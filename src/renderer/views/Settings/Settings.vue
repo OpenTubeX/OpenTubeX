@@ -1,321 +1,1894 @@
 <template>
-  <div class="settingsPage">
-    <template v-if="unlocked">
-      <div v-show="settingsSectionTypeOpenInMobile != null">
+  <section
+    ref="settingsWindowRef"
+    class="settingsWindow"
+    :class="{ maximized: isWindowMaximized }"
+    :style="windowStyle"
+    role="dialog"
+    :aria-label="windowTitle"
+    :data-android-back-nested="!isInDesktopView && showBackButton ? '' : null"
+    tabindex="-1"
+    @keydown.esc.capture="handleSettingsEscape"
+  >
+    <header
+      class="settingsWindowHeader"
+      @pointerdown="startDragging"
+      @dblclick="handleHeaderDoubleClick"
+    >
+      <div class="settingsHeaderNavigation">
         <button
-          class="returnToMenuMobileButton"
-          :aria-label="t('Settings.Return to Settings Menu')"
-          :title="t('Settings.Return to Settings Menu')"
-          @click="returnToSettingsMenu"
+          v-if="showBackButton"
+          type="button"
+          class="settingsHeaderButton settingsBackButton"
+          :aria-label="t('Back')"
+          :title="t('Back')"
+          @click="goBack"
         >
-          <FontAwesomeIcon
-            class="returnToMenuMobileIcon"
-            :icon="['fas', 'angle-left']"
+          <FtIcon :icon="['fas', 'arrow-left']" />
+        </button>
+        <div
+          class="settingsBreadcrumb"
+          aria-live="polite"
+        >
+          <span
+            v-if="isStandaloneViewOpen"
+            class="settingsBreadcrumbLabel"
+          >
+            <FtIcon
+              class="settingsWindowIcon"
+              :icon="standaloneViewIcon"
+              aria-hidden="true"
+            />
+            <span class="settingsBreadcrumbText">{{ windowTitle }}</span>
+          </span>
+          <button
+            v-else-if="showBackButton"
+            v-show="isInDesktopView"
+            type="button"
+            class="settingsBreadcrumbRoot"
+            @click="returnToSettingsMenu"
+          >
+            <FtIcon
+              class="settingsWindowIcon"
+              :icon="['fas', 'cog']"
+              aria-hidden="true"
+            />
+            <span class="settingsBreadcrumbText">{{ t('Settings.Settings') }}</span>
+          </button>
+          <span
+            v-else
+            class="settingsBreadcrumbLabel"
+          >
+            <FtIcon
+              class="settingsWindowIcon"
+              :icon="['fas', 'cog']"
+              aria-hidden="true"
+            />
+            <span class="settingsBreadcrumbText">{{ t('Settings.Settings') }}</span>
+          </span>
+          <template v-if="unlocked && !isStandaloneViewOpen && currentSectionTitle">
+            <FtIcon
+              v-show="isInDesktopView"
+              class="settingsBreadcrumbSeparator"
+              :icon="['fas', 'angle-right']"
+            />
+            <button
+              v-if="subpageTitle"
+              type="button"
+              class="settingsBreadcrumbParent"
+              @click="returnToCategory"
+            >
+              <FtIcon
+                v-if="currentSectionIcon"
+                class="settingsBreadcrumbCategoryIcon"
+                :icon="currentSectionIcon"
+                aria-hidden="true"
+              />
+              <span class="settingsBreadcrumbText">{{ currentSectionTitle }}</span>
+            </button>
+            <span
+              v-else
+              class="settingsBreadcrumbLabel"
+            >
+              <FtIcon
+                v-if="currentSectionIcon"
+                class="settingsBreadcrumbCategoryIcon"
+                :icon="currentSectionIcon"
+                aria-hidden="true"
+              />
+              <span class="settingsBreadcrumbText">{{ currentSectionTitle }}</span>
+            </span>
+          </template>
+          <template v-if="unlocked && !isStandaloneViewOpen && subpageTitle">
+            <template
+              v-for="(parent, depth) in parentSubpages"
+              :key="depth"
+            >
+              <FtIcon
+                class="settingsBreadcrumbSeparator"
+                :icon="['fas', 'angle-right']"
+              />
+              <button
+                type="button"
+                class="settingsBreadcrumbParent"
+                @click="closeSubpagesFrom(depth + 1)"
+              >
+                <FtIcon
+                  v-if="parent.icon"
+                  class="settingsBreadcrumbCategoryIcon settingsBreadcrumbSubpageIcon"
+                  :icon="parent.icon"
+                  aria-hidden="true"
+                />
+                <span class="settingsBreadcrumbText">{{ parent.title }}</span>
+              </button>
+            </template>
+            <FtIcon
+              class="settingsBreadcrumbSeparator"
+              :icon="['fas', 'angle-right']"
+            />
+            <span class="settingsBreadcrumbLabel">
+              <FtIcon
+                v-if="subpageIcon"
+                class="settingsBreadcrumbCategoryIcon settingsBreadcrumbSubpageIcon"
+                :icon="subpageIcon"
+                aria-hidden="true"
+              />
+              <span class="settingsBreadcrumbText">{{ subpageTitle }}</span>
+            </span>
+          </template>
+          <span
+            v-show="protectedSettingsVisible"
+            :id="subpageBreadcrumbTargetId"
+            class="settingsBreadcrumbAction"
           />
+        </div>
+      </div>
+      <FtInput
+        v-if="unlocked && !isProfileManagerOpen && !isKeyboardShortcutPromptOpen && !isStandaloneViewOpen && !subpageTitle"
+        ref="settingsSearchInputRef"
+        class="settingsSearch"
+        input-type="search"
+        :value="settingsSearchQuery"
+        :placeholder="t('Settings.Search Settings')"
+        :show-label="false"
+        :show-action-button="false"
+        @input="handleSettingsSearch"
+      />
+      <div class="settingsHeaderActions">
+        <button
+          v-if="unlocked && showKeyboardShortcutAction && !isStandaloneViewOpen && !isKeyboardShortcutPromptOpen"
+          type="button"
+          class="settingsHeaderButton"
+          :aria-label="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
+          :title="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
+          @click="showKeyboardShortcutPrompt"
+        >
+          <FtIcon :icon="['fas', 'keyboard']" />
+        </button>
+        <button
+          v-if="!isStandaloneViewOpen && !isKeyboardShortcutPromptOpen"
+          type="button"
+          class="settingsHeaderButton"
+          :class="{ active: highlightChangedSettings }"
+          :aria-label="t('Settings.Highlight Changed Settings')"
+          :title="t('Settings.Highlight Changed Settings')"
+          :aria-pressed="highlightChangedSettings"
+          @click="updateHighlightChangedSettings(!highlightChangedSettings)"
+        >
+          <FtIcon :icon="['fas', 'pen']" />
+        </button>
+        <button
+          v-if="!isStandaloneViewOpen && !isKeyboardShortcutPromptOpen"
+          type="button"
+          class="settingsHeaderButton"
+          :class="{ active: showPerformanceImpactIndicators }"
+          :aria-label="t('Settings.Performance Impact.Show Performance Impact')"
+          :title="t('Settings.Performance Impact.Show Performance Impact')"
+          :aria-pressed="showPerformanceImpactIndicators"
+          @click="updateShowPerformanceImpactIndicators(!showPerformanceImpactIndicators)"
+        >
+          <FtIcon :icon="['fas', 'gauge-high']" />
+        </button>
+        <button
+          v-if="showMinimizeButton"
+          type="button"
+          class="settingsHeaderButton"
+          :aria-label="t('Minimize')"
+          :title="t('Minimize')"
+          @click="minimizeSettings"
+        >
+          <FtIcon :icon="['fas', 'angle-down']" />
+        </button>
+        <button
+          v-if="!isMaximizationForced"
+          type="button"
+          class="settingsHeaderButton"
+          :aria-label="maximizeButtonLabel"
+          :title="maximizeButtonLabel"
+          @click="toggleMaximized"
+        >
+          <FtIcon :icon="isMaximized ? ['fas', 'compress'] : ['fas', 'expand']" />
+        </button>
+        <button
+          ref="settingsCloseButtonRef"
+          type="button"
+          class="settingsHeaderButton settingsCloseButton"
+          :aria-label="t('Close')"
+          :title="t('Close')"
+          @click="closeSettings"
+        >
+          <FtIcon :icon="['fas', 'xmark']" />
         </button>
       </div>
-      <FtSettingsMenu
-        v-show="isInDesktopView || settingsSectionTypeOpenInMobile == null"
-        ref="menuRef"
-        :settings-sections="settingsSectionComponents"
-        :active-section="activeSection"
-        @navigate-to-section="navigateToSection"
-      />
-      <div
-        v-show="isInDesktopView || settingsSectionTypeOpenInMobile != null"
-        class="settingsContent"
+    </header>
+
+    <div
+      ref="settingsPageRef"
+      class="settingsPage"
+      :class="{ compactSettings: !isInDesktopView }"
+    >
+      <template v-if="isAboutOpen">
+        <div
+          ref="standaloneScrollRef"
+          v-overlay-scrollbars
+          class="settingsSubpageScroll settingsAboutPage"
+        >
+          <About />
+        </div>
+      </template>
+      <template v-else-if="isDownloadsOpen">
+        <div
+          ref="standaloneScrollRef"
+          v-overlay-scrollbars
+          class="settingsSubpageScroll settingsDownloadsPage"
+        >
+          <Downloads />
+        </div>
+      </template>
+      <SettingsView
+        v-if="hasUnlockedSettings"
+        :active="canNavigateSettings && !isStandaloneViewOpen"
       >
-        <div class="switchRow">
-          <FtButton
-            v-if="USING_ELECTRON"
-            :label="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
-            :icon="['fas', 'keyboard']"
-            @click="showKeyboardShortcutPrompt"
+        <template v-if="renderedProfileManagerOpen">
+          <div
+            v-show="protectedSettingsVisible"
+            ref="profileManagerScrollRef"
+            v-overlay-scrollbars
+            class="settingsSubpageScroll"
+            @scroll.passive="clampProfileManagerScroll"
+          >
+            <ProfileSettings />
+          </div>
+        </template>
+        <template v-else-if="renderedKeyboardShortcutPromptOpen">
+          <div
+            v-show="protectedSettingsVisible"
+            class="settingsSubpageScroll settingsKeyboardShortcutPage"
+          >
+            <FtKeyboardShortcutPrompt embedded />
+          </div>
+        </template>
+        <template v-else>
+          <FtSettingsMenu
+            v-show="protectedSettingsVisible && !subpageTitle && (isInDesktopView || (!activeSection && settingsSearchQuery === ''))"
+            ref="menuRef"
+            v-overlay-scrollbars
+            :class="[
+              { mobileSettingsMenu: !isInDesktopView },
+              settingsMenuTransitionClass
+            ]"
+            :settings-sections="filteredSettingsSectionComponents"
+            :active-section="activeSection"
+            :empty-message="t('Settings.No Settings Found')"
+            :filtered="settingsSearchQuery !== ''"
+            @navigate-to-section="navigateToSection"
           />
-          <FtToggleSwitch
-            class="settingsToggle"
-            :label="t('Settings.Sort Settings Sections (A-Z)')"
-            :default-value="settingsSectionSortEnabled"
-            @change="updateSettingsSectionSortEnabled"
+          <div
+            v-show="protectedSettingsVisible && !subpageTitle && (isInDesktopView || activeSection || settingsSearchQuery !== '')"
+            class="settingsContentPane"
+          >
+            <div
+              v-if="activeSettingsSection?.tabs"
+              ref="settingsContentHeaderRef"
+              class="settingsContentHeader"
+            >
+              <FtTabs
+                class="settingsSectionTabs"
+                :style="{ '--settings-section-tab-count': activeSettingsSection.tabs.length }"
+                variant="segmented"
+                :aria-label="activeSettingsSection.title"
+              >
+                <button
+                  v-for="(tab, index) in activeSettingsSection.tabs"
+                  :id="`${sectionTabIdPrefix}-${tab.id}`"
+                  :key="tab.id"
+                  type="button"
+                  class="settingsSectionTab"
+                  :class="{ selected: activeSectionTab === tab.id }"
+                  role="tab"
+                  :aria-controls="sectionTabPanelId"
+                  :aria-selected="activeSectionTab === tab.id"
+                  :tabindex="activeSectionTab === tab.id ? 0 : -1"
+                  :data-settings-tab="tab.id"
+                  @click="activateSectionTab(tab.id)"
+                  @keydown.left.prevent="activateSectionTab(activeSettingsSection.tabs.at(index - 1).id, true)"
+                  @keydown.right.prevent="activateSectionTab(activeSettingsSection.tabs[(index + 1) % activeSettingsSection.tabs.length].id, true)"
+                  @keydown.home.prevent="activateSectionTab(activeSettingsSection.tabs[0].id, true)"
+                  @keydown.end.prevent="activateSectionTab(activeSettingsSection.tabs.at(-1).id, true)"
+                >
+                  <FtIcon
+                    :icon="tab.icon"
+                    aria-hidden="true"
+                  />
+                  {{ tab.label }}
+                </button>
+              </FtTabs>
+            </div>
+            <div
+              ref="settingsContentRef"
+              v-overlay-scrollbars
+              class="settingsContent"
+              :class="[
+                settingsContentTransitionClass,
+                { highlightChangedSettings }
+              ]"
+              tabindex="-1"
+              @scroll.passive="clampSettingsContentScroll"
+            >
+              <component
+                :is="activeSettingsSection.component"
+                v-if="activeSettingsSection"
+                :id="activeSettingsSection.tabs ? sectionTabPanelId : undefined"
+                :key="activeSettingsSection.renderKey ?? activeSettingsSection.type"
+                :active-tab="activeSectionTab"
+                class="section"
+                :data-section="activeSettingsSection.type"
+                :role="activeSettingsSection.tabs ? 'tabpanel' : undefined"
+                :aria-labelledby="activeSettingsSection.tabs ? `${sectionTabIdPrefix}-${activeSectionTab}` : undefined"
+              />
+              <div
+                v-else-if="settingsSearchQuery !== ''"
+                class="settingsSearchResults"
+                :class="{ settingsSearchResultsEmpty: settingsSearchResults.length === 0 }"
+              >
+                <template v-if="settingsSearchResults.length > 0">
+                  <section
+                    v-for="result in settingsSearchResults"
+                    :key="result.section.type"
+                    class="settingsSearchResult"
+                  >
+                    <h2
+                      class="settingsSearchResultHeading"
+                    >
+                      <FtIcon
+                        :icon="result.section.icon"
+                        aria-hidden="true"
+                      />
+                      {{ result.section.title }}
+                    </h2>
+                    <button
+                      v-for="match in result.matches"
+                      :key="`${match.label}-${match.tab ?? ''}`"
+                      type="button"
+                      class="settingsSearchResultMatch"
+                      @click="openSearchResult(result.section.type, match)"
+                    >
+                      {{ match.label }}
+                    </button>
+                  </section>
+                </template>
+                <p
+                  v-else
+                  class="settingsNoResults"
+                >
+                  {{ t('Settings.No Settings Found') }}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div
+            v-show="protectedSettingsVisible && subpageTitle"
+            :id="subpageTargetId"
+            ref="settingsSubpageContentRef"
+            v-overlay-scrollbars
+            class="settingsSubpageScroll"
+            :class="{ settingsSubpageFlush: subpageFlush }"
           />
-        </div>
-        <div class="settingsSections">
-          <component
-            :is="section.component"
-            v-for="section in settingsSectionComponents"
-            :key="section.type"
-            ref="sectionRefs"
-            class="section"
-            :class="{ hideOnMobile: settingsSectionTypeOpenInMobile !== section.type }"
-            :data-section="section.type"
-          />
-        </div>
+        </template>
+      </SettingsView>
+      <div
+        v-if="!unlocked && !isStandaloneViewOpen"
+        v-overlay-scrollbars
+        class="settingsPassword"
+      >
+        <PasswordDialog
+          ref="passwordDialogRef"
+          @unlocked="handleUnlock"
+        />
       </div>
-    </template>
-    <PasswordDialog
-      v-else
-      @unlocked="handleUnlock"
+    </div>
+    <div
+      v-for="direction in RESIZE_DIRECTIONS"
+      v-show="!isWindowMaximized"
+      :key="direction"
+      class="settingsResizeHandle"
+      :class="`resize-${direction}`"
+      aria-hidden="true"
+      @pointerdown="startResizing($event, direction)"
     />
-  </div>
+  </section>
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
+import FtInput from '../../components/FtInput/FtInput.vue'
+import FtTabs from '../../components/FtTabs/FtTabs.vue'
+import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
+import { useRootClass } from '../../helpers/rootClasses'
+import { FtIcon } from '@opentubex/icons'
+import {
+  computed,
+  defineComponent,
+  inject,
+  nextTick,
+  onActivated,
+  onBeforeUnmount,
+  onDeactivated,
+  onMounted,
+  onUpdated,
+  provide,
+  ref,
+  shallowRef,
+  useId,
+  useTemplateRef,
+  watch
+} from 'vue'
 import { useI18n } from 'vue-i18n'
+import { tmWithFallback } from '../../i18n/index'
 
-import GeneralSettings from '../../components/GeneralSettings/GeneralSettings.vue'
-import ThemeSettings from '../../components/ThemeSettings.vue'
-import PlayerSettings from '../../components/PlayerSettings/PlayerSettings.vue'
-import ExternalPlayerSettings from '../../components/ExternalPlayerSettings.vue'
-import SubscriptionSettings from '../../components/SubscriptionSettings/SubscriptionSettings.vue'
-import PrivacySettings from '../../components/PrivacySettings.vue'
-import DataSettings from '../../components/DataSettings/DataSettings.vue'
-import DistractionSettings from '../../components/DistractionSettings/DistractionSettings.vue'
-import ProxySettings from '../../components/ProxySettings/ProxySettings.vue'
-import SponsorBlockSettings from '../../components/SponsorBlockSettings.vue'
-import ParentalControlSettings from '../../components/ParentalControlSettings.vue'
-import ExperimentalSettings from '../../components/ExperimentalSettings/ExperimentalSettings.vue'
-import PasswordSettings from '../../components/PasswordSettings/PasswordSettings.vue'
+import DownloadSettings from '../../components/Settings/Downloads/DownloadSettings.vue'
+import DataSection from '../../components/Settings/Data/DataSection.vue'
+import SyncSettings from '../../components/Settings/Sync/SyncSettings.vue'
 import PasswordDialog from '../../components/PasswordDialog/PasswordDialog.vue'
-import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
-import FtButton from '../../components/FtButton/FtButton.vue'
 import FtSettingsMenu from '../../components/FtSettingsMenu/FtSettingsMenu.vue'
+import FtKeyboardShortcutPrompt from '../../components/FtKeyboardShortcutPrompt/FtKeyboardShortcutPrompt.vue'
+import AddOnsSection from '../../components/Settings/AddOns/AddOnsSection.vue'
+import AdvancedSection from '../../components/Settings/Advanced/AdvancedSection.vue'
+import AppearanceSection from '../../components/Settings/Appearance/AppearanceSection.vue'
+import FocusSection from '../../components/Settings/Focus/FocusSection.vue'
+import GeneralSection from '../../components/Settings/General/GeneralSection.vue'
+import PlaybackSection from '../../components/Settings/Playback/PlaybackSection.vue'
+import PrivacySection from '../../components/Settings/Privacy/PrivacySection.vue'
+import SubscriptionsSection from '../../components/Settings/Subscriptions/SubscriptionsSection.vue'
+import ProfileSettings from '../ProfileSettings/ProfileSettings.vue'
+import About from '../About/About.vue'
+import Downloads from '../Downloads/Downloads.vue'
 
 import store from '../../store/index'
+import { usePhoneLayout } from '../../composables/usePhoneLayout'
+import { settingsSubpageKey } from '../../components/FtSettingsSubpage/settingsSubpage'
+import {
+  clampOverlayScrollTop,
+  isOverlayScrollTopOutOfBounds,
+  restoreOverlayScrollTop,
+  updateOverlayScrollbars
+} from '../../helpers/overlayScrollbars'
+import { initializePlatformInfo, isLinuxWayland, supportsAutoPictureInPictureMinimize } from '../../helpers/platform'
+import {
+  createSettingsSearchIndex,
+  findSettingsSearchTab,
+  normalizeSettingsSearchText,
+  removeRedundantSettingsSearchMatches,
+  settingsSearchNavigationKey,
+  findSettingsSearchTarget,
+} from '../../helpers/settingsSearch'
 
 const USING_ELECTRON = !!process.env.IS_ELECTRON
-const SETTINGS_MOBILE_WIDTH_THRESHOLD = 1015
+const IS_CAPACITOR = !!process.env.IS_CAPACITOR
+const phoneLayout = usePhoneLayout()
+const SUPPORTS_LOCAL_API = !!process.env.SUPPORTS_LOCAL_API
+const IS_MAC = process.platform === 'darwin'
+const SETTINGS_DESKTOP_WIDTH_THRESHOLD = 760
+const SETTINGS_BOUNDS_STORAGE_KEY = 'opentubex-settings-window-bounds'
+const WINDOW_MARGIN = 12
+const MINIMUM_WIDTH = 360
+const MINIMUM_HEIGHT = 360
+const DEFAULT_WIDTH = 1280
+const DEFAULT_HEIGHT = 820
+const RESIZE_DIRECTIONS = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw']
+const props = defineProps({
+  hardwareKeyboardAttached: {
+    type: Boolean,
+    default: false
+  },
+  searchTarget: {
+    type: Object,
+    default: null
+  }
+})
+const showKeyboardShortcutAction = computed(() => (
+  USING_ELECTRON || (IS_CAPACITOR && props.hardwareKeyboardAttached)
+))
+const emit = defineEmits(['search-target-opened'])
+const LEGACY_SETTINGS_SECTION_MAP = {
+  theme: 'appearance',
+  player: 'playback',
+  'caption-appearance': 'playback',
+  channel: 'playback',
+  subscription: 'subscriptions',
+  distraction: 'focus',
+  'parental-control': 'focus',
+  'sponsor-block': 'add-ons',
+  'return-youtube-dislike': 'add-ons',
+  'external-player': 'advanced',
+  'external-software': 'advanced',
+  sync: 'sync',
+  proxy: 'advanced',
+  'context-menu-search': 'general',
+  storage: 'data',
+  experimental: 'advanced'
+}
 
 const { locale, t } = useI18n()
-
+const normalizeSearchText = value => normalizeSettingsSearchText(value, locale.value)
+initializePlatformInfo()
+const settingsSearchSubsectionTargets = computed(() => ({
+  subscriptions: [{
+    search: t('Settings.Subscription Settings.Subscription Settings'),
+    target: t('Settings.Subscription Settings.Subscription Settings')
+  }],
+  playback: [{
+    search: t('Settings.Player Settings.Caption Appearance.Caption Appearance'),
+    target: t('Settings.Player Settings.Caption Appearance.Captions')
+  }],
+  data: [{
+    search: t('Settings.Privacy Settings.Clear Search History and Cache'),
+    target: t('Settings.Storage Settings.Search History')
+  }]
+}))
 const isInDesktopView = ref(true)
-const settingsSectionTypeOpenInMobile = ref(null)
-const activeSection = ref(null)
+const isMaximized = ref(false)
+const isNarrowLayout = ref(window.innerWidth < SETTINGS_DESKTOP_WIDTH_THRESHOLD)
+const activeSection = ref(
+  LEGACY_SETTINGS_SECTION_MAP[store.getters.getSettingsWindowSection] ??
+  store.getters.getSettingsWindowSection
+)
+// Legacy sections that are tabs of their category open on that tab.
+const LEGACY_SETTINGS_SECTION_TABS = {
+  storage: 'storage',
+  distraction: 'distraction',
+  'parental-control': 'parental'
+}
+/** @type {import('vue').Ref<Record<string, string>>} */
+const activeSectionTabs = ref(sectionTabFor(store.getters.getSettingsWindowSection) ?? {})
+const settingsSearchQuery = ref('')
+const settingsContentTransitionClass = ref('')
+const settingsMenuTransitionClass = ref('')
+const settingsWindowRef = useTemplateRef('settingsWindowRef')
+const settingsPageRef = useTemplateRef('settingsPageRef')
+const settingsContentHeaderRef = useTemplateRef('settingsContentHeaderRef')
+const settingsContentRef = useTemplateRef('settingsContentRef')
+const settingsSubpageContentRef = useTemplateRef('settingsSubpageContentRef')
+const standaloneScrollRef = useTemplateRef('standaloneScrollRef')
+const profileManagerScrollRef = useTemplateRef('profileManagerScrollRef')
+const settingsSearchInputRef = useTemplateRef('settingsSearchInputRef')
+const passwordDialogRef = useTemplateRef('passwordDialogRef')
+const settingsCloseButtonRef = useTemplateRef('settingsCloseButtonRef')
+const menuRef = useTemplateRef('menuRef')
+const subpageTargetId = `settings-subpage-${useId().replaceAll(':', '')}`
+const subpageBreadcrumbTargetId = `settings-subpage-breadcrumb-${useId().replaceAll(':', '')}`
+const sectionTabIdPrefix = `settings-section-tab-${useId().replaceAll(':', '')}`
+const sectionTabPanelId = `${sectionTabIdPrefix}-panel`
+/**
+ * Open subpages, innermost last. A subpage can open another one, such as theme
+ * discovery from the theme gallery; only the innermost is shown.
+ * @type {import('vue').ShallowRef<{ title: string, icon: string[] | null, flush: boolean, close: () => void, scrollTop: number }[]>}
+ */
+const subpageStack = shallowRef([])
+const currentSubpage = computed(() => subpageStack.value.at(-1) ?? null)
+const parentSubpages = computed(() => subpageStack.value.slice(0, -1))
+const subpageTitle = computed(() => currentSubpage.value?.title ?? '')
+const subpageIcon = computed(() => currentSubpage.value?.icon ?? null)
+const subpageFlush = computed(() => currentSubpage.value?.flush ?? false)
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const settingsSectionSortEnabled = computed(() => store.getters.getSettingsSectionSortEnabled)
+/**
+ * Removes the subpages from `depth` on, all of them by default, and asks them
+ * to close. `closedSelf` skips the one at `depth`, which is already closing.
+ */
+function closeSubpagesFrom(depth = 0, closedSelf = false) {
+  const closing = subpageStack.value.slice(depth + (closedSelf ? 1 : 0))
+  if (depth >= subpageStack.value.length) return
+  subpageStack.value = subpageStack.value.slice(0, depth)
+  closing.reverse().forEach(({ close }) => close())
+  restoreParentSubpageScroll()
+}
 
-const settingsComponentsData = computed(() => {
-  return [
-    {
-      type: 'theme',
-      title: t('Settings.Theme Settings.Theme Settings'),
-      icon: ['fas', 'display'],
-      component: ThemeSettings
-    },
-    {
-      type: 'player',
-      title: t('Settings.Player Settings.Player Settings'),
-      icon: ['fas', 'circle-play'],
-      component: PlayerSettings
-    },
-    ...(process.env.IS_ELECTRON
-      ? [{
-          type: 'external-player',
-          title: t('Settings.External Player Settings.External Player Settings'),
-          icon: ['fas', 'clapperboard'],
-          component: ExternalPlayerSettings
-        }]
-      : []),
-    {
-      type: 'subscription',
-      title: t('Settings.Subscription Settings.Subscription Settings'),
-      icon: ['fas', 'play'],
-      component: SubscriptionSettings
-    },
-    {
-      type: 'distraction',
-      title: t('Settings.Distraction Free Settings.Distraction Free Settings'),
-      icon: ['fas', 'eye-slash'],
-      component: DistractionSettings
-    },
-    {
-      type: 'parental-control',
-      title: t('Settings.Parental Control Settings.Parental Control Settings'),
-      icon: ['fas', 'user-lock'],
-      component: ParentalControlSettings
-    },
-    {
-      type: 'privacy',
-      title: t('Settings.Privacy Settings.Privacy Settings'),
-      icon: ['fas', 'lock'],
-      component: PrivacySettings
-    },
-    {
-      type: 'data',
-      title: t('Settings.Data Settings.Data Settings'),
-      icon: ['fas', 'database'],
-      component: DataSettings
-    },
-    ...(process.env.IS_ELECTRON
-      ? [
-          {
-            type: 'proxy',
-            title: t('Settings.Proxy Settings.Proxy Settings'),
-            icon: ['fas', 'network-wired'],
-            component: ProxySettings
-          }
-        ]
-      : []),
-    {
-      type: 'sponsor-block',
-      title: t('Settings.SponsorBlock Settings.SponsorBlock Settings'),
-      // TODO: replace with SponsorBlock icon
-      icon: ['fas', 'shield'],
-      component: SponsorBlockSettings
-    },
-    {
-      type: 'password',
-      title: t('Settings.Password Settings.Password Settings'),
-      icon: ['fas', 'key'],
-      component: PasswordSettings
-    },
-    ...(process.env.IS_ELECTRON
-      ? [{
-          type: 'experimental',
-          title: t('Settings.Experimental Settings.Experimental Settings'),
-          icon: ['fas', 'flask'],
-          component: ExperimentalSettings
-        }]
-      : []),
-  ]
-})
+function closeAllSubpages() {
+  closeSubpagesFrom(0)
+}
 
-const collator = computed(() => {
-  return new Intl.Collator([locale.value, 'en'], { sensitivity: 'base' })
-})
+function restoreParentSubpageScroll() {
+  const parent = currentSubpage.value
+  if (!parent) return
+  // The parent was hidden, and a flush child does not scroll the shared viewport.
+  nextTick(() => {
+    if (currentSubpage.value === parent && settingsSubpageContentRef.value) {
+      restoreOverlayScrollTop(settingsSubpageContentRef.value, parent.scrollTop)
+    }
+  })
+}
+let settingsResizeObserver = null
+let settingsSectionResizeObserver = null
+let profileManagerResizeObserver = null
+let standaloneContentResizeObserver = null
+let observationScheduled = false
+let boundsSaveTimer = null
+let boundsAnimation = null
+let searchHighlightTimer = null
+let standaloneClampFrame = null
+let downloadsReturnScrollTop = 0
+let draggingPointerId = null
+let resizeSession = null
+let dragOffsetX = 0
+let dragOffsetY = 0
+/** Bounds applied directly to the element while a drag or resize is in progress */
+let liveBounds = null
+let maximizedDragSession = null
+let restoreBounds = null
+/** @type {Array<{ element: HTMLElement, scrollTop: number }>} */
+let preservedScrollPositions = []
 
-const settingsSectionComponents = computed(() => {
-  let settingsSections = settingsComponentsData.value
-
-  if (settingsSectionSortEnabled.value) {
-    const collator_ = collator.value
-
-    settingsSections = settingsSections.toSorted((a, b) => {
-      return collator_.compare(a.title, b.title)
+const windowBounds = ref(getInitialBounds())
+const isMaximizationForced = computed(() => IS_CAPACITOR || isNarrowLayout.value)
+const isWindowMaximized = computed(() => isMaximized.value || isMaximizationForced.value)
+const windowStyle = computed(() => isWindowMaximized.value
+  ? {
+      left: '0',
+      top: 'var(--app-safe-area-inset-top, 0px)',
+      inlineSize: '100%',
+      blockSize: 'calc(100dvh - var(--app-safe-area-inset-top, 0px))'
+    }
+  : {
+      left: '0',
+      top: '0',
+      // Translation keeps movement separate from layout and bounds animations.
+      translate: getWindowTranslate(windowBounds.value),
+      inlineSize: `${windowBounds.value.width}px`,
+      blockSize: `${windowBounds.value.height}px`
     })
-  }
+const maximizeButtonLabel = computed(() => isMaximized.value ? t('Restore') : t('Maximize'))
 
-  // ensure General Settings is placed first regardless of sorting
-  const generalSettingsEntry = {
-    type: 'general',
-    title: t('Settings.General Settings.General Settings'),
-    icon: ['fas', 'border-all'],
-    component: GeneralSettings
-  }
+const settingsWindowMorphing = computed(() => store.getters.getSettingsWindowMorphing)
+const highlightChangedSettings = computed(() => store.getters.getHighlightChangedSettings)
+const showPerformanceImpactIndicators = computed(() => store.getters.getShowPerformanceImpactIndicators)
+const isProfileManagerOpen = computed(() => store.getters.getSettingsWindowView === 'profile')
+const isAboutOpen = computed(() => store.getters.getSettingsWindowView === 'about')
+const isDownloadsOpen = computed(() => store.getters.getSettingsWindowView === 'downloads')
+const canReturnFromDownloads = computed(() => (
+  isDownloadsOpen.value && store.getters.getSettingsWindowReturnView === 'settings'
+))
+const isStandaloneViewOpen = computed(() => isAboutOpen.value || isDownloadsOpen.value)
+const showMinimizeButton = computed(() => {
+  if (isDownloadsOpen.value) return !store.getters.getMoveDownloadsToAppHeader
+  if (isAboutOpen.value) return true
+  return !store.getters.getMoveSettingsToAppHeader
+})
+const isKeyboardShortcutPromptOpen = computed(() => store.getters.getIsKeyboardShortcutPromptShown)
+const windowTitle = computed(() => {
+  if (isAboutOpen.value) return t('About.About')
+  if (isDownloadsOpen.value) return t('Settings.Download Settings.Download Settings')
+  return t('Settings.Settings')
+})
+const standaloneViewIcon = computed(() => isDownloadsOpen.value
+  ? ['fas', 'download']
+  : ['fas', 'info-circle'])
 
-  return [generalSettingsEntry, ...settingsSections]
+const settingsComponentsData = computed(() => [
+  {
+    type: 'appearance',
+    title: t('Settings.Categories.Appearance'),
+    description: t('Settings.Categories.Appearance Description'),
+    icon: ['fas', 'display'],
+    component: AppearanceSection
+  },
+  {
+    type: 'playback',
+    title: t('Settings.Quick Settings.Playback'),
+    description: t('Settings.Categories.Playback Description'),
+    icon: ['fas', 'circle-play'],
+    component: PlaybackSection
+  },
+  {
+    type: 'add-ons',
+    renderKey: 'add-ons-standalone-voice-over',
+    title: t('Settings.Categories.Add-ons'),
+    description: t('Settings.Categories.Add-ons Description'),
+    icon: ['fas', 'puzzle-piece'],
+    component: AddOnsSection
+  },
+  {
+    type: 'subscriptions',
+    title: t('Subscriptions.Subscriptions'),
+    description: t('Settings.Categories.Subscriptions Description'),
+    icon: ['fas', 'users'],
+    component: SubscriptionsSection
+  },
+  ...(supportsYtDlp
+    ? [{
+        type: 'download',
+        title: t('Settings.Download Settings.Download Settings'),
+        description: t('Settings.Categories.Downloads Description'),
+        icon: ['fas', 'download'],
+        component: DownloadSettings
+      }]
+    : []),
+  {
+    type: 'focus',
+    title: t('Settings.Categories.Focus'),
+    description: t('Settings.Categories.Focus Description'),
+    icon: ['fas', 'bullseye'],
+    component: FocusSection,
+    tabs: [
+      {
+        id: 'distraction',
+        label: t('Settings.Distraction Free Settings.Distraction Free Settings'),
+        icon: ['fas', 'eye-slash']
+      },
+      {
+        id: 'wellbeing',
+        label: t('Settings.Distraction Free Settings.Sections.Digital Wellbeing'),
+        icon: ['fas', 'heart']
+      },
+      {
+        id: 'parental',
+        label: t('Settings.Parental Control Settings.Parental Control Settings'),
+        icon: ['fas', 'shield-halved']
+      }
+    ]
+  },
+  {
+    type: 'privacy',
+    renderKey: 'privacy-with-navigation-history',
+    title: t('Settings.Privacy Settings.Privacy Settings'),
+    description: t('Settings.Categories.Privacy Description'),
+    icon: ['fas', 'lock'],
+    component: PrivacySection
+  },
+  {
+    type: 'data',
+    title: t('Settings.Data Settings.Data And Storage'),
+    description: t('Settings.Categories.Data And Storage Description'),
+    icon: ['fas', 'box-archive'],
+    component: DataSection,
+    tabs: [
+      {
+        id: 'data',
+        label: t('Settings.Data Settings.Data Settings'),
+        icon: ['fas', 'layer-group']
+      },
+      {
+        id: 'storage',
+        label: t('Settings.Storage Settings.Storage'),
+        icon: ['fas', 'database']
+      }
+    ]
+  },
+  {
+    type: 'sync',
+    title: t('Settings.Sync Settings.Sync Settings'),
+    description: t('Settings.Categories.Sync Description'),
+    icon: ['fas', 'sync'],
+    component: SyncSettings
+  },
+  {
+    type: 'advanced',
+    title: t('Settings.Categories.Advanced'),
+    description: t('Settings.Categories.Advanced Description'),
+    icon: ['fas', 'flask'],
+    component: AdvancedSection
+  }
+])
+
+const settingsSectionComponents = computed(() => [{
+  type: 'general',
+  renderKey: 'general-without-navigation-history',
+  title: t('Settings.General Settings.General Settings'),
+  description: t('Settings.Categories.General Description'),
+  icon: ['fas', 'border-all'],
+  component: GeneralSection
+}, ...settingsComponentsData.value])
+const settingsSearchableValues = computed(() => createSettingsSearchIndex({
+  sections: settingsSectionComponents.value,
+  tm: tmWithFallback,
+  store,
+  usingElectron: USING_ELECTRON,
+  isCapacitor: IS_CAPACITOR,
+  phoneLayout: phoneLayout.value,
+  isIos: !!process.env.IS_IOS,
+  supportsLocalApi: SUPPORTS_LOCAL_API,
+  isMac: IS_MAC,
+  isLinuxWayland: isLinuxWayland.value,
+  supportsAutoPictureInPictureMinimize: supportsAutoPictureInPictureMinimize.value,
+}))
+provide(settingsSearchNavigationKey, {
+  find(labels, settingKey) {
+    return findSettingsSearchTarget(settingsSearchableValues.value, labels, settingKey)
+  },
+  async open({ section, match }) {
+    const target = await openSearchResult(section, match)
+    const focusable = 'button, input, select, textarea, [tabindex]'
+    // Prefer the form field over label-row buttons, such as tooltip triggers
+    // that open their tooltip on focus.
+    const control = target?.matches(focusable)
+      ? target
+      : target?.querySelector('input, select, textarea') ?? target?.querySelector(focusable)
+    settingsWindowRef.value?.focus({ preventScroll: true })
+    control?.focus({ preventScroll: true })
+  }
+})
+const settingsSearchResults = computed(() => {
+  const query = normalizeSearchText(settingsSearchQuery.value)
+  if (query === '') return []
+
+  return settingsSectionComponents.value.flatMap((section) => {
+    const values = settingsSearchableValues.value.get(section.type) ?? []
+    const matches = removeRedundantSettingsSearchMatches(
+      values.filter(match => normalizeSearchText(match.label).includes(query)),
+      locale.value
+    )
+    return matches.length === 0 ? [] : [{ section, matches: matches.slice(0, 6) }]
+  })
+})
+const filteredSettingsSectionComponents = computed(() => {
+  if (settingsSearchQuery.value === '') return settingsSectionComponents.value
+  return settingsSearchResults.value.map(({ section }) => section)
+})
+const activeSettingsSection = computed(() => {
+  return settingsSectionComponents.value.find(({ type }) => type === activeSection.value) ?? null
+})
+const activeSectionTab = computed(() => {
+  const section = activeSettingsSection.value
+  return section?.tabs ? activeSectionTabs.value[section.type] ?? section.tabs[0].id : undefined
+})
+const currentSectionTitle = computed(() => {
+  if (isKeyboardShortcutPromptOpen.value) {
+    return t('KeyboardShortcutPrompt.Keyboard Shortcuts')
+  }
+  if (isProfileManagerOpen.value) {
+    return t('Profile.Profile Manager')
+  }
+  return activeSettingsSection.value?.title ?? ''
+})
+const currentSectionIcon = computed(() => {
+  if (isKeyboardShortcutPromptOpen.value) {
+    return ['fas', 'keyboard']
+  }
+  if (isProfileManagerOpen.value) {
+    return ['fas', 'users']
+  }
+  return activeSettingsSection.value?.icon ?? null
+})
+const showBackButton = computed(() => {
+  if (isDownloadsOpen.value) return canReturnFromDownloads.value
+  if (isStandaloneViewOpen.value) return false
+  if (!unlocked.value) return false
+
+  return isKeyboardShortcutPromptOpen.value || isProfileManagerOpen.value || subpageTitle.value !== '' ||
+    (!isInDesktopView.value && activeSection.value !== null)
 })
 
 const unlocked = ref(store.getters.getSettingsPassword === '')
+// Mount pages after the first unlock, then hide them while settings is locked.
+const hasUnlockedSettings = ref(unlocked.value && !isStandaloneViewOpen.value)
+const canNavigateSettings = computed(() => unlocked.value && store.getters.getSettingsWindowOpen)
+const protectedSettingsVisible = computed(() => unlocked.value && !isStandaloneViewOpen.value)
+const renderedProfileManagerOpen = ref(isProfileManagerOpen.value)
+const renderedKeyboardShortcutPromptOpen = ref(isKeyboardShortcutPromptOpen.value)
 
-if (unlocked.value) {
-  onMounted(handleMounted)
+watch([unlocked, isStandaloneViewOpen, isProfileManagerOpen, isKeyboardShortcutPromptOpen], ([isUnlocked, standalone, profile, shortcuts]) => {
+  if (!isUnlocked || standalone) return
+  hasUnlockedSettings.value = true
+  renderedProfileManagerOpen.value = profile
+  renderedKeyboardShortcutPromptOpen.value = shortcuts
+})
+
+const SettingsView = defineComponent({
+  props: { active: Boolean },
+  setup(props, { slots }) {
+    const settingsWindow = inject(settingsSubpageKey)
+    provide(settingsSubpageKey, {
+      ...settingsWindow,
+      isActive: computed(() => props.active)
+    })
+    return () => slots.default?.()
+  }
+})
+
+provide(settingsSubpageKey, {
+  isActive: computed(() => store.getters.getSettingsWindowOpen && (unlocked.value || isStandaloneViewOpen.value)),
+  targetId: subpageTargetId,
+  breadcrumbTargetId: subpageBreadcrumbTargetId,
+  isCurrent: close => currentSubpage.value?.close === close,
+  open(title, close, icon = null, flush = false) {
+    const stack = subpageStack.value
+    const index = stack.findIndex(entry => entry.close === close)
+    if (index !== -1) {
+      subpageStack.value = stack.with(index, { ...stack[index], title, icon, flush })
+      return
+    }
+    const parent = stack.at(-1)
+    if (parent) parent.scrollTop = settingsSubpageContentRef.value?.scrollTop ?? 0
+    subpageStack.value = [...stack, { title, icon, flush, close, scrollTop: 0 }]
+  },
+  close(close) {
+    const index = subpageStack.value.findIndex(entry => entry.close === close)
+    if (index === -1) return
+    // Closing a subpage also closes the ones it opened.
+    closeSubpagesFrom(index, true)
+  }
+})
+
+// KeepAlive retains the window while it is closed.
+const windowActive = ref(true)
+useRootClass('appSettingsMaximized', () => windowActive.value && isWindowMaximized.value)
+// Vue rewrites the bound style on every update, which would put a gesture's
+// window back at its committed bounds until the pointer is released.
+onUpdated(() => {
+  if (liveBounds !== null) applyLiveBounds()
+})
+onMounted(() => {
+  handleMounted()
+})
+onActivated(() => {
+  windowActive.value = true
+  handleMounted()
+  nextTick(() => {
+    if (unlocked.value || isStandaloneViewOpen.value) restorePreservedScrollPositions()
+  })
+})
+onDeactivated(() => {
+  windowActive.value = false
+  if (!settingsWindowMorphing.value) {
+    preserveScrollPositions()
+  }
+  stopObserving()
+  stopDragging()
+  stopResizing()
+})
+onBeforeUnmount(() => {
+  stopObserving()
+  stopDragging()
+  stopResizing()
+  if (boundsSaveTimer !== null) {
+    clearTimeout(boundsSaveTimer)
+  }
+  boundsAnimation?.cancel()
+  if (searchHighlightTimer !== null) {
+    clearTimeout(searchHighlightTimer)
+  }
+  cancelStandaloneScrollClamp()
+})
+
+// A reduced-motion morph removes the window without a leave transition, so deactivation is too late
+watch(settingsWindowMorphing, (morphing) => {
+  if (morphing && windowActive.value) preserveScrollPositions()
+})
+
+watch(isProfileManagerOpen, (open) => {
+  if (!open) {
+    stopObservingProfileManager()
+    setInitialSection()
+  } else {
+    nextTick(observeProfileManager)
+  }
+})
+watch(() => store.getters.getSettingsWindowView, async (view, previousView) => {
+  if (['about', 'downloads'].includes(view) && !['about', 'downloads'].includes(previousView)) {
+    preserveScrollPositions(false)
+  }
+  stopObservingStandaloneContent()
+  if (view === 'downloads' && canReturnFromDownloads.value) {
+    downloadsReturnScrollTop = settingsContentRef.value?.scrollTop ?? 0
+  }
+  await nextTick()
+  if (view !== store.getters.getSettingsWindowView) return
+  if (!['about', 'downloads'].includes(view)) {
+    if (unlocked.value) restorePreservedScrollPositions()
+    return
+  }
+  const scrollViewport = standaloneScrollRef.value
+  if (scrollViewport) restoreOverlayScrollTop(scrollViewport, 0)
+  observeStandaloneContent()
+})
+watch(activeSection, (section) => {
+  if (section !== null) {
+    store.commit('rememberSettingsWindowSection', section)
+  }
+  nextTick(observeActiveSettingsSection)
+})
+let handledSectionRequest = null
+watch([
+  () => store.getters.getSettingsWindowSectionRequest,
+  canNavigateSettings,
+  () => props.searchTarget
+], async ([request, canNavigate, searchTarget]) => {
+  if (!canNavigate || !request || request === handledSectionRequest || searchTarget) return
+  await nextTick()
+  if (!canNavigateSettings.value || request !== store.getters.getSettingsWindowSectionRequest || request === handledSectionRequest || props.searchTarget) return
+  handledSectionRequest = request
+  const { section } = request
+  const normalizedSection = LEGACY_SETTINGS_SECTION_MAP[section] ?? section
+  if (settingsSectionComponents.value.some(candidate => candidate.type === normalizedSection)) {
+    navigateToSection(normalizedSection)
+  }
+  if (LEGACY_SETTINGS_SECTION_TABS[section]) {
+    await activateSectionTab(LEGACY_SETTINGS_SECTION_TABS[section])
+  }
+  if (request.subpage) {
+    await nextTick()
+    settingsContentRef.value?.querySelector(`[data-settings-subpage="${request.subpage}"]`)?.click()
+    // The subpage replaces the focused search field, so keep focus in the window for Escape
+    await nextTick()
+    settingsWindowRef.value?.focus({ preventScroll: true })
+  }
+}, { immediate: true })
+watch([() => props.searchTarget, canNavigateSettings], async ([target, canNavigate]) => {
+  if (!target || !canNavigate) return
+  await nextTick()
+  if (!canNavigateSettings.value || target !== props.searchTarget) return
+  const opened = await openSearchResult(target.section, target)
+  if (opened && canNavigateSettings.value && target === props.searchTarget) {
+    emit('search-target-opened', target)
+  }
+}, { immediate: true })
+
+function handleMounted() {
+  unlocked.value = store.getters.getSettingsPassword === ''
+  updateNarrowLayout()
+  handleResize(settingsWindowRef.value?.clientWidth ?? windowBounds.value.width)
+  setInitialSection()
+  nextTick(observeProfileManager)
+  nextTick(observeStandaloneContent)
+  nextTick(() => {
+    if (!unlocked.value) {
+      passwordDialogRef.value?.focus()
+      return
+    }
+    const initialFocus = isNarrowLayout.value || (IS_CAPACITOR && !props.hardwareKeyboardAttached)
+      ? settingsCloseButtonRef.value
+      : settingsSearchInputRef.value ?? settingsCloseButtonRef.value
+    initialFocus?.focus()
+  })
+  if (settingsResizeObserver !== null || observationScheduled) {
+    return
+  }
+  observationScheduled = true
+  nextTick(() => {
+    observationScheduled = false
+    const element = settingsWindowRef.value
+    if (!element) return
+    handleResize(element.clientWidth)
+    settingsResizeObserver = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect
+      handleResize(width)
+      if (width > 0 && height > 0) {
+        if (
+          !isWindowMaximized.value &&
+          boundsAnimation === null &&
+          draggingPointerId === null &&
+          resizeSession === null
+        ) {
+          windowBounds.value = clampBounds({
+            ...windowBounds.value,
+            width: element.offsetWidth,
+            height: element.offsetHeight
+          })
+          scheduleBoundsSave()
+        }
+        if (protectedSettingsVisible.value && settingsContentRef.value) {
+          clampOverlayScrollTop(
+            settingsContentRef.value,
+            getSettingsContentEnd(settingsContentRef.value)
+          )
+        }
+        scheduleStandaloneScrollClamp()
+      }
+    })
+    settingsResizeObserver.observe(element)
+    window.addEventListener('resize', handleViewportResize)
+    observeActiveSettingsSection()
+  })
+}
+
+function stopObserving() {
+  observationScheduled = false
+  settingsResizeObserver?.disconnect()
+  settingsResizeObserver = null
+  cancelStandaloneScrollClamp()
+  settingsSectionResizeObserver?.disconnect()
+  settingsSectionResizeObserver = null
+  stopObservingProfileManager()
+  stopObservingStandaloneContent()
+  window.removeEventListener('resize', handleViewportResize)
+}
+
+function observeProfileManager() {
+  stopObservingProfileManager()
+  const content = profileManagerScrollRef.value
+  const profileManager = content?.firstElementChild
+  if (!content || !(profileManager instanceof HTMLElement)) return
+
+  profileManagerResizeObserver = new ResizeObserver(() => {
+    clampOverlayScrollTop(content, profileManager)
+  })
+  profileManagerResizeObserver.observe(profileManager)
+  clampOverlayScrollTop(content, profileManager)
+}
+
+function stopObservingProfileManager() {
+  profileManagerResizeObserver?.disconnect()
+  profileManagerResizeObserver = null
+}
+
+function observeStandaloneContent() {
+  stopObservingStandaloneContent()
+  const scrollViewport = standaloneScrollRef.value
+  const content = scrollViewport?.firstElementChild
+  if (!scrollViewport || !(content instanceof HTMLElement)) return
+
+  standaloneContentResizeObserver = new ResizeObserver(scheduleStandaloneScrollClamp)
+  standaloneContentResizeObserver.observe(content)
+  scheduleStandaloneScrollClamp()
+}
+
+function stopObservingStandaloneContent() {
+  standaloneContentResizeObserver?.disconnect()
+  standaloneContentResizeObserver = null
+}
+
+function clampProfileManagerScroll() {
+  const content = profileManagerScrollRef.value
+  const profileManager = content?.firstElementChild
+  if (content && profileManager instanceof HTMLElement) {
+    clampOverlayScrollTop(content, profileManager)
+  }
+}
+
+function observeActiveSettingsSection() {
+  settingsSectionResizeObserver?.disconnect()
+  settingsSectionResizeObserver = null
+  const content = settingsContentRef.value
+  const contentEnd = getSettingsContentEnd(content)
+  if (!content || !contentEnd) return
+  let previousHeight = null
+  settingsSectionResizeObserver = new ResizeObserver(([entry]) => {
+    if (!protectedSettingsVisible.value) return
+    const height = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height
+    const contentShrank = previousHeight !== null && height < previousHeight
+    previousHeight = height
+    if (isInDesktopView.value || content.scrollTop > 0 || contentShrank) {
+      clampOverlayScrollTop(content, contentEnd)
+    }
+  })
+  content.querySelectorAll(':scope > .section, :scope > .settingsSearchResults').forEach(element => {
+    settingsSectionResizeObserver.observe(element)
+  })
+  // Desktop keeps this pane visible between categories; reconcile its retained
+  // scrollbar tracks. A fresh phone viewport at the origin has nothing to clamp.
+  if (isInDesktopView.value || content.scrollTop > 0) clampOverlayScrollTop(content, contentEnd)
+}
+
+function clampSettingsContentScroll(event) {
+  const content = event.currentTarget
+  const contentEnd = getSettingsContentEnd(content)
+  if (!contentEnd) return
+  if (isOverlayScrollTopOutOfBounds(content, contentEnd)) {
+    clampOverlayScrollTop(content, contentEnd)
+  }
+}
+
+function scheduleStandaloneScrollClamp() {
+  cancelStandaloneScrollClamp()
+  standaloneClampFrame = requestAnimationFrame(() => {
+    standaloneClampFrame = null
+    const scrollViewport = standaloneScrollRef.value
+    if (scrollViewport) {
+      clampOverlayScrollTop(scrollViewport, scrollViewport.firstElementChild)
+    }
+  })
+}
+
+function cancelStandaloneScrollClamp() {
+  if (standaloneClampFrame !== null) {
+    cancelAnimationFrame(standaloneClampFrame)
+    standaloneClampFrame = null
+  }
+}
+
+function getSettingsContentEnd(content) {
+  const sections = content?.querySelectorAll(
+    ':scope > .section, :scope > .settingsSearchResults'
+  )
+  return sections?.[sections.length - 1] ?? null
 }
 
 function handleUnlock() {
   unlocked.value = true
-
   nextTick(() => {
-    handleMounted()
+    setInitialSection()
+    restorePreservedScrollPositions()
   })
 }
 
-onBeforeUnmount(() => {
-  document.removeEventListener('scroll', markScrolledToSectionAsActive)
-  window.removeEventListener('resize', handleResize)
-})
-
-function showKeyboardShortcutPrompt() {
-  store.dispatch('showKeyboardShortcutPrompt')
-}
-
-/**
- * @param {boolean} value
- */
-function updateSettingsSectionSortEnabled(value) {
-  store.dispatch('updateSettingsSectionSortEnabled', value)
-}
-
-function handleMounted() {
-  handleResize()
-  window.addEventListener('resize', handleResize)
-  document.addEventListener('scroll', markScrolledToSectionAsActive)
-
-  // mark first section as active before any scrolling has taken place
-  activeSection.value = settingsSectionComponents.value[0].type
-}
-
-const sectionRefs = useTemplateRef('sectionRefs')
-
-/**
- * @param {string} sectionType
- */
-function navigateToSection(sectionType) {
-  if (isInDesktopView.value) {
-    nextTick(() => {
-      const sectionElement = sectionRefs.value.find(sectionRef => {
-        return sectionRef.$el.dataset.section === sectionType
-      })?.$el
-      sectionElement.scrollIntoView()
-
-      const sectionHeading = sectionElement.firstChild.firstChild
-      sectionHeading.tabIndex = 0
-      sectionHeading.focus()
-      sectionHeading.tabIndex = -1
-    })
-  } else {
-    settingsSectionTypeOpenInMobile.value = sectionType
+function setInitialSection() {
+  if (isProfileManagerOpen.value || !unlocked.value || settingsSearchQuery.value !== '') return
+  if (isInDesktopView.value && activeSection.value === null) {
+    activeSection.value = getRememberedSection()
   }
 }
 
-const menuRef = useTemplateRef('menuRef')
-
-function returnToSettingsMenu() {
-  const openSection = settingsSectionTypeOpenInMobile.value
-  settingsSectionTypeOpenInMobile.value = null
-
-  // focus the corresponding Settings Menu title
-  nextTick(() => {
-    return menuRef.value?.focusLink(openSection)
-  })
+function getRememberedSection() {
+  const rememberedSection = LEGACY_SETTINGS_SECTION_MAP[store.getters.getSettingsWindowSection] ??
+    store.getters.getSettingsWindowSection
+  return settingsSectionComponents.value.some(({ type }) => type === rememberedSection)
+    ? rememberedSection
+    : settingsSectionComponents.value[0].type
 }
 
-/* Set the current section to be shown as active in the Settings Menu
-* if it is the lowest section within the top quarter of the viewport (25vh) */
-function markScrolledToSectionAsActive() {
-  if (!isInDesktopView.value) {
-    activeSection.value = null
+function navigateToSection(sectionType) {
+  const previousSection = activeSection.value
+  const content = settingsContentRef.value
+  const resetScroll = previousSection !== sectionType && content &&
+    (previousSection !== null || content.scrollTop !== 0 || content.scrollLeft !== 0)
+  closeAllSubpages()
+  activeSection.value = sectionType
+  if (resetScroll) {
+    // Reconcile retained scrollbars after replacing an existing category.
+    // Opening a fresh viewport from the phone menu needs no forced update.
+    nextTick(() => {
+      restoreOverlayScrollTop(content, 0)
+      content.scrollLeft = 0
+      updateOverlayScrollbars(content)
+    })
+  }
+  if (isInDesktopView.value && previousSection !== null && previousSection !== sectionType) {
+    const previousIndex = settingsSectionComponents.value.findIndex(({ type }) => type === previousSection)
+    const nextIndex = settingsSectionComponents.value.findIndex(({ type }) => type === sectionType)
+    animateSettingsElement(
+      settingsContentRef,
+      settingsContentTransitionClass,
+      nextIndex >= previousIndex ? 'settingsSectionSlideForward' : 'settingsSectionSlideBackward'
+    )
+  } else if (!isInDesktopView.value) {
+    animateSettingsElement(
+      settingsContentRef,
+      settingsContentTransitionClass,
+      'settingsCompactSlideForward'
+    )
+    nextTick(() => {
+      const selectedTab = settingsContentHeaderRef.value?.querySelector('[role="tab"][aria-selected="true"]')
+      const focusTarget = selectedTab ?? settingsContentRef.value
+      focusTarget?.focus({ preventScroll: true })
+    })
+  }
+}
+
+/**
+ * @param {string} tab
+ * @param {boolean} [focus]
+ */
+async function activateSectionTab(tab, focus = false) {
+  const section = activeSettingsSection.value
+  if (!section?.tabs?.some(({ id }) => id === tab)) return
+  const changed = activeSectionTab.value !== tab
+  activeSectionTabs.value[section.type] = tab
+  await nextTick()
+
+  if (focus) {
+    settingsContentHeaderRef.value?.querySelector(`[data-settings-tab="${tab}"]`)?.focus()
+  }
+  if (changed && settingsContentRef.value) {
+    restoreOverlayScrollTop(settingsContentRef.value, 0)
+  }
+}
+
+/** @returns {Record<string, string> | null} the category tab a legacy section opens */
+function sectionTabFor(section) {
+  const tab = LEGACY_SETTINGS_SECTION_TABS[section]
+  return tab ? { [LEGACY_SETTINGS_SECTION_MAP[section]]: tab } : null
+}
+
+/**
+ * @param {Readonly<import('vue').ShallowRef<HTMLElement | {$el?: HTMLElement} | null>>} elementRef
+ * @param {import('vue').Ref<string>} classRef
+ * @param {string} className
+ */
+async function animateSettingsElement(elementRef, classRef, className) {
+  classRef.value = ''
+  await nextTick()
+  const element = elementRef.value?.$el ?? elementRef.value
+  element?.getBoundingClientRect()
+  classRef.value = className
+  await nextTick()
+
+  // A class left in place keeps its animation attached to the element, so
+  // anything that later has the browser start it over — rebuilding the overlay
+  // scrollbars, for instance — replays the slide long after the navigation it
+  // belonged to. Drop it once it has played.
+  // Nothing to play, because reduced motion suppressed it. Leaving the class
+  // behind would let it slide as soon as reduced motion is turned back off.
+  const animations = element?.getAnimations() ?? []
+  if (animations.length === 0) {
+    if (classRef.value === className) {
+      classRef.value = ''
+    }
     return
   }
 
-  const scrollY = window.scrollY + window.innerHeight / 4
+  const results = await Promise.allSettled(animations.map(animation => animation.finished))
+  // Rejected means a newer navigation cancelled this one, and owns the class now.
+  if (results.some(({ status }) => status === 'rejected')) return
 
-  for (const sectionRef of sectionRefs.value) {
-    const sectionElement = sectionRef.$el
-
-    const sectionHeight = sectionElement.offsetHeight
-    const sectionTop = sectionElement.offsetTop
-
-    if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
-      activeSection.value = sectionElement.dataset.section
-      break
-    }
+  if (classRef.value === className) {
+    classRef.value = ''
   }
 }
 
-function handleResize() {
-  const wasNotInDesktopView = !isInDesktopView.value
-  isInDesktopView.value = window.innerWidth > SETTINGS_MOBILE_WIDTH_THRESHOLD
+async function openSearchResult(sectionType, match) {
+  settingsSearchQuery.value = ''
+  navigateToSection(sectionType)
+  await nextTick()
 
-  // navigate to section that was open in mobile or desktop view, if any
-  if (isInDesktopView.value && wasNotInDesktopView && settingsSectionTypeOpenInMobile.value != null) {
-    navigateToSection(settingsSectionTypeOpenInMobile.value)
-    settingsSectionTypeOpenInMobile.value = null
-  } else if (!isInDesktopView.value && !wasNotInDesktopView && activeSection.value) {
-    navigateToSection(activeSection.value)
+  const { label } = match
+  const normalizedLabel = normalizeSearchText(label.trim())
+  const searchTab = findSettingsSearchTab(match)
+  if (searchTab) {
+    await activateSectionTab(searchTab)
+    await nextTick()
   }
+
+  if (match.subpage) {
+    settingsContentRef.value?.querySelector(`[data-settings-subpage="${match.subpage}"]`)?.click()
+    await nextTick()
+    if (match.subpageTab) {
+      settingsSubpageContentRef.value?.querySelector(`[data-settings-subpage-tab="${match.subpageTab}"]`)?.click()
+      await nextTick()
+    }
+  }
+
+  const content = subpageTitle.value ? settingsSubpageContentRef.value : settingsContentRef.value
+  if (!content) return
+  const findTarget = () => {
+    const section = settingsSectionComponents.value.find(({ type }) => type === sectionType)
+    const isSectionMatch = [section?.title, section?.description]
+      .some(value => normalizeSearchText(value ?? '') === normalizedLabel)
+    const settingControl = match.settingKey
+      ? [...content.querySelectorAll('[data-setting-key]')].find(element =>
+          element.dataset.settingKey === match.settingKey && isShown(element))
+      : null
+    let target = settingControl ?? (isSectionMatch
+      ? content.querySelector(`.section[data-section="${sectionType}"]`)
+      : null)
+    if (match.subpage && normalizeSearchText(subpageTitle.value) === normalizedLabel) {
+      target = content.querySelector('.settingsSubpageContent')
+    }
+    if (target === null) {
+      const subsectionTarget = settingsSearchSubsectionTargets.value[sectionType]?.find(
+        ({ search }) => normalizeSearchText(search) === normalizedLabel
+      )
+      if (subsectionTarget) {
+        const targetHeading = normalizeSearchText(subsectionTarget.target)
+        const headingElement = [...content.querySelectorAll('h1, h2, h3, h4')]
+          .find(element => getSearchTargetText(element) === targetHeading)
+        target = headingElement?.closest('.settingsSection') ?? null
+      }
+    }
+    if (target === null) {
+      const visibleTextElements = [...content.querySelectorAll(
+        'label, button, input[aria-label], p, h1, h2, h3, h4, span, legend, div'
+      )]
+        .filter(isShown)
+      const labelElement = visibleTextElements
+        .find(element => normalizeSearchText(element.getAttribute('aria-label') ?? '') === normalizedLabel) ?? visibleTextElements
+        .filter(element => getSearchTargetText(element) === normalizedLabel)
+        .at(-1) ?? visibleTextElements
+        .filter(element => getSearchTargetText(element).startsWith(`${normalizedLabel}:`))
+        .at(-1)
+      const settingsSection = labelElement?.matches('h1, h2, h3, h4')
+        ? labelElement.closest('.settingsSection')
+        : null
+      const control = settingsSection ?? labelElement?.closest(
+        '.switch-ctn, .select, .ft-input-component, .pure-material-slider, ' +
+        '.pure-checkbox, .captionControl, .preferenceToggle, .themePickerEntry'
+      ) ?? labelElement
+      target = control?.classList.contains('ft-input-component')
+        ? control.querySelector('.ft-input')
+        : control
+    }
+    return target
+  }
+  let target = findTarget()
+  // A control can sit on another tab of the opened subpage, such as the
+  // color settings of the theme gallery's other theme list.
+  if (!target && match.subpage) {
+    const selectedTab = content.querySelector('[data-settings-subpage-tab][aria-selected="true"]')
+    for (const tab of content.querySelectorAll('[data-settings-subpage-tab]:not([aria-selected="true"])')) {
+      tab.click()
+      await nextTick()
+      target = findTarget()
+      if (target) break
+    }
+    // Keep the tab the user was on when no tab has the result.
+    if (!target) selectedTab?.click()
+  }
+  if (!target) return
+
+  target.scrollIntoView({ block: 'center', behavior: 'smooth' })
+  target.classList.remove('settingsSearchTarget')
+  // Restart the animation if the same result is selected repeatedly.
+  await new Promise(resolve => requestAnimationFrame(resolve))
+  target.classList.add('settingsSearchTarget')
+  if (searchHighlightTimer !== null) clearTimeout(searchHighlightTimer)
+  searchHighlightTimer = setTimeout(() => {
+    target.classList.remove('settingsSearchTarget')
+    searchHighlightTimer = null
+  }, 2200)
+  return target
+}
+
+/** Rendered and not hidden with visibility, which keeps layout space for controls that may return. */
+function isShown(element) {
+  return element.getClientRects().length > 0 && element.checkVisibility?.({ visibilityProperty: true }) !== false
+}
+
+function getSearchTargetText(element) {
+  const clone = element.cloneNode(true)
+  clone.querySelectorAll('.tooltip, .changedSettingIndicator, .changedSettingIndicatorPlaceholder')
+    .forEach(child => child.remove())
+  return normalizeSearchText(clone.textContent.trim())
+}
+
+function handleSettingsSearch(value) {
+  // FtInput emits the current text even while the keyboard is composing.
+  settingsSearchQuery.value = value
+  closeAllSubpages()
+  activeSection.value = settingsSearchQuery.value === '' && isInDesktopView.value
+    ? getRememberedSection()
+    : null
+  nextTick(() => {
+    if (settingsContentRef.value) settingsContentRef.value.scrollTop = 0
+  })
+}
+
+function goBack() {
+  if (canReturnFromDownloads.value) {
+    store.dispatch('showSettingsWindowRoot')
+    nextTick(() => {
+      const content = settingsContentRef.value
+      if (!content) return
+      restoreOverlayScrollTop(content, downloadsReturnScrollTop)
+      content.focus()
+    })
+  } else if (isKeyboardShortcutPromptOpen.value) {
+    store.dispatch('hideKeyboardShortcutPrompt')
+  } else if (isProfileManagerOpen.value) {
+    returnToSettingsMenu()
+  } else if (currentSubpage.value) {
+    closeSubpagesFrom(subpageStack.value.length - 1)
+  } else {
+    returnToSettingsMenu()
+  }
+}
+
+function returnToSettingsMenu() {
+  if (isKeyboardShortcutPromptOpen.value) {
+    store.dispatch('hideKeyboardShortcutPrompt')
+    if (!isInDesktopView.value) {
+      activeSection.value = null
+    }
+    return
+  }
+  if (isProfileManagerOpen.value) {
+    store.dispatch('showSettingsWindowRoot')
+    activeSection.value = isInDesktopView.value ? 'data' : null
+    return
+  }
+  closeAllSubpages()
+  if (!isInDesktopView.value) {
+    const previousSection = activeSection.value
+    const content = settingsContentRef.value
+    // Clear retained offsets while the viewport is visible. Hidden viewports
+    // report zero even when their scrollbar instance retains the old position.
+    if (content && (content.scrollTop !== 0 || content.scrollLeft !== 0)) {
+      restoreOverlayScrollTop(content, 0)
+      content.scrollLeft = 0
+    }
+    activeSection.value = null
+    animateSettingsElement(menuRef, settingsMenuTransitionClass, 'settingsCompactSlideBackward')
+    nextTick(() => menuRef.value?.focusLink(previousSection))
+  }
+}
+
+function returnToCategory() {
+  closeAllSubpages()
+}
+
+function showKeyboardShortcutPrompt() {
+  if (!canNavigateSettings.value) return
+  store.dispatch('showKeyboardShortcutPrompt')
+}
+
+function updateShowPerformanceImpactIndicators(value) {
+  store.dispatch('updateShowPerformanceImpactIndicators', value)
+}
+
+function updateHighlightChangedSettings(value) {
+  store.dispatch('updateHighlightChangedSettings', value)
+}
+
+function handleResize(width) {
+  if (width <= 0) return
+  const desktop = width >= SETTINGS_DESKTOP_WIDTH_THRESHOLD
+  if (desktop === isInDesktopView.value) return
+  isInDesktopView.value = desktop
+  if (desktop && activeSection.value === null && settingsSearchQuery.value === '') {
+    activeSection.value = getRememberedSection()
+  }
+}
+
+function closeSettings() {
+  store.dispatch('closeSettingsWindowToIcon')
+}
+
+function minimizeSettings() {
+  store.dispatch('minimizeSettingsWindow')
+}
+
+function preserveScrollPositions(standalone = isStandaloneViewOpen.value) {
+  if (!unlocked.value && !standalone) return
+  const viewports = getCurrentScrollViewports(standalone)
+  preservedScrollPositions = [
+    ...preservedScrollPositions.filter(({ element }) => !viewports.has(element)),
+    ...[...viewports].filter(element => element.scrollTop > 0)
+      .map(element => ({ element, scrollTop: element.scrollTop }))
+  ]
+}
+
+function getCurrentScrollViewports(standalone = isStandaloneViewOpen.value) {
+  const content = standalone ? standaloneScrollRef.value : settingsPageRef.value
+  if (!content) return new Set()
+  const selector = '[data-overlayscrollbars-viewport]'
+  return new Set([
+    ...(content.matches(selector) ? [content] : []),
+    ...content.querySelectorAll(selector)
+  ])
+}
+
+function restorePreservedScrollPositions() {
+  const viewports = getCurrentScrollViewports()
+  const pending = []
+  for (const { element, scrollTop } of preservedScrollPositions) {
+    if (!element.isConnected) continue
+    if (viewports.has(element)) restoreOverlayScrollTop(element, scrollTop)
+    else pending.push({ element, scrollTop })
+  }
+  preservedScrollPositions = pending
+}
+
+async function toggleMaximized() {
+  // A gesture commits its bounds on release, so the restore bounds would be stale.
+  if (isMaximizationForced.value || draggingPointerId !== null || resizeSession !== null) return
+  cancelBoundsAnimation()
+  const element = settingsWindowRef.value
+  const from = getWindowAnimationState(element)
+  if (isMaximized.value) {
+    restoreSettingsWindow()
+  } else {
+    restoreBounds = { ...windowBounds.value }
+    isMaximized.value = true
+  }
+  await nextTick()
+  animateWindowBounds(element, from)
+}
+
+function getWindowAnimationState(element) {
+  if (!element) return null
+  const bounds = element.getBoundingClientRect()
+  return {
+    left: bounds.left,
+    top: bounds.top,
+    width: bounds.width,
+    height: bounds.height,
+    borderRadius: getComputedStyle(element).borderRadius
+  }
+}
+
+// The window is already at its target bounds here, so the difference is played back
+// with transforms only. Animating left/top/width/height instead would relayout the
+// whole settings page and re-evaluate its container queries on every single frame.
+function animateWindowBounds(element, from) {
+  if (!element || !from || document.documentElement.dataset.reducedMotion === 'reduce') return
+  const to = getWindowAnimationState(element)
+  if (to.width === 0 || to.height === 0) return
+  const animation = element.animate([
+    {
+      transformOrigin: '0 0',
+      transform: `translate(${from.left - to.left}px, ${from.top - to.top}px) scale(${from.width / to.width}, ${from.height / to.height})`,
+      borderRadius: from.borderRadius
+    },
+    {
+      transformOrigin: '0 0',
+      transform: 'none',
+      borderRadius: to.borderRadius
+    }
+  ], {
+    duration: 240,
+    easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)'
+  })
+  boundsAnimation = animation
+  animation.finished.catch(() => {}).finally(() => {
+    if (boundsAnimation === animation) boundsAnimation = null
+  })
+}
+
+function cancelBoundsAnimation() {
+  boundsAnimation?.cancel()
+  boundsAnimation = null
+}
+
+function restoreSettingsWindow() {
+  if (!isMaximized.value) return
+  windowBounds.value = clampBounds(restoreBounds ?? windowBounds.value)
+  restoreBounds = null
+  isMaximized.value = false
+  scheduleBoundsSave()
+}
+
+function handleSettingsEscape(event) {
+  if (event.target.closest('[aria-expanded="true"], [data-settings-escape-scope]')) return
+  event.preventDefault()
+  event.stopPropagation()
+  if (!isInDesktopView.value && showBackButton.value) goBack()
+  else closeSettings()
+}
+
+function handleHeaderDoubleClick(event) {
+  if (
+    isMaximizationForced.value ||
+    event.button !== 0 ||
+    event.target.closest('button, input, .settingsSearch')
+  ) return
+  toggleMaximized()
+}
+
+function startDragging(event) {
+  if (
+    isMaximizationForced.value ||
+    event.button !== 0 ||
+    draggingPointerId !== null ||
+    resizeSession !== null ||
+    event.target.closest('button, input, .settingsSearch')
+  ) return
+  cancelBoundsAnimation()
+  const renderedBounds = settingsWindowRef.value.getBoundingClientRect()
+  if (isMaximized.value) {
+    const floatingBounds = clampBounds(restoreBounds ?? windowBounds.value)
+    maximizedDragSession = {
+      floatingBounds,
+      horizontalPosition: renderedBounds.width > 0
+        ? (event.clientX - renderedBounds.left) / renderedBounds.width
+        : 0.5,
+      pointerOffsetY: event.clientY - renderedBounds.top
+    }
+  } else {
+    const bounds = windowBounds.value
+    dragOffsetX = event.clientX - bounds.x
+    dragOffsetY = event.clientY - bounds.y
+  }
+  draggingPointerId = event.pointerId
+  document.documentElement.classList.add('draggingSettingsWindow')
+  window.addEventListener('pointermove', dragWindow)
+  window.addEventListener('pointerup', stopDragging)
+  window.addEventListener('pointercancel', stopDragging)
+  event.preventDefault()
+}
+
+function dragWindow(event) {
+  if (event.pointerId !== draggingPointerId) return
+  if (maximizedDragSession !== null) {
+    const { floatingBounds, horizontalPosition, pointerOffsetY } = maximizedDragSession
+    windowBounds.value = clampBounds({
+      ...floatingBounds,
+      x: event.clientX - floatingBounds.width * horizontalPosition,
+      y: event.clientY - pointerOffsetY
+    })
+    dragOffsetX = event.clientX - windowBounds.value.x
+    dragOffsetY = event.clientY - windowBounds.value.y
+    maximizedDragSession = null
+    restoreBounds = null
+    isMaximized.value = false
+    return
+  }
+  liveBounds = clampBounds({
+    ...windowBounds.value,
+    x: event.clientX - dragOffsetX,
+    y: event.clientY - dragOffsetY
+  })
+  // Updating reactive bounds here also rerenders the settings controls and their
+  // scrollbar directives. Only commit the final bounds when the drag stops.
+  applyLiveBounds()
+}
+
+function applyLiveBounds() {
+  const { style } = settingsWindowRef.value
+  style.translate = getWindowTranslate(liveBounds)
+  style.inlineSize = `${liveBounds.width}px`
+  style.blockSize = `${liveBounds.height}px`
+}
+
+function commitLiveBounds() {
+  if (liveBounds === null) return
+  windowBounds.value = liveBounds
+  liveBounds = null
+}
+
+function stopDragging(event) {
+  if (event && event.pointerId !== draggingPointerId) return
+  if (draggingPointerId === null) return
+  commitLiveBounds()
+  draggingPointerId = null
+  maximizedDragSession = null
+  document.documentElement.classList.remove('draggingSettingsWindow')
+  window.removeEventListener('pointermove', dragWindow)
+  window.removeEventListener('pointerup', stopDragging)
+  window.removeEventListener('pointercancel', stopDragging)
+  scheduleBoundsSave()
+}
+
+function startResizing(event, direction) {
+  if (event.button !== 0 || isWindowMaximized.value || draggingPointerId !== null || resizeSession !== null) return
+  cancelBoundsAnimation()
+  resizeSession = {
+    direction,
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startY: event.clientY,
+    bounds: { ...windowBounds.value }
+  }
+  document.documentElement.classList.add('resizingSettingsWindow')
+  document.documentElement.style.cursor = getComputedStyle(event.currentTarget).cursor
+  window.addEventListener('pointermove', resizeWindow)
+  window.addEventListener('pointerup', stopResizing)
+  window.addEventListener('pointercancel', stopResizing)
+  event.preventDefault()
+  event.stopPropagation()
+}
+
+function resizeWindow(event) {
+  if (resizeSession === null || event.pointerId !== resizeSession.pointerId) return
+  const { direction, startX, startY, bounds } = resizeSession
+  const deltaX = event.clientX - startX
+  const deltaY = event.clientY - startY
+  let left = bounds.x
+  let right = bounds.x + bounds.width
+  let top = bounds.y
+  let bottom = bounds.y + bounds.height
+
+  if (direction.includes('e')) right += deltaX
+  if (direction.includes('w')) left += deltaX
+  if (direction.includes('s')) bottom += deltaY
+  if (direction.includes('n')) top += deltaY
+
+  const maximumRight = window.innerWidth - WINDOW_MARGIN
+  const maximumBottom = window.innerHeight - WINDOW_MARGIN
+  const minimumWidth = Math.min(MINIMUM_WIDTH, maximumRight - WINDOW_MARGIN)
+  const minimumHeight = Math.min(MINIMUM_HEIGHT, maximumBottom - WINDOW_MARGIN)
+  left = Math.max(WINDOW_MARGIN, left)
+  top = Math.max(WINDOW_MARGIN, top)
+  right = Math.min(maximumRight, right)
+  bottom = Math.min(maximumBottom, bottom)
+
+  if (right - left < minimumWidth) {
+    if (direction.includes('w')) left = Math.max(WINDOW_MARGIN, right - minimumWidth)
+    else right = Math.min(maximumRight, left + minimumWidth)
+  }
+  if (bottom - top < minimumHeight) {
+    if (direction.includes('n')) top = Math.max(WINDOW_MARGIN, bottom - minimumHeight)
+    else bottom = Math.min(maximumBottom, top + minimumHeight)
+  }
+
+  liveBounds = {
+    x: left,
+    y: top,
+    width: right - left,
+    height: bottom - top
+  }
+  // As with dragging, commit the reactive bounds only when the resize stops.
+  applyLiveBounds()
+}
+
+function stopResizing(event) {
+  if (resizeSession === null || (event && event.pointerId !== resizeSession.pointerId)) return
+  commitLiveBounds()
+  resizeSession = null
+  document.documentElement.classList.remove('resizingSettingsWindow')
+  document.documentElement.style.removeProperty('cursor')
+  window.removeEventListener('pointermove', resizeWindow)
+  window.removeEventListener('pointerup', stopResizing)
+  window.removeEventListener('pointercancel', stopResizing)
+  scheduleBoundsSave()
+}
+
+function handleViewportResize() {
+  updateNarrowLayout()
+  if (isMaximizationForced.value) {
+    stopDragging()
+    stopResizing()
+  }
+  clampWindowToViewport()
+}
+
+function updateNarrowLayout() {
+  isNarrowLayout.value = window.innerWidth < SETTINGS_DESKTOP_WIDTH_THRESHOLD
+}
+
+function clampWindowToViewport() {
+  if (isWindowMaximized.value) return
+  windowBounds.value = clampBounds(liveBounds ?? windowBounds.value)
+  if (liveBounds !== null) liveBounds = windowBounds.value
+}
+
+// Whole CSS pixels still fall between device pixels at fractional UI or display
+// scales. A window translated there blurs its borders across two pixel rows, and
+// once a pane scrolls on its own layer it covers part of the header border.
+function getWindowTranslate({ x, y }) {
+  const ratio = window.devicePixelRatio || 1
+  return `${Math.round(x * ratio) / ratio}px ${Math.round(y * ratio) / ratio}px`
+}
+
+function clampBounds(bounds) {
+  const maximumWidth = Math.max(0, window.innerWidth - WINDOW_MARGIN * 2)
+  const maximumHeight = Math.max(0, window.innerHeight - WINDOW_MARGIN * 2)
+  const width = Math.min(Math.max(bounds.width, MINIMUM_WIDTH), maximumWidth)
+  const height = Math.min(Math.max(bounds.height, MINIMUM_HEIGHT), maximumHeight)
+  return {
+    x: Math.min(Math.max(bounds.x, WINDOW_MARGIN), window.innerWidth - width - WINDOW_MARGIN),
+    y: Math.min(Math.max(bounds.y, WINDOW_MARGIN), window.innerHeight - height - WINDOW_MARGIN),
+    width,
+    height
+  }
+}
+
+function getInitialBounds() {
+  const fallbackWidth = Math.min(DEFAULT_WIDTH, Math.max(MINIMUM_WIDTH, window.innerWidth - 48))
+  const fallbackHeight = Math.min(DEFAULT_HEIGHT, Math.max(MINIMUM_HEIGHT, window.innerHeight - 80))
+  const fallback = {
+    x: Math.round((window.innerWidth - fallbackWidth) / 2),
+    y: Math.max(WINDOW_MARGIN, Math.round((window.innerHeight - fallbackHeight) / 2)),
+    width: fallbackWidth,
+    height: fallbackHeight
+  }
+  try {
+    const saved = JSON.parse(localStorage.getItem(SETTINGS_BOUNDS_STORAGE_KEY))
+    if ([saved?.x, saved?.y, saved?.width, saved?.height].every(Number.isFinite)) {
+      return clampBounds(saved)
+    }
+  } catch {
+    // Ignore corrupt state and use the centered default.
+  }
+  return clampBounds(fallback)
+}
+
+function scheduleBoundsSave() {
+  if (boundsSaveTimer !== null) clearTimeout(boundsSaveTimer)
+  boundsSaveTimer = setTimeout(() => {
+    try {
+      localStorage.setItem(SETTINGS_BOUNDS_STORAGE_KEY, JSON.stringify(windowBounds.value))
+    } catch {
+      // Bounds are convenience state; storage can be unavailable or full.
+    } finally {
+      boundsSaveTimer = null
+    }
+  }, 150)
 }
 </script>
 

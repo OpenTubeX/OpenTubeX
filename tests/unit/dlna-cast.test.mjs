@@ -1,0 +1,251 @@
+import assert from 'node:assert/strict'
+import { createServer } from 'node:http'
+import test from 'node:test'
+
+import { createMediaServer, parseDlnaDevice, sendAvTransport } from '../../src/main/dlnaCast.js'
+
+function listen (server) {
+  return new Promise(resolve => server.listen(0, '127.0.0.1', () => resolve(server.address().port)))
+}
+
+function close (server) {
+  server.closeAllConnections()
+  return new Promise(resolve => server.close(resolve))
+}
+
+const allowLoopback = async () => [{ address: '127.0.0.1', family: 4 }]
+
+test('reads an AVTransport endpoint from a MediaRenderer description', () => {
+  const description = `<?xml version="1.0"?>
+    <root><device><deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType>
+      <friendlyName>Living Room &amp; TV</friendlyName><serviceList><service>
+        <serviceType>urn:schemas-upnp-org:service:AVTransport:1</serviceType>
+        <controlURL>/upnp/control</controlURL>
+      </service></serviceList></device></root>`
+  assert.deepEqual(parseDlnaDevice(description, 'http://192.168.1.7:8000/device.xml', '192.168.1.7'), {
+    id: 'http://192.168.1.7:8000/device.xml',
+    name: 'Living Room & TV',
+    address: '192.168.1.7',
+    controlUrl: 'http://192.168.1.7:8000/upnp/control',
+    serviceType: 'urn:schemas-upnp-org:service:AVTransport:1'
+  })
+  assert.equal(parseDlnaDevice(description, 'http://192.168.1.7/device.xml', '192.168.1.8'), null)
+  assert.equal(parseDlnaDevice(description.replace('/upnp/control', 'http://television.local:8000/upnp/control'),
+    'http://192.168.1.7:8000/device.xml', '192.168.1.7').controlUrl,
+  'http://192.168.1.7:8000/upnp/control')
+  assert.equal(parseDlnaDevice(description.replace('/upnp/control', 'control'),
+    'http://192.168.1.7:8000/descriptions/device.xml', '192.168.1.7').controlUrl,
+  'http://192.168.1.7:8000/descriptions/control')
+})
+
+test('resolves AVTransport URLs against the advertised URLBase', () => {
+  for (const [base, control, expected] of [
+    ['http://192.168.1.7:1400/upnp/', 'control/transport', 'http://192.168.1.7:1400/upnp/control/transport'],
+    ['http://television.local:1400/upnp/', 'control/transport', 'http://192.168.1.7:1400/upnp/control/transport'],
+    ['http://192.168.1.7:1400/upnp', 'control/transport', 'http://192.168.1.7:1400/control/transport'],
+    ['http://192.168.1.7:1400/upnp/', '/control', 'http://192.168.1.7:1400/control'],
+    ['http://192.168.1.7:1400/upnp/', 'http://192.168.1.7:1500/control', 'http://192.168.1.7:1500/control'],
+  ]) {
+    const description = `<d:root xmlns:d="urn:schemas-upnp-org:device-1-0">
+      <d:URLBase>${base}</d:URLBase><d:device>
+        <d:deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</d:deviceType>
+        <d:friendlyName>TV</d:friendlyName><d:serviceList><d:service>
+          <d:serviceType>urn:schemas-upnp-org:service:AVTransport:1</d:serviceType>
+          <d:controlURL>${control}</d:controlURL>
+        </d:service></d:serviceList></d:device></d:root>`
+    assert.equal(parseDlnaDevice(description, 'http://192.168.1.7:8000/device.xml', '192.168.1.7')?.controlUrl,
+      expected, `${base} + ${control}`)
+  }
+})
+
+test('rejects invalid URLBase and foreign IP control endpoints', () => {
+  for (const [base, control] of [
+    ['http://192.168.1.8:1400/upnp/', 'control'],
+    ['https://192.168.1.7:1400/upnp/', 'control'],
+    ['invalid URL', 'control'],
+    ['http://192.168.1.7:1400/upnp/', 'http://192.168.1.8/control'],
+  ]) {
+    const description = `<root xmlns="urn:schemas-upnp-org:device-1-0">
+      <URLBase>${base}</URLBase><device>
+        <deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType>
+        <friendlyName>TV</friendlyName><serviceList><service>
+          <serviceType>urn:schemas-upnp-org:service:AVTransport:1</serviceType>
+          <controlURL>${control}</controlURL>
+        </service></serviceList></device></root>`
+    assert.equal(parseDlnaDevice(description, 'http://192.168.1.7:8000/device.xml', '192.168.1.7'),
+      null, `${base} + ${control}`)
+  }
+})
+
+test('sends escaped media metadata in a SOAP AVTransport request', async t => {
+  // This checks the request body, not the renderer deadline, which a busy host
+  // can exceed for a loopback request.
+  t.mock.method(AbortSignal, 'timeout', () => new AbortController().signal)
+  let action
+  let body
+  const renderer = createServer(async (request, response) => {
+    action = request.headers.soapaction
+    body = await new Promise(resolve => {
+      let value = ''
+      request.on('data', chunk => { value += chunk })
+      request.on('end', () => resolve(value))
+    })
+    response.writeHead(200).end()
+  })
+  const port = await listen(renderer)
+  t.after(() => close(renderer))
+
+  await sendAvTransport({
+    controlUrl: `http://127.0.0.1:${port}/control`,
+    serviceType: 'urn:schemas-upnp-org:service:AVTransport:1'
+  }, 'SetAVTransportURI', {
+    InstanceID: 0,
+    CurrentURI: 'http://127.0.0.1/video?a=1&b=2',
+    CurrentURIMetaData: '<DIDL-Lite><dc:title>A & B</dc:title></DIDL-Lite>'
+  })
+
+  assert.equal(action, '"urn:schemas-upnp-org:service:AVTransport:1#SetAVTransportURI"')
+  assert.match(body, /video\?a=1&amp;b=2/)
+  assert.match(body, /&lt;DIDL-Lite&gt;/)
+  assert.match(body, /A &amp; B/)
+})
+
+test('serves MP4 byte ranges only to the selected device and token', async t => {
+  const media = Buffer.from('abcdefghij')
+  const upstream = createServer((request, response) => {
+    assert.equal(request.headers.range, 'bytes=2-5')
+    response.writeHead(206, {
+      'content-type': 'video/mp4',
+      'content-range': 'bytes 2-5/10',
+      'content-length': 4,
+      'accept-ranges': 'bytes'
+    }).end(media.subarray(2, 6))
+  })
+  const upstreamPort = await listen(upstream)
+  t.after(() => close(upstream))
+
+  const proxy = createMediaServer(`http://127.0.0.1:${upstreamPort}/video`, '127.0.0.1', 'secret', undefined, allowLoopback)
+  const proxyPort = await listen(proxy)
+  t.after(() => close(proxy))
+
+  const denied = await fetch(`http://127.0.0.1:${proxyPort}/wrong/video.mp4`)
+  assert.equal(denied.status, 404)
+
+  const response = await fetch(`http://127.0.0.1:${proxyPort}/secret/video.mp4`, {
+    headers: { Range: 'bytes=2-5' }
+  })
+  assert.equal(response.status, 206)
+  assert.equal(response.headers.get('content-range'), 'bytes 2-5/10')
+  assert.equal(await response.text(), 'cdef')
+})
+
+test('follows media redirects without forwarding credentials to another origin', async t => {
+  let redirectedHeaders
+  const destination = createServer((request, response) => {
+    redirectedHeaders = request.headers
+    response.writeHead(206, {
+      'content-range': 'bytes 2-5/10',
+      'content-length': 4
+    }).end('cdef')
+  })
+  const destinationPort = await listen(destination)
+  t.after(() => close(destination))
+
+  const source = createServer((request, response) => {
+    response.writeHead(302, { location: `http://127.0.0.1:${destinationPort}/video` }).end()
+  })
+  const sourcePort = await listen(source)
+  t.after(() => close(source))
+
+  const proxy = createMediaServer(`http://127.0.0.1:${sourcePort}/video`, '127.0.0.1', 'secret', url =>
+    url === `http://127.0.0.1:${sourcePort}/video` ? { Cookie: 'private=cookie', Authorization: 'Bearer private' } : {}, allowLoopback)
+  const proxyPort = await listen(proxy)
+  t.after(() => close(proxy))
+
+  const response = await fetch(`http://127.0.0.1:${proxyPort}/secret/video.mp4`, {
+    headers: { Range: 'bytes=2-5' }
+  })
+  assert.equal(response.status, 206)
+  assert.equal(await response.text(), 'cdef')
+  assert.equal(redirectedHeaders.range, 'bytes=2-5')
+  assert.equal(redirectedHeaders.cookie, undefined)
+  assert.equal(redirectedHeaders.authorization, undefined)
+})
+
+test('resolves credentials for each same-origin media redirect', async t => {
+  const requests = []
+  const upstream = createServer((request, response) => {
+    requests.push([request.url, request.headers.cookie])
+    if (request.url === '/media/video') response.writeHead(302, { location: '/other/video' }).end()
+    else response.writeHead(200).end('video')
+  })
+  const upstreamPort = await listen(upstream)
+  t.after(() => close(upstream))
+  const origin = `http://127.0.0.1:${upstreamPort}`
+  const proxy = createMediaServer(`${origin}/media/video`, '127.0.0.1', 'secret', url =>
+    new URL(url).pathname.startsWith('/media/') ? { Cookie: 'scoped=cookie' } : {}, allowLoopback)
+  const proxyPort = await listen(proxy)
+  t.after(() => close(proxy))
+
+  assert.equal(await (await fetch(`http://127.0.0.1:${proxyPort}/secret/video.mp4`)).text(), 'video')
+  assert.deepEqual(requests, [['/media/video', 'scoped=cookie'], ['/other/video', undefined]])
+})
+
+test('refuses media hosts and redirects the resolver does not allow', async t => {
+  let destinationRequests = 0
+  const destination = createServer((request, response) => {
+    destinationRequests++
+    response.writeHead(200).end('private')
+  })
+  const destinationPort = await listen(destination)
+  t.after(() => close(destination))
+  const source = createServer((request, response) => {
+    response.writeHead(302, { location: `http://localhost:${destinationPort}/admin` }).end()
+  })
+  const sourcePort = await listen(source)
+  t.after(() => close(source))
+
+  const unresolved = createMediaServer(`http://127.0.0.1:${destinationPort}/video`, '127.0.0.1', 'secret')
+  const redirected = createMediaServer(`http://127.0.0.1:${sourcePort}/video`, '127.0.0.1', 'secret', undefined,
+    async url => url.hostname === '127.0.0.1' ? [{ address: '127.0.0.1', family: 4 }] : null)
+  for (const proxy of [unresolved, redirected]) {
+    const proxyPort = await listen(proxy)
+    t.after(() => close(proxy))
+    assert.equal((await fetch(`http://127.0.0.1:${proxyPort}/secret/video.mp4`)).status, 502)
+  }
+  assert.equal(destinationRequests, 0)
+})
+
+test('refuses to relay media when the user routes it through a proxy', async t => {
+  let upstreamRequests = 0
+  const upstream = createServer((request, response) => {
+    upstreamRequests++
+    response.writeHead(200).end('video')
+  })
+  const upstreamPort = await listen(upstream)
+  t.after(() => close(upstream))
+
+  const proxied = []
+  const proxy = createMediaServer(`http://127.0.0.1:${upstreamPort}/video`, '127.0.0.1', 'secret', undefined, allowLoopback,
+    async url => { proxied.push(url); return 'SOCKS5 127.0.0.1:9050' })
+  const proxyPort = await listen(proxy)
+  t.after(() => close(proxy))
+
+  assert.equal((await fetch(`http://127.0.0.1:${proxyPort}/secret/video.mp4`)).status, 502)
+  assert.deepEqual(proxied, [`http://127.0.0.1:${upstreamPort}/video`])
+  assert.equal(upstreamRequests, 0)
+})
+
+test('reads the renderer SOAP playback position for cast recovery', async t => {
+  const xml = '<response><RelTime>00:00:08</RelTime></response>'
+  const renderer = createServer((request, response) => {
+    assert.match(request.headers.soapaction, /#GetPositionInfo"$/)
+    response.writeHead(200, { 'Content-Type': 'text/xml' }).end(xml)
+  })
+  const port = await listen(renderer)
+  t.after(() => close(renderer))
+  const body = await sendAvTransport({
+    controlUrl: `http://127.0.0.1:${port}/control`, serviceType: 'urn:schemas-upnp-org:service:AVTransport:1'
+  }, 'GetPositionInfo', { InstanceID: 0 })
+  assert.equal(body, xml)
+})

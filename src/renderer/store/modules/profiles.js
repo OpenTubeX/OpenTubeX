@@ -1,16 +1,20 @@
-import { MAIN_PROFILE_ID } from '../../../constants'
+import { MAIN_PROFILE_ID, THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../../constants'
 import { DBProfileHandlers } from '../../../datastores/handlers/index'
-import { calculateColorLuminance, getRandomColor } from '../../helpers/colors'
-import { deepCopy } from '../../helpers/utils'
+import { getProfileWithUpdatedSubscriptionDetails } from '../../helpers/subscription-profile-details'
+import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getNextSubscriptionSettingsTimestamp, isValidSubscriptionSettingsTimestamp } from '../../helpers/subscription-channels'
+import { DEFAULT_PROFILE_ICON } from '../../helpers/profileIcons'
+import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 
 const state = {
   profileList: [{
     _id: MAIN_PROFILE_ID,
     name: 'All Channels',
-    bgColor: '#000000',
-    textColor: '#FFFFFF',
+    bgColor: THEME_BG_COLOR,
+    textColor: THEME_TEXT_COLOR,
+    icon: { ...DEFAULT_PROFILE_ICON },
     subscriptions: []
   }],
+  profilesLoaded: false,
   activeProfile: MAIN_PROFILE_ID
 }
 
@@ -35,6 +39,29 @@ const getters = {
     const mainProfile = state.profileList[0]
 
     return mainProfile.subscriptions.reduce((set, channel) => set.add(channel.id), new Set())
+  },
+
+  /** Lets every subscribe button answer membership without scanning the active profile */
+  getActiveSubscribedChannelIdSet: (state, getters) => {
+    return getters.getActiveProfile.subscriptions.reduce((set, channel) => set.add(channel.id), new Set())
+  },
+
+  /** Cached subscription details, so channel ids can be resolved to names without a network request */
+  getSubscribedChannelsById: (state) => {
+    // The all channels profile is always the first profile in the array
+    const mainProfile = state.profileList[0]
+
+    return new Map(mainProfile.subscriptions.map((channel) => [channel.id, channel]))
+  },
+
+  /** Channels whose members-only videos are shown, which also requires authenticated playback */
+  getMembersOnlyChannelIdSet: (state, getters) => {
+    if (!hasConfiguredRestrictedPlaybackAuthentication(getters)) return new Set()
+
+    // Channel settings are kept in sync across profiles, so the main profile has them all
+    return new Set(state.profileList[0].subscriptions
+      .filter(channel => channel.showMembersOnly === true)
+      .map(channel => channel.id))
   },
 }
 
@@ -62,20 +89,19 @@ const actions = {
       profiles = await DBProfileHandlers.find()
     } catch (errMessage) {
       console.error(errMessage)
-      return
+      return null
     }
 
-    if (!Array.isArray(profiles)) return
+    if (!Array.isArray(profiles)) return null
 
     if (profiles.length === 0) {
       // Create a default profile and persist it
-      const randomColor = getRandomColor().value
-      const textColor = calculateColorLuminance(randomColor)
       const defaultProfile = {
         _id: MAIN_PROFILE_ID,
         name: defaultName,
-        bgColor: randomColor,
-        textColor: textColor,
+        bgColor: THEME_BG_COLOR,
+        textColor: THEME_TEXT_COLOR,
+        icon: { ...DEFAULT_PROFILE_ICON },
         subscriptions: []
       }
 
@@ -84,9 +110,10 @@ const actions = {
         commit('setProfileList', [defaultProfile])
       } catch (errMessage) {
         console.error(errMessage)
+        return null
       }
 
-      return
+      return false
     }
 
     // We want the primary profile to always be first
@@ -104,104 +131,91 @@ const actions = {
     }
 
     commit('setProfileList', profiles)
+    return true
   },
 
-  async batchUpdateSubscriptionDetails({ dispatch, state }, channels) {
-    if (channels.length === 0) { return }
+  async batchUpdateSubscriptionDetails({ commit, state }, channels) {
+    if (channels.length === 0) { return true }
+    // Skip the main-process round trip when no synced profile would change.
+    // Before profiles load, only the datastore knows the subscriptions.
+    if (state.profilesLoaded && state.profileList.every(profile => getProfileWithUpdatedSubscriptionDetails(profile, channels) === null)) {
+      return true
+    }
 
-    const profileList = state.profileList
-
-    for (const profile of profileList) {
-      // Only copied if something has actually changed, in which case this variable will be replaced with the copy.
-      let currentProfile = profile
-      let profileUpdated = false
-
-      for (const { channelThumbnailUrl, channelName, channelId } of channels) {
-        let channel = currentProfile.subscriptions.find((channel) => {
-          return channel.id === channelId
-        }) ?? null
-
-        if (channel === null) { continue }
-
-        if (channel.name !== channelName && channelName != null) {
-          if (!profileUpdated) {
-            const index = currentProfile.subscriptions.indexOf(channel)
-
-            currentProfile = deepCopy(currentProfile)
-            channel = currentProfile.subscriptions[index]
-            profileUpdated = true
-          }
-
-          channel.name = channelName
-        }
-
-        if (channelThumbnailUrl) {
-          const thumbnail = channelThumbnailUrl
-            // change thumbnail size if different
-            .replace(/=s\d*/, '=s176')
-            // If this is an Invidious URL, convert it to a YouTube one
-            .replace(/^https?:\/\/[^/]+\/ggpht/, 'https://yt3.googleusercontent.com')
-
-          if (channel.thumbnail !== thumbnail) {
-            if (!profileUpdated) {
-              const index = currentProfile.subscriptions.indexOf(channel)
-
-              currentProfile = deepCopy(currentProfile)
-              channel = currentProfile.subscriptions[index]
-              profileUpdated = true
-            }
-
-            channel.thumbnail = thumbnail
-          }
-        }
-      }
-
-      if (profileUpdated) {
-        await dispatch('updateProfile', currentProfile)
-      }
+    try {
+      const { profileIds, success } = await DBProfileHandlers.updateSubscriptionDetails(channels)
+      if (profileIds.length > 0) commit('updateSubscriptionDetails', { channels, profileIds })
+      return success
+    } catch (error) {
+      console.error(error)
+      return false
     }
   },
 
-  async updateSubscriptionDetails({ dispatch, state }, { channelThumbnailUrl, channelName, channelId }) {
-    const thumbnail = channelThumbnailUrl
-      // change thumbnail size if different
-      ?.replace(/=s\d*/, '=s176')
-      // If this is an Invidious URL, convert it to a YouTube one
-      .replace(/^https?:\/\/[^/]+\/ggpht/, 'https://yt3.googleusercontent.com') ??
-      null
-    const profileList = state.profileList
+  async updateSubscriptionDetails({ dispatch }, channel) {
+    return dispatch('batchUpdateSubscriptionDetails', [channel])
+  },
 
-    for (const profile of profileList) {
-      const index = profile.subscriptions.findIndex((channel) => {
-        return channel.id === channelId
-      })
-
-      if (index === -1) { continue }
-
-      // Only copied when something has actually changed
-      let currentProfileCopy
-
-      if (channelName != null && profile.subscriptions[index].name !== channelName) {
-        if (currentProfileCopy === undefined) {
-          currentProfileCopy = deepCopy(profile)
-        }
-
-        currentProfileCopy.subscriptions[index].name = channelName
+  async batchUpdateChannelSettings({ commit, state }, updates) {
+    if (updates.length === 0) return true
+    const subscriptionsById = new Map(state.profileList[0].subscriptions.map(channel => [channel.id, channel]))
+    const availableUpdates = updates.filter(({ channelId }) => subscriptionsById.has(channelId))
+    if (availableUpdates.length === 0) return false
+    const channelIds = new Set(availableUpdates.map(({ channelId }) => channelId))
+    const profiles = state.profileList
+      .filter(profile => profile.subscriptions.some(channel => channelIds.has(channel.id)))
+    const subscriptionsByChannelId = new Map([...channelIds].map(channelId => [channelId, []]))
+    for (const profile of profiles) {
+      for (const channel of profile.subscriptions) {
+        subscriptionsByChannelId.get(channel.id)?.push(channel)
       }
-
-      if (thumbnail != null && profile.subscriptions[index].thumbnail !== thumbnail) {
-        if (currentProfileCopy === undefined) {
-          currentProfileCopy = deepCopy(profile)
-        }
-
-        currentProfileCopy.subscriptions[index].thumbnail = thumbnail
+    }
+    try {
+      const patches = availableUpdates.map(({ channelId, settings }) => ({
+        channelId,
+        settings,
+        updatedAt: getNextSubscriptionSettingsTimestamp(subscriptionsByChannelId.get(channelId))
+      }))
+      const profileIds = profiles.map(profile => profile._id)
+      const updatedProfileIds = await DBProfileHandlers.batchUpdateChannelSettings(patches, profileIds)
+      if (!Array.isArray(updatedProfileIds)) return false
+      if (updatedProfileIds.length > 0) {
+        commit('updateChannelSettings', { updates: patches, profileIds: updatedProfileIds })
       }
+      return availableUpdates.length === updates.length && updatedProfileIds.length === profileIds.length
+    } catch (error) {
+      console.error(error)
+      return false
+    }
+  },
 
-      if (currentProfileCopy !== undefined) {
-        await dispatch('updateProfile', currentProfileCopy)
-      } else { // channel has not been updated, stop iterating through profiles
-        break
+  async updateChannelSettings({ commit, state }, { channelId, settings, fromSync = false, updatedAt }) {
+    if (fromSync && !isValidSubscriptionSettingsTimestamp(updatedAt)) return false
+
+    const primarySubscription = state.profileList[0].subscriptions
+      .find(channel => channel.id === channelId)
+    if (primarySubscription === undefined) return false
+
+    const profiles = state.profileList
+      .filter(profile => profile.subscriptions.some(subscription => subscription.id === channelId))
+    try {
+      const editTimestamp = fromSync
+        ? updatedAt
+        : getNextSubscriptionSettingsTimestamp(profiles.map(profile => (
+            profile.subscriptions.find(subscription => subscription.id === channelId)
+          )))
+      const channel = getChannelWithUpdatedSettings(primarySubscription, settings, editTimestamp)
+      const profileIds = profiles.map(profile => profile._id)
+      const updatedProfileIds = await DBProfileHandlers.updateChannelSettings(channel, profileIds)
+      if (!Array.isArray(updatedProfileIds)) return false
+
+      if (updatedProfileIds.length > 0) {
+        commit('updateChannelSettings', { channel, profileIds: updatedProfileIds })
       }
+      return updatedProfileIds.length === profileIds.length
+    } catch (error) {
+      console.error(error)
+      return false
     }
   },
 
@@ -209,8 +223,10 @@ const actions = {
     try {
       const newProfile = await DBProfileHandlers.create(profile)
       commit('addProfileToList', newProfile)
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 
@@ -218,14 +234,39 @@ const actions = {
     try {
       await DBProfileHandlers.upsert(profile)
       commit('upsertProfileToList', profile)
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
+  },
+
+  /** Saves the name, colors, and icon, keeping subscriptions that changed elsewhere */
+  async updateProfileDetails({ commit }, { profileId, details }) {
+    try {
+      await DBProfileHandlers.updateDetails(profileId, details)
+      commit('updateProfileDetails', { profileId, details })
+      return true
+    } catch (errMessage) {
+      console.error(errMessage)
+      return false
+    }
+  },
+
+  /** Replaces subscriptions unless they changed since `previous`, here or in the datastore */
+  async updateProfileSubscriptionsFromSync({ commit, state }, { profileId, subscriptions, previous }) {
+    const current = state.profileList.find(profile => profile._id === profileId)
+    if (JSON.stringify(current?.subscriptions) !== JSON.stringify(previous)) return false
+    const profile = await DBProfileHandlers.updateSubscriptionsIfUnchanged(profileId, subscriptions, previous)
+    if (profile === null) return false
+    commit('upsertProfileToList', profile)
+    return true
   },
 
   async addChannelToProfiles({ commit }, { channel, profileIds }) {
     // If this is an Invidious URL, convert it to a YouTube one
-    if (!channel.thumbnail.startsWith('https://yt3.googleusercontent.com/')) {
+    // Imported channels may have no thumbnail
+    if (typeof channel.thumbnail === 'string' && !channel.thumbnail.startsWith('https://yt3.googleusercontent.com/')) {
       channel.thumbnail = channel.thumbnail.replace(/^https?:\/\/[^/]+\/ggpht/, 'https://yt3.googleusercontent.com')
     }
 
@@ -237,10 +278,23 @@ const actions = {
     }
   },
 
-  async removeChannelFromProfiles({ commit }, { channelId, profileIds }) {
+  async removeChannelFromProfiles({ commit, dispatch }, { channelIds, profileIds }) {
     try {
-      await DBProfileHandlers.removeChannelFromProfiles(channelId, profileIds)
-      commit('removeChannelFromProfiles', { channelId, profileIds })
+      await DBProfileHandlers.removeChannelFromProfiles(channelIds, profileIds)
+      commit('removeChannelFromProfiles', { channelIds, profileIds })
+
+      if (profileIds.includes(MAIN_PROFILE_ID)) {
+        try {
+          await dispatch('updateYtDlpAutomaticDownloadRules', value => {
+            const rules = JSON.parse(value || '{}')
+            if (rules === null || typeof rules !== 'object' || Array.isArray(rules)) return value
+            for (const channelId of channelIds) delete rules[channelId]
+            return JSON.stringify(rules)
+          })
+        } catch (error) {
+          console.error('Failed to remove automatic download settings for the unsubscribed channel', error)
+        }
+      }
     } catch (errMessage) {
       console.error(errMessage)
     }
@@ -250,8 +304,10 @@ const actions = {
     try {
       await DBProfileHandlers.delete(profileId)
       commit('removeProfileFromList', profileId)
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 
@@ -260,9 +316,16 @@ const actions = {
   }
 }
 
+function withDefaultProfileIcon(profile) {
+  return profile._id === MAIN_PROFILE_ID && profile.icon == null
+    ? { ...profile, icon: { ...DEFAULT_PROFILE_ICON } }
+    : profile
+}
+
 const mutations = {
   setProfileList(state, profileList) {
-    state.profileList = profileList
+    state.profileList = profileList.map(withDefaultProfileIcon)
+    state.profilesLoaded = true
   },
 
   setActiveProfile(state, activeProfile) {
@@ -270,7 +333,7 @@ const mutations = {
   },
 
   addProfileToList(state, profile) {
-    state.profileList.push(profile)
+    state.profileList.push(withDefaultProfileIcon(profile))
     state.profileList.sort(profileSort)
   },
 
@@ -280,9 +343,9 @@ const mutations = {
     })
 
     if (i === -1) {
-      state.profileList.push(updatedProfile)
+      state.profileList.push(withDefaultProfileIcon(updatedProfile))
     } else {
-      state.profileList.splice(i, 1, updatedProfile)
+      state.profileList.splice(i, 1, withDefaultProfileIcon(updatedProfile))
     }
 
     state.profileList.sort(profileSort)
@@ -290,17 +353,57 @@ const mutations = {
 
   addChannelToProfiles(state, { channel, profileIds }) {
     for (const id of profileIds) {
-      state.profileList.find(profile => profile._id === id).subscriptions.push(channel)
+      const profile = state.profileList.find(profile => profile._id === id)
+      if (!profile) { continue }
+
+      if (!profile.subscriptions.some(subscription => subscription.id === channel.id)) {
+        profile.subscriptions.push(channel)
+      }
     }
   },
 
-  removeChannelFromProfiles(state, { channelId, profileIds }) {
+  removeChannelFromProfiles(state, { channelIds, profileIds }) {
     for (const id of profileIds) {
       const profile = state.profileList.find(profile => profile._id === id)
+      if (!profile) { continue }
 
       // use filter instead of splice in case the subscription appears multiple times
       // https://github.com/FreeTubeApp/FreeTube/pull/3468#discussion_r1179290877
-      profile.subscriptions = profile.subscriptions.filter(channel => channel.id !== channelId)
+      profile.subscriptions = profile.subscriptions.filter(channel => !channelIds.includes(channel.id))
+    }
+  },
+
+  updateProfileDetails(state, { profileId, details: { name, bgColor, textColor, icon } }) {
+    const profile = state.profileList.find(profile => profile._id === profileId)
+    if (!profile) return
+
+    Object.assign(profile, { name, bgColor, textColor, icon: withDefaultProfileIcon({ _id: profileId, icon }).icon })
+    state.profileList.sort(profileSort)
+  },
+
+  updateChannelSettings(state, { channel, updates, profileIds }) {
+    const updatesById = new Map(updates?.map(update => [update.channelId, update]))
+    for (const id of profileIds) {
+      const profile = state.profileList.find(profile => profile._id === id)
+      if (!profile) continue
+
+      profile.subscriptions = profile.subscriptions.map(subscription => {
+        const update = updatesById.get(subscription.id)
+        if (update) {
+          return getChannelWithUpdatedSettings(subscription, update.settings, update.updatedAt, true)
+        }
+        return subscription.id === channel?.id ? copySubscriptionChannelSettings(subscription, channel) : subscription
+      })
+    }
+  },
+
+  updateSubscriptionDetails(state, { channels, profileIds }) {
+    for (const id of profileIds) {
+      const profile = state.profileList.find(profile => profile._id === id)
+      if (!profile) continue
+
+      const updatedProfile = getProfileWithUpdatedSubscriptionDetails(profile, channels)
+      if (updatedProfile !== null) profile.subscriptions = updatedProfile.subscriptions
     }
   },
 
@@ -309,7 +412,14 @@ const mutations = {
       return profile._id === profileId
     })
 
-    state.profileList.splice(i, 1)
+    if (i !== -1) {
+      state.profileList.splice(i, 1)
+    }
+    // Other windows and server sync delete profiles too, so every deletion
+    // keeps the active profile valid here.
+    if (state.activeProfile === profileId) {
+      state.activeProfile = MAIN_PROFILE_ID
+    }
   }
 }
 

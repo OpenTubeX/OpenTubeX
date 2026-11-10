@@ -1,0 +1,32 @@
+/*
+  Classes set by useGridReorder: the other items slide aside while one is dragged.
+  The transitions override the items' own ones only for the drag.
+*/
+.reorderActive,
+.reorderActive * {
+  cursor: grabbing;
+}
+
+.reorderActive > * {
+  transition: translate var(--motion-fast-spatial) !important;
+}
+
+/*
+  A spring would carry a card that wraps between rows past the grid's edge,
+  briefly widening the page and showing a horizontal scrollbar.
+*/
+.reorderActive.reorderGrid > * {
+  transition: translate var(--motion-slow-effects) !important;
+}
+
+.reorderActive > .reorderDragged {
+  position: relative;
+  z-index: 1;
+  border-radius: var(--shape-corner-large);
+  background-color: var(--reorder-row-color, var(--card-bg-color));
+  box-shadow: 0 4px 16px rgb(0 0 0 / 30%);
+}
+
+.reorderActive > .reorderDragged:not(.reorderDropping) {
+  transition: none !important;
+}

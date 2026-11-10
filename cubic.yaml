@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=https://cubic.dev/schema/cubic-repository-config.schema.json
+
+version: 1
+reviews:
+  # Review each PR once when it opens; request more with `@cubic-dev-ai incremental review`
+  incremental_commits: false
+  ultrareview: manual
+  ignore:
+    files:
+      - "tests/**"
+      - "e2e/tests/**"
+      - "static/locales/**"
+    head_branches:
+      - "upstream-sync"
+      - "weblate-translations"
+      - "dependabot/**"
+    pr_labels:
+      - "translations"
+    pr_titles:
+      - "*Translations update from Weblate*"

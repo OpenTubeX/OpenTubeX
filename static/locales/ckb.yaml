@@ -251,7 +251,7 @@ Settings:
     Disable Smooth Scrolling: ''
     UI Scale: ''
     Hide Side Bar Labels: ''
-    Hide FreeTube Header Logo: ''
+    Hide OpenTubeX Header Logo: ''
     Base Theme:
       Base Theme: 'ڕووکاری بنچینە'
       Black: 'ڕەش'
@@ -393,7 +393,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: ''
     Fetch Feeds from RSS: ''
-    Fetch Automatically: ''
     To: بۆ
   Distraction Free Settings:
     Distraction Free Settings: ''
@@ -443,7 +442,7 @@ Settings:
     History File: 'پەڕگەی مێژوو'
     Playlist File: 'پەڕگەی پێڕستی لێدان'
     Export Subscriptions: ''
-    Export FreeTube: 'هەناردەکردنی فریتیوب'
+    Export OpenTubeX: 'هەناردەکردنی فریتیوب'
     Export YouTube: 'هەناردەکردنی یوتیوب'
     Export NewPipe: 'هەناردەکردنی نیوپایپ'
     Import History: 'هاوردەکردنی مێژوو'
@@ -524,7 +523,7 @@ About:
   Downloads / Changelog: ''
   GitHub releases: ''
   Help: 'یارمەتی'
-  FreeTube Wiki: 'ویکی فریتیوب'
+  OpenTubeX Wiki: 'ویکی فریتیوب'
   FAQ: 'پرسیارە دووبارەکان'
   Discussions: ''
   Report a problem: 'سکاڵا لە کێشەیەک بکە'
@@ -587,7 +586,7 @@ Channel:
   Your search results have returned 0 results: ''
   This channel does not exist: 'ئەم کەناڵە بوونی نییە'
   This channel does not allow searching: 'ئەم کەناڵە ڕێ بە گەڕان نادات'
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: ''
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: ''
   Channel Tabs: ''
   Videos:
     Videos: 'ڤیدیۆکان'
@@ -595,6 +594,7 @@ Channel:
       Newest: 'نوێترین'
       Oldest: 'کۆنترین'
       Most Popular: ''
+    This channel does not currently have any videos: 'ئەم کەناڵە ئێستا هیچ ڤیدیۆیەکی نییە'
   Shorts:
     This channel does not currently have any shorts: ''
   Live:
@@ -790,7 +790,6 @@ Tooltips:
     Hide Subscriptions Live: ''
   Subscription Settings:
     Fetch Feeds from RSS: ''
-    Fetch Automatically: ''
   Experimental Settings:
     Replace HTTP Cache: ''
   SponsorBlock Settings:

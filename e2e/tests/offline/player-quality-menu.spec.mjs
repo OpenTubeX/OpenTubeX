@@ -1,0 +1,496 @@
+import { test, expect, setWindowSize } from '../../helpers/app.mjs'
+import { activeTab, openMockedVideo, openPlayerOptions, settleMenuZoom } from '../../helpers/player.mjs'
+import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
+import { POST_LIVE_VIDEO_URL, routePostLiveMedia } from '../../helpers/media.mjs'
+
+const TRACKS = [
+  { id: 1, codecs: 'av01.0.12M.08', width: 3840, height: 2160, frameRate: 60, bandwidth: 18e6 },
+  { id: 2, codecs: 'av01.0.09M.08', width: 1920, height: 1080, frameRate: 60, bandwidth: 4e6 },
+  { id: 3, codecs: 'av01.0.08M.08', width: 1280, height: 720, frameRate: 60, bandwidth: 2e6 },
+  { id: 4, codecs: 'vp09.00.51.08', width: 3840, height: 2160, frameRate: 60, bandwidth: 20e6 },
+  { id: 5, codecs: 'vp09.00.41.08', width: 1920, height: 1080, frameRate: 60, bandwidth: 5e6 },
+  { id: 6, codecs: 'vp09.00.41.08', width: 1920, height: 1080, frameRate: 60, bandwidth: 9e6 },
+  { id: 7, codecs: 'vp09.00.40.08', width: 1280, height: 720, frameRate: 60, bandwidth: 2.5e6 },
+  { id: 8, codecs: 'avc1.64002a', width: 1920, height: 1080, frameRate: 60, bandwidth: 6e6 },
+  { id: 9, codecs: 'avc1.4d4020', width: 1280, height: 720, frameRate: 60, bandwidth: 3e6 },
+  { id: 10, codecs: 'avc1.4d401e', width: 640, height: 360, frameRate: 30, bandwidth: 7e5 },
+]
+
+/**
+ * Opens a video that Shaka plays adaptively, so it builds the resolution menu.
+ *
+ * @param {{ electronApp: import('@playwright/test').ElectronApplication }} app
+ * @param {import('@playwright/test').Page} page
+ * @param {(string | [string, string, string?, number?])[]} streams The codecs
+ * that the manifest offers the stream in, optionally with a resolution other
+ * than 320x180, a name for its video rendition and a bandwidth
+ */
+async function openAdaptiveVideo(app, page, streams = ['avc1.42c00d']) {
+  // Software decoding on a busy machine drops frames, and automatic quality
+  // then disables the playing stream for 30 seconds, which also hides it from
+  // the resolution menu and switches to another codec
+  await page.evaluate(() => {
+    const getVideoPlaybackQuality = HTMLVideoElement.prototype.getVideoPlaybackQuality
+    HTMLVideoElement.prototype.getVideoPlaybackQuality = function () {
+      const { creationTime, totalVideoFrames } = getVideoPlaybackQuality.call(this)
+      return { creationTime, totalVideoFrames, droppedVideoFrames: 0, corruptedVideoFrames: 0 }
+    }
+  })
+  await mockPlayableWatchPage(app, page)
+  await routePostLiveMedia(page)
+  await page.route('https://quality-menu.test/*.m3u8', route => route.fulfill({
+    contentType: 'application/x-mpegurl',
+    body: route.request().url().endsWith('/master.m3u8')
+      ? `#EXTM3U
+${streams.map(stream => [stream].flat()).map(([codec, resolution = '320x180', name, bandwidth = 84000], index) => [
+  ...(name ? [`#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="${name}",NAME="${name}",AUTOSELECT=YES,DEFAULT=YES`] : []),
+  `#EXT-X-STREAM-INF:BANDWIDTH=${bandwidth},CODECS="${codec}",RESOLUTION=${resolution}${name ? `,VIDEO="${name}"` : ''}`,
+  `video-${index}.m3u8\n`
+].join('\n')).join('')}`
+      : `#EXTM3U
+#EXT-X-TARGETDURATION:2
+#EXT-X-VERSION:7
+#EXT-X-MEDIA-SEQUENCE:0
+#EXT-X-PLAYLIST-TYPE:VOD
+#EXT-X-MAP:URI="${POST_LIVE_VIDEO_URL}"
+#EXTINF:2,
+${POST_LIVE_VIDEO_URL}
+#EXT-X-ENDLIST
+`
+  }))
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    ipcMain.removeHandler('yt-dlp-get-playback-info')
+    ipcMain.handle('yt-dlp-get-playback-info', () => ({
+      isLive: false,
+      liveStatus: 'not_live',
+      hlsManifestUrl: 'https://quality-menu.test/master.m3u8',
+      formats: [],
+      duration: 2,
+      storyboardVtt: null,
+      title: 'Quality menu',
+      captions: [],
+      captionTranslations: [],
+      version: 'test'
+    }))
+  })
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+}
+
+test.describe('quality labels in the grid menu', () => {
+  test.use({
+    seed: {
+      settings: {
+        videoPlaybackEngine: 'yt-dlp',
+        ytDlpPlaybackEngineDefaultMigration: true,
+        defaultVideoFormat: 'dash',
+        defaultQuality: 'auto',
+        usePlayerMenuGrid: true,
+        useSponsorBlock: false,
+        playNextVideo: false,
+        fetchSubscriptionsAutomatically: false,
+      }
+    }
+  })
+
+  test('labels Dolby Vision, LCEVC and non-square pixels like Shaka', async ({ app, page }) => {
+    await openAdaptiveVideo(app, page)
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    await player.evaluate(element => {
+      const shakaPlayer = element.ui.getControls().getPlayer()
+      shakaPlayer.getVideoTracks = () => [
+        { id: 1, codecs: 'avc1.64002a', width: 1920, height: 1080, frameRate: 30, bandwidth: 4e6, active: true },
+        { id: 2, codecs: 'dvh1.05.06', width: 3840, height: 2160, frameRate: 30, bandwidth: 20e6, hdr: 'PQ' },
+        // Displayed as 1920x1080, so it's not portrait video
+        { id: 3, codecs: 'vp09.00.40.08', width: 960, height: 1080, frameRate: 30, bandwidth: 2e6, pixelAspectRatio: '2:1' },
+        { id: 4, codecs: 'lvc1.vvi1.01', width: 1280, height: 720, frameRate: 30, bandwidth: 1e6 },
+      ].map(track => ({ hdr: 'SDR', roles: [], videoLayout: null, active: false, ...track }))
+      shakaPlayer.dispatchEvent({ type: 'trackschanged' })
+    })
+    const menu = player.locator('.shaka-resolutions')
+    const codecs = menu.locator('.ft-quality-codecs')
+    await player.hover()
+    await openPlayerOptions(player)
+    await player.locator('.shaka-resolution-button').click()
+    await codecs.getByRole('button', { name: 'DVH1' }).click()
+    await expect(menu.locator('.explicit-resolution > span')).toHaveText(['2160p Dolby Vision'])
+    await codecs.getByRole('button', { name: 'VP9' }).click()
+    await expect(menu.locator('.explicit-resolution > span')).toHaveText(['1080p'])
+    await codecs.getByRole('button', { name: 'LVC1' }).click()
+    await expect(menu.locator('.explicit-resolution > span')).toHaveText(['720p LCEVC'])
+  })
+})
+
+test.describe('quality in the grid menu', { tag: '@scale' }, () => {
+  test.use({
+    seed: {
+      settings: {
+        videoPlaybackEngine: 'yt-dlp',
+        ytDlpPlaybackEngineDefaultMigration: true,
+        defaultVideoFormat: 'dash',
+        defaultQuality: 'auto',
+        usePlayerMenuGrid: true,
+        useSponsorBlock: false,
+        playNextVideo: false,
+        fetchSubscriptionsAutomatically: false,
+      }
+    }
+  })
+
+  test('phone options keep a submenu that Shaka rebuilds while it is open', async ({ app, page }, testInfo) => {
+    await openAdaptiveVideo(app, page)
+    await setWindowSize(app, page, { width: 360, height: 760 })
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    await player.hover()
+    await player.locator('.shaka-overflow-menu-button').click({ force: true })
+    const dialog = player.locator('.phonePlayerOptions[open]')
+    await dialog.locator('.shaka-resolution-button').click()
+    const menu = dialog.locator('.shaka-resolutions')
+    const header = dialog.locator(':scope > .shaka-back-to-overflow-button')
+    await expect(menu.locator('.shaka-enable-abr-button')).toBeVisible()
+
+    // Shaka rebuilds the open menu whenever automatic quality switches tracks
+    await player.evaluate(element => element.ui.getControls().getPlayer().dispatchEvent({ type: 'adaptation' }))
+    await expect(menu.locator('.explicit-resolution')).toHaveCount(1)
+    await expect(menu.locator('.shaka-enable-abr-button')).toBeVisible()
+    await expect(header).toHaveText('Resolution')
+    // Submenu titles follow the back icon at the start of the header
+    const headerBounds = await header.boundingBox()
+    const titleBounds = await header.locator('span').boundingBox()
+    expect(titleBounds.x - headerBounds.x).toBeLessThan(64)
+
+    await header.click()
+    await expect(menu).toBeHidden()
+    await dialog.locator('.shaka-playbackrate-button').click()
+    await expect(header).toHaveText('Playback speed')
+    await dialog.screenshot({ path: testInfo.outputPath('phone-speed.png') })
+    await dialog.press('Escape')
+    await expect(dialog.locator('.shaka-resolution-button')).toBeVisible()
+  })
+
+  test('lists the resolutions of the codec picked in the header', async ({ app, page }, testInfo) => {
+    await openAdaptiveVideo(app, page)
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+
+    // A single test stream can't be played in several codecs, so the
+    // resolution menu gets YouTube-like tracks to list instead.
+    await player.evaluate((element, tracks) => {
+      const shakaPlayer = element.ui.getControls().getPlayer()
+      let activeId = 8
+      window.__selectedQualityTracks = []
+      shakaPlayer.getVideoTracks = () => tracks.map(track => ({
+        ...track,
+        active: track.id === activeId,
+        roles: [],
+        hdr: 'SDR',
+        videoLayout: null,
+      }))
+      shakaPlayer.selectVideoTrack = (track) => {
+        activeId = track.id
+        window.__selectedQualityTracks.push(track.id)
+        shakaPlayer.dispatchEvent({ type: 'variantchanged' })
+      }
+      shakaPlayer.configure({ abr: { enabled: false } })
+      shakaPlayer.dispatchEvent({ type: 'trackschanged' })
+    }, TRACKS)
+
+    const menu = player.locator('.shaka-resolutions')
+    const codecs = menu.locator('.ft-quality-codecs')
+    const tiles = menu.locator('.explicit-resolution')
+    const openMenu = async () => {
+      await player.hover()
+      await openPlayerOptions(player)
+      await player.locator('.shaka-resolution-button').click()
+      await expect(menu).toBeVisible()
+    }
+
+    await openMenu()
+    await expect(codecs).toHaveAccessibleName('Video Codec')
+    await expect(codecs.getByRole('button')).toHaveText(['AV1', 'VP9', 'H.264'])
+    await expect(codecs.getByRole('button', { name: 'H.264' })).toHaveAttribute('aria-pressed', 'true')
+    await expect(tiles.locator('> span')).toHaveText(['1080p60', '720p60', '360p'])
+    await expect(tiles.first()).toHaveAttribute('aria-selected', 'true')
+    await menu.screenshot({ path: testInfo.outputPath('h264.png') })
+    const title = await menu.locator('.shaka-back-to-overflow-button > span').boundingBox()
+    const switcher = await codecs.boundingBox()
+    expect(title.x + title.width).toBeLessThanOrEqual(switcher.x)
+
+    await codecs.getByRole('button', { name: 'VP9' }).click()
+    await expect(menu).toBeVisible()
+    await expect(codecs.getByRole('button', { name: 'VP9' })).toHaveAttribute('aria-pressed', 'true')
+    await expect(tiles.locator('> span')).toHaveText(['2160p60', '1080p60 (9 Mbps)', '1080p60 (5 Mbps)', '720p60'])
+    await expect(tiles.locator('> .shaka-quality-mark')).toHaveText(['4K', 'HD', 'HD'])
+    await expect(tiles.locator('[aria-selected="true"]')).toHaveCount(0)
+    await menu.screenshot({ path: testInfo.outputPath('vp9.png') })
+
+    // Playback events rebuild the open menu
+    await player.evaluate(element => element.ui.getControls().getPlayer().dispatchEvent({ type: 'adaptation' }))
+    await expect(codecs.getByRole('button', { name: 'VP9' })).toHaveAttribute('aria-pressed', 'true')
+    await expect(tiles).toHaveCount(4)
+
+    await tiles.filter({ hasText: '1080p60 (5 Mbps)' }).click()
+    await expect.poll(() => page.evaluate(() => window.__selectedQualityTracks)).toEqual([5])
+    await expect(player.locator('.shaka-resolution-button')).toHaveAttribute('shaka-status', '1080p60 (5 Mbps)')
+
+    await page.keyboard.press('Escape')
+    await openMenu()
+    await expect(codecs.getByRole('button', { name: 'VP9' })).toHaveAttribute('aria-pressed', 'true')
+    await expect(tiles.filter({ hasText: '1080p60 (5 Mbps)' })).toHaveAttribute('aria-selected', 'true')
+
+    // The phone layout shows the header above the menu, with the codecs
+    // beside its title while they fit
+    await page.keyboard.press('Escape')
+    await setWindowSize(app, page, { width: 450, height: 700 })
+    await openMenu()
+    const dialog = player.locator('.phonePlayerOptions[open]')
+    const header = dialog.locator(':scope > .shaka-back-to-overflow-button')
+    await codecs.getByRole('button', { name: 'AV1' }).click()
+    await expect(codecs.getByRole('button', { name: 'AV1' })).toHaveAttribute('aria-pressed', 'true')
+    await expect(tiles.locator('> span')).toHaveText(['2160p60', '1080p60', '720p60'])
+    await expect(dialog).toHaveAttribute('data-header-action', '')
+    const headerBox = await header.boundingBox()
+    const headerSwitcher = await codecs.boundingBox()
+    expect(headerSwitcher.y).toBeGreaterThanOrEqual(headerBox.y)
+    expect(headerSwitcher.y + headerSwitcher.height).toBeLessThanOrEqual(headerBox.y + headerBox.height)
+    await dialog.screenshot({ path: testInfo.outputPath('phone-header.png') })
+
+    // Otherwise they're as far from the header as from the options, and in
+    // the grid as far from the options as those are from the end of the menu
+    await menu.locator('.shaka-back-to-overflow-button > span').evaluate(span => { span.textContent = 'Resolution '.repeat(3).trim() })
+    await expect(dialog).not.toHaveAttribute('data-header-action')
+    const spacingIsEven = async () => {
+      const headerBounds = await header.boundingBox()
+      const menuBounds = await dialog.locator(':scope > .shaka-overflow-menu').boundingBox()
+      const switcher = await codecs.boundingBox()
+      const firstTile = await tiles.first().boundingBox()
+      const lastTile = await menu.locator('.shaka-enable-abr-button').boundingBox()
+      const above = switcher.y - (headerBounds.y + headerBounds.height)
+      const between = firstTile.y - (switcher.y + switcher.height)
+      const end = menuBounds.y + menuBounds.height - (lastTile.y + lastTile.height)
+      return above > 0 && Math.abs(above - between) < 1 && Math.abs(above - end) < 1
+    }
+    await expect.poll(spacingIsEven).toBe(true)
+    await dialog.screenshot({ path: testInfo.outputPath('phone.png') })
+
+    // Opening the submenu from a scrolled menu measures it from the top. At 95%
+    // the menu fits without scrolling, which leaves the same expectation.
+    await header.click()
+    // Too wide to fit beside the title at any UI scale
+    await page.addStyleTag({ content: '.phonePlayerOptions .ft-quality-codecs > button { padding-inline: 40px !important; }' })
+    const overflowMenu = dialog.locator(':scope > .shaka-overflow-menu')
+    await overflowMenu.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await dialog.locator('.shaka-resolution-button').evaluate(button => button.click())
+    await expect(dialog).not.toHaveAttribute('data-header-action')
+    await expect.poll(spacingIsEven).toBe(true)
+
+    // Leaving the phone layout restores the regular placement
+    await dialog.locator('.phonePlayerOptionsClose').click()
+    await expect(dialog).toHaveCount(0)
+    expect(await codecs.evaluate(element => element.style.marginBlock)).toBe('')
+    await setWindowSize(app, page, { width: 1280, height: 800 })
+    await openMenu()
+    const menuBox = await player.locator('.shaka-overflow-menu').boundingBox()
+    const desktopSwitcher = await codecs.boundingBox()
+    expect(desktopSwitcher.y - menuBox.y).toBeLessThan(10)
+    await page.keyboard.press('Escape')
+
+    await player.evaluate((element, tracks) => {
+      const shakaPlayer = element.ui.getControls().getPlayer()
+      shakaPlayer.getVideoTracks = () => tracks
+        .filter(track => track.codecs.startsWith('avc1'))
+        .map(track => ({ ...track, active: track.id === 8, roles: [], hdr: 'SDR', videoLayout: null }))
+      shakaPlayer.dispatchEvent({ type: 'trackschanged' })
+    }, TRACKS)
+    await expect(codecs).toHaveCount(0)
+  })
+})
+
+test.describe('quality codecs with classic controls', () => {
+  test.use({
+    seed: {
+      settings: {
+        videoPlaybackEngine: 'yt-dlp',
+        ytDlpPlaybackEngineDefaultMigration: true,
+        defaultVideoFormat: 'dash',
+        defaultQuality: 'auto',
+        useFrostedGlassPlayerUi: false,
+        useSponsorBlock: false,
+        playNextVideo: false,
+        fetchSubscriptionsAutomatically: false,
+      }
+    }
+  })
+
+  test('keeps the codecs in the phone header without the frosted dialog', async ({ app, page }) => {
+    await openAdaptiveVideo(app, page)
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    await expect(player).toHaveClass(/\bclassicPlayerControls\b/)
+    await player.evaluate((element, tracks) => {
+      const shakaPlayer = element.ui.getControls().getPlayer()
+      shakaPlayer.getVideoTracks = () => tracks.map(track => ({ ...track, active: track.id === 8, roles: [], hdr: 'SDR', videoLayout: null }))
+      shakaPlayer.dispatchEvent({ type: 'trackschanged' })
+    }, TRACKS)
+    await setWindowSize(app, page, { width: 450, height: 700 })
+    await player.hover()
+    await player.locator('.shaka-overflow-menu-button').click({ force: true })
+    const dialog = player.locator('.phonePlayerOptions[open]')
+    await dialog.locator('.shaka-resolution-button').click()
+    await expect(dialog).toHaveAttribute('data-header-action', '')
+    // The zooming menu holds the switcher until the zoom has ended
+    await settleMenuZoom(player)
+    const header = await dialog.locator(':scope > .shaka-back-to-overflow-button').boundingBox()
+    // Away from the top of the window, where the viewport would place it
+    expect(header.y).toBeGreaterThan(20)
+    const switcher = await dialog.locator('.ft-quality-codecs').boundingBox()
+    expect(switcher.y).toBeGreaterThanOrEqual(header.y)
+    expect(switcher.y + switcher.height).toBeLessThanOrEqual(header.y + header.height)
+  })
+})
+
+test.describe('quality codecs from the manifest', () => {
+  test.use({
+    seed: {
+      settings: {
+        videoPlaybackEngine: 'yt-dlp',
+        ytDlpPlaybackEngineDefaultMigration: true,
+        defaultVideoFormat: 'dash',
+        defaultQuality: 'auto',
+        // The test stream is H.264, so automatic quality must play it
+        preferredVideoCodec: 'h264',
+        useSponsorBlock: false,
+        playNextVideo: false,
+        fetchSubscriptionsAutomatically: false,
+      }
+    }
+  })
+
+  test('lists codecs that automatic quality would not choose', async ({ app, page }, testInfo) => {
+    // Shaka keeps a single codec per resolution unless the player opts out
+    await openAdaptiveVideo(app, page, ['av01.0.00M.08', 'vp09.00.10.08', 'avc1.42c00d'])
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    await player.hover()
+    await openPlayerOptions(player)
+    await player.locator('.shaka-resolution-button').click()
+    const codecs = player.locator('.shaka-resolutions .ft-quality-codecs')
+    await expect(codecs.getByRole('button')).toHaveText(['AV1', 'VP9', 'H.264'])
+    await expect(codecs.getByRole('button', { name: 'H.264' })).toHaveAttribute('aria-pressed', 'true')
+    await player.locator('.shaka-resolutions').screenshot({ path: testInfo.outputPath('codecs.png') })
+  })
+
+  test('lists every resolution when the manifest names them', async ({ app, page }) => {
+    // Twitch names the video rendition of each resolution, which Shaka reports
+    // as a different label for each video track
+    await openAdaptiveVideo(app, page, [['avc1.42c00d', '1280x720', '720p'], ['avc1.42c00d', '640x360', '360p']])
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    await player.hover()
+    await openPlayerOptions(player)
+    await player.locator('.shaka-resolution-button').click()
+    const menu = player.locator('.shaka-resolutions')
+    await expect(menu.locator('.explicit-resolution > span')).toHaveText(['720p', '360p'])
+    await expect(menu.locator('.ft-quality-codecs')).toHaveCount(0)
+  })
+
+  test('lists only the resolutions of the playing alternative video', async ({ app, page }) => {
+    await openAdaptiveVideo(app, page)
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    await player.evaluate(element => {
+      const shakaPlayer = element.ui.getControls().getPlayer()
+      shakaPlayer.getVideoTracks = () => [
+        { id: 1, label: 'Main', width: 1920, height: 1080, bandwidth: 4e6, active: true },
+        { id: 2, label: 'Sign language', width: 1280, height: 720, bandwidth: 2e6 },
+      ].map(track => ({ codecs: 'avc1.64002a', frameRate: 30, hdr: 'SDR', roles: [], videoLayout: null, active: false, ...track }))
+      shakaPlayer.dispatchEvent({ type: 'trackschanged' })
+    })
+    await player.hover()
+    await openPlayerOptions(player)
+    await player.locator('.shaka-resolution-button').click()
+    await expect(player.locator('.shaka-resolutions .explicit-resolution > span')).toHaveText(['1080p'])
+  })
+
+  test('lets Shaka choose the codecs without smooth codec switching', async ({ app, page }) => {
+    // Shaka then limits automatic quality to the codec of the first variant
+    await page.evaluate(() => {
+      delete SourceBuffer.prototype.changeType
+      delete window.ManagedSourceBuffer
+    })
+    await openAdaptiveVideo(app, page, ['av01.0.04M.08', 'avc1.42c00d'])
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    await expect.poll(() => player.evaluate(element => {
+      return element.ui.getControls().getPlayer().getVariantTracks().find(track => track.active)?.videoCodec
+    })).toBe('avc1.42c00d')
+  })
+})
+
+test.describe('default quality with a preferred codec', () => {
+  test.use({
+    seed: {
+      settings: {
+        videoPlaybackEngine: 'yt-dlp',
+        ytDlpPlaybackEngineDefaultMigration: true,
+        defaultVideoFormat: 'dash',
+        defaultQuality: '720',
+        preferredVideoCodec: 'h264',
+        useSponsorBlock: false,
+        playNextVideo: false,
+        fetchSubscriptionsAutomatically: false,
+      }
+    }
+  })
+
+  test('falls back to a lower resolution in the preferred codec', async ({ app, page }) => {
+    await openAdaptiveVideo(app, page, ['avc1.42c00d', ['av01.0.04M.08', '1280x720']])
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    await expect.poll(() => player.evaluate(element => {
+      return element.ui.getControls().getPlayer().getVariantTracks().find(track => track.active)?.videoCodec
+    })).toBe('avc1.42c00d')
+  })
+})
+
+test.describe('automatic quality after a stream is disabled', () => {
+  test.use({
+    seed: {
+      settings: {
+        videoPlaybackEngine: 'yt-dlp',
+        ytDlpPlaybackEngineDefaultMigration: true,
+        defaultVideoFormat: 'dash',
+        defaultQuality: 'auto',
+        useSponsorBlock: false,
+        playNextVideo: false,
+        fetchSubscriptionsAutomatically: false,
+      }
+    }
+  })
+
+  test('drops to a lower resolution of the same codec instead of switching to AV1', async ({ app, page }) => {
+    // A GPU that decodes H.264 but not AV1, so automatic quality prefers H.264
+    await page.evaluate(() => {
+      const capabilities = navigator.mediaCapabilities
+      const decodingInfo = capabilities.decodingInfo.bind(capabilities)
+      capabilities.decodingInfo = async configuration => {
+        const info = await decodingInfo(configuration)
+        const av1 = configuration.video?.contentType.includes('av01')
+        return { supported: info.supported, smooth: true, powerEfficient: !av1, keySystemAccess: info.keySystemAccess }
+      }
+    })
+    await openAdaptiveVideo(app, page, [
+      ['avc1.42c00d', '640x360', undefined, 200000],
+      ['av01.0.04M.08', '640x360', undefined, 200000],
+      ['avc1.42c00d', '320x180'],
+    ])
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    const activeVideo = () => player.evaluate(element => {
+      const track = element.ui.getControls().getPlayer().getVariantTracks().find(track => track.active)
+      return `${track?.videoCodec} ${track?.height}p`
+    })
+    await expect.poll(activeVideo).toBe('avc1.42c00d 360p')
+
+    // Shaka disables the playing stream for a while when it drops frames
+    await player.evaluate(element => {
+      const shakaPlayer = element.ui.getControls().getPlayer()
+      const { videoId } = shakaPlayer.getVariantTracks().find(track => track.active)
+      const { video } = shakaPlayer.getManifest().variants.find(variant => variant.video?.id === videoId)
+      shakaPlayer.disableStream(video, 30)
+    })
+    await expect.poll(activeVideo).toBe('avc1.42c00d 180p')
+  })
+})

@@ -1,0 +1,82 @@
+import { test, expect, sel, waitForAppReady, clickSearchCancel } from '../../helpers/app.mjs'
+
+test.use({
+  seed: {
+    settings: {
+      enableSearchSuggestions: false,
+      keyboardShortcuts: JSON.stringify({
+        APP: {
+          GENERAL: {
+            SEARCH_IN_NEW_WINDOW: 'ctrl+enter'
+          }
+        }
+      })
+    }
+  }
+})
+
+test.describe('search input', () => {
+  test.use({
+    seed: {
+      settings: { enableSearchSuggestions: false },
+      searchHistory: [{ _id: 'recent search', lastUpdatedAt: Date.now() }]
+    }
+  })
+
+  for (const direction of ['rtl']) {
+    test(`uses the native cancel control and restores recent searches in ${direction}`, async ({ page }) => {
+      await page.locator('body').evaluate((element, direction) => { element.dir = direction }, direction)
+      const input = page.locator(sel.searchInput)
+      const suggestions = page.locator('.topNav .searchContainer .options .list li')
+      await expect(input).toHaveAttribute('type', 'search')
+      await expect(page.locator('.topNav .clearInputTextButton')).toHaveCount(0)
+
+      await input.fill('unmatched query')
+      await expect(suggestions).toHaveCount(0)
+      await clickSearchCancel(input)
+
+      await expect(input).toHaveValue('')
+      await expect(input).toBeFocused()
+      await expect(suggestions).toHaveCount(1)
+      await expect(suggestions.first()).toContainText('recent search')
+
+      await input.press('ArrowDown')
+      await expect(input).toHaveValue('recent search')
+      await clickSearchCancel(input)
+      await expect(input).toHaveValue('')
+      await input.press('Enter')
+      await expect(page).not.toHaveURL(/#\/search\//)
+    })
+  }
+})
+
+test('back navigation restores the previous search text', async ({ page }) => {
+  const searchInput = page.locator(sel.searchInput)
+
+  await searchInput.fill('first search')
+  await searchInput.press('Enter')
+  await expect(page).toHaveURL(/#\/search\/first%20search/)
+
+  await searchInput.fill('second search')
+  await searchInput.press('Enter')
+  await expect(page).toHaveURL(/#\/search\/second%20search/)
+
+  await page.locator(sel.backButton).click()
+
+  await expect(page).toHaveURL(/#\/search\/first%20search/)
+  await expect(searchInput).toHaveValue('first search')
+})
+
+test('Shift+Enter searches in a new window', async ({ app, page }) => {
+  await page.locator(sel.searchInput).fill('shift enter search')
+
+  const [newWindow] = await Promise.all([
+    app.electronApp.waitForEvent('window'),
+    page.locator(sel.searchInput).press('Shift+Enter')
+  ])
+  await waitForAppReady(newWindow)
+
+  await expect(newWindow).toHaveURL(/#\/search\/shift%20enter%20search/)
+  await expect(newWindow.locator('.navFilterButton')).not.toHaveClass(/filterChanged/)
+  await expect(page).not.toHaveURL(/#\/search\//)
+})

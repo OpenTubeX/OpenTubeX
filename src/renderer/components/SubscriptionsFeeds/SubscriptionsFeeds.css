@@ -1,0 +1,38 @@
+.noFeeds {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.message {
+  color: var(--tertiary-text-color);
+  margin-block: 16px 0;
+}
+
+.errorBanner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  /* Matches the padding above the content of the items below */
+  margin-block: 6px 0;
+  padding-block: 4px;
+  padding-inline: 14px 4px;
+  border: 1px solid color-mix(in srgb, var(--destructive-color) 35%, transparent);
+  border-radius: var(--shape-corner-medium);
+  background-color: color-mix(in srgb, var(--destructive-color) 10%, var(--card-bg-color));
+  color: var(--primary-text-color);
+}
+
+.errorBannerIcon {
+  flex-shrink: 0;
+  color: var(--destructive-color);
+}
+
+.errorBannerText {
+  flex: 1;
+  margin: 0;
+  padding-block: 6px;
+  overflow-wrap: anywhere;
+}

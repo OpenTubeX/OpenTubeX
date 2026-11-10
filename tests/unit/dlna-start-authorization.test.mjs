@@ -1,0 +1,135 @@
+import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
+import test from 'node:test'
+import vm from 'node:vm'
+
+async function fixture() {
+  const castIpc = await readFile(new URL('../../src/main/castIpc.js', import.meta.url), 'utf8')
+  const preload = await readFile(new URL('../../src/preload/interface.js', import.meta.url), 'utf8')
+  const handlers = new Map()
+  const attempts = []
+  const invocations = []
+  let focused = true
+  let finishValidation
+  const event = {
+    sender: { id: 1, isFocused: () => focused, isDestroyed: () => false, once() {} },
+    senderFrame: { url: 'app://opentubex/index.html' }
+  }
+  const context = vm.createContext({
+    IpcChannels: { DLNA_START: 'start' },
+    ipcMain: { handle: (channel, handler) => handlers.set(channel, handler) },
+    isOpenTubeXUrl: url => url === event.senderFrame.url,
+    invidiousAuthorizations: new Map(),
+    getYtDlpExternalStreamHeaders: () => ({}),
+    getYtDlpExternalStreamCookieHeader: () => null,
+    getDlnaFfmpegExecutable: () => new Promise((_resolve, reject) => { finishValidation = () => reject(new Error('FFmpeg unavailable')) }),
+    createMediaAddressResolver: async () => ({ privateInstance: null, resolveAddresses: async () => [{ address: '93.184.215.14', family: 4 }] }),
+    session: { defaultSession: { resolveProxy: async () => 'DIRECT' } },
+    startDlnaCast: async (_owner, payload, _headers, _mux, _addresses, resolveProxy) => {
+      attempts.push({ ...payload, resolveProxy })
+      return { castId: 'cast-1' }
+    },
+    stopDlnaCast: async () => {},
+    isActiveDlnaCast: () => true,
+    powerSaveBlocker: { start: () => 1, stop() {} },
+    console,
+    URL,
+    navigator: { userActivation: { isActive: true } },
+    ipcRenderer: { invoke: (channel, payload) => { invocations.push(payload); return handlers.get(channel)(event, payload) } }
+  })
+  vm.runInContext(castIpc.slice(castIpc.indexOf('  const dlnaOwners ='), castIpc.indexOf('  ipcMain.handle(IpcChannels.DLNA_RECOVER')), context)
+  const dlnaStart = preload.indexOf('  dlna: {')
+  const dlna = vm.runInContext(`({${preload.slice(dlnaStart, preload.indexOf('\n  },\n', dlnaStart) + 4)}}).dlna`, context)
+  return {
+    dlna,
+    attempts,
+    invocations,
+    context,
+    finish() { finishValidation() },
+    blur() { focused = false }
+  }
+}
+
+const payload = {
+  deviceId: 'tv',
+  mediaUrl: 'https://media.example/video.mp4',
+  audioUrl: 'https://media.example/audio.m4a',
+  fallbackMediaUrl: 'https://media.example/complete.mp4',
+  title: 'Video',
+  startSeconds: 12
+}
+
+test('slow mux validation falls back within the original authorized start after focus and activation expire', async () => {
+  const f = await fixture()
+  const pending = f.dlna.start(payload)
+  f.blur()
+  f.context.navigator.userActivation.isActive = false
+  f.finish()
+  const result = await pending
+  assert.equal(result.castId, 'cast-1')
+  assert.equal(result.usedFallback, true)
+  assert.equal(f.invocations.length, 1, 'fallback must stay inside the original main-process operation')
+  assert.equal(f.attempts[0].mediaUrl, payload.fallbackMediaUrl)
+  assert.equal(f.attempts[0].audioUrl, undefined)
+  assert.equal(f.attempts[0].startSeconds, 12)
+})
+
+test('a fresh cast still requires both a user gesture and initial window focus', async () => {
+  const f = await fixture()
+  f.context.navigator.userActivation.isActive = false
+  assert.match((await f.dlna.start(payload)).error, /user action/)
+  assert.equal(f.invocations.length, 0)
+  f.context.navigator.userActivation.isActive = true
+  f.blur()
+  assert.match((await f.dlna.start(payload)).error, /active OpenTubeX window/)
+  assert.equal(f.attempts.length, 0)
+})
+
+test('a source the relay would refuse does not start a cast', async () => {
+  const f = await fixture()
+  f.context.createMediaAddressResolver = async () => ({ resolveAddresses: async url => url.hostname === 'media.example' ? null : [] })
+  const { audioUrl, fallbackMediaUrl, ...single } = payload
+  assert.match((await f.dlna.start(single)).error, /not allowed/)
+  assert.equal(f.attempts.length, 0)
+})
+
+test('a proxied source does not start a cast, and the relay resolves the proxy for every hop', async () => {
+  const f = await fixture()
+  const { audioUrl, fallbackMediaUrl, ...single } = payload
+  f.context.session.defaultSession.resolveProxy = async url => url === single.mediaUrl ? 'PROXY 127.0.0.1:8080' : 'DIRECT'
+  assert.match((await f.dlna.start(single)).error, /direct route/)
+  assert.equal(f.attempts.length, 0)
+
+  f.context.session.defaultSession.resolveProxy = async () => 'DIRECT'
+  assert.equal((await f.dlna.start(single)).castId, 'cast-1')
+  f.context.session.defaultSession.resolveProxy = async url => `PROXY ${new URL(url).hostname}:1080`
+  assert.equal(await f.attempts[0].resolveProxy('https://redirect.example/video'), 'PROXY redirect.example:1080')
+})
+
+test('a stop that finishes after the next cast started keeps that cast awake', async () => {
+  const f = await fixture()
+  const active = new Set()
+  let nextId = 1
+  f.context.powerSaveBlocker = { start: () => { active.add(nextId); return nextId++ }, stop: id => active.delete(id) }
+  let finishStop
+  f.context.stopDlnaCast = () => new Promise(resolve => { finishStop = () => resolve(true) })
+  f.context.getDlnaFfmpegExecutable = async () => '/usr/bin/ffmpeg'
+  const videoOnly = { ...payload, audioUrl: undefined, fallbackMediaUrl: undefined }
+  assert.equal((await f.dlna.start(videoOnly)).castId, 'cast-1')
+  const stopping = vm.runInContext('stopDlna', f.context)(1, 'cast-1')
+  assert.equal((await f.dlna.start(videoOnly)).castId, 'cast-1')
+  finishStop()
+  assert.equal(await stopping, true)
+  assert.equal(active.size, 1)
+})
+
+test('a cast stopped while it was starting does not keep the machine awake', async () => {
+  const f = await fixture()
+  let started = 0
+  f.context.powerSaveBlocker = { start: () => ++started, stop() {} }
+  f.context.getDlnaFfmpegExecutable = async () => '/usr/bin/ffmpeg'
+  // e.g. the window closed during the initial seek and its listener stopped the cast
+  f.context.isActiveDlnaCast = () => false
+  assert.equal((await f.dlna.start({ ...payload, audioUrl: undefined, fallbackMediaUrl: undefined })).castId, 'cast-1')
+  assert.equal(started, 0)
+})

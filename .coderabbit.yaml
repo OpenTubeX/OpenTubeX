@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+
+reviews:
+  high_level_summary: false
+  request_changes_workflow: true
+  path_instructions:
+    - path: "tests/**"
+      instructions: &test-bar >-
+        Besides correctness, check that each added or expanded test meets the test bar in AGENTS.md ("Test bar" under
+        Testing). Flag tests that assert exact cosmetic styling or label wording, restate constants, defaults,
+        configuration or source text, mirror mocks, assert wall-clock durations, duplicate an existing test, or
+        repeat one check across icon packs, themes, locales, widths or near-identical inputs when no case takes a
+        different code path. Flag @scale tags on
+        tests that measure nothing fractional UI scale can break. Do not ask for more tests or more cases.
+    - path: "e2e/tests/**"
+      instructions: *test-bar
+  path_filters:
+    # Native string files generated from static/locales by _scripts/prepareAndroid.mjs and _scripts/prepareIos.mjs
+    - "!android/app/src/main/res/values*/widget_strings.xml"
+    - "!ios/App/App/*.lproj/InfoPlist.strings"
+    - "!ios/App/OpenTubeXWidgets/*.lproj/Localizable.strings"
+  auto_review:
+    ignore_title_keywords:
+      - "Translations update from Weblate"
+      - "chore: sync development from FreeTubeApp/FreeTube"
+    ignore_usernames:
+      - "dependabot[bot]"
+    labels:
+      - "!translations"
+    enabled: false
+    auto_incremental_review: false

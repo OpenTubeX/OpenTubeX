@@ -1,0 +1,661 @@
+import { test, expect, goTo, goToSettingsSection, waitForAppReady, expectScrollAtRenderedEnd, setWindowSize } from '../../helpers/app.mjs'
+import { decryptSyncDocument, encryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
+
+/**
+ * @param {Date} date
+ */
+function toDateKey(date) {
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0')
+  ].join('-')
+}
+
+const today = toDateKey(new Date())
+const yesterday = toDateKey(new Date(Date.now() - 86_400_000))
+
+// Marks the history migration as already completed so the seeded totals
+// stay exact and no historical-estimate prompt appears.
+const migrationDone = {
+  _id: 'history-watch-time-v1',
+  completedAt: Date.now(),
+  hadEstimates: false,
+  adjustment: null
+}
+
+async function expectStatsActionsLayout(page, count) {
+  const footer = page.locator('.statsFooter')
+  await expect(footer.getByRole('button')).toHaveCount(count)
+  await expect.poll(() => footer.evaluate(element => {
+    const footer = element.getBoundingClientRect()
+    const buttons = [...element.querySelectorAll('button')].map(button => {
+      const bounds = button.getBoundingClientRect()
+      const range = document.createRange()
+      range.selectNodeContents(button)
+      const content = range.getBoundingClientRect()
+      const style = getComputedStyle(button)
+      const padding = Number.parseFloat(style.paddingLeft) + Number.parseFloat(style.paddingRight) +
+        Number.parseFloat(style.borderLeftWidth) + Number.parseFloat(style.borderRightWidth)
+      return { bounds, fits: Math.abs(bounds.width - Math.max(64, content.width + padding)) < 1 }
+    })
+    const note = element.querySelector('.estimateNote')?.getBoundingClientRect()
+    return buttons.every(({ bounds, fits }, index) => {
+      const aligned = buttons.length === 1
+        ? Math.abs(bounds.right - footer.right) < 1
+        : Math.abs(bounds.left + bounds.width / 2 - (footer.left + footer.width / 2)) < 1
+      return fits && aligned && bounds.left >= footer.left - 1 && bounds.right <= footer.right + 1 &&
+        (index === 0 ? !note || bounds.top - note.bottom >= 19 : bounds.top - buttons[index - 1].bounds.bottom >= 15)
+    })
+  })).toBe(true)
+}
+
+test.describe('watch stats', () => {
+  test.use({
+    seed: {
+      watchStats: [
+        { _id: today, date: today, seconds: 3600 },
+        { _id: yesterday, date: yesterday, seconds: 1800 },
+        migrationDone
+      ]
+    }
+  })
+
+  test('resetting statistics clears all recorded time', async ({ page }) => {
+    await goTo(page, 'stats')
+    await expect(page.locator('.summaryCard').filter({ hasText: 'Total watch time' })).toContainText('1 hr 30 min')
+
+    await page.locator('.resetStatsButton').click()
+    await page.getByRole('button', { name: 'Reset', exact: true }).click()
+
+    await expect(page.locator('.summaryCard').filter({ hasText: 'Total watch time' })).toContainText('0 min')
+  })
+})
+
+test.describe('historical watch time migration', () => {
+  test.use({
+    seed: {
+      history: [
+        {
+          _id: 'watchedvid01',
+          videoId: 'watchedvid01',
+          title: 'Previously watched video',
+          author: 'Test Channel',
+          authorId: 'UC-test-channel-id',
+          published: Date.now() - 2 * 86_400_000,
+          description: '',
+          viewCount: 1234,
+          lengthSeconds: 600,
+          watchProgress: 600,
+          isWatched: true,
+          timeWatched: Date.now() - 86_400_000,
+          isLive: false,
+          type: 'video'
+        }
+      ]
+    }
+  })
+
+  test('estimates watch time from history and offers a playback speed adjustment', async ({ app, page, attachScreenshot }) => {
+    await goTo(page, 'stats')
+
+    // First visit after the migration: the adjustment prompt opens on its own.
+    const prompt = page.locator('.historicalAdjustment')
+    await expect(prompt).toBeVisible()
+
+    await prompt.getByRole('button', { name: 'Apply playback speed' }).click()
+    await expect(prompt).toBeHidden()
+    await expect(page.getByText('Imported watch time has been adjusted', { exact: true })).toBeHidden()
+
+    // The estimate is marked as such and contributes to the totals:
+    // 600 seconds of saved playback progress become 10 minutes.
+    await expect(page.locator('.estimateNote')).toBeVisible()
+    await expect(page.locator('.summaryCard').filter({ hasText: 'Total watch time' })).toContainText('10 min')
+    await expect(page.locator('.adjustEstimateButton')).toBeVisible()
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await setWindowSize(app, page, { width: 375, height: 850 })
+    await expectStatsActionsLayout(page, 2)
+    await page.locator('.statsFooter').scrollIntoViewIfNeeded()
+    await attachScreenshot('statistics action stack at 375px')
+  })
+})
+
+test.describe('synced watch stats', () => {
+  const key = Buffer.alloc(32, 1).toString('base64')
+  const salt = Buffer.alloc(16, 2).toString('base64')
+  const laptop = Buffer.alloc(16, 3).toString('base64url')
+  const phone = Buffer.alloc(16, 4).toString('base64url')
+
+  test.use({
+    seed: {
+      settings: {
+        syncServerEnabled: false,
+        syncServerAutoSync: false,
+        syncServerUrl: 'https://sync.example',
+        syncServerUsername: 'test',
+        syncServerToken: 'test-token',
+        syncServerPrivacyMode: 'enhanced',
+        syncServerPrivacyKey: key,
+        syncServerPrivacySalt: salt,
+        syncServerDeviceId: laptop,
+        syncServerDeviceName: 'Laptop',
+        syncServerSyncSubscriptions: false,
+        syncServerSyncPlaylists: false,
+        syncServerSyncHistory: false,
+        syncServerSyncProfiles: false,
+        syncServerSyncSessions: false,
+        syncServerSyncSettings: false,
+      },
+      watchStats: [
+        { _id: today, date: today, seconds: 3600 },
+        migrationDone,
+      ],
+    },
+  })
+
+  test('device picker grows into available space and fades overflowing edges', async ({ app, page }, testInfo) => {
+    await goTo(page, 'stats')
+    await page.evaluate(() => {
+      const store = window.$store
+      store.commit('setSyncServerEnabled', true)
+      store.commit('setSyncServerWatchStatsSupported', true)
+      store.commit('setSyncedWatchStats', [
+        { deviceId: 'phone', deviceName: 'Pixel 8 Pro', platform: 'android', days: {} },
+        { deviceId: 'tablet', deviceName: 'Living room tablet', platform: 'android', days: {} },
+      ])
+    })
+    const picker = page.getByRole('group', { name: 'Devices' })
+    const scrollbar = picker.locator(':scope > .os-scrollbar-horizontal')
+    const expectIndicatorAligned = async () => {
+      await expect.poll(() => picker.evaluate(group => {
+        const button = group.querySelector('[aria-pressed="true"]').getBoundingClientRect()
+        const indicator = group.querySelector('.deviceSegmentIndicator').getBoundingClientRect()
+        return Math.max(Math.abs(button.left - indicator.left), Math.abs(button.right - indicator.right))
+      })).toBeLessThan(1)
+    }
+    const expectSingleLineLabels = async () => {
+      await expect.poll(() => picker.getByRole('button').evaluateAll(buttons => buttons.every(button => {
+        const range = document.createRange()
+        range.selectNodeContents(button.lastChild)
+        return range.getClientRects().length === 1
+      }))).toBe(true)
+    }
+    const expectNoOverflow = async () => {
+      await expect.poll(() => picker.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+      await expect.poll(() => picker.evaluate(element => element.scrollLeft)).toBe(0)
+      await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+      await expect(picker).not.toHaveClass(/fadeLeft|fadeRight/)
+    }
+    await expect(picker.getByRole('button')).toHaveCount(4)
+    await expect.poll(async () => {
+      const laptop = await picker.getByRole('button', { name: 'Laptop', exact: true }).boundingBox()
+      const tablet = await picker.getByRole('button', { name: 'Living room tablet', exact: true }).boundingBox()
+      return laptop.width / tablet.width
+    }).toBeLessThan(0.8)
+    for (const name of ['Laptop', 'Pixel 8 Pro', 'Living room tablet', 'All devices']) {
+      await picker.getByRole('button', { name, exact: true }).click()
+      await expectIndicatorAligned()
+    }
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await expect(page.locator('body')).toHaveClass(/\bdark\b/)
+    await expect.poll(() => picker.evaluate(element => element.getBoundingClientRect().width)).toBeGreaterThan(460)
+    await expectNoOverflow()
+    await expectSingleLineLabels()
+    await picker.screenshot({ path: testInfo.outputPath('devices-wide.png') })
+
+    await page.evaluate(() => window.$store.dispatch('updateUiScale', 125))
+    await expectNoOverflow()
+    await picker.getByRole('button', { name: 'Living room tablet', exact: true }).click()
+    await expectIndicatorAligned()
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      BrowserWindow.getAllWindows()[0]?.setBounds({ x: 0, y: 0, width: 480, height: 800 })
+    })
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+    await expect(picker).toHaveClass(/fadeRight/)
+    await expect(picker).toHaveCSS('mask-image', /linear-gradient/)
+    await expect(picker).not.toHaveClass(/fadeLeft/)
+    await picker.evaluate(element => { element.scrollLeft = (element.scrollWidth - element.clientWidth) / 2 })
+    await expect(picker).toHaveClass(/fadeLeft/)
+    await expect(picker).toHaveClass(/fadeRight/)
+    // Electron's locator screenshot clipping uses unzoomed coordinates.
+    await page.evaluate(() => window.$store.dispatch('updateUiScale', 100))
+    await expect.poll(() => page.evaluate(() => window.innerWidth)).toBeGreaterThan(400)
+    await picker.evaluate(element => { element.scrollLeft = (element.scrollWidth - element.clientWidth) / 2 })
+    await expect(picker).toHaveClass(/fadeLeft/)
+    await expect(picker).toHaveClass(/fadeRight/)
+    await picker.screenshot({ path: testInfo.outputPath('devices-overflow.png') })
+    await page.evaluate(() => window.$store.dispatch('updateUiScale', 125))
+    // Wait for the zoomed viewport before choosing its scroll boundary.
+    await expect.poll(() => page.evaluate(() => window.innerWidth)).toBeLessThan(400)
+    await picker.evaluate(element => { element.scrollLeft = element.scrollWidth })
+    await expect(picker).toHaveClass(/fadeLeft/)
+    await expect(picker).not.toHaveClass(/fadeRight/)
+    // The indicator settling clamps the offset to the track's rendered end,
+    // which includes the track's border.
+    const remaining = await picker.evaluate(async element => {
+      element.querySelector('.deviceSegmentIndicator').dispatchEvent(new Event('transitionend'))
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+      return element.scrollWidth - element.clientWidth - element.scrollLeft
+    })
+    expect(remaining).toBeLessThanOrEqual(1)
+    await expect(picker).not.toHaveClass(/fadeRight/)
+
+    // Expanding the viewport must remove both the stale offset and fades.
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      BrowserWindow.getAllWindows()[0]?.setBounds({ x: 0, y: 0, width: 1600, height: 900 })
+    })
+    await expectNoOverflow()
+    await expectIndicatorAligned()
+
+    // Shorter labels and removal can also eliminate an existing scroll range.
+    for (const change of ['rename', 'remove']) {
+      await page.emulateMedia({ reducedMotion: change === 'remove' ? 'reduce' : 'no-preference' })
+      await page.evaluate(() => {
+        const store = window.$store
+        store.commit('setSyncedWatchStats', store.getters.getSyncedWatchStats.map(device => ({
+          ...device, deviceName: 'A device with a very long name that needs horizontal scrolling',
+        })))
+      })
+      await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+      await picker.evaluate(element => { element.scrollLeft = element.scrollWidth })
+      await expect(picker).toHaveClass(/fadeLeft/)
+      await page.evaluate(change => {
+        const store = window.$store
+        store.commit('setSyncedWatchStats', change === 'remove'
+          ? []
+          : store.getters.getSyncedWatchStats.map(device => ({ ...device, deviceName: 'Phone' })))
+      }, change)
+      await expectNoOverflow()
+      await expectIndicatorAligned()
+    }
+
+    await page.evaluate(() => window.$store
+      .commit('setSyncedWatchStats', [{ deviceId: 'tablet', deviceName: 'Living room Android tablet', days: {} }]))
+    await expect(picker.getByRole('button')).toHaveCount(3)
+    await expect.poll(() => picker.evaluate(element => element.getBoundingClientRect().width)).toBeGreaterThan(460)
+    await expectNoOverflow()
+    await expectSingleLineLabels()
+  })
+
+  test('reconnecting through QR pairing keeps the saved device identity', async ({ page }) => {
+    const requests = []
+    let session
+    await page.route('https://sync.example/**', async route => {
+      const { pathname } = new URL(route.request().url())
+      if (pathname === '/health') {
+        return route.fulfill({ json: { capabilities: { encrypted_sync: 1, live_sync: 1, key_pairing: 1 } } })
+      }
+      if (pathname === '/v1/pairing' && route.request().method() === 'POST') {
+        const body = route.request().postDataJSON()
+        requests.push(body)
+        session = {
+          version: 1,
+          id: body.id,
+          account_id: null,
+          recipient_public_key: body.recipient_public_key,
+          recipient_device_id: body.recipient_device_id,
+          recipient_device_name: body.recipient_device_name,
+          approving_device_id: null,
+          expires_at: Date.now() + 120000,
+          approved: false
+        }
+        return route.fulfill({ json: session })
+      }
+      if (pathname.startsWith('/v1/pairing/')) return route.fulfill({ json: session })
+      return route.fulfill({ status: 404 })
+    })
+    await page.evaluate(() => {
+      const store = window.$store
+      store.commit('setSyncServerToken', '')
+      store.commit('setSyncServerEnabled', true)
+    })
+    const sync = await goToSettingsSection(page, 'sync')
+    for (let attempt = 0; attempt < 2; attempt++) {
+      await sync.getByRole('button', { name: 'Pair with an existing device' }).click()
+      const receiver = page.getByRole('dialog', { name: 'Pair with an existing device' })
+      await receiver.getByRole('button', { name: 'Create pairing code' }).click()
+      await expect(receiver.locator('.pairingQr')).toBeVisible()
+      expect(requests[attempt].recipient_device_id).toBe(laptop)
+      await receiver.press('Escape')
+      await expect(receiver).toBeHidden()
+    }
+    expect(requests[0].id).not.toBe(requests[1].id)
+    expect(requests[0].recipient_public_key).not.toBe(requests[1].recipient_public_key)
+  })
+
+  test('repairs duplicate device stats with a preview and preserves the repair after sync', async ({ app, page }, testInfo) => {
+    let failUpload = false
+    let holdUpload = false
+    let uploadStarted
+    let releaseUpload
+    let revision = 1
+    let devices = [{ deviceId: phone, deviceName: 'Pixel (old)', platform: 'android', days: { [today]: 1800, [yesterday]: 1800 } }]
+    let payload = await encryptSyncDocument(devices, key, salt)
+    await page.route('https://sync.example/**', async route => {
+      const { pathname } = new URL(route.request().url())
+      if (pathname === '/health') return route.fulfill({ json: { capabilities: { encrypted_sync: 1, live_sync: 1, watch_stats: 1 } } })
+      if (pathname === '/v1/encrypted_sync') return route.fulfill({ json: { collections: [{ collection: 'watchStats', revision }], legacy_data: false } })
+      if (pathname === '/v1/account/sessions') return route.fulfill({ json: { sessions: [] } })
+      if (pathname === '/v1/encrypted_sync/events') return route.fulfill({ json: [] })
+      if (pathname === '/v1/encrypted_sync/watchStats') {
+        if (route.request().method() === 'PUT') {
+          if (failUpload) return route.fulfill({ status: 503, json: { error: 'Upload failed' } })
+          if (holdUpload) {
+            uploadStarted()
+            await new Promise(resolve => { releaseUpload = resolve })
+          }
+          const request = route.request().postDataJSON()
+          expect(request.revision).toBe(revision)
+          payload = request.payload
+          devices = await decryptSyncDocument(payload, key)
+          revision++
+        }
+        return route.fulfill({ json: { revision, payload } })
+      }
+      return route.fulfill({ status: 404 })
+    })
+    await page.evaluate(async () => {
+      const store = window.$store
+      await store.dispatch('updateSyncServerDeviceName', 'Pixel')
+      await store.dispatch('updateSyncServerEnabled', true)
+      await store.dispatch('syncWithSyncServer')
+    })
+    await goTo(page, 'stats')
+    const picker = page.getByRole('group', { name: 'Devices' })
+    const total = page.locator('.summaryCard').filter({ hasText: 'Total watch time' })
+    await expect(total).toContainText('2 hr')
+    await picker.getByRole('button', { name: 'Pixel (old)', exact: true }).click()
+    await page.getByRole('button', { name: 'Replace old device', exact: true }).click()
+    let dialog = page.getByRole('dialog', { name: 'Replace old device' })
+    await expect(dialog).toContainText('Days in both histories: 1')
+    await expect(dialog.getByRole('button', { name: 'Replace old device' })).toBeDisabled()
+    await dialog.getByRole('radio', { name: /Keep larger daily total/ }).check()
+    await expect(dialog.locator('.repairResult')).toContainText('1 hr 30 min')
+    await dialog.getByRole('radio', { name: /Add daily totals/ }).check()
+    await expect(dialog.locator('.repairResult')).toContainText('2 hr')
+    await dialog.getByRole('button', { name: 'Cancel' }).click()
+    expect(devices).toHaveLength(2)
+    await page.getByRole('button', { name: 'Replace old device', exact: true }).click()
+    dialog = page.getByRole('dialog', { name: 'Replace old device' })
+    await dialog.getByRole('radio', { name: /Keep larger daily total/ }).check()
+    await dialog.screenshot({ path: testInfo.outputPath('device-repair-preview.png') })
+    await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setContentSize(430, 750))
+    await page.evaluate(() => window.$store.dispatch('updateUiScale', 125))
+    const scroller = dialog.locator('.promptContentScroller')
+    await expect(scroller.locator(':scope > .os-scrollbar-vertical')).not.toHaveClass(/os-scrollbar-unusable/)
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expectScrollAtRenderedEnd(scroller)
+    await dialog.screenshot({ path: testInfo.outputPath('device-repair-mobile-125.png') })
+    await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setContentSize(1600, 1000))
+    await page.evaluate(() => window.$store.dispatch('updateUiScale', 100))
+    await expect(scroller.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-unusable/)
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
+    holdUpload = true
+    const uploading = new Promise(resolve => { uploadStarted = resolve })
+    await dialog.getByRole('button', { name: 'Replace old device', exact: true }).click()
+    await uploading
+    await expect(dialog.getByRole('button', { name: 'Cancel', exact: true })).toBeDisabled()
+    await expect(dialog).toHaveAttribute('inert', '')
+    await dialog.getByRole('button', { name: 'Cancel', exact: true }).evaluate(button => button.click())
+    await page.keyboard.press('Escape')
+    await expect(dialog).toBeVisible()
+    holdUpload = false
+    releaseUpload()
+    await expect(dialog).toBeHidden()
+    await expect(picker.getByRole('button')).toHaveCount(2)
+    await expect(total).toContainText('1 hr 30 min')
+    expect(devices).toHaveLength(1)
+    expect(devices[0].replacedDevices[0].deviceId).toBe(phone)
+    await page.evaluate(() => window.$store.dispatch('syncWithSyncServer'))
+    await picker.getByRole('button', { name: 'All devices' }).click()
+    await expect(total).toContainText('1 hr 30 min')
+    await picker.getByRole('button', { name: 'Pixel', exact: true }).click()
+    await page.locator('.resetStatsButton').click()
+    await page.getByRole('button', { name: 'Reset', exact: true }).click()
+    await expect(total.locator('strong')).toHaveText('0 min')
+    await page.evaluate(() => window.$store.dispatch('syncWithSyncServer'))
+    await expect(total.locator('strong')).toHaveText('0 min')
+    expect(devices).toHaveLength(1)
+    expect(devices[0].reset.baselines[phone]).toEqual({ [today]: 1800, [yesterday]: 1800 })
+    // Disconnect clears the remote cache, so the offline reset must be completed
+    // from the encrypted repaired tree at the next connection.
+    await page.evaluate(async () => {
+      const store = window.$store
+      await store.dispatch('recordWatchTime', { date: '2026-10-08', seconds: 120 })
+      await store.dispatch('disconnectSyncServer')
+      await store.dispatch('clearWatchStats')
+      await store.dispatch('recordWatchTime', { date: '2026-10-08', seconds: 60 })
+    })
+    await expect(total).toContainText('1 min')
+    failUpload = true
+    await page.evaluate(async ({ key, salt, laptop }) => {
+      const store = window.$store
+      await store.dispatch('completeSyncServerPairing', {
+        serverUrl: 'https://sync.example',
+        username: 'test',
+        token: 'test-token',
+        privacyKey: key,
+        privacySalt: salt,
+        deviceId: laptop,
+        deviceName: 'Pixel',
+      })
+      try { await store.dispatch('syncWithSyncServer') } catch {}
+    }, { key, salt, laptop })
+    expect(await page.evaluate(() => window.$store
+      .getters.getSyncServerWatchStatsReset.pending)).toBe(true)
+    failUpload = false
+    await page.evaluate(() => window.$store.dispatch('syncWithSyncServer'))
+    expect(await page.evaluate(() => window.$store
+      .getters.getSyncServerWatchStatsReset.pending)).toBeUndefined()
+    await expect(total).toContainText('1 min')
+    expect(devices).toHaveLength(1)
+    expect(devices[0].reset.baselines[phone]).toEqual({ [today]: 1800, [yesterday]: 1800 })
+    await page.evaluate(() => window.$store.dispatch('syncWithSyncServer'))
+    await expect(total).toContainText('1 min')
+  })
+
+  test('switches between devices and keeps another device after a local reset', async ({ app, page }) => {
+    const remote = [{ deviceId: phone, deviceName: 'Phone', platform: 'android', days: { [today]: 1800 } }]
+    let revision = 1
+    let watchStatsSupported = true
+    let payload = await encryptSyncDocument(remote, key, salt)
+    await page.route('https://sync.example/**', async route => {
+      const { pathname } = new URL(route.request().url())
+      if (pathname === '/health') {
+        return route.fulfill({ json: { capabilities: { encrypted_sync: 1, live_sync: 1, watch_stats: Number(watchStatsSupported) } } })
+      }
+      if (pathname === '/v1/encrypted_sync') {
+        return route.fulfill({ json: { collections: [{ collection: 'watchStats', revision }], legacy_data: false } })
+      }
+      if (pathname === '/v1/account/sessions') {
+        return route.fulfill({ json: { sessions: [] } })
+      }
+      if (pathname === '/v1/encrypted_sync/events') {
+        return route.fulfill({ json: [] })
+      }
+      if (pathname === '/v1/encrypted_sync/watchStats') {
+        if (route.request().method() === 'PUT') {
+          const request = route.request().postDataJSON()
+          expect(request.revision).toBe(revision)
+          payload = request.payload
+          revision++
+        }
+        return route.fulfill({ json: { revision, payload } })
+      }
+      return route.fulfill({ status: 404 })
+    })
+
+    const sync = await goToSettingsSection(page, 'sync')
+    await sync.getByRole('checkbox', { name: 'Enable Sync', exact: true }).press('Space')
+    const statisticsToggle = sync.getByRole('checkbox', { name: 'Watch stats' })
+    await expect(statisticsToggle).toBeEnabled()
+    await expect(statisticsToggle).toBeChecked()
+    await statisticsToggle.press('Space')
+    await expect(statisticsToggle).not.toBeChecked()
+    await statisticsToggle.press('Space')
+    await expect(statisticsToggle).toBeChecked()
+    await sync.getByRole('button', { name: 'Sync now', exact: true }).click()
+    await expect(sync.getByRole('button', { name: 'Sync now', exact: true })).toBeEnabled()
+    await expect(sync.locator('.error')).toHaveCount(0)
+    await page.getByRole('dialog', { name: 'Settings' }).getByRole('button', { name: 'Close', exact: true }).click()
+    await goTo(page, 'stats')
+
+    const total = page.locator('.summaryCard').filter({ hasText: 'Total watch time' })
+    await expect(total).toContainText('1 hr 30 min')
+
+    const selector = page.getByRole('group', { name: 'Devices' })
+    await expect(selector.locator('.deviceSegmentIcon')).toHaveCount(3)
+    await expect.poll(async () => selector.evaluate(group => {
+      const header = group.closest('.statsHeader').getBoundingClientRect()
+      const control = group.getBoundingClientRect()
+      return Math.abs(header.right - control.right) < 2 && control.top >= header.top && control.bottom <= header.bottom
+    })).toBe(true)
+    const selectedSegmentIsAligned = async (name) => {
+      const button = selector.getByRole('button', { name })
+      await expect(button).toHaveAttribute('aria-pressed', 'true')
+      await expect.poll(async () => selector.evaluate((group, label) => {
+        const selected = [...group.querySelectorAll('.deviceSegment')]
+          .find(segment => segment.textContent.trim() === label)
+        const indicator = group.querySelector('.deviceSegmentIndicator')
+        const selectedBounds = selected.getBoundingClientRect()
+        const indicatorBounds = indicator.getBoundingClientRect()
+        return Math.abs(selectedBounds.left - indicatorBounds.left) < 2 &&
+          Math.abs(selectedBounds.right - indicatorBounds.right) < 2
+      }, name)).toBe(true)
+    }
+    await selector.getByRole('button', { name: 'Phone' }).click()
+    await expect(total).toContainText('30 min')
+    await selectedSegmentIsAligned('Phone')
+    await page.evaluate(() => window.$store.dispatch('updateUiScale', 125))
+    await expect(selector).toBeVisible()
+    await selectedSegmentIsAligned('Phone')
+    await selector.getByRole('button', { name: 'Laptop' }).click()
+    await expect(total).toContainText('1 hr')
+    await selectedSegmentIsAligned('Laptop')
+    await page.locator('.resetStatsButton').click()
+    await expect(page.getByRole('button', { name: 'Reset', exact: true })).toBeVisible()
+    await selector.getByRole('button', { name: 'Phone' }).evaluate(button => button.click())
+    await expect(page.getByRole('button', { name: 'Reset', exact: true })).toBeHidden()
+    await selector.getByRole('button', { name: 'Laptop' }).click()
+    await page.locator('.resetStatsButton').click()
+    await page.getByRole('button', { name: 'Reset', exact: true }).click()
+    await selector.getByRole('button', { name: 'All devices' }).click()
+    await expect(total).toContainText('30 min')
+    await selectedSegmentIsAligned('All devices')
+    await page.evaluate(() => window.$store.commit('setHasHistoricalWatchTimeEstimate', true))
+    await selector.getByRole('button', { name: 'Laptop' }).click()
+    await expect(page.locator('.historicalAdjustment')).toBeVisible()
+    await selector.getByRole('button', { name: 'Phone' }).evaluate(button => button.click())
+    await expect(page.locator('.historicalAdjustment')).toBeHidden()
+    await page.evaluate(() => window.$store.commit('setHasHistoricalWatchTimeEstimate', false))
+    await selector.getByRole('button', { name: 'All devices' }).click()
+    await page.evaluate(() => {
+      const store = window.$store
+      store.commit('setSyncedWatchStats', [
+        ...store.getters.getSyncedWatchStats,
+        ...Array.from({ length: 15 }, (_, index) => ({
+          deviceId: `extra-${index}`,
+          deviceName: index === 0 ? 'Extra device with a much longer name' : `Extra device ${index}`,
+          days: {},
+        })),
+      ])
+    })
+    await expect(selector.getByRole('button')).toHaveCount(18)
+    await selector.getByRole('button', { name: 'Extra device with a much longer name' }).click()
+    await selectedSegmentIsAligned('Extra device with a much longer name')
+    await selector.getByRole('button', { name: 'All devices' }).click()
+    // Sidebar reflow animations briefly change the range again after resizing.
+    // Check clamping against the final layout without that intermediate range.
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await expect(page.locator('html')).toHaveAttribute('data-reduced-motion', 'reduce')
+    const scrollbar = selector.locator(':scope > .os-scrollbar-horizontal')
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      BrowserWindow.getAllWindows()[0]?.setBounds({ x: 0, y: 0, width: 480, height: 800 })
+    })
+    await expect.poll(() => page.evaluate(() => window.innerWidth)).toBeLessThan(500)
+    await selector.evaluate(element => { element.scrollLeft = element.scrollWidth })
+    await expect.poll(() => selector.evaluate(element => element.scrollLeft)).toBeGreaterThan(0)
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      BrowserWindow.getAllWindows()[0]?.setBounds({ x: 0, y: 0, width: 1600, height: 900 })
+    })
+    await expect.poll(() => page.evaluate(() => window.innerWidth)).toBeGreaterThan(1000)
+    await expect.poll(() => selector.evaluate(element =>
+      Math.abs(element.scrollLeft - (element.scrollWidth - element.clientWidth)))).toBeLessThanOrEqual(3)
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+    await page.evaluate(() => {
+      const store = window.$store
+      store.commit('setSyncedWatchStats', store.getters.getSyncedWatchStats.slice(0, 2))
+    })
+    await expect(selector.getByRole('button')).toHaveCount(3)
+    await expect.poll(() => selector.evaluate(element => element.scrollLeft)).toBe(0)
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+    const syncAfterReset = await goToSettingsSection(page, 'sync')
+    await syncAfterReset.getByRole('button', { name: 'Sync now', exact: true }).click()
+    await expect.poll(async () => decryptSyncDocument(payload, key)).toEqual([
+      { deviceId: phone, deviceName: 'Phone', platform: 'android', days: { [today]: 1800 } },
+      { deviceId: laptop, deviceName: 'Laptop', platform: expect.any(String), days: {}, reset: { id: expect.any(String), at: expect.any(Number), epochs: { [laptop]: null }, generation: 1, origin: laptop, baselines: { [laptop]: {} } } },
+    ])
+    await page.context().setOffline(true)
+    await page.reload()
+    await waitForAppReady(page)
+    await goTo(page, 'stats')
+    await expect(page.locator('.summaryCard').filter({ hasText: 'Total watch time' })).toContainText('30 min')
+    await expect(page.getByRole('group', { name: 'Devices' })).toBeVisible()
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      BrowserWindow.getAllWindows()[0]?.setBounds({ x: 0, y: 0, width: 480, height: 800 })
+    })
+    await expect.poll(() => page.evaluate(() => window.innerWidth)).toBeLessThan(500)
+    await expect.poll(() => page.locator('.statsHeader').evaluate(header => {
+      const title = header.querySelector('h2').getBoundingClientRect()
+      const control = header.querySelector('.deviceSegments').getBoundingClientRect()
+      return title.bottom <= control.top && control.right <= header.getBoundingClientRect().right + 1
+    })).toBe(true)
+    await page.evaluate(() => {
+      const store = window.$store
+      store.commit('setSyncedWatchStats', store.getters.getSyncedWatchStats.map(device => ({
+        ...device,
+        deviceName: 'Pixel 8 Pro',
+      })))
+    })
+    await expect(selector.getByRole('button')).toHaveCount(3)
+    await expect.poll(() => selector.evaluate(element =>
+      element.scrollWidth - element.clientWidth)).toBeGreaterThan(1)
+    await expect(selector.locator(':scope > .os-scrollbar-horizontal')).not.toHaveClass(/os-scrollbar-unusable/)
+    await expect(selector).toHaveClass(/fadeRight/)
+
+    watchStatsSupported = false
+    await page.context().setOffline(false)
+    await page.reload()
+    await waitForAppReady(page)
+    await goTo(page, 'stats')
+    await expect(page.getByRole('group', { name: 'Devices' })).toBeHidden()
+
+    await expect(page.locator('.summaryCard').filter({ hasText: 'Total watch time' })).toContainText('0 min')
+    await page.context().setOffline(true)
+    await page.reload()
+    await waitForAppReady(page)
+    await goTo(page, 'stats')
+    await expect(page.getByRole('group', { name: 'Devices' })).toBeHidden()
+    await page.evaluate(async cached => {
+      const store = window.$store
+      await store.dispatch('updateSyncServerSyncWatchStats', false)
+      await store.dispatch('updateSyncServerSnapshot', JSON.stringify({ watchStats: cached }))
+    }, remote)
+    await page.context().setOffline(false)
+    await page.reload()
+    await waitForAppReady(page)
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getSyncServerWatchStatsSupported)).toBe(false)
+    await expect.poll(() => page.evaluate(() => JSON.parse(window.$store.state.settings.syncServerSnapshot).watchStats?.length)).toBe(1)
+    await goTo(page, 'stats')
+    await page.evaluate(async () => window.$store.dispatch('updateSyncServerSyncWatchStats', true))
+    await expect(page.getByRole('group', { name: 'Devices' })).toBeHidden()
+    await page.evaluate(async cached => {
+      const store = window.$store
+      store.commit('setSyncedWatchStats', cached)
+      store.commit('setSyncServerWatchStatsSupported', true)
+      await store.dispatch('replaceSyncServerToken', 'replacement-token')
+    }, remote)
+    await expect(page.getByRole('group', { name: 'Devices' })).toBeHidden()
+  })
+})

@@ -1,0 +1,275 @@
+.sectionDescription {
+  margin-block: 0 1em;
+  padding-inline: 20px;
+  color: var(--secondary-text-color);
+}
+
+.enableChannelSettingsToggle {
+  display: flex;
+  justify-content: center;
+  margin-block-end: 1em;
+}
+
+.preferenceToggles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: 1em 2em;
+  margin-block-end: 1em;
+}
+
+@container settings-content (width <= 680px) {
+  .preferenceToggles {
+    justify-items: center;
+  }
+}
+
+.manageButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  max-inline-size: 100%;
+}
+
+.manageButton :deep(.btn) {
+  min-inline-size: 0;
+  white-space: normal;
+}
+
+.manageButton :deep(.syncedSettingIndicator) {
+  font-size: 0.8em;
+  margin-inline-start: 0;
+}
+
+.channelManagerToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px 16px;
+  margin-block-end: 1em;
+}
+
+.channelManagerToolbar .addSubscribedChannelButton {
+  margin: 0;
+}
+
+.addSubscribedChannelPicker {
+  text-align: start;
+}
+
+.addSubscribedChannelHeader {
+  flex: none;
+}
+
+.addSubscribedChannelHeading {
+  text-align: center;
+}
+
+.addSubscribedChannelSearch {
+  margin-block-end: 8px;
+}
+
+.addSubscribedChannelEmptyState {
+  margin-block: 16px;
+  margin-inline: auto;
+  max-inline-size: 320px;
+  text-align: center;
+}
+
+.addSubscribedChannelList {
+  display: grid;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.addSubscribedChannelOption {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--shape-corner-extra-small);
+  color: inherit;
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  gap: 12px;
+  grid-template-columns: 40px minmax(0, 1fr) 16px;
+  inline-size: 100%;
+  min-block-size: 48px;
+  padding-block: 4px;
+  padding-inline: 8px;
+  text-align: start;
+}
+
+.addSubscribedChannelOption:is(:hover, :focus-visible) {
+  background-color: var(--side-nav-hover-color);
+  color: var(--side-nav-hover-text-color);
+}
+
+.addSubscribedChannelName {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.addSubscribedChannelIcon {
+  justify-self: center;
+}
+
+.channelSearch {
+  /* Share the row with the add button and take the space it leaves over;
+     wrap above it once the field would get narrower than this. */
+  flex: 1 1 240px;
+
+  /* The toolbar spaces the list below, so drop the field's own bottom margin
+     to center it with the button. */
+  --input-bottom-spacing: 0;
+}
+
+.channelListContainer {
+  /* Use the height the search field and the close button leave over */
+  flex-grow: 1;
+  min-block-size: 0;
+  overflow-y: auto;
+
+  /* Scroll anchoring can move the list away from its end when a preference
+     row is removed. clampOverlayScrollTop keeps the offset valid instead. */
+  overflow-anchor: none;
+
+  /* Keep the cards' focus outlines clear of the scroll container's edges */
+  padding: 2px;
+
+  /* Overlay scrollbars need their own space beside the cards. */
+  padding-inline-end: calc(var(--scrollbar-track-width) + 6px);
+}
+
+.emptyState {
+  padding: 2rem;
+  text-align: center;
+}
+
+.channelListContent {
+  /* Include child margins in the wrapper used to measure the scroll boundary. */
+  display: flow-root;
+}
+
+.channelList {
+  display: flex;
+  flex-wrap: wrap;
+
+  /* Centers a lone card instead of stretching it across the whole prompt */
+  justify-content: center;
+  gap: 1em;
+  margin-block: 0 1em;
+  padding: 0;
+  list-style: none;
+}
+
+.channelEntry {
+  display: flex;
+
+  /* Keep cards wide enough for two preference columns instead of packing the
+     prompt with narrow cards whose controls have to stack or wrap. */
+  flex: 1 1 520px;
+  flex-direction: column;
+  max-inline-size: 760px;
+  padding: 1em;
+  border: 1px solid var(--border-color);
+  border-radius: var(--shape-corner-large);
+}
+
+.channelHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+}
+
+.channelLink {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-inline-size: 0;
+  gap: 0.75em;
+  color: inherit;
+  text-decoration: none;
+}
+
+.channelThumbnail {
+  inline-size: 40px;
+  block-size: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.channelThumbnailPlaceholder {
+  display: grid;
+
+  /* Icons default to a 1.25em wide box, which would sit off-center in the circle */
+  --icon-width: 1em;
+
+  place-items: center;
+  background-color: var(--side-nav-hover-color);
+  color: var(--secondary-text-color);
+  font-size: 20px;
+}
+
+.channelName {
+  flex: 1;
+  min-inline-size: 0;
+  margin: 0;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.channelHandle {
+  display: block;
+  color: var(--secondary-text-color);
+  font-size: 0.875em;
+  font-weight: 400;
+}
+
+.channelPreferences {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 0.5em 1em;
+  margin-block-start: 0.75em;
+}
+
+.channelPreference {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+
+  /* Keeps the rows level even though the controls have different natural heights */
+  min-block-size: 56px;
+
+  /* Per-row room for FtSelect's floating label so wrapped auto-fit rows stay clear.
+     Applied to every preference so side-by-side controls keep a shared center line. */
+  padding-block-start: 30px;
+}
+
+/* Each control ships its own spacing for use in a settings page, which would
+   leave the rows here indented by different amounts. Drop FtSelect's margins
+   too so the select box centers with the slider. */
+.channelPreference :deep(.pure-material-slider) {
+  inline-size: auto;
+  margin: 0;
+  padding: 0;
+}
+
+.channelPreference :deep(.select) {
+  inline-size: auto;
+  margin-block: 0;
+}
+
+.preferenceIcon {
+  inline-size: 20px;
+  flex-shrink: 0;
+  color: var(--secondary-text-color);
+}
+
+.channelPreference > :nth-child(2) {
+  flex: 1;
+  min-inline-size: 0;
+}

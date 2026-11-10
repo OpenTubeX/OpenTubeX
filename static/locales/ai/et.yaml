@@ -1,0 +1,2626 @@
+# Optional AI-generated translations for keys missing from ../et.yaml.
+Color Picker:
+  Hue: Toon
+  Opacity: Läbipaistmatus
+  Backdrop Blur: Tausta hägustamine
+  Hex Color: HEX-värv
+  Apply Color: Rakenda
+  Reset Color: Lähtesta
+  Copy Color: Kopeeri
+  Copy From Another Color: Kopeeri teiselt värvilt
+  Color Copied: Värv on kopeeritud
+  Invalid Color: Sisestage sobiv HEX-värv
+  Clipboard Unavailable: Lõikelaud pole saadaval
+  Saturation and Brightness: Küllastus ja heledus
+New Tab: Uus vahekaart
+Maximize: Maksimeeri
+Restore: Taasta
+Close Tab: Sulge vahekaart
+Close Confirmation:
+  Background Sync Warning: Väljumisel peatub tellimuste taustal värskendamine.
+  Hide Window: Peida aken
+  Title: Kas väljuda OpenTubeXist?
+  Message: Kas soovite kindlasti OpenTubeXist väljuda?
+  Quit: Välju
+  Never Ask Again: Ära enam küsi
+Close Window Confirmation:
+  Title: Kas sulgeda aken?
+  Message: Selles aknas on {count} vahekaarti. Kas soovite selle kindlasti sulgeda?
+  Close Window: Sulge aken
+Confirmations:
+  Never Ask Again: Ära enam küsi
+  Settings Hint: Selle kinnituse saab uuesti sisse lülitada jaotises Seaded → Üldine → Küsi kinnitust enne…
+Close Multiple Tabs Confirmation:
+  Title: Kas sulgeda mitu vahekaarti?
+  Message: See sulgeb {count} vahekaarti.
+  Close Tabs: Sulge {count} vahekaarti
+Load Multiple Tabs Confirmation:
+  Title: Kas laadida mitu vahekaarti?
+  Message: See laadib {count} vahekaarti.
+  Load Tabs: Laadi {count} vahekaarti
+Unload Multiple Tabs Confirmation:
+  Title: Kas laadida mitu vahekaarti mälust välja?
+  Message: See laadib {count} vahekaarti mälust välja.
+  Unload Tabs: Laadi {count} vahekaarti mälust välja
+Tabs Unloaded To Free Memory: Mälu vabastamiseks laaditi välja {count} vahekaart, mida te pole hiljuti kasutanud | Mälu vabastamiseks laaditi välja {count} vahekaarti, mida te pole hiljuti kasutanud
+Use Vertical Tabs: Kasuta püstiseid vahekaarte
+Use Horizontal Tabs: Kasuta rõhtsaid vahekaarte
+Resize Tab Bar: Muuda vahekaardiriba suurust
+Find in page: Otsi lehelt
+Previous match: Eelmine vaste
+Next match: Järgmine vaste
+Close find bar: Sulge otsinguriba
+No matches: Vasteid pole
+Version {versionNumber} is now available.: Versioon {versionNumber} on nüüd saadaval.
+See changes and update: Vaata muudatusi ja värskenda
+Dismiss: Peida
+Update to {version}: Värskenda versioonile {version}
+Global:
+  Ambient Mode: Ümbrusrežiim
+  Loading More: Laaditakse juurde
+  New: Uus
+Search Listing:
+  Label:
+    Members Only: Ainult liikmetele
+    Possibly AI-generated: Võib olla tehisintellekti loodud
+Stats:
+  Left of daily limit: "Sinu päevalimiidist ({limit}) on jäänud {duration}"
+  Daily limit reached: "Päevalimiit ({limit}) on täis"
+  Replace old device: "Asenda vana seade"
+  Replacement explanation: "Ühenda {device} selle seadmega ainult siis, kui mõlemad kirjed kuuluvad samale füüsilisele seadmele."
+  Overlapping days: "Päevad mõlemas ajaloos: {count}"
+  Overlapping watch time: "Kattuv vaatamisaeg"
+  Keep larger daily total: "Säilita suurem päevane summa"
+  Larger total explanation: "Dubleeritud ajalugude jaoks. Võib jätta sama päeva lisavaatamise arvestamata."
+  Add daily totals: "Liida päevased summad"
+  Add totals explanation: "Eraldi ajalugude jaoks. Võib dubleeritud vaatamist kaks korda arvestada."
+  Replacement preservation: "Ainult ühes ajaloos olevad päevad säilitatakse. Algsed ajalood jäävad krüptitud sünkroonimisse salvestatuks."
+  Combined watch time: "Ühendatud vaatamisaeg"
+  Replacement changed: "Vaatamisaeg muutus. Sulge eelvaade ja ava see uuesti, et vaadata uusi summasid."
+  Replacement success: "Seadmete statistika ühendatud"
+  All devices: Kõik seadmed
+  Stats: Statistika
+  Watch time summary: Vaatamisaja kokkuvõte
+  Today: Täna
+  This week: Sel nädalal
+  Total watch time: Vaatamisaeg kokku
+  Daily average: Päevane keskmine
+  So far today: Täna seni
+  Since: Alates {day}
+  All recorded time: Kogu salvestatud aeg
+  Per calendar day: Kalendripäeva kohta
+  Day by day: Päevade kaupa
+  Highest: 'Pikim: {duration}'
+  Week by week: Nädalate kaupa
+  Last 14 days: Viimased 14 päeva
+  Last 8 weeks: Viimased 8 nädalat
+  Daily chart aria: Viimase 14 päeva päevane vaatamisaeg
+  Weekly chart aria: Viimase 8 nädala nädalane vaatamisaeg
+  No data: Videote vaatamisel kuvatakse siin vaatamisaeg.
+  Estimate note: Sellele värskendusele eelnev vaatamisaeg on hinnatud salvestatud esituse edenemise põhjal.
+  Adjust imported watch time: Kohanda imporditud vaatamisaega
+  Imported watch time: Imporditud vaatamisaeg
+  Imported watch time explanation: Valige tavaliselt kasutatud esituskiirus. Tegeliku vaatamisaja hindamiseks jagatakse imporditud videote kestused selle kiirusega.
+  Playback speed: Esituskiirus
+  Channel speed note: Võimaluse korral kasutatakse selle asemel kanalite salvestatud esituskiirusi.
+  Apply playback speed: Rakenda esituskiirus
+  Imported watch time adjusted: Imporditud vaatamisaega on kohandatud
+  Reset statistics: Lähtesta statistika
+  Reset: Lähtesta
+  Reset confirmation: Kas soovite kindlasti kogu vaatamisstatistika lähtestada? Seda ei saa tagasi võtta.
+  Reset success: Vaatamisstatistika on lähtestatud
+  Less than a minute: < 1 min
+  Minutes: '{minutes} min'
+  Hours: '{hours} t'
+  Hours and minutes: '{hours} t {minutes} min'
+Home Page:
+  Keep disabled and hide this section: "Jäta keelatuks ja peida see jaotis"
+  Familiar description: "Eelista vaatamata videoid kanalitelt, mis sulle juba meeldivad."
+  Balanced description: "Sega tuttavaid kanaleid uutega, mis vastavad sinu huvidele."
+  Explore description: "Anna rohkem ruumi uutele kanalitele, mis on seotud sinu huvidega."
+  Turn off recommendations: Lülita soovitused välja
+  Recommended for you: "Sulle soovitatud"
+  Recommendations description: "Järjesta videoid oma seadmes vaatamisajaloo põhjal. Kanalite ID-d ja teemaotsingud saadetakse videote leidmiseks sinu valitud taustateenusele."
+  Enable recommendations: "Luba soovitused"
+  Recommendations need history: "Soovituste saamiseks vaata mõnda videot, kui ajalugu on lubatud."
+  No recommendations: "Soovitusi ei leitud. Proovi värskendada pärast rohkemate videote vaatamist."
+  Recommendations unavailable: "Soovituste laadimine nurjus. Proovi hiljem uuesti."
+  More like this: "Rohkem selliseid"
+  Not interested: "Ei huvita"
+  Hide this channel: "Peida see kanal"
+  Channel hidden: "{channel} on soovitustest peidetud"
+  Reset recommendations: "Lähtesta soovitused"
+  Discovery: "Avastamine"
+  Familiar: "Tuttav"
+  Balanced: "Tasakaalustatud"
+  Explore: "Avasta"
+  Related to: "Seotud videoga {title}"
+  More from: "Rohkem kanalilt {channel}"
+  Matches interest: "Vastab sinu huvile teema {topic} vastu"
+  Related discovery privacy: "Seotud videote leidmiseks saadetakse ka videote identifikaatoreid."
+  Home: Avaleht
+  Description: Jätka sealt, kus pooleli jäid, ja vaata hiljutisi tegevusi.
+  Customize: Kohanda avalehte
+  Done: Valmis
+  Customize description: Vali kuvatavad jaotised ja järjesta need soovitud viisil.
+  Continue watching: Jätka vaatamist
+  New since last visit: Uus pärast viimast külastust
+  Watch queue: Vaatamisjärjekord
+  Recent playlists: Hiljutised esitusloendid
+  Recent downloads: Hiljutised allalaadimised
+  Upcoming reminders: Tulevased meeldetuletused
+  Watch statistics: Vaatamisstatistika
+  View all: Kuva kõik
+  Previous shelf page: Eelmine jaotise {section} leht
+  Next shelf page: Järgmine jaotise {section} leht
+  Shelf page status: '{section}, leht {page}/{total}.'
+  Move section up: Liiguta {section} üles
+  Move section down: Liiguta {section} alla
+  Section moved: '{section} liigutati kohale {position}/{total}.'
+  Nothing here yet: Siin pole veel midagi
+  Empty description: Siin kuvatakse videod, mille vaatamist alustad, kasutatud esitusloendid, allalaadimised ja meeldetuletused.
+  All sections hidden: Kõik jaotised on peidetud
+  All sections hidden description: Kohanda avalehte, et mõni jaotis uuesti kuvada.
+Subscriptions:
+  New video from {channel}: Uus video kanalilt {channel}
+  New short from {channel}: Uus lühivideo kanalilt {channel}
+  '{channel} is live': "{channel} on otse-eetris"
+  New post from {channel}: Uus postitus kanalilt {channel}
+  Mark As Unseen: Märgi mittenähtuks
+  Copy Error Details: "Kopeeri tehnilised üksikasjad"
+  Refresh Errors: "Kanalid, mida ei saanud värskendada: {channels}. Klõpsa üksikasjade vaatamiseks."
+  Refresh Error Channels More: "{channels} ja veel {count} | {channels} ja veel {count}"
+  Never show {type} from this channel in feeds again: Ära enam näita selle kanali sisu tüübiga {type} voogudes
+  Refreshing Subscription Videos: Tellimuste videote värskendamine
+  Refreshing Subscription Shorts: Tellimuste Shorts-videote värskendamine
+  Refreshing Subscription Live Streams: Tellimuste otseülekannete värskendamine
+  Refreshing Subscription Posts: Tellimuste postituste värskendamine
+  New Content: Uus sisu
+  New Feed Refresh Warning Title: Kas värskendada kõiki tellimuste vooge?
+  New Feed Refresh Warning: Ühe tellimuse kõigi sisutüüpide värskendamine ilma RSS-ita võib võtta kaua aega. Kas soovite jätkata? | {count} tellimuse kõigi sisutüüpide värskendamine ilma RSS-ita võib võtta kaua aega. Kas soovite jätkata?
+  New Since Last Refresh: Uus pärast viimast värskendamist
+  Mark As Seen: Märgi nähtuks
+  Mark All as Seen: Märgi kõik nähtuks
+  No New Content: Uut sisu pole.
+  New Content Tabs: Uue sisu vahekaardid
+  Show Tabbed View: Kuva vahekaartidega vaade
+  Show Combined View: Kuva koondvaade
+  Newest First: Uuemad ees
+  Oldest First: Vanemad ees
+  RSS Feeds:
+    Refreshing: RSS-voogude värskendamine
+    Tab: RSS
+    Followed Feeds: Jälgitavad RSS-vood
+    Add Feed: Lisa voog
+    Feed URL: RSS- või Atom-voo URL
+    Remove Feed: Eemalda {feed}
+    Invalid Feed URL: Sisesta veebiaadress, mis algab http:// või https://.
+    Feed Already Followed: Sa juba jälgid seda voogu.
+    Feed Could Not Be Loaded: Voogu ei õnnestunud laadida. Kontrolli, kas aadress viitab RSS- või Atom-voole.
+    Feed Requires Browser Check: See sait nõuab brauseri kontrolli, mida OpenTubeX ei suuda läbida. Proovi selle voo jaoks teist aadressi või RSSHubi eksemplari.
+    Refresh Errors: 1 voogu ei õnnestunud värskendada. | {count} voogu ei õnnestunud värskendada.
+    Description: Lisa RSS- või Atom-voog, et jälgida teiste platvormide sisuloojaid. {rssHub}i eksemplarid pakuvad vooge paljudele saitidele, näiteks Twitchile.
+    Empty Items: Sinu voogudes pole praegu ühtegi üksust.
+    No Feeds: Sa ei jälgi veel ühtegi RSS-voogu.
+    RSSHub:
+      Browse: Sirvi RSSHubi
+      Title: Lisa voog RSSHubist
+      Description: Vali RSSHubi eksemplar, teenus ja see, mida jälgida. Voo aadress koostatakse sinu eest.
+      Instance: RSSHubi eksemplar
+      Service: Teenus
+      Search Services: Otsi teenuseid
+      Loading Services: Teenuste laadimine…
+      Services Could Not Be Loaded: See eksemplar ei tagastanud oma teenuseid. Kontrolli aadressi või vali teine eksemplar.
+      Feed Type: Voo tüüp
+      Requires Configuration: See voog vajab eksemplaril lisaseadistust, seega ei pruugi see avalikel eksemplaridel töötada.
+      Optional Parameter: '{parameter} (valikuline)'
+      Not Set: Määramata
+    Retry Feed: Proovi {feed} uuesti
+Trending:
+  Music: Muusika
+  Load Error: Trende ei saanud laadida.
+  Unsupported Backend: Trendide jaoks on vaja Local API-t. Valige Local API või lubage taustaprogrammi varuvariant.
+Most Popular Feed Empty: Selle Invidiousi eksemplari Most Populari voog on tühi.
+Feed:
+  Cancel Refresh: Tühista värskendamine
+  Next Auto Refresh: 'Järgmine automaatne värskendamine: {date}'
+User Playlists:
+  Refresh Saved Playlists: 'Värskenda salvestatud esitusloendeid'
+  Saved Playlists Refresh Failed: 'Mõnda salvestatud esitusloendit ei õnnestunud värskendada.'
+  Save: "Salvesta"
+  Edit: "Muuda"
+  Pin to Navigation: "Kinnita navigeerimisribale"
+  Unpin from Navigation: "Eemalda navigeerimisribalt"
+  Pin to Top: "Kinnita üles"
+  Unpin from Top: "Vabasta ülevalt"
+  Pinned to Top: "Üles kinnitatud"
+  Reorder Hint: Järjestuse muutmiseks lohista või kasuta nooleklahve
+  Add new videos to the top (custom order): "Lisa uued videod algusesse (kohandatud järjestus)"
+  Shuffle videos by default: "Esita videod vaikimisi juhuslikus järjekorras"
+  Repair Playlists: Paranda esitusloendeid
+  Repair Description: Taasta puuduvad videoandmed pärast YouTube Takeouti ZIP-faili importimist. Esitusloendite järjekord ei muutu.
+  Remove Unavailable Videos: "Eemalda kättesaamatud videod"
+  Remove Unavailable Videos Confirmation: "Kas eemaldada kättesaamatud videod? Leitud: {count}. Ei saanud kontrollida: {uncertain}. Kontrollimata videod jäävad alles."
+  Add Missing Videos: "Lisa algsest esitusloendist puuduvad videod"
+  Source Playlist: "Algne esitusloend"
+  Save Playlist: "Salvesta esitusloend"
+  Remove Saved Playlist: "Eemalda salvestatud esitusloend"
+  Load More Playlists: Laadi veel esitusloendeid
+  Save to: Salvesta asukohta…
+  Quick Bookmark Icon: Kiirjärjehoidja ikoon
+  Custom Emoji: Kohandatud emoji
+  Choose Image: Vali pilt
+  Use Bookmark Icon: Kasuta järjehoidja ikooni
+  SinglePlaylistView:
+    Retry: Proovi uuesti
+    This playlist could not be loaded.: Seda esitusloendit ei saanud laadida.
+    More videos could not be loaded.: Rohkem videoid ei saanud laadida.
+  Playlist Thumbnail: "Esitusloendi pisipilt"
+  Restore Default Thumbnail: "Taasta vaikimisi pisipilt"
+  AddVideoPrompt:
+    And N more videos: 'ja veel {count} video | ja veel {count} videot'
+  Move Up: Üles
+  Move Down: Alla
+  Remove: Eemalda
+  Background Tasks:
+    Loading videos from {playlistName}: 'Laadin videoid esitusloendist {playlistName}'
+    Adding missing videos to {playlistName}: 'Lisan puuduvaid videoid esitusloendisse {playlistName}'
+    Checking {playlistName} for unavailable videos: 'Kontrollin esitusloendit {playlistName} kättesaamatute videote suhtes ({checked}/{total})'
+History:
+  From Date: 'Alates'
+  To Date: 'Kuni'
+  Channel Filter: 'Kanal'
+  All Channels: 'Kõik kanalid'
+  Clear Filters: 'Tühjenda filtrid'
+  Invalid Date Range: 'Alguskuupäev peab olema lõppkuupäevast varasem või sellega sama.'
+  Empty Filter Message: 'Ükski video sinu ajaloos ei vasta nendele filtritele.'
+  Repair Compact: "Paranda"
+  Mark All Watched Compact: "Kõik vaadatud"
+  Repair Use Cookies: "Kasuta seadistatud yt-dlp küpsiseid"
+  Repair Cookies Hint: "Kontrollida tuleb üle 500 video. Seadista küpsised yt-dlp seadetes ja luba need siin, et vähendada päringute piiramise ohtu."
+  Repair Description: "Kasuta pärast ajaloo importimist või kui videote andmed puuduvad või LIVE-märgis on vale."
+  Repair Details: "Täidab puuduvad pealkirjad, kanalid ja avaldamiskuupäevad ning kontrollib kestusi ja LIVE-märgiseid. Vaatamise edenemine ja vaadatuks märkimine ei muutu."
+  Repair Notice: "Suure ajaloo töötlemine võib võtta aega. Ebaõnnestunud päringuid korratakse automaatselt. Kustutatud või privaatsete videote andmed võivad jääda puudulikuks."
+  Start Repair: "Alusta parandamist"
+  Repair Checking: "Videoandmete kontrollimine"
+  Repair Waiting: "YouTube'i ootamine. Parandamine jätkub automaatselt."
+  Repair Retrying: "Ebaõnnestunud päringute kordamine"
+  Repair Finished: "Parandamine lõpetatud"
+  Repair Stopped: "Parandamine peatatud"
+  Repair: "Paranda ajalugu"
+  Repair Progress: "Kontrollitud {checked}/{total} · Parandatud {repaired} · Ebaõnnestunud {failed}"
+  Mark All As Watched: Märgi kõik vaadatuks
+  Mark All As Watched Confirmation: Kas soovite kindlasti kõik ajaloos olevad videod vaadatuks märkida?
+  All History Marked as Watched: Kõik ajaloos olevad videod on vaadatuks märgitud
+  Select History Age: Valige, kui vana peab kirje kustutamiseks olema.
+  Delete Entries Older Than: Kustuta kirjed, mis on vanemad kui
+  Number of Days: Päevade arv
+  History Cleanup Warning: See kustutab sobivad vaatamisajaloo kirjed jäädavalt.
+  1 Day: 1 päev
+  1 Week: 1 nädal
+  1 Month: 1 kuu
+  3 Months: 3 kuud
+  1 Year: 1 aasta
+  All Time: Kogu aeg
+  Custom: Kohandatud
+  History Older Than Days Removed: Ühest päevast vanem vaatamisajalugu on eemaldatud | {days} päevast vanem vaatamisajalugu on eemaldatud
+Settings:
+  Diagnostics:
+    Diagnostics: Diagnostika
+    Description: Kui diagnostikalogi on sisse lülitatud, hoiab OpenTubeX viimaseid logisõnumeid mälus, et saaksid need veateadetele lisada. See ei salvesta ega saada neid kunagi ise ning logi väljalülitamine kustutab need. Aruanded jätavad välja küpsised, märgid, IP-aadressid ja URL-i parameetrid, kuid võivad sisaldada esitatud videote ID-sid, seega kontrolli aruannet enne jagamist.
+    Enable Logging: Luba diagnostikalogi
+    Copy Report: Kopeeri aruanne
+    Save Report: Salvesta aruanne
+    Clear Log: Tühjenda logi
+    Report Copied: Diagnostikaaruanne kopeeritud
+    Report Saved: Diagnostikaaruanne salvestatud
+    Report File: Diagnostikaaruanne
+    Save Failed: Diagnostikaaruannet ei saanud salvestada
+    Log Cleared Message: Diagnostikalogi tühjendatud
+  Tab Unloading:
+    Automatically unload tabs: "Vabasta vahelehed automaatselt mälust"
+    Memory threshold: "Mälulävi"
+    Tabs to unload: "Mälust vabastatavad vahelehed"
+    Automatic unloading help: "Vabasta vanimad taustal olevad vahelehed mälust. Aktiivsed ja esitavad vahelehed jäävad laadituks."
+    Memory threshold help: "Protsent renderdusprotsessi mälupiirangust, mitte süsteemi kogu muutmälust."
+  Password Settings:
+    Failed to Save Password: "Parooli salvestamine ebaõnnestus."
+    Confirm Password: "Kinnita parool"
+    Passwords Do Not Match: "Paroolid ei ühti."
+  Navigation and Controls: "Navigeerimine ja juhtelemendid"
+  Control Bar:
+    Title: "Juhtriba"
+    Customize: "Kohanda juhtriba"
+    Hidden: "Peidetud"
+    Empty: "Juhtelemente pole"
+    Move to Control Bar: "Teisalda {control} juhtribale"
+    Move to Player Menu: "Teisalda {control} pleieri menüüsse"
+    Hide: "Peida {control}"
+  Fullscreen Actions:
+    Recommended Videos: "Soovitatud videod"
+    Title: "Täisekraani toimingud"
+    Customize: "Kohanda täisekraani toiminguid"
+    Add Action: "Lisa toiming"
+    Empty: "Täisekraani toiminguid pole valitud"
+    Quick Bookmark: "Kiirjärjehoidja"
+    Availability Hint: "Toimingud kuvatakse ainult videotel, mille puhul need on saadaval."
+    Disabled: "(keelatud)"
+  Quick Settings:
+    Quick Settings: Kiirseaded
+    Customize Quick Settings: Kiirseadete kohandamine
+    Add Setting: Lisa säte
+    Appearance: Välimus
+    Playback: Esitus
+    Content: Sisu
+    Language and Region: Keel ja piirkond
+    All Settings: Kõik seaded
+    Profile Selector Hint: Profiili vahetamiseks võib profiiliikoonil ka paremklõpsata
+    Profile Selector Touch Hint: Profiili vahetamiseks võib profiiliikoonile ka pikalt vajutada
+  Categories:
+    General Description: Keel, käivitamine, vahekaardid ja tõlkimine
+    Appearance: Välimus
+    Appearance Description: Teema, paigutus, navigeerimine ja videoloendid
+    Content appearance: Videoloendid ja pisipildid
+    Layout: Paigutus
+    Playback Description: Pleieri vaikeseaded, subtiitrid ja kanalipõhised seaded
+    Subscriptions Description: Voogude värskendamine, uute videote teavitused ja RSS-vood
+    Downloads Description: Allalaadimiskaust, mallid ja automaatsed allalaadimised
+    Focus: Keskendumine
+    Focus Description: Peidetud sisu, vaatamispiirangud, meeldetuletused ja vanemlik järelevalve
+    Add-ons: Lisad
+    Add-ons Description: SponsorBlock, DeArrow, mittemeeldimised, AiSList ja pealelugemise tõlge
+    Privacy Description: Ajalugu, otsingusoovitused, lingid ja rakenduse parool
+    Online activity: Võrgutegevus
+    Data And Storage Description: Varukoopiad, import ja eksport, kettakasutus ja puhastamine
+    Sync Description: Sünkroonimisserveri konto, seadmete sidumine ja sünkroonitud andmed
+    Advanced: Täpsemad seaded
+    Advanced Description: Taustateenused, puhverdamine, välised tööriistad, puhverserver ja diagnostika
+    Alternative providers: Video- ja metaandmete pakkujad
+  Highlight Changed Settings: Tõsta esile vaikeseadetest erinevad seaded
+  Reset Setting to Default: Lähtesta see seade vaikeväärtusele
+  Performance Impact:
+    Show Performance Impact: Kuva jõudlusmõju näidikud
+    Moderate: Mõõdukas mõju
+    High: Suur mõju
+    Description: See seade võib suurendada {resources} kasutust
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: mälu
+      Network: võrgu
+      Disk: ketta
+  General Settings:
+    Link Underlines:
+      Link Underlines: "Linkide allajoonimine"
+      On Hover: "Jooni lingid alla, kui kursor on nende kohal"
+      Never: "Ära kunagi jooni linke alla"
+      Always: "Jooni lingid alati alla"
+    Limit Titles to Two Lines: "Piira pealkirjad kahe reaga"
+    Close Window With Last Tab: 'Sulge aken viimase vahekaardi sulgemisel'
+    Preferred Video Codec: Eelistatud videokoodek
+    Always Use Backup Media Server: "Kasuta alati varumeediaserverit"
+    Automatically switch stream extraction methods: "Vaheta voo eraldamise meetodeid automaatselt"
+    Enable Tabs: "Luba vahekaardid"
+    Thumbnail Swipe Gestures:
+      Left: Pisipiltidel vasakule pühkimine
+      Right: Pisipiltidel paremale pühkimine
+      Description: Valitud toimingu tegemiseks pühi video pisipildil horisontaalselt ja tõsta sõrm.
+    Data Saver Thumbnails: "Andmesäästlikud pisipildid"
+    Use tray icon: "Kasuta süsteemisalve ikooni"
+    Close to system tray: "Sulge süsteemisalve"
+    Tray required for background refresh: "Süsteemisalve ikoon on vajalik, kui tellimuste taustal värskendamine on lubatud."
+    Show Video Menu Button: Kuva videomenüü nupp
+    Swipe to refresh: Värskendamiseks viipa
+    Blur Thumbnails: Hägusta pisipildid
+    Navigation:
+      Always Show Navigation Bar: Kuva navigeerimisriba alati, kui see on allosas
+      Compact Tab Labels: Kompaktne navigeerimisriba, kui see on allosas
+      Show Active Subscriptions: Näita aktiivseid tellimusi külgribal
+      Navigation: Navigeerimine
+      Customize Navigation: Kohanda navigeerimist
+      Add Item: Lisa üksus
+    Date Format: Kuupäevavorming
+    Time Format: Kellaajavorming
+    Language Default: Keele vaikeseade
+    Update Relative Timestamps: Hoia suhtelised ajatemplid ajakohasena
+    Stream Extraction Method:
+      Stream Extraction Method: Voo eraldamise meetod
+      yt-dlp: yt-dlp
+      Built-in: Sisseehitatud
+    Confirm Before: Küsi kinnitust enne…
+    Confirmation Options:
+      Closing App: OpenTubeXist väljumist
+      Closing Window: Mitme vahekaardiga akna sulgemist
+      Closing Tabs: Mitme vahekaardi sulgemist
+      Loading Tabs: Mitme vahekaardi laadimist
+      Unloading Tabs: Mitme vahekaardi mälust eemaldamist
+    Remember Tab Navigation History: Jäta vahekaartidel liikumise ajalugu meelde
+    New Tab Position:
+      New Tab Position: Uue vahekaardi asukoht
+      At the end: Lõpus
+      After current tab: Praeguse vahekaardi järel
+      After current tab in opened order: Praeguse vahekaardi järel avamisjärjekorras
+    Tab Close Focus:
+      Last active tab: "Viimati aktiivne vahekaart"
+      Next tab in tab order: "Järgmine vahekaart vahekaartide järjekorras"
+      Previous tab in tab order: "Eelmine vahekaart vahekaartide järjekorras"
+      Tab Close Focus: Pärast aktiivse vahekaardi sulgemist
+    Startup Behavior:
+      Startup Behavior: Käivitamisel
+      Load all tabs: Laadi kõik vahekaardid
+      Load previously loaded tabs: Laadi varem laaditud vahekaardid
+      Load last active tab: Laadi viimati aktiivne vahekaart
+      Start with an empty session: Alusta tühja seansiga
+      Load landing page, keep other tabs unloaded: Laadi avaleht, jäta teised vahekaardid laadimata
+    Use AI Translation Completions: Täida puuduvad tõlked tehisaru loodud tõlgetega
+    Reduced Motion:
+      Reduced Motion: Vähendatud liikumine
+      System: Süsteemi järgi
+      Force On: Lülita alati sisse
+      Force Off: Lülita alati välja
+    Comment Translation:
+      Title: Kommentaaride tõlked
+      Enable: Luba kommentaaride tõlkimine
+      Never Translate: Ära tõlgi kommentaare järgmises keeles
+      Choose Language: Vali keel
+      Description: Rakenduse keeles kommentaarid on juba välja jäetud. Lisage muud keeled, mida oskate lugeda.
+      Remove Language: Tõlgi jälle {language} keeles kommentaare
+    Avoid translation:
+      Avoid translation: Eelista tõlkimata videoteksti
+      Disabled: Väljas
+      Watch Only: Ainult video kasutajaliideses
+      Entire App: Kogu rakenduses
+    Playlist View Type:
+      Playlist View Type: Esitusloendi vaate tüüp
+    Show Thumbnail Previews: Kuva pisipiltide eelvaated
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: Pisipildi lisatoimingunupp
+      None: Puudub
+      Mark as Watched: Märgi vaadatuks
+      Copy YouTube Link: Kopeeri YouTube'i link
+      Open in YouTube: Ava YouTube'is
+    Mobile Layout:
+      Mobile Layout: 'Mobiilipaigutus'
+      Automatic: 'Automaatne'
+      Phone: 'Telefon'
+      Tablet: 'Tahvelarvuti'
+    Video View Type:
+      Full Width: Täislaius
+    Grid Columns:
+      Grid Columns: Ruudustiku veerud
+      Playlist Grid Columns: Esitusloendite ruudustiku veerud
+      Auto: Automaatne
+    Preferred API Backend:
+      Yattee Server: Yattee server
+    Yattee Server:
+      Server URL: Yattee serveri URL
+      Username: Kasutajanimi
+      Password: Salasõna
+      Proxy Videos: Puhverda videosid Yattee serveri kaudu
+      Test Connection: Testi ühendust
+      Testing: Testin ühendust…
+      Connected: 'Ühendus loodud: Yattee Server {version}'
+      Errors:
+        Invalid URL: Sisesta serveri URL koos eesliitega https:// või http://.
+        Unreachable: Serveriga ei õnnestunud ühendust saada. Kontrolli URL-i ja seda, kas server töötab.
+        Media not allowed: 'Ühendus loodud, kuid server ei luba sellel rakendusel videoid laadida. Määra serveri keskkonnamuutujates CORS_ORIGINS={origins}.'
+        Not a Yattee server: Server vastas, aga see pole Yattee server.
+        Credentials required: Server nõuab kasutajanime ja salasõna.
+        Invalid credentials: Server lükkas kasutajanime või salasõna tagasi.
+        Rate limited: Liiga paljude ebaõnnestunud katsete tõttu blokeerib server sisselogimised. Proovi hiljem uuesti.
+        Server error: Server tagastas vea (HTTP {status}).
+    Notifications:
+      Notifications: Teavitused
+      System and In-App: Süsteem ja rakenduses
+      System Only: Ainult süsteem
+      Off: Väljas
+    Auto Load Next Page:
+      Lists Tooltip: Laadi voogude, otsingutulemuste ja muude loendite lisalehed automaatselt.
+    Auto Load Comments:
+      Label: Laadi kommentaarid automaatselt
+      Tooltip: Laadi kommentaarid lehe avamisel ja laadi kerimisel rohkem kommentaare.
+  Context Menu Search Settings:
+    Context Menu Search Settings: Kontekstimenüü otsing
+    Description: Valige otsingumootorid, mis kuvatakse valitud tekstil paremklõpsamisel. Otsingud avanevad vaikebrauseris.
+    Icon Hint: Otsingumootori lubamisel võetakse faviconi laadimiseks ühendust selle veebisaidiga.
+    Engine Name: Otsingumootori nimi
+    Search URL: Otsingu URL
+    URL Hint: Kasutage %s kohas, kus URL peab sisaldama kodeeritud valitud teksti.
+    Add Custom Engine: Lisa kohandatud otsingumootor
+    Add Engine: Lisa otsingumootor
+    Remove Engine: Eemalda {engine}
+    Invalid Engine: Sisestage nimi ja sobiv HTTP- või HTTPS-otsingu URL, mis sisaldab %s.
+    Engine Limit: Saate lisada kuni {count} kohandatud otsingumootorit.
+  Theme Settings:
+    Theme and Colors: "Kujundus ja värvid"
+    Font Size: Fondi suurus
+    Sections:
+      Interface: "Liides"
+      Side Bar and Header: "Külgriba ja päis"
+      Tabs: "Vahekaardid"
+      Player: "Pleier"
+      Scrolling: "Kerimine"
+      Notifications: "Teavitused"
+    Only Show Important Notifications: Kuva ainult olulised teavitused
+    Visible Search Suggestions: "Nähtavad otsingusoovitused"
+    Material Accent Color: "Materiali aktsentvärv"
+    Tally Accent Color: "Tallyi aktsentvärv"
+    Material Wallpaper Colors: "Taustapildi värvid"
+    Material System Accent Color: "Süsteemi rõhuvärv"
+    Tab Loading Indicator:
+      Tab Loading Indicator: Vahekaardi laadimisnäidik
+      Bar: Riba
+      Dot: Punkt (klassikaline)
+    Compact Settings Categories: "Kompaktsed seadete kategooriad"
+    Playlist Thumbnail Size: "Esitusloendi pisipiltide suurus"
+    Compact Mobile Mini Player: "Kompaktne mobiilne minipleier"
+    Always Show Mobile Search Bar: "Kuva mobiili otsinguriba alati"
+    Frosted Glass Player UI: "Mattklaasi efektiga pleieri kasutajaliides"
+    Main Color Theme:
+      Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Roosivesi"
+      Catppuccin Macchiato Flamingo: "Catppuccin Macchiato Flamingo"
+      Catppuccin Macchiato Pink: "Catppuccin Macchiato Roosa"
+      Catppuccin Macchiato Mauve: "Catppuccin Macchiato Lillakas"
+      Catppuccin Macchiato Red: "Catppuccin Macchiato Punane"
+      Catppuccin Macchiato Maroon: "Catppuccin Macchiato Kastanipunane"
+      Catppuccin Macchiato Peach: "Catppuccin Macchiato Oranž"
+      Catppuccin Macchiato Yellow: "Catppuccin Macchiato Kollane"
+      Catppuccin Macchiato Green: "Catppuccin Macchiato Roheline"
+      Catppuccin Macchiato Teal: "Catppuccin Macchiato Rohekassinine"
+      Catppuccin Macchiato Sky: "Catppuccin Macchiato Helesinine"
+      Catppuccin Macchiato Sapphire: "Catppuccin Macchiato Safiir"
+      Catppuccin Macchiato Blue: "Catppuccin Macchiato Sinine"
+      Catppuccin Macchiato Lavender: "Catppuccin Macchiato Lavendel"
+    Move Downloads to App Header: Teisalda allalaadimised rakenduse päisesse
+    Move Settings to App Header: Teisalda seaded rakenduse päisesse
+    Hide Side Bar on Watch Pages: Peida vaatamislehtedel külgriba
+    UI Roundness: Kasutajaliidese nurkade ümardus
+    Scrollbar Width: Kerimisriba laius
+    Scroll Speed: Kerimiskiirus
+    Animation Speed: Animatsiooni kiirus
+    Thumbnail Size: Pisipildi suurus
+    Show Tab Icons: Kuva vahekaartide ikoonid
+    Load Missing Tab Icons: Laadi puuduvad vahekaartide ikoonid
+    Loading Missing Tab Icons: Puuduvate vahekaartide ikoonide laadimine…
+    No Missing Tab Icons: Kõik toetatud vahekaartide ikoonid on juba laaditud
+    Loaded Tab Icons: 'Laaditi {count} puuduv vahekaardiikoon | Laaditi {count} puuduvat vahekaardiikooni'
+    Loaded Tab Icons With Failures: Laaditi {loaded} vahekaardiikooni; {failed} ikooni laadimine nurjus
+    Show Tab Previews: Kuva vahekaartide eelvaated
+    Use Fixed Tab Width: Kasuta rõhtrežiimis vahekaartide kindlat laiust
+    Use Custom Title Bar: Kasuta kohandatud tiitliriba
+    Tab Width: Vahekaardi laius
+    Vertical Tab Height: Vertikaalsete vahekaartide kõrgus
+    Tab Layout:
+      Tab Layout: Vahekaartide paigutus
+      Horizontal Top: Rõhtsalt ülal
+      Horizontal Bottom: Rõhtsalt all
+      Vertical Left: Püstiselt vasakul
+      Vertical Right: Püstiselt paremal
+    Show Toast Timeout Indicator: Kuva hüpikteate aegumise näidik
+    Use Grid Player Menu: Kuva pleieri menüü ruudustikuna
+    Show Progress as Notification: Kuva edenemine teavitusena
+    Operation in Progress: Toiming on pooleli
+    Toast Position:
+      Test Toast: Testteavitus
+      Toast Position: Hüpikteate asukoht
+      Bottom Left: All vasakul
+      Bottom Center: All keskel
+      Bottom Right: All paremal
+      Top Left: Ülal vasakul
+      Top Center: Ülal keskel
+      Top Right: Ülal paremal
+    Icon Pack:
+      Icon Pack: Ikoonipakk
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: Rakenduse font
+      System Default: Süsteemi vaikefont
+      Unable to Load: Paigaldatud süsteemifonte ei saa laadida
+      Bundled Fonts: Kaasasolevad fondid
+      System Fonts: Süsteemi fondid
+    Always Show Scrollbars: Kuva kerimisribad alati
+    Base Theme:
+      Material Light: "Material Hele"
+      Material Dark: "Material Tume"
+      Material Black: "Material Must"
+      Dynamic colors: Dünaamilised värvid
+      Tokyo Night Night: Tokyo Night Night
+      Tokyo Night Storm: Tokyo Night Storm
+      Tokyo Night Moon: Tokyo Night Moon
+      Tokyo Night Day: Tokyo Night Day
+      Rosé Pine: Rosé Pine
+      Rosé Pine Moon: Rosé Pine Moon
+      Rosé Pine Dawn: Rosé Pine Dawn
+      Kanagawa Wave: Kanagawa Wave
+      Kanagawa Dragon: Kanagawa Dragon
+      Kanagawa Lotus: Kanagawa Lotus
+      Ayu Dark: Ayu Dark
+      Ayu Mirage: Ayu Mirage
+      Ayu Light: Ayu Light
+      One Dark: One Dark
+      Carbonfox: Carbonfox
+      Catppuccin Macchiato: Catppuccin Macchiato
+      Tally Light: "Tally Hele"
+      Tally Dark: "Tally Tume"
+      Custom: Kohandatud
+      Built-in Themes: Sisseehitatud teemad
+      Custom Themes: Kohandatud teemad
+    Light Theme: Hele teema
+    Dark Theme: Tume teema
+    Custom Theme:
+      Share Restrictions Prompt: "Kirjeldus võib sisaldada kuni 500 märki, sealhulgas Markdowni. Lubatud on ainult GitHubis majutatud lingid ja pildid, sealhulgas otse siia üles laaditud failid. Bot eemaldab välised lingid ja pildid, lühendab pikki kirjeldusi ning jätab muudatusi selgitava kommentaari."
+      Import from Clipboard: "Impordi lõikelaualt"
+      Invalid Clipboard Theme: "Lõikelaual pole kehtivat teemat. Kopeeri teema JSON ja proovi uuesti."
+      Create Custom Theme: Loo kohandatud teema
+      Edit Custom Theme: Muuda kohandatud teemat
+      Custom Theme Creator: Kohandatud teema loomine
+      Theme Name: Teema nimi
+      Based On: Alusteema
+      Import Theme: Impordi teema
+      Export Theme: Ekspordi teema
+      Share Theme: Jaga teemat
+      Share Description Prompt: Kirjelda teemat ja lisa kõik, mida peaks enne selle kasutamist teadma.
+      Share Screenshots Prompt: "Lohista siia vähemalt üks kuvatõmmis. Jäta see jaotis tühjaks, et bot lisaks kolm eelvaadet näidissisuga, ilma sinu isikuandmeteta."
+      Delete Theme: Kustuta teema
+      Delete Theme Confirmation: Kas kustutada „{name}”? Seda ei saa tagasi võtta.
+      Save and Apply: Salvesta ja rakenda
+      Discard Changes: Hülga muudatused
+      Reset Colors: Lähtesta alusteema värvid
+      Theme File: OpenTubeXi teemafail
+      Theme Saved: Kohandatud teema on salvestatud ja rakendatud
+      Theme Imported: Teema on redaktorisse imporditud
+      Theme Exported: Teema on eksporditud
+      Theme Deleted: Kohandatud teema on kustutatud
+      Unable to Load: Kohandatud teemat ei õnnestunud laadida
+      Unable to Save: Kohandatud teemat ei õnnestunud salvestada
+      Unable to Export: Kohandatud teemat ei õnnestunud eksportida
+      Unable to Share: Kohandatud teemat ei õnnestunud jagada
+      Unable to Delete: Kohandatud teemat ei õnnestunud kustutada
+      Invalid Theme File: Vigane kohandatud teema fail
+      Colors:
+        Watched thumbnail overlay: "Vaadatud videote pisipiltide ülekate"
+        Thumbnail badge background: "Pisipiltide siltide taust"
+        Main text: Põhitekst
+        Secondary text: Teisene tekst
+        Subtle text: Vähemärgatav tekst
+        Borders and dividers: Äärised ja eraldajad
+        Subtle surfaces and indicators: Vähemärgatavad pinnad ja indikaatorid
+        Title text: Pealkirja tekst
+        Selected text background: Valitud teksti taust
+        Selected text: Valitud tekst
+        Logo icon: Logo ikoon
+        Logo text: Logo tekst
+        Logo hover: Logo kursoriga osutamisel
+        Logo pressed: Logo vajutamisel
+        Page background: Lehe taust
+        Card background: Kaardi taust
+        Secondary card background: Teisese kaardi taust
+        Favorite icon: Lemmikuikoon
+        Error color: Vea värv
+        Scrollbar thumb: Kerimisriba liugur
+        Scrollbar thumb hover: Kerimisriba liugur kursoriga osutamisel
+        Scrollbar thumb pressed: Kerimisriba liugur vajutamisel
+        Dropdown item hover text: Ripploendi kirje tekst kursoriga osutamisel
+        Dropdown item hover background: Ripploendi kirje taust kursoriga osutamisel
+        Navigation and panel background: Navigeerimisala ja paneeli taust
+        Neutral item hover and focus background: Neutraalse kirje taust kursoriga osutamisel ja fookuses
+        Neutral item hover and focus text and icons: Neutraalse kirje tekst ja ikoonid kursoriga osutamisel ja fookuses
+        Neutral item pressed background: Neutraalse kirje taust vajutamisel
+        Neutral item pressed text and icons: Neutraalse kirje tekst ja ikoonid vajutamisel
+        Header button hover and focus background: Päisenupu taust kursoriga osutamisel ja fookuses
+        Header button hover and focus text and icons: Päisenupu tekst ja ikoonid kursoriga osutamisel ja fookuses
+        Header button pressed background: Päisenupu taust vajutamisel
+        Header button pressed text and icons: Päisenupu tekst ja ikoonid vajutamisel
+        Search and dropdown background: Otsingu ja ripploendi taust
+        Settings search background: Seadete otsingu taust
+        Instance menu: Eksemplari menüü
+        Shadow color: Varju värv
+        Primary controls and highlights: Põhijuhtelemendid ja esiletõstud
+        Primary control hover and focus: Põhijuhtelement kursoriga osutamisel ja fookuses
+        Primary control pressed: Põhijuhtelement vajutamisel
+        Text and icons on primary controls: Põhijuhtelementide tekst ja ikoonid
+        Secondary controls and highlights: Teisesed juhtelemendid ja esiletõstud
+        Secondary control hover and focus: Teisene juhtelement kursoriga osutamisel ja fookuses
+        Secondary control pressed: Teisene juhtelement vajutamisel
+        Light secondary color: Hele teisene värv
+        Visited accent: Külastatud elemendi rõhuvärv
+        Text and icons on secondary controls: Teiseste juhtelementide tekst ja ikoonid
+        Links: Lingid
+        Visited links: Külastatud lingid
+        Destructive action: Pöördumatu toiming
+        Destructive hover and focus: Pöördumatu toiming kursoriga osutamisel ja fookuses
+        Destructive pressed: Pöördumatu toiming vajutamisel
+        Text and icons on destructive actions: Pöördumatute toimingute tekst ja ikoonid
+  Player Settings:
+    Rewind on Resume: "Keri jätkamisel tagasi"
+    Minimum Pause Before Rewinding: "Minimaalne paus enne tagasikerimist"
+    Mono Audio: 'Monoheli'
+    Show Mono Audio Toggle: 'Näita monoheli lülitit'
+    Pause on Stream Recovery: "Peata voo taastamisel"
+    Buffering:
+      Buffering: Puhverdamine
+      Description: Vali, kui palju videost mängija ette laadib ja laadituna hoiab.
+      Buffer Ahead Hint: Suurem ettepuhver hoiab esitust käigus ka pikemate ühenduskatkestuste ajal, kuid laadib alla videot, mida sa ei pruugi vaadata.
+      Rewind Buffer Hint: Suurem tagasikerimise puhver võimaldab tagasi hüpata ilma uuesti alla laadimata, kuid kasutab rohkem mälu.
+      Buffer Before Playing Hint: Kui ootad enne esitust rohkem videot ära, hoiab see ebastabiilse ühenduse korral ära korduvad seisakud, kuid videod käivituvad ja jätkuvad pärast kerimist aeglasemalt.
+      Preset: Puhverdamise eelseadistus
+      Presets:
+        Data Saver: Andmesääst
+        Default: Vaikimisi
+        Smooth Playback: Sujuv esitus
+        Custom: Kohandatud
+      Buffer Ahead: Ettepuhver
+      Buffer Ahead Tooltip: 'Kui kaugele praegusest kohast ette laaditakse. Kõrge kvaliteedi korral võivad mälupiirangud väga suuri väärtusi piirata. Vaikimisi: {value}'
+      Rewind Buffer: Tagasikerimise puhver
+      Rewind Buffer Tooltip: 'Kui palju juba vaadatud videost jääb laadituks. Vaikimisi: {value}'
+      Buffer Before Playing: Puhver enne esitust
+      Buffer Before Playing Tooltip: 'Kui palju videost peab olema laaditud, enne kui esitus algab või pärast puhvri tühjenemist jätkub. Vaikimisi: {value}'
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Kvaliteedi piirang mahupiiranguga võrkudes"
+      No Limit: "Piirang puudub"
+      Tooltip: "Mobiilse andmeside ja teiste mahupiiranguga võrkude korral algavad videod selles või madalamas kvaliteedis. Pleieris saab siiski valida kõrgema kvaliteedi."
+    Show Music Mode Toggle: "Kuva muusikarežiimi lüliti"
+    Enable DLNA Casting: "Luba DLNA edastamine"
+    Skip Unavailable Playlist Videos: "Jäta esitusloendis kättesaamatud videod vahele"
+    Lights Off: Tuled välja
+    Show Lights Off Toggle: Näita tulede väljalülitamise lülitit
+    Show Volume Boost Toggle: "Kuva helitugevuse võimenduse lüliti"
+    Swipe Gestures:
+      Fullscreen Brightness: Täisheledus täisekraanil
+      Left: Vasakul küljel pühkimine
+      Right: Paremal küljel pühkimine
+      Disabled: Keelatud
+      Brightness: Heledus
+      Volume: Helitugevus
+      Hint: Pühi täisekraanil video küljel üles või alla.
+      Unavailable: Taasesituse juhtelementide kohandamine ebaõnnestus.
+    yt-dlp Streaming: "yt-dlp voogedastus"
+    Continue Playback When Screen Is Locked: 'Jätka esitamist lukustatud ekraaniga'
+    Music Visualizer: Muusika visualiseerija
+    Automatically Open Chapters: Ava peatükid automaatselt
+    Caption Appearance:
+      Caption Appearance: Subtiitrite välimus
+      Captions: Subtiitrid
+      Preferred Language: Eelistatud subtiitrikeel
+      Application Language: Rakenduse keel
+      Enable Translations: Luba subtiitrite tõlkimine
+      Text Color: Teksti värv
+      Background Color: Taustavärv
+      Background Opacity: Tausta läbipaistmatus
+      Font Size: Fondi suurus
+      Anchor:
+        Anchor: Paigutus
+        Top Left: Üleval vasakul
+        Top Center: Üleval keskel
+        Top Right: Üleval paremal
+        Bottom Left: All vasakul
+        Bottom Center: All keskel
+        Bottom Right: All paremal
+        Center Left: Keskel vasakul
+        Center: Keskel
+        Center Right: Keskel paremal
+      Edge Style:
+        Edge Style: Ääre stiil
+        None: Puudub
+        Outline: Kontuur
+        Drop Shadow: Langev vari
+        Raised: Kõrgendatud
+        Depressed: Süvistatud
+      Reset: Lähtesta subtiitrite välimus
+      Default: Vaikimisi
+      Text Opacity: Teksti läbipaistmatus
+      Font Family:
+        Font Family: Fondiperekond
+        Monospaced Serif: Püsilaiusega seriifkiri
+        Proportional Serif: Proportsionaalne seriifkiri
+        Monospaced Sans-Serif: Püsilaiusega seriifita kiri
+        Proportional Sans-Serif: Proportsionaalne seriifita kiri
+      Colors:
+        White: Valge
+        Yellow: Kollane
+        Green: Roheline
+        Cyan: Tsüaan
+        Blue: Sinine
+        Magenta: Magenta
+        Red: Punane
+        Black: Must
+    Auto Picture in Picture:
+      Auto Picture in Picture: Lülitu automaatselt pilt-pildis-režiimi
+      On Tab Change: Vahekaardi vahetamisel
+      On Window Minimize: Akna minimeerimisel
+      On Window Hide: Kui aken kaotab fookuse või vahetatakse teise akna vastu
+      Wayland Minimize Unsupported: Wayland ei teata rakendustele akna minimeerimisest, seega pole see käiviti saadaval. Kasuta selle asemel valikut "Kui aken kaotab fookuse või vahetatakse teise akna vastu", mis hõlmab ka minimeerimist.
+      On Tab Change Mini Player: Vahekaardi vahetamisel kuvatakse selle asemel minipleier. Selle kasutamiseks määra „Videost lahkumisel“ väärtuseks „Peata esitamine“.
+    Scroll Mini Player:
+      Scroll Mini Player: Minipleier kerimisel
+      Scroll Player Mode: Allapoole kerimisel
+      Scroll Player Mode Tooltip: Mängija kinnitatakse ainult siis, kui see võtab enda alla kõige rohkem poole akna kõrgusest. Muul juhul, näiteks telefonides horisontaalpaigutuses või laiades akendes, kuvatakse selle asemel minimängija.
+      Scroll Player Modes:
+        Mini: Näita minipleierit
+        Pin: Kinnita mängija üles, kui ruumi on
+        Off: Keri koos lehega
+      Leaving Video: Videost lahkumisel
+      Leaving Video Modes:
+        Keep Playing: Jätka esitamist minipleieris
+        Stop: Peata esitamine
+    Multiply Seek Interval by Playback Rate: Korruta kerimissamm esituskiirusega
+    Show Playback Rate Adjusted Timestamp: Kuva esituskiiruse järgi kohandatud ajatähis
+    Use YouTube-style Shorts: Kasuta YouTube’i stiilis Shorts-videoid
+    Loop Shorts: Korda Shorts-videoid
+    Remember Volume: Jäta helitugevus meelde
+    Skip Silence: Jäta vaikus vahele
+    Show Skip Silence Toggle: Kuva vaikuse vahelejätmise lüliti
+    Enable Skip Silence by Default: Luba vaikuse vahelejätmine vaikimisi
+    Enable Video Zoom: Luba video suurendamine
+    Enable Seek History: Luba kerimisajalugu
+    Show Seek Bar Filmstrip: "Näita kerimisriba kaadririba"
+    Voice-over Translation:
+      Title: Pealelugemisega tõlge
+      Attribution: (Yandexi toel)
+      Enable: Luba pealelugemisega tõlge
+      Prepare in Background: Alusta pealelugemisega tõlgete ettevalmistamist taustal
+      Background Preparation Tooltip: Saadab toetatud video laadimisel kohe tõlketeenusele praeguse video ID, kestuse ja valitud keele.
+      Language: Pealelugemisega tõlke keel
+      Supported Source Languages: 'Toetatud lähtekeeled: vene, inglise, hiina, korea, araabia, prantsuse, itaalia, hispaania, saksa ja jaapani.'
+      Voice Volume: Tõlgitud kõne helitugevus
+      Original Volume: Algse heli helitugevus
+      Russian: Vene
+      English: Inglise
+      Kazakh: Kasahhi
+    Hold to Double Playback Speed: Hoia all, et esituskiirust kahekordistada
+    Use Quick Playback Speed Bar: Kasuta esituskiiruse kiirvalikuriba
+    Customize Quick Playback Speed Bar: Kohanda esituskiiruse kiirvalikuriba
+    Quick Playback Speed Bar Manager: Esituskiiruse kiirvalikuriba
+    Add Playback Speed: Lisa esituskiirus
+    Reset Quick Playback Speed Bar: Taasta vaikeväärtused
+    Playback Speed Name: Nimi
+    Edit Playback Speed Name: Muuda esituskiiruse nime
+    Use Automatic Playback Speed Name: Kasuta esituskiiruse automaatset nime
+    Reorder Playback Speed: Lohista esituskiiruse järjestuse muutmiseks
+    Playback Speed: Esituskiirus
+    Parallel Segment Loading: Segmentide paralleelne laadimine
+    Rotate Wide Videos to Landscape in Fullscreen: 'Pööra laiad videod täisekraanil rõhtpaigutusse'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Täisekraanile minemiseks või sealt väljumiseks nipsa üles või alla'
+    Preload Upcoming Videos: "Järgmiste videote eellaadimine"
+    Upcoming Videos to Preload: "Eellaaditavate videote arv"
+    Concurrent Preloads: "Samaaegsed eellaadimised"
+    Ignore System Rotation Lock for Fullscreen: Eira täisekraani jaoks süsteemi pööramislukku
+    Swipe Left or Right to Seek in Fullscreen: Täisekraanil kerimiseks pühkige vasakule või paremale
+    Show Swipe to Seek Preview: Näita pühkimisega kerimise eelvaadet
+    Enable Google Cast: "Luba Google Cast"
+    Sections:
+      Playback: Taasesitus
+      Autoplay: Automaatne esitus
+      Playback Speed: Taasesituse kiirus
+      Player Controls: Pleieri juhtnupud
+      Gestures: Žestid
+      Viewing Modes: Vaaterežiimid
+      Shorts: Shorts
+      Screenshots: Ekraanipildid
+    Enable FCast: "Luba FCast"
+    Screenshot:
+      Legacy Formats: "Vanemad vormingud"
+      Modern Formats: "Kaasaegsed vormingud"
+  Channel Settings:
+    Channel Settings: Kanali seaded
+    Channel Settings Description: Jäta iga kanali jaoks eraldi meelde vaatamise ajal valitud seaded, et need rakenduksid uuesti, kui vaatad järgmisel korral selle kanali videot.
+    Enable Channel Playback Settings: Luba kanalipõhised esitusseaded
+    Auto Save Playback Speed: Salvesta esituskiiruse muudatused automaatselt
+    Auto Save Video Quality: Salvesta videokvaliteedi muudatused automaatselt
+    Auto Save Subtitles State: Salvesta subtiitrite oleku muudatused automaatselt
+    Auto Save Volume: Salvesta helitugevuse muudatused automaatselt
+    Manage Saved Channels: Halda salvestatud kanaleid ({channelCount})
+    Saved Channels: Salvestatud kanaliseaded
+    Enable Saved Channel Settings Sync: Sünkrooni salvestatud kanaliseaded
+    Disable Saved Channel Settings Sync: Lõpeta salvestatud kanaliseadete sünkroonimine
+    Search Channels: Otsi kanaleid
+    No Saved Channels: Ühegi kanali jaoks pole veel eraldi seadeid salvestatud
+    No Matching Channels: Otsingule vastavaid kanaleid pole
+    Forget Channel: Unusta kõik selle kanali seaded
+    Forget Value: Unusta see seade
+    Add Setting: Jäta selle kanali jaoks meelde veel üks seade
+    Add Subscribed Channel: Lisa tellitud kanal
+    Video Quality: Video kvaliteet
+    Subtitles Enabled: Subtiitrid lubatud
+    Volume: Helitugevus
+  Download Settings:
+    Download Settings: Allalaadimised
+    Enable Downloads: Luba allalaadimised
+    Managed Tools Download Started Template: 'Vajalikku välist tarkvara ei leitud: {tools}. Hallatavate koopiate allalaadimine…'
+    Managed Tools Download Finished Template: '{tools} on alla laaditud'
+    Managed Tools Update Started Template: Üksusele {tools} leiti uuendus. Allalaadimine…
+    Managed Tools Update Finished Template: '{tools} on uuendatud'
+    Managed Tools Update Available Template: Üksusele {tools} on saadaval uuendus.
+    Managed Tools Update Source Notice: "OpenTubeX laadib selle otse GitHubist, seega F-Droid ega teised rakenduspoed seda ei kontrolli."
+    Update Managed Tools: Uuenda
+    Managed Tools Download Error Template: 'Hallatavaid tööriistu ei õnnestunud alla laadida: {errors}'
+    Download Folder: Allalaadimiskaust
+    Global Additional yt-dlp Arguments: Täiendavad yt-dlp argumendid
+    Concurrent Downloads: Samaaegsed allalaadimised
+    Bandwidth Limit: Ribalaiuse piirang (KiB/s)
+    Download Templates: Allalaadimismallid
+    Manage Download Templates: Halda allalaadimismalle ({templateCount})
+    New Template: Uus mall
+    Template Source: Muudetav või aluseks võetav mall
+    Built-in Template: '{name} (sisseehitatud)'
+    Custom Template Name: '{name} (kohandatud)'
+    Create Template Copy: Loo koopia
+    Template Copy Name: '{name} koopia'
+    Automatic Downloads: Automaatsed allalaadimised
+    Manage Automatic Downloads: Halda automaatseid allalaadimisi ({channelCount})
+    Automatic Downloads Description: Vali iga tellitud kanali jaoks allalaadimismall ja filtrid. Sobivad videod laaditakse tellimuste voogude värskendamisel taustal alla.
+    Automatic Downloads New Only: Kanali lubamisel laaditakse alla alates selle järgmisest uuest videost. Olemasolevaid ega kanali varasemaid videoid alla ei laadita.
+    Automatic Downloads No Channels: Enne automaatsete allalaadimiste seadistamist telli kanal.
+    No Matching Automatic Download Channels: Otsingule vastavaid kanaleid pole.
+    Automatic Downloads Livestreams: Otseülekanded
+    Minimum Duration Seconds: Minimaalne kestus (sekundites)
+    Maximum Duration Seconds: Maksimaalne kestus (sekundites)
+    Minimum File Size MB: Minimaalne failisuurus (MB)
+    Maximum File Size MB: Maksimaalne failisuurus (MB)
+    Maximum Age Days: Maksimaalne vanus (päevades)
+    Title Includes: Pealkiri sisaldab
+    Title Excludes: Pealkiri ei sisalda
+    Title Filter Hint: Eralda pealkirja otsingusõnad komadega. Video pealkiri peab sisaldama vähemalt üht nõutud otsingusõna ega tohi sisaldada ühtki välistatud otsingusõna.
+    Automatic Downloads Require Unmetered Network: "Ainult mahupiiranguta võrkudes"
+    Automatic Downloads Require Charging: "Ainult laadimise ajal"
+  External Software Settings:
+    Create YouTube session: "Loo YouTube’i seanss"
+    YouTube session hint: "Vajadusel logi sisse ja salvesta seanss. Vali seadetes, kas kasutada seda allalaadimiseks, esitamiseks või subtiitrite jaoks."
+    Use cookies for downloads: "Kasuta allalaadimisel küpsiseid"
+    YouTube session failed: "YouTube’i seansi salvestamine ebaõnnestus."
+    Checking FFmpeg and FFprobe: FFmpegi ja FFprobe’i kontrollimine…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe pole veel alla laaditud. Allalaadimiseks klõpsa allolevat nuppu.
+    External Software Settings: Väline tarkvara
+    yt-dlp Source: yt-dlp allikas
+    yt-dlp Channel: yt-dlp kanal
+    Sources:
+      System: Süsteem (PATH või kohandatud asukoht)
+      Managed: OpenTubeXi hallatav
+    Detected Version Template: 'Tuvastatud yt-dlp versioon: {version}'
+    Managed Not Downloaded: yt-dlp pole veel alla laaditud. Allalaadimiseks klõpsa allolevat nuppu.
+    System yt-dlp Missing Warning: Sinu süsteemist ei leitud yt-dlp-d. Paigalda see, määra allpool kohandatud asukoht või vali allikaks "OpenTubeXi hallatav".
+    Download yt-dlp: Laadi yt-dlp alla
+    Update yt-dlp: Uuenda yt-dlp-d
+    Checking yt-dlp: yt-dlp kontrollimine…
+    Downloading yt-dlp: yt-dlp allalaadimine…
+    yt-dlp Downloaded Template: yt-dlp {version} on alla laaditud
+    yt-dlp Download Error Template: 'yt-dlp allalaadimine nurjus: {error}'
+    FFmpeg Source: FFmpegi allikas
+    Detected FFmpeg Version Template: 'Tuvastatud FFmpegi versioon: {version}'
+    Detected FFmpeg and FFprobe Version Template: 'Tuvastatud FFmpegi/FFprobei versioon: {version}'
+    FFmpeg Managed Not Downloaded: FFmpeg pole veel alla laaditud. Allalaadimiseks klõpsa allolevat nuppu.
+    System FFmpeg Missing Warning: Sinu süsteemist ei leitud FFmpegi. Seda on vaja video ja heli ühendamiseks ning heli teisendamiseks. Paigalda see, määra allpool kohandatud asukoht või vali allikaks "OpenTubeXi hallatav".
+    Download FFmpeg: Laadi FFmpeg alla
+    Update FFmpeg: Uuenda FFmpegi
+    Checking FFmpeg: FFmpegi kontrollimine…
+    Downloading FFmpeg: FFmpegi allalaadimine…
+    FFmpeg Downloaded Template: FFmpeg {version} on alla laaditud
+    FFmpeg Download Error Template: 'FFmpegi allalaadimine nurjus: {error}'
+    Detected FFprobe Version Template: 'Tuvastatud FFprobe’i versioon: {version}'
+    FFprobe Managed Not Downloaded: FFprobe pole veel alla laaditud. Selle koos FFmpegiga allalaadimiseks klõpsa allolevat nuppu.
+    System FFprobe Missing Warning: Sinu süsteemist ei leitud FFprobe’i. Seda on vaja meedia kontrollimiseks järeltöötluse ajal. Paigalda see FFmpegi kõrvale või vali allikaks "OpenTubeXi hallatav".
+    Checking FFprobe: FFprobe’i kontrollimine…
+    Download FFmpeg and FFprobe: Laadi FFmpeg ja FFprobe alla
+    Update FFmpeg and FFprobe: Uuenda FFmpegi ja FFprobe’i
+    Downloading FFmpeg and FFprobe: FFmpegi ja FFprobe’i allalaadimine…
+    FFmpeg and FFprobe Downloaded Template: FFmpeg ja FFprobe {version} on alla laaditud
+    FFmpeg and FFprobe Download Error Template: 'FFmpegi ja FFprobe’i allalaadimine nurjus: {error}'
+    Managed Tool Already Current Template: '{tool} {version} on juba ajakohane'
+    Managed Tool Errors:
+      Removed: 'Allalaaditud fail eemaldati, tõenäoliselt viirusetõrjetarkvara poolt'
+      Unusable: 'Allalaaditud programmi ei saanud käivitada. Viirusetõrjetarkvara võib seda blokeerida või see ei toeta seda süsteemi'
+      Release Not Found: 'Uusimat väljalaset ei leitud'
+      Verification Failed: 'Allalaadimist ei õnnestunud ametliku väljalaskena kinnitada'
+      Downgrade: 'Allalaaditud väljalase on paigaldatust vanem'
+      Invalid Archive: 'Allalaaditud arhiiv on vigane'
+      Rollback Failed: 'Värskendamine nurjus ja eelmist versiooni ei õnnestunud täielikult taastada'
+    Managed Tool Updates: Hallatavate tööriistade uuendused
+    Update Modes:
+      Automatic: Uuenda automaatselt
+      Ask: Küsi enne uuendamist
+      Manual: Uuenda ainult käsitsi
+    yt-dlp Executable Path: yt-dlp käivitatav fail
+    FFmpeg Executable Path: FFmpeg käivitatav fail
+    Restricted Playback Authentication: "yt-dlp küpsised"
+    Cookie Source: Küpsiste allikas
+    Cookie Sources:
+      None: Puudub
+      File: Fail
+      Browser: Brauser
+    Cookie File: Küpsisefail
+    Browser for Cookies: Küpsiste brauser
+    Browser Profile: Brauseriprofiil (valikuline)
+    Browser Profile Placeholder: Profiili nimi või asukoht
+    Browser Profile Invalid: "Sisesta profiili nimi või vali kaustanupuga profiilikaust."
+    Select Browser: Vali brauser
+    Always Use Cookies: Kasuta alati küpsiseid
+    Restricted Playback Authentication Hint: Vaikimisi edastab OpenTubeX need küpsised yt-dlp-le alles siis, kui valid vanusepiiranguga või ainult liikmetele mõeldud video juures "Proovi seadistatud küpsistega".
+    Restricted Playback Authentication Warning: yt-dlp kasutamine Google’i kontoga võib kaasa tuua ajutised või püsivad kontopiirangud.
+    Use cookies for subtitles: "Kasuta subtiitrite jaoks küpsiseid"
+  Privacy Settings:
+    Internet Connectivity Checks: "Internetiühenduse kontrollid"
+    Internet Connectivity Checks Tooltip: "Saadab väikeseid päringuid GrapheneOS-i majutatud serverisse internetiühenduse kontrollimiseks."
+    Automatic History Retention: Ajaloo automaatne säilitusaeg (päevades)
+    Automatic History Retention Placeholder: Tähtajatult säilitamiseks jäta tühjaks
+    Automatic History Retention Tooltip: Ajaloo tähtajatult säilitamiseks jäta väli tühjaks. Arvu salvestamisel eemaldatakse vanemad kirjed kohe ja edaspidi automaatselt, kuni rakendus on avatud.
+    Automatic Search History Retention: Otsinguajaloo automaatne säilitusaeg (päevades)
+    Automatic Search History Retention Tooltip: Otsinguajaloo tähtajatult säilitamiseks jäta väli tühjaks. Arvu salvestamisel eemaldatakse vanemad otsingud kohe ja edaspidi automaatselt, kuni rakendus on avatud.
+    History Retention Saved: Ajaloo säilitusaeg on salvestatud
+    Invalid History Retention Days: Sisesta päevade arvuks nullist suurem täisarv
+    Enable Watch Statistics: Luba vaatamisstatistika
+    Week Starts On: Nädala alguspäev
+    Cache Video Metadata: Metaandmete ajalugu
+    Cache Video Metadata Tooltip: Säilitab külastatud videote toetatud metaandmete kõik versioonid, sealhulgas pealkirjad, pisipildid ja kirjeldused. Säilitab ka tellimuste voogudes kuvatud pealkirjad. See on vaikimisi keelatud, sest metaandmete ajaloo säilitamine võtab kettal rohkem ruumi.
+    Watched Percentage Threshold: Vaadatuks märkimise lävend
+    Watched Percentage Threshold Tooltip: Video märgitakse vaadatuks, kui valitud protsent videost on vaadatud ja lõpuni on jäänud kuni 2 minutit. Väärtuse 0% korral märgitakse video vaadatuks esitamise alguses. Väärtuse 100% korral märgitakse see vaadatuks esitamise lõpus.
+    Clear Video Metadata Cache: Tühjenda video metaandmete vahemälu
+    Are you sure you want to clear the video metadata cache?: Kas soovid kindlasti vahemällu salvestatud videote pealkirjad, pisipildid ja kirjeldused kustutada?
+    Failed to clear video metadata cache: Video metaandmete vahemälu tühjendamine nurjus
+    Video metadata cache has been cleared: Video metaandmete vahemälu on tühjendatud
+    Video Metadata Cache Size: 'Video metaandmete vahemälu: {size}'
+  Storage Settings:
+    Storage: Salvestusruum
+    Downloaded Media: Jälgitud allalaaditud meedia
+    Storage Breakdown: Salvestusruumi jaotus
+    Shown Total: Kuvatud kokku
+    Calculating: Arvutamine…
+    Not Available: Täpset mahtu pole saadaval
+    At Least: Vähemalt {size}
+    Failed To Read Storage: Mõne üksuse salvestusmahtu ei õnnestunud lugeda
+    Downloaded Media Description: Video-, heli- ja subtiitrifailid, mida allalaadimisajalugu endiselt jälgib.
+    Selected Download Folders: Kasutaja valitud allalaadimiskaustad
+    Download History Records: Allalaadimisajaloo kirjed
+    Download History Records Description: '{count} lõpetatud allalaadimise kirje. See kirje jälgib olekut ja failide asukohti, kuid ei sisalda allalaaditud meediat. | {count} lõpetatud allalaadimise kirjet. Need kirjed jälgivad olekut ja failide asukohti, kuid ei sisalda allalaaditud meediat.'
+    Clear Download History Records: Tühjenda allalaadimisajaloo kirjed
+    Clear Download History Confirmation: Kas tühjendada kõik lõpetatud allalaadimiste kirjed?
+    Download Files Stay On Disk: Allalaaditud failid jäävad kettale, kuid neid ei kuvata enam allalaadimiste lehel.
+    Clear Records: Tühjenda kirjed
+    Replaceable Caches: Taasloodavad vahemälud
+    Application Caches: Rakenduse vahemälud
+    Browser Caches: Brauseri vahemälud
+    Browser Caches Hint: Chromiumi HTTP-, GPU-, koodi-, varjutaja-, service worker’i ja sõnastikuvahemälud.
+    Clear Android Cache Confirmation: Kas tühjendada Androidi brauseri vahemälu?
+    Stored App Data: Salvestatud rakenduseandmed
+    Included In App Data: Sisaldub ülal näidatud rakenduse andmetes
+    Browser Runtime Data: Brauseri käitusandmed
+    Browser Runtime Data Hint: Chromiumi seansi- ja kohalik salvestusruum, küpsised, privaatsus- ja võrguolek ning krahhifailid.
+    Subscription Feed Cache: Tellimuste ja voo vahemälu
+    Subscription Feed Cache Description: Salvestab hangitud tellimusvideod, lühivideod, otseülekanded ja postitused. OpenTubeX loob selle voo järgmisel värskendamisel uuesti.
+    Clear Subscription Feed Cache: Tühjenda tellimuste ja voo vahemälu
+    Clear Subscription Feed Cache Confirmation: Kas tühjendada tellimuste ja voo vahemälu?
+    Subscription Feed Cache Effect: Tellimuste vood võivad olla kuni värskendamiseni tühjad. Teie tellimusi ja profiile ei muudeta.
+    Session Search Cache: Seansi otsinguvahemälu
+    In Memory: Mälus
+    Session Search Cache Description: '{count} otsing on kiirema tagasiliikumise jaoks mällu puhverdatud. OpenTubeXi sulgemisel see vahemälu kustutatakse. | {count} otsingut on kiirema tagasiliikumise jaoks mällu puhverdatud. OpenTubeXi sulgemisel see vahemälu kustutatakse.'
+    Clear Session Search Cache: Tühjenda seansi otsinguvahemälu
+    Clear Session Search Cache Confirmation: Kas tühjendada seansi otsinguvahemälu?
+    Session Search Cache Effect: Vahemällu salvestatud tulemuste lehed eemaldatakse. Salvestatud otsinguajalugu ei muudeta.
+    HTTP Cache: HTTP-vahemälu
+    HTTP Cache Description: Electron salvestab võrguvastused kettale, et korduvad päringud saaks laadida samu andmeid uuesti alla laadimata. OpenTubeX loob selle vahemälu vajaduse korral uuesti.
+    Managed By Electron: Electroni hallatav
+    Clear HTTP Cache: Tühjenda HTTP-vahemälu
+    Clear HTTP Cache Confirmation: Kas tühjendada Electroni HTTP-vahemälu?
+    HTTP Cache Effect: Piltide ja muude võrguressursside laadimine võib vahemälu taasloomise ajal ühe korra kauem aega võtta.
+    Tab Image Cache: Vahekaartide pisipildid ja kanalite avatarid
+    Tab Image Cache Description: Salvestab avatud ja taastatud vahekaartide eelvaatepildid ning kanalite avatarid. OpenTubeX loob need vahekaartide kasutamisel uuesti.
+    Clear Tab Image Cache: Tühjenda vahekaartide pildivahemälu
+    Clear Tab Image Cache Confirmation: Kas tühjendada vahekaartide pisipildid ja kanalite avatarid?
+    Tab Image Cache Effect: Vahekaartide pildid võivad korraks kaduda ja need luuakse vahekaartide kasutamisel uuesti.
+    Playback Caches: Esituse vahemälud
+    Playback Caches Description: Salvestab rakenduse seansside vahel yt-dlp voogude URL-id ja YouTube'i mängija failid. URL-i vahemälu kehtib ainult yt-dlp abil hangitud voogudele.
+    Playback URL Cache Entry Size: yt-dlp voo URL-i vahemälu piirang
+    Playback URL Cache Entry Size Tooltip: Määrab iga vahemällu salvestatud yt-dlp voo kirje suurima mahu. yt-dlp voogude püsiva vahemälu keelamiseks määrake väärtuseks 0 MB.
+    Clear Playback Caches: Tühjenda esituse vahemälud
+    Clear Playback Caches Confirmation: Kas tühjendada yt-dlp ja mängija vahemälud?
+    Playback Caches Effect: Järgmise kohaliku esituse käivitamine võib võtta kauem aega, sest voo ja mängija andmed hangitakse uuesti.
+    Clear Cache: Tühjenda vahemälu
+    History Data: Salvestatud ajalooandmed
+    Video Metadata Description: Salvestab toetatud videote varasemad pealkirjad, pisipildid ja kirjeldused. Pärast kustutamist ei saa vanu versioone taastada.
+    Video Metadata Effect: Salvestatud metaandmete versioonid kustutatakse jäädavalt. Video praegused andmed saab endiselt uuesti hankida.
+    Watch History: Vaatamisajalugu ja statistika
+    Watch History Description: Vaatamisajalugu talletab vaadatud videod ja edenemise. Vaatamisstatistika talletab päevased vaatamiste koguarvud. Säilitusaeg kehtib ainult vaatamisajaloole.
+    Clear Watch Statistics: Tühjenda vaatamisstatistika
+    Watch History Effect: Vaadatud videote kirjed ja salvestatud edenemine kustutatakse. Vaatamisstatistika jääb alles.
+    Clear Watch Statistics Confirmation: Kas kustutada kogu vaatamisstatistika?
+    Watch Statistics Effect: Päevased vaatamiste koguarvud kustutatakse. Vaatamisajalugu jääb alles.
+    Search History: Otsinguajalugu
+    Search History Description: Salvestab otsingud, mille otsustasite meelde jätta.
+    Delete Search History: Kustuta otsinguajalugu
+    Delete Search History Confirmation: Kas kustutada kogu salvestatud otsinguajalugu?
+    Search History Effect: Teie varasematel otsingutel põhinevad salvestatud otsingusoovitused kaovad. Praeguse seansi vahemälu jääb alles.
+    Other User Data: Muud kasutajaandmed
+    Other Profile Files: Muud profiilifailid
+    Other Profile Files Hint: Varukoopiad, ajutised failid ja profiilikirjed, mida OpenTubeX veel ei tunne.
+    Subscriptions And Profiles: Tellimused ja profiilid
+    Subscriptions And Profiles Description: Salvestab tellitud kanalid, profiilinimed ja profiilikuuluvuse.
+    Subscriptions And Profiles Effect: Kõik tellimused ja lisaprofiilid kustutatakse jäädavalt. Tühjendatakse ka voo vahemälu andmed.
+    Playlists Description: Salvestab esitusloendite nimed, kirjeldused ja salvestatud videod.
+    Playlists Effect: Kõik esitusloendid ja nende salvestatud videote loendid kustutatakse jäädavalt. Allalaaditud meediafailid jäävad alles.
+    Settings And Sessions: Seaded, vahekaartide seansid ja meeldetuletused
+    Settings And Sessions Description: Salvestab rakenduse eelistused, taastatavad vahekaardid ja otseülekannete meeldetuletused. Nende failide vaatamiseks või varundamiseks avage profiilikaust. Sellel lehel neid ei kustutata.
+    Cleanup Complete: Salvestusruumi puhastamine on lõpetatud
+    Cleanup Failed: Salvestusruumi puhastamine nurjus
+  Subscription Settings:
+    Fetch Feed on Startup: Hangi voog käivitamisel
+    Show New Content Feed: Kuva uue sisu voog
+    RSS Feeds: RSS-vood
+    Enable RSS Feeds: Kasuta RSS-vooge teiste platvormide jaoks
+    Manage RSS Feeds: Halda RSS-vooge
+    Show New Content Indicators: Kuva uue sisu tähised
+    Show Scheduled Live Streams / Premieres First: Kuva ajastatud otseülekanded ja esilinastused esimesena
+    Auto Refresh Interval: Automaatse värskendamise intervall
+    Videos Auto Refresh Interval: Videote automaatse värskendamise intervall
+    Shorts Auto Refresh Interval: Lühivideote automaatse värskendamise intervall
+    Live Auto Refresh Interval: Otseülekannete automaatse värskendamise intervall
+    Posts Auto Refresh Interval: Postituste automaatse värskendamise intervall
+    Refresh Subscriptions While App Is Closed: "Värskenda tellimusi, kui rakendus on suletud"
+    Notify About New Uploads: Teavita uutest üleslaadimistest
+    RSS Feeds Auto Refresh Interval: RSS-voogude automaatse värskendamise intervall
+  Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Vaatamisaja arvestamise allikas"
+      Break Reminder Action: "Kui on pausi aeg"
+      Grayscale: "Halltoonid"
+      Apply Grayscale To: "Halltoonide rakendamine"
+      Off: "Väljas"
+      Always: "Alati"
+      During Bedtime: "Magamaminekuajal"
+      After the Daily Limit: "Pärast päevalimiiti"
+      Whole App: "Kogu rakendusele"
+      Videos and Images: "Videotele ja piltidele"
+      Daily Watch Time Limit: "Päevane vaatamisaja limiit"
+      Daily Shorts Limit: "Päevane Shorts-videote limiit"
+      When a Limit Is Reached: "Kui limiit on täis"
+      Remind Me: "Tuleta meelde"
+      Pause Playback: "Peata esitus"
+      Take a Break Reminder: "Pausi meeldetuletus"
+      Every: "Iga {duration} järel"
+      Bedtime Reminder: "Magamamineku meeldetuletus"
+      Bedtime Start: "Magamamineku algus"
+      Bedtime End: "Magamamineku lõpp"
+      Wait Until the Video Ends: "Oota video lõpuni"
+      Silence Upload Notifications at Bedtime: "Vaigista uute üleslaadimiste teavitused magamaminekuajal"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Peata automaatne esitus magamaminekuajal ja pärast päevalimiiti"
+    Hide Popularity Graph: "Peida populaarsuse graafik"
+    Enable Block Lists: "Luba blokeerimisloendid"
+    AI Video Summaries: Tehisintellekti loodud videokokkuvõtted
+    Hide: Peida
+    Collapsed: Ahendatud
+    Expanded: Laiendatud
+    Video Descriptions: Videokirjeldused
+    Video Description Modes:
+      Hide: Peida
+      Collapsed: Ahendatud
+      Expanded: Laiendatud
+    Playing Interface Hide Delay: Liidese peitmise viivitus esitamise ajal
+    Hide Startup Splash: Peida käivituskuva
+    Hide Header Sync Indicator: Peida rakenduse päise sünkroonimisnäidik
+    Hide Repeat Stats: Peida korduste statistika
+    Hide Playlist Stats: Peida esitusloendi statistika
+    Sections:
+      Digital Wellbeing: "Digitaalne heaolu"
+      Visible While Paused: Pausi ajal täisaknas või täisekraanil nähtav
+    Hide Channel Avatars: Peida kanalite avatarid
+    Shorten View Counts: Lühenda vaatamiste, kommentaaride ja kommentaaride meeldimiste arvu
+    Hide Live Chat Replay: Peida otsevestluse kordus
+    Hide Home: Peida avaleht
+    Disable A-B Repeat: Lülita A-B-kordus välja
+    Hide End-Screen Annotations: Peida lõpuekraani märkused
+    Hide End-Screen Recommendations: "Peida lõpuekraani soovitused"
+    Hide Paid Promotion Badge: Peida tasulise reklaami märk
+    Show Player Controls: Kuva mängija juhtnupud
+    Show Video Title: Kuva video pealkiri
+    Show Bottom Right Actions Dock: Kuva all paremal toiminguriba
+    Paused Interface Hide Delay: Liidese peitmise viivitus pausi ajal
+  Data Settings:
+    Scheduled backups: "Ajastatud varukoopiad"
+    Scheduled backup description: "Salvesta täielikud ZIP-varukoopiad, kui OpenTubeX on avatud. Vahele jäänud koopiad luuakse käivitamisel. Piirang kehtib ainult selle kausta ajastatud koopiatele."
+    Choose backup folder: "Vali varukoopiate kaust"
+    No backup folder selected: "Varukoopiate kausta pole valitud"
+    Enable scheduled backups: "Luba ajastatud varukoopiad"
+    Backup frequency: "Varundamise sagedus"
+    Backups to keep: "Säilitatavate koopiate arv"
+    Daily: "Iga päev"
+    Weekly: "Iga nädal"
+    Every 30 days: "Iga 30 päeva järel"
+    Last scheduled backup: "Viimane ajastatud varukoopia: {date}"
+    No scheduled backup yet: "Ajastatud varukoopiat veel pole"
+    Scheduled backup failed: "Varundamine nurjus. Kontrolli, et kausta saaks kirjutada. Uus katse viie minuti pärast."
+    Import Preview:
+      Title: Muudatuste eelvaade
+      New: "Uued: {count}"
+      Existing: "Olemasolevad: {count}"
+      Skipped: "Vahele jäetud: {count}"
+      Unreadable files: "Loetamatud failid: {count}"
+      Settings effect: Vastavad seaded asendatakse. Privaatsed ja tundmatud seaded jäetakse vahele.
+      Details effect: Olemasolevad tellimused või videod säilitatakse. Imporditud profiili või esitusloendi andmed asendavad praegused.
+      Merge effect: Olemasolevad andmed säilitatakse ja liidetakse vastavate kirjetega.
+      Subscriptions effect: Olemasolevad tellimused säilitatakse. Lisatakse ainult uued kanalid.
+      History merge effect: Vastavad videod liidetakse sinu ajalooga, säilitades salvestatud üksikasjad ja viimase vaatamiskuupäeva. Muu ajalugu säilitatakse.
+    Select export data: "Vali eksporditavad andmed"
+    Export selected data: "Ekspordi valitud andmed"
+    Complete backup: "Täielik varundamine"
+    Import backup: "Impordi varukoopia"
+    Export backup: "Ekspordi varukoopia"
+    Backup description: "Salvesta profiilid, esitusloendid, ajalugu, statistika ja ülekantavad seaded ühte ZIP-FAILI. Importimine ühendab need selles seadmes juba olevate andmetega."
+    Select backup data: "Vali imporditavad andmed"
+    Profiles and subscriptions: "Profiilid ja tellimused"
+    Backup exported: "Varunduse eksportimine õnnestus"
+    Backup imported: "Varunduse importimine õnnestus"
+    Import YouTube Takeout ZIP: "Impordi YouTube Takeouti ZIP"
+    Select Takeout data: "Vali imporditavad andmed"
+    Import selected data: "Impordi valitud andmed"
+    No supported Takeout data: "Sellest ZIP-failist ei leitud toetatud YouTube’i andmeid."
+    Data And Storage: Andmed ja salvestusruum
+    Profile Directory: Profiilikaust
+    Open Profile Directory: Ava profiilikaust
+    Invalid JSON row, skipping item: Rea {row} JSON on vigane, üksus jäetakse vahele
+    Import subscriptions formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube’i varukoopia või FreeTube’i eksport (.json)'
+    Import history formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube’i varukoopia (.json)'
+    Import playlists formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import search history formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: "Kanalite esituskiirused"
+    Import channel playback speeds: "Impordi kanalite esituskiirused"
+    Channel playback speeds file: "Kanalite esituskiiruste fail"
+    Import channel playback speeds formats: "Toetatud vormingud: kasutajaskripti {script} salvestatud andmed (.json)"
+    Invalid channel playback speeds file: "Sellest failist ei leitud ühegi kanali esituskiirust"
+    Channel playback speeds imported: "Imporditi {count} kanali esituskiirus | Imporditi {count} kanali esituskiirused"
+    Channels not found: "{count} kanalit ei leitud | {count} kanalit ei leitud"
+  Sync Settings:
+    Revoke Session Tabs Warning: "Samuti kustutatakse selle seadme sünkroonitud vahelehtede komplektid."
+    Revoke Session Partial Failure: "Sünkroonitud vahekaartide komplektid kustutati, kuid juurdepääsu tühistamist ei saanud kinnitada. Proovi juurdepääs uuesti tühistada."
+    Tab Sync Revocation Pending: "Vahelehtede sünkroonimine on peatatud, kuni selle sisselogimise tühistamine on ootel. Proovi tühistamist uuesti sünkroonimise seadetes."
+    Show More: "Näita rohkem"
+    Sync Automatically: "Sünkrooni automaatselt"
+    Activity: "Konto tegevus"
+    No Activity: "Hiljutisi tegevusi pole"
+    Clear Activity: "Tühjenda selles seadmes"
+    Clear Activity Hint: "Peida olemasolev kontotegevus selles seadmes. Tegevus serveris ja teistes seadmetes jääb muutumatuks. Uut tegevust kuvatakse endiselt."
+    Setting Changed: "{device} muutis sätte {setting} väärtuseks {value}"
+    Item Updated: "{device} uuendas sätet {setting}"
+    Item Added: "{device} lisas {item} jaotisse {setting}"
+    Item Removed: "{device} eemaldas {item} jaotisest {setting}"
+    Item Renamed: "{device} nimetas {item} ümber nimega {value}"
+    Saved Playlists: "Salvestatud esitusloendid"
+    No Feed Types: "Puudub"
+    Open On Device: "Ava teises seadmes"
+    Video Sent: "Video saadetud. Võrguühenduseta seadmed saavad selle uuesti ühendudes 24 tunni jooksul."
+    Video Received: "Saadud video: {title}"
+    Previous Auto Sync Notice: "Automaatne sünkroonimine on välja lülitatud. Varasem versioon võis selle andmekao vältimiseks välja lülitada."
+    Enable Automatic Sync: "Luba automaatne sünkroonimine"
+    Destructive Sync Blocked: "Sünkroonimine peatati andmekao vältimiseks. Automaatne sünkroonimine on välja lülitatud. Kustutamiste ülevaatamiseks ava sünkroonimise seaded."
+    Devices: "Seadmed"
+    Devices Hint: "Vaata üle seadmed, millel on juurdepääs sellele sünkroonimiskontole."
+    Change Password: "Muuda parooli"
+    Refresh Devices: "Värskenda seadmeid"
+    Current Device: "Praegune seade"
+    Revoke Session: "Tühista juurdepääs"
+    Session Created: "Loodud"
+    Last Active: "Viimati aktiivne"
+    Session Expires: "Aegub"
+    Unknown Device: "Tundmatu seade"
+    Operating System: "Operatsioonisüsteem"
+    Rename Device: "Nimeta seade ümber"
+    Save Device Name: "Salvesta nimi"
+    Device Name Invalid: "Seadme nimi võib sisaldada kuni 80 märki ega tohi sisaldada juhtmärke."
+    Device Renamed: "Seade on ümber nimetatud"
+    Revoke Session Confirmation: "Kas tühistada see seanss?"
+    Revoke Current Session Warning: "Selle seansi tühistamine katkestab selle seadme ühenduse sünkroonimiskontoga."
+    Revoke Session Warning: "{device} kaotab juurdepääsu sellele sünkroonimiskontole."
+    Confirm Revoke Session: "Tühista seanss"
+    Session Revoked: "Seanss tühistatud"
+    Change Password Warning: "Parooli muutmine logib kõik teised seadmed välja. See seade jääb ühendatuks."
+    Current Password: "Praegune parool"
+    New Password: "Uus parool"
+    Confirm New Password: "Kinnita uus parool"
+    Save New Password: "Salvesta uus parool"
+    Account Management Failed: "Sünkroonimiskonto andmeid ei saanud laadida."
+    All Password Fields Required: "Täida kõik parooliväljad."
+    New Password Too Short: "Uus parool peab olema vähemalt 8 tähemärki pikk."
+    New Passwords Do Not Match: "Uued paroolid ei ühti."
+    Password Changed: "Parool on muudetud. Teised seadmed logiti välja."
+    Sync Settings: Sünkroonimine
+    Watch stats: "Vaatamisstatistika"
+    Enable Sync: Luba sünkroonimine
+    Privacy Passphrase: Privaatsuse salafraas
+    Privacy Passphrase Hint: Kasutage konto paroolist erinevat salafraasi. Seda ei edastata sellest seadmest välja ja seda on vaja igas seadmes. Selle kaotamisel ei saa krüptitud sünkroonimisandmeid taastada.
+    Privacy Policy: Selle serveri privaatsuspoliitika
+    Enhanced Privacy Enabled: Täiustatud privaatsus on lubatud. Server salvestab ainult krüptitud sünkroonimisandmeid.
+    Enhanced Privacy Unsupported: Hoiatus — see server ei toeta täiustatud privaatsust. Sünkroonitud andmed on serveri haldajale nähtavad.
+    Description: 'Sünkrooni tellimused, profiilid, esitusloendid, vaatamisajalugu ja toetatud seaded OpenTubeXi või LibreTube’i sünkroonimisserveriga. LibreTube’i serverid ei pruugi kõiki sünkroonimisfunktsioone toetada.'
+    Server URL: Sünkroonimisserveri URL
+    Checking Server: Sünkroonimisserveri kontrollimine…
+    Server Unavailable: Selle sünkroonimisserveriga ei saa ühendust luua. Kontrollige URL-i ja proovige uuesti.
+    Username: Kasutajanimi
+    Log In: Logi sisse
+    Register: Registreeru
+    Pair Another Device: Seo teine seade
+    Pair With Existing Device: Seo olemasoleva seadmega
+    Device Name: Seadme nimi
+    This Device: See seade
+    Device Name Required: Sisestage selle seadme nimi.
+    Pairing Device Name Hint: Valige nimi, mille tunnete ära seadmest, kus see taotlus kinnitatakse.
+    Create Pairing Code: Loo sidumiskood
+    Creating Pairing Code: Turvalise sidumiskoodi loomine…
+    Pairing QR Alt: Seadme {device} sidumise QR-kood
+    Scan Pairing Code: Avage juba ühendatud seadmes „Seo teine seade” ja skannige see kood.
+    Pairing Code: Sidumiskood
+    Use Text Pairing Code: Kasuta selle asemel tekstikoodi
+    Show QR Code: Kuva QR-kood
+    Text Pairing Code Hint: Kopeerige see kood olemasolevasse seadmesse. See sisaldab sidumissaladust, seega kustutage see pärast sidumist lõikelaua ajaloost.
+    Pairing QR Warning: Näidake seda koodi ainult usaldusväärsele ja juba ühendatud seadmele, milles see taotlus kinnitatakse. Kood aegub kahe minuti pärast.
+    Pairing Expires: Sidumiskood aegub {time}.
+    Verifying Pairing: Edastatud privaatsusvõtme kontrollimine…
+    Completing Pairing: Seadme sidumise lõpetamine…
+    Compare Pairing Codes: Võrdle sidumiskoode
+    Pairing Code Match Hint: Kinnitage ainult siis, kui see kood ühtib olemasolevas seadmes kuvatava koodiga.
+    Pairing Codes Match: Koodid ühtivad
+    Pairing Approval Code Hint: Hoidke see aken avatuna ja võrrelge seda koodi uue seadme koodiga. Uues seadmes ei tohi jätkata, kui koodid erinevad.
+    Pairing Scan Hint: Skannige lisatavas seadmes kuvatav sidumiskood.
+    Enter Pairing Code: Sisesta kood käsitsi
+    Pairing Code Entry Hint: Kleepige lisatavas seadmes kuvatav sidumiskood.
+    Check Pairing Code: Kontrolli koodi
+    Scan QR Code: Skanni QR-kood
+    Waiting For Pairing Code: Sidumiskoodi ootamine…
+    Checking Pairing Request: Sidumistaotluse kontrollimine…
+    Approving Pairing Request: Privaatsusvõtme krüptimine ja saatmine…
+    Pairing Approval Warning: Kinnitage ainult siis, kui näete seda taotlust lisatavas seadmes. Sidumine annab juurdepääsu kontole ja edastab privaatsusvõtme.
+    Approve Pairing: Kinnita sidumine
+    Try Again: Proovi uuesti
+    Scan Again: Skanni uuesti
+    Camera Unavailable: OpenTubeX ei pääsenud kaamerale juurde. Kontrollige kaamera kasutamise õigust või sisestage sidumiskood käsitsi.
+    Pairing Unsupported: See sünkroonimisserver ei toeta seadmete turvalist sidumist.
+    Pairing Failed: Seadme sidumine nurjus. Proovige uue koodiga uuesti.
+    Pairing Request Changed: Sidumistaotlus muutus, aegus või seda on juba kasutatud. Looge uus kood.
+    Pairing Server Mismatch: See kood kuulub teisele sünkroonimisserverile.
+    Pairing Verification Unavailable: Edastatud võtme kontrollimiseks pole saadaval ühtegi krüptitud sünkroonimiskogu. Sünkroonige olemasolev seade ja proovige uuesti.
+    Pairing Completed: Seadme sidumine on lõpetatud
+    Pairing Approved: Seadme sidumine on kinnitatud
+    Use Pairing Invite: Kasuta ühendatud seadme koodi
+    Show Pairing Invite: Kuva sidumiskood
+    Scan Pairing Invite: Avage lisatavas seadmes „Seo olemasoleva seadmega”, valige „Kasuta ühendatud seadme koodi” ja skannige see kood.
+    Pairing Invite QR Alt: Lisatava seadme sidumise QR-kood
+    Pairing Invite Text Hint: Kopeerige see kood lisatavasse seadmesse. Selle abil saab seade taotleda juurdepääsu teie kontole, seega kustutage see pärast sidumist lõikelaua ajaloost.
+    Pairing Invite Warning: Näidake seda koodi ainult lisatavale seadmele. Selle taotlus tuleb siiski selles seadmes kinnitada.
+    Pairing Invite Scan Hint: Skannige ühendatud seadmes kuvatav sidumiskood.
+    Pairing Invite Entry Hint: Kleepige ühendatud seadmes kuvatav sidumiskood.
+    Pairing Invite Code Hint: Kinnitage taotlus ühendatud seadmes ainult siis, kui seal kuvatakse see kood. Seejärel lõpeb sidumine automaatselt.
+    Pairing Invite Approval Hint: Kinnitage ainult siis, kui lisatav seade kuvab seda koodi.
+    Pairing Invite Approved: Sidumine on kinnitatud. Uus seade lõpetab sidumise automaatselt.
+    Disconnect: Katkesta ühendus
+    Delete Account: Kustuta sünkroonimiskonto
+    Delete Account Confirmation: Kas kustutada sünkroonimiskonto?
+    Delete Account Warning: See kustutab jäädavalt teie sünkroonimiskonto ja kõik sellesse serverisse salvestatud andmed. Teie kohalikke OpenTubeXi andmeid ei kustutata.
+    Confirm Delete Account: Kustuta konto
+    Password Required: Parool on nõutav
+    Account Deleted: Sünkroonimiskonto on kustutatud
+    Connected as: Ühendatud kasutajana {username}
+    Profiles: Profiilid
+    Open Tabs: Avatud vahekaardid ja seanss
+    Disable Setting Sync: Lõpeta selle seade sünkroonimine
+    Enable Setting Sync: Sünkrooni see seade
+    Sync Now: Sünkrooni kohe
+    Downloading encrypted data: Krüptitud sünkroonimisandmete allalaadimine…
+    Syncing subscriptions: Tellimuste sünkroonimine…
+    Syncing playlists: Esitusloendite sünkroonimine…
+    Syncing history: Vaatamisajaloo sünkroonimine…
+    Syncing statistics: Vaatamisstatistika sünkroonimine…
+    Syncing profiles: Profiilide sünkroonimine…
+    Syncing open tabs: Avatud vahekaartide ja seansi sünkroonimine…
+    Syncing settings: Seadete sünkroonimine…
+    Uploading encrypted data: Krüptitud sünkroonimisandmete üleslaadimine…
+    Finishing sync: Sünkroonimise lõpetamine…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'Viimati sünkroonitud: {date}'
+    History not supported: See serveriversioon ei toeta vaatamisajaloo sünkroonimist.
+    Settings not supported: See serveriversioon ei toeta seadete sünkroonimist.
+    Sync completed: Sünkroonimine on lõpetatud
+    Sync failed: 'Sünkroonimine nurjus: {error}'
+    Data Loss Confirmation: Kas kinnitada andmeid kustutav sünkroonimine?
+    Data Loss Warning: Sünkroonimine kustutaks kõigis seadmetes kogust „{collection}“ {deleted} üksust {previous} varem sünkroonitud üksusest. Kui te ei kustutanud neid ise, näiteks seetõttu, et server lähtestati, säilitage need, et need kõikjal taastada.
+    Keep Deleted Items: Säilita üksused
+    Confirm Data Loss: Kustuta ja jätka
+    Use Shared Tabs: 'Kasuta seadmetes üht jagatud vahelehtede komplekti'
+    Shared Tabs Warning: 'Selles seadmes avatud vahekaardid saavad ühiseks vahekaartide kogumiks. Teised seadmed asendavad sünkroonimisel oma avatud vahekaardid selle kogumikuga; eri seadmete vahekaarte ei ühendata.'
+    Tabs From Other Devices: 'Teiste seadmete vahelehed'
+    Device Tab Session: '{platform} · {count} vahelehte'
+    Mobile Device: 'Mobiilseade'
+    Desktop Device: 'Arvuti'
+    Open All Tabs: 'Ava kõik vahelehed'
+    Open All Tabs Confirmation: "Kas avada kõik vahelehed?"
+    Server Update Required: "Uuenda seda serverit, et toetada krüptitud reaalajas sünkroonimist."
+    Log In with Provider: 'Logi sisse teenusega {provider}'
+    Log In with Single Sign-On: 'Logi sisse ühekordse sisselogimisega'
+    Continue in Browser: 'Jätka brauseris. OpenTubeX jätkab, kui oled valmis.'
+    Connected with Single Sign-On: 'Ühendatud ühekordse sisselogimisega'
+    Delete Single Sign-On Account Hint: 'Brauser avaneb, et saaksid kustutamise oma sisselogimisteenuse pakkuja juures kinnitada.'
+  Proxy Settings:
+    IP Block Recovery Script Path: IP-blokeeringust taastamise skript
+    Select IP Block Recovery Script File: Vali IP-blokeeringust taastamise skriptifail
+    Running IP block recovery script: IP-blokeeringust taastamise skripti käivitamine
+    IP block recovery script failed: 'IP-blokeeringust taastamise skript nurjus (väljumiskood: {exitCode})'
+    IP block recovery script finished: IP-blokeeringust taastamise skript lõpetas töö
+    Reloading video after IP block recovery: Video uuesti laadimine pärast IP-blokeeringust taastamist
+    Failed to select IP block recovery script: IP-blokeeringust taastamise skripti valimine nurjus
+  SponsorBlock Settings:
+    Enable SponsorBlock Submission: Luba SponsorBlocki andmete esitamine
+    SponsorBlock Private User ID (optional): Privaatne kasutaja ID (valikuline)
+    SponsorBlock Private User ID Tooltip: Kleepige brauserilaiendist SponsorBlocki privaatne kasutaja-ID. Rakenduse loodud ID kasutamiseks jätke see tühjaks.
+    Generated SponsorBlock User ID: Loodud SponsorBlocki kasutaja-ID
+    Generated SponsorBlock User ID Tooltip: Seda rakenduse loodud SponsorBlocki kasutaja-ID-d saab kasutada brauserilaiendis või rakenduse kasutamisel teises arvutis.
+    Reveal Generated User ID: Kuva loodud kasutaja-ID
+    Generated SponsorBlock User ID Copy Button: Kopeeri loodud SponsorBlocki kasutaja-ID
+    Generated SponsorBlock User ID Copied: Loodud SponsorBlocki kasutaja-ID kopeeriti lõikelauale
+    Skip notification timeout: Vahelejätmisteavituse kuvamisaeg
+    Custom Color: Kohandatud värv
+    DeArrow Settings: DeArrow
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Luba Return YouTube Dislike
+    Return YouTube Dislike Url: API URL
+  Password Dialog:
+    Incorrect Password: Vale parool
+    Unlock: Ava
+    Unlocking: Avamine…
+  Search Settings: Otsingu seaded
+  No Settings Found: Seadeid ei leitud
+  Interface Customizer:
+    Customize Interface: "Kohanda liidest"
+    Preview: "Eelvaade"
+    Player: "Pleier"
+    Desktop: "Arvuti"
+    Mobile: "Mobiil"
+    Playing: "Esitamisel"
+    Player Menu: "Pleieri menüü"
+    Fullscreen: "Täisekraan"
+    Paused: "Peatatud"
+    Controls: "Juhtnupud"
+    Example Video Title: "Näidisvideo"
+    Resolution: "Eraldusvõime"
+    Loop: "Kordus"
+    Off: "Väljas"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Peida tehisintellekti rämpssisuga kanalid
+    Hide AI Slop Channels Tooltip: Peidab kogukonna hallatavas AiSListi blokeerimisloendis (aisloplist.com) olevad kanalid otsingutulemustest, populaarsust koguvate videote hulgast ja soovitustest ning märgistab videod, mis pärinevad selle hoiatusloendis olevatelt kanalitelt. Tellimusi see ei mõjuta. Loendid laaditakse GitHubist alla kord päevas ja need kehtivad ainult kohaliku API kaudu laaditud tulemustele.
+    Downloading: Loendite allalaadimine…
+    Failed to Download: Loendeid ei õnnestunud alla laadida
+    Loaded Status: "Blokeeritud kanalid: {blocked} · Märgistatud kanalid: {warned} · Uuendatud: {date}"
+Tutorial:
+  Skip: Jäta vahele
+  Next: Edasi
+  Finish: Lõpeta
+  Welcome:
+    Title: Tere tulemast rakendusse OpenTubeX
+    Description: Siin on mõned juhtnupud, mis aitavad teil rakendusega tutvuda.
+  Navigation:
+    Title: Teie kogu on alati käepärast
+    Description: Navigeerimisriba kaudu pääsete tellimuste, esitusloendite, ajaloo ja muu juurde.
+  Search:
+    Title: Otsige või kleepige link
+    Description: Leidke videoid ja kanaleid või kleepige toetatud video URL otse otsinguväljale.
+  Tabs:
+    Title: Hoidke lehed vahekaartidel avatuna
+    Description: Avage korraga mitu lehte ja jätkake hiljem samast kohast. Valige, kus vahekaardid teie paigutusega kõige paremini sobivad.
+  Quick Settings:
+    Title: Kohandage rakendus endale sobivaks
+    Description: Valige kujundus ja video vaikekvaliteet. Neid ja muid eelistusi saate igal ajal profiilimenüüs muuta. Profiili vahetamiseks paremklõpsake oma profiili.
+    Touch Description: Valige kujundus ja video vaikekvaliteet. Neid ja muid eelistusi saate igal ajal profiilimenüüs muuta. Profiili vahetamiseks vajutage pikalt oma profiilile.
+  Import Data:
+    Title: Võtke oma andmed kaasa
+    Description: Soovi korral importige tellimused, ajalugu, esitusloendid, otsinguajalugu või seaded teisest toetatud rakendusest või varukoopiast.
+    Action: Impordi andmed
+    Not Now: Mitte praegu
+About:
+  Project: Projekt
+  Community: Kogukond
+  Contribute: Panusta
+  Documentation: Dokumentatsioon
+  Downloads: Allalaadimised
+  Changelog: Muudatuste logi
+  Commit: Commit
+  Matrix: Matrix
+  Email: E-post
+Profile:
+  Customization: Kohandamine
+  Manage Profile Subscriptions: Halda profiili tellimusi
+  Icon Names:
+    Person: Inimene
+    People: Inimesed
+    Headphones: Kõrvaklapid
+    Gaming: Mängud
+    Film: Film
+    Art: Kunst
+    Science: Teadus
+    Globe: Gloobus
+    Heart: Süda
+    Sun: Päike
+    Moon: Kuu
+    Trophy: Karikas
+  Profile Icon: Profiiliikoon
+  Choose an Emoji: Vali emotikon
+  Custom Emoji: Kohandatud emotikon
+  Emoji: Emotikon
+  Choose Image: Vali pilt
+  Crop Image: Kärbi pilti
+  Zoom: Suurendus
+  Apply Crop: Rakenda kärpimine
+  Transparent: Läbipaistev
+  Use Initial: Kasuta esitähte
+  The selected image could not be loaded: Valitud pilti ei õnnestunud laadida
+  Theme Color: Kujunduse värv
+Channel:
+  Hide Watched: Peida vaadatud
+  Fewer videos per day: "Vähem videoid päevas"
+  More videos per day: "Rohkem videoid päevas"
+  Verified: Kinnitatud
+  Official Artist Channel: Ametlik esitaja kanal
+  Subscription settings: Tellimuse seaded
+  Failed to save subscription settings: Kanali seadeid ei õnnestunud salvestada
+  Videos per day: Videoid päevas
+  Use global setting: Kasuta üldist seadet
+  Unlimited: Piiramata
+  More videos hidden: '+{count} veel | +{count} veel'
+  Show in subscription feed: Kuva tellimuste voos
+  Notify about new uploads: Teavita uutest üleslaadimistest
+  Show members-only videos: Näita ainult liikmetele mõeldud videoid
+  Upload Notifications On: "Sind teavitatakse kanali {channelName} uutest üleslaadimistest, kui tellimusi värskendatakse"
+  Upload Notifications Off: "Sind ei teavitata kanali {channelName} uutest üleslaadimistest"
+  Upload Notifications Disabled In Settings: "Kanali {channelName} teavitused on sees, kuid uute üleslaadimiste teavitused on seadetes välja lülitatud"
+  Turn On Upload Notifications: "Lülita sisse"
+  Channel Name Unavailable: Kanali nimi pole saadaval
+  Search Result Types: Otsingutulemuste tüübid
+  All Results: Kõik
+  Posts:
+    Original post unavailable: "Algne postitus pole saadaval"
+    Members-only video hidden by OpenTubeX: "OpenTubeX peitis ainult liikmetele mõeldud video"
+    Video hidden by OpenTubeX because of its title: "OpenTubeX peitis video, sest selle pealkiri sisaldab peidetud teksti"
+Video:
+  Info panel source: 'Allikas: {source}'
+  External DRM Protected: "DRMiga kaitstud videoid ei saa OpenTubeXis esitada, kuna nende jaoks on vaja omanduslikke suletud lähtekoodiga komponente."
+  Invalid Media URL: "Vigane meedia URL"
+  Mark As Fully Watched: Märgi täielikult vaadatuks
+  AI-generated video summary: "Tehisintellekti loodud video kokkuvõte"
+  Quality and accuracy may vary: "Kvaliteet ja täpsus võivad erineda"
+  Includes paid promotion: Sisaldab tasulist reklaami
+  Age Restricted Badge: Vanusepiiranguga
+  Music Video Badge: Muusikavideo
+  Queue: Esitusjärjekord
+  Play Next: Esita järgmisena
+  Add to Queue: Lisa esitusjärjekorda
+  Added to Play Next: Video esitatakse järgmisena
+  Added to Queue: Video lisati esitusjärjekorda
+  Clear Queue: Tühjenda esitusjärjekord
+  Queue Video Count: '{count} video | {count} videot'
+  Remove from Queue: Eemalda {title} esitusjärjekorrast
+  Remove Video from Queue: Eemalda esitusjärjekorrast
+  Drag to Reorder Queue: Lohista {title} esitusjärjekorras teise kohta
+  Reorder Queue Item: Muuda video {title} järjekorda
+  Reorder Queue Item Instructions: Selle video liigutamiseks esitusjärjekorras kasutage üles- ja allanoole klahve.
+  Queue Item Moved: '{title} teisaldati kohale {position}/{total}.'
+  Queue Item Cannot Move Up: Videot {title} ei saa ülespoole liigutada. See on juba kohal 1/{total}.
+  Queue Item Cannot Move Down: Videot {title} ei saa allapoole liigutada. See on juba kohal {total}/{total}.
+  Metadata: Video teave
+  Close Metadata: Sulge video teave
+  Metadata Cache:
+    Title History: Pealkirjade ajalugu
+    Thumbnail History: Pisipiltide ajalugu
+    Description History: Kirjelduste ajalugu
+    Previous Version: Eelmine {number}
+    Empty: (tühi)
+  Fetching Streams: Voogude hankimine yt-dlp abil…
+  Waiting For Connection: "Serveriga ei õnnestunud ühendust saada. Proovin automaatselt uuesti…"
+  Retry Now: "Proovi kohe uuesti"
+  Transcript:
+    Title: Transkriptsioon
+    Search: Otsi transkriptsioonist
+    Language: Transkriptsiooni keel
+    Save: Salvesta
+    Show: Näita transkriptsiooni
+    Hide: Peida transkriptsioon
+    Close: Sulge transkriptsioon
+    Copied: Transkriptsioon kopeeriti lõikelauale
+    Saved: Transkriptsioon salvestati
+    Save Error: Transkriptsiooni ei saanud salvestada
+    Text File: Tekstifail
+    Unavailable: Selle video transkriptsioon pole saadaval.
+    Load Error: Transkriptsiooni ei saanud laadida.
+    Empty: See transkriptsioon ei sisalda teksti.
+    No Results: Ükski transkriptsiooni lõik ei vasta otsingule.
+  Retry With Built-in Extraction: Proovi uuesti sisseehitatud meetodiga
+  Retry With yt-dlp Extraction: Proovi uuesti yt-dlp abil
+  Reloading video after streaming URL error: Video laaditakse voogedastuse URL-i vea tõttu uuesti
+  Configure Restricted Playback Cookies Hint: "Seadista küpsised jaotises Seaded → Täpsemad seaded → Väline tarkvara → yt-dlp küpsised."
+  Try With Configured Cookies: Proovi seadistatud küpsistega
+  Restricted Playback Authentication Failed Template: 'yt-dlp ei pääsenud seadistatud küpsistega sellele videole juurde: {error}'
+  Unmark As Watched: Eemalda vaadatuks märkimine
+  Video has been unmarked as watched: Video pole enam vaadatuks märgitud
+  Save Channel Playback Speed: Salvesta kanali esituskiirus
+  Channel Playback Speed Saved: Kanali esituskiirus salvestati
+  Save Channel Video Quality: Salvesta kanali videokvaliteet
+  Channel Video Quality Saved: Kanali videokvaliteet salvestati
+  Save Channel Subtitles State: Salvesta kanali subtiitrite olek
+  Channel Subtitles State Saved: Kanali subtiitrite olek salvestati
+  Save Channel Volume: Salvesta kanali helitugevus
+  Channel Volume Saved: Kanali helitugevus salvestati
+  Save Channel Setting: Kanali seade salvestatakse…
+  Channel Setting Already Set: '{setting} väärtus on juba {value}'
+  Video has been saved to {playlistName}: Video salvestati esitusloendisse {playlistName}
+  Video has been removed from {playlistName}: Video eemaldati esitusloendist {playlistName}
+  There was a problem saving the video to {playlistName}: Video salvestamisel esitusloendisse {playlistName} tekkis probleem
+  There was a problem removing the video from {playlistName}: Video eemaldamisel esitusloendist {playlistName} tekkis probleem
+  Failed to load collaborators: Kaastöötajate laadimine nurjus
+  Notify me: Teavita mind
+  Notification on: Teavitus on sisse lülitatud
+  Notification enabled: Sind teavitatakse selle video algamisest
+  Notification cancelled: Alguse teavitus tühistati
+  Notification unavailable: Süsteemiteavitused pole saadaval
+  Scheduled video starting: Ajastatud video algab
+  Live notification body: '{videoTitle} algab nüüd'
+  Collaborators: Kaastöötajad
+  Live Chat Replay: Otsevestluse kordus
+  Show Live Chat: Näita otsevestlust
+  Show Live Chat Replay: Näita otsevestluse kordust
+  Close Live Chat: Sulge otsevestlus
+  Close Live Chat Replay: Sulge otsevestluse kordus
+  Live Chat Settings: Otsevestluse seaded
+  Show Live Chat Timestamps: Näita ajatempleid
+  Chat Filter: Vestluse filter
+  Top Chat: Populaarseimad sõnumid
+  All Messages: Kõik sõnumid
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: Otsevestluse kordus on sisse lülitatud.  Video esitamise ajal kuvatakse siin vestlussõnumid.
+  Premiere started: Esilinastus on käimas. Algas {timeAgo}
+  Sponsor Block category:
+    hook: Sissejuhatus/tervitus
+  Player:
+    Playing in Picture-in-Picture: Esitatakse pilt-pildis-režiimis
+    Stream Recovery:
+      DASH Fallback: "Helivoog ebaõnnestus, lülitun DASH-vormingutele: {error}"
+      Error Copied: "Viga kopeeriti lõikelauale"
+      Legacy Fallback: "Voog ebaõnnestus, lülitun pärandvormingutele: {error}"
+    Caption Timing:
+      Adjust Timing: Muuda ajastust…
+      Caption Timing: Subtiitrite ajastus
+      Offset: Nihe (sekundites)
+      Hint: Negatiivsed väärtused näitavad subtiitreid varem, positiivsed hiljem. Kehtib ainult selle video puhul.
+      Earlier: Varem
+      Later: Hiljem
+      Reset: Lähtesta
+    Most Replayed: "Enim uuesti vaadatud"
+    Pull up for precise seeking: "Täpseks kerimiseks lohista üles"
+    Precise seeking, drag down to exit: "Täpne kerimine · Väljumiseks lohista alla"
+    Cast: "Edasta"
+    Music Mode: "Muusikarežiim"
+    Music Mode Description: "Esita videoid kiirusel 1× ja alusta sellel vahelehel uusi videoid algusest. Sinu salvestatud taasesituse vaikeseaded jäävad muutmata."
+    DLNA:
+      Cast: "Edasta DLNA-seadmesse"
+      Stop: "Lõpeta edastamine"
+      No Devices: "DLNA-seadmeid ei leitud"
+      No MP4 Source: "Selle video jaoks pole ühilduvat MP4-voogu"
+      Error: "Video edastamine ebaõnnestus"
+    Repeat Stats:
+      Repeat Stats: Korduste statistika
+      Looping: Kordus sees
+      Repeats: Kordus | Kordused
+      Time Spent: Vaatamisaeg
+    Voice-over Translation:
+      Start: Tõlgi
+      Cancel: Tühista
+      Progress: Pealelugemisega tõlke ettevalmistamine…
+      Retry: Proovi uuesti
+      Error: Pealelugemisega tõlge nurjus. Proovi hiljem uuesti.
+      Duration Error: Pealelugemisega tõlge on saadaval ainult kuni neljatunniste videote jaoks.
+    Caption Appearance:
+      Options: Valikud
+      Sample: Subtiitrid näevad välja nii
+    Auto-translate: Automaattõlge
+    Sleep Timer:
+      Sleep Timer: Unetaimer
+      'Off': 'Väljas'
+      Minutes: '{minutes} minutit'
+      End of video: Video lõpp
+      End of current chapter: Praeguse peatüki lõpp
+      Remaining: 'Jäänud {time}'
+      Cancel timer: Tühista taimer
+      Timer ended: Unetaimeri aeg sai täis
+    A-B Repeat:
+      A-B Repeat: A-B-kordus
+      'On': Sees
+      'Off': Väljas
+      Point A: Punkt A
+      Point B: Punkt B
+      Set Repeat Start: Määra korduse algus
+      Set Repeat End: Määra korduse lõpp
+      Pause Repeat: Peata A-B-kordus
+      Resume Repeat: Jätka A-B-kordust
+      Adjust Point: 'Kohanda punkti {point}, praegu {timestamp}'
+      Clear Range: Tühjenda A-B-korduse vahemik
+      End Before Start: Punkt B peab olema pärast punkti A.
+      Outside Duration: Ajatempel peab jääma video kestuse piiresse.
+      Cleared: A-B-kordus tühjendatud
+    Seek History:
+      Seek History: Kerimisajalugu
+      Positions: '{count} asukoht | {count} asukohta'
+      Nothing to undo: Pole midagi tagasi võtta
+      Nothing to redo: Pole midagi uuesti teha
+    Zoom:
+      Zoom: Suurendus
+      'Off': 'Väljas'
+    Volume Boost:
+      Volume Boost: "Helitugevuse võimendus"
+      'Off': "Väljas"
+    Auto-generated Caption Template: '{language} (automaatselt loodud)'
+    Up next in {seconds}: Järgmine algab {seconds} pärast
+    Resize dock: Muuda doki suurust
+    Play now: Esita kohe
+    MusicPlaybackRateOverride: Tuvastati muusikavideo, esituskiirus on 1×
+    Normal: Tavaline
+    Set Default: Määra vaikeväärtuseks
+    Hide Annotations: Peida märkused
+    Show Annotations: Näita märkusi
+    Hide: Peida
+    Show: Näita
+    Scroll Mini Player:
+      Collapse Controls: "Ahenda juhtnupud"
+      Expand Controls: "Laienda juhtnupud"
+      Back to Top: Tagasi üles
+      Return to Video Tab: Naase video vahekaardile
+      Hide: Peida minipleier
+      Play: Esita
+      Pause: Peata
+      Drag Handle: Liiguta minipleierit
+      Rewind 10 seconds: Keri 10 sekundit tagasi
+      Forward 10 seconds: Keri 10 sekundit edasi
+    SponsorBlock:
+      CancelCurrentSegment: Tühista lõigu loomine
+      ClearSegments: Kustuta lõigud
+      ClearSegmentsPrompt: Kas soovid kindlasti kustutada kõik selle video SponsorBlocki lõigumustandid?
+      CompleteSegmentsBeforeSubmitting: Viimistle enne saatmist kõik lõigumustandid.
+      CategoryLabel: Kategooria
+      ActionTypeLabel: Lõigu tüüp
+      DuplicateSegments: Lõikude topeltmustandid pole lubatud.
+      EndAction: (Lõpp)
+      EndActionLabel: Lõpp
+      EndTimeAfterStart: Lõigu lõppaeg peab olema algusajast hilisem.
+      EndTimeBeforeVideoEnd: Lõigu lõppaeg peab jääma video kestuse piiresse.
+      EndTimeLabel: Lõigu lõppaeg
+      DisableAutoSkipTemporarily: Lülita SponsorBlocki automaatne vahelejätmine ajutiselt välja
+      EnableAutoSkipTemporarily: Lülita SponsorBlocki automaatne vahelejätmine uuesti sisse
+      Guidelines: Juhised
+      InspectSegment: Vaata üle
+      InvalidStartTime: Sisesta sobiv lõigu algusaeg.
+      NoSegmentsToSubmit: Loo enne saatmist vähemalt üks lõpetatud lõik.
+      NowAction: (Nüüd)
+      CloseInfoPanel: Sulge SponsorBlocki teave
+      OpenInfoPanel: Ava SponsorBlocki teave
+      OpenSubmissionMenu: Ava saatmismenüü
+      PreviewRequired: Vaata enne saatmist iga lõigu eelvaadet.
+      PreviewSegment: Eelvaade
+      SaveSegment: Salvesta
+      SetSegmentEndNow: Lõpeta lõik praegu
+      StartAction: (Algus)
+      StartSegmentNow: Alusta lõiku praegu
+      SubmissionBadRequest: SponsorBlock lükkas saatmistaotluse tagasi.
+      SubmissionDuplicate: See lõik on juba saadetud.
+      SubmissionFailed: SponsorBlocki lõikude saatmine nurjus.
+      SubmissionForbidden: SponsorBlock lükkas saadetise tagasi.
+      SubmissionRateLimited: SponsorBlock piiras selle saadetise saatmist.
+      SubmissionSuccess: SponsorBlocki lõigud saadeti.
+      SubmitSegment: Saada lõik
+      SubmitSegments: Saada
+      StartTimeLabel: Lõigu algusaeg
+      TimeDivider: kuni
+      SkipPrompt: Kas jätta {segmentCategory} vahele?
+      SkipPromptAction: Jäta vahele
+      SkipToHighlight: Kas liikuda esiletõstetud kohani?
+      SkippedToHighlight: Liiguti esiletõstetud kohani
+      SkipToastUnskip: Võta vahelejätmine tagasi
+      SkipToastReskip: Jäta uuesti vahele
+      MutedSegment: '{segmentCategory} vaigistati'
+      MuteToastUnmute: Taasta heli
+      InfoPanelLoading: Lõike alles laaditakse...
+      InfoPanelHasSegments: Selle video lõigud on andmebaasis olemas!
+      InfoPanelNoSegments: Lõike ei leitud
+      RefreshSegments: Värskenda lõike
+      RefreshInfo: Värskenda SponsorBlocki teavet
+      ContributionStatsTitle: Sinu panus
+      ContributionStatsLoading: Panuse statistika laadimine...
+      ContributionStatsError: Panuse statistika pole saadaval. Proovi värskendada.
+      ContributionStatsNoUserId: Panuse statistika nägemiseks saada lõik või impordi oma SponsorBlocki kasutaja-ID.
+      Submissions: Saadetud lõigud
+      Segments: Lõigud
+      TimeSaved: Säästetud aeg
+      AutoSkipEnabled: Jäta lõigud automaatselt vahele
+      AutoSkipOn: 'Sees'
+      AutoSkipOff: 'Väljas'
+      WhitelistChannel: Lisa kanal lubatud loendisse
+      ChannelWhitelisted: Lubatud loendis
+      RemoveChannelFromWhitelist: Eemalda kanal lubatud loendist
+      MuteSegment: Vaigista lõik
+      SkipSegment: Jäta lõik vahele
+      CloseSegmentActions: Sulge lõigu toimingud
+      FullVideo: Kogu video
+      FullVideoLabel: '{segmentCategory} · Kogu video'
+      MuteActionType: Vaigista
+      MutePrompt: Kas vaigistada {segmentCategory}?
+      SkipActionType: Jäta vahele
+      LockedSegment: Lukustatud lõik
+      UpvoteSegment: Anna poolthääl
+      DownvoteSegment: Anna vastuhääl
+      VoteFailed: SponsorBlocki hääle saatmine nurjus.
+      ChangeCategory: Muuda kategooriat
+      CopyAndDownvote: Kopeeri ja hääleta vastu
+      SubmitCategoryVote: Saada kategooriahääl
+      CategoryVoteSuccess: Kategooriahääl saadetud.
+    Google Cast:
+      Position: "Taasesituse asukoht"
+      Invalid Authentication: "Vastuvõtja saatis vigase autentimisvastuse."
+      Authentication Declined: "Vastuvõtja keeldus autentimisest."
+      Audio Only Receiver: "Vastuvõtja toetab ainult heli edastamist."
+      Disconnected: "Vastuvõtja ühendus katkes."
+      Timeout: "Vastuvõtja ei vastanud."
+      Busy: "Teine aken juba edastab."
+      Not Authorized: "Aktiveeri see aken ja proovi uuesti."
+      Invalid Request: "Vigane edastamistaotlus."
+      IPv4 Required: "Vajalik on IPv4-ühendus."
+      Launch Failed: "Vastuvõtjat ei saanud käivitada."
+      Load Failed: "Vastuvõtja ei saanud videot laadida."
+      Cancelled: "Edastamine tühistati."
+      Private Not Authorized: "Juurdepääsu privaatsele meediale ei kinnitatud."
+      Invalid Subtitles: "Vigased edastamise subtiitrid."
+      Discovery Failed: "Vastuvõtjaid ei saanud otsida."
+      Preparing Video: "Video ettevalmistamine edastamiseks…"
+      Connecting: "Ühendamine seadmega {device}…"
+      Starting Receiver: "Casti vastuvõtja käivitamine…"
+      Loading Video: "Video laadimine vastuvõtjas…"
+      Buffering: "Puhverdamine seadmes {device}…"
+      Allow Private Instance: "Kas lubada sellel edastusel lugeda meediat privaatsest Invidiousi instantsist {instance}?"
+      Cast: "Edasta Google Casti seadmesse"
+      Connected: "Edastamine seadmesse {device}"
+      Rewind: "10 sekundit tagasi"
+      Forward: "10 sekundit edasi"
+      Subtitles Off: "Lülita subtiitrid välja"
+      Return: "Naase kohalikule taasesitusele"
+      No Devices: "Google Casti seadmeid ei leitud"
+      No Source: "Google Casti jaoks pole ühilduvat voogu"
+      Error: "Video edastamine ebaõnnestus"
+      Error With Details: "Video edastamine ebaõnnestus: {error}"
+      Untrusted Receiver: "Vastuvõtja sertifikaati ei usaldata. Kasuta autenditud Google Casti vastuvõtjat."
+    FCast:
+      Cast: "Edasta FCasti vastuvõtjasse"
+      No Devices: "FCasti vastuvõtjaid ei leitud"
+      No Source: "FCasti jaoks pole ühilduvat voogu"
+    Secondary Captions: Teised subtiitrid
+    Subtitle File:
+      Load: "Laadi subtiitrifail…"
+      Subtitle Files: "Subtiitrifailid"
+      Error: "Subtiitrifaili ei õnnestunud laadida. Vali SRT- või WebVTT-fail."
+  External Media:
+    Dislikes: "Ei meeldi | Ei meeldi"
+    Reposts: "Taaspostitus | Taaspostitused"
+    Saves: "Salvestamine | Salvestamised"
+    Series: "Seeria"
+    Season: "Hooaeg"
+    Season Number: "Hooaja number"
+    Episode: "Episood"
+    Episode Number: "Episoodi number"
+    Track: "Muusikapala"
+    Track Number: "Raja number"
+    Artists: "Esitajad"
+    Album: "Album"
+    Genres: "Žanrid"
+    Media Type: "Meedia tüüp"
+    Availability: "Saadavus"
+    Age Limit: "Vanusepiirang"
+    Release Date: "Väljalaskekuupäev"
+    Availability Values:
+      public: "Avalik"
+      private: "Privaatne"
+      premium_only: "Ainult Premium"
+      subscriber_only: "Ainult tellijad"
+      needs_auth: "Vajalik on sisselogimine"
+      unlisted: "Registriväline"
+  Save Queue to Playlist: "Salvesta esitusjärjekord esitusloendisse"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Kui kasutad Yattee serverit, siis reaalajas vestlus hetkel ei ole toetatud. Selleks on vajalik otseliidestus YouTube'iga.
+  External Player:
+    LaunchFailedTemplate: "{externalPlayer} käivitamine nurjus. Kontrolli, et see on paigaldatud, või määra välise mängija seadetes käivitusfaili asukoht."
+    Confirm Arguments Title: "Kas käivitada väline mängija kohandatud argumentidega?"
+    Confirm Arguments Message: "{externalPlayer} käivitub nende kohandatud argumentidega:"
+    Confirm Arguments Warning: "Mõned argumendid võivad käivitada programme või faile üle kirjutada. Jätka ainult siis, kui lisasid need ise."
+    Run: "Käivita"
+    LaunchCanceledTemplate: "{externalPlayer} ei avatud"
+Playlist:
+  Playlist Already Preloaded: "Kõik esitusloendi videod on juba eellaaditud"
+  Playlist Preload Progress: "Videote eellaadimine: {completed}/{requested}"
+  Close Playlist: Sulge esitusloend
+  Preload Playlist: "Eellaadi kõik videod"
+  Preload Playlist Warning Title: "Kas eellaadida kõik videod?"
+  Preload Playlist Warning: "Eellaadimine küsib YouTube'ilt selle esitusloendi iga video. Paljude päringute saatmine lühikese aja jooksul võib põhjustada, et YouTube blokeerib ajutiselt teie IP-aadressi. Kas soovite jätkata?"
+  Preloading Playlist: "Kõigi videote eellaadimine..."
+  Playlist Preload Complete: "Eellaaditud videoid: {count}."
+  Playlist Preload Partial: "Eellaaditi {preloaded}/{requested} videot. {failed} eellaadimine nurjus."
+  Playlist Preload Pagination Failed: "Tervet esitusloendit ei saanud laadida, seega eellaadimine tühistati."
+  Add Playlist to Queue: "Lisa esitusloend esitusjärjekorda"
+  Playlist Added to Queue: "Esitusloend lisati esitusjärjekorda"
+Change Format:
+  yt-dlp Error Template: "yt-dlp ei saanud vooge hankida: {error}"
+  Local Video File: Kohalik videofail
+  Local Audio File: Kohalik helifail
+  Online Video: Veebivideo
+  Stream Source: Voo allikas
+  Stream Extraction Method: Voo eraldamise meetod
+  Playback Engine: Esitusmootor
+  Streaming Protocol: Voogedastusprotokoll
+  Not Available For This Video: Pole selle video jaoks saadaval
+  Protocols:
+    Progressive: Progressiivne
+  Descriptions:
+    Local File: Esitatakse otse sellesse seadmesse allalaaditud failist
+    Online Video: Voogedastusvormingud laaditakse seadistatud veebiallikast
+    Dash: Kohanduv kvaliteet, mitu helirada ja suurimad eraldusvõimed
+    Legacy: Video ja heli on ühes failis, saadaval on ainult väiksemad eraldusvõimed
+    Audio: Ainult heli, sobib andmemahu säästmiseks või taustal kuulamiseks
+  yt-dlp Fallback Template: 'yt-dlp ei saanud vooge hankida, selle asemel kasutatakse sisseehitatud mootorit: {error}'
+  yt-dlp Default Clients Fallback: Eelistatud yt-dlp kliendid ei saanud esitatavaid vooge hankida, proovitakse yt-dlp vaikekliente
+  Built-in Fallback Template: 'Sisseehitatud mootor ei saanud voogu esitada, selle asemel proovitakse yt-dlp-d: {error}'
+Share:
+  Shared YouTube Link: "Jagatud YouTube’i link"
+  Open in Player: "Ava mängijas"
+  No YouTube Link: "Jagatud tekst ei sisalda toetatud YouTube’i linki."
+  Loading Video Information: "Video teabe laadimine…"
+  Video Information Failed: "Video teavet ei saanud laadida. Proovi uuesti või ava link."
+  Share Link: "Jaga linki"
+  Share failed: "Linki ei õnnestunud jagada"
+  Timestamp Link Copied: Ajatempliga link kopeeriti lõikelauale
+Context Menu:
+  Opened in a Background Tab: "Avatud taustal oleval vahelehel"
+  Open in a Background Tab: "Ava taustal uuel vahelehel"
+  Select Tab: Vali vahekaart
+  Close Tabs Before: Sulge eelnevad vahekaardid
+  Close Tabs After: Sulge järgnevad vahekaardid
+  Close Other Tabs: Sulge teised vahekaardid
+  Copy {service} link without playlist: "Kopeeri {service} link ilma esitusloendita"
+  Context Menu: Kontekstimenüü
+  Select All: Vali kõik
+  Save Image As…: Salvesta pilt nimega…
+  Copy Image: Kopeeri pilt
+  Copy Image Address: Kopeeri pildi aadress
+  Cancel Refresh: Tühista värskendamine
+  Reload Videos: Laadi videod uuesti
+  Reload Shorts: Laadi lühivideod uuesti
+  Reload Live: Laadi otseülekanded uuesti
+  Reload Posts: Laadi postitused uuesti
+  Reload All Feeds: Laadi kõik vood uuesti
+  Reload RSS Feeds: Laadi RSS-vood uuesti
+  Close Multiple Tabs: Sulge {count} vahekaarti
+  Duplicate Tab: Klooni vahekaart
+  Duplicate Multiple Tabs: Klooni {count} vahekaarti
+  Move Tab: Teisalda vahekaart
+  Move Tabs: Teisalda vahekaardid
+  Move Tab to Group: Teisalda vahekaart rühma
+  Collapse Group: Ahenda rühm
+  Expand Group: Laienda rühm
+  Move Tabs to Group: Teisalda vahekaardid rühma
+  Manage Tab Groups…: Halda vahekaardirühmi…
+  To Beginning: Algusse
+  To End: Lõppu
+  Close Tabs: Sulge vahekaardid
+  To the Top: Üles
+  To the Left: Vasakule
+  To the Bottom: Alla
+  To the Right: Paremale
+  Other Tabs: Muud vahekaardid
+  Copy YouTube Link: Kopeeri YouTube'i link
+  Copy YouTube Links: Kopeeri YouTube'i lingid
+  Pin Tab: Kinnita vahekaart
+  Pin Tabs: Kinnita vahekaardid
+  Unpin Tab: Eemalda vahekaardi kinnitus
+  Unpin Tabs: Eemalda vahekaartide kinnitus
+  Tab Color: Vahekaardi värv
+  Default: Vaikeväärtus
+  Purple: Lilla
+  Reopen Closed Tab: Ava suletud vahekaart uuesti
+  Reload Tab: Laadi vahekaart uuesti
+  Reload Tabs: Laadi vahekaardid uuesti
+  Load Tab: Laadi vahekaart
+  Load Tabs: Laadi vahekaardid
+  Unload Tab: Laadi vahekaart mälust välja
+  Unload Tabs: Laadi vahekaardid mälust välja
+  Unload Tabs Failed: "Valitud vahekaarte ei õnnestunud mälust eemaldada."
+  Move Tab to Window: Teisalda vahekaart aknasse
+  Move Tabs to Window: Teisalda vahekaardid aknasse
+  Open in a New Tab: Ava uuel vahekaardil
+  Open in a New Window: Ava uues aknas
+  Copy Link: Kopeeri link
+  Copy Invidious Link: Kopeeri Invidiousi link
+  Search Selection in New Tab: Otsi valikut "{selection}" uuel vahekaardil
+  Search Selection in New Window: Otsi valikut "{selection}" uues aknas
+  Search With: Otsi otsingumootoriga {engine}
+  Search With Multiple: Otsi otsingumootoriga...
+  Selection Too Long: Valik on otsimiseks liiga pikk (> {count} märki)
+  Background Tab: Taustal vaheleht
+Tab Organizer:
+  Tab History: "Vahekaardi ajalugu"
+  Current Page: "Praegune leht"
+  Icon Labels:
+    Podcast: 'Taskuhääling'
+    Clock: 'Kell'
+    Puzzle Piece: 'Pusletükk'
+    People: 'Inimesed'
+    Chart: 'Diagramm'
+    Calendar: 'Kalender'
+    Images: 'Pildid'
+    Music: 'Muusika'
+    Folder: Kaust
+    Bookmark: Järjehoidja
+    Favorites: Lemmikud
+    Videos: Videod
+    Gaming: Mängud
+    Research: Uurimistöö
+    Art: Kunst
+    Travel: Reisimine
+  Group Icon: Rühma ikoon
+  Title: Vahekaartide korraldaja
+  Open Tab Count: '{count} avatud vahekaart | {count} avatud vahekaarti'
+  Search Label: Otsi vahekaarte
+  Selected Count: '{count} vahekaart valitud | {count} vahekaarti valitud'
+  Tab Count: '{count} vahekaart | {count} vahekaarti'
+  Select All: Vali kõik
+  Select None: Tühista kõik valikud
+  Move To Group: Teisalda valitud vahekaardid rühma
+  Choose Group: Vali rühm
+  Ungrouped: Rühmitamata
+  Pin: Kinnita
+  Unpin: Eemalda kinnitus
+  Load: Laadi
+  Unload: Laadi mälust välja
+  Unload All: Laadi kõik mälust välja
+  Close All: Sulge kõik
+  Ungroup: Eemalda rühmast
+  Group Name: Rühma nimi
+  Color: Värv
+  No Color: Värv puudub
+  Create Group: Loo rühm
+  Expand Group: Laienda rühm
+  Collapse Group: Ahenda rühm
+  Expand Group Label: Laienda {name}, {count} vahekaart | Laienda {name}, {count} vahekaarti
+  Rename Group: Nimeta {name} ümber
+  Change Group Color: Muuda rühma {name} värvi
+  Move To Window: Teisalda aknasse
+  Choose Window: Vali aken
+  Select Tab: Vali {title}
+  Active: Aktiivne
+  Pinned: Kinnitatud
+  Unloaded: Mälust välja laaditud
+  Playing: Esitamisel
+  Close Tab: Sulge {title}
+  No Open Results: Ükski avatud vahekaart ei vasta otsingule.
+  Recently Closed: Hiljuti suletud
+  Clear: Tühjenda
+  No Closed Results: Ükski hiljuti suletud vaheleht ei vasta sellele otsingule.
+  Drag Tab: Lohista rühma teisaldamiseks
+Chapters:
+  Open Chapters: Ava peatükid
+  Close Chapters: Sulge peatükid
+  Copy Timestamp Link: Kopeeri link ajahetkele {timestamp}
+  Loop Chapter: 'Korda peatükki: {chapter}'
+  Looping Chapter: 'Peatükki korratakse: {chapter}'
+  Chapter Loop Stopped: 'Peatüki kordamine peatatud'
+Comments:
+  Image unavailable: "Pilt pole saadaval"
+  Comment Count: 1 kommentaar | {count} kommentaari
+  Show Comments: Kuva kommentaarid
+  Getting comment replies, please wait: Kommentaari vastuste laadimine, palun oota
+  Reload Comments: Laadi kommentaarid uuesti
+  Reply Count: 1 vastus | {replyCount} vastust
+  Comments are turned off: Kommentaarid on välja lülitatud
+  YouTube did not provide advertised replies: YouTube näitas, et sellel kommentaaril on vastuseid, kuid ei edastanud neid. Need võivad olla kustutatud või peidetud, seega eemaldati vastamisnupp.
+  Pinned by you: Sinu kinnitatud
+  A reply is pinned: Üks vastus on kinnitatud
+  Filter loaded comments: Filtreeri laaditud kommentaare
+  Comment filters: Kommentaarifiltrid
+  From creator: Sisuloojalt
+  Contains timestamps: Sisaldab ajamärke
+  Pin comment by author: Kinnita kasutaja {author} kommentaar
+  Unpin comment by author: Eemalda kasutaja {author} kommentaari kinnitus
+  Edited: (muudetud)
+  Highlighted comment: Esiletõstetud kommentaar
+  Highlighted reply: Esiletõstetud vastus
+  Search loaded comments: Otsi laaditud kommentaaridest
+  Loaded comment search result count: 1 tulemus {total} laaditud kommentaari hulgast | {count} tulemust {total} laaditud kommentaari hulgast
+  No loaded comments match your filters: Ükski laaditud kommentaar ei vasta filtritele
+  YouTube comment link copied to clipboard: YouTube'i kommentaari link kopeeriti lõikelauale
+  Translate to {language}: Tõlgi keelde {language}
+  Show original: Kuva originaal
+  Translating comment, please wait: Kommentaari tõlkimine, palun oota
+  Comment translation failed: Kommentaari tõlge nurjus
+Description:
+  Title: Kirjeldus
+  Copy Description: Kopeeri kirjeldus
+  Description Copied: Kirjeldus kopeeriti lõikelauale
+  Video Category: 'Video kategooria:'
+  Video Tags: Videosildid
+  Games: Mängud
+  Music: Muusika
+Tooltips:
+  General Settings:
+    Limit Titles to Two Lines: "Lühendab loendites ja ruudustikes videote ja esitusloendite pealkirjad kolmikpunktiga kahele reale, et kaardid oleksid ühtlasemad. Täispealkirja nägemiseks hoia kursorit pealkirja kohal."
+    Close Window With Last Tab: 'Kui see on välja lülitatud, avab viimase vahekaardi sulgemine hoopis uue vahekaardi ja aken jääb avatuks, kuni selle sulgete.'
+    Preferred Video Codec: |
+      Automaatrežiim eelistab koodekeid, mida su seade saab riistvaraliselt dekodeerida.
+      AV1: parim kvaliteet väikseima andmemahuga, kuid igal videol seda pole. Ilma riistvaralise dekodeerimiseta võib see akut tühjendada või kaadreid vahele jätta.
+      VP9: tõhususe ja ühilduvuse tasakaal, tavaliselt saadaval kuni kõrgeima eraldusvõimeni.
+      H.264: peaaegu igas seadmes kõige kergemini dekodeeritav, kuid kasutab rohkem andmeid ja piirdub tavaliselt 1080p-ga.
+      Muudatused rakenduvad järgmisele videole. Kui eelistatud koodek pole saadaval, kasutatakse teist.
+    Always Use Backup Media Server: "Voogedastab videoid YouTube'i nimetatud varuserverist määratud serveri asemel, näiteks kui sinu internetiteenuse pakkuja vahemälu on sageli aeglane. Muidu vahetab OpenTubeX serverit ainult siis, kui määratud server ei vasta."
+    Automatically switch stream extraction methods: "Proovi yt-dlp-d, kui sisseehitatud taasesitus ebaõnnestub, või sisseehitatud taasesitust, kui yt-dlp ebaõnnestub."
+    Enable Tabs: "Praegune leht jääb avatuks. Muud kaardid säilitatakse rakenduse taaskäivitamiseni; nende taastamiseks luba kaardid uuesti."
+    Data Saver Thumbnails: "Kasuta väiksema eraldusvõimega pisipilte, et vähendada andmekasutust."
+    Use AI Translation Completions: Täida inimeste tehtud tõlgete lüngad tehisaru loodud tekstiga. Inimeste tehtud tõlkeid eelistatakse alati.
+    Update Relative Timestamps: Uuendab suhtelisi ajamärke kogu rakenduses, kuni leht on avatud. Kui see on välja lülitatud, uuendatakse neid alles pärast lehe uuesti laadimist või sellele naasmist.
+    Stream Extraction Method: |
+      Vali, kuidas OpenTubeX videovooge hangib. Valimise korral peab yt-dlp olema saadaval.
+      yt-dlp kasutamisel võib videote käivitumine kauem aega võtta.
+      Sisseehitatud meetod ei toeta otseülekannetes ega esilinastustes ajas liikumist.
+    Avoid translation: |
+      Keela YouTube'i video pealkirja, kirjelduse ja peatükkide automaattõlge.
+      Liiga palju päringuid, näiteks loendites olevate videote pealkirjade hankimine, võib ajutiselt
+      vähendada rakenduse töökindlust.
+    Show Thumbnail Previews: Kuva videote pisipiltidele kursori viimisel animeeritud eelvaated.
+    Startup Behavior: |
+      Vali, mida OpenTubeX käivitumisel teeb.
+      Kõigi vahelehtede laadimine taastab kohe kõik salvestatud vahelehed, kuid taustal olevatel vahelehtedel ei käivitata videoid automaatselt.
+      Varem laaditud vahelehtede laadimine laadib uuesti vahelehed, mis olid OpenTubeX-i sulgemisel laaditud, ja jätab teised laadimata.
+      Viimati aktiivse vahelehe laadimine taastab eelmise seansi nii, et teised vahelehed on avatud, kuid laadimata; need laaditakse klõpsamisel.
+      Tühja seansiga alustamine jätab salvestatud vahelehed vahele ja avab uue akna.
+    Remember Tab Navigation History: Iga vahelehe edasi- ja tagasiliikumise ajalugu salvestatakse ning taastatakse OpenTubeX-i taaskäivitamisel.
+    Yattee Server: Server, millel töötab yattee-server ja kust OpenTubeX laadib videoid, kanaleid, esitusloendeid ja otsingutulemusi. Kasutajanimi ja salasõna salvestatakse ainult selles seadmes.
+    Proxy Videos Through Yattee Server: Edastab video- ja helivood serveri kaudu. Jäta see sisse lülitatuks, kui server just ei kasuta sinuga sama internetiühendust, sest YouTube edastab vooge ainult aadressile, mis neid küsis. Pisipildid laaditakse alati otse YouTube'ist.
+    Notifications: Vali, kuidas OpenTubeX sind otseülekannetest, uutest üleslaadimistest ja automaatsetest allalaadimistest teavitab. Valikuga Süsteem ja rakenduses ilmuvad teavitused OpenTubeXis selle kasutamise ajal, muidu süsteemiteavitustena, ja kell hoiab neid alles. Väljas peidab ka teavituste valikud.
+  Proxy Settings:
+    IP Block Recovery Script Path: Skriptifaili asukoht, mida kasutatakse IP-blokeeringu tuvastamisel. OpenTubeX ootab skripti lõppemist ja laadib seejärel video uuesti. Kui varumeetod on lubatud, käivitatakse skript ainult siis, kui ka varumeetod nurjub.
+  Player Settings:
+    Rewind on Resume: "Hüppab peatatud video jätkamisel nii mitu sekundit tagasi, et saaksid viimaseid hetki uuesti näha. Väljalülitamiseks määra 0."
+    Minimum Pause Before Rewinding: "Kerib tagasi ainult siis, kui video oli vähemalt nii kaua peatatud. Iga pausi järel tagasikerimiseks määra 0."
+    Mono Audio: 'Esitab vasakut ja paremat helikanalit mõlemas kõrvas. Kasuta seda, kui video heli kostab ainult kõrvaklappide ühest küljest.'
+    Pause on Stream Recovery: "Kui videovoog ebaõnnestub ja mängija laadib selle uuesti või lülitub teisele vormingule või mootorile, peatatakse taasesitus ja viga jääb mängija ülaossa, kuni selle sulged. Kui see on välja lülitatud, jätkub taasesitus ja viga kuvatakse lühidalt teavitusena."
+    Continue Playback When Screen Is Locked: 'Jätab heli taustal mängima ja pakub Androidi meediajuhtelemente. Lülita see välja, et esitus peatataks, kui rakendus pole enam nähtav.'
+    Enable Caption Translations: Kui see on lubatud ja videol pole eelistatud subtiitrikeeles sobivat originaalrada, eelistavad subtiitrinupp ja kiirklahv C automaatselt tõlgitud rada.
+    Use Quick Playback Speed Bar: Kuvab paremal asuvates pleieri juhtelementides esituskiiruse kiirvalikuriba. Kui esituskiiruse kanalipõhine käsitsi salvestamine on lubatud, sisaldab riba ka praeguse kanali kiiruse salvestamise nuppu.
+    Multiply Seek Interval by Playback Rate: Kui see on lubatud, korrutatakse kerimissammud (nooleklahvid ja J/L) praeguse esituskiirusega. Kui see on välja lülitatud, jäävad kerimissammud esituskiirusest olenemata samaks.
+    Show Playback Rate Adjusted Timestamp: Kui see on lubatud ja esituskiirus erineb 1x kiirusest, kuvab pleier tavapärase ajamärgi järel sulgudes esituskiirusele kohandatud ajamärgi.
+    Use YouTube-style Shorts: Kuvab Shortsid tellimuste ja kanalite lehtedel püstpaigutusega ruudustikus ning kasutab YouTube'i laadis Shortsi pleierit.
+    Loop Shorts: Kui see on lubatud, käivituvad Shortsid automaatselt uuesti. Kui see on välja lülitatud, peatuvad Shortsid lõpus ja kuvatakse uuesti esitamise nupp.
+    Show Skip Silence Toggle: Kuvab pleieri seadete menüüs vaikuse vahelejätmise lüliti.
+    Enable Skip Silence by Default: Lubab uutel vahelehtedel vaikuse vahelejätmise. Selle muutmine ühel vahelehel ei mõjuta teisi vahelehti.
+    Enable Video Zoom: Kuvab pleieri seadete menüüs suumi juhtelemendi ning lubab selle kiirklahvid ja panoraamimise juhtelemendid.
+    Enable Seek History: Jätab meelde, kust sa igas videos edasi hüppasid, kuni rakendus suletakse. Näitab kerimisajaloo loendit pleieri seadete menüüs ja lubab selle kiirklahvid.
+    Show Seek Bar Filmstrip: "Kerimisriba nupu lohistamine näitab kaadririba selle koha ümber, kuhu jõuad, ja selle peale üles tõmmates saad täpselt kerida. Kui see on keelatud, näitab lohistamine üht pisipilti nagu kursoriga üle liikudes."
+    Voice-over Translation: Tõlkepäringu tegemisel saadab video ID, kestuse ja valitud keele mitteametlikule Yandexi pealelugemise tõlketeenusele. Vaikimisi välja lülitatud.
+    Hold to Double Playback Speed: Praeguse esituskiiruse ajutiseks kahekordistamiseks hoia pleieri kohal all tühikuklahvi või hiire vasakut nuppu.
+    Ambient Mode: Sulandab video värvid pleieri ümbrusega.
+    Default Volume: Pole kasutatav, kui helitugevuse meeldejätmine on lubatud. Iga video kindla algse helitugevuse määramiseks lülita helitugevuse meeldejätmine välja.
+    Parallel Segment Loading: |
+      Mitu video- ja helisegmenti enne esitamist korraga laadida.
+      Suuremad väärtused võivad aidata aeglase või ebastabiilse ühenduse korral, kuid kasutavad rohkem ribalaiust ja mälu.
+      Samuti võivad need panna automaatvaliku ühenduse kiirust alahindama ja madalamat kvaliteeti valima.
+      Vood, mida saab laadida ainult ühe päringu kaupa, eiravad seda seadet.
+    Preload Upcoming Videos: "Hangib ja salvestab järgmiste videote yt-dlp voogedastusaadressid vahemällu. Järjekord on esitusloenditest ja soovitustest tähtsam."
+    Upcoming Videos to Preload: "Taustal hangitavate yt-dlp aadressidega järgmiste videote suurim arv."
+    Concurrent Preloads: "Suurim arv yt-dlp protsesse, mida kasutatakse videote samaaegseks eellaadimiseks. Suuremad väärtused kasutavad rohkem protsessorit, mälu ja võrgu läbilaskevõimet."
+    Ignore System Rotation Lock for Fullscreen: Pööra seadet füüsiliselt täisekraani avamiseks ja sulgemiseks ka siis, kui Androidi automaatne pööramine on välja lülitatud.
+  Download Settings:
+    Download Folder: Videod salvestatakse sellesse kausta. Süsteemi allalaadimiste kausta kasutamiseks jäta väli tühjaks.
+    Global Additional yt-dlp Arguments: Täiendavad käsureaargumendid, mis edastatakse iga allalaadimise puhul yt-dlp-le, näiteks --cookies-from-browser firefox.
+    Concurrent Downloads: Korraga töötavate yt-dlp tööde suurim arv.
+    Bandwidth Limit: Piirab järjekorra kogu edastuskiirust, jagades selle piirangu samaaegsete tööde vahel. Piirangu eemaldamiseks sisesta 0.
+  External Software Settings:
+    yt-dlp Source: OpenTubeX võib kasutada süsteemi paigaldatud yt-dlp-d või laadida alla ja hallata oma yt-dlp koopiat, mida hoitakse kasutajaandmete kaustas.
+    yt-dlp Channel: Vali, millise yt-dlp väljalaskekanali OpenTubeX alla laadib ja haldab. Enamikule kasutajatele on soovitatav Stable.
+    FFmpeg Source: OpenTubeX võib kasutada süsteemi paigaldatud FFmpegi ja FFprobe'i või laadida alla ning hallata oma staatilisi järke, mida hoitakse kasutajaandmete kaustas.
+    Managed Tool Updates: Vali, kas hallatavaid tööriistu uuendatakse automaatselt, enne uuendamist küsitakse luba või uuendatakse ainult käsitsi uuendamise nuppude kaudu. Puuduvad tööriistad laaditakse vajaduse korral siiski alla.
+    yt-dlp Executable Path: Vaikimisi eeldab OpenTubeX, et yt-dlp leitakse keskkonnamuutuja PATH kaudu. Vajaduse korral saab siin määrata kohandatud asukoha.
+    Cookie Source: Vali, kas yt-dlp loeb autentitud esitamiseks Netscape'i küpsisefaili või paigaldatud brauseri küpsiseid.
+    Cookie File: Vali autentitud esitamiseks Netscape'i vormingus küpsisefail.
+    Browser for Cookies: Brauseritugi tuvastatakse valitud yt-dlp täitmisfailist. Autenditud esituse taotlemisel käsib OpenTubeX yt-dlp-l sellest brauserist küpsiseid lugeda.
+    Browser Profile: Valikuline brauseriprofiili nimi või kaust. Viimati kasutatud profiili valimiseks jäta väli tühjaks.
+    Always Use Cookies: "Kasuta seadistatud küpsiseid allalaadimiste, subtiitrite ja yt-dlp voogude hankimise jaoks. See ei muuda voo eraldamise meetodiks yt-dlp-d. Kui yt-dlp on valitud, võivad saada kättesaadavaks ainult kontoga kasutatavad vormingud, sealhulgas YouTube Premiumi täiustatud bitikiirus, kui kontol on sellele juurdepääs."
+    FFmpeg Executable Path: FFmpeg on vajalik eraldi video- ja helivoogude ühendamiseks ning heli teisendamiseks. Vaikimisi eeldab OpenTubeX, et FFmpeg leitakse keskkonnamuutuja PATH kaudu. Vajaduse korral saab siin määrata kohandatud asukoha.
+    Use cookies for subtitles: "Kasuta seadistatud küpsiseid subtiitrite ja automaattõlgete jaoks. Selle lubab ka „Kasuta alati küpsiseid“."
+  Distraction Free Settings:
+    Hide Playlist Stats: Peidab esitusloendite lehtedel videote arvu, vaatamiste arvu, viimase uuendamise kuupäeva ja kogukestuse.
+    Count Watch Time From: "„Kõik seadmed“ arvestab iga seadet, mis sünkroonib vaatamisstatistikat. „See seade“ arvestab ainult seda, mida sa siin vaatad."
+    When a Limit Is Reached: "„Peata esitus“ võimaldab lisada 15 minutit või jätta limiidi tänaseks tähelepanuta. Seadistuste salasõna korral saad limiiti tõsta ainult seadistustes."
+    Grayscale: "Kuvab rakenduse halltoonides, et see tõmbaks vähem tähelepanu. „Magamaminekuajal“ järgib magamamineku meeldetuletuse ajakava."
+    Apply Grayscale To: "„Videotele ja piltidele“ jätab liidese värviliseks ja muudab halliks sisu, näiteks videod, pisipildid ja avatarid."
+    Daily Watch Time Limit: "Loeb kokku, mida oled täna vaadanud kõigis seadmetes, mis sünkroonivad vaatamisstatistikat, sealhulgas Shorts-videod."
+    Daily Shorts Limit: "Loeb kokku Shorts-videod, mida oled täna selles seadmes vaadanud."
+    Take a Break Reminder: "Peatab video pärast nii pikka vaatamist. Vähemalt 10-minutiline paus alustab loendust uuesti."
+    Bedtime Reminder: "Peatab video ja tuletab sulle algus- ja lõpuaja vahel meelde, et vaatamine lõpetada."
+    Shorten View Counts: Kuvab YouTube'i juba ümardatud vaatamiste arvu, kommentaaride arvu ja kommentaaride meeldimiste arvu lühendatud kujul, näiteks 14 000 asemel 14 tuh. Täpsed arvud kuvatakse alati täielikult.
+  Subscription Settings:
+    Fetch Feed on Startup: Kui see on lubatud, hangib OpenTubeX tellimuste voo automaatselt käivitumisel ja uue akna avamisel.
+    Show New Content Feed: Kuvab vahelehe Uus, mis sisaldab tellimuste voo üksusi, mida eelmise hankimise ajal polnud.
+    Enable RSS Feeds: Kuvab tellimuste lehel RSS-vahekaardi RSS- või Atom-voogude üksustega, et saaksid jälgida teiste platvormide sisuloojaid. Selle üksused avatakse yt-dlp abil.
+    Show New Content Indicators: Kuvab väikese punkti nende tellimuste voo üksuste kõrval, mida eelmise hankimise ajal polnud.
+    Show Scheduled Live Streams / Premieres First: Hoiab eelseisvad otseülekanded ja esilinastused tellimuste voo alguses. Kui see on välja lülitatud, jäävad need ülekande alguseni oma väljakuulutamise kohale. Olemasolevate ajastatud kirjete väljakuulutamise kuupäevade hankimiseks värskenda pärast väljalülitamist üks kord tellimuste voogu.
+    Auto Refresh Interval: "Kui tihti OpenTubeX rakenduse töötamise ajal tellimuste voogu automaatselt värskendab. Androidis värskendab nullist erinev intervall voogu ka siis, kui rakendus on suletud."
+    Refresh Subscriptions While App Is Closed: "Värskendab vooge valitud seadistustega. Arvutis jääb OpenTubeX süsteemisalve kuni väljumiseni. Android määrab taustavärskenduste aja."
+    Notify About New Uploads: Kuvab selles seadmes süsteemiteavitusi kanalite kohta, mille teavitused oled nende tellimuse seadetes sisse lülitanud. OpenTubeX kontrollib uut sisu tellimuste värskendamisel, seega vali automaatse värskendamise intervall. Et saada teavitusi ka siis, kui rakendus on suletud, luba ka värskendamine suletud rakenduse korral.
+    RSS Feeds Auto Refresh Interval: Kui sageli OpenTubeX sinu RSS-voogusid automaatselt värskendab, kui rakendus on avatud.
+  Theme Settings:
+    Only Show Important Notifications: Peidab rakendusesisesed teavitused, mis ainult kinnitavad toimingut või teatavad olekust. Vead, hoiatused, teie seadistatud meeldetuletused ja toimingut pakkuvad teavitused, nagu Võta tagasi, kuvatakse endiselt. Taustatoimingute edenemine, näiteks tellimuste värskendamine, kuvatakse teavituse asemel üldisel edenemisribal. Süsteemiteavitusi see ei mõjuta.
+    Visible Search Suggestions: "Määrab, mitu otsinguajaloo kirjet ja soovitust otsinguriba näitab, enne kui selle loendit tuleb kerida. Loend ei ulatu kunagi akna alumisest servast kaugemale."
+    Thumbnail Size: "Muudab videote pisipiltide suurust ruudustikes ja loendites. Fikseeritud veergude arvuga või täislaiuse vaatega ruudustikud täidavad selle asemel iga rea, seega muudab see seal ainult loendite pisipilte ja Shortse. Telefonisuurustes akendes on ruudustiku pisipildid piiratud 100%-ga."
+    Playlist Thumbnail Size: "Muudab videote pisipiltide suurust esitusloendite lehtedel. Fikseeritud veergude arvuga või täislaiuse vaatega ruudustikud täidavad selle asemel iga rea, seega muudab see seal ainult loendite pisipilte ja Shortse. Telefonisuurustes akendes on ruudustiku pisipildid piiratud 100%-ga."
+    Compact Settings Categories: "Peidab kirjeldused ja vähendab seadete kategooriate kõrgust."
+    Show Progress as Notification: Kuvab üldise edenemisriba asemel taustatoimingute, näiteks tellimuste värskendamise ja hallatavate tööriistade allalaadimise, reaalajas edenemisega püsiva teavituse.
+    Always Show Scrollbars: Hoiab kerimisribad alati nähtaval. Kui see on välja lülitatud, kaovad need veidi pärast hiire liigutamise lõpetamist ja ilmuvad uuesti kohe, kui hiirt taas liigutad.
+    Scroll Speed: Muudab hiireratta ja puuteplaadi kerimisliigutuste vahemaad.
+    Use Fixed Tab Width: Annab horisontaalsel vaheleheribal igale vahelehele pealkirjast sõltumata sama laiuse.
+    Use Custom Title Bar: Asendab süsteemi tiitliriba vahekaardiribaga või ülemise navigeerimisega, kui vahekaardid pole üleval, et säästa vertikaalset ruumi. Akna juhtnupud kuvatakse selle riba nurgas.
+    Use Grid Player Menu: Paigutab videopleieri seadete menüü ridade loendi asemel paanide ruudustikuna.
+The playlist is at the beginning. Enable loop to continue playing: Esitusloend on alguses. Esitamise jätkamiseks luba kordus
+External link opening has been disabled in Settings → Privacy: Väliste linkide avamine on jaotises Seaded → Privaatsus keelatud
+KeyboardShortcutPrompt:
+  Toggle Quick Bookmark: Lisa kiirjärjehoidjate esitusloendisse või eemalda sellest
+  Reopen Closed Window: Ava viimati suletud aken uuesti
+  Edit Hint: Vali kiirklahv ja vajuta seejärel uut klahvikombinatsiooni. Määrangu eemaldamiseks vajuta Backspace või Delete.
+  Change Shortcut: Muuda toimingu {action} kiirklahvi
+  Press Shortcut: Vajuta kiirklahvi…
+  Unassigned: Määramata
+  Reset Shortcut: Lähtesta toimingu {action} kiirklahv
+  Reset to Defaults: Taasta vaikeväärtused
+  Shortcut Already Assigned: Kiirklahv on juba määratud
+  Shortcut Conflict: '{shortcut} on juba määratud järgmistele toimingutele: {actions}. Kas soovid selle ümber määrata?'
+  Reserved Shortcut Conflict: '{shortcut} on reserveeritud järgmistele toimingutele: {actions} ja seda ei saa ümber määrata.'
+  Reassign: Määra ümber
+  Sections:
+    App:
+      Tabs: "Rakendus:\_Vahelehed"
+      Search and Page: "Rakendus:\_Otsing ja leht"
+      Window and View: "Rakendus:\_Aken ja vaade"
+  New Tab: Loo uus vaheleht
+  Close Tab: Sulge aktiivne vaheleht
+  Reload Tab: Laadi aktiivne vaheleht uuesti
+  Reopen Closed Tab: Ava viimati suletud vaheleht uuesti
+  Next Tab: Aktiveeri järgmine vaheleht
+  Previous Tab: Aktiveeri eelmine vaheleht
+  Switch to Tab: Aktiveeri vaheleht 1–9
+  Toggle Tab Orientation: Vaheta vahelehtede paigutust
+  Find in Page: Otsi praeguselt lehelt teksti
+  Find Next Match: Liigu järgmisele vastele
+  Find Previous Match: Liigu eelmisele vastele
+  Toggle Normal Playback Speed: Vaheta 1x kiiruse ja eelmise esituskiiruse vahel
+  Toggle Skip Silence: Lülita vaikuse vahelejätmine sisse või välja
+  Set A-B Repeat Point A: Määra A-B-korduse punkt A
+  Set A-B Repeat Point B: Määra A-B-korduse punkt B
+  Clear A-B Repeat: Tühjenda A-B-kordus
+  Video Zoom In: Suurenda videot
+  Video Zoom Out: Vähenda videot
+  Tab Switcher: Vahelehtede vahetaja
+  Undo Seek: Võta viimane kerimine tagasi
+  Redo Seek: Tee tagasi võetud kerimine uuesti
+CommandPalette:
+  Title: Käsupalett
+  Open: Ava käsupalett
+  Search Label: "Otsi käske, seadeid ja kohalikke videoid"
+  Search Placeholder: Otsi käske, seadeid ja kohalikke videoid…
+  Results: "Tulemused"
+  No Results: "Sobivaid tulemusi ei leitud"
+  Result Count: "Tulemused: {count} | Tulemused: {count}"
+  Move: Liigu
+  Run: Käivita
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'Aktiveeri vaheleht: {title}'
+  Switch Profile: 'Vaheta profiili: {name}'
+  Open Playlist: 'Ava esitusloend: {name}'
+  Cancel Download: 'Tühista allalaadimine: {title}'
+  Groups:
+    App: Rakendus
+    Navigation: Navigeerimine
+    Tabs: Vahelehed
+    Local Videos: Kohalikud videod
+  Unavailable:
+    Current Page: See leht on juba avatud
+    No History: Selles suunas pole ühtegi lehte
+    Desktop: Saadaval ainult töölauarakenduses
+    Build: Pole selles järgus saadaval
+    One Tab: Ava esmalt veel üks vaheleht
+    Active Tab: See on aktiivne vaheleht
+    Active Profile: See on aktiivne profiil
+    Download Finished: See allalaadimine ei ole enam pooleli
+    Video: Ava esmalt video
+Downloads:
+  File Name Template Invalid: 'Kasuta allalaadimiskaustas suhtelist teed ilma "..", "~", "$", "%" või eesliiteta nagu "thumbnail:".'
+  Search Completed: "Otsi lõpetatud allalaadimisi pealkirja või kanali järgi"
+  Format: "Vorming"
+  All Formats: "Kõik vormingud"
+  Largest First: "Suurimad enne"
+  Smallest First: "Väikseimad enne"
+  No Matching Downloads: "Sobivaid lõpetatud allalaadimisi pole. Proovi muud otsingut või filtrit."
+  Add Download: Lisa allalaadimine
+  Preparing: Ettevalmistamine…
+  Export Failed: "Allalaaditud faili ei saanud salvestada. Vali allalaadimiskaust, kuhu saab kirjutada, ja proovi uuesti."
+  Remove File Permanently Warning: "See kustutab faili „{title}“ jäädavalt."
+  Download: Laadi alla
+  Download Video: Laadi video alla
+  Download Playlist: Laadi esitusloend alla
+  Downloading: Allalaadimine
+  Queue: Järjekord
+  Downloaded: Alla laaditud
+  Canceled: Tühistatud
+  Open Downloads: Ava allalaadimised
+  No Downloads: Allalaadimisi veel pole
+  No Downloads Description: Alustatud allalaadimised kuvatakse siin.
+  Clear Failed Canceled Skipped And Missing: Eemalda nurjunud, tühistatud, vahele jäetud ja puuduvad allalaadimised
+  Clear From List: Eemalda loendist
+  Show in Folder: Kuva kaustas
+  Play Download: Esita allalaaditud fail
+  Retry Download: Proovi allalaadimist uuesti
+  Pause Download: Peata allalaadimine
+  Resume Download: Jätka allalaadimist
+  Move Earlier: Liiguta ettepoole
+  Move Later: Liiguta tahapoole
+  Pause All: Peata kõik
+  Resume All: Jätka kõiki
+  Retry All: Proovi kõiki nurjunud allalaadimisi uuesti
+  Total Size: 'Kogumaht: {size}'
+  Local File: Kohalik fail
+  Available Offline: Võrguühenduseta saadaval
+  Remove File: Eemalda fail
+  Remove File Confirmation: Kas eemaldada allalaaditud fail?
+  Remove File Warning: See teisaldab faili "{title}" sinu seadme prügikasti.
+  File Not Found: Allalaaditud faili ei leitud.
+  Download Missing: Allalaadimine pole saadaval
+  Files Missing: Allalaaditud fail pole enam failisüsteemis saadaval. | Allalaaditud failid pole enam failisüsteemis saadaval.
+  Files Available: '{total} allalaaditud failist on saadaval {available}.'
+  More Files: Veel 1 fail | Veel {count} faili
+  Template Used: 'Mall: {name}'
+  Download Type: Allalaadimise tüüp
+  Template: Mall
+  Unsaved: Salvestamata
+  Media Type: Meediumi tüüp
+  Video: Video
+  Audio: Heli
+  Maximum Resolution: Suurim eraldusvõime
+  Best Available: Parim saadaolev
+  Automatic: Automaatne
+  Container: Konteiner
+  Video Codec: Videokoodek
+  Audio Codec: Helikoodek
+  File Name Template: Failinime mall
+  File Name Template Help: 'Saadaolevad väljad: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: Ajavahemik ja peatükid
+  Start Time: Algusaeg
+  End Time: Lõpuaeg
+  Split by Chapters: Jaga peatükkide kaupa eraldi failideks
+  Remove Segments: Eemalda segmendid
+  Subtitles and Metadata: Subtiitrid ja metaandmed
+  Include Subtitles: Kaasa subtiitrid
+  Embed Subtitles: Manusta subtiitrid meediumifaili
+  Subtitle Format: Subtiitrite vorming
+  Subtitle Languages: Subtiitrite keeled
+  Subtitle Languages Help: 'Komadega eraldatud yt-dlp keelevalijad, näiteks: en.*,de.*'
+  Embed Cover Art: Manusta pisipilt kaanepildina
+  Embed Metadata: Manusta pealkiri, autor, kirjeldus ja peatükid
+  Additional yt-dlp Arguments: Täiendavad yt-dlp argumendid
+  Custom yt-dlp Arguments: Kohandatud yt-dlp argumendid
+  Template Name: Malli nimi
+  Save Template: Salvesta mall
+  Delete Template: Kustuta mall
+  Template Saved: Allalaadimismall "{name}" salvestati
+  Template Name Exists: Allalaadimismall nimega "{name}" on juba olemas.
+  Choose Folder: Muuda
+  Select Folder: Vali kaust
+  Folder Required: Allalaadimiste lubamiseks vali allalaadimiskaust.
+  System Downloads Folder: Süsteemi allalaadimiste kaust
+  Processing: Töötlemine…
+  Queued: Järjekorras
+  Queued Position: Järjekorras, koht {position}
+  Paused: Peatatud
+  Pausing: Praegune töö viiakse lõpule ja seejärel järjekord peatatakse
+  Download Complete: Allalaadimine on lõpetatud
+  Download Cancelled: Allalaadimine tühistati
+  Download Failed: Allalaadimine nurjus
+  File Name Shortened: Failinime lühendati, sest video pealkiri oli liiga pikk.
+  Some Videos Not Downloaded: Mõnda selle esitusloendi videot ei õnnestunud alla laadida.
+  Insufficient Disk Space: Kettaruumi pole piisavalt. Vaja on umbes {required}, saadaval on {available}.
+  Unknown Download Size: Allalaadimise maht pole teada. Sihtfailisüsteemis on saadaval {available}.
+  Disk Space Check Unavailable: Enne selle allalaadimise alustamist ei saanud saadaolevat kettaruumi kontrollida.
+  Download Failure Hint: Vaata {issuesLink}, seejärel proovi jaotises Seaded → Täpsemad seaded → Väline tarkvara vahetada yt-dlp kanaliks Nightly või Master.
+  yt-dlp YouTube Issues: yt-dlp hiljutised probleemid YouTube'iga
+  Automatic Download Started: Automaatne allalaadimine algas
+  Automatic Download Started Body: Sisu "{title}" laaditakse kanalilt {channel} taustal alla.
+  Automatic Download Complete: Automaatne allalaadimine on lõpetatud
+  Automatic Download Failed: Automaatne allalaadimine nurjus
+  Automatic Download Could Not Start: Video "{title}" automaatset allalaadimist ei saanud alustada.
+  Automatic Download Skipped: Automaatse allalaadimise filtrid jätsid selle vahele
+  Cancel Download: Tühista allalaadimine
+  yt-dlp Not Found: yt-dlp-d ei leitud. Paigalda see või määra selle asukoht jaotises Seaded → Täpsemad seaded → Väline tarkvara.
+  Download Complete Template: Sisu "{title}" allalaadimine on lõppenud
+  Download Failed Template: Sisu "{title}" allalaadimine nurjus
+  Templates:
+    Video Best: Video - parim kvaliteet
+    Video Resolution: Video - {resolution}
+    Audio Best: Heli - parim kvaliteet
+    Audio Format: Heli - {format}
+    Subtitles Format: Subtiitrid - {format}
+  Waiting for Unmetered Network: "Ootab mahupiiranguta võrku"
+  Waiting for Charging: "Ootab laadijat"
+  Remove File Failed: Allalaaditud faili eemaldamine nurjus.
+Channels:
+  Load More Channels: "Laadi rohkem kanaleid"
+Theme Discovery:
+  Discover Themes: "Avasta teemasid"
+  Refresh: "Värskenda"
+  View on GitHub: "Vaata GitHubis"
+  Load Error: "Teemade laadimine ebaõnnestus. Proovi värskendada."
+  Loading: "Laadimine…"
+  No Themes: "Paigaldatavaid teemasid ei leitud."
+  No Preview: "Kuvatõmmis pole saadaval"
+  Load More: "Laadi rohkem"
+  Applied: "Rakendatud"
+  Apply Theme: "Rakenda teema"
+  Install and Apply: "Paigalda ja rakenda"
+  Update and Apply: "Uuenda ja rakenda"
+
+Connection:
+  Offline: Võrguühenduseta
+  Reconnecting: "Ühendus katkes. Proovin uuesti ühendada…"
+  Back Online: "Taas võrgus"
+
+App Icon:
+  Restart: "Taaskäivita rakendus"
+  Saved Message: "Ikoon on salvestatud. Käivitaja värskendamine võib võtta hetke."
+  Title: "Rakenduse ikoon"
+  Error: "Rakenduse ikooni ei saanud laadida ega muuta"
+
+Tray:
+  Hide All Windows: "Peida kõik aknad"
+  Show All Windows: "Näita kõiki aknaid"
+
+Tray Icon:
+  Title: "Süsteemisalve ikoon"
+  Follow App Theme: "Järgi rakenduse teemat"
+  Monochrome: "Ühevärviline"
+
+Form Inputs:
+  Browse: "Sirvi"
+  Use Default Path: "Kasuta vaikimisi"
+  Enter Password Hint: "Sisesta oma parool"
+  Choose Password Hint: "Vali parool"
+  Confirm Password Hint: "Korda oma uut parooli"
+  Encryption Passphrase Hint: "Sisesta oma krüptimise paroolifraas"
+  Show Password: "Näita parooli"
+  Hide Password: "Peida parool"
+  Search Text Hint: "Sisesta otsingusõnad"
+  Playlist Description Hint: "Kirjelda seda esitusloendit"
+  Filename Preview: "Failinime eelvaade"
+  Enter Channels: "Sisesta kanalid"
+  Enter Text: "Sisesta tekst"
+  Video URL: Video või esitusloendi URL
+  Paste Link: Kleebi video või esitusloendi link
+  Example: nt {example}
+  No Minimum: Miinimum puudub
+  No Maximum: Maksimum puudub
+  Any Age: Mis tahes vanus
+  Included Terms Example: nt õpetus, arvustus
+  Excluded Terms Example: nt treiler, eelvaade
+  Global Arguments Hint: Valikulised argumendid igale allalaadimisele
+  Unlimited Hint: 0 tähendab piiramatut
+  Add Argument: Lisa argument
+  Template Name Example: nt Ainult heli
+  Download Arguments Hint: Valikulised argumendid sellele allalaadimisele
+  Generated ID Hint: Jäta tühjaks, et luua ID
+  Default Value: "Vaikimisi: {value}"
+
+Search Filters:
+  Possible Age Restriction Hint: "YouTube võib olla sellele otsingupäringule vanusepiirangu kehtestanud."
+  Cookie Search Failed: "Otsing seadistatud küpsistega ebaõnnestus."
+  Showing results for: "Kuvatakse tulemused päringule {query}"
+  Search instead for: "Otsi hoopis {query}"
+  Including results for: "Sisaldab tulemusi päringule {query}"
+  Search only for: "Otsi ainult {query}"
+  Did you mean: "Kas mõtlesite {query}?"
+
+Storage Startup Error:
+  Title: "Rakenduse andmeid ei saanud laadida"
+  Message: "Vabasta seadmes salvestusruumi ja proovi uuesti. Sünkroonimine on peatatud, kuni andmed on laaditud."
+  Retry: "Proovi uuesti"
+Search Bar:
+  Use Suggestion: Kasuta soovitust
+
+Native Permissions:
+  Local Network Denied: "Läheduses olevate seadmete luba keelati."
+  Local Network: "Leia seadmeid kohalikust võrgust ja edasta neisse videoid ning sünkrooni seadeid ja andmeid seadmete vahel."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Avaleht"
+  subscriptions: "Tellimused"
+  userplaylists: "Loendid"
+  history: "Ajalugu"
+  subscribedchannels: "Kanalid"
+  trending: "Trendid"
+  popular: "Populaarne"
+  stats: "Statistika"
+  more: "Veel"
+
+Installer:
+  Create Desktop Shortcut: Loo töölauale otsetee
+Older Version Changes:
+  Title: "Muudatused vanemast versioonist"
+  Message: "OpenTubeXi vanemas versioonis tehtud muudatused rakendati sinu kogule."
+  Detail: "Kui üksust muudeti mõlemas versioonis, säilitati vanema versiooni muudatus. Sinu varasema kogu varukoopia on sinu profiilikaustas."
+Library Format Changed:
+  Title: "Kogu viidi uude vormingusse"
+  Message: "Sinu kogu kasutab nüüd uut salvestusvormingut."
+  Detail: "OpenTubeXi vanemad versioonid saavad sinu kogu endiselt avada, kuid näitavad seda sellisena, nagu see oli enne seda uuendust. Vanemas versioonis tehtud muudatused lisatakse, kui naased selle versiooni juurde."
+Invidious Fallback Warning: "See päring läheb sinu seadistatud Invidiousi serverist mööda ja ühendub otse YouTube’iga, avaldades sinu IP-aadressi."
+Automatically unloaded to free memory: "Mälu vabastamiseks automaatselt maha laaditud"
+Home Widgets:
+  Continue Watching: "Jätka vaatamist"
+  Continue Watching Description: "Jätka videoid, mida hakkasid vaatama"
+  Continue Watching Empty: "Siin kuvatakse videod, mida hakkad vaatama"
+  Quick Access: "Kiirjuurdepääs"
+  Quick Access Description: "Ava Otsing, Tellimused või Vaata hiljem"
+  Search: "Otsi"
+  Subscriptions: "Tellimused"
+  Watch Later: "Vaata hiljem"
+Subscription Groups:
+  Groups: Rühmad
+  All: Kõik
+  New Group: Uus rühm
+  Edit Group: Muuda rühma
+  Group Name: Rühma nimi
+  Create: Loo
+  Save: Salvesta
+  Delete Group: Kustuta rühm
+  Delete Prompt: Kas kustutada rühm „{groupName}“? Selle kanalite tellimused jäävad alles.
+  Empty Group: Selles rühmas pole praeguse profiili kanaleid.
+  Save Failed: Rühma ei õnnestunud salvestada.
+  Delete Failed: Rühma ei õnnestunud kustutada.
+  Group Icon: Rühma ikoon
+  No Icon: Ikoonita
+Yattee Server:
+  API Error (Click to copy): Yattee serveri viga (kopeerimiseks klõpsi)
+  Unsupported page: See leht pole Yattee serveriga saadaval. Lülita sisse „{fallbackSetting}“, et laadida see kohaliku API kaudu.
+  Posts unavailable: Yattee serverid ei paku postitusi. Lülita sisse „{fallbackSetting}“, et laadida need kohaliku API kaudu.
+  Errors:
+    Invalid credentials: Yattee server lükkas kasutajanime või salasõna tagasi. Kontrolli neid jaotises Seadistused → Täpsemad seaded.
+    Rate limited: Liiga paljude ebaõnnestunud katsete tõttu blokeerib Yattee server sisselogimised. Proovi hiljem uuesti.
+    Streams not relayed: Yattee server ei edastanud selle video vooge. Kuni videod puhverdatakse serveri kaudu, ei loo OpenTubeX otseühendust YouTube'iga.
+    Not configured: Sisesta oma Yattee serveri URL jaotises Seadistused → Täpsemad seaded.
+    HTTPS required: Android saab esitada videoid ainult Yattee serveritest, mis kasutavad HTTPS-i.
+    Streams unavailable: Selle video vooge ei õnnestunud Yattee serverist laadida. Kontrolli serverit nupuga „Testi ühendust“ jaotises Seadistused → Täpsemad seaded.
+Yattee Fallback Warning: See päring läheb sinu seadistatud Yattee serverist mööda ja ühendub otse YouTube'iga, avaldades sinu IP-aadressi.
+Update With Package Manager: 'Uuenda {packageManager} abil:'
+Update Command Copied: 'Uuenduskäsk kopeeriti'
+Digital Wellbeing:
+  Watch time limit almost reached: "Sinu päevase vaatamisaja limiidini on jäänud {duration}"
+  Shorts limit almost reached: "Sinu päevase Shorts-videote limiidini on jäänud {duration}"
+  Daily watch time limit reached: "Päevane vaatamisaja limiit on täis"
+  Daily Shorts limit reached: "Päevane Shorts-videote limiit on täis"
+  Watched today: "Oled täna vaadanud {duration}."
+  Shorts watched today: "Oled täna vaadanud Shorts-videoid {duration}."
+  15 More Minutes: "Veel 15 minutit"
+  Ignore for Today: "Ignoreeri tänaseks"
+  Time to take a break: "Aeg teha paus"
+  Watching for: "Oled vaadanud juba {duration}."
+  Time for bed: "On aeg magama minna"
+  Bedtime started at: "Sinu magamaminekuaeg algas kell {time}."
+  Remind Me in 10 Minutes: "Tuleta meelde 10 minuti pärast"
+Notification Center:
+  Notifications: "Teavitused"
+  Notifications With Unread: "Teavitused ({count} lugemata)"
+  Mark as Read: "Märgi loetuks"
+  Mark All as Read: "Märgi kõik loetuks"
+  Clear All: "Tühjenda kõik"
+  Clear: "Tühjenda"
+  Empty: "Teavitusi veel pole"
+  Empty Hint: "Siia ilmuvad otseülekannete meeldetuletused ja uued üleslaadimised kanalitelt, mille teavitused on sisse lülitatud."

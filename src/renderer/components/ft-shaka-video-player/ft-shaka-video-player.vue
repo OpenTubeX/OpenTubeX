@@ -1,128 +1,1919 @@
 <template>
   <div
-    ref="container"
-    class="ftVideoPlayer shaka-video-container"
+    class="ftVideoPlayerHost"
     :class="{
-      fullWindow: fullWindowEnabled,
-      sixteenByNine: forceAspectRatio && !fullWindowEnabled
+      ambientWideLayout: theatrePossible && !useTheatreMode,
+      theatreUnavailable: !theatrePossible,
+      shortsPlayer,
+      scrollPinnedPlayer
     }"
   >
-    <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
-    <video
-      ref="video"
-      class="player"
-      preload="auto"
-      crossorigin="anonymous"
-      playsinline
-      :autoplay="autoplayVideos ? true : null"
-      :poster="thumbnail"
-      @play="handlePlay"
-      @pause="handlePause"
-      @ended="handleEnded"
-      @canplay="handleCanPlay"
-      @volumechange="updateVolume"
-      @timeupdate="handleTimeupdate"
-      @enterpictureinpicture="handleEnterPictureInPicture"
-      @leavepictureinpicture="handleLeavePictureInPicture"
+    <Teleport to="body">
+      <Transition
+        name="lights-off"
+        appear
+      >
+        <LightsOffOverlay
+          v-if="lightsOffVisible"
+          :player="container"
+        />
+      </Transition>
+    </Teleport>
+    <canvas
+      v-show="ambientModeVisible"
+      ref="ambientLayoutCanvas"
+      class="ambientLayoutCanvas"
+      aria-hidden="true"
     />
-    <!--
+    <canvas
+      v-show="ambientModeVisible"
+      ref="ambientCanvas"
+      class="ambientCanvas"
+      aria-hidden="true"
+    />
+    <!-- Keep the ambient surface outside the element measured by the scroll mini player. -->
+    <div
+      ref="scrollMiniAnchor"
+      class="scrollMiniAnchor"
+      aria-hidden="true"
+    />
+    <div
+      v-if="fullWindowEnabled"
+      class="fullWindowPlaceholder"
+      :style="{ height: `${fullWindowPlaceholderHeight}px` }"
+      aria-hidden="true"
+    />
+    <div
+      v-if="scrollMiniPlayerActive || scrollMiniPlayerDragStyle || (mobileMiniBar && scrollMiniPlayerAnimating)"
+      ref="scrollMiniPlaceholder"
+      class="scrollMiniPlaceholder"
+      :style="{ height: `${scrollMiniPlaceholderHeight}px` }"
+      aria-hidden="true"
+    />
+    <!-- eslint-disable vue/html-indent -->
+    <Teleport
+      to="#cross-tab-mini-player-layer"
+      :disabled="!scrollMiniPlayerDragStyle && !scrollMiniPlayerDetached && !(mobileMiniBar && (scrollMiniPlayerActive || scrollMiniPlayerAnimating))"
+    >
+    <!-- Keep controls visibility out of :class: Vue would erase Shaka's
+         no-cursor class when the controls time out.
+         Keep the inactivity delay available while paused: pointer activity can
+         schedule the timer before a click resumes playback. Paused interface
+         visibility uses its own reveal timer. -->
+    <div
+      ref="container"
+      :data-playing-interface-hide-delay="playingInterfaceHideDelay"
+      class="ftVideoPlayer shaka-video-container"
+      data-title-tooltips-above
+      :data-tab-id="tabId"
+      :data-action-dock-visible="actionDockVisible"
+      :data-player-controls-shown="playerControlsShown"
+      :data-submenu-opened="isSubMenuOpened"
+      :inert="scrollMiniPlayerDismissed"
+      :aria-hidden="scrollMiniPlayerDismissed ? 'true' : undefined"
+      :class="{
+        autoQualityUnavailable: !autoQualitySupported,
+        classicPlayerControls: !useFrostedGlassPlayerUi,
+        fullWindow: fullWindowEnabled || androidFullscreenHostActive,
+        shortsPlayer,
+        shortsPaused: shortsPaused && hasLoaded,
+        sixteenByNine: (audioPlayerMode || forceAspectRatio || (!shortsPlayer && !videoLayoutReady)) &&
+          !fullWindowEnabled && !scrollMiniPlayerActive,
+        musicAudioPlayer: audioPlayerMode,
+        scrollMiniPlayer: scrollMiniPlayerActive,
+        mobileMiniBar: mobileMiniBar && (scrollMiniPlayerActive || scrollMiniPlayerAnimating),
+        mobileMiniBarCollapsed,
+        mobileMiniBarCompact: compactMobileMiniPlayer,
+        scrollMiniPlayerStashed,
+        scrollMiniPlayerStashedRight: scrollMiniPlayerStashedSide === 'right',
+        scrollMiniPlayerAnimating,
+        scrollMiniPlayerDismissed,
+        fullscreenMetadataOpen: showFullscreenMetadata,
+        fullscreenTranscriptOpen: showFullscreenTranscript,
+        fullscreenSponsorBlockOpen: showFullscreenSponsorBlock,
+        fullscreenCommentsOpen: showFullscreenComments,
+        fullscreenLiveChatOpen: showFullscreenLiveChat,
+        fullscreenPlaylistOpen: showFullscreenPlaylist,
+        fullscreenQueueOpen: showFullscreenQueue,
+        fullscreenRecommendationsOpen: showFullscreenRecommendations,
+        chaptersOverlayOpen: showChaptersOverlay && chapters.length > 0,
+        fullscreenDockLayoutOpen,
+        portraitFullscreenDocks,
+        fullscreenAmbientBarsVisible,
+        fullscreenDockResizing,
+        fullscreenDockReordering,
+        mobileFullscreenSwipeEnabled: enableMobileFullscreenSwipe,
+        mobileFullscreenSwiping,
+        mobileFullscreenSwipeSettling,
+        presentationModeChanging,
+        videoZoomPannable: videoZoomPanReady,
+        videoZoomPanning,
+        videoZoomPinching,
+        videoZoomTouchEnabled: videoZoomPossible,
+        vrMode: useVrMode,
+        playerPaused: playerPaused && hasLoaded,
+        pausedInterfaceRevealed,
+        hidePlayerControlsWhenPaused: !showPlayerControlsWhenPaused,
+        hideVideoTitleWhenPaused: !showVideoTitleWhenPaused,
+        hideFullscreenActionsWhenPaused: !showFullscreenActionsWhenPaused,
+        captionsUseAppFont
+      }"
+      :style="[
+        captionPlayerVariables,
+        { '--inline-player-aspect-ratio': audioPlayerMode || forceAspectRatio ? 16 / 9 : (annotationVideoAspectRatio ?? 16 / 9) },
+        scrollMiniPlayerActive ? scrollMiniPlayerStyle : undefined,
+        scrollMiniPlayerDragStyle,
+        mobileFullscreenSwipeStyle,
+        { '--mobile-fullscreen-actions-block-size': `${fullscreenActionsBlockSize}px` },
+        {
+          '--sponsorblock-notice-inline-size': `${sponsorBlockNoticeSize.inline}px`,
+          '--sponsorblock-notice-block-size': `${sponsorBlockNoticeSize.block}px`
+        },
+        shortsPlayer ? { '--shorts-aspect-ratio': shortsAspectRatio } : undefined
+      ]"
+      @mouseenter="handleScrollMiniPlayerEnter"
+      @mousemove.capture="handlePlayerMouseMove"
+      @mouseleave="handlePlayerMouseLeave"
+      @pointerenter="handleVideoZoomPointerEnter"
+      @pointerleave="handleVideoZoomPointerLeave"
+      @pointerdown.capture="handleVideoZoomPointerDown"
+      @touchmove.capture="handleMobilePlayerTouchMove"
+      @touchend.capture="handlePlayerTouchEnd"
+      @focusin="handlePlayerFocusIn"
+      @focusout="handleScrollMiniPlayerLeave"
+      @contextmenu="positionShortsContextMenu"
+      @contextmenu.capture="handlePlayerContextMenu"
+      @dblclick.capture="handlePlayerControlDoubleClick"
+    >
+      <!-- Ambient glow surface for fullscreen, where the host-level canvases are not rendered. -->
+      <canvas
+        v-show="ambientModeVisible"
+        ref="ambientFullscreenCanvas"
+        class="ambientFullscreenCanvas"
+        aria-hidden="true"
+      />
+      <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
+      <video
+        ref="video"
+        class="player"
+        :class="{ audioOnly: format === 'audio', musicAudioTrack }"
+        :style="videoZoomStyle"
+        preload="auto"
+        crossorigin="anonymous"
+        playsinline
+        :autoplay="autoplayVideos || (!suppressInitialAutoplay && shortsPlayer && isActiveTab) ? true : null"
+        :loop="shortsPlayer && loopShorts && !autoplayEnabled"
+        @play="handlePlay"
+        @playing="handlePlaying"
+        @waiting="handleWaiting"
+        @pause="handlePause"
+        @ended="handleEnded"
+        @seeking="handleSeeking"
+        @seeked="handleSeeked"
+        @loadeddata="handleMediaFrameLoaded(true)"
+        @emptied="handleMediaFrameLoaded(false)"
+        @canplay="handleCanPlay"
+        @resize="handleVideoResize"
+        @volumechange="updateVolume"
+        @timeupdate="handleTimeupdate"
+        @ratechange="handleRateChange"
+        @loadedmetadata="handleAbRepeatDurationChange(); updateMobileMiniBarProgress()"
+        @durationchange="handleAbRepeatDurationChange(); updateMobileMiniBarProgress()"
+        @enterpictureinpicture="handleEnterPictureInPicture"
+        @leavepictureinpicture="handleLeavePictureInPicture"
+      />
+      <!--
+        Keep the decoded poster and its resolution fallback through playback.
+        It also fills the inline player during PiP; the native poster attribute
+        can't, as Chromium may stretch it across the PiP surface (#362). The
+        poster covers Chromium's PiP message, so show our own instead. The
+        image is decorative, so only that message reaches assistive technology.
+      -->
+      <div
+        v-if="thumbnail"
+        v-show="audioPlayerMode
+          ? mobileMiniBar && (scrollMiniPlayerActive || scrollMiniPlayerDragStyle || scrollMiniPlayerAnimating)
+          : showPoster || pictureInPictureActive || showCountdownOverlay || showEndedScreen"
+        class="countdownPoster"
+        :class="{ endedPoster: !audioPlayerMode && showEndedScreen }"
+      >
+        <FtRetryImage
+          :src="thumbnail"
+          alt=""
+        />
+        <div
+          v-if="pictureInPictureActive && !audioPlayerMode"
+          class="pictureInPictureMessage"
+        >
+          <FtIcon
+            :icon="['fas', 'picture-in-picture']"
+            class="pictureInPictureIcon"
+            aria-hidden="true"
+          />
+          <span class="pictureInPictureText">
+            {{ $t('Video.Player.Playing in Picture-in-Picture') }}
+          </span>
+        </div>
+      </div>
+      <template v-if="showEndedScreen">
+        <div
+          v-if="endedRecommendations.length > 0"
+          class="endedScreen"
+        >
+          <nav
+            class="endedRecommendations shaka-no-propagation"
+            :aria-label="$t('Up Next')"
+            @click.stop
+            @dblclick.stop
+            @pointerdown.stop
+          >
+            <router-link
+              v-for="recommendation in endedRecommendations"
+              :key="recommendation.videoId"
+              class="endedRecommendation"
+              :to="{ path: `/watch/${recommendation.videoId}`, query: recommendation.isMusic === true ? { musicVideo: 'true' } : undefined }"
+              :title="recommendation.title"
+              :aria-label="recommendation.title"
+            >
+              <FtRetryImage
+                :class="{ blur: blurThumbnails }"
+                :src="recommendation.thumbnail"
+                alt=""
+              />
+              <span
+                class="endedRecommendationTitle"
+                dir="auto"
+              >
+                <span class="endedRecommendationTitleText">{{ recommendation.title }}</span>
+              </span>
+            </router-link>
+          </nav>
+        </div>
+      </template>
+      <div
+        v-if="audioPlayerMode"
+        class="musicAudioSurface"
+        aria-hidden="true"
+      >
+        <FtRetryImage
+          v-if="thumbnail"
+          class="musicAudioBackdrop"
+          :src="thumbnail"
+          alt=""
+          @load="showMusicImage"
+          @error="hideBrokenMusicImage"
+        />
+        <div class="musicAudioShade" />
+        <canvas
+          v-show="musicVisualizerEnabled && !scrollMiniPlayerActive"
+          ref="musicVisualizerCanvas"
+          class="musicVisualizerCanvas"
+        />
+        <div class="musicAudioContent">
+          <FtRetryImage
+            v-if="thumbnail"
+            class="musicAudioArtwork"
+            :src="thumbnail"
+            alt=""
+            @load="showMusicImage"
+            @error="hideBrokenMusicImage"
+          />
+          <div
+            v-if="title || artist || channelThumbnail"
+            class="musicAudioMetadata"
+          >
+            <div
+              v-if="title"
+              class="musicAudioTitle"
+            >
+              {{ title }}
+            </div>
+            <div
+              v-if="artist || channelThumbnail"
+              class="musicAudioCreator"
+            >
+              <FtRetryImage
+                v-if="channelThumbnail"
+                :fallback-icon="['fas', 'circle-user']"
+                class="musicAudioAvatar"
+                :src="channelThumbnail"
+                alt=""
+                @load="showMusicImage"
+                @error="hideBrokenMusicImage"
+              />
+              <span
+                v-if="artist"
+                class="musicAudioArtist"
+                dir="auto"
+              >{{ artist }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        v-if="voiceOverTranslationState === 'loading'"
+        class="voiceOverTranslationProgress shaka-no-propagation"
+        role="status"
+        aria-live="polite"
+      >
+        <FtLoader
+          class="voiceOverTranslationProgressSpinner"
+          inline
+          size="16px"
+          :tab-loading-indicator="false"
+        />
+        {{ $t('Video.Player.Voice-over Translation.Progress') }}
+      </div>
+      <div
+        v-if="streamRecoveryNotice !== null"
+        class="streamRecoveryNotice shaka-no-propagation"
+        role="alert"
+        @click.stop
+        @dblclick.stop
+      >
+        <ft-icon
+          class="streamRecoveryNoticeIcon"
+          :icon="['fas', 'circle-exclamation']"
+        />
+        <span
+          class="streamRecoveryNoticeMessage"
+          :title="streamRecoveryNotice"
+        >{{ streamRecoveryNotice }}</span>
+        <button
+          type="button"
+          class="streamRecoveryNoticeButton"
+          @click="copyStreamRecoveryNotice"
+        >
+          <ft-icon :icon="['fas', 'copy']" />
+          {{ $t('Copy') }}
+        </button>
+        <button
+          type="button"
+          class="streamRecoveryNoticeButton"
+          @click="dismissStreamRecoveryNotice"
+        >
+          <ft-icon :icon="['fas', 'xmark']" />
+          {{ $t('Dismiss') }}
+        </button>
+      </div>
+      <FtPaidPromotionBadge
+        v-if="showPaidPromotion"
+        class="paidPromotionOverlay shaka-no-propagation"
+      />
+      <div
+        v-if="shortsPlayer"
+        class="shortsTopControls shaka-no-propagation"
+        @dblclick.stop.prevent
+      >
+        <div class="shortsTopControlsGroup">
+          <button
+            type="button"
+            class="shortsTopControl"
+            :aria-label="shortsPaused
+              ? $t('Video.Player.Scroll Mini Player.Play')
+              : $t('Video.Player.Scroll Mini Player.Pause')"
+            @click.stop="toggleShortsPlayback"
+          >
+            <svg
+              v-if="playbackEnded"
+              class="shortsReplayIcon"
+              viewBox="0 -960 960 960"
+              aria-hidden="true"
+            >
+              <path :d="replayIcon" />
+            </svg>
+            <ft-icon
+              v-else
+              :icon="['fas', shortsPaused ? 'play' : 'pause']"
+            />
+          </button>
+          <div class="shortsVolumeControl">
+            <button
+              type="button"
+              class="shortsTopControl"
+              :aria-label="$t('KeyboardShortcutPrompt.Mute')"
+              @click.stop="toggleShortsMuted"
+            >
+              <ft-icon :icon="['fas', shortsMuted ? 'volume-mute' : 'volume-high']" />
+            </button>
+            <div
+              class="shaka-range-container shortsVolumeSlider"
+              :style="{ '--shorts-volume': `${scrollMiniVolumePercent}%` }"
+            >
+              <input
+                type="range"
+                class="shaka-range-element"
+                min="0"
+                max="100"
+                step="any"
+                :value="scrollMiniVolumePercent"
+                :aria-label="$t('Settings.Channel Settings.Volume')"
+                @input.stop="updateScrollMiniVolume"
+                @click.stop
+              >
+            </div>
+          </div>
+        </div>
+        <div class="shortsTopControlsGroup">
+          <button
+            v-if="shortsCaptionsAvailable"
+            type="button"
+            class="shortsTopControl shortsCaptionsControl"
+            :class="{ active: shortsCaptionsEnabled }"
+            :aria-label="$t('KeyboardShortcutPrompt.Captions')"
+            :aria-pressed="String(shortsCaptionsEnabled)"
+            @click.stop="toggleShortsCaptions"
+          >
+            <svg
+              class="shortsCaptionsControlIcon"
+              viewBox="0 -960 960 960"
+              aria-hidden="true"
+            >
+              <path :d="shortsCaptionsEnabled ? closedCaptionsFilledIcon : closedCaptionsOutlinedIcon" />
+            </svg>
+            <span
+              class="shortsCaptionsControlSlash"
+              aria-hidden="true"
+            />
+          </button>
+          <button
+            type="button"
+            class="shortsTopControl"
+            :aria-label="$t('Video.More Options')"
+            @click.stop="openShortsOverflowMenu($event)"
+          >
+            <ft-icon :icon="['fas', 'ellipsis-v']" />
+          </button>
+          <button
+            type="button"
+            class="shortsTopControl"
+            :aria-label="$t('KeyboardShortcutPrompt.Fullscreen')"
+            :aria-pressed="String(isFullscreen)"
+            @click.stop="toggleShortsFullscreen"
+          >
+            <ft-icon :icon="['fas', isFullscreen ? 'compress' : 'expand']" />
+          </button>
+        </div>
+      </div>
+      <div
+        v-if="shortsPlayer"
+        class="shortsFullscreenMetadata shaka-no-propagation"
+        @click.stop
+        @dblclick.stop
+      >
+        <div class="shortsFullscreenMetadataSide">
+          <slot name="shorts-fullscreen-metadata" />
+        </div>
+        <div
+          class="shortsFullscreenVideoSpace"
+          aria-hidden="true"
+        />
+      </div>
+      <Transition name="fade">
+        <div
+          v-if="autoplayCountdown"
+          v-overlay-scrollbars
+          class="autoplayCountdownOverlay shaka-no-propagation"
+          role="dialog"
+          :aria-label="$t('Up Next')"
+          @click.stop
+          @dblclick.stop
+          @pointerdown.stop
+        >
+          <div
+            class="autoplayCountdownCard"
+            :class="{
+              compact: compactAutoplayLayout,
+              tiny: tinyAutoplayLayout
+            }"
+          >
+            <p
+              class="autoplayCountdownHeading"
+              aria-live="polite"
+            >
+              {{ $t('Video.Player.Up next in {seconds}', { seconds: autoplayCountdown.remainingSeconds }) }}
+            </p>
+            <div class="autoplayThumbnailWrapper">
+              <FtRetryImage
+                class="autoplayThumbnail"
+                :src="autoplayThumbnail"
+                alt=""
+              />
+              <span
+                v-if="autoplayDuration"
+                class="autoplayDuration"
+              >
+                {{ autoplayDuration }}
+              </span>
+            </div>
+            <div
+              class="autoplayTitle"
+              dir="auto"
+            >
+              {{ autoplayNextVideo?.title }}
+            </div>
+            <div
+              v-if="autoplayNextVideo?.author"
+              class="autoplayAuthor"
+              dir="auto"
+            >
+              {{ autoplayNextVideo.author }}
+            </div>
+            <div class="autoplayActions">
+              <button
+                type="button"
+                class="autoplayButton autoplayCancel"
+                @click="cancelAutoplayCountdown"
+              >
+                <ft-icon :icon="['fas', 'xmark']" />
+                {{ $t('Cancel') }}
+              </button>
+              <button
+                type="button"
+                class="autoplayButton autoplayPlayNow"
+                @click="playAutoplayVideoNow"
+              >
+                <ft-icon :icon="['fas', 'play']" />
+                {{ $t('Video.Player.Play now') }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+      <div
+        v-if="visibleFullscreenActions.length > 0"
+        ref="fullscreenActionsElement"
+        v-overlay-scrollbars
+        class="fullscreenActions shaka-no-propagation"
+        @click.stop
+        @dblclick.stop
+        @pointerdown.stop
+        @focusin="actionDockFocused = true"
+        @focusout="actionDockFocused = $event.currentTarget.contains($event.relatedTarget)"
+      >
+        <div
+          ref="fullscreenActionsContent"
+          class="fullscreenActionsContent"
+        >
+          <template
+            v-for="action in visibleFullscreenActions"
+            :key="action"
+          >
+            <button
+              v-if="action === 'queue'"
+              type="button"
+              class="fullscreenAction fullscreenQueueToggle"
+              :class="{ open: showFullscreenQueue }"
+              :aria-label="$t('Video.Queue')"
+              :title="$t('Video.Queue')"
+              :aria-expanded="String(showFullscreenQueue)"
+              @click="setFullscreenQueue(!showFullscreenQueue)"
+            >
+              <FtIcon :icon="['fas', 'queue']" />
+            </button>
+            <button
+              v-else-if="action === 'recommendations'"
+              type="button"
+              class="fullscreenAction fullscreenRecommendationsToggle"
+              :class="{ open: showFullscreenRecommendations }"
+              :aria-label="$t('Settings.Fullscreen Actions.Recommended Videos')"
+              :title="$t('Settings.Fullscreen Actions.Recommended Videos')"
+              :aria-expanded="String(showFullscreenRecommendations)"
+              @click="setFullscreenRecommendations(!showFullscreenRecommendations)"
+            >
+              <FtIcon :icon="['fas', 'circle-play']" />
+            </button>
+            <button
+              v-else-if="action === 'download'"
+              type="button"
+              class="fullscreenAction fullscreenDownloadAction"
+              :aria-label="$t('Downloads.Download Video')"
+              :title="$t('Downloads.Download Video')"
+              @click="openDownload"
+            >
+              <FtIcon :icon="['fas', 'download']" />
+            </button>
+            <button
+              v-else-if="action === 'playlist'"
+              type="button"
+              class="fullscreenAction fullscreenPlaylistToggle"
+              :class="{ open: showFullscreenPlaylist }"
+              :aria-label="$t('Playlist.Playlist')"
+              :title="$t('Playlist.Playlist')"
+              :aria-expanded="String(showFullscreenPlaylist)"
+              @click="shortsPhonePanels ? requestShortsPhonePanel('playlist') : setFullscreenPlaylist(!showFullscreenPlaylist)"
+            >
+              <FtIcon :icon="['fas', 'list']" />
+            </button>
+            <button
+              v-else-if="action === 'liveChat'"
+              type="button"
+              class="fullscreenAction fullscreenLiveChatToggle"
+              :class="{ open: showFullscreenLiveChat }"
+              :aria-label="$t('Video.Live Chat')"
+              :title="$t('Video.Live Chat')"
+              :aria-expanded="String(showFullscreenLiveChat)"
+              @click="shortsPhonePanels ? requestShortsPhonePanel('chat') : setFullscreenLiveChat(!showFullscreenLiveChat)"
+            >
+              <FtIcon :icon="['fas', 'message']" />
+            </button>
+            <button
+              v-else-if="action === 'comments'"
+              type="button"
+              class="fullscreenAction fullscreenCommentsToggle"
+              :class="{ open: showFullscreenComments }"
+              :aria-label="$t('Comments.Comments')"
+              :title="$t('Comments.Comments')"
+              :aria-expanded="String(showFullscreenComments)"
+              @click="shortsPhonePanels ? requestShortsPhonePanel('comments') : setFullscreenComments(!showFullscreenComments)"
+            >
+              <FtIcon :icon="['fas', 'comment']" />
+            </button>
+            <button
+              v-else-if="action === 'sponsorBlock'"
+              type="button"
+              class="fullscreenAction fullscreenSponsorBlockToggle"
+              :class="{ open: showFullscreenSponsorBlock }"
+              :aria-label="showFullscreenSponsorBlock
+                ? $t('Video.Player.SponsorBlock.CloseInfoPanel')
+                : $t('Video.Player.SponsorBlock.OpenInfoPanel')"
+              :title="showFullscreenSponsorBlock
+                ? $t('Video.Player.SponsorBlock.CloseInfoPanel')
+                : $t('Video.Player.SponsorBlock.OpenInfoPanel')"
+              :aria-expanded="String(showFullscreenSponsorBlock)"
+              @click="toggleFullscreenSponsorBlock"
+            >
+              <FtIcon :icon="['fas', 'shield-halved']" />
+            </button>
+            <button
+              v-else-if="action === 'transcript'"
+              type="button"
+              class="fullscreenAction fullscreenTranscriptToggle"
+              :class="{ open: showFullscreenTranscript }"
+              :aria-label="showFullscreenTranscript
+                ? $t('Video.Transcript.Hide')
+                : $t('Video.Transcript.Show')"
+              :title="showFullscreenTranscript
+                ? $t('Video.Transcript.Hide')
+                : $t('Video.Transcript.Show')"
+              :aria-expanded="String(showFullscreenTranscript)"
+              @click="toggleFullscreenTranscript"
+            >
+              <FtIcon :icon="['fas', 'file-lines']" />
+            </button>
+            <FtShareButton
+              v-else-if="action === 'share'"
+              :id="videoId"
+              :external-url="externalUrl"
+              class="fullscreenShareAction"
+              :playlist-id="playlistId"
+              :get-timestamp="getShareTimestamp"
+              dropdown-position-y="top"
+            />
+            <FtIconButton
+              v-else-if="action === 'addToPlaylist'"
+              class="fullscreenPlaylistAction"
+              :class="{ open: isInAnyPlaylist }"
+              :title="$t('User Playlists.Add to Playlist')"
+              :icon="isInAnyPlaylist ? ['fac', 'playlist-check'] : ['fac', 'playlist-add']"
+              force-dropdown
+              dropdown-modal-on-mobile
+              mobile-sheet
+              dropdown-position-x="left"
+              dropdown-position-y="top"
+            >
+              <FtAddToPlaylistDropdown
+                :video-data="playlistVideoData"
+                :below-player="false"
+              />
+            </FtIconButton>
+            <button
+              v-else-if="action === 'quickBookmark'"
+              type="button"
+              class="fullscreenAction fullscreenQuickBookmarkAction"
+              :class="{ open: quickBookmarked }"
+              :aria-label="quickBookmarkTitle"
+              :title="quickBookmarkTitle"
+              @click="toggleQuickBookmark"
+            >
+              <FtIcon :icon="quickBookmarkIcon" />
+            </button>
+          </template>
+        </div>
+      </div>
+      <!--
       VR playback is only possible for VR videos with "EQUIRECTANGULAR" projection
       This intentionally doesn't use the "useVrMode" computed prop,
       as that changes depending on the active format,
       but as we initialize the shaka-player UI once per watch page,
       the canvas has to exist even in audio-only mode, because the user may switch to DASH later.
     -->
-    <canvas
-      v-if="vrProjection === 'EQUIRECTANGULAR'"
-      ref="vrCanvas"
-      class="vrCanvas"
-    />
-    <div
-      v-if="showStats"
-      class="stats"
-    >
-      <span>{{ $t('Video.Player.Stats.Video ID', { videoId }) }}</span>
-      <br>
-      <span>{{ $t('Video.Player.Stats.Media Formats', { formats: format }) }}</span>
-      <br>
-      <span>{{ $t('Video.Player.Stats.Bitrate', { bitrate: stats.bitrate }) }}</span>
-      <br>
-      <span>{{ $t('Video.Player.Stats.Volume', { volumePercentage: stats.volume }) }}</span>
-      <br>
-      <template
-        v-if="format !== 'legacy'"
-      >
-        <span>{{ $t('Video.Player.Stats.Bandwidth', { bandwidth: stats.bandwidth }) }}</span>
-        <br>
-      </template>
-      <span>{{ $t('Video.Player.Stats.Buffered', { bufferedPercentage: stats.buffered }) }}</span>
-      <br>
-      <span
-        v-if="format === 'audio'"
-      >{{ $t('Video.Player.Stats.CodecAudio', stats.codecs) }}</span>
-      <span
-        v-else-if="stats.codecs.audioItag && stats.codecs.videoItag"
-      >{{ $t('Video.Player.Stats.CodecsVideoAudio', stats.codecs) }}</span>
-      <span
-        v-else
-      >{{ $t('Video.Player.Stats.CodecsVideoAudioNoItags', stats.codecs) }}</span>
-      <br>
-      <span>{{ $t('Video.Player.Stats.Player Dimensions', playerDimensions) }}</span>
-      <br>
-      <template
-        v-if="format !== 'audio'"
-      >
-        <span>{{ $t('Video.Player.Stats.Resolution', stats.resolution) }}</span>
-        <br>
-        <span>{{ $t('Video.Player.Stats.Dropped Frames / Total Frames', stats.frames) }}</span>
-      </template>
-    </div>
-    <Transition name="fade">
+      <canvas
+        v-if="vrProjection === 'EQUIRECTANGULAR'"
+        ref="vrCanvas"
+        class="vrCanvas"
+      />
+      <FtVideoAnnotations
+        v-if="!hideAnnotations && !showEndedScreen"
+        :active="isActiveTab"
+        :annotations="annotations"
+        :current-time="annotationCurrentTime"
+        :video-aspect-ratio="annotationVideoAspectRatio"
+        :video-fit="annotationVideoFit"
+      />
       <div
-        v-if="showValueChangePopup"
-        class="valueChangePopup"
-        :class="{ 'invert-content-order': invertValueChangeContentOrder }"
+        v-if="secondaryCaptionText"
+        class="secondaryCaptions"
+        :class="{ secondaryCaptionsAtTop: secondaryCaptionPosition.atTop }"
+        :style="[secondaryCaptionsBox, { textAlign: secondaryCaptionPosition.align, alignItems: secondaryCaptionPosition.alignItems }, captionStyle.text]"
+        translate="no"
       >
-        <font-awesome-icon
-          v-if="valueChangeIcon"
-          :icon="['fas', valueChangeIcon]"
-        />
-        <span>{{ valueChangeMessage }}</span>
+        <span :style="{ backgroundColor: captionStyle.background }">{{ secondaryCaptionText }}</span>
       </div>
-    </Transition>
-    <div
-      v-if="showOfflineMessage"
-      class="offlineWrapper"
-    >
-      <font-awesome-layers
-        class="offlineIcon"
+      <FtMobileSheet
+        class="fullscreenDockSheet"
+        :enabled="portraitFullscreenDocks"
+        :open="fullscreenDockOpen"
+        :title="fullscreenDockTitle"
+        :header-selector="fullscreenDockHeaderSelector"
+        fullscreen
+        @close="closePortraitFullscreenDock"
+      >
+        <Transition name="chapter-slide">
+          <aside
+            v-if="showChaptersOverlay && (isFullscreen || fullWindowEnabled) && chapters.length > 0"
+            ref="chapterOverlay"
+            class="chapterOverlay shaka-no-propagation"
+            :class="{ fullscreenDockReorderable: fullscreenDockCanReorder('chapters') }"
+            :style="fullscreenDockStyle('chapters')"
+            :role="portraitFullscreenDocks ? 'presentation' : 'dialog'"
+            tabindex="-1"
+            :aria-label="$t('Chapters.Chapters')"
+            @click.stop="handleDocumentClick"
+            @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'chapters')"
+            @dblclick.stop
+            @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'chapters')"
+            @pointerdown.stop
+            @wheel.stop
+            @keydown.esc.stop.prevent="closeChaptersOverlay"
+          >
+            <button
+              v-if="fullscreenDockCanResize('chapters')"
+              type="button"
+              class="fullscreenDockResizeHandle"
+              :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
+              :title="$t('Video.Player.Resize dock', 'Resize dock')"
+              @pointerdown="handleFullscreenDockResizePointerDown($event, 'chapters')"
+              @keydown="handleFullscreenDockResizeKeydown($event, 'chapters')"
+              @dblclick.stop.prevent="resetFullscreenDockHeights"
+            />
+            <header class="chapterOverlayHeader">
+              <h2 class="chapterOverlayTitle">
+                <svg
+                  class="chapterOverlayTitleIcon"
+                  viewBox="0 -960 960 960"
+                  aria-hidden="true"
+                >
+                  <path d="m400-200-182 91q-20 10-39-1.5T160-145v-495q0-33 23.5-56.5T240-720h320q33 0 56.5 23.5T640-640v495q0 23-19 34.5t-39 1.5l-182-91Zm360-40q-17 0-28.5-11.5T720-280v-520H320q-17 0-28.5-11.5T280-840q0-17 11.5-28.5T320-880h400q33 0 56.5 23.5T800-800v520q0 17-11.5 28.5T760-240Z" />
+                </svg>
+                {{ chaptersKind === 'keyMoments' ? $t('Chapters.Key Moments') : $t('Chapters.Chapters') }}
+              </h2>
+              <button
+                type="button"
+                class="chapterOverlayClose"
+                :aria-label="$t('Chapters.Close Chapters')"
+                :title="$t('Chapters.Close Chapters')"
+                @click="closeChaptersOverlay"
+              >
+                <FtIcon :icon="['fas', 'xmark']" />
+              </button>
+            </header>
+            <WatchVideoChapters
+              :chapters="chapters"
+              :chapter-thumbnails="chapterThumbnails"
+              :current-chapter-index="currentChapterIndex"
+              :fallback-thumbnail="thumbnail"
+              :looped-chapter-index="loopedChapterIndex"
+              @copy-timestamp="copyChapterTimestamp"
+              @loop-chapter="toggleChapterLoop"
+              @timestamp-event="selectOverlayChapter"
+            />
+          </aside>
+        </Transition>
+        <aside
+          ref="fullscreenMetadataOverlay"
+          class="fullscreenMetadataOverlay shaka-no-propagation"
+          :class="{
+            open: showFullscreenMetadata,
+            fullscreenDockReorderable: fullscreenDockCanReorder('metadata')
+          }"
+          :style="fullscreenDockStyle('metadata')"
+          tabindex="-1"
+          :role="portraitFullscreenDocks ? 'presentation' : 'dialog'"
+          :aria-label="$t('Video.Metadata', 'Video information')"
+          :aria-hidden="String(!showFullscreenMetadata)"
+          :inert="!showFullscreenMetadata"
+          @click.stop="handleDocumentClick"
+          @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'metadata')"
+          @dblclick.stop
+          @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'metadata')"
+          @pointerdown.stop
+          @wheel.stop
+          @keydown.esc.stop.prevent="closeFullscreenMetadata"
+        >
+          <button
+            v-if="fullscreenDockCanResize('metadata')"
+            type="button"
+            class="fullscreenDockResizeHandle"
+            :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
+            :title="$t('Video.Player.Resize dock', 'Resize dock')"
+            @pointerdown="handleFullscreenDockResizePointerDown($event, 'metadata')"
+            @keydown="handleFullscreenDockResizeKeydown($event, 'metadata')"
+            @dblclick.stop.prevent="resetFullscreenDockHeights"
+          />
+          <header class="fullscreenMetadataHeader">
+            <h2 class="fullscreenDockHeading">
+              <FtIcon
+                class="fullscreenDockHeadingIcon"
+                :icon="['fas', 'info-circle']"
+              />
+              {{ $t('Video.Metadata', 'Video information') }}
+            </h2>
+            <button
+              type="button"
+              class="fullscreenMetadataClose"
+              :aria-label="$t('Video.Close Metadata', 'Close video information')"
+              :title="$t('Video.Close Metadata', 'Close video information')"
+              @click="closeFullscreenMetadata"
+            >
+              <FtIcon :icon="['fas', 'xmark']" />
+            </button>
+          </header>
+          <div
+            ref="fullscreenMetadataTarget"
+            v-overlay-scrollbars
+            class="fullscreenMetadataTarget"
+          />
+        </aside>
+        <aside
+          ref="fullscreenTranscriptOverlay"
+          class="fullscreenTranscriptOverlay shaka-no-propagation"
+          :class="{
+            open: showFullscreenTranscript,
+            fullscreenDockReorderable: fullscreenDockCanReorder('transcript')
+          }"
+          :style="fullscreenDockStyle('transcript')"
+          tabindex="-1"
+          :role="portraitFullscreenDocks ? 'presentation' : 'dialog'"
+          :aria-label="$t('Video.Transcript.Title')"
+          :aria-hidden="String(!showFullscreenTranscript)"
+          :inert="!showFullscreenTranscript"
+          @click.stop="handleDocumentClick"
+          @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'transcript')"
+          @dblclick.stop
+          @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'transcript')"
+          @pointerdown.stop
+          @wheel.stop
+          @keydown.esc.stop.prevent="closeFullscreenTranscript"
+        >
+          <button
+            v-if="fullscreenDockCanResize('transcript')"
+            type="button"
+            class="fullscreenDockResizeHandle"
+            :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
+            :title="$t('Video.Player.Resize dock', 'Resize dock')"
+            @pointerdown="handleFullscreenDockResizePointerDown($event, 'transcript')"
+            @keydown="handleFullscreenDockResizeKeydown($event, 'transcript')"
+            @dblclick.stop.prevent="resetFullscreenDockHeights"
+          />
+          <div
+            ref="fullscreenTranscriptTarget"
+            class="fullscreenTranscriptTarget"
+          />
+        </aside>
+        <aside
+          ref="fullscreenSponsorBlockOverlay"
+          class="fullscreenSponsorBlockOverlay shaka-no-propagation"
+          :class="{
+            open: showFullscreenSponsorBlock,
+            fullscreenDockReorderable: fullscreenDockCanReorder('sponsorBlock')
+          }"
+          :style="fullscreenDockStyle('sponsorBlock')"
+          tabindex="-1"
+          :role="portraitFullscreenDocks ? 'presentation' : 'dialog'"
+          :aria-label="$t('Settings.SponsorBlock Settings.SponsorBlock Settings')"
+          :aria-hidden="String(!showFullscreenSponsorBlock)"
+          :inert="!showFullscreenSponsorBlock"
+          @click.stop="handleDocumentClick"
+          @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'sponsorBlock')"
+          @dblclick.stop
+          @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'sponsorBlock')"
+          @pointerdown.stop
+          @wheel.stop
+          @keydown.esc.stop.prevent="closeFullscreenSponsorBlock"
+        >
+          <button
+            v-if="fullscreenDockCanResize('sponsorBlock')"
+            type="button"
+            class="fullscreenDockResizeHandle"
+            :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
+            :title="$t('Video.Player.Resize dock', 'Resize dock')"
+            @pointerdown="handleFullscreenDockResizePointerDown($event, 'sponsorBlock')"
+            @keydown="handleFullscreenDockResizeKeydown($event, 'sponsorBlock')"
+            @dblclick.stop.prevent="resetFullscreenDockHeights"
+          />
+          <div
+            ref="fullscreenSponsorBlockTarget"
+            class="fullscreenSponsorBlockTarget"
+          />
+        </aside>
+        <aside
+          ref="fullscreenLiveChatOverlay"
+          class="fullscreenLiveChatOverlay shaka-no-propagation"
+          :class="{
+            open: showFullscreenLiveChat,
+            fullscreenDockReorderable: fullscreenDockCanReorder('liveChat')
+          }"
+          :style="fullscreenDockStyle('liveChat')"
+          tabindex="-1"
+          :role="portraitFullscreenDocks ? 'presentation' : 'dialog'"
+          :aria-label="$t('Video.Live Chat')"
+          :aria-hidden="String(!showFullscreenLiveChat)"
+          :inert="!showFullscreenLiveChat"
+          @click.stop="handleDocumentClick"
+          @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'liveChat')"
+          @dblclick.stop
+          @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'liveChat')"
+          @pointerdown.stop
+          @wheel.stop
+          @keydown.esc.stop.prevent="closeFullscreenLiveChat"
+        >
+          <button
+            v-if="fullscreenDockCanResize('liveChat')"
+            type="button"
+            class="fullscreenDockResizeHandle"
+            :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
+            :title="$t('Video.Player.Resize dock', 'Resize dock')"
+            @pointerdown="handleFullscreenDockResizePointerDown($event, 'liveChat')"
+            @keydown="handleFullscreenDockResizeKeydown($event, 'liveChat')"
+            @dblclick.stop.prevent="resetFullscreenDockHeights"
+          />
+          <div
+            ref="fullscreenLiveChatTarget"
+            class="fullscreenLiveChatTarget"
+          />
+        </aside>
+        <aside
+          ref="fullscreenCommentsOverlay"
+          class="fullscreenCommentsOverlay shaka-no-propagation"
+          :class="{
+            open: showFullscreenComments,
+            fullscreenDockReorderable: fullscreenDockCanReorder('comments')
+          }"
+          :style="fullscreenDockStyle('comments')"
+          tabindex="-1"
+          :role="portraitFullscreenDocks ? 'presentation' : 'dialog'"
+          :aria-label="$t('Comments.Comments')"
+          :aria-hidden="String(!showFullscreenComments)"
+          :inert="!showFullscreenComments"
+          @click.stop="handleDocumentClick"
+          @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'comments')"
+          @dblclick.stop
+          @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'comments')"
+          @pointerdown.stop
+          @wheel.stop
+          @keydown.esc.stop.prevent="closeFullscreenComments"
+        >
+          <button
+            v-if="fullscreenDockCanResize('comments')"
+            type="button"
+            class="fullscreenDockResizeHandle"
+            :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
+            :title="$t('Video.Player.Resize dock', 'Resize dock')"
+            @pointerdown="handleFullscreenDockResizePointerDown($event, 'comments')"
+            @keydown="handleFullscreenDockResizeKeydown($event, 'comments')"
+            @dblclick.stop.prevent="resetFullscreenDockHeights"
+          />
+        </aside>
+        <aside
+          ref="fullscreenPlaylistOverlay"
+          class="fullscreenPlaylistOverlay shaka-no-propagation"
+          :class="{
+            open: showFullscreenPlaylist,
+            fullscreenDockReorderable: fullscreenDockCanReorder('playlist')
+          }"
+          :style="fullscreenDockStyle('playlist')"
+          tabindex="-1"
+          :role="portraitFullscreenDocks ? 'presentation' : 'dialog'"
+          :aria-label="$t('Playlist.Playlist')"
+          :aria-hidden="String(!showFullscreenPlaylist)"
+          :inert="!showFullscreenPlaylist"
+          @click.stop="handleDocumentClick"
+          @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'playlist')"
+          @dblclick.stop
+          @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'playlist')"
+          @pointerdown.stop
+          @wheel.stop
+          @keydown.esc.stop.prevent="closeFullscreenPlaylist"
+        >
+          <button
+            v-if="fullscreenDockCanResize('playlist')"
+            type="button"
+            class="fullscreenDockResizeHandle"
+            :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
+            :title="$t('Video.Player.Resize dock', 'Resize dock')"
+            @pointerdown="handleFullscreenDockResizePointerDown($event, 'playlist')"
+            @keydown="handleFullscreenDockResizeKeydown($event, 'playlist')"
+            @dblclick.stop.prevent="resetFullscreenDockHeights"
+          />
+          <div
+            ref="fullscreenPlaylistTarget"
+            class="fullscreenPlaylistTarget"
+          />
+        </aside>
+        <aside
+          ref="fullscreenQueueOverlay"
+          class="fullscreenQueueOverlay shaka-no-propagation"
+          :class="{
+            open: showFullscreenQueue,
+            fullscreenDockReorderable: fullscreenDockCanReorder('queue')
+          }"
+          :style="fullscreenDockStyle('queue')"
+          tabindex="-1"
+          :role="portraitFullscreenDocks ? 'presentation' : 'dialog'"
+          :aria-label="$t('Video.Queue')"
+          :aria-hidden="String(!showFullscreenQueue)"
+          :inert="!showFullscreenQueue"
+          @click.stop="handleDocumentClick"
+          @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'queue')"
+          @dblclick.stop
+          @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'queue')"
+          @pointerdown.stop
+          @wheel.stop
+          @keydown.esc.stop.prevent="closeFullscreenQueue"
+        >
+          <button
+            v-if="fullscreenDockCanResize('queue')"
+            type="button"
+            class="fullscreenDockResizeHandle"
+            :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
+            :title="$t('Video.Player.Resize dock', 'Resize dock')"
+            @pointerdown="handleFullscreenDockResizePointerDown($event, 'queue')"
+            @keydown="handleFullscreenDockResizeKeydown($event, 'queue')"
+            @dblclick.stop.prevent="resetFullscreenDockHeights"
+          />
+          <div
+            ref="fullscreenQueueTarget"
+            class="fullscreenQueueTarget"
+          />
+        </aside>
+        <aside
+          ref="fullscreenRecommendationsOverlay"
+          class="fullscreenRecommendationsOverlay shaka-no-propagation"
+          :class="{
+            open: showFullscreenRecommendations,
+            fullscreenDockReorderable: fullscreenDockCanReorder('recommendations')
+          }"
+          :style="fullscreenDockStyle('recommendations')"
+          tabindex="-1"
+          :role="portraitFullscreenDocks ? 'presentation' : 'dialog'"
+          :aria-label="$t('Settings.Fullscreen Actions.Recommended Videos')"
+          :aria-hidden="String(!showFullscreenRecommendations)"
+          :inert="!showFullscreenRecommendations"
+          @click.stop="handleDocumentClick"
+          @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'recommendations')"
+          @dblclick.stop
+          @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'recommendations')"
+          @pointerdown.stop
+          @wheel.stop
+          @keydown.esc.stop.prevent="closeFullscreenRecommendations"
+        >
+          <button
+            v-if="fullscreenDockCanResize('recommendations')"
+            type="button"
+            class="fullscreenDockResizeHandle"
+            :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
+            :title="$t('Video.Player.Resize dock', 'Resize dock')"
+            @pointerdown="handleFullscreenDockResizePointerDown($event, 'recommendations')"
+            @keydown="handleFullscreenDockResizeKeydown($event, 'recommendations')"
+            @dblclick.stop.prevent="resetFullscreenDockHeights"
+          />
+          <div
+            ref="fullscreenRecommendationsTarget"
+            class="fullscreenRecommendationsTarget"
+          />
+        </aside>
+      </FtMobileSheet>
+      <div
+        v-if="showStats"
+        class="stats"
+      >
+        <span>{{ $t('Video.Player.Stats.Video ID', { videoId }) }}</span>
+        <br>
+        <span>{{ $t('Video.Player.Stats.Media Formats', { formats: format }) }}</span>
+        <br>
+        <span>{{ $t('Video.Player.Stats.Bitrate', { bitrate: stats.bitrate }) }}</span>
+        <br>
+        <span>{{ $t('Video.Player.Stats.Volume', { volumePercentage: stats.volume }) }}</span>
+        <br>
+        <template
+          v-if="format !== 'legacy'"
+        >
+          <span>{{ $t('Video.Player.Stats.Bandwidth', { bandwidth: stats.bandwidth }) }}</span>
+          <br>
+        </template>
+        <span>{{ $t('Video.Player.Stats.Buffered', { bufferedPercentage: stats.buffered }) }}</span>
+        <br>
+        <span
+          v-if="format === 'audio'"
+        >{{ $t('Video.Player.Stats.CodecAudio', stats.codecs) }}</span>
+        <span
+          v-else-if="stats.codecs.audioItag && stats.codecs.videoItag"
+        >{{ $t('Video.Player.Stats.CodecsVideoAudio', stats.codecs) }}</span>
+        <span
+          v-else
+        >{{ $t('Video.Player.Stats.CodecsVideoAudioNoItags', stats.codecs) }}</span>
+        <br>
+        <span>{{ $t('Video.Player.Stats.Player Dimensions', playerDimensions) }}</span>
+        <br>
+        <template
+          v-if="format !== 'audio'"
+        >
+          <span>{{ $t('Video.Player.Stats.Resolution', stats.resolution) }}</span>
+          <br>
+          <span>{{ $t('Video.Player.Stats.Dropped Frames / Total Frames', stats.frames) }}</span>
+        </template>
+      </div>
+      <div
+        v-if="videoZoomPinching && videoFillZoomProximity > 0"
+        class="videoFillZoomEdges"
+        :class="{ videoFillZoomSnapReady }"
+        :style="{ opacity: videoFillZoomProximity }"
         aria-hidden="true"
       >
-        <font-awesome-icon :icon="['fas', 'wifi']" />
-        <font-awesome-icon :icon="['fas', 'slash']" />
-      </font-awesome-layers>
-      <p class="offlineMessage">
-        <span>
-          {{ $t('Video.Player.You appear to be offline') }}
-        </span>
-        <br>
-        <span class="offlineMessageSubtitle">
-          {{ $t('Video.Player.Playback will resume automatically when your connection comes back') }}
-        </span>
-      </p>
-    </div>
-    <div
-      v-if="sponsorBlockShowSkippedToast && skippedSponsorBlockSegments.length > 0"
-      class="skippedSegmentsWrapper"
-    >
-      <p
-        v-for="{ uuid, translatedCategory } in skippedSponsorBlockSegments"
-        :key="uuid"
-        class="skippedSegment"
+        <span class="videoFillZoomEdge videoFillZoomEdgeTop" />
+        <span class="videoFillZoomEdge videoFillZoomEdgeRight" />
+        <span class="videoFillZoomEdge videoFillZoomEdgeBottom" />
+        <span class="videoFillZoomEdge videoFillZoomEdgeLeft" />
+      </div>
+      <Transition name="fade">
+        <div
+          v-if="!mobileSeekPreview && (videoZoomPinching || showTemporaryPlaybackRateIndicator || showValueChangePopup)"
+          class="valueChangePopup"
+          :class="{
+            'invert-content-order':
+              showTemporaryPlaybackRateIndicator || invertValueChangeContentOrder
+          }"
+        >
+          <span
+            v-if="videoZoomPinching || showTemporaryPlaybackRateIndicator || valueChangeIcons.length > 0"
+            class="valueChangeIcons"
+          >
+            <template
+              v-for="icon in videoZoomPinching ? ['search'] : showTemporaryPlaybackRateIndicator ? ['forward'] : valueChangeIcons"
+              :key="typeof icon === 'string' ? icon : icon.path"
+            >
+              <svg
+                v-if="typeof icon === 'object'"
+                class="valueChangeCustomIcon"
+                :viewBox="icon.viewBox"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path :d="icon.path" />
+              </svg>
+              <ft-icon
+                v-else
+                :icon="['fas', icon]"
+              />
+            </template>
+          </span>
+          <span class="valueChangeText">{{
+            videoZoomPinching
+              ? formatVideoZoom(videoZoomGestureZoom)
+              : showTemporaryPlaybackRateIndicator
+              ? temporaryPlaybackRateIndicatorMessage
+              : valueChangeMessage
+          }}</span>
+        </div>
+      </Transition>
+      <div
+        v-if="showOfflineMessage"
+        class="offlineWrapper"
       >
-        {{ $t('Video.Player.Skipped segment', { segmentCategory: translatedCategory }) }}
-      </p>
+        <ft-icon-layers
+          class="offlineIcon"
+          aria-hidden="true"
+        >
+          <ft-icon :icon="['fas', 'wifi']" />
+          <ft-icon :icon="['fas', 'slash']" />
+        </ft-icon-layers>
+        <p class="offlineMessage">
+          <span>
+            {{ $t('Video.Player.You appear to be offline') }}
+          </span>
+          <br>
+          <span class="offlineMessageSubtitle">
+            {{ $t('Video.Player.Playback will resume automatically when your connection comes back') }}
+          </span>
+        </p>
+      </div>
+      <Transition name="fade">
+        <div
+          v-if="showCountdownOverlay"
+          class="countdownOverlay"
+          role="status"
+          aria-live="polite"
+          :aria-label="countdownAriaLabel"
+        >
+          <div class="countdownProgress">
+            <svg
+              class="countdownRing"
+              viewBox="0 0 92 92"
+              aria-hidden="true"
+            >
+              <circle
+                class="countdownRingTrack"
+                cx="46"
+                cy="46"
+                :r="38"
+                fill="none"
+              />
+              <circle
+                class="countdownRingProgress"
+                cx="46"
+                cy="46"
+                :r="38"
+                fill="none"
+                :stroke-dasharray="countdownRingCircumference"
+                :stroke-dashoffset="countdownRingDashoffset"
+              />
+            </svg>
+            <span class="countdownTime">
+              {{ countdownTimeLabel }}
+            </span>
+          </div>
+        </div>
+      </Transition>
+      <div
+        v-if="sponsorBlockShowSkippedToast && (promptSponsorBlockSegments.length > 0 || skippedSponsorBlockSegments.length > 0)"
+        ref="sponsorBlockNoticesElement"
+        class="skippedSegmentsWrapper shaka-no-propagation"
+        @pointerdown.stop
+        @touchstart.stop
+        @touchmove.stop
+        @touchend.stop
+        @mousemove.stop
+        @focusin.stop
+        @click.stop
+      >
+        <div
+          v-for="{ uuid, translatedCategory, color } in promptSponsorBlockSegments"
+          :key="uuid"
+          class="skippedSegment"
+        >
+          <div class="skippedSegmentHeader">
+            <div class="skippedSegmentTitle">
+              <ft-icon
+                class="skippedSegmentShield"
+                :icon="['fas', 'shield-halved']"
+                :style="{ color }"
+              />
+              <span class="skippedSegmentText">
+                {{ getSponsorBlockPromptLabel(translatedCategory, uuid) }}
+              </span>
+            </div>
+            <div class="skippedSegmentHeaderActions">
+              <span class="skippedSegmentTimer">
+                {{ getSponsorBlockPromptTimeLabel(uuid) }}
+              </span>
+              <button
+                class="closeSkippedSegmentButton"
+                :title="$t('Close')"
+                @click.stop.prevent="dismissPromptSponsorBlockSegment(uuid)"
+              >
+                <ft-icon :icon="['fas', 'xmark']" />
+              </button>
+            </div>
+          </div>
+          <div class="skippedSegmentActions">
+            <button
+              class="unskipButton"
+              :title="getSponsorBlockPromptActionLabel(uuid)"
+              @click.stop.prevent="skipPromptSponsorBlockSegment(uuid)"
+            >
+              {{ getSponsorBlockPromptActionLabel(uuid) }}
+            </button>
+          </div>
+        </div>
+        <div
+          v-for="{ uuid, translatedCategory, colors, unskipped, isHighlight } in skippedSponsorBlockSegments"
+          :key="uuid"
+          class="skippedSegment"
+          :class="{ editing: sponsorBlockToastEditingUuid === uuid }"
+          @click.stop
+          @mouseenter="pauseSponsorBlockToastCountdown(uuid)"
+          @mouseleave="resumeSponsorBlockToastCountdown(uuid)"
+          @focusin="pauseSponsorBlockToastCountdown(uuid)"
+          @focusout="resumeSponsorBlockToastCountdown(uuid)"
+        >
+          <div class="skippedSegmentHeader">
+            <div class="skippedSegmentTitle">
+              <span class="skippedSegmentShields">
+                <ft-icon
+                  v-for="(color, index) in colors"
+                  :key="index"
+                  class="skippedSegmentShield"
+                  :icon="['fas', 'shield-halved']"
+                  :style="{ color }"
+                />
+              </span>
+              <span class="skippedSegmentText">
+                {{ getSponsorBlockToastLabel(uuid, translatedCategory, isHighlight) }}
+              </span>
+            </div>
+            <div class="skippedSegmentHeaderActions">
+              <span class="skippedSegmentTimer">
+                <ft-icon
+                  v-if="isSponsorBlockToastCountdownPaused(uuid)"
+                  :icon="['fas', 'pause']"
+                />
+                <template v-else>
+                  {{ getSponsorBlockToastTimeLabel(uuid) }}
+                </template>
+              </span>
+              <button
+                v-if="sponsorBlockEnableSubmission"
+                class="editSkippedSegmentButton"
+                :title="$t('Edit')"
+                :aria-expanded="sponsorBlockToastEditingUuid === uuid"
+                :disabled="sponsorBlockVotePending !== null"
+                @click.stop.prevent="toggleSponsorBlockToastEditing(uuid)"
+              >
+                <ft-icon :icon="['fas', 'pencil']" />
+              </button>
+              <button
+                class="closeSkippedSegmentButton"
+                :title="$t('Close')"
+                @click.stop.prevent="removeSponsorBlockToast(uuid)"
+              >
+                <ft-icon :icon="['fas', 'xmark']" />
+              </button>
+            </div>
+          </div>
+          <div
+            v-if="sponsorBlockToastEditingSegment?.uuid === uuid"
+            v-overlay-scrollbars
+            class="sponsorBlockToastEditor"
+          >
+            <SponsorBlockSegmentEditor
+              :segment="sponsorBlockToastEditingSegment"
+              :pending="sponsorBlockVotePending !== null"
+              center-wrapped-cancel
+              @category-vote="changeSponsorBlockInfoSegmentCategory"
+              @copy-and-downvote="copyAndDownvoteSponsorBlockInfoSegment"
+              @resize="clampSponsorBlockToastEditorScroll"
+            />
+          </div>
+          <div
+            v-else
+            class="skippedSegmentActions"
+          >
+            <button
+              v-if="unskipped"
+              class="unskipButton"
+              :title="getSponsorBlockToastActionLabel(true, uuid)"
+              @click.stop.prevent="redoSkipSponsorBlockSegment(uuid)"
+            >
+              {{ getSponsorBlockToastActionLabel(true, uuid) }}
+            </button>
+            <button
+              v-else
+              class="unskipButton"
+              :title="getSponsorBlockToastActionLabel(false, uuid)"
+              @click.stop.prevent="unskipSponsorBlockSegment(uuid)"
+            >
+              {{ getSponsorBlockToastActionLabel(false, uuid) }}
+            </button>
+          </div>
+        </div>
+      </div>
+      <div
+        v-if="sponsorBlockSubmissionMenuOpen"
+        class="sponsorBlockSubmissionWrapper"
+      >
+        <div class="sponsorBlockSubmissionMenu">
+          <div class="sponsorBlockSubmissionHeader">
+            <div class="sponsorBlockSubmissionTitle">
+              <ft-icon
+                class="sponsorBlockSubmissionShield"
+                :icon="['fas', 'shield-halved']"
+              />
+              <span>{{ $t('Video.Player.SponsorBlock.SubmitSegment') }}</span>
+            </div>
+            <button
+              class="sponsorBlockSubmissionClose"
+              :title="$t('Close')"
+              @click="closeSponsorBlockSubmissionMenu"
+            >
+              <ft-icon :icon="['fas', 'xmark']" />
+            </button>
+          </div>
+          <p
+            v-if="sponsorBlockSubmissionError !== ''"
+            class="sponsorBlockSubmissionError"
+          >
+            {{ sponsorBlockSubmissionError }}
+          </p>
+          <div
+            v-overlay-scrollbars
+            class="sponsorBlockSubmissionSegments"
+          >
+            <div
+              v-for="segment in sponsorBlockDraftSegments"
+              :key="segment.id"
+              class="sponsorBlockDraftSegment"
+            >
+              <div
+                class="sponsorBlockDraftTimes"
+                :class="{
+                  editing: isSponsorBlockDraftEditing(segment.id),
+                  viewing: !isSponsorBlockDraftEditing(segment.id)
+                }"
+              >
+                <span
+                  v-if="isSponsorBlockFullVideoSegment(segment)"
+                  class="sponsorBlockDraftTimeText"
+                >
+                  {{ $t('Video.Player.SponsorBlock.FullVideo') }}
+                </span>
+                <template v-else-if="isSponsorBlockDraftEditing(segment.id)">
+                  <button
+                    class="sponsorBlockDraftTimeAction"
+                    @click="setSponsorBlockDraftTime(segment.id, 'startTime', 0)"
+                  >
+                    {{ $t('Video.Player.SponsorBlock.StartAction') }}
+                  </button>
+                  <button
+                    class="sponsorBlockDraftTimeAction"
+                    @click="setSponsorBlockDraftTime(segment.id, 'startTime', video?.currentTime ?? 0)"
+                  >
+                    {{ $t('Video.Player.SponsorBlock.NowAction') }}
+                  </button>
+                  <!-- eslint-disable @intlify/vue-i18n/no-raw-text -- Timestamp examples are language independent. -->
+                  <input
+                    class="sponsorBlockDraftTimeInput"
+                    placeholder="0:00.000"
+                    :value="sponsorBlockDraftEditValues[segment.id]?.startTime ?? ''"
+                    :aria-label="$t('Video.Player.SponsorBlock.StartTimeLabel')"
+                    @input="updateSponsorBlockDraftEditField(segment.id, 'startTime', $event.target.value)"
+                  >
+                  <!-- eslint-enable @intlify/vue-i18n/no-raw-text -->
+                </template>
+                <span
+                  v-else
+                  class="sponsorBlockDraftTimeText"
+                >
+                  {{ sponsorBlockDraftEditValues[segment.id]?.startTime ?? '' }}
+                </span>
+                <span
+                  v-if="!isSponsorBlockPointSegment(segment) && !isSponsorBlockFullVideoSegment(segment)"
+                  class="sponsorBlockDraftTimeDivider"
+                >{{ $t('Video.Player.SponsorBlock.TimeDivider') }}</span>
+                <template v-if="isSponsorBlockDraftEditing(segment.id) && !isSponsorBlockPointSegment(segment) && !isSponsorBlockFullVideoSegment(segment)">
+                  <!-- eslint-disable @intlify/vue-i18n/no-raw-text -- Timestamp examples are language independent. -->
+                  <input
+                    class="sponsorBlockDraftTimeInput"
+                    placeholder="0:30.000"
+                    :value="sponsorBlockDraftEditValues[segment.id]?.endTime ?? ''"
+                    :aria-label="$t('Video.Player.SponsorBlock.EndTimeLabel')"
+                    @input="updateSponsorBlockDraftEditField(segment.id, 'endTime', $event.target.value)"
+                  >
+                  <!-- eslint-enable @intlify/vue-i18n/no-raw-text -->
+                  <button
+                    class="sponsorBlockDraftTimeAction"
+                    @click="setSponsorBlockDraftTime(segment.id, 'endTime', video?.currentTime ?? 0)"
+                  >
+                    {{ $t('Video.Player.SponsorBlock.NowAction') }}
+                  </button>
+                  <button
+                    class="sponsorBlockDraftTimeAction"
+                    @click="setSponsorBlockDraftTime(segment.id, 'endTime', getSponsorBlockSubmissionVideoDuration())"
+                  >
+                    {{ $t('Video.Player.SponsorBlock.EndAction') }}
+                  </button>
+                </template>
+                <span
+                  v-else-if="!isSponsorBlockPointSegment(segment) && !isSponsorBlockFullVideoSegment(segment)"
+                  class="sponsorBlockDraftTimeText"
+                >
+                  {{ sponsorBlockDraftEditValues[segment.id]?.endTime ?? '' }}
+                </span>
+              </div>
+              <FtSelect
+                class="sponsorBlockDraftCategory"
+                variant="outlined"
+                :placeholder="$t('Video.Player.SponsorBlock.CategoryLabel')"
+                :value="sponsorBlockDraftEditValues[segment.id]?.category ?? segment.category"
+                :select-names="sponsorBlockSubmissionCategoryNames"
+                :select-values="sponsorBlockSubmissionCategories"
+                :icon="['fas', 'list']"
+                :show-icon="false"
+                @change="updateSponsorBlockDraftCategory(segment.id, $event)"
+              />
+              <FtSelect
+                v-if="!isSponsorBlockPointSegment(segment)"
+                class="sponsorBlockDraftCategory"
+                variant="outlined"
+                :placeholder="$t('Video.Player.SponsorBlock.ActionTypeLabel')"
+                :value="sponsorBlockDraftEditValues[segment.id]?.actionType ?? segment.actionType"
+                :select-names="getSponsorBlockActionTypeSelectNames(sponsorBlockDraftEditValues[segment.id]?.category ?? segment.category)"
+                :select-values="getSponsorBlockActionTypeSelectValues(sponsorBlockDraftEditValues[segment.id]?.category ?? segment.category)"
+                :icon="['fas', 'forward']"
+                :show-icon="false"
+                @change="updateSponsorBlockDraftActionType(segment.id, $event)"
+              />
+              <div class="sponsorBlockDraftActions">
+                <button
+                  class="sponsorBlockDraftActionButton"
+                  @click="deleteSponsorBlockDraft(segment.id)"
+                >
+                  {{ $t('Delete') }}
+                </button>
+                <button
+                  v-if="!isSponsorBlockFullVideoSegment(segment)"
+                  class="sponsorBlockDraftActionButton"
+                  :disabled="segment.endTime == null && !isSponsorBlockPointSegment(segment)"
+                  @click="previewSponsorBlockDraft(segment.id, 'preview')"
+                >
+                  {{ $t('Video.Player.SponsorBlock.PreviewSegment') }}
+                </button>
+                <button
+                  v-if="!isSponsorBlockFullVideoSegment(segment)"
+                  class="sponsorBlockDraftActionButton"
+                  @click="previewSponsorBlockDraft(segment.id, 'inspect')"
+                >
+                  {{ $t('Video.Player.SponsorBlock.InspectSegment') }}
+                </button>
+                <button
+                  v-if="!isSponsorBlockPointSegment(segment) && !isSponsorBlockFullVideoSegment(segment)"
+                  class="sponsorBlockDraftActionButton"
+                  :disabled="segment.endTime == null"
+                  @click="previewSponsorBlockDraft(segment.id, 'end')"
+                >
+                  {{ $t('Video.Player.SponsorBlock.EndActionLabel') }}
+                </button>
+                <button
+                  class="sponsorBlockDraftActionButton"
+                  @click="toggleSponsorBlockDraftEditing(segment.id)"
+                >
+                  {{
+                    isSponsorBlockDraftEditing(segment.id)
+                      ? $t('Video.Player.SponsorBlock.SaveSegment')
+                      : $t('Edit')
+                  }}
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="sponsorBlockSubmissionFooter">
+            <button
+              class="sponsorBlockSubmissionGuidelines"
+              @click="openSponsorBlockGuidelines"
+            >
+              {{ $t('Video.Player.SponsorBlock.Guidelines') }}
+            </button>
+            <button
+              class="sponsorBlockSubmissionButton"
+              :disabled="sponsorBlockSubmissionPending"
+              @click="submitSponsorBlockDrafts"
+            >
+              {{ $t('Video.Player.SponsorBlock.SubmitSegments') }}
+            </button>
+          </div>
+        </div>
+      </div>
+      <Teleport
+        to="#cross-tab-mini-player-layer"
+        :disabled="!scrollMiniPlayerDragStyle && !scrollMiniPlayerAnimating"
+      >
+        <div
+          v-if="mobileMiniBar && !scrollMiniPlayerDismissed &&
+            (scrollMiniPlayerActive || scrollMiniPlayerDragStyle || scrollMiniPlayerAnimating)"
+          ref="mobileMiniBarOverlay"
+          class="mobileMiniBarOverlay"
+          :class="{
+            mobileMiniBarMorphOverlay: scrollMiniPlayerDragStyle || scrollMiniPlayerAnimating,
+            mobileMiniBarDismissible: mobileMiniBarCanDismiss,
+            mobileMiniBarCompact: compactMobileMiniPlayer,
+            mobileMiniBarCollapsed,
+            mobileMiniBarRestoring: scrollMiniPlayerDragStyle
+              ? scrollMiniPlayerActive
+              : scrollMiniPlayerAnimating && !scrollMiniPlayerActive
+          }"
+          :style="mobileMiniBarOverlayStyle"
+        >
+          <div
+            class="mobileMiniBarProgress"
+          >
+            <div
+              aria-hidden="true"
+              :style="{ transform: `scaleX(${mobileMiniBarProgress})` }"
+            />
+            <input
+              v-if="scrollMiniPlayerActive"
+              class="mobileMiniBarSeek"
+              :class="{ mobileMiniBarSeeking }"
+              type="range"
+              min="0"
+              max="100"
+              step="0.1"
+              :value="mobileMiniBarProgress * 100"
+              :disabled="mobileMiniBarSeekDisabled"
+              :aria-label="mobileMiniBarSeekLabel"
+              :aria-valuetext="mobileMiniBarSeekValueText"
+              @input="handleMobileMiniBarSeekInput"
+              @pointerdown.stop="startMobileMiniBarSeek"
+              @pointerup="mobileMiniBarSeeking = false"
+              @pointercancel="mobileMiniBarSeeking = false"
+              @lostpointercapture="mobileMiniBarSeeking = false"
+              @blur="mobileMiniBarSeeking = false"
+              @keydown.stop
+              @click.stop
+            >
+          </div>
+          <button
+            v-if="scrollMiniPlayerActive"
+            type="button"
+            class="mobileMiniBarReturn"
+            :disabled="mobileMiniBarControlsDisabled"
+            :aria-label="scrollMiniPlayerDetached
+              ? $t('Video.Player.Scroll Mini Player.Return to Video Tab')
+              : $t('Video.Player.Scroll Mini Player.Back to Top')"
+            @click.stop.prevent="scrollMiniScrollToTop"
+          />
+          <div class="mobileMiniBarDetails">
+            <span
+              class="mobileMiniBarTitle"
+              dir="auto"
+            >{{ title }}</span>
+            <span class="mobileMiniBarUploader">
+              <span dir="auto">{{ channelName }}</span>
+            </span>
+          </div>
+          <button
+            v-if="compactMobileMiniPlayer"
+            type="button"
+            class="mobileMiniBarExpand"
+            :disabled="mobileMiniBarControlsDisabled"
+            :aria-label="mobileMiniBarExpanded ? $t('Video.Player.Scroll Mini Player.Collapse Controls') : $t('Video.Player.Scroll Mini Player.Expand Controls')"
+            :aria-expanded="mobileMiniBarExpanded"
+            @pointerdown.stop
+            @keydown.stop
+            @click.stop.prevent="mobileMiniBarExpanded = !mobileMiniBarExpanded"
+          >
+            <ft-icon
+              :icon="['fas', 'angle-up']"
+              class="mobileMiniBarChevron"
+              aria-hidden="true"
+            />
+          </button>
+          <button
+            v-if="mobileMiniBarCanDismiss"
+            type="button"
+            class="mobileMiniBarDismiss"
+            :disabled="mobileMiniBarControlsDisabled"
+            :aria-label="$t('Video.Player.Scroll Mini Player.Hide')"
+            @click.stop.prevent="dismissMobileMiniPlayer"
+          >
+            <ft-icon
+              :icon="['fas', 'times']"
+              aria-hidden="true"
+            />
+          </button>
+          <div
+            class="mobileMiniBarPlayback"
+            @pointerdown.stop
+            @keydown.stop
+          >
+            <button
+              v-if="!mobileMiniBarCollapsed && canSkipPrevious"
+              type="button"
+              :disabled="mobileMiniBarControlsDisabled"
+              :aria-label="$t('Video.Previous')"
+              @click.stop.prevent="$emit('skip-to-prev')"
+            >
+              <ft-icon
+                :icon="['fas', 'step-backward']"
+                aria-hidden="true"
+              />
+            </button>
+            <button
+              v-if="!mobileMiniBarCollapsed"
+              type="button"
+              :disabled="mobileMiniBarSeekDisabled"
+              :aria-label="$t('Video.Player.Scroll Mini Player.Rewind 10 seconds')"
+              @click.stop.prevent="seekBySeconds(-10, false, false, false)"
+            >
+              <ft-icon
+                :icon="['fas', 'rewind-10']"
+                aria-hidden="true"
+              />
+            </button>
+            <button
+              type="button"
+              class="mobileMiniBarPlayPause"
+              :disabled="mobileMiniBarControlsDisabled"
+              :aria-label="playbackEnded ? replayLabel : scrollMiniIsPaused ? $t('Video.Player.Scroll Mini Player.Play') : $t('Video.Player.Scroll Mini Player.Pause')"
+              @click.stop.prevent="scrollMiniTogglePlayPause"
+            >
+              <ft-icon
+                :icon="['fas', playbackEnded ? 'replay' : scrollMiniIsPaused ? 'play' : 'pause']"
+                aria-hidden="true"
+              />
+            </button>
+            <button
+              v-if="!mobileMiniBarCollapsed"
+              type="button"
+              :disabled="mobileMiniBarSeekDisabled"
+              :aria-label="$t('Video.Player.Scroll Mini Player.Forward 10 seconds')"
+              @click.stop.prevent="seekBySeconds(10, false, false, false)"
+            >
+              <ft-icon
+                :icon="['fas', 'forward-10']"
+                aria-hidden="true"
+              />
+            </button>
+            <button
+              v-if="!mobileMiniBarCollapsed && canSkipNext"
+              type="button"
+              :disabled="mobileMiniBarControlsDisabled"
+              :aria-label="$t('Video.Next')"
+              @click.stop.prevent="$emit('skip-to-next')"
+            >
+              <ft-icon
+                :icon="['fas', 'step-forward']"
+                aria-hidden="true"
+              />
+            </button>
+          </div>
+        </div>
+      </Teleport>
+      <!-- Tracks where mouse double-clicks start; the controls inside handle the keyboard. -->
+      <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events -->
+      <div
+        v-if="scrollMiniPlayerActive"
+        class="scrollMiniPlayerControls"
+        @click.capture="trackScrollMiniClick"
+        @dblclick="handleScrollMiniDoubleClick"
+      >
+        <button
+          type="button"
+          class="scrollMiniPointerLayer"
+          :aria-label="scrollMiniPlayerStashed ? $t('Video.Player.Scroll Mini Player.Back to Top') : undefined"
+          :tabindex="scrollMiniPlayerStashed ? 0 : -1"
+          @pointerdown.stop.prevent="revealScrollMiniPlayerControls"
+          @click.stop.prevent="revealScrollMiniPlayerControls"
+          @keydown.enter.space.stop.prevent="revealScrollMiniPlayerControls"
+          @pointermove="handleScrollMiniControlsPointerMove"
+          @wheel.passive="suppressScrollMiniPlayPausePointerReveal"
+        />
+        <button
+          v-if="!scrollMiniPlayerStashed"
+          type="button"
+          :tabindex="scrollMiniPlayerDetached ? 0 : -1"
+          class="scrollMiniScrollTop"
+          :class="{ 'scrollMiniScrollTop-detached': scrollMiniPlayerDetached }"
+          :title="scrollMiniPlayerDetached
+            ? $t('Video.Player.Scroll Mini Player.Return to Video Tab')
+            : $t('Video.Player.Scroll Mini Player.Back to Top')"
+          @click.stop.prevent="scrollMiniScrollToTop"
+          @mousedown.stop.prevent
+        >
+          <ft-icon
+            :icon="scrollMiniPlayerDetached
+              ? ['fac', 'back-to-tab']
+              : ['fas', 'angle-up']"
+          />
+        </button>
+        <button
+          v-if="scrollMiniPlayerDetached && !scrollMiniPlayerStashed"
+          type="button"
+          class="scrollMiniDismiss"
+          :title="$t('Video.Player.Scroll Mini Player.Hide')"
+          :aria-label="$t('Video.Player.Scroll Mini Player.Hide')"
+          @click.stop.prevent="dismissCrossTabMiniPlayer"
+          @mousedown.stop.prevent
+        >
+          <ft-icon :icon="['fas', 'times']" />
+        </button>
+        <button
+          v-if="!scrollMiniPlayerStashed"
+          type="button"
+          :tabindex="scrollMiniPlayerDetached ? 0 : -1"
+          class="scrollMiniPlayPause"
+          :class="{ isHidden: !scrollMiniPlayPauseVisible }"
+          :title="playbackEnded ? replayLabel : scrollMiniIsPaused ? $t('Video.Player.Scroll Mini Player.Play') : $t('Video.Player.Scroll Mini Player.Pause')"
+          @click.stop.prevent="scrollMiniTogglePlayPause"
+          @mouseenter="handleScrollMiniPlayPauseMouseEnter"
+          @focusin="handleScrollMiniPlayPauseMouseEnter"
+          @pointerdown.stop
+          @mousedown.stop.prevent
+        >
+          <ft-icon
+            :icon="['fas', playbackEnded ? 'replay' : scrollMiniIsPaused ? 'play' : 'pause']"
+            aria-hidden="true"
+          />
+        </button>
+        <div
+          v-if="!scrollMiniPlayerStashed"
+          class="scrollMiniVolume"
+          :class="{ isExpanded: scrollMiniVolumeExpanded }"
+          @mouseenter="handleScrollMiniVolumeMouseEnter"
+          @mouseleave="handleScrollMiniVolumeMouseLeave"
+          @focusin="handleScrollMiniVolumeMouseEnter"
+          @focusout="handleScrollMiniVolumeMouseLeave"
+        >
+          <ft-icon
+            class="scrollMiniVolumeIcon"
+            :icon="scrollMiniVolumeIcon"
+          />
+          <div
+            ref="scrollMiniVolumeTrack"
+            class="shaka-range-container scrollMiniVolumeTrack"
+          >
+            <input
+              type="range"
+              :tabindex="scrollMiniPlayerDetached ? 0 : -1"
+              class="shaka-range-element scrollMiniVolumeBar"
+              min="0"
+              max="100"
+              step="any"
+              :value="scrollMiniVolumePercent"
+              :aria-label="$t('Settings.Channel Settings.Volume')"
+              @input.stop="updateScrollMiniVolume"
+              @pointerdown.stop="handleScrollMiniVolumePointerDown"
+            >
+          </div>
+        </div>
+        <div
+          v-if="!scrollMiniPlayerStashed"
+          class="scrollMiniDragHandle"
+          :class="{
+            isHidden: !scrollMiniPlayPauseVisible,
+            'scrollMiniDragHandle-onLightBg': scrollMiniDragHandleOnLightBg
+          }"
+          :title="$t('Video.Player.Scroll Mini Player.Drag Handle')"
+          @pointerdown.stop="handleScrollMiniDragPointerDown"
+          @mousedown.stop.prevent
+        />
+        <div
+          v-if="!scrollMiniPlayerStashed"
+          class="scrollMiniResizeHandle"
+          :class="[
+            `scrollMiniResizeHandle-${scrollMiniResizeCorner}`,
+            {
+              isHidden: !scrollMiniPlayPauseVisible,
+              'scrollMiniResizeHandle-onLightBg': scrollMiniResizeHandleOnLightBg
+            }
+          ]"
+          @pointerdown.stop="handleScrollMiniResizePointerDown"
+          @mousedown.stop.prevent
+        />
+      </div>
     </div>
+    </Teleport>
+    <!-- eslint-enable vue/html-indent -->
+    <section
+      v-if="repeatStats.active && !shortsPlayer && !hideRepeatStats && !fullWindowEnabled && !isFullscreen &&
+        !scrollMiniPlayerDetached"
+      class="repeatStats"
+      :class="{ scrollMiniHidden: scrollMiniPlayerActive }"
+      :aria-label="$t('Video.Player.Repeat Stats.Repeat Stats')"
+    >
+      <span class="repeatStatsMode">
+        <ft-icon
+          :icon="['fas', 'retweet']"
+          aria-hidden="true"
+        />
+        {{ repeatStatsRange ? $t('Video.Player.A-B Repeat.A-B Repeat') : $t('Video.Player.Repeat Stats.Looping') }}
+        <bdi v-if="repeatStatsRange">{{ repeatStatsRange }}</bdi>
+      </span>
+      <dl class="repeatStatsValues">
+        <div>
+          <dt>{{ $t('Video.Player.Repeat Stats.Repeats', {}, repeatStats.repeats) }}</dt>
+          <dd class="repeatStatsCount">
+            {{ repeatStats.repeats.toLocaleString($i18n.locale) }}
+          </dd>
+        </div>
+        <div>
+          <dt>{{ $t('Video.Player.Repeat Stats.Time Spent') }}</dt>
+          <dd class="repeatStatsTime">
+            {{ repeatStatsTime }}
+          </dd>
+        </div>
+      </dl>
+    </section>
   </div>
 </template>
 
@@ -130,3 +1921,72 @@
 
 <style src="shaka-player/dist/controls.css" />
 <style scoped src="./ft-shaka-video-player.css" />
+<style scoped src="./opentubex/musicAudio.css" />
+<style scoped src="./opentubex/shortsPlayer.css" />
+<style scoped src="./opentubex/endedScreen.css" />
+<style scoped src="./opentubex/chapters.css" />
+<style scoped src="./opentubex/playerMenu.css" />
+<style scoped src="./opentubex/controlBar.css" />
+<style scoped src="./opentubex/playerOverlays.css" />
+<style scoped src="./opentubex/sponsorBlock.css" />
+<style scoped src="./opentubex/seekBarMarkers.css" />
+<style scoped src="./opentubex/fullscreen.css" />
+<style scoped src="./opentubex/bufferSpinner.css" />
+<style scoped src="./opentubex/fullscreenControls.css" />
+<style scoped src="./opentubex/controlBarItems.css" />
+<style scoped src="./opentubex/captions.css" />
+<style scoped src="./opentubex/scrollMiniPlayer.css" />
+<style scoped src="./opentubex/tooltips.css" />
+<style scoped src="./opentubex/videoLayout.css" />
+<style scoped src="./opentubex/phonePlayerOptions.css" />
+<style scoped src="./opentubex/classicPlayerControls.css" />
+<style scoped src="./opentubex/portraitFullscreenDocks.css" />
+<style>
+/* Unscoped: pseudo-elements on range inputs do not work reliably with Vue scoped CSS. */
+.ftVideoPlayer.scrollMiniPlayer .scrollMiniVolumeBar {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.ftVideoPlayer.scrollMiniPlayer .scrollMiniVolumeBar::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 4px;
+  background: transparent;
+  border: 0;
+  color: transparent;
+  cursor: pointer;
+}
+
+.ftVideoPlayer.scrollMiniPlayer .scrollMiniVolumeBar::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  border: 0;
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  margin-top: -4px;
+  cursor: pointer;
+}
+
+.ftVideoPlayer.scrollMiniPlayer .scrollMiniVolumeBar::-moz-range-track {
+  width: 100%;
+  height: 4px;
+  background: transparent;
+  border: 0;
+  color: transparent;
+  cursor: pointer;
+}
+
+.ftVideoPlayer.scrollMiniPlayer .scrollMiniVolumeBar::-moz-range-thumb {
+  appearance: none;
+  border: 0;
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  cursor: pointer;
+}
+</style>

@@ -1,0 +1,2633 @@
+# ../eu.yaml fitxategian falta diren gakoetarako aukerako itzulpen automatikoak.
+Color Picker:
+  Hue: Tonua
+  Opacity: Opakutasuna
+  Backdrop Blur: Atzeko planoaren lausotzea
+  Hex Color: Kolore hamaseitarra
+  Apply Color: Aplikatu
+  Reset Color: Berrezarri
+  Copy Color: Kopiatu
+  Copy From Another Color: Kopiatu beste kolore batetik
+  Color Copied: Kolorea kopiatu da
+  Invalid Color: Idatzi baliozko kolore hamaseitar bat
+  Clipboard Unavailable: Arbela ez dago erabilgarri
+  Saturation and Brightness: Saturazioa eta distira
+New Tab: Fitxa berria
+Maximize: Maximizatu
+Restore: Leheneratu
+Close Tab: Itxi fitxa
+Close Confirmation:
+  Background Sync Warning: Irtetez gero, harpidetzen atzeko planoko eguneratzea geldituko da.
+  Hide Window: Ezkutatu leihoa
+  Title: OpenTubeX aplikaziotik irten?
+  Message: Ziur OpenTubeX aplikaziotik irten nahi duzula?
+  Quit: Irten
+  Never Ask Again: Ez galdetu berriro
+Close Window Confirmation:
+  Title: Leihoa itxi?
+  Message: Leiho honek {count} fitxa ditu. Ziur itxi nahi duzula?
+  Close Window: Itxi leihoa
+Confirmations:
+  Never Ask Again: Ez galdetu berriro
+  Settings Hint: Berrespen hau berriro gaitu dezakezu Ezarpenak → Orokorra → Berretsi aurretik… atalean
+Close Multiple Tabs Confirmation:
+  Title: Hainbat fitxa itxi?
+  Message: Ekintza honek {count} fitxa itxiko ditu.
+  Close Tabs: Itxi {count} fitxa
+Load Multiple Tabs Confirmation:
+  Title: Hainbat fitxa kargatu?
+  Message: Ekintza honek {count} fitxa kargatuko ditu.
+  Load Tabs: Kargatu {count} fitxa
+Unload Multiple Tabs Confirmation:
+  Title: Hainbat fitxa memoriatik kendu?
+  Message: Ekintza honek {count} fitxa memoriatik kenduko ditu.
+  Unload Tabs: Kendu {count} fitxa memoriatik
+Tabs Unloaded To Free Memory: Memoria askatzeko, azkenaldian erabili ez duzun fitxa {count} memoriatik kendu da | Memoria askatzeko, azkenaldian erabili ez dituzun {count} fitxa memoriatik kendu dira
+Use Vertical Tabs: Erabili fitxa bertikalak
+Use Horizontal Tabs: Erabili fitxa horizontalak
+Resize Tab Bar: Aldatu fitxa-barraren tamaina
+Find in page: Bilatu orrian
+Previous match: Aurreko bat-etortzea
+Next match: Hurrengo bat-etortzea
+Close find bar: Itxi bilaketa-barra
+No matches: Ez dago bat-etortzerik
+Version {versionNumber} is now available.: '{versionNumber} bertsioa erabilgarri dago.'
+See changes and update: Ikusi aldaketak eta eguneratu
+Dismiss: Baztertu
+Update to {version}: Eguneratu {version} bertsiora
+Global:
+  Ambient Mode: Giro-modua
+  Loading More: Gehiago kargatzen
+  New: Berria
+Search Listing:
+  Label:
+    Members Only: Kideentzat soilik
+    Possibly AI-generated: Agian AA bidez sortua
+Stats:
+  Left of daily limit: "Eguneko mugatik ({limit}) {duration} geratzen zaizu"
+  Daily limit reached: "Eguneko mugara iritsi zara ({limit})"
+  Replace old device: "Ordeztu gailu zaharra"
+  Replacement explanation: "Batu {device} gailu honekin bi sarrerak gailu fisiko berarenak badira soilik."
+  Overlapping days: "Bi historietan dauden egunak: {count}"
+  Overlapping watch time: "Gainjarritako ikuste-denbora"
+  Keep larger daily total: "Mantendu eguneko guztizko handiena"
+  Larger total explanation: "Historia bikoiztuetarako. Egun bereko ikuste gehigarria gal daiteke."
+  Add daily totals: "Batu eguneko guztizkoak"
+  Add totals explanation: "Historia bereizietarako. Bikoiztutako ikusteak bi aldiz konta ditzake."
+  Replacement preservation: "Historia bakarrean dauden egunak mantentzen dira. Jatorrizko historiak sinkronizazio zifratuan gordeta mantentzen dira."
+  Combined watch time: "Ikuste-denbora bateratua"
+  Replacement changed: "Ikuste-denbora aldatu da. Itxi aurrebista hau eta ireki berriro guztizko berriak berrikusteko."
+  Replacement success: "Gailuen estatistikak bateratu dira"
+  All devices: Gailu guztiak
+  Stats: Estatistikak
+  Watch time summary: Ikustaldi-denboraren laburpena
+  Today: Gaur
+  This week: Aste honetan
+  Total watch time: Ikustaldi-denbora guztira
+  Daily average: Eguneko batezbestekoa
+  So far today: Gaur orain arte
+  Since: '{day} egunetik'
+  All recorded time: Erregistratutako denbora guztia
+  Per calendar day: Egutegiko egun bakoitzeko
+  Day by day: Egunez egun
+  Highest: 'Handiena: {duration}'
+  Week by week: Astez aste
+  Last 14 days: Azken 14 egunak
+  Last 8 weeks: Azken 8 asteak
+  Daily chart aria: Azken 14 egunetako eguneroko ikustaldi-denbora
+  Weekly chart aria: Azken 8 asteetako asteko ikustaldi-denbora
+  No data: Bideoak ikusi ahala agertuko da hemen ikustaldi-denbora.
+  Estimate note: Eguneratze honen aurreko ikustaldi-denbora gordetako erreprodukzio-aurrerapenetik kalkulatu da.
+  Adjust imported watch time: Doitu inportatutako ikustaldi-denbora
+  Imported watch time: Inportatutako ikustaldi-denbora
+  Imported watch time explanation: Aukeratu erabili ohi zenuen erreprodukzio-abiadura. Inportatutako bideoen iraupena abiadura horrekin zatituko da, bideoak ikusten benetan emandako denbora kalkulatzeko.
+  Playback speed: Erreprodukzio-abiadura
+  Channel speed note: Kanaletako gordetako erreprodukzio-abiadurak erabiliko dira erabilgarri daudenean.
+  Apply playback speed: Aplikatu erreprodukzio-abiadura
+  Imported watch time adjusted: Inportatutako ikustaldi-denbora doitu da
+  Reset statistics: Berrezarri estatistikak
+  Reset: Berrezarri
+  Reset confirmation: Ziur ikustaldien estatistika guztiak berrezarri nahi dituzula? Ekintza hau ezin da desegin.
+  Reset success: Ikustaldien estatistikak berrezarri dira
+  Less than a minute: < 1 min
+  Minutes: '{minutes} min'
+  Hours: '{hours} h'
+  Hours and minutes: '{hours} h {minutes} min'
+Home Page:
+  Keep disabled and hide this section: "Mantendu desgaituta eta ezkutatu atal hau"
+  Familiar description: "Lehenetsi ikusi gabeko bideoak dagoeneko gustuko dituzun kanaletatik."
+  Balanced description: "Nahastu kanal ezagunak zure interesekin bat datozen kanal berriekin."
+  Explore description: "Eman leku gehiago zure interesekin lotutako kanal berriei."
+  Turn off recommendations: Desaktibatu gomendioak
+  Recommended for you: "Zuretzat gomendatuak"
+  Recommendations description: "Sailkatu bideoak zure gailuan ikusitakoen historian oinarrituta. Kanalen identifikatzaileak eta gaien araberako bilaketak hautatutako backend-era bidaltzen dira bideoak aurkitzeko."
+  Enable recommendations: "Gaitu gomendioak"
+  Recommendations need history: "Ikusi bideo batzuk historia gaituta gomendioak jasotzeko."
+  No recommendations: "Ez da gomendiorik aurkitu. Saiatu freskatzen bideo gehiago ikusi ondoren."
+  Recommendations unavailable: "Ezin izan dira gomendioak kargatu. Saiatu berriro geroago."
+  More like this: "Horrelako gehiago"
+  Not interested: "Ez zait interesatzen"
+  Hide this channel: "Ezkutatu kanal hau"
+  Channel hidden: "{channel} gomendioetatik ezkutatu da"
+  Reset recommendations: "Berrezarri gomendioak"
+  Discovery: "Aurkikuntza"
+  Familiar: "Ezaguna"
+  Balanced: "Orekatua"
+  Explore: "Arakatu"
+  Related to: "{title} bideoarekin erlazionatuta"
+  More from: "{channel} kanaleko gehiago"
+  Matches interest: "{topic} gaiari buruzko zure interesarekin bat dator"
+  Related discovery privacy: "Bideoen identifikatzaileak ere bidaltzen dira erlazionatutako bideoak aurkitzeko."
+  Home: Hasiera
+  Description: Jarraitu utzitako lekutik eta ikusi azken jarduera.
+  Customize: Pertsonalizatu hasiera
+  Done: Eginda
+  Customize description: Aukeratu zer atal agertuko diren eta antolatu nahi duzun hurrenkeran.
+  Continue watching: Jarraitu ikusten
+  New since last visit: Azken bisitatik berria
+  Watch queue: Erreprodukzio-ilara
+  Recent playlists: Azken erreprodukzio-zerrendak
+  Recent downloads: Azken deskargak
+  Upcoming reminders: Hurrengo gogorarazpenak
+  Watch statistics: Ikustaldien estatistikak
+  View all: Ikusi dena
+  Previous shelf page: '{section} atalaren aurreko orria'
+  Next shelf page: '{section} atalaren hurrengo orria'
+  Shelf page status: '{section}, {page}. orria {total}(e)tik.'
+  Move section up: Eraman {section} gora
+  Move section down: Eraman {section} behera
+  Section moved: '{section} {position}. posiziora eraman da, {total} posiziotatik.'
+  Nothing here yet: Oraindik ez dago ezer hemen
+  Empty description: Hasten dituzun bideoak, erabiltzen dituzun erreprodukzio-zerrendak, deskargak eta gogorarazpenak hemen agertuko dira.
+  All sections hidden: Atal guztiak ezkutatuta daude
+  All sections hidden description: Pertsonalizatu hasiera atal bat berriro erakusteko.
+Subscriptions:
+  New video from {channel}: "{channel} kanalaren bideo berria"
+  New short from {channel}: "{channel} kanalaren labur berria"
+  '{channel} is live': "{channel} zuzenean dago"
+  New post from {channel}: "{channel} kanalaren argitalpen berria"
+  Mark As Unseen: Markatu ikusi gabeko gisa
+  Copy Error Details: "Kopiatu xehetasun teknikoak"
+  Refresh Errors: "Eguneratu ezin izan diren kanalak: {channels}. Egin klik xehetasunak ikusteko."
+  Refresh Error Channels More: "{channels} eta beste {count} | {channels} eta beste {count}"
+  Never show {type} from this channel in feeds again: Ez erakutsi berriro kanal honetako {type} jarioetan
+  Refreshing Subscription Videos: Harpidetzetako bideoak freskatzen
+  Refreshing Subscription Shorts: Harpidetzetako bideo laburrak freskatzen
+  Refreshing Subscription Live Streams: Harpidetzetako zuzeneko emankizunak freskatzen
+  Refreshing Subscription Posts: Harpidetzetako argitalpenak freskatzen
+  New Content: Eduki berria
+  New Feed Refresh Warning Title: Harpidetza-jario guztiak freskatu?
+  New Feed Refresh Warning: RSS erabili gabe harpidetza 1eko eduki mota guztiak freskatzeak luze jo dezake. Jarraitu nahi duzu? | RSS erabili gabe {count} harpidetzatako eduki mota guztiak freskatzeak luze jo dezake. Jarraitu nahi duzu?
+  New Since Last Refresh: Azken freskatzetik berria
+  Mark As Seen: Markatu ikusita
+  Mark All as Seen: Markatu guztiak ikusita
+  No New Content: Ez dago eduki berririk.
+  New Content Tabs: Eduki berriko fitxak
+  Show Tabbed View: Erakutsi fitxen ikuspegia
+  Show Combined View: Erakutsi ikuspegi bateratua
+  Newest First: Berrienak lehenik
+  Oldest First: Zaharrenak lehenik
+  RSS Feeds:
+    Refreshing: RSS jarioak freskatzen
+    Tab: RSS
+    Followed Feeds: Jarraitutako RSS jarioak
+    Add Feed: Gehitu jarioa
+    Feed URL: RSS edo Atom jarioaren URLa
+    Remove Feed: Kendu {feed}
+    Invalid Feed URL: Idatzi http:// edo https:// aurrizkiarekin hasten den web-helbide bat.
+    Feed Already Followed: Dagoeneko jarraitzen duzu jario hau.
+    Feed Could Not Be Loaded: Ezin izan da jarioa kargatu. Egiaztatu helbideak RSS edo Atom jario bat adierazten duela.
+    Feed Requires Browser Check: Gune honek OpenTubeX-ek egin ezin duen arakatzaile-egiaztapen bat eskatzen du. Saiatu beste helbide edo RSSHub instantzia batekin jario honetarako.
+    Refresh Errors: Ezin izan da jario 1 freskatu. | Ezin izan dira {count} jario freskatu.
+    Description: Gehitu RSS edo Atom jario bat beste plataformetako sortzaileei jarraitzeko. {rssHub} instantziek webgune askotarako jarioak eskaintzen dituzte, Twitch adibidez.
+    Empty Items: Zure jarioek ez dute elementurik une honetan.
+    No Feeds: Oraindik ez duzu RSS jariorik jarraitzen.
+    RSSHub:
+      Browse: Arakatu RSSHub
+      Title: Gehitu RSSHub-eko jario bat
+      Description: Aukeratu RSSHub instantzia bat, zerbitzu bat eta zer jarraitu. Jarioaren helbidea automatikoki sortzen da.
+      Instance: RSSHub instantzia
+      Service: Zerbitzua
+      Search Services: Bilatu zerbitzuak
+      Loading Services: Zerbitzuak kargatzen…
+      Services Could Not Be Loaded: Instantzia honek ez ditu bere zerbitzuak itzuli. Egiaztatu helbidea edo aukeratu beste instantzia bat.
+      Feed Type: Jario mota
+      Requires Configuration: Jario honek konfigurazio gehigarria behar du instantzian, beraz baliteke instantzia publikoetan ez ibiltzea.
+      Optional Parameter: '{parameter} (aukerakoa)'
+      Not Set: Ezarri gabe
+    Retry Feed: Saiatu berriro {feed} kargatzen
+Trending:
+  Music: Musika
+  Load Error: Ezin izan dira joerak kargatu.
+  Unsupported Backend: Joerek API lokala behar dute. Hautatu API lokala edo gaitu ordezko motorra.
+Most Popular Feed Empty: Invidious instantzia honen Ikusienak jarioa hutsik dago.
+Feed:
+  Cancel Refresh: Utzi freskatzeari
+  Next Auto Refresh: 'Hurrengo freskatze automatikoa: {date}'
+User Playlists:
+  Refresh Saved Playlists: 'Freskatu gordetako erreprodukzio-zerrendak'
+  Saved Playlists Refresh Failed: 'Gordetako erreprodukzio-zerrenda batzuk ezin izan dira freskatu.'
+  Save: "Gorde"
+  Edit: "Editatu"
+  Pin to Navigation: "Ainguratu nabigazioan"
+  Unpin from Navigation: "Desainguratu nabigaziotik"
+  Pin to Top: "Ainguratu goian"
+  Unpin from Top: "Desainguratu goitik"
+  Pinned to Top: "Goian ainguratuta"
+  Reorder Hint: Arrastatu edo erabili gezi-teklak berrordenatzeko
+  Add new videos to the top (custom order): "Gehitu bideo berriak hasieran (ordena pertsonalizatua)"
+  Shuffle videos by default: "Erreproduzitu bideoak ausazko ordenan modu lehenetsian"
+  Repair Playlists: Konpondu erreprodukzio-zerrendak
+  Repair Description: Berreskuratu falta diren bideo-datuak YouTube Takeout ZIP bat inportatu ondoren. Zerrenden ordena ez da aldatzen.
+  Remove Unavailable Videos: "Kendu erabilgarri ez dauden bideoak"
+  Remove Unavailable Videos Confirmation: "Eskuragarri ez dauden bideoak kendu? Aurkitu: {count}. Ezin izan da egiaztatu: {uncertain}. Egiaztatu gabeko bideoak gordeko dira."
+  Add Missing Videos: "Gehitu falta diren bideoak jatorrizko erreprodukzio-zerrendatik"
+  Source Playlist: "Jatorrizko erreprodukzio-zerrenda"
+  Save Playlist: "Gorde erreprodukzio-zerrenda"
+  Remove Saved Playlist: "Kendu gordetako erreprodukzio-zerrenda"
+  Load More Playlists: Kargatu erreprodukzio-zerrenda gehiago
+  Save to: Gorde hemen…
+  Quick Bookmark Icon: Laster-marka azkarraren ikonoa
+  Custom Emoji: Emoji pertsonalizatua
+  Choose Image: Aukeratu irudia
+  Use Bookmark Icon: Erabili laster-markaren ikonoa
+  SinglePlaylistView:
+    Retry: Saiatu berriro
+    This playlist could not be loaded.: Ezin izan da erreprodukzio-zerrenda hau kargatu.
+    More videos could not be loaded.: Ezin izan dira bideo gehiago kargatu.
+  Playlist Thumbnail: "Erreprodukzio-zerrendaren miniatura"
+  Restore Default Thumbnail: "Leheneratu miniatura lehenetsia"
+  AddVideoPrompt:
+    And N more videos: 'eta beste bideo {count} | eta beste {count} bideo'
+  Move Up: Gora
+  Move Down: Behera
+  Remove: Kendu
+  Background Tasks:
+    Loading videos from {playlistName}: '{playlistName} zerrendako bideoak kargatzen'
+    Adding missing videos to {playlistName}: 'Falta diren bideoak {playlistName} zerrendara gehitzen'
+    Checking {playlistName} for unavailable videos: '{playlistName} zerrendan erabilgarri ez dauden bideoak bilatzen ({checked}/{total})'
+History:
+  From Date: 'Hasiera'
+  To Date: 'Amaiera'
+  Channel Filter: 'Kanala'
+  All Channels: 'Kanal guztiak'
+  Clear Filters: 'Garbitu iragazkiak'
+  Invalid Date Range: 'Hasiera-datak amaiera-data baino lehenagokoa edo berdina izan behar du.'
+  Empty Filter Message: 'Zure historiako bideorik ez dator bat iragazki hauekin.'
+  Repair Compact: "Konpondu"
+  Mark All Watched Compact: "Denak ikusita"
+  Repair Use Cookies: "Erabili konfiguratutako yt-dlp cookieak"
+  Repair Cookies Hint: "500 bideo baino gehiago egiaztatu behar dira. Konfiguratu cookieak yt-dlp ezarpenetan eta gaitu hemen eskaeren mugaketa-arriskua murrizteko."
+  Repair Description: "Erabili historia inportatu ondoren, edo bideoei xehetasunak falta zaizkienean edo LIVE etiketa okerra dutenean."
+  Repair Details: "Falta diren izenburuak, kanalak eta argitalpen-datak betetzen ditu, eta iraupenak eta LIVE etiketak egiaztatzen ditu. Ikustearen aurrerapena eta ikusitako egoera ez dira aldatzen."
+  Repair Notice: "Historia handiek denbora behar dezakete. Huts egindako eskaerak automatikoki errepikatzen dira. Ezabatutako edo bideo pribatuen datuak osatu gabe gera daitezke."
+  Start Repair: "Hasi konpontzen"
+  Repair Checking: "Bideo-xehetasunak egiaztatzen"
+  Repair Waiting: "YouTube-ren zain. Konponketa automatikoki jarraituko da."
+  Repair Retrying: "Huts egindako eskaerak errepikatzen"
+  Repair Finished: "Konponketa amaitu da"
+  Repair Stopped: "Konponketa gelditu da"
+  Repair: "Konpondu historia"
+  Repair Progress: "Egiaztatuak: {checked}/{total} · Konponduak: {repaired} · Huts egindakoak: {failed}"
+  Mark All As Watched: Markatu guztiak ikusita
+  Mark All As Watched Confirmation: Ziur historiako bideo guztiak ikusita markatu nahi dituzula?
+  All History Marked as Watched: Historiako bideo guztiak ikusita markatu dira
+  Select History Age: Aukeratu sarrera batek zenbat denbora izan behar duen ezabatu aurretik.
+  Delete Entries Older Than: Ezabatu hau baino zaharragoak diren sarrerak
+  Number of Days: Egun kopurua
+  History Cleanup Warning: Bat datozen ikustaldi-historiako sarrerak behin betiko ezabatuko dira.
+  1 Day: Egun 1
+  1 Week: Aste 1
+  1 Month: Hilabete 1
+  3 Months: 3 hilabete
+  1 Year: Urte 1
+  All Time: Denbora guztia
+  Custom: Pertsonalizatua
+  History Older Than Days Removed: Egun 1 baino zaharragoa den ikustaldi-historia kendu da | {days} egun baino zaharragoa den ikustaldi-historia kendu da
+Settings:
+  Diagnostics:
+    Diagnostics: Diagnostikoa
+    Description: Diagnostiko-erregistroa aktibatuta dagoen bitartean, OpenTubeX-ek azken erregistro-mezuak memorian gordetzen ditu, akats-txostenei erantsi ahal izateko. Ez ditu inoiz bere kabuz gordetzen edo bidaltzen, eta erregistroa desaktibatzean ezabatu egiten dira. Txostenek ez dituzte cookieak, tokenak, IP helbideak eta URL parametroak barne hartzen, baina erreproduzitu dituzun bideoen IDak izan ditzakete; beraz, berrikusi txostena partekatu aurretik.
+    Enable Logging: Gaitu diagnostiko-erregistroa
+    Copy Report: Kopiatu txostena
+    Save Report: Gorde txostena
+    Clear Log: Garbitu erregistroa
+    Report Copied: Diagnostiko-txostena kopiatu da
+    Report Saved: Diagnostiko-txostena gorde da
+    Report File: Diagnostiko-txostena
+    Save Failed: Ezin izan da diagnostiko-txostena gorde
+    Log Cleared Message: Diagnostiko-erregistroa garbitu da
+  Tab Unloading:
+    Automatically unload tabs: "Deskargatu fitxak automatikoki"
+    Memory threshold: "Memoriaren atalasea"
+    Tabs to unload: "Deskargatu beharreko fitxak"
+    Automatic unloading help: "Deskargatu atzeko planoko fitxa zaharrenak memoria askatzeko. Fitxa aktiboak eta erreproduzitzen ari direnak kargatuta geratzen dira."
+    Memory threshold help: "Errendatze-prozesuaren memoria-mugaren ehunekoa, ez sistemaren RAM osoarena."
+  Password Settings:
+    Failed to Save Password: "Ezin izan da pasahitza gorde."
+    Confirm Password: "Berretsi pasahitza"
+    Passwords Do Not Match: "Pasahitzak ez datoz bat."
+  Navigation and Controls: "Nabigazioa eta kontrolak"
+  Control Bar:
+    Title: "Kontrol-barra"
+    Customize: "Pertsonalizatu kontrol-barra"
+    Hidden: "Ezkutatuta"
+    Empty: "Ez dago kontrolik"
+    Move to Control Bar: "Eraman {control} kontrol-barrara"
+    Move to Player Menu: "Eraman {control} erreproduzigailuaren menura"
+    Hide: "Ezkutatu {control}"
+  Fullscreen Actions:
+    Recommended Videos: "Gomendatutako bideoak"
+    Title: "Pantaila osoko ekintzak"
+    Customize: "Pertsonalizatu pantaila osoko ekintzak"
+    Add Action: "Gehitu ekintza"
+    Empty: "Ez da pantaila osoko ekintzarik hautatu"
+    Quick Bookmark: "Laster-marka azkarra"
+    Availability Hint: "Ekintzak aplikagarriak diren bideoetan soilik agertzen dira."
+    Disabled: "(desgaituta)"
+  Quick Settings:
+    Quick Settings: Ezarpen azkarrak
+    Customize Quick Settings: Pertsonalizatu ezarpen azkarrak
+    Add Setting: Gehitu ezarpena
+    Appearance: Itxura
+    Playback: Erreprodukzioa
+    Content: Edukia
+    Language and Region: Hizkuntza eta eskualdea
+    All Settings: Ezarpen guztiak
+    Profile Selector Hint: Profil batetik bestera aldatzeko, eskuineko klik ere egin dezakezu profilaren ikonoan
+    Profile Selector Touch Hint: Profil batetik bestera aldatzeko, profilaren ikonoa sakatuta ere eduki dezakezu
+  Categories:
+    General Description: Hizkuntza, abioa, fitxak eta itzulpena
+    Appearance: Itxura
+    Appearance Description: Gaia, diseinua, nabigazioa eta bideo-zerrendak
+    Content appearance: Bideo-zerrendak eta koadro txikiak
+    Layout: Diseinua
+    Playback Description: Erreproduzigailuaren balio lehenetsiak, azpitituluak eta kanal bakoitzeko ezarpenak
+    Subscriptions Description: Jarioen freskatzea, bideo berrien jakinarazpenak eta RSS jarioak
+    Downloads Description: Deskargen karpeta, txantiloiak eta deskarga automatikoak
+    Focus: Kontzentrazioa
+    Focus Description: Ezkutatutako edukia, ikusteko mugak, gogorarazpenak eta gurasoen kontrola
+    Add-ons: Gehigarriak
+    Add-ons Description: SponsorBlock, DeArrow, atsegin ezak, AiSList eta ahots bidezko itzulpena
+    Privacy Description: Historia, bilaketa-iradokizunak, estekak eta aplikazioaren pasahitza
+    Online activity: Lineako jarduera
+    Data And Storage Description: Babeskopiak, inportazioa eta esportazioa, diskoaren erabilera eta garbiketa
+    Sync Description: Sinkronizazio-zerbitzariko kontua, gailuen parekatzea eta sinkronizatutako datuak
+    Advanced: Aurreratua
+    Advanced Description: Backendak, bufferra, kanpoko tresnak, proxya eta diagnostikoa
+    Alternative providers: Bideoen eta metadatuen hornitzaileak
+  Highlight Changed Settings: Nabarmendu lehenetsitako balioetatik aldatutako ezarpenak
+  Reset Setting to Default: Berrezarri ezarpen honen balio lehenetsia
+  Performance Impact:
+    Show Performance Impact: Erakutsi errendimenduaren eraginaren adierazleak
+    Moderate: Eragin ertaina
+    High: Eragin handia
+    Description: Ezarpen honek {resources} baliabideen erabilera handitu dezake
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: memoria
+      Network: sarea
+      Disk: diskoa
+  General Settings:
+    Link Underlines:
+      Link Underlines: "Esteken azpimarra"
+      On Hover: "Azpimarratu estekak kurtsorea gainetik pasatzean"
+      Never: "Ez azpimarratu inoiz estekak"
+      Always: "Azpimarratu beti estekak"
+    Limit Titles to Two Lines: "Mugatu izenburuak bi lerrora"
+    Close Window With Last Tab: 'Itxi leihoa azken fitxa ixtean'
+    Preferred Video Codec: Hobetsitako bideo-kodeka
+    Always Use Backup Media Server: "Erabili beti babeskopia-multimedia zerbitzaria"
+    Automatically switch stream extraction methods: "Aldatu automatikoki korronteak erauzteko metodoak"
+    Enable Tabs: "Gaitu fitxak"
+    Thumbnail Swipe Gestures:
+      Left: Irudi txikietan ezkerrera irristatu
+      Right: Irudi txikietan eskuinera irristatu
+      Description: Irristatu horizontalki bideo baten irudi txikian eta askatu hautatutako ekintza egiteko.
+    Data Saver Thumbnails: "Datuak aurrezteko miniaturak"
+    Use tray icon: "Erabili sistemaren erretiluko ikonoa"
+    Close to system tray: "Itxi sistemaren erretilura"
+    Tray required for background refresh: "Sistemaren erretiluko ikonoa beharrezkoa da harpidetzak atzeko planoan eguneratzea gaituta dagoen bitartean."
+    Show Video Menu Button: Erakutsi bideo-menuaren botoia
+    Swipe to refresh: Irristatu freskatzeko
+    Blur Thumbnails: Lausotu koadro txikiak
+    Navigation:
+      Always Show Navigation Bar: Erakutsi beti nabigazio-barra behealdean dagoenean
+      Compact Tab Labels: Nabigazio-barra trinkoa behealdean dagoenean
+      Show Active Subscriptions: Erakutsi harpidetza aktiboak alboko barran
+      Navigation: Nabigazioa
+      Customize Navigation: Pertsonalizatu nabigazioa
+      Add Item: Gehitu elementua
+    Date Format: Data-formatua
+    Time Format: Ordu-formatua
+    Language Default: Hizkuntzaren lehenetsia
+    Update Relative Timestamps: Mantendu denbora-marka erlatiboak eguneratuta
+    Stream Extraction Method:
+      Stream Extraction Method: Korronteak erauzteko metodoa
+      yt-dlp: yt-dlp
+      Built-in: Integratua
+    Confirm Before: Berretsi aurretik…
+    Confirmation Options:
+      Closing App: OpenTubeX ixtea
+      Closing Window: Hainbat fitxa dituen leiho bat ixtea
+      Closing Tabs: Hainbat fitxa ixtea
+      Loading Tabs: Hainbat fitxa kargatzea
+      Unloading Tabs: Hainbat fitxa memoriatik kentzea
+    Remember Tab Navigation History: Gogoratu fitxen nabigazio-historia
+    New Tab Position:
+      New Tab Position: Fitxa berriaren kokapena
+      At the end: Amaieran
+      After current tab: Uneko fitxaren ondoren
+      After current tab in opened order: Uneko fitxaren ondoren, irekitze-ordenan
+    Tab Close Focus:
+      Last active tab: "Azken fitxa aktiboa"
+      Next tab in tab order: "Hurrengo fitxa fitxen ordenan"
+      Previous tab in tab order: "Aurreko fitxa fitxen ordenan"
+      Tab Close Focus: Fitxa aktiboa itxi ondoren
+    Startup Behavior:
+      Startup Behavior: Abioan
+      Load all tabs: Kargatu fitxa guztiak
+      Load previously loaded tabs: Kargatu aurretik kargatutako fitxak
+      Load last active tab: Kargatu aktibo egon den azken fitxa
+      Start with an empty session: Hasi saio huts batekin
+      Load landing page, keep other tabs unloaded: Kargatu hasierako orria eta mantendu beste fitxak kargatu gabe
+    Use AI Translation Completions: Bete falta diren itzulpenak adimen artifizialak sortutakoekin
+    Reduced Motion:
+      Reduced Motion: Mugimendu murriztua
+      System: Sistema
+      Force On: Behartu gaituta
+      Force Off: Behartu desgaituta
+    Comment Translation:
+      Title: Iruzkinen itzulpena
+      Enable: Gaitu iruzkinen itzulpena
+      Never Translate: Ez itzuli hizkuntza honetako iruzkinak
+      Choose Language: Aukeratu hizkuntza
+      Description: Aplikazioaren hizkuntzako iruzkinak baztertuta daude dagoeneko. Gehitu irakur ditzakezun gainerako hizkuntzak.
+      Remove Language: Itzuli berriro {language} hizkuntzako iruzkinak
+    Avoid translation:
+      Avoid translation: Hobetsi itzuli gabeko bideo-testua
+      Disabled: Desgaituta
+      Watch Only: Bideoaren interfazean soilik
+      Entire App: Aplikazio osoan
+    Playlist View Type:
+      Playlist View Type: Erreprodukzio-zerrendaren ikuspegi mota
+    Show Thumbnail Previews: Erakutsi koadro txikien aurrebistak
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: Koadro txikiaren ekintza-botoi gehigarria
+      None: Bat ere ez
+      Mark as Watched: Markatu ikusita
+      Copy YouTube Link: Kopiatu YouTube esteka
+      Open in YouTube: Ireki YouTuben
+    Mobile Layout:
+      Mobile Layout: 'Mugikorreko diseinua'
+      Automatic: 'Automatikoa'
+      Phone: 'Telefonoa'
+      Tablet: 'Tableta'
+    Video View Type:
+      Full Width: Zabalera osoa
+    Grid Columns:
+      Grid Columns: Saretako zutabeak
+      Playlist Grid Columns: Erreprodukzio-zerrenden saretako zutabeak
+      Auto: Automatikoa
+    Preferred API Backend:
+      Yattee Server: Yattee zerbitzaria
+    Yattee Server:
+      Server URL: Yattee zerbitzariaren URLa
+      Username: Erabiltzaile-izena
+      Password: Pasahitza
+      Proxy Videos: Erabili Yattee zerbitzaria bideoen proxy gisa
+      Test Connection: Probatu konexioa
+      Testing: Konexioa probatzen…
+      Connected: 'Konektatuta: Yattee Server {version}'
+      Errors:
+        Invalid URL: Sartu zerbitzariaren URLa, https:// edo http:// aurrizkiarekin.
+        Unreachable: Ezin izan da zerbitzarira iritsi. Egiaztatu URLa eta zerbitzaria martxan dagoen.
+        Media not allowed: 'Konektatuta, baina zerbitzariak ez dio aplikazio honi bideoak kargatzen uzten. Ezarri CORS_ORIGINS={origins} zerbitzariaren ingurune-aldagaietan.'
+        Not a Yattee server: Zerbitzariak erantzun du, baina ez da Yattee zerbitzaria.
+        Credentials required: Zerbitzariak erabiltzaile-izena eta pasahitza behar ditu.
+        Invalid credentials: Zerbitzariak erabiltzaile-izena edo pasahitza baztertu du.
+        Rate limited: Zerbitzaria saio-hasierak blokeatzen ari da, huts egindako saiakera gehiegi egon direlako. Saiatu berriro geroago.
+        Server error: Zerbitzariak errore bat itzuli du (HTTP {status}).
+    Notifications:
+      Notifications: Jakinarazpenak
+      System and In-App: Sistema eta aplikazioan
+      System Only: Sistema soilik
+      Off: Desaktibatuta
+    Auto Load Next Page:
+      Lists Tooltip: Kargatu automatikoki jarioen, bilaketa-emaitzen eta beste zerrenda batzuen orri gehigarriak.
+    Auto Load Comments:
+      Label: Kargatu iruzkinak automatikoki
+      Tooltip: Kargatu iruzkinak orria irekitzean eta kargatu gehiago korritu ahala.
+  Context Menu Search Settings:
+    Context Menu Search Settings: Laster-menuko bilaketa
+    Description: Aukeratu hautatutako testuan eskuineko klik egitean agertuko diren bilaketa-motorrak. Bilaketak arakatzaile lehenetsian irekiko dira.
+    Icon Hint: Motor bat gaitzean, haren webgunearekin konektatuko da favicon-a kargatzeko.
+    Engine Name: Motorraren izena
+    Search URL: Bilaketaren URLa
+    URL Hint: Erabili %s URLak kodetutako hautapen-testua eduki behar duen lekuan.
+    Add Custom Engine: Gehitu bilaketa-motor pertsonalizatua
+    Add Engine: Gehitu motorra
+    Remove Engine: Kendu {engine}
+    Invalid Engine: Idatzi izen bat eta %s duen baliozko HTTP edo HTTPS bilaketa-URL bat.
+    Engine Limit: Gehienez {count} bilaketa-motor pertsonalizatu gehi ditzakezu.
+  Theme Settings:
+    Theme and Colors: "Gaia eta koloreak"
+    Font Size: Letra-tamaina
+    Sections:
+      Interface: "Interfazea"
+      Side Bar and Header: "Alboko barra eta goiburua"
+      Tabs: "Fitxak"
+      Player: "Erreproduzigailua"
+      Scrolling: "Korritzea"
+      Notifications: "Jakinarazpenak"
+    Only Show Important Notifications: Erakutsi jakinarazpen garrantzitsuak soilik
+    Visible Search Suggestions: "Bilaketa-iradokizun ikusgaiak"
+    Material Accent Color: "Material azentu-kolorea"
+    Tally Accent Color: "Tally azentu-kolorea"
+    Material Wallpaper Colors: "Horma-paperaren koloreak"
+    Material System Accent Color: "Sistemaren nabarmentze-kolorea"
+    Tab Loading Indicator:
+      Tab Loading Indicator: Fitxaren karga-adierazlea
+      Bar: Barra
+      Dot: Puntua (klasikoa)
+    Compact Settings Categories: "Ezarpen-kategoria trinkoak"
+    Playlist Thumbnail Size: "Erreprodukzio-zerrendako miniaturen tamaina"
+    Compact Mobile Mini Player: "Mugikorreko erreproduzitzaile txiki trinkoa"
+    Always Show Mobile Search Bar: "Erakutsi beti mugikorreko bilaketa-barra"
+    Frosted Glass Player UI: "Beira esmerilatu efektuko erreproduzigailuaren interfazea"
+    Main Color Theme:
+      Catppuccin Macchiato Rosewater: "Kaputxino Macchiato urlarrosa"
+      Catppuccin Macchiato Flamingo: "Kaputxino Macchiato flamingoa"
+      Catppuccin Macchiato Pink: "Kaputxino Macchiato arrosa"
+      Catppuccin Macchiato Mauve: "Kaputxino Macchiato ubela"
+      Catppuccin Macchiato Red: "Kaputxino Macchiato gorria"
+      Catppuccin Macchiato Maroon: "Kaputxino Macchiato marroia"
+      Catppuccin Macchiato Peach: "Kaputxino Macchiato mertxika"
+      Catppuccin Macchiato Yellow: "Kaputxino Macchiato horia"
+      Catppuccin Macchiato Green: "Kaputxino Macchiato berdea"
+      Catppuccin Macchiato Teal: "Kaputxino Macchiato berde-urdinxka"
+      Catppuccin Macchiato Sky: "Kaputxino Macchiato zerua"
+      Catppuccin Macchiato Sapphire: "Kaputxino Macchiato zafiroa"
+      Catppuccin Macchiato Blue: "Kaputxino Macchiato urdina"
+      Catppuccin Macchiato Lavender: "Kaputxino Macchiato izpilikua"
+    Move Downloads to App Header: Eraman Deskargak aplikazioaren goiburura
+    Move Settings to App Header: Eraman Ezarpenak aplikazioaren goiburura
+    Hide Side Bar on Watch Pages: Ezkutatu alboko barra bideoen orrietan
+    UI Roundness: Interfazearen biribiltasuna
+    Scrollbar Width: Korritze-barraren zabalera
+    Scroll Speed: Korritze-abiadura
+    Animation Speed: Animazioen abiadura
+    Thumbnail Size: Koadro txikien tamaina
+    Show Tab Icons: Erakutsi fitxen ikonoak
+    Load Missing Tab Icons: Kargatu falta diren fitxen ikonoak
+    Loading Missing Tab Icons: Falta diren fitxen ikonoak kargatzen…
+    No Missing Tab Icons: Onartutako fitxen ikono guztiak kargatuta daude
+    Loaded Tab Icons: 'Falta zen fitxaren ikonoa kargatu da: {count} | Falta ziren fitxen ikonoak kargatu dira: {count}'
+    Loaded Tab Icons With Failures: Fitxen {loaded} ikono kargatu dira; ezin izan dira {failed} kargatu
+    Show Tab Previews: Erakutsi fitxen aurrebistak
+    Use Fixed Tab Width: Erabili fitxa-zabalera finkoa modu horizontalean
+    Use Custom Title Bar: Erabili izenburu-barra pertsonalizatua
+    Tab Width: Fitxen zabalera
+    Vertical Tab Height: Fitxa bertikalen altuera
+    Tab Layout:
+      Tab Layout: Fitxen diseinua
+      Horizontal Top: Horizontala goian
+      Horizontal Bottom: Horizontala behean
+      Vertical Left: Bertikala ezkerrean
+      Vertical Right: Bertikala eskuinean
+    Show Toast Timeout Indicator: Erakutsi jakinarazpen iragankorraren denbora-adierazlea
+    Use Grid Player Menu: Erabili sareta erreproduzigailuaren menuan
+    Show Progress as Notification: Erakutsi aurrerapena jakinarazpen gisa
+    Operation in Progress: Eragiketa abian
+    Toast Position:
+      Test Toast: Probako jakinarazpena
+      Toast Position: Jakinarazpen iragankorraren kokapena
+      Bottom Left: Behean ezkerrean
+      Bottom Center: Behean erdian
+      Bottom Right: Behean eskuinean
+      Top Left: Goian ezkerrean
+      Top Center: Goian erdian
+      Top Right: Goian eskuinean
+    Icon Pack:
+      Icon Pack: Ikono-paketea
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: Aplikazioaren letra-tipoa
+      System Default: Sistemaren lehenetsia
+      Unable to Load: Ezin izan dira sisteman instalatutako letra-tipoak kargatu
+      Bundled Fonts: Barneko letra-tipoak
+      System Fonts: Sistemako letra-tipoak
+    Always Show Scrollbars: Erakutsi beti korritze-barrak
+    Base Theme:
+      Material Light: "Material Argia"
+      Material Dark: "Material Iluna"
+      Material Black: "Material Beltza"
+      Dynamic colors: Kolore dinamikoak
+      Tokyo Night Night: Tokyo Night Night
+      Tokyo Night Storm: Tokyo Night Storm
+      Tokyo Night Moon: Tokyo Night Moon
+      Tokyo Night Day: Tokyo Night Day
+      Rosé Pine: Rosé Pine
+      Rosé Pine Moon: Rosé Pine Moon
+      Rosé Pine Dawn: Rosé Pine Dawn
+      Kanagawa Wave: Kanagawa Wave
+      Kanagawa Dragon: Kanagawa Dragon
+      Kanagawa Lotus: Kanagawa Lotus
+      Ayu Dark: Ayu Dark
+      Ayu Mirage: Ayu Mirage
+      Ayu Light: Ayu Light
+      One Dark: One Dark
+      Carbonfox: Carbonfox
+      Catppuccin Macchiato: Catppuccin Macchiato
+      Tally Light: "Tally Argia"
+      Tally Dark: "Tally Iluna"
+      Custom: Pertsonalizatua
+      Built-in Themes: Gai integratuak
+      Custom Themes: Gai pertsonalizatuak
+    Light Theme: Gai argia
+    Dark Theme: Gai iluna
+    Custom Theme:
+      Share Restrictions Prompt: "Deskribapenek gehienez 500 karaktere izan ditzakete, Markdown barne. GitHuben ostatatutako estekak eta irudiak soilik onartzen dira, hemen zuzenean igotakoak barne. Botak kanpoko estekak eta irudiak kentzen ditu, deskribapen luzeak laburtzen ditu eta aldaketak azaltzen dituen iruzkina uzten du."
+      Import from Clipboard: "Inportatu arbeletik"
+      Invalid Clipboard Theme: "Arbelak ez du baliozko gairik. Kopiatu gaiaren JSONa eta saiatu berriro."
+      Create Custom Theme: Sortu gai pertsonalizatua
+      Edit Custom Theme: Editatu gai pertsonalizatua
+      Custom Theme Creator: Gai pertsonalizatuen sortzailea
+      Theme Name: Gaiaren izena
+      Based On: Oinarri duen gaia
+      Import Theme: Inportatu gaia
+      Export Theme: Esportatu gaia
+      Share Theme: Partekatu gaia
+      Share Description Prompt: Deskribatu gaia eta erabiltzen hasi aurretik jakin beharrekoak.
+      Share Screenshots Prompt: "Arrastatu eta jaregin pantaila-argazki bat edo gehiago hemen. Utzi atal hau hutsik botak adibidezko edukia duten hiru aurrebista gehitzeko, zure datu pertsonalik gabe."
+      Delete Theme: Ezabatu gaia
+      Delete Theme Confirmation: “{name}” ezabatu? Ekintza hau ezin da desegin.
+      Save and Apply: Gorde eta aplikatu
+      Discard Changes: Baztertu aldaketak
+      Reset Colors: Berrezarri oinarrizko gaiaren koloreak
+      Theme File: OpenTubeX gai-fitxategia
+      Theme Saved: Gai pertsonalizatua gorde eta aplikatu da
+      Theme Imported: Gaia editorera inportatu da
+      Theme Exported: Gaia esportatu da
+      Theme Deleted: Gai pertsonalizatua ezabatu da
+      Unable to Load: Ezin izan da gai pertsonalizatua kargatu
+      Unable to Save: Ezin izan da gai pertsonalizatua gorde
+      Unable to Export: Ezin izan da gai pertsonalizatua esportatu
+      Unable to Share: Ezin izan da gai pertsonalizatua partekatu
+      Unable to Delete: Ezin izan da gai pertsonalizatua ezabatu
+      Invalid Theme File: Gai pertsonalizatuaren fitxategia ez da baliozkoa
+      Colors:
+        Watched thumbnail overlay: "Ikusitako bideoen miniaturen gainjartzea"
+        Thumbnail badge background: "Miniaturetako etiketen atzeko planoa"
+        Main text: Testu nagusia
+        Secondary text: Bigarren mailako testua
+        Subtle text: Testu lausoa
+        Borders and dividers: Ertzak eta bereizleak
+        Subtle surfaces and indicators: Gainazal eta adierazle leunak
+        Title text: Izenburuen testua
+        Selected text background: Hautatutako testuaren atzeko planoa
+        Selected text: Hautatutako testua
+        Logo icon: Logotipoaren ikonoa
+        Logo text: Logotipoaren testua
+        Logo hover: Logotipoa seinalatzean
+        Logo pressed: Logotipoa sakatzean
+        Page background: Orriaren atzeko planoa
+        Card background: Txartelaren atzeko planoa
+        Secondary card background: Bigarren mailako txartelaren atzeko planoa
+        Favorite icon: Gogokoen ikonoa
+        Error color: Errorearen kolorea
+        Scrollbar thumb: Korritze-barraren heldulekua
+        Scrollbar thumb hover: Korritze-barraren heldulekua seinalatzean
+        Scrollbar thumb pressed: Korritze-barraren heldulekua sakatzean
+        Dropdown item hover text: Goitibeherako elementuaren testua seinalatzean
+        Dropdown item hover background: Goitibeherako elementuaren atzeko planoa seinalatzean
+        Navigation and panel background: Nabigazioaren eta panelaren atzeko planoa
+        Neutral item hover and focus background: Elementu neutroaren atzeko planoa seinalatzean eta fokuratzean
+        Neutral item hover and focus text and icons: Elementu neutroaren testua eta ikonoak seinalatzean eta fokuratzean
+        Neutral item pressed background: Elementu neutroaren atzeko planoa sakatzean
+        Neutral item pressed text and icons: Elementu neutroaren testua eta ikonoak sakatzean
+        Header button hover and focus background: Goiburuko botoiaren atzeko planoa seinalatzean eta fokuratzean
+        Header button hover and focus text and icons: Goiburuko botoiaren testua eta ikonoak seinalatzean eta fokuratzean
+        Header button pressed background: Goiburuko botoiaren atzeko planoa sakatzean
+        Header button pressed text and icons: Goiburuko botoiaren testua eta ikonoak sakatzean
+        Search and dropdown background: Bilaketaren eta goitibeherako menuaren atzeko planoa
+        Settings search background: Ezarpenen bilaketaren atzeko planoa
+        Instance menu: Instantzien menua
+        Shadow color: Itzalaren kolorea
+        Primary controls and highlights: Kontrol eta nabarmentze nagusiak
+        Primary control hover and focus: Kontrol nagusia seinalatzean eta fokuratzean
+        Primary control pressed: Kontrol nagusia sakatzean
+        Text and icons on primary controls: Kontrol nagusietako testua eta ikonoak
+        Secondary controls and highlights: Bigarren mailako kontrolak eta nabarmentzeak
+        Secondary control hover and focus: Bigarren mailako kontrola seinalatzean eta fokuratzean
+        Secondary control pressed: Bigarren mailako kontrola sakatzean
+        Light secondary color: Bigarren mailako kolore argia
+        Visited accent: Bisitatutako elementuen kolore bereizgarria
+        Text and icons on secondary controls: Bigarren mailako kontroletako testua eta ikonoak
+        Links: Estekak
+        Visited links: Bisitatutako estekak
+        Destructive action: Ekintza suntsitzailea
+        Destructive hover and focus: Ekintza suntsitzailea seinalatzean eta fokuratzean
+        Destructive pressed: Ekintza suntsitzailea sakatzean
+        Text and icons on destructive actions: Ekintza suntsitzaileetako testua eta ikonoak
+  Player Settings:
+    Rewind on Resume: "Atzera egin berrekitean"
+    Minimum Pause Before Rewinding: "Atzera egin aurreko gutxieneko pausa"
+    Mono Audio: 'Audio monoa'
+    Show Mono Audio Toggle: 'Erakutsi audio monoaren etengailua'
+    Pause on Stream Recovery: "Pausatu jarioa berreskuratzean"
+    Buffering:
+      Buffering: Bufferra
+      Description: Aukeratu erreproduzigailuak bideoaren zenbat kargatzen duen aldez aurretik eta zenbat mantentzen duen kargatuta.
+      Buffer Ahead Hint: Aurrerako buffer handiagoak erreprodukzioari eusten dio konexio-eten luzeagoetan, baina agian ikusiko ez duzun bideoa deskargatzen du.
+      Rewind Buffer Hint: Atzera egiteko buffer handiagoak atzera jauzi egiten uzten dizu berriro deskargatu gabe, baina memoria gehiago erabiltzen du.
+      Buffer Before Playing Hint: Erreproduzitu aurretik bideo gehiago itxaroteak konexio ezegonkorretan behin eta berriz gelditzea saihesten du, baina bideoek denbora gehiago behar dute hasteko eta beste puntu batera jauzi egin ondoren jarraitzeko.
+      Preset: Bufferraren aurrezarpena
+      Presets:
+        Data Saver: Datuak aurreztea
+        Default: Lehenetsia
+        Smooth Playback: Erreprodukzio arina
+        Custom: Pertsonalizatua
+      Buffer Ahead: Aurrerako bufferra
+      Buffer Ahead Tooltip: 'Uneko posiziotik zenbat aurrerago kargatzen den. Kalitate handietan, memoria-mugek balio oso handiak muga ditzakete. Lehenetsia: {value}'
+      Rewind Buffer: Atzera egiteko bufferra
+      Rewind Buffer Tooltip: 'Dagoeneko ikusi duzun bideoaren zenbat geratzen den kargatuta. Lehenetsia: {value}'
+      Buffer Before Playing: Erreproduzitu aurreko bufferra
+      Buffer Before Playing Tooltip: 'Bideoaren zenbat kargatu behar den erreprodukzioa hasi aurretik, edo bufferra agortu ondoren jarraitu aurretik. Lehenetsia: {value}'
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Kalitate-muga sare neurtuetan"
+      No Limit: "Mugarik ez"
+      Tooltip: "Datu mugikorretan eta beste sare neurtu batzuetan, bideoak kalitate honetan edo txikiagoan hasten dira. Erreproduzigailuan kalitate handiagoa aukera dezakezu oraindik ere."
+    Show Music Mode Toggle: "Erakutsi musika-moduaren etengailua"
+    Enable DLNA Casting: "Gaitu DLNA bidezko igorpena"
+    Skip Unavailable Playlist Videos: "Saltatu erabilgarri ez dauden bideoak erreprodukzio-zerrendetan"
+    Lights Off: Argiak itzali
+    Show Lights Off Toggle: Erakutsi argiak itzaltzeko etengailua
+    Show Volume Boost Toggle: "Erakutsi bolumen-igoeraren etengailua"
+    Swipe Gestures:
+      Fullscreen Brightness: Distira maximoa pantaila osoan
+      Left: Irristatu ezkerreko aldean
+      Right: Irristatu eskuineko aldean
+      Disabled: Desgaituta
+      Brightness: Distira
+      Volume: Bolumena
+      Hint: Pantaila osoan, irristatu gora edo behera bideoaren albo batean.
+      Unavailable: Ezin izan dira erreprodukzio-kontrolak doitu.
+    yt-dlp Streaming: "yt-dlp transmisioa"
+    Continue Playback When Screen Is Locked: 'Jarraitu erreproduzitzen pantaila blokeatuta dagoenean'
+    Music Visualizer: Musika-bistaratzailea
+    Automatically Open Chapters: Ireki kapituluak automatikoki
+    Caption Appearance:
+      Caption Appearance: Azpitituluen itxura
+      Captions: Azpitituluak
+      Preferred Language: Azpitituluetarako hobetsitako hizkuntza
+      Application Language: Aplikazioaren hizkuntza
+      Enable Translations: Gaitu azpitituluen itzulpena
+      Text Color: Testuaren kolorea
+      Background Color: Atzeko planoaren kolorea
+      Background Opacity: Atzeko planoaren opakutasuna
+      Font Size: Letra-tamaina
+      Anchor:
+        Anchor: Aingura
+        Top Left: Goian ezkerrean
+        Top Center: Goian erdian
+        Top Right: Goian eskuinean
+        Bottom Left: Behean ezkerrean
+        Bottom Center: Behean erdian
+        Bottom Right: Behean eskuinean
+        Center Left: Erdian ezkerrean
+        Center: Erdian
+        Center Right: Erdian eskuinean
+      Edge Style:
+        Edge Style: Ertzaren estiloa
+        None: Bat ere ez
+        Outline: Ingerada
+        Drop Shadow: Itzala
+        Raised: Goratua
+        Depressed: Sakondua
+      Reset: Berrezarri azpitituluen itxura
+      Default: Lehenetsia
+      Text Opacity: Testuaren opakutasuna
+      Font Family:
+        Font Family: Letra-familia
+        Monospaced Serif: Tarte bakarreko serif
+        Proportional Serif: Serif proportzionala
+        Monospaced Sans-Serif: Tarte bakarreko sans-serif
+        Proportional Sans-Serif: Sans-serif proportzionala
+      Colors:
+        White: Zuria
+        Yellow: Horia
+        Green: Berdea
+        Cyan: Ziana
+        Blue: Urdina
+        Magenta: Magenta
+        Red: Gorria
+        Black: Beltza
+    Auto Picture in Picture:
+      Auto Picture in Picture: Sartu automatikoki Picture-in-Picture moduan
+      On Tab Change: Fitxaz aldatzean
+      On Window Minimize: Leihoa minimizatzean
+      On Window Hide: Leihoak fokua galtzean edo beste leiho batera aldatzean
+      Wayland Minimize Unsupported: Waylandek ez die aplikazioei jakinarazten leihoa minimizatzen denean; beraz, abiarazle hau ez dago erabilgarri. Erabili "Leihoak fokua galtzean edo beste leiho batera aldatzean" aukera, minimizatzea ere barne hartzen baitu.
+      On Tab Change Mini Player: Fitxaz aldatzean minierreproduzigailua erakusten da horren ordez. Hau erabiltzeko, ezarri «Bideo batetik irtetean» aukera «Gelditu erreprodukzioa» gisa.
+    Scroll Mini Player:
+      Scroll Mini Player: Korritzeko minierreproduzigailua
+      Scroll Player Mode: Behera korritzean
+      Scroll Player Mode Tooltip: Erreproduzigailua leihoaren altueraren erdia gehienez hartzen duen bitartean bakarrik ainguratzen da. Bestela, adibidez telefonoetan horizontalean edo leiho zabaletan, mini erreproduzigailua erakusten da horren ordez.
+      Scroll Player Modes:
+        Mini: Erakutsi minierreproduzigailua
+        Pin: Ainguratu erreproduzigailua goian, lekua badago
+        Off: Korritu orriarekin batera
+      Leaving Video: Bideo batetik irtetean
+      Leaving Video Modes:
+        Keep Playing: Jarraitu erreproduzitzen minierreproduzigailuan
+        Stop: Gelditu erreprodukzioa
+    Multiply Seek Interval by Playback Rate: Biderkatu bilaketa-tartea erreprodukzio-abiadurarekin
+    Show Playback Rate Adjusted Timestamp: Erakutsi erreprodukzio-abiadurara doitutako denbora-marka
+    Use YouTube-style Shorts: Erabili YouTube estiloko Shorts bideoak
+    Loop Shorts: Erreproduzitu Shorts bideoak begiztan
+    Remember Volume: Gogoratu bolumena
+    Skip Silence: Saltatu isiluneak
+    Show Skip Silence Toggle: Erakutsi isiluneak saltatzeko etengailua
+    Enable Skip Silence by Default: Gaitu isiluneak saltatzea modu lehenetsian
+    Enable Video Zoom: Gaitu bideoaren zooma
+    Enable Seek History: Gaitu jauzien historia
+    Show Seek Bar Filmstrip: "Erakutsi bilaketa-barraren fotograma-zerrenda"
+    Voice-over Translation:
+      Title: Ahots bidezko itzulpena
+      Attribution: (Yandexek eskainia)
+      Enable: Gaitu ahots bidezko itzulpena
+      Prepare in Background: Hasi ahots bidezko itzulpenak atzeko planoan prestatzen
+      Background Preparation Tooltip: Uneko bideoaren IDa, iraupena eta hautatutako hizkuntza bidaltzen dizkio itzulpen-zerbitzuari, onartutako bideo bat kargatu bezain laster.
+      Language: Ahots bidezko itzulpenaren hizkuntza
+      Supported Source Languages: 'Onartutako jatorrizko hizkuntzak: errusiera, ingelesa, txinera, koreera, arabiera, frantsesa, italiera, gaztelania, alemana eta japoniera.'
+      Voice Volume: Itzulitako ahotsaren bolumena
+      Original Volume: Jatorrizko audioaren bolumena
+      Russian: Errusiera
+      English: Ingelesa
+      Kazakh: Kazakhera
+    Hold to Double Playback Speed: Eduki sakatuta erreprodukzio-abiadura bikoizteko
+    Use Quick Playback Speed Bar: Erabili erreprodukzio-abiaduraren barra azkarra
+    Customize Quick Playback Speed Bar: Pertsonalizatu erreprodukzio-abiaduraren barra azkarra
+    Quick Playback Speed Bar Manager: Erreprodukzio-abiaduraren barra azkarra
+    Add Playback Speed: Gehitu erreprodukzio-abiadura
+    Reset Quick Playback Speed Bar: Berrezarri balio lehenetsiak
+    Playback Speed Name: Izena
+    Edit Playback Speed Name: Editatu erreprodukzio-abiaduraren izena
+    Use Automatic Playback Speed Name: Erabili erreprodukzio-abiaduraren izen automatikoa
+    Reorder Playback Speed: Arrastatu erreprodukzio-abiadura berrantolatzeko
+    Playback Speed: Erreprodukzio-abiadura
+    Parallel Segment Loading: Segmentuak paraleloan kargatzea
+    Rotate Wide Videos to Landscape in Fullscreen: 'Biratu bideo zabalak horizontalera pantaila osoan'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Irristatu gora edo behera pantaila osoan sartzeko edo irteteko'
+    Preload Upcoming Videos: "Aurrekargatu hurrengo bideoak"
+    Upcoming Videos to Preload: "Aurrekargatu beharreko bideo kopurua"
+    Concurrent Preloads: "Aldibereko aurrekargak"
+    Ignore System Rotation Lock for Fullscreen: Ez ikusi sistemaren biraketa-blokeoa pantaila osorako
+    Swipe Left or Right to Seek in Fullscreen: Irristatu ezkerrera edo eskuinera pantaila osoan aurrera edo atzera egiteko
+    Show Swipe to Seek Preview: Erakutsi aurrebista hatza irristatuz aurrera edo atzera egitean
+    Enable Google Cast: "Gaitu Google Cast"
+    Sections:
+      Playback: Erreprodukzioa
+      Autoplay: Erreprodukzio automatikoa
+      Playback Speed: Erreprodukzio-abiadura
+      Player Controls: Erreproduzitzailearen kontrolak
+      Gestures: Keinuak
+      Viewing Modes: Ikuspegi moduak
+      Shorts: Shorts
+      Screenshots: Pantaila-argazkiak
+    Enable FCast: "Gaitu FCast"
+    Screenshot:
+      Legacy Formats: "Formatu zaharrak"
+      Modern Formats: "Formatu modernoak"
+  Channel Settings:
+    Channel Settings: Kanalen ezarpenak
+    Channel Settings Description: Gogoratu kanal bakoitzerako bideoak ikustean aukeratutako ezarpenak, kanal horretako beste bideo bat ikusten duzunean berriro aplikatzeko.
+    Enable Channel Playback Settings: Gaitu kanalen erreprodukzio-ezarpenak
+    Auto Save Playback Speed: Gorde automatikoki erreprodukzio-abiaduraren aldaketak
+    Auto Save Video Quality: Gorde automatikoki bideo-kalitatearen aldaketak
+    Auto Save Subtitles State: Gorde automatikoki azpitituluen egoeraren aldaketak
+    Auto Save Volume: Gorde automatikoki bolumenaren aldaketak
+    Manage Saved Channels: Kudeatu gordetako kanalak ({channelCount})
+    Saved Channels: Gordetako kanalen ezarpenak
+    Enable Saved Channel Settings Sync: Sinkronizatu gordetako kanalen ezarpenak
+    Disable Saved Channel Settings Sync: Utzi gordetako kanalen ezarpenak sinkronizatzeari
+    Search Channels: Bilatu kanalak
+    No Saved Channels: Oraindik ez da gorde kanal jakin baterako ezarpenik
+    No Matching Channels: Ez dago bilaketarekin bat datorren kanalik
+    Forget Channel: Ahaztu kanal honen ezarpen guztiak
+    Forget Value: Ahaztu ezarpen hau
+    Add Setting: Gogoratu beste ezarpen bat kanal honetarako
+    Add Subscribed Channel: Gehitu harpidetutako kanal bat
+    Video Quality: Bideo-kalitatea
+    Subtitles Enabled: Azpitituluak gaituta
+    Volume: Bolumena
+  Download Settings:
+    Download Settings: Deskargak
+    Enable Downloads: Gaitu deskargak
+    Managed Tools Download Started Template: 'Ez da aurkitu beharrezko kanpoko softwarea: {tools}. Kudeatutako kopiak deskargatzen…'
+    Managed Tools Download Finished Template: Amaitu da {tools} deskargatzen
+    Managed Tools Update Started Template: Eguneratze bat aurkitu da {tools} tresnetarako. Deskargatzen…
+    Managed Tools Update Finished Template: Amaitu da {tools} eguneratzen
+    Managed Tools Update Available Template: Eguneratze bat dago erabilgarri {tools} tresnetarako.
+    Managed Tools Update Source Notice: "OpenTubeX-ek zuzenean GitHub-etik deskargatzen du, beraz F-Droid-ek eta beste aplikazio-dendek ez dute egiaztatzen."
+    Update Managed Tools: Eguneratu
+    Managed Tools Download Error Template: 'Ezin izan dira kudeatutako tresnak deskargatu: {errors}'
+    Download Folder: Deskargen karpeta
+    Global Additional yt-dlp Arguments: yt-dlp argumentu gehigarriak
+    Concurrent Downloads: Aldibereko deskargak
+    Bandwidth Limit: Banda-zabaleraren muga (KiB/s)
+    Download Templates: Deskarga-txantiloiak
+    Manage Download Templates: Kudeatu deskarga-txantiloiak ({templateCount})
+    New Template: Txantiloi berria
+    Template Source: Editatu edo oinarri gisa erabiliko den txantiloia
+    Built-in Template: '{name} (integratua)'
+    Custom Template Name: '{name} (pertsonalizatua)'
+    Create Template Copy: Sortu kopia
+    Template Copy Name: '{name} kopia'
+    Automatic Downloads: Deskarga automatikoak
+    Manage Automatic Downloads: Kudeatu deskarga automatikoak ({channelCount})
+    Automatic Downloads Description: Hautatu deskarga-txantiloi bat eta iragazkiak harpidetutako kanal bakoitzerako. Bat datozen bideoak atzeko planoan deskargatuko dira harpidetza-jarioak freskatzean.
+    Automatic Downloads New Only: Kanal bat gaitzean, hurrengo bideo berritik aurrera hasiko dira deskargak. Ez dira deskargatuko lehendik dauden bideoak eta kanalaren aurreko bideoak.
+    Automatic Downloads No Channels: Harpidetu kanal batera deskarga automatikoak konfiguratu aurretik.
+    No Matching Automatic Download Channels: Ez dago bilaketarekin bat datorren kanalik.
+    Automatic Downloads Livestreams: Zuzeneko emankizunak
+    Minimum Duration Seconds: Gutxieneko iraupena (segundoak)
+    Maximum Duration Seconds: Gehieneko iraupena (segundoak)
+    Minimum File Size MB: Fitxategiaren gutxieneko tamaina (MB)
+    Maximum File Size MB: Fitxategiaren gehieneko tamaina (MB)
+    Maximum Age Days: Gehieneko antzinatasuna (egunak)
+    Title Includes: Izenburuak hau du
+    Title Excludes: Izenburuak ez du hau
+    Title Filter Hint: Bereizi izenburuko terminoak komaz. Bideoak sartutako terminoetako batekin bat etorri behar du gutxienez, eta baztertutako terminoekin ez.
+    Automatic Downloads Require Unmetered Network: "Neurtu gabeko sareetan soilik"
+    Automatic Downloads Require Charging: "Kargatzen ari denean soilik"
+  External Software Settings:
+    Create YouTube session: "Sortu YouTube saioa"
+    YouTube session hint: "Hasi saioa beharrezkoa bada eta gorde. Aukeratu ezarpenetan deskargetarako, erreprodukziorako edo azpitituluetarako erabiltzea."
+    Use cookies for downloads: "Erabili cookieak deskargetarako"
+    YouTube session failed: "Ezin izan da YouTube saioa gorde."
+    Checking FFmpeg and FFprobe: FFmpeg/FFprobe egiaztatzen…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe ez dira deskargatu oraindik. Egin klik beheko botoian deskargatzeko.
+    External Software Settings: Kanpoko softwarea
+    yt-dlp Source: yt-dlp-ren jatorria
+    yt-dlp Channel: yt-dlp-ren kanala
+    Sources:
+      System: Sistema (PATH edo bide-izen pertsonalizatua)
+      Managed: OpenTubeX aplikazioak kudeatua
+    Detected Version Template: 'Hautemandako yt-dlp bertsioa: {version}'
+    Managed Not Downloaded: yt-dlp ez da deskargatu oraindik. Egin klik beheko botoian deskargatzeko.
+    System yt-dlp Missing Warning: Ez da yt-dlp aurkitu sisteman. Instalatu, ezarri bide-izen pertsonalizatu bat behean edo aldatu jatorria "OpenTubeX aplikazioak kudeatua" aukerara.
+    Download yt-dlp: Deskargatu yt-dlp
+    Update yt-dlp: Eguneratu yt-dlp
+    Checking yt-dlp: yt-dlp egiaztatzen…
+    Downloading yt-dlp: yt-dlp deskargatzen…
+    yt-dlp Downloaded Template: yt-dlp {version} deskargatu da
+    yt-dlp Download Error Template: 'Ezin izan da yt-dlp deskargatu: {error}'
+    FFmpeg Source: FFmpeg-en jatorria
+    Detected FFmpeg Version Template: 'Hautemandako FFmpeg bertsioa: {version}'
+    Detected FFmpeg and FFprobe Version Template: 'Hautemandako FFmpeg/FFprobe bertsioa: {version}'
+    FFmpeg Managed Not Downloaded: FFmpeg ez da deskargatu oraindik. Egin klik beheko botoian deskargatzeko.
+    System FFmpeg Missing Warning: Ez da FFmpeg aurkitu sisteman. Beharrezkoa da bideoa eta audioa bateratzeko eta audioa bihurtzeko. Instalatu, ezarri bide-izen pertsonalizatu bat behean edo aldatu jatorria "OpenTubeX aplikazioak kudeatua" aukerara.
+    Download FFmpeg: Deskargatu FFmpeg
+    Update FFmpeg: Eguneratu FFmpeg
+    Checking FFmpeg: FFmpeg egiaztatzen…
+    Downloading FFmpeg: FFmpeg deskargatzen…
+    FFmpeg Downloaded Template: FFmpeg {version} deskargatu da
+    FFmpeg Download Error Template: 'Ezin izan da FFmpeg deskargatu: {error}'
+    Detected FFprobe Version Template: 'Hautemandako FFprobe bertsioa: {version}'
+    FFprobe Managed Not Downloaded: FFprobe ez da deskargatu oraindik. Egin klik beheko botoian FFmpeg-ekin batera deskargatzeko.
+    System FFprobe Missing Warning: Ez da FFprobe aurkitu sisteman. Beharrezkoa da prozesatu ondoren multimedia aztertzeko. Instalatu FFmpeg-en ondoan edo aldatu jatorria "OpenTubeX aplikazioak kudeatua" aukerara.
+    Checking FFprobe: FFprobe egiaztatzen…
+    Download FFmpeg and FFprobe: Deskargatu FFmpeg eta FFprobe
+    Update FFmpeg and FFprobe: Eguneratu FFmpeg eta FFprobe
+    Downloading FFmpeg and FFprobe: FFmpeg eta FFprobe deskargatzen…
+    FFmpeg and FFprobe Downloaded Template: FFmpeg eta FFprobe {version} deskargatu dira
+    FFmpeg and FFprobe Download Error Template: 'Ezin izan dira FFmpeg eta FFprobe deskargatu: {error}'
+    Managed Tool Already Current Template: '{tool} {version} eguneratuta dago dagoeneko'
+    Managed Tool Errors:
+      Removed: 'Deskargatutako fitxategia ezabatu egin da, ziurrenik birusen aurkako software batek'
+      Unusable: 'Ezin izan da deskargatutako programa exekutatu. Baliteke birusen aurkako software batek blokeatzea, edo sistema hau ez onartzea'
+      Release Not Found: 'Ezin izan da azken bertsioa aurkitu'
+      Verification Failed: 'Ezin izan da egiaztatu deskarga bertsio ofiziala denik'
+      Downgrade: 'Deskargatutako bertsioa instalatutakoa baino zaharragoa da'
+      Invalid Archive: 'Deskargatutako artxiboa baliogabea da'
+      Rollback Failed: 'Eguneratzeak huts egin du eta ezin izan da aurreko bertsioa guztiz leheneratu'
+    Managed Tool Updates: Kudeatutako tresnen eguneratzeak
+    Update Modes:
+      Automatic: Eguneratu automatikoki
+      Ask: Galdetu eguneratu aurretik
+      Manual: Eguneratu eskuz soilik
+    yt-dlp Executable Path: yt-dlp exekutagarria
+    FFmpeg Executable Path: FFmpeg exekutagarria
+    Restricted Playback Authentication: "yt-dlp cookieak"
+    Cookie Source: Cookieen jatorria
+    Cookie Sources:
+      None: Bat ere ez
+      File: Fitxategia
+      Browser: Arakatzailea
+    Cookie File: Cookie-fitxategia
+    Browser for Cookies: Cookieetarako arakatzailea
+    Browser Profile: Arakatzailearen profila (aukerakoa)
+    Browser Profile Placeholder: Profilaren izena edo bide-izena
+    Browser Profile Invalid: "Idatzi profil-izen bat, edo aukeratu profil-karpeta bat karpeta-botoiarekin."
+    Select Browser: Hautatu arakatzailea
+    Always Use Cookies: Erabili beti cookieak
+    Restricted Playback Authentication Hint: Modu lehenetsian, OpenTubeX aplikazioak cookie hauek yt-dlp-ri ematen dizkio soilik adin-muga duen edo kideentzat den bideo batean "Saiatu konfiguratutako cookieekin" aukeratu ondoren.
+    Restricted Playback Authentication Warning: yt-dlp Google kontu batekin erabiltzeak kontua aldi baterako edo behin betiko mugatzea eragin dezake.
+    Use cookies for subtitles: "Erabili cookieak azpitituluetarako"
+  Privacy Settings:
+    Internet Connectivity Checks: "Interneteko konexioaren egiaztapenak"
+    Internet Connectivity Checks Tooltip: "Eskaera txikiak bidaltzen dizkio GrapheneOSek ostatatutako zerbitzari bati Interneterako sarbidea egiaztatzeko."
+    Automatic History Retention: Historiaren atxikipen automatikoa (egunak)
+    Automatic History Retention Placeholder: Utzi hutsik betiko gordetzeko
+    Automatic History Retention Tooltip: Utzi hutsik historia betiko gordetzeko. Zenbaki bat gordetzean, sarrera zaharragoak orain eta automatikoki kenduko dira aplikazioa irekita dagoen bitartean.
+    Automatic Search History Retention: Bilaketa-historiaren atxikipen automatikoa (egunak)
+    Automatic Search History Retention Tooltip: Utzi hutsik bilaketa-historia betiko gordetzeko. Zenbaki bat gordetzean, bilaketa zaharragoak orain eta automatikoki kenduko dira aplikazioa irekita dagoen bitartean.
+    History Retention Saved: Historiaren atxikipena gorde da
+    Invalid History Retention Days: Idatzi zero baino handiagoa den egun kopuru oso bat
+    Enable Watch Statistics: Gaitu ikustaldien estatistikak
+    Week Starts On: Astearen lehen eguna
+    Cache Video Metadata: Metadatuen historia
+    Cache Video Metadata Tooltip: Bisitatzen dituzun bideo bateragarrien metadatuen bertsio guztiak gordetzen ditu, izenburuak, koadro txikiak eta deskribapenak barne. Zure harpidetzen jarioetan agertzen diren izenburuak ere gordetzen ditu. Modu lehenetsian desgaituta dago, metadatuen historia gordetzeak disko-erabilera handitzen duelako.
+    Watched Percentage Threshold: Ikusitako ehunekoaren atalasea
+    Watched Percentage Threshold Tooltip: Bideoak ikusita markatuko dira hautatutako ehunekora iritsi eta gehienez 2 minutu geratzen direnean. % 0 hautatuz gero, erreprodukzioa hastean markatuko dira; % 100 hautatuz gero, amaitzean.
+    Clear Video Metadata Cache: Garbitu bideoen metadatuen cachea
+    Are you sure you want to clear the video metadata cache?: Ziur cachean gordetako bideoen izenburuak, koadro txikiak eta deskribapenak garbitu nahi dituzula?
+    Failed to clear video metadata cache: Ezin izan da bideoen metadatuen cachea garbitu
+    Video metadata cache has been cleared: Bideoen metadatuen cachea garbitu da
+    Video Metadata Cache Size: 'Bideoen metadatuen cachea: {size}'
+  Storage Settings:
+    Storage: Biltegiratzea
+    Downloaded Media: Erregistratutako deskargatutako multimedia
+    Storage Breakdown: Biltegiratzearen banaketa
+    Shown Total: Erakutsitakoa guztira
+    Calculating: Kalkulatzen…
+    Not Available: Tamaina zehatza ez dago erabilgarri
+    At Least: Gutxienez {size}
+    Failed To Read Storage: Ezin izan dira biltegiratze-tamaina batzuk irakurri
+    Downloaded Media Description: Deskargen historian oraindik erregistratuta dauden bideo-, audio- eta azpititulu-fitxategiak.
+    Selected Download Folders: Erabiltzaileak hautatutako deskarga-karpetak
+    Download History Records: Deskargen historiako erregistroak
+    Download History Records Description: 'Amaitutako deskarga-erregistro {count}. Erregistroak egoera eta fitxategien kokapenak gordetzen ditu, baina ez deskargatutako multimedia. | Amaitutako {count} deskarga-erregistro. Erregistroek egoera eta fitxategien kokapenak gordetzen dituzte, baina ez deskargatutako multimedia.'
+    Clear Download History Records: Garbitu deskargen historiako erregistroak
+    Clear Download History Confirmation: Amaitutako deskarga-erregistro guztiak garbitu?
+    Download Files Stay On Disk: Deskargatutako fitxategiak diskoan geratuko dira, baina ez dira gehiago Deskargak orrian agertuko.
+    Clear Records: Garbitu erregistroak
+    Replaceable Caches: Birsortu daitezkeen cacheak
+    Application Caches: Aplikazioaren cacheak
+    Browser Caches: Arakatzailearen cacheak
+    Browser Caches Hint: Chromium-en HTTP, GPU, kode, itzaldura, service worker eta hiztegi cacheak.
+    Clear Android Cache Confirmation: Android-en arakatzailearen cachea garbitu?
+    Stored App Data: Gordetako aplikazio-datuak
+    Included In App Data: Goian erakutsitako aplikazio-datuetan sartuta
+    Browser Runtime Data: Arakatzailearen exekuzio-datuak
+    Browser Runtime Data Hint: Chromium-en saio- eta biltegiratze lokala, cookieak, pribatutasun- eta sare-egoera eta hutsegite-fitxategiak.
+    Subscription Feed Cache: Harpidetzen eta jarioen cachea
+    Subscription Feed Cache Description: Eskuratutako harpidetza-bideoak, Shorts bideoak, zuzeneko emankizunak eta argitalpenak gordetzen ditu. OpenTubeX aplikazioak hurrengo jario-freskatzean birsortuko du.
+    Clear Subscription Feed Cache: Garbitu harpidetzen eta jarioen cachea
+    Clear Subscription Feed Cache Confirmation: Harpidetzen eta jarioen cachea garbitu?
+    Subscription Feed Cache Effect: Harpidetza-jarioak hutsik ager daitezke freskatu arte. Harpidetzak eta profilak ez dira aldatuko.
+    Session Search Cache: Saioko bilaketen cachea
+    In Memory: Memorian
+    Session Search Cache Description: 'Bilaketa {count} memorian gorde da cachean, atzerako nabigazioa bizkortzeko. Cache hau OpenTubeX ixtean baztertuko da. | {count} bilaketa memorian gorde dira cachean, atzerako nabigazioa bizkortzeko. Cache hau OpenTubeX ixtean baztertuko da.'
+    Clear Session Search Cache: Garbitu saioko bilaketen cachea
+    Clear Session Search Cache Confirmation: Saioko bilaketen cachea garbitu?
+    Session Search Cache Effect: Cacheko emaitza-orriak baztertuko dira. Gordetako bilaketa-historia ez da aldatuko.
+    HTTP Cache: HTTP cachea
+    HTTP Cache Description: Electron-ek sareko erantzunak diskoan gordetzen ditu, eskaera errepikatuak datu berak berriro deskargatu gabe kargatzeko. OpenTubeX aplikazioak cache hau behar ahala birsortzen du.
+    Managed By Electron: Electron-ek kudeatua
+    Clear HTTP Cache: Garbitu HTTP cachea
+    Clear HTTP Cache Confirmation: Electron-en HTTP cachea garbitu?
+    HTTP Cache Effect: Irudiak eta sareko beste baliabideak motelago karga daitezke behin, cachea birsortzen den bitartean.
+    Tab Image Cache: Fitxen koadro txikiak eta kanalen abatarrak
+    Tab Image Cache Description: Irekitako eta leheneratutako fitxen aurrebista-irudiak eta kanalen abatarrak gordetzen ditu. OpenTubeX aplikazioak fitxak erabili ahala birsortzen ditu.
+    Clear Tab Image Cache: Garbitu fitxen irudien cachea
+    Clear Tab Image Cache Confirmation: Fitxen koadro txikiak eta kanalen abatarrak garbitu?
+    Tab Image Cache Effect: Fitxen irudiak une batez desager daitezke, eta fitxak erabili ahala birsortuko dira.
+    Playback Caches: Erreprodukzio-cacheak
+    Playback Caches Description: yt-dlp korronteen URLak aplikazioaren saioen artean gordetzen ditu, baita YouTube erreproduzigailuaren fitxategiak ere. URLen cachea yt-dlp bidez eskuratutako korronteei soilik aplikatzen zaie.
+    Playback URL Cache Entry Size: yt-dlp korronteen URLen cache-muga
+    Playback URL Cache Entry Size Tooltip: Cacheko yt-dlp korronte-sarrera bakoitzaren gehieneko tamaina ezartzen du. Ezarri 0 MB yt-dlp korronteen cache iraunkorra desgaitzeko.
+    Clear Playback Caches: Garbitu erreprodukzio-cacheak
+    Clear Playback Caches Confirmation: yt-dlp eta erreproduzigailuaren cacheak garbitu?
+    Playback Caches Effect: Hurrengo erreprodukzio lokalaren eskaerak denbora gehiago behar dezake korrontearen eta erreproduzigailuaren datuak berriro eskuratu bitartean.
+    Clear Cache: Garbitu cachea
+    History Data: Gordetako historiak
+    Video Metadata Description: Bideo bateragarrien aurreko izenburuak, koadro txikiak eta deskribapenak gordetzen ditu. Berrikuspen zaharrak ezin dira birsortu ezabatu ondoren.
+    Video Metadata Effect: Gordetako metadatuen berrikuspenak behin betiko ezabatuko dira. Uneko bideoaren xehetasunak berriro eskura daitezke.
+    Watch History: Ikustaldi-historia eta estatistikak
+    Watch History Description: Ikustaldi-historiak ikusitako bideoak eta aurrerapena erregistratzen ditu. Ikustaldien estatistikek eguneroko ikustaldi-denbora gordetzen dute. Atxikipena ikustaldi-historiari soilik aplikatzen zaio.
+    Clear Watch Statistics: Garbitu ikustaldien estatistikak
+    Watch History Effect: Ikusitako bideoen erregistroak eta gordetako aurrerapena ezabatuko dira. Ikustaldien estatistikak mantenduko dira.
+    Clear Watch Statistics Confirmation: Ikustaldien estatistika guztiak ezabatu?
+    Watch Statistics Effect: Eguneroko ikustaldi-denborak ezabatuko dira. Ikustaldi-historia mantenduko da.
+    Search History: Bilaketa-historia
+    Search History Description: Gogoratzea aukeratu dituzun bilaketak gordetzen ditu.
+    Delete Search History: Ezabatu bilaketa-historia
+    Delete Search History Confirmation: Gordetako bilaketa-historia osoa ezabatu?
+    Search History Effect: Aurreko bilaketetan oinarritutako gordetako iradokizunak desagertuko dira. Uneko saioko cachea mantenduko da.
+    Other User Data: Erabiltzailearen beste datu batzuk
+    Other Profile Files: Profilaren beste fitxategi batzuk
+    Other Profile Files Hint: OpenTubeX aplikazioak oraindik ezagutzen ez dituen babeskopiak, aldi baterako fitxategiak eta profil-sarrerak.
+    Subscriptions And Profiles: Harpidetzak eta profilak
+    Subscriptions And Profiles Description: Harpidetutako kanalak, profilen izenak eta profiletako kidetza gordetzen ditu.
+    Subscriptions And Profiles Effect: Harpidetza guztiak eta profil gehigarriak behin betiko ezabatuko dira. Jarioen cacheko datuak ere garbituko dira.
+    Playlists Description: Erreprodukzio-zerrenden izenak, deskribapenak eta gordetako bideoak gordetzen ditu.
+    Playlists Effect: Erreprodukzio-zerrenda guztiak eta haietan gordetako bideo-zerrendak behin betiko ezabatuko dira. Deskargatutako multimedia-fitxategiak mantenduko dira.
+    Settings And Sessions: Ezarpenak, fitxen saioak eta gogorarazleak
+    Settings And Sessions Description: Aplikazioaren hobespenak, leheneratu daitezkeen fitxak eta zuzeneko emankizunen gogorarazleak gordetzen ditu. Ireki profilaren direktorioa fitxategiak aztertzeko edo babeskopia egiteko; orri honek ez ditu ezabatzen.
+    Cleanup Complete: Biltegiratzea garbitu da
+    Cleanup Failed: Ezin izan da biltegiratzea garbitu
+  Subscription Settings:
+    Fetch Feed on Startup: Eskuratu jarioa abioan
+    Show New Content Feed: Erakutsi eduki berriaren jarioa
+    RSS Feeds: RSS jarioak
+    Enable RSS Feeds: Gaitu beste plataformetarako RSS jarioak
+    Manage RSS Feeds: Kudeatu RSS jarioak
+    Show New Content Indicators: Erakutsi eduki berriaren adierazleak
+    Show Scheduled Live Streams / Premieres First: Erakutsi programatutako zuzeneko emankizunak eta estreinaldiak lehenik
+    Auto Refresh Interval: Freskatze automatikoaren tartea
+    Videos Auto Refresh Interval: Bideoen freskatze automatikoaren tartea
+    Shorts Auto Refresh Interval: Shorts bideoen freskatze automatikoaren tartea
+    Live Auto Refresh Interval: Zuzeneko emankizunen freskatze automatikoaren tartea
+    Posts Auto Refresh Interval: Argitalpenen freskatze automatikoaren tartea
+    Refresh Subscriptions While App Is Closed: "Freskatu harpidetzak aplikazioa itxita dagoenean"
+    Notify About New Uploads: Jakinarazi igoera berriak
+    RSS Feeds Auto Refresh Interval: RSS jarioen freskatze automatikoaren tartea
+  Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Ikusteko denbora zenbatzeko iturria"
+      Break Reminder Action: "Atsedenaldia hartzeko ordua denean"
+      Grayscale: "Gris-eskala"
+      Apply Grayscale To: "Aplikatu gris-eskala hemen"
+      Off: "Desaktibatuta"
+      Always: "Beti"
+      During Bedtime: "Lotara joateko orduan"
+      After the Daily Limit: "Eguneko muga gainditu ondoren"
+      Whole App: "Aplikazio osoan"
+      Videos and Images: "Bideo eta irudietan"
+      Daily Watch Time Limit: "Eguneko ikusteko denbora-muga"
+      Daily Shorts Limit: "Eguneko Shorts bideoen muga"
+      When a Limit Is Reached: "Muga batera iristean"
+      Remind Me: "Gogorarazi"
+      Pause Playback: "Pausatu erreprodukzioa"
+      Take a Break Reminder: "Atsedenaldia hartzeko gogorarazpena"
+      Every: "{duration} behin"
+      Bedtime Reminder: "Lotara joateko gogorarazpena"
+      Bedtime Start: "Lotara joateko orduaren hasiera"
+      Bedtime End: "Lotara joateko orduaren amaiera"
+      Wait Until the Video Ends: "Itxaron bideoa amaitu arte"
+      Silence Upload Notifications at Bedtime: "Isilarazi igoera berrien jakinarazpenak lotara joateko orduan"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Gelditu erreprodukzio automatikoa lotara joateko orduan eta eguneko muga gainditu ondoren"
+    Hide Popularity Graph: "Ezkutatu ospearen grafikoa"
+    Enable Block Lists: "Gaitu blokeo-zerrendak"
+    AI Video Summaries: AAren bideo-laburpenak
+    Hide: Ezkutatu
+    Collapsed: Tolestuta
+    Expanded: Zabalduta
+    Video Descriptions: Bideoen deskribapenak
+    Video Description Modes:
+      Hide: Ezkutatu
+      Collapsed: Tolestuta
+      Expanded: Zabalduta
+    Playing Interface Hide Delay: Erreprodukzioan interfazea ezkutatzeko atzerapena
+    Hide Startup Splash: Ezkutatu abio-pantaila
+    Hide Header Sync Indicator: Ezkutatu aplikazioaren goiburuko sinkronizazio-adierazlea
+    Hide Repeat Stats: Ezkutatu errepikapenen estatistikak
+    Hide Playlist Stats: Ezkutatu erreprodukzio-zerrendaren estatistikak
+    Sections:
+      Digital Wellbeing: "Ongizate digitala"
+      Visible While Paused: Ikusgai pausatuta dagoenean leiho osoan edo pantaila osoan
+    Hide Channel Avatars: Ezkutatu kanalen abatarrak
+    Shorten View Counts: Laburtu ikustaldien, iruzkinen eta iruzkinetako atsegiteen kopuruak
+    Hide Live Chat Replay: Ezkutatu zuzeneko txataren errepikapena
+    Hide Home: Ezkutatu hasiera
+    Disable A-B Repeat: Desgaitu A-B errepikapena
+    Hide End-Screen Annotations: Ezkutatu amaierako pantailako oharpenak
+    Hide End-Screen Recommendations: "Ezkutatu amaierako pantailako gomendioak"
+    Hide Paid Promotion Badge: Ezkutatu ordainpeko sustapenaren bereizgarria
+    Show Player Controls: Erakutsi erreproduzigailuaren kontrolak
+    Show Video Title: Erakutsi bideoaren izenburua
+    Show Bottom Right Actions Dock: Erakutsi ekintzen panela behean eskuinean
+    Paused Interface Hide Delay: Pausatutako interfazea ezkutatzeko atzerapena
+  Data Settings:
+    Scheduled backups: "Programatutako babeskopiak"
+    Scheduled backup description: "Gorde ZIP babeskopia osoak OpenTubeX irekita dagoen bitartean. Egin gabeko kopiak abiaraztean egiten dira. Muga karpeta honetako programatutako kopiei soilik aplikatzen zaie."
+    Choose backup folder: "Aukeratu babeskopien karpeta"
+    No backup folder selected: "Ez da babeskopien karpetarik aukeratu"
+    Enable scheduled backups: "Gaitu programatutako babeskopiak"
+    Backup frequency: "Babeskopien maiztasuna"
+    Backups to keep: "Gordeko diren kopiak"
+    Daily: "Egunero"
+    Weekly: "Astero"
+    Every 30 days: "30 egunean behin"
+    Last scheduled backup: "Azken babeskopia programatua: {date}"
+    No scheduled backup yet: "Oraindik ez dago babeskopia programaturik"
+    Scheduled backup failed: "Babeskopiak huts egin du. Egiaztatu karpetan idatz daitekeela. Bost minutu barru berriro saiatuko da."
+    Import Preview:
+      Title: Aldaketen aurrebista
+      New: "Berriak: {count}"
+      Existing: "Daudenak: {count}"
+      Skipped: "Saltatuak: {count}"
+      Unreadable files: "Irakurri ezin diren fitxategiak: {count}"
+      Settings effect: Bat datozen ezarpenak ordezten dira. Ezarpen pribatuak eta ezezagunak saltatzen dira.
+      Details effect: Dauden harpidetzak edo bideoak mantentzen dira. Inportatutako profilen edo erreprodukzio-zerrenden xehetasunek unekoak ordezten dituzte.
+      Merge effect: Dauden datuak mantendu eta bat datozen erregistroekin bateratzen dira.
+      Subscriptions effect: Dauden harpidetzak mantentzen dira. Kanal berriak soilik gehitzen dira.
+      History merge effect: Bat datozen bideoak historiarekin batzen dira, gordetako xehetasunak eta ikustaldi-data berriena mantenduz. Gainerako historia mantentzen da.
+    Select export data: "Hautatu esportatu nahi dituzun datuak"
+    Export selected data: "Esportatu hautatutako datuak"
+    Complete backup: "Babeskopia osoa"
+    Import backup: "Inportatu babeskopia"
+    Export backup: "Esportatu babeskopia"
+    Backup description: "Gorde profilak, erreprodukzio-zerrendak, historia, estatistikak eta transferi daitezkeen ezarpenak ZIP fitxategi bakar batean. Inportatzean, gailu honetan dagoeneko dauden datuekin bat egiten dira."
+    Select backup data: "Hautatu inportatzeko datuak"
+    Profiles and subscriptions: "Profilak eta harpidetzak"
+    Backup exported: "Babeskopia behar bezala esportatu da"
+    Backup imported: "Babeskopia behar bezala inportatu da"
+    Import YouTube Takeout ZIP: "Inportatu YouTube Takeout ZIPa"
+    Select Takeout data: "Hautatu inportatu beharreko datuak"
+    Import selected data: "Inportatu hautatutako datuak"
+    No supported Takeout data: "Ez da aurkitu onartutako YouTube daturik ZIP honetan."
+    Data And Storage: Datuak eta biltegiratzea
+    Profile Directory: Profilaren direktorioa
+    Open Profile Directory: Ireki profilaren direktorioa
+    Invalid JSON row, skipping item: '{row}. errenkadako JSONa ez da baliozkoa; elementua saltatzen'
+    Import subscriptions formats: 'Onartutako formatuak: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube babeskopia edo FreeTube esportazioa (.json)'
+    Import history formats: 'Onartutako formatuak: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube babeskopia (.json)'
+    Import playlists formats: 'Onartutako formatuak: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import search history formats: 'Onartutako formatuak: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: "Kanalen erreprodukzio-abiadurak"
+    Import channel playback speeds: "Inportatu kanalen erreprodukzio-abiadurak"
+    Channel playback speeds file: "Kanalen erreprodukzio-abiaduren fitxategia"
+    Import channel playback speeds formats: "Onartutako formatuak: {script} erabiltzaile-scriptaren biltegia (.json)"
+    Invalid channel playback speeds file: "Ez da kanalen erreprodukzio-abiadurarik aurkitu fitxategi honetan"
+    Channel playback speeds imported: "{count} kanalaren erreprodukzio-abiadura inportatu da | {count} kanalen erreprodukzio-abiadurak inportatu dira"
+    Channels not found: "Ezin izan da {count} kanal aurkitu | Ezin izan dira {count} kanal aurkitu"
+  Sync Settings:
+    Revoke Session Tabs Warning: "Gailu honen sinkronizatutako fitxa multzoak ere ezabatuko dira."
+    Revoke Session Partial Failure: "Sinkronizatutako fitxa multzoak ezabatu dira, baina ezin izan da sarbidea kentzea berretsi. Saiatu berriro sarbidea kentzen."
+    Tab Sync Revocation Pending: "Fitxen sinkronizazioa pausatuta dago saio-hasiera honen baliogabetzea zain dagoen bitartean. Saiatu berriro baliogabetzen sinkronizazio-ezarpenetan."
+    Show More: "Erakutsi gehiago"
+    Sync Automatically: "Sinkronizatu automatikoki"
+    Activity: "Kontuaren jarduera"
+    No Activity: "Ez dago azken jarduerarik"
+    Clear Activity: "Garbitu gailu honetan"
+    Clear Activity Hint: "Ezkutatu kontuaren lehendik dagoen jarduera gailu honetan. Zerbitzariko eta beste gailuetako jarduera ez da aldatuko. Jarduera berria agertzen jarraituko da."
+    Setting Changed: "{device} gailuak {setting} aldatu du: {value}"
+    Item Updated: "{device} gailuak {setting} eguneratu du"
+    Item Added: "{device} gailuak {item} gehitu du {setting} atalera"
+    Item Removed: "{device} gailuak {item} kendu du {setting} ataletik"
+    Item Renamed: "{device} gailuak {item} izena {value} izenarekin aldatu du"
+    Saved Playlists: "Gordetako erreprodukzio-zerrendak"
+    No Feed Types: "Bat ere ez"
+    Open On Device: "Ireki beste gailu batean"
+    Video Sent: "Bideoa bidali da. Lineaz kanpoko gailuek 24 orduko epean berriro konektatzean jasoko dute."
+    Video Received: "Jasotako bideoa: {title}"
+    Previous Auto Sync Notice: "Sinkronizazio automatikoa desgaituta dago. Baliteke aurreko bertsio batek desgaitu izana datuak ez galtzeko."
+    Enable Automatic Sync: "Gaitu sinkronizazio automatikoa"
+    Destructive Sync Blocked: "Sinkronizazioa gelditu da datuak galtzea saihesteko. Sinkronizazio automatikoa desaktibatuta dago. Ireki sinkronizazio-ezarpenak ezabaketak berrikusteko."
+    Devices: "Gailuak"
+    Devices Hint: "Berrikusi sinkronizazio-kontu hau atzi dezaketen gailuak."
+    Change Password: "Aldatu pasahitza"
+    Refresh Devices: "Freskatu gailuak"
+    Current Device: "Uneko gailua"
+    Revoke Session: "Kendu sarbidea"
+    Session Created: "Sortuta"
+    Last Active: "Azken jarduera"
+    Session Expires: "Iraungitzea"
+    Unknown Device: "Gailu ezezaguna"
+    Operating System: "Sistema eragilea"
+    Rename Device: "Aldatu gailuaren izena"
+    Save Device Name: "Gorde izena"
+    Device Name Invalid: "Gailuen izenek gehienez 80 karaktere izan ditzakete eta ezin dute kontrol-karaktererik izan."
+    Device Renamed: "Gailuaren izena aldatu da"
+    Revoke Session Confirmation: "Saio hau kendu?"
+    Revoke Current Session Warning: "Saio hau kentzeak gailu hau sinkronizazio-kontutik deskonektatuko du."
+    Revoke Session Warning: "{device} gailuak sinkronizazio-kontu honetarako sarbidea galduko du."
+    Confirm Revoke Session: "Kendu saioa"
+    Session Revoked: "Saioa kenduta"
+    Change Password Warning: "Pasahitza aldatzeak beste gailu guztietako saioak itxiko ditu. Gailu honek konektatuta jarraituko du."
+    Current Password: "Uneko pasahitza"
+    New Password: "Pasahitz berria"
+    Confirm New Password: "Berretsi pasahitz berria"
+    Save New Password: "Gorde pasahitz berria"
+    Account Management Failed: "Ezin izan dira sinkronizazio-kontuaren xehetasunak kargatu."
+    All Password Fields Required: "Bete pasahitz-eremu guztiak."
+    New Password Too Short: "Pasahitz berriak gutxienez 8 karaktere izan behar ditu."
+    New Passwords Do Not Match: "Pasahitz berriak ez datoz bat."
+    Password Changed: "Pasahitza aldatu da. Beste gailuetako saioak itxi dira."
+    Sync Settings: Sinkronizazioa
+    Watch stats: "Ikustaldien estatistikak"
+    Enable Sync: Gaitu sinkronizazioa
+    Privacy Passphrase: Pribatutasun-pasaesaldia
+    Privacy Passphrase Hint: Erabili kontuaren pasahitzaz bestelako pasaesaldi bat. Ez da inoiz gailu honetatik ateratzen eta gailu guztietan behar da; galtzen baduzu, ezin izango dituzu berreskuratu sinkronizatutako datu zifratuak.
+    Privacy Policy: Zerbitzari honen pribatutasun-politika
+    Enhanced Privacy Enabled: Pribatutasun hobetua gaituta dago. Zerbitzariak sinkronizatutako datu zifratuak soilik gordetzen ditu.
+    Enhanced Privacy Unsupported: Abisua. Zerbitzari honek ez du pribatutasun hobetua onartzen. Sinkronizatutako datuak zerbitzariaren operadoreak ikus ditzake.
+    Description: 'Sinkronizatu harpidetzak, profilak, erreprodukzio-zerrendak, ikustaldien historia eta onartutako ezarpenak OpenTubeX edo LibreTube sinkronizazio-zerbitzari batekin. Baliteke LibreTube zerbitzariek sinkronizazio-eginbide guztiak ez onartzea.'
+    Server URL: Sinkronizazio-zerbitzariaren URLa
+    Checking Server: Sinkronizazio-zerbitzaria egiaztatzen…
+    Server Unavailable: Ezin da sinkronizazio-zerbitzari honekin konektatu. Egiaztatu URLa eta saiatu berriro.
+    Username: Erabiltzaile-izena
+    Log In: Hasi saioa
+    Register: Erregistratu
+    Pair Another Device: Parekatu beste gailu bat
+    Pair With Existing Device: Parekatu lehendik dagoen gailu batekin
+    Device Name: Gailuaren izena
+    This Device: Gailu hau
+    Device Name Required: Idatzi gailu honentzako izen bat.
+    Pairing Device Name Hint: Aukeratu eskaera onartuko duen gailuan ezagutuko duzun izen bat.
+    Create Pairing Code: Sortu parekatze-kodea
+    Creating Pairing Code: Parekatze-kode segurua sortzen…
+    Pairing QR Alt: '{device} gailua parekatzeko QR kodea'
+    Scan Pairing Code: Ireki "Parekatu beste gailu bat" lehendik konektatuta dagoen gailuan eta eskaneatu kode hau.
+    Pairing Code: Parekatze-kodea
+    Use Text Pairing Code: Erabili testu-kodea
+    Show QR Code: Erakutsi QR kodea
+    Text Pairing Code Hint: Kopiatu kode hau lehendik dagoen gailura. Parekatze-sekretua dauka; beraz, garbitu arbeleko historiatik parekatu ondoren.
+    Pairing QR Warning: Erakutsi kode hau eskaera onartuko duen gailu fidagarri eta konektatuari soilik. Bi minuturen buruan iraungiko da.
+    Pairing Expires: Parekatze-kodea {time}(e)tan iraungiko da.
+    Verifying Pairing: Transferitutako pribatutasun-gakoa egiaztatzen…
+    Completing Pairing: Gailuaren parekatzea osatzen…
+    Compare Pairing Codes: Konparatu parekatze-kodeak
+    Pairing Code Match Hint: Berretsi kode hau lehendik dagoen gailuko kodearekin bat badator soilik.
+    Pairing Codes Match: Kodeak bat datoz
+    Pairing Approval Code Hint: Mantendu leiho hau irekita eta konparatu kodea gailu berrikoarekin. Gailu berriak ez du jarraitu behar kodeak desberdinak badira.
+    Pairing Scan Hint: Eskaneatu gehitzen ari zaren gailuan agertzen den parekatze-kodea.
+    Enter Pairing Code: Idatzi kodea eskuz
+    Pairing Code Entry Hint: Itsatsi gehitzen ari zaren gailuan agertzen den parekatze-kodea.
+    Check Pairing Code: Egiaztatu kodea
+    Scan QR Code: Eskaneatu QR kodea
+    Waiting For Pairing Code: Parekatze-kode baten zain…
+    Checking Pairing Request: Parekatze-eskaera egiaztatzen…
+    Approving Pairing Request: Pribatutasun-gakoa zifratu eta bidaltzen…
+    Pairing Approval Warning: Onartu gehitzen ari zaren gailuan eskaera hau ikus badezakezu soilik. Parekatzeak konturako sarbidea ematen du eta pribatutasun-gakoa transferitzen du.
+    Approve Pairing: Onartu parekatzea
+    Try Again: Saiatu berriro
+    Scan Again: Eskaneatu berriro
+    Camera Unavailable: OpenTubeX aplikazioak ezin izan du kamera erabili. Egiaztatu kameraren baimena edo idatzi parekatze-kodea eskuz.
+    Pairing Unsupported: Sinkronizazio-zerbitzari honek ez du gailuen parekatze segurua onartzen.
+    Pairing Failed: Ezin izan da gailua parekatu. Saiatu berriro kode berri batekin.
+    Pairing Request Changed: Parekatze-eskaera aldatu edo iraungi da, edo erabili da dagoeneko. Sortu kode berri bat.
+    Pairing Server Mismatch: Kode hau beste sinkronizazio-zerbitzari batekoa da.
+    Pairing Verification Unavailable: Ez dago sinkronizazio-bilduma zifraturik transferitutako gakoa egiaztatzeko. Sinkronizatu lehendik dagoen gailua eta saiatu berriro.
+    Pairing Completed: Gailua parekatu da
+    Pairing Approved: Gailuaren parekatzea onartu da
+    Use Pairing Invite: Erabili konektatutako gailuko kodea
+    Show Pairing Invite: Erakutsi parekatze-kodea
+    Scan Pairing Invite: Gehitzen ari zaren gailuan, ireki "Parekatu lehendik dagoen gailu batekin", aukeratu "Erabili konektatutako gailuko kodea" eta eskaneatu kode hau.
+    Pairing Invite QR Alt: Gehitzen ari zaren gailua parekatzeko QR kodea
+    Pairing Invite Text Hint: Kopiatu kode hau gehitzen ari zaren gailura. Gailu batek zure konturako sarbidea eskatzeko aukera ematen du; beraz, garbitu arbeleko historiatik parekatu ondoren.
+    Pairing Invite Warning: Erakutsi kode hau gehitzen ari zaren gailuari soilik. Haren eskaera gailu honetan onartu beharko duzu oraindik.
+    Pairing Invite Scan Hint: Eskaneatu konektatutako gailuan agertzen den parekatze-kodea.
+    Pairing Invite Entry Hint: Itsatsi konektatutako gailuan agertzen den parekatze-kodea.
+    Pairing Invite Code Hint: Onartu eskaera konektatutako gailuan, kode hau agertzen bada soilik. Ondoren, parekatzea automatikoki amaituko da.
+    Pairing Invite Approval Hint: Onartu gehitzen ari zaren gailuak kode hau erakusten badu soilik.
+    Pairing Invite Approved: Parekatzea onartu da. Gailu berriak automatikoki amaituko du parekatzea.
+    Disconnect: Deskonektatu
+    Delete Account: Ezabatu sinkronizazio-kontua
+    Delete Account Confirmation: Sinkronizazio-kontua ezabatu?
+    Delete Account Warning: Sinkronizazio-kontua eta zerbitzari honetan gordetako datu guztiak behin betiko ezabatuko dira. OpenTubeX aplikazioko datu lokalak ez dira ezabatuko.
+    Confirm Delete Account: Ezabatu kontua
+    Password Required: Pasahitza behar da
+    Account Deleted: Sinkronizazio-kontua ezabatu da
+    Connected as: '{username} gisa konektatuta'
+    Profiles: Profilak
+    Open Tabs: Irekitako fitxak eta saioa
+    Disable Setting Sync: Utzi ezarpen hau sinkronizatzeari
+    Enable Setting Sync: Sinkronizatu ezarpen hau
+    Sync Now: Sinkronizatu orain
+    Downloading encrypted data: Sinkronizatutako datu zifratuak deskargatzen…
+    Syncing subscriptions: Harpidetzak sinkronizatzen…
+    Syncing playlists: Erreprodukzio-zerrendak sinkronizatzen…
+    Syncing history: Ikustaldi-historia sinkronizatzen…
+    Syncing statistics: Ikustaldien estatistikak sinkronizatzen…
+    Syncing profiles: Profilak sinkronizatzen…
+    Syncing open tabs: Irekitako fitxak eta saioa sinkronizatzen…
+    Syncing settings: Ezarpenak sinkronizatzen…
+    Uploading encrypted data: Sinkronizatutako datu zifratuak kargatzen…
+    Finishing sync: Sinkronizazioa amaitzen…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'Azken sinkronizazioa: {date}'
+    History not supported: Zerbitzariaren bertsio honek ez du ikustaldi-historia sinkronizatzea onartzen.
+    Settings not supported: Zerbitzariaren bertsio honek ez du ezarpenak sinkronizatzea onartzen.
+    Sync completed: Sinkronizazioa osatu da
+    Sync failed: 'Sinkronizazioak huts egin du: {error}'
+    Data Loss Confirmation: Datuak ezabatuko dituen sinkronizazioa berretsi?
+    Data Loss Warning: Sinkronizazioak «{collection}» ataleko aurretik sinkronizatutako {previous} elementuetatik {deleted} ezabatuko lituzke gailu guztietan. Zuk ezabatu ez badituzu, adibidez zerbitzaria berrezarri delako, mantendu itzazu leku guztietan leheneratzeko.
+    Keep Deleted Items: Mantendu elementuak
+    Confirm Data Loss: Ezabatu eta jarraitu
+    Use Shared Tabs: 'Erabili partekatutako fitxa multzo bakarra gailu guztietan'
+    Shared Tabs Warning: 'Gailu honetan irekita dauden fitxak multzo partekatua bihurtuko dira. Beste gailuek sinkronizatzean beren fitxa irekiak multzo horrekin ordeztuko dituzte; gailu desberdinetako fitxak ez dira bateratuko.'
+    Tabs From Other Devices: 'Beste gailuetako fitxak'
+    Device Tab Session: '{platform} · {count} fitxa'
+    Mobile Device: 'Mugikorra'
+    Desktop Device: 'Mahaigaina'
+    Open All Tabs: 'Ireki fitxa guztiak'
+    Open All Tabs Confirmation: "Fitxa guztiak ireki?"
+    Server Update Required: "Eguneratu zerbitzari hau zifratutako zuzeneko sinkronizazioa onartzeko."
+    Log In with Provider: 'Hasi saioa {provider} erabiliz'
+    Log In with Single Sign-On: 'Hasi saioa saio-hasiera bakarrarekin'
+    Continue in Browser: 'Jarraitu nabigatzailean. OpenTubeX-ek jarraituko du amaitzen duzunean.'
+    Connected with Single Sign-On: 'Saio-hasiera bakarrarekin konektatuta'
+    Delete Single Sign-On Account Hint: 'Nabigatzailea irekiko da, ezabatzea zure saio-hornitzailearekin berresteko.'
+  Proxy Settings:
+    IP Block Recovery Script Path: IP blokeoaren berreskuratze-scripta
+    Select IP Block Recovery Script File: Hautatu IP blokeoa berreskuratzeko script-fitxategia
+    Running IP block recovery script: IP blokeoa berreskuratzeko scripta exekutatzen
+    IP block recovery script failed: 'IP blokeoa berreskuratzeko scriptak huts egin du (irteera-kodea: {exitCode})'
+    IP block recovery script finished: IP blokeoa berreskuratzeko scripta amaitu da
+    Reloading video after IP block recovery: Bideoa berriro kargatzen IP blokeoa berreskuratu ondoren
+    Failed to select IP block recovery script: Ezin izan da IP blokeoa berreskuratzeko scripta hautatu
+  SponsorBlock Settings:
+    Enable SponsorBlock Submission: Gaitu SponsorBlock-era bidaltzea
+    SponsorBlock Private User ID (optional): Erabiltzailearen ID pribatua (aukerakoa)
+    SponsorBlock Private User ID Tooltip: Itsatsi arakatzailearen hedapeneko SponsorBlock erabiltzaile-ID pribatua. Utzi hutsik aplikazioak sortutako ID bat erabiltzeko.
+    Generated SponsorBlock User ID: Aplikazioak sortutako SponsorBlock erabiltzaile-IDa
+    Generated SponsorBlock User ID Tooltip: Aplikazioak sortutako SponsorBlock erabiltzaile-ID hau arakatzailearen hedapenean edo aplikazioa beste ordenagailu batean erabiltzean erabil dezakezu.
+    Reveal Generated User ID: Erakutsi sortutako erabiltzaile-IDa
+    Generated SponsorBlock User ID Copy Button: Kopiatu sortutako SponsorBlock erabiltzaile-IDa
+    Generated SponsorBlock User ID Copied: Sortutako SponsorBlock erabiltzaile-IDa arbelean kopiatu da
+    Skip notification timeout: Saltatze-jakinarazpenaren denbora-muga
+    Custom Color: Kolore pertsonalizatua
+    DeArrow Settings: DeArrow
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Gaitu Return YouTube Dislike
+    Return YouTube Dislike Url: APIaren URLa
+  Password Dialog:
+    Incorrect Password: Pasahitza ez da zuzena
+    Unlock: Desblokeatu
+    Unlocking: Desblokeatzen…
+  Search Settings: Bilaketa-ezarpenak
+  No Settings Found: Ez da ezarpenik aurkitu
+  Interface Customizer:
+    Customize Interface: "Pertsonalizatu interfazea"
+    Preview: "Aurrebista"
+    Player: "Erreproduzigailua"
+    Desktop: "Mahaigaina"
+    Mobile: "Mugikorra"
+    Playing: "Erreproduzitzen"
+    Player Menu: "Erreproduzigailuaren menua"
+    Fullscreen: "Pantaila osoa"
+    Paused: "Pausatuta"
+    Controls: "Kontrolak"
+    Example Video Title: "Adibideko bideoa"
+    Resolution: "Bereizmena"
+    Loop: "Begizta"
+    Off: "Desaktibatuta"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Ezkutatu AA bidezko zabor-edukiko kanalak
+    Hide AI Slop Channels Tooltip: Komunitateak mantentzen duen AiSList blokeo-zerrendako (aisloplist.com) kanalak ezkutatzen ditu bilaketa-emaitzetatik, joeretatik eta gomendioetatik, eta haren abisu-zerrendako kanalen bideoak etiketatzen ditu. Harpidetzei ez die eragiten. Zerrendak egunean behin deskargatzen dira GitHub-etik, eta tokiko APIarekin kargatutako emaitzei soilik aplikatzen zaizkie.
+    Downloading: Zerrendak deskargatzen…
+    Failed to Download: Ezin izan dira zerrendak deskargatu
+    Loaded Status: "Blokeatutako kanalak: {blocked} · Markatutako kanalak: {warned} · Eguneratua: {date}"
+Tutorial:
+  Skip: Saltatu
+  Next: Hurrengoa
+  Finish: Amaitu
+  Welcome:
+    Title: Ongi etorri OpenTubeX aplikaziora
+    Description: Kontrol hauek aplikazioa erabiltzen hasten lagunduko dizute.
+  Navigation:
+    Title: Liburutegia beti eskura
+    Description: Erabili nabigazioa harpidetzak, erreprodukzio-zerrendak, historia eta beste atal batzuk irekitzeko.
+  Search:
+    Title: Bilatu edo itsatsi esteka bat
+    Description: Bilatu bideoak eta kanalak, edo itsatsi bideo bateragarri baten URLa zuzenean bilaketa-eremuan.
+  Tabs:
+    Title: Mantendu orriak fitxetan irekita
+    Description: Ireki hainbat orri aldi berean uneko kokapena galdu gabe. Aukeratu fitxetarako kokapen egokiena zure diseinuan.
+  Quick Settings:
+    Title: Pertsonalizatu aplikazioa
+    Description: Aukeratu gai bat eta bideo-kalitate lehenetsia. Aldatu hobespen horiek eta beste batzuk profilaren menutik nahi duzunean, edo egin eskuineko klik menuan profila aldatzeko.
+    Touch Description: Aukeratu gai bat eta bideo-kalitate lehenetsia. Aldatu hobespen horiek eta beste batzuk profilaren menutik nahi duzunean, edo eduki menua sakatuta profila aldatzeko.
+  Import Data:
+    Title: Inportatu zure datuak
+    Description: Nahi izanez gero, inportatu harpidetzak, historia, erreprodukzio-zerrendak, bilaketa-historia edo ezarpenak beste aplikazio bateragarri edo babeskopia batetik.
+    Action: Inportatu datuak
+    Not Now: Orain ez
+About:
+  Project: Proiektua
+  Community: Komunitatea
+  Contribute: Lagundu
+  Documentation: Dokumentazioa
+  Downloads: Deskargak
+  Changelog: Aldaketen erregistroa
+  Commit: Commit-a
+  Matrix: Matrix
+  Email: Helbide elektronikoa
+Profile:
+  Customization: Pertsonalizazioa
+  Manage Profile Subscriptions: Kudeatu profileko harpidetzak
+  Icon Names:
+    Person: Pertsona
+    People: Pertsonak
+    Headphones: Entzungailuak
+    Gaming: Jokoak
+    Film: Filma
+    Art: Artea
+    Science: Zientzia
+    Globe: Lur-globoa
+    Heart: Bihotza
+    Sun: Eguzkia
+    Moon: Ilargia
+    Trophy: Garaikurra
+  Profile Icon: Profilaren ikonoa
+  Choose an Emoji: Aukeratu emojia
+  Custom Emoji: Emoji pertsonalizatua
+  Emoji: Emojia
+  Choose Image: Aukeratu irudia
+  Crop Image: Moztu irudia
+  Zoom: Zooma
+  Apply Crop: Aplikatu mozketa
+  Transparent: Gardena
+  Use Initial: Erabili iniziala
+  The selected image could not be loaded: Ezin izan da hautatutako irudia kargatu
+  Theme Color: Gaiaren kolorea
+Channel:
+  Hide Watched: Ezkutatu ikusitakoak
+  Fewer videos per day: "Eguneko bideo gutxiago"
+  More videos per day: "Eguneko bideo gehiago"
+  Verified: Egiaztatua
+  Official Artist Channel: Artistaren kanal ofiziala
+  Subscription settings: Harpidetzaren ezarpenak
+  Failed to save subscription settings: Ezin izan dira kanalaren ezarpenak gorde
+  Videos per day: Eguneko bideoak
+  Use global setting: Erabili ezarpen orokorra
+  Unlimited: Mugagabea
+  More videos hidden: '+{count} gehiago | +{count} gehiago'
+  Show in subscription feed: Erakutsi harpidetzen jarioan
+  Notify about new uploads: Jakinarazi igoera berriak
+  Show members-only videos: Erakutsi kideentzako soilik diren bideoak
+  Upload Notifications On: "{channelName} kanalaren igoera berrien jakinarazpenak jasoko dituzu harpidetzak freskatzean"
+  Upload Notifications Off: "Ez duzu {channelName} kanalaren igoera berrien jakinarazpenik jasoko"
+  Upload Notifications Disabled In Settings: "{channelName} kanalaren jakinarazpenak aktibatuta daude, baina igoera berrien jakinarazpenak desaktibatuta daude ezarpenetan"
+  Turn On Upload Notifications: "Aktibatu"
+  Channel Name Unavailable: Kanalaren izena ez dago erabilgarri
+  Search Result Types: Bilaketa-emaitzen motak
+  All Results: Guztiak
+  Posts:
+    Original post unavailable: "Jatorrizko argitalpena ez dago erabilgarri"
+    Members-only video hidden by OpenTubeX: "OpenTubeX-ek kideentzako soilik den bideoa ezkutatu du"
+    Video hidden by OpenTubeX because of its title: "OpenTubeX-ek bideoa ezkutatu du, izenburuak testu ezkutatua duelako"
+Video:
+  Info panel source: 'Iturria: {source}'
+  External DRM Protected: "DRM babestutako bideoak ezin dira erreproduzitu OpenTubeXn, kode itxiko osagai jabedunak behar baitituzte."
+  Invalid Media URL: "Multimedia URLa ez da baliozkoa"
+  Mark As Fully Watched: Markatu osorik ikusita bezala
+  AI-generated video summary: "AAk sortutako bideo-laburpena"
+  Quality and accuracy may vary: "Kalitatea eta zehaztasuna alda daitezke"
+  Includes paid promotion: Ordainpeko sustapena du
+  Age Restricted Badge: Adin-muga du
+  Music Video Badge: Musika-bideoa
+  Queue: Ilara
+  Play Next: Erreproduzitu hurrena
+  Add to Queue: Gehitu ilarara
+  Added to Play Next: Bideoa hurrena erreproduzituko da
+  Added to Queue: Bideoa ilarara gehitu da
+  Clear Queue: Garbitu ilara
+  Queue Video Count: 'Bideo {count} | {count} bideo'
+  Remove from Queue: Kendu {title} ilaratik
+  Remove Video from Queue: Kendu ilaratik
+  Drag to Reorder Queue: Arrastatu {title} ilara berrantolatzeko
+  Reorder Queue Item: Berrantolatu {title}
+  Reorder Queue Item Instructions: Erabili gora eta behera gezi-teklak bideo hau ilaran mugitzeko.
+  Queue Item Moved: '{title} {position}. kokapenera eraman da, {total} kokapenetatik.'
+  Queue Item Cannot Move Up: Ezin da {title} gora mugitu. Lehen kokapenean dago dagoeneko, {total} kokapenetatik.
+  Queue Item Cannot Move Down: Ezin da {title} behera mugitu. Azken kokapenean dago dagoeneko, {total}. kokapenean {total} kokapenetatik.
+  Metadata: Bideoaren informazioa
+  Close Metadata: Itxi bideoaren informazioa
+  Metadata Cache:
+    Title History: Izenburuen historia
+    Thumbnail History: Koadro txikien historia
+    Description History: Deskribapenen historia
+    Previous Version: Aurreko {number}
+    Empty: (hutsik)
+  Fetching Streams: Korronteak yt-dlp bidez eskuratzen…
+  Waiting For Connection: "Ezin izan da zerbitzarira iritsi. Automatikoki berriro saiatzen…"
+  Retry Now: "Saiatu berriro orain"
+  Transcript:
+    Title: Transkripzioa
+    Search: Bilatu transkripzioan
+    Language: Transkripzioaren hizkuntza
+    Save: Gorde
+    Show: Erakutsi transkripzioa
+    Hide: Ezkutatu transkripzioa
+    Close: Itxi transkripzioa
+    Copied: Transkripzioa arbelean kopiatu da
+    Saved: Transkripzioa gorde da
+    Save Error: Ezin izan da transkripzioa gorde
+    Text File: Testu-fitxategia
+    Unavailable: Bideo honek ez du transkripziorik.
+    Load Error: Ezin izan da transkripzioa kargatu.
+    Empty: Transkripzio honek ez du testurik.
+    No Results: Transkripzioko zatirik ez dator bat bilaketarekin.
+  Retry With Built-in Extraction: Saiatu berriro erauzketa integratuarekin
+  Retry With yt-dlp Extraction: Saiatu berriro yt-dlp erauzketarekin
+  Reloading video after streaming URL error: Bideoa berriro kargatzen korrontearen URLak huts egin ondoren
+  Configure Restricted Playback Cookies Hint: "Konfiguratu cookieak Ezarpenak → Aurreratua → Kanpoko softwarea → yt-dlp cookieak atalean."
+  Try With Configured Cookies: Saiatu konfiguratutako cookieekin
+  Restricted Playback Authentication Failed Template: 'yt-dlp-k ezin izan du bideo hau atzitu konfiguratutako cookieekin: {error}'
+  Unmark As Watched: Kendu ikusita marka
+  Video has been unmarked as watched: Bideoari ikusita marka kendu zaio
+  Save Channel Playback Speed: Gorde kanalaren erreprodukzio-abiadura
+  Channel Playback Speed Saved: Kanalaren erreprodukzio-abiadura gorde da
+  Save Channel Video Quality: Gorde kanalaren bideo-kalitatea
+  Channel Video Quality Saved: Kanalaren bideo-kalitatea gorde da
+  Save Channel Subtitles State: Gorde kanalaren azpitituluen egoera
+  Channel Subtitles State Saved: Kanalaren azpitituluen egoera gorde da
+  Save Channel Volume: Gorde kanalaren bolumena
+  Channel Volume Saved: Kanalaren bolumena gorde da
+  Save Channel Setting: Gorde kanalaren ezarpena…
+  Channel Setting Already Set: '{setting} ezarpenak {value} balioa du dagoeneko'
+  Video has been saved to {playlistName}: Bideoa {playlistName} zerrendan gorde da
+  Video has been removed from {playlistName}: Bideoa {playlistName} zerrendatik kendu da
+  There was a problem saving the video to {playlistName}: Arazo bat izan da bideoa {playlistName} zerrendan gordetzean
+  There was a problem removing the video from {playlistName}: Arazo bat izan da bideoa {playlistName} zerrendatik kentzean
+  Failed to load collaborators: Ezin izan dira kolaboratzaileak kargatu
+  Notify me: Jakinarazi
+  Notification on: Jakinarazpena aktibatuta
+  Notification enabled: Bideo hau hasten denean jakinaraziko zaizu
+  Notification cancelled: Hasierako jakinarazpena bertan behera utzi da
+  Notification unavailable: Sistemaren jakinarazpenak ez daude erabilgarri
+  Scheduled video starting: Programatutako bideoa hasten ari da
+  Live notification body: '{videoTitle} orain hasiko da'
+  AI-generated content: Adimen artifizialak sortutako edukia
+  Collaborators: Kolaboratzaileak
+  Live Chat Replay: Zuzeneko txataren errepikapena
+  Show Live Chat: Erakutsi zuzeneko txata
+  Show Live Chat Replay: Erakutsi zuzeneko txataren errepikapena
+  Close Live Chat: Itxi zuzeneko txata
+  Close Live Chat Replay: Itxi zuzeneko txataren errepikapena
+  Live Chat Settings: Zuzeneko txataren ezarpenak
+  Show Live Chat Timestamps: Erakutsi denbora-markak
+  Chat Filter: Txataren iragazkia
+  Top Chat: Txat nagusia
+  All Messages: Mezu guztiak
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: Zuzeneko txataren errepikapena gaituta dago. Bideoa erreproduzitu ahala agertuko dira hemen txateko mezuak.
+  Premiere started: Estreinaldia abian da. Duela {timeAgo} hasi da
+  Sponsor Block category:
+    hook: Amua/agurrak
+    highlight: Une aipagarria
+    exclusive access: Sarbide esklusiboa
+  Sponsor Block category short:
+    intro: Etenaldia
+    interaction: Elkarrekintzaren gogorarazlea
+    music offtopic: Musikaz bestelakoa
+    filler: Gaitik kanpokoak
+  Player:
+    Playing in Picture-in-Picture: Irudiz irudi moduan erreproduzitzen
+    Stream Recovery:
+      DASH Fallback: "Audio-jarioak huts egin du, DASH formatuetara aldatzen: {error}"
+      Error Copied: "Errorea arbelera kopiatu da"
+      Legacy Fallback: "Jarioak huts egin du, formatu zaharretara aldatzen: {error}"
+    Caption Timing:
+      Adjust Timing: Doitu denboraketa…
+      Caption Timing: Azpitituluen denboraketa
+      Offset: Desplazamendua (segundoak)
+      Hint: Balio negatiboek azpitituluak lehenago erakusten dituzte; positiboek, geroago. Bideo honetarako soilik.
+      Earlier: Lehenago
+      Later: Geroago
+      Reset: Berrezarri
+    Most Replayed: "Gehien errepikatua"
+    Pull up for precise seeking: "Arrastatu gora zehatz bilatzeko"
+    Precise seeking, drag down to exit: "Bilaketa zehatza · Arrastatu behera irteteko"
+    Cast: "Igorri"
+    Music Mode: "Musika modua"
+    Music Mode Description: "Erreproduzitu bideoak 1× abiaduran eta hasi bideo berriak hasieratik fitxa honetan. Gordetako erreprodukzio-ezarpen lehenetsiak ez dira aldatzen."
+    DLNA:
+      Cast: "Igorri DLNA gailu batera"
+      Stop: "Gelditu igorpena"
+      No Devices: "Ez da DLNA gailurik aurkitu"
+      No MP4 Source: "Ez dago MP4 korronte bateragarririk bideo honetarako"
+      Error: "Ezin izan da bideoa igorri"
+    Repeat Stats:
+      Repeat Stats: Errepikapenen estatistikak
+      Looping: Begiztan
+      Repeats: Errepikapena | Errepikapenak
+      Time Spent: Emandako denbora
+    Voice-over Translation:
+      Start: Itzuli
+      Cancel: Utzi
+      Progress: Ahots bidezko itzulpena prestatzen…
+      Retry: Saiatu berriro
+      Error: Ahots bidezko itzulpenak huts egin du. Saiatu berriro geroago.
+      Duration Error: Ahots bidezko itzulpena gehienez lau orduko bideoetarako dago erabilgarri.
+    Caption Appearance:
+      Options: Aukerak
+      Sample: Honelako itxura dute azpitituluek
+    Auto-translate: Itzulpen automatikoa
+    Sleep Timer:
+      Sleep Timer: Lo-tenporizadorea
+      'Off': 'Desaktibatuta'
+      Minutes: '{minutes} minutu'
+      End of video: Bideoaren amaieran
+      End of current chapter: Uneko kapituluaren amaiera
+      Remaining: '{time} geratzen dira'
+      Cancel timer: Utzi tenporizadorea
+      Timer ended: Lo-tenporizadorea amaitu da
+    A-B Repeat:
+      A-B Repeat: A-B errepikapena
+      'On': Aktibatuta
+      'Off': Desaktibatuta
+      Point A: A puntua
+      Point B: B puntua
+      Set Repeat Start: Ezarri errepikapenaren hasiera
+      Set Repeat End: Ezarri errepikapenaren amaiera
+      Pause Repeat: Pausatu A-B errepikapena
+      Resume Repeat: Berrekin A-B errepikapenari
+      Adjust Point: 'Doitu {point} puntua; une honetan {timestamp}'
+      Clear Range: Garbitu A-B errepikapenaren tartea
+      End Before Start: B puntuak A puntuaren ondoren egon behar du.
+      Outside Duration: Denbora-markak bideoaren barruan egon behar du.
+      Cleared: A-B errepikapena garbitu da
+    Seek History:
+      Seek History: Jauzien historia
+      Positions: '{count} posizio | {count} posizio'
+      Nothing to undo: Ez dago desegiteko ezer
+      Nothing to redo: Ez dago berregiteko ezer
+    Zoom:
+      Zoom: Zooma
+      'Off': 'Desaktibatuta'
+    Volume Boost:
+      Volume Boost: "Bolumen-igoera"
+      'Off': "Desaktibatuta"
+    Auto-generated Caption Template: '{language} (automatikoki sortua)'
+    Up next in {seconds}: Hurrengoa {seconds} segundo barru
+    Resize dock: Aldatu panelaren tamaina
+    Play now: Erreproduzitu orain
+    MusicPlaybackRateOverride: Musika-bideoa hauteman da; 1x abiaduran erreproduzitzen
+    Normal: Normala
+    Set Default: Ezarri lehenetsi gisa
+    Hide Annotations: Ezkutatu oharpenak
+    Show Annotations: Erakutsi oharpenak
+    Hide: Ezkutatu
+    Show: Erakutsi
+    Scroll Mini Player:
+      Collapse Controls: "Tolestu kontrolak"
+      Expand Controls: "Zabaldu kontrolak"
+      Back to Top: Itzuli goialdera
+      Return to Video Tab: Itzuli bideoaren fitxara
+      Hide: Ezkutatu minierreproduzigailua
+      Play: Erreproduzitu
+      Pause: Pausatu
+      Drag Handle: Mugitu minierreproduzigailua
+      Rewind 10 seconds: 10 segundo atzera
+      Forward 10 seconds: 10 segundo aurrera
+    SponsorBlock:
+      CancelCurrentSegment: Utzi segmentua sortzeari
+      ClearSegments: Garbitu segmentuak
+      ClearSegmentsPrompt: Ziur bideo honetarako zirriborratutako SponsorBlock segmentu guztiak garbitu nahi dituzula?
+      CompleteSegmentsBeforeSubmitting: Osatu zirriborratutako segmentu guztiak bidali aurretik.
+      CategoryLabel: Kategoria
+      ActionTypeLabel: Segmentu mota
+      DuplicateSegments: Ezin dira segmentu-zirriborro bikoiztuak sortu.
+      EndAction: (Amaitu)
+      EndActionLabel: Amaiera
+      EndTimeAfterStart: Segmentuaren amaiera-uneak hasiera-unearen ondorengoa izan behar du.
+      EndTimeBeforeVideoEnd: Segmentuaren amaiera-uneak bideoaren iraupenaren barruan egon behar du.
+      EndTimeLabel: Segmentuaren amaiera-unea
+      DisableAutoSkipTemporarily: Desgaitu aldi baterako SponsorBlock-en saltatze automatikoa
+      EnableAutoSkipTemporarily: Gaitu berriro SponsorBlock-en saltatze automatikoa
+      Guidelines: Jarraibideak
+      InspectSegment: Aztertu
+      InvalidStartTime: Idatzi baliozko segmentuaren hasiera-unea.
+      NoSegmentsToSubmit: Sortu gutxienez segmentu oso bat bidali aurretik.
+      NowAction: (Orain)
+      CloseInfoPanel: Itxi SponsorBlock-en informazioa
+      OpenInfoPanel: Ireki SponsorBlock-en informazioa
+      OpenSubmissionMenu: Ireki bidalketa-menua
+      PreviewRequired: Aurreikusi segmentu guztiak bidali aurretik.
+      PreviewSegment: Aurreikusi
+      SaveSegment: Gorde
+      SetSegmentEndNow: Amaitu segmentua orain
+      StartAction: (Hasi)
+      StartSegmentNow: Hasi segmentua orain
+      SubmissionBadRequest: SponsorBlock-ek bidalketa-eskaera baztertu du.
+      SubmissionDuplicate: Hau lehenago bidali da dagoeneko.
+      SubmissionFailed: Ezin izan dira SponsorBlock segmentuak bidali.
+      SubmissionForbidden: SponsorBlock-ek bidalketa baztertu du.
+      SubmissionRateLimited: SponsorBlock-ek bidalketaren maiztasuna mugatu du.
+      SubmissionSuccess: SponsorBlock segmentuak bidali dira.
+      SubmitSegment: Bidali segmentua
+      SubmitSegments: Bidali
+      StartTimeLabel: Segmentuaren hasiera-unea
+      TimeDivider: '–'
+      SkipPrompt: '{segmentCategory} saltatu?'
+      SkipPromptAction: Saltatu
+      SkipToHighlight: Une aipagarrira saltatu?
+      SkippedToHighlight: Une aipagarrira saltatu da
+      SkipToastUnskip: Desegin saltatzea
+      SkipToastReskip: Saltatu berriro
+      MutedSegment: '{segmentCategory} isilarazi da'
+      MuteToastUnmute: Aktibatu soinua
+      InfoPanelLoading: Segmentuak kargatzen ari dira oraindik...
+      InfoPanelHasSegments: Bideo honek segmentuak ditu datu-basean!
+      InfoPanelNoSegments: Ez da segmenturik aurkitu
+      RefreshSegments: Freskatu segmentuak
+      RefreshInfo: Freskatu SponsorBlock-en informazioa
+      ContributionStatsTitle: Zure ekarpenak
+      ContributionStatsLoading: Ekarpenen estatistikak kargatzen...
+      ContributionStatsError: Ekarpenen estatistikak ez daude erabilgarri. Saiatu freskatzen.
+      ContributionStatsNoUserId: Bidali segmentu bat edo inportatu SponsorBlock erabiltzaile-IDa ekarpenen estatistikak ikusteko.
+      Submissions: Bidalketak
+      Segments: Segmentuak
+      TimeSaved: Aurreztutako denbora
+      AutoSkipEnabled: Saltatu segmentuak automatikoki
+      AutoSkipOn: 'Aktibatuta'
+      AutoSkipOff: 'Desaktibatuta'
+      WhitelistChannel: Gehitu kanala baimenduen zerrendara
+      ChannelWhitelisted: Baimenduta
+      RemoveChannelFromWhitelist: Kendu kanala baimenduen zerrendatik
+      MuteSegment: Isilarazi segmentua
+      SkipSegment: Saltatu segmentua
+      CloseSegmentActions: Itxi segmentuaren ekintzak
+      FullVideo: Bideo osoa
+      FullVideoLabel: '{segmentCategory} · Bideo osoa'
+      MuteActionType: Isilarazi
+      MutePrompt: '{segmentCategory} isilarazi?'
+      SkipActionType: Saltatu
+      LockedSegment: Blokeatutako segmentua
+      UpvoteSegment: Eman aldeko botoa
+      DownvoteSegment: Eman kontrako botoa
+      VoteFailed: Ezin izan da SponsorBlock botoa bidali.
+      ChangeCategory: Aldatu kategoria
+      CopyAndDownvote: Kopiatu eta eman aurkako botoa
+      SubmitCategoryVote: Bidali kategoriaren botoa
+      CategoryVoteSuccess: Kategoriaren botoa bidali da.
+    Google Cast:
+      Position: "Erreprodukzio-posizioa"
+      Invalid Authentication: "Hartzaileak autentifikazio-erantzun baliogabea bidali du."
+      Authentication Declined: "Hartzaileak autentifikazioa ukatu du."
+      Audio Only Receiver: "Hartzaileak audio-igorpena soilik onartzen du."
+      Disconnected: "Hartzailea deskonektatu da."
+      Timeout: "Hartzaileak ez du erantzun."
+      Busy: "Beste leiho bat dago jada igortzen."
+      Not Authorized: "Aktibatu leiho hau eta saiatu berriro."
+      Invalid Request: "Igorpen-eskaera baliogabea."
+      IPv4 Required: "IPv4 konexioa behar da."
+      Launch Failed: "Ezin izan da hartzailea abiarazi."
+      Load Failed: "Hartzaileak ezin izan du bideoa kargatu."
+      Cancelled: "Igorpena bertan behera utzi da."
+      Private Not Authorized: "Ez da onartu multimedia pribaturako sarbidea."
+      Invalid Subtitles: "Igorpenaren azpititulu baliogabeak."
+      Discovery Failed: "Ezin izan dira hartzaileak bilatu."
+      Preparing Video: "Bideoa igortzeko prestatzen…"
+      Connecting: "{device} gailura konektatzen…"
+      Starting Receiver: "Cast hargailua abiarazten…"
+      Loading Video: "Bideoa hargailuan kargatzen…"
+      Buffering: "{device} gailuan bufferreratzen…"
+      Allow Private Instance: "Baimendu igorpen honi {instance} Invidious instantzia pribatuko multimedia irakurtzea?"
+      Cast: "Igorri Google Cast gailu batera"
+      Connected: "{device} gailura igortzen"
+      Rewind: "10 segundo atzera"
+      Forward: "10 segundo aurrera"
+      Subtitles Off: "Desaktibatu azpitituluak"
+      Return: "Itzuli tokiko erreprodukziora"
+      No Devices: "Ez da Google Cast gailurik aurkitu"
+      No Source: "Ez dago Google Cast-erako korronte bateragarririk"
+      Error: "Ezin izan da bideoa igorri"
+      Error With Details: "Ezin izan da bideoa igorri: {error}"
+      Untrusted Receiver: "Hartzailearen ziurtagiria ez da fidagarria. Erabili autentifikatutako Google Cast hartzaile bat."
+    FCast:
+      Cast: "Igorri FCast hartzaile batera"
+      No Devices: "Ez da FCast hartzailerik aurkitu"
+      No Source: "Ez dago FCast-erako korronte bateragarririk"
+    Secondary Captions: Bigarren mailako azpitituluak
+    Subtitle File:
+      Load: "Kargatu azpititulu-fitxategia…"
+      Subtitle Files: "Azpititulu-fitxategiak"
+      Error: "Ezin izan da azpititulu-fitxategia kargatu. Aukeratu SRT edo WebVTT fitxategi bat."
+  External Media:
+    Dislikes: "Desatsegitea | Desatsegiteak"
+    Reposts: "Berriro argitaratzea | Berriro argitaratzeak"
+    Saves: "Gordeketa | Gordeketak"
+    Series: "Seriea"
+    Season: "Denboraldia"
+    Season Number: "Denboraldi zenbakia"
+    Episode: "Atala"
+    Episode Number: "Atal zenbakia"
+    Track: "Musika pista"
+    Track Number: "Pista zenbakia"
+    Artists: "Artistak"
+    Album: "Albuma"
+    Genres: "Generoak"
+    Media Type: "Multimedia mota"
+    Availability: "Eskuragarritasuna"
+    Age Limit: "Adin muga"
+    Release Date: "Argitaratze data"
+    Availability Values:
+      public: "Publikoa"
+      private: "Pribatua"
+      premium_only: "Premium bakarrik"
+      subscriber_only: "Harpidedunentzat bakarrik"
+      needs_auth: "Saioa hasi behar da"
+      unlisted: "Zerrendatu gabeak"
+  Save Queue to Playlist: "Gorde ilara erreprodukzio-zerrendan"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Zuzeneko txata ez da oraingoz onartzen Yattee zerbitzariarekin. Beharrezkoa da YouTubera zuzenean konektatzea.
+  External Player:
+    LaunchFailedTemplate: Ezin izan da {externalPlayer} abiarazi. Egiaztatu instalatuta dagoela, edo ezarri exekutagarriaren bidea kanpoko erreproduzigailuaren ezarpenetan.
+    Confirm Arguments Title: "Kanpoko erreproduzigailua argumentu pertsonalizatuekin exekutatu?"
+    Confirm Arguments Message: "{externalPlayer} argumentu pertsonalizatu hauekin abiaraziko da:"
+    Confirm Arguments Warning: "Argumentu batzuek programak exekutatu edo fitxategiak gainidatz ditzakete. Jarraitu zuk zeuk gehitu badituzu soilik."
+    Run: "Exekutatu"
+    LaunchCanceledTemplate: "Ez da {externalPlayer} ireki"
+Playlist:
+  Playlist Already Preloaded: "Erreprodukzio-zerrendako bideo guztiak aurrez kargatuta daude"
+  Playlist Preload Progress: "Bideoak aurrez kargatzen: {completed}/{requested}"
+  Close Playlist: Itxi erreprodukzio-zerrenda
+  Preload Playlist: "Aurrekargatu bideo guztiak"
+  Preload Playlist Warning Title: "Bideo guztiak aurrekargatu?"
+  Preload Playlist Warning: "Aurrekargak erreprodukzio-zerrenda honetako bideo guztiak eskatzen dizkio YouTube-ri. Denbora laburrean eskaera asko bidaltzeak YouTube-k zure IP helbidea aldi baterako blokeatzea eragin dezake. Jarraitu nahi duzu?"
+  Preloading Playlist: "Bideo guztiak aurrekargatzen..."
+  Playlist Preload Complete: "Aurrekargatutako bideoak: {count}."
+  Playlist Preload Partial: "{requested} bideotatik {preloaded} aurrekargatu dira. {failed} ezin izan dira aurrekargatu."
+  Playlist Preload Pagination Failed: "Ezin izan da erreprodukzio-zerrenda osoa kargatu; aurrekarga bertan behera utzi da."
+  Add Playlist to Queue: "Gehitu erreprodukzio-zerrenda ilarara"
+  Playlist Added to Queue: "Erreprodukzio-zerrenda ilarara gehitu da"
+Change Format:
+  yt-dlp Error Template: "yt-dlp-k ezin izan ditu korronteak eman: {error}"
+  Local Video File: Bideo-fitxategi lokala
+  Local Audio File: Audio-fitxategi lokala
+  Online Video: Lineako bideoa
+  Stream Source: Korrontearen jatorria
+  Stream Extraction Method: Korrontea erauzteko metodoa
+  Playback Engine: Erreprodukzio-motorra
+  Streaming Protocol: Korronte-protokoloa
+  Not Available For This Video: Ez dago erabilgarri bideo honetarako
+  Protocols:
+    Progressive: Progresiboa
+  Descriptions:
+    Local File: Gailu honetara deskargatutako fitxategitik zuzenean erreproduzitzen da
+    Online Video: Kargatu korronte-formatuak konfiguratutako lineako jatorritik
+    Dash: Kalitate moldagarria, hainbat audio-pista eta bereizmen handienak
+    Legacy: Bideoa eta audioa batera dituen fitxategi bakarra, bereizmen txikiagoetara mugatua
+    Audio: Audioa soilik, banda-zabalera aurrezteko edo atzeko planoan entzuteko
+  yt-dlp Fallback Template: 'yt-dlp-k ezin izan ditu korronteak eman; motor integratua erabiliko da: {error}'
+  yt-dlp Default Clients Fallback: Hobetsitako yt-dlp bezeroek ezin izan dituzte korronte erreproduzigarriak eman; yt-dlp-ren bezero lehenetsiekin saiatzen
+  Built-in Fallback Template: 'Motor integratuak ezin izan du korrontea erreproduzitu; yt-dlp-rekin saiatzen: {error}'
+Share:
+  Shared YouTube Link: "Partekatutako YouTube esteka"
+  Open in Player: "Ireki erreproduzitzailean"
+  No YouTube Link: "Partekatutako testuak ez du onartutako YouTube estekarik."
+  Loading Video Information: "Bideoaren informazioa kargatzen…"
+  Video Information Failed: "Ezin izan da bideoaren informazioa kargatu. Saiatu berriro edo ireki esteka."
+  Share Link: "Partekatu esteka"
+  Share failed: "Ezin izan da esteka partekatu"
+  Timestamp Link Copied: Denbora-markaren esteka arbelean kopiatu da
+Context Menu:
+  Opened in a Background Tab: "Atzeko planoko fitxa batean irekita"
+  Open in a Background Tab: "Ireki atzeko planoko fitxa batean"
+  Select Tab: Hautatu fitxa
+  Close Tabs Before: Itxi aurreko fitxak
+  Close Tabs After: Itxi ondorengo fitxak
+  Close Other Tabs: Itxi beste fitxak
+  Copy {service} link without playlist: "Kopiatu {service} esteka erreprodukzio-zerrendarik gabe"
+  Context Menu: Laster-menua
+  Select All: Hautatu dena
+  Save Image As…: Gorde irudia honela…
+  Copy Image: Kopiatu irudia
+  Copy Image Address: Kopiatu irudiaren helbidea
+  Cancel Refresh: Utzi freskatzeari
+  Reload Videos: Kargatu berriro bideoak
+  Reload Shorts: Kargatu berriro Shorts bideoak
+  Reload Live: Kargatu berriro zuzenekoak
+  Reload Posts: Kargatu berriro argitalpenak
+  Reload All Feeds: Kargatu berriro jario guztiak
+  Reload RSS Feeds: Birkargatu RSS jarioak
+  Close Multiple Tabs: Itxi {count} fitxa
+  Duplicate Tab: Bikoiztu fitxa
+  Duplicate Multiple Tabs: Bikoiztu {count} fitxa
+  Move Tab: Mugitu fitxa
+  Move Tabs: Mugitu fitxak
+  Move Tab to Group: Eraman fitxa taldera
+  Collapse Group: Tolestu taldea
+  Expand Group: Zabaldu taldea
+  Move Tabs to Group: Eraman fitxak taldera
+  Manage Tab Groups…: Kudeatu fitxa-taldeak…
+  To Beginning: Hasierara
+  To End: Amaierara
+  Close Tabs: Itxi fitxak
+  To the Top: Goialdera
+  To the Left: Ezkerrera
+  To the Bottom: Behealdera
+  To the Right: Eskuinerantz
+  Other Tabs: Beste fitxak
+  Copy YouTube Link: Kopiatu YouTube esteka
+  Copy YouTube Links: Kopiatu YouTube estekak
+  Pin Tab: Ainguratu fitxa
+  Pin Tabs: Ainguratu fitxak
+  Unpin Tab: Desainguratu fitxa
+  Unpin Tabs: Desainguratu fitxak
+  Tab Color: Fitxaren kolorea
+  Default: Lehenetsia
+  Purple: Morea
+  Reopen Closed Tab: Ireki berriro itxitako fitxa
+  Reload Tab: Kargatu berriro fitxa
+  Reload Tabs: Kargatu berriro fitxak
+  Load Tab: Kargatu fitxa
+  Load Tabs: Kargatu fitxak
+  Unload Tab: Kendu fitxa memoriatik
+  Unload Tabs: Kendu fitxak memoriatik
+  Unload Tabs Failed: "Ezin izan dira hautatutako fitxak memoriatik kendu."
+  Move Tab to Window: Eraman fitxa leihora
+  Move Tabs to Window: Eraman fitxak leihora
+  Open in a New Tab: Ireki fitxa berri batean
+  Open in a New Window: Ireki leiho berri batean
+  Copy Link: Kopiatu esteka
+  Copy Invidious Link: Kopiatu Invidious esteka
+  Search Selection in New Tab: Bilatu "{selection}" fitxa berri batean
+  Search Selection in New Window: Bilatu "{selection}" leiho berri batean
+  Search With: Bilatu {engine} erabiliz
+  Search With Multiple: Bilatu honekin...
+  Selection Too Long: Hautapena luzeegia da bilatzeko (> {count} karaktere)
+  Background Tab: Atzeko planoko fitxa
+Tab Organizer:
+  Tab History: "Fitxaren historia"
+  Current Page: "Uneko orria"
+  Icon Labels:
+    Podcast: 'Podcasta'
+    Clock: 'Erlojua'
+    Puzzle Piece: 'Puzzle pieza'
+    People: 'Pertsonak'
+    Chart: 'Grafikoa'
+    Calendar: 'Egutegia'
+    Images: 'Irudiak'
+    Music: 'Musika'
+    Folder: Karpeta
+    Bookmark: Laster-marka
+    Favorites: Gogokoak
+    Videos: Bideoak
+    Gaming: Jokoak
+    Research: Ikerketa
+    Art: Artea
+    Travel: Bidaiak
+  Group Icon: Taldearen ikonoa
+  Title: Fitxen antolatzailea
+  Open Tab Count: 'Fitxa ireki {count} | {count} fitxa ireki'
+  Search Label: Bilatu fitxak
+  Selected Count: 'Fitxa {count} hautatuta | {count} fitxa hautatuta'
+  Tab Count: 'Fitxa {count} | {count} fitxa'
+  Select All: Hautatu dena
+  Select None: Kendu hautapena
+  Move To Group: Eraman hautatutako fitxak taldera
+  Choose Group: Aukeratu taldea
+  Ungrouped: Talderik gabe
+  Pin: Ainguratu
+  Unpin: Desainguratu
+  Load: Kargatu
+  Unload: Kendu memoriatik
+  Unload All: Kendu denak memoriatik
+  Close All: Itxi denak
+  Ungroup: Kendu taldetik
+  Group Name: Taldearen izena
+  Color: Kolorea
+  No Color: Kolorerik ez
+  Create Group: Sortu taldea
+  Expand Group: Zabaldu taldea
+  Collapse Group: Tolestu taldea
+  Expand Group Label: Zabaldu {name}, fitxa {count} | Zabaldu {name}, {count} fitxa
+  Rename Group: Aldatu {name} taldearen izena
+  Change Group Color: Aldatu {name} taldearen kolorea
+  Move To Window: Eraman leihora
+  Choose Window: Aukeratu leihoa
+  Select Tab: Hautatu {title}
+  Active: Aktibo
+  Pinned: Ainguratuta
+  Unloaded: Memoriatik kenduta
+  Playing: Erreproduzitzen
+  Close Tab: Itxi {title}
+  No Open Results: Irekitako fitxarik ez dator bat bilaketa honekin.
+  Recently Closed: Duela gutxi itxitakoak
+  Clear: Garbitu
+  No Closed Results: Duela gutxi itxitako fitxarik ez dator bat bilaketa honekin.
+  Drag Tab: Arrastatu talde batera eramateko
+Chapters:
+  Open Chapters: Ireki kapituluak
+  Close Chapters: Itxi kapituluak
+  Copy Timestamp Link: Kopiatu {timestamp} uneko esteka
+  Loop Chapter: 'Errepikatu kapitulua: {chapter}'
+  Looping Chapter: 'Kapitulua errepikatzen: {chapter}'
+  Chapter Loop Stopped: 'Kapituluaren errepikapena gelditu da'
+Comments:
+  Image unavailable: "Irudia ez dago erabilgarri"
+  Comment Count: Iruzkin 1 | {count} iruzkin
+  Show Comments: Erakutsi iruzkinak
+  Getting comment replies, please wait: Iruzkinen erantzunak eskuratzen; itxaron
+  Reload Comments: Kargatu berriro iruzkinak
+  Reply Count: Erantzun 1 | {replyCount} erantzun
+  YouTube did not provide advertised replies: YouTube-k iruzkin honek erantzunak dituela adierazi du, baina ez ditu eman. Baliteke ezabatuta edo ezkutatuta egotea; beraz, erantzuteko botoia kendu da.
+  Pinned by you: Zuk ainguratua
+  A reply is pinned: Erantzun bat ainguratuta dago
+  Filter loaded comments: Iragazi kargatutako iruzkinak
+  Comment filters: Iruzkinen iragazkiak
+  From creator: Sortzailearena
+  Contains timestamps: Denbora-markak ditu
+  Pin comment by author: Ainguratu {author} erabiltzailearen iruzkina
+  Unpin comment by author: Desainguratu {author} erabiltzailearen iruzkina
+  Edited: (editatua)
+  Highlighted comment: Nabarmendutako iruzkina
+  Highlighted reply: Nabarmendutako erantzuna
+  Search loaded comments: Bilatu kargatutako iruzkinetan
+  Loaded comment search result count: Kargatutako {total} iruzkinetatik 1 | Kargatutako {total} iruzkinetatik {count}
+  No loaded comments match your filters: Kargatutako iruzkinik ez dator bat iragazkiekin
+  YouTube comment link copied to clipboard: YouTube iruzkinaren esteka arbelean kopiatu da
+  Translate to {language}: Itzuli {language} hizkuntzara
+  Show original: Erakutsi jatorrizkoa
+  Translating comment, please wait: Iruzkina itzultzen; itxaron
+  Comment translation failed: Ezin izan da iruzkina itzuli
+Description:
+  Title: Deskribapena
+  Copy Description: Kopiatu deskribapena
+  Description Copied: Deskribapena arbelean kopiatu da
+  Video Category: 'Bideoaren kategoria:'
+  Video Tags: Bideoaren etiketak
+  Games: Jokoak
+  Music: Musika
+Tooltips:
+  General Settings:
+    Limit Titles to Two Lines: "Zerrenda eta saretetako bideo eta erreprodukzio-zerrenden izenburuak bi lerrora laburtzen ditu eten-puntuekin, txartelak uniformeagoak izan daitezen. Pasatu kurtsorea izenburu baten gainetik osorik ikusteko."
+    Close Window With Last Tab: 'Desaktibatuta dagoenean, azken fitxa itxiz gero fitxa berri bat irekitzen da, eta leihoak irekita jarraitzen du zuk itxi arte.'
+    Preferred Video Codec: |
+      Modu automatikoak zure gailuak hardware bidez deskodetu ditzakeen kodekak hobesten ditu.
+      AV1: kalitaterik onena datu gutxienarekin, baina bideo guztiek ez dute. Hardware bidezko deskodetzerik gabe, bateria agortu edo fotogramak gal ditzake.
+      VP9: eraginkortasunaren eta bateragarritasunaren arteko oreka, normalean bereizmen handieneraino erabilgarri.
+      H.264: ia edozein gailutan deskodetzeko errazena, baina datu gehiago erabiltzen ditu eta normalean 1080p-n gelditzen da.
+      Aldaketak hurrengo bideoan aplikatzen dira. Hobetsitako kodeka erabilgarri ez badago, beste bat erabiltzen da.
+    Always Use Backup Media Server: "YouTubek adierazten duen ordezko zerbitzaritik erreproduzitzen ditu bideoak esleitutakotik beharrean, adibidez zure Interneteko hornitzailearen cachea sarritan motela denean. Bestela, esleitutako zerbitzariak erantzuten ez duenean soilik aldatzen du OpenTubeXek."
+    Automatically switch stream extraction methods: "Probatu yt-dlp erreprodukzio integratuak huts egiten badu, edo erreprodukzio integratua yt-dlp-k huts egiten badu."
+    Enable Tabs: "Uneko orria irekita mantentzen du. Beste fitxak aplikazioa berrabiarazi arte gordetzen dira; gaitu fitxak berriro berreskuratzeko."
+    Data Saver Thumbnails: "Erabili bereizmen txikiagoko miniaturak datuen erabilera murrizteko."
+    Use AI Translation Completions: Bete giza itzulpenetan falta diren zatiak adimen artifizialak sortutako testuarekin. Giza itzulpenek beti dute lehentasuna.
+    Update Relative Timestamps: Denbora-marka erlatiboak aplikazio osoan eguneratzen ditu orria irekita dagoen bitartean. Desgaituta dagoenean, orria berriro kargatu edo bisitatu ondoren soilik eguneratzen dira.
+    Stream Extraction Method: |
+      Aukeratu OpenTubeX aplikazioak bideo-korronteak nola eskuratuko dituen. yt-dlp erabilgarri egon behar da hautatuta dagoenean.
+      Baliteke bideoek denbora gehiago behar izatea hasteko yt-dlp erabiltzean.
+      Motor integratuak ez du onartzen zuzeneko emankizunetan eta estreinaldietan denbora jakin batera joatea.
+    Avoid translation: |
+      Desgaitu YouTube-k bideo baten izenburua, deskribapena eta kapituluak automatikoki itzultzea.
+      Eskaera gehiegik, hala nola zerrendetako bideoen izenburuak eskuratzeak,
+      aplikazioaren fidagarritasuna aldi baterako murriztu dezakete.
+    Show Thumbnail Previews: Erakutsi aurrebista animatuak bideoen koadro txikiak seinalatzean.
+    Startup Behavior: |
+      Aukeratu OpenTubeX aplikazioak zer egingo duen abiaraztean.
+      Kargatu fitxa guztiak aukerak berehala leheneratzen ditu gordetako fitxa guztiak, baina atzeko planoko fitxek ez dituzte bideoak automatikoki erreproduzituko.
+      Kargatu aurretik kargatutako fitxak aukerak OpenTubeX itxi zenean kargatuta zeuden fitxak berriro kargatzen ditu eta gainerakoak memoriatik kenduta mantentzen ditu.
+      Kargatu aktibo egon den azken fitxa aukerak aurreko saioa leheneratzen du beste fitxak irekita baina memoriatik kenduta dituela; haietan klik egitean kargatuko dira.
+      Hasi saio huts batekin aukerak gordetako fitxak saltatu eta leiho berri bat irekitzen du.
+    Remember Tab Navigation History: Fitxa bakoitzaren atzerako eta aurrerako nabigazio-historia gorde eta leheneratzen da OpenTubeX berrabiaraztean.
+    Yattee Server: OpenTubeXk bideoak, kanalak, erreprodukzio-zerrendak eta bilaketa-emaitzak kargatzeko erabiltzen duen yattee-server instantzia. Erabiltzaile-izena eta pasahitza gailu honetan soilik gordetzen dira.
+    Proxy Videos Through Yattee Server: Bideo- eta audio-jarioak zerbitzariaren bidez igortzen ditu. Utzi gaituta, zerbitzariak zure Interneteko konexioa partekatzen ez badu behintzat, YouTubek jarioak eskatu dituen helbideari soilik bidaltzen baitizkio. Miniaturak beti YouTubetik zuzenean kargatzen dira.
+    Notifications: Aukeratu OpenTubeX-ek nola jakinarazten dizkizun zuzeneko emanaldiak, igoera berriak eta deskarga automatikoak. Sistema eta aplikazioan aukerarekin, jakinarazpenak OpenTubeX-en agertzen dira erabiltzen duzun bitartean, eta bestela sistemaren jakinarazpen gisa, eta kanpaiak gordetzen ditu. Desaktibatuta aukerak jakinarazpenen aukerak ere ezkutatzen ditu.
+  Proxy Settings:
+    IP Block Recovery Script Path: IP blokeoa hautematean exekutatuko den script-fitxategiaren bide-izena. OpenTubeX aplikazioak amaitu arte itxaroten du eta gero bideoa berriro kargatzen du. Ordezko motorra gaituta badago, hark ere huts egiten duenean soilik exekutatzen da.
+  Player Settings:
+    Rewind on Resume: "Pausatutako bideo bat berrekitean, segundo kopuru hori atzera egiten du azken uneak berriro ikus ditzazun. Ezarri 0 desaktibatzeko."
+    Minimum Pause Before Rewinding: "Bideoa gutxienez denbora horretan pausatuta egon bada bakarrik egiten du atzera. Ezarri 0 pausa bakoitzaren ondoren atzera egiteko."
+    Mono Audio: 'Ezkerreko eta eskuineko audio-kanalak bi belarrietan erreproduzitzen ditu. Erabili bideo baten soinua entzungailuen alde batetik bakarrik ateratzen denean.'
+    Pause on Stream Recovery: "Bideo-jarioak huts egiten duenean eta erreproduzigailuak berriro kargatzen duenean edo beste formatu edo motor batera aldatzen denean, erreprodukzioa pausatu egiten da eta errorea erreproduzigailuaren goialdean geratzen da baztertu arte. Desgaituta badago, erreprodukzioak jarraitzen du eta errorea jakinarazpen gisa agertzen da laburki."
+    Continue Playback When Screen Is Locked: 'Audioa atzeko planoan erreproduzitzen mantentzen du eta Android multimedia-kontrolak eskaintzen ditu. Desaktibatu aplikazioa ikusgai ez dagoenean erreprodukzioa pausatzeko.'
+    Enable Caption Translations: Gaituta dagoenean, azpitituluen botoiak eta C lasterbideak hobetsitako azpititulu-hizkuntzara automatikoki itzulitako pista aukeratzen dute, bideoak hizkuntza horretako jatorrizko pistarik ez badu.
+    Use Quick Playback Speed Bar: Erreprodukzio-abiaduraren barra azkar bat erakusten du eskuineko erreproduzigailu-kontroletan. Kanal bakoitzaren erreprodukzio-abiadura eskuz gordetzea gaituta badago, barrak uneko kanalerako abiadura gordetzeko botoia ere izango du.
+    Multiply Seek Interval by Playback Rate: Gaituta dagoenean, bilaketa-tarteak (gezi-teklak eta J/L) uneko erreprodukzio-abiadurarekin biderkatzen dira. Desgaituta dagoenean, tarteak ez dira aldatzen erreprodukzio-abiadura edozein dela ere.
+    Show Playback Rate Adjusted Timestamp: Gaituta dagoenean eta erreprodukzio-abiadura 1x ez denean, erreproduzigailuak abiadurara doitutako denbora-markak erakusten ditu parentesi artean denbora-marka arruntaren ondoren.
+    Use YouTube-style Shorts: Shorts bideoak sareta bertikalean erakusten ditu harpidetzen eta kanalen orrietan, eta YouTube estiloko Shorts erreproduzigailua erabiltzen du.
+    Loop Shorts: Gaituta dagoenean, Shorts bideoak automatikoki hasten dira berriro. Desgaituta dagoenean, amaieran gelditzen dira eta berriro erreproduzitzeko botoia erakusten dute.
+    Show Skip Silence Toggle: Isiluneak saltatzea aktibatzeko edo desaktibatzeko etengailua erakusten du erreproduzigailuaren ezarpen-menuan.
+    Enable Skip Silence by Default: Isiluneak saltatzea gaitzen du fitxa berrietarako. Fitxa batean aldatzeak ez die beste fitxei eragiten.
+    Enable Video Zoom: Zoom kontrola erakusten du erreproduzigailuaren ezarpen-menuan eta teklatuko lasterbideak eta desplazamendu-kontrolak gaitzen ditu.
+    Enable Seek History: Bideo bakoitzean nondik egin duzun jauzi gogoratzen du aplikazioa itxi arte. Jauzien historiaren zerrenda erakusten du erreproduzigailuaren ezarpenen menuan eta haren laster-teklak gaitzen ditu.
+    Show Seek Bar Filmstrip: "Bilaketa-barraren kontrola arrastatzean, iritsiko zaren lekuaren inguruko fotograma-zerrenda bat erakusten da, eta haren gainera gora arrastatuz gero zehatz bilatzen da. Desgaituta dagoenean, arrastatzean irudi txiki bakarra erakusten da, gainetik pasatzean bezala."
+    Voice-over Translation: Itzulpena eskatzean bideoaren IDa, iraupena eta hautatutako hizkuntza bidaltzen dizkio Yandexen ahots bidezko itzulpen-zerbitzu ez-ofizialari. Modu lehenetsian desgaituta dago.
+    Hold to Double Playback Speed: Eduki sakatuta zuriune-barra edo saguaren ezkerreko botoia erreproduzigailuaren gainean uneko erreprodukzio-abiadura aldi baterako bikoizteko.
+    Ambient Mode: Bideoaren koloreak erreproduzigailuaren inguruan hedatzen ditu.
+    Default Volume: Desgaituta dago Gogoratu bolumena aukera gaituta dagoenean. Desgaitu aukera hori bideo bakoitzerako hasierako bolumen finko bat ezartzeko.
+    Parallel Segment Loading: |
+      Erreproduzitu aurretik zenbat bideo- eta audio-segmentu kargatuko diren aldi berean.
+      Balio handiagoek konexio motel edo ezegonkorretan lagun dezakete, baina banda-zabalera eta memoria gehiago erabiltzen dituzte.
+      Baliteke Automatikoa aukerak konexioaren abiadura txikiagoa dela kalkulatzea eta kalitate txikiagoa hautatzea ere.
+      Aldiko eskaera bakarrera mugatutako korronteek ezarpen hau baztertzen dute.
+    Preload Upcoming Videos: "Hurrengo bideoen yt-dlp URLak eskuratu eta cachean gordetzen ditu. Ilarak lehentasuna du zerrenden eta gomendioen aurretik."
+    Upcoming Videos to Preload: "Atzeko planoan yt-dlp URLak eskuratuko zaizkien hurrengo bideoen gehieneko kopurua."
+    Concurrent Preloads: "Bideoak aldi berean aurrekargatzeko erabilitako yt-dlp prozesuen gehieneko kopurua. Balio handiagoek PUZ, memoria eta sareko banda-zabalera gehiago erabiltzen dute."
+    Ignore System Rotation Lock for Fullscreen: Biratu gailua fisikoki pantaila osoan sartzeko eta irteteko, Androiden biraketa automatikoa desaktibatuta badago ere.
+  Download Settings:
+    Download Folder: Bideoak karpeta honetan gordetzen dira. Utzi hutsik sistemako Deskargak karpeta erabiltzeko.
+    Global Additional yt-dlp Arguments: Deskarga bakoitzean yt-dlp-ri emandako komando-lerroko argumentu gehigarriak; adibidez, --cookies-from-browser firefox.
+    Concurrent Downloads: Aldi berean exekuta daitezkeen yt-dlp lanen gehieneko kopurua.
+    Bandwidth Limit: Ilararen transferentzia-tasa bateratua mugatzen du balio hau aldibereko lanen artean zatituta. Idatzi 0 mugarik ez ezartzeko.
+  External Software Settings:
+    yt-dlp Source: OpenTubeX aplikazioak sisteman instalatutako yt-dlp erabil dezake, edo yt-dlp-ren berezko kopia deskargatu eta kudeatu. Kopia hori erabiltzaile-datuen direktorioan gordetzen da.
+    yt-dlp Channel: Hautatu OpenTubeX aplikazioak deskargatu eta kudeatuko duen yt-dlp argitalpen-kanala. Stable kanala gomendatzen da erabiltzaile gehienentzat.
+    FFmpeg Source: OpenTubeX aplikazioak sisteman instalatutako FFmpeg eta FFprobe erabil ditzake, edo haien konpilazio estatikoak deskargatu eta kudeatu. Konpilazioak erabiltzaile-datuen direktorioan gordetzen dira.
+    Managed Tool Updates: Aukeratu kudeatutako tresnak automatikoki eguneratuko diren, eguneratu aurretik galdetuko den edo eskuzko botoiekin soilik eguneratuko diren. Falta diren tresnak behar direnean deskargatuko dira hala ere.
+    yt-dlp Executable Path: Modu lehenetsian, OpenTubeX aplikazioak yt-dlp PATH ingurune-aldagaiaren bidez aurki daitekeela joko du. Behar izanez gero, bide-izen pertsonalizatu bat ezar daiteke hemen.
+    Cookie Source: Aukeratu yt-dlp-k Netscape cookie-fitxategi bat edo instalatutako arakatzaile baten cookieak irakurriko dituen autentifikatutako erreprodukziorako.
+    Cookie File: Hautatu Netscape formatuko cookie-fitxategi bat autentifikatutako erreprodukziorako.
+    Browser for Cookies: Hautatutako yt-dlp exekutagarriak adierazten du zein arakatzaile onartzen diren. Autentifikatutako erreprodukzioa eskatzean, OpenTubeX aplikazioak arakatzaile hau irakurtzeko eskatzen dio yt-dlp-ri.
+    Browser Profile: Arakatzailearen aukerako profil-izena edo karpeta. Utzi hutsik azkena erabilitako profila erabiltzeko.
+    Always Use Cookies: "Erabili konfiguratutako cookieak deskargetarako, azpitituluetarako eta yt-dlp-k korronteak ateratzen dituen bakoitzean. Honek ez du korronteak erauzteko metodoa yt-dlp aukerara aldatzen. yt-dlp hautatuta dagoenean, kontuarekin soilik erabil daitezkeen formatuak egon daitezke erabilgarri, YouTube Premium-en bit-tasa hobetua barne kontuak sarbidea badu."
+    FFmpeg Executable Path: FFmpeg beharrezkoa da bideo- eta audio-korronte bereiziak bateratzeko eta audioa bihurtzeko. Modu lehenetsian, OpenTubeX aplikazioak FFmpeg PATH ingurune-aldagaiaren bidez aurki daitekeela joko du. Behar izanez gero, bide-izen pertsonalizatu bat ezar daiteke hemen.
+    Use cookies for subtitles: "Erabili konfiguratutako cookieak azpitituluetarako eta itzulpen automatikoetarako. «Erabili beti cookieak» aukerak ere gaitzen du."
+  Distraction Free Settings:
+    Hide Playlist Stats: Erreprodukzio-zerrenden orrietan bideo kopurua, ikustaldi kopurua, azken eguneratzearen data eta iraupen osoa ezkutatzen ditu.
+    Count Watch Time From: "«Gailu guztiak» aukerak ikustaldi-estatistikak sinkronizatzen dituen gailu oro zenbatzen du. «Gailu hau» aukerak hemen ikusten duzuna soilik zenbatzen du."
+    When a Limit Is Reached: "«Pausatu erreprodukzioa» aukerarekin 15 minutu gehi ditzakezu edo gaurko muga ez ikusi egin. Ezarpenen pasahitz batekin, muga Ezarpenetan bakarrik igo dezakezu."
+    Grayscale: "Aplikazioa gris-tonuetan erakusten du, arreta gutxiago erakar dezan. «Lotara joateko orduan» aukerak lotara joateko gogorarazpenaren ordutegia jarraitzen du."
+    Apply Grayscale To: "«Bideo eta irudietan» aukerak interfazea koloretan mantentzen du, eta edukia jartzen du grisez, hala nola bideoak, miniaturak eta avatarrak."
+    Daily Watch Time Limit: "Gaur ikusi duzuna zenbatzen du ikustaldi-estatistikak sinkronizatzen dituzten gailu guztietan, Shorts bideoak barne."
+    Daily Shorts Limit: "Gaur gailu honetan ikusi dituzun Shorts bideoak zenbatzen ditu."
+    Take a Break Reminder: "Bideoa pausatzen du denbora hori ikusi ondoren. 10 minutuko edo gehiagoko etenaldi batek zenbaketa berriro hasten du."
+    Bedtime Reminder: "Bideoa pausatzen du eta ikusteari uzteko gogorarazten dizu hasiera- eta amaiera-orduen artean."
+    Shorten View Counts: YouTube-k dagoeneko biribildu dituen ikustaldi-, iruzkin- eta iruzkinetako atsegite-kopuruak modu laburtuan erakusten ditu; adibidez, 14K, 14.000 ordez. Kopuru zehatzak osorik erakusten dira beti.
+  Subscription Settings:
+    Fetch Feed on Startup: Gaituta dagoenean, OpenTubeX aplikazioak harpidetza-jarioa automatikoki eskuratuko du abioan eta leiho berri bat irekitzean.
+    Show New Content Feed: Berria fitxa erakusten du, aurreko eskuratzean ez zeuden harpidetza-jarioko elementuekin.
+    Enable RSS Feeds: RSS fitxa bat erakusten du Harpidetzak orrian RSS edo Atom jarioen elementuekin, beste plataformetako sortzaileei jarraitu ahal izateko. Bere elementuak yt-dlp-rekin irekitzen dira.
+    Show New Content Indicators: Puntu txiki bat erakusten du aurreko eskuratzean ez zeuden harpidetza-jarioko elementuen ondoan.
+    Show Scheduled Live Streams / Premieres First: Laster hasiko diren zuzeneko emankizunak eta estreinaldiak harpidetza-jarioaren goialdean mantentzen ditu. Desgaituta dagoenean, iragarpenaren kokapenean geratzen dira hasi arte. Desgaitu ondoren, freskatu behin harpidetza-jarioa lehendik programatutako elementuen iragarpen-datak eskuratzeko.
+    Auto Refresh Interval: "OpenTubeX aplikazioak harpidetza-jarioa automatikoki freskatuko duen maiztasuna, aplikazioa irekita dagoen bitartean. Androiden, zero ez den tarte batek jarioa freskatzen du aplikazioa itxita dagoenean ere."
+    Refresh Subscriptions While App Is Closed: "Jarioak hautatutako ezarpenekin eguneratzen ditu. Ordenagailuan, OpenTubeX sistemaren erretiluan geratzen da irten arte. Android-ek atzeko planoko eguneratzeen unea kontrolatzen du."
+    Notify About New Uploads: Gailu honetan sistemaren jakinarazpenak erakusten ditu harpidetza-ezarpenetan jakinarazpenak aktibatu dituzun kanaletarako. OpenTubeX-ek eduki berria bilatzen du harpidetzak freskatzean; beraz, aukeratu freskatze automatikoaren tarte bat. Aplikazioa itxita dagoenean jakinarazpenak jasotzeko, gaitu ere freskatzea aplikazioa itxita dagoenean.
+    RSS Feeds Auto Refresh Interval: Aplikazioa irekita dagoen bitartean OpenTubeX-ek zure RSS jarioak zenbatero freskatzen dituen automatikoki.
+  Theme Settings:
+    Only Show Important Notifications: Ekintza bat berretsi edo egoera bat jakinarazi besterik egiten ez duten aplikazioko jakinarazpenak ezkutatzen ditu. Erroreak, abisuak, konfiguratu dituzun gogorarazpenak eta ekintza bat eskaintzen duten jakinarazpenak, Desegin adibidez, agertzen jarraitzen dute. Atzeko planoko eragiketen aurrerapena, harpidetzak freskatzea adibidez, aurrerapen-barra orokorrean erakusten da jakinarazpen baten ordez. Sistemaren jakinarazpenei ez die eragiten.
+    Visible Search Suggestions: "Bilaketa-barrak bere zerrenda korritu aurretik zenbat bilaketa-historiako sarrera eta iradokizun erakusten dituen zehazten du. Zerrenda ez da inoiz leihoaren behealdetik haratago hedatzen."
+    Thumbnail Size: "Bideoen miniaturen tamaina aldatzen du sareta eta zerrendetan. Zutabe kopuru finkoa edo Zabalera osoa ikuspegia duten saretek errenkada bakoitza betetzen dute horren ordez, beraz han zerrendetako miniaturak eta Shorts-ak soilik aldatzen ditu. Telefono-tamainako leihoetan saretako miniaturak % 100era mugatzen dira."
+    Playlist Thumbnail Size: "Bideoen miniaturen tamaina aldatzen du erreprodukzio-zerrenden orrietan. Zutabe kopuru finkoa edo Zabalera osoa ikuspegia duten saretek errenkada bakoitza betetzen dute horren ordez, beraz han zerrendetako miniaturak eta Shorts-ak soilik aldatzen ditu. Telefono-tamainako leihoetan saretako miniaturak % 100era mugatzen dira."
+    Compact Settings Categories: "Deskribapenak ezkutatu eta ezarpen-kategorien altuera murrizten du."
+    Show Progress as Notification: Jakinarazpen iraunkor batean erakusten du atzeko planoko eragiketen uneko aurrerapena, hala nola harpidetzen freskatzea eta kudeatutako tresnen deskargak, aurrerapen-barra globala erabili beharrean.
+    Always Show Scrollbars: Korritze-barrak ikusgai mantentzen ditu beti. Desgaituta dagoenean, sagua mugitzeari utzi eta handik gutxira desagertzen dira, eta berriro mugitu bezain laster agertzen.
+    Scroll Speed: Saguaren gurpileko eta ukipen-paneleko keinuek zenbat korritzen duten aldatzen du.
+    Use Fixed Tab Width: Fitxa horizontalen barrako fitxa guztiei zabalera bera ematen die, izenburuaren arabera tamainatu beharrean.
+    Use Custom Title Bar: Sistemaren izenburu-barra fitxa-barrarekin ordezkatzen du, edo goiko nabigazioarekin fitxak goian ez daudenean, espazio bertikala aurrezteko. Leihoaren kontrolak barra horren izkinan agertzen dira.
+    Use Grid Player Menu: Erreproduzigailuaren ezarpen-menua lauzaz osatutako sareta batean antolatzen du, errenkada-zerrenda baten ordez.
+The playlist is at the beginning. Enable loop to continue playing: Erreprodukzio-zerrenda hasieran dago. Gaitu begizta erreproduzitzen jarraitzeko
+External link opening has been disabled in Settings → Privacy: Kanpoko estekak irekitzea desgaitu da Ezarpenak → Pribatutasuna atalean
+KeyboardShortcutPrompt:
+  Toggle Quick Bookmark: Gehitu laster-markaren erreprodukzio-zerrendara edo kendu bertatik
+  Reopen Closed Window: Ireki berriro itxitako azken leihoa
+  Edit Hint: Hautatu lasterbide bat eta sakatu tekla-konbinazio berria. Sakatu Atzera-tekla edo Ezabatu esleipena kentzeko.
+  Change Shortcut: Aldatu {action} ekintzaren lasterbidea
+  Press Shortcut: Sakatu lasterbidea…
+  Unassigned: Esleitu gabe
+  Reset Shortcut: Berrezarri {action} ekintzaren lasterbidea
+  Reset to Defaults: Berrezarri lehenetsiak
+  Shortcut Already Assigned: Lasterbidea esleituta dago dagoeneko
+  Shortcut Conflict: '{shortcut} lasterbidea {actions} ekintzei esleituta dago dagoeneko. Berriz esleitu nahi duzu?'
+  Reserved Shortcut Conflict: '{shortcut} lasterbidea {actions} ekintzetarako erreserbatuta dago eta ezin da berriz esleitu.'
+  Reassign: Esleitu berriz
+  Sections:
+    App:
+      Tabs: "Aplikazioa:\_Fitxak"
+      Search and Page: "Aplikazioa:\_Bilaketa eta orria"
+      Window and View: "Aplikazioa:\_Leihoa eta ikuspegia"
+  New Tab: Sortu fitxa berria
+  Close Tab: Itxi uneko fitxa
+  Reload Tab: Kargatu berriro uneko fitxa
+  Reopen Closed Tab: Ireki berriro itxitako azken fitxa
+  Next Tab: Joan hurrengo fitxara
+  Previous Tab: Joan aurreko fitxara
+  Switch to Tab: Joan 1–9 fitxara
+  Toggle Tab Orientation: Aldatu fitxen diseinua
+  Find in Page: Bilatu testua uneko orrian
+  Find Next Match: Joan hurrengo bat-etortzera
+  Find Previous Match: Joan aurreko bat-etortzera
+  Toggle Normal Playback Speed: Aldatu 1x abiaduraren eta aurreko erreprodukzio-abiaduraren artean
+  Toggle Skip Silence: Aktibatu edo desaktibatu isiluneak saltatzea
+  Set A-B Repeat Point A: Ezarri A-B errepikapenaren A puntua
+  Set A-B Repeat Point B: Ezarri A-B errepikapenaren B puntua
+  Clear A-B Repeat: Garbitu A-B errepikapena
+  Video Zoom In: Handiagotu bideoa
+  Video Zoom Out: Txikiagotu bideoa
+  Tab Switcher: Fitxa-aldatzailea
+  Undo Seek: Desegin azken jauzia
+  Redo Seek: Berregin desegindako jauzia
+CommandPalette:
+  Title: Komando-paleta
+  Open: Ireki komando-paleta
+  Search Label: "Bilatu komandoak, ezarpenak eta tokiko bideoak"
+  Search Placeholder: Bilatu komandoak, ezarpenak eta tokiko bideoak…
+  Results: "Emaitzak"
+  No Results: "Ez dago bat datorren emaitzarik"
+  Result Count: "Emaitzak: {count} | Emaitzak: {count}"
+  Move: Mugitu
+  Run: Exekutatu
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'Joan fitxara: {title}'
+  Switch Profile: 'Aldatu profila: {name}'
+  Open Playlist: 'Ireki erreprodukzio-zerrenda: {name}'
+  Cancel Download: 'Utzi deskarga: {title}'
+  Groups:
+    App: Aplikazioa
+    Navigation: Nabigazioa
+    Tabs: Fitxak
+    Local Videos: Tokiko bideoak
+  Unavailable:
+    Current Page: Orri honetan zaude dagoeneko
+    No History: Ez dago orririk norabide honetan
+    Desktop: Mahaigaineko aplikazioan soilik dago erabilgarri
+    Build: Ez dago erabilgarri konpilazio honetan
+    One Tab: Ireki beste fitxa bat lehenik
+    Active Tab: Hau da fitxa aktiboa
+    Active Profile: Hau da profil aktiboa
+    Download Finished: Deskarga hau ez dago martxan
+    Video: Ireki bideo bat lehenik
+Downloads:
+  File Name Template Invalid: 'Erabili deskargen karpetaren barruko bide erlatibo bat, "..", "~", "$", "%" edo "thumbnail:" bezalako aurrizkirik gabe.'
+  Search Completed: "Bilatu amaitutako deskargak izenburuaren edo kanalaren arabera"
+  Format: "Formatua"
+  All Formats: "Formatu guztiak"
+  Largest First: "Handienak lehenik"
+  Smallest First: "Txikienak lehenik"
+  No Matching Downloads: "Ez dago bat datorren amaitutako deskargarik. Saiatu beste bilaketa edo iragazki batekin."
+  Add Download: Gehitu deskarga
+  Preparing: Prestatzen…
+  Export Failed: "Ezin izan da deskargatutako fitxategia gorde. Aukeratu idazteko baimena duen deskarga-karpeta bat eta saiatu berriro."
+  Remove File Permanently Warning: "Honek \"{title}\" behin betiko ezabatuko du."
+  Download: Deskargatu
+  Download Video: Deskargatu bideoa
+  Download Playlist: Deskargatu erreprodukzio-zerrenda
+  Downloading: Deskargatzen
+  Queue: Ilara
+  Downloaded: Deskargatuta
+  Canceled: Bertan behera utzita
+  Open Downloads: Ireki Deskargak
+  No Downloads: Oraindik ez dago deskargarik
+  No Downloads Description: Hasten dituzun deskargak hemen agertuko dira.
+  Clear Failed Canceled Skipped And Missing: Garbitu huts egindakoak, bertan behera utzitakoak, saltatutakoak eta falta direnak
+  Clear From List: Kendu zerrendatik
+  Show in Folder: Erakutsi karpetan
+  Play Download: Erreproduzitu deskarga
+  Retry Download: Saiatu berriro deskargatzen
+  Pause Download: Pausatu deskarga
+  Resume Download: Jarraitu deskargatzen
+  Move Earlier: Mugitu aurrerago
+  Move Later: Mugitu atzerago
+  Pause All: Pausatu denak
+  Resume All: Jarraitu denak
+  Retry All: Saiatu berriro huts egindako deskarga guztiak
+  Total Size: 'Tamaina guztira: {size}'
+  Local File: Fitxategi lokala
+  Available Offline: Lineaz kanpo erabilgarri
+  Remove File: Kendu fitxategia
+  Remove File Confirmation: Deskargatutako fitxategia kendu?
+  Remove File Warning: Ekintza honek "{title}" gailuko zakarrontzira eramango du.
+  File Not Found: Ezin izan da deskargatutako fitxategia aurkitu.
+  Download Missing: Deskarga ez dago erabilgarri
+  Files Missing: Deskargatutako fitxategia ez dago fitxategi-sisteman erabilgarri. | Deskargatutako fitxategiak ez daude fitxategi-sisteman erabilgarri.
+  Files Available: 'Deskargatutako {total} fitxategietatik {available} daude erabilgarri.'
+  More Files: Fitxategi 1 gehiago | {count} fitxategi gehiago
+  Template Used: 'Txantiloia: {name}'
+  Download Type: Deskarga mota
+  Template: Txantiloia
+  Unsaved: Gorde gabe
+  Media Type: Multimedia mota
+  Video: Bideoa
+  Audio: Audioa
+  Maximum Resolution: Gehieneko bereizmena
+  Best Available: Erabilgarri dagoen onena
+  Automatic: Automatikoa
+  Container: Edukiontzia
+  Video Codec: Bideo-kodeka
+  Audio Codec: Audio-kodeka
+  File Name Template: Fitxategi-izenaren txantiloia
+  File Name Template Help: 'Eremu erabilgarriak: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: Denbora-tartea eta kapituluak
+  Start Time: Hasiera-unea
+  End Time: Amaiera-unea
+  Split by Chapters: Zatitu kapitulu bakoitza fitxategi bereizi batean
+  Remove Segments: Kendu segmentuak
+  Subtitles and Metadata: Azpitituluak eta metadatuak
+  Include Subtitles: Sartu azpitituluak
+  Embed Subtitles: Txertatu azpitituluak multimedia-fitxategian
+  Subtitle Format: Azpitituluen formatua
+  Subtitle Languages: Azpitituluen hizkuntzak
+  Subtitle Languages Help: 'Komaz bereizitako yt-dlp hizkuntza-hautatzaileak; adibidez: en.*,de.*'
+  Embed Cover Art: Txertatu koadro txikia azal gisa
+  Embed Metadata: Txertatu izenburua, egilea, deskribapena eta kapituluak
+  Additional yt-dlp Arguments: yt-dlp-ren argumentu gehigarriak
+  Custom yt-dlp Arguments: yt-dlp-ren argumentu pertsonalizatuak
+  Template Name: Txantiloiaren izena
+  Save Template: Gorde txantiloia
+  Delete Template: Ezabatu txantiloia
+  Template Saved: '"{name}" deskarga-txantiloia gorde da'
+  Template Name Exists: 'Badago dagoeneko "{name}" izeneko deskarga-txantiloi bat.'
+  Choose Folder: Aldatu
+  Select Folder: Aukeratu karpeta
+  Folder Required: Aukeratu deskarga-karpeta bat deskargak gaitzeko.
+  System Downloads Folder: Sistemako Deskargak karpeta
+  Processing: Prozesatzen…
+  Queued: Ilaran
+  Queued Position: Ilaran, {position}. kokapenean
+  Paused: Pausatuta
+  Pausing: Uneko lana amaitu ondoren, ilara pausatuko da
+  Download Complete: Deskarga osatu da
+  Download Cancelled: Deskarga bertan behera utzi da
+  Download Failed: Deskargak huts egin du
+  File Name Shortened: Fitxategi-izena laburtu da, bideoaren izenburua luzeegia zelako.
+  Some Videos Not Downloaded: Erreprodukzio-zerrenda honetako bideo batzuk ezin izan dira deskargatu.
+  Insufficient Disk Space: Ez dago behar adina leku diskoan. {required} inguru behar dira eta {available} daude erabilgarri.
+  Unknown Download Size: Deskargaren tamaina ezezaguna da. {available} daude erabilgarri helburuko fitxategi-sisteman.
+  Disk Space Check Unavailable: Ezin izan da egiaztatu diskoan zenbat leku dagoen erabilgarri deskarga hasi aurretik.
+  Download Failure Hint: Egiaztatu {issuesLink}; ondoren, saiatu yt-dlp kanala Nightly edo Master aukerara aldatzen Ezarpenak → Aurreratua → Kanpoko softwarea atalean.
+  yt-dlp YouTube Issues: yt-dlp-k YouTuberekin izandako azken arazoak
+  Automatic Download Started: Deskarga automatikoa hasi da
+  Automatic Download Started Body: '"{title}" {channel} kanaletik atzeko planoan deskargatzen.'
+  Automatic Download Complete: Deskarga automatikoa osatu da
+  Automatic Download Failed: Deskarga automatikoak huts egin du
+  Automatic Download Could Not Start: 'Ezin izan da "{title}" bideoaren deskarga automatikoa hasi.'
+  Automatic Download Skipped: Deskarga automatikoen iragazkiek saltatu dute
+  Cancel Download: Utzi deskarga
+  yt-dlp Not Found: Ez da yt-dlp aurkitu. Instalatu edo ezarri haren bide-izena Ezarpenak → Aurreratua → Kanpoko softwarea atalean.
+  Download Complete Template: '"{title}" bideoaren deskarga amaitu da'
+  Download Failed Template: '"{title}" bideoaren deskargak huts egin du'
+  Templates:
+    Video Best: Bideoa - Kalitate onena
+    Video Resolution: Bideoa - {resolution}
+    Audio Best: Audioa - Kalitate onena
+    Audio Format: Audioa - {format}
+    Subtitles Format: Azpitituluak - {format}
+  Waiting for Unmetered Network: "Neurtu gabeko sare baten zain"
+  Waiting for Charging: "Kargagailu baten zain"
+  Remove File Failed: Ezin izan da deskargatutako fitxategia kendu.
+Channels:
+  Load More Channels: "Kargatu kanal gehiago"
+Theme Discovery:
+  Discover Themes: "Aurkitu gaiak"
+  Refresh: "Freskatu"
+  View on GitHub: "Ikusi GitHub-en"
+  Load Error: "Ezin izan dira gaiak kargatu. Saiatu freskatzen."
+  Loading: "Kargatzen…"
+  No Themes: "Ez da instalatzeko gairik aurkitu."
+  No Preview: "Pantaila-argazkia ez dago erabilgarri"
+  Load More: "Kargatu gehiago"
+  Applied: "Aplikatuta"
+  Apply Theme: "Aplikatu gaia"
+  Install and Apply: "Instalatu eta aplikatu"
+  Update and Apply: "Eguneratu eta aplikatu"
+
+Connection:
+  Offline: Lineaz kanpo
+  Reconnecting: "Konexioa galdu da. Berriz konektatzen saiatzen…"
+  Back Online: "Berriro konektatuta"
+
+App Icon:
+  Restart: "Berrabiarazi aplikazioa"
+  Saved Message: "Ikonoa gorde da. Abiarazleak une bat behar izan dezake eguneratzeko."
+  Title: "Aplikazioaren ikonoa"
+  Error: "Ezin izan da aplikazioaren ikonoa kargatu edo aldatu"
+
+Tray:
+  Hide All Windows: "Ezkutatu leiho guztiak"
+  Show All Windows: "Erakutsi leiho guztiak"
+
+Tray Icon:
+  Title: "Sistemaren erretiluko ikonoa"
+  Follow App Theme: "Jarraitu aplikazioaren gaiari"
+  Monochrome: "Monokromoa"
+
+Form Inputs:
+  Browse: "Arakatu"
+  Use Default Path: "Erabili lehenetsia"
+  Enter Password Hint: "Sartu zure pasahitza"
+  Choose Password Hint: "Aukeratu pasahitz bat"
+  Confirm Password Hint: "Errepikatu zure pasahitz berria"
+  Encryption Passphrase Hint: "Sartu zure zifratze-pasaesaldia"
+  Show Password: "Erakutsi pasahitza"
+  Hide Password: "Ezkutatu pasahitza"
+  Search Text Hint: "Sartu bilaketa-hitzak"
+  Playlist Description Hint: "Deskribatu erreprodukzio-zerrenda hau"
+  Filename Preview: "Fitxategi-izenaren aurrebista"
+  Enter Channels: "Sartu kanalak"
+  Enter Text: "Sartu testua"
+  Video URL: Bideoaren edo erreprodukzio-zerrendaren URLa
+  Paste Link: Itsatsi bideo edo erreprodukzio-zerrenda baten esteka
+  Example: adib. {example}
+  No Minimum: Gutxienekorik ez
+  No Maximum: Gehienekorik ez
+  Any Age: Edozein antzinatasun
+  Included Terms Example: adib. tutoriala, iritzia
+  Excluded Terms Example: adib. trailerra, aurrerapena
+  Global Arguments Hint: Aukerako argumentuak deskarga guztietarako
+  Unlimited Hint: 0 mugarik ez izateko
+  Add Argument: Gehitu argumentu bat
+  Template Name Example: adib. Audioa soilik
+  Download Arguments Hint: Aukerako argumentuak deskarga honetarako
+  Generated ID Hint: Utzi hutsik ID bat sortzeko
+  Default Value: "Lehenetsia: {value}"
+
+Search Filters:
+  Possible Age Restriction Hint: "Baliteke YouTube-k bilaketa-kontsulta honi adin-murrizketa ezarri izana."
+  Cookie Search Failed: "Konfiguratutako cookieekin egindako bilaketak huts egin du."
+  Showing results for: "{query} bilaketaren emaitzak erakusten"
+  Search instead for: "Bilatu {query} horren ordez"
+  Including results for: "{query} bilaketaren emaitzak barne"
+  Search only for: "Bilatu {query} soilik"
+  Did you mean: "{query} esan nahi zenuen?"
+
+Storage Startup Error:
+  Title: "Ezin izan dira aplikazioaren datuak kargatu"
+  Message: "Askatu biltegiratze-lekua gailuan eta saiatu berriro. Sinkronizazioa etenda dago zure datuak kargatu arte."
+  Retry: "Saiatu berriro"
+Search Bar:
+  Use Suggestion: Erabili iradokizuna
+
+Native Permissions:
+  Local Network Denied: "Inguruko gailuetarako baimena ukatu da."
+  Local Network: "Sare lokaleko gailuak aurkitu eta bideoak haietara igorri, eta ezarpenak eta datuak gailuen artean sinkronizatu."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Hasiera"
+  subscriptions: "Harpid."
+  userplaylists: "Zerrendak"
+  history: "Historia"
+  subscribedchannels: "Kanalak"
+  trending: "Joerak"
+  popular: "Ikusienak"
+  stats: "Estatist."
+  more: "Gehiago"
+
+Installer:
+  Create Desktop Shortcut: Sortu lasterbide bat mahaigainean
+Older Version Changes:
+  Title: "Bertsio zaharrago bateko aldaketak"
+  Message: "OpenTubeX-en bertsio zaharrago batean egindako aldaketak zure liburutegian aplikatu dira."
+  Detail: "Elementu bat bi bertsioetan aldatu bada, bertsio zaharragoko aldaketa gorde da. Zure aurreko liburutegiaren babeskopia profileko karpetan dago."
+Library Format Changed:
+  Title: "Liburutegia formatu berri batera eraman da"
+  Message: "Zure liburutegiak biltegiratze formatu berria erabiltzen du orain."
+  Detail: "OpenTubeX-en bertsio zaharragoek zure liburutegia ireki dezakete oraindik, baina eguneratze honen aurretik zegoen bezala erakusten dute. Bertsio zaharrago batean egiten dituzun aldaketak bertsio honetara itzultzen zarenean gehitzen dira."
+Invidious Fallback Warning: "Eskaera honek konfiguratutako Invidious instantzia saihesten du eta zuzenean YouTubera konektatzen da, zure IP helbidea agerian utziz."
+Automatically unloaded to free memory: "Automatikoki deskargatuta memoria askatzeko"
+Home Widgets:
+  Continue Watching: "Jarraitu ikusten"
+  Continue Watching Description: "Jarraitu ikusten hasitako bideoekin"
+  Continue Watching Empty: "Ikusten hasten zaren bideoak hemen agertuko dira"
+  Quick Access: "Sarbide azkarra"
+  Quick Access Description: "Ireki Bilatu, Harpidetzak edo Ikusi geroago"
+  Search: "Bilatu"
+  Subscriptions: "Harpidetzak"
+  Watch Later: "Ikusi geroago"
+Subscription Groups:
+  Groups: Taldeak
+  All: Guztiak
+  New Group: Talde berria
+  Edit Group: Editatu taldea
+  Group Name: Taldearen izena
+  Create: Sortu
+  Save: Gorde
+  Delete Group: Ezabatu taldea
+  Delete Prompt: '"{groupName}" taldea ezabatu nahi duzu? Bere kanaletako harpidetzak mantendu egingo dira.'
+  Empty Group: Talde honek ez du uneko profileko kanalik.
+  Save Failed: Ezin izan da taldea gorde.
+  Delete Failed: Ezin izan da taldea ezabatu.
+  Group Icon: Taldearen ikonoa
+  No Icon: Ikonorik gabe
+Yattee Server:
+  API Error (Click to copy): Yattee zerbitzariak huts egin du (klikatu kopiatzeko)
+  Unsupported page: Orri hau ez dago erabilgarri Yattee zerbitzariarekin. Gaitu «{fallbackSetting}» tokiko APIarekin kargatzeko.
+  Posts unavailable: Yattee zerbitzariek ez dute argitalpenik eskaintzen. Gaitu «{fallbackSetting}» tokiko APIarekin kargatzeko.
+  Errors:
+    Invalid credentials: Yattee zerbitzariak erabiltzaile-izena edo pasahitza baztertu du. Egiaztatu Ezarpenak → Aurreratua atalean.
+    Rate limited: Yattee zerbitzaria saio-hasierak blokeatzen ari da, huts egindako saiakera gehiegi egon direlako. Saiatu berriro geroago.
+    Streams not relayed: Yattee zerbitzariak ez ditu bideo honen jarioak igorri. Bideoak zerbitzariaren bidez igortzen diren bitartean, OpenTubeX ez da YouTubera zuzenean konektatzen.
+    Not configured: Sartu zure Yattee zerbitzariaren URLa Ezarpenak → Aurreratua atalean.
+    HTTPS required: Android-ek HTTPS erabiltzen duten Yattee zerbitzarietako bideoak soilik erreproduzi ditzake.
+    Streams unavailable: Ezin izan dira bideo honen jarioak Yattee zerbitzaritik kargatu. Erabili «Probatu konexioa» Ezarpenak → Aurreratua atalean zerbitzaria egiaztatzeko.
+Yattee Fallback Warning: Eskaera honek konfiguratutako Yattee zerbitzaria saihesten du eta zuzenean YouTubera konektatzen da, zure IP helbidea agerian utziz.
+Update With Package Manager: 'Eguneratu {packageManager} erabiliz:'
+Update Command Copied: 'Eguneratze-komandoa kopiatu da'
+Digital Wellbeing:
+  Watch time limit almost reached: "{duration} geratzen zaizu eguneko ikusteko denbora-mugara iristeko"
+  Shorts limit almost reached: "{duration} geratzen zaizu eguneko Shorts bideoen mugara iristeko"
+  Daily watch time limit reached: "Eguneko ikusteko denbora-mugara iritsi zara"
+  Daily Shorts limit reached: "Eguneko Shorts bideoen mugara iritsi zara"
+  Watched today: "Gaur {duration} eman duzu bideoak ikusten."
+  Shorts watched today: "Gaur {duration} eman duzu Shorts bideoak ikusten."
+  15 More Minutes: "Beste 15 minutu"
+  Ignore for Today: "Ez egin kasurik gaur"
+  Time to take a break: "Atsedenaldi bat hartzeko garaia da"
+  Watching for: "{duration} daramatzazu ikusten."
+  Time for bed: "Lotara joateko ordua da"
+  Bedtime started at: "Zure lotara joateko ordua ordu honetan hasi da: {time}."
+  Remind Me in 10 Minutes: "Gogorarazi 10 minutu barru"
+Notification Center:
+  Notifications: "Jakinarazpenak"
+  Notifications With Unread: "Jakinarazpenak ({count} irakurri gabe)"
+  Mark as Read: "Markatu irakurritako gisa"
+  Mark All as Read: "Markatu guztiak irakurritako gisa"
+  Clear All: "Garbitu guztiak"
+  Clear: "Garbitu"
+  Empty: "Oraindik ez dago jakinarazpenik"
+  Empty Hint: "Zuzeneko emanaldien gogorarazpenak eta jakinarazpenak aktibatuta dituzten kanalen igoera berriak hemen agertuko dira."

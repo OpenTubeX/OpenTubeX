@@ -1,7 +1,8 @@
 <template>
   <div
-    class="ft-list-post ft-list-item outside"
+    class="ft-list-post"
     :appearance="appearance"
+    :class="embedded ? 'sharedPostCard' : ['ft-list-item', 'outside', { list: listType === 'list', grid: listType !== 'list' }]"
   >
     <div
       class="author-div"
@@ -12,26 +13,30 @@
         <router-link
           v-if="enableChannelLinks && authorId"
           :to="`/channel/${authorId}`"
+          class="authorThumbnailLink"
           tabindex="-1"
           aria-hidden="true"
         >
-          <img
+          <FtRetryImage
+            :fallback-icon="['fas', 'circle-user']"
             :src="authorThumbnail"
             class="communityThumbnail"
             alt=""
-          >
+          />
         </router-link>
-        <img
+        <FtRetryImage
           v-else
+          :fallback-icon="['fas', 'circle-user']"
           :src="authorThumbnail"
           class="communityThumbnail"
           alt=""
-        >
+        />
       </template>
       <p
         class="authorName"
         dir="auto"
       >
+        <FtNewContentDot v-if="showNewSubscriptionFeedIndicator" />
         <router-link
           v-if="authorId && enableChannelLinks"
           :to="`/channel/${authorId}`"
@@ -65,39 +70,66 @@
       <swiper-slide
         v-for="(img, index) in postContent.content"
         :key="index"
-        lazy="true"
       >
-        <img
-          :src="getBestQualityImage(img)"
+        <FtRetryImage
+          :src="getBestQualityImage(img, { preserveYouTubeCrop: true })"
           class="communityImage"
           alt=""
           loading="lazy"
-        >
+        />
       </swiper-slide>
+      <!-- Swiper wires up these light DOM controls, so they can use the
+           theme and icon pack. Its a11y module makes them buttons; real
+           buttons would get disabled and drop keyboard focus at either end. -->
+      <div
+        ref="swiperPrevRef"
+        slot="container-end"
+        class="sliderButton swiper-button-prev"
+      >
+        <FtIcon
+          :icon="['fas', 'angle-left']"
+          aria-hidden="true"
+        />
+      </div>
+      <div
+        ref="swiperNextRef"
+        slot="container-end"
+        class="sliderButton swiper-button-next"
+      >
+        <FtIcon
+          :icon="['fas', 'angle-right']"
+          aria-hidden="true"
+        />
+      </div>
+      <div
+        ref="swiperPaginationRef"
+        slot="container-end"
+        class="sliderPagination"
+      />
     </swiper-container>
     <div
       v-else-if="postType === 'image' && postContent.content.length > 0"
     >
-      <img
+      <FtRetryImage
         :src="getBestQualityImage(postContent.content)"
         class="communityImage"
         alt=""
-      >
+      />
     </div>
     <div
       v-else-if="postType === 'video'"
     >
       <FtListVideo
-        v-if="!hideVideo"
+        v-if="hiddenVideoReason == null"
         :data="data.postContent.content"
-        appearance=""
+        appearance="communityPost"
         force-list-type="grid"
       />
       <p
         v-else
         class="hiddenVideo"
       >
-        {{ '[' + $t('Channel.Posts.Video hidden by FreeTube') + ']' }}
+        {{ '[' + hiddenVideoReason + ']' }}
       </p>
     </div>
     <div
@@ -115,20 +147,38 @@
       />
     </div>
     <div
+      v-else-if="postType === 'sharedPost'"
+    >
+      <FtCommunityPost
+        v-if="postContent.content"
+        :data="postContent.content"
+        :appearance="appearance"
+        :hide-forbidden-titles="hideForbiddenTitles"
+        embedded
+      />
+      <p
+        v-else
+        class="unavailablePost"
+      >
+        {{ '[' + $t('Channel.Posts.Original post unavailable') + ']' }}
+      </p>
+    </div>
+    <div
       class="bottomSection"
     >
       <span
+        v-if="voteCount != null"
         class="likeCount"
         :title="$t('Global.Counts.Like Count', {count: formattedVoteCount}, voteCount)"
         :aria-label="$t('Global.Counts.Like Count', {count: formattedVoteCount}, voteCount)"
       >
-        <FontAwesomeIcon
+        <FtIcon
           class="thumbs-up-icon"
           :icon="['fas', 'thumbs-up']"
           aria-hidden="true"
         /> {{ formattedVoteCount }}</span>
       <router-link
-        v-if="!singlePost"
+        v-if="!singlePost && !hideComments"
         :to="{
           path: `/post/${postId}`,
           query: authorId ? { authorId } : undefined
@@ -137,61 +187,68 @@
         :aria-label="$t('Channel.Posts.View Full Post')"
       >
         <span
-          v-if="!hideComments"
           class="commentCount"
-          :title="$t('Global.Counts.Comment Count', {count: formattedCommentCount}, commentCount)"
-          :aria-label="$t('Global.Counts.Comment Count', {count: formattedCommentCount}, commentCount)"
+          :title="commentCountLabel"
+          :aria-label="commentCountLabel"
         >
-          <FontAwesomeIcon
+          <FtIcon
             class="comment-count-icon"
             :icon="['fas', 'comment']"
             aria-hidden="true"
           /> {{ formattedCommentCount }}</span>
       </router-link>
-      <span
-        v-else-if="commentCount != null && !hideComments"
-        class="commentCount"
-        :title="$t('Global.Counts.Comment Count', {count: formattedCommentCount}, commentCount)"
-        :aria-label="$t('Global.Counts.Comment Count', {count: formattedCommentCount}, commentCount)"
-      >
-        <FontAwesomeIcon
-          class="comment-count-icon"
-          :icon="['fas', 'comment']"
-        /> {{ commentCount }}</span>
       <FtShareButton
-        v-if="!hideSharingActions"
+        v-if="!hideSharingActions && !embedded"
         :id="postId"
         share-target-type="Post"
         class="shareButton"
         :size="18"
+      />
+      <FtIconButton
+        v-if="dropdownOptions.length > 0"
+        class="optionsButton"
+        :icon="['fas', 'ellipsis-v']"
+        :title="$t('Video.More Options')"
+        theme="base-no-default"
+        :size="18"
+        dropdown-position-x="right"
+        :dropdown-options="dropdownOptions"
+        @click="handleOptionsClick"
       />
     </div>
   </div>
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import FtRetryImage from '../FtRetryImage.vue'
+import { FtIcon } from '@opentubex/icons'
 import autolinker from 'autolinker'
-import swiperA11yCssUrl from 'swiper/element/css/a11y'
-import swiperNavigationCssUrl from 'swiper/element/css/navigation'
-import swiperPaginationCssUrl from 'swiper/element/css/pagination'
-import { A11y, Navigation, Pagination } from 'swiper/modules'
-import { computed, onMounted, useTemplateRef } from 'vue'
+import { computed, onActivated, onMounted, useTemplateRef } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import FtListVideo from '../FtListVideo/FtListVideo.vue'
 import FtListPlaylist from '../FtListPlaylist/FtListPlaylist.vue'
 import FtCommunityPoll from '../FtCommunityPoll/FtCommunityPoll.vue'
+import FtNewContentDot from '../FtNewContentDot/FtNewContentDot.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
+import FtIconButton from '../FtIconButton/FtIconButton.vue'
+import { useHideSubscriptionFeedType } from '../../composables/useHideSubscriptionFeedType'
+import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { vSaferHtml } from '../../directives/vSaferHtml.js'
 
 import store from '../../store/index'
+import { usesInvidiousApi } from '../../../apiBackends'
 
 import {
+  copyToClipboard,
+  createWebURL,
   formatNumber,
   getRelativeTimeFromDate,
-  isNumberRounded,
 } from '../../helpers/utils'
+import { isRoundedNumber } from '../../helpers/viewCounts'
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
+import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
+import { loadSwiperModules } from './swiperLoader'
 
 const props = defineProps({
   data: {
@@ -210,22 +267,99 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  /** Renders the original post inside a shared post */
+  embedded: {
+    type: Boolean,
+    default: false
+  },
+})
+
+const { t } = useI18n()
+const relativeTimeNow = useRelativeTimeClock()
+const { hideSubscriptionFeedType, hideSubscriptionFeedTypeOption } = useHideSubscriptionFeedType(() => props.data.authorId, true)
+
+/** @type {import('vue').ComputedRef<'grid' | 'list'>} */
+const listType = computed(() => {
+  return store.getters.getListType
 })
 
 /** @type {import('vue').ComputedRef<string[]>} */
 const forbiddenTitles = computed(() => {
   if (!props.hideForbiddenTitles) { return [] }
-  return JSON.parse(store.getters.getForbiddenTitles)
+  return store.getters.getActiveForbiddenTitles
 })
 
-const hideVideo = computed(() => {
-  return forbiddenTitles.value.some((text) => props.data.postContent.content.title?.toLowerCase().includes(text.toLowerCase()))
+/** @type {import('vue').ComputedRef<string | null>} */
+const hiddenVideoReason = computed(() => {
+  const video = props.data.postContent.content
+  if (isVideoHiddenByPreferences(video, { membersOnlyChannelIds: store.getters.getMembersOnlyChannelIdSet })) {
+    return t('Channel.Posts.Members-only video hidden by OpenTubeX')
+  }
+  if (forbiddenTitles.value.some((text) => video.title?.toLowerCase().includes(text))) {
+    return t('Channel.Posts.Video hidden by OpenTubeX because of its title')
+  }
+  return null
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideSharingActions = computed(() => store.getters.getHideSharingActions)
 
-/** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
+const showNewSubscriptionFeedIndicator = computed(() => {
+  return store.getters.getShowNewSubscriptionFeedIndicators &&
+    props.data.isNewInSubscriptionFeed === true &&
+    props.data.hideNewSubscriptionFeedIndicator !== true
+})
+
+const showMarkAsSeen = computed(() => {
+  return props.data.isNewInSubscriptionFeed === true &&
+    (props.data.isInNewSubscriptionFeed === true || showNewSubscriptionFeedIndicator.value)
+})
+
+const dropdownOptions = computed(() => {
+  const options = []
+  if (props.embedded) {
+    return options
+  }
+  options.push({
+    label: t('Context Menu.Copy YouTube Link'),
+    value: 'copyYoutubeLink',
+    icon: ['fab', 'youtube']
+  })
+  if (showMarkAsSeen.value) {
+    options.push({
+      label: t('Subscriptions.Mark As Seen'),
+      value: 'markAsSeen',
+      icon: ['fas', 'check']
+    })
+  }
+  if (hideSubscriptionFeedTypeOption.value) {
+    options.push(hideSubscriptionFeedTypeOption.value)
+  }
+  return options
+})
+
+/**
+ * @param {string} option
+ */
+function handleOptionsClick(option) {
+  switch (option) {
+    case 'copyYoutubeLink':
+      copyToClipboard(`https://www.youtube.com/post/${postId}`, {
+        messageOnSuccess: t('Share.YouTube URL copied to clipboard')
+      })
+      break
+    case 'markAsSeen':
+      if (showMarkAsSeen.value && props.data.postId) {
+        store.dispatch('markSubscriptionPostAsSeen', props.data.postId)
+      }
+      break
+    case 'hideSubscriptionFeedType':
+      hideSubscriptionFeedType()
+      break
+  }
+}
+
+/** @type {import('vue').ComputedRef<'local' | 'invidious' | 'yattee'>} */
 const backendPreference = computed(() => {
   return store.getters.getBackendPreference
 })
@@ -242,6 +376,7 @@ let authorThumbnail = ''
 let postContent = ''
 let author = ''
 let authorId = ''
+/** @type {number?} */
 let voteCount = 0
 /** @type {number?} */
 let commentCount = null
@@ -251,35 +386,26 @@ parseCommunityData()
 const formattedCommentCount = computed(() => {
   if (commentCount == null) return ''
   if (props.singlePost) return formatNumber(commentCount)
-  return formatNumber(commentCount, isNumberRounded(commentCount) ? { notation: 'compact' } : undefined)
+  return formatNumber(commentCount, isRoundedNumber(commentCount) ? { notation: 'compact' } : undefined)
 })
 
+const commentCountLabel = computed(() => commentCount == null
+  ? t('Channel.Posts.View Full Post')
+  : t('Global.Counts.Comment Count', { count: formattedCommentCount.value }, commentCount))
+
 const formattedVoteCount = computed(() => {
-  return formatNumber(voteCount, voteCount != null && isNumberRounded(voteCount) ? { notation: 'compact' } : undefined)
+  return formatNumber(voteCount, voteCount != null && isRoundedNumber(voteCount) ? { notation: 'compact' } : undefined)
 })
 
 const publishedText = computed(() => {
   if (props.data.publishedTime) {
-    return getRelativeTimeFromDate(props.data.publishedTime)
+    return getRelativeTimeFromDate(props.data.publishedTime, false, true, relativeTimeNow.value)
   }
 
   return ''
 })
 
 function parseCommunityData() {
-  if ('backstagePostThreadRenderer' in props.data) {
-    postText = 'Shared post'
-    postType = 'text'
-
-    authorThumbnail = 'https://yt3.ggpht.com/ytc/AAUvwnjm-0qglHJkAHqLFsCQQO97G7cCNDuDLldsrn25Lg=s88-c-k-c0x00ffffff-no-rj'
-
-    if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
-      authorThumbnail = youtubeImageUrlToInvidious(authorThumbnail)
-    }
-
-    return
-  }
-
   postText = autolinker.link(props.data.postText)
   postContent = props.data.postContent
   postId = props.data.postId
@@ -291,7 +417,7 @@ function parseCommunityData() {
 
   authorThumbnail = getBestQualityImage(props.data.authorThumbnails)
 
-  if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
+  if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendPreference.value)) {
     authorThumbnail = youtubeImageUrlToInvidious(authorThumbnail)
   } else if (authorThumbnail.startsWith('//')) {
     authorThumbnail = 'https:' + authorThumbnail
@@ -300,46 +426,86 @@ function parseCommunityData() {
 
 /**
  * @param {{ width: number, height: number, url: string }[]} imageArray
+ * @param {{ preserveYouTubeCrop?: boolean }} [options]
  */
-function getBestQualityImage(imageArray) {
+function getBestQualityImage(imageArray, options = {}) {
   const imageArrayCopy = Array.from(imageArray)
   imageArrayCopy.sort((a, b) => {
     return Number.parseInt(b.width) - Number.parseInt(a.width)
   })
 
-  // Remove cropping directives when applicable
-  return imageArrayCopy[0]?.url?.replace(/-c-fcrop64=[^-]+/i, '') ?? ''
+  const url = imageArrayCopy[0]?.url ?? ''
+
+  // Multi-image carousels match YouTube's square CDN crops. Single-image
+  // posts show the full frame (YouTube omits fcrop64 for those).
+  if (options.preserveYouTubeCrop) {
+    return url
+  }
+
+  return url.replace(/-c-fcrop64=[^-]+/i, '')
 }
 
 const swiperContainerRef = useTemplateRef('swiperContainerRef')
+const swiperPrevRef = useTemplateRef('swiperPrevRef')
+const swiperNextRef = useTemplateRef('swiperNextRef')
+const swiperPaginationRef = useTemplateRef('swiperPaginationRef')
+let swiperInitializationPromise = null
 
-if (postType === 'multiImage' && postContent.content.length > 0) {
-  onMounted(() => {
-    /** @type {import('swiper/element').SwiperContainer} */
+async function initializeSwiper() {
+  const existingSwiper = swiperContainerRef.value?.swiper
+  if (swiperInitializationPromise || (existingSwiper && !existingSwiper.destroyed)) {
+    return
+  }
+
+  swiperInitializationPromise = loadSwiperModules()
+
+  try {
+    const { A11y, Navigation, Pagination } = await swiperInitializationPromise
+    /** @type {import('swiper/element').SwiperContainer|null} */
+    const swiperContainer = swiperContainerRef.value
+    if (!swiperContainer?.isConnected || (swiperContainer.swiper && !swiperContainer.swiper.destroyed)) {
+      return
+    }
+
     const swiperOptions = {
       modules: [A11y, Navigation, Pagination],
 
       injectStylesUrls: [
-        swiperA11yCssUrl,
-        swiperNavigationCssUrl,
-        swiperPaginationCssUrl
+        // This file is created with the copy webpack plugin in the web and renderer webpack configs.
+        // If you add more modules, please remember to add their CSS files to the list in webpack config files.
+        createWebURL(`/swiper-${process.env.SWIPER_VERSION}.css`)
       ],
 
-      a11y: true,
-      navigation: true,
+      a11y: {
+        prevSlideMessage: t('Video.Previous'),
+        nextSlideMessage: t('Video.Next'),
+      },
+      navigation: {
+        prevEl: swiperPrevRef.value,
+        nextEl: swiperNextRef.value,
+        addIcons: false,
+      },
       pagination: {
-        enabled: true,
-        clickable: true
+        el: swiperPaginationRef.value,
+        clickable: true,
       },
       slidesPerView: 1,
       // prevents slides from bleeding over due to rounding errors
-      spaceBetween: 10
+      spaceBetween: 8
     }
 
-    Object.assign(swiperContainerRef.value, swiperOptions)
+    Object.assign(swiperContainer, swiperOptions)
+    swiperContainer.initialize()
+  } catch (error) {
+    console.error('Failed to initialize community post carousel', error)
+  } finally {
+    swiperInitializationPromise = null
+  }
+}
 
-    swiperContainerRef.value.initialize()
-  })
+if (postType === 'multiImage' && postContent.content.length > 0) {
+  onMounted(initializeSwiper)
+  onActivated(initializeSwiper)
 }
 
 const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)

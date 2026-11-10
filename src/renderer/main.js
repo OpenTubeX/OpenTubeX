@@ -1,306 +1,152 @@
+import { ytDlp } from './helpers/ytDlp'
+import { supportsYtDlp } from './helpers/ytDlpCapabilities'
 import { createApp } from 'vue'
+import { installNetworkFetch } from './helpers/networkRecovery'
 import i18n from './i18n/index'
 import router from './router/index'
 import store from './store/index'
 import App from './App.vue'
-import { showExternalPlayerUnsupportedActionToast, showToast } from './helpers/utils'
-import { library } from './fontawesome-minimal'
+import { initializeTabNavigationService } from './tabs/TabNavigationService'
+import { showToast } from './helpers/utils'
+import { installViewTransitions } from './helpers/viewTransitions'
+import { installTitleTooltips } from './helpers/titleTooltips'
+import { initializeAppScrollbars, overlayScrollbarsDirective } from './helpers/overlayScrollbars'
+import { releaseAutomaticDownloadSchedule } from './helpers/automaticDownloads'
+import { initializeAndroidDynamicColors } from './helpers/dynamicColors'
+import { observeAndroidNetworkMetered } from './helpers/androidUi'
+import './helpers/reducedTransparency'
+import { networkMetered } from './helpers/player/meteredNetworkQuality'
 // import the styles
-import '@fortawesome/fontawesome-svg-core/styles.css'
+import './helpers/overlayScrollbars.css'
+// Only the positioning and stacking rules are used, FtToast supplies the design
+import 'vue-sonner/style.css'
+import './helpers/anchoredPosition.css'
+import './helpers/titleTooltips.css'
+import './helpers/gridReorder.css'
 
-import { register as registerSwiper } from 'swiper/element'
+import { FtIcon, FtIconLayers } from './icons/iconComponents'
 
-// Please keep the list of constants sorted by name
-// to avoid code conflict and duplicate entries
-import {
-  faAngleDown,
-  faAngleLeft,
-  faAngleUp,
-  faArrowDown,
-  faArrowDownShortWide,
-  faArrowDownWideShort,
-  faArrowLeft,
-  faArrowRight,
-  faArrowUp,
-  faArrowUpRightFromSquare,
-  faBars,
-  faBarsProgress,
-  faBorderAll,
-  faBookmark,
-  faCheck,
-  faChevronRight,
-  faCircleExclamation,
-  faCirclePlay,
-  faCircleUser,
-  faClapperboard,
-  faClock,
-  faClockRotateLeft,
-  faClone,
-  faComment,
-  faCopy,
-  faDatabase,
-  faDisplay,
-  faDownload,
-  faEdit,
-  faEllipsisH,
-  faEllipsisV,
-  faEnvelope,
-  faExchangeAlt,
-  faExclamationCircle,
-  faExpand,
-  faExternalLinkAlt,
-  faEye,
-  faEyeSlash,
-  faFileDownload,
-  faFileImage,
-  faFileVideo,
-  faFilm,
-  faFilter,
-  faFilterCircleXmark,
-  faFlask,
-  faFire,
-  faForward,
-  faGamepad,
-  faGauge,
-  faGlobe,
-  faGraduationCap,
-  faGrip,
-  faHashtag,
-  faHeart,
-  faHistory,
-  faImages,
-  faInfoCircle,
-  faKey,
-  faKeyboard,
-  faLanguage,
-  faLink,
-  faLinkSlash,
-  faList,
-  faLocationDot,
-  faLock,
-  faMessage,
-  faMoneyCheckDollar,
-  faMusic,
-  faNetworkWired,
-  faPalette,
-  faPhotoFilm,
-  faPlay,
-  faPlus,
-  faPodcast,
-  faQuestionCircle,
-  faRandom,
-  faRetweet,
-  faRotateRight,
-  faRss,
-  faSatelliteDish,
-  faSave,
-  faSearch,
-  faServer,
-  faShareAlt,
-  faShield,
-  faSlash,
-  faSlidersH,
-  faSortAlphaDown,
-  faSortAlphaDownAlt,
-  faSortDown,
-  faStepBackward,
-  faStepForward,
-  faSync,
-  faThumbsDown,
-  faThumbsUp,
-  faThumbtack,
-  faTimes,
-  faTimesCircle,
-  faTowerBroadcast,
-  faTrash,
-  faTrophy,
-  faTv,
-  faUserCheck,
-  faUserLock,
-  faUsers,
-  faUsersSlash,
-  faVideo,
-  faVolumeHigh,
-  faVolumeLow,
-  faVolumeMute,
-  faWifi,
-  faXmark
-} from '@fortawesome/free-solid-svg-icons'
-import {
-  faBookmark as farBookmark,
-  faDotCircle as farDotCircle
-} from '@fortawesome/free-regular-svg-icons'
-import {
-  faBitcoin,
-  faGithub,
-  faMastodon,
-  faMatrix,
-} from '@fortawesome/free-brands-svg-icons'
-import { FontAwesomeIcon, FontAwesomeLayers } from '@fortawesome/vue-fontawesome'
-
-// Please keep the list of constants sorted by name
-// to avoid code conflict and duplicate entries
-library.add(
-  // solid icons
-  faAngleDown,
-  faAngleLeft,
-  faAngleUp,
-  faArrowDown,
-  faArrowDownShortWide,
-  faArrowDownWideShort,
-  faArrowLeft,
-  faArrowRight,
-  faArrowUp,
-  faArrowUpRightFromSquare,
-  faBars,
-  faBarsProgress,
-  faBorderAll,
-  faBookmark,
-  faCheck,
-  faChevronRight,
-  faCircleExclamation,
-  faCirclePlay,
-  faCircleUser,
-  faClapperboard,
-  faClock,
-  faClockRotateLeft,
-  faClone,
-  faComment,
-  faCopy,
-  faDatabase,
-  faDisplay,
-  faDownload,
-  faEdit,
-  faEllipsisH,
-  faEllipsisV,
-  faEnvelope,
-  faExchangeAlt,
-  faExclamationCircle,
-  faExpand,
-  faExternalLinkAlt,
-  faEye,
-  faEyeSlash,
-  faFileDownload,
-  faFileImage,
-  faFileVideo,
-  faFilm,
-  faFilter,
-  faFilterCircleXmark,
-  faFlask,
-  faFire,
-  faForward,
-  faGamepad,
-  faGauge,
-  faGlobe,
-  faGraduationCap,
-  faGrip,
-  faHashtag,
-  faHeart,
-  faHistory,
-  faImages,
-  faInfoCircle,
-  faKey,
-  faKeyboard,
-  faLanguage,
-  faLink,
-  faLinkSlash,
-  faList,
-  faLocationDot,
-  faLock,
-  faMessage,
-  faMoneyCheckDollar,
-  faMusic,
-  faNetworkWired,
-  faPalette,
-  faPhotoFilm,
-  faPlay,
-  faPlus,
-  faPodcast,
-  faQuestionCircle,
-  faRandom,
-  faRetweet,
-  faRotateRight,
-  faRss,
-  faSatelliteDish,
-  faSave,
-  faSearch,
-  faServer,
-  faShareAlt,
-  faShield,
-  faSlash,
-  faSlidersH,
-  faSortAlphaDown,
-  faSortAlphaDownAlt,
-  faSortDown,
-  faStepBackward,
-  faStepForward,
-  faSync,
-  faThumbsDown,
-  faThumbsUp,
-  faThumbtack,
-  faTimes,
-  faTimesCircle,
-  faTowerBroadcast,
-  faTrash,
-  faTrophy,
-  faTv,
-  faUserCheck,
-  faUserLock,
-  faUsers,
-  faUsersSlash,
-  faVideo,
-  faVolumeHigh,
-  faVolumeLow,
-  faVolumeMute,
-  faWifi,
-  faXmark,
-
-  // solid icons
-  farBookmark,
-  farDotCircle,
-
-  // brand icons
-  faGithub,
-  faBitcoin,
-  faMastodon,
-  faMatrix,
-)
-
-registerSwiper()
+installNetworkFetch({
+  checkInternet: true,
+  // Load the persisted privacy choice before sending the first probe.
+  internetChecksEnabled: false,
+  corsDisabled: process.env.IS_ELECTRON,
+  getRequestError: process.env.IS_ELECTRON ? url => window.ftElectron.getRequestError(url) : undefined
+})
 
 const app = createApp(App)
 
 app.config.performance = process.env.NODE_ENV === 'development'
 
 app
-  .component('FontAwesomeIcon', FontAwesomeIcon)
-  .component('FontAwesomeLayers', FontAwesomeLayers)
+  .component('FtIcon', FtIcon)
+  .component('FtIconLayers', FtIconLayers)
+  .directive('overlay-scrollbars', overlayScrollbarsDirective)
 
   .use(router)
   .use(store)
   .use(i18n)
 
-router.isReady().then(() => {
+installViewTransitions(router)
+installTitleTooltips()
+
+const tabNavigation = initializeTabNavigationService(router, store)
+
+// Read the initial state before a restored Watch page picks its starting quality,
+// but don't let a missing answer prevent the application from mounting.
+let networkMeteredTimeout
+const networkMeteredReady = Promise.race([
+  observeAndroidNetworkMetered(metered => { networkMetered.value = metered }).catch(error => {
+    console.error('Failed to observe metered networks:', error)
+  }),
+  new Promise(resolve => { networkMeteredTimeout = setTimeout(resolve, 1500) }),
+]).finally(() => clearTimeout(networkMeteredTimeout))
+
+// Resolve native colors before App applies its first theme and system-bar style.
+const dynamicColorsReady = process.env.IS_CAPACITOR
+  ? initializeAndroidDynamicColors().catch(error => {
+      console.error('Failed to load initial Android dynamic colors:', error)
+    })
+  : Promise.resolve()
+
+Promise.all([router.isReady(), dynamicColorsReady, networkMeteredReady]).then(async () => {
+  if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
+    try {
+      const { waitForDatastores } = await import('../datastores/index')
+      await waitForDatastores()
+    } catch (error) {
+      console.error('Android app storage is unavailable:', error)
+      // Use the system locale without reading or writing failed app storage.
+      await store.dispatch('triggerCurrentLocaleSideEffects', 'system')
+      const { setIconPack } = await import('./icons/iconPackState')
+      await setIconPack('material')
+      const { default: StorageStartupError } = await import('./components/StorageStartupError/StorageStartupError.vue')
+      createApp(StorageStartupError).use(i18n).mount('#app')
+      document.getElementById('startup-splash')?.remove()
+      document.getElementById('app')?.removeAttribute('inert')
+      return
+    }
+  }
   app.mount('#app')
+  initializeAppScrollbars({ useNativePageScrollbar: process.env.IS_CAPACITOR })
 })
 
 // to avoid accessing electron api from web app build
 if (process.env.IS_ELECTRON) {
-  window.ftElectron.handleChangeView((route) => {
-    router.push(route)
+  window.ftElectron.handleShowSettingsWindow((view, toggle) => {
+    const settingsWindowOpen = store.getters.getSettingsWindowOpen &&
+      !['about', 'downloads'].includes(store.getters.getSettingsWindowView)
+    if (toggle && settingsWindowOpen) {
+      store.dispatch('hideSettingsWindow')
+    } else {
+      store.dispatch('showSettingsWindow', view)
+    }
   })
 
-  window.ftElectron.handleOpenInExternalPlayerResult(
-    (externalPlayer, unsupportedActions, isPlaylist) => {
-      for (const action of unsupportedActions) {
-        showExternalPlayerUnsupportedActionToast(externalPlayer, action)
-      }
-
-      const videoOrPlaylist = isPlaylist
-        ? i18n.global.t('Video.External Player.playlist')
-        : i18n.global.t('Video.External Player.video')
-
-      showToast(i18n.global.t('Video.External Player.OpeningTemplate', { videoOrPlaylist, externalPlayer }))
+  window.ftElectron.handleChangeView((route, tabId) => {
+    const targetTabId = tabId ?? store.getters.getActiveTabId
+    if (route && targetTabId) {
+      tabNavigation.push(targetTabId, route)
     }
-  )
+  })
+
+  window.ftElectron.tabs.onGoHistory(({ tabId, offset }) => {
+    tabNavigation.go(tabId, offset)
+  })
+}
+
+if (supportsYtDlp) {
+  const removedDownloadIds = new Set()
+
+  ytDlp.handleYtDlpDownloadStatus((download) => {
+    store.commit('upsertYtDlpDownload', download)
+    releaseAutomaticDownloadSchedule(download)
+
+    if (download.status === 'completed' && download.automatic !== true) {
+      showToast({
+        message: i18n.global.t('Downloads.Download Complete Template', { title: download.title }),
+        icon: ['fas', 'download'],
+      })
+    } else if (download.status === 'failed' && download.automatic !== true) {
+      showToast({
+        message: download.errorMessage === 'ENOENT'
+          ? i18n.global.t('Downloads.yt-dlp Not Found')
+          : i18n.global.t('Downloads.Download Failed Template', { title: download.title }),
+        icon: ['fas', 'circle-exclamation'],
+      })
+    }
+  })
+
+  ytDlp.handleYtDlpDownloadsRemoved((ids) => {
+    for (const id of ids) {
+      removedDownloadIds.add(id)
+      store.commit('removeYtDlpDownload', id)
+    }
+  })
+
+  ytDlp.ytDlpListDownloads().then(downloads => {
+    for (const download of downloads) {
+      if (!removedDownloadIds.has(download.id)) store.commit('upsertYtDlpDownload', download)
+    }
+  }).catch(error => console.warn('Could not load download history', error))
 }

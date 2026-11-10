@@ -1,5 +1,13 @@
-import { MIXED_SEARCH_HISTORY_ENTRIES_DISPLAY_LIMIT, SEARCH_RESULTS_DISPLAY_LIMIT } from '../../../constants'
+import { MIXED_SEARCH_HISTORY_ENTRIES_DISPLAY_LIMIT } from '../../../constants'
 import { DBSearchHistoryHandlers } from '../../../datastores/handlers/index'
+import { getRetentionCutoff } from '../../../history'
+import {
+  getSearchHistoryEntryQuery,
+  mergeSearchHistoryEntries,
+  normalizeSearchHistoryEntry,
+  resolveSearchHistoryEntry,
+  sortSearchHistoryByLastUpdatedAt,
+} from '../../../search-history'
 
 const state = {
   searchHistoryEntries: []
@@ -10,48 +18,58 @@ const getters = {
     return state.searchHistoryEntries
   },
 
-  getLatestSearchHistoryNames: (state) => {
-    return state.searchHistoryEntries.slice(0, SEARCH_RESULTS_DISPLAY_LIMIT).map((entry) => entry._id)
+  getLatestSearchHistoryEntries: (state) => {
+    return state.searchHistoryEntries
   },
 
-  getLatestMatchingSearchHistoryNames: (state) => (id) => {
+  getLatestMatchingSearchHistoryEntries: (state) => (query) => {
     const matches = []
-    let counter = 0
 
     for (const entry of state.searchHistoryEntries) {
-      if (entry._id.startsWith(id)) {
-        matches.push(entry._id)
+      if (getSearchHistoryEntryQuery(entry).startsWith(query)) {
+        matches.push(entry)
 
-        counter++
-
-        if (counter === MIXED_SEARCH_HISTORY_ENTRIES_DISPLAY_LIMIT) {
+        if (matches.length === MIXED_SEARCH_HISTORY_ENTRIES_DISPLAY_LIMIT) {
           break
         }
       }
     }
 
     // prioritize more concise matches
-    return matches.sort((a, b) => a.length - b.length)
-  },
-
-  getSearchHistoryEntryWithId: (state) => (id) => {
-    return state.searchHistoryEntries.find(p => p._id === id)
+    return matches.sort((a, b) => {
+      return getSearchHistoryEntryQuery(a).length - getSearchHistoryEntryQuery(b).length
+    })
   },
 }
 const actions = {
-  async grabSearchHistoryEntries({ commit }) {
+  async grabSearchHistoryEntries({ commit, dispatch, rootGetters }) {
     try {
       const results = await DBSearchHistoryHandlers.find()
-      commit('setSearchHistoryEntries', results)
+      commit('mergeLoadedSearchHistoryEntries', results)
+    } catch (errMessage) {
+      console.error(errMessage)
+    }
+    await dispatch('removeSearchHistoryOlderThan', rootGetters.getSearchHistoryRetentionDays)
+  },
+
+  async removeSearchHistoryOlderThan({ commit, state }, days) {
+    const cutoff = getRetentionCutoff(days)
+    // The list mirrors the datastore, so skip the query when nothing expired.
+    if (cutoff === null || !state.searchHistoryEntries.some(entry => entry.lastUpdatedAt < cutoff)) return
+
+    try {
+      const remaining = await DBSearchHistoryHandlers.deleteOlderThan(cutoff)
+      if (remaining !== null) commit('setSearchHistoryEntries', remaining)
     } catch (errMessage) {
       console.error(errMessage)
     }
   },
 
-  async updateSearchHistoryEntry({ commit }, searchHistoryEntry) {
+  async updateSearchHistoryEntry({ state, commit }, searchHistoryEntry) {
     try {
-      await DBSearchHistoryHandlers.upsert(searchHistoryEntry)
-      commit('upsertSearchHistoryEntryToList', searchHistoryEntry)
+      const updatedEntry = resolveSearchHistoryEntry(searchHistoryEntry, state.searchHistoryEntries)
+      const persistedEntry = await DBSearchHistoryHandlers.upsert(updatedEntry)
+      commit('upsertSearchHistoryEntryToList', persistedEntry ?? updatedEntry)
     } catch (errMessage) {
       console.error(errMessage)
     }
@@ -65,12 +83,14 @@ const actions = {
     try {
       // sort before sending saving to the database and passing to other windows
       // so that the other windows can use it as is, without having to sort the array themselves
-      historyItems.sort((a, b) => b.timeWatched - a.timeWatched)
+      sortSearchHistoryByLastUpdatedAt(historyItems)
 
       await DBSearchHistoryHandlers.overwrite(historyItems)
       commit('setSearchHistoryEntries', historyItems)
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 
@@ -87,18 +107,26 @@ const actions = {
     try {
       await DBSearchHistoryHandlers.deleteAll()
       commit('setSearchHistoryEntries', [])
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 }
 
 const mutations = {
+  mergeLoadedSearchHistoryEntries(state, searchHistoryEntries) {
+    state.searchHistoryEntries = mergeSearchHistoryEntries(searchHistoryEntries, state.searchHistoryEntries)
+    sortSearchHistoryByLastUpdatedAt(state.searchHistoryEntries)
+  },
+
   setSearchHistoryEntries(state, searchHistoryEntries) {
-    state.searchHistoryEntries = searchHistoryEntries
+    state.searchHistoryEntries = searchHistoryEntries.map(normalizeSearchHistoryEntry)
   },
 
   upsertSearchHistoryEntryToList(state, updatedSearchHistoryEntry) {
+    updatedSearchHistoryEntry = normalizeSearchHistoryEntry(updatedSearchHistoryEntry)
     state.searchHistoryEntries = state.searchHistoryEntries.filter((p) => {
       return p._id !== updatedSearchHistoryEntry._id
     })

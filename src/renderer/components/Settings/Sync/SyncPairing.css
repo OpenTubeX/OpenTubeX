@@ -1,0 +1,115 @@
+.pairingContent {
+  box-sizing: border-box;
+  margin-inline: auto;
+  max-inline-size: 38rem;
+  padding-block-end: 1rem;
+  text-align: center;
+}
+
+.pairingContent :deep(.ft-input-component) {
+  inline-size: min(100%, 32rem);
+  margin-inline: auto;
+}
+
+.pairingActions {
+  justify-content: center;
+}
+
+.pairingWaiting > p {
+  margin-block: 0.5rem;
+}
+
+.pairingModeActions :deep(.btn) {
+  margin-block: 0.25rem;
+}
+
+.pairingFooter {
+  border-block-start: 1px solid var(--divider-color);
+  justify-content: center;
+  padding-block-start: 0.75rem;
+}
+
+.pairingQr {
+  background: #fff;
+  block-size: auto;
+  inline-size: min(100%, 18rem, 36vh);
+  margin-inline: auto;
+}
+
+.pairingWarning {
+  font-weight: 600;
+}
+
+.pairingVerificationCode {
+  font-family: monospace;
+  font-size: clamp(2rem, 10vw, 3rem);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+}
+
+.pairingSecondary {
+  color: var(--secondary-text-color);
+}
+
+.pairingError {
+  color: var(--error-color, #c62828);
+  overflow-wrap: anywhere;
+}
+
+.pairingPollStatus {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-block-start: 0.5rem;
+}
+
+.scannerFrame {
+  align-items: center;
+  aspect-ratio: 1;
+  background-color: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
+  border-radius: calc(28px * var(--ui-roundness));
+  color: var(--secondary-text-color);
+  display: flex;
+  inline-size: min(100%, 24rem);
+  justify-content: center;
+  margin-inline: auto;
+  overflow: hidden;
+  position: relative;
+}
+
+.scannerPlaceholderIcon {
+  font-size: 3rem;
+}
+
+.scannerVideo {
+  block-size: 100%;
+  inline-size: 100%;
+  inset: 0;
+  object-fit: cover;
+  position: absolute;
+}
+
+.pairingDetails {
+  display: grid;
+  gap: 0.75rem;
+  margin-inline: auto;
+  max-inline-size: 32rem;
+  text-align: start;
+}
+
+.pairingDetails div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.pairingDetails dt {
+  color: var(--secondary-text-color);
+  font-size: 0.9rem;
+}
+
+.pairingDetails dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}

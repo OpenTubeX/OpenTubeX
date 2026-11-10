@@ -284,6 +284,13 @@ export default defineConfig([
       'object-shorthand': 'off',
       'vue/multi-word-component-names': 'off',
 
+      // `v-safer-html` fills the element with sanitized HTML, just like `v-html` does,
+      // and `FtVerifiedBadge` renders the name it is given
+      'vuejs-accessibility/heading-has-content': ['error', {
+        accessibleChildren: ['FtVerifiedBadge'],
+        accessibleDirectives: ['safer-html'],
+      }],
+
       'vuejs-accessibility/label-has-for': ['error', {
         required: {
           some: ['nesting', 'id'],
@@ -323,7 +330,10 @@ export default defineConfig([
 
       'vue/no-unused-emit-declarations': 'error',
       'vue/prefer-use-template-ref': 'error',
-      'vue/no-undef-directives': 'error',
+      // v-overlay-scrollbars is registered globally in main.js
+      'vue/no-undef-directives': ['error', { ignore: ['overlay-scrollbars'] }],
+      // Native slots of the Swiper custom element, not Vue slots.
+      'vue/no-deprecated-slot-attribute': ['error', { ignoreParents: ['swiper-container'] }],
 
       'jsdoc/check-alignment': 'error',
       'jsdoc/check-property-names': 'error',
@@ -444,5 +454,54 @@ export default defineConfig([
       'unicorn/prefer-date-now': 'error',
       'unicorn/prefer-array-index-of': 'error',
     }
+  },
+  {
+    files: ['e2e/**/*.mjs', 'tests/**/*.mjs'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+    },
+    settings: {
+      'vue-i18n': {
+        localeDir: `./static/locales/{${activeLocales.join(',')}}.yaml`,
+        messageSyntaxVersion: '^11.0.0',
+      },
+    },
+    rules: {
+      '@stylistic/space-before-function-paren': 'off',
+      '@stylistic/comma-dangle': ['error', 'only-multiline'],
+    },
+  },
+  {
+    name: 'tests',
+    files: ['tests/**/*.mjs'],
+    rules: {
+      // Tests compile source excerpts with `new Function`
+      'no-new-func': 'off',
+      // Tests stub built-in prototype methods and restore them afterwards
+      'no-extend-native': 'off',
+      // Captured listeners and watch callbacks take data, not an error, first
+      'n/no-callback-literal': 'off',
+      // Wait loops poll variables that asynchronous callbacks assign
+      'no-unmodified-loop-condition': 'off',
+      // Mocks record writes through setter-only properties
+      'accessor-pairs': 'off',
+      // Tests register several stub components in one file
+      'vue/one-component-per-file': 'off',
+    },
+  },
+  {
+    // The main process, preload and shared modules have no import cycles; keep
+    // it that way. The renderer still has some, so it is not checked yet.
+    // _scripts/ProcessBoundaryPlugin.js keeps renderer-only code out of them.
+    name: 'process-boundaries',
+    files: ['src/main/**/*.js', 'src/preload/**/*.js', 'src/datastores/**/*.js', 'src/*.js'],
+    rules: {
+      'import-x/no-cycle': ['error', { ignoreExternal: true }],
+    },
   }
 ])

@@ -1,0 +1,30 @@
+.autoRefreshIntervals {
+  display: flex;
+  flex-direction: column;
+  inline-size: 100%;
+  max-inline-size: 380px;
+}
+
+.autoRefreshIntervals > :deep(.select) {
+  box-sizing: border-box;
+  inline-size: 100%;
+}
+
+.onlyShowLatestFromChannelNumber {
+  box-sizing: border-box;
+  inline-size: 100%;
+  padding-inline-start: 44px;
+}
+
+.onlyShowLatestFromChannelNumber :deep(.pure-material-slider) {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 380px;
+  margin-inline: 0;
+}
+
+.subscriptionChannelSettingsManager {
+  box-sizing: border-box;
+  max-inline-size: 100%;
+  padding-inline-start: 44px;
+}

@@ -1,4 +1,5 @@
 const path = require('path')
+const ProcessBoundaryPlugin = require('./ProcessBoundaryPlugin')
 
 const isDevMode = process.env.NODE_ENV === 'development'
 
@@ -24,6 +25,7 @@ const config = {
     'electron/renderer'
   ],
   externalsType: 'commonjs',
+  plugins: [new ProcessBoundaryPlugin()],
   node: {
     __dirname: false,
     __filename: false

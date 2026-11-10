@@ -1,0 +1,209 @@
+import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
+import test from 'node:test'
+import vm from 'node:vm'
+
+import { createAppShortcuts, getAppShortcutPath } from '../../src/renderer/helpers/appShortcuts.js'
+import { getHomeWidgetPage } from '../../src/renderer/helpers/homeWidgetData.js'
+import { shouldOpenExternalMediaUrl } from '../../src/renderer/helpers/externalMediaUrl.js'
+import { isSyncServerOidcCallbackUrl } from '../../src/renderer/helpers/sync-server-oidc.js'
+import { resolveMobileContextLinkCopyUrl } from '../../src/renderer/helpers/mobileLinkActions.js'
+
+const pages = ['subscriptions', 'userplaylists', 'history', 'downloads']
+
+async function loadKeyboardShortcutHandler(context) {
+  const source = await readFile(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
+  const start = source.indexOf('function handleKeyboardShortcuts(event) {')
+  const handlerSource = source.slice(start, source.indexOf('\n/**', start))
+  return vm.runInNewContext(`${handlerSource}\nhandleKeyboardShortcuts`, context)
+}
+
+test('unknown shortcut IDs cannot navigate to arbitrary routes', () => {
+  for (const id of ['settings', '../history', '/history', '__proto__', '', null, undefined]) {
+    assert.equal(getAppShortcutPath(id), null)
+  }
+})
+
+test('retained startup clicks and running-app clicks navigate and update localized shortcuts', async () => {
+  const source = await readFile(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
+  const start = source.indexOf('async function enableCapacitorIntegrations() {')
+  const integration = source.slice(start, source.indexOf('\nconst windowTitle', start))
+  const listeners = new Map()
+  const paths = []
+  const youtubeLinks = []
+  const updates = []
+  const wakeStates = []
+  let settingsOpen = true
+  let updateLocale
+  let stopped = false
+  let widgetSyncStopped = false
+  const appWindow = new EventTarget()
+  let searchFocusRequests = 0
+  appWindow.addEventListener('opentubex:focus-search', () => { searchFocusRequests++ })
+  const locale = { value: 'en-US' }
+  const enable = vm.runInNewContext(`${integration}\nenableCapacitorIntegrations`, {
+    window: appWindow,
+    document: { getElementById: () => null },
+    CustomEvent,
+    dataReady: { value: true },
+    isAnyPromptOpen: { value: false },
+    getHomeWidgetPage,
+    shouldOpenExternalMediaUrl,
+    isSyncServerOidcCallbackUrl,
+    syncContinueWatchingWidget: () => () => { widgetSyncStopped = true },
+    Capacitor: { getPlatform: () => 'android' },
+    supportsYtDlp: true,
+    handleAndroidBack() {},
+    initializeAndroidBack: async () => () => {},
+    getAndroidBackPreview() {},
+    shouldInterceptAndroidBack() {},
+    CapacitorApp: {
+      addListener: async (name, callback) => {
+        listeners.set(name, callback)
+        return { remove: () => listeners.delete(name) }
+      },
+      getState: async () => ({ isActive: true }),
+      getLaunchUrl: async () => ({ url: 'opentubex://https//www.youtube.com/feed/history' }),
+    },
+    AppShortcuts: {
+      addListener: async (name, callback) => {
+        assert.equal(name, 'click')
+        listeners.set(name, callback)
+        // Native plugins retain shortcut clicks until the renderer subscribes.
+        await callback({ shortcutId: 'subscriptions' })
+        return { remove: () => listeners.delete(name) }
+      },
+      set: async ({ shortcuts }) => { updates.push(shortcuts) },
+    },
+    initializeCapacitorLiveReminderActions: async () => () => {},
+    showInAppNotification: () => {},
+    addAndroidMediaSessionActionListener: async () => () => {},
+    setAndroidAppVisible() {},
+    setAndroidAppActive() {},
+    clearTimeout,
+    playbackScreenWake: { setAppActive: active => wakeStates.push(active) },
+    store: {
+      getters: {},
+      dispatch: async (action, view) => {
+        if (action === 'showSettingsWindow') {
+          paths.push(`settings:${view}`)
+          return
+        }
+        assert.equal(action, 'hideSettingsWindow')
+        settingsOpen = false
+      },
+    },
+    watch: (watchedLocale, callback, options) => {
+      assert.equal(watchedLocale, locale)
+      assert.equal(options.immediate, true)
+      updateLocale = callback
+      callback()
+      return () => { stopped = true }
+    },
+    locale,
+    t: key => `${locale.value}:${key}`,
+    createAppShortcuts,
+    getAppShortcutPath,
+    openInternalPath: ({ path, query }) => {
+      assert.equal(settingsOpen, false, 'settings must not cover the destination')
+      paths.push(query ? `${path}?${new URLSearchParams(query)}` : path)
+    },
+    handleYoutubeLink: url => { youtubeLinks.push(url) },
+  })
+  const cleanup = await enable()
+  assert.deepEqual(wakeStates, [true])
+  assert.deepEqual(paths, ['/subscriptions'])
+  for (const page of pages.slice(1)) {
+    settingsOpen = true
+    await listeners.get('click')({ shortcutId: page })
+  }
+  await listeners.get('click')({ shortcutId: 'settings' })
+  assert.deepEqual(paths, ['/subscriptions', '/userplaylists', '/history', 'settings:downloads'])
+  listeners.get('appUrlOpen')({ url: 'https://youtu.be/123' })
+  listeners.get('appUrlOpen')({ url: 'opentubex://https://www.youtube.com/watch?v=jNQXAC9IVRw' })
+  listeners.get('appUrlOpen')({ url: 'opentubex://https//www.youtube.com/feed/subscriptions' })
+  assert.deepEqual(youtubeLinks, ['https://www.youtube.com/feed/history', 'https://youtu.be/123', 'https://www.youtube.com/watch?v=jNQXAC9IVRw', 'https://www.youtube.com/feed/subscriptions'])
+  for (const page of ['subscriptions', 'watch-later', 'search']) {
+    settingsOpen = true
+    listeners.get('appUrlOpen')({ url: `opentubex://open/${page}` })
+    await new Promise(resolve => setImmediate(resolve))
+  }
+  assert.deepEqual(paths.slice(pages.length), ['/subscriptions', '/playlist/watchLater?playlistType=user'])
+  assert.equal(searchFocusRequests, 1)
+  assert.equal(youtubeLinks.length, 4, 'widget pages must not be treated as YouTube links')
+  assert.equal(updates[0][2].title, 'en-US:History.History')
+  locale.value = 'de-DE'
+  updateLocale()
+  assert.equal(updates[1][2].title, 'de-DE:History.History')
+  cleanup()
+  assert.deepEqual(wakeStates, [true, false])
+  assert.equal(stopped, true)
+  assert.equal(widgetSyncStopped, true)
+  assert.equal(listeners.size, 0)
+})
+
+test('tab organizer shortcut opens and closes it again with its search focused', async () => {
+  const tabOrganizerOpen = { value: false }
+  const handler = await loadKeyboardShortcutHandler({
+    showTutorial: { value: false },
+    commandPaletteOpen: { value: false },
+    tabOrganizerOpen,
+    findbarVisible: { value: false },
+    tabSwitcherVisible: { value: false },
+    process: { env: { IS_ELECTRON: true } },
+    isElectron: true,
+    KeyboardShortcuts: { APP: { GENERAL: { OPEN_TAB_ORGANIZER: 'organizer' } } },
+    matchesKeyboardShortcut: (_event, shortcut) => shortcut === 'organizer',
+    isTypingTarget: () => tabOrganizerOpen.value,
+    openTabOrganizer: () => { tabOrganizerOpen.value = true },
+    closeTabOrganizer: () => { tabOrganizerOpen.value = false },
+  })
+  const event = { key: 'o', preventDefault() {} }
+  handler(event)
+  assert.equal(tabOrganizerOpen.value, true)
+  handler({ ...event, repeat: true })
+  assert.equal(tabOrganizerOpen.value, true, 'holding the shortcut must not close the organizer')
+  handler(event)
+  assert.equal(tabOrganizerOpen.value, false)
+  handler({ ...event, repeat: true })
+  assert.equal(tabOrganizerOpen.value, false, 'holding the shortcut must not reopen the organizer')
+})
+
+test('copy-current-URL shortcut copies only portable active-route URLs', async () => {
+  const copied = []
+  let prevented = false
+  const appWindow = {
+    location: {
+      href: 'file:///opt/OpenTubeX/resources/app.asar/dist/index.html#/watch/abcdefghijk?playlistId=PL123&timestamp=42'
+    }
+  }
+  const handler = await loadKeyboardShortcutHandler({
+    showTutorial: { value: false },
+    isElectron: false,
+    commandPaletteOpen: { value: false },
+    tabOrganizerOpen: { value: false },
+    window: appWindow,
+    KeyboardShortcuts: { APP: { GENERAL: { COPY_CURRENT_URL: 'copy-url' } } },
+    matchesKeyboardShortcut: (_event, shortcut) => shortcut === 'copy-url',
+    resolveMobileContextLinkCopyUrl,
+    copyToClipboard: async (url, options) => { copied.push({ url, options }) },
+    t: key => key,
+  })
+
+  handler({ preventDefault: () => { prevented = true } })
+  await new Promise(resolve => setImmediate(resolve))
+
+  assert.equal(prevented, true)
+  assert.equal(copied.length, 1)
+  assert.equal(copied[0].url, 'https://youtu.be/abcdefghijk?list=PL123&t=42')
+  assert.equal(copied[0].options.messageOnSuccess, 'Share.YouTube URL copied to clipboard')
+
+  appWindow.location.href = 'file:///opt/OpenTubeX/resources/app.asar/dist/index.html#/history'
+  handler({ preventDefault: () => {} })
+  assert.equal(copied.length, 1)
+
+  appWindow.location.href =
+    'file:///opt/OpenTubeX/resources/app.asar/dist/index.html#/playlist/PL_PRIVATE?playlistType=user'
+  handler({ preventDefault: () => {} })
+  assert.equal(copied.length, 1)
+})

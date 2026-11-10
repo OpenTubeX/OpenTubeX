@@ -1,6 +1,5 @@
 /* stylelint-disable no-descending-specificity */
 $thumbnail-overlay-opacity: 0.85;
-$watched-transition-duration: 0.5s;
 $grid-mode-grab-bar-padding: 1em;
 
 @mixin is-result {
@@ -36,53 +35,101 @@ $grid-mode-grab-bar-padding: 1em;
   }
 }
 
-@mixin low-contrast-when-watched($col) {
+// `$animate: false` keeps the shorthand off the card itself, where it would
+// replace the thumbnail swipe's translate transition.
+@mixin low-contrast-when-watched($col, $animate: true) {
   color: $col;
 
   @at-root {
     .watched &,
     .watched#{&} {
       color: var(--tertiary-text-color);
-      transition-duration: $watched-transition-duration;
+
+      @if $animate {
+        transition: color var(--motion-slow-effects);
+      }
     }
     .watched:hover &,
     .watched:hover#{&} {
       color: $col;
-      transition-duration: $watched-transition-duration;
     }
+  }
+}
+
+.channelName {
+  align-items: center;
+  display: inline-flex;
+  gap: 6px;
+  max-inline-size: 100%;
+  text-decoration: none;
+  vertical-align: middle;
+}
+
+.channelNameText {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.grabBar {
+  color: var(--tertiary-text-color);
+  cursor: grab;
+  text-align: center;
+  user-select: none;
+  touch-action: none;
+  -webkit-touch-callout: none;
+
+  // Space a bit from the thumbnail.
+  padding-block: $grid-mode-grab-bar-padding;
+
+  svg {
+    // Make icon appears more centered from default `-0.125em` from FA style
+    vertical-align: -0.15em;
+  }
+
+  &.grabBarDisabled {
+    cursor: not-allowed;
+    opacity: 0.3;
   }
 }
 
 .ft-list-item {
   padding: 6px;
+  border-radius: var(--shape-corner-large);
 
   &.watched {
     background-color: var(--bg-color);
 
-    @include low-contrast-when-watched(var(--primary-text-color));
-
-    .thumbnailImage {
-      opacity: 0.3;
-      /* stylelint-disable-next-line declaration-property-value-no-unknown */
-      transition: opacity $watched-transition-duration;
+    @include is-watch-playlist-item {
+      background-color: transparent;
     }
 
-    &:hover .thumbnailImage,
-    &:focus .thumbnailImage {
-      opacity: 1;
-      transition-duration: $watched-transition-duration;
+    @include low-contrast-when-watched(var(--primary-text-color), false);
+
+    .thumbnailLink::after {
+      background-color: var(--watched-thumbnail-overlay-color);
+      content: '';
+      inset: 0;
+      pointer-events: none;
+      position: absolute;
+      transition: opacity var(--motion-slow-effects);
+    }
+
+    &:hover .thumbnailLink::after,
+    .thumbnailLink:focus::after {
+      opacity: 0;
     }
   }
 
   .videoThumbnail {
+    position: relative;
     display: grid;
 
     .thumbnailLink,
     .videoWatched,
     .videoDuration,
+    .playlistIndexBadge,
     .externalPlayerIcon,
     .playlistIcons,
-    .watchedProgressBar,
     .videoCountContainer,
     .background,
     .inner {
@@ -91,12 +138,27 @@ $grid-mode-grab-bar-padding: 1em;
       user-select: none;
     }
 
+    // FtListVideo's watched progress arc reads the same 12px radius in JS.
     .thumbnailLink {
+      position: relative;
+      border-radius: var(--shape-corner-medium);
       display: flex;
       overflow: hidden;
     }
 
+    // Pressing the thumbnail tightens its corners one step. The radius only
+    // transitions under the pointer, so UI Roundness changes stay instant.
+    .thumbnailLink:is(:hover, :active) {
+      transition: border-radius var(--motion-fast-spatial);
+    }
+
+    .thumbnailLink:active {
+      border-radius: var(--shape-corner-small);
+    }
+
     .thumbnailImage {
+      border-radius: inherit;
+
       @include is-sidebar-item {
         block-size: 75px;
       }
@@ -107,28 +169,43 @@ $grid-mode-grab-bar-padding: 1em;
       }
     }
 
+    .videoWatched,
+    .playlistIndexBadge,
+    .videoDuration {
+      // Paint above the positioned thumbnail link.
+      position: relative;
+      background-color: var(--thumbnail-badge-bg-color);
+      backdrop-filter: var(--thumbnail-badge-blur);
+      border-radius: var(--shape-corner-small);
+      color: var(--primary-text-color);
+      font-size: 15px;
+      line-height: 1.2;
+      padding-block: 3px;
+      padding-inline: 4px;
+      pointer-events: none;
+    }
+
     .videoWatched {
       place-self: flex-start start;
-      background-color: var(--bg-color);
-      color: var(--primary-text-color);
-      opacity: $thumbnail-overlay-opacity;
-      padding: 2px;
-      pointer-events: none;
+
+      @include is-watch-playlist-item {
+        font-size: 12px;
+        place-self: flex-end start;
+        margin-block-end: 4px;
+        margin-inline-start: 4px;
+      }
+    }
+
+    .playlistIndexBadge {
+      place-self: start start;
+      margin: 4px;
+      font-size: 12px;
     }
 
     .videoDuration {
       place-self: flex-end end;
-      background-color: var(--card-bg-color);
-      border-radius: 5px;
-      color: var(--primary-text-color);
-      font-size: 15px;
-      line-height: 1.2;
       margin-block: 0 4px;
       margin-inline: 0 4px;
-      opacity: $thumbnail-overlay-opacity;
-      padding-block: 3px;
-      padding-inline: 4px;
-      pointer-events: none;
 
       @include is-watch-playlist-item {
         font-size: 12px;
@@ -149,15 +226,17 @@ $grid-mode-grab-bar-padding: 1em;
 
     .playlistIcons {
       justify-self: end;
-      margin-inline-end: 3px;
-      margin-block-start: 3px;
+      margin-inline-end: 8px;
+      margin-block-start: 8px;
       display: grid;
       grid-auto-flow: column;
+      gap: 8px;
       justify-content: flex-end;
       block-size: fit-content;
     }
 
     .quickBookmarkVideoIcon,
+    .extraThumbnailActionIcon,
     .addToPlaylistIcon,
     .trashIcon,
     .upArrowIcon,
@@ -166,22 +245,24 @@ $grid-mode-grab-bar-padding: 1em;
     }
 
     .watchedProgressBar {
-      place-self: flex-end stretch;
-      background-color: var(--primary-color);
-      block-size: 2px;
+      pointer-events: none;
       z-index: 2;
     }
 
     .videoCountContainer {
       place-self: stretch end;
+      border-start-end-radius: var(--shape-corner-medium);
+      border-end-end-radius: var(--shape-corner-medium);
       display: grid;
       font-size: 20px;
       inline-size: 60px;
+      overflow: hidden;
       pointer-events: none;
 
       .background {
-        background-color: var(--bg-color);
-        opacity: 0.9;
+        position: relative;
+        background-color: var(--thumbnail-badge-bg-color);
+        backdrop-filter: var(--thumbnail-badge-blur);
       }
 
       .inner {
@@ -192,6 +273,15 @@ $grid-mode-grab-bar-padding: 1em;
         justify-content: center;
         z-index: 1;
       }
+    }
+
+    &:hover .videoCountContainer {
+      transition: border-radius var(--motion-fast-spatial);
+    }
+
+    &:has(.thumbnailLink:active) .videoCountContainer {
+      border-start-end-radius: var(--shape-corner-small);
+      border-end-end-radius: var(--shape-corner-small);
     }
   }
 
@@ -206,10 +296,15 @@ $grid-mode-grab-bar-padding: 1em;
       .channelImage {
         border-radius: 50%;
         block-size: 130px;
+        inline-size: 130px;
+        vertical-align: middle;
       }
 
       .gameImage {
         block-size: 130px;
+        inline-size: calc(130px * 5 / 7);
+        object-fit: contain;
+        vertical-align: middle;
       }
     }
   }
@@ -234,6 +329,31 @@ $grid-mode-grab-bar-padding: 1em;
 
     .optionsButton {
       grid-area: optionsExternalButton;
+
+      :deep(.iconDropdown) {
+        inline-size: min(320px, calc(100vw - 16px));
+        max-block-size: calc(100vh - 16px);
+        overflow: hidden auto;
+      }
+
+      :deep(.iconDropdown .list) {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      :deep(.iconDropdown .listItem) {
+        min-inline-size: 0;
+      }
+
+      :deep(.iconDropdown .listItem > span) {
+        overflow: hidden;
+        text-align: start;
+        text-overflow: ellipsis;
+      }
+
+      :deep(.iconDropdown .listItemDivider) {
+        grid-column: 1 / -1;
+      }
     }
 
     .externalPlayerButton {
@@ -243,6 +363,7 @@ $grid-mode-grab-bar-padding: 1em;
     .title {
       font-size: 20px;
       grid-area: title;
+      line-height: 1.3;
       text-decoration: none;
       overflow-wrap: break-word;
       overflow-wrap: anywhere;
@@ -255,9 +376,16 @@ $grid-mode-grab-bar-padding: 1em;
     }
 
     .infoLine {
+      align-items: center;
+      column-gap: 0.75em;
+      display: flex;
+      flex-wrap: wrap;
       font-size: 14px;
       grid-area: infoLine;
+      min-inline-size: 0;
       margin-block-start: 5px;
+      overflow-clip-margin: 2px;
+      overflow-x: clip;
       overflow-wrap: anywhere;
       text-align: start;
 
@@ -268,7 +396,44 @@ $grid-mode-grab-bar-padding: 1em;
       }
 
       .channelName {
+        flex: 0 0 auto;
+
         @include low-contrast-when-watched(var(--secondary-text-color));
+      }
+
+      .videoInfo {
+        // The outer infoLine clips wrapped separators, including the channel dot.
+        overflow: visible;
+        row-gap: 0;
+        flex: 0 0 auto;
+        inline-size: max-content;
+        max-inline-size: 100%;
+        position: relative;
+      }
+
+      .videoInfo:empty {
+        display: none;
+      }
+
+      .videoInfo::before {
+        background-color: currentcolor;
+        block-size: 0.25em;
+        border-radius: 50%;
+        content: none;
+        inset-block-start: 0.5lh;
+        inline-size: 0.25em;
+        inset-inline-start: -0.5em;
+        position: absolute;
+        transform: translateY(-50%);
+      }
+
+      .channelName + .videoInfo::before {
+        content: '';
+      }
+
+      .videoInfo > span {
+        position: relative;
+        white-space: nowrap;
       }
     }
 
@@ -304,15 +469,20 @@ $grid-mode-grab-bar-padding: 1em;
     }
 
     &.result {
+      .info {
+        grid-template-columns: minmax(0, 1fr) auto;
+        min-inline-size: 0;
+      }
+
       .videoThumbnail,
       .channelThumbnailLink,
       .thumbnailLink,
       .thumbnailImage {
-        inline-size: 336px;
-        max-inline-size: 25vw;
+        inline-size: var(--thumbnail-list-size, 336px);
+        max-inline-size: var(--thumbnail-list-max-size, 25vw);
 
         @media only screen and (width <= 680px) {
-          max-inline-size: 30vw;
+          max-inline-size: var(--thumbnail-list-mobile-max-size, 30vw);
         }
       }
 
@@ -330,6 +500,9 @@ $grid-mode-grab-bar-padding: 1em;
 
     .grabBar {
       grid-area: grabBar;
+      align-self: center;
+      padding-block: 0;
+      padding-inline: 4px 12px;
     }
 
     .videoThumbnail {
@@ -365,6 +538,16 @@ $grid-mode-grab-bar-padding: 1em;
     box-sizing: border-box;
     block-size: 100%;
 
+    &:has(> .grabBar) {
+      // Make top & bottom padding look consistent
+      padding-block-start: 0;
+    }
+
+    .info {
+      grid-template-columns: minmax(0, 1fr) auto;
+      min-inline-size: 0;
+    }
+
     .videoThumbnail,
     .channelThumbnail {
       // Using padding not margin to avoid being able to drag on empty space
@@ -373,9 +556,13 @@ $grid-mode-grab-bar-padding: 1em;
       .thumbnailImage {
         // Ensure placeholder image displayed at same aspect ratio as most other images
         aspect-ratio: 16/9;
-        // DeArrrow thumbnails are vertical for shorts.
-        // Set the object-fit so they don't get stretched to 16:9
-        object-fit: contain;
+        // Crop the letterboxing in YouTube's 4:3 thumbnail fallbacks.
+        object-fit: cover;
+
+        &.deArrowThumbnail {
+          // Preserve portrait DeArrow thumbnails displayed in regular cards.
+          object-fit: contain;
+        }
       }
     }
 
@@ -403,13 +590,20 @@ $grid-mode-grab-bar-padding: 1em;
     opacity: $thumbnail-overlay-opacity;
   }
 
+  // The container opacity would make an open dropdown (e.g. add to playlist) see-through
+  :deep(.playlistIcons:has(.iconDropdown, .iconButton[aria-expanded='true'])) {
+    opacity: 1;
+  }
+
   @media (hover: hover) {
     &:hover .quickBookmarkVideoIcon:not(.alwaysVisible),
+    &:hover .extraThumbnailActionIcon,
     .quickBookmarkVideoIcon.bookmarked:not(.alwaysVisible),
     &:hover .addToPlaylistIcon:not(.alwaysVisible),
     &:hover .externalPlayerIcon,
     &:has(:focus-visible) .addToPlaylistIcon:not(.alwaysVisible),
     &:has(:focus-visible) .quickBookmarkVideoIcon:not(.alwaysVisible),
+    &:has(:focus-visible) .extraThumbnailActionIcon,
     &:has(:focus-visible) .externalPlayerIcon {
       opacity: 1;
     }
@@ -417,16 +611,22 @@ $grid-mode-grab-bar-padding: 1em;
     &:hover .optionsButton,
     &:has(:focus-visible) .optionsButton,
     // Keep visible when the drop down is open
-    :deep(.optionsButton:has(> .iconDropdown:focus-within)) {
+    :deep(.optionsButton:has(> .iconDropdown:focus-within, .iconButton[aria-expanded='true'])) {
       opacity: 1;
     }
 
     .quickBookmarkVideoIcon:not(.alwaysVisible),
+    .extraThumbnailActionIcon,
     .addToPlaylistIcon:not(.alwaysVisible),
     .externalPlayerIcon,
     .optionsButton {
       opacity: 0;
-      transition: visibility 0s, opacity 0.2s linear;
+      transition: visibility 0s, opacity var(--motion-fast-effects);
+    }
+
+    // Keep visible while the dropdown is open, even if the pointer leaves the video
+    :deep(.addToPlaylistIcon:has(.iconDropdown, .iconButton[aria-expanded='true'])) {
+      opacity: 1;
     }
   }
 }
@@ -447,4 +647,15 @@ $grid-mode-grab-bar-padding: 1em;
   margin-block-end: inherit;
   font-size: inherit;
   font-weight: inherit;
+}
+
+// The optional Limit Titles to Two Lines setting.
+// The 1.3 line height leaves room for descenders inside the clamped box.
+// Keyboard focus shows the whole title, as the tooltip only opens on hover.
+:root.limitTitlesToTwoLines .ft-list-video .title:not(:focus-visible) .h3Title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
 }

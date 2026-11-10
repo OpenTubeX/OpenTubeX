@@ -2,6 +2,9 @@
 - changed-files:
   - any-glob-to-any-file: '**'
 
+translations:
+- head-branch: ['^weblate-translations$']
+
 'PR: dependencies':
 - any:
   - changed-files:

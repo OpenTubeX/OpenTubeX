@@ -1,7 +1,17 @@
 .ft-card {
   background-color: var(--card-bg-color);
+  background-image: var(--card-bg-image);
+  backdrop-filter: var(--card-bg-blur, none);
+  border-radius: var(--shape-corner-medium);
   margin: 8px;
   padding-block: 3px 16px;
   padding-inline: 16px;
   box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
+}
+
+/* FtFixedBackground paints the background fixed to the viewport. Keep the
+   base specificity so pages can still position their cards. */
+.ft-card:where(.fixedBackground) {
+  position: relative;
+  background-clip: var(--fixed-background-host-clip, border-box);
 }

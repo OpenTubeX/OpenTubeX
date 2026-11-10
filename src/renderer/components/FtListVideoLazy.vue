@@ -1,8 +1,6 @@
 <template>
   <div
-    v-observe-visibility="visible ? false : {
-      callback: onVisibilityChanged
-    }"
+    v-first-visible="visible ? false : onFirstVisible"
     :style="{ display }"
   >
     <FtListVideo
@@ -33,12 +31,13 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
-import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
+import { computed, ref, watch } from 'vue'
+import { vFirstVisible } from '../helpers/firstVisible'
 
 import FtListVideo from './FtListVideo/FtListVideo.vue'
 
 import store from '../store/index'
+import { isVideoHiddenByPreferences } from '../helpers/subscriptions'
 
 const props = defineProps({
   data: {
@@ -115,48 +114,62 @@ const props = defineProps({
   }
 })
 
-const visible = ref(props.initialVisibleState)
-const display = ref('block')
+const EMPTY_SET = new Set()
 
-const channelsHidden = computed(() => {
+/** @type {import('vue').ComputedRef<Set<string>>} */
+const channelsHiddenNames = computed(() => {
   // Some component users like channel view will have this disabled
-  if (!props.useChannelsHiddenPreference) { return [] }
+  if (!props.useChannelsHiddenPreference) { return EMPTY_SET }
 
-  return JSON.parse(store.getters.getChannelsHidden).map((ch) => {
-    // Legacy support
-    if (typeof ch === 'string') {
-      return { name: ch, preferredName: '', icon: '' }
-    }
-    return ch
-  })
+  return store.getters.getActiveChannelsHiddenNames
 })
 
+/** @type {import('vue').ComputedRef<Set<string>>} */
+const aiSlopChannels = computed(() => {
+  if (!props.useChannelsHiddenPreference) { return EMPTY_SET }
+
+  return store.getters.getAiSlopBlockedChannels
+})
+
+/** @type {import('vue').ComputedRef<string[]>} */
 const forbiddenTitles = computed(() => {
   if (!props.hideForbiddenTitles) { return [] }
-  return JSON.parse(store.getters.getForbiddenTitles.toLowerCase())
-})
-
-const hideChannelsBasedOnText = computed(() => {
-  return store.getters.getHideChannelsBasedOnText
+  return store.getters.getActiveForbiddenTitles
 })
 
 const shouldBeVisible = computed(() => {
-  const lowerCaseTitle = props.data.title?.toLowerCase()
-  const lowerCaseAuthor = props.data.author?.toLowerCase()
-
-  return !(channelsHidden.value.some(ch => ch.name === props.data.authorId || (props.data.collaborators?.length > 0 && ch.name === props.data.collaborators[0].id)) ||
-    channelsHidden.value.some(ch => ch.name === props.data.author) ||
-    (lowerCaseTitle && forbiddenTitles.value.some((text) => lowerCaseTitle.includes(text))) ||
-    (hideChannelsBasedOnText.value && lowerCaseAuthor && forbiddenTitles.value.some((text) => lowerCaseAuthor.includes(text))))
+  return !isVideoHiddenByPreferences(props.data, {
+    hiddenChannelNames: channelsHiddenNames.value,
+    aiSlopChannels: aiSlopChannels.value,
+    forbiddenTitles: forbiddenTitles.value,
+    hideChannelsBasedOnText: false,
+    membersOnlyChannelIds: store.getters.getMembersOnlyChannelIdSet,
+  })
 })
 
-/**
- * @param {boolean} isVisible
- */
-function onVisibilityChanged(isVisible) {
-  if (isVisible && shouldBeVisible.value) {
-    visible.value = isVisible
-  } else if (isVisible) {
+const visible = ref(props.initialVisibleState && shouldBeVisible.value)
+const display = ref(shouldBeVisible.value ? 'block' : 'none')
+const loadedByVisibilityObserver = ref(false)
+
+watch(
+  [() => props.initialVisibleState, shouldBeVisible],
+  ([initialVisibleState, isAllowed]) => {
+    if (!isAllowed) {
+      visible.value = false
+      display.value = 'none'
+      return
+    }
+
+    display.value = 'block'
+    visible.value = initialVisibleState || loadedByVisibilityObserver.value
+  }
+)
+
+function onFirstVisible() {
+  if (shouldBeVisible.value) {
+    loadedByVisibilityObserver.value = true
+    visible.value = true
+  } else {
     display.value = 'none'
   }
 }

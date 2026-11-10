@@ -1,22 +1,78 @@
 .card {
-  inline-size: 85%;
+  --history-control-gap: 20px;
+
+  /*
+    As far below the heading as its content is from the top of the card (its
+    padding and the title offset), so the actions have the same space above and
+    below them.
+  */
+  --history-heading-gap: calc(3px + var(--page-title-offset));
+  --history-field-label-outset: 7px;
+
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 92dvw;
   margin-block: 0 60px;
   margin-inline: auto;
 }
 
+.historyResults {
+  margin-block-start: var(--history-control-gap);
+}
+
 .optionsRow {
+  --settings-control-margin: 0;
+
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: 1fr;
   align-items: center;
+  row-gap: var(--history-control-gap);
+  margin-block-end: var(--history-control-gap);
+}
+
+.toggleOptions {
+  --history-switch-hit-height: var(--switch-touch-height);
+  --history-switch-padding: calc((var(--history-switch-hit-height) - var(--switch-track-height)) / 2);
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 24px;
+}
+
+/* Keep the full touch target while spacing the visible track and wrapped text. */
+.toggleOptions :deep(.switch-label) {
+  padding-block: var(--history-switch-padding);
+  margin-block: calc(-1 * var(--history-switch-padding));
+}
+
+.toggleOptions :deep(.switch-label-text) {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--switch-track-height);
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .card {
+    --history-field-label-outset: 9px;
+  }
+
+  .toggleOptions {
+    --history-switch-hit-height: max(48px, var(--switch-touch-height));
+  }
 }
 
 @media only screen and (width <= 800px) {
   .optionsRow {
     /* Switch to 2 rows from 2 columns */
     grid-template-columns: auto;
-    grid-template-rows: auto auto;
+    grid-template-rows: auto;
     align-items: stretch;
+  }
+
+  .optionsRow > .sortSelect.contentSized {
+    inline-size: 100%;
   }
 }
 
@@ -25,8 +81,142 @@
   margin-inline-start: auto;
 }
 
+.sortSelect.outlined {
+  margin-block-start: var(--history-field-label-outset);
+}
+
+.headingRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-block-start: var(--page-title-offset);
+}
+
+.headingRow h2 {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.headingActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 8px;
+  margin-inline-start: auto;
+}
+
+@media only screen and (width <= 800px) {
+  .headingActions {
+    flex-basis: 100%;
+    margin-inline-start: 0;
+  }
+}
+
+.historySearch {
+  --input-bottom-spacing: 0;
+
+  margin-block: var(--history-control-gap);
+}
+
+.historySearch.outlined {
+  margin-block-start: calc(var(--history-control-gap) + var(--history-field-label-outset));
+}
+
+.headingRow + .historySearch {
+  margin-block-start: var(--history-heading-gap);
+}
+
+.headingRow + .historySearch.outlined {
+  margin-block-start: calc(var(--history-heading-gap) + var(--history-field-label-outset));
+}
+
+.historyActionButton {
+  min-inline-size: 0;
+  margin: 0;
+}
+
+.historyCompactActionLabel {
+  display: none;
+}
+
+@media only screen and (width <= 800px) {
+  .headingActions {
+    min-inline-size: 0;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .headingActions > .historyActionButton {
+    block-size: auto;
+    flex: 1 0 auto;
+    max-inline-size: 100%;
+    min-block-size: var(--phone-touch-target, 48px);
+  }
+
+  .historyFullActionLabel {
+    display: none;
+  }
+
+  .historyCompactActionLabel {
+    display: block;
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .headingActions :deep(svg) {
+    flex-shrink: 0;
+  }
+}
+
+@container route (width <= 220px) {
+  .headingActions {
+    flex-wrap: nowrap;
+    overflow-inline: auto;
+  }
+
+  .headingActions > .historyActionButton {
+    flex: 0 0 auto;
+    max-inline-size: none;
+  }
+}
+
+.cleanupPromptContent {
+  box-sizing: border-box;
+  inline-size: min(420px, 100%);
+  min-inline-size: 0;
+  margin-inline: auto;
+}
+
+.cleanupPromptContent p {
+  overflow-wrap: anywhere;
+}
+
+.cleanupPromptTitle {
+  text-align: center;
+}
+
+.cleanupPromptContent > :deep(.select),
+.cleanupPromptContent > :deep(.ft-input-component) {
+  inline-size: 100%;
+}
+
+.cleanupPromptContent > :deep(.ft-input-component) {
+  margin-block-start: 20px;
+}
+
+.cleanupWarning {
+  color: var(--tertiary-text-color);
+  font-size: 0.9rem;
+}
+
 .message {
   color: var(--tertiary-text-color);
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .headingIcon {
@@ -35,6 +225,94 @@
 
 @media only screen and (width <= 680px) {
   .card {
-    inline-size: 90%;
+    inline-size: 100%;
+  }
+}
+
+:global(.promptCard.fixedLayout.historyRepairPrompt) {
+  inline-size: min(520px, 100%);
+  block-size: auto;
+}
+
+.historyFilterToggleRow {
+  margin-block: var(--history-control-gap);
+}
+
+.historySearchOptions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--history-control-gap);
+  min-inline-size: 0;
+}
+
+.historySearchOptions > .toggleOptions {
+  flex: 1 1 100px;
+  min-inline-size: 0;
+}
+
+.historySearchOptions .toggleOptions :deep(.switch-ctn) {
+  inline-size: auto;
+}
+
+.historySearchOptions .toggleOptions :deep(.switch-label) {
+  inline-size: auto;
+}
+
+.historyFilterToggle {
+  justify-self: start;
+  margin: 0;
+  min-block-size: var(--phone-touch-target, 48px);
+}
+
+.historyFilterCard {
+  padding: var(--history-control-gap);
+  border-radius: var(--shape-corner-large-increased);
+  background-color: var(--secondary-card-bg-color);
+}
+
+.historyFilters {
+  --settings-control-margin: 0;
+  --input-bottom-spacing: 0;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr) auto;
+  align-items: center;
+  gap: var(--history-control-gap);
+  margin-block: var(--history-field-label-outset) 0;
+}
+
+.historyFilters > * {
+  min-inline-size: 0;
+  margin: 0;
+}
+
+.historyDateFilter,
+.historyChannelFilter {
+  inline-size: 100%;
+}
+
+.historyDateFilter {
+  color-scheme: var(--native-color-scheme, light);
+}
+
+.historyClearFilters {
+  min-block-size: var(--phone-touch-target, 48px);
+}
+
+.historyFilterError {
+  grid-column: 1 / -1;
+  color: var(--primary-text-color);
+}
+
+@media only screen and (width <= 1000px) {
+  .historyFilters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media only screen and (width <= 400px) {
+  .historyFilters {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

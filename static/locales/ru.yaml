@@ -39,6 +39,8 @@ Global:
     Comment Count: 1 комментарий | {count} комментариев
     Like Count: 1 лайк | {count} лайков
     Replies Remaining: "{' '}(остался 1) | {' '}(осталось {count})"
+  Ambient Mode: Режим амбиентной подсветки
+  New: Новое
 Search / Go to URL: 'Поиск / Перейти по адресу'
   # In Filter Button
 Search Filters:
@@ -247,7 +249,7 @@ Settings:
     Auto Load Next Page:
       Label: Авто-загрузка следующей страницы
       Tooltip: Автоматическая загрузка дополнительных страниц и комментариев.
-    Open Deep Links In New Window: Открыть URL-адреса, переданные в FreeTube, в новом окне
+    Open Deep Links In New Window: Открыть URL-адреса, переданные в OpenTubeX, в новом окне
     Minimize to system tray: Сворачивать в область уведомлений
   Theme Settings:
     Theme Settings: 'Внешний вид'
@@ -368,7 +370,7 @@ Settings:
     Expand Side Bar by Default: Расширить боковую панель
     Disable Smooth Scrolling: Отключить плавную прокрутку
     Hide Side Bar Labels: Скрыть надписи боковой панели
-    Hide FreeTube Header Logo: Скрыть значок FreeTube
+    Hide OpenTubeX Header Logo: Скрыть значок OpenTubeX
   Player Settings:
     Player Settings: 'Проигрыватель'
     Play Next Video: 'Автоматическое воспроизведение рекомендуемых видеороликов'
@@ -434,7 +436,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Подписки'
     Fetch Feeds from RSS: Загружать Ленты из RSS
-    Fetch Automatically: Автоматически загружать ленту
     Confirm Before Unsubscribing: Запрашивать подтверждение перед отпиской
 
     'Limit the number of videos displayed for each channel': Ограничить количество видео, отображаемых на каждом канале
@@ -483,7 +484,7 @@ Settings:
     Import History: Импортировать историю
     Export NewPipe: Экспортировать NewPipe
     Export YouTube: Экспортировать YouTube
-    Export FreeTube: Экспортировать FreeTube
+    Export OpenTubeX: Экспортировать OpenTubeX
     Export Subscriptions: Экспортировать подписки
     Import Subscriptions: Импортировать подписки
     Select Export Type: Выбрать тип экспорта
@@ -497,9 +498,9 @@ Settings:
     Playlist File: Файл плейлистов
     Subscription File: Файл подписок
     History File: Файл истории
-    Export Playlists For Older FreeTube Versions:
-      Label: Экспортировать подборки для старых выпусков FreeTube
-      Tooltip: "Эта настройка экспортирует видео из всех плейлистов в один с названием «Избранное».\nКак экспортировать и импортировать видео в плейлистах для старых версий FreeTube:\n1. Экспортируй свои плейлисты с этой включённой настройкой.\n 2. Удали все свои существующие плейлисты, используя настройку удаления всех плейлистов под разделом Настройки Конфиденциальности.\n3. Запусти старую версию Freetube и импортируй экспортированные ранее плейлисты."
+    Export Playlists For Older OpenTubeX Versions:
+      Label: Экспортировать подборки для старых выпусков OpenTubeX
+      Tooltip: "Эта настройка экспортирует видео из всех плейлистов в один с названием «Избранное».\nКак экспортировать и импортировать видео в плейлистах для старых версий OpenTubeX:\n1. Экспортируй свои плейлисты с этой включённой настройкой.\n 2. Удали все свои существующие плейлисты, используя настройку удаления всех плейлистов под разделом Настройки Конфиденциальности.\n3. Запусти старую версию OpenTubeX и импортируй экспортированные ранее плейлисты."
     Search history file: Файл истории поиска
     Search history: История поиска
     Import search history: Импортировать историю поиска
@@ -580,11 +581,11 @@ Settings:
     Ip: Ip
     Enable Tor / Proxy: Включить Tor/Прокси
     Proxy Settings: Прокси
-    Proxy Warning: FreeTube не имеет встроенного прокси, но может подключаться к внешнему прокси, например, к запущенному на вашей машине Tor или к внешнему прокси, например, SOCKS5, предоставляемому некоторыми VPN. Если он включен, убедитесь, что Ваш прокси/Tor настроен правильно, иначе FreeTube не сможет получить данные.
+    Proxy Warning: OpenTubeX не имеет встроенного прокси, но может подключаться к внешнему прокси, например, к запущенному на вашей машине Tor или к внешнему прокси, например, SOCKS5, предоставляемому некоторыми VPN. Если он включен, убедитесь, что Ваш прокси/Tor настроен правильно, иначе OpenTubeX не сможет получить данные.
     Proxy Username: Имя пользователя прокси
     Proxy Password: Пароль прокси
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: Уведомлять о пропущенном сегменте
+    Notify when sponsor segment is skipped: Показывать уведомление после пропуска сегмента
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': Адрес SponsorBlock API (По умолчанию https://sponsor.ajay.app)
     Enable SponsorBlock: Включить SponsorBlock
     SponsorBlock Settings: SponsorBlock
@@ -652,7 +653,7 @@ About:
   Website: Сайт
   Report a problem: Сообщить о проблеме
   FAQ: ЧАВО
-  FreeTube Wiki: Вики FreeTube
+  OpenTubeX Wiki: Вики OpenTubeX
   Help: Помощь
   GitHub releases: Релизы на GitHub
   Downloads / Changelog: Скачать / Список изменений
@@ -664,7 +665,7 @@ About:
   AGPLv3: Лицензия AGPLv3
   Licensed under the {licenseLink}: Лицензируется на условиях {licenseLink}
   Please read the {roomRulesLink}: Пожалуйста, прочтите {roomRulesLink}
-  FreeTube is made possible by {creditsPageLink}: FreeTube стал возможен благодаря {creditsPageLink}
+  OpenTubeX is made possible by {creditsPageLink}: OpenTubeX стал возможен благодаря {creditsPageLink}
 Channel:
   Subscribe: 'Подписаться'
   Unsubscribe: 'Отписаться'
@@ -676,6 +677,7 @@ Channel:
       Newest: 'Новым'
       Oldest: 'Старым'
       Most Popular: 'Самым популярным'
+    This channel does not currently have any videos: 'На этом канале в настоящее время нет видео'
     This channel has videos but none could be displayed, try fetching more: У этого канала есть видео, но ни одно не удалось отобразить, попробуйте загрузить больше
   Playlists:
     Playlists: 'Плейлисты'
@@ -700,13 +702,13 @@ Channel:
   This channel does not exist: Этого канала не существует
   This channel does not allow searching: Этот канал не позволяет выполнять поиск
   Channel Tabs: Вкладки каналов
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: Этот канал ограничен по возрасту и в настоящее время не может быть просмотрен во FreeTube.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Этот канал ограничен по возрасту и в настоящее время не может быть просмотрен во OpenTubeX.
   Posts:
     This channel currently does not have any posts: На этом канале в настоящее время нет никаких записей
     votes: 'Голосов: {votes}'
     Hide Answers: Скрыть ответы
     Reveal Answers: Раскрыть ответы
-    Video hidden by FreeTube: Видео скрыто FreeTube'ом
+    Video hidden by OpenTubeX: Видео скрыто OpenTubeX'ом
     Viewing Posts Only Supported By Invidious: Просмотр постов поддерживается только в Invidious. Перейдите на вкладку "Сообщество" канала, чтобы просматривать контент там без Invidious.
     View Full Post: Просмотреть полный пост
   Live:
@@ -769,14 +771,22 @@ Video:
   Video has been saved: Видео было добавлено в сохранённые
   Save Video: Добавить видео в сохранённые
   Sponsor Block category:
-    music offtopic: Сегмент без музыки
-    interaction: Напоминание
-    self-promotion: Самореклама
-    outro: Концовка
-    intro: Вступление
+    music offtopic: 'Музыка: Сегмент без музыки'
+    interaction: Напоминание о взаимодействии (подписка)
+    self-promotion: Безвозмездная или самореклама
+    outro: Конечная заставка/титры
+    intro: Пауза/интро
     sponsor: Спонсор
-    recap: Краткое содержание
-    filler: Отвлечение
+    recap: Предпросмотр/краткое содержание
+    filler: Отвлечённые темы/шутки
+    hook: Завязка/приветствие
+    highlight: Важное
+    exclusive access: Эксклюзивный доступ
+  Sponsor Block category short:
+    intro: Заставка
+    interaction: Напоминание о взаимодействии
+    music offtopic: Без музыки
+    filler: Отвлечённые темы
   External Player:
     Unsupported Actions:
       looping playlists: повторение плейлистов
@@ -816,7 +826,7 @@ Video:
       Volume: 'Громкость: {volumePercentage}%'
       Bandwidth: 'Пропускная способность: {bandwidth} кбит/с'
     You appear to be offline: Похоже, вы Оффлайн.
-    Skipped segment: Пропущен {segmentCategory} сегмент
+    Skipped segment: 'Пропущено: {segmentCategory}'
     Playback will resume automatically when your connection comes back: Воспроизведение будет возобновлено автоматически, когда соединение будет восстановлено.
     Audio Tracks: Аудиодорожки
     Theatre Mode: Широкий экран
@@ -829,21 +839,21 @@ Video:
     Autoplay is on: Автопроигрывание включено
     Autoplay is off: Автопроигрывание выключено
   IP block: YouTube заблокировал ваш IP-адрес для просмотра видео. Пожалуйста, попробуйте переключиться на другой VPN или прокси.
-  MembersOnly: Видео только для подписчиков нельзя смотреть на FreeTube, так как для них требуется вход в Google и платная подписка на автора канала.
+  MembersOnly: Видео только для подписчиков нельзя смотреть на OpenTubeX, так как для них требуется вход в Google и платная подписка на автора канала.
   Unlisted: Отсутствует в списках
-  AgeRestricted: Видео с возрастными ограничениями нельзя смотреть через FreeTube, так как для этого требуется вход в Google и использование подтвержденной учетной записи YouTube.
+  AgeRestricted: Видео с возрастными ограничениями нельзя смотреть через OpenTubeX, так как для этого требуется вход в Google и использование подтвержденной учетной записи YouTube.
   DeArrow:
-    Show Original Details: Показать стандартные свойства
-    Show Modified Details: Показать модифицированные свойства
+    Show Original Details: Показать изначальные сведения
+    Show Modified Details: Показать изменённые сведения
 #& Playlists
-  DRMProtected: Видео, защищенное DRM, не может быть воспроизведено в FreeTube, так как оно требует использования проприетарных компонентов с закрытым исходным кодом. Если вы хотите посмотреть это видео, пожалуйста, смотрите его на официальном сайте YouTube в веб-браузере с поддержкой DRM.
+  DRMProtected: Видео, защищенное DRM, не может быть воспроизведено в OpenTubeX, так как оно требует использования проприетарных компонентов с закрытым исходным кодом. Если вы хотите посмотреть это видео, пожалуйста, смотрите его на официальном сайте YouTube в веб-браузере с поддержкой DRM.
   Save Watched Progress: Сохранение прогресса просмотренного видео
   Watched Progress Saved: Прогресс просмотренного видео сохранён
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Оставшееся время preroll-рекламы: {remindingTimeSeconds} сек'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Оставшееся время задержки SABR: {remindingTimeSeconds} сек'
   Popout Live Chat: Вынести чат в отдельное окно
-  Private: Приватные видео нельзя смотреть в FreeTube, так как они требуют входа в Google и владения видео.
+  Private: Приватные видео нельзя смотреть в OpenTubeX, так как они требуют входа в Google и владения видео.
   Enable SponsorBlock on Channel: Включить SponsorBlock для канала
   Disable SponsorBlock on Channel: Отключить SponsorBlock для канала
   Collapse Playlist: Свернуть плейлист
@@ -921,7 +931,7 @@ Comments:
   Hearted: С сердечком
   Subscribed: Подписан(а)
   There are no comments available for this post: Для этой записи нет доступных комментариев
-  Hide Replies: Скрыть ответ | Скрыть ответы
+  Hide {replyCount} replies: Скрыть 1 ответ | Скрыть {replyCount} ответа(ов)
   View 1 reply from {channelName}: Смотреть 1 ответ от {channelName}
   View {replyCount} replies from {channelName} and others: Смотреть {replyCount} ответа(ов) от {channelName} и других
   Loading replies: Загрузка ответов...
@@ -993,16 +1003,15 @@ Version {versionNumber} is now available!  Click for more details: Версия 
 This video is unavailable because of missing formats. This can happen due to country unavailability.: Это видео недоступно из-за отсутствия форматов. Это может произойти из-за региональных ограничений.
 Tooltips:
   General Settings:
-    Thumbnail Preference: Все заставки на FreeTube будут заменены снимком из видео, размытым или скрытым, вместо заставки по умолчанию.
-    Invidious Instance: Экземпляр Invidious, к которому FreeTube будет подключаться для вызовов API. Изменения этой настройки применяются только к текущему окну, если только вы не сделаете этот экземпляр экземпляром по умолчанию.
-    Fallback to Non-Preferred Backend on Failure: Если у вашего предпочитаемого набора функций есть проблема, FreeTube автоматически попытается использовать ваш нежелательный набор функций в качестве запасного метода, если он включен.
-    Preferred API Backend: Выберите движок, который FreeTube будет использовать для получения данных. Локальный набор функций — это встроенный экстрактор. Набор функций Invidious требует подключения к серверу Invidious.
+    Thumbnail Preference: Все заставки на OpenTubeX будут заменены снимком из видео, размытым или скрытым, вместо заставки по умолчанию.
+    Invidious Instance: Экземпляр Invidious, к которому OpenTubeX будет подключаться для вызовов API. Изменения этой настройки применяются только к текущему окну, если только вы не сделаете этот экземпляр экземпляром по умолчанию.
+    Fallback to Non-Preferred Backend on Failure: Если у вашего предпочитаемого набора функций есть проблема, OpenTubeX автоматически попытается использовать ваш нежелательный набор функций в качестве запасного метода, если он включен.
+    Preferred API Backend: Выберите движок, который OpenTubeX будет использовать для получения данных. Локальный набор функций — это встроенный экстрактор. Набор функций Invidious требует подключения к серверу Invidious.
     Region for Trending: Регион трендов позволяет выбрать, в какой стране будут отображаться трендовые видео.
-    External Link Handling: "Выберите действие при нажатии на ссылку, которая не может быть открыта во FreeTube.\nПо умолчанию, FreeTube откроет ссылку в браузере по умолчанию.\n"
-    Open Deep Links In New Window: URL-адреса, передаваемые FreeTube, например, с помощью расширений браузера или аргументов командной строки, открываются в новом окне.
+    External Link Handling: "Выберите действие при нажатии на ссылку, которая не может быть открыта во OpenTubeX.\nПо умолчанию, OpenTubeX откроет ссылку в браузере по умолчанию.\n"
+    Open Deep Links In New Window: URL-адреса, передаваемые OpenTubeX, например, с помощью расширений браузера или аргументов командной строки, открываются в новом окне.
   Subscription Settings:
-    Fetch Feeds from RSS: Если эта настройка включена, FreeTube будет получать вашу ленту подписок с помощью RSS, вместо метода по умолчанию. RSS работает быстрее и предотвращает блокировку IP, но не предоставляет определённую информацию, такую как продолжительность видео , статус прямого эфира или публикации
-    Fetch Automatically: Если эта функция включена, FreeTube будет автоматически загружать ленту вашей подписки при запуске и при открытии нового окна.
+    Fetch Feeds from RSS: Если эта настройка включена, OpenTubeX будет получать вашу ленту подписок с помощью RSS, вместо метода по умолчанию. RSS работает быстрее и предотвращает блокировку IP, но не предоставляет определённую информацию, такую как продолжительность видео , статус прямого эфира или публикации
   Player Settings:
     Default Media Format: Устанавливает форматы, используемые при воспроизведении видео. Формат DASH может воспроизводить более высокое качество. Устаревшие форматы ограничены пределом в 360p, но используют меньшую пропускную способность. Звуковые форматы — только звуковые потоки.
     Proxy Videos Through Invidious: Будет подключаться к Invidious для показа видео вместо прямого подключения к YouTube.
@@ -1011,7 +1020,7 @@ Tooltips:
   External Player Settings:
     Custom External Player Arguments: Любые пользовательские аргументы командной строки, которые вы хотите передать внешнему проигрывателю.
     Ignore Warnings: Скрыть предупреждения, когда текущий внешний проигрыватель не поддерживает текущее действие (например, обратный порядок плейлистов и т.д.).
-    Custom External Player Executable: По умолчанию FreeTube будет считать, что выбранный внешний проигрыватель можно найти через переменную окружения PATH. При необходимости здесь можно задать собственный путь.
+    Custom External Player Executable: По умолчанию OpenTubeX будет считать, что выбранный внешний проигрыватель можно найти через переменную окружения PATH. При необходимости здесь можно задать собственный путь.
     External Player: При выборе внешнего проигрывателя на миниатюре появится значок, позволяющий открыть видео (плейлист, если поддерживается) во внешнем проигрывателе. Внимание, настройки Invidious не применяются ко внешним проигрывателям.
     DefaultCustomArgumentsTemplate: "(По умолчанию: '{defaultCustomArguments}')"
     Ignore Default Arguments: 'Не передавать никаких аргументов внешнему проигрывателю по умолчанию, кроме адреса видео (напр.: частота проигрывания, адрес плейлиста и т. д.). Пользовательские аргументы всё ещё будут передаваться.'
@@ -1161,6 +1170,35 @@ Autoplay Interruption Timer: Автоигра отменена из-за {autopl
 shortcutLabelSeparator: ｜
 Compact side navigation: Свернуть боковую панель
 Expand side navigation: Развернуть боковую панель
+New Tab: Новая вкладка
+Close Tab: Закрыть вкладку
+Close Confirmation:
+  Title: Выйти из OpenTubeX?
+  Message: Вы уверены что хотите выйти из OpenTubeX?
+  Quit: Выйти
+  Never Ask Again: Больше не спрашивать
+Use Vertical Tabs: Использовать вертикальные вкладки
+Use Horizontal Tabs: Использовать горизонтальные вкладки
+Find in page: Найти на странице
+Previous match: Предидущий результат
+Next match: Следующий результат
+Close find bar: Закрыть панель поиска
+No matches: Результатов не найдено
+Downloads:
+  Download: Скачать
+  Download Video: Скачать видео
+  Download Type: Формат скачивания
+  Custom yt-dlp Arguments: Пользовательские аргументы yt-dlp
+Stats:
+  Stats: Статистика
+  Today: Сегодня
+  This week: На этой неделе
+  Total watch time: Общее время просмотра
+  Daily average: Среднее по дням
+  So far today: За сегодня
+  Since: Начиная с
+  All recorded time: За все время
+  Per calendar day: За календарный день
 Screenshot Clipboard Success: Скриншот сохранён в буфер обмена
 Screenshot Clipboard Error: Не удалось скопировать скриншот в буфер обмена
 SponsorBlock Disabled on Channel: SponsorBlock отключён для канала {channel}

@@ -1,0 +1,2694 @@
+# Optional AI-generated translations for keys missing from ../nl.yaml.
+Color Picker:
+  Hue: Tint
+  Opacity: Ondoorzichtigheid
+  Backdrop Blur: Achtergrondvervaging
+  Hex Color: Hexkleur
+  Apply Color: Toepassen
+  Reset Color: Herstellen
+  Copy Color: Kopiëren
+  Copy From Another Color: Van een andere kleur kopiëren
+  Color Copied: Kleur gekopieerd
+  Invalid Color: Voer een geldige hexkleur in
+  Clipboard Unavailable: Klembord niet beschikbaar
+  Saturation and Brightness: Verzadiging en helderheid
+New Tab: Nieuw tabblad
+Maximize: Maximaliseren
+Restore: Herstellen
+Close Tab: Tabblad sluiten
+Close Confirmation:
+  Background Sync Warning: Als je afsluit, stopt het vernieuwen van abonnementen op de achtergrond.
+  Hide Window: Venster verbergen
+  Title: OpenTubeX afsluiten?
+  Message: Weet je zeker dat je OpenTubeX wilt afsluiten?
+  Quit: Afsluiten
+  Never Ask Again: Niet meer vragen
+Close Window Confirmation:
+  Title: Venster sluiten?
+  Message: Dit venster bevat {count} tabbladen. Weet je zeker dat je het wilt sluiten?
+  Close Window: Venster sluiten
+Confirmations:
+  Never Ask Again: Niet meer vragen
+  Settings Hint: Je kunt deze bevestiging weer inschakelen via Instellingen → Algemeen → Bevestigen vóór…
+Close Multiple Tabs Confirmation:
+  Title: Meerdere tabbladen sluiten?
+  Message: Hiermee worden {count} tabbladen gesloten.
+  Close Tabs: '{count} tabbladen sluiten'
+Load Multiple Tabs Confirmation:
+  Title: Meerdere tabbladen laden?
+  Message: Hiermee worden {count} tabbladen geladen.
+  Load Tabs: '{count} tabbladen laden'
+Unload Multiple Tabs Confirmation:
+  Title: Meerdere tabbladen uit het geheugen verwijderen?
+  Message: Hiermee worden {count} tabbladen uit het geheugen verwijderd.
+  Unload Tabs: '{count} tabbladen uit het geheugen verwijderen'
+Tabs Unloaded To Free Memory: Om geheugen vrij te maken, is {count} tabblad dat je recent niet hebt gebruikt uit het geheugen verwijderd | Om geheugen vrij te maken, zijn {count} tabbladen die je recent niet hebt gebruikt uit het geheugen verwijderd
+Use Vertical Tabs: Verticale tabbladen gebruiken
+Use Horizontal Tabs: Horizontale tabbladen gebruiken
+Resize Tab Bar: Grootte van tabbladbalk aanpassen
+Find in page: Zoeken op pagina
+Previous match: Vorige overeenkomst
+Next match: Volgende overeenkomst
+Close find bar: Zoekbalk sluiten
+No matches: Geen overeenkomsten
+Version {versionNumber} is now available.: Versie {versionNumber} is nu beschikbaar.
+See changes and update: Wijzigingen bekijken en bijwerken
+Dismiss: Negeren
+Update to {version}: Bijwerken naar {version}
+Global:
+  Ambient Mode: Sfeermodus
+  Loading More: Meer laden
+  New: Nieuw
+Search Listing:
+  Label:
+    Members Only: Alleen voor leden
+    Possibly AI-generated: Mogelijk door AI gegenereerd
+Stats:
+  Left of daily limit: "Nog {duration} over van je daglimiet van {limit}"
+  Daily limit reached: "Daglimiet van {limit} bereikt"
+  Replace old device: "Oud apparaat vervangen"
+  Replacement explanation: "Combineer {device} alleen met dit apparaat als beide vermeldingen bij hetzelfde fysieke apparaat horen."
+  Overlapping days: "Dagen in beide geschiedenissen: {count}"
+  Overlapping watch time: "Overlappende kijktijd"
+  Keep larger daily total: "Grootste dagtotaal behouden"
+  Larger total explanation: "Voor dubbele geschiedenissen. Kan extra kijktijd op dezelfde dag missen."
+  Add daily totals: "Dagtotalen optellen"
+  Add totals explanation: "Voor afzonderlijke geschiedenissen. Kan dubbele kijktijd twee keer tellen."
+  Replacement preservation: "Dagen die slechts in één geschiedenis staan blijven behouden. De oorspronkelijke geschiedenissen blijven opgeslagen in versleutelde synchronisatie."
+  Combined watch time: "Gecombineerde kijktijd"
+  Replacement changed: "De kijktijd is gewijzigd. Sluit dit voorbeeld en open het opnieuw om de nieuwe totalen te bekijken."
+  Replacement success: "Apparaatstatistieken gecombineerd"
+  All devices: Alle apparaten
+  Stats: Statistieken
+  Watch time summary: Overzicht van kijktijd
+  Today: Vandaag
+  This week: Deze week
+  Total watch time: Totale kijktijd
+  Daily average: Dagelijks gemiddelde
+  So far today: Tot nu toe vandaag
+  Since: Sinds {day}
+  All recorded time: Alle geregistreerde tijd
+  Per calendar day: Per kalenderdag
+  Day by day: Per dag
+  Highest: 'Hoogste: {duration}'
+  Week by week: Per week
+  Last 14 days: Afgelopen 14 dagen
+  Last 8 weeks: Afgelopen 8 weken
+  Daily chart aria: Dagelijkse kijktijd van de afgelopen 14 dagen
+  Weekly chart aria: Wekelijkse kijktijd van de afgelopen 8 weken
+  No data: Je kijktijd verschijnt hier zodra je video's bekijkt.
+  Estimate note: De kijktijd van vóór deze update is geschat op basis van je opgeslagen afspeelvoortgang.
+  Adjust imported watch time: Geïmporteerde kijktijd aanpassen
+  Imported watch time: Geïmporteerde kijktijd
+  Imported watch time explanation: Kies de afspeelsnelheid die je meestal gebruikte. De duur van geïmporteerde video's wordt door deze snelheid gedeeld om te schatten hoelang je daadwerkelijk hebt gekeken.
+  Playback speed: Afspeelsnelheid
+  Channel speed note: Indien beschikbaar worden in plaats daarvan opgeslagen afspeelsnelheden per kanaal gebruikt.
+  Apply playback speed: Afspeelsnelheid toepassen
+  Imported watch time adjusted: Geïmporteerde kijktijd is aangepast
+  Reset statistics: Statistieken wissen
+  Reset: Wissen
+  Reset confirmation: Weet je zeker dat je alle kijkstatistieken wilt wissen? Dit kan niet ongedaan worden gemaakt.
+  Reset success: Kijkstatistieken zijn gewist
+  Less than a minute: < 1 min
+  Minutes: '{minutes} min'
+  Hours: '{hours} uur'
+  Hours and minutes: '{hours} uur {minutes} min'
+Home Page:
+  Keep disabled and hide this section: "Uitgeschakeld houden en deze sectie verbergen"
+  Familiar description: "Geef voorrang aan onbekeken video’s van kanalen die je al leuk vindt."
+  Balanced description: "Combineer vertrouwde kanalen met nieuwe die bij je interesses passen."
+  Explore description: "Geef meer ruimte aan nieuwe kanalen die aansluiten bij je interesses."
+  Turn off recommendations: Aanbevelingen uitschakelen
+  Recommended for you: "Aanbevolen voor jou"
+  Recommendations description: "Rangschik video's op je apparaat op basis van je kijkgeschiedenis. Kanaal-ID's en zoekopdrachten op onderwerp worden naar de gekozen backend gestuurd om video's te vinden."
+  Enable recommendations: "Aanbevelingen inschakelen"
+  Recommendations need history: "Bekijk enkele video's met de geschiedenis ingeschakeld om aanbevelingen te krijgen."
+  No recommendations: "Geen aanbevelingen gevonden. Probeer te vernieuwen nadat je meer video's hebt bekeken."
+  Recommendations unavailable: "Kan aanbevelingen niet laden. Probeer het later opnieuw."
+  More like this: "Meer zoals dit"
+  Not interested: "Niet geïnteresseerd"
+  Hide this channel: "Dit kanaal verbergen"
+  Channel hidden: "{channel} verborgen uit aanbevelingen"
+  Reset recommendations: "Aanbevelingen resetten"
+  Discovery: "Ontdekken"
+  Familiar: "Vertrouwd"
+  Balanced: "Evenwichtig"
+  Explore: "Verkennen"
+  Related to: "Gerelateerd aan {title}"
+  More from: "Meer van {channel}"
+  Matches interest: "Past bij je interesse in {topic}"
+  Related discovery privacy: "Ook video-ID’s worden verstuurd om gerelateerde video’s te vinden."
+  Home: Start
+  Description: Ga verder waar je gebleven was en bekijk recente activiteit.
+  Customize: Startpagina aanpassen
+  Done: Gereed
+  Customize description: Kies welke secties worden weergegeven en zet ze in de gewenste volgorde.
+  Continue watching: Verder kijken
+  New since last visit: Nieuw sinds het laatste bezoek
+  Watch queue: Wachtrij
+  Recent playlists: Recente afspeellijsten
+  Recent downloads: Recente downloads
+  Upcoming reminders: Aankomende herinneringen
+  Watch statistics: Kijkstatistieken
+  View all: Alles bekijken
+  Previous shelf page: Vorige pagina van {section}
+  Next shelf page: Volgende pagina van {section}
+  Shelf page status: "{section}, pagina {page} van {total}."
+  Move section up: Verplaats {section} omhoog
+  Move section down: Verplaats {section} omlaag
+  Section moved: "{section} verplaatst naar positie {position} van {total}."
+  Nothing here yet: Nog niets te zien
+  Empty description: Video's die je start, afspeellijsten die je gebruikt, downloads en herinneringen verschijnen hier.
+  All sections hidden: Alle secties zijn verborgen
+  All sections hidden description: Pas de startpagina aan om weer een sectie te tonen.
+Subscriptions:
+  New video from {channel}: Nieuwe video van {channel}
+  New short from {channel}: Nieuwe Short van {channel}
+  '{channel} is live': "{channel} is live"
+  New post from {channel}: Nieuwe post van {channel}
+  Mark As Unseen: Markeren als ongezien
+  Copy Error Details: "Technische details kopiëren"
+  Refresh Errors: "Kanalen die niet konden worden vernieuwd: {channels}. Klik om details te bekijken."
+  Refresh Error Channels More: "{channels} en nog {count} | {channels} en nog {count}"
+  Never show {type} from this channel in feeds again: Nooit meer {type} van dit kanaal in feeds tonen
+  Refreshing Subscription Videos: Abonnementsvideo's vernieuwen
+  Refreshing Subscription Shorts: Shorts van abonnementen vernieuwen
+  Refreshing Subscription Live Streams: Livestreams van abonnementen vernieuwen
+  Refreshing Subscription Posts: Berichten van abonnementen vernieuwen
+  New Content: Nieuwe content
+  New Feed Refresh Warning Title: Alle abonnementsfeeds vernieuwen?
+  New Feed Refresh Warning: Alle contenttypen zonder RSS vernieuwen voor 1 abonnement kan lang duren. Wil je doorgaan? | Alle contenttypen zonder RSS vernieuwen voor {count} abonnementen kan lang duren. Wil je doorgaan?
+  New Since Last Refresh: Nieuw sinds de laatste vernieuwing
+  Mark As Seen: Markeren als gezien
+  Mark All as Seen: Alles markeren als gezien
+  No New Content: Er is geen nieuwe content.
+  New Content Tabs: Tabbladen voor nieuwe content
+  Show Tabbed View: Weergave met tabbladen tonen
+  Show Combined View: Gecombineerde weergave tonen
+  Newest First: Nieuwste eerst
+  Oldest First: Oudste eerst
+  Posts:
+    RSS Message: YouTube biedt geen RSS-feeds voor berichten. Schakel de instelling "{rssSetting}" uit om berichten te bekijken of schakel de instelling "{hideSetting}" in om dit tabblad te verbergen.
+  RSS Feeds:
+    Refreshing: RSS-feeds vernieuwen
+    Tab: RSS
+    Followed Feeds: Gevolgde RSS-feeds
+    Add Feed: Feed toevoegen
+    Feed URL: URL van RSS- of Atom-feed
+    Remove Feed: '{feed} verwijderen'
+    Invalid Feed URL: Voer een webadres in dat begint met http:// of https://.
+    Feed Already Followed: Je volgt deze feed al.
+    Feed Could Not Be Loaded: De feed kan niet worden geladen. Controleer of het adres naar een RSS- of Atom-feed verwijst.
+    Feed Requires Browser Check: Deze site vraagt om een browsercontrole die OpenTubeX niet kan voltooien. Probeer een ander adres of een andere RSSHub-instantie voor deze feed.
+    Refresh Errors: 1 feed kan niet worden vernieuwd. | {count} feeds kunnen niet worden vernieuwd.
+    Description: Voeg een RSS- of Atom-feed toe om makers op andere platforms te volgen. {rssHub}-instanties bieden feeds voor veel sites, zoals Twitch.
+    Empty Items: Je feeds bevatten momenteel geen items.
+    No Feeds: Je volgt nog geen RSS-feeds.
+    RSSHub:
+      Browse: RSSHub doorbladeren
+      Title: Feed toevoegen vanuit RSSHub
+      Description: Kies een RSSHub-instantie, een dienst en wat je wilt volgen. Het feedadres wordt voor je gemaakt.
+      Instance: RSSHub-instantie
+      Service: Dienst
+      Search Services: Diensten zoeken
+      Loading Services: Diensten laden…
+      Services Could Not Be Loaded: Deze instantie heeft haar diensten niet teruggegeven. Controleer het adres of kies een andere instantie.
+      Feed Type: Feedtype
+      Requires Configuration: Deze feed heeft extra instellingen op de instantie nodig en werkt mogelijk niet op openbare instanties.
+      Optional Parameter: '{parameter} (optioneel)'
+      Not Set: Niet ingesteld
+    Retry Feed: '{feed} opnieuw proberen'
+Trending:
+  Music: Muziek
+  Load Error: Trending kan niet worden geladen.
+  Unsupported Backend: Voor Trending is de Local API vereist. Selecteer de Local API of schakel terugvallen op een andere backend in.
+Most Popular Feed Empty: De feed Populairst van deze Invidious-instantie is leeg.
+Feed:
+  Cancel Refresh: Vernieuwen annuleren
+  Next Auto Refresh: 'Volgende automatische vernieuwing: {date}'
+User Playlists:
+  Refresh Saved Playlists: 'Opgeslagen afspeellijsten vernieuwen'
+  Saved Playlists Refresh Failed: 'Sommige opgeslagen afspeellijsten konden niet worden vernieuwd.'
+  Save: "Opslaan"
+  Edit: "Bewerken"
+  This playlist is private or does not exist.: "Deze afspeellijst is privé of bestaat niet."
+  Pin to Navigation: "Vastmaken aan navigatie"
+  Unpin from Navigation: "Losmaken van navigatie"
+  Pin to Top: "Bovenaan vastzetten"
+  Unpin from Top: "Bovenaan losmaken"
+  Pinned to Top: "Bovenaan vastgezet"
+  Reorder Hint: Sleep of gebruik de pijltjestoetsen om de volgorde te wijzigen
+  Add new videos to the top (custom order): "Nieuwe video’s bovenaan toevoegen (aangepaste volgorde)"
+  Shuffle videos by default: "Video’s standaard in willekeurige volgorde afspelen"
+  Repair Playlists: Afspeellijsten herstellen
+  Repair Description: Herstel ontbrekende videogegevens na het importeren van een YouTube Takeout-ZIP. De volgorde van video's in afspeellijsten blijft gelijk.
+  Remove Unavailable Videos: "Verwijder niet-beschikbare video's"
+  Remove Unavailable Videos Confirmation: "Niet-beschikbare video's verwijderen? Gevonden: {count}. Kon niet controleren: {uncertain}. Niet-gecontroleerde video's worden bewaard."
+  Add Missing Videos: "Ontbrekende video’s uit de bronafspeellijst toevoegen"
+  Source Playlist: "Bronafspeellijst"
+  Save Playlist: "Afspeellijst opslaan"
+  Remove Saved Playlist: "Opgeslagen afspeellijst verwijderen"
+  Load More Playlists: Meer afspeellijsten laden
+  Save to: Opslaan in…
+  Move Video to the Top: Video bovenaan zetten
+  Move Video to the Bottom: Video onderaan zetten
+  Quick Bookmark Icon: Pictogram voor snelle bladwijzer
+  Custom Emoji: Aangepaste emoji
+  Choose Image: Afbeelding kiezen
+  Use Bookmark Icon: Bladwijzerpictogram gebruiken
+  SinglePlaylistView:
+    Retry: Opnieuw proberen
+    This playlist could not be loaded.: Deze afspeellijst kan niet worden geladen.
+    More videos could not be loaded.: Er kunnen geen video's meer worden geladen.
+  Playlist Thumbnail: "Afspeellijstminiatuur"
+  Restore Default Thumbnail: "Standaardminiatuur herstellen"
+  AddVideoPrompt:
+    And N more videos: 'en nog {count} video | en nog {count} video’s'
+  Move Up: Omhoog
+  Move Down: Omlaag
+  Remove: Verwijderen
+  Background Tasks:
+    Loading videos from {playlistName}: 'Video''s uit {playlistName} laden'
+    Adding missing videos to {playlistName}: 'Ontbrekende video''s toevoegen aan {playlistName}'
+    Checking {playlistName} for unavailable videos: '{playlistName} controleren op niet-beschikbare video''s ({checked}/{total})'
+History:
+  From Date: 'Van'
+  To Date: 'Tot'
+  Channel Filter: 'Kanaal'
+  All Channels: 'Alle kanalen'
+  Clear Filters: 'Filters wissen'
+  Invalid Date Range: 'De begindatum moet vóór of op de einddatum liggen.'
+  Empty Filter Message: 'Geen video''s in je geschiedenis komen overeen met deze filters.'
+  Repair Compact: "Herstellen"
+  Mark All Watched Compact: "Alles bekeken"
+  Repair Use Cookies: "Geconfigureerde yt-dlp-cookies gebruiken"
+  Repair Cookies Hint: "Meer dan 500 video's moeten worden gecontroleerd. Configureer cookies in de yt-dlp-instellingen en schakel ze hier in om de kans op verzoekbeperking te verkleinen."
+  Repair Description: "Gebruik dit na het importeren van de geschiedenis, of wanneer videogegevens ontbreken of video's onterecht als LIVE worden aangeduid."
+  Repair Details: "Vult ontbrekende titels, kanalen en publicatiedatums aan en controleert speelduur en LIVE-aanduidingen. Je kijkvoortgang en bekeken-status blijven ongewijzigd."
+  Repair Notice: "Een grote geschiedenis kan even duren. Mislukte verzoeken worden automatisch opnieuw geprobeerd. Verwijderde of privévideo's kunnen onvolledig blijven."
+  Start Repair: "Herstel starten"
+  Repair Checking: "Videogegevens controleren"
+  Repair Waiting: "Wachten op YouTube. Het herstel wordt automatisch hervat."
+  Repair Retrying: "Mislukte verzoeken opnieuw proberen"
+  Repair Finished: "Herstel voltooid"
+  Repair Stopped: "Herstel gestopt"
+  Repair: "Geschiedenis herstellen"
+  Repair Progress: "Gecontroleerd {checked}/{total} · Hersteld {repaired} · Mislukt {failed}"
+  Mark All As Watched: Alles markeren als bekeken
+  Mark All As Watched Confirmation: Weet je zeker dat je alle video's in je geschiedenis als bekeken wilt markeren?
+  All History Marked as Watched: Alle video's in je geschiedenis zijn als bekeken gemarkeerd
+  Select History Age: Kies hoe oud een item moet zijn voordat het wordt verwijderd.
+  Delete Entries Older Than: Items verwijderen die ouder zijn dan
+  Number of Days: Aantal dagen
+  History Cleanup Warning: Hiermee worden overeenkomende items uit de kijkgeschiedenis definitief verwijderd.
+  1 Day: 1 dag
+  1 Week: 1 week
+  1 Month: 1 maand
+  3 Months: 3 maanden
+  1 Year: 1 jaar
+  All Time: Altijd
+  Custom: Aangepast
+  History Older Than Days Removed: Kijkgeschiedenis ouder dan 1 dag is verwijderd | Kijkgeschiedenis ouder dan {days} dagen is verwijderd
+Settings:
+  Diagnostics:
+    Diagnostics: Diagnostiek
+    Description: Zolang het diagnoselogboek is ingeschakeld, bewaart OpenTubeX recente logberichten in het geheugen zodat je ze aan bugrapporten kunt toevoegen. Het slaat ze nooit uit zichzelf op en verstuurt ze nooit, en als je het logboek uitschakelt, worden ze verwijderd. Rapporten laten cookies, tokens, IP-adressen en URL-parameters weg, maar kunnen ID's bevatten van video's die je hebt afgespeeld, dus controleer een rapport voordat je het deelt.
+    Enable Logging: Diagnoselogboek inschakelen
+    Copy Report: Rapport kopiëren
+    Save Report: Rapport opslaan
+    Clear Log: Log wissen
+    Report Copied: Diagnoserapport gekopieerd
+    Report Saved: Diagnoserapport opgeslagen
+    Report File: Diagnoserapport
+    Save Failed: Kan het diagnoserapport niet opslaan
+    Log Cleared Message: Diagnoselog gewist
+  Tab Unloading:
+    Automatically unload tabs: "Tabbladen automatisch ontladen"
+    Memory threshold: "Geheugendrempel"
+    Tabs to unload: "Te ontladen tabbladen"
+    Automatic unloading help: "Ontlaad de oudste achtergrondtabbladen om geheugen vrij te maken. Actieve en afspelende tabbladen blijven geladen."
+    Memory threshold help: "Percentage van de geheugenlimiet van de renderer, niet van het totale systeemgeheugen."
+  Password Settings:
+    Failed to Save Password: "Wachtwoord opslaan mislukt."
+    Confirm Password: "Wachtwoord bevestigen"
+    Passwords Do Not Match: "De wachtwoorden komen niet overeen."
+  Navigation and Controls: "Navigatie en bediening"
+  Control Bar:
+    Title: "Bedieningsbalk"
+    Customize: "Bedieningsbalk aanpassen"
+    Hidden: "Verborgen"
+    Empty: "Geen bedieningselementen"
+    Move to Control Bar: "{control} naar de bedieningsbalk verplaatsen"
+    Move to Player Menu: "{control} naar het spelermenu verplaatsen"
+    Hide: "{control} verbergen"
+  Fullscreen Actions:
+    Recommended Videos: "Aanbevolen video’s"
+    Title: "Acties op volledig scherm"
+    Customize: "Acties op volledig scherm aanpassen"
+    Add Action: "Actie toevoegen"
+    Empty: "Geen acties op volledig scherm geselecteerd"
+    Quick Bookmark: "Snelle bladwijzer"
+    Availability Hint: "Acties verschijnen alleen bij video’s waarop ze van toepassing zijn."
+    Disabled: "(uitgeschakeld)"
+  Quick Settings:
+    Quick Settings: Snelle instellingen
+    Customize Quick Settings: Snelle instellingen aanpassen
+    Add Setting: Instelling toevoegen
+    Appearance: Uiterlijk
+    Playback: Afspelen
+    Content: Content
+    Language and Region: Taal en regio
+    All Settings: Alle instellingen
+    Profile Selector Hint: Je kunt ook met de rechtermuisknop op het profielpictogram klikken om van profiel te wisselen
+    Profile Selector Touch Hint: Je kunt ook lang op het profielpictogram drukken om van profiel te wisselen
+  Categories:
+    General Description: Taal, opstarten, tabbladen en vertaling
+    Appearance: Uiterlijk
+    Appearance Description: Thema, indeling, navigatie en videolijsten
+    Content appearance: Videolijsten en miniaturen
+    Layout: Indeling
+    Playback Description: Standaardinstellingen van de speler, ondertiteling en instellingen per kanaal
+    Subscriptions Description: Feeds vernieuwen, meldingen over nieuwe video's en RSS-feeds
+    Downloads Description: Downloadmap, sjablonen en automatische downloads
+    Focus: Focus
+    Focus Description: Verborgen inhoud, kijklimieten, herinneringen en ouderlijk toezicht
+    Add-ons: Add-ons
+    Add-ons Description: SponsorBlock, DeArrow, dislikes, AiSList en voice-oververtaling
+    Privacy Description: Geschiedenis, zoeksuggesties, links en app-wachtwoord
+    Online activity: Onlineactiviteit
+    Data And Storage Description: Back-ups, importeren en exporteren, schijfgebruik en opschonen
+    Sync Description: Account op de synchronisatieserver, apparaten koppelen en gesynchroniseerde gegevens
+    Advanced: Geavanceerd
+    Advanced Description: Back-ends, buffering, externe hulpmiddelen, proxy en diagnostiek
+    Alternative providers: Providers voor video en metadata
+  Highlight Changed Settings: Instellingen markeren die afwijken van de standaardwaarden
+  Reset Setting to Default: Deze instelling terugzetten op de standaardwaarde
+  Performance Impact:
+    Show Performance Impact: Indicatoren voor invloed op prestaties tonen
+    Moderate: Gemiddelde invloed
+    High: Grote invloed
+    Description: Deze instelling kan het gebruik van {resources} verhogen
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: geheugen
+      Network: netwerk
+      Disk: schijf
+  General Settings:
+    Link Underlines:
+      Link Underlines: "Onderstreping van links"
+      On Hover: "Links onderstrepen bij aanwijzen"
+      Never: "Links nooit onderstrepen"
+      Always: "Links altijd onderstrepen"
+    Limit Titles to Two Lines: "Titels beperken tot twee regels"
+    Close Window With Last Tab: 'Venster sluiten bij het sluiten van het laatste tabblad'
+    Preferred Video Codec: Voorkeursvideocodec
+    Always Use Backup Media Server: "Altijd de back-upmediaserver gebruiken"
+    Automatically switch stream extraction methods: "Automatisch wisselen van streamextractiemethode"
+    Enable Tabs: "Tabbladen inschakelen"
+    Thumbnail Swipe Gestures:
+      Left: Naar links vegen op miniaturen
+      Right: Naar rechts vegen op miniaturen
+      Description: Veeg horizontaal over een videominiatuur en laat los om de geselecteerde actie uit te voeren.
+    Data Saver Thumbnails: "Databesparende miniaturen"
+    Use tray icon: "Systeemvakpictogram gebruiken"
+    Close to system tray: "Sluiten naar systeemvak"
+    Tray required for background refresh: "Het systeemvakpictogram is vereist zolang het vernieuwen van abonnementen op de achtergrond is ingeschakeld."
+    Show Video Menu Button: Videomenuknop tonen
+    Swipe to refresh: Vegen om te vernieuwen
+    Blur Thumbnails: Miniaturen vervagen
+    Navigation:
+      Always Show Navigation Bar: Navigatiebalk altijd tonen wanneer deze onderaan staat
+      Compact Tab Labels: Compacte navigatiebalk wanneer deze onderaan staat
+      Show Active Subscriptions: Actieve abonnementen in de zijbalk tonen
+      Navigation: Navigatie
+      Customize Navigation: Navigatie aanpassen
+      Add Item: Item toevoegen
+    Date Format: Datumnotatie
+    Time Format: Tijdnotatie
+    Language Default: Standaard voor taal
+    Update Relative Timestamps: Relatieve tijdsaanduidingen blijven bijwerken
+    Stream Extraction Method:
+      Stream Extraction Method: Methode voor stream-extractie
+      yt-dlp: yt-dlp
+      Built-in: Ingebouwd
+    Confirm Before: Bevestigen vóór…
+    Confirmation Options:
+      Closing App: OpenTubeX afsluiten
+      Closing Window: Een venster met meerdere tabbladen sluiten
+      Closing Tabs: Meerdere tabbladen sluiten
+      Loading Tabs: Meerdere tabbladen laden
+      Unloading Tabs: Meerdere tabbladen uit het geheugen verwijderen
+    Remember Tab Navigation History: Navigatiegeschiedenis van tabbladen onthouden
+    New Tab Position:
+      New Tab Position: Positie van nieuw tabblad
+      At the end: Aan het einde
+      After current tab: Na het huidige tabblad
+      After current tab in opened order: Na het huidige tabblad, in volgorde van openen
+    Tab Close Focus:
+      Last active tab: "Laatst actieve tabblad"
+      Next tab in tab order: "Volgend tabblad in de tabbladvolgorde"
+      Previous tab in tab order: "Vorig tabblad in de tabbladvolgorde"
+      Tab Close Focus: Na het sluiten van het actieve tabblad
+    Startup Behavior:
+      Startup Behavior: Bij het opstarten
+      Load all tabs: Alle tabbladen laden
+      Load previously loaded tabs: Eerder geladen tabbladen laden
+      Load last active tab: Laatst actieve tabblad laden
+      Start with an empty session: Met een lege sessie beginnen
+      Load landing page, keep other tabs unloaded: Startpagina laden, andere tabbladen ongeladen houden
+    Use AI Translation Completions: Ontbrekende vertalingen aanvullen met door AI gegenereerde vertalingen
+    Reduced Motion:
+      Reduced Motion: Minder beweging
+      System: Systeem
+      Force On: Altijd aan
+      Force Off: Altijd uit
+    Comment Translation:
+      Title: Reacties vertalen
+      Enable: Vertaling van reacties inschakelen
+      Never Translate: Reacties nooit vertalen uit het
+      Choose Language: Kies een taal
+      Description: Reacties in de taal van de app zijn al uitgesloten. Voeg andere talen toe die je kunt lezen.
+      Remove Language: Reacties in het {language} weer vertalen
+    Avoid translation:
+      Avoid translation: Onvertaalde videotekst verkiezen
+      Disabled: Uitgeschakeld
+      Watch Only: Alleen video-interface
+      Entire App: Hele app
+    Playlist View Type:
+      Playlist View Type: Weergavetype voor afspeellijsten
+    Show Thumbnail Previews: Voorbeelden van miniaturen tonen
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: Extra actieknop op miniaturen
+      None: Geen
+      Mark as Watched: Markeren als bekeken
+      Copy YouTube Link: YouTube-link kopiëren
+      Open in YouTube: Openen in YouTube
+    Mobile Layout:
+      Mobile Layout: 'Mobiele indeling'
+      Automatic: 'Automatisch'
+      Phone: 'Telefoon'
+      Tablet: 'Tablet'
+    Video View Type:
+      Full Width: Volledige breedte
+    Grid Columns:
+      Grid Columns: Rasterkolommen
+      Playlist Grid Columns: Rasterkolommen voor afspeellijsten
+      Auto: Automatisch
+    Preferred API Backend:
+      Yattee Server: Yattee-server
+    Yattee Server:
+      Server URL: URL van Yattee-server
+      Username: Gebruikersnaam
+      Password: Wachtwoord
+      Proxy Videos: Video's via de Yattee-server afspelen
+      Test Connection: Verbinding testen
+      Testing: Verbinding testen…
+      Connected: Verbonden met Yattee Server {version}
+      Errors:
+        Invalid URL: Voer de URL van de server in, beginnend met https:// of http://.
+        Unreachable: Kan de server niet bereiken. Controleer de URL en of de server actief is.
+        Media not allowed: 'Verbonden, maar de server staat niet toe dat deze app video''s laadt. Stel CORS_ORIGINS={origins} in bij de omgevingsvariabelen van de server.'
+        Not a Yattee server: De server reageerde, maar het is geen Yattee-server.
+        Credentials required: De server vereist een gebruikersnaam en wachtwoord.
+        Invalid credentials: De server heeft de gebruikersnaam of het wachtwoord geweigerd.
+        Rate limited: De server blokkeert aanmeldingen na te veel mislukte pogingen. Probeer het later opnieuw.
+        Server error: De server gaf een fout terug (HTTP {status}).
+    Notifications:
+      Notifications: Meldingen
+      System and In-App: Systeem en in de app
+      System Only: Alleen systeem
+      Off: Uit
+    Auto Load Next Page:
+      Lists Tooltip: Extra pagina's van feeds, zoekresultaten en andere lijsten automatisch laden.
+    Auto Load Comments:
+      Label: Opmerkingen automatisch laden
+      Tooltip: Opmerkingen laden wanneer de pagina opent en meer opmerkingen laden terwijl je scrolt.
+  Context Menu Search Settings:
+    Context Menu Search Settings: Zoeken via contextmenu
+    Description: Kies welke zoekmachines verschijnen wanneer je met de rechtermuisknop op geselecteerde tekst klikt. Zoekopdrachten worden in je standaardbrowser geopend.
+    Icon Hint: Als je een zoekmachine inschakelt, wordt de website benaderd om het favicon te laden.
+    Engine Name: Naam van zoekmachine
+    Search URL: Zoek-URL
+    URL Hint: Gebruik %s op de plaats waar de URL de gecodeerde geselecteerde tekst moet bevatten.
+    Add Custom Engine: Aangepaste zoekmachine toevoegen
+    Add Engine: Zoekmachine toevoegen
+    Remove Engine: '{engine} verwijderen'
+    Invalid Engine: Voer een naam en een geldige HTTP- of HTTPS-zoek-URL met %s in.
+    Engine Limit: Je kunt maximaal {count} aangepaste zoekmachines toevoegen.
+  Theme Settings:
+    Theme and Colors: "Thema en kleuren"
+    Font Size: Lettergrootte
+    Sections:
+      Interface: "Interface"
+      Side Bar and Header: "Zijbalk en koptekst"
+      Tabs: "Tabbladen"
+      Player: "Speler"
+      Scrolling: "Scrollen"
+      Notifications: "Meldingen"
+    Only Show Important Notifications: Alleen belangrijke meldingen tonen
+    Visible Search Suggestions: "Zichtbare zoeksuggesties"
+    Material Accent Color: "Material-accentkleur"
+    Tally Accent Color: "Tally-accentkleur"
+    Material Wallpaper Colors: "Kleuren van de achtergrondafbeelding"
+    Material System Accent Color: "Systeemaccentkleur"
+    Tab Loading Indicator:
+      Tab Loading Indicator: Laadindicator voor tabbladen
+      Bar: Balk
+      Dot: Stip (klassiek)
+    Compact Settings Categories: "Compacte instellingencategorieën"
+    Playlist Thumbnail Size: "Grootte van afspeellijstminiaturen"
+    Compact Mobile Mini Player: "Compacte mobiele minispeler"
+    Always Show Mobile Search Bar: "Mobiele zoekbalk altijd tonen"
+    Frosted Glass Player UI: "Spelerinterface met matglaseffect"
+    Main Color Theme:
+      Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Rozenwater"
+      Catppuccin Macchiato Flamingo: "Catppuccin Macchiato Flamingo"
+      Catppuccin Macchiato Pink: "Catppuccin Macchiato Roze"
+      Catppuccin Macchiato Mauve: "Catppuccin Macchiato Mauve"
+      Catppuccin Macchiato Red: "Catppuccin Macchiato Rood"
+      Catppuccin Macchiato Maroon: "Catppuccin Macchiato kastanjebruin"
+      Catppuccin Macchiato Peach: "Catppuccin Macchiato Perzik"
+      Catppuccin Macchiato Yellow: "Catppuccin Macchiato Geel"
+      Catppuccin Macchiato Green: "Catppuccin Macchiato Groen"
+      Catppuccin Macchiato Teal: "Catppuccin Macchiato blauwgroen"
+      Catppuccin Macchiato Sky: "Catppuccin Macchiato Hemel"
+      Catppuccin Macchiato Sapphire: "Catppuccin Macchiato Saffier"
+      Catppuccin Macchiato Blue: "Catppuccin Macchiato Blauw"
+      Catppuccin Macchiato Lavender: "Catppuccin Macchiato Lavendel"
+    Move Downloads to App Header: Downloads naar appkop verplaatsen
+    Move Settings to App Header: Instellingen naar appkop verplaatsen
+    Hide Side Bar on Watch Pages: Zijbalk op kijkpagina's verbergen
+    UI Roundness: Afronding van interface
+    Scrollbar Width: Breedte van schuifbalk
+    Scroll Speed: Scrollsnelheid
+    Animation Speed: Animatiesnelheid
+    Thumbnail Size: Grootte van miniaturen
+    Show Tab Icons: Tabbladpictogrammen tonen
+    Load Missing Tab Icons: Ontbrekende tabbladpictogrammen laden
+    Loading Missing Tab Icons: Ontbrekende tabbladpictogrammen laden…
+    No Missing Tab Icons: Alle ondersteunde tabbladpictogrammen zijn al geladen
+    Loaded Tab Icons: 'Ontbrekend tabbladpictogram geladen: {count} | Ontbrekende tabbladpictogrammen geladen: {count}'
+    Loaded Tab Icons With Failures: '{loaded} tabbladpictogrammen geladen; {failed} konden niet worden geladen'
+    Show Tab Previews: Voorbeelden van tabbladen tonen
+    Use Fixed Tab Width: Vaste tabbladbreedte gebruiken in horizontale modus
+    Use Custom Title Bar: Aangepaste titelbalk gebruiken
+    Tab Width: Tabbladbreedte
+    Vertical Tab Height: Hoogte van verticale tabbladen
+    Tab Layout:
+      Tab Layout: Tabbladindeling
+      Horizontal Top: Horizontaal bovenaan
+      Horizontal Bottom: Horizontaal onderaan
+      Vertical Left: Verticaal links
+      Vertical Right: Verticaal rechts
+    Show Toast Timeout Indicator: Aftelindicator in meldingen tonen
+    Use Grid Player Menu: Rasterindeling voor spelermenu gebruiken
+    Show Progress as Notification: Voortgang als melding tonen
+    Operation in Progress: Bewerking wordt uitgevoerd
+    Toast Position:
+      Test Toast: Testmelding
+      Toast Position: Positie van meldingen
+      Bottom Left: Linksonder
+      Bottom Center: Middenonder
+      Bottom Right: Rechtsonder
+      Top Left: Linksboven
+      Top Center: Middenboven
+      Top Right: Rechtsboven
+    Icon Pack:
+      Icon Pack: Pictogrampakket
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: Lettertype van app
+      System Default: Systeemstandaard
+      Unable to Load: Geïnstalleerde systeemlettertypen kunnen niet worden geladen
+      Bundled Fonts: Meegeleverde lettertypen
+      System Fonts: Systeemlettertypen
+    Always Show Scrollbars: Schuifbalken altijd tonen
+    Base Theme:
+      Material Light: "Material Licht"
+      Material Dark: "Material Donker"
+      Material Black: "Material Zwart"
+      Dynamic colors: Dynamische kleuren
+      Tokyo Night Night: Tokyo Night Night
+      Tokyo Night Storm: Tokyo Night Storm
+      Tokyo Night Moon: Tokyo Night Moon
+      Tokyo Night Day: Tokyo Night Day
+      Rosé Pine: Rosé Pine
+      Rosé Pine Moon: Rosé Pine Moon
+      Rosé Pine Dawn: Rosé Pine Dawn
+      Kanagawa Wave: Kanagawa Wave
+      Kanagawa Dragon: Kanagawa Dragon
+      Kanagawa Lotus: Kanagawa Lotus
+      Ayu Dark: Ayu Dark
+      Ayu Mirage: Ayu Mirage
+      Ayu Light: Ayu Light
+      One Dark: One Dark
+      Carbonfox: Carbonfox
+      Catppuccin Macchiato: Catppuccin Macchiato
+      Tally Light: "Tally Licht"
+      Tally Dark: "Tally Donker"
+      Custom: Aangepast
+      Built-in Themes: "Ingebouwde thema's"
+      Custom Themes: "Aangepaste thema's"
+    Light Theme: Licht thema
+    Dark Theme: Donker thema
+    Custom Theme:
+      Share Restrictions Prompt: "Beschrijvingen mogen maximaal 500 tekens bevatten, inclusief Markdown. Alleen links en afbeeldingen die op GitHub worden gehost zijn toegestaan, ook rechtstreekse uploads hier. De bot verwijdert externe links en afbeeldingen, kort lange beschrijvingen in en plaatst een reactie met uitleg over de wijzigingen."
+      Import from Clipboard: "Importeren uit het klembord"
+      Invalid Clipboard Theme: "Het klembord bevat geen geldig thema. Kopieer de JSON van het thema en probeer het opnieuw."
+      Create Custom Theme: Aangepast thema maken
+      Edit Custom Theme: Aangepast thema bewerken
+      Custom Theme Creator: Editor voor aangepaste thema's
+      Theme Name: Themanaam
+      Based On: Gebaseerd op
+      Import Theme: Thema importeren
+      Export Theme: Thema exporteren
+      Share Theme: Thema delen
+      Share Description Prompt: Beschrijf het thema en wat gebruikers moeten weten voordat ze het gebruiken.
+      Share Screenshots Prompt: "Sleep een of meer schermafbeeldingen hierheen. Laat dit gedeelte leeg zodat de bot drie voorbeelden toevoegt met voorbeeldinhoud, zonder je persoonlijke gegevens."
+      Delete Theme: Thema verwijderen
+      Delete Theme Confirmation: “{name}” verwijderen? Dit kan niet ongedaan worden gemaakt.
+      Save and Apply: Opslaan en toepassen
+      Discard Changes: Wijzigingen negeren
+      Reset Colors: Terugzetten naar basisthema
+      Theme File: OpenTubeX-themabestand
+      Theme Saved: Aangepast thema opgeslagen en toegepast
+      Theme Imported: Thema in de editor geïmporteerd
+      Theme Exported: Thema geëxporteerd
+      Theme Deleted: Aangepast thema verwijderd
+      Unable to Load: Aangepast thema kan niet worden geladen
+      Unable to Save: Aangepast thema kan niet worden opgeslagen
+      Unable to Export: Aangepast thema kan niet worden geëxporteerd
+      Unable to Share: Aangepast thema kan niet worden gedeeld
+      Unable to Delete: Aangepast thema kan niet worden verwijderd
+      Invalid Theme File: Ongeldig bestand voor aangepast thema
+      Colors:
+        Watched thumbnail overlay: "Overlay op miniaturen van bekeken video's"
+        Thumbnail badge background: "Achtergrond van labels op miniaturen"
+        Main text: Hoofdtekst
+        Secondary text: Secundaire tekst
+        Subtle text: Subtiele tekst
+        Borders and dividers: Randen en scheidingslijnen
+        Subtle surfaces and indicators: Subtiele vlakken en indicatoren
+        Title text: Titeltekst
+        Selected text background: Achtergrond van geselecteerde tekst
+        Selected text: Geselecteerde tekst
+        Logo icon: Logopictogram
+        Logo text: Logotekst
+        Logo hover: Logo bij aanwijzen
+        Logo pressed: Logo bij indrukken
+        Page background: Pagina-achtergrond
+        Card background: Kaartachtergrond
+        Secondary card background: Secundaire kaartachtergrond
+        Favorite icon: Favorietenpictogram
+        Error color: Foutkleur
+        Scrollbar thumb: Schuifbalkgreep
+        Scrollbar thumb hover: Schuifbalkgreep bij aanwijzen
+        Scrollbar thumb pressed: Schuifbalkgreep bij indrukken
+        Dropdown item hover text: Tekst van keuzelijstitem bij aanwijzen
+        Dropdown item hover background: Achtergrond van keuzelijstitem bij aanwijzen
+        Navigation and panel background: Achtergrond van navigatie en panelen
+        Neutral item hover and focus background: Achtergrond van neutraal item bij aanwijzen en focus
+        Neutral item hover and focus text and icons: Tekst en pictogrammen van neutraal item bij aanwijzen en focus
+        Neutral item pressed background: Achtergrond van ingedrukt neutraal item
+        Neutral item pressed text and icons: Tekst en pictogrammen van ingedrukt neutraal item
+        Header button hover and focus background: Achtergrond van kopknop bij aanwijzen en focus
+        Header button hover and focus text and icons: Tekst en pictogrammen van kopknop bij aanwijzen en focus
+        Header button pressed background: Achtergrond van ingedrukte kopknop
+        Header button pressed text and icons: Tekst en pictogrammen van ingedrukte kopknop
+        Search and dropdown background: Achtergrond van zoeken en keuzelijsten
+        Settings search background: Achtergrond van zoeken in instellingen
+        Instance menu: Instantiemenu
+        Shadow color: Schaduwkleur
+        Primary controls and highlights: Primaire bediening en markeringen
+        Primary control hover and focus: Primaire bediening bij aanwijzen en focus
+        Primary control pressed: Primaire bediening bij indrukken
+        Text and icons on primary controls: Tekst en pictogrammen op primaire bediening
+        Secondary controls and highlights: Secundaire bediening en markeringen
+        Secondary control hover and focus: Secundaire bediening bij aanwijzen en focus
+        Secondary control pressed: Secundaire bediening bij indrukken
+        Light secondary color: Lichte secundaire kleur
+        Visited accent: Accent voor bezocht item
+        Text and icons on secondary controls: Tekst en pictogrammen op secundaire bediening
+        Links: Links
+        Visited links: Bezochte links
+        Destructive action: Verwijderactie
+        Destructive hover and focus: Verwijderactie bij aanwijzen en focus
+        Destructive pressed: Verwijderactie bij indrukken
+        Text and icons on destructive actions: Tekst en pictogrammen bij verwijderacties
+  Player Settings:
+    Rewind on Resume: "Terugspoelen bij hervatten"
+    Minimum Pause Before Rewinding: "Minimale pauze voor terugspoelen"
+    Mono Audio: 'Mono-audio'
+    Show Mono Audio Toggle: 'Schakelaar voor mono-audio tonen'
+    Default Media Format:
+      Default Media Format: 'Standaardmediaformaat'
+    Pause on Stream Recovery: "Pauzeren bij streamherstel"
+    Buffering:
+      Buffering: Buffering
+      Description: Kies hoeveel van de video de speler vooraf laadt en geladen houdt.
+      Buffer Ahead Hint: Meer buffer vooruit houdt het afspelen gaande bij langere verbindingsonderbrekingen, maar downloadt video die je misschien niet bekijkt.
+      Rewind Buffer Hint: Een grotere terugspoelbuffer laat je terugspringen zonder opnieuw te downloaden, maar gebruikt meer geheugen.
+      Buffer Before Playing Hint: Wachten op meer video vóór het afspelen voorkomt herhaaldelijk haperen bij instabiele verbindingen, maar video’s starten langzamer en gaan na het spoelen later verder.
+      Preset: Bufferingvoorinstelling
+      Presets:
+        Data Saver: Databesparing
+        Default: Standaard
+        Smooth Playback: Vloeiend afspelen
+        Custom: Aangepast
+      Buffer Ahead: Buffer vooruit
+      Buffer Ahead Tooltip: 'Hoe ver voorbij de huidige positie wordt geladen. Bij hoge kwaliteiten kunnen geheugenlimieten zeer hoge waarden beperken. Standaard: {value}'
+      Rewind Buffer: Terugspoelbuffer
+      Rewind Buffer Tooltip: 'Hoeveel van de al bekeken video geladen blijft. Standaard: {value}'
+      Buffer Before Playing: Buffer vóór afspelen
+      Buffer Before Playing Tooltip: 'Hoeveel van de video geladen moet zijn voordat het afspelen begint, of na haperen verdergaat. Standaard: {value}'
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Maximale kwaliteit op netwerken met datalimiet"
+      No Limit: "Geen limiet"
+      Tooltip: "Op mobiele data en andere netwerken met een datalimiet starten video's in deze kwaliteit of lager. Je kunt in de speler nog steeds een hogere kwaliteit kiezen."
+    Show Music Mode Toggle: "Schakelaar voor muziekmodus tonen"
+    Enable DLNA Casting: "DLNA-casting inschakelen"
+    Skip Unavailable Playlist Videos: "Niet-beschikbare video's in afspeellijsten overslaan"
+    Lights Off: Lichten uit
+    Show Lights Off Toggle: Schakelaar voor 'Lichten uit' tonen
+    Show Volume Boost Toggle: "Schakelaar voor volumeversterking tonen"
+    Swipe Gestures:
+      Fullscreen Brightness: Maximale helderheid op volledig scherm
+      Left: Vegen aan de linkerkant
+      Right: Vegen aan de rechterkant
+      Disabled: Uitgeschakeld
+      Brightness: Helderheid
+      Volume: Volume
+      Hint: Veeg in volledig scherm omhoog of omlaag aan een zijkant van de video.
+      Unavailable: De afspeelbediening kon niet worden aangepast.
+    yt-dlp Streaming: "yt-dlp-streaming"
+    Continue Playback When Screen Is Locked: 'Doorgaan met afspelen wanneer het scherm is vergrendeld'
+    Music Visualizer: Muziekvisualisatie
+    Automatically Open Chapters: Hoofdstukken automatisch openen
+    Caption Appearance:
+      Caption Appearance: Uiterlijk van ondertiteling
+      Captions: Ondertiteling
+      Preferred Language: Voorkeurstaal voor ondertiteling
+      Application Language: Taal van de app
+      Enable Translations: Vertaling van ondertiteling inschakelen
+      Text Color: Tekstkleur
+      Background Color: Achtergrondkleur
+      Background Opacity: Ondoorzichtigheid van achtergrond
+      Font Size: Lettergrootte
+      Anchor:
+        Anchor: Uitlijning
+        Top Left: Linksboven
+        Top Center: Middenboven
+        Top Right: Rechtsboven
+        Bottom Left: Linksonder
+        Bottom Center: Middenonder
+        Bottom Right: Rechtsonder
+        Center Left: Midden links
+        Center: Midden
+        Center Right: Midden rechts
+      Edge Style:
+        Edge Style: Randstijl
+        None: Geen
+        Outline: Contour
+        Drop Shadow: Slagschaduw
+        Raised: Verhoogd
+        Depressed: Verlaagd
+      Reset: Uiterlijk van ondertiteling herstellen
+      Default: Standaard
+      Text Opacity: Ondoorzichtigheid van lettertype
+      Font Family:
+        Font Family: Lettertypegroep
+        Monospaced Serif: Serif met gelijke tekenbreedte
+        Proportional Serif: Proportionele serif
+        Monospaced Sans-Serif: Sans-serif met gelijke tekenbreedte
+        Proportional Sans-Serif: Proportionele sans-serif
+      Colors:
+        White: Wit
+        Yellow: Geel
+        Green: Groen
+        Cyan: Cyaan
+        Blue: Blauw
+        Magenta: Magenta
+        Red: Rood
+        Black: Zwart
+    Default Viewing Mode:
+      Full Window (Always On): Volledig venster (altijd aan)
+      Full Screen (Always On): Volledig scherm (altijd aan)
+      Tooltip: De meeste standaardweergavemodi worden alleen aan het begin van elke kijksessie toegepast. Wijzigingen tijdens de sessie blijven actief tot de sessie eindigt. Modi die altijd aanstaan worden telkens toegepast wanneer je naar een nieuwe video gaat, ongeacht wijzigingen in de weergavemodus bij de vorige video.
+    Auto Picture in Picture:
+      Auto Picture in Picture: Beeld-in-beeld automatisch inschakelen
+      On Tab Change: Bij wisselen van tabblad
+      On Window Minimize: Bij minimaliseren van venster
+      On Window Hide: Wanneer het venster de focus verliest of je naar een ander venster gaat
+      Wayland Minimize Unsupported: Wayland meldt het minimaliseren van vensters niet aan apps, waardoor deze trigger niet beschikbaar is. Gebruik in plaats daarvan "Wanneer het venster de focus verliest of je naar een ander venster gaat". Dit geldt ook voor minimaliseren.
+      On Tab Change Mini Player: Bij wisselen van tabblad verschijnt in plaats daarvan de minispeler. Stel ‘Bij het verlaten van een video’ in op ‘Afspelen stoppen’ om dit te gebruiken.
+    Scroll Mini Player:
+      Scroll Mini Player: Minispeler tijdens scrollen
+      Scroll Player Mode: Bij omlaag scrollen
+      Scroll Player Mode Tooltip: De speler wordt alleen vastgezet zolang die hoogstens de helft van de vensterhoogte inneemt. Anders, zoals op telefoons in liggende stand of in brede vensters, wordt in plaats daarvan de minispeler getoond.
+      Scroll Player Modes:
+        Mini: Minispeler tonen
+        Pin: Speler bovenaan vastzetten als er ruimte is
+        Off: Meescrollen met de pagina
+      Leaving Video: Bij het verlaten van een video
+      Leaving Video Modes:
+        Keep Playing: Blijven afspelen in een minispeler
+        Stop: Afspelen stoppen
+    Multiply Seek Interval by Playback Rate: Zoekinterval vermenigvuldigen met afspeelsnelheid
+    Show Playback Rate Adjusted Timestamp: Tijdsaanduiding aangepast aan afspeelsnelheid tonen
+    Use YouTube-style Shorts: Shorts in YouTube-stijl gebruiken
+    Loop Shorts: Shorts herhalen
+    Remember Volume: Volume onthouden
+    Skip Silence: Stiltes overslaan
+    Show Skip Silence Toggle: Schakelaar voor stiltes overslaan tonen
+    Enable Skip Silence by Default: Stiltes standaard overslaan
+    Enable Video Zoom: Videozoom inschakelen
+    Enable Seek History: Spoelgeschiedenis inschakelen
+    Show Seek Bar Filmstrip: "Filmstrip van zoekbalk tonen"
+    Voice-over Translation:
+      Title: Voice-oververtaling
+      Attribution: (mogelijk gemaakt door Yandex)
+      Enable: Voice-oververtaling inschakelen
+      Prepare in Background: Voice-oververtalingen op de achtergrond voorbereiden
+      Background Preparation Tooltip: Stuurt de ID, duur en geselecteerde taal van de huidige video naar de vertaaldienst zodra een ondersteunde video wordt geladen.
+      Language: Taal voor voice-oververtaling
+      Supported Source Languages: 'Ondersteunde brontalen: Russisch, Engels, Chinees, Koreaans, Arabisch, Frans, Italiaans, Spaans, Duits en Japans.'
+      Voice Volume: Volume van vertaalde stem
+      Original Volume: Volume van oorspronkelijke audio
+      Russian: Russisch
+      English: Engels
+      Kazakh: Kazachs
+    Hold to Double Playback Speed: Ingedrukt houden voor dubbele afspeelsnelheid
+    Use Quick Playback Speed Bar: Balk voor snelle afspeelsnelheid gebruiken
+    Customize Quick Playback Speed Bar: Balk voor snelle afspeelsnelheid aanpassen
+    Quick Playback Speed Bar Manager: Balk voor snelle afspeelsnelheid
+    Add Playback Speed: Afspeelsnelheid toevoegen
+    Reset Quick Playback Speed Bar: Standaardwaarden herstellen
+    Playback Speed Name: Naam
+    Edit Playback Speed Name: Naam van afspeelsnelheid bewerken
+    Use Automatic Playback Speed Name: Automatische naam voor afspeelsnelheid gebruiken
+    Reorder Playback Speed: Sleep om afspeelsnelheid te verplaatsen
+    Playback Speed: Afspeelsnelheid
+    Parallel Segment Loading: Segmenten parallel laden
+    Screenshot:
+      Mode: Schermafbeeldingsmodus
+      Modes:
+        Save To Folder: Opslaan in map
+        Clipboard: Naar klembord kopiëren
+      Legacy Formats: "Oudere formaten"
+      Modern Formats: "Moderne formaten"
+    Rotate Wide Videos to Landscape in Fullscreen: 'Brede video’s liggend draaien in volledig scherm'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Veeg omhoog of omlaag om volledig scherm te openen of te sluiten'
+    Preload Upcoming Videos: "Volgende video’s vooraf laden"
+    Upcoming Videos to Preload: "Aantal vooraf te laden video’s"
+    Concurrent Preloads: "Gelijktijdige voorladingen"
+    Ignore System Rotation Lock for Fullscreen: Negeer de rotatievergrendeling van het systeem voor volledig scherm
+    Swipe Left or Right to Seek in Fullscreen: Veeg naar links of rechts om te spoelen op volledig scherm
+    Show Swipe to Seek Preview: Voorbeeld tonen bij vegen om te spoelen
+    Enable Google Cast: "Google Cast inschakelen"
+    Sections:
+      Playback: Afspelen
+      Autoplay: Automatisch afspelen
+      Playback Speed: Afspeelsnelheid
+      Player Controls: Spelerbediening
+      Gestures: Gebaren
+      Viewing Modes: Weergavemodi
+      Shorts: Shorts
+      Screenshots: Schermafbeeldingen
+    Enable FCast: "FCast inschakelen"
+  Channel Settings:
+    Channel Settings: Kanaalinstellingen
+    Channel Settings Description: Onthoud de instellingen die je tijdens het kijken kiest afzonderlijk voor elk kanaal, zodat ze weer worden toegepast wanneer je een andere video van dat kanaal bekijkt.
+    Enable Channel Playback Settings: Afspeelinstellingen per kanaal inschakelen
+    Auto Save Playback Speed: Wijzigingen in afspeelsnelheid automatisch opslaan
+    Auto Save Video Quality: Wijzigingen in videokwaliteit automatisch opslaan
+    Auto Save Subtitles State: Wijzigingen in ondertitelingsstatus automatisch opslaan
+    Auto Save Volume: Wijzigingen in volume automatisch opslaan
+    Manage Saved Channels: Opgeslagen kanalen beheren ({channelCount})
+    Saved Channels: Opgeslagen kanaalinstellingen
+    Enable Saved Channel Settings Sync: Opgeslagen kanaalinstellingen synchroniseren
+    Disable Saved Channel Settings Sync: Synchronisatie van opgeslagen kanaalinstellingen stoppen
+    Search Channels: Kanalen zoeken
+    No Saved Channels: Er zijn nog geen kanaalspecifieke instellingen opgeslagen
+    No Matching Channels: Geen kanalen komen overeen met je zoekopdracht
+    Forget Channel: Alle instellingen voor dit kanaal vergeten
+    Forget Value: Deze instelling vergeten
+    Add Setting: Nog een instelling voor dit kanaal onthouden
+    Add Subscribed Channel: Geabonneerd kanaal toevoegen
+    Video Quality: Videokwaliteit
+    Subtitles Enabled: Ondertiteling ingeschakeld
+    Volume: Volume
+  Download Settings:
+    Download Settings: Downloads
+    Enable Downloads: Downloads inschakelen
+    Managed Tools Download Started Template: 'Vereiste externe software niet gevonden: {tools}. Beheerde exemplaren downloaden…'
+    Managed Tools Download Finished Template: Downloaden van {tools} voltooid
+    Managed Tools Update Started Template: Er is een update voor {tools} gevonden. Downloaden…
+    Managed Tools Update Finished Template: Bijwerken van {tools} voltooid
+    Managed Tools Update Available Template: Er is een update voor {tools} beschikbaar.
+    Managed Tools Update Source Notice: "OpenTubeX downloadt deze rechtstreeks van GitHub, dus F-Droid en andere appwinkels controleren deze niet."
+    Update Managed Tools: Bijwerken
+    Managed Tools Download Error Template: 'De beheerde hulpprogramma''s kunnen niet worden gedownload: {errors}'
+    Download Folder: Downloadmap
+    Global Additional yt-dlp Arguments: Extra yt-dlp-argumenten
+    Concurrent Downloads: Gelijktijdige downloads
+    Bandwidth Limit: Bandbreedtelimiet (KiB/s)
+    Download Templates: Downloadsjablonen
+    Manage Download Templates: Downloadsjablonen beheren ({templateCount})
+    New Template: Nieuw sjabloon
+    Template Source: Sjabloon om te bewerken of als basis te gebruiken
+    Built-in Template: '{name} (ingebouwd)'
+    Custom Template Name: '{name} (aangepast)'
+    Create Template Copy: Kopie maken
+    Template Copy Name: 'Kopie van {name}'
+    Automatic Downloads: Automatische downloads
+    Manage Automatic Downloads: Automatische downloads beheren ({channelCount})
+    Automatic Downloads Description: Selecteer een downloadsjabloon en filters voor elk kanaal waarop je bent geabonneerd. Overeenkomende video's worden op de achtergrond gedownload wanneer abonnementsfeeds worden vernieuwd.
+    Automatic Downloads New Only: Als je een kanaal inschakelt, wordt begonnen met de eerstvolgende nieuwe upload. Bestaande video's en oudere kanaalvideo's worden niet gedownload.
+    Automatic Downloads No Channels: Abonneer je op een kanaal voordat je automatische downloads instelt.
+    No Matching Automatic Download Channels: Geen kanalen komen overeen met je zoekopdracht.
+    Automatic Downloads Livestreams: Livestreams
+    Minimum Duration Seconds: Minimale duur (seconden)
+    Maximum Duration Seconds: Maximale duur (seconden)
+    Minimum File Size MB: Minimale bestandsgrootte (MB)
+    Maximum File Size MB: Maximale bestandsgrootte (MB)
+    Maximum Age Days: Maximale leeftijd (dagen)
+    Title Includes: Titel bevat
+    Title Excludes: Titel bevat niet
+    Title Filter Hint: Scheid meerdere titeltermen met komma's. Een video moet ten minste één opgenomen term bevatten en geen enkele uitgesloten term.
+    Automatic Downloads Require Unmetered Network: "Alleen op netwerken zonder datalimiet"
+    Automatic Downloads Require Charging: "Alleen tijdens opladen"
+  External Software Settings:
+    Create YouTube session: "YouTube-sessie maken"
+    YouTube session hint: "Log indien nodig in en sla de sessie op. Kies in de instellingen of je deze voor downloads, afspelen of ondertitels wilt gebruiken."
+    Use cookies for downloads: "Cookies gebruiken voor downloads"
+    YouTube session failed: "De YouTube-sessie kon niet worden opgeslagen."
+    Checking FFmpeg and FFprobe: FFmpeg/FFprobe controleren…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe zijn nog niet gedownload. Klik op de knop hieronder om ze te downloaden.
+    External Software Settings: Externe software
+    yt-dlp Source: yt-dlp-bron
+    yt-dlp Channel: yt-dlp-kanaal
+    Sources:
+      System: Systeem (PATH of aangepast pad)
+      Managed: Beheerd door OpenTubeX
+    Detected Version Template: 'Gedetecteerde yt-dlp-versie: {version}'
+    Managed Not Downloaded: yt-dlp is nog niet gedownload. Klik op de knop hieronder om het te downloaden.
+    System yt-dlp Missing Warning: yt-dlp is niet op je systeem gevonden. Installeer het, stel hieronder een aangepast pad in of wijzig de bron in "Beheerd door OpenTubeX".
+    Download yt-dlp: yt-dlp downloaden
+    Update yt-dlp: yt-dlp bijwerken
+    Checking yt-dlp: yt-dlp controleren…
+    Downloading yt-dlp: yt-dlp downloaden…
+    yt-dlp Downloaded Template: yt-dlp {version} is gedownload
+    yt-dlp Download Error Template: 'Downloaden van yt-dlp mislukt: {error}'
+    FFmpeg Source: FFmpeg-bron
+    Detected FFmpeg Version Template: 'Gedetecteerde FFmpeg-versie: {version}'
+    Detected FFmpeg and FFprobe Version Template: 'Gedetecteerde FFmpeg/FFprobe-versie: {version}'
+    FFmpeg Managed Not Downloaded: FFmpeg is nog niet gedownload. Klik op de knop hieronder om het te downloaden.
+    System FFmpeg Missing Warning: FFmpeg is niet op je systeem gevonden. Het is vereist om video en audio samen te voegen en audio te converteren. Installeer het, stel hieronder een aangepast pad in of wijzig de bron in "Beheerd door OpenTubeX".
+    Download FFmpeg: FFmpeg downloaden
+    Update FFmpeg: FFmpeg bijwerken
+    Checking FFmpeg: FFmpeg controleren…
+    Downloading FFmpeg: FFmpeg downloaden…
+    FFmpeg Downloaded Template: FFmpeg {version} is gedownload
+    FFmpeg Download Error Template: 'Downloaden van FFmpeg mislukt: {error}'
+    Detected FFprobe Version Template: 'Gedetecteerde FFprobe-versie: {version}'
+    FFprobe Managed Not Downloaded: FFprobe is nog niet gedownload. Klik op de knop hieronder om het samen met FFmpeg te downloaden.
+    System FFprobe Missing Warning: FFprobe is niet op je systeem gevonden. Het is vereist om media tijdens de nabewerking te inspecteren. Installeer het naast FFmpeg of wijzig de bron in "Beheerd door OpenTubeX".
+    Checking FFprobe: FFprobe controleren…
+    Download FFmpeg and FFprobe: FFmpeg en FFprobe downloaden
+    Update FFmpeg and FFprobe: FFmpeg en FFprobe bijwerken
+    Downloading FFmpeg and FFprobe: FFmpeg en FFprobe downloaden…
+    FFmpeg and FFprobe Downloaded Template: FFmpeg en FFprobe {version} zijn gedownload
+    FFmpeg and FFprobe Download Error Template: 'Downloaden van FFmpeg en FFprobe mislukt: {error}'
+    Managed Tool Already Current Template: '{tool} {version} is al bijgewerkt'
+    Managed Tool Errors:
+      Removed: 'Het gedownloade bestand is verwijderd, waarschijnlijk door antivirussoftware'
+      Unusable: 'Het gedownloade programma kon niet worden uitgevoerd. Antivirussoftware blokkeert het mogelijk, of het ondersteunt dit systeem niet'
+      Release Not Found: 'Kan de nieuwste release niet vinden'
+      Verification Failed: 'De download kon niet worden geverifieerd als officiële release'
+      Downgrade: 'De gedownloade release is ouder dan de geïnstalleerde'
+      Invalid Archive: 'Het gedownloade archief is ongeldig'
+      Rollback Failed: 'De update is mislukt en de vorige versie kon niet volledig worden hersteld'
+    Managed Tool Updates: Updates voor beheerde hulpprogramma's
+    Update Modes:
+      Automatic: Automatisch bijwerken
+      Ask: Vragen vóór het bijwerken
+      Manual: Alleen handmatig bijwerken
+    yt-dlp Executable Path: Uitvoerbaar yt-dlp-bestand
+    FFmpeg Executable Path: Uitvoerbaar FFmpeg-bestand
+    Restricted Playback Authentication: "yt-dlp-cookies"
+    Cookie Source: Cookiebron
+    Cookie Sources:
+      None: Geen
+      File: Bestand
+      Browser: Browser
+    Cookie File: Cookiebestand
+    Browser for Cookies: Browser voor cookies
+    Browser Profile: Browserprofiel (optioneel)
+    Browser Profile Placeholder: Profielnaam of pad
+    Browser Profile Invalid: "Voer een profielnaam in of kies een profielmap met de mapknop."
+    Select Browser: Selecteer een browser
+    Always Use Cookies: Cookies altijd gebruiken
+    Restricted Playback Authentication Hint: OpenTubeX geeft deze cookies standaard pas aan yt-dlp door nadat je bij een video met een leeftijdsbeperking of een video voor leden hebt gekozen voor "Proberen met ingestelde cookies".
+    Restricted Playback Authentication Warning: Als je yt-dlp met een Google-account gebruikt, kan je account tijdelijk of permanent worden beperkt.
+    Use cookies for subtitles: "Cookies gebruiken voor ondertitels"
+  Privacy Settings:
+    Internet Connectivity Checks: "Internetverbinding controleren"
+    Internet Connectivity Checks Tooltip: "Stuurt kleine verzoeken naar een server gehost door GrapheneOS om internettoegang te controleren."
+    Automatic History Retention: Geschiedenis automatisch bewaren (dagen)
+    Automatic History Retention Placeholder: Leeg laten om onbeperkt te bewaren
+    Automatic History Retention Tooltip: Laat dit leeg om de geschiedenis onbeperkt te bewaren. Als je een getal opslaat, worden oudere items nu en automatisch verwijderd zolang de app geopend is.
+    Automatic Search History Retention: Zoekgeschiedenis automatisch bewaren (dagen)
+    Automatic Search History Retention Tooltip: Laat dit leeg om de zoekgeschiedenis onbeperkt te bewaren. Als je een getal opslaat, worden oudere zoekopdrachten nu en automatisch verwijderd zolang de app geopend is.
+    History Retention Saved: Bewaartermijn voor geschiedenis is opgeslagen
+    Invalid History Retention Days: Voer een geheel aantal dagen groter dan nul in
+    Enable Watch Statistics: Kijkstatistieken inschakelen
+    Week Starts On: Week begint op
+    Cache Video Metadata: Metadatageschiedenis
+    Cache Video Metadata Tooltip: Bewaart elke versie van ondersteunde videometadata voor video's die je bezoekt, waaronder titels, miniaturen en beschrijvingen. Bewaart ook de titels die in je abonnementsfeeds worden getoond. Dit is standaard uitgeschakeld omdat het bewaren van metadatageschiedenis meer schijfruimte gebruikt.
+    Watched Percentage Threshold: Drempel voor percentage bekeken
+    Watched Percentage Threshold Tooltip: Video's worden als bekeken gemarkeerd zodra het geselecteerde percentage is bereikt en er niet meer dan 2 minuten over zijn. Bij 0% gebeurt dit wanneer het afspelen begint. Bij 100% wanneer het afspelen eindigt.
+    Clear Video Metadata Cache: Cache met videometadata wissen
+    Are you sure you want to clear the video metadata cache?: Weet je zeker dat je de gecachte videotitels, miniaturen en beschrijvingen wilt wissen?
+    Failed to clear video metadata cache: Wissen van cache met videometadata mislukt
+    Video metadata cache has been cleared: Cache met videometadata is gewist
+    Video Metadata Cache Size: 'Cache met videometadata: {size}'
+  Storage Settings:
+    Storage: Opslag
+    Downloaded Media: Bijgehouden gedownloade media
+    Storage Breakdown: Verdeling van opslag
+    Shown Total: Weergegeven totaal
+    Calculating: Berekenen…
+    Not Available: Exacte grootte niet beschikbaar
+    At Least: Minstens {size}
+    Failed To Read Storage: Sommige opslaggroottes kunnen niet worden gelezen
+    Downloaded Media Description: Video-, audio- en ondertitelingsbestanden die nog in de downloadgeschiedenis worden bijgehouden.
+    Selected Download Folders: Door gebruiker geselecteerde downloadmappen
+    Download History Records: Items in downloadgeschiedenis
+    Download History Records Description: '{count} voltooide download. Dit item houdt de status en bestandslocaties bij, maar bevat de gedownloade media niet. | {count} voltooide downloads. Deze items houden de status en bestandslocaties bij, maar bevatten de gedownloade media niet.'
+    Clear Download History Records: Downloadgeschiedenis wissen
+    Clear Download History Confirmation: Alle voltooide downloads uit de geschiedenis wissen?
+    Download Files Stay On Disk: Gedownloade bestanden blijven op de schijf staan, maar worden niet meer op de pagina Downloads weergegeven.
+    Clear Records: Geschiedenis wissen
+    Replaceable Caches: Vervangbare caches
+    Application Caches: Appcaches
+    Browser Caches: Browsercaches
+    Browser Caches Hint: HTTP-, GPU-, code-, shader-, serviceworker- en woordenboekcaches van Chromium.
+    Clear Android Cache Confirmation: Browsercache van Android wissen?
+    Stored App Data: Opgeslagen appgegevens
+    Included In App Data: Opgenomen in de appgegevens hierboven
+    Browser Runtime Data: Runtimegegevens van browser
+    Browser Runtime Data Hint: Sessie- en lokale opslag, cookies, privacy- en netwerkstatus en crashbestanden van Chromium.
+    Subscription Feed Cache: Cache van abonnementen en feeds
+    Subscription Feed Cache Description: Bewaart opgehaalde abonnementsvideo's, Shorts, livestreams en berichten. OpenTubeX maakt deze opnieuw aan bij de volgende feedvernieuwing.
+    Clear Subscription Feed Cache: Cache van abonnementen en feeds wissen
+    Clear Subscription Feed Cache Confirmation: Cache van abonnementen en feeds wissen?
+    Subscription Feed Cache Effect: Abonnementsfeeds kunnen leeg lijken totdat ze worden vernieuwd. Je abonnementen en profielen worden niet gewijzigd.
+    Session Search Cache: Zoekcache van sessie
+    In Memory: In geheugen
+    Session Search Cache Description: '{count} zoekopdracht is in het geheugen gecacht om sneller terug te navigeren. Deze cache wordt verwijderd wanneer OpenTubeX wordt afgesloten. | {count} zoekopdrachten zijn in het geheugen gecacht om sneller terug te navigeren. Deze cache wordt verwijderd wanneer OpenTubeX wordt afgesloten.'
+    Clear Session Search Cache: Zoekcache van sessie wissen
+    Clear Session Search Cache Confirmation: Zoekcache van sessie wissen?
+    Session Search Cache Effect: Gecachte resultaatpagina's worden verwijderd. De opgeslagen zoekgeschiedenis wordt niet gewijzigd.
+    HTTP Cache: HTTP-cache
+    HTTP Cache Description: Electron bewaart netwerkreacties op de schijf, zodat herhaalde aanvragen kunnen laden zonder dezelfde gegevens opnieuw te downloaden. OpenTubeX maakt deze cache naar behoefte opnieuw aan.
+    Managed By Electron: Beheerd door Electron
+    Clear HTTP Cache: HTTP-cache wissen
+    Clear HTTP Cache Confirmation: HTTP-cache van Electron wissen?
+    HTTP Cache Effect: Afbeeldingen en andere netwerkbronnen kunnen eenmalig langzamer laden terwijl de cache opnieuw wordt opgebouwd.
+    Tab Image Cache: Miniaturen van tabbladen en kanaalavatars
+    Tab Image Cache Description: Bewaart voorbeeldafbeeldingen en kanaalavatars voor geopende en herstelde tabbladen. OpenTubeX maakt ze opnieuw aan terwijl de tabbladen worden gebruikt.
+    Clear Tab Image Cache: Afbeeldingscache van tabbladen wissen
+    Clear Tab Image Cache Confirmation: Miniaturen van tabbladen en kanaalavatars wissen?
+    Tab Image Cache Effect: Afbeeldingen van tabbladen kunnen kort verdwijnen en worden opnieuw aangemaakt wanneer de tabbladen worden gebruikt.
+    Playback Caches: Afspeelcaches
+    Playback Caches Description: Bewaart URL's van yt-dlp-streams tussen appsessies en YouTube-spelerbestanden. De URL-cache geldt alleen voor streams die met yt-dlp zijn opgehaald.
+    Playback URL Cache Entry Size: Cachelimiet voor URL van yt-dlp-stream
+    Playback URL Cache Entry Size Tooltip: Stelt de maximale grootte van elk gecacht item voor een yt-dlp-stream in. Stel dit in op 0 MB om permanente caching van yt-dlp-streams uit te schakelen.
+    Clear Playback Caches: Afspeelcaches wissen
+    Clear Playback Caches Confirmation: Caches van yt-dlp en de speler wissen?
+    Playback Caches Effect: De volgende lokale afspeelaanvraag kan langer duren omdat stream- en spelergegevens opnieuw worden opgehaald.
+    Clear Cache: Cache wissen
+    History Data: Opgeslagen geschiedenis
+    Video Metadata Description: Bewaart eerdere titels, miniaturen en beschrijvingen van ondersteunde video's. Oude versies kunnen na verwijdering niet opnieuw worden aangemaakt.
+    Video Metadata Effect: Opgeslagen metadataversies worden definitief verwijderd. De huidige videogegevens kunnen nog steeds opnieuw worden opgehaald.
+    Watch History: Kijkgeschiedenis en statistieken
+    Watch History Description: De kijkgeschiedenis registreert bekeken video's en voortgang. Kijkstatistieken bewaren dagelijkse kijktotalen. De bewaartermijn geldt alleen voor de kijkgeschiedenis.
+    Clear Watch Statistics: Kijkstatistieken wissen
+    Watch History Effect: Registraties van bekeken video's en opgeslagen voortgang worden verwijderd. Kijkstatistieken blijven behouden.
+    Clear Watch Statistics Confirmation: Alle kijkstatistieken verwijderen?
+    Watch Statistics Effect: Dagelijkse kijktotalen worden verwijderd. De kijkgeschiedenis blijft behouden.
+    Search History: Zoekgeschiedenis
+    Search History Description: Bewaart zoekopdrachten die je wilde onthouden.
+    Delete Search History: Zoekgeschiedenis verwijderen
+    Delete Search History Confirmation: Alle opgeslagen zoekgeschiedenis verwijderen?
+    Search History Effect: Opgeslagen zoeksuggesties uit je eerdere zoekopdrachten verdwijnen. De cache van de huidige sessie blijft behouden.
+    Other User Data: Overige gebruikersgegevens
+    Other Profile Files: Overige profielbestanden
+    Other Profile Files Hint: Back-ups, tijdelijke bestanden en profielitems die OpenTubeX nog niet herkent.
+    Subscriptions And Profiles: Abonnementen en profielen
+    Subscriptions And Profiles Description: Bewaart geabonneerde kanalen, profielnamen en profieltoewijzingen.
+    Subscriptions And Profiles Effect: Alle abonnementen en extra profielen worden definitief verwijderd. Ook de feedcache wordt gewist.
+    Playlists Description: Bewaart namen en beschrijvingen van afspeellijsten en opgeslagen video's.
+    Playlists Effect: Elke afspeellijst en de bijbehorende lijst met opgeslagen video's worden definitief verwijderd. Gedownloade mediabestanden blijven behouden.
+    Settings And Sessions: Instellingen, tabbladsessies en herinneringen
+    Settings And Sessions Description: Bewaart appvoorkeuren, herstelbare tabbladen en herinneringen voor livestreams. Open de profielmap om deze bestanden te bekijken of er een back-up van te maken. Deze pagina verwijdert ze niet.
+    Cleanup Complete: Opslag opgeschoond
+    Cleanup Failed: Opschonen van opslag mislukt
+  Subscription Settings:
+    Fetch Feed on Startup: Feed ophalen bij opstarten
+    Show New Content Feed: Feed met nieuwe content tonen
+    RSS Feeds: RSS-feeds
+    Enable RSS Feeds: RSS-feeds voor andere platforms inschakelen
+    Manage RSS Feeds: RSS-feeds beheren
+    Show New Content Indicators: Indicatoren voor nieuwe content tonen
+    Show Scheduled Live Streams / Premieres First: Geplande livestreams en premières eerst tonen
+    Auto Refresh Interval: Interval voor automatisch vernieuwen
+    Videos Auto Refresh Interval: Interval voor automatisch vernieuwen van video's
+    Shorts Auto Refresh Interval: Interval voor automatisch vernieuwen van Shorts
+    Live Auto Refresh Interval: Interval voor automatisch vernieuwen van livestreams
+    Posts Auto Refresh Interval: Interval voor automatisch vernieuwen van berichten
+    Refresh Subscriptions While App Is Closed: "Abonnementen vernieuwen terwijl de app gesloten is"
+    Notify About New Uploads: Melden bij nieuwe uploads
+    RSS Feeds Auto Refresh Interval: Interval voor automatisch vernieuwen van RSS-feeds
+  Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Kijktijd tellen van"
+      Break Reminder Action: "Als het tijd is voor een pauze"
+      Grayscale: "Grijstinten"
+      Apply Grayscale To: "Grijstinten toepassen op"
+      Off: "Uit"
+      Always: "Altijd"
+      During Bedtime: "Tijdens bedtijd"
+      After the Daily Limit: "Na de daglimiet"
+      Whole App: "Hele app"
+      Videos and Images: "Video's en afbeeldingen"
+      Daily Watch Time Limit: "Daglimiet voor kijktijd"
+      Daily Shorts Limit: "Daglimiet voor Shorts"
+      When a Limit Is Reached: "Bij het bereiken van een limiet"
+      Remind Me: "Herinneren"
+      Pause Playback: "Afspelen pauzeren"
+      Take a Break Reminder: "Pauzeherinnering"
+      Every: "Om de {duration}"
+      Bedtime Reminder: "Bedtijdherinnering"
+      Bedtime Start: "Begin van bedtijd"
+      Bedtime End: "Einde van bedtijd"
+      Wait Until the Video Ends: "Wachten tot de video is afgelopen"
+      Silence Upload Notifications at Bedtime: "Uploadmeldingen dempen tijdens bedtijd"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Automatisch afspelen stoppen tijdens bedtijd en na de daglimiet"
+    Hide Popularity Graph: "Populariteitsgrafiek verbergen"
+    Enable Block Lists: "Blokkeerlijsten inschakelen"
+    AI Video Summaries: AI-videosamenvattingen
+    Hide: Verbergen
+    Collapsed: Ingeklapt
+    Expanded: Uitgeklapt
+    Video Descriptions: Videobeschrijvingen
+    Video Description Modes:
+      Hide: Verbergen
+      Collapsed: Ingeklapt
+      Expanded: Uitgeklapt
+    Playing Interface Hide Delay: Vertraging bij het verbergen van de interface tijdens het afspelen
+    Hide Startup Splash: Opstartscherm verbergen
+    Hide Header Sync Indicator: Synchronisatie-indicator in de appkop verbergen
+    Hide Repeat Stats: Herhaalstatistieken verbergen
+    Hide Playlist Stats: Afspeellijststatistieken verbergen
+    Sections:
+      Digital Wellbeing: "Digitaal welzijn"
+      Visible While Paused: Zichtbaar wanneer gepauzeerd in volledig venster of volledig scherm
+    Hide Channel Avatars: Kanaalavatars verbergen
+    Shorten View Counts: Aantallen weergaven, reacties en vind-ik-leuks bij reacties inkorten
+    Hide Home: Startpagina verbergen
+    Hide Live Chat Replay: Herhaling van livechat verbergen
+    Disable A-B Repeat: A-B-herhaling uitschakelen
+    Hide End-Screen Annotations: Eindschermannotaties verbergen
+    Hide End-Screen Recommendations: "Aanbevelingen op het eindscherm verbergen"
+    Hide Paid Promotion Badge: Label voor betaalde promotie verbergen
+    Show Player Controls: Spelerbediening tonen
+    Show Video Title: Videotitel tonen
+    Show Bottom Right Actions Dock: Actiebalk rechtsonder tonen
+    Paused Interface Hide Delay: Wachttijd voor verbergen van gepauzeerde interface
+    Add: Toevoegen
+    Remove: Verwijderen
+    Hide Channel Shows: Kanaal­tabblad ‘Programma's’ verbergen
+  Data Settings:
+    Scheduled backups: "Geplande back-ups"
+    Scheduled backup description: "Bewaar volledige ZIP-back-ups terwijl OpenTubeX geopend is. Gemiste back-ups worden bij het opstarten gemaakt. De limiet geldt alleen voor geplande back-ups in deze map."
+    Choose backup folder: "Back-upmap kiezen"
+    No backup folder selected: "Geen back-upmap gekozen"
+    Enable scheduled backups: "Geplande back-ups inschakelen"
+    Backup frequency: "Back-upfrequentie"
+    Backups to keep: "Aantal te bewaren back-ups"
+    Daily: "Dagelijks"
+    Weekly: "Wekelijks"
+    Every 30 days: "Elke 30 dagen"
+    Last scheduled backup: "Laatste geplande back-up: {date}"
+    No scheduled backup yet: "Nog geen geplande back-up"
+    Scheduled backup failed: "Back-up mislukt. Controleer of de map beschrijfbaar is. Nieuwe poging over vijf minuten."
+    Import Preview:
+      Title: Wijzigingen vooraf bekijken
+      New: "Nieuw: {count}"
+      Existing: "Bestaand: {count}"
+      Skipped: "Overgeslagen: {count}"
+      Unreadable files: "Onleesbare bestanden: {count}"
+      Settings effect: Overeenkomende instellingen worden vervangen. Privé- en onbekende instellingen worden overgeslagen.
+      Details effect: Bestaande abonnementen of video’s blijven behouden. Geïmporteerde profiel- of afspeellijstgegevens vervangen de huidige gegevens.
+      Merge effect: Bestaande gegevens blijven behouden en worden samengevoegd met overeenkomende records.
+      Subscriptions effect: Bestaande abonnementen blijven behouden. Alleen nieuwe kanalen worden toegevoegd.
+      History merge effect: Overeenkomende video’s worden samengevoegd met je geschiedenis, waarbij opgeslagen gegevens en de nieuwste kijkdatum behouden blijven. Andere geschiedenis blijft behouden.
+    Select export data: "Selecteer de gegevens om te exporteren"
+    Export selected data: "Geselecteerde gegevens exporteren"
+    Complete backup: "Volledige back-up"
+    Import backup: "Back-up importeren"
+    Export backup: "Back-up exporteren"
+    Backup description: "Sla profielen, afspeellijsten, geschiedenis, statistieken en overdraagbare instellingen op in één ZIP-bestand. Door ze te importeren, worden ze samengevoegd met gegevens die al op dit apparaat staan."
+    Select backup data: "Selecteer de gegevens om te importeren"
+    Profiles and subscriptions: "Profielen en abonnementen"
+    Backup exported: "Back-up succesvol geëxporteerd"
+    Backup imported: "Back-up succesvol geïmporteerd"
+    Import YouTube Takeout ZIP: "YouTube Takeout-ZIP importeren"
+    Select Takeout data: "Selecteer de gegevens om te importeren"
+    Import selected data: "Geselecteerde gegevens importeren"
+    No supported Takeout data: "Geen ondersteunde YouTube-gegevens gevonden in deze ZIP."
+    Data And Storage: Gegevens en opslag
+    Profile Directory: Profielmap
+    Open Profile Directory: Profielmap openen
+    Settings File: Instellingenbestand
+    Import Settings: Instellingen importeren
+    Export Settings: Instellingen exporteren
+    Settings Tooltip: Instellingen die specifiek zijn voor het besturingssysteem of de gebruiker, of die experimenteel zijn, kunnen niet worden geëxporteerd of geïmporteerd (bijvoorbeeld proxy, externe speler, map voor schermafbeeldingen...)
+    Invalid JSON row, skipping item: Ongeldige JSON op rij {row}, item wordt overgeslagen
+    All settings have been successfully imported: Alle instellingen zijn geïmporteerd
+    All settings have been successfully exported: Alle instellingen zijn geëxporteerd
+    Setting object has insufficient data, skipping item: Instellingsobject bevat onvoldoende gegevens, item wordt overgeslagen
+    Unknown setting key: 'Onbekende instellingssleutel: {key}'
+    Non-transferable setting key: 'Niet-overdraagbare instellingssleutel: {key}'
+    Import subscriptions formats: 'Ondersteunde indelingen: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube-back-up of FreeTube-export (.json)'
+    Import history formats: 'Ondersteunde indelingen: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube-back-up (.json)'
+    Import playlists formats: 'Ondersteunde indelingen: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import search history formats: 'Ondersteunde indelingen: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: "Afspeelsnelheden per kanaal"
+    Import channel playback speeds: "Afspeelsnelheden per kanaal importeren"
+    Channel playback speeds file: "Bestand met afspeelsnelheden per kanaal"
+    Import channel playback speeds formats: "Ondersteunde indelingen: opslag van het userscript {script} (.json)"
+    Invalid channel playback speeds file: "Er zijn geen afspeelsnelheden per kanaal gevonden in dit bestand"
+    Channel playback speeds imported: "Afspeelsnelheid van {count} kanaal geïmporteerd | Afspeelsnelheden van {count} kanalen geïmporteerd"
+    Channels not found: "{count} kanaal kon niet worden gevonden | {count} kanalen konden niet worden gevonden"
+  Sync Settings:
+    Revoke Session Tabs Warning: "De gesynchroniseerde tabbladsets van dit apparaat worden ook verwijderd."
+    Revoke Session Partial Failure: "Gesynchroniseerde tabbladsets zijn verwijderd, maar het intrekken kon niet worden bevestigd. Probeer de toegang opnieuw in te trekken."
+    Tab Sync Revocation Pending: "Tabsynchronisatie is gepauzeerd zolang de intrekking van deze aanmelding in behandeling is. Probeer de intrekking opnieuw in de synchronisatie-instellingen."
+    Show More: "Meer tonen"
+    Sync Automatically: "Automatisch synchroniseren"
+    Activity: "Accountactiviteit"
+    No Activity: "Geen recente activiteit"
+    Clear Activity: "Wissen op dit apparaat"
+    Clear Activity Hint: "Verberg bestaande accountactiviteit op dit apparaat. Activiteit op de server en andere apparaten blijft ongewijzigd. Nieuwe activiteit blijft verschijnen."
+    Setting Changed: "{device} heeft {setting} gewijzigd naar {value}"
+    Item Updated: "{device} heeft {setting} bijgewerkt"
+    Item Added: "{device} heeft {item} toegevoegd aan {setting}"
+    Item Removed: "{device} heeft {item} verwijderd uit {setting}"
+    Item Renamed: "{device} heeft {item} hernoemd naar {value}"
+    Saved Playlists: "Opgeslagen afspeellijsten"
+    No Feed Types: "Geen"
+    Open On Device: "Openen op een ander apparaat"
+    Video Sent: "Video verzonden. Offline apparaten ontvangen deze als ze binnen 24 uur opnieuw verbinding maken."
+    Video Received: "Video ontvangen: {title}"
+    Previous Auto Sync Notice: "Automatische synchronisatie is uitgeschakeld. Een eerdere versie heeft deze mogelijk uitgeschakeld om gegevensverlies te voorkomen."
+    Enable Automatic Sync: "Automatische synchronisatie inschakelen"
+    Destructive Sync Blocked: "Synchronisatie is gestopt om gegevensverlies te voorkomen. Automatische synchronisatie is uitgeschakeld. Open de synchronisatie-instellingen om de verwijderingen te bekijken."
+    Devices: "Apparaten"
+    Devices Hint: "Bekijk de apparaten die toegang hebben tot dit synchronisatieaccount."
+    Change Password: "Wachtwoord wijzigen"
+    Refresh Devices: "Apparaten vernieuwen"
+    Current Device: "Huidig apparaat"
+    Revoke Session: "Toegang intrekken"
+    Session Created: "Aangemaakt"
+    Last Active: "Laatst actief"
+    Session Expires: "Verloopt"
+    Unknown Device: "Onbekend apparaat"
+    Operating System: "Besturingssysteem"
+    Rename Device: "Apparaat hernoemen"
+    Save Device Name: "Naam opslaan"
+    Device Name Invalid: "Apparaatnamen mogen maximaal 80 tekens bevatten en geen besturingstekens."
+    Device Renamed: "Apparaat hernoemd"
+    Revoke Session Confirmation: "Deze sessie intrekken?"
+    Revoke Current Session Warning: "Als je deze sessie intrekt, wordt dit apparaat losgekoppeld van het synchronisatieaccount."
+    Revoke Session Warning: "{device} verliest toegang tot dit synchronisatieaccount."
+    Confirm Revoke Session: "Sessie intrekken"
+    Session Revoked: "Sessie ingetrokken"
+    Change Password Warning: "Als je je wachtwoord wijzigt, worden alle andere apparaten afgemeld. Dit apparaat blijft verbonden."
+    Current Password: "Huidig wachtwoord"
+    New Password: "Nieuw wachtwoord"
+    Confirm New Password: "Nieuw wachtwoord bevestigen"
+    Save New Password: "Nieuw wachtwoord opslaan"
+    Account Management Failed: "De gegevens van het synchronisatieaccount konden niet worden geladen."
+    All Password Fields Required: "Vul alle wachtwoordvelden in."
+    New Password Too Short: "Het nieuwe wachtwoord moet minstens 8 tekens lang zijn."
+    New Passwords Do Not Match: "De nieuwe wachtwoorden komen niet overeen."
+    Password Changed: "Wachtwoord gewijzigd. Andere apparaten zijn afgemeld."
+    Sync Settings: Synchronisatie
+    Watch stats: "Kijkstatistieken"
+    Enable Sync: Synchronisatie inschakelen
+    Privacy Passphrase: Privacywachtzin
+    Privacy Passphrase Hint: Gebruik een andere wachtzin dan je accountwachtwoord. Deze verlaat dit apparaat nooit en is op elk apparaat vereist. Als je de wachtzin kwijtraakt, kunnen versleutelde synchronisatiegegevens niet worden hersteld.
+    Privacy Policy: Privacybeleid van deze server
+    Enhanced Privacy Enabled: Verbeterde privacy is ingeschakeld. De server bewaart alleen versleutelde synchronisatiegegevens.
+    Enhanced Privacy Unsupported: Waarschuwing. Deze server ondersteunt geen verbeterde privacy. De beheerder kan gesynchroniseerde gegevens bekijken.
+    Description: 'Synchroniseer abonnementen, profielen, afspeellijsten, kijkgeschiedenis en ondersteunde instellingen met een OpenTubeX- of LibreTube-synchronisatieserver. LibreTube-servers ondersteunen mogelijk niet alle synchronisatiefuncties.'
+    Server URL: URL van synchronisatieserver
+    Checking Server: Synchronisatieserver controleren…
+    Server Unavailable: Kan geen verbinding maken met deze synchronisatieserver. Controleer de URL en probeer het opnieuw.
+    Username: Gebruikersnaam
+    Log In: Inloggen
+    Register: Registreren
+    Pair Another Device: Nog een apparaat koppelen
+    Pair With Existing Device: Met een bestaand apparaat koppelen
+    Device Name: Apparaatnaam
+    This Device: Dit apparaat
+    Device Name Required: Voer een naam voor dit apparaat in.
+    Pairing Device Name Hint: Kies een naam die je herkent op het apparaat dat dit verzoek goedkeurt.
+    Create Pairing Code: Koppelcode maken
+    Creating Pairing Code: Veilige koppelcode maken…
+    Pairing QR Alt: QR-koppelcode voor {device}
+    Scan Pairing Code: Open "Nog een apparaat koppelen" op een apparaat dat al is verbonden en scan deze code.
+    Pairing Code: Koppelcode
+    Use Text Pairing Code: In plaats daarvan tekstcode gebruiken
+    Show QR Code: QR-code tonen
+    Text Pairing Code Hint: Kopieer deze code naar het bestaande apparaat. De code bevat het koppelgeheim. Wis de code daarom na het koppelen uit de klembordgeschiedenis.
+    Pairing QR Warning: Toon deze code alleen aan het vertrouwde, al verbonden apparaat dat dit verzoek goedkeurt. De code verloopt na twee minuten.
+    Pairing Expires: Koppelcode verloopt om {time}.
+    Verifying Pairing: Overgedragen privacysleutel verifiëren…
+    Completing Pairing: Koppeling van apparaat voltooien…
+    Compare Pairing Codes: Koppelcodes vergelijken
+    Pairing Code Match Hint: Bevestig alleen als deze code overeenkomt met de code op je bestaande apparaat.
+    Pairing Codes Match: Codes komen overeen
+    Pairing Approval Code Hint: Houd dit venster open en vergelijk deze code met het nieuwe apparaat. Het nieuwe apparaat mag niet doorgaan als de codes verschillen.
+    Pairing Scan Hint: Scan de koppelcode die wordt getoond op het apparaat dat je toevoegt.
+    Enter Pairing Code: Code handmatig invoeren
+    Pairing Code Entry Hint: Plak de koppelcode die wordt getoond op het apparaat dat je toevoegt.
+    Check Pairing Code: Code controleren
+    Scan QR Code: QR-code scannen
+    Waiting For Pairing Code: Wachten op een koppelcode…
+    Checking Pairing Request: Koppelverzoek controleren…
+    Approving Pairing Request: Privacysleutel versleutelen en verzenden…
+    Pairing Approval Warning: Keur dit alleen goed als je het verzoek kunt zien op het apparaat dat je toevoegt. Door te koppelen geef je toegang tot het account en draag je de privacysleutel over.
+    Approve Pairing: Koppeling goedkeuren
+    Try Again: Opnieuw proberen
+    Scan Again: Opnieuw scannen
+    Camera Unavailable: OpenTubeX heeft geen toegang tot een camera. Controleer de cameramachtiging of voer de koppelcode handmatig in.
+    Pairing Unsupported: Deze synchronisatieserver ondersteunt geen veilige apparaatkoppeling.
+    Pairing Failed: Koppelen van apparaat mislukt. Probeer het opnieuw met een nieuwe code.
+    Pairing Request Changed: Het koppelverzoek is gewijzigd, verlopen of al gebruikt. Maak een nieuwe code.
+    Pairing Server Mismatch: Deze code hoort bij een andere synchronisatieserver.
+    Pairing Verification Unavailable: Er is geen versleutelde synchronisatieverzameling beschikbaar om de overgedragen sleutel te verifiëren. Synchroniseer het bestaande apparaat en probeer het opnieuw.
+    Pairing Completed: Apparaat gekoppeld
+    Pairing Approved: Apparaatkoppeling goedgekeurd
+    Use Pairing Invite: Code van verbonden apparaat gebruiken
+    Show Pairing Invite: Koppelcode tonen
+    Scan Pairing Invite: 'Open op het apparaat dat je toevoegt "Met een bestaand apparaat koppelen", kies "Code van verbonden apparaat gebruiken" en scan deze code.'
+    Pairing Invite QR Alt: QR-koppelcode voor het apparaat dat je toevoegt
+    Pairing Invite Text Hint: Kopieer deze code naar het apparaat dat je toevoegt. Hiermee kan een apparaat toegang tot je account aanvragen. Wis de code daarom na het koppelen uit de klembordgeschiedenis.
+    Pairing Invite Warning: Toon deze code alleen aan het apparaat dat je toevoegt. Je moet het verzoek van dat apparaat nog steeds op dit apparaat goedkeuren.
+    Pairing Invite Scan Hint: Scan de koppelcode die op je verbonden apparaat wordt getoond.
+    Pairing Invite Entry Hint: Plak de koppelcode die op je verbonden apparaat wordt getoond.
+    Pairing Invite Code Hint: Keur het verzoek op je verbonden apparaat alleen goed als daar deze code wordt getoond. Het koppelen wordt daarna automatisch voltooid.
+    Pairing Invite Approval Hint: Keur alleen goed als het apparaat dat je toevoegt deze code toont.
+    Pairing Invite Approved: Koppeling goedgekeurd. Het nieuwe apparaat voltooit het koppelen automatisch.
+    Disconnect: Verbinding verbreken
+    Delete Account: Synchronisatieaccount verwijderen
+    Delete Account Confirmation: Synchronisatieaccount verwijderen?
+    Delete Account Warning: Hiermee worden je synchronisatieaccount en alle gegevens op deze server definitief verwijderd. Je lokale OpenTubeX-gegevens worden niet verwijderd.
+    Confirm Delete Account: Account verwijderen
+    Password Required: Wachtwoord is vereist
+    Account Deleted: Synchronisatieaccount verwijderd
+    Connected as: Verbonden als {username}
+    Profiles: Profielen
+    Open Tabs: Geopende tabbladen en sessie
+    Disable Setting Sync: Synchronisatie van deze instelling stoppen
+    Enable Setting Sync: Deze instelling synchroniseren
+    Sync Now: Nu synchroniseren
+    Downloading encrypted data: Versleutelde synchronisatiegegevens downloaden…
+    Syncing subscriptions: Abonnementen synchroniseren…
+    Syncing playlists: Afspeellijsten synchroniseren…
+    Syncing history: Kijkgeschiedenis synchroniseren…
+    Syncing statistics: Kijkstatistieken synchroniseren…
+    Syncing profiles: Profielen synchroniseren…
+    Syncing open tabs: Geopende tabbladen en sessie synchroniseren…
+    Syncing settings: Instellingen synchroniseren…
+    Uploading encrypted data: Versleutelde synchronisatiegegevens uploaden…
+    Finishing sync: Synchronisatie voltooien…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'Laatst gesynchroniseerd: {date}'
+    History not supported: Deze serverversie ondersteunt het synchroniseren van kijkgeschiedenis niet.
+    Settings not supported: Deze serverversie ondersteunt het synchroniseren van instellingen niet.
+    Sync completed: Synchronisatie voltooid
+    Sync failed: "Synchronisatie mislukt: {error}"
+    Data Loss Confirmation: Synchronisatie met gegevensverlies bevestigen?
+    Data Loss Warning: Synchronisatie zou {deleted} van de {previous} eerder gesynchroniseerde items in ‘{collection}’ op alle apparaten verwijderen. Als je ze niet zelf hebt verwijderd, bijvoorbeeld omdat de server is gereset, behoud ze dan om ze overal te herstellen.
+    Keep Deleted Items: Items behouden
+    Confirm Data Loss: Verwijderen en doorgaan
+    Use Shared Tabs: 'Eén gedeelde set tabbladen op alle apparaten gebruiken'
+    Shared Tabs Warning: 'De geopende tabbladen op dit apparaat worden de gedeelde set. Andere apparaten vervangen hun geopende tabbladen door deze set wanneer ze synchroniseren; tabbladen van verschillende apparaten worden niet samengevoegd.'
+    Tabs From Other Devices: 'Tabbladen van andere apparaten'
+    Device Tab Session: '{platform} · {count} tabbladen'
+    Mobile Device: 'Mobiel'
+    Desktop Device: 'Desktop'
+    Open All Tabs: 'Alle tabbladen openen'
+    Open All Tabs Confirmation: "Alle tabbladen openen?"
+    Server Update Required: "Werk deze server bij om versleutelde livesynchronisatie te ondersteunen."
+    Log In with Provider: 'Inloggen met {provider}'
+    Log In with Single Sign-On: 'Inloggen met eenmalige aanmelding'
+    Continue in Browser: 'Ga verder in je browser. OpenTubeX gaat verder zodra je klaar bent.'
+    Connected with Single Sign-On: 'Verbonden met eenmalige aanmelding'
+    Delete Single Sign-On Account Hint: 'Je browser wordt geopend zodat je het verwijderen kunt bevestigen bij je aanmeldprovider.'
+  Proxy Settings:
+    IP Block Recovery Script Path: Script voor herstel na IP-blokkering
+    Select IP Block Recovery Script File: Herstelscript voor IP-blokkade selecteren
+    Running IP block recovery script: Herstelscript voor IP-blokkade uitvoeren
+    IP block recovery script failed: 'Herstelscript voor IP-blokkade mislukt (afsluitcode: {exitCode})'
+    IP block recovery script finished: Herstelscript voor IP-blokkade voltooid
+    Reloading video after IP block recovery: Video opnieuw laden na herstel van IP-blokkade
+    Failed to select IP block recovery script: Selecteren van herstelscript voor IP-blokkade mislukt
+  SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "Uitgesloten kanalen"
+      Tooltip: "Voer een kanaal-ID in om te voorkomen dat SponsorBlock-segmenten in de video’s van dit kanaal worden overgeslagen. De ID moet exact overeenkomen en is hoofdlettergevoelig."
+    Enable SponsorBlock Submission: Inzenden naar SponsorBlock inschakelen
+    SponsorBlock Private User ID (optional): Privégebruikers-ID (optioneel)
+    SponsorBlock Private User ID Tooltip: Plak de privé-gebruikers-ID van SponsorBlock uit de browserextensie. Laat dit leeg om een door de app gegenereerde ID te gebruiken.
+    Generated SponsorBlock User ID: Gegenereerde SponsorBlock-gebruikers-ID
+    Generated SponsorBlock User ID Tooltip: Deze door de app gegenereerde SponsorBlock-gebruikers-ID kan worden gebruikt in de browserextensie of als je de app op een andere computer gebruikt.
+    Reveal Generated User ID: Gegenereerde gebruikers-ID tonen
+    Generated SponsorBlock User ID Copy Button: Gegenereerde SponsorBlock-gebruikers-ID kopiëren
+    Generated SponsorBlock User ID Copied: Gegenereerde SponsorBlock-gebruikers-ID naar klembord gekopieerd
+    Skip notification timeout: Weergaveduur van oversla-melding
+    Custom Color: Aangepaste kleur
+    DeArrow Settings: DeArrow
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Return YouTube Dislike inschakelen
+    Return YouTube Dislike Url: API-URL
+  Parental Control Settings:
+    Disable Channel Links: Kanaallinks uitschakelen
+  Password Dialog:
+    Incorrect Password: Onjuist wachtwoord
+    Unlock: Ontgrendelen
+    Unlocking: Ontgrendelen…
+  Search Settings: Instellingen zoeken
+  No Settings Found: Geen instellingen gevonden
+  Experimental Settings:
+    Disable Hardware Acceleration: Hardwareversnelling uitschakelen
+  Interface Customizer:
+    Customize Interface: "Interface aanpassen"
+    Preview: "Voorbeeld"
+    Player: "Speler"
+    Desktop: "Desktop"
+    Mobile: "Mobiel"
+    Playing: "Speelt af"
+    Player Menu: "Spelermenu"
+    Fullscreen: "Volledig scherm"
+    Paused: "Gepauzeerd"
+    Controls: "Bediening"
+    Example Video Title: "Voorbeeldvideo"
+    Resolution: "Resolutie"
+    Loop: "Herhalen"
+    Off: "Uit"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Kanalen met AI-rommel verbergen
+    Hide AI Slop Channels Tooltip: Verbergt kanalen op de door de community bijgehouden AiSList-blokkeerlijst (aisloplist.com) in zoekresultaten, trending en aanbevelingen, en labelt video's van kanalen op de waarschuwingslijst ervan. Abonnementen worden niet beïnvloed. De lijsten worden eenmaal per dag van GitHub gedownload en gelden alleen voor resultaten die met de lokale API zijn geladen.
+    Downloading: Lijsten downloaden…
+    Failed to Download: Kan de lijsten niet downloaden
+    Loaded Status: "Geblokkeerde kanalen: {blocked} · Gemarkeerde kanalen: {warned} · Bijgewerkt: {date}"
+Tutorial:
+  Skip: Overslaan
+  Next: Volgende
+  Finish: Voltooien
+  Welcome:
+    Title: Welkom bij OpenTubeX
+    Description: Dit zijn de belangrijkste bedieningselementen om snel aan de slag te gaan.
+  Navigation:
+    Title: Je bibliotheek is altijd dichtbij
+    Description: Gebruik de navigatie om naar abonnementen, afspeellijsten, geschiedenis en meer te gaan.
+  Search:
+    Title: Zoeken of een link plakken
+    Description: Zoek video's en kanalen of plak een ondersteunde video-URL rechtstreeks in het zoekveld.
+  Tabs:
+    Title: Pagina's openhouden in tabbladen
+    Description: Open meerdere pagina's tegelijk zonder je plek kwijt te raken. Kies waar tabbladen het beste in je indeling passen.
+  Quick Settings:
+    Title: Pas OpenTubeX aan
+    Description: Kies een thema en standaardvideokwaliteit. Wijzig deze en andere voorkeuren wanneer je wilt via je profielmenu of klik erop met de rechtermuisknop om van profiel te wisselen.
+    Touch Description: Kies een thema en standaardvideokwaliteit. Wijzig deze en andere voorkeuren wanneer je wilt via je profielmenu of druk er lang op om van profiel te wisselen.
+  Import Data:
+    Title: Neem je gegevens mee
+    Description: Importeer desgewenst abonnementen, geschiedenis, afspeellijsten, zoekgeschiedenis of instellingen uit een andere ondersteunde app of back-up.
+    Action: Gegevens importeren
+    Not Now: Niet nu
+About:
+  Project: Project
+  Community: Gemeenschap
+  Contribute: Bijdragen
+  Documentation: Documentatie
+  Downloads: Downloads
+  Changelog: Wijzigingslogboek
+  Commit: Commit
+  Licensed under the {licenseLink}: Uitgebracht onder de {licenseLink}
+  Matrix: Matrix
+  Email: E-mail
+  Please read the {roomRulesLink}: Lees de {roomRulesLink}
+  OpenTubeX is made possible by {creditsPageLink}: OpenTubeX wordt mogelijk gemaakt door {creditsPageLink}
+Profile:
+  Customization: Aanpassen
+  Manage Profile Subscriptions: Profielabonnementen beheren
+  Icon Names:
+    Person: Persoon
+    People: Personen
+    Headphones: Hoofdtelefoon
+    Gaming: Games
+    Film: Film
+    Art: Kunst
+    Science: Wetenschap
+    Globe: Wereldbol
+    Heart: Hart
+    Sun: Zon
+    Moon: Maan
+    Trophy: Trofee
+  Profile Icon: Profielpictogram
+  Choose an Emoji: Emoji kiezen
+  Custom Emoji: Aangepaste emoji
+  Emoji: Emoji
+  Choose Image: Afbeelding kiezen
+  Crop Image: Afbeelding bijsnijden
+  Zoom: Zoom
+  Apply Crop: Bijsnijden toepassen
+  Transparent: Transparant
+  Use Initial: Initiaal gebruiken
+  The selected image could not be loaded: De geselecteerde afbeelding kan niet worden geladen
+  Theme Color: Themakleur
+  Go To Profile Manager: Naar profielbeheer
+Channel:
+  Hide Watched: Bekeken verbergen
+  Fewer videos per day: "Minder video’s per dag"
+  More videos per day: "Meer video’s per dag"
+  Verified: Geverifieerd
+  Official Artist Channel: Officieel artiestenkanaal
+  About:
+    Links: Links
+  Subscription settings: Abonnementsinstellingen
+  Failed to save subscription settings: Kan de kanaalinstellingen niet opslaan
+  Videos per day: Video's per dag
+  Use global setting: Algemene instelling gebruiken
+  Unlimited: Onbeperkt
+  More videos hidden: '+{count} meer | +{count} meer'
+  Show in subscription feed: Tonen in abonnementenfeed
+  Notify about new uploads: Melden bij nieuwe uploads
+  Show members-only videos: "Video's alleen voor leden tonen"
+  Upload Notifications On: "Je krijgt een melding bij nieuwe uploads van {channelName} wanneer je abonnementen worden vernieuwd"
+  Upload Notifications Off: "Je krijgt geen meldingen meer bij nieuwe uploads van {channelName}"
+  Upload Notifications Disabled In Settings: "Meldingen voor {channelName} staan aan, maar meldingen bij nieuwe uploads staan uit in je instellingen"
+  Turn On Upload Notifications: "Inschakelen"
+  Channel Name Unavailable: Kanaalnaam niet beschikbaar
+  Search Result Types: Typen zoekresultaten
+  All Results: Alles
+  View All: Alles bekijken
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "Dit kanaal heeft video’s, maar er konden er geen worden weergegeven. Probeer er meer te laden"
+  Posts:
+    Original post unavailable: "Oorspronkelijk bericht niet beschikbaar"
+    Members-only video hidden by OpenTubeX: "Video alleen voor leden verborgen door OpenTubeX"
+    Video hidden by OpenTubeX because of its title: "Video verborgen door OpenTubeX omdat de titel verborgen tekst bevat"
+  Shows:
+    Shows: Programma's
+    This channel does not currently have any shows: Dit kanaal heeft momenteel geen programma's
+Video:
+  Info panel source: 'Bron: {source}'
+  External DRM Protected: "Video's die beschermd worden door DRM kunnen niet worden afgespeeld in OpenTubeX omdat ze propriëtaire onderdelen met gesloten broncode vereisen."
+  Invalid Media URL: "Ongeldige media-URL"
+  Mark As Fully Watched: Markeren als volledig bekeken
+  AI-generated video summary: "Door AI gegenereerde videosamenvatting"
+  Quality and accuracy may vary: "Kwaliteit en nauwkeurigheid kunnen variëren"
+  Includes paid promotion: Bevat betaalde promotie
+  Age Restricted Badge: Leeftijdsbeperking
+  Music Video Badge: Muziekvideo
+  Queue: Wachtrij
+  Play Next: Hierna afspelen
+  Add to Queue: Aan wachtrij toevoegen
+  Added to Play Next: Video wordt hierna afgespeeld
+  Added to Queue: Video aan wachtrij toegevoegd
+  Clear Queue: Wachtrij wissen
+  Queue Video Count: '{count} video | {count} video''s'
+  Remove from Queue: '{title} uit wachtrij verwijderen'
+  Remove Video from Queue: Uit wachtrij verwijderen
+  Drag to Reorder Queue: Sleep {title} om de wachtrij te ordenen
+  Reorder Queue Item: '{title} verplaatsen'
+  Reorder Queue Item Instructions: Gebruik de pijltoetsen omhoog en omlaag om deze video in de wachtrij te verplaatsen.
+  Queue Item Moved: '{title} verplaatst naar positie {position} van {total}.'
+  Queue Item Cannot Move Up: Kan {title} niet omhoog verplaatsen. De video staat al op positie 1 van {total}.
+  Queue Item Cannot Move Down: Kan {title} niet omlaag verplaatsen. De video staat al op positie {total} van {total}.
+  Metadata: Video-informatie
+  Close Metadata: Video-informatie sluiten
+  Metadata Cache:
+    Title History: Titelgeschiedenis
+    Thumbnail History: Miniatuurgeschiedenis
+    Description History: Beschrijvingsgeschiedenis
+    Previous Version: Vorige {number}
+    Empty: (leeg)
+  Fetching Streams: Streams ophalen met yt-dlp…
+  Waiting For Connection: "Kan de server niet bereiken. Automatisch opnieuw proberen…"
+  Retry Now: "Nu opnieuw proberen"
+  Transcript:
+    Title: Transcript
+    Search: Transcript doorzoeken
+    Language: Taal van transcript
+    Save: Opslaan
+    Show: Transcript tonen
+    Hide: Transcript verbergen
+    Close: Transcript sluiten
+    Copied: Transcript naar klembord gekopieerd
+    Saved: Transcript opgeslagen
+    Save Error: Transcript kan niet worden opgeslagen
+    Text File: Tekstbestand
+    Unavailable: Voor deze video is geen transcript beschikbaar.
+    Load Error: Het transcript kan niet worden geladen.
+    Empty: Dit transcript bevat geen tekst.
+    No Results: Geen transcriptsegmenten komen overeen met je zoekopdracht.
+  Retry With Built-in Extraction: Opnieuw proberen met ingebouwde extractie
+  Retry With yt-dlp Extraction: Opnieuw proberen met yt-dlp-extractie
+  Reloading video after streaming URL error: Video opnieuw laden na fout met stream-URL
+  Configure Restricted Playback Cookies Hint: "Stel cookies in via Instellingen → Geavanceerd → Externe software → yt-dlp-cookies."
+  Try With Configured Cookies: Proberen met ingestelde cookies
+  Restricted Playback Authentication Failed Template: 'yt-dlp heeft met de ingestelde cookies geen toegang tot deze video: {error}'
+  Private: Privévideo's kunnen niet in OpenTubeX worden bekeken, omdat hiervoor aanmelden bij Google en eigendom van de video vereist zijn.
+  Collapse Playlist: Afspeellijst invouwen
+  Expand Playlist: Afspeellijst uitvouwen
+  Unmark As Watched: Markering als bekeken verwijderen
+  Video has been unmarked as watched: Markering van video als bekeken is verwijderd
+  Save Channel Playback Speed: Afspeelsnelheid voor kanaal opslaan
+  Channel Playback Speed Saved: Afspeelsnelheid voor kanaal opgeslagen
+  Save Channel Video Quality: Videokwaliteit voor kanaal opslaan
+  Channel Video Quality Saved: Videokwaliteit voor kanaal opgeslagen
+  Save Channel Subtitles State: Ondertitelingsstatus voor kanaal opslaan
+  Channel Subtitles State Saved: Ondertitelingsstatus voor kanaal opgeslagen
+  Save Channel Volume: Volume voor kanaal opslaan
+  Channel Volume Saved: Volume voor kanaal opgeslagen
+  Save Channel Setting: Kanaalinstelling opslaan…
+  Channel Setting Already Set: '{setting} is al ingesteld op {value}'
+  Video has been saved to {playlistName}: Video is opgeslagen in {playlistName}
+  Video has been removed from {playlistName}: Video is verwijderd uit {playlistName}
+  There was a problem saving the video to {playlistName}: Er is een probleem opgetreden bij het opslaan van de video in {playlistName}
+  There was a problem removing the video from {playlistName}: Er is een probleem opgetreden bij het verwijderen van de video uit {playlistName}
+  Failed to load collaborators: Laden van bijdragers mislukt
+  Notify me: Mij op de hoogte stellen
+  Notification on: Melding aan
+  Notification enabled: Je krijgt een melding wanneer deze video begint
+  Notification cancelled: Startmelding geannuleerd
+  Notification unavailable: Systeemmeldingen zijn niet beschikbaar
+  Scheduled video starting: Geplande video begint
+  Live notification body: '{videoTitle} begint nu'
+  Premiere: Première
+  AI: AI
+  AI-generated content: Door AI gegenereerde content
+  Collaborators: Bijdragers
+  Live Chat Replay: Herhaling van livechat
+  Show Live Chat: Livechat tonen
+  Show Live Chat Replay: Herhaling van livechat tonen
+  Close Live Chat: Livechat sluiten
+  Close Live Chat Replay: Herhaling van livechat sluiten
+  Live Chat Settings: Instellingen voor livechat
+  Show Live Chat Timestamps: Tijdsaanduidingen tonen
+  Chat Filter: Chatfilter
+  Top Chat: Topchat
+  All Messages: Alle berichten
+  Popout Live Chat: Chat in apart venster openen
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: Herhaling van livechat is ingeschakeld. Chatberichten verschijnen hier terwijl de video wordt afgespeeld.
+  Premiere started: Première bezig. Begonnen {timeAgo}
+  Sponsor Block category:
+    hook: Intro/begroeting
+  Sponsor Block category short:
+    filler: Uitweidingen
+  Player:
+    Playing in Picture-in-Picture: Wordt afgespeeld in beeld-in-beeld
+    Stream Recovery:
+      DASH Fallback: "De audiostream is mislukt, er wordt overgeschakeld naar DASH-formaten: {error}"
+      Error Copied: "Fout gekopieerd naar klembord"
+      Legacy Fallback: "De stream is mislukt, er wordt overgeschakeld naar verouderde formaten: {error}"
+    Caption Timing:
+      Adjust Timing: Timing aanpassen…
+      Caption Timing: Ondertiteltiming
+      Offset: Verschuiving (seconden)
+      Hint: Negatieve waarden tonen ondertitels eerder; positieve waarden later. Geldt alleen voor deze video.
+      Earlier: Eerder
+      Later: Later
+      Reset: Herstellen
+    Most Replayed: "Meest opnieuw afgespeeld"
+    Pull up for precise seeking: "Sleep omhoog om nauwkeurig te zoeken"
+    Precise seeking, drag down to exit: "Nauwkeurig zoeken · Sleep omlaag om te stoppen"
+    Cast: "Casten"
+    Music Mode: "Muziekmodus"
+    Music Mode Description: "Speel video’s af op 1× en start nieuwe video’s vanaf het begin in dit tabblad. Je opgeslagen standaardinstellingen voor afspelen blijven ongewijzigd."
+    DLNA:
+      Cast: "Casten naar een DLNA-apparaat"
+      Stop: "Stoppen met casten"
+      No Devices: "Geen DLNA-apparaten gevonden"
+      No MP4 Source: "Geen compatibele MP4-stream voor deze video"
+      Error: "Kan de video niet casten"
+    Repeat Stats:
+      Repeat Stats: Herhaalstatistieken
+      Looping: Herhalen ingeschakeld
+      Repeats: Herhaling | Herhalingen
+      Time Spent: Bestede tijd
+    Voice-over Translation:
+      Start: Vertalen
+      Cancel: Annuleren
+      Progress: Voice-oververtaling voorbereiden…
+      Retry: Opnieuw proberen
+      Error: Voice-oververtaling mislukt. Probeer het later opnieuw.
+      Duration Error: Voice-oververtaling is alleen beschikbaar voor video's van maximaal vier uur.
+    Caption Appearance:
+      Options: Opties
+      Sample: Zo ziet ondertiteling eruit
+    Auto-translate: Automatisch vertalen
+    Sleep Timer:
+      Sleep Timer: Slaaptimer
+      'Off': Uit
+      Minutes: '{minutes} minuten'
+      End of video: Einde van video
+      End of current chapter: Einde van huidig hoofdstuk
+      Remaining: '{time} resterend'
+      Cancel timer: Timer annuleren
+      Timer ended: Slaaptimer afgelopen
+    A-B Repeat:
+      A-B Repeat: A-B-herhaling
+      On: Aan
+      Off: Uit
+      Point A: Punt A
+      Point B: Punt B
+      Set Repeat Start: Begin van herhaling instellen
+      Set Repeat End: Einde van herhaling instellen
+      Pause Repeat: A-B-herhaling pauzeren
+      Resume Repeat: A-B-herhaling hervatten
+      Adjust Point: Punt {point} aanpassen, momenteel {timestamp}
+      Clear Range: Bereik van A-B-herhaling wissen
+      End Before Start: Punt B moet na punt A liggen.
+      Outside Duration: Het tijdstip moet binnen de duur van de video liggen.
+      Cleared: A-B-herhaling gewist
+    Seek History:
+      Seek History: Spoelgeschiedenis
+      Positions: '{count} positie | {count} posities'
+      Nothing to undo: Niets om ongedaan te maken
+      Nothing to redo: Niets om opnieuw uit te voeren
+    Zoom:
+      Zoom: Zoom
+      'Off': Uit
+    Volume Boost:
+      Volume Boost: "Volumeversterking"
+      'Off': "Uit"
+    Auto-generated Caption Template: '{language} (automatisch gegenereerd)'
+    Up next in {seconds}: Hierna over {seconds}
+    Resize dock: Grootte van paneel aanpassen
+    Play now: Nu afspelen
+    MusicPlaybackRateOverride: Muziekvideo gedetecteerd, afspelen op 1x
+    Normal: Normaal
+    Set Default: Als standaard instellen
+    Hide Annotations: Annotaties verbergen
+    Show Annotations: Annotaties tonen
+    Hide: Verbergen
+    Show: Tonen
+    Scroll Mini Player:
+      Collapse Controls: "Bediening inklappen"
+      Expand Controls: "Bediening uitklappen"
+      Back to Top: Terug naar boven
+      Return to Video Tab: Terug naar videotabblad
+      Hide: Minispeler verbergen
+      Play: Afspelen
+      Pause: Pauzeren
+      Drag Handle: Minispeler verplaatsen
+      Rewind 10 seconds: 10 seconden terugspoelen
+      Forward 10 seconds: 10 seconden vooruitspoelen
+    SponsorBlock:
+      CancelCurrentSegment: Maken van segment annuleren
+      ClearSegments: Segmenten wissen
+      ClearSegmentsPrompt: Weet je zeker dat je alle conceptsegmenten van SponsorBlock voor deze video wilt wissen?
+      CompleteSegmentsBeforeSubmitting: Voltooi elk conceptsegment voordat je het indient.
+      CategoryLabel: Categorie
+      ActionTypeLabel: Segmenttype
+      DuplicateSegments: Dubbele conceptsegmenten zijn niet toegestaan.
+      EndAction: (Einde)
+      EndActionLabel: Einde
+      EndTimeAfterStart: De eindtijd van het segment moet na de begintijd liggen.
+      EndTimeBeforeVideoEnd: De eindtijd van het segment moet binnen de videoduur vallen.
+      EndTimeLabel: Eindtijd van segment
+      DisableAutoSkipTemporarily: Automatisch overslaan door SponsorBlock tijdelijk uitschakelen
+      EnableAutoSkipTemporarily: Automatisch overslaan door SponsorBlock weer inschakelen
+      Guidelines: Richtlijnen
+      InspectSegment: Bekijken
+      InvalidStartTime: Voer een geldige begintijd voor het segment in.
+      NoSegmentsToSubmit: Maak ten minste één volledig segment voordat je het indient.
+      NowAction: (Nu)
+      CloseInfoPanel: SponsorBlock-informatie sluiten
+      OpenInfoPanel: SponsorBlock-informatie openen
+      OpenSubmissionMenu: Indienen-menu openen
+      PreviewRequired: Bekijk een voorbeeld van elk segment voordat je het indient.
+      PreviewSegment: Voorbeeld
+      SaveSegment: Opslaan
+      SetSegmentEndNow: Segment nu beëindigen
+      StartAction: (Begin)
+      StartSegmentNow: Segment nu beginnen
+      SubmissionBadRequest: SponsorBlock heeft het verzoek tot indienen geweigerd.
+      SubmissionDuplicate: Dit is al eerder ingediend.
+      SubmissionFailed: Indienen van SponsorBlock-segmenten mislukt.
+      SubmissionForbidden: SponsorBlock heeft de inzending geweigerd.
+      SubmissionRateLimited: SponsorBlock heeft de inzending wegens een frequentielimiet geweigerd.
+      SubmissionSuccess: SponsorBlock-segmenten ingediend.
+      SubmitSegment: Segment indienen
+      SubmitSegments: Indienen
+      StartTimeLabel: Begintijd van segment
+      TimeDivider: tot
+      SkipPrompt: '{segmentCategory} overslaan?'
+      SkipPromptAction: Overslaan
+      SkipToHighlight: Naar hoogtepunt springen?
+      SkippedToHighlight: Naar hoogtepunt gesprongen
+      SkipToastUnskip: Niet overslaan
+      SkipToastReskip: Opnieuw overslaan
+      MutedSegment: '{segmentCategory} gedempt'
+      MuteToastUnmute: Dempen opheffen
+      InfoPanelLoading: Segmenten worden nog geladen...
+      InfoPanelHasSegments: Deze video heeft segmenten in de database!
+      InfoPanelNoSegments: Geen segmenten gevonden
+      RefreshSegments: Segmenten vernieuwen
+      RefreshInfo: SponsorBlock-informatie vernieuwen
+      ContributionStatsTitle: Jouw bijdragen
+      ContributionStatsLoading: Bijdragestatistieken laden...
+      ContributionStatsError: Bijdragestatistieken zijn niet beschikbaar. Probeer ze te vernieuwen.
+      ContributionStatsNoUserId: Dien een segment in of importeer je SponsorBlock-gebruikers-ID om bijdragestatistieken te bekijken.
+      Submissions: Inzendingen
+      Segments: Segmenten
+      TimeSaved: Bespaarde tijd
+      AutoSkipEnabled: Segmenten automatisch overslaan
+      AutoSkipOn: Aan
+      AutoSkipOff: Uit
+      WhitelistChannel: Kanaal toestaan
+      ChannelWhitelisted: Toegestaan
+      RemoveChannelFromWhitelist: Kanaal niet meer toestaan
+      MuteSegment: Segment dempen
+      SkipSegment: Segment overslaan
+      CloseSegmentActions: Segmentacties sluiten
+      FullVideo: Hele video
+      FullVideoLabel: '{segmentCategory} · Hele video'
+      MuteActionType: Dempen
+      MutePrompt: '{segmentCategory} dempen?'
+      SkipActionType: Overslaan
+      LockedSegment: Vergrendeld segment
+      UpvoteSegment: Positieve stem
+      DownvoteSegment: Negatieve stem
+      VoteFailed: SponsorBlock-stem indienen mislukt.
+      ChangeCategory: Categorie wijzigen
+      CopyAndDownvote: Kopiëren en negatief stemmen
+      SubmitCategoryVote: Categoriestem versturen
+      CategoryVoteSuccess: Categoriestem verstuurd.
+    Google Cast:
+      Position: "Afspeelpositie"
+      Invalid Authentication: "De ontvanger stuurde een ongeldig authenticatieantwoord."
+      Authentication Declined: "De ontvanger weigerde authenticatie."
+      Audio Only Receiver: "De ontvanger ondersteunt alleen het casten van audio."
+      Disconnected: "De ontvanger is losgekoppeld."
+      Timeout: "De ontvanger reageerde niet."
+      Busy: "Een ander venster cast al."
+      Not Authorized: "Activeer dit venster en probeer opnieuw."
+      Invalid Request: "Ongeldig castverzoek."
+      IPv4 Required: "Een IPv4-verbinding is vereist."
+      Launch Failed: "De ontvanger kon niet worden gestart."
+      Load Failed: "De ontvanger kon de video niet laden."
+      Cancelled: "Het casten is geannuleerd."
+      Private Not Authorized: "Toegang tot privémedia is niet goedgekeurd."
+      Invalid Subtitles: "Ongeldige ondertitels voor casting."
+      Discovery Failed: "Ontvangers konden niet worden gezocht."
+      Preparing Video: "Video voorbereiden voor casten…"
+      Connecting: "Verbinden met {device}…"
+      Starting Receiver: "Cast-ontvanger starten…"
+      Loading Video: "Video laden op de ontvanger…"
+      Buffering: "Bufferen op {device}…"
+      Allow Private Instance: "Deze cast toestaan media te lezen van de privé-Invidious-instantie {instance}?"
+      Cast: "Casten naar een Google Cast-apparaat"
+      Connected: "Casten naar {device}"
+      Rewind: "10 seconden terug"
+      Forward: "10 seconden vooruit"
+      Subtitles Off: "Ondertiteling uit"
+      Return: "Terug naar lokaal afspelen"
+      No Devices: "Geen Google Cast-apparaten gevonden"
+      No Source: "Geen compatibele stream voor Google Cast"
+      Error: "Kan de video niet casten"
+      Error With Details: "Kan de video niet casten: {error}"
+      Untrusted Receiver: "Het certificaat van de ontvanger wordt niet vertrouwd. Gebruik een geauthenticeerde Google Cast-ontvanger."
+    FCast:
+      Cast: "Casten naar een FCast-ontvanger"
+      No Devices: "Geen FCast-ontvangers gevonden"
+      No Source: "Geen compatibele stream voor FCast"
+    Secondary Captions: Tweede ondertiteling
+    Subtitle File:
+      Load: "Ondertitelbestand laden…"
+      Subtitle Files: "Ondertitelbestanden"
+      Error: "Het ondertitelbestand kan niet worden geladen. Kies een SRT- of WebVTT-bestand."
+  Watch:
+    'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Resterende tijd van preroll-advertentie: {remindingTimeSeconds}s'
+    'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Resterende SABR-wachttijd: {remindingTimeSeconds}s'
+  Station: Station
+  Playlist:
+    Unavailable videos are hidden: 1 niet-beschikbare video is verborgen | {count} niet-beschikbare video's zijn verborgen
+  External Media:
+    Dislikes: "Dislike | Dislikes"
+    Reposts: "Herplaatsing | Herplaatsingen"
+    Saves: "Opgeslagen item | Opgeslagen items"
+    Series: "Serie"
+    Season: "Seizoen"
+    Season Number: "Seizoennummer"
+    Episode: "Aflevering"
+    Episode Number: "Afleveringsnummer"
+    Track: "Muzieknummer"
+    Track Number: "Tracknummer"
+    Artists: "Artiesten"
+    Album: "Album"
+    Genres: "Genres"
+    Media Type: "Mediatype"
+    Availability: "Beschikbaarheid"
+    Age Limit: "Leeftijdsgrens"
+    Release Date: "Releasedatum"
+    Availability Values:
+      public: "Openbaar"
+      private: "Privé"
+      premium_only: "Alleen premium"
+      subscriber_only: "Alleen abonnees"
+      needs_auth: "Inloggen vereist"
+      unlisted: "Verborgen"
+  How this was made: Hoe dit is gemaakt
+  Save Queue to Playlist: "Wachtrij opslaan in afspeellijst"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Livechat wordt momenteel niet ondersteund door de Yattee-server. Een directe verbinding met YouTube is nodig.
+  External Player:
+    LaunchFailedTemplate: Kan {externalPlayer} niet starten. Controleer of het is geïnstalleerd, of stel het pad naar het uitvoerbare bestand in bij de instellingen voor externe spelers.
+    Confirm Arguments Title: "Externe speler uitvoeren met aangepaste argumenten?"
+    Confirm Arguments Message: "{externalPlayer} start met deze aangepaste argumenten:"
+    Confirm Arguments Warning: "Sommige argumenten kunnen programma's uitvoeren of bestanden overschrijven. Ga alleen verder als je ze zelf hebt toegevoegd."
+    Run: "Uitvoeren"
+    LaunchCanceledTemplate: "{externalPlayer} is niet geopend"
+Playlist:
+  Playlist Already Preloaded: "Alle video's in de afspeellijst zijn al vooraf geladen"
+  Playlist Preload Progress: "Video's vooraf laden: {completed} van {requested}"
+  Close Playlist: Afspeellijst sluiten
+  Preload Playlist: "Alle video’s vooraf laden"
+  Preload Playlist Warning Title: "Alle video’s vooraf laden?"
+  Preload Playlist Warning: "Vooraf laden vraagt elke video in deze afspeellijst op bij YouTube. Veel verzoeken in korte tijd kunnen ervoor zorgen dat YouTube je IP-adres tijdelijk blokkeert. Wil je doorgaan?"
+  Preloading Playlist: "Alle video’s worden vooraf geladen..."
+  Playlist Preload Complete: "Vooraf geladen video’s: {count}."
+  Playlist Preload Partial: "{preloaded} van {requested} video’s vooraf geladen. {failed} konden niet worden geladen."
+  Playlist Preload Pagination Failed: "De volledige afspeellijst kon niet worden geladen. Vooraf laden is geannuleerd."
+  Unavailable videos are hidden: Niet-beschikbare video's zijn verborgen
+  Add Playlist to Queue: "Afspeellijst aan wachtrij toevoegen"
+  Playlist Added to Queue: "Afspeellijst aan wachtrij toegevoegd"
+Change Format:
+  yt-dlp Error Template: "yt-dlp kon de streams niet leveren: {error}"
+  Local Video File: Lokaal videobestand
+  Local Audio File: Lokaal audiobestand
+  Online Video: Onlinevideo
+  Stream Source: Streambron
+  Stream Extraction Method: Methode voor stream-extractie
+  Playback Engine: Afspeelengine
+  Streaming Protocol: Streamingprotocol
+  Not Available For This Video: Niet beschikbaar voor deze video
+  Protocols:
+    Progressive: Progressief
+  Descriptions:
+    Local File: Rechtstreeks afgespeeld vanuit het gedownloade bestand op dit apparaat
+    Online Video: Streamingindelingen laden uit de ingestelde onlinebron
+    Dash: Adaptieve kwaliteit, meerdere audiotracks en de hoogste resoluties
+    Legacy: Eén bestand met video en audio gecombineerd, beperkt tot lagere resoluties
+    Audio: Alleen audio, handig om bandbreedte te besparen of op de achtergrond te luisteren
+  yt-dlp Fallback Template: 'yt-dlp kon geen streams leveren. De ingebouwde engine wordt gebruikt: {error}'
+  yt-dlp Default Clients Fallback: De voorkeursclients van yt-dlp konden geen afspeelbare streams leveren. De standaardclients van yt-dlp worden geprobeerd
+  Built-in Fallback Template: 'De ingebouwde engine kon de stream niet afspelen. yt-dlp wordt geprobeerd: {error}'
+Share:
+  Shared YouTube Link: "Gedeelde YouTube-link"
+  Open in Player: "Openen in de speler"
+  No YouTube Link: "De gedeelde tekst bevat geen ondersteunde YouTube-link."
+  Loading Video Information: "Videogegevens laden…"
+  Video Information Failed: "Kan de videogegevens niet laden. Probeer opnieuw of open de link."
+  Share Link: "Link delen"
+  Share failed: "Kan de link niet delen"
+  Timestamp Link Copied: Link met tijdsaanduiding naar klembord gekopieerd
+Context Menu:
+  Opened in a Background Tab: "Geopend in een tabblad op de achtergrond"
+  Open in a Background Tab: "Openen in een tabblad op de achtergrond"
+  Select Tab: Tabblad selecteren
+  Close Tabs Before: Voorgaande tabbladen sluiten
+  Close Tabs After: Volgende tabbladen sluiten
+  Close Other Tabs: Andere tabbladen sluiten
+  Copy {service} link without playlist: "{service}-link zonder afspeellijst kopiëren"
+  Context Menu: Contextmenu
+  Select All: Alles selecteren
+  Save Image As…: Afbeelding opslaan als…
+  Copy Image: Afbeelding kopiëren
+  Copy Image Address: Afbeeldingsadres kopiëren
+  Cancel Refresh: Vernieuwen annuleren
+  Reload Videos: Video's opnieuw laden
+  Reload Shorts: Shorts opnieuw laden
+  Reload Live: Livestreams opnieuw laden
+  Reload Posts: Berichten opnieuw laden
+  Reload All Feeds: Alle feeds opnieuw laden
+  Reload RSS Feeds: RSS-feeds opnieuw laden
+  Close Multiple Tabs: '{count} tabbladen sluiten'
+  Duplicate Tab: Tabblad dupliceren
+  Duplicate Multiple Tabs: '{count} tabbladen dupliceren'
+  Move Tab: Tabblad verplaatsen
+  Move Tabs: Tabbladen verplaatsen
+  Move Tab to Group: Tabblad naar groep verplaatsen
+  Collapse Group: Groep samenvouwen
+  Expand Group: Groep uitvouwen
+  Move Tabs to Group: Tabbladen naar groep verplaatsen
+  Manage Tab Groups…: Tabbladgroepen beheren…
+  To Beginning: Naar begin
+  To End: Naar einde
+  Close Tabs: Tabbladen sluiten
+  To the Top: Naar boven
+  To the Left: Naar links
+  To the Bottom: Naar onderen
+  To the Right: Naar rechts
+  Other Tabs: Andere tabbladen
+  Copy YouTube Link: YouTube-link kopiëren
+  Copy YouTube Links: YouTube-links kopiëren
+  Pin Tab: Tabblad vastmaken
+  Pin Tabs: Tabbladen vastmaken
+  Unpin Tab: Tabblad losmaken
+  Unpin Tabs: Tabbladen losmaken
+  Tab Color: Tabbladkleur
+  Default: Standaard
+  Purple: Paars
+  Reopen Closed Tab: Gesloten tabblad opnieuw openen
+  Reload Tab: Tabblad opnieuw laden
+  Reload Tabs: Tabbladen opnieuw laden
+  Load Tab: Tabblad laden
+  Load Tabs: Tabbladen laden
+  Unload Tab: Tabblad uit geheugen verwijderen
+  Unload Tabs: Tabbladen uit geheugen verwijderen
+  Unload Tabs Failed: "De geselecteerde tabbladen konden niet uit het geheugen worden verwijderd."
+  Move Tab to Window: Tabblad naar venster verplaatsen
+  Move Tabs to Window: Tabbladen naar venster verplaatsen
+  Open in a New Tab: Openen in nieuw tabblad
+  Open in a New Window: Openen in nieuw venster
+  Copy Link: Link kopiëren
+  Copy Invidious Link: Invidious-link kopiëren
+  Search Selection in New Tab: Zoeken naar "{selection}" in een nieuw tabblad
+  Search Selection in New Window: Zoeken naar "{selection}" in een nieuw venster
+  Search With: Zoeken met {engine}
+  Search With Multiple: Zoeken met...
+  Selection Too Long: Selectie is te lang om te zoeken (> {count} tekens)
+  Background Tab: Achtergrondtabblad
+Tab Organizer:
+  Tab History: "Tabgeschiedenis"
+  Current Page: "Huidige pagina"
+  Icon Labels:
+    Podcast: 'Podcast'
+    Clock: 'Klok'
+    Puzzle Piece: 'Puzzelstuk'
+    People: 'Mensen'
+    Chart: 'Grafiek'
+    Calendar: 'Agenda'
+    Images: 'Afbeeldingen'
+    Music: 'Muziek'
+    Folder: Map
+    Bookmark: Bladwijzer
+    Favorites: Favorieten
+    Videos: Video's
+    Gaming: Games
+    Research: Onderzoek
+    Art: Kunst
+    Travel: Reizen
+  Group Icon: Groepspictogram
+  Title: Tabbladen beheren
+  Open Tab Count: '{count} open tabblad | {count} open tabbladen'
+  Search Label: Tabbladen zoeken
+  Selected Count: '{count} tabblad geselecteerd | {count} tabbladen geselecteerd'
+  Tab Count: '{count} tabblad | {count} tabbladen'
+  Select All: Alles selecteren
+  Select None: Niets selecteren
+  Move To Group: Geselecteerde tabbladen naar groep verplaatsen
+  Choose Group: Kies een groep
+  Ungrouped: Niet gegroepeerd
+  Pin: Vastmaken
+  Unpin: Losmaken
+  Load: Laden
+  Unload: Uit geheugen verwijderen
+  Unload All: Alles uit geheugen verwijderen
+  Close All: Alles sluiten
+  Ungroup: Uit groep halen
+  Group Name: Groepsnaam
+  Color: Kleur
+  No Color: Geen kleur
+  Create Group: Groep maken
+  Expand Group: Groep uitvouwen
+  Collapse Group: Groep samenvouwen
+  Expand Group Label: '{name} uitvouwen, {count} tabblad | {name} uitvouwen, {count} tabbladen'
+  Rename Group: '{name} hernoemen'
+  Change Group Color: Kleur van {name} wijzigen
+  Move To Window: Naar venster verplaatsen
+  Choose Window: Kies een venster
+  Select Tab: '{title} selecteren'
+  Active: Actief
+  Pinned: Vastgemaakt
+  Unloaded: Uit geheugen verwijderd
+  Playing: Wordt afgespeeld
+  Close Tab: '{title} sluiten'
+  No Open Results: Geen open tabbladen komen overeen met deze zoekopdracht.
+  Recently Closed: Onlangs gesloten
+  Clear: Wissen
+  No Closed Results: Geen onlangs gesloten tabbladen komen overeen met deze zoekopdracht.
+  Drag Tab: Sleep om naar een groep te verplaatsen
+Chapters:
+  Open Chapters: Hoofdstukken openen
+  Close Chapters: Hoofdstukken sluiten
+  Copy Timestamp Link: Link op {timestamp} kopiëren
+  Loop Chapter: 'Hoofdstuk herhalen: {chapter}'
+  Looping Chapter: 'Hoofdstuk wordt herhaald: {chapter}'
+  Chapter Loop Stopped: 'Herhalen van hoofdstuk gestopt'
+Comments:
+  Image unavailable: "Afbeelding niet beschikbaar"
+  Comment Count: 1 reactie | {count} reacties
+  Show Comments: Reacties tonen
+  Getting comment replies, please wait: Antwoorden op reactie ophalen, even geduld
+  Reload Comments: Reacties opnieuw laden
+  Reply Count: 1 antwoord | {replyCount} antwoorden
+  Comments are turned off: Reacties zijn uitgeschakeld
+  YouTube did not provide advertised replies: YouTube gaf aan dat deze reactie antwoorden heeft, maar leverde ze niet aan. Ze zijn mogelijk verwijderd of verborgen. Daarom is de antwoordknop weggehaald.
+  Pinned by you: Door jou vastgezet
+  A reply is pinned: Er is een antwoord vastgezet
+  Filter loaded comments: Geladen reacties filteren
+  Comment filters: Reactiefilters
+  From creator: Van maker
+  Contains timestamps: Bevat tijdsaanduidingen
+  Pin comment by author: Reactie van {author} vastzetten
+  Unpin comment by author: Reactie van {author} losmaken
+  Edited: (bewerkt)
+  Highlighted comment: Uitgelichte reactie
+  Highlighted reply: Uitgelicht antwoord
+  Search loaded comments: Geladen reacties doorzoeken
+  Loaded comment search result count: 1 van {total} geladen reacties | {count} van {total} geladen reacties
+  No loaded comments match your filters: Geen geladen reacties voldoen aan je filters
+  YouTube comment link copied to clipboard: Link naar YouTube-reactie naar klembord gekopieerd
+  Translate to {language}: Vertalen naar het {language}
+  Show original: Origineel tonen
+  Translating comment, please wait: Reactie vertalen, even geduld
+  Comment translation failed: Vertalen van reactie mislukt
+Description:
+  Title: Beschrijving
+  Copy Description: Beschrijving kopiëren
+  Description Copied: Beschrijving naar klembord gekopieerd
+  Video Category: 'Videocategorie:'
+  Video Tags: Videotags
+  Games: Games
+  Music: Muziek
+Tooltips:
+  General Settings:
+    Limit Titles to Two Lines: "Kort titels van video's en afspeellijsten in lijsten en rasters in tot twee regels met een beletselteken, voor gelijkmatigere kaarten. Beweeg de muis over een titel om deze volledig te zien."
+    Close Window With Last Tab: 'Indien uitgeschakeld, opent het sluiten van het laatste tabblad in plaats daarvan een nieuw tabblad, zodat het venster open blijft totdat je het sluit.'
+    Preferred Video Codec: |
+      Automatisch geeft de voorkeur aan codecs die je apparaat met hardware kan decoderen.
+      AV1: de beste kwaliteit voor de minste data, maar niet elke video heeft het. Zonder hardwaredecodering kan het de batterij leegtrekken of beelden overslaan.
+      VP9: een balans tussen efficiëntie en compatibiliteit, meestal beschikbaar tot de hoogste resolutie.
+      H.264: het makkelijkst te decoderen op bijna elk apparaat, maar gebruikt meer data en stopt meestal bij 1080p.
+      Wijzigingen gelden vanaf de volgende video. Als de voorkeurscodec niet beschikbaar is, wordt een andere gebruikt.
+    Always Use Backup Media Server: "Streamt video's vanaf de back-upserver die YouTube opgeeft in plaats van de toegewezen server, bijvoorbeeld wanneer de cache van je internetprovider vaak traag is. Anders schakelt OpenTubeX alleen over wanneer de toegewezen server niet reageert."
+    Automatically switch stream extraction methods: "Probeer yt-dlp als de ingebouwde afspeelengine faalt, of de ingebouwde afspeelengine als yt-dlp faalt."
+    Enable Tabs: "Houdt de huidige pagina open. Andere tabbladen blijven bewaard totdat de app opnieuw wordt gestart; schakel tabbladen weer in om ze te herstellen."
+    Data Saver Thumbnails: "Gebruik miniaturen met een lagere resolutie om het dataverbruik te verminderen."
+    Use AI Translation Completions: Vul ontbrekende menselijke vertalingen aan met door AI gegenereerde tekst. Menselijke vertalingen krijgen altijd voorrang.
+    Update Relative Timestamps: Werkt relatieve tijdsaanduidingen in de hele app bij zolang een pagina geopend blijft. Als dit is uitgeschakeld, worden ze alleen bijgewerkt nadat je de pagina opnieuw laadt of bezoekt.
+    Stream Extraction Method: |
+      Kies hoe OpenTubeX videostreams ophaalt. yt-dlp moet beschikbaar zijn als je deze optie selecteert.
+      Met yt-dlp kan het langer duren voordat video's beginnen.
+      De ingebouwde methode ondersteunt zoeken in livestreams en premières niet.
+    Avoid translation: |
+      Schakel de automatische vertaling door YouTube van de titel, beschrijving en hoofdstukken van een video uit.
+      Te veel aanvragen, bijvoorbeeld om videotitels in lijsten op te halen, kunnen de
+      betrouwbaarheid van de app tijdelijk verminderen.
+    Show Thumbnail Previews: Toon bewegende voorbeelden wanneer je de aanwijzer boven videominiaturen houdt.
+    Startup Behavior: |
+      Kies wat OpenTubeX bij het opstarten doet.
+      Alle tabbladen laden herstelt elk opgeslagen tabblad direct, maar video's op achtergrondtabbladen worden niet automatisch afgespeeld.
+      Eerder geladen tabbladen laden herlaadt de tabbladen die geladen waren toen OpenTubeX werd afgesloten en laat de overige tabbladen uit het geheugen verwijderd.
+      Laatst actieve tabblad laden herstelt de vorige sessie met de andere tabbladen geopend, maar uit het geheugen verwijderd. Ze worden geladen wanneer je erop klikt.
+      Met een lege sessie beginnen slaat de opgeslagen tabbladen over en opent een nieuw venster.
+    Remember Tab Navigation History: De navigatiegeschiedenis voor vooruit en achteruit van elk tabblad wordt opgeslagen en hersteld wanneer OpenTubeX opnieuw wordt gestart.
+    Yattee Server: De yattee-server-instantie waarvan OpenTubeX video's, kanalen, afspeellijsten en zoekresultaten laadt. De gebruikersnaam en het wachtwoord worden alleen op dit apparaat opgeslagen.
+    Proxy Videos Through Yattee Server: Stuurt video- en audiostreams door via de server. Laat dit aan, tenzij de server je internetverbinding deelt, want YouTube levert streams alleen aan het adres dat ze heeft opgevraagd. Miniaturen worden altijd rechtstreeks van YouTube geladen.
+    Notifications: Kies hoe OpenTubeX je op de hoogte brengt van livestreams, nieuwe uploads en automatische downloads. Met Systeem en in de app verschijnen meldingen in OpenTubeX terwijl je het gebruikt en anders als systeemmeldingen, en de bel bewaart ze. Uit verbergt ook de meldingsopties.
+  Proxy Settings:
+    IP Block Recovery Script Path: Pad naar het scriptbestand dat wordt uitgevoerd wanneer een IP-blokkade wordt gedetecteerd. OpenTubeX wacht tot het klaar is en laadt daarna de video opnieuw. Als terugvallen is ingeschakeld, wordt het alleen uitgevoerd wanneer ook dat mislukt.
+  Player Settings:
+    Rewind on Resume: "Springt dit aantal seconden terug wanneer je een gepauzeerde video hervat, zodat je de laatste momenten opnieuw kunt zien. Stel in op 0 om dit uit te schakelen."
+    Minimum Pause Before Rewinding: "Spoelt alleen terug als de video minstens zo lang gepauzeerd was. Stel in op 0 om na elke pauze terug te spoelen."
+    Mono Audio: 'Speelt het linker- en rechteraudiokanaal in beide oren af. Gebruik dit als het geluid van een video maar uit één kant van je koptelefoon komt.'
+    Pause on Stream Recovery: "Wanneer de videostream mislukt en de speler deze opnieuw laadt of overschakelt naar een ander formaat of een andere engine, wordt het afspelen gepauzeerd en blijft de fout bovenaan de speler staan tot je deze sluit. Indien uitgeschakeld, gaat het afspelen door en verschijnt de fout kort als melding."
+    Continue Playback When Screen Is Locked: 'Blijft audio op de achtergrond afspelen en biedt Android-mediabediening. Schakel dit uit om te pauzeren wanneer de app niet meer zichtbaar is.'
+    Enable Caption Translations: Als dit is ingeschakeld en de video geen overeenkomend oorspronkelijk ondertitelingsspoor heeft, geven de ondertitelingsknop en sneltoets C de voorkeur aan een automatisch vertaald spoor in de voorkeurstaal voor ondertiteling.
+    Use Quick Playback Speed Bar: Toont rechts in de spelerbediening een balk om snel de afspeelsnelheid te kiezen. Als het handmatig opslaan van afspeelsnelheid per kanaal is ingeschakeld, bevat de balk ook een knop om de snelheid voor het huidige kanaal op te slaan.
+    Multiply Seek Interval by Playback Rate: Als dit is ingeschakeld, worden zoekintervallen van de pijltoetsen en J/L vermenigvuldigd met de huidige afspeelsnelheid. Als dit is uitgeschakeld, blijven zoekintervallen gelijk, ongeacht de afspeelsnelheid.
+    Show Playback Rate Adjusted Timestamp: Als dit is ingeschakeld en de afspeelsnelheid afwijkt van 1x, toont de speler na de normale tijdsaanduiding tussen haakjes een tijd die aan de afspeelsnelheid is aangepast.
+    Use YouTube-style Shorts: Toont Shorts in een staand raster op abonnements- en kanaalpagina's en gebruikt de Shorts-speler in YouTube-stijl.
+    Loop Shorts: Als dit is ingeschakeld, beginnen Shorts automatisch opnieuw. Als dit is uitgeschakeld, stoppen Shorts aan het einde en verschijnt een knop om ze opnieuw af te spelen.
+    Show Skip Silence Toggle: Toont in het instellingenmenu van de speler een aan-uitschakelaar om stiltes over te slaan.
+    Enable Skip Silence by Default: Schakelt het overslaan van stiltes in voor nieuwe tabbladen. Een wijziging in één tabblad heeft geen invloed op andere tabbladen.
+    Enable Video Zoom: Toont de zoombediening in het instellingenmenu van de speler en schakelt de bijbehorende sneltoetsen en bediening voor verschuiven in.
+    Enable Seek History: Onthoudt vanaf waar je in elke video bent gesprongen totdat de app wordt gesloten. Toont de lijst met de spoelgeschiedenis in het instellingenmenu van de speler en schakelt de bijbehorende sneltoetsen in.
+    Show Seek Bar Filmstrip: "Als je de knop van de zoekbalk sleept, verschijnt een strook frames rond de plek waar je uitkomt, en als je omhoog op de strook sleept, zoek je nauwkeurig. Indien uitgeschakeld, toont slepen één miniatuur, zoals bij aanwijzen."
+    Voice-over Translation: Stuurt de video-ID, duur en geselecteerde taal naar de onofficiële voice-oververtaaldienst van Yandex wanneer je om een vertaling vraagt. Standaard uitgeschakeld.
+    Hold to Double Playback Speed: Houd de spatiebalk of linkermuisknop boven de speler ingedrukt om de huidige afspeelsnelheid tijdelijk te verdubbelen.
+    Ambient Mode: Laat de kleuren van de video overvloeien in het gebied rond de speler.
+    Default Volume: Uitgeschakeld zolang Volume onthouden is ingeschakeld. Schakel Volume onthouden uit om voor elke video een vast beginvolume in te stellen.
+    Parallel Segment Loading: |
+      Hoeveel video- en audiosegmenten vóór het afspelen tegelijk moeten worden geladen.
+      Hogere waarden kunnen helpen bij langzame of instabiele verbindingen, maar gebruiken meer bandbreedte en geheugen.
+      Hierdoor kan Automatisch de verbindingssnelheid ook onderschatten en een lagere kwaliteit kiezen.
+      Streams die tot één aanvraag tegelijk zijn beperkt, negeren deze instelling.
+    Preload Upcoming Videos: "Haalt yt-dlp-URL’s voor de volgende video’s op en bewaart ze in de cache. De wachtrij heeft voorrang op afspeellijsten en aanbevelingen."
+    Upcoming Videos to Preload: "Het maximale aantal volgende video’s waarvan de yt-dlp-URL’s op de achtergrond worden opgehaald."
+    Concurrent Preloads: "Het maximale aantal yt-dlp-processen dat wordt gebruikt om video's tegelijk vooraf te laden. Hogere waarden gebruiken meer CPU, geheugen en netwerkbandbreedte."
+    Ignore System Rotation Lock for Fullscreen: Draai het apparaat om volledig scherm te openen en te sluiten, ook als automatisch draaien in Android uitstaat.
+  Download Settings:
+    Download Folder: Video's worden in deze map opgeslagen. Laat dit leeg om de downloadmap van je systeem te gebruiken.
+    Global Additional yt-dlp Arguments: Aanvullende opdrachtregelargumenten die bij elke download aan yt-dlp worden doorgegeven, bijvoorbeeld --cookies-from-browser firefox.
+    Concurrent Downloads: Het maximale aantal yt-dlp-taken dat tegelijk mag worden uitgevoerd.
+    Bandwidth Limit: Beperkt de totale overdrachtssnelheid van de wachtrij door deze limiet over gelijktijdige taken te verdelen. Voer 0 in voor geen limiet.
+  External Software Settings:
+    yt-dlp Source: OpenTubeX kan de yt-dlp-installatie op je systeem gebruiken of een eigen exemplaar van yt-dlp downloaden en beheren. Dit exemplaar wordt in de map met gebruikersgegevens bewaard.
+    yt-dlp Channel: Selecteer welk releasekanaal van yt-dlp OpenTubeX downloadt en beheert. Stable wordt voor de meeste gebruikers aanbevolen.
+    FFmpeg Source: OpenTubeX kan de FFmpeg- en FFprobe-installaties op je systeem gebruiken of eigen statische builds downloaden en beheren. Deze worden in de map met gebruikersgegevens bewaard.
+    Managed Tool Updates: Kies of beheerde hulpprogramma's automatisch worden bijgewerkt, vóór het bijwerken om bevestiging vragen of alleen via de handmatige knoppen worden bijgewerkt. Ontbrekende hulpprogramma's worden nog steeds gedownload wanneer ze nodig zijn.
+    yt-dlp Executable Path: OpenTubeX gaat er standaard van uit dat yt-dlp via de omgevingsvariabele PATH kan worden gevonden. Je kunt hier zo nodig een aangepast pad instellen.
+    Cookie Source: Kies of yt-dlp voor geverifieerd afspelen een Netscape-cookiebestand of cookies uit een geïnstalleerde browser moet lezen.
+    Cookie File: Selecteer een cookiebestand in Netscape-indeling voor geverifieerd afspelen.
+    Browser for Cookies: Browserondersteuning wordt uit het geselecteerde uitvoerbare bestand van yt-dlp gelezen. OpenTubeX vraagt yt-dlp om deze browser te lezen wanneer geverifieerd afspelen wordt aangevraagd.
+    Browser Profile: Optionele naam of map van het browserprofiel. Laat dit leeg om het laatst gebruikte profiel te gebruiken.
+    Always Use Cookies: "Gebruik de ingestelde cookies voor downloads, ondertitels en telkens wanneer yt-dlp streams ophaalt. Dit wijzigt de methode voor stream-extractie niet in yt-dlp. Als yt-dlp is geselecteerd, kunnen indelingen die alleen voor accounts beschikbaar zijn worden aangeboden, waaronder de verbeterde bitsnelheid van YouTube Premium als het account daar toegang toe heeft."
+    FFmpeg Executable Path: FFmpeg is vereist om afzonderlijke video- en audiostreams samen te voegen en audio te converteren. OpenTubeX gaat er standaard van uit dat FFmpeg via de omgevingsvariabele PATH kan worden gevonden. Je kunt hier zo nodig een aangepast pad instellen.
+    Use cookies for subtitles: "Gebruik de ingestelde cookies voor ondertitels en automatische vertalingen. Wordt ook ingeschakeld door \"Altijd cookies gebruiken\"."
+  Distraction Free Settings:
+    Hide Playlist Stats: Verbergt het aantal video’s, het aantal weergaven, de datum van de laatste update en de totale duur op afspeellijstpagina’s.
+    Count Watch Time From: "‘Alle apparaten’ telt elk apparaat dat kijkstatistieken synchroniseert. ‘Dit apparaat’ telt alleen wat je hier bekijkt."
+    When a Limit Is Reached: "Met ‘Afspelen pauzeren’ kun je 15 minuten toevoegen of de limiet voor vandaag negeren. Met een instellingenwachtwoord kun je een limiet alleen in de instellingen verhogen."
+    Grayscale: "Toont de app in grijstinten, zodat deze minder aandacht trekt. ‘Tijdens bedtijd’ volgt het schema van de bedtijdherinnering."
+    Apply Grayscale To: "‘Video's en afbeeldingen’ houdt de interface in kleur en maakt inhoud zoals video's, miniaturen en avatars grijs."
+    Daily Watch Time Limit: "Telt wat je vandaag hebt bekeken op alle apparaten die kijkstatistieken synchroniseren, inclusief Shorts."
+    Daily Shorts Limit: "Telt de Shorts die je vandaag op dit apparaat hebt bekeken."
+    Take a Break Reminder: "Pauzeert de video na zoveel kijktijd. Een pauze van 10 minuten of langer start de telling opnieuw."
+    Bedtime Reminder: "Pauzeert de video en herinnert je eraan om tussen de begin- en eindtijd te stoppen met kijken."
+    Shorten View Counts: Toont aantallen weergaven, reacties en vind-ik-leuks bij reacties die YouTube al verkort heeft afgerond, bijvoorbeeld 14K in plaats van 14.000. Exacte aantallen worden altijd volledig weergegeven.
+  Subscription Settings:
+    Fetch Feed on Startup: Als dit is ingeschakeld, haalt OpenTubeX je abonnementsfeed automatisch op bij het opstarten en wanneer een nieuw venster wordt geopend.
+    Show New Content Feed: Toont een tabblad Nieuw met items uit de abonnementsfeed die bij de vorige ophaalactie nog niet aanwezig waren.
+    Enable RSS Feeds: Toont een RSS-tabblad op de pagina Abonnementen met de items van RSS- of Atom-feeds, zodat je makers op andere platforms kunt volgen. De items worden geopend met yt-dlp.
+    Show New Content Indicators: Toont een klein puntje naast items uit de abonnementsfeed die bij de vorige ophaalactie nog niet aanwezig waren.
+    Show Scheduled Live Streams / Premieres First: Houdt aankomende livestreams en premières bovenaan de abonnementsfeed. Als dit is uitgeschakeld, blijven ze tot hun start op de positie van hun aankondiging staan. Vernieuw na het uitschakelen de abonnementsfeed eenmaal om de aankondigingsdatums van bestaande geplande items op te halen.
+    Auto Refresh Interval: "Hoe vaak OpenTubeX je abonnementsfeed automatisch vernieuwt terwijl de app geopend is. Op Android vernieuwt een interval dat niet nul is de feed ook wanneer de app gesloten is."
+    Refresh Subscriptions While App Is Closed: "Ververst feeds met je gekozen instellingen. Op de computer blijft OpenTubeX in het systeemvak totdat je afsluit. Android bepaalt wanneer verversingen op de achtergrond worden uitgevoerd."
+    Notify About New Uploads: Toont systeemmeldingen op dit apparaat voor kanalen waarvan je de meldingen hebt ingeschakeld in hun abonnementsinstellingen. OpenTubeX controleert op nieuwe inhoud wanneer abonnementen worden vernieuwd, dus kies een interval voor automatisch vernieuwen. Om ook meldingen te krijgen terwijl de app gesloten is, schakel je ook vernieuwen terwijl de app gesloten is in.
+    RSS Feeds Auto Refresh Interval: Hoe vaak OpenTubeX je RSS-feeds automatisch vernieuwt terwijl de app geopend is.
+  Theme Settings:
+    Only Show Important Notifications: Verbergt meldingen in de app die alleen een actie bevestigen of een status melden. Fouten, waarschuwingen, herinneringen die je hebt ingesteld en meldingen met een actie, zoals Ongedaan maken, worden nog steeds getoond. De voortgang van achtergrondtaken, zoals het vernieuwen van abonnementen, wordt in de algemene voortgangsbalk getoond in plaats van in een melding. Systeemmeldingen worden niet beïnvloed.
+    Visible Search Suggestions: "Bepaalt hoeveel items uit de zoekgeschiedenis en suggesties de zoekbalk toont voordat de lijst gaat scrollen. De lijst loopt nooit door voorbij de onderkant van het venster."
+    Thumbnail Size: "Schaalt videominiaturen in rasters en lijsten. Rasters met een vast aantal kolommen of de weergave Volledige breedte vullen in plaats daarvan elke rij, dus daar verandert de schuifregelaar alleen lijstminiaturen en Shorts. In vensters ter grootte van een telefoon zijn rasterminiaturen beperkt tot 100%."
+    Playlist Thumbnail Size: "Schaalt videominiaturen op afspeellijstpagina's. Rasters met een vast aantal kolommen of de weergave Volledige breedte vullen in plaats daarvan elke rij, dus daar verandert de schuifregelaar alleen lijstminiaturen en Shorts. In vensters ter grootte van een telefoon zijn rasterminiaturen beperkt tot 100%."
+    Compact Settings Categories: "Verbergt beschrijvingen en verkleint de hoogte van instellingencategorieën."
+    Show Progress as Notification: Toont een blijvende melding met actuele voortgang voor achtergrondbewerkingen, zoals het vernieuwen van abonnementen en downloaden van beheerde hulpprogramma's, in plaats van de algemene voortgangsbalk.
+    Always Show Scrollbars: Houdt de schuifbalken altijd zichtbaar. Als dit is uitgeschakeld, verdwijnen ze kort nadat je stopt met het bewegen van de muis en verschijnen ze weer zodra je de muis beweegt.
+    Scroll Speed: Wijzigt hoe ver muiswiel- en touchpadbewegingen scrollen.
+    Use Fixed Tab Width: Geeft elk tabblad in de horizontale tabbladbalk dezelfde breedte in plaats van de breedte aan de titel aan te passen.
+    Use Custom Title Bar: Vervangt de titelbalk van het systeem door de tabbladbalk, of door de bovenste navigatie als de tabbladen niet bovenaan staan, om verticale ruimte te besparen. De vensterknoppen verschijnen in de hoek van die balk.
+    Use Grid Player Menu: Rangschikt het instellingenmenu van de videospeler als een raster met tegels in plaats van een lijst met rijen.
+  Experimental Settings:
+    Disable Hardware Acceleration: Schakelt GPU-hardwareversnelling uit. Kan grafische problemen oplossen, maar zal waarschijnlijk de prestaties verminderen.
+The playlist is at the beginning. Enable loop to continue playing: De afspeellijst staat aan het begin. Schakel herhalen in om door te gaan met afspelen
+External link opening has been disabled in Settings → Privacy: Het openen van externe links is uitgeschakeld via Instellingen → Privacy
+Screenshot Clipboard Success: Schermafbeelding op klembord opgeslagen
+Screenshot Clipboard Error: Kopiëren van schermafbeelding naar klembord mislukt
+KeyboardShortcutPrompt:
+  Toggle Quick Bookmark: Toevoegen aan of verwijderen uit de afspeellijst voor snel opslaan
+  Reopen Closed Window: Laatst gesloten venster opnieuw openen
+  Edit Hint: Selecteer een sneltoets en druk daarna op een nieuwe toetsencombinatie. Druk op Backspace of Delete om de toewijzing te verwijderen.
+  Change Shortcut: Sneltoets voor {action} wijzigen
+  Press Shortcut: Druk op sneltoets…
+  Unassigned: Niet toegewezen
+  Reset Shortcut: Sneltoets voor {action} herstellen
+  Reset to Defaults: Standaardwaarden herstellen
+  Shortcut Already Assigned: Sneltoets is al toegewezen
+  Shortcut Conflict: '{shortcut} is al toegewezen aan {actions}. Wil je de sneltoets opnieuw toewijzen?'
+  Reserved Shortcut Conflict: '{shortcut} is gereserveerd voor {actions} en kan niet opnieuw worden toegewezen.'
+  Reassign: Opnieuw toewijzen
+  Sections:
+    App:
+      Tabs: "App:\_Tabbladen"
+      Search and Page: "App:\_Zoeken en pagina"
+      Window and View: "App:\_Venster en weergave"
+  New Tab: Nieuw tabblad maken
+  Close Tab: Huidig tabblad sluiten
+  Reload Tab: Huidig tabblad opnieuw laden
+  Reopen Closed Tab: Laatst gesloten tabblad opnieuw openen
+  Next Tab: Naar het volgende tabblad gaan
+  Previous Tab: Naar het vorige tabblad gaan
+  Switch to Tab: Naar tabblad 1–9 gaan
+  Toggle Tab Orientation: Tussen tabbladindelingen wisselen
+  Find in Page: Tekst op de huidige pagina zoeken
+  Find Next Match: Naar de volgende overeenkomst gaan
+  Find Previous Match: Naar de vorige overeenkomst gaan
+  Toggle Normal Playback Speed: Wisselen tussen snelheid 1x en de vorige afspeelsnelheid
+  Toggle Skip Silence: Stiltes overslaan in- of uitschakelen
+  Set A-B Repeat Point A: Punt A van A-B-herhaling instellen
+  Set A-B Repeat Point B: Punt B van A-B-herhaling instellen
+  Clear A-B Repeat: A-B-herhaling wissen
+  Video Zoom In: Inzoomen op de video
+  Video Zoom Out: Uitzoomen op de video
+  Tab Switcher: Tabbladwisselaar
+  Undo Seek: Laatste sprong ongedaan maken
+  Redo Seek: Ongedaan gemaakte sprong opnieuw uitvoeren
+CommandPalette:
+  Title: Opdrachtpalet
+  Open: Opdrachtpalet openen
+  Search Label: "Zoek opdrachten, instellingen en lokale video’s"
+  Search Placeholder: Zoek opdrachten, instellingen en lokale video’s…
+  Results: "Resultaten"
+  No Results: "Geen overeenkomende resultaten"
+  Result Count: "Resultaten: {count} | Resultaten: {count}"
+  Move: Verplaatsen
+  Run: Uitvoeren
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'Naar tabblad gaan: {title}'
+  Switch Profile: 'Van profiel wisselen: {name}'
+  Open Playlist: 'Afspeellijst openen: {name}'
+  Cancel Download: 'Download annuleren: {title}'
+  Groups:
+    App: App
+    Navigation: Navigatie
+    Tabs: Tabbladen
+    Local Videos: Lokale video’s
+  Unavailable:
+    Current Page: Je bent al op deze pagina
+    No History: Geen pagina in deze richting
+    Desktop: Alleen beschikbaar in de desktop-app
+    Build: Niet beschikbaar in deze build
+    One Tab: Open eerst nog een tabblad
+    Active Tab: Dit is het actieve tabblad
+    Active Profile: Dit is het actieve profiel
+    Download Finished: Deze download wordt niet meer uitgevoerd
+    Video: Open eerst een video
+Downloads:
+  File Name Template Invalid: 'Gebruik een relatief pad binnen de downloadmap zonder "..", "~", "$", "%" of een voorvoegsel zoals "thumbnail:".'
+  Search Completed: "Voltooide downloads zoeken op titel of kanaal"
+  Format: "Formaat"
+  All Formats: "Alle formaten"
+  Largest First: "Grootste eerst"
+  Smallest First: "Kleinste eerst"
+  No Matching Downloads: "Geen overeenkomende voltooide downloads. Probeer een andere zoekopdracht of filter."
+  Add Download: Download toevoegen
+  Preparing: Voorbereiden…
+  Export Failed: "Het gedownloade bestand kon niet worden opgeslagen. Kies een downloadmap met schrijfrechten en probeer het opnieuw."
+  Remove File Permanently Warning: "Hiermee wordt \"{title}\" definitief verwijderd."
+  Download: Downloaden
+  Download Video: Video downloaden
+  Download Playlist: Afspeellijst downloaden
+  Downloading: Downloaden
+  Queue: Wachtrij
+  Downloaded: Gedownload
+  Canceled: Geannuleerd
+  Open Downloads: Downloads openen
+  No Downloads: Nog geen downloads
+  No Downloads Description: Downloads die je start verschijnen hier.
+  Clear Failed Canceled Skipped And Missing: Mislukte, geannuleerde, overgeslagen en ontbrekende items wissen
+  Clear From List: Uit lijst verwijderen
+  Show in Folder: In map tonen
+  Play Download: Download afspelen
+  Retry Download: Download opnieuw proberen
+  Pause Download: Download pauzeren
+  Resume Download: Download hervatten
+  Move Earlier: Eerder plaatsen
+  Move Later: Later plaatsen
+  Pause All: Alles pauzeren
+  Resume All: Alles hervatten
+  Retry All: Alle mislukte downloads opnieuw proberen
+  Total Size: 'Totale grootte: {size}'
+  Local File: Lokaal bestand
+  Available Offline: Offline beschikbaar
+  Remove File: Bestand verwijderen
+  Remove File Confirmation: Gedownload bestand verwijderen?
+  Remove File Warning: Hiermee wordt "{title}" naar de prullenbak van je apparaat verplaatst.
+  File Not Found: Het gedownloade bestand is niet gevonden.
+  Download Missing: Download niet beschikbaar
+  Files Missing: Het gedownloade bestand is niet meer beschikbaar in het bestandssysteem. | De gedownloade bestanden zijn niet meer beschikbaar in het bestandssysteem.
+  Files Available: '{available} van {total} gedownloade bestanden zijn beschikbaar.'
+  More Files: Nog 1 bestand | Nog {count} bestanden
+  Template Used: 'Sjabloon: {name}'
+  Download Type: Downloadtype
+  Template: Sjabloon
+  Unsaved: Niet opgeslagen
+  Media Type: Mediatype
+  Video: Video
+  Audio: Audio
+  Maximum Resolution: Maximale resolutie
+  Best Available: Beste beschikbaar
+  Automatic: Automatisch
+  Container: Container
+  Video Codec: Videocodec
+  Audio Codec: Audiocodec
+  File Name Template: Sjabloon voor bestandsnaam
+  File Name Template Help: 'Beschikbare velden: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: Tijdsbereik en hoofdstukken
+  Start Time: Begintijd
+  End Time: Eindtijd
+  Split by Chapters: Per hoofdstuk in afzonderlijke bestanden splitsen
+  Remove Segments: Segmenten verwijderen
+  Subtitles and Metadata: Ondertiteling en metadata
+  Include Subtitles: Ondertiteling opnemen
+  Embed Subtitles: Ondertiteling in het mediabestand insluiten
+  Subtitle Format: Ondertitelingsindeling
+  Subtitle Languages: Ondertitelingstalen
+  Subtitle Languages Help: 'Door komma''s gescheiden yt-dlp-taalselectoren, bijvoorbeeld: en.*,de.*'
+  Embed Cover Art: Miniatuur als albumhoes insluiten
+  Embed Metadata: Titel, maker, beschrijving en hoofdstukken insluiten
+  Additional yt-dlp Arguments: Aanvullende yt-dlp-argumenten
+  Custom yt-dlp Arguments: Aangepaste yt-dlp-argumenten
+  Template Name: Sjabloonnaam
+  Save Template: Sjabloon opslaan
+  Delete Template: Sjabloon verwijderen
+  Template Saved: Downloadsjabloon "{name}" opgeslagen
+  Template Name Exists: Er bestaat al een downloadsjabloon met de naam "{name}".
+  Choose Folder: Wijzigen
+  Select Folder: Map kiezen
+  Folder Required: Kies een downloadmap om downloads in te schakelen.
+  System Downloads Folder: Downloadmap van systeem
+  Processing: Verwerken…
+  Queued: In wachtrij
+  Queued Position: In wachtrij, positie {position}
+  Paused: Gepauzeerd
+  Pausing: De huidige taak wordt voltooid, daarna wordt de wachtrij gepauzeerd
+  Download Complete: Download voltooid
+  Download Cancelled: Download geannuleerd
+  Download Failed: Download mislukt
+  File Name Shortened: De bestandsnaam is ingekort omdat de videotitel te lang was.
+  Some Videos Not Downloaded: Sommige video's in deze afspeellijst konden niet worden gedownload.
+  Insufficient Disk Space: Onvoldoende schijfruimte. Er is ongeveer {required} nodig en {available} beschikbaar.
+  Unknown Download Size: De downloadgrootte is onbekend. Er is {available} beschikbaar op het doelbestandssysteem.
+  Disk Space Check Unavailable: De beschikbare schijfruimte kon niet worden gecontroleerd voordat deze download werd gestart.
+  Download Failure Hint: Bekijk {issuesLink} en probeer daarna het yt-dlp-kanaal te wijzigen in Nightly of Master via Instellingen → Geavanceerd → Externe software.
+  yt-dlp YouTube Issues: recente yt-dlp-problemen met YouTube
+  Automatic Download Started: Automatische download gestart
+  Automatic Download Started Body: '"{title}" van {channel} op de achtergrond downloaden.'
+  Automatic Download Complete: Automatische download voltooid
+  Automatic Download Failed: Automatische download mislukt
+  Automatic Download Could Not Start: De automatische download van "{title}" kan niet worden gestart.
+  Automatic Download Skipped: Overgeslagen door filters voor automatische downloads
+  Cancel Download: Download annuleren
+  yt-dlp Not Found: yt-dlp is niet gevonden. Installeer het of stel het pad in via Instellingen → Geavanceerd → Externe software.
+  Download Complete Template: Download van "{title}" is voltooid
+  Download Failed Template: Download van "{title}" is mislukt
+  Templates:
+    Video Best: Video - beste kwaliteit
+    Video Resolution: Video - {resolution}
+    Audio Best: Audio - beste kwaliteit
+    Audio Format: Audio - {format}
+    Subtitles Format: Ondertiteling - {format}
+  Waiting for Unmetered Network: "Wachten op een netwerk zonder datalimiet"
+  Waiting for Charging: "Wachten op een oplader"
+  Remove File Failed: Kan het gedownloade bestand niet verwijderen.
+Channels:
+  Load More Channels: "Meer kanalen laden"
+Search Bar:
+  Use Suggestion: Suggestie gebruiken
+  Open Search Container: Zoekveld openen
+  Search: Zoeken
+Theme Discovery:
+  Discover Themes: "Thema's ontdekken"
+  Refresh: "Vernieuwen"
+  View on GitHub: "Bekijken op GitHub"
+  Load Error: "Thema's konden niet worden geladen. Probeer te vernieuwen."
+  Loading: "Laden…"
+  No Themes: "Geen installeerbare thema's gevonden."
+  No Preview: "Schermafbeelding niet beschikbaar"
+  Load More: "Meer laden"
+  Applied: "Toegepast"
+  Apply Theme: "Thema toepassen"
+  Install and Apply: "Installeren en toepassen"
+  Update and Apply: "Bijwerken en toepassen"
+
+Connection:
+  Offline: Offline
+  Reconnecting: "Verbinding verbroken. Bezig met opnieuw verbinden…"
+  Back Online: "Weer online"
+
+App Icon:
+  Restart: "App herstarten"
+  Saved Message: "Pictogram opgeslagen. Het kan even duren voordat je launcher is bijgewerkt."
+  Title: "App-pictogram"
+  Error: "Kan het app-pictogram niet laden of wijzigen"
+
+Tray:
+  Hide All Windows: "Alle vensters verbergen"
+  Show All Windows: "Alle vensters tonen"
+
+Tray Icon:
+  Title: "Systeemvakpictogram"
+  Follow App Theme: "Appthema volgen"
+  Monochrome: "Monochroom"
+
+Form Inputs:
+  Browse: "Bladeren"
+  Use Default Path: "Standaard gebruiken"
+  Enter Password Hint: "Voer je wachtwoord in"
+  Choose Password Hint: "Kies een wachtwoord"
+  Confirm Password Hint: "Herhaal je nieuwe wachtwoord"
+  Encryption Passphrase Hint: "Voer je versleutelingswachtzin in"
+  Show Password: "Wachtwoord tonen"
+  Hide Password: "Wachtwoord verbergen"
+  Search Text Hint: "Voer zoektermen in"
+  Playlist Description Hint: "Beschrijf deze afspeellijst"
+  Filename Preview: "Voorbeeld van bestandsnaam"
+  Enter Channels: "Voer kanalen in"
+  Enter Text: "Voer tekst in"
+  Video URL: Video- of afspeellijst-URL
+  Paste Link: Plak een video- of afspeellijstlink
+  Example: bijv. {example}
+  No Minimum: Geen minimum
+  No Maximum: Geen maximum
+  Any Age: Elke ouderdom
+  Included Terms Example: bijv. uitleg, recensie
+  Excluded Terms Example: bijv. trailer, voorvertoning
+  Global Arguments Hint: Optionele argumenten voor elke download
+  Unlimited Hint: 0 voor onbeperkt
+  Add Argument: Voeg een argument toe
+  Template Name Example: bijv. Alleen audio
+  Download Arguments Hint: Optionele argumenten voor deze download
+  Generated ID Hint: Laat leeg om een ID te genereren
+  Default Value: "Standaard: {value}"
+
+Search Filters:
+  Possible Age Restriction Hint: "YouTube heeft mogelijk een leeftijdsbeperking ingesteld voor deze zoekopdracht."
+  Cookie Search Failed: "Zoeken met de ingestelde cookies is mislukt."
+  Showing results for: "Resultaten voor {query} worden weergegeven"
+  Search instead for: "In plaats daarvan zoeken naar {query}"
+  Including results for: "Inclusief resultaten voor {query}"
+  Search only for: "Alleen zoeken naar {query}"
+  Did you mean: "Bedoelde je {query}?"
+
+Storage Startup Error:
+  Title: "Appgegevens konden niet worden geladen"
+  Message: "Maak opslagruimte vrij op het apparaat en probeer het opnieuw. Synchronisatie is gepauzeerd totdat je gegevens zijn geladen."
+  Retry: "Opnieuw proberen"
+Native Permissions:
+  Local Network Denied: "Toestemming voor apparaten in de buurt is geweigerd."
+  Local Network: "Apparaten op je lokale netwerk vinden en er video's naartoe casten, en instellingen en gegevens tussen apparaten synchroniseren."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Home"
+  subscriptions: "Abonn."
+  userplaylists: "Playlists"
+  history: "Historie"
+  subscribedchannels: "Kanalen"
+  trending: "Trending"
+  popular: "Populair"
+  stats: "Statistiek"
+  more: "Meer"
+
+Installer:
+  Create Desktop Shortcut: Een snelkoppeling op het bureaublad maken
+Older Version Changes:
+  Title: "Wijzigingen uit een oudere versie"
+  Message: "Wijzigingen die je in een oudere versie van OpenTubeX hebt gemaakt, zijn in je bibliotheek doorgevoerd."
+  Detail: "Als een item in beide versies is gewijzigd, is de wijziging uit de oudere versie behouden. Een back-up van je eerdere bibliotheek staat in je profielmap."
+Library Format Changed:
+  Title: "Bibliotheek omgezet naar een nieuwe indeling"
+  Message: "Je bibliotheek gebruikt nu een nieuwe opslagindeling."
+  Detail: "Oudere versies van OpenTubeX kunnen je bibliotheek nog openen, maar tonen die zoals die was vóór deze update. Wijzigingen die je in een oudere versie maakt, worden toegevoegd wanneer je terugkeert naar deze versie."
+Invidious Fallback Warning: "Dit verzoek omzeilt je ingestelde Invidious-instantie en maakt rechtstreeks verbinding met YouTube, waardoor je IP-adres wordt blootgesteld."
+Automatically unloaded to free memory: "Automatisch ontladen om geheugen vrij te maken"
+Home Widgets:
+  Continue Watching: "Verder kijken"
+  Continue Watching Description: "Hervat video's die je bent begonnen te kijken"
+  Continue Watching Empty: "Video's die je begint te kijken verschijnen hier"
+  Quick Access: "Snelle toegang"
+  Quick Access Description: "Open Zoeken, Abonnementen of Later bekijken"
+  Search: "Zoeken"
+  Subscriptions: "Abonnementen"
+  Watch Later: "Later bekijken"
+Subscription Groups:
+  Groups: Groepen
+  All: Alles
+  New Group: Nieuwe groep
+  Edit Group: Groep bewerken
+  Group Name: Groepsnaam
+  Create: Aanmaken
+  Save: Opslaan
+  Delete Group: Groep verwijderen
+  Delete Prompt: Groep ‘{groupName}’ verwijderen? U blijft geabonneerd op de kanalen in deze groep.
+  Empty Group: Deze groep bevat geen kanalen uit het huidige profiel.
+  Save Failed: De groep kon niet worden opgeslagen.
+  Delete Failed: De groep kon niet worden verwijderd.
+  Group Icon: Groepspictogram
+  No Icon: Geen pictogram
+Yattee Server:
+  API Error (Click to copy): Fout in Yattee-server (Klik om te kopiëren)
+  Unsupported page: Deze pagina is niet beschikbaar met de Yattee-server. Schakel ‘{fallbackSetting}’ in om deze met de lokale API te laden.
+  Posts unavailable: Yattee-servers bieden geen berichten. Schakel ‘{fallbackSetting}’ in om ze met de lokale API te laden.
+  Errors:
+    Invalid credentials: De Yattee-server heeft de gebruikersnaam of het wachtwoord geweigerd. Controleer ze via Instellingen → Geavanceerd.
+    Rate limited: De Yattee-server blokkeert aanmeldingen na te veel mislukte pogingen. Probeer het later opnieuw.
+    Streams not relayed: De Yattee-server heeft de streams van deze video niet doorgestuurd. Zolang video's via de server lopen, maakt OpenTubeX geen rechtstreekse verbinding met YouTube.
+    Not configured: Voer de URL van je Yattee-server in via Instellingen → Geavanceerd.
+    HTTPS required: Android kan alleen video's afspelen van Yattee-servers die HTTPS gebruiken.
+    Streams unavailable: De streams van deze video konden niet van de Yattee-server worden geladen. Gebruik ‘Verbinding testen’ via Instellingen → Geavanceerd om de server te controleren.
+Yattee Fallback Warning: Dit verzoek omzeilt je ingestelde Yattee-server en maakt rechtstreeks verbinding met YouTube, waardoor je IP-adres wordt blootgesteld.
+Update With Package Manager: 'Bijwerken met {packageManager}:'
+Update Command Copied: 'Bijwerkopdracht gekopieerd'
+Digital Wellbeing:
+  Watch time limit almost reached: "Nog {duration} tot je daglimiet voor kijktijd"
+  Shorts limit almost reached: "Nog {duration} tot je daglimiet voor Shorts"
+  Daily watch time limit reached: "Daglimiet voor kijktijd bereikt"
+  Daily Shorts limit reached: "Daglimiet voor Shorts bereikt"
+  Watched today: "Je hebt vandaag {duration} gekeken."
+  Shorts watched today: "Je hebt vandaag {duration} Shorts gekeken."
+  15 More Minutes: "Nog 15 minuten"
+  Ignore for Today: "Vandaag negeren"
+  Time to take a break: "Tijd voor een pauze"
+  Watching for: "Je kijkt al {duration}."
+  Time for bed: "Het is bedtijd"
+  Bedtime started at: "Je bedtijd begon om {time}."
+  Remind Me in 10 Minutes: "Over 10 minuten herinneren"
+Notification Center:
+  Notifications: "Meldingen"
+  Notifications With Unread: "Meldingen ({count} ongelezen)"
+  Mark as Read: "Markeren als gelezen"
+  Mark All as Read: "Alles markeren als gelezen"
+  Clear All: "Alles wissen"
+  Clear: "Wissen"
+  Empty: "Nog geen meldingen"
+  Empty Hint: "Herinneringen aan livestreams en nieuwe uploads van kanalen met ingeschakelde meldingen verschijnen hier."

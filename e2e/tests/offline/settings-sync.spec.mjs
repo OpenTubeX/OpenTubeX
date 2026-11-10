@@ -1,0 +1,1371 @@
+import { createHash, randomBytes } from 'node:crypto'
+
+import {
+  test,
+  expect,
+  goTo,
+  goToSettingsSection,
+  latestSettings,
+  openNewWindowFromTabBar,
+  waitForAppReady,
+  readDatastore,
+} from '../../helpers/app.mjs'
+
+const PAIRING_SERVER_URL = 'https://pairing.example'
+const PAIRING_ACCOUNT_ID = '0198e2d4-8ad2-7f73-8d6e-4f076707ce25'
+
+function pairingComparisonCode(request) {
+  const fields = ['version', 'origin', 'sessionId', 'recipientPublicKey', 'recipientDeviceId', 'recipientDeviceName', 'pairingSecret']
+  const digest = createHash('sha256')
+    .update(JSON.stringify(Object.fromEntries(fields.map(field => [field, request[field]]))))
+    .digest()
+  return String(digest.readUInt32BE(0) % 1000000).padStart(6, '0')
+}
+
+async function disableCamera(page) {
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'mediaDevices', {
+      configurable: true,
+      value: {
+        enumerateDevices: () => Promise.resolve([]),
+        getUserMedia: () => Promise.reject(new Error('No camera'))
+      }
+    })
+  })
+}
+
+test.describe('settings', () => {
+  test('links the server-provided sync privacy policy and clears it when switching servers', async ({ page }) => {
+    await page.route('https://sync.opentubex.org/health', route => route.fulfill({
+      json: { status: 'ok', privacy_policy_url: 'https://operator.example/privacy', capabilities: {} }
+    }))
+    await page.route('https://sync.libretube.dev/health', route => route.fulfill({ body: 'OK' }))
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
+
+    const syncSection = page.locator('[data-section="sync"]')
+    await syncSection.locator('label.switch-label').filter({ hasText: 'Enable Sync' }).click()
+
+    const privacyPolicy = syncSection.getByRole('link', {
+      name: 'Privacy policy for this server'
+    })
+
+    await expect(privacyPolicy).toHaveAttribute(
+      'href',
+      'https://operator.example/privacy'
+    )
+
+    await syncSection.getByLabel('Sync server URL').fill('https://sync.libretube.dev')
+    await expect(privacyPolicy).toHaveCount(0)
+    await syncSection.getByLabel('Sync server URL').fill('https://sync.opentubex.org')
+    await expect(privacyPolicy).toHaveAttribute('href', 'https://operator.example/privacy')
+  })
+
+  test('requires live support for encrypted sync while retaining legacy servers', async ({ page }) => {
+    await page.route('https://sync.opentubex.org/health', route => route.fulfill({
+      json: { capabilities: { encrypted_sync: 1 } }
+    }))
+    await page.route('https://sync.libretube.dev/health', route => route.fulfill({ body: 'OK' }))
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
+    const syncSection = page.locator('[data-section="sync"]')
+    await syncSection.locator('label.switch-label').filter({ hasText: 'Enable Sync' }).click()
+    await expect(syncSection.locator('.error')).toHaveText('Update this server to support encrypted live sync.')
+    await expect(syncSection.getByLabel(/Privacy passphrase/)).toBeHidden()
+    await expect(syncSection.locator('.privacyHint')).toBeHidden()
+    await expect(syncSection.getByText(/does not support enhanced privacy/)).toBeHidden()
+    await page.evaluate(() => window.$store.dispatch('updateCurrentLocale', 'de-DE'))
+    await expect(syncSection.locator('.error')).toHaveText('Aktualisiere diesen Server, um verschlüsselte Live-Synchronisierung zu unterstützen.')
+    await page.evaluate(() => window.$store.dispatch('updateCurrentLocale', 'en-US'))
+    await expect(syncSection.locator('.error')).toHaveText('Update this server to support encrypted live sync.')
+    await expect(syncSection.getByRole('button', { name: 'Log in' })).toBeDisabled()
+    await syncSection.getByLabel('Sync server URL').fill('https://sync.libretube.dev')
+    await expect(syncSection.getByText(/does not support enhanced privacy/)).toBeVisible()
+    await expect(syncSection.getByLabel(/Privacy passphrase/)).toBeHidden()
+    await syncSection.getByLabel('Username').fill('legacy-user')
+    await syncSection.getByLabel('Password', { exact: true }).fill('test-password')
+    await expect(syncSection.getByRole('button', { name: 'Log in' })).toBeEnabled()
+    await expect(syncSection.locator('.error')).toHaveCount(0)
+  })
+
+  test('waits for the device name before creating a secure sync pairing code', async ({ app, page }) => {
+    const serverUrl = 'https://pairing.example'
+    let createdSession
+    let pendingSession
+    let cancelledSessionId
+    let cancelledRecipientToken
+
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      globalThis.__pairingDeviceNameResolvers = []
+      ipcMain.removeHandler('get-device-name')
+      ipcMain.handle('get-device-name', () => new Promise(resolve => {
+        globalThis.__pairingDeviceNameResolvers.push(resolve)
+      }))
+    })
+
+    await page.route(`${serverUrl}/**`, async route => {
+      const request = route.request()
+      const url = new URL(request.url())
+      if (url.pathname === '/health') {
+        await route.fulfill({
+          json: {
+            status: 'ok',
+            capabilities: { encrypted_sync: 1, live_sync: 1, key_pairing: 1 }
+          }
+        })
+        return
+      }
+      if (url.pathname === '/v1/pairing' && request.method() === 'POST') {
+        createdSession = request.postDataJSON()
+        pendingSession = {
+          version: 1,
+          id: createdSession.id,
+          account_id: null,
+          recipient_public_key: createdSession.recipient_public_key,
+          recipient_device_id: createdSession.recipient_device_id,
+          recipient_device_name: createdSession.recipient_device_name,
+          approving_device_id: null,
+          expires_at: Date.now() + 120_000,
+          approved: false
+        }
+        await route.fulfill({ status: 201, json: pendingSession })
+        return
+      }
+      if (url.pathname.startsWith('/v1/pairing/') && request.method() === 'GET') {
+        await route.fulfill({ json: pendingSession })
+        return
+      }
+      if (url.pathname.startsWith('/v1/pairing/') && request.method() === 'DELETE') {
+        cancelledSessionId = url.pathname.split('/').at(-1)
+        cancelledRecipientToken = request.headers()['x-pairing-token']
+        await route.fulfill({ status: 204 })
+        return
+      }
+      await route.fulfill({ status: 404 })
+    })
+
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
+    const syncSection = page.locator('[data-section="sync"]')
+    await syncSection.getByText('Enable Sync', { exact: true }).click()
+    await syncSection.getByLabel('Sync server URL').fill(serverUrl)
+    await syncSection.getByLabel('Sync server URL').press('Tab')
+    const pairButton = syncSection.getByRole('button', { name: 'Pair with an existing device' })
+    const loginButton = syncSection.getByRole('button', { name: 'Log in' })
+    const registerButton = syncSection.getByRole('button', { name: 'Register' })
+    await expect(pairButton).toBeEnabled()
+    await expect(loginButton).toBeDisabled()
+    await expect(registerButton).toBeDisabled()
+
+    await pairButton.click()
+    const dialog = page.getByRole('dialog', { name: 'Pair with an existing device' })
+    await expect(dialog.getByLabel('Device name')).toHaveValue('This device')
+    await dialog.getByRole('button', { name: 'Create pairing code' }).click()
+    await app.electronApp.evaluate(() => {
+      for (const resolve of globalThis.__pairingDeviceNameResolvers) resolve('Travel laptop')
+      delete globalThis.__pairingDeviceNameResolvers
+    })
+
+    await expect(dialog.getByRole('img', { name: 'Pairing QR code for Travel laptop' })).toBeVisible()
+    await expect(dialog.getByText('Pairing code expires at')).toBeVisible()
+    expect(createdSession).toMatchObject({ version: 1, recipient_device_name: 'Travel laptop' })
+    expect(createdSession.recipient_token_hash).toMatch(/^[\w-]{43}$/)
+    // Random keys can contain words like "jwt", so check the field names instead of the serialized values.
+    expect(Object.keys(createdSession).sort()).toEqual([
+      'id', 'recipient_device_id', 'recipient_device_name', 'recipient_public_key', 'recipient_token_hash', 'version'
+    ])
+
+    await page.evaluate(() => {
+      const store = window.$store
+      return store.dispatch('updateUiScale', 95)
+    })
+    await page.setViewportSize({ width: 600, height: 420 })
+    const textCodeButton = dialog.getByRole('button', { name: 'Use text code instead' })
+    await expect(textCodeButton).toBeInViewport()
+    await expect(dialog.locator('.promptContentScroller')).toHaveJSProperty('scrollTop', 0)
+    await textCodeButton.click()
+    const codeField = dialog.getByRole('textbox', { name: 'Pairing code' })
+    await expect(codeField).toHaveValue(/^opentubex-pairing:/)
+    await expect(codeField).toHaveAttribute('readonly', '')
+
+    await page.setViewportSize({ width: 600, height: 300 })
+    const contentScroller = dialog.locator('.promptContentScroller')
+    const cancelButton = dialog.locator('.promptFixedFooter').getByRole('button', { name: 'Cancel' })
+    await expect(contentScroller).toHaveAttribute('data-overlayscrollbars-viewport')
+    await expect(cancelButton).toBeVisible()
+    const cancelBoundsBeforeScroll = await cancelButton.boundingBox()
+    await contentScroller.evaluate(element => element.scrollTo(0, element.scrollHeight))
+    await expect.poll(() => contentScroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    const cancelBoundsAfterScroll = await cancelButton.boundingBox()
+    expect(Math.abs(cancelBoundsAfterScroll.y - cancelBoundsBeforeScroll.y)).toBeLessThanOrEqual(1)
+
+    await cancelButton.click()
+    await expect(dialog).toHaveCount(0)
+    await expect.poll(() => cancelledSessionId).toBe(createdSession.id)
+    expect(cancelledRecipientToken).toMatch(/^[\w-]{43}$/)
+    expect(createHash('sha256')
+      .update(Buffer.from(cancelledRecipientToken, 'base64url'))
+      .digest('base64url')).toBe(createdSession.recipient_token_hash)
+  })
+
+  test('joins with a pairing code shown on a connected device', async ({ page }) => {
+    const invite = {
+      version: 1,
+      origin: PAIRING_SERVER_URL,
+      sessionId: randomBytes(32).toString('base64url'),
+      pairingSecret: randomBytes(32).toString('base64url'),
+      recipientToken: randomBytes(32).toString('base64url'),
+      accountId: PAIRING_ACCOUNT_ID
+    }
+    const inviteCode = `opentubex-pairing-invite:${Buffer.from(JSON.stringify(invite)).toString('base64url')}`
+    let createdSession
+    let pendingSession
+    let pollToken
+
+    await page.route(`${PAIRING_SERVER_URL}/**`, async route => {
+      const request = route.request()
+      const url = new URL(request.url())
+      if (url.pathname === '/health') {
+        await route.fulfill({
+          json: {
+            status: 'ok',
+            capabilities: { encrypted_sync: 1, live_sync: 1, key_pairing: 1 }
+          }
+        })
+        return
+      }
+      if (url.pathname === '/v1/pairing' && request.method() === 'POST') {
+        createdSession = request.postDataJSON()
+        pendingSession = {
+          version: 1,
+          id: createdSession.id,
+          account_id: null,
+          recipient_public_key: createdSession.recipient_public_key,
+          recipient_device_id: createdSession.recipient_device_id,
+          recipient_device_name: createdSession.recipient_device_name,
+          approving_device_id: null,
+          expires_at: Date.now() + 120_000,
+          approved: false
+        }
+        await route.fulfill({ status: 201, json: pendingSession })
+        return
+      }
+      if (url.pathname === `/v1/pairing/${invite.sessionId}` && request.method() === 'GET') {
+        pollToken = request.headers()['x-pairing-token']
+        await route.fulfill({ json: pendingSession })
+        return
+      }
+      await route.fulfill({ status: 404 })
+    })
+
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
+    const syncSection = page.locator('[data-section="sync"]')
+    await syncSection.getByText('Enable Sync', { exact: true }).click()
+    await syncSection.getByLabel('Sync server URL').fill(PAIRING_SERVER_URL)
+    await syncSection.getByLabel('Sync server URL').press('Tab')
+    await disableCamera(page)
+
+    await syncSection.getByRole('button', { name: 'Pair with an existing device' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Pair with an existing device' })
+    await dialog.getByRole('button', { name: 'Use code from connected device' }).click()
+    await expect(dialog.getByRole('alert')).toContainText('could not access a camera')
+    await dialog.getByRole('textbox', { name: 'Pairing code' }).fill(inviteCode)
+    await dialog.getByRole('button', { name: 'Check code' }).click()
+
+    const comparisonCode = dialog.locator('.pairingVerificationCode')
+    await expect(comparisonCode).toHaveText(/^\d{6}$/)
+    expect(createdSession).toMatchObject({ version: 1, id: invite.sessionId })
+    expect(createdSession.recipient_token_hash).toBe(createHash('sha256')
+      .update(Buffer.from(invite.recipientToken, 'base64url'))
+      .digest('base64url'))
+    await expect(comparisonCode).toHaveText(pairingComparisonCode({
+      ...invite,
+      recipientPublicKey: createdSession.recipient_public_key,
+      recipientDeviceId: createdSession.recipient_device_id,
+      recipientDeviceName: createdSession.recipient_device_name
+    }))
+    await expect.poll(() => pollToken).toBe(invite.recipientToken)
+
+    // Anyone who saw the invite could claim the session with another account.
+    pendingSession = { ...pendingSession, account_id: '0198e2d4-8ad2-7f73-8d6e-4f076707ce26' }
+    await expect(dialog.getByRole('alert')).toContainText('The pairing request changed')
+  })
+
+  test('keeps the sync server idle until sync is enabled', async ({ page }) => {
+    const syncRequests = []
+    await page.route('https://sync.opentubex.org/**', async (route) => {
+      syncRequests.push(route.request().url())
+      await route.fulfill({ status: 200, body: 'OK' })
+    })
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
+
+    const syncSection = page.locator('[data-section="sync"]')
+    await expect(syncSection.getByLabel('Enable Sync')).not.toBeChecked()
+    await expect(syncSection.getByLabel('Sync server URL')).toHaveCount(0)
+    // Give an unwanted server check time to start.
+    await page.waitForTimeout(500)
+    expect(syncRequests).toEqual([])
+  })
+})
+
+test.describe('secure pairing manual entry', () => {
+  const serverUrl = 'https://pairing.example'
+
+  test.use({
+    seed: {
+      settings: {
+        syncServerAutoSync: false,
+        syncServerEnabled: true,
+        syncServerPrivacyKey: `${'A'.repeat(43)}=`,
+        syncServerPrivacyMode: 'enhanced',
+        syncServerPrivacySalt: `${'A'.repeat(22)}==`,
+        syncServerToken: [
+          Buffer.from('{"alg":"HS256","typ":"JWT"}').toString('base64url'),
+          Buffer.from(JSON.stringify({ sub: PAIRING_ACCOUNT_ID, exp: 4102444800 })).toString('base64url'),
+          'signature'
+        ].join('.'),
+        syncServerUrl: serverUrl,
+        syncServerUsername: 'pairing-user'
+      }
+    }
+  })
+
+  test('accepts a text code when no camera is available', async ({ page }) => {
+    const accountId = '0198e2d4-8ad2-7f73-8d6e-4f076707ce25'
+    let approvedPayload
+    const request = {
+      version: 1,
+      origin: serverUrl,
+      sessionId: 'ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8',
+      recipientPublicKey: 'sfG4QN56MkGwJ0jPmwW3TcjF6EUSmHOIF712qo6-jCs',
+      recipientDeviceId: 'MDEyMzQ1Njc4OTo7PD0-Pw',
+      recipientDeviceName: 'Window B',
+      pairingSecret: 'oKGio6SlpqeoqaqrrK2ur7CxsrO0tba3uLm6u7y9vr8'
+    }
+    const pairingCode = `opentubex-pairing:${Buffer.from(JSON.stringify(request)).toString('base64url')}`
+
+    await page.route(`${serverUrl}/**`, async route => {
+      const url = new URL(route.request().url())
+      if (url.pathname === '/health') {
+        await route.fulfill({
+          json: {
+            status: 'ok',
+            capabilities: { encrypted_sync: 1, live_sync: 1, key_pairing: 1 }
+          }
+        })
+        return
+      }
+      if (url.pathname === `/v1/pairing/${request.sessionId}/claim`) {
+        await route.fulfill({
+          json: {
+            session: {
+              version: request.version,
+              id: request.sessionId,
+              account_id: accountId,
+              recipient_public_key: request.recipientPublicKey,
+              recipient_device_id: request.recipientDeviceId,
+              recipient_device_name: request.recipientDeviceName,
+              approving_device_id: null,
+              expires_at: Date.now() + 120_000,
+              approved: false
+            },
+            jwt: 'fresh.pairing.token'
+          }
+        })
+        return
+      }
+      if (url.pathname === `/v1/pairing/${request.sessionId}` &&
+          route.request().method() === 'PUT') {
+        approvedPayload = route.request().postDataJSON()
+        await route.fulfill({ status: 204 })
+        return
+      }
+      await route.fulfill({ status: 404 })
+    })
+
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
+    const syncSection = page.locator('[data-section="sync"]')
+    await expect(syncSection.getByText('Enhanced privacy is enabled.')).toBeVisible()
+
+    await disableCamera(page)
+
+    await syncSection.getByRole('button', { name: 'Pair another device' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Pair another device' })
+    await expect(dialog.getByRole('alert')).toContainText('could not access a camera')
+    await dialog.getByRole('button', { name: 'Enter code manually' }).click()
+    await dialog.getByRole('textbox', { name: 'Pairing code' }).fill(pairingCode)
+    await dialog.getByRole('button', { name: 'Check code' }).click()
+
+    await expect(dialog.getByText(serverUrl, { exact: true })).toBeVisible()
+    await expect(dialog.getByText('Window B', { exact: true })).toBeVisible()
+    await dialog.getByRole('button', { name: 'Approve pairing' }).click()
+    await expect(dialog.locator('.pairingVerificationCode')).toHaveText(/^\d{6}$/)
+    expect(approvedPayload.approving_device_id).toMatch(/^[\w-]{22}$/)
+    expect(approvedPayload.encrypted_payload).toMatch(/^[\w-]+$/)
+    expect(JSON.stringify(approvedPayload)).not.toMatch(/fresh\.pairing\.token|pairing-user/)
+    await expect(dialog.locator('.promptFixedFooter').getByRole('button', { name: 'Close' }))
+      .toBeVisible()
+  })
+  test('shows a pairing code when this device cannot scan the new device', async ({ page }) => {
+    const accountId = '0198e2d4-8ad2-7f73-8d6e-4f076707ce25'
+    const recipient = {
+      recipientPublicKey: 'sfG4QN56MkGwJ0jPmwW3TcjF6EUSmHOIF712qo6-jCs',
+      recipientDeviceId: 'MDEyMzQ1Njc4OTo7PD0-Pw',
+      recipientDeviceName: 'Phone without login'
+    }
+    let invite = null
+    let registered = false
+    const pollTokens = []
+    let approvedPayload
+
+    function session(overrides = {}) {
+      return {
+        version: 1,
+        id: invite.sessionId,
+        account_id: null,
+        recipient_public_key: recipient.recipientPublicKey,
+        recipient_device_id: recipient.recipientDeviceId,
+        recipient_device_name: recipient.recipientDeviceName,
+        approving_device_id: null,
+        expires_at: Date.now() + 120_000,
+        approved: false,
+        ...overrides
+      }
+    }
+
+    await page.route(`${serverUrl}/**`, async route => {
+      const request = route.request()
+      const url = new URL(request.url())
+      if (url.pathname === '/health') {
+        await route.fulfill({
+          json: {
+            status: 'ok',
+            capabilities: { encrypted_sync: 1, live_sync: 1, key_pairing: 1 }
+          }
+        })
+        return
+      }
+      if (invite && url.pathname === `/v1/pairing/${invite.sessionId}` && request.method() === 'GET') {
+        pollTokens.push(request.headers()['x-pairing-token'])
+        if (registered) await route.fulfill({ json: session() })
+        else await route.fulfill({ status: 404, body: 'pairing session not found or expired' })
+        return
+      }
+      if (invite && url.pathname === `/v1/pairing/${invite.sessionId}/claim`) {
+        expect(request.postDataJSON()).toMatchObject({
+          recipient_public_key: recipient.recipientPublicKey,
+          recipient_device_id: recipient.recipientDeviceId,
+          recipient_device_name: recipient.recipientDeviceName
+        })
+        await route.fulfill({
+          json: { session: session({ account_id: accountId }), jwt: 'fresh.pairing.token' }
+        })
+        return
+      }
+      if (invite && url.pathname === `/v1/pairing/${invite.sessionId}` && request.method() === 'PUT') {
+        approvedPayload = request.postDataJSON()
+        await route.fulfill({ status: 204 })
+        return
+      }
+      await route.fulfill({ status: 404 })
+    })
+
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
+    const syncSection = page.locator('[data-section="sync"]')
+    await expect(syncSection.getByText('Enhanced privacy is enabled.')).toBeVisible()
+    await disableCamera(page)
+
+    await syncSection.getByRole('button', { name: 'Pair another device' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Pair another device' })
+    await expect(dialog.getByRole('alert')).toContainText('could not access a camera')
+    await dialog.getByRole('button', { name: 'Show pairing code' }).click()
+    await expect(dialog.getByRole('img', { name: 'Pairing QR code for the device you are adding' }))
+      .toBeVisible()
+    await expect(dialog.getByText('Pairing code expires at')).toBeVisible()
+    await dialog.getByRole('button', { name: 'Use text code instead' }).click()
+    const codeField = dialog.getByRole('textbox', { name: 'Pairing code' })
+    await expect(codeField).toHaveValue(/^opentubex-pairing-invite:/)
+    invite = JSON.parse(Buffer.from(
+      (await codeField.inputValue()).slice('opentubex-pairing-invite:'.length),
+      'base64url'
+    ).toString())
+    expect(Object.keys(invite)).toEqual(['version', 'origin', 'sessionId', 'pairingSecret', 'recipientToken', 'accountId'])
+    expect(invite.origin).toBe(serverUrl)
+    expect(invite.accountId).toBe(accountId)
+
+    await expect.poll(() => pollTokens.length).toBeGreaterThan(0)
+    expect(new Set(pollTokens)).toEqual(new Set([invite.recipientToken]))
+    registered = true
+
+    const comparisonCode = pairingComparisonCode({ ...invite, ...recipient })
+    await expect(dialog.locator('.pairingVerificationCode')).toHaveText(comparisonCode)
+    await expect(dialog.getByText('Phone without login', { exact: true })).toBeVisible()
+    await dialog.getByRole('button', { name: 'Approve pairing' }).click()
+    await expect(dialog.getByText('The new device finishes pairing automatically.')).toBeVisible()
+    expect(approvedPayload.encrypted_payload).toMatch(/^[\w-]+$/)
+    expect(JSON.stringify(approvedPayload)).not.toMatch(/fresh\.pairing\.token|pairing-user/)
+  })
+})
+
+test.describe('sync settings', () => {
+  test.use({
+    seed: {
+      settings: {
+        syncServerEnabled: true,
+        syncServerAutoSync: false,
+        syncServerPrivacyKey: 'e2e-privacy-key',
+        syncServerPrivacyMode: 'legacy',
+        syncServerSnapshot: '{"subscriptions":[]}',
+        syncServerToken: 'invalid-token',
+        syncServerUrl: 'https://sync.example',
+        syncServerUsername: 'sync-user',
+        syncServerLastSyncAt: 1234
+      }
+    }
+  })
+
+  test('keeps the paired username when its device metadata update fails', async ({ page }) => {
+    await page.route('https://sync.example/**', route => {
+      const url = new URL(route.request().url())
+      if (url.pathname === '/health') {
+        return route.fulfill({
+          json: { status: 'ok', capabilities: { account_sessions: 1 } }
+        })
+      }
+      if (url.pathname.endsWith('/account/sessions/current')) {
+        return route.fulfill({ status: 503, body: 'metadata unavailable' })
+      }
+      return route.fulfill({ status: 404 })
+    })
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
+
+    const syncSection = page.locator('[data-section="sync"]')
+    const username = syncSection.getByLabel('Username')
+    await syncSection.getByRole('button', { name: 'Disconnect' }).click()
+    await expect(username).toBeEnabled()
+    await username.fill('')
+    await expect(username).toHaveValue('')
+
+    await page.evaluate(() => {
+      const store = window.$store
+      return store.dispatch('completeSyncServerPairing', {
+        serverUrl: 'https://sync.example',
+        username: 'paired-user',
+        token: 'paired-token',
+        privacyKey: 'paired-privacy-key',
+        privacySalt: 'paired-privacy-salt',
+        deviceId: 'MDEyMzQ1Njc4OTo7PD0-Pw',
+        deviceName: 'Paired device',
+        deviceSystemInfo: {
+          platform: 'android',
+          architecture: 'arm64-v8a',
+          release: '16'
+        }
+      })
+    })
+
+    await expect(username).toBeDisabled()
+    await expect(username).toHaveValue('paired-user')
+  })
+
+  test('records concurrent setting edits without losing a sync timestamp', async ({ page }) => {
+    const updatedAt = await page.evaluate(async () => {
+      const store = window.$store
+      await Promise.all([
+        store.dispatch('recordSyncSettingEdit', 'baseTheme'),
+        store.dispatch('recordSyncSettingEdit', 'mainColor'),
+      ])
+      return store.state.settings.syncServerSettingUpdatedAt
+    })
+
+    expect(updatedAt.baseTheme).toEqual(expect.any(Number))
+    expect(updatedAt.mainColor).toEqual(expect.any(Number))
+  })
+
+  test('does not follow sync-server redirects with credentials', async ({ page }) => {
+    let credentialedRequestStarted
+    const credentialedRequest = new Promise(resolve => {
+      credentialedRequestStarted = resolve
+    })
+    let downgradedRequests = 0
+    await page.route('https://sync.example/**', route => {
+      if (route.request().headers().authorization === 'invalid-token') {
+        credentialedRequestStarted()
+      }
+      return route.fulfill({
+        status: 307,
+        headers: { location: 'http://sync.opentubex.org/health' }
+      })
+    })
+    await page.route('http://sync.opentubex.org/**', route => {
+      downgradedRequests++
+      return route.fulfill({ status: 200, body: 'OK' })
+    })
+
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
+    await credentialedRequest
+    await page.waitForTimeout(100)
+    expect(downgradedRequests).toBe(0)
+  })
+
+  test('shows session expiration and other sync failures outside Sync settings', async ({ page }) => {
+    let response = { status: 500, body: 'Background sync failed' }
+    await page.route('https://sync.example/**', async (route) => {
+      await route.fulfill(response)
+    })
+
+    const sync = () => page.evaluate(async () => {
+      const store = window.$store
+      await store.dispatch('syncWithSyncServer').catch(() => {})
+    })
+
+    await sync()
+    const toast = page.locator('.toast', {
+      hasText: 'Sync failed: Background sync failed'
+    })
+    await expect(toast).toBeVisible()
+    await expect(toast.locator('.icon[data-icon="circle-exclamation"]')).toBeVisible()
+
+    response = { status: 401, body: 'Invalid or missing authentication token' }
+    await sync()
+    await expect(page.locator('.toast', {
+      hasText: 'Sync failed: Sync server session expired. Sign in again to resume syncing.'
+    })).toBeVisible()
+  })
+
+  test('clears a sync error and enables credentials after disconnecting', async ({ page }) => {
+    let delayServerCheck = false
+    let finishServerCheck
+    let serverCheckStarted
+    const serverCheckPending = new Promise((resolve) => {
+      finishServerCheck = resolve
+    })
+    const serverCheckRequested = new Promise((resolve) => {
+      serverCheckStarted = resolve
+    })
+    await page.route('https://sync.example/**', async (route) => {
+      if (new URL(route.request().url()).pathname === '/health') {
+        if (delayServerCheck) {
+          serverCheckStarted()
+          await serverCheckPending
+        }
+        await route.fulfill({ status: 200, json: { capabilities: { encrypted_sync: 1, live_sync: 1 } } })
+      } else {
+        await route.fulfill({ status: 500, body: 'Sync failed' })
+      }
+    })
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
+
+    const syncSection = page.locator('[data-section="sync"]')
+    await syncSection.getByRole('button', { name: 'Sync now' }).click()
+    await expect(syncSection.locator('.error')).toHaveText('Sync failed')
+    await page.waitForTimeout(250)
+    await expect(page.locator('.toast', { hasText: 'Sync failed: Sync failed' })).toHaveCount(0)
+
+    await expect(syncSection.getByLabel('Sync server URL')).toBeDisabled()
+    await expect(syncSection.getByLabel('Username')).toBeDisabled()
+    // Sync may query optional capabilities before the post-disconnect check.
+    delayServerCheck = true
+    await syncSection.getByRole('button', { name: 'Disconnect' }).click()
+
+    try {
+      await serverCheckRequested
+      // Scoped to the sync failure: the same element also carries unrelated
+      // notices (e.g. the enhanced-privacy hint) once the server check lands.
+      await expect(syncSection.locator('.error', { hasText: 'Sync failed' })).toHaveCount(0)
+      await expect(syncSection.getByLabel('Sync server URL')).toBeEnabled()
+      await expect(syncSection.getByLabel('Username')).toBeEnabled()
+      await expect(syncSection.getByLabel('Password', { exact: true })).toBeEnabled()
+    } finally {
+      finishServerCheck()
+    }
+  })
+
+  test('stops an active sync when sync is disabled', async ({ page }) => {
+    let finishSyncRequest
+    let syncRequestStarted
+    const syncRequestPending = new Promise((resolve) => {
+      finishSyncRequest = resolve
+    })
+    const syncRequestRequested = new Promise((resolve) => {
+      syncRequestStarted = resolve
+    })
+    const syncRequests = []
+
+    await page.route('https://sync.example/**', async (route) => {
+      const pathname = new URL(route.request().url()).pathname
+      if (pathname === '/health') {
+        await route.fulfill({ status: 200, json: { capabilities: { encrypted_sync: 1, live_sync: 1 } } })
+        return
+      }
+
+      if (pathname === '/v1/account/sessions' || pathname === '/v1/encrypted_sync/events') {
+        await route.fulfill({ json: [] })
+        return
+      }
+      syncRequests.push(pathname)
+      syncRequestStarted()
+      await syncRequestPending
+      await route.fulfill({ status: 200, json: [] })
+    })
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
+
+    const syncSection = page.locator('[data-section="sync"]')
+    await syncSection.getByRole('button', { name: 'Sync now' }).click()
+    await syncRequestRequested
+    await syncSection.getByText('Enable Sync', { exact: true }).click()
+    finishSyncRequest()
+
+    await expect(syncSection.getByLabel('Enable Sync')).not.toBeChecked()
+    await expect(syncSection.locator('.syncProgress')).toBeHidden()
+    await expect(syncSection.locator('.error')).toHaveCount(0)
+    await expect(page.locator('.toast', { hasText: 'Sync completed' })).toHaveCount(0)
+    // Give a stray follow-up sync time to start.
+    await page.waitForTimeout(500)
+    expect(syncRequests).toHaveLength(1)
+  })
+
+  test('stops an active sync in another window when sync is disabled', async ({ app, page }) => {
+    const otherWindow = await openNewWindowFromTabBar(app, page)
+    await waitForAppReady(otherWindow)
+
+    let finishSyncRequest
+    let syncRequestStarted
+    const syncRequestPending = new Promise((resolve) => {
+      finishSyncRequest = resolve
+    })
+    const syncRequestRequested = new Promise((resolve) => {
+      syncRequestStarted = resolve
+    })
+    const syncRequests = []
+
+    await otherWindow.route('https://sync.example/**', async (route) => {
+      const pathname = new URL(route.request().url()).pathname
+      if (pathname === '/health') {
+        await route.fulfill({ status: 200, json: { capabilities: { encrypted_sync: 1, live_sync: 1 } } })
+        return
+      }
+      if (pathname === '/v1/account/sessions' || pathname === '/v1/encrypted_sync/events') {
+        await route.fulfill({ json: [] })
+        return
+      }
+      syncRequests.push(pathname)
+      syncRequestStarted()
+      await syncRequestPending
+      await route.fulfill({ status: 200, json: [] }).catch(() => {})
+    })
+
+    await goTo(page, 'settings')
+    await goTo(otherWindow, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
+    await otherWindow.locator('.settingsMenu [data-section="sync"]').click()
+    const firstSyncSection = page.locator('[data-section="sync"]')
+    const otherSyncSection = otherWindow.locator('[data-section="sync"]')
+
+    await otherSyncSection.getByRole('button', { name: 'Sync now' }).click()
+    await syncRequestRequested
+    await firstSyncSection.getByText('Enable Sync', { exact: true }).click()
+    finishSyncRequest()
+
+    await expect(firstSyncSection.getByLabel('Enable Sync')).not.toBeChecked()
+    await expect(otherSyncSection.getByLabel('Enable Sync')).not.toBeChecked()
+    await expect(otherSyncSection.locator('.syncProgress')).toBeHidden()
+    // Give a stray follow-up sync time to start.
+    await otherWindow.waitForTimeout(500)
+    expect(syncRequests).toHaveLength(1)
+  })
+
+  test('cancels authentication without storing a new token when sync is disabled', async ({ app, page }) => {
+    let finishAuthentication
+    let authenticationStarted
+    const authenticationPending = new Promise((resolve) => {
+      finishAuthentication = resolve
+    })
+    const authenticationRequested = new Promise((resolve) => {
+      authenticationStarted = resolve
+    })
+
+    await page.route('https://sync.example/**', async (route) => {
+      const pathname = new URL(route.request().url()).pathname
+      if (pathname === '/health') {
+        await route.fulfill({ status: 200, body: 'OK' })
+        return
+      }
+      authenticationStarted()
+      await authenticationPending
+      await route.fulfill({ status: 200, json: { jwt: 'late-token' } }).catch(() => {})
+    })
+
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
+    const syncSection = page.locator('[data-section="sync"]')
+    await syncSection.getByRole('button', { name: 'Disconnect' }).click()
+    await syncSection.getByLabel('Username').fill('sync-user')
+    await syncSection.getByLabel('Password', { exact: true }).fill('sync-password')
+    await syncSection.getByRole('button', { name: 'Log in' }).click()
+    await authenticationRequested
+    await syncSection.getByText('Enable Sync', { exact: true }).click()
+    finishAuthentication()
+
+    await expect(syncSection.getByLabel('Enable Sync')).not.toBeChecked()
+    await expect.poll(async () => {
+      const settings = latestSettings(
+        readDatastore(app.userDataDir, 'settings')
+      )
+      return settings.syncServerToken
+    }).toBe('')
+  })
+
+  test('disables credentials while authentication is pending', async ({ page }) => {
+    let finishAuthentication
+    const authenticationPending = new Promise((resolve) => {
+      finishAuthentication = resolve
+    })
+    await page.route('https://sync.example/**', async (route) => {
+      const pathname = new URL(route.request().url()).pathname
+      if (pathname === '/health') {
+        await route.fulfill({ status: 200, body: 'OK' })
+      } else {
+        await authenticationPending
+        await route.fulfill({ status: 401, body: 'Invalid credentials' })
+      }
+    })
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
+
+    const syncSection = page.locator('[data-section="sync"]')
+    await syncSection.getByRole('button', { name: 'Disconnect' }).click()
+    await expect(syncSection.getByLabel('Username')).toBeEnabled()
+    await syncSection.getByLabel('Username').fill('sync-user')
+    const passwordInput = syncSection.getByLabel('Password', { exact: true })
+    await passwordInput.fill('sync-password')
+    const passwordToggle = passwordInput.locator('../..').locator('.passwordVisibilityToggle')
+    await passwordToggle.click()
+    await expect(passwordInput).toHaveAttribute('type', 'text')
+    await syncSection.getByRole('button', { name: 'Log in' }).click()
+
+    await expect(syncSection.getByLabel('Sync server URL')).toBeDisabled()
+    await expect(syncSection.getByLabel('Username')).toBeDisabled()
+    await expect(passwordInput).toBeDisabled()
+    await expect(passwordInput).toHaveAttribute('type', 'password')
+    await expect(passwordToggle).toHaveAccessibleName('Show password')
+    await expect(passwordToggle).toBeDisabled()
+    await expect(syncSection.getByRole('button', { name: 'Log in' })).toBeDisabled()
+    await expect(syncSection.getByRole('button', { name: 'Register' })).toBeDisabled()
+
+    finishAuthentication()
+    await expect(syncSection.locator('.error')).toHaveText('Invalid credentials')
+    await expect(syncSection.getByLabel('Sync server URL')).toBeEnabled()
+    await expect(syncSection.getByLabel('Username')).toBeEnabled()
+    await expect(passwordInput).toBeEnabled()
+    await expect(passwordToggle).toBeEnabled()
+  })
+
+  test('preserves the sync baseline while reauthenticating an expired session', async ({ app, page }) => {
+    let finishPostLoginSync
+    let postLoginSyncStarted
+    const postLoginSyncPending = new Promise((resolve) => {
+      finishPostLoginSync = resolve
+    })
+    const postLoginSyncRequested = new Promise((resolve) => {
+      postLoginSyncStarted = resolve
+    })
+    let authenticatedManifestRequests = 0
+
+    await page.route('https://sync.example/**', async (route) => {
+      const request = route.request()
+      const pathname = new URL(request.url()).pathname
+      const authorization = request.headers().authorization
+
+      if (pathname === '/health') {
+        await route.fulfill({
+          status: 200,
+          json: { capabilities: { encrypted_sync: 1, live_sync: 1 } }
+        })
+      } else if (pathname === '/v1/account/login') {
+        await route.fulfill({ status: 200, json: { jwt: 'renewed-token' } })
+      } else if (pathname === '/v1/encrypted_sync/events' || pathname === '/v1/account/sessions') {
+        // Opening the section refreshes account activity and devices. Answer
+        // those so only "Sync now" expires the session, not a background refresh
+        // that can finish before the button is clicked.
+        await route.fulfill({
+          status: 200,
+          json: pathname === '/v1/account/sessions' ? { sessions: [] } : []
+        })
+      } else if (authorization === 'invalid-token') {
+        await route.fulfill({
+          status: 401,
+          body: 'Invalid or missing authentication token'
+        })
+      } else if (pathname === '/v1/encrypted_sync') {
+        authenticatedManifestRequests++
+        if (authenticatedManifestRequests === 2) {
+          postLoginSyncStarted()
+          await postLoginSyncPending
+        }
+        await route.fulfill({ status: 200, json: { collections: [] } })
+      } else if (request.method() === 'PUT') {
+        await route.fulfill({ status: 200, json: {} })
+      } else {
+        await route.fulfill({ status: 200, json: { revision: 0 } })
+      }
+    })
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
+
+    const syncSection = page.locator('[data-section="sync"]')
+    await syncSection.getByRole('button', { name: 'Sync now' }).click()
+    await expect(syncSection.locator('.error')).toHaveText(
+      'Sync server session expired. Sign in again to resume syncing.'
+    )
+    await expect(syncSection.getByLabel('Username')).toBeEnabled()
+
+    await syncSection.getByLabel('Password', { exact: true }).fill('sync-password')
+    await syncSection.getByLabel(/Privacy passphrase/).fill('sync-privacy-passphrase')
+    await syncSection.getByRole('button', { name: 'Log in' }).click()
+
+    try {
+      await postLoginSyncRequested
+      const settings = latestSettings(
+        readDatastore(app.userDataDir, 'settings')
+      )
+      expect(settings.syncServerSnapshot).toBe('{"subscriptions":[]}')
+      expect(settings.syncServerLastSyncAt).toBe(1234)
+    } finally {
+      finishPostLoginSync()
+    }
+
+    await expect(syncSection.getByText('Connected as sync-user')).toBeVisible()
+    await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
+  })
+})
+
+test.describe('OIDC sync login', () => {
+  const OIDC_ACCOUNT_ID = '0198e2d4-8ad2-7f73-8d6e-4f076707ce26'
+
+  function oidcToken(accountId = OIDC_ACCOUNT_ID) {
+    const encode = value => Buffer.from(JSON.stringify(value)).toString('base64url')
+    return `${encode({ alg: 'HS256' })}.${encode({ sub: accountId, exp: 4102444800 })}.signature`
+  }
+
+  /** Delivers a link the way the OS hands it to a running app. */
+  function openLink(app, url) {
+    return app.electronApp.evaluate(({ app }, url) => {
+      app.emit('second-instance', {}, [process.execPath, url], '')
+    }, url)
+  }
+
+  async function recordExternalLinks(app) {
+    await app.electronApp.evaluate(({ shell }) => {
+      globalThis.oidcExternalUrls = []
+      shell.openExternal = async url => {
+        globalThis.oidcExternalUrls.push(url)
+      }
+    })
+    return async () => await app.electronApp.evaluate(() => globalThis.oidcExternalUrls)
+  }
+
+  test.describe('signed out', () => {
+    test.use({
+      seed: {
+        settings: {
+          currentLocale: 'en-US',
+          syncServerEnabled: true,
+          syncServerAutoSync: false,
+          syncServerUrl: 'https://sync.example',
+        }
+      }
+    })
+
+    /**
+     * @param {import('@playwright/test').Page} page
+     * @param {{ sessionDeviceId?: (deviceId: string) => string, oidcState?: boolean }} [options]
+     */
+    async function routeOidcServer(page, { sessionDeviceId = deviceId => deviceId, oidcState = false } = {}) {
+      const server = { deviceId: '' }
+      await page.route('https://sync.example/**', async (route) => {
+        const request = route.request()
+        const { pathname } = new URL(request.url())
+        if (pathname === '/health') {
+          await route.fulfill({ json: { status: 'ok', capabilities: { encrypted_sync: 1, live_sync: 1, account_sessions: 1 } } })
+        } else if (pathname === '/meta') {
+          await route.fulfill({ json: { oidc: true, oidc_display_name: 'Authelia', oidc_state: oidcState } })
+        } else if (pathname === '/v1/account/sessions') {
+          await route.fulfill({
+            json: {
+              sessions: [{ id: 'session-1', current: true, device_id: sessionDeviceId(server.deviceId) }],
+              password_login: false,
+            }
+          })
+        } else if (pathname === '/v1/encrypted_sync/events') {
+          await route.fulfill({ json: [] })
+        } else if (pathname === '/v1/encrypted_sync') {
+          await route.fulfill({ json: { collections: [] } })
+        } else if (request.method() === 'PATCH') {
+          await route.fulfill({ status: 204 })
+        } else if (request.method() === 'PUT') {
+          await route.fulfill({ json: {} })
+        } else {
+          await route.fulfill({ json: { revision: 0 } })
+        }
+      })
+      return server
+    }
+
+    test('signs in through the server’s OIDC provider', async ({ app, page, attachScreenshot }) => {
+      const externalLinks = await recordExternalLinks(app)
+      const server = await routeOidcServer(page, { oidcState: true })
+      const section = await goToSettingsSection(page, 'sync')
+
+      await section.getByLabel(/Privacy passphrase/).fill('sync-privacy-passphrase')
+      const login = section.getByRole('button', { name: 'Log in with Authelia' })
+      await expect(login).toBeEnabled()
+      await login.click()
+
+      await expect.poll(externalLinks).toHaveLength(1)
+      const url = new URL((await externalLinks())[0])
+      expect(url.origin + url.pathname).toBe('https://sync.example/v1/account/oidc/authenticate')
+      expect(url.searchParams.get('redirect_url')).toBe('opentubex://oidc')
+      server.deviceId = url.searchParams.get('device_id')
+      expect(server.deviceId).toBe(latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerDeviceId)
+      await expect(section.getByText('Continue in your browser. OpenTubeX resumes when you are done.')).toBeVisible()
+      await expect(section.getByRole('button', { name: 'Cancel' })).toBeVisible()
+      await attachScreenshot('OIDC login pending')
+
+      // A callback for a sign-in another page started leaves this one waiting.
+      // Callbacks arrive in order, so had it been accepted, the sign-in below
+      // would find nothing waiting and the checks for this account would fail.
+      await openLink(app, `opentubex://oidc?token=${oidcToken('another-account')}&state=forged`)
+
+      const state = url.searchParams.get('state')
+      expect(state).toMatch(/^[\w-]{43}$/)
+      await openLink(app, `opentubex://oidc?token=${oidcToken()}&state=${state}`)
+
+      await expect(section.getByText('Connected with single sign-on')).toBeVisible()
+      await expect(section.getByLabel('Username')).toHaveCount(0)
+      await attachScreenshot('OIDC login connected')
+      await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerUsername)
+        .toBe(`OIDC-ACCOUNT-${OIDC_ACCOUNT_ID}`)
+      expect(latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerToken).toBe(oidcToken())
+    })
+
+    test('ignores sign-ins this device did not start', async ({ app, page }) => {
+      const externalLinks = await recordExternalLinks(app)
+      await routeOidcServer(page, { sessionDeviceId: () => 'another-device' })
+      const section = await goToSettingsSection(page, 'sync')
+      const login = section.getByRole('button', { name: 'Log in with Authelia' })
+      await expect(login).toBeVisible()
+
+      // A link alone, without a pending sign-in, does nothing.
+      await openLink(app, `opentubex://oidc?token=${oidcToken()}`)
+      // Give an accepted callback time to sign in.
+      await page.waitForTimeout(500)
+      await expect(section.getByText('Connected with single sign-on')).toHaveCount(0)
+      expect(latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerToken ?? '').toBe('')
+
+      await section.getByLabel(/Privacy passphrase/).fill('sync-privacy-passphrase')
+      await login.click()
+      await expect.poll(externalLinks).toHaveLength(1)
+      await openLink(app, `opentubex://oidc?token=${oidcToken()}`)
+
+      await expect(section.locator('.error')).toHaveText('This sign-in was not started on this device')
+      await expect(login).toBeEnabled()
+      expect(latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerToken ?? '').toBe('')
+    })
+
+    test('cancels a pending sign-in', async ({ app, page }) => {
+      const externalLinks = await recordExternalLinks(app)
+      await routeOidcServer(page)
+      const section = await goToSettingsSection(page, 'sync')
+
+      await section.getByLabel(/Privacy passphrase/).fill('sync-privacy-passphrase')
+      await section.getByRole('button', { name: 'Log in with Authelia' }).click()
+      await expect.poll(externalLinks).toHaveLength(1)
+      await section.getByRole('button', { name: 'Cancel' }).click()
+
+      await expect(section.getByRole('button', { name: 'Log in with Authelia' })).toBeEnabled()
+      await expect(section.locator('.error')).toHaveCount(0)
+      await openLink(app, `opentubex://oidc?token=${oidcToken()}`)
+      await page.waitForTimeout(500)
+      await expect(section.getByText('Connected with single sign-on')).toHaveCount(0)
+    })
+
+    test('offers no login on servers that cannot tell which device started it', async ({ page }) => {
+      const metaRequests = []
+      await page.route('https://sync.example/**', async (route) => {
+        const { pathname } = new URL(route.request().url())
+        if (pathname === '/meta') metaRequests.push(pathname)
+        await route.fulfill({
+          json: pathname === '/meta'
+            ? { oidc: true, oidc_display_name: 'Authelia' }
+            : { status: 'ok', capabilities: {} }
+        })
+      })
+      const section = await goToSettingsSection(page, 'sync')
+      await section.getByLabel('Username').fill('alice')
+      await section.getByLabel('Password', { exact: true }).fill('password')
+      // Enabled once the server check is done.
+      await expect(section.getByRole('button', { name: 'Log in', exact: true })).toBeEnabled()
+      await expect(section.getByRole('button', { name: /Log in with/ })).toHaveCount(0)
+      expect(metaRequests).toEqual([])
+    })
+  })
+
+  test.describe('signed in', () => {
+    test.use({
+      seed: {
+        settings: {
+          currentLocale: 'en-US',
+          syncServerEnabled: true,
+          syncServerAutoSync: false,
+          syncServerPrivacyMode: 'legacy',
+          syncServerToken: 'oidc-token',
+          syncServerUrl: 'https://sync.example',
+          syncServerUsername: `OIDC-ACCOUNT-${OIDC_ACCOUNT_ID}`,
+          syncServerLastSyncAt: 1234,
+        }
+      }
+    })
+
+    test('deletes the account after the provider confirms it', async ({ app, page }) => {
+      const externalLinks = await recordExternalLinks(app)
+      let deleted = false
+      const deletionRequests = []
+      await page.route('https://sync.example/**', async (route) => {
+        const request = route.request()
+        const { pathname } = new URL(request.url())
+        if (pathname === '/health') {
+          await route.fulfill({ json: { status: 'ok', capabilities: { account_sessions: 1 } } })
+        } else if (pathname === '/meta') {
+          await route.fulfill({ json: { oidc: true } })
+        } else if (deleted) {
+          // Servers answer a deleted account's token like this, not with 401.
+          await route.fulfill({ status: 404, body: "account doesn't exist" })
+        } else if (pathname === '/v1/account/oidc/delete') {
+          deletionRequests.push(request.postDataJSON())
+          await route.fulfill({ json: { authorization_url: 'https://auth.example/authorize?state=abc' } })
+        } else {
+          await route.fulfill({ json: [] })
+        }
+      })
+      const section = await goToSettingsSection(page, 'sync')
+      await expect(section.getByText('Connected with single sign-on')).toBeVisible()
+
+      await section.getByRole('button', { name: 'Delete sync account' }).click()
+      const dialog = page.getByRole('dialog', { name: 'Delete sync account?' })
+      await expect(dialog.getByText('Your browser opens so that you can confirm the deletion with your sign-in provider.')).toBeVisible()
+      await expect(dialog.getByLabel('Password')).toHaveCount(0)
+      await dialog.getByRole('button', { name: 'Delete account' }).click()
+
+      await expect.poll(externalLinks).toEqual(['https://auth.example/authorize?state=abc'])
+      expect(deletionRequests).toEqual([{ redirect_url: 'opentubex://oidc', state: expect.stringMatching(/^[\w-]{43}$/) }])
+      await expect(dialog.getByText('Continue in your browser. OpenTubeX resumes when you are done.')).toBeVisible()
+
+      // A connection drop while the browser is open cancels running sync requests.
+      await page.evaluate(() => {
+        Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
+        window.dispatchEvent(new Event('offline'))
+        Object.defineProperty(navigator, 'onLine', { configurable: true, value: true })
+        window.dispatchEvent(new Event('online'))
+      })
+      deleted = true
+      await openLink(app, 'opentubex://oidc')
+
+      await expect(page.locator('.toast', { hasText: 'Sync account deleted' })).toBeVisible()
+      await expect(dialog).toHaveCount(0)
+      await expect(section.getByRole('button', { name: 'Log in with single sign-on' })).toBeVisible()
+      expect(latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerToken).toBe('')
+    })
+
+    test('cancels a deletion that waits for the browser', async ({ app, page }) => {
+      const externalLinks = await recordExternalLinks(app)
+      await page.route('https://sync.example/**', async (route) => {
+        const { pathname } = new URL(route.request().url())
+        if (pathname === '/v1/account/oidc/delete') {
+          await route.fulfill({ json: { authorization_url: 'https://auth.example/authorize' } })
+        } else if (pathname === '/health') {
+          await route.fulfill({ json: { status: 'ok', capabilities: {} } })
+        } else {
+          await route.fulfill({ json: [] })
+        }
+      })
+      const section = await goToSettingsSection(page, 'sync')
+      const dialog = page.getByRole('dialog', { name: 'Delete sync account?' })
+      const waiting = dialog.getByText('Continue in your browser. OpenTubeX resumes when you are done.')
+
+      await section.getByRole('button', { name: 'Delete sync account' }).click()
+      await dialog.getByRole('button', { name: 'Delete account' }).click()
+      await expect(waiting).toBeVisible()
+      await dialog.getByRole('button', { name: 'Cancel' }).click()
+      await expect(dialog).toHaveCount(0)
+
+      await section.getByRole('button', { name: 'Delete sync account' }).click()
+      await dialog.getByRole('button', { name: 'Delete account' }).click()
+      await expect(waiting).toBeVisible()
+      await page.keyboard.press('Escape')
+      await expect(dialog).toHaveCount(0)
+      expect(await externalLinks()).toHaveLength(2)
+
+      await openLink(app, 'opentubex://oidc')
+      await page.waitForTimeout(500)
+      await expect(section.getByText('Connected with single sign-on')).toBeVisible()
+      await expect(page.locator('.toast', { hasText: 'Sync account deleted' })).toHaveCount(0)
+    })
+
+    test('keeps the account when the provider did not confirm the deletion', async ({ app, page }) => {
+      const externalLinks = await recordExternalLinks(app)
+      await page.route('https://sync.example/**', async (route) => {
+        const { pathname } = new URL(route.request().url())
+        if (pathname === '/v1/account/oidc/delete') {
+          await route.fulfill({ json: { authorization_url: 'https://auth.example/authorize' } })
+        } else if (pathname === '/health') {
+          await route.fulfill({ json: { status: 'ok', capabilities: {} } })
+        } else {
+          await route.fulfill({ json: [] })
+        }
+      })
+      const section = await goToSettingsSection(page, 'sync')
+      await section.getByRole('button', { name: 'Delete sync account' }).click()
+      const dialog = page.getByRole('dialog', { name: 'Delete sync account?' })
+      await dialog.getByRole('button', { name: 'Delete account' }).click()
+      await expect.poll(externalLinks).toHaveLength(1)
+
+      await openLink(app, 'opentubex://oidc')
+
+      await expect(dialog.locator('.error')).toHaveText('The sync account was not deleted')
+      expect(latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerToken).toBe('oidc-token')
+    })
+  })
+})
+
+test.describe('tabs from other synced devices', () => {
+  test.use({
+    seed: {
+      settings: {
+        currentLocale: 'en-US',
+        syncServerEnabled: true,
+        syncServerAutoSync: false,
+        syncServerUsername: 'test-user',
+        syncServerToken: 'offline-test-token',
+        syncServerPrivacyMode: 'enhanced',
+        syncServerSyncSessions: true,
+        syncServerSharedTabs: false,
+      }
+    }
+  })
+
+  test('confirms before replacing other devices’ tabs with this device tab set', { tag: '@scale' }, async ({ page, attachScreenshot }) => {
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await page.route('https://sync.opentubex.org/**', route => route.fulfill({
+      json: { status: 'ok', capabilities: { encrypted_sync: 1 } }
+    }))
+    const section = await goToSettingsSection(page, 'sync')
+    const toggle = section.getByRole('checkbox', { name: 'Use one shared tab set across devices' })
+    const toggleLabel = section.locator('label.switch-label')
+      .filter({ hasText: 'Use one shared tab set across devices' })
+    await expect(toggle).not.toBeChecked()
+    await toggleLabel.click()
+
+    const dialog = page.getByRole('dialog', { name: 'Use one shared tab set across devices' })
+    await expect(dialog).toContainText('The open tabs on this device become the shared set.')
+    await expect(dialog).toContainText('tabs from different devices are not combined')
+    await expect(dialog.locator(':scope > p')).toHaveCSS('text-align', 'center')
+
+    for (const viewport of [
+      { width: 1280, height: 800 },
+      { width: 820, height: 650 },
+      { width: 390, height: 844 },
+      { width: 844, height: 390 },
+    ]) {
+      await page.setViewportSize(viewport)
+      await expect.poll(() => dialog.evaluate(element => {
+        const card = element.getBoundingClientRect()
+        return Math.min(...[...element.querySelectorAll(':scope > h2, :scope > p, :scope > .actions')]
+          .flatMap(child => {
+            const rect = child.getBoundingClientRect()
+            return [rect.left - card.left, card.right - rect.right]
+          }))
+      }), { message: `dialog content has side padding at ${viewport.width}×${viewport.height}` }).toBeGreaterThanOrEqual(11)
+      await expect.poll(() => dialog.evaluate(element => {
+        const card = element.getBoundingClientRect()
+        const text = element.querySelector('p').getBoundingClientRect()
+        return Math.abs((text.left - card.left) - (card.right - text.right))
+      }), { message: 'dialog text has equal left and right padding' }).toBeLessThanOrEqual(1)
+      await expect.poll(() => dialog.evaluate(element => element.scrollWidth - element.clientWidth))
+        .toBeLessThanOrEqual(1)
+      await expect(dialog).toBeInViewport({ ratio: 1 })
+      if (viewport.width === 820) await attachScreenshot('shared tabs confirmation with padded content')
+    }
+
+    await dialog.getByRole('button', { name: 'Cancel' }).click()
+    await expect(dialog).toHaveCount(0)
+    await expect(toggle).not.toBeChecked()
+
+    await toggleLabel.click()
+    await dialog.getByRole('button', { name: 'Use one shared tab set across devices' }).click()
+    await expect(dialog).toHaveCount(0)
+    await expect(toggle).toBeChecked()
+    await expect.poll(() => page.evaluate(() => {
+      const store = window.$store
+      return store.state.settings.syncServerSharedTabs
+    })).toBe(true)
+    await toggleLabel.click()
+    await expect(dialog).toHaveCount(0)
+    await expect.poll(() => page.evaluate(() => {
+      const store = window.$store
+      return store.state.settings.syncServerSharedTabs
+    })).toBe(false)
+  })
+
+  test('does not schedule sync for a superseded shared-tab choice', async ({ page }) => {
+    await page.route('https://sync.opentubex.org/**', route => route.fulfill({
+      json: { status: 'ok', capabilities: { encrypted_sync: 1 } }
+    }))
+    const section = await goToSettingsSection(page, 'sync')
+    const toggle = section.getByRole('checkbox', { name: 'Use one shared tab set across devices' })
+    const toggleLabel = section.locator('label.switch-label')
+      .filter({ hasText: 'Use one shared tab set across devices' })
+    await page.evaluate(() => {
+      const store = window.$store
+      store.commit('setSyncServerSharedTabs', true)
+      const dispatch = store.dispatch.bind(store)
+      window.sharedTabUpdates = []
+      window.sharedTabSyncSchedules = []
+      store.dispatch = (action, ...args) => {
+        if (action === 'updateSyncServerSharedTabs') {
+          return new Promise(resolve => window.sharedTabUpdates.push({ enabled: args[0], resolve }))
+        }
+        if (action === 'scheduleSyncServer') {
+          window.sharedTabSyncSchedules.push(args[0])
+          return Promise.resolve()
+        }
+        return dispatch(action, ...args)
+      }
+    })
+    await expect(toggle).toBeChecked()
+    await toggleLabel.click()
+    await toggleLabel.click()
+    const dialog = page.getByRole('dialog', { name: 'Use one shared tab set across devices' })
+    await dialog.getByRole('button', { name: 'Use one shared tab set across devices' }).click()
+    await expect.poll(() => page.evaluate(() => window.sharedTabUpdates.map(update => update.enabled)))
+      .toEqual([false, true])
+
+    await page.evaluate(async () => {
+      window.sharedTabUpdates[0].resolve()
+      await new Promise(resolve => setTimeout(resolve, 0))
+    })
+    await expect.poll(() => page.evaluate(() => window.sharedTabSyncSchedules)).toEqual([])
+    await page.evaluate(() => {
+      window.sharedTabUpdates[1].resolve()
+    })
+    await expect.poll(() => page.evaluate(() => window.sharedTabSyncSchedules)).toEqual(['sessions'])
+  })
+})

@@ -37,14 +37,17 @@
       >
         <FtButton
           :label="$t('Profile.Select All')"
+          :icon="['fas', 'check']"
           @click="selectAll"
         />
         <FtButton
           :label="$t('Profile.Select None')"
+          :icon="['fas', 'xmark']"
           @click="selectNone"
         />
         <FtButton
           :label="$t('Profile.Add Selected To Profile')"
+          :icon="['fas', 'user-plus']"
           text-color="var(--text-with-main-color)"
           background-color="var(--primary-color)"
           @click="addChannelsToProfile"
@@ -158,9 +161,17 @@ if (typeof props.profile.subscriptions !== 'undefined') {
   loadChannels()
 }
 
-watch(() => props.profile, () => {
+watch(() => props.profile, (profile, oldProfile) => {
   loadChannels()
-  selectNone()
+  if (profile._id !== oldProfile._id) {
+    selectNone()
+    return
+  }
+  // Feed refreshes update channel names and thumbnails, so only drop channels that are gone
+  const channelIds = new Set(channels.value.map(channel => channel.id))
+  selected.forEach(channelId => {
+    if (!channelIds.has(channelId)) selected.delete(channelId)
+  })
 }, { deep: true })
 
 watch(filteredProfileIndex, loadChannels)
@@ -220,7 +231,7 @@ function handleProfileFilterChange(profileId) {
 
 function addChannelsToProfile() {
   if (selected.size === 0) {
-    showToast(t('Profile.No channel(s) have been selected'))
+    showToast({ message: t('Profile.No channel(s) have been selected'), icon: ['fas', 'circle-exclamation'] })
   } else {
     const profileId = profileIdList.value[filteredProfileIndex.value]
     const subscriptions = profileList.value
@@ -228,11 +239,11 @@ function addChannelsToProfile() {
       .subscriptions
       .filter((channel) => selected.has(channel.id))
 
-    const profile = deepCopy(props.profile)
-    profile.subscriptions.push(...deepCopy(subscriptions))
-
-    store.dispatch('updateProfile', profile)
-    showToast(t('Profile.Profile has been updated'))
+    // Push only the selected channels, like subscribing, so channels changed elsewhere stay
+    for (const channel of deepCopy(subscriptions)) {
+      store.dispatch('addChannelToProfiles', { channel, profileIds: [props.profile._id] })
+    }
+    showToast({ message: t('Profile.Profile has been updated'), icon: ['fas', 'user-check'] })
     selectNone()
   }
 }

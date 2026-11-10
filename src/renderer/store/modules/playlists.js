@@ -1,13 +1,62 @@
+import { toRaw } from 'vue'
+import { applyPlaylistRepairUpdate } from '../../../playlistRepair'
+import { PlaylistVideoAddResult } from '../../../constants'
 import { DBPlaylistHandlers } from '../../../datastores/handlers/index'
+import {
+  decrementPlaylistVideoCounts,
+  incrementPlaylistVideoCounts,
+  resetPlaylistVideoCounts
+} from '../../helpers/playlist-video-counts'
 import { generateRandomUniqueId, processToBeAddedPlaylistVideo } from '../../helpers/playlists'
+import { getQuickBookmarkIconValue } from '../../helpers/quickBookmarkIcons'
 import { deepCopy } from '../../helpers/utils'
 
 function generateRandomPlaylistId() {
   return `ft-playlist--${generateRandomUniqueId()}`
 }
 
+/**
+ * In-flight `addVideo` writes, keyed by `playlistId:videoId`.
+ *
+ * The toggle style controls (add to playlist popover, quick bookmark button) all
+ * derive their state from the store, which only updates once the write commits.
+ * A second activation during that window - including from a different control
+ * for the same video - would otherwise append a duplicate entry.
+ *
+ * Callers share the pending promise rather than getting an early result, so they
+ * all report the outcome the write actually had.
+ *
+ * This only saves a redundant write within one window. Two windows racing is
+ * caught by `upsertVideoByPlaylistId`, which refuses to add a video the playlist
+ * already has and reports back whether it wrote anything.
+ *
+ * Bulk adds go through `addVideos`, which intentionally still allows duplicates.
+ */
+const pendingVideoAdds = new Map()
+
 function generateRandomPlaylistName() {
   return `Playlist ${new Date().toISOString()}-${Math.floor(Math.random() * 10000)}`
+}
+
+/** Attributes playlist entries are not meant to carry, even with `null` values */
+const UNDESIRED_VIDEO_ATTRIBUTES = [
+  'authorUrl',
+  'description',
+  'index',
+  'liveNow',
+  'videoThumbnails',
+]
+
+/**
+ * Mutates the given video, so it must be a copy the caller owns.
+ * @param {any} videoData
+ */
+function removeUndesiredVideoAttributes(videoData) {
+  for (const attrName of UNDESIRED_VIDEO_ATTRIBUTES) {
+    if (typeof videoData[attrName] !== 'undefined') {
+      delete videoData[attrName]
+    }
+  }
 }
 
 /*
@@ -51,8 +100,8 @@ function processNewPlayist(playlist) {
   }
 
   const now = Date.now()
-  playlist.createdAt = now
-  playlist.lastUpdatedAt = now
+  if (!Number.isFinite(playlist.createdAt)) { playlist.createdAt = now }
+  if (!Number.isFinite(playlist.lastUpdatedAt)) { playlist.lastUpdatedAt = now }
 
   // Ensure all videos have required attributes
   if (Array.isArray(playlist.videos)) {
@@ -66,6 +115,8 @@ const state = {
   // which depends on playlist data being ready
   playlistsReady: false,
   playlists: [],
+  /** @type {import('../../helpers/playlist-video-counts').PlaylistVideoCounts} */
+  playlistVideoCounts: new Map(),
   defaultPlaylists: [
     {
       playlistName: 'Favorites',
@@ -78,6 +129,7 @@ const state = {
       playlistName: 'Watch Later',
       protected: false,
       description: 'Videos to watch later',
+      quickBookmarkIcon: 'clock',
       videos: [],
       _id: 'watchLater',
     },
@@ -87,6 +139,11 @@ const state = {
 const getters = {
   getPlaylistsReady: (state) => state.playlistsReady,
   getAllPlaylists: (state) => state.playlists,
+  // `has(videoId)` answers "is this video in any playlist". Kept incrementally
+  // by the mutations below rather than derived, because every list item reads
+  // it: deriving it made one playlist edit rescan every saved video and
+  // invalidate the answer for all of them at once.
+  getPlaylistVideoCounts: (state) => state.playlistVideoCounts,
   getPlaylist: (state) => (playlistId) => {
     return state.playlists.find(playlist => playlist._id === playlistId)
   },
@@ -98,10 +155,31 @@ const getters = {
     }
 
     return state.playlists.find((playlist) => playlist._id === playlistId)
+  },
+  // Share one index across all mounted cards and watch tabs. Each consumer
+  // previously scanned the entire target playlist for its own video.
+  getQuickBookmarkVideoIds(_state, getters) {
+    return new Set(getters.getQuickBookmarkPlaylist?.videos.map(video => video.videoId))
+  },
+  getQuickBookmarkIcon(state, getters) {
+    const icon = getQuickBookmarkIconValue(getters.getQuickBookmarkPlaylist)
+    return typeof icon === 'string' ? ['far', icon] : icon
   }
 }
 
 const actions = {
+  async repairPlaylistMetadata({ commit }, payload) {
+    const result = await DBPlaylistHandlers.repairMetadata(payload)
+    for (const update of result.updates) commit('applyPlaylistMetadataRepairs', update)
+    return { repaired: result.repaired, failed: result.failed }
+  },
+
+  async importPlaylist({ commit }, playlist) {
+    processNewPlayist(playlist)
+    await DBPlaylistHandlers.upsert(playlist)
+    commit('upsertPlaylistToList', playlist)
+  },
+
   async addPlaylist({ state, commit, rootState, dispatch }, payload) {
     processNewPlayist(payload)
 
@@ -109,13 +187,21 @@ const actions = {
       await DBPlaylistHandlers.create([payload])
 
       const noQuickBookmarkSet = !rootState.settings.quickBookmarkTargetPlaylistId || !state.playlists.some((playlist) => playlist._id === rootState.settings.quickBookmarkTargetPlaylistId)
-      if (noQuickBookmarkSet) {
-        dispatch('updateQuickBookmarkTargetPlaylistId', payload._id, { root: true })
-      }
-
       commit('addPlaylist', payload)
+      if (noQuickBookmarkSet) {
+        // Settings persist asynchronously; wait so a playlist added right after
+        // this one sees the new target instead of replacing it. The playlist is
+        // already saved, so a failed settings write must not report it as lost.
+        try {
+          await dispatch('updateQuickBookmarkTargetPlaylistId', payload._id, { root: true })
+        } catch (error) {
+          console.error(error)
+        }
+      }
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 
@@ -150,11 +236,37 @@ const actions = {
     playlist.lastUpdatedAt = Date.now()
 
     try {
-      await DBPlaylistHandlers.upsert(playlist)
+      // Another window may have deleted the playlist, which must stay deleted
+      if (!await DBPlaylistHandlers.update(playlist)) return false
       commit('upsertPlaylistToList', playlist)
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
+  },
+
+  async updatePlaylistFromSync({ state, commit }, { playlist, previous, keepLastUpdatedAt = false }) {
+    if (!keepLastUpdatedAt) playlist.lastUpdatedAt = Date.now()
+    const saved = await DBPlaylistHandlers.upsertIfUnchanged(playlist, previous)
+    if (!saved) return false
+    const current = state.playlists.find(item => item._id === playlist._id)
+    if (JSON.stringify(current) !== JSON.stringify(previous)) return false
+    commit('upsertPlaylistToList', playlist)
+    return true
+  },
+
+  /**
+   * Saves a new order of the given entries. Entries added or removed by
+   * another window meanwhile are kept as they are.
+   * @returns {Promise<boolean>} whether the playlist still existed
+   */
+  async reorderPlaylistVideos({ commit }, { _id, playlistItemIds }) {
+    const lastUpdatedAt = Date.now()
+    const videos = await DBPlaylistHandlers.reorderVideos(_id, lastUpdatedAt, playlistItemIds)
+    if (videos === null) return false
+    commit('upsertPlaylistToList', { _id, lastUpdatedAt, videos })
+    return true
   },
 
   async updatePlaylistLastPlayedAt({ commit }, playlist) {
@@ -163,35 +275,74 @@ const actions = {
     playlist.lastPlayedAt = Date.now()
 
     try {
-      await DBPlaylistHandlers.upsert(playlist)
-      commit('upsertPlaylistToList', playlist)
+      if (await DBPlaylistHandlers.update(playlist)) commit('upsertPlaylistToList', playlist)
     } catch (errMessage) {
       console.error(errMessage)
     }
   },
 
-  async addVideo({ commit }, payload) {
+  async updatePlaylistSortOrder({ commit }, { _id, sortOrder }) {
+    // Sorting is a view preference, so it leaves `lastUpdatedAt` alone
     try {
-      const { _id, videoData } = payload
-
-      processToBeAddedPlaylistVideo(videoData)
-
-      const lastUpdatedAt = Date.now()
-
-      await DBPlaylistHandlers.upsertVideoByPlaylistId(_id, lastUpdatedAt, videoData)
-
-      payload.lastUpdatedAt = lastUpdatedAt
-      commit('addVideo', payload)
+      // Another window may have deleted the playlist, which must stay deleted
+      if (await DBPlaylistHandlers.updateSortOrder(_id, sortOrder)) {
+        commit('upsertPlaylistToList', { _id, sortOrder })
+      }
     } catch (errMessage) {
       console.error(errMessage)
     }
+  },
+
+  addVideo({ commit }, payload) {
+    const { _id, videoData } = payload
+    const pendingKey = `${_id}:${videoData.videoId}`
+
+    // Another activation is already adding this video, wait on that write
+    // instead of issuing a second one
+    const pending = pendingVideoAdds.get(pendingKey)
+    if (pending != null) {
+      return pending
+    }
+
+    const promise = (async () => {
+      try {
+        processToBeAddedPlaylistVideo(videoData)
+        removeUndesiredVideoAttributes(videoData)
+
+        const lastUpdatedAt = Date.now()
+
+        const result = await DBPlaylistHandlers.upsertVideoByPlaylistId(_id, lastUpdatedAt, videoData)
+
+        if (result.status === PlaylistVideoAddResult.ADDED) {
+          payload.lastUpdatedAt = result.lastUpdatedAt
+          payload.addVideosToTop = result.addVideosToTop
+          commit('addVideo', payload)
+        }
+
+        // ALREADY_PRESENT means another window got there first, so the video is
+        // in the playlist and its sync event brings it into our state. Committing
+        // as well would show it twice. PLAYLIST_MISSING is a genuine failure:
+        // the playlist is gone, so the caller must not report a saved video.
+        return result.status !== PlaylistVideoAddResult.PLAYLIST_MISSING
+      } catch (errMessage) {
+        console.error(errMessage)
+
+        return false
+      } finally {
+        pendingVideoAdds.delete(pendingKey)
+      }
+    })()
+
+    pendingVideoAdds.set(pendingKey, promise)
+
+    return promise
   },
 
   async addVideos({ commit }, payload) {
     // Assumes videos are added NOT from export
     // Since this action will ensure uniqueness of `playlistItemId` of added video entries
     try {
-      const { _id, videos } = payload
+      const { _id, videos, deduplicate = false } = payload
 
       const currentTime = Date.now()
 
@@ -206,29 +357,21 @@ const actions = {
         if (videoData.type == null) {
           videoData.type = 'video'
         }
-        // Undesired attributes, even with `null` values
-        [
-          'authorUrl',
-          'description',
-          'index',
-          'liveNow',
-          'videoThumbnails',
-          'viewCount',
-        ].forEach(attrName => {
-          if (typeof videoData[attrName] !== 'undefined') {
-            delete videoData[attrName]
-          }
-        })
+        removeUndesiredVideoAttributes(videoData)
 
         return videoData
       })
 
       const lastUpdatedAt = Date.now()
 
-      await DBPlaylistHandlers.upsertVideosByPlaylistId(_id, lastUpdatedAt, newVideoObjects)
-      commit('addVideos', { _id, lastUpdatedAt, videos: newVideoObjects })
+      const result = await DBPlaylistHandlers.upsertVideosByPlaylistId(_id, lastUpdatedAt, newVideoObjects, deduplicate)
+      if (result.status === PlaylistVideoAddResult.ADDED) {
+        commit('addVideos', { _id, lastUpdatedAt: result.lastUpdatedAt, addVideosToTop: result.addVideosToTop, videos: result.videos })
+      }
+      return result.status !== PlaylistVideoAddResult.PLAYLIST_MISSING
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 
@@ -236,14 +379,18 @@ const actions = {
     try {
       const payload = (await DBPlaylistHandlers.find()).filter((e) => e != null)
       if (payload.length === 0) {
-        // Not using `addPlaylists` to ensure required attributes with dynamic values added
-        state.defaultPlaylists.forEach(playlist => {
-          dispatch('addPlaylist', deepCopy(playlist))
-        })
+        // Not using `addPlaylists` to ensure required attributes with dynamic values added.
+        // Create them in order and wait, so the first default becomes the quick
+        // bookmark target and the playlists exist before `playlistsReady` is set.
+        for (const playlist of state.defaultPlaylists) {
+          // Deep copy so `addPlaylist` doesn't mutate the defaults template in state
+          await dispatch('addPlaylist', deepCopy(playlist))
+        }
       } else {
         const dateNow = Date.now()
         const currentTime = Date.now()
 
+        const repairs = []
         payload.forEach((playlist) => {
           let anythingUpdated = false
           // Assign generated playlist ID in case DB data corrupted
@@ -270,6 +417,11 @@ const actions = {
             playlist.lastUpdatedAt = dateNow
             anythingUpdated = true
           }
+          // Older versions could recreate a deleted playlist without videos
+          if (!Array.isArray(playlist.videos)) {
+            playlist.videos = []
+            anythingUpdated = true
+          }
           playlist.videos.forEach((v) => {
             // Ensure all videos has `timeAdded` property
             if (v.timeAdded == null) {
@@ -292,7 +444,6 @@ const actions = {
             // Undesired attributes, even with `null` values
             [
               'description',
-              'viewCount',
             ].forEach(attrName => {
               if (typeof v[attrName] !== 'undefined') {
                 delete v[attrName]
@@ -302,55 +453,24 @@ const actions = {
           })
           // Save updated playlist object
           if (anythingUpdated) {
-            DBPlaylistHandlers.upsert(playlist)
+            repairs.push(DBPlaylistHandlers.update(playlist))
           }
         })
-
-        const favoritesPlaylist = payload.find((playlist) => {
-          return playlist.playlistName === 'Favorites' || playlist._id === 'favorites'
-        })
-        const watchLaterPlaylist = payload.find((playlist) => {
-          return playlist.playlistName === 'Watch Later' || playlist._id === 'watchLater'
-        })
-
-        if (favoritesPlaylist != null) {
-          const defaultFavoritesPlaylist = state.defaultPlaylists.find((e) => e._id === 'favorites')
-
-          // Update existing matching playlist only if it exists
-          if (favoritesPlaylist._id !== defaultFavoritesPlaylist._id || favoritesPlaylist.protected !== defaultFavoritesPlaylist.protected) {
-            const oldId = favoritesPlaylist._id
-            favoritesPlaylist._id = defaultFavoritesPlaylist._id
-            favoritesPlaylist.protected = defaultFavoritesPlaylist.protected
-            if (oldId === defaultFavoritesPlaylist._id) {
-              // Update playlist if ID already the same
-              DBPlaylistHandlers.upsert(favoritesPlaylist)
-            } else {
-              dispatch('removePlaylist', oldId)
-              // DO NOT use dispatch('addPlaylist', ...)
-              // Which causes duplicate displayed playlist in window (But DB is fine)
-              // Due to the object is already in `payload`
-              DBPlaylistHandlers.create(favoritesPlaylist)
-            }
-          }
+        // A failed repair write must be logged, not left as an unhandled rejection.
+        for (const result of await Promise.allSettled(repairs)) {
+          if (result.status === 'rejected') console.error(result.reason)
         }
 
-        if (watchLaterPlaylist != null) {
-          const defaultWatchLaterPlaylist = state.defaultPlaylists.find((e) => e._id === 'watchLater')
-
-          // Update existing matching playlist only if it exists
-          if (watchLaterPlaylist._id !== defaultWatchLaterPlaylist._id || watchLaterPlaylist.protected !== defaultWatchLaterPlaylist.protected) {
-            const oldId = watchLaterPlaylist._id
-            watchLaterPlaylist._id = defaultWatchLaterPlaylist._id
-            watchLaterPlaylist.protected = defaultWatchLaterPlaylist.protected
-            if (oldId === defaultWatchLaterPlaylist._id) {
-              // Update playlist if ID already the same
-              DBPlaylistHandlers.upsert(watchLaterPlaylist)
-            } else {
-              dispatch('removePlaylist', oldId)
-              // DO NOT use dispatch('addPlaylist', ...)
-              // Which causes duplicate displayed playlist in window (But DB is fine)
-              // Due to the object is already in `payload`
-              DBPlaylistHandlers.create(watchLaterPlaylist)
+        // Names are editable and non-unique. Only the stable ID identifies a
+        // built-in playlist; replacing a namesake can delete user data.
+        for (const defaultPlaylist of state.defaultPlaylists) {
+          const playlist = payload.find((entry) => entry._id === defaultPlaylist._id)
+          if (playlist != null && playlist.protected !== defaultPlaylist.protected) {
+            playlist.protected = defaultPlaylist.protected
+            try {
+              await DBPlaylistHandlers.update(playlist)
+            } catch (errMessage) {
+              console.error(errMessage)
             }
           }
         }
@@ -377,8 +497,25 @@ const actions = {
 
       await DBPlaylistHandlers.deleteAll()
       commit('removeAllPlaylists')
+      await dispatch('unpinPlaylists', playlistIds)
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
+    }
+  },
+
+  async unpinPlaylists({ dispatch, getters, rootGetters }, playlistIds) {
+    // Protected playlists survive deletion requests, so only unpin removed ones.
+    const remainingIds = new Set(getters.getAllPlaylists.map(playlist => playlist._id))
+    const removedIds = new Set(playlistIds.filter(id => !remainingIds.has(id)))
+    const pinnedIds = rootGetters.getPinnedPlaylistIds
+    if (pinnedIds.some(id => removedIds.has(id))) {
+      await dispatch('updatePinnedPlaylistIds', pinnedIds.filter(id => !removedIds.has(id)))
+    }
+    const topPinnedIds = rootGetters.getUserPlaylistsPinnedIds
+    if (topPinnedIds.some(id => removedIds.has(id))) {
+      await dispatch('updateUserPlaylistsPinnedIds', topPinnedIds.filter(id => !removedIds.has(id)))
     }
   },
 
@@ -399,6 +536,7 @@ const actions = {
 
       await DBPlaylistHandlers.delete(playlistId)
       commit('removePlaylist', playlistId)
+      await dispatch('unpinPlaylists', [playlistId])
     } catch (errMessage) {
       console.error(errMessage)
     }
@@ -410,6 +548,7 @@ const actions = {
 
       await DBPlaylistHandlers.deleteMultiple(playlistIds)
       commit('removePlaylists', playlistIds)
+      await dispatch('unpinPlaylists', playlistIds)
     } catch (errMessage) {
       console.error(errMessage)
     }
@@ -428,37 +567,66 @@ const actions = {
       payload.lastUpdatedAt = lastUpdatedAt
 
       commit('removeVideo', payload)
+
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+
+      return false
     }
   },
 
   async removeVideos({ commit, dispatch }, payload) {
-    try {
-      const { _id, playlistItemIds, videoIds } = payload
+    const { _id, playlistItemIds, videoIds } = payload
 
-      await dispatch('unsetLastViewedPlaylistForVideos', { videoIds, lastViewedPlaylistId: _id })
+    await dispatch('unsetLastViewedPlaylistForVideos', { videoIds, lastViewedPlaylistId: _id })
 
-      const lastUpdatedAt = Date.now()
+    const lastUpdatedAt = Date.now()
 
-      await DBPlaylistHandlers.deleteVideoIdsByPlaylistId(_id, lastUpdatedAt, playlistItemIds)
+    await DBPlaylistHandlers.deleteVideoIdsByPlaylistId(_id, lastUpdatedAt, playlistItemIds)
 
-      payload.lastUpdatedAt = lastUpdatedAt
+    payload.lastUpdatedAt = lastUpdatedAt
 
-      commit('removeVideos', payload)
-    } catch (errMessage) {
-      console.error(errMessage)
-    }
+    commit('removeVideos', payload)
   },
 }
 
+/**
+ * Removes the matching videos from a playlist and stops counting them, in one
+ * pass over the playlist.
+ *
+ * @param {object} state
+ * @param {{ videos: object[] }} playlist
+ * @param {(video: object) => boolean} matches
+ */
+function dropPlaylistVideos(state, playlist, matches) {
+  const removed = []
+  const kept = []
+
+  // Iterating the proxy would store reactive proxies in the new raw array.
+  for (const video of toRaw(playlist.videos)) {
+    (matches(video) ? removed : kept).push(video)
+  }
+
+  decrementPlaylistVideoCounts(state.playlistVideoCounts, removed)
+  playlist.videos = kept
+}
+
 const mutations = {
+  applyPlaylistMetadataRepairs(state, update) {
+    applyPlaylistRepairUpdate(state.playlists, update)
+  },
+
   addPlaylist(state, payload) {
     state.playlists.push(payload)
+    incrementPlaylistVideoCounts(state.playlistVideoCounts, payload.videos)
   },
 
   addPlaylists(state, payload) {
     state.playlists.push(...payload)
+    for (const playlist of payload) {
+      incrementPlaylistVideoCounts(state.playlistVideoCounts, playlist.videos)
+    }
   },
 
   upsertPlaylistToList(state, updatedPlaylist) {
@@ -468,69 +636,101 @@ const mutations = {
 
     if (i === -1) {
       state.playlists.push(updatedPlaylist)
+      incrementPlaylistVideoCounts(state.playlistVideoCounts, updatedPlaylist.videos)
     } else {
       const foundPlaylist = state.playlists[i]
+      // Playback timestamps and metadata edits leave membership unchanged.
+      // Recount only when the update actually replaces the video list.
+      const replacesVideos = Object.hasOwn(updatedPlaylist, 'videos')
+      if (replacesVideos) decrementPlaylistVideoCounts(state.playlistVideoCounts, foundPlaylist.videos)
       state.playlists.splice(i, 1, Object.assign(foundPlaylist, updatedPlaylist))
+      if (replacesVideos) incrementPlaylistVideoCounts(state.playlistVideoCounts, foundPlaylist.videos)
     }
   },
 
   addVideo(state, payload) {
     const playlist = state.playlists.find(playlist => playlist._id === payload._id)
     if (playlist) {
-      playlist.videos.push(payload.videoData)
+      if (payload.addVideosToTop === true) {
+        // Unshifting through the proxy would trigger every index it shifts.
+        playlist.videos = [payload.videoData, ...toRaw(playlist.videos)]
+      } else {
+        playlist.videos.push(payload.videoData)
+      }
       playlist.lastUpdatedAt = payload.lastUpdatedAt
+      incrementPlaylistVideoCounts(state.playlistVideoCounts, [payload.videoData])
     }
   },
 
   addVideos(state, payload) {
     const playlist = state.playlists.find(playlist => playlist._id === payload._id)
     if (playlist) {
-      playlist.videos = [].concat(playlist.videos, payload.videos)
+      const videos = toRaw(playlist.videos)
+      playlist.videos = payload.addVideosToTop === true
+        ? payload.videos.concat(videos)
+        : videos.concat(payload.videos)
       playlist.lastUpdatedAt = payload.lastUpdatedAt
+      incrementPlaylistVideoCounts(state.playlistVideoCounts, payload.videos)
     }
   },
 
   removeAllPlaylists(state) {
     state.playlists = []
+    state.playlistVideoCounts.clear()
   },
 
   removeAllVideos(state, playlistId) {
     const playlist = state.playlists.find(playlist => playlist._id === playlistId)
     if (playlist) {
+      decrementPlaylistVideoCounts(state.playlistVideoCounts, playlist.videos)
       playlist.videos = []
     }
   },
 
   removeVideo(state, { _id, lastUpdatedAt, videoId, playlistItemId }) {
     const playlist = state.playlists.find(playlist => playlist._id === _id)
-    if (playlist) {
-      if (playlistItemId != null) {
-        playlist.videos = playlist.videos.filter(video => video.playlistItemId !== playlistItemId)
-        playlist.lastUpdatedAt = lastUpdatedAt
-      } else if (videoId != null) {
-        playlist.videos = playlist.videos.filter(video => video.videoId !== videoId)
-        playlist.lastUpdatedAt = lastUpdatedAt
-      }
+    if (!playlist) {
+      return
+    }
+
+    if (playlistItemId != null) {
+      dropPlaylistVideos(state, playlist, video => video.playlistItemId === playlistItemId)
+      playlist.lastUpdatedAt = lastUpdatedAt
+    } else if (videoId != null) {
+      dropPlaylistVideos(state, playlist, video => video.videoId === videoId)
+      playlist.lastUpdatedAt = lastUpdatedAt
     }
   },
 
   removeVideos(state, { _id, lastUpdatedAt, playlistItemIds }) {
     const playlist = state.playlists.find(playlist => playlist._id === _id)
     if (playlist) {
-      playlist.videos = playlist.videos.filter(video => {
-        const playlistItemIdMatches = playlistItemIds.includes(video.playlistItemId)
-        return !playlistItemIdMatches
-      })
+      const removedIds = new Set(playlistItemIds)
+      dropPlaylistVideos(state, playlist, video => removedIds.has(video.playlistItemId))
       playlist.lastUpdatedAt = lastUpdatedAt
     }
   },
 
   removePlaylist(state, playlistId) {
-    state.playlists = state.playlists.filter(playlist => playlist._id !== playlistId || playlist.protected)
+    mutations.removePlaylists(state, [playlistId])
+  },
+
+  removePlaylists(state, playlistIds) {
+    const removedIds = new Set(playlistIds)
+    const isKept = playlist => !removedIds.has(playlist._id) || playlist.protected
+
+    for (const playlist of state.playlists) {
+      if (!isKept(playlist)) {
+        decrementPlaylistVideoCounts(state.playlistVideoCounts, playlist.videos)
+      }
+    }
+
+    state.playlists = toRaw(state.playlists).filter(isKept)
   },
 
   setAllPlaylists(state, payload) {
     state.playlists = payload
+    resetPlaylistVideoCounts(state.playlistVideoCounts, payload)
   },
 
   setPlaylistsReady(state, payload) {

@@ -1,0 +1,89 @@
+.commentTranslationSettings {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-block-end: 12px !important;
+}
+
+.commentTranslationDescription {
+  color: var(--tertiary-text-color);
+  margin-block: 0 4px;
+  max-inline-size: 700px;
+  text-align: center;
+}
+
+.commentTranslationLanguageSelect {
+  inline-size: min(100%, 330px);
+}
+
+.commentTranslationLanguages {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+
+  /* Rows stay 48px apart so the remove buttons' touch targets never overlap. */
+  gap: 16px 8px;
+  list-style: none;
+  margin-block: 18px 0;
+  padding: 0;
+  max-inline-size: 700px;
+}
+
+/* Material 3 input chips: outlined, 32px tall, with a trailing remove icon
+   whose touch target extends past the chip to 48px. */
+.commentTranslationLanguage {
+  align-items: center;
+  border: 1px solid var(--divider-color);
+  border-radius: var(--shape-corner-small);
+  box-sizing: border-box;
+  color: var(--primary-text-color);
+  display: flex;
+  font-size: 14px;
+  font-weight: 500;
+  gap: 4px;
+  line-height: 20px;
+  min-block-size: 32px;
+  padding-inline: 12px 4px;
+  transition: opacity var(--motion-fast-effects);
+}
+
+.commentTranslationLanguage:has(.commentTranslationLanguageRemove:disabled) {
+  opacity: 0.38;
+}
+
+.commentTranslationLanguageRemove {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--shape-corner-full);
+  block-size: 24px;
+  color: var(--secondary-text-color);
+  cursor: pointer;
+  display: flex;
+  flex: none;
+  font-size: 18px;
+  inline-size: 24px;
+  justify-content: center;
+  padding: 0;
+  position: relative;
+  transition: background-color var(--motion-fast-effects), color var(--motion-fast-effects);
+}
+
+.commentTranslationLanguageRemove::after {
+  content: '';
+  inset: -12px;
+  position: absolute;
+}
+
+.commentTranslationLanguageRemove:disabled {
+  cursor: not-allowed;
+}
+
+.commentTranslationLanguageRemove:is(:hover, :focus-visible):not(:disabled) {
+  background-color: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
+  color: var(--primary-text-color);
+}
+
+.commentTranslationLanguageRemove:active:not(:disabled) {
+  background-color: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
+}

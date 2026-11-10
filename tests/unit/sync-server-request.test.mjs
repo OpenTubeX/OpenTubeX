@@ -1,0 +1,280 @@
+import assert from 'node:assert/strict'
+import { executeBackgroundJob as runBackgroundJob } from '../../src/renderer/helpers/background-job-operations.js'
+import test from 'node:test'
+import { readFile } from 'node:fs/promises'
+import vm from 'node:vm'
+import { setImmediate as nextEventLoopTurn } from 'node:timers/promises'
+
+import { delegateRequests, withNetworkRecovery } from '../../src/renderer/helpers/networkRecovery.js'
+import { applySyncServerUserAgent } from '../../src/syncServerUserAgent.js'
+import { createSyncServerRequestHeaders } from '../../src/renderer/helpers/sync-server-request.js'
+import * as errors from '../../src/renderer/helpers/sync-server-errors.js'
+import { createAbortError } from '../../src/renderer/helpers/api/requestErrors.js'
+import { waitForRequest } from '../../src/renderer/helpers/api/requestWait.js'
+
+async function loadClient(env, version, requests, nativeRequest, browserRequest, serverUrl = 'https://sync.example', localNetworkAccess = async () => {}) {
+  const context = vm.createContext({
+    runBackgroundJob,
+    ...errors,
+    delegateRequests,
+    withNetworkRecovery,
+    process: { env },
+    packageDetails: { version },
+    createSyncServerRequestHeaders,
+    applySyncServerUserAgent,
+    createAbortError,
+    waitForRequest,
+    ensureAndroidLocalNetworkAccess: localNetworkAccess,
+    URL,
+    URLSearchParams,
+    Request,
+    Response,
+    Headers,
+    AbortController,
+    setTimeout,
+    clearTimeout,
+    setActiveTimeout: (callback, ms) => {
+      const timeout = setTimeout(callback, ms)
+      return () => clearTimeout(timeout)
+    },
+    // Android requests use the cancellable AndroidHttp plugin.
+    registerPlugin: () => ({
+      request: async options => {
+        requests.push(options)
+        if (nativeRequest) return nativeRequest(options)
+        return { status: 200, data: '{}', headers: {} }
+      },
+      abort: async () => {},
+    }),
+    crypto: globalThis.crypto,
+    fetch: async (url, options) => {
+      requests.push({ url, ...options })
+      return browserRequest ? browserRequest(options) : new Response('{}')
+    },
+  })
+  for (const file of ['api/capacitor-http.js', 'sync-server.js']) {
+    const source = (await readFile(new URL(`../../src/renderer/helpers/${file}`, import.meta.url), 'utf8'))
+      .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
+      .replace(/^export \{[\s\S]*?\}\n/gm, '')
+      .replace(/^export /gm, '')
+    vm.runInContext(source, context)
+  }
+  return vm.runInContext(`new SyncServerClient(${JSON.stringify(serverUrl)})`, context)
+}
+
+test('legacy playlist updates explicitly clear a custom thumbnail', async () => {
+  const requests = []
+  const client = await loadClient({ IS_ELECTRON: true }, '0.36.0', requests)
+  await client.updatePlaylist('cover', { title: 'Cover', description: '', thumbnail_url: null, custom_thumbnail: null })
+  assert.equal(requests.at(-1).method, 'PATCH')
+  assert.equal(JSON.parse(requests.at(-1).body).custom_thumbnail, '')
+  assert.equal(JSON.parse(requests.at(-1).body).thumbnail_url, null)
+  const image = 'data:image/webp;base64,dGVzdA=='
+  await client.updatePlaylist('cover', { title: 'Cover', description: '', custom_thumbnail: image })
+  assert.equal(JSON.parse(requests.at(-1).body).custom_thumbnail, image)
+  await client.updatePlaylist('cover', { title: 'Cover', description: '' })
+  assert.ok(!Object.hasOwn(JSON.parse(requests.at(-1).body), 'custom_thumbnail'))
+})
+
+for (const [operation, run] of [
+  ['small collection upload', client => client.putEncryptedSyncCollection('settings', 1, 'encrypted')],
+  ['manifest', client => client.getEncryptedSyncManifest()],
+  ['collection download', client => client.getEncryptedSyncCollection('history')],
+  ['legacy download', client => client.getLegacyEncryptedSync()],
+  ['activity download', client => client.getSyncEvents()],
+  ['large collection upload', client => client.putEncryptedSyncCollection('history', 1, 'a'.repeat(4 * 1024 * 1024))],
+]) {
+  test(`Android encrypted sync ${operation} can take longer than 30 seconds`, async t => {
+    t.mock.timers.enable({ apis: ['setTimeout'] })
+    const client = await loadClient({ IS_CAPACITOR: true }, '0.34.0', [], options => new Promise((resolve, reject) => {
+      const responseTimer = setTimeout(() => {
+        clearTimeout(timeoutTimer)
+        resolve({ status: 200, data: '{"revision":2}', headers: {} })
+      }, 31_000)
+      const timeoutTimer = setTimeout(() => {
+        clearTimeout(responseTimer)
+        reject(Object.assign(new Error('timeout'), { code: 'SocketTimeoutException' }))
+      }, options.readTimeout)
+    }))
+    const result = run(client)
+    const completed = assert.doesNotReject(async () => {
+      assert.equal((await result).revision, 2)
+    })
+    await nextEventLoopTurn()
+    t.mock.timers.tick(31_000)
+    await completed
+  })
+}
+
+for (const [operation, run, timeoutMs] of [
+  ['health check', client => client.health(), 60_000],
+  ['change wait', client => client.waitForSyncChanges(''), 85_000],
+  ['collection download', client => client.getEncryptedSyncCollection('history'), 300_000],
+  ['activity download', client => client.getSyncEvents(), 300_000],
+  ['small collection upload', client => client.putEncryptedSyncCollection('history', 1, 'encrypted'), 300_000],
+  ['large collection upload', client => client.putEncryptedSyncCollection('history', 1, 'a'.repeat(4 * 1024 * 1024)), 300_000],
+]) {
+  test(`Android sync ${operation} still stops at its request deadline`, async t => {
+    t.mock.timers.enable({ apis: ['setTimeout'] })
+    const requests = []
+    const client = await loadClient({ IS_CAPACITOR: true }, '0.34.0', requests, () => new Promise(() => {}))
+    let settled = false
+    const result = run(client).finally(() => { settled = true })
+    const rejected = assert.rejects(result, { message: 'Sync server request timed out' })
+    await nextEventLoopTurn()
+    assert.equal(requests[0].connectTimeout, timeoutMs)
+    assert.equal(requests[0].readTimeout, timeoutMs)
+    t.mock.timers.tick(timeoutMs - 1)
+    await nextEventLoopTurn()
+    assert.equal(settled, false)
+    t.mock.timers.tick(1)
+    await rejected
+    assert.equal(client.requestControllers.size, 0)
+  })
+}
+
+test('Android encrypted sync can be cancelled before the extended deadline', async () => {
+  const client = await loadClient({ IS_CAPACITOR: true }, '0.34.0', [], () => new Promise(() => {}))
+  const result = client.getEncryptedSyncCollection('history')
+  const rejected = assert.rejects(result, errors.SyncServerCancelledError)
+  await nextEventLoopTurn()
+  client.cancel()
+  await rejected
+  assert.equal(client.requestControllers.size, 0)
+})
+
+test('Android sync sends 0.34.0-nightly-976 through native HTTP on public and authenticated requests', async () => {
+  const version = '0.34.0-nightly-976'
+  const requests = []
+  const client = await loadClient({ IS_CAPACITOR: true, IS_ELECTRON: false }, version, requests)
+  await client.health()
+  client.token = 'sync-token'
+  await client.request('/subscriptions', { method: 'POST', body: { id: 'channel' } })
+
+  assert.equal(requests.length, 2)
+  for (const request of requests) {
+    const headers = new Headers(request.headers)
+    assert.equal(headers.get('User-Agent'), `OpenTubeX/${version}`)
+    assert.equal(headers.has('OpenTubeX-Client-Version'), false)
+    assert.equal(headers.get('Accept'), 'application/json')
+  }
+  assert.equal(new Headers(requests[0].headers).has('Authorization'), false)
+  assert.equal(new Headers(requests[1].headers).get('Authorization'), 'sync-token')
+  assert.equal(new Headers(requests[1].headers).get('Content-Type'), 'application/json')
+  assert.equal(requests[1].data, '{"id":"channel"}')
+})
+
+test('reads the operator privacy policy and capabilities from one health request', async () => {
+  const requests = []
+  const client = await loadClient({ IS_CAPACITOR: true }, '0.35.0', requests, () => ({
+    status: 200,
+    data: JSON.stringify({ capabilities: { encrypted_sync: 1, live_sync: 1 }, privacy_policy_url: 'https://operator.example/privacy' }),
+    headers: {},
+  }))
+  const [capabilities, policy] = await Promise.all([client.getCapabilities(), client.getPrivacyPolicyUrl()])
+  assert.equal(capabilities.encrypted_sync, 1)
+  assert.equal(policy, 'https://operator.example/privacy')
+  assert.equal(requests.length, 1)
+})
+
+test('ignores absent or unsafe operator privacy policy URLs', async () => {
+  for (const value of [undefined, null, 42, {}, '', '/privacy', 'javascript:alert(1)', 'data:text/html,test', 'file:///tmp/policy', 'https://user:secret@example.org/privacy']) {
+    const client = await loadClient({ IS_CAPACITOR: true }, '0.35.0', [], () => ({
+      status: 200, data: JSON.stringify({ privacy_policy_url: value }), headers: {},
+    }))
+    assert.equal(await client.getPrivacyPolicyUrl(), null, String(value))
+  }
+  const client = await loadClient({ IS_CAPACITOR: true }, '0.35.0', [], () => ({
+    status: 200, data: 'OK', headers: {},
+  }))
+  assert.equal(await client.getPrivacyPolicyUrl(), null)
+  assert.equal(Object.keys(await client.getCapabilities()).length, 0)
+})
+
+test('requires live sync only for servers advertising encrypted sync', async () => {
+  for (const capabilities of [{}, { bulk_sync: 1 }, { encrypted_sync: 1, live_sync: 1 }]) {
+    const client = await loadClient({ IS_CAPACITOR: true }, '0.35.0', [], () => ({
+      status: 200, data: JSON.stringify({ capabilities }), headers: {},
+    }))
+    assert.equal(await client.supportsEncryptedSync(), capabilities.encrypted_sync === 1)
+  }
+  for (const liveSync of [undefined, 0, 2]) {
+    const client = await loadClient({ IS_CAPACITOR: true }, '0.35.0', [], () => ({
+      status: 200, data: JSON.stringify({ capabilities: { encrypted_sync: 1, live_sync: liveSync } }), headers: {},
+    }))
+    await assert.rejects(client.supportsEncryptedSync(), { message: 'This server must be updated to support encrypted live sync.' })
+  }
+})
+
+for (const payload of ['a'.repeat(4 * 1024 * 1024)]) {
+  test(`Electron encrypted upload tolerates a slow response (${payload.length} bytes)`, async t => {
+    t.mock.timers.enable({ apis: ['setTimeout'] })
+    const client = await loadClient({ IS_ELECTRON: true }, '0.35.0', [], undefined, options => new Promise((resolve, reject) => {
+      const timer = setTimeout(() => resolve(new Response('{"revision":2}')), 60_000)
+      options.signal.addEventListener('abort', () => {
+        clearTimeout(timer)
+        reject(new DOMException('Aborted', 'AbortError'))
+      }, { once: true })
+    }))
+    const completed = assert.doesNotReject(async () => {
+      assert.equal((await client.putEncryptedSyncCollection('history', 1, payload)).revision, 2)
+    })
+    await nextEventLoopTurn()
+    t.mock.timers.tick(60_000)
+    await completed
+    assert.equal(client.requestControllers.size, 0)
+  })
+}
+
+test('Capacitor sync can use an explicitly configured HTTP local server', async () => {
+  const requests = []
+  const client = await loadClient({ IS_CAPACITOR: true }, '0.34.0', requests, undefined, undefined, 'http://127.0.0.1:18879')
+  await client.health()
+  assert.equal(requests.length, 1)
+  assert.equal(requests[0].url, 'http://127.0.0.1:18879/health')
+})
+
+test('Android sync cannot contact a LAN server after permission is denied', async () => {
+  const requests = []
+  const client = await loadClient({ IS_CAPACITOR: true }, '0.36.1', requests, undefined, undefined,
+    'http://192.168.1.2:8080', async ({ url }) => {
+      assert.equal(url, 'http://192.168.1.2:8080/health')
+      throw new Error('Nearby devices permission was denied')
+    })
+  await assert.rejects(client.health(), /Nearby devices permission was denied/)
+  assert.equal(requests.length, 0)
+})
+
+test('cancelling Android sync while permission is pending prevents the native request', async () => {
+  const requests = []
+  let allow
+  const permission = new Promise(resolve => { allow = resolve })
+  const client = await loadClient({ IS_CAPACITOR: true }, '0.36.1', requests, undefined, undefined,
+    'http://192.168.1.2:8080', () => permission)
+  const pending = client.health()
+  await nextEventLoopTurn()
+  client.cancel()
+  let timeout
+  try {
+    await Promise.race([
+      assert.rejects(pending, errors.SyncServerCancelledError),
+      new Promise((resolve, reject) => { timeout = setTimeout(() => reject(new Error('Cancellation waited for the permission prompt')), 1000) })
+    ])
+  } finally { clearTimeout(timeout); allow() }
+  await nextEventLoopTurn()
+  assert.equal(requests.length, 0)
+})
+
+test('watch history paging terminates when the advertised page size is unusable', async () => {
+  const requests = []
+  const pages = [[{ video: { id: 'a' } }, { video: { id: 'b' } }], []]
+  const client = await loadClient({ IS_ELECTRON: true }, '0.36.0', requests, null, async () => {
+    if (requests.length > 10) throw new Error('watch history paging never terminated')
+    return new Response(JSON.stringify(pages.shift() ?? []))
+  })
+  client.getServerInfo = async () => ({ capabilities: { history_page_size: 0 } })
+  const history = await client.getWatchHistory()
+  assert.equal(history.length, 2)
+  assert.ok(!requests.some(request => request.url.includes('page_size=0')))
+  assert.ok(requests.length <= 2, `expected at most two pages, sent ${requests.length}`)
+})

@@ -1,0 +1,37 @@
+import { test, expect, goToSettingsSection, setWindowSize, openCustomThemeEditor } from '../../helpers/app.mjs'
+
+test.use({ seed: { settings: { currentLocale: 'en-US', fetchSubscriptionsAutomatically: false } } })
+
+test('color picker stays within bounds on opening when neither side fits', async ({ app, page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await setWindowSize(app, page, { width: 1200, height: 650 })
+  await goToSettingsSection(page, 'appearance')
+  await openCustomThemeEditor(page)
+  await page.locator('.settingsWindow').getByRole('button', { name: 'Maximize', exact: true }).click()
+  const trigger = page.locator('.customThemeEditor .colorFieldTrigger').first()
+  await trigger.evaluate(button => {
+    const scroller = button.closest('.colorGrid')
+    const spacer = document.createElement('div')
+    spacer.style.gridColumn = '1 / -1'
+    spacer.style.blockSize = `${innerHeight * 2}px`
+    scroller.prepend(spacer)
+    scroller.append(spacer.cloneNode())
+    const viewport = scroller.getBoundingClientRect()
+    const rect = button.getBoundingClientRect()
+    const top = Math.max(viewport.top + 16, Math.min(innerHeight / 2, viewport.bottom - rect.height - 16))
+    scroller.scrollTop += rect.top - top
+  })
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+  await trigger.evaluate(button => button.click())
+  const popup = page.locator('.colorPickerPopover')
+  await expect(popup).toBeVisible()
+  expect(await popup.evaluate(menu => {
+    const button = document.querySelector('.customThemeEditor .colorFieldTrigger').getBoundingClientRect()
+    const height = menu.getBoundingClientRect().height
+    return height < innerHeight - 24 && button.top - 20 < height && innerHeight - button.bottom - 20 < height
+  }), 'the popup fits the viewport but neither side of the trigger').toBe(true)
+  await expect.poll(() => popup.evaluate(element => {
+    const rect = element.getBoundingClientRect()
+    return rect.top >= 11 && rect.bottom <= innerHeight - 11
+  })).toBe(true)
+})

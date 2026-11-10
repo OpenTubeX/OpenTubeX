@@ -1,0 +1,9 @@
+.iconDropdown.notificationCenterDropdown {
+  background-image: var(--card-bg-image);
+  inline-size: min(380px, calc(100vw - 16px));
+  user-select: text;
+}
+
+.iconDropdown.notificationCenterDropdown .iconDropdownContent {
+  max-block-size: min(480px, calc(100dvh - 120px));
+}

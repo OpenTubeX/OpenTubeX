@@ -1,76 +1,127 @@
-.shareLinks {
-  display: grid;
-  grid-auto-flow: column;
-  grid-template-rows: auto auto;
-  padding: 12px;
-  inline-size: max-content;
-}
-
-.header {
-  color: var(--primary-text-color);
-  font-size: 18px;
-  font-weight: bold;
-  margin-block: 4px 8px;
-  margin-inline: 0;
-  display: flex;
-  justify-content: center;
-}
-
-.buttons {
+/* Labels keep one line while the menu fits, and wrap once the compact
+   dialog caps its width. */
+.shareMenu {
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  max-inline-size: min-content;
-  min-inline-size: 150px;
+  inline-size: max-content;
+  min-inline-size: min(272px, calc(100vw - 26px));
+  max-inline-size: 100%;
+  padding: 4px;
 }
 
-.action {
-  padding: 6px;
-  white-space: initial;
+.shareTimestamp {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-block-end: 4px;
+  padding-block: 2px 6px;
+  padding-inline: 12px 0;
+  border-block-end: 1px solid color-mix(in srgb, var(--border-color) 45%, transparent);
 }
 
-.divider {
-  background: var(--tertiary-text-color);
-  grid-row: span 3;
-  margin-block: 0;
-  margin-inline: 12px;
+.shareTimestampIcon {
+  flex-shrink: 0;
+  color: var(--secondary-text-color);
+}
+
+.shareLinks {
+  display: flex;
+}
+
+.shareSection {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+}
+
+.shareSectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-block-size: 32px;
+  padding-inline: 12px;
+  color: var(--secondary-text-color);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.shareSectionDivider {
+  flex: none;
   inline-size: 1px;
+  margin-block: 8px;
+  margin-inline: 4px;
+  background-color: color-mix(in srgb, var(--border-color) 45%, transparent);
+}
+
+.shareActionDivider {
+  block-size: 1px;
+  margin-block: 4px;
+  margin-inline: 12px;
+  background-color: color-mix(in srgb, var(--border-color) 45%, transparent);
+}
+
+.shareAction {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-block-size: 40px;
+  padding-block: 8px;
+  padding-inline: 12px;
+  border: 0;
+  border-radius: var(--shape-corner-medium);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.shareAction > .ft-icon {
+  flex: none;
+  inline-size: 18px;
+  color: var(--secondary-text-color);
+  font-size: 16px;
+}
+
+.shareAction:is(:hover, :focus-visible) {
+  background-color: var(--side-nav-hover-color);
+  color: var(--side-nav-hover-text-color);
+}
+
+.shareAction:is(:hover, :focus-visible) > .ft-icon {
+  color: inherit;
+}
+
+.shareAction:active {
+  border-radius: var(--shape-corner-extra-small);
 }
 
 .youtubeLogo {
-  block-size: 18px;
+  block-size: 14px;
   inline-size: auto;
-}
-
-.invidious {
-  letter-spacing: -0.4px;
 }
 
 .invidiousLogo {
   background-size: cover;
   display: inline-block;
-  block-size: 20px;
-  margin-inline-end: 2px;
-  inline-size: 20px;
+  block-size: 18px;
+  inline-size: 18px;
 }
 
 @media only screen and (width <= 450px) {
   .shareLinks {
-    grid-auto-flow: row;
-    margin-inline: auto;
-    justify-items: center;
-    max-inline-size: max-content;
+    flex-direction: column;
   }
 
-  .header.invidious {
-    margin-block-start: 20px;
-  }
-
-  .buttons {
-    max-inline-size: min-content;
-    min-inline-size: 180px;
-  }
-
-  .divider {
-    display: none;
+  .shareSectionDivider {
+    inline-size: auto;
+    block-size: 1px;
+    margin-block: 4px;
+    margin-inline: 12px;
   }
 }

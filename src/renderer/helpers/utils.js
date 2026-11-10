@@ -1,15 +1,22 @@
+import { calculatePublishedDate, extractNumberFromString, escapeHTML, CHANNEL_HANDLE_REGEX } from './feed-metadata'
+import { Browser } from '@capacitor/browser'
+import { Clipboard } from '@capawesome/capacitor-clipboard'
+import { Share } from '@capacitor/share'
 import { nextTick } from 'vue'
 import i18n from '../i18n/index'
 import router from '../router/index'
+import { getCapacitorTabService } from '../tabs/CapacitorTabService'
+import { getTabNavigationService } from '../tabs/TabNavigationService'
 import { UnsupportedPlayerActions } from '../../constants'
+import { getSearchHistoryEntryKey } from '../../search-history'
+import { getPreferredShortThumbnailUrl } from './player/shorts'
+import { isRoundedNumber } from './viewCounts'
+import { blobToDataUrl } from './fileData'
+import { saveAndroidFile } from './androidStorage'
+export { calculatePublishedDate, extractNumberFromString, escapeHTML, CHANNEL_HANDLE_REGEX }
 
 // allowed characters in channel handle: A-Z, a-z, 0-9, -, _, .
 // https://support.google.com/youtube/answer/11585688#change_handle
-export const CHANNEL_HANDLE_REGEX = /^@[\w.-]{3,30}$/
-
-const PUBLISHED_TEXT_REGEX = /(\d+)\s?([a-z]+)/i
-
-export const MIME_TYPE_CODECS_REGEX = /codecs="?([^"]+)"?/
 
 /**
  * @param {string} sortPreference
@@ -48,56 +55,6 @@ export function getIconForSortPreference(sortPreference) {
       // quantity ascending
       return ['fas', 'arrow-down-short-wide']
   }
-}
-
-/**
- * @param {string} publishedText
- * @param {boolean} isLive
- * @param {boolean} isUpcoming
- * @param {Date|undefined} premiereDate
- */
-export function calculatePublishedDate(publishedText, isLive = false, isUpcoming = false, premiereDate = undefined) {
-  const now = Date.now()
-
-  if (isLive) {
-    return now
-  } else if (isUpcoming) {
-    if (premiereDate) {
-      return premiereDate.getTime()
-    } else {
-      // should never happen but just to be sure that we always return a number
-      return now
-    }
-  }
-
-  if (!publishedText) {
-    return undefined
-  }
-
-  const match = publishedText.match(PUBLISHED_TEXT_REGEX)
-
-  const timeFrame = match[2]
-  const timeAmount = parseInt(match[1])
-  let timeSpan = null
-
-  if (timeFrame.startsWith('second') || timeFrame === 's') {
-    timeSpan = timeAmount * 1000
-  } else if (timeFrame.startsWith('minute') || timeFrame === 'm' || timeFrame === 'min') {
-    timeSpan = timeAmount * 60000
-  } else if (timeFrame.startsWith('hour') || timeFrame === 'h') {
-    timeSpan = timeAmount * 3600000
-  } else if (timeFrame.startsWith('day') || timeFrame === 'd') {
-    timeSpan = timeAmount * 86400000
-  } else if (timeFrame.startsWith('week') || timeFrame === 'w') {
-    timeSpan = timeAmount * 604800000
-  } else if (timeFrame.startsWith('month') || timeFrame === 'mo') {
-    // 30 day month being used
-    timeSpan = timeAmount * 2592000000
-  } else if (timeFrame.startsWith('year') || timeFrame === 'y') {
-    timeSpan = timeAmount * 31556952000
-  }
-
-  return now - timeSpan
 }
 
 /**
@@ -192,44 +149,224 @@ function secondsToVttTimestamp(seconds) {
   return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`
 }
 
-export const ToastEventBus = new EventTarget()
+/**
+ * Builds a maximum-quality thumbnail URL for a video, honouring the current backend
+ * and the user's thumbnail preference. Handy for toasts that reference a single
+ * video by id. Returns null when thumbnails are hidden, so callers can omit the
+ * image entirely rather than showing a meaningless placeholder.
+ * @param {string} videoId
+ * @param {'local' | 'invidious' | 'yattee'} backendPreference
+ * @param {string} currentInvidiousInstanceUrl
+ * @param {'' | 'hidden' | 'start' | 'middle' | 'end'} thumbnailPreference
+ * @param {boolean} portrait
+ * @returns {string | null}
+ */
+export function getVideoThumbnailUrl(videoId, backendPreference, currentInvidiousInstanceUrl, thumbnailPreference = '', portrait = false) {
+  if (thumbnailPreference === 'hidden') {
+    return null
+  }
+
+  const baseUrl = backendPreference === 'invidious'
+    ? currentInvidiousInstanceUrl
+    : 'https://i.ytimg.com'
+
+  switch (thumbnailPreference) {
+    case 'start':
+      return `${baseUrl}/vi/${videoId}/${portrait ? 'oar1' : 'mq1'}.jpg`
+    case 'middle':
+      return `${baseUrl}/vi/${videoId}/${portrait ? 'oar2' : 'mq2'}.jpg`
+    case 'end':
+      return `${baseUrl}/vi/${videoId}/${portrait ? 'oar3' : 'mq3'}.jpg`
+    default:
+      return `${baseUrl}/vi/${videoId}/${portrait ? 'oardefault' : 'maxresdefault'}.jpg`
+  }
+}
 
 /**
- * @param {string | (({elapsedMs: number, remainingMs: number}) => string)} message
+ * Resolves a Shorts thumbnail consistently for cards, navigation previews, and
+ * the player poster. YouTube's selected portrait image wins for the default
+ * preference; explicit frame preferences still use their generated URLs.
+ * @param {{ videoId: string, thumbnailUrl?: string, lowResolutionThumbnailUrl?: string } | null | undefined} video
+ * @param {'local' | 'invidious' | 'yattee'} backendPreference
+ * @param {string} currentInvidiousInstanceUrl
+ * @param {'' | 'hidden' | 'start' | 'middle' | 'end'} thumbnailPreference
+ * @param {boolean} dataSaver
+ * @returns {string | null}
+ */
+export function getShortThumbnailUrl(video, backendPreference, currentInvidiousInstanceUrl, thumbnailPreference = '', dataSaver = false) {
+  if (!video?.videoId) {
+    return null
+  }
+
+  const fallbackUrl = getVideoThumbnailUrl(
+    video.videoId,
+    backendPreference,
+    currentInvidiousInstanceUrl,
+    thumbnailPreference,
+    true
+  )
+
+  const preferredVideo = dataSaver && video.lowResolutionThumbnailUrl
+    ? { ...video, thumbnailUrl: video.lowResolutionThumbnailUrl }
+    : video
+  return getPreferredShortThumbnailUrl(preferredVideo, thumbnailPreference, fallbackUrl)
+}
+
+export const ToastEventBus = new EventTarget()
+
+/** Icon shown on toasts that report a failure */
+export const ERROR_TOAST_ICON = ['fas', 'circle-exclamation']
+
+/**
+ * @typedef {object} ToastOptions
+ * @property {string | (({elapsedMs: number, remainingMs: number}) => string)} message
+ * @property {number} [time]
+ * @property {Function} [action]
+ * @property {boolean} [dismissOnAction] close the toast after its main action, defaults to true
+ * @property {{ label: string, action?: Function, primary?: boolean, icon?: [string, string] }[]} [buttons]
+ * @property {'open-sync-settings' | null} [buttonAction] predefined action for cross-window notifications
+ * @property {boolean} [verticalButtons] whether buttons should be stacked vertically
+ * @property {boolean} [dismissible] whether Escape and swipe gestures can dismiss the toast
+ * @property {AbortSignal} [abortSignal]
+ * @property {string} [image] optional image URL (e.g. a video thumbnail) shown alongside the message
+ * @property {[string, string]} [icon] optional semantic icon (e.g. `['fas', 'trash']`) shown
+ *   alongside the message, ignored when an image is given
+ * @property {boolean} [important] keeps the toast when only important notifications are allowed,
+ *   for reminders the user set up. Errors, warnings, and toasts with actions are kept regardless
+ */
+
+/**
+ * @typedef {object} ToastControl
+ * @property {(time: number) => void} startTimeout starts a finite timeout for an indefinite toast
+ */
+
+/**
+ * @param {string | (({elapsedMs: number, remainingMs: number}) => string) | ToastOptions} message
+ *   the message to display, or an options object for more control (e.g. to show an image or icon)
  * @param {number} time
  * @param {Function} action
  * @param {AbortSignal} abortSignal
+ * @returns {ToastControl | null | undefined}
  */
 export function showToast(message, time = null, action = null, abortSignal = null) {
+  let image = null
+  let icon = null
+  let buttons = []
+  let buttonAction = null
+  let verticalButtons = false
+  let dismissible = true
+  let dismissOnAction = true
+  let important = false
+
+  // Allow calling with a single options object while staying backwards compatible
+  // with the positional (message, time, action, abortSignal) signature
+  if (message !== null && typeof message === 'object') {
+    ({ message, time = null, action = null, abortSignal = null, image = null, icon = null, buttons = [], buttonAction = null, verticalButtons = false, dismissible = true, dismissOnAction = true, important = false } = message)
+  }
+
   // Sometimes caller just pass user setting based value in and it can be zero
   if (time === 0) {
     console.warn('showToast called with time: 0', { message, time, action, abortSignal })
     return
   }
 
-  ToastEventBus.dispatchEvent(new CustomEvent('toast-open', {
-    detail: {
-      message,
-      time,
-      action,
-      abortSignal,
+  const detail = {
+    message,
+    time,
+    action,
+    abortSignal,
+    image,
+    icon,
+    buttons,
+    buttonAction,
+    verticalButtons,
+    dismissible,
+    dismissOnAction,
+    important,
+    /** @type {ToastControl | null} */
+    control: null,
+  }
+  ToastEventBus.dispatchEvent(new CustomEvent('toast-open', { detail }))
+  return detail.control
+}
+
+/**
+ * @param {string} backend the preferred backend
+ * @returns {string} the label for errors of the Invidious-compatible API
+ */
+export function getInvidiousApiErrorMessage(backend) {
+  return backend === 'yattee'
+    ? i18n.global.t('Yattee Server.API Error (Click to copy)')
+    : i18n.global.t('Invidious API Error (Click to copy)')
+}
+
+/**
+ * Announce every direct retry, including requests made by background tabs.
+ * @param {string} [backend] the preferred backend that failed
+ */
+export function showInvidiousFallbackToast(backend = 'invidious') {
+  const message = backend === 'yattee'
+    ? i18n.global.t('Yattee Fallback Warning')
+    : i18n.global.t('Invidious Fallback Warning')
+  showToastOnAllTabs(message, 10000, ['fas', 'triangle-exclamation'])
+}
+
+/**
+ * Shows a toast in every window and tab.
+ * @param {string} message
+ * @param {number} time
+ * @param {[string, string] | null} icon optional semantic icon shown alongside the message
+ * @param {'open-sync-settings' | null} buttonAction optional predefined action
+ */
+export function showToastOnAllTabs(message, time = null, icon = null, buttonAction = null) {
+  if (process.env.IS_ELECTRON) {
+    window.ftElectron.showToastOnAllTabs(message, time, icon, buttonAction)
+  } else {
+    showToast({ message, time, icon, buttonAction })
+  }
+}
+
+/** @returns {Promise<string>} */
+export async function readClipboard() {
+  if (process.env.IS_ELECTRON) return window.ftElectron.readClipboard()
+  if (process.env.IS_CAPACITOR) {
+    try {
+      const { type, value } = await Clipboard.read()
+      if (type === 'HTML') {
+        const template = document.createElement('template')
+        template.innerHTML = value
+        return template.content.textContent ?? ''
+      }
+      return type === 'TEXT' || type === 'URL' ? value : ''
+    } catch (error) {
+      if (error.code === 'EMPTY_CLIPBOARD') return ''
+      throw error
     }
-  }))
+  }
+  return navigator.clipboard.readText()
 }
 
 /**
  * This writes to the clipboard. If an error occurs during the copy,
  * a toast with the error is shown. If the copy is successful and
  * there is a success message, a toast with that message is shown.
- * @param {string|Blob} content the content to be copied to the clipboard (text or image Blob)
+ * @param {string|Error|Blob} content the content to be copied to the clipboard (text, an error copied as its message, or an image Blob)
  * @param {object} [options] - Optional settings for the copy operation.
  * @param {null|string} options.messageOnSuccess the message to be displayed as a toast when the copy succeeds (optional)
  * @param {null|string} options.messageOnError the message to be displayed as a toast when the copy fails (optional)
  */
 export async function copyToClipboard(content, { messageOnSuccess = null, messageOnError = null } = {}) {
-  if (navigator.clipboard !== undefined && window.isSecureContext) {
+  const useCapacitorClipboard = process.env.IS_CAPACITOR
+  if (useCapacitorClipboard || (navigator.clipboard !== undefined && window.isSecureContext)) {
     try {
-      if (content instanceof Blob) {
+      if (useCapacitorClipboard) {
+        if (content instanceof Blob) {
+          await Clipboard.write({ image: await blobToDataUrl(content), label: 'OpenTubeX' })
+        } else {
+          // The native bridge serializes options as JSON, which turns non-string values such as errors into {}
+          await Clipboard.write({ text: String(content), label: 'OpenTubeX' })
+        }
+      } else if (content instanceof Blob) {
         await navigator.clipboard.write([
           new ClipboardItem({
             [content.type]: content
@@ -240,49 +377,173 @@ export async function copyToClipboard(content, { messageOnSuccess = null, messag
       }
 
       if (messageOnSuccess !== null) {
-        showToast(messageOnSuccess)
+        showToast({ message: messageOnSuccess, icon: ['fas', 'copy'] })
       }
     } catch (error) {
       if (content instanceof Blob) {
-        console.error(`Failed to data of type "${content.type}" to clipboard`, error)
+        console.error('Failed to copy clipboard data of type', content.type, error)
       } else {
-        console.error(`Failed to copy ${content} to clipboard`, error)
+        console.error('Failed to copy content to clipboard', content, error)
       }
-      if (messageOnError !== null) {
-        showToast(`${messageOnError}: ${error}`, 5000)
-      } else {
-        showToast(`${i18n.global.t('Clipboard.Copy failed')}: ${error}`, 5000)
-      }
+      showToast({
+        message: messageOnError !== null
+          ? `${messageOnError}: ${error}`
+          : `${i18n.global.t('Clipboard.Copy failed')}: ${error}`,
+        time: 5000,
+        icon: ERROR_TOAST_ICON,
+      })
     }
   } else {
-    showToast(i18n.global.t('Clipboard.Cannot access clipboard without a secure connection'), 5000)
+    showToast({
+      message: i18n.global.t('Clipboard.Cannot access clipboard without a secure connection'),
+      time: 5000,
+      icon: ERROR_TOAST_ICON,
+    })
   }
+}
+
+// API requests often fail together. Show at most one error toast every 10 seconds.
+let lastApiErrorToastAt = Number.NEGATIVE_INFINITY
+
+/**
+ * Shows an error toast for a failed request, which copies the error to the
+ * clipboard when clicked.
+ * @param {string} message the message describing what failed
+ * @param {Error | string} error the error to report and make copyable
+ * @param {(options: ToastOptions) => void} [show] toast function to use,
+ *   e.g. the tab-scoped one from {@link import('../composables/useTabToast').useTabToast}
+ */
+export function showApiErrorToast(message, error, show = showToast) {
+  const now = Date.now()
+  if (now - lastApiErrorToastAt < 10000) return
+  lastApiErrorToastAt = now
+  show({
+    message: `${message}: ${error}`,
+    time: 10000,
+    action: () => {
+      copyToClipboard(error)
+    },
+    icon: ERROR_TOAST_ICON,
+  })
 }
 
 /**
  * Opens a link in the default web browser or a new tab in the web builds
  * @param {string} url the URL to open
+ * @param {object} [options]
+ * @param {boolean} [options.background] keep the app in front of the browser (desktop middle-click)
  */
-export async function openExternalLink(url) {
+export async function openExternalLink(url, { background = false } = {}) {
+  if (process.env.IS_CAPACITOR) {
+    await Browser.open({ url })
+    return
+  }
+
+  if (process.env.IS_ELECTRON && background) {
+    await window.ftElectron.openExternalLinkInBackground(url)
+    return
+  }
+
   window.open(url, '_blank', 'noreferrer')
 }
 
 /**
- * Opens an internal path in the same or a new window.
+ * Opens the platform's native share picker for a public link.
+ * @param {string} url the URL to share
+ */
+export async function shareLink(url) {
+  try {
+    if (process.env.IS_ELECTRON) await window.ftElectron.shareLink(url)
+    else await Share.share({ url })
+  } catch (error) {
+    // The Android plugin rejects when the user dismisses the picker.
+    if (error.message === 'Share canceled') return
+    showApiErrorToast(i18n.global.t('Share.Share failed'), error)
+  }
+}
+
+/** Ctrl+Alt+middle-click opens an internal link without loading its tab. */
+export function isUnloadedBackgroundTabClick(event) {
+  return process.env.IS_ELECTRON && event?.type === 'auxclick' && event.button === 1 &&
+    event.ctrlKey && event.altKey && !event.shiftKey
+}
+
+/**
+ * Opens an internal path in the same window, a new tab, or a new window.
  * Optionally with query params and setting the contents of the search bar in the new window.
  * @param {object} params
  * @param {string} params.path the internal path to open
- * @param {boolean} params.doCreateNewWindow set to true to open a new window
- * @param {object} params.query the query params to use (optional)
- * @param {string} params.searchQueryText the text to show in the search bar in the new window (optional)
+ * @param {boolean} [params.doCreateNewWindow] set to true to open a new window (Shift+click)
+ * @param {boolean} [params.doCreateNewTab] set to true to open in a new tab (Ctrl/Cmd+click or middle-click)
+ * @param {boolean} [params.makeActive=true] set to false to open tab in background (only used when doCreateNewTab is true)
+ * @param {boolean} [params.lazyLoad=false] set to true to leave a background tab unloaded
+ * @param {string} [params.title] initial title for the destination
+ * @param {string | null} [params.thumbnail] image for the Android background-tab confirmation
+ * @param {object} [params.query] the query params to use (optional)
+ * @param {string} [params.searchQueryText] the text to show in the search bar in the new window (optional)
  */
-export function openInternalPath({ path, query = undefined, doCreateNewWindow, searchQueryText = null }) {
-  if (process.env.IS_ELECTRON && doCreateNewWindow) {
-    window.ftElectron.openInNewWindow(path, query, searchQueryText)
+export function openInternalPath({ path, query = undefined, doCreateNewWindow = false, doCreateNewTab = false, makeActive = true, lazyLoad = false, title = undefined, thumbnail = null, searchQueryText = null }) {
+  if (process.env.IS_ELECTRON) {
+    if (doCreateNewTab) {
+      // Open in new tab
+      let route = path
+      if (route.startsWith('/')) {
+        route = route.substring(1)
+      }
+      return window.ftElectron.tabs.create({
+        route,
+        query,
+        title,
+        makeActive,
+        lazyLoad,
+        inheritColorFromOpener: true,
+        openerTabId: getTabNavigationService().getPresentedTabId(),
+        preloadInBackground: !makeActive && !lazyLoad && path.startsWith('/watch/')
+      })
+    } else if (doCreateNewWindow) {
+      // Open in new window
+      window.ftElectron.openInNewWindow(path, query, searchQueryText)
+    } else {
+      // Navigate in the presented logical tab.
+      getTabNavigationService().pushPresented({
+        path,
+        query,
+        state: title ? { tabTitle: title } : undefined
+      })
+    }
+  } else if (process.env.IS_CAPACITOR) {
+    if ((doCreateNewTab || doCreateNewWindow) && getCapacitorTabService().tabsEnabled) {
+      return getCapacitorTabService().createTab({ path, query }, title, makeActive).then(tabId => {
+        if (tabId && !makeActive && !process.env.IS_IOS) {
+          showToast({ message: i18n.global.t('Context Menu.Opened in a Background Tab'), image: thumbnail })
+        }
+        return tabId
+      })
+    }
+
+    return getTabNavigationService().pushPresented({
+      path,
+      query,
+      state: title ? { tabTitle: title } : undefined
+    })
   } else {
+    // The web build has no tabs or windows of its own, so a Ctrl/middle/Shift+click
+    // is handed to the browser, pointed at this app's route for the destination
+    // instead of the external URL the click started from.
+    if (doCreateNewTab || doCreateNewWindow) {
+      const { href } = router.resolve({ path, query })
+
+      // `window.open` returns null when a popup blocker steps in,
+      // navigating in place is better than doing nothing at all
+      if (window.open(href, '_blank', doCreateNewWindow ? 'popup' : undefined) != null) {
+        return
+      }
+    }
+
     router.push({
       path,
-      query
+      query,
+      state: title ? { tabTitle: title } : undefined
     })
   }
 }
@@ -292,15 +553,17 @@ export function openInternalPath({ path, query = undefined, doCreateNewWindow, s
  * @param {{[key: string]: string | string[]}} acceptedTypes
  * @param {string} [rememberDirectoryId]
  * @param {'desktop' | 'documents' | 'downloads' | 'music' | 'pictures' | 'videos'} [startInDirectory]
- * @returns {Promise<{ content: string, filename: string } | null>}
+ * @param {boolean} [multiple]
+ * @returns {Promise<File[]>} No files when the picker was canceled.
  */
-export async function readFileWithPicker(
+export async function pickFilesWithPicker(
   fileTypeDescription,
   acceptedTypes,
   rememberDirectoryId,
-  startInDirectory
+  startInDirectory,
+  multiple = true
 ) {
-  let file
+  let files
 
   // Only supported in Electron and desktop Chromium browsers
   // https://developer.mozilla.org/en-US/docs/Web/API/Window/showOpenFilePicker#browser_compatibility
@@ -309,38 +572,46 @@ export async function readFileWithPicker(
   if (process.env.IS_ELECTRON || 'showOpenFilePicker' in window) {
     try {
       /** @type {FileSystemFileHandle[]} */
-      const [handle] = await window.showOpenFilePicker({
+      const handles = await window.showOpenFilePicker({
         excludeAcceptAllOption: true,
-        multiple: false,
+        multiple,
         id: rememberDirectoryId,
         startIn: startInDirectory,
         types: [{
           description: fileTypeDescription,
-          accept: acceptedTypes
+          accept: Object.fromEntries(Object.entries(acceptedTypes).map(([type, extensions]) => [
+            type,
+            Array.isArray(extensions) ? extensions : [extensions]
+          ]))
         }],
       })
 
-      file = await handle.getFile()
+      files = await Promise.all(handles.map(handle => handle.getFile()))
     } catch (error) {
       // user pressed cancel in the file picker
       if (error.name === 'AbortError') {
-        return null
+        return []
       }
 
       throw error
     }
   } else {
-    /** @type {File|null} */
-    const fallbackFile = await new Promise((resolve) => {
-      const joinedExtensions = Object.values(acceptedTypes)
-        .flat()
-        .join(',')
+    /** @type {File[]} */
+    files = await new Promise((resolve) => {
+      const extensions = Object.values(acceptedTypes).flat()
 
       const fileInput = document.createElement('input')
       fileInput.type = 'file'
-      fileInput.accept = joinedExtensions
+      fileInput.multiple = multiple
+      // WebKit's native picker cannot identify our line-delimited JSON .db files, and Android 8 has
+      // no MIME types for subtitle files, so its picker would only offer cloud storage for them.
+      // Let them select any file; importers still validate the filename and contents.
+      fileInput.accept = (process.env.IS_IOS && extensions.includes('.db')) ||
+        (process.env.IS_CAPACITOR && extensions.some(extension => extension === '.srt' || extension === '.vtt'))
+        ? ''
+        : extensions.join(',')
       fileInput.onchange = () => {
-        resolve(fileInput.files[0])
+        resolve(Array.from(fileInput.files))
         fileInput.onchange = null
       }
 
@@ -349,7 +620,7 @@ export async function readFileWithPicker(
         setTimeout(() => {
           if (fileInput.files.length === 0 && typeof fileInput.onchange === 'function') {
             // if there are no files and the onchange has not been triggered, the file-picker was canceled
-            resolve(null)
+            resolve([])
             fileInput.onchange = null
           }
         }, 1000)
@@ -357,28 +628,44 @@ export async function readFileWithPicker(
       window.addEventListener('focus', listenForEnd, { once: true })
       fileInput.click()
     })
-
-    if (fallbackFile === null) {
-      return null
-    }
-
-    file = fallbackFile
   }
 
-  return {
-    content: await file.text(),
-    filename: file.name
-  }
+  return files
+}
+
+/**
+ * @param {string} fileTypeDescription
+ * @param {{[key: string]: string | string[]}} acceptedTypes
+ * @param {string} [rememberDirectoryId]
+ * @param {'desktop' | 'documents' | 'downloads' | 'music' | 'pictures' | 'videos'} [startInDirectory]
+ * @returns {Promise<File | null>}
+ */
+export async function pickFileWithPicker(fileTypeDescription, acceptedTypes, rememberDirectoryId, startInDirectory) {
+  const [file] = await pickFilesWithPicker(fileTypeDescription, acceptedTypes, rememberDirectoryId, startInDirectory, false)
+  return file ?? null
+}
+
+/**
+ * @param {string} fileTypeDescription
+ * @param {{[key: string]: string | string[]}} acceptedTypes
+ * @param {string} [rememberDirectoryId]
+ * @param {'desktop' | 'documents' | 'downloads' | 'music' | 'pictures' | 'videos'} [startInDirectory]
+ * @returns {Promise<{ content: string, filename: string } | null>}
+ */
+export async function readFileWithPicker(fileTypeDescription, acceptedTypes, rememberDirectoryId, startInDirectory) {
+  const file = await pickFileWithPicker(fileTypeDescription, acceptedTypes, rememberDirectoryId, startInDirectory)
+  return file === null ? null : { content: await file.text(), filename: file.name }
 }
 
 /**
  * @param {string} fileName
- * @param {string | Blob} content
+ * @param {string | Blob | (() => Promise<Blob>)} content
  * @param {string} fileTypeDescription
  * @param {string} mimeType
  * @param {string} fileExtension
  * @param {string} [rememberDirectoryId]
  * @param {'desktop' | 'documents' | 'downloads' | 'music' | 'pictures' | 'videos'} [startInDirectory]
+ * @param {string} [defaultDirectory] Native directory selected in settings.
  * @returns {Promise<boolean>}
  */
 export async function writeFileWithPicker(
@@ -388,8 +675,12 @@ export async function writeFileWithPicker(
   mimeType,
   fileExtension,
   rememberDirectoryId,
-  startInDirectory
+  startInDirectory,
+  defaultDirectory
 ) {
+  if (process.env.IS_CAPACITOR) {
+    return saveAndroidFile(fileName, typeof content === 'function' ? await content() : content, mimeType, defaultDirectory)
+  }
   // Only supported in Electron and desktop Chromium browsers
   // https://developer.mozilla.org/en-US/docs/Web/API/Window/showOpenFilePicker#browser_compatibility
   // As we know it is supported in Electron, adding the build flag means we can skip the runtime check in Electron
@@ -413,6 +704,8 @@ export async function writeFileWithPicker(
         }],
       })
 
+      // Prepare expensive exports only after the picker has consumed the click gesture.
+      if (typeof content === 'function') content = await content()
       writableFileStream = await handle.createWritable()
       await writableFileStream.write(content)
     } catch (error) {
@@ -430,6 +723,7 @@ export async function writeFileWithPicker(
 
     return true
   } else {
+    if (typeof content === 'function') content = await content()
     if (typeof content === 'string') {
       content = new Blob([content], { type: mimeType })
     }
@@ -486,35 +780,22 @@ export function formatDurationAsTimestamp(lengthSeconds) {
     return lengthSeconds
   }
 
-  if (lengthSeconds === 0) {
-    return '0:00'
+  // Media durations can include milliseconds; timestamps display whole seconds.
+  lengthSeconds = Math.floor(lengthSeconds)
+
+  // Match the player, which shows days past 24 hours (d:hh:mm:ss).
+  const parts = [
+    Math.floor(lengthSeconds / 86400),
+    Math.floor(lengthSeconds / 3600) % 24,
+    Math.floor(lengthSeconds / 60) % 60,
+    lengthSeconds % 60
+  ]
+  // Drop leading zero units but always keep minutes and seconds.
+  while (parts.length > 2 && parts[0] === 0) {
+    parts.shift()
   }
 
-  let hours = 0
-
-  if (lengthSeconds >= 3600) {
-    hours = Math.floor(lengthSeconds / 3600)
-    lengthSeconds = lengthSeconds - hours * 3600
-  }
-
-  let minutes = Math.floor(lengthSeconds / 60)
-  if (minutes < 10 && hours > 0) {
-    minutes = '0' + minutes
-  }
-
-  let seconds = lengthSeconds - minutes * 60
-  if (seconds < 10) {
-    seconds = '0' + seconds
-  }
-
-  let timestamp
-  if (hours > 0) {
-    timestamp = hours + ':' + minutes + ':' + seconds
-  } else {
-    timestamp = minutes + ':' + seconds
-  }
-
-  return timestamp
+  return parts.map((part, index) => index === 0 ? part : String(part).padStart(2, '0')).join(':')
 }
 
 /**
@@ -523,11 +804,7 @@ export function formatDurationAsTimestamp(lengthSeconds) {
  * @returns {boolean}
  */
 export function searchFiltersMatch(filtersA, filtersB) {
-  return filtersA?.prioritize === filtersB?.prioritize &&
-    filtersA?.time === filtersB?.time &&
-    filtersA?.type === filtersB?.type &&
-    filtersA?.duration === filtersB?.duration &&
-    filtersA?.features?.length === filtersB?.features?.length && filtersA?.features?.every((val, index) => val === filtersB?.features[index])
+  return getSearchHistoryEntryKey('', filtersA) === getSearchHistoryEntryKey('', filtersB)
 }
 
 /**
@@ -583,12 +860,41 @@ export async function getSystemLocale() {
   return locale || 'en-US'
 }
 
-export function extractNumberFromString(str) {
-  if (typeof str === 'string') {
-    return parseInt(str.replaceAll(/\D+/g, ''))
-  } else {
-    return NaN
+/**
+ * Opens a video or playlist in the external player and reports the outcome.
+ * Callers mark videos as watched or consume queue items only when this
+ * resolves to true, so a canceled or failed launch leaves them untouched.
+ * @param {import('../../main/externalPlayer').ExternalPlayerPayload} payload
+ * @returns {Promise<boolean>} whether the player started
+ */
+export async function openInExternalPlayer(payload) {
+  const result = await window.ftElectron.openInExternalPlayer(payload)
+  if (result == null) return false
+  const { externalPlayer, unsupportedActions, isPlaylist, status } = result
+
+  if (status !== 'opened') {
+    showToast({
+      message: status === 'cancelled'
+        ? i18n.global.t('Video.External Player.LaunchCanceledTemplate', { externalPlayer })
+        : i18n.global.t('Video.External Player.LaunchFailedTemplate', { externalPlayer }),
+      icon: ['fas', status === 'cancelled' ? 'xmark' : 'circle-exclamation'],
+    })
+    return false
   }
+
+  for (const action of unsupportedActions) {
+    showExternalPlayerUnsupportedActionToast(externalPlayer, action)
+  }
+
+  const videoOrPlaylist = isPlaylist
+    ? i18n.global.t('Video.External Player.playlist')
+    : i18n.global.t('Video.External Player.video')
+
+  showToast({
+    message: i18n.global.t('Video.External Player.OpeningTemplate', { videoOrPlaylist, externalPlayer }),
+    icon: ['fas', 'external-link-alt'],
+  })
+  return true
 }
 
 /**
@@ -625,13 +931,13 @@ export function showExternalPlayerUnsupportedActionToast(externalPlayer, action)
   const message = i18n.global.t('Video.External Player.UnsupportedActionTemplate', {
     externalPlayer, action: actionString
   })
-  showToast(message)
+  showToast({ message, icon: ['fas', 'triangle-exclamation'] })
 }
 
 export function getVideoParamsFromUrl(url) {
   /** @type {URL} */
   let urlObject
-  const paramsObject = { videoId: null, timestamp: null, playlistId: null }
+  const paramsObject = { videoId: null, timestamp: null, playlistId: null, commentId: null, isShort: false }
   try {
     urlObject = new URL(url)
   } catch {
@@ -640,6 +946,7 @@ export function getVideoParamsFromUrl(url) {
 
   function extractParams(videoId) {
     paramsObject.videoId = videoId
+    paramsObject.commentId = urlObject.searchParams.get('lc')
     let timestamp = urlObject.searchParams.get('t')
     if (timestamp && (timestamp.includes('h') || timestamp.includes('m') || timestamp.includes('s'))) {
       const { seconds, minutes, hours } = timestamp.match(/(?:(?<hours>(\d+))h)?(?:(?<minutes>(\d+))m)?(?:(?<seconds>(\d+))s)?/).groups
@@ -695,6 +1002,7 @@ export function getVideoParamsFromUrl(url) {
     function () {
       if (/^\/shorts\/[\w-]+$/.test(urlObject.pathname)) {
         extractParams(urlObject.pathname.replace('/shorts/', ''))
+        paramsObject.isShort = true
         return paramsObject
       }
     },
@@ -744,33 +1052,40 @@ export function toDistractionFreeTitle(title, minUpperCase = 3) {
     .replace(reg, x => capitalizedWord(x.toLowerCase()))
 }
 
+// Constructing Intl formatters is expensive and some of them are used once per list item,
+// so cache them per locale + options
+
+/** @type {Map<string, Intl.NumberFormat>} */
+const numberFormatCache = new Map()
+
 /**
  * @param {number} number
  * @param {Intl.NumberFormatOptions?} options
  * @returns {string}
  */
 export function formatNumber(number, options = undefined) {
-  return Intl.NumberFormat([i18n.global.locale.value, 'en'], options).format(number)
+  const locale = i18n.global.locale.value
+  // Sorted keys give equivalent option objects the same formatter.
+  const key = options ? `${locale}|${JSON.stringify(options, Object.keys(options).sort())}` : locale
+  let formatter = numberFormatCache.get(key)
+
+  if (!formatter) {
+    formatter = new Intl.NumberFormat([locale, 'en'], options)
+    numberFormatCache.set(key, formatter)
+  }
+
+  return formatter.format(number)
 }
 
-export function isNumberRounded(number) {
-  switch (number.toString().length) {
-    case 11:
-    case 10:
-      return number % 100000000 === 0
-    case 9:
-    case 8:
-      return number % 1000000 === 0
-    case 7:
-      return number % 100000 === 0
-    case 6:
-    case 5:
-      return number % 1000 === 0
-    case 4:
-      return number % 100 === 0
-    default:
-      return false
-  }
+/**
+ * Formats a view count, using compact notation (e.g. 14K, 3.5M) when YouTube gave us
+ * an already rounded number, as the trailing zeros just waste space in that case.
+ * @param {number} viewCount
+ * @param {boolean} shorten the user's "Shorten View Counts" setting
+ * @returns {string}
+ */
+export function formatViewCount(viewCount, shorten) {
+  return formatNumber(viewCount, shorten && isRoundedNumber(viewCount) ? { notation: 'compact' } : undefined)
 }
 
 export function formatSubscriberCount(number) {
@@ -789,22 +1104,24 @@ export function getTodayDateStrLocalTimezone() {
   return timeNowStr.split('T')[0]
 }
 
-// Some locales are considered as supported by Chromium but are not translated.
-// This results in "-1 d" being returned instead of "1 day ago".
-// In those cases, force the use of the locale fallback.
-// See https://issues.chromium.org/issues/396060189
-const LOCALES_REQUIRING_FALLBACK = ['az']
-const FALLBACK_LOCALE = 'en'
-const FALLBACK_LOCALES = [FALLBACK_LOCALE]
+/** @type {Map<string, Intl.RelativeTimeFormat>} */
+const relativeTimeFormatCache = new Map()
 
 /**
  * @param {string} locale
- * @returns {string[]}
+ * @param {Intl.RelativeTimeFormatOptions['numeric']} numeric
+ * @returns {Intl.RelativeTimeFormat}
  */
-export function getLocalesWithFallback(locale) {
-  return LOCALES_REQUIRING_FALLBACK.includes(locale)
-    ? FALLBACK_LOCALES
-    : [locale, FALLBACK_LOCALE]
+export function getCachedRelativeTimeFormat(locale, numeric = 'always') {
+  const key = `${locale}|${numeric}`
+  let formatter = relativeTimeFormatCache.get(key)
+
+  if (!formatter) {
+    formatter = new Intl.RelativeTimeFormat([locale, 'en'], { numeric })
+    relativeTimeFormatCache.set(key, formatter)
+  }
+
+  return formatter
 }
 
 /**
@@ -812,14 +1129,14 @@ export function getLocalesWithFallback(locale) {
  * @param {number} date
  * @param {boolean} hideSeconds
  * @param {boolean} useThirtyDayMonths
+ * @param {number} now
  * @returns {string}
  */
-export function getRelativeTimeFromDate(date, hideSeconds = false, useThirtyDayMonths = true) {
+export function getRelativeTimeFromDate(date, hideSeconds = false, useThirtyDayMonths = true, now = Date.now()) {
   if (!date) {
     return ''
   }
 
-  const now = Date.now()
   // Convert from ms to second
   // For easier code interpretation the value is made to be positive
   let timeDiffFromNow = ((now - date) / 1000)
@@ -864,23 +1181,9 @@ export function getRelativeTimeFromDate(date, hideSeconds = false, useThirtyDayM
     timeUnit = 'year'
   }
 
-  const locales = getLocalesWithFallback(i18n.global.locale.value)
   // Using `Math.ceil` so that -1.x days ago displayed as 1 day ago
   // Notice that the value is turned to negative to be displayed as "ago"
-  return new Intl.RelativeTimeFormat(locales).format(Math.ceil(-timeDiffFromNow), timeUnit)
-}
-
-/**
- * Escapes HTML tags to avoid XSS
- * @param {string} untrusted
- * @returns {string}
- */
-export function escapeHTML(untrusted) {
-  return untrusted.replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll('\'', '&apos;')
+  return getCachedRelativeTimeFormat(i18n.global.locale.value).format(Math.ceil(-timeDiffFromNow), timeUnit)
 }
 
 /**
@@ -1021,6 +1324,8 @@ function getIndividualLocalizedShortcut(shortcut) {
       return i18n.global.t('Keys.alt')
     case 'ctrl':
       return i18n.global.t('Keys.ctrl')
+    case 'control':
+      return i18n.global.t('Keys.ctrl')
     case 'shift':
       return i18n.global.t('Keys.shift')
     case 'enter':
@@ -1048,6 +1353,8 @@ function getMacIconForShortcut(shortcut) {
     case 'cmd':
     case 'ctrl':
       return '⌘'
+    case 'control':
+      return '⌃'
     case 'shift':
       return '⇧'
     case 'enter':
@@ -1090,6 +1397,10 @@ export function getLocalizedShortcut(shortcut) {
  * @returns {string} the localized action title with keyboard shortcut
  */
 export function addKeyboardShortcutToActionTitle(actionTitle, shortcut) {
+  if (!shortcut) {
+    return actionTitle
+  }
+
   return i18n.global.t('KeyboardShortcutTemplate', {
     label: actionTitle,
     shortcut
@@ -1106,7 +1417,9 @@ export function localizeAndAddKeyboardShortcutToActionTitle(localizedActionTitle
   if (!Array.isArray(sometimesManyUnlocalizedShortcuts)) {
     unlocalizedShortcuts = [unlocalizedShortcuts]
   }
-  const localizedShortcuts = unlocalizedShortcuts.map((s) => getLocalizedShortcut(s))
+  const localizedShortcuts = unlocalizedShortcuts
+    .filter(Boolean)
+    .map((s) => getLocalizedShortcut(s))
   const shortcutLabelSeparator = i18n.global.t('shortcutLabelSeparator')
   return addKeyboardShortcutToActionTitle(localizedActionTitle, localizedShortcuts.join(shortcutLabelSeparator))
 }
@@ -1115,7 +1428,7 @@ export function localizeAndAddKeyboardShortcutToActionTitle(localizedActionTitle
  * @template {Function} T
  * @param {T} func
  * @param {number} wait
- * @returns {T}
+ * @returns {T & { cancel: () => void }}
  */
 export function debounce(func, wait) {
   let timeout
@@ -1123,7 +1436,7 @@ export function debounce(func, wait) {
   // Using a fully fledged function here instead of an arrow function
   // so that we can get `this` and pass it onto the original function.
   // Vue components using the options API use `this` alot.
-  return function (...args) {
+  const debounced = function (...args) {
     const context = this
 
     clearTimeout(timeout)
@@ -1133,6 +1446,13 @@ export function debounce(func, wait) {
       func.apply(context, args)
     }, wait)
   }
+
+  debounced.cancel = () => {
+    clearTimeout(timeout)
+    timeout = null
+  }
+
+  return debounced
 }
 
 /**
@@ -1158,4 +1478,65 @@ export function throttle(func, wait) {
       }, wait)
     }
   }
+}
+
+// Every list item of every feed can add an entry, so the cache is capped and
+// evicts the oldest titles first rather than growing for the whole session.
+const OEMBED_TITLE_CACHE_LIMIT = 500
+const oembedTitleCache = new Map()
+const oembedTitleRequests = new Map()
+
+/**
+ * @param {string} videoId
+ * @param {string} title
+ */
+function cacheOembedTitle(videoId, title) {
+  if (oembedTitleCache.size >= OEMBED_TITLE_CACHE_LIMIT) {
+    // Map iterates in insertion order, so the first key is the oldest one.
+    oembedTitleCache.delete(oembedTitleCache.keys().next().value)
+  }
+
+  oembedTitleCache.set(videoId, title)
+}
+
+/**
+ * @param {string} videoId
+ * @returns {string | null}
+ */
+export function getCachedOembedTitle(videoId) {
+  return oembedTitleCache.get(videoId) ?? null
+}
+
+/**
+ * @param {string} videoId
+ * @returns {Promise<string | null>}
+ */
+export async function getOembedTitle(videoId) {
+  const cachedTitle = getCachedOembedTitle(videoId)
+  if (cachedTitle !== null) {
+    return cachedTitle
+  }
+
+  if (oembedTitleRequests.has(videoId)) {
+    return oembedTitleRequests.get(videoId)
+  }
+
+  const request = (async () => {
+    try {
+      const oembedInfo = await (await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}`)).json()
+      if (typeof oembedInfo.title === 'string' && oembedInfo.title.length > 0) {
+        cacheOembedTitle(videoId, oembedInfo.title)
+        return oembedInfo.title
+      }
+    } catch (error) {
+      console.error(`Failed to fetch oEmbed info for ${videoId}: ${error}`)
+    } finally {
+      oembedTitleRequests.delete(videoId)
+    }
+
+    return null
+  })()
+
+  oembedTitleRequests.set(videoId, request)
+  return request
 }

@@ -1,0 +1,650 @@
+import { readFile } from 'node:fs/promises'
+import vm from 'node:vm'
+import { SyncLiveConnectionState } from '../../src/renderer/helpers/sync-server-live.js'
+import { createStore } from 'vuex'
+import assert from 'node:assert/strict'
+import test from 'node:test'
+import { importWithStubs, sourceUrl } from '../helpers/module-stubs.mjs'
+import * as profileSync from '../../src/renderer/helpers/profile-sync.js'
+import { MAIN_PROFILE_ID, THEME_BG_COLOR } from '../../src/constants.js'
+import { getProfileWithUpdatedSubscriptionDetails } from '../../src/renderer/helpers/subscription-profile-details.js'
+import { copySubscriptionChannelSettings } from '../../src/renderer/helpers/subscription-channels.js'
+
+import {
+  AUTO_SYNC_INTERVAL_MS,
+  dispatchRemoteSyncAction,
+  isRemoteSyncDispatch,
+  SYNC_ACTION_REASONS,
+  SYNC_MUTATION_REASONS,
+  isSyncReasonEnabled,
+} from '../../src/renderer/helpers/sync-server-scheduling.js'
+
+function settings (overrides = {}) {
+  return {
+    syncServerPrivacyMode: 'enhanced',
+    syncServerSyncSubscriptions: false,
+    syncServerSyncPlaylists: false,
+    syncServerSyncHistory: false,
+    syncServerSyncLiveReminders: false,
+    syncServerSyncNotifications: false,
+    syncServerSyncProfiles: false,
+    syncServerSyncSessions: false,
+    syncServerSyncSettings: false,
+    ...overrides,
+  }
+}
+
+test('only schedules changes for enabled collections', () => {
+  assert.equal(isSyncReasonEnabled(settings(), 'history'), false)
+  assert.equal(isSyncReasonEnabled(settings({ syncServerSyncHistory: true }), 'history'), true)
+  assert.equal(isSyncReasonEnabled(settings({ syncServerSyncProfiles: true }), 'profilesOrSubscriptions'), true)
+  assert.equal(isSyncReasonEnabled(settings({ syncServerSyncSubscriptions: true }), 'profilesOrSubscriptions'), true)
+  assert.equal(isSyncReasonEnabled(settings(), 'automatic'), false)
+  assert.equal(isSyncReasonEnabled(settings({ syncServerSyncPlaylists: true }), 'automatic'), true)
+})
+
+test('requires enhanced privacy and the collection toggle for private collections', () => {
+  assert.equal(isSyncReasonEnabled(settings({ syncServerSyncLiveReminders: true }), 'liveReminders'), true)
+  assert.equal(isSyncReasonEnabled(settings({ syncServerSyncLiveReminders: true }), 'automatic'), true)
+  assert.equal(isSyncReasonEnabled(settings({ syncServerSyncNotifications: true }), 'notificationDismissals'), true)
+  assert.equal(isSyncReasonEnabled(settings({ syncServerSyncNotifications: true }), 'automatic'), true)
+  assert.equal(isSyncReasonEnabled(settings({ syncServerPrivacyMode: 'legacy', syncServerSyncNotifications: true }), 'notificationDismissals'), false)
+  assert.equal(isSyncReasonEnabled(settings({ syncServerSyncSettings: true }), 'settings'), true)
+  assert.equal(isSyncReasonEnabled(settings({ syncServerSyncSessions: true }), 'sessions'), true)
+  assert.equal(isSyncReasonEnabled(settings({
+    syncServerPrivacyMode: 'legacy',
+    syncServerSyncSettings: true,
+    syncServerSyncSessions: true,
+    syncServerSyncLiveReminders: true,
+    syncServerSyncNotifications: true,
+  }), 'automatic'), false)
+})
+
+async function loadLocalChangePlugin() {
+  const source = await readFile(new URL('../../src/renderer/store/index.js', import.meta.url), 'utf8')
+  return vm.runInNewContext(
+    source.slice(source.indexOf('function syncOnLocalChanges('), source.indexOf('function reloadRecommendationEvidenceAfterHistoryRemoval(')) + '\nsyncOnLocalChanges',
+    {
+      SYNC_ACTION_REASONS,
+      SYNC_MUTATION_REASONS,
+      isRemoteSyncDispatch,
+      ...profileSync,
+      isSettingSyncable: key => key === 'autoplayVideos',
+      isSettingSyncEnabled: () => true
+    }
+  )
+}
+
+test('schedules imported playlist changes while skipping failed and remote writes', async () => {
+  const scheduled = []
+  const store = createStore({
+    state: { settings: settings({ syncServerSyncPlaylists: true }) },
+    plugins: [await loadLocalChangePlugin()],
+    mutations: { upsertPlaylistToList() {} },
+    actions: {
+      async importPlaylist({ commit }, { fail = false } = {}) {
+        if (fail) { throw new Error('Playlist write failed') }
+        commit('upsertPlaylistToList')
+      },
+      scheduleSyncServer: (_, reason) => scheduled.push(reason),
+    },
+  })
+  await store.dispatch('importPlaylist')
+  assert.deepEqual(scheduled, ['playlists'])
+  await dispatchRemoteSyncAction(store.dispatch, 'importPlaylist')
+  await assert.rejects(store.dispatch('importPlaylist', { fail: true }), /Playlist write failed/)
+  assert.deepEqual(scheduled, ['playlists'])
+})
+
+async function profileChangeFixture() {
+  const source = await readFile(new URL('../../src/renderer/store/modules/profiles.js', import.meta.url), 'utf8')
+  const profiles = vm.runInNewContext(source
+    .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
+    .replace('export default {', 'globalThis.profiles = {') + '\nprofiles', {
+    MAIN_PROFILE_ID,
+    DEFAULT_PROFILE_ICON: {},
+    THEME_BG_COLOR: 'theme',
+    THEME_TEXT_COLOR: 'theme',
+    getProfileWithUpdatedSubscriptionDetails,
+    copySubscriptionChannelSettings,
+    deepCopy: value => JSON.parse(JSON.stringify(value)),
+    DBProfileHandlers: {
+      upsert: async () => {},
+      updateDetails: async () => {},
+      updateSubscriptionDetails: async () => ({ profileIds: [MAIN_PROFILE_ID, 'profile'], success: true }),
+    },
+  })
+  const channel = { id: 'channel', name: 'Old channel name', thumbnail: 'old-avatar' }
+  profiles.state.profileList = [
+    { _id: MAIN_PROFILE_ID, name: 'All channels', subscriptions: [channel] },
+    { _id: 'profile', name: 'Music', bgColor: '#123456', textColor: '#abcdef', subscriptions: [channel] },
+  ]
+  const scheduled = []
+  const store = createStore({
+    modules: { profiles },
+    state: { settings: {} },
+    plugins: [await loadLocalChangePlugin()],
+    actions: { scheduleSyncServer: (_, reason) => scheduled.push(reason) },
+  })
+  return { store, scheduled }
+}
+
+test('channel metadata refreshes update real profiles without scheduling a sync', async () => {
+  const { store, scheduled } = await profileChangeFixture()
+  await store.dispatch('batchUpdateSubscriptionDetails', [{
+    channelId: 'channel', channelName: 'New channel name', channelThumbnailUrl: 'https://yt3.googleusercontent.com/new=s88',
+  }])
+  await store.dispatch('updateSubscriptionDetails', {
+    channelId: 'channel', channelName: 'Latest channel name', channelThumbnailUrl: 'https://yt3.googleusercontent.com/latest=s88',
+  })
+  assert.equal(store.state.profiles.profileList[0].subscriptions[0].name, 'Latest channel name')
+  assert.deepEqual(scheduled, [])
+})
+
+test('profile metadata and membership edits still schedule syncs after channel refreshes', async () => {
+  const { store, scheduled } = await profileChangeFixture()
+  await store.dispatch('batchUpdateSubscriptionDetails', [{ channelId: 'channel', channelName: 'Refreshed' }])
+  scheduled.length = 0
+  for (const change of [{ name: 'Renamed' }, { bgColor: '#654321' }, { textColor: '#fedcba' }]) {
+    const profile = JSON.parse(JSON.stringify(store.state.profiles.profileList.find(profile => profile._id === 'profile')))
+    await store.dispatch('updateProfileDetails', { profileId: 'profile', details: { ...profile, ...change } })
+  }
+  const profile = JSON.parse(JSON.stringify(store.state.profiles.profileList.find(profile => profile._id === 'profile')))
+  await store.dispatch('updateProfile', { ...profile, subscriptions: [{ id: 'other', name: 'Other channel' }] })
+  assert.deepEqual(scheduled, [...Array(3).fill('profiles'), 'profilesOrSubscriptions'])
+})
+
+test('local-only profile edits and identical saves do not schedule syncs', async () => {
+  const { store, scheduled } = await profileChangeFixture()
+  await store.dispatch('updateProfileDetails', { profileId: MAIN_PROFILE_ID, details: { ...JSON.parse(JSON.stringify(store.state.profiles.profileList[0])), name: 'Local label', bgColor: '#fff' } })
+  const profile = JSON.parse(JSON.stringify(store.state.profiles.profileList[1]))
+  await store.dispatch('updateProfileDetails', { profileId: 'profile', details: { ...profile, icon: { type: 'emoji', value: '🎵' } } })
+  await store.dispatch('updateProfileDetails', { profileId: 'profile', details: JSON.parse(JSON.stringify(store.state.profiles.profileList[1])) })
+  await store.dispatch('updateProfile', JSON.parse(JSON.stringify(store.state.profiles.profileList[1])))
+  assert.deepEqual(scheduled, [])
+})
+
+test('changing theme bgColor to its explicit fallback still schedules a profile sync', async () => {
+  const { store, scheduled } = await profileChangeFixture()
+  store.commit('setProfileList', store.state.profiles.profileList.map(profile =>
+    profile._id === 'profile' ? { ...profile, bgColor: THEME_BG_COLOR } : profile))
+  const profile = JSON.parse(JSON.stringify(store.state.profiles.profileList[1]))
+  await store.dispatch('updateProfileDetails', { profileId: 'profile', details: { ...profile, bgColor: '#000000' } })
+  assert.deepEqual(scheduled, ['profiles'])
+})
+
+test('remote actions do not schedule uploads while concurrent user actions still do', async () => {
+  let releaseRemote
+  const pendingRemote = new Promise(resolve => { releaseRemote = resolve })
+  const scheduled = []
+  const store = createStore({
+    state: { settings: { autoplayVideos: true }, progress: 0 },
+    plugins: [await loadLocalChangePlugin()],
+    mutations: {
+      setAutoplayVideos: (state, value) => { state.settings.autoplayVideos = value },
+      updateRecordWatchProgressInHistoryCache: (state, value) => { state.progress = value },
+    },
+    actions: {
+      async updateAutoplayVideos({ commit }, value) {
+        await pendingRemote
+        commit('setAutoplayVideos', value)
+      },
+      updateWatchProgress: ({ commit }, value) => commit('updateRecordWatchProgressInHistoryCache', value),
+      scheduleSyncServer: (_, reason) => { scheduled.push(reason) },
+    },
+  })
+  const remote = dispatchRemoteSyncAction(store.dispatch, 'updateAutoplayVideos', false)
+  assert.equal(isRemoteSyncDispatch(), false)
+  try {
+    await store.dispatch('updateWatchProgress', 42)
+    assert.deepEqual(scheduled, ['history'])
+  } finally {
+    releaseRemote()
+    await remote
+  }
+  assert.deepEqual(scheduled, ['history'])
+  await store.dispatch('updateAutoplayVideos', true)
+  assert.deepEqual(scheduled, ['history', 'settings'])
+})
+
+test('nested remote dispatches and thrown dispatches restore their origin scope', () => {
+  dispatchRemoteSyncAction(() => {
+    assert.equal(isRemoteSyncDispatch(), true)
+    assert.throws(() => dispatchRemoteSyncAction(() => {
+      assert.equal(isRemoteSyncDispatch(), true)
+      throw new Error('Dispatch failed')
+    }), /Dispatch failed/)
+    assert.equal(isRemoteSyncDispatch(), true)
+  })
+  assert.equal(isRemoteSyncDispatch(), false)
+})
+
+const platformHooks = { holdBackgroundSync: () => () => {}, isAppHidden: () => false }
+const [{ createSyncScheduler }] = await importWithStubs([sourceUrl('src/renderer/helpers/sync-server-scheduler.js')], {
+  [sourceUrl('src/renderer/helpers/androidBackgroundSync.js')]: {
+    holdBackgroundSync: () => platformHooks.holdBackgroundSync(),
+    setPeriodicBackgroundSync: () => {},
+  },
+  [sourceUrl('src/renderer/helpers/appVisibility.js')]: { isAppHidden: () => platformHooks.isAppHidden() },
+})
+
+async function schedulingFixture(t, platform = {}) {
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 1000000 })
+  for (const name of ['IS_CAPACITOR', 'IS_IOS']) {
+    const previous = process.env[name]
+    if (platform[name]) process.env[name] = platform[name]
+    else delete process.env[name]
+    t.after(() => {
+      if (previous === undefined) delete process.env[name]
+      else process.env[name] = previous
+    })
+  }
+  const calls = []
+  let releaseSync
+  let blockSync = false
+  let pendingLock = Promise.resolve()
+  let releaseLock
+  let hidden = false
+  const holds = new Set()
+  // Hold counts after each change, in the order native code receives them.
+  const holdCounts = []
+  let nextHold = 0
+  platformHooks.isAppHidden = () => hidden
+  platformHooks.holdBackgroundSync = () => {
+    const id = ++nextHold
+    holds.add(id)
+    holdCounts.push(holds.size)
+    return () => {
+      // Releases reach native code after a resolved begin call.
+      queueMicrotask(() => {
+        holds.delete(id)
+        holdCounts.push(holds.size)
+      })
+    }
+  }
+  const liveConnection = new SyncLiveConnectionState(null)
+  const context = {
+    rootState: {
+      settings: settings({
+        syncServerEnabled: true,
+        syncServerAutoSync: true,
+        syncServerToken: 'token',
+        syncServerSyncHistory: true,
+        syncServerSyncSessions: true,
+        syncServerSyncSettings: true
+      }),
+      syncServer: { syncServerStatus: 'idle' },
+    },
+  }
+  const scheduler = createSyncScheduler({
+    getSettings: () => context.rootState.settings,
+    getSyncState: () => context.rootState.syncServer,
+    runSync: async () => {
+      calls.push(Date.now())
+      if (blockSync) await new Promise(resolve => { releaseSync = resolve })
+    },
+    // The store passes these requests through its actions back to the scheduler.
+    requestSync: options => scheduler.sync(options),
+    requestAutoSync: restart => restart ? scheduler.restart() : scheduler.start(),
+    withSyncLock: callback => pendingLock.then(callback),
+    isOffline: () => false,
+    isLiveConnected: () => liveConnection.isConnected(),
+    startLive: () => {},
+    stopLive: () => {},
+  })
+  return {
+    calls,
+    context,
+    liveConnection,
+    holds,
+    holdCounts,
+    start: () => scheduler.start(),
+    schedule: reason => scheduler.schedule(reason),
+    resume: () => scheduler.resumeHidden(),
+    sync: options => scheduler.sync(options),
+    stop: () => scheduler.stop(),
+    block: () => { blockSync = true },
+    setHidden: value => { hidden = value },
+    holdLock: () => { pendingLock = new Promise(resolve => { releaseLock = resolve }) },
+    releaseLock: () => releaseLock(),
+    release: () => { blockSync = false; releaseSync() },
+    tick: async ms => {
+      t.mock.timers.tick(ms)
+      // Drain the lock, sync, and dispatch promise chains without real delays.
+      for (let i = 0; i < 20; i++) await Promise.resolve()
+    },
+  }
+}
+
+test('history sync waits for inactivity', async t => {
+  const f = await schedulingFixture(t)
+  f.schedule('history')
+  await f.tick(30000 - 1)
+  assert.equal(f.calls.length, 0)
+  f.schedule('history')
+  await f.tick(30000 - 1)
+  assert.equal(f.calls.length, 0)
+  await f.tick(1)
+  assert.equal(f.calls.length, 1)
+})
+
+test('history sync has a maximum wait during continuous edits', async t => {
+  const f = await schedulingFixture(t)
+  for (let elapsed = 0; elapsed < 60000; elapsed += 1000) {
+    f.schedule('history')
+    await f.tick(1000)
+    assert.equal(f.calls.length, elapsed + 1000 === 60000 ? 1 : 0)
+  }
+})
+
+test('history edits do not postpone the tabs deadline', async t => {
+  const f = await schedulingFixture(t)
+  f.schedule('sessions')
+  for (let i = 0; i < 10; i++) {
+    f.schedule('history')
+    await f.tick(1000)
+  }
+  assert.equal(f.calls.length, 1)
+  await f.tick(60000)
+  assert.equal(f.calls.length, 1, 'one full sync consumes both pending collections')
+})
+
+test('manual sync is immediate and cancels pending event syncs', async t => {
+  const f = await schedulingFixture(t)
+  f.schedule('history')
+  f.schedule('sessions')
+  await f.sync()
+  assert.equal(f.calls.length, 1)
+  await f.tick(60000)
+  assert.equal(f.calls.length, 1)
+})
+
+test('stopping automatic sync cancels pending changes', async t => {
+  const f = await schedulingFixture(t)
+  f.schedule('history')
+  f.schedule('sessions')
+  f.stop()
+  await f.tick(60000)
+  assert.equal(f.calls.length, 0)
+})
+
+test('other changes retain their short delay and automatic checks cannot suppress local edits', async t => {
+  const f = await schedulingFixture(t)
+  f.context.rootState.settings.syncServerLastSyncAt = Date.now()
+  f.schedule('settings')
+  f.schedule('automatic')
+  await f.tick(1500)
+  assert.equal(f.calls.length, 1)
+})
+
+for (const remoteOnly of [false, true]) {
+  test(`edits during a ${remoteOnly ? 'remote' : 'full'} sync keep their debounce`, async t => {
+    const f = await schedulingFixture(t)
+    f.block()
+    const syncing = f.sync({ remoteOnly })
+    await f.tick(0)
+    f.schedule('history')
+    f.release()
+    await syncing
+    await f.tick(29999)
+    assert.equal(f.calls.length, 1)
+    await f.tick(1)
+    assert.equal(f.calls.length, 2)
+  })
+}
+
+test('an expired deadline waits for the active sync, then runs without another debounce', async t => {
+  const f = await schedulingFixture(t)
+  f.block()
+  const syncing = f.sync()
+  await f.tick(0)
+  f.schedule('sessions')
+  await f.tick(30000)
+  assert.equal(f.calls.length, 1)
+  f.release()
+  await syncing
+  await f.tick(0)
+  assert.equal(f.calls.length, 2)
+})
+
+test('disabling a collection before its deadline prevents its scheduled sync', async t => {
+  const f = await schedulingFixture(t)
+  f.schedule('history')
+  f.context.rootState.settings.syncServerSyncHistory = false
+  await f.tick(30000)
+  assert.equal(f.calls.length, 0)
+})
+
+test('a recent automatic check preserves the pending history deadline', async t => {
+  const f = await schedulingFixture(t)
+  f.context.rootState.settings.syncServerLastSyncAt = Date.now()
+  f.schedule('history')
+  f.schedule('automatic')
+  await f.tick(1500)
+  assert.equal(f.calls.length, 0)
+  await f.tick(28500)
+  assert.equal(f.calls.length, 1)
+})
+
+test('stopping sync cancels an expired timer waiting for an active sync', async t => {
+  const f = await schedulingFixture(t)
+  f.block()
+  const syncing = f.sync()
+  await f.tick(0)
+  f.schedule('sessions')
+  await f.tick(10000)
+  f.stop()
+  f.release()
+  await syncing
+  await f.tick(0)
+  assert.equal(f.calls.length, 1)
+})
+
+for (const connected of [true, false]) {
+  test(`periodic fallback ${connected ? 'skips a healthy live connection' : 'syncs without a live connection'}`, async t => {
+    const f = await schedulingFixture(t)
+    f.liveConnection.setConnected(connected)
+    f.start()
+    await f.tick(AUTO_SYNC_INTERVAL_MS)
+    assert.equal(f.calls.length, connected ? 0 : 1)
+    await f.tick(AUTO_SYNC_INTERVAL_MS)
+    assert.equal(f.calls.length, connected ? 0 : 2)
+  })
+}
+
+test('periodic fallback does not sync while the mobile app is hidden', async t => {
+  const f = await schedulingFixture(t, { IS_CAPACITOR: 'true' })
+  f.liveConnection.setConnected(false)
+  f.start()
+  f.setHidden(true)
+  await f.tick(AUTO_SYNC_INTERVAL_MS)
+  await f.tick(AUTO_SYNC_INTERVAL_MS)
+  assert.equal(f.calls.length, 0)
+  f.setHidden(false)
+  await f.tick(AUTO_SYNC_INTERVAL_MS)
+  assert.equal(f.calls.length, 1)
+})
+
+test('queued event syncs wait while the iOS app is hidden and replay on resume', async t => {
+  const f = await schedulingFixture(t, { IS_CAPACITOR: 'true', IS_IOS: 'true' })
+  f.schedule('history')
+  f.setHidden(true)
+  await f.tick(30000)
+  assert.equal(f.calls.length, 0)
+  f.setHidden(false)
+  f.resume()
+  await f.tick(30000)
+  assert.equal(f.calls.length, 1)
+  f.resume()
+  await f.tick(30000)
+  assert.equal(f.calls.length, 1)
+})
+
+test('event syncs run while the Android app is hidden and hold it until they finish', async t => {
+  const f = await schedulingFixture(t, { IS_CAPACITOR: 'true' })
+  f.block()
+  f.schedule('history')
+  f.schedule('history')
+  assert.equal(f.holds.size, 1)
+  f.setHidden(true)
+  await f.tick(30000)
+  assert.equal(f.calls.length, 1)
+  assert.equal(f.holds.size, 1)
+  f.release()
+  await f.tick(0)
+  assert.equal(f.holds.size, 0)
+})
+
+test('a full sync queued behind a remote-only check keeps the Android app held', async t => {
+  const f = await schedulingFixture(t, { IS_CAPACITOR: 'true' })
+  f.block()
+  const remote = f.sync({ remoteOnly: true })
+  await f.tick(0)
+  const full = f.sync()
+  f.release()
+  await remote
+  await full
+  await f.tick(0)
+  assert.equal(f.calls.length, 2)
+  assert.equal(f.holdCounts.at(-1), 0)
+  assert.equal(f.holdCounts.indexOf(0), f.holdCounts.length - 1)
+})
+
+test('full syncs and stopping automatic sync release pending event sync holds', async t => {
+  const f = await schedulingFixture(t, { IS_CAPACITOR: 'true' })
+  f.schedule('history')
+  f.schedule('sessions')
+  assert.equal(f.holds.size, 2)
+  await f.sync()
+  await f.tick(0)
+  assert.equal(f.holds.size, 0)
+  f.schedule('history')
+  f.stop()
+  await f.tick(0)
+  assert.equal(f.holds.size, 0)
+})
+
+test('periodic fallback resumes after a live disconnect', async t => {
+  const f = await schedulingFixture(t)
+  f.liveConnection.setConnected(true)
+  f.start()
+  await f.tick(AUTO_SYNC_INTERVAL_MS)
+  assert.equal(f.calls.length, 0)
+  f.liveConnection.setConnected(false)
+  await f.tick(AUTO_SYNC_INTERVAL_MS)
+  assert.equal(f.calls.length, 1)
+})
+
+test('periodic fallback retries failed uploads despite a healthy live connection and recent sync', async t => {
+  const f = await schedulingFixture(t)
+  f.liveConnection.setConnected(true)
+  f.context.rootState.syncServer.syncServerStatus = 'error'
+  f.start()
+  await f.tick(AUTO_SYNC_INTERVAL_MS - 1000)
+  // Another renderer can update this shared timestamp while our upload failed.
+  f.context.rootState.settings.syncServerLastSyncAt = Date.now()
+  await f.tick(1000)
+  assert.equal(f.calls.length, 1)
+})
+
+test('a due edit waits for session deletion to release the sync lock', async t => {
+  const f = await schedulingFixture(t)
+  f.schedule('sessions')
+  f.holdLock()
+  f.context.rootState.syncServer.syncServerStatus = 'syncing'
+  await f.tick(10000)
+  assert.equal(f.calls.length, 0)
+  f.context.rootState.syncServer.syncServerStatus = 'success'
+  f.releaseLock()
+  await f.tick(0)
+  assert.equal(f.calls.length, 1)
+})
+
+test('edits made during session deletion wait for its sync lock', async t => {
+  const f = await schedulingFixture(t)
+  f.holdLock()
+  f.context.rootState.syncServer.syncServerStatus = 'syncing'
+  f.schedule('history')
+  await f.tick(30000)
+  assert.equal(f.calls.length, 0)
+  f.context.rootState.syncServer.syncServerStatus = 'success'
+  f.releaseLock()
+  await f.tick(0)
+  assert.equal(f.calls.length, 1)
+})
+
+test('stopping during a fallback health check cancels its upload and rescheduling', async t => {
+  const f = await schedulingFixture(t)
+  let finishHealthCheck
+  f.liveConnection.isConnected = () => new Promise(resolve => { finishHealthCheck = resolve })
+  f.start()
+  await f.tick(AUTO_SYNC_INTERVAL_MS)
+  f.stop()
+  finishHealthCheck(false)
+  await f.tick(0)
+  assert.equal(f.calls.length, 0)
+  f.liveConnection.isConnected = async () => false
+  await f.tick(AUTO_SYNC_INTERVAL_MS)
+  assert.equal(f.calls.length, 0)
+  f.start()
+  await f.tick(AUTO_SYNC_INTERVAL_MS)
+  assert.equal(f.calls.length, 1, 'an explicit restart still works')
+})
+
+test('stopping during an active sync prevents completion or later edits from restarting it', async t => {
+  const f = await schedulingFixture(t)
+  f.block()
+  const syncing = f.sync()
+  await f.tick(0)
+  f.stop()
+  f.release()
+  await syncing
+  f.schedule('history')
+  await f.tick(AUTO_SYNC_INTERVAL_MS)
+  assert.equal(f.calls.length, 1)
+})
+
+test('stopping sync cancels an automatic upload already queued behind the lock', async t => {
+  const f = await schedulingFixture(t)
+  f.holdLock()
+  f.schedule('sessions')
+  await f.tick(10000)
+  f.stop()
+  f.releaseLock()
+  await f.tick(0)
+  assert.equal(f.calls.length, 0)
+})
+
+test('automatic sync can restart before any collection is enabled', async t => {
+  const f = await schedulingFixture(t)
+  f.stop()
+  const settings = f.context.rootState.settings
+  settings.syncServerSyncSessions = false
+  settings.syncServerSyncHistory = false
+  settings.syncServerSyncSettings = false
+  f.start()
+  settings.syncServerSyncHistory = true
+  f.schedule('history')
+  await f.tick(30000)
+  assert.equal(f.calls.length, 1)
+})
+
+test('repaired playlist metadata schedules sync after saved updates, excluding empty or remote repairs', async () => {
+  const source = await readFile(new URL('../../src/renderer/store/modules/playlists.js', import.meta.url), 'utf8')
+  const action = source.slice(source.indexOf('  async repairPlaylistMetadata('), source.indexOf('  async importPlaylist('))
+  const repairPlaylistMetadata = vm.runInNewContext(`({${action}}).repairPlaylistMetadata`, {
+    DBPlaylistHandlers: { repairMetadata: async payload => ({ updates: payload.updates, repaired: payload.updates.length, failed: 0 }) }
+  })
+  const scheduled = []
+  const store = createStore({
+    state: { settings: settings({ syncServerSyncPlaylists: true }) },
+    plugins: [await loadLocalChangePlugin()],
+    mutations: { applyPlaylistMetadataRepairs() {} },
+    actions: { repairPlaylistMetadata, scheduleSyncServer: (_, reason) => scheduled.push(reason) },
+  })
+  await store.dispatch('repairPlaylistMetadata', { updates: [{ _id: 'saved' }] })
+  assert.deepEqual(scheduled, ['playlists'])
+  await store.dispatch('repairPlaylistMetadata', { updates: [] })
+  await dispatchRemoteSyncAction(store.dispatch, 'repairPlaylistMetadata', { updates: [{ _id: 'remote' }] })
+  assert.deepEqual(scheduled, ['playlists'])
+})

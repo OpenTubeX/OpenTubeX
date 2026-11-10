@@ -1,0 +1,611 @@
+import assert from 'node:assert/strict'
+import test from 'node:test'
+import { readFile } from 'node:fs/promises'
+import vm from 'node:vm'
+import Datastore from '@seald-io/nedb'
+
+import { migrateStoredSettings } from '../../src/datastores/settingsMigrations.js'
+import { DEFAULT_NAVIGATION_ITEMS } from '../../src/navigationItems.js'
+import { DEFAULT_QUICK_SETTINGS } from '../../src/renderer/helpers/quickSettings.js'
+import {
+  migrateLegacySettings,
+  migrateStoredAiVideoSummarySetting,
+  migrateSyncServerUrl,
+} from '../../src/renderer/helpers/settings-migrations.js'
+
+test('migrates an enabled legacy subscription progress notification preference', () => {
+  assert.deepEqual(migrateLegacySettings({ showSubscriptionRefreshToast: true }), {
+    showProgressBarToast: true,
+  })
+})
+
+test('migrates the legacy subscription progress notification preference', () => {
+  assert.deepEqual(migrateLegacySettings({ showSubscriptionRefreshToast: false }), {
+    showProgressBarToast: false,
+  })
+})
+
+test('prefers the current progress notification preference', () => {
+  assert.deepEqual(migrateLegacySettings({
+    showSubscriptionRefreshToast: false,
+    showProgressBarToast: true,
+  }), {
+    showProgressBarToast: true,
+  })
+})
+
+test('preserves the old live chat visibility choice for replays', () => {
+  assert.deepEqual(migrateLegacySettings({ hideLiveChat: true }), {
+    hideLiveChat: true,
+    hideLiveChatReplay: true,
+  })
+})
+
+test('prefers an explicit live chat replay visibility choice', () => {
+  assert.deepEqual(migrateLegacySettings({
+    hideLiveChat: true,
+    hideLiveChatReplay: false,
+  }), {
+    hideLiveChat: true,
+    hideLiveChatReplay: false,
+  })
+})
+
+test('copies the former Auto Load Next Page choice to comments', () => {
+  assert.deepEqual(migrateLegacySettings({ generalAutoLoadMorePaginatedItemsEnabled: false }), {
+    generalAutoLoadMorePaginatedItemsEnabled: false,
+    autoLoadComments: false,
+  })
+  assert.deepEqual(migrateLegacySettings({ generalAutoLoadMorePaginatedItemsEnabled: true }), {
+    generalAutoLoadMorePaginatedItemsEnabled: true,
+    autoLoadComments: true,
+  })
+})
+
+test('prefers an explicit Auto Load Comments choice', () => {
+  assert.deepEqual(migrateLegacySettings({
+    generalAutoLoadMorePaginatedItemsEnabled: false,
+    autoLoadComments: true,
+  }), {
+    generalAutoLoadMorePaginatedItemsEnabled: false,
+    autoLoadComments: true,
+  })
+})
+
+test('migrates the legacy vertical tab bar preference to the left layout', () => {
+  assert.deepEqual(migrateLegacySettings({ useVerticalTabBar: true }), {
+    tabBarPosition: 'left',
+  })
+})
+
+test('prefers an explicit tab bar position over the legacy preference', () => {
+  assert.deepEqual(migrateLegacySettings({
+    useVerticalTabBar: true,
+    tabBarPosition: 'right',
+  }), {
+    tabBarPosition: 'right',
+  })
+})
+
+test('inverts the legacy Downloads placement preference', () => {
+  assert.deepEqual(migrateLegacySettings({ moveDownloadsToQuickSettings: false }), {
+    moveDownloadsToAppHeader: true,
+  })
+  assert.deepEqual(migrateLegacySettings({ moveDownloadsToQuickSettings: true }), {
+    moveDownloadsToAppHeader: false,
+  })
+})
+
+test('prefers the current Downloads placement preference', () => {
+  assert.deepEqual(migrateLegacySettings({
+    moveDownloadsToQuickSettings: false,
+    moveDownloadsToAppHeader: false,
+  }), {
+    moveDownloadsToAppHeader: false,
+  })
+})
+
+test('drops the removed per-channel enable switches and the automatic saving they disabled', () => {
+  assert.deepEqual(migrateLegacySettings({
+    rememberPlaybackSpeedPerChannel: true,
+    autoUpdateChannelPlaybackSpeeds: true,
+    rememberVideoQualityPerChannel: false,
+    autoUpdateChannelVideoQualities: true,
+    rememberSubtitlesStatePerChannel: true,
+    rememberVolumePerChannel: false,
+    autoUpdateChannelVolumes: false,
+  }), {
+    autoUpdateChannelPlaybackSpeeds: true,
+    autoUpdateChannelVideoQualities: false,
+    autoUpdateChannelVolumes: false,
+  })
+  // Exports without the former switches keep their automatic saving choice
+  assert.deepEqual(migrateLegacySettings({ autoUpdateChannelVolumes: true }), { autoUpdateChannelVolumes: true })
+})
+
+test('turns off stored automatic saving that a disabled per-channel switch kept inactive', async () => {
+  const settings = new Datastore()
+  await settings.insertAsync([
+    { _id: 'rememberPlaybackSpeedPerChannel', value: false },
+    { _id: 'autoUpdateChannelPlaybackSpeeds', value: true },
+    { _id: 'rememberVideoQualityPerChannel', value: true },
+    { _id: 'autoUpdateChannelVideoQualities', value: true },
+    { _id: 'rememberVolumePerChannel', value: false },
+    { _id: 'autoUpdateChannelSubtitlesStates', value: true },
+  ])
+
+  await migrateStoredSettings(settings)
+  // A second run must not touch automatic saving that was turned on after the upgrade
+  await migrateStoredSettings(settings)
+
+  const stored = Object.fromEntries((await settings.findAsync({})).map(({ _id, value }) => [_id, value]))
+  assert.deepEqual(stored, {
+    autoUpdateChannelPlaybackSpeeds: false,
+    autoUpdateChannelVideoQualities: true,
+    autoUpdateChannelSubtitlesStates: true,
+  })
+})
+
+test('migrates the legacy AI video summary visibility preference', () => {
+  assert.deepEqual(migrateLegacySettings({ hideAiVideoSummaries: true }), {
+    aiVideoSummaryMode: 'hide',
+  })
+  assert.deepEqual(migrateLegacySettings({ hideAiVideoSummaries: false }), {
+    aiVideoSummaryMode: 'collapsed',
+  })
+})
+
+test('prefers the current AI video summary mode', () => {
+  assert.deepEqual(migrateLegacySettings({
+    hideAiVideoSummaries: true,
+    aiVideoSummaryMode: 'expanded',
+  }), {
+    aiVideoSummaryMode: 'expanded',
+  })
+})
+
+const settingsSource = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
+const passwordUpdater = settingsSource.slice(settingsSource.indexOf('  updateSettingsPassword:'), settingsSource.indexOf('  grabUserSettings:'))
+
+for (const failure of [null, 'hash', 'write']) {
+  test(`password updater reports ${failure ?? 'success'} without committing a failed save`, async () => {
+    const commits = []
+    const errors = []
+    const writes = []
+    const actions = vm.runInNewContext(`({${passwordUpdater}})`, {
+      hashPassword: async () => {
+        if (failure === 'hash') throw new Error('hash failed')
+        return 'hashed-password'
+      },
+      DBSettingHandlers: {
+        upsert: async (key, value) => {
+          if (failure === 'write') throw new Error('write failed')
+          writes.push([key, value])
+        }
+      },
+      console: { error: error => errors.push(error.message) },
+    })
+    const result = await actions.updateSettingsPassword({ commit: (...args) => commits.push(args) }, 'password')
+    assert.equal(result, failure === null)
+    assert.deepEqual(commits, failure === null ? [['setSettingsPassword', 'hashed-password']] : [])
+    assert.deepEqual(writes, failure === null ? [['settingsPassword', 'hashed-password']] : [])
+    assert.deepEqual(errors, failure ? [`${failure} failed`] : [])
+  })
+}
+
+const tutorialSource = await readFile(new URL('../../src/renderer/helpers/tutorialState.js', import.meta.url), 'utf8')
+const LAST_USED_VERSION_SETTING_ID = tutorialSource.match(/LAST_USED_VERSION_SETTING_ID = '([^']+)'/)[1]
+const TUTORIAL_AUDIENCE_SETTING_ID = tutorialSource.match(/TUTORIAL_AUDIENCE_SETTING_ID = '([^']+)'/)[1]
+const { createDefaultSettings } = await import('../../src/settingsDefaults.js')
+const summaryDefault = createDefaultSettings({ supportsLocalApi: true, isElectron: true }).aiVideoSummaryMode
+const summaryEntriesStart = settingsSource.indexOf('      const legacyHideAiVideoSummariesEntry')
+const summaryEntriesEnd = settingsSource.indexOf('      const legacyPlaybackSpeedSyncEntry', summaryEntriesStart)
+const summaryStartupStart = settingsSource.indexOf('      if (legacyHideAiVideoSummariesEntry)')
+const summaryStartupEnd = settingsSource.indexOf('      // Migrate the legacy auto Picture-in-Picture', summaryStartupStart)
+
+for (const [name, initialSettings, profiles, expectedMode] of [
+  ['fresh installations', {}, [], 'collapsed'],
+  ['tutorial-only settings', { [LAST_USED_VERSION_SETTING_ID]: '0.36.0', [TUTORIAL_AUDIENCE_SETTING_ID]: 'new' }, [], 'collapsed'],
+  ['tutorial-only settings with an existing profile', { [TUTORIAL_AUDIENCE_SETTING_ID]: 'new' }, [{ _id: 'main' }], 'hide'],
+  ['existing users without a saved summary preference', { theme: 'dark' }, [], 'hide'],
+  ['existing profiles without saved settings', {}, [{ _id: 'main' }], 'hide'],
+  ['legacy hidden summaries', { hideAiVideoSummaries: true }, [], 'hide'],
+  ['legacy visible summaries', { hideAiVideoSummaries: false }, [], 'collapsed'],
+  ...['hide', 'collapsed', 'expanded'].map(mode => [
+    `explicit ${mode} summaries`, { aiVideoSummaryMode: mode }, [], mode,
+  ]),
+]) {
+  test(`startup preserves AI summary mode for ${name} across restarts`, async () => {
+    const stored = { ...initialSettings }
+    for (let startup = 0; startup < 2; startup++) {
+      const state = { aiVideoSummaryMode: stored.aiVideoSummaryMode ?? summaryDefault }
+      await vm.runInNewContext(`(async () => {
+        ${settingsSource.slice(summaryEntriesStart, summaryEntriesEnd)}
+        ${settingsSource.slice(summaryStartupStart, summaryStartupEnd)}
+      })()`, {
+        state,
+        TUTORIAL_STATE_SETTING_IDS: new Set([LAST_USED_VERSION_SETTING_ID, TUTORIAL_AUDIENCE_SETTING_ID]),
+        userSettings: Object.entries(stored).map(([_id, value]) => ({ _id, value })),
+        DBProfileHandlers: { find: async () => profiles },
+        DBSettingHandlers: {
+          upsert: async (key, value) => { stored[key] = value },
+          delete: async key => { delete stored[key] },
+        },
+        commit: (key, value) => {
+          assert.equal(key, 'setAiVideoSummaryMode')
+          state.aiVideoSummaryMode = value
+        },
+        dispatch: async (key, value) => {
+          assert.equal(key, 'updateAiVideoSummaryMode')
+          stored.aiVideoSummaryMode = value
+          state.aiVideoSummaryMode = value
+        },
+        recordSettingSyncTimestamp: async () => {},
+        migrateStoredAiVideoSummarySetting,
+        console,
+      })
+      assert.equal(state.aiVideoSummaryMode, expectedMode)
+      assert.equal(stored.aiVideoSummaryMode, expectedMode)
+      assert.equal(Object.hasOwn(stored, 'hideAiVideoSummaries'), false)
+    }
+  })
+}
+
+test('keeps the stored legacy AI summary preference when replacement persistence fails', async () => {
+  let deletedLegacySetting = false
+
+  await assert.rejects(migrateStoredAiVideoSummarySetting({
+    legacyValue: false,
+    hasCurrentSetting: false,
+    saveCurrentSetting: async () => { throw new Error('write failed') },
+    deleteLegacySetting: async () => { deletedLegacySetting = true },
+  }), /write failed/)
+
+  assert.equal(deletedLegacySetting, false)
+})
+
+test('removes the stored legacy AI summary preference after replacement persistence', async () => {
+  let savedMode = null
+  let deletedLegacySetting = false
+
+  await migrateStoredAiVideoSummarySetting({
+    legacyValue: false,
+    hasCurrentSetting: false,
+    saveCurrentSetting: async mode => { savedMode = mode },
+    deleteLegacySetting: async () => { deletedLegacySetting = true },
+  })
+
+  assert.equal(savedMode, 'collapsed')
+  assert.equal(deletedLegacySetting, true)
+})
+
+test('migrates navigation visibility switches to an ordered list', () => {
+  assert.deepEqual(migrateLegacySettings({
+    hideHome: true,
+    hidePlaylists: false,
+    hidePopularVideos: true,
+    hideTrendingVideos: false,
+  }), {
+    hidePlaylists: false,
+    navigationItems: [
+      'subscriptions',
+      'userplaylists',
+      'history',
+      'subscribedchannels',
+      'trending',
+      'stats',
+    ],
+  })
+})
+
+test('prefers current navigation items over former visibility switches', () => {
+  assert.deepEqual(migrateLegacySettings({
+    navigationItems: ['history'],
+    hideHome: false,
+  }), {
+    navigationItems: ['history'],
+  })
+})
+
+test('keeps Hide Playlists because it also controls playlist actions', () => {
+  assert.deepEqual(migrateLegacySettings({
+    hidePlaylists: true,
+  }), {
+    hidePlaylists: true,
+    navigationItems: DEFAULT_NAVIGATION_ITEMS.filter(id => id !== 'userplaylists'),
+  })
+})
+
+test('migrates only the old public sync server URL', () => {
+  for (const value of ['https://sync.d3sox.me', 'https://sync.d3sox.me/', 'https://SYNC.D3SOX.ME:443/']) {
+    assert.equal(migrateSyncServerUrl(value), 'https://sync.opentubex.org')
+  }
+  for (const value of [
+    'https://sync.opentubex.org', 'https://sync.libretube.dev',
+    'https://sync.d3sox.me/custom', 'https://sync.d3sox.me:8443',
+    'https://sync.d3sox.me.example.org', 'https://sync.d3sox.me?custom=1',
+    'https://user:password@sync.d3sox.me', '', null,
+  ]) {
+    assert.equal(migrateSyncServerUrl(value), value)
+  }
+})
+
+test('startup persists the new sync URL and retries after a failed write without clearing the session', async () => {
+  const source = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
+  const start = source.indexOf('      for (const { _id, value } of userSettings)')
+  const end = source.indexOf('      const hasNavigationItems', start)
+  assert.ok(start >= 0 && end > start)
+  const stored = {
+    syncServerUrl: 'https://sync.d3sox.me',
+    syncServerToken: 'existing-token',
+    syncServerPrivacyKey: 'existing-key',
+    syncServerDeviceId: 'existing-device',
+  }
+  let failWrite = true
+  let writes = 0
+  const run = async () => {
+    const loaded = {}
+    await vm.runInNewContext(`(async () => { ${source.slice(start, end)} })()`, {
+      userSettings: Object.entries(stored).map(([_id, value]) => ({ _id, value })),
+      mutationIds: Object.keys(stored),
+      defaultMutationId: key => key,
+      settingsWithSideEffects: [],
+      migrateSyncServerUrl,
+      DBSettingHandlers: {
+        async upsert(key, value) {
+          writes++
+          if (failWrite) throw new Error('write failed')
+          stored[key] = value
+        },
+      },
+      commit: (key, value) => { loaded[key] = value },
+      console: { error() {} },
+    })
+    assert.deepEqual(loaded, stored)
+    return loaded
+  }
+  assert.equal((await run()).syncServerUrl, 'https://sync.d3sox.me')
+  failWrite = false
+  assert.equal((await run()).syncServerUrl, 'https://sync.opentubex.org')
+  assert.equal((await run()).syncServerUrl, 'https://sync.opentubex.org')
+  assert.equal(writes, 2)
+  assert.equal(stored.syncServerToken, 'existing-token')
+  assert.equal(stored.syncServerPrivacyKey, 'existing-key')
+  assert.equal(stored.syncServerDeviceId, 'existing-device')
+})
+
+test('settings migrations read every legacy key in one query', async () => {
+  const settings = new Datastore()
+  await settings.insertAsync([
+    { _id: 'currentLocale', value: 'en_GB' },
+    { _id: 'externalPlayerCustomArgs', value: '--a;--b' },
+    { _id: 'defaultTheatreMode', value: true },
+    { _id: 'saveWatchedProgress', value: false },
+    { _id: 'screenshotAskPath', value: true },
+  ])
+  let reads = 0
+  for (const method of ['findAsync', 'findOneAsync']) {
+    const original = settings[method].bind(settings)
+    settings[method] = (...args) => { reads++; return original(...args) }
+  }
+
+  await migrateStoredSettings(settings)
+
+  assert.equal(reads, 1)
+  settings.findAsync = Datastore.prototype.findAsync
+  const stored = Object.fromEntries((await settings.findAsync({})).map(({ _id, value }) => [_id, value]))
+  assert.deepEqual(stored, {
+    currentLocale: 'en-GB',
+    externalPlayerCustomArgs: '["--a","--b"]',
+    defaultViewingMode: 'theatre',
+    watchedProgressSavingMode: 'never',
+    screenshotMode: 'prompt_folder',
+  })
+})
+
+test('resets saved Quick Settings that still match the former defaults', async () => {
+  const formerDefaults = ['baseTheme', 'mainColor', 'uiScale', 'thumbnailSize', 'defaultQuality', 'playNextVideo',
+    'enableSubtitlesByDefault', 'listType', 'playlistViewType', 'hideRecommendedVideos', 'hideComments',
+    'currentLocale', 'region']
+  const customized = formerDefaults.slice(0, -1)
+  for (const [value, expected] of [[formerDefaults, undefined], [customized, customized]]) {
+    const settings = new Datastore()
+    await settings.insertAsync({ _id: 'quickSettings', value })
+
+    await migrateStoredSettings(settings)
+
+    assert.deepEqual((await settings.findOneAsync({ _id: 'quickSettings' }))?.value, expected)
+  }
+
+  assert.deepEqual(migrateLegacySettings({ quickSettings: formerDefaults }), { quickSettings: [...DEFAULT_QUICK_SETTINGS] })
+  assert.deepEqual(migrateLegacySettings({ quickSettings: customized }), { quickSettings: customized })
+})
+
+test('migrates the stored Hide Video Description switch to the Video descriptions select', async () => {
+  for (const [initial, expected] of [
+    [
+      [
+        { _id: 'hideVideoDescription', value: true },
+        { _id: 'quickSettings', value: ['hideComments', 'hideVideoDescription'] },
+        { _id: 'syncServerSettingsExcluded', value: ['hideVideoDescription'] },
+      ],
+      {
+        videoDescriptionMode: 'hide',
+        quickSettings: ['hideComments', 'videoDescriptionMode'],
+        syncServerSettingsExcluded: ['videoDescriptionMode'],
+      },
+    ],
+    [[{ _id: 'hideVideoDescription', value: false }], {}],
+    [
+      [{ _id: 'hideVideoDescription', value: true }, { _id: 'videoDescriptionMode', value: 'expanded' }],
+      { videoDescriptionMode: 'expanded' },
+    ],
+  ]) {
+    const settings = new Datastore()
+    await settings.insertAsync(initial)
+
+    await migrateStoredSettings(settings)
+    await migrateStoredSettings(settings)
+
+    const stored = Object.fromEntries((await settings.findAsync({})).map(({ _id, value }) => [_id, value]))
+    assert.deepEqual(stored, expected)
+  }
+})
+
+test('migrates an imported Hide Video Description switch to the Video descriptions select', () => {
+  assert.deepEqual(migrateLegacySettings({ hideVideoDescription: true }), { videoDescriptionMode: 'hide' })
+  assert.deepEqual(migrateLegacySettings({ hideVideoDescription: false }), { videoDescriptionMode: 'collapsed' })
+  assert.deepEqual(
+    migrateLegacySettings({ hideVideoDescription: true, videoDescriptionMode: 'expanded' }),
+    { videoDescriptionMode: 'expanded' }
+  )
+  assert.deepEqual(
+    migrateLegacySettings({ quickSettings: ['hideVideoDescription', 'videoDescriptionMode', 'hideComments'] }),
+    { quickSettings: ['videoDescriptionMode', 'hideComments'] }
+  )
+})
+
+test('migrates the mini player switches to the scroll player select', async () => {
+  for (const [initial, expected] of [
+    [
+      [
+        { _id: 'scrollMiniPlayerEnabled', value: false },
+        { _id: 'scrollMiniPlayerOnAllTabs', value: true },
+        { _id: 'quickSettings', value: ['scrollMiniPlayerEnabled', 'hideComments'] },
+      ],
+      { scrollPlayerMode: 'off', quickSettings: ['scrollPlayerMode', 'hideComments'] },
+    ],
+    // Startup maps the older Picture-in-Picture mode only while neither setting is saved.
+    [[{ _id: 'scrollMiniPlayerEnabled', value: true }], { scrollPlayerMode: 'mini' }],
+    [
+      [{ _id: 'scrollMiniPlayerEnabled', value: false }, { _id: 'scrollPlayerMode', value: 'pin' }],
+      { scrollPlayerMode: 'pin' },
+    ],
+  ]) {
+    const settings = new Datastore()
+    await settings.insertAsync(initial)
+
+    await migrateStoredSettings(settings)
+    await migrateStoredSettings(settings)
+
+    const stored = Object.fromEntries((await settings.findAsync({})).map(({ _id, value }) => [_id, value]))
+    assert.deepEqual(stored, expected)
+  }
+
+  assert.deepEqual(
+    migrateLegacySettings({ scrollMiniPlayerEnabled: false, scrollMiniPlayerOnAllTabs: true }),
+    { scrollPlayerMode: 'off' }
+  )
+})
+
+const controlBarMigrationStart = settingsSource.indexOf('      // The chapters and screenshot buttons used to sit')
+const controlBarMigrationEnd = settingsSource.indexOf('      // Existing logged-in sync users', controlBarMigrationStart)
+
+/**
+ * @param {Record<string, unknown>} stored
+ * @param {boolean} saves whether saving the control bar succeeds
+ */
+async function migrateControlBar(stored, saves = true) {
+  const dispatches = []
+  await vm.runInNewContext(`(async () => {
+    ${settingsSource.slice(controlBarMigrationStart, controlBarMigrationEnd)}
+  })()`, {
+    CONTROL_BAR_BUTTONS_MIGRATION_SETTING: 'controlBarButtonsMigration',
+    userSettings: Object.entries(stored).map(([_id, value]) => ({ _id, value })),
+    dispatch: async (action, value) => {
+      dispatches.push([action, value])
+      if (saves) stored.controlBarButtons = value
+      return saves
+    },
+    DBSettingHandlers: { upsert: async (key, value) => { stored[key] = value } },
+    console: { error() {} },
+  })
+  // Arrays from the script's context have another realm's prototype.
+  return JSON.parse(JSON.stringify(dispatches))
+}
+
+test('saved control bars keep the chapters and screenshot buttons once', async () => {
+  const stored = { controlBarButtons: ['captions', 'menu', 'fullscreen'] }
+  assert.deepEqual(await migrateControlBar(stored), [['updateControlBarButtons', ['chapters', 'screenshot', 'captions', 'menu', 'fullscreen']]])
+  assert.equal(stored.controlBarButtonsMigration, true)
+  // Later launches leave a control bar without them alone.
+  stored.controlBarButtons = ['menu']
+  assert.deepEqual(await migrateControlBar(stored), [])
+
+  // Without a saved control bar, the defaults already have them.
+  const fresh = {}
+  assert.deepEqual(await migrateControlBar(fresh), [])
+  assert.equal(fresh.controlBarButtonsMigration, true)
+})
+
+test('a failed control bar migration retries on the next launch', async () => {
+  const stored = { controlBarButtons: ['menu'] }
+  await migrateControlBar(stored, false)
+  assert.equal(stored.controlBarButtonsMigration, undefined)
+  await migrateControlBar(stored)
+  assert.deepEqual([...stored.controlBarButtons], ['chapters', 'screenshot', 'menu'])
+  assert.equal(stored.controlBarButtonsMigration, true)
+})
+
+const autoLoadCommentsMigrationStart = settingsSource.indexOf('      // Auto Load Next Page used to control comments too')
+const autoLoadCommentsMigrationEnd = settingsSource.indexOf('      if (legacyHideAiVideoSummariesEntry)', autoLoadCommentsMigrationStart)
+
+const syncTimestampWriterStart = settingsSource.indexOf('let settingSyncTimestampWrite')
+const syncTimestampWriterEnd = settingsSource.indexOf('const customState', syncTimestampWriterStart)
+
+/**
+ * @param {Record<string, unknown>} stored
+ * @param {Record<string, number>} [startupEditTimes] edit times saved earlier in startup
+ */
+async function migrateAutoLoadComments(stored, startupEditTimes) {
+  const state = { syncServerSettingUpdatedAt: startupEditTimes ?? stored.syncServerSettingUpdatedAt ?? {} }
+  const commits = {}
+  await vm.runInNewContext(`(async () => {
+    ${settingsSource.slice(syncTimestampWriterStart, syncTimestampWriterEnd)}
+    ${settingsSource.slice(autoLoadCommentsMigrationStart, autoLoadCommentsMigrationEnd)}
+  })()`, {
+    userSettings: Object.entries(stored).map(([_id, value]) => ({ _id, value })),
+    state,
+    commit: (mutation, value) => {
+      commits[mutation] = value
+      if (mutation === 'setSyncServerSettingUpdatedAt') state.syncServerSettingUpdatedAt = value
+    },
+    DBSettingHandlers: { upsert: async (key, value) => { stored[key] = value } },
+    isSettingSyncable: () => true,
+    CUSTOM_THEMES_SYNC_KEY: 'customThemes',
+    console,
+  })
+  // Objects from the script's context have another realm's prototype.
+  return JSON.parse(JSON.stringify({ stored, commits }))
+}
+
+test('startup copies Auto Load Next Page to comments with its sync edit time', async () => {
+  const editTimes = { generalAutoLoadMorePaginatedItemsEnabled: 20, keyboardShortcuts: 30 }
+  assert.deepEqual(await migrateAutoLoadComments({
+    generalAutoLoadMorePaginatedItemsEnabled: false,
+    syncServerSettingUpdatedAt: { generalAutoLoadMorePaginatedItemsEnabled: 20 },
+  }, { generalAutoLoadMorePaginatedItemsEnabled: 20, keyboardShortcuts: 30 }), {
+    stored: {
+      generalAutoLoadMorePaginatedItemsEnabled: false,
+      autoLoadComments: false,
+      // Keeps the edit time an earlier startup migration saved.
+      syncServerSettingUpdatedAt: { ...editTimes, autoLoadComments: 20 },
+    },
+    commits: { setAutoLoadComments: false, setSyncServerSettingUpdatedAt: { ...editTimes, autoLoadComments: 20 } },
+  })
+
+  // Without a recorded edit, the copy is not an edit either.
+  assert.deepEqual(await migrateAutoLoadComments({}), {
+    stored: { autoLoadComments: true },
+    commits: { setAutoLoadComments: true },
+  })
+
+  // A saved choice is never replaced.
+  assert.deepEqual(await migrateAutoLoadComments({
+    generalAutoLoadMorePaginatedItemsEnabled: false,
+    autoLoadComments: true,
+  }), {
+    stored: { generalAutoLoadMorePaginatedItemsEnabled: false, autoLoadComments: true },
+    commits: {},
+  })
+})

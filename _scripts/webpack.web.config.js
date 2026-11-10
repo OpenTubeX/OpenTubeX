@@ -3,6 +3,11 @@ const fs = require('fs')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const { VueLoaderPlugin } = require('vue-loader')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
+const getStartupSplash = require('./startupSplash')
+const postcssFontScale = require('./postcssFontScale')
+const getBuildCommit = require('./buildCommit')
+const RelativeImportMetaUrlPlugin = require('./RelativeImportMetaUrlPlugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const MinimizerPlugin = require('minimizer-webpack-plugin')
 const ProcessLocalesPlugin = require('./ProcessLocalesPlugin')
@@ -13,6 +18,26 @@ const {
 } = require('./getShakaLocales')
 
 const isDevMode = process.env.NODE_ENV === 'development'
+const isCapacitor = process.env.IS_CAPACITOR === 'true'
+const outputPath = path.join(__dirname, isCapacitor ? '../dist/capacitor' : '../dist/web')
+
+const postcssLoader = {
+  loader: 'postcss-loader',
+  options: {
+    postcssOptions: {
+      plugins: [
+        postcssFontScale,
+        // WebKit needs -webkit-backdrop-filter before Safari 18. Keep the targets in
+        // sync with IPHONEOS_DEPLOYMENT_TARGET in ios/App/App.xcodeproj.
+        ...(process.env.CAPACITOR_PLATFORM === 'ios'
+          ? [['autoprefixer', { overrideBrowserslist: ['ios_saf >= 17.4'], remove: false }]]
+          : [])
+      ]
+    }
+  }
+}
+
+const { version: swiperVersion } = JSON.parse(fs.readFileSync(path.join(__dirname, '../node_modules/swiper/package.json')))
 
 /** @type {import('webpack').Configuration} */
 const config = {
@@ -23,44 +48,25 @@ const config = {
     web: path.join(__dirname, '../src/renderer/main.js'),
   },
   output: {
-    path: path.join(__dirname, '../dist/web'),
+    path: outputPath,
     filename: '[name].js',
-    copy: [
-      {
-        from: 'static/pwabuilder-sw.js',
-        to: '.'
-      },
-      ...(isDevMode
-        ? []
-        : [
-            {
-              from: 'static',
-              to: 'static',
-              globOptions: {
-                ignore: [
-                  '**/.*',
-                  'static/{locales,pwabuilder-sw.js}'
-                ]
-              }
-            },
-            {
-              context: path.dirname(require.resolve('shaka-player/ui/locales/en.json')),
-              from: `{${SHAKA_LOCALES_TO_BE_BUNDLED.join(',')}}.json`,
-              to: 'static/shaka-player-locales',
-              transform: (input) => {
-                return JSON.stringify(JSON.parse(input.toString('utf-8')))
-              }
-            }
-          ]
-      ),
-    ]
   },
-  externals: {
-    'youtubei.js': '{}',
-    googlevideo: '{}'
-  },
+  ...(isCapacitor
+    ? {}
+    : {
+        externals: {
+          'youtubei.js': '{}',
+          googlevideo: '{}'
+        }
+      }),
   module: {
     rules: [
+      {
+        // Only the OPFS pool VFS is used. Do not bundle the library's
+        // optional worker API, which it starts with `new Worker()`.
+        test: /node_modules[\\/]@sqlite\.org[\\/]sqlite-wasm[\\/]/,
+        parser: { worker: false },
+      },
       {
         test: /\.vue$/,
         loader: 'vue-loader',
@@ -82,6 +88,7 @@ const config = {
               esModule: false
             }
           },
+          postcssLoader,
           {
             loader: 'sass-loader',
             options: {
@@ -92,34 +99,24 @@ const config = {
       },
       {
         test: /\.css$/,
-        oneOf: [
+        use: [
           {
-            test: /[/\\]swiper[/\\]/,
-            type: 'asset/resource',
-            generator: {
-              filename: 'swiper-[name].[contenthash][ext]'
+            loader: MiniCssExtractPlugin.loader
+          },
+          {
+            loader: 'css-loader',
+            options: {
+              esModule: false
             }
           },
+          postcssLoader
+        ],
+        rules: [
           {
-            use: [
-              {
-                loader: MiniCssExtractPlugin.loader
-              },
-              {
-                loader: 'css-loader',
-                options: {
-                  esModule: false
-                }
-              }
-            ],
-            rules: [
-              {
-                resource: require.resolve('shaka-player/dist/controls.css'),
-                use: path.join(__dirname, 'patch-shaka-player-loader.js')
-              }
-            ],
-          },
-        ]
+            resource: require.resolve('shaka-player/dist/controls.css'),
+            use: path.join(__dirname, 'patch-shaka-player-loader.js')
+          }
+        ],
       },
       {
         test: /\.html$/,
@@ -127,10 +124,18 @@ const config = {
       },
       {
         test: /\.(png|jpe?g|gif|tif?f|bmp|webp|svg)(\?.*)?$/,
-        type: 'asset/resource',
-        generator: {
-          filename: 'imgs/[name][ext]'
-        }
+        oneOf: [
+          {
+            resourceQuery: /inline/,
+            type: 'asset/inline'
+          },
+          {
+            type: 'asset/resource',
+            generator: {
+              filename: 'imgs/[name][ext]'
+            }
+          }
+        ]
       },
       {
         test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
@@ -176,17 +181,28 @@ const config = {
     __filename: false
   },
   plugins: [
+    new RelativeImportMetaUrlPlugin(),
     new webpack.DefinePlugin({
       'process.platform': 'undefined',
       'process.env.IS_ELECTRON': false,
       'process.env.IS_ELECTRON_MAIN': false,
-      'process.env.SUPPORTS_LOCAL_API': false,
+      'process.env.IS_CAPACITOR': isCapacitor,
+      'process.env.IS_IOS': isCapacitor && process.env.CAPACITOR_PLATFORM === 'ios',
+      // Matches the scheme _scripts/prepareIos.mjs registers.
+      'process.env.APP_URL_SCHEME': JSON.stringify(
+        isCapacitor && process.env.CAPACITOR_PLATFORM === 'ios' && /-nightly-\d+$/.test(require('../package.json').version)
+          ? 'opentubex-nightly'
+          : 'opentubex'
+      ),
+      'process.env.SUPPORTS_LOCAL_API': isCapacitor,
+      'process.env.BUILD_COMMIT': JSON.stringify(getBuildCommit()),
       __VUE_OPTIONS_API__: 'true',
       __VUE_PROD_DEVTOOLS__: 'false',
       __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: 'false',
       __VUE_I18N_LEGACY_API__: 'false',
       __VUE_I18N_FULL_INSTALL__: 'false',
       __INTLIFY_PROD_DEVTOOLS__: 'false',
+      'process.env.SWIPER_VERSION': `'${swiperVersion}'`
     }),
     new webpack.ProvidePlugin({
       process: 'process/browser.js'
@@ -194,23 +210,53 @@ const config = {
     new HtmlWebpackPlugin({
       excludeChunks: ['processTaskWorker'],
       filename: 'index.html',
-      template: path.resolve(__dirname, '../src/index.ejs')
+      template: path.resolve(__dirname, '../src/index.ejs'),
+      templateParameters: isCapacitor
+        ? { startupSplash: getStartupSplash({ staticProgress: process.env.CAPACITOR_PLATFORM !== 'ios' }) }
+        : {}
     }),
     new VueLoaderPlugin(),
     new MiniCssExtractPlugin({
       filename: isDevMode ? '[name].css' : '[name].[contenthash].css',
       chunkFilename: isDevMode ? '[id].css' : '[id].[contenthash].css',
+      // Route-level chunks can discover scoped Vue styles in different orders.
+      // Their selectors cannot affect one another, so no global order is needed.
+      ignoreOrder: true,
     }),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: '*/LICENSE',
+          context: path.join(__dirname, '../node_modules/@fontsource-variable'),
+          to: 'fonts/licenses/[path][name][ext]'
+        },
+        {
+          from: path.join(__dirname, '../node_modules/swiper/modules/a11y-element.css').replaceAll('\\', '/'),
+          to: `swiper-${swiperVersion}.css`,
+          context: path.join(__dirname, '../node_modules/swiper/modules'),
+          transformAll: (assets) => {
+            return Buffer.concat(assets.map(asset => asset.data))
+          }
+        }
+      ]
+    })
   ],
   resolve: {
+    fallback: {
+      // Feed parsing uses sax.parser, not its optional Node stream wrapper.
+      stream: false,
+      // @hpke/core prefers Web Crypto in supported browsers. Its old-Node
+      // fallback is unreachable in modern web builds and must not be bundled.
+      crypto: false
+    },
     alias: {
+      '@root': path.resolve(__dirname, '..'),
       DB_HANDLERS_ELECTRON_RENDERER_OR_WEB$: path.resolve(__dirname, '../src/datastores/handlers/web.js'),
 
       // change to "shaka-player.ui-es2021.debug.js" to get debug logs (update jsconfig to get updated types)
       'shaka-player$': 'shaka-player/dist/shaka-player.ui-es2021.js',
 
-      // Make @fortawesome/vue-fontawesome use the trimmed down API instead of the original @fortawesome/fontawesome-svg-core
-      '@fortawesome/fontawesome-svg-core$': path.resolve(__dirname, '../src/renderer/fontawesome-minimal.js')
+      '@opentubex/icons$': path.resolve(__dirname, '../src/renderer/icons/iconComponents.js')
     },
     extensions: ['.js', '.vue']
   },
@@ -224,14 +270,55 @@ const processLocalesPlugin = new ProcessLocalesPlugin({
   outputDir: 'static/locales',
 })
 
+const processAILocalesPlugin = new ProcessLocalesPlugin({
+  activeLocales: processLocalesPlugin.activeLocales,
+  allowMissing: true,
+  collectMetadata: false,
+  compress: false,
+  hotReload: isDevMode,
+  inputDir: path.join(__dirname, '../static/locales/ai'),
+  localeSource: 'ai',
+  outputDir: 'static/locales/ai',
+})
+
 config.plugins.push(
   processLocalesPlugin,
+  processAILocalesPlugin,
   new webpack.DefinePlugin({
     'process.env.LOCALE_NAMES': JSON.stringify(processLocalesPlugin.localeNames),
+    'process.env.LOCALE_TRANSLATION_PERCENTAGES': JSON.stringify(processLocalesPlugin.localeTranslationPercentages),
+    'process.env.AI_LOCALES': JSON.stringify([...processAILocalesPlugin.locales.keys()]),
     'process.env.GEOLOCATION_NAMES': JSON.stringify(fs.readdirSync(path.join(__dirname, '..', 'static', 'geolocations')).map(filename => filename.replace('.json', ''))),
     'process.env.SHAKA_LOCALE_MAPPINGS': JSON.stringify(SHAKA_LOCALE_MAPPINGS),
     'process.env.SHAKA_LOCALES_PREBUNDLED': JSON.stringify(SHAKA_LOCALES_PREBUNDLED)
   }),
+  new CopyWebpackPlugin({
+    patterns: [
+      ...(isCapacitor
+        ? []
+        : [{
+            from: path.join(__dirname, '../static/pwabuilder-sw.js'),
+            to: path.join(outputPath, 'pwabuilder-sw.js'),
+          }]),
+      ...(isDevMode
+        ? []
+        : [
+            {
+              from: path.join(__dirname, '../static'),
+              to: path.join(outputPath, 'static'),
+              globOptions: {
+                dot: true,
+                ignore: ['**/.*', '**/locales/**', '**/pwabuilder-sw.js', '**/dashFiles/**', '**/storyboards/**'],
+              },
+            },
+            {
+              from: path.join(__dirname, '../node_modules/shaka-player/ui/locales', `{${SHAKA_LOCALES_TO_BE_BUNDLED.join(',')}}.json`).replaceAll('\\', '/'),
+              to: path.join(outputPath, 'static/shaka-player-locales'),
+              context: path.join(__dirname, '../node_modules/shaka-player/ui/locales')
+            }
+          ])
+    ]
+  })
 )
 
 module.exports = config

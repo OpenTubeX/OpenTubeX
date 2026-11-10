@@ -1,0 +1,53 @@
+package org.opentubex.app;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import android.app.NotificationManager;
+
+import org.junit.Test;
+
+public class OpenTubeXNotificationChannelsTest {
+    @Test
+    public void distinctNotificationPurposesKeepStableChannelIds() {
+        OpenTubeXNotificationChannels.ChannelSpec[] channels =
+            OpenTubeXNotificationChannels.specifications();
+
+        assertEquals(5, channels.length);
+        assertArrayEquals(
+            new String[] { "media-playback", "subscription-refresh", "live-reminders", "yt-dlp-downloads", "new-uploads" },
+            new String[] { channels[0].id, channels[1].id, channels[2].id, channels[3].id, channels[4].id }
+        );
+        assertEquals(NotificationManager.IMPORTANCE_LOW, channels[0].importance);
+        assertEquals(NotificationManager.IMPORTANCE_LOW, channels[1].importance);
+        assertEquals(NotificationManager.IMPORTANCE_HIGH, channels[2].importance);
+        assertEquals(R.string.notification_channel_media_playback_name, channels[0].nameResource);
+        assertEquals(R.string.notification_channel_subscription_refresh_name, channels[1].nameResource);
+        assertEquals(R.string.notification_channel_live_reminders_name, channels[2].nameResource);
+        assertEquals(
+            R.string.notification_channel_media_playback_description,
+            channels[0].descriptionResource
+        );
+        assertEquals(
+            R.string.notification_channel_subscription_refresh_description,
+            channels[1].descriptionResource
+        );
+        assertEquals(
+            R.string.notification_channel_live_reminders_description,
+            channels[2].descriptionResource
+        );
+        assertFalse(channels[0].showBadge);
+        assertFalse(channels[1].showBadge);
+        assertTrue(channels[2].showBadge);
+        assertEquals(NotificationManager.IMPORTANCE_LOW, channels[3].importance);
+        assertEquals(R.string.notification_channel_downloads_name, channels[3].nameResource);
+        assertEquals(R.string.notification_channel_downloads_description, channels[3].descriptionResource);
+        assertFalse(channels[3].showBadge);
+        assertEquals(NotificationManager.IMPORTANCE_DEFAULT, channels[4].importance);
+        assertEquals(R.string.notification_channel_new_uploads_name, channels[4].nameResource);
+        assertEquals(R.string.notification_channel_new_uploads_description, channels[4].descriptionResource);
+        assertTrue(channels[4].showBadge);
+    }
+}

@@ -1,0 +1,73 @@
+name: Flaky E2E Tests
+
+# Keep one issue listing E2E tests that passed only on retry, so flaky tests
+# are fixed in batches instead of failing unrelated PRs.
+on:
+  workflow_run:
+    workflows: [E2E Tests]
+    types: [completed]
+
+permissions: {}
+
+concurrency:
+  group: flaky-e2e-tests
+  queue: max
+  cancel-in-progress: false
+
+jobs:
+  record:
+    name: Record flaky tests
+    # Fork PRs could fill the list with tests that do not exist upstream.
+    if: >-
+      github.repository == 'OpenTubeX/OpenTubeX' &&
+      github.event.workflow_run.conclusion != 'cancelled' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-slim
+
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+
+    steps:
+    - name: Check out trusted recorder
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        ref: ${{ github.event.repository.default_branch }}
+        persist-credentials: false
+
+    - name: Download flaky tests
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      with:
+        # A rerun keeps the earlier attempt's artifacts, which were already recorded.
+        pattern: e2e-flaky-${{ github.event.workflow_run.run_attempt }}-*
+        path: ${{ runner.temp }}/flaky
+        run-id: ${{ github.event.workflow_run.id }}
+        github-token: ${{ github.token }}
+
+    - name: Update flaky test issue
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        GH_REPO: ${{ github.repository }}
+        BRANCH: ${{ github.event.workflow_run.head_branch }}
+        RUN_URL: ${{ github.event.workflow_run.html_url }}
+      run: |
+        set -euo pipefail
+        title='Flaky E2E tests'
+        number="$(
+          gh issue list --state open --author app/github-actions --search "in:title \"$title\"" \
+            --json number,title --jq "map(select(.title == \"$title\")) | first | .number // empty"
+        )"
+        body="$RUNNER_TEMP/body.md"
+        updated="$RUNNER_TEMP/updated.md"
+        if [[ -n "$number" ]]; then
+          gh issue view "$number" --json body --jq .body > "$body"
+        fi
+        node _scripts/flakyTestsIssue.mjs "$RUNNER_TEMP/flaky" "$body" "$updated"
+        [[ -f "$updated" ]] || exit 0
+        if [[ -n "$number" ]]; then
+          gh issue edit "$number" --body-file "$updated"
+        else
+          gh issue create --title "$title" --body-file "$updated"
+        fi

@@ -1,11 +1,13 @@
 import shaka from 'shaka-player'
 import { parseWebmSegmentIndex } from './WebmSegmentIndexParser'
 import { parseMp4SegmentIndex } from './Mp4SegmentIndexParser'
-import { MIME_TYPE_CODECS_REGEX } from '../utils.js'
+import { decodeSabrLiveHead, onSabrLiveHead } from './sabrProtocol'
 
 /**
  * @typedef {{
+ *   scheme: string,
  *   duration: number,
+ *   live?: { targetDurationSec: number },
  *   formats: {
  *     itag: number,
  *     lastModified: string,
@@ -74,12 +76,18 @@ const NetworkingEngine = shaka.net.NetworkingEngine
 
 export const MANIFEST_TYPE_SABR = 'application/sabr+json'
 
+const CODECS_REGEX = /codecs="?([^"]+)"?/
+
 const VIDEO_CODEC_PRIORITIES = [
   'av01',
   'vp09',
   'vp9',
   'avc1'
 ]
+
+const LIVE_UPDATE_INTERVAL_MS = 1000
+/** How many segments past the last reported head to expect before a new report */
+const MAX_PREDICTED_LIVE_SEGMENTS = 3
 
 /**
  * @implements {shaka.extern.ManifestParser}
@@ -91,6 +99,12 @@ class SabrManifestParser {
      * @type {shaka.extern.ManifestConfiguration | null}
      */
     this._config = null
+
+    /**
+     * @private
+     * @type {SabrLiveWindow | null}
+     */
+    this._liveWindow = null
   }
 
   /**
@@ -134,11 +148,45 @@ class SabrManifestParser {
     /** @type {SabrManifest} */
     const manifestData = JSON.parse(decodeURIComponent(uri.slice(uriPrefixLength)))
 
-    const presentationTimeline = new shaka.media.PresentationTimeline(0, 0, true)
-    presentationTimeline.setStatic(true)
-    presentationTimeline.setSegmentAvailabilityDuration(Infinity)
-    presentationTimeline.lockStartTime()
-    presentationTimeline.setDuration(manifestData.duration)
+    const worstVideoFormat = manifestData.formats.reduce((previousFormat, currentFormat) => {
+      if (currentFormat.width === undefined) {
+        return previousFormat
+      } else if (previousFormat === null) {
+        return currentFormat
+      } else {
+        return currentFormat.bitrate < previousFormat.bitrate ? currentFormat : previousFormat
+      }
+    }, null)
+
+    /** @type {shaka.media.PresentationTimeline} */
+    let presentationTimeline
+
+    if (manifestData.live) {
+      const audioFormat = manifestData.formats.find(format => format.mimeType.startsWith('audio/'))
+      const head = await requestLiveHead(manifestData.scheme, audioFormat, worstVideoFormat, networkingEngine)
+
+      // The player unloaded while waiting for the head
+      if (this._config === null) {
+        throw new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.PLAYER,
+          shaka.util.Error.Code.OPERATION_ABORTED
+        )
+      }
+
+      this._liveWindow = new SabrLiveWindow(head, manifestData.live.targetDurationSec)
+      presentationTimeline = this._liveWindow.presentationTimeline
+      this._liveWindow.start(manifestData.scheme, () =>
+        requestLiveHead(manifestData.scheme, audioFormat, worstVideoFormat, networkingEngine))
+    } else {
+      presentationTimeline = new shaka.media.PresentationTimeline(0, 0, true)
+      presentationTimeline.setStatic(true)
+      presentationTimeline.setSegmentAvailabilityDuration(Infinity)
+      presentationTimeline.lockStartTime()
+      presentationTimeline.setDuration(manifestData.duration)
+    }
+
+    const liveWindow = this._liveWindow
 
     let currentId = 0
 
@@ -156,16 +204,6 @@ class SabrManifestParser {
     let fakeVideoFormatId
 
     if (this._config.disableVideo) {
-      const worstVideoFormat = manifestData.formats.reduce((previousFormat, currentFormat) => {
-        if (currentFormat.width === undefined) {
-          return previousFormat
-        } else if (previousFormat === null) {
-          return currentFormat
-        } else {
-          return currentFormat.bitrate < previousFormat.bitrate ? currentFormat : previousFormat
-        }
-      }, null)
-
       fakeVideoFormatId = buildFormatId(worstVideoFormat)
     }
 
@@ -185,12 +223,21 @@ class SabrManifestParser {
             hasVoiceBoostAudio,
             presentationTimeline,
             networkingEngine,
-            fakeVideoFormatId
+            fakeVideoFormatId,
+            manifestData.scheme,
+            liveWindow
           )
         )
       } else if (!this._config.disableVideo) {
         videoStreams.push(
-          /** @__NOINLINE__ */ createVideoStream(format, currentId++, presentationTimeline, networkingEngine)
+          /** @__NOINLINE__ */ createVideoStream(
+            format,
+            currentId++,
+            presentationTimeline,
+            networkingEngine,
+            manifestData.scheme,
+            liveWindow
+          )
         )
       }
     }
@@ -246,18 +293,16 @@ class SabrManifestParser {
     currentId += textStreams.length
 
     const imageStreams = /** @__NOINLINE__ */ createImageStreams(manifestData.storyboards, presentationTimeline, currentId)
-    currentId += imageStreams.length
-
-    const chapterStreams = /** @__NOINLINE__ */ createChapterStreams(manifestData.chapters, currentId)
 
     /** @type {shaka.extern.Manifest} */
     const manifest = {
       type: 'SABR',
-      startTime: 0,
+      // Live playback starts at the live edge
+      startTime: liveWindow ? null : 0,
       variants,
       textStreams,
       imageStreams,
-      chapterStreams,
+      chapterStreams: [],
       presentationTimeline,
 
       gapCount: 0,
@@ -280,6 +325,8 @@ class SabrManifestParser {
    */
   stop() {
     this._config = null
+    this._liveWindow?.stop()
+    this._liveWindow = null
     return Promise.resolve()
   }
 }
@@ -299,6 +346,8 @@ function buildFormatId(format) {
  * @param {shaka.media.PresentationTimeline} presentationTimeline
  * @param {shaka.net.NetworkingEngine} networkingEngine
  * @param {string | undefined} fakeVideoFormatId
+ * @param {string} scheme
+ * @param {SabrLiveWindow | null} liveWindow
  */
 function createAudioStream(
   format,
@@ -307,7 +356,9 @@ function createAudioStream(
   hasVoiceBoostAudio,
   presentationTimeline,
   networkingEngine,
-  fakeVideoFormatId
+  fakeVideoFormatId,
+  scheme,
+  liveWindow
 ) {
   const roles = []
 
@@ -353,7 +404,7 @@ function createAudioStream(
     id,
     originalId: buildFormatId(format),
     mimeType: format.mimeType.split(';', 1)[0],
-    codecs: format.mimeType.match(MIME_TYPE_CODECS_REGEX)[1],
+    codecs: format.mimeType.match(CODECS_REGEX)[1],
     fullMimeTypes: new Set([format.mimeType]),
     bandwidth: format.bitrate,
     audioSamplingRate: format.audioSampleRate ?? null,
@@ -369,15 +420,22 @@ function createAudioStream(
       // shaka-player sometimes calls the create function even when the segment index already exists
       if (stream.segmentIndex) { return }
 
+      if (liveWindow) {
+        liveWindow.openSegmentIndex(stream, buildSegmentUrl(format, stream, scheme, fakeVideoFormatId))
+        return
+      }
+
       stream.segmentIndex = await createMediaSegmentIndex(
         format,
         stream,
         presentationTimeline,
         networkingEngine,
+        scheme,
         fakeVideoFormatId
       )
     },
     closeSegmentIndex: () => {
+      liveWindow?.closeSegmentIndex(stream)
       if (stream.segmentIndex) {
         stream.segmentIndex.release()
         stream.segmentIndex = null
@@ -406,8 +464,10 @@ function createAudioStream(
  * @param {number} id
  * @param {shaka.media.PresentationTimeline} presentationTimeline
  * @param {shaka.net.NetworkingEngine} networkingEngine
+ * @param {string} scheme
+ * @param {SabrLiveWindow | null} liveWindow
  */
-function createVideoStream(format, id, presentationTimeline, networkingEngine) {
+function createVideoStream(format, id, presentationTimeline, networkingEngine, scheme, liveWindow) {
   const colorGamut = format.colorPrimaries === 'BT2020' ? 'rec2020' : 'srgb'
 
   let hdr = 'SDR'
@@ -424,7 +484,7 @@ function createVideoStream(format, id, presentationTimeline, networkingEngine) {
     id,
     originalId: buildFormatId(format),
     mimeType: format.mimeType.split(';', 1)[0],
-    codecs: format.mimeType.match(MIME_TYPE_CODECS_REGEX)[1],
+    codecs: format.mimeType.match(CODECS_REGEX)[1],
     fullMimeTypes: new Set([format.mimeType]),
     bandwidth: format.bitrate,
     width: format.width,
@@ -438,9 +498,15 @@ function createVideoStream(format, id, presentationTimeline, networkingEngine) {
       // shaka-player sometimes calls the create function even when the segment index already exists
       if (stream.segmentIndex) { return }
 
-      stream.segmentIndex = await createMediaSegmentIndex(format, stream, presentationTimeline, networkingEngine)
+      if (liveWindow) {
+        liveWindow.openSegmentIndex(stream, buildSegmentUrl(format, stream, scheme))
+        return
+      }
+
+      stream.segmentIndex = await createMediaSegmentIndex(format, stream, presentationTimeline, networkingEngine, scheme)
     },
     closeSegmentIndex: () => {
+      liveWindow?.closeSegmentIndex(stream)
       if (stream.segmentIndex) {
         stream.segmentIndex.release()
         stream.segmentIndex = null
@@ -625,98 +691,13 @@ function createImageStreams(storyboards, presentationTimeline, currentId) {
 }
 
 /**
- * @param {SabrManifest['chapters']} chapters
- * @param {number} currentId
- */
-function createChapterStreams(chapters, currentId) {
-  if (chapters.length === 0) {
-    return []
-  }
-
-  /** @type {shaka.media.SegmentReference[]} */
-  const references = []
-
-  for (const chapter of chapters) {
-    const reference = new shaka.media.SegmentReference(
-      chapter.startSeconds,
-      chapter.endSeconds,
-      () => [],
-      /* startByte= */ 0,
-      /* endByte= */ null,
-      /* initSegmentReference= */ null,
-      /* timestampOffset= */ 0,
-      /* appendWindowStart= */ 0,
-      /* appendWindowEnd= */ Infinity
-    )
-
-    reference.setMetadata({
-      title: chapter.title,
-      images: chapter.thumbnail
-        ? [{
-            url: chapter.thumbnail.url,
-            width: chapter.thumbnail.width,
-            height: chapter.thumbnail.height,
-          }]
-        : []
-    })
-
-    references.push(reference)
-  }
-
-  /** @type {shaka.extern.Stream} */
-  const stream = {
-    id: currentId,
-    originalId: null,
-    groupId: null,
-    createSegmentIndex: () => Promise.resolve(),
-    segmentIndex: new shaka.media.SegmentIndex(references),
-    mimeType: 'text/plain',
-    codecs: '',
-    supplementalCodecs: '',
-    kind: '',
-    encrypted: false,
-    drmInfos: [],
-    keyIds: new Set(),
-    language: 'und',
-    originalLanguage: 'und',
-    label: null,
-    type: 'chapter',
-    primary: false,
-    trickModeVideo: null,
-    dependencyStream: null,
-    emsgSchemeIdUris: null,
-    roles: [],
-    forced: false,
-    channelsCount: null,
-    audioSamplingRate: null,
-    spatialAudio: false,
-    closedCaptions: null,
-    accessibilityPurpose: null,
-    external: true,
-    fastSwitching: false,
-    fullMimeTypes: new Set(['text/plain']),
-    isAudioMuxedInVideo: false,
-    baseOriginalId: null
-  }
-
-  return [stream]
-}
-
-/**
  * @param {SabrManifest['formats'][0]} format
  * @param {shaka.extern.Stream} stream
- * @param {shaka.media.PresentationTimeline} presentationTimeline
- * @param {shaka.net.NetworkingEngine} networkingEngine
+ * @param {string} scheme
  * @param {string | undefined} fakeVideoFormatId
  */
-async function createMediaSegmentIndex(
-  format,
-  stream,
-  presentationTimeline,
-  networkingEngine,
-  fakeVideoFormatId = undefined
-) {
-  let url = `sabr:${stream.type}?formatId=${encodeURIComponent(stream.originalId)}`
+function buildSegmentUrl(format, stream, scheme, fakeVideoFormatId = undefined) {
+  let url = `${scheme}:${stream.type}?formatId=${encodeURIComponent(stream.originalId)}`
 
   if (fakeVideoFormatId) {
     url += `&videoFormatId=${encodeURIComponent(fakeVideoFormatId)}`
@@ -733,6 +714,27 @@ async function createMediaSegmentIndex(
 
     url += `&resolution=${resolution}`
   }
+
+  return url
+}
+
+/**
+ * @param {SabrManifest['formats'][0]} format
+ * @param {shaka.extern.Stream} stream
+ * @param {shaka.media.PresentationTimeline} presentationTimeline
+ * @param {shaka.net.NetworkingEngine} networkingEngine
+ * @param {string} scheme
+ * @param {string | undefined} fakeVideoFormatId
+ */
+async function createMediaSegmentIndex(
+  format,
+  stream,
+  presentationTimeline,
+  networkingEngine,
+  scheme,
+  fakeVideoFormatId = undefined
+) {
+  const url = buildSegmentUrl(format, stream, scheme, fakeVideoFormatId)
 
   /** @type {shaka.extern.Request} */
   const request = {
@@ -824,6 +826,238 @@ function createVodMediaSegmentIndex(url, response, format, stream, duration) {
   }
 
   return new shaka.media.SegmentIndex(references)
+}
+
+/**
+ * @param {string} scheme
+ * @param {SabrManifest['formats'][0]} audioFormat
+ * @param {SabrManifest['formats'][0]} videoFormat
+ * @param {shaka.net.NetworkingEngine} networkingEngine
+ */
+async function requestLiveHead(scheme, audioFormat, videoFormat, networkingEngine) {
+  const uri = `${scheme}:live?formatId=${encodeURIComponent(buildFormatId(audioFormat))}` +
+    `&videoFormatId=${encodeURIComponent(buildFormatId(videoFormat))}`
+
+  const response = await networkingEngine.request(
+    NetworkingEngine.RequestType.SEGMENT,
+    NetworkingEngine.makeRequest([uri], NetworkingEngine.defaultRetryParameters()),
+    { type: NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT }
+  ).promise
+
+  return decodeSabrLiveHead(response.data)
+}
+
+/**
+ * @typedef LiveSegment
+ * @property {number} sequenceNumber
+ * @property {number} startTime
+ * @property {number} endTime
+ * @property {number} requestTimeMs
+ */
+
+/**
+ * Lists the segments of a live SABR stream, which YouTube numbers by `sq`.
+ * Each lasts the target duration, so their times follow from the head the
+ * server reports. Shaka places media by its own timestamps, so the estimate's
+ * small drift from them does not misplace it.
+ */
+class SabrLiveWindow {
+  /**
+   * @param {import('./sabrProtocol').SabrLiveHead} head
+   * @param {number} targetDuration in seconds
+   */
+  constructor(head, targetDuration) {
+    /** @private */
+    this._targetDuration = targetDuration
+    /** @private */
+    this._head = head
+    /**
+     * @private
+     * @type {LiveSegment[]}
+     */
+    this._segments = []
+    /**
+     * Streams with an open segment index, and their segment URL
+     * @private
+     * @type {Map<shaka.extern.Stream, string>}
+     */
+    this._streams = new Map()
+    /** @private */
+    this._intervalId = null
+    /**
+     * @private
+     * @type {(() => void) | null}
+     */
+    this._removeHeadListener = null
+    /**
+     * @private
+     * @type {() => Promise<unknown>}
+     */
+    this._refreshHead = async () => {}
+    /** @private */
+    this._headRefreshedAtMs = 0
+
+    const seekableSegments = Math.floor((head.timeMs - head.minSeekableTimeMs) / 1000 / targetDuration)
+    this._appendSegments(Math.max(1, head.sequenceNumber - seekableSegments), head.sequenceNumber)
+
+    // Start where YouTube's player does: at the maximum seekable time, a few
+    // segments behind the head, so the next segments are already available.
+    const end = this._segments.at(-1).endTime
+    const delay = Math.max(end - head.maxSeekableTimeMs / 1000, 3 * targetDuration)
+
+    this.presentationTimeline = new shaka.media.PresentationTimeline(0, delay)
+    this.presentationTimeline.setStatic(false)
+    // The server only reports segments that exist, so the edge must not run ahead of them
+    this.presentationTimeline.setClampLiveEdgeToSegments(true)
+    this.presentationTimeline.notifyMaxSegmentDuration(targetDuration)
+    this.presentationTimeline.notifySegments(this._segments)
+    this._updateAvailabilityDuration()
+  }
+
+  /**
+   * @param {string} scheme
+   * @param {() => Promise<unknown>} refreshHead requests the head, which reaches the head listener
+   */
+  start(scheme, refreshHead) {
+    this._refreshHead = refreshHead
+    this._removeHeadListener = onSabrLiveHead(scheme, (head) => {
+      // Audio and video requests can report heads out of order
+      if (head.sequenceNumber < this._head.sequenceNumber) return
+
+      this._head = head
+      this._update()
+    })
+
+    // A paused player makes no requests, so follow the clock between head reports
+    this._intervalId = setInterval(() => this._update(), LIVE_UPDATE_INTERVAL_MS)
+  }
+
+  stop() {
+    clearInterval(this._intervalId)
+    this._intervalId = null
+    this._removeHeadListener?.()
+    this._removeHeadListener = null
+    this._streams.clear()
+  }
+
+  /**
+   * @param {shaka.extern.Stream} stream
+   * @param {string} url
+   */
+  openSegmentIndex(stream, url) {
+    this._streams.set(stream, url)
+    stream.segmentIndex = new shaka.media.SegmentIndex(
+      this._segments.map(segment => this._createReference(stream, url, segment))
+    )
+  }
+
+  /**
+   * @param {shaka.extern.Stream} stream
+   */
+  closeSegmentIndex(stream) {
+    this._streams.delete(stream)
+  }
+
+  /** @private */
+  _update() {
+    const head = this._head
+    const targetDurationMs = this._targetDuration * 1000
+
+    // Segments past the head become available every target duration. Expect
+    // them for a while; a stream that stops producing them reports no new head.
+    const elapsedSegments = Math.max(0, Math.floor((Date.now() - head.receivedAtMs) / targetDurationMs))
+    const lastSequenceNumber = head.sequenceNumber + Math.min(elapsedSegments, MAX_PREDICTED_LIVE_SEGMENTS)
+
+    // Without media requests, such as while paused, nothing reports the head.
+    // Ask for it once the predictions run out, so the edge stays current.
+    if (elapsedSegments > MAX_PREDICTED_LIVE_SEGMENTS && Date.now() - this._headRefreshedAtMs >= targetDurationMs) {
+      this._headRefreshedAtMs = Date.now()
+      this._refreshHead().catch(() => {})
+    }
+
+    const previousLast = this._segments.at(-1).sequenceNumber
+    const added = this._appendSegments(previousLast + 1, lastSequenceNumber)
+    this.presentationTimeline.notifySegments(added)
+    this._updateAvailabilityDuration()
+
+    // A newer head can also move the start of the window
+    const windowStart = this.presentationTimeline.getSegmentAvailabilityStart()
+
+    for (const [stream, url] of this._streams) {
+      stream.segmentIndex?.mergeAndEvict(added.map(segment => this._createReference(stream, url, segment)), windowStart)
+    }
+
+    const firstAvailable = this._segments.findIndex(segment => segment.endTime > windowStart)
+    if (firstAvailable > 0) this._segments.splice(0, firstAvailable)
+  }
+
+  /**
+   * @private
+   * @param {number} first
+   * @param {number} last
+   */
+  _appendSegments(first, last) {
+    const head = this._head
+    const added = []
+
+    for (let sequenceNumber = first; sequenceNumber <= last; sequenceNumber++) {
+      const estimatedStart = head.timeMs / 1000 + (sequenceNumber - head.sequenceNumber) * this._targetDuration
+      const previous = this._segments.at(-1)
+
+      // Follow the newest head's estimate, so the times cannot drift from the
+      // media timestamps when segments differ from the target duration. The
+      // buffered ranges reported to SABR map media times to these segments.
+      // Segments must not overlap, so a segment starts no earlier than the
+      // previous one ends, and ends early to make up for it.
+      const startTime = previous ? Math.max(previous.endTime, estimatedStart) : estimatedStart
+      const estimatedEnd = estimatedStart + this._targetDuration
+      const endTime = estimatedEnd > startTime ? estimatedEnd : startTime + this._targetDuration
+
+      // SABR returns the segment containing the requested time, so ask for its middle
+      const requestTimeMs = Math.round((estimatedStart + this._targetDuration / 2) * 1000)
+      const segment = { sequenceNumber, startTime, endTime, requestTimeMs }
+      this._segments.push(segment)
+      added.push(segment)
+    }
+
+    return added
+  }
+
+  /** @private */
+  _updateAvailabilityDuration() {
+    const end = this._segments.at(-1).endTime
+    this.presentationTimeline.setSegmentAvailabilityDuration(
+      Math.max(end - this._head.minSeekableTimeMs / 1000, this._targetDuration)
+    )
+  }
+
+  /**
+   * @private
+   * @param {shaka.extern.Stream} stream
+   * @param {string} url
+   * @param {LiveSegment} segment
+   */
+  _createReference(stream, url, segment) {
+    const uris = [`${url}&startTimeMs=${segment.requestTimeMs}&sq=${segment.sequenceNumber}`]
+
+    // Live segments are self-initializing, so they have no init segment
+    const reference = new shaka.media.SegmentReference(
+      segment.startTime,
+      segment.endTime,
+      () => uris,
+      0,
+      null,
+      null,
+      0,
+      0,
+      Infinity
+    )
+
+    reference.mimeType = stream.mimeType
+    reference.codecs = stream.codecs
+
+    return reference
+  }
 }
 
 if (process.env.SUPPORTS_LOCAL_API) {

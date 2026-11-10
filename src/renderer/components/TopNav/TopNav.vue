@@ -1,164 +1,424 @@
 <template>
   <nav
+    ref="header"
     class="topNav"
-    :class="{ topNavBarColor: barColor }"
+    :class="{ compactLogo, phoneLayout, phoneSearchOpen: phoneLayout && showSearchContainer, phoneSearchPinned }"
+    :style="{ '--header-side-space': `${headerSideSpace}px` }"
+    @keydown.esc="closePhoneSearch"
   >
-    <div class="side">
-      <button
-        class="menuButton navButton"
-        :aria-label="expandCollapseSideBarLabel"
-        :title="expandCollapseSideBarLabel"
-        @click="toggleSideNav"
-      >
-        <FontAwesomeIcon
-          class="navIcon"
-          :icon="['fas', 'bars']"
-        />
-      </button>
-      <FtIconButton
-        class="navIconButton"
-        :disabled="isArrowBackwardDisabled"
-        :class="{ arrowDisabled: isArrowBackwardDisabled }"
-        :icon="['fas', 'arrow-left']"
-        :theme="null"
-        :size="20"
-        :use-shadow="false"
-        dropdown-position-x="right"
-        :dropdown-options="navigationHistoryDropdownOptions"
-        open-on-right-or-long-click
-        :title="backwardText"
-        @click="historyBack"
-      />
-      <FtIconButton
-        class="navIconButton"
-        :disabled="isArrowForwardDisabled"
-        :class="{ arrowDisabled: isArrowForwardDisabled }"
-        :icon="['fas', 'arrow-right']"
-        :theme="null"
-        :size="20"
-        :use-shadow="false"
-        dropdown-position-x="right"
-        :dropdown-options="navigationHistoryDropdownOptions"
-        open-on-right-or-long-click
-        :title="forwardText"
-        @click="historyForward"
-      />
-      <button
-        v-if="!hideSearchBar"
-        class="navSearchButton navButton"
-        :aria-label="t('Search Bar.Open Search Container')"
-        :title="t('Search Bar.Open Search Container')"
-        @click="toggleSearchContainer"
-      >
-        <FontAwesomeIcon
-          class="navIcon"
-          :icon="['fas', 'search']"
-        />
-      </button>
-      <button
-        class="navNewWindowButton navButton"
-        :aria-label="t('Open New Window')"
-        :title="newWindowText"
-        @click="createNewWindow"
-      >
-        <FontAwesomeIcon
-          class="navIcon"
-          :icon="['fas', 'clone']"
-        />
-      </button>
-      <RouterLink
-        v-if="!hideHeaderLogo"
-        class="logo"
-        dir="ltr"
-        :title="headerLogoTitle"
-        :to="landingPage"
-      >
-        <div
-          class="logoIcon"
-        />
-        <div
-          class="logoText"
-        />
-      </RouterLink>
-    </div>
-    <div class="middle">
+    <div class="topNavInner">
       <div
-        v-if="!hideSearchBar"
-        v-show="showSearchContainer"
-        ref="searchContainer"
-        class="searchContainer"
+        ref="navigationActions"
+        class="side"
       >
-        <FtInput
-          ref="searchInput"
-          :placeholder="t('Search / Go to URL')"
-          class="searchInput"
-          is-search
-          :action-button-label="t('Search Bar.Search')"
-          :data-list="activeDataList"
-          :data-list-properties="activeDataListProperties"
-          show-clear-text-button
-          show-data-when-empty
-          @input="getSearchSuggestionsDebounce"
-          @click="goToSearch"
-          @clear="clearLastSuggestionQuery"
-          @remove="removeSearchHistoryEntryInDbAndCache"
-        />
         <button
-          class="navFilterButton navButton"
-          :class="{ filterChanged: searchFilterValueChanged }"
-          :aria-label="t('Search Filters.Search Filters')"
-          :title="t('Search Filters.Search Filters')"
-          @click="showSearchFilters"
+          class="menuButton navButton"
+          :aria-label="expandCollapseSideBarLabel"
+          :title="expandCollapseSideBarLabel"
+          @click="toggleSideNav"
         >
-          <FontAwesomeIcon
+          <FtIcon
             class="navIcon"
-            :icon="['fas', 'filter']"
+            :icon="['fas', 'bars']"
           />
         </button>
+        <FtIconButton
+          class="navIconButton navBackButton"
+          :disabled="isArrowBackwardDisabled"
+          :class="{ arrowDisabled: isArrowBackwardDisabled }"
+          :icon="['fas', 'arrow-left']"
+          :theme="null"
+          :size="20"
+          dropdown-position-x="right"
+          :dropdown-options="navigationHistoryDropdownOptions"
+          open-on-right-or-long-click
+          :title="backwardText"
+          @click="historyBack"
+        />
+        <FtIconButton
+          class="navIconButton navForwardButton"
+          :disabled="isArrowForwardDisabled"
+          :class="{ arrowDisabled: isArrowForwardDisabled }"
+          :icon="['fas', 'arrow-right']"
+          :theme="null"
+          :size="20"
+          dropdown-position-x="right"
+          :dropdown-options="navigationHistoryDropdownOptions"
+          open-on-right-or-long-click
+          :title="forwardText"
+          @click="historyForward"
+        />
+        <RouterLink
+          v-if="!hideHeaderLogo"
+          class="logo"
+          dir="ltr"
+          :title="headerLogoTitle"
+          :to="landingPage"
+        >
+          <div
+            class="logoIcon"
+          />
+          <div
+            class="logoText"
+          />
+        </RouterLink>
+      </div>
+      <div class="middle">
+        <button
+          v-if="phoneSearchPinned"
+          ref="pinnedSearchTrigger"
+          type="button"
+          class="pinnedSearchTrigger"
+          :aria-label="pinnedSearchText ? `${t('Search / Go to URL')}: ${pinnedSearchText}` : t('Search / Go to URL')"
+          data-tutorial="search"
+          @click="focusSearch"
+        >
+          <FtIcon
+            :icon="['fas', 'search']"
+            aria-hidden="true"
+          />
+          <span class="pinnedSearchLabel">{{ pinnedSearchText || t('Search / Go to URL') }}</span>
+        </button>
+        <div
+          v-if="!hideSearchBar"
+          v-show="showSearchContainer"
+          ref="searchContainer"
+          class="searchContainer"
+          data-tutorial="search"
+        >
+          <button
+            v-if="phoneLayout"
+            type="button"
+            class="closeMobileSearch navButton"
+            :aria-label="t('Close')"
+            :title="t('Close')"
+            @click="closePhoneSearch"
+          >
+            <FtIcon
+              :icon="['fas', 'arrow-left']"
+              aria-hidden="true"
+            />
+          </button>
+          <FtInput
+            ref="searchInput"
+            :placeholder="t('Search / Go to URL')"
+            :show-label="false"
+            class="searchInput"
+            input-type="search"
+            is-search
+            show-suggestion-fill-button
+            external-media-navigation
+            :action-button-label="t('Search Bar.Search')"
+            :data-list="activeDataList"
+            :data-list-properties="activeDataListProperties"
+            :style="{ '--visible-search-suggestions': visibleSearchSuggestions }"
+            show-data-when-empty
+            @input="getSearchSuggestionsDebounce"
+            @focus="getSearchSuggestionsDebounce(currentSearchText)"
+            @blur="cancelSearchSuggestions"
+            @click="goToSearch"
+            @clear="handleSearchInputClear"
+            @remove="removeSearchHistoryEntryInDbAndCache"
+          >
+            <template #extraAction>
+              <button
+                type="button"
+                class="navFilterButton navButton"
+                :class="{ filterChanged: searchFilterValueChanged }"
+                :aria-label="t('Search Filters.Search Filters')"
+                :title="t('Search Filters.Search Filters')"
+                @click="showSearchFilters"
+                @contextmenu.stop.prevent="clearSearchFilters"
+              >
+                <FtIcon
+                  class="navIcon"
+                  :icon="['fas', 'filter']"
+                />
+              </button>
+            </template>
+          </FtInput>
+        </div>
+      </div>
+      <div
+        ref="headerActions"
+        class="side profiles"
+      >
+        <button
+          v-if="!hideSearchBar && !phoneSearchPinned"
+          ref="searchTrigger"
+          type="button"
+          class="navSearchButton navButton"
+          :aria-label="t('Search Bar.Open Search Container')"
+          :title="t('Search Bar.Open Search Container')"
+          data-tutorial="search"
+          @click="focusSearch"
+        >
+          <FtIcon
+            class="navIcon"
+            :icon="['fas', 'search']"
+            aria-hidden="true"
+          />
+        </button>
+        <button
+          v-if="syncing && !hideHeaderSyncIndicator && !compactPhoneActions"
+          type="button"
+          class="syncIndicator navButton"
+          :aria-label="syncIndicatorLabel"
+          :title="syncIndicatorLabel"
+          @click="openSyncSettings"
+        >
+          <FtIcon
+            class="navIcon"
+            :icon="['fas', 'sync']"
+            aria-hidden="true"
+          />
+        </button>
+        <button
+          v-if="settingsWindowMinimized && !compactPhoneActions"
+          type="button"
+          class="minimizedUtilityButton navButton"
+          :aria-label="restoreSettingsWindowLabel"
+          :title="restoreSettingsWindowLabel"
+          @click="restoreSettingsWindow"
+        >
+          <FtIcon
+            class="navIcon"
+            :icon="minimizedSettingsWindowIcon"
+          />
+        </button>
+        <FtNotificationCenter v-if="supportsNotificationHistory && store.getters.getNotificationMode === 'both'" />
+        <button
+          v-if="showDownloadsButton && !headerShortcutsOverflow"
+          type="button"
+          class="downloadsButton navButton"
+          :class="{ active: downloadsWindowOpen }"
+          data-settings-window-icon="downloads"
+          :aria-label="t('Settings.Download Settings.Download Settings')"
+          :title="t('Settings.Download Settings.Download Settings')"
+          :aria-pressed="downloadsWindowOpen"
+          @click="toggleDownloadsWindow"
+        >
+          <FtIcon
+            class="navIcon"
+            :icon="['fas', 'download']"
+          />
+        </button>
+        <button
+          v-if="showSettingsButton && !headerShortcutsOverflow"
+          type="button"
+          class="settingsButton navButton"
+          :class="{ active: settingsWindowOpen }"
+          data-settings-window-icon="settings"
+          :aria-label="t('Settings.Settings')"
+          :title="t('Settings.Settings')"
+          :aria-pressed="settingsWindowOpen"
+          @click="toggleSettingsWindow"
+        >
+          <FtIcon
+            class="navIcon"
+            :icon="['fas', 'cog']"
+          />
+        </button>
+        <CapacitorPhoneTabSwitcher
+          v-if="store.getters.getTabsEnabled"
+          ref="phoneTabSwitcher"
+          @request-exit="emit('request-android-exit')"
+        />
+        <FtQuickSettingsMenu
+          :compact-header="phoneLayout"
+          :header-actions-overflow="headerShortcutsOverflow"
+        >
+          <template #overflow-actions="{ close }">
+            <template v-if="compactPhoneActions">
+              <button
+                v-if="syncing && !hideHeaderSyncIndicator"
+                type="button"
+                class="phoneOverflowAction phoneOverflowSync"
+                @click="close(); openSyncSettings()"
+              >
+                <FtIcon
+                  class="phoneOverflowIcon"
+                  :icon="['fas', 'sync']"
+                  aria-hidden="true"
+                />
+                <span>{{ syncIndicatorLabel }}</span>
+              </button>
+              <button
+                v-if="settingsWindowMinimized"
+                type="button"
+                class="phoneOverflowAction phoneOverflowRestore"
+                @click="close(); restoreSettingsWindow()"
+              >
+                <FtIcon
+                  class="phoneOverflowIcon"
+                  :icon="minimizedSettingsWindowIcon"
+                  aria-hidden="true"
+                />
+                <span>{{ restoreSettingsWindowLabel }}</span>
+              </button>
+            </template>
+          </template>
+        </FtQuickSettingsMenu>
       </div>
     </div>
-    <FtProfileSelector class="side profiles" />
   </nav>
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { syncProgressLabel } from '../../helpers/syncProgressLabel'
+import { FtIcon } from '@opentubex/icons'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowReactive, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
 import FtInput from '../FtInput/FtInput.vue'
-import FtProfileSelector from '../FtProfileSelector/FtProfileSelector.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
+import FtQuickSettingsMenu from '../FtQuickSettingsMenu/FtQuickSettingsMenu.vue'
+import FtNotificationCenter from '../FtNotificationCenter/FtNotificationCenter.vue'
+import CapacitorPhoneTabSwitcher from '../TabBar/CapacitorPhoneTabSwitcher.vue'
 
 import store from '../../store/index'
+import { usesInvidiousApi } from '../../../apiBackends'
 
-import { KeyboardShortcuts, MOBILE_WIDTH_THRESHOLD, SEARCH_RESULTS_DISPLAY_LIMIT } from '../../../constants'
-import { debounce, localizeAndAddKeyboardShortcutToActionTitle, openInternalPath } from '../../helpers/utils'
+import { getConfiguredKeyboardShortcuts, SEARCH_RESULTS_DISPLAY_LIMIT } from '../../../constants'
+import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
+import { getSearchFilterTabId, getSearchHistoryEntryQuery, getSearchSettingsFromRouteQuery } from '../../../search-history'
+import { CHANNEL_HANDLE_REGEX, isUnloadedBackgroundTabClick, localizeAndAddKeyboardShortcutToActionTitle, openInternalPath, searchFiltersMatch, showInvidiousFallbackToast } from '../../helpers/utils'
 import { translateWindowTitle } from '../../helpers/strings'
-import { clearLocalSearchSuggestionsSession, getLocalClip, getLocalSearchSuggestions } from '../../helpers/api/local'
-import { getClipInvidious, getInvidiousSearchSuggestions } from '../../helpers/api/invidious'
+import { getLocalSearchSuggestions } from '../../helpers/api/local'
+import { getInvidiousSearchSuggestions } from '../../helpers/api/invidious'
+import { getTabNavigationService } from '../../tabs/TabNavigationService'
+import { shouldOpenExternalMediaUrl } from '../../helpers/externalMediaUrl'
+import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
+import { usePhoneLayout } from '../../composables/usePhoneLayout'
+import { usesCapacitorTabletLayout } from '../../helpers/capacitorLayout'
+import { supportsNotificationHistory } from '../../helpers/notificationHistory'
 
 const { t } = useI18n()
+const syncing = computed(() => store.getters.getSyncServerStatus === 'syncing')
+const syncLabel = computed(() => syncProgressLabel(t, store.getters.getSyncServerProgress?.stage))
+const hideHeaderSyncIndicator = computed(() => store.getters.getHideHeaderSyncIndicator)
+const syncIndicatorLabel = computed(() => `${t('Settings.Sync Settings.Sync Settings')}: ${syncLabel.value}`)
+const emit = defineEmits(['request-android-exit'])
+const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
+  store.getters.getKeyboardShortcuts
+).APP.GENERAL)
 const router = useRouter()
 const route = useRoute()
+const usesLogicalTabs = process.env.IS_ELECTRON || process.env.IS_CAPACITOR
+const navigation = usesLogicalTabs ? getTabNavigationService() : null
 
-const showSearchContainer = ref(true)
-/** @type {import('vue').ShallowRef<string[]>} */
-const navigationHistoryDropdownOptions = shallowRef([])
+const automaticTabletViewport = usePhoneLayout('(min-width: 768px)')
+const header = useTemplateRef('header')
+const phoneTabSwitcher = useTemplateRef('phoneTabSwitcher')
+defineExpose({
+  organizerSwipe: computed(() => usesCapacitorTabletLayout(store.getters.getCapacitorLayoutMode, automaticTabletViewport.value)
+    ? null
+    : phoneTabSwitcher.value?.organizerSwipe)
+})
+const navigationActions = useTemplateRef('navigationActions')
+const headerActions = useTemplateRef('headerActions')
+const headerMetrics = shallowRef({ width: window.innerWidth, navigation: 0, actions: 0, logoText: 0, shortcutSpace: window.innerWidth })
+const compactLogo = computed(() => !hideSearchBar.value && headerMetrics.value.width < 440 + 2 * Math.max(
+  headerMetrics.value.navigation + headerMetrics.value.logoText,
+  headerMetrics.value.actions
+))
+const headerSideSpace = computed(() => Math.max(
+  headerMetrics.value.navigation + (compactLogo.value ? 0 : headerMetrics.value.logoText),
+  headerMetrics.value.actions
+))
+const compactHeader = computed(() => headerMetrics.value.width <= 680 ||
+  headerMetrics.value.width < 240 + 2 * Math.max(headerMetrics.value.navigation, headerMetrics.value.actions))
+const phoneLayout = computed(() => process.env.IS_CAPACITOR
+  ? compactHeader.value || !usesCapacitorTabletLayout(store.getters.getCapacitorLayoutMode, automaticTabletViewport.value)
+  : compactHeader.value)
+const showSearchContainer = ref(!phoneLayout.value)
+const narrowHeader = computed(() => headerMetrics.value.width < 480)
+const compactPhoneActions = computed(() => phoneLayout.value && narrowHeader.value)
+const headerShortcutsOverflow = computed(() => phoneLayout.value &&
+  headerMetrics.value.shortcutSpace < 52 * (Number(showDownloadsButton.value) + Number(showSettingsButton.value)))
+const searchTrigger = useTemplateRef('searchTrigger')
+const pinnedSearchTrigger = useTemplateRef('pinnedSearchTrigger')
+watch(phoneLayout, phone => { showSearchContainer.value = !phone })
+
+// Reserve equal space on each side using the actual controls, including optional
+// actions. Exclude the search icon so collapsing search cannot change its cutoff.
+function measureHeader() {
+  const width = header.value.getBoundingClientRect().width
+  if (phoneLayout.value && showSearchContainer.value) {
+    headerMetrics.value = { ...headerMetrics.value, width }
+    return
+  }
+  const headerStyle = getComputedStyle(header.value.firstElementChild)
+  const measureActions = (element, outerMargin, excludeShortcuts = false) => {
+    const children = [...element.children].filter(child =>
+      !child.classList.contains('navSearchButton') &&
+      (!excludeShortcuts || !child.matches('.downloadsButton, .settingsButton')) &&
+      child.getBoundingClientRect().width > 0)
+    const style = getComputedStyle(element)
+    return children.reduce((total, child) => {
+      const childStyle = getComputedStyle(child)
+      return total + child.getBoundingClientRect().width +
+        (parseFloat(childStyle.marginInlineStart) || 0) + (parseFloat(childStyle.marginInlineEnd) || 0)
+    }, 0) + Math.max(0, children.length - 1) * (parseFloat(style.columnGap) || 0) +
+      (parseFloat(style.paddingInlineStart) || 0) + (parseFloat(style.paddingInlineEnd) || 0) +
+      (parseFloat(style[outerMargin]) || 0) + (parseFloat(headerStyle.paddingInlineStart) || 12)
+  }
+  const text = navigationActions.value.querySelector('.logoText')
+  const textStyle = text && getComputedStyle(text)
+  const logoText = textStyle ? parseFloat(textStyle.inlineSize) + parseFloat(textStyle.marginInlineStart) : 0
+  const navigationWidth = measureActions(navigationActions.value, 'marginInlineStart')
+  const navigationSpace = navigationWidth -
+    (text?.getBoundingClientRect().width > 0 ? logoText : 0)
+  const sectionGap = parseFloat(headerStyle.columnGap) || 0
+  headerMetrics.value = {
+    width,
+    navigation: navigationSpace,
+    actions: measureActions(headerActions.value, 'marginInlineEnd'),
+    logoText,
+    // Reserve a 48px touch target plus the 4px gap for search and each shortcut.
+    // Budget phone shortcuts against the icon so hiding the name cannot make
+    // shortcuts appear again and repeatedly toggle the layout.
+    shortcutSpace: width - (phoneLayout.value ? navigationSpace : navigationWidth) - sectionGap - measureActions(headerActions.value, 'marginInlineEnd', true) -
+      (hideSearchBar.value ? 0 : 52)
+  }
+}
+const headerResizeObserver = new ResizeObserver(measureHeader)
+// The scrollbar setting changes the actions' margin without resizing their box.
+watch(() => store.getters.getScrollbarThumbWidth, measureHeader, { flush: 'post' })
+const logicalHistoryState = computed(() => {
+  const tabId = store.getters.getPresentedTabId
+  return store.getters.getTabHistoryState(tabId)
+})
+const navigationHistoryDropdownOptions = computed(() => {
+  return usesLogicalTabs ? logicalHistoryState.value.options : []
+})
 /** @type {import('vue').ShallowRef<string[]>} */
 const searchSuggestionsDataList = shallowRef([])
 const lastSuggestionQuery = ref('')
+/** @type {AbortController | null} */
+let suggestionController = null
+/** @type {string | null} */
+let completedSuggestionQuery = null
+let suggestionTimeout
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideSearchBar = computed(() => store.getters.getHideSearchBar)
+// Search pages always pin the phone search so their query stays visible.
+const phoneSearchPinned = computed(() => phoneLayout.value && !hideSearchBar.value && !showSearchContainer.value &&
+  (store.getters.getAlwaysShowMobileSearchBar || presentedRoutePath.value.startsWith('/search/')))
+watch(hideSearchBar, hidden => {
+  if (hidden && phoneLayout.value) closePhoneSearch()
+})
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideHeaderLogo = computed(() => store.getters.getHideHeaderLogo)
+const useWatchSideNavOverlay = computed(() => {
+  return store.getters.getHideSideBarOnWatchPages && route.path.startsWith('/watch/')
+})
 /** @type {import('vue').ComputedRef<boolean>} */
 const enableSearchSuggestions = computed(() => store.getters.getEnableSearchSuggestions)
+const visibleSearchSuggestions = computed(() => store.getters.getVisibleSearchSuggestions)
 /** @type {import('vue').ComputedRef<string>} */
-const barColor = computed(() => store.getters.getBarColor)
-
 const expandCollapseSideBarLabel = computed(() => {
   return store.getters.getIsSideNavOpen ? t('Compact side navigation') : t('Expand side navigation')
 })
@@ -183,10 +443,10 @@ const navigationHistoryAddendum = computed(() => {
 const backwardText = computed(() => {
   const shortcuts = process.platform === 'darwin'
     ? [
-        KeyboardShortcuts.APP.GENERAL.HISTORY_BACKWARD,
-        KeyboardShortcuts.APP.GENERAL.HISTORY_BACKWARD_ALT_MAC
+        appKeyboardShortcuts.value.HISTORY_BACKWARD,
+        appKeyboardShortcuts.value.HISTORY_BACKWARD_ALT_MAC
       ]
-    : KeyboardShortcuts.APP.GENERAL.HISTORY_BACKWARD
+    : appKeyboardShortcuts.value.HISTORY_BACKWARD
 
   return localizeAndAddKeyboardShortcutToActionTitle(
     t('Back'),
@@ -197,10 +457,10 @@ const backwardText = computed(() => {
 const forwardText = computed(() => {
   const shortcuts = process.platform === 'darwin'
     ? [
-        KeyboardShortcuts.APP.GENERAL.HISTORY_FORWARD,
-        KeyboardShortcuts.APP.GENERAL.HISTORY_FORWARD_ALT_MAC
+        appKeyboardShortcuts.value.HISTORY_FORWARD,
+        appKeyboardShortcuts.value.HISTORY_FORWARD_ALT_MAC
       ]
-    : KeyboardShortcuts.APP.GENERAL.HISTORY_FORWARD
+    : appKeyboardShortcuts.value.HISTORY_FORWARD
 
   return localizeAndAddKeyboardShortcutToActionTitle(
     t('Forward'),
@@ -212,8 +472,16 @@ const forwardText = computed(() => {
  * @param {number} offset
  */
 function goToOffset(offset) {
-  // no point navigating to the current route
-  if (offset !== 0) {
+  if (offset === 0) {
+    return
+  }
+
+  if (usesLogicalTabs) {
+    const tabId = store.getters.getPresentedTabId
+    if (tabId) {
+      navigation.go(tabId, offset)
+    }
+  } else {
     router.go(offset)
   }
 }
@@ -222,60 +490,158 @@ function goToOffset(offset) {
  * @param {number} [offset]
  */
 function historyBack(offset) {
-  if (offset != null) {
-    goToOffset(offset)
-  } else {
-    router.back()
-  }
+  goToOffset(offset ?? -1)
 }
 
 /**
  * @param {number} [offset]
  */
 function historyForward(offset) {
-  if (offset != null) {
-    goToOffset(offset)
-  } else {
-    router.forward()
-  }
+  goToOffset(offset ?? 1)
 }
 
-const newWindowText = computed(() => {
-  return localizeAndAddKeyboardShortcutToActionTitle(
-    t('Open New Window'),
-    KeyboardShortcuts.APP.GENERAL.NEW_WINDOW
-  )
+const isElectron = process.env.IS_ELECTRON
+const enableDownloads = computed(() => store.getters.getEnableDownloads)
+const moveDownloadsToAppHeader = computed(() => store.getters.getMoveDownloadsToAppHeader)
+const moveSettingsToAppHeader = computed(() => store.getters.getMoveSettingsToAppHeader)
+const settingsWindowMinimized = computed(() => store.getters.getSettingsWindowMinimized)
+const settingsWindowView = computed(() => store.getters.getSettingsWindowView)
+const downloadsWindowOpen = computed(() => (
+  store.getters.getSettingsWindowOpen &&
+  store.getters.getSettingsWindowView === 'downloads'
+))
+const settingsWindowOpen = computed(() => (
+  store.getters.getSettingsWindowOpen &&
+  !['about', 'downloads'].includes(store.getters.getSettingsWindowView)
+))
+const showDownloadsButton = computed(() => (
+  supportsYtDlp &&
+  enableDownloads.value &&
+  moveDownloadsToAppHeader.value &&
+  !(settingsWindowMinimized.value && settingsWindowView.value === 'downloads')
+))
+const showSettingsButton = computed(() => (
+  (isElectron || process.env.IS_CAPACITOR) &&
+  moveSettingsToAppHeader.value &&
+  !(settingsWindowMinimized.value && !['about', 'downloads'].includes(settingsWindowView.value))
+))
+const minimizedSettingsWindowTitle = computed(() => {
+  if (settingsWindowView.value === 'about') return t('About.About')
+  if (settingsWindowView.value === 'downloads') return t('Settings.Download Settings.Download Settings')
+  return t('Settings.Settings')
 })
+const minimizedSettingsWindowIcon = computed(() => {
+  if (settingsWindowView.value === 'about') return ['fas', 'info-circle']
+  if (settingsWindowView.value === 'downloads') return ['fas', 'download']
+  return ['fas', 'cog']
+})
+const restoreSettingsWindowLabel = computed(() => `${t('Restore')}: ${minimizedSettingsWindowTitle.value}`)
 
-function createNewWindow() {
-  const url = new URL(window.location.href)
-  url.hash = landingPage.value
+function toggleDownloadsWindow() {
+  store.dispatch(downloadsWindowOpen.value ? 'closeSettingsWindowToIcon' : 'openSettingsWindowFromIcon', 'downloads')
+}
 
-  window.open(url.toString(), '_blank', 'noreferrer')
+function openSyncSettings() {
+  store.commit('setSettingsWindowSection', 'sync')
+  store.dispatch('showSettingsWindow')
+}
+
+function toggleSettingsWindow() {
+  store.dispatch(settingsWindowOpen.value ? 'closeSettingsWindowToIcon' : 'openSettingsWindowFromIcon')
+}
+
+function restoreSettingsWindow() {
+  store.dispatch('restoreSettingsWindow')
 }
 
 const usingOnlySearchHistoryResults = computed(() => lastSuggestionQuery.value.length === 0)
 
-/** @type {import('vue').ComputedRef<string[]>} */
-const latestMatchingSearchHistoryNames = computed(() => {
-  return store.getters.getLatestMatchingSearchHistoryNames(lastSuggestionQuery.value)
+/** @type {import('vue').ComputedRef<object[]>} */
+const latestMatchingSearchHistoryEntries = computed(() => {
+  return store.getters.getLatestMatchingSearchHistoryEntries(lastSuggestionQuery.value)
 })
 
-/** @type {import('vue').ComputedRef<string[]>} */
-const latestSearchHistoryNames = computed(() => store.getters.getLatestSearchHistoryNames)
+/** @type {import('vue').ComputedRef<object[]>} */
+const latestSearchHistoryEntries = computed(() => store.getters.getLatestSearchHistoryEntries)
+
+const activeSearchHistoryEntries = computed(() => usingOnlySearchHistoryResults.value
+  ? latestSearchHistoryEntries.value
+  : latestMatchingSearchHistoryEntries.value)
+
+const searchFilterLabels = computed(() => ({
+  prioritize: {
+    popularity: t('Search Filters.Prioritize.Popularity'),
+  },
+  time: {
+    today: t('Search Filters.Time.Today'),
+    week: t('Search Filters.Time.This Week'),
+    month: t('Search Filters.Time.This Month'),
+    year: t('Search Filters.Time.This Year'),
+  },
+  type: {
+    video: t('Search Filters.Type.Videos'),
+    shorts: t('Global.Shorts'),
+    channel: t('Search Filters.Type.Channels'),
+    playlist: t('Playlists'),
+    movie: t('Search Filters.Type.Movies'),
+  },
+  duration: {
+    under_three_mins: t('Search Filters.Duration.< 3 minutes'),
+    three_to_twenty_mins: t('Search Filters.Duration.3 - 20 minutes'),
+    over_twenty_mins: t('Search Filters.Duration.> 20 minutes'),
+  },
+  features: {
+    live: t('Search Filters.Features.Live'),
+    '4k': t('Search Filters.Features.4K'),
+    hd: t('Search Filters.Features.HD'),
+    subtitles: t('Search Filters.Features.Subtitles'),
+    creative_commons: t('Search Filters.Features.Creative Commons'),
+    360: t('Search Filters.Features.360 Video'),
+    vr180: t('Search Filters.Features.VR180'),
+    '3d': t('Search Filters.Features.3D'),
+    hdr: t('Search Filters.Features.HDR'),
+    location: t('Search Filters.Features.Location'),
+  },
+}))
+
+/**
+ * @param {{ query: string, searchSettings: object }} entry
+ * @returns {string}
+ */
+function getSearchHistoryEntryDisplayText(entry) {
+  const settings = entry.searchSettings
+  const filterLabels = ['prioritize', 'time', 'type', 'duration']
+    .map(group => searchFilterLabels.value[group][settings[group]])
+    .filter(Boolean)
+
+  for (const feature of settings.features) {
+    filterLabels.push(searchFilterLabels.value.features[feature] ?? feature)
+  }
+
+  return filterLabels.length === 0
+    ? entry.query
+    : `${entry.query} (${filterLabels.join(', ')})`
+}
+
+/** @type {import('vue').ComputedRef<string>} */
+const searchFilterTabId = computed(() => getSearchFilterTabId(store.getters.getPresentedTabId))
+
+/** @type {import('vue').ComputedRef<any>} */
+const searchSettings = computed(() => store.getters.getSearchSettings(searchFilterTabId.value))
 
 const activeDataList = computed(() => {
   // show latest search history when the search bar is empty
   if (usingOnlySearchHistoryResults.value) {
-    return latestSearchHistoryNames.value
+    return latestSearchHistoryEntries.value.map(getSearchHistoryEntryQuery)
   }
 
-  const searchResults = [...latestMatchingSearchHistoryNames.value]
+  const searchHistoryNames = latestMatchingSearchHistoryEntries.value.map(getSearchHistoryEntryQuery)
+  const searchResults = [...searchHistoryNames]
 
   if (enableSearchSuggestions.value) {
     for (const searchSuggestion of searchSuggestionsDataList.value) {
       // prevent duplicate results between search history entries and YT search suggestions
-      if (latestMatchingSearchHistoryNames.value.includes(searchSuggestion)) {
+      if (searchHistoryNames.includes(searchSuggestion)) {
         continue
       }
 
@@ -290,246 +656,444 @@ const activeDataList = computed(() => {
   return searchResults
 })
 
-const activeDataListProperties = computed(() => {
-  const searchHistoryEntriesCount = usingOnlySearchHistoryResults.value
-    ? latestSearchHistoryNames.value.length
-    : latestMatchingSearchHistoryNames.value.length
+const searchHistoryEntriesCount = computed(() => activeSearchHistoryEntries.value.length)
 
+// The getters run only for the rows FtInput renders.
+const activeDataListProperties = computed(() => {
   const properties = []
 
   for (let i = 0; i < activeDataList.value.length; i++) {
-    properties.push(i < searchHistoryEntriesCount
-      ? { isRemoveable: true, iconName: 'clock-rotate-left' }
-      : { isRemoveable: false, iconName: 'magnifying-glass' }
+    const queryText = activeDataList.value[i]
+    const searchHistoryEntry = activeSearchHistoryEntries.value[i]
+
+    properties.push(i < searchHistoryEntriesCount.value
+      ? {
+          isLink: true,
+          isRemoveable: true,
+          isSearchHistory: true,
+          iconName: 'clock-rotate-left',
+          get href() { return getSearchResultHref(queryText, searchHistoryEntry.searchSettings) },
+          get displayText() { return getSearchHistoryEntryDisplayText(searchHistoryEntry) },
+          get ariaLabel() { return getSearchHistoryEntryDisplayText(searchHistoryEntry) },
+        }
+      : {
+          isLink: true,
+          isRemoveable: false,
+          isSearchHistory: false,
+          iconName: 'magnifying-glass',
+          get href() { return getSearchResultHref(queryText) },
+        }
     )
   }
 
   return properties
 })
 
-const isArrowBackwardDisabled = ref(true)
-const isArrowForwardDisabled = ref(true)
-
-if (process.env.IS_ELECTRON || 'navigation' in window) {
-  watch(route, () => {
-    setNavigationHistoryDropdownOptions()
-
-    isArrowForwardDisabled.value = !window.navigation.canGoForward
-    isArrowBackwardDisabled.value = !window.navigation.canGoBack
-  }, { deep: true })
-} else {
-  // If the Navigation API isn't supported (Firefox and Safari)
-  // keep the back and forwards buttons always enabled
-  isArrowBackwardDisabled.value = false
-  isArrowForwardDisabled.value = false
-}
-
-let navigationHistoryDropdownActiveEntry = null
-let isLoadingNavigationHistory = false
-let pendingNavigationHistoryLabel = null
-
-async function setNavigationHistoryDropdownOptions() {
-  if (process.env.IS_ELECTRON) {
-    isLoadingNavigationHistory = true
-    const dropdownOptions = await window.ftElectron.getNavigationHistory()
-
-    const activeEntry = dropdownOptions.find(option => option.active)
-
-    if (pendingNavigationHistoryLabel) {
-      activeEntry.label = pendingNavigationHistoryLabel
-    }
-
-    navigationHistoryDropdownOptions.value = dropdownOptions
-    navigationHistoryDropdownActiveEntry = activeEntry
-    isLoadingNavigationHistory = false
+const isArrowBackwardDisabled = computed(() => {
+  if (usesLogicalTabs) {
+    return !logicalHistoryState.value.canGoBack
   }
-}
 
-/** @type {import('vue').ComputedRef<string>} */
-const appTitle = computed(() => store.getters.getAppTitle)
+  // Reading the route makes this computed refresh after browser navigation.
+  const hasCurrentRoute = typeof route.fullPath === 'string'
+  return hasCurrentRoute && 'navigation' in window ? !window.navigation.canGoBack : false
+})
+const isArrowForwardDisabled = computed(() => {
+  if (usesLogicalTabs) {
+    return !logicalHistoryState.value.canGoForward
+  }
 
-watch(appTitle, (value) => {
-  nextTick(() => {
-    if (isLoadingNavigationHistory) {
-      pendingNavigationHistoryLabel = value
-    } else if (navigationHistoryDropdownActiveEntry) {
-      navigationHistoryDropdownActiveEntry.label = value
-    }
-  })
+  const hasCurrentRoute = typeof route.fullPath === 'string'
+  return hasCurrentRoute && 'navigation' in window ? !window.navigation.canGoForward : false
 })
 
 function toggleSideNav() {
   store.commit('toggleSideNav')
 }
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const searchFilterValueChanged = computed(() => store.getters.getSearchFilterValueChanged)
+const searchFilterValueChanged = computed(() => {
+  return store.getters.getSearchFilterValueChanged(searchFilterTabId.value)
+})
 
 function showSearchFilters() {
   store.dispatch('showSearchFilters')
 }
 
-const searchContainer = useTemplateRef('searchContainer')
+function clearSearchFilters() {
+  const tabId = searchFilterTabId.value
+  store.commit('setSearchPrioritize', { tabId, value: 'relevance' })
+  store.commit('setSearchTime', { tabId, value: '' })
+  store.commit('setSearchType', { tabId, value: 'all' })
+  store.commit('setSearchDuration', { tabId, value: '' })
+  store.commit('setSearchFeatures', { tabId, value: [] })
+  store.commit('setSearchFilterValueChanged', { tabId, value: false })
+  rerunPresentedSearchWithFilters()
+}
+
+watch(() => store.getters.getShowSearchFilters, (shown, wasShown) => {
+  if (wasShown && !shown) {
+    rerunPresentedSearchWithFilters()
+  }
+})
+
+/**
+ * Applies changed search filters to the search results that are already shown.
+ */
+function rerunPresentedSearchWithFilters() {
+  const presented = presentedRoute.value
+  const searchText = presented == null ? null : getSearchTextFromPath(presented.path)
+  if (searchText == null ||
+    searchFiltersMatch(getSearchSettingsFromRouteQuery(presented.query), searchSettings.value)) {
+    return
+  }
+
+  const destination = getTextSearchDestination(searchText, null)
+  const { spellCorrection } = presented.query
+  openInternalPath({
+    ...destination,
+    query: spellCorrection == null ? destination.query : { ...destination.query, spellCorrection },
+  })
+}
+
 const searchInput = useTemplateRef('searchInput')
 
-/** @type {import('vue').ComputedRef<any>} */
-const searchSettings = computed(() => store.getters.getSearchSettings)
+// The search bar renders once for the whole window and is shared by every
+// logical tab, so its text has to be persisted per tab to stay independent.
+// Mirror the live input value here since FtInput doesn't expose a getter.
+const searchTextByTabId = new Map()
+const currentSearchText = ref('')
+// The pinned phone search pill shows the text while the input is hidden.
+const pinnedSearchText = computed(() => currentSearchText.value.trim())
+
+/**
+ * @param {string} path
+ * @returns {string | null}
+ */
+function getSearchTextFromPath(path) {
+  const encodedQuery = path.match(/^\/search\/(.+)$/)?.[1]
+  if (encodedQuery == null) {
+    return null
+  }
+
+  try {
+    return decodeURIComponent(encodedQuery)
+  } catch {
+    return encodedQuery
+  }
+}
+
+/**
+ * @param {string} tabId
+ * @returns {string}
+ */
+function getSearchTextForTab(tabId) {
+  if (searchTextByTabId.has(tabId)) {
+    return searchTextByTabId.get(tabId) ?? ''
+  }
+
+  const path = store.getters.getTabById(tabId)?.route.path ?? ''
+  return getSearchTextFromPath(path) ?? ''
+}
+
+const presentedRoute = computed(() => {
+  if (!usesLogicalTabs) {
+    return route
+  }
+
+  const tabId = store.getters.getPresentedTabId
+  return store.getters.getTabById(tabId)?.route ?? null
+})
+
+const presentedRoutePath = computed(() => presentedRoute.value?.path ?? '')
+
+watch([searchFilterTabId, presentedRoutePath], ([tabId, path], [previousTabId]) => {
+  // Tab switches restore that tab's cached draft in the watcher below. Route
+  // changes within one tab restore the submitted query from navigation history.
+  if (tabId !== previousTabId) {
+    return
+  }
+
+  const searchText = getSearchTextFromPath(path)
+  if (searchText != null) {
+    updateSearchInputText(searchText)
+    cancelSearchSuggestions()
+  }
+})
+
+if (usesLogicalTabs) {
+  const presentedTabId = computed(() => store.getters.getPresentedTabId)
+
+  watch(presentedTabId, (tabId, previousTabId) => {
+    // Skip the initial null -> id transition during startup so we don't clobber
+    // text that was pre-filled for this tab (e.g. a search carried into a new
+    // window). A search route is the exception: restored tabs have no cached
+    // input text, so hydrate it from the route itself.
+    if (previousTabId == null) {
+      if (tabId != null) {
+        const searchText = getSearchTextForTab(tabId)
+        if (searchText.length > 0) {
+          updateSearchInputText(searchText)
+        }
+      }
+      return
+    }
+
+    searchTextByTabId.set(previousTabId, currentSearchText.value)
+    if (phoneLayout.value) closePhoneSearch()
+    updateSearchInputText(tabId != null ? getSearchTextForTab(tabId) : '')
+    cancelSearchSuggestions()
+  })
+}
+
+/**
+ * @param {string} rawQueryText
+ * @param {object | null} selectedSearchSettings
+ * @returns {Promise<{ path: string, query?: object, searchQueryText: string }>}
+ */
+async function getSearchDestination(rawQueryText, selectedSearchSettings = null) {
+  const queryText = rawQueryText.trim()
+  if (isPlainSearchText(queryText)) return getTextSearchDestination(queryText, selectedSearchSettings)
+
+  if (supportsYtDlp && shouldOpenExternalMediaUrl(queryText, store.getters.getCurrentInvidiousInstanceUrl)) {
+    return {
+      path: '/external-media',
+      query: { url: queryText },
+      searchQueryText: queryText
+    }
+  }
+
+  const result = await store.dispatch('getYoutubeUrlInfo', queryText)
+
+  switch (result.urlType) {
+    case 'video': {
+      const { videoId, timestamp, playlistId, commentId, isShort } = result
+      const query = {}
+
+      if (isShort) query.short = 'true'
+      if (timestamp) query.timestamp = timestamp
+      if (playlistId?.length > 0) query.playlistId = playlistId
+      if (commentId) query.commentId = commentId
+
+      return { path: `/watch/${videoId}`, query, searchQueryText: queryText }
+    }
+
+    case 'playlist':
+      return {
+        path: `/playlist/${result.playlistId}`,
+        query: result.query,
+        searchQueryText: queryText
+      }
+
+    case 'search':
+      return {
+        path: `/search/${encodeURIComponent(result.searchQuery)}`,
+        query: result.query,
+        searchQueryText: result.searchQuery
+      }
+
+    case 'hashtag':
+      return {
+        path: `/hashtag/${encodeURIComponent(result.hashtag)}`,
+        searchQueryText: `#${result.hashtag}`
+      }
+
+    case 'post':
+      return {
+        path: `/post/${result.postId}`,
+        query: result.query,
+        searchQueryText: queryText
+      }
+
+    case 'channel':
+      return {
+        path: `/channel/${result.channelId}/${result.subPath}`,
+        query: { url: result.url },
+        searchQueryText: queryText
+      }
+
+    case 'trending':
+    case 'subscriptions':
+    case 'history':
+    case 'userplaylists':
+      return { path: `/${result.urlType}`, searchQueryText: queryText }
+
+    case 'invalid_url':
+    default: {
+      if (supportsYtDlp && shouldOpenExternalMediaUrl(queryText, store.getters.getCurrentInvidiousInstanceUrl)) {
+        return {
+          path: '/external-media',
+          query: { url: queryText },
+          searchQueryText: queryText
+        }
+      }
+      return getTextSearchDestination(queryText, selectedSearchSettings)
+    }
+  }
+}
+
+/**
+ * @param {string} queryText
+ * @param {object | null} selectedSearchSettings
+ */
+function getTextSearchDestination(queryText, selectedSearchSettings) {
+  const settings = selectedSearchSettings ?? searchSettings.value
+  return {
+    path: `/search/${encodeURIComponent(queryText)}`,
+    query: {
+      prioritize: settings.prioritize,
+      time: settings.time,
+      type: settings.type,
+      duration: settings.duration,
+      features: [...settings.features],
+    },
+    searchQueryText: queryText
+  }
+}
+
+/**
+ * URLs need a scheme separator, and handles are the only scheme-less text
+ * treated as one. Anything else is searched without the URL parsing in
+ * `getYoutubeUrlInfo`, which throws twice for plain text.
+ * @param {string} queryText trimmed text
+ */
+function isPlainSearchText(queryText) {
+  return !queryText.includes(':') && !CHANNEL_HANDLE_REGEX.test(queryText)
+}
+
+// Links are resolved only for the rows FtInput renders, as the complete search
+// history can have thousands of entries. URL entries resolve asynchronously.
+let searchResultHrefs = new Map()
+const resolvedUrlHrefs = shallowReactive(new Map())
+let pendingUrlHrefs = new Set()
+const searchHrefGeneration = ref(0)
+
+watch(searchSettings, () => {
+  searchHrefGeneration.value++
+  searchResultHrefs = new Map()
+  pendingUrlHrefs = new Set()
+  resolvedUrlHrefs.clear()
+}, { deep: true })
+
+/**
+ * @param {string} rawQueryText
+ * @param {object | null} selectedSearchSettings
+ * @returns {string | undefined}
+ */
+function getSearchResultHref(rawQueryText, selectedSearchSettings = null) {
+  // Read during render, so changed search filters re-render the links.
+  const generation = searchHrefGeneration.value
+  const key = JSON.stringify([rawQueryText, selectedSearchSettings])
+  const cachedHref = searchResultHrefs.get(key)
+  if (cachedHref !== undefined) return cachedHref
+
+  const queryText = rawQueryText.trim()
+  if (isPlainSearchText(queryText)) {
+    const destination = getTextSearchDestination(queryText, selectedSearchSettings)
+    const href = router.resolve({ path: destination.path, query: destination.query }).href
+    // Typed suggestions add entries for as long as the app runs.
+    if (searchResultHrefs.size >= 1000) searchResultHrefs.clear()
+    searchResultHrefs.set(key, href)
+    return href
+  }
+
+  const href = resolvedUrlHrefs.get(key)
+  if (href === undefined && !pendingUrlHrefs.has(key)) {
+    pendingUrlHrefs.add(key)
+    getSearchDestination(rawQueryText, selectedSearchSettings).then(destination => {
+      if (generation === searchHrefGeneration.value) {
+        resolvedUrlHrefs.set(key, router.resolve({ path: destination.path, query: destination.query }).href)
+      }
+    }).catch(error => {
+      console.error(error)
+    }).finally(() => {
+      if (generation === searchHrefGeneration.value) pendingUrlHrefs.delete(key)
+    })
+  }
+  return href
+}
 
 /**
  * @param {string} queryText
  * @param {object} options
- * @param {MouseEvent} options.event
+ * @param {MouseEvent | KeyboardEvent} options.event
+ * @param {number} [options.dataListIndex]
  */
-function goToSearch(queryText, { event }) {
+async function goToSearch(queryText, { event, dataListIndex }) {
   const doCreateNewWindow = event && event.shiftKey
+  const ctrlOrCmdPressed = event && ((process.platform !== 'darwin' && event.ctrlKey) ||
+    (process.platform === 'darwin' && event.metaKey))
+  const isMiddleClick = event?.type === 'auxclick' && event.button === 1
+  const doCreateNewTab = (ctrlOrCmdPressed || isMiddleClick) && !doCreateNewWindow
+  const makeActive = !isMiddleClick
 
-  if (window.innerWidth <= MOBILE_WIDTH_THRESHOLD) {
-    searchContainer.value.blur()
-    showSearchContainer.value = false
-  } else {
-    searchInput.value.blur()
+  if (!isMiddleClick) {
+    if (phoneLayout.value) {
+      searchInput.value.blur()
+      showSearchContainer.value = false
+    } else {
+      searchInput.value.blur()
+    }
   }
 
-  clearLocalSearchSuggestionsSession()
+  cancelSearchSuggestions()
 
-  store.dispatch('getYoutubeUrlInfo', queryText).then(async (result) => {
-    switch (result.urlType) {
-      case 'clip':
-      case 'video': {
-        let videoId, timestamp, playlistId
+  const selectedSearchHistoryEntry = activeDataListProperties.value[dataListIndex]?.isSearchHistory
+    ? activeSearchHistoryEntries.value[dataListIndex]
+    : null
+  const selectedSearchSettings = selectedSearchHistoryEntry?.searchSettings
 
-        if (result.urlType === 'video') {
-          videoId = result.videoId
-          timestamp = result.timestamp
-          playlistId = result.playlistId
-        } else if (result.urlType === 'clip') {
-          const clipResult = await getClip(result.clipId)
-          videoId = clipResult.videoId
-          timestamp = clipResult.startTime
-        }
+  if (selectedSearchSettings != null && !doCreateNewTab && !doCreateNewWindow) {
+    const tabId = searchFilterTabId.value
+    store.commit('setSearchPrioritize', { tabId, value: selectedSearchSettings.prioritize })
+    store.commit('setSearchTime', { tabId, value: selectedSearchSettings.time })
+    store.commit('setSearchType', { tabId, value: selectedSearchSettings.type })
+    store.commit('setSearchDuration', { tabId, value: selectedSearchSettings.duration })
+    store.commit('setSearchFeatures', { tabId, value: [...selectedSearchSettings.features] })
+    store.commit('setSearchFilterValueChanged', {
+      tabId,
+      value: selectedSearchSettings.prioritize !== 'relevance' ||
+      selectedSearchSettings.time !== '' ||
+      selectedSearchSettings.type !== 'all' ||
+      selectedSearchSettings.duration !== '' ||
+      selectedSearchSettings.features.length > 0
+    })
+  }
 
-        const query = {}
-        if (timestamp) {
-          query.timestamp = timestamp
-        }
-        if (playlistId && playlistId.length > 0) {
-          query.playlistId = playlistId
-        }
-
-        openInternalPath({
-          path: `/watch/${videoId}`,
-          query,
-          doCreateNewWindow,
-          searchQueryText: queryText,
-        })
-        break
-      }
-
-      case 'playlist': {
-        const { playlistId, query } = result
-
-        openInternalPath({
-          path: `/playlist/${playlistId}`,
-          query,
-          doCreateNewWindow,
-          searchQueryText: queryText,
-        })
-        break
-      }
-
-      case 'search': {
-        const { searchQuery, query } = result
-
-        openInternalPath({
-          path: `/search/${encodeURIComponent(searchQuery)}`,
-          query,
-          doCreateNewWindow,
-          searchQueryText: searchQuery,
-        })
-        break
-      }
-
-      case 'hashtag': {
-        const { hashtag } = result
-        openInternalPath({
-          path: `/hashtag/${encodeURIComponent(hashtag)}`,
-          doCreateNewWindow,
-          searchQueryText: `#${hashtag}`,
-        })
-
-        break
-      }
-
-      case 'post': {
-        const { postId, query } = result
-
-        openInternalPath({
-          path: `/post/${postId}`,
-          query,
-          doCreateNewWindow,
-          searchQueryText: queryText,
-        })
-        break
-      }
-
-      case 'channel': {
-        const { channelId, subPath, url } = result
-
-        openInternalPath({
-          path: `/channel/${channelId}/${subPath}`,
-          doCreateNewWindow,
-          query: {
-            url,
-          },
-          searchQueryText: queryText,
-        })
-        break
-      }
-
-      case 'trending':
-      case 'subscriptions':
-      case 'history':
-      case 'userplaylists':
-        openInternalPath({
-          path: `/${result.urlType}`,
-          doCreateNewWindow,
-          searchQueryText: queryText
-        })
-        break
-
-      case 'invalid_url':
-      default: {
-        openInternalPath({
-          path: `/search/${encodeURIComponent(queryText)}`,
-          query: {
-            prioritize: searchSettings.value.prioritize,
-            time: searchSettings.value.time,
-            type: searchSettings.value.type,
-            duration: searchSettings.value.duration,
-            // Array proxy cannot be cloned during IPC call
-            features: [...searchSettings.value.features],
-          },
-          doCreateNewWindow,
-          searchQueryText: queryText,
-        })
-      }
-    }
-
-    if (doCreateNewWindow) {
-      // Query text copied to new window = can be removed from current window
-      updateSearchInputText('')
-    }
+  const destination = await getSearchDestination(queryText, selectedSearchSettings)
+  openInternalPath({
+    ...destination,
+    doCreateNewWindow,
+    doCreateNewTab,
+    makeActive,
+    lazyLoad: isUnloadedBackgroundTabClick(event),
   })
+
+  if (doCreateNewWindow) {
+    // Query text copied to new window = can be removed from current window
+    updateSearchInputText('')
+  }
 }
 
-function clearLastSuggestionQuery() {
+function cancelSearchSuggestions() {
+  clearTimeout(suggestionTimeout)
+  suggestionController?.abort()
+  suggestionController = null
+}
+
+function handleSearchInputClear() {
   lastSuggestionQuery.value = ''
+  searchSuggestionsDataList.value = []
+  currentSearchText.value = ''
+  cancelSearchSuggestions()
 }
 
 /**
  * @param {string} text
  */
 function updateSearchInputText(text) {
+  cancelSearchSuggestions()
+  lastSuggestionQuery.value = ''
+  currentSearchText.value = text
   searchInput.value?.setText(text)
 }
 
@@ -537,84 +1101,123 @@ function updateSearchInputText(text) {
  * @param {string} query
  */
 function getSearchSuggestionsDebounce(query) {
-  if (query === lastSuggestionQuery.value) {
-    return
-  }
+  currentSearchText.value = query
+  if (query === lastSuggestionQuery.value &&
+      (suggestionController != null || completedSuggestionQuery === query.trim())) return
 
+  cancelSearchSuggestions()
+  completedSuggestionQuery = null
   lastSuggestionQuery.value = query
-
-  if (enableSearchSuggestions.value) {
-    debounceSearchResults(query.trim())
-  }
-}
-
-/** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
-const backendPreference = computed(() => store.getters.getBackendPreference)
-/** @type {import('vue').ComputedRef<boolean>} */
-const backendFallback = computed(() => store.getters.getBackendFallback)
-
-const debounceSearchResults = debounce(/** @param {string} query */(query) => {
-  if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
-    getSearchSuggestionsInvidious(query)
-  } else {
-    getSearchSuggestionsLocal(query)
-  }
-}, 200)
-
-/**
- * @param {string} query
- */
-async function getSearchSuggestionsLocal(query) {
-  searchSuggestionsDataList.value = query.length > 0
-    ? await getLocalSearchSuggestions(query)
-    : []
-}
-
-async function getSearchSuggestionsInvidious(query) {
-  if (query === '') {
+  if (!enableSearchSuggestions.value || query.trim() === '') {
     searchSuggestionsDataList.value = []
     return
   }
 
-  try {
-    searchSuggestionsDataList.value = (await getInvidiousSearchSuggestions(query)).suggestions
-  } catch (err) {
-    console.error(err)
+  const controller = new AbortController()
+  suggestionController = controller
+  suggestionTimeout = setTimeout(() => loadSearchSuggestions(query.trim(), controller), 200)
+}
 
-    if (process.env.SUPPORTS_LOCAL_API && backendFallback.value) {
-      console.error(
-        'Error gettings search suggestions.  Falling back to Local API'
-      )
-      getSearchSuggestionsLocal(query)
+/** @type {import('vue').ComputedRef<'local' | 'invidious' | 'yattee'>} */
+const backendPreference = computed(() => store.getters.getBackendPreference)
+/** @type {import('vue').ComputedRef<boolean>} */
+const backendFallback = computed(() => store.getters.getBackendFallback)
+
+watch([enableSearchSuggestions, backendPreference, backendFallback], () => {
+  cancelSearchSuggestions()
+  completedSuggestionQuery = null
+  searchSuggestionsDataList.value = []
+})
+
+/**
+ * @param {string} query
+ * @param {AbortController} controller
+ */
+async function loadSearchSuggestions(query, controller) {
+  const { signal } = controller
+  if (signal.aborted) return
+  try {
+    let suggestions
+    if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendPreference.value)) {
+      try {
+        suggestions = (await getInvidiousSearchSuggestions(query, signal)).suggestions
+      } catch (error) {
+        if (signal.aborted || !process.env.SUPPORTS_LOCAL_API || !backendFallback.value) throw error
+        showInvidiousFallbackToast(backendPreference.value)
+        suggestions = await getLocalSearchSuggestions(query, signal)
+      }
+    } else {
+      suggestions = await getLocalSearchSuggestions(query, signal)
     }
+    if (!signal.aborted) {
+      searchSuggestionsDataList.value = suggestions
+      completedSuggestionQuery = query
+    }
+  } catch (error) {
+    if (!signal.aborted) console.error('Error getting search suggestions', error)
+  } finally {
+    if (suggestionController === controller) suggestionController = null
   }
 }
 
 /**
  * @param {string} query
+ * @param {object} options
+ * @param {number} options.dataListIndex
  */
-function removeSearchHistoryEntryInDbAndCache(query) {
-  store.dispatch('removeSearchHistoryEntry', query)
-  store.commit('removeFromSessionSearchHistory', query)
+function removeSearchHistoryEntryInDbAndCache(query, { dataListIndex }) {
+  const searchHistoryEntry = activeSearchHistoryEntries.value[dataListIndex]
+  if (searchHistoryEntry == null) {
+    return
+  }
+
+  store.dispatch('removeSearchHistoryEntry', searchHistoryEntry._id)
+  store.commit('removeFromSessionSearchHistory', {
+    query,
+    searchSettings: searchHistoryEntry.searchSettings,
+  })
 }
 
-function toggleSearchContainer() {
-  showSearchContainer.value = !showSearchContainer.value
+async function focusSearch(selectText = false) {
+  if (hideSearchBar.value) return
+  showSearchContainer.value = true
+  await nextTick()
+  searchInput.value?.focus()
+  if (selectText === true) searchInput.value?.select()
+}
+
+function closePhoneSearch(event) {
+  if (!phoneLayout.value || !showSearchContainer.value) return
+  event?.preventDefault()
+  event?.stopPropagation()
+  searchInput.value?.blur()
+  showSearchContainer.value = false
+  nextTick(() => (pinnedSearchTrigger.value ?? searchTrigger.value)?.focus({ preventScroll: true }))
+}
+
+function handleFocusSearch() {
+  setTimeout(() => focusSearch(true), 0)
 }
 
 /**
  * @param {KeyboardEvent} event
  */
 function handleKeyboardShortcuts(event) {
-  const ctrlOrCommandPressed = (process.platform !== 'darwin' && event.ctrlKey) ||
-    (process.platform === 'darwin' && event.metaKey)
+  const target = event.target
+  const isTypingInInput = target.tagName === 'INPUT' ||
+    target.tagName === 'TEXTAREA' ||
+    target.isContentEditable
+  const shortcuts = appKeyboardShortcuts.value
+  const focusSearchShortcut = [
+    shortcuts.FOCUS_SEARCH,
+    shortcuts.FOCUS_SEARCH_ALT,
+    ...process.platform === 'darwin' ? [shortcuts.FOCUS_SEARCH_ALT_MAC] : [],
+  ].some(shortcut => matchesKeyboardShortcut(event, shortcut))
+  const slashShortcut = matchesKeyboardShortcut(event, shortcuts.FOCUS_SEARCH_ALT_SLASH)
 
   if (
     !hideSearchBar.value &&
-    (
-      (ctrlOrCommandPressed && (event.key === 'L' || event.key === 'l')) ||
-      (event.altKey && (event.key === 'D' || event.key === 'd' || (process.platform === 'darwin' && event.key === '∂')))
-    )
+    (focusSearchShortcut || (slashShortcut && !isTypingInInput))
   ) {
     event.preventDefault()
 
@@ -623,67 +1226,29 @@ function handleKeyboardShortcuts(event) {
     // Chromium on KDE Plasma, it seems both focus() focus and
     // select() have to be called asynchronously (see issue #2019).
     setTimeout(() => {
-      searchInput.value?.focus()
-      searchInput.value?.select()
+      focusSearch(true)
     }, 0)
   }
 }
 
-let previousWindowWidth
-
-function handleWindowResize() {
-  // Don't change the status of showSearchContainer if only the height of the window changes
-  // Opening the virtual keyboard can trigger this resize event, but it won't change the width
-  if (previousWindowWidth !== window.innerWidth) {
-    showSearchContainer.value = window.innerWidth > MOBILE_WIDTH_THRESHOLD
-    previousWindowWidth = window.innerWidth
-  }
-}
-
-async function getClip(clipId) {
-  if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
-    try {
-      return await getClipInvidious(clipId)
-    } catch (err) {
-      console.error(err)
-
-      if (process.env.SUPPORTS_LOCAL_API && backendFallback.value) {
-        console.error(
-          'Error resolving clip URL.  Falling back to Local API'
-        )
-        return await getLocalClip(clipId)
-      }
-    }
-  } else {
-    try {
-      return await getLocalClip(clipId)
-    } catch (err) {
-      console.error(err)
-
-      if (backendFallback.value) {
-        console.error(
-          'Error resolving clip URL.  Falling back to Invidious API'
-        )
-        return await getClipInvidious(clipId)
-      }
-    }
-  }
-}
-
 onMounted(() => {
-  previousWindowWidth = window.innerWidth
-  if (window.innerWidth <= MOBILE_WIDTH_THRESHOLD) {
-    showSearchContainer.value = false
+  measureHeader()
+  for (const element of [header.value, navigationActions.value, headerActions.value]) {
+    headerResizeObserver.observe(element)
   }
-
   // Store is not up-to-date when the component mounts, so we use timeout.
   setTimeout(() => {
-    if (store.getters.getExpandSideBar) {
+    if (store.getters.getExpandSideBar && !useWatchSideNavOverlay.value) {
       toggleSideNav()
     }
   }, 0)
 
-  window.addEventListener('resize', handleWindowResize)
+  window.addEventListener('opentubex:focus-search', handleFocusSearch)
+
+  const searchText = getSearchTextFromPath(presentedRoutePath.value)
+  if (currentSearchText.value.length === 0 && searchText) {
+    updateSearchInputText(searchText)
+  }
 
   if (process.env.IS_ELECTRON) {
     window.addEventListener('keydown', handleKeyboardShortcuts)
@@ -697,7 +1262,9 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', handleWindowResize)
+  cancelSearchSuggestions()
+  headerResizeObserver.disconnect()
+  window.removeEventListener('opentubex:focus-search', handleFocusSearch)
 
   if (process.env.IS_ELECTRON) {
     window.removeEventListener('keydown', handleKeyboardShortcuts)

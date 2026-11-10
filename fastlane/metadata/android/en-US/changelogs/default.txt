@@ -1,0 +1,4 @@
+Highlights
+• The app takes on Material 3 Expressive, with rounder corners, tinted buttons and selections, springier motion, and bolder titles. Custom themes keep working.
+• A bell in the top bar keeps your live stream reminders, new uploads, and automatic downloads, which appear in the app instead of as system notifications while you use OpenTubeX. A new setting in General switches notifications to system only or off.
+…and more

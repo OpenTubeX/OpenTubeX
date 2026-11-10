@@ -1,11 +1,54 @@
 .card {
-  inline-size: 85%;
+  /* Match the search spacing below the History and Playlists headings. */
+  --channels-heading-gap: calc(3px + var(--page-title-offset));
+  --channels-field-label-outset: 7px;
+
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 92dvw;
   margin-block: 0 60px;
   margin-inline: auto;
 }
 
+.heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-block-end: 12px;
+  padding-block-start: var(--page-title-offset);
+}
+
+.heading:has(+ .controls) {
+  margin-block-end: 0;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 16px;
+
+  /* The outlined labels sit above the fields. */
+  margin-block-start: calc(var(--channels-heading-gap) + var(--channels-field-label-outset));
+}
+
+.channelSearch {
+  --input-bottom-spacing: 0;
+}
+
+.sortSelect {
+  margin-block: 0;
+}
+
+.groupBar {
+  margin-block-start: 16px;
+}
+
 .message {
   color: var(--tertiary-text-color);
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .count {
@@ -15,17 +58,60 @@
 .channels {
   inline-size: 100%;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
   gap: 2.5rem;
   margin-block-start: 2rem;
 }
 
 .channel {
+  position: relative;
+  min-inline-size: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   row-gap: 0.75rem;
   padding: 0.5rem;
+  border-radius: var(--shape-corner-medium);
+}
+
+.channel.reorderable {
+  cursor: grab;
+}
+
+.channel.draggedChannel {
+  opacity: 0.5;
+}
+
+.channelMove-move {
+  transition: transform 200ms ease;
+}
+
+.grabBar {
+  position: absolute;
+  inset-block-start: 0.25rem;
+  inset-inline-start: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 36px;
+  min-block-size: 36px;
+  border-radius: 50%;
+  color: var(--tertiary-text-color);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  transition: background-color var(--motion-fast-effects), color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.grabBar:hover,
+.grabBar:focus-visible {
+  background-color: var(--side-nav-hover-color);
+  color: var(--primary-text-color);
+}
+
+.grabBar:active {
+  border-radius: var(--shape-corner-medium);
 }
 
 .thumbnailContainer {
@@ -36,19 +122,36 @@
 }
 
 .channelThumbnail {
+  inline-size: 120px;
   block-size: 120px;
   border-radius: 50%;
+  font-size: 120px;
+}
+
+.channelThumbnail :deep(.ft-icon__glyph) {
+  block-size: 100%;
+  inline-size: 100%;
+  scale: 1;
+}
+
+.channelText {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  row-gap: 0.25rem;
+  inline-size: 100%;
+  min-inline-size: 0;
 }
 
 .channelName {
-  flex-grow: 1;
   color: inherit;
   font-size: 1.1rem;
   text-decoration: none;
   text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
-  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
   inline-size: 100%;
   display: -webkit-box;
   line-clamp: 3;
@@ -56,6 +159,17 @@
   -webkit-box-orient: vertical;
   padding-block: 0;
   padding-inline: 4px;
+}
+
+.channelHandle {
+  max-inline-size: 100%;
+  box-sizing: border-box;
+  padding-inline: 4px;
+  overflow: hidden;
+  color: var(--secondary-text-color);
+  font-size: 0.875rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .unsubscribeContainer {
@@ -72,16 +186,30 @@
   color: var(--primary-color);
 }
 
+@media (any-pointer: coarse), (width <= 680px) {
+  .card {
+    --channels-field-label-outset: 9px;
+  }
+}
+
 @media only screen and (width <= 680px) {
   .card {
-    inline-size: 90%;
+    inline-size: 100%;
+  }
+
+  .controls {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: calc(20px + var(--channels-field-label-outset));
   }
 
   .channels {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 11.5rem), 1fr));
     gap: 1.5rem;
   }
 
   .channelThumbnail {
+    inline-size: 80px;
     block-size: 80px;
+    font-size: 80px;
   }
 }

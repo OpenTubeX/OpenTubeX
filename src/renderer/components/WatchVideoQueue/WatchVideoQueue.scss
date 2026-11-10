@@ -1,0 +1,408 @@
+.watchQueue {
+  padding-block-start: 16px;
+}
+
+.queueHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-block-end: 12px;
+  border-block-end: 1px solid var(--side-nav-hover-color);
+}
+
+.queueHeading {
+  flex: 1;
+}
+
+/* Rows form one segmented list: large outer corners, tight inner ones. The
+   reorder composable paints each row with --reorder-row-color. */
+.queueItemsContent {
+  display: grid;
+  gap: 2px;
+  margin-block: 12px 0;
+  margin-inline: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.queueTitle {
+  margin: 0;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+
+.queueCount {
+  color: var(--secondary-text-color);
+  font-size: 13px;
+}
+
+.queueReorderInstructions,
+.queueReorderStatus {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.queueHeaderAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  color: var(--link-color);
+  cursor: pointer;
+  font: inherit;
+}
+
+/* Outside the fullscreen dock, the actions are icon buttons like the other
+   panel headers', such as the transcript's. The header class rather than the
+   card scopes this, as phone panels teleport the header out of the card. */
+.queueHeader:where(:not(.fullscreenDockHeader)) {
+  gap: 8px;
+
+  .queueHeaderAction {
+    justify-content: center;
+    inline-size: 40px;
+    block-size: 40px;
+    padding: 0;
+    border-radius: 50%;
+    color: inherit;
+    font-size: 20px;
+    transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+
+    &:hover,
+    &:focus-visible {
+      color: var(--side-nav-hover-text-color);
+      background-color: var(--side-nav-hover-color);
+    }
+
+    &:active {
+      border-radius: var(--shape-corner-medium);
+    }
+  }
+
+  .clearQueueLabel {
+    display: none;
+  }
+}
+
+.queueItems {
+  max-block-size: 480px;
+  overflow-anchor: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.queueItem {
+  --reorder-row-color: color-mix(in srgb, var(--primary-text-color) 6%, var(--card-bg-color));
+
+  background-color: var(--reorder-row-color);
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding-block: 8px;
+  border-radius: var(--shape-corner-extra-small);
+}
+
+.queueItem:first-child {
+  border-start-start-radius: var(--shape-corner-large-increased);
+  border-start-end-radius: var(--shape-corner-large-increased);
+}
+
+.queueItem:last-child {
+  border-end-start-radius: var(--shape-corner-large-increased);
+  border-end-end-radius: var(--shape-corner-large-increased);
+}
+
+/* A dragged row lifts out of the group with fully rounded corners. */
+.queueItem.dragging {
+  border-radius: var(--shape-corner-large-increased);
+}
+
+/* Rows that never mounted estimate a default row; released rows keep their measured height. */
+.queueItem.windowedListShell {
+  block-size: 104px;
+}
+
+.queueItem-move {
+  transition: transform var(--motion-default-effects);
+}
+
+.queueDragHandle {
+  touch-action: none;
+  display: grid;
+  place-items: center;
+  inline-size: 30px;
+  block-size: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--secondary-text-color);
+  cursor: grab;
+  font: inherit;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+
+  &:hover,
+  &:focus-visible {
+    background-color: var(--side-nav-hover-color);
+    color: var(--primary-text-color);
+  }
+
+  &:active {
+    border-radius: var(--shape-corner-medium);
+    cursor: grabbing;
+  }
+}
+
+.queueVideo {
+  min-inline-size: 0;
+}
+
+/* The drag handle reorders the queue, so the playlist drag area would only pad the row bottom. */
+.queueVideo :deep(.restArea) {
+  display: none;
+}
+
+/* Center thumbnails on the row like the drag handle and menu, even beside wrapped titles. */
+.queueVideo :deep(.videoThumbnail),
+.queueThumbnail {
+  align-self: center;
+}
+
+/* Lay out other media like the list items of YouTube videos. */
+.externalQueueVideo {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  padding: 6px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.queueThumbnail {
+  aspect-ratio: 16 / 9;
+  block-size: 75px;
+  border-radius: var(--shape-corner-small);
+  object-fit: cover;
+}
+
+.queueDetails {
+  display: flex;
+  min-inline-size: 0;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.queueVideoTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: inherit;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.queueAuthor {
+  color: var(--secondary-text-color);
+  font-size: 12px;
+}
+
+.fullscreenQueue {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
+  container-name: queue;
+  container-type: inline-size;
+
+  /* Space the header actions like the comments dock does. */
+  .queueHeader.fullscreenDockHeader {
+    gap: 4px;
+  }
+
+  .queueHeading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-inline-size: 0;
+  }
+
+  .queueTitle {
+    min-inline-size: 0;
+    max-inline-size: 100%;
+  }
+
+  .queueTitleIcon {
+    flex-shrink: 0;
+  }
+
+  .queueLabel {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .queueCount {
+    white-space: nowrap;
+  }
+
+  .queueHeaderAction {
+    flex-shrink: 0;
+    min-inline-size: 36px;
+    min-block-size: 36px;
+    padding: 6px;
+    border-radius: var(--shape-corner-small);
+    color: inherit;
+    font-size: 13px;
+    white-space: nowrap;
+
+    &:hover,
+    &:focus-visible {
+      background-color: rgb(255 255 255 / 20%);
+    }
+  }
+
+  .saveQueue {
+    justify-content: center;
+  }
+
+  /* Without the clear label, both actions match the close button. */
+  .queueHeader:is([data-compact='1'], [data-compact='2']) .queueHeaderAction {
+    justify-content: center;
+    inline-size: 36px;
+    block-size: 36px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 18px;
+  }
+
+  .queueHeader:is([data-compact='1'], [data-compact='2']) .clearQueueLabel {
+    display: none;
+  }
+
+  .queueHeader[data-compact='2'] .queueCount {
+    display: none;
+  }
+
+  .queueItems {
+    flex: 1 1 auto;
+    min-block-size: 0;
+    max-block-size: none;
+    margin-inline: 16px 4px;
+    padding-inline-end: calc(var(--scrollbar-track-width) + 4px);
+  }
+
+  /* Match the fullscreen playlist dock. */
+  .queueVideo :deep(.ft-list-item),
+  .externalQueueVideo {
+    padding-block: 4px;
+  }
+
+  .queueVideo :deep(.title),
+  .queueVideoTitle {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+}
+
+@media (orientation: landscape) and (height <= 600px) {
+  /* Match the child card's thumbnail rule so its fixed height cannot win. */
+  /* stylelint-disable-next-line selector-max-compound-selectors */
+  .fullscreenQueue .queueVideo :deep(.ft-list-item .videoThumbnail .thumbnailImage),
+  .fullscreenQueue .queueThumbnail {
+    inline-size: 80px;
+    block-size: 45px;
+  }
+
+  .fullscreenQueue .queueVideo :deep(.info) {
+    min-inline-size: 0;
+  }
+
+  /* Not even the SponsorBlock icon fits beside the duration in these thumbnails. */
+  .fullscreenQueue .queueVideo :deep(.sponsorBlockVideoLabel) {
+    display: none;
+  }
+}
+
+@media (width <= 600px), (pointer: coarse) {
+  .queueItem {
+    grid-template-columns: var(--phone-touch-target, 48px) minmax(0, 1fr) auto;
+  }
+
+  .queueDragHandle {
+    inline-size: var(--phone-touch-target, 48px);
+    block-size: var(--phone-touch-target, 48px);
+  }
+
+  .queueHeaderAction {
+    min-inline-size: var(--phone-touch-target, 48px);
+    min-block-size: var(--phone-touch-target, 48px);
+  }
+
+  .saveQueue {
+    justify-content: center;
+  }
+}
+
+@container queue (width <= 200px) {
+  .fullscreenQueue .queueHeader.fullscreenDockHeader {
+    gap: 0 4px;
+    padding-inline-start: 8px;
+  }
+
+  .fullscreenQueue .queueHeading,
+  .fullscreenQueue .queueTitle {
+    gap: 4px;
+  }
+
+}
+
+/* Narrow docks stack the menu under the handle and the thumbnail above the text. */
+@container queue (width <= 320px) {
+  .fullscreenQueue .queueItem {
+    grid-template-columns: var(--phone-touch-target, 48px) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .fullscreenQueue .queueItemMenu {
+    grid-column: 1;
+  }
+
+  .fullscreenQueue .queueVideo {
+    grid-row: span 2;
+  }
+
+  .fullscreenQueue .queueVideo :deep(.ft-list-item) {
+    grid-template: 'thumbnail' auto 'info' auto / minmax(0, 1fr);
+    row-gap: 6px;
+  }
+
+  /* Keep the duration badge on the thumbnail. */
+  .fullscreenQueue .queueVideo :deep(.videoThumbnail) {
+    justify-self: start;
+  }
+
+  .fullscreenQueue .externalQueueVideo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+:root.limitTitlesToTwoLines .externalQueueVideo:not(:focus-visible) .queueVideoTitle {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}

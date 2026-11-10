@@ -1,18 +1,69 @@
 <template>
   <div
     v-if="dataReady"
+    ref="appRoot"
     class="app"
-    :class="{
+    :class="[{
       hideOutlines: outlinesHidden,
       isLocaleRightToLeft: isLocaleRightToLeft,
       isSideNavOpen: isSideNavOpen,
-      hideLabelsSideBar: hideLabelsSideBar && !isSideNavOpen
-    }"
+      hideLabelsSideBar: hideLabelsSideBar && !isSideNavOpen,
+      compactNavigation: compactNavigationLabels,
+      capacitorTabs: isCapacitor,
+      capacitorPhoneLayout: isCapacitor && !capacitorTabletLayout,
+      capacitorTabletLayout,
+      verticalTabs: useVerticalTabBar,
+      verticalTabsLeft: tabBarPosition === 'left',
+      verticalTabsRight: tabBarPosition === 'right',
+      bottomTabs: isElectron && tabBarPosition === 'bottom',
+      topTabs: (isElectron && tabBarPosition === 'top') || showTabletTabStrip,
+      customTitleBar: hasCustomTitleBar,
+      watchSideNavOverlay: useWatchSideNavOverlay,
+      watchSideNavTransitionDisabled
+    }, `tabBar-${tabBarPosition}`]"
+    :style="appStyle"
   >
-    <TopNav
+    <TabBar
       :inert="isAnyPromptOpen"
     />
+    <WindowControls
+      v-if="hasLinuxWindowControls"
+      @insets="windowControlsInsets = $event"
+    />
+    <CapacitorTabletTabBar
+      v-if="isCapacitor && store.getters.getTabsEnabled"
+      :inert="isAnyPromptOpen"
+      @request-exit="requestAndroidAppExit"
+    />
+    <TopNav
+      ref="topNav"
+      :inert="isAnyPromptOpen"
+      @request-android-exit="requestAndroidAppExit"
+      @pointerdown.capture="startPageSwipe"
+      @pointermove.capture="movePageSwipe"
+      @pointerup.capture="finishPageSwipe"
+      @pointercancel.capture="cancelPageSwipe"
+      @click.capture="suppressPageSwipeClick"
+    />
     <SideNav
+      :inert="isAnyPromptOpen"
+      :force-expanded="useWatchSideNavOverlay"
+      :data-watch-return-expanded="sideNavOpenBeforeWatchOverlay"
+    />
+    <Transition name="fade">
+      <button
+        v-if="useWatchSideNavOverlay && isSideNavOpen"
+        type="button"
+        class="sideNavBackdrop"
+        :inert="isAnyPromptOpen"
+        :aria-label="t('Close')"
+        @click="closeSideNav"
+      />
+    </Transition>
+    <!-- Fixed mini players must stay outside the route's query container. -->
+    <div
+      id="cross-tab-mini-player-layer"
+      class="crossTabMiniPlayerLayer"
       :inert="isAnyPromptOpen"
     />
     <FtFlexBox
@@ -20,18 +71,17 @@
       role="main"
       :inert="isAnyPromptOpen"
     >
-      <div
-        v-if="showUpdatesBanner"
-        class="banner-wrapper"
-      >
-        <FtNotificationBanner
-          class="banner"
-          :message="updateBannerMessage"
-          role="link"
-          @click="handleUpdateBannerClick"
+      <template v-if="usesLogicalTabs">
+        <TabContent
+          v-for="tab in tabContainers"
+          :key="tab.id"
+          :tab="tab"
+          :page-swipe="pageSwipe"
+          :prewarm="pageSwipeNeighborIds.includes(tab.id)"
         />
-      </div>
+      </template>
       <RouterView
+        v-else
         v-slot="{ Component }"
         class="routerView"
       >
@@ -43,52 +93,165 @@
         </Transition>
       </RouterView>
     </FtFlexBox>
+    <!-- Leave keyframes avoid staging classes that restyle the settings subtree. -->
+    <Transition
+      name="settings-window"
+      :css="!settingsWindowMorphing"
+      leave-from-class=""
+      leave-to-class=""
+      v-bind="settingsWindowMorphing ? getUtilityWindowMorphHooks() : {}"
+    >
+      <KeepAlive>
+        <SettingsWindow
+          v-if="settingsWindowOpen"
+          :hardware-keyboard-attached="hardwareKeyboardAttached"
+          :search-target="settingsSearchTarget"
+          @search-target-opened="clearSettingsSearchTarget"
+        />
+      </KeepAlive>
+    </Transition>
+    <FtTutorialOverlay
+      v-if="showTutorial"
+      @close="completeTutorial"
+    />
+    <FtCommandPalette
+      v-if="commandPaletteOpen"
+      :commands="commandPaletteCommands"
+      :video-sources="commandPaletteVideoSources"
+      :show-shortcuts="hardwareKeyboardAttached"
+      @close="closeCommandPalette"
+    />
+    <TabOrganizer
+      v-if="tabOrganizerOpen"
+      @close="closeTabOrganizer"
+    />
+    <SubscriptionRefreshErrors />
+    <DigitalWellbeing />
     <FtPrompt
       v-if="showReleaseNotes"
       theme="readable-width"
-      @click="toggleShowReleaseNotes"
+      @click="closeReleaseNotes"
     >
       <template #label="{ labelId }">
         <h1
           :id="labelId"
           class="changeLogTitle"
-          dir="ltr"
         >
           {{ changeLogTitle }}
         </h1>
       </template>
-      <bdo
-        v-safer-html.lenient="updateChangelog"
+      <div
+        ref="changeLogScroller"
+        v-overlay-scrollbars
         class="changeLogText"
         dir="ltr"
         lang="en"
-      />
+      >
+        <div
+          ref="changeLogContent"
+          v-safer-html.lenient="updateChangelog"
+          class="changeLogContent"
+        />
+      </div>
+      <p
+        v-if="packageManagerUpdate"
+        class="changeLogUpdateCommand"
+      >
+        {{ t('Update With Package Manager', { packageManager: packageManagerUpdate.packageManager }) }}
+        <code dir="ltr">{{ packageManagerUpdate.command }}</code>
+      </p>
       <FtFlexBox>
         <FtButton
+          v-if="packageManagerUpdate"
+          :label="t('Copy')"
+          :icon="['fas', 'copy']"
+          @click="copyPackageManagerUpdateCommand"
+        />
+        <FtButton
+          v-else
           :label="t('Download From Site')"
+          :icon="['fas', 'download']"
           @click="openDownloadsPage"
         />
         <FtButton
+          :label="t('About.Donate')"
+          :icon="['fas', 'heart']"
+          variant="tonal"
+          @click="openDonatePage"
+        />
+        <FtButton
           :label="t('Close')"
+          :icon="['fas', 'xmark']"
           :text-color="null"
           :background-color="null"
-          @click="toggleShowReleaseNotes"
+          @click="closeReleaseNotes"
         />
       </FtFlexBox>
     </FtPrompt>
     <FtPrompt
       v-if="showExternalLinkOpeningPrompt"
+      autosize
       :label="t('Are you sure you want to open this link?')"
       :extra-labels="[lastExternalLinkToBeOpened]"
       :option-names="externalLinkOpeningPromptNames"
       :option-values="EXTERNAL_LINK_OPENING_PROMPT_VALUES"
+      :option-icons="[['fas', 'arrow-up-right-from-square'], ['fas', 'xmark']]"
+      :option-variants="['tonal']"
       @click="handleExternalLinkOpeningPromptAnswer"
+    />
+    <FtPrompt
+      v-if="multipleTabsActionPrompt != null"
+      autosize
+      :label="multipleTabsActionPromptTitle"
+      :extra-labels="[multipleTabsActionPromptMessage, t('Confirmations.Settings Hint')]"
+      :option-names="multipleTabsActionPromptNames"
+      :option-values="MULTIPLE_TABS_ACTION_PROMPT_VALUES"
+      :option-icons="multipleTabsActionPromptIcons"
+      @click="handleMultipleTabsActionPromptAnswer"
+    />
+    <FtPrompt
+      v-if="libraryNotice"
+      :key="libraryNotices[0]"
+      autosize
+      :label="libraryNotice.title"
+      @click="dismissLibraryNotice"
+    >
+      <p class="libraryNoticeText">
+        <strong>{{ libraryNotice.message }}</strong>
+      </p>
+      <p class="libraryNoticeText">
+        {{ libraryNotice.detail }}
+      </p>
+      <FtFlexBox>
+        <FtButton
+          :label="t('Ok')"
+          :icon="['fas', 'check']"
+          @click="dismissLibraryNotice"
+        />
+      </FtFlexBox>
+    </FtPrompt>
+    <FtPrompt
+      v-if="showAndroidExitPrompt"
+      autosize
+      is-first-option-destructive
+      :label="t('Close Confirmation.Title')"
+      :extra-labels="[t('Close Confirmation.Message')]"
+      :option-names="androidExitPromptNames"
+      :option-values="ANDROID_EXIT_PROMPT_VALUES"
+      :option-icons="[['fas', 'power-off'], ['fas', 'xmark'], ['fas', 'eye-slash']]"
+      @click="handleAndroidExitPromptAnswer"
     />
     <FtSearchFilters
       v-if="showSearchFilters"
+      :key="presentedTabId"
     />
-    <FtKeyboardShortcutPrompt
-      v-if="isKeyboardShortcutPromptShown"
+    <SharedYoutubeLinkPrompt
+      v-if="sharedYoutubeLink"
+      :key="sharedYoutubeLink.id"
+      :url="sharedYoutubeLink.url"
+      :video-id="sharedYoutubeLink.videoId"
+      @open="openSharedYoutubeLink"
+      @close="sharedYoutubeLink = null"
     />
     <FtPlaylistAddVideoPrompt
       v-if="showAddToPlaylistPrompt"
@@ -96,66 +259,838 @@
     <FtCreatePlaylistPrompt
       v-if="showCreatePlaylistPrompt"
     />
+    <FtContextMenu />
+    <Teleport :to="mobileContextMenuTarget">
+      <Transition
+        :css="false"
+        @enter="enterMobileContextSheet"
+        @leave="leaveMobileContextSheet"
+        @after-leave="releaseMobileContextSheet"
+      >
+        <div
+          v-if="mobileContextLink || mobileContextActions"
+          class="mobileLinkActionsBackdrop"
+          @pointerdown.stop
+          @touchstart.stop
+          @touchend.stop
+          @dblclick.stop
+          @click.stop.self="closeMobileLinkActions"
+          @keydown.esc.stop="backMobileContextMenu"
+        >
+          <section
+            ref="mobileLinkActionsRef"
+            class="mobileLinkActions"
+            data-bottom-sheet
+            role="menu"
+            :aria-label="mobileContextMenuTitle"
+            tabindex="-1"
+            @pointerdown="startMobileContextDrag"
+            @touchmove="moveMobileContextTouch"
+            @scroll.capture="updateMobileContextScrollAction"
+            @click.capture="filterMobileContextClick"
+            @keydown.esc.stop="backMobileContextMenu"
+            @keydown="handleMobileContextKeydown"
+            @keydown.space.stop
+          >
+            <div
+              class="bottomSheetHandle"
+              aria-hidden="true"
+            />
+            <div class="mobileLinkActionsHeader">
+              <button
+                v-if="mobileContextMenuStack.length > 1"
+                type="button"
+                class="mobileLinkActionsBack"
+                @click="backMobileContextMenu"
+              >
+                <FtIcon
+                  :icon="['fas', 'arrow-left']"
+                  aria-hidden="true"
+                />
+                {{ t('Back') }}
+              </button>
+              <strong
+                v-if="mobileContextMenuStack.length === 1"
+                dir="auto"
+              >{{ mobileContextMenuTitle }}</strong>
+            </div>
+            <div
+              ref="mobileLinkActionsScrollRef"
+              v-overlay-scrollbars
+              class="mobileLinkActionsScroll"
+            >
+              <div
+                ref="mobileLinkActionsContentRef"
+                class="mobileLinkActionsContent"
+              >
+                <div
+                  v-if="mobileContextQuickActionGroups.length"
+                  class="mobileLinkQuickActionGroups"
+                >
+                  <div
+                    v-for="group in mobileContextQuickActionGroups"
+                    :key="group.className"
+                    class="mobileLinkQuickActions"
+                    :class="group.className"
+                  >
+                    <div
+                      v-for="(row, rowIndex) in group.rows"
+                      :key="rowIndex"
+                      class="mobileLinkQuickActionRow"
+                    >
+                      <button
+                        v-for="action in row"
+                        :key="action.label"
+                        type="button"
+                        :role="action.pressed === undefined ? 'menuitem' : 'menuitemcheckbox'"
+                        :aria-label="quickActionAccessibleName(action)"
+                        :aria-checked="action.pressed"
+                        :disabled="action.enabled === false"
+                        @click="runMobileContextAction(action)"
+                      >
+                        <FtIcon
+                          class="mobileLinkQuickActionIcon"
+                          :icon="action.icon"
+                          aria-hidden="true"
+                        />
+                        <span class="mobileLinkQuickActionLabel">{{ action.shortLabel ?? action.label }}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <template
+                  v-for="(action, index) in mobileContextMenuRows"
+                  :key="`${index}:${action.label}`"
+                >
+                  <div
+                    v-if="action.type === 'separator'"
+                    class="mobileLinkActionsSeparator"
+                    role="separator"
+                  />
+                  <button
+                    v-else
+                    type="button"
+                    :role="action.checked === undefined ? 'menuitem' : 'menuitemcheckbox'"
+                    :aria-checked="action.checked"
+                    :aria-label="action.label"
+                    :disabled="action.enabled === false"
+                    :aria-haspopup="action.submenu ? 'menu' : undefined"
+                    @click="runMobileContextAction(action)"
+                  >
+                    <FtIcon
+                      v-if="action.icon"
+                      :icon="action.icon"
+                      aria-hidden="true"
+                    />
+                    <span
+                      v-else
+                      aria-hidden="true"
+                    />
+                    <span>{{ action.label }}</span>
+                    <span
+                      v-if="action.submenu"
+                      class="mobileLinkSubmenuArrow"
+                      aria-hidden="true"
+                    />
+                  </button>
+                </template>
+                <button
+                  v-if="mobileContextLink"
+                  type="button"
+                  role="menuitem"
+                  @click="openMobileContextLink(false)"
+                >
+                  <FtIcon :icon="['fas', 'link']" />
+                  {{ t('Share.Open Link') }}
+                </button>
+                <button
+                  v-if="mobileContextLinkCanOpenInTab"
+                  type="button"
+                  role="menuitem"
+                  @click="openMobileContextLink(true)"
+                >
+                  <FtIcon :icon="['fas', 'arrow-up-right-from-square']" />
+                  {{ t('Context Menu.Open in a New Tab') }}
+                </button>
+                <button
+                  v-if="mobileContextLinkCopyUrl"
+                  type="button"
+                  role="menuitem"
+                  @click="copyMobileContextLink"
+                >
+                  <FtIcon :icon="['fas', 'copy']" />
+                  {{ t('Share.Copy Link') }}
+                </button>
+                <button
+                  v-if="mobileContextLinkCopyUrl"
+                  type="button"
+                  role="menuitem"
+                  @click="shareMobileContextLink"
+                >
+                  <FtIcon
+                    :icon="['fas', 'share-alt']"
+                    aria-hidden="true"
+                  />
+                  {{ t('Share.Share Link') }}
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </Transition>
+    </Teleport>
     <FtToast />
     <FtProgressBar
       v-if="showProgressBar"
+      :progress="displayedProgressBarPercentage"
     />
+    <div
+      v-if="findbarVisible"
+      class="findbar"
+      role="search"
+      @keydown.stop="handleFindbarNavigationShortcut"
+    >
+      <FtIcon
+        :icon="['fas', 'search']"
+        class="findbarIcon"
+        aria-hidden="true"
+      />
+      <input
+        ref="findbarInputRef"
+        v-model="findbarQuery"
+        class="findbarInput"
+        type="search"
+        :placeholder="t('Find in page')"
+        :aria-label="t('Find in page')"
+        @input="findInPage"
+        @keydown.enter.prevent="findInPage($event.shiftKey)"
+        @keydown.esc.prevent="closeFindbar"
+      >
+      <span
+        class="findbarStatus"
+        aria-live="polite"
+      >
+        {{ findbarStatus }}
+      </span>
+      <button
+        type="button"
+        class="findbarButton"
+        :aria-label="t('Previous match')"
+        :title="t('Previous match')"
+        @click="findInPage(true)"
+      >
+        <FtIcon
+          :icon="['fas', 'angle-up']"
+          aria-hidden="true"
+        />
+      </button>
+      <button
+        type="button"
+        class="findbarButton"
+        :aria-label="t('Next match')"
+        :title="t('Next match')"
+        @click="findInPage(false)"
+      >
+        <FtIcon
+          :icon="['fas', 'angle-down']"
+          aria-hidden="true"
+        />
+      </button>
+      <button
+        type="button"
+        class="findbarButton"
+        :aria-label="t('Close find bar')"
+        :title="t('Close')"
+        @click="closeFindbar"
+      >
+        <FtIcon
+          :icon="['fas', 'xmark']"
+          aria-hidden="true"
+        />
+      </button>
+    </div>
+    <div
+      v-if="tabSwitcherVisible"
+      class="tabSwitcherOverlay"
+      data-tab-preview-overlay
+      data-tab-preview-preserve-visibility
+      @mousedown.prevent
+      @wheel.prevent="handleTabSwitcherWheel"
+    >
+      <div
+        ref="tabSwitcherRef"
+        v-overlay-scrollbars
+        class="tabSwitcher"
+        :class="{
+          pointerActive: tabSwitcherPointerActive,
+          noPreviews: !showTabPreviews
+        }"
+        role="listbox"
+        :aria-label="t('KeyboardShortcutPrompt.Tab Switcher')"
+        :aria-activedescendant="tabSwitcherSelectedTabId"
+        @pointermove="activateTabSwitcherPointer"
+        @pointerleave="clearTabSwitcherSelection"
+      >
+        <button
+          v-for="(tab, index) in tabSwitcherTabs"
+          :id="`tab-switcher-option-${tab.id}`"
+          :key="tab.id"
+          type="button"
+          class="tabSwitcherItem"
+          :class="{ selected: index === tabSwitcherSelectedIndex }"
+          :style="getTabSwitcherItemStyle(tab)"
+          role="option"
+          :aria-selected="index === tabSwitcherSelectedIndex"
+          @pointermove="setTabSwitcherSelectedIndex(index)"
+          @focus="setTabSwitcherSelectedIndex(index)"
+          @click="commitTabSwitcherSelection(index)"
+        >
+          <span
+            v-if="showTabPreviews"
+            class="tabSwitcherPreview"
+          >
+            <FtRetryImage
+              v-if="getUsableTabSwitcherPreviewUrl(tab)"
+              :src="tabSwitcherPreviewUrls[tab.id]"
+              :alt="`${formatTabTitle(tab.title)} preview`"
+              loading="lazy"
+              decoding="async"
+              draggable="false"
+              @error="handleTabSwitcherPreviewError(tab)"
+            />
+            <FtRetryImage
+              v-else-if="!tabSwitcherPreviewPending[tab.id] && getUsableTabSwitcherAvatarUrl(tab)"
+              :fallback-icon="getTabPageIcon(tab) || ['fas', 'display']"
+              :src="getUsableTabSwitcherAvatarUrl(tab)"
+              :alt="`${formatTabTitle(tab.title)} preview`"
+              class="tabSwitcherPreviewAvatar"
+              loading="lazy"
+              decoding="async"
+              draggable="false"
+              @error="handleTabSwitcherAvatarError(tab)"
+            />
+            <span
+              v-else-if="!tabSwitcherPreviewPending[tab.id]"
+              class="tabSwitcherPreviewFallback"
+              aria-hidden="true"
+            >
+              <FtIcon
+                :icon="getTabPageIcon(tab) || ['fas', 'display']"
+                class="tabSwitcherFallbackIcon"
+              />
+            </span>
+          </span>
+          <span class="tabSwitcherTitle">
+            <FtRetryImage
+              v-if="showTabIcons && getUsableTabSwitcherAvatarUrl(tab)"
+              :fallback-icon="getTabPageIcon(tab) || ['fas', 'display']"
+              :src="getUsableTabSwitcherAvatarUrl(tab)"
+              class="tabSwitcherTitleAvatar"
+              alt=""
+              loading="lazy"
+              decoding="async"
+              draggable="false"
+              @error="handleTabSwitcherAvatarError(tab)"
+            />
+            <FtIcon
+              v-else-if="showTabIcons && getTabPageIcon(tab)"
+              :icon="getTabPageIcon(tab)"
+              class="tabSwitcherTitleIcon"
+              aria-hidden="true"
+            />
+            <span class="tabSwitcherTitleText">
+              {{ formatTabTitle(tab.title) }}
+            </span>
+          </span>
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { marked } from 'marked'
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useBottomSheetDismiss } from './composables/useBottomSheetDismiss'
+import { OPEN_MOBILE_CONTEXT_MENU_EVENT } from './helpers/buttonMenu'
+import { installIosContextMenu } from './helpers/iosContextMenu'
+import '@fontsource-variable/geist'
+import '@fontsource-variable/google-sans'
+import '@fontsource-variable/figtree'
+import '@fontsource-variable/source-sans-3'
+import '@fontsource-variable/ibm-plex-sans'
+import '@fontsource-variable/inter'
+import '@fontsource-variable/manrope'
+import '@fontsource-variable/plus-jakarta-sans'
+import FtRetryImage from './components/FtRetryImage.vue'
+import { initializeCapacitorYtDlp, ytDlp } from './helpers/ytDlp'
+import { managedToolErrorMessage } from './helpers/managedToolErrors'
+import { playDownloadedFile, refreshDownloadRecords } from './helpers/downloadPlayback'
+import { supportsYtDlp } from './helpers/ytDlpCapabilities'
+import { setAndroidAppActive, setAndroidAppVisible } from './helpers/appVisibility.js'
+import { initializeShimmerVisibility } from './helpers/shimmerVisibility.js'
+import { createAppShortcuts, getAppShortcutPath } from './helpers/appShortcuts'
+import { getHomeWidgetPage } from './helpers/homeWidgetData'
+import { syncContinueWatchingWidget } from './helpers/homeWidgets'
+import { AppShortcuts } from '@capawesome/capacitor-app-shortcuts'
+import { playbackScreenWake } from './helpers/playbackScreenWake'
+import { FtIcon } from '@opentubex/icons'
+import { App as CapacitorApp } from '@capacitor/app'
+import { Capacitor, SystemBars, SystemBarsStyle } from '@capacitor/core'
+import { Browser } from '@capacitor/browser'
+import { clampOverlayScrollTop, restoreOverlayScrollTop } from './helpers/overlayScrollbars'
+import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, unref, useId, useTemplateRef, watch } from 'vue'
+import { useScrollClamp } from './composables/useScrollClamp'
+import { usePhoneLayout } from './composables/usePhoneLayout'
+import { useTitleBarOverlay } from './composables/useTitleBarOverlay'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
+import { tmWithFallback } from './i18n/index'
+import { routerKey, useRoute, useRouter } from 'vue-router'
 
 import FtFlexBox from './components/ft-flex-box/ft-flex-box.vue'
 import TopNav from './components/TopNav/TopNav.vue'
 import SideNav from './components/SideNav/SideNav.vue'
-import FtNotificationBanner from './components/FtNotificationBanner/FtNotificationBanner.vue'
+import TabBar from './components/TabBar/TabBar.vue'
+import WindowControls from './components/WindowControls/WindowControls.vue'
+import CapacitorTabletTabBar from './components/TabBar/CapacitorTabletTabBar.vue'
+import TabContent from './components/TabContent/TabContent.vue'
 import FtPrompt from './components/FtPrompt/FtPrompt.vue'
+import SharedYoutubeLinkPrompt from './components/SharedYoutubeLinkPrompt/SharedYoutubeLinkPrompt.vue'
+import { initializeAndroidIncomingShare } from './helpers/androidIncomingShare'
+import { extractSharedMediaLink, extractSharedYoutubeLink } from './helpers/sharedYoutubeLink'
+import { shouldOpenExternalMediaUrl } from './helpers/externalMediaUrl'
+import SubscriptionRefreshErrors from './components/SubscriptionRefreshErrors.vue'
+import DigitalWellbeing from './components/DigitalWellbeing/DigitalWellbeing.vue'
 import FtButton from './components/FtButton/FtButton.vue'
 import FtToast from './components/FtToast/FtToast.vue'
+import { initializeNetworkRecovery } from './helpers/networkRecovery'
 import FtProgressBar from './components/FtProgressBar/FtProgressBar.vue'
-import FtPlaylistAddVideoPrompt from './components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue'
-import FtCreatePlaylistPrompt from './components/FtCreatePlaylistPrompt/FtCreatePlaylistPrompt.vue'
-import FtKeyboardShortcutPrompt from './components/FtKeyboardShortcutPrompt/FtKeyboardShortcutPrompt.vue'
-import FtSearchFilters from './components/FtSearchFilters/FtSearchFilters.vue'
+import FtContextMenu from './components/FtContextMenu/FtContextMenu.vue'
+import { lockBodyScroll, unlockBodyScroll } from './components/FtPrompt/scrollLock'
 import { vSaferHtml } from './directives/vSaferHtml.js'
 
 import store from './store/index'
+import { isSyncServerOidcCallbackUrl } from './helpers/sync-server-oidc'
+import { MATERIAL_SYSTEM_SEED, MATERIAL_THEME_VALUES, normalizeSystemAccentColor } from '../materialTheme.js'
+import { SIGNAL_THEME_VALUES } from '../signalTheme.js'
+import { androidDynamicColors, desktopSystemAccentColor, getAndroidDynamicColors, onAndroidDynamicColorsChanged } from './helpers/dynamicColors'
+import {
+  exitAndroidApp,
+  getAndroidHardwareKeyboardState,
+  isAndroidLauncherReturnInProgress,
+  setAndroidPictureInPictureDocumentState,
+  setAndroidSystemBarsBackground
+} from './helpers/androidUi'
+import {
+  applyThemeToDocument,
+  getThemeBackground,
+  handleCustomThemeUpdated,
+  loadCustomThemes,
+} from './helpers/customTheme'
+import { repairSystemThemeSettings } from './helpers/customThemeSync'
 
 import packageDetails from '../../package.json'
-import { openExternalLink, openInternalPath, showToast } from './helpers/utils'
+import { MULTIPLE_TABS_CONFIRM_THRESHOLD, KeyboardShortcuts } from '../constants'
+import { updateTrayIcon } from './helpers/trayIcon'
+import { resolveBaseTheme, resolveSystemThemeSettings } from '../appearanceSettings'
+import { calculateColorLuminance, resolveColor } from './helpers/colors'
+import { matchesKeyboardShortcut } from './helpers/keyboardShortcuts'
+import { hasVisibleGamepadLayer, initializeGamepadNavigation } from './helpers/gamepadNavigation'
+import { initializeAndroidBack } from './helpers/androidBack'
+import { getAndroidBackPlayer, getAndroidBackSheet } from './helpers/androidBackGesture'
+import { createAndroidBackDialogPreview } from './helpers/androidBackDialog'
+import { getSettingsWindowIconButton, getUtilityWindowCloseKeyframes, getUtilityWindowMorphHooks } from './helpers/utilityWindowMorph'
+import { keyboardEventInitFromShortcut, OPEN_COMMAND_PALETTE_EVENT } from './helpers/commandPalette'
+import { createCommandPaletteRegistry } from './helpers/commandPaletteRegistry'
+import {
+  resolveExternalLinkAction,
+  resolveMobileContextLinkCopyUrl,
+} from './helpers/mobileLinkActions'
+import { startProgressBarOperation } from './helpers/progressBar'
+import { initializePlatformInfo, isLinuxWayland, supportsAutoPictureInPictureMinimize } from './helpers/platform'
+import { cacheStartupAppearance, revealStartupSplash } from './helpers/startupSplash'
+import { mirrorAppState } from './helpers/rootClasses'
+import {
+  shouldShowProgressStartToast,
+  shouldUseProgressToast,
+} from './helpers/progressPresentation'
+import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog, scheduleUpdateChecks } from './helpers/releaseUpdates'
+import { copyToClipboard, isUnloadedBackgroundTabClick, openExternalLink, openInExternalPlayer, openInternalPath, shareLink, showToast } from './helpers/utils'
+import { getChannelLinkDetails, getChannelLinkMenuItems } from './helpers/channel-context-menu'
+import { initializeCapacitorLiveReminderActions } from './helpers/liveReminders'
+import { showInAppNotification } from './helpers/notificationHistory'
+import {
+  addAndroidMediaSessionActionListener,
+  shouldPauseAndroidPlaybackOnAppStateChange,
+} from './helpers/androidMediaSession'
+import { classifyRequestFailure } from './helpers/api/requestDiagnostics'
+import { useSubscriptionAutoRefresh } from './composables/useSubscriptionAutoRefresh'
+import { useRssFeedAutoRefresh } from './composables/useRssFeedAutoRefresh'
 import { translateWindowTitle } from './helpers/strings'
-import { loadLocale } from './i18n/index'
-import { getLocalClip } from './helpers/api/local.js'
-import { getClipInvidious } from './helpers/api/invidious.js'
+import { formatTabTitle } from './tabs/tabTitle'
+import { normalizeScrollbarThumbWidth } from './constants/scrollbar'
+import { getAppFontFamily } from './helpers/appFont'
+import { canMarkHistoryEntryAsWatched } from './helpers/history'
+import { setupPhoneViewport } from './helpers/phoneViewport'
+import { createCapacitorUiScale } from './helpers/capacitorUiScale'
+import { usesCapacitorTabletLayout } from './helpers/capacitorLayout'
+import { findSwipeTab, shouldFinishPageSwipe } from './helpers/capacitorPageSwipe'
+import { getTabAccentColor } from './constants/tabColors'
+import { getThumbnailListStyles } from './constants/thumbnailSize'
+import {
+  getNextTabBarPosition,
+  isVerticalTabBarPosition,
+  normalizeTabBarPosition
+} from './constants/tabBarPosition'
+import {
+  getLastUsedVersion,
+  getTutorialAudience,
+  markTutorialCompleted,
+  setLastUsedVersion,
+  setTutorialAudience,
+} from './helpers/tutorialState'
+import { dismissAutoSyncNotice, shouldShowAutoSyncNotice, showAutoSyncNoticeOnce } from './helpers/sync-auto-sync-notice'
+import { invalidateAllYtDlpPlaybackSources } from './helpers/player/ytDlpPlayback'
+import { getTabNavigationService } from './tabs/TabNavigationService'
+import { initializeCapacitorTabPreviews } from './tabs/capacitorTabPreviews'
+import { initializeCapacitorTabAvatars } from './tabs/capacitorTabAvatars'
+import { initializeCapacitorTabService } from './tabs/CapacitorTabService'
+import { tabMediaCoordinator } from './tabs/TabMediaCoordinator'
+import { tabRuntimeRegistry } from './tabs/TabRuntimeRegistry'
+import { getTabAvatarUrl, getTabPageIcon, getTabPreviewFallbackUrl } from './tabs/tabPreview'
+import { preloadResolvedRoute, preloadUtilityRoutes } from './router/index'
+import { installRoutePreloadIntent } from './helpers/routePreloadIntent'
+import { getTabsKeptLoaded } from './tabs/TabResidency'
+import { initializeCapacitorPullToRefresh } from './helpers/capacitorPullToRefresh'
+import { getWebViewHeapStatistics, startMemoryPressureMonitor } from './helpers/memoryPressure'
+import { collapseSeparators } from './helpers/menuSeparators'
+
+const SettingsWindow = defineAsyncComponent(() => import('./views/Settings/Settings.vue'))
+const FtPlaylistAddVideoPrompt = defineAsyncComponent(() => import('./components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue'))
+const FtCreatePlaylistPrompt = defineAsyncComponent(() => import('./components/FtCreatePlaylistPrompt/FtCreatePlaylistPrompt.vue'))
+const FtSearchFilters = defineAsyncComponent(() => import('./components/FtSearchFilters/FtSearchFilters.vue'))
+const FtTutorialOverlay = defineAsyncComponent(() => import('./components/FtTutorialOverlay/FtTutorialOverlay.vue'))
+const FtCommandPalette = defineAsyncComponent(() => import('./components/FtCommandPalette/FtCommandPalette.vue'))
+const TabOrganizer = defineAsyncComponent(() => import('./components/TabOrganizer/TabOrganizer.vue'))
+const OPEN_TAB_ORGANIZER_EVENT = 'opentubex:open-tab-organizer'
 
 const route = useRoute()
 const router = useRouter()
+const availableRoutePaths = new Set(router.getRoutes().map(candidate => candidate.path))
+const isElectron = process.env.IS_ELECTRON
+const isCapacitor = process.env.IS_CAPACITOR
+const usesLogicalTabs = isElectron || isCapacitor
+const navigation = usesLogicalTabs ? getTabNavigationService() : null
+const capacitorTabService = isCapacitor
+  ? initializeCapacitorTabService(router, store, navigation)
+  : null
+if (usesLogicalTabs) {
+  provide(routerKey, navigation.createPresentedRouterFacade())
+}
 const { locale, t } = useI18n()
+initializePlatformInfo()
 
-/** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
-const backendPreference = computed(() => store.getters.getBackendPreference)
+const tabContainers = computed(() => {
+  return store.getters.getTabContainerIds
+    .map(tabId => store.getters.getTabById(tabId))
+    .filter(Boolean)
+})
+const activeTabId = computed(() => store.getters.getActiveTabId)
+const presentedTabId = computed(() => store.getters.getPresentedTabId)
+const selectionRevision = computed(() => store.state.tabs.selectionRevision)
+const pageSwipeNeighborIds = computed(() => {
+  if (!isCapacitor || activeTabId.value !== presentedTabId.value) return []
+  return [-1, 1]
+    .map(direction => findSwipeTab(store.getters.getTabs, presentedTabId.value, direction)?.id)
+    .filter(Boolean)
+})
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const backendFallback = computed(() => store.getters.getBackendFallback)
+const topNav = useTemplateRef('topNav')
+const organizerSwipeActive = ref(false)
+const pageSwipe = shallowRef(null)
+let pageSwipePointer = null
+let pageSwipeClickPointerId = null
+let pageSwipeClickTimeout = null
+
+function clearPageSwipeClick() {
+  window.clearTimeout(pageSwipeClickTimeout)
+  pageSwipeClickTimeout = null
+  pageSwipeClickPointerId = null
+}
+
+function startPageSwipe(event) {
+  if (event.isPrimary) clearPageSwipeClick()
+  if (!isCapacitor || event.pointerType !== 'touch' || !event.isPrimary ||
+      pageSwipe.value || organizerSwipeActive.value || isAnyPromptOpen.value ||
+      activeTabId.value !== presentedTabId.value ||
+      !event.target.closest('.topNavInner') ||
+      event.target.closest('input, textarea, select, [contenteditable], [role="dialog"], [role="menu"], .dropdownLayer, .ft-input-component .options')) return
+
+  const width = document.querySelector('.app > .routerView')?.getBoundingClientRect().width
+  if (!width) return
+  pageSwipePointer = {
+    id: event.pointerId,
+    fromId: presentedTabId.value,
+    x: event.clientX,
+    y: event.clientY,
+    time: event.timeStamp,
+    width,
+    dragging: false,
+    cancelled: false
+  }
+}
+
+function movePageSwipe(event) {
+  const pointer = pageSwipePointer
+  if (!pointer || pointer.id !== event.pointerId || pointer.cancelled) return
+
+  const distance = event.clientX - pointer.x
+  const verticalDistance = Math.abs(event.clientY - pointer.y)
+  if (!pointer.dragging) {
+    if (Math.max(Math.abs(distance), verticalDistance) < 10) return
+    if (verticalDistance > Math.abs(distance) * 1.2) {
+      const organizer = topNav.value?.organizerSwipe
+      if (event.clientY <= pointer.y || !organizer?.begin()) {
+        pageSwipePointer = null
+        return
+      }
+      pointer.organizer = organizer
+      organizerSwipeActive.value = true
+    } else if (Math.abs(distance) < verticalDistance * 1.2) {
+      return
+    }
+  }
+
+  if (isAnyPromptOpen.value || activeTabId.value !== pointer.fromId || presentedTabId.value !== pointer.fromId) {
+    // Keep tracking the release so cancellation cannot turn a drag into a click.
+    pointer.cancelled = true
+    pageSwipe.value = null
+    if (pointer.organizer) {
+      pointer.organizer.cancel()
+      organizerSwipeActive.value = false
+    }
+    return
+  }
+
+  if (!pointer.dragging) {
+    pointer.dragging = true
+    pageSwipeClickPointerId = event.pointerId
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+  event.preventDefault()
+
+  if (pointer.organizer) {
+    pointer.organizer.update(event.clientY - pointer.y)
+    return
+  }
+
+  const direction = distance < 0 ? 1 : -1
+  const target = findSwipeTab(store.getters.getTabs, pointer.fromId, direction)
+  pageSwipe.value = target
+    ? {
+        fromId: pointer.fromId,
+        toId: target.id,
+        direction,
+        offset: Math.max(-pointer.width, Math.min(pointer.width, distance)),
+        width: pointer.width,
+        scrollTop: window.scrollY,
+        settling: false
+      }
+    : null
+}
+
+function suppressPageSwipeClick(event) {
+  if (event.detail === 0 || event.pointerId !== pageSwipeClickPointerId) return
+  clearPageSwipeClick()
+  event.preventDefault()
+  event.stopPropagation()
+}
+
+async function finishPageSwipe(event, cancelled = false) {
+  const pointer = pageSwipePointer
+  if (!pointer || pointer.id !== event.pointerId) return
+  pageSwipePointer = null
+  // Keep suppression for the click dispatched with pointerup, then expire it
+  // even when capture release or cancellation produces no click.
+  if (pointer.dragging) pageSwipeClickTimeout = window.setTimeout(clearPageSwipeClick, 0)
+  if (pointer.organizer) {
+    try {
+      await pointer.organizer.finish(event.timeStamp - pointer.time, cancelled || pointer.cancelled || isAnyPromptOpen.value || activeTabId.value !== pointer.fromId || presentedTabId.value !== pointer.fromId)
+    } finally {
+      organizerSwipeActive.value = false
+    }
+    return
+  }
+  const swipe = pageSwipe.value
+  if (!swipe) return
+
+  const commit = !cancelled && !isAnyPromptOpen.value && shouldFinishPageSwipe(swipe.offset, swipe.width, event.timeStamp - pointer.time) &&
+    findSwipeTab(store.getters.getTabs, swipe.fromId, swipe.direction)?.id === swipe.toId
+  const reducedMotion = document.documentElement.dataset.reducedMotion === 'reduce'
+  if (!reducedMotion) {
+    // Let a fast drag paint once before starting the release transition.
+    await nextTick()
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+    if (pageSwipe.value !== swipe) return
+  }
+  const settledSwipe = {
+    ...swipe,
+    offset: commit ? Math.sign(swipe.offset) * swipe.width : 0,
+    settling: true
+  }
+  pageSwipe.value = settledSwipe
+  await nextTick()
+  if (!reducedMotion) {
+    const target = document.querySelector('.pageSwipeTo')
+    if (target) {
+      await new Promise(resolve => {
+        const finish = () => {
+          target.removeEventListener('transitionend', onTransition)
+          target.removeEventListener('transitioncancel', onTransition)
+          window.clearTimeout(timeoutId)
+          resolve()
+        }
+        const onTransition = transition => {
+          if (transition.target === target && transition.propertyName === 'left') finish()
+        }
+        target.addEventListener('transitionend', onTransition)
+        target.addEventListener('transitioncancel', onTransition)
+        // Covers the slowest 25% animation-speed setting if WebView skips the event.
+        const timeoutId = window.setTimeout(finish, 1000)
+      })
+    }
+  }
+  if (pageSwipe.value !== settledSwipe) return
+  try {
+    if (commit && !isAnyPromptOpen.value && activeTabId.value === swipe.fromId && presentedTabId.value === swipe.fromId &&
+        findSwipeTab(store.getters.getTabs, swipe.fromId, swipe.direction)?.id === swipe.toId) {
+      await capacitorTabService.activateTab(swipe.toId)
+    }
+  } finally {
+    pageSwipe.value = null
+  }
+}
+
+function cancelPageSwipe(event) {
+  if (event) {
+    finishPageSwipe(event, true)
+    return
+  }
+  clearPageSwipeClick()
+  topNav.value?.organizerSwipe?.cancel()
+  organizerSwipeActive.value = false
+  pageSwipePointer = null
+  pageSwipe.value = null
+}
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const isSideNavOpen = computed(() => store.getters.getIsSideNavOpen)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideLabelsSideBar = computed(() => store.getters.getHideLabelsSideBar)
+const compactNavigationLabels = computed(() => store.getters.getCompactNavigationLabels)
+
+const tabBarPosition = computed(() => isElectron
+  ? normalizeTabBarPosition(store.getters.getTabBarPosition)
+  : 'top')
+const useVerticalTabBar = computed(() => isElectron && isVerticalTabBarPosition(tabBarPosition.value))
+// Fixed when the window is created, so a changed setting waits for a restart.
+const hasCustomTitleBar = isElectron && window.ftElectron.customTitleBar
+// Linux has no native window controls overlay, so the renderer draws them.
+const hasLinuxWindowControls = hasCustomTitleBar && process.platform === 'linux'
+/** @type {import('vue').Ref<{ left: number, right: number } | null>} */
+const windowControlsInsets = ref(null)
+const tabletTabStripQuery = window.matchMedia('(min-width: 768px)')
+const automaticTabletTabStrip = ref(tabletTabStripQuery.matches)
+const capacitorLayoutMode = computed(() => store.getters.getCapacitorLayoutMode)
+const capacitorTabletLayout = computed(() => isCapacitor && (
+  usesCapacitorTabletLayout(capacitorLayoutMode.value, automaticTabletTabStrip.value)
+))
+const showTabletTabStrip = computed(() => capacitorTabletLayout.value && store.getters.getTabsEnabled)
+tabletTabStripQuery.addEventListener('change', handleTabletTabStripChange)
+
+const appStyle = computed(() => {
+  const style = {}
+  if (useVerticalTabBar.value) {
+    style['--vertical-tab-bar-width'] = `${store.getters.getVerticalTabBarWidth}px`
+  }
+  if (showTabletTabStrip.value) style['--top-tab-bar-height'] = '48px'
+  if (windowControlsInsets.value) {
+    style['--title-bar-inset-left'] = `${windowControlsInsets.value.left}px`
+    style['--title-bar-inset-right'] = `${windowControlsInsets.value.right}px`
+    style['--title-bar-controls-height'] = '32px'
+  }
+
+  return Object.keys(style).length > 0 ? style : undefined
+})
+
+function handleTabletTabStripChange(event) {
+  automaticTabletTabStrip.value = event.matches
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const useWatchSideNavOverlay = computed(() => {
+  return store.getters.getHideSideBarOnWatchPages && (route.path.startsWith('/watch/') || route.path === '/external-media')
+})
+
+const sideNavOpenBeforeWatchOverlay = ref(null)
+const watchSideNavTransitionDisabled = ref(false)
+let watchSideNavTransitionFrame = null
+
+watch(useWatchSideNavOverlay, (enabled) => {
+  if (enabled) {
+    disableWatchSideNavTransitionForNextFrame()
+    sideNavOpenBeforeWatchOverlay.value = isSideNavOpen.value
+    closeSideNav()
+  } else if (sideNavOpenBeforeWatchOverlay.value !== null) {
+    // Leaving the overlay brings the sidebar back into normal flow and may
+    // reopen it. Suppress its inline-size transition for the reflow so the
+    // content snaps to its final position instead of sliding in from the right.
+    disableWatchSideNavTransitionForNextFrame()
+
+    if (isSideNavOpen.value !== sideNavOpenBeforeWatchOverlay.value) {
+      store.commit('toggleSideNav')
+    }
+
+    sideNavOpenBeforeWatchOverlay.value = null
+  }
+}, { immediate: true })
+
+function disableWatchSideNavTransitionForNextFrame() {
+  cancelWatchSideNavTransitionReset()
+  watchSideNavTransitionDisabled.value = true
+
+  watchSideNavTransitionFrame = requestAnimationFrame(() => {
+    watchSideNavTransitionFrame = requestAnimationFrame(() => {
+      watchSideNavTransitionDisabled.value = false
+      watchSideNavTransitionFrame = null
+    })
+  })
+}
+
+function cancelWatchSideNavTransitionReset() {
+  if (watchSideNavTransitionFrame !== null) {
+    cancelAnimationFrame(watchSideNavTransitionFrame)
+    watchSideNavTransitionFrame = null
+  }
+}
+
+function closeSideNav() {
+  if (isSideNavOpen.value) {
+    store.commit('toggleSideNav')
+  }
+}
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const isAnyPromptOpen = computed(() => store.getters.isAnyPromptOpen)
+const sharedYoutubeLink = ref(null)
+let sharedYoutubeLinkId = 0
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const showSearchFilters = computed(() => store.getters.getShowSearchFilters)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const isKeyboardShortcutPromptShown = computed(() => store.getters.getIsKeyboardShortcutPromptShown)
+const settingsWindowOpen = computed(() => store.getters.getSettingsWindowOpen)
+const settingsWindowMorphing = computed(() => store.getters.getSettingsWindowMorphing)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const showAddToPlaylistPrompt = computed(() => store.getters.getShowAddToPlaylistPrompt)
@@ -163,192 +1098,2802 @@ const showAddToPlaylistPrompt = computed(() => store.getters.getShowAddToPlaylis
 /** @type {import('vue').ComputedRef<boolean>} */
 const showCreatePlaylistPrompt = computed(() => store.getters.getShowCreatePlaylistPrompt)
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const showProgressBar = computed(() => store.getters.getShowProgressBar)
+/** @type {import('vue').ComputedRef<number[]>} */
+const progressPercentages = computed(() => {
+  const percentages = store.getters.getProgressOperations.map(operation => operation.percentage ?? 0)
+  if (store.getters.getSubscriptionFeedRefreshInProgress) {
+    percentages.unshift(store.getters.getSubscriptionFeedRefreshProgress)
+  }
+  return percentages
+})
+const progressUsesToast = computed(() => {
+  return shouldUseProgressToast(store.getters.getEffectiveShowProgressBarToast)
+})
+const showProgressStartToast = computed(() => {
+  return shouldShowProgressStartToast(store.getters.getEffectiveShowProgressBarToast)
+})
+
+const showProgressBar = computed(() => {
+  return !progressUsesToast.value && progressPercentages.value.length > 0
+})
+// The single bar shows the combined progress of every running operation.
+const displayedProgressBarPercentage = computed(() => {
+  const percentages = progressPercentages.value
+  return percentages.reduce((sum, percentage) => sum + percentage, 0) / Math.max(percentages.length, 1)
+})
 
 const landingPage = computed(() => '/' + store.getters.getLandingPage)
 
 /** @type {import('vue').ComputedRef<string>} */
 const defaultInvidiousInstance = computed(() => store.getters.getDefaultInvidiousInstance)
 
+/** @type {import('vue').ComputedRef<string>} */
+const historyRetentionDays = computed(() => store.getters.getHistoryRetentionDays)
+/** @type {import('vue').ComputedRef<string>} */
+const searchHistoryRetentionDays = computed(() => store.getters.getSearchHistoryRetentionDays)
+
 const dataReady = ref(false)
+// Page-wide and teleported styles read the layout from <html>.
+watch(useTemplateRef('appRoot'), (app, _previous, onCleanup) => {
+  if (app) onCleanup(mirrorAppState(app))
+}, { flush: 'sync' })
+useTitleBarOverlay(() => [dataReady.value, tabBarPosition.value])
+const showTutorial = ref(false)
+const findbarVisible = ref(false)
+const findbarQuery = ref('')
+const findbarMatchIndex = ref(0)
+const findbarMatchCount = ref(0)
+const findbarInputRef = useTemplateRef('findbarInputRef')
+const tabSwitcherVisible = ref(false)
+const tabSwitcherSelectedIndex = ref(-1)
+const tabSwitcherPreviewUrls = ref({})
+const tabSwitcherPreviewPending = ref({})
+const tabSwitcherFailedAvatarUrls = ref({})
+const tabSwitcherFailedPreviewUrls = ref({})
+const tabSwitcherPointerActive = ref(false)
+const tabSwitcherRef = useTemplateRef('tabSwitcherRef')
+const commandPaletteOpen = ref(false)
+const hardwareKeyboardAttached = ref(!isCapacitor)
+provide('hardwareKeyboardAttached', hardwareKeyboardAttached)
+const mobileContextLink = ref(null)
+const mobileContextActions = shallowRef(null)
+const mobileContextMenuTarget = shallowRef(document.fullscreenElement ?? document.body)
+function updateMobileContextMenuTarget() {
+  mobileContextMenuTarget.value = document.fullscreenElement ?? document.body
+}
+document.addEventListener('fullscreenchange', updateMobileContextMenuTarget)
+onBeforeUnmount(() => document.removeEventListener('fullscreenchange', updateMobileContextMenuTarget))
+const mobileContextMenuPath = ref([])
+const mobileContextMenuStack = computed(() => {
+  const stack = [{ label: mobileContextLinkLabel.value, items: unref(mobileContextActions.value?.actions) ?? [] }]
+  for (const label of mobileContextMenuPath.value) {
+    const action = stack.at(-1).items.find(item => item.label === label)
+    if (!action?.submenu) break
+    stack.push({ label: action.label, items: action.submenu })
+  }
+  return stack
+})
+const mobileContextMenuItems = computed(() => mobileContextMenuStack.value.at(-1).items)
+const mobileContextQuickActions = computed(() => mobileContextMenuItems.value.filter(action => action.quickAction))
+const mobileContextThumbnailActions = computed(() => mobileContextMenuStack.value.length === 1
+  ? unref(mobileContextActions.value?.thumbnailActions) ?? []
+  : [])
+// The accessible name keeps the full action and must contain the visible label so voice control can target it.
+function quickActionAccessibleName(action) {
+  return !action.shortLabel || action.label.toLocaleLowerCase().includes(action.shortLabel.toLocaleLowerCase())
+    ? action.label
+    : `${action.shortLabel}, ${action.label}`
+}
+const MOBILE_QUICK_ACTION_COLUMNS = 4
+function balanceQuickActionRows(actions) {
+  const columns = Math.ceil(actions.length / Math.ceil(actions.length / MOBILE_QUICK_ACTION_COLUMNS))
+  return Array.from({ length: Math.ceil(actions.length / columns) }, (_, row) => actions.slice(row * columns, (row + 1) * columns))
+}
+const mobileContextQuickActionGroups = computed(() => [
+  { className: 'mobileLinkShortcutRow', actions: mobileContextQuickActions.value },
+  { className: 'mobileThumbnailActionRow', actions: mobileContextThumbnailActions.value }
+].filter(group => group.actions.length).map(group => ({ className: group.className, rows: balanceQuickActionRows(group.actions) })))
+const mobileContextMenuRows = computed(() => {
+  const rows = mobileContextMenuItems.value.filter(action => !action.quickAction)
+  return collapseSeparators(rows)
+})
+const mobileContextMenuTitle = computed(() => mobileContextMenuStack.value.at(-1).label)
+// The button that opened the sheet gets focus back when it closes.
+let mobileContextTrigger = null
+let mobileContextReturnFocus = null
+/**
+ * Menu buttons bind `aria-expanded` to their own popover, which the sheet
+ * replaces, so report the sheet's state on them while it is open.
+ * @param {HTMLElement | null} trigger
+ * @param {boolean} expanded
+ */
+function setMobileContextTriggerExpanded(trigger, expanded) {
+  if (trigger?.matches('[aria-expanded], [aria-haspopup]')) trigger.setAttribute('aria-expanded', String(expanded))
+}
+async function openMobileContextActions(menu) {
+  if (!mobileContextActions.value) {
+    mobileContextTrigger = menu.trigger ?? null
+    setMobileContextTriggerExpanded(mobileContextTrigger, true)
+  }
+  mobileContextMenuPath.value = []
+  mobileContextLink.value = null
+  mobileContextActions.value = menu
+  await nextTick()
+  mobileLinkActionsRef.value?.focus({ preventScroll: true })
+}
+provide('openMobileContextActions', openMobileContextActions)
+/** @param {CustomEvent} event */
+function handleOpenMobileContextMenu(event) {
+  openMobileContextActions(event.detail)
+}
+const mobileLinkActionsPromptId = useId()
+const mobileLinkActionsRef = useTemplateRef('mobileLinkActionsRef')
+const {
+  startDrag: startMobileContextDrag, moveTouch: moveMobileContextTouch, filterClick: filterMobileContextClick,
+  updateScrollAction: updateMobileContextScrollAction,
+  enter: enterMobileContextSheet, leave: leaveMobileContextSheet
+} = useBottomSheetDismiss(mobileLinkActionsRef, closeMobileLinkActions, {
+  canDismissOnBack: () => mobileContextMenuStack.value.length === 1
+})
+const mobileLinkActionsScrollRef = useTemplateRef('mobileLinkActionsScrollRef')
+const mobileLinkActionsContentRef = useTemplateRef('mobileLinkActionsContentRef')
+watch(mobileLinkActionsContentRef, (content, _, onCleanup) => {
+  if (!content) return
+  const scroller = mobileLinkActionsScrollRef.value
+  const observer = new ResizeObserver(() => clampOverlayScrollTop(scroller, content))
+  observer.observe(content)
+  observer.observe(scroller)
+  onCleanup(() => observer.disconnect())
+})
+watch([mobileContextLink, mobileContextActions, mobileContextMenuPath], async () => {
+  await nextTick()
+  if (mobileLinkActionsScrollRef.value) restoreOverlayScrollTop(mobileLinkActionsScrollRef.value, 0)
+})
+let mobileLinkActionsLocked = false
+const mobileContextLinkLabel = computed(() => {
+  if (mobileContextActions.value) return mobileContextActions.value.title
+  const link = mobileContextLink.value
+  if (!link) return ''
+
+  const itemTitle = link.closest('.ft-list-item')?.querySelector('.h3Title, .playlistTitle')?.textContent
+  return link.dataset.tabTitle?.trim() ||
+    link.getAttribute('aria-label')?.trim() ||
+    link.textContent?.trim() ||
+    itemTitle?.trim() ||
+    link.href
+})
+watch(() => mobileContextMenuStack.value.length, (depth) => {
+  if (mobileContextMenuPath.value.length >= depth) {
+    mobileContextMenuPath.value = mobileContextMenuPath.value.slice(0, depth - 1)
+  }
+})
+const mobileContextLinkCanOpenInTab = computed(() => {
+  if (!store.getters.getTabsEnabled) return false
+  const href = mobileContextLink.value?.href ?? ''
+  return href.startsWith(`${window.location.href.split('#')[0]}#`) ||
+    /^https?:\/\/(?:www\.|m\.)?(?:youtube\.com|youtu\.be)\//.test(href)
+})
+const mobileContextLinkCopyUrl = computed(() => {
+  const href = mobileContextLink.value?.href
+  return href
+    ? resolveMobileContextLinkCopyUrl(href, window.location.href.split('#')[0])
+    : null
+})
+watch(() => mobileContextLink.value !== null || mobileContextActions.value !== null, (isOpen) => {
+  if (isOpen && !mobileLinkActionsLocked) {
+    lockBodyScroll()
+    store.commit('addOpenPrompt', mobileLinkActionsPromptId)
+    mobileLinkActionsLocked = true
+  }
+})
+function releaseMobileContextSheet() {
+  if (mobileContextLink.value || mobileContextActions.value || !mobileLinkActionsLocked) return
+  store.commit('removeOpenPrompt', mobileLinkActionsPromptId)
+  unlockBodyScroll()
+  mobileLinkActionsLocked = false
+  const trigger = mobileContextReturnFocus
+  mobileContextReturnFocus = null
+  // The app stays inert until the prompt is removed. Skip it when an action already moved focus, like into a dialog.
+  nextTick(() => {
+    if (trigger instanceof HTMLElement && trigger.isConnected && (!document.activeElement || document.activeElement === document.body)) {
+      trigger.focus({ preventScroll: true })
+    }
+  })
+}
+const tabOrganizerOpen = ref(false)
+const showAndroidExitPrompt = ref(false)
+const settingsSearchTarget = ref(null)
+watch(() => store.getters.getSettingsWindowSectionRequest, request => {
+  if (request) settingsSearchTarget.value = null
+}, { flush: 'sync' })
+watch(isKeyboardShortcutPromptShown, shown => {
+  if (!shown) return
+  settingsSearchTarget.value = null
+  store.commit('setSettingsWindowSection', null)
+}, { flush: 'sync' })
+if (process.env.IS_ELECTRON) {
+  // The main process adds the credentials to player, caption and image requests.
+  watch(() => [store.getters.getApiServerAuthorization, store.getters.getApiServerUrl], ([authorization, url]) => {
+    if (authorization) {
+      window.ftElectron.setInvidiousAuthorization(authorization, url)
+    } else {
+      window.ftElectron.clearInvidiousAuthorization()
+    }
+  }, { immediate: true, flush: 'sync' })
+}
+function startTabMemoryPressureMonitor(getHeapStatistics, unloadTabs) {
+  return startMemoryPressureMonitor({
+    getHeapStatistics,
+    getSettings: () => ({
+      enabled: store.getters.getAutoUnloadTabs,
+      memoryThreshold: store.getters.getAutoUnloadMemoryThreshold,
+      tabPercentage: store.getters.getAutoUnloadTabPercentage
+    }),
+    unloadTabs,
+    notify: count => showToast({
+      message: t('Tabs Unloaded To Free Memory', { count }, count),
+      icon: ['fas', 'memory']
+    })
+  })
+}
+
+const HISTORY_CLEANUP_INTERVAL = 60 * 60 * 1000
+let historyCleanupTimer = null
+let searchHistoryCleanupTimer = null
+let removeTabsStateListener = null
+let stopMemoryPressureMonitor = null
+let removeReloadRequestListener = null
+let removeConfirmMultipleTabsActionListener = null
+let removeLibraryNoticesListener = null
+let removeOpenUrlListener = null
+let removeRoutePreloadIntent = null
+let removeCapacitorIntegrationListeners = null
+let removeAndroidIncomingShare = null
+let capacitorPullToRefreshSetup = null
+let removeCapacitorTabPreviews = null
+let removeCapacitorTabAvatars = null
+let removeYtDlpBinaryUpdatedListener = null
+let removeAndroidYtDlpSettingsListener = null
+let removeOpenTabOrganizerListener = null
+let removeGamepadNavigation = () => {}
+/** @type {number|null} */
+let utilityRoutePreloadId = null
+let utilityRoutePreloadUsesIdleCallback = false
+
+function isSyncSettingsVisible() {
+  const section = document.querySelector(
+    '.settingsWindow .settingsContent > [data-section="sync"]'
+  )
+  return settingsWindowOpen.value && section !== null && section.getClientRects().length > 0
+}
+
+watch([dataReady, () => store.getters.getSyncServerError], ([ready, error]) => {
+  if (!ready || error === '' || isSyncSettingsVisible()) return
+
+  showToast({
+    message: t('Settings.Sync Settings.Sync failed', { error }),
+    icon: ['fas', 'circle-exclamation'],
+  })
+}, { flush: 'post' })
+
+function scheduleUtilityRoutePreload() {
+  if (utilityRoutePreloadId !== null) {
+    return
+  }
+
+  const preload = () => {
+    utilityRoutePreloadId = null
+    preloadUtilityRoutes()
+  }
+
+  if (typeof window.requestIdleCallback === 'function') {
+    utilityRoutePreloadUsesIdleCallback = true
+    utilityRoutePreloadId = window.requestIdleCallback(preload, { timeout: 2000 })
+  } else {
+    utilityRoutePreloadUsesIdleCallback = false
+    utilityRoutePreloadId = window.setTimeout(preload, 1000)
+  }
+}
+
+function cancelUtilityRoutePreload() {
+  if (utilityRoutePreloadId === null) {
+    return
+  }
+
+  if (utilityRoutePreloadUsesIdleCallback) {
+    window.cancelIdleCallback(utilityRoutePreloadId)
+  } else {
+    clearTimeout(utilityRoutePreloadId)
+  }
+  utilityRoutePreloadId = null
+}
+let tabSwitcherPreviewRequestId = 0
+let tabSwitcherOpenTimer = null
+let tabSwitcherScrollPending = false
+const TAB_SWITCHER_HOLD_DELAY_MS = 150
+let findbarMatches = []
+const findbarStateByTabId = new Map()
+
+const tabSwitcherTabs = computed(() => store.getters.getTabs)
+const showTabIcons = computed(() => store.getters.getShowTabIcons)
+const showTabPreviews = computed(() => store.getters.getShowTabPreviews)
+const findbarStatus = computed(() => {
+  if (findbarQuery.value.trim().length === 0) {
+    return ''
+  }
+
+  if (findbarMatchCount.value === 0) {
+    return t('No matches')
+  }
+
+  return `${findbarMatchIndex.value}/${findbarMatchCount.value}`
+})
+const tabSwitcherSelectedTabId = computed(() => {
+  const tab = tabSwitcherTabs.value[tabSwitcherSelectedIndex.value]
+  return tab ? `tab-switcher-option-${tab.id}` : undefined
+})
+
+/**
+ * Falls back to OpenTubeX-managed external software when the configured system
+ * executables are unavailable. Selected managed executables are updated when
+ * automatic updates are enabled or the user accepts an available update.
+ * @param {('yt-dlp' | 'ffmpeg')[] | null} requestedUpdates
+ */
+async function initializeManagedExternalSoftware(requestedUpdates = null) {
+  if (!supportsYtDlp || ytDlp.isBundledIosRuntime) {
+    return
+  }
+
+  const recovery = initializeNetworkRecovery()
+  // Native tool downloads do not pass through the renderer fetch wrapper.
+  // Wait before displaying download progress or checking for updates.
+  await recovery.run('managed-tools', async () => {})
+
+  const info = await ytDlp.ytDlpGetInfo()
+  if (info === null) {
+    return
+  }
+
+  /** @type {('yt-dlp' | 'ffmpeg' | 'ffprobe')[]} */
+  const missingBinaries = []
+  /** @type {('yt-dlp' | 'ffmpeg')[]} */
+  const binariesToUpdate = []
+
+  if (!info.ytDlp.available) {
+    missingBinaries.push('yt-dlp')
+  }
+  if (!info.ffmpeg.available) {
+    missingBinaries.push('ffmpeg')
+  }
+  if (!info.ffprobe.available) {
+    missingBinaries.push('ffprobe')
+  }
+
+  const updateMode = store.getters.getExternalSoftwareUpdateMode
+  const automaticUpdates = updateMode === 'automatic'
+  let missingManagedBinaries = missingBinaries
+  if (!automaticUpdates && missingBinaries.length > 0) {
+    const managedInfo = await ytDlp.ytDlpGetInfo({ ytDlpSource: 'managed', ffmpegSource: 'managed' })
+    if (managedInfo !== null) {
+      missingManagedBinaries = missingBinaries.filter(binary => {
+        if (binary === 'yt-dlp') {
+          return !managedInfo.ytDlp.available
+        }
+        return binary === 'ffmpeg' ? !managedInfo.ffmpeg.available : !managedInfo.ffprobe.available
+      })
+    }
+  }
+
+  if (missingManagedBinaries.includes('yt-dlp') ||
+    ((isCapacitor || store.getters.getYtDlpSource === 'managed') &&
+      (automaticUpdates || requestedUpdates?.includes('yt-dlp')))) {
+    binariesToUpdate.push('yt-dlp')
+  }
+  if (missingManagedBinaries.includes('ffmpeg') || missingManagedBinaries.includes('ffprobe') ||
+    (!isCapacitor && store.getters.getYtDlpFfmpegSource === 'managed' &&
+      (automaticUpdates || requestedUpdates?.includes('ffmpeg')))) {
+    binariesToUpdate.push('ffmpeg')
+  }
+
+  const settingUpdates = []
+  if (missingBinaries.includes('yt-dlp') && store.getters.getYtDlpSource !== 'managed') {
+    settingUpdates.push(store.dispatch('updateYtDlpSource', 'managed'))
+  }
+  if ((missingBinaries.includes('ffmpeg') || missingBinaries.includes('ffprobe')) &&
+    store.getters.getYtDlpFfmpegSource !== 'managed') {
+    settingUpdates.push(store.dispatch('updateYtDlpFfmpegSource', 'managed'))
+  }
+  await Promise.all(settingUpdates)
+
+  if (binariesToUpdate.length === 0) {
+    if (updateMode === 'ask' && requestedUpdates === null) {
+      await notifyAboutManagedExternalSoftwareUpdates([])
+    }
+    return
+  }
+
+  await recovery.run('managed-tools', async () => {})
+
+  let downloadStarted = missingManagedBinaries.length > 0
+  let toolProgressPercentage = 0
+  let progressOperation = null
+
+  function showToolProgress(message) {
+    const progress = {
+      icon: ['fas', 'download'],
+      message,
+      percentage: toolProgressPercentage,
+    }
+    if (progressOperation === null) {
+      progressOperation = startProgressBarOperation(store, progress)
+    } else {
+      progressOperation.update(progress)
+    }
+  }
+
+  if (downloadStarted) {
+    const tools = binariesToUpdate.join(' and ')
+    const message = t('Settings.Download Settings.Managed Tools Download Started Template', { tools })
+    if (showProgressStartToast.value) {
+      showToast({ message, icon: ['fas', 'download'] })
+    }
+    showToolProgress(message)
+  }
+
+  const progressByBinary = Object.fromEntries(
+    binariesToUpdate.map(binary => [binary, 0])
+  )
+  const removeProgressListener = ytDlp.addYtDlpBinaryDownloadProgressListener(({ binary, percent, inProgress }) => {
+    if (!binariesToUpdate.includes(binary) || !inProgress || percent === null) {
+      return
+    }
+
+    if (!downloadStarted) {
+      downloadStarted = true
+      const tools = binariesToUpdate.join(' and ')
+      const message = t('Settings.Download Settings.Managed Tools Update Started Template', { tools })
+      if (showProgressStartToast.value) {
+        showToast({ message, icon: ['fas', 'download'] })
+      }
+      showToolProgress(message)
+    }
+
+    progressByBinary[binary] = Math.max(progressByBinary[binary] ?? 0, percent)
+    const percentages = Object.values(progressByBinary)
+    const combinedPercentage = percentages.reduce((sum, value) => sum + value, 0) / percentages.length
+    toolProgressPercentage = Math.max(toolProgressPercentage, combinedPercentage)
+    progressOperation.update({ percentage: toolProgressPercentage })
+  })
+
+  try {
+    const results = await Promise.all(binariesToUpdate.map(async binary => {
+      try {
+        const result = await recovery.run('managed-tools', async () => {
+          const result = await ytDlp.ytDlpDownloadBinary(binary)
+          if (result === null || 'error' in result) {
+            throw Object.assign(new Error(result?.error ?? ''), { code: result?.errorCode })
+          }
+          return result
+        }, {
+          isNetworkError: async error => {
+            const failure = classifyRequestFailure(error)
+            return failure === 'network' || (failure === 'api' && !await recovery.checkConnection())
+          },
+        })
+        return { binary, result }
+      } catch (error) {
+        return { binary, result: { error: String(error), errorCode: error?.code } }
+      }
+    }))
+    const failures = results.filter(({ result }) => result === null || 'error' in result)
+    const updatedBinaries = results
+      .filter(({ result }) => result !== null && 'version' in result && result.updated)
+      .map(({ binary }) => binary)
+
+    if (failures.length === 0 && updatedBinaries.length > 0) {
+      toolProgressPercentage = 100
+      progressOperation?.update({ percentage: toolProgressPercentage })
+      const updatedTools = updatedBinaries.join(' and ')
+      showToast({
+        message: missingManagedBinaries.length > 0
+          ? t('Settings.Download Settings.Managed Tools Download Finished Template', { tools: updatedTools })
+          : t('Settings.Download Settings.Managed Tools Update Finished Template', { tools: updatedTools }),
+        icon: ['fas', 'check'],
+      })
+    } else {
+      if (failures.length > 0) {
+        const errors = failures.map(({ binary, result }) => `${binary}: ${managedToolErrorMessage(result, t)}`).join('; ')
+        showToast({
+          message: t('Settings.Download Settings.Managed Tools Download Error Template', { errors }),
+          icon: ['fas', 'circle-exclamation'],
+        })
+      }
+    }
+  } finally {
+    removeProgressListener()
+    progressOperation?.finish()
+  }
+
+  if (updateMode === 'ask' && requestedUpdates === null) {
+    await notifyAboutManagedExternalSoftwareUpdates(missingManagedBinaries)
+  }
+}
+
+/**
+ * Checks installed managed tools and offers an explicit update action.
+ * @param {('yt-dlp' | 'ffmpeg' | 'ffprobe')[]} binariesInstalledThisRun
+ */
+async function notifyAboutManagedExternalSoftwareUpdates(binariesInstalledThisRun) {
+  await initializeNetworkRecovery().run('managed-tools', async () => {})
+  const candidates = []
+  if ((isCapacitor || store.getters.getYtDlpSource === 'managed') && !binariesInstalledThisRun.includes('yt-dlp')) {
+    candidates.push('yt-dlp')
+  }
+  if (!isCapacitor && store.getters.getYtDlpFfmpegSource === 'managed' &&
+    !binariesInstalledThisRun.includes('ffmpeg') && !binariesInstalledThisRun.includes('ffprobe')) {
+    candidates.push('ffmpeg')
+  }
+
+  const checks = await Promise.all(candidates.map(async binary => {
+    const result = await ytDlp.ytDlpCheckBinaryUpdate(binary)
+    if (result !== null && 'error' in result) {
+      console.warn(`Checking for a managed ${binary} update failed`, result.error)
+    }
+    return result?.available === true ? binary : null
+  }))
+  const availableUpdates = checks.filter(binary => binary !== null)
+  if (availableUpdates.length === 0) {
+    return
+  }
+
+  showManagedExternalSoftwareUpdatePrompt(availableUpdates)
+}
+
+/**
+ * @param {('yt-dlp' | 'ffmpeg')[]} availableUpdates
+ */
+function showManagedExternalSoftwareUpdatePrompt(availableUpdates) {
+  const message = t('Settings.Download Settings.Managed Tools Update Available Template', {
+    tools: availableUpdates.join(' and ')
+  })
+  showToast({
+    // Android only updates yt-dlp, which app stores do not review.
+    message: isCapacitor ? `${message} ${t('Settings.Download Settings.Managed Tools Update Source Notice')}` : message,
+    time: Infinity,
+    icon: ['fas', 'download'],
+    buttons: [
+      { label: t('Cancel') },
+      {
+        label: t('Settings.Download Settings.Update Managed Tools'),
+        primary: true,
+        action: () => {
+          initializeManagedExternalSoftware(availableUpdates)
+            .catch(error => console.error('Failed to update managed external software', error))
+        }
+      }
+    ]
+  })
+}
+
+const MANAGED_TOOLS_UPDATE_PREVIEW_EVENT = 'opentubex:preview-managed-tools-update'
+
+/**
+ * Allows the real actionable update prompt to be previewed from DevTools.
+ * @param {Event} event
+ */
+function previewManagedExternalSoftwareUpdatePrompt(event) {
+  const detail = event instanceof CustomEvent ? event.detail : null
+  const availableUpdates = Array.isArray(detail)
+    ? detail.filter(binary => binary === 'yt-dlp' || binary === 'ffmpeg')
+    : []
+  showManagedExternalSoftwareUpdatePrompt(availableUpdates.length > 0 ? [...new Set(availableUpdates)] : ['yt-dlp'])
+}
+
+async function initializeTutorial(hasExistingInstallation, lastUsedVersion, persistedAudience) {
+  try {
+    const audience = getTutorialAudience(persistedAudience)
+    if (audience === 'completed' || audience === 'existing') return false
+    if (hasExistingInstallation === null) return false
+
+    if (audience !== 'new') {
+      if (hasExistingInstallation || lastUsedVersion !== null) return false
+      await setTutorialAudience('new')
+    }
+
+    return true
+  } catch (error) {
+    console.error('Failed to initialize tutorial', error)
+    return false
+  }
+}
+
+async function completeTutorial() {
+  showTutorial.value = false
+  await nextTick()
+
+  if (isElectron) {
+    try {
+      await window.ftElectron.tabs.setShortcutsBlocked(false)
+    } catch (error) {
+      console.error('Failed to restore tab shortcuts', error)
+    }
+  }
+
+  try {
+    await markTutorialCompleted()
+  } catch (error) {
+    console.error('Failed to save tutorial completion', error)
+  }
+}
+
+let removeInternetConnectivitySettingsListener = null
+let removeIosContextMenu = null
+let removeShimmerVisibility = null
 
 onMounted(async () => {
-  await store.dispatch('grabUserSettings')
+  removeShimmerVisibility = initializeShimmerVisibility()
+  removeGamepadNavigation = initializeGamepadNavigation({
+    onBack: handleGamepadBack,
+    onNavigate: () => store.dispatch('showOutlines'),
+    onPlayPause: handleGamepadPlayPause,
+  })
+  let tabsReady = Promise.resolve()
+  if (supportsYtDlp) {
+    removeYtDlpBinaryUpdatedListener = ytDlp.addYtDlpBinaryUpdatedListener(invalidateAllYtDlpPlaybackSources)
+  }
 
+  if (isElectron) {
+    window.addEventListener(MANAGED_TOOLS_UPDATE_PREVIEW_EVENT, previewManagedExternalSoftwareUpdatePrompt)
+    tabsReady = store.dispatch('initializeTabs').then((removeListener) => {
+      removeTabsStateListener = removeListener
+      window.ftElectron.tabs.rendererReady()
+    })
+    stopMemoryPressureMonitor = startTabMemoryPressureMonitor(
+      window.ftElectron.getHeapStatistics,
+      percentage => window.ftElectron.tabs.unloadLeastRecentlyUsed(percentage, getTabsKeptLoaded())
+    )
+  } else if (isCapacitor && getWebViewHeapStatistics()) {
+    stopMemoryPressureMonitor = startTabMemoryPressureMonitor(
+      getWebViewHeapStatistics,
+      async percentage => capacitorTabService.unloadLeastRecentlyUsedTabs(percentage, getTabsKeptLoaded())
+    )
+  }
+
+  const settingsReady = store.dispatch('grabUserSettings').then(async tutorialState => {
+    if (isCapacitor) {
+      await store.dispatch('loadAndroidProxySettings').catch(() => {
+        showToast({
+          message: t('Settings.Proxy Settings["Error getting network information. Is your proxy configured properly?"]'),
+          icon: ['fas', 'circle-exclamation'],
+        })
+      })
+    }
+    removeInternetConnectivitySettingsListener = store.watch(
+      () => store.getters.getInternetConnectivityChecks,
+      enabled => initializeNetworkRecovery().setInternetChecksEnabled(enabled),
+      { immediate: true, flush: 'sync' }
+    )
+    removeAndroidYtDlpSettingsListener = initializeCapacitorYtDlp()
+    return tutorialState
+  })
+  if (isCapacitor) {
+    tabsReady = settingsReady.then(() => capacitorTabService.initialize(route))
+    removeCapacitorTabPreviews = initializeCapacitorTabPreviews(store, computed(() => pageSwipe.value || organizerSwipeActive.value), tabsReady, tabId => navigation.isTabLoading(tabId))
+    removeCapacitorTabAvatars = initializeCapacitorTabAvatars(store, tabsReady)
+  }
+  const customThemesReady = loadCustomThemes().catch((error) => {
+    console.error('Failed to load custom theme:', error)
+    return []
+  })
+  const invidiousInstancesReady = store.dispatch('fetchInvidiousInstancesFromFile')
+  const profilesReady = settingsReady.then(() => (
+    store.dispatch('grabAllProfiles', t('Profile.All Channels'))
+  ))
+  // The library needs only settings (history retention) and profiles
+  // (subscriptions). Load it during the remaining startup work instead of after.
+  const libraryReady = Promise.all([
+    settingsReady.then(() => Promise.all([store.dispatch('grabHistory'), store.dispatch('grabAllPlaylists')])),
+    profilesReady.then(() => store.dispatch('grabAllSubscriptions')),
+  ])
+  tabsReady.then(() => {
+    const initialRoute = usesLogicalTabs ? store.getters.getActiveTab?.route : route
+    if (initialRoute) {
+      return preloadResolvedRoute(router.resolve(initialRoute.fullPath))
+    }
+  }).catch(error => {
+    console.error('Failed to preload the initial route', error)
+  })
+  const [tutorialState, themes] = await Promise.all([
+    settingsReady,
+    customThemesReady,
+    invidiousInstancesReady,
+    tabsReady,
+  ])
+  const lastUsedVersion = getLastUsedVersion(tutorialState.lastUsedVersion)
+  const showAutoSyncNotice = shouldShowAutoSyncNotice(lastUsedVersion, store.state.settings)
+  if (tutorialState.landingPageToInitialize !== null) {
+    await store.dispatch('updateLandingPage', tutorialState.landingPageToInitialize)
+  }
+
+  try {
+    store.commit('setCustomThemes', themes)
+    if (baseTheme.value === 'custom' && themes.length > 0) {
+      await store.dispatch('updateBaseTheme', `custom:${themes[0].id}`)
+    }
+    await sanitizeAppearanceSettings(themes)
+  } catch (error) {
+    console.error('Failed to load custom theme:', error)
+  }
+  removeCustomThemeListener = handleCustomThemeUpdated(async (themes) => {
+    store.commit('setCustomThemes', themes)
+    await repairSystemThemeSettings(store, themes)
+    updateTheme()
+  })
+  appearanceSettingsReady = true
   updateTheme()
+  if (store.getters.getTrayIconPreset !== 'theme') refreshTrayIcon()
 
-  await store.dispatch('fetchInvidiousInstancesFromFile')
   if (defaultInvidiousInstance.value === '') {
     await store.dispatch('setRandomCurrentInvidiousInstance')
   }
 
-  store.dispatch('fetchInvidiousInstances').then(() => {
-    if (defaultInvidiousInstance.value === '') {
-      store.dispatch('setRandomCurrentInvidiousInstance')
-    }
-  })
+  // Refresh the bundled list once a random instance serves API requests,
+  // including when a settings change makes it do so
+  let invidiousInstancesRefreshed = false
+  watch(() => {
+    const { backendPreference, backendFallback } = store.state.settings
+    // Yattee requests go to its own server, never to a random instance
+    return defaultInvidiousInstance.value === '' && backendPreference !== 'yattee' &&
+      (!process.env.SUPPORTS_LOCAL_API || backendPreference === 'invidious' || (backendPreference === 'local' && backendFallback))
+  }, (usesRandomInstance) => {
+    if (!usesRandomInstance || invidiousInstancesRefreshed) return
+    invidiousInstancesRefreshed = true
+    const previousInvidiousInstance = store.getters.getCurrentInvidiousInstance
+    store.dispatch('fetchInvidiousInstances').then(() => {
+      // Keep an instance chosen while the list was loading
+      if (defaultInvidiousInstance.value === '' && store.getters.getCurrentInvidiousInstance === previousInvidiousInstance) {
+        store.dispatch('setRandomCurrentInvidiousInstance')
+      }
+    })
+  }, { immediate: true })
 
-  store.dispatch('grabAllProfiles', t('Profile.All Channels')).then(() => {
-    store.dispatch('grabHistory')
-    store.dispatch('grabAllPlaylists')
-    store.dispatch('grabAllSubscriptions')
+  profilesReady.then(async (hasExistingProfiles) => {
+    const hasExistingInstallation = tutorialState.hasExistingSettings === true || hasExistingProfiles === true
+      ? true
+      : tutorialState.hasExistingSettings === null || hasExistingProfiles === null
+        ? null
+        : false
+    const tutorialPending = await initializeTutorial(
+      hasExistingInstallation,
+      lastUsedVersion,
+      tutorialState.tutorialAudience
+    )
+    if (hasExistingInstallation !== null || lastUsedVersion !== null) {
+      await setLastUsedVersion(packageDetails.version)
+    }
+
     store.dispatch('grabSearchHistoryEntries')
+
+    // YouTube links have to be caught in both builds, otherwise the browser
+    // navigates away from the app instead of opening the linked video,
+    // channel, playlist or hashtag in it
+    document.addEventListener('click', handleClick)
+    document.addEventListener('auxclick', handleAuxClick)
+    removeRoutePreloadIntent = installRoutePreloadIntent({
+      preload: path => preloadResolvedRoute(router.resolve(path))
+    })
 
     if (process.env.IS_ELECTRON) {
       store.dispatch('setupListenersToSyncWindows')
-      document.addEventListener('click', handleClick)
-      document.addEventListener('auxclick', handleAuxClick)
-      enableOpenUrl()
+      removeOpenUrlListener = enableOpenUrl()
       store.dispatch('getExternalPlayerCmdArgumentsData')
+      removeReloadRequestListener = window.ftElectron.tabs.onRequestReload(prepareAndReloadTab)
+      removeConfirmMultipleTabsActionListener = window.ftElectron.tabs
+        .onConfirmMultipleAction(handleConfirmMultipleTabsActionRequest)
+    } else if (isCapacitor) {
+      removeCapacitorIntegrationListeners = await enableCapacitorIntegrations()
     }
 
+    await libraryReady
+    store.dispatch('initializeSyncServer').catch(error => {
+      console.error('Initial sync server sync failed', error)
+    })
+
     dataReady.value = true
+
+    if (process.env.IS_ELECTRON) {
+      // Prompts teleport into .app, which renders once data is ready.
+      nextTick(() => {
+        removeLibraryNoticesListener = window.ftElectron.libraryNotices.onChanged(loadLibraryNotices)
+        loadLibraryNotices()
+      })
+    }
+
+    if (isCapacitor) {
+      await subscriptionAutoRefresh.listenForNativeCancellation()
+    }
+
+    await nextTick()
+    // Startup prompts teleport into .app, which only exists after dataReady renders.
+    if (isCapacitor) {
+      removeAndroidIncomingShare = await initializeAndroidIncomingShare(handleAndroidSharedText)
+    }
+    if (showAutoSyncNotice) {
+      showAutoSyncNoticeOnce(release => {
+        const dismissNotice = () => {
+          dismissAutoSyncNotice()
+          release()
+        }
+        showToast({
+          message: t('Settings.Sync Settings.Previous Auto Sync Notice'),
+          time: Infinity,
+          dismissible: false,
+          icon: ['fas', 'sync'],
+          verticalButtons: true,
+          buttons: [{
+            label: t('Dismiss'),
+            icon: ['fas', 'xmark'],
+            action: dismissNotice,
+          }, {
+            label: t('Settings.Sync Settings.Enable Automatic Sync'),
+            icon: ['fas', 'sync'],
+            primary: true,
+            action: async () => {
+              try {
+                await store.dispatch('setSyncServerAutoSync', true)
+                dismissNotice()
+              } catch (error) {
+                showToast({ message: error.message, icon: ['fas', 'circle-exclamation'] })
+              } finally {
+                release()
+              }
+            },
+          }],
+        })
+      })
+    }
+    scheduleUtilityRoutePreload()
+    if (isCapacitor) {
+      capacitorPullToRefreshSetup = initializeCapacitorPullToRefresh()
+        .catch(error => console.error('Failed to initialize pull to refresh', error))
+    }
+    if (isElectron && tutorialPending) {
+      try {
+        await window.ftElectron.tabs.setShortcutsBlocked(true)
+      } catch (error) {
+        console.error('Failed to block tab shortcuts for tutorial', error)
+      }
+    }
+    showTutorial.value = tutorialPending
+    initializeManagedExternalSoftware().catch(error => console.error('Failed to initialize managed external software', error))
 
     setTimeout(() => {
       checkForNewUpdates()
     }, 500)
+    stopUpdateChecks = scheduleUpdateChecks(checkForNewUpdates, UPDATE_CHECK_INTERVAL, document)
   })
 
-  if (route.path === '/') {
-    router.replace({ path: landingPage.value })
+  await router.isReady()
+
+  if (isElectron) {
+    const activeTab = store.getters.getActiveTab
+    if (activeTab?.route.path === '/') {
+      await navigation.replace(activeTab.id, { path: landingPage.value })
+    }
+  } else if (route.path === '/') {
+    await router.replace({ path: landingPage.value })
   }
 
   setWindowTitle()
 
   document.addEventListener('keydown', handleKeyboardShortcuts)
+  window.addEventListener('opentubex:close-context-menu', closeOwnedMobileContextMenu)
+  window.addEventListener(OPEN_MOBILE_CONTEXT_MENU_EVENT, handleOpenMobileContextMenu)
+  window.addEventListener(OPEN_COMMAND_PALETTE_EVENT, openCommandPalette)
+  window.addEventListener(OPEN_TAB_ORGANIZER_EVENT, openTabOrganizer)
+  if (isCapacitor) {
+    window.addEventListener('opentubex:android-pip', handleAndroidPictureInPictureChange)
+    window.addEventListener('opentubex:hardware-keyboard', handleHardwareKeyboardChange)
+    if (process.env.IS_IOS) removeIosContextMenu = installIosContextMenu(document)
+    document.addEventListener('contextmenu', handleMobileLinkContextMenu, true)
+    hardwareKeyboardAttached.value = await getAndroidHardwareKeyboardState()
+  }
+  document.addEventListener('keyup', handleKeyboardShortcutKeyup)
   document.addEventListener('mousedown', handleMouseDown)
+  document.addEventListener('pointermove', handleNumberInputPointer, { passive: true })
+  document.addEventListener('pointerdown', handleNumberInputPointer, { capture: true, passive: true })
+  document.addEventListener('pointerup', handleNumberInputPointer, { capture: true, passive: true })
+  document.addEventListener('pointerout', handleNumberInputPointer, { passive: true })
   document.addEventListener('dragstart', handleDragStart)
+  window.addEventListener('blur', cancelTabSwitcher)
+  if (process.env.IS_ELECTRON) {
+    removeOpenTabOrganizerListener = window.ftElectron.tabs.onOpenOrganizer(openTabOrganizer)
+  }
+  subscriptionAutoRefresh.start()
+  rssFeedAutoRefresh.start()
 })
 
 onBeforeUnmount(() => {
+  cancelPageSwipe()
+  removeShimmerVisibility?.()
+  removeInternetConnectivitySettingsListener?.()
+  if (mobileLinkActionsLocked) {
+    store.commit('removeOpenPrompt', mobileLinkActionsPromptId)
+    unlockBodyScroll()
+    mobileLinkActionsLocked = false
+  }
+  tabletTabStripQuery.removeEventListener('change', handleTabletTabStripChange)
+  capacitorTabService?.dispose()
+  removeCapacitorTabPreviews?.()
+  removeCapacitorTabAvatars?.()
+  document.documentElement.classList.remove('hideOutlines', 'limitTitlesToTwoLines')
+  delete document.documentElement.dataset.linkUnderline
+  removeGamepadNavigation()
+  removeCustomThemeListener()
+  cancelUtilityRoutePreload()
+  cancelTabSwitcher()
+  systemColorScheme.removeEventListener('change', handleSystemColorSchemeChange)
+  if (isElectron) {
+    window.ftElectron.tabs.setPreviewCapturePaused(false)
+    window.ftElectron.tabs.setShortcutsBlocked(false).catch(() => {})
+  }
+  cancelWatchSideNavTransitionReset()
+  subscriptionAutoRefresh.stop()
+  rssFeedAutoRefresh.stop()
+  clearInterval(historyCleanupTimer)
+  clearInterval(searchHistoryCleanupTimer)
+  stopUpdateChecks?.()
+  store.dispatch('stopSyncServerAutoSync')
   document.removeEventListener('keydown', handleKeyboardShortcuts)
+  window.removeEventListener('opentubex:close-context-menu', closeOwnedMobileContextMenu)
+  window.removeEventListener(OPEN_MOBILE_CONTEXT_MENU_EVENT, handleOpenMobileContextMenu)
+  window.removeEventListener(OPEN_COMMAND_PALETTE_EVENT, openCommandPalette)
+  window.removeEventListener(OPEN_TAB_ORGANIZER_EVENT, openTabOrganizer)
+  window.removeEventListener('opentubex:android-pip', handleAndroidPictureInPictureChange)
+  window.removeEventListener('opentubex:hardware-keyboard', handleHardwareKeyboardChange)
+  removeIosContextMenu?.()
+  document.removeEventListener('contextmenu', handleMobileLinkContextMenu, true)
+  document.removeEventListener('keyup', handleKeyboardShortcutKeyup)
   document.removeEventListener('mousedown', handleMouseDown)
+  document.removeEventListener('pointermove', handleNumberInputPointer)
+  document.removeEventListener('pointerdown', handleNumberInputPointer, true)
+  document.removeEventListener('pointerup', handleNumberInputPointer, true)
+  document.removeEventListener('pointerout', handleNumberInputPointer)
   document.removeEventListener('dragstart', handleDragStart)
   document.removeEventListener('click', handleClick)
   document.removeEventListener('auxclick', handleAuxClick)
+  window.removeEventListener('blur', cancelTabSwitcher)
+  window.removeEventListener(MANAGED_TOOLS_UPDATE_PREVIEW_EVENT, previewManagedExternalSoftwareUpdatePrompt)
+  removeTabsStateListener?.()
+  stopMemoryPressureMonitor?.()
+  removeReloadRequestListener?.()
+  removeConfirmMultipleTabsActionListener?.()
+  removeLibraryNoticesListener?.()
+  removeOpenUrlListener?.()
+  removeRoutePreloadIntent?.()
+  removeCapacitorIntegrationListeners?.()
+  removeAndroidIncomingShare?.()
+  capacitorPullToRefreshSetup?.then(remove => remove?.())
+  removeYtDlpBinaryUpdatedListener?.()
+  removeAndroidYtDlpSettingsListener?.()
+  removeOpenTabOrganizerListener?.()
 })
+
+watch([activeTabId, selectionRevision], ([tabId, revision]) => {
+  if (isElectron && tabId) {
+    navigation.requestPresentation(tabId, revision)
+  }
+}, { immediate: true })
+
+const STARTUP_PRELOAD_TIMEOUT_MS = 5000
+
+watch([
+  dataReady,
+  presentedTabId,
+  () => store.getters.getActiveTab?.loadState,
+  () => store.getters.getTabById(presentedTabId.value)?.route.fullPath,
+], async ([ready, presented, loadState, fullPath], _, onCleanup) => {
+  if (!usesLogicalTabs || !ready || (!presented && loadState !== 'unloaded') || !document.getElementById('startup-splash')) return
+  let cancelled = false
+  let preloadTimeout
+  onCleanup(() => {
+    cancelled = true
+    clearTimeout(preloadTimeout)
+  })
+  if (presented && fullPath) {
+    try {
+      // Tab presentation acknowledges its container before an async route has
+      // loaded. Wait for its content, but expose the shell if the chunk stalls.
+      await Promise.race([
+        preloadResolvedRoute(router.resolve(fullPath)),
+        new Promise(resolve => { preloadTimeout = setTimeout(resolve, STARTUP_PRELOAD_TIMEOUT_MS) })
+      ])
+    } catch (error) {
+      // A failed route must still expose the shell so navigation can recover.
+      console.error('Failed to load the startup route', error)
+    } finally {
+      clearTimeout(preloadTimeout)
+    }
+  }
+  await nextTick()
+  if (!cancelled) revealStartupSplash()
+}, { flush: 'post' })
+
+watch(presentedTabId, async (tabId, previousTabId) => {
+  if (!isElectron || tabId === previousTabId) {
+    return
+  }
+
+  if (previousTabId) {
+    findbarStateByTabId.set(previousTabId, {
+      visible: findbarVisible.value,
+      query: findbarQuery.value,
+      matchIndex: Math.max(0, findbarMatchIndex.value - 1)
+    })
+  }
+
+  clearFindbarHighlights()
+  const state = findbarStateByTabId.get(tabId) ?? {
+    visible: false,
+    query: '',
+    matchIndex: 0
+  }
+  findbarVisible.value = state.visible
+  findbarQuery.value = state.query
+  findbarMatchIndex.value = 0
+  findbarMatchCount.value = 0
+
+  if (state.visible && state.query.trim().length > 0) {
+    await nextTick()
+    highlightFindbarMatches(state.query.trim())
+    selectFindbarMatch(state.matchIndex)
+  }
+})
+
+watch(historyRetentionDays, days => {
+  clearInterval(historyCleanupTimer)
+  historyCleanupTimer = scheduleRetentionCleanup('removeHistoryOlderThan', days)
+})
+watch(searchHistoryRetentionDays, days => {
+  clearInterval(searchHistoryCleanupTimer)
+  searchHistoryCleanupTimer = scheduleRetentionCleanup('removeSearchHistoryOlderThan', days)
+})
+
+/**
+ * @param {string} action
+ * @param {string} days
+ * @returns {ReturnType<typeof setInterval> | null}
+ */
+function scheduleRetentionCleanup(action, days) {
+  const parsedDays = Number(days)
+  if (!Number.isInteger(parsedDays) || parsedDays < 1) {
+    return null
+  }
+
+  return setInterval(() => {
+    store.dispatch(action, parsedDays)
+  }, HISTORY_CLEANUP_INTERVAL)
+}
+
+const subscriptionAutoRefresh = useSubscriptionAutoRefresh({ dataReady, t })
+const rssFeedAutoRefresh = useRssFeedAutoRefresh(dataReady)
 
 /** @type {import('vue').ComputedRef<string>} */
 const baseTheme = computed(() => store.getters.getBaseTheme)
+const capacitorUiScale = isCapacitor ? createCapacitorUiScale(window, document) : null
+watch(() => store.getters.getUiScale, value => {
+  capacitorUiScale?.setScale(value)
+  document.documentElement.style.setProperty('--phone-touch-target', `${Math.max(48, 4800 / value)}px`)
+}, { immediate: true })
+onBeforeUnmount(setupPhoneViewport(window, document, isCapacitor && !process.env.IS_IOS))
+onBeforeUnmount(() => capacitorUiScale?.dispose())
+
+const appFont = computed(() => store.getters.getAppFont)
+let removeCustomThemeListener = () => {}
+const systemColorScheme = window.matchMedia('(prefers-color-scheme: dark)')
+const systemUsesDarkTheme = ref(systemColorScheme.matches)
+systemColorScheme.addEventListener('change', handleSystemColorSchemeChange)
+
+if (isCapacitor) {
+  let dynamicColorsListener
+  let disposed = false
+  const receiveColors = (colors) => {
+    if (disposed) return
+    androidDynamicColors.value = colors
+    const theme = baseTheme.value === 'system'
+      ? (systemUsesDarkTheme.value ? store.getters.getSystemDarkTheme : store.getters.getSystemLightTheme)
+      : baseTheme.value
+    if (MATERIAL_THEME_VALUES.includes(theme) ||
+      (SIGNAL_THEME_VALUES.includes(theme) && store.getters.getSignalAccentColor === MATERIAL_SYSTEM_SEED)) updateTheme()
+  }
+  onMounted(async () => {
+    try {
+      dynamicColorsListener = await onAndroidDynamicColorsChanged(receiveColors)
+      if (disposed) {
+        await dynamicColorsListener?.remove()
+        return
+      }
+      receiveColors(await getAndroidDynamicColors())
+    } catch (error) {
+      console.error('Failed to load Android dynamic colors:', error)
+    }
+  })
+  onBeforeUnmount(() => {
+    disposed = true
+    dynamicColorsListener?.remove()
+  })
+}
+
+if (isElectron) {
+  let disposed = false
+  let receivedUpdate = false
+  const receiveAccent = color => {
+    if (disposed) return
+    desktopSystemAccentColor.value = normalizeSystemAccentColor(color)
+    if (baseTheme.value === 'dynamic' || [store.getters.getMaterialSeedColor, store.getters.getSignalAccentColor].includes(MATERIAL_SYSTEM_SEED)) updateTheme()
+  }
+  const removeListener = window.ftElectron.handleSystemAccentColorUpdated(color => {
+    receivedUpdate = true
+    receiveAccent(color)
+  })
+  window.ftElectron.getSystemAccentColor().then(color => {
+    if (!receivedUpdate) receiveAccent(color)
+  }).catch(error => console.error('Failed to load system accent color:', error))
+  onBeforeUnmount(() => {
+    disposed = true
+    removeListener()
+  })
+}
 
 watch(baseTheme, updateTheme)
+watch(() => store.getters.getMaterialSeedColor, updateTheme)
+watch(() => store.getters.getSignalAccentColor, updateTheme)
+watch(appFont, updateAppFont)
+watch(() => store.getters.getSystemLightTheme, updateTheme)
+watch(() => store.getters.getSystemDarkTheme, updateTheme)
 
 /** @type {import('vue').ComputedRef<string>} */
 const mainColor = computed(() => store.getters.getMainColor)
 
 watch(mainColor, updateTheme)
+watch(() => store.getters.getHideStartupSplash, cacheCapacitorStartupAppearance)
+watch(() => store.getters.getCustomThemes, cacheCapacitorStartupAppearance)
 
 /** @type {import('vue').ComputedRef<string>} */
 const secColor = computed(() => store.getters.getSecColor)
 
 watch(secColor, updateTheme)
 
+/** @type {import('vue').ComputedRef<number>} */
+const uiRoundness = computed(() => store.getters.getUiRoundness)
+
+watch(uiRoundness, updateUiRoundness)
+
+/** @type {import('vue').ComputedRef<number>} */
+const fontSize = computed(() => store.getters.getFontSize)
+
+watch(fontSize, updateFontSize)
+
+/** @type {import('vue').ComputedRef<number>} */
+const scrollbarThumbWidth = computed(() => store.getters.getScrollbarThumbWidth)
+
+watch(scrollbarThumbWidth, updateScrollbarThumbWidth)
+
+/** @type {import('vue').ComputedRef<number>} */
+const thumbnailSize = computed(() => store.getters.getThumbnailSize)
+
+watch(thumbnailSize, updateThumbnailListSize)
+
+let appearanceSettingsReady = false
+watch(() => store.getters.getTrayIconPreset, refreshTrayIcon)
+
+function refreshTrayIcon() {
+  if (isElectron && appearanceSettingsReady) {
+    updateTrayIcon(store.getters.getTrayIconPreset).catch(error => console.error('Unable to update tray icon', error))
+  }
+}
+
 function updateTheme() {
-  document.body.className = `${baseTheme.value || 'system'} main${mainColor.value || 'Red'} sec${secColor.value || 'Blue'}`
-  document.body.dataset.systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  // Keep Android's cached native background until the saved theme is known.
+  // Applying the store's temporary system default can otherwise flash white.
+  if (isCapacitor && Capacitor.getPlatform() === 'android' && !appearanceSettingsReady) return
+  const effectiveTheme = baseTheme.value === 'system'
+    ? (systemUsesDarkTheme.value ? store.getters.getSystemDarkTheme : store.getters.getSystemLightTheme)
+    : baseTheme.value
+  const customThemes = store.getters.getCustomThemes
+  const customTheme = customThemes.find(theme => `custom:${theme.id}` === effectiveTheme) ??
+    (effectiveTheme === 'custom' ? customThemes[0] : null) ?? null
+  applyThemeToDocument(
+    effectiveTheme, mainColor.value, secColor.value, customTheme,
+    store.getters.getMaterialSeedColor, store.getters.getSignalAccentColor
+  )
+  cacheCapacitorStartupAppearance()
+  if (store.getters.getTrayIconPreset === 'theme') refreshTrayIcon()
+  updateSystemBarsStyle()
+}
+
+function cacheCapacitorStartupAppearance() {
+  if (!isCapacitor || !appearanceSettingsReady) return
+  const appearance = (dark) => {
+    const theme = baseTheme.value === 'system'
+      ? (dark ? store.getters.getSystemDarkTheme : store.getters.getSystemLightTheme)
+      : baseTheme.value
+    const background = getThemeBackground(theme, store.getters.getCustomThemes, dark, store.getters.getMaterialSeedColor)
+    return { background, dark: calculateColorLuminance(background) !== '#000000' }
+  }
+  cacheStartupAppearance({
+    light: appearance(false),
+    dark: appearance(true),
+    hideSplash: store.getters.getHideStartupSplash
+  })
+}
+
+function updateSystemBarsStyle() {
+  if (!Capacitor.isNativePlatform() || !Capacitor.isPluginAvailable('SystemBars')) return
+
+  // Native video needs a transparent WebView; use the theme backdrop behind it.
+  const bodyStyle = getComputedStyle(document.body)
+  const backgroundColor = bodyStyle.getPropertyValue('--bg-color').trim() || bodyStyle.backgroundColor
+  const usesDarkIcons = calculateColorLuminance(backgroundColor) === '#000000'
+  Promise.all([
+    setAndroidSystemBarsBackground(backgroundColor, ['system', 'dynamic'].includes(baseTheme.value)),
+    SystemBars.setStyle({
+      style: usesDarkIcons ? SystemBarsStyle.Light : SystemBarsStyle.Dark
+    })
+  ]).catch((error) => {
+    console.error('Failed to update system bar style:', error)
+  })
+}
+
+function updateAppFont() {
+  document.body.style.setProperty(
+    '--app-font-family',
+    getAppFontFamily(appFont.value)
+  )
+}
+
+async function sanitizeAppearanceSettings(customThemes) {
+  const systemThemes = resolveSystemThemeSettings({
+    systemLightTheme: store.getters.getSystemLightTheme,
+    systemDarkTheme: store.getters.getSystemDarkTheme,
+  }, customThemes)
+  const settings = [
+    ['BaseTheme', resolveBaseTheme(store.getters.getBaseTheme, 'system', customThemes)],
+    ['SystemLightTheme', systemThemes.systemLightTheme],
+    ['SystemDarkTheme', systemThemes.systemDarkTheme],
+    ['MainColor', resolveColor(store.getters.getMainColor, 'Red')],
+    ['SecColor', resolveColor(store.getters.getSecColor, 'Blue')],
+  ]
+
+  await Promise.all(settings.map(([name, value]) =>
+    store.getters[`get${name}`] === value ? null : store.dispatch(`update${name}`, value)))
+}
+
+function handleSystemColorSchemeChange(event) {
+  systemUsesDarkTheme.value = event.matches
+  if (['system', 'dynamic'].includes(baseTheme.value)) updateTheme()
+}
+
+function updateUiRoundness() {
+  document.body.style.setProperty('--ui-roundness', String(uiRoundness.value / 100))
+}
+
+function updateFontSize() {
+  document.body.style.setProperty('--font-scale', String(fontSize.value / 100))
+}
+
+function updateScrollbarThumbWidth() {
+  document.body.style.setProperty(
+    '--scrollbar-thumb-width',
+    `${normalizeScrollbarThumbWidth(scrollbarThumbWidth.value)}px`
+  )
+}
+
+// Setting these once on the body keeps a thumbnail size change from
+// re-rendering every list that shows thumbnails.
+function updateThumbnailListSize() {
+  for (const [property, value] of Object.entries(getThumbnailListStyles(thumbnailSize.value))) {
+    document.body.style.setProperty(property, value)
+  }
 }
 
 updateTheme()
+updateAppFont()
+updateUiRoundness()
+updateFontSize()
+updateScrollbarThumbWidth()
+updateThumbnailListSize()
 
-const showUpdatesBanner = ref(false)
-const latestVersionNumber = ref('')
 const showReleaseNotes = ref(false)
 const changeLogTitle = ref('')
 const updateChangelog = ref('')
+/** @type {import('vue').Ref<{ packageManager: string, command: string } | null>} */
+const packageManagerUpdate = ref(null)
+useScrollClamp(useTemplateRef('changeLogScroller'), useTemplateRef('changeLogContent'))
+const DISMISSED_UPDATE_VERSION_STORAGE_KEY = 'opentubex-dismissed-update-version'
+/** @type {{ tagName: string, versionNumber: string } | null} */
+let availableUpdate = null
+/** @type {AbortController | null} */
+let availableUpdateToast = null
+const UPDATE_CHECK_INTERVAL = 6 * 60 * 60 * 1000
+/** @type {(() => void) | null} */
+let stopUpdateChecks = null
+/** @type {() => string} */
+let renderUpdateChangelog = () => ''
+// Release notes can be labeled for some platforms, so the prompt hides notes for others.
+const releaseNotePlatform = process.env.IS_ELECTRON
+  ? { darwin: 'macos', linux: 'linux', win32: 'windows' }[process.platform] ?? null
+  : process.env.IS_CAPACITOR ? (process.env.IS_IOS ? 'ios' : 'android') : null
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const checkForUpdates = computed(() => store.getters.getCheckForUpdates)
 
-const updateBannerMessage = computed(() => {
-  return t('Version {versionNumber} is now available!  Click for more details', {
-    versionNumber: latestVersionNumber.value
+function dismissAvailableUpdate() {
+  if (availableUpdate !== null) {
+    sessionStorage.setItem(DISMISSED_UPDATE_VERSION_STORAGE_KEY, availableUpdate.tagName)
+  }
+}
+
+function showAvailableUpdateToast() {
+  const update = availableUpdate
+  if (
+    update === null ||
+    sessionStorage.getItem(DISMISSED_UPDATE_VERSION_STORAGE_KEY) === update.tagName
+  ) {
+    return
+  }
+
+  // A later check can find a newer release while the older one's toast is open
+  availableUpdateToast?.abort()
+  availableUpdateToast = new AbortController()
+  showToast({
+    abortSignal: availableUpdateToast.signal,
+    message: t('Version {versionNumber} is now available.', {
+      versionNumber: update.versionNumber
+    }),
+    time: Infinity,
+    dismissible: false,
+    icon: ['fas', 'sync'],
+    verticalButtons: true,
+    buttons: [
+      {
+        label: t('Dismiss'),
+        icon: ['fas', 'xmark'],
+        action: dismissAvailableUpdate
+      },
+      {
+        label: t('See changes and update'),
+        icon: ['fas', 'file-lines'],
+        primary: true,
+        action: () => {
+          updateChangelog.value = renderUpdateChangelog()
+          showReleaseNotes.value = true
+        }
+      }
+    ]
   })
-})
+}
 
 async function checkForNewUpdates() {
   if (!checkForUpdates.value) {
     return
   }
 
+  // Each release lists dozens of assets, so fetch small pages and stop at the installed release
+  const releasesUrl = 'https://api.github.com/repos/OpenTubeX/OpenTubeX/releases?per_page=5'
+
   try {
-    const response = await fetch('https://api.github.com/repos/freetubeapp/freetube/releases?per_page=1')
-    const json = await response.json()
+    const availableReleases = await fetchReleasePages(releasesUrl, fetch, packageDetails.version)
+    const releases = findUpdateReleases(availableReleases, packageDetails.version)
+    if (releases.length === 0) {
+      return
+    }
 
-    const tagName = json[0].tag_name
+    const release = releases[0]
+    const tagName = release.tag_name
     const versionNumber = tagName.replace('v', '').replace('-beta', '')
+    // The toast for this release is open, was dismissed, or was answered already
+    if (
+      availableUpdate?.tagName === tagName ||
+      sessionStorage.getItem(DISMISSED_UPDATE_VERSION_STORAGE_KEY) === tagName
+    ) {
+      return
+    }
 
-    let changelog = json[0].body
+    const changelog = formatReleaseChangelog(releases, releaseNotePlatform)
       // Link usernames to their GitHub profiles
       .replaceAll(/@(\S+)\b/g, '[@$1](https://github.com/$1)')
       // Shorten pull request links to #1234
-      .replaceAll(/https:\/\/github\.com\/FreeTubeApp\/FreeTube\/pull\/(\d+)/g, '[#$1]($&)')
+      .replaceAll(/https:\/\/github\.com\/OpenTubeX\/OpenTubeX\/pull\/(\d+)/g, '[#$1]($&)')
 
-    // Add the title
-    changelog = `${changelog}`
-
-    updateChangelog.value = marked.parse(changelog)
-    changeLogTitle.value = json[0].name
-    latestVersionNumber.value = versionNumber
-
-    const appVersion = packageDetails.version.split('.')
-    const latestVersion = versionNumber.split('.')
-
-    if (parseInt(appVersion[0]) < parseInt(latestVersion[0])) {
-      showUpdatesBanner.value = true
-    } else if (parseInt(appVersion[1]) < parseInt(latestVersion[1])) {
-      showUpdatesBanner.value = true
-    } else if (parseInt(appVersion[2]) < parseInt(latestVersion[2]) && parseInt(appVersion[1]) <= parseInt(latestVersion[1])) {
-      showUpdatesBanner.value = true
+    const [{ createReleaseNotesMarkdown, resolvePictureColorScheme }, packageManager] = await Promise.all([
+      import('./helpers/releaseNotesMarkdown'),
+      window.ftElectron?.getPackageManagerUpdate() ?? null
+    ])
+    // The setting can change during the request, and an open prompt keeps its changelog
+    if (!checkForUpdates.value || showReleaseNotes.value) {
+      return
     }
+    packageManagerUpdate.value = packageManager
+    const changelogHtml = createReleaseNotesMarkdown().parse(changelog)
+    // Pick screenshots for the app theme when the prompt opens, because the
+    // theme can change after this check. The OS color scheme can differ from it.
+    renderUpdateChangelog = () => {
+      const isDark = getComputedStyle(document.body).getPropertyValue('--native-color-scheme').trim() === 'dark'
+      return resolvePictureColorScheme(changelogHtml, isDark ? 'dark' : 'light')
+    }
+    changeLogTitle.value = t('Update to {version}', { version: release.name ?? tagName })
+    availableUpdate = { tagName, versionNumber }
+    showAvailableUpdateToast()
   } catch (error) {
-    console.error('errored while checking for updates', 'https://api.github.com/repos/freetubeapp/freetube/releases?per_page=1', error)
+    console.error('errored while checking for updates', releasesUrl, error)
   }
 }
 
-function toggleShowReleaseNotes() {
-  showReleaseNotes.value = !showReleaseNotes.value
+function closeReleaseNotes() {
+  showReleaseNotes.value = false
+  showAvailableUpdateToast()
 }
 
-/**
- * @param {boolean} response
- */
-function handleUpdateBannerClick(response) {
-  if (response) {
-    showReleaseNotes.value = true
-  } else {
-    showUpdatesBanner.value = false
-  }
+function copyPackageManagerUpdateCommand() {
+  copyToClipboard(packageManagerUpdate.value.command, { messageOnSuccess: t('Update Command Copied') })
 }
 
 function openDownloadsPage() {
-  openExternalLink('https://freetubeapp.io#download')
+  handleExternalLink('https://opentubex.org/downloads/')
+  // Keep the update reachable unless the link opened right away
+  if (resolveExternalLinkAction(externalLinkHandling.value) !== 'open') return
+  dismissAvailableUpdate()
   showReleaseNotes.value = false
-  showUpdatesBanner.value = false
+}
+
+function openDonatePage() {
+  handleExternalLink('https://opentubex.org/donate/')
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const outlinesHidden = computed(() => store.getters.getOutlinesHidden)
 
+watch(outlinesHidden, hidden => {
+  document.documentElement.classList.toggle('hideOutlines', hidden)
+}, { flush: 'sync', immediate: true })
+
+// On <html>, like hideOutlines, so every list in the document matches.
+watch(() => store.getters.getLimitTitlesToTwoLines, limit => {
+  document.documentElement.classList.toggle('limitTitlesToTwoLines', limit)
+}, { flush: 'sync', immediate: true })
+
+watch(() => store.getters.getLinkUnderline, value => {
+  document.documentElement.dataset.linkUnderline = value
+}, { flush: 'sync', immediate: true })
+
+const phoneLayout = usePhoneLayout()
+const commandPaletteDownloads = computed(previous => {
+  const downloads = Object.values(store.getters.getYtDlpDownloads).map(({ id, title, status }) => ({ id, title, status }))
+  return previous?.length === downloads.length && downloads.every((download, index) => (
+    download.id === previous[index].id && download.title === previous[index].title && download.status === previous[index].status
+  ))
+    ? previous
+    : downloads
+})
+const commandPaletteVideoSources = computed(() => ({
+  history: store.getters.getHistoryCacheSorted,
+  saveVideoHistoryWithLastViewedPlaylist: store.getters.getSaveVideoHistoryWithLastViewedPlaylist,
+  playlists: store.getters.getAllPlaylists,
+  downloads: store.getters.getYtDlpDownloads,
+  queue: store.getters.getWatchQueue,
+  group: t('CommandPalette.Groups.Local Videos'),
+  sources: {
+    history: t('History.History'),
+    playlists: t('Playlists'),
+    downloads: t('Settings.Download Settings.Download Settings'),
+    queue: t('Video.Queue'),
+  },
+  playLibraryVideo: playLibraryVideoFromCommandPalette,
+  playDownloadedVideo: playDownloadedVideoFromCommandPalette,
+  playQueuedVideo: playQueuedVideoFromCommandPalette,
+  removeQueuedVideo: id => store.commit('removeVideoFromWatchQueue', id),
+}))
+const commandPaletteCommands = computed(() => createCommandPaletteRegistry({
+  t,
+  tm: tmWithFallback,
+  locale: locale.value,
+  routePath: route.path,
+  store,
+  downloads: commandPaletteDownloads.value,
+  isElectron,
+  isCapacitor,
+  phoneLayout: phoneLayout.value,
+  hardwareKeyboardAttached: hardwareKeyboardAttached.value,
+  navigate: navigateFromCommandPalette,
+  openSettingsSection,
+  openSettingsSearchResult,
+  openSettingsView,
+  goHistory: goHistoryFromCommandPalette,
+  openFindbar,
+  focusSearch: focusSearchFromCommandPalette,
+  showKeyboardShortcuts: () => store.dispatch('showKeyboardShortcutPrompt'),
+  createTab: () => store.dispatch('createTab', { makeActive: true }),
+  closeTabs: closeTabsFromCommandPalette,
+  reloadTabs: reloadTabsFromCommandPalette,
+  runShortcut: runShortcutFromCommandPalette,
+  createWindow: createWindowFromCommandPalette,
+  routeAvailable: path => availableRoutePaths.has(path),
+  supportsLocalApi: !!process.env.SUPPORTS_LOCAL_API,
+  isMac: process.platform === 'darwin',
+  isLinuxWayland: isLinuxWayland.value,
+  supportsAutoPictureInPictureMinimize: supportsAutoPictureInPictureMinimize.value,
+}))
+
+function openCommandPalette() {
+  if (showTutorial.value || (!commandPaletteOpen.value && isAnyPromptOpen.value)) return
+  commandPaletteOpen.value = true
+}
+
+function closeCommandPalette() {
+  commandPaletteOpen.value = false
+}
+
+function openTabOrganizer() {
+  if (!isElectron || showTutorial.value || (!tabOrganizerOpen.value && isAnyPromptOpen.value)) return
+  tabOrganizerOpen.value = true
+}
+
+function closeTabOrganizer() {
+  tabOrganizerOpen.value = false
+}
+
+function navigateFromCommandPalette(location) {
+  if (isElectron) {
+    return navigation.push(presentedTabId.value, location)
+  }
+  return router.push(location)
+}
+
+async function playLibraryVideoFromCommandPalette(video, location) {
+  if (!isElectron || store.getters.getExternalPlayer === '' || store.getters.getDefaultViewingMode !== 'external_player') {
+    return navigateFromCommandPalette(location)
+  }
+  const history = store.getters.getHistoryCacheById[video.videoId]
+  const saveProgress = ['auto', 'semi-auto'].includes(store.getters.getWatchedProgressSavingMode)
+  tabMediaCoordinator.dispatchAction('pause', {}, presentedTabId.value)
+  const opened = await openInExternalPlayer({
+    videoId: video.videoId,
+    // Palette results have no position within a remote playlist.
+    playlistId: null,
+    startTime: saveProgress ? history?.watchProgress ?? 0 : 0,
+    playbackRate: store.getters.getDefaultPlayback,
+  })
+  if (opened && store.getters.getRememberHistory && canMarkHistoryEntryAsWatched(video)) {
+    store.dispatch('updateHistory', {
+      ...video,
+      ...history,
+      watchProgress: history?.watchProgress ?? 0,
+      isWatched: true,
+      timeWatched: history?.timeWatched ?? Date.now(),
+      type: 'video',
+    })
+  }
+}
+
+function playQueuedVideoFromCommandPalette(location) {
+  const currentRoute = usesLogicalTabs ? store.getters.getTabById(presentedTabId.value)?.route : route
+  const withoutTimestamp = fullPath => {
+    const url = new URL(fullPath, 'https://opentubex.invalid')
+    url.searchParams.delete('timestamp')
+    return `${url.pathname}${url.search}${url.hash}`
+  }
+  if (currentRoute && withoutTimestamp(router.resolve(location).fullPath) === withoutTimestamp(currentRoute.fullPath)) {
+    const mediaTabId = usesLogicalTabs ? presentedTabId.value : 'web'
+    tabMediaCoordinator.dispatchAction('seekto', { seekTime: 0 }, mediaTabId)
+    tabMediaCoordinator.dispatchAction('play', {}, mediaTabId)
+    return
+  }
+  return navigateFromCommandPalette(location)
+}
+
+function playDownloadedVideoFromCommandPalette(id, file) {
+  return playDownloadedFile(id, file, {
+    refreshDownloads: () => refreshDownloadRecords(ytDlp, store),
+    playNative: (id, path) => ytDlp.ytDlpPlayDownload(id, path),
+    navigate: navigateFromCommandPalette,
+    fileNotFound: () => showToast({ message: t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] }),
+  })
+}
+
+function goHistoryFromCommandPalette(offset) {
+  if (usesLogicalTabs) {
+    return navigation.go(presentedTabId.value, offset)
+  }
+  return router.go(offset)
+}
+
+const ANDROID_EXIT_PROMPT_VALUES = ['quit', 'cancel', 'neverAskAgain']
+const androidExitPromptNames = computed(() => [
+  t('Close Confirmation.Quit'),
+  t('Cancel'),
+  t('Close Confirmation.Never Ask Again')
+])
+
+async function requestAndroidAppExit() {
+  if (!store.getters.getConfirmCloseApp) {
+    await exitAndroidApp()
+    return
+  }
+
+  showAndroidExitPrompt.value = true
+}
+
+/** @param {'quit' | 'cancel' | 'neverAskAgain' | null} option */
+async function handleAndroidExitPromptAnswer(option) {
+  showAndroidExitPrompt.value = false
+  if (option === 'neverAskAgain') {
+    await store.dispatch('updateConfirmCloseApp', false)
+  }
+  if (option === 'quit' || option === 'neverAskAgain') {
+    await exitAndroidApp()
+  }
+}
+
+function getAndroidBackTarget() {
+  const modalDialog = [...document.querySelectorAll('dialog:modal')].at(-1)
+  const settingsWindow = settingsWindowOpen.value ? document.querySelector('.settingsWindow') : null
+  const openDialog = [...document.querySelectorAll('dialog[open]')].at(-1)
+  const focused = document.activeElement instanceof HTMLElement ? document.activeElement : document
+  const prompt = [...document.querySelectorAll('.prompt:not([inert])')].at(-1)
+  const phoneSearch = document.querySelector('.topNav.phoneSearchOpen')
+  const phoneTabDialog = document.querySelector('.capacitorPhoneTabDialog')
+  const tabTarget = phoneTabDialog?.contains(focused) ? focused : phoneTabDialog
+  const searchTarget = phoneSearch?.contains(focused) ? focused : phoneSearch
+  // Color pickers in settings are teleported out of the window they belong to.
+  const colorPicker = document.querySelector('.colorPickerPopover')
+  const colorPickerTarget = colorPicker?.contains(focused) ? focused : colorPicker
+  // Focused popups inside a prompt or settings close before their window.
+  const promptTarget = prompt?.contains(focused) ? focused : prompt
+  return colorPickerTarget ?? modalDialog ?? promptTarget ?? (settingsWindow?.contains(focused) ? focused : settingsWindow) ?? openDialog ?? tabTarget ?? searchTarget ?? focused
+}
+
+async function handleAndroidBack() {
+  if (mobileContextLink.value !== null || mobileContextActions.value !== null) {
+    backMobileContextMenu()
+    return
+  }
+
+  const sideNavShown = isSideNavBackTarget()
+  const hadOpenLayer = hasVisibleGamepadLayer() || sideNavShown
+  const target = getAndroidBackTarget()
+  const escapeEvent = new KeyboardEvent('keydown', {
+    key: 'Escape',
+    code: 'Escape',
+    bubbles: true,
+    cancelable: true,
+  })
+
+  if (sideNavShown) {
+    closeSideNav()
+    return
+  }
+  if (!target.dispatchEvent(escapeEvent) || hadOpenLayer) {
+    return
+  }
+  if (document.fullscreenElement !== null) {
+    await document.exitFullscreen()
+    return
+  }
+
+  const tabId = presentedTabId.value
+  if (tabId && store.getters.getTabHistoryState(tabId).canGoBack) {
+    await navigation.back(tabId)
+    return
+  }
+
+  await requestAndroidAppExit()
+}
+
+function shouldInterceptAndroidBack() {
+  const tabId = presentedTabId.value
+  return Boolean(store.getters.getConfirmCloseApp ||
+    (tabId && store.getters.getTabHistoryState(tabId).canGoBack) ||
+    isSideNavShown() || settingsWindowOpen.value || isAnyPromptOpen.value ||
+    mobileContextLink.value || mobileContextActions.value ||
+    document.fullscreenElement || document.querySelector('.ftVideoPlayer.fullWindow, dialog[open], .topNav.phoneSearchOpen, .iconDropdown') ||
+    hasVisibleGamepadLayer())
+}
+
+/** Narrow layouts show the bottom navigation bar instead of the drawer. */
+function isSideNavShown() {
+  return isSideNavOpen.value && window.matchMedia('(width > 680px)').matches
+}
+
+/** Back closes the side nav only when no layer is open above it. */
+function isSideNavBackTarget() {
+  return isSideNavShown() && !isAnyPromptOpen.value && !settingsWindowOpen.value &&
+    !mobileContextLink.value && !mobileContextActions.value && !document.querySelector('dialog[open]') &&
+    !getAndroidBackPopup(document.activeElement ?? document.body)
+}
+
+/** @param {Element} target */
+function getAndroidBackPopup(target) {
+  const popup = target.closest?.('[data-settings-escape-scope], .iconDropdown, .colorPickerPopover, .contextMenu')
+  if (popup) return popup
+  const id = target.closest?.('[aria-expanded="true"][aria-controls]')?.getAttribute('aria-controls')
+  const controlled = id ? document.getElementById(id) : null
+  // Disclosure buttons also control panels, which Back does not close.
+  return controlled?.matches('[role="listbox"], [role="menu"], [role="dialog"]') ? controlled : null
+}
+
+/**
+ * Shrink the visible part of a page into a card, like Android's in-app Back.
+ * Pages have no visible fixed-position children, which a transform would move.
+ * @param {HTMLElement} page
+ */
+function getAndroidBackPageKeyframes(page) {
+  const bounds = page.getBoundingClientRect()
+  const top = Math.max(0, -bounds.top)
+  const left = Math.max(0, -bounds.left)
+  const bottom = Math.max(0, bounds.bottom - window.innerHeight)
+  const right = Math.max(0, bounds.right - window.innerWidth)
+  const transformOrigin = `${window.innerWidth / 2 - bounds.left}px ${window.innerHeight / 2 - bounds.top}px`
+  const visible = `${top}px ${right}px ${bottom}px ${left}px`
+  return [
+    { transformOrigin, transform: 'scale(1)', clipPath: `inset(${visible} round 0px)` },
+    { transformOrigin, transform: 'scale(0.9)', clipPath: `inset(${visible} round 32px)` }
+  ]
+}
+
+/** Use the first preview that can begin; the rest keep their ordinary Back. */
+function combineAndroidBackPreviews(previews) {
+  let active = null
+  return {
+    begin() {
+      active = previews.find(preview => preview?.begin()) ?? null
+      return active !== null
+    },
+    update(progress) { active?.update(progress) },
+    finish(commit) { return active?.finish(commit) },
+    cancel() { active?.cancel() },
+  }
+}
+
+function getAndroidBackPreview() {
+  if (mobileContextLink.value || mobileContextActions.value) {
+    return mobileLinkActionsRef.value ? getAndroidBackSheet(mobileLinkActionsRef.value) : null
+  }
+  if (isSideNavBackTarget()) {
+    const drawer = document.querySelector('.sideNav')
+    if (!drawer) return null
+    const overlay = useWatchSideNavOverlay.value
+    return createAndroidBackDialogPreview(drawer, handleAndroidBack, isSideNavBackTarget, () => overlay
+      ? [
+          { transform: 'translateX(0)' },
+          { transform: `translateX(${(isLocaleRightToLeft.value ? 1 : -1) * drawer.getBoundingClientRect().width}px)` }
+        ]
+      // The rail pushes the page, so it collapses like the button does.
+      : [{ inlineSize: getComputedStyle(drawer).inlineSize }, { inlineSize: 'var(--desktop-nav-rail-width)' }])
+  }
+  const target = getAndroidBackTarget()
+  const sheet = getAndroidBackSheet(target) ?? getAndroidBackSheet(target.closest?.('[data-bottom-sheet]'))
+  if (sheet && !target.classList.contains('compactSheet')) return sheet
+  const popup = getAndroidBackPopup(target)
+  if (popup) {
+    return createAndroidBackDialogPreview(popup, handleAndroidBack, () =>
+      popup.isConnected && getAndroidBackPopup(getAndroidBackTarget()) === popup)
+  }
+  const dialog = target.closest?.('.settingsWindow, .prompt, dialog[open]')
+  if (dialog && !target.closest?.('[aria-expanded="true"]')) {
+    const nested = dialog.hasAttribute('data-android-back-nested')
+    const content = nested
+      ? dialog.querySelector('.settingsContent') ?? dialog
+      : dialog
+    const isAvailable = () =>
+      content.isConnected && dialog.hasAttribute('data-android-back-nested') === nested &&
+      getAndroidBackTarget().closest?.('.settingsWindow, .prompt, dialog[open]') === dialog
+    if (!nested && dialog.matches('.settingsWindow')) {
+      // An opening morph owns the window. Ordinary Back closes it once the morph ends.
+      if (store.getters.getSettingsWindowMorphing) return null
+      // The gesture plays the morph into the header button, so closing must not replay it.
+      return createAndroidBackDialogPreview(dialog, () => store.dispatch('hideSettingsWindow'), isAvailable, element =>
+        getUtilityWindowCloseKeyframes(element, getSettingsWindowIconButton(store.getters.getSettingsWindowView)))
+    }
+    return createAndroidBackDialogPreview(content, handleAndroidBack, isAvailable)
+  }
+  const tabOverlay = target.closest?.('.capacitorPhoneTabOverlay')
+  if (tabOverlay) {
+    // Back returns from tab history to open tabs inside the switcher.
+    const isClosing = () => tabOverlay.isConnected && !tabOverlay.querySelector('.capacitorPhoneTabDialog:is([inert], [data-android-back-nested])') &&
+      getAndroidBackTarget().closest?.('.capacitorPhoneTabOverlay') === tabOverlay
+    if (!isClosing()) return null
+    return createAndroidBackDialogPreview(tabOverlay, handleAndroidBack, isClosing, () => [
+      { opacity: 1, transform: 'none' },
+      { opacity: 0, transform: 'scale(0.94)' }
+    ])
+  }
+  const search = target.closest?.('.topNav.phoneSearchOpen')
+  const searchContainer = search?.querySelector('.searchContainer')
+  if (searchContainer) {
+    return createAndroidBackDialogPreview(searchContainer, handleAndroidBack, () =>
+      searchContainer.isConnected && getAndroidBackTarget().closest?.('.topNav.phoneSearchOpen') === search, () => [
+      { opacity: 1, transform: 'none' },
+      { opacity: 0, transform: `translateX(${isLocaleRightToLeft.value ? -24 : 24}px)` }
+    ])
+  }
+  const tabId = presentedTabId.value
+  if (!tabId || settingsWindowOpen.value || isAnyPromptOpen.value || hasVisibleGamepadLayer() ||
+    document.fullscreenElement || document.querySelector('dialog[open], .topNav.phoneSearchOpen')) return null
+  const page = document.querySelector(`.tabContent[data-tab-id="${CSS.escape(tabId)}"]`)
+  return combineAndroidBackPreviews([
+    getAndroidBackPlayer(tabId),
+    page && createAndroidBackDialogPreview(page, handleAndroidBack, () =>
+      page.isConnected && presentedTabId.value === tabId && store.getters.getTabHistoryState(tabId).canGoBack,
+    getAndroidBackPageKeyframes)
+  ])
+}
+
+function handleAndroidPictureInPictureChange(event) {
+  setAndroidPictureInPictureDocumentState(event.active === true, event)
+}
+
+function handleHardwareKeyboardChange(event) {
+  hardwareKeyboardAttached.value = event.attached === true
+  if (!hardwareKeyboardAttached.value) {
+    store.dispatch('hideKeyboardShortcutPrompt')
+  }
+}
+
+function openSettingsView(view) {
+  settingsSearchTarget.value = null
+  store.commit('setSettingsWindowSection', null)
+  store.dispatch('showSettingsWindow', view)
+}
+
+function openSettingsSection(section) {
+  settingsSearchTarget.value = null
+  store.commit('setSettingsWindowSection', section)
+  store.dispatch('showSettingsWindow')
+}
+
+function openSettingsSearchResult(section, match) {
+  settingsSearchTarget.value = { section, ...match }
+  store.commit('setSettingsWindowSection', null)
+  store.dispatch('showSettingsWindow')
+}
+
+function clearSettingsSearchTarget(target) {
+  if (settingsSearchTarget.value === target) {
+    settingsSearchTarget.value = null
+  }
+}
+
+function focusSearchFromCommandPalette() {
+  window.dispatchEvent(new CustomEvent('opentubex:focus-search'))
+}
+
+function createWindowFromCommandPalette() {
+  if (isElectron) {
+    openInternalPath({
+      path: landingPage.value,
+      doCreateNewWindow: true
+    })
+    return
+  }
+
+  const url = new URL(window.location.href)
+  url.hash = landingPage.value
+  window.open(url.toString(), '_blank', 'noreferrer')
+}
+
+async function closeTabsFromCommandPalette() {
+  const hasRemainingTabs = await closeShortcutTabs()
+  if (!hasRemainingTabs) window.close()
+}
+
+function reloadTabsFromCommandPalette() {
+  for (const tabId of getShortcutTabIds()) prepareAndReloadTab(tabId)
+}
+
+function runShortcutFromCommandPalette(shortcut) {
+  nextTick(() => {
+    document.dispatchEvent(new KeyboardEvent('keydown', keyboardEventInitFromShortcut(shortcut)))
+  })
+}
+
+function handleGamepadPlayPause() {
+  document.dispatchEvent(new KeyboardEvent(
+    'keydown',
+    keyboardEventInitFromShortcut(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.PLAY)
+  ))
+}
+
+function handleGamepadBack() {
+  const hadOpenLayer = hasVisibleGamepadLayer()
+  const target = document.activeElement instanceof HTMLElement ? document.activeElement : document
+  const escapeEvent = new KeyboardEvent('keydown', {
+    key: 'Escape',
+    code: 'Escape',
+    bubbles: true,
+    cancelable: true,
+  })
+
+  if (!target.dispatchEvent(escapeEvent) || hadOpenLayer) {
+    return
+  }
+  if (document.fullscreenElement !== null) {
+    document.exitFullscreen()
+    return
+  }
+
+  goHistoryFromCommandPalette(-1)
+}
+
 /**
  * @param {KeyboardEvent} event
  */
 function handleKeyboardShortcuts(event) {
-  // ignore user typing in HTML `input` elements
-  if (event.shiftKey && event.key === '?' && event.target.tagName !== 'INPUT') {
-    store.commit('setIsKeyboardShortcutPromptShown', !isKeyboardShortcutPromptShown.value)
+  if (showTutorial.value) return
+
+  if (event.key === 'Escape' && (mobileContextLink.value || mobileContextActions.value)) {
+    event.preventDefault()
+    backMobileContextMenu()
+    return
   }
 
-  if (event.key === 'Tab') {
+  const shortcuts = KeyboardShortcuts.APP.GENERAL
+
+  if (matchesKeyboardShortcut(event, shortcuts.OPEN_COMMAND_PALETTE)) {
+    event.preventDefault()
+    if (commandPaletteOpen.value) {
+      closeCommandPalette()
+    } else {
+      openCommandPalette()
+    }
+    return
+  }
+
+  if (isElectron && !commandPaletteOpen.value &&
+    matchesKeyboardShortcut(event, shortcuts.OPEN_TAB_ORGANIZER) &&
+    (tabOrganizerOpen.value || !isTypingTarget(event.target))) {
+    event.preventDefault()
+    if (event.repeat) return
+    if (tabOrganizerOpen.value) closeTabOrganizer()
+    else openTabOrganizer()
+    return
+  }
+
+  if (commandPaletteOpen.value || tabOrganizerOpen.value) return
+
+  if (matchesKeyboardShortcut(event, shortcuts.COPY_CURRENT_URL)) {
+    event.preventDefault()
+    const appUrl = window.location.href.split('#')[0]
+    const publicUrl = resolveMobileContextLinkCopyUrl(window.location.href, appUrl)
+    if (publicUrl) {
+      copyToClipboard(publicUrl, {
+        messageOnSuccess: t('Share.YouTube URL copied to clipboard')
+      })
+    }
+    return
+  }
+
+  if (matchesKeyboardShortcut(event, shortcuts.FIND_IN_PAGE)) {
+    event.preventDefault()
+    store.dispatch('showOutlines')
+    openFindbar()
+    return
+  }
+
+  if (supportsYtDlp && matchesKeyboardShortcut(event, shortcuts.NAVIGATE_TO_DOWNLOADS)) {
+    event.preventDefault()
+    store.dispatch('showSettingsWindow', 'downloads')
+    return
+  }
+
+  if (findbarVisible.value && handleFindbarNavigationShortcut(event)) {
+    return
+  }
+
+  if (event.key === 'Escape' && isTabSwitcherActive()) {
+    event.preventDefault()
+    cancelTabSwitcher()
+    return
+  }
+
+  if (findbarVisible.value && event.key === 'Escape') {
+    event.preventDefault()
+    closeFindbar()
+    return
+  }
+
+  if (findbarVisible.value && event.key === 'Enter' && !isTypingTarget(event.target)) {
+    event.preventDefault()
+    findInPage(event.shiftKey)
+    return
+  }
+
+  if (matchesKeyboardShortcut(event, shortcuts.SHOW_SHORTCUTS) && !isTypingTarget(event.target)) {
+    event.preventDefault()
+    store.dispatch(isKeyboardShortcutPromptShown.value && settingsWindowOpen.value
+      ? 'hideSettingsWindow'
+      : 'showKeyboardShortcutPrompt')
+  }
+
+  if (event.key === 'Tab' && !event.ctrlKey) {
     store.dispatch('showOutlines')
   }
+
+  // Tab keyboard shortcuts (Electron only)
+  if (process.env.IS_ELECTRON) {
+    // Ctrl+1..9: Switch to tab by number
+    if (matchesKeyboardShortcut(event, shortcuts.SWITCH_TO_TAB)) {
+      if (!isTypingTarget(event.target)) {
+        const index = parseInt(event.key, 10) - 1
+        const tabs = store.state.tabs.tabs
+        if (index < tabs.length) {
+          event.preventDefault()
+          store.dispatch('activateTab', tabs[index].id)
+          return
+        }
+      }
+    }
+
+    // F1: Toggle between horizontal and vertical tabs
+    if (matchesKeyboardShortcut(event, shortcuts.TOGGLE_TAB_ORIENTATION) && !isTypingTarget(event.target)) {
+      event.preventDefault()
+      cycleTabLayout()
+      return
+    }
+
+    // Ctrl+T: New tab
+    if (matchesKeyboardShortcut(event, shortcuts.NEW_TAB)) {
+      event.preventDefault()
+      store.dispatch('createTab', { makeActive: true })
+      return
+    }
+
+    if (matchesKeyboardShortcut(event, shortcuts.RESTORE_CLOSED_WINDOW)) {
+      event.preventDefault()
+      window.ftElectron.reopenClosedWindow()
+      return
+    }
+
+    // Ctrl+Shift+T: Restore closed tab
+    if (matchesKeyboardShortcut(event, shortcuts.RESTORE_CLOSED_TAB)) {
+      event.preventDefault()
+      store.dispatch('restoreClosedTab')
+      return
+    }
+
+    // Ctrl+W: Close tab (handled in menu, but also here for robustness)
+    if (matchesKeyboardShortcut(event, shortcuts.CLOSE_TAB)) {
+      event.preventDefault()
+      closeShortcutTabs().then((hasRemainingTabs) => {
+        if (!hasRemainingTabs) {
+          window.close()
+        }
+      })
+      return
+    }
+
+    // Ctrl+Tab: Next tab
+    if (matchesKeyboardShortcut(event, shortcuts.NEXT_TAB)) {
+      event.preventDefault()
+      cycleTabSwitcher(1)
+      return
+    }
+
+    // Ctrl+Shift+Tab: Previous tab
+    if (matchesKeyboardShortcut(event, shortcuts.PREV_TAB)) {
+      event.preventDefault()
+      cycleTabSwitcher(-1)
+      return
+    }
+
+    // Reload tab unless the current view handles refresh itself
+    if ([shortcuts.RELOAD_TAB, shortcuts.RELOAD_TAB_ALT]
+      .some(shortcut => matchesKeyboardShortcut(event, shortcut))) {
+      const tabIds = getShortcutTabIds()
+      if (tabIds.length === 1 && /^\/(?:subscriptions|trending|popular)(?:\/|$)/.test(route.path)) {
+        event.preventDefault()
+        return
+      }
+      event.preventDefault()
+      for (const tabId of tabIds) {
+        prepareAndReloadTab(tabId)
+      }
+    }
+  }
+}
+
+/**
+ * The setting is only committed to the store once it has been persisted, so
+ * consecutive presses are queued to keep every one of them from advancing
+ * from the same stale value.
+ */
+let pendingTabLayoutUpdate = Promise.resolve()
+
+function cycleTabLayout() {
+  pendingTabLayoutUpdate = pendingTabLayoutUpdate.then(() =>
+    store.dispatch('updateTabBarPosition', getNextTabBarPosition(tabBarPosition.value))
+  )
+}
+
+/**
+ * @param {EventTarget | null} target
+ * @returns {boolean}
+ */
+function isTypingTarget(target) {
+  return target instanceof HTMLElement && (
+    target.tagName === 'INPUT' ||
+    target.tagName === 'TEXTAREA' ||
+    target.isContentEditable
+  )
+}
+
+/**
+ * @param {KeyboardEvent} event
+ * @returns {boolean}
+ */
+function handleFindbarNavigationShortcut(event) {
+  const shortcuts = KeyboardShortcuts.APP.GENERAL
+  const isNextShortcut = [
+    shortcuts.FIND_NEXT,
+    shortcuts.FIND_NEXT_ALT,
+  ].some(shortcut => matchesKeyboardShortcut(event, shortcut))
+  const isPreviousShortcut = [
+    shortcuts.FIND_PREVIOUS,
+    shortcuts.FIND_PREVIOUS_ALT,
+  ].some(shortcut => matchesKeyboardShortcut(event, shortcut))
+
+  if (!isNextShortcut && !isPreviousShortcut) {
+    return false
+  }
+
+  event.preventDefault()
+  findInPage(isPreviousShortcut)
+  return true
+}
+
+function openFindbar() {
+  findbarVisible.value = true
+
+  const selection = window.getSelection()?.toString().trim()
+  if (selection) {
+    findbarQuery.value = selection
+  }
+
+  nextTick(() => {
+    findbarInputRef.value?.focus()
+    findbarInputRef.value?.select()
+    findInPage()
+  })
+}
+
+function closeFindbar() {
+  findbarVisible.value = false
+  findbarMatchIndex.value = 0
+  findbarMatchCount.value = 0
+  clearFindbarHighlights()
+}
+
+/**
+ * @param {boolean | Event} [backwards]
+ */
+function findInPage(backwards = null) {
+  const query = findbarQuery.value.trim()
+  if (query.length === 0) {
+    findbarMatchIndex.value = 0
+    findbarMatchCount.value = 0
+    clearFindbarHighlights()
+    return
+  }
+
+  const input = findbarInputRef.value
+  const selectionStart = input?.selectionStart ?? query.length
+  const selectionEnd = input?.selectionEnd ?? query.length
+  const isNavigation = typeof backwards === 'boolean'
+  const direction = backwards === true ? -1 : 1
+
+  if (!isNavigation || findbarMatches.length === 0) {
+    highlightFindbarMatches(query)
+  } else {
+    selectFindbarMatch(findbarMatchIndex.value - 1 + direction)
+  }
+
+  requestAnimationFrame(() => {
+    input?.focus()
+    input?.setSelectionRange(selectionStart, selectionEnd)
+  })
+}
+
+/**
+ * @param {string} query
+ */
+function highlightFindbarMatches(query) {
+  clearFindbarHighlights()
+
+  const walker = document.createTreeWalker(
+    tabRuntimeRegistry.getRoot(presentedTabId.value) ?? document.body,
+    NodeFilter.SHOW_TEXT,
+    {
+      acceptNode: (node) => {
+        if (
+          isFindbarTextNode(node) ||
+          isNonSearchableTextNode(node) ||
+          isHiddenTextNode(node)
+        ) {
+          return NodeFilter.FILTER_REJECT
+        }
+
+        return NodeFilter.FILTER_ACCEPT
+      }
+    }
+  )
+  const normalizedQuery = query.toLocaleLowerCase()
+  const ranges = []
+
+  while (walker.nextNode()) {
+    const node = walker.currentNode
+    const text = node.textContent ?? ''
+    const normalizedText = text.toLocaleLowerCase()
+    let index = normalizedText.indexOf(normalizedQuery)
+
+    while (index !== -1) {
+      ranges.push({
+        node,
+        start: index,
+        end: index + normalizedQuery.length
+      })
+      index = normalizedText.indexOf(normalizedQuery, index + normalizedQuery.length)
+    }
+  }
+
+  const matches = ranges.map((rangeInfo) => {
+    const range = document.createRange()
+    range.setStart(rangeInfo.node, rangeInfo.start)
+    range.setEnd(rangeInfo.node, rangeInfo.end)
+    return range
+  })
+
+  findbarMatches = matches
+  findbarMatchCount.value = matches.length
+  paintFindbarHighlights()
+  selectFindbarMatch(matches.length > 0 ? 0 : -1)
+}
+
+function clearFindbarHighlights() {
+  window.CSS.highlights.delete('findbarmatch')
+  window.CSS.highlights.delete('findbarmatchcurrent')
+  findbarMatches = []
+}
+
+function paintFindbarHighlights() {
+  const highlight = new window.Highlight(...findbarMatches)
+  highlight.priority = 0
+  window.CSS.highlights.set('findbarmatch', highlight)
+}
+
+/**
+ * @param {number} index
+ */
+function selectFindbarMatch(index) {
+  const matches = findbarMatches
+  if (matches.length === 0) {
+    findbarMatchIndex.value = 0
+    findbarMatchCount.value = 0
+    return
+  }
+
+  const nextIndex = (index + matches.length) % matches.length
+  const currentMatch = matches[nextIndex]
+  const currentHighlight = new window.Highlight(currentMatch)
+  currentHighlight.priority = 1
+
+  window.CSS.highlights.set('findbarmatchcurrent', currentHighlight)
+  scrollFindbarMatchIntoView(currentMatch)
+
+  findbarMatchIndex.value = nextIndex + 1
+  findbarMatchCount.value = matches.length
+}
+
+/**
+ * @param {Range} match
+ */
+function scrollFindbarMatchIntoView(match) {
+  const rect = match.getBoundingClientRect()
+  if (rect.width === 0 && rect.height === 0) {
+    return
+  }
+
+  const targetBlockCenter = rect.top + rect.height / 2
+  const viewportBlockCenter = window.innerHeight / 2
+  window.scrollBy({
+    top: targetBlockCenter - viewportBlockCenter,
+    behavior: 'smooth'
+  })
+}
+
+/**
+ * @param {Node} node
+ * @returns {boolean}
+ */
+function isFindbarTextNode(node) {
+  return node.parentElement?.closest('.findbar') != null
+}
+
+/**
+ * @param {Node} node
+ * @returns {boolean}
+ */
+function isNonSearchableTextNode(node) {
+  return node.parentElement?.closest('datalist, input, option, optgroup, script, select, style, template, textarea') != null
+}
+
+/**
+ * @param {Node} node
+ * @returns {boolean}
+ */
+function isHiddenTextNode(node) {
+  const element = node.parentElement
+  if (element == null) {
+    return true
+  }
+
+  const style = window.getComputedStyle(element)
+  return style.display === 'none' ||
+    style.visibility === 'hidden' ||
+    element.closest('[aria-hidden="true"]') != null
+}
+
+/**
+ * @param {KeyboardEvent} event
+ */
+function handleKeyboardShortcutKeyup(event) {
+  if (!isTabSwitcherActive()) {
+    return
+  }
+
+  if (event.key === 'Control' || !event.ctrlKey) {
+    event.preventDefault()
+    commitTabSwitcherSelection()
+  }
+}
+
+/**
+ * @param {number} direction
+ */
+function cycleTabSwitcher(direction) {
+  const tabs = tabSwitcherTabs.value
+  if (tabs.length <= 1) {
+    return
+  }
+
+  if (!isTabSwitcherActive()) {
+    const activeIndex = Math.max(0, tabs.findIndex(tab => tab.id === store.getters.getActiveTabId))
+    tabSwitcherSelectedIndex.value = wrapTabSwitcherIndex(activeIndex + direction, tabs.length)
+    // A quick release commits the selection without mounting the menu,
+    // measuring its scrollbar, or requesting/decoding previews.
+    tabSwitcherOpenTimer = setTimeout(() => {
+      tabSwitcherOpenTimer = null
+      if (showTabPreviews.value) {
+        window.ftElectron.tabs.setPreviewCapturePaused(true)
+      }
+      tabSwitcherVisible.value = true
+      scrollTabSwitcherSelectionIntoView()
+      loadTabSwitcherPreviews()
+    }, TAB_SWITCHER_HOLD_DELAY_MS)
+    return
+  }
+
+  tabSwitcherSelectedIndex.value = wrapTabSwitcherIndex(
+    tabSwitcherSelectedIndex.value + direction,
+    tabs.length
+  )
+  scrollTabSwitcherSelectionIntoView()
+}
+
+/**
+ * @param {number} index
+ * @param {number} length
+ * @returns {number}
+ */
+function wrapTabSwitcherIndex(index, length) {
+  return (index + length) % length
+}
+
+function isTabSwitcherActive() {
+  return tabSwitcherOpenTimer != null || tabSwitcherVisible.value
+}
+
+function loadTabSwitcherPreviews() {
+  if (
+    !showTabPreviews.value ||
+    !process.env.IS_ELECTRON ||
+    typeof window.ftElectron?.tabs?.getCachedPreviews !== 'function'
+  ) {
+    return
+  }
+
+  const requestId = ++tabSwitcherPreviewRequestId
+  const tabIds = tabSwitcherTabs.value.map(tab => tab.id)
+  tabSwitcherPreviewPending.value = Object.fromEntries(tabIds.map(tabId => [tabId, true]))
+
+  window.ftElectron.tabs.getCachedPreviews(tabIds).then((previews) => {
+    if (requestId !== tabSwitcherPreviewRequestId || !tabSwitcherVisible.value) {
+      return
+    }
+
+    tabSwitcherPreviewUrls.value = Object.fromEntries(
+      Object.entries(previews).filter(([, dataUrl]) => typeof dataUrl === 'string' && dataUrl.length > 0)
+    )
+  }).catch(() => {}).finally(() => {
+    if (requestId === tabSwitcherPreviewRequestId && tabSwitcherVisible.value) {
+      tabSwitcherPreviewPending.value = {}
+    }
+  })
+}
+
+function getUsableTabSwitcherAvatarUrl(tab) {
+  const avatarUrl = getTabAvatarUrl(tab) || getTabPreviewFallbackUrl(tab)
+  return avatarUrl !== tabSwitcherFailedAvatarUrls.value[tab.id] ? avatarUrl : null
+}
+
+function getUsableTabSwitcherPreviewUrl(tab) {
+  const previewUrl = tabSwitcherPreviewUrls.value[tab.id]
+  return previewUrl !== tabSwitcherFailedPreviewUrls.value[tab.id] ? previewUrl : null
+}
+
+function handleTabSwitcherAvatarError(tab) {
+  tabSwitcherFailedAvatarUrls.value = {
+    ...tabSwitcherFailedAvatarUrls.value,
+    [tab.id]: getUsableTabSwitcherAvatarUrl(tab)
+  }
+}
+
+function handleTabSwitcherPreviewError(tab) {
+  tabSwitcherFailedPreviewUrls.value = {
+    ...tabSwitcherFailedPreviewUrls.value,
+    [tab.id]: getUsableTabSwitcherPreviewUrl(tab)
+  }
+}
+
+/**
+ * @param {number} index
+ */
+function setTabSwitcherSelectedIndex(index) {
+  tabSwitcherSelectedIndex.value = index
+}
+
+function activateTabSwitcherPointer() {
+  tabSwitcherPointerActive.value = true
+}
+
+function clearTabSwitcherSelection() {
+  tabSwitcherSelectedIndex.value = -1
+  tabSwitcherPointerActive.value = false
+}
+
+/**
+ * @param {WheelEvent} event
+ */
+function handleTabSwitcherWheel(event) {
+  const switcher = tabSwitcherRef.value
+  if (!(switcher instanceof HTMLElement)) {
+    return
+  }
+
+  const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY)
+    ? event.deltaX
+    : event.deltaY
+
+  if (delta === 0) {
+    return
+  }
+
+  // Prefer vertical scrolling when the switcher wraps into multiple rows;
+  // fall back to horizontal when that is the only overflow axis.
+  if (switcher.scrollHeight > switcher.clientHeight) {
+    switcher.scrollTop += delta
+  } else {
+    switcher.scrollLeft += delta
+  }
+}
+
+function scrollTabSwitcherSelectionIntoView() {
+  if (!tabSwitcherVisible.value || tabSwitcherScrollPending) return
+  tabSwitcherScrollPending = true
+  nextTick(() => {
+    tabSwitcherScrollPending = false
+    if (!tabSwitcherVisible.value) return
+    const selectedTabId = tabSwitcherSelectedTabId.value
+    if (selectedTabId == null) {
+      return
+    }
+
+    document.getElementById(selectedTabId)?.scrollIntoView({
+      block: 'nearest',
+      inline: 'nearest'
+    })
+  })
+}
+
+/**
+ * @param {number} [index]
+ */
+function commitTabSwitcherSelection(index) {
+  if (typeof index === 'number') {
+    tabSwitcherSelectedIndex.value = index
+  }
+
+  const selectedTab = tabSwitcherTabs.value[tabSwitcherSelectedIndex.value]
+  cancelTabSwitcher()
+
+  if (selectedTab && selectedTab.id !== store.getters.getActiveTabId) {
+    store.dispatch('activateTab', selectedTab.id)
+  }
+}
+
+function cancelTabSwitcher() {
+  clearTimeout(tabSwitcherOpenTimer)
+  tabSwitcherOpenTimer = null
+  tabSwitcherSelectedIndex.value = -1
+  if (!tabSwitcherVisible.value) {
+    return
+  }
+
+  tabSwitcherVisible.value = false
+  tabSwitcherPreviewUrls.value = {}
+  tabSwitcherPreviewPending.value = {}
+  tabSwitcherFailedAvatarUrls.value = {}
+  tabSwitcherFailedPreviewUrls.value = {}
+  tabSwitcherPointerActive.value = false
+  tabSwitcherPreviewRequestId++
+  window.ftElectron.tabs.setPreviewCapturePaused(false)
+}
+
+/**
+ * @param {{color?: string | null}} tab
+ * @returns {Record<string, string | undefined>}
+ */
+function getTabSwitcherItemStyle(tab) {
+  return {
+    '--tab-switcher-accent-color': getTabAccentColor(tab.color) || undefined
+  }
+}
+
+async function prepareAndReloadTab(tabId = activeTabId.value) {
+  const tab = store.getters.getTabById(tabId)
+  if (!tab) {
+    return
+  }
+
+  if (tab.route.path.startsWith('/watch/')) {
+    const timestamp = store.getters.getWatchTimestamp(tabId)
+    if (typeof timestamp === 'number' && timestamp > 0) {
+      navigation.prepareReload(tabId, {
+        path: tab.route.path,
+        query: { ...tab.route.query, oneTimeTimestamp: Math.floor(timestamp) }
+      })
+    }
+  }
+  store.dispatch('reloadTab', tabId)
+}
+
+function getShortcutTabIds() {
+  const selectedTabIds = store.getters.getSelectedTabIds
+  return selectedTabIds.length > 1
+    ? [...selectedTabIds]
+    : activeTabId.value ? [activeTabId.value] : []
+}
+
+const multipleTabsActionPrompt = ref(null)
+const multipleTabsActionPromptCount = ref(0)
+/** @type {import('vue').Ref<Array<'olderVersionChanges' | 'libraryFormatChanged'>>} */
+const libraryNotices = ref([])
+const libraryNotice = computed(() => {
+  switch (libraryNotices.value[0]) {
+    case 'olderVersionChanges':
+      return {
+        title: t('Older Version Changes.Title'),
+        message: t('Older Version Changes.Message'),
+        detail: t('Older Version Changes.Detail'),
+      }
+    case 'libraryFormatChanged':
+      return {
+        title: t('Library Format Changed.Title'),
+        message: t('Library Format Changed.Message'),
+        detail: t('Library Format Changed.Detail'),
+      }
+    default:
+      return null
+  }
+})
+
+async function loadLibraryNotices() {
+  try {
+    libraryNotices.value = await window.ftElectron.libraryNotices.get()
+  } catch (error) {
+    console.error('Failed to load library notices', error)
+  }
+}
+
+function dismissLibraryNotice() {
+  const notice = libraryNotices.value.shift()
+  if (notice) window.ftElectron.libraryNotices.dismiss(notice)
+}
+
+const MULTIPLE_TABS_ACTION_PROMPT_VALUES = ['confirm', 'cancel', 'neverAskAgain']
+
+/** @type {((confirmed: boolean) => void) | null} */
+let multipleTabsActionPromptResolve = null
+/** @type {Promise<boolean> | null} */
+let multipleTabsActionPromptPromise = null
+
+const multipleTabsActionPromptTitle = computed(() => {
+  if (multipleTabsActionPrompt.value === 'load') return t('Load Multiple Tabs Confirmation.Title')
+  if (multipleTabsActionPrompt.value === 'unload') return t('Unload Multiple Tabs Confirmation.Title')
+  return t('Close Multiple Tabs Confirmation.Title')
+})
+const multipleTabsActionPromptMessage = computed(() => {
+  const count = multipleTabsActionPromptCount.value
+  const parameters = { count }
+  if (multipleTabsActionPrompt.value === 'load') return t('Load Multiple Tabs Confirmation.Message', parameters, count)
+  if (multipleTabsActionPrompt.value === 'unload') return t('Unload Multiple Tabs Confirmation.Message', parameters, count)
+  return t('Close Multiple Tabs Confirmation.Message', parameters, count)
+})
+const multipleTabsActionPromptNames = computed(() => [
+  multipleTabsActionPrompt.value === 'load'
+    ? t(
+        'Load Multiple Tabs Confirmation.Load Tabs',
+        { count: multipleTabsActionPromptCount.value },
+        multipleTabsActionPromptCount.value
+      )
+    : multipleTabsActionPrompt.value === 'unload'
+      ? t(
+          'Unload Multiple Tabs Confirmation.Unload Tabs',
+          { count: multipleTabsActionPromptCount.value },
+          multipleTabsActionPromptCount.value
+        )
+      : t(
+          'Close Multiple Tabs Confirmation.Close Tabs',
+          { count: multipleTabsActionPromptCount.value },
+          multipleTabsActionPromptCount.value
+        ),
+  t('Cancel'),
+  t('Confirmations.Never Ask Again')
+])
+const multipleTabsActionPromptIcons = computed(() => [
+  ['fas', { load: 'download', unload: 'right-from-bracket' }[multipleTabsActionPrompt.value] ?? 'rectangle-xmark'],
+  ['fas', 'xmark'],
+  ['fas', 'eye-slash']
+])
+
+/**
+ * @param {'close' | 'load' | 'unload'} action
+ */
+function isMultipleTabsActionConfirmationEnabled(action) {
+  if (action === 'load') return store.getters.getConfirmLoadMultipleTabs
+  if (action === 'unload') return store.getters.getConfirmUnloadMultipleTabs
+  return store.getters.getConfirmCloseMultipleTabs
+}
+
+/**
+ * @param {'close' | 'load' | 'unload'} action
+ */
+function disableMultipleTabsActionConfirmation(action) {
+  if (action === 'load') return store.dispatch('updateConfirmLoadMultipleTabs', false)
+  if (action === 'unload') return store.dispatch('updateConfirmUnloadMultipleTabs', false)
+  return store.dispatch('updateConfirmCloseMultipleTabs', false)
+}
+
+/**
+ * Ask the user to confirm an action affecting several tabs at once. Concurrent
+ * requests for the same action share one prompt; a different action is rejected.
+ * @param {number} count
+ * @param {'close' | 'load' | 'unload'} action
+ * @returns {Promise<boolean>}
+ */
+function confirmMultipleTabsAction(count, action) {
+  if (!isMultipleTabsActionConfirmationEnabled(action)) return Promise.resolve(true)
+
+  if (multipleTabsActionPromptPromise) {
+    if (multipleTabsActionPrompt.value !== action) return Promise.resolve(false)
+
+    multipleTabsActionPromptCount.value = Math.max(multipleTabsActionPromptCount.value, count)
+    return multipleTabsActionPromptPromise
+  }
+
+  multipleTabsActionPrompt.value = action
+  multipleTabsActionPromptCount.value = count
+  multipleTabsActionPromptPromise = new Promise(resolve => {
+    multipleTabsActionPromptResolve = resolve
+  })
+  return multipleTabsActionPromptPromise
+}
+
+/**
+ * @param {'confirm' | 'cancel' | 'neverAskAgain' | null} option
+ */
+async function handleMultipleTabsActionPromptAnswer(option) {
+  const action = multipleTabsActionPrompt.value
+  multipleTabsActionPrompt.value = null
+  multipleTabsActionPromptCount.value = 0
+  const resolve = multipleTabsActionPromptResolve
+  multipleTabsActionPromptResolve = null
+  multipleTabsActionPromptPromise = null
+  if (option === 'neverAskAgain' && action != null) {
+    try {
+      await disableMultipleTabsActionConfirmation(action)
+    } catch (error) {
+      console.error('Failed to disable the bulk tab action confirmation', error)
+    }
+  }
+  resolve?.(option === 'confirm' || option === 'neverAskAgain')
+}
+
+/**
+ * @param {{ requestId: string, count: number, action: 'close' | 'load' | 'unload' }} request
+ */
+async function handleConfirmMultipleTabsActionRequest({ requestId, count, action }) {
+  const confirmed = await confirmMultipleTabsAction(count, action)
+  window.ftElectron.tabs.respondConfirmMultipleAction(requestId, confirmed)
+}
+
+async function closeShortcutTabs() {
+  const tabIds = getShortcutTabIds()
+  if (tabIds.length >= MULTIPLE_TABS_CONFIRM_THRESHOLD && !await confirmMultipleTabsAction(tabIds.length, 'close')) {
+    return true
+  }
+
+  if (tabIds.length === 0) {
+    return true
+  }
+  if (tabIds.length === 1) {
+    return await store.dispatch('closeTab', tabIds[0])
+  }
+
+  return await store.dispatch('closeTabs', tabIds)
 }
 
 function handleMouseDown() {
   store.dispatch('hideOutlines')
 }
 
+/** @param {PointerEvent} event */
+function handleNumberInputPointer(event) {
+  const input = event.target
+  if (!(input instanceof HTMLInputElement) || input.type !== 'number') return
+  if (event.type === 'pointerout') {
+    if (event.relatedTarget !== input) {
+      input.style.removeProperty('--number-step-up-color')
+      input.style.removeProperty('--number-step-down-color')
+    }
+    return
+  }
+  if (input.disabled || input.readOnly) return
+
+  // Chromium exposes both native step arrows as one pseudo-element. Split its
+  // paint at the content's center while keeping native stepping and key repeat.
+  const bounds = input.getBoundingClientRect()
+  const style = getComputedStyle(input)
+  const rtl = style.direction === 'rtl'
+  const edge = rtl ? bounds.left + parseFloat(style.paddingLeft) + 4 : bounds.right - parseFloat(style.paddingRight) - 4
+  const middle = bounds.top + (bounds.height + parseFloat(style.paddingTop) - parseFloat(style.paddingBottom)) / 2
+  let hoveredStep = ''
+  if (Math.abs(event.clientX - edge) <= 12 && Math.abs(event.clientY - middle) <= 14) {
+    hoveredStep = event.clientY < middle ? 'up' : 'down'
+  }
+  // Custom themes may use a translucent pressed color, which would fade the arrow out.
+  const highlight = event.buttons & 1 ? 'rgb(from var(--primary-color-active) r g b / 100%)' : 'var(--primary-color)'
+  for (const step of ['up', 'down']) {
+    const property = `--number-step-${step}-color`
+    const color = hoveredStep === step ? highlight : ''
+    if (input.style.getPropertyValue(property) !== color) {
+      if (color) input.style.setProperty(property, color)
+      else input.style.removeProperty(property)
+    }
+  }
+}
+
 const lastExternalLinkToBeOpened = ref('')
+let lastExternalLinkInBackground = false
 const showExternalLinkOpeningPrompt = ref(false)
 const EXTERNAL_LINK_OPENING_PROMPT_VALUES = ['yes', 'no']
 
@@ -371,99 +3916,352 @@ function handleExternalLinkOpeningPromptAnswer(option) {
     // if `lastExternalLinkToBeOpened` is empty
 
     // Open links externally
-    openExternalLink(lastExternalLinkToBeOpened.value)
+    openExternalLink(lastExternalLinkToBeOpened.value, { background: lastExternalLinkInBackground })
   }
 }
 
 /**
  * @param {PointerEvent} event
+ * @returns {HTMLAnchorElement | null}
  */
-function isExternalLink(event) {
-  return event.target.tagName === 'A' && !event.target.href.startsWith(window.location.origin)
+function getEventLink(event) {
+  const target = event.target instanceof Element ? event.target : null
+  const link = target?.closest('a[href]')
+  return link instanceof HTMLAnchorElement ? link : null
+}
+
+/**
+ * @param {HTMLAnchorElement} link
+ */
+function isExternalLink(link) {
+  return link.origin !== window.location.origin
+}
+
+/**
+ * Opens modified clicks on ordinary internal links through the app's tab and
+ * window APIs. Components with specialized navigation can opt out by calling
+ * preventDefault() before the event reaches the document.
+ * @param {PointerEvent} event
+ * @param {HTMLAnchorElement | null} link
+ */
+function handleInternalLinkShortcut(event, link) {
+  if (!process.env.IS_ELECTRON || event.defaultPrevented || link === null || isExternalLink(link)) {
+    return false
+  }
+
+  const isMiddleClick = event.type === 'auxclick' && event.button === 1
+  const ctrlOrCmdPressed = process.platform === 'darwin' ? event.metaKey : event.ctrlKey
+  const isCtrlOrCmdClick = event.type === 'click' && event.button === 0 && ctrlOrCmdPressed && !event.altKey
+  if (!isMiddleClick && !isCtrlOrCmdClick) {
+    return false
+  }
+
+  const hashRoute = new URL(link.href).hash.slice(1)
+  if (!hashRoute.startsWith('/')) {
+    return false
+  }
+
+  const destination = router.resolve(hashRoute)
+  event.preventDefault()
+  openInternalPath({
+    path: destination.path,
+    query: destination.query,
+    title: link.dataset.tabTitle || undefined,
+    doCreateNewWindow: event.shiftKey,
+    doCreateNewTab: !event.shiftKey,
+    makeActive: isCtrlOrCmdClick,
+    lazyLoad: isUnloadedBackgroundTabClick(event)
+  })
+  return true
 }
 
 /**
  * @param {PointerEvent} event
  */
 function handleClick(event) {
-  if (isExternalLink(event)) {
-    handleLinkClick(event)
+  const link = getEventLink(event)
+  if (handleInternalLinkShortcut(event, link)) {
+    return
   }
+
+  if (link !== null && isExternalLink(link)) {
+    handleLinkClick(event, link)
+  }
+}
+
+async function handleMobileLinkContextMenu(event) {
+  if (event.target instanceof Element && event.target.closest('.ft-list-video') && !event.target.closest('.channelName')) return
+  const link = getEventLink(event)
+  if (!link) return
+
+  event.preventDefault()
+  event.stopPropagation()
+  const channel = getChannelLinkDetails(link)
+  mobileContextActions.value = channel
+    ? { title: channel.name, actions: getChannelLinkMenuItems(channel, t) }
+    : null
+  mobileContextLink.value = link
+  await nextTick()
+  mobileLinkActionsRef.value?.focus({ preventScroll: true })
+}
+
+function closeOwnedMobileContextMenu(event) {
+  if (mobileContextActions.value?.actions === event.detail) closeMobileLinkActions()
+}
+
+watch(() => route.fullPath, closeMobileLinkActions)
+
+function closeMobileLinkActions() {
+  setMobileContextTriggerExpanded(mobileContextTrigger, false)
+  mobileContextReturnFocus = mobileContextTrigger ?? mobileContextReturnFocus
+  mobileContextTrigger = null
+  mobileContextMenuPath.value = []
+  mobileContextLink.value = null
+  mobileContextActions.value = null
+}
+
+/**
+ * Up and Down move through the sheet's items, Left and Right through a quick
+ * action row, and the inline-end arrow opens a submenu that the other leaves.
+ * @param {KeyboardEvent} event
+ */
+function handleMobileContextKeydown(event) {
+  if (!['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
+  const sheet = mobileLinkActionsRef.value
+  if (!sheet) return
+  event.preventDefault()
+  // Like Tab, so a sheet opened by touch shows where focus moves.
+  store.dispatch('showOutlines')
+  const focused = document.activeElement instanceof HTMLElement && sheet.contains(document.activeElement)
+    ? document.activeElement
+    : null
+  const rtl = document.body.dir === 'rtl'
+  const forward = event.key === (rtl ? 'ArrowLeft' : 'ArrowRight')
+  const backward = event.key === (rtl ? 'ArrowRight' : 'ArrowLeft')
+  const row = focused?.closest('.mobileLinkQuickActionRow')
+  if ((forward || backward) && !row) {
+    if (forward && focused?.getAttribute('aria-haspopup') === 'menu') {
+      const action = mobileContextMenuRows.value.find(item => item.label === focused.getAttribute('aria-label'))
+      if (action) runMobileContextAction(action, { focusFirstItem: true })
+    } else if (backward && mobileContextMenuStack.value.length > 1) {
+      backMobileContextMenu()
+    }
+    return
+  }
+  const buttons = [...((forward || backward) ? row : sheet).querySelectorAll('button:enabled')]
+  const index = focused ? buttons.indexOf(focused) : -1
+  const step = event.key === 'ArrowUp' || backward ? -1 : 1
+  const nextIndex = event.key === 'Home'
+    ? 0
+    : event.key === 'End'
+      ? buttons.length - 1
+      : index < 0 ? (step > 0 ? 0 : buttons.length - 1) : (index + step + buttons.length) % buttons.length
+  buttons[nextIndex]?.focus()
+}
+
+async function backMobileContextMenu() {
+  if (mobileContextMenuStack.value.length === 1) {
+    closeMobileLinkActions()
+    return
+  }
+  const triggerLabel = mobileContextMenuStack.value.at(-1).label
+  mobileContextMenuPath.value = mobileContextMenuPath.value.slice(0, mobileContextMenuStack.value.length - 2)
+  await nextTick()
+  mobileLinkActionsRef.value?.querySelector(`[role="menuitem"][aria-label="${CSS.escape(triggerLabel)}"]:not(:disabled)`)?.focus({ preventScroll: true })
+}
+
+async function runMobileContextAction(action, { focusFirstItem = false } = {}) {
+  if (action.enabled === false) return
+  if (action.submenu) {
+    mobileContextMenuPath.value = [...mobileContextMenuStack.value.slice(1).map(level => level.label), action.label]
+    await nextTick()
+    const sheet = mobileLinkActionsRef.value
+    const target = (focusFirstItem && sheet?.querySelector('.mobileLinkActionsContent button:enabled')) ||
+      sheet?.querySelector('.mobileLinkActionsBack')
+    target?.focus({ preventScroll: true })
+    return
+  }
+  closeMobileLinkActions()
+  return action.run()
+}
+
+async function copyMobileContextLink() {
+  const url = mobileContextLinkCopyUrl.value
+  if (!url) return
+
+  closeMobileLinkActions()
+  await copyToClipboard(url)
+}
+
+async function shareMobileContextLink() {
+  const url = mobileContextLinkCopyUrl.value
+  if (!url) return
+
+  closeMobileLinkActions()
+  await shareLink(url)
+}
+
+async function openMobileContextLink(newTab) {
+  const link = mobileContextLink.value
+  if (!link) return
+
+  const href = link.href
+  closeMobileLinkActions()
+  const internalPrefix = `${window.location.href.split('#')[0]}#`
+  if (href.startsWith(internalPrefix)) {
+    const destination = router.resolve(new URL(href).hash.slice(1))
+    await openInternalPath({
+      path: destination.path,
+      query: destination.query,
+      title: link.dataset.tabTitle || undefined,
+      doCreateNewTab: newTab,
+      makeActive: true
+    })
+    return
+  }
+
+  if (/^https?:\/\/((www\.|m\.)?youtube\.com|youtu\.be)\//.test(href)) {
+    await handleYoutubeLink(href, { doCreateNewTab: newTab })
+    return
+  }
+
+  handleExternalLink(href)
 }
 
 /**
  * @param {PointerEvent} event
  */
 function handleAuxClick(event) {
+  const link = getEventLink(event)
+
   // auxclick fires for all clicks not performed with the primary button
   // only handle the link click if it was the middle button,
   // otherwise the context menu breaks
-  if (isExternalLink(event) && event.button === 1) {
-    handleLinkClick(event)
+  if (event.button === 1 && handleInternalLinkShortcut(event, link)) {
+    return
+  }
+
+  if (link !== null && isExternalLink(link) && event.button === 1) {
+    handleLinkClick(event, link)
+    return
+  }
+
+  // The tab rework replaced the browser's navigation history with a per-tab
+  // logical history, so Chromium's native mouse back/forward buttons no longer
+  // navigate anything. Route buttons 3 (back) and 4 (forward) through the tab
+  // navigation service instead. auxclick fires once per click, avoiding the
+  // double dispatch seen with mousedown/mouseup for these buttons.
+  // The web build has no logical tabs and the browser's own history still
+  // works there, so those buttons are left alone.
+  if (process.env.IS_ELECTRON && (event.button === 3 || event.button === 4)) {
+    event.preventDefault()
+
+    const tabId = activeTabId.value
+    if (tabId != null) {
+      navigation.go(tabId, event.button === 3 ? -1 : 1)
+    }
   }
 }
 
 /**
- * @param {PointerEvent} event
+ * @param {string} href
+ * @param {object} [options]
+ * @param {boolean} [options.background] keep the app in front of the browser, as for middle-clicks
  */
-function handleLinkClick(event) {
-  const href = event.target.href
-  event.preventDefault()
-
-  // Check if it's a YouTube link, but exclude live chat pop out
-  const youtubeUrlPattern = /^https?:\/\/((www\.)?youtube\.com(\/embed)?|youtu\.be)\/(?!.*live_chat).*$/
-  const isYoutubeLink = youtubeUrlPattern.test(href)
-
-  if (isYoutubeLink) {
-    // `auxclick` is the event type for non-left click
-    // https://developer.mozilla.org/en-US/docs/Web/API/Element/auxclick_event
-    handleYoutubeLink(href, {
-      doCreateNewWindow: event.type === 'auxclick'
+function handleExternalLink(href, { background = false } = {}) {
+  const action = resolveExternalLinkAction(externalLinkHandling.value)
+  if (action === 'disabled') {
+    showToast({
+      message: t('External link opening has been disabled in Settings → Privacy'),
+      icon: ['fas', 'link-slash'],
     })
-  } else if (externalLinkHandling.value === 'doNothing') {
-    // Let user know opening external link is disabled via setting
-    showToast(t('External link opening has been disabled in the general settings'))
-  } else if (externalLinkHandling.value === 'openLinkAfterPrompt') {
-    // Storing the URL is necessary as
-    // there is no other way to pass the URL to click callback
+  } else if (action === 'prompt') {
     lastExternalLinkToBeOpened.value = href
+    lastExternalLinkInBackground = background
     showExternalLinkOpeningPrompt.value = true
   } else {
-    // Open links externally
-    openExternalLink(href)
+    openExternalLink(href, { background })
   }
 }
 
-async function handleYoutubeLink(href, { doCreateNewWindow = false } = {}) {
-  const result = await store.dispatch('getYoutubeUrlInfo', href)
+provide('handleExternalLink', handleExternalLink)
+provide('handleDocumentClick', handleClick)
+
+/**
+ * @param {PointerEvent} event
+ * @param {HTMLAnchorElement} link
+ */
+function handleLinkClick(event, link) {
+  const href = link.href
+  event.preventDefault()
+
+  // Check if it's a YouTube link, but exclude live chat pop out
+  const youtubeUrlPattern = /^https?:\/\/((www\.|m\.)?youtube\.com(\/embed)?|youtu\.be)\/(?!.*live_chat).*$/
+  const isYoutubeLink = youtubeUrlPattern.test(href)
+
+  // Determine if we should open in new tab or new window.
+  // `process.platform` is `undefined` in the web build, where the app can be
+  // opened from any OS, so both modifiers count there.
+  const ctrlOrCmdPressed = process.env.IS_ELECTRON
+    ? ((process.platform !== 'darwin' && event.ctrlKey) || (process.platform === 'darwin' && event.metaKey))
+    : (event.ctrlKey || event.metaKey)
+  const isMiddleClick = event.type === 'auxclick' && event.button === 1
+  const doCreateNewTab = ctrlOrCmdPressed || isMiddleClick
+  const doCreateNewWindow = event.shiftKey
+
+  if (isYoutubeLink) {
+    handleYoutubeLink(href, {
+      doCreateNewWindow,
+      doCreateNewTab,
+      isMiddleClick,
+      lazyLoad: isUnloadedBackgroundTabClick(event)
+    })
+  } else {
+    handleExternalLink(href, { background: isMiddleClick })
+  }
+}
+
+async function handleYoutubeLink(href, {
+  doCreateNewWindow = false,
+  doCreateNewTab = false,
+  isMiddleClick = false,
+  lazyLoad = false,
+  tabId = null
+} = {}) {
+  const result = await store.dispatch('getYoutubeUrlInfo', tabId ? { url: href, tabId } : href)
+  // Middle clicks should open tabs in background (not make them active)
+  const makeActive = !isMiddleClick
+  const openPath = (options) => {
+    if (isElectron && tabId && !options.doCreateNewWindow && !options.doCreateNewTab) {
+      return navigation.push(tabId, { path: options.path, query: options.query })
+    }
+    return openInternalPath({ ...options, lazyLoad })
+  }
 
   switch (result.urlType) {
-    case 'clip':
     case 'video': {
-      let videoId, timestamp, playlistId
-
-      if (result.urlType === 'video') {
-        videoId = result.videoId
-        timestamp = result.timestamp
-        playlistId = result.playlistId
-      } else if (result.urlType === 'clip') {
-        const clipResult = await getClip(result.clipId)
-        videoId = clipResult.videoId
-        timestamp = clipResult.startTime
-      }
+      const { videoId, timestamp, playlistId, commentId, isShort } = result
 
       const query = {}
+      if (isShort) {
+        query.short = 'true'
+      }
       if (timestamp) {
         query.timestamp = timestamp
       }
       if (playlistId && playlistId.length > 0) {
         query.playlistId = playlistId
       }
+      if (commentId) {
+        query.commentId = commentId
+      }
 
-      openInternalPath({
+      openPath({
         path: `/watch/${videoId}`,
         query,
-        doCreateNewWindow
+        doCreateNewWindow,
+        doCreateNewTab,
+        makeActive
       })
       break
     }
@@ -471,10 +4269,12 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false } = {}) {
     case 'playlist': {
       const { playlistId, query } = result
 
-      openInternalPath({
+      openPath({
         path: `/playlist/${playlistId}`,
         query,
-        doCreateNewWindow
+        doCreateNewWindow,
+        doCreateNewTab,
+        makeActive
       })
       break
     }
@@ -482,10 +4282,12 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false } = {}) {
     case 'search': {
       const { searchQuery, query } = result
 
-      openInternalPath({
+      openPath({
         path: `/search/${encodeURIComponent(searchQuery)}`,
         query,
         doCreateNewWindow,
+        doCreateNewTab,
+        makeActive,
         searchQueryText: searchQuery
       })
       break
@@ -493,9 +4295,11 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false } = {}) {
 
     case 'hashtag': {
       const { hashtag } = result
-      openInternalPath({
+      openPath({
         path: `/hashtag/${encodeURIComponent(hashtag)}`,
-        doCreateNewWindow
+        doCreateNewWindow,
+        doCreateNewTab,
+        makeActive
       })
       break
     }
@@ -503,10 +4307,12 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false } = {}) {
     case 'post': {
       const { postId, query } = result
 
-      openInternalPath({
+      openPath({
         path: `/post/${postId}`,
         query,
-        doCreateNewWindow
+        doCreateNewWindow,
+        doCreateNewTab,
+        makeActive
       })
       break
     }
@@ -514,9 +4320,11 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false } = {}) {
     case 'channel': {
       const { channelId, subPath, url } = result
 
-      openInternalPath({
+      openPath({
         path: `/channel/${channelId}/${subPath}`,
         doCreateNewWindow,
+        doCreateNewTab,
+        makeActive,
         query: {
           url
         }
@@ -528,9 +4336,11 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false } = {}) {
     case 'subscriptions':
     case 'history':
     case 'userplaylists':
-      openInternalPath({
+      openPath({
         path: `/${result.urlType}`,
-        doCreateNewWindow
+        doCreateNewWindow,
+        doCreateNewTab,
+        makeActive
       })
       break
 
@@ -541,17 +4351,226 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false } = {}) {
 
     default: {
       // Unknown URL type
-      showToast(t('Unknown YouTube url type, cannot be opened in app'))
+      showToast({
+        message: t('Unknown YouTube url type, cannot be opened in app'),
+        icon: ['fas', 'circle-exclamation'],
+      })
     }
   }
 }
 
 function enableOpenUrl() {
-  window.ftElectron.handleOpenUrl((url) => {
-    if (url) {
-      handleYoutubeLink(url)
+  const removeOpenUrl = window.ftElectron.handleOpenUrl((url, tabId) => {
+    if (!url) return
+    // other sites must not reach the YouTube parser, which reads e.g. facebook.com/watch?v= as a video
+    if (supportsYtDlp && shouldOpenExternalMediaUrl(url, store.getters.getCurrentInvidiousInstanceUrl)) {
+      const route = { path: '/external-media', query: { url } }
+      if (tabId) navigation.push(tabId, route)
+      else openInternalPath(route)
+      return
     }
+    handleYoutubeLink(url, { tabId })
   })
+  const removeOidcCallback = window.ftElectron.handleSyncServerOidcCallback(url => {
+    store.dispatch('receiveSyncServerOidcCallback', url)
+  })
+  return () => {
+    removeOpenUrl()
+    removeOidcCallback()
+  }
+}
+
+function openExternalMedia(url) {
+  return openInternalPath({ path: '/external-media', query: { url } })
+}
+
+async function handleAndroidSharedText(text) {
+  const id = ++sharedYoutubeLinkId
+  const url = extractSharedYoutubeLink(text)
+  const mediaUrl = !url && supportsYtDlp ? extractSharedMediaLink(text, store.getters.getCurrentInvidiousInstanceUrl) : null
+  if (mediaUrl) {
+    sharedYoutubeLink.value = null
+    await store.dispatch('hideSettingsWindow')
+    if (id === sharedYoutubeLinkId) openExternalMedia(mediaUrl)
+    return
+  }
+  let info = null
+  try {
+    info = url ? await store.dispatch('getYoutubeUrlInfo', url) : null
+  } catch (error) {
+    console.error('Unable to resolve shared YouTube link', error)
+  }
+  if (id !== sharedYoutubeLinkId) return
+  sharedYoutubeLink.value = null
+  if (!info || ['invalid_url', 'unknown'].includes(info.urlType) || (info.urlType === 'video' && !/^[\w-]{11}$/.test(info.videoId))) {
+    showToast({ message: t('Share.No YouTube Link'), icon: ['fas', 'circle-exclamation'] })
+    return
+  }
+  sharedYoutubeLink.value = { id, url, videoId: info.videoId ?? '' }
+}
+
+function openSharedYoutubeLink() {
+  const url = sharedYoutubeLink.value?.url
+  sharedYoutubeLink.value = null
+  if (url) handleYoutubeLink(url)
+}
+
+async function enableCapacitorIntegrations() {
+  const openUrl = async url => {
+    if (!url) return
+    if (isSyncServerOidcCallbackUrl(url)) {
+      // The browser stays open over the app on iOS.
+      if (Capacitor.getPlatform() === 'ios') Browser.close().catch(() => {})
+      store.dispatch('receiveSyncServerOidcCallback', url)
+      return
+    }
+    const widgetPage = getHomeWidgetPage(url)
+    if (widgetPage) {
+      await store.dispatch('hideSettingsWindow')
+      if (widgetPage.route) return openInternalPath(widgetPage.route)
+      const focusSearch = () => {
+        if (document.getElementById('app')?.inert) {
+          // The startup splash keeps the app inert until it is hidden.
+          document.addEventListener('startup-splash-hidden', focusSearch, { once: true })
+        } else {
+          window.dispatchEvent(new CustomEvent('opentubex:focus-search'))
+        }
+      }
+      // A cold start opens the URL before the top navigation is mounted, and
+      // open prompts make it inert, so its search cannot take focus yet.
+      const canFocusSearch = () => dataReady.value && !isAnyPromptOpen.value
+      if (canFocusSearch()) {
+        focusSearch()
+      } else {
+        const stop = watch(canFocusSearch, ready => {
+          if (!ready) return
+          stop()
+          // Let the update render and mount the top navigation first.
+          nextTick(focusSearch)
+        })
+      }
+      return
+    }
+    // iOS URL handling can remove the embedded protocol's colon.
+    const target = url.replace(/^opentubex(?:-nightly)?:(?:\/\/)?/, '').replace(/^(https?)\/\//, '$1://')
+    if (supportsYtDlp && shouldOpenExternalMediaUrl(target, store.getters.getCurrentInvidiousInstanceUrl)) {
+      const mediaUrl = new URL(target)
+      // Android intent filters cannot require Facebook's video ID query parameter.
+      if ((mediaUrl.hostname === 'facebook.com' || mediaUrl.hostname.endsWith('.facebook.com')) &&
+        /^\/watch\/?$/.test(mediaUrl.pathname) && !/^\d+$/.test(mediaUrl.searchParams.get('v') ?? '')) {
+        return handleExternalLink(target)
+      }
+      await store.dispatch('hideSettingsWindow')
+      return openExternalMedia(target)
+    }
+    return handleYoutubeLink(target)
+  }
+  const backButtonHandle = Capacitor.getPlatform() === 'android'
+    ? await CapacitorApp.addListener('backButton', handleAndroidBack)
+    : null
+  const removeAndroidBack = Capacitor.getPlatform() === 'android'
+    ? await initializeAndroidBack({
+        back: handleAndroidBack,
+        getPreview: getAndroidBackPreview,
+        shouldIntercept: shouldInterceptAndroidBack
+      }).catch(error => {
+        console.error('Unable to enable predictive back', error)
+        return null
+      })
+    : null
+  const urlHandle = await CapacitorApp.addListener('appUrlOpen', ({ url }) => {
+    openUrl(url)
+  })
+  const shortcutHandle = await AppShortcuts.addListener('click', async ({ shortcutId }) => {
+    if (shortcutId === 'downloads') {
+      await store.dispatch('showSettingsWindow', 'downloads')
+      return
+    }
+    const path = getAppShortcutPath(shortcutId)
+    if (!path) return
+    await store.dispatch('hideSettingsWindow')
+    await openInternalPath({ path })
+  })
+  const stopShortcutUpdates = watch(locale, () => {
+    const shortcuts = createAppShortcuts({
+      subscriptions: t('Subscriptions.Subscriptions'),
+      userplaylists: t('Playlists'),
+      history: t('History.History'),
+      downloads: t('Settings.Download Settings.Download Settings'),
+    })
+    AppShortcuts.set({ shortcuts: supportsYtDlp ? shortcuts : shortcuts.filter(shortcut => shortcut.id !== 'downloads') }).catch(error => console.error('Failed to update app shortcuts', error))
+  }, { immediate: true })
+  const stopHomeWidgetUpdates = syncContinueWatchingWidget(store, watch)
+  const removeReminderActions = await initializeCapacitorLiveReminderActions((videoId) => {
+    handleYoutubeLink(`https://www.youtube.com/watch?v=${videoId}`)
+  }, showInAppNotification)
+  const removeMediaActions = await addAndroidMediaSessionActionListener(({ action, ...details }) => {
+    tabMediaCoordinator.dispatchAction(action, details)
+  })
+  const handleTaskRemoved = () => tabMediaCoordinator.pauseAll()
+  window.addEventListener('opentubex:android-task-removed', handleTaskRemoved)
+  let receivedAppState = false
+  let backgroundStateTimeout = null
+  let appStateVersion = 0
+  const appStateHandle = await CapacitorApp.addListener('appStateChange', ({ isActive }) => {
+    if (Capacitor.getPlatform() === 'android') setAndroidAppActive(isActive)
+    receivedAppState = true
+    appStateVersion += 1
+    const version = appStateVersion
+    playbackScreenWake?.setAppActive(isActive)
+    clearTimeout(backgroundStateTimeout)
+    if (Capacitor.getPlatform() === 'android' && !isActive) {
+      // The launcher briefly stops the PiP Activity while returning to its
+      // existing task. Do not hide or pause playback for that handoff.
+      const checkBackgroundState = async () => {
+        if (await isAndroidLauncherReturnInProgress()) {
+          if (version === appStateVersion) {
+            backgroundStateTimeout = setTimeout(checkBackgroundState, 10_000)
+          }
+          return
+        }
+        const state = await CapacitorApp.getState().catch(() => ({ isActive: false }))
+        if (version !== appStateVersion || state.isActive) return
+        setAndroidAppVisible(false)
+        if (shouldPauseAndroidPlaybackOnAppStateChange(
+          false,
+          store.getters.getContinuePlaybackWhenScreenIsLocked
+        )) tabMediaCoordinator.pauseAll()
+      }
+      backgroundStateTimeout = setTimeout(checkBackgroundState, 250)
+      return
+    }
+    setAndroidAppVisible(isActive)
+    if (shouldPauseAndroidPlaybackOnAppStateChange(
+      isActive,
+      store.getters.getContinuePlaybackWhenScreenIsLocked
+    )) tabMediaCoordinator.pauseAll()
+  })
+  const appState = await CapacitorApp.getState()
+  if (!receivedAppState) {
+    if (Capacitor.getPlatform() === 'android') setAndroidAppActive(appState.isActive)
+    playbackScreenWake?.setAppActive(appState.isActive)
+    setAndroidAppVisible(appState.isActive)
+  }
+  const launch = await CapacitorApp.getLaunchUrl()
+  await openUrl(launch?.url)
+
+  return () => {
+    clearTimeout(backgroundStateTimeout)
+    stopShortcutUpdates()
+    stopHomeWidgetUpdates()
+    shortcutHandle.remove()
+    backButtonHandle?.remove()
+    removeAndroidBack?.()
+    urlHandle.remove()
+    appStateHandle.remove()
+    window.removeEventListener('opentubex:android-task-removed', handleTaskRemoved)
+    playbackScreenWake?.setAppActive(false)
+    setAndroidAppActive(null)
+    setAndroidAppVisible(null)
+    removeReminderActions()
+    removeMediaActions()
+  }
 }
 
 const windowTitle = computed(() => {
@@ -563,28 +4582,59 @@ const windowTitle = computed(() => {
     !routePath.startsWith('/playlist/') &&
     !routePath.startsWith('/search/')
   ) {
-    return translateWindowTitle(route.meta.title) ?? ''
+    return translateWindowTitle(route.meta.title)
   } else {
     return null
   }
 })
 
 /** @type {import('vue').ComputedRef<string>} */
-const appTitle = computed(() => store.getters.getAppTitle)
+const appTitle = computed(() => {
+  if (isElectron) {
+    const tab = store.getters.getTabById(presentedTabId.value)
+    return tab?.contentTitle ?? ''
+  }
+  return store.getters.getAppTitle
+})
 
-watch(appTitle, (value) => {
+function publishAppTitle(value) {
   if (value.length > 0) {
     document.title = `${value} - ${packageDetails.productName}`
   } else {
     document.title = packageDetails.productName
   }
-})
 
-watch(windowTitle, setWindowTitle)
+  if (isElectron && presentedTabId.value) {
+    window.ftElectron.setWindowTitle(document.title, presentedTabId.value)
+  }
+}
+
+watch(appTitle, publishAppTitle)
+
+// Also watch the route: the title string alone can stay identical across a
+// route change (e.g. '/' and '/subscriptions' share the same title), which
+// would leave a tab's placeholder title in place when the route-match guard
+// in setWindowTitle deferred an earlier update.
+watch([windowTitle, () => route.fullPath], setWindowTitle)
 
 function setWindowTitle() {
-  if (windowTitle.value !== null) {
+  if (windowTitle.value === null) {
+    return
+  }
+
+  const titleTabId = store.state.tabs.transitionTargetTabId ?? presentedTabId.value
+  if (usesLogicalTabs && titleTabId) {
+    // During startup the shared router briefly sits on its initial route while
+    // the restored tab's own route hasn't been projected yet. Only attribute
+    // the router's title to the tab when it is actually on this route.
+    const tab = store.getters.getTabById(titleTabId)
+    if (tab && tab.route.fullPath !== route.fullPath) {
+      return
+    }
+    navigation.setTitle(titleTabId, windowTitle.value)
+  } else {
     store.commit('setAppTitle', windowTitle.value)
+    publishAppTitle(windowTitle.value)
   }
 }
 
@@ -600,10 +4650,6 @@ watch(locale, (value) => {
 
   document.body.dir = isLocaleRightToLeft.value ? 'rtl' : 'ltr'
 }, { immediate: true })
-
-// en-US is the fallback locale, which means we always need it
-// regardless of the user's settings so we can already start start loading it now
-loadLocale('en-US')
 
 /** @type {import('vue').ComputedRef<string>} */
 const currentInvidiousInstanceUrl = computed(() => store.getters.getCurrentInvidiousInstanceUrl)
@@ -704,14 +4750,6 @@ function handleDragStart(event) {
       transformedURL.pathname = '/feed/playlists'
       transformed = true
       break
-    case 'settings':
-      transformedURL.pathname = '/account'
-      transformed = true
-      break
-    case 'about':
-      transformedURL.pathname = '/about'
-      transformed = true
-      break
     case 'popular':
       transformedURL = new URL(`${currentInvidiousInstanceUrl.value}/feed/popular`)
       transformed = true
@@ -741,37 +4779,6 @@ function handleDragStart(event) {
     event.stopPropagation()
   }
 }
-
-async function getClip(clipId) {
-  if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
-    try {
-      return await getClipInvidious(clipId)
-    } catch (err) {
-      console.error(err)
-
-      if (process.env.SUPPORTS_LOCAL_API && backendFallback.value) {
-        console.error(
-          'Error resolving clip URL.  Falling back to Local API'
-        )
-        return await getLocalClip(clipId)
-      }
-    }
-  } else {
-    try {
-      return await getLocalClip(clipId)
-    } catch (err) {
-      console.error(err)
-
-      if (backendFallback.value) {
-        console.error(
-          'Error resolving clip URL.  Falling back to Invidious API'
-        )
-        return await getClipInvidious(clipId)
-      }
-    }
-  }
-}
-
 </script>
 
 <style src="./themes.css" />

@@ -7,15 +7,6 @@
   block-size: 40px;
 }
 
-.draggable:active {
-  cursor: grabbing;
-}
-
-.draggedVideo {
-  opacity: 0;
-  transition: 0.01s;
-}
-
 .videoIndexArea {
   min-inline-size: 30px;
   color: var(--tertiary-text-color);
@@ -38,6 +29,8 @@
   flex-direction: column;
   justify-content: center;
   cursor: grab;
+  touch-action: none;
+  -webkit-touch-callout: none;
 }
 
 .draggable:not(.draggable:only-child) .videoIndexArea {
@@ -48,9 +41,15 @@
 
 .draggable:not(.draggable:only-child) .grabBar {
   display: revert;
-  order: 2;
 }
 
 .videoIndexIcon {
   font-size: 14px;
+}
+
+.downloadAvailableIcon {
+  color: var(--primary-color);
+  display: block;
+  font-size: 11px;
+  margin-block-start: 4px;
 }

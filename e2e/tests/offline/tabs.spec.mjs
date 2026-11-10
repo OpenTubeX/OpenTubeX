@@ -1,0 +1,4187 @@
+import { randomBytes } from 'node:crypto'
+import { sampleColors } from '../../helpers/colors.mjs'
+import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
+import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
+import { expectTabStripSettled } from '../../helpers/tabs.mjs'
+
+import { abortUnmockedRequest, test, expect, sel, goTo, goToSettingsSection, clickSearchCancel, expectScrollAtRenderedEnd, openNewWindowFromTabBar, setWindowSize, waitForAppReady } from '../../helpers/app.mjs'
+import {
+  encryptSyncServerDeviceInfo,
+  randomSyncServerDeviceId,
+} from '../../../src/renderer/helpers/sync-server-sessions.js'
+
+// A closing filters prompt stays in the page while it fades out.
+const filters = page => page.locator('.prompt:not([inert])')
+
+/**
+ * Returns the box of an element that has stopped moving. Menus and submenus
+ * animate in, so measuring right after they become visible yields coordinates
+ * that are still a few pixels off their resting place.
+ * @param {import('@playwright/test').Locator} locator
+ * @returns {Promise<{ x: number, y: number, width: number, height: number }>}
+ */
+async function boundingBoxWhenSettled(locator) {
+  let previous = null
+  let settledBox = null
+
+  await expect.poll(async () => {
+    const box = await locator.boundingBox()
+    const current = box && `${box.x},${box.y},${box.width},${box.height}`
+    const settled = current !== null && current === previous
+    previous = current
+    if (settled) {
+      settledBox = box
+    }
+    return settled
+  }).toBe(true)
+
+  return settledBox
+}
+
+/**
+ * Delay reorder handling in the main process without delaying other tab
+ * operations, simulating a busy system around the renderer-to-main handoff.
+ * @param {{electronApp: import('@playwright/test').ElectronApplication}} app
+ * @param {number} [delayMs]
+ */
+async function delayTabReorders(app, delayMs = 1000) {
+  await app.electronApp.evaluate(({ ipcMain }, delay) => {
+    const channel = 'tabs-reorder'
+    const [listener] = ipcMain.listeners(channel)
+    ipcMain.removeListener(channel, listener)
+    ipcMain.on(channel, (event, ...args) => {
+      setTimeout(() => {
+        // Electron never delivers messages from a destroyed sender. A reorder
+        // still pending at teardown would otherwise throw in the main process,
+        // and its error dialog keeps the app from quitting.
+        if (!event.sender.isDestroyed()) {
+          listener(event, ...args)
+        }
+      }, delay)
+    })
+  }, delayMs)
+}
+
+/**
+ * Leaves three tabs open with the requested one active and returns their ids in
+ * tab bar order.
+ * @param {import('@playwright/test').Page} page
+ * @param {number} activeIndex
+ * @returns {Promise<string[]>}
+ */
+async function openThreeTabsAndActivate(page, activeIndex) {
+  await page.locator(sel.newTabButton).click()
+  await page.locator(sel.newTabButton).click()
+  await expect(page.locator(sel.tabs)).toHaveCount(3)
+
+  await page.locator(sel.tabs).nth(activeIndex).click()
+  await expect(page.locator(sel.tabs).nth(activeIndex)).toHaveClass(/active/)
+
+  return await page.locator(sel.tabs).evaluateAll(
+    (tabs) => tabs.map((tab) => tab.dataset.tabId)
+  )
+}
+
+test.describe('tab bar', () => {
+  test('keeps auto-sized tab geometry stable when selection changes', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
+    await page.evaluate(async () => {
+      for (let index = 0; index < 4; index++) {
+        await window.ftElectron.tabs.create({ route: '/history', makeActive: true })
+      }
+    })
+    const tabs = page.locator(sel.tabs)
+    await expect(tabs).toHaveCount(5)
+    await expect(tabs.locator('.tabTitleText')).toHaveText(['Subscriptions', 'History', 'History', 'History', 'History'])
+    await expectTabStripSettled(page)
+
+    async function geometry() {
+      return await page.locator('.tabsContainer').evaluate(container => {
+        const origin = container.getBoundingClientRect().left - container.scrollLeft
+        return {
+          range: container.scrollWidth - container.clientWidth,
+          tabs: [...container.querySelectorAll('.tab')].map(tab => ({
+            width: tab.getBoundingClientRect().width,
+            start: tab.getBoundingClientRect().left - origin,
+            close: tab.querySelector('.closeButton').getBoundingClientRect().left - origin
+          }))
+        }
+      })
+    }
+
+    await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setSize(width, 800), Math.round(550 * uiScale / 100))
+    await expect(page.locator('.tabsContainer > .os-scrollbar-horizontal')).toHaveClass(/os-scrollbar-visible/)
+    const before = await geometry()
+    expect(before.tabs[0].width).toBeGreaterThan(100)
+    expect(before.tabs[0].width).toBeLessThan(200)
+    for (const tab of await tabs.all()) {
+      await page.evaluate(id => window.ftElectron.tabs.activate(id), await tab.getAttribute('data-tab-id'))
+      await expect(tab).toHaveClass(/active/)
+      await expect.poll(async () => {
+        const after = await geometry()
+        return Math.abs(after.range - before.range) <= 1 && after.tabs.every((box, index) =>
+          ['width', 'start', 'close'].every(key => Math.abs(box[key] - before.tabs[index][key]) <= 0.1)
+        )
+      }, { message: 'selection keeps tab widths, close buttons and scroll range stable' }).toBe(true)
+    }
+
+    await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1100, 800))
+    for (const colorScheme of ['dark', 'light']) {
+      await page.emulateMedia({ colorScheme })
+      await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+      const box = await page.locator('.tabBar').boundingBox()
+      const screenshot = await app.electronApp.evaluate(async ({ BrowserWindow }, box) => {
+        const contents = BrowserWindow.getAllWindows()[0].webContents
+        return (await contents.capturePage({ x: Math.round(box.x), y: Math.round(box.y), width: Math.round(box.width), height: Math.round(box.height) })).toPNG().toString('base64')
+      }, box)
+      await testInfo.attach(`stable browser tabs ${colorScheme}`, { body: Buffer.from(screenshot, 'base64'), contentType: 'image/png' })
+    }
+  })
+
+  test('centers horizontal tabs above their resting scrollbar', { tag: '@scale' }, async ({ page }) => {
+    for (const overflowing of [false, true]) {
+      if (overflowing) {
+        await page.evaluate(async () => {
+          for (let index = 0; index < 20; index++) {
+            await window.ftElectron.tabs.create({ route: '/history', makeActive: false, lazyLoad: true })
+          }
+        })
+        await expect(page.locator('.tabsContainer > .os-scrollbar-horizontal')).toHaveClass(/os-scrollbar-visible/)
+      }
+      for (const position of ['top', 'bottom']) {
+        await page.evaluate(position => window.$store.commit('setTabBarPosition', position), position)
+        await expect.poll(() => page.locator('.tab').first().evaluate(tab => {
+          const tabBar = tab.closest('.tabBar')
+          const bar = tabBar.getBoundingClientRect()
+          const box = tab.getBoundingClientRect()
+          const top = box.top - bar.top
+          const bottom = bar.bottom - box.bottom
+          const style = getComputedStyle(tab)
+          // The resting thumb sits in the gap on the window edge, clear of the tabs.
+          const scrollbar = tabBar.querySelector('.os-scrollbar-horizontal')
+          const handle = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
+          const clear = !scrollbar.classList.contains('os-scrollbar-visible') ||
+            (tabBar.classList.contains('position-bottom') ? handle.bottom <= box.top + 0.5 : handle.top >= box.bottom - 0.5)
+          return top >= 0.5 && Math.abs(top - bottom) <= 0.6 && clear && style.borderTopWidth === style.borderBottomWidth
+        }), { message: `balanced tab gaps at ${position}, overflow ${overflowing}` }).toBe(true)
+        if (overflowing) {
+          // The shown scrollbar's track reaches past the gap, but a click on
+          // an inactive tab's edge beside it still lands on the tab.
+          const tab = page.locator('.tab:not(.active)').first()
+          const scrollbar = page.locator('.tabsContainer > .os-scrollbar-horizontal')
+          const box = await tab.boundingBox()
+          await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+          await expect(scrollbar).not.toHaveClass(/app-scrollbar-idle/)
+          expect(await tab.evaluate((element, position) => {
+            const box = element.getBoundingClientRect()
+            const y = position === 'bottom' ? box.top + 1 : box.bottom - 1
+            return element.contains(document.elementFromPoint(box.left + box.width / 2, y))
+          }, position), `tab edge reachable at ${position}`).toBe(true)
+        }
+      }
+    }
+  })
+
+  test('reconciles synced sessions without remounting retained tabs', async ({ page }) => {
+    const initialState = await page.evaluate(() => window.ftElectron.tabs.getState())
+    const retainedTabId = initialState.activeTabId
+    const remoteClosedTab = await page.evaluate(() => window.ftElectron.tabs.create({
+      route: '/stats',
+      title: 'Closed remotely',
+      makeActive: false,
+      lazyLoad: true
+    }))
+    const secondRetainedTab = await page.evaluate(() => window.ftElectron.tabs.create({
+      route: '/history',
+      title: 'Retained history',
+      makeActive: true
+    }))
+
+    await expect(page.locator(`.tabContent[data-tab-id="${secondRetainedTab.id}"]`)).toBeVisible()
+    await page.locator(`.tab[data-tab-id="${retainedTabId}"]`).click()
+    await expect(page.locator(`.tabContent[data-tab-id="${retainedTabId}"]`)).toBeVisible()
+    await page.locator(`.tab[data-tab-id="${remoteClosedTab.id}"]`).click()
+    await expect(page.locator(`.tabContent[data-tab-id="${remoteClosedTab.id}"]`)).toBeVisible()
+
+    const result = await page.evaluate(async ({ retainedTabIds, remoteClosedTabId }) => {
+      window.__syncRetainedTabNodes = retainedTabIds.map(tabId => (
+        document.querySelector(`.tabContent[data-tab-id="${tabId}"]`)
+      ))
+      const store = window.$store
+      store.commit('prepareTabReloadRoute', {
+        tabId: retainedTabIds[0],
+        route: '/stats'
+      })
+      store.commit('setTabContentTitle', {
+        tabId: retainedTabIds[0],
+        title: 'Stale local title'
+      })
+      const [session] = await window.ftElectron.tabs.getSyncSessions()
+      const remoteSession = {
+        ...session,
+        groups: [{
+          id: 'remote-research-group',
+          name: 'Remote research',
+          color: 'purple',
+          icon: 'flask',
+          isCollapsed: true
+        }],
+        tabs: [
+          ...session.tabs
+            .filter(tab => tab.id !== remoteClosedTabId)
+            .map(tab => tab.id === retainedTabIds[0]
+              ? {
+                  ...tab,
+                  url: 'app://bundle/#/playlists',
+                  title: 'Playlists',
+                  groupId: 'remote-research-group'
+                }
+              : tab),
+          {
+            id: 'remote-new-tab',
+            url: 'app://bundle/#/history',
+            title: 'Opened remotely',
+            isPinned: false,
+            color: null,
+            groupId: 'remote-research-group',
+            isUnloaded: true
+          }
+        ],
+        activeTabId: retainedTabIds[1],
+        updatedAt: session.updatedAt + 1
+      }
+
+      const applied = await window.ftElectron.tabs.applySyncSessions([remoteSession])
+      const stateAfterApply = await window.ftElectron.tabs.getState()
+      return {
+        applied,
+        removedPresentedTabCleared: stateAfterApply.presentedTabId !== remoteClosedTabId,
+        groups: stateAfterApply.groups,
+        groupedTabIds: stateAfterApply.tabs
+          .filter(tab => tab.groupId === 'remote-research-group')
+          .map(tab => tab.id)
+      }
+    }, {
+      retainedTabIds: [retainedTabId, secondRetainedTab.id],
+      remoteClosedTabId: remoteClosedTab.id
+    })
+
+    expect(result).toEqual({
+      applied: true,
+      removedPresentedTabCleared: true,
+      groups: [{
+        id: 'remote-research-group',
+        name: 'Remote research',
+        color: 'purple',
+        icon: 'flask',
+        isCollapsed: true
+      }],
+      groupedTabIds: [retainedTabId, 'remote-new-tab']
+    })
+    await expect(page.locator(`.tab[data-tab-id="${remoteClosedTab.id}"]`)).toHaveCount(0)
+    await expect(page.locator('.tab[data-tab-id="remote-new-tab"]')).toHaveCount(0)
+    await page.getByRole('button', { name: 'Expand Remote research, 2 tabs', exact: true }).click()
+    await expect(page.locator('.tab[data-tab-id="remote-new-tab"]')).toHaveCount(1)
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', secondRetainedTab.id)
+    await expect.poll(() => page.evaluate(tabId => {
+      const store = window.$store
+      return store.getters.getTabById(tabId).route.fullPath
+    }, retainedTabId)).toBe('/playlists')
+    expect(await page.evaluate(tabId => {
+      const store = window.$store
+      const tab = store.getters.getTabById(tabId)
+      return {
+        retainedNodesConnected: window.__syncRetainedTabNodes.map(node => node?.isConnected === true),
+        pendingReloadRoute: tab.pendingReloadRoute,
+        contentTitle: tab.contentTitle
+      }
+    }, retainedTabId)).toEqual({
+      retainedNodesConnected: [true, true],
+      pendingReloadRoute: null,
+      contentTitle: 'Playlists'
+    })
+  })
+
+  test('keeps opening tabs after a blocked navigation to another site', async ({ app, page }) => {
+    // Playwright waits for the blocked navigation before using locators, so
+    // query and click through the page instead.
+    const tabCount = () => page.evaluate(() => document.querySelectorAll('.tabBar .tab').length)
+    const openTab = () => page.evaluate(() => document.querySelector('.tabBar .newTabButton').click())
+    await expect.poll(tabCount).toBe(1)
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      globalThis.blockedNavigationStarted = false
+      BrowserWindow.getAllWindows()[0].webContents.once('did-start-navigation', () => {
+        globalThis.blockedNavigationStarted = true
+      })
+    })
+
+    // A link whose click never reaches the document link handler navigates the window
+    await page.evaluate(() => {
+      const link = document.createElement('a')
+      link.href = 'https://example.com/blocked'
+      link.addEventListener('click', event => event.stopPropagation())
+      document.body.append(link)
+      link.click()
+      link.remove()
+    })
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.blockedNavigationStarted)).toBe(true)
+
+    await openTab()
+    await expect.poll(tabCount).toBe(2)
+  })
+
+  test('Ctrl+T selects and presents the new tab before main receives mount readiness', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      const channel = 'tabs-mount-ready'
+      const [listener] = ipcMain.listeners(channel)
+      const pending = []
+      const holdMount = (...args) => pending.push(args)
+      ipcMain.removeListener(channel, listener)
+      ipcMain.on(channel, holdMount)
+      ipcMain.once('e2e-release-tab-mounts', () => {
+        ipcMain.removeListener(channel, holdMount)
+        ipcMain.on(channel, listener)
+        for (const args of pending) listener(...args)
+      })
+    })
+
+    try {
+      await page.keyboard.press('Control+t')
+      await expect(page.locator(sel.tabs)).toHaveCount(2)
+      const newTab = page.locator(sel.tabs).nth(1)
+      await expect(newTab).toHaveClass(/active/)
+      const tabId = await newTab.getAttribute('data-tab-id')
+      await expect(page.locator(`.tabContent[data-tab-id="${tabId}"]`)).toBeVisible()
+      const state = await page.evaluate(() => window.ftElectron.tabs.getState())
+      expect(state.activeTabId).toBe(tabId)
+      expect(state.tabs.find(tab => tab.id === tabId).loadState).toBe('mounting')
+    } finally {
+      await app.electronApp.evaluate(({ ipcMain }) => ipcMain.emit('e2e-release-tab-mounts'))
+    }
+  })
+
+  test('restarts background tab creation order after a manual move', async ({ page }) => {
+    const openerTabId = await page.locator(sel.tabs).getAttribute('data-tab-id')
+    const existingTab = await page.evaluate(() => window.ftElectron.tabs.create({
+      route: '/history',
+      title: 'Existing tab',
+      makeActive: false,
+      lazyLoad: true,
+      openerTabId: 'unrelated-tab'
+    }))
+    const firstVideo = await page.evaluate(openerTabId => window.ftElectron.tabs.create({
+      route: '/watch/first',
+      title: 'First video',
+      makeActive: false,
+      lazyLoad: true,
+      openerTabId
+    }), openerTabId)
+    const secondVideo = await page.evaluate(openerTabId => window.ftElectron.tabs.create({
+      route: '/watch/second',
+      title: 'Second video',
+      makeActive: false,
+      lazyLoad: true,
+      openerTabId
+    }), openerTabId)
+
+    await expect(page.locator(sel.tabs)).toHaveCount(4)
+    await expect.poll(async () => page.locator(sel.tabs).evaluateAll(
+      tabs => tabs.map(tab => tab.dataset.tabId)
+    )).toEqual([openerTabId, firstVideo.id, secondVideo.id, existingTab.id])
+
+    await page.evaluate(tabIds => window.ftElectron.tabs.reorder(tabIds), [
+      openerTabId,
+      firstVideo.id,
+      existingTab.id,
+      secondVideo.id
+    ])
+    const thirdVideo = await page.evaluate(openerTabId => window.ftElectron.tabs.create({
+      route: '/watch/third',
+      title: 'Third video',
+      makeActive: false,
+      lazyLoad: true,
+      openerTabId
+    }), openerTabId)
+    const fourthVideo = await page.evaluate(openerTabId => window.ftElectron.tabs.create({
+      route: '/watch/fourth',
+      title: 'Fourth video',
+      makeActive: false,
+      lazyLoad: true,
+      openerTabId
+    }), openerTabId)
+
+    await expect.poll(async () => page.locator(sel.tabs).evaluateAll(
+      tabs => tabs.map(tab => tab.dataset.tabId)
+    )).toEqual([
+      openerTabId,
+      thirdVideo.id,
+      fourthVideo.id,
+      firstVideo.id,
+      existingTab.id,
+      secondVideo.id
+    ])
+  })
+
+  test('single-tab moves reset creation order only when the order changes', async ({ page }) => {
+    const openerTabId = await page.locator(sel.tabs).getAttribute('data-tab-id')
+    const firstVideo = await page.evaluate(openerTabId => window.ftElectron.tabs.create({
+      route: '/watch/first',
+      title: 'First video',
+      makeActive: false,
+      lazyLoad: true,
+      openerTabId
+    }), openerTabId)
+    const secondVideo = await page.evaluate(openerTabId => window.ftElectron.tabs.create({
+      route: '/watch/second',
+      title: 'Second video',
+      makeActive: false,
+      lazyLoad: true,
+      openerTabId
+    }), openerTabId)
+
+    await page.evaluate(tabId => window.ftElectron.tabs.move(tabId, 2), secondVideo.id)
+    const thirdVideo = await page.evaluate(openerTabId => window.ftElectron.tabs.create({
+      route: '/watch/third',
+      title: 'Third video',
+      makeActive: false,
+      lazyLoad: true,
+      openerTabId
+    }), openerTabId)
+
+    await expect.poll(async () => page.locator(sel.tabs).evaluateAll(
+      tabs => tabs.map(tab => tab.dataset.tabId)
+    )).toEqual([openerTabId, firstVideo.id, secondVideo.id, thirdVideo.id])
+
+    await page.evaluate(tabId => window.ftElectron.tabs.move(tabId, 4), secondVideo.id)
+    const fourthVideo = await page.evaluate(openerTabId => window.ftElectron.tabs.create({
+      route: '/watch/fourth',
+      title: 'Fourth video',
+      makeActive: false,
+      lazyLoad: true,
+      openerTabId
+    }), openerTabId)
+    const fifthVideo = await page.evaluate(openerTabId => window.ftElectron.tabs.create({
+      route: '/watch/fifth',
+      title: 'Fifth video',
+      makeActive: false,
+      lazyLoad: true,
+      openerTabId
+    }), openerTabId)
+
+    await expect.poll(async () => page.locator(sel.tabs).evaluateAll(
+      tabs => tabs.map(tab => tab.dataset.tabId)
+    )).toEqual([
+      openerTabId,
+      fourthVideo.id,
+      fifthVideo.id,
+      firstVideo.id,
+      thirdVideo.id,
+      secondVideo.id
+    ])
+  })
+
+  test('fixed internal routes use their page title before mounting', async ({ page }) => {
+    const fixedRoutes = [
+      ['/subscriptions', 'Subscriptions'],
+      ['/subscribedchannels', 'Channel List'],
+      ['/trending', 'Trending'],
+      ['/popular', 'Most Popular'],
+      ['/userplaylists', 'Your Playlists'],
+      ['/history', 'History'],
+      ['/stats', 'Stats']
+    ]
+    const tabs = await page.evaluate(async (routes) => {
+      return await Promise.all(routes.map(route => (
+        window.ftElectron.tabs.create({
+          route,
+          makeActive: false,
+          lazyLoad: true
+        })
+      )))
+    }, [...fixedRoutes.map(([route]) => route), '/channel/channel-id', '/'])
+
+    expect(tabs.map(tab => tab.title)).toEqual([
+      ...fixedRoutes.map(([, title]) => title),
+      '/channel/channel-id',
+      '/'
+    ])
+  })
+
+  test('uses one utility window for Settings and Downloads', async ({ page }) => {
+    const routeBeforeOpening = page.url()
+    await goTo(page, 'settings')
+    await expect(page.locator(`${sel.activeTab} .tabLoadingLine`)).toHaveCount(0)
+    await expect(page.locator(sel.activeTab).locator('[data-icon="subscriptions"]')).toBeVisible()
+    await expect(page.locator('.settingsWindow')).toHaveCount(1)
+    await expect(page.locator('.settingsWindow .settingsMenu')).toBeVisible()
+
+    await goTo(page, 'downloads')
+    const downloadsWindow = page.getByRole('dialog', { name: 'Downloads', exact: true })
+    await expect(downloadsWindow).toBeVisible()
+    await expect(downloadsWindow.locator('.settingsBreadcrumb')).toContainText('Downloads')
+    await expect(downloadsWindow.locator('.settingsMenu')).toBeHidden()
+    await expect(downloadsWindow.locator('.settingsDownloadsPage')).toBeVisible()
+    await expect(page.locator('.settingsWindow')).toHaveCount(1)
+    await expect(page.locator(sel.activeTab).locator('[data-icon="subscriptions"]')).toBeVisible()
+    expect(page.url()).toBe(routeBeforeOpening)
+
+    await downloadsWindow.locator('.settingsCloseButton').click()
+    await expect(downloadsWindow).toBeHidden()
+    expect(page.url()).toBe(routeBeforeOpening)
+
+    await goTo(page, 'downloads')
+    await goTo(page, 'settings')
+    await expect(page.getByRole('dialog', { name: 'Settings', exact: true })).toBeVisible()
+    await expect(page.getByRole('dialog', { name: 'Settings', exact: true }).locator('.settingsMenu')).toBeVisible()
+    await expect(page.getByRole('dialog', { name: 'Downloads', exact: true })).toHaveCount(0)
+    await expect(page.locator('.settingsWindow')).toHaveCount(1)
+  })
+
+  test('keeps subscription tab text and loading indicators unchanged while fetching', async ({ page }) => {
+    for (const route of ['/subscriptions', '/', '/subscriptions/', '/Subscriptions', '/Subscriptions/']) {
+      const subscriptionsTab = await page.evaluate(route => window.ftElectron.tabs.create({
+        route,
+        makeActive: false
+      }), route)
+      const tab = page.locator(`.tab[data-tab-id="${subscriptionsTab.id}"]`)
+      await expect(tab).not.toHaveClass(/unloaded|loading/)
+      // Subscription tabs never show the loading class, so wait for the page's
+      // own loader to settle. Its final update would otherwise clear the
+      // loading state set below.
+      await expect.poll(() => page.evaluate(id => {
+        const tab = window.$store.getters.getTabById(id)
+        return tab.loadState === 'loaded' && !tab.isLoading
+      }, subscriptionsTab.id)).toBe(true)
+      await page.evaluate(id => window.ftElectron.tabs.setLoading(true, id), subscriptionsTab.id)
+      await expect.poll(() => page.evaluate(id => (
+        window.$store.getters.getTabById(id).isLoading
+      ), subscriptionsTab.id)).toBe(true)
+      await expect(tab.locator('.tabLoadingLine')).toHaveCount(0)
+      await expect(tab.locator('.tabTitleText')).toHaveCSS('opacity', '1')
+      await page.evaluate(id => window.ftElectron.tabs.setLoading(false, id), subscriptionsTab.id)
+    }
+  })
+
+  test('keeps the loading glow inside its tab', async ({ app, page }) => {
+    const loadingTab = await page.evaluate(() => window.ftElectron.tabs.create({
+      route: '/watch/clipped-loading-glow', makeActive: false, lazyLoad: true
+    }))
+    const tab = page.locator(`.tab[data-tab-id="${loadingTab.id}"]`)
+    await page.evaluate(id => {
+      window.$store.commit('setReducedMotion', 'off')
+      window.ftElectron.tabs.setLoading(true, id)
+    }, loadingTab.id)
+    const line = tab.locator('.tabLoadingLine')
+    await expect(line).toBeVisible()
+    await expectTabStripSettled(page)
+    const points = await tab.evaluate(element => {
+      element.style.setProperty('--accent-color', '#ff00ff')
+      for (const animation of element.querySelector('.tabLoadingLine').getAnimations({ subtree: true })) {
+        animation.pause()
+        animation.currentTime = 600
+      }
+      const box = element.getBoundingClientRect()
+      return [0.25, 0.5, 0.75].map(fraction => [box.width * fraction, box.height - 0.5])
+    })
+    await line.evaluate(element => { element.style.visibility = 'hidden' })
+    const baseline = await sampleColors(app, tab, points)
+    await line.evaluate(element => { element.style.visibility = 'visible' })
+    const loading = await sampleColors(app, tab, points)
+    expect(Math.max(...loading.flatMap((color, index) => color.map((channel, component) =>
+      Math.abs(channel - baseline[index][component])
+    )))).toBeLessThanOrEqual(2)
+  })
+
+  test('keeps the loading line at the tab bottom with icons and reduced motion', { tag: '@scale' }, async ({ page }) => {
+    const watchTab = await page.evaluate(() => window.ftElectron.tabs.create({
+      route: '/watch/loading-line',
+      makeActive: false,
+      lazyLoad: true
+    }))
+    const tab = page.locator(`.tab[data-tab-id="${watchTab.id}"]`)
+    const line = tab.locator('.tabLoadingLine')
+    await page.evaluate(id => window.ftElectron.tabs.setLoading(true, id), watchTab.id)
+    await expect(line).toBeVisible()
+    await expect(tab.locator('.tabPageIcon')).toBeVisible()
+    await expect(tab.locator('.tabTitleText')).toHaveCSS('opacity', '0.8')
+
+    for (const position of ['top', 'bottom', 'left', 'right']) {
+      await page.evaluate(position => {
+        window.$store.commit('setTabBarPosition', position)
+      }, position)
+      await expect.poll(() => line.evaluate(element => {
+        const tab = element.closest('.tab').getBoundingClientRect()
+        const line = element.getBoundingClientRect()
+        return line.left >= tab.left && line.right <= tab.right &&
+          Math.abs(line.bottom - tab.bottom) < 2
+      })).toBe(true)
+    }
+
+    await page.evaluate(id => window.ftElectron.tabs.setPinned(id, true), watchTab.id)
+    await expect(line).toBeVisible()
+    await page.evaluate(id => window.ftElectron.tabs.setPlaybackState('playing', id), watchTab.id)
+    await expect(tab.locator('.playingIcon')).toBeVisible()
+    await expect(line).toBeVisible()
+
+    const animationName = () => line.evaluate(element => getComputedStyle(element).animationName)
+    await expect.poll(animationName).not.toBe('none')
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await expect.poll(animationName).toBe('none')
+    await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'off'))
+    await expect.poll(animationName).not.toBe('none')
+    await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'system'))
+    await expect.poll(animationName).toBe('none')
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'on'))
+    await expect.poll(animationName).toBe('none')
+    await page.evaluate(id => window.ftElectron.tabs.setLoading(false, id), watchTab.id)
+    await expect(line).toHaveCount(0)
+    await expect(tab.locator('.playingIcon')).toBeVisible()
+    await expect(tab.locator('.tabTitleText')).toHaveCSS('opacity', '1')
+  })
+
+  test('restores the loading dot from Appearance settings and remembers the choice', { tag: '@scale' }, async ({ app, page }) => {
+    await goToSettingsSection(page, 'appearance')
+    const indicator = page.getByRole('combobox', { name: 'Tab Loading Style', exact: true })
+    await expect(indicator).toHaveText('Bar')
+    await indicator.click()
+    await page.locator(`#${await indicator.getAttribute('aria-controls')}`)
+      .getByRole('option', { name: 'Dot (classic)', exact: true }).click()
+    await expect(indicator).toHaveText('Dot (classic)')
+    const next = await app.relaunch()
+    page = next.page
+    await goToSettingsSection(page, 'appearance')
+    const savedIndicator = page.getByRole('combobox', { name: 'Tab Loading Style', exact: true })
+    await expect(savedIndicator).toHaveText('Dot (classic)')
+    for (const width of [1600, 732, 520]) {
+      await app.electronApp.evaluate(({ BrowserWindow }, width) => {
+        const window = BrowserWindow.getAllWindows()[0]
+        window.setBounds({ ...window.getBounds(), width, height: 800 })
+      }, width)
+      await savedIndicator.scrollIntoViewIfNeeded()
+      await expect(savedIndicator).toBeVisible()
+      await expect.poll(() => savedIndicator.locator('..').locator('.select-label-text')
+        .evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+    }
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      const window = BrowserWindow.getAllWindows()[0]
+      window.setBounds({ ...window.getBounds(), width: 1600, height: 900 })
+    })
+    await page.locator('.settingsCloseButton').click()
+
+    const watchTab = await page.evaluate(() => window.ftElectron.tabs.create({
+      route: '/watch/loading-dot',
+      makeActive: false,
+      lazyLoad: true
+    }))
+    const tab = page.locator(`.tab[data-tab-id="${watchTab.id}"]`)
+    await page.evaluate(id => window.ftElectron.tabs.setLoading(true, id), watchTab.id)
+    const dot = tab.locator('.tabLoadingDot')
+    await expect(dot).toBeVisible()
+    await expect(tab.locator('.tabLoadingLine')).toHaveCount(0)
+    await expect(tab.locator('.tabPageIcon')).toHaveCount(0)
+    for (const position of ['top', 'bottom', 'left', 'right']) {
+      await page.evaluate(position => window.$store.commit('setTabBarPosition', position), position)
+      await expect(dot).toBeVisible()
+      expect(await dot.evaluate(element => {
+        const tab = element.closest('.tab').getBoundingClientRect()
+        const dot = element.getBoundingClientRect()
+        return dot.left >= tab.left && dot.right <= tab.right && dot.top >= tab.top && dot.bottom <= tab.bottom
+      })).toBe(true)
+    }
+    const animationName = () => dot.evaluate(element => getComputedStyle(element).animationName)
+    await expect.poll(animationName).not.toBe('none')
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await expect.poll(animationName).toBe('none')
+    await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'off'))
+    await expect.poll(animationName).not.toBe('none')
+    await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'system'))
+    await expect.poll(animationName).toBe('none')
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'on'))
+    await expect.poll(animationName).toBe('none')
+    await page.evaluate(id => window.ftElectron.tabs.setLoading(false, id), watchTab.id)
+    await expect(dot).toHaveCount(0)
+    await expect(tab.locator('.tabPageIcon')).toBeVisible()
+  })
+
+  test('keeps a cached watch avatar visible while loading', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.route(/^https:\/\/yt3\.(?:ggpht|googleusercontent)\.com\//, route => fulfillVisualFixture(route, 'avatar'))
+    const videoId = 'jNQXAC9IVRw'
+    await page.evaluate(({ videoId }) => {
+      const store = window.$store
+      // Keep autoplay from replacing the avatar with the playback icon.
+      store.commit('setAutoplayVideos', false)
+      store.commit('setVideoAvatar', {
+        videoId,
+        avatar: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
+      })
+
+      window.__watchTabIconStates = []
+      const recordIconStates = () => {
+        for (const tab of document.querySelectorAll('.tab')) {
+          window.__watchTabIconStates.push({
+            id: tab.dataset.tabId,
+            loading: tab.querySelector('.tabLoadingLine') != null,
+            avatar: tab.querySelector('.tabAvatar')?.checkVisibility({ visibilityProperty: true }) === true
+          })
+        }
+      }
+      new MutationObserver(recordIconStates).observe(
+        document.querySelector('.tabsContainer'),
+        { childList: true, attributes: true, attributeFilter: ['style'], subtree: true }
+      )
+    }, { videoId })
+
+    const watchTab = await page.evaluate(({ videoId }) => {
+      return window.ftElectron.tabs.create({
+        route: `/watch/${videoId}`,
+        title: 'Cached video',
+        makeActive: true
+      })
+    }, { videoId })
+
+    const tab = page.locator(`.tab[data-tab-id="${watchTab.id}"]`)
+    await expect(tab.locator('.tabLoadingLine')).toBeVisible()
+    // A cold watch page parses the player script before it finishes loading,
+    // which takes longer than the default timeout on a busy machine.
+    await expect(tab.locator('.tabLoadingLine')).toHaveCount(0, { timeout: 30_000 })
+    await expect.poll(() => page.evaluate(tabId => (
+      window.__watchTabIconStates.some(state => state.id === tabId && !state.loading && state.avatar)
+    ), watchTab.id)).toBe(true)
+
+    const states = await page.evaluate(
+      tabId => window.__watchTabIconStates.filter(state => state.id === tabId),
+      watchTab.id
+    )
+    const lastLoadingIndex = states.findLastIndex(state => state.loading)
+
+    expect(lastLoadingIndex).toBeGreaterThanOrEqual(0)
+    expect(states.some(state => state.loading && state.avatar)).toBe(true)
+    expect(states.slice(lastLoadingIndex + 1).some(state => state.avatar)).toBe(true)
+  })
+
+  test('Ctrl+T opens and Ctrl+W closes a tab', async ({ page }) => {
+    await page.keyboard.press('Control+t')
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    await expect(page.locator(sel.tabs).nth(1)).toContainText('Subscriptions')
+    await expect(page.locator(sel.tabs).nth(1)).not.toContainText('/subscriptions')
+
+    await page.keyboard.press('Control+w')
+    await expect(page.locator(sel.tabs)).toHaveCount(1)
+  })
+
+  test('each tab keeps its own route', async ({ page }) => {
+    await goTo(page, 'history')
+    await expect(page).toHaveURL(/#\/history/)
+
+    await page.locator(sel.newTabButton).click()
+    await goTo(page, 'userplaylists')
+    await expect(page).toHaveURL(/#\/userplaylists/)
+
+    // Switch back to the first tab: its route must be restored.
+    await page.locator(sel.tabs).first().click()
+    await expect(page).toHaveURL(/#\/history/)
+
+    await page.locator(sel.tabs).nth(1).click()
+    await expect(page).toHaveURL(/#\/userplaylists/)
+  })
+
+  test('selects multiple tabs with modifier clicks', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(4)
+
+    const tabs = page.locator(sel.tabs)
+    await tabs.first().click()
+    await tabs.nth(2).click({ modifiers: ['Control'] })
+
+    await expect(tabs.first()).toHaveAttribute('aria-pressed', 'true')
+    await expect(tabs.nth(1)).toHaveAttribute('aria-pressed', 'false')
+    await expect(tabs.nth(2)).toHaveAttribute('aria-pressed', 'true')
+
+    await tabs.nth(3).click({ modifiers: ['Shift'] })
+    await expect(tabs.first()).toHaveAttribute('aria-pressed', 'false')
+    await expect(tabs.nth(2)).toHaveAttribute('aria-pressed', 'true')
+    await expect(tabs.nth(3)).toHaveAttribute('aria-pressed', 'true')
+
+    await tabs.nth(1).click()
+    await expect(page.locator(`${sel.tabs}[aria-pressed="true"]`)).toHaveCount(0)
+    await expect(tabs.nth(1)).toHaveClass(/active/)
+  })
+
+  test('uses the only selected tab as the shift-selection anchor', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(4)
+
+    const tabs = page.locator(sel.tabs)
+    await tabs.first().click()
+    await tabs.nth(2).click({ modifiers: ['Control'] })
+    await tabs.first().click({ modifiers: ['Control'] })
+    await tabs.nth(3).click({ modifiers: ['Shift'] })
+
+    await expect(tabs.first()).toHaveAttribute('aria-pressed', 'false')
+    await expect(tabs.nth(1)).toHaveAttribute('aria-pressed', 'false')
+    await expect(tabs.nth(2)).toHaveAttribute('aria-pressed', 'true')
+    await expect(tabs.nth(3)).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  test('clears multi-selection when a shortcut activates another tab', async ({ page }) => {
+    const tabIds = await openThreeTabsAndActivate(page, 0)
+    const tabs = page.locator(sel.tabs)
+    await tabs.nth(2).click({ modifiers: ['Control'] })
+    await expect(page.locator(`${sel.tabs}[aria-pressed="true"]`)).toHaveCount(2)
+
+    await page.keyboard.press('Control+2')
+    await expect(tabs.nth(1)).toHaveClass(/active/)
+    await expect(page.locator(`${sel.tabs}[aria-pressed="true"]`)).toHaveCount(0)
+
+    await page.keyboard.press('Control+w')
+    await expect(tabs).toHaveCount(2)
+    const remainingTabIds = await tabs.evaluateAll(elements => elements.map(tab => tab.dataset.tabId))
+    expect(remainingTabIds).toEqual([tabIds[0], tabIds[2]])
+  })
+
+  test('applies close and reload shortcuts to the selected tabs', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(3)
+
+    let tabs = page.locator(sel.tabs)
+    await tabs.first().click()
+    await tabs.nth(2).click({ modifiers: ['Control'] })
+
+    const beforeReload = await page.evaluate(() => window.ftElectron.tabs.getState())
+    const selectedIds = [beforeReload.tabs[0].id, beforeReload.tabs[2].id]
+    const unselectedId = beforeReload.tabs[1].id
+    const refreshKeys = Object.fromEntries(
+      beforeReload.tabs.map(tab => [tab.id, tab.refreshKey])
+    )
+
+    await page.keyboard.press('F5')
+    await expect.poll(async () => {
+      const state = await page.evaluate(() => window.ftElectron.tabs.getState())
+      return Object.fromEntries(state.tabs.map(tab => [tab.id, tab.refreshKey]))
+    }).toEqual({
+      [selectedIds[0]]: refreshKeys[selectedIds[0]] + 1,
+      [unselectedId]: refreshKeys[unselectedId],
+      [selectedIds[1]]: refreshKeys[selectedIds[1]] + 1
+    })
+
+    await page.keyboard.press('Control+w')
+    await expect(tabs).toHaveCount(1)
+    tabs = page.locator(sel.tabs)
+    await expect(tabs).toHaveAttribute('data-tab-id', unselectedId)
+  })
+
+  test('confirms before closing several selected tabs at once', async ({ page }) => {
+    for (let index = 0; index < 5; index++) {
+      await page.locator(sel.newTabButton).click()
+    }
+    const tabs = page.locator(sel.tabs)
+    await expect(tabs).toHaveCount(6)
+
+    await tabs.first().click()
+    for (let index = 1; index < 5; index++) {
+      await tabs.nth(index).click({ modifiers: ['Control'] })
+    }
+
+    await page.keyboard.press('Control+w')
+    const prompt = page.locator('.prompt')
+    await expect(prompt).toBeVisible()
+    await expect(prompt).toContainText('5')
+
+    await prompt.getByRole('button', { name: 'Cancel' }).click()
+    await expect(prompt).toHaveCount(0)
+    await expect(tabs).toHaveCount(6)
+
+    await page.keyboard.press('Control+w')
+    await expect(prompt).toContainText('Settings → General → Confirm before…')
+    await prompt.getByRole('button', { name: 'Never ask again', exact: true }).click()
+    await expect(tabs).toHaveCount(1)
+    await expect.poll(() => page.evaluate(() => {
+      const store = window.$store
+      return store.getters.getConfirmCloseMultipleTabs
+    })).toBe(false)
+  })
+
+  test('shows a confirmation for loading several unloaded tabs', async ({ page }) => {
+    for (let index = 0; index < 5; index++) {
+      await page.evaluate(() => window.ftElectron.tabs.create({
+        makeActive: false,
+        lazyLoad: true
+      }))
+    }
+
+    const tabs = page.locator(sel.tabs)
+    await expect(tabs).toHaveCount(6)
+    await tabs.first().click()
+    for (let index = 1; index < 6; index++) {
+      await tabs.nth(index).click({ modifiers: ['Control'] })
+    }
+    await tabs.last().click({ button: 'right' })
+    await page.getByRole('menuitem', { name: 'Load Tabs', exact: true }).click()
+
+    const prompt = page.locator('.prompt')
+    await expect(prompt).toContainText('Load multiple tabs?')
+    await expect(prompt).toContainText('This will load 5 tabs.')
+    await expect(prompt).toContainText('Settings → General → Confirm before…')
+    await expect(prompt.getByRole('button', { name: 'Load 5 Tabs', exact: true })).toBeVisible()
+    await prompt.getByRole('button', { name: 'Cancel' }).click()
+    await expect(page.locator(`${sel.tabs}.unloaded`)).toHaveCount(5)
+  })
+
+  test('Ctrl+middle-click unloads only the clicked background tab and plain middle-click closes it', async ({ page }) => {
+    const tabIds = await openThreeTabsAndActivate(page, 0)
+    const tabs = page.locator(sel.tabs)
+    const targetTab = page.locator(`.tab[data-tab-id="${tabIds[1]}"]`)
+    await tabs.nth(2).click({ modifiers: ['Control'] })
+
+    await targetTab.click({ button: 'middle', modifiers: ['Control'] })
+    await expect(tabs).toHaveCount(3)
+    await expect(targetTab).toHaveClass(/unloaded/)
+    await expect(page.locator(`${sel.tabs}.unloaded`)).toHaveCount(1)
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[0])
+    await expect(page.locator(`.tabContent[data-tab-id="${tabIds[1]}"] .routerView`)).toHaveCount(0)
+
+    // Repeating the shortcut must leave an unloaded tab open.
+    await targetTab.click({ button: 'middle', modifiers: ['Control'] })
+    await expect(tabs).toHaveCount(3)
+    await expect(targetTab).toHaveClass(/unloaded/)
+
+    await targetTab.click()
+    await expect(targetTab).not.toHaveClass(/unloaded/)
+    await expect(page.locator(`.tabContent[data-tab-id="${tabIds[1]}"]`)).toBeVisible()
+    await targetTab.click({ button: 'middle' })
+    await expect(targetTab).toHaveCount(0)
+    await expect(tabs).toHaveCount(2)
+  })
+
+  test('Ctrl+middle-click unloads the active tab and presents its neighbor', async ({ page }) => {
+    const tabIds = await openThreeTabsAndActivate(page, 1)
+    const targetTab = page.locator(`.tab[data-tab-id="${tabIds[1]}"]`)
+    await expect(page.locator(`.tabContent[data-tab-id="${tabIds[1]}"]`)).toBeVisible()
+
+    await targetTab.click({ button: 'middle', modifiers: ['Control'] })
+    await expect(page.locator(sel.tabs)).toHaveCount(3)
+    await expect(targetTab).toHaveClass(/unloaded/)
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[2])
+    await expect(page.locator(`.tabContent[data-tab-id="${tabIds[2]}"]`)).toBeVisible()
+    await expect(page.locator(`.tabContent[data-tab-id="${tabIds[1]}"] .routerView`)).toHaveCount(0)
+  })
+
+  test('Ctrl+middle-click preserves the only active tab', async ({ page }) => {
+    const tab = page.locator(sel.tabs)
+    await expect(tab).toHaveCount(1)
+    await tab.click({ button: 'middle', modifiers: ['Control'] })
+    await expect(tab).toHaveCount(1)
+    await expect(tab).not.toHaveClass(/unloaded/)
+    await expect(page.locator('.tabContent')).toBeVisible()
+  })
+
+  test('unloads an active selected tab from the tab context menu', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    const tabs = page.locator(sel.tabs)
+    await expect(tabs).toHaveCount(3)
+
+    await tabs.first().click()
+    const initialState = await page.evaluate(() => window.ftElectron.tabs.getState())
+    const selectedTabIds = initialState.tabs.slice(0, 2).map(tab => tab.id)
+    const survivingTabId = initialState.tabs[2].id
+    await expect.poll(() => page.evaluate(tabId => {
+      return window.ftElectron.tabs.getState().then(state => state.presentedTabId === tabId)
+    }, selectedTabIds[0])).toBe(true)
+
+    await tabs.nth(1).click({ modifiers: ['Control'] })
+    await tabs.nth(1).click({ button: 'right' })
+    await page.getByRole('menuitem', { name: 'Unload Tabs', exact: true }).click()
+
+    await expect.poll(() => page.evaluate(async selectedTabIds => {
+      const state = await window.ftElectron.tabs.getState()
+      return {
+        activeTabId: state.activeTabId,
+        unloaded: selectedTabIds.map(tabId => state.tabs.find(tab => tab.id === tabId)?.isUnloaded)
+      }
+    }, selectedTabIds), { timeout: 2_000 }).toEqual({
+      activeTabId: survivingTabId,
+      unloaded: [true, true]
+    })
+  })
+
+  test('does not confirm when closing fewer tabs than the threshold', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    const tabs = page.locator(sel.tabs)
+    await expect(tabs).toHaveCount(3)
+
+    await tabs.first().click()
+    await tabs.nth(1).click({ modifiers: ['Control'] })
+
+    await page.keyboard.press('Control+w')
+    await expect(tabs).toHaveCount(1)
+    await expect(page.locator('.prompt')).toHaveCount(0)
+  })
+
+  test('closes several tabs in one state update', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(4)
+
+    // The first tab stays active, so no tab that is about to be closed has to
+    // be presented (and mounted) on the way out. A tab that is still presented
+    // while it closes is kept alive until its replacement paints, which is a
+    // second state update by design.
+    await page.locator(sel.tabs).first().click()
+    await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
+    await expect.poll(async () => {
+      const state = await page.evaluate(() => window.ftElectron.tabs.getState())
+      return state.presentedTabId === state.tabs[0].id
+    }).toBe(true)
+
+    const tabCounts = await page.evaluate(async () => {
+      const initialState = await window.ftElectron.tabs.getState()
+      const closingIds = initialState.tabs.slice(1).map(tab => tab.id)
+
+      return await new Promise((resolve, reject) => {
+        const counts = []
+        const timeoutId = window.setTimeout(() => {
+          removeListener()
+          reject(new Error('Timed out waiting for the tabs to close'))
+        }, 5000)
+        const removeListener = window.ftElectron.tabs.onStateUpdated((state) => {
+          if (state.tabs.length === initialState.tabs.length) return
+
+          counts.push(state.tabs.length)
+          if (state.tabs.length === 1) {
+            window.clearTimeout(timeoutId)
+            removeListener()
+            resolve(counts)
+          }
+        })
+
+        window.ftElectron.tabs.closeMultiple(closingIds)
+      })
+    })
+
+    expect(tabCounts).toEqual([1])
+    await expect(page.locator(sel.tabs)).toHaveCount(1)
+  })
+
+  test('coalesces rapid tab creation state updates', async ({ page }) => {
+    const tabCounts = await page.evaluate(async () => {
+      const initialState = await window.ftElectron.tabs.getState()
+      const counts = []
+      let finishBurst
+      const burstFinished = new Promise(resolve => { finishBurst = resolve })
+      const removeListener = window.ftElectron.tabs.onStateUpdated((state) => {
+        if (state.tabs.length === initialState.tabs.length || state.tabs.length === counts.at(-1)) return
+        counts.push(state.tabs.length)
+        if (state.tabs.length === initialState.tabs.length + 4) finishBurst()
+      })
+
+      await Promise.all(Array.from({ length: 4 }, () => (
+        window.ftElectron.tabs.create({ route: '/history', makeActive: false })
+      )))
+      // Creation replies can arrive before the coalesced state notification.
+      await burstFinished
+      removeListener()
+      return counts
+    })
+
+    // The first tab appears immediately; the rest of the burst arrives together.
+    expect(tabCounts).toEqual([2, 5])
+    await expect(page.locator(sel.tabs)).toHaveCount(5)
+  })
+
+  test('applies a complete tab reorder in one state update', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(4)
+
+    const result = await page.evaluate(async () => {
+      const initialState = await window.ftElectron.tabs.getState()
+      const initialIds = initialState.tabs.map(tab => tab.id)
+      const reorderedIds = [...initialIds.slice(1), initialIds[0]]
+
+      return await new Promise((resolve, reject) => {
+        const changedOrders = []
+        const timeoutId = window.setTimeout(() => {
+          removeListener()
+          reject(new Error('Timed out waiting for atomic tab reorder'))
+        }, 5000)
+        const removeListener = window.ftElectron.tabs.onStateUpdated((state) => {
+          const order = state.tabs.map(tab => tab.id)
+          if (order.every((tabId, index) => tabId === initialIds[index])) return
+
+          const key = order.join(',')
+          if (!changedOrders.includes(key)) {
+            changedOrders.push(key)
+          }
+          if (order.every((tabId, index) => tabId === reorderedIds[index])) {
+            window.clearTimeout(timeoutId)
+            removeListener()
+            resolve({ changedOrders, reorderedIds })
+          }
+        })
+
+        window.ftElectron.tabs.reorder(reorderedIds)
+      })
+    })
+
+    expect(result.changedOrders).toHaveLength(1)
+    await expect.poll(() => {
+      return page.locator(sel.tabs).evaluateAll(elements => {
+        return elements.map(element => element.dataset.tabId)
+      })
+    }).toEqual(result.reorderedIds)
+  })
+
+  test('commits a completed drop before a new pointerdown cancels settling', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(4)
+
+    const tabs = page.locator(sel.tabs)
+    const originalIds = await tabs.evaluateAll(elements => {
+      return elements.map(element => element.dataset.tabId)
+    })
+    await tabs.nth(1).click()
+    await expect(tabs.nth(1)).toHaveClass(/active/)
+    await tabs.nth(3).click({ modifiers: ['Control'] })
+
+    await page.evaluate(() => {
+      const tabs = Array.from(document.querySelectorAll('.tabBar .tab'))
+      const sourceRect = tabs[3].getBoundingClientRect()
+      const targetRect = tabs[2].getBoundingClientRect()
+      tabs[3].dispatchEvent(new PointerEvent('pointerdown', {
+        bubbles: true,
+        button: 0,
+        clientX: sourceRect.left + sourceRect.width / 2,
+        clientY: sourceRect.top + sourceRect.height / 2
+      }))
+      window.dispatchEvent(new PointerEvent('pointermove', {
+        bubbles: true,
+        buttons: 1,
+        clientX: targetRect.left + targetRect.width / 2 - 2,
+        clientY: targetRect.top + targetRect.height / 2
+      }))
+      window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0 }))
+
+      const interruptRect = tabs[0].getBoundingClientRect()
+      tabs[0].dispatchEvent(new PointerEvent('pointerdown', {
+        bubbles: true,
+        button: 0,
+        clientX: interruptRect.left + interruptRect.width / 2,
+        clientY: interruptRect.top + interruptRect.height / 2
+      }))
+      window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0 }))
+    })
+
+    await expect.poll(() => {
+      return tabs.evaluateAll(elements => {
+        return elements.map(element => element.dataset.tabId)
+      })
+    }).toEqual([
+      originalIds[1],
+      originalIds[0],
+      originalIds[3],
+      originalIds[2]
+    ])
+  })
+
+  test('drags all selected tabs together from the selected tab under the pointer', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(5)
+
+    const tabs = page.locator(sel.tabs)
+    const originalIds = await tabs.evaluateAll(elements => {
+      return elements.map(element => element.dataset.tabId)
+    })
+    await tabs.nth(2).click()
+    await expect(tabs.nth(2)).toHaveClass(/active/)
+    await tabs.nth(3).click({ modifiers: ['Control'] })
+    await expect(page.locator(`${sel.tabs}[aria-pressed="true"]`)).toHaveCount(2)
+
+    const sourceBox = await tabs.nth(3).boundingBox()
+    const targetBox = await tabs.first().boundingBox()
+    expect(sourceBox).not.toBeNull()
+    expect(targetBox).not.toBeNull()
+
+    await page.mouse.move(
+      sourceBox.x + sourceBox.width / 2,
+      sourceBox.y + sourceBox.height / 2
+    )
+    await page.mouse.down()
+    await page.mouse.move(
+      targetBox.x + targetBox.width / 2,
+      targetBox.y + targetBox.height / 2,
+      { steps: 5 }
+    )
+    await page.mouse.up()
+
+    await expect.poll(() => {
+      return tabs.evaluateAll(elements => {
+        return elements.map(element => element.dataset.tabId)
+      })
+    }).toEqual([
+      originalIds[2],
+      originalIds[3],
+      originalIds[0],
+      originalIds[1],
+      originalIds[4]
+    ])
+  })
+
+  for (const position of ['top', 'bottom', 'left', 'right']) {
+    test(`autoscrolls an overflowing tab bar while a tab is dragged to either end at ${position}`, { tag: '@scale' }, async ({ app, page }) => {
+      const vertical = position === 'left' || position === 'right'
+      // Overflow both layouts by a few hundred pixels.
+      const tabCount = vertical ? 25 : 13
+      await setWindowSize(app, page, { width: 800, height: 400 })
+      await page.evaluate(async ({ position, tabCount }) => {
+        window.$store.commit('setTabBarPosition', position)
+        for (let index = 1; index < tabCount; index++) {
+          await window.ftElectron.tabs.create({
+            route: '/history', title: `History ${index}`, makeActive: false, lazyLoad: true
+          })
+        }
+      }, { position, tabCount })
+      const container = page.locator('.tabsContainer')
+      const tabs = page.locator(sel.tabs)
+      await expect(tabs).toHaveCount(tabCount)
+      await expect(container.locator(`:scope > .os-scrollbar-${vertical ? 'vertical' : 'horizontal'}`))
+        .toHaveClass(/os-scrollbar-visible/)
+      const tabOrder = () => tabs.evaluateAll(elements => elements.map(element => element.dataset.tabId))
+      // Integer scroll sizes can differ from the fractional offset at non-100% UI scales.
+      const distanceFromEnd = toEnd => container.evaluate((element, { vertical, toEnd }) => {
+        const content = element.querySelector('.tabsContent')
+        const maximum = vertical
+          ? content.scrollHeight - element.clientHeight
+          : content.scrollWidth - element.clientWidth
+        const offset = vertical ? element.scrollTop : element.scrollLeft
+        return Math.abs((toEnd ? maximum : 0) - offset) * devicePixelRatio
+      }, { vertical, toEnd })
+      const originalIds = await tabOrder()
+      await expect.poll(() => distanceFromEnd(true)).toBeGreaterThan(200)
+
+      // Hold the dragged tab just inside one end until the list stops scrolling.
+      const dragToEdge = async (tab, toEnd) => {
+        const box = await tab.boundingBox()
+        const bounds = await container.boundingBox()
+        expect(box).not.toBeNull()
+        expect(bounds).not.toBeNull()
+        const edge = vertical
+          ? (toEnd ? bounds.y + bounds.height - 4 : bounds.y + 4)
+          : (toEnd ? bounds.x + bounds.width - 4 : bounds.x + 4)
+        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+        await page.mouse.down()
+        await page.mouse.move(
+          vertical ? box.x + box.width / 2 : edge,
+          vertical ? edge : box.y + box.height / 2,
+          { steps: 5 }
+        )
+        await expect.poll(() => distanceFromEnd(toEnd)).toBeLessThanOrEqual(2)
+        await page.mouse.up()
+      }
+
+      await dragToEdge(tabs.first(), true)
+      await expect.poll(tabOrder).toEqual([...originalIds.slice(1), originalIds[0]])
+      await expect(page.locator('.tab.dragging, .tab.settling')).toHaveCount(0)
+
+      // The list still scrolls to its start, past the pinned tab, when the tab cannot pass it.
+      await page.evaluate(tabId => window.ftElectron.tabs.setPinned(tabId, true), originalIds[1])
+      await expect(tabs.first()).toHaveClass(/pinned/)
+      await dragToEdge(page.locator(`.tab[data-tab-id="${originalIds[0]}"]`), false)
+      await expect.poll(tabOrder).toEqual([originalIds[1], originalIds[0], ...originalIds.slice(2)])
+    })
+  }
+
+  test('batches tab drag rendering on a throttled CPU in both layouts', { tag: '@performance' }, async ({ page }) => {
+    await page.evaluate(async () => {
+      window.ftElectron.setZoomFactor(0.95)
+      for (let index = 0; index < 29; index++) {
+        await window.ftElectron.tabs.create({
+          route: '/stats', title: `Tab ${index}`, makeActive: false, lazyLoad: true
+        })
+      }
+    })
+    const tabs = page.locator(sel.tabs)
+    await expect(tabs).toHaveCount(30)
+    const session = await page.context().newCDPSession(page)
+    await session.send('Emulation.setCPUThrottlingRate', { rate: 4 })
+
+    for (const vertical of [false, true]) {
+      if (vertical) {
+        await page.keyboard.press('F1')
+        await expect(page.locator('.app')).toHaveClass(/tabBar-left/)
+      }
+      const originalIds = await tabs.evaluateAll(elements => elements.map(element => element.dataset.tabId))
+      const metrics = await page.evaluate(async isVertical => {
+        const source = document.querySelector('.tabBar .tab')
+        const rect = source.getBoundingClientRect()
+        const startX = rect.left + rect.width / 2
+        const startY = rect.top + rect.height / 2
+        let transformWrites = 0
+        const observer = new MutationObserver(records => { transformWrites += records.length })
+        observer.observe(source, { attributes: true, attributeFilter: ['style'] })
+        source.dispatchEvent(new PointerEvent('pointerdown', {
+          bubbles: true, button: 0, clientX: startX, clientY: startY
+        }))
+        for (let index = 0; index < 40; index++) {
+          const offset = 6 + index / 4
+          window.dispatchEvent(new PointerEvent('pointermove', {
+            bubbles: true,
+            buttons: 1,
+            clientX: startX + (isVertical ? 0 : offset),
+            clientY: startY + (isVertical ? offset : 0)
+          }))
+          // Give Vue a chance to render between input events in the same frame.
+          await Promise.resolve()
+        }
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+        observer.disconnect()
+        const transform = new DOMMatrixReadOnly(getComputedStyle(source).transform)
+        return { transformWrites, offset: isVertical ? transform.m42 : transform.m41 }
+      }, vertical)
+      expect(metrics.transformWrites).toBe(1)
+      expect(metrics.offset).toBeCloseTo(15.75, 2)
+
+      await page.evaluate(() => {
+        const target = document.querySelectorAll('.tabBar .tab')[3].getBoundingClientRect()
+        window.dispatchEvent(new PointerEvent('pointermove', {
+          bubbles: true,
+          buttons: 1,
+          clientX: target.left + target.width / 2,
+          clientY: target.top + target.height / 2
+        }))
+        // Release before the next frame to exercise the final position flush.
+        window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0 }))
+      })
+      await expect.poll(() => tabs.evaluateAll(elements => elements.map(element => element.dataset.tabId)))
+        .toEqual([...originalIds.slice(1, 4), originalIds[0], ...originalIds.slice(4)])
+      await expect(page.locator('.tab.dragging, .tab.settling, .tab.noTransition')).toHaveCount(0)
+    }
+    await session.send('Emulation.setCPUThrottlingRate', { rate: 1 })
+    await session.detach()
+  })
+
+  test('animates vertical tabs when a new drag interrupts settling', async ({ page }) => {
+    await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
+    await page.keyboard.press('F1')
+    await expect(page.locator('.app')).toHaveClass(/tabBar-left/)
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(4)
+
+    const neighborAnimation = await page.evaluate(() => {
+      const tabs = Array.from(document.querySelectorAll('.tabBar .tab'))
+
+      function pointerEvent(type, target, point, buttons = 0) {
+        target.dispatchEvent(new PointerEvent(type, {
+          bubbles: true,
+          button: 0,
+          buttons,
+          clientX: point.left + point.width / 2,
+          clientY: point.top + point.height / 2
+        }))
+      }
+
+      function drag(source, target) {
+        const sourceRect = source.getBoundingClientRect()
+        const targetRect = target.getBoundingClientRect()
+        pointerEvent('pointerdown', source, sourceRect, 1)
+        pointerEvent('pointermove', window, targetRect, 1)
+        pointerEvent('pointerup', window, targetRect)
+      }
+
+      drag(tabs[3], tabs[0])
+
+      const sourceRect = tabs[1].getBoundingClientRect()
+      const targetRect = tabs[3].getBoundingClientRect()
+      pointerEvent('pointerdown', tabs[1], sourceRect, 1)
+      pointerEvent('pointermove', window, targetRect, 1)
+
+      return new Promise(resolve => {
+        let inspectedFrames = 0
+
+        function inspectAnimation() {
+          inspectedFrames++
+          const animation = tabs[2].getAnimations().find(candidate => {
+            return candidate.effect instanceof KeyframeEffect &&
+              candidate.effect.target === tabs[2] &&
+              candidate.effect.getKeyframes().some(frame => frame.transform != null) &&
+              candidate.effect.getComputedTiming().duration > 0
+          })
+          if (!animation && inspectedFrames < 4) {
+            requestAnimationFrame(inspectAnimation)
+            return
+          }
+
+          pointerEvent('pointerup', window, targetRect)
+          resolve({
+            duration: animation?.effect.getComputedTiming().duration ?? 0,
+            playState: animation?.playState ?? null
+          })
+        }
+
+        requestAnimationFrame(inspectAnimation)
+      })
+    })
+
+    expect(neighborAnimation).toEqual({
+      duration: 200,
+      playState: 'running'
+    })
+  })
+
+  test('restores animations when a deferred drag ends before its resume frame', async ({ page }) => {
+    await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
+    await page.keyboard.press('F1')
+    await expect(page.locator('.app')).toHaveClass(/tabBar-left/)
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(4)
+
+    const transitionProperties = await page.evaluate(() => {
+      const tabs = Array.from(document.querySelectorAll('.tabBar .tab'))
+
+      function pointerEvent(type, target, point, buttons = 0) {
+        target.dispatchEvent(new PointerEvent(type, {
+          bubbles: true,
+          button: 0,
+          buttons,
+          clientX: point.left + point.width / 2,
+          clientY: point.top + point.height / 2
+        }))
+      }
+
+      const firstSourceRect = tabs[3].getBoundingClientRect()
+      const firstTargetRect = tabs[0].getBoundingClientRect()
+      pointerEvent('pointerdown', tabs[3], firstSourceRect, 1)
+      pointerEvent('pointermove', window, firstTargetRect, 1)
+      pointerEvent('pointercancel', window, firstTargetRect)
+
+      const secondSourceRect = tabs[1].getBoundingClientRect()
+      pointerEvent('pointerdown', tabs[1], secondSourceRect, 1)
+
+      return new Promise(resolve => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            pointerEvent('pointerup', window, secondSourceRect)
+            requestAnimationFrame(() => {
+              resolve(tabs.map(tab => getComputedStyle(tab).transitionProperty))
+            })
+          })
+        })
+      })
+    })
+
+    expect(transitionProperties.every(properties => properties.includes('transform'))).toBe(true)
+  })
+
+  test('keeps consecutive selected drags aligned while reorder updates are delayed', async ({ app, page }) => {
+    await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(5)
+
+    const tabs = page.locator(sel.tabs)
+    const originalIds = await tabs.evaluateAll(elements => {
+      return elements.map(element => element.dataset.tabId)
+    })
+    await tabs.nth(2).click()
+    await expect(tabs.nth(2)).toHaveClass(/active/)
+    await tabs.nth(3).click({ modifiers: ['Control'] })
+
+    await delayTabReorders(app)
+
+    await page.evaluate(() => {
+      const tabs = Array.from(document.querySelectorAll('.tabBar .tab'))
+
+      function drag(source, target) {
+        const sourceRect = source.getBoundingClientRect()
+        const targetRect = target.getBoundingClientRect()
+        source.dispatchEvent(new PointerEvent('pointerdown', {
+          bubbles: true,
+          button: 0,
+          clientX: sourceRect.left + sourceRect.width / 2,
+          clientY: sourceRect.top + sourceRect.height / 2
+        }))
+        window.dispatchEvent(new PointerEvent('pointermove', {
+          bubbles: true,
+          buttons: 1,
+          clientX: targetRect.left + targetRect.width / 2,
+          clientY: targetRect.top + targetRect.height / 2
+        }))
+        window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0 }))
+      }
+
+      drag(tabs[3], tabs[0])
+      drag(tabs[2], tabs[4])
+    })
+
+    // The reorder IPC is delayed by 1 s; the dragged order must hold meanwhile.
+    await page.waitForTimeout(600)
+    const visualOrderWhileWaiting = await tabs.evaluateAll(elements => {
+      return elements
+        .map(element => ({
+          id: element.dataset.tabId,
+          start: element.getBoundingClientRect().left
+        }))
+        .sort((a, b) => a.start - b.start)
+        .map(({ id }) => id)
+    })
+    expect(visualOrderWhileWaiting).toEqual([
+      originalIds[0],
+      originalIds[1],
+      originalIds[4],
+      originalIds[2],
+      originalIds[3]
+    ])
+
+    await expect.poll(() => {
+      return tabs.evaluateAll(elements => {
+        return elements.map(element => element.dataset.tabId)
+      })
+    }).toEqual([
+      originalIds[0],
+      originalIds[1],
+      originalIds[4],
+      originalIds[2],
+      originalIds[3]
+    ])
+  })
+
+  test('restores the authoritative order when an intervening tab invalidates a reorder', async ({ app, page }) => {
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(4)
+    await expectTabStripSettled(page)
+
+    const tabs = page.locator(sel.tabs)
+    const originalIds = await tabs.evaluateAll(elements => {
+      return elements.map(element => element.dataset.tabId)
+    })
+    await delayTabReorders(app)
+
+    await page.evaluate(() => {
+      const tabs = Array.from(document.querySelectorAll('.tabBar .tab'))
+      const sourceRect = tabs[3].getBoundingClientRect()
+      const targetRect = tabs[0].getBoundingClientRect()
+      tabs[3].dispatchEvent(new PointerEvent('pointerdown', {
+        bubbles: true,
+        button: 0,
+        clientX: sourceRect.left + sourceRect.width / 2,
+        clientY: sourceRect.top + sourceRect.height / 2
+      }))
+      window.dispatchEvent(new PointerEvent('pointermove', {
+        bubbles: true,
+        buttons: 1,
+        clientX: targetRect.left + targetRect.width / 2,
+        clientY: targetRect.top + targetRect.height / 2
+      }))
+      window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0 }))
+    })
+    // The drop commits after its settle animation. Open the intervening tab
+    // only once the four-tab reorder is pending; a tab arriving earlier joins
+    // the reorder instead of invalidating it.
+    await expect.poll(() => page.evaluate(() => window.$store.state.tabs.pendingTabOrder), {
+      // The order stays pending only until the delayed reorder is answered.
+      intervals: [100]
+    }).toEqual([
+      originalIds[3],
+      originalIds[0],
+      originalIds[1],
+      originalIds[2]
+    ])
+
+    await page.evaluate(openerTabId => window.ftElectron.tabs.create({
+      route: '/history',
+      title: 'Intervening tab',
+      makeActive: false,
+      lazyLoad: true,
+      openerTabId
+    }), originalIds[0])
+
+    const authoritativeOrder = await page.evaluate(async () => {
+      return (await window.ftElectron.tabs.getState()).tabs.map(tab => tab.id)
+    })
+    await expect(tabs).toHaveCount(5)
+    await expect.poll(() => tabs.evaluateAll(elements => {
+      return elements.map(element => element.dataset.tabId)
+    })).toEqual(authoritativeOrder)
+    await expect.poll(() => page.evaluate(() => {
+      const store = window.$store
+      return store.state.tabs.pendingTabOrder
+    })).toBeNull()
+  })
+
+  test('keeps a submenu open while moving toward it diagonally', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.tabs).first().click({ button: 'right' })
+
+    const closeTabs = page.getByRole('menuitem', { name: 'Close Tabs', exact: true })
+    await closeTabs.hover()
+
+    const submenu = closeTabs.locator('xpath=following-sibling::*[@role="menu"]')
+    await expect(submenu).toBeVisible()
+
+    // Build the path from the settled submenu and keep it comfortably inside
+    // the safe triangle so device-pixel rounding cannot close the submenu.
+    const parentBox = await boundingBoxWhenSettled(closeTabs)
+    const submenuBox = await boundingBoxWhenSettled(submenu)
+
+    await page.mouse.move(
+      parentBox.x + parentBox.width * 0.75,
+      parentBox.y + parentBox.height / 2
+    )
+    await page.mouse.move(
+      submenuBox.x + submenuBox.width / 2,
+      submenuBox.y + submenuBox.height * 0.65,
+      { steps: 10 }
+    )
+
+    await expect(submenu).toBeVisible()
+  })
+
+  test('moves selected tabs between groups from the tab context menu', async ({ page }) => {
+    const { firstTabId, secondTabId, groupId } = await page.evaluate(async () => {
+      const first = await window.ftElectron.tabs.create({
+        route: '/stats',
+        title: 'First grouped tab',
+        makeActive: false,
+        lazyLoad: true
+      })
+      const second = await window.ftElectron.tabs.create({
+        route: '/history',
+        title: 'Second grouped tab',
+        makeActive: false,
+        lazyLoad: true
+      })
+      const group = await window.ftElectron.tabs.createGroup({ name: 'Research', color: 'blue' })
+      return { firstTabId: first.id, secondTabId: second.id, groupId: group.id }
+    })
+
+    await page.evaluate((tabIds) => {
+      const store = window.$store
+      return store.dispatch('setTabSelection', tabIds)
+    }, [firstTabId, secondTabId])
+    await page.locator(`.tab[data-tab-id="${secondTabId}"]`).click({ button: 'right' })
+
+    const moveTabsToGroup = page.getByRole('menuitem', { name: 'Move Tabs to Group', exact: true })
+    await expect(moveTabsToGroup.locator('.itemIcon')).toHaveClass(/groupMenuIcon/)
+    await moveTabsToGroup.hover()
+    const bulkSubmenu = moveTabsToGroup.locator('xpath=following-sibling::*[@role="menu"]')
+    const researchItem = bulkSubmenu.getByRole('menuitemradio', { name: 'Research', exact: true })
+    await expect(researchItem.locator('.groupColorSwatch')).toHaveCSS('background-color', 'rgb(63, 127, 214)')
+    await researchItem.click()
+
+    await expect.poll(() => page.evaluate(async (targetGroupId) => {
+      const state = await window.ftElectron.tabs.getState()
+      return state.tabs.filter(tab => tab.groupId === targetGroupId).map(tab => tab.id)
+    }, groupId)).toEqual([firstTabId, secondTabId])
+
+    await page.evaluate((tabId) => {
+      const store = window.$store
+      return store.dispatch('setTabSelection', [tabId])
+    }, firstTabId)
+    await page.locator(`.tab[data-tab-id="${firstTabId}"]`).click({ button: 'right' })
+
+    const moveTabToGroup = page.getByRole('menuitem', { name: 'Move Tab to Group', exact: true })
+    await moveTabToGroup.hover()
+    const singleSubmenu = moveTabToGroup.locator('xpath=following-sibling::*[@role="menu"]')
+    const ungroupedItem = singleSubmenu.getByRole('menuitemradio', { name: 'Ungrouped', exact: true })
+    await expect(ungroupedItem.locator('[data-icon="link-slash"]')).toBeVisible()
+    await ungroupedItem.click()
+    await expect.poll(() => page.evaluate(async (tabId) => {
+      return (await window.ftElectron.tabs.getState()).tabs.find(tab => tab.id === tabId)?.groupId
+    }, firstTabId)).toBeNull()
+
+    await page.locator(`.tab[data-tab-id="${firstTabId}"]`).click({ button: 'right' })
+    const manageGroups = page.getByRole('menuitem', { name: 'Move Tab to Group', exact: true })
+    await manageGroups.hover()
+    await manageGroups.locator('xpath=following-sibling::*[@role="menu"]')
+      .getByRole('menuitem', { name: 'Manage Tab Groups…', exact: true })
+      .click()
+    await expect(page.getByRole('dialog', { name: 'Tab Organizer' })).toBeVisible()
+  })
+
+  test('collapses a group into one tab bar button and preserves reorder positions', async ({ page }) => {
+    await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
+    const setup = await page.evaluate(async () => {
+      const first = await window.ftElectron.tabs.create({
+        route: '/stats',
+        title: 'First research tab',
+        makeActive: false,
+        lazyLoad: true
+      })
+      const second = await window.ftElectron.tabs.create({
+        route: '/history',
+        title: 'Second research tab',
+        makeActive: true,
+        lazyLoad: true
+      })
+      const trailing = await window.ftElectron.tabs.create({
+        route: '/playlists',
+        title: 'Trailing tab',
+        makeActive: false,
+        lazyLoad: true
+      })
+      const group = await window.ftElectron.tabs.createGroup({ name: 'Research', color: 'blue' })
+      await window.ftElectron.tabs.setGroup([first.id, second.id], group.id)
+      const state = await window.ftElectron.tabs.getState()
+      return {
+        firstId: first.id,
+        secondId: second.id,
+        trailingId: trailing.id,
+        groupId: group.id,
+        originalOrder: state.tabs.map(tab => tab.id)
+      }
+    })
+
+    await page.locator(`.tab[data-tab-id="${setup.firstId}"]`).click({ button: 'right' })
+    const collapseGroup = page.getByRole('menuitem', { name: 'Collapse Group', exact: true })
+    await expect(collapseGroup.locator('[data-icon="compress"]')).toBeVisible()
+    await collapseGroup.click()
+
+    await expect(page.locator(`.tab[data-tab-id="${setup.firstId}"]`)).toHaveCount(0)
+    await expect(page.locator(`.tab[data-tab-id="${setup.secondId}"]`)).toHaveCount(0)
+    const collapsedGroup = page.getByRole('button', { name: 'Expand Research, 2 tabs', exact: true })
+    await expect(collapsedGroup).toHaveCount(1)
+    await expect(collapsedGroup).toHaveClass(/active/)
+    await expect(collapsedGroup).not.toHaveAttribute('title')
+    await expect(collapsedGroup.locator('.collapsedTabGroupName')).toHaveText('Research')
+    await expect(collapsedGroup.locator('[data-icon="layer-group"]')).toBeVisible()
+    await expect.poll(() => page.evaluate(async (groupId) => {
+      return (await window.ftElectron.tabs.getState()).groups.find(group => group.id === groupId)?.isCollapsed
+    }, setup.groupId)).toBe(true)
+
+    await page.evaluate((trailingId) => {
+      const source = document.querySelector(`.tab[data-tab-id="${trailingId}"]`)
+      const target = document.querySelector('.tabBar .tab')
+      const sourceRect = source.getBoundingClientRect()
+      const targetRect = target.getBoundingClientRect()
+      source.dispatchEvent(new PointerEvent('pointerdown', {
+        bubbles: true,
+        button: 0,
+        clientX: sourceRect.left + sourceRect.width / 2,
+        clientY: sourceRect.top + sourceRect.height / 2
+      }))
+      window.dispatchEvent(new PointerEvent('pointermove', {
+        bubbles: true,
+        buttons: 1,
+        clientX: targetRect.left + targetRect.width / 2,
+        clientY: targetRect.top + targetRect.height / 2
+      }))
+      window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0 }))
+    }, setup.trailingId)
+
+    const reorderedIds = [
+      setup.trailingId,
+      setup.originalOrder[0],
+      setup.firstId,
+      setup.secondId
+    ]
+    await expect.poll(() => page.evaluate(async () => {
+      return (await window.ftElectron.tabs.getState()).tabs.map(tab => tab.id)
+    })).toEqual(reorderedIds)
+
+    await page.evaluate((groupId) => {
+      const source = document.querySelector(`.collapsedTabGroup[data-group-id="${groupId}"]`)
+      const target = document.querySelector('.tabBar .tab')
+      const sourceRect = source.getBoundingClientRect()
+      const targetRect = target.getBoundingClientRect()
+      source.dispatchEvent(new PointerEvent('pointerdown', {
+        bubbles: true,
+        button: 0,
+        clientX: sourceRect.left + sourceRect.width / 2,
+        clientY: sourceRect.top + sourceRect.height / 2
+      }))
+      window.dispatchEvent(new PointerEvent('pointermove', {
+        bubbles: true,
+        buttons: 1,
+        clientX: targetRect.left + targetRect.width / 2,
+        clientY: targetRect.top + targetRect.height / 2
+      }))
+      window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0 }))
+    }, setup.groupId)
+
+    const groupReorderedIds = [
+      setup.firstId,
+      setup.secondId,
+      setup.trailingId,
+      setup.originalOrder[0]
+    ]
+    await expect.poll(() => page.evaluate(async () => {
+      return (await window.ftElectron.tabs.getState()).tabs.map(tab => tab.id)
+    })).toEqual(groupReorderedIds)
+
+    await collapsedGroup.click()
+    await expect(page.locator('.collapsedTabGroup')).toHaveCount(0)
+    await expect(page.locator(sel.tabs)).toHaveCount(4)
+    await expect.poll(() => page.locator(sel.tabs).evaluateAll(tabs => {
+      return tabs.map(tab => tab.dataset.tabId)
+    })).toEqual(groupReorderedIds)
+  })
+
+  test('clamps its horizontal scrollbar after collapsing a group at the scroll end', async ({ page }) => {
+    await page.setViewportSize({ width: 800, height: 600 })
+    const groupId = await page.evaluate(async () => {
+      const tabIds = []
+      for (let index = 0; index < 18; index++) {
+        const tab = await window.ftElectron.tabs.create({
+          route: `/watch/tab-bar-scroll-${index}`,
+          title: `Scrollable tab ${index}`,
+          makeActive: false,
+          lazyLoad: true
+        })
+        tabIds.push(tab.id)
+      }
+      const group = await window.ftElectron.tabs.createGroup({ name: 'Scrollable group', color: 'green' })
+      await window.ftElectron.tabs.setGroup(tabIds.slice(2), group.id)
+      return group.id
+    })
+
+    const container = page.locator('.tabsContainer')
+    const scrollbar = page.locator('.tabsContainer > .os-scrollbar-horizontal')
+    await expect(scrollbar).toHaveClass(/os-scrollbar-visible/)
+    await expectTabStripSettled(page)
+    await container.evaluate(element => { element.scrollLeft = element.scrollWidth })
+    await expect.poll(() => container.evaluate(element => (
+      element.scrollLeft > 0 &&
+      Math.abs(element.scrollLeft - (element.scrollWidth - element.clientWidth)) <= 1
+    ))).toBe(true)
+
+    await page.evaluate(groupId => window.ftElectron.tabs.updateGroup(groupId, { isCollapsed: true }), groupId)
+    await expect(page.getByRole('button', { name: 'Expand Scrollable group, 16 tabs', exact: true })).toBeVisible()
+    await expect.poll(() => container.evaluate(element => ({
+      maxScroll: Math.max(0, element.scrollWidth - element.clientWidth),
+      scrollLeft: element.scrollLeft
+    }))).toEqual({ maxScroll: 0, scrollLeft: 0 })
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+  })
+
+  test('clamps its vertical scrollbar after collapsing an expanded group at the scroll end', async ({ page, attachScreenshot }) => {
+    await page.setViewportSize({ width: 800, height: 450 })
+    await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
+    const groupId = await page.evaluate(async () => {
+      const tabIds = []
+      for (let index = 0; index < 14; index++) {
+        const tab = await window.ftElectron.tabs.create({
+          route: `/watch/vertical-tab-bar-scroll-${index}`,
+          title: `Vertical scrollable tab ${index}`,
+          makeActive: false,
+          lazyLoad: true
+        })
+        tabIds.push(tab.id)
+      }
+      const group = await window.ftElectron.tabs.createGroup({
+        name: 'Vertical scrollable group',
+        color: 'green'
+      })
+      await window.ftElectron.tabs.setGroup(tabIds.slice(2), group.id)
+      await window.ftElectron.tabs.updateGroup(group.id, { isCollapsed: true })
+      return group.id
+    })
+    // Switching to vertical tabs re-renders the tab bar in a microtask. Inside the async evaluate above,
+    // a garbage collection during that render could collect its already settled promise before
+    // Playwright read the result.
+    await page.evaluate(() => window.$store.commit('setTabBarPosition', 'left'))
+
+    const container = page.locator('.tabsContainer')
+    const scrollbar = container.locator(':scope > .os-scrollbar-vertical')
+    const collapsedGroup = page.getByRole('button', {
+      name: 'Expand Vertical scrollable group, 12 tabs',
+      exact: true
+    })
+    await expect(collapsedGroup).toBeVisible()
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+
+    await collapsedGroup.click()
+    await expect(page.locator('.tab[data-tab-id]')).toHaveCount(15)
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+    await container.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => container.evaluate(element => (
+      element.scrollTop > 0 &&
+      Math.abs(element.scrollTop - (element.scrollHeight - element.clientHeight)) <= 1
+    ))).toBe(true)
+
+    await page.evaluate(groupId => window.ftElectron.tabs.updateGroup(groupId, { isCollapsed: true }), groupId)
+    await expect(collapsedGroup).toBeVisible()
+    await expect.poll(() => container.evaluate(element => ({
+      maxScroll: Math.max(0, element.scrollHeight - element.clientHeight),
+      scrollTop: element.scrollTop
+    }))).toEqual({ maxScroll: 0, scrollTop: 0 })
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+    await attachScreenshot('vertical tab group collapsed without stale scroll range')
+  })
+
+  test('keeps a submenu inside the viewport for a bottom vertical tab', async ({ page }) => {
+    await page.setViewportSize({ width: 800, height: 450 })
+    await page.keyboard.press('F1')
+    await expect(page.locator('.app')).toHaveClass(/verticalTabs/)
+
+    for (let index = 0; index < 7; index++) {
+      await page.keyboard.press('Control+t')
+    }
+
+    await page.locator(sel.activeTab).click({ button: 'right' })
+    const moveTab = page.getByRole('menuitem', { name: 'Move Tab', exact: true })
+    await moveTab.hover()
+
+    const submenu = moveTab.locator('xpath=following-sibling::*[@role="menu"]')
+    await expect(submenu).toBeVisible()
+    const submenuBox = await boundingBoxWhenSettled(submenu)
+    const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }))
+
+    expect(submenuBox.x).toBeGreaterThanOrEqual(8)
+    expect(submenuBox.y).toBeGreaterThanOrEqual(8)
+    expect(submenuBox.x + submenuBox.width).toBeLessThanOrEqual(viewport.width - 8)
+    expect(submenuBox.y + submenuBox.height).toBeLessThanOrEqual(viewport.height - 8)
+  })
+
+  test('aligns close buttons for pinned and unpinned vertical tabs', async ({ page }) => {
+    await page.keyboard.press('Control+t')
+    await page.keyboard.press('F1')
+    await expect(page.locator('.app')).toHaveClass(/verticalTabs/)
+
+    const tabs = page.locator(sel.tabs)
+    const pinnedTab = tabs.first()
+    const unpinnedTab = tabs.nth(1)
+    const pinnedTabId = await pinnedTab.getAttribute('data-tab-id')
+
+    await page.evaluate(tabId => window.ftElectron.tabs.setPinned(tabId, true), pinnedTabId)
+    await expect(pinnedTab).toHaveClass(/pinned/)
+    await expectTabStripSettled(page)
+    await pinnedTab.hover()
+
+    const pinnedCloseBox = await pinnedTab.locator('.closeButton').boundingBox()
+    const unpinnedCloseBox = await unpinnedTab.locator('.closeButton').boundingBox()
+
+    expect(pinnedCloseBox).not.toBeNull()
+    expect(unpinnedCloseBox).not.toBeNull()
+    expect(pinnedCloseBox.x).toBe(unpinnedCloseBox.x)
+  })
+
+  for (const [zoomFactor, baseTheme] of [[0.95, 'dark']]) {
+    test(`keeps the vertical tab resize line above navigation at ${zoomFactor * 100}% UI scale in ${baseTheme} theme`, async ({ page, attachScreenshot }) => {
+      await page.evaluate(async ({ zoomFactor, baseTheme }) => {
+        await window.ftElectron.setZoomFactor(zoomFactor)
+        const store = window.$store
+        store.commit('setBaseTheme', baseTheme)
+      }, { zoomFactor, baseTheme })
+
+      for (const position of ['left', 'right']) {
+        await page.evaluate(position => {
+          const store = window.$store
+          store.commit('setTabBarPosition', position)
+        }, position)
+
+        const handle = page.getByRole('separator', { name: 'Resize Tab Bar' })
+        await expect(handle).toBeVisible()
+        await handle.hover()
+        await expect(handle).not.toHaveCSS('background-image', 'none')
+        // The center of the line must be opaque so the active-page accent
+        // cannot show through it, even when the handle is stacked above it.
+        expect(await handle.evaluate((element) => {
+          const color = getComputedStyle(element).backgroundImage.match(/color\([^)]+\)|rgba?\([^)]+\)/g)?.[1]
+          if (!color) return 0
+          const canvas = document.createElement('canvas')
+          canvas.width = canvas.height = 1
+          const context = canvas.getContext('2d')
+          context.fillStyle = color
+          context.fillRect(0, 0, 1, 1)
+          return context.getImageData(0, 0, 1, 1).data[3]
+        })).toBe(255)
+
+        await expect.poll(() => handle.evaluate((element) => {
+          const handleRect = element.getBoundingClientRect()
+          const headerRect = document.querySelector('.topNav').getBoundingClientRect()
+          const activeOption = document.querySelector('.sideNav .navOption.router-link-active')
+          const optionRect = activeOption.getBoundingClientRect()
+          const x = handleRect.left + handleRect.width / 2 +
+            (element.closest('.position-left') ? 1 : -1)
+          return [
+            headerRect.top + headerRect.height / 2,
+            optionRect.top + optionRect.height / 2
+          ].map(y => document.elementFromPoint(x, y) === element)
+        })).toEqual([true, true])
+
+        const initialWidth = await page.locator('.tabBar.vertical').evaluate(element => element.getBoundingClientRect().width)
+        const handleBox = await handle.boundingBox()
+        await page.mouse.move(handleBox.x + handleBox.width / 2, handleBox.y + 30)
+        await page.mouse.down()
+        await expect(page.locator('body')).toHaveClass(/tab-bar-resizing/)
+        await page.mouse.move(handleBox.x + handleBox.width / 2 + (position === 'left' ? 30 : -30), handleBox.y + 30)
+        await expect.poll(() => page.locator('.tabBar.vertical').evaluate(element => element.getBoundingClientRect().width))
+          .toBeGreaterThan(initialWidth + 20)
+        await page.mouse.up()
+        await expect(page.locator('body')).not.toHaveClass(/tab-bar-resizing/)
+        await handle.hover()
+        await attachScreenshot(`${position} resize line at ${zoomFactor * 100}% UI scale`)
+      }
+    })
+  }
+
+  test('keeps the vertical tab scrollbar inside the window edge', async ({ page }) => {
+    await page.setViewportSize({ width: 800, height: 450 })
+    for (let index = 0; index < 15; index++) {
+      await page.keyboard.press('Control+t')
+    }
+
+    for (const position of ['left', 'right']) {
+      await page.evaluate(position => {
+        const store = window.$store
+        store.commit('setTabBarPosition', position)
+      }, position)
+
+      const container = page.locator('.tabsContainer')
+      const scrollbar = container.locator(':scope > .os-scrollbar-vertical')
+      await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+
+      await expect.poll(async () => {
+        const [containerBox, scrollbarBox] = await Promise.all([
+          container.boundingBox(),
+          scrollbar.boundingBox()
+        ])
+        if (containerBox === null || scrollbarBox === null) return Infinity
+
+        const containerEdge = position === 'left'
+          ? containerBox.x
+          : containerBox.x + containerBox.width
+        const scrollbarEdge = position === 'left'
+          ? scrollbarBox.x
+          : scrollbarBox.x + scrollbarBox.width
+        const expectedEdge = position === 'left' ? 0 : 800
+
+        return Math.max(
+          Math.abs(containerEdge - expectedEdge),
+          Math.abs(scrollbarEdge - expectedEdge)
+        )
+      }).toBeLessThanOrEqual(1)
+    }
+  })
+
+  // Regression: search bar text used to leak between tabs (65f4e2e13)
+  test('search bar text is independent per tab', async ({ page }) => {
+    const searchInput = page.locator(sel.searchInput)
+    await searchInput.fill('first tab query')
+
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    await expect(searchInput).toHaveValue('')
+
+    await searchInput.fill('second tab query')
+
+    await page.locator(sel.tabs).first().click()
+    await expect(searchInput).toHaveValue('first tab query')
+
+    await page.locator(sel.tabs).nth(1).click()
+    await expect(searchInput).toHaveValue('second tab query')
+  })
+
+  test('cleared search bar text stays empty after switching tabs', async ({ page }) => {
+    const searchInput = page.locator(sel.searchInput)
+    await page.locator(sel.newTabButton).click()
+
+    await searchInput.fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+    await clickSearchCancel(searchInput)
+    await expect(searchInput).toHaveValue('')
+
+    await page.locator(sel.tabs).first().click()
+    await page.locator(sel.tabs).nth(1).click()
+
+    await expect(searchInput).toHaveValue('')
+  })
+
+  test('search filters are independent per tab', async ({ page }) => {
+    const filterButton = page.locator('.navFilterButton')
+
+    await filterButton.click()
+    await filters(page).locator('.searchRadio', { hasText: 'Time' }).getByText('Today', { exact: true }).click()
+    await page.getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(filterButton).toHaveClass(/filterChanged/)
+
+    await page.locator(sel.newTabButton).click()
+    await expect(filterButton).not.toHaveClass(/filterChanged/)
+
+    await filterButton.click()
+    await expect(filters(page).locator('input[type="radio"][value="today"]')).not.toBeChecked()
+    await filters(page).locator('.searchRadio', { hasText: 'Prioritize' }).getByText('Popularity', { exact: true }).click()
+    await page.getByRole('button', { name: 'Close', exact: true }).click()
+
+    await page.locator(sel.tabs).first().click()
+    await filterButton.click()
+    await expect(filters(page).locator('input[type="radio"][value="today"]')).toBeChecked()
+    await expect(filters(page).locator('input[type="radio"][value="relevance"]')).toBeChecked()
+    await page.getByRole('button', { name: 'Close', exact: true }).click()
+
+    await page.locator(sel.tabs).nth(1).click()
+    await filterButton.click()
+    await expect(filters(page).locator('input[type="radio"][value="popularity"]')).toBeChecked()
+    await expect(filters(page).locator('input[type="radio"][value="today"]')).not.toBeChecked()
+  })
+
+  test('loading a search tab fills the search bar from its route', async ({ page }) => {
+    const searchTab = await page.evaluate(() => window.ftElectron.tabs.create({
+      route: '/search/loaded%20tab%20query',
+      makeActive: false
+    }))
+
+    await page.locator(`.tab[data-tab-id="${searchTab.id}"]`).click()
+
+    await expect(page.locator(sel.searchInput)).toHaveValue('loaded tab query')
+  })
+
+  test('closing the active tab returns to the last active tab by default', async ({ page }) => {
+    const tabIds = await openThreeTabsAndActivate(page, 1)
+
+    await page.locator(sel.activeTab).locator('.closeButton').click()
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[2])
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    await page.locator(sel.activeTab).locator('.closeButton').click()
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[0])
+  })
+
+  test('last active focus ignores background tabs and tab order', async ({ page }) => {
+    const tabIds = await openThreeTabsAndActivate(page, 0)
+    await page.locator(sel.tabs).nth(2).click()
+    await page.evaluate(() => window.ftElectron.tabs.create({ makeActive: false }))
+    await expect(page.locator(sel.tabs)).toHaveCount(4)
+
+    await page.locator(sel.activeTab).locator('.closeButton').click()
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[0])
+  })
+
+  // Regression: removing a logical tab left its detached video presented in
+  // the native PiP window (#268). A canvas stream keeps this independent of
+  // external media servers while exercising Chromium's real PiP API.
+  test('exits PiP when its source tab is closed', async ({ page }) => {
+    const sourceTab = page.locator('.tabContent[aria-hidden="false"]')
+    await sourceTab.evaluate(async (root) => {
+      const canvas = document.createElement('canvas')
+      canvas.width = 320
+      canvas.height = 180
+      canvas.getContext('2d').fillRect(0, 0, canvas.width, canvas.height)
+
+      const video = document.createElement('video')
+      video.className = 'pipTestVideo'
+      video.muted = true
+      video.srcObject = canvas.captureStream(5)
+
+      const button = document.createElement('button')
+      button.className = 'pipTestButton'
+      button.textContent = 'Enter PiP'
+      button.addEventListener('click', () => video.requestPictureInPicture(), { once: true })
+
+      root.append(canvas, video, button)
+      await video.play()
+    })
+
+    const video = page.locator('.pipTestVideo')
+    await sourceTab.locator('.pipTestButton').click()
+    await expect.poll(() => video.evaluate(
+      (element) => document.pictureInPictureElement === element
+    )).toBe(true)
+
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    await expect.poll(() => video.evaluate(
+      (element) => document.pictureInPictureElement === element
+    )).toBe(true)
+
+    await page.locator(sel.tabs).first().locator('.closeButton').click()
+    await expect(page.locator(sel.tabs)).toHaveCount(1)
+    await expect.poll(() => page.evaluate(() => document.pictureInPictureElement === null)).toBe(true)
+  })
+
+  // Regression: closing the presented tab activates its replacement before the
+  // old subtree is disposed. Auto-PiP must not interpret that transition as an
+  // ordinary tab switch and open PiP for the tab being closed (#364).
+  test('does not enter PiP while its source tab is closing', async ({ page }) => {
+    const sourceTab = page.locator('.tabContent[aria-hidden="false"]')
+    const sourceTabId = await sourceTab.getAttribute('data-tab-id')
+    await sourceTab.evaluate(async (root) => {
+      const canvas = document.createElement('canvas')
+      canvas.width = 320
+      canvas.height = 180
+      canvas.getContext('2d').fillRect(0, 0, canvas.width, canvas.height)
+
+      const video = document.createElement('video')
+      video.className = 'player pipTestVideo'
+      video.muted = true
+      video.srcObject = canvas.captureStream(5)
+      video.ui = {
+        getControls: () => ({
+          togglePiP: () => video.requestPictureInPicture()
+        })
+      }
+
+      root.append(canvas, video)
+      await video.play()
+    })
+
+    // Verify the synthetic player exercises the same privileged PiP request
+    // path used by automatic PiP.
+    await page.evaluate((tabId) => window.ftElectron.requestPiP(tabId), sourceTabId)
+    await expect.poll(() => page.evaluate(() => document.pictureInPictureElement !== null)).toBe(true)
+    await page.evaluate(() => document.exitPictureInPicture())
+
+    await page.evaluate(() => window.ftElectron.tabs.create({ makeActive: false }))
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+
+    await page.evaluate((tabId) => {
+      window.ftElectron.tabs.close(tabId)
+      window.ftElectron.requestPiP(tabId)
+    }, sourceTabId)
+
+    await expect(page.locator(sel.tabs)).toHaveCount(1)
+    await expect.poll(() => page.evaluate(() => document.pictureInPictureElement === null)).toBe(true)
+  })
+
+  // Regression: selected tab was lost when navigating back (3f498ec59)
+  test('history back keeps the current tab selected', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/active/)
+
+    await goTo(page, 'history')
+    await expect(page).toHaveURL(/#\/history/)
+
+    await page.locator(sel.backButton).click()
+    await expect(page).toHaveURL(/#\/subscriptions/)
+    await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/active/)
+  })
+})
+
+test.describe('closed tabs', () => {
+  test('restores regular and pinned tabs at their previous positions', async ({ page }) => {
+    const { closedTabId, expectedRoutes } = await page.evaluate(async () => {
+      await window.ftElectron.tabs.create({
+        route: '/stats',
+        title: 'Before restored tab',
+        makeActive: false,
+        lazyLoad: true
+      })
+      const restored = await window.ftElectron.tabs.create({
+        route: '/history',
+        title: 'Restored in place',
+        makeActive: false,
+        lazyLoad: true
+      })
+      const after = await window.ftElectron.tabs.create({
+        route: '/userplaylists',
+        title: 'After restored tab',
+        makeActive: false,
+        lazyLoad: true
+      })
+      const expectedRoutes = (await window.ftElectron.tabs.getState()).tabs.map(tab => tab.route.fullPath)
+
+      await window.ftElectron.tabs.activate(after.id)
+      await window.ftElectron.tabs.close(restored.id)
+      const closedTabId = (await window.ftElectron.tabs.getState()).closedTabs
+        .find(tab => tab.title === 'Restored in place')?.id
+
+      return { closedTabId, expectedRoutes }
+    })
+
+    expect(closedTabId).toBeTruthy()
+    await page.locator(sel.tabOrganizerButton).click()
+    const organizer = page.getByRole('dialog', { name: 'Tab Organizer' })
+    await organizer.locator('.closedTabRow')
+      .filter({ hasText: 'Restored in place' })
+      .getByRole('button', { name: 'Restore' })
+      .click()
+
+    await expect.poll(() => page.evaluate(async () => {
+      return (await window.ftElectron.tabs.getState()).tabs.map(tab => tab.route.fullPath)
+    })).toEqual(expectedRoutes)
+
+    const pinned = await page.evaluate(async () => {
+      await window.ftElectron.tabs.create({
+        route: '/watch/pinned-before',
+        title: 'Pinned before restored tab',
+        isPinned: true,
+        makeActive: false,
+        lazyLoad: true
+      })
+      const restored = await window.ftElectron.tabs.create({
+        route: '/watch/pinned-restored',
+        title: 'Pinned restored in place',
+        isPinned: true,
+        makeActive: false,
+        lazyLoad: true
+      })
+      await window.ftElectron.tabs.create({
+        route: '/watch/pinned-after',
+        title: 'Pinned after restored tab',
+        isPinned: true,
+        makeActive: false,
+        lazyLoad: true
+      })
+      const expectedRoutes = (await window.ftElectron.tabs.getState()).tabs.map(tab => tab.route.fullPath)
+
+      await window.ftElectron.tabs.close(restored.id)
+      const closedTabId = (await window.ftElectron.tabs.getState()).closedTabs
+        .find(tab => tab.title === 'Pinned restored in place')?.id
+      return { closedTabId, expectedRoutes }
+    })
+
+    expect(pinned.closedTabId).toBeTruthy()
+    await organizer.locator('.closedTabRow')
+      .filter({ hasText: 'Pinned restored in place' })
+      .getByRole('button', { name: 'Restore' })
+      .click()
+
+    await expect.poll(() => page.evaluate(async () => {
+      return (await window.ftElectron.tabs.getState()).tabs.map(tab => tab.route.fullPath)
+    })).toEqual(pinned.expectedRoutes)
+  })
+
+  test('preserves relative order when several closed tabs are restored out of closing order', async ({ page }) => {
+    const closedTabIds = await page.evaluate(async () => {
+      const tabs = []
+      for (const title of ['Restore order A', 'Restore order B', 'Restore order C', 'Restore order D']) {
+        tabs.push(await window.ftElectron.tabs.create({
+          route: `/watch/${title.at(-1).toLowerCase()}`,
+          title,
+          makeActive: false,
+          lazyLoad: true
+        }))
+      }
+
+      await window.ftElectron.tabs.close(tabs[1].id)
+      await window.ftElectron.tabs.close(tabs[2].id)
+      const closedTabs = (await window.ftElectron.tabs.getState()).closedTabs
+      return {
+        older: closedTabs.find(tab => tab.title === 'Restore order B')?.id,
+        newer: closedTabs.find(tab => tab.title === 'Restore order C')?.id
+      }
+    })
+
+    expect(closedTabIds.older).toBeTruthy()
+    expect(closedTabIds.newer).toBeTruthy()
+    await page.evaluate(async ({ older, newer }) => {
+      await window.ftElectron.tabs.restoreClosed(older)
+      await window.ftElectron.tabs.restoreClosed(newer)
+    }, closedTabIds)
+
+    await expect.poll(() => page.evaluate(async () => {
+      return (await window.ftElectron.tabs.getState()).tabs
+        .map(tab => tab.route.fullPath)
+        .filter(route => /^\/watch\/[a-d]$/.test(route))
+    })).toEqual(['/watch/a', '/watch/b', '/watch/c', '/watch/d'])
+  })
+
+  test('restores any recently closed tab and clears the retained list', async ({ page }) => {
+    await page.evaluate(async () => {
+      const older = await window.ftElectron.tabs.create({
+        route: '/userplaylists',
+        title: 'Older closed tab',
+        makeActive: false,
+        lazyLoad: true
+      })
+      const newer = await window.ftElectron.tabs.create({
+        route: '/history',
+        title: 'Newer closed tab',
+        makeActive: false,
+        lazyLoad: true
+      })
+      await window.ftElectron.tabs.close(older.id)
+      await window.ftElectron.tabs.close(newer.id)
+    })
+
+    await page.locator(sel.tabOrganizerButton).click()
+    const organizer = page.getByRole('dialog', { name: 'Tab Organizer' })
+    const closedRows = organizer.locator('.closedTabRow')
+    await expect(closedRows).toHaveCount(2)
+    await expect(closedRows.nth(0)).toContainText('Newer closed tab')
+    await expect(closedRows.nth(1)).toContainText('Older closed tab')
+
+    await closedRows.filter({ hasText: 'Older closed tab' }).getByRole('button', { name: 'Restore' }).click()
+    await expect(closedRows.filter({ hasText: 'Older closed tab' })).toHaveCount(0)
+    await expect(closedRows.filter({ hasText: 'Newer closed tab' })).toHaveCount(1)
+    await expect.poll(() => page.evaluate(async () => {
+      const state = await window.ftElectron.tabs.getState()
+      return state.tabs.some(tab => tab.route.fullPath === '/userplaylists')
+    })).toBe(true)
+
+    await organizer.getByRole('button', { name: 'Clear', exact: true }).click()
+    await expect(closedRows).toHaveCount(0)
+  })
+
+  test('does not restore a tab whose deferred close is interrupted by shutdown', async ({ app }) => {
+    let page = app.page
+    const closedTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
+
+    await page.evaluate(() => window.ftElectron.tabs.create({
+      route: '/stats',
+      makeActive: false,
+      lazyLoad: true
+    }))
+
+    await page.locator(sel.activeTab).locator('.closeButton').evaluate(element => element.click())
+    ;({ page } = await app.relaunch())
+    await expect(page.locator(sel.tabs)).toHaveCount(1)
+    await expect(page.locator(sel.tabs)).not.toHaveAttribute('data-tab-id', closedTabId)
+    await expect(page).toHaveURL(/#\/stats/)
+  })
+
+  test('restoring a closed tab restores its navigation history', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+    await goTo(page, 'history')
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.tabs).first().click()
+    await expect(page).toHaveURL(/#\/history/)
+
+    await page.keyboard.press('Control+w')
+    await expect(page.locator(sel.tabs)).toHaveCount(1)
+    await page.keyboard.press('Control+Shift+t')
+
+    await expect(page).toHaveURL(/#\/history/)
+    await page.locator(sel.backButton).click()
+    await expect(page).toHaveURL(/#\/userplaylists/)
+    await page.locator(sel.forwardButton).click()
+    await expect(page).toHaveURL(/#\/history/)
+  })
+
+  test.describe('with navigation history disabled after closing', () => {
+    test.use({ seed: { settings: { rememberTabNavigationHistory: true } } })
+
+    test('does not persist restored history across a relaunch', async ({ app }) => {
+      let page = app.page
+      await goTo(page, 'userplaylists')
+      await goTo(page, 'history')
+      await page.locator(sel.newTabButton).click()
+      await page.locator(sel.tabs).first().click()
+      await page.keyboard.press('Control+w')
+
+      const privacy = await goToSettingsSection(page, 'privacy')
+      await expect(page.locator('.settingsWindow')).not.toHaveClass(/settings-window-enter-active/)
+      const rememberHistory = privacy.getByRole('checkbox', { name: 'Remember Tab Navigation History' })
+      await expect(rememberHistory).toBeChecked()
+      await privacy.locator('label.switch-label').filter({ hasText: 'Remember Tab Navigation History' }).click()
+      await expect(rememberHistory).not.toBeChecked()
+
+      await page.keyboard.press('Control+Shift+t')
+      await expect(page).toHaveURL(/#\/history/)
+
+      ;({ page } = await app.relaunch())
+      await expect(page).toHaveURL(/#\/history/)
+      await expect(page.locator(sel.backButton)).toBeDisabled()
+    })
+  })
+})
+
+test.describe('tab close focus set to the previous tab', () => {
+  test.use({ seed: { settings: { tabCloseFocus: 'previousTab' } } })
+
+  test('closing the active tab selects the previous tab in tab order', async ({ page }) => {
+    const tabIds = await openThreeTabsAndActivate(page, 1)
+    await page.locator(sel.activeTab).locator('.closeButton').click()
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[0])
+  })
+
+  test('falls back to the next tab when there is no previous tab', async ({ page }) => {
+    const tabIds = await openThreeTabsAndActivate(page, 0)
+    await page.locator(sel.activeTab).locator('.closeButton').click()
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[1])
+  })
+})
+
+test.describe('tab close focus set to the next tab', () => {
+  test.use({ seed: { settings: { tabCloseFocus: 'nextTab' } } })
+
+  test('closing the active tab selects the next tab', async ({ page }) => {
+    const tabIds = await openThreeTabsAndActivate(page, 1)
+
+    await page.locator(sel.activeTab).locator('.closeButton').click()
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[2])
+  })
+
+  test('falls back to the previous tab when there is no next tab', async ({ page }) => {
+    const tabIds = await openThreeTabsAndActivate(page, 2)
+
+    await page.locator(sel.activeTab).locator('.closeButton').click()
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[1])
+  })
+
+  test('selects the loaded previous tab when the next tab is unloaded', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/active/)
+    const previousTabId = await page.locator(sel.tabs).first().getAttribute('data-tab-id')
+    await expect(page.locator(`.tab[data-tab-id="${previousTabId}"]`)).not.toHaveClass(/unloaded/)
+    const unloadedTab = await page.evaluate(() => window.ftElectron.tabs.create({
+      makeActive: false,
+      lazyLoad: true
+    }))
+    await expect(page.locator(`.tab[data-tab-id="${unloadedTab.id}"]`)).toHaveClass(/unloaded/)
+
+    await page.locator(sel.activeTab).locator('.closeButton').click()
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', previousTabId)
+    await expect(page.locator(`.tab[data-tab-id="${unloadedTab.id}"]`)).toHaveClass(/unloaded/)
+  })
+})
+
+test('closing the last tab of a window closes the window by default', async ({ app, page }) => {
+  const newWindow = await openNewWindowFromTabBar(app, page)
+  await waitForAppReady(newWindow)
+
+  const closed = newWindow.waitForEvent('close')
+  await newWindow.locator(sel.activeTab).locator('.closeButton').click()
+  await closed
+  await expect(page.locator(sel.tabs)).toHaveCount(1)
+})
+
+test.describe('closing the last tab with the window kept open', () => {
+  test.use({ seed: { settings: { closeWindowWithLastTab: false, confirmCloseApp: true } } })
+
+  test.beforeEach(async ({ app }) => {
+    await app.electronApp.evaluate(({ dialog }) => {
+      globalThis.lastTabCloseDialogs = []
+      dialog.showMessageBox = async (_window, options) => {
+        globalThis.lastTabCloseDialogs.push(options.message)
+        // Confirm, so a quit prompt would close the window and teardown can quit
+        return { response: 0 }
+      }
+    })
+  })
+
+  test('replaces the last tab with a new tab without asking to quit', async ({ app, page }) => {
+    await page.locator('.sideNav a[href="#/history"]:visible').first().click()
+    await expect(page).toHaveURL(/#\/history/)
+    const closedTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
+
+    await page.locator(sel.activeTab).locator('.closeButton').click()
+    await expect(page.locator(sel.tabs)).toHaveCount(1)
+    await expect(page.locator(sel.activeTab)).not.toHaveAttribute('data-tab-id', closedTabId)
+    await expect(page.locator(sel.activeTab)).toContainText('Subscriptions')
+
+    // The menu accelerator closes the replacement the same way.
+    const replacementTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
+    await page.keyboard.press('Control+w')
+    await expect(page.locator(sel.activeTab)).not.toHaveAttribute('data-tab-id', replacementTabId)
+    await expect(page.locator(sel.tabs)).toHaveCount(1)
+
+    expect(await app.electronApp.evaluate(() => globalThis.lastTabCloseDialogs)).toEqual([])
+    expect(page.isClosed()).toBe(false)
+
+    await page.keyboard.press('Control+Shift+t')
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+  })
+
+  test('rapid closes leave exactly one active replacement tab', async ({ page }) => {
+    // Two closes of the same last tab, then a close of its replacement before
+    // the replacement has been presented, as when Ctrl+W auto-repeats.
+    const state = await page.evaluate(async () => {
+      const tabs = window.ftElectron.tabs
+      const [firstTab] = (await tabs.getState()).tabs
+      await Promise.all([tabs.close(firstTab.id), tabs.close(firstTab.id)])
+      const { activeTabId, tabs: tabsAfterDoubleClose } = await tabs.getState()
+      await tabs.close(activeTabId)
+      return {
+        firstTabId: firstTab.id,
+        closedReplacementId: activeTabId,
+        replacementCount: tabsAfterDoubleClose.filter(tab => tab.id !== firstTab.id).length
+      }
+    })
+
+    expect(state.replacementCount).toBe(1)
+    await expect(page.locator(sel.tabs)).toHaveCount(1)
+    const activeTab = page.locator(sel.activeTab)
+    await expect(activeTab).toHaveCount(1)
+    const activeTabId = await activeTab.getAttribute('data-tab-id')
+    expect([state.firstTabId, state.closedReplacementId]).not.toContain(activeTabId)
+  })
+
+  test('replaces all selected tabs with a new tab', async ({ app, page }) => {
+    await page.locator(sel.newTabButton).click()
+    const tabs = page.locator(sel.tabs)
+    await expect(tabs).toHaveCount(2)
+    const closedTabIds = await tabs.evaluateAll(elements => elements.map(element => element.dataset.tabId))
+    await tabs.first().click({ modifiers: ['Control'] })
+
+    await page.keyboard.press('Control+w')
+    await expect(tabs).toHaveCount(1)
+    expect(closedTabIds).not.toContain(await tabs.first().getAttribute('data-tab-id'))
+    expect(await app.electronApp.evaluate(() => globalThis.lastTabCloseDialogs)).toEqual([])
+  })
+})
+
+test.describe('fixed tab width', () => {
+  test.use({ seed: { settings: { useFixedTabWidth: true, fixedTabWidth: 140 } } })
+
+  test('gives every horizontal tab the configured width', async ({ page }) => {
+    await page.keyboard.press('Control+t')
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+
+    await expect.poll(async () => {
+      return await page.locator(sel.tabs).evaluateAll(
+        tabs => tabs.map(tab => Math.round(tab.getBoundingClientRect().width))
+      )
+    }).toEqual([140, 140])
+
+    // Vertical tabs fill the column, so the setting must not constrain them.
+    await page.keyboard.press('F1')
+    await expect(page.locator('.app')).toHaveClass(/verticalTabs/)
+    await expect.poll(async () => {
+      return await page.locator(sel.tabs).first().evaluate(
+        tab => Math.round(tab.getBoundingClientRect().width)
+      )
+    }).toBeGreaterThan(140)
+  })
+})
+
+test.describe('vertical tab height', () => {
+  test.use({ seed: { settings: { tabBarPosition: 'left', verticalTabHeight: 44 } } })
+
+  test('gives vertical tabs and collapsed groups the configured height', { tag: '@scale' }, async ({ page }) => {
+    await page.evaluate(async () => {
+      const tab = await window.ftElectron.tabs.create({ route: '/history', makeActive: false, lazyLoad: true })
+      const group = await window.ftElectron.tabs.createGroup({ name: 'Grouped', color: 'green' })
+      await window.ftElectron.tabs.setGroup([tab.id], group.id)
+      await window.ftElectron.tabs.updateGroup(group.id, { isCollapsed: true })
+    })
+    await expect(page.locator('.tabBar .collapsedTabGroup')).toHaveCount(1)
+
+    const itemHeights = () => page.locator('.tabBar .tabBarReorderItem').evaluateAll(
+      items => items.map(item => Math.round(item.getBoundingClientRect().height))
+    )
+    await expect.poll(itemHeights).toEqual([44, 44])
+
+    await page.evaluate(() => window.$store.commit('setVerticalTabHeight', 26))
+    await expect.poll(itemHeights).toEqual([26, 26])
+
+    // The horizontal bar keeps its own fixed height.
+    await page.keyboard.press('F1')
+    await expect(page.locator('.app')).not.toHaveClass(/verticalTabs/)
+    await expect.poll(() => page.locator(sel.activeTab).evaluate(
+      tab => Math.round(tab.getBoundingClientRect().height)
+    )).toBe(30)
+  })
+
+  // 15 tabs stop overflowing once they shrink, 40 tabs still overflow. The
+  // last tab is active, so revealing it keeps the strip at its end.
+  for (const tabCount of [15, 40]) {
+    test(`clamps the scrolled strip when ${tabCount} tabs shrink`, { tag: '@scale' }, async ({ app, page }) => {
+      await setWindowSize(app, page, { width: 1000, height: 700 })
+      await page.evaluate(async count => {
+        window.$store.commit('setVerticalTabHeight', 56)
+        for (let index = 1; index < count; index++) {
+          await window.ftElectron.tabs.create({ route: '/history', title: `History ${index}`, makeActive: index === count - 1, lazyLoad: true })
+        }
+      }, tabCount)
+      await expect(page.locator(sel.tabs)).toHaveCount(tabCount)
+
+      const container = page.locator('.tabBar .tabsContainer')
+      await expect(container).toHaveAttribute('data-overlayscrollbars-viewport')
+      await container.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => container.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+      await page.evaluate(() => window.$store.commit('setVerticalTabHeight', 24))
+      await expect.poll(() => page.locator(sel.tabs).first().evaluate(
+        tab => Math.round(tab.getBoundingClientRect().height)
+      )).toBe(24)
+
+      const overflows = await container.evaluate(element => element.scrollHeight > element.clientHeight + 1)
+      expect(overflows).toBe(tabCount === 40)
+      if (overflows) {
+        await expectScrollAtRenderedEnd(container)
+      } else {
+        await expect.poll(() => container.evaluate(element => element.scrollTop)).toBe(0)
+      }
+      await expect.poll(() => container.evaluate(element => {
+        const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+        return scrollbar.classList.contains('os-scrollbar-unusable') === (element.scrollHeight <= element.clientHeight)
+      })).toBe(true)
+    })
+  }
+
+  test('keeps the active tab in view when tabs grow', { tag: '@scale' }, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 1000, height: 700 })
+    // The 21st of 40 tabs is in view at 24px, but not at 56px.
+    const activeTabId = await page.evaluate(async () => {
+      window.$store.commit('setVerticalTabHeight', 24)
+      const tabs = []
+      for (let index = 1; index < 40; index++) {
+        tabs.push(await window.ftElectron.tabs.create({ route: '/history', title: `History ${index}`, makeActive: false, lazyLoad: true }))
+      }
+      await window.ftElectron.tabs.activate(tabs[19].id)
+      return tabs[19].id
+    })
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', activeTabId)
+    await expectActiveTabInView(page)
+
+    await page.evaluate(() => window.$store.commit('setVerticalTabHeight', 56))
+    await expect.poll(() => page.locator(sel.activeTab).evaluate(
+      tab => Math.round(tab.getBoundingClientRect().height)
+    )).toBe(56)
+    await expectActiveTabInView(page)
+  })
+})
+
+/**
+ * Waits until the active tab, or the collapsed group that contains it, lies
+ * inside the scrolled tab strip, which must overflow for the check to mean
+ * anything.
+ * @param {import('@playwright/test').Page} page
+ */
+async function expectActiveTabInView(page) {
+  // A collapsing group's active tab stays active while it closes.
+  await expectTabStripSettled(page)
+  await expect.poll(() => page.locator('.tabBar .tabBarReorderItem.active').evaluate(tab => {
+    const container = tab.closest('.tabsContainer')
+    const viewport = container.getBoundingClientRect()
+    const box = tab.getBoundingClientRect()
+    return {
+      overflows: container.scrollWidth > container.clientWidth + 1 || container.scrollHeight > container.clientHeight + 1,
+      inside: box.left >= viewport.left - 1 && box.right <= viewport.right + 1 &&
+        box.top >= viewport.top - 1 && box.bottom <= viewport.bottom + 1
+    }
+  })).toEqual({ overflows: true, inside: true })
+}
+
+for (const tabBarPosition of ['top', 'left']) {
+  test.describe(`overflowing tabs at ${tabBarPosition}`, () => {
+    test.use({ seed: { settings: { tabBarPosition, useFixedTabWidth: true, fixedTabWidth: 200 } } })
+
+    test('scroll the active tab into view on launch, keyboard switching, and new tabs', { tag: '@scale' }, async ({ app }) => {
+      let page = app.page
+      // Small enough for the strip to overflow even with a group collapsed.
+      await setWindowSize(app, page, { width: 1200, height: 500 })
+      // The initial tab stays first, so Ctrl+1 switches back to it.
+      const firstTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
+      const lastTabId = await page.evaluate(async () => {
+        let tab
+        for (let index = 0; index < 40; index++) {
+          tab = await window.ftElectron.tabs.create({
+            route: '/history', title: `History ${index + 1}`, makeActive: false, lazyLoad: true
+          })
+        }
+        return tab.id
+      })
+
+      // Scroll by hand first, so the next state update echoes that position.
+      const container = page.locator('.tabsContainer')
+      await container.evaluate(element => element.scrollTo(200, 200))
+      await expect.poll(async () => {
+        const offset = await container.evaluate(element => element.scrollLeft || element.scrollTop)
+        if (offset <= 0) return false
+        // Only the horizontal bar shares its offset with the main process.
+        if (tabBarPosition !== 'top') return true
+        const shared = await page.evaluate(async () => (await window.ftElectron.tabs.getState()).tabBarScrollPosition)
+        return Math.abs(shared - offset) < 1
+      }).toBe(true)
+
+      // Ctrl+Shift+Tab wraps around from the first tab to the last one.
+      await page.keyboard.press('Control+Shift+Tab')
+      await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', lastTabId)
+      await expectActiveTabInView(page)
+
+      await page.keyboard.press('Control+1')
+      await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', firstTabId)
+      await expectActiveTabInView(page)
+
+      await page.locator(sel.newTabButton).click()
+      await expect(page.locator(sel.tabs)).toHaveCount(42)
+      const newTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
+      await expect(page.locator(sel.tabs).last()).toHaveAttribute('data-tab-id', newTabId)
+      await expectActiveTabInView(page)
+
+      // A tab switch while a tab is being dragged still reveals the new active tab.
+      const newTabBox = await page.locator(sel.activeTab).boundingBox()
+      await page.mouse.move(newTabBox.x + newTabBox.width / 2, newTabBox.y + newTabBox.height / 2)
+      await page.mouse.down()
+      await page.mouse.move(
+        newTabBox.x + newTabBox.width / 2 - (tabBarPosition === 'top' ? 20 : 0),
+        newTabBox.y + newTabBox.height / 2 - (tabBarPosition === 'top' ? 0 : 10),
+        { steps: 4 }
+      )
+      await expect(page.locator('.tabBar .tab.dragging')).toHaveCount(1)
+      await page.keyboard.press('Control+1')
+      await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', firstTabId)
+      await expectActiveTabInView(page)
+      await page.mouse.up()
+      // A click on the strip commits a settling drop early, which moves the
+      // collapsed group below away from the pointer before the release.
+      await expect(page.locator('.tabBar .tab.settling')).toHaveCount(0)
+
+      // Expanding a collapsed group reveals the active tab inside it.
+      const groupedTabIds = await page.evaluate(async () => {
+        const { tabs } = await window.ftElectron.tabs.getState()
+        const ids = tabs.slice(1, 21).map(tab => tab.id)
+        const group = await window.ftElectron.tabs.createGroup({ name: 'Grouped', color: 'green' })
+        await window.ftElectron.tabs.setGroup(ids, group.id)
+        await window.ftElectron.tabs.activate(ids.at(-1))
+        await window.$store.dispatch('updateTabGroup', { groupId: group.id, changes: { isCollapsed: true } })
+        return ids
+      })
+      const collapsedGroup = page.locator('.tabBar .collapsedTabGroup')
+      await expect(collapsedGroup).toHaveClass(/active/)
+
+      // Switching to another tab of the collapsed group reveals the group.
+      await container.evaluate(element => element.scrollTo(element.scrollWidth, element.scrollHeight))
+      await page.evaluate(id => window.ftElectron.tabs.activate(id), groupedTabIds.at(-2))
+      await expect.poll(() => page.evaluate(async () => (await window.ftElectron.tabs.getState()).activeTabId))
+        .toBe(groupedTabIds.at(-2))
+      await expectActiveTabInView(page)
+      await page.evaluate(id => window.ftElectron.tabs.activate(id), groupedTabIds.at(-1))
+
+      await container.evaluate(element => element.scrollTo(0, 0))
+      await collapsedGroup.click()
+      await expect(collapsedGroup).toHaveCount(0)
+      await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', groupedTabIds.at(-1))
+      await expectActiveTabInView(page)
+
+      // Switching between horizontal and vertical tabs keeps the active tab visible.
+      await page.evaluate(id => window.ftElectron.tabs.activate(id), lastTabId)
+      await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', lastTabId)
+      await expectActiveTabInView(page)
+      for (const position of [tabBarPosition === 'top' ? 'left' : 'top', tabBarPosition]) {
+        await page.evaluate(position => window.$store.commit('setTabBarPosition', position), position)
+        await expect(page.locator('.app')).toHaveClass(position === 'top' ? /^(?!.*verticalTabs)/ : /verticalTabs/)
+        await expectActiveTabInView(page)
+      }
+
+      if (tabBarPosition === 'top') {
+        // A reloaded renderer restores the shared offset before it reveals
+        // the active tab, which is already visible there.
+        const middleTabId = await page.evaluate(async () => (await window.ftElectron.tabs.getState()).tabs[30].id)
+        await page.evaluate(id => window.ftElectron.tabs.activate(id), middleTabId)
+        await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', middleTabId)
+        const centeredOffset = await page.locator(sel.activeTab).evaluate(tab => {
+          const strip = tab.closest('.tabsContainer')
+          strip.scrollLeft += tab.getBoundingClientRect().left - strip.getBoundingClientRect().left -
+            (strip.clientWidth - tab.offsetWidth) / 2
+          return strip.scrollLeft
+        })
+        await expect.poll(() => page.evaluate(async () => (await window.ftElectron.tabs.getState()).tabBarScrollPosition))
+          .toBeCloseTo(centeredOffset, 0)
+        await page.reload()
+        await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', middleTabId)
+        await expect.poll(() => page.locator('.tabsContainer').evaluate(strip => strip.scrollLeft)).toBeCloseTo(centeredOffset, 0)
+        await page.evaluate(id => window.ftElectron.tabs.activate(id), lastTabId)
+        await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', lastTabId)
+      }
+
+      await page.locator('.tabsContainer').evaluate(element => element.scrollTo(0, 0))
+      ;({ page } = await app.relaunch())
+      await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', lastTabId)
+      await expectActiveTabInView(page)
+    })
+  })
+}
+
+test.describe('localized tab titles', () => {
+  test.use({ seed: { settings: { currentLocale: 'de-DE' } } })
+
+  test('new subscription tabs use the loaded locale', async ({ page }) => {
+    await expect(page.locator(sel.activeTab)).toContainText('Abos')
+
+    await page.keyboard.press('Control+t')
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    await expect(page.locator(sel.activeTab)).toContainText('Abos')
+    await expect(page.locator(sel.activeTab)).not.toContainText(/\/subscriptions|Subscriptions\.Subscriptions/)
+  })
+})
+
+test.describe('custom default page', () => {
+  test.use({ seed: { settings: { landingPage: 'history' } } })
+
+  test('uses the configured route and title for a new tab', async ({ page }) => {
+    const tab = await page.evaluate(async () => {
+      return await window.ftElectron.tabs.create({
+        makeActive: false,
+        lazyLoad: true
+      })
+    })
+
+    expect(tab.route.fullPath).toBe('/history')
+    expect(tab.title).toBe('History')
+  })
+})
+
+test.describe('removed settings landing page', () => {
+  test.use({ seed: { settings: { landingPage: 'settings' } } })
+
+  test('migrates to subscriptions before creating tabs', async ({ page }) => {
+    const tab = await page.evaluate(async () => {
+      return await window.ftElectron.tabs.create({
+        makeActive: false,
+        lazyLoad: true
+      })
+    })
+
+    expect(tab.route.fullPath).toBe('/subscriptions')
+    expect(tab.title).toBe('Subscriptions')
+  })
+})
+
+test.describe('RTL context menus', () => {
+  test.use({ seed: { settings: { currentLocale: 'ar' } } })
+
+  test('positions the menu at the physical pointer coordinates', async ({ page }) => {
+    const targetBox = await page.locator(sel.searchInput).boundingBox()
+    expect(targetBox).not.toBeNull()
+
+    const pointer = {
+      x: targetBox.x + targetBox.width / 2,
+      y: targetBox.y + targetBox.height / 2
+    }
+    await page.mouse.click(pointer.x, pointer.y, { button: 'right' })
+
+    const menu = page.locator('.contextMenu')
+    await expect(menu).toBeVisible()
+    await expect(menu).toHaveCSS('transform', 'none')
+
+    const menuBox = await menu.boundingBox()
+    const viewport = await page.evaluate(() => ({
+      width: window.innerWidth,
+      height: window.innerHeight
+    }))
+    expect(menuBox).not.toBeNull()
+    expect(menuBox.x).toBeCloseTo(
+      Math.max(8, Math.min(pointer.x - menuBox.width, viewport.width - menuBox.width - 8)),
+      0
+    )
+    expect(menuBox.y).toBeCloseTo(
+      Math.max(8, Math.min(pointer.y, viewport.height - menuBox.height - 8)),
+      0
+    )
+
+    await page.keyboard.press('Escape')
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.tabs).first().click({ button: 'right' })
+
+    const closeTabs = page.getByRole('menuitem', { name: 'Close Tabs', exact: true })
+    await closeTabs.hover()
+
+    const submenu = closeTabs.locator('xpath=following-sibling::*[@role="menu"]')
+    await expect(submenu).toBeVisible()
+
+    const parentBox = await closeTabs.boundingBox()
+    const submenuBox = await submenu.boundingBox()
+    expect(parentBox).not.toBeNull()
+    expect(submenuBox).not.toBeNull()
+    expect(submenuBox.x + submenuBox.width / 2).toBeLessThan(
+      parentBox.x + parentBox.width / 2
+    )
+  })
+})
+
+test.describe('subscription feed tabs', () => {
+  test.use({
+    seed: {
+      settings: {
+        hideSubscriptionsVideos: false,
+        hideSubscriptionsShorts: false,
+        hideSubscriptionsLive: false,
+        hideSubscriptionsCommunity: false,
+        useRssFeeds: false
+      }
+    }
+  })
+
+  test('uses the last selected feed for newly opened subscription tabs', async ({ page }) => {
+    const feedTab = (tab) => page
+      .locator('.tabContent[aria-hidden="false"]')
+      .locator(`[data-subscription-feed-tab="${tab}"]`)
+
+    await feedTab('shorts').click()
+    await expect(feedTab('shorts')).toHaveAttribute('aria-selected', 'true')
+
+    await page.locator(sel.newTabButton).click()
+    await expect(feedTab('shorts')).toHaveAttribute('aria-selected', 'true')
+
+    await feedTab('live').click()
+    await page.locator(sel.tabs).first().click()
+    await expect(feedTab('shorts')).toHaveAttribute('aria-selected', 'true')
+
+    await goTo(page, 'history')
+    await goTo(page, 'subscriptions')
+    await expect(feedTab('live')).toHaveAttribute('aria-selected', 'true')
+  })
+})
+
+test.describe('background tab shortcuts', () => {
+  test.use({
+    seed: {
+      settings: { fetchSubscriptionsAutomatically: false },
+      profiles: [
+        {
+          _id: 'allChannels',
+          name: 'All Channels',
+          bgColor: '#000000',
+          textColor: '#FFFFFF',
+          subscriptions: [
+            {
+              id: 'UC-test-subscription',
+              name: 'Test subscription',
+              thumbnail: ''
+            }
+          ]
+        }
+      ]
+    }
+  })
+
+  for (const [label, shortcut] of [['Ctrl+R', 'Control+r']]) {
+    test(`${label} refreshes the current feed on an active subscriptions tab`, async ({ page }) => {
+      await expect(page.getByText(/disabled automatic subscription fetching/i)).toBeVisible()
+      await page.route(/^https?:\/\//, abortUnmockedRequest)
+
+      const beforeRefresh = await page.evaluate(() => window.ftElectron.tabs.getState())
+      const refreshKey = beforeRefresh.tabs.find(tab => tab.id === beforeRefresh.activeTabId).refreshKey
+
+      const externalRequests = []
+      page.on('request', (request) => {
+        if (/^https?:/.test(request.url())) {
+          externalRequests.push(request.url())
+        }
+      })
+
+      await page.keyboard.press(shortcut)
+      await expect.poll(() => externalRequests.length).toBeGreaterThan(0)
+      await expect.poll(async () => {
+        const state = await page.evaluate(() => window.ftElectron.tabs.getState())
+        return state.tabs.find(tab => tab.id === state.activeTabId).refreshKey
+      }).toBe(refreshKey)
+    })
+  }
+
+  // Regression: the document-level subscriptions listener refreshed a hidden
+  // tab when R was pressed in a different tab (d20ff948f).
+  test('R does not refresh subscriptions in a background tab', async ({ page }) => {
+    await expect(page.getByText(/disabled automatic subscription fetching/i)).toBeVisible()
+
+    await page.locator(sel.newTabButton).click()
+    await goTo(page, 'history')
+
+    const subscriptionRefreshRequests = []
+    page.on('request', (request) => {
+      if (request.url().includes('UC-test-subscription')) {
+        subscriptionRefreshRequests.push(request.url())
+      }
+    })
+
+    await page.locator('body').press('r')
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => {
+      requestAnimationFrame(resolve)
+    })))
+    expect(subscriptionRefreshRequests).toEqual([])
+  })
+
+  test('R typed in settings search does not refresh subscriptions behind it', async ({ page }) => {
+    await goTo(page, 'settings')
+    const search = page.getByRole('searchbox', { name: 'Search settings' })
+    const subscriptionRefreshRequests = []
+    page.on('request', (request) => {
+      if (request.url().includes('UC-test-subscription')) {
+        subscriptionRefreshRequests.push(request.url())
+      }
+    })
+
+    await search.press('r')
+    await expect(search).toHaveValue('r')
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => {
+      requestAnimationFrame(resolve)
+    })))
+    expect(subscriptionRefreshRequests).toEqual([])
+  })
+})
+
+test.describe('tab organizer', () => {
+  test('shows synced tab sets in device tabs and confirms deletion', async ({ page }) => {
+    const privacyKey = randomBytes(32).toString('base64')
+    const phoneDeviceId = randomSyncServerDeviceId()
+    const desktopDeviceId = randomSyncServerDeviceId()
+    const phoneDeviceInfo = {
+      name: 'Pixel 9',
+      platform: 'android',
+      architecture: 'arm64-v8a',
+      release: '16',
+    }
+    let encryptedPhoneInfo = await encryptSyncServerDeviceInfo(
+      phoneDeviceInfo,
+      privacyKey,
+      phoneDeviceId
+    )
+    let markDelayedResponseStarted
+    let releaseDelayedResponse
+    let markTokenReplacementResponseStarted
+    let releaseTokenReplacementResponse
+    const delayedResponseStarted = new Promise(resolve => {
+      markDelayedResponseStarted = resolve
+    })
+    const delayedResponseRelease = new Promise(resolve => {
+      releaseDelayedResponse = resolve
+    })
+    const tokenReplacementResponseStarted = new Promise(resolve => {
+      markTokenReplacementResponseStarted = resolve
+    })
+    const tokenReplacementResponseRelease = new Promise(resolve => {
+      releaseTokenReplacementResponse = resolve
+    })
+    let accountSessionRequests = 0
+    let healthRequests = 0
+    await page.route('https://sync.opentubex.org/**', async route => {
+      const pathname = new URL(route.request().url()).pathname
+      if (pathname === '/health') {
+        healthRequests++
+        await route.fulfill({
+          status: 200,
+          json: { capabilities: { account_sessions: 1 } },
+        })
+      } else if (pathname === '/v1/account/sessions') {
+        const requestNumber = ++accountSessionRequests
+        const responseEncryptedPhoneInfo = encryptedPhoneInfo
+        if (requestNumber === 2) {
+          markDelayedResponseStarted()
+          await delayedResponseRelease
+        } else if (requestNumber === 4) {
+          markTokenReplacementResponseStarted()
+          await tokenReplacementResponseRelease
+        }
+        await route.fulfill({
+          status: 200,
+          json: {
+            sessions: [{
+              device_id: phoneDeviceId,
+              encrypted_device_info: responseEncryptedPhoneInfo,
+            }],
+          },
+        })
+      } else {
+        await route.fulfill({ status: 500, body: 'Unexpected sync request' })
+      }
+    })
+
+    await page.evaluate(({ desktopDeviceId, phoneDeviceId, privacyKey }) => {
+      const store = window.$store
+      store.commit('setSyncServerEnabled', true)
+      store.commit('setSyncServerToken', 'e2e-token')
+      store.commit('setSyncServerPrivacyKey', privacyKey)
+      store.commit('setSyncServerPrivacyMode', 'enhanced')
+      store.commit('setSyncServerSyncSessions', true)
+      store.commit('setSyncServerSharedTabs', false)
+      window.__deviceNameRefreshCompletions = 0
+      store.subscribeAction({
+        after(action) {
+          if (action.type === 'refreshSyncServerDevices') {
+            window.__deviceNameRefreshCompletions++
+          }
+        },
+      })
+      store.commit('setSyncServerOtherDeviceSessions', [
+        {
+          syncDeviceId: phoneDeviceId,
+          syncPlatform: 'mobile',
+          sessionId: 'mobile-session-e2e',
+          tabs: [
+            { id: 'synced-watch', title: 'Synced watch tab', url: 'https://localhost/watch/synced-video?timestamp=42#details' },
+            { id: 'synced-history', title: 'Synced history tab', url: 'https://localhost/history' },
+          ],
+        },
+        {
+          syncDeviceId: desktopDeviceId,
+          syncPlatform: 'desktop',
+          sessionId: 'desktop-session-e2e',
+          tabs: [
+            { id: 'synced-desktop', title: 'Desktop synced tab', url: 'app://bundle/index.html#/subscriptions' },
+          ],
+        },
+      ])
+      store._actions.deleteSyncServerSession = [session => {
+        store.commit(
+          'setSyncServerOtherDeviceSessions',
+          store.getters.getSyncServerOtherDeviceSessions.filter(candidate => (
+            candidate.syncDeviceId !== session.syncDeviceId ||
+            candidate.sessionId !== session.sessionId
+          ))
+        )
+        return Promise.resolve(true)
+      }]
+    }, { desktopDeviceId, phoneDeviceId, privacyKey })
+
+    await page.locator(sel.tabOrganizerButton).click()
+    const organizer = page.getByRole('dialog', { name: 'Tab Organizer' })
+    const syncedSection = organizer.locator('.syncedTabsSection')
+    const sessionTabs = syncedSection.getByRole('tablist', { name: 'Tabs from other devices' })
+    const mobileTab = sessionTabs.getByRole('tab', { name: 'Pixel 9 · 2 tabs', exact: true })
+    const desktopTab = sessionTabs.getByRole('tab', { name: 'Desktop · 1 tab', exact: true })
+    const syncedSet = syncedSection.getByRole('tabpanel')
+    await expect.poll(() => accountSessionRequests).toBe(1)
+    await expect.poll(() => page.evaluate(() => window.__deviceNameRefreshCompletions)).toBe(1)
+    expect(healthRequests).toBe(0)
+    await expect(syncedSection.getByRole('heading', { name: 'Tabs from other devices' })).toBeVisible()
+    await expect(sessionTabs.getByRole('tab')).toHaveCount(2)
+    await expect(mobileTab).toHaveAttribute('aria-selected', 'true')
+    await expect(desktopTab).toHaveAttribute('aria-selected', 'false')
+    await expect(mobileTab.locator('[data-icon="smartphone"]')).toBeVisible()
+    await expect(sessionTabs.locator('[data-icon="display"]')).toBeVisible()
+    await expect(syncedSet.locator('[data-icon="clapperboard"]')).toBeVisible()
+    await expect(syncedSet.locator('[data-icon="clock-rotate-left"]')).toBeVisible()
+    await expect(syncedSet.locator('[data-icon="arrow-up-right-from-square"]')).toHaveCount(2)
+    await expect(syncedSet).not.toContainText('Desktop synced tab')
+    await expect(syncedSet.locator('small')).toHaveText(['/watch/synced-video?timestamp=42#details', '/history'])
+
+    encryptedPhoneInfo = await encryptSyncServerDeviceInfo(
+      { ...phoneDeviceInfo, name: 'Stale phone' },
+      privacyKey,
+      phoneDeviceId
+    )
+    await organizer.locator('.tabOrganizerHeader .iconButton').click()
+    await expect(organizer).toBeHidden()
+    await page.locator(sel.tabOrganizerButton).click()
+    await delayedResponseStarted
+    await expect.poll(() => accountSessionRequests).toBe(2)
+
+    encryptedPhoneInfo = await encryptSyncServerDeviceInfo(
+      { ...phoneDeviceInfo, name: 'Travel phone' },
+      privacyKey,
+      phoneDeviceId
+    )
+    await organizer.locator('.tabOrganizerHeader .iconButton').click()
+    await expect(organizer).toBeHidden()
+    await page.locator(sel.tabOrganizerButton).click()
+    await expect.poll(() => accountSessionRequests).toBe(3)
+    await expect.poll(() => page.evaluate(() => window.__deviceNameRefreshCompletions)).toBe(2)
+    expect(healthRequests).toBe(0)
+    const renamedMobileTab = sessionTabs.getByRole('tab', {
+      name: 'Travel phone · 2 tabs',
+      exact: true,
+    })
+    await expect(renamedMobileTab).toBeVisible()
+    releaseDelayedResponse()
+    await expect.poll(() => page.evaluate(() => window.__deviceNameRefreshCompletions)).toBe(3)
+    await expect(renamedMobileTab).toBeVisible()
+
+    await renamedMobileTab.press('ArrowRight')
+    await expect(desktopTab).toBeFocused()
+    await expect(desktopTab).toHaveAttribute('aria-selected', 'true')
+    await expect(syncedSet).toContainText('Desktop synced tab')
+    await expect(syncedSet.locator('small')).toHaveText(['/subscriptions'])
+    await expect(syncedSet).not.toContainText('Synced watch tab')
+
+    await desktopTab.press('Home')
+    await expect(renamedMobileTab).toBeFocused()
+    await expect(syncedSet).toContainText('Synced watch tab')
+
+    const deleteSet = syncedSection.getByRole('button', { name: 'Delete: Travel phone · 2 tabs' })
+    await deleteSet.click()
+    let confirmation = page.getByRole('dialog', { name: 'Delete' })
+    await expect(confirmation).toContainText('Travel phone · 2 tabs')
+    await confirmation.getByRole('button', { name: 'Cancel' }).click()
+    await expect(syncedSet).toBeVisible()
+
+    await deleteSet.click()
+    confirmation = page.getByRole('dialog', { name: 'Delete' })
+    await confirmation.getByRole('button', { name: 'Delete', exact: true }).click()
+    await expect(renamedMobileTab).toHaveCount(0)
+    await expect(desktopTab).toHaveAttribute('aria-selected', 'true')
+    await expect(syncedSet).toContainText('Desktop synced tab')
+
+    await organizer.locator('.tabOrganizerHeader .iconButton').click()
+    await expect(organizer).toBeHidden()
+    await page.locator(sel.tabOrganizerButton).click()
+    await tokenReplacementResponseStarted
+    await expect.poll(() => accountSessionRequests).toBe(4)
+    await page.evaluate(async () => {
+      const store = window.$store
+      await store.dispatch('replaceSyncServerToken', 'replacement-token')
+    })
+    releaseTokenReplacementResponse()
+    await expect.poll(() => page.evaluate(() => window.__deviceNameRefreshCompletions)).toBe(4)
+    await expect.poll(() => page.evaluate(() => {
+      const store = window.$store
+      return store.state.syncServer.syncServerDevices
+    })).toEqual({})
+    await expect.poll(() => page.evaluate(() => {
+      const store = window.$store
+      return store.getters.getSyncServerToken
+    })).toBe('replacement-token')
+  })
+
+  for (const iconPack of ['material']) {
+    test(`opens synced mobile and desktop routes with ${iconPack} device icons`, async ({ page }, testInfo) => {
+      await page.evaluate(async (pack) => {
+        const store = window.$store
+        await store.dispatch('updateIconPack', pack)
+        store.commit('setSyncServerEnabled', true)
+        store.commit('setSyncServerToken', 'e2e-token')
+        store.commit('setSyncServerPrivacyMode', 'enhanced')
+        store.commit('setSyncServerSyncSessions', true)
+        store.commit('setSyncServerSharedTabs', false)
+        store.commit('setSyncServerOtherDeviceSessions', [
+          {
+            syncDeviceId: 'phone-e2e',
+            syncPlatform: 'mobile',
+            sessionId: 'phone-session',
+            tabs: [{ id: 'phone-tab', title: 'Subscriptions', url: 'https://localhost/subscriptions' }],
+          },
+          {
+            syncDeviceId: 'desktop-e2e',
+            syncPlatform: 'desktop',
+            sessionId: 'desktop-session',
+            tabs: [
+              { id: 'desktop-history', title: 'History', url: 'app://bundle/index.html#/history' },
+              { id: 'desktop-playlists', title: 'Playlists', url: 'app://bundle/index.html#/playlists' },
+            ],
+          },
+        ])
+      }, iconPack)
+
+      await page.locator(sel.tabOrganizerButton).click()
+      const organizer = page.getByRole('dialog', { name: 'Tab Organizer' })
+      const syncedSection = organizer.locator('.syncedTabsSection')
+      const phoneIcon = syncedSection.getByRole('tab', { name: 'Mobile · 1 tab', exact: true })
+        .locator('[data-icon="smartphone"]')
+      await expect(phoneIcon).toBeVisible()
+      await expect(phoneIcon).toHaveAttribute('data-icon-pack', iconPack)
+      await expect(syncedSection.locator('small')).toHaveText(['/subscriptions'])
+      const screenshot = testInfo.outputPath(`synced-tabs-${iconPack}.png`)
+      await syncedSection.screenshot({ path: screenshot })
+      await testInfo.attach(`Synced tabs with ${iconPack} icons`, { path: screenshot, contentType: 'image/png' })
+
+      await syncedSection.locator('.syncedTabTarget').click()
+      await expect.poll(() => page.evaluate(() => window.ftElectron.tabs.getState().then(state => (
+        state.tabs.find(tab => tab.id === state.activeTabId)?.route.fullPath
+      )))).toBe('/subscriptions')
+
+      await syncedSection.getByRole('tab', { name: 'Desktop · 2 tabs', exact: true }).click()
+      await expect(syncedSection.locator('small')).toHaveText(['/history', '/playlists'])
+      const tabIdsBefore = await page.evaluate(() => window.ftElectron.tabs.getState().then(state => state.tabs.map(tab => tab.id)))
+      const openAll = syncedSection.getByRole('button', { name: 'Open all tabs' })
+      const confirmation = page.getByRole('dialog', { name: 'Open all tabs?', exact: true })
+      for (const dismiss of ['cancel', 'escape', 'backdrop']) {
+        await openAll.click()
+        await expect(confirmation).toContainText('Desktop · 2 tabs')
+        await expect(organizer).toHaveAttribute('inert', '')
+        if (dismiss === 'cancel') await confirmation.getByRole('button', { name: 'Cancel' }).click()
+        else if (dismiss === 'escape') await page.keyboard.press('Escape')
+        else await page.locator('.prompt:not([inert])').click({ position: { x: 5, y: 5 } })
+        await expect(confirmation).toHaveCount(0)
+        await expect(organizer).not.toHaveAttribute('inert')
+        await expect(openAll).toBeFocused()
+        expect(await page.evaluate(() => window.ftElectron.tabs.getState().then(state => state.tabs.map(tab => tab.id))))
+          .toEqual(tabIdsBefore)
+      }
+      await openAll.click()
+      await confirmation.getByRole('button', { name: 'Open all tabs', exact: true }).click()
+      await expect(confirmation).toHaveCount(0)
+      await expect.poll(() => page.evaluate(() => window.ftElectron.tabs.getState().then(state => (
+        state.tabs.slice(-3).map(tab => tab.route.fullPath)
+      )))).toEqual(['/subscriptions', '/history', '/playlists'])
+      await organizer.locator('.tabOrganizerHeader .iconButton').click()
+      await expect.poll(() => page.evaluate(() => window.location.hash)).toBe('#/playlists')
+    })
+  }
+
+  test('keeps synced-device tab geometry stable when selection changes', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
+    await page.evaluate(() => {
+      const store = window.$store
+      store.commit('setSyncServerEnabled', true)
+      store.commit('setSyncServerToken', 'e2e-token')
+      store.commit('setSyncServerPrivacyMode', 'enhanced')
+      store.commit('setSyncServerSyncSessions', true)
+      store.commit('setSyncServerSharedTabs', false)
+      store.commit('setSyncServerOtherDeviceSessions', Array.from({ length: 8 }, (_, index) => ({
+        syncDeviceId: `device-${index}`,
+        syncPlatform: index % 2 ? 'desktop' : 'mobile',
+        sessionId: `session-${index}`,
+        tabs: [{ id: `synced-${index}`, title: 'History', url: '/history' }]
+      })))
+    })
+    await page.locator(sel.tabOrganizerButton).click()
+    const row = page.locator('.syncedSessionTabs')
+    const tabs = row.getByRole('tab')
+    await expect(tabs).toHaveCount(8)
+    await boundingBoxWhenSettled(row)
+
+    async function geometry() {
+      return await row.evaluate(element => {
+        const origin = element.getBoundingClientRect()
+        return [...element.querySelectorAll('[role="tab"]')].map(tab => {
+          const box = tab.getBoundingClientRect()
+          return { width: box.width, x: box.left - origin.left, y: box.top - origin.top }
+        })
+      })
+    }
+
+    await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setSize(width, 800), Math.round(900 * uiScale / 100))
+    await boundingBoxWhenSettled(row)
+    const before = await geometry()
+    expect(new Set(before.map(box => box.y)).size, 'device tabs wrap onto multiple rows').toBeGreaterThan(1)
+    for (const tab of await tabs.all()) {
+      await tab.click()
+      await expect(tab).toHaveAttribute('aria-selected', 'true')
+      await expect.poll(async () => (await geometry()).every((box, index) =>
+        ['width', 'x', 'y'].every(key => Math.abs(box[key] - before[index][key]) <= 0.2)
+      ), { message: 'device selection keeps target widths and wrapping stable' }).toBe(true)
+    }
+
+    await boundingBoxWhenSettled(row)
+    for (const colorScheme of ['dark', 'light']) {
+      await page.emulateMedia({ colorScheme })
+      await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+      const box = await row.boundingBox()
+      const screenshot = await app.electronApp.evaluate(async ({ BrowserWindow }, box) => {
+        return (await BrowserWindow.getAllWindows()[0].webContents.capturePage({
+          x: Math.round(box.x), y: Math.round(box.y), width: Math.round(box.width), height: Math.round(box.height)
+        })).toPNG().toString('base64')
+      }, box)
+      await testInfo.attach(`stable synced-device tabs ${colorScheme}`, { body: Buffer.from(screenshot, 'base64'), contentType: 'image/png' })
+    }
+  })
+
+  test('clamps scroll after switching to a shorter synced session at fractional UI scale', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
+    await page.evaluate(() => {
+      const store = window.$store
+      store.commit('setSyncServerEnabled', true)
+      store.commit('setSyncServerToken', 'e2e-token')
+      store.commit('setSyncServerPrivacyMode', 'enhanced')
+      store.commit('setSyncServerSyncSessions', true)
+      store.commit('setSyncServerSharedTabs', false)
+      store.commit('setSyncServerOtherDeviceSessions', [
+        {
+          syncDeviceId: 'phone-e2e',
+          syncPlatform: 'mobile',
+          sessionId: 'long-mobile-session',
+          tabs: Array.from({ length: 30 }, (_, index) => ({
+            id: `long-synced-${index}`,
+            title: `Long synced tab ${index}`,
+            url: `/watch/long-synced-${index}`,
+          })),
+        },
+        {
+          syncDeviceId: 'desktop-e2e',
+          syncPlatform: 'desktop',
+          sessionId: 'short-desktop-session',
+          tabs: [{ id: 'short-synced', title: 'Short synced tab', url: '/subscriptions' }],
+        },
+      ])
+    })
+
+    await page.locator(sel.tabOrganizerButton).click()
+    const organizer = page.getByRole('dialog', { name: 'Tab Organizer' })
+    const scroller = organizer.locator('.tabOrganizerScroll')
+    const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+    const syncedSection = organizer.locator('.syncedTabsSection')
+    const desktopTab = syncedSection.getByRole('tab', { name: 'Desktop · 1 tab', exact: true })
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+    await desktopTab.evaluate(element => element.click())
+    await expect(syncedSection.locator('.syncedTabTarget')).toHaveCount(1)
+    await expect.poll(() => scroller.evaluate(element => {
+      const maximum = Math.max(0, element.scrollHeight - element.clientHeight)
+      const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+      const unusable = scrollbar.classList.contains('os-scrollbar-unusable')
+      if (Math.abs(element.scrollTop - maximum) > 1) return false
+      if (maximum <= 1) return unusable
+      const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
+      const thumb = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
+      return !unusable && Math.abs(track.bottom - thumb.bottom) <= 1
+    })).toBe(true)
+  })
+
+  test('selects a visible range with Shift-click', async ({ page }) => {
+    await page.evaluate(async () => {
+      for (let index = 1; index <= 3; index++) {
+        if (index === 2) {
+          await window.ftElectron.tabs.create({
+            route: '/history?range=hidden',
+            title: 'Hidden gap tab',
+            makeActive: false,
+            lazyLoad: true
+          })
+        }
+        await window.ftElectron.tabs.create({
+          route: `/history?range=${index}`,
+          title: `Range tab ${index}`,
+          makeActive: false,
+          lazyLoad: true
+        })
+      }
+    })
+
+    await page.locator(sel.tabOrganizerButton).click()
+    const organizer = page.getByRole('dialog', { name: 'Tab Organizer' })
+    await organizer.getByRole('searchbox', { name: 'Search tabs' }).fill('Range tab')
+    const rangeRows = organizer.locator('.tabOrganizerRow').filter({ hasText: 'Range tab' })
+    await expect(rangeRows).toHaveCount(3)
+
+    await rangeRows.first().locator('.tabSelection label').click()
+    await rangeRows.last().locator('.tabSelection label').click({ modifiers: ['Shift'] })
+
+    await expect(rangeRows.locator('input[type="checkbox"]:checked')).toHaveCount(3)
+    await expect(rangeRows.last().getByRole('checkbox')).toBeFocused()
+    await expect(organizer.getByText('3 tabs selected', { exact: true })).toBeVisible()
+    await expect(organizer.locator('.tabOrganizerRow').filter({ hasNotText: 'Range tab' })
+      .locator('input[type="checkbox"]:checked')).toHaveCount(0)
+  })
+
+  test('unloads an active tab as part of a group bulk action', async ({ page }) => {
+    const groupedTabIds = await page.evaluate(async () => {
+      const backgroundTab = await window.ftElectron.tabs.create({
+        route: '/history',
+        title: 'Bulk background tab',
+        makeActive: false,
+        lazyLoad: false
+      })
+      const activeTab = await window.ftElectron.tabs.create({
+        route: '/subscriptions',
+        title: 'Bulk active tab',
+        makeActive: true,
+        lazyLoad: false
+      })
+      const group = await window.ftElectron.tabs.createGroup({ name: 'Bulk unload group' })
+      await window.ftElectron.tabs.setGroup([backgroundTab.id, activeTab.id], group.id)
+      return [backgroundTab.id, activeTab.id]
+    })
+
+    await page.locator(sel.tabOrganizerButton).click()
+    const group = page.getByRole('dialog', { name: 'Tab Organizer' })
+      .locator('.tabGroup')
+      .filter({ hasText: 'Bulk unload group' })
+    await group.getByRole('button', { name: 'Unload All' }).click()
+
+    await expect.poll(() => page.evaluate(async tabIds => {
+      const state = await window.ftElectron.tabs.getState()
+      return {
+        activeTabIsOutsideGroup: !tabIds.includes(state.activeTabId),
+        unloaded: tabIds.map(tabId => state.tabs.find(tab => tab.id === tabId)?.isUnloaded)
+      }
+    }, groupedTabIds), { timeout: 2_000 }).toEqual({
+      activeTabIsOutsideGroup: true,
+      unloaded: [true, true]
+    })
+  })
+
+  test('clamps its scroll position after collapsing and filtering at fractional UI scale', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
+    await page.evaluate(async () => {
+      const tabIds = []
+      for (let index = 0; index < 24; index++) {
+        const tab = await window.ftElectron.tabs.create({
+          route: `/watch/organizer-scroll-${index}`,
+          title: index === 23 ? 'Only matching tab' : `Scrollable tab ${index}`,
+          makeActive: false,
+          lazyLoad: true
+        })
+        tabIds.push(tab.id)
+      }
+      const group = await window.ftElectron.tabs.createGroup({ name: 'Scrollable group', color: 'green' })
+      await window.ftElectron.tabs.setGroup(tabIds, group.id)
+    })
+
+    await page.locator(sel.tabOrganizerButton).click()
+    const organizer = page.getByRole('dialog', { name: 'Tab Organizer' })
+    const scroller = organizer.locator('.tabOrganizerScroll')
+    const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+    const group = organizer.locator('.tabGroup').filter({ hasText: 'Scrollable group' })
+    const collapseButton = group.getByRole('button', { name: 'Collapse group' })
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+    await collapseButton.evaluate(element => element.click())
+    await expect(group.locator('.tabOrganizerRow')).toHaveCount(0)
+    await expect.poll(() => scroller.evaluate(element => ({
+      distanceFromEnd: Math.abs(element.scrollTop - Math.max(0, element.scrollHeight - element.clientHeight)),
+      scrollTop: element.scrollTop
+    }))).toEqual({ distanceFromEnd: 0, scrollTop: 0 })
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+
+    await group.getByRole('button', { name: 'Expand group' }).evaluate(element => element.click())
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await organizer.getByRole('searchbox', { name: 'Search tabs' }).fill('Only matching tab')
+    await expect(group.locator('.tabOrganizerRow')).toHaveCount(1)
+    await expect.poll(() => scroller.evaluate(element => ({
+      distanceFromEnd: Math.abs(element.scrollTop - Math.max(0, element.scrollHeight - element.clientHeight)),
+      scrollTop: element.scrollTop
+    }))).toEqual({ distanceFromEnd: 0, scrollTop: 0 })
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+  })
+
+  test('searches tab metadata and manages persistent collapsible groups', async ({ page }) => {
+    const { betaId } = await page.evaluate(async () => {
+      await window.ftElectron.tabs.create({
+        route: '/watch/jNQXAC9IVRw',
+        title: 'Alpha video',
+        isPinned: true,
+        makeActive: false,
+        lazyLoad: true
+      })
+      const beta = await window.ftElectron.tabs.create({
+        route: '/history',
+        title: 'Beta channel',
+        makeActive: false,
+        lazyLoad: true
+      })
+      return { betaId: beta.id }
+    })
+
+    await page.locator(sel.tabOrganizerButton).click()
+    const organizer = page.getByRole('dialog', { name: 'Tab Organizer' })
+    const search = organizer.getByRole('searchbox', { name: 'Search tabs' })
+    const openRows = organizer.locator('.tabGroup .tabOrganizerRow')
+    await expect(organizer).toBeVisible()
+    await expect(search).toHaveAttribute('placeholder', 'Search tabs')
+    await expect(organizer.locator('.tabOrganizerSearch .textInputLabelText')).toHaveCount(0)
+
+    await search.fill('/history')
+    await expect(openRows).toHaveCount(1)
+    await expect(openRows).toContainText('Beta channel')
+
+    await organizer.getByRole('button', { name: 'Select All' }).click()
+    await search.fill('')
+    const betaCheckbox = openRows
+      .filter({ hasText: 'Beta channel' })
+      .getByRole('checkbox', { name: 'Select Beta channel' })
+    const alphaCheckbox = openRows
+      .filter({ hasText: 'Alpha video' })
+      .getByRole('checkbox', { name: 'Select Alpha video' })
+    await expect(betaCheckbox).toBeChecked()
+    await expect(alphaCheckbox).not.toBeChecked()
+    await organizer.getByRole('button', { name: 'Select None' }).click()
+
+    await search.fill('Alpha video')
+    await expect(openRows).toHaveCount(1)
+    await expect(openRows).toContainText('Pinned')
+    await expect(openRows).toContainText('Unloaded')
+    const alphaRow = openRows.filter({ hasText: 'Alpha video' })
+    await expect(alphaCheckbox).toHaveClass(/checkbox/)
+    await alphaRow.locator('.tabSelection label').click()
+    await expect(alphaCheckbox).toBeChecked()
+    const alphaIdentity = alphaRow.locator('.tabIdentity')
+    await alphaIdentity.hover()
+    await expect(alphaIdentity).toHaveCSS('outline-style', 'none')
+
+    await search.fill('')
+    const bulkActions = organizer.locator('.bulkActions')
+    const pinButton = bulkActions.getByRole('button', { name: 'Pin', exact: true })
+    const unpinButton = bulkActions.getByRole('button', { name: 'Unpin', exact: true })
+    const loadButton = bulkActions.getByRole('button', { name: 'Load', exact: true })
+    const unloadButton = bulkActions.getByRole('button', { name: 'Unload', exact: true })
+    const selectNoneButton = organizer.getByRole('button', { name: 'Select None' })
+    await expect(selectNoneButton).toBeVisible()
+    await expect(pinButton).toBeDisabled()
+    await expect(unpinButton).toBeEnabled()
+    await expect(loadButton).toBeEnabled()
+    await expect(unloadButton).toBeDisabled()
+    await selectNoneButton.click()
+    await expect(alphaCheckbox).not.toBeChecked()
+    await expect(pinButton).toBeDisabled()
+    await expect(unpinButton).toBeDisabled()
+    await expect(loadButton).toBeDisabled()
+    await expect(unloadButton).toBeDisabled()
+    const selectAllButton = organizer.getByRole('button', { name: 'Select All' })
+    await expect(selectAllButton).toBeVisible()
+    await selectAllButton.click()
+    await expect(pinButton).toBeEnabled()
+    await expect(unpinButton).toBeEnabled()
+    await expect(loadButton).toBeEnabled()
+    await expect(unloadButton).toBeEnabled()
+    await selectNoneButton.click()
+    await alphaRow.locator('.tabSelection label').click()
+
+    const groupSelect = organizer.locator('.selectionControls').getByRole('combobox', { name: 'Move selected tabs to group' })
+    await expect(groupSelect).toBeVisible()
+    await expect(bulkActions.locator(':scope > :last-child')).toHaveClass(/tabOrganizerSearch/)
+    const groupSelectLabel = organizer.locator('.bulkActionSelect .select-label')
+    await expect(groupSelectLabel).toHaveText('Move selected tabs to group')
+    await expect(groupSelectLabel).toBeVisible()
+    const [
+      selectionBox,
+      actionsBox,
+      groupSelectBox,
+      groupSelectLabelBox,
+      searchContainerBox,
+      searchInputBox,
+      searchIconBox
+    ] = await Promise.all([
+      organizer.locator('.selectionControls').boundingBox(),
+      bulkActions.boundingBox(),
+      groupSelect.boundingBox(),
+      groupSelectLabel.boundingBox(),
+      organizer.locator('.tabOrganizerSearch').boundingBox(),
+      search.boundingBox(),
+      organizer.locator('.tabOrganizerSearch .searchIcon').boundingBox()
+    ])
+    expect(actionsBox.y).toBeCloseTo(selectionBox.y, 0)
+    expect(groupSelectLabelBox.y + groupSelectLabelBox.height / 2).toBeCloseTo(groupSelectBox.y, 0)
+    expect(groupSelectBox.y + groupSelectBox.height).toBeLessThanOrEqual(selectionBox.y + selectionBox.height + 1)
+    const pinBox = await pinButton.boundingBox()
+    const closeBox = await bulkActions.getByRole('button', { name: 'Close', exact: true }).boundingBox()
+    expect(Math.abs(searchInputBox.y + searchInputBox.height - pinBox.y - pinBox.height)).toBeLessThanOrEqual(1)
+    expect(searchContainerBox.x).toBeGreaterThanOrEqual(closeBox.x + closeBox.width + 7)
+    expect(actionsBox.x + actionsBox.width - (searchContainerBox.x + searchContainerBox.width)).toBeCloseTo(24, 0)
+    expect(searchIconBox.x).toBeGreaterThan(searchInputBox.x)
+    expect(searchIconBox.x + searchIconBox.width).toBeLessThan(searchInputBox.x + searchInputBox.width)
+    expect(Math.abs(
+      searchIconBox.y + searchIconBox.height / 2 - (searchInputBox.y + searchInputBox.height / 2)
+    )).toBeLessThanOrEqual(1)
+    await organizer.getByRole('button', { name: 'Create Group', exact: true }).click()
+    const createGroupPrompt = page.getByRole('dialog', { name: 'Create Group', exact: true })
+    await createGroupPrompt.getByRole('textbox', { name: 'Group name', exact: true }).fill('Research')
+    await createGroupPrompt.getByRole('button', { name: 'Create Group', exact: true }).click()
+    await expect(createGroupPrompt).toHaveCount(0)
+
+    let researchGroup = organizer.locator('.tabGroup').filter({ hasText: 'Research' })
+    await expect(groupSelect.locator('.optionColorDot, .optionIcon')).toHaveCount(0)
+    await groupSelect.click()
+    const chooseGroupOption = page.getByRole('option', { name: 'Choose a group', exact: true })
+    const ungroupedOption = page.getByRole('option', { name: 'Ungrouped', exact: true })
+    const researchOption = page.getByRole('option', { name: 'Research', exact: true })
+    await expect(chooseGroupOption.locator('.optionColorDot, .optionIcon')).toHaveCount(0)
+    await expect(ungroupedOption.locator('[data-icon="link-slash"]')).toBeVisible()
+    await expect(researchOption.locator('.optionColorDot.empty')).toBeVisible()
+    await chooseGroupOption.click()
+    await researchGroup.locator('.groupIconButton').click()
+    await researchGroup.getByRole('option', { name: 'Blue', exact: true }).click()
+    await expect(researchGroup.getByRole('button', { name: 'Collapse group' }).locator('svg')).toBeVisible()
+    await expect(researchGroup.getByRole('button', { name: 'Activate First' })).toHaveCount(0)
+    await expect(researchGroup.getByRole('button', { name: 'Unload All' })).toBeDisabled()
+    await expect(researchGroup.getByRole('button', { name: 'Close All' })).toBeVisible()
+    await expect(researchGroup.getByRole('button', { name: 'Ungroup' }).locator('[data-icon="link-slash"]')).toBeVisible()
+    await expect(researchGroup.locator('.tabOrganizerRow')).toContainText('Alpha video')
+    await expect(page.locator('.tab[data-tab-id]').filter({ has: page.locator('.groupBadge') })).toHaveCount(1)
+    await expect.poll(() => page.evaluate(async () => {
+      const state = await window.ftElectron.tabs.getState()
+      const group = state.groups.find(candidate => candidate.name === 'Research')
+      return {
+        color: group?.color,
+        groupedTitles: state.tabs.filter(tab => tab.groupId === group?.id).map(tab => tab.title)
+      }
+    })).toEqual({ color: 'blue', groupedTitles: ['Alpha video'] })
+
+    await researchGroup.getByRole('button', { name: 'Rename Research' }).click()
+    const renameInput = organizer.locator('.groupRenameInput')
+    await expect(renameInput).toHaveAccessibleName('Group name')
+    expect(await renameInput.evaluate(element => element.labels.length)).toBe(0)
+    await renameInput.fill('Reading')
+    await renameInput.press('Enter')
+    researchGroup = organizer.locator('.tabGroup').filter({ hasText: 'Reading' })
+    await researchGroup.locator('.groupIconButton').click()
+    await researchGroup.getByRole('option', { name: 'Purple', exact: true }).click()
+    await expect.poll(() => page.evaluate(async () => {
+      const group = (await window.ftElectron.tabs.getState()).groups.find(candidate => candidate.name === 'Reading')
+      return group?.color
+    })).toBe('purple')
+
+    const betaRow = organizer.locator('.tabOrganizerRow').filter({ hasText: 'Beta channel' })
+    const researchTabRow = researchGroup.locator('.tabOrganizerRow').first()
+    const dragData = await page.evaluateHandle(() => new DataTransfer())
+    await betaRow.dispatchEvent('dragstart', { dataTransfer: dragData })
+    await researchTabRow.dispatchEvent('dragenter', { dataTransfer: dragData })
+    await expect(researchGroup).toHaveClass(/dropTarget/)
+    await betaRow.dispatchEvent('dragend', { dataTransfer: dragData })
+    await betaRow.dragTo(researchTabRow)
+    await expect.poll(() => page.evaluate(async (tabId) => {
+      return (await window.ftElectron.tabs.getState()).tabs.find(tab => tab.id === tabId)?.groupId
+    }, betaId)).not.toBeNull()
+    const groupCount = researchGroup.locator('.tabGroupCount')
+    await expect(groupCount).toHaveText('2 tabs')
+
+    await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
+    await page.setViewportSize({ width: 440, height: 800 })
+    await expect(groupCount).toHaveCSS('white-space', 'nowrap')
+    const responsiveActions = researchGroup.locator('.groupActions')
+    const responsiveActionButtons = responsiveActions.locator(':scope > button')
+    const [
+      responsiveHeaderBox,
+      responsiveSelectionBox,
+      responsiveLabelBox,
+      responsiveButtonBoxes,
+      responsiveBulkActionsBox,
+      responsiveGroupSelectBox,
+      responsiveSearchBox
+    ] = await Promise.all([
+      researchGroup.locator('.tabGroupHeader').boundingBox(),
+      organizer.locator('.selectionControls').boundingBox(),
+      organizer.locator('.bulkActionSelect .select-label').boundingBox(),
+      responsiveActionButtons.evaluateAll(buttons => buttons.map(button => {
+        const { x, y, width, height } = button.getBoundingClientRect()
+        return { x, y, width, height }
+      })),
+      bulkActions.boundingBox(),
+      groupSelect.boundingBox(),
+      organizer.locator('.tabOrganizerSearch').boundingBox()
+    ])
+    expect(responsiveLabelBox.y).toBeGreaterThanOrEqual(responsiveSelectionBox.y - 1)
+    expect(responsiveLabelBox.y + responsiveLabelBox.height).toBeLessThanOrEqual(responsiveSelectionBox.y + responsiveSelectionBox.height + 1)
+    expect(responsiveSearchBox.y).toBeGreaterThanOrEqual(responsiveGroupSelectBox.y + responsiveGroupSelectBox.height)
+    expect(responsiveSearchBox.x - responsiveBulkActionsBox.x).toBeCloseTo(16, 0)
+    expect(Math.abs(
+      responsiveBulkActionsBox.x + responsiveBulkActionsBox.width -
+      (responsiveSearchBox.x + responsiveSearchBox.width)
+    )).toBeCloseTo(16, 0)
+    expect(Math.max(...responsiveButtonBoxes.map(box => box.y)) - Math.min(...responsiveButtonBoxes.map(box => box.y)))
+      .toBeLessThanOrEqual(1)
+    const firstResponsiveActionBox = responsiveButtonBoxes[0]
+    const responsiveActionStartGap = firstResponsiveActionBox.x - responsiveHeaderBox.x
+    expect(responsiveActionStartGap).toBeGreaterThanOrEqual(4)
+    expect(responsiveActionStartGap).toBeLessThanOrEqual(8)
+    await page.setViewportSize({ width: 1280, height: 800 })
+
+    const ungroupedGroup = organizer.getByRole('heading', { name: 'Ungrouped', exact: true }).locator('../..')
+    await betaRow.dragTo(ungroupedGroup)
+    await expect.poll(() => page.evaluate(async (tabId) => {
+      return (await window.ftElectron.tabs.getState()).tabs.find(tab => tab.id === tabId)?.groupId
+    }, betaId)).toBeNull()
+
+    await researchGroup.getByRole('button', { name: 'Collapse group' }).click()
+    await expect(researchGroup.locator('.tabOrganizerRow')).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Expand Reading, 1 tab', exact: true })).toBeVisible()
+    await page.keyboard.press('Escape')
+    await page.locator(sel.tabOrganizerButton).click()
+
+    const reopenedOrganizer = page.getByRole('dialog', { name: 'Tab Organizer' })
+    const reopenedGroup = reopenedOrganizer.locator('.tabGroup').filter({ hasText: 'Reading' })
+    await expect(reopenedGroup.getByRole('button', { name: 'Expand group' })).toBeVisible()
+    await reopenedOrganizer.getByRole('searchbox', { name: 'Search tabs' }).fill('Alpha video')
+    await expect(reopenedGroup.locator('.tabOrganizerRow')).toContainText('Alpha video')
+    await expect(reopenedGroup.getByRole('button', { name: 'Expand group' }))
+      .toHaveAttribute('aria-expanded', 'true')
+  })
+
+  test('lays out vertical tab actions and organizer tab metadata', async ({ page }) => {
+    await page.evaluate(async () => {
+      const store = window.$store
+      store.commit('setTabBarPosition', 'left')
+      await window.ftElectron.setZoomFactor(0.95)
+      const tab = await window.ftElectron.tabs.create({
+        route: '/history',
+        title: 'History entry - OpenTubeX',
+        makeActive: false,
+        lazyLoad: true
+      })
+      await window.ftElectron.tabs.createGroup({ name: 'Unloaded group' })
+        .then(group => window.ftElectron.tabs.setGroup([tab.id], group.id))
+    })
+
+    await expect(page.locator('.app')).toHaveClass(/verticalTabsLeft/)
+    const organizerButton = page.locator(sel.tabOrganizerButton)
+    const newTabButton = page.locator(sel.newTabButton)
+    const [organizerButtonBox, newTabButtonBox] = await Promise.all([
+      organizerButton.boundingBox(),
+      newTabButton.boundingBox()
+    ])
+    expect(Math.abs(organizerButtonBox.y - newTabButtonBox.y)).toBeLessThanOrEqual(1)
+    expect(newTabButtonBox.x).toBeGreaterThanOrEqual(organizerButtonBox.x + organizerButtonBox.width)
+
+    await organizerButton.click()
+    const organizer = page.getByRole('dialog', { name: 'Tab Organizer' })
+    const group = organizer.locator('.tabGroup').filter({ hasText: 'Unloaded group' })
+    const row = group.locator('.tabOrganizerRow')
+    await expect(row.locator('.tabIdentity > span')).toHaveText('History entry')
+    await expect(row).not.toContainText(' - OpenTubeX')
+    await expect(row.locator('.tabIcon [data-icon="clock-rotate-left"]')).toBeVisible()
+    await expect(group.getByRole('button', { name: 'Unload All' })).toBeDisabled()
+
+    // The organizer still slides in, so measure every part in the same frame.
+    expect(await row.evaluate(row => {
+      const [iconBox, titleBox, urlBox] = ['.tabIcon', '.tabIdentity > span', '.tabIdentity > small']
+        .map(selector => row.querySelector(selector).getBoundingClientRect())
+      return Math.abs(iconBox.y + iconBox.height / 2 - (titleBox.y + urlBox.y + urlBox.height) / 2)
+    })).toBeLessThanOrEqual(1)
+  })
+})
+
+/**
+ * Opens the Ctrl+Tab switcher and keeps Control held so the overlay stays up.
+ * Callers must release Control (or Escape) when finished.
+ * @param {import('@playwright/test').Page} page
+ */
+async function openTabSwitcher(page) {
+  await page.keyboard.down('Control')
+  await page.keyboard.press('Tab')
+  await expect(page.locator('.tabSwitcher')).toBeVisible()
+}
+
+test.describe('tab switcher', () => {
+  test('wraps into multiple rows when there are many tabs', async ({ page }) => {
+    await page.evaluate(async () => {
+      for (let i = 0; i < 9; i++) {
+        await window.ftElectron.tabs.create({
+          makeActive: false,
+          lazyLoad: true
+        })
+      }
+    })
+    await expect(page.locator(sel.tabs)).toHaveCount(10)
+
+    try {
+      await openTabSwitcher(page)
+
+      const gridPositions = await page.locator('.tabSwitcherItem').evaluateAll((items) => {
+        return {
+          rows: new Set(items.map((item) => Math.round(item.getBoundingClientRect().top))).size,
+          columns: new Set(items.map((item) => Math.round(item.getBoundingClientRect().left))).size
+        }
+      })
+      expect(gridPositions.rows).toBeGreaterThan(1)
+      expect(gridPositions.columns).toBeGreaterThan(1)
+    } finally {
+      await page.keyboard.up('Control')
+    }
+
+    await expect(page.locator('.tabSwitcher')).toHaveCount(0)
+  })
+})
+
+test('selects whole tab groups and changes their icons', async ({ page }) => {
+  const groupId = await page.evaluate(async () => {
+    const group = await window.ftElectron.tabs.createGroup({ name: 'Research' })
+    const ids = []
+    for (const title of ['Alpha research', 'Beta research']) {
+      const tab = await window.ftElectron.tabs.create({ route: '/history', title, makeActive: false, lazyLoad: true })
+      ids.push(tab.id)
+    }
+    await window.ftElectron.tabs.setGroup(ids, group.id)
+    return group.id
+  })
+  await page.locator(sel.tabOrganizerButton).click()
+  const organizer = page.getByRole('dialog', { name: 'Tab Organizer' })
+  const group = organizer.locator('.tabGroup').filter({ hasText: 'Research' })
+  const checkbox = group.locator('.groupSelection input')
+  const rows = group.locator('.tabOrganizerRow input[type="checkbox"]')
+  await expect(checkbox).not.toBeChecked()
+  await group.locator('.groupSelection label').click()
+  await expect(checkbox).toBeChecked()
+  for (const row of await rows.all()) await expect(row).toBeChecked()
+  await group.locator('.tabOrganizerRow .tabSelection label').first().click()
+  await expect(checkbox).not.toBeChecked()
+  await organizer.getByRole('searchbox').fill('Alpha research')
+  await group.locator('.groupSelection label').click()
+  await expect(checkbox).toBeChecked()
+  await organizer.getByRole('searchbox').fill('')
+  for (const row of await rows.all()) await expect(row).toBeChecked()
+  await group.locator('.groupSelection label').click()
+  for (const row of await rows.all()) await expect(row).not.toBeChecked()
+  await group.locator('.groupIconButton').click()
+  await expect(group.locator('.groupIconPicker button')).toHaveCount(17)
+  const pickerSize = await group.locator('.groupIconPicker').boundingBox()
+  expect(pickerSize).not.toBeNull()
+  expect(pickerSize.width).toBeGreaterThan(pickerSize.height)
+  await expect(group.locator('.groupIconPicker')).not.toContainText(/Home|Subscriptions|History/)
+  await group.getByRole('button', { name: 'Research', exact: true }).click()
+  await expect(group.locator('.groupIconPicker')).toBeVisible()
+  await group.getByRole('button', { name: 'Research', exact: true }).focus()
+  await page.keyboard.press('Escape')
+  await expect(group.locator('.groupIconPicker')).toBeHidden()
+  await expect(organizer).toBeVisible()
+  await expect(group.locator('.groupIconButton [data-icon="flask"]')).toBeVisible()
+  await group.getByRole('button', { name: 'Collapse group', exact: true }).click()
+  await organizer.locator('.tabOrganizerHeader .iconButton').click()
+  await expect(page.locator(`[data-group-id="${groupId}"] [data-icon="flask"]`)).toBeVisible()
+  await page.locator(sel.tabOrganizerButton).click()
+  await expect(group.locator('.groupIconButton [data-icon="flask"]')).toBeVisible()
+  await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
+  await expect(group.locator('.groupIconButton [data-icon="flask"]')).toBeVisible()
+  await expect(group.locator('.groupIconButton [data-icon="flask"]')).toHaveAttribute('data-icon-pack', 'material')
+  await group.locator('.groupIconButton').click()
+  await page.screenshot({ path: test.info().outputPath('tab-group-icons-material.png') })
+  await page.evaluate(() => window.$store.dispatch('updateIconPack', 'remix'))
+  await expect(group.locator('.groupIconButton [data-icon="flask"]')).toHaveAttribute('data-icon-pack', 'remix')
+  await page.screenshot({ path: test.info().outputPath('tab-group-icons-remix.png') })
+  await group.getByRole('button', { name: 'Music', exact: true }).click()
+  await expect(group.locator('.groupIconButton [data-icon="headphones"]')).toBeVisible()
+})
+
+for (const tabBarPosition of ['top', 'left']) {
+  test.describe(`tab open and close animation at ${tabBarPosition}`, () => {
+    test.use({ seed: { settings: { tabBarPosition } } })
+
+    test('wipes tabs open and shut and closes the gap without a jump', { tag: '@scale' }, async ({ page }) => {
+      const vertical = tabBarPosition === 'left'
+      const create = title => page.evaluate(title => window.ftElectron.tabs.create({
+        route: '/history', title, makeActive: false, lazyLoad: true
+      }).then(tab => tab.id), title)
+      const ids = [await create('First'), await create('Second'), await create('Third')]
+      await expect(page.locator(sel.tabs)).toHaveCount(4)
+      await expectTabStripSettled(page)
+
+      // Pause the strip's animations as soon as the item that opens or closes
+      // during `action` starts, at the beginning or end of their timelines.
+      // Closing tabs finish closing as copies in the ghost layer.
+      const pauseTransition = (action, moment, title = 'Opened') => page.evaluate(({ action, moment, title }) => new Promise(resolve => {
+        const bar = document.querySelector('.tabBar')
+        const content = bar.querySelector('.tabsContent')
+        const known = new Set(content.querySelectorAll('.tab'))
+        const observer = new MutationObserver(() => {
+          const tab = action.type === 'create'
+            ? [...content.querySelectorAll('.tab')].find(tab => !known.has(tab))
+            : bar.querySelector('.tabGhostLayer > .tab')
+          if (!tab) return
+          observer.disconnect()
+          const animations = bar.getAnimations({ subtree: true })
+            .filter(animation => !(animation instanceof CSSAnimation) && !(animation instanceof CSSTransition))
+          for (const animation of animations) {
+            animation.pause()
+            const { endTime } = animation.effect.getComputedTiming()
+            animation.currentTime = { start: 0, middle: endTime / 2, nearEnd: endTime - 1, end: endTime }[moment]
+          }
+          // Hit testing follows the clip that draws the tab.
+          const rect = tab.getBoundingClientRect()
+          const y = rect.top + rect.height / 2
+          const visible = []
+          for (let x = Math.floor(rect.left); x <= rect.right; x++) {
+            if (document.elementsFromPoint(x, y).some(element => tab.contains(element))) visible.push(x)
+          }
+          // Whether the visible part is drawn over the tab before it.
+          const previous = tab.parentElement.previousElementSibling?.firstElementChild?.getBoundingClientRect()
+          const center = (visible[0] + visible.at(-1)) / 2
+          const overlapsPrevious = Boolean(previous && visible.length > 0 &&
+            center > previous.left && center < previous.right && y > previous.top && y < previous.bottom)
+          resolve({ id: tab.dataset.tabId, animations: tab.getAnimations().length, visibleSize: visible.length, overlapsPrevious })
+        })
+        observer.observe(bar, { childList: true, subtree: true })
+        if (action.type === 'create') {
+          window.ftElectron.tabs.create({ route: '/history', title, makeActive: false, lazyLoad: true })
+        } else {
+          window.ftElectron.tabs.close(action.id)
+        }
+      }), { action, moment, title })
+      const finish = () => page.evaluate(() => {
+        document.querySelector('.tabBar').getAnimations({ subtree: true })
+          .filter(animation => !(animation instanceof CSSAnimation) && !(animation instanceof CSSTransition))
+          .forEach(animation => animation.finish())
+      })
+      const visibleSize = tabId => page.locator(`.tabBar .tabsContent .tab[data-tab-id="${tabId}"]`).evaluate(tab => {
+        const rect = tab.getBoundingClientRect()
+        const y = rect.top + rect.height / 2
+        let size = 0
+        for (let x = Math.floor(rect.left); x <= rect.right; x++) {
+          if (document.elementsFromPoint(x, y).some(element => tab.contains(element))) size++
+        }
+        return size
+      })
+      const start = tabId => page.locator(`.tabBar .tab[data-tab-id="${tabId}"]`).evaluate((element, vertical) => {
+        const rect = element.getBoundingClientRect()
+        return vertical ? rect.top : rect.left
+      }, vertical)
+
+      // An opening tab starts clipped away entirely.
+      const hidden = await pauseTransition({ type: 'create' }, 'start')
+      expect(hidden.visibleSize).toBe(0)
+      expect(hidden.animations).toBeGreaterThan(0)
+      await finish()
+      await expectTabStripSettled(page)
+      expect(await visibleSize(hidden.id)).toBeGreaterThan(60)
+
+      // Halfway open, it is drawn in its own slot.
+      const opening = await pauseTransition({ type: 'create' }, 'middle')
+      expect(opening.visibleSize).toBeGreaterThan(0)
+      expect(opening.overlapsPrevious).toBe(false)
+      const opened = opening.id
+      await finish()
+      await expectTabStripSettled(page)
+
+      // A title that changes while the tab opens changes the size it opens to.
+      const retitled = (await pauseTransition({ type: 'create' }, 'nearEnd', 'Short')).id
+      const retitledTab = page.locator(`.tabBar .tab[data-tab-id="${retitled}"]`)
+      await page.evaluate(id => window.ftElectron.tabs.updateTitle('A considerably longer title for this tab', id), retitled)
+      await expect(retitledTab).toContainText('A considerably longer')
+      const stretchedSize = await retitledTab.evaluate(element => element.getBoundingClientRect().width)
+      await finish()
+      await expectTabStripSettled(page)
+      expect(Math.abs(await visibleSize(retitled) - stretchedSize)).toBeLessThan(2)
+
+      // At the end of the close animation, the next tab already sits in the
+      // closed tab's slot, so removing the closed tab does not move it.
+      const closedSlot = await start(ids[1])
+      const closing = await pauseTransition({ type: 'close', id: ids[1] }, 'end')
+      expect(closing).toMatchObject({ id: ids[1], visibleSize: 0 })
+      expect(Math.abs(await start(ids[2]) - closedSlot)).toBeLessThan(0.5)
+      await finish()
+      await expect(page.locator(`.tabBar .tab[data-tab-id="${ids[1]}"]`)).toHaveCount(0)
+      expect(Math.abs(await start(ids[2]) - closedSlot)).toBeLessThan(0.5)
+
+      // Pressing a tab measures the strip for a drag, so running animations
+      // complete at once.
+      await pauseTransition({ type: 'close', id: opened }, 'start')
+      expect(await page.locator(`.tabBar .tab[data-tab-id="${ids[0]}"]`).evaluate(element => {
+        element.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }))
+        window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0 }))
+        return document.querySelectorAll('.tabBar .tabGhostLayer > *').length
+      })).toBe(0)
+
+      // A tab closed while it opens does not move the tab after it on removal.
+      const popping = (await pauseTransition({ type: 'create' }, 'start')).id
+      await page.evaluate(async id => {
+        const ids = (await window.ftElectron.tabs.getState()).tabs.map(tab => tab.id).filter(tabId => tabId !== id)
+        ids.splice(1, 0, id)
+        await window.$store.dispatch('reorderTabs', ids)
+      }, popping)
+      await expect(page.locator(sel.tabs).nth(1)).toHaveAttribute('data-tab-id', popping)
+      const follower = await page.locator(sel.tabs).nth(2).getAttribute('data-tab-id')
+      await pauseTransition({ type: 'close', id: popping }, 'end')
+      const followerAtCloseEnd = await start(follower)
+      await finish()
+      await expect(page.locator(`.tabBar .tab[data-tab-id="${popping}"]`)).toHaveCount(0)
+      expect(Math.abs(await start(follower) - followerAtCloseEnd)).toBeLessThan(0.5)
+
+      // Closing the last tab of a strip scrolled to its end keeps the scroll
+      // range and position until the tab is removed, and after it.
+      await page.evaluate(async () => {
+        for (let index = 0; index < 30; index++) {
+          await window.ftElectron.tabs.create({ route: '/history', title: `Filler ${index + 1}`, makeActive: false, lazyLoad: true })
+        }
+      })
+      await expectTabStripSettled(page)
+      const container = page.locator('.tabBar .tabsContainer')
+      const scrollState = () => container.evaluate((element, vertical) => vertical
+        ? { offset: element.scrollTop, range: element.scrollHeight - element.clientHeight }
+        : { offset: element.scrollLeft, range: element.scrollWidth - element.clientWidth }, vertical)
+      // Scrolling past the end stops at the end.
+      await container.evaluate(element => element.scrollTo(element.scrollWidth, element.scrollHeight))
+      await expect.poll(async () => (await scrollState()).range).toBeGreaterThan(100)
+      const lastId = await page.locator(sel.tabs).last().getAttribute('data-tab-id')
+      const lastClosing = await pauseTransition({ type: 'close', id: lastId }, 'end')
+      expect(lastClosing.id).toBe(lastId)
+      const atCloseEnd = await scrollState()
+      await finish()
+      await expect(page.locator(`.tabBar .tab[data-tab-id="${lastId}"]`)).toHaveCount(0)
+      const afterRemoval = await scrollState()
+      expect(Math.abs(afterRemoval.range - atCloseEnd.range)).toBeLessThan(1)
+      expect(Math.abs(afterRemoval.offset - atCloseEnd.offset)).toBeLessThan(1)
+
+      // Reduced motion removes closed tabs without animating them.
+      await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'on'))
+      const removal = page.evaluate(id => new Promise(resolve => {
+        const observer = new MutationObserver(() => {
+          if (document.querySelector(`.tabBar [data-tab-id="${id}"]`)) return
+          observer.disconnect()
+          resolve(document.querySelector('.tabBar .tabsContent').getAnimations({ subtree: true }).length)
+        })
+        observer.observe(document.querySelector('.tabBar .tabsContent'), { childList: true, subtree: true })
+        window.ftElectron.tabs.close(id)
+      }), ids[2])
+      expect(await removal).toBe(0)
+    })
+  })
+}

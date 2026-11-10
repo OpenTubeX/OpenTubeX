@@ -1,13 +1,69 @@
-@mixin dual-column-template {
-  grid-template: 'video video sidebar' 0fr 'info info sidebar' auto 'info info sidebar' 1fr / 1fr 1fr 1fr;
+@use '../../scss-partials/watch-layout' as *;
+
+.streamPlaceholder {
+  background-color: #000;
+  display: grid;
+  // Thumbnails with a taller aspect ratio must not grow the row past the player.
+  grid-template-rows: minmax(0, 1fr);
+  overflow: hidden;
+  place-items: center;
+
+  > * {
+    grid-area: 1 / 1;
+  }
+
+  .videoThumbnail {
+    block-size: 100%;
+    object-fit: cover;
+    filter: brightness(0.55) var(--content-filter,);
+  }
 }
 
-@mixin theatre-mode-template {
-  grid-template: 'video video video' auto 'info info sidebar' auto 'info info sidebar' auto / 1fr 1fr 1fr;
+.streamPlaceholderOverlay {
+  align-items: center;
+  background-color: rgb(0 0 0 / 90%);
+  border-radius: var(--shape-corner-large-increased);
+  color: #fff;
+  display: flex;
+  gap: 10px;
+  max-inline-size: calc(100% - 40px);
+  padding-block: 10px;
+  padding-inline: 20px;
+  // Both are static grid items in the same cell, where the poster (a replaced
+  // element) would otherwise paint over this. A z-index establishes a stacking
+  // context for a grid item even without positioning it.
+  z-index: 1;
 }
 
-@mixin single-column-template {
-  grid-template: 'video' auto 'info' auto 'sidebar' auto / auto;
+.streamPlaceholderSpinner {
+  flex: 0 0 auto;
+}
+
+.streamPlaceholderText {
+  min-inline-size: 0;
+}
+
+// Centered over the loading placeholder, which positions its skeleton absolutely.
+.connectionWaitNotice {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 12px;
+  box-sizing: border-box;
+  inline-size: fit-content;
+  max-inline-size: calc(100% - 24px);
+  block-size: fit-content;
+  margin: auto;
+  padding-block: 8px;
+  padding-inline: 20px 8px;
+  border-radius: var(--shape-corner-large-increased);
+  background-color: rgb(0 0 0 / 90%);
+  color: #fff;
+  text-align: center;
 }
 
 .ageRestricted {
@@ -16,7 +72,7 @@
   display: inline-block;
   max-inline-size: calc(80vh * 1.78);
 
-  @media only screen and (width >= 1051px) {
+  @container route (width >= 1051px) {
     inline-size: 300%;
   }
 }
@@ -24,11 +80,12 @@
 .premiereDate {
   align-items: center;
   background-color: rgb(0 0 0 / 80%);
-  border-radius: 5px;
+  border-radius: var(--shape-corner-small);
   inset-block-end: 12px;
   color: #fff;
   display: flex;
-  block-size: 60px;
+  gap: 12px;
+  min-block-size: 60px;
   inset-inline-start: 12px;
   padding-block: 0;
   padding-inline: 12px;
@@ -42,13 +99,37 @@
   }
 
   .premiereText {
-    margin-block: 0;
-    margin-inline: 12px;
+    margin: 0;
     min-inline-size: 200px;
 
     .premiereTextTimestamp {
       font-size: 0.85em;
       font-weight: bold;
+    }
+  }
+
+  .liveReminderButton {
+    align-items: center;
+    background: #fff;
+    border: 2px solid #fff;
+    border-radius: var(--shape-corner-extra-small);
+    color: #111;
+    cursor: pointer;
+    display: flex;
+    font-weight: 500;
+    gap: 8px;
+    padding-block: 8px;
+    padding-inline: 12px;
+    white-space: nowrap;
+
+    &.active {
+      background: transparent;
+      color: #fff;
+    }
+
+    &:disabled {
+      cursor: wait;
+      opacity: 0.6;
     }
   }
 }
@@ -58,34 +139,49 @@
   position: static;
 }
 
+@media (width <= 600px) {
+  .premiereDate {
+    align-items: flex-start;
+    flex-direction: column;
+    inset-inline: 8px;
+    padding-block: 12px;
+
+    .premiereIcon {
+      display: none;
+    }
+
+    .premiereText {
+      min-inline-size: 0;
+    }
+  }
+}
+
 .videoLayout {
-  @include dual-column-template;
+  @include watch-layout-areas;
 
-  align-items: start;
-  display: grid;
-
-  &.isLoading,
-  &.noSidebar {
-    @include single-column-template;
+  .videoPlayerPlaceholder {
+    aspect-ratio: 16 / 9;
+    inline-size: 100%;
+    border-radius: calc(12px * var(--ui-roundness));
   }
 
   .videoArea {
-    grid-area: video;
-
-    .videoAreaMargin {
-      margin-block: 0 16px;
-      margin-inline: 0;
-    }
-
     .videoPlayer {
-      grid-column: 1;
-      margin-block: 0;
-      margin-inline: auto;
-      max-inline-size: calc(80vh * 1.78);
-      position: relative;
-
       .videoThumbnail {
         inline-size: 100%;
+      }
+
+      &.videoPlayerError {
+        aspect-ratio: 16 / 9;
+        inline-size: 100%;
+        overflow: hidden;
+        background-color: #000;
+
+        .videoThumbnail {
+          block-size: 100%;
+          object-fit: cover;
+          filter: brightness(0.55) var(--content-filter,);
+        }
       }
 
       .errorContainer {
@@ -101,7 +197,7 @@
         align-items: center;
         gap: 20px;
         padding: 10px;
-        border-radius: 20px;
+        border-radius: calc(20px * var(--ui-roundness));
         background-color: rgb(0 0 0 / 90%);
         color: #fff;
       }
@@ -110,8 +206,34 @@
         font-size: 80px;
       }
 
+      .errorContent {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+      }
+
       .errorMessage {
         margin: 0;
+      }
+
+      .restrictedPlaybackHint {
+        margin: 0;
+        color: rgb(255 255 255 / 75%);
+        font-size: 14px;
+      }
+
+      .errorActions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .errorActionButton {
+        margin: 0;
+        min-block-size: 44px;
+        max-inline-size: 100%;
+        white-space: normal;
       }
 
       @media only screen and (width <= 680px) {
@@ -130,35 +252,959 @@
     }
   }
 
-  .watchVideo {
-    grid-column: 1;
-    margin-block: 0 16px;
-    margin-inline: 0;
-  }
-
-  .infoArea {
-    grid-area: info;
-    position: relative;
-    z-index: 2;
-  }
-
-  .sidebarArea {
-    grid-area: sidebar;
-
-    @media only screen and (width >= 1051px) {
-      min-inline-size: 380px;
-    }
-
-    @at-root .noSidebar#{&} {
-      grid-area: auto;
+  &.ambientModeActive {
+    .infoArea :deep(.watchVideoInfo.ft-card),
+    .sidebarArea :deep(.transcriptCard.ft-card),
+    .sidebarArea :deep(.watchVideoPlaylist.ft-card),
+    .sidebarArea :deep(.watchVideoQueue.ft-card),
+    .sidebarArea :deep(.watchVideoRecommendations.ft-card) {
+      background-color: color-mix(in srgb, var(--card-bg-color) 78%, transparent);
     }
   }
 
-  .watchVideoPlaylist,
-  .watchVideoSidebar,
-  .theatrePlaylist {
-    margin-block: 0 16px;
-    margin-inline: 8px;
+  .shortsSwipeViewport {
+    display: contents;
+  }
+
+  &.shortsPlayerActive {
+    @include single-column-template;
+
+    --shorts-player-height: calc(100dvh - 156px);
+
+    .infoArea,
+    .commentsArea,
+    .sidebarArea {
+      display: none;
+    }
+
+    .videoArea {
+      position: relative;
+      overscroll-behavior: contain;
+    }
+
+    .videoArea .videoAreaMargin {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) var(--shorts-player-width) minmax(0, 1fr);
+      grid-template-rows: minmax(0, var(--shorts-player-height)) auto;
+      align-items: center;
+      column-gap: 14px;
+      min-block-size: 0;
+      margin-block-end: 0;
+    }
+
+    .shortsSwipeActive {
+      overflow: clip;
+
+      &:where(:not(.shortsSwipeExpanded)) > .videoPlayer {
+        transform: translateY(var(--shorts-swipe-offset));
+        will-change: transform;
+      }
+    }
+
+    .shortsSwipeActive.shortsSwipeExpanded :deep(.ftVideoPlayer:is(.fullWindow, :fullscreen) > :not(.shortsSwipePreview)) {
+      translate: 0 var(--shorts-swipe-offset);
+      will-change: translate;
+    }
+
+    .videoArea .videoPlayer {
+      grid-column: 2;
+      grid-row: 1;
+      inline-size: 100%;
+      block-size: var(--shorts-player-height);
+      max-inline-size: none;
+      align-self: center;
+      overflow: visible;
+      border-radius: calc(12px * var(--ui-roundness));
+    }
+
+    .videoArea :deep(.ftVideoPlayer),
+    .videoArea .videoPlayer:has(.errorContainer) {
+      overflow: hidden;
+    }
+
+    .videoArea .videoPlayerPlaceholder {
+      aspect-ratio: var(--shorts-aspect-ratio);
+      block-size: var(--shorts-player-height);
+    }
+
+    .shortsSwipeViewport {
+      position: relative;
+      display: grid;
+      grid-column: 2;
+      grid-row: 1;
+      block-size: var(--shorts-player-height);
+      min-inline-size: 0;
+      border-radius: calc(12px * var(--ui-roundness));
+    }
+
+    .videoArea .shortsSwipeViewport > .videoPlayer,
+    .videoArea :deep(.ftVideoPlayer.shortsPlayer) {
+      grid-column: 1;
+      touch-action: pan-x pinch-zoom;
+    }
+
+    // The error message scrolls on its own, which would let the browser claim vertical swipes.
+    // Its scroll timeline is only active while the message overflows.
+    .shortsSwipeViewport > .videoPlayer .errorContainer {
+      animation: shorts-error-overflow linear both;
+      animation-timeline: scroll(self block);
+      touch-action: if(style(--shorts-error-overflow: 1): auto; else: pan-x pinch-zoom);
+    }
+
+    @keyframes shorts-error-overflow {
+      from,
+      to {
+        --shorts-error-overflow: 1;
+      }
+    }
+
+    .shortsSwipePreview {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      transform: translateY(var(--shorts-swipe-preview-offset));
+      will-change: transform;
+      background-color: var(--side-nav-hover-color);
+
+      img {
+        inline-size: 100%;
+        block-size: 100%;
+        object-fit: cover;
+      }
+    }
+
+    .shortsPlayerPlaceholder {
+      position: relative;
+      background-color: var(--side-nav-hover-color);
+    }
+
+    .shortsTransitionPreview {
+      inline-size: 100%;
+      block-size: 100%;
+      object-fit: cover;
+    }
+
+    .shortsTransitionPrevious,
+    .shortsTransitionNext {
+      animation: shorts-transition-in 220ms cubic-bezier(0.2, 0, 0, 1) both;
+    }
+
+    .shortsTransitionPrevious {
+      --shorts-transition-offset: -8%;
+    }
+
+    .shortsTransitionNext {
+      --shorts-transition-offset: 8%;
+    }
+
+    .shortsSkeleton {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      background: var(--side-nav-hover-color);
+    }
+
+    .shortsSkeleton::before {
+      content: '';
+      position: absolute;
+
+      /* stylelint-disable-next-line liberty/use-logical-spec -- Preserve the sweep's physical direction in RTL layouts. */
+      inset: 0 auto 0 0;
+      inline-size: 200%;
+      pointer-events: none;
+      transform: translateX(100%);
+      background: linear-gradient(
+        105deg,
+        transparent 35%,
+        color-mix(in srgb, var(--primary-text-color) 10%, transparent) 48%,
+        transparent 61%
+      );
+      animation: shorts-skeleton-sweep 1.2s linear infinite;
+    }
+
+    .shortsSkeletonControls {
+      display: flex;
+      justify-content: space-between;
+      padding: 16px;
+    }
+
+    .shortsSkeletonControlGroup {
+      display: flex;
+      gap: 8px;
+    }
+
+    .shortsSkeletonControlGroup span {
+      inline-size: 46px;
+      block-size: 46px;
+      border-radius: 50%;
+    }
+
+    .shortsSkeletonSeek {
+      position: absolute;
+      inset-block-end: 5px;
+      inset-inline: 8px;
+      block-size: 4px;
+      border-radius: calc(2px * var(--ui-roundness));
+    }
+
+    .shortsExternalMetadata {
+      grid-column: 1;
+      grid-row: 1;
+      place-self: end end;
+      box-sizing: border-box;
+      inline-size: min(100%, 560px);
+      padding-block: 0 18px;
+      padding-inline: 0 12px;
+    }
+
+    .shortsChannelRow {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .shortsPaidPromotion {
+      margin-block-end: 8px;
+    }
+
+    .shortsChannelRow :deep(.ftSubscribeButton) {
+      flex: none;
+    }
+
+    .shortsFullscreenMetadataContent {
+      min-inline-size: 0;
+      inline-size: min(100%, 560px);
+      pointer-events: auto;
+    }
+
+    .shortsFullscreenChannelRow {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      min-inline-size: 0;
+    }
+
+    .shortsFullscreenChannelRow :deep(.ftSubscribeButton) {
+      flex: none;
+    }
+
+    .shortsFullscreenChannel {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-inline-size: 0;
+      max-inline-size: 100%;
+      padding: 0;
+      border: 0;
+      color: inherit;
+      background: transparent;
+      cursor: pointer;
+      font: inherit;
+      text-decoration: none;
+      text-shadow: 0 1px 2px #000, 0 2px 8px rgb(0 0 0 / 85%);
+    }
+
+    .shortsFullscreenChannel span {
+      overflow: hidden;
+      font-weight: 600;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .shortsFullscreenChannelThumbnail {
+      inline-size: 36px;
+      block-size: 36px;
+      flex: none;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .shortsFullscreenTitle {
+      margin-block: 12px 0;
+      margin-inline: -12px 0;
+    }
+
+    .shortsFullscreenTitleButton {
+      max-inline-size: 100%;
+      padding-block: 8px;
+      padding-inline: 12px;
+      border: 0;
+      border-radius: var(--shape-corner-medium);
+      color: inherit;
+      background: transparent;
+      cursor: pointer;
+      overflow-wrap: anywhere;
+      font: inherit;
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 1.3;
+      text-align: start;
+      text-shadow: 0 1px 2px #000, 0 2px 8px rgb(0 0 0 / 85%);
+      transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+    }
+
+    .shortsFullscreenTitleButton:hover,
+    .shortsFullscreenTitleButton:focus-visible {
+      background-color: rgb(255 255 255 / 14%);
+    }
+
+    .shortsFullscreenTitleButton:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 2px;
+    }
+
+    .shortsExternalChannel {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-inline-size: 0;
+      padding: 0;
+      border: 0;
+      color: var(--primary-text-color);
+      background: transparent;
+      cursor: pointer;
+      font: inherit;
+      flex: 0 0 auto;
+      max-inline-size: 100%;
+      text-decoration: none;
+    }
+
+    .shortsExternalChannel span {
+      font-weight: 600;
+      overflow-wrap: anywhere;
+      white-space: normal;
+    }
+
+    .shortsExternalChannelThumbnail {
+      inline-size: 36px;
+      block-size: 36px;
+      flex: none;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .shortsExternalTitle {
+      margin-block: 12px 0;
+      margin-inline: -12px 0;
+    }
+
+    .shortsExternalTitleButton {
+      max-inline-size: 100%;
+      padding-block: 8px;
+      padding-inline: 12px;
+      border: 0;
+      border-radius: var(--shape-corner-medium);
+      color: inherit;
+      background: transparent;
+      cursor: pointer;
+      overflow-wrap: anywhere;
+      font: inherit;
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+      text-align: start;
+      transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+    }
+
+    .shortsFullscreenTitleButton:active,
+    .shortsExternalTitleButton:active {
+      border-radius: var(--shape-corner-small);
+    }
+
+    .shortsExternalTitleButton:hover,
+    .shortsExternalTitleButton:focus-visible {
+      background-color: var(--side-nav-hover-color);
+    }
+
+    .shortsExternalTitleButton:focus-visible {
+      outline: 2px solid var(--primary-color);
+      outline-offset: 2px;
+    }
+
+    .shortsMetadataSkeleton {
+      pointer-events: none;
+    }
+
+    .shortsSkeletonChannelRow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .shortsSkeletonAvatar {
+      inline-size: 36px;
+      block-size: 36px;
+      flex: none;
+      border-radius: 50%;
+    }
+
+    .shortsSkeletonChannel {
+      inline-size: min(180px, 42%);
+      block-size: 14px;
+      border-radius: calc(7px * var(--ui-roundness));
+    }
+
+    .shortsSkeletonSubscribe {
+      inline-size: 116px;
+      block-size: 38px;
+      border-radius: calc(19px * var(--ui-roundness));
+    }
+
+    .shortsSkeletonTitle {
+      display: block;
+      inline-size: min(280px, 70%);
+      block-size: 20px;
+      margin-block-start: 12px;
+      border-radius: calc(7px * var(--ui-roundness));
+    }
+
+    .shortsLinkedVideo {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      max-inline-size: 100%;
+      margin-block-start: 12px;
+      padding-block: 6px;
+      padding-inline: 10px;
+      border: 0;
+      border-radius: calc(14px * var(--ui-roundness));
+      color: var(--primary-text-color);
+      background-color: var(--side-nav-hover-color);
+      cursor: pointer;
+      font: inherit;
+      font-size: 12px;
+      text-decoration: none;
+      transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+    }
+
+    .shortsLinkedVideo:active {
+      border-radius: var(--shape-corner-small);
+    }
+
+    .shortsLinkedVideo span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .shortsActionRail {
+      grid-column: 3;
+      grid-row: 1;
+      place-self: end start;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 13px;
+      padding-block-end: 14px;
+    }
+
+    .shortsAction {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      max-inline-size: 72px;
+      color: var(--primary-text-color);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .shortsMetadataAction {
+      display: none;
+    }
+
+    .shortsSoundThumbnail {
+      display: grid;
+      place-items: center;
+      inline-size: 48px;
+      block-size: 48px;
+      padding: 0;
+      border: 0;
+      color: var(--primary-text-color);
+      background-color: var(--side-nav-hover-color);
+      cursor: pointer;
+      font-size: 19px;
+      margin-block-start: 2px;
+      overflow: hidden;
+      border-radius: var(--shape-corner-small);
+      text-decoration: none;
+    }
+
+    .shortsComponentAction :deep(.iconButton) {
+      inline-size: 48px;
+      block-size: 48px;
+      color: var(--primary-text-color) !important;
+      background-color: var(--side-nav-hover-color);
+    }
+
+    .shortsComponentAction :deep(.favorite) {
+      color: var(--favorite-icon-color) !important;
+      background-color: var(--side-nav-hover-color);
+    }
+
+    .shortsComponentAction :deep(.iconButton:hover),
+    .shortsComponentAction :deep(.iconButton:focus-visible) {
+      color: var(--side-nav-hover-text-color) !important;
+      background-color: var(--side-nav-active-color);
+    }
+
+    .shortsComponentAction.active :deep(.iconButton),
+    .shortsComponentAction.active :deep(.iconButton:hover),
+    .shortsComponentAction.active :deep(.iconButton:focus-visible),
+    .shortsComponentAction :deep(.iconButton[aria-expanded='true']) {
+      color: var(--primary-text-color) !important;
+      background-color: color-mix(
+        in srgb,
+        var(--side-nav-hover-color) 78%,
+        var(--primary-text-color)
+      );
+      opacity: 1;
+    }
+
+    .shortsQuickBookmarked :deep(.icon),
+    .shortsQuickBookmarked :deep(.iconButton:hover .icon),
+    .shortsQuickBookmarked :deep(.iconButton:focus-visible .icon) {
+      color: var(--favorite-icon-color) !important;
+    }
+
+    .shortsSoundThumbnail img {
+      inline-size: 100%;
+      block-size: 100%;
+      object-fit: cover;
+    }
+
+    .shortsActionSkeleton span {
+      inline-size: 48px;
+      block-size: 48px;
+      border-radius: 50%;
+    }
+
+    .shortsSkeletonSound {
+      inline-size: 48px;
+      block-size: 48px;
+      border-radius: var(--shape-corner-small);
+    }
+
+    .videoPlayer:has(.errorContainer) .videoThumbnail {
+      inline-size: 100%;
+      block-size: 100%;
+      object-fit: cover;
+      filter: brightness(0.55) var(--content-filter,);
+    }
+
+    .shortsNextPreview {
+      position: relative;
+      grid-column: 2;
+      grid-row: 2;
+      justify-self: stretch;
+      block-size: 22px;
+      margin-block-start: 10px;
+      overflow: hidden;
+      border: 0;
+      border-start-start-radius: var(--shape-corner-medium);
+      border-start-end-radius: var(--shape-corner-medium);
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .shortsNextPreview::before {
+      position: absolute;
+      inset-block: -24px;
+      inset-inline: 0;
+      background-image:
+        linear-gradient(rgb(0 0 0 / 20%), rgb(0 0 0 / 20%)),
+        var(--shorts-next-thumbnail);
+      background-position: center;
+      background-size: cover;
+      content: '';
+      filter: blur(12px) var(--content-filter,);
+      transform: scale(1.1);
+    }
+
+    .shortsNavigation {
+      position: fixed;
+      z-index: 12;
+      inset-inline-end: 24px;
+      inset-block-start: 50%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transform: translateY(-50%);
+    }
+
+    .shortsNavigationButton {
+      display: grid;
+      place-items: center;
+      inline-size: 48px;
+      block-size: 48px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      color: var(--primary-text-color);
+      background-color: var(--side-nav-hover-color);
+      cursor: pointer;
+      font-size: 18px;
+      transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+    }
+
+    .shortsNavigationButton:hover,
+    .shortsNavigationButton:focus-visible {
+      background-color: var(--side-nav-active-color);
+    }
+
+    .shortsNavigationButton:disabled {
+      cursor: default;
+      opacity: 0.35;
+    }
+
+    .shortsNavigationButton:not(:disabled):active {
+      border-radius: var(--shape-corner-medium);
+    }
+
+    .shortsCommentsPanel,
+    .shortsAuxPanel {
+      position: absolute;
+      z-index: 20;
+      inset-block-start: 0;
+      inset-inline-end: 88px;
+      block-size: var(--shorts-player-height);
+      inline-size: min(420px, calc(100vw - 32px));
+      overflow: hidden;
+      border-radius: var(--shape-corner-extra-large);
+      background-color: var(--card-bg-color);
+      backdrop-filter: var(--card-bg-blur, none);
+      box-shadow: 0 8px 32px rgb(0 0 0 / 35%);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateX(24px);
+      transition:
+        opacity var(--motion-default-effects),
+        transform var(--motion-default-spatial),
+        visibility var(--motion-default-effects);
+    }
+
+    .shortsCommentsPanelOpen {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateX(0);
+    }
+
+    .shortsCommentsPanel :deep(.fullscreenCommentCard) {
+      block-size: 100%;
+      color: var(--primary-text-color);
+    }
+
+    .shortsCommentsPanel :deep(.commentsContentWrapper) {
+      // This panel sits on a themed card instead of over the video.
+      --scrollbar-color: inherit;
+      --scrollbar-color-hover: inherit;
+    }
+
+    .shortsCommentsPanel :deep(.fullscreenCommentHeader) {
+      color: var(--primary-text-color);
+      background-color: transparent;
+      border-block-end-color: var(--side-nav-hover-color);
+    }
+
+    .shortsCommentsPanel :deep(.fullscreenCommentAction) {
+      color: inherit;
+    }
+
+    .shortsCommentsPanel :deep(.fullscreenCommentAction:where(:enabled):hover),
+    .shortsCommentsPanel :deep(.fullscreenCommentAction:where(:enabled):focus-visible) {
+      background-color: var(--side-nav-hover-color);
+    }
+
+    .shortsCommentsPanel :deep(.fullscreenCommentAction:where(:enabled).active) {
+      color: var(--on-selected-container-color);
+      background-color: var(--selected-container-color);
+    }
+
+    .shortsCommentsPanel :deep(.fullscreenCommentAction:where(:enabled).active:is(:hover, :focus-visible)) {
+      background-color: var(--selected-container-hover-color);
+    }
+
+    .shortsAuxPanelOpen {
+      display: flex;
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateX(0);
+    }
+
+    .shortsAuxPanel {
+      flex-direction: column;
+      // Paint one gradient across the header, contents and unused panel space.
+      background-image: var(--card-bg-image);
+    }
+
+    .shortsAuxPanelHeader {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      box-sizing: border-box;
+      flex: 0 0 52px;
+      align-items: center;
+      justify-content: space-between;
+      padding-block: 0;
+      padding-inline: 14px 8px;
+      border-block-end: 1px solid var(--side-nav-hover-color);
+      color: var(--primary-text-color);
+      background-color: transparent;
+    }
+
+    .shortsAuxPanelHeader h2 {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: -0.01em;
+    }
+
+    .shortsAuxPanelTarget {
+      flex: 1 1 auto;
+      min-block-size: 0;
+      overflow: hidden auto;
+      overflow-anchor: none;
+      overscroll-behavior: contain;
+    }
+
+    .shortsAuxPanelTarget :deep(.watchVideo) {
+      box-sizing: border-box;
+      max-inline-size: 100%;
+      margin-block: 0;
+      margin-inline: 0;
+      border-radius: 0;
+      box-shadow: none;
+      background: transparent;
+      backdrop-filter: none;
+    }
+
+    .shortsAuxPanelTarget :deep(.watchVideoTranscript) {
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+      block-size: 100%;
+      margin-block-end: 0;
+      max-block-size: none;
+      // The segment list keeps the end padding so its scrollbar sits on the
+      // panel edge instead of inside the card's padding.
+      padding-inline-end: 0;
+      overflow: hidden;
+    }
+
+    .shortsAuxPanelTarget :deep(.watchVideoTranscript > :not(.transcriptSegments)) {
+      margin-inline-end: 16px;
+    }
+
+    .shortsAuxPanelTarget :deep(.transcriptSegments) {
+      flex: 1 1 auto;
+      min-block-size: 0;
+      max-block-size: none;
+      padding-inline-end: 16px;
+      overscroll-behavior: contain;
+    }
+
+    .shortsAuxPanelTarget :deep(.sponsorBlockContent) {
+      overscroll-behavior: contain;
+    }
+
+    .shortsAuxPanelTarget :deep(.watchVideoInfo),
+    .shortsAuxPanelTarget :deep(.videoDescription) {
+      flex: 0 0 auto;
+    }
+
+    .shortsAuxPanelTarget :deep(.watchVideoInfo) {
+      padding-block-end: 4px;
+    }
+
+    .shortsAuxPanelTarget :deep(.videoDescription),
+    .shortsAuxPanelTarget :deep(.descriptionScroll) {
+      max-block-size: none;
+      overflow: visible;
+    }
+
+    .shortsAuxPanelTarget :deep(.videoMetrics),
+    .shortsAuxPanelTarget :deep(.videoButtons) {
+      align-items: flex-start;
+      flex-direction: column;
+      inline-size: 100%;
+    }
+
+    .shortsAuxPanelTarget :deep(.videoOptions),
+    .shortsAuxPanelTarget :deep(.videoOptionsMobileRow) {
+      max-inline-size: 100%;
+      flex-wrap: wrap;
+    }
+
+    .shortsAuxPanelTarget :deep(.datePublishedAndViewCount),
+    .shortsAuxPanelTarget :deep(.profileRow) {
+      max-inline-size: 100%;
+    }
+
+    .shortsAuxPanelTarget :deep(.datePublishedAndViewCount) {
+      display: flex;
+      flex: 0 0 auto;
+      flex-wrap: wrap;
+      align-items: baseline;
+      align-content: flex-start;
+      row-gap: 2px;
+    }
+
+    .shortsAuxPanelTarget :deep(.profileRow) {
+      flex-wrap: wrap;
+      margin-block: 6px;
+    }
+
+    .shortsAuxPanelTarget :deep(.publishedDate) {
+      white-space: nowrap;
+    }
+
+    .shortsAuxPanelTarget :deep(.likeBarContainer) {
+      display: flex;
+      justify-content: flex-start;
+      inline-size: 100%;
+    }
+
+    .shortsAuxPanelTarget :deep(.likeSection) {
+      inline-size: min(210px, 100%);
+      max-inline-size: 100%;
+      margin-inline: 0;
+      text-align: start;
+    }
+
+    .shortsAuxPanelTarget :deep(.likeCounts) {
+      justify-content: flex-start;
+    }
+
+    .shortsAuxPanelTarget :deep(.watchVideoSideBar) {
+      block-size: 100%;
+      max-block-size: none;
+      margin: 0;
+      border-radius: 0;
+    }
+
+    .shortsAuxPanelClose {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      inline-size: 36px;
+      block-size: 36px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      color: inherit;
+      background-color: transparent;
+      cursor: pointer;
+      font-size: 18px;
+      transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+    }
+
+    .shortsAuxPanelClose:hover,
+    .shortsAuxPanelClose:focus-visible {
+      background-color: var(--side-nav-hover-color);
+    }
+
+    .shortsAuxPanelClose:active {
+      border-radius: var(--shape-corner-medium);
+    }
+
+    @media (height <= 850px) {
+      .shortsActionRail {
+        gap: 7px;
+      }
+
+      .shortsAction {
+        gap: 2px;
+        font-size: 10px;
+      }
+
+      .shortsComponentAction :deep(.iconButton),
+      .shortsSoundThumbnail {
+        inline-size: 42px;
+        block-size: 42px;
+      }
+    }
+
+    @container route (width <= 900px) {
+      .videoArea .videoAreaMargin {
+        grid-template-columns: minmax(0, 1fr) min(
+          100%,
+          var(--shorts-player-width)
+        ) minmax(0, 1fr);
+        grid-template-rows: minmax(0, var(--shorts-player-height)) auto auto;
+      }
+
+      .shortsExternalMetadata {
+        position: static;
+        grid-column: 2;
+        grid-row: 2;
+        place-self: start stretch;
+        inline-size: 100%;
+        min-inline-size: 0;
+        padding-block: 12px 0;
+        padding-inline: 0;
+      }
+
+      .shortsChannelRow {
+        min-inline-size: 0;
+      }
+
+      .shortsExternalChannel {
+        color: var(--primary-text-color);
+        opacity: 1;
+      }
+
+      .shortsExternalTitleButton {
+        display: -webkit-box;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+      }
+
+      .shortsActionRail {
+        position: absolute;
+        z-index: 5;
+        inset-inline-end: 8px;
+        inset-block-end: 16px;
+        color: #fff;
+      }
+
+      .shortsAction {
+        color: #fff;
+      }
+
+      .shortsNextPreview {
+        grid-row: 3;
+      }
+
+      // The rail overlays the player here and grows upwards from its bottom, so
+      // a viewport-anchored nav ends up on the action buttons. Let it flow as
+      // the top of the same column instead, which lines it up with them.
+      .shortsNavigation {
+        position: static;
+        gap: inherit;
+        transform: none;
+      }
+    }
+
+    @media only screen and (width <= 760px) {
+      .shortsNavigationButton {
+        inline-size: 42px;
+        block-size: 42px;
+        color: #fff;
+        background-color: rgb(0 0 0 / 55%);
+      }
+    }
+
   }
 
   .watchVideoSidebar,
@@ -175,10 +1221,14 @@
       margin-block: auto;
     }
 
-    @media (width <= 1050px) {
+    @container route (width <= 768px) {
       block-size: auto;
       margin-inline: 0;
     }
+  }
+
+  .resizablePlaylist {
+    block-size: auto;
   }
 
   .watchVideoRecommendations,
@@ -186,29 +1236,610 @@
     margin-block: 0 16px;
     margin-inline: 0;
 
-    @media only screen and (width >= 1051px) {
+    @container route (width >= 1051px) {
       margin-block: 0 16px;
       margin-inline: 8px;
     }
   }
 
-  @media only screen and (width <= 1350px) {
-    @include theatre-mode-template;
+  @include watch-layout-responsive;
+}
+
+/* The Android fullscreen element contains the whole watch layout. Keep the
+   player over it even before Vue applies its fullWindow class. */
+:global(.capacitorTabs .videoLayout:not(.shortsPlayerActive):is(:fullscreen, :popover-open)) {
+  overflow: hidden;
+  background: #000;
+}
+
+:global(.capacitorTabs .videoLayout:popover-open) {
+  position: fixed;
+  inset: 0;
+  inline-size: 100vw;
+  block-size: 100vh;
+  max-inline-size: none;
+  max-block-size: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+:global(.capacitorTabs .videoLayout:not(.shortsPlayerActive):is(:fullscreen, :popover-open) .videoArea .videoPlayer) {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  inline-size: 100%;
+  block-size: 100%;
+  max-inline-size: none;
+  margin: 0;
+}
+
+:global(.capacitorTabs .videoLayout:not(.shortsPlayerActive):is(:fullscreen, :popover-open) .videoArea .videoPlayer .ftVideoPlayer) {
+  inline-size: 100%;
+  block-size: 100%;
+  aspect-ratio: auto;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsActionRail) {
+  position: relative;
+  grid-column: 1;
+  grid-row: 1;
+  place-self: start end;
+  block-size: max(0px, calc(var(--shorts-player-height) - 60px));
+  justify-content: safe flex-end;
+  inset: auto;
+  inline-size: auto;
+  margin: 0;
+  margin-block-start: 60px;
+  padding-inline-end: 8px;
+  box-sizing: border-box;
+  align-items: center;
+  gap: 8px;
+  padding-block-end: 0;
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+}
+
+:global(.capacitorPhoneLayout .shortsActionRail > :not(.os-scrollbar)) {
+  flex-shrink: 0;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .videoArea .videoAreaMargin) {
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: 0;
+  inline-size: 100%;
+  max-inline-size: 100%;
+}
+
+@media (width <= 680px) {
+  :global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .videoArea) {
+    // The phone route starts below its top toolbar and reserves the bottom tab bar.
+    // Both the skeleton and the loaded player use this height.
+    --shorts-player-height: max(
+      0px,
+      calc(
+        100dvh - var(--top-nav-sticky-offset) - var(--mobile-nav-height) -
+        var(--mobile-progress-bar-space) - 48px
+      )
+    ) !important;
+  }
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive :is(.shortsChannelRow, .shortsSkeletonChannelRow)) {
+  display: none;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive :is(.shortsExternalTitle, .shortsSkeletonTitle)) {
+  display: none;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsExternalMetadata) {
+  padding-block: 0;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsMetadataAction) {
+  display: flex;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .videoArea .shortsSwipeViewport),
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .videoArea .videoPlayer),
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsExternalMetadata),
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsNextPreview) {
+  grid-column: 1;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsCommentsPanel),
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsAuxPanel) {
+  inset-inline: 0 auto;
+  box-sizing: border-box;
+  inline-size: calc(100% - 58px);
+  max-inline-size: 420px;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsAction) {
+  gap: 0;
+  max-inline-size: 44px;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsAction:not(.shortsActionSkeleton) > span),
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsSkeletonVolume) {
+  display: none;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsActionSkeleton > span),
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsSkeletonSound),
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsSkeletonControlGroup span) {
+  inline-size: 42px;
+  block-size: 42px;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsNavigation) {
+  gap: 8px;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsComponentAction .iconButton),
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsSoundThumbnail),
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsNavigationButton) {
+  inline-size: 42px;
+  block-size: 42px;
+}
+
+// Landscape phones cross the tablet tab-strip breakpoint, but still need the
+// compact Shorts controls when there is little vertical space.
+@media (orientation: landscape) and (height <= 600px) {
+  :global(.capacitorTabletLayout .videoLayout.shortsPlayerActive .videoArea) {
+    --shorts-player-height: max(
+      0px,
+      calc(100dvh - var(--top-nav-sticky-offset) - var(--mobile-progress-bar-space) - 48px)
+    ) !important;
   }
 
-  @media only screen and (width >= 1051px) {
-    &.useTheatreMode {
-      @include theatre-mode-template;
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoArea .videoAreaMargin) {
+    grid-template-columns: minmax(0, 1fr);
+    column-gap: 0;
+    inline-size: 100%;
+    max-inline-size: 100%;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoArea) {
+    --shorts-landscape-player-width: min(100%, 600px, calc(var(--shorts-player-height) * var(--shorts-aspect-ratio)));
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoArea .shortsSwipeViewport),
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoArea .videoPlayer),
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsExternalMetadata),
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsNextPreview) {
+    grid-column: 1;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoArea .shortsSwipeViewport),
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoArea .videoPlayer) {
+    inline-size: var(--shorts-landscape-player-width);
+    justify-self: center;
+    background-color: #000;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoPlayerError) {
+    overflow: visible;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoArea .ftVideoPlayer.shortsPlayer:has(.phonePlayerOptions[open])) {
+    overflow: visible;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoPlayerError .errorContainer) {
+    inset-block: 0;
+    inset-inline: 50% auto;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: safe center;
+    inline-size: min(560px, calc(100vw - 200px));
+    padding: 8px;
+    overflow: hidden auto;
+    transform: translateX(-50%);
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoPlayerError .errorContainer:dir(rtl)) {
+    transform: translateX(50%);
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoPlayerError .errorWrapper) {
+    box-sizing: border-box;
+    inline-size: 100%;
+    flex: none;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoPlayerError .errorContent) {
+    min-inline-size: 0;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoPlayerError :is(.errorMessage, .errorActionButton)) {
+    overflow-wrap: anywhere;
+  }
+
+  @media (width < 600px) {
+    :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoPlayerError .errorWrapper) {
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoPlayerError .errorIcon) {
+      font-size: 32px;
     }
   }
 
-  @media only screen and (width <= 1050px) {
-    @include single-column-template;
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .streamPlaceholderOverlay) {
+    flex-direction: column;
+    text-align: center;
   }
 
-  @media only screen and (width >= 1051px) {
-    .infoArea {
-      scroll-margin-block-start: 76px;
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .streamPlaceholderText) {
+    overflow-wrap: anywhere;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsExternalMetadata) {
+    position: absolute;
+    z-index: 4;
+    grid-row: 1;
+    inset-block: calc(var(--shorts-player-height) - 16px) auto;
+    inset-inline: 16px auto;
+    inline-size: min(35%, 360px, calc((100% - var(--shorts-landscape-player-width)) / 2 - 24px));
+    padding: 0;
+    color: var(--primary-text-color);
+    transform: translateY(-100%);
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive :is(.shortsExternalTitle, .shortsSkeletonTitle)) {
+    display: block;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsMetadataAction) {
+    display: none;
+  }
+
+  @media (width < 480px) {
+    :global(.capacitorTabs .videoLayout.shortsPlayerActive :is(.shortsExternalTitle, .shortsSkeletonTitle)) {
+      display: none;
+    }
+
+    :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsMetadataAction) {
+      display: flex;
     }
   }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsExternalTitleButton) {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsActionRail) {
+    position: absolute;
+    z-index: 5;
+    inset-block: 12px auto;
+    inset-inline: auto 8px;
+    box-sizing: border-box;
+    block-size: max(0px, calc(var(--shorts-player-height) - 20px));
+    inline-size: 66px;
+    margin: 0;
+    padding-block: 0;
+    padding-inline: 0 24px;
+    overflow: hidden auto;
+    overscroll-behavior: contain;
+    justify-content: safe flex-end;
+    gap: 8px;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsActionRail > :not(.os-scrollbar)) {
+    flex-shrink: 0;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive :is(
+    .shortsChannelRow,
+    .shortsSkeletonChannelRow,
+    .shortsFullscreenChannelRow,
+    .shortsAction:not(.shortsActionSkeleton) > span,
+    .shortsSkeletonVolume
+  )) {
+    display: none;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsNavigation) {
+    position: static;
+    gap: 8px;
+    transform: none;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsNavigationButton) {
+    inline-size: 42px;
+    block-size: 42px;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive :is(
+    .shortsActionSkeleton > span,
+    .shortsSkeletonSound,
+    .shortsSkeletonControlGroup span
+  )) {
+    inline-size: 42px;
+    block-size: 42px;
+    flex: none;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsSkeletonControls) {
+    padding: 4px;
+    flex-wrap: wrap;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsSkeletonControlGroup) {
+    gap: 2px;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsPlayerPlaceholder) {
+    container: shorts-landscape-player / inline-size;
+  }
+}
+
+@container shorts-landscape-player (width < 100px) {
+  :global(.shortsSkeletonControls) {
+    align-items: center;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 2px;
+  }
+
+  :global(.shortsSkeletonControlGroup) {
+    flex-direction: column;
+    gap: 0;
+  }
+}
+
+@keyframes shorts-transition-in {
+  from {
+    opacity: 0.7;
+    transform: translateY(var(--shorts-transition-offset, 0));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shorts-skeleton-sweep {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+.skeletonLine {
+  block-size: 14px;
+  border-radius: var(--shape-corner-extra-small);
+}
+
+.commentsSkeleton {
+  display: grid;
+  gap: 24px;
+  box-sizing: border-box;
+  padding: 16px;
+  border-radius: var(--shape-corner-medium);
+  background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
+
+  .skeletonLine {
+    block-size: 12px;
+  }
+
+  .skeletonCommentsTitle {
+    inline-size: min(220px, 50%);
+    block-size: 20px;
+  }
+
+  .skeletonComment {
+    display: grid;
+    grid-template-columns: 60px minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .skeletonCommentAvatar {
+    inline-size: 60px;
+    block-size: 60px;
+    border-radius: 50%;
+  }
+
+  .skeletonCommentDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .skeletonCommentAuthor {
+    inline-size: min(160px, 45%);
+  }
+
+  .skeletonLine.short {
+    inline-size: 70%;
+  }
+}
+
+.playlistSkeleton {
+  box-sizing: border-box;
+  overflow: hidden;
+  padding-block: 20px 16px;
+  padding-inline: 16px;
+  border-radius: var(--shape-corner-medium);
+  background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
+
+  .skeletonPlaylistTitle {
+    inline-size: 45%;
+    block-size: 18px;
+    margin-block-end: 8px;
+  }
+
+  .skeletonPlaylistMeta {
+    inline-size: 28%;
+    block-size: 12px;
+    margin-block-end: 12px;
+  }
+
+  .skeletonPlaylistProgress {
+    inline-size: 100%;
+    block-size: 6px;
+    border-radius: var(--shape-corner-full);
+    margin-block-end: 14px;
+  }
+
+  .skeletonPlaylistButtons {
+    display: flex;
+    gap: 14px;
+    margin-block-end: 12px;
+  }
+
+  .skeletonPlaylistButton {
+    inline-size: 20px;
+    block-size: 20px;
+    border-radius: 50%;
+  }
+
+  .skeletonPlaylistItems {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .skeletonPlaylistItem {
+    display: grid;
+    grid-template-columns: 18px 128px 1fr;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .skeletonPlaylistIndex {
+    inline-size: 10px;
+    block-size: 12px;
+    border-radius: var(--shape-corner-extra-small);
+    justify-self: center;
+  }
+
+  .skeletonPlaylistThumbnail {
+    aspect-ratio: 16 / 9;
+    inline-size: 128px;
+    border-radius: var(--shape-corner-small);
+  }
+
+  .skeletonPlaylistDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .skeletonPlaylistDetailLine {
+    block-size: 11px;
+    inline-size: 92%;
+    border-radius: var(--shape-corner-extra-small);
+  }
+
+  .skeletonPlaylistDetailLine.short {
+    inline-size: 70%;
+  }
+
+  .skeletonPlaylistDetailLine.shorter {
+    inline-size: 50%;
+  }
+}
+
+.recommendationsSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-block: 0 16px;
+  margin-inline: 8px;
+  padding-block: 16px;
+  padding-inline: 16px;
+  border-radius: var(--shape-corner-medium);
+  background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
+
+  .skeletonRecommendation {
+    display: flex;
+    gap: 8px;
+  }
+
+  .skeletonRecommendationThumbnail {
+    aspect-ratio: 16 / 9;
+    inline-size: 163px;
+    border-radius: var(--shape-corner-small);
+    flex-shrink: 0;
+  }
+
+  .skeletonRecommendationDetails {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .skeletonLine {
+    block-size: 12px;
+    inline-size: 90%;
+  }
+
+  .skeletonLine.short {
+    inline-size: 60%;
+  }
+}
+
+.videoLayout :is(.phonePanelButton, .phoneVideoSummary) {
+  margin-block: 12px;
+  margin-inline: 16px;
+}
+
+.videoLayout .phonePanelButton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+  inline-size: calc(100% - 32px);
+  min-block-size: var(--phone-touch-target, 48px);
+  padding-block: 12px;
+  padding-inline: 16px;
+  border: 0;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+
+  .phoneCommentsLabel {
+    min-inline-size: 0;
+    flex: 1;
+  }
+}
+
+.phoneQueuePreview {
+  display: block;
+  margin-block-start: 4px;
+  font-size: 0.875em;
+  color: var(--secondary-text-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:global(.phonePanelContent .shortsPhoneSheetContent) {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  overflow: visible;
+  background: transparent;
+}
+
+:global(.phonePanelContent .shortsPhoneSheetContent .shortsAuxPanelTarget) {
+  overflow: visible;
 }

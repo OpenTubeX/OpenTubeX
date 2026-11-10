@@ -4,6 +4,7 @@ name: Upload Release
 
 # Controls when the action will run. Workflow runs when manually triggered using the UI
 # or API.
+# Get release ID: gh api repos/OpenTubeX/OpenTubeX/releases/tags/<tagname> --jq .id
 on:
   workflow_dispatch:
     inputs:
@@ -11,13 +12,50 @@ on:
         type: string
         required: true
         description: Release ID
+      publishRelease:
+        type: boolean
+        required: true
+        default: true
+        description: Publish release after uploading assets
 
 cache-mode: none
 permissions: {}
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+  resolve-target:
+    name: Resolve release target
+    runs-on: ubuntu-latest
+
+    outputs:
+      sha: ${{ steps.target.outputs.sha }}
+
+    # Reading a draft release requires write access.
+    permissions:
+      contents: write
+
+    # Build the commit the draft release targets, not the branch tip at dispatch time.
+    steps:
+    - name: Resolve release target commit
+      id: target
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        sha="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .target_commitish)"
+
+        # A branch or tag name could resolve to a different commit than the release.
+        if [[ ! "$sha" =~ ^[0-9a-f]{40}$ ]]; then
+          echo "The release must target a full commit SHA, not '$sha'." >&2
+          exit 1
+        fi
+
+        echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
   build:
+    needs: resolve-target
 
     permissions:
       contents: write
@@ -26,6 +64,7 @@ jobs:
       matrix:
         node-version: [24.x]
         runtime:
+          - android
           - linux-x64
           - linux-arm64
           - win-x64
@@ -33,12 +72,15 @@ jobs:
           - osx-x64
           - osx-arm64
         include:
+        - runtime: android
+          os: ubuntu-latest
+
         - runtime: linux-x64
           os: ubuntu-latest
           appimage-arch: amd64
 
         - runtime: linux-arm64
-          os: ubuntu-latest
+          os: ubuntu-24.04-arm
           appimage-arch: arm64
 
         - runtime: osx-x64
@@ -56,27 +98,55 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
+        fetch-depth: 0
         persist-credentials: false
+        ref: ${{ needs.resolve-target.outputs.sha }}
 
     # Do not restore the pnpm cache, to avoid cache poisoning affecting releases
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 #v7.1.0
+      uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
       with:
         node-version: ${{ matrix.node-version }}
         package-manager-cache: false
 
-    - name: Install pnpm
-      uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 #v6.1.1
+    - name: Set up Go for the Cast sender
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
       with:
-        version: 11
+        go-version-file: _scripts/cast-sender/go.mod
         cache: false
 
-    - run: pnpm install --frozen-lockfile
+    - name: Install pnpm
+      uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      with:
+        cache: false
+
+    - name: Set up MSBuild for LANCommander Interposer
+      if: matrix.runtime == 'win-x64'
+      uses: microsoft/setup-msbuild@30375c66a4eea26614e0d39710365f22f8b0af57 # v3.0.0
+
+    - run: pnpm run ci
       shell: bash
     - run: pnpm run lint
       shell: bash
+
+    - name: Use Java 21 for Android
+      if: matrix.runtime == 'android'
+      uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
+      with:
+        distribution: temurin
+        java-version: 21
+
+    - name: Set up Android SDK
+      if: matrix.runtime == 'android'
+      uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+      with:
+        packages: platform-tools ndk;30.0.16248370
+
+    - name: Install Android runtime packer
+      if: matrix.runtime == 'android'
+      run: sudo apt-get update && sudo apt-get install --yes 7zip
 
     - name: Get Version Number
       id: getPackageInfo
@@ -84,335 +154,457 @@ jobs:
       run: |
         jq --raw-output '"version=" + .version' package.json >> "$GITHUB_OUTPUT"
 
-    - name: Install libarchive-tools
-      if: startsWith(matrix.os, 'ubuntu')
+    - name: Install Linux packaging dependencies
+      if: startsWith(matrix.os, 'ubuntu') && matrix.runtime != 'android'
       shell: bash
       run: |
         sudo apt update
-        sudo apt -y install libarchive-tools
+        apt_package() {
+          for package_name in "$@"; do
+            if apt-cache show "$package_name" >/dev/null 2>&1; then
+              printf '%s\n' "$package_name"
+              return 0
+            fi
+          done
+
+          return 1
+        }
+        sudo apt -y install \
+          binutils dbus-x11 desktop-file-utils file gcc libarchive-tools libasound2t64 \
+          "$(apt_package libatk-bridge2.0-0t64 libatk-bridge2.0-0)" \
+          "$(apt_package libatspi2.0-0t64 libatspi2.0-0)" \
+          "$(apt_package libgtk-3-0t64 libgtk-3-0)" \
+          libnotify4 libnss3 libsecret-1-0 libxss1 libxtst6 patchelf strace wget xauth xdg-utils xvfb
+
+    # electron-builder adds these to the deb and rpm packages (see ebuilder.config.mjs).
+    - name: Prepare Linux package changelogs
+      if: startsWith(matrix.runtime, 'linux')
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        changelog_dir="${RUNNER_TEMP}/package-changelogs"
+        mkdir -p "$changelog_dir"
+        gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .body > "${changelog_dir}/release-notes.md"
+        node _scripts/storeReleaseNotes.mjs debian "${changelog_dir}/release-notes.md" > "${changelog_dir}/debian"
+        node _scripts/storeReleaseNotes.mjs rpm "${changelog_dir}/release-notes.md" > "${changelog_dir}/rpm"
+        echo "PACKAGE_CHANGELOG_DIR=${changelog_dir}" >> "$GITHUB_ENV"
 
     - name: Build x64 with Node.js ${{ matrix.node-version}}
       if: contains(matrix.runtime, 'x64')
       shell: bash
-      run: pnpm run build
+      run: |
+        for attempt in {1..5}; do
+          if pnpm run pack && pnpm run build-release x64; then
+            exit 0
+          fi
+          if (( attempt == 5 )); then
+            exit 1
+          fi
+          echo "Build attempt $attempt failed; retrying in 10 seconds."
+          sleep 10
+        done
 
     - name: Build ARM64 with Node.js ${{ matrix.node-version}}
       if: contains(matrix.runtime, 'arm64')
       shell: bash
-      run: pnpm run build:arm64
+      run: |
+        for attempt in {1..5}; do
+          if pnpm run build:arm64; then
+            exit 0
+          fi
+          if (( attempt == 5 )); then
+            exit 1
+          fi
+          echo "Build attempt $attempt failed; retrying in 10 seconds."
+          sleep 10
+        done
 
-    - name: Add update information to AppImage
-      if: startsWith(matrix.os, 'ubuntu')
+    - name: Build signed Android APKs
+      if: matrix.runtime == 'android'
+      shell: bash
+      env:
+        ANDROID_RELEASE_KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+        ANDROID_RELEASE_STORE_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEYSTORE_PASSWORD }}
+        ANDROID_RELEASE_KEYSTORE: ${{ github.workspace }}/android/release.keystore
+      run: |
+        set -euo pipefail
+        if [[ -z "$ANDROID_RELEASE_KEYSTORE_BASE64" || -z "$ANDROID_RELEASE_STORE_PASSWORD" ]]; then
+          echo "Android release signing secrets are not configured." >&2
+          exit 1
+        fi
+        printf '%s' "$ANDROID_RELEASE_KEYSTORE_BASE64" | base64 --decode > "$ANDROID_RELEASE_KEYSTORE"
+        chmod 600 "$ANDROID_RELEASE_KEYSTORE"
+        # Gradle reads the version code recorded by Create Draft Release, as
+        # F-Droid's rebuild does. Stable promotion must update a nightly built
+        # from the same commit.
+        expected_code="$(( $(git rev-list --count HEAD) * 2 + 1 ))"
+        if ! grep --quiet --line-regexp "versionCode=${expected_code}" android/app/version.properties; then
+          echo "android/app/version.properties must contain versionCode=${expected_code}." >&2
+          exit 1
+        fi
+        pnpm run capacitor:sync:android
+        ./android/gradlew --project-dir android :app:assembleRelease -PsplitApks
+        python3 _scripts/android_apks.py android/app/build/outputs/apk/release android-apks --release
+        # Lite APKs omit yt-dlp and FFmpeg for devices with little storage.
+        ./android/gradlew --project-dir android :app:assembleRelease -PsplitApks -Plite
+        python3 _scripts/android_apks.py android/app/build/outputs/apk/release android-lite-apks --release --lite
+
+    - name: Convert x64 AppImage to Anylinux AppImage
+      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
       shell: bash
       env:
         VERSION: ${{ steps.getPackageInfo.outputs.version }}
-        APPIMAGE_ARCH: ${{ matrix.appimage-arch }}
+        UPINFO: 'gh-releases-zsync|OpenTubeX|OpenTubeX|latest-all|opentubex-*-amd64.AppImage.zsync'
       run: |
-        update_info="gh-releases-zsync|FreeTubeApp|FreeTube|latest-all|freetube-*-${APPIMAGE_ARCH}.AppImage.zsync"
+        docker run --rm -v "$PWD":/work -w /work -e UPINFO ghcr.io/pkgforge-dev/archlinux:latest@sha256:bc8f6de48226af230a64b9a97f645f89c6b01f4d79c1a45cb317ed59a5d2b4e4 \
+          sh _scripts/package-anylinux-appimage.sh "build/opentubex_${VERSION}_amd64.deb"
 
-        cd build
-
-        section_offset_hex="$(objdump --section-headers ./FreeTube-${VERSION}*.AppImage | awk '$2 == ".upd_info" { printf $6 }')"
-
-        script='const fd = fs.openSync(process.argv[3], "r+"); fs.writeSync(fd, process.argv[2], parseInt(process.argv[1], 16)); fs.closeSync(fd)'
-
-        node -e "$script" $section_offset_hex "$update_info" ./FreeTube-${VERSION}*.AppImage
-
-        zsyncmake -u "freetube-${VERSION}-beta-${APPIMAGE_ARCH}.AppImage" ./FreeTube-${VERSION}*.AppImage
-
-    - name: Upload Linux .zip x64 Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/FreeTubeApp/FreeTube/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: freetube-${{ steps.getPackageInfo.outputs.version }}-beta-linux-x64-portable.zip
-        asset_path: build/freetube-${{ steps.getPackageInfo.outputs.version }}.zip
-        asset_content_type: application/zip
-
-    - name: Upload Linux .7z x64 Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/FreeTubeApp/FreeTube/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: freetube-${{ steps.getPackageInfo.outputs.version }}-beta-linux-x64-portable.7z
-        asset_path: build/freetube-${{ steps.getPackageInfo.outputs.version }}.7z
-        asset_content_type: application/x-7z-compressed
-
-    - name: Upload Linux .zip ARM64 Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
+    - name: Convert ARM64 AppImage to Anylinux AppImage
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
+      shell: bash
       env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/FreeTubeApp/FreeTube/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: freetube-${{ steps.getPackageInfo.outputs.version }}-beta-linux-arm64-portable.zip
-        asset_path: build/freetube-${{ steps.getPackageInfo.outputs.version }}-arm64.zip
-        asset_content_type: application/zip
+        VERSION: ${{ steps.getPackageInfo.outputs.version }}
+        UPINFO: 'gh-releases-zsync|OpenTubeX|OpenTubeX|latest-all|opentubex-*-arm64.AppImage.zsync'
+      run: |
+        docker run --rm -v "$PWD":/work -w /work -e UPINFO ghcr.io/pkgforge-dev/archlinux:latest@sha256:bc8f6de48226af230a64b9a97f645f89c6b01f4d79c1a45cb317ed59a5d2b4e4 \
+          sh _scripts/package-anylinux-appimage.sh "build/opentubex_${VERSION}_arm64.deb"
 
-    - name: Upload Linux .7z ARM64 Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
+    - name: Resolve release tag
+      id: release
       env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/FreeTubeApp/FreeTube/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: freetube-${{ steps.getPackageInfo.outputs.version }}-beta-linux-arm64-portable.7z
-        asset_path: build/freetube-${{ steps.getPackageInfo.outputs.version }}-arm64.7z
-        asset_content_type: application/x-7z-compressed
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
+        echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
-    - name: Upload Linux .deb x64 Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
+    - name: Prepare release assets
       env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/FreeTubeApp/FreeTube/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: freetube_${{ steps.getPackageInfo.outputs.version }}_beta_amd64.deb
-        asset_path: build/freetube_${{ steps.getPackageInfo.outputs.version }}_amd64.deb
-        asset_content_type: application/vnd.debian.binary-package
+        RUNTIME: ${{ matrix.runtime }}
+        VERSION: ${{ steps.getPackageInfo.outputs.version }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        mkdir release-assets
 
-    - name: Upload Linux .deb ARM64 Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/FreeTubeApp/FreeTube/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: freetube_${{ steps.getPackageInfo.outputs.version }}_beta_arm64.deb
-        asset_path: build/freetube_${{ steps.getPackageInfo.outputs.version }}_arm64.deb
-        asset_content_type: application/vnd.debian.binary-package
+        case "$RUNTIME" in
+          android)
+            cp android-apks/*.apk android-lite-apks/*.apk release-assets/
+            ;;
+          linux-x64)
+            cp "build/opentubex-${VERSION}.zip" \
+              "release-assets/opentubex-${VERSION}-beta-linux-x64-portable.zip"
+            cp "build/opentubex-${VERSION}.7z" \
+              "release-assets/opentubex-${VERSION}-beta-linux-x64-portable.7z"
+            cp "build/opentubex_${VERSION}_amd64.deb" \
+              "release-assets/opentubex_${VERSION}_beta_amd64.deb"
+            cp "build/opentubex-${VERSION}-amd64.AppImage" \
+              "release-assets/opentubex-${VERSION}-beta-amd64.AppImage"
+            cp "build/opentubex-${VERSION}-amd64.AppImage.zsync" \
+              "release-assets/opentubex-${VERSION}-beta-amd64.AppImage.zsync"
+            cp "build/opentubex-${VERSION}.x86_64.rpm" \
+              "release-assets/opentubex-${VERSION}-beta.amd64.rpm"
+            cp "build/opentubex-${VERSION}.pacman" \
+              "release-assets/opentubex-${VERSION}-beta-amd64.pacman"
+            ;;
+          linux-arm64)
+            cp "build/opentubex-${VERSION}-arm64.zip" \
+              "release-assets/opentubex-${VERSION}-beta-linux-arm64-portable.zip"
+            cp "build/opentubex-${VERSION}-arm64.7z" \
+              "release-assets/opentubex-${VERSION}-beta-linux-arm64-portable.7z"
+            cp "build/opentubex_${VERSION}_arm64.deb" \
+              "release-assets/opentubex_${VERSION}_beta_arm64.deb"
+            cp "build/opentubex-${VERSION}-arm64.AppImage" \
+              "release-assets/opentubex-${VERSION}-beta-arm64.AppImage"
+            cp "build/opentubex-${VERSION}-arm64.AppImage.zsync" \
+              "release-assets/opentubex-${VERSION}-beta-arm64.AppImage.zsync"
+            cp "build/opentubex-${VERSION}.aarch64.rpm" \
+              "release-assets/opentubex-${VERSION}-beta.arm64.rpm"
+            ;;
+          win-x64)
+            cp "build/opentubex Setup ${VERSION}.exe" \
+              "release-assets/opentubex-${VERSION}-beta-setup-x64.exe"
+            cp "build/opentubex-${VERSION}-win.zip" \
+              "release-assets/opentubex-${VERSION}-beta-win-x64-portable.zip"
+            cp "build/opentubex-${VERSION}-win.7z" \
+              "release-assets/opentubex-${VERSION}-beta-win-x64-portable.7z"
+            ;;
+          win-arm64)
+            cp "build/opentubex Setup ${VERSION}.exe" \
+              "release-assets/opentubex-${VERSION}-beta-setup-arm64.exe"
+            cp "build/opentubex-${VERSION}-arm64-win.zip" \
+              "release-assets/opentubex-${VERSION}-beta-win-arm64-portable.zip"
+            cp "build/opentubex-${VERSION}-arm64-win.7z" \
+              "release-assets/opentubex-${VERSION}-beta-win-arm64-portable.7z"
+            ;;
+          osx-x64)
+            cp "build/opentubex-${VERSION}.dmg" \
+              "release-assets/opentubex-${VERSION}-beta-mac-x64.dmg"
+            cp "build/opentubex-${VERSION}-mac.zip" \
+              "release-assets/opentubex-${VERSION}-beta-mac-x64.zip"
+            cp "build/opentubex-${VERSION}-mac.7z" \
+              "release-assets/opentubex-${VERSION}-beta-mac-x64.7z"
+            ;;
+          osx-arm64)
+            cp "build/opentubex-${VERSION}-arm64.dmg" \
+              "release-assets/opentubex-${VERSION}-beta-mac-arm64.dmg"
+            cp "build/opentubex-${VERSION}-arm64-mac.zip" \
+              "release-assets/opentubex-${VERSION}-beta-mac-arm64.zip"
+            cp "build/opentubex-${VERSION}-arm64-mac.7z" \
+              "release-assets/opentubex-${VERSION}-beta-mac-arm64.7z"
+            ;;
+        esac
 
-    - name: Upload AppImage x64 Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
+    # Uploading assets does not update the release, which GITHUB_TOKEN cannot do
+    # once the default branch changes workflows after the release target.
+    - name: Upload release assets
       env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/FreeTubeApp/FreeTube/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: freetube-${{ steps.getPackageInfo.outputs.version }}-beta-amd64.AppImage
-        asset_path: build/FreeTube-${{ steps.getPackageInfo.outputs.version }}.AppImage
-        asset_content_type: application/vnd.appimage
+        GH_TOKEN: ${{ github.token }}
+        TAG: ${{ steps.release.outputs.tag }}
+      shell: bash
+      run: gh release upload "$TAG" release-assets/* --clobber --repo "$GITHUB_REPOSITORY"
 
-    - name: Upload AppImage .zsync x64 Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/FreeTubeApp/FreeTube/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: freetube-${{ steps.getPackageInfo.outputs.version }}-beta-amd64.AppImage.zsync
-        asset_path: build/FreeTube-${{ steps.getPackageInfo.outputs.version }}.AppImage.zsync
-        asset_content_type: application/x-zsync
+    # publish-release only attests release assets that match these checksums.
+    # Node hashes the same way on every runner OS.
+    - name: Record release asset checksums
+      working-directory: release-assets
+      shell: bash
+      run: |
+        node -e 'const { createHash } = require("node:crypto"); const fs = require("node:fs")
+        for (const file of fs.readdirSync(".")) console.log(`${createHash("sha256").update(fs.readFileSync(file)).digest("hex")}  ${file}`)' \
+          > "$RUNNER_TEMP/checksums.txt"
 
-    - name: Upload AppImage ARM64 Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Upload release asset checksums
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
-        upload_url: https://uploads.github.com/repos/FreeTubeApp/FreeTube/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: freetube-${{ steps.getPackageInfo.outputs.version }}-beta-arm64.AppImage
-        asset_path: build/FreeTube-${{ steps.getPackageInfo.outputs.version }}-arm64.AppImage
-        asset_content_type: application/vnd.appimage
+        name: checksums-${{ matrix.runtime }}
+        path: ${{ runner.temp }}/checksums.txt
+        retention-days: 1
+        overwrite: true
 
-    - name: Upload AppImage .zsync ARM64 Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/FreeTubeApp/FreeTube/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: freetube-${{ steps.getPackageInfo.outputs.version }}-beta-arm64.AppImage.zsync
-        asset_path: build/FreeTube-${{ steps.getPackageInfo.outputs.version }}-arm64.AppImage.zsync
-        asset_content_type: application/x-zsync
+  ios:
+    name: Build iOS IPA
+    needs: resolve-target
+    permissions:
+      contents: read
+    uses: ./.github/workflows/package-ios.yml
+    with:
+      ref: ${{ needs.resolve-target.outputs.sha }}
 
-    - name: Upload Linux .rpm x64 Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  upload-ios:
+    name: Attach iOS IPA to release
+    needs: ios
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - name: Download iOS IPA
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
       with:
-        upload_url: https://uploads.github.com/repos/FreeTubeApp/FreeTube/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: freetube-${{ steps.getPackageInfo.outputs.version }}-beta.amd64.rpm
-        asset_path: build/freetube-${{ steps.getPackageInfo.outputs.version }}.x86_64.rpm
-        asset_content_type: application/x-rpm
+        name: ${{ needs.ios.outputs.artifact-name }}
+        path: release-assets
+    - name: Resolve release tag
+      id: release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
+        echo "tag=$tag" >> "$GITHUB_OUTPUT"
+    - name: Upload iOS release asset
+      env:
+        GH_TOKEN: ${{ github.token }}
+        TAG: ${{ steps.release.outputs.tag }}
+      shell: bash
+      run: gh release upload "$TAG" release-assets/*.ipa --clobber --repo "$GITHUB_REPOSITORY"
+    - name: Record release asset checksums
+      working-directory: release-assets
+      shell: bash
+      run: sha256sum -- *.ipa > "$RUNNER_TEMP/checksums.txt"
+    - name: Upload release asset checksums
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: checksums-ios
+        path: ${{ runner.temp }}/checksums.txt
+        retention-days: 1
+        overwrite: true
 
-    - name: Upload Linux .rpm ARM64 Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/FreeTubeApp/FreeTube/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: freetube-${{ steps.getPackageInfo.outputs.version }}-beta.arm64.rpm
-        asset_path: build/freetube-${{ steps.getPackageInfo.outputs.version }}.aarch64.rpm
-        asset_content_type: application/x-rpm
+  publish-release:
+    name: Publish draft release
+    needs: [build, upload-ios]
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.assets.outputs.tag }}
 
-    - name: Upload Pacman .pacman x64 Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/FreeTubeApp/FreeTube/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: freetube-${{ steps.getPackageInfo.outputs.version }}-beta-amd64.pacman
-        asset_path: build/freetube-${{ steps.getPackageInfo.outputs.version }}.pacman
-        asset_content_type: application/x-zstd-compressed-tar
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
 
-    - name: Upload Windows x64 .exe Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-x64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+    - name: Download release asset checksums
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
       with:
-        upload_url: https://uploads.github.com/repos/FreeTubeApp/FreeTube/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: freetube-${{ steps.getPackageInfo.outputs.version }}-beta-setup-x64.exe
-        asset_path: build/freetube Setup ${{ steps.getPackageInfo.outputs.version }}.exe
-        asset_content_type: application/x-ms-dos-executable
+        pattern: checksums-*
+        path: ${{ runner.temp }}/build-checksums
 
-    - name: Upload Windows x64 portable Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-x64')
+    - name: Check release assets against build outputs
+      id: assets
       env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/FreeTubeApp/FreeTube/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: freetube-${{ steps.getPackageInfo.outputs.version }}-beta-win-x64-portable.exe
-        asset_path: build/FreeTube ${{ steps.getPackageInfo.outputs.version }}.exe
-        asset_content_type: application/x-ms-dos-executable
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        cat "$RUNNER_TEMP"/build-checksums/*/checksums.txt | sort -k 2 > "$RUNNER_TEMP/checksums.txt"
+        gh api --paginate "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}/assets?per_page=100" \
+          --jq '.[] | select(.name | endswith(".intoto.jsonl") | not)
+            | "\(.digest // error("\(.name) has no digest") | ltrimstr("sha256:"))  \(.name)"' \
+          | sort -k 2 > "$RUNNER_TEMP/release-checksums.txt"
+        if ! diff -u "$RUNNER_TEMP/checksums.txt" "$RUNNER_TEMP/release-checksums.txt"; then
+          echo "::error::The release assets do not match the files the build jobs uploaded."
+          exit 1
+        fi
+        echo "tag=$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)" >> "$GITHUB_OUTPUT"
 
-    - name: Upload Windows x64 .zip Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-x64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Attest build provenance
+      id: attest
+      uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
       with:
-        upload_url: https://uploads.github.com/repos/FreeTubeApp/FreeTube/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: freetube-${{ steps.getPackageInfo.outputs.version }}-beta-win-x64-portable.zip
-        asset_path: build/freetube-${{ steps.getPackageInfo.outputs.version }}-win.zip
-        asset_content_type: application/zip
+        subject-checksums: ${{ runner.temp }}/checksums.txt
 
-    - name: Upload Windows x64 .7z Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-x64')
+    - name: Upload provenance to release
       env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/FreeTubeApp/FreeTube/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: freetube-${{ steps.getPackageInfo.outputs.version }}-beta-win-x64-portable.7z
-        asset_path: build/freetube-${{ steps.getPackageInfo.outputs.version }}-win.7z
-        asset_content_type: application/x-7z-compressed
+        GH_TOKEN: ${{ github.token }}
+        BUNDLE: ${{ steps.attest.outputs.bundle-path }}
+        TAG: ${{ steps.assets.outputs.tag }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        provenance="$RUNNER_TEMP/opentubex-${TAG#v}.intoto.jsonl"
+        cp "$BUNDLE" "$provenance"
+        gh release upload "$TAG" "$provenance" --clobber --repo "$GITHUB_REPOSITORY"
 
-    - name: Upload Windows arm64 .exe Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-arm64')
+    # GITHUB_TOKEN cannot update a release whose target commit has different
+    # workflow files than the default branch, so this needs workflow access.
+    - name: Publish release if it is a draft
+      if: inputs.publishRelease
       env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/FreeTubeApp/FreeTube/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: freetube-${{ steps.getPackageInfo.outputs.version }}-beta-setup-arm64.exe
-        asset_path: build/freetube Setup ${{ steps.getPackageInfo.outputs.version }}.exe
-        asset_content_type: application/x-ms-dos-executable
+        GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+      shell: bash
+      run: |
+        set -euo pipefail
 
-    - name: Upload Windows arm64 portable Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-arm64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/FreeTubeApp/FreeTube/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: freetube-${{ steps.getPackageInfo.outputs.version }}-beta-win-arm64-portable.exe
-        asset_path: build/FreeTube ${{ steps.getPackageInfo.outputs.version }}.exe
-        asset_content_type: application/x-ms-dos-executable
+        draft="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .draft)"
+        if [[ "$draft" == true ]]; then
+          gh api \
+            --method PATCH \
+            "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" \
+            -F draft=false \
+            --silent
+        fi
 
-    - name: Upload Windows arm64 .zip Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-arm64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/FreeTubeApp/FreeTube/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: freetube-${{ steps.getPackageInfo.outputs.version }}-beta-win-arm64-portable.zip
-        asset_path: build/freetube-${{ steps.getPackageInfo.outputs.version }}-arm64-win.zip
-        asset_content_type: application/zip
+  notify-package-repositories:
+    name: Notify ${{ matrix.repository }} of release
+    needs: publish-release
+    if: inputs.publishRelease
+    runs-on: ubuntu-latest
 
-    - name: Upload Windows arm64 .7z Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-arm64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/FreeTubeApp/FreeTube/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: freetube-${{ steps.getPackageInfo.outputs.version }}-beta-win-arm64-portable.7z
-        asset_path: build/freetube-${{ steps.getPackageInfo.outputs.version }}-arm64-win.7z
-        asset_content_type: application/x-7z-compressed
+    permissions:
+      contents: read
 
-    - name: Upload Mac x64 .dmg Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'macos') && startsWith(matrix.runtime, 'osx-x64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/FreeTubeApp/FreeTube/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: freetube-${{ steps.getPackageInfo.outputs.version }}-beta-mac-x64.dmg
-        asset_path: build/freetube-${{ steps.getPackageInfo.outputs.version }}.dmg
-        asset_content_type: application/x-apple-diskimage
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - repository: flatpak
+            pattern: '-linux-(x64|arm64)-portable[.]zip$'
+            count: 2
+          - repository: aur
+            pattern: '_(amd64|arm64)[.]deb$'
+            count: 2
+          - repository: rpm
+            pattern: '[.](amd64|arm64)[.]rpm$'
+            count: 2
+          - repository: apt
+            pattern: '[.]deb$'
+            count: 2
+          - repository: arch
+            pattern: '_(amd64|arm64)[.]deb$'
+            count: 2
+          - repository: snap
+            pattern: '_(amd64|arm64)[.]deb$'
+            count: 2
+          - repository: fdroid
+            pattern: '[.]apk$'
+            count: 10
+          - repository: sidestore
+            pattern: '-ios-unsigned[.]ipa$'
+            count: 1
+          - repository: nix
+            pattern: '(_(amd64|arm64)[.]deb|-mac-(x64|arm64)[.]zip)$'
+            count: 4
+          - repository: homebrew-tap
+            pattern: '-mac-(x64|arm64)[.]zip$'
+            count: 2
+          - repository: scoop-bucket
+            pattern: '-win-(x64|arm64)-portable[.]zip$'
+            count: 2
 
-    - name: Upload Mac x64 .zip Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'macos') && startsWith(matrix.runtime, 'osx-x64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
-        upload_url: https://uploads.github.com/repos/FreeTubeApp/FreeTube/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: freetube-${{ steps.getPackageInfo.outputs.version }}-beta-mac-x64.zip
-        asset_path: build/freetube-${{ steps.getPackageInfo.outputs.version }}-mac.zip
-        asset_content_type: application/zip
+        persist-credentials: false
 
-    - name: Upload Mac x64 .7z Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'macos') && startsWith(matrix.runtime, 'osx-x64')
+    - name: Wait for public release assets
       env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/FreeTubeApp/FreeTube/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: freetube-${{ steps.getPackageInfo.outputs.version }}-beta-mac-x64.7z
-        asset_path: build/freetube-${{ steps.getPackageInfo.outputs.version }}-mac.7z
-        asset_content_type: application/x-7z-compressed
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+        ASSET_PATTERN: ${{ matrix.pattern }}
+        ASSET_COUNT: ${{ matrix.count }}
+      shell: bash
+      run: bash _scripts/wait-for-release-assets.sh "$RELEASE_ID" "$ASSET_PATTERN" "$ASSET_COUNT"
 
-    - name: Upload Mac arm64 .dmg Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'macos') && startsWith(matrix.runtime, 'osx-arm64')
+    - name: Notify package repository
       env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/FreeTubeApp/FreeTube/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: freetube-${{ steps.getPackageInfo.outputs.version }}-beta-mac-arm64.dmg
-        asset_path: build/freetube-${{ steps.getPackageInfo.outputs.version }}-arm64.dmg
-        asset_content_type: application/x-apple-diskimage
+        GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
+        REPOSITORY: ${{ matrix.repository }}
+        TAG: ${{ needs.publish-release.outputs.tag }}
+      shell: bash
+      run: |
+        gh api "repos/OpenTubeX/${REPOSITORY}/dispatches" \
+          --method POST \
+          -f event_type=opentubex-release \
+          -f "client_payload[tag]=$TAG"
 
-    - name: Upload Mac arm64 .zip Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'macos') && startsWith(matrix.runtime, 'osx-arm64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/FreeTubeApp/FreeTube/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: freetube-${{ steps.getPackageInfo.outputs.version }}-beta-mac-arm64.zip
-        asset_path: build/freetube-${{ steps.getPackageInfo.outputs.version }}-arm64-mac.zip
-        asset_content_type: application/x-apple-diskimage
+  trigger-website-update:
+    name: Trigger website update
+    needs: publish-release
+    runs-on: ubuntu-latest
 
-    - name: Upload Mac arm64 .7z Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'macos') && startsWith(matrix.runtime, 'osx-arm64')
+    permissions:
+      actions: write
+      contents: read
+
+    steps:
+    - name: Trigger website update workflow
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/FreeTubeApp/FreeTube/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: freetube-${{ steps.getPackageInfo.outputs.version }}-beta-mac-arm64.7z
-        asset_path: build/freetube-${{ steps.getPackageInfo.outputs.version }}-arm64-mac.7z
-        asset_content_type: application/x-7z-compressed
+        GH_TOKEN: ${{ github.token }}
+        TAG: ${{ needs.publish-release.outputs.tag }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        gh workflow run updateSite.yml \
+          --repo "$GITHUB_REPOSITORY" \
+          --ref "$GITHUB_REF_NAME" \
+          -f "releaseTag=$TAG"

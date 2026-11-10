@@ -1,0 +1,273 @@
+.autoPictureInPictureSettings {
+  margin-block: 1rem;
+}
+
+.groupTitle:not(:first-child) {
+  margin-block-start: 1.5em;
+}
+
+/* Each group sizes its two columns to its own labels and centers them. */
+.playerSwitchGrid {
+  align-items: center;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, max-content));
+  justify-content: center;
+  column-gap: 48px;
+}
+
+.screenshotFormatRow {
+  align-items: center;
+}
+
+@container settings-content (width <= 680px) {
+  .playerSwitchGrid {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+
+  .playerSwitchGrid :deep(.switch-ctn) {
+    inline-size: min(100%, 294px);
+    margin-inline: auto;
+  }
+
+  /* Stacked selects share one width so their edges line up across groups. */
+  .playerSelectGrid {
+    align-items: center;
+    flex-direction: column;
+  }
+
+  .playerSelectGrid :deep(.select) {
+    box-sizing: border-box;
+    inline-size: min(100%, 400px);
+    margin-inline-end: 0;
+  }
+
+  /* The shared width already fits the caption, so let the field shrink with it. */
+  .playerSelectGrid :deep(.select.contentSized) {
+    grid-template-columns: minmax(0, 1fr) var(--select-indicator-space);
+  }
+
+}
+
+@media only screen and (width <= 680px) {
+  @container settings-content (width <= 680px) {
+    .playerSwitchGrid :deep(.switch-ctn) {
+      inline-size: 100%;
+    }
+
+    .quickPlaybackSpeedCustomizeButton :deep(.btn) {
+      max-inline-size: 380px;
+      gap: 8px;
+      padding-inline: 12px;
+      overflow-wrap: normal;
+      text-wrap: wrap;
+    }
+
+    .quickPlaybackSpeedToggle {
+      inline-size: min(calc(100% - 32px), 380px);
+    }
+
+    .quickPlaybackSpeedToggle :deep(.switch-label) {
+      max-inline-size: 100%;
+    }
+
+    .quickPlaybackSpeedToggle :deep(.switch-label-text) {
+      margin-inline-end: 0;
+    }
+  }
+}
+
+.screenshotFolderContainer {
+  align-items: center;
+  column-gap: 1rem;
+  margin-block: 0;
+  margin-inline: auto;
+  inline-size: 95%;
+}
+
+.screenshotFolderButton {
+  flex-grow: 0;
+}
+
+.screenshotFolderPath,
+.screenshotFilenamePatternInput,
+.screenshotFilenamePatternExample {
+  flex-grow: 1;
+  margin-block-start: 10px;
+}
+
+.screenshotFilenamePatternInput {
+  min-inline-size: 0;
+}
+
+.emptyState {
+  padding: 2rem;
+  text-align: center;
+}
+
+.channelSpeedList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-block: 1rem;
+}
+
+.channelSpeedEntry {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--shape-corner-medium);
+}
+
+.channelSpeedInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.channelId {
+  margin: 0;
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.settingButtonWithSync {
+  display: inline-flex;
+  align-items: center;
+  max-inline-size: 100%;
+}
+
+.settingButtonWithSync :deep(.btn) {
+  min-inline-size: 0;
+  white-space: normal;
+}
+
+.quickPlaybackSpeedToolbarActions,
+.quickPlaybackSpeedList {
+  inline-size: min(800px, 100%);
+  box-sizing: border-box;
+  margin-inline: auto;
+}
+
+.quickPlaybackSpeedToolbar {
+  position: sticky;
+  z-index: 2;
+  inset-block-start: -20px;
+  flex: 0 0 auto;
+  margin-block-start: -20px;
+  margin-inline: -20px;
+  padding-block: calc(20px + 0.5rem) 0.5rem;
+  padding-inline: 20px;
+  background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
+}
+
+.quickPlaybackSpeedList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-block: 0.5rem 1rem;
+}
+
+.quickPlaybackSpeedEntry {
+  display: grid;
+  grid-template-columns: 40px minmax(180px, 1fr) minmax(110px, 160px) 40px;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--shape-corner-medium);
+  background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
+  transition: transform 0.18s ease, opacity 0.18s ease;
+  will-change: transform;
+}
+
+.quickPlaybackSpeedEntry.dragging {
+  opacity: 0.65;
+  z-index: 1;
+  transition: opacity 0.18s ease;
+}
+
+.quickPlaybackSpeedEntry.suppressTransition {
+  transition: none;
+}
+
+.quickPlaybackSpeedFields {
+  min-inline-size: 0;
+}
+
+.quickPlaybackSpeedNameRow,
+.quickPlaybackSpeedNameEditRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-block-size: 45px;
+}
+
+.quickPlaybackSpeedNameInput {
+  --input-bottom-spacing: 0;
+
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.quickPlaybackSpeedName {
+  overflow: hidden;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quickPlaybackSpeedValueField {
+  --input-bottom-spacing: 0;
+
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.quickPlaybackSpeedDragHandle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 40px;
+  block-size: 40px;
+  border: 0;
+  border-radius: var(--shape-corner-extra-small);
+  background: transparent;
+  color: var(--tertiary-text-color);
+  cursor: grab;
+  touch-action: none;
+}
+
+.quickPlaybackSpeedDragHandle:active {
+  cursor: grabbing;
+}
+
+.quickPlaybackSpeedDragHandle:hover {
+  background-color: var(--side-nav-hover-color);
+  color: var(--side-nav-hover-text-color);
+}
+
+.quickPlaybackSpeedIconButton.delete :deep(.iconButton) {
+  color: var(--destructive-color);
+}
+
+@media only screen and (width <= 680px) {
+  .quickPlaybackSpeedEntry {
+    grid-template-columns: 40px minmax(0, 1fr) 40px;
+  }
+
+  .quickPlaybackSpeedValueField {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .quickPlaybackSpeedDragHandle,
+  .quickPlaybackSpeedIconButton.delete {
+    justify-self: start;
+  }
+}

@@ -10,6 +10,30 @@
       >
         {{ selectedText }}
       </p>
+      <FtFlexBox
+        v-if="showUnsubscribeButton"
+        class="selectionActions"
+      >
+        <FtButton
+          :label="$t('Profile.Select All')"
+          :icon="['fas', 'check']"
+          :disabled="selected.size === subscriptions.length"
+          @click="selectAll"
+        />
+        <FtButton
+          :label="$t('Profile.Select None')"
+          :icon="['fas', 'xmark']"
+          :disabled="selected.size === 0"
+          @click="selectNone"
+        />
+        <FtButton
+          :label="$t('Profile.Delete Selected')"
+          :icon="['fas', 'trash']"
+          theme="destructive"
+          :disabled="selected.size === 0"
+          @click="displayDeletePrompt"
+        />
+      </FtFlexBox>
       <FtFlexBox>
         <FtChannelBubble
           v-for="channel in subscriptions"
@@ -22,30 +46,14 @@
           @change="handleChannelToggle(channel.id)"
         />
       </FtFlexBox>
-      <FtFlexBox
-        v-if="showUnsubscribeButton"
-      >
-        <FtButton
-          :label="$t('Profile.Select All')"
-          @click="selectAll"
-        />
-        <FtButton
-          :label="$t('Profile.Select None')"
-          @click="selectNone"
-        />
-        <FtButton
-          :label="$t('Profile.Delete Selected')"
-          text-color="var(--destructive-text-color)"
-          background-color="var(--destructive-color)"
-          @click="displayDeletePrompt"
-        />
-      </FtFlexBox>
     </FtCard>
     <FtPrompt
       v-if="showDeletePrompt"
+      autosize
       :label="deletePromptMessage"
       :option-names="deletePromptNames"
       :option-values="DELTE_PROMPT_VALUES"
+      :option-icons="[['fas', 'trash'], ['fas', 'xmark']]"
       :is-first-option-destructive="true"
       @click="handleDeletePromptClick"
     />
@@ -137,9 +145,17 @@ if (typeof props.profile.subscriptions !== 'undefined') {
   loadSubscriptions()
 }
 
-watch(() => props.profile, () => {
+watch(() => props.profile, (profile, oldProfile) => {
   loadSubscriptions()
-  selectNone()
+  if (profile._id !== oldProfile._id) {
+    selectNone()
+    return
+  }
+  // Feed refreshes update channel names and thumbnails, so only drop channels that are gone
+  const channelIds = new Set(subscriptions.value.map(channel => channel.id))
+  selected.forEach(channelId => {
+    if (!channelIds.has(channelId)) selected.delete(channelId)
+  })
 }, { deep: true })
 
 /** @type {import('vue').Reactive<Set<string>>} */
@@ -194,7 +210,7 @@ const deletePromptMessage = computed(() => {
 
 function displayDeletePrompt() {
   if (selected.size === 0) {
-    showToast(t('Profile.No channel(s) have been selected'))
+    showToast({ message: t('Profile.No channel(s) have been selected'), icon: ['fas', 'circle-exclamation'] })
   } else {
     showDeletePrompt.value = true
   }
@@ -205,38 +221,22 @@ function displayDeletePrompt() {
  */
 function handleDeletePromptClick(value) {
   if (value === 'delete') {
+    const channelIds = [...selected]
     subscriptions.value = subscriptions.value.filter((channel) => {
       return !selected.has(channel.id)
     })
 
-    if (props.isMainProfile) {
-      profileList.value.forEach((x) => {
-        const profile = deepCopy(x)
+    // Removing channels from the primary profile unsubscribes from them in every profile
+    const profiles = props.isMainProfile
+      ? profileList.value.filter(profile => profile.subscriptions.some(channel => selected.has(channel.id)))
+      : [props.profile]
+    const profileIds = profiles.map(profile => profile._id)
 
-        profile.subscriptions = profile.subscriptions.filter((channel) => {
-          return !selected.has(channel.id)
-        })
+    // Pull only the selected channels, like unsubscribing, so channels added elsewhere stay
+    store.dispatch('removeChannelFromProfiles', { channelIds, profileIds })
 
-        // Only update changed profiles
-        if (x.subscriptions.length !== profile.subscriptions.length) {
-          store.dispatch('updateProfile', profile)
-        }
-      })
-
-      showToast(t('Profile.Profile has been updated'))
-      selectNone()
-    } else {
-      /** @type {Profile} */
-      const profile = {
-        ...props.profile,
-        subscriptions: deepCopy(subscriptions.value)
-      }
-
-      store.dispatch('updateProfile', profile)
-
-      showToast(t('Profile.Profile has been updated'))
-      selectNone()
-    }
+    showToast({ message: t('Profile.Profile has been updated'), icon: ['fas', 'user-check'] })
+    selectNone()
   }
 
   showDeletePrompt.value = false

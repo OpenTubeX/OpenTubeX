@@ -1,0 +1,86 @@
+.ftVideoPlayer.portraitFullscreenDocks {
+  /* stylelint-disable-next-line length-zero-no-unit */
+  --side-panel-width: 0px;
+}
+
+.ftVideoPlayer.portraitFullscreenDocks.fullscreenDockLayoutOpen :is(.player, .musicAudioSurface, .ambientFullscreenCanvas),
+.ftVideoPlayer.portraitFullscreenDocks.fullscreenDockLayoutOpen :deep(.shaka-controls-container) {
+  align-self: start;
+  block-size: 30%;
+  min-block-size: 0;
+  inset-block-end: auto;
+}
+
+.ftVideoPlayer.portraitFullscreenDocks.fullscreenDockLayoutOpen :is(
+  .endedPoster, .endedScreen, .countdownPoster, .countdownOverlay,
+  :deep(.shaka-spinner-container), :deep(.videoAnnotations),
+  :deep(.shaka-text-container), :deep(.shaka-speech-to-text-container)
+) {
+  inset-block-end: 70%;
+}
+
+/* The fullscreen title already labels the compact audio surface above a sheet. */
+.ftVideoPlayer.portraitFullscreenDocks.fullscreenDockLayoutOpen .musicAudioMetadata {
+  display: none;
+}
+
+.ftVideoPlayer.portraitFullscreenDocks.fullscreenDockLayoutOpen .musicAudioContent {
+  margin-block-end: 0;
+}
+
+.ftVideoPlayer.portraitFullscreenDocks :deep(.fullscreenDockSheet) > :is(aside, .chapterOverlay) {
+  position: relative;
+  inset: auto;
+  flex: 1;
+  min-block-size: 0;
+  inline-size: 100%;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 0;
+  background: var(--card-bg-color);
+  box-shadow: none;
+  transform: none;
+  transition: none;
+}
+
+.ftVideoPlayer.portraitFullscreenDocks :deep(.fullscreenDockSheet) > .shaka-no-propagation:not(.open, .chapterOverlay) {
+  display: none;
+}
+
+.ftVideoPlayer.portraitFullscreenDocks :deep(.fullscreenDockSheet) > aside::before {
+  display: none;
+}
+
+.ftVideoPlayer.portraitFullscreenDocks :deep(:is(.chapterOverlayHeader, .fullscreenMetadataHeader, .transcriptHeader, .sponsorBlockHeader, .liveChatDockHeader, .fullscreenCommentHeader, .playlistDockHeader, .fullscreenDockHeader)) {
+  position: relative;
+  flex: 0 0 auto;
+  min-block-size: 64px;
+  box-sizing: border-box;
+  padding-block: 16px 8px;
+  gap: 8px;
+  background: transparent;
+  touch-action: none;
+}
+
+.ftVideoPlayer.portraitFullscreenDocks :deep(:is(.chapterOverlayHeader, .fullscreenMetadataHeader, .transcriptHeader, .sponsorBlockHeader, .liveChatDockHeader, .fullscreenCommentHeader, .playlistDockHeader, .fullscreenDockHeader)::before) {
+  content: '';
+  position: absolute;
+  inline-size: 32px;
+  block-size: 4px;
+  inset-block-start: 5px;
+  inset-inline-start: calc(50% - 16px);
+  border-radius: calc(2px * var(--ui-roundness));
+  background: var(--secondary-text-color);
+  opacity: 0.5;
+}
+
+.ftVideoPlayer.portraitFullscreenDocks :deep(:is(.chapterOverlayHeader, .fullscreenMetadataHeader, .transcriptHeader, .sponsorBlockHeader, .liveChatDockHeader, .fullscreenCommentHeader, .playlistDockHeader, .fullscreenDockHeader) button) {
+  min-inline-size: 48px;
+  min-block-size: 48px;
+}
+
+.ftVideoPlayer.portraitFullscreenDocks :deep(.queueHeading) {
+  flex-direction: column;
+  align-items: start;
+  gap: 2px;
+}

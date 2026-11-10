@@ -1,0 +1,485 @@
+import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
+import test from 'node:test'
+import vm from 'node:vm'
+import Datastore from '@seald-io/nedb'
+import { toRaw } from 'vue'
+import { ensureSubscriptionFeedEntryState } from '../../src/renderer/helpers/subscription-entries.js'
+import * as seenData from '../../src/subscriptionSeenVideos.js'
+import * as feedState from '../../src/subscriptionFeedState.js'
+import { applySubscriptionSeenVideosToCache, applySubscriptionSeenPostsToCache } from '../../src/renderer/helpers/subscription-seen-videos.js'
+import { DBActions } from '../../src/constants.js'
+
+// The handlers module imports the platform datastore singleton through webpack.
+// Run the actual cache class with an isolated real NeDB for each interleaving.
+const source = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
+const start = source.indexOf('class SubscriptionCache {')
+const cacheSource = source.slice(start, source.indexOf('\nclass ', start + 1))
+const storeSource = await readFile(new URL('../../src/renderer/store/modules/subscription-cache.js', import.meta.url), 'utf8')
+const moduleSource = storeSource.slice(storeSource.indexOf('/**\n * Electron datastore payloads'))
+  .replace('export default', 'globalThis.cacheModule =')
+
+for (const [tab, field, cacheKey, update, mark] of [
+  ['videos', 'videos', 'videoCache', 'updateVideosByChannelId', 'markSubscriptionVideoAsSeen'],
+  ['shorts', 'shorts', 'shortsCache', 'updateShortsByChannelId', 'markSubscriptionVideoAsSeen'],
+  ['live', 'liveStreams', 'liveCache', 'updateLiveStreamsByChannelId', 'markSubscriptionVideoAsSeen'],
+  ['posts', 'communityPosts', 'postsCache', 'updateCommunityPostsByChannelId', 'markSubscriptionPostAsSeen'],
+]) {
+  test(`marking ${tab} seen tolerates a malformed persisted feed`, async () => {
+    const db = { subscriptionCache: new Datastore({ inMemoryOnly: true }) }
+    const Cache = vm.runInNewContext(`${cacheSource}\nSubscriptionCache`, { db, ...feedState })
+    const idKey = tab === 'posts' ? 'postId' : 'videoId'
+    for (const malformed of [{}, 'invalid', 1, true]) {
+      await db.subscriptionCache.updateAsync({ _id: 'channel' }, {
+        _id: 'channel', [field]: malformed, [`${field}Timestamp`]: new Date(1000),
+      }, { upsert: true })
+      await Cache.markEntriesAsSeen('channel', tab, [{ [idKey]: 'displayed', isNewInSubscriptionFeed: false }])
+      const saved = (await Cache.find())[0]
+      assert.deepEqual(saved[field], [])
+      assert.equal(new Date(saved[`${field}Timestamp`]).getTime(), 1000)
+    }
+  })
+  for (const bulk of [false, true]) {
+    test(`${bulk ? 'bulk' : 'individual'} seen action survives a concurrent ${tab} refresh and sync`, async () => {
+      const db = { subscriptionCache: new Datastore({ inMemoryOnly: true }) }
+      const Cache = vm.runInNewContext(`${cacheSource}\nSubscriptionCache`, { db, ...seenData, ...feedState })
+      const idKey = tab === 'posts' ? 'postId' : 'videoId'
+      const entriesKey = tab === 'posts' ? 'posts' : 'videos'
+      const old = { [idKey]: 'displayed', title: 'Old metadata', isNewInSubscriptionFeed: true }
+      const fresh = [
+        { ...old, title: 'Fresh metadata' },
+        { [idKey]: 'arrived-during-mark', isNewInSubscriptionFeed: true },
+      ]
+      await Cache[update]('channel', [old], new Date(1000))
+      const context = vm.createContext({
+        console,
+        toRaw,
+        ...seenData,
+        ...feedState,
+        applySubscriptionSeenVideosToCache,
+        applySubscriptionSeenPostsToCache,
+        DBSubscriptionCacheHandlers: Cache,
+      })
+      vm.runInContext(moduleSource, context)
+      const { actions, mutations, state } = context.cacheModule
+      state[cacheKey].channel = { [entriesKey]: [old], timestamp: new Date(1000) }
+      let marks = []
+      const actionContext = {
+        state,
+        rootGetters: { getSubscriptionSeenVideos: [] },
+        commit: (type, payload) => mutations[type](state, payload),
+        dispatch: async (type, payload) => {
+          if (type === 'mergeSubscriptionSeenPosts') {
+            assert.deepEqual(structuredClone(payload), { posts: [{ postId: 'displayed' }] })
+            return
+          }
+          assert.equal(type, 'mergeSubscriptionSeenVideos')
+          marks = seenData.mergeSubscriptionSeenVideos(marks,
+            payload.videos.map(video => ({ ...video, seenAt: 3000 })))
+        },
+      }
+      // The database receives the refresh before its acknowledgement reaches
+      // the renderer. The clicked card still carries the earlier timestamp.
+      await Cache[update]('channel', fresh, new Date(2000))
+      await (bulk
+        ? actions.markSubscriptionEntriesAsSeen(actionContext, { tab, channelIds: ['channel'] })
+        : actions[mark](actionContext, 'displayed'))
+      assert.equal(old.isNewInSubscriptionFeed, false, 'feed cards retaining the original object must update too')
+      // A delayed refresh reply must not restore the dismissed card.
+      const mutation = {
+        videos: 'updateVideoCacheByChannel',
+        shorts: 'updateShortsCacheByChannel',
+        live: 'updateLiveCacheByChannel',
+        posts: 'updatePostsCacheByChannel'
+      }[tab]
+      mutations[mutation](state, { channelId: 'channel', entries: fresh, timestamp: new Date(2000) })
+      const saved = (await Cache.find())[0]
+      assert.deepEqual(saved[field].map(entry => entry.isNewInSubscriptionFeed), [false, true])
+      assert.equal(saved[field][0].title, 'Fresh metadata')
+      assert.equal(new Date(saved[`${field}Timestamp`]).getTime(), 2000)
+      assert.deepEqual(state[cacheKey].channel[entriesKey].map(entry => entry.isNewInSubscriptionFeed), [false, true])
+      if (tab !== 'posts') {
+        // Replay the uploaded marks on another device with its own stale feed.
+        const remote = applySubscriptionSeenVideosToCache({ channel: { videos: fresh } }, marks)
+        assert.deepEqual(remote.channel.videos.map(entry => entry.isNewInSubscriptionFeed), [false, true])
+      }
+      // A response already computed before the click can arrive after it too.
+      await Cache[update]('channel', fresh, new Date(4000))
+      assert.deepEqual((await Cache.find())[0][field].map(entry => entry.isNewInSubscriptionFeed), [false, true])
+    })
+  }
+}
+
+for (const idKey of ['videoId', 'postId']) {
+  test(`malformed persisted ${idKey} feed does not prevent refresh`, () => {
+    const incoming = [{ [idKey]: 'new', isNewInSubscriptionFeed: true }]
+    for (const previous of [{}, 'invalid', 1, true, null, undefined]) {
+      assert.equal(feedState.preserveSubscriptionSeenEntries(incoming, previous, idKey), incoming)
+    }
+  })
+  test(`missing ${idKey} cannot dismiss an unrelated feed entry`, () => {
+    const incoming = [{ isNewInSubscriptionFeed: true }, { [idKey]: '', isNewInSubscriptionFeed: true }]
+    const old = incoming.map(entry => ({ ...entry, isNewInSubscriptionFeed: false }))
+    assert.equal(feedState.preserveSubscriptionSeenEntries(incoming, old, idKey), incoming)
+  })
+}
+
+test('duplicate and absent seen marks do not rewrite the persisted feed', async () => {
+  const db = { subscriptionCache: new Datastore({ inMemoryOnly: true }) }
+  const Cache = vm.runInNewContext(`${cacheSource}\nSubscriptionCache`, { db, ...feedState })
+  const entry = { videoId: 'seen', isNewInSubscriptionFeed: false }
+  await Cache.updateVideosByChannelId('channel', [entry], new Date(1000))
+  let writes = 0
+  const update = db.subscriptionCache.updateAsync.bind(db.subscriptionCache)
+  db.subscriptionCache.updateAsync = (...args) => { writes++; return update(...args) }
+  await Cache.markEntriesAsSeen('channel', 'videos', [entry])
+  await Cache.markEntriesAsSeen('channel', 'videos', [{ ...entry, videoId: 'absent' }])
+  assert.equal(writes, 0)
+})
+
+test('a stale members-only seen action leaves a newly public upload new', async () => {
+  const db = { subscriptionCache: new Datastore({ inMemoryOnly: true }) }
+  const Cache = vm.runInNewContext(`${cacheSource}\nSubscriptionCache`, { db, ...feedState })
+  const privateVideo = { videoId: 'video', isMembersOnly: true, isNewInSubscriptionFeed: false }
+  await Cache.updateVideosByChannelId('channel', [privateVideo], new Date(1000))
+  const publicVideo = { ...privateVideo, isMembersOnly: false, isNewInSubscriptionFeed: true }
+  await Cache.updateVideosByChannelId('channel', [publicVideo], new Date(2000))
+  await Cache.markEntriesAsSeen('channel', 'videos', [privateVideo])
+  assert.equal((await Cache.find())[0].videos[0].isNewInSubscriptionFeed, true)
+  await Cache.markEntriesAsSeen('channel', 'videos', [{ ...publicVideo, isNewInSubscriptionFeed: false }])
+  assert.equal((await Cache.find())[0].videos[0].isNewInSubscriptionFeed, false)
+})
+
+for (const enrichmentFirst of [false, true]) {
+  test(`Shorts refresh preserves new entries when enrichment starts ${enrichmentFirst ? 'first' : 'second'}`, async () => {
+    const db = { subscriptionCache: new Datastore({ inMemoryOnly: true }) }
+    const Cache = vm.runInNewContext(`${cacheSource}\nSubscriptionCache`, { db, ...feedState })
+    await Cache.updateShortsByChannelId('channel', [{ videoId: 'old', title: 'Old title' }], new Date(1000))
+
+    const refresh = () => Cache.updateShortsByChannelId('channel', [
+      { videoId: 'old', title: 'Refreshed title' },
+      { videoId: 'new', title: 'New title' },
+    ], new Date(2000))
+    const enrich = () => Cache.updateShortsWithChannelPageShortsByChannelId('channel', [
+      { videoId: 'old', title: 'Enriched title', viewCount: 2000 },
+    ])
+    const first = enrichmentFirst ? enrich() : refresh()
+    // Let the first read enter NeDB's queue before starting the other writer.
+    await Promise.resolve()
+    await Promise.resolve()
+    await Promise.resolve()
+    await Promise.all([first, enrichmentFirst ? refresh() : enrich()])
+
+    const result = await db.subscriptionCache.findOneAsync({ _id: 'channel' })
+    assert.deepEqual(result.shorts.map(video => video.videoId), ['old', 'new'])
+    assert.equal(new Date(result.shortsTimestamp).getTime(), 2000)
+    assert.equal(result.shorts[0].title, enrichmentFirst ? 'Refreshed title' : 'Enriched title')
+  })
+}
+
+for (const delayDatabaseReply of [false, true]) {
+  test(`a premiere update cannot overwrite a full refresh when its database ${delayDatabaseReply ? 'reply' : 'write'} arrives late`, async () => {
+    const db = { subscriptionCache: new Datastore({ inMemoryOnly: true }) }
+    const Cache = vm.runInNewContext(`${cacheSource}\nSubscriptionCache`, { db, ...feedState })
+    const cachedVideos = [{ videoId: 'premiere', viewCount: 1000, isNewInSubscriptionFeed: false }]
+    await Cache.updateVideosByChannelId('channel', cachedVideos, new Date(1000))
+
+    let releasePremiere
+    let signalWaiting
+    const waiting = new Promise(resolve => { signalWaiting = resolve })
+    const resume = new Promise(resolve => { releasePremiere = resolve })
+    const context = vm.createContext({
+      console,
+      ...feedState,
+      ensureSubscriptionFeedEntryState,
+      DBSubscriptionCacheHandlers: {
+        async updateVideosByChannelId(channelId, videos, timestamp) {
+          if (timestamp.getTime() !== 1000) {
+            return Cache.updateVideosByChannelId(channelId, videos, timestamp)
+          }
+          // Model an IPC acknowledgement delayed until after a newer refresh,
+          // and the inverse order where the old write itself reaches NeDB late.
+          if (delayDatabaseReply) {
+            const result = await Cache.updateVideosByChannelId(channelId, videos, timestamp)
+            signalWaiting()
+            await resume
+            return result
+          }
+          signalWaiting()
+          await resume
+          return Cache.updateVideosByChannelId(channelId, videos, timestamp)
+        }
+      }
+    })
+    vm.runInContext(moduleSource, context)
+    const { actions, mutations, state } = context.cacheModule
+    state.videoCache.channel = { videos: cachedVideos, timestamp: new Date(1000) }
+    const actionContext = {
+      state,
+      rootGetters: { getHistoryCacheById: {} },
+      commit(type, payload) { mutations[type](state, payload) }
+    }
+    const premiereUpdate = actions.updateSubscriptionVideosCacheByChannel(actionContext, {
+      channelId: 'channel',
+      videos: [{ ...cachedVideos[0], viewCount: 2500 }],
+      timestamp: new Date(1000)
+    })
+    await waiting
+
+    const refreshedVideos = [
+      { videoId: 'premiere', viewCount: 3000, isNewInSubscriptionFeed: false },
+      { videoId: 'new-video', isNewInSubscriptionFeed: true }
+    ]
+    await actions.updateSubscriptionVideosCacheByChannel(actionContext, {
+      channelId: 'channel', videos: refreshedVideos, timestamp: new Date(2000)
+    })
+    releasePremiere()
+    await premiereUpdate
+
+    assert.equal(state.videoCache.channel.videos, refreshedVideos)
+    assert.equal(state.videoCache.channel.timestamp.getTime(), 2000)
+    const persisted = await db.subscriptionCache.findOneAsync({ _id: 'channel' })
+    assert.deepEqual(persisted.videos, refreshedVideos)
+    assert.equal(new Date(persisted.videosTimestamp).getTime(), 2000)
+  })
+}
+
+test('loading persisted video caches supplies feed markers without changing known seen state or embedded videos', async () => {
+  const entries = [
+    { videoId: 'unmarked' },
+    { videoId: 'seen', isNewInSubscriptionFeed: false },
+    { videoId: 'new', isNewInSubscriptionFeed: true },
+  ]
+  const embedded = { videoId: 'embedded' }
+  const context = vm.createContext({
+    console,
+    DBSubscriptionCacheHandlers: {
+      find: async () => [{
+        _id: 'channel',
+        videos: entries,
+        shorts: entries,
+        liveStreams: entries,
+        communityPosts: [{ postId: 'post', postContent: { type: 'video', content: embedded } }],
+      }],
+    },
+  })
+  vm.runInContext(moduleSource, context)
+  const { actions, mutations, state } = context.cacheModule
+  await actions.grabAllSubscriptions({
+    rootGetters: { getSubscribedChannelIdSet: new Set(['channel']) },
+    commit: (type, payload) => mutations[type](state, payload),
+  })
+  for (const key of ['videoCache', 'shortsCache', 'liveCache']) {
+    assert.deepEqual(structuredClone(state[key].channel.videos), [
+      { videoId: 'unmarked', isNewInSubscriptionFeed: false }, entries[1], entries[2],
+    ])
+  }
+  assert.equal(state.postsCache.channel.posts[0].postContent.content.isNewInSubscriptionFeed, undefined)
+})
+
+test('clearing cached channels lets closed-app refreshes queue their unchanged feeds again', async () => {
+  const forgotten = []
+  const context = vm.createContext({
+    console,
+    toRaw,
+    ...seenData,
+    ...feedState,
+    applySubscriptionSeenVideosToCache,
+    applySubscriptionSeenPostsToCache,
+    DBSubscriptionCacheHandlers: { deleteMultipleChannels: async () => {}, deleteAll: async () => {} },
+    forgetAndroidSubscriptionRefreshFingerprints: async channelIds => { forgotten.push(channelIds) },
+  })
+  vm.runInContext(moduleSource, context)
+  const { actions } = context.cacheModule
+  await actions.clearSubscriptionsCacheForManyChannels({ commit() {} }, ['UCremoved'])
+  await actions.clearSubscriptionsCache({ commit() {} })
+  assert.deepEqual(forgotten, [['UCremoved'], undefined])
+})
+
+test('a failed closed-app fingerprint reset keeps the cache so clearing it can be retried', async () => {
+  const deleted = []
+  const commits = []
+  const context = vm.createContext({
+    console: { ...console, error() {} },
+    toRaw,
+    ...seenData,
+    ...feedState,
+    applySubscriptionSeenVideosToCache,
+    applySubscriptionSeenPostsToCache,
+    DBSubscriptionCacheHandlers: {
+      deleteMultipleChannels: async channelIds => { deleted.push(channelIds) },
+      deleteAll: async () => { deleted.push('all') },
+    },
+    forgetAndroidSubscriptionRefreshFingerprints: async () => { throw new Error('Unable to reset fingerprints') },
+  })
+  vm.runInContext(moduleSource, context)
+  const commit = name => { commits.push(name) }
+  await context.cacheModule.actions.clearSubscriptionsCacheForManyChannels({ commit }, ['UCremoved'])
+  assert.equal(await context.cacheModule.actions.clearSubscriptionsCache({ commit }), false)
+  assert.deepEqual(deleted, [])
+  assert.deepEqual(commits, [])
+})
+
+test('a refresh stores many channel feeds in one transaction and keeps their other feeds', async () => {
+  const db = { subscriptionCache: new Datastore({ inMemoryOnly: true }) }
+  const Cache = vm.runInNewContext(`${cacheSource}\nSubscriptionCache`, { db, ...feedState })
+  await Cache.updateShortsByChannelId('a', [{ videoId: 'short' }], new Date(1000))
+  await Cache.updateVideosByChannelId('b', [{ videoId: 'newer' }], new Date(3000))
+  const replaced = []
+  db.subscriptionCache.replaceManyAsync = async docs => {
+    replaced.push(docs.map(doc => doc._id))
+    for (const doc of docs) await db.subscriptionCache.updateAsync({ _id: doc._id }, doc, { upsert: true })
+  }
+  const applied = await Cache.updateFeeds([
+    { channelId: 'a', field: 'videos', entries: [{ videoId: 'a1' }], timestamp: new Date(2000) },
+    { channelId: 'b', field: 'videos', entries: [{ videoId: 'stale' }], timestamp: new Date(2000) },
+    { channelId: 'c', field: 'liveStreams', entries: [{ videoId: 'live' }], timestamp: new Date(2000) },
+  ])
+  assert.deepEqual(structuredClone(applied), [true, false, true])
+  assert.deepEqual(structuredClone(replaced), [['a', 'c']])
+  const docs = Object.fromEntries((await Cache.find()).map(doc => [doc._id, doc]))
+  assert.deepEqual(structuredClone(docs.a.shorts.map(video => video.videoId)), ['short'])
+  assert.deepEqual(structuredClone(docs.a.videos.map(video => video.videoId)), ['a1'])
+  assert.equal(new Date(docs.a.videosTimestamp).getTime(), 2000)
+  assert.deepEqual(structuredClone(docs.b.videos.map(video => video.videoId)), ['newer'])
+  assert.deepEqual(structuredClone(docs.c.liveStreams.map(video => video.videoId)), ['live'])
+  assert.throws(() => Cache.updateFeeds([{ channelId: 'a', field: 'posts', entries: [], timestamp: new Date() }]), /Unknown subscription feed/)
+})
+
+test('feed writes queued while one crosses IPC go together in the next request', async () => {
+  const bridgeSource = await readFile(new URL('../../src/datastores/handlers/electron.js', import.meta.url), 'utf8')
+  const start = bridgeSource.indexOf('// Subscription cache requests reach the main process')
+  const requests = []
+  let release
+  const context = vm.createContext({
+    DBActions,
+    dbSubscriptionCache: (action, data) => new Promise(resolve => {
+      requests.push({ action, data })
+      release = () => resolve(data.map(() => true))
+    }),
+  })
+  const Cache = vm.runInContext(`${bridgeSource.slice(start, bridgeSource.indexOf('\nfunction compactAllDatastores'))}\nSubscriptionCache`, context)
+  const first = Cache.updateVideosByChannelId('a', [{ videoId: 'a1' }], new Date(1000))
+  await Promise.resolve()
+  assert.equal(requests.length, 1)
+  const later = [
+    Cache.updateShortsByChannelId('b', [], new Date(1000)),
+    Cache.updateLiveStreamsByChannelId('c', [], new Date(1000)),
+    Cache.updateCommunityPostsByChannelId('d', [], new Date(1000)),
+  ]
+  release()
+  assert.equal(await first, true)
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(requests.length, 2)
+  assert.ok(requests.every(({ action }) => action === DBActions.SUBSCRIPTION_CACHE.UPDATE_FEEDS))
+  assert.deepEqual(structuredClone(requests[0].data.map(({ channelId, field }) => [channelId, field])), [['a', 'videos']])
+  assert.deepEqual(structuredClone(requests[1].data.map(({ channelId, field }) => [channelId, field])),
+    [['b', 'shorts'], ['c', 'liveStreams'], ['d', 'communityPosts']])
+  release()
+  assert.deepEqual(structuredClone(await Promise.all(later)), [true, true, true])
+})
+
+test('cache requests keep their order around batched feed writes', async () => {
+  const bridgeSource = await readFile(new URL('../../src/datastores/handlers/electron.js', import.meta.url), 'utf8')
+  const start = bridgeSource.indexOf('// Subscription cache requests reach the main process')
+  const requests = []
+  const pending = []
+  const context = vm.createContext({
+    DBActions,
+    dbSubscriptionCache: (action, data) => new Promise(resolve => {
+      requests.push(action === DBActions.SUBSCRIPTION_CACHE.UPDATE_FEEDS ? data.map(({ channelId }) => channelId) : action)
+      pending.push(() => resolve(Array.isArray(data) ? data.map(() => true) : null))
+    }),
+  })
+  const Cache = vm.runInContext(`${bridgeSource.slice(start, bridgeSource.indexOf('\nfunction compactAllDatastores'))}\nSubscriptionCache`, context)
+  const settle = () => new Promise(resolve => setImmediate(resolve))
+
+  const writes = [Cache.updateVideosByChannelId('a', [], new Date(1000))]
+  await settle()
+  // While the first write crosses IPC: a write, a deletion, then another write.
+  writes.push(Cache.updateVideosByChannelId('b', [], new Date(1000)))
+  const deletion = Cache.deleteAll()
+  writes.push(Cache.updateVideosByChannelId('c', [], new Date(1000)))
+  while (pending.length > 0) {
+    pending.shift()()
+    await settle()
+  }
+  await Promise.all([...writes, deletion])
+
+  assert.deepEqual(structuredClone(requests), [['a'], ['b'], DBActions.GENERAL.DELETE_ALL, ['c']])
+})
+
+test('marking many channel feeds seen is one write', async () => {
+  const db = { subscriptionCache: new Datastore({ inMemoryOnly: true }) }
+  const Cache = vm.runInNewContext(`${cacheSource}\nSubscriptionCache`, { db, ...feedState })
+  for (const channelId of ['a', 'b', 'c']) {
+    await Cache.updateVideosByChannelId(channelId, [{ videoId: `${channelId}-video`, isNewInSubscriptionFeed: true }], new Date(1000))
+  }
+  const replaced = []
+  db.subscriptionCache.replaceManyAsync = async docs => {
+    replaced.push(docs.map(doc => doc._id))
+    for (const doc of docs) await db.subscriptionCache.updateAsync({ _id: doc._id }, doc, { upsert: true })
+  }
+  await Cache.markEntriesAsSeenMany([
+    { channelId: 'a', tab: 'videos', entries: [{ videoId: 'a-video', isNewInSubscriptionFeed: false }] },
+    { channelId: 'b', tab: 'videos', entries: [{ videoId: 'absent', isNewInSubscriptionFeed: false }] },
+    { channelId: 'c', tab: 'videos', entries: [{ videoId: 'c-video', isNewInSubscriptionFeed: false }] },
+  ])
+  assert.deepEqual(structuredClone(replaced), [['a', 'c']])
+  const docs = Object.fromEntries((await Cache.find()).map(doc => [doc._id, doc.videos[0].isNewInSubscriptionFeed]))
+  assert.deepEqual(docs, { a: false, b: true, c: false })
+})
+
+for (const deletion of ['deleteAll', 'deleteMultipleChannels']) {
+  test(`${deletion} during a refresh is not undone by the refresh write`, async () => {
+    const db = { subscriptionCache: new Datastore({ inMemoryOnly: true }) }
+    const Cache = vm.runInNewContext(`${cacheSource}\nSubscriptionCache`, { db, ...feedState })
+    await Cache.updateFeeds([
+      { channelId: 'channel', field: 'videos', entries: [{ videoId: 'old' }], timestamp: new Date(1000) },
+      { channelId: 'channel', field: 'shorts', entries: [{ videoId: 'short' }], timestamp: new Date(1000) },
+    ])
+
+    // Hold the refresh between reading the channel and writing it back.
+    let releaseRead
+    const read = new Promise(resolve => { releaseRead = resolve })
+    const findAsync = db.subscriptionCache.findAsync.bind(db.subscriptionCache)
+    db.subscriptionCache.findAsync = async (...args) => {
+      const docs = await findAsync(...args)
+      await read
+      return docs
+    }
+    const refresh = Cache.updateFeeds([{ channelId: 'channel', field: 'videos', entries: [{ videoId: 'new' }], timestamp: new Date(2000) }])
+    await new Promise(resolve => setImmediate(resolve))
+    const removal = deletion === 'deleteAll' ? Cache.deleteAll() : Cache.deleteMultipleChannels(['channel'])
+    releaseRead()
+    db.subscriptionCache.findAsync = findAsync
+    await Promise.all([refresh, removal])
+
+    assert.deepEqual(await Cache.find(), [])
+  })
+}
+
+for (const profilesLoaded of [false, true]) {
+  test(`loading the cache ${profilesLoaded ? 'removes' : 'keeps'} unsubscribed channels when profiles ${profilesLoaded ? 'loaded' : 'failed to load'}`, async () => {
+    const entry = { _id: 'channel', videos: [{ videoId: 'video' }], videosTimestamp: new Date(1000) }
+    const context = vm.createContext({
+      console: { error() {} },
+      toRaw,
+      ...seenData,
+      ...feedState,
+      applySubscriptionSeenVideosToCache,
+      applySubscriptionSeenPostsToCache,
+      DBSubscriptionCacheHandlers: { find: async () => [entry] },
+    })
+    vm.runInContext(moduleSource, context)
+    const dispatched = []
+    await context.cacheModule.actions.grabAllSubscriptions({
+      commit() {},
+      dispatch: (...args) => dispatched.push(args),
+      // A failed profile load leaves only the default main profile, without subscriptions.
+      rootState: { profiles: { profilesLoaded } },
+      rootGetters: { getSubscribedChannelIdSet: new Set() },
+    })
+    assert.deepEqual(structuredClone(dispatched), profilesLoaded ? [['clearSubscriptionsCacheForManyChannels', ['channel']]] : [])
+  })
+}

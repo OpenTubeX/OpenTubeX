@@ -1,0 +1,1591 @@
+import { toRaw } from 'vue'
+import {
+  DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo,
+  mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote, selectChangedHistory, mergeChangedHistoryBaseline,
+} from './sync-history-merge.js'
+import { runBackgroundJob } from './background-jobs.js'
+import { MAIN_PROFILE_ID } from '../../constants'
+import i18n from '../i18n/index'
+import packageDetails from '../../../package.json'
+import { applySyncServerUserAgent } from '../../syncServerUserAgent'
+import {
+  CUSTOM_THEMES_SYNC_KEY,
+  customThemeIdFromValue,
+  normalizeCustomThemes,
+} from '../../customTheme'
+import {
+  SyncServerDataLossError,
+  SyncServerCancelledError,
+  SyncServerTabRevocationPendingError,
+  SyncServerError,
+  SyncServerUnsupportedError,
+  SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
+  SYNC_SERVER_SESSION_EXPIRED_MESSAGE,
+  isAccountDeletedError,
+  isExpiredSessionReauthentication,
+  isSessionExpiredError,
+  syncServerResponseErrorMessage,
+} from './sync-server-errors'
+import { getSyncableSettingKeys, isSettingSyncEnabled } from '../store/modules/settings'
+import { deepCopy } from './utils'
+import { replaceCustomThemes } from './customTheme'
+import { repairSystemThemeSettings } from './customThemeSync'
+import { generateRandomUniqueId, isPlaylistSortOrder } from './playlists'
+import { normalizePlaylistThumbnail } from './playlist-thumbnails'
+import {
+  getMergedProfileBackground,
+  getMergedProfileTextColor,
+  getSyncProfileBackground,
+  getSyncProfileTextColor
+} from './profile-sync.js'
+import { createSyncServerRequestHeaders } from './sync-server-request'
+import { isValidPlaylistBookmark, playlistBookmarkForSync } from './playlist-bookmarks'
+import { getOtherDeviceSessions, getRevokedSyncSessionLogins, mergeSyncSessions } from './sync-sessions'
+import { isValidSyncServerDeviceId } from './sync-server-sessions'
+import {
+  areSyncSettingValuesEqual,
+  mergeSettingEntry,
+  migrateLegacySyncedSettings,
+  resolveMergedThemeEntry,
+} from './sync-settings-conflict'
+import { getCapacitorTabService } from '../tabs/CapacitorTabService'
+import { capacitorHttpFetch } from './api/capacitor-http'
+import { delegateRequests } from './networkRecovery'
+import { setActiveTimeout } from './activeTimeout'
+
+import {
+  SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY,
+  getSubscriptionSettingsForSync,
+  mergeSubscriptionSettingsEntry,
+  applySubscriptionSettingsSync
+} from './subscription-settings-sync'
+
+const LEGACY_HISTORY_PAGE_SIZE = 50
+const BULK_SYNC_CHUNK_SIZE = 100
+const LEGACY_SYNC_CONCURRENCY = 4
+// The server may wait up to 30 seconds each for a database connection and a
+// SQLite lock under load, so leave room for that plus a slow transfer.
+const REQUEST_TIMEOUT_MS = 60_000
+// The server holds /changes open for 25 seconds before rereading the cursor.
+const CHANGES_WAIT_TIMEOUT_MS = 25_000 + REQUEST_TIMEOUT_MS
+const MAX_ENCRYPTED_SYNC_TIMEOUT_MS = 5 * 60 * 1000
+
+function syncServerFetch(input, init, timeoutMs) {
+  return process.env.IS_CAPACITOR
+    ? capacitorHttpFetch(input, {
+        ...init,
+        // Encrypted transfers may outlast the native client's 30-second default.
+        nativeTimeoutMs: timeoutMs,
+        // The user may explicitly configure an HTTP server on their local network.
+        allowHttp: true,
+        headers: applySyncServerUserAgent(Object.fromEntries(new Headers(init.headers))),
+      })
+    : fetch(input, init)
+}
+
+export {
+  SyncServerDataLossError,
+  SyncServerCancelledError,
+  SyncServerTabRevocationPendingError,
+  SyncServerError,
+  SyncServerUnsupportedError,
+  SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
+  SYNC_SERVER_SESSION_EXPIRED_MESSAGE,
+  isAccountDeletedError,
+  isExpiredSessionReauthentication,
+  isSessionExpiredError,
+}
+
+export function normalizeSyncServerUrl(value) {
+  let url
+  try {
+    url = new URL(value)
+  } catch {
+    throw new SyncServerError('Invalid sync server URL')
+  }
+
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    throw new SyncServerError('Sync server URL must use HTTP or HTTPS')
+  }
+
+  url.username = ''
+  url.password = ''
+  url.search = ''
+  url.hash = ''
+  url.pathname = url.pathname
+    .replace(/\/(?:docs|v1)\/?$/, '')
+    .replace(/\/$/, '')
+
+  return url.toString().replace(/\/$/, '')
+}
+
+export class SyncServerClient {
+  constructor(serverUrl, token = '') {
+    this.serverUrl = normalizeSyncServerUrl(serverUrl)
+    this.token = token
+    this.apiPrefix = null
+    this.serverInfoPromise = null
+    this.requestControllers = new Set()
+    this.cancelled = false
+  }
+
+  cancel() {
+    this.cancelled = true
+    for (const controller of this.requestControllers) controller.abort()
+  }
+
+  async request(path, { timeoutMs = REQUEST_TIMEOUT_MS, ...options } = {}) {
+    if (this.cancelled) throw new SyncServerCancelledError()
+    const controller = new AbortController()
+    this.requestControllers.add(controller)
+    // Sync retries and times out its own requests. In the app's recovery queue,
+    // a long poll held past its header timeout would mark the server as failed
+    // and delay every other sync request until the poll itself timed out.
+    const releaseRequest = delegateRequests(controller.signal, { ownDeadline: true })
+    const cancelTimeout = setActiveTimeout(() => controller.abort(), timeoutMs)
+    const headers = createSyncServerRequestHeaders({
+      hasBody: options.body != null,
+      headers: options.headers,
+      token: this.token,
+      version: process.env.IS_ELECTRON || process.env.IS_CAPACITOR ? packageDetails.version : '',
+    })
+
+    try {
+      const response = await syncServerFetch(`${this.serverUrl}${path}`, {
+        ...options,
+        redirect: 'error',
+        headers,
+        // Bodies and responses are mostly one large ciphertext string.
+        // Copying it to a worker in chunks costs far more than JSON itself.
+        body: options.body == null ? undefined : JSON.stringify(options.body),
+        signal: controller.signal,
+      }, timeoutMs)
+      const text = await response.text()
+
+      if (!response.ok) {
+        throw new SyncServerError(syncServerResponseErrorMessage(response.status, text), response.status)
+      }
+
+      if (!text) return null
+
+      try {
+        return JSON.parse(text)
+      } catch (error) {
+        if (error.name !== 'SyntaxError') throw error
+        return text
+      }
+    } catch (error) {
+      if (error instanceof SyncServerError) {
+        throw error
+      }
+      if (error?.name === 'AbortError') {
+        if (this.cancelled) throw new SyncServerCancelledError()
+        throw new SyncServerError('Sync server request timed out')
+      }
+      throw new SyncServerError(error?.message || 'Unable to reach sync server')
+    } finally {
+      cancelTimeout()
+      this.requestControllers.delete(controller)
+      releaseRequest()
+    }
+  }
+
+  health() {
+    return this.request('/health')
+  }
+
+  getServerInfo() {
+    this.serverInfoPromise ??= this.health().then(response => {
+      // Existing LibreTube servers return the plain text "OK". A structured
+      // health response advertises the optional OpenTubeX extensions.
+      if (!response || typeof response !== 'object' || Array.isArray(response)) return {}
+      return response
+    }).catch(error => {
+      this.serverInfoPromise = null
+      throw error
+    })
+    return this.serverInfoPromise
+  }
+
+  async getCapabilities() {
+    const { capabilities } = await this.getServerInfo()
+    const supported = capabilities && typeof capabilities === 'object' ? capabilities : {}
+    if (supported.encrypted_sync === 1 && supported.live_sync !== 1) {
+      throw new SyncServerUnsupportedError()
+    }
+    return supported
+  }
+
+  async getPrivacyPolicyUrl() {
+    const { privacy_policy_url: value } = await this.getServerInfo()
+    if (typeof value !== 'string') return null
+    try {
+      const url = new URL(value)
+      return ['https:', 'http:'].includes(url.protocol) && !url.username && !url.password
+        ? url.href
+        : null
+    } catch {
+      return null
+    }
+  }
+
+  /**
+   * The OIDC login the server offers, or null. Servers report it through
+   * `/meta`, which older servers do not serve.
+   * @returns {Promise<{ name: string } | null>}
+   */
+  async getOidcLogin() {
+    let meta
+    try {
+      // Without session listing the app cannot tell whether a login callback
+      // belongs to a sign-in this device started.
+      if (!await this.supportsAccountSessions()) return null
+      meta = await this.request('/meta')
+    } catch (error) {
+      if (error instanceof SyncServerCancelledError) throw error
+      return null
+    }
+    if (meta?.oidc !== true) return null
+    const name = typeof meta.oidc_display_name === 'string' ? meta.oidc_display_name.trim() : ''
+    return { name }
+  }
+
+  /**
+   * Whether OIDC callbacks carry the `state` the app sent. Older servers do
+   * not serve `/meta`.
+   * @returns {Promise<boolean>}
+   */
+  async returnsOidcState() {
+    try {
+      return (await this.request('/meta'))?.oidc_state === true
+    } catch (error) {
+      if (error.status === 404) return false
+      throw error
+    }
+  }
+
+  async supportsEncryptedSync() {
+    const capabilities = await this.getCapabilities()
+    return capabilities.encrypted_sync === 1
+  }
+
+  async supportsBulkSync() {
+    const capabilities = await this.getCapabilities()
+    return capabilities.bulk_sync === 1
+  }
+
+  async supportsPlaylistThumbnails() {
+    const capabilities = await this.getCapabilities()
+    return capabilities.playlist_thumbnails === 1
+  }
+
+  async supportsSeenVideosSync() {
+    const capabilities = await this.getCapabilities()
+    return capabilities.seen_videos === 1
+  }
+
+  async supportsKeyPairing() {
+    const capabilities = await this.getCapabilities()
+    return capabilities.key_pairing === 1
+  }
+
+  async supportsAccountSessions() {
+    const capabilities = await this.getCapabilities()
+    return capabilities.account_sessions === 1
+  }
+
+  createPairingSession(recipient) {
+    return this.request('/v1/pairing', {
+      method: 'POST',
+      body: {
+        version: 1,
+        id: recipient.sessionId,
+        recipient_public_key: recipient.recipientPublicKey,
+        recipient_device_id: recipient.recipientDeviceId,
+        recipient_device_name: recipient.recipientDeviceName,
+        recipient_token_hash: recipient.recipientTokenHash,
+      },
+    })
+  }
+
+  getPairingSession(sessionId, recipientToken) {
+    return this.request(`/v1/pairing/${encodeURIComponent(sessionId)}`, {
+      headers: { 'X-Pairing-Token': recipientToken },
+    })
+  }
+
+  claimPairingSession(request, encryptedDeviceInfo) {
+    return this.request(`/v1/pairing/${encodeURIComponent(request.sessionId)}/claim`, {
+      method: 'POST',
+      body: {
+        version: request.version,
+        recipient_public_key: request.recipientPublicKey,
+        recipient_device_id: request.recipientDeviceId,
+        recipient_device_name: request.recipientDeviceName,
+        encrypted_device_info: encryptedDeviceInfo,
+      },
+    })
+  }
+
+  approvePairingSession(sessionId, approvingDeviceId, encryptedPayload) {
+    return this.request(`/v1/pairing/${encodeURIComponent(sessionId)}`, {
+      method: 'PUT',
+      body: {
+        approving_device_id: approvingDeviceId,
+        encrypted_payload: encryptedPayload,
+      },
+    })
+  }
+
+  consumePairingSession(sessionId, recipientToken) {
+    return this.request(`/v1/pairing/${encodeURIComponent(sessionId)}/consume`, {
+      method: 'POST',
+      headers: { 'X-Pairing-Token': recipientToken },
+    })
+  }
+
+  cancelPairingSession(sessionId, recipientToken) {
+    return this.request(`/v1/pairing/${encodeURIComponent(sessionId)}`, {
+      method: 'DELETE',
+      headers: { 'X-Pairing-Token': recipientToken },
+    })
+  }
+
+  getEncryptedSyncManifest({ playbackSpeedsInSettings = false } = {}) {
+    const query = playbackSpeedsInSettings ? '?playback_speeds_in_settings=true' : ''
+    return this.request(`/v1/encrypted_sync${query}`, { timeoutMs: MAX_ENCRYPTED_SYNC_TIMEOUT_MS })
+  }
+
+  /**
+   * Servers with `collection_changes` return only the changes after `since`
+   * when they can, and refuse reads without it while changes are pending.
+   * Reading with `since` also lets the account append changes. Older servers
+   * ignore it and return the full collection.
+   * @param {string} collection
+   * @param {number} [since]
+   */
+  getEncryptedSyncCollection(collection, since) {
+    const query = since === undefined ? '' : `?since=${encodeURIComponent(since)}`
+    return this.request(
+      `/v1/encrypted_sync/${encodeURIComponent(collection)}${query}`,
+      { timeoutMs: MAX_ENCRYPTED_SYNC_TIMEOUT_MS }
+    )
+  }
+
+  getLegacyEncryptedSync() {
+    return this.request('/v1/encrypted_sync/legacy', { timeoutMs: MAX_ENCRYPTED_SYNC_TIMEOUT_MS })
+  }
+
+  putEncryptedSyncCollection(collection, revision, payload, activity) {
+    // Upload throughput and server commit latency cannot be inferred from size.
+    // Allow the same bounded transfer window as encrypted downloads.
+    return this.request(`/v1/encrypted_sync/${encodeURIComponent(collection)}`, {
+      method: 'PUT',
+      body: { revision, payload, ...(activity ? { activity } : {}) },
+      timeoutMs: MAX_ENCRYPTED_SYNC_TIMEOUT_MS,
+    })
+  }
+
+  appendEncryptedSyncChange(collection, revision, payload, activity) {
+    return this.request(`/v1/encrypted_sync/${encodeURIComponent(collection)}/changes`, {
+      method: 'POST',
+      body: { revision, payload, ...(activity ? { activity } : {}) },
+    })
+  }
+
+  waitForSyncChanges(cursor) {
+    return this.request(`/v1/encrypted_sync/changes?since=${encodeURIComponent(cursor)}`, { timeoutMs: CHANGES_WAIT_TIMEOUT_MS })
+  }
+
+  getSyncEvents(since = '') {
+    // Activity is encrypted and padded too; accumulated events can be several
+    // megabytes even when the library collections need no further changes.
+    return this.request(`/v1/encrypted_sync/events?since=${encodeURIComponent(since)}`, { timeoutMs: MAX_ENCRYPTED_SYNC_TIMEOUT_MS })
+  }
+
+  sendDeviceRequest(recipient, payload) {
+    return this.request('/v1/encrypted_sync/events', { method: 'POST', body: { recipient, payload } })
+  }
+
+  acknowledgeDeviceRequest(id) {
+    return this.request(`/v1/encrypted_sync/events/${encodeURIComponent(id)}`, { method: 'DELETE' })
+  }
+
+  async apiRequest(path, options = {}) {
+    if (this.apiPrefix !== null) {
+      return this.request(`${this.apiPrefix}${path}`, options)
+    }
+
+    try {
+      const response = await this.request(`/v1${path}`, options)
+      this.apiPrefix = '/v1'
+      return response
+    } catch (error) {
+      if (error.status !== 404) throw error
+      const response = await this.request(path, options)
+      this.apiPrefix = ''
+      return response
+    }
+  }
+
+  async authenticate(mode, name, password, deviceId) {
+    // Account operations use the v1 contract, independent of legacy sync routing.
+    const response = await this.request(`/v1/account/${mode}`, {
+      method: 'POST',
+      body: { name, password, device_id: deviceId },
+    })
+    this.token = response.jwt
+    return response.jwt
+  }
+
+  /**
+   * Starts deleting an OIDC account. The server deletes it once its owner signs
+   * in at the returned URL.
+   * @param {string} redirectUrl
+   * @param {string} state returned in the callback by servers that support it
+   * @returns {Promise<string>}
+   */
+  async startOidcAccountDeletion(redirectUrl, state) {
+    const response = await this.request('/v1/account/oidc/delete', {
+      method: 'POST',
+      body: { redirect_url: redirectUrl, state },
+    })
+    let url = null
+    try {
+      url = new URL(response?.authorization_url)
+    } catch {}
+    if (url?.protocol !== 'https:' && url?.protocol !== 'http:') {
+      throw new SyncServerError('The sync server returned an invalid sign-in URL')
+    }
+    return url.href
+  }
+
+  deleteAccount(password) {
+    return this.request('/v1/account/delete', {
+      method: 'DELETE',
+      body: { password },
+    })
+  }
+
+  getAccountSessions() {
+    return this.request('/v1/account/sessions')
+  }
+
+  updateAccountSession(sessionId, encryptedDeviceInfo) {
+    return this.request(`/v1/account/sessions/${encodeURIComponent(sessionId)}`, {
+      method: 'PATCH',
+      body: { encrypted_device_info: encryptedDeviceInfo },
+    })
+  }
+
+  revokeAccountSession(sessionId) {
+    return this.request(`/v1/account/sessions/${encodeURIComponent(sessionId)}`, {
+      method: 'DELETE',
+    })
+  }
+
+  changePassword(currentPassword, newPassword) {
+    return this.request('/v1/account/password', {
+      method: 'PUT',
+      body: {
+        current_password: currentPassword,
+        new_password: newPassword,
+      },
+    })
+  }
+
+  getSubscriptions() {
+    return this.apiRequest('/subscriptions/')
+  }
+
+  async getSubscriptionGroups() {
+    try {
+      return await this.apiRequest('/subscriptions/groups/')
+    } catch (error) {
+      if (error.status === 404) return null
+      throw error
+    }
+  }
+
+  createSubscriptionGroup(group) {
+    return this.apiRequest('/subscriptions/groups/', { method: 'POST', body: group })
+  }
+
+  updateSubscriptionGroup(groupId, group) {
+    return this.apiRequest(`/subscriptions/groups/${encodeURIComponent(groupId)}`, {
+      method: 'PATCH',
+      body: group,
+    })
+  }
+
+  deleteSubscriptionGroup(groupId) {
+    return this.apiRequest(`/subscriptions/groups/${encodeURIComponent(groupId)}`, {
+      method: 'DELETE',
+    })
+  }
+
+  addSubscriptionGroupChannel(groupId, channelId) {
+    return this.apiRequest(
+      `/subscriptions/groups/${encodeURIComponent(groupId)}/channels/${encodeURIComponent(channelId)}`,
+      { method: 'PUT' }
+    )
+  }
+
+  removeSubscriptionGroupChannel(groupId, channelId) {
+    return this.apiRequest(
+      `/subscriptions/groups/${encodeURIComponent(groupId)}/channels/${encodeURIComponent(channelId)}`,
+      { method: 'DELETE' }
+    )
+  }
+
+  subscribe(channel) {
+    return this.apiRequest('/subscriptions/', { method: 'PUT', body: channel })
+  }
+
+  subscribeBulk(channels) {
+    return this.apiRequest('/subscriptions/bulk', { method: 'PUT', body: channels })
+  }
+
+  unsubscribe(channelId) {
+    return this.apiRequest(`/subscriptions/${encodeURIComponent(channelId)}`, { method: 'DELETE' })
+  }
+
+  getPlaylists() {
+    return this.apiRequest('/playlists/')
+  }
+
+  getPlaylistBookmarks() {
+    return this.apiRequest('/playlist_bookmarks/')
+  }
+
+  createPlaylistBookmark(bookmark) {
+    return this.apiRequest('/playlist_bookmarks/', { method: 'POST', body: bookmark })
+  }
+
+  deletePlaylistBookmark(playlistId) {
+    return this.apiRequest(
+      `/playlist_bookmarks/${encodeURIComponent(playlistId)}`,
+      { method: 'DELETE' }
+    )
+  }
+
+  getPlaylist(playlistId) {
+    return this.apiRequest(`/playlists/${encodeURIComponent(playlistId)}`)
+  }
+
+  createPlaylist(playlist) {
+    return this.apiRequest('/playlists/', { method: 'POST', body: playlist })
+  }
+
+  updatePlaylist(playlistId, playlist) {
+    return this.apiRequest(`/playlists/${encodeURIComponent(playlistId)}`, {
+      method: 'PATCH',
+      // Omitted custom thumbnails are left alone by released clients. An empty
+      // value explicitly restores the default without changing thumbnail_url.
+      body: {
+        ...playlist,
+        ...(Object.hasOwn(playlist, 'custom_thumbnail') ? { custom_thumbnail: playlist.custom_thumbnail ?? '' } : {}),
+      },
+    })
+  }
+
+  deletePlaylist(playlistId) {
+    return this.apiRequest(`/playlists/${encodeURIComponent(playlistId)}`, { method: 'DELETE' })
+  }
+
+  addPlaylistVideos(playlistId, videos) {
+    return this.apiRequest(`/playlists/${encodeURIComponent(playlistId)}/videos`, {
+      method: 'POST',
+      body: videos,
+    })
+  }
+
+  removePlaylistVideo(playlistId, videoId) {
+    return this.apiRequest(
+      `/playlists/${encodeURIComponent(playlistId)}/videos/${encodeURIComponent(videoId)}`,
+      { method: 'DELETE' }
+    )
+  }
+
+  async getWatchHistory() {
+    const history = []
+    const capabilities = await this.getCapabilities()
+    const advertisedPageSize = capabilities.history_page_size
+    const hasUsablePageSize = Number.isInteger(advertisedPageSize) && advertisedPageSize > 0
+    const pageSize = hasUsablePageSize ? advertisedPageSize : LEGACY_HISTORY_PAGE_SIZE
+    const pageSizeQuery = hasUsablePageSize ? `&page_size=${pageSize}` : ''
+
+    for (let page = 1; ; page++) {
+      let entries
+      try {
+        entries = await this.apiRequest(
+          `/watch_history/?page=${page}&order=added_date_desc${pageSizeQuery}`
+        )
+      } catch (error) {
+        if (error.status === 404) return null
+        throw error
+      }
+      history.push(...entries)
+      // An empty page ends paging even if the server ignored the requested
+      // size, so a misreported capability cannot keep this loop running.
+      if (entries.length === 0 || entries.length < pageSize) {
+        return history
+      }
+    }
+  }
+
+  putWatchHistory(entry) {
+    return this.apiRequest('/watch_history/', { method: 'PUT', body: entry })
+  }
+
+  putWatchHistoryBulk(entries) {
+    return this.apiRequest('/watch_history/bulk', { method: 'PUT', body: entries })
+  }
+
+  deleteWatchHistory(videoId) {
+    return this.apiRequest(`/watch_history/${encodeURIComponent(videoId)}`, { method: 'DELETE' })
+  }
+
+  async getChannelPlaybackSpeeds() {
+    try {
+      return await this.apiRequest('/channel_playback_speeds/')
+    } catch (error) {
+      if (error.status === 404) return null
+      throw error
+    }
+  }
+}
+
+function mapBy(items, getId) {
+  return new Map(items.map(item => [getId(item), item]))
+}
+
+async function uploadInChunks(items, supportsBulk, uploadBulk, uploadSingle) {
+  if (items.length === 0) return
+
+  if (supportsBulk) {
+    for (let index = 0; index < items.length; index += BULK_SYNC_CHUNK_SIZE) {
+      await uploadBulk(items.slice(index, index + BULK_SYNC_CHUNK_SIZE))
+    }
+    return
+  }
+
+  // Older LibreTube-compatible servers do not expose bulk endpoints.
+  for (let index = 0; index < items.length; index += LEGACY_SYNC_CONCURRENCY) {
+    const chunk = items.slice(index, index + LEGACY_SYNC_CONCURRENCY)
+    const results = await Promise.allSettled(chunk.map(uploadSingle))
+
+    for (let resultIndex = 0; resultIndex < results.length; resultIndex++) {
+      const result = results[resultIndex]
+      if (result.status === 'fulfilled') continue
+
+      const status = result.reason?.status
+      const retryable = status === 409 || status === 423 || status === 429 || status >= 500
+      if (!retryable) throw result.reason
+
+      // Some legacy SQLite servers reject concurrent writes instead of queuing them.
+      await uploadSingle(chunk[resultIndex])
+    }
+  }
+}
+
+export function mergeIds(...args) {
+  return mergeSyncIds(...args)
+}
+
+function channelToRemote(channel) {
+  return {
+    id: channel.id,
+    name: channel.name || channel.id,
+    avatar: normalizeChannelAvatar(channel.thumbnail) || DEFAULT_CHANNEL_AVATAR,
+    verified: false,
+  }
+}
+
+function channelToLocal(channel) {
+  return {
+    id: channel.id,
+    name: channel.name,
+    thumbnail: normalizeChannelAvatar(channel.avatar),
+  }
+}
+
+function videoToRemote(video, options) {
+  return syncVideoToRemote(video, options)
+}
+
+function videoToLocal(video, timeAdded = Date.now()) {
+  return {
+    videoId: video.id,
+    title: video.title,
+    ...uploaderToLocal(video.uploader),
+    lengthSeconds: video.duration,
+    published: video.upload_date,
+    timeAdded,
+    playlistItemId: generateRandomUniqueId(),
+    type: 'video',
+  }
+}
+
+/** `null` follows the default sort order. */
+function playlistSortOrder(sortOrder) {
+  return isPlaylistSortOrder(sortOrder) ? sortOrder : null
+}
+
+function playlistMetadataFromLocal(playlist, features) {
+  return {
+    id: playlist._id,
+    title: playlist.playlistName,
+    description: playlist.description || '',
+    thumbnail_url: null,
+    ...(features.thumbnails ? { custom_thumbnail: playlist.customThumbnail || null } : {}),
+    ...(features.sortOrder ? { sort_order: playlistSortOrder(playlist.sortOrder) } : {}),
+  }
+}
+
+function playlistMetadataFromRemote(playlist, features) {
+  return {
+    id: playlist.id,
+    title: playlist.title,
+    description: playlist.description || '',
+    thumbnail_url: null,
+    ...(features.thumbnails ? { custom_thumbnail: playlist.custom_thumbnail || null } : {}),
+    ...(features.sortOrder ? { sort_order: playlistSortOrder(playlist.sort_order) } : {}),
+  }
+}
+
+// Baselines only detect cover edits. A fingerprint avoids repeating every
+// image in each snapshot write.
+function thumbnailFingerprint(thumbnail) {
+  if (!thumbnail) return null
+  let first = 0xdeadbeef
+  let second = 0x41c6ce57
+  for (let index = 0; index < thumbnail.length; index++) {
+    const code = thumbnail.charCodeAt(index)
+    first = Math.imul(first ^ code, 2654435761)
+    second = Math.imul(second ^ code, 1597334677)
+  }
+  first = Math.imul(first ^ (first >>> 16), 2246822507) ^ Math.imul(second ^ (second >>> 13), 3266489909)
+  second = Math.imul(second ^ (second >>> 16), 2246822507) ^ Math.imul(first ^ (first >>> 13), 3266489909)
+  return `${thumbnail.length}:${(second >>> 0).toString(36)}${(first >>> 0).toString(36)}`
+}
+
+function playlistBaselineMetadata(metadata) {
+  if (!Object.hasOwn(metadata, 'custom_thumbnail')) return metadata
+  return { ...metadata, custom_thumbnail: thumbnailFingerprint(metadata.custom_thumbnail) }
+}
+
+function metadataEquals(first, second) {
+  return JSON.stringify(first) === JSON.stringify(second)
+}
+
+function selectPlaylistMetadata(local, remote, previous, features) {
+  if (!local) return playlistMetadataFromRemote(remote, features)
+  if (!remote) return playlistMetadataFromLocal(local, features)
+
+  const localMetadata = playlistMetadataFromLocal(local, features)
+  const remoteMetadata = playlistMetadataFromRemote(remote, features)
+  if (!previous) return localMetadata
+
+  const previousMetadata = playlistMetadataFromRemote(previous, features)
+  const localBaseline = playlistBaselineMetadata(localMetadata)
+  const merged = { ...localMetadata }
+  const fields = ['title', 'description', ...(features.thumbnails ? ['custom_thumbnail'] : []), ...(features.sortOrder ? ['sort_order'] : [])]
+  for (const field of fields) {
+    if (localBaseline[field] === previousMetadata[field]) {
+      merged[field] = remoteMetadata[field]
+    }
+  }
+  return merged
+}
+
+function isSameLocalPlaylist(playlist, metadata, videos) {
+  return playlist.playlistName === metadata.title &&
+    (playlist.description || '') === metadata.description &&
+    (!Object.hasOwn(metadata, 'custom_thumbnail') || (playlist.customThumbnail || null) === metadata.custom_thumbnail) &&
+    (!Object.hasOwn(metadata, 'sort_order') || playlistSortOrder(playlist.sortOrder) === metadata.sort_order) &&
+    playlist.videos.length === videos.length &&
+    playlist.videos.every((video, index) => metadataEquals(video, videos[index]))
+}
+
+export async function syncSubscriptions(client, store, previousIds = [], options = {}) {
+  // Subscriptions edited here or in another window while the server responds
+  // would be overwritten, so merge again from the changed subscriptions.
+  let baseline = previousIds
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const result = await mergeSubscriptions(client, store, baseline, options)
+    if (result.mergedIds) return result.mergedIds
+    // The attempt already brought the server to its merge of the local
+    // subscriptions it read, so the retry merges against those. Otherwise an
+    // edit made meanwhile would look like a change from another device and be
+    // undone.
+    baseline = result.baseline
+  }
+  throw new Error('Subscriptions changed during sync. Try again.')
+}
+
+async function mergeSubscriptions(client, store, previousIds, options) {
+  const profiles = deepCopy(store.state.profiles.profileList)
+  const mainProfile = profiles.find(profile => profile._id === MAIN_PROFILE_ID) ?? profiles[0]
+  const localSubscriptions = mainProfile.subscriptions.map(channel => ({
+    ...channel,
+    thumbnail: normalizeChannelAvatar(channel.thumbnail),
+  }))
+  const localById = mapBy(localSubscriptions, channel => channel.id)
+  const remoteSubscriptions = await client.getSubscriptions()
+  const remoteById = mapBy(remoteSubscriptions, channel => channel.id)
+  const mergedIds = mergeIds(localById.keys(), remoteById.keys(), previousIds, {
+    ...options,
+    collection: 'subscriptions',
+    getItemName: id => localById.get(id)?.name || remoteById.get(id)?.name,
+  })
+
+  for (const id of remoteById.keys()) {
+    if (!mergedIds.has(id)) {
+      await client.unsubscribe(id)
+    }
+  }
+  const subscriptionsToAdd = Array.from(mergedIds)
+    .filter(id => !remoteById.has(id))
+    .map(id => channelToRemote(localById.get(id)))
+  await uploadInChunks(
+    subscriptionsToAdd,
+    await client.supportsBulkSync(),
+    channels => client.subscribeBulk(channels),
+    channel => client.subscribe(channel)
+  )
+
+  const mergedSubscriptions = Array.from(mergedIds).map(id => {
+    return localById.get(id) ?? channelToLocal(remoteById.get(id))
+  })
+  const mergedIdSet = new Set(mergedIds)
+
+  let mainProfileSaved = false
+  for (const profile of profiles) {
+    const subscriptions = profile._id === mainProfile._id
+      ? mergedSubscriptions
+      : profile.subscriptions.filter(channel => mergedIdSet.has(channel.id))
+
+    if (!metadataEquals(profile.subscriptions, subscriptions)) {
+      const saved = await store.dispatch('updateProfileSubscriptionsFromSync', {
+        profileId: profile._id,
+        subscriptions,
+        previous: profile.subscriptions,
+      })
+      if (!saved) {
+        // Once the main profile holds the merge, both sides agree on it.
+        return { baseline: Array.from(mainProfileSaved ? mergedIds : localById.keys()) }
+      }
+    }
+    if (profile._id === mainProfile._id) mainProfileSaved = true
+  }
+
+  return { mergedIds: Array.from(mergedIds) }
+}
+
+export async function syncPlaylistBookmarks(client, store, previousIds = [], options = {}) {
+  const localBookmarks = (Array.isArray(store.state.settings.playlistBookmarks)
+    ? store.state.settings.playlistBookmarks
+    : []).filter(isValidPlaylistBookmark)
+  const localById = mapBy(localBookmarks, bookmark => bookmark.playlist.id)
+  const remoteBookmarks = (await client.getPlaylistBookmarks()).filter(isValidPlaylistBookmark)
+  const remoteById = mapBy(remoteBookmarks, bookmark => bookmark.playlist.id)
+  const mergedIds = mergeIds(localById.keys(), remoteById.keys(), previousIds, {
+    ...options,
+    collection: 'playlistBookmarks',
+    getItemName: id => localById.get(id)?.playlist.title || remoteById.get(id)?.playlist.title,
+  })
+
+  for (const id of remoteById.keys()) {
+    if (!mergedIds.has(id)) {
+      await client.deletePlaylistBookmark(id)
+    }
+  }
+
+  for (const id of localById.keys()) {
+    if (!remoteById.has(id) && mergedIds.has(id)) {
+      await client.createPlaylistBookmark(playlistBookmarkForSync(localById.get(id)))
+    }
+  }
+
+  const addedIds = Array.from(mergedIds).filter(id => !localById.has(id))
+  const removedIds = new Set(Array.from(localById.keys()).filter(id => !mergedIds.has(id)))
+
+  if (addedIds.length > 0 || removedIds.size > 0) {
+    // Apply the merge to the saved list as part of the write, so bookmarks
+    // saved or removed meanwhile survive, and the next sync syncs them.
+    const saved = await store.dispatch('updatePlaylistBookmarks', savedBookmarks => {
+      const currentBookmarks = savedBookmarks.filter(isValidPlaylistBookmark)
+      const currentIds = new Set(currentBookmarks.map(bookmark => bookmark.playlist.id))
+      return [
+        ...currentBookmarks.filter(bookmark => !removedIds.has(bookmark.playlist.id)),
+        ...addedIds.filter(id => !currentIds.has(id)).map(id => ({ ...remoteById.get(id), savedAt: Date.now() })),
+      ]
+    })
+    if (!saved) throw new Error('Could not save synced playlist bookmarks')
+  }
+
+  return Array.from(mergedIds)
+}
+
+export async function syncPlaylists(client, store, previous = {}, options = {}) {
+  const features = {
+    thumbnails: typeof client.supportsPlaylistThumbnails === 'function' && await client.supportsPlaylistThumbnails(),
+    sortOrder: typeof client.supportsPlaylistSortOrder === 'function' && await client.supportsPlaylistSortOrder(),
+  }
+  const localPlaylists = deepCopy(store.state.playlists.playlists)
+  const localById = mapBy(localPlaylists, playlist => playlist._id)
+  const remotePlaylistHeaders = await client.getPlaylists()
+  const remotePlaylists = await Promise.all(
+    remotePlaylistHeaders.map(playlist => client.getPlaylist(playlist.id))
+  )
+  const localIdByRemoteId = new Map(Object.entries(previous).map(([localId, snapshot]) => {
+    return [snapshot.remoteId ?? localId, localId]
+  }))
+  const remoteById = new Map(remotePlaylists.map(entry => {
+    const remoteId = entry.playlist.id
+    const localId = localIdByRemoteId.get(remoteId) ?? remoteId
+    return [localId, { ...entry, remoteId }]
+  }))
+  const mergedIds = mergeIds(localById.keys(), remoteById.keys(), Object.keys(previous), {
+    ...options,
+    collection: 'playlists',
+    getItemName: id => localById.get(id)?.playlistName || remoteById.get(id)?.playlist.title || previous[id]?.metadata?.title,
+  })
+  // `removePlaylist` keeps protected playlists, so restore them remotely instead.
+  for (const [id, local] of localById) {
+    if (local.protected) mergedIds.add(id)
+  }
+  const nextSnapshot = {}
+  const assertCurrent = (local, id) => {
+    const current = store.state.playlists.playlists.find(playlist => playlist._id === id)
+    if (!metadataEquals(local, current)) throw new Error('Playlist changed during sync. Try again.')
+  }
+
+  for (const [id, remote] of remoteById) {
+    if (!mergedIds.has(id)) {
+      await client.deletePlaylist(remote.remoteId)
+    }
+  }
+
+  for (const id of localById.keys()) {
+    if (!mergedIds.has(id)) {
+      // `removePlaylist` logs failures instead of returning them.
+      await store.dispatch('removePlaylist', id)
+      if (store.state.playlists.playlists.some(playlist => playlist._id === id)) {
+        throw new Error('Could not remove synced playlist')
+      }
+    }
+  }
+
+  for (const id of mergedIds) {
+    let local = localById.get(id)
+    let remote = remoteById.get(id)
+    // A playlist missing on one side is new there or restored from a kept
+    // deletion, also when a retry finds a restoration that stopped halfway.
+    const restoredPlaylist = !local || !remote || options.deletions?.playlists?.kept?.includes(id)
+    const rawRemoteMetadata = remote ? playlistMetadataFromRemote({ ...remote.playlist, id }, features) : null
+    const metadata = selectPlaylistMetadata(local, rawRemoteMetadata, previous[id]?.metadata, features)
+    if (metadata.custom_thumbnail) {
+      for (const candidate of new Set([metadata.custom_thumbnail, local?.customThumbnail])) {
+        if (!candidate) continue
+        try {
+          metadata.custom_thumbnail = await normalizePlaylistThumbnail(candidate)
+          break
+        } catch (error) {
+          console.warn('Could not load synced playlist thumbnail', id, error)
+          metadata.custom_thumbnail = null
+        }
+      }
+    }
+    let remoteId = remote?.remoteId ?? id
+    assertCurrent(local, id)
+
+    if (!remote) {
+      const createdPlaylist = await client.createPlaylist(metadata)
+      remoteId = createdPlaylist?.id ?? id
+      // Keep the generated ID even if a later stale-state guard aborts this
+      // sync. A retry must recognize our copy instead of importing it as new.
+      await store.persistPlaylistSyncBaseline(id, { remoteId, metadata: playlistBaselineMetadata(metadata) })
+      remote = { playlist: { ...metadata, id: remoteId }, videos: [], remoteId }
+    } else if (!metadataEquals(metadata, rawRemoteMetadata)) {
+      await client.updatePlaylist(remoteId, metadata)
+    }
+
+    const localVideos = local?.videos ?? []
+    const remoteVideosById = mapBy(remote.videos, video => video.id)
+    const localVideosById = mapBy(
+      localVideos.filter(video => videoToRemote(video, options) !== null || remoteVideosById.has(video.videoId)),
+      video => video.videoId
+    )
+    const localMetadataById = new Map()
+    for (const video of localVideos) {
+      const payload = videoToRemote(video, options)
+      if (!payload) continue
+      const existing = localMetadataById.get(video.videoId)
+      localMetadataById.set(video.videoId, existing ? enrichSyncVideo(existing, payload) : payload)
+    }
+    const mergedVideoIds = mergeIds(
+      localVideosById.keys(),
+      remoteVideosById.keys(),
+      previous[id]?.videos,
+      {
+        ...options,
+        restored: restoredPlaylist,
+        collection: 'playlistVideos',
+        scope: id,
+        scopeName: metadata.title,
+        getItemName: videoId => localVideosById.get(videoId)?.title || remoteVideosById.get(videoId)?.title,
+      }
+    )
+    const remoteVideosToAdd = []
+    for (const videoId of mergedVideoIds) {
+      const localMetadata = localMetadataById.get(videoId)
+      const existing = remoteVideosById.get(videoId)
+      if (!localMetadata) continue
+      const enriched = existing ? enrichSyncVideo(existing, localMetadata) : localMetadata
+      if (!metadataEquals(existing, enriched)) remoteVideosToAdd.push(enriched)
+      remoteVideosById.set(videoId, enriched)
+    }
+
+    let added = []
+    const removed = []
+    try {
+      if (remoteVideosToAdd.length > 0) {
+        await client.addPlaylistVideos(remoteId, remoteVideosToAdd)
+        added = remoteVideosToAdd.map(video => video.id)
+      }
+      for (const videoId of remoteVideosById.keys()) {
+        if (!mergedVideoIds.has(videoId)) {
+          await client.removePlaylistVideo(remoteId, videoId)
+          removed.push(videoId)
+        }
+      }
+    } finally {
+      // Record completed writes once, including when a later removal fails.
+      if (added.length > 0 || removed.length > 0) {
+        await store.persistPlaylistSyncBaseline(id, { remoteId, metadata: playlistBaselineMetadata(metadata), added, removed })
+      }
+    }
+
+    // Preserve each local occurrence and its identity/order when metadata alone
+    // changes. The membership map intentionally deduplicates only remote IDs.
+    const retainedVideos = localVideos
+      .filter(video => videoToRemote(video, options) === null || mergedVideoIds.has(video.videoId))
+      .map(video => {
+        const current = video.authorId === UNKNOWN_SYNC_UPLOADER_ID
+          ? { ...video, ...uploaderToLocal({ id: video.authorId, name: video.author }) }
+          : video
+        const remoteVideo = remoteVideosById.get(video.videoId)
+        if (!remoteVideo) return current
+        const uploader = uploaderToLocal(remoteVideo.uploader)
+        const identified = current.authorId || !uploader.authorId ? current : { ...current, authorId: uploader.authorId }
+        const payload = videoToRemote(identified, options)
+        if (!payload) return current
+        const enriched = enrichSyncVideo(payload, remoteVideo)
+        const result = { ...identified }
+        if (payload.title !== enriched.title) result.title = enriched.title
+        if (payload.uploader.name !== enriched.uploader.name) result.author = enriched.uploader.name
+        if (payload.upload_date !== enriched.upload_date) result.published = enriched.upload_date
+        if ((!Number.isFinite(video.lengthSeconds) || video.lengthSeconds <= 0) && payload.duration !== enriched.duration) {
+          result.lengthSeconds = enriched.duration
+          result.isLive = false
+          result.liveNow = false
+          result.isUpcoming = false
+        }
+        return result
+      })
+    const addedVideos = Array.from(mergedVideoIds)
+      .filter(videoId => !localVideosById.has(videoId))
+      .map(videoId => videoToLocal(remoteVideosById.get(videoId)))
+    const mergedVideos = local?.addVideosToTop === true
+      ? addedVideos.concat(retainedVideos)
+      : retainedVideos.concat(addedVideos)
+
+    assertCurrent(local, id)
+    if (!local) {
+      local = {
+        _id: id,
+        playlistName: metadata.title,
+        description: metadata.description,
+        customThumbnail: metadata.custom_thumbnail || '',
+        ...(metadata.sort_order ? { sortOrder: metadata.sort_order } : {}),
+        protected: false,
+        videos: mergedVideos,
+      }
+      if (!await store.dispatch('addPlaylist', local)) throw new Error('Could not save synced playlist')
+    } else if (!isSameLocalPlaylist(local, metadata, mergedVideos)) {
+      const saved = await store.dispatch('updatePlaylistFromSync', {
+        previous: local,
+        // Sorting is a view preference, so a sort order change alone keeps `lastUpdatedAt`
+        keepLastUpdatedAt: isSameLocalPlaylist({ ...local, sortOrder: metadata.sort_order }, metadata, mergedVideos),
+        playlist: {
+          ...local,
+          playlistName: metadata.title,
+          description: metadata.description,
+          ...(features.thumbnails ? { customThumbnail: metadata.custom_thumbnail || '' } : {}),
+          ...(features.sortOrder ? { sortOrder: metadata.sort_order } : {}),
+          videos: mergedVideos,
+        },
+      })
+      if (!saved) throw new Error('Playlist changed during sync. Try again.')
+    }
+
+    await store.persistPlaylistSyncBaseline(id, { remoteId, metadata: playlistBaselineMetadata(metadata), applied: true, videos: Array.from(mergedVideoIds) })
+    nextSnapshot[id] = {
+      remoteId,
+      metadata: playlistBaselineMetadata(metadata),
+      videos: Array.from(mergedVideoIds),
+    }
+  }
+
+  return nextSnapshot
+}
+
+// `changedIds` lists the entries changed locally since the last merge, while
+// the remote history is still the one that merge produced.
+export async function syncHistory(client, store, previous = {}, options = {}, { changedIds = null } = {}) {
+  const historyChanged = new Error('Watch history changed during sync. Try again.')
+  const legacy = typeof client.applyWatchHistoryChanges !== 'function'
+  const acknowledgedUpserts = new Map()
+  const acknowledgedDeletions = new Set()
+  const acknowledge = (upserts, deletions = []) => {
+    for (const id of deletions) {
+      acknowledgedUpserts.delete(id)
+      acknowledgedDeletions.add(id)
+    }
+    for (const entry of upserts) {
+      acknowledgedDeletions.delete(entry.video.id)
+      acknowledgedUpserts.set(entry.video.id, entry.metadata)
+    }
+  }
+  for (let attempt = 0; attempt < 3; attempt++) {
+    store.assertActive?.()
+    const remoteHistory = await client.getWatchHistory()
+    if (remoteHistory === null) return null
+    const revision = store.state.history.historyRevision
+    const localHistory = toRaw(store.state.history.historyCacheSorted).slice()
+    const assertHistoryCurrent = () => {
+      store.assertActive?.()
+      if (store.state.history.historyRevision !== revision) throw historyChanged
+    }
+    let merged
+    try {
+      // Sending tens of thousands of entries to the worker costs more than
+      // the merge. Unchanged entries would merge to their baseline again.
+      // A retry follows an edit made during this sync, which the IDs lack.
+      const changed = changedIds && !legacy && attempt === 0
+        ? selectChangedHistory({ localHistory, remoteHistory, previous, changedIds })
+        : null
+      merged = await runBackgroundJob('mergeHistory', {
+        ...(changed ?? { localHistory, remoteHistory, previous }),
+        // Large deletions take the full merge, which asks to confirm them.
+        options: { ...options, ...(changed ? { allowDataLoss: true } : {}), deferRepairAcknowledgement: !legacy },
+        acknowledged: { upserts: Array.from(acknowledgedUpserts), deletions: Array.from(acknowledgedDeletions) },
+      })
+      if (changed) merged.next = mergeChangedHistoryBaseline(previous, changedIds, merged.next)
+      assertHistoryCurrent()
+    } catch (error) {
+      store.assertActive?.()
+      // Even a failed merge can be based on mixed chunks and report false data
+      // loss. Only retry stale computations; rejected writes have uncertain effects.
+      if (store.state.history.historyRevision !== revision) continue
+      throw error
+    }
+    const { next, baselineChanged, historyToUpload, remoteDeletions, insertions, updates, deletions } = merged
+    let completed = false
+    try {
+      if (!legacy) {
+        if (historyToUpload.length || remoteDeletions.length) {
+          await client.applyWatchHistoryChanges(historyToUpload, remoteDeletions)
+          acknowledge(historyToUpload, remoteDeletions)
+        }
+      } else {
+        for (const id of remoteDeletions) {
+          await client.deleteWatchHistory(id)
+          acknowledge([], [id])
+        }
+        await uploadInChunks(
+          historyToUpload,
+          await client.supportsBulkSync(),
+          async entries => { await client.putWatchHistoryBulk(entries); acknowledge(entries) },
+          async entry => { await client.putWatchHistory(entry); acknowledge([entry]) }
+        )
+      }
+
+      store.assertActive?.()
+      if (store.state.history.historyRevision !== revision) continue
+      if (insertions.length > 0 || updates.length > 0 || deletions.length > 0) {
+        try {
+          await store.dispatch('applyHistorySyncChanges', {
+            insertions,
+            updates,
+            deletions,
+            ...(store.assertActive || revision !== undefined ? { assertActive: assertHistoryCurrent } : {}),
+          })
+        } catch (error) {
+          if (error !== historyChanged) throw error
+          store.assertActive?.()
+          continue
+        }
+      }
+      completed = true
+      return next
+    } finally {
+      // Legacy requests already changed the server even if a later write,
+      // local application, or collection fails. Encrypted adapter writes only
+      // change its in-memory document and must wait for the actual upload.
+      const acknowledged = acknowledgedUpserts.size > 0 || acknowledgedDeletions.size > 0
+      if (legacy && ((completed && baselineChanged) || acknowledged)) {
+        await store.persistHistorySyncBaseline?.({
+          previous,
+          acknowledged: { upserts: Array.from(acknowledgedUpserts), deletions: Array.from(acknowledgedDeletions) },
+          ...(completed ? { next } : {}),
+        })
+      }
+    }
+  }
+  throw historyChanged
+}
+
+function profileMetadata(profile, fallback = {}) {
+  return {
+    title: profile.name,
+    bgColor: getSyncProfileBackground(profile.bgColor, fallback.bgColor),
+    textColor: getSyncProfileTextColor(profile.textColor, fallback.textColor),
+  }
+}
+
+function remoteProfileMetadata(group, fallback = {}) {
+  return {
+    title: group.title,
+    bgColor: getSyncProfileBackground(group.bg_color, fallback.bgColor),
+    textColor: group.text_color ?? fallback.textColor ?? '#FFFFFF',
+  }
+}
+
+export async function syncProfiles(client, store, previous = {}, options = {}) {
+  const profiles = store.state.profiles.profileList
+  const localProfiles = profiles.filter(profile => profile._id !== MAIN_PROFILE_ID)
+  const localById = mapBy(localProfiles, profile => profile._id)
+  const remoteGroups = await client.getSubscriptionGroups()
+  if (remoteGroups === null) return null
+  const localIdByRemoteId = new Map(Object.entries(previous).map(([localId, snapshot]) => {
+    return [snapshot.remoteId ?? localId, localId]
+  }))
+  const remoteById = new Map(remoteGroups.map(entry => {
+    const remoteId = entry.group.id
+    const localId = entry.group.local_id ?? localIdByRemoteId.get(remoteId) ?? remoteId
+    return [localId, { ...entry, remoteId }]
+  }))
+  const mergedIds = mergeIds(localById.keys(), remoteById.keys(), Object.keys(previous), {
+    ...options,
+    collection: 'profiles',
+    getItemName: id => localById.get(id)?.name || remoteById.get(id)?.group.title || previous[id]?.metadata?.title,
+  })
+  const mainSubscriptions = profiles.find(profile => profile._id === MAIN_PROFILE_ID)?.subscriptions ?? []
+  const subscriptionsById = mapBy(mainSubscriptions, channel => channel.id)
+  const next = {}
+
+  for (const [id, remote] of remoteById) {
+    if (!mergedIds.has(id)) await client.deleteSubscriptionGroup(remote.remoteId)
+  }
+  for (const id of localById.keys()) {
+    if (!mergedIds.has(id) && !await store.dispatch('removeProfile', id)) {
+      throw new Error('Could not remove synced profile')
+    }
+  }
+
+  for (const id of mergedIds) {
+    const local = localById.get(id)
+    let remote = remoteById.get(id)
+    // A profile missing on one side is new there or restored from a kept
+    // deletion, also when a retry finds a restoration that stopped halfway.
+    const restoredProfile = !local || !remote || options.deletions?.profiles?.kept?.includes(id)
+    const oldMetadata = previous[id]?.metadata
+    const localMetadata = local ? profileMetadata(local, oldMetadata) : null
+    const remoteMetadata = remote
+      ? remoteProfileMetadata(remote.group, oldMetadata ?? localMetadata ?? {})
+      : null
+    const localChanged = localMetadata && !metadataEquals(localMetadata, oldMetadata)
+    const remoteChanged = remoteMetadata && !metadataEquals(remoteMetadata, oldMetadata)
+    const metadata = remoteChanged && !localChanged ? remoteMetadata : localMetadata ?? remoteMetadata
+    let remoteId = remote?.remoteId ?? id
+
+    const groupPayload = {
+      id,
+      local_id: id,
+      title: metadata.title,
+      bg_color: metadata.bgColor,
+      text_color: metadata.textColor,
+    }
+    if (!remote) {
+      const created = await client.createSubscriptionGroup(groupPayload)
+      remoteId = created?.id ?? id
+      remote = { group: { ...groupPayload, id: remoteId }, channels: [], remoteId }
+    } else if (!metadataEquals(metadata, remoteMetadata)) {
+      await client.updateSubscriptionGroup(remoteId, groupPayload)
+    }
+
+    const localChannelIds = local?.subscriptions.map(channel => channel.id) ?? []
+    const remoteChannelIds = remote.channels.map(channel => channel.id)
+    const mergedChannelIds = mergeIds(
+      localChannelIds,
+      remoteChannelIds,
+      previous[id]?.channels,
+      {
+        ...options,
+        restored: restoredProfile,
+        collection: 'profileChannels',
+        scope: id,
+        scopeName: metadata.title,
+        getItemName: channelId => subscriptionsById.get(channelId)?.name ||
+          local?.subscriptions.find(channel => channel.id === channelId)?.name ||
+          remote.channels.find(channel => channel.id === channelId)?.name,
+      }
+    )
+    for (const channelId of remoteChannelIds) {
+      if (!mergedChannelIds.has(channelId)) {
+        await client.removeSubscriptionGroupChannel(remoteId, channelId)
+      }
+    }
+    for (const channelId of mergedChannelIds) {
+      if (!remoteChannelIds.includes(channelId)) {
+        await client.addSubscriptionGroupChannel(remoteId, channelId)
+      }
+    }
+
+    const mergedSubscriptions = Array.from(mergedChannelIds)
+      .map(channelId => subscriptionsById.get(channelId))
+      .filter(Boolean)
+    const mergedProfile = {
+      _id: id,
+      name: metadata.title,
+      bgColor: getMergedProfileBackground(local, metadata.bgColor),
+      textColor: getMergedProfileTextColor(local, metadata.textColor),
+      ...(local && Object.hasOwn(local, 'icon') ? { icon: local.icon } : {}),
+      subscriptions: mergedSubscriptions,
+    }
+    if (!local || !metadataEquals(local, mergedProfile)) {
+      if (!await store.dispatch('updateProfile', mergedProfile)) throw new Error('Could not save synced profile')
+    }
+
+    next[id] = {
+      remoteId,
+      metadata,
+      channels: Array.from(mergedChannelIds),
+    }
+  }
+
+  return next
+}
+
+function settingUpdater(key) {
+  return `update${key.charAt(0).toUpperCase()}${key.slice(1)}`
+}
+
+async function repairCustomThemeReferences(store, previousThemes, themes) {
+  const themeIds = new Set(themes.map(theme => theme.id))
+  const previousById = new Map(previousThemes.map(theme => [theme.id, theme]))
+  const fallbacks = {
+    baseTheme: 'system',
+    systemLightTheme: 'light',
+    systemDarkTheme: 'dark',
+  }
+
+  for (const [key, defaultTheme] of Object.entries(fallbacks)) {
+    const id = customThemeIdFromValue(store.state.settings[key])
+    if (id === null || themeIds.has(id)) continue
+
+    const deletedTheme = previousById.get(id)
+    if (key === 'baseTheme' && deletedTheme) {
+      await store.dispatch('updateMainColor', deletedTheme.mainColor)
+      await store.dispatch('updateSecColor', deletedTheme.secondaryColor)
+    }
+    await store.dispatch(settingUpdater(key), deletedTheme?.basedOn ?? defaultTheme)
+  }
+
+  await repairSystemThemeSettings(store, themes)
+}
+
+const SYNC_DEVICE_ID_KEY = 'opentubex-sync-device-id'
+let volatileSyncDeviceId = null
+
+function getSyncDeviceId() {
+  try {
+    let deviceId = localStorage.getItem(SYNC_DEVICE_ID_KEY)
+    if (!deviceId) {
+      deviceId = crypto.randomUUID()
+      localStorage.setItem(SYNC_DEVICE_ID_KEY, deviceId)
+    }
+    return deviceId
+  } catch {
+    volatileSyncDeviceId ??= crypto.randomUUID()
+    return volatileSyncDeviceId
+  }
+}
+
+function getTabSessionDeviceIdentity(settings = {}) {
+  const legacyDeviceId = getSyncDeviceId()
+  const deviceId = isValidSyncServerDeviceId(settings.syncServerDeviceId)
+    ? settings.syncServerDeviceId
+    : legacyDeviceId
+  return {
+    deviceId,
+    legacyDeviceIds: deviceId === legacyDeviceId ? [] : [legacyDeviceId],
+  }
+}
+
+export function getSavedOtherDeviceSessions(snapshot, settings) {
+  const { deviceId, legacyDeviceIds } = getTabSessionDeviceIdentity(settings)
+  return getOtherDeviceSessions(
+    snapshot?.sessionsV2 ?? snapshot?.sessions,
+    deviceId,
+    legacyDeviceIds
+  )
+}
+
+function getTabSyncAdapter() {
+  if (process.env.IS_ELECTRON) return window.ftElectron?.tabs ?? null
+  if (process.env.IS_CAPACITOR) {
+    try {
+      return getCapacitorTabService()
+    } catch {
+      return null
+    }
+  }
+  return null
+}
+
+export async function syncSessions(client, store, previous = null, { accountClient = client } = {}) {
+  if (process.env.IS_CAPACITOR && store.state.settings.enableMobileTabs === false) return null
+
+  const tabs = getTabSyncAdapter()
+  if (typeof tabs?.getSyncSessions !== 'function' ||
+      typeof tabs?.applySyncSessions !== 'function') {
+    return null
+  }
+
+  const local = await tabs.getSyncSessions()
+  const remote = await client.getSessions()
+  if (process.env.IS_CAPACITOR && store.state.settings.enableMobileTabs === false) return null
+  const { deviceId, legacyDeviceIds } = getTabSessionDeviceIdentity(store.state.settings)
+  const revokedLogins = getRevokedSyncSessionLogins(remote, deviceId)
+  let reclaimDeviceSessions = false
+  let activeRevokedLogins = []
+  if (revokedLogins.length > 0) {
+    const response = await accountClient.getAccountSessions()
+    const current = Array.isArray(response?.sessions)
+      ? response.sessions.filter(session => session?.current === true)
+      : []
+    if (current.length !== 1 || current[0].device_id !== deviceId ||
+        response.sessions.some(session => typeof session?.id !== 'string' || session.id.length === 0)) {
+      throw new Error(i18n.global.t('Settings.Sync Settings.Account Management Failed'))
+    }
+    // Block this login's entire upload, including windows opened after cleanup.
+    // Keep local tabs intact while the account-session DELETE is pending.
+    if (revokedLogins.includes(current[0].id)) {
+      throw new SyncServerTabRevocationPendingError(i18n.global.t('Settings.Sync Settings.Tab Sync Revocation Pending'))
+    }
+    activeRevokedLogins = revokedLogins.filter(id => response.sessions.some(session => session.id === id))
+    reclaimDeviceSessions = true
+  }
+  const merged = mergeSyncSessions({
+    localSessions: local,
+    remoteValue: remote,
+    previousValue: previous,
+    deviceId,
+    platform: process.env.IS_CAPACITOR ? 'mobile' : 'desktop',
+    preferredMode: store.state.settings.syncServerSharedTabs ? 'shared' : 'separate',
+    legacyDeviceIds,
+    reclaimDeviceSessions,
+    activeRevokedLogins,
+  })
+
+  if (!metadataEquals(local, merged.sessionsToApply) && merged.sessionsToApply.length > 0) {
+    const applied = await tabs.applySyncSessions(merged.sessionsToApply)
+    if (!applied) throw new Error('Failed to apply synced tab sessions')
+  }
+  if (process.env.IS_CAPACITOR && store.state.settings.enableMobileTabs === false) return null
+  if (!metadataEquals(remote, merged.document)) {
+    await client.putSessions(merged.document)
+  }
+  if ((merged.mode === 'shared') !== store.state.settings.syncServerSharedTabs) {
+    await store.dispatch('updateSyncServerSharedTabs', merged.mode === 'shared')
+  }
+
+  return merged
+}
+
+export async function syncSettings(client, store, previousSnapshot = {}) {
+  const remoteEntries = await client.getSettings()
+  // Migrate the last synced snapshot too, so local edits made before the first sync keep their edit time.
+  const previous = migrateLegacySyncedSettings(previousSnapshot)
+  const remote = migrateLegacySyncedSettings(Object.fromEntries(remoteEntries.map(entry => [entry.key, entry])))
+  // Keep the server's entry order even when devices sync different keys.
+  // Reordering unchanged settings would create revisions that wake each other.
+  const merged = { ...remote }
+  const now = Date.now()
+  const localUpdatedAt = store.state.settings.syncServerSettingUpdatedAt !== null &&
+    typeof store.state.settings.syncServerSettingUpdatedAt === 'object' &&
+    !Array.isArray(store.state.settings.syncServerSettingUpdatedAt)
+    ? store.state.settings.syncServerSettingUpdatedAt
+    : {}
+  const local = Object.fromEntries([
+    [CUSTOM_THEMES_SYNC_KEY, normalizeCustomThemes(store.state.utils.customThemes)],
+    ...getSyncableSettingKeys(store.state.settings).map(key => (
+      [key, deepCopy(store.state.settings[key])]
+    )),
+  ])
+
+  if (isSettingSyncEnabled(store.state.settings, SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY)) {
+    local[SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY] = getSubscriptionSettingsForSync(store)
+  }
+
+  for (const [key, value] of Object.entries(local)) {
+    const old = previous[key]
+    const remoteEntry = remote[key]
+    const mergeEntry = key === SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY
+      ? mergeSubscriptionSettingsEntry
+      : mergeSettingEntry
+    let entry = mergeEntry({
+      key,
+      value,
+      old,
+      remoteEntry,
+      localUpdatedAt: localUpdatedAt[key],
+      now,
+    })
+
+    entry = resolveMergedThemeEntry(
+      entry, store.state.utils.customThemes, local[CUSTOM_THEMES_SYNC_KEY], now
+    )
+    merged[key] = entry
+    if (key === 'defaultProfile' &&
+        !store.state.profiles.profileList.some(profile => profile._id === entry.value)) {
+      entry = { key, value: MAIN_PROFILE_ID, updatedAt: now }
+      merged[key] = entry
+    }
+    const currentValue = key === CUSTOM_THEMES_SYNC_KEY || key === SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY
+      ? value
+      : store.state.settings[key]
+    const valuesEqual = key === CUSTOM_THEMES_SYNC_KEY
+      ? areSyncSettingValuesEqual(key, currentValue, entry.value)
+      : metadataEquals(currentValue, entry.value)
+    if (!valuesEqual) {
+      if (key === SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY) {
+        await applySubscriptionSettingsSync(store, entry.value)
+      } else if (key === CUSTOM_THEMES_SYNC_KEY) {
+        const previousThemes = store.state.utils.customThemes
+        const themes = await replaceCustomThemes(entry.value)
+        store.commit('setCustomThemes', themes)
+        await repairCustomThemeReferences(store, previousThemes, themes)
+      } else {
+        await store.dispatch(settingUpdater(key), deepCopy(entry.value))
+      }
+    }
+  }
+
+  await client.putSettings(Object.values(merged))
+  return merged
+}

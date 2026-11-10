@@ -1,0 +1,2622 @@
+# Optional AI-generated translations for keys missing from ../eo.yaml.
+Color Picker:
+  Hue: Nuanco
+  Opacity: Opakeco
+  Backdrop Blur: Fona nebulo
+  Hex Color: Deksesuma koloro
+  Apply Color: Apliki
+  Reset Color: Restarigi
+  Copy Color: Kopii
+  Copy From Another Color: Kopii el alia koloro
+  Color Copied: Koloro kopiita
+  Invalid Color: Enigu validan deksesuman koloron
+  Clipboard Unavailable: Tondujo ne disponeblas
+  Saturation and Brightness: Saturiĝo kaj heleco
+New Tab: Nova langeto
+Maximize: Maksimumigi
+Restore: Restarigi
+Close Tab: Fermi langeton
+Close Confirmation:
+  Title: Ĉu eliri el OpenTubeX?
+  Message: Ĉu vi certas, ke vi volas eliri el OpenTubeX?
+  Background Sync Warning: Eliro haltigos la fonan aktualigadon de abonoj.
+  Hide Window: Kaŝi fenestron
+  Quit: Eliri
+  Never Ask Again: Neniam plu demandi
+Older Version Changes:
+  Title: Ŝanĝoj el pli malnova versio
+  Message: Ŝanĝoj, kiujn vi faris en pli malnova versio de OpenTubeX, estis aplikitaj al via biblioteko.
+  Detail: Se ero estis ŝanĝita en ambaŭ versioj, la ŝanĝo el la pli malnova versio estis konservita. Savkopio de via antaŭa biblioteko troviĝas en via profila dosierujo.
+Library Format Changed:
+  Title: Biblioteko movita al nova formo
+  Message: Via biblioteko nun uzas novan konservan formon.
+  Detail: Pli malnovaj versioj de OpenTubeX ankoraŭ povas malfermi vian bibliotekon, sed ili montras ĝin kiel ĝi estis antaŭ ĉi tiu ĝisdatigo. Ŝanĝoj, kiujn vi faras en pli malnova versio, estas realdonitaj kiam vi revenas al ĉi tiu versio.
+Close Window Confirmation:
+  Title: Ĉu fermi fenestron?
+  Message: Ĉi tiu fenestro enhavas {count} langetojn. Ĉu vi certas, ke vi volas fermi ĝin?
+  Close Window: Fermi fenestron
+Confirmations:
+  Never Ask Again: Neniam plu demandi
+  Settings Hint: Vi povas reŝalti ĉi tiun konfirmon en Agordoj → Ĝenerala → Konfirmi antaŭ…
+Close Multiple Tabs Confirmation:
+  Title: Ĉu fermi plurajn langetojn?
+  Message: Tio fermos {count} langetojn.
+  Close Tabs: Fermi {count} langetojn
+Load Multiple Tabs Confirmation:
+  Title: Ĉu ŝargi plurajn langetojn?
+  Message: Tio ŝargos {count} langetojn.
+  Load Tabs: Ŝargi {count} langetojn
+Unload Multiple Tabs Confirmation:
+  Title: Ĉu malŝargi plurajn langetojn?
+  Message: Tio malŝargos {count} langetojn.
+  Unload Tabs: Malŝargi {count} langetojn
+Tabs Unloaded To Free Memory: Malŝargis {count} langeton, kiun vi ne uzis lastatempe, por liberigi memoron | Malŝargis {count} langetojn, kiujn vi ne uzis lastatempe, por liberigi memoron
+Use Vertical Tabs: Uzi vertikalajn langetojn
+Use Horizontal Tabs: Uzi horizontalajn langetojn
+Resize Tab Bar: Ŝanĝi grandecon de langetobreto
+Find in page: Serĉi en paĝo
+Previous match: Antaŭa trafo
+Next match: Sekva trafo
+Close find bar: Fermi serĉobreton
+No matches: Neniu trafo
+Version {versionNumber} is now available.: Versio {versionNumber} nun disponeblas.
+See changes and update: Vidi ŝanĝojn kaj ĝisdatigi
+Dismiss: Ignori
+Update to {version}: Ĝisdatigi al {version}
+Update With Package Manager: 'Ĝisdatigi per {packageManager}:'
+Update Command Copied: Ĝisdatiga komando kopiita
+Global:
+  Ambient Mode: Ĉirkaŭa reĝimo
+  Loading More: Ŝargado de pli
+  New: Nova
+Search Bar:
+  Use Suggestion: Uzi proponon
+Search Listing:
+  Label:
+    Members Only: Nur por membroj
+    Possibly AI-generated: Eble generita de AI
+Search Filters:
+  Possible Age Restriction Hint: YouTube eble aĝolimigis ĉi tiun serĉpeton.
+  Cookie Search Failed: Serĉo malsukcesis kun la agorditaj kuketoj.
+  Showing results for: Montrante rezultojn por {query}
+  Search instead for: Serĉi anstataŭe {query}
+  Including results for: Inkluzivante rezultojn por {query}
+  Search only for: Serĉi nur {query}
+  Did you mean: Ĉu vi celis {query}?
+Stats:
+  Left of daily limit: 'Restas {duration} el via ĉiutaga limo de {limit}'
+  Daily limit reached: Ĉiutaga limo de {limit} atingita
+  Replace old device: Anstataŭigi malnovan aparaton
+  Replacement explanation: Kunigu {device} kun ĉi tiu aparato nur se ambaŭ eroj apartenas al la sama fizika aparato.
+  Overlapping days: 'Tagoj en ambaŭ historioj: {count}'
+  Overlapping watch time: Interkovra spekttempo
+  Keep larger daily total: Konservi la pli grandan ĉiutagan sumon
+  Larger total explanation: Plej taŭga por duobligitaj historioj. Povas maltrafi aldonan spektadon en la sama tago.
+  Add daily totals: Adicii ĉiutagajn sumojn
+  Add totals explanation: Plej taŭga por apartaj historioj. Povas kalkuli duobligitan spektadon dufoje.
+  Replacement preservation: Tagoj trovitaj en nur unu historio estas konservitaj. La originaj historioj restas konservitaj en ĉifrita sinkronigo.
+  Combined watch time: Kunigita spekttempo
+  Replacement changed: La spekttempo ŝanĝiĝis. Fermu ĉi tiun antaŭrigardon kaj remalfermu ĝin por kontroli la novajn sumojn.
+  Replacement success: Aparataj statistikoj kunigitaj
+  Stats: Statistikoj
+  All devices: Ĉiuj aparatoj
+  Watch time summary: Resumo de spekttempo
+  Today: Hodiaŭ
+  This week: Ĉi-semajne
+  Total watch time: Tuta spekttempo
+  Daily average: Ĉiutaga mezumo
+  So far today: Ĝis nun hodiaŭ
+  Since: Ekde {day}
+  All recorded time: Tuta registrita tempo
+  Per calendar day: Po kalendara tago
+  Day by day: Tagon post tago
+  Highest: 'Plej alta: {duration}'
+  Week by week: Semajnon post semajno
+  Last 14 days: Lastaj 14 tagoj
+  Last 8 weeks: Lastaj 8 semajnoj
+  Daily chart aria: Ĉiutaga spekttempo dum la lastaj 14 tagoj
+  Weekly chart aria: Ĉiusemajna spekttempo dum la lastaj 8 semajnoj
+  No data: La spekttempo aperos ĉi tie dum vi spektas videaĵojn.
+  Estimate note: La spekttempo de antaŭ ĉi tiu ĝisdatigo estas taksita laŭ via konservita spektoprogreso.
+  Adjust imported watch time: Alĝustigi enportitan spekttempon
+  Imported watch time: Enportita spekttempo
+  Imported watch time explanation: Elektu la ludrapidon, kiun vi kutime uzis. La daŭroj de la enportitaj videaĵoj estos dividitaj per ĉi tiu rapido por taksi la efektivan tempon, kiun vi pasigis spektante.
+  Playback speed: Ludrapido
+  Channel speed note: Konservitaj kanalaj ludrapidoj estas uzataj anstataŭe, kiam disponeblaj.
+  Apply playback speed: Apliki ludrapidon
+  Imported watch time adjusted: La enportita spekttempo estis alĝustigita
+  Reset statistics: Restarigi statistikojn
+  Reset: Restarigi
+  Reset confirmation: Ĉu vi certas, ke vi volas restarigi ĉiujn spektajn statistikojn? Tio ĉi ne malfareblas.
+  Reset success: La spektaj statistikoj estis restarigitaj
+  Less than a minute: < 1 min
+  Minutes: '{minutes} min'
+  Hours: '{hours} h'
+  Hours and minutes: '{hours} h {minutes} min'
+Home Page:
+  Keep disabled and hide this section: Lasi malŝaltita kaj kaŝi ĉi tiun sekcion
+  Familiar description: Preferi nespektitajn videaĵojn de kanaloj, kiujn vi jam ŝatas.
+  Balanced description: Miksi konatajn kanalojn kun novaj, kiuj kongruas kun viaj interesoj.
+  Explore description: Doni pli da spaco al novaj kanaloj rilataj al viaj interesoj.
+  Turn off recommendations: Malŝalti rekomendojn
+  Recommended for you: Rekomendita por vi
+  Recommendations description: Ordigi videaĵojn sur via aparato laŭ via spekthistorio. Kanalaj identigiloj kaj temaj serĉoj estas senditaj al via elektita interna API por trovi videaĵojn.
+  Enable recommendations: Ŝalti rekomendojn
+  Recommendations need history: Spektu kelkajn videaĵojn kun ŝaltita historio por ricevi rekomendojn.
+  No recommendations: Neniu rekomendo trovita. Provu aktualigi post spekti pli da videaĵoj.
+  Recommendations unavailable: Ne eblis ŝargi rekomendojn. Provu denove poste.
+  More like this: Pli da tiaj
+  Not interested: Ne interesas min
+  Hide this channel: Kaŝi ĉi tiun kanalon
+  Channel hidden: "{channel} kaŝita el rekomendoj"
+  Reset recommendations: Restarigi rekomendojn
+  Discovery: Malkovrado
+  Familiar: Konata
+  Balanced: Ekvilibra
+  Explore: Esplori
+  Related to: Rilata al {title}
+  More from: Pli de {channel}
+  Matches interest: Kongruas kun via intereso pri {topic}
+  Related discovery privacy: Identigiloj de videaĵoj ankaŭ estas senditaj por trovi rilatajn videaĵojn.
+  Home: Hejmo
+  Description: Daŭrigu de kie vi ĉesis kaj vidu lastatempan agadon.
+  Customize: Personecigi hejmon
+  Done: Farite
+  Customize description: Elektu, kiuj sekcioj aperas, kaj aranĝu ilin laŭ la ordo, kiun vi volas.
+  Continue watching: Daŭrigi spektadon
+  New since last visit: Nova ekde la lasta vizito
+  Watch queue: Spektovico
+  Recent playlists: Lastatempaj ludlistoj
+  Recent downloads: Lastatempaj elŝutoj
+  Upcoming reminders: Venontaj memorigoj
+  Watch statistics: Spektaj statistikoj
+  View all: Vidi ĉion
+  Previous shelf page: Antaŭa paĝo de {section}
+  Next shelf page: Sekva paĝo de {section}
+  Shelf page status: '{section}, paĝo {page} el {total}.'
+  Move section up: Movi {section} supren
+  Move section down: Movi {section} malsupren
+  Section moved: '{section} movita al pozicio {position} el {total}.'
+  Nothing here yet: Ankoraŭ nenio ĉi tie
+  Empty description: Videaĵoj, kiujn vi komencas, ludlistoj, kiujn vi uzas, elŝutoj kaj memorigoj aperos ĉi tie.
+  All sections hidden: Ĉiuj sekcioj estas kaŝitaj
+  All sections hidden description: Personecigu la hejmon por remontri sekcion.
+Subscriptions:
+  New video from {channel}: Nova videaĵo de {channel}
+  New short from {channel}: Nova videaĵeto de {channel}
+  '{channel} is live': '{channel} nun tujelsendas'
+  New post from {channel}: Nova afiŝo de {channel}
+  Mark As Unseen: Marki kiel nevidita
+  Copy Error Details: Kopii teknikajn detalojn
+  Refresh Errors: 'Kanaloj, kiuj ne povis esti aktualigitaj: {channels}. Alklaku por vidi detalojn.'
+  Refresh Error Channels More: '{channels} kaj {count} plia | {channels} kaj {count} pliaj'
+  Never show {type} from this channel in feeds again: Neniam plu montri {type} de ĉi tiu kanalo en fluoj
+  Refreshing Subscription Videos: Aktualigado de abonaj videaĵoj
+  Refreshing Subscription Shorts: Aktualigado de abonaj videaĵetoj
+  Refreshing Subscription Live Streams: Aktualigado de abonaj tujelsendoj
+  Refreshing Subscription Posts: Aktualigado de abonaj afiŝoj
+  New Content: Nova enhavo
+  New Feed Refresh Warning Title: Ĉu aktualigi ĉiujn abonfluojn?
+  New Feed Refresh Warning: Aktualigi ĉiujn enhavotipojn sen RSS por 1 abono povas daŭri longe. Ĉu vi volas daŭrigi? | Aktualigi ĉiujn enhavotipojn sen RSS por {count} abonoj povas daŭri longe. Ĉu vi volas daŭrigi?
+  New Since Last Refresh: Nova ekde la lasta aktualigo
+  Mark As Seen: Marki kiel vidita
+  Mark All as Seen: Marki ĉion kiel vidita
+  No New Content: Ne estas nova enhavo.
+  New Content Tabs: Langetoj de nova enhavo
+  Show Tabbed View: Montri langetan vidon
+  Show Combined View: Montri kunigitan vidon
+  Newest First: Plej novaj unue
+  Oldest First: Plej malnovaj unue
+  RSS Feeds:
+    Refreshing: Refreŝigante RSS-fluojn
+    Tab: RSS
+    Followed Feeds: Sekvataj RSS-fluoj
+    Add Feed: Aldoni fluon
+    Feed URL: URL de RSS- aŭ Atom-fluo
+    Remove Feed: Forigi {feed}
+    Invalid Feed URL: Enigu retadreson, kiu komenciĝas per http:// aŭ https://.
+    Feed Already Followed: Vi jam sekvas ĉi tiun fluon.
+    Feed Could Not Be Loaded: Ne eblis ŝargi la fluon. Kontrolu, ke la adreso montras al RSS- aŭ Atom-fluo.
+    Feed Requires Browser Check: Ĉi tiu retejo postulas retumilan kontrolon, kiun OpenTubeX ne povas plenumi. Provu alian adreson aŭ alian RSSHub-servilon por ĉi tiu fluo.
+    Refresh Errors: 1 fluo ne povis esti aktualigita. | {count} fluoj ne povis esti aktualigitaj.
+    Description: Aldonu RSS- aŭ Atom-fluon por sekvi kreantojn de aliaj platformoj. Serviloj de {rssHub} provizas fluojn por multaj retejoj, ekzemple Twitch.
+    Empty Items: Viaj fluoj nuntempe havas neniun eron.
+    No Feeds: Vi ankoraŭ ne sekvas iun ajn RSS-fluon.
+    RSSHub:
+      Browse: Foliumi RSSHub
+      Title: Aldoni fluon el RSSHub
+      Description: Elektu RSSHub-servilon, servon kaj kion sekvi. La adreso de la fluo estas kreata por vi.
+      Instance: RSSHub-servilo
+      Service: Servo
+      Search Services: Serĉi servojn
+      Loading Services: Ŝargante servojn…
+      Services Could Not Be Loaded: Ĉi tiu servilo ne redonis siajn servojn. Kontrolu la adreson aŭ elektu alian servilon.
+      Feed Type: Speco de fluo
+      Requires Configuration: Ĉi tiu fluo bezonas aldonan agordon ĉe la servilo, do ĝi eble ne funkcias ĉe publikaj serviloj.
+      Optional Parameter: '{parameter} (nedeviga)'
+      Not Set: Ne agordita
+    Retry Feed: Reprovi {feed}
+Channels:
+  Load More Channels: Ŝargi pli da kanaloj
+Subscription Groups:
+  Groups: Grupoj
+  All: Ĉiuj
+  New Group: Nova grupo
+  Edit Group: Redakti grupon
+  Group Name: Nomo de grupo
+  Create: Krei
+  Save: Konservi
+  Delete Group: Forigi grupon
+  Delete Prompt: Ĉu forigi la grupon "{groupName}"? Ĝiaj kanaloj restas abonitaj.
+  Empty Group: Ĉi tiu grupo havas neniun kanalon en la aktuala profilo.
+  Save Failed: Ne eblis konservi la grupon.
+  Delete Failed: Ne eblis forigi la grupon.
+  Group Icon: Grupa piktogramo
+  No Icon: Neniu piktogramo
+Trending:
+  Music: Muziko
+  Load Error: Ne eblis ŝargi tendencojn.
+  Unsupported Backend: Tendencoj postulas la lokan API. Elektu la lokan API aŭ ŝaltu retropaŝon al alia interna API.
+Most Popular Feed Empty: La fluo de plej popularaj de ĉi tiu Invidious-servilo estas malplena.
+Feed:
+  Cancel Refresh: Nuligi aktualigon
+  Next Auto Refresh: 'Sekva aŭtomata aktualigo: {date}'
+User Playlists:
+  Refresh Saved Playlists: 'Aktualigi konservitajn ludlistojn'
+  Saved Playlists Refresh Failed: 'Kelkaj konservitaj ludlistoj ne povis esti aktualigitaj.'
+  Add new videos to the top (custom order): Aldoni novajn videaĵojn al la supro (laŭmenda ordo)
+  Shuffle videos by default: Defaŭlte miksi videaĵojn
+  Repair Playlists: Ripari ludlistojn
+  Repair Description: Restarigi mankantajn detalojn de videaĵoj post enporto de ZIP-dosiero de YouTube Takeout. La ordo de la ludlisto restas senŝanĝa.
+  Add Missing Videos: Aldoni mankantajn videaĵojn el la fonta ludlisto
+  Source Playlist: Fonta ludlisto
+  Load More Playlists: Ŝargi pli da ludlistoj
+  Save to: Konservi al…
+  Quick Bookmark Icon: Piktogramo de rapida legosigno
+  Custom Emoji: Laŭmenda emoĝio
+  Choose Image: Elekti bildon
+  Use Bookmark Icon: Uzi legosignan piktogramon
+  Save: Konservi
+  Save Playlist: Konservi ludliston
+  Remove Saved Playlist: Forigi konservitan ludliston
+  Edit: Redakti
+  Remove Unavailable Videos: Forigi nedisponeblajn videaĵojn
+  Remove Unavailable Videos Confirmation: 'Ĉu forigi nedisponeblajn videaĵojn? Trovitaj: {count}. Ne kontroleblaj: {uncertain}. Nekontrolitaj videaĵoj estos konservitaj.'
+  Pin to Navigation: Alpingli al navigado
+  Unpin from Navigation: Malalpingli el navigado
+  Pin to Top: "Fiksi supre"
+  Unpin from Top: "Malfiksi de supre"
+  Pinned to Top: "Fiksita supre"
+  Reorder Hint: Trenu aŭ uzu la sagoklavojn por reordigi
+  SinglePlaylistView:
+    Retry: Reprovi
+    This playlist could not be loaded.: Ne eblis ŝargi ĉi tiun ludliston.
+    More videos could not be loaded.: Ne eblis ŝargi pli da videaĵoj.
+  AddVideoPrompt:
+    And N more videos: kaj {count} plia videaĵo | kaj {count} pliaj videaĵoj
+  Playlist Thumbnail: Bildeto de ludlisto
+  Restore Default Thumbnail: Restarigi defaŭltan bildeton
+  Move Up: Supren
+  Move Down: Malsupren
+  Remove: Forigi
+  Background Tasks:
+    Loading videos from {playlistName}: 'Ŝargante videojn el {playlistName}'
+    Adding missing videos to {playlistName}: 'Aldonante mankantajn videojn al {playlistName}'
+    Checking {playlistName} for unavailable videos: 'Kontrolante {playlistName} pri nedisponeblaj videoj ({checked}/{total})'
+History:
+  From Date: De
+  To Date: Ĝis
+  Channel Filter: Kanalo
+  All Channels: Ĉiuj kanaloj
+  Clear Filters: Viŝi filtrilojn
+  Invalid Date Range: La dato "De" devas esti samtaga aŭ antaŭa al la dato "Ĝis".
+  Empty Filter Message: Neniu videaĵo en via historio kongruas kun ĉi tiuj filtriloj.
+  Repair Use Cookies: Uzi agorditajn kuketojn de yt-dlp
+  Repair Cookies Hint: Pli ol 500 videaĵoj bezonas kontroladon. Agordu kuketojn en la agordoj de yt-dlp kaj ŝaltu ilin ĉi tie por malpliigi la riskon de blokoj pro eksceso da petoj.
+  Repair Description: Uzu ĉi tion post enporto de historio, aŭ kiam videaĵoj havas mankantajn detalojn aŭ malĝustan etikedon LIVE.
+  Repair Details: Plenigas mankantajn titolojn, kanalojn kaj publikigajn datojn, kaj kontrolas daŭrojn kaj etikedojn LIVE. Via spektoprogreso kaj spektita stato restas senŝanĝaj.
+  Repair Notice: Grandaj historioj povas daŭri iom. Malsukcesintaj petoj estas aŭtomate reprovataj. Forigitaj aŭ privataj videaĵoj eble restos nekompletaj.
+  Start Repair: Komenci riparon
+  Repair Checking: Kontrolado de detaloj de videaĵoj
+  Repair Waiting: Atendado de YouTube. La riparo daŭros aŭtomate.
+  Repair Retrying: Reprovado de malsukcesintaj petoj
+  Repair Finished: Riparo finiĝis
+  Repair Stopped: Riparo haltigita
+  Repair: Ripari historion
+  Repair Compact: Ripari
+  Mark All Watched Compact: Marki ĉiujn spektitaj
+  Repair Progress: Kontrolitaj {checked}/{total} · Riparitaj {repaired} · Malsukcesintaj {failed}
+  Mark All As Watched: Marki ĉiujn kiel spektitaj
+  Mark All As Watched Confirmation: Ĉu vi certas, ke vi volas marki ĉiujn videaĵojn en via historio kiel spektitaj?
+  All History Marked as Watched: Ĉiuj videaĵoj en via historio estis markitaj kiel spektitaj
+  Select History Age: Elektu kiom malnova ero devas esti antaŭ ol ĝi estas forigita.
+  Delete Entries Older Than: Forigi erojn pli malnovajn ol
+  Number of Days: Nombro de tagoj
+  History Cleanup Warning: Tio ĉi definitive forigas kongruajn erojn de la spekthistorio.
+  1 Day: 1 tago
+  1 Week: 1 semajno
+  1 Month: 1 monato
+  3 Months: 3 monatoj
+  1 Year: 1 jaro
+  All Time: Ĉiam
+  Custom: Laŭmenda
+  History Older Than Days Removed: Spekthistorio pli malnova ol 1 tago estis forigita | Spekthistorio pli malnova ol {days} tagoj estis forigita
+Settings:
+  Tab Unloading:
+    Automatically unload tabs: Aŭtomate malŝargi langetojn
+    Memory threshold: Memorsojlo
+    Tabs to unload: Langetoj malŝargotaj
+    Automatic unloading help: Malŝargi la plej malnovajn fonajn langetojn por liberigi memoron. Aktivaj kaj ludantaj langetoj restas ŝargitaj.
+    Memory threshold help: Procento de la memorlimo de la bildigilo, ne de la tuta sistema RAM.
+  Navigation and Controls: Navigado kaj regiloj
+  Interface Customizer:
+    Customize Interface: Personecigi interfacon
+    Preview: Antaŭrigardo
+    Player: Ludilo
+    Desktop: Labortablo
+    Mobile: Poŝaparato
+    Playing: Ludanta
+    Player Menu: Ludila menuo
+    Fullscreen: Plenekrane
+    Paused: Paŭzigita
+    Controls: Regiloj
+    Example Video Title: Ekzempla videaĵo
+    Resolution: Distingivo
+    Loop: Ripeti
+    'Off': 'Malŝaltita'
+  Control Bar:
+    Title: Regbreto
+    Customize: Personecigi regbreton
+    Hidden: Kaŝitaj
+    Empty: Neniu regilo
+    Move to Control Bar: Movi {control} al la regbreto
+    Move to Player Menu: Movi {control} al la ludila menuo
+    Hide: Kaŝi {control}
+  Fullscreen Actions:
+    Recommended Videos: Rekomenditaj videaĵoj
+    Title: Plenekranaj agoj
+    Customize: Personecigi plenekranajn agojn
+    Add Action: Aldoni agon
+    Empty: Neniu plenekrana ago elektita
+    Quick Bookmark: Rapida legosigno
+    Availability Hint: "Agoj aperas nur ĉe videoj, al kiuj ili aplikiĝas."
+    Disabled: "(malŝaltita)"
+  Quick Settings:
+    Quick Settings: Rapidaj agordoj
+    Customize Quick Settings: Personecigi rapidajn agordojn
+    Add Setting: Aldoni agordon
+    Appearance: Aspekto
+    Playback: Ludado
+    Content: Enhavo
+    Language and Region: Lingvo kaj regiono
+    All Settings: Ĉiuj agordoj
+    Profile Selector Hint: Vi ankaŭ povas dekstre alklaki la profilan piktogramon por ŝanĝi profilon
+    Profile Selector Touch Hint: Vi ankaŭ povas longe tuŝi la profilan piktogramon por ŝanĝi profilon
+  Categories:
+    General Description: Lingvo, startigo, langetoj kaj tradukado
+    Appearance: Aspekto
+    Appearance Description: Etoso, aranĝo, navigado kaj videaĵlistoj
+    Content appearance: Videaĵlistoj kaj bildetoj
+    Layout: Aranĝo
+    Playback Description: Defaŭltaj agordoj de la ludilo, apudskribo kaj agordoj por ĉiu kanalo
+    Subscriptions Description: Aktualigo de fluoj, sciigoj pri novaj videaĵoj kaj RSS-fluoj
+    Downloads Description: Elŝuta dosierujo, ŝablonoj kaj aŭtomataj elŝutoj
+    Focus: Fokuso
+    Focus Description: Kaŝita enhavo, spektolimoj, memorigiloj kaj gepatra kontrolo
+    Add-ons: Aldonaĵoj
+    Add-ons Description: SponsorBlock, DeArrow, malŝatoj, AiSList kaj voĉa traduko
+    Privacy Description: Historio, serĉaj sugestoj, ligiloj kaj pasvorto de la aplikaĵo
+    Online activity: Reta agado
+    Data And Storage Description: Savkopioj, enporto kaj elporto, diskuzo kaj purigado
+    Sync Description: Konto ĉe la sinkroniga servilo, parigo de aparatoj kaj sinkronigitaj datumoj
+    Advanced: Altnivela
+    Advanced Description: Internaj API-oj, bufrado, eksteraj iloj, prokurilo kaj diagnozo
+    Alternative providers: Provizantoj de videaĵoj kaj metadatumoj
+  Highlight Changed Settings: Emfazi agordojn ŝanĝitajn de la defaŭltoj
+  Reset Setting to Default: Restarigi ĉi tiun agordon al ĝia defaŭlto
+  Performance Impact:
+    Show Performance Impact: Montri indikilojn de rendimenta efiko
+    Moderate: Modera efiko
+    High: Alta efiko
+    Description: Ĉi tiu agordo povas pliigi la uzon de {resources}
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: memoro
+      Network: reto
+      Disk: disko
+  General Settings:
+    Link Underlines:
+      Link Underlines: "Substrekado de ligiloj"
+      On Hover: "Substreki ligilojn dum ŝvebado"
+      Never: "Neniam substreki ligilojn"
+      Always: "Ĉiam substreki ligilojn"
+    Limit Titles to Two Lines: "Limigi titolojn al du linioj"
+    Preferred Video Codec: Preferata videokodeko
+    Enable Tabs: Ŝalti langetojn
+    Thumbnail Swipe Gestures:
+      Left: Ŝovi maldekstren sur bildetoj
+      Right: Ŝovi dekstren sur bildetoj
+      Description: Ŝovu bildeton de videaĵo horizontale kaj malpremu por plenumi la elektitan agon.
+    Data Saver Thumbnails: Datumŝparaj bildetoj
+    Use tray icon: Uzi taskopletan piktogramon
+    Close to system tray: Fermi al la taskopleto
+    Tray required for background refresh: La taskopleta piktogramo necesas dum la fona aktualigo de abonoj estas ŝaltita.
+    Show Video Menu Button: Montri butonon de videaĵa menuo
+    Swipe to refresh: Ŝovi por aktualigi
+    Blur Thumbnails: Nebuligi bildetojn
+    Navigation:
+      Always Show Navigation Bar: Ĉiam montri la navigobreton kiam ĝi estas malsupre
+      Compact Tab Labels: Kompakta navigobreto kiam ĝi estas malsupre
+      Show Active Subscriptions: Montri aktivajn abonojn en la flankobreto
+      Navigation: Navigado
+      Customize Navigation: Personecigi navigadon
+      Add Item: Aldoni eron
+    Mobile Layout:
+      Mobile Layout: Poŝaparata aranĝo
+      Automatic: Aŭtomata
+      Phone: Telefono
+      Tablet: Tabulkomputilo
+    Update Relative Timestamps: Teni relativajn tempindikojn ĝisdataj
+    Automatically switch stream extraction methods: Aŭtomate ŝanĝi metodojn de fluelĉerpado
+    Stream Extraction Method:
+      Stream Extraction Method: Metodo de fluelĉerpado
+      yt-dlp: yt-dlp
+      Built-in: Integrita
+    Confirm Before: Konfirmi antaŭ…
+    Confirmation Options:
+      Closing App: Fermi OpenTubeX
+      Closing Window: Fermi fenestron kun pluraj langetoj
+      Closing Tabs: Fermi plurajn langetojn
+      Loading Tabs: Ŝargi plurajn langetojn
+      Unloading Tabs: Malŝargi plurajn langetojn
+    Always Use Backup Media Server: Ĉiam uzi rezervan medioservilon
+    Close Window With Last Tab: Fermi la fenestron kiam la lasta langeto estas fermita
+    Remember Tab Navigation History: Memori navigan historion de langetoj
+    New Tab Position:
+      New Tab Position: Pozicio de novaj langetoj
+      At the end: Ĉe la fino
+      After current tab: Post la aktuala langeto
+      After current tab in opened order: Post la aktuala langeto, laŭ malferma ordo
+    Tab Close Focus:
+      Last active tab: Lasta aktiva langeto
+      Next tab in tab order: Sekva langeto laŭ langeta ordo
+      Previous tab in tab order: Antaŭa langeto laŭ langeta ordo
+      Tab Close Focus: Post fermo de la aktiva langeto
+    Startup Behavior:
+      Startup Behavior: Je startigo
+      Load all tabs: Ŝargi ĉiujn langetojn
+      Load previously loaded tabs: Ŝargi antaŭe ŝargitajn langetojn
+      Load last active tab: Ŝargi la lastan aktivan langeton
+      Start with an empty session: Komenci kun malplena seanco
+      Load landing page, keep other tabs unloaded: Ŝargi la ekan paĝon, lasi aliajn langetojn malŝargitaj
+    Date Format: Datoformo
+    Time Format: Horoformo
+    Language Default: Lingva defaŭlto
+    Use AI Translation Completions: Plenigi mankantajn tradukojn per tradukoj generitaj de AI
+    Reduced Motion:
+      Reduced Motion: Malpliigita movo
+      System: Sistemo
+      Force On: Devigi ŝaltita
+      Force Off: Devigi malŝaltita
+    Comment Translation:
+      Title: Tradukoj de komentoj
+      Enable: Ŝalti tradukojn de komentoj
+      Never Translate: Neniam traduki komentojn en
+      Choose Language: Elektu lingvon
+      Description: Komentoj en la lingvo de la aplikaĵo jam estas ekskluzivitaj. Aldonu aliajn lingvojn, kiujn vi povas legi.
+      Remove Language: Denove traduki komentojn en {language}
+    Avoid translation:
+      Avoid translation: Preferi netradukitan tekston de videaĵoj
+      Disabled: Malŝaltita
+      Watch Only: Nur videaĵa interfaco
+      Entire App: Tuta aplikaĵo
+    Preferred API Backend:
+      Yattee Server: Yattee-servilo
+    Video View Type:
+      Full Width: Plena larĝo
+    Playlist View Type:
+      Playlist View Type: Aranĝo de ludlistoj
+    Grid Columns:
+      Grid Columns: Kradaj kolumnoj
+      Playlist Grid Columns: Kradaj kolumnoj de ludlistoj
+      Auto: Aŭtomata
+    Show Thumbnail Previews: Montri antaŭrigardojn de bildetoj
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: Aldona agobutono sur bildetoj
+      None: Neniu
+      Mark as Watched: Marki kiel spektita
+      Copy YouTube Link: Kopii ligilon de YouTube
+      Open in YouTube: Malfermi per YouTube
+    Yattee Server:
+      Server URL: URL de Yattee-servilo
+      Username: Uzantnomo
+      Password: Pasvorto
+      Proxy Videos: Prokuri videaĵojn tra la Yattee-servilo
+      Test Connection: Kontroli konekton
+      Testing: Kontrolado de la konekto…
+      Connected: Konektita al Yattee-servilo {version}
+      Errors:
+        Invalid URL: Enigu la URL de la servilo, komencante per https:// aŭ http://.
+        Unreachable: Ne eblis atingi la servilon. Kontrolu la URL kaj ĉu la servilo funkcias.
+        Media not allowed: Konektita, sed la servilo ne permesas al ĉi tiu aplikaĵo ŝargi videaĵojn. Agordu CORS_ORIGINS={origins} en la medio de la servilo.
+        Not a Yattee server: La servilo respondis, sed ĝi ne estas Yattee-servilo.
+        Credentials required: La servilo postulas uzantnomon kaj pasvorton.
+        Invalid credentials: La servilo rifuzis la uzantnomon aŭ pasvorton.
+        Rate limited: La servilo blokas ensalutojn post tro multaj malsukcesaj provoj. Provu denove poste.
+        Server error: La servilo redonis eraron (HTTP {status}).
+    Notifications:
+      Notifications: Sciigoj
+      System and In-App: Sistemo kaj en la aplikaĵo
+      System Only: Nur sistemo
+      Off: Malŝaltitaj
+    Auto Load Next Page:
+      Lists Tooltip: Aŭtomate ŝargi pliajn paĝojn de fluoj, serĉrezultoj kaj aliaj listoj.
+    Auto Load Comments:
+      Label: Aŭtomate ŝargi komentojn
+      Tooltip: Ŝargi komentojn kiam la paĝo malfermiĝas kaj ŝargi pliajn dum vi rulumas.
+  Context Menu Search Settings:
+    Context Menu Search Settings: Serĉo per kunteksta menuo
+    Description: Elektu, kiuj serĉiloj aperas kiam vi dekstre alklakas elektitan tekston. Serĉoj malfermiĝas en via defaŭlta retumilo.
+    Icon Hint: Ŝalti serĉilon kontaktas ĝian retejon por ŝargi la retejan piktogramon.
+    Engine Name: Nomo de serĉilo
+    Search URL: Serĉa URL
+    URL Hint: Uzu %s kie la URL enhavu la koditan elektitan tekston.
+    Add Custom Engine: Aldoni laŭmendan serĉilon
+    Add Engine: Aldoni serĉilon
+    Remove Engine: Forigi {engine}
+    Invalid Engine: Enigu nomon kaj validan HTTP- aŭ HTTPS-serĉan URL, kiu enhavas %s.
+    Engine Limit: Vi povas aldoni ĝis {count} laŭmendajn serĉilojn.
+  Theme Settings:
+    Theme and Colors: "Etoso kaj koloroj"
+    Font Size: Tipara grandeco
+    Sections:
+      Interface: "Fasado"
+      Side Bar and Header: "Flanka breto kaj kapo"
+      Tabs: "Langetoj"
+      Player: "Ludilo"
+      Scrolling: "Rulumado"
+      Notifications: "Sciigoj"
+    Only Show Important Notifications: Montri nur gravajn sciigojn
+    Material Accent Color: Material-akcenta koloro
+    Tally Accent Color: Tally-akcenta koloro
+    Material Wallpaper Colors: Koloroj de ekranfono
+    Material System Accent Color: "Sistema akcenta koloro"
+    Tab Loading Indicator:
+      Tab Loading Indicator: Stilo de langeta ŝargado
+      Bar: Breto
+      Dot: Punkto (klasika)
+    Compact Mobile Mini Player: Kompakta poŝaparata ludileto
+    Always Show Mobile Search Bar: Ĉiam montri poŝaparatan serĉobreton
+    Move Downloads to App Header: Movi elŝutojn al la kapo de la aplikaĵo
+    Move Settings to App Header: Movi agordojn al la kapo de la aplikaĵo
+    Hide Side Bar on Watch Pages: Kaŝi flankobreton sur spektopaĝoj
+    UI Roundness: Rondeco de la interfaco
+    Scrollbar Width: Larĝo de rulumbreto
+    Scroll Speed: Rulumrapido
+    Visible Search Suggestions: Videblaj serĉproponoj
+    Animation Speed: Rapido de animacioj
+    Thumbnail Size: Grandeco de bildetoj
+    Playlist Thumbnail Size: Grandeco de bildetoj de ludlistoj
+    Show Tab Icons: Montri langetajn piktogramojn
+    Load Missing Tab Icons: Ŝargi mankantajn langetajn piktogramojn
+    Loading Missing Tab Icons: Ŝargado de mankantaj langetaj piktogramoj…
+    No Missing Tab Icons: Ĉiuj subtenataj langetaj piktogramoj jam estas ŝargitaj
+    Loaded Tab Icons: 'Mankanta langeta piktogramo ŝargita: {count} | Mankantaj langetaj piktogramoj ŝargitaj: {count}'
+    Loaded Tab Icons With Failures: Ŝargis {loaded} langetajn piktogramojn; {failed} ne povis esti ŝargitaj
+    Show Tab Previews: Montri antaŭrigardojn de langetoj
+    Use Fixed Tab Width: Uzi fiksan langetan larĝon en horizontala reĝimo
+    Use Custom Title Bar: Uzi laŭmendan titolbreton
+    Tab Width: Langeta larĝo
+    Vertical Tab Height: Alteco de vertikalaj langetoj
+    Tab Layout:
+      Tab Layout: Aranĝo de langetoj
+      Horizontal Top: Horizontale supre
+      Horizontal Bottom: Horizontale malsupre
+      Vertical Left: Vertikale maldekstre
+      Vertical Right: Vertikale dekstre
+    Show Toast Timeout Indicator: Montri indikilon de daŭro de sciigoj
+    Use Grid Player Menu: Uzi kradan ludilan menuon
+    Frosted Glass Player UI: Ludila interfaco kun frosta vitro
+    Show Progress as Notification: Montri progreson kiel sciigon
+    Operation in Progress: Operacio okazanta
+    Toast Position:
+      Toast Position: Pozicio de sciigoj
+      Test Toast: Prova sciigo
+      Bottom Left: Malsupre maldekstre
+      Bottom Center: Malsupre centre
+      Bottom Right: Malsupre dekstre
+      Top Left: Supre maldekstre
+      Top Center: Supre centre
+      Top Right: Supre dekstre
+    Icon Pack:
+      Icon Pack: Piktograma pako
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: Tiparo de la aplikaĵo
+      System Default: Sistema defaŭlto
+      Unable to Load: Ne eblas ŝargi instalitajn sistemajn tiparojn
+      Bundled Fonts: Kunpakitaj tiparoj
+      System Fonts: Sistemaj tiparoj
+    Always Show Scrollbars: Ĉiam montri rulumbretojn
+    Compact Settings Categories: Kompaktaj agordaj kategorioj
+    Base Theme:
+      Material Light: Material luma
+      Material Dark: Material malluma
+      Material Black: Material nigra
+      Dynamic colors: Dinamikaj koloroj
+      Tokyo Night Night: Tokyo Night Night
+      Tokyo Night Storm: Tokyo Night Storm
+      Tokyo Night Moon: Tokyo Night Moon
+      Tokyo Night Day: Tokyo Night Day
+      Rosé Pine: Rosé Pine
+      Rosé Pine Moon: Rosé Pine Moon
+      Rosé Pine Dawn: Rosé Pine Dawn
+      Kanagawa Wave: Kanagawa Wave
+      Kanagawa Dragon: Kanagawa Dragon
+      Kanagawa Lotus: Kanagawa Lotus
+      Ayu Dark: Ayu malluma
+      Ayu Mirage: Ayu Mirage
+      Ayu Light: Ayu luma
+      One Dark: One Dark
+      Carbonfox: Carbonfox
+      Catppuccin Macchiato: Catppuccin Macchiato
+      Tally Light: Tally luma
+      Tally Dark: Tally malluma
+      Custom: Laŭmenda
+      Built-in Themes: Enkonstruitaj etosoj
+      Custom Themes: Laŭmendaj etosoj
+    Light Theme: Luma etoso
+    Dark Theme: Malluma etoso
+    Custom Theme:
+      Share Restrictions Prompt: Priskriboj povas enhavi ĝis 500 signojn, inkluzive de Markdown. Nur ligiloj kaj bildoj gastigitaj ĉe GitHub estas permesataj, inkluzive de rektaj alŝutoj ĉi tie. La roboto forigas eksterajn ligilojn kaj bildojn, mallongigas longajn priskribojn kaj lasas komenton klarigantan ĉiujn ŝanĝojn.
+      Import from Clipboard: Enporti el la tondujo
+      Invalid Clipboard Theme: La tondujo ne enhavas validan etoson. Kopiu la JSON de la etoso kaj provu denove.
+      Create Custom Theme: Krei laŭmendan etoson
+      Edit Custom Theme: Redakti laŭmendan etoson
+      Custom Theme Creator: Kreilo de laŭmendaj etosoj
+      Theme Name: Nomo de etoso
+      Based On: Bazita sur
+      Import Theme: Enporti etoson
+      Export Theme: Elporti etoson
+      Share Theme: Kunhavigi etoson
+      Share Description Prompt: Priskribu la etoson kaj ĉion, kion homoj sciu antaŭ ol uzi ĝin.
+      Share Screenshots Prompt: Trenu kaj demetu unu aŭ plurajn ekrankopiojn ĉi tie. Lasu ĉi tiun sekcion malplena por ke la roboto aldonu tri antaŭrigardojn kun ekzempla enhavo, sen viaj personaj datumoj.
+      Delete Theme: Forigi etoson
+      Delete Theme Confirmation: Ĉu forigi “{name}”? Tio ĉi ne malfareblas.
+      Save and Apply: Konservi kaj apliki
+      Discard Changes: Forĵeti ŝanĝojn
+      Reset Colors: Restarigi al la baza etoso
+      Theme File: Etosa dosiero de OpenTubeX
+      Theme Saved: Laŭmenda etoso konservita kaj aplikita
+      Theme Imported: Etoso enportita en la redaktilon
+      Theme Exported: Etoso elportita
+      Theme Deleted: Laŭmenda etoso forigita
+      Unable to Load: Ne eblas ŝargi la laŭmendan etoson
+      Unable to Save: Ne eblas konservi la laŭmendan etoson
+      Unable to Export: Ne eblas elporti la laŭmendan etoson
+      Unable to Share: Ne eblas kunhavigi la laŭmendan etoson
+      Unable to Delete: Ne eblas forigi la laŭmendan etoson
+      Invalid Theme File: Nevalida dosiero de laŭmenda etoso
+      Colors:
+        Watched thumbnail overlay: Surmeto de spektitaj bildetoj
+        Thumbnail badge background: "Fono de insignoj sur bildetoj"
+        Main text: Ĉefa teksto
+        Secondary text: Sekundara teksto
+        Subtle text: Diskreta teksto
+        Borders and dividers: Borderoj kaj dividiloj
+        Subtle surfaces and indicators: Diskretaj surfacoj kaj indikiloj
+        Title text: Titola teksto
+        Selected text background: Fono de elektita teksto
+        Selected text: Elektita teksto
+        Logo icon: Emblema piktogramo
+        Logo text: Emblema teksto
+        Logo hover: Emblemo sub kursoro
+        Logo pressed: Emblemo premita
+        Page background: Paĝa fono
+        Card background: Karta fono
+        Secondary card background: Sekundara karta fono
+        Favorite icon: Piktogramo de plej ŝatataj
+        Error color: Erara koloro
+        Scrollbar thumb: Rulumbreta tenilo
+        Scrollbar thumb hover: Rulumbreta tenilo sub kursoro
+        Scrollbar thumb pressed: Rulumbreta tenilo premita
+        Dropdown item hover text: Teksto de falmenua ero sub kursoro
+        Dropdown item hover background: Fono de falmenua ero sub kursoro
+        Navigation and panel background: Fono de navigado kaj paneloj
+        Neutral item hover and focus background: Fono de neŭtrala ero sub kursoro kaj enfokusigita
+        Neutral item hover and focus text and icons: Teksto kaj piktogramoj de neŭtrala ero sub kursoro kaj enfokusigita
+        Neutral item pressed background: Fono de premita neŭtrala ero
+        Neutral item pressed text and icons: Teksto kaj piktogramoj de premita neŭtrala ero
+        Header button hover and focus background: Fono de kapa butono sub kursoro kaj enfokusigita
+        Header button hover and focus text and icons: Teksto kaj piktogramoj de kapa butono sub kursoro kaj enfokusigita
+        Header button pressed background: Fono de premita kapa butono
+        Header button pressed text and icons: Teksto kaj piktogramoj de premita kapa butono
+        Search and dropdown background: Fono de serĉo kaj falmenuoj
+        Settings search background: Fono de agorda serĉo
+        Instance menu: Servila menuo
+        Shadow color: Ombra koloro
+        Primary controls and highlights: Ĉefaj regiloj kaj emfazoj
+        Primary control hover and focus: Ĉefa regilo sub kursoro kaj enfokusigita
+        Primary control pressed: Ĉefa regilo premita
+        Text and icons on primary controls: Teksto kaj piktogramoj sur ĉefaj regiloj
+        Secondary controls and highlights: Sekundaraj regiloj kaj emfazoj
+        Secondary control hover and focus: Sekundara regilo sub kursoro kaj enfokusigita
+        Secondary control pressed: Sekundara regilo premita
+        Light secondary color: Hela sekundara koloro
+        Visited accent: Akcento de vizititaj
+        Text and icons on secondary controls: Teksto kaj piktogramoj sur sekundaraj regiloj
+        Links: Ligiloj
+        Visited links: Vizititaj ligiloj
+        Destructive action: Detrua ago
+        Destructive hover and focus: Detrua ago sub kursoro kaj enfokusigita
+        Destructive pressed: Detrua ago premita
+        Text and icons on destructive actions: Teksto kaj piktogramoj sur detruaj agoj
+    Main Color Theme:
+      Catppuccin Macchiato Rosewater: Catppuccin Macchiato rozakvo
+      Catppuccin Macchiato Flamingo: Catppuccin Macchiato flamengo
+      Catppuccin Macchiato Pink: Catppuccin Macchiato rozkoloro
+      Catppuccin Macchiato Mauve: Catppuccin Macchiato purpuro
+      Catppuccin Macchiato Red: Catppuccin Macchiato ruĝo
+      Catppuccin Macchiato Maroon: Catppuccin Macchiato bruno
+      Catppuccin Macchiato Peach: Catppuccin Macchiato persikarbo
+      Catppuccin Macchiato Yellow: Catppuccin Macchiato flavo
+      Catppuccin Macchiato Green: Catppuccin Macchiato verdo
+      Catppuccin Macchiato Teal: Catppuccin Macchiato blua verdo
+      Catppuccin Macchiato Sky: Catppuccin Macchiato ĉielo
+      Catppuccin Macchiato Sapphire: Catppuccin Macchiato safiro
+      Catppuccin Macchiato Blue: Catppuccin Macchiato bluo
+      Catppuccin Macchiato Lavender: Catppuccin Macchiato lavendo
+  Player Settings:
+    Rewind on Resume: "Malantaŭeniri je daŭrigo"
+    Minimum Pause Before Rewinding: "Minimuma paŭzo antaŭ malantaŭeniro"
+    Sections:
+      Playback: Ludado
+      Autoplay: Aŭtomata ludado
+      Playback Speed: Ludrapido
+      Player Controls: Ludilaj regiloj
+      Gestures: Gestoj
+      Viewing Modes: Spektoreĝimoj
+      Shorts: Videaĵetoj
+      Screenshots: Ekrankopioj
+    Lights Off: Lumoj estingitaj
+    Show Lights Off Toggle: Montri baskulon de estingitaj lumoj
+    Show Volume Boost Toggle: Montri baskulon de laŭteca plifortigo
+    Show Mono Audio Toggle: Montri baskulon de monofonia sono
+    Show Music Mode Toggle: Montri baskulon de muzika reĝimo
+    Swipe Gestures:
+      Fullscreen Brightness: Plena heleco en plenekrana reĝimo
+      Left: Ŝovo sur la maldekstra flanko
+      Right: Ŝovo sur la dekstra flanko
+      Disabled: Malŝaltita
+      Brightness: Heleco
+      Volume: Laŭteco
+      Hint: Ŝovu supren aŭ malsupren sur ajna flanko de la videaĵo en plenekrana reĝimo.
+      Unavailable: Ne eblis alĝustigi la ludregilojn.
+    yt-dlp Streaming: Fluigado per yt-dlp
+    Music Visualizer: Muzika vidigilo
+    Skip Unavailable Playlist Videos: Salti nedisponeblajn videaĵojn de ludlistoj
+    Automatically Open Chapters: Aŭtomate malfermi ĉapitrojn
+    Caption Appearance:
+      Caption Appearance: Aspekto de apudskribo
+      Captions: Apudskribo
+      Preferred Language: Preferata lingvo de apudskribo
+      Application Language: Lingvo de la aplikaĵo
+      Enable Translations: Ŝalti tradukojn de apudskribo
+      Text Color: Teksta koloro
+      Background Color: Fona koloro
+      Background Opacity: Fona opakeco
+      Font Size: Tipara grandeco
+      Text Opacity: Teksta opakeco
+      Default: Defaŭlta
+      Font Family:
+        Font Family: Tiparfamilio
+        Monospaced Serif: Egallarĝa kun serifoj
+        Proportional Serif: Proporcia kun serifoj
+        Monospaced Sans-Serif: Egallarĝa sen serifoj
+        Proportional Sans-Serif: Proporcia sen serifoj
+      Colors:
+        White: Blanko
+        Yellow: Flavo
+        Green: Verdo
+        Cyan: Ciankoloro
+        Blue: Bluo
+        Magenta: Maĝento
+        Red: Ruĝo
+        Black: Nigro
+      Anchor:
+        Anchor: Pozicio
+        Top Left: Supre maldekstre
+        Top Center: Supre centre
+        Top Right: Supre dekstre
+        Center Left: Centre maldekstre
+        Center: Centre
+        Center Right: Centre dekstre
+        Bottom Left: Malsupre maldekstre
+        Bottom Center: Malsupre centre
+        Bottom Right: Malsupre dekstre
+      Edge Style:
+        Edge Style: Randa stilo
+        None: Neniu
+        Outline: Konturo
+        Drop Shadow: Ĵetita ombro
+        Raised: Reliefa
+        Depressed: Enpremita
+      Reset: Restarigi aspekton de apudskribo
+    Auto Picture in Picture:
+      Auto Picture in Picture: Aŭtomate eniri bildenbildan reĝimon
+      On Tab Change: Kiam oni ŝanĝas langeton
+      On Window Minimize: Kiam oni minimumigas la fenestron
+      On Window Hide: Kiam la fenestro perdas fokuson aŭ oni ŝanĝas al alia
+      Wayland Minimize Unsupported: Wayland ne raportas minimumigon de fenestroj al aplikaĵoj, do ĉi tiu ekigilo ne disponeblas. Uzu anstataŭe "Kiam la fenestro perdas fokuson aŭ oni ŝanĝas al alia", kiu ankaŭ kovras minimumigon.
+      On Tab Change Mini Player: Ŝanĝo de langeto anstataŭe montras la ludileton. Por uzi tion, agordu “Kiam oni forlasas videaĵon” al “Ĉesigi ludadon”.
+    Scroll Mini Player:
+      Scroll Mini Player: Rulumada ludileto
+      Scroll Player Mode: Dum rulumado malsupren
+      Scroll Player Mode Tooltip: La ludilo estas fiksita nur dum ĝi okupas maksimume duonon de la alteco de la fenestro. Alie, ekzemple ĉe telefonoj en horizontala orientiĝo aŭ en larĝaj fenestroj, anstataŭe aperas la miniludilo.
+      Scroll Player Modes:
+        Mini: Montri ludileton
+        Pin: Fiksi la ludilon supre, se estas spaco
+        Off: Rulumi kun la paĝo
+      Leaving Video: Kiam oni forlasas videaĵon
+      Leaving Video Modes:
+        Keep Playing: Daŭrigi ludadon en ludileto
+        Stop: Ĉesigi ludadon
+    Multiply Seek Interval by Playback Rate: Multobligi saltintervalon per ludrapido
+    Rotate Wide Videos to Landscape in Fullscreen: Turni larĝajn videaĵojn al horizontala orientiĝo en plenekrana reĝimo
+    Swipe Up or Down to Enter or Exit Fullscreen: Ŝovi supren aŭ malsupren por eniri aŭ eliri el plenekrana reĝimo
+    Show Playback Rate Adjusted Timestamp: Montri tempindikon alĝustigitan laŭ ludrapido
+    Use YouTube-style Shorts: Uzi videaĵetojn laŭ stilo de YouTube
+    Loop Shorts: Ripeti videaĵetojn
+    Preload Upcoming Videos: Antaŭŝargi venontajn videaĵojn
+    Upcoming Videos to Preload: Venontaj videaĵoj antaŭŝargotaj
+    Concurrent Preloads: Samtempaj antaŭŝargoj
+    Remember Volume: Memori laŭtecon
+    Mono Audio: Monofonia sono
+    Skip Silence: Salti silenton
+    Show Skip Silence Toggle: Montri baskulon de silento-saltado
+    Enable DLNA Casting: Ŝalti elsendadon per DLNA
+    Enable Skip Silence by Default: Defaŭlte ŝalti silento-saltadon
+    Enable Video Zoom: Ŝalti videaĵan zomon
+    Enable Seek History: Ŝalti historion de saltoj
+    Show Seek Bar Filmstrip: "Montri filmstrion de la serĉbreto"
+    Pause on Stream Recovery: Paŭzigi je restariĝo de fluo
+    Continue Playback When Screen Is Locked: Daŭrigi ludadon kiam la ekrano estas ŝlosita
+    Voice-over Translation:
+      Title: Voĉa traduko
+      Attribution: (funkciigita de Yandex)
+      Enable: Ŝalti voĉan tradukon
+      Prepare in Background: Komenci prepari voĉajn tradukojn fone
+      Background Preparation Tooltip: Sendas la identigilon, daŭron kaj elektitan lingvon de la aktuala videaĵo al la tradukservo tuj kiam subtenata videaĵo ŝargiĝas.
+      Language: Lingvo de voĉa traduko
+      Supported Source Languages: 'Subtenataj fontaj lingvoj: rusa, angla, ĉina, korea, araba, franca, itala, hispana, germana kaj japana.'
+      Voice Volume: Laŭteco de tradukita voĉo
+      Original Volume: Laŭteco de originala sono
+      Russian: Rusa
+      English: Angla
+      Kazakh: Kazaĥa
+    Hold to Double Playback Speed: Teni premita por duobligi ludrapidon
+    Use Quick Playback Speed Bar: Uzi breton de rapidaj ludrapidoj
+    Customize Quick Playback Speed Bar: Personecigi breton de rapidaj ludrapidoj
+    Quick Playback Speed Bar Manager: Breto de rapidaj ludrapidoj
+    Add Playback Speed: Aldoni ludrapidon
+    Reset Quick Playback Speed Bar: Restarigi al defaŭltoj
+    Playback Speed Name: Nomo
+    Edit Playback Speed Name: Redakti nomon de ludrapido
+    Use Automatic Playback Speed Name: Uzi aŭtomatan nomon de ludrapido
+    Reorder Playback Speed: Treni por reordigi ludrapidon
+    Playback Speed: Ludrapido
+    Parallel Segment Loading: Paralela ŝargado de segmentoj
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: Kvalitlimo ĉe mezurataj retoj
+      No Limit: Sen limo
+      Tooltip: Ĉe poŝtelefonaj datumoj kaj aliaj mezurataj retoj, videaĵoj komenciĝas je ĉi tiu kvalito aŭ pli malalta. Vi ankoraŭ povas elekti pli altan kvaliton en la ludilo.
+    Buffering:
+      Buffering: Bufrado
+      Description: Elektu kiom da videaĵo la ludilo ŝargas anticipe kaj tenas ŝargita.
+      Buffer Ahead Hint: Pli granda antaŭa bufro daŭrigas la ludadon dum pli longaj konektaj interrompoj, sed elŝutas videaĵon, kiun vi eble ne spektos.
+      Rewind Buffer Hint: Pli granda revolva bufro ebligas salti reen sen reelŝuti, sed uzas pli da memoro.
+      Buffer Before Playing Hint: Atendi pli da videaĵo antaŭ ludado malhelpas ripetajn haltojn ĉe nestabilaj konektoj, sed videaĵoj bezonas pli longe por komenciĝi kaj daŭri post saltado.
+      Preset: Bufra antaŭagordo
+      Presets:
+        Data Saver: Datumŝparo
+        Default: Defaŭlta
+        Smooth Playback: Glata ludado
+        Custom: Laŭmenda
+      Buffer Ahead: Antaŭa bufro
+      Buffer Ahead Tooltip: 'Kiom for post la aktuala pozicio ŝargi. Ĉe altaj kvalitoj, memorlimoj povas limigi tre altajn valorojn. Defaŭlto: {value}'
+      Rewind Buffer: Revolva bufro
+      Rewind Buffer Tooltip: 'Kiom el la jam spektita videaĵo restas ŝargita. Defaŭlto: {value}'
+      Buffer Before Playing: Bufro antaŭ ludado
+      Buffer Before Playing Tooltip: 'Kiom da videaĵo devas ŝargiĝi antaŭ ol la ludado komenciĝas aŭ daŭras post halto. Defaŭlto: {value}'
+    Screenshot:
+      Legacy Formats: Heredaĵaj formoj
+      Modern Formats: Modernaj formoj
+    Ignore System Rotation Lock for Fullscreen: Ignori sisteman rotacian ŝloson por plenekrana reĝimo
+    Swipe Left or Right to Seek in Fullscreen: Ŝovi maldekstren aŭ dekstren por salti en plenekrana reĝimo
+    Show Swipe to Seek Preview: Montri antaŭrigardon de saltado per ŝovo
+    Enable Google Cast: Ŝalti Google Cast
+    Enable FCast: Ŝalti FCast
+  Channel Settings:
+    Channel Settings: Kanalaj agordoj
+    Channel Settings Description: Memori la agordojn, kiujn vi elektas dum spektado, aparte por ĉiu kanalo, por ke ili estu reaplikitaj la venontan fojon, kiam vi spektos unu el ĝiaj videaĵoj.
+    Enable Channel Playback Settings: Ŝalti kanalajn ludagordojn
+    Auto Save Playback Speed: Aŭtomate konservi ŝanĝojn de ludrapido
+    Auto Save Video Quality: Aŭtomate konservi ŝanĝojn de videokvalito
+    Auto Save Subtitles State: Aŭtomate konservi ŝanĝojn de subteksta stato
+    Auto Save Volume: Aŭtomate konservi ŝanĝojn de laŭteco
+    Manage Saved Channels: Administri konservitajn kanalojn ({channelCount})
+    Saved Channels: Konservitaj kanalaj agordoj
+    Enable Saved Channel Settings Sync: Sinkronigi konservitajn kanalajn agordojn
+    Disable Saved Channel Settings Sync: Ĉesi sinkronigi konservitajn kanalajn agordojn
+    Search Channels: Serĉi kanalojn
+    No Saved Channels: Ankoraŭ neniuj kanal-specifaj agordoj estis konservitaj
+    No Matching Channels: Neniu kanalo kongruas kun via serĉo
+    Forget Channel: Forgesi ĉiujn agordojn por ĉi tiu kanalo
+    Forget Value: Forgesi ĉi tiun agordon
+    Add Setting: Memori alian agordon por ĉi tiu kanalo
+    Add Subscribed Channel: Aldoni abonitan kanalon
+    Video Quality: Videokvalito
+    Subtitles Enabled: Subtekstoj ŝaltitaj
+    Volume: Laŭteco
+  Download Settings:
+    Download Settings: Elŝutoj
+    Enable Downloads: Ŝalti elŝutojn
+    Managed Tools Download Started Template: 'Necesa ekstera programaro ne troviĝis: {tools}. Elŝutado de administrataj kopioj…'
+    Managed Tools Download Finished Template: Finis elŝuti {tools}
+    Managed Tools Update Started Template: Ĝisdatigo troviĝis por {tools}. Elŝutado…
+    Managed Tools Update Finished Template: Finis ĝisdatigi {tools}
+    Managed Tools Update Available Template: Ĝisdatigo disponeblas por {tools}.
+    Managed Tools Update Source Notice: OpenTubeX elŝutas ĝin rekte de GitHub, do F-Droid kaj aliaj aplikaĵvendejoj ne kontrolas ĝin.
+    Update Managed Tools: Ĝisdatigi
+    Managed Tools Download Error Template: 'Ne eblis elŝuti la administratajn ilojn: {errors}'
+    Download Folder: Elŝuta dosierujo
+    Global Additional yt-dlp Arguments: Aldonaj argumentoj por yt-dlp
+    Concurrent Downloads: Samtempaj elŝutoj
+    Bandwidth Limit: Kapacita limo (KiB/s)
+    Download Templates: Elŝutaj ŝablonoj
+    Manage Download Templates: Administri elŝutajn ŝablonojn ({templateCount})
+    New Template: Nova ŝablono
+    Template Source: Ŝablono redaktota aŭ uzota kiel bazo
+    Built-in Template: '{name} (integrita)'
+    Custom Template Name: '{name} (laŭmenda)'
+    Create Template Copy: Krei kopion
+    Template Copy Name: 'Kopio de {name}'
+    Automatic Downloads: Aŭtomataj elŝutoj
+    Manage Automatic Downloads: Administri aŭtomatajn elŝutojn ({channelCount})
+    Automatic Downloads Description: Elektu elŝutan ŝablonon kaj filtrilojn por ĉiu abonita kanalo. Kongruaj videaĵoj elŝutiĝas fone kiam abonfluoj aktualiĝas.
+    Automatic Downloads New Only: Ŝalti kanalon komenciĝas per ĝia sekva nova alŝuto. Ekzistantaj videaĵoj kaj la malnova enhavo de la kanalo ne estas elŝutataj.
+    Automatic Downloads No Channels: Abonu kanalon antaŭ ol agordi aŭtomatajn elŝutojn.
+    No Matching Automatic Download Channels: Neniu kanalo kongruas kun via serĉo.
+    Automatic Downloads Livestreams: Tujelsendoj
+    Automatic Downloads Require Unmetered Network: Nur ĉe nemezurataj retoj
+    Automatic Downloads Require Charging: Nur dum ŝargado
+    Minimum Duration Seconds: Minimuma daŭro (sekundoj)
+    Maximum Duration Seconds: Maksimuma daŭro (sekundoj)
+    Minimum File Size MB: Minimuma dosiergrandeco (MB)
+    Maximum File Size MB: Maksimuma dosiergrandeco (MB)
+    Maximum Age Days: Maksimuma aĝo (tagoj)
+    Title Includes: Titolo enhavas
+    Title Excludes: Titolo ne enhavas
+    Title Filter Hint: Apartigu plurajn titolajn terminojn per komoj. Videaĵo devas kongrui kun almenaŭ unu inkluzivita termino kaj kun neniu ekskluzivita termino.
+  External Software Settings:
+    Create YouTube session: Krei YouTube-seancon
+    YouTube session hint: Ensalutu se necese, poste konservu. Elektu en la agordoj ĉu uzi ĉi tiun seancon por elŝutoj, ludado aŭ subtekstoj.
+    Use cookies for downloads: Uzi kuketojn por elŝutoj
+    YouTube session failed: Ne eblas konservi la YouTube-seancon.
+    Checking FFmpeg and FFprobe: Kontrolado de FFmpeg/FFprobe…
+    FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe ankoraŭ ne estas elŝutitaj. Alklaku la suban butonon por elŝuti ilin.
+    External Software Settings: Ekstera programaro
+    yt-dlp Source: Fonto de yt-dlp
+    yt-dlp Channel: Kanalo de yt-dlp
+    Sources:
+      System: Sistemo (PATH aŭ laŭmenda vojo)
+      Managed: Administrata de OpenTubeX
+    Detected Version Template: 'Detektita versio de yt-dlp: {version}'
+    Managed Not Downloaded: yt-dlp ankoraŭ ne estas elŝutita. Alklaku la suban butonon por elŝuti ĝin.
+    System yt-dlp Missing Warning: yt-dlp ne troviĝis en via sistemo. Instalu ĝin, difinu laŭmendan vojon sube aŭ ŝanĝu la fonton al "Administrata de OpenTubeX".
+    Download yt-dlp: Elŝuti yt-dlp
+    Update yt-dlp: Ĝisdatigi yt-dlp
+    Checking yt-dlp: Kontrolado de yt-dlp…
+    Downloading yt-dlp: Elŝutado de yt-dlp…
+    yt-dlp Downloaded Template: yt-dlp {version} estis elŝutita
+    yt-dlp Download Error Template: 'Elŝuto de yt-dlp malsukcesis: {error}'
+    FFmpeg Source: Fonto de FFmpeg
+    Detected FFmpeg Version Template: 'Detektita versio de FFmpeg: {version}'
+    Detected FFmpeg and FFprobe Version Template: 'Detektita versio de FFmpeg/FFprobe: {version}'
+    FFmpeg Managed Not Downloaded: FFmpeg ankoraŭ ne estas elŝutita. Alklaku la suban butonon por elŝuti ĝin.
+    System FFmpeg Missing Warning: FFmpeg ne troviĝis en via sistemo. Ĝi necesas por kunfandi videon kaj sonon kaj por sonkonvertado. Instalu ĝin, difinu laŭmendan vojon sube aŭ ŝanĝu la fonton al "Administrata de OpenTubeX".
+    Download FFmpeg: Elŝuti FFmpeg
+    Update FFmpeg: Ĝisdatigi FFmpeg
+    Checking FFmpeg: Kontrolado de FFmpeg…
+    Downloading FFmpeg: Elŝutado de FFmpeg…
+    FFmpeg Downloaded Template: FFmpeg {version} estis elŝutita
+    FFmpeg Download Error Template: 'Elŝuto de FFmpeg malsukcesis: {error}'
+    Detected FFprobe Version Template: 'Detektita versio de FFprobe: {version}'
+    FFprobe Managed Not Downloaded: FFprobe ankoraŭ ne estas elŝutita. Alklaku la suban butonon por elŝuti ĝin kun FFmpeg.
+    System FFprobe Missing Warning: FFprobe ne troviĝis en via sistemo. Ĝi necesas por ekzameni aŭdvidaĵojn dum postprilaborado. Instalu ĝin apud FFmpeg aŭ ŝanĝu la fonton al "Administrata de OpenTubeX".
+    Checking FFprobe: Kontrolado de FFprobe…
+    Download FFmpeg and FFprobe: Elŝuti FFmpeg kaj FFprobe
+    Update FFmpeg and FFprobe: Ĝisdatigi FFmpeg kaj FFprobe
+    Downloading FFmpeg and FFprobe: Elŝutado de FFmpeg kaj FFprobe…
+    FFmpeg and FFprobe Downloaded Template: FFmpeg kaj FFprobe {version} estis elŝutitaj
+    FFmpeg and FFprobe Download Error Template: 'Elŝuto de FFmpeg kaj FFprobe malsukcesis: {error}'
+    Managed Tool Already Current Template: '{tool} {version} jam estas ĝisdata'
+    Managed Tool Errors:
+      Removed: La elŝutita dosiero estis forigita, plej verŝajne de kontraŭvirusa programo
+      Unusable: La elŝutita programo ne povis esti rulata. Kontraŭvirusa programo eble blokas ĝin, aŭ ĝi ne subtenas ĉi tiun sistemon
+      Release Not Found: Ne eblis trovi la plej novan eldonon
+      Verification Failed: Ne eblis kontroli, ke la elŝuto estas oficiala eldono
+      Downgrade: La elŝutita eldono estas pli malnova ol la instalita
+      Invalid Archive: La elŝutita arkivo estas nevalida
+      Rollback Failed: La ĝisdatigo malsukcesis kaj la antaŭa versio ne povis esti plene restarigita
+    Managed Tool Updates: Ĝisdatigoj de administrataj iloj
+    Update Modes:
+      Automatic: Ĝisdatigi aŭtomate
+      Ask: Demandi antaŭ ĝisdatigo
+      Manual: Nur ĝisdatigi permane
+    yt-dlp Executable Path: Plenumeblo de yt-dlp
+    FFmpeg Executable Path: Plenumeblo de FFmpeg
+    Restricted Playback Authentication: Kuketoj de yt-dlp
+    Cookie Source: Fonto de kuketoj
+    Cookie Sources:
+      None: Neniu
+      File: Dosiero
+      Browser: Retumilo
+    Cookie File: Kuketa dosiero
+    Browser for Cookies: Retumilo por kuketoj
+    Browser Profile: Retumila profilo (nedeviga)
+    Browser Profile Placeholder: Profilnomo aŭ vojo
+    Browser Profile Invalid: "Enigu profilan nomon, aŭ elektu profilan dosierujon per la dosieruja butono."
+    Select Browser: Elektu retumilon
+    Always Use Cookies: Ĉiam uzi kuketojn
+    Restricted Playback Authentication Hint: Defaŭlte, OpenTubeX nur donas ĉi tiujn kuketojn al yt-dlp post kiam vi elektas "Provi kun agorditaj kuketoj" ĉe aĝolimigita aŭ nur-membra videaĵo.
+    Restricted Playback Authentication Warning: Uzi yt-dlp kun Google-konto povas konduki al provizoraj aŭ daŭraj kontolimigoj.
+    Use cookies for subtitles: Uzi kuketojn por subtekstoj
+  Privacy Settings:
+    Internet Connectivity Checks: Kontroloj de interreta konekteco
+    Internet Connectivity Checks Tooltip: Sendas malgrandajn petojn al servilo gastigita de GrapheneOS por kontroli interretan aliron.
+    Automatic History Retention: Aŭtomata konservado de historio (tagoj)
+    Automatic History Retention Placeholder: Lasu malplena por konservi por ĉiam
+    Automatic History Retention Tooltip: Lasu malplena por konservi la historion por ĉiam. Konservi nombron forigas pli malnovajn erojn nun kaj aŭtomate dum la aplikaĵo estas malfermita.
+    Automatic Search History Retention: Aŭtomata konservado de serĉhistorio (tagoj)
+    Automatic Search History Retention Tooltip: Lasu malplena por konservi la serĉhistorion por ĉiam. Konservi nombron forigas pli malnovajn serĉojn nun kaj aŭtomate dum la aplikaĵo estas malfermita.
+    History Retention Saved: La konservado de historio estis konservita
+    Invalid History Retention Days: Enigu entjeran nombron de tagoj pli grandan ol nulo
+    Enable Watch Statistics: Ŝalti spektajn statistikojn
+    Week Starts On: Semajno komenciĝas je
+    Cache Video Metadata: Historio de metadatumoj
+    Cache Video Metadata Tooltip: Konservas ĉiun version de subtenataj metadatumoj de videaĵoj, kiujn vi vizitas, inkluzive de titoloj, bildetoj kaj priskriboj. Ĝi ankaŭ konservas la titolojn montratajn en viaj abonfluoj. Defaŭlte malŝaltita, ĉar konservi historion de metadatumoj pliigas la diskuzon.
+    Watched Percentage Threshold: Procenta sojlo de spektado
+    Watched Percentage Threshold Tooltip: Videaĵoj estas markitaj kiel spektitaj post atingo de la elektita procento kaj kiam restas ne pli ol 2 minutoj. Je 0%, ili estas markitaj kiam la ludado komenciĝas. Je 100%, ili estas markitaj kiam la ludado finiĝas.
+    Clear Video Metadata Cache: Viŝi kaŝmemoron de videaĵaj metadatumoj
+    Are you sure you want to clear the video metadata cache?: Ĉu vi certas, ke vi volas viŝi la kaŝmemoritajn titolojn, bildetojn kaj priskribojn de videaĵoj?
+    Failed to clear video metadata cache: Malsukcesis viŝi la kaŝmemoron de videaĵaj metadatumoj
+    Video metadata cache has been cleared: La kaŝmemoro de videaĵaj metadatumoj estis viŝita
+    Video Metadata Cache Size: 'Kaŝmemoro de videaĵaj metadatumoj: {size}'
+  Storage Settings:
+    Storage: Konservejo
+    Downloaded Media: Spurataj elŝutitaj aŭdvidaĵoj
+    Storage Breakdown: Disigo de konservejo
+    Shown Total: Montrita sumo
+    Calculating: Kalkulado…
+    Not Available: Ĝusta grandeco ne disponeblas
+    At Least: Almenaŭ {size}
+    Failed To Read Storage: Kelkaj konservaj grandecoj ne povis esti legitaj
+    Downloaded Media Description: Video-, son- kaj subtekstaj dosieroj, kiujn la elŝuta historio ankoraŭ spuras.
+    Selected Download Folders: Elŝutaj dosierujoj elektitaj de la uzanto
+    Download History Records: Registroj de elŝuta historio
+    Download History Records Description: '{count} finita elŝuta registro. Ĉi tiu registro spuras staton kaj dosierlokojn, sed ne enhavas la elŝutitajn aŭdvidaĵojn. | {count} finitaj elŝutaj registroj. Ĉi tiuj registroj spuras staton kaj dosierlokojn, sed ne enhavas la elŝutitajn aŭdvidaĵojn.'
+    Clear Download History Records: Viŝi registrojn de elŝuta historio
+    Clear Download History Confirmation: Ĉu viŝi ĉiujn finitajn elŝutajn registrojn?
+    Download Files Stay On Disk: Elŝutitaj dosieroj restos sur la disko, sed ili ne plu aperos sur la paĝo de elŝutoj.
+    Clear Records: Viŝi registrojn
+    Replaceable Caches: Anstataŭigeblaj kaŝmemoroj
+    Application Caches: Kaŝmemoroj de la aplikaĵo
+    Browser Caches: Retumilaj kaŝmemoroj
+    Browser Caches Hint: Kaŝmemoroj de Chromium por HTTP, GPU, kodo, ombrigiloj, service workers kaj vortaroj.
+    Clear Android Cache Confirmation: Ĉu viŝi la retumilan kaŝmemoron de Android?
+    Stored App Data: Konservitaj datumoj de la aplikaĵo
+    Included In App Data: Inkluzivita en la supraj datumoj de la aplikaĵo
+    Browser Runtime Data: Rultempaj datumoj de la retumilo
+    Browser Runtime Data Hint: Seancaj kaj lokaj konservejoj, kuketoj, privatecaj kaj retaj statoj kaj kolapsaj dosieroj de Chromium.
+    Subscription Feed Cache: Kaŝmemoro de abonoj kaj fluoj
+    Subscription Feed Cache Description: Konservas venigitajn abonajn videaĵojn, videaĵetojn, tujelsendojn kaj afiŝojn. OpenTubeX rekreas ĝin je la sekva aktualigo de fluoj.
+    Clear Subscription Feed Cache: Viŝi kaŝmemoron de abonoj kaj fluoj
+    Clear Subscription Feed Cache Confirmation: Ĉu viŝi la kaŝmemoron de abonoj kaj fluoj?
+    Subscription Feed Cache Effect: Abonfluoj eble aperos malplenaj ĝis ili aktualiĝos. Viaj abonoj kaj profiloj ne estos ŝanĝitaj.
+    Session Search Cache: Seanca serĉa kaŝmemoro
+    In Memory: En memoro
+    Session Search Cache Description: '{count} serĉo estas kaŝmemorita por pli rapida reena navigado. Ĉi tiu kaŝmemoro estas forĵetita kiam OpenTubeX fermiĝas. | {count} serĉoj estas kaŝmemoritaj por pli rapida reena navigado. Ĉi tiu kaŝmemoro estas forĵetita kiam OpenTubeX fermiĝas.'
+    Clear Session Search Cache: Viŝi seancan serĉan kaŝmemoron
+    Clear Session Search Cache Confirmation: Ĉu viŝi la seancan serĉan kaŝmemoron?
+    Session Search Cache Effect: Kaŝmemoritaj rezultpaĝoj estos forĵetitaj. La konservita serĉa historio ne estos ŝanĝita.
+    HTTP Cache: HTTP-kaŝmemoro
+    HTTP Cache Description: Electron konservas retajn respondojn sur la disko, por ke ripetaj petoj povu ŝargiĝi sen reelŝuti la samajn datumojn. OpenTubeX rekreas ĉi tiun kaŝmemoron laŭbezone.
+    Managed By Electron: Administrata de Electron
+    Clear HTTP Cache: Viŝi HTTP-kaŝmemoron
+    Clear HTTP Cache Confirmation: Ĉu viŝi la HTTP-kaŝmemoron de Electron?
+    HTTP Cache Effect: Bildoj kaj aliaj retaj rimedoj eble ŝargiĝos pli malrapide unufoje dum la kaŝmemoro rekonstruiĝas.
+    Tab Image Cache: Langetaj bildetoj kaj kanalaj avataroj
+    Tab Image Cache Description: Konservas antaŭrigardajn bildojn kaj kanalajn avatarojn por malfermitaj kaj restarigitaj langetoj. OpenTubeX rekreas ilin dum langetoj estas uzataj.
+    Clear Tab Image Cache: Viŝi langetan bildan kaŝmemoron
+    Clear Tab Image Cache Confirmation: Ĉu viŝi langetajn bildetojn kaj kanalajn avatarojn?
+    Tab Image Cache Effect: Langetaj bildoj eble malaperos mallonge kaj estos rekreitaj dum iliaj langetoj estas uzataj.
+    Playback Caches: Ludadaj kaŝmemoroj
+    Playback Caches Description: Konservas URL-ojn de yt-dlp-fluoj inter seancoj de la aplikaĵo, plus ludilajn dosierojn de YouTube. La URL-kaŝmemoro validas nur por fluoj venigitaj per yt-dlp.
+    Playback URL Cache Entry Size: Limo de URL-kaŝmemoro de yt-dlp-fluoj
+    Playback URL Cache Entry Size Tooltip: Difinas la maksimuman grandecon de ĉiu kaŝmemorita yt-dlp-flua ero. Agordu ĝin al 0 MB por malŝalti daŭran kaŝmemoradon de yt-dlp-fluoj.
+    Clear Playback Caches: Viŝi ludadajn kaŝmemorojn
+    Clear Playback Caches Confirmation: Ĉu viŝi la kaŝmemorojn de yt-dlp kaj de la ludilo?
+    Playback Caches Effect: La sekva loka ludpeto eble daŭros pli longe dum flu- kaj ludilaj datumoj estas revenigataj.
+    Clear Cache: Viŝi kaŝmemoron
+    History Data: Konservitaj historioj
+    Video Metadata Description: Konservas pasintajn titolojn, bildetojn kaj priskribojn por subtenataj videaĵoj. Malnovaj revizioj ne povas esti rekreitaj post forigo.
+    Video Metadata Effect: Konservitaj revizioj de metadatumoj estos definitive forigitaj. Aktualaj detaloj de videaĵoj ankoraŭ povas esti revenigitaj.
+    Watch History: Spekthistorio kaj statistikoj
+    Watch History Description: La spekthistorio registras spektitajn videaĵojn kaj progreson. Spektaj statistikoj konservas ĉiutagajn spektajn sumojn. La konservado-limo validas nur por la spekthistorio.
+    Clear Watch Statistics: Viŝi spektajn statistikojn
+    Watch History Effect: Registroj de spektitaj videaĵoj kaj konservita progreso estos forigitaj. Spektaj statistikoj restos.
+    Clear Watch Statistics Confirmation: Ĉu forigi ĉiujn spektajn statistikojn?
+    Watch Statistics Effect: Ĉiutagaj spektaj sumoj estos forigitaj. La spekthistorio restos.
+    Search History: Serĉa historio
+    Search History Description: Konservas serĉojn, kiujn vi elektis memori.
+    Delete Search History: Forigi serĉan historion
+    Delete Search History Confirmation: Ĉu forigi la tutan konservitan serĉan historion?
+    Search History Effect: Konservitaj serĉproponoj el viaj antaŭaj serĉoj malaperos. La aktuala seanca kaŝmemoro restos.
+    Other User Data: Aliaj uzantaj datumoj
+    Other Profile Files: Aliaj profilaj dosieroj
+    Other Profile Files Hint: Savkopioj, provizoraj dosieroj kaj profilaj eroj, kiujn OpenTubeX ankoraŭ ne rekonas.
+    Subscriptions And Profiles: Abonoj kaj profiloj
+    Subscriptions And Profiles Description: Konservas abonitajn kanalojn, profilnomojn kaj profilan membrecon.
+    Subscriptions And Profiles Effect: Ĉiuj abonoj kaj kromaj profiloj estos definitive forigitaj. Datumoj de la flua kaŝmemoro ankaŭ estos viŝitaj.
+    Playlists Description: Konservas nomojn, priskribojn kaj konservitajn videaĵojn de ludlistoj.
+    Playlists Effect: Ĉiu ludlisto kaj ĝia listo de konservitaj videaĵoj estos definitive forigitaj. Elŝutitaj aŭdvidaj dosieroj restos.
+    Settings And Sessions: Agordoj, langetaj seancoj kaj memorigoj
+    Settings And Sessions Description: Konservas preferojn de la aplikaĵo, restarigeblajn langetojn kaj memorigojn pri tujelsendoj. Malfermu la profilan dosierujon por ekzameni aŭ savkopii ĉi tiujn dosierojn; ĉi tiu paĝo ne forigas ilin.
+    Cleanup Complete: Purigado de konservejo finiĝis
+    Cleanup Failed: Purigado de konservejo malsukcesis
+  Subscription Settings:
+    Fetch Feed on Startup: Venigi fluon je startigo
+    Show New Content Feed: Montri fluon de nova enhavo
+    RSS Feeds: RSS-fluoj
+    Enable RSS Feeds: Ŝalti RSS-fluojn por aliaj platformoj
+    Manage RSS Feeds: Administri RSS-fluojn
+    Show New Content Indicators: Montri indikilojn de nova enhavo
+    Show Scheduled Live Streams / Premieres First: Montri planitajn tujelsendojn / premierojn unue
+    Auto Refresh Interval: Intervalo de aŭtomata aktualigo
+    Videos Auto Refresh Interval: Intervalo de aŭtomata aktualigo de videaĵoj
+    Shorts Auto Refresh Interval: Intervalo de aŭtomata aktualigo de videaĵetoj
+    Live Auto Refresh Interval: Intervalo de aŭtomata aktualigo de tujelsendoj
+    Posts Auto Refresh Interval: Intervalo de aŭtomata aktualigo de afiŝoj
+    Refresh Subscriptions While App Is Closed: Aktualigi abonojn dum la aplikaĵo estas fermita
+    Notify About New Uploads: Sciigi pri novaj alŝutoj
+    RSS Feeds Auto Refresh Interval: Intervalo de aŭtomata aktualigo de RSS-fluoj
+  Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: Kalkuli spekttempon de
+      Break Reminder Action: Kiam estas tempo por paŭzo
+      Grayscale: Grizskalo
+      Apply Grayscale To: "Apliki grizskalon al"
+      'Off': 'Malŝaltita'
+      Always: Ĉiam
+      During Bedtime: Dum dormotempo
+      After the Daily Limit: Post la ĉiutaga limo
+      Whole App: "Tuta aplikaĵo"
+      Videos and Images: "Videaĵoj kaj bildoj"
+      Daily Watch Time Limit: Ĉiutaga limo de spekttempo
+      Daily Shorts Limit: Ĉiutaga limo de videaĵetoj
+      When a Limit Is Reached: Kiam limo estas atingita
+      Remind Me: Memorigi min
+      Pause Playback: Paŭzigi ludadon
+      Take a Break Reminder: Memorigo por paŭzi
+      Every: Ĉiun {duration}
+      Bedtime Reminder: Memorigo pri dormotempo
+      Bedtime Start: Komenco de dormotempo
+      Bedtime End: Fino de dormotempo
+      Wait Until the Video Ends: Atendi ĝis la videaĵo finiĝas
+      Silence Upload Notifications at Bedtime: Silentigi sciigojn pri alŝutoj dum dormotempo
+      Stop Autoplay at Bedtime and After the Daily Limit: Haltigi aŭtomatan ludadon dum dormotempo kaj post la ĉiutaga limo
+    AI Video Summaries: AI-resumoj de videaĵoj
+    Hide: Kaŝi
+    Collapsed: Falditaj
+    Expanded: Malfalditaj
+    Video Descriptions: Priskriboj de videaĵoj
+    Video Description Modes:
+      Hide: Kaŝi
+      Collapsed: Falditaj
+      Expanded: Malfalditaj
+    Playing Interface Hide Delay: Prokrasto de kaŝo de la interfaco dum ludado
+    Hide Startup Splash: Kaŝi startan ekranon
+    Hide Header Sync Indicator: Kaŝi sinkronigan indikilon en la kapo
+    Hide Repeat Stats: Kaŝi ripetajn statistikojn
+    Hide Playlist Stats: Kaŝi statistikojn de ludlisto
+    Sections:
+      Digital Wellbeing: Cifereca bonfarto
+      Visible While Paused: Videbla dum paŭzo en plena fenestro / plena ekrano
+    Hide Channel Avatars: Kaŝi kanalajn avatarojn
+    Shorten View Counts: Mallongigi nombrojn de rigardoj, komentoj kaj ŝatoj de komentoj
+    Hide Home: Kaŝi hejmon
+    Hide Live Chat Replay: Kaŝi reludon de tujelsenda babilejo
+    Hide Popularity Graph: Kaŝi popularecan grafikaĵon
+    Disable A-B Repeat: Malŝalti A-B-ripeton
+    Hide End-Screen Annotations: Kaŝi finekranajn komentarojn
+    Hide End-Screen Recommendations: Kaŝi finekranajn rekomendojn
+    Hide Paid Promotion Badge: Kaŝi insignon de pagita reklamo
+    Enable Block Lists: Ŝalti bloklistojn
+    Show Player Controls: Montri ludilajn regilojn
+    Show Video Title: Montri titolon de videaĵo
+    Show Bottom Right Actions Dock: Montri agobreton malsupre dekstre
+    Paused Interface Hide Delay: Prokrasto de kaŝo de la interfaco dum paŭzo
+  Data Settings:
+    Scheduled backups: Planitaj savkopioj
+    Scheduled backup description: Konservi kompletajn ZIP-savkopiojn dum OpenTubeX estas malfermita. Maltrafitaj savkopioj ruliĝas je startigo. La limo validas nur por planitaj savkopioj en ĉi tiu dosierujo.
+    Choose backup folder: Elekti savkopian dosierujon
+    No backup folder selected: Neniu savkopia dosierujo elektita
+    Enable scheduled backups: Ŝalti planitajn savkopiojn
+    Backup frequency: Ofteco de savkopioj
+    Backups to keep: Konservotaj savkopioj
+    Daily: Ĉiutage
+    Weekly: Ĉiusemajne
+    Every 30 days: Ĉiujn 30 tagojn
+    Last scheduled backup: 'Lasta planita savkopio: {date}'
+    No scheduled backup yet: Ankoraŭ neniu planita savkopio
+    Scheduled backup failed: Savkopio malsukcesis. Kontrolu, ke la dosierujo estas skribebla. Reprovo post kvin minutoj.
+    Import Preview:
+      Title: Antaŭrigardi ŝanĝojn
+      New: 'Novaj: {count}'
+      Existing: 'Ekzistantaj: {count}'
+      Skipped: 'Saltitaj: {count}'
+      Unreadable files: 'Nelegeblaj dosieroj: {count}'
+      Settings effect: Kongruaj agordoj estas anstataŭigitaj. Privataj kaj nekonataj agordoj estas saltitaj.
+      Details effect: Ekzistantaj abonoj aŭ videaĵoj estas konservitaj. Enportitaj detaloj de profiloj aŭ ludlistoj anstataŭigas la aktualajn detalojn.
+      Merge effect: Ekzistantaj datumoj estas konservitaj kaj kunfanditaj kun kongruaj registroj.
+      Subscriptions effect: Ekzistantaj abonoj estas konservitaj. Nur novaj kanaloj estas aldonitaj.
+      History merge effect: Kongruaj videaĵoj estas kunfanditaj kun via historio, tenante la konservitajn detalojn kaj la plej freŝan spektodaton. Alia historio estas konservita.
+    Select export data: Elektu la datumojn elportotajn
+    Export selected data: Elporti elektitajn datumojn
+    Complete backup: Kompleta savkopio
+    Import backup: Enporti savkopion
+    Export backup: Elporti savkopion
+    Backup description: Konservi profilojn, ludlistojn, historion, statistikojn kaj transdoneblajn agordojn en unu ZIP-dosiero. Enporto kunfandas ilin kun la datumoj jam en ĉi tiu aparato.
+    Select backup data: Elektu la datumojn enportotajn
+    Profiles and subscriptions: Profiloj kaj abonoj
+    Backup exported: Savkopio sukcese elportita
+    Backup imported: Savkopio sukcese enportita
+    Import YouTube Takeout ZIP: Enporti ZIP-dosieron de YouTube Takeout
+    Select Takeout data: Elektu la datumojn enportotajn
+    Import selected data: Enporti elektitajn datumojn
+    No supported Takeout data: Neniuj subtenataj datumoj de YouTube troviĝis en ĉi tiu ZIP-dosiero.
+    Data And Storage: Datumoj kaj konservejo
+    Profile Directory: Profila dosierujo
+    Open Profile Directory: Malfermi profilan dosierujon
+    Invalid JSON row, skipping item: Nevalida JSON en vico {row}, elemento estos saltita
+    Import subscriptions formats: 'Subtenataj formoj: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), savkopio de LibreTube aŭ elporto de FreeTube (.json)'
+    Import history formats: 'Subtenataj formoj: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), savkopio de LibreTube (.json)'
+    Import playlists formats: 'Subtenataj formoj: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import search history formats: 'Subtenataj formoj: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: Kanalaj ludrapidoj
+    Import channel playback speeds: Enporti kanalajn ludrapidojn
+    Channel playback speeds file: Dosiero de kanalaj ludrapidoj
+    Import channel playback speeds formats: 'Subtenataj formoj: konservejo de la uzantskripto {script} (.json)'
+    Invalid channel playback speeds file: Neniuj kanalaj ludrapidoj troviĝis en ĉi tiu dosiero
+    Channel playback speeds imported: Enportis la ludrapidon de {count} kanalo | Enportis la ludrapidojn de {count} kanaloj
+    Channels not found: '{count} kanalo ne troviĝis | {count} kanaloj ne troviĝis'
+  Sync Settings:
+    Revoke Session Tabs Warning: La sinkronigitaj langetaroj de ĉi tiu aparato ankaŭ estos forigitaj.
+    Revoke Session Partial Failure: Sinkronigitaj langetaroj estis forigitaj, sed la revoko ne povis esti konfirmita. Reprovu por revoki la aliron.
+    Tab Sync Revocation Pending: Langeta sinkronigo estas paŭzigita dum la revoko de ĉi tiu ensaluto atendas. Reprovu la revokon en la sinkronigaj agordoj.
+    Sync Automatically: Sinkronigi aŭtomate
+    Activity: Konta agado
+    No Activity: Neniu lastatempa agado
+    Clear Activity: Viŝi en ĉi tiu aparato
+    Clear Activity Hint: Kaŝi ekzistantan kontan agadon en ĉi tiu aparato. Agado en la servilo kaj en aliaj aparatoj restas senŝanĝa. Nova agado ankoraŭ aperos.
+    Show More: Montri pli
+    Setting Changed: '{device} ŝanĝis {setting} al {value}'
+    Item Updated: '{device} ĝisdatigis {setting}'
+    Item Added: '{device} aldonis {item} al {setting}'
+    Item Removed: '{device} forigis {item} el {setting}'
+    Item Renamed: '{device} renomis {item} al {value}'
+    Saved Playlists: Konservitaj ludlistoj
+    No Feed Types: Neniuj fluotipoj
+    Open On Device: Malfermi en alia aparato
+    Video Sent: Videaĵo sendita. Senkonektaj aparatoj ricevos ĝin kiam ili rekonektiĝos, dum ĝis 24 horoj.
+    Video Received: 'Ricevita videaĵo: {title}'
+    Previous Auto Sync Notice: Aŭtomata sinkronigo estas malŝaltita. Pli frua versio eble malŝaltis ĝin por eviti perdon de datumoj.
+    Enable Automatic Sync: Ŝalti aŭtomatan sinkronigon
+    Destructive Sync Blocked: Sinkronigo haltis por eviti perdon de datumoj. Aŭtomata sinkronigo estas malŝaltita. Malfermu la sinkronigajn agordojn por kontroli la forigojn.
+    Sync Settings: Sinkronigo
+    Watch stats: Spektaj statistikoj
+    Enable Sync: Ŝalti sinkronigon
+    Privacy Passphrase: Privateca pasfrazo
+    Privacy Passphrase Hint: Uzu pasfrazon apartan de via konta pasvorto. Ĝi neniam forlasas ĉi tiun aparaton kaj estas bezonata en ĉiu aparato; perdi ĝin igas ĉifritajn sinkronigajn datumojn nerestaŭreblaj.
+    Privacy Policy: Privateca politiko de ĉi tiu servilo
+    Enhanced Privacy Enabled: Plibonigita privateco estas ŝaltita. La servilo konservas nur ĉifritajn sinkronigajn datumojn.
+    Enhanced Privacy Unsupported: Averto — ĉi tiu servilo ne subtenas plibonigitan privatecon. Sinkronigitaj datumoj estas videblaj por ĝia operaciisto.
+    Description: Sinkronigi abonojn, profilojn, ludlistojn, spekthistorion kaj subtenatajn agordojn kun sinkroniga servilo de OpenTubeX aŭ LibreTube. Serviloj de LibreTube eble ne subtenas ĉiun sinkronigan funkcion.
+    Server URL: URL de sinkroniga servilo
+    Checking Server: Kontrolado de la sinkroniga servilo…
+    Server Unavailable: Ne eblas konektiĝi al ĉi tiu sinkroniga servilo. Kontrolu la URL kaj provu denove.
+    Username: Uzantnomo
+    Log In: Ensaluti
+    Register: Registriĝi
+    Pair Another Device: Parigi alian aparaton
+    Pair With Existing Device: Parigi kun ekzistanta aparato
+    Device Name: Nomo de aparato
+    This Device: Ĉi tiu aparato
+    Device Name Required: Enigu nomon por ĉi tiu aparato.
+    Pairing Device Name Hint: Elektu nomon, kiun vi rekonos sur la aparato, kiu aprobos ĉi tiun peton.
+    Create Pairing Code: Krei parigan kodon
+    Creating Pairing Code: Kreado de sekura pariga kodo…
+    Pairing QR Alt: Pariga QR-kodo por {device}
+    Scan Pairing Code: Sur jam konektita aparato, malfermu "Parigi alian aparaton" kaj skanu ĉi tiun kodon.
+    Pairing Code: Pariga kodo
+    Use Text Pairing Code: Uzi tekstan kodon anstataŭe
+    Show QR Code: Montri QR-kodon
+    Text Pairing Code Hint: Kopiu ĉi tiun kodon al la ekzistanta aparato. Ĝi enhavas la parigan sekreton, do viŝu ĝin el la tonduja historio post la parigo.
+    Pairing QR Warning: Montru ĉi tiun kodon nur al la fidinda, jam konektita aparato, kiu aprobos ĉi tiun peton. Ĝi eksvalidiĝas post du minutoj.
+    Pairing Expires: La pariga kodo eksvalidiĝos je {time}.
+    Verifying Pairing: Kontrolado de la transdonita privateca ŝlosilo…
+    Completing Pairing: Finado de aparata parigo…
+    Compare Pairing Codes: Kompari parigajn kodojn
+    Pairing Code Match Hint: Konfirmu nur se ĉi tiu kodo kongruas kun la kodo sur via ekzistanta aparato.
+    Pairing Codes Match: La kodoj kongruas
+    Pairing Approval Code Hint: Tenu ĉi tiun fenestron malfermita kaj komparu ĉi tiun kodon kun la nova aparato. La nova aparato ne daŭrigu se la kodoj malsamas.
+    Pairing Scan Hint: Skanu la parigan kodon montritan sur la aparato, kiun vi aldonas.
+    Enter Pairing Code: Enigi kodon permane
+    Pairing Code Entry Hint: Algluu la parigan kodon montritan sur la aparato, kiun vi aldonas.
+    Check Pairing Code: Kontroli kodon
+    Scan QR Code: Skani QR-kodon
+    Waiting For Pairing Code: Atendado de pariga kodo…
+    Checking Pairing Request: Kontrolado de la pariga peto…
+    Approving Pairing Request: Ĉifrado kaj sendado de la privateca ŝlosilo…
+    Pairing Approval Warning: Aprobu nur se vi povas vidi ĉi tiun peton sur la aparato, kiun vi aldonas. Parigo donas aliron al la konto kaj transdonas la privatecan ŝlosilon.
+    Approve Pairing: Aprobi parigon
+    Try Again: Provi denove
+    Scan Again: Skani denove
+    Camera Unavailable: OpenTubeX ne povis aliri kameraon. Kontrolu la kameraan permeson aŭ enigu la parigan kodon permane.
+    Pairing Unsupported: Ĉi tiu sinkroniga servilo ne subtenas sekuran aparatan parigon.
+    Pairing Failed: Aparata parigo malsukcesis. Provu denove kun nova kodo.
+    Pairing Request Changed: La pariga peto ŝanĝiĝis, eksvalidiĝis aŭ jam estis uzita. Kreu novan kodon.
+    Pairing Server Mismatch: Ĉi tiu kodo apartenas al alia sinkroniga servilo.
+    Pairing Verification Unavailable: Neniu ĉifrita sinkroniga kolekto disponeblas por kontroli la transdonitan ŝlosilon. Sinkronigu la ekzistantan aparaton, poste provu denove.
+    Pairing Completed: Aparata parigo finiĝis
+    Pairing Approved: Aparata parigo aprobita
+    Use Pairing Invite: Uzi kodon de konektita aparato
+    Show Pairing Invite: Montri parigan kodon
+    Scan Pairing Invite: Sur la aparato, kiun vi aldonas, malfermu "Parigi kun ekzistanta aparato", elektu "Uzi kodon de konektita aparato" kaj skanu ĉi tiun kodon.
+    Pairing Invite QR Alt: Pariga QR-kodo por la aparato, kiun vi aldonas
+    Pairing Invite Text Hint: Kopiu ĉi tiun kodon al la aparato, kiun vi aldonas. Ĝi ebligas al aparato peti aliron al via konto, do viŝu ĝin el la tonduja historio post la parigo.
+    Pairing Invite Warning: Montru ĉi tiun kodon nur al la aparato, kiun vi aldonas. Vi ankoraŭ devas aprobi ĝian peton sur ĉi tiu aparato.
+    Pairing Invite Scan Hint: Skanu la parigan kodon montritan sur via konektita aparato.
+    Pairing Invite Entry Hint: Algluu la parigan kodon montritan sur via konektita aparato.
+    Pairing Invite Code Hint: Aprobu la peton sur via konektita aparato nur se ĝi montras ĉi tiun kodon. La parigo tiam finiĝas aŭtomate.
+    Pairing Invite Approval Hint: Aprobu nur se la aparato, kiun vi aldonas, montras ĉi tiun kodon.
+    Pairing Invite Approved: Parigo aprobita. La nova aparato finas la parigon aŭtomate.
+    Disconnect: Malkonekti
+    Delete Account: Forigi sinkronigan konton
+    Delete Account Confirmation: Ĉu forigi la sinkronigan konton?
+    Delete Account Warning: Tio ĉi definitive forigas vian sinkronigan konton kaj ĉiujn datumojn konservitajn en ĉi tiu servilo. Viaj lokaj datumoj de OpenTubeX ne estos forigitaj.
+    Confirm Delete Account: Forigi konton
+    Password Required: Pasvorto estas bezonata
+    Account Deleted: Sinkroniga konto forigita
+    Devices: Aparatoj
+    Devices Hint: Kontrolu la aparatojn, kiuj povas aliri ĉi tiun sinkronigan konton.
+    Change Password: Ŝanĝi pasvorton
+    Refresh Devices: Aktualigi aparatojn
+    Current Device: Aktuala aparato
+    Revoke Session: Revoki aliron
+    Session Created: Kreita
+    Last Active: Laste aktiva
+    Session Expires: Eksvalidiĝas
+    Unknown Device: Nekonata aparato
+    Operating System: Operaciumo
+    Rename Device: Renomi aparaton
+    Save Device Name: Konservi nomon
+    Device Name Invalid: Nomoj de aparatoj povas enhavi ĝis 80 signojn kaj neniujn stirsignojn.
+    Device Renamed: Aparato renomita
+    Revoke Session Confirmation: Ĉu revoki ĉi tiun seancon?
+    Revoke Current Session Warning: Revoki ĉi tiun seancon malkonektos ĉi tiun aparaton de la sinkroniga konto.
+    Revoke Session Warning: '{device} perdos aliron al ĉi tiu sinkroniga konto.'
+    Confirm Revoke Session: Revoki seancon
+    Session Revoked: Seanco revokita
+    Change Password Warning: Ŝanĝi vian pasvorton elsalutigos ĉiun alian aparaton. Ĉi tiu aparato restos konektita.
+    Current Password: Aktuala pasvorto
+    New Password: Nova pasvorto
+    Confirm New Password: Konfirmi novan pasvorton
+    Save New Password: Konservi novan pasvorton
+    Account Management Failed: Detaloj de la sinkroniga konto ne povis esti ŝargitaj.
+    All Password Fields Required: Plenigu ĉiujn pasvortajn kampojn.
+    New Password Too Short: La nova pasvorto devas havi almenaŭ 8 signojn.
+    New Passwords Do Not Match: La novaj pasvortoj ne kongruas.
+    Password Changed: Pasvorto ŝanĝita. Aliaj aparatoj estis elsalutigitaj.
+    Connected as: Konektita kiel {username}
+    Profiles: Profiloj
+    Open Tabs: Malfermitaj langetoj kaj seanco
+    Use Shared Tabs: Uzi unu komunan langetaron inter aparatoj
+    Shared Tabs Warning: La malfermitaj langetoj en ĉi tiu aparato fariĝas la komuna aro. Aliaj aparatoj anstataŭigas siajn malfermitajn langetojn per ĉi tiu aro kiam ili sinkroniĝas; langetoj de malsamaj aparatoj ne estas kunigitaj.
+    Tabs From Other Devices: Langetoj de aliaj aparatoj
+    Device Tab Session: '{platform} · {count} langetoj'
+    Mobile Device: Poŝaparato
+    Desktop Device: Labortablo
+    Open All Tabs: Malfermi ĉiujn langetojn
+    Open All Tabs Confirmation: Ĉu malfermi ĉiujn langetojn?
+    Disable Setting Sync: Ĉesi sinkronigi ĉi tiun agordon
+    Enable Setting Sync: Sinkronigi ĉi tiun agordon
+    Sync Now: Sinkronigi nun
+    Downloading encrypted data: Elŝutado de ĉifritaj sinkronigaj datumoj…
+    Syncing subscriptions: Sinkronigado de abonoj…
+    Syncing playlists: Sinkronigado de ludlistoj…
+    Syncing history: Sinkronigado de spekthistorio…
+    Syncing statistics: Sinkronigado de spektaj statistikoj…
+    Syncing profiles: Sinkronigado de profiloj…
+    Syncing open tabs: Sinkronigado de malfermitaj langetoj kaj seanco…
+    Syncing settings: Sinkronigado de agordoj…
+    Uploading encrypted data: Alŝutado de ĉifritaj sinkronigaj datumoj…
+    Finishing sync: Finado de sinkronigo…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'Laste sinkronigita: {date}'
+    History not supported: Ĉi tiu servila versio ne subtenas sinkronigon de spekthistorio.
+    Settings not supported: Ĉi tiu servila versio ne subtenas sinkronigon de agordoj.
+    Sync completed: Sinkronigo finiĝis
+    Sync failed: 'Sinkronigo malsukcesis: {error}'
+    Data Loss Confirmation: Ĉu konfirmi detruan sinkronigon?
+    Data Loss Warning: La sinkronigo forigus {deleted} el {previous} antaŭe sinkronigitaj eroj en “{collection}” en ĉiuj aparatoj. Se vi ne forigis ilin, ekzemple ĉar la servilo estis restarigita, konservu ilin por restarigi ilin ĉie.
+    Keep Deleted Items: Konservi erojn
+    Confirm Data Loss: Forigi kaj daŭrigi
+    Server Update Required: Ĝisdatigu ĉi tiun servilon por subteni ĉifritan tujan sinkronigon.
+    Log In with Provider: 'Ensaluti per {provider}'
+    Log In with Single Sign-On: 'Ensaluti per unuopa ensaluto'
+    Continue in Browser: 'Daŭrigu en via retumilo. OpenTubeX daŭrigos kiam vi finos.'
+    Connected with Single Sign-On: 'Konektita per unuopa ensaluto'
+    Delete Single Sign-On Account Hint: 'Via retumilo malfermiĝos, por ke vi konfirmu la forigon ĉe via ensaluta provizanto.'
+  Proxy Settings:
+    IP Block Recovery Script Path: Skripto por restariĝo post IP-bloko
+    Select IP Block Recovery Script File: Elekti skriptodosieron por restariĝo post IP-bloko
+    Running IP block recovery script: Rulado de skripto por restariĝo post IP-bloko
+    IP block recovery script failed: 'Skripto por restariĝo post IP-bloko malsukcesis (elira kodo: {exitCode})'
+    IP block recovery script finished: Skripto por restariĝo post IP-bloko finiĝis
+    Reloading video after IP block recovery: Reŝargado de videaĵo post restariĝo de IP-bloko
+    Failed to select IP block recovery script: Malsukcesis elekti skripton por restariĝo post IP-bloko
+  SponsorBlock Settings:
+    Enable SponsorBlock Submission: Ŝalti sendadon al SponsorBlock
+    SponsorBlock Private User ID (optional): Privata uzantidentigilo (nedeviga)
+    SponsorBlock Private User ID Tooltip: Algluu la privatan uzantidentigilon de SponsorBlock el la retumila etendaĵo. Lasu ĉi tion malplena por uzi identigilon generitan de la aplikaĵo.
+    Generated SponsorBlock User ID: Generita uzantidentigilo de SponsorBlock
+    Generated SponsorBlock User ID Tooltip: Ĉi tiu uzantidentigilo de SponsorBlock generita de la aplikaĵo uzeblas en la retumila etendaĵo aŭ se vi uzas la aplikaĵon en alia komputilo.
+    Reveal Generated User ID: Montri generitan uzantidentigilon
+    Generated SponsorBlock User ID Copy Button: Kopii generitan uzantidentigilon de SponsorBlock
+    Generated SponsorBlock User ID Copied: Generita uzantidentigilo de SponsorBlock kopiita al la tondujo
+    Skip notification timeout: Daŭro de sciigo pri saltado
+    DeArrow Settings: DeArrow
+    Custom Color: Laŭmenda koloro
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Ŝalti Return YouTube Dislike
+    Return YouTube Dislike Url: URL de API
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Kaŝi kanalojn de AI-rubaĵo
+    Hide AI Slop Channels Tooltip: Kaŝas kanalojn en la komunume prizorgata bloklisto AiSList (aisloplist.com) el serĉrezultoj, tendencoj kaj rekomendoj, kaj etikedas videaĵojn de kanaloj en ĝia avertlisto. Abonoj ne estas tuŝitaj. La listoj estas elŝutataj de GitHub unufoje tage kaj validas nur por rezultoj ŝargitaj per la loka API.
+    Downloading: Elŝutado de la listoj…
+    Failed to Download: Ne eblis elŝuti la listojn
+    Loaded Status: 'Blokitaj kanaloj: {blocked} · Markitaj kanaloj: {warned} · Ĝisdatigita: {date}'
+  Diagnostics:
+    Diagnostics: Diagnozo
+    Description: Dum diagnoza protokolado estas ŝaltita, OpenTubeX tenas lastatempajn protokolajn mesaĝojn en memoro, por ke vi povu aldoni ilin al cimraportoj. Ĝi neniam konservas aŭ sendas ilin per si mem, kaj malŝalti protokoladon forigas ilin. Raportoj ellasas kuketojn, ĵetonojn, IP-adresojn kaj URL-parametrojn, sed ili povas enhavi identigilojn de videaĵoj, kiujn vi ludis, do kontrolu raporton antaŭ ol kunhavigi ĝin.
+    Enable Logging: Ŝalti diagnozan protokoladon
+    Copy Report: Kopii raporton
+    Save Report: Konservi raporton
+    Clear Log: Viŝi protokolon
+    Report Copied: Diagnoza raporto kopiita
+    Report Saved: Diagnoza raporto konservita
+    Report File: Diagnoza raporto
+    Save Failed: Ne eblas konservi la diagnozan raporton
+    Log Cleared Message: Diagnoza protokolo viŝita
+  Password Dialog:
+    Incorrect Password: Malĝusta pasvorto
+    Unlock: Malŝlosi
+    Unlocking: Malŝlosado…
+  Search Settings: Serĉi agordojn
+  No Settings Found: Neniu agordo trovita
+  Password Settings:
+    Failed to Save Password: Malsukcesis konservi la pasvorton.
+    Confirm Password: Konfirmi pasvorton
+    Passwords Do Not Match: La pasvortoj ne kongruas.
+Tutorial:
+  Skip: Preterlasi
+  Next: Sekva
+  Finish: Fini
+  Welcome:
+    Title: Bonvenon al OpenTubeX
+    Description: Jen la malmultaj regiloj, kiuj helpos vin senti vin hejme.
+  Navigation:
+    Title: Via biblioteko ĉiam estas proksime
+    Description: Uzu la navigadon por atingi abonojn, ludlistojn, historion kaj pli.
+  Search:
+    Title: Serĉu aŭ algluu ligilon
+    Description: Trovu videaĵojn kaj kanalojn, aŭ algluu subtenatan URL de videaĵo rekte en la serĉkampon.
+  Tabs:
+    Title: Tenu paĝojn malfermitaj en langetoj
+    Description: Malfermu plurajn paĝojn samtempe sen perdi vian lokon. Elektu kie langetoj plej bone taŭgas en via aranĝo.
+  Quick Settings:
+    Title: Faru ĝin via
+    Description: Elektu etoson kaj defaŭltan videokvaliton. Ŝanĝu tiujn kaj aliajn preferojn el via profila menuo iam ajn, aŭ dekstre alklaku ĝin por ŝanĝi profilon.
+    Touch Description: Elektu etoson kaj defaŭltan videokvaliton. Ŝanĝu tiujn kaj aliajn preferojn el via profila menuo iam ajn, aŭ longe tuŝu ĝin por ŝanĝi profilon.
+  Import Data:
+    Title: Kunportu viajn datumojn
+    Description: Laŭvole enportu abonojn, historion, ludlistojn, serĉan historion aŭ agordojn el alia subtenata aplikaĵo aŭ savkopio.
+    Action: Enporti datumojn
+    Not Now: Ne nun
+About:
+  Project: Projekto
+  Community: Komunumo
+  Contribute: Kontribui
+  Documentation: Dokumentaro
+  Downloads: Elŝutoj
+  Changelog: Ŝanĝoprotokolo
+  Commit: Enmeto
+  Matrix: Matrix
+  Email: Retpoŝto
+Profile:
+  Customization: Personecigo
+  Manage Profile Subscriptions: Administri profilajn abonojn
+  Icon Names:
+    Person: Persono
+    People: Homoj
+    Headphones: Kapaŭskultiloj
+    Gaming: Ludado
+    Film: Filmo
+    Art: Arto
+    Science: Scienco
+    Globe: Terglobo
+    Heart: Koro
+    Sun: Suno
+    Moon: Luno
+    Trophy: Trofeo
+  Profile Icon: Profila piktogramo
+  Choose an Emoji: Elekti emoĝion
+  Custom Emoji: Laŭmenda emoĝio
+  Emoji: Emoĝio
+  Choose Image: Elekti bildon
+  Crop Image: Stuci bildon
+  Zoom: Zomo
+  Apply Crop: Apliki stucon
+  Transparent: Travidebla
+  Use Initial: Uzi komencliteron
+  The selected image could not be loaded: La elektita bildo ne povis esti ŝargita
+  Theme Color: Etosa koloro
+Channel:
+  Hide Watched: Kaŝi spektitajn
+  Fewer videos per day: "Malpli da videaĵoj tage"
+  More videos per day: "Pli da videaĵoj tage"
+  Subscription settings: Abonaj agordoj
+  Failed to save subscription settings: Malsukcesis konservi kanalajn agordojn
+  Videos per day: Videaĵoj tage
+  Use global setting: Uzi ĝeneralan agordon
+  Unlimited: Senlima
+  More videos hidden: +{count} plia | +{count} pliaj
+  Verified: Kontrolita
+  Official Artist Channel: Oficiala kanalo de artisto
+  Show in subscription feed: Montri en abonfluo
+  Notify about new uploads: Sciigi pri novaj alŝutoj
+  Show members-only videos: Montri videojn nur por membroj
+  Upload Notifications On: Vi estos sciigita pri novaj alŝutoj de {channelName} kiam viaj abonoj aktualiĝos
+  Upload Notifications Off: Vi ne estos sciigita pri novaj alŝutoj de {channelName}
+  Upload Notifications Disabled In Settings: Sciigoj por {channelName} estas ŝaltitaj, sed sciigoj pri alŝutoj estas malŝaltitaj en viaj agordoj
+  Turn On Upload Notifications: Ŝalti
+  Channel Name Unavailable: Kanala nomo ne disponeblas
+  Search Result Types: Tipoj de serĉrezultoj
+  All Results: Ĉiuj
+  Posts:
+    Original post unavailable: Originala afiŝo ne disponeblas
+    Members-only video hidden by OpenTubeX: "Video nur por membroj kaŝita de OpenTubeX"
+    Video hidden by OpenTubeX because of its title: "Video kaŝita de OpenTubeX ĉar ĝia titolo enhavas kaŝitan tekston"
+Video:
+  Mark As Fully Watched: Marki kiel tute spektita
+  AI-generated video summary: Resumo de videaĵo generita de AI
+  Quality and accuracy may vary: Kvalito kaj precizeco povas varii
+  Includes paid promotion: Enhavas pagitan reklamon
+  Age Restricted Badge: Aĝolimigita
+  Music Video Badge: Muzikvideaĵo
+  Queue: Vico
+  Play Next: Ludi sekve
+  Add to Queue: Aldoni al vico
+  Added to Play Next: La videaĵo ludiĝos sekve
+  Added to Queue: Videaĵo aldonita al la vico
+  Clear Queue: Viŝi vicon
+  Save Queue to Playlist: Konservi vicon al ludlisto
+  Queue Video Count: '{count} videaĵo | {count} videaĵoj'
+  Remove from Queue: Forigi {title} el la vico
+  Remove Video from Queue: Forigi el la vico
+  Drag to Reorder Queue: Trenu {title} por reordigi la vicon
+  Reorder Queue Item: Reordigi {title}
+  Reorder Queue Item Instructions: Uzu la sagoklavojn Supren kaj Malsupren por movi ĉi tiun videaĵon en la vico.
+  Queue Item Moved: Movis {title} al pozicio {position} el {total}.
+  Queue Item Cannot Move Up: Ne eblas movi {title} supren. Ĝi jam estas en pozicio 1 el {total}.
+  Queue Item Cannot Move Down: Ne eblas movi {title} malsupren. Ĝi jam estas en pozicio {total} el {total}.
+  Metadata: Informoj pri videaĵo
+  Close Metadata: Fermi informojn pri videaĵo
+  Metadata Cache:
+    Title History: Historio de titoloj
+    Thumbnail History: Historio de bildetoj
+    Description History: Historio de priskriboj
+    Previous Version: Antaŭa {number}
+    Empty: (malplena)
+  Fetching Streams: Venigado de fluoj per yt-dlp…
+  Waiting For Connection: "Ne eblis atingi la servilon. Aŭtomate reprovante…"
+  Retry Now: "Reprovi nun"
+  Transcript:
+    Title: Transskribo
+    Search: Serĉi en transskribo
+    Language: Lingvo de transskribo
+    Save: Konservi
+    Show: Montri transskribon
+    Hide: Kaŝi transskribon
+    Close: Fermi transskribon
+    Copied: Transskribo kopiita al la tondujo
+    Saved: Transskribo konservita
+    Save Error: Ne eblas konservi la transskribon
+    Text File: Teksta dosiero
+    Unavailable: Neniu transskribo disponeblas por ĉi tiu videaĵo.
+    Load Error: La transskribo ne povis esti ŝargita.
+    Empty: Ĉi tiu transskribo ne enhavas tekston.
+    No Results: Neniu segmento de la transskribo kongruas kun via serĉo.
+  Retry With Built-in Extraction: Reprovi per integrita elĉerpado
+  Retry With yt-dlp Extraction: Reprovi per elĉerpado de yt-dlp
+  Reloading video after streaming URL error: Reŝargado de videaĵo post eraro de flua URL
+  Configure Restricted Playback Cookies Hint: Agordu kuketojn en Agordoj → Altnivela → Ekstera programaro → Kuketoj de yt-dlp.
+  Try With Configured Cookies: Provi kun agorditaj kuketoj
+  Restricted Playback Authentication Failed Template: 'yt-dlp ne povis aliri ĉi tiun videaĵon per la agorditaj kuketoj: {error}'
+  External DRM Protected: Videaĵoj protektitaj de DRM ne ludeblas en OpenTubeX, ĉar ili postulas proprietajn fermitkodajn komponaĵojn.
+  Invalid Media URL: Nevalida aŭdvidaĵa URL
+  External Media:
+    Dislikes: malŝato | malŝatoj
+    Reposts: reafiŝo | reafiŝoj
+    Saves: konservo | konservoj
+    Series: Serio
+    Season: Sezono
+    Season Number: Numero de sezono
+    Episode: Epizodo
+    Episode Number: Numero de epizodo
+    Track: Trako
+    Track Number: Numero de trako
+    Artists: Artistoj
+    Album: Albumo
+    Genres: Ĝenroj
+    Media Type: Aŭdvidaĵa tipo
+    Availability: Disponebleco
+    Age Limit: Aĝolimo
+    Release Date: Eldondato
+    Availability Values:
+      public: Publika
+      private: Privata
+      premium_only: Nur Premium
+      subscriber_only: Nur abonantoj
+      needs_auth: Ensaluto necesas
+      unlisted: Nelistigita
+  Unmark As Watched: Malmarki kiel spektita
+  Video has been unmarked as watched: La videaĵo estis malmarkita kiel spektita
+  Save Channel Playback Speed: Konservi kanalan ludrapidon
+  Channel Playback Speed Saved: Kanala ludrapido konservita
+  Save Channel Video Quality: Konservi kanalan videokvaliton
+  Channel Video Quality Saved: Kanala videokvalito konservita
+  Save Channel Subtitles State: Konservi kanalan subtekstan staton
+  Channel Subtitles State Saved: Kanala subteksta stato konservita
+  Save Channel Volume: Konservi kanalan laŭtecon
+  Channel Volume Saved: Kanala laŭteco konservita
+  Save Channel Setting: Konservi kanalan agordon…
+  Channel Setting Already Set: '{setting} jam estas agordita al {value}'
+  Video has been saved to {playlistName}: La videaĵo estis konservita al {playlistName}
+  Video has been removed from {playlistName}: La videaĵo estis forigita el {playlistName}
+  There was a problem saving the video to {playlistName}: Estis problemo dum la konservado de la videaĵo al {playlistName}
+  There was a problem removing the video from {playlistName}: Estis problemo dum la forigado de la videaĵo el {playlistName}
+  Failed to load collaborators: Malsukcesis ŝargi kunlaborantojn
+  Notify me: Sciigi min
+  Notification on: Sciigo ŝaltita
+  Notification enabled: Vi estos sciigita kiam ĉi tiu videaĵo komenciĝos
+  Notification cancelled: Komenca sciigo nuligita
+  Notification unavailable: Sistemaj sciigoj ne disponeblas
+  Scheduled video starting: Planita videaĵo komenciĝas
+  Live notification body: '{videoTitle} komenciĝas nun'
+  AI-generated content: Enhavo generita de AI
+  Collaborators: Kunlaborantoj
+  Live Chat Replay: Reludo de tujelsenda babilejo
+  Show Live Chat: Montri tujelsendan babilejon
+  Show Live Chat Replay: Montri reludon de tujelsenda babilejo
+  Close Live Chat: Fermi tujelsendan babilejon
+  Close Live Chat Replay: Fermi reludon de tujelsenda babilejo
+  Live Chat Settings: Agordoj de tujelsenda babilejo
+  Show Live Chat Timestamps: Montri tempindikojn
+  Chat Filter: Babileja filtrilo
+  Top Chat: Ĉefaj mesaĝoj
+  All Messages: Ĉiuj mesaĝoj
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: Reludo de tujelsenda babilejo estas ŝaltita.  Mesaĝoj aperos ĉi tie dum la videaĵo ludiĝas.
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: La tujelsenda babilejo aktuale ne estas subtenata kun la Yattee-servilo. Rekta konekto al YouTube estas postulata.
+  Premiere started: Premiero okazanta. Komenciĝis {timeAgo}
+  Sponsor Block category:
+    hook: Hoko/Salutoj
+    highlight: Kulminaĵo
+    exclusive access: Ekskluziva aliro
+  Sponsor Block category short:
+    intro: Paŭzo
+    interaction: Memorigo pri interago
+    music offtopic: Ne-muziko
+    filler: Flankaj temoj
+  Player:
+    Stream Recovery:
+      DASH Fallback: 'La sonfluo malsukcesis, ŝanĝante al DASH-aj formoj: {error}'
+      Error Copied: Eraro kopiita al la tondujo
+      Legacy Fallback: 'La fluo malsukcesis, ŝanĝante al heredaĵaj formoj: {error}'
+    Caption Timing:
+      Adjust Timing: Alĝustigi tempon…
+      Caption Timing: Tempo de apudskribo
+      Offset: Deŝovo (sekundoj)
+      Hint: Negativaj valoroj montras apudskribon pli frue; pozitivaj valoroj montras ĝin pli malfrue. Validas nur por ĉi tiu videaĵo.
+      Earlier: Pli frue
+      Later: Pli malfrue
+      Reset: Restarigi
+    Cast: Elsendi
+    Most Replayed: Plej reludita
+    Pull up for precise seeking: Tiru supren por preciza saltado
+    Precise seeking, drag down to exit: Preciza saltado · Trenu malsupren por eliri
+    Playing in Picture-in-Picture: Ludado en bildenbilda reĝimo
+    Music Mode: Muzika reĝimo
+    Music Mode Description: Ludi videaĵojn je 1× kaj komenci novajn videaĵojn de la komenco en ĉi tiu langeto. Viaj konservitaj ludaj defaŭltoj restas senŝanĝaj.
+    DLNA:
+      Cast: Elsendi al DLNA-aparato
+      Stop: Ĉesi elsendi
+      No Devices: Neniu DLNA-aparato trovita
+      No MP4 Source: Neniu kongrua MP4-fluo por ĉi tiu videaĵo
+      Error: Ne eblis elsendi la videaĵon
+    Repeat Stats:
+      Repeat Stats: Ripetaj statistikoj
+      Looping: Ripetado
+      Repeats: Ripeto | Ripetoj
+      Time Spent: Pasigita tempo
+    Voice-over Translation:
+      Start: Traduki
+      Cancel: Nuligi
+      Progress: Preparado de voĉa traduko…
+      Retry: Reprovi
+      Error: Voĉa traduko malsukcesis. Bonvolu provi denove poste.
+      Duration Error: Voĉa traduko disponeblas nur por videaĵoj ĝis kvar horoj longaj.
+    Caption Appearance:
+      Options: Opcioj
+      Sample: Apudskribo aspektas tiel
+    Auto-translate: Aŭtomate traduki
+    Secondary Captions: Sekundara apudskribo
+    Subtitle File:
+      Load: Ŝargi subtekstan dosieron…
+      Subtitle Files: Subtekstaj dosieroj
+      Error: Ne eblis ŝargi la subtekstan dosieron. Elektu SRT- aŭ WebVTT-dosieron.
+    Sleep Timer:
+      Sleep Timer: Dorma tempumilo
+      'Off': 'Malŝaltita'
+      Minutes: '{minutes} minutoj'
+      End of video: Fino de videaĵo
+      End of current chapter: Fino de aktuala ĉapitro
+      Remaining: 'Restas {time}'
+      Cancel timer: Nuligi tempumilon
+      Timer ended: Dorma tempumilo finiĝis
+    A-B Repeat:
+      A-B Repeat: A-B-ripeto
+      'On': 'Ŝaltita'
+      'Off': 'Malŝaltita'
+      Point A: Punkto A
+      Point B: Punkto B
+      Set Repeat Start: Difini komencon de ripeto
+      Set Repeat End: Difini finon de ripeto
+      Pause Repeat: Paŭzigi A-B-ripeton
+      Resume Repeat: Daŭrigi A-B-ripeton
+      Adjust Point: Alĝustigi punkton {point}, nun {timestamp}
+      Clear Range: Viŝi A-B-ripetan intervalon
+      End Before Start: Punkto B devas esti post punkto A.
+      Outside Duration: La tempindiko devas esti ene de la videaĵo.
+      Cleared: A-B-ripeto viŝita
+    Seek History:
+      Seek History: Historio de saltoj
+      Positions: '{count} pozicio | {count} pozicioj'
+      Nothing to undo: Nenio malfarebla
+      Nothing to redo: Nenio refarebla
+    Zoom:
+      Zoom: Zomo
+      'Off': 'Malŝaltita'
+    Volume Boost:
+      Volume Boost: Laŭteca plifortigo
+      'Off': 'Malŝaltita'
+    Auto-generated Caption Template: '{language} (aŭtomate generita)'
+    Up next in {seconds}: Sekve post {seconds}
+    Resize dock: Ŝanĝi grandecon de la doko
+    Play now: Ludi nun
+    MusicPlaybackRateOverride: Muzikvideaĵo detektita, ludado je 1x
+    Normal: Normala
+    Set Default: Difini kiel defaŭlto
+    Hide Annotations: Kaŝi komentarojn
+    Show Annotations: Montri komentarojn
+    Hide: Kaŝi
+    Show: Montri
+    Scroll Mini Player:
+      Collapse Controls: Faldi regilojn
+      Expand Controls: Malfaldi regilojn
+      Back to Top: Reen al la supro
+      Return to Video Tab: Reveni al la videaĵa langeto
+      Hide: Kaŝi ludileton
+      Play: Ludi
+      Pause: Paŭzigi
+      Drag Handle: Movi ludileton
+      Rewind 10 seconds: Revolvi 10 sekundojn
+      Forward 10 seconds: Antaŭeniri 10 sekundojn
+    SponsorBlock:
+      CancelCurrentSegment: Nuligi kreadon de segmento
+      ClearSegments: Viŝi segmentojn
+      ClearSegmentsPrompt: Ĉu vi certas, ke vi volas viŝi ĉiujn malnetajn SponsorBlock-segmentojn por ĉi tiu videaĵo?
+      CompleteSegmentsBeforeSubmitting: Kompletigu ĉiun malnetan segmenton antaŭ ol sendi.
+      CategoryLabel: Kategorio
+      ActionTypeLabel: Tipo de segmento
+      DuplicateSegments: Duobligitaj malnetaj segmentoj ne estas permesataj.
+      EndAction: (Fino)
+      EndActionLabel: Fino
+      EndTimeAfterStart: La fina tempo de la segmento devas esti post la komenca tempo.
+      EndTimeBeforeVideoEnd: La fina tempo de la segmento devas esti ene de la daŭro de la videaĵo.
+      EndTimeLabel: Fina tempo de segmento
+      DisableAutoSkipTemporarily: Provizore malŝalti aŭtomatan saltadon de SponsorBlock
+      EnableAutoSkipTemporarily: Reŝalti aŭtomatan saltadon de SponsorBlock
+      Guidelines: Gvidlinioj
+      InspectSegment: Ekzameni
+      InvalidStartTime: Enigu validan komencan tempon de segmento.
+      NoSegmentsToSubmit: Kreu almenaŭ unu kompletan segmenton antaŭ ol sendi.
+      NowAction: (Nun)
+      CloseInfoPanel: Fermi informojn de SponsorBlock
+      OpenInfoPanel: Malfermi informojn de SponsorBlock
+      OpenSubmissionMenu: Malfermi sendan menuon
+      PreviewRequired: Bonvolu antaŭrigardi ĉiun segmenton antaŭ ol sendi.
+      PreviewSegment: Antaŭrigardi
+      SaveSegment: Konservi
+      SetSegmentEndNow: Fini segmenton nun
+      StartAction: (Komenco)
+      StartSegmentNow: Komenci segmenton nun
+      SubmissionBadRequest: SponsorBlock rifuzis la sendan peton.
+      SubmissionDuplicate: Tio ĉi jam estis sendita antaŭe.
+      SubmissionFailed: Malsukcesis sendi SponsorBlock-segmentojn.
+      SubmissionForbidden: SponsorBlock rifuzis la sendaĵon.
+      SubmissionRateLimited: SponsorBlock limigis ĉi tiun sendaĵon pro eksceso da petoj.
+      SubmissionSuccess: SponsorBlock-segmentoj senditaj.
+      SubmitSegment: Sendi segmenton
+      SubmitSegments: Sendi
+      StartTimeLabel: Komenca tempo de segmento
+      TimeDivider: ĝis
+      SkipPrompt: Ĉu salti {segmentCategory}?
+      SkipPromptAction: Salti
+      SkipToHighlight: Ĉu salti al la kulminaĵo?
+      SkippedToHighlight: Saltis al la kulminaĵo
+      SkipToastUnskip: Malfari salton
+      SkipToastReskip: Resalti
+      MutedSegment: '{segmentCategory} silentigita'
+      MuteToastUnmute: Malsilentigi
+      InfoPanelLoading: Segmentoj ankoraŭ ŝargiĝas...
+      InfoPanelHasSegments: Ĉi tiu videaĵo havas segmentojn en la datumbazo!
+      InfoPanelNoSegments: Neniu segmento trovita
+      RefreshSegments: Aktualigi segmentojn
+      RefreshInfo: Aktualigi informojn de SponsorBlock
+      ContributionStatsTitle: Viaj kontribuoj
+      ContributionStatsLoading: Ŝargado de kontribuaj statistikoj...
+      ContributionStatsError: Kontribuaj statistikoj ne disponeblas. Provu aktualigi.
+      ContributionStatsNoUserId: Sendu segmenton aŭ enportu vian uzantidentigilon de SponsorBlock por vidi kontribuajn statistikojn.
+      Submissions: Sendaĵoj
+      Segments: Segmentoj
+      TimeSaved: Ŝparita tempo
+      AutoSkipEnabled: Aŭtomate salti segmentojn
+      AutoSkipOn: 'Ŝaltita'
+      AutoSkipOff: 'Malŝaltita'
+      WhitelistChannel: Aldoni kanalon al la permesolisto
+      ChannelWhitelisted: En la permesolisto
+      RemoveChannelFromWhitelist: Forigi kanalon el la permesolisto
+      MuteSegment: Silentigi segmenton
+      SkipSegment: Salti segmenton
+      CloseSegmentActions: Fermi segmentajn agojn
+      FullVideo: Tuta videaĵo
+      FullVideoLabel: '{segmentCategory} · Tuta videaĵo'
+      MuteActionType: Silentigi
+      MutePrompt: Ĉu silentigi {segmentCategory}?
+      SkipActionType: Salti
+      LockedSegment: Ŝlosita segmento
+      UpvoteSegment: Voĉdoni por
+      DownvoteSegment: Voĉdoni kontraŭ
+      VoteFailed: Malsukcesis sendi SponsorBlock-voĉdonon.
+      ChangeCategory: Ŝanĝi kategorion
+      CopyAndDownvote: Kopii kaj voĉdoni kontraŭ
+      SubmitCategoryVote: Sendi kategorian voĉdonon
+      CategoryVoteSuccess: Kategoria voĉdono sendita.
+    Google Cast:
+      Position: "Ludpozicio"
+      Invalid Authentication: La ricevilo sendis nevalidan aŭtentigan respondon.
+      Authentication Declined: La ricevilo rifuzis aŭtentigon.
+      Audio Only Receiver: La ricevilo subtenas nur sonelsendadon.
+      Disconnected: Ricevilo malkonektita.
+      Timeout: La ricevilo ne respondis.
+      Busy: Alia fenestro jam elsendas.
+      Not Authorized: Aktivigu ĉi tiun fenestron kaj provu denove.
+      Invalid Request: Nevalida elsenda peto.
+      IPv4 Required: IPv4-konekto estas postulata.
+      Launch Failed: Ne eblis lanĉi la ricevilon.
+      Load Failed: La ricevilo ne povis ŝargi la videaĵon.
+      Cancelled: Elsendado estis nuligita.
+      Private Not Authorized: Aliro al privataj aŭdvidaĵoj ne estis aprobita.
+      Invalid Subtitles: Nevalidaj elsendaj subtekstoj.
+      Discovery Failed: Ne eblis malkovri ricevilojn.
+      Preparing Video: Preparado de videaĵo por elsendado…
+      Connecting: Konektiĝado al {device}…
+      Starting Receiver: Lanĉado de la Cast-ricevilo…
+      Loading Video: Ŝargado de videaĵo en la ricevilo…
+      Buffering: Bufrado ĉe {device}…
+      Allow Private Instance: Ĉu permesi al ĉi tiu elsendo legi aŭdvidaĵojn de la privata Invidious-servilo {instance}?
+      Cast: Elsendi al Google Cast-aparato
+      Connected: Elsendado al {device}
+      Rewind: Revolvi 10 sekundojn
+      Forward: Antaŭeniri 10 sekundojn
+      Subtitles Off: Subtekstoj malŝaltitaj
+      Return: Reveni al loka ludado
+      No Devices: Neniu Google Cast-aparato trovita
+      No Source: Neniu kongrua fluo por Google Cast
+      Error: Ne eblis elsendi la videaĵon
+      Error With Details: 'Ne eblis elsendi la videaĵon: {error}'
+      Untrusted Receiver: La atestilo de la ricevilo ne estas fidinda. Uzu aŭtentigitan Google Cast-ricevilon.
+    FCast:
+      Cast: Elsendi al FCast-ricevilo
+      No Devices: Neniu FCast-ricevilo trovita
+      No Source: Neniu kongrua fluo por FCast
+  Info panel source: 'Fonto: {source}'
+  External Player:
+    LaunchFailedTemplate: Ne eblis lanĉi {externalPlayer}. Kontrolu, ke ĝi estas instalita, aŭ agordu la vojon al ĝia plenumebla dosiero en la agordoj de ekstera ludilo.
+    Confirm Arguments Title: "Ĉu lanĉi la eksteran ludilon kun propraj argumentoj?"
+    Confirm Arguments Message: "{externalPlayer} startos kun ĉi tiuj propraj argumentoj:"
+    Confirm Arguments Warning: "Kelkaj argumentoj povas lanĉi programojn aŭ anstataŭigi dosierojn. Daŭrigu nur se vi mem aldonis ilin."
+    Run: "Lanĉi"
+    LaunchCanceledTemplate: "{externalPlayer} ne estis malfermita"
+Playlist:
+  Close Playlist: Fermi ludliston
+  Add Playlist to Queue: Aldoni ludliston al la vico
+  Playlist Added to Queue: Ludlisto aldonita al la vico
+  Preload Playlist: Antaŭŝargi ĉiujn videaĵojn
+  Preload Playlist Warning Title: "Ĉu antaŭŝargi ĉiujn videaĵojn?"
+  Preload Playlist Warning: "Antaŭŝargado petas ĉiun videaĵon de ĉi tiu ludlisto de YouTube. Sendi multajn petojn en mallonga tempo povas igi YouTube provizore bloki vian IP-adreson. Ĉu vi volas daŭrigi?"
+  Preloading Playlist: Antaŭŝargado de ĉiuj videaĵoj...
+  Playlist Already Preloaded: Ĉiuj videaĵoj de la ludlisto jam estas antaŭŝargitaj
+  Playlist Preload Progress: 'Antaŭŝargado de videaĵoj: {completed} el {requested}'
+  Playlist Preload Complete: 'Antaŭŝargitaj videaĵoj: {count}.'
+  Playlist Preload Partial: Antaŭŝargis {preloaded} el {requested} videaĵoj. {failed} ne povis esti antaŭŝargitaj.
+  Playlist Preload Pagination Failed: La tuta ludlisto ne povis esti ŝargita, do la antaŭŝargado estis nuligita.
+Change Format:
+  yt-dlp Error Template: 'yt-dlp ne povis provizi la fluojn: {error}'
+  Local Video File: Loka videodosiero
+  Local Audio File: Loka sondosiero
+  Online Video: Reta videaĵo
+  Stream Source: Fluofonto
+  Stream Extraction Method: Metodo de fluelĉerpado
+  Playback Engine: Luda motoro
+  Streaming Protocol: Fluiga protokolo
+  Not Available For This Video: Ne disponebla por ĉi tiu videaĵo
+  Protocols:
+    Progressive: Progresiva
+  Descriptions:
+    Local File: Ludata rekte el la elŝutita dosiero en ĉi tiu aparato
+    Online Video: Ŝargi fluigajn formojn el la agordita reta fonto
+    Dash: Adapta kvalito, pluraj sonfluoj kaj la plej altaj distingivoj
+    Legacy: Unu dosiero kun kunigitaj video kaj sono, limigita al pli malaltaj distingivoj
+    Audio: Nur sono, utila por ŝpari kapaciton aŭ aŭskulti fone
+  yt-dlp Fallback Template: 'yt-dlp ne povis provizi la fluojn, uzante anstataŭe la integritan motoron: {error}'
+  yt-dlp Default Clients Fallback: La preferataj klientoj de yt-dlp ne povis provizi ludeblajn fluojn, provante anstataŭe la defaŭltajn klientojn de yt-dlp
+  Built-in Fallback Template: 'La integrita motoro ne povis ludi la fluon, provante anstataŭe yt-dlp: {error}'
+Share:
+  Shared YouTube Link: Kunhavigita ligilo de YouTube
+  Open in Player: Malfermi en ludilo
+  No YouTube Link: La kunhavigita teksto ne enhavas subtenatan ligilon de YouTube.
+  Loading Video Information: Ŝargado de informoj pri videaĵo…
+  Video Information Failed: Ne eblis ŝargi informojn pri videaĵo. Provu denove aŭ malfermu la ligilon.
+  Share Link: Kunhavigi ligilon
+  Share failed: Ne eblis kunhavigi la ligilon
+  Timestamp Link Copied: Ligilo kun tempindiko kopiita al la tondujo
+Context Menu:
+  Opened in a Background Tab: Malfermita en fona langeto
+  Open in a Background Tab: Malfermi en fona langeto
+  Select Tab: Elekti langeton
+  Close Tabs Before: Fermi antaŭajn langetojn
+  Close Tabs After: Fermi postajn langetojn
+  Close Other Tabs: Fermi aliajn langetojn
+  Copy {service} link without playlist: Kopii ligilon de {service} sen ludlisto
+  Context Menu: Kunteksta menuo
+  Select All: Elekti ĉion
+  Save Image As…: Konservi bildon kiel…
+  Copy Image: Kopii bildon
+  Copy Image Address: Kopii adreson de bildo
+  Cancel Refresh: Nuligi aktualigon
+  Reload Videos: Reŝargi videaĵojn
+  Reload Shorts: Reŝargi videaĵetojn
+  Reload Live: Reŝargi tujelsendojn
+  Reload Posts: Reŝargi afiŝojn
+  Reload All Feeds: Reŝargi ĉiujn fluojn
+  Reload RSS Feeds: Reŝargi RSS-fluojn
+  Close Multiple Tabs: Fermi {count} langetojn
+  Duplicate Tab: Duobligi langeton
+  Duplicate Multiple Tabs: Duobligi {count} langetojn
+  Move Tab: Movi langeton
+  Move Tabs: Movi langetojn
+  Move Tab to Group: Movi langeton al grupo
+  Collapse Group: Faldi grupon
+  Expand Group: Malfaldi grupon
+  Move Tabs to Group: Movi langetojn al grupo
+  Manage Tab Groups…: Administri langetajn grupojn…
+  To Beginning: Al la komenco
+  To End: Al la fino
+  Close Tabs: Fermi langetojn
+  To the Top: Supren
+  To the Left: Maldekstren
+  To the Bottom: Malsupren
+  To the Right: Dekstren
+  Other Tabs: Aliaj langetoj
+  Copy YouTube Link: Kopii ligilon de YouTube
+  Copy YouTube Links: Kopii ligilojn de YouTube
+  Pin Tab: Alpingli langeton
+  Pin Tabs: Alpingli langetojn
+  Unpin Tab: Malalpingli langeton
+  Unpin Tabs: Malalpingli langetojn
+  Tab Color: Langeta koloro
+  Default: Defaŭlta
+  Purple: Purpuro
+  Reopen Closed Tab: Remalfermi fermitan langeton
+  Reload Tab: Reŝargi langeton
+  Reload Tabs: Reŝargi langetojn
+  Load Tab: Ŝargi langeton
+  Load Tabs: Ŝargi langetojn
+  Unload Tab: Malŝargi langeton
+  Unload Tabs: Malŝargi langetojn
+  Unload Tabs Failed: Ne eblis malŝargi la elektitajn langetojn.
+  Move Tab to Window: Movi langeton al fenestro
+  Move Tabs to Window: Movi langetojn al fenestro
+  Open in a New Tab: Malfermi en nova langeto
+  Open in a New Window: Malfermi en nova fenestro
+  Copy Link: Kopii ligilon
+  Copy Invidious Link: Kopii ligilon de Invidious
+  Search Selection in New Tab: Serĉi "{selection}" en nova langeto
+  Search Selection in New Window: Serĉi "{selection}" en nova fenestro
+  Search With: Serĉi per {engine}
+  Search With Multiple: Serĉi per...
+  Selection Too Long: La elekto estas tro longa por serĉi (> {count} signoj)
+  Background Tab: Fona langeto
+Tab Organizer:
+  Tab History: Langeta historio
+  Current Page: Aktuala paĝo
+  Icon Labels:
+    Folder: Dosierujo
+    Bookmark: Legosigno
+    Favorites: Plej ŝatataj
+    Videos: Videaĵoj
+    Gaming: Ludado
+    Research: Esplorado
+    Art: Arto
+    Travel: Vojaĝoj
+    Podcast: Podkasto
+    Clock: Horloĝo
+    Puzzle Piece: Puzlero
+    People: Homoj
+    Chart: Diagramo
+    Calendar: Kalendaro
+    Images: Bildoj
+    Music: Muziko
+  Group Icon: Grupa piktogramo
+  Title: Langeta organizilo
+  Open Tab Count: '{count} malfermita langeto | {count} malfermitaj langetoj'
+  Search Label: Serĉi langetojn
+  Selected Count: '{count} langeto elektita | {count} langetoj elektitaj'
+  Tab Count: '{count} langeto | {count} langetoj'
+  Select All: Elekti ĉiujn
+  Select None: Elekti neniun
+  Move To Group: Movi elektitajn langetojn al grupo
+  Choose Group: Elektu grupon
+  Ungrouped: Negrupigitaj
+  Pin: Alpingli
+  Unpin: Malalpingli
+  Load: Ŝargi
+  Unload: Malŝargi
+  Unload All: Malŝargi ĉiujn
+  Close All: Fermi ĉiujn
+  Ungroup: Malgrupigi
+  Group Name: Nomo de grupo
+  Color: Koloro
+  No Color: Neniu koloro
+  Create Group: Krei grupon
+  Expand Group: Malfaldi grupon
+  Collapse Group: Faldi grupon
+  Expand Group Label: Malfaldi {name}, {count} langeto | Malfaldi {name}, {count} langetoj
+  Rename Group: Renomi {name}
+  Change Group Color: Ŝanĝi koloron de {name}
+  Move To Window: Movi al fenestro
+  Choose Window: Elektu fenestron
+  Select Tab: Elekti {title}
+  Active: Aktiva
+  Pinned: Alpinglita
+  Unloaded: Malŝargita
+  Playing: Ludanta
+  Close Tab: Fermi {title}
+  No Open Results: Neniu malfermita langeto kongruas kun ĉi tiu serĉo.
+  Recently Closed: Lastatempe fermitaj
+  Clear: Viŝi
+  No Closed Results: Neniu lastatempe fermita langeto kongruas kun ĉi tiu serĉo.
+  Drag Tab: Trenu por movi al grupo
+Chapters:
+  Open Chapters: Malfermi ĉapitrojn
+  Close Chapters: Fermi ĉapitrojn
+  Copy Timestamp Link: Kopii ligilon je {timestamp}
+  Loop Chapter: 'Ripeti ĉapitron: {chapter}'
+  Looping Chapter: 'Ripetado de ĉapitro: {chapter}'
+  Chapter Loop Stopped: Ĉesis ripeti ĉapitron
+Comments:
+  Image unavailable: Bildo ne disponeblas
+  Comment Count: 1 komento | {count} komentoj
+  Show Comments: Montri komentojn
+  Getting comment replies, please wait: Akirado de respondoj al komentoj, bonvolu atendi
+  Reload Comments: Reŝargi komentojn
+  Reply Count: 1 respondo | {replyCount} respondoj
+  YouTube did not provide advertised replies: YouTube montris, ke ĉi tiu komento havas respondojn, sed ne provizis ilin. Ili eble estis forigitaj aŭ kaŝitaj, do la respondbutono estis forigita.
+  Pinned by you: Alpinglita de vi
+  A reply is pinned: Respondo estas alpinglita
+  Filter loaded comments: Filtri ŝargitajn komentojn
+  Comment filters: Komentaj filtriloj
+  From creator: De la kreinto
+  Contains timestamps: Enhavas tempindikojn
+  Pin comment by author: Alpingli komenton de {author}
+  Unpin comment by author: Malalpingli komenton de {author}
+  Edited: (redaktita)
+  Highlighted comment: Emfazita komento
+  Highlighted reply: Emfazita respondo
+  Search loaded comments: Serĉi en ŝargitaj komentoj
+  Loaded comment search result count: 1 el {total} ŝargitaj komentoj | {count} el {total} ŝargitaj komentoj
+  No loaded comments match your filters: Neniu ŝargita komento kongruas kun viaj filtriloj
+  YouTube comment link copied to clipboard: Ligilo al komento de YouTube kopiita al la tondujo
+  Translate to {language}: Traduki al {language}
+  Show original: Montri originalon
+  Translating comment, please wait: Tradukado de komento, bonvolu atendi
+  Comment translation failed: Traduko de komento malsukcesis
+Description:
+  Title: Priskribo
+  Copy Description: Kopii priskribon
+  Description Copied: Priskribo kopiita al la tondujo
+  Video Category: 'Kategorio de videaĵo:'
+  Video Tags: Etikedoj de videaĵo
+  Games: Ludoj
+  Music: Muziko
+Tooltips:
+  General Settings:
+    Limit Titles to Two Lines: "Mallongigas titolojn de videoj kaj ludlistoj en listoj kaj kradoj al du linioj kun tripunkto, por pli unuformaj kartoj. Ŝvebigu la musmontrilon super titolo por vidi ĝin tute."
+    Preferred Video Codec: |
+      Aŭtomata preferas kodekojn, kiujn via aparato povas malkodi per aparataro.
+      AV1: la plej bona kvalito por la malplej da datumoj, sed ne ĉiu videaĵo havas ĝin. Sen aparatara malkodado, ĝi povas malplenigi la baterion aŭ perdi bildojn.
+      VP9: ekvilibro inter efikeco kaj kongrueco, kutime disponebla ĝis la plej alta distingivo.
+      H.264: la plej facile malkodebla en preskaŭ ĉiu aparato, sed ĝi uzas pli da datumoj kaj kutime ĉesas je 1080p.
+      Ŝanĝoj validas por la sekva videaĵo. Se la preferata kodeko ne disponeblas, alia estas uzata.
+    Yattee Server: La yattee-server-servilo, el kiu OpenTubeX ŝargas videaĵojn, kanalojn, ludlistojn kaj serĉrezultojn. La uzantnomo kaj pasvorto estas konservataj nur en ĉi tiu aparato.
+    Proxy Videos Through Yattee Server: Plusendas video- kaj sonfluojn tra la servilo. Lasu ĉi tion ŝaltita krom se la servilo kunhavas vian interretan konekton, ĉar YouTube servas fluojn nur al la adreso, kiu petis ilin. Bildetoj ĉiam ŝargiĝas rekte de YouTube.
+    Enable Tabs: Tenas la aktualan paĝon malfermita. Aliaj langetoj estas konservataj ĝis la aplikaĵo restartas; reŝaltu langetojn por restarigi ilin.
+    Data Saver Thumbnails: Uzi bildetojn kun pli malalta distingivo por malpliigi datumuzon.
+    Use AI Translation Completions: Plenigi mankojn en homaj tradukoj per teksto generita de AI. Homaj tradukoj ĉiam havas prioritaton.
+    Update Relative Timestamps: Ĝisdatigas relativajn tempindikojn tra la tuta aplikaĵo dum paĝo restas malfermita. Kiam malŝaltita, ili ĝisdatiĝas nur post reŝargo aŭ revizito de la paĝo.
+    Automatically switch stream extraction methods: Provi yt-dlp se la integrita ludado malsukcesas, aŭ la integritan ludadon se yt-dlp malsukcesas.
+    Stream Extraction Method: |
+      Elektu kiel OpenTubeX akiras videofluojn. yt-dlp devas esti disponebla kiam elektita.
+      Videaĵoj eble bezonos pli longe por komenciĝi kiam oni uzas yt-dlp.
+      La integrita metodo ne subtenas saltadon en tujelsendoj kaj premieroj.
+    Avoid translation: |
+      Malŝalti la aŭtomatan tradukadon de YouTube por titolo, priskribo kaj ĉapitroj de videaĵo.
+      Tro multaj petoj, ekzemple venigado de videaĵaj titoloj tra listoj, povas provizore
+      malbonigi la fidindecon de la aplikaĵo.
+    Always Use Backup Media Server: Fluigas videaĵojn el la rezerva servilo, kiun YouTube nomas, anstataŭ el la asignita, ekzemple kiam la kaŝmemoro de via interreta provizanto ofte estas malrapida. Alie OpenTubeX ŝanĝas nur kiam la asignita servilo ne respondas.
+    Show Thumbnail Previews: Montri movbildajn antaŭrigardojn kiam la kursoro estas super bildetoj de videaĵoj.
+    Startup Behavior: |
+      Elektu kion OpenTubeX faras kiam ĝi startas.
+      Ŝargi ĉiujn langetojn tuj restarigas ĉiun konservitan langeton, sed fonaj langetoj ne aŭtomate ludos videaĵojn.
+      Ŝargi antaŭe ŝargitajn langetojn reŝargas la langetojn, kiuj estis ŝargitaj kiam OpenTubeX fermiĝis, kaj lasas la aliajn malŝargitaj.
+      Ŝargi la lastan aktivan langeton restarigas la antaŭan seancon kun la aliaj langetoj malfermitaj sed malŝargitaj; ili ŝargiĝas kiam vi alklakas ilin.
+      Komenci kun malplena seanco preterlasas la konservitajn langetojn kaj malfermas novan fenestron.
+    Close Window With Last Tab: Kiam malŝaltita, fermi la lastan langeton anstataŭe malfermas novan langeton, do la fenestro restas malfermita ĝis vi fermas ĝin.
+    Remember Tab Navigation History: La reena kaj antaŭena navigada historio de ĉiu langeto estas konservata kaj restarigata kiam OpenTubeX restartas.
+    Notifications: Elektu kiel OpenTubeX sciigas vin pri rektaj elsendoj, novaj alŝutoj kaj aŭtomataj elŝutoj. Kun Sistemo kaj en la aplikaĵo, sciigoj aperas en OpenTubeX dum vi uzas ĝin kaj alie kiel sistemaj sciigoj, kaj la sonorilo konservas ilin. Malŝaltitaj ankaŭ kaŝas la sciigajn agordojn.
+  Proxy Settings:
+    IP Block Recovery Script Path: Vojo al skriptodosiero rulota kiam IP-bloko estas detektita. OpenTubeX atendas ĝis ĝi finiĝas, poste reŝargas la videaĵon. Se retropaŝo estas ŝaltita, ĝi ruliĝas nur kiam ankaŭ la retropaŝo malsukcesas.
+  Player Settings:
+    Rewind on Resume: "Saltas tiom da sekundoj malantaŭen kiam vi daŭrigas paŭzitan videon, por ke vi revidu la lastajn momentojn. Agordu al 0 por malŝalti."
+    Minimum Pause Before Rewinding: "Malantaŭeniras nur kiam la video estis paŭzita almenaŭ tiom longe. Agordu al 0 por malantaŭeniri post ĉiu paŭzo."
+    Enable Caption Translations: Kiam ŝaltita, la apudskriba butono kaj la fulmoklavo C preferas aŭtomate tradukitan trakon en la preferata apudskriba lingvo, kiam la videaĵo ne provizas kongruan originalan trakon.
+    Use Quick Playback Speed Bar: Montras breton de rapidaj ludrapidoj en la ludilaj regiloj dekstre. Se permana konservado de ludrapido po kanalo estas ŝaltita, la breto ankaŭ enhavas la butonon por konservi la rapidon por la aktuala kanalo.
+    Multiply Seek Interval by Playback Rate: Kiam ŝaltita, saltintervaloj (sagoklavoj kaj J/L) estas multobligitaj per la aktuala ludrapido. Kiam malŝaltita, saltintervaloj restas konstantaj sendepende de la ludrapido.
+    Show Playback Rate Adjusted Timestamp: Kiam ŝaltita kaj la ludrapido malsamas ol 1x, la ludilo montras tempindikojn alĝustigitajn laŭ ludrapido inter krampoj post la normala tempindiko.
+    Use YouTube-style Shorts: Montras videaĵetojn en vertikala krado sur abonaj kaj kanalaj paĝoj kaj uzas ludilon de videaĵetoj laŭ stilo de YouTube.
+    Loop Shorts: Kiam ŝaltita, videaĵetoj rekomenciĝas aŭtomate. Kiam malŝaltita, videaĵetoj haltas ĉe la fino kaj montras butonon por reludi.
+    Show Skip Silence Toggle: Montras ŝaltilon por salti silenton en la agorda menuo de la ludilo.
+    Enable Skip Silence by Default: Ŝaltas silento-saltadon por novaj langetoj. Ŝanĝi ĝin en unu langeto ne influas aliajn langetojn.
+    Enable Video Zoom: Montras la zoman regilon en la agorda menuo de la ludilo kaj ŝaltas ĝiajn fulmoklavojn kaj panoramajn regilojn.
+    Enable Seek History: Memoras de kie vi saltis en ĉiu videaĵo ĝis la aplikaĵo fermiĝas. Montras la liston de historio de saltoj en la agorda menuo de la ludilo kaj ŝaltas ĝiajn fulmoklavojn.
+    Show Seek Bar Filmstrip: "Treni la tenilon de la serĉbreto montras strion de kadroj ĉirkaŭ la loko, kien vi saltos, kaj tiri supren sur ĝin ebligas precizan saltadon. Se malŝaltita, trenado montras unu bildeton, kiel dum ŝvebado."
+    Pause on Stream Recovery: Kiam la videofluo malsukcesas kaj la ludilo reŝargas ĝin aŭ ŝanĝas al alia formo aŭ motoro, paŭzigi la ludadon kaj teni la eraron supre de la ludilo ĝis vi fermas ĝin. Kiam malŝaltita, la ludado daŭras kaj la eraro aperas mallonge kiel sciigo.
+    Continue Playback When Screen Is Locked: Daŭrigas la sonludadon fone kaj provizas Android-aŭdvidajn regilojn. Malŝaltu ĉi tion por paŭzigi kiam la aplikaĵo ne plu estas videbla.
+    Voice-over Translation: Sendas la identigilon, daŭron kaj elektitan lingvon de la videaĵo al la neoficiala voĉtraduka servo de Yandex kiam vi petas tradukon. Defaŭlte malŝaltita.
+    Hold to Double Playback Speed: Tenu premita la spacoklavon aŭ la maldekstran musbutonon super la ludilo por provizore duobligi la aktualan ludrapidon.
+    Ambient Mode: Miksas la kolorojn de la videaĵo en la areon ĉirkaŭ la ludilo.
+    Mono Audio: Ludas la maldekstran kaj dekstran sonkanalojn en ambaŭ oreloj. Uzu ĝin kiam la sono de videaĵo venas nur el unu flanko de viaj kapaŭskultiloj.
+    Default Volume: Malŝaltita dum "Memori laŭtecon" estas ŝaltita. Malŝaltu "Memori laŭtecon" por difini fiksan startan laŭtecon por ĉiu videaĵo.
+    Parallel Segment Loading: |
+      Kiom da video- kaj sonsegmentoj ŝargi samtempe antaŭ la ludado.
+      Pli altaj valoroj povas helpi ĉe malrapidaj aŭ nestabilaj konektoj, sed uzas pli da kapacito kaj memoro.
+      Ili ankaŭ povas igi la aŭtomatan reĝimon subtaksi la konektan rapidon kaj elekti pli malaltan kvaliton.
+      Fluoj limigitaj al unu peto samtempe ignoras ĉi tiun agordon.
+    Preload Upcoming Videos: Venigas kaj kaŝmemorigas URL-ojn de yt-dlp-fluoj por videaĵoj, kiuj povas ludiĝi sekve. La spektovico havas prioritaton super ludlistoj kaj rekomendoj.
+    Upcoming Videos to Preload: La maksimuma nombro de venontaj videaĵoj, kies URL-oj de yt-dlp-fluoj estas venigataj fone.
+    Concurrent Preloads: La maksimuma nombro de yt-dlp-procezoj uzataj por samtempe antaŭŝargi videaĵojn. Pli altaj valoroj uzas pli da CPU, memoro kaj reta kapacito.
+    Ignore System Rotation Lock for Fullscreen: Uzi fizikan rotacion de la aparato por eniri kaj eliri el plenekrana reĝimo eĉ kiam la aŭtomata rotacio de Android estas malŝaltita.
+  Download Settings:
+    Download Folder: Videaĵoj estas konservataj en ĉi tiu dosierujo. Lasu malplena por uzi la elŝutan dosierujon de via sistemo.
+    Global Additional yt-dlp Arguments: Aldonaj komandliniaj argumentoj donataj al yt-dlp por ĉiu elŝuto, ekzemple --cookies-from-browser firefox.
+    Concurrent Downloads: La maksimuma nombro de yt-dlp-taskoj, kiuj povas ruliĝi samtempe.
+    Bandwidth Limit: Limigas la kunigitan transigan rapidon de la vico dividante ĉi tiun limon inter samtempaj taskoj. Enigu 0 por neniu limo.
+  External Software Settings:
+    yt-dlp Source: OpenTubeX povas aŭ uzi la yt-dlp instalitan en via sistemo aŭ elŝuti kaj administri sian propran kopion de yt-dlp, kiu estas konservata en la dosierujo de uzantaj datumoj.
+    yt-dlp Channel: Elektu kiun eldonkanalon de yt-dlp OpenTubeX elŝutas kaj administras. Stabila estas rekomendata por plej multaj uzantoj.
+    FFmpeg Source: OpenTubeX povas aŭ uzi FFmpeg kaj FFprobe instalitajn en via sistemo aŭ elŝuti kaj administri siajn proprajn statikajn kompilaĵojn, kiuj estas konservataj en la dosierujo de uzantaj datumoj.
+    Managed Tool Updates: Elektu ĉu administrataj iloj ĝisdatiĝas aŭtomate, demandas antaŭ ĝisdatigo aŭ nur ĝisdatiĝas per la permanaj butonoj. Mankantaj iloj ankoraŭ estas elŝutataj kiam necesas.
+    yt-dlp Executable Path: Defaŭlte, OpenTubeX supozas, ke yt-dlp troveblas per la ĉirkaŭaĵa variablo PATH. Se necese, eblas difini laŭmendan vojon ĉi tie.
+    Cookie Source: Elektu ĉu yt-dlp legu Netscape-kuketan dosieron aŭ kuketojn el instalita retumilo por aŭtentigita ludado.
+    Cookie File: Elektu kuketan dosieron en Netscape-formo por aŭtentigita ludado.
+    Browser for Cookies: Retumila subteno estas legata el la elektita plenumeblo de yt-dlp. OpenTubeX petas yt-dlp legi ĉi tiun retumilon kiam aŭtentigita ludado estas petata.
+    Browser Profile: Nedeviga nomo aŭ dosierujo de retumila profilo. Lasu malplena por uzi la plej lastatempe aliritan profilon.
+    Always Use Cookies: Uzi la agorditajn kuketojn por elŝutoj, subtekstoj kaj ĉiam kiam yt-dlp elĉerpas fluojn. Tio ĉi ne ŝanĝas la metodon de fluelĉerpado al yt-dlp. Kun yt-dlp elektita, formoj nur por kontoj eble disponebliĝos, inkluzive de la plibonigita bitrapido de YouTube Premium kiam la konto havas aliron.
+    FFmpeg Executable Path: FFmpeg necesas por kunfandi apartajn video- kaj sonfluojn kaj por sonkonvertado. Defaŭlte, OpenTubeX supozas, ke FFmpeg troveblas per la ĉirkaŭaĵa variablo PATH. Se necese, eblas difini laŭmendan vojon ĉi tie.
+    Use cookies for subtitles: Uzi la agorditajn kuketojn por subtekstoj kaj aŭtomataj tradukoj. Ankaŭ ŝaltita per "Ĉiam uzi kuketojn".
+  Distraction Free Settings:
+    Hide Playlist Stats: Kaŝas la nombron de videoj, la nombron de spektoj, la daton de la lasta ĝisdatigo kaj la tutan daŭron en ludlistaj paĝoj.
+    Count Watch Time From: Ĉiuj aparatoj kalkulas ĉiun aparaton, kiu sinkronigas spektajn statistikojn. Ĉi tiu aparato kalkulas nur tion, kion vi spektas ĉi tie.
+    When a Limit Is Reached: Paŭzigi ludadon ebligas al vi aldoni 15 minutojn aŭ ignori la limon por hodiaŭ. Kun agorda pasvorto, vi povas altigi limon nur en la agordoj.
+    Grayscale: "Montras la aplikaĵon en grizaj nuancoj, por ke ĝi altiru malpli da atento. Dum dormotempo sekvas la horaron de la memorigo pri dormotempo."
+    Apply Grayscale To: "Videaĵoj kaj bildoj tenas la fasadon kolora kaj grizigas enhavon kiel videaĵojn, miniaturojn kaj profilbildojn."
+    Daily Watch Time Limit: Kalkulas tion, kion vi spektis hodiaŭ en ĉiuj aparatoj, kiuj sinkronigas spektajn statistikojn, inkluzive de videaĵetoj.
+    Daily Shorts Limit: Kalkulas la videaĵetojn, kiujn vi spektis en ĉi tiu aparato hodiaŭ.
+    Take a Break Reminder: Paŭzigas la videaĵon post tiom da spektado. Paŭzo de 10 minutoj aŭ pli rekomencigas la kalkulon.
+    Bedtime Reminder: Paŭzigas la videaĵon kaj memorigas vin ĉesi spekti inter la komenca kaj fina horoj.
+    Shorten View Counts: Montras nombrojn de rigardoj, komentoj kaj ŝatoj de komentoj, kiujn YouTube jam rondigis, en mallongigita formo, ekz. 14K anstataŭ 14 000. Ĝustaj nombroj ĉiam estas montrataj plene.
+  Subscription Settings:
+    Fetch Feed on Startup: Kiam ŝaltita, OpenTubeX aŭtomate venigos vian abonfluon je startigo kaj kiam nova fenestro malfermiĝas.
+    Show New Content Feed: Montras langeton "Nova" kun eroj de la abonfluo, kiuj ne ĉeestis dum la antaŭa venigo.
+    Enable RSS Feeds: Montras RSS-langeton sur la paĝo de abonoj kun la eroj de RSS- aŭ Atom-fluoj, por ke vi povu sekvi kreantojn en aliaj platformoj. Ĝiaj eroj malfermiĝas per yt-dlp.
+    Show New Content Indicators: Montras malgrandan punkton apud eroj de la abonfluo, kiuj ne ĉeestis dum la antaŭa venigo.
+    Show Scheduled Live Streams / Premieres First: Tenas venontajn tujelsendojn kaj premierojn supre de la abonfluo. Kiam malŝaltita, ili restas ĉe sia anonca pozicio ĝis ili komenciĝas. Aktualigu la abonfluon unufoje post malŝalto por akiri anoncajn datojn de ekzistantaj planitaj eroj.
+    Auto Refresh Interval: Kiom ofte OpenTubeX aŭtomate aktualigas vian abonfluon dum la aplikaĵo estas malfermita. Ĉe Android, nenula intervalo ankaŭ aktualigas ĝin dum la aplikaĵo estas fermita.
+    Refresh Subscriptions While App Is Closed: Aktualigas fluojn laŭ viaj elektitaj agordoj. Ĉe labortablo, OpenTubeX restas en la taskopleto ĝis vi eliras. Android regas kiam fonaj aktualigoj ruliĝas.
+    Notify About New Uploads: Montras sistemajn sciigojn en ĉi tiu aparato por kanaloj, kies sciigojn vi ŝaltis en iliaj abonaj agordoj. OpenTubeX kontrolas novan enhavon kiam abonoj aktualiĝas, do elektu intervalon de aŭtomata aktualigo. Por esti sciigita dum la aplikaĵo estas fermita, ankaŭ ŝaltu aktualigadon dum la aplikaĵo estas fermita.
+    RSS Feeds Auto Refresh Interval: Kiom ofte OpenTubeX aŭtomate aktualigas viajn RSS-fluojn dum la aplikaĵo estas malfermita.
+  Theme Settings:
+    Only Show Important Notifications: Kaŝas sciigojn en la aplikaĵo, kiuj nur konfirmas agon aŭ raportas staton. Eraroj, avertoj, memorigoj, kiujn vi agordis, kaj sciigoj, kiuj proponas agon, ekzemple Malfari, ankoraŭ aperas. Fona progreso, ekzemple aktualigo de abonoj, montriĝas en la ĝenerala progresbreto anstataŭ kiel sciigo. Sistemaj sciigoj ne estas tuŝitaj.
+    Thumbnail Size: Skalas bildetojn de videaĵoj en kradoj kaj listoj. Kradoj kun fiksa nombro de kolumnoj aŭ la aranĝo "Plena larĝo" anstataŭe plenigas ĉiun vicon, do tie ĝi ŝanĝas nur listajn bildetojn kaj videaĵetojn. Telefongrandaj fenestroj limigas kradajn bildetojn al 100%.
+    Playlist Thumbnail Size: Skalas bildetojn de videaĵoj sur ludlistaj paĝoj. Kradoj kun fiksa nombro de kolumnoj aŭ la aranĝo "Plena larĝo" anstataŭe plenigas ĉiun vicon, do tie ĝi ŝanĝas nur listajn bildetojn kaj videaĵetojn. Telefongrandaj fenestroj limigas kradajn bildetojn al 100%.
+    Show Progress as Notification: Montras daŭran sciigon kun tuja progreso por fonaj operacioj, ekzemple aktualigoj de abonoj kaj elŝutoj de administrataj iloj, anstataŭ uzi la ĝeneralan progresbreton.
+    Always Show Scrollbars: Tenas la rulumbretojn ĉiam videblaj. Kiam malŝaltita, ili forvelkas baldaŭ post kiam vi ĉesas movi la muson kaj reaperas tuj kiam vi movas ĝin denove.
+    Scroll Speed: Ŝanĝas kiom malproksimen rulumas gestoj de musrado kaj tuŝplato.
+    Visible Search Suggestions: Difinas kiom da eroj de serĉa historio kaj proponoj la serĉobreto montras antaŭ ol ĝia listo rulumiĝas. La listo neniam etendiĝas preter la malsupro de la fenestro.
+    Use Fixed Tab Width: Donas al ĉiu langeto en la horizontala langetobreto la saman larĝon anstataŭ grandigi ilin laŭ ilia titolo.
+    Use Custom Title Bar: Anstataŭigas la sisteman titolbreton per la langetobreto, aŭ per la supra navigado kiam langetoj ne estas supre, por ŝpari vertikalan spacon. La fenestraj regiloj aperas en la angulo de tiu breto.
+    Use Grid Player Menu: Aranĝas la agordan menuon de la videaĵa ludilo kiel kradon de kaheloj anstataŭ listo de vicoj.
+    Compact Settings Categories: Kaŝas priskribojn kaj malpliigas la altecon de agordaj kategorioj.
+Yattee Server:
+  API Error (Click to copy): Eraro de Yattee-servilo (alklaku por kopii)
+  Errors:
+    Invalid credentials: La Yattee-servilo rifuzis la uzantnomon aŭ pasvorton. Kontrolu ilin en Agordoj → Altnivela.
+    Rate limited: La Yattee-servilo blokas ensalutojn post tro multaj malsukcesaj provoj. Provu denove poste.
+    Streams not relayed: La Yattee-servilo ne plusendis la fluojn de ĉi tiu videaĵo. Dum videaĵoj estas prokurataj tra la servilo, OpenTubeX ne konektiĝas rekte al YouTube.
+    Not configured: Enigu la URL de via Yattee-servilo en Agordoj → Altnivela.
+    HTTPS required: Android povas ludi videaĵojn nur de Yattee-serviloj, kiuj uzas HTTPS.
+    Streams unavailable: Ne eblis ŝargi la fluojn de ĉi tiu videaĵo el la Yattee-servilo. Uzu "Kontroli konekton" en Agordoj → Altnivela por kontroli la servilon.
+  Unsupported page: Ĉi tiu paĝo ne disponeblas kun la Yattee-servilo. Ŝaltu “{fallbackSetting}” por ŝargi ĝin per la loka API.
+  Posts unavailable: Yattee-serviloj ne provizas afiŝojn. Ŝaltu “{fallbackSetting}” por ŝargi ilin per la loka API.
+The playlist is at the beginning. Enable loop to continue playing: La ludlisto estas ĉe la komenco. Ŝaltu la ripetadon por daŭrigi la ludadon
+External link opening has been disabled in Settings → Privacy: La malfermado de eksteraj ligiloj estis malŝaltita en Agordoj → Privateco
+KeyboardShortcutPrompt:
+  Reopen Closed Window: Remalfermi la laste fermitan fenestron
+  Edit Hint: Elektu fulmoklavon, poste premu novan klavkombinon. Premu Retropaŝon aŭ Forigon por malasigni ĝin.
+  Change Shortcut: Ŝanĝi fulmoklavon por {action}
+  Press Shortcut: Premu fulmoklavon…
+  Unassigned: Neasignita
+  Reset Shortcut: Restarigi fulmoklavon por {action}
+  Reset to Defaults: Restarigi al defaŭltoj
+  Shortcut Already Assigned: Fulmoklavo jam asignita
+  Shortcut Conflict: '{shortcut} jam estas asignita al {actions}. Ĉu vi volas reasigni ĝin?'
+  Reserved Shortcut Conflict: '{shortcut} estas rezervita por {actions} kaj ne povas esti reasignita.'
+  Reassign: Reasigni
+  Sections:
+    App:
+      Tabs: "Aplikaĵo:\_Langetoj"
+      Search and Page: "Aplikaĵo:\_Serĉo kaj paĝo"
+      Window and View: "Aplikaĵo:\_Fenestro kaj vido"
+  New Tab: Krei novan langeton
+  Close Tab: Fermi la aktualan langeton
+  Reload Tab: Reŝargi la aktualan langeton
+  Reopen Closed Tab: Remalfermi la laste fermitan langeton
+  Next Tab: Ŝanĝi al la sekva langeto
+  Previous Tab: Ŝanĝi al la antaŭa langeto
+  Switch to Tab: Ŝanĝi al langeto 1–9
+  Toggle Tab Orientation: Ŝanĝi inter langetaj aranĝoj
+  Find in Page: Serĉi tekston en la aktuala paĝo
+  Find Next Match: Salti al la sekva trafo
+  Find Previous Match: Salti al la antaŭa trafo
+  Toggle Quick Bookmark: Aldoni al aŭ forigi el la ludlisto de rapida legosigno
+  Toggle Normal Playback Speed: Baskuli inter rapido 1x kaj la antaŭa ludrapido
+  Toggle Skip Silence: Baskuli silento-saltadon
+  Set A-B Repeat Point A: Difini punkton A de A-B-ripeto
+  Set A-B Repeat Point B: Difini punkton B de A-B-ripeto
+  Clear A-B Repeat: Viŝi A-B-ripeton
+  Video Zoom In: Zomi en la videaĵon
+  Video Zoom Out: Malzomi la videaĵon
+  Tab Switcher: Langeta ŝanĝilo
+  Undo Seek: Malfari la lastan salton
+  Redo Seek: Refari malfaritan salton
+CommandPalette:
+  Title: Komanda paletro
+  Open: Malfermi komandan paletron
+  Search Label: Serĉi komandojn, agordojn kaj lokajn videaĵojn
+  Search Placeholder: Serĉi komandojn, agordojn kaj lokajn videaĵojn…
+  Results: Rezultoj
+  No Results: Neniu kongrua rezulto
+  Result Count: '{count} rezulto trovita | {count} rezultoj trovitaj'
+  Move: Movi
+  Run: Ruli
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'Ŝanĝi al langeto: {title}'
+  Switch Profile: 'Ŝanĝi profilon: {name}'
+  Open Playlist: 'Malfermi ludliston: {name}'
+  Cancel Download: 'Nuligi elŝuton: {title}'
+  Groups:
+    App: Aplikaĵo
+    Navigation: Navigado
+    Tabs: Langetoj
+    Local Videos: Lokaj videaĵoj
+  Unavailable:
+    Current Page: Jam sur ĉi tiu paĝo
+    No History: Neniu paĝo en ĉi tiu direkto
+    Desktop: Disponebla nur en la labortabla aplikaĵo
+    Build: Ne disponebla en ĉi tiu versio
+    One Tab: Unue malfermu alian langeton
+    Active Tab: Ĉi tiu estas la aktiva langeto
+    Active Profile: Ĉi tiu estas la aktiva profilo
+    Download Finished: Ĉi tiu elŝuto ne plu ruliĝas
+    Video: Unue malfermu videaĵon
+Downloads:
+  File Name Template Invalid: 'Uzu relativan vojon ene de la elŝuta dosierujo sen "..", "~", "$", "%" aŭ prefikso kiel "thumbnail:".'
+  Add Download: Aldoni elŝuton
+  Search Completed: Serĉi finitajn elŝutojn laŭ titolo aŭ kanalo
+  Format: Formo
+  All Formats: Ĉiuj formoj
+  Largest First: Plej grandaj unue
+  Smallest First: Plej malgrandaj unue
+  No Matching Downloads: Neniu finita elŝuto kongruas. Provu alian serĉon aŭ filtrilon.
+  Preparing: Preparado…
+  Export Failed: Ne eblis konservi la elŝutitan dosieron. Elektu skribeblan elŝutan dosierujon kaj reprovu.
+  Remove File Permanently Warning: Tio ĉi definitive forigos "{title}".
+  Download: Elŝuti
+  Download Video: Elŝuti videaĵon
+  Download Playlist: Elŝuti ludliston
+  Downloading: Elŝutado
+  Queue: Vico
+  Downloaded: Elŝutitaj
+  Canceled: Nuligitaj
+  Open Downloads: Malfermi elŝutojn
+  No Downloads: Ankoraŭ neniuj elŝutoj
+  No Downloads Description: Elŝutoj, kiujn vi komencas, aperos ĉi tie.
+  Clear Failed Canceled Skipped And Missing: Viŝi malsukcesintajn, nuligitajn, saltitajn kaj mankantajn
+  Clear From List: Viŝi el la listo
+  Show in Folder: Montri en dosierujo
+  Play Download: Ludi elŝuton
+  Retry Download: Reprovi elŝuton
+  Pause Download: Paŭzigi elŝuton
+  Resume Download: Daŭrigi elŝuton
+  Move Earlier: Movi pli frue
+  Move Later: Movi pli malfrue
+  Pause All: Paŭzigi ĉiujn
+  Resume All: Daŭrigi ĉiujn
+  Retry All: Reprovi ĉiujn malsukcesintajn elŝutojn
+  Total Size: 'Tuta grandeco: {size}'
+  Local File: Loka dosiero
+  Available Offline: Disponebla senkonekte
+  Remove File: Forigi dosieron
+  Remove File Confirmation: Ĉu forigi la elŝutitan dosieron?
+  Remove File Warning: Tio ĉi movos "{title}" al la rubujo de via aparato.
+  File Not Found: La elŝutita dosiero ne troviĝis.
+  Download Missing: Elŝuto ne disponeblas
+  Files Missing: La elŝutita dosiero ne plu disponeblas en la dosiersistemo. | La elŝutitaj dosieroj ne plu disponeblas en la dosiersistemo.
+  Files Available: '{available} el {total} elŝutitaj dosieroj disponeblas.'
+  More Files: 1 plia dosiero | {count} pliaj dosieroj
+  Template Used: 'Ŝablono: {name}'
+  Download Type: Elŝuta tipo
+  Template: Ŝablono
+  Unsaved: Nekonservita
+  Media Type: Aŭdvidaĵa tipo
+  Video: Video
+  Audio: Sono
+  Maximum Resolution: Maksimuma distingivo
+  Best Available: Plej bona disponebla
+  Automatic: Aŭtomata
+  Container: Ujformo
+  Video Codec: Videokodeko
+  Audio Codec: Sonkodeko
+  File Name Template: Dosiernoma ŝablono
+  File Name Template Help: 'Disponeblaj kampoj: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: Tempa intervalo kaj ĉapitroj
+  Start Time: Komenca tempo
+  End Time: Fina tempo
+  Split by Chapters: Dividi en apartajn dosierojn laŭ ĉapitroj
+  Remove Segments: Forigi segmentojn
+  Subtitles and Metadata: Subtekstoj kaj metadatumoj
+  Include Subtitles: Inkluzivi subtekstojn
+  Embed Subtitles: Enkorpigi subtekstojn en la aŭdvidan dosieron
+  Subtitle Format: Subteksta formo
+  Subtitle Languages: Subtekstaj lingvoj
+  Subtitle Languages Help: 'Komo-apartigitaj lingvoelektiloj de yt-dlp, ekzemple: en.*,de.*'
+  Embed Cover Art: Enkorpigi bildeton kiel kovrilbildon
+  Embed Metadata: Enkorpigi titolon, aŭtoron, priskribon kaj ĉapitrojn
+  Additional yt-dlp Arguments: Aldonaj argumentoj por yt-dlp
+  Custom yt-dlp Arguments: Laŭmendaj argumentoj por yt-dlp
+  Template Name: Nomo de ŝablono
+  Save Template: Konservi ŝablonon
+  Delete Template: Forigi ŝablonon
+  Template Saved: Konservis elŝutan ŝablonon "{name}"
+  Template Name Exists: Elŝuta ŝablono nomata "{name}" jam ekzistas.
+  Choose Folder: Ŝanĝi
+  Select Folder: Elekti dosierujon
+  Folder Required: Elektu elŝutan dosierujon por ŝalti elŝutojn.
+  System Downloads Folder: Sistema elŝuta dosierujo
+  Processing: Prilaborado…
+  Queued: Envicigita
+  Queued Position: Envicigita, pozicio {position}
+  Waiting for Unmetered Network: Atendado de nemezurata reto
+  Waiting for Charging: Atendado de ŝargilo
+  Paused: Paŭzigita
+  Pausing: La aktuala tasko finiĝos, poste la vico paŭziĝos
+  Download Complete: Elŝuto finiĝis
+  Download Cancelled: Elŝuto nuligita
+  Download Failed: Elŝuto malsukcesis
+  File Name Shortened: La dosiernomo estis mallongigita, ĉar la titolo de la videaĵo estis tro longa.
+  Some Videos Not Downloaded: Kelkaj videoj en ĉi tiu ludlisto ne estis elŝuteblaj.
+  Insufficient Disk Space: Ne sufiĉas diskospaco. Proksimume {required} necesas kaj {available} disponeblas.
+  Unknown Download Size: La elŝuta grandeco estas nekonata. {available} disponeblas en la cela dosiersistemo.
+  Disk Space Check Unavailable: La disponebla diskospaco ne povis esti kontrolita antaŭ la komenco de ĉi tiu elŝuto.
+  Download Failure Hint: Kontrolu {issuesLink}, poste provu ŝanĝi la kanalon de yt-dlp al Nightly aŭ Master en Agordoj → Altnivela → Ekstera programaro.
+  yt-dlp YouTube Issues: lastatempajn problemojn de yt-dlp pri YouTube
+  Automatic Download Started: Aŭtomata elŝuto komenciĝis
+  Automatic Download Started Body: Elŝutado de "{title}" de {channel} fone.
+  Automatic Download Complete: Aŭtomata elŝuto finiĝis
+  Automatic Download Failed: Aŭtomata elŝuto malsukcesis
+  Automatic Download Could Not Start: Ne eblis komenci la aŭtomatan elŝuton de "{title}".
+  Automatic Download Skipped: Saltita de filtriloj de aŭtomataj elŝutoj
+  Cancel Download: Nuligi elŝuton
+  yt-dlp Not Found: yt-dlp ne troviĝis. Instalu ĝin aŭ difinu ĝian vojon en Agordoj → Altnivela → Ekstera programaro.
+  Download Complete Template: La elŝuto de "{title}" finiĝis
+  Download Failed Template: La elŝuto de "{title}" malsukcesis
+  Templates:
+    Video Best: Video - Plej bona kvalito
+    Video Resolution: Video - {resolution}
+    Audio Best: Sono - Plej bona kvalito
+    Audio Format: Sono - {format}
+    Subtitles Format: Subtekstoj - {format}
+  Remove File Failed: Ne eblis forigi la elŝutitan dosieron.
+Theme Discovery:
+  Discover Themes: Malkovri etosojn
+  Refresh: Aktualigi
+  View on GitHub: Vidi ĉe GitHub
+  Load Error: Ne eblis ŝargi etosojn. Provu aktualigi.
+  Loading: Ŝargado…
+  No Themes: Neniu instalebla etoso trovita.
+  No Preview: Ekrankopio ne disponeblas
+  Load More: Ŝargi pli
+  Applied: Aplikita
+  Apply Theme: Apliki etoson
+  Install and Apply: Instali kaj apliki
+  Update and Apply: Ĝisdatigi kaj apliki
+Connection:
+  Offline: Senkonekte
+  Reconnecting: Konekto perdita. Provado rekonektiĝi…
+  Back Online: Denove konektita
+App Icon:
+  Restart: Restartigi aplikaĵon
+  Saved Message: Piktogramo konservita. Via lanĉilo eble bezonos momenton por ĝisdatiĝi.
+  Title: Piktogramo de la aplikaĵo
+  Error: Ne eblas ŝargi aŭ ŝanĝi la piktogramon de la aplikaĵo
+Tray:
+  Hide All Windows: Kaŝi ĉiujn fenestrojn
+  Show All Windows: Montri ĉiujn fenestrojn
+Tray Icon:
+  Title: Taskopleta piktogramo
+  Follow App Theme: Sekvi la etoson de la aplikaĵo
+  Monochrome: "Unukolora"
+Form Inputs:
+  Browse: "Foliumi"
+  Use Default Path: "Uzi la defaŭlton"
+  Enter Password Hint: Enigu vian pasvorton
+  Choose Password Hint: Elektu pasvorton
+  Confirm Password Hint: Ripetu vian novan pasvorton
+  Encryption Passphrase Hint: Enigu vian ĉifran pasfrazon
+  Show Password: Montri pasvorton
+  Hide Password: Kaŝi pasvorton
+  Search Text Hint: Enigu serĉterminojn
+  Playlist Description Hint: Priskribu ĉi tiun ludliston
+  Filename Preview: Antaŭrigardo de dosiernomo
+  Enter Channels: Enigu kanalojn
+  Enter Text: Enigu tekston
+  Video URL: URL de videaĵo aŭ ludlisto
+  Paste Link: Algluu ligilon de videaĵo aŭ ludlisto
+  Example: ekz. {example}
+  No Minimum: Sen minimumo
+  No Maximum: Sen maksimumo
+  Any Age: Ajna aĝo
+  Included Terms Example: ekz. lernilo, recenzo
+  Excluded Terms Example: ekz. antaŭfilmo, antaŭrigardo
+  Global Arguments Hint: Nedevigaj argumentoj por ĉiu elŝuto
+  Unlimited Hint: 0 por senlima
+  Add Argument: Aldoni argumenton
+  Template Name Example: ekz. Nur sono
+  Download Arguments Hint: Nedevigaj argumentoj por ĉi tiu elŝuto
+  Generated ID Hint: Lasu malplena por generi identigilon
+  Default Value: 'Defaŭlto: {value}'
+Storage Startup Error:
+  Title: Ne eblis ŝargi datumojn de la aplikaĵo
+  Message: Liberigu konservejon de la aparato kaj provu denove. Sinkronigo estas paŭzigita ĝis viaj datumoj estos ŝargitaj.
+  Retry: Reprovi
+Native Permissions:
+  Local Network Denied: La permeso por proksimaj aparatoj estis rifuzita.
+  Local Network: Malkovri kaj elsendi videaĵojn al aparatoj en via loka reto, kaj sinkronigi agordojn kaj datumojn inter aparatoj.
+Home Widgets:
+  Continue Watching: Daŭrigi spektadon
+  Continue Watching Description: Daŭrigi videaĵojn, kiujn vi ekspektis
+  Continue Watching Empty: Videaĵoj, kiujn vi ekspektas, aperas ĉi tie
+  Quick Access: Rapida aliro
+  Quick Access Description: Malfermi serĉon, abonojn aŭ "Spekti poste"
+  Search: Serĉi
+  Subscriptions: Abonoj
+  Watch Later: Spekti poste
+Mobile Navigation:
+  home: Hejmo
+  subscriptions: Abonoj
+  userplaylists: Ludlistoj
+  history: Historio
+  subscribedchannels: Kanaloj
+  trending: Tendencoj
+  popular: Popularaj
+  stats: Statistikoj
+  more: Pli
+Installer:
+  Create Desktop Shortcut: Krei labortablan ligilon
+Invidious Fallback Warning: Ĉi tiu peto preterpasas vian agorditan Invidious-servilon kaj konektiĝas rekte al YouTube, malkaŝante vian IP-adreson.
+Yattee Fallback Warning: Ĉi tiu peto preterpasas vian agorditan Yattee-servilon kaj konektiĝas rekte al YouTube, malkaŝante vian IP-adreson.
+Automatically unloaded to free memory: Aŭtomate malŝargita por liberigi memoron
+Digital Wellbeing:
+  Watch time limit almost reached: 'Restas {duration} el via ĉiutaga limo de spekttempo'
+  Shorts limit almost reached: 'Restas {duration} el via ĉiutaga limo de videaĵetoj'
+  Daily watch time limit reached: Ĉiutaga limo de spekttempo atingita
+  Daily Shorts limit reached: Ĉiutaga limo de videaĵetoj atingita
+  Watched today: Vi spektis {duration} hodiaŭ.
+  Shorts watched today: Vi spektis {duration} da videaĵetoj hodiaŭ.
+  15 More Minutes: 15 pliaj minutoj
+  Ignore for Today: Ignori por hodiaŭ
+  Time to take a break: Tempo por paŭzi
+  Watching for: Vi spektas jam dum {duration}.
+  Time for bed: Estas tempo enlitiĝi
+  Bedtime started at: Via dormotempo komenciĝis je {time}.
+  Remind Me in 10 Minutes: Memorigi min post 10 minutoj
+Notification Center:
+  Notifications: "Sciigoj"
+  Notifications With Unread: "Sciigoj (nelegitaj: {count})"
+  Mark as Read: "Marki kiel legitan"
+  Mark All as Read: "Marki ĉiujn kiel legitajn"
+  Clear All: "Forigi ĉiujn"
+  Clear: "Forigi"
+  Empty: "Ankoraŭ neniuj sciigoj"
+  Empty Hint: "Memorigoj pri rektaj elsendoj kaj novaj alŝutoj de kanaloj kun ŝaltitaj sciigoj aperos ĉi tie."

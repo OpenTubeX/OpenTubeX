@@ -250,7 +250,7 @@ Settings:
     Auto Load Next Page:
       Label: Αυτόματη φόρτωση επόμενης σελίδας
       Tooltip: Φόρτωση πρόσθετων σελίδων και σχολίων αυτόματα.
-    Open Deep Links In New Window: Άνοιγμα URL που πέρασαν στο FreeTube σε ένα νέο παράθυρο
+    Open Deep Links In New Window: Άνοιγμα URL που πέρασαν στο OpenTubeX σε ένα νέο παράθυρο
     Minimize to system tray: Ελαχιστοποίηση στη γραμμή εργασιών
   Theme Settings:
     Theme Settings: 'Θέματα'
@@ -371,7 +371,7 @@ Settings:
     Expand Side Bar by Default: Ανάπτυξη της πλευρικής μπάρας από προεπιλογή
     Disable Smooth Scrolling: Απενεργοποίηση ομαλής κύλισης
     Hide Side Bar Labels: Απόκρυψη ετικετών πλευρικής μπάρας
-    Hide FreeTube Header Logo: Απόκρυψη Λογότυπου Κεφαλίδας FreeTube
+    Hide OpenTubeX Header Logo: Απόκρυψη Λογότυπου Κεφαλίδας OpenTubeX
   Player Settings:
     Player Settings: 'Πρόγραμμα αναπαραγωγής'
     Play Next Video: 'Αναπαραγωγή Προτεινόμενου Βίντεο'
@@ -463,7 +463,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Συνδρομές'
     Fetch Feeds from RSS: 'Φόρτωση τροφοδοσίας RSS'
-    Fetch Automatically: Αυτόματη Λήψη Τροφοδοσίας
     'Limit the number of videos displayed for each channel': Περιορίστε τον αριθμό των βίντεο που εμφανίζονται για κάθε κανάλι
     Confirm Before Unsubscribing: Επιβεβαίωση πριν από τη Απεγραφή
     To: Προς
@@ -472,7 +471,7 @@ Settings:
     Select Export Type: 'Επιλογή Τρόπου Εξαγωγής'
     Import Subscriptions: 'Εισαγωγή Συνδρομών'
     Export Subscriptions: 'Εξαγωγή Συνδρομών'
-    Export FreeTube: 'Εξαγωγή για FreeTube'
+    Export OpenTubeX: 'Εξαγωγή για OpenTubeX'
     Export YouTube: 'Εξαγωγή για Youtube'
     Export NewPipe: 'Εξαγωγή για NewPipe'
     Import History: 'Εισαγωγή Ιστορικού'
@@ -500,9 +499,9 @@ Settings:
     History File: Αρχείο Ιστορικού
     Playlist File: Αρχείο Λίστας Αναπαραγωγής
 
-    Export Playlists For Older FreeTube Versions:
-      Label: Εξαγωγή λιστών αναπαραγωγής για παλαιότερες εκδόσεις FreeTube
-      Tooltip: "Αυτή η επιλογή εξάγει βίντεο από όλες τις λίστες αναπαραγωγής σε μία λίστα αναπαραγωγής με το όνομα “Αγαπημένα”.\nΠώς να εξάγετε & να εισάγετε βίντεο σε λίστες αναπαραγωγής για μια παλαιότερη έκδοση του FreeTube:\n1. Εξάγετε τις λίστες αναπαραγωγής σας με ενεργοποιημένη αυτή την επιλογή.\n 2. Διαγράψτε όλες τις υπάρχουσες λίστες αναπαραγωγής σας χρησιμοποιώντας την επιλογή Κατάργηση όλων των λιστών αναπαραγωγής στις Ρυθμίσεις απορρήτου.\n 3. Εκκινήστε την παλαιότερη έκδοση του FreeTube και εισαγάγετε τις εξαχθείσες λίστες αναπαραγωγής.\""
+    Export Playlists For Older OpenTubeX Versions:
+      Label: Εξαγωγή λιστών αναπαραγωγής για παλαιότερες εκδόσεις OpenTubeX
+      Tooltip: "Αυτή η επιλογή εξάγει βίντεο από όλες τις λίστες αναπαραγωγής σε μία λίστα αναπαραγωγής με το όνομα “Αγαπημένα”.\nΠώς να εξάγετε & να εισάγετε βίντεο σε λίστες αναπαραγωγής για μια παλαιότερη έκδοση του OpenTubeX:\n1. Εξάγετε τις λίστες αναπαραγωγής σας με ενεργοποιημένη αυτή την επιλογή.\n 2. Διαγράψτε όλες τις υπάρχουσες λίστες αναπαραγωγής σας χρησιμοποιώντας την επιλογή Κατάργηση όλων των λιστών αναπαραγωγής στις Ρυθμίσεις απορρήτου.\n 3. Εκκινήστε την παλαιότερη έκδοση του OpenTubeX και εισαγάγετε τις εξαχθείσες λίστες αναπαραγωγής.\""
     Search history file: Αρχείο ιστορικού αναζήτησης
     Search history: Ιστορικό αναζήτησης
     Import search history: Εισαγωγή ιστορικού αναζήτησης
@@ -516,8 +515,8 @@ Settings:
     All settings have been successfully imported: Όλες οι ρυθμίσεις εισήχθηκαν με επιτυχία
     All settings have been successfully exported: Όλες οι ρυθμίσεις εξήχθηκαν με επιτυχία
     Setting object has insufficient data, skipping item: Ρύθμιση αντικειμένου έχει ανεπαρκή δεδομένα, παράλειψη στοιχείου
-    Unknown setting key: 'Άγνωστο κλειδί ρύθμισης: {key}'
-    Non-transferable setting key: 'Μη μεταβιβάσιμο κλειδί ρύθμισης: {key}'
+    Unknown setting key: "Άγνωστο κλειδί ρύθμισης: {key}"
+    Non-transferable setting key: "Μη μεταβιβάσιμο κλειδί ρύθμισης: {key}"
   Distraction Free Settings:
     Distraction Free Settings: Χωρίς απόσπαση
     Hide Live Chat: Απόκρυψη Ζωντανής συνομιλίας
@@ -583,7 +582,7 @@ Settings:
     Proxy Protocol: Πρωτόκολλο μεσολάβησης
     Enable Tor / Proxy: Ενεργοποίηση Tor / Proxy
     Proxy Settings: Διακομιστής μεσολάβησης
-    Proxy Warning: Το FreeTube δεν διαθέτει ενσωματωμένο διακομιστή μεσολάβησης, αλλά μπορεί να συνδεθεί σε έναν εξωτερικό διακομιστή μεσολάβησης, όπως έναν που εκτελείται στο μηχάνημά σας, όπως το Tor, ή έναν εξωτερικό διακομιστή μεσολάβησης, όπως ένας διακομιστής μεσολάβησης SOCKS5 που παρέχεται από ορισμένα VPN. Εάν είναι ενεργοποιημένο, βεβαιωθείτε ότι ο διακομιστής μεσολάβησης/το Tor έχει ρυθμιστεί σωστά, αλλιώς το FreeTube δεν θα μπορεί να αντλήσει δεδομένα.
+    Proxy Warning: Το OpenTubeX δεν διαθέτει ενσωματωμένο διακομιστή μεσολάβησης, αλλά μπορεί να συνδεθεί σε έναν εξωτερικό διακομιστή μεσολάβησης, όπως έναν που εκτελείται στο μηχάνημά σας, όπως το Tor, ή έναν εξωτερικό διακομιστή μεσολάβησης, όπως ένας διακομιστής μεσολάβησης SOCKS5 που παρέχεται από ορισμένα VPN. Εάν είναι ενεργοποιημένο, βεβαιωθείτε ότι ο διακομιστής μεσολάβησης/το Tor έχει ρυθμιστεί σωστά, αλλιώς το OpenTubeX δεν θα μπορεί να αντλήσει δεδομένα.
     Proxy Username: Όνομα χρήστη διακομιστή μεσολάβησης
     Proxy Password: Κωδικός πρόσβασης διακομιστή μεσολάβησης
   External Player Settings:
@@ -598,7 +597,7 @@ Settings:
     Ignore Default Arguments: Αγνοήστε τα προεπιλεγμένα επιχειρήματα
   SponsorBlock Settings:
     Enable SponsorBlock: Ενεργοποίηση του SponsorBlock
-    Notify when sponsor segment is skipped: Ειδοποίηση όταν παραλείπεται το τμήμα χορηγού
+    Notify when sponsor segment is skipped: Εμφάνιση ειδοποιήσεων μετά την παράλειψη κάθε τμήματος
     SponsorBlock Settings: 'SponsorBlock'
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': Διεύθυνση URL του API του SponsorBlock (Η προεπιλογή είναι https://sponsor.ajay.app)
     Skip Options:
@@ -647,7 +646,7 @@ About:
   GitHub issues: Προβλήματα GitHub
   Report a problem: Αναφορά προβλήματος
   FAQ: Συχνές ερωτήσεις
-  FreeTube Wiki: FreeTube βίκι
+  OpenTubeX Wiki: OpenTubeX βίκι
   Help: Βοήθεια
   GitHub releases: Κυκλοφορίες GitHub
   Downloads / Changelog: Λήψεις / Αρχείο καταγραφής αλλαγών
@@ -657,7 +656,7 @@ About:
   AGPLv3: 'AGPLv3'
   Licensed under the {licenseLink}: Διατίθεται υπό την άδεια {licenseLink}
   Please read the {roomRulesLink}: Παρακαλώ διαβάστε τους {roomRulesLink}
-  FreeTube is made possible by {creditsPageLink}: Το FreeTube υποστηρίζεται από τους {creditsPageLink}
+  OpenTubeX is made possible by {creditsPageLink}: Το OpenTubeX υποστηρίζεται από τους {creditsPageLink}
 Profile:
   Profile Select: 'Επιλογή Προφίλ'
   All Channels: 'Όλα τα κανάλια'
@@ -716,6 +715,7 @@ Channel:
       Oldest: 'Παλαιότερο'
       Most Popular: 'Τα πιο δημοφιλή'
     This channel has videos but none could be displayed, try fetching more: Αυτό το κανάλι περιέχει βίντεο, αλλά δεν ήταν δυνατή η προβολή κανενός. Δοκιμάστε να ανακτήσετε περισσότερα
+    This channel does not currently have any videos: 'Αυτό το κανάλι δε διαθέτει προς το παρόν κάποιο βίντεο'
   Playlists:
     Playlists: 'Λίστες αναπαραγωγής'
     This channel does not currently have any playlists: 'Αυτό το κανάλι δε διαθέτει προς το παρόν κάποια λίστα αναπαραγωγής'
@@ -735,7 +735,7 @@ Channel:
     Joined: Εγγράφηκαν
     Links: Σύνδεσμοι
   This channel does not allow searching: Αυτό το κανάλι δεν επιτρέπει την αναζήτηση
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: Αυτό το κανάλι έχει περιορισμό ηλικίας και προς το παρόν δεν μπορεί να προβληθεί στο FreeTube.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Αυτό το κανάλι έχει περιορισμό ηλικίας και προς το παρόν δεν μπορεί να προβληθεί στο OpenTubeX.
   Channel Tabs: Καρτέλες Καναλιών
   This channel does not exist: Αυτό το κανάλι δεν υπάρχει
   Posts:
@@ -744,7 +744,7 @@ Channel:
     Hide Answers: Απόκρυψη Απαντήσεων
     votes: '{votes} ψήφοι'
     View Full Post: Προβολή πλήρους δημοσίευσης
-    Video hidden by FreeTube: Βίντεο κρυμμένο από FreeTube
+    Video hidden by OpenTubeX: Βίντεο κρυμμένο από OpenTubeX
     Viewing Posts Only Supported By Invidious: Η προβολή αναρτήσεων υποστηρίζεται μόνο από το Invidious. Μεταβείτε στην καρτέλα της κοινότητας ενός καναλιού για να δείτε το περιεχόμενο εκεί χωρίς το Invidious.
   Live:
     Live: Ζωντανά
@@ -806,14 +806,22 @@ Video:
   Video has been saved: Το βίντεο έχει αποθηκευτεί
   Save Video: Αποθήκευση βίντεο
   Sponsor Block category:
-    intro: Εισαγωγή
-    interaction: Αλληλεπίδραση
-    sponsor: Χορηγός
-    outro: Επίλογος
-    self-promotion: Αυτοπροβολή
-    music offtopic: Μουσική Εκτός θέματος
-    recap: Ανακεφαλαίωση
-    filler: Γεμιστικό
+    intro: Παύση/Εισαγωγή με Animation
+    interaction: Υπενθύμιση Αλληλεπίδρασης (Εγγραφή)
+    sponsor: Χορηγία
+    outro: Προτεινόμενα βίντεο καναλιών/Εύσημα
+    self-promotion: Αφιλοκέρδεια/Προσωπική Προώθηση
+    music offtopic: 'Μουσική: Τμήμα χωρίς μουσική'
+    recap: Προεπισκόπηση/Περίληψη
+    filler: Εφαπτόμενα/Αστεία
+    hook: Δέλεαρ/Χαιρετισμοί
+    highlight: Καλύτερη στιγμή
+    exclusive access: Αποκλειστική Πρόσβαση
+  Sponsor Block category short:
+    intro: Διάλειμμα
+    interaction: Υπενθύμιση Αλληλεπίδρασης
+    music offtopic: Χωρίς Μουσική
+    filler: Εφαπτόμενα
   External Player:
     video: βίντεο
     OpenInTemplate: Άνοιγμα σε {externalPlayer}
@@ -863,19 +871,19 @@ Video:
     Show Stats: Εμφάνιση στατιστικών στοιχείων
     Hide Stats: Απόκρυψη στατιστικών
     Audio Tracks: Κομμάτια ήχου
-    Skipped segment: Παραλείφθηκε το τμήμα {segmentCategory}
+    Skipped segment: 'Παραλείφθηκε «{segmentCategory}»'
     Playback will resume automatically when your connection comes back: Η αναπαραγωγή θα συνεχιστεί αυτόματα όταν επανέλθει η σύνδεσή σας.
     You appear to be offline: Φαίνεται ότι είστε εκτός σύνδεσης.
-  MembersOnly: Τα βίντεο μόνο για μέλη δεν μπορούν να παρακολουθηθούν με το FreeTube, καθώς απαιτούν σύνδεση στο Google και συνδρομή επί πληρωμή στο κανάλι του μεταφορτωτή.
+  MembersOnly: Τα βίντεο μόνο για μέλη δεν μπορούν να παρακολουθηθούν με το OpenTubeX, καθώς απαιτούν σύνδεση στο Google και συνδρομή επί πληρωμή στο κανάλι του μεταφορτωτή.
   Save Watched Progress: Αποθήκευση παρακολουθούμενης προόδου
   Watched Progress Saved: Παρακολουθούμενη πρόοδος Αποθηκευμένη
   IP block: Το YouTube έχει αποκλείσει τη διεύθυνση IP σας από την παρακολούθηση βίντεο. Προσπαθήστε να αλλάξετε VPN ή proxy.
-  AgeRestricted: Τα βίντεο με περιορισμούς ηλικίας δεν μπορούν να παρακολουθηθούν με το FreeTube, καθώς απαιτούν σύνδεση στο Google και χρήση ενός λογαριασμού YouTube που έχει επαληθευτεί ως προς την ηλικία.
+  AgeRestricted: Τα βίντεο με περιορισμούς ηλικίας δεν μπορούν να παρακολουθηθούν με το OpenTubeX, καθώς απαιτούν σύνδεση στο Google και χρήση ενός λογαριασμού YouTube που έχει επαληθευτεί ως προς την ηλικία.
   DeArrow:
-    Show Original Details: Εμφάνιση αρχικών λεπτομερειών
-    Show Modified Details: Εμφάνιση τροποποιημένων λεπτομερειών
+    Show Original Details: Εμφάνιση Αρχικών Λεπτομερειών
+    Show Modified Details: Εμφάνιση Τροποποιημένων Λεπτομερειών
   More Options: Περισσότερες Επιλογές
-  DRMProtected: Τα βίντεο που προστατεύονται με DRM δεν μπορούν να αναπαραχθούν στο FreeTube, καθώς απαιτούν ιδιόκτητα εξαρτήματα κλειστού κώδικα. Αν θέλετε να παρακολουθήσετε αυτό το βίντεο, παρακαλούμε να το παρακολουθήσετε στον επίσημο ιστότοπο του YouTube σε ένα πρόγραμμα περιήγησης ιστού με δυνατότητα DRM.
+  DRMProtected: Τα βίντεο που προστατεύονται με DRM δεν μπορούν να αναπαραχθούν στο OpenTubeX, καθώς απαιτούν ιδιόκτητα εξαρτήματα κλειστού κώδικα. Αν θέλετε να παρακολουθήσετε αυτό το βίντεο, παρακαλούμε να το παρακολουθήσετε στον επίσημο ιστότοπο του YouTube σε ένα πρόγραμμα περιήγησης ιστού με δυνατότητα DRM.
   Popout Live Chat: Αναδυόμενο παράθυρο συνομιλίας
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Υπόλοιπος χρόνος διαφήμισης πριν το βίντεο: {remindingTimeSeconds} δευτερόλεπτα'
@@ -983,8 +991,7 @@ Version {versionNumber} is now available!  Click for more details: Η έκδοσ
 This video is unavailable because of missing formats. This can happen due to country unavailability.: Αυτό το βίντεο δεν είναι διαθέσιμο λόγω έλλειψης μορφών. Αυτό μπορεί να συμβαίνει λόγω μη διαθεσιμότητας του βίντεο στη χώρα σας.
 Tooltips:
   Subscription Settings:
-    Fetch Feeds from RSS: Όταν ενεργοποιηθεί, το FreeTube θα χρησιμοποιήσει RSS αντί για την προεπιλεγμένη μέθοδο για να αρπάξει τη ροή συνδρομής σας. Το RSS είναι ταχύτερο και αποτρέπει τον αποκλεισμό IP, αλλά δεν παρέχει ορισμένες πληροφορίες, όπως διάρκεια βίντεο, ζωντανή κατάσταση ή αναρτήσεις
-    Fetch Automatically: Όταν ενεργοποιηθεί, το FreeTube θα ανακτήσει αυτόματα τη ροή συνδρομής σας κατά την εκκίνηση και όταν ανοίξει ένα νέο παράθυρο.
+    Fetch Feeds from RSS: Όταν ενεργοποιηθεί, το OpenTubeX θα χρησιμοποιήσει RSS αντί για την προεπιλεγμένη μέθοδο για να αρπάξει τη ροή συνδρομής σας. Το RSS είναι ταχύτερο και αποτρέπει τον αποκλεισμό IP, αλλά δεν παρέχει ορισμένες πληροφορίες, όπως διάρκεια βίντεο, ζωντανή κατάσταση ή αναρτήσεις
   Player Settings:
     Default Media Format: Ορίστε τις μορφές που χρησιμοποιούνται κατά την αναπαραγωγή ενός βίντεο. Οι μορφές DASH μπορούν να αναπαράγουν υψηλότερες ποιότητες. Οι μορφές παλαιού τύπου περιορίζονται σε μέγιστο 360p, αλλά χρησιμοποιούν μικρότερο εύρος ζώνης. Οι μορφές ήχου είναι ροές μόνο ήχου.
     Proxy Videos Through Invidious: Θα συνδεθεί με το Invidious για να εξυπηρετήσει τα βίντεο αντί να κάνει μια άμεση σύνδεση με το YouTube.
@@ -992,14 +999,14 @@ Tooltips:
     Skip by Scrolling Over Video Player: Χρησιμοποιήστε τον τροχό κύλισης για να παρακάμψετε το βίντεο, στυλ MPV.
   General Settings:
     Region for Trending: Η περιοχή των τάσεων σας επιτρέπει να επιλέξετε τα δημοφιλή βίντεο της χώρας που θέλετε να εμφανίζονται.
-    Thumbnail Preference: Όλες οι μικρογραφίες σε όλο το FreeTube θα αντικατασταθούν με ένα πλαίσιο του βίντεο, θολό ή κρυφό αντί για την προεπιλεγμένη μικρογραφία.
-    Fallback to Non-Preferred Backend on Failure: Όταν το προτιμώμενο API αντιμετωπίζει πρόβλημα, το FreeTube θα προσπαθήσει να χρησιμοποιήσει το μη προτιμώμενο API ως εναλλακτική μέθοδο όταν ενεργοποιηθεί.
-    Preferred API Backend: Επέλεξε το σύστημα με το οποίο το Freetube θα συλλέγει δεδομένα. Το τοπικό API είναι ένα ενσωματωμένο εργαλείο. Ενώ το Invidious API απαιτεί έναν Invidious server για να συνδεθεί.
-    Invidious Instance: Το στιγμιότυπο Invidious στο οποίο το FreeTube θα συνδεθεί για κλήσεις διεπαφής.
-    External Link Handling: "Επιλέξτε την προεπιλεγμένη συμπεριφορά όταν κάνετε κλικ σε έναν σύνδεσμο, ο οποίος δεν μπορεί να ανοίξει στο FreeTube.\nΑπό προεπιλογή, το FreeTube θα ανοίξει τον σύνδεσμο που έχει πατηθεί στο προεπιλεγμένο πρόγραμμα περιήγησης.\n"
-    Open Deep Links In New Window: Οι διευθύνσεις URL που μεταβιβάζονται στο FreeTube, όπως από επεκτάσεις του προγράμματος περιήγησης redirect ή από ορίσματα της γραμμής εντολών, ανοίγουν σε ένα νέο παράθυρο.
+    Thumbnail Preference: Όλες οι μικρογραφίες σε όλο το OpenTubeX θα αντικατασταθούν με ένα πλαίσιο του βίντεο, θολό ή κρυφό αντί για την προεπιλεγμένη μικρογραφία.
+    Fallback to Non-Preferred Backend on Failure: Όταν το προτιμώμενο API αντιμετωπίζει πρόβλημα, το OpenTubeX θα προσπαθήσει να χρησιμοποιήσει το μη προτιμώμενο API ως εναλλακτική μέθοδο όταν ενεργοποιηθεί.
+    Preferred API Backend: Επέλεξε το σύστημα με το οποίο το OpenTubeX θα συλλέγει δεδομένα. Το τοπικό API είναι ένα ενσωματωμένο εργαλείο. Ενώ το Invidious API απαιτεί έναν Invidious server για να συνδεθεί.
+    Invidious Instance: Το στιγμιότυπο Invidious στο οποίο το OpenTubeX θα συνδεθεί για κλήσεις διεπαφής.
+    External Link Handling: "Επιλέξτε την προεπιλεγμένη συμπεριφορά όταν κάνετε κλικ σε έναν σύνδεσμο, ο οποίος δεν μπορεί να ανοίξει στο OpenTubeX.\nΑπό προεπιλογή, το OpenTubeX θα ανοίξει τον σύνδεσμο που έχει πατηθεί στο προεπιλεγμένο πρόγραμμα περιήγησης.\n"
+    Open Deep Links In New Window: Οι διευθύνσεις URL που μεταβιβάζονται στο OpenTubeX, όπως από επεκτάσεις του προγράμματος περιήγησης redirect ή από ορίσματα της γραμμής εντολών, ανοίγουν σε ένα νέο παράθυρο.
   External Player Settings:
-    Custom External Player Executable: Από προεπιλογή, το FreeTube θα υποθέσει ότι το επιλεγμένο εξωτερικό πρόγραμμα αναπαραγωγής μπορεί να βρεθεί μέσω της μεταβλητής περιβάλλοντος PATH. Εάν χρειάζεται, μπορείτε να ορίσετε μια προσαρμοσμένη διαδρομή εδώ.
+    Custom External Player Executable: Από προεπιλογή, το OpenTubeX θα υποθέσει ότι το επιλεγμένο εξωτερικό πρόγραμμα αναπαραγωγής μπορεί να βρεθεί μέσω της μεταβλητής περιβάλλοντος PATH. Εάν χρειάζεται, μπορείτε να ορίσετε μια προσαρμοσμένη διαδρομή εδώ.
     Ignore Warnings: Απόκρυψη προειδοποιήσεων για όταν το τρέχον εξωτερικό πρόγραμμα αναπαραγωγής δεν υποστηρίζει την τρέχουσα ενέργεια (π.χ. αντιστροφή λιστών αναπαραγωγής κ.λπ.).
     External Player: Η επιλογή ενός εξωτερικού προγράμματος αναπαραγωγής θα εμφανίσει ένα εικονίδιο, για το άνοιγμα του βίντεο (λίστα αναπαραγωγής, εάν υποστηρίζεται) στο εξωτερικό πρόγραμμα αναπαραγωγής, στη μικρογραφία. Προειδοποίηση, Οι ακατάλληλες ρυθμίσεις δεν επηρεάζουν τις εξωτερικές συσκευές αναπαραγωγής.
     DefaultCustomArgumentsTemplate: "(Προεπιλογή: '{defaultCustomArguments}')"
@@ -1011,7 +1018,7 @@ Tooltips:
   Distraction Free Settings:
     Hide Channels: Εισαγάγετε ένα αναγνωριστικό καναλιού για να αποκρύψετε όλα τα βίντεο, τις λίστες αναπαραγωγής και το ίδιο το κανάλι, ώστε να μην εμφανίζονται στην αναζήτηση, τα ανερχόμενα, τα πιο δημοφιλή και προτεινόμενα. Το αναγνωριστικό καναλιού που καταχωρίσατε πρέπει να αντιστοιχεί πλήρως και να κάνει διάκριση πεζών-κεφαλαίων.
     Hide Subscriptions Live: Αυτή η ρύθμιση παρακάμπτεται από τη ρύθμιση "{appWideSetting}" σε όλη την εφαρμογή, στην ενότητα "{subsection}" του "{settingsSection}"
-    Hide Videos, Playlists and Channels Containing Text: Εισάγετε μια λέξη, ένα τμήμα λέξης ή μια φράση (χωρίς ευαισθησία στην πεζότητα) για να αποκρύψετε όλα τα βίντεο και τις λίστες αναπαραγωγής των οποίων οι αρχικοί τίτλοι την περιέχουν σε όλο το FreeTube, εξαιρώντας μόνο το Ιστορικό, τις Λίστες αναπαραγωγής σας και τα βίντεο μέσα σε λίστες αναπαραγωγής.
+    Hide Videos, Playlists and Channels Containing Text: Εισάγετε μια λέξη, ένα τμήμα λέξης ή μια φράση (χωρίς ευαισθησία στην πεζότητα) για να αποκρύψετε όλα τα βίντεο και τις λίστες αναπαραγωγής των οποίων οι αρχικοί τίτλοι την περιέχουν σε όλο το OpenTubeX, εξαιρώντας μόνο το Ιστορικό, τις Λίστες αναπαραγωγής σας και τα βίντεο μέσα σε λίστες αναπαραγωγής.
     Hide Videos on Watch: Αποκρύπτει τα βίντεο που παρακολουθήσατε στις καρτέλες Βίντεο, Σύντομα και Ζωντανά στις σελίδες Συνδρομές και Κανάλια. Αυτό δεν επηρεάζει την καρτέλα Αρχική σελίδα στις σελίδες του Καναλιού
   SponsorBlock Settings:
     UseDeArrowTitles: Αντικαταστήστε τους τίτλους βίντεο με τίτλους που υποβλήθηκαν από τους χρήστες από το DeArrow.

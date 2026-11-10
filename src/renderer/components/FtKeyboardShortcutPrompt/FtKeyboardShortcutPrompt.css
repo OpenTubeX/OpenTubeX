@@ -4,6 +4,17 @@
   max-inline-size: 80%;
 }
 
+.keyboardShortcutPromptEmbedded {
+  display: flex;
+  flex-direction: column;
+  max-inline-size: none;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow: hidden;
+  container-type: inline-size;
+}
+
 .titleAndCloseButton {
   display: flex;
   justify-content: space-between;
@@ -24,26 +35,70 @@ h3 {
   margin-block: 0.25em;
   inline-size: fit-content;
   font-weight: bold;
+  letter-spacing: -0.01em;
 }
 
 .center {
   text-align: center;
 }
 
-.primarySection {
-  inline-size: 100%;
+.shortcutToolbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1em;
+  margin-block-end: 0.5em;
+  padding-block: 0.5em 1em;
+  background: var(--base-color);
 }
 
-.primarySections,
-.primarySection {
+.editHint {
+  flex: 1;
+  margin: 0;
+}
+
+.shortcutSearch {
+  --input-bottom-spacing: 0;
+  --form-control-height: 36px;
+
+  flex: 0 1 240px;
+  min-inline-size: 0;
+}
+
+.shortcutNoResults {
+  inline-size: 100%;
+  text-align: center;
+  color: var(--secondary-text-color);
+}
+
+.shortcutColumnsContent,
+.shortcutColumn {
   display: flex;
-  flex-flow: row wrap;
   gap: 30px;
+}
+
+.shortcutColumnsContent {
+  align-items: flex-start;
+  flex-flow: row wrap;
   justify-content: space-evenly;
 }
 
-.secondarySection {
-  flex: 0 0 500px;
+.keyboardShortcutPromptEmbedded .shortcutColumns {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding-block-end: 1em;
+}
+
+.shortcutColumn {
+  flex: 0 1 500px;
+  flex-flow: column nowrap;
+}
+
+.shortcutSection {
+  inline-size: 100%;
 }
 
 .labelsAndShortcuts {
@@ -68,16 +123,70 @@ h3 {
 
 .label {
   display: table-cell;
+  margin-block: 0;
   padding-inline-end: 2em;
   inline-size: 300px;
   min-inline-size: 300px;
+  vertical-align: middle;
 }
 
 .shortcut {
   font-family: monospace;
   display: table-cell;
   vertical-align: middle;
+}
+
+.shortcutBinding {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2em;
+}
+
+.shortcutBinding + .shortcutBinding {
+  margin-inline-start: 0.4em;
+}
+
+.shortcutButton {
+  padding-block: 0.35em;
+  padding-inline: 0.6em;
+  border: 1px solid var(--primary-shadow-color);
+  border-radius: var(--shape-corner-small);
+  color: var(--primary-text-color);
+  background: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
+  font: inherit;
   text-transform: capitalize;
+  cursor: pointer;
+  transition: border-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.shortcutButton:active {
+  border-radius: var(--shape-corner-extra-small);
+}
+
+.shortcutValue {
+  display: inline-block;
+  padding-block: 0.35em;
+  padding-inline: 0.6em;
+  text-transform: capitalize;
+}
+
+.shortcutButton:hover,
+.shortcutButton:focus-visible,
+.shortcutButton.recording,
+.shortcutButton.modified {
+  border-color: var(--accent-color);
+}
+
+.shortcutButton:hover,
+.shortcutButton:focus-visible,
+.shortcutButton.recording {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 1px;
+}
+
+.resetShortcutButton {
+  color: var(--accent-color);
 }
 
 :deep(.promptCard) {
@@ -90,11 +199,37 @@ h3 {
     inline-size: 200px;
   }
 
-  .secondarySection {
-    flex: 0;
+  .shortcutColumn {
+    display: contents;
+  }
+}
+
+@container (width <= 600px) {
+  .shortcutToolbar {
+    align-items: stretch;
+    flex-direction: column;
   }
 
-  .primarySection {
-    justify-content: flex-start;
+  .shortcutSearch {
+    flex-basis: auto;
+  }
+
+  .label {
+    min-inline-size: 0;
+    inline-size: auto;
+    padding-inline-end: 1em;
+    overflow-wrap: anywhere;
+  }
+
+  .labelsAndShortcuts {
+    inline-size: 100%;
+  }
+
+  .shortcut {
+    overflow-wrap: anywhere;
+  }
+
+  .shortcutColumn {
+    display: contents;
   }
 }

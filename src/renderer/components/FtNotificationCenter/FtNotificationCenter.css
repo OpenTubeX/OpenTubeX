@@ -1,0 +1,99 @@
+.notificationCenter {
+  position: relative;
+}
+
+.notificationCenter.wiggle :deep(.iconButton > .icon) {
+  transform-origin: 50% 10%;
+  animation: notification-bell-wiggle 800ms ease-in-out;
+}
+
+@keyframes notification-bell-wiggle {
+  15% {
+    transform: rotate(14deg);
+  }
+
+  30% {
+    transform: rotate(-12deg);
+  }
+
+  45% {
+    transform: rotate(9deg);
+  }
+
+  60% {
+    transform: rotate(-6deg);
+  }
+
+  75% {
+    transform: rotate(3deg);
+  }
+}
+
+.notificationCenter[data-unread-count]::after {
+  position: absolute;
+  inset-block-start: 4px;
+  inset-inline-end: 2px;
+  box-sizing: border-box;
+  min-inline-size: 18px;
+  block-size: 18px;
+  padding-inline: 5px;
+  border-radius: 9px;
+  background-color: var(--primary-color);
+  box-shadow: 0 0 0 2px var(--card-bg-color);
+  color: var(--text-with-main-color);
+  content: attr(data-unread-count);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.notificationCenterHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-block-size: 48px;
+  padding-block: 4px;
+  padding-inline: 16px 6px;
+  border-block-end: 1px solid var(--border-color);
+}
+
+.notificationCenterHeader h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.notificationActions {
+  display: flex;
+  gap: 4px;
+}
+
+.notificationActions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 36px;
+  block-size: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--secondary-text-color);
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.notificationActions button:hover,
+.notificationActions button:focus-visible {
+  background-color: var(--side-nav-hover-color);
+  color: var(--side-nav-hover-text-color);
+}
+
+.notificationSheetScroller {
+  flex: 1;
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}

@@ -1,0 +1,380 @@
+import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import test from 'node:test'
+import vm from 'node:vm'
+
+const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
+const start = source.indexOf('    const seekingIsPossible = computed(() => {')
+const end = source.indexOf('\n    })', start) + '\n    })'.length
+
+function canSeekLive(props) {
+  return vm.runInNewContext(`${source.slice(start, end)}\nseekingIsPossible.value`, {
+    computed: getter => ({ value: getter() }),
+    props: { isLive: true, playbackEngine: 'built-in', ...props }
+  })
+}
+
+for (const playbackEngine of ['yt-dlp']) {
+  for (const [manifestMimeType, manifestSrc] of [
+    ['application/dash+xml', 'https://example.com/live.mpd'],
+    ['application/x-mpegurl', 'https://example.com/playlist_type/DVR/live.m3u8']
+  ]) {
+    test(`${playbackEngine} hides seeking when DVR is disabled, even with ${manifestSrc}`, () => {
+      assert.equal(canSeekLive({ playbackEngine, manifestMimeType, manifestSrc, isLiveDvrEnabled: false }), false)
+    })
+  }
+}
+
+test('built-in live playback never offers seeking with HLS', () => {
+  for (const isLiveDvrEnabled of [true, false, null]) {
+    assert.equal(canSeekLive({
+      manifestMimeType: 'application/x-mpegurl',
+      manifestSrc: 'https://example.com/manifest_duration/3600/live',
+      isLiveDvrEnabled
+    }), false)
+  }
+})
+
+test('built-in live SABR playback offers seeking unless DVR is disabled', () => {
+  const manifestMimeType = 'application/sabr+json'
+  assert.equal(canSeekLive({ manifestMimeType, isLiveDvrEnabled: true }), true)
+  assert.equal(canSeekLive({ manifestMimeType, isLiveDvrEnabled: null }), true)
+  assert.equal(canSeekLive({ manifestMimeType, isLiveDvrEnabled: false }), false)
+})
+
+test('keeps yt-dlp seeking for DVR-enabled livestreams and premieres', () => {
+  assert.equal(canSeekLive({ playbackEngine: 'yt-dlp', manifestMimeType: 'application/dash+xml', isLiveDvrEnabled: true }), true)
+})
+
+test('keeps manifest-based seeking when the backend has no DVR metadata', () => {
+  assert.equal(canSeekLive({ playbackEngine: 'yt-dlp', manifestMimeType: 'application/dash+xml', isLiveDvrEnabled: null }), true)
+  assert.equal(canSeekLive({ manifestMimeType: 'application/x-mpegurl', manifestSrc: 'https://example.com/manifest_duration/30/live.m3u8' }), false)
+})
+
+test('DVR metadata does not disable seeking for ordinary videos or ended streams', () => {
+  assert.equal(canSeekLive({ isLive: false, manifestMimeType: 'application/dash+xml', isLiveDvrEnabled: false }), true)
+})
+
+function absoluteSeekFixture(props) {
+  const seekingAllowed = canSeekLive({ manifestMimeType: 'application/dash+xml', ...props })
+  const state = {
+    props,
+    isLive: { value: props.isLive !== false },
+    abRepeatEnabled: { value: false },
+    ui: { getControls: () => ({ isSeeking: () => false }) },
+    player: { seekRange: () => ({ start: 0, end: 30 }) },
+    seekingIsPossible: { value: seekingAllowed },
+    hasPlaybackPosition: { value: false },
+    hasLoaded: { value: true },
+    loadGeneration: 0,
+    pendingMetadataSeek: null,
+    seekBarMouseDown: false,
+    resumeAutoplayAfterSeek: false,
+    initialAutoplayCanceled: false,
+    playCalls: 0,
+    videoLayoutReady: { value: true },
+    applyPendingPresentationModes() {},
+    updateAutoPip() {},
+    handleVideoResize() {},
+    handlePause() {},
+    noteSeekHistoryJump() {},
+    canSeek: () => seekingAllowed,
+    accumulatedSeekSeconds: 5,
+    video: { value: { currentTime: 10, duration: 30, paused: true, autoplay: false, pause() {}, play() { state.playCalls++; return Promise.resolve() }, fastSeek(time) { this.currentTime = time } } },
+    mediaTabId: 'live-test',
+    mediaSessionSource: 'player-live-test',
+    mediaSessionStopped: false,
+    tabMediaCoordinator: {
+      setActionHandlers(_id, _owner, handlers) { state.handlers = handlers },
+      setPlaybackState() {}
+    },
+  }
+  const functions = ['pause', 'setCurrentTime', 'rememberSeekPosition', 'registerMediaSessionHandlers', 'handleSeekBarInput', 'handleSeekBarMouseChange', 'restoreSeekAutoplay', 'handleCanPlay'].map(name => {
+    const match = source.match(new RegExp(`    function ${name}\\([^]*?\\n    }`))
+    assert.ok(match, `missing ${name}`)
+    return match[0]
+  }).join('\n')
+  const api = vm.runInNewContext(`${functions}\nregisterMediaSessionHandlers();\n({ pause, setCurrentTime, handleSeekBarInput, handleSeekBarMouseChange, handleCanPlay })`, state)
+  return { state, ...api }
+}
+
+for (const props of [
+  { playbackEngine: 'built-in', isLiveDvrEnabled: true },
+  { playbackEngine: 'yt-dlp', isLiveDvrEnabled: false }
+]) {
+  test(`${props.playbackEngine} blocks timestamp and Media Session seeking when live seeking is disabled`, () => {
+    const { state, setCurrentTime } = absoluteSeekFixture(props)
+    setCurrentTime(3)
+    assert.equal(state.video.value.currentTime, 10)
+    assert.equal(state.hasPlaybackPosition.value, false)
+    for (const fastSeek of [true, false]) {
+      state.handlers.seekto({ seekTime: 2, fastSeek })
+      assert.equal(state.video.value.currentTime, 10)
+    }
+    state.handlers.stop()
+    assert.equal(state.video.value.currentTime, 10)
+  })
+}
+
+test('absolute seeking still works for ordinary videos and yt-dlp DVR', () => {
+  for (const props of [{ isLive: false }, { playbackEngine: 'yt-dlp', isLiveDvrEnabled: true }]) {
+    const { state, setCurrentTime } = absoluteSeekFixture(props)
+    setCurrentTime(3)
+    assert.equal(state.video.value.currentTime, 3)
+    assert.equal(state.hasPlaybackPosition.value, true)
+    for (const fastSeek of [true, false]) {
+      state.video.value.currentTime = 10
+      state.handlers.seekto({ seekTime: 2, fastSeek })
+      assert.equal(state.video.value.currentTime, 2)
+    }
+  }
+})
+
+test('adds only the viewer\'s own seeks to the seek history', () => {
+  const { state, setCurrentTime } = absoluteSeekFixture({ isLive: false })
+  const noted = []
+  state.noteSeekHistoryJump = time => noted.push(time)
+
+  // Restoring a position, such as after casting, is not a jump.
+  setCurrentTime(20)
+  setCurrentTime(25, true)
+  state.handlers.seekto({ seekTime: 2 })
+  assert.deepEqual(noted, [25, 2])
+})
+
+test('retains the latest absolute seek before metadata, including zero', () => {
+  const { state, setCurrentTime } = absoluteSeekFixture({ isLive: false })
+  state.videoLayoutReady.value = false
+  state.video.value.readyState = 0
+  for (const time of [15, 5, 0]) {
+    setCurrentTime(time)
+    assert.equal(state.pendingMetadataSeek, time)
+    assert.equal(state.hasPlaybackPosition.value, true)
+  }
+})
+
+test('retains seeks before Shaka is assigned and applies the latest after initialization', () => {
+  const { state, setCurrentTime, handleCanPlay } = absoluteSeekFixture({ isLive: false })
+  const player = state.player
+  state.player = null
+  state.ui = null
+  state.hasLoaded.value = false
+  state.video.value.readyState = 0
+  for (const time of [15, 0, 5]) {
+    setCurrentTime(time)
+    assert.equal(state.pendingMetadataSeek, time)
+    assert.equal(state.hasPlaybackPosition.value, true)
+    assert.equal(state.endSeekTarget, null)
+  }
+  state.player = player
+  state.video.value.readyState = 3
+  handleCanPlay()
+  assert.equal(state.video.value.currentTime, 5)
+  assert.equal(state.pendingMetadataSeek, null)
+})
+
+test('consumes the startup seek even when canplay precedes Shaka loaded', () => {
+  const { state, setCurrentTime, handleCanPlay } = absoluteSeekFixture({ isLive: false })
+  state.hasLoaded.value = false
+  state.video.value.readyState = 0
+  setCurrentTime(5)
+  state.video.value.readyState = 3
+  handleCanPlay()
+  assert.equal(state.video.value.currentTime, 5)
+  assert.equal(state.pendingMetadataSeek, null)
+  state.hasLoaded.value = true
+  state.video.value.currentTime = 20
+  handleCanPlay()
+  assert.equal(state.video.value.currentTime, 20)
+})
+
+for (const manifestType of [null, 'DASH']) {
+  test(`loading completion only consumes a native seek made after canplay with manifestType=${manifestType}`, () => {
+    const { state, setCurrentTime, handleCanPlay } = absoluteSeekFixture({ isLive: false })
+    state.hasLoaded.value = false
+    state.video.value.readyState = 4
+    handleCanPlay()
+    setCurrentTime(5)
+    assert.equal(state.pendingMetadataSeek, 5)
+    state.video.value.currentTime = 6
+    const loadedStart = source.indexOf('    async function handleLoaded() {')
+    const loadedEnd = source.indexOf('      // Background tabs', loadedStart)
+    let manifestReads = 0
+    Object.assign(state, {
+      togglePlaybackRate: null,
+      isLive: { value: false },
+      localCaptions: { value: [] },
+      restorePendingPlaybackRate() {},
+      player: {
+        isLive: () => false,
+        getManifestType: () => manifestType,
+        getManifest: () => { manifestReads++; return manifestType === null ? null : {} }
+      }
+    })
+    vm.runInNewContext(`${source.slice(loadedStart, loadedEnd)}\n    }\nhandleLoaded()`, state)
+    assert.equal(manifestReads, 0, 'playback detection must not use the deprecated manifest getter')
+    assert.equal(state.pendingMetadataSeek, manifestType === null ? null : 5)
+    if (manifestType !== null) return
+    assert.equal(state.video.value.currentTime, 6)
+    state.video.value.currentTime = 20
+    handleCanPlay()
+    assert.equal(state.video.value.currentTime, 20)
+  })
+}
+
+test('retains a queued seek when a timeline pointer interaction is canceled', () => {
+  const { state, setCurrentTime, handleSeekBarInput } = absoluteSeekFixture({ isLive: false })
+  state.videoLayoutReady.value = false
+  state.video.value.readyState = 0
+  setCurrentTime(15)
+  handleSeekBarInput({ type: 'pointerdown', target: { matches: () => true } })
+  assert.equal(state.pendingMetadataSeek, 15)
+})
+
+test('records a first timeline input while buffering without an earlier chapter seek', () => {
+  const { state, handleSeekBarInput } = absoluteSeekFixture({ isLive: false })
+  state.videoLayoutReady.value = false
+  state.video.value.readyState = 1
+  handleSeekBarInput({ type: 'input', target: { matches: () => true, value: '5' } })
+  assert.equal(state.pendingMetadataSeek, 5)
+})
+
+test('retains a first timeline seek when data is ready but canplay has not fired', () => {
+  const { state, handleSeekBarInput } = absoluteSeekFixture({ isLive: false })
+  state.video.value.readyState = 4
+  state.videoLayoutReady.value = false
+  handleSeekBarInput({ type: 'input', target: { matches: () => true, value: '5' } })
+  assert.equal(state.pendingMetadataSeek, 5)
+})
+
+test('a mouse drag retains the latest timeline value and consumes its release', () => {
+  const { state, handleSeekBarInput, handleSeekBarMouseChange } = absoluteSeekFixture({ isLive: false })
+  state.videoLayoutReady.value = false
+  state.video.value.readyState = 1
+  handleSeekBarInput({ type: 'mousedown', target: { matches: () => true, value: '5' } })
+  state.ui = { getControls: () => ({ isSeeking: () => false, getDisplayTime: () => 15 }) }
+  handleSeekBarMouseChange({ type: 'mousemove' })
+  assert.equal(state.pendingMetadataSeek, 15)
+  assert.equal(state.seekBarMouseDown, true)
+  handleSeekBarMouseChange({ type: 'mouseup' })
+  assert.equal(state.pendingMetadataSeek, 15)
+  assert.equal(state.seekBarMouseDown, false)
+})
+
+test('a timeline release after playback is ready is not replayed on canplay', () => {
+  const { state, handleSeekBarInput, handleSeekBarMouseChange, handleCanPlay } = absoluteSeekFixture({ isLive: false })
+  state.ui = { getControls: () => ({ isSeeking: () => false, getDisplayTime: () => 15 }) }
+  handleSeekBarInput({ type: 'mousedown', target: { matches: () => true, value: '15' } })
+  // Shaka applies the seek before this release handler runs.
+  state.video.value.currentTime = 15
+  state.video.value.readyState = 1
+  handleSeekBarMouseChange({ type: 'mouseup' })
+  assert.equal(state.pendingMetadataSeek, null)
+  state.video.value.currentTime = 15.2
+  state.video.value.readyState = 4
+  handleCanPlay()
+  assert.equal(state.video.value.currentTime, 15.2)
+})
+
+for (const endEvent of ['mouseup', 'touchend', 'blur']) {
+  test(`a startup timeline seek restores pending autoplay on ${endEvent}`, () => {
+    const { state, handleSeekBarInput, handleSeekBarMouseChange } = absoluteSeekFixture({ isLive: false })
+    state.video.value.autoplay = true
+    state.videoLayoutReady.value = false
+    state.ui = { getControls: () => ({ isSeeking: () => false, getDisplayTime: () => 5 }) }
+    const target = { matches: () => true, value: '5' }
+    handleSeekBarInput({ type: endEvent.startsWith('touch') ? 'touchstart' : 'mousedown', target })
+    // The first frame may become ready while the pointer is still held down.
+    state.videoLayoutReady.value = true
+    if (endEvent === 'mouseup') handleSeekBarMouseChange({ type: endEvent })
+    else handleSeekBarInput({ type: endEvent, target })
+    assert.equal(state.playCalls, 1)
+    // A second release must not override a later pause.
+    handleSeekBarInput({ type: 'blur', target })
+    assert.equal(state.playCalls, 1)
+  })
+}
+
+for (const [autoplay, ready] of [[false, false], [true, true]]) {
+  test(`timeline seeking preserves paused playback with autoplay=${autoplay}, ready=${ready}`, () => {
+    const { state, handleSeekBarInput, handleSeekBarMouseChange } = absoluteSeekFixture({ isLive: false })
+    state.video.value.autoplay = autoplay
+    state.videoLayoutReady.value = ready
+    state.ui = { getControls: () => ({ isSeeking: () => false, getDisplayTime: () => 5 }) }
+    handleSeekBarInput({ type: 'mousedown', target: { matches: () => true, value: '5' } })
+    handleSeekBarMouseChange({ type: 'mouseup' })
+    assert.equal(state.playCalls, 0)
+  })
+}
+
+for (const action of ['pause', 'stop', 'exposed pause']) {
+  for (const duringSeek of [false, true]) {
+    test(`${action === 'exposed pause' ? 'An exposed pause' : `A Media Session ${action}`} ${duringSeek ? 'during' : 'before'} startup seeking cancels pending autoplay`, () => {
+      const { state, pause, handleSeekBarInput, handleSeekBarMouseChange } = absoluteSeekFixture({ isLive: false })
+      const requestPause = action === 'exposed pause' ? pause : state.handlers[action]
+      state.video.value.autoplay = true
+      state.videoLayoutReady.value = false
+      state.ui = { getControls: () => ({ isSeeking: () => false, getDisplayTime: () => 5 }) }
+      if (!duringSeek) requestPause()
+      handleSeekBarInput({ type: 'mousedown', target: { matches: () => true, value: '5' } })
+      if (duringSeek) requestPause()
+      handleSeekBarMouseChange({ type: 'mouseup' })
+      assert.equal(state.playCalls, 0)
+    })
+  }
+}
+
+for (const action of ['chapter', 'media session', 'timeline']) {
+  test(`a newer ${action} seek replaces a seek queued before metadata`, () => {
+    const { state, setCurrentTime, handleSeekBarInput } = absoluteSeekFixture({ isLive: false })
+    state.videoLayoutReady.value = false
+    state.video.value.readyState = 0
+    setCurrentTime(15)
+    state.video.value.readyState = 1
+    if (action === 'chapter') setCurrentTime(5)
+    if (action === 'media session') state.handlers.seekto({ seekTime: 5 })
+    if (action === 'timeline') handleSeekBarInput({ type: 'input', target: { matches: () => true, value: '5' } })
+    assert.equal(state.pendingMetadataSeek, 5)
+  })
+}
+
+for (const manifestType of [null, 'DASH']) {
+  for (const userSeek of [false, true]) {
+    test(`metadata restores saved progress only for native playback with manifestType=${manifestType}, userSeek=${userSeek}`, async () => {
+      const mediaElement = new EventTarget()
+      mediaElement.currentTime = userSeek ? 5 : 0.002
+      mediaElement.seeking = userSeek
+      const player = new EventTarget()
+      let manifestReads = 0
+      const startTimeUpdates = []
+      player.getManifest = () => { manifestReads++; return manifestType === null ? null : {} }
+      player.getManifestType = () => manifestType
+      // Native playback is still NOT_LOADED when canupdatestarttime fires.
+      player.getLoadMode = () => manifestType === null ? 1 : 2
+      player.updateStartTime = value => startTimeUpdates.push(value)
+      player.configure = () => {}
+      player.load = async () => {
+        player.dispatchEvent(new Event('canupdatestarttime'))
+        mediaElement.dispatchEvent(new Event('loadedmetadata'))
+      }
+      const match = source.match(/ {4}async function loadPlaybackSource\([^]*?\n {4}}/)
+      assert.ok(match)
+      const loadPlaybackSource = vm.runInNewContext(`${match[0]}\nloadPlaybackSource`, {
+        player,
+        video: { value: mediaElement },
+        pendingMetadataSeek: null,
+        foregroundLoadAbortController: null,
+        process: { env: {} },
+        hasPlaybackPosition: { value: userSeek },
+        progressivePlayback: { value: false },
+        bufferingConfig: { value: {} },
+        props: { videoId: 'video', playbackEngine: 'built-in', format: 'legacy' },
+        console: { warn() {} }
+      })
+      await loadPlaybackSource('https://example.com/video', 15, 'video/webm')
+      assert.equal(manifestReads, 0, 'playback detection must not use the deprecated manifest getter')
+      assert.deepEqual(startTimeUpdates, manifestType === null ? [null] : [])
+      assert.equal(mediaElement.currentTime, userSeek ? 5 : manifestType === null ? 15 : 0.002)
+    })
+  }
+}

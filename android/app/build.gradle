@@ -1,0 +1,280 @@
+apply plugin: 'com.android.application'
+
+def nativeNdkDirectory = androidComponents.sdkComponents.ndkDirectory
+def optimizedTestBuild = ['nightly', 'release'].contains(project.findProperty('testBuildType'))
+// Releases also publish lite APKs without the bundled yt-dlp runtime and FFmpeg.
+// They install as separate apps so app stores can list them next to the full builds.
+def liteBuild = project.hasProperty('lite')
+def liteIdSuffix = liteBuild ? '.lite' : ''
+def liteName = liteBuild ? ' Lite' : ''
+
+def releaseKeystorePath = System.getenv("ANDROID_RELEASE_KEYSTORE")
+def releaseStorePassword = System.getenv("ANDROID_RELEASE_STORE_PASSWORD")
+def releaseSigningConfigured = releaseKeystorePath?.trim() && releaseStorePassword?.trim()
+// F-Droid builds unsigned release APKs and publishes the signed GitHub APKs
+// when they match.
+def unsignedRelease = project.hasProperty('unsignedRelease')
+
+gradle.taskGraph.whenReady { graph ->
+    def releaseTaskScheduled = graph.allTasks.any { task ->
+        task.project == project && task.name.toLowerCase().contains("release")
+    }
+    if (releaseTaskScheduled && !releaseSigningConfigured && !unsignedRelease) {
+        throw new GradleException(
+            "Release signing is not configured. Set ANDROID_RELEASE_KEYSTORE and " +
+            "ANDROID_RELEASE_STORE_PASSWORD, or pass -PunsignedRelease for an unsigned build."
+        )
+    }
+}
+
+def versionProperties = new Properties()
+file('version.properties').withInputStream { versionProperties.load(it) }
+def baseVersionCode = (System.getenv("ANDROID_VERSION_CODE") ?: versionProperties.versionCode).toInteger()
+// F-Droid needs a distinct version code for every APK. Prefer 64-bit APKs
+// on devices that also run 32-bit code; the universal APK keeps digit 0.
+def abiVersionCodes = ['armeabi-v7a': 1, 'x86': 2, 'arm64-v8a': 3, 'x86_64': 4]
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        variant.outputs.each { output ->
+            def abi = output.filters.find {
+                it.filterType == com.android.build.api.variant.FilterConfiguration.FilterType.ABI
+            }?.identifier
+            if (abi) output.versionCode.set(baseVersionCode * 10 + abiVersionCodes[abi])
+        }
+    }
+}
+
+def appIconOutput = rootProject.file('../build/generated/app-icons')
+def generateAppIconPresets = tasks.register('generateAppIconPresets', Exec) {
+    workingDir rootProject.file('..')
+    commandLine 'node', '_scripts/brand/generate-app-icon-presets.mjs'
+    inputs.files(
+        rootProject.file('../src/appIconPresets.js'),
+        rootProject.file('../src/constants.js'),
+        rootProject.file('../_scripts/brand/generate-app-icon-presets.mjs'),
+        file('src/main/AndroidManifest.xml'),
+        file('src/main/res/drawable/ic_launcher_monochrome.xml'),
+        file('src/dev/res/drawable/ic_launcher_dev_monochrome.xml'),
+        file('src/debug/res/drawable/ic_launcher_nightly_monochrome.xml')
+    )
+    inputs.files(rootProject.fileTree('../_scripts/brand') { include 'icon-*.svg' })
+    outputs.dir(appIconOutput)
+}
+tasks.named('preBuild').configure { dependsOn(generateAppIconPresets) }
+
+def castSenderOutput = layout.buildDirectory.dir('generated/cast-sender')
+def generateCastSender = tasks.register('generateCastSender', Exec) {
+    workingDir rootProject.file('..')
+    inputs.dir(rootProject.file('../_scripts/cast-sender'))
+    inputs.files(rootProject.file('../_scripts/androidCastSender.mjs'), rootProject.file('../_scripts/castSender.mjs'), rootProject.file('../_scripts/goBuild.mjs'))
+    inputs.property('abis', project.findProperty('testAbi') ?: 'arm64-v8a,armeabi-v7a,x86_64,x86')
+    outputs.dir(castSenderOutput)
+    doFirst {
+        commandLine 'node', '_scripts/androidCastSender.mjs', castSenderOutput.get().asFile.absolutePath,
+            nativeNdkDirectory.get().asFile.absolutePath, inputs.properties.abis
+    }
+}
+tasks.named('preBuild').configure { dependsOn(generateCastSender) }
+
+def rumbleHttpOutput = layout.buildDirectory.dir('generated/rumble-http')
+def generateRumbleHttp = tasks.register('generateRumbleHttp', Exec) {
+    workingDir rootProject.file('..')
+    inputs.dir(rootProject.file('../_scripts/yt-dlp-http'))
+    inputs.files(rootProject.file('../_scripts/androidYtDlpHttp.mjs'), rootProject.file('../_scripts/goBuild.mjs'), rootProject.file('../_scripts/cast-sender/Go.LICENSE'))
+    inputs.property('abis', project.findProperty('testAbi') ?: 'arm64-v8a,armeabi-v7a,x86_64,x86')
+    outputs.dir(rumbleHttpOutput)
+    doFirst {
+        commandLine 'node', '_scripts/androidYtDlpHttp.mjs', rumbleHttpOutput.get().asFile.absolutePath,
+            nativeNdkDirectory.get().asFile.absolutePath, inputs.properties.abis
+    }
+}
+if (!liteBuild) tasks.named('preBuild').configure { dependsOn(generateRumbleHttp) }
+
+// Replaces the older yt-dlp that youtubedl-android bundles, so fresh installs can
+// play videos before the first managed update.
+// .github/workflows/mobile-dependencies.yml opens a PR for each new release.
+def ytDlpVersion = '2026.10.26'
+def ytDlpSha256 = 'e51e69e89489f199530f13d32a4342da3ddb2cf34842f364603a066db05afbf3'
+def ytDlpOutput = layout.buildDirectory.dir('generated/yt-dlp')
+def downloadYtDlp = tasks.register('downloadYtDlp') {
+    inputs.property('version', ytDlpVersion)
+    inputs.property('sha256', ytDlpSha256)
+    outputs.dir(ytDlpOutput)
+    doLast {
+        def bytes = new URL("https://github.com/yt-dlp/yt-dlp/releases/download/${ytDlpVersion}/yt-dlp")
+            .getBytes(connectTimeout: 30_000, readTimeout: 60_000)
+        def hash = java.security.MessageDigest.getInstance('SHA-256').digest(bytes).encodeHex().toString()
+        if (hash != ytDlpSha256) throw new GradleException("yt-dlp ${ytDlpVersion} has SHA-256 ${hash}, expected ${ytDlpSha256}")
+        def target = new File(ytDlpOutput.get().asFile, 'res/raw/ytdlp')
+        target.parentFile.mkdirs()
+        target.bytes = bytes
+    }
+}
+if (!liteBuild) tasks.named('preBuild').configure { dependsOn(downloadYtDlp) }
+
+android {
+    namespace = "org.opentubex.app"
+    buildFeatures {
+        buildConfig = true
+        resValues = true
+    }
+    compileSdk = rootProject.ext.compileSdkVersion
+    ndkVersion '30.0.16248370'
+    defaultConfig {
+        applicationId "org.opentubex.app"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode = baseVersionCode * 10
+        versionName = System.getenv("ANDROID_VERSION_NAME") ?:
+            new groovy.json.JsonSlurper().parse(rootProject.file('../package.json')).version
+        buildConfigField "boolean", "BUNDLES_YT_DLP", (!liteBuild).toString()
+        buildConfigField "String", "YT_DLP_VERSION", "\"${ytDlpVersion}\""
+        manifestPlaceholders += [bundlesYtDlp: (!liteBuild).toString()]
+        ndk { abiFilters.addAll((project.findProperty('testAbi') ?: 'arm64-v8a,armeabi-v7a,x86_64,x86').split(',')) }
+        testInstrumentationRunner(optimizedTestBuild
+            ? "org.opentubex.app.OptimizedApkInstrumentation"
+            : "androidx.test.runner.AndroidJUnitRunner")
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+    }
+    // CI publishes a standalone APK for each CPU plus a universal fallback.
+    // Keep local debug/instrumentation builds as one APK.
+    splits {
+        abi {
+            enable project.hasProperty('splitApks') && !project.hasProperty('testAbi')
+            reset()
+            include 'arm64-v8a', 'armeabi-v7a', 'x86_64', 'x86'
+            universalApk true
+        }
+    }
+    testBuildType project.findProperty('testBuildType') ?: 'debug'
+    // F-Droid rejects this block because only Google can read it.
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
+    signingConfigs {
+        nightly {
+            // This public testing key keeps local builds installable. CI re-signs
+            // published nightlies with the private nightly key (see SIGNING.md).
+            // Never use it for a distributable release APK.
+            storeFile rootProject.file("nightly.keystore")
+            storePassword "opentubex-nightly"
+            keyAlias "opentubex-nightly"
+            keyPassword "opentubex-nightly"
+        }
+        if (releaseSigningConfigured) {
+            production {
+                storeFile rootProject.file(releaseKeystorePath)
+                storePassword releaseStorePassword
+                keyAlias "opentubex-android-release"
+                keyPassword releaseStorePassword
+            }
+        }
+    }
+    sourceSets {
+        main.jniLibs.srcDirs += [new File(castSenderOutput.get().asFile, 'jniLibs')]
+        main.assets.srcDirs += [new File(castSenderOutput.get().asFile, 'licenses')]
+        if (!liteBuild) {
+            main.jniLibs.srcDirs += [new File(rumbleHttpOutput.get().asFile, 'jniLibs')]
+            main.assets.srcDirs += [new File(rumbleHttpOutput.get().asFile, 'licenses')]
+            main.res.srcDirs += [new File(ytDlpOutput.get().asFile, 'res')]
+        }
+        main.manifest.srcFile new File(appIconOutput, 'AndroidManifest.xml')
+        main.res.srcDirs += [new File(appIconOutput, 'android/main/res')]
+        debug.res.srcDirs = ['src/dev/res', new File(appIconOutput, 'android/dev/res')]
+        nightly.res.srcDirs = ['src/debug/res', new File(appIconOutput, 'android/debug/res')]
+        androidTest.assets.srcDirs += ['../../e2e/fixtures/media']
+        androidTest.assets.srcDirs += ['../../e2e/fixtures/player-scripts']
+    }
+    if (optimizedTestBuild) {
+        sourceSets.androidTest {
+            java.srcDirs = ['src/optimizedAndroidTest/java']
+            manifest.srcFile 'src/optimizedAndroidTest/AndroidManifest.xml'
+        }
+    }
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = true
+            keepDebugSymbols += ['**/libpython.zip.so', '**/libffmpeg.zip.so', '**/libopentubex_cast.so']
+        }
+    }
+    buildTypes {
+        debug {
+            // Local test builds must not receive published nightly updates.
+            // Both testing identities stay separate from production because
+            // the nightly signing key is public.
+            applicationIdSuffix ".dev${liteIdSuffix}"
+            resValue "string", "app_name", "OpenTubeX Dev${liteName}"
+            resValue "string", "title_activity_main", "OpenTubeX Dev${liteName}"
+            signingConfig signingConfigs.nightly
+        }
+        release {
+            // Shrink unused bytecode, but preserve runtime-discovered code and
+            // resources. Avoid R8 optimizations and renaming in the keep rules.
+            minifyEnabled true
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (liteBuild) {
+                proguardFiles 'proguard-lite.pro'
+                applicationIdSuffix liteIdSuffix
+                resValue "string", "app_name", "OpenTubeX Lite"
+                resValue "string", "title_activity_main", "OpenTubeX Lite"
+            }
+            if (releaseSigningConfigured && !unsignedRelease) {
+                signingConfig signingConfigs.production
+            }
+        }
+        nightly {
+            initWith release
+            applicationIdSuffix ".nightly${liteIdSuffix}"
+            resValue "string", "app_name", "OpenTubeX Nightly${liteName}"
+            resValue "string", "title_activity_main", "OpenTubeX Nightly${liteName}"
+            signingConfig signingConfigs.nightly
+            matchingFallbacks = ['release']
+        }
+    }
+}
+
+apply from: '../trim-runtime.gradle'
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation "com.squareup.okhttp3:okhttp:5.5.1"
+    implementation "org.brotli:dec:0.1.2"
+    testImplementation "com.squareup.okhttp3:mockwebserver:5.5.1"
+    // Lite builds still compile the yt-dlp code paths, which BuildConfig.BUNDLES_YT_DLP disables.
+    def ytDlpConfiguration = liteBuild ? 'compileOnly' : 'implementation'
+    add(ytDlpConfiguration, "io.github.junkfood02.youtubedl-android:library:0.18.1")
+    add(ytDlpConfiguration, "io.github.junkfood02.youtubedl-android:ffmpeg:0.18.1")
+    implementation "androidx.documentfile:documentfile:1.1.0"
+    implementation "androidx.sqlite:sqlite-bundled:2.7.1"
+    testImplementation "org.json:json:20260814"
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.2.0"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation "androidx.webkit:webkit:$androidxWebkitVersion"
+    implementation "androidx.work:work-runtime:$androidxWorkVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    if (!optimizedTestBuild) {
+        androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+        androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+        // PairingCameraTest serves a sync server over HTTPS and shows the scanner a QR code.
+        androidTestImplementation "com.squareup.okhttp3:okhttp-tls:5.5.1"
+        androidTestImplementation "com.google.zxing:core:3.5.4"
+    }
+    implementation project(':capacitor-cordova-android-plugins')
+}
+
+apply from: 'capacitor.build.gradle'

@@ -1,0 +1,443 @@
+package org.opentubex.app;
+
+import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.IDN;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.ProxySelector;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
+import java.util.Base64;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
+
+import javax.net.ssl.SSLParameters;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+
+/** One HTTP proxy for Chromium, URLConnection and child processes.
+ * Upstream connections never fall back to direct, including failed handshakes.
+ * Other apps can reach loopback ports, so every request needs this launch's secret.
+ */
+final class AndroidProxyRelay implements AutoCloseable {
+    private static final int TIMEOUT = 30_000;
+    static final String USER = "opentubex";
+    static final String REALM = "OpenTubeX";
+    private static final byte[] AUTHENTICATION_REQUIRED = ("HTTP/1.1 407 Proxy Authentication Required\r\n" +
+        "Proxy-Authenticate: Basic realm=\"" + REALM + "\"\r\nContent-Length: 0\r\n").getBytes(StandardCharsets.US_ASCII);
+    private final String password;
+    private final byte[] authorization;
+    private final ServerSocket server;
+    private final ExecutorService threads = Executors.newCachedThreadPool(runnable -> {
+        Thread thread = new Thread(runnable, "opentubex-proxy");
+        thread.setDaemon(true);
+        return thread;
+    });
+    private final Semaphore capacity = new Semaphore(64);
+    private final Set<Socket> sockets = new HashSet<>();
+    interface AddressResolver { InetAddress[] resolve(String host) throws IOException; }
+    private final AddressResolver resolver;
+    private final ProxySelector systemSelector;
+    private ProxyConfiguration configuration;
+    private long generation;
+
+    AndroidProxyRelay(ProxyConfiguration configuration, ProxySelector systemSelector) throws IOException {
+        this(configuration, systemSelector, InetAddress::getAllByName);
+    }
+
+    AndroidProxyRelay(ProxyConfiguration configuration, ProxySelector systemSelector, AddressResolver resolver) throws IOException {
+        this.resolver = resolver;
+        this.configuration = configuration;
+        this.systemSelector = systemSelector;
+        byte[] secret = new byte[32];
+        new SecureRandom().nextBytes(secret);
+        password = Base64.getUrlEncoder().withoutPadding().encodeToString(secret);
+        authorization = authorizationHeader().getBytes(StandardCharsets.US_ASCII);
+        server = new ServerSocket(0, 64, InetAddress.getByName("127.0.0.1"));
+        threads.execute(this::accept);
+    }
+
+    int port() { return server.getLocalPort(); }
+    String url() { return "http://127.0.0.1:" + port(); }
+    String authenticatedUrl() { return "http://" + USER + ":" + password + "@127.0.0.1:" + port(); }
+    String password() { return password; }
+    String authorizationHeader() {
+        return "Basic " + Base64.getEncoder().encodeToString((USER + ":" + password).getBytes(StandardCharsets.US_ASCII));
+    }
+
+    /** An HTTPS origin can send its own 407 inside the tunnel, so only the CONNECT request
+     * and plain HTTP requests, whose header the relay reads and strips, carry the secret. */
+    okhttp3.Authenticator okHttpAuthenticator() {
+        return (route, response) -> {
+            okhttp3.Request request = response.request();
+            if (request.header("Proxy-Authorization") != null ||
+                (request.isHttps() && !request.method().equals("CONNECT"))) return null;
+            return request.newBuilder().header("Proxy-Authorization", authorizationHeader()).build();
+        };
+    }
+
+    /** URLConnection reports a 407 the same way whether it came from the relay or from an
+     * origin inside the tunnel. Only Android's tunnel setup asks on behalf of the relay. */
+    static boolean isUrlConnectionTunnelChallenge(StackTraceElement[] stack) {
+        for (StackTraceElement frame : stack) {
+            if (frame.getMethodName().equals("createTunnel") && frame.getClassName().endsWith(".RealConnection")) return true;
+        }
+        return false;
+    }
+
+    synchronized void configure(ProxyConfiguration value) {
+        if (configuration.equals(value)) return;
+        configuration = value;
+        generation++;
+        for (Socket socket : sockets) closeSocket(socket);
+        sockets.clear();
+    }
+
+    private void accept() {
+        while (!server.isClosed()) {
+            try {
+                Socket client = server.accept();
+                if (!capacity.tryAcquire()) { closeSocket(client); continue; }
+                synchronized (this) { sockets.add(client); }
+                threads.execute(() -> {
+                    try { forward(client); } finally {
+                        closeSocket(client);
+                        synchronized (this) { sockets.remove(client); }
+                        capacity.release();
+                    }
+                });
+            } catch (IOException error) {
+                if (!server.isClosed()) close();
+            }
+        }
+    }
+
+    private void forward(Socket client) {
+        Socket upstream = null;
+        Socket transport = null;
+        boolean connected = false;
+        try {
+            final ProxyConfiguration policy;
+            final long version;
+            synchronized (this) { policy = configuration; version = generation; }
+            policy.validate();
+            client.setSoTimeout(TIMEOUT);
+            String[] headers = readAuthenticatedHeaders(client);
+            if (headers == null) return;
+            String[] request = headers[0].split(" ", 3);
+            if (request.length != 3) throw new IOException("Invalid proxy request");
+            boolean tunnel = request[0].equals("CONNECT");
+            URI target = new URI(tunnel ? "https://" + request[1] : request[1]);
+            if ((!tunnel && !"http".equals(target.getScheme())) || target.getHost() == null ||
+                target.getRawUserInfo() != null) throw new IOException("Invalid proxy target");
+            int port = target.getPort() == -1 ? (tunnel ? 443 : 80) : target.getPort();
+            if (port < 1 || port > 65535) throw new IOException("Invalid destination port");
+            String host = target.getHost().replace("[", "").replace("]", "");
+            // WebView only reports a challenge's host, so a local server must never be able to
+            // ask for this relay's credentials with a 401 from 127.0.0.1.
+            if (isLoopbackName(host)) throw new IOException("Loopback destinations are not proxied");
+            ProxyConfiguration route = resolveSystemProxy(policy, target);
+            boolean forwardHttp = !tunnel && route.enabled && Arrays.asList("http", "https").contains(route.protocol);
+            transport = connectTransport(route.enabled ? route.hostname : host, route.enabled ? route.port : port, version, client);
+            upstream = transport;
+            upstream = connect(upstream, route, host, port, forwardHttp);
+            final Socket remote = upstream;
+            synchronized (this) {
+                if (version != generation || client.isClosed()) throw new IOException("Proxy changed");
+            }
+            OutputStream output = remote.getOutputStream();
+            if (tunnel) {
+                client.getOutputStream().write("HTTP/1.1 200 Connection Established\r\n\r\n".getBytes(StandardCharsets.US_ASCII));
+            } else {
+                String path = target.getRawPath();
+                if (path == null || path.isEmpty()) path = "/";
+                if (target.getRawQuery() != null) path += "?" + target.getRawQuery();
+                StringBuilder forwarded = new StringBuilder(request[0] + " " +
+                    (forwardHttp ? target.toASCIIString() : path) + " HTTP/1.1\r\n");
+                for (int i = 1; i < headers.length; i++) {
+                    String name = headers[i].split(":", 2)[0].toLowerCase(Locale.ROOT);
+                    if (!Arrays.asList("proxy-authorization", "proxy-connection", "connection", "host").contains(name)) {
+                        forwarded.append(headers[i]).append("\r\n");
+                    }
+                }
+                forwarded.append("Host: ").append(authority(host, port)).append("\r\nConnection: close\r\n\r\n");
+                if (forwardHttp) forwarded.insert(forwarded.length() - 2, authorization(route));
+                output.write(forwarded.toString().getBytes(StandardCharsets.ISO_8859_1));
+            }
+            // Read timeouts bound the handshake only. A download can keep receiving
+            // data without sending anything for much longer; the caller owns its
+            // transfer timeout and closing either socket still cancels both pumps.
+            client.setSoTimeout(0);
+            remote.setSoTimeout(0);
+            connected = true;
+            // Half-close preserves responses after a client finishes sending its body.
+            threads.execute(() -> copyRequest(client, remote));
+            copy(remote.getInputStream(), client.getOutputStream());
+        } catch (Exception error) {
+            if (!connected) {
+                try { client.getOutputStream().write("HTTP/1.1 502 Bad Gateway\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".getBytes(StandardCharsets.US_ASCII)); }
+                catch (IOException ignored) { /* Client has already disconnected. */ }
+            }
+        } finally {
+            closeSocket(upstream);
+            synchronized (this) { sockets.remove(transport); }
+        }
+    }
+
+    /** Clients answer the first 407 on the same connection. A Content-Length body is
+     * discarded first, because Android 8 cannot retry a request with a body when the
+     * connection closes (its URLConnection then fails with a NullPointerException). */
+    private String[] readAuthenticatedHeaders(Socket client) throws IOException {
+        InputStream input = client.getInputStream();
+        for (int attempt = 0; attempt < 3; attempt++) {
+            String[] headers = readHeaders(input).split("\r\n");
+            // Only a single Content-Length body can be skipped. Chunked, ambiguous and
+            // 100-continue requests close, since their body cannot be found or never comes.
+            boolean close = false;
+            long length = -1;
+            for (int i = 1; i < headers.length; i++) {
+                String[] header = headers[i].split(":", 2);
+                String name = header[0].trim().toLowerCase(Locale.ROOT);
+                String value = header.length == 2 ? header[1].trim() : "";
+                if (name.equals("proxy-authorization") &&
+                    MessageDigest.isEqual(authorization, value.getBytes(StandardCharsets.US_ASCII))) return headers;
+                if (name.equals("transfer-encoding") || name.equals("expect")) close = true;
+                if (name.equals("content-length")) {
+                    if (length >= 0) close = true;
+                    try { length = Long.parseLong(value); } catch (NumberFormatException error) { close = true; }
+                    if (length < 0) close = true;
+                }
+            }
+            if (!close && length > 0) skipBytes(input, length);
+            OutputStream output = client.getOutputStream();
+            output.write(AUTHENTICATION_REQUIRED);
+            output.write((close ? "Connection: close\r\n\r\n" : "\r\n").getBytes(StandardCharsets.US_ASCII));
+            if (close) return null;
+        }
+        return null;
+    }
+
+    private static void skipBytes(InputStream input, long length) throws IOException {
+        byte[] buffer = new byte[8192];
+        while (length > 0) {
+            int count = input.read(buffer, 0, (int) Math.min(buffer.length, length));
+            if (count == -1) throw new EOFException();
+            length -= count;
+        }
+    }
+
+    static boolean isLoopbackName(String host) {
+        String name = host.toLowerCase(Locale.ROOT);
+        if (name.endsWith(".")) name = name.substring(0, name.length() - 1);
+        if (name.equals("localhost") || name.endsWith(".localhost")) return true;
+        // Only literals: resolving a hostname here would leak lookups past the upstream proxy.
+        if (!name.matches("[0-9a-f:.]+") || !(name.contains(":") || name.matches("[0-9.]+"))) return false;
+        try {
+            InetAddress address = InetAddress.getByName(name);
+            return address.isLoopbackAddress() || address.isAnyLocalAddress();
+        }
+        catch (IOException error) { return false; }
+    }
+
+    static void copyRequest(Socket client, Socket remote) {
+        try {
+            copy(client.getInputStream(), remote.getOutputStream());
+            try { remote.shutdownOutput(); }
+            catch (UnsupportedOperationException ignored) {
+                // Older Android TLS sockets cannot half-close. HTTP bodies and
+                // tunneled TLS records carry their own completion markers; leave
+                // the response pump running until the peer closes or we cancel.
+            }
+        } catch (IOException ignored) { closeSocket(remote); }
+    }
+
+    synchronized boolean proxies(URI target) {
+        return resolveSystemProxy(configuration, target).enabled;
+    }
+
+    synchronized String connectionHost(URI target) {
+        ProxyConfiguration route = resolveSystemProxy(configuration, target);
+        return route.enabled ? route.hostname : target.getHost();
+    }
+
+    private ProxyConfiguration resolveSystemProxy(ProxyConfiguration policy, URI target) {
+        if (!policy.enabled && systemSelector != null) {
+            // Preserve Android's Wi-Fi proxy when the app proxy is disabled.
+            for (Proxy proxy : systemSelector.select(target)) {
+                if (proxy.type() == Proxy.Type.DIRECT) break;
+                if (proxy.address() instanceof InetSocketAddress address) {
+                    policy = new ProxyConfiguration(true, proxy.type() == Proxy.Type.HTTP ? "http" : "socks5",
+                        address.getHostString(), Integer.toString(address.getPort()), "", "");
+                    break;
+                }
+            }
+        }
+        return policy;
+    }
+
+    private Socket connectTransport(String host, int port, long version, Socket client) throws IOException {
+        long deadline = System.nanoTime() + java.util.concurrent.TimeUnit.MILLISECONDS.toNanos(TIMEOUT);
+        InetAddress[] addresses = resolver.resolve(host);
+        IOException failure = new IOException("No reachable address");
+        for (int index = 0; index < addresses.length; index++) {
+            InetAddress address = addresses[index];
+            long remaining = java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(deadline - System.nanoTime());
+            if (remaining <= 0) break;
+            Socket socket = new Socket(Proxy.NO_PROXY);
+            synchronized (this) {
+                if (version != generation || client.isClosed()) {
+                    closeSocket(socket);
+                    throw new IOException("Proxy changed");
+                }
+                sockets.add(socket);
+            }
+            try {
+                // A broken address family must not prevent reaching another address.
+                // With a proxy enabled, only its endpoint is resolved locally.
+                socket.connect(new InetSocketAddress(address, port), (int) Math.max(1, remaining / (addresses.length - index)));
+                return socket;
+            } catch (IOException error) {
+                failure = error;
+                closeSocket(socket);
+                synchronized (this) { sockets.remove(socket); }
+            }
+        }
+        throw failure;
+    }
+
+    private Socket connect(Socket socket, ProxyConfiguration policy, String host, int port, boolean forwardHttp) throws IOException {
+        String endpoint = policy.enabled ? policy.hostname : host;
+        socket.setSoTimeout(TIMEOUT);
+        if (!policy.enabled) return socket;
+        if (policy.protocol.equals("https")) {
+            SSLSocket tls = (SSLSocket) ((SSLSocketFactory) SSLSocketFactory.getDefault())
+                .createSocket(socket, endpoint, policy.port, true);
+            SSLParameters parameters = tls.getSSLParameters();
+            parameters.setEndpointIdentificationAlgorithm("HTTPS");
+            tls.setSSLParameters(parameters);
+            tls.startHandshake();
+            socket = tls;
+        }
+        InputStream input = socket.getInputStream();
+        OutputStream output = socket.getOutputStream();
+        if (forwardHttp) return socket;
+        switch (policy.protocol) {
+            case "http": case "https":
+                String destination = authority(host, port);
+                output.write(("CONNECT " + destination + " HTTP/1.1\r\nHost: " + destination + "\r\n" + authorization(policy) + "\r\n").getBytes(StandardCharsets.ISO_8859_1));
+                String[] status = readHeaders(input).split("\r\n", 2)[0].split(" ", 3);
+                if (status.length < 2 || !status[1].equals("200")) throw new IOException("Proxy refused CONNECT");
+                break;
+            case "socks5":
+                socks5(input, output, policy, host, port);
+                break;
+            case "socks4":
+                // SOCKS4a resolves the destination remotely, unlike plain SOCKS4.
+                output.write(new byte[] {4, 1, (byte) (port >> 8), (byte) port, 0, 0, 0, 1, 0});
+                output.write(IDN.toASCII(host).getBytes(StandardCharsets.US_ASCII));
+                output.write(0);
+                byte[] reply = readBytes(input, 8);
+                if (reply[1] != 90) throw new IOException("SOCKS4 proxy refused connection");
+                break;
+            default: throw new IOException("Unsupported proxy protocol");
+        }
+        return socket;
+    }
+
+    private static void socks5(InputStream input, OutputStream output, ProxyConfiguration policy,
+                               String host, int port) throws IOException {
+        boolean authenticate = !policy.username.isEmpty() || !policy.password.isEmpty();
+        output.write(new byte[] {5, 1, (byte) (authenticate ? 2 : 0)});
+        byte[] greeting = readBytes(input, 2);
+        if (greeting[0] != 5 || greeting[1] != (authenticate ? 2 : 0)) throw new IOException("SOCKS5 authentication rejected");
+        if (authenticate) {
+            byte[] user = policy.username.getBytes(StandardCharsets.UTF_8);
+            byte[] password = policy.password.getBytes(StandardCharsets.UTF_8);
+            if (user.length > 255 || password.length > 255) throw new IOException("SOCKS5 credentials too long");
+            output.write(1); output.write(user.length); output.write(user);
+            output.write(password.length); output.write(password);
+            byte[] auth = readBytes(input, 2);
+            if (auth[0] != 1 || auth[1] != 0) throw new IOException("SOCKS5 authentication rejected");
+        }
+        output.write(new byte[] {5, 1, 0});
+        if (host.contains(":")) {
+            output.write(4);
+            output.write(InetAddress.getByName(host).getAddress());
+        } else {
+            byte[] name = IDN.toASCII(host).getBytes(StandardCharsets.US_ASCII);
+            if (name.length > 255) throw new IOException("Destination hostname too long");
+            output.write(3); output.write(name.length); output.write(name);
+        }
+        output.write(port >> 8); output.write(port & 255);
+        byte[] reply = readBytes(input, 4);
+        if (reply[0] != 5 || reply[1] != 0 || reply[2] != 0) throw new IOException("SOCKS5 proxy refused connection");
+        int length = switch (reply[3]) { case 1 -> 4; case 4 -> 16; case 3 -> readBytes(input, 1)[0] & 255;
+            default -> throw new IOException("Invalid SOCKS5 address"); };
+        readBytes(input, length + 2);
+    }
+
+    static String readHeaders(InputStream input) throws IOException {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        int tail = 0;
+        while (bytes.size() < 65536) {
+            int next = input.read();
+            if (next == -1) throw new EOFException();
+            bytes.write(next);
+            tail = (tail << 8) | next;
+            if (tail == 0x0d0a0d0a) return bytes.toString(StandardCharsets.ISO_8859_1.name());
+        }
+        throw new IOException("Proxy headers too large");
+    }
+
+    private static byte[] readBytes(InputStream input, int length) throws IOException {
+        byte[] bytes = new byte[length];
+        int offset = 0;
+        while (offset < length) {
+            int count = input.read(bytes, offset, length - offset);
+            if (count == -1) throw new EOFException();
+            offset += count;
+        }
+        return bytes;
+    }
+
+    private static String authority(String host, int port) {
+        return (host.contains(":") ? "[" + host + "]" : host) + ":" + port;
+    }
+
+    private static String authorization(ProxyConfiguration policy) {
+        if (policy.username.isEmpty() && policy.password.isEmpty()) return "";
+        return "Proxy-Authorization: Basic " + Base64.getEncoder().encodeToString(
+            (policy.username + ":" + policy.password).getBytes(StandardCharsets.UTF_8)) + "\r\n";
+    }
+
+    private static void copy(InputStream input, OutputStream output) throws IOException {
+        byte[] buffer = new byte[32768];
+        int count;
+        while ((count = input.read(buffer)) != -1) output.write(buffer, 0, count);
+    }
+
+    private static void closeSocket(Socket socket) {
+        if (socket != null) try { socket.close(); } catch (IOException ignored) { /* Already closed. */ }
+    }
+
+    @Override public synchronized void close() {
+        try { server.close(); } catch (IOException ignored) { /* Already closed. */ }
+        for (Socket socket : sockets) closeSocket(socket);
+        sockets.clear();
+        threads.shutdownNow();
+    }
+}

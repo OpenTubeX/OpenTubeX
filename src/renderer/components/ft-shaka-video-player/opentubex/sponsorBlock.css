@@ -1,0 +1,354 @@
+/* stylelint-disable liberty/use-logical-spec */
+
+.skippedSegmentsWrapper:has(.sponsorBlockToastEditor) {
+  max-width: 96%;
+  max-height: calc(100% - var(--sponsorblock-notice-bottom) - 8px);
+}
+
+/* Scale the SponsorBlock skip notice down with the mini player so it stays
+   inside it instead of overflowing at small sizes. */
+.ftVideoPlayer.scrollMiniPlayer .skippedSegmentsWrapper {
+  transform: scale(var(--scroll-mini-scale, 1));
+  transform-origin: bottom right;
+}
+
+.ftVideoPlayer.scrollMiniPlayer .skippedSegmentsWrapper:where(:dir(rtl)) {
+  transform-origin: bottom left;
+}
+
+.skippedSegment.editing {
+  --skipped-segment-background: var(--card-bg-color);
+
+  box-sizing: border-box;
+  width: 420px;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 0;
+  color: var(--primary-text-color);
+}
+
+.sponsorBlockToastEditor {
+  min-height: 0;
+  overflow: hidden auto;
+}
+
+.sponsorBlockSubmissionMenu {
+  --sponsorblock-submission-surface: rgb(24 24 24);
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px 12px;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: calc(10px * var(--ui-roundness));
+  background-color: var(--sponsorblock-submission-surface);
+  color: #fff;
+  box-shadow: 0 10px 28px rgb(0 0 0 / 35%);
+}
+
+.sponsorBlockSubmissionHeader,
+.sponsorBlockSubmissionTitle,
+.sponsorBlockSubmissionFooter,
+.sponsorBlockDraftTimes,
+.sponsorBlockDraftActions {
+  display: flex;
+  align-items: center;
+}
+
+.sponsorBlockSubmissionHeader,
+.sponsorBlockSubmissionFooter {
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.sponsorBlockSubmissionTitle {
+  min-width: 0;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.sponsorBlockSubmissionShield {
+  font-size: 14px;
+}
+
+.sponsorBlockSubmissionClose,
+.sponsorBlockDraftActionButton,
+.sponsorBlockDraftTimeAction,
+.sponsorBlockSubmissionGuidelines,
+.sponsorBlockSubmissionButton {
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.sponsorBlockSubmissionClose {
+  width: 24px;
+  height: 24px;
+  border-radius: calc(999px * var(--ui-roundness));
+  cursor: pointer;
+}
+
+.sponsorBlockSubmissionSegments {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: min(45vh, 360px);
+
+  /* Span the menu's end padding so the scrollbar rests at the panel edge. */
+  margin-inline-end: -12px;
+  padding-inline-end: 12px;
+  overflow: hidden auto;
+}
+
+/* Reserve the scrollbar gutter only while the list actually scrolls. */
+.sponsorBlockSubmissionSegments:has(> .os-scrollbar-vertical:not(.os-scrollbar-unusable)) {
+  padding-inline-end: calc(var(--scrollbar-track-width) + 4px);
+}
+
+.sponsorBlockDraftSegment {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sponsorBlockDraftTimes {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.sponsorBlockDraftTimes.editing {
+  max-width: 100%;
+}
+
+.sponsorBlockDraftTimes.viewing {
+  justify-content: center;
+}
+
+.sponsorBlockDraftTimeAction,
+.sponsorBlockDraftActionButton,
+.sponsorBlockSubmissionGuidelines,
+.sponsorBlockSubmissionButton {
+  padding: 0;
+  font-size: 13px;
+  text-decoration: underline;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.sponsorBlockDraftTimeInput {
+  width: 78px;
+  min-width: 78px;
+  min-height: 30px;
+  box-sizing: border-box;
+  padding: 4px 8px;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: calc(4px * var(--ui-roundness));
+  background-color: rgb(0 0 0 / 35%);
+  color: inherit;
+}
+
+.sponsorBlockDraftTimeText {
+  min-width: 78px;
+  color: rgb(255 255 255 / 92%);
+  font-size: 13px;
+  line-height: 30px;
+  text-align: center;
+}
+
+.sponsorBlockDraftTimeDivider {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 14px;
+  text-align: center;
+}
+
+:deep(.sponsorBlockDraftCategory) {
+  inline-size: 100%;
+  margin-block: 8px 0;
+}
+
+:deep(.sponsorBlockDraftCategory .select-text),
+:deep(.sponsorBlockDraftCategory .nativeSelect) {
+  block-size: 34px;
+  padding-inline-start: 0.75rem;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: calc(4px * var(--ui-roundness));
+  background-color: rgb(0 0 0 / 35%);
+  color: #fff;
+  font-size: 13px;
+}
+
+:deep(.sponsorBlockDraftCategory .select-label),
+:deep(.sponsorBlockDraftCategory .iconSelect) {
+  color: rgb(255 255 255 / 70%);
+  font-size: 12px;
+}
+
+:deep(.sponsorBlockDraftCategory .select-bar::before),
+:deep(.sponsorBlockDraftCategory .select-bar::after) {
+  background: rgb(255 255 255 / 55%);
+}
+
+.sponsorBlockDraftActions {
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sponsorBlockSubmissionError {
+  margin: 0;
+  color: #ff9a9a;
+  font-size: 13px;
+}
+
+.sponsorBlockSubmissionButton:disabled,
+.sponsorBlockDraftActionButton:disabled {
+  cursor: default;
+  opacity: 0.45;
+  text-decoration: none;
+}
+
+.skippedSegmentHeader,
+.skippedSegmentTitle,
+.skippedSegmentHeaderActions,
+.skippedSegmentActions {
+  display: flex;
+  align-items: center;
+}
+
+.skippedSegmentHeader {
+  flex-shrink: 0;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.skippedSegmentTitle {
+  min-width: 0;
+  gap: 8px;
+}
+
+.skippedSegmentHeaderActions {
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.skippedSegmentActions {
+  gap: 8px;
+}
+
+.skippedSegmentShield {
+  font-size: 14px;
+}
+
+.skippedSegmentShields {
+  display: flex;
+  flex-shrink: 0;
+}
+
+/* Grouped skips stack one shield per category, each cut out of the one before it. */
+.skippedSegmentShield + .skippedSegmentShield {
+  margin-inline-start: -6px;
+  filter:
+    drop-shadow(1.5px 0 0 var(--skipped-segment-background))
+    drop-shadow(-1.5px 0 0 var(--skipped-segment-background))
+    drop-shadow(0 1.5px 0 var(--skipped-segment-background))
+    drop-shadow(0 -1.5px 0 var(--skipped-segment-background));
+}
+
+.skippedSegmentText {
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.skippedSegmentTimer {
+  min-width: 42px;
+  padding: 2px 6px;
+  border-radius: calc(4px * var(--ui-roundness));
+  background-color: rgb(255 255 255 / 10%);
+  color: rgb(255 255 255 / 88%);
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.skippedSegment.editing .skippedSegmentTimer {
+  background-color: var(--secondary-card-bg-color);
+  color: var(--secondary-text-color);
+}
+
+.closeSkippedSegmentButton,
+.editSkippedSegmentButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-width: 0;
+  border-style: none;
+  border-radius: calc(999px * var(--ui-roundness));
+  background-color: transparent;
+  color: rgb(255 255 255 / 70%);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.closeSkippedSegmentButton:hover,
+.editSkippedSegmentButton:hover:where(:not(:disabled)) {
+  background-color: rgb(255 255 255 / 12%);
+  color: #fff;
+}
+
+.closeSkippedSegmentButton:focus,
+.editSkippedSegmentButton:focus {
+  outline: 2px solid rgb(255 255 255 / 45%);
+  outline-offset: 1px;
+}
+
+.skippedSegment.editing :is(.closeSkippedSegmentButton, .editSkippedSegmentButton) {
+  color: var(--secondary-text-color);
+  outline-color: currentcolor;
+}
+
+.editSkippedSegmentButton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.unskipButton {
+  min-height: 34px;
+  padding: 6px 10px;
+  border-width: 0;
+  border-style: none;
+  border-radius: calc(6px * var(--ui-roundness));
+  background-color: rgb(255 255 255 / 10%);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.unskipButton:hover {
+  background-color: rgb(255 255 255 / 35%);
+}
+
+.unskipButton:focus {
+  outline: 2px solid rgb(255 255 255 / 50%);
+  outline-offset: 1px;
+}

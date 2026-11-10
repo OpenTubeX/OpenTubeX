@@ -1,0 +1,118 @@
+.videoSummary {
+  box-sizing: border-box;
+  min-inline-size: 0;
+  padding-block: 0;
+  padding-inline: 16px;
+  overflow-wrap: anywhere;
+}
+
+/* Matches FtCard, like the description and comments; phonePanelCard.css styles
+   the phone card's surface. */
+.videoSummary:not(.phonePanelCard) {
+  position: relative;
+  border-radius: var(--shape-corner-medium);
+  background-color: var(--card-bg-color);
+
+  /* FtFixedBackground paints the background fixed to the viewport. */
+  background-clip: var(--fixed-background-host-clip, border-box);
+  backdrop-filter: var(--card-bg-blur, none);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
+  color: var(--primary-text-color);
+}
+
+.videoSummary summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-block-size: 48px;
+  box-sizing: border-box;
+  padding-block: 12px;
+  cursor: pointer;
+  list-style: none;
+}
+
+/* Closed details render only their summary, so the fixed background lives
+   in it and takes the card's background and corners. */
+.videoSummary summary > .fixedBackgroundLayer {
+  border-radius: var(--shape-corner-medium);
+  background-color: var(--card-bg-color);
+  background-image: var(--card-bg-image);
+}
+
+.videoSummary summary::-webkit-details-marker {
+  display: none;
+}
+
+.videoSummary summary:focus-visible {
+  outline: 2px solid var(--primary-text-color);
+  outline-offset: 4px;
+}
+
+.summaryHeading {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.summaryTitle {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.summaryDisclaimer {
+  color: var(--secondary-text-color);
+  font-size: 0.875em;
+}
+
+.summaryChevron {
+  flex-shrink: 0;
+  transition: transform var(--motion-default-spatial);
+}
+
+.videoSummary[open] .summaryChevron {
+  transform: rotate(180deg);
+}
+
+.summaryParagraph {
+  white-space: pre-wrap;
+  line-height: 1.5;
+  margin-block: 0 12px;
+}
+
+.videoSummary[open] {
+  padding-block-end: 16px;
+}
+
+.summaryParagraph:last-child {
+  margin-block-end: 0;
+}
+
+/* Phones match the watch page's Comments and Description cards: an icon, title and
+   chevron row with the disclaimer below it. */
+.videoSummary.phoneVideoSummary summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.videoSummary.phoneVideoSummary .summaryHeading {
+  display: contents;
+}
+
+.videoSummary.phoneVideoSummary .summaryTitle {
+  font-weight: inherit;
+  letter-spacing: normal;
+}
+
+.videoSummary.phoneVideoSummary .summaryChevron {
+  grid-area: 1 / 3;
+}
+
+.videoSummary.phoneVideoSummary .summaryDisclaimer {
+  grid-column: 1 / -1;
+  line-height: 1.4;
+}
+
+.videoSummary.phoneVideoSummary .summaryDisclaimer::before {
+  content: none;
+}

@@ -5,36 +5,54 @@
     @focusout="handleDropdownFocusOut"
   >
     <button
+      ref="iconButton"
       class="iconButton"
       :aria-label="title"
       :title="title"
       :class="{
         [theme]: true,
-        shadow: useShadow,
         pressed: openOnRightOrLongClick && dropdownShown,
         disabled
       }"
       :style="{
         padding: padding + 'px',
-        fontSize: size + 'px'
+        fontSize: size + 'px',
+        anchorName: dropdownShown || dropdownRendered ? dropdownAnchor : null
       }"
       :aria-disabled="disabled"
-      :aria-expanded="dropdownShown"
+      :aria-expanded="ariaExpanded ?? dropdownShown"
+      :aria-pressed="ariaPressed"
       @pointerdown="handleIconPointerDown"
       @contextmenu.prevent
       @click="handleIconClick"
     >
-      <FontAwesomeIcon
+      <FtIconLayers
+        v-if="overlayIcon"
+        class="icon"
+      >
+        <FtIcon
+          :icon="icon"
+          :spin="spin"
+        />
+        <FtIcon
+          class="overlayIcon"
+          :icon="overlayIcon"
+          transform="shrink-7 up-1"
+        />
+      </FtIconLayers>
+      <FtIcon
+        v-else
         class="icon"
         :icon="icon"
+        :spin="spin"
       />
     </button>
-    <template
-      v-if="dropdownShown"
-    >
+    <template v-if="settingsOverlayActive">
+      <slot v-if="dropdownShown && ownsPhoneSheet" />
       <FtPrompt
-        v-if="useModal"
+        v-else-if="dropdownShown && useModal"
         :autosize="true"
+        :card-class="dropdownClass"
         :label="title"
         @click="dropdownShown = false"
       >
@@ -50,98 +68,193 @@
               :key="index"
               role="option"
               :aria-selected="option.active"
+              :aria-disabled="option.disabled"
               tabindex="-1"
               :class="{
                 listItemDivider: option.type === 'divider',
                 listItem: option.type !== 'divider',
-                active: option.active
+                hasIcon: option.icon,
+                active: option.active,
+                disabled: option.disabled
               }"
-              @click="handleDropdownClick(option.value)"
-              @keydown.enter="handleDropdownClick(option.value)"
-              @keydown.space="handleDropdownClick(option.value)"
+              @click="handleDropdownClick(option, $event)"
+              @keydown.enter="handleDropdownClick(option)"
+              @keydown.space="handleDropdownClick(option)"
             >
-              {{ option.type === 'divider' ? '' : option.label }}
+              <template v-if="option.type !== 'divider'">
+                <div
+                  v-if="option.icon || option.active"
+                  class="optionIconColumn"
+                >
+                  <FtIcon
+                    :icon="option.active ? ['fas', 'check'] : option.icon"
+                  />
+                </div>
+                <span :class="{ wrapLabel: option.wrapLabel }">{{ option.label }}</span>
+              </template>
             </li>
           </ul>
         </slot>
       </FtPrompt>
-      <div
-        v-else
-        ref="dropdown"
-        tabindex="-1"
-        class="iconDropdown"
-        :class="{
-          left: dropdownPositionX === 'left',
-          right: dropdownPositionX === 'right',
-          center: dropdownPositionX === 'center',
-          bottom: dropdownPositionY === 'bottom',
-          top: dropdownPositionY === 'top'
-        }"
-        @keydown.esc.stop="handleDropdownEscape"
+      <Teleport
+        v-else-if="(dropdownShown || dropdownRendered) && !ownsPhoneSheet && !useModal"
+        :to="fullscreenDropdownTarget ?? '.app'"
+        :disabled="!portaledDropdown"
       >
-        <slot>
-          <ul
-            v-if="dropdownOptions.length > 0"
-            class="list"
-            role="listbox"
+        <Transition
+          name="icon-dropdown"
+          :css="animatedDropdown"
+          appear
+          @enter="finishDropdownTransition"
+          @leave="finishDropdownTransition"
+          @after-leave="dropdownRendered = dropdownShown"
+        >
+          <div
+            v-if="dropdownShown"
+            class="dropdownLayer"
+            :class="{ fullscreenDropdownLayer: fullscreenDropdownTarget }"
+            :role="fullscreenDropdownTarget ? 'dialog' : null"
+            :aria-label="fullscreenDropdownTarget ? title : null"
+            @keydown.esc.stop="handleDropdownEscape"
+            @pointerdown.self.prevent
+            @pointerdown.stop
+            @touchstart.stop
+            @touchend.stop
+            @dblclick.stop
+            @click.stop="($event.target === $event.currentTarget) && handleDropdownEscape()"
           >
-            <li
-              v-for="(option, index) in dropdownOptions"
-              :id="id + index"
-              :key="index"
-              :role="option.type === 'divider' ? 'separator' : 'option'"
-              :aria-selected="option.active"
-              :tabindex="option.type === 'divider' ? '-1' : '0'"
+            <div
+              ref="dropdown"
+              v-overlay-scrollbars="!$slots['dropdown-header']"
+              tabindex="-1"
+              class="iconDropdown"
               :class="{
-                listItemDivider: option.type === 'divider',
-                listItem: option.type !== 'divider',
-                active: option.active
+                kebabMenu: isKebabMenu,
+                left: dropdownPositionX === 'left',
+                right: dropdownPositionX === 'right',
+                center: dropdownPositionX === 'center',
+                bottom: dropdownPositionY === 'bottom',
+                top: dropdownPositionY === 'top',
+                portal: portaledDropdown,
+                hasFixedHeader: !!$slots['dropdown-header'],
+                [dropdownClass]: dropdownClass !== ''
               }"
-              @click="handleDropdownClick(option.value)"
-              @keydown.enter="handleDropdownClick(option.value)"
-              @keydown.space="handleDropdownClick(option.value)"
+              @focusout="handleDropdownFocusOut"
+              @keydown.esc.stop="handleDropdownEscape"
             >
-              <div class="checkmarkColumn">
-                <FontAwesomeIcon
-                  v-if="option.active"
-                  :icon="['fas', 'check']"
-                />
+              <div
+                v-if="$slots['dropdown-header']"
+                class="iconDropdownHeader"
+              >
+                <slot name="dropdown-header" />
               </div>
-              {{ option.type === 'divider' ? '' : option.label }}
-            </li>
-          </ul>
-        </slot>
-      </div>
+              <div
+                v-if="$slots['dropdown-header']"
+                ref="dropdownContent"
+                v-overlay-scrollbars
+                class="iconDropdownContent"
+              >
+                <div ref="dropdownContentInner">
+                  <slot />
+                </div>
+              </div>
+              <slot v-else>
+                <ul
+                  v-if="dropdownOptions.length > 0"
+                  ref="dropdownContentInner"
+                  class="list"
+                  role="listbox"
+                >
+                  <li
+                    v-for="(option, index) in dropdownOptions"
+                    :id="id + index"
+                    :key="index"
+                    :role="option.type === 'divider' ? 'separator' : 'option'"
+                    :aria-selected="option.active"
+                    :aria-disabled="option.disabled"
+                    :tabindex="option.type === 'divider' || option.disabled ? '-1' : '0'"
+                    :class="{
+                      listItemDivider: option.type === 'divider',
+                      listItem: option.type !== 'divider',
+                      hasIcon: option.icon,
+                      active: option.active,
+                      disabled: option.disabled
+                    }"
+                    @click="handleDropdownClick(option)"
+                    @keydown.enter="handleDropdownClick(option)"
+                    @keydown.space="handleDropdownClick(option)"
+                  >
+                    <div
+                      v-if="option.icon || option.active"
+                      class="optionIconColumn"
+                    >
+                      <FtIcon
+                        :icon="option.active ? ['fas', 'check'] : option.icon"
+                      />
+                    </div>
+                    <span
+                      v-if="option.type !== 'divider'"
+                      :class="{ wrapLabel: option.wrapLabel }"
+                    >{{ option.label }}</span>
+                  </li>
+                </ul>
+              </slot>
+            </div>
+          </div>
+        </Transition>
+      </Teleport>
     </template>
   </div>
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef } from 'vue'
+import { FtIcon, FtIconLayers } from '@opentubex/icons'
+import { provide, computed, nextTick, onBeforeUnmount, ref, useId, useSlots, useTemplateRef, watch } from 'vue'
 
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
+import { usePhoneLayout } from '../../composables/usePhoneLayout'
+import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { getAnchoredPosition, getUntransformedRect, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
+import { finishTransition } from '../../helpers/animationSpeed'
+import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
+import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
+import { openMobileContextMenu, usesMobileContextSheet } from '../../helpers/buttonMenu'
 
 const props = defineProps({
+  mobileSheet: { type: Boolean, default: false },
+  // Context menu actions that replace the dropdown on phones
+  mobileActions: { type: Array, default: null },
   title: {
     type: String,
     required: true,
   },
   icon: {
-    type: Array,
+    type: [Array, Object],
     default: () => ['fas', 'ellipsis-v']
+  },
+  overlayIcon: {
+    type: Array,
+    default: null
   },
   disabled: {
     type: Boolean,
     default: false
   },
+  spin: {
+    type: Boolean,
+    default: false
+  },
+  ariaPressed: {
+    type: Boolean,
+    default: null
+  },
+  ariaExpanded: {
+    type: Boolean,
+    default: null
+  },
   theme: {
     type: String,
     default: 'base'
-  },
-  useShadow: {
-    type: Boolean,
-    default: true
   },
   padding: {
     type: Number,
@@ -154,6 +267,19 @@ const props = defineProps({
   forceDropdown: {
     type: Boolean,
     default: false
+  },
+  dropdownPortal: {
+    type: Boolean,
+    default: false
+  },
+  // Opens and closes the dropdown like the quick settings menu
+  animatedDropdown: {
+    type: Boolean,
+    default: false
+  },
+  dropdownClass: {
+    type: String,
+    default: ''
   },
   dropdownPositionX: {
     type: String,
@@ -168,7 +294,10 @@ const props = defineProps({
     // - type: ('labelValue'|'divider', default to 'labelValue' for less typing)
     // - label: String (if type === 'labelValue')
     // - value: String (if type === 'labelValue')
+    // - (OPTIONAL) icon: semantic icon tuple (if type === 'labelValue')
     // - (OPTIONAL) active: Number (if type === 'labelValue')
+    // - (OPTIONAL) disabled: Boolean (if type === 'labelValue')
+    // - (OPTIONAL) wrapLabel: Boolean (if type === 'labelValue')
     type: Array,
     default: () => []
   },
@@ -182,58 +311,149 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['click', 'disabled-click'])
+const emit = defineEmits(['click', 'disabled-click', 'dropdown-open'])
 
 const LONG_CLICK_BOUNDARY_MS = 500
 
 const id = useId()
+const dropdownAnchor = `--icon-menu-${id}`
+const slots = useSlots()
+
+// Phones show the options in the bottom sheet that context menus use.
+const mobileDropdownActions = computed(() => props.mobileActions ?? props.dropdownOptions.map(option => option.type === 'divider'
+  ? { type: 'separator' }
+  : {
+      label: option.label,
+      icon: option.active ? ['fas', 'check'] : option.icon,
+      checked: option.active,
+      enabled: !option.disabled,
+      run: () => emit('click', option.value)
+    }))
+
+const isKebabMenu = computed(() => (
+  Array.isArray(props.icon) && ['ellipsis-v', 'ellipsis-vertical'].includes(props.icon[1])
+))
 
 const dropdownShown = ref(false)
-const useModal = ref(false)
+// Keeps the dropdown, its Teleport, and the anchor it is placed against while its close animation runs
+const dropdownRendered = ref(false)
+const settingsOverlayActive = useSettingsOverlay(() => {
+  dropdownShown.value = false
+  dropdownRendered.value = false
+  clearLongPress()
+  clearLongPressClick()
+})
+const phoneLayout = usePhoneLayout()
+const ownsPhoneSheet = computed(() => props.mobileSheet && phoneLayout.value)
+const fullscreenDropdownTarget = ref(null)
+const portaledDropdown = computed(() => props.dropdownPortal || fullscreenDropdownTarget.value !== null)
+const usesDropdownAnchor = computed(() => supportsAnchorPositioning && portaledDropdown.value && !fullscreenDropdownTarget.value)
+const modalLayout = usePhoneLayout('(max-width: 900px), (max-height: 600px)')
+const useModal = computed(() => props.dropdownModalOnMobile && modalLayout.value && !fullscreenDropdownTarget.value)
 
-let blockLeftClick = false
+let longPressClickPointerId = null
 let longPressTimer = null
-
-if (props.dropdownModalOnMobile) {
-  onMounted(() => {
-    useModal.value = window.innerWidth <= 900
-    window.addEventListener('resize', handleResize)
-  })
-
-  onBeforeUnmount(() => {
-    window.removeEventListener('resize', handleResize)
-  })
-}
+let longPressStart = null
+let dropdownViewportUpdateFrame = null
+let fullscreenTargetObserver = null
 
 const dropdown = useTemplateRef('dropdown')
+const dropdownContent = useTemplateRef('dropdownContent')
+const dropdownContentInner = useTemplateRef('dropdownContentInner')
+useAnchoredViewportBounds(useTemplateRef('iconButton'), dropdown, computed(() => dropdownShown.value && usesDropdownAnchor.value))
+
+watch(dropdownContentInner, (content, _, onCleanup) => {
+  if (!content) return
+  const observer = new ResizeObserver(scheduleDropdownViewportUpdate)
+  observer.observe(content)
+  onCleanup(() => observer.disconnect())
+})
+
+watch(dropdownShown, (shown) => {
+  if (shown && !useModal.value && !ownsPhoneSheet.value) {
+    dropdownRendered.value = true
+    window.addEventListener('resize', scheduleDropdownViewportUpdate)
+    if (!usesDropdownAnchor.value) {
+      window.addEventListener('scroll', handleViewportScroll, { capture: true, passive: true })
+    }
+  } else {
+    removeDropdownViewportListeners()
+    fullscreenDropdownTarget.value = null
+  }
+})
+
+function syncFullscreenDropdownTarget() {
+  const target = fullscreenDropdownTarget.value
+  if (target && !target.matches(':fullscreen, .fullWindow')) {
+    handleDropdownEscape()
+  }
+}
+
+watch(fullscreenDropdownTarget, (target) => {
+  fullscreenTargetObserver?.disconnect()
+  fullscreenTargetObserver = null
+  document.removeEventListener('fullscreenchange', syncFullscreenDropdownTarget)
+  if (!target) return
+  fullscreenTargetObserver = new MutationObserver(syncFullscreenDropdownTarget)
+  fullscreenTargetObserver.observe(target, {
+    attributes: true,
+    attributeFilter: ['class']
+  })
+  document.addEventListener('fullscreenchange', syncFullscreenDropdownTarget)
+})
+
+function closeMobileSheet() {
+  window.dispatchEvent(new CustomEvent('opentubex:close-context-menu', { detail: mobileDropdownActions }))
+}
+
+onBeforeUnmount(() => {
+  if (props.mobileActions || props.dropdownOptions.length > 0) closeMobileSheet()
+  clearLongPress()
+  clearLongPressClick()
+  removeDropdownViewportListeners()
+  fullscreenTargetObserver?.disconnect()
+  document.removeEventListener('fullscreenchange', syncFullscreenDropdownTarget)
+})
 
 /**
  * @param {PointerEvent | null} e
  * @param {boolean} isRightOrLongClick
  */
 function handleIconClick(e, isRightOrLongClick = false) {
+  if (!settingsOverlayActive.value) return
+  if (suppressLongPressClick(e)) {
+    return
+  }
+
   if (props.disabled) {
     emit('disabled-click')
     return
   }
 
-  if (blockLeftClick) {
-    return
-  }
-
-  if (longPressTimer != null) {
-    clearTimeout(longPressTimer)
-    longPressTimer = null
-  }
+  clearLongPress()
 
   if ((!props.openOnRightOrLongClick || (props.openOnRightOrLongClick && isRightOrLongClick)) &&
     (props.forceDropdown || props.dropdownOptions.length > 0)) {
+    if (!dropdownShown.value && (props.mobileActions || !slots.default) && usesMobileContextSheet()) {
+      openMobileContextMenu({ title: props.title, actions: mobileDropdownActions, trigger: ftIconButton.value?.firstElementChild })
+      emit('dropdown-open')
+      return
+    }
+    if (!dropdownShown.value) {
+      fullscreenDropdownTarget.value = props.dropdownModalOnMobile
+        ? ftIconButton.value?.closest(':fullscreen, .fullWindow') ?? null
+        : null
+    }
     dropdownShown.value = !dropdownShown.value
-    if (dropdownShown.value && !useModal.value) {
+    if (dropdownShown.value) emit('dropdown-open')
+    if (dropdownShown.value && !useModal.value && !ownsPhoneSheet.value) {
       // wait until the dropdown is visible
       // then focus it so we can hide it automatically when it loses focus
       nextTick(() => {
-        dropdown.value?.focus()
+        if (!settingsOverlayActive.value || !dropdownShown.value) return
+        // Place the menu first: focusing it where it overflows would scroll the page to it.
+        keepDropdownInViewport()
+        dropdown.value?.focus({ preventScroll: true })
       })
     }
   } else {
@@ -245,61 +465,281 @@ function handleIconClick(e, isRightOrLongClick = false) {
  * @param {PointerEvent} event
  */
 function handleIconPointerDown(event) {
-  if (!props.openOnRightOrLongClick) {
+  if (!settingsOverlayActive.value || !props.openOnRightOrLongClick) {
     return
   }
 
   if (event.button === 2) { // right button click
     handleIconClick(null, true)
   } else if (event.button === 0) { // left button click
+    clearLongPress()
+    longPressStart = { id: event.pointerId, x: event.clientX, y: event.clientY }
+    window.addEventListener('pointermove', cancelMovedLongPress, true)
+    window.addEventListener('pointerup', finishLongPress, true)
+    window.addEventListener('pointercancel', finishLongPress, true)
     longPressTimer = setTimeout(() => {
+      clearLongPress()
+      if (!settingsOverlayActive.value) return
       handleIconClick(null, true)
 
-      // prevent a long press that ends on the icon button from firing the handleIconClick handler
-      window.addEventListener('pointerup', preventButtonClickAfterLongPress, { once: true })
-      window.addEventListener('pointercancel', () => {
-        window.removeEventListener('pointerup', preventButtonClickAfterLongPress)
-      }, { once: true })
+      // WebView can dispatch the release click after zero-delay timers.
+      longPressClickPointerId = event.pointerId
+      window.addEventListener('pointerdown', clearLongPressClick, true)
+      window.addEventListener('pointercancel', cancelLongPressClick, true)
     }, LONG_CLICK_BOUNDARY_MS)
   }
 }
 
-function preventButtonClickAfterLongPress() {
-  blockLeftClick = true
+function clearLongPress() {
+  clearTimeout(longPressTimer)
+  longPressTimer = null
+  longPressStart = null
+  window.removeEventListener('pointermove', cancelMovedLongPress, true)
+  window.removeEventListener('pointerup', finishLongPress, true)
+  window.removeEventListener('pointercancel', finishLongPress, true)
+}
 
-  setTimeout(() => {
-    blockLeftClick = false
-  }, 0)
+/** @param {PointerEvent} event */
+function finishLongPress(event) {
+  if (longPressStart?.id === event.pointerId) clearLongPress()
+}
+
+/** @param {PointerEvent} event */
+function cancelMovedLongPress(event) {
+  if (longPressStart?.id === event.pointerId && Math.hypot(event.clientX - longPressStart.x, event.clientY - longPressStart.y) >= 10) {
+    clearLongPress()
+  }
+}
+
+/**
+ * The bottom edge of the sticky app chrome (the horizontal tab bar and the top
+ * navigation). Dropdowns must not cover it, so it is their upper boundary
+ * instead of the viewport edge. The vertical tab bar is a side column, so it
+ * never sits above the content.
+ * @returns {number}
+ */
+function getTopChromeBottom() {
+  // In fullscreen the chrome is not on screen, even though it keeps its layout.
+  if (document.fullscreenElement != null || fullscreenDropdownTarget.value) {
+    return 0
+  }
+
+  let bottom = 0
+
+  for (const selector of ['.topNav', '.tabBar.position-top']) {
+    const element = document.querySelector(selector)
+
+    if (element != null) {
+      bottom = Math.max(bottom, element.getBoundingClientRect().bottom)
+    }
+  }
+
+  return bottom
+}
+
+/**
+ * Keeps the preferred side unless only the other one fits the whole menu.
+ * @param {number} aboveTop the menu's top edge when it opens above the button
+ * @param {number} belowTop the menu's top edge when it opens below the button
+ * @param {number} minTop
+ * @param {number} maxTop
+ */
+function opensAbove(aboveTop, belowTop, minTop, maxTop) {
+  const fitsAbove = aboveTop >= minTop
+  const fitsBelow = belowTop <= maxTop
+  return props.dropdownPositionY === 'top' ? fitsAbove || !fitsBelow : fitsAbove && !fitsBelow
+}
+
+function keepDropdownInViewport() {
+  if (dropdown.value == null) {
+    return
+  }
+
+  const viewportMargin = 8
+  const fullscreenStyle = fullscreenDropdownTarget.value ? getComputedStyle(fullscreenDropdownTarget.value) : null
+  const safeTop = Math.max(parseFloat(fullscreenStyle?.getPropertyValue('--safe-area-inset-top')) || 0,
+    parseFloat(fullscreenStyle?.getPropertyValue('--app-safe-area-inset-top')) || 0)
+  const bottomMargin = viewportMargin + (parseFloat(fullscreenStyle?.getPropertyValue('--safe-area-inset-bottom')) || 0)
+  const minTop = Math.max(viewportMargin + safeTop, getTopChromeBottom() + 4)
+  // Measuring the unconstrained menu removes its scroll range, which resets
+  // the offset. Restore it once the menu is constrained again.
+  const scroller = dropdownContent.value ?? dropdown.value
+  const scrollTop = scroller.scrollTop
+  dropdown.value.style.removeProperty('transform')
+  dropdown.value.style.removeProperty('max-block-size')
+  dropdown.value.style.removeProperty('overflow-y')
+
+  // A menu that is too tall for the space below the chrome has to scroll,
+  // otherwise clamping it would just push it past the viewport bottom instead.
+  const availableHeight = window.innerHeight - minTop - bottomMargin
+  if (getUntransformedRect(dropdown.value).height > availableHeight) {
+    dropdown.value.style.maxBlockSize = `${availableHeight}px`
+    dropdown.value.style.overflowY = dropdownContent.value ? 'hidden' : 'auto'
+  }
+  if (scroller.scrollTop !== scrollTop) restoreOverlayScrollTop(scroller, scrollTop)
+
+  if (dropdownContentInner.value) {
+    clampOverlayScrollTop(dropdownContent.value ?? dropdown.value, dropdownContentInner.value)
+  }
+
+  if (portaledDropdown.value) {
+    const button = ftIconButton.value?.querySelector('.iconButton')
+    if (button == null) {
+      return
+    }
+
+    const buttonRect = button.getBoundingClientRect()
+    const dropdownRect = getUntransformedRect(dropdown.value)
+    let left
+    if (props.dropdownPositionX === 'left') {
+      left = buttonRect.right - dropdownRect.width
+    } else if (props.dropdownPositionX === 'right') {
+      left = buttonRect.left
+    } else {
+      left = buttonRect.left + (buttonRect.width - dropdownRect.width) / 2
+    }
+
+    const aboveButton = buttonRect.top - dropdownRect.height - 4
+    const belowButton = buttonRect.bottom + 4
+    const maxLeft = window.innerWidth - viewportMargin - dropdownRect.width
+    const maxTop = window.innerHeight - bottomMargin - dropdownRect.height
+    const top = fullscreenDropdownTarget.value
+      ? maxTop
+      : opensAbove(aboveButton, belowButton, minTop, maxTop) ? aboveButton : belowButton
+
+    dropdown.value.style.inset = 'auto'
+    const clampedLeft = Math.max(viewportMargin, Math.min(left, maxLeft))
+    const clampedTop = Math.max(minTop, Math.min(top, maxTop))
+    if (usesDropdownAnchor.value) {
+      const position = getAnchoredPosition(dropdownAnchor, buttonRect, left, top, {
+        minLeft: viewportMargin, maxLeft, minTop, maxTop
+      }, props.dropdownPositionY === 'top' ? { above: top === aboveButton, gap: 4, bottomMargin } : undefined)
+      for (const [property, value] of Object.entries(position)) {
+        if (property.startsWith('--')) dropdown.value.style.setProperty(property, value ?? '')
+        else dropdown.value.style[property] = value
+      }
+    } else {
+      dropdown.value.style.left = `${clampedLeft}px`
+      dropdown.value.style.top = `${clampedTop}px`
+    }
+    return
+  }
+
+  const rect = getUntransformedRect(dropdown.value)
+  const offsetX = Math.max(viewportMargin - rect.left, Math.min(0, window.innerWidth - viewportMargin - rect.right))
+
+  // .top and .bottom keep the same distance from the button, so the other side mirrors the menu across it
+  const container = ftIconButton.value.getBoundingClientRect()
+  const gap = props.dropdownPositionY === 'top' ? container.top - rect.bottom : rect.top - container.bottom
+  const maxTop = window.innerHeight - viewportMargin - rect.height
+  const top = opensAbove(container.top - gap - rect.height, container.bottom + gap, minTop, maxTop)
+    ? container.top - gap - rect.height
+    : container.bottom + gap
+  const offsetY = Math.max(minTop, Math.min(top, maxTop)) - rect.top
+
+  dropdown.value.style.transform = `translate(${offsetX}px, ${offsetY}px)`
+}
+
+function scheduleDropdownViewportUpdate() {
+  if (dropdownViewportUpdateFrame != null) {
+    cancelAnimationFrame(dropdownViewportUpdateFrame)
+  }
+
+  dropdownViewportUpdateFrame = requestAnimationFrame(() => {
+    dropdownViewportUpdateFrame = null
+    keepDropdownInViewport()
+  })
+}
+
+/** Scrolling the dropdown's own content does not move it. @param {Event} event */
+function handleViewportScroll(event) {
+  if (event.target instanceof Node && dropdown.value?.contains(event.target)) return
+  scheduleDropdownViewportUpdate()
+}
+
+function removeDropdownViewportListeners() {
+  window.removeEventListener('resize', scheduleDropdownViewportUpdate)
+  window.removeEventListener('scroll', handleViewportScroll, true)
+
+  if (dropdownViewportUpdateFrame != null) {
+    cancelAnimationFrame(dropdownViewportUpdateFrame)
+    dropdownViewportUpdateFrame = null
+  }
+}
+
+function clearLongPressClick() {
+  longPressClickPointerId = null
+  window.removeEventListener('pointerdown', clearLongPressClick, true)
+  window.removeEventListener('pointercancel', cancelLongPressClick, true)
+}
+
+/** @param {PointerEvent} event */
+function cancelLongPressClick(event) {
+  if (event.pointerId === longPressClickPointerId) clearLongPressClick()
+}
+
+/** @param {PointerEvent | null} event */
+function suppressLongPressClick(event) {
+  if (!event || event.detail === 0 || event.pointerId !== longPressClickPointerId) return false
+  clearLongPressClick()
+  return true
 }
 
 const ftIconButton = useTemplateRef('ftIconButton')
 
-function handleDropdownFocusOut() {
-  if (!useModal.value && dropdownShown.value && !ftIconButton.value?.matches(':focus-within')) {
+function handleDropdownFocusOut(event) {
+  const nextTarget = event.relatedTarget
+  const focusStaysInControl = (
+    nextTarget instanceof Node &&
+    (
+      ftIconButton.value?.contains(nextTarget) ||
+      dropdown.value?.contains(nextTarget)
+    )
+  )
+
+  if (!useModal.value && !ownsPhoneSheet.value && dropdownShown.value && !focusStaysInControl) {
     dropdownShown.value = false
   }
 }
 
+provide('closeIconDropdown', handleDropdownEscape)
+
+/**
+ * @param {Element} layer
+ * @param {() => void} done
+ */
+function finishDropdownTransition(layer, done) {
+  if (props.animatedDropdown) finishTransition(layer.firstElementChild ?? layer, done)
+  else done()
+}
+
 function handleDropdownEscape() {
   dropdownShown.value = false
-  ftIconButton.value?.firstElementChild?.focus()
+  if (settingsOverlayActive.value) ftIconButton.value?.firstElementChild?.focus()
 }
 
-function handleDropdownClick(value) {
-  emit('click', value)
+function handleDropdownClick(option, event) {
+  if (!settingsOverlayActive.value) return
+  if (option.disabled) {
+    if (useModal.value) {
+      event?.stopPropagation()
+    }
+
+    return
+  }
+
+  emit('click', option.value)
 
   dropdownShown.value = false
-}
-
-function handleResize() {
-  useModal.value = window.innerWidth <= 900
 }
 
 defineExpose({
   dropdownShown: computed(() => dropdownShown.value),
+  updateDropdownLayout: keepDropdownInViewport,
 
   hideDropdown: () => {
     dropdownShown.value = false
+    if (props.mobileActions) closeMobileSheet()
   }
 })
 </script>

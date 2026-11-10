@@ -1,11 +1,16 @@
+/* The radius is half the height rather than full, so the press morph is
+   smooth. */
 .getNextPage {
   background-color: var(--search-bar-color);
+  backdrop-filter: var(--search-bar-blur, none);
+  border-radius: calc(22.5px * var(--ui-roundness));
   inline-size: 100%;
   block-size: 45px;
   line-height: 45px;
   text-align: center;
   cursor: pointer;
   margin-block-start: 16px;
+  transition: background-color var(--motion-fast-effects), color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
 .getNextPage:hover,
@@ -14,8 +19,14 @@
   color: var(--side-nav-hover-text-color);
 }
 
+.getNextPage:active {
+  border-radius: var(--shape-corner-medium);
+}
+
 .card {
-  inline-size: 85%;
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 92dvw;
   margin-block: 0 60px;
   margin-inline: auto;
 }
@@ -24,8 +35,108 @@
   color: var(--primary-color);
 }
 
+.searchStatus {
+  color: var(--tertiary-text-color);
+  margin-block: 32px 16px;
+  text-align: center;
+}
+
+.searchCorrection {
+  margin-block: 0 16px;
+}
+
+.searchCorrection.centered {
+  text-align: center;
+}
+
+.searchCorrection p {
+  margin-block: 4px;
+}
+
+.searchNotice {
+  margin-block: 32px 16px;
+  text-align: center;
+}
+
+.searchHint {
+  color: var(--tertiary-text-color);
+  margin-block: 0 16px;
+  text-align: center;
+}
+
+.searchNotice h3 {
+  letter-spacing: -0.01em;
+}
+
+.searchNotice p {
+  color: var(--tertiary-text-color);
+}
+
+.searchRetryButton {
+  margin-inline: auto;
+}
+
 @media only screen and (width <= 680px) {
   .card {
-    inline-size: 90%;
+    inline-size: 100%;
+  }
+
+  .card :deep(.autoGrid > .grid),
+  .card :deep(.ft-list-item.grid) {
+    block-size: auto;
+    min-block-size: 0;
+  }
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .card :deep(.info .title),
+  .card :deep(.info a.channelName),
+  .card :deep(.info button.channelName),
+  .card :deep(.info a.handle) {
+    position: relative;
+    border-radius: var(--shape-corner-extra-small);
+  }
+
+  .card :deep(.info .title::before),
+  .card :deep(.info a.channelName::before),
+  .card :deep(.info button.channelName::before),
+  .card :deep(.info a.handle::before) {
+    content: '';
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    inline-size: max(48px, 100%);
+    block-size: 48px;
+    transform: translate(-50%, -50%);
+  }
+
+  .card :deep(.info .title:active),
+  .card :deep(.info a.channelName:active),
+  .card :deep(.info button.channelName:active),
+  .card :deep(.info a.handle:active) {
+    background-color: var(--side-nav-hover-color);
+    color: var(--side-nav-hover-text-color);
+  }
+
+  .card :deep(.optionsButton .iconButton),
+  .card :deep(.ft-list-item .deArrowToggleButton) {
+    box-sizing: border-box;
+    min-block-size: 48px;
+    min-inline-size: 48px;
+  }
+
+  /* Narrower segments let the icon-only group fit a two-column grid. */
+  .card :deep(.channelSubscribeButton button) {
+    box-sizing: border-box;
+    min-block-size: 48px;
+    min-inline-size: 40px;
+  }
+
+  .getNextPage {
+    min-block-size: 48px;
+    block-size: auto;
+    line-height: 1.5;
+    padding: 12px;
+    box-sizing: border-box;
   }
 }

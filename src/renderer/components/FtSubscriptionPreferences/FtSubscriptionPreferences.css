@@ -1,0 +1,119 @@
+/* With the bell off, the notification chips stay available but recede. */
+.notificationsOff .preferenceChips {
+  opacity: 0.7;
+}
+
+.dailyVideoLimit {
+  display: flex;
+  min-block-size: 34px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--shape-corner-medium);
+  overflow: hidden;
+}
+
+.dailyVideoLimit button {
+  border: 0;
+  background: transparent;
+  color: var(--secondary-text-color);
+  font: inherit;
+  cursor: pointer;
+}
+
+.dailyVideoLimitOption {
+  flex: 1 1 auto;
+  padding-inline: 8px;
+}
+
+.dailyVideoLimitOption,
+.dailyVideoLimitStepper {
+  border-inline-start: 1px solid var(--border-color);
+}
+
+.dailyVideoLimitOption:first-child {
+  border-inline-start: 0;
+}
+
+.dailyVideoLimitStepper {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: stretch;
+}
+
+.dailyVideoLimitStepper button {
+  min-inline-size: 30px;
+  padding-inline: 4px;
+}
+
+/* Unlike disabled buttons, these keep focus at the limit, which keeps the popover open. */
+.dailyVideoLimitStepper button[aria-disabled='true'] {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.dailyVideoLimitCount {
+  min-inline-size: 28px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dailyVideoLimitOption[aria-pressed='true'],
+.dailyVideoLimitStepper.active {
+  background-color: color-mix(in srgb, var(--primary-color) 20%, transparent);
+}
+
+.dailyVideoLimitOption[aria-pressed='true'],
+.dailyVideoLimitStepper.active .dailyVideoLimitCount {
+  color: var(--primary-text-color);
+  font-weight: 600;
+}
+
+.dailyVideoLimit button:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
+}
+
+.dailyVideoLimit button:not([aria-disabled='true']):is(:hover, :focus-visible) {
+  background-color: var(--side-nav-hover-color);
+  color: var(--side-nav-hover-text-color);
+}
+
+/* Applies to the channel everywhere, so it sits apart from the feed settings. */
+.membersOnlyPreference {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-block-start: 4px;
+  padding-block: 4px;
+  padding-inline: 6px 0;
+  border-block-start: 1px solid var(--divider-color);
+}
+
+.membersOnlyIcon {
+  flex-shrink: 0;
+  color: var(--secondary-text-color);
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .dailyVideoLimitOption {
+    min-block-size: 40px;
+  }
+
+  /* Touch-sized stepper buttons need their own row. */
+  .dailyVideoLimit {
+    flex-wrap: wrap;
+  }
+
+  .dailyVideoLimitStepper {
+    flex: 1 0 100%;
+    border-block-start: 1px solid var(--border-color);
+    border-inline-start: 0;
+  }
+
+  .dailyVideoLimitStepper button {
+    min-block-size: 44px;
+    min-inline-size: 44px;
+  }
+
+  .dailyVideoLimitStepper .dailyVideoLimitCount {
+    flex: 1;
+  }
+}

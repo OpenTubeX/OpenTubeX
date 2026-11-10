@@ -1,0 +1,2660 @@
+# Optional AI-generated translations for keys missing from ../el.yaml.
+Color Picker:
+  Hue: Απόχρωση
+  Opacity: Αδιαφάνεια
+  Backdrop Blur: Θόλωση φόντου
+  Hex Color: Δεκαεξαδικό χρώμα
+  Apply Color: Εφαρμογή
+  Reset Color: Επαναφορά
+  Copy Color: Αντιγραφή
+  Copy From Another Color: Αντιγραφή από άλλο χρώμα
+  Color Copied: Το χρώμα αντιγράφηκε
+  Invalid Color: Εισαγάγετε ένα έγκυρο δεκαεξαδικό χρώμα
+  Clipboard Unavailable: Το πρόχειρο δεν είναι διαθέσιμο
+  Saturation and Brightness: Κορεσμός και φωτεινότητα
+New Tab: Νέα καρτέλα
+Maximize: Μεγιστοποίηση
+Restore: Επαναφορά
+Close Tab: Κλείσιμο καρτέλας
+Close Confirmation:
+  Background Sync Warning: Η έξοδος θα διακόψει την ανανέωση συνδρομών στο παρασκήνιο.
+  Hide Window: Απόκρυψη παραθύρου
+  Title: Έξοδος από το OpenTubeX;
+  Message: Θέλετε σίγουρα να κλείσετε το OpenTubeX;
+  Quit: Έξοδος
+  Never Ask Again: Να μην εμφανιστεί ξανά
+Close Window Confirmation:
+  Title: Κλείσιμο παραθύρου;
+  Message: Αυτό το παράθυρο περιέχει {count} καρτέλες. Θέλετε σίγουρα να το κλείσετε;
+  Close Window: Κλείσιμο παραθύρου
+Confirmations:
+  Never Ask Again: Να μην εμφανιστεί ξανά
+  Settings Hint: Μπορείτε να ενεργοποιήσετε ξανά αυτήν την επιβεβαίωση από τις Ρυθμίσεις → Γενικά → Επιβεβαίωση πριν από…
+Close Multiple Tabs Confirmation:
+  Title: Κλείσιμο πολλών καρτελών;
+  Message: Θα κλείσουν {count} καρτέλες.
+  Close Tabs: Κλείσιμο {count} καρτελών
+Load Multiple Tabs Confirmation:
+  Title: Φόρτωση πολλών καρτελών;
+  Message: Θα φορτωθούν {count} καρτέλες.
+  Load Tabs: Φόρτωση {count} καρτελών
+Unload Multiple Tabs Confirmation:
+  Title: Αποφόρτωση πολλών καρτελών;
+  Message: Θα αποφορτωθούν {count} καρτέλες.
+  Unload Tabs: Αποφόρτωση {count} καρτελών
+Tabs Unloaded To Free Memory: Αποφορτώθηκε {count} καρτέλα που δεν έχετε χρησιμοποιήσει πρόσφατα για απελευθέρωση μνήμης | Αποφορτώθηκαν {count} καρτέλες που δεν έχετε χρησιμοποιήσει πρόσφατα για απελευθέρωση μνήμης
+Use Vertical Tabs: Χρήση κατακόρυφων καρτελών
+Use Horizontal Tabs: Χρήση οριζόντιων καρτελών
+Resize Tab Bar: Αλλαγή μεγέθους γραμμής καρτελών
+Find in page: Εύρεση στη σελίδα
+Previous match: Προηγούμενη αντιστοιχία
+Next match: Επόμενη αντιστοιχία
+Close find bar: Κλείσιμο γραμμής εύρεσης
+No matches: Δεν βρέθηκαν αντιστοιχίες
+Version {versionNumber} is now available.: Η έκδοση {versionNumber} είναι πλέον διαθέσιμη.
+See changes and update: Προβολή αλλαγών και ενημέρωση
+Dismiss: Απόρριψη
+Update to {version}: Ενημέρωση στην έκδοση {version}
+Global:
+  Ambient Mode: Λειτουργία περιβάλλοντος
+  Loading More: Φόρτωση περισσότερων
+  New: Νέο
+Search Listing:
+  Label:
+    Members Only: Μόνο για μέλη
+    Possibly AI-generated: Πιθανώς δημιουργημένο από AI
+Stats:
+  Left of daily limit: "Απομένουν {duration} από το ημερήσιο όριό σας των {limit}"
+  Daily limit reached: "Συμπληρώθηκε το ημερήσιο όριο των {limit}"
+  Replace old device: "Αντικατάσταση παλιάς συσκευής"
+  Replacement explanation: "Συνδυάστε το {device} με αυτή τη συσκευή μόνο αν και οι δύο καταχωρίσεις ανήκουν στην ίδια φυσική συσκευή."
+  Overlapping days: "Ημέρες και στα δύο ιστορικά: {count}"
+  Overlapping watch time: "Επικαλυπτόμενος χρόνος θέασης"
+  Keep larger daily total: "Διατήρηση μεγαλύτερου ημερήσιου συνόλου"
+  Larger total explanation: "Για διπλότυπα ιστορικά. Μπορεί να παραλείψει επιπλέον θέαση την ίδια ημέρα."
+  Add daily totals: "Πρόσθεση ημερήσιων συνόλων"
+  Add totals explanation: "Για ξεχωριστά ιστορικά. Μπορεί να μετρήσει διπλότυπη θέαση δύο φορές."
+  Replacement preservation: "Οι ημέρες που υπάρχουν σε ένα μόνο ιστορικό διατηρούνται. Τα αρχικά ιστορικά παραμένουν αποθηκευμένα στον κρυπτογραφημένο συγχρονισμό."
+  Combined watch time: "Συνδυασμένος χρόνος θέασης"
+  Replacement changed: "Ο χρόνος θέασης άλλαξε. Κλείστε και ανοίξτε ξανά αυτή την προεπισκόπηση για να ελέγξετε τα νέα σύνολα."
+  Replacement success: "Τα στατιστικά συσκευών συνδυάστηκαν"
+  All devices: Όλες οι συσκευές
+  Stats: Στατιστικά
+  Watch time summary: Σύνοψη χρόνου παρακολούθησης
+  Today: Σήμερα
+  This week: Αυτή την εβδομάδα
+  Total watch time: Συνολικός χρόνος παρακολούθησης
+  Daily average: Ημερήσιος μέσος όρος
+  So far today: Μέχρι τώρα σήμερα
+  Since: Από {day}
+  All recorded time: Όλος ο καταγεγραμμένος χρόνος
+  Per calendar day: Ανά ημερολογιακή ημέρα
+  Day by day: Ανά ημέρα
+  Highest: 'Μέγιστος: {duration}'
+  Week by week: Ανά εβδομάδα
+  Last 14 days: Τελευταίες 14 ημέρες
+  Last 8 weeks: Τελευταίες 8 εβδομάδες
+  Daily chart aria: Ημερήσιος χρόνος παρακολούθησης για τις τελευταίες 14 ημέρες
+  Weekly chart aria: Εβδομαδιαίος χρόνος παρακολούθησης για τις τελευταίες 8 εβδομάδες
+  No data: Ο χρόνος παρακολούθησης θα εμφανιστεί εδώ όταν παρακολουθήσετε βίντεο.
+  Estimate note: Ο χρόνος παρακολούθησης πριν από αυτήν την ενημέρωση υπολογίζεται κατά προσέγγιση από την αποθηκευμένη πρόοδο αναπαραγωγής.
+  Adjust imported watch time: Προσαρμογή εισαγόμενου χρόνου παρακολούθησης
+  Imported watch time: Εισαγόμενος χρόνος παρακολούθησης
+  Imported watch time explanation: Επιλέξτε την ταχύτητα αναπαραγωγής που χρησιμοποιούσατε συνήθως. Οι διάρκειες των εισαγόμενων βίντεο θα διαιρεθούν με αυτήν την ταχύτητα, ώστε να υπολογιστεί ο πραγματικός χρόνος παρακολούθησης.
+  Playback speed: Ταχύτητα αναπαραγωγής
+  Channel speed note: Όπου υπάρχουν, χρησιμοποιούνται οι αποθηκευμένες ταχύτητες αναπαραγωγής των καναλιών.
+  Apply playback speed: Εφαρμογή ταχύτητας αναπαραγωγής
+  Imported watch time adjusted: Ο εισαγόμενος χρόνος παρακολούθησης προσαρμόστηκε
+  Reset statistics: Επαναφορά στατιστικών
+  Reset: Επαναφορά
+  Reset confirmation: Θέλετε σίγουρα να επαναφέρετε όλα τα στατιστικά παρακολούθησης; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.
+  Reset success: Έγινε επαναφορά των στατιστικών παρακολούθησης
+  Less than a minute: < 1 λεπτό
+  Minutes: '{minutes} λεπτά'
+  Hours: '{hours} ώρες'
+  Hours and minutes: '{hours} ώρες {minutes} λεπτά'
+Home Page:
+  Keep disabled and hide this section: "Διατήρηση απενεργοποίησης και απόκρυψη αυτής της ενότητας"
+  Familiar description: "Προτίμηση σε βίντεο που δεν έχετε δει από κανάλια που ήδη σας αρέσουν."
+  Balanced description: "Συνδυασμός γνωστών καναλιών με νέα που ταιριάζουν στα ενδιαφέροντά σας."
+  Explore description: "Περισσότερος χώρος για νέα κανάλια σχετικά με τα ενδιαφέροντά σας."
+  Turn off recommendations: Απενεργοποίηση προτάσεων
+  Recommended for you: "Προτάσεις για εσάς"
+  Recommendations description: "Κατατάξτε τα βίντεο στη συσκευή σας με βάση το ιστορικό παρακολούθησης. Τα αναγνωριστικά καναλιών και οι αναζητήσεις ανά θέμα αποστέλλονται στον επιλεγμένο διακομιστή για την εύρεση βίντεο."
+  Enable recommendations: "Ενεργοποίηση προτάσεων"
+  Recommendations need history: "Παρακολουθήστε μερικά βίντεο με ενεργοποιημένο το ιστορικό για να λάβετε προτάσεις."
+  No recommendations: "Δεν βρέθηκαν προτάσεις. Δοκιμάστε να κάνετε ανανέωση αφού παρακολουθήσετε περισσότερα βίντεο."
+  Recommendations unavailable: "Δεν ήταν δυνατή η φόρτωση των προτάσεων. Δοκιμάστε ξανά αργότερα."
+  More like this: "Περισσότερα παρόμοια"
+  Not interested: "Δεν με ενδιαφέρει"
+  Hide this channel: "Απόκρυψη αυτού του καναλιού"
+  Channel hidden: "Το {channel} αποκρύφτηκε από τις προτάσεις"
+  Reset recommendations: "Επαναφορά προτάσεων"
+  Discovery: "Ανακάλυψη"
+  Familiar: "Γνώριμα"
+  Balanced: "Ισορροπημένα"
+  Explore: "Εξερεύνηση"
+  Related to: "Σχετικό με {title}"
+  More from: "Περισσότερα από {channel}"
+  Matches interest: "Ταιριάζει με το ενδιαφέρον σας για {topic}"
+  Related discovery privacy: "Αποστέλλονται επίσης αναγνωριστικά βίντεο για την εύρεση σχετικών βίντεο."
+  Home: Αρχική
+  Description: Συνεχίστε από εκεί που σταματήσατε και δείτε την πρόσφατη δραστηριότητα.
+  Customize: Προσαρμογή αρχικής
+  Done: Τέλος
+  Customize description: Επιλέξτε ποιες ενότητες θα εμφανίζονται και τακτοποιήστε τις με τη σειρά που θέλετε.
+  Continue watching: Συνέχεια παρακολούθησης
+  New since last visit: Νέα από την τελευταία επίσκεψη
+  Watch queue: Ουρά παρακολούθησης
+  Recent playlists: Πρόσφατες λίστες αναπαραγωγής
+  Recent downloads: Πρόσφατες λήψεις
+  Upcoming reminders: Προσεχείς υπενθυμίσεις
+  Watch statistics: Στατιστικά παρακολούθησης
+  View all: Προβολή όλων
+  Previous shelf page: Προηγούμενη σελίδα για {section}
+  Next shelf page: Επόμενη σελίδα για {section}
+  Shelf page status: '{section}, σελίδα {page} από {total}.'
+  Move section up: Μετακίνηση του {section} επάνω
+  Move section down: Μετακίνηση του {section} κάτω
+  Section moved: 'Το {section} μετακινήθηκε στη θέση {position} από {total}.'
+  Nothing here yet: Δεν υπάρχει τίποτα εδώ ακόμη
+  Empty description: Τα βίντεο που αρχίζετε, οι λίστες αναπαραγωγής που χρησιμοποιείτε, οι λήψεις και οι υπενθυμίσεις θα εμφανίζονται εδώ.
+  All sections hidden: Όλες οι ενότητες είναι κρυφές
+  All sections hidden description: Προσαρμόστε την αρχική για να εμφανίσετε ξανά μια ενότητα.
+Subscriptions:
+  New video from {channel}: Νέο βίντεο από {channel}
+  New short from {channel}: Νέο σύντομο βίντεο από {channel}
+  '{channel} is live': Το {channel} μεταδίδει ζωντανά
+  New post from {channel}: Νέα ανάρτηση από {channel}
+  Mark As Unseen: Επισήμανση ως μη προβεβλημένου
+  Copy Error Details: "Αντιγραφή τεχνικών λεπτομερειών"
+  Refresh Errors: "Κανάλια που δεν ήταν δυνατό να ανανεωθούν: {channels}. Κάντε κλικ για προβολή λεπτομερειών."
+  Refresh Error Channels More: "{channels} και {count} ακόμη | {channels} και {count} ακόμη"
+  Never show {type} from this channel in feeds again: Να μην εμφανίζεται ξανά περιεχόμενο τύπου {type} από αυτό το κανάλι στις ροές
+  Refreshing Subscription Videos: Ανανέωση βίντεο συνδρομών
+  Refreshing Subscription Shorts: Ανανέωση σύντομων βίντεο συνδρομών
+  Refreshing Subscription Live Streams: Ανανέωση ζωντανών μεταδόσεων συνδρομών
+  Refreshing Subscription Posts: Ανανέωση αναρτήσεων συνδρομών
+  New Content: Νέο περιεχόμενο
+  New Feed Refresh Warning Title: Ανανέωση όλων των ροών συνδρομών;
+  New Feed Refresh Warning: Η ανανέωση όλων των τύπων περιεχομένου χωρίς RSS για 1 συνδρομή μπορεί να διαρκέσει πολύ. Θέλετε να συνεχίσετε; | Η ανανέωση όλων των τύπων περιεχομένου χωρίς RSS για {count} συνδρομές μπορεί να διαρκέσει πολύ. Θέλετε να συνεχίσετε;
+  New Since Last Refresh: Νέα από την τελευταία ανανέωση
+  Mark As Seen: Επισήμανση ως προβεβλημένου
+  Mark All as Seen: Επισήμανση όλων ως προβεβλημένων
+  No New Content: Δεν υπάρχει νέο περιεχόμενο.
+  New Content Tabs: Καρτέλες νέου περιεχομένου
+  Show Tabbed View: Προβολή σε καρτέλες
+  Show Combined View: Ενιαία προβολή
+  Newest First: Νεότερα πρώτα
+  Oldest First: Παλαιότερα πρώτα
+  RSS Feeds:
+    Refreshing: Ανανέωση ροών RSS
+    Tab: RSS
+    Followed Feeds: Ροές RSS που ακολουθείτε
+    Add Feed: Προσθήκη ροής
+    Feed URL: URL ροής RSS ή Atom
+    Remove Feed: Αφαίρεση {feed}
+    Invalid Feed URL: Εισαγάγετε μια διεύθυνση ιστού που ξεκινά με http:// ή https://.
+    Feed Already Followed: Ακολουθείτε ήδη αυτή τη ροή.
+    Feed Could Not Be Loaded: Δεν ήταν δυνατή η φόρτωση της ροής. Ελέγξτε ότι η διεύθυνση οδηγεί σε ροή RSS ή Atom.
+    Feed Requires Browser Check: Αυτός ο ιστότοπος απαιτεί έλεγχο προγράμματος περιήγησης που το OpenTubeX δεν μπορεί να ολοκληρώσει. Δοκιμάστε άλλη διεύθυνση ή άλλο στιγμιότυπο RSSHub για αυτή τη ροή.
+    Refresh Errors: Δεν ήταν δυνατή η ανανέωση 1 ροής. | Δεν ήταν δυνατή η ανανέωση {count} ροών.
+    Description: Προσθέστε μια ροή RSS ή Atom για να ακολουθείτε δημιουργούς από άλλες πλατφόρμες. Τα στιγμιότυπα {rssHub} παρέχουν ροές για πολλούς ιστότοπους, όπως το Twitch.
+    Empty Items: Οι ροές σας δεν έχουν προς το παρόν κανένα στοιχείο.
+    No Feeds: Δεν ακολουθείτε ακόμη καμία ροή RSS.
+    RSSHub:
+      Browse: Περιήγηση στο RSSHub
+      Title: Προσθήκη ροής από το RSSHub
+      Description: Επιλέξτε ένα στιγμιότυπο RSSHub, μια υπηρεσία και τι θέλετε να ακολουθείτε. Η διεύθυνση της ροής δημιουργείται αυτόματα.
+      Instance: Στιγμιότυπο RSSHub
+      Service: Υπηρεσία
+      Search Services: Αναζήτηση υπηρεσιών
+      Loading Services: Φόρτωση υπηρεσιών…
+      Services Could Not Be Loaded: Αυτό το στιγμιότυπο δεν επέστρεψε τις υπηρεσίες του. Ελέγξτε τη διεύθυνση ή επιλέξτε άλλο στιγμιότυπο.
+      Feed Type: Τύπος ροής
+      Requires Configuration: Αυτή η ροή χρειάζεται επιπλέον ρύθμιση στο στιγμιότυπο, οπότε ίσως να μη λειτουργεί σε δημόσια στιγμιότυπα.
+      Optional Parameter: '{parameter} (προαιρετικό)'
+      Not Set: Δεν έχει οριστεί
+    Retry Feed: Νέα προσπάθεια για {feed}
+Trending:
+  Music: Μουσική
+  Load Error: Δεν ήταν δυνατή η φόρτωση των τάσεων.
+  Unsupported Backend: Οι τάσεις απαιτούν το Τοπικό API. Επιλέξτε το Τοπικό API ή ενεργοποιήστε την εφεδρική χρήση συστήματος υποστήριξης.
+Most Popular Feed Empty: Η ροή «Δημοφιλέστερα» αυτού του στιγμιοτύπου Invidious είναι κενή.
+Feed:
+  Cancel Refresh: Ακύρωση ανανέωσης
+  Next Auto Refresh: 'Επόμενη αυτόματη ανανέωση: {date}'
+User Playlists:
+  Refresh Saved Playlists: 'Ανανέωση αποθηκευμένων λιστών αναπαραγωγής'
+  Saved Playlists Refresh Failed: 'Δεν ήταν δυνατή η ανανέωση ορισμένων αποθηκευμένων λιστών αναπαραγωγής.'
+  Save: "Αποθήκευση"
+  Edit: "Επεξεργασία"
+  This playlist is private or does not exist.: "Αυτή η λίστα αναπαραγωγής είναι ιδιωτική ή δεν υπάρχει."
+  Pin to Navigation: "Καρφίτσωμα στην πλοήγηση"
+  Unpin from Navigation: "Ξεκαρφίτσωμα από την πλοήγηση"
+  Pin to Top: "Καρφίτσωμα στην κορυφή"
+  Unpin from Top: "Ξεκαρφίτσωμα από την κορυφή"
+  Pinned to Top: "Καρφιτσωμένη στην κορυφή"
+  Reorder Hint: Σύρετε ή χρησιμοποιήστε τα πλήκτρα βέλους για αναδιάταξη
+  Add new videos to the top (custom order): "Προσθήκη νέων βίντεο στην κορυφή (προσαρμοσμένη σειρά)"
+  Shuffle videos by default: "Τυχαία σειρά βίντεο από προεπιλογή"
+  Repair Playlists: Επιδιόρθωση λιστών αναπαραγωγής
+  Repair Description: Επαναφέρετε τα στοιχεία βίντεο που λείπουν μετά την εισαγωγή ZIP από το YouTube Takeout. Η σειρά στις λίστες παραμένει ίδια.
+  Remove Unavailable Videos: "Αφαίρεση μη διαθέσιμων βίντεο"
+  Remove Unavailable Videos Confirmation: "Να αφαιρεθούν τα μη διαθέσιμα βίντεο; Βρέθηκαν: {count}. Δεν ήταν δυνατός ο έλεγχος: {uncertain}. Τα βίντεο που δεν ελέγχθηκαν θα διατηρηθούν."
+  Add Missing Videos: "Προσθήκη βίντεο που λείπουν από την αρχική λίστα αναπαραγωγής"
+  Source Playlist: "Αρχική λίστα αναπαραγωγής"
+  Save Playlist: "Αποθήκευση λίστας αναπαραγωγής"
+  Remove Saved Playlist: "Αφαίρεση αποθηκευμένης λίστας αναπαραγωγής"
+  Load More Playlists: Φόρτωση περισσότερων λιστών αναπαραγωγής
+  Save to: Αποθήκευση σε…
+  Quick Bookmark Icon: Εικονίδιο γρήγορου σελιδοδείκτη
+  Custom Emoji: Προσαρμοσμένο emoji
+  Choose Image: Επιλογή εικόνας
+  Use Bookmark Icon: Χρήση εικονιδίου σελιδοδείκτη
+  SinglePlaylistView:
+    Retry: Επανάληψη
+    This playlist could not be loaded.: Δεν ήταν δυνατή η φόρτωση αυτής της λίστας αναπαραγωγής.
+    More videos could not be loaded.: Δεν ήταν δυνατή η φόρτωση περισσότερων βίντεο.
+  Playlist Thumbnail: "Μικρογραφία λίστας αναπαραγωγής"
+  Restore Default Thumbnail: "Επαναφορά προεπιλεγμένης μικρογραφίας"
+  AddVideoPrompt:
+    And N more videos: 'και {count} ακόμη βίντεο | και {count} ακόμη βίντεο'
+  Move Up: Πάνω
+  Move Down: Κάτω
+  Remove: Αφαίρεση
+  Background Tasks:
+    Loading videos from {playlistName}: 'Φόρτωση βίντεο από {playlistName}'
+    Adding missing videos to {playlistName}: 'Προσθήκη βίντεο που λείπουν στο {playlistName}'
+    Checking {playlistName} for unavailable videos: 'Έλεγχος του {playlistName} για μη διαθέσιμα βίντεο ({checked}/{total})'
+History:
+  From Date: 'Από'
+  To Date: 'Έως'
+  Channel Filter: 'Κανάλι'
+  All Channels: 'Όλα τα κανάλια'
+  Clear Filters: 'Εκκαθάριση φίλτρων'
+  Invalid Date Range: 'Η ημερομηνία έναρξης πρέπει να είναι προγενέστερη ή ίση με την ημερομηνία λήξης.'
+  Empty Filter Message: 'Κανένα βίντεο στο ιστορικό σας δεν ταιριάζει με αυτά τα φίλτρα.'
+  Repair Compact: "Επιδιόρθωση"
+  Mark All Watched Compact: "Όλα προβλήθηκαν"
+  Repair Use Cookies: "Χρήση των ρυθμισμένων cookies του yt-dlp"
+  Repair Cookies Hint: "Πρέπει να ελεγχθούν πάνω από 500 βίντεο. Διαμορφώστε cookies στις ρυθμίσεις του yt-dlp και ενεργοποιήστε τα εδώ για να μειώσετε τον κίνδυνο περιορισμού αιτημάτων."
+  Repair Description: "Χρησιμοποιήστε το μετά την εισαγωγή ιστορικού ή όταν λείπουν στοιχεία βίντεο ή υπάρχει λανθασμένη ένδειξη LIVE."
+  Repair Details: "Συμπληρώνει τίτλους, κανάλια και ημερομηνίες δημοσίευσης που λείπουν και ελέγχει τη διάρκεια και τις ενδείξεις LIVE. Η πρόοδος και η κατάσταση παρακολούθησης παραμένουν ίδιες."
+  Repair Notice: "Τα μεγάλα ιστορικά μπορεί να χρειαστούν χρόνο. Τα αποτυχημένα αιτήματα επαναλαμβάνονται αυτόματα. Διαγραμμένα ή ιδιωτικά βίντεο μπορεί να παραμείνουν ελλιπή."
+  Start Repair: "Έναρξη επιδιόρθωσης"
+  Repair Checking: "Έλεγχος στοιχείων βίντεο"
+  Repair Waiting: "Αναμονή για το YouTube. Η επιδιόρθωση θα συνεχιστεί αυτόματα."
+  Repair Retrying: "Επανάληψη αποτυχημένων αιτημάτων"
+  Repair Finished: "Η επιδιόρθωση ολοκληρώθηκε"
+  Repair Stopped: "Η επιδιόρθωση σταμάτησε"
+  Repair: "Επιδιόρθωση ιστορικού"
+  Repair Progress: "Ελέγχθηκαν {checked}/{total} · Διορθώθηκαν {repaired} · Απέτυχαν {failed}"
+  Mark All As Watched: Επισήμανση όλων ως παρακολουθημένων
+  Mark All As Watched Confirmation: Θέλετε σίγουρα να επισημάνετε ως παρακολουθημένα όλα τα βίντεο στο ιστορικό σας;
+  All History Marked as Watched: Όλα τα βίντεο στο ιστορικό σας επισημάνθηκαν ως παρακολουθημένα
+  Select History Age: Επιλέξτε πόσο παλιά πρέπει να είναι μια καταχώριση για να διαγραφεί.
+  Delete Entries Older Than: Διαγραφή καταχωρίσεων παλαιότερων από
+  Number of Days: Αριθμός ημερών
+  History Cleanup Warning: Οι αντίστοιχες καταχωρίσεις ιστορικού παρακολούθησης θα διαγραφούν οριστικά.
+  1 Day: 1 ημέρα
+  1 Week: 1 εβδομάδα
+  1 Month: 1 μήνας
+  3 Months: 3 μήνες
+  1 Year: 1 έτος
+  All Time: Όλο το διάστημα
+  Custom: Προσαρμοσμένο
+  History Older Than Days Removed: Αφαιρέθηκε το ιστορικό παρακολούθησης που ήταν παλαιότερο από 1 ημέρα | Αφαιρέθηκε το ιστορικό παρακολούθησης που ήταν παλαιότερο από {days} ημέρες
+Settings:
+  Diagnostics:
+    Diagnostics: Διαγνωστικά
+    Description: Όσο η διαγνωστική καταγραφή είναι ενεργή, το OpenTubeX κρατά τα πρόσφατα μηνύματα καταγραφής στη μνήμη ώστε να μπορείτε να τα επισυνάψετε σε αναφορές σφαλμάτων. Δεν τα αποθηκεύει ούτε τα στέλνει ποτέ από μόνο του, και η απενεργοποίηση της καταγραφής τα διαγράφει. Οι αναφορές παραλείπουν cookies, tokens, διευθύνσεις IP και παραμέτρους URL, αλλά μπορεί να περιέχουν αναγνωριστικά βίντεο που αναπαραγάγατε, οπότε ελέγξτε μια αναφορά πριν τη μοιραστείτε.
+    Enable Logging: Ενεργοποίηση διαγνωστικής καταγραφής
+    Copy Report: Αντιγραφή αναφοράς
+    Save Report: Αποθήκευση αναφοράς
+    Clear Log: Εκκαθάριση καταγραφής
+    Report Copied: Η διαγνωστική αναφορά αντιγράφηκε
+    Report Saved: Η διαγνωστική αναφορά αποθηκεύτηκε
+    Report File: Διαγνωστική αναφορά
+    Save Failed: Δεν ήταν δυνατή η αποθήκευση της διαγνωστικής αναφοράς
+    Log Cleared Message: Η διαγνωστική καταγραφή εκκαθαρίστηκε
+  Tab Unloading:
+    Automatically unload tabs: "Αυτόματη εκφόρτωση καρτελών"
+    Memory threshold: "Όριο μνήμης"
+    Tabs to unload: "Καρτέλες προς εκφόρτωση"
+    Automatic unloading help: "Εκφορτώνει τις παλαιότερες καρτέλες παρασκηνίου για απελευθέρωση μνήμης. Οι ενεργές καρτέλες και όσες αναπαράγουν περιεχόμενο παραμένουν φορτωμένες."
+    Memory threshold help: "Ποσοστό του ορίου μνήμης της διεργασίας απόδοσης, όχι της συνολικής RAM του συστήματος."
+  Password Settings:
+    Failed to Save Password: "Αποτυχία αποθήκευσης του κωδικού πρόσβασης."
+    Confirm Password: "Επιβεβαίωση κωδικού πρόσβασης"
+    Passwords Do Not Match: "Οι κωδικοί πρόσβασης δεν ταιριάζουν."
+  Navigation and Controls: "Πλοήγηση και στοιχεία ελέγχου"
+  Control Bar:
+    Title: "Γραμμή ελέγχου"
+    Customize: "Προσαρμογή γραμμής ελέγχου"
+    Hidden: "Κρυφά"
+    Empty: "Δεν υπάρχουν στοιχεία ελέγχου"
+    Move to Control Bar: "Μετακίνηση του {control} στη γραμμή ελέγχου"
+    Move to Player Menu: "Μετακίνηση του {control} στο μενού προγράμματος αναπαραγωγής"
+    Hide: "Απόκρυψη του {control}"
+  Fullscreen Actions:
+    Recommended Videos: "Προτεινόμενα βίντεο"
+    Title: "Ενέργειες πλήρους οθόνης"
+    Customize: "Προσαρμογή ενεργειών πλήρους οθόνης"
+    Add Action: "Προσθήκη ενέργειας"
+    Empty: "Δεν επιλέχθηκαν ενέργειες πλήρους οθόνης"
+    Quick Bookmark: "Γρήγορος σελιδοδείκτης"
+    Availability Hint: "Οι ενέργειες εμφανίζονται μόνο στα βίντεο όπου ισχύουν."
+    Disabled: "(απενεργοποιημένο)"
+  Quick Settings:
+    Quick Settings: Γρήγορες ρυθμίσεις
+    Customize Quick Settings: Προσαρμογή γρήγορων ρυθμίσεων
+    Add Setting: Προσθήκη ρύθμισης
+    Appearance: Εμφάνιση
+    Playback: Αναπαραγωγή
+    Content: Περιεχόμενο
+    Language and Region: Γλώσσα και περιοχή
+    All Settings: Όλες οι ρυθμίσεις
+    Profile Selector Hint: Μπορείτε επίσης να κάνετε δεξί κλικ στο εικονίδιο προφίλ για να αλλάξετε προφίλ
+    Profile Selector Touch Hint: Μπορείτε επίσης να πατήσετε παρατεταμένα το εικονίδιο προφίλ για να αλλάξετε προφίλ
+  Categories:
+    General Description: Γλώσσα, εκκίνηση, καρτέλες και μετάφραση
+    Appearance: Εμφάνιση
+    Appearance Description: Θέμα, διάταξη, πλοήγηση και λίστες βίντεο
+    Content appearance: Λίστες βίντεο και μικρογραφίες
+    Layout: Διάταξη
+    Playback Description: Προεπιλογές προγράμματος αναπαραγωγής, υπότιτλοι και ρυθμίσεις ανά κανάλι
+    Subscriptions Description: Ανανέωση ροών, ειδοποιήσεις νέων βίντεο και ροές RSS
+    Downloads Description: Φάκελος λήψεων, πρότυπα και αυτόματες λήψεις
+    Focus: Εστίαση
+    Focus Description: Κρυφό περιεχόμενο, όρια προβολής, υπενθυμίσεις και γονικός έλεγχος
+    Add-ons: Πρόσθετα
+    Add-ons Description: SponsorBlock, DeArrow, αρνητικές ψήφοι, AiSList και μετάφραση εκφώνησης
+    Privacy Description: Ιστορικό, προτάσεις αναζήτησης, σύνδεσμοι και κωδικός πρόσβασης εφαρμογής
+    Online activity: Δραστηριότητα στο διαδίκτυο
+    Data And Storage Description: Αντίγραφα ασφαλείας, εισαγωγή και εξαγωγή, χρήση δίσκου και εκκαθάριση
+    Sync Description: Λογαριασμός διακομιστή συγχρονισμού, σύζευξη συσκευών και συγχρονισμένα δεδομένα
+    Advanced: Για προχωρημένους
+    Advanced Description: Υπηρεσίες υποστήριξης, προσωρινή αποθήκευση, εξωτερικά εργαλεία, διακομιστής μεσολάβησης και διαγνωστικά
+    Alternative providers: Πάροχοι βίντεο και μεταδεδομένων
+  Highlight Changed Settings: Επισήμανση ρυθμίσεων που διαφέρουν από τις προεπιλεγμένες
+  Reset Setting to Default: Επαναφορά αυτής της ρύθμισης στην προεπιλεγμένη τιμή
+  Performance Impact:
+    Show Performance Impact: Εμφάνιση ενδείξεων επιβάρυνσης επιδόσεων
+    Moderate: Μέτρια επιβάρυνση
+    High: Υψηλή επιβάρυνση
+    Description: Αυτή η ρύθμιση μπορεί να αυξήσει τη χρήση {resources}
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: μνήμης
+      Network: δικτύου
+      Disk: δίσκου
+  General Settings:
+    Link Underlines:
+      Link Underlines: "Υπογράμμιση συνδέσμων"
+      On Hover: "Υπογράμμιση συνδέσμων κατά την τοποθέτηση του δείκτη"
+      Never: "Ποτέ υπογράμμιση συνδέσμων"
+      Always: "Πάντα υπογράμμιση συνδέσμων"
+    Limit Titles to Two Lines: "Περιορισμός τίτλων σε δύο γραμμές"
+    Close Window With Last Tab: 'Κλείσιμο παραθύρου κατά το κλείσιμο της τελευταίας καρτέλας'
+    Preferred Video Codec: Προτιμώμενος κωδικοποιητής βίντεο
+    Always Use Backup Media Server: "Πάντα χρήση του εφεδρικού διακομιστή πολυμέσων"
+    Automatically switch stream extraction methods: "Αυτόματη εναλλαγή μεθόδων εξαγωγής ροής"
+    Enable Tabs: "Ενεργοποίηση καρτελών"
+    Thumbnail Swipe Gestures:
+      Left: Σάρωση αριστερά στις μικρογραφίες
+      Right: Σάρωση δεξιά στις μικρογραφίες
+      Description: Σύρετε οριζόντια μια μικρογραφία βίντεο και αφήστε την για να εκτελέσετε την επιλεγμένη ενέργεια.
+    Data Saver Thumbnails: "Μικρογραφίες εξοικονόμησης δεδομένων"
+    Use tray icon: "Χρήση εικονιδίου περιοχής ειδοποιήσεων"
+    Close to system tray: "Κλείσιμο στην περιοχή ειδοποιήσεων"
+    Tray required for background refresh: "Το εικονίδιο απαιτείται όσο είναι ενεργή η ανανέωση συνδρομών στο παρασκήνιο."
+    Show Video Menu Button: Εμφάνιση κουμπιού μενού βίντεο
+    Swipe to refresh: Σύρετε για ανανέωση
+    Blur Thumbnails: Θόλωση μικρογραφιών
+    Navigation:
+      Always Show Navigation Bar: Να εμφανίζεται πάντα η γραμμή πλοήγησης όταν βρίσκεται στο κάτω μέρος
+      Compact Tab Labels: Συμπαγής γραμμή πλοήγησης όταν βρίσκεται στο κάτω μέρος
+      Show Active Subscriptions: Εμφάνιση ενεργών συνδρομών στην πλαϊνή γραμμή
+      Navigation: Πλοήγηση
+      Customize Navigation: Προσαρμογή πλοήγησης
+      Add Item: Προσθήκη στοιχείου
+    Date Format: Μορφή ημερομηνίας
+    Time Format: Μορφή ώρας
+    Language Default: Προεπιλογή γλώσσας
+    Update Relative Timestamps: Συνεχής ενημέρωση σχετικών χρονικών ενδείξεων
+    Stream Extraction Method:
+      Stream Extraction Method: Μέθοδος εξαγωγής ροής
+      yt-dlp: yt-dlp
+      Built-in: Ενσωματωμένη
+    Confirm Before: Επιβεβαίωση πριν από…
+    Confirmation Options:
+      Closing App: Κλείσιμο του OpenTubeX
+      Closing Window: Κλείσιμο παραθύρου με πολλές καρτέλες
+      Closing Tabs: Κλείσιμο πολλών καρτελών
+      Loading Tabs: Φόρτωση πολλών καρτελών
+      Unloading Tabs: Αποφόρτωση πολλών καρτελών
+    Remember Tab Navigation History: Απομνημόνευση ιστορικού περιήγησης καρτελών
+    New Tab Position:
+      New Tab Position: Θέση νέας καρτέλας
+      At the end: Στο τέλος
+      After current tab: Μετά την τρέχουσα καρτέλα
+      After current tab in opened order: Μετά την τρέχουσα καρτέλα, με τη σειρά ανοίγματος
+    Tab Close Focus:
+      Last active tab: "Τελευταία ενεργή καρτέλα"
+      Next tab in tab order: "Επόμενη καρτέλα στη σειρά καρτελών"
+      Previous tab in tab order: "Προηγούμενη καρτέλα στη σειρά καρτελών"
+      Tab Close Focus: Μετά το κλείσιμο της ενεργής καρτέλας
+    Startup Behavior:
+      Startup Behavior: Κατά την εκκίνηση
+      Load all tabs: Φόρτωση όλων των καρτελών
+      Load previously loaded tabs: Φόρτωση των καρτελών που ήταν ήδη φορτωμένες
+      Load last active tab: Φόρτωση της τελευταίας ενεργής καρτέλας
+      Start with an empty session: Έναρξη με κενή συνεδρία
+      Load landing page, keep other tabs unloaded: Φόρτωση αρχικής σελίδας, διατήρηση των άλλων καρτελών χωρίς φόρτωση
+    Use AI Translation Completions: Συμπλήρωση μεταφράσεων που λείπουν με μεταφράσεις παραγόμενες από AI
+    Reduced Motion:
+      Reduced Motion: Μειωμένη κίνηση
+      System: Σύστημα
+      Force On: Επιβολή ενεργοποίησης
+      Force Off: Επιβολή απενεργοποίησης
+    Comment Translation:
+      Title: Μεταφράσεις σχολίων
+      Enable: Ενεργοποίηση μεταφράσεων σχολίων
+      Never Translate: Να μη μεταφράζονται σχόλια στα
+      Choose Language: Επιλογή γλώσσας
+      Description: Τα σχόλια στη γλώσσα της εφαρμογής εξαιρούνται ήδη. Προσθέστε όσες άλλες γλώσσες μπορείτε να διαβάσετε.
+      Remove Language: Να μεταφράζονται ξανά τα σχόλια στα {language}
+    Avoid translation:
+      Avoid translation: Προτίμηση μη μεταφρασμένου κειμένου βίντεο
+      Disabled: Απενεργοποιημένο
+      Watch Only: Μόνο στο περιβάλλον βίντεο
+      Entire App: Σε ολόκληρη την εφαρμογή
+    Playlist View Type:
+      Playlist View Type: Τύπος προβολής λίστας αναπαραγωγής
+    Show Thumbnail Previews: Εμφάνιση προεπισκοπήσεων μικρογραφιών
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: Πρόσθετο κουμπί ενέργειας μικρογραφίας
+      None: Κανένα
+      Mark as Watched: Επισήμανση ως παρακολουθημένου
+      Copy YouTube Link: Αντιγραφή συνδέσμου YouTube
+      Open in YouTube: Άνοιγμα στο YouTube
+    Mobile Layout:
+      Mobile Layout: 'Διάταξη κινητού'
+      Automatic: 'Αυτόματα'
+      Phone: 'Τηλέφωνο'
+      Tablet: 'Tablet'
+    Video View Type:
+      Full Width: Πλήρες πλάτος
+    Grid Columns:
+      Grid Columns: Στήλες πλέγματος
+      Playlist Grid Columns: Στήλες πλέγματος λιστών αναπαραγωγής
+      Auto: Αυτόματα
+    Preferred API Backend:
+      Yattee Server: Διακομιστής Yattee
+    Yattee Server:
+      Server URL: URL διακομιστή Yattee
+      Username: Όνομα χρήστη
+      Password: Κωδικός πρόσβασης
+      Proxy Videos: Αναμετάδοση βίντεο μέσω του διακομιστή Yattee
+      Test Connection: Έλεγχος σύνδεσης
+      Testing: Έλεγχος της σύνδεσης…
+      Connected: Συνδέθηκε στο Yattee Server {version}
+      Errors:
+        Invalid URL: Εισαγάγετε το URL του διακομιστή, ξεκινώντας με https:// ή http://.
+        Unreachable: Δεν ήταν δυνατή η πρόσβαση στον διακομιστή. Ελέγξτε το URL και αν ο διακομιστής λειτουργεί.
+        Media not allowed: 'Συνδέθηκε, αλλά ο διακομιστής δεν επιτρέπει σε αυτή την εφαρμογή να φορτώνει βίντεο. Ορίστε CORS_ORIGINS={origins} στις μεταβλητές περιβάλλοντος του διακομιστή.'
+        Not a Yattee server: Ο διακομιστής απάντησε, αλλά δεν είναι διακομιστής Yattee.
+        Credentials required: Ο διακομιστής απαιτεί όνομα χρήστη και κωδικό πρόσβασης.
+        Invalid credentials: Ο διακομιστής απέρριψε το όνομα χρήστη ή τον κωδικό πρόσβασης.
+        Rate limited: Ο διακομιστής δεν επιτρέπει τη σύνδεση μετά από πάρα πολλές αποτυχημένες προσπάθειες. Δοκιμάστε ξανά αργότερα.
+        Server error: Ο διακομιστής επέστρεψε σφάλμα (HTTP {status}).
+    Notifications:
+      Notifications: Ειδοποιήσεις
+      System and In-App: Σύστημα και εντός εφαρμογής
+      System Only: Μόνο σύστημα
+      Off: Ανενεργές
+    Auto Load Next Page:
+      Lists Tooltip: Αυτόματη φόρτωση επιπλέον σελίδων ροών, αποτελεσμάτων αναζήτησης και άλλων λιστών.
+    Auto Load Comments:
+      Label: Αυτόματη φόρτωση σχολίων
+      Tooltip: Φόρτωση σχολίων όταν ανοίγει η σελίδα και φόρτωση περισσότερων καθώς κάνετε κύλιση.
+  Context Menu Search Settings:
+    Context Menu Search Settings: Αναζήτηση από το μενού περιβάλλοντος
+    Description: Επιλέξτε ποιες μηχανές αναζήτησης θα εμφανίζονται όταν κάνετε δεξί κλικ σε επιλεγμένο κείμενο. Οι αναζητήσεις ανοίγουν στο προεπιλεγμένο πρόγραμμα περιήγησης.
+    Icon Hint: Με την ενεργοποίηση μιας μηχανής, η εφαρμογή συνδέεται στον ιστότοπό της για να φορτώσει το favicon.
+    Engine Name: Όνομα μηχανής
+    Search URL: URL αναζήτησης
+    URL Hint: Χρησιμοποιήστε %s στο σημείο του URL όπου πρέπει να τοποθετηθεί το κωδικοποιημένο επιλεγμένο κείμενο.
+    Add Custom Engine: Προσθήκη προσαρμοσμένης μηχανής
+    Add Engine: Προσθήκη μηχανής
+    Remove Engine: Αφαίρεση {engine}
+    Invalid Engine: Εισαγάγετε ένα όνομα και ένα έγκυρο URL αναζήτησης HTTP ή HTTPS που περιέχει %s.
+    Engine Limit: Μπορείτε να προσθέσετε έως {count} προσαρμοσμένες μηχανές αναζήτησης.
+  Theme Settings:
+    Theme and Colors: "Θέμα και χρώματα"
+    Font Size: Μέγεθος γραμματοσειράς
+    Sections:
+      Interface: "Διεπαφή"
+      Side Bar and Header: "Πλευρική στήλη και κεφαλίδα"
+      Tabs: "Καρτέλες"
+      Player: "Πρόγραμμα αναπαραγωγής"
+      Scrolling: "Κύλιση"
+      Notifications: "Ειδοποιήσεις"
+    Only Show Important Notifications: Εμφάνιση μόνο σημαντικών ειδοποιήσεων
+    Visible Search Suggestions: "Ορατές προτάσεις αναζήτησης"
+    Material Accent Color: "Χρώμα έμφασης Material"
+    Tally Accent Color: "Χρώμα έμφασης Tally"
+    Material Wallpaper Colors: "Χρώματα ταπετσαρίας"
+    Material System Accent Color: "Χρώμα έμφασης συστήματος"
+    Tab Loading Indicator:
+      Tab Loading Indicator: Ένδειξη φόρτωσης καρτέλας
+      Bar: Γραμμή
+      Dot: Κουκκίδα (κλασική)
+    Compact Settings Categories: "Συμπαγείς κατηγορίες ρυθμίσεων"
+    Playlist Thumbnail Size: "Μέγεθος μικρογραφιών λίστας αναπαραγωγής"
+    Compact Mobile Mini Player: "Συμπαγής μίνι αναπαραγωγέας κινητού"
+    Always Show Mobile Search Bar: "Να εμφανίζεται πάντα η γραμμή αναζήτησης στο κινητό"
+    Frosted Glass Player UI: "Διεπαφή προγράμματος αναπαραγωγής με εφέ θαμπού γυαλιού"
+    Main Color Theme:
+      Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Ροδόνερο"
+      Catppuccin Macchiato Flamingo: "Catppuccin Macchiato Φλαμίνγκο"
+      Catppuccin Macchiato Pink: "Catppuccin Macchiato Ροζ"
+      Catppuccin Macchiato Mauve: "Catppuccin Macchiato Μωβ"
+      Catppuccin Macchiato Red: "Catppuccin Macchiato Κόκκινο"
+      Catppuccin Macchiato Maroon: "Catppuccin Macchiato Βυσσινί"
+      Catppuccin Macchiato Peach: "Catppuccin Macchiato Ροδακινί"
+      Catppuccin Macchiato Yellow: "Catppuccin Macchiato Κίτρινο"
+      Catppuccin Macchiato Green: "Catppuccin Macchiato Πράσινο"
+      Catppuccin Macchiato Teal: "Catppuccin Macchiato Τιρκουάζ"
+      Catppuccin Macchiato Sky: "Catppuccin Macchiato Ουρανός"
+      Catppuccin Macchiato Sapphire: "Catppuccin Macchiato Ζαφείρι"
+      Catppuccin Macchiato Blue: "Catppuccin Macchiato Μπλε"
+      Catppuccin Macchiato Lavender: "Catppuccin Macchiato Λεβάντα"
+    Move Downloads to App Header: Μετακίνηση λήψεων στην κεφαλίδα της εφαρμογής
+    Move Settings to App Header: Μετακίνηση ρυθμίσεων στην κεφαλίδα της εφαρμογής
+    Hide Side Bar on Watch Pages: Απόκρυψη πλευρικής γραμμής στις σελίδες παρακολούθησης
+    UI Roundness: Στρογγυλότητα περιβάλλοντος χρήστη
+    Scrollbar Width: Πλάτος γραμμής κύλισης
+    Scroll Speed: Ταχύτητα κύλισης
+    Animation Speed: Ταχύτητα κινήσεων
+    Thumbnail Size: Μέγεθος μικρογραφιών
+    Show Tab Icons: Εμφάνιση εικονιδίων καρτελών
+    Load Missing Tab Icons: Φόρτωση εικονιδίων καρτελών που λείπουν
+    Loading Missing Tab Icons: Φόρτωση εικονιδίων καρτελών που λείπουν…
+    No Missing Tab Icons: Όλα τα υποστηριζόμενα εικονίδια καρτελών έχουν ήδη φορτωθεί
+    Loaded Tab Icons: 'Φορτώθηκε το εικονίδιο καρτέλας που έλειπε: {count} | Φορτώθηκαν τα εικονίδια καρτελών που έλειπαν: {count}'
+    Loaded Tab Icons With Failures: Φορτώθηκαν {loaded} εικονίδια καρτελών. Δεν ήταν δυνατή η φόρτωση {failed} εικονιδίων
+    Show Tab Previews: Εμφάνιση προεπισκοπήσεων καρτελών
+    Use Fixed Tab Width: Χρήση σταθερού πλάτους καρτελών στην οριζόντια λειτουργία
+    Use Custom Title Bar: Χρήση προσαρμοσμένης γραμμής τίτλου
+    Tab Width: Πλάτος καρτέλας
+    Vertical Tab Height: Ύψος κάθετων καρτελών
+    Tab Layout:
+      Tab Layout: Διάταξη καρτελών
+      Horizontal Top: Οριζόντια επάνω
+      Horizontal Bottom: Οριζόντια κάτω
+      Vertical Left: Κατακόρυφα αριστερά
+      Vertical Right: Κατακόρυφα δεξιά
+    Show Toast Timeout Indicator: Εμφάνιση ένδειξης λήξης ειδοποιήσεων
+    Use Grid Player Menu: Χρήση μενού προγράμματος αναπαραγωγής σε πλέγμα
+    Show Progress as Notification: Εμφάνιση προόδου ως ειδοποίησης
+    Operation in Progress: Η λειτουργία βρίσκεται σε εξέλιξη
+    Toast Position:
+      Test Toast: Δοκιμαστική ειδοποίηση
+      Toast Position: Θέση ειδοποιήσεων
+      Bottom Left: Κάτω αριστερά
+      Bottom Center: Κάτω στο κέντρο
+      Bottom Right: Κάτω δεξιά
+      Top Left: Επάνω αριστερά
+      Top Center: Επάνω στο κέντρο
+      Top Right: Επάνω δεξιά
+    Icon Pack:
+      Icon Pack: Πακέτο εικονιδίων
+      Material Symbols: Material Symbols
+      Remix Icon: Remix Icon
+    Font:
+      App Font: Γραμματοσειρά εφαρμογής
+      System Default: Προεπιλογή συστήματος
+      Unable to Load: Δεν ήταν δυνατή η φόρτωση των εγκατεστημένων γραμματοσειρών συστήματος
+      Bundled Fonts: Ενσωματωμένες γραμματοσειρές
+      System Fonts: Γραμματοσειρές συστήματος
+    Always Show Scrollbars: Μόνιμη εμφάνιση γραμμών κύλισης
+    Base Theme:
+      Material Light: "Material Φωτεινό"
+      Material Dark: "Material Σκοτεινό"
+      Material Black: "Material Μαύρο"
+      Dynamic colors: Δυναμικά χρώματα
+      Tokyo Night Night: Tokyo Night Night
+      Tokyo Night Storm: Tokyo Night Storm
+      Tokyo Night Moon: Tokyo Night Moon
+      Tokyo Night Day: Tokyo Night Day
+      Rosé Pine: Rosé Pine
+      Rosé Pine Moon: Rosé Pine Moon
+      Rosé Pine Dawn: Rosé Pine Dawn
+      Kanagawa Wave: Kanagawa Wave
+      Kanagawa Dragon: Kanagawa Dragon
+      Kanagawa Lotus: Kanagawa Lotus
+      Ayu Dark: Ayu Dark
+      Ayu Mirage: Ayu Mirage
+      Ayu Light: Ayu Light
+      One Dark: One Dark
+      Carbonfox: Carbonfox
+      Catppuccin Macchiato: Catppuccin Macchiato
+      Tally Light: "Tally Φωτεινό"
+      Tally Dark: "Tally Σκοτεινό"
+      Custom: Προσαρμοσμένο
+      Built-in Themes: Ενσωματωμένα θέματα
+      Custom Themes: Προσαρμοσμένα θέματα
+    Light Theme: Φωτεινό θέμα
+    Dark Theme: Σκοτεινό θέμα
+    Custom Theme:
+      Share Restrictions Prompt: "Οι περιγραφές μπορούν να περιέχουν έως 500 χαρακτήρες, συμπεριλαμβανομένου του Markdown. Επιτρέπονται μόνο σύνδεσμοι και εικόνες που φιλοξενούνται στο GitHub, συμπεριλαμβανομένων των απευθείας μεταφορτώσεων εδώ. Το bot αφαιρεί εξωτερικούς συνδέσμους και εικόνες, συντομεύει μεγάλες περιγραφές και αφήνει ένα σχόλιο που εξηγεί τις αλλαγές."
+      Import from Clipboard: "Εισαγωγή από το πρόχειρο"
+      Invalid Clipboard Theme: "Το πρόχειρο δεν περιέχει έγκυρο θέμα. Αντιγράψτε το JSON του θέματος και δοκιμάστε ξανά."
+      Create Custom Theme: Δημιουργία προσαρμοσμένου θέματος
+      Edit Custom Theme: Επεξεργασία προσαρμοσμένου θέματος
+      Custom Theme Creator: Δημιουργία προσαρμοσμένου θέματος
+      Theme Name: Όνομα θέματος
+      Based On: Βασισμένο στο
+      Import Theme: Εισαγωγή θέματος
+      Export Theme: Εξαγωγή θέματος
+      Share Theme: Κοινοποίηση θέματος
+      Share Description Prompt: Περιγράψτε το θέμα και ό,τι πρέπει να γνωρίζουν οι χρήστες πριν το χρησιμοποιήσουν.
+      Share Screenshots Prompt: "Σύρετε και αποθέστε εδώ ένα ή περισσότερα στιγμιότυπα οθόνης. Αφήστε αυτή την ενότητα κενή για να προσθέσει το bot τρεις προεπισκοπήσεις με ενδεικτικό περιεχόμενο, χωρίς τα προσωπικά σας δεδομένα."
+      Delete Theme: Διαγραφή θέματος
+      Delete Theme Confirmation: Διαγραφή του «{name}»; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.
+      Save and Apply: Αποθήκευση και εφαρμογή
+      Discard Changes: Απόρριψη αλλαγών
+      Reset Colors: Επαναφορά στο βασικό θέμα
+      Theme File: Αρχείο θέματος OpenTubeX
+      Theme Saved: Το προσαρμοσμένο θέμα αποθηκεύτηκε και εφαρμόστηκε
+      Theme Imported: Το θέμα εισήχθη στο πρόγραμμα επεξεργασίας
+      Theme Exported: Το θέμα εξήχθη
+      Theme Deleted: Το προσαρμοσμένο θέμα διαγράφηκε
+      Unable to Load: Δεν ήταν δυνατή η φόρτωση του προσαρμοσμένου θέματος
+      Unable to Save: Δεν ήταν δυνατή η αποθήκευση του προσαρμοσμένου θέματος
+      Unable to Export: Δεν ήταν δυνατή η εξαγωγή του προσαρμοσμένου θέματος
+      Unable to Share: Δεν ήταν δυνατή η κοινοποίηση του προσαρμοσμένου θέματος
+      Unable to Delete: Δεν ήταν δυνατή η διαγραφή του προσαρμοσμένου θέματος
+      Invalid Theme File: Μη έγκυρο αρχείο προσαρμοσμένου θέματος
+      Colors:
+        Watched thumbnail overlay: "Επικάλυψη μικρογραφιών προβεβλημένων βίντεο"
+        Thumbnail badge background: "Φόντο σημάνσεων μικρογραφιών"
+        Main text: Κύριο κείμενο
+        Secondary text: Δευτερεύον κείμενο
+        Subtle text: Διακριτικό κείμενο
+        Borders and dividers: Περιγράμματα και διαχωριστικά
+        Subtle surfaces and indicators: Διακριτικές επιφάνειες και ενδείξεις
+        Title text: Κείμενο τίτλου
+        Selected text background: Φόντο επιλεγμένου κειμένου
+        Selected text: Επιλεγμένο κείμενο
+        Logo icon: Εικονίδιο λογότυπου
+        Logo text: Κείμενο λογότυπου
+        Logo hover: Λογότυπο κατά την κατάδειξη
+        Logo pressed: Λογότυπο κατά το πάτημα
+        Page background: Φόντο σελίδας
+        Card background: Φόντο κάρτας
+        Secondary card background: Φόντο δευτερεύουσας κάρτας
+        Favorite icon: Εικονίδιο αγαπημένου
+        Error color: Χρώμα σφάλματος
+        Scrollbar thumb: Δείκτης γραμμής κύλισης
+        Scrollbar thumb hover: Δείκτης γραμμής κύλισης κατά την κατάδειξη
+        Scrollbar thumb pressed: Δείκτης γραμμής κύλισης κατά το πάτημα
+        Dropdown item hover text: Κείμενο αναπτυσσόμενου στοιχείου κατά την κατάδειξη
+        Dropdown item hover background: Φόντο αναπτυσσόμενου στοιχείου κατά την κατάδειξη
+        Navigation and panel background: Φόντο πλοήγησης και πλαισίων
+        Neutral item hover and focus background: Φόντο ουδέτερου στοιχείου κατά την κατάδειξη και την εστίαση
+        Neutral item hover and focus text and icons: Κείμενο και εικονίδια ουδέτερου στοιχείου κατά την κατάδειξη και την εστίαση
+        Neutral item pressed background: Φόντο ουδέτερου στοιχείου κατά το πάτημα
+        Neutral item pressed text and icons: Κείμενο και εικονίδια ουδέτερου στοιχείου κατά το πάτημα
+        Header button hover and focus background: Φόντο κουμπιού κεφαλίδας κατά την κατάδειξη και την εστίαση
+        Header button hover and focus text and icons: Κείμενο και εικονίδια κουμπιού κεφαλίδας κατά την κατάδειξη και την εστίαση
+        Header button pressed background: Φόντο κουμπιού κεφαλίδας κατά το πάτημα
+        Header button pressed text and icons: Κείμενο και εικονίδια κουμπιού κεφαλίδας κατά το πάτημα
+        Search and dropdown background: Φόντο αναζήτησης και αναπτυσσόμενων μενού
+        Settings search background: Φόντο αναζήτησης ρυθμίσεων
+        Instance menu: Μενού στιγμιοτύπων
+        Shadow color: Χρώμα σκιάς
+        Primary controls and highlights: Κύρια στοιχεία ελέγχου και επισημάνσεις
+        Primary control hover and focus: Κύριο στοιχείο ελέγχου κατά την κατάδειξη και την εστίαση
+        Primary control pressed: Κύριο στοιχείο ελέγχου κατά το πάτημα
+        Text and icons on primary controls: Κείμενο και εικονίδια στα κύρια στοιχεία ελέγχου
+        Secondary controls and highlights: Δευτερεύοντα στοιχεία ελέγχου και επισημάνσεις
+        Secondary control hover and focus: Δευτερεύον στοιχείο ελέγχου κατά την κατάδειξη και την εστίαση
+        Secondary control pressed: Δευτερεύον στοιχείο ελέγχου κατά το πάτημα
+        Light secondary color: Ανοιχτό δευτερεύον χρώμα
+        Visited accent: Χρώμα έμφασης για ήδη προβεβλημένα στοιχεία
+        Text and icons on secondary controls: Κείμενο και εικονίδια στα δευτερεύοντα στοιχεία ελέγχου
+        Links: Σύνδεσμοι
+        Visited links: Σύνδεσμοι που έχουν ανοιχτεί
+        Destructive action: Καταστροφική ενέργεια
+        Destructive hover and focus: Καταστροφική ενέργεια κατά την κατάδειξη και την εστίαση
+        Destructive pressed: Καταστροφική ενέργεια κατά το πάτημα
+        Text and icons on destructive actions: Κείμενο και εικονίδια καταστροφικών ενεργειών
+  Player Settings:
+    Rewind on Resume: "Επαναφορά πίσω κατά τη συνέχιση"
+    Minimum Pause Before Rewinding: "Ελάχιστη παύση πριν την επαναφορά πίσω"
+    Mono Audio: 'Μονοφωνικός ήχος'
+    Show Mono Audio Toggle: 'Εμφάνιση διακόπτη μονοφωνικού ήχου'
+    Default Media Format:
+      Default Media Format: 'Προεπιλεγμένη μορφή πολυμέσων'
+    Pause on Stream Recovery: "Παύση κατά την ανάκτηση ροής"
+    Buffering:
+      Buffering: Προσωρινή αποθήκευση
+      Description: Επιλέξτε πόσο βίντεο φορτώνει εκ των προτέρων και διατηρεί φορτωμένο το πρόγραμμα αναπαραγωγής.
+      Buffer Ahead Hint: Περισσότερη φόρτωση εκ των προτέρων διατηρεί την αναπαραγωγή σε μεγαλύτερες διακοπές σύνδεσης, αλλά κατεβάζει βίντεο που ίσως δεν θα δείτε.
+      Rewind Buffer Hint: Μεγαλύτερη προσωρινή μνήμη επανατύλιξης σας επιτρέπει να γυρίζετε πίσω χωρίς νέα λήψη, αλλά χρησιμοποιεί περισσότερη μνήμη.
+      Buffer Before Playing Hint: Η αναμονή για περισσότερο βίντεο πριν από την αναπαραγωγή αποτρέπει τις επαναλαμβανόμενες διακοπές σε ασταθείς συνδέσεις, αλλά τα βίντεο αργούν περισσότερο να ξεκινήσουν και να συνεχίσουν μετά από μετάβαση.
+      Preset: Προκαθορισμένη ρύθμιση προσωρινής αποθήκευσης
+      Presets:
+        Data Saver: Εξοικονόμηση δεδομένων
+        Default: Προεπιλογή
+        Smooth Playback: Ομαλή αναπαραγωγή
+        Custom: Προσαρμοσμένη
+      Buffer Ahead: Φόρτωση εκ των προτέρων
+      Buffer Ahead Tooltip: 'Πόσο μακριά πέρα από την τρέχουσα θέση γίνεται φόρτωση. Σε υψηλές ποιότητες, τα όρια μνήμης μπορεί να περιορίσουν τις πολύ υψηλές τιμές. Προεπιλογή: {value}'
+      Rewind Buffer: Προσωρινή μνήμη επανατύλιξης
+      Rewind Buffer Tooltip: 'Πόσο από το βίντεο που έχετε ήδη δει παραμένει φορτωμένο. Προεπιλογή: {value}'
+      Buffer Before Playing: Φόρτωση πριν από την αναπαραγωγή
+      Buffer Before Playing Tooltip: 'Πόσο βίντεο πρέπει να φορτωθεί πριν ξεκινήσει η αναπαραγωγή ή πριν συνεχιστεί μετά από διακοπή. Προεπιλογή: {value}'
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Όριο ποιότητας σε δίκτυα με χρέωση δεδομένων"
+      No Limit: "Χωρίς όριο"
+      Tooltip: "Σε δεδομένα κινητής και άλλα δίκτυα με χρέωση δεδομένων, τα βίντεο ξεκινούν σε αυτήν ή χαμηλότερη ποιότητα. Μπορείτε ακόμα να επιλέξετε υψηλότερη ποιότητα στο πρόγραμμα αναπαραγωγής."
+    Show Music Mode Toggle: "Εμφάνιση διακόπτη λειτουργίας μουσικής"
+    Enable DLNA Casting: "Ενεργοποίηση μετάδοσης DLNA"
+    Skip Unavailable Playlist Videos: "Παράλειψη μη διαθέσιμων βίντεο σε λίστες αναπαραγωγής"
+    Lights Off: Σβήσιμο φώτων
+    Show Lights Off Toggle: Εμφάνιση διακόπτη σβησίματος φώτων
+    Show Volume Boost Toggle: "Εμφάνιση διακόπτη ενίσχυσης έντασης"
+    Swipe Gestures:
+      Fullscreen Brightness: Μέγιστη φωτεινότητα σε πλήρη οθόνη
+      Left: Σύρσιμο στην αριστερή πλευρά
+      Right: Σύρσιμο στη δεξιά πλευρά
+      Disabled: Απενεργοποιημένο
+      Brightness: Φωτεινότητα
+      Volume: Ένταση ήχου
+      Hint: Σύρετε πάνω ή κάτω σε μια πλευρά του βίντεο σε πλήρη οθόνη.
+      Unavailable: Δεν ήταν δυνατή η προσαρμογή των στοιχείων ελέγχου αναπαραγωγής.
+    yt-dlp Streaming: "Ροή μέσω yt-dlp"
+    Continue Playback When Screen Is Locked: 'Συνέχιση αναπαραγωγής όταν η οθόνη είναι κλειδωμένη'
+    Music Visualizer: Οπτικοποίηση μουσικής
+    Automatically Open Chapters: Αυτόματο άνοιγμα κεφαλαίων
+    Caption Appearance:
+      Caption Appearance: Εμφάνιση υποτίτλων
+      Captions: Υπότιτλοι
+      Preferred Language: Προτιμώμενη γλώσσα υποτίτλων
+      Application Language: Γλώσσα εφαρμογής
+      Enable Translations: Ενεργοποίηση μετάφρασης υποτίτλων
+      Text Color: Χρώμα κειμένου
+      Background Color: Χρώμα φόντου
+      Background Opacity: Αδιαφάνεια φόντου
+      Font Size: Μέγεθος γραμματοσειράς
+      Anchor:
+        Anchor: Αγκύρωση
+        Top Left: Επάνω αριστερά
+        Top Center: Επάνω στο κέντρο
+        Top Right: Επάνω δεξιά
+        Bottom Left: Κάτω αριστερά
+        Bottom Center: Κάτω στο κέντρο
+        Bottom Right: Κάτω δεξιά
+        Center Left: Κέντρο αριστερά
+        Center: Κέντρο
+        Center Right: Κέντρο δεξιά
+      Edge Style:
+        Edge Style: Στυλ περιγράμματος
+        None: Κανένα
+        Outline: Περίγραμμα
+        Drop Shadow: Σκιά
+        Raised: Ανάγλυφο
+        Depressed: Βυθισμένο
+      Reset: Επαναφορά εμφάνισης υποτίτλων
+      Default: Προεπιλογή
+      Text Opacity: Αδιαφάνεια γραμματοσειράς
+      Font Family:
+        Font Family: Οικογένεια γραμματοσειρών
+        Monospaced Serif: Serif σταθερού πλάτους
+        Proportional Serif: Serif αναλογικού πλάτους
+        Monospaced Sans-Serif: Sans-Serif σταθερού πλάτους
+        Proportional Sans-Serif: Sans-Serif αναλογικού πλάτους
+      Colors:
+        White: Άσπρο
+        Yellow: Κίτρινο
+        Green: Πράσινο
+        Cyan: Κυανό
+        Blue: Μπλε
+        Magenta: Ματζέντα
+        Red: Κόκκινο
+        Black: Μαύρο
+    Default Viewing Mode:
+      Tooltip: Οι περισσότερες προεπιλεγμένες λειτουργίες προβολής εφαρμόζονται μόνο στην αρχή κάθε συνεδρίας παρακολούθησης. Οι αλλαγές που κάνετε κατά τη συνεδρία διατηρούνται μέχρι να τελειώσει. Οι μόνιμα ενεργές λειτουργίες προβολής εφαρμόζονται κάθε φορά που αλλάζετε βίντεο, ανεξάρτητα από τις αλλαγές που κάνατε κατά την προβολή του προηγούμενου βίντεο.
+    Auto Picture in Picture:
+      Auto Picture in Picture: Αυτόματη μετάβαση σε λειτουργία εικόνας εντός εικόνας
+      On Tab Change: Κατά την αλλαγή καρτέλας
+      On Window Minimize: Κατά την ελαχιστοποίηση του παραθύρου
+      On Window Hide: Όταν το παράθυρο χάνει την εστίαση ή αλλάζετε εφαρμογή
+      Wayland Minimize Unsupported: Το Wayland δεν αναφέρει στις εφαρμογές την ελαχιστοποίηση παραθύρων, επομένως αυτή η συνθήκη δεν είναι διαθέσιμη. Χρησιμοποιήστε την επιλογή «Όταν το παράθυρο χάνει την εστίαση ή αλλάζετε εφαρμογή», η οποία καλύπτει και την ελαχιστοποίηση.
+      On Tab Change Mini Player: Κατά την αλλαγή καρτέλας εμφανίζεται αντί γι' αυτό το μικρό πρόγραμμα αναπαραγωγής. Για να το χρησιμοποιήσετε, ορίστε το «Κατά την έξοδο από ένα βίντεο» σε «Διακοπή αναπαραγωγής».
+    Scroll Mini Player:
+      Scroll Mini Player: Μικρό πρόγραμμα αναπαραγωγής κατά την κύλιση
+      Scroll Player Mode: Κατά την κύλιση προς τα κάτω
+      Scroll Player Mode Tooltip: Η αναπαραγωγή καρφιτσώνεται μόνο όσο καταλαμβάνει το πολύ το μισό ύψος του παραθύρου. Διαφορετικά, όπως σε τηλέφωνα σε οριζόντιο προσανατολισμό ή σε φαρδιά παράθυρα, εμφανίζεται η μίνι αναπαραγωγή.
+      Scroll Player Modes:
+        Mini: Εμφάνιση μικρού προγράμματος αναπαραγωγής
+        Pin: Καρφίτσωμα της αναπαραγωγής στην κορυφή, αν υπάρχει χώρος
+        Off: Κύλιση μαζί με τη σελίδα
+      Leaving Video: Κατά την έξοδο από ένα βίντεο
+      Leaving Video Modes:
+        Keep Playing: Συνέχιση αναπαραγωγής σε μικρό πρόγραμμα αναπαραγωγής
+        Stop: Διακοπή αναπαραγωγής
+    Multiply Seek Interval by Playback Rate: Πολλαπλασιασμός διαστήματος μετακίνησης με την ταχύτητα αναπαραγωγής
+    Show Playback Rate Adjusted Timestamp: Εμφάνιση χρονικής ένδειξης προσαρμοσμένης στην ταχύτητα αναπαραγωγής
+    Use YouTube-style Shorts: Χρήση σύντομων βίντεο τύπου YouTube
+    Loop Shorts: Επανάληψη σύντομων βίντεο
+    Remember Volume: Απομνημόνευση έντασης ήχου
+    Skip Silence: Παράλειψη σιωπής
+    Show Skip Silence Toggle: Εμφάνιση διακόπτη παράλειψης σιωπής
+    Enable Skip Silence by Default: Προεπιλεγμένη ενεργοποίηση παράλειψης σιωπής
+    Enable Video Zoom: Ενεργοποίηση μεγέθυνσης βίντεο
+    Enable Seek History: Ενεργοποίηση ιστορικού μεταβάσεων
+    Show Seek Bar Filmstrip: "Εμφάνιση ταινίας καρέ γραμμής αναζήτησης"
+    Voice-over Translation:
+      Title: Μετάφραση εκφώνησης
+      Attribution: (με την υποστήριξη της Yandex)
+      Enable: Ενεργοποίηση μετάφρασης εκφώνησης
+      Prepare in Background: Έναρξη προετοιμασίας μεταφράσεων εκφώνησης στο παρασκήνιο
+      Background Preparation Tooltip: Μόλις φορτωθεί ένα υποστηριζόμενο βίντεο, αποστέλλονται στην υπηρεσία μετάφρασης το αναγνωριστικό, η διάρκεια και η επιλεγμένη γλώσσα του.
+      Language: Γλώσσα μετάφρασης εκφώνησης
+      Supported Source Languages: 'Υποστηριζόμενες γλώσσες προέλευσης: Ρωσικά, Αγγλικά, Κινεζικά, Κορεατικά, Αραβικά, Γαλλικά, Ιταλικά, Ισπανικά, Γερμανικά και Ιαπωνικά.'
+      Voice Volume: Ένταση μεταφρασμένης φωνής
+      Original Volume: Ένταση αρχικού ήχου
+      Russian: Ρωσικά
+      English: Αγγλικά
+      Kazakh: Καζακικά
+    Hold to Double Playback Speed: Παρατεταμένο πάτημα για διπλάσια ταχύτητα αναπαραγωγής
+    Use Quick Playback Speed Bar: Χρήση γραμμής γρήγορης επιλογής ταχύτητας αναπαραγωγής
+    Customize Quick Playback Speed Bar: Προσαρμογή γραμμής γρήγορης επιλογής ταχύτητας αναπαραγωγής
+    Quick Playback Speed Bar Manager: Γραμμή γρήγορης επιλογής ταχύτητας αναπαραγωγής
+    Add Playback Speed: Προσθήκη ταχύτητας αναπαραγωγής
+    Reset Quick Playback Speed Bar: Επαναφορά προεπιλογών
+    Playback Speed Name: Όνομα
+    Edit Playback Speed Name: Επεξεργασία ονόματος ταχύτητας αναπαραγωγής
+    Use Automatic Playback Speed Name: Χρήση αυτόματου ονόματος ταχύτητας αναπαραγωγής
+    Reorder Playback Speed: Σύρετε για αλλαγή σειράς της ταχύτητας αναπαραγωγής
+    Playback Speed: Ταχύτητα αναπαραγωγής
+    Parallel Segment Loading: Παράλληλη φόρτωση τμημάτων
+    Rotate Wide Videos to Landscape in Fullscreen: 'Περιστροφή ευρέων βίντεο σε οριζόντιο προσανατολισμό σε πλήρη οθόνη'
+    Swipe Up or Down to Enter or Exit Fullscreen: 'Σύρετε πάνω ή κάτω για είσοδο ή έξοδο από την πλήρη οθόνη'
+    Preload Upcoming Videos: "Προφόρτωση επόμενων βίντεο"
+    Upcoming Videos to Preload: "Πλήθος βίντεο για προφόρτωση"
+    Concurrent Preloads: "Ταυτόχρονες προφορτώσεις"
+    Ignore System Rotation Lock for Fullscreen: Παράβλεψη κλειδώματος περιστροφής συστήματος για πλήρη οθόνη
+    Swipe Left or Right to Seek in Fullscreen: Σύρετε αριστερά ή δεξιά για αναζήτηση σε πλήρη οθόνη
+    Show Swipe to Seek Preview: Εμφάνιση προεπισκόπησης κατά τη μετακίνηση με σάρωση
+    Enable Google Cast: "Ενεργοποίηση Google Cast"
+    Sections:
+      Playback: Αναπαραγωγή
+      Autoplay: Αυτόματη αναπαραγωγή
+      Playback Speed: Ταχύτητα αναπαραγωγής
+      Player Controls: Στοιχεία ελέγχου προγράμματος αναπαραγωγής
+      Gestures: Χειρονομίες
+      Viewing Modes: Λειτουργίες προβολής
+      Shorts: Shorts
+      Screenshots: Στιγμιότυπα οθόνης
+    Enable FCast: "Ενεργοποίηση FCast"
+    Screenshot:
+      Legacy Formats: "Παλαιότερες μορφές"
+      Modern Formats: "Σύγχρονες μορφές"
+  Channel Settings:
+    Channel Settings: Ρυθμίσεις καναλιών
+    Channel Settings Description: Απομνημόνευση των ρυθμίσεων που επιλέγετε κατά την παρακολούθηση, ξεχωριστά για κάθε κανάλι, ώστε να εφαρμόζονται ξανά την επόμενη φορά που θα παρακολουθήσετε κάποιο βίντεό του.
+    Enable Channel Playback Settings: Ενεργοποίηση ρυθμίσεων αναπαραγωγής ανά κανάλι
+    Auto Save Playback Speed: Αυτόματη αποθήκευση αλλαγών ταχύτητας αναπαραγωγής
+    Auto Save Video Quality: Αυτόματη αποθήκευση αλλαγών ποιότητας βίντεο
+    Auto Save Subtitles State: Αυτόματη αποθήκευση αλλαγών κατάστασης υποτίτλων
+    Auto Save Volume: Αυτόματη αποθήκευση αλλαγών έντασης ήχου
+    Manage Saved Channels: Διαχείριση αποθηκευμένων καναλιών ({channelCount})
+    Saved Channels: Αποθηκευμένες ρυθμίσεις καναλιών
+    Enable Saved Channel Settings Sync: Συγχρονισμός αποθηκευμένων ρυθμίσεων καναλιών
+    Disable Saved Channel Settings Sync: Διακοπή συγχρονισμού αποθηκευμένων ρυθμίσεων καναλιών
+    Search Channels: Αναζήτηση καναλιών
+    No Saved Channels: Δεν έχουν αποθηκευτεί ακόμη ρυθμίσεις για συγκεκριμένα κανάλια
+    No Matching Channels: Κανένα κανάλι δεν αντιστοιχεί στην αναζήτησή σας
+    Forget Channel: Διαγραφή όλων των ρυθμίσεων αυτού του καναλιού
+    Forget Value: Διαγραφή αυτής της ρύθμισης
+    Add Setting: Απομνημόνευση άλλης ρύθμισης για αυτό το κανάλι
+    Add Subscribed Channel: Προσθήκη εγγεγραμμένου καναλιού
+    Video Quality: Ποιότητα βίντεο
+    Subtitles Enabled: Υπότιτλοι ενεργοποιημένοι
+    Volume: Ένταση ήχου
+  Download Settings:
+    Download Settings: Λήψεις
+    Enable Downloads: Ενεργοποίηση λήψεων
+    Managed Tools Download Started Template: 'Δεν βρέθηκε το απαιτούμενο εξωτερικό λογισμικό: {tools}. Γίνεται λήψη διαχειριζόμενων αντιγράφων…'
+    Managed Tools Download Finished Template: Ολοκληρώθηκε η λήψη των {tools}
+    Managed Tools Update Started Template: Βρέθηκε ενημέρωση για τα {tools}. Γίνεται λήψη…
+    Managed Tools Update Finished Template: Ολοκληρώθηκε η ενημέρωση των {tools}
+    Managed Tools Update Available Template: Υπάρχει διαθέσιμη ενημέρωση για τα {tools}.
+    Managed Tools Update Source Notice: "Το OpenTubeX την κατεβάζει απευθείας από το GitHub, οπότε το F-Droid και τα άλλα καταστήματα εφαρμογών δεν την ελέγχουν."
+    Update Managed Tools: Ενημέρωση
+    Managed Tools Download Error Template: 'Δεν ήταν δυνατή η λήψη των διαχειριζόμενων εργαλείων: {errors}'
+    Download Folder: Φάκελος λήψεων
+    Global Additional yt-dlp Arguments: Πρόσθετα ορίσματα yt-dlp
+    Concurrent Downloads: Ταυτόχρονες λήψεις
+    Bandwidth Limit: Όριο εύρους ζώνης (KiB/s)
+    Download Templates: Πρότυπα λήψεων
+    Manage Download Templates: Διαχείριση προτύπων λήψεων ({templateCount})
+    New Template: Νέο πρότυπο
+    Template Source: Πρότυπο για επεξεργασία ή χρήση ως βάση
+    Built-in Template: '{name} (ενσωματωμένο)'
+    Custom Template Name: '{name} (προσαρμοσμένο)'
+    Create Template Copy: Δημιουργία αντιγράφου
+    Template Copy Name: '{name} - Αντίγραφο'
+    Automatic Downloads: Αυτόματες λήψεις
+    Manage Automatic Downloads: Διαχείριση αυτόματων λήψεων ({channelCount})
+    Automatic Downloads Description: Επιλέξτε ένα πρότυπο λήψης και φίλτρα για κάθε κανάλι στο οποίο έχετε εγγραφεί. Τα βίντεο που αντιστοιχούν στα φίλτρα λαμβάνονται στο παρασκήνιο όταν ανανεώνονται οι ροές συνδρομών.
+    Automatic Downloads New Only: Με την ενεργοποίηση ενός καναλιού, οι λήψεις αρχίζουν από την επόμενη νέα μεταφόρτωσή του. Δεν λαμβάνονται τα υπάρχοντα βίντεο ούτε το παλαιότερο περιεχόμενο του καναλιού.
+    Automatic Downloads No Channels: Εγγραφείτε σε ένα κανάλι πριν ρυθμίσετε τις αυτόματες λήψεις.
+    No Matching Automatic Download Channels: Κανένα κανάλι δεν αντιστοιχεί στην αναζήτησή σας.
+    Automatic Downloads Livestreams: Ζωντανές μεταδόσεις
+    Minimum Duration Seconds: Ελάχιστη διάρκεια (δευτερόλεπτα)
+    Maximum Duration Seconds: Μέγιστη διάρκεια (δευτερόλεπτα)
+    Minimum File Size MB: Ελάχιστο μέγεθος αρχείου (MB)
+    Maximum File Size MB: Μέγιστο μέγεθος αρχείου (MB)
+    Maximum Age Days: Μέγιστη ηλικία (ημέρες)
+    Title Includes: Ο τίτλος περιλαμβάνει
+    Title Excludes: Ο τίτλος δεν περιλαμβάνει
+    Title Filter Hint: Διαχωρίστε πολλούς όρους τίτλου με κόμματα. Ένα βίντεο πρέπει να αντιστοιχεί σε τουλάχιστον έναν όρο συμπερίληψης και σε κανέναν όρο αποκλεισμού.
+    Automatic Downloads Require Unmetered Network: "Μόνο σε δίκτυα χωρίς χρέωση δεδομένων"
+    Automatic Downloads Require Charging: "Μόνο κατά τη φόρτιση"
+  External Software Settings:
+    Create YouTube session: "Δημιουργία συνεδρίας YouTube"
+    YouTube session hint: "Συνδεθείτε αν χρειάζεται και αποθηκεύστε τη συνεδρία. Επιλέξτε στις ρυθμίσεις αν θα χρησιμοποιείται για λήψεις, αναπαραγωγή ή υπότιτλους."
+    Use cookies for downloads: "Χρήση cookies για λήψεις"
+    YouTube session failed: "Αδυναμία αποθήκευσης της συνεδρίας YouTube."
+    Checking FFmpeg and FFprobe: Έλεγχος FFmpeg/FFprobe…
+    FFmpeg and FFprobe Managed Not Downloaded: Δεν έχει γίνει ακόμη λήψη του FFmpeg/FFprobe. Κάντε κλικ στο παρακάτω κουμπί για να το κατεβάσετε.
+    External Software Settings: Εξωτερικό λογισμικό
+    yt-dlp Source: Προέλευση yt-dlp
+    yt-dlp Channel: Κανάλι yt-dlp
+    Sources:
+      System: Σύστημα (PATH ή προσαρμοσμένη διαδρομή)
+      Managed: Διαχείριση από το OpenTubeX
+    Detected Version Template: 'Εντοπίστηκε έκδοση yt-dlp: {version}'
+    Managed Not Downloaded: Δεν έχει γίνει ακόμη λήψη του yt-dlp. Κάντε κλικ στο παρακάτω κουμπί για να το κατεβάσετε.
+    System yt-dlp Missing Warning: Το yt-dlp δεν βρέθηκε στο σύστημά σας. Εγκαταστήστε το, ορίστε παρακάτω μια προσαρμοσμένη διαδρομή ή αλλάξτε την προέλευση σε «Διαχείριση από το OpenTubeX».
+    Download yt-dlp: Λήψη yt-dlp
+    Update yt-dlp: Ενημέρωση yt-dlp
+    Checking yt-dlp: Έλεγχος yt-dlp…
+    Downloading yt-dlp: Λήψη yt-dlp…
+    yt-dlp Downloaded Template: Έγινε λήψη του yt-dlp {version}
+    yt-dlp Download Error Template: 'Η λήψη του yt-dlp απέτυχε: {error}'
+    FFmpeg Source: Προέλευση FFmpeg
+    Detected FFmpeg Version Template: 'Εντοπίστηκε έκδοση FFmpeg: {version}'
+    Detected FFmpeg and FFprobe Version Template: 'Εντοπίστηκε έκδοση FFmpeg/FFprobe: {version}'
+    FFmpeg Managed Not Downloaded: Δεν έχει γίνει ακόμη λήψη του FFmpeg. Κάντε κλικ στο παρακάτω κουμπί για να το κατεβάσετε.
+    System FFmpeg Missing Warning: Το FFmpeg δεν βρέθηκε στο σύστημά σας. Απαιτείται για τη συγχώνευση βίντεο και ήχου, καθώς και για τη μετατροπή ήχου. Εγκαταστήστε το, ορίστε παρακάτω μια προσαρμοσμένη διαδρομή ή αλλάξτε την προέλευση σε «Διαχείριση από το OpenTubeX».
+    Download FFmpeg: Λήψη FFmpeg
+    Update FFmpeg: Ενημέρωση FFmpeg
+    Checking FFmpeg: Έλεγχος FFmpeg…
+    Downloading FFmpeg: Λήψη FFmpeg…
+    FFmpeg Downloaded Template: Έγινε λήψη του FFmpeg {version}
+    FFmpeg Download Error Template: 'Η λήψη του FFmpeg απέτυχε: {error}'
+    Detected FFprobe Version Template: 'Εντοπίστηκε έκδοση FFprobe: {version}'
+    FFprobe Managed Not Downloaded: Δεν έχει γίνει ακόμη λήψη του FFprobe. Κάντε κλικ στο παρακάτω κουμπί για να το κατεβάσετε μαζί με το FFmpeg.
+    System FFprobe Missing Warning: Το FFprobe δεν βρέθηκε στο σύστημά σας. Απαιτείται για την εξέταση πολυμέσων κατά τη μετεπεξεργασία. Εγκαταστήστε το δίπλα στο FFmpeg ή αλλάξτε την προέλευση σε «Διαχείριση από το OpenTubeX».
+    Checking FFprobe: Έλεγχος FFprobe…
+    Download FFmpeg and FFprobe: Λήψη FFmpeg και FFprobe
+    Update FFmpeg and FFprobe: Ενημέρωση FFmpeg και FFprobe
+    Downloading FFmpeg and FFprobe: Λήψη FFmpeg και FFprobe…
+    FFmpeg and FFprobe Downloaded Template: Έγινε λήψη των FFmpeg και FFprobe {version}
+    FFmpeg and FFprobe Download Error Template: 'Η λήψη των FFmpeg και FFprobe απέτυχε: {error}'
+    Managed Tool Already Current Template: Το {tool} {version} είναι ήδη ενημερωμένο
+    Managed Tool Errors:
+      Removed: 'Το αρχείο που λήφθηκε αφαιρέθηκε, πιθανότατα από λογισμικό προστασίας από ιούς'
+      Unusable: 'Δεν ήταν δυνατή η εκτέλεση του προγράμματος που λήφθηκε. Ενδέχεται να το αποκλείει λογισμικό προστασίας από ιούς ή να μην υποστηρίζει αυτό το σύστημα'
+      Release Not Found: 'Δεν ήταν δυνατή η εύρεση της πιο πρόσφατης έκδοσης'
+      Verification Failed: 'Δεν ήταν δυνατή η επαλήθευση της λήψης ως επίσημης έκδοσης'
+      Downgrade: 'Η έκδοση που λήφθηκε είναι παλαιότερη από την εγκατεστημένη'
+      Invalid Archive: 'Το αρχείο συμπίεσης που λήφθηκε δεν είναι έγκυρο'
+      Rollback Failed: 'Η ενημέρωση απέτυχε και η προηγούμενη έκδοση δεν ήταν δυνατό να αποκατασταθεί πλήρως'
+    Managed Tool Updates: Ενημερώσεις διαχειριζόμενων εργαλείων
+    Update Modes:
+      Automatic: Αυτόματη ενημέρωση
+      Ask: Ερώτηση πριν από την ενημέρωση
+      Manual: Μόνο μη αυτόματη ενημέρωση
+    yt-dlp Executable Path: Εκτελέσιμο yt-dlp
+    FFmpeg Executable Path: Εκτελέσιμο FFmpeg
+    Restricted Playback Authentication: "Cookies του yt-dlp"
+    Cookie Source: Προέλευση cookie
+    Cookie Sources:
+      None: Καμία
+      File: Αρχείο
+      Browser: Πρόγραμμα περιήγησης
+    Cookie File: Αρχείο cookie
+    Browser for Cookies: Πρόγραμμα περιήγησης για cookie
+    Browser Profile: Προφίλ προγράμματος περιήγησης (προαιρετικό)
+    Browser Profile Placeholder: Όνομα ή διαδρομή προφίλ
+    Browser Profile Invalid: "Εισαγάγετε ένα όνομα προφίλ ή επιλέξτε φάκελο προφίλ με το κουμπί φακέλου."
+    Select Browser: Επιλογή προγράμματος περιήγησης
+    Always Use Cookies: Μόνιμη χρήση cookie
+    Restricted Playback Authentication Hint: Από προεπιλογή, το OpenTubeX διαβιβάζει αυτά τα cookie στο yt-dlp μόνο αφού επιλέξετε «Δοκιμή με τα ρυθμισμένα cookie» σε βίντεο με περιορισμό ηλικίας ή μόνο για μέλη.
+    Restricted Playback Authentication Warning: Η χρήση του yt-dlp με λογαριασμό Google μπορεί να οδηγήσει σε προσωρινούς ή μόνιμους περιορισμούς του λογαριασμού.
+    Use cookies for subtitles: "Χρήση cookies για υπότιτλους"
+  Privacy Settings:
+    Internet Connectivity Checks: "Έλεγχοι σύνδεσης στο διαδίκτυο"
+    Internet Connectivity Checks Tooltip: "Στέλνει μικρά αιτήματα σε έναν διακομιστή που φιλοξενείται από το GrapheneOS για έλεγχο της πρόσβασης στο διαδίκτυο."
+    Automatic History Retention: Αυτόματη διατήρηση ιστορικού (ημέρες)
+    Automatic History Retention Placeholder: Αφήστε το κενό για μόνιμη διατήρηση
+    Automatic History Retention Tooltip: Αφήστε το κενό για να διατηρείται το ιστορικό για πάντα. Αν αποθηκεύσετε έναν αριθμό, οι παλαιότερες καταχωρίσεις αφαιρούνται τώρα και αυτόματα όσο η εφαρμογή είναι ανοιχτή.
+    Automatic Search History Retention: Αυτόματη διατήρηση ιστορικού αναζητήσεων (ημέρες)
+    Automatic Search History Retention Tooltip: Αφήστε το κενό για να διατηρείται το ιστορικό αναζητήσεων για πάντα. Αν αποθηκεύσετε έναν αριθμό, οι παλαιότερες αναζητήσεις αφαιρούνται τώρα και αυτόματα όσο η εφαρμογή είναι ανοιχτή.
+    History Retention Saved: Η ρύθμιση διατήρησης ιστορικού αποθηκεύτηκε
+    Invalid History Retention Days: Εισαγάγετε ακέραιο αριθμό ημερών μεγαλύτερο από το μηδέν
+    Enable Watch Statistics: Ενεργοποίηση στατιστικών παρακολούθησης
+    Week Starts On: Πρώτη ημέρα εβδομάδας
+    Cache Video Metadata: Ιστορικό μεταδεδομένων
+    Cache Video Metadata Tooltip: Διατηρεί κάθε έκδοση των υποστηριζόμενων μεταδεδομένων για τα βίντεο που επισκέπτεστε, όπως τίτλους, μικρογραφίες και περιγραφές. Διατηρεί επίσης τους τίτλους που εμφανίζονται στις ροές των συνδρομών σας. Είναι απενεργοποιημένο από προεπιλογή, επειδή η αποθήκευση ιστορικού μεταδεδομένων αυξάνει τη χρήση δίσκου.
+    Watched Percentage Threshold: Όριο ποσοστού παρακολούθησης
+    Watched Percentage Threshold Tooltip: Τα βίντεο επισημαίνονται ως παρακολουθημένα όταν φτάσουν στο επιλεγμένο ποσοστό και απομένουν έως 2 λεπτά. Στο 0%, επισημαίνονται όταν αρχίζει η αναπαραγωγή. Στο 100%, επισημαίνονται όταν τελειώνει.
+    Clear Video Metadata Cache: Εκκαθάριση κρυφής μνήμης μεταδεδομένων βίντεο
+    Are you sure you want to clear the video metadata cache?: Θέλετε σίγουρα να διαγράψετε τους τίτλους, τις μικρογραφίες και τις περιγραφές βίντεο από την κρυφή μνήμη;
+    Failed to clear video metadata cache: Απέτυχε η εκκαθάριση της κρυφής μνήμης μεταδεδομένων βίντεο
+    Video metadata cache has been cleared: Η κρυφή μνήμη μεταδεδομένων βίντεο εκκαθαρίστηκε
+    Video Metadata Cache Size: 'Κρυφή μνήμη μεταδεδομένων βίντεο: {size}'
+  Storage Settings:
+    Storage: Αποθηκευτικός χώρος
+    Downloaded Media: Καταγεγραμμένα ληφθέντα πολυμέσα
+    Storage Breakdown: Ανάλυση αποθηκευτικού χώρου
+    Shown Total: Εμφανιζόμενο σύνολο
+    Calculating: Υπολογισμός…
+    Not Available: Το ακριβές μέγεθος δεν είναι διαθέσιμο
+    At Least: Τουλάχιστον {size}
+    Failed To Read Storage: Δεν ήταν δυνατή η ανάγνωση ορισμένων μεγεθών αποθήκευσης
+    Downloaded Media Description: Αρχεία βίντεο, ήχου και υποτίτλων που εξακολουθεί να καταγράφει το ιστορικό λήψεων.
+    Selected Download Folders: Φάκελοι λήψεων που επέλεξε ο χρήστης
+    Download History Records: Καταχωρίσεις ιστορικού λήψεων
+    Download History Records Description: '{count} καταχώριση ολοκληρωμένης λήψης. Αυτή η καταχώριση παρακολουθεί την κατάσταση και τις θέσεις των αρχείων, αλλά δεν περιέχει τα ληφθέντα πολυμέσα. | {count} καταχωρίσεις ολοκληρωμένων λήψεων. Αυτές οι καταχωρίσεις παρακολουθούν την κατάσταση και τις θέσεις των αρχείων, αλλά δεν περιέχουν τα ληφθέντα πολυμέσα.'
+    Clear Download History Records: Εκκαθάριση καταχωρίσεων ιστορικού λήψεων
+    Clear Download History Confirmation: Εκκαθάριση όλων των καταχωρίσεων ολοκληρωμένων λήψεων;
+    Download Files Stay On Disk: Τα ληφθέντα αρχεία θα παραμείνουν στον δίσκο, αλλά δεν θα εμφανίζονται πλέον στη σελίδα Λήψεις.
+    Clear Records: Εκκαθάριση καταχωρίσεων
+    Replaceable Caches: Κρυφές μνήμες που μπορούν να αναδημιουργηθούν
+    Application Caches: Κρυφές μνήμες εφαρμογής
+    Browser Caches: Κρυφές μνήμες προγράμματος περιήγησης
+    Browser Caches Hint: Κρυφές μνήμες HTTP, GPU, κώδικα, shader, service worker και λεξικών του Chromium.
+    Clear Android Cache Confirmation: Εκκαθάριση της προσωρινής μνήμης προγράμματος περιήγησης του Android;
+    Stored App Data: Αποθηκευμένα δεδομένα εφαρμογής
+    Included In App Data: Περιλαμβάνεται στα δεδομένα εφαρμογής που εμφανίζονται παραπάνω
+    Browser Runtime Data: Δεδομένα εκτέλεσης προγράμματος περιήγησης
+    Browser Runtime Data Hint: Χώρος αποθήκευσης συνεδρίας και τοπικός χώρος αποθήκευσης, cookie, κατάσταση απορρήτου και δικτύου, καθώς και αρχεία κατάρρευσης του Chromium.
+    Subscription Feed Cache: Κρυφή μνήμη συνδρομών και ροών
+    Subscription Feed Cache Description: Αποθηκεύει τα βίντεο, τα σύντομα βίντεο, τις ζωντανές μεταδόσεις και τις αναρτήσεις συνδρομών που ανακτήθηκαν. Το OpenTubeX την αναδημιουργεί στην επόμενη ανανέωση των ροών.
+    Clear Subscription Feed Cache: Εκκαθάριση κρυφής μνήμης συνδρομών και ροών
+    Clear Subscription Feed Cache Confirmation: Εκκαθάριση της κρυφής μνήμης συνδρομών και ροών;
+    Subscription Feed Cache Effect: Οι ροές συνδρομών μπορεί να εμφανίζονται κενές μέχρι να ανανεωθούν. Οι συνδρομές και τα προφίλ σας δεν θα αλλάξουν.
+    Session Search Cache: Κρυφή μνήμη αναζητήσεων συνεδρίας
+    In Memory: Στη μνήμη
+    Session Search Cache Description: '{count} αναζήτηση έχει αποθηκευτεί προσωρινά στη μνήμη για ταχύτερη πλοήγηση προς τα πίσω. Αυτή η κρυφή μνήμη απορρίπτεται όταν κλείσει το OpenTubeX. | {count} αναζητήσεις έχουν αποθηκευτεί προσωρινά στη μνήμη για ταχύτερη πλοήγηση προς τα πίσω. Αυτή η κρυφή μνήμη απορρίπτεται όταν κλείσει το OpenTubeX.'
+    Clear Session Search Cache: Εκκαθάριση κρυφής μνήμης αναζητήσεων συνεδρίας
+    Clear Session Search Cache Confirmation: Εκκαθάριση της κρυφής μνήμης αναζητήσεων συνεδρίας;
+    Session Search Cache Effect: Οι προσωρινά αποθηκευμένες σελίδες αποτελεσμάτων θα απορριφθούν. Το αποθηκευμένο ιστορικό αναζητήσεων δεν θα αλλάξει.
+    HTTP Cache: Κρυφή μνήμη HTTP
+    HTTP Cache Description: Το Electron αποθηκεύει τις αποκρίσεις δικτύου στον δίσκο, ώστε τα επαναλαμβανόμενα αιτήματα να φορτώνονται χωρίς νέα λήψη των ίδιων δεδομένων. Το OpenTubeX αναδημιουργεί αυτήν την κρυφή μνήμη όταν χρειάζεται.
+    Managed By Electron: Διαχείριση από το Electron
+    Clear HTTP Cache: Εκκαθάριση κρυφής μνήμης HTTP
+    Clear HTTP Cache Confirmation: Εκκαθάριση της κρυφής μνήμης HTTP του Electron;
+    HTTP Cache Effect: Οι εικόνες και άλλοι πόροι δικτύου μπορεί να φορτωθούν πιο αργά μία φορά, μέχρι να αναδημιουργηθεί η κρυφή μνήμη.
+    Tab Image Cache: Μικρογραφίες καρτελών και εικόνες προφίλ καναλιών
+    Tab Image Cache Description: Αποθηκεύει εικόνες προεπισκόπησης και εικόνες προφίλ καναλιών για ανοιχτές καρτέλες και καρτέλες που έχουν επαναφερθεί. Το OpenTubeX τις αναδημιουργεί καθώς χρησιμοποιούνται οι καρτέλες.
+    Clear Tab Image Cache: Εκκαθάριση κρυφής μνήμης εικόνων καρτελών
+    Clear Tab Image Cache Confirmation: Εκκαθάριση μικρογραφιών καρτελών και εικόνων προφίλ καναλιών;
+    Tab Image Cache Effect: Οι εικόνες καρτελών μπορεί να εξαφανιστούν για λίγο και θα αναδημιουργηθούν καθώς χρησιμοποιούνται οι καρτέλες τους.
+    Playback Caches: Κρυφές μνήμες αναπαραγωγής
+    Playback Caches Description: Αποθηκεύει URL ροών του yt-dlp μεταξύ συνεδριών της εφαρμογής, καθώς και αρχεία του προγράμματος αναπαραγωγής YouTube. Η κρυφή μνήμη URL ισχύει μόνο για ροές που ανακτήθηκαν με το yt-dlp.
+    Playback URL Cache Entry Size: Όριο κρυφής μνήμης URL ροής yt-dlp
+    Playback URL Cache Entry Size Tooltip: Ορίζει το μέγιστο μέγεθος κάθε προσωρινά αποθηκευμένης καταχώρισης ροής yt-dlp. Ορίστε το σε 0 MB για να απενεργοποιήσετε τη μόνιμη προσωρινή αποθήκευση ροών yt-dlp.
+    Clear Playback Caches: Εκκαθάριση κρυφών μνημών αναπαραγωγής
+    Clear Playback Caches Confirmation: Εκκαθάριση των κρυφών μνημών yt-dlp και προγράμματος αναπαραγωγής;
+    Playback Caches Effect: Το επόμενο αίτημα τοπικής αναπαραγωγής μπορεί να διαρκέσει περισσότερο, μέχρι να ανακτηθούν ξανά τα δεδομένα ροής και προγράμματος αναπαραγωγής.
+    Clear Cache: Εκκαθάριση κρυφής μνήμης
+    History Data: Αποθηκευμένα ιστορικά
+    Video Metadata Description: Αποθηκεύει παλαιότερους τίτλους, μικρογραφίες και περιγραφές για υποστηριζόμενα βίντεο. Οι παλιές αναθεωρήσεις δεν μπορούν να αναδημιουργηθούν μετά τη διαγραφή.
+    Video Metadata Effect: Οι αποθηκευμένες αναθεωρήσεις μεταδεδομένων θα διαγραφούν οριστικά. Τα τρέχοντα στοιχεία βίντεο μπορούν να ανακτηθούν ξανά.
+    Watch History: Ιστορικό και στατιστικά παρακολούθησης
+    Watch History Description: Το ιστορικό παρακολούθησης καταγράφει τα προβεβλημένα βίντεο και την πρόοδο. Τα στατιστικά παρακολούθησης αποθηκεύουν τα ημερήσια σύνολα προβολής. Η διατήρηση ισχύει μόνο για το ιστορικό παρακολούθησης.
+    Clear Watch Statistics: Εκκαθάριση στατιστικών παρακολούθησης
+    Watch History Effect: Οι καταχωρίσεις προβεβλημένων βίντεο και η αποθηκευμένη πρόοδος θα διαγραφούν. Τα στατιστικά παρακολούθησης θα διατηρηθούν.
+    Clear Watch Statistics Confirmation: Διαγραφή όλων των στατιστικών παρακολούθησης;
+    Watch Statistics Effect: Τα ημερήσια σύνολα προβολής θα διαγραφούν. Το ιστορικό παρακολούθησης θα διατηρηθεί.
+    Search History: Ιστορικό αναζητήσεων
+    Search History Description: Αποθηκεύει τις αναζητήσεις που επιλέξατε να απομνημονεύονται.
+    Delete Search History: Διαγραφή ιστορικού αναζητήσεων
+    Delete Search History Confirmation: Διαγραφή όλου του αποθηκευμένου ιστορικού αναζητήσεων;
+    Search History Effect: Οι αποθηκευμένες προτάσεις από προηγούμενες αναζητήσεις θα εξαφανιστούν. Η κρυφή μνήμη της τρέχουσας συνεδρίας θα διατηρηθεί.
+    Other User Data: Άλλα δεδομένα χρήστη
+    Other Profile Files: Άλλα αρχεία προφίλ
+    Other Profile Files Hint: Αντίγραφα ασφαλείας, προσωρινά αρχεία και καταχωρίσεις προφίλ που το OpenTubeX δεν αναγνωρίζει ακόμη.
+    Subscriptions And Profiles: Συνδρομές και προφίλ
+    Subscriptions And Profiles Description: Αποθηκεύει τα κανάλια συνδρομών, τα ονόματα προφίλ και τις συμμετοχές σε προφίλ.
+    Subscriptions And Profiles Effect: Όλες οι συνδρομές και τα πρόσθετα προφίλ θα διαγραφούν οριστικά. Θα εκκαθαριστούν επίσης τα δεδομένα κρυφής μνήμης ροών.
+    Playlists Description: Αποθηκεύει ονόματα και περιγραφές λιστών αναπαραγωγής, καθώς και αποθηκευμένα βίντεο.
+    Playlists Effect: Κάθε λίστα αναπαραγωγής και η λίστα αποθηκευμένων βίντεό της θα διαγραφούν οριστικά. Τα ληφθέντα αρχεία πολυμέσων θα διατηρηθούν.
+    Settings And Sessions: Ρυθμίσεις, συνεδρίες καρτελών και υπενθυμίσεις
+    Settings And Sessions Description: Αποθηκεύει τις προτιμήσεις εφαρμογής, τις καρτέλες με δυνατότητα επαναφοράς και τις υπενθυμίσεις ζωντανών μεταδόσεων. Ανοίξτε τον κατάλογο προφίλ για να εξετάσετε ή να δημιουργήσετε αντίγραφα ασφαλείας αυτών των αρχείων. Αυτή η σελίδα δεν τα διαγράφει.
+    Cleanup Complete: Η εκκαθάριση αποθηκευτικού χώρου ολοκληρώθηκε
+    Cleanup Failed: Η εκκαθάριση αποθηκευτικού χώρου απέτυχε
+  Subscription Settings:
+    Fetch Feed on Startup: Ανάκτηση ροής κατά την εκκίνηση
+    Show New Content Feed: Εμφάνιση ροής νέου περιεχομένου
+    RSS Feeds: Ροές RSS
+    Enable RSS Feeds: Ενεργοποίηση ροών RSS για άλλες πλατφόρμες
+    Manage RSS Feeds: Διαχείριση ροών RSS
+    Show New Content Indicators: Εμφάνιση ενδείξεων νέου περιεχομένου
+    Show Scheduled Live Streams / Premieres First: Εμφάνιση προγραμματισμένων ζωντανών μεταδόσεων / πρεμιερών πρώτα
+    Auto Refresh Interval: Διάστημα αυτόματης ανανέωσης
+    Videos Auto Refresh Interval: Διάστημα αυτόματης ανανέωσης βίντεο
+    Shorts Auto Refresh Interval: Διάστημα αυτόματης ανανέωσης σύντομων βίντεο
+    Live Auto Refresh Interval: Διάστημα αυτόματης ανανέωσης ζωντανών μεταδόσεων
+    Posts Auto Refresh Interval: Διάστημα αυτόματης ανανέωσης αναρτήσεων
+    Refresh Subscriptions While App Is Closed: "Ανανέωση συνδρομών όταν η εφαρμογή είναι κλειστή"
+    Notify About New Uploads: Ειδοποίηση για νέες μεταφορτώσεις
+    RSS Feeds Auto Refresh Interval: Διάστημα αυτόματης ανανέωσης ροών RSS
+  Distraction Free Settings:
+    Digital Wellbeing:
+      Count Watch Time From: "Μέτρηση χρόνου παρακολούθησης από"
+      Break Reminder Action: "Όταν είναι ώρα για διάλειμμα"
+      Grayscale: "Κλίμακα του γκρι"
+      Apply Grayscale To: "Εφαρμογή κλίμακας του γκρι σε"
+      Off: "Ανενεργό"
+      Always: "Πάντα"
+      During Bedtime: "Την ώρα του ύπνου"
+      After the Daily Limit: "Μετά το ημερήσιο όριο"
+      Whole App: "Όλη την εφαρμογή"
+      Videos and Images: "Βίντεο και εικόνες"
+      Daily Watch Time Limit: "Ημερήσιο όριο χρόνου παρακολούθησης"
+      Daily Shorts Limit: "Ημερήσιο όριο Shorts"
+      When a Limit Is Reached: "Όταν συμπληρωθεί ένα όριο"
+      Remind Me: "Υπενθύμιση"
+      Pause Playback: "Παύση αναπαραγωγής"
+      Take a Break Reminder: "Υπενθύμιση για διάλειμμα"
+      Every: "Κάθε {duration}"
+      Bedtime Reminder: "Υπενθύμιση ώρας ύπνου"
+      Bedtime Start: "Έναρξη ώρας ύπνου"
+      Bedtime End: "Λήξη ώρας ύπνου"
+      Wait Until the Video Ends: "Αναμονή μέχρι το τέλος του βίντεο"
+      Silence Upload Notifications at Bedtime: "Σίγαση ειδοποιήσεων νέων μεταφορτώσεων την ώρα του ύπνου"
+      Stop Autoplay at Bedtime and After the Daily Limit: "Διακοπή αυτόματης αναπαραγωγής την ώρα του ύπνου και μετά το ημερήσιο όριο"
+    Hide Popularity Graph: "Απόκρυψη γραφήματος δημοτικότητας"
+    Enable Block Lists: "Ενεργοποίηση λιστών αποκλεισμού"
+    AI Video Summaries: Συνόψεις βίντεο από ΤΝ
+    Hide: Απόκρυψη
+    Collapsed: Συμπτυγμένες
+    Expanded: Αναπτυγμένες
+    Video Descriptions: Περιγραφές βίντεο
+    Video Description Modes:
+      Hide: Απόκρυψη
+      Collapsed: Συμπτυγμένες
+      Expanded: Αναπτυγμένες
+    Playing Interface Hide Delay: Καθυστέρηση απόκρυψης διεπαφής κατά την αναπαραγωγή
+    Hide Startup Splash: Απόκρυψη οθόνης εκκίνησης
+    Hide Header Sync Indicator: Απόκρυψη ένδειξης συγχρονισμού στην κεφαλίδα της εφαρμογής
+    Hide Repeat Stats: Απόκρυψη στατιστικών επανάληψης
+    Hide Playlist Stats: Απόκρυψη στατιστικών λίστας αναπαραγωγής
+    Sections:
+      Digital Wellbeing: "Ψηφιακή ευεξία"
+      Visible While Paused: Ορατά κατά την παύση σε πλήρες παράθυρο / πλήρη οθόνη
+    Hide Channel Avatars: Απόκρυψη εικόνων προφίλ καναλιών
+    Shorten View Counts: Συντόμευση πλήθους προβολών, σχολίων και θετικών ψήφων σχολίων
+    Hide Home: Απόκρυψη αρχικής
+    Hide Live Chat Replay: Απόκρυψη επανάληψης ζωντανής συνομιλίας
+    Disable A-B Repeat: Απενεργοποίηση επανάληψης A-B
+    Hide End-Screen Annotations: Απόκρυψη σχολίων τέλους βίντεο
+    Hide End-Screen Recommendations: "Απόκρυψη προτάσεων στην οθόνη τέλους"
+    Hide Paid Promotion Badge: Απόκρυψη σήματος πληρωμένης προώθησης
+    Show Player Controls: Εμφάνιση στοιχείων ελέγχου προγράμματος αναπαραγωγής
+    Show Video Title: Εμφάνιση τίτλου βίντεο
+    Show Bottom Right Actions Dock: Εμφάνιση βάσης ενεργειών κάτω δεξιά
+    Paused Interface Hide Delay: Καθυστέρηση απόκρυψης περιβάλλοντος κατά την παύση
+    Hide Channel Shows: Απόκρυψη της καρτέλας «Εκπομπές» του καναλιού
+  Data Settings:
+    Scheduled backups: "Προγραμματισμένα αντίγραφα ασφαλείας"
+    Scheduled backup description: "Αποθήκευση πλήρων αντιγράφων ZIP όσο το OpenTubeX είναι ανοιχτό. Τα παραλειπόμενα αντίγραφα δημιουργούνται κατά την εκκίνηση. Το όριο ισχύει μόνο για προγραμματισμένα αντίγραφα σε αυτόν τον φάκελο."
+    Choose backup folder: "Επιλογή φακέλου αντιγράφων"
+    No backup folder selected: "Δεν επιλέχθηκε φάκελος αντιγράφων"
+    Enable scheduled backups: "Ενεργοποίηση προγραμματισμένων αντιγράφων"
+    Backup frequency: "Συχνότητα αντιγράφων"
+    Backups to keep: "Αντίγραφα προς διατήρηση"
+    Daily: "Καθημερινά"
+    Weekly: "Εβδομαδιαία"
+    Every 30 days: "Κάθε 30 ημέρες"
+    Last scheduled backup: "Τελευταίο προγραμματισμένο αντίγραφο: {date}"
+    No scheduled backup yet: "Δεν υπάρχει ακόμη προγραμματισμένο αντίγραφο"
+    Scheduled backup failed: "Η δημιουργία αντιγράφου απέτυχε. Ελέγξτε ότι ο φάκελος είναι εγγράψιμος. Νέα προσπάθεια σε πέντε λεπτά."
+    Import Preview:
+      Title: Προεπισκόπηση αλλαγών
+      New: "Νέες: {count}"
+      Existing: "Υπάρχουσες: {count}"
+      Skipped: "Παραλείφθηκαν: {count}"
+      Unreadable files: "Μη αναγνώσιμα αρχεία: {count}"
+      Settings effect: Οι αντίστοιχες ρυθμίσεις αντικαθίστανται. Οι ιδιωτικές και άγνωστες ρυθμίσεις παραλείπονται.
+      Details effect: Οι υπάρχουσες συνδρομές ή τα βίντεο διατηρούνται. Οι εισαγόμενες λεπτομέρειες προφίλ ή λιστών αναπαραγωγής αντικαθιστούν τις τρέχουσες.
+      Merge effect: Τα υπάρχοντα δεδομένα διατηρούνται και συγχωνεύονται με τις αντίστοιχες εγγραφές.
+      Subscriptions effect: Οι υπάρχουσες συνδρομές διατηρούνται. Προστίθενται μόνο νέα κανάλια.
+      History merge effect: Τα αντίστοιχα βίντεο συγχωνεύονται με το ιστορικό σας, διατηρώντας τις αποθηκευμένες λεπτομέρειες και την πιο πρόσφατη ημερομηνία παρακολούθησης. Το υπόλοιπο ιστορικό διατηρείται.
+    Select export data: "Επιλέξτε τα δεδομένα για εξαγωγή"
+    Export selected data: "Εξαγωγή επιλεγμένων δεδομένων"
+    Complete backup: "Ολοκλήρωση αντιγράφου ασφαλείας"
+    Import backup: "Εισαγωγή αντιγράφου ασφαλείας"
+    Export backup: "Εξαγωγή αντιγράφου ασφαλείας"
+    Backup description: "Αποθηκεύστε προφίλ, λίστες αναπαραγωγής, ιστορικό, στατιστικά στοιχεία και μεταβιβάσιμες ρυθμίσεις σε ένα αρχείο ZIP. Η εισαγωγή τους συγχωνεύει με δεδομένα που υπάρχουν ήδη σε αυτήν τη συσκευή."
+    Select backup data: "Επιλέξτε τα δεδομένα για εισαγωγή"
+    Profiles and subscriptions: "Προφίλ και συνδρομές"
+    Backup exported: "Επιτυχής εξαγωγή αντιγράφου ασφαλείας"
+    Backup imported: "Το αντίγραφο ασφαλείας εισήχθη με επιτυχία"
+    Import YouTube Takeout ZIP: "Εισαγωγή ZIP YouTube Takeout"
+    Select Takeout data: "Επιλέξτε τα δεδομένα προς εισαγωγή"
+    Import selected data: "Εισαγωγή επιλεγμένων δεδομένων"
+    No supported Takeout data: "Δεν βρέθηκαν υποστηριζόμενα δεδομένα YouTube σε αυτό το ZIP."
+    Data And Storage: Δεδομένα και αποθηκευτικός χώρος
+    Profile Directory: Κατάλογος προφίλ
+    Open Profile Directory: Άνοιγμα καταλόγου προφίλ
+    Invalid JSON row, skipping item: Μη έγκυρο JSON στη γραμμή {row}, το στοιχείο παραλείπεται
+    Import subscriptions formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), αντίγραφο ασφαλείας LibreTube ή εξαγωγή FreeTube (.json)'
+    Import history formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), αντίγραφο ασφαλείας LibreTube (.json)'
+    Import playlists formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
+    Import search history formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: "Ταχύτητες αναπαραγωγής καναλιών"
+    Import channel playback speeds: "Εισαγωγή ταχυτήτων αναπαραγωγής καναλιών"
+    Channel playback speeds file: "Αρχείο ταχυτήτων αναπαραγωγής καναλιών"
+    Import channel playback speeds formats: "Υποστηριζόμενες μορφές: δεδομένα αποθήκευσης του σεναρίου χρήστη {script} (.json)"
+    Invalid channel playback speeds file: "Δεν βρέθηκαν ταχύτητες αναπαραγωγής καναλιών σε αυτό το αρχείο"
+    Channel playback speeds imported: "Έγινε εισαγωγή της ταχύτητας αναπαραγωγής {count} καναλιού | Έγινε εισαγωγή των ταχυτήτων αναπαραγωγής {count} καναλιών"
+    Channels not found: "Δεν ήταν δυνατή η εύρεση {count} καναλιού | Δεν ήταν δυνατή η εύρεση {count} καναλιών"
+  Sync Settings:
+    Revoke Session Tabs Warning: "Τα συγχρονισμένα σύνολα καρτελών αυτής της συσκευής θα διαγραφούν επίσης."
+    Revoke Session Partial Failure: "Τα συγχρονισμένα σύνολα καρτελών διαγράφηκαν, αλλά η ανάκληση δεν μπόρεσε να επιβεβαιωθεί. Δοκιμάστε ξανά να ανακαλέσετε την πρόσβαση."
+    Tab Sync Revocation Pending: "Ο συγχρονισμός καρτελών έχει τεθεί σε παύση όσο εκκρεμεί η ανάκληση αυτής της σύνδεσης. Δοκιμάστε ξανά την ανάκληση στις ρυθμίσεις συγχρονισμού."
+    Show More: "Εμφάνιση περισσότερων"
+    Sync Automatically: "Αυτόματος συγχρονισμός"
+    Activity: "Δραστηριότητα λογαριασμού"
+    No Activity: "Δεν υπάρχει πρόσφατη δραστηριότητα"
+    Clear Activity: "Εκκαθάριση σε αυτή τη συσκευή"
+    Clear Activity Hint: "Απόκρυψη της υπάρχουσας δραστηριότητας λογαριασμού σε αυτή τη συσκευή. Η δραστηριότητα στον διακομιστή και στις άλλες συσκευές παραμένει αμετάβλητη. Η νέα δραστηριότητα θα συνεχίσει να εμφανίζεται."
+    Setting Changed: "Το {device} άλλαξε το {setting} σε {value}"
+    Item Updated: "Το {device} ενημέρωσε το {setting}"
+    Item Added: "Το {device} πρόσθεσε το {item} στο {setting}"
+    Item Removed: "Το {device} αφαίρεσε το {item} από το {setting}"
+    Item Renamed: "Το {device} μετονόμασε το {item} σε {value}"
+    Saved Playlists: "Αποθηκευμένες λίστες αναπαραγωγής"
+    No Feed Types: "Κανένα"
+    Open On Device: "Άνοιγμα σε άλλη συσκευή"
+    Video Sent: "Το βίντεο στάλθηκε. Οι συσκευές εκτός σύνδεσης θα το λάβουν όταν επανασυνδεθούν εντός 24 ωρών."
+    Video Received: "Λήφθηκε βίντεο: {title}"
+    Previous Auto Sync Notice: "Ο αυτόματος συγχρονισμός είναι απενεργοποιημένος. Μια παλαιότερη έκδοση ενδέχεται να τον απενεργοποίησε για να αποτρέψει την απώλεια δεδομένων."
+    Enable Automatic Sync: "Ενεργοποίηση αυτόματου συγχρονισμού"
+    Destructive Sync Blocked: "Ο συγχρονισμός σταμάτησε για να αποφευχθεί η απώλεια δεδομένων. Ο αυτόματος συγχρονισμός είναι απενεργοποιημένος. Ανοίξτε τις ρυθμίσεις συγχρονισμού για να ελέγξετε τις διαγραφές."
+    Devices: "Συσκευές"
+    Devices Hint: "Ελέγξτε τις συσκευές που έχουν πρόσβαση σε αυτόν τον λογαριασμό συγχρονισμού."
+    Change Password: "Αλλαγή κωδικού πρόσβασης"
+    Refresh Devices: "Ανανέωση συσκευών"
+    Current Device: "Τρέχουσα συσκευή"
+    Revoke Session: "Ανάκληση πρόσβασης"
+    Session Created: "Δημιουργήθηκε"
+    Last Active: "Τελευταία δραστηριότητα"
+    Session Expires: "Λήγει"
+    Unknown Device: "Άγνωστη συσκευή"
+    Operating System: "Λειτουργικό σύστημα"
+    Rename Device: "Μετονομασία συσκευής"
+    Save Device Name: "Αποθήκευση ονόματος"
+    Device Name Invalid: "Τα ονόματα συσκευών μπορούν να περιέχουν έως 80 χαρακτήρες και όχι χαρακτήρες ελέγχου."
+    Device Renamed: "Η συσκευή μετονομάστηκε"
+    Revoke Session Confirmation: "Ανάκληση αυτής της συνεδρίας;"
+    Revoke Current Session Warning: "Η ανάκληση αυτής της συνεδρίας θα αποσυνδέσει αυτήν τη συσκευή από τον λογαριασμό συγχρονισμού."
+    Revoke Session Warning: "Η συσκευή {device} θα χάσει την πρόσβαση σε αυτόν τον λογαριασμό συγχρονισμού."
+    Confirm Revoke Session: "Ανάκληση συνεδρίας"
+    Session Revoked: "Η συνεδρία ανακλήθηκε"
+    Change Password Warning: "Η αλλαγή του κωδικού πρόσβασης θα αποσυνδέσει όλες τις άλλες συσκευές. Αυτή η συσκευή θα παραμείνει συνδεδεμένη."
+    Current Password: "Τρέχων κωδικός πρόσβασης"
+    New Password: "Νέος κωδικός πρόσβασης"
+    Confirm New Password: "Επιβεβαίωση νέου κωδικού πρόσβασης"
+    Save New Password: "Αποθήκευση νέου κωδικού πρόσβασης"
+    Account Management Failed: "Δεν ήταν δυνατή η φόρτωση των στοιχείων του λογαριασμού συγχρονισμού."
+    All Password Fields Required: "Συμπληρώστε όλα τα πεδία κωδικού πρόσβασης."
+    New Password Too Short: "Ο νέος κωδικός πρόσβασης πρέπει να έχει τουλάχιστον 8 χαρακτήρες."
+    New Passwords Do Not Match: "Οι νέοι κωδικοί πρόσβασης δεν ταιριάζουν."
+    Password Changed: "Ο κωδικός πρόσβασης άλλαξε. Οι άλλες συσκευές αποσυνδέθηκαν."
+    Sync Settings: Συγχρονισμός
+    Watch stats: "Στατιστικά παρακολούθησης"
+    Enable Sync: Ενεργοποίηση συγχρονισμού
+    Privacy Passphrase: Συνθηματικό απορρήτου
+    Privacy Passphrase Hint: Χρησιμοποιήστε διαφορετικό συνθηματικό από τον κωδικό πρόσβασης του λογαριασμού σας. Δεν εγκαταλείπει ποτέ αυτήν τη συσκευή και απαιτείται σε κάθε συσκευή. Αν το χάσετε, δεν θα είναι δυνατή η ανάκτηση των κρυπτογραφημένων δεδομένων συγχρονισμού.
+    Privacy Policy: Πολιτική απορρήτου αυτού του διακομιστή
+    Enhanced Privacy Enabled: Το ενισχυμένο απόρρητο είναι ενεργοποιημένο. Ο διακομιστής αποθηκεύει μόνο κρυπτογραφημένα δεδομένα συγχρονισμού.
+    Enhanced Privacy Unsupported: 'Προειδοποίηση: Αυτός ο διακομιστής δεν υποστηρίζει ενισχυμένο απόρρητο. Ο διαχειριστής του μπορεί να δει τα συγχρονισμένα δεδομένα.'
+    Description: 'Συγχρονίστε συνδρομές, προφίλ, λίστες αναπαραγωγής, ιστορικό παρακολούθησης και υποστηριζόμενες ρυθμίσεις με έναν διακομιστή συγχρονισμού OpenTubeX ή LibreTube. Οι διακομιστές LibreTube ενδέχεται να μην υποστηρίζουν κάθε δυνατότητα συγχρονισμού.'
+    Server URL: URL διακομιστή συγχρονισμού
+    Checking Server: Έλεγχος διακομιστή συγχρονισμού…
+    Server Unavailable: Δεν είναι δυνατή η σύνδεση σε αυτόν τον διακομιστή συγχρονισμού. Ελέγξτε το URL και δοκιμάστε ξανά.
+    Username: Όνομα χρήστη
+    Log In: Σύνδεση
+    Register: Εγγραφή
+    Pair Another Device: Σύζευξη άλλης συσκευής
+    Pair With Existing Device: Σύζευξη με υπάρχουσα συσκευή
+    Device Name: Όνομα συσκευής
+    This Device: Αυτή η συσκευή
+    Device Name Required: Εισαγάγετε ένα όνομα για αυτήν τη συσκευή.
+    Pairing Device Name Hint: Επιλέξτε ένα όνομα που θα αναγνωρίσετε στη συσκευή από την οποία θα εγκρίνετε αυτό το αίτημα.
+    Create Pairing Code: Δημιουργία κωδικού σύζευξης
+    Creating Pairing Code: Δημιουργία ασφαλούς κωδικού σύζευξης…
+    Pairing QR Alt: Κωδικός QR σύζευξης για τη συσκευή {device}
+    Scan Pairing Code: Σε μια ήδη συνδεδεμένη συσκευή, ανοίξτε την επιλογή «Σύζευξη άλλης συσκευής» και σαρώστε αυτόν τον κωδικό.
+    Pairing Code: Κωδικός σύζευξης
+    Use Text Pairing Code: Χρήση κωδικού κειμένου
+    Show QR Code: Εμφάνιση κωδικού QR
+    Text Pairing Code Hint: Αντιγράψτε αυτόν τον κωδικό στην υπάρχουσα συσκευή. Περιέχει το μυστικό σύζευξης, γι' αυτό διαγράψτε τον από το ιστορικό του πρόχειρου μετά τη σύζευξη.
+    Pairing QR Warning: Εμφανίστε αυτόν τον κωδικό μόνο στην αξιόπιστη, ήδη συνδεδεμένη συσκευή που θα εγκρίνει το αίτημα. Λήγει μετά από δύο λεπτά.
+    Pairing Expires: Ο κωδικός σύζευξης λήγει στις {time}.
+    Verifying Pairing: Επαλήθευση του μεταφερμένου κλειδιού απορρήτου…
+    Completing Pairing: Ολοκλήρωση σύζευξης συσκευής…
+    Compare Pairing Codes: Σύγκριση κωδικών σύζευξης
+    Pairing Code Match Hint: Επιβεβαιώστε μόνο αν αυτός ο κωδικός είναι ίδιος με τον κωδικό στην υπάρχουσα συσκευή σας.
+    Pairing Codes Match: Οι κωδικοί είναι ίδιοι
+    Pairing Approval Code Hint: Διατηρήστε αυτό το παράθυρο ανοιχτό και συγκρίνετε αυτόν τον κωδικό με τη νέα συσκευή. Η νέα συσκευή δεν πρέπει να συνεχίσει αν οι κωδικοί διαφέρουν.
+    Pairing Scan Hint: Σαρώστε τον κωδικό σύζευξης που εμφανίζεται στη συσκευή που προσθέτετε.
+    Enter Pairing Code: Μη αυτόματη εισαγωγή κωδικού
+    Pairing Code Entry Hint: Επικολλήστε τον κωδικό σύζευξης που εμφανίζεται στη συσκευή που προσθέτετε.
+    Check Pairing Code: Έλεγχος κωδικού
+    Scan QR Code: Σάρωση κωδικού QR
+    Waiting For Pairing Code: Αναμονή για κωδικό σύζευξης…
+    Checking Pairing Request: Έλεγχος αιτήματος σύζευξης…
+    Approving Pairing Request: Κρυπτογράφηση και αποστολή του κλειδιού απορρήτου…
+    Pairing Approval Warning: Εγκρίνετε μόνο αν βλέπετε αυτό το αίτημα στη συσκευή που προσθέτετε. Η σύζευξη παρέχει πρόσβαση στον λογαριασμό και μεταφέρει το κλειδί απορρήτου.
+    Approve Pairing: Έγκριση σύζευξης
+    Try Again: Δοκιμή ξανά
+    Scan Again: Νέα σάρωση
+    Camera Unavailable: Το OpenTubeX δεν μπόρεσε να αποκτήσει πρόσβαση σε κάμερα. Ελέγξτε την άδεια κάμερας ή εισαγάγετε τον κωδικό σύζευξης μη αυτόματα.
+    Pairing Unsupported: Αυτός ο διακομιστής συγχρονισμού δεν υποστηρίζει ασφαλή σύζευξη συσκευών.
+    Pairing Failed: Η σύζευξη της συσκευής απέτυχε. Δοκιμάστε ξανά με νέο κωδικό.
+    Pairing Request Changed: Το αίτημα σύζευξης άλλαξε, έληξε ή έχει ήδη χρησιμοποιηθεί. Δημιουργήστε νέο κωδικό.
+    Pairing Server Mismatch: Αυτός ο κωδικός ανήκει σε διαφορετικό διακομιστή συγχρονισμού.
+    Pairing Verification Unavailable: Δεν υπάρχει διαθέσιμη κρυπτογραφημένη συλλογή συγχρονισμού για την επαλήθευση του μεταφερμένου κλειδιού. Συγχρονίστε την υπάρχουσα συσκευή και δοκιμάστε ξανά.
+    Pairing Completed: Η σύζευξη της συσκευής ολοκληρώθηκε
+    Pairing Approved: Η σύζευξη της συσκευής εγκρίθηκε
+    Use Pairing Invite: Χρήση κωδικού από συνδεδεμένη συσκευή
+    Show Pairing Invite: Εμφάνιση κωδικού σύζευξης
+    Scan Pairing Invite: Στη συσκευή που προσθέτετε, ανοίξτε την επιλογή «Σύζευξη με υπάρχουσα συσκευή», επιλέξτε «Χρήση κωδικού από συνδεδεμένη συσκευή» και σαρώστε αυτόν τον κωδικό.
+    Pairing Invite QR Alt: Κωδικός QR σύζευξης για τη συσκευή που προσθέτετε
+    Pairing Invite Text Hint: Αντιγράψτε αυτόν τον κωδικό στη συσκευή που προσθέτετε. Επιτρέπει σε μια συσκευή να ζητήσει πρόσβαση στον λογαριασμό σας, γι' αυτό διαγράψτε τον από το ιστορικό του πρόχειρου μετά τη σύζευξη.
+    Pairing Invite Warning: Δείξτε αυτόν τον κωδικό μόνο στη συσκευή που προσθέτετε. Θα πρέπει ακόμη να εγκρίνετε το αίτημά της σε αυτήν τη συσκευή.
+    Pairing Invite Scan Hint: Σαρώστε τον κωδικό σύζευξης που εμφανίζεται στη συνδεδεμένη συσκευή σας.
+    Pairing Invite Entry Hint: Επικολλήστε τον κωδικό σύζευξης που εμφανίζεται στη συνδεδεμένη συσκευή σας.
+    Pairing Invite Code Hint: Εγκρίνετε το αίτημα στη συνδεδεμένη συσκευή σας μόνο αν εμφανίζει αυτόν τον κωδικό. Στη συνέχεια η σύζευξη ολοκληρώνεται αυτόματα.
+    Pairing Invite Approval Hint: Εγκρίνετε μόνο αν η συσκευή που προσθέτετε εμφανίζει αυτόν τον κωδικό.
+    Pairing Invite Approved: Η σύζευξη εγκρίθηκε. Η νέα συσκευή θα ολοκληρώσει τη σύζευξη αυτόματα.
+    Disconnect: Αποσύνδεση
+    Delete Account: Διαγραφή λογαριασμού συγχρονισμού
+    Delete Account Confirmation: Διαγραφή λογαριασμού συγχρονισμού;
+    Delete Account Warning: Ο λογαριασμός συγχρονισμού και όλα τα δεδομένα που είναι αποθηκευμένα σε αυτόν τον διακομιστή θα διαγραφούν οριστικά. Τα τοπικά δεδομένα OpenTubeX δεν θα διαγραφούν.
+    Confirm Delete Account: Διαγραφή λογαριασμού
+    Password Required: Απαιτείται κωδικός πρόσβασης
+    Account Deleted: Ο λογαριασμός συγχρονισμού διαγράφηκε
+    Connected as: Συνδεδεμένος ως {username}
+    Profiles: Προφίλ
+    Open Tabs: Ανοιχτές καρτέλες και συνεδρία
+    Disable Setting Sync: Διακοπή συγχρονισμού αυτής της ρύθμισης
+    Enable Setting Sync: Συγχρονισμός αυτής της ρύθμισης
+    Sync Now: Συγχρονισμός τώρα
+    Downloading encrypted data: Λήψη κρυπτογραφημένων δεδομένων συγχρονισμού…
+    Syncing subscriptions: Συγχρονισμός συνδρομών…
+    Syncing playlists: Συγχρονισμός λιστών αναπαραγωγής…
+    Syncing history: Συγχρονισμός ιστορικού παρακολούθησης…
+    Syncing statistics: Συγχρονισμός στατιστικών παρακολούθησης…
+    Syncing profiles: Συγχρονισμός προφίλ…
+    Syncing open tabs: Συγχρονισμός ανοιχτών καρτελών και συνεδρίας…
+    Syncing settings: Συγχρονισμός ρυθμίσεων…
+    Uploading encrypted data: Μεταφόρτωση κρυπτογραφημένων δεδομένων συγχρονισμού…
+    Finishing sync: Ολοκλήρωση συγχρονισμού…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'Τελευταίος συγχρονισμός: {date}'
+    History not supported: Αυτή η έκδοση διακομιστή δεν υποστηρίζει συγχρονισμό ιστορικού παρακολούθησης.
+    Settings not supported: Αυτή η έκδοση διακομιστή δεν υποστηρίζει συγχρονισμό ρυθμίσεων.
+    Sync completed: Ο συγχρονισμός ολοκληρώθηκε
+    Sync failed: 'Ο συγχρονισμός απέτυχε: {error}'
+    Data Loss Confirmation: Επιβεβαίωση συγχρονισμού με διαγραφή δεδομένων;
+    Data Loss Warning: Ο συγχρονισμός θα διέγραφε {deleted} από τα {previous} ήδη συγχρονισμένα στοιχεία στο «{collection}» σε όλες τις συσκευές. Αν δεν τα διαγράψατε εσείς, για παράδειγμα επειδή έγινε επαναφορά του διακομιστή, διατηρήστε τα για να επανέλθουν παντού.
+    Keep Deleted Items: Διατήρηση στοιχείων
+    Confirm Data Loss: Διαγραφή και συνέχεια
+    Use Shared Tabs: 'Χρήση ενός κοινόχρηστου συνόλου καρτελών σε όλες τις συσκευές'
+    Shared Tabs Warning: 'Οι ανοιχτές καρτέλες αυτής της συσκευής γίνονται το κοινό σύνολο. Όταν συγχρονιστούν οι άλλες συσκευές, αντικαθιστούν τις ανοιχτές καρτέλες τους με αυτό το σύνολο· οι καρτέλες διαφορετικών συσκευών δεν συγχωνεύονται.'
+    Tabs From Other Devices: 'Καρτέλες από άλλες συσκευές'
+    Device Tab Session: '{platform} · {count} καρτέλες'
+    Mobile Device: 'Κινητό'
+    Desktop Device: 'Υπολογιστής'
+    Open All Tabs: 'Άνοιγμα όλων των καρτελών'
+    Open All Tabs Confirmation: "Άνοιγμα όλων των καρτελών;"
+    Server Update Required: "Ενημερώστε αυτόν τον διακομιστή για υποστήριξη κρυπτογραφημένου συγχρονισμού σε πραγματικό χρόνο."
+    Log In with Provider: 'Σύνδεση με {provider}'
+    Log In with Single Sign-On: 'Σύνδεση με ενιαία σύνδεση'
+    Continue in Browser: 'Συνεχίστε στο πρόγραμμα περιήγησης. Το OpenTubeX θα συνεχίσει μόλις τελειώσετε.'
+    Connected with Single Sign-On: 'Συνδέθηκε με ενιαία σύνδεση'
+    Delete Single Sign-On Account Hint: 'Θα ανοίξει το πρόγραμμα περιήγησης για να επιβεβαιώσετε τη διαγραφή στον πάροχο σύνδεσής σας.'
+  Proxy Settings:
+    IP Block Recovery Script Path: Σενάριο ανάκτησης από αποκλεισμό IP
+    Select IP Block Recovery Script File: Επιλογή αρχείου δέσμης ενεργειών αποκατάστασης αποκλεισμού IP
+    Running IP block recovery script: Εκτέλεση δέσμης ενεργειών αποκατάστασης αποκλεισμού IP
+    IP block recovery script failed: 'Η δέσμη ενεργειών αποκατάστασης αποκλεισμού IP απέτυχε (κωδικός εξόδου: {exitCode})'
+    IP block recovery script finished: Η δέσμη ενεργειών αποκατάστασης αποκλεισμού IP ολοκληρώθηκε
+    Reloading video after IP block recovery: Επαναφόρτωση βίντεο μετά την αποκατάσταση αποκλεισμού IP
+    Failed to select IP block recovery script: Απέτυχε η επιλογή δέσμης ενεργειών αποκατάστασης αποκλεισμού IP
+  SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "Εξαιρούμενα κανάλια"
+      Tooltip: "Εισαγάγετε αναγνωριστικό καναλιού ώστε να μην παραλείπονται τα τμήματα SponsorBlock στα βίντεό του. Πρέπει να ταιριάζει ακριβώς, με διάκριση πεζών και κεφαλαίων."
+    Enable SponsorBlock Submission: Ενεργοποίηση υποβολών SponsorBlock
+    SponsorBlock Private User ID (optional): Ιδιωτικό ID χρήστη (προαιρετικό)
+    SponsorBlock Private User ID Tooltip: Επικολλήστε το ιδιωτικό αναγνωριστικό χρήστη SponsorBlock από την επέκταση προγράμματος περιήγησης. Αφήστε το κενό για να χρησιμοποιηθεί αναγνωριστικό που δημιουργεί η εφαρμογή.
+    Generated SponsorBlock User ID: Αναγνωριστικό χρήστη SponsorBlock που δημιουργήθηκε
+    Generated SponsorBlock User ID Tooltip: Αυτό το αναγνωριστικό χρήστη SponsorBlock δημιουργήθηκε από την εφαρμογή και μπορεί να χρησιμοποιηθεί στην επέκταση προγράμματος περιήγησης ή σε άλλον υπολογιστή όπου χρησιμοποιείτε την εφαρμογή.
+    Reveal Generated User ID: Εμφάνιση αναγνωριστικού χρήστη που δημιουργήθηκε
+    Generated SponsorBlock User ID Copy Button: Αντιγραφή αναγνωριστικού χρήστη SponsorBlock που δημιουργήθηκε
+    Generated SponsorBlock User ID Copied: Το αναγνωριστικό χρήστη SponsorBlock που δημιουργήθηκε αντιγράφηκε στο πρόχειρο
+    Skip notification timeout: Διάρκεια ειδοποίησης παράλειψης
+    Custom Color: Προσαρμοσμένο χρώμα
+    DeArrow Settings: DeArrow
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Ενεργοποίηση Return YouTube Dislike
+    Return YouTube Dislike Url: URL API
+  Parental Control Settings:
+    Disable Channel Links: Απενεργοποίηση συνδέσμων καναλιών
+  Password Dialog:
+    Incorrect Password: Λανθασμένος κωδικός πρόσβασης
+    Unlock: Ξεκλείδωμα
+    Unlocking: Ξεκλείδωμα…
+  Search Settings: Αναζήτηση ρυθμίσεων
+  No Settings Found: Δεν βρέθηκαν ρυθμίσεις
+  Experimental Settings:
+    Disable Hardware Acceleration: Απενεργοποίηση επιτάχυνσης υλικού
+  Interface Customizer:
+    Customize Interface: "Προσαρμογή διεπαφής"
+    Preview: "Προεπισκόπηση"
+    Player: "Πρόγραμμα αναπαραγωγής"
+    Desktop: "Υπολογιστής"
+    Mobile: "Κινητό"
+    Playing: "Αναπαράγεται"
+    Player Menu: "Μενού προγράμματος αναπαραγωγής"
+    Fullscreen: "Πλήρης οθόνη"
+    Paused: "Σε παύση"
+    Controls: "Χειριστήρια"
+    Example Video Title: "Παράδειγμα βίντεο"
+    Resolution: "Ανάλυση"
+    Loop: "Επανάληψη"
+    Off: "Ανενεργό"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Απόκρυψη καναλιών με χαμηλής ποιότητας περιεχόμενο AI
+    Hide AI Slop Channels Tooltip: Αποκρύπτει τα κανάλια της λίστας αποκλεισμού AiSList που συντηρεί η κοινότητα (aisloplist.com) από τα αποτελέσματα αναζήτησης, τις τάσεις και τις προτάσεις, και επισημαίνει τα βίντεο από κανάλια της λίστας προειδοποίησής της. Οι συνδρομές δεν επηρεάζονται. Οι λίστες λαμβάνονται από το GitHub μία φορά την ημέρα και ισχύουν μόνο για αποτελέσματα που φορτώνονται μέσω του τοπικού API.
+    Downloading: Λήψη των λιστών…
+    Failed to Download: Δεν ήταν δυνατή η λήψη των λιστών
+    Loaded Status: "Αποκλεισμένα κανάλια: {blocked} · Επισημασμένα κανάλια: {warned} · Ενημέρωση: {date}"
+Tutorial:
+  Skip: Παράλειψη
+  Next: Επόμενο
+  Finish: Τέλος
+  Welcome:
+    Title: Καλώς ήρθατε στο OpenTubeX
+    Description: Αυτά είναι τα βασικά στοιχεία ελέγχου που θα σας βοηθήσουν να εξοικειωθείτε με την εφαρμογή.
+  Navigation:
+    Title: Η βιβλιοθήκη σας είναι πάντα διαθέσιμη
+    Description: Χρησιμοποιήστε την πλοήγηση για να ανοίξετε τις συνδρομές, τις λίστες αναπαραγωγής, το ιστορικό και άλλα.
+  Search:
+    Title: Αναζήτηση ή επικόλληση συνδέσμου
+    Description: Βρείτε βίντεο και κανάλια ή επικολλήστε ένα υποστηριζόμενο URL βίντεο απευθείας στο πεδίο αναζήτησης.
+  Tabs:
+    Title: Διατήρηση σελίδων ανοιχτών σε καρτέλες
+    Description: Ανοίξτε πολλές σελίδες ταυτόχρονα χωρίς να χάνετε τη θέση σας. Επιλέξτε πού ταιριάζουν καλύτερα οι καρτέλες στη διάταξή σας.
+  Quick Settings:
+    Title: Προσαρμόστε το στα μέτρα σας
+    Description: Επιλέξτε θέμα και προεπιλεγμένη ποιότητα βίντεο. Μπορείτε να αλλάξετε αυτές και άλλες προτιμήσεις από το μενού προφίλ ανά πάσα στιγμή ή να κάνετε δεξί κλικ σε αυτό για αλλαγή προφίλ.
+    Touch Description: Επιλέξτε θέμα και προεπιλεγμένη ποιότητα βίντεο. Μπορείτε να αλλάξετε αυτές και άλλες προτιμήσεις από το μενού προφίλ ανά πάσα στιγμή ή να το πατήσετε παρατεταμένα για αλλαγή προφίλ.
+  Import Data:
+    Title: Μεταφέρετε τα δεδομένα σας
+    Description: Προαιρετικά, εισαγάγετε συνδρομές, ιστορικό, λίστες αναπαραγωγής, ιστορικό αναζητήσεων ή ρυθμίσεις από άλλη υποστηριζόμενη εφαρμογή ή αντίγραφο ασφαλείας.
+    Action: Εισαγωγή δεδομένων
+    Not Now: Όχι τώρα
+About:
+  Project: Έργο
+  Community: Κοινότητα
+  Contribute: Συνεισφορά
+  Documentation: Τεκμηρίωση
+  Downloads: Λήψεις
+  Changelog: Αρχείο αλλαγών
+  Commit: Commit
+  Matrix: Matrix
+  Email: Ηλεκτρονικό ταχυδρομείο
+Profile:
+  Customization: Προσαρμογή
+  Manage Profile Subscriptions: Διαχείριση συνδρομών προφίλ
+  Icon Names:
+    Person: Άτομο
+    People: Άτομα
+    Headphones: Ακουστικά
+    Gaming: Παιχνίδια
+    Film: Ταινία
+    Art: Τέχνη
+    Science: Επιστήμη
+    Globe: Υδρόγειος
+    Heart: Καρδιά
+    Sun: Ήλιος
+    Moon: Σελήνη
+    Trophy: Τρόπαιο
+  Profile Icon: Εικονίδιο προφίλ
+  Choose an Emoji: Επιλογή emoji
+  Custom Emoji: Προσαρμοσμένο emoji
+  Emoji: Emoji
+  Choose Image: Επιλογή εικόνας
+  Crop Image: Περικοπή εικόνας
+  Zoom: Μεγέθυνση
+  Apply Crop: Εφαρμογή περικοπής
+  Transparent: Διαφανές
+  Use Initial: Χρήση αρχικού γράμματος
+  The selected image could not be loaded: Δεν ήταν δυνατή η φόρτωση της επιλεγμένης εικόνας
+  Theme Color: Χρώμα θέματος
+  Go To Profile Manager: Μετάβαση στη διαχείριση προφίλ
+Channel:
+  Hide Watched: Απόκρυψη προβεβλημένων
+  Fewer videos per day: "Λιγότερα βίντεο ανά ημέρα"
+  More videos per day: "Περισσότερα βίντεο ανά ημέρα"
+  Verified: Επαληθευμένο
+  Official Artist Channel: Επίσημο κανάλι καλλιτέχνη
+  About:
+    Links: Σύνδεσμοι
+  Subscription settings: Ρυθμίσεις συνδρομής
+  Failed to save subscription settings: Δεν ήταν δυνατή η αποθήκευση των ρυθμίσεων καναλιού
+  Videos per day: Βίντεο ανά ημέρα
+  Use global setting: Χρήση καθολικής ρύθμισης
+  Unlimited: Χωρίς όριο
+  More videos hidden: '+{count} ακόμη | +{count} ακόμη'
+  Show in subscription feed: Εμφάνιση στη ροή συνδρομών
+  Notify about new uploads: Ειδοποίηση για νέες μεταφορτώσεις
+  Show members-only videos: Εμφάνιση βίντεο μόνο για μέλη
+  Upload Notifications On: "Θα ειδοποιείστε για νέες μεταφορτώσεις από το {channelName} όταν ανανεώνονται οι συνδρομές σας"
+  Upload Notifications Off: "Δεν θα ειδοποιείστε για νέες μεταφορτώσεις από το {channelName}"
+  Upload Notifications Disabled In Settings: "Οι ειδοποιήσεις για το {channelName} είναι ενεργές, αλλά οι ειδοποιήσεις για νέες μεταφορτώσεις είναι απενεργοποιημένες στις ρυθμίσεις σας"
+  Turn On Upload Notifications: "Ενεργοποίηση"
+  Channel Name Unavailable: Το όνομα καναλιού δεν είναι διαθέσιμο
+  Search Result Types: Τύποι αποτελεσμάτων αναζήτησης
+  All Results: Όλα
+  View All: Προβολή όλων
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "Αυτό το κανάλι έχει βίντεο, αλλά κανένα δεν μπόρεσε να εμφανιστεί. Δοκιμάστε να φορτώσετε περισσότερα"
+  Posts:
+    Original post unavailable: "Η αρχική ανάρτηση δεν είναι διαθέσιμη"
+    Members-only video hidden by OpenTubeX: "Το OpenTubeX απέκρυψε βίντεο μόνο για μέλη"
+    Video hidden by OpenTubeX because of its title: "Το OpenTubeX απέκρυψε το βίντεο επειδή ο τίτλος του περιέχει κρυφό κείμενο"
+  Shows:
+    Shows: Εκπομπές
+    This channel does not currently have any shows: Αυτό το κανάλι δεν έχει προς το παρόν εκπομπές
+Video:
+  Info panel source: 'Πηγή: {source}'
+  External DRM Protected: "Τα βίντεο που προστατεύονται με DRM δεν μπορούν να αναπαραχθούν στο OpenTubeX, καθώς απαιτούν ιδιόκτητα εξαρτήματα κλειστού κώδικα."
+  Invalid Media URL: "Μη έγκυρο URL πολυμέσων"
+  Mark As Fully Watched: Σήμανση ως πλήρως προβληθέν
+  AI-generated video summary: "Σύνοψη βίντεο που δημιουργήθηκε από ΤΝ"
+  Quality and accuracy may vary: "Η ποιότητα και η ακρίβεια ενδέχεται να διαφέρουν"
+  Includes paid promotion: Περιλαμβάνει πληρωμένη προώθηση
+  Age Restricted Badge: Περιορισμός ηλικίας
+  Music Video Badge: Μουσικό βίντεο
+  Queue: Ουρά αναπαραγωγής
+  Play Next: Αναπαραγωγή στη συνέχεια
+  Add to Queue: Προσθήκη στην ουρά αναπαραγωγής
+  Added to Play Next: Το βίντεο θα αναπαραχθεί στη συνέχεια
+  Added to Queue: Το βίντεο προστέθηκε στην ουρά αναπαραγωγής
+  Clear Queue: Εκκαθάριση ουράς αναπαραγωγής
+  Queue Video Count: '{count} βίντεο | {count} βίντεο'
+  Remove from Queue: Αφαίρεση του {title} από την ουρά αναπαραγωγής
+  Remove Video from Queue: Αφαίρεση από την ουρά αναπαραγωγής
+  Drag to Reorder Queue: Σύρετε το {title} για να αλλάξετε τη σειρά στην ουρά αναπαραγωγής
+  Reorder Queue Item: Αλλαγή σειράς του {title}
+  Reorder Queue Item Instructions: Χρησιμοποιήστε τα πλήκτρα επάνω και κάτω βέλους για να μετακινήσετε αυτό το βίντεο στην ουρά αναπαραγωγής.
+  Queue Item Moved: Το {title} μετακινήθηκε στη θέση {position} από {total}.
+  Queue Item Cannot Move Up: Δεν είναι δυνατή η μετακίνηση του {title} προς τα επάνω. Βρίσκεται ήδη στη θέση 1 από {total}.
+  Queue Item Cannot Move Down: Δεν είναι δυνατή η μετακίνηση του {title} προς τα κάτω. Βρίσκεται ήδη στη θέση {total} από {total}.
+  Metadata: Πληροφορίες βίντεο
+  Close Metadata: Κλείσιμο πληροφοριών βίντεο
+  Collapse Playlist: Σύμπτυξη λίστας αναπαραγωγής
+  Expand Playlist: Ανάπτυξη λίστας αναπαραγωγής
+  Metadata Cache:
+    Title History: Ιστορικό τίτλων
+    Thumbnail History: Ιστορικό μικρογραφιών
+    Description History: Ιστορικό περιγραφών
+    Previous Version: Προηγούμενο {number}
+    Empty: (κενό)
+  Fetching Streams: Ανάκτηση ροών με το yt-dlp…
+  Waiting For Connection: "Δεν ήταν δυνατή η σύνδεση με τον διακομιστή. Αυτόματη επανάληψη…"
+  Retry Now: "Επανάληψη τώρα"
+  Transcript:
+    Title: Απομαγνητοφώνηση
+    Search: Αναζήτηση στην απομαγνητοφώνηση
+    Language: Γλώσσα απομαγνητοφώνησης
+    Save: Αποθήκευση
+    Show: Εμφάνιση απομαγνητοφώνησης
+    Hide: Απόκρυψη απομαγνητοφώνησης
+    Close: Κλείσιμο απομαγνητοφώνησης
+    Copied: Η απομαγνητοφώνηση αντιγράφηκε στο πρόχειρο
+    Saved: Η απομαγνητοφώνηση αποθηκεύτηκε
+    Save Error: Δεν ήταν δυνατή η αποθήκευση της απομαγνητοφώνησης
+    Text File: Αρχείο κειμένου
+    Unavailable: Δεν υπάρχει διαθέσιμη απομαγνητοφώνηση για αυτό το βίντεο.
+    Load Error: Δεν ήταν δυνατή η φόρτωση της απομαγνητοφώνησης.
+    Empty: Αυτή η απομαγνητοφώνηση δεν περιέχει κείμενο.
+    No Results: Κανένα τμήμα της απομαγνητοφώνησης δεν αντιστοιχεί στην αναζήτησή σας.
+  Retry With Built-in Extraction: Νέα προσπάθεια με ενσωματωμένη εξαγωγή
+  Retry With yt-dlp Extraction: Νέα προσπάθεια με εξαγωγή yt-dlp
+  Reloading video after streaming URL error: Επαναφόρτωση βίντεο μετά από σφάλμα URL ροής
+  Configure Restricted Playback Cookies Hint: "Ρυθμίστε τα cookie στις Ρυθμίσεις → Για προχωρημένους → Εξωτερικό λογισμικό → Cookies του yt-dlp."
+  Try With Configured Cookies: Δοκιμή με τα ρυθμισμένα cookie
+  Restricted Playback Authentication Failed Template: 'Το yt-dlp δεν μπόρεσε να αποκτήσει πρόσβαση σε αυτό το βίντεο με τα ρυθμισμένα cookie: {error}'
+  Private: Τα ιδιωτικά βίντεο δεν μπορούν να προβληθούν στο OpenTubeX, επειδή απαιτούν σύνδεση στο Google και κυριότητα του βίντεο.
+  Unmark As Watched: Κατάργηση επισήμανσης ως παρακολουθημένου
+  Video has been unmarked as watched: Η επισήμανση του βίντεο ως παρακολουθημένου καταργήθηκε
+  Save Channel Playback Speed: Αποθήκευση ταχύτητας αναπαραγωγής καναλιού
+  Channel Playback Speed Saved: Η ταχύτητα αναπαραγωγής καναλιού αποθηκεύτηκε
+  Save Channel Video Quality: Αποθήκευση ποιότητας βίντεο καναλιού
+  Channel Video Quality Saved: Η ποιότητα βίντεο καναλιού αποθηκεύτηκε
+  Save Channel Subtitles State: Αποθήκευση κατάστασης υποτίτλων καναλιού
+  Channel Subtitles State Saved: Η κατάσταση υποτίτλων καναλιού αποθηκεύτηκε
+  Save Channel Volume: Αποθήκευση έντασης ήχου καναλιού
+  Channel Volume Saved: Η ένταση ήχου καναλιού αποθηκεύτηκε
+  Save Channel Setting: Αποθήκευση ρύθμισης καναλιού…
+  Channel Setting Already Set: 'Το {setting} έχει ήδη οριστεί σε {value}'
+  Video has been saved to {playlistName}: Το βίντεο αποθηκεύτηκε στη λίστα {playlistName}
+  Video has been removed from {playlistName}: Το βίντεο αφαιρέθηκε από τη λίστα {playlistName}
+  There was a problem saving the video to {playlistName}: Παρουσιάστηκε πρόβλημα κατά την αποθήκευση του βίντεο στη λίστα {playlistName}
+  There was a problem removing the video from {playlistName}: Παρουσιάστηκε πρόβλημα κατά την αφαίρεση του βίντεο από τη λίστα {playlistName}
+  Failed to load collaborators: Απέτυχε η φόρτωση συνεργατών
+  Notify me: Ειδοποίησέ με
+  Notification on: Ειδοποίηση ενεργή
+  Notification enabled: Θα ειδοποιηθείτε όταν ξεκινήσει αυτό το βίντεο
+  Notification cancelled: Η ειδοποίηση έναρξης ακυρώθηκε
+  Notification unavailable: Οι ειδοποιήσεις συστήματος δεν είναι διαθέσιμες
+  Scheduled video starting: Το προγραμματισμένο βίντεο ξεκινά
+  Live notification body: 'Το {videoTitle} ξεκινά τώρα'
+  Premiere: Πρεμιέρα
+  AI: AI
+  AI-generated content: Περιεχόμενο παραγόμενο από AI
+  Collaborators: Συνεργάτες
+  Live Chat Replay: Επανάληψη ζωντανής συνομιλίας
+  Show Live Chat: Εμφάνιση ζωντανής συνομιλίας
+  Show Live Chat Replay: Εμφάνιση επανάληψης ζωντανής συνομιλίας
+  Close Live Chat: Κλείσιμο ζωντανής συνομιλίας
+  Close Live Chat Replay: Κλείσιμο επανάληψης ζωντανής συνομιλίας
+  Live Chat Settings: Ρυθμίσεις ζωντανής συνομιλίας
+  Show Live Chat Timestamps: Εμφάνιση χρονικών ενδείξεων
+  Chat Filter: Φίλτρο συνομιλίας
+  Top Chat: Κορυφαία συνομιλία
+  All Messages: Όλα τα μηνύματα
+  Live chat replay is enabled. Chat messages will appear here as the video plays.: Η επανάληψη ζωντανής συνομιλίας είναι ενεργοποιημένη. Τα μηνύματα θα εμφανίζονται εδώ κατά την αναπαραγωγή του βίντεο.
+  Premiere started: Η πρεμιέρα βρίσκεται σε εξέλιξη. Ξεκίνησε {timeAgo}
+  Player:
+    Playing in Picture-in-Picture: Αναπαραγωγή σε λειτουργία εικόνας εντός εικόνας
+    Stream Recovery:
+      DASH Fallback: "Η ροή ήχου απέτυχε, γίνεται εναλλαγή σε μορφές DASH: {error}"
+      Error Copied: "Το σφάλμα αντιγράφηκε στο πρόχειρο"
+      Legacy Fallback: "Η ροή απέτυχε, γίνεται εναλλαγή σε παλαιού τύπου μορφές: {error}"
+    Caption Timing:
+      Adjust Timing: Προσαρμογή χρονισμού…
+      Caption Timing: Χρονισμός υποτίτλων
+      Offset: Μετατόπιση (δευτερόλεπτα)
+      Hint: Οι αρνητικές τιμές εμφανίζουν τους υπότιτλους νωρίτερα και οι θετικές αργότερα. Μόνο για αυτό το βίντεο.
+      Earlier: Νωρίτερα
+      Later: Αργότερα
+      Reset: Επαναφορά
+    Most Replayed: "Πιο συχνή επανάληψη"
+    Pull up for precise seeking: "Σύρετε προς τα πάνω για ακριβή αναζήτηση"
+    Precise seeking, drag down to exit: "Ακριβής αναζήτηση · Σύρετε προς τα κάτω για έξοδο"
+    Cast: "Μετάδοση"
+    Music Mode: "Λειτουργία μουσικής"
+    Music Mode Description: "Αναπαραγωγή βίντεο με ταχύτητα 1× και έναρξη νέων βίντεο από την αρχή σε αυτήν την καρτέλα. Οι αποθηκευμένες προεπιλογές αναπαραγωγής παραμένουν αμετάβλητες."
+    DLNA:
+      Cast: "Μετάδοση σε συσκευή DLNA"
+      Stop: "Διακοπή μετάδοσης"
+      No Devices: "Δεν βρέθηκαν συσκευές DLNA"
+      No MP4 Source: "Δεν υπάρχει συμβατή ροή MP4 για αυτό το βίντεο"
+      Error: "Δεν ήταν δυνατή η μετάδοση του βίντεο"
+    Repeat Stats:
+      Repeat Stats: Στατιστικά επανάληψης
+      Looping: Επανάληψη ενεργή
+      Repeats: Επανάληψη | Επαναλήψεις
+      Time Spent: Χρόνος παρακολούθησης
+    Voice-over Translation:
+      Start: Μετάφραση
+      Cancel: Ακύρωση
+      Progress: Προετοιμασία μετάφρασης εκφώνησης…
+      Retry: Επανάληψη
+      Error: Η μετάφραση εκφώνησης απέτυχε. Δοκιμάστε ξανά αργότερα.
+      Duration Error: Η μετάφραση εκφώνησης είναι διαθέσιμη μόνο για βίντεο διάρκειας έως τεσσάρων ωρών.
+    Caption Appearance:
+      Options: Επιλογές
+      Sample: Έτσι εμφανίζονται οι υπότιτλοι
+    Auto-translate: Αυτόματη μετάφραση
+    Sleep Timer:
+      Sleep Timer: Χρονοδιακόπτης ύπνου
+      'Off': 'Ανενεργός'
+      Minutes: '{minutes} λεπτά'
+      End of video: Στο τέλος του βίντεο
+      End of current chapter: Τέλος του τρέχοντος κεφαλαίου
+      Remaining: 'Απομένουν {time}'
+      Cancel timer: Ακύρωση χρονοδιακόπτη
+      Timer ended: Ο χρονοδιακόπτης ύπνου έληξε
+    A-B Repeat:
+      A-B Repeat: Επανάληψη A-B
+      On: Ενεργή
+      Off: Ανενεργή
+      Point A: Σημείο A
+      Point B: Σημείο B
+      Set Repeat Start: Ορισμός αρχής επανάληψης
+      Set Repeat End: Ορισμός τέλους επανάληψης
+      Pause Repeat: Παύση επανάληψης A-B
+      Resume Repeat: Συνέχιση επανάληψης A-B
+      Adjust Point: 'Προσαρμογή σημείου {point}, τώρα {timestamp}'
+      Clear Range: Εκκαθάριση εύρους επανάληψης A-B
+      End Before Start: Το σημείο B πρέπει να βρίσκεται μετά το σημείο A.
+      Outside Duration: Η χρονική σήμανση πρέπει να βρίσκεται εντός του βίντεο.
+      Cleared: Η επανάληψη A-B εκκαθαρίστηκε
+    Seek History:
+      Seek History: Ιστορικό μεταβάσεων
+      Positions: '{count} θέση | {count} θέσεις'
+      Nothing to undo: Δεν υπάρχει κάτι για αναίρεση
+      Nothing to redo: Δεν υπάρχει κάτι για επανάληψη
+    Zoom:
+      Zoom: Μεγέθυνση
+      'Off': 'Ανενεργή'
+    Volume Boost:
+      Volume Boost: "Ενίσχυση έντασης"
+      'Off': "Ανενεργή"
+    Auto-generated Caption Template: '{language} (δημιουργήθηκαν αυτόματα)'
+    Up next in {seconds}: Επόμενο σε {seconds}
+    Resize dock: Αλλαγή μεγέθους βάσης
+    Play now: Αναπαραγωγή τώρα
+    MusicPlaybackRateOverride: Εντοπίστηκε μουσικό βίντεο, αναπαραγωγή σε ταχύτητα 1x
+    Normal: Κανονική
+    Set Default: Ορισμός ως προεπιλογή
+    Hide Annotations: Απόκρυψη σχολίων
+    Show Annotations: Εμφάνιση σχολίων
+    Hide: Απόκρυψη
+    Show: Εμφάνιση
+    Scroll Mini Player:
+      Collapse Controls: "Σύμπτυξη χειριστηρίων"
+      Expand Controls: "Ανάπτυξη χειριστηρίων"
+      Back to Top: Επιστροφή στην κορυφή
+      Return to Video Tab: Επιστροφή στην καρτέλα βίντεο
+      Hide: Απόκρυψη μίνι προγράμματος αναπαραγωγής
+      Play: Αναπαραγωγή
+      Pause: Παύση
+      Drag Handle: Μετακίνηση μικρού προγράμματος αναπαραγωγής
+      Rewind 10 seconds: Μετάβαση 10 δευτερόλεπτα πίσω
+      Forward 10 seconds: Μετάβαση 10 δευτερόλεπτα μπροστά
+    SponsorBlock:
+      CancelCurrentSegment: Ακύρωση δημιουργίας τμήματος
+      ClearSegments: Εκκαθάριση τμημάτων
+      ClearSegmentsPrompt: Θέλετε σίγουρα να εκκαθαρίσετε όλα τα πρόχειρα τμήματα SponsorBlock για αυτό το βίντεο;
+      CompleteSegmentsBeforeSubmitting: Ολοκληρώστε όλα τα πρόχειρα τμήματα πριν από την υποβολή.
+      CategoryLabel: Κατηγορία
+      ActionTypeLabel: Τύπος τμήματος
+      DuplicateSegments: Δεν επιτρέπονται διπλότυπα πρόχειρα τμήματα.
+      EndAction: (Τέλος)
+      EndActionLabel: Τέλος
+      EndTimeAfterStart: Η ώρα λήξης του τμήματος πρέπει να είναι μετά την ώρα έναρξης.
+      EndTimeBeforeVideoEnd: Η ώρα λήξης του τμήματος πρέπει να βρίσκεται εντός της διάρκειας του βίντεο.
+      EndTimeLabel: Ώρα λήξης τμήματος
+      DisableAutoSkipTemporarily: Προσωρινή απενεργοποίηση αυτόματης παράλειψης SponsorBlock
+      EnableAutoSkipTemporarily: Επανενεργοποίηση αυτόματης παράλειψης SponsorBlock
+      Guidelines: Οδηγίες
+      InspectSegment: Επιθεώρηση
+      InvalidStartTime: Εισαγάγετε έγκυρη ώρα έναρξης τμήματος.
+      NoSegmentsToSubmit: Δημιουργήστε τουλάχιστον ένα ολοκληρωμένο τμήμα πριν από την υποβολή.
+      NowAction: (Τώρα)
+      CloseInfoPanel: Κλείσιμο πληροφοριών SponsorBlock
+      OpenInfoPanel: Άνοιγμα πληροφοριών SponsorBlock
+      OpenSubmissionMenu: Άνοιγμα μενού υποβολής
+      PreviewRequired: Κάντε προεπισκόπηση κάθε τμήματος πριν από την υποβολή.
+      PreviewSegment: Προεπισκόπηση
+      SaveSegment: Αποθήκευση
+      SetSegmentEndNow: Λήξη τμήματος τώρα
+      StartAction: (Έναρξη)
+      StartSegmentNow: Έναρξη τμήματος τώρα
+      SubmissionBadRequest: Το SponsorBlock απέρριψε το αίτημα υποβολής.
+      SubmissionDuplicate: Αυτό έχει ήδη υποβληθεί.
+      SubmissionFailed: Απέτυχε η υποβολή τμημάτων SponsorBlock.
+      SubmissionForbidden: Το SponsorBlock απέρριψε την υποβολή.
+      SubmissionRateLimited: Το SponsorBlock περιόρισε τον ρυθμό αυτής της υποβολής.
+      SubmissionSuccess: Τα τμήματα SponsorBlock υποβλήθηκαν.
+      SubmitSegment: Υποβολή τμήματος
+      SubmitSegments: Υποβολή
+      StartTimeLabel: Ώρα έναρξης τμήματος
+      TimeDivider: έως
+      SkipPrompt: Παράλειψη {segmentCategory};
+      SkipPromptAction: Παράλειψη
+      SkipToHighlight: Μετάβαση στο σημαντικότερο σημείο;
+      SkippedToHighlight: Έγινε μετάβαση στο σημαντικότερο σημείο
+      SkipToastUnskip: Αναίρεση παράλειψης
+      SkipToastReskip: Νέα παράλειψη
+      MutedSegment: 'Έγινε σίγαση: {segmentCategory}'
+      MuteToastUnmute: Κατάργηση σίγασης
+      InfoPanelLoading: Τα τμήματα φορτώνονται ακόμη...
+      InfoPanelHasSegments: Αυτό το βίντεο έχει τμήματα στη βάση δεδομένων!
+      InfoPanelNoSegments: Δεν βρέθηκαν τμήματα
+      RefreshSegments: Ανανέωση τμημάτων
+      RefreshInfo: Ανανέωση πληροφοριών SponsorBlock
+      ContributionStatsTitle: Οι συνεισφορές σας
+      ContributionStatsLoading: Φόρτωση στατιστικών συνεισφορών...
+      ContributionStatsError: Τα στατιστικά συνεισφορών δεν είναι διαθέσιμα. Δοκιμάστε να τα ανανεώσετε.
+      ContributionStatsNoUserId: Υποβάλετε ένα τμήμα ή εισαγάγετε το αναγνωριστικό χρήστη SponsorBlock για να δείτε στατιστικά συνεισφορών.
+      Submissions: Υποβολές
+      Segments: Τμήματα
+      TimeSaved: Χρόνος που εξοικονομήθηκε
+      AutoSkipEnabled: Αυτόματη παράλειψη τμημάτων
+      AutoSkipOn: 'Ενεργή'
+      AutoSkipOff: 'Ανενεργή'
+      WhitelistChannel: Προσθήκη καναλιού στη λίστα επιτρεπόμενων
+      ChannelWhitelisted: Στη λίστα επιτρεπόμενων
+      RemoveChannelFromWhitelist: Αφαίρεση καναλιού από τη λίστα επιτρεπόμενων
+      MuteSegment: Σίγαση τμήματος
+      SkipSegment: Παράλειψη τμήματος
+      CloseSegmentActions: Κλείσιμο ενεργειών τμήματος
+      FullVideo: Ολόκληρο βίντεο
+      FullVideoLabel: '{segmentCategory} · Ολόκληρο βίντεο'
+      MuteActionType: Σίγαση
+      MutePrompt: Σίγαση {segmentCategory};
+      SkipActionType: Παράλειψη
+      LockedSegment: Κλειδωμένο τμήμα
+      UpvoteSegment: Θετική ψήφος
+      DownvoteSegment: Αρνητική ψήφος
+      VoteFailed: Απέτυχε η υποβολή ψήφου στο SponsorBlock.
+      ChangeCategory: Αλλαγή κατηγορίας
+      CopyAndDownvote: Αντιγραφή και αρνητική ψήφος
+      SubmitCategoryVote: Υποβολή ψήφου κατηγορίας
+      CategoryVoteSuccess: Η ψήφος κατηγορίας υποβλήθηκε.
+    Google Cast:
+      Position: "Θέση αναπαραγωγής"
+      Invalid Authentication: "Ο δέκτης έστειλε μη έγκυρη απάντηση ελέγχου ταυτότητας."
+      Authentication Declined: "Ο δέκτης αρνήθηκε τον έλεγχο ταυτότητας."
+      Audio Only Receiver: "Ο δέκτης υποστηρίζει μόνο μετάδοση ήχου."
+      Disconnected: "Ο δέκτης αποσυνδέθηκε."
+      Timeout: "Ο δέκτης δεν απάντησε."
+      Busy: "Ένα άλλο παράθυρο μεταδίδει ήδη."
+      Not Authorized: "Ενεργοποιήστε αυτό το παράθυρο και δοκιμάστε ξανά."
+      Invalid Request: "Μη έγκυρο αίτημα μετάδοσης."
+      IPv4 Required: "Απαιτείται σύνδεση IPv4."
+      Launch Failed: "Δεν ήταν δυνατή η εκκίνηση του δέκτη."
+      Load Failed: "Ο δέκτης δεν μπόρεσε να φορτώσει το βίντεο."
+      Cancelled: "Η μετάδοση ακυρώθηκε."
+      Private Not Authorized: "Δεν εγκρίθηκε η πρόσβαση σε ιδιωτικά πολυμέσα."
+      Invalid Subtitles: "Μη έγκυροι υπότιτλοι μετάδοσης."
+      Discovery Failed: "Δεν ήταν δυνατή η αναζήτηση δεκτών."
+      Preparing Video: "Προετοιμασία βίντεο για μετάδοση…"
+      Connecting: "Σύνδεση με {device}…"
+      Starting Receiver: "Εκκίνηση του δέκτη Cast…"
+      Loading Video: "Φόρτωση βίντεο στον δέκτη…"
+      Buffering: "Αποθήκευση στην προσωρινή μνήμη του {device}…"
+      Allow Private Instance: "Να επιτραπεί σε αυτή τη μετάδοση να διαβάζει πολυμέσα από την ιδιωτική εγκατάσταση Invidious {instance};"
+      Cast: "Μετάδοση σε συσκευή Google Cast"
+      Connected: "Μετάδοση στο {device}"
+      Rewind: "Πίσω 10 δευτερόλεπτα"
+      Forward: "Μπροστά 10 δευτερόλεπτα"
+      Subtitles Off: "Απενεργοποίηση υποτίτλων"
+      Return: "Επιστροφή στην τοπική αναπαραγωγή"
+      No Devices: "Δεν βρέθηκαν συσκευές Google Cast"
+      No Source: "Δεν υπάρχει συμβατή ροή για το Google Cast"
+      Error: "Δεν ήταν δυνατή η μετάδοση του βίντεο"
+      Error With Details: "Δεν ήταν δυνατή η μετάδοση του βίντεο: {error}"
+      Untrusted Receiver: "Το πιστοποιητικό του δέκτη δεν είναι έμπιστο. Χρησιμοποιήστε έναν πιστοποιημένο δέκτη Google Cast."
+    FCast:
+      Cast: "Μετάδοση σε δέκτη FCast"
+      No Devices: "Δεν βρέθηκαν δέκτες FCast"
+      No Source: "Δεν υπάρχει συμβατή ροή για το FCast"
+    Secondary Captions: Δευτερεύοντες υπότιτλοι
+    Subtitle File:
+      Load: "Φόρτωση αρχείου υποτίτλων…"
+      Subtitle Files: "Αρχεία υποτίτλων"
+      Error: "Δεν ήταν δυνατή η φόρτωση του αρχείου υποτίτλων. Επιλέξτε ένα αρχείο SRT ή WebVTT."
+  Station: Σταθμός
+  Playlist:
+    Unavailable videos are hidden: 1 μη διαθέσιμο βίντεο είναι κρυμμένο | {count} μη διαθέσιμα βίντεο είναι κρυμμένα
+  External Media:
+    Dislikes: "Αρνητική ψήφος | Αρνητικές ψήφοι"
+    Reposts: "Αναδημοσίευση | Αναδημοσιεύσεις"
+    Saves: "Αποθήκευση | Αποθηκεύσεις"
+    Series: "Σειρά"
+    Season: "Σεζόν"
+    Season Number: "Αριθμός σεζόν"
+    Episode: "Επεισόδιο"
+    Episode Number: "Αριθμός επεισοδίου"
+    Track: "Μουσικό κομμάτι"
+    Track Number: "Αριθμός κομματιού"
+    Artists: "Καλλιτέχνες"
+    Album: "Άλμπουμ"
+    Genres: "Είδη"
+    Media Type: "Τύπος μέσου"
+    Availability: "Διαθεσιμότητα"
+    Age Limit: "Όριο ηλικίας"
+    Release Date: "Ημερομηνία κυκλοφορίας"
+    Availability Values:
+      public: "Δημόσιο"
+      private: "Ιδιωτικό"
+      premium_only: "Μόνο Premium"
+      subscriber_only: "Μόνο συνδρομητές"
+      needs_auth: "Απαιτείται σύνδεση"
+      unlisted: "Μη καταχωρημένο"
+  How this was made: Πώς δημιουργήθηκε αυτό
+  Save Queue to Playlist: "Αποθήκευση ουράς αναπαραγωγής σε λίστα αναπαραγωγής"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Η ζωντανή συνομιλία δεν υποστηρίζεται προς το παρόν με τον διακομιστή Yattee. Απαιτείται άμεση σύνδεση με το YouTube.
+  External Player:
+    LaunchFailedTemplate: Δεν ήταν δυνατή η εκκίνηση του {externalPlayer}. Βεβαιωθείτε ότι είναι εγκατεστημένο ή ορίστε τη διαδρομή του εκτελέσιμου αρχείου στις ρυθμίσεις εξωτερικού προγράμματος αναπαραγωγής.
+    Confirm Arguments Title: "Εκτέλεση της εξωτερικής εφαρμογής αναπαραγωγής με προσαρμοσμένα ορίσματα;"
+    Confirm Arguments Message: "Το {externalPlayer} θα ξεκινήσει με αυτά τα προσαρμοσμένα ορίσματα:"
+    Confirm Arguments Warning: "Ορισμένα ορίσματα μπορούν να εκτελέσουν προγράμματα ή να αντικαταστήσουν αρχεία. Συνεχίστε μόνο αν τα προσθέσατε εσείς."
+    Run: "Εκτέλεση"
+    LaunchCanceledTemplate: "Το {externalPlayer} δεν άνοιξε"
+Playlist:
+  Playlist Already Preloaded: "Όλα τα βίντεο της λίστας αναπαραγωγής έχουν ήδη προφορτωθεί"
+  Playlist Preload Progress: "Προφόρτωση βίντεο: {completed} από {requested}"
+  Close Playlist: Κλείσιμο λίστας αναπαραγωγής
+  Preload Playlist: "Προφόρτωση όλων των βίντεο"
+  Preload Playlist Warning Title: "Προφόρτωση όλων των βίντεο;"
+  Preload Playlist Warning: "Η προφόρτωση ζητά από το YouTube κάθε βίντεο αυτής της λίστας αναπαραγωγής. Η αποστολή πολλών αιτημάτων σε σύντομο χρόνο μπορεί να οδηγήσει το YouTube να αποκλείσει προσωρινά τη διεύθυνση IP σας. Θέλετε να συνεχίσετε;"
+  Preloading Playlist: "Γίνεται προφόρτωση όλων των βίντεο..."
+  Playlist Preload Complete: "Προφορτωμένα βίντεο: {count}."
+  Playlist Preload Partial: "Προφορτώθηκαν {preloaded} από {requested} βίντεο. Απέτυχαν {failed}."
+  Playlist Preload Pagination Failed: "Δεν ήταν δυνατή η φόρτωση ολόκληρης της λίστας, οπότε η προφόρτωση ακυρώθηκε."
+  Unavailable videos are hidden: Τα μη διαθέσιμα βίντεο είναι κρυμμένα
+  Add Playlist to Queue: "Προσθήκη λίστας αναπαραγωγής στην ουρά αναπαραγωγής"
+  Playlist Added to Queue: "Η λίστα αναπαραγωγής προστέθηκε στην ουρά αναπαραγωγής"
+Change Format:
+  yt-dlp Error Template: "Το yt-dlp δεν μπόρεσε να παρέχει τις ροές: {error}"
+  Local Video File: Τοπικό αρχείο βίντεο
+  Local Audio File: Τοπικό αρχείο ήχου
+  Online Video: Διαδικτυακό βίντεο
+  Stream Source: Προέλευση ροής
+  Stream Extraction Method: Μέθοδος εξαγωγής ροής
+  Playback Engine: Μηχανή αναπαραγωγής
+  Streaming Protocol: Πρωτόκολλο ροής
+  Not Available For This Video: Δεν είναι διαθέσιμο για αυτό το βίντεο
+  Protocols:
+    Progressive: Προοδευτικό
+  Descriptions:
+    Local File: Αναπαραγωγή απευθείας από το ληφθέν αρχείο σε αυτήν τη συσκευή
+    Online Video: Φόρτωση μορφών ροής από τη ρυθμισμένη διαδικτυακή προέλευση
+    Dash: Προσαρμοζόμενη ποιότητα, πολλά κομμάτια ήχου και οι υψηλότερες αναλύσεις
+    Legacy: Ένα αρχείο με συνδυασμένο βίντεο και ήχο, με περιορισμό σε χαμηλότερες αναλύσεις
+    Audio: Μόνο ήχος, χρήσιμο για εξοικονόμηση εύρους ζώνης ή ακρόαση στο παρασκήνιο
+  yt-dlp Fallback Template: 'Το yt-dlp δεν μπόρεσε να παράσχει τις ροές, οπότε χρησιμοποιείται η ενσωματωμένη μηχανή: {error}'
+  yt-dlp Default Clients Fallback: Οι προτιμώμενοι πελάτες yt-dlp δεν μπόρεσαν να παράσχουν ροές με δυνατότητα αναπαραγωγής. Γίνεται δοκιμή με τους προεπιλεγμένους πελάτες του yt-dlp
+  Built-in Fallback Template: 'Η ενσωματωμένη μηχανή δεν μπόρεσε να αναπαραγάγει τη ροή. Γίνεται δοκιμή με το yt-dlp: {error}'
+Share:
+  Shared YouTube Link: "Κοινόχρηστος σύνδεσμος YouTube"
+  Open in Player: "Άνοιγμα στο πρόγραμμα αναπαραγωγής"
+  No YouTube Link: "Το κοινόχρηστο κείμενο δεν περιέχει υποστηριζόμενο σύνδεσμο YouTube."
+  Loading Video Information: "Φόρτωση πληροφοριών βίντεο…"
+  Video Information Failed: "Δεν ήταν δυνατή η φόρτωση των πληροφοριών βίντεο. Δοκιμάστε ξανά ή ανοίξτε τον σύνδεσμο."
+  Share Link: "Κοινοποίηση συνδέσμου"
+  Share failed: "Δεν ήταν δυνατή η κοινοποίηση του συνδέσμου"
+  Timestamp Link Copied: Ο σύνδεσμος χρονικής ένδειξης αντιγράφηκε στο πρόχειρο
+Context Menu:
+  Opened in a Background Tab: "Άνοιξε σε καρτέλα στο παρασκήνιο"
+  Open in a Background Tab: "Άνοιγμα σε καρτέλα στο παρασκήνιο"
+  Select Tab: Επιλογή καρτέλας
+  Close Tabs Before: Κλείσιμο προηγούμενων καρτελών
+  Close Tabs After: Κλείσιμο επόμενων καρτελών
+  Close Other Tabs: Κλείσιμο άλλων καρτελών
+  Copy {service} link without playlist: "Αντιγραφή συνδέσμου {service} χωρίς λίστα αναπαραγωγής"
+  Context Menu: Μενού περιβάλλοντος
+  Select All: Επιλογή όλων
+  Save Image As…: Αποθήκευση εικόνας ως…
+  Copy Image: Αντιγραφή εικόνας
+  Copy Image Address: Αντιγραφή διεύθυνσης εικόνας
+  Cancel Refresh: Ακύρωση ανανέωσης
+  Reload Videos: Επαναφόρτωση βίντεο
+  Reload Shorts: Επαναφόρτωση σύντομων βίντεο
+  Reload Live: Επαναφόρτωση ζωντανών μεταδόσεων
+  Reload Posts: Επαναφόρτωση αναρτήσεων
+  Reload All Feeds: Επαναφόρτωση όλων των ροών
+  Reload RSS Feeds: Επαναφόρτωση ροών RSS
+  Close Multiple Tabs: Κλείσιμο {count} καρτελών
+  Duplicate Tab: Δημιουργία διπλότυπης καρτέλας
+  Duplicate Multiple Tabs: Δημιουργία {count} διπλότυπων καρτελών
+  Move Tab: Μετακίνηση καρτέλας
+  Move Tabs: Μετακίνηση καρτελών
+  Move Tab to Group: Μετακίνηση καρτέλας σε ομάδα
+  Collapse Group: Σύμπτυξη ομάδας
+  Expand Group: Ανάπτυξη ομάδας
+  Move Tabs to Group: Μετακίνηση καρτελών σε ομάδα
+  Manage Tab Groups…: Διαχείριση ομάδων καρτελών…
+  To Beginning: Στην αρχή
+  To End: Στο τέλος
+  Close Tabs: Κλείσιμο καρτελών
+  To the Top: Στην κορυφή
+  To the Left: Αριστερά
+  To the Bottom: Στο κάτω μέρος
+  To the Right: Δεξιά
+  Other Tabs: Άλλες καρτέλες
+  Copy YouTube Link: Αντιγραφή συνδέσμου YouTube
+  Copy YouTube Links: Αντιγραφή συνδέσμων YouTube
+  Pin Tab: Καρφίτσωμα καρτέλας
+  Pin Tabs: Καρφίτσωμα καρτελών
+  Unpin Tab: Ξεκαρφίτσωμα καρτέλας
+  Unpin Tabs: Ξεκαρφίτσωμα καρτελών
+  Tab Color: Χρώμα καρτέλας
+  Default: Προεπιλεγμένο
+  Purple: Μοβ
+  Reopen Closed Tab: Εκ νέου άνοιγμα κλειστής καρτέλας
+  Reload Tab: Επαναφόρτωση καρτέλας
+  Reload Tabs: Επαναφόρτωση καρτελών
+  Load Tab: Φόρτωση καρτέλας
+  Load Tabs: Φόρτωση καρτελών
+  Unload Tab: Αποφόρτωση καρτέλας
+  Unload Tabs: Αποφόρτωση καρτελών
+  Unload Tabs Failed: "Δεν ήταν δυνατή η αποφόρτωση των επιλεγμένων καρτελών."
+  Move Tab to Window: Μετακίνηση καρτέλας σε παράθυρο
+  Move Tabs to Window: Μετακίνηση καρτελών σε παράθυρο
+  Open in a New Tab: Άνοιγμα σε νέα καρτέλα
+  Open in a New Window: Άνοιγμα σε νέο παράθυρο
+  Copy Link: Αντιγραφή συνδέσμου
+  Copy Invidious Link: Αντιγραφή συνδέσμου Invidious
+  Search Selection in New Tab: Αναζήτηση του «{selection}» σε νέα καρτέλα
+  Search Selection in New Window: Αναζήτηση του «{selection}» σε νέο παράθυρο
+  Search With: Αναζήτηση με {engine}
+  Search With Multiple: Αναζήτηση με...
+  Selection Too Long: Η επιλογή είναι πολύ μεγάλη για αναζήτηση (> {count} χαρακτήρες)
+  Background Tab: Καρτέλα παρασκηνίου
+Tab Organizer:
+  Tab History: "Ιστορικό καρτέλας"
+  Current Page: "Τρέχουσα σελίδα"
+  Icon Labels:
+    Podcast: 'Podcast'
+    Clock: 'Ρολόι'
+    Puzzle Piece: 'Κομμάτι παζλ'
+    People: 'Άτομα'
+    Chart: 'Γράφημα'
+    Calendar: 'Ημερολόγιο'
+    Images: 'Εικόνες'
+    Music: 'Μουσική'
+    Folder: Φάκελος
+    Bookmark: Σελιδοδείκτης
+    Favorites: Αγαπημένα
+    Videos: Βίντεο
+    Gaming: Παιχνίδια
+    Research: Έρευνα
+    Art: Τέχνη
+    Travel: Ταξίδια
+  Group Icon: Εικονίδιο ομάδας
+  Title: Οργάνωση καρτελών
+  Open Tab Count: '{count} ανοιχτή καρτέλα | {count} ανοιχτές καρτέλες'
+  Search Label: Αναζήτηση καρτελών
+  Selected Count: '{count} επιλεγμένη καρτέλα | {count} επιλεγμένες καρτέλες'
+  Tab Count: '{count} καρτέλα | {count} καρτέλες'
+  Select All: Επιλογή όλων
+  Select None: Καμία επιλογή
+  Move To Group: Μετακίνηση επιλεγμένων καρτελών σε ομάδα
+  Choose Group: Επιλογή ομάδας
+  Ungrouped: Χωρίς ομάδα
+  Pin: Καρφίτσωμα
+  Unpin: Ξεκαρφίτσωμα
+  Load: Φόρτωση
+  Unload: Αποφόρτωση
+  Unload All: Αποφόρτωση όλων
+  Close All: Κλείσιμο όλων
+  Ungroup: Κατάργηση ομαδοποίησης
+  Group Name: Όνομα ομάδας
+  Color: Χρώμα
+  No Color: Χωρίς χρώμα
+  Create Group: Δημιουργία ομάδας
+  Expand Group: Ανάπτυξη ομάδας
+  Collapse Group: Σύμπτυξη ομάδας
+  Expand Group Label: Ανάπτυξη {name}, {count} καρτέλα | Ανάπτυξη {name}, {count} καρτέλες
+  Rename Group: Μετονομασία {name}
+  Change Group Color: Αλλαγή χρώματος για {name}
+  Move To Window: Μετακίνηση σε παράθυρο
+  Choose Window: Επιλογή παραθύρου
+  Select Tab: Επιλογή {title}
+  Active: Ενεργή
+  Pinned: Καρφιτσωμένη
+  Unloaded: Αποφορτωμένη
+  Playing: Αναπαράγεται
+  Close Tab: Κλείσιμο {title}
+  No Open Results: Καμία ανοιχτή καρτέλα δεν αντιστοιχεί σε αυτήν την αναζήτηση.
+  Recently Closed: Έκλεισαν πρόσφατα
+  Clear: Εκκαθάριση
+  No Closed Results: Καμία καρτέλα που έκλεισε πρόσφατα δεν αντιστοιχεί σε αυτήν την αναζήτηση.
+  Drag Tab: Σύρετε για μετακίνηση σε ομάδα
+Chapters:
+  Open Chapters: Άνοιγμα κεφαλαίων
+  Close Chapters: Κλείσιμο κεφαλαίων
+  Copy Timestamp Link: Αντιγραφή συνδέσμου στο {timestamp}
+  Loop Chapter: 'Επανάληψη κεφαλαίου: {chapter}'
+  Looping Chapter: 'Επαναλαμβάνεται το κεφάλαιο: {chapter}'
+  Chapter Loop Stopped: 'Η επανάληψη του κεφαλαίου σταμάτησε'
+Comments:
+  Image unavailable: "Η εικόνα δεν είναι διαθέσιμη"
+  Comment Count: 1 σχόλιο | {count} σχόλια
+  Show Comments: Εμφάνιση σχολίων
+  Getting comment replies, please wait: Ανάκτηση απαντήσεων σχολίων, περιμένετε
+  Reload Comments: Επαναφόρτωση σχολίων
+  Reply Count: 1 απάντηση | {replyCount} απαντήσεις
+  Comments are turned off: Τα σχόλια είναι απενεργοποιημένα
+  YouTube did not provide advertised replies: Το YouTube έδειξε ότι αυτό το σχόλιο έχει απαντήσεις, αλλά δεν τις παρείχε. Ίσως έχουν διαγραφεί ή αποκρυφτεί, γι' αυτό αφαιρέθηκε το κουμπί απαντήσεων.
+  Pinned by you: Καρφιτσώθηκε από εσάς
+  A reply is pinned: Μια απάντηση είναι καρφιτσωμένη
+  Filter loaded comments: Φιλτράρισμα φορτωμένων σχολίων
+  Comment filters: Φίλτρα σχολίων
+  From creator: Από τον δημιουργό
+  Contains timestamps: Περιέχει χρονικές ενδείξεις
+  Pin comment by author: Καρφίτσωμα σχολίου από {author}
+  Unpin comment by author: Ξεκαρφίτσωμα σχολίου από {author}
+  Edited: (επεξεργασμένο)
+  Highlighted comment: Επισημασμένο σχόλιο
+  Highlighted reply: Επισημασμένη απάντηση
+  Search loaded comments: Αναζήτηση στα φορτωμένα σχόλια
+  Loaded comment search result count: 1 από {total} φορτωμένα σχόλια | {count} από {total} φορτωμένα σχόλια
+  No loaded comments match your filters: Κανένα φορτωμένο σχόλιο δεν αντιστοιχεί στα φίλτρα σας
+  YouTube comment link copied to clipboard: Ο σύνδεσμος σχολίου YouTube αντιγράφηκε στο πρόχειρο
+  Translate to {language}: Μετάφραση στα {language}
+  Show original: Εμφάνιση πρωτοτύπου
+  Translating comment, please wait: Το σχόλιο μεταφράζεται, περιμένετε
+  Comment translation failed: Η μετάφραση του σχολίου απέτυχε
+Description:
+  Title: Περιγραφή
+  Copy Description: Αντιγραφή περιγραφής
+  Description Copied: Η περιγραφή αντιγράφηκε στο πρόχειρο
+  Video Category: 'Κατηγορία βίντεο:'
+  Video Tags: Ετικέτες βίντεο
+  Games: Παιχνίδια
+  Music: Μουσική
+Tooltips:
+  General Settings:
+    Limit Titles to Two Lines: "Συντομεύει τους τίτλους βίντεο και λιστών αναπαραγωγής σε λίστες και πλέγματα σε δύο γραμμές με αποσιωπητικά, για πιο ομοιόμορφες κάρτες. Τοποθετήστε τον δείκτη πάνω σε έναν τίτλο για να τον δείτε ολόκληρο."
+    Close Window With Last Tab: 'Όταν είναι απενεργοποιημένο, το κλείσιμο της τελευταίας καρτέλας ανοίγει μια νέα καρτέλα, ώστε το παράθυρο να μένει ανοιχτό μέχρι να το κλείσετε.'
+    Preferred Video Codec: |
+      Η αυτόματη λειτουργία προτιμά κωδικοποιητές που η συσκευή σας μπορεί να αποκωδικοποιήσει με υλικό.
+      AV1: η καλύτερη ποιότητα με τα λιγότερα δεδομένα, αλλά δεν τον έχει κάθε βίντεο. Χωρίς αποκωδικοποίηση υλικού μπορεί να εξαντλεί την μπαταρία ή να χάνει καρέ.
+      VP9: ισορροπία μεταξύ αποδοτικότητας και συμβατότητας, συνήθως διαθέσιμος έως την υψηλότερη ανάλυση.
+      H.264: ο ευκολότερος στην αποκωδικοποίηση σε σχεδόν κάθε συσκευή, αλλά χρησιμοποιεί περισσότερα δεδομένα και συνήθως σταματά στα 1080p.
+      Οι αλλαγές ισχύουν από το επόμενο βίντεο. Αν ο προτιμώμενος κωδικοποιητής δεν είναι διαθέσιμος, χρησιμοποιείται άλλος.
+    Always Use Backup Media Server: "Μεταδίδει τα βίντεο από τον εφεδρικό διακομιστή που ορίζει το YouTube αντί για τον εκχωρημένο, για παράδειγμα όταν η κρυφή μνήμη του παρόχου διαδικτύου σας είναι συχνά αργή. Διαφορετικά, το OpenTubeX αλλάζει μόνο όταν ο εκχωρημένος διακομιστής δεν αποκρίνεται."
+    Automatically switch stream extraction methods: "Δοκιμή του yt-dlp αν αποτύχει η ενσωματωμένη αναπαραγωγή, ή της ενσωματωμένης αναπαραγωγής αν αποτύχει το yt-dlp."
+    Enable Tabs: "Η τρέχουσα σελίδα παραμένει ανοιχτή. Οι άλλες καρτέλες διατηρούνται μέχρι την επανεκκίνηση της εφαρμογής· ενεργοποιήστε ξανά τις καρτέλες για να τις επαναφέρετε."
+    Data Saver Thumbnails: "Χρησιμοποιήστε μικρογραφίες χαμηλότερης ανάλυσης για να μειώσετε τη χρήση δεδομένων."
+    Use AI Translation Completions: Συμπληρώνει τα κενά στις ανθρώπινες μεταφράσεις με κείμενο παραγόμενο από AI. Οι ανθρώπινες μεταφράσεις έχουν πάντα προτεραιότητα.
+    Update Relative Timestamps: Ενημερώνει τις σχετικές χρονικές ενδείξεις σε όλη την εφαρμογή όσο μια σελίδα παραμένει ανοιχτή. Όταν είναι απενεργοποιημένο, ενημερώνονται μόνο μετά από επαναφόρτωση ή νέα επίσκεψη στη σελίδα.
+    Stream Extraction Method: |
+      Επιλέξτε τον τρόπο με τον οποίο το OpenTubeX αποκτά τις ροές βίντεο. Αν επιλέξετε το yt-dlp, πρέπει να είναι διαθέσιμο.
+      Με τη χρήση του yt-dlp, τα βίντεο μπορεί να καθυστερούν περισσότερο να ξεκινήσουν.
+      Η ενσωματωμένη μέθοδος δεν υποστηρίζει μετακίνηση σε άλλο χρονικό σημείο ζωντανών μεταδόσεων και πρεμιερών.
+    Avoid translation: |
+      Απενεργοποιεί την αυτόματη μετάφραση του τίτλου, της περιγραφής και των κεφαλαίων ενός βίντεο από το YouTube.
+      Πάρα πολλά αιτήματα, όπως η ανάκτηση τίτλων βίντεο από λίστες, μπορεί να επηρεάσουν προσωρινά
+      την αξιοπιστία της εφαρμογής.
+    Show Thumbnail Previews: Εμφανίζει κινούμενες προεπισκοπήσεις κατά την κατάδειξη μικρογραφιών βίντεο.
+    Startup Behavior: |
+      Επιλέξτε τι θα κάνει το OpenTubeX κατά την εκκίνηση.
+      Η φόρτωση όλων των καρτελών επαναφέρει αμέσως κάθε αποθηκευμένη καρτέλα, αλλά τα βίντεο δεν θα αναπαράγονται αυτόματα στις καρτέλες παρασκηνίου.
+      Η φόρτωση των καρτελών που ήταν ήδη φορτωμένες επαναφορτώνει όσες ήταν φορτωμένες όταν έκλεισε το OpenTubeX και διατηρεί τις υπόλοιπες αποφορτωμένες.
+      Η φόρτωση της τελευταίας ενεργής καρτέλας επαναφέρει την προηγούμενη συνεδρία με τις άλλες καρτέλες ανοιχτές αλλά αποφορτωμένες. Φορτώνονται όταν κάνετε κλικ σε αυτές.
+      Η έναρξη με κενή συνεδρία παραλείπει τις αποθηκευμένες καρτέλες και ανοίγει ένα νέο παράθυρο.
+    Remember Tab Navigation History: Το ιστορικό πλοήγησης προς τα πίσω και προς τα εμπρός κάθε καρτέλας αποθηκεύεται και επαναφέρεται κατά την επανεκκίνηση του OpenTubeX.
+    Yattee Server: Η παρουσία yattee-server από την οποία το OpenTubeX φορτώνει βίντεο, κανάλια, λίστες αναπαραγωγής και αποτελέσματα αναζήτησης. Το όνομα χρήστη και ο κωδικός πρόσβασης αποθηκεύονται μόνο σε αυτή τη συσκευή.
+    Proxy Videos Through Yattee Server: Αναμεταδίδει τις ροές βίντεο και ήχου μέσω του διακομιστή. Αφήστε το ενεργοποιημένο, εκτός αν ο διακομιστής μοιράζεται τη σύνδεσή σας στο διαδίκτυο, επειδή το YouTube εξυπηρετεί τις ροές μόνο στη διεύθυνση που τις ζήτησε. Οι μικρογραφίες φορτώνονται πάντα απευθείας από το YouTube.
+    Notifications: Επιλέξτε πώς σας ειδοποιεί το OpenTubeX για ζωντανές μεταδόσεις, νέα βίντεο και αυτόματες λήψεις. Με την επιλογή Σύστημα και εντός εφαρμογής, οι ειδοποιήσεις εμφανίζονται στο OpenTubeX όσο το χρησιμοποιείτε και αλλιώς ως ειδοποιήσεις συστήματος, και το καμπανάκι τις κρατά. Η επιλογή Ανενεργές κρύβει επίσης τις επιλογές ειδοποιήσεων.
+  Proxy Settings:
+    IP Block Recovery Script Path: Διαδρομή του αρχείου δέσμης ενεργειών που θα εκτελείται όταν εντοπίζεται αποκλεισμός IP. Το OpenTubeX περιμένει να ολοκληρωθεί και έπειτα επαναφορτώνει το βίντεο. Αν είναι ενεργοποιημένη η εφεδρική χρήση συστήματος υποστήριξης, εκτελείται μόνο όταν αποτύχει και αυτή.
+  Player Settings:
+    Rewind on Resume: "Πηγαίνει πίσω τόσα δευτερόλεπτα όταν συνεχίζετε ένα βίντεο σε παύση, ώστε να δείτε ξανά τις τελευταίες στιγμές. Ορίστε 0 για απενεργοποίηση."
+    Minimum Pause Before Rewinding: "Πηγαίνει πίσω μόνο όταν το βίντεο ήταν σε παύση τουλάχιστον τόσο χρόνο. Ορίστε 0 για επαναφορά μετά από κάθε παύση."
+    Mono Audio: 'Αναπαράγει το αριστερό και το δεξί κανάλι ήχου και στα δύο αυτιά. Χρησιμοποιήστε το όταν ο ήχος ενός βίντεο ακούγεται μόνο από τη μία πλευρά των ακουστικών σας.'
+    Pause on Stream Recovery: "Όταν η ροή βίντεο αποτύχει και η εφαρμογή αναπαραγωγής την επαναφορτώσει ή αλλάξει σε άλλη μορφή ή μηχανή, η αναπαραγωγή τίθεται σε παύση και το σφάλμα παραμένει στο πάνω μέρος της εφαρμογής αναπαραγωγής μέχρι να το απορρίψετε. Όταν είναι απενεργοποιημένο, η αναπαραγωγή συνεχίζεται και το σφάλμα εμφανίζεται σύντομα ως ειδοποίηση."
+    Continue Playback When Screen Is Locked: 'Διατηρεί την αναπαραγωγή ήχου στο παρασκήνιο και παρέχει στοιχεία ελέγχου πολυμέσων Android. Απενεργοποιήστε το για παύση όταν η εφαρμογή δεν είναι πλέον ορατή.'
+    Enable Caption Translations: Όταν είναι ενεργοποιημένο και το βίντεο δεν παρέχει αντίστοιχο πρωτότυπο κομμάτι, το κουμπί υποτίτλων και η συντόμευση C προτιμούν ένα αυτόματα μεταφρασμένο κομμάτι στην προτιμώμενη γλώσσα υποτίτλων.
+    Use Quick Playback Speed Bar: Εμφανίζει μια γραμμή γρήγορης επιλογής ταχύτητας στα στοιχεία ελέγχου του προγράμματος αναπαραγωγής, στη δεξιά πλευρά. Αν είναι ενεργοποιημένη η μη αυτόματη αποθήκευση ταχύτητας αναπαραγωγής ανά κανάλι, η γραμμή περιλαμβάνει επίσης το κουμπί αποθήκευσης της ταχύτητας για το τρέχον κανάλι.
+    Multiply Seek Interval by Playback Rate: Όταν είναι ενεργοποιημένο, τα διαστήματα μετακίνησης (πλήκτρα βέλους και J/L) πολλαπλασιάζονται με την τρέχουσα ταχύτητα αναπαραγωγής. Όταν είναι απενεργοποιημένο, παραμένουν σταθερά ανεξάρτητα από την ταχύτητα αναπαραγωγής.
+    Show Playback Rate Adjusted Timestamp: Όταν είναι ενεργοποιημένο και η ταχύτητα αναπαραγωγής διαφέρει από 1x, το πρόγραμμα αναπαραγωγής εμφανίζει σε παρένθεση, μετά την κανονική χρονική ένδειξη, μια ένδειξη προσαρμοσμένη στην ταχύτητα αναπαραγωγής.
+    Use YouTube-style Shorts: Εμφανίζει τα σύντομα βίντεο σε κατακόρυφο πλέγμα στις σελίδες συνδρομών και καναλιών και χρησιμοποιεί το πρόγραμμα αναπαραγωγής σύντομων βίντεο τύπου YouTube.
+    Loop Shorts: Όταν είναι ενεργοποιημένο, τα σύντομα βίντεο ξεκινούν ξανά αυτόματα. Όταν είναι απενεργοποιημένο, σταματούν στο τέλος και εμφανίζουν κουμπί επανάληψης.
+    Show Skip Silence Toggle: Εμφανίζει διακόπτη ενεργοποίησης και απενεργοποίησης της παράλειψης σιωπής στο μενού ρυθμίσεων του προγράμματος αναπαραγωγής.
+    Enable Skip Silence by Default: Ενεργοποιεί την παράλειψη σιωπής για νέες καρτέλες. Η αλλαγή της σε μία καρτέλα δεν επηρεάζει τις άλλες.
+    Enable Video Zoom: Εμφανίζει το στοιχείο ελέγχου μεγέθυνσης στο μενού ρυθμίσεων του προγράμματος αναπαραγωγής και ενεργοποιεί τις συντομεύσεις πληκτρολογίου και τα στοιχεία ελέγχου μετατόπισης.
+    Enable Seek History: Θυμάται από πού μεταβήκατε σε κάθε βίντεο μέχρι να κλείσει η εφαρμογή. Εμφανίζει τη λίστα ιστορικού μεταβάσεων στο μενού ρυθμίσεων του προγράμματος αναπαραγωγής και ενεργοποιεί τις συντομεύσεις πληκτρολογίου του.
+    Show Seek Bar Filmstrip: "Η μεταφορά του δείκτη της γραμμής αναζήτησης εμφανίζει μια ταινία με καρέ γύρω από το σημείο όπου θα μεταβείτε, και αν σύρετε προς τα πάνω επάνω της, η αναζήτηση γίνεται με ακρίβεια. Όταν είναι απενεργοποιημένο, η μεταφορά εμφανίζει μία μικρογραφία, όπως όταν περνάτε τον δείκτη από πάνω."
+    Voice-over Translation: Όταν ζητάτε μετάφραση, αποστέλλει το αναγνωριστικό, τη διάρκεια και την επιλεγμένη γλώσσα του βίντεο στην ανεπίσημη υπηρεσία μετάφρασης εκφώνησης της Yandex. Είναι απενεργοποιημένο από προεπιλογή.
+    Hold to Double Playback Speed: Κρατήστε πατημένο το πλήκτρο διαστήματος ή το αριστερό κουμπί του ποντικιού πάνω από το πρόγραμμα αναπαραγωγής για να διπλασιάσετε προσωρινά την τρέχουσα ταχύτητα αναπαραγωγής.
+    Ambient Mode: Αναμειγνύει τα χρώματα του βίντεο με την περιοχή γύρω από το πρόγραμμα αναπαραγωγής.
+    Default Volume: Είναι απενεργοποιημένο όσο είναι ενεργή η απομνημόνευση έντασης ήχου. Απενεργοποιήστε την απομνημόνευση έντασης ήχου για να ορίσετε σταθερή αρχική ένταση για κάθε βίντεο.
+    Parallel Segment Loading: |
+      Πόσα τμήματα βίντεο και ήχου θα φορτώνονται ταυτόχρονα πριν από την αναπαραγωγή.
+      Οι υψηλότερες τιμές μπορεί να βοηθήσουν σε αργές ή ασταθείς συνδέσεις, αλλά χρησιμοποιούν περισσότερο εύρος ζώνης και μνήμη.
+      Μπορεί επίσης να προκαλέσουν στην Αυτόματη ρύθμιση υποεκτίμηση της ταχύτητας σύνδεσης και επιλογή χαμηλότερης ποιότητας.
+      Οι ροές που περιορίζονται σε ένα αίτημα κάθε φορά αγνοούν αυτήν τη ρύθμιση.
+    Preload Upcoming Videos: "Ανακτά και αποθηκεύει προσωρινά τις διευθύνσεις yt-dlp των επόμενων βίντεο. Η ουρά προηγείται των λιστών και των προτάσεων."
+    Upcoming Videos to Preload: "Ο μέγιστος αριθμός επόμενων βίντεο των οποίων οι διευθύνσεις yt-dlp ανακτώνται στο παρασκήνιο."
+    Concurrent Preloads: "Ο μέγιστος αριθμός διεργασιών yt-dlp που χρησιμοποιούνται για την ταυτόχρονη προφόρτωση βίντεο. Οι υψηλότερες τιμές χρησιμοποιούν περισσότερη CPU, μνήμη και εύρος ζώνης δικτύου."
+    Ignore System Rotation Lock for Fullscreen: Περιστρέψτε τη συσκευή για είσοδο και έξοδο από την πλήρη οθόνη, ακόμη και όταν η αυτόματη περιστροφή του Android είναι απενεργοποιημένη.
+  Download Settings:
+    Download Folder: Τα βίντεο αποθηκεύονται σε αυτόν τον φάκελο. Αφήστε το κενό για να χρησιμοποιηθεί ο φάκελος Λήψεις του συστήματός σας.
+    Global Additional yt-dlp Arguments: Πρόσθετα ορίσματα γραμμής εντολών που διαβιβάζονται στο yt-dlp για κάθε λήψη, για παράδειγμα --cookies-from-browser firefox.
+    Concurrent Downloads: Ο μέγιστος αριθμός εργασιών yt-dlp που μπορούν να εκτελούνται ταυτόχρονα.
+    Bandwidth Limit: Περιορίζει τον συνολικό ρυθμό μεταφοράς της ουράς, διαιρώντας αυτό το όριο μεταξύ των ταυτόχρονων εργασιών. Εισαγάγετε 0 για απεριόριστο ρυθμό.
+  External Software Settings:
+    yt-dlp Source: Το OpenTubeX μπορεί να χρησιμοποιήσει είτε το yt-dlp που είναι εγκατεστημένο στο σύστημά σας είτε να κατεβάσει και να διαχειρίζεται δικό του αντίγραφο του yt-dlp, το οποίο αποθηκεύεται στον κατάλογο δεδομένων χρήστη.
+    yt-dlp Channel: Επιλέξτε ποιο κανάλι εκδόσεων yt-dlp θα κατεβάζει και θα διαχειρίζεται το OpenTubeX. Το Stable συνιστάται για τους περισσότερους χρήστες.
+    FFmpeg Source: Το OpenTubeX μπορεί να χρησιμοποιήσει είτε τα FFmpeg και FFprobe που είναι εγκατεστημένα στο σύστημά σας είτε να κατεβάσει και να διαχειρίζεται δικές του στατικές εκδόσεις, οι οποίες αποθηκεύονται στον κατάλογο δεδομένων χρήστη.
+    Managed Tool Updates: Επιλέξτε αν τα διαχειριζόμενα εργαλεία θα ενημερώνονται αυτόματα, αν θα ζητείται επιβεβαίωση πριν από την ενημέρωση ή αν θα ενημερώνονται μόνο από τα κουμπιά μη αυτόματης ενημέρωσης. Η λήψη εργαλείων που λείπουν εξακολουθεί να γίνεται όταν απαιτούνται.
+    yt-dlp Executable Path: Από προεπιλογή, το OpenTubeX θεωρεί ότι το yt-dlp μπορεί να βρεθεί μέσω της μεταβλητής περιβάλλοντος PATH. Αν χρειάζεται, μπορείτε να ορίσετε εδώ μια προσαρμοσμένη διαδρομή.
+    Cookie Source: Επιλέξτε αν το yt-dlp θα διαβάζει ένα αρχείο cookie Netscape ή cookie από εγκατεστημένο πρόγραμμα περιήγησης για πιστοποιημένη αναπαραγωγή.
+    Cookie File: Επιλέξτε ένα αρχείο cookie σε μορφή Netscape για πιστοποιημένη αναπαραγωγή.
+    Browser for Cookies: Η υποστήριξη προγραμμάτων περιήγησης διαβάζεται από το επιλεγμένο εκτελέσιμο yt-dlp. Το OpenTubeX ζητά από το yt-dlp να διαβάσει αυτό το πρόγραμμα περιήγησης όταν ζητείται πιστοποιημένη αναπαραγωγή.
+    Browser Profile: Προαιρετικό όνομα ή φάκελος προφίλ προγράμματος περιήγησης. Αφήστε το κενό για να χρησιμοποιηθεί το προφίλ που προσπελάστηκε πιο πρόσφατα.
+    Always Use Cookies: "Χρησιμοποιήστε τα ρυθμισμένα cookies για λήψεις, υπότιτλους και όποτε το yt-dlp εξάγει ροές. Δεν αλλάζει τη μέθοδο εξαγωγής ροής σε yt-dlp. Με επιλεγμένο το yt-dlp, μπορεί να γίνουν διαθέσιμες μορφές μόνο για λογαριασμούς, όπως ο βελτιωμένος ρυθμός μετάδοσης bit του YouTube Premium, όταν ο λογαριασμός έχει πρόσβαση."
+    FFmpeg Executable Path: Το FFmpeg απαιτείται για τη συγχώνευση ξεχωριστών ροών βίντεο και ήχου, καθώς και για τη μετατροπή ήχου. Από προεπιλογή, το OpenTubeX θεωρεί ότι το FFmpeg μπορεί να βρεθεί μέσω της μεταβλητής περιβάλλοντος PATH. Αν χρειάζεται, μπορείτε να ορίσετε εδώ μια προσαρμοσμένη διαδρομή.
+    Use cookies for subtitles: "Χρήση των ρυθμισμένων cookies για υπότιτλους και αυτόματες μεταφράσεις. Ενεργοποιείται επίσης από το «Να χρησιμοποιούνται πάντα cookies»."
+  Distraction Free Settings:
+    Hide Playlist Stats: Αποκρύπτει τον αριθμό βίντεο, τον αριθμό προβολών, την ημερομηνία τελευταίας ενημέρωσης και τη συνολική διάρκεια στις σελίδες λιστών αναπαραγωγής.
+    Count Watch Time From: "Η επιλογή «Όλες οι συσκευές» μετρά κάθε συσκευή που συγχρονίζει στατιστικά παρακολούθησης. Η επιλογή «Αυτή η συσκευή» μετρά μόνο ό,τι παρακολουθείτε εδώ."
+    When a Limit Is Reached: "Η επιλογή «Παύση αναπαραγωγής» σάς επιτρέπει να προσθέσετε 15 λεπτά ή να αγνοήσετε το όριο για σήμερα. Με κωδικό πρόσβασης ρυθμίσεων, μπορείτε να αυξήσετε ένα όριο μόνο από τις Ρυθμίσεις."
+    Grayscale: "Εμφανίζει την εφαρμογή σε αποχρώσεις του γκρι, ώστε να τραβά λιγότερο την προσοχή. Η επιλογή «Την ώρα του ύπνου» ακολουθεί το πρόγραμμα της υπενθύμισης ώρας ύπνου."
+    Apply Grayscale To: "Η επιλογή «Βίντεο και εικόνες» κρατά το περιβάλλον έγχρωμο και κάνει γκρι το περιεχόμενο, όπως βίντεο, μικρογραφίες και avatar."
+    Daily Watch Time Limit: "Μετρά ό,τι παρακολουθήσατε σήμερα σε όλες τις συσκευές που συγχρονίζουν στατιστικά παρακολούθησης, μαζί με τα Shorts."
+    Daily Shorts Limit: "Μετρά τα Shorts που παρακολουθήσατε σήμερα σε αυτή τη συσκευή."
+    Take a Break Reminder: "Θέτει το βίντεο σε παύση μετά από τόση παρακολούθηση. Ένα διάλειμμα 10 λεπτών ή περισσότερο ξεκινά ξανά τη μέτρηση."
+    Bedtime Reminder: "Θέτει το βίντεο σε παύση και σας υπενθυμίζει να σταματήσετε την παρακολούθηση μεταξύ της ώρας έναρξης και της ώρας λήξης."
+    Shorten View Counts: Εμφανίζει σε σύντομη μορφή τα πλήθη προβολών, σχολίων και θετικών ψήφων σχολίων που έχει ήδη στρογγυλοποιήσει το YouTube, π.χ. 14K αντί για 14.000. Τα ακριβή πλήθη εμφανίζονται πάντα ολόκληρα.
+  Subscription Settings:
+    Fetch Feed on Startup: Όταν είναι ενεργοποιημένο, το OpenTubeX ανακτά αυτόματα τη ροή συνδρομών κατά την εκκίνηση και όταν ανοίγει νέο παράθυρο.
+    Show New Content Feed: Εμφανίζει μια καρτέλα «Νέα» με στοιχεία της ροής συνδρομών που δεν υπήρχαν κατά την προηγούμενη ανάκτηση.
+    Enable RSS Feeds: Εμφανίζει μια καρτέλα RSS στη σελίδα Συνδρομές με τα στοιχεία ροών RSS ή Atom, ώστε να μπορείτε να ακολουθείτε δημιουργούς σε άλλες πλατφόρμες. Τα στοιχεία της ανοίγουν με το yt-dlp.
+    Show New Content Indicators: Εμφανίζει μια μικρή κουκκίδα δίπλα στα στοιχεία της ροής συνδρομών που δεν υπήρχαν κατά την προηγούμενη ανάκτηση.
+    Show Scheduled Live Streams / Premieres First: Διατηρεί τις επερχόμενες ζωντανές μεταδόσεις και πρεμιέρες στην κορυφή της ροής συνδρομών. Όταν είναι απενεργοποιημένο, παραμένουν στη θέση ανακοίνωσής τους μέχρι να ξεκινήσουν. Μετά την απενεργοποίηση, ανανεώστε μία φορά τη ροή συνδρομών για να ανακτηθούν οι ημερομηνίες ανακοίνωσης των υπαρχουσών προγραμματισμένων καταχωρίσεων.
+    Auto Refresh Interval: "Πόσο συχνά το OpenTubeX ανανεώνει αυτόματα τη ροή συνδρομών όσο η εφαρμογή είναι ανοιχτή. Στο Android, ένα μη μηδενικό διάστημα ανανεώνει τη ροή και όταν η εφαρμογή είναι κλειστή."
+    Refresh Subscriptions While App Is Closed: "Ανανεώνει τις ροές με τις επιλεγμένες ρυθμίσεις. Στον υπολογιστή, το OpenTubeX παραμένει στην περιοχή ειδοποιήσεων μέχρι την έξοδο. Το Android καθορίζει πότε εκτελούνται οι ανανεώσεις στο παρασκήνιο."
+    Notify About New Uploads: Εμφανίζει ειδοποιήσεις συστήματος σε αυτήν τη συσκευή για κανάλια των οποίων ενεργοποιήσατε τις ειδοποιήσεις στις ρυθμίσεις συνδρομής τους. Το OpenTubeX ελέγχει για νέο περιεχόμενο κατά την ανανέωση των συνδρομών, οπότε επιλέξτε διάστημα αυτόματης ανανέωσης. Για να λαμβάνετε ειδοποιήσεις όταν η εφαρμογή είναι κλειστή, ενεργοποιήστε επίσης την ανανέωση όταν η εφαρμογή είναι κλειστή.
+    RSS Feeds Auto Refresh Interval: Πόσο συχνά το OpenTubeX ανανεώνει αυτόματα τις ροές RSS σας όσο η εφαρμογή είναι ανοιχτή.
+  Theme Settings:
+    Only Show Important Notifications: Αποκρύπτει τις ειδοποιήσεις εντός εφαρμογής που απλώς επιβεβαιώνουν μια ενέργεια ή αναφέρουν μια κατάσταση. Τα σφάλματα, οι προειδοποιήσεις, οι υπενθυμίσεις που έχετε ορίσει και οι ειδοποιήσεις που προσφέρουν μια ενέργεια, όπως η Αναίρεση, εξακολουθούν να εμφανίζονται. Η πρόοδος εργασιών στο παρασκήνιο, όπως η ανανέωση των συνδρομών, εμφανίζεται στη γενική γραμμή προόδου αντί για ειδοποίηση. Οι ειδοποιήσεις συστήματος δεν επηρεάζονται.
+    Visible Search Suggestions: "Ορίζει πόσες καταχωρίσεις ιστορικού αναζήτησης και προτάσεις εμφανίζει η γραμμή αναζήτησης πριν χρειαστεί κύλιση η λίστα της. Η λίστα δεν εκτείνεται ποτέ πέρα από το κάτω άκρο του παραθύρου."
+    Thumbnail Size: "Αλλάζει το μέγεθος των μικρογραφιών βίντεο σε πλέγματα και λίστες. Τα πλέγματα με σταθερό αριθμό στηλών ή η προβολή Πλήρες πλάτος γεμίζουν αντίθετα κάθε σειρά, οπότε εκεί αλλάζει μόνο τις μικρογραφίες λιστών και τα Shorts. Σε παράθυρα μεγέθους τηλεφώνου, οι μικρογραφίες πλέγματος περιορίζονται στο 100%."
+    Playlist Thumbnail Size: "Αλλάζει το μέγεθος των μικρογραφιών βίντεο στις σελίδες λιστών αναπαραγωγής. Τα πλέγματα με σταθερό αριθμό στηλών ή η προβολή Πλήρες πλάτος γεμίζουν αντίθετα κάθε σειρά, οπότε εκεί αλλάζει μόνο τις μικρογραφίες λιστών και τα Shorts. Σε παράθυρα μεγέθους τηλεφώνου, οι μικρογραφίες πλέγματος περιορίζονται στο 100%."
+    Compact Settings Categories: "Αποκρύπτει τις περιγραφές και μειώνει το ύψος των κατηγοριών ρυθμίσεων."
+    Show Progress as Notification: Εμφανίζει μια μόνιμη ειδοποίηση με ζωντανή πρόοδο για λειτουργίες παρασκηνίου, όπως ανανεώσεις συνδρομών και λήψεις διαχειριζόμενων εργαλείων, αντί για την καθολική γραμμή προόδου.
+    Always Show Scrollbars: Διατηρεί τις γραμμές κύλισης πάντα ορατές. Όταν είναι απενεργοποιημένο, εξαφανίζονται λίγο αφού σταματήσετε να κινείτε το ποντίκι και επανεμφανίζονται μόλις το κινήσετε ξανά.
+    Scroll Speed: Αλλάζει την απόσταση κύλισης με τη ροδέλα του ποντικιού και τις χειρονομίες ροδέλας της επιφάνειας αφής.
+    Use Fixed Tab Width: Δίνει σε κάθε καρτέλα της οριζόντιας γραμμής καρτελών το ίδιο πλάτος, αντί να προσαρμόζει το μέγεθός της στον τίτλο.
+    Use Custom Title Bar: Αντικαθιστά τη γραμμή τίτλου του συστήματος με τη γραμμή καρτελών ή με την επάνω πλοήγηση όταν οι καρτέλες δεν βρίσκονται επάνω, για εξοικονόμηση κάθετου χώρου. Τα στοιχεία ελέγχου του παραθύρου εμφανίζονται στη γωνία αυτής της γραμμής.
+    Use Grid Player Menu: Διατάσσει το μενού ρυθμίσεων του προγράμματος αναπαραγωγής βίντεο ως πλέγμα πλακιδίων αντί για λίστα γραμμών.
+  Experimental Settings:
+    Disable Hardware Acceleration: Απενεργοποιεί την επιτάχυνση υλικού GPU. Μπορεί να διορθώσει προβλήματα γραφικών, αλλά πιθανότατα θα μειώσει την απόδοση.
+The playlist is at the beginning. Enable loop to continue playing: Η λίστα αναπαραγωγής βρίσκεται στην αρχή. Ενεργοποιήστε την επανάληψη για να συνεχιστεί η αναπαραγωγή
+External link opening has been disabled in Settings → Privacy: Το άνοιγμα εξωτερικών συνδέσμων έχει απενεργοποιηθεί στις Ρυθμίσεις → Απόρρητο
+Screenshot Clipboard Success: Το στιγμιότυπο οθόνης αποθηκεύτηκε στο πρόχειρο
+Screenshot Clipboard Error: Η αντιγραφή του στιγμιότυπου οθόνης στο πρόχειρο απέτυχε
+KeyboardShortcutPrompt:
+  Toggle Quick Bookmark: Προσθήκη ή αφαίρεση από τη λίστα αναπαραγωγής γρήγορου σελιδοδείκτη
+  Reopen Closed Window: Επαναφορά του τελευταίου κλεισμένου παραθύρου
+  Edit Hint: Επιλέξτε μια συντόμευση και έπειτα πατήστε έναν νέο συνδυασμό πλήκτρων. Πατήστε Backspace ή Delete για να καταργήσετε την αντιστοίχισή της.
+  Change Shortcut: Αλλαγή συντόμευσης για {action}
+  Press Shortcut: Πατήστε συντόμευση…
+  Unassigned: Χωρίς αντιστοίχιση
+  Reset Shortcut: Επαναφορά συντόμευσης για {action}
+  Reset to Defaults: Επαναφορά προεπιλογών
+  Shortcut Already Assigned: Η συντόμευση είναι ήδη αντιστοιχισμένη
+  Shortcut Conflict: 'Η συντόμευση {shortcut} είναι ήδη αντιστοιχισμένη στις ενέργειες {actions}. Θέλετε να την αντιστοιχίσετε ξανά;'
+  Reserved Shortcut Conflict: 'Η συντόμευση {shortcut} είναι δεσμευμένη για τις ενέργειες {actions} και δεν μπορεί να αντιστοιχιστεί ξανά.'
+  Reassign: Νέα αντιστοίχιση
+  Sections:
+    App:
+      Tabs: "Εφαρμογή:\_Καρτέλες"
+      Search and Page: "Εφαρμογή:\_Αναζήτηση και σελίδα"
+      Window and View: "Εφαρμογή:\_Παράθυρο και προβολή"
+  New Tab: Δημιουργία νέας καρτέλας
+  Close Tab: Κλείσιμο τρέχουσας καρτέλας
+  Reload Tab: Επαναφόρτωση τρέχουσας καρτέλας
+  Reopen Closed Tab: Εκ νέου άνοιγμα της τελευταίας κλειστής καρτέλας
+  Next Tab: Μετάβαση στην επόμενη καρτέλα
+  Previous Tab: Μετάβαση στην προηγούμενη καρτέλα
+  Switch to Tab: Μετάβαση στην καρτέλα 1–9
+  Toggle Tab Orientation: Εναλλαγή μεταξύ διατάξεων καρτελών
+  Find in Page: Εύρεση κειμένου στην τρέχουσα σελίδα
+  Find Next Match: Μετάβαση στην επόμενη αντιστοιχία
+  Find Previous Match: Μετάβαση στην προηγούμενη αντιστοιχία
+  Toggle Normal Playback Speed: Εναλλαγή μεταξύ ταχύτητας 1x και της προηγούμενης ταχύτητας αναπαραγωγής
+  Toggle Skip Silence: Εναλλαγή παράλειψης σιωπής
+  Set A-B Repeat Point A: Ορισμός σημείου A επανάληψης A-B
+  Set A-B Repeat Point B: Ορισμός σημείου B επανάληψης A-B
+  Clear A-B Repeat: Εκκαθάριση επανάληψης A-B
+  Video Zoom In: Μεγέθυνση βίντεο
+  Video Zoom Out: Σμίκρυνση βίντεο
+  Tab Switcher: Εναλλαγή καρτελών
+  Undo Seek: Αναίρεση της τελευταίας μετάβασης
+  Redo Seek: Επανάληψη μιας μετάβασης που αναιρέθηκε
+CommandPalette:
+  Title: Παλέτα εντολών
+  Open: Άνοιγμα παλέτας εντολών
+  Search Label: "Αναζήτηση εντολών, ρυθμίσεων και τοπικών βίντεο"
+  Search Placeholder: Αναζήτηση εντολών, ρυθμίσεων και τοπικών βίντεο…
+  Results: "Αποτελέσματα"
+  No Results: "Δεν βρέθηκαν αντίστοιχα αποτελέσματα"
+  Result Count: "Αποτελέσματα: {count} | Αποτελέσματα: {count}"
+  Move: Μετακίνηση
+  Run: Εκτέλεση
+  Keys:
+    Up: ↑
+    Down: ↓
+    Escape: Esc
+  Switch to Tab: 'Μετάβαση στην καρτέλα: {title}'
+  Switch Profile: 'Αλλαγή προφίλ: {name}'
+  Open Playlist: 'Άνοιγμα λίστας αναπαραγωγής: {name}'
+  Cancel Download: 'Ακύρωση λήψης: {title}'
+  Groups:
+    App: Εφαρμογή
+    Navigation: Πλοήγηση
+    Tabs: Καρτέλες
+    Local Videos: Τοπικά βίντεο
+  Unavailable:
+    Current Page: Βρίσκεστε ήδη σε αυτήν τη σελίδα
+    No History: Δεν υπάρχει σελίδα προς αυτήν την κατεύθυνση
+    Desktop: Διαθέσιμο μόνο στην εφαρμογή για υπολογιστές
+    Build: Δεν είναι διαθέσιμο σε αυτήν την έκδοση
+    One Tab: Ανοίξτε πρώτα άλλη καρτέλα
+    Active Tab: Αυτή είναι η ενεργή καρτέλα
+    Active Profile: Αυτό είναι το ενεργό προφίλ
+    Download Finished: Αυτή η λήψη δεν εκτελείται πλέον
+    Video: Ανοίξτε πρώτα ένα βίντεο
+Downloads:
+  File Name Template Invalid: 'Χρησιμοποιήστε μια σχετική διαδρομή μέσα στον φάκελο λήψεων χωρίς "..", "~", "$", "%" ή πρόθεμα όπως "thumbnail:".'
+  Search Completed: "Αναζήτηση ολοκληρωμένων λήψεων κατά τίτλο ή κανάλι"
+  Format: "Μορφή"
+  All Formats: "Όλες οι μορφές"
+  Largest First: "Μεγαλύτερα πρώτα"
+  Smallest First: "Μικρότερα πρώτα"
+  No Matching Downloads: "Δεν βρέθηκαν αντίστοιχες ολοκληρωμένες λήψεις. Δοκιμάστε άλλη αναζήτηση ή φίλτρο."
+  Add Download: Προσθήκη λήψης
+  Preparing: Προετοιμασία…
+  Export Failed: "Δεν ήταν δυνατή η αποθήκευση του ληφθέντος αρχείου. Επιλέξτε έναν φάκελο λήψεων με δικαίωμα εγγραφής και δοκιμάστε ξανά."
+  Remove File Permanently Warning: "Αυτό θα διαγράψει οριστικά το «{title}»."
+  Download: Λήψη
+  Download Video: Λήψη βίντεο
+  Download Playlist: Λήψη λίστας αναπαραγωγής
+  Downloading: Γίνεται λήψη
+  Queue: Ουρά
+  Downloaded: Ολοκληρωμένη
+  Canceled: Ακυρώθηκε
+  Open Downloads: Άνοιγμα λήψεων
+  No Downloads: Δεν υπάρχουν ακόμη λήψεις
+  No Downloads Description: Οι λήψεις που ξεκινάτε θα εμφανίζονται εδώ.
+  Clear Failed Canceled Skipped And Missing: Εκκαθάριση αποτυχημένων, ακυρωμένων, παραλειφθεισών και απούσων
+  Clear From List: Αφαίρεση από τη λίστα
+  Show in Folder: Εμφάνιση στον φάκελο
+  Play Download: Αναπαραγωγή ληφθέντος αρχείου
+  Retry Download: Νέα προσπάθεια λήψης
+  Pause Download: Παύση λήψης
+  Resume Download: Συνέχιση λήψης
+  Move Earlier: Μετακίνηση νωρίτερα
+  Move Later: Μετακίνηση αργότερα
+  Pause All: Παύση όλων
+  Resume All: Συνέχιση όλων
+  Retry All: Νέα προσπάθεια όλων των αποτυχημένων λήψεων
+  Total Size: 'Συνολικό μέγεθος: {size}'
+  Local File: Τοπικό αρχείο
+  Available Offline: Διαθέσιμο εκτός σύνδεσης
+  Remove File: Αφαίρεση αρχείου
+  Remove File Confirmation: Αφαίρεση ληφθέντος αρχείου;
+  Remove File Warning: Το «{title}» θα μετακινηθεί στον κάδο απορριμμάτων της συσκευής σας.
+  File Not Found: Δεν ήταν δυνατή η εύρεση του ληφθέντος αρχείου.
+  Download Missing: Η λήψη δεν είναι διαθέσιμη
+  Files Missing: Το ληφθέν αρχείο δεν είναι πλέον διαθέσιμο στο σύστημα αρχείων. | Τα ληφθέντα αρχεία δεν είναι πλέον διαθέσιμα στο σύστημα αρχείων.
+  Files Available: 'Είναι διαθέσιμα {available} από {total} ληφθέντα αρχεία.'
+  More Files: 1 ακόμη αρχείο | {count} ακόμη αρχεία
+  Template Used: 'Πρότυπο: {name}'
+  Download Type: Τύπος λήψης
+  Template: Πρότυπο
+  Unsaved: Μη αποθηκευμένο
+  Media Type: Τύπος πολυμέσων
+  Video: Βίντεο
+  Audio: Ήχος
+  Maximum Resolution: Μέγιστη ανάλυση
+  Best Available: Βέλτιστη διαθέσιμη
+  Automatic: Αυτόματη
+  Container: Περιέκτης
+  Video Codec: Κωδικοποιητής βίντεο
+  Audio Codec: Κωδικοποιητής ήχου
+  File Name Template: Πρότυπο ονόματος αρχείου
+  File Name Template Help: 'Διαθέσιμα πεδία: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: Χρονικό εύρος και κεφάλαια
+  Start Time: Ώρα έναρξης
+  End Time: Ώρα λήξης
+  Split by Chapters: Διαχωρισμός σε ξεχωριστά αρχεία ανά κεφάλαιο
+  Remove Segments: Αφαίρεση τμημάτων
+  Subtitles and Metadata: Υπότιτλοι και μεταδεδομένα
+  Include Subtitles: Συμπερίληψη υποτίτλων
+  Embed Subtitles: Ενσωμάτωση υποτίτλων στο αρχείο πολυμέσων
+  Subtitle Format: Μορφή υποτίτλων
+  Subtitle Languages: Γλώσσες υποτίτλων
+  Subtitle Languages Help: 'Επιλογείς γλώσσας yt-dlp διαχωρισμένοι με κόμματα, για παράδειγμα: en.*,de.*'
+  Embed Cover Art: Ενσωμάτωση μικρογραφίας ως εξώφυλλο
+  Embed Metadata: Ενσωμάτωση τίτλου, δημιουργού, περιγραφής και κεφαλαίων
+  Additional yt-dlp Arguments: Πρόσθετα ορίσματα yt-dlp
+  Custom yt-dlp Arguments: Προσαρμοσμένα ορίσματα yt-dlp
+  Template Name: Όνομα προτύπου
+  Save Template: Αποθήκευση προτύπου
+  Delete Template: Διαγραφή προτύπου
+  Template Saved: Αποθηκεύτηκε το πρότυπο λήψης «{name}»
+  Template Name Exists: Υπάρχει ήδη πρότυπο λήψης με το όνομα «{name}».
+  Choose Folder: Αλλαγή
+  Select Folder: Επιλογή φακέλου
+  Folder Required: Επιλέξτε φάκελο λήψεων για να ενεργοποιήσετε τις λήψεις.
+  System Downloads Folder: Φάκελος λήψεων συστήματος
+  Processing: Επεξεργασία…
+  Queued: Σε αναμονή
+  Queued Position: Σε αναμονή, θέση {position}
+  Paused: Σε παύση
+  Pausing: Η τρέχουσα εργασία θα ολοκληρωθεί και έπειτα η ουρά θα τεθεί σε παύση
+  Download Complete: Η λήψη ολοκληρώθηκε
+  Download Cancelled: Η λήψη ακυρώθηκε
+  Download Failed: Η λήψη απέτυχε
+  File Name Shortened: Το όνομα αρχείου συντομεύτηκε επειδή ο τίτλος του βίντεο ήταν πολύ μεγάλος.
+  Some Videos Not Downloaded: Ορισμένα βίντεο αυτής της λίστας αναπαραγωγής δεν ήταν δυνατό να ληφθούν.
+  Insufficient Disk Space: Δεν υπάρχει αρκετός χώρος στον δίσκο. Απαιτούνται περίπου {required} και είναι διαθέσιμα {available}.
+  Unknown Download Size: Το μέγεθος της λήψης είναι άγνωστο. Στο σύστημα αρχείων προορισμού είναι διαθέσιμα {available}.
+  Disk Space Check Unavailable: Δεν ήταν δυνατός ο έλεγχος του διαθέσιμου χώρου στον δίσκο πριν από την έναρξη αυτής της λήψης.
+  Download Failure Hint: Ελέγξτε το {issuesLink} και έπειτα δοκιμάστε να αλλάξετε το κανάλι yt-dlp σε Nightly ή Master από τις Ρυθμίσεις → Για προχωρημένους → Εξωτερικό λογισμικό.
+  yt-dlp YouTube Issues: πρόσφατα προβλήματα του yt-dlp με το YouTube
+  Automatic Download Started: Η αυτόματη λήψη ξεκίνησε
+  Automatic Download Started Body: Γίνεται λήψη του «{title}» από το κανάλι {channel} στο παρασκήνιο.
+  Automatic Download Complete: Η αυτόματη λήψη ολοκληρώθηκε
+  Automatic Download Failed: Η αυτόματη λήψη απέτυχε
+  Automatic Download Could Not Start: Δεν ήταν δυνατή η έναρξη αυτόματης λήψης του «{title}».
+  Automatic Download Skipped: Παραλείφθηκε από τα φίλτρα αυτόματων λήψεων
+  Cancel Download: Ακύρωση λήψης
+  yt-dlp Not Found: Το yt-dlp δεν βρέθηκε. Εγκαταστήστε το ή ορίστε τη διαδρομή του στις Ρυθμίσεις → Για προχωρημένους → Εξωτερικό λογισμικό.
+  Download Complete Template: Η λήψη του «{title}» ολοκληρώθηκε
+  Download Failed Template: Η λήψη του «{title}» απέτυχε
+  Templates:
+    Video Best: Βίντεο - Βέλτιστη ποιότητα
+    Video Resolution: Βίντεο - {resolution}
+    Audio Best: Ήχος - Βέλτιστη ποιότητα
+    Audio Format: Ήχος - {format}
+    Subtitles Format: Υπότιτλοι - {format}
+  Waiting for Unmetered Network: "Αναμονή για δίκτυο χωρίς χρέωση δεδομένων"
+  Waiting for Charging: "Αναμονή για φορτιστή"
+  Remove File Failed: Δεν ήταν δυνατή η αφαίρεση του ληφθέντος αρχείου.
+Channels:
+  Load More Channels: "Φόρτωση περισσότερων καναλιών"
+Search Bar:
+  Use Suggestion: Χρήση πρότασης
+Theme Discovery:
+  Discover Themes: "Ανακάλυψη θεμάτων"
+  Refresh: "Ανανέωση"
+  View on GitHub: "Προβολή στο GitHub"
+  Load Error: "Δεν ήταν δυνατή η φόρτωση θεμάτων. Δοκιμάστε ανανέωση."
+  Loading: "Φόρτωση…"
+  No Themes: "Δεν βρέθηκαν θέματα για εγκατάσταση."
+  No Preview: "Το στιγμιότυπο οθόνης δεν είναι διαθέσιμο"
+  Load More: "Φόρτωση περισσότερων"
+  Applied: "Εφαρμόστηκε"
+  Apply Theme: "Εφαρμογή θέματος"
+  Install and Apply: "Εγκατάσταση και εφαρμογή"
+  Update and Apply: "Ενημέρωση και εφαρμογή"
+
+Connection:
+  Offline: Εκτός σύνδεσης
+  Reconnecting: "Η σύνδεση χάθηκε. Γίνεται προσπάθεια επανασύνδεσης…"
+  Back Online: "Ξανά σε σύνδεση"
+
+App Icon:
+  Restart: "Επανεκκίνηση εφαρμογής"
+  Saved Message: "Το εικονίδιο αποθηκεύτηκε. Η αρχική οθόνη μπορεί να χρειαστεί λίγο χρόνο για ενημέρωση."
+  Title: "Εικονίδιο εφαρμογής"
+  Error: "Δεν ήταν δυνατή η φόρτωση ή η αλλαγή του εικονιδίου της εφαρμογής"
+
+Tray:
+  Hide All Windows: "Απόκρυψη όλων των παραθύρων"
+  Show All Windows: "Εμφάνιση όλων των παραθύρων"
+
+Tray Icon:
+  Title: "Εικονίδιο περιοχής ειδοποιήσεων"
+  Follow App Theme: "Ακολούθηση θέματος εφαρμογής"
+  Monochrome: "Μονόχρωμο"
+
+Form Inputs:
+  Browse: "Περιήγηση"
+  Use Default Path: "Χρήση προεπιλογής"
+  Enter Password Hint: "Εισαγάγετε τον κωδικό σας"
+  Choose Password Hint: "Επιλέξτε έναν κωδικό"
+  Confirm Password Hint: "Επαναλάβετε τον νέο κωδικό σας"
+  Encryption Passphrase Hint: "Εισαγάγετε τη φράση κρυπτογράφησής σας"
+  Show Password: "Εμφάνιση κωδικού πρόσβασης"
+  Hide Password: "Απόκρυψη κωδικού πρόσβασης"
+  Search Text Hint: "Εισαγάγετε όρους αναζήτησης"
+  Playlist Description Hint: "Περιγράψτε αυτήν τη λίστα αναπαραγωγής"
+  Filename Preview: "Προεπισκόπηση ονόματος αρχείου"
+  Enter Channels: "Εισαγάγετε κανάλια"
+  Enter Text: "Εισαγάγετε κείμενο"
+  Video URL: URL βίντεο ή λίστας αναπαραγωγής
+  Paste Link: Επικολλήστε σύνδεσμο βίντεο ή λίστας αναπαραγωγής
+  Example: π.χ. {example}
+  No Minimum: Χωρίς ελάχιστο
+  No Maximum: Χωρίς μέγιστο
+  Any Age: Οποιαδήποτε ηλικία
+  Included Terms Example: π.χ. οδηγός, κριτική
+  Excluded Terms Example: π.χ. τρέιλερ, προεπισκόπηση
+  Global Arguments Hint: Προαιρετικά ορίσματα για κάθε λήψη
+  Unlimited Hint: 0 για απεριόριστο
+  Add Argument: Προσθέστε ένα όρισμα
+  Template Name Example: π.χ. Μόνο ήχος
+  Download Arguments Hint: Προαιρετικά ορίσματα για αυτή τη λήψη
+  Generated ID Hint: Αφήστε κενό για δημιουργία ID
+  Default Value: "Προεπιλογή: {value}"
+
+Search Filters:
+  Possible Age Restriction Hint: "Το YouTube ενδέχεται να έχει επιβάλει ηλικιακό περιορισμό σε αυτό το ερώτημα αναζήτησης."
+  Cookie Search Failed: "Η αναζήτηση με τα ρυθμισμένα cookies απέτυχε."
+  Showing results for: "Εμφάνιση αποτελεσμάτων για {query}"
+  Search instead for: "Αναζήτηση για {query} αντί αυτού"
+  Including results for: "Συμπεριλαμβάνονται αποτελέσματα για {query}"
+  Search only for: "Αναζήτηση μόνο για {query}"
+  Did you mean: "Μήπως εννοούσατε {query};"
+
+Storage Startup Error:
+  Title: "Δεν ήταν δυνατή η φόρτωση των δεδομένων της εφαρμογής"
+  Message: "Ελευθερώστε χώρο στη συσκευή και δοκιμάστε ξανά. Ο συγχρονισμός έχει τεθεί σε παύση μέχρι να φορτωθούν τα δεδομένα σας."
+  Retry: "Δοκιμή ξανά"
+Native Permissions:
+  Local Network Denied: "Η άδεια για κοντινές συσκευές απορρίφθηκε."
+  Local Network: "Εντοπισμός συσκευών στο τοπικό σας δίκτυο και μετάδοση βίντεο σε αυτές, καθώς και συγχρονισμός ρυθμίσεων και δεδομένων μεταξύ συσκευών."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Αρχική"
+  subscriptions: "Συνδρ."
+  userplaylists: "Λίστες"
+  history: "Ιστορικό"
+  subscribedchannels: "Κανάλια"
+  trending: "Τάσεις"
+  popular: "Δημοφιλή"
+  stats: "Στατιστικά"
+  more: "Περισσ."
+
+Installer:
+  Create Desktop Shortcut: Δημιουργία συντόμευσης στην επιφάνεια εργασίας
+Older Version Changes:
+  Title: "Αλλαγές από παλαιότερη έκδοση"
+  Message: "Οι αλλαγές που κάνατε σε παλαιότερη έκδοση του OpenTubeX εφαρμόστηκαν στη βιβλιοθήκη σας."
+  Detail: "Αν ένα στοιχείο άλλαξε και στις δύο εκδόσεις, διατηρήθηκε η αλλαγή από την παλαιότερη έκδοση. Ένα αντίγραφο ασφαλείας της προηγούμενης βιβλιοθήκης σας βρίσκεται στον φάκελο του προφίλ σας."
+Library Format Changed:
+  Title: "Η βιβλιοθήκη μεταφέρθηκε σε νέα μορφή"
+  Message: "Η βιβλιοθήκη σας χρησιμοποιεί πλέον νέα μορφή αποθήκευσης."
+  Detail: "Οι παλαιότερες εκδόσεις του OpenTubeX μπορούν ακόμα να ανοίξουν τη βιβλιοθήκη σας, αλλά την εμφανίζουν όπως ήταν πριν από αυτήν την ενημέρωση. Οι αλλαγές που κάνετε σε παλαιότερη έκδοση προστίθενται όταν επιστρέψετε σε αυτήν την έκδοση."
+Invidious Fallback Warning: "Αυτό το αίτημα παρακάμπτει τη ρυθμισμένη παρουσία Invidious και συνδέεται απευθείας στο YouTube, αποκαλύπτοντας τη διεύθυνση IP σας."
+Automatically unloaded to free memory: "Εκφορτώθηκε αυτόματα για απελευθέρωση μνήμης"
+Home Widgets:
+  Continue Watching: "Συνέχεια παρακολούθησης"
+  Continue Watching Description: "Συνεχίστε τα βίντεο που αρχίσατε να βλέπετε"
+  Continue Watching Empty: "Τα βίντεο που αρχίζετε να βλέπετε εμφανίζονται εδώ"
+  Quick Access: "Γρήγορη πρόσβαση"
+  Quick Access Description: "Άνοιγμα Αναζήτησης, Συνδρομών ή Παρακολούθησης αργότερα"
+  Search: "Αναζήτηση"
+  Subscriptions: "Συνδρομές"
+  Watch Later: "Παρακολούθηση αργότερα"
+Subscription Groups:
+  Groups: Ομάδες
+  All: Όλα
+  New Group: Νέα ομάδα
+  Edit Group: Επεξεργασία ομάδας
+  Group Name: Όνομα ομάδας
+  Create: Δημιουργία
+  Save: Αποθήκευση
+  Delete Group: Διαγραφή ομάδας
+  Delete Prompt: Διαγραφή της ομάδας "{groupName}"; Οι εγγραφές στα κανάλια της θα διατηρηθούν.
+  Empty Group: Αυτή η ομάδα δεν περιέχει κανάλια από το τρέχον προφίλ.
+  Save Failed: Δεν ήταν δυνατή η αποθήκευση της ομάδας.
+  Delete Failed: Δεν ήταν δυνατή η διαγραφή της ομάδας.
+  Group Icon: Εικονίδιο ομάδας
+  No Icon: Χωρίς εικονίδιο
+Yattee Server:
+  API Error (Click to copy): Σφάλμα διακομιστή Yattee (Κάντε κλικ για αντιγραφή)
+  Unsupported page: Αυτή η σελίδα δεν είναι διαθέσιμη με τον διακομιστή Yattee. Ενεργοποιήστε τη ρύθμιση «{fallbackSetting}» για να τη φορτώσετε με το τοπικό API.
+  Posts unavailable: Οι διακομιστές Yattee δεν παρέχουν αναρτήσεις. Ενεργοποιήστε τη ρύθμιση «{fallbackSetting}» για να τις φορτώσετε με το τοπικό API.
+  Errors:
+    Invalid credentials: Ο διακομιστής Yattee απέρριψε το όνομα χρήστη ή τον κωδικό πρόσβασης. Ελέγξτε τα στις Ρυθμίσεις → Για προχωρημένους.
+    Rate limited: Ο διακομιστής Yattee δεν επιτρέπει τη σύνδεση μετά από πάρα πολλές αποτυχημένες προσπάθειες. Δοκιμάστε ξανά αργότερα.
+    Streams not relayed: Ο διακομιστής Yattee δεν αναμετέδωσε τις ροές αυτού του βίντεο. Όσο τα βίντεο περνούν μέσω του διακομιστή, το OpenTubeX δεν συνδέεται απευθείας στο YouTube.
+    Not configured: Εισαγάγετε το URL του διακομιστή Yattee σας στις Ρυθμίσεις → Για προχωρημένους.
+    HTTPS required: Το Android μπορεί να αναπαράγει βίντεο μόνο από διακομιστές Yattee που χρησιμοποιούν HTTPS.
+    Streams unavailable: Δεν ήταν δυνατή η φόρτωση των ροών αυτού του βίντεο από τον διακομιστή Yattee. Χρησιμοποιήστε τον «Έλεγχο σύνδεσης» στις Ρυθμίσεις → Για προχωρημένους για να ελέγξετε τον διακομιστή.
+Yattee Fallback Warning: Αυτό το αίτημα παρακάμπτει τον ρυθμισμένο διακομιστή Yattee και συνδέεται απευθείας στο YouTube, αποκαλύπτοντας τη διεύθυνση IP σας.
+Update With Package Manager: 'Ενημέρωση με {packageManager}:'
+Update Command Copied: 'Η εντολή ενημέρωσης αντιγράφηκε'
+Digital Wellbeing:
+  Watch time limit almost reached: "Απομένουν {duration} έως το ημερήσιο όριο χρόνου παρακολούθησης"
+  Shorts limit almost reached: "Απομένουν {duration} έως το ημερήσιο όριο Shorts"
+  Daily watch time limit reached: "Συμπληρώθηκε το ημερήσιο όριο χρόνου παρακολούθησης"
+  Daily Shorts limit reached: "Συμπληρώθηκε το ημερήσιο όριο Shorts"
+  Watched today: "Παρακολουθήσατε {duration} σήμερα."
+  Shorts watched today: "Παρακολουθήσατε Shorts για {duration} σήμερα."
+  15 More Minutes: "15 λεπτά ακόμα"
+  Ignore for Today: "Παράβλεψη για σήμερα"
+  Time to take a break: "Ώρα για διάλειμμα"
+  Watching for: "Παρακολουθείτε εδώ και {duration}."
+  Time for bed: "Ώρα για ύπνο"
+  Bedtime started at: "Η ώρα του ύπνου σας ξεκίνησε στις {time}."
+  Remind Me in 10 Minutes: "Υπενθύμιση σε 10 λεπτά"
+Notification Center:
+  Notifications: "Ειδοποιήσεις"
+  Notifications With Unread: "Ειδοποιήσεις (μη αναγνωσμένες: {count})"
+  Mark as Read: "Σήμανση ως αναγνωσμένο"
+  Mark All as Read: "Σήμανση όλων ως αναγνωσμένων"
+  Clear All: "Απαλοιφή όλων"
+  Clear: "Απαλοιφή"
+  Empty: "Δεν υπάρχουν ακόμη ειδοποιήσεις"
+  Empty Hint: "Εδώ θα εμφανίζονται υπενθυμίσεις ζωντανών μεταδόσεων και νέα βίντεο από κανάλια με ενεργές ειδοποιήσεις."

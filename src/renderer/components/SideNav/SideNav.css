@@ -1,24 +1,24 @@
 .sideNav {
   display: block;
-  block-size: calc(100vh - 60px);
-  inline-size: 80px;
+  block-size: calc(100dvh - var(--top-nav-sticky-offset, 60px) - var(--connection-status-space, 0px));
+  inline-size: var(--desktop-nav-rail-width);
   overflow-x: hidden;
   position: sticky;
   inset-inline-start: 0;
-  inset-block-start: 60px;
+  inset-block-start: var(--top-nav-sticky-offset, 60px);
   z-index: 3;
   box-shadow: 1px -1px 1px -1px var(--primary-shadow-color);
   background-color: var(--side-nav-color);
-  transition-property: inline-size;
-  transition-duration: 150ms;
-  transition-timing-function: ease-in-out;
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- the page reflows beside the navigation as it expands */
+  transition: inline-size var(--motion-default-effects);
   user-select: none;
 }
 
 .inner {
   block-size: 100%;
-  inline-size: 80px;
+  inline-size: var(--desktop-nav-rail-width);
   overflow: hidden auto;
+  position: relative;
 }
 
 .topNavOption {
@@ -45,35 +45,47 @@
   -webkit-user-drag: none;
 }
 
+.navOptionButton {
+  inline-size: 100%;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+
 .channelLink {
   display: block;
   color: inherit;
   text-decoration: inherit;
 }
 
+.navOption:focus-visible,
+.navChannel:focus-visible {
+  z-index: 2;
+}
+
 .navOption:hover,
 .navChannel:hover {
   background-color: var(--side-nav-hover-color);
   color: var(--side-nav-hover-text-color);
-  transition: background 0.2s ease-in;
 }
 
 .navOption:active,
 .navChannel:active {
   background-color: var(--side-nav-active-color);
   color: var(--side-nav-active-text-color);
-  transition: background 0.2s ease-in;
 }
 
 .navIcon {
   block-size: 1em;
-  inline-size: 100%;
+  inline-size: 1em;
   display: block;
+  margin-inline: auto;
 }
 
-.navIcon.fa-user-check {
-  /* Align icon according to torso */
-  transform: translateX(0.2em);
+.navIcon[data-icon='user-check'][data-icon-pack='material'] {
+  transform: translateX(0.15em);
 }
 
 .navLabel {
@@ -117,8 +129,20 @@
 }
 
 .channelThumbnail {
+  block-size: 35px;
+  inline-size: 35px;
   border-radius: 50%;
   vertical-align: middle;
+}
+
+.channelThumbnail :deep(.ft-icon__glyph) {
+  block-size: 100%;
+  inline-size: 100%;
+  scale: 1;
+}
+
+.subscriptionLoadSentinel {
+  block-size: 1px;
 }
 
 .noThumbnail {
@@ -141,7 +165,7 @@
 }
 
 .hiddenLabels {
-  inline-size: 60px;
+  inline-size: 50px;
 }
 
 .hiddenLabels .navLabel {
@@ -156,71 +180,12 @@
   pointer-events: none;
 }
 
-@media only screen and (width > 680px) {
-  ::-webkit-scrollbar {
-    inline-size: 10px;
-    block-size: 10px;
-  }
+.sideNav.highlightTransitionsDisabled :is(.navOption, .navChannel):not(:hover, :focus-visible, :active)::before {
+  transition: none;
+}
 
-  .opened {
-    inline-size: 200px;
-  }
-
-  .opened .inner {
-    inline-size: 200px;
-  }
-
-  .opened .refreshIcon {
-    display: block;
-  }
-
-  .opened .navIcon {
-    inline-size: 1.25em;
-    margin-inline-start: 10px;
-  }
-
-  .opened .navIcon.fa-user-check {
-    block-size: 1em;
-  }
-
-  .opened .navOption {
-    padding-inline: 5px;
-  }
-
-  .opened .navLabel {
-    text-align: start;
-    margin-inline-start: 40px;
-    margin-block-end: 16px;
-    font-size: 16px;
-  }
-
-  .opened .channelLink {
-    display: flex;
-    align-items: center;
-  }
-
-  .opened .navChannel .navLabel {
-    font-size: 12px;
-    flex-grow: 1;
-    margin: 0;
-  }
-
-  .opened .thumbnailContainer {
-    inset-block-start: 50%;
-    position: absolute;
-    transform: translateY(-50%);
-    margin-block: 0;
-  }
-
-  .opened .navChannel .thumbnailContainer {
-    position: static;
-    transform: none;
-    margin: 5px;
-  }
-
-  .opened.hiddenLabels .navLabel {
-    display: block;
-  }
+.sideNav.layoutTransitionsDisabled {
+  transition: none;
 }
 
 @media only screen and (width <= 680px) {
@@ -235,14 +200,31 @@
   }
 
   .sideNav {
+    --hide-on-scroll: 1;
+
+    flex-wrap: nowrap;
+    gap: 4px;
+    padding-inline: 4px;
+    background-color: var(--side-nav-color);
+    box-shadow: none;
+    box-sizing: border-box;
     inset-inline-start: 0;
     position: fixed;
     display: flex;
     margin-block-start: 0;
-    block-size: 60px;
+    block-size: var(--mobile-nav-height);
     inline-size: 100%;
     inset-block: auto 0;
+    padding-block-end: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0));
     overflow-y: hidden;
+    transform: none;
+    transition: var(--mobile-nav-reveal-transition);
+  }
+
+  .sideNav.scrollHidden:not(:has(:focus-visible)) {
+    transform: translateY(100%);
+    transition: var(--mobile-nav-hide-transition);
+    pointer-events: none;
   }
 
   .topNavOption {
@@ -272,6 +254,23 @@
   .hiddenLabels {
     inline-size: 100%;
   }
+
+  .compactLabels .navOption:not(.mobileHidden) {
+    align-items: center;
+    block-size: var(--mobile-nav-content-height);
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    padding-block: 0;
+  }
+
+  .compactLabels .thumbnailContainer {
+    margin-block: 0;
+  }
+
+  .compactLabels .navLabel {
+    display: none;
+  }
 }
 
 @media only screen and (width <= 400px) {
@@ -287,3 +286,12 @@
   }
 }
 
+.channelThumbnail.playlistThumbnail {
+  border-radius: var(--shape-corner-small);
+  object-fit: cover;
+}
+
+.channelThumbnail.playlistThumbnail.blur {
+  clip-path: inset(0 round var(--shape-corner-small));
+  filter: blur(5px) var(--content-filter,);
+}
