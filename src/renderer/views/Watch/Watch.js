@@ -1440,6 +1440,9 @@ export default defineComponent({
       if (previousSummary.length > 0 && this.aiVideoSummaryMode !== 'hide') this.clampShortsAuxPanelScroll()
     },
     currentLocale: 'updateUpcomingTimestamp',
+    // The waiting player error belongs to the replaced source
+    activeFormat: 'cancelPlaybackNetworkWait',
+    manifestSrc: 'cancelPlaybackNetworkWait',
     dateFormatPreference: 'updateUpcomingTimestamp',
     timeFormatPreference: 'updateUpcomingTimestamp',
     theatrePossible(possible, wasPossible) {
@@ -1645,7 +1648,7 @@ export default defineComponent({
     connectionEvents.removeEventListener('change', this.handleDownloadConnectionChange)
     connectionEvents.removeEventListener('waiting', this.updateWaitingOrigins)
     clearTimeout(this.downloadedPlaybackFallbackTimer)
-    this.playbackNetworkWaitController?.abort()
+    this.cancelPlaybackNetworkWait()
     this.shortsNavigation.removeListeners()
     window.removeEventListener('resize', this.updateShortsViewportHeight)
     window.removeEventListener('resize', this.updateTheatreLayoutAvailability)
@@ -2412,6 +2415,7 @@ export default defineComponent({
             requestedVideoId !== this.videoId &&
             this.$refs.player.hasLoaded
           if (retainShort) {
+            this.cancelPlaybackNetworkWait()
             this.$refs.player.suspendForShortsNavigation()
           } else {
             await this.destroyPlayer()
@@ -5869,7 +5873,7 @@ export default defineComponent({
       if (probeUrl === null) return false
 
       const player = this.$refs.player
-      this.playbackNetworkWaitController?.abort()
+      this.cancelPlaybackNetworkWait()
       const controller = new AbortController()
       this.playbackNetworkWaitController = controller
       this.playbackNetworkWaitOrigin = new URL(probeUrl).origin
@@ -5886,12 +5890,19 @@ export default defineComponent({
         }
       }
       if (player !== this.$refs.player || this.isLoading) return true
+      // Whether or not the retry starts, a further failure needs fresh streaming data
+      this.playbackNetworkRetryPending = true
+      this.playbackNetworkRetryPlayedSeconds = 0
       if (player?.retryStreaming() !== true) return false
 
       console.warn(`Retrying the stream of ${this.videoId} after its server answered again`)
-      this.playbackNetworkRetryPending = true
-      this.playbackNetworkRetryPlayedSeconds = 0
       return true
+    },
+
+    cancelPlaybackNetworkWait() {
+      this.playbackNetworkWaitController?.abort()
+      this.playbackNetworkWaitController = null
+      this.playbackNetworkWaitOrigin = null
     },
 
     isAndroidTransientHttpRecoveryEnabled() {
@@ -7165,7 +7176,7 @@ export default defineComponent({
     },
 
     destroyPlayer: async function(player = this.$refs.player) {
-      this.playbackNetworkWaitController?.abort()
+      this.cancelPlaybackNetworkWait()
       this.playerTeardownInProgress = true
       try {
         const miniPlayerStartHeight = player.getMiniPlayerHandoffHeight?.() ?? 0

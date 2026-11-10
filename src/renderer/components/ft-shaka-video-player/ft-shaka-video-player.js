@@ -9757,7 +9757,7 @@ export default defineComponent({
     // If we briefly lose the connection but it comes back before the buffer is empty,
     // the user won't notice anything so we don't need to display the message.
     const showOfflineMessage = computed(() => {
-      return !props.localFilePlayback && isOffline.value && isBuffering.value
+      return !props.localFilePlayback && isOffline.value && (isBuffering.value || mediaWaiting.value)
     })
 
     // Like the offline message, only once the buffered video has played

@@ -114,7 +114,6 @@ test('an unreachable stream server keeps the player and retries it in place with
 
 test('a stream whose in-place retry cannot start reloads once the server answers', async () => {
   const { view, player, waits } = createUnreachableStreamView()
-  view.isAndroidTransientHttpRecoveryEnabled = () => false
   player.retryStreaming = () => false
   const handled = view.handlePlayerError(lostConnection())
   await Promise.resolve()
