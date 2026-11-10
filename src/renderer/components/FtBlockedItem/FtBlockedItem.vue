@@ -17,6 +17,7 @@
       type="button"
       class="blockedItemReveal"
       @click.stop.prevent="reveal"
+      @keydown.enter.space.stop
     >
       <span class="blockedItemLabel">
         <FtIcon
