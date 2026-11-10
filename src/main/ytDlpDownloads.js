@@ -837,7 +837,7 @@ async function startYtDlpDownload(
   /** @param {string} line */
   function handleStderrLine(line) {
     // `--print` writes the file and metadata sentinels to stdout. Extractor and
-    // server text can reach stderr, so it must not choose files to serve or trash.
+    // server text can reach stderr, so sentinels found there are ignored.
     if (!line.startsWith(FINAL_PATH_PREFIX) && !line.startsWith(FINAL_METADATA_PREFIX)) {
       handleStdoutLine(line)
     }
