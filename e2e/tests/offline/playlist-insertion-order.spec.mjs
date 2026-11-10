@@ -238,5 +238,10 @@ test('playlist import restores the saved insertion preference for existing and n
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     return [id, 'imported-insertion-order'].map(id => store.getters.getPlaylist(id)?.addVideosToTop)
   }, playlistId)).toEqual([true, true])
-  await expect(page.getByText('Unknown data key: addVideosToTop', { exact: true })).toHaveCount(0)
+  // Sync keeps imported options over the server's copy only with their edit time.
+  expect(await page.evaluate(id => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    return [id, 'imported-insertion-order'].map(id => Number.isSafeInteger(store.getters.getPlaylist(id)?.preferencesUpdatedAt))
+  }, playlistId)).toEqual([true, true])
+  await expect(page.getByText(/^Unknown data key: (addVideosToTop|preferencesUpdatedAt)$/)).toHaveCount(0)
 })

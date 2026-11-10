@@ -1913,6 +1913,10 @@ async function importPlaylistDatabase(data) {
       allPlaylists.value.find(playlist => playlist.playlistName === playlistObject.playlistName)
 
     if (targetPlaylist === undefined) {
+      // Saved options are a local edit, so sync keeps them over the server's copy of the playlist
+      if (BOOLEAN_PLAYLIST_KEYS.some(key => Object.hasOwn(playlistObject, key))) {
+        playlistObject.preferencesUpdatedAt = Date.now()
+      }
       newPlaylists.push(playlistObject)
       return
     }
