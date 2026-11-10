@@ -47,7 +47,8 @@ public final class FailureDiagnostics extends RunListener {
     }
 
     private static void reportStall(Description description) {
-        Log.e(TAG, description + " is still running after " + STALL_MINUTES + " minutes" + windowState());
+        // No shell commands here: a wedged device could block them and keep the shard hanging.
+        Log.e(TAG, description + " is still running after " + STALL_MINUTES + " minutes");
         for (Map.Entry<Thread, StackTraceElement[]> entry : Thread.getAllStackTraces().entrySet()) {
             StringBuilder stack = new StringBuilder("Thread ").append(entry.getKey().getName())
                 .append(" (").append(entry.getKey().getState()).append(')');
