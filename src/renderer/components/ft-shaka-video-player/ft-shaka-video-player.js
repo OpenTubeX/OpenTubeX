@@ -219,6 +219,9 @@ const FULL_WINDOW_ANIMATION_DURATION_MS = 400
 const HTTP_IN_HEX = 0x68747470
 
 const USE_OVERFLOW_MENU_WIDTH_THRESHOLD = 634
+// Match the line-height and vertical padding of .ft-chapter-preview
+const CHAPTER_PREVIEW_LINE_HEIGHT = 17
+const CHAPTER_PREVIEW_PADDING_BLOCK = 12
 const TEMPORARY_PLAYBACK_RATE_KEYBOARD_SOURCE = 'keyboard'
 const TEMPORARY_PLAYBACK_RATE_POINTER_SOURCE = 'pointer'
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg'
@@ -3927,7 +3930,7 @@ export default defineComponent({
         chapterPreview.textContent = chapter.title
       }
 
-      chapterPreview.style.display = 'inline-block'
+      chapterPreview.style.display = ''
 
       const playerRect = container.value.getBoundingClientRect()
       const maxFromSeekBar = rect.width - 8
@@ -3940,7 +3943,7 @@ export default defineComponent({
         ),
         0
       )
-      chapterPreview.style.maxWidth = `${maxW}px`
+      chapterPreview.style.setProperty('--ft-chapter-preview-max-width', `${maxW}px`)
 
       const thumbContainer = seekBarContainer.querySelector('.shaka-player-ui-thumbnail-container')
       let bottomPx
@@ -3954,6 +3957,16 @@ export default defineComponent({
         bottomPx = seekBarContainer.offsetHeight + 8
       }
       chapterPreview.style.bottom = `${bottomPx}px`
+
+      // The player clips its overflow, so short players get fewer than three lines,
+      // and the title overlaps the thumbnail when not even one line fits above it.
+      const spaceAbove = chapterPreview.getBoundingClientRect().bottom - playerRect.top - 4
+      const oneLineHeight = CHAPTER_PREVIEW_PADDING_BLOCK + CHAPTER_PREVIEW_LINE_HEIGHT
+      if (spaceAbove < oneLineHeight) {
+        chapterPreview.style.bottom = `${bottomPx - (oneLineHeight - spaceAbove)}px`
+      }
+      const lines = Math.floor((spaceAbove - CHAPTER_PREVIEW_PADDING_BLOCK) / CHAPTER_PREVIEW_LINE_HEIGHT)
+      chapterPreview.style.setProperty('--ft-chapter-preview-lines', `${Math.max(1, Math.min(3, lines))}`)
 
       const previewWidth = chapterPreview.offsetWidth
       const minX = previewWidth / 2
