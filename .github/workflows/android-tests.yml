@@ -97,6 +97,9 @@ jobs:
         api-level: 35
         target: google_apis
         arch: x86_64
+        # Emulator 37.2.13 crashes partway through a shard; 37.1.11 runs the
+        # whole suite.
+        emulator-build: 15917651
         # A 411dp wide phone, at a resolution software rendering can keep up with.
         profile: pixel_6
         ram-size: 4096M
