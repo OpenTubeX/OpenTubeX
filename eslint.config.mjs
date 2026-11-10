@@ -332,6 +332,8 @@ export default defineConfig([
       'vue/prefer-use-template-ref': 'error',
       // v-overlay-scrollbars is registered globally in main.js
       'vue/no-undef-directives': ['error', { ignore: ['overlay-scrollbars'] }],
+      // Native slots of the Swiper custom element, not Vue slots.
+      'vue/no-deprecated-slot-attribute': ['error', { ignoreParents: ['swiper-container'] }],
 
       'jsdoc/check-alignment': 'error',
       'jsdoc/check-property-names': 'error',

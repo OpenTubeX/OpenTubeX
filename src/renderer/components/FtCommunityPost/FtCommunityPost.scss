@@ -237,6 +237,132 @@
 
 .sliderContainer {
   display: grid;
+
+  // Slide changes decelerate like Material 3's emphasized easing.
+  --swiper-wrapper-transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+
+  // Opaque tonal surface so the controls stay readable on any image.
+  --slider-surface: color-mix(in srgb, var(--primary-color) 12%, var(--card-bg-color));
+}
+
+// Tonal icon buttons that float on the image and morph into a rounded square
+// when pressed, like FtIconButton.
+.sliderButton {
+  --slider-button-shape: 50%;
+  --slider-button-rest: var(--slider-surface);
+  --slider-button-fill: var(--slider-button-rest);
+
+  position: absolute;
+  inset-block-start: 50%;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  inline-size: 40px;
+  block-size: 40px;
+  padding: 0;
+  border: none;
+  border-radius: var(--slider-button-shape);
+  background-color: var(--slider-button-fill);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 30%);
+  color: var(--primary-text-color);
+  cursor: pointer;
+  font-size: 24px;
+  line-height: 0;
+  translate: 0 -50%;
+  transition:
+    opacity var(--motion-default-effects),
+    scale var(--motion-fast-spatial),
+    border-radius var(--motion-fast-spatial),
+    background-color var(--motion-default-effects);
+
+  &.swiper-button-prev {
+    inset-inline-start: 12px;
+  }
+
+  &.swiper-button-next {
+    inset-inline-end: 12px;
+  }
+
+  &:hover,
+  &:focus-visible {
+    --slider-button-fill: color-mix(in srgb, var(--primary-text-color) 8%, var(--slider-button-rest));
+  }
+
+  &:active {
+    --slider-button-shape: var(--shape-corner-medium);
+    --slider-button-fill: color-mix(in srgb, var(--primary-text-color) 12%, var(--slider-button-rest));
+  }
+
+  // At either end the unavailable direction shrinks away instead of dimming.
+  &.swiper-button-disabled {
+    opacity: 0;
+    pointer-events: none;
+    scale: 0.6;
+  }
+
+  // A single slide needs no navigation.
+  &.swiper-button-lock {
+    display: none;
+  }
+}
+
+// Mice reveal the buttons on hover; touch screens swipe instead.
+@media (hover: hover) {
+  .sliderContainer:not(:hover, :has(:focus-visible)) .sliderButton {
+    opacity: 0;
+    scale: 0.6;
+  }
+}
+
+@media (hover: none) {
+  .sliderButton {
+    display: none;
+  }
+}
+
+// Page indicator: the current slide's dot stretches into a pill.
+.sliderPagination {
+  position: absolute;
+  inset-block-end: 12px;
+  inset-inline: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  inline-size: fit-content;
+  margin-inline: auto;
+  padding-block: 6px;
+  padding-inline: 8px;
+  border-radius: var(--shape-corner-full);
+  background-color: var(--slider-surface);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 30%);
+
+  &.swiper-pagination-lock {
+    display: none;
+  }
+
+  :deep(.swiper-pagination-bullet) {
+    inline-size: 8px;
+    block-size: 8px;
+    border-radius: var(--shape-corner-full);
+    background-color: color-mix(in srgb, var(--primary-text-color) 38%, transparent);
+    cursor: pointer;
+    transition:
+      inline-size var(--motion-fast-spatial),
+      background-color var(--motion-default-effects);
+
+    &:hover {
+      background-color: color-mix(in srgb, var(--primary-text-color) 60%, transparent);
+    }
+  }
+
+  :deep(.swiper-pagination-bullet-active),
+  :deep(.swiper-pagination-bullet-active:hover) {
+    inline-size: 24px;
+    background-color: var(--primary-color);
+  }
 }
 
 .sharedPostCard {

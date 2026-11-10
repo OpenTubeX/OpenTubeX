@@ -70,16 +70,43 @@
       <swiper-slide
         v-for="(img, index) in postContent.content"
         :key="index"
-        lazy="true"
       >
         <FtRetryImage
           :src="getBestQualityImage(img, { preserveYouTubeCrop: true })"
           class="communityImage"
           alt=""
           loading="lazy"
-          @error="removeImagePreloader"
         />
       </swiper-slide>
+      <!-- Swiper wires up these light DOM controls, so they can use the
+           theme and icon pack. -->
+      <button
+        ref="swiperPrevRef"
+        slot="container-end"
+        type="button"
+        class="sliderButton swiper-button-prev"
+      >
+        <FtIcon
+          :icon="['fas', 'angle-left']"
+          aria-hidden="true"
+        />
+      </button>
+      <button
+        ref="swiperNextRef"
+        slot="container-end"
+        type="button"
+        class="sliderButton swiper-button-next"
+      >
+        <FtIcon
+          :icon="['fas', 'angle-right']"
+          aria-hidden="true"
+        />
+      </button>
+      <div
+        ref="swiperPaginationRef"
+        slot="container-end"
+        class="sliderPagination"
+      />
     </swiper-container>
     <div
       v-else-if="postType === 'image' && postContent.content.length > 0"
@@ -419,25 +446,10 @@ function getBestQualityImage(imageArray, options = {}) {
   return url.replace(/-c-fcrop64=[^-]+/i, '')
 }
 
-/**
- * Swiper only removes its lazy preloader after an image load event. Failed
- * requests can therefore leave it visible indefinitely.
- *
- * @param {Event} event
- */
-function removeImagePreloader(event) {
-  const image = event.currentTarget
-  if (!(image instanceof HTMLElement)) {
-    return
-  }
-
-  const slide = image.closest('swiper-slide')
-  const preloader = slide?.querySelector('.swiper-lazy-preloader') ??
-    slide?.shadowRoot?.querySelector('.swiper-lazy-preloader')
-  preloader?.remove()
-}
-
 const swiperContainerRef = useTemplateRef('swiperContainerRef')
+const swiperPrevRef = useTemplateRef('swiperPrevRef')
+const swiperNextRef = useTemplateRef('swiperNextRef')
+const swiperPaginationRef = useTemplateRef('swiperPaginationRef')
 let swiperInitializationPromise = null
 
 async function initializeSwiper() {
@@ -465,15 +477,22 @@ async function initializeSwiper() {
         createWebURL(`/swiper-${process.env.SWIPER_VERSION}.css`)
       ],
 
-      a11y: true,
-      navigation: true,
+      a11y: {
+        prevSlideMessage: t('Video.Previous'),
+        nextSlideMessage: t('Video.Next'),
+      },
+      navigation: {
+        prevEl: swiperPrevRef.value,
+        nextEl: swiperNextRef.value,
+        addIcons: false,
+      },
       pagination: {
-        enabled: true,
-        clickable: true
+        el: swiperPaginationRef.value,
+        clickable: true,
       },
       slidesPerView: 1,
       // prevents slides from bleeding over due to rounding errors
-      spaceBetween: 10
+      spaceBetween: 8
     }
 
     Object.assign(swiperContainer, swiperOptions)

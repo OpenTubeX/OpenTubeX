@@ -280,19 +280,17 @@ test.describe('community post images', () => {
     // Carousel chrome should sit on the image, not in a tall empty gap below it.
     const carouselLayout = await multiPost.locator('swiper-container.sliderContainer').evaluate((container) => {
       const image = container.querySelector('img.communityImage')
-      const pagination = container.shadowRoot?.querySelector('.swiper-pagination')
+      const pagination = container.querySelector('.sliderPagination')
       return {
         containerHeight: container.getBoundingClientRect().height,
         imageHeight: image.getBoundingClientRect().height,
-        paginationBottom: pagination?.getBoundingClientRect().bottom ?? null,
+        paginationBottom: pagination.getBoundingClientRect().bottom,
         containerBottom: container.getBoundingClientRect().bottom
       }
     })
 
     expect(carouselLayout.containerHeight).toBeLessThan(carouselLayout.imageHeight * 1.35)
-    if (carouselLayout.paginationBottom != null) {
-      expect(carouselLayout.paginationBottom).toBeLessThanOrEqual(carouselLayout.containerBottom + 1)
-    }
+    expect(carouselLayout.paginationBottom).toBeLessThanOrEqual(carouselLayout.containerBottom + 1)
   })
 
   test('restores carousel navigation after returning to the Posts tab', async ({ page }) => {
@@ -400,7 +398,6 @@ interruptedImageTest('clears the loader when a gallery image request is interrup
   const image = firstSlide.locator('img.communityImage:not(.retryImagePlaceholder)')
   await expect.poll(async () => image.evaluate((element) => element.complete)).toBe(true)
 
-  await expect(firstSlide.locator('.swiper-lazy-preloader')).toHaveCount(0)
   await expect(image).toBeHidden()
   await expect(firstSlide.locator('.retryImagePlaceholder')).toBeVisible()
 })
