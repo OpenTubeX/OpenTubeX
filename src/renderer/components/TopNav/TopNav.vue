@@ -145,9 +145,9 @@
                 :href="getSearchResultHref(linkPreview.queryText)"
               >
                 <img
-                  v-if="linkPreview.thumbnail"
+                  v-if="linkPreviewThumbnail"
                   class="linkPreviewThumbnail"
-                  :src="linkPreview.thumbnail"
+                  :src="linkPreviewThumbnail"
                   alt=""
                 >
                 <span
@@ -424,8 +424,10 @@ const navigationHistoryDropdownOptions = computed(() => {
 const searchSuggestionsDataList = shallowRef([])
 // Shows which video a link opens before it is submitted. It belongs to the
 // search suggestions, as both request data for text that was not submitted.
-/** @type {import('vue').ShallowRef<{ queryText: string, thumbnail: string | null, title?: string, details?: string } | null>} */
+/** @type {import('vue').ShallowRef<{ queryText: string, videoId: string, title?: string, details?: string } | null>} */
 const linkPreview = shallowRef(null)
+// Follows the thumbnail settings, which can change while a preview is loaded.
+const linkPreviewThumbnail = computed(() => linkPreview.value && getNotificationThumbnailUrl(linkPreview.value.videoId))
 /** The text whose preview is shown or loading. */
 let linkPreviewQuery = null
 let linkPreviewController = null
@@ -1271,7 +1273,7 @@ async function loadLinkPreview(queryText, signal) {
   if (signal.aborted || result.urlType !== 'video') return
 
   const { videoId } = result
-  const preview = { queryText, thumbnail: getNotificationThumbnailUrl(videoId) }
+  const preview = { queryText, videoId }
   const watchedVideo = store.getters.getHistoryCacheById[videoId]
   if (watchedVideo) {
     linkPreview.value = { ...preview, title: watchedVideo.title, details: getLinkPreviewDetails(watchedVideo) }
