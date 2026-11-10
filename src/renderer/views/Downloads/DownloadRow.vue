@@ -123,7 +123,7 @@
               />
               {{ t('Downloads.File Name Shortened') }}
             </p>
-            <DownloadFailureHint v-if="download.status === 'failed'" />
+            <DownloadFailureHint v-if="download.status === 'failed' && !isBlockedNativeCodeError(download.errorMessage)" />
             <ul
               v-if="!COMPACT && destinations.length > 0"
               class="destinationList"
@@ -365,7 +365,7 @@ import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 import { downloadTemplateName } from '../../helpers/downloadTemplates'
 import { formatBytes } from '../../helpers/fileSize'
-import { downloadErrorMessage } from '../../helpers/downloadErrors'
+import { downloadErrorMessage, isBlockedNativeCodeError } from '../../helpers/downloadErrors'
 import { isDownloadPlaybackSupported, isPlayableDownloadFile, downloadQueueVideos } from '../../helpers/downloadPlayback'
 import { openButtonMenu } from '../../helpers/buttonMenu'
 
