@@ -57,6 +57,7 @@ Global:
   Ambient Mode: Modd amgylchynol
   Loading More: Wrthi'n llwytho rhagor
   New: Newydd
+  Show Blocked Item: Dangos eitem wedi'i blocio
 Search Listing:
   Label:
     Members Only: Aelodau yn unig
@@ -1218,6 +1219,7 @@ Settings:
     Show Bottom Right Actions Dock: Dangos doc gweithredoedd y gwaelod ar y dde
     Paused Interface Hide Delay: Oedi cyn cuddio'r rhyngwyneb wrth oedi
     Hide Channel Shows: Cuddio Tab "Sioeau" Sianel
+    Blur Blocked Items: Niwlio eitemau wedi'u blocio yn lle eu cuddio
   Data Settings:
     Settings could not be imported: "Methu mewnforio'r gosodiadau"
     Some settings could not be imported: "Methu mewnforio pob gosodiad ({failed} o {total} wedi methu)"

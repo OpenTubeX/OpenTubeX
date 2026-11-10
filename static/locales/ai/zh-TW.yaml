@@ -57,6 +57,7 @@ Global:
   Ambient Mode: 微光模式
   Loading More: 正在載入更多內容
   New: 新
+  Show Blocked Item: 顯示已封鎖的項目
 Search Listing:
   Label:
     Members Only: 會員專屬
@@ -1215,6 +1216,7 @@ Settings:
     Show Bottom Right Actions Dock: 顯示右下角操作列
     Paused Interface Hide Delay: 暫停介面的隱藏延遲
     Hide Channel Shows: 隱藏頻道“節目”標籤
+    Blur Blocked Items: 模糊顯示已封鎖的項目，而非隱藏
   Data Settings:
     Settings could not be imported: "無法匯入設定"
     Some settings could not be imported: "部分設定無法匯入（{total} 項中有 {failed} 項失敗）"

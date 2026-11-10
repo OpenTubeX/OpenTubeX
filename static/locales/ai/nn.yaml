@@ -57,6 +57,7 @@ Global:
   Ambient Mode: Omgjevnadsmodus
   Loading More: Lastar inn meir
   New: Ny
+  Show Blocked Item: Vis blokkert element
 Search Listing:
   Label:
     Members Only: Berre for medlemmer
@@ -1360,6 +1361,7 @@ Settings:
     Paused Interface Hide Delay: Forseinking før grensesnittet blir gøymt ved pause
     Add: Legg til
     Remove: Fjern
+    Blur Blocked Items: Gjer blokkerte element uskarpe i staden for å gøyma dei
   Data Settings:
     Settings could not be imported: "Innstillingane kunne ikkje importerast"
     Some settings could not be imported: "Ikkje alle innstillingane kunne importerast ({failed} av {total} mislukkast)"

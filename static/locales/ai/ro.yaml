@@ -57,6 +57,7 @@ Global:
   Ambient Mode: Mod ambiental
   Loading More: Se încarcă mai multe
   New: Nou
+  Show Blocked Item: Afișează elementul blocat
 Search Listing:
   Label:
     Members Only: Numai pentru membri
@@ -1222,6 +1223,7 @@ Settings:
     Add: Adaugă
     Remove: Elimină
     Hide Channel Shows: Ascunde fila „Emisiuni” a canalului
+    Blur Blocked Items: Estompează elementele blocate în loc să le ascunzi
   Data Settings:
     Settings could not be imported: "Setările nu au putut fi importate"
     Some settings could not be imported: "Nu toate setările au putut fi importate (eșuate: {failed} din {total})"

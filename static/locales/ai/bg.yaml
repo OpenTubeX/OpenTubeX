@@ -57,6 +57,7 @@ Global:
   Ambient Mode: Амбиентен режим
   Loading More: Зареждат се още
   New: Ново
+  Show Blocked Item: Показване на блокирания елемент
 Search Listing:
   Label:
     Members Only: Само за членове
@@ -1222,6 +1223,7 @@ Settings:
     Add: Добавяне
     Remove: Премахване
     Hide Channel Shows: Скриване на раздел "Предавания"
+    Blur Blocked Items: Замъгляване на блокираните елементи вместо скриването им
   Data Settings:
     Settings could not be imported: "Настройките не можаха да бъдат импортирани"
     Some settings could not be imported: "Не всички настройки можаха да бъдат импортирани (неуспешни: {failed} от {total})"

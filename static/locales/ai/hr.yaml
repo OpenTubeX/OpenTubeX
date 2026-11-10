@@ -57,6 +57,7 @@ Global:
   Ambient Mode: Ambijentalni način rada
   Loading More: Učitavanje dodatnog sadržaja
   New: Novo
+  Show Blocked Item: Prikaži blokiranu stavku
 Search Listing:
   Label:
     Members Only: Samo za članove
@@ -1222,6 +1223,7 @@ Settings:
     Add: Dodaj
     Remove: Ukloni
     Hide Channel Shows: Sakrij karticu "Emisije" kanala
+    Blur Blocked Items: Zamuti blokirane stavke umjesto skrivanja
   Data Settings:
     Settings could not be imported: "Postavke nije bilo moguće uvesti"
     Some settings could not be imported: "Nije bilo moguće uvesti sve postavke (neuspjelo: {failed} od {total})"

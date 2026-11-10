@@ -57,6 +57,7 @@ Global:
   Ambient Mode: Stämningsbelysning
   Loading More: Läser in mer
   New: Nytt
+  Show Blocked Item: Visa blockerat objekt
 Search Listing:
   Label:
     Members Only: Endast medlemmar
@@ -1214,6 +1215,7 @@ Settings:
     Show Video Title: Visa videotitel
     Show Bottom Right Actions Dock: Visa åtgärdsfältet längst ned till höger
     Paused Interface Hide Delay: Fördröjning innan pausgränssnittet döljs
+    Blur Blocked Items: Gör blockerade objekt suddiga i stället för att dölja dem
   Data Settings:
     Settings could not be imported: "Inställningarna kunde inte importeras"
     Some settings could not be imported: "Alla inställningar kunde inte importeras ({failed} av {total} misslyckades)"

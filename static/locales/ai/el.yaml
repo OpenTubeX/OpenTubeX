@@ -57,6 +57,7 @@ Global:
   Ambient Mode: Λειτουργία περιβάλλοντος
   Loading More: Φόρτωση περισσότερων
   New: Νέο
+  Show Blocked Item: Εμφάνιση αποκλεισμένου στοιχείου
 Search Listing:
   Label:
     Members Only: Μόνο για μέλη
@@ -1215,6 +1216,7 @@ Settings:
     Show Bottom Right Actions Dock: Εμφάνιση βάσης ενεργειών κάτω δεξιά
     Paused Interface Hide Delay: Καθυστέρηση απόκρυψης περιβάλλοντος κατά την παύση
     Hide Channel Shows: Απόκρυψη της καρτέλας «Εκπομπές» του καναλιού
+    Blur Blocked Items: Θόλωση αποκλεισμένων στοιχείων αντί για απόκρυψή τους
   Data Settings:
     Settings could not be imported: "Δεν ήταν δυνατή η εισαγωγή των ρυθμίσεων"
     Some settings could not be imported: "Δεν ήταν δυνατή η εισαγωγή όλων των ρυθμίσεων (απέτυχαν {failed} από {total})"

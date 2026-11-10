@@ -61,6 +61,7 @@ Global:
     Like Count: 1 m'agrada | {count} m'agrades | {count} m'agrades
     Comment Count: 1 comentari | {count} comentaris | {count} comentaris
     Watching Count: 1 espectador | {count} espectadors | {count} espectadors
+  Show Blocked Item: Mostra l'element bloquejat
 Search Bar:
   Use Suggestion: Utilitza el suggeriment
   Remove: Suprimeix
@@ -1520,6 +1521,7 @@ Settings:
     Paused Interface Hide Delay: Retard per ocultar la interfície en pausa
     Add: Afegeix
     Remove: Elimina
+    Blur Blocked Items: Difumina els elements bloquejats en lloc d'amagar-los
   Data Settings:
     Settings could not be imported: "No s'ha pogut importar la configuració"
     Some settings could not be imported: "No s'ha pogut importar tota la configuració (han fallat {failed} de {total})"

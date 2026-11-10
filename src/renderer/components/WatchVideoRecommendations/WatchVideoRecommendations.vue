@@ -37,27 +37,32 @@
         class="recommendationsContent"
       >
         <template v-if="offline">
-          <router-link
+          <FtBlockedItem
             v-for="video in visibleData"
             :key="video.videoId"
-            :to="video.route"
-            class="offlineDownloadRecommendation"
-            @click="pausePlayer"
+            :blocked="isBlurredByBlockLists(video, { hideChannelsBasedOnText: false })"
+            :reveal-key="video.videoId"
           >
-            <FtRetryImage
-              :src="hideThumbnails ? thumbnailPlaceholder : video.thumbnail || thumbnailPlaceholder"
-              alt=""
-              class="offlineDownloadThumbnail"
-              :class="{ blur: blurThumbnails }"
-            />
-            <span class="offlineDownloadText">
-              <span class="offlineDownloadTitle">{{ video.title }}</span>
-              <span
-                v-if="video.author"
-                class="offlineDownloadAuthor"
-              >{{ video.author }}</span>
-            </span>
-          </router-link>
+            <router-link
+              :to="video.route"
+              class="offlineDownloadRecommendation"
+              @click="pausePlayer"
+            >
+              <FtRetryImage
+                :src="hideThumbnails ? thumbnailPlaceholder : video.thumbnail || thumbnailPlaceholder"
+                alt=""
+                class="offlineDownloadThumbnail"
+                :class="{ blur: blurThumbnails }"
+              />
+              <span class="offlineDownloadText">
+                <span class="offlineDownloadTitle">{{ video.title }}</span>
+                <span
+                  v-if="video.author"
+                  class="offlineDownloadAuthor"
+                >{{ video.author }}</span>
+              </span>
+            </router-link>
+          </FtBlockedItem>
         </template>
         <!-- Match the five loading rows so the card is populated when the skeleton disappears. -->
         <template v-else>
@@ -83,9 +88,11 @@ import { computed, useTemplateRef } from 'vue'
 import { FtIcon } from '@opentubex/icons'
 import { useScrollClamp } from '../../composables/useScrollClamp'
 import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import FtBlockedItem from '../FtBlockedItem/FtBlockedItem.vue'
 import FtCard from '../ft-card/ft-card.vue'
 import FtListVideoLazy from '../FtListVideoLazy.vue'
 import FtRetryImage from '../FtRetryImage.vue'
+import { isBlurredByBlockLists } from '../../helpers/blockedItems'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import store from '../../store'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
@@ -105,9 +112,9 @@ const props = defineProps({
 const visibleData = computed(() => props.offline
   ? props.data
   : props.data.filter(video => !isVideoHiddenByPreferences(video, {
-      hiddenChannelNames: store.getters.getActiveChannelsHiddenNames,
+      hiddenChannelNames: store.getters.getChannelsHiddenNamesToRemove,
       aiSlopChannels: store.getters.getAiSlopBlockedChannels,
-      forbiddenTitles: store.getters.getActiveForbiddenTitles,
+      forbiddenTitles: store.getters.getForbiddenTitlesToRemove,
       hideChannelsBasedOnText: false,
       membersOnlyChannelIds: store.getters.getMembersOnlyChannelIdSet,
     })))

@@ -57,6 +57,7 @@ Global:
   Ambient Mode: Mode ambiant
   Loading More: Chargement en cours
   New: Nouveau
+  Show Blocked Item: Afficher l’élément bloqué
 Search Listing:
   Label:
     Members Only: Réservé aux membres
@@ -1214,6 +1215,7 @@ Settings:
     Show Video Title: Afficher le titre de la vidéo
     Show Bottom Right Actions Dock: Afficher la barre d’actions en bas à droite
     Paused Interface Hide Delay: Délai avant le masquage de l’interface en pause
+    Blur Blocked Items: Flouter les éléments bloqués au lieu de les masquer
   Data Settings:
     Settings could not be imported: "Impossible d'importer les paramètres"
     Some settings could not be imported: "Certains paramètres n'ont pas pu être importés ({failed} sur {total} en échec)"

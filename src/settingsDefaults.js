@@ -200,6 +200,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     channelsHidden: '[]',
     forbiddenTitles: '[]',
     enableBlockLists: true,
+    blurBlockedItems: false,
     showAddedChannelsHidden: true,
     showAddedForbiddenTitles: true,
     videoDescriptionMode: 'collapsed',

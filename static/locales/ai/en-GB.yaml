@@ -56,6 +56,7 @@ Global:
   Ambient Mode: Ambient Mode
   Loading More: Loading more
   New: New
+  Show Blocked Item: Show blocked item
 Search Listing:
   Label:
     Members Only: Members only
@@ -1199,6 +1200,7 @@ Settings:
     Add: Add
     Remove: Remove
     Hide Channel Shows: Hide Channel "Shows" Tab
+    Blur Blocked Items: Blur blocked items instead of hiding them
   Data Settings:
     Settings could not be imported: "Settings could not be imported"
     Some settings could not be imported: "{failed} of {total} settings could not be imported"

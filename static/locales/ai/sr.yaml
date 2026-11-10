@@ -59,6 +59,7 @@ Global:
   Ambient Mode: Амбијентални режим
   Loading More: Учитава се још
   New: Ново
+  Show Blocked Item: Прикажи блокирану ставку
 Search Listing:
   Label:
     Members Only: Само за чланове
@@ -1240,6 +1241,7 @@ Settings:
     Add: Додај
     Remove: Уклони
     Hide Channel Shows: Сакриј картицу „Емисије“ на каналу
+    Blur Blocked Items: Замагли блокиране ставке уместо да их сакријеш
   Data Settings:
     Settings could not be imported: "Подешавања није могуће увести"
     Some settings could not be imported: "Није могуће увести сва подешавања (неуспешно: {failed} од {total})"

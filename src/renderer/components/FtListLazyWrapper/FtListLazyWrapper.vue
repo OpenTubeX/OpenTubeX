@@ -17,52 +17,57 @@
     <template
       v-if="visible"
     >
-      <FtListVideo
-        v-if="finalDataType === 'video' || finalDataType === 'shortVideo'"
-        :appearance="appearance"
-        :data="displayedData"
-        :playlist-id="playlistId"
-        :playlist-type="playlistType"
-        :playlist-item-id="playlistItemId"
-        :show-video-with-last-viewed-playlist="showVideoWithLastViewedPlaylist"
-        :show-watched-style-in-history="showWatchedStyleInHistory"
-        :always-show-add-to-playlist-button="alwaysShowAddToPlaylistButton"
-        :quick-bookmark-button-enabled="quickBookmarkButtonEnabled"
-        :can-move-video-up="canMoveVideoUp"
-        :can-move-video-down="canMoveVideoDown"
-        :can-remove-from-playlist="canRemoveFromPlaylist"
-        :force-list-type="layout"
-        :show-grab-bar="showGrabBar && layout === 'grid'"
-        :grab-bar-enabled="isDraggable && layout === 'grid'"
-        @move-video-up="moveVideoUp"
-        @move-video-down="moveVideoDown"
-        @move-video-to-the-top="moveVideoToTheTop"
-        @move-video-to-the-bottom="moveVideoToTheBottom"
-        @remove-from-playlist="removeFromPlaylist"
-      />
-      <FtListChannel
-        v-else-if="finalDataType === 'channel'"
-        :appearance="appearance"
-        :data="displayedData"
-      />
-      <FtListPlaylist
-        v-else-if="finalDataType === 'playlist'"
-        :appearance="appearance"
-        :data="displayedData"
-        :search-query-text="searchQueryText"
-        :show-grab-bar="isDraggable"
-      />
-      <FtCommunityPost
-        v-else-if="finalDataType === 'community'"
-        :hide-forbidden-titles="hideForbiddenTitles"
-        :appearance="appearance"
-        :data="displayedData"
-      />
-      <FtListHashtag
-        v-else-if="data.type === 'hashtag'"
-        :appearance="appearance"
-        :data="displayedData"
-      />
+      <FtBlockedItem
+        :blocked="blocked"
+        :reveal-key="blockedRevealKey"
+      >
+        <FtListVideo
+          v-if="finalDataType === 'video' || finalDataType === 'shortVideo'"
+          :appearance="appearance"
+          :data="displayedData"
+          :playlist-id="playlistId"
+          :playlist-type="playlistType"
+          :playlist-item-id="playlistItemId"
+          :show-video-with-last-viewed-playlist="showVideoWithLastViewedPlaylist"
+          :show-watched-style-in-history="showWatchedStyleInHistory"
+          :always-show-add-to-playlist-button="alwaysShowAddToPlaylistButton"
+          :quick-bookmark-button-enabled="quickBookmarkButtonEnabled"
+          :can-move-video-up="canMoveVideoUp"
+          :can-move-video-down="canMoveVideoDown"
+          :can-remove-from-playlist="canRemoveFromPlaylist"
+          :force-list-type="layout"
+          :show-grab-bar="showGrabBar && layout === 'grid'"
+          :grab-bar-enabled="isDraggable && layout === 'grid'"
+          @move-video-up="moveVideoUp"
+          @move-video-down="moveVideoDown"
+          @move-video-to-the-top="moveVideoToTheTop"
+          @move-video-to-the-bottom="moveVideoToTheBottom"
+          @remove-from-playlist="removeFromPlaylist"
+        />
+        <FtListChannel
+          v-else-if="finalDataType === 'channel'"
+          :appearance="appearance"
+          :data="displayedData"
+        />
+        <FtListPlaylist
+          v-else-if="finalDataType === 'playlist'"
+          :appearance="appearance"
+          :data="displayedData"
+          :search-query-text="searchQueryText"
+          :show-grab-bar="isDraggable"
+        />
+        <FtCommunityPost
+          v-else-if="finalDataType === 'community'"
+          :hide-forbidden-titles="hideForbiddenTitles"
+          :appearance="appearance"
+          :data="displayedData"
+        />
+        <FtListHashtag
+          v-else-if="data.type === 'hashtag'"
+          :appearance="appearance"
+          :data="displayedData"
+        />
+      </FtBlockedItem>
     </template>
   </div>
 </template>
@@ -74,6 +79,7 @@ import { vFirstVisible } from '../../helpers/firstVisible'
 
 import { usePlaylistDrag } from '../../composables/usePlaylistDrag'
 
+import FtBlockedItem from '../FtBlockedItem/FtBlockedItem.vue'
 import FtListVideo from '../FtListVideo/FtListVideo.vue'
 import {
   FtCommunityPost,
@@ -217,6 +223,9 @@ const hideUpcomingPremieres = computed(() => {
 
 const EMPTY_SET = new Set()
 
+/** Lists keep block list matches and blur them instead of removing them */
+const blurBlockedItems = computed(() => store.getters.getBlurBlockedItemsActive)
+
 /** @type {import('vue').ComputedRef<Set<string>>} */
 const channelsHiddenNames = computed(() => {
   // Some component users like channel view will have this disabled
@@ -238,24 +247,25 @@ const forbiddenTitles = computed(() => {
   return store.getters.getActiveForbiddenTitles
 })
 
-const showResult = computed(() => {
+/**
+ * @param {{
+ *   hiddenChannelNames: Set<string>,
+ *   forbiddenTitles: string[],
+ *   otherFilters: boolean,
+ * }} filters `otherFilters` adds the filters that always remove items
+ */
+function isHidden({ hiddenChannelNames, forbiddenTitles, otherFilters }) {
   const dataType = finalDataType.value
 
-  if (!dataType) {
-    return false
-  }
-
   if (dataType === 'video' || dataType === 'shortVideo') {
-    if (isVideoHiddenByPreferences(props.data, {
-      hideLiveStreams: hideLiveStreams.value,
-      hideUpcomingPremieres: hideUpcomingPremieres.value,
-      hiddenChannelNames: channelsHiddenNames.value,
-      aiSlopChannels: aiSlopChannels.value,
-      forbiddenTitles: forbiddenTitles.value,
-      membersOnlyChannelIds: props.hideMembersOnly ? store.getters.getMembersOnlyChannelIdSet : null
-    })) {
-      return false
-    }
+    return isVideoHiddenByPreferences(props.data, {
+      hideLiveStreams: otherFilters && hideLiveStreams.value,
+      hideUpcomingPremieres: otherFilters && hideUpcomingPremieres.value,
+      hiddenChannelNames,
+      aiSlopChannels: otherFilters ? aiSlopChannels.value : EMPTY_SET,
+      forbiddenTitles,
+      membersOnlyChannelIds: otherFilters && props.hideMembersOnly ? store.getters.getMembersOnlyChannelIdSet : null
+    })
   } else if (dataType === 'channel') {
     const attrsToCheck = [
       // Local API
@@ -269,22 +279,20 @@ const showResult = computed(() => {
 
     const lowerCaseName = props.data.name?.toLowerCase()
 
-    if ((attrsToCheck.some(a => a != null && channelsHiddenNames.value.has(a))) ||
-      isOnAiSlopList(aiSlopChannels.value, {
+    // hide channels by author
+    return attrsToCheck.some(a => a != null && hiddenChannelNames.has(a)) ||
+      (otherFilters && isOnAiSlopList(aiSlopChannels.value, {
         authorId: props.data.id ?? props.data.authorId,
         authorHandle: props.data.handle ?? props.data.channelHandle
-      }) ||
-      (forbiddenTitles.value.some((text) => lowerCaseName.includes(text)))) {
-      // hide channels by author
-      return false
-    }
+      })) ||
+      (lowerCaseName != null && forbiddenTitles.some((text) => lowerCaseName.includes(text)))
   } else if (dataType === 'playlist') {
     const lowerCaseTitle = props.data.title?.toLowerCase()
     const lowerCaseChannelName = props.data.channelName?.toLowerCase()
 
-    if ((lowerCaseTitle != null && forbiddenTitles.value.some((text) => lowerCaseTitle.includes(text))) ||
-      (lowerCaseChannelName != null && forbiddenTitles.value.some((text) => lowerCaseChannelName.includes(text)))) {
-      return false
+    if ((lowerCaseTitle != null && forbiddenTitles.some((text) => lowerCaseTitle.includes(text))) ||
+      (lowerCaseChannelName != null && forbiddenTitles.some((text) => lowerCaseChannelName.includes(text)))) {
+      return true
     }
 
     const attrsToCheck = [
@@ -297,12 +305,45 @@ const showResult = computed(() => {
       props.data.authorId,
     ]
 
-    if (attrsToCheck.some(a => a != null && channelsHiddenNames.value.has(a))) {
-      // hide playlists by author
-      return false
-    }
+    // hide playlists by author
+    return attrsToCheck.some(a => a != null && hiddenChannelNames.has(a))
   }
-  return true
+  return false
+}
+
+const showResult = computed(() => {
+  if (!finalDataType.value) {
+    return false
+  }
+
+  return !isHidden({
+    hiddenChannelNames: blurBlockedItems.value ? EMPTY_SET : channelsHiddenNames.value,
+    forbiddenTitles: blurBlockedItems.value ? [] : forbiddenTitles.value,
+    otherFilters: true,
+  })
+})
+
+const blocked = computed(() => {
+  if (!blurBlockedItems.value) {
+    return false
+  }
+
+  // Feeds remove posts by blocked authors themselves when blocked items are hidden
+  if (finalDataType.value === 'community') {
+    const lowerCaseAuthor = props.data.author?.toLowerCase()
+    return lowerCaseAuthor != null && forbiddenTitles.value.some((text) => lowerCaseAuthor.includes(text))
+  }
+
+  return isHidden({
+    hiddenChannelNames: channelsHiddenNames.value,
+    forbiddenTitles: forbiddenTitles.value,
+    otherFilters: false,
+  })
+})
+
+const blockedRevealKey = computed(() => {
+  const data = props.data
+  return data.videoId ?? data.playlistId ?? data.postId ?? data.id ?? data.authorId ?? null
 })
 
 const visible = ref(props.firstScreen)

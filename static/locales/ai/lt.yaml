@@ -57,6 +57,7 @@ Global:
   Ambient Mode: Fono apšvietimo režimas
   Loading More: Įkeliama daugiau
   New: Nauja
+  Show Blocked Item: Rodyti užblokuotą elementą
 Search Listing:
   Label:
     VR180: VR180
@@ -1454,6 +1455,7 @@ Settings:
     Paused Interface Hide Delay: Pristabdytos sąsajos slėpimo delsa
     Add: Pridėti
     Remove: Pašalinti
+    Blur Blocked Items: Sulieti užblokuotus elementus, užuot juos slėpus
   Data Settings:
     Settings could not be imported: "Nepavyko importuoti nustatymų"
     Some settings could not be imported: "Nepavyko importuoti visų nustatymų (nepavyko: {failed} iš {total})"

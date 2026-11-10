@@ -57,6 +57,7 @@ Global:
   Ambient Mode: Giro-modua
   Loading More: Gehiago kargatzen
   New: Berria
+  Show Blocked Item: Erakutsi blokeatutako elementua
 Search Listing:
   Label:
     Members Only: Kideentzat soilik
@@ -1214,6 +1215,7 @@ Settings:
     Show Video Title: Erakutsi bideoaren izenburua
     Show Bottom Right Actions Dock: Erakutsi ekintzen panela behean eskuinean
     Paused Interface Hide Delay: Pausatutako interfazea ezkutatzeko atzerapena
+    Blur Blocked Items: Lausotu blokeatutako elementuak ezkutatu beharrean
   Data Settings:
     Settings could not be imported: "Ezin izan dira ezarpenak inportatu"
     Some settings could not be imported: "Ezin izan dira ezarpen guztiak inportatu ({total}etik {failed} huts egin dute)"

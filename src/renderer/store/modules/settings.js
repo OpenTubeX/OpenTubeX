@@ -563,6 +563,21 @@ const customGetters = {
     return state.enableBlockLists ? getters.getForbiddenTitlesParsed : []
   },
 
+  /** Lists keep block list matches and blur them instead of removing them */
+  getBlurBlockedItemsActive: (state) => {
+    return state.enableBlockLists && state.blurBlockedItems
+  },
+
+  /** Hidden channels that lists remove; autoplay and navigation use `getActiveChannelsHiddenNames` */
+  getChannelsHiddenNamesToRemove: (_state, getters) => {
+    return getters.getBlurBlockedItemsActive ? new Set() : getters.getActiveChannelsHiddenNames
+  },
+
+  /** Forbidden text that lists remove; autoplay and navigation use `getActiveForbiddenTitles` */
+  getForbiddenTitlesToRemove: (_state, getters) => {
+    return getters.getBlurBlockedItemsActive ? [] : getters.getActiveForbiddenTitles
+  },
+
   getTransferableSettings: (state) => {
     const transferableSettings = {}
     for (const [key, value] of Object.entries(state)) {

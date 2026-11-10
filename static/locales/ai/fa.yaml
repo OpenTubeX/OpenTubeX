@@ -59,6 +59,7 @@ Global:
   Ambient Mode: حالت محیطی
   Loading More: در حال بارگذاری بیشتر
   New: جدید
+  Show Blocked Item: نمایش مورد مسدودشده
 Search Listing:
   Label:
     Members Only: فقط اعضا
@@ -1254,6 +1255,7 @@ Settings:
     Add: افزودن
     Remove: حذف
     Hide Channel Shows: پنهان کردن زبانه "برنامه‌ها" کانال
+    Blur Blocked Items: تار کردن موارد مسدودشده به‌جای پنهان کردن آن‌ها
   Data Settings:
     Settings could not be imported: "وارد کردن تنظیمات ممکن نشد"
     Some settings could not be imported: "وارد کردن همه تنظیمات ممکن نشد ({failed} از {total} ناموفق بود)"

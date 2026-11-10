@@ -59,6 +59,7 @@ Global:
   Ambient Mode: Modo ambiente
   Loading More: Cargando más
   New: Nuevo
+  Show Blocked Item: Mostrar elemento bloqueado
 Search character limit: La consulta de búsqueda supera el límite de {searchCharacterLimit} caracteres
 Search Listing:
   Label:
@@ -1306,6 +1307,7 @@ Settings:
     Add: Agregar
     Remove: Eliminar
     Hide Channel Shows: Ocultar la pestaña de 'Programas' del canal
+    Blur Blocked Items: Desenfocar los elementos bloqueados en lugar de ocultarlos
   Data Settings:
     Settings could not be imported: "No se pudo importar la configuración"
     Some settings could not be imported: "No se pudo importar toda la configuración (fallaron {failed} de {total})"

@@ -69,6 +69,7 @@ Global:
   Ambient Mode: Omgewingsmodus
   Loading More: Laai meer
   New: Nuut
+  Show Blocked Item: Wys geblokkeerde item
 Search Bar:
   Use Suggestion: Gebruik voorstel
   Open Search Container: Maak soekhouer oop
@@ -1405,6 +1406,7 @@ Settings:
     Paused Interface Hide Delay: Versteekvertraging van koppelvlak tydens pouse
     Add: Voeg by
     Remove: Verwyder
+    Blur Blocked Items: Vervaag geblokkeerde items in plaas daarvan om hulle te versteek
   Data Settings:
     Settings could not be imported: "Instellings kon nie ingevoer word nie"
     Some settings could not be imported: "Nie alle instellings kon ingevoer word nie ({failed} van {total} het misluk)"

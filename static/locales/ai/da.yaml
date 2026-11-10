@@ -59,6 +59,7 @@ Global:
   Ambient Mode: Omgivende tilstand
   Loading More: Indlæser mere
   New: Ny
+  Show Blocked Item: Vis blokeret element
 Search Listing:
   Label:
     Members Only: Kun for medlemmer
@@ -1243,6 +1244,7 @@ Settings:
     Add: Tilføj
     Remove: Fjern
     Hide Channel Shows: Skjul "Serier"-fanen på kanaler
+    Blur Blocked Items: Slør blokerede elementer i stedet for at skjule dem
   Data Settings:
     Settings could not be imported: "Indstillingerne kunne ikke importeres"
     Some settings could not be imported: "Ikke alle indstillinger kunne importeres ({failed} af {total} mislykkedes)"

@@ -116,6 +116,13 @@
         setting-key="enableBlockLists"
         @change="updateEnableBlockLists"
       />
+      <FtToggleSwitch
+        :label="t('Settings.Distraction Free Settings.Blur Blocked Items')"
+        :disabled="!enableBlockLists"
+        :default-value="blurBlockedItems"
+        setting-key="blurBlockedItems"
+        @change="store.dispatch('updateBlurBlockedItems', $event)"
+      />
     </FtFlexBox>
     <FtFlexBox>
       <FtInputTags
@@ -949,6 +956,9 @@ const enableBlockLists = computed(() => store.getters.getEnableBlockLists)
 function updateEnableBlockLists(value) {
   store.dispatch('updateEnableBlockLists', value)
 }
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const blurBlockedItems = computed(() => store.getters.getBlurBlockedItems)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const showAddedChannelsHidden = computed(() => store.getters.getShowAddedChannelsHidden)

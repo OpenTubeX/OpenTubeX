@@ -1212,6 +1212,43 @@ test.describe('new feed display filters', () => {
     await expect(page.getByRole('heading', { name: 'Posts', exact: true })).toHaveCount(0)
     await expect(page.getByRole('button', { name: 'Mark all as seen' })).toHaveCount(0)
   })
+
+  test.describe('with blocked items blurred', () => {
+    test.use({
+      seed: {
+        settings: {
+          ...commonSettings,
+          forbiddenTitles: JSON.stringify(['Blocked']),
+          blurBlockedItems: true
+        },
+        profiles: [profile()],
+        subscriptionCache: hiddenCache
+      }
+    })
+
+    test('covers blocked videos and posts until they are revealed', async ({ page }) => {
+      await goTo(page, 'subscriptions')
+      await page.locator('[data-subscription-feed-tab="videos"]').click()
+
+      const reveal = page.getByRole('button', { name: 'Show blocked item' })
+      await expect(page.getByRole('link', { name: 'Hidden premiere' }).first()).toBeVisible()
+      await expect(reveal).toHaveCount(1)
+      // Covered cards stay out of the tab order and accessibility tree.
+      await expect(page.getByRole('link', { name: 'Blocked title' })).toHaveCount(0)
+
+      await reveal.focus()
+      await page.keyboard.press('Enter')
+      await expect(reveal).toHaveCount(0)
+      await expect(page.getByRole('link', { name: 'Blocked title' }).first()).toBeVisible()
+      await expect(page.locator('.blockedItem :focus:not([tabindex="-1"])')).toHaveCount(1)
+
+      await page.locator('[data-subscription-feed-tab="posts"]').click()
+      await expect(page.locator('.blockedItem.covered')).toContainText('Forbidden post')
+      await reveal.click()
+      await expect(page.locator('.blockedItem.covered')).toHaveCount(0)
+      await expect(page.getByText('Forbidden post', { exact: true })).toBeVisible()
+    })
+  })
 })
 
 test.describe('new feed latest-per-channel limit', () => {

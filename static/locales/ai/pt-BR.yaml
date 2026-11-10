@@ -26,6 +26,7 @@ Global:
   Ambient Mode: Modo ambiente
   Loading More: Carregando mais
   New: Novo
+  Show Blocked Item: Mostrar item bloqueado
 Search Listing:
   Label:
     Members Only: Apenas para membros
@@ -1183,6 +1184,7 @@ Settings:
     Show Video Title: Mostrar título do vídeo
     Show Bottom Right Actions Dock: Mostrar barra de ações no canto inferior direito
     Paused Interface Hide Delay: Atraso até ocultar a interface durante a pausa
+    Blur Blocked Items: Desfocar itens bloqueados em vez de ocultá-los
   Data Settings:
     Settings could not be imported: "Não foi possível importar as configurações"
     Some settings could not be imported: "Não foi possível importar todas as configurações ({failed} de {total} falharam)"

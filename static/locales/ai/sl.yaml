@@ -71,6 +71,7 @@ Global:
     Like Count: 1 všeček | {count} všečka | {count} všečki | {count} všečkov
     Comment Count: 1 komentar | {count} komentarja | {count} komentarji | {count} komentarjev
     Watching Count: 1 gledalec | {count} gledalca | {count} gledalci | {count} gledalcev
+  Show Blocked Item: Prikaži blokiran element
 Search Bar:
   Use Suggestion: Uporabi predlog
   Remove: Odstrani
@@ -1480,6 +1481,7 @@ Settings:
     Paused Interface Hide Delay: Zakasnitev skrivanja vmesnika med premorom
     Add: Dodaj
     Remove: Odstrani
+    Blur Blocked Items: Zamegli blokirane elemente, namesto da bi jih skril
   Data Settings:
     Settings could not be imported: "Nastavitev ni bilo mogoče uvoziti"
     Some settings could not be imported: "Vseh nastavitev ni bilo mogoče uvoziti (neuspešno: {failed} od {total})"

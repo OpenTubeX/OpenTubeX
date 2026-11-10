@@ -67,6 +67,7 @@ Global:
   Ambient Mode: Ĉirkaŭa reĝimo
   Loading More: Ŝargado de pli
   New: Nova
+  Show Blocked Item: Montri blokitan eron
 Search Bar:
   Use Suggestion: Uzi proponon
 Search Listing:
@@ -1250,6 +1251,7 @@ Settings:
     Show Video Title: Montri titolon de videaĵo
     Show Bottom Right Actions Dock: Montri agobreton malsupre dekstre
     Paused Interface Hide Delay: Prokrasto de kaŝo de la interfaco dum paŭzo
+    Blur Blocked Items: Nebuligi blokitajn erojn anstataŭ kaŝi ilin
   Data Settings:
     Settings could not be imported: "Ne eblis importi la agordojn"
     Some settings could not be imported: "Ne eblis importi ĉiujn agordojn ({failed} el {total} malsukcesis)"

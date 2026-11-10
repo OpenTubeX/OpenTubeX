@@ -119,12 +119,17 @@
     <div
       v-else-if="postType === 'video'"
     >
-      <FtListVideo
+      <FtBlockedItem
         v-if="hiddenVideoReason == null"
-        :data="data.postContent.content"
-        appearance="communityPost"
-        force-list-type="grid"
-      />
+        :blocked="videoTitleBlocked"
+        :reveal-key="data.postContent.content.videoId"
+      >
+        <FtListVideo
+          :data="data.postContent.content"
+          appearance="communityPost"
+          force-list-type="grid"
+        />
+      </FtBlockedItem>
       <p
         v-else
         class="hiddenVideo"
@@ -226,6 +231,7 @@ import autolinker from 'autolinker'
 import { computed, onActivated, onMounted, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import FtBlockedItem from '../FtBlockedItem/FtBlockedItem.vue'
 import FtListVideo from '../FtListVideo/FtListVideo.vue'
 import FtListPlaylist from '../FtListPlaylist/FtListPlaylist.vue'
 import FtCommunityPoll from '../FtCommunityPoll/FtCommunityPoll.vue'
@@ -289,13 +295,18 @@ const forbiddenTitles = computed(() => {
   return store.getters.getActiveForbiddenTitles
 })
 
+const videoTitleBlocked = computed(() => {
+  const title = props.data.postContent.content.title?.toLowerCase()
+  return title != null && forbiddenTitles.value.some((text) => title.includes(text))
+})
+
 /** @type {import('vue').ComputedRef<string | null>} */
 const hiddenVideoReason = computed(() => {
   const video = props.data.postContent.content
   if (isVideoHiddenByPreferences(video, { membersOnlyChannelIds: store.getters.getMembersOnlyChannelIdSet })) {
     return t('Channel.Posts.Members-only video hidden by OpenTubeX')
   }
-  if (forbiddenTitles.value.some((text) => video.title?.toLowerCase().includes(text))) {
+  if (!store.getters.getBlurBlockedItemsActive && videoTitleBlocked.value) {
     return t('Channel.Posts.Video hidden by OpenTubeX because of its title')
   }
   return null

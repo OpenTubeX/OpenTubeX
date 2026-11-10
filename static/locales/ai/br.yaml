@@ -57,6 +57,7 @@ Global:
   Ambient Mode: "Mod endro"
   Loading More: "O kargañ muioc'h"
   New: "Nevez"
+  Show Blocked Item: Diskouez an elfenn stanket
 Search Listing:
   Label:
     Members Only: "Evit an izili hepken"
@@ -1214,6 +1215,7 @@ Settings:
     Show Video Title: "Diskouez titl ar video"
     Show Bottom Right Actions Dock: "Diskouez kael an oberoù en traoñ a-zehou"
     Paused Interface Hide Delay: "Dale a-raok kuzhat an etrefas en ehan"
+    Blur Blocked Items: Lakaat an elfennoù stanket da vezañ dispis e-lec'h o kuzhat
   Data Settings:
     Settings could not be imported: "N'eus ket bet gallet enporzhiañ an arventennoù"
     Some settings could not be imported: "N'eus ket bet gallet enporzhiañ an holl arventennoù ({failed} diwar {total} c'hwitet)"
