@@ -177,6 +177,18 @@
   background-color: rgb(255 255 255 / 20%);
 }
 
+.chapterOverlayNote {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding-block: 8px;
+  padding-inline: 14px;
+  color: var(--tertiary-text-color);
+  font-size: 13px;
+}
+
 .chapterOverlay :deep(.chaptersWrapper) {
   flex: 1;
   min-block-size: 0;

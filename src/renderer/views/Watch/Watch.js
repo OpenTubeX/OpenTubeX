@@ -395,7 +395,7 @@ export default defineComponent({
       videoChapters: [],
       videoPopularity: [],
       videoCurrentChapterIndex: 0,
-      /** @type {'chapters' | 'keyMoments'} */
+      /** @type {'chapters' | 'autoChapters' | 'keyMoments'} */
       videoChaptersKind: 'chapters',
       channelName: '',
       channelVerified: false,
@@ -3573,10 +3573,13 @@ export default defineComponent({
         let chaptersKind = 'chapters'
         this.videoPopularity = this.isLive ? [] : getVideoPopularity(result)
         if (!this.hideChapters) {
-          const rawChapters = result.player_overlays?.decorated_player_bar?.player_bar?.markers_map
-            ?.find(marker => marker.marker_key === 'DESCRIPTION_CHAPTERS')?.value.chapters
+          const markersMap = result.player_overlays?.decorated_player_bar?.player_bar?.markers_map
+          const chaptersMarker = markersMap?.find(marker => marker.marker_key === 'DESCRIPTION_CHAPTERS') ??
+            markersMap?.find(marker => marker.marker_key === 'AUTO_CHAPTERS')
+          const rawChapters = chaptersMarker?.value.chapters
 
           if (rawChapters && !avoidTranslation) {
+            if (chaptersMarker.marker_key === 'AUTO_CHAPTERS') chaptersKind = 'autoChapters'
             for (const chapter of rawChapters) {
               const start = chapter.time_range_start_millis / 1000
 
@@ -3605,7 +3608,9 @@ export default defineComponent({
                   })
                 }
               }
-              chaptersKind = 'keyMoments'
+              chaptersKind = macroMarkersList.contents.some(item => item instanceof YTNodes.MacroMarkersInfoItem)
+                ? 'autoChapters'
+                : 'keyMoments'
             } else {
               const chapterDescription = avoidTranslation
                 ? result.basic_info.short_description
