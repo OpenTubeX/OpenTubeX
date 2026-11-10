@@ -33,6 +33,8 @@ export function takeOverLeavingModalBackdrop(backdrop) {
     // Important declarations override the leave animation.
     leaving.style.setProperty('background-color', 'transparent', 'important')
     leaving.style.setProperty('backdrop-filter', 'none', 'important')
+    // It paints nothing now, so a later modal must not start from it.
+    leavingBackdrops.delete(leaving)
   }
   return from
 }
