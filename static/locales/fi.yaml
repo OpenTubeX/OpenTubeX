@@ -558,7 +558,7 @@ Settings:
     Hide Channels Disabled Message: Jotkut kanavat estettiin tunnuksella, eikä niitä käsitelty. Ominaisuus on estetty näiden tunnuksien päivityksen ajaksi
     Hide Channels API Error: Virhe haettaessa käyttäjää antamalla tunnuksella. Tarkista uudelleen, onko tunnus oikea.
     Hide Subscriptions Posts: Piilota tilausviestit
-    Add: Jaa
+    Add: Lisää
     Remove: Poista
   The app needs to restart for changes to take effect. Restart and apply change?: Sovellus on käynnistettävä uudelleen, jotta muutokset tulevat voimaan. Käynnistetäänkö uudelleen?
   Proxy Settings:
