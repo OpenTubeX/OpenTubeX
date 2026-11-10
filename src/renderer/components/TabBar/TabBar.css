@@ -156,6 +156,20 @@
   white-space: nowrap;
 }
 
+/* Match unloaded tabs when every tab in the collapsed group is unloaded. */
+.collapsedTabGroup.unloaded > * {
+  opacity: 0.72;
+}
+
+.collapsedTabGroup.unloaded .collapsedTabGroupName {
+  color: var(--secondary-text-color);
+}
+
+.collapsedTabGroup.unloaded:hover > *,
+.collapsedTabGroup.unloaded.active > * {
+  opacity: 1;
+}
+
 .newTabButton,
 .tabOrganizerButton {
   display: flex;
