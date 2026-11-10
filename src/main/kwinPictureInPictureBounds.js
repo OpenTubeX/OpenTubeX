@@ -34,17 +34,37 @@ const report = window => {
   callDBus(${report}, Math.round(saved.x), Math.round(saved.y), Math.round(saved.width), Math.round(saved.height))
 }
 const restore = window => {
+  let placed = null
+  const place = bounds => {
+    placed = bounds
+    window.frameGeometry = bounds
+  }
   const bounds = saved && fit(saved, rect(window.frameGeometry), workAreas())
   if (bounds) {
     // Wayland applies a resize after the client agrees to it and drops a
     // move that comes with it, so move first.
-    window.frameGeometry = { x: bounds.x, y: bounds.y, width: window.frameGeometry.width, height: window.frameGeometry.height }
-    window.frameGeometry = bounds
+    place({ x: bounds.x, y: bounds.y, width: window.frameGeometry.width, height: window.frameGeometry.height })
+    place(bounds)
   }
-  window.frameGeometryChanged.connect(() => {
-    if (!window.move && !window.resize) report(window)
+  // Only report where the user puts the window, not where the script or
+  // Chromium does.
+  window.frameGeometryChanged.connect(old => {
+    if (window.move || window.resize) return
+    const current = rect(window.frameGeometry)
+    if (current.width !== old.width || current.height !== old.height) {
+      // Chromium resizes the window for a video with another aspect ratio,
+      // and may adjust the size the script asked for.
+      const moved = saved && fit(saved, current, workAreas(), true)
+      if (moved) place(moved)
+    } else if (!placed || Math.abs(current.x - placed.x) >= 1 || Math.abs(current.y - placed.y) >= 1) {
+      placed = null
+      report(window)
+    }
   })
-  window.interactiveMoveResizeFinished.connect(() => report(window))
+  window.interactiveMoveResizeFinished.connect(() => {
+    placed = null
+    report(window)
+  })
 }
 // Chromium's Picture-in-Picture window is the only window of the app without a
 // desktop file name. Its caption is translated, and on Wayland it is only
