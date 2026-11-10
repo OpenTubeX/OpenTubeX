@@ -144,7 +144,8 @@ public class ChromecastTest {
         };
         nsd.registerService(service, NsdManager.PROTOCOL_DNS_SD, listener);
         try {
-            registered.get(5, TimeUnit.SECONDS);
+            // mDNS probing takes seconds on a slow emulator.
+            registered.get(30, TimeUnit.SECONDS);
             JSArray devices = CastDiscovery.discover(context);
             boolean found = false;
             for (int index = 0; index < devices.length(); index++) {
