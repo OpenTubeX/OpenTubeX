@@ -103,3 +103,17 @@ test('returns from Picture-in-Picture to the next playlist video', async ({ app,
   await expect(player).not.toHaveClass(/scrollMiniPlayer/)
   await expect(player).toBeVisible()
 })
+
+test('plays the next playlist video in Picture-in-Picture opened from the mini player', async ({ app, page }) => {
+  const { player, video } = await openPlaylistVideo(app, page)
+  await page.getByRole('link', { name: 'Go to History', exact: true }).click()
+  await expect(player).toHaveClass(/scrollMiniPlayer/)
+  await setFocused(app, page, false)
+  await expect.poll(() => pictureInPictureActive(page)).toBe(true)
+
+  await video.evaluate(element => { element.currentTime = element.duration - 0.2 })
+  await expect(video).toHaveAttribute('src', /^downloadmedia:\/\/file\/2\/offline0002/)
+  await expect.poll(() => pictureInPictureActive(page)).toBe(true)
+  await expect.poll(() => video.evaluate(element => !element.paused && element.currentTime > 0.1)).toBe(true)
+  await expect(page).toHaveURL(/#\/history$/)
+})

@@ -1327,6 +1327,9 @@ export default defineComponent({
     let startInFullwindow = props.startInFullwindow
     let startInFullscreen = props.startInFullscreen
     let startInPip = props.startInPip
+    // The next video restores the Picture-in-Picture window of the previous
+    // one, also while its Watch page is hidden.
+    const pictureInPictureStartPending = ref(startInPip)
     const dockedPanelMemory = createDockedPanelMemory(props.startWithDockedPanels)
     let exitFullscreenCleanup = null
     let syncingChapterOverlayButton = false
@@ -1404,7 +1407,7 @@ export default defineComponent({
     // A mini player or Picture-in-Picture window keeps showing this player
     // while its Watch page is hidden.
     const presentedOutsideTab = computed(() => isCrossTabMiniPlayerPresented.value ||
-      pictureInPictureActive.value || miniPlayerStartPending.value)
+      pictureInPictureActive.value || miniPlayerStartPending.value || pictureInPictureStartPending.value)
 
     const {
       getAutoPictureInPictureState,
@@ -1426,7 +1429,10 @@ export default defineComponent({
       initialState: props.autoPictureInPictureState,
     })
     // The user returned to the Watch page before this player mounted.
-    if (isActiveTab.value) miniPlayerStartPending.value = false
+    if (isActiveTab.value) {
+      miniPlayerStartPending.value = false
+      pictureInPictureStartPending.value = false
+    }
 
     // Capture the replacement player's initial state. The parent clears its
     // pending SABR state after this player loads, but that must not add autoplay
@@ -1456,6 +1462,7 @@ export default defineComponent({
     watch(isActiveTab, (active) => {
       if (active) {
         miniPlayerStartPending.value = false
+        pictureInPictureStartPending.value = false
         nextTick(() => {
           applyPendingPresentationModes()
           remeasureControlPanelWidth()
@@ -4960,7 +4967,8 @@ export default defineComponent({
         !isActiveTab.value &&
         !isCurrentPictureInPictureVideo &&
         !scrollMiniPlayerDetached.value &&
-        !miniPlayerStartPending.value
+        !miniPlayerStartPending.value &&
+        !pictureInPictureStartPending.value
       ) {
         video.value.pause()
         return
@@ -5175,20 +5183,23 @@ export default defineComponent({
     }
 
     function applyPendingPresentationModes() {
-      if (!isActiveTab.value || !ui) {
+      if (!ui) {
         return
       }
 
-      if (startInFullwindow && fullWindowListenerReady) {
-        startInFullwindow = false
-        events.dispatchEvent(new CustomEvent('setFullWindow', { detail: true }))
-      }
+      // Only Picture-in-Picture continues while the Watch page is hidden.
+      if (isActiveTab.value) {
+        if (startInFullwindow && fullWindowListenerReady) {
+          startInFullwindow = false
+          events.dispatchEvent(new CustomEvent('setFullWindow', { detail: true }))
+        }
 
-      if (startInFullscreen && hasLoaded.value && process.env.IS_CAPACITOR) {
-        if (androidFullscreenHostActive.value) startInFullscreen = false
-      } else if (startInFullscreen && hasLoaded.value && process.env.IS_ELECTRON) {
-        startInFullscreen = false
-        window.ftElectron.requestFullscreen(tabId)
+        if (startInFullscreen && hasLoaded.value && process.env.IS_CAPACITOR) {
+          if (androidFullscreenHostActive.value) startInFullscreen = false
+        } else if (startInFullscreen && hasLoaded.value && process.env.IS_ELECTRON) {
+          startInFullscreen = false
+          window.ftElectron.requestFullscreen(tabId)
+        }
       }
 
       if (
@@ -5777,7 +5788,7 @@ export default defineComponent({
       if (detached) {
         miniPlayerHandoffHeight = height
         miniPlayerStartPending.value = false
-      } else if (video.value?.ended && miniPlayerHandoffHeight > 0) {
+      } else if (video.value?.ended && miniPlayerHandoffHeight > 0 && !scrollMiniPlayerDismissed.value) {
         miniPlayerStartPending.value = true
       }
     }, { flush: 'sync' })
@@ -5876,6 +5887,7 @@ export default defineComponent({
      */
     function handleEnterPictureInPicture(event) {
       pictureInPictureActive.value = true
+      pictureInPictureStartPending.value = false
       pipWindow = event.pictureInPictureWindow
       tabMediaCoordinator.setPictureInPicture(mediaTabId, true)
       handlePictureInPictureResize()
