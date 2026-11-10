@@ -6,8 +6,18 @@ const BLOCKED_NATIVE_LIBRARY = /couldn't map "[^"]*\/youtubedl-android\/[^"]*" s
  * @param {string} error
  * @returns {boolean}
  */
-export function isBlockedNativeCodeError(error) {
+function isBlockedNativeCodeError(error) {
   return BLOCKED_NATIVE_LIBRARY.test(error)
+}
+
+/**
+ * Whether updating or switching yt-dlp could help with a failed download. It can't when Android
+ * blocked its native code or the process was killed.
+ * @param {string} error
+ * @returns {boolean}
+ */
+export function suggestsYtDlpUpdate(error) {
+  return error !== 'DOWNLOAD_STOPPED_UNEXPECTEDLY' && !isBlockedNativeCodeError(error)
 }
 
 /**
