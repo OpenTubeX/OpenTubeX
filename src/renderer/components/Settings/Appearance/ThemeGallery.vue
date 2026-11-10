@@ -220,6 +220,7 @@
             >
               <label class="themeOption">
                 <input
+                  :id="`theme-option-${option.value}`"
                   type="radio"
                   :name="section.settingKey"
                   :checked="option.value === section.selected"
@@ -236,22 +237,23 @@
                     :icon="['fas', 'check']"
                   />
                 </span>
-                <span
-                  :id="`theme-name-${option.value}`"
-                  class="optionName"
-                >{{ option.name }}</span>
               </label>
-              <button
-                v-if="isCustomThemeValue(option.value)"
-                type="button"
-                class="editThemeButton"
-                :aria-label="t('Settings.Theme Settings.Custom Theme.Edit Custom Theme')"
-                :aria-describedby="`theme-name-${option.value}`"
-                :title="t('Settings.Theme Settings.Custom Theme.Edit Custom Theme')"
-                @click="openCustomThemeEditor(customThemeIdFromValue(option.value))"
-              >
-                <FtIcon :icon="['fas', 'pen']" />
-              </button>
+              <span class="optionNameRow">
+                <label
+                  :id="`theme-name-${option.value}`"
+                  :for="`theme-option-${option.value}`"
+                  class="optionName"
+                >{{ option.name }}</label>
+                <FtButton
+                  v-if="isCustomThemeValue(option.value)"
+                  size="extra-small"
+                  :icon="['fas', 'pen']"
+                  :aria-label="t('Settings.Theme Settings.Custom Theme.Edit Custom Theme')"
+                  :aria-describedby="`theme-name-${option.value}`"
+                  :label="t('Edit')"
+                  @click="openCustomThemeEditor(customThemeIdFromValue(option.value))"
+                />
+              </span>
             </div>
           </div>
         </div>
@@ -767,36 +769,10 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 }
 
 .themeCard {
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   min-inline-size: 0;
-}
-
-.editThemeButton {
-  position: absolute;
-  z-index: 2;
-  inset-block-start: 6px;
-  inset-inline-start: 6px;
-  display: grid;
-  place-items: center;
-  inline-size: 28px;
-  block-size: 28px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background-color: var(--card-bg-color);
-  color: var(--primary-text-color);
-  box-shadow: 0 1px 3px var(--primary-shadow-color);
-  cursor: pointer;
-  transition: background-color var(--motion-fast-effects);
-}
-
-.editThemeButton:hover,
-.editThemeButton:focus-visible {
-  background-color: var(--side-nav-hover-color);
-}
-
-.editThemeButton .ft-icon {
-  font-size: 0.85em;
 }
 
 .themeOption {
@@ -826,7 +802,8 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
   transition: outline-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
 }
 
-.themeOption:hover .optionPreview {
+.themeOption:hover .optionPreview,
+.themeCard:has(.optionName:hover) .optionPreview {
   outline: 2px solid var(--tertiary-text-color);
 }
 
@@ -857,12 +834,26 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
   color: var(--text-with-main-color);
 }
 
+.optionNameRow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-inline-size: 0;
+}
+
+.optionNameRow .optionName {
+  max-inline-size: 100%;
+  cursor: pointer;
+}
+
 .optionName {
   overflow-wrap: anywhere;
   text-align: center;
 }
 
-.themeOption:has(:checked) .optionName {
+.themeOption:has(:checked) .optionName,
+.themeCard:has(:checked) .optionName {
   font-weight: 600;
 }
 </style>
