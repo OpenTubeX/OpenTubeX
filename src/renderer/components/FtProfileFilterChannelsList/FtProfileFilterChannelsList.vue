@@ -239,10 +239,10 @@ function addChannelsToProfile() {
       .subscriptions
       .filter((channel) => selected.has(channel.id))
 
-    const profile = deepCopy(props.profile)
-    profile.subscriptions.push(...deepCopy(subscriptions))
-
-    store.dispatch('updateProfile', profile)
+    // Push only the selected channels, like subscribing, so channels changed elsewhere stay
+    for (const channel of deepCopy(subscriptions)) {
+      store.dispatch('addChannelToProfiles', { channel, profileIds: [props.profile._id] })
+    }
     showToast({ message: t('Profile.Profile has been updated'), icon: ['fas', 'user-check'] })
     selectNone()
   }

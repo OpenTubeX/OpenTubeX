@@ -537,7 +537,7 @@ test('keeps queued bulk changes for remaining channels after another window unsu
   await expect(members.getByRole('checkbox')).not.toBeChecked()
   await other.evaluate(channelId => (
     window.$store.dispatch('removeChannelFromProfiles', {
-      channelId, profileIds: ['allChannels', 'profile-1']
+      channelIds: [channelId], profileIds: ['allChannels', 'profile-1']
     })
   ), CHANNEL_ID)
   await expect.poll(() => page.evaluate(() => (

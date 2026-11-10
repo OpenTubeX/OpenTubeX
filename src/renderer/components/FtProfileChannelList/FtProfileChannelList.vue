@@ -221,38 +221,22 @@ function displayDeletePrompt() {
  */
 function handleDeletePromptClick(value) {
   if (value === 'delete') {
+    const channelIds = [...selected]
     subscriptions.value = subscriptions.value.filter((channel) => {
       return !selected.has(channel.id)
     })
 
-    if (props.isMainProfile) {
-      profileList.value.forEach((x) => {
-        const profile = deepCopy(x)
+    // Removing channels from the primary profile unsubscribes from them in every profile
+    const profiles = props.isMainProfile
+      ? profileList.value.filter(profile => profile.subscriptions.some(channel => selected.has(channel.id)))
+      : [props.profile]
+    const profileIds = profiles.map(profile => profile._id)
 
-        profile.subscriptions = profile.subscriptions.filter((channel) => {
-          return !selected.has(channel.id)
-        })
+    // Pull only the selected channels, like unsubscribing, so channels added elsewhere stay
+    store.dispatch('removeChannelFromProfiles', { channelIds, profileIds })
 
-        // Only update changed profiles
-        if (x.subscriptions.length !== profile.subscriptions.length) {
-          store.dispatch('updateProfile', profile)
-        }
-      })
-
-      showToast({ message: t('Profile.Profile has been updated'), icon: ['fas', 'user-check'] })
-      selectNone()
-    } else {
-      /** @type {Profile} */
-      const profile = {
-        ...props.profile,
-        subscriptions: deepCopy(subscriptions.value)
-      }
-
-      store.dispatch('updateProfile', profile)
-
-      showToast({ message: t('Profile.Profile has been updated'), icon: ['fas', 'user-check'] })
-      selectNone()
-    }
+    showToast({ message: t('Profile.Profile has been updated'), icon: ['fas', 'user-check'] })
+    selectNone()
   }
 
   showDeletePrompt.value = false

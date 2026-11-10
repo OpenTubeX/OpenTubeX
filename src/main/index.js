@@ -3393,13 +3393,25 @@ function runApp() {
           return null
 
         case DBActions.PROFILES.REMOVE_CHANNEL:
-          await baseHandlers.profiles.removeChannelFromProfiles(data.channelId, data.profileIds)
+          await baseHandlers.profiles.removeChannelFromProfiles(data.channelIds, data.profileIds)
           syncOtherWindows(
             IpcChannels.SYNC_PROFILES,
             event,
             { event: SyncEvents.PROFILES.REMOVE_CHANNEL, data }
           )
           return null
+
+        case DBActions.PROFILES.UPDATE_DETAILS: {
+          const { numAffected } = await baseHandlers.profiles.updateDetails(data.profileId, data.details)
+          if (numAffected > 0) {
+            syncOtherWindows(
+              IpcChannels.SYNC_PROFILES,
+              event,
+              { event: SyncEvents.PROFILES.UPDATE_DETAILS, data }
+            )
+          }
+          return null
+        }
 
         case DBActions.PROFILES.UPDATE_CHANNEL_SETTINGS:
         case DBActions.PROFILES.BATCH_UPDATE_CHANNEL_SETTINGS: {

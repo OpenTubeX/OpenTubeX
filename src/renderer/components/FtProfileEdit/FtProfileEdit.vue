@@ -501,24 +501,20 @@ function saveProfile() {
     return
   }
 
-  const profile = {
+  const details = {
     name: profileName.value,
     bgColor: profileBgColor.value,
     textColor: profileTextColor.value,
-    icon: deepCopy(profileIcon.value),
-    subscriptions: deepCopy(props.profile.subscriptions)
-  }
-
-  if (!props.isNew) {
-    profile._id = profileId.value
+    icon: deepCopy(profileIcon.value)
   }
 
   if (props.isNew) {
-    store.dispatch('createProfile', profile)
+    store.dispatch('createProfile', { ...details, subscriptions: deepCopy(props.profile.subscriptions) })
     showToast({ message: t('Profile.Profile has been created'), icon: ['fas', 'user-plus'] })
     emit('new-profile-created')
   } else {
-    store.dispatch('updateProfile', profile)
+    // Leave subscriptions out so channels added elsewhere since this page loaded stay
+    store.dispatch('updateProfileDetails', { profileId: profileId.value, details })
     showToast({ message: t('Profile.Profile has been updated'), icon: ['fas', 'user-check'] })
   }
 }

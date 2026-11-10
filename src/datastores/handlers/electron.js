@@ -214,8 +214,12 @@ class Profiles {
     return dbProfiles(DBActions.PROFILES.ADD_CHANNEL, { channel, profileIds })
   }
 
-  static removeChannelFromProfiles(channelId, profileIds) {
-    return dbProfiles(DBActions.PROFILES.REMOVE_CHANNEL, { channelId, profileIds })
+  static removeChannelFromProfiles(channelIds, profileIds) {
+    return dbProfiles(DBActions.PROFILES.REMOVE_CHANNEL, { channelIds, profileIds })
+  }
+
+  static updateDetails(profileId, details) {
+    return dbProfiles(DBActions.PROFILES.UPDATE_DETAILS, { profileId, details })
   }
 
   static updateChannelSettings(channel, profileIds) {

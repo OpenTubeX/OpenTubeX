@@ -131,7 +131,7 @@ test('a subscription sync retry keeps an unsubscribe made after the first attemp
     await subscribeBulk(channels)
     if (!removed) {
       removed = true
-      await store.dispatch('removeChannelFromProfiles', { channelId: 'A', profileIds: [MAIN_PROFILE_ID] })
+      await store.dispatch('removeChannelFromProfiles', { channelIds: ['A'], profileIds: [MAIN_PROFILE_ID] })
     }
   }
 
@@ -201,4 +201,46 @@ test('a subscription sync retry keeps a resubscribe made after the main profile 
   assert.deepEqual([...synced].sort(), ['A', 'B', 'C'])
   assert.deepEqual([...remote.keys()].sort(), ['A', 'B', 'C'])
   assert.deepEqual(mainIds().sort(), ['A', 'B', 'C'])
+})
+
+test('editing profile details keeps a channel another window or sync added after the page loaded', async () => {
+  const { db, store } = await fixture([channel('A')], [channel('A')])
+  const loaded = structuredClone(store.state.profiles.profileList.find(profile => profile._id === 'second'))
+  await db.profiles.updateAsync({ _id: 'second' }, { $push: { subscriptions: channel('B') } })
+
+  assert.equal(await store.dispatch('updateProfileDetails', {
+    profileId: 'second',
+    details: { ...loaded, name: 'Renamed', bgColor: '#123456', textColor: '#abcdef', icon: { type: 'emoji', value: '🎵' } },
+  }), true)
+
+  const saved = await db.profiles.findOneAsync({ _id: 'second' })
+  assert.deepEqual(saved.subscriptions.map(channel => channel.id), ['A', 'B'])
+  assert.deepEqual([saved.name, saved.bgColor, saved.textColor, saved.icon], ['Renamed', '#123456', '#abcdef', { type: 'emoji', value: '🎵' }])
+  assert.equal(store.state.profiles.profileList.find(profile => profile._id === 'second').name, 'Renamed')
+})
+
+test('removing channels from the primary profile keeps a concurrently added channel and cleans up their download rules', async () => {
+  const { db, store, ids, mainIds } = await fixture([channel('A'), channel('B')], [channel('A')])
+  await db.profiles.updateAsync({ _id: { $in: [MAIN_PROFILE_ID, 'second'] } }, { $push: { subscriptions: channel('C') } }, { multi: true })
+  let rules = JSON.stringify({ A: {}, B: {}, C: {} })
+  const dispatch = store.dispatch
+  store.dispatch = async (type, payload) => {
+    if (type !== 'updateYtDlpAutomaticDownloadRules') return dispatch(type, payload)
+    rules = payload(rules)
+  }
+
+  await store.dispatch('removeChannelFromProfiles', { channelIds: ['A', 'B'], profileIds: [MAIN_PROFILE_ID, 'second'] })
+
+  assert.deepEqual(await ids(), ['C'])
+  assert.deepEqual((await db.profiles.findOneAsync({ _id: 'second' })).subscriptions.map(channel => channel.id), ['C'])
+  assert.deepEqual(mainIds(), [])
+  assert.deepEqual(JSON.parse(rules), { C: {} })
+})
+
+test('adding a channel without a thumbnail to a profile saves it', async () => {
+  const { db, store } = await fixture([channel('A')], [])
+
+  await store.dispatch('addChannelToProfiles', { channel: { ...channel('A'), thumbnail: null }, profileIds: ['second'] })
+
+  assert.deepEqual((await db.profiles.findOneAsync({ _id: 'second' })).subscriptions.map(channel => channel.id), ['A'])
 })

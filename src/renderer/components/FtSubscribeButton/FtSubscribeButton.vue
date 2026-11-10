@@ -933,7 +933,7 @@ function handleUnsubscription(profile) {
     })
   }
 
-  store.dispatch('removeChannelFromProfiles', { channelId: props.channelId, profileIds })
+  store.dispatch('removeChannelFromProfiles', { channelIds: [props.channelId], profileIds })
 
   showToast({ message: t('Channel.Channel has been removed from your subscriptions'), icon: ['fas', 'trash'] })
 

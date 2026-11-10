@@ -364,8 +364,8 @@ for (const removeAll of [false, true]) {
     const profileIds = ['allChannels', 'custom']
     // Another window's unsubscribe reaches the store before the queued edit starts.
     for (const channelId of removeAll ? ['removed', 'remaining'] : ['removed']) {
-      await DBProfileHandlers.removeChannelFromProfiles(channelId, profileIds)
-      for (const window of [store, other]) window.commit('removeChannelFromProfiles', { channelId, profileIds })
+      await DBProfileHandlers.removeChannelFromProfiles([channelId], profileIds)
+      for (const window of [store, other]) window.commit('removeChannelFromProfiles', { channelIds: [channelId], profileIds })
     }
     const write = t.mock.method(db.profiles, 'updateAsync')
     assert.equal(await store.dispatch('batchUpdateChannelSettings', updates), false)
