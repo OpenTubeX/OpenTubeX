@@ -43,8 +43,6 @@ Unload Multiple Tabs Confirmation:
   Message: Ezzel kiürít {count} lapot.
   Unload Tabs: Lapok kiürítése ({count})
 Tabs Unloaded To Free Memory: '{count} nemrég nem használt lap kiürítve a memória felszabadításához | {count} nemrég nem használt lap kiürítve a memória felszabadításához'
-Use Vertical Tabs: Függőleges lapok használata
-Use Horizontal Tabs: Vízszintes lapok használata
 Resize Tab Bar: Lapsáv átméretezése
 Find in page: Keresés az oldalon
 Previous match: Előző találat
@@ -372,7 +370,6 @@ Settings:
     Add-ons: Kiegészítők
     Add-ons Description: SponsorBlock, DeArrow, negatív értékelések, AiSList és hangalámondás fordítása
     Privacy Description: Előzmények, keresési javaslatok, hivatkozások és alkalmazásjelszó
-    Online activity: Internetes tevékenység
     Data And Storage Description: Biztonsági mentések, importálás és exportálás, lemezhasználat és tisztítás
     Sync Description: Szinkronizálási szerverfiók, eszközpárosítás és szinkronizált adatok
     Advanced: Speciális
@@ -1002,8 +999,6 @@ Settings:
     Update FFmpeg: FFmpeg frissítése
     Checking FFmpeg: FFmpeg ellenőrzése…
     Downloading FFmpeg: FFmpeg letöltése…
-    FFmpeg Downloaded Template: Az FFmpeg {version} letöltve
-    FFmpeg Download Error Template: 'Nem sikerült letölteni az FFmpeg programot: {error}'
     Detected FFprobe Version Template: 'Észlelt FFprobe-verzió: {version}'
     FFprobe Managed Not Downloaded: Az FFprobe még nincs letöltve. Az FFmpeg programmal együtt az alábbi gombra kattintva töltheti le.
     System FFprobe Missing Warning: Az FFprobe nem található a rendszeren. Az utófeldolgozás során a média vizsgálatához szükséges. Telepítse az FFmpeg mellé, vagy váltson „Az OpenTubeX felügyeletével” forrásra.
@@ -1064,7 +1059,6 @@ Settings:
     Clear Video Metadata Cache: Videómetaadatok gyorsítótárának törlése
     Are you sure you want to clear the video metadata cache?: Biztosan törli a gyorsítótárazott videócímeket, bélyegképeket és leírásokat?
     Failed to clear video metadata cache: Nem sikerült törölni a videómetaadatok gyorsítótárát
-    Video metadata cache has been cleared: A videómetaadatok gyorsítótára törölve
     Video Metadata Cache Size: 'Videómetaadatok gyorsítótára: {size}'
   Storage Settings:
     Storage: Tárhely
@@ -1277,6 +1271,7 @@ Settings:
     Channel playback speeds imported: "{count} csatorna lejátszási sebessége importálva | {count} csatorna lejátszási sebessége importálva"
     Channels not found: "{count} csatorna nem található | {count} csatorna nem található"
   Sync Settings:
+    Signed Out After Restore: 'A szinkronizálás kijelentkezett, mert ezeket az alkalmazásadatokat biztonsági mentésből vagy másik eszközről állították vissza. Jelentkezz be újra az eszköz szinkronizálásához.'
     Revoke Session Tabs Warning: "Az eszköz szinkronizált lapkészletei is törlődnek."
     Revoke Session Partial Failure: "A szinkronizált lapkészletek törlődtek, de a hozzáférés visszavonását nem sikerült megerősíteni. Próbáld újra visszavonni a hozzáférést."
     Tab Sync Revocation Pending: "A lapok szinkronizálása szünetel, amíg ennek a bejelentkezésnek a visszavonása függőben van. Próbáld újra a visszavonást a szinkronizálási beállításokban."
@@ -1796,8 +1791,6 @@ Video:
       EndTimeAfterStart: A szakasz végének a kezdete után kell lennie.
       EndTimeBeforeVideoEnd: A szakasz végének a videó időtartamán belül kell lennie.
       EndTimeLabel: Szakasz vége
-      DisableAutoSkipTemporarily: SponsorBlock automatikus átugrásának ideiglenes kikapcsolása
-      EnableAutoSkipTemporarily: SponsorBlock automatikus átugrásának visszakapcsolása
       Guidelines: Irányelvek
       InspectSegment: Ellenőrzés
       InvalidStartTime: Adjon meg érvényes kezdési időt a szakaszhoz.
@@ -1833,7 +1826,6 @@ Video:
       InfoPanelLoading: A szakaszok még töltődnek...
       InfoPanelHasSegments: A videóhoz tartoznak szakaszok az adatbázisban!
       InfoPanelNoSegments: Nem találhatók szakaszok
-      RefreshSegments: Szakaszok frissítése
       RefreshInfo: SponsorBlock-információk frissítése
       ContributionStatsTitle: Saját közreműködések
       ContributionStatsLoading: Közreműködési statisztikák betöltése...

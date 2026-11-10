@@ -43,8 +43,6 @@ Unload Multiple Tabs Confirmation:
   Message: Ekintza honek {count} fitxa memoriatik kenduko ditu.
   Unload Tabs: Kendu {count} fitxa memoriatik
 Tabs Unloaded To Free Memory: Memoria askatzeko, azkenaldian erabili ez duzun fitxa {count} memoriatik kendu da | Memoria askatzeko, azkenaldian erabili ez dituzun {count} fitxa memoriatik kendu dira
-Use Vertical Tabs: Erabili fitxa bertikalak
-Use Horizontal Tabs: Erabili fitxa horizontalak
 Resize Tab Bar: Aldatu fitxa-barraren tamaina
 Find in page: Bilatu orrian
 Previous match: Aurreko bat-etortzea
@@ -372,7 +370,6 @@ Settings:
     Add-ons: Gehigarriak
     Add-ons Description: SponsorBlock, DeArrow, atsegin ezak, AiSList eta ahots bidezko itzulpena
     Privacy Description: Historia, bilaketa-iradokizunak, estekak eta aplikazioaren pasahitza
-    Online activity: Lineako jarduera
     Data And Storage Description: Babeskopiak, inportazioa eta esportazioa, diskoaren erabilera eta garbiketa
     Sync Description: Sinkronizazio-zerbitzariko kontua, gailuen parekatzea eta sinkronizatutako datuak
     Advanced: Aurreratua
@@ -1002,8 +999,6 @@ Settings:
     Update FFmpeg: Eguneratu FFmpeg
     Checking FFmpeg: FFmpeg egiaztatzen…
     Downloading FFmpeg: FFmpeg deskargatzen…
-    FFmpeg Downloaded Template: FFmpeg {version} deskargatu da
-    FFmpeg Download Error Template: 'Ezin izan da FFmpeg deskargatu: {error}'
     Detected FFprobe Version Template: 'Hautemandako FFprobe bertsioa: {version}'
     FFprobe Managed Not Downloaded: FFprobe ez da deskargatu oraindik. Egin klik beheko botoian FFmpeg-ekin batera deskargatzeko.
     System FFprobe Missing Warning: Ez da FFprobe aurkitu sisteman. Beharrezkoa da prozesatu ondoren multimedia aztertzeko. Instalatu FFmpeg-en ondoan edo aldatu jatorria "OpenTubeX aplikazioak kudeatua" aukerara.
@@ -1064,7 +1059,6 @@ Settings:
     Clear Video Metadata Cache: Garbitu bideoen metadatuen cachea
     Are you sure you want to clear the video metadata cache?: Ziur cachean gordetako bideoen izenburuak, koadro txikiak eta deskribapenak garbitu nahi dituzula?
     Failed to clear video metadata cache: Ezin izan da bideoen metadatuen cachea garbitu
-    Video metadata cache has been cleared: Bideoen metadatuen cachea garbitu da
     Video Metadata Cache Size: 'Bideoen metadatuen cachea: {size}'
   Storage Settings:
     Storage: Biltegiratzea
@@ -1277,6 +1271,7 @@ Settings:
     Channel playback speeds imported: "{count} kanalaren erreprodukzio-abiadura inportatu da | {count} kanalen erreprodukzio-abiadurak inportatu dira"
     Channels not found: "Ezin izan da {count} kanal aurkitu | Ezin izan dira {count} kanal aurkitu"
   Sync Settings:
+    Signed Out After Restore: 'Sinkronizazioaren saioa itxi da, aplikazioaren datu hauek babeskopia batetik edo beste gailu batetik leheneratu direlako. Hasi saioa berriro gailu hau sinkronizatzeko.'
     Revoke Session Tabs Warning: "Gailu honen sinkronizatutako fitxa multzoak ere ezabatuko dira."
     Revoke Session Partial Failure: "Sinkronizatutako fitxa multzoak ezabatu dira, baina ezin izan da sarbidea kentzea berretsi. Saiatu berriro sarbidea kentzen."
     Tab Sync Revocation Pending: "Fitxen sinkronizazioa pausatuta dago saio-hasiera honen baliogabetzea zain dagoen bitartean. Saiatu berriro baliogabetzen sinkronizazio-ezarpenetan."
@@ -1806,8 +1801,6 @@ Video:
       EndTimeAfterStart: Segmentuaren amaiera-uneak hasiera-unearen ondorengoa izan behar du.
       EndTimeBeforeVideoEnd: Segmentuaren amaiera-uneak bideoaren iraupenaren barruan egon behar du.
       EndTimeLabel: Segmentuaren amaiera-unea
-      DisableAutoSkipTemporarily: Desgaitu aldi baterako SponsorBlock-en saltatze automatikoa
-      EnableAutoSkipTemporarily: Gaitu berriro SponsorBlock-en saltatze automatikoa
       Guidelines: Jarraibideak
       InspectSegment: Aztertu
       InvalidStartTime: Idatzi baliozko segmentuaren hasiera-unea.
@@ -1843,7 +1836,6 @@ Video:
       InfoPanelLoading: Segmentuak kargatzen ari dira oraindik...
       InfoPanelHasSegments: Bideo honek segmentuak ditu datu-basean!
       InfoPanelNoSegments: Ez da segmenturik aurkitu
-      RefreshSegments: Freskatu segmentuak
       RefreshInfo: Freskatu SponsorBlock-en informazioa
       ContributionStatsTitle: Zure ekarpenak
       ContributionStatsLoading: Ekarpenen estatistikak kargatzen...

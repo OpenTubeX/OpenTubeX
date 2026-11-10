@@ -787,6 +787,37 @@ test.describe('playlist cleanup', () => {
   })
 })
 
+test.describe('playlist duplicate cleanup', () => {
+  const video = (videoId, playlistItemId) => ({
+    videoId, playlistItemId, title: videoId, author: 'Test Channel', authorId: 'UC-test-channel-id', lengthSeconds: 60, type: 'video', timeAdded: 1,
+  })
+  test.use({
+    seed: {
+      playlists: [{
+        _id: 'duplicates',
+        playlistName: 'Duplicates test',
+        description: '',
+        protected: false,
+        createdAt: 1,
+        lastUpdatedAt: 1,
+        videos: [video('copy0000000', 'copy-1'), video('once0000000', 'once-1'), video('copy0000000', 'copy-2')],
+      }],
+    }
+  })
+
+  test('removes only the duplicate entries', async ({ app, page }) => {
+    await goTo(page, 'userplaylists')
+    await page.getByRole('link', { name: 'Duplicates test', exact: true }).click()
+    await (await openPlaylistMenuItem(page, 'Remove Duplicate Videos')).click()
+    const dialog = page.getByRole('dialog')
+    await expect(dialog).toContainText('remove 1 duplicate video')
+    await dialog.getByRole('button', { name: 'Yes, Delete' }).click()
+    // The removal deletes the entries rather than saving the rest, so only they are gone
+    await expect.poll(() => readDatastore(app.userDataDir, 'playlists').trim().split('\n').map(line => JSON.parse(line))
+      .find(playlist => playlist._id === 'duplicates').videos.map(video => video.playlistItemId)).toEqual(['copy-1', 'once-1'])
+  })
+})
+
 test.describe('saved playlist metadata', () => {
   test.use({
     seed: {

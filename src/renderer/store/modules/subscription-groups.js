@@ -65,35 +65,35 @@ const actions = {
    * @param {Omit<import('../../helpers/subscription-groups').SubscriptionGroup, 'id'>} group
    * @returns {Promise<string | null>} the new group's ID
    */
-  async createSubscriptionGroup({ dispatch, getters }, group) {
+  async createSubscriptionGroup({ dispatch }, group) {
     const id = crypto.randomUUID()
-    const saved = await dispatch('updateSubscriptionGroups', [
-      ...getters.getSubscriptionGroupList,
-      { id, ...group },
-    ])
+    const saved = await dispatch('updateSubscriptionGroups', groups => [...normalizeSubscriptionGroups(groups), { id, ...group }])
     return saved ? id : null
   },
 
   /** @param {import('../../helpers/subscription-groups').SubscriptionGroup} group */
-  saveSubscriptionGroup({ dispatch, getters }, group) {
-    const groups = getters.getSubscriptionGroupList
+  saveSubscriptionGroup({ dispatch }, group) {
     // Another device can delete the group while it is being edited. Saving then
-    // restores it with the edits, as it also replaces changes made meanwhile.
-    return dispatch('updateSubscriptionGroups', groups.some(existing => existing.id === group.id)
-      ? groups.map(existing => existing.id === group.id ? group : existing)
-      : [...groups, group])
+    // restores it with the edits.
+    return dispatch('updateSubscriptionGroups', value => {
+      const groups = normalizeSubscriptionGroups(value)
+      return groups.some(existing => existing.id === group.id)
+        ? groups.map(existing => existing.id === group.id ? group : existing)
+        : [...groups, group]
+    })
   },
 
-  async deleteSubscriptionGroup({ commit, dispatch, getters, state }, groupId) {
-    const saved = await dispatch('updateSubscriptionGroups', getters.getSubscriptionGroupList.filter(group => {
+  async deleteSubscriptionGroup({ commit, dispatch, state }, groupId) {
+    const saved = await dispatch('updateSubscriptionGroups', groups => normalizeSubscriptionGroups(groups).filter(group => {
       return group.id !== groupId
     }))
     if (saved && state.activeSubscriptionGroupId === groupId) commit('setActiveSubscriptionGroupId', null)
     return saved
   },
 
-  setChannelInSubscriptionGroup({ dispatch, getters }, { groupId, channelId, included }) {
-    return dispatch('updateSubscriptionGroups', getters.getSubscriptionGroupList.map(group => {
+  // Changes only this channel in the saved groups, so another window's edits stay
+  setChannelInSubscriptionGroup({ dispatch }, { groupId, channelId, included }) {
+    return dispatch('updateSubscriptionGroups', groups => normalizeSubscriptionGroups(groups).map(group => {
       if (group.id !== groupId || group.channelIds.includes(channelId) === included) return group
       return {
         ...group,

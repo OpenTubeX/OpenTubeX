@@ -3,6 +3,7 @@ import { DBProfileHandlers } from '../../../datastores/handlers/index'
 import { getProfileWithUpdatedSubscriptionDetails } from '../../helpers/subscription-profile-details'
 import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getNextSubscriptionSettingsTimestamp, isValidSubscriptionSettingsTimestamp } from '../../helpers/subscription-channels'
 import { DEFAULT_PROFILE_ICON } from '../../helpers/profileIcons'
+import { profileSyncSnapshot } from '../../helpers/profileSyncSnapshot'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 
 const state = {
@@ -230,6 +231,17 @@ const actions = {
     }
   },
 
+  /** Adds imported channels and icon to a profile, keeping changes made meanwhile */
+  async mergeImportedProfile({ commit }, profile) {
+    try {
+      commit('upsertProfileToList', await DBProfileHandlers.mergeImported(profile))
+      return true
+    } catch (errMessage) {
+      console.error(errMessage)
+      return false
+    }
+  },
+
   async updateProfile({ commit }, profile) {
     try {
       await DBProfileHandlers.upsert(profile)
@@ -251,6 +263,22 @@ const actions = {
       console.error(errMessage)
       return false
     }
+  },
+
+  /**
+   * Saves a profile from sync unless it changed since `previous`, here or in
+   * the datastore. `previous` is null for a profile this device did not have.
+   * @returns {Promise<boolean>} false when the profile changed meanwhile
+   */
+  async saveSyncedProfile({ commit, state }, { profile, previous }) {
+    const current = state.profileList.find(item => item._id === profile._id)
+    if (previous === null ? current !== undefined : current === undefined || profileSyncSnapshot(current) !== profileSyncSnapshot(previous)) {
+      return false
+    }
+    const saved = await DBProfileHandlers.saveFromSyncIfUnchanged(profile, previous)
+    if (saved === null) return false
+    commit('upsertProfileToList', saved)
+    return true
   },
 
   /** Replaces subscriptions unless they changed since `previous`, here or in the datastore */

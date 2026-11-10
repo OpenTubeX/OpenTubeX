@@ -2500,26 +2500,28 @@ function runApp() {
     }
   })
 
-  ipcMain.on(IpcChannels.ENABLE_PROXY, (event, url) => {
+  // Resolve once requests use the new proxy, so a proxy test cannot reach the
+  // IP check through the previous connection.
+  ipcMain.handle(IpcChannels.ENABLE_PROXY, async (event, url) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
 
-    session.defaultSession.setProxy({
+    proxyUrl = url
+    await session.defaultSession.setProxy({
       proxyRules: url
     })
-    proxyUrl = url
-    session.defaultSession.closeAllConnections()
+    await session.defaultSession.closeAllConnections()
   })
 
-  ipcMain.on(IpcChannels.DISABLE_PROXY, (event) => {
+  ipcMain.handle(IpcChannels.DISABLE_PROXY, async (event) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
 
-    session.defaultSession.setProxy({ mode: 'system' })
     proxyUrl = undefined
-    session.defaultSession.closeAllConnections()
+    await session.defaultSession.setProxy({ mode: 'system' })
+    await session.defaultSession.closeAllConnections()
   })
 
   // #region navigation history
@@ -3175,9 +3177,12 @@ function runApp() {
           )
           return null
 
-        case DBActions.HISTORY.MERGE_BACKUP: {
+        case DBActions.HISTORY.MERGE_BACKUP:
+        case DBActions.HISTORY.IMPORT: {
           if (typeof data === 'string') data = JSON.parse(data)
-          const updates = await baseHandlers.history.mergeBackup(data)
+          const updates = action === DBActions.HISTORY.IMPORT
+            ? await baseHandlers.history.importRecords(data.records, data.rule)
+            : await baseHandlers.history.mergeBackup(data)
           const changes = { insertions: [], updates, deletions: [] }
           syncOtherWindows(
             IpcChannels.SYNC_HISTORY,
@@ -3456,6 +3461,14 @@ function runApp() {
           return result
         }
 
+        case DBActions.PROFILES.SAVE_FROM_SYNC_IF_UNCHANGED: {
+          const profile = await baseHandlers.profiles.saveFromSyncIfUnchanged(data.profile, data.previous)
+          if (profile !== null) {
+            syncOtherWindows(IpcChannels.SYNC_PROFILES, event, { event: SyncEvents.GENERAL.UPSERT, data: profile })
+          }
+          return profile
+        }
+
         case DBActions.PROFILES.UPDATE_SUBSCRIPTIONS_IF_UNCHANGED: {
           const profile = await baseHandlers.profiles.updateSubscriptionsIfUnchanged(data.profileId, data.subscriptions, data.previous)
           if (profile !== null) {
@@ -3464,8 +3477,11 @@ function runApp() {
           return profile
         }
 
-        case DBActions.PROFILES.MERGE_BACKUP: {
-          const profile = await baseHandlers.profiles.mergeBackup(data)
+        case DBActions.PROFILES.MERGE_BACKUP:
+        case DBActions.PROFILES.MERGE_IMPORTED: {
+          const profile = action === DBActions.PROFILES.MERGE_IMPORTED
+            ? await baseHandlers.profiles.mergeImported(data)
+            : await baseHandlers.profiles.mergeBackup(data)
           syncOtherWindows(IpcChannels.SYNC_PROFILES, event, { event: SyncEvents.GENERAL.UPSERT, data: profile })
           return profile
         }
@@ -3685,14 +3701,15 @@ function runApp() {
           return updatedEntry
         }
 
-        case DBActions.GENERAL.OVERWRITE:
-          await baseHandlers.searchHistory.overwrite(data)
+        case DBActions.SEARCH_HISTORY.MERGE_IMPORTED: {
+          const entries = await baseHandlers.searchHistory.mergeImported(data)
           syncOtherWindows(
             IpcChannels.SYNC_SEARCH_HISTORY,
             event,
-            { event: SyncEvents.GENERAL.OVERWRITE, data }
+            { event: SyncEvents.GENERAL.OVERWRITE, data: entries }
           )
-          return null
+          return entries
+        }
 
         case DBActions.GENERAL.DELETE:
           await baseHandlers.searchHistory.delete(data)

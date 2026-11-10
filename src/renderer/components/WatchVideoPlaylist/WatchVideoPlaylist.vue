@@ -287,7 +287,7 @@ import store from '../../store/index'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { usesInvidiousApi } from '../../../apiBackends'
 
-import { getInvidiousApiErrorMessage, showInvidiousFallbackToast, deepCopy, extractNumberFromString, getVideoThumbnailUrl, showApiErrorToast, showToast } from '../../helpers/utils'
+import { getInvidiousApiErrorMessage, showInvidiousFallbackToast, extractNumberFromString, getVideoThumbnailUrl, showApiErrorToast, showToast } from '../../helpers/utils'
 import {
   getLocalCachedFeedContinuation,
   getLocalPlaylist,
@@ -920,16 +920,15 @@ async function persistPlaylistOrder(items) {
   const selectedPlaylist = selectedUserPlaylist.value
   if (selectedPlaylist == null) { return }
 
-  const playlist = {
-    playlistName: selectedPlaylist.playlistName,
-    protected: selectedPlaylist.protected,
-    description: selectedPlaylist.description,
-    videos: deepCopy(reversePlaylist.value ? items.toReversed() : items),
-    _id: selectedPlaylist._id,
-  }
-
+  const videos = reversePlaylist.value ? items.toReversed() : items
   try {
-    await store.dispatch('updatePlaylist', playlist)
+    // Apply the order to the saved entries, so videos another window added
+    // or removed in the meantime stay that way.
+    const saved = await store.dispatch('reorderPlaylistVideos', {
+      _id: selectedPlaylist._id,
+      playlistItemIds: videos.map(video => video.playlistItemId),
+    })
+    if (!saved) throw new Error('Could not update playlist')
   } catch (error) {
     showToast({
       message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),

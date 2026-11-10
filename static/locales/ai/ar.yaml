@@ -43,8 +43,6 @@ Unload Multiple Tabs Confirmation:
   Message: 'سيؤدي هذا إلى تفريغ علامتي تبويب ({count}). | سيؤدي هذا إلى تفريغ {count} علامات تبويب. | سيؤدي هذا إلى تفريغ {count} علامة تبويب. | سيؤدي هذا إلى تفريغ {count} علامة تبويب.'
   Unload Tabs: 'تفريغ علامتي تبويب ({count}) | تفريغ {count} علامات تبويب | تفريغ {count} علامة تبويب | تفريغ {count} علامة تبويب'
 Tabs Unloaded To Free Memory: تم تفريغ {count} علامة تبويب لم تستخدمها مؤخرًا لتحرير الذاكرة | تم تفريغ علامة تبويب واحدة ({count}) لم تستخدمها مؤخرًا لتحرير الذاكرة | تم تفريغ علامتي تبويب ({count}) لم تستخدمهما مؤخرًا لتحرير الذاكرة | تم تفريغ {count} علامات تبويب لم تستخدمها مؤخرًا لتحرير الذاكرة | تم تفريغ {count} علامة تبويب لم تستخدمها مؤخرًا لتحرير الذاكرة | تم تفريغ {count} علامة تبويب لم تستخدمها مؤخرًا لتحرير الذاكرة
-Use Vertical Tabs: استخدم علامات التبويب العمودية
-Use Horizontal Tabs: استخدم علامات التبويب الأفقية
 Resize Tab Bar: تغيير حجم شريط علامات التبويب
 Find in page: البحث في الصفحة
 Previous match: 'النتيجة السابقة'
@@ -377,7 +375,6 @@ Settings:
     Add-ons: الإضافات
     Add-ons Description: SponsorBlock، وDeArrow، وعدم الإعجاب، وAiSList، والترجمة الصوتية
     Privacy Description: السجل واقتراحات البحث والروابط وكلمة مرور التطبيق
-    Online activity: 'النشاط على الإنترنت'
     Data And Storage Description: النسخ الاحتياطية والاستيراد والتصدير واستخدام القرص والتنظيف
     Sync Description: حساب خادم المزامنة وإقران الأجهزة والبيانات المتزامنة
     Advanced: متقدم
@@ -1013,8 +1010,6 @@ Settings:
     Update FFmpeg: تحديث إف إف إم بي إي جي
     Checking FFmpeg: جارٍ التحقق من FFmpeg...
     Downloading FFmpeg: جارٍ تنزيل FFmpeg...
-    FFmpeg Downloaded Template: تم تنزيل FFmpeg {version}
-    FFmpeg Download Error Template: 'فشل تنزيل FFmpeg: {error}'
     Detected FFprobe Version Template: 'تم اكتشاف إصدار FFprobe: {version}'
     FFprobe Managed Not Downloaded: لم يتم تنزيل FFprobe بعد. انقر فوق الزر أدناه لتنزيله باستخدام FFmpeg.
     System FFprobe Missing Warning: لم يتم العثور على FFprobe على نظامك. وهو مطلوب لفحص الوسائط أثناء مرحلة ما بعد المعالجة. قم بتثبيته بجوار FFmpeg، أو قم بتبديل المصدر إلى "Managed by OpenTubeX".
@@ -1075,7 +1070,6 @@ Settings:
     Clear Video Metadata Cache: مسح ذاكرة التخزين المؤقت لبيانات تعريف الفيديو
     Are you sure you want to clear the video metadata cache?: هل أنت متأكد أنك تريد مسح عناوين الفيديو والصور المصغرة والأوصاف المخزنة مؤقتًا؟
     Failed to clear video metadata cache: فشل في مسح ذاكرة التخزين المؤقت للبيانات التعريفية للفيديو
-    Video metadata cache has been cleared: تم مسح ذاكرة التخزين المؤقت للبيانات الوصفية للفيديو
     Video Metadata Cache Size: 'ذاكرة التخزين المؤقت للبيانات الوصفية للفيديو: {size}'
   Storage Settings:
     Storage: تخزين
@@ -1300,6 +1294,7 @@ Settings:
     Channel playback speeds imported: "لم يتم استيراد سرعة التشغيل لأي قناة ({count}) | تم استيراد سرعة التشغيل لقناة واحدة ({count}) | تم استيراد سرعات التشغيل لقناتين ({count}) | تم استيراد سرعات التشغيل لـ {count} قنوات | تم استيراد سرعات التشغيل لـ {count} قناة | تم استيراد سرعات التشغيل لـ {count} قناة"
     Channels not found: "تعذّر العثور على {count} قناة | تعذّر العثور على قناة واحدة ({count}) | تعذّر العثور على قناتين ({count}) | تعذّر العثور على {count} قنوات | تعذّر العثور على {count} قناة | تعذّر العثور على {count} قناة"
   Sync Settings:
+    Signed Out After Restore: 'تم تسجيل الخروج من المزامنة لأن بيانات التطبيق هذه استُعيدت من نسخة احتياطية أو من جهاز آخر. سجّل الدخول مجددًا لمزامنة هذا الجهاز.'
     Revoke Session Tabs Warning: "ستُحذف أيضًا مجموعات علامات التبويب المتزامنة لهذا الجهاز."
     Revoke Session Partial Failure: "حُذفت مجموعات علامات التبويب المتزامنة، لكن تعذر تأكيد إلغاء الوصول. أعد المحاولة لإلغاء الوصول."
     Tab Sync Revocation Pending: "مزامنة علامات التبويب متوقفة مؤقتًا أثناء انتظار إلغاء وصول تسجيل الدخول هذا. أعد محاولة إلغاء الوصول في إعدادات المزامنة."
@@ -1841,8 +1836,6 @@ Video:
       EndTimeAfterStart: يجب أن يكون وقت انتهاء المقطع بعد وقت البدء.
       EndTimeBeforeVideoEnd: يجب أن يكون وقت انتهاء المقطع ضمن مدة الفيديو.
       EndTimeLabel: وقت انتهاء المقطع
-      DisableAutoSkipTemporarily: قم بتعطيل التخطي التلقائي لـ SponsorBlock مؤقتًا
-      EnableAutoSkipTemporarily: أعد تمكين التخطي التلقائي لـ SponsorBlock
       Guidelines: المبادئ التوجيهية
       InspectSegment: فحص
       InvalidStartTime: أدخل وقت بدء المقطع صالحًا.
@@ -1878,7 +1871,6 @@ Video:
       InfoPanelLoading: لا يزال يتم تحميل المقاطع...
       InfoPanelHasSegments: يحتوي هذا الفيديو على مقاطع في قاعدة البيانات!
       InfoPanelNoSegments: لم يتم العثور على أي شرائح
-      RefreshSegments: تحديث المقاطع
       RefreshInfo: قم بتحديث معلومات SponsorBlock
       ContributionStatsTitle: مساهماتك
       ContributionStatsLoading: جارٍ تحميل إحصاءات المساهمة...

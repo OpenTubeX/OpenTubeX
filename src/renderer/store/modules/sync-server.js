@@ -13,6 +13,8 @@ import {
   SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
   SyncServerDataLossError,
   SYNC_SERVER_SESSION_EXPIRED_MESSAGE,
+  SYNC_SERVER_RESTORED_DEVICE_MESSAGE,
+  forgetSyncDeviceId,
   getSavedOtherDeviceSessions,
   isExpiredSessionReauthentication,
   isAccountDeletedError,
@@ -217,7 +219,9 @@ const getters = {
   getSyncServerProgress: state => state.syncServerProgress,
   getSyncServerError: state => state.syncServerError === SYNC_SERVER_UPDATE_REQUIRED_MESSAGE
     ? i18n.global.t('Settings.Sync Settings.Server Update Required')
-    : state.syncServerError,
+    : state.syncServerError === SYNC_SERVER_RESTORED_DEVICE_MESSAGE
+      ? i18n.global.t('Settings.Sync Settings.Signed Out After Restore')
+      : state.syncServerError,
   getSyncServerLastResult: state => state.syncServerLastResult,
   getSyncServerPendingDeletion: state => state.syncServerPendingDeletion,
   getSyncServerOidcPending: state => state.syncServerOidcPending,
@@ -1687,6 +1691,21 @@ const actions = {
     commit('setSyncServerError', SYNC_SERVER_SESSION_EXPIRED_MESSAGE)
     commit('setSyncServerSessionExpired', true)
     commit('setSyncServerStatus', 'error')
+  },
+
+  /**
+   * App data restored from a backup or another device keeps that
+   * installation's sync sign-in, keys, and device ID, so the two would sync
+   * as one device. This one signs in again as a new device instead.
+   */
+  async forgetRestoredSyncServerDevice({ commit, dispatch, rootState }) {
+    const { syncServerToken, syncServerDeviceId } = rootState.settings
+    forgetSyncDeviceId()
+    if (!syncServerToken && !syncServerDeviceId) return
+    await dispatch('disconnectSyncServer')
+    await dispatch('updateSyncServerDeviceId', '', { root: true })
+    await dispatch('updateSyncServerDeviceName', '', { root: true })
+    if (syncServerToken) commit('setSyncServerError', SYNC_SERVER_RESTORED_DEVICE_MESSAGE)
   },
 
   async disconnectSyncServer({ commit, dispatch }) {

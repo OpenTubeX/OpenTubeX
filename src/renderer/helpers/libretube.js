@@ -229,7 +229,8 @@ export function convertLibreTubeWatchHistoryToOpenTubeX(backupData, existingHist
     let isWatched = true
 
     if (watchPosition != null && duration != null && duration > 0) {
-      const positionSeconds = watchPosition > duration ? watchPosition / 1000 : watchPosition
+      // LibreTube stores positions in milliseconds and durations in seconds
+      const positionSeconds = watchPosition / 1000
       watchProgress = Math.min(Math.max(positionSeconds, 0), duration)
       isWatched = hasReachedWatchedThreshold(watchProgress, duration)
     }

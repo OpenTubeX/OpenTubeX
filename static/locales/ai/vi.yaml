@@ -43,8 +43,6 @@ Unload Multiple Tabs Confirmation:
   Message: Thao tác này sẽ dỡ {count} thẻ.
   Unload Tabs: Dỡ {count} thẻ
 Tabs Unloaded To Free Memory: Đã dỡ {count} thẻ bạn không dùng gần đây để giải phóng bộ nhớ
-Use Vertical Tabs: Dùng thẻ dọc
-Use Horizontal Tabs: Dùng thẻ ngang
 Resize Tab Bar: Đổi kích thước thanh thẻ
 Find in page: Tìm trong trang
 Previous match: Kết quả trước
@@ -372,7 +370,6 @@ Settings:
     Add-ons: Tiện ích bổ sung
     Add-ons Description: SponsorBlock, DeArrow, lượt không thích, AiSList và bản dịch lồng tiếng
     Privacy Description: Lịch sử, gợi ý tìm kiếm, liên kết và mật khẩu ứng dụng
-    Online activity: Hoạt động trực tuyến
     Data And Storage Description: Bản sao lưu, nhập và xuất, dung lượng ổ đĩa và dọn dẹp
     Sync Description: Tài khoản máy chủ đồng bộ, ghép nối thiết bị và dữ liệu được đồng bộ
     Advanced: Nâng cao
@@ -1002,8 +999,6 @@ Settings:
     Update FFmpeg: Cập nhật FFmpeg
     Checking FFmpeg: Đang kiểm tra FFmpeg…
     Downloading FFmpeg: Đang tải FFmpeg…
-    FFmpeg Downloaded Template: Đã tải FFmpeg {version}
-    FFmpeg Download Error Template: 'Không tải được FFmpeg: {error}'
     Detected FFprobe Version Template: 'Phiên bản FFprobe đã phát hiện: {version}'
     FFprobe Managed Not Downloaded: Chưa tải FFprobe. Nhấp vào nút bên dưới để tải cùng FFmpeg.
     System FFprobe Missing Warning: Không tìm thấy FFprobe trên hệ thống. Công cụ này cần thiết để kiểm tra nội dung đa phương tiện trong quá trình xử lý hậu kỳ. Hãy cài đặt cạnh FFmpeg hoặc chuyển nguồn sang "Do OpenTubeX quản lý".
@@ -1064,7 +1059,6 @@ Settings:
     Clear Video Metadata Cache: Xóa bộ nhớ đệm siêu dữ liệu video
     Are you sure you want to clear the video metadata cache?: Bạn có chắc muốn xóa tiêu đề, hình thu nhỏ và mô tả video trong bộ nhớ đệm không?
     Failed to clear video metadata cache: Không thể xóa bộ nhớ đệm siêu dữ liệu video
-    Video metadata cache has been cleared: Đã xóa bộ nhớ đệm siêu dữ liệu video
     Video Metadata Cache Size: 'Bộ nhớ đệm siêu dữ liệu video: {size}'
   Storage Settings:
     Storage: Bộ nhớ
@@ -1281,6 +1275,7 @@ Settings:
     Channel playback speeds imported: "Đã nhập tốc độ phát của {count} kênh"
     Channels not found: "Không tìm thấy {count} kênh"
   Sync Settings:
+    Signed Out After Restore: 'Đồng bộ đã bị đăng xuất vì dữ liệu ứng dụng này được khôi phục từ bản sao lưu hoặc từ thiết bị khác. Hãy đăng nhập lại để đồng bộ thiết bị này.'
     Revoke Session Tabs Warning: "Các bộ thẻ đã đồng bộ của thiết bị này cũng sẽ bị xóa."
     Revoke Session Partial Failure: "Các bộ thẻ đã đồng bộ đã bị xóa, nhưng không thể xác nhận việc thu hồi. Hãy thử thu hồi quyền truy cập lần nữa."
     Tab Sync Revocation Pending: "Đồng bộ thẻ đang tạm dừng trong khi chờ thu hồi quyền truy cập của lần đăng nhập này. Thử thu hồi lại trong Cài đặt đồng bộ."
@@ -1806,8 +1801,6 @@ Video:
       EndTimeAfterStart: Thời điểm kết thúc phân đoạn phải sau thời điểm bắt đầu.
       EndTimeBeforeVideoEnd: Thời điểm kết thúc phân đoạn phải nằm trong thời lượng video.
       EndTimeLabel: Thời điểm kết thúc phân đoạn
-      DisableAutoSkipTemporarily: Tạm tắt tự động bỏ qua của SponsorBlock
-      EnableAutoSkipTemporarily: Bật lại tự động bỏ qua của SponsorBlock
       Guidelines: Hướng dẫn
       InspectSegment: Kiểm tra
       InvalidStartTime: Nhập thời điểm bắt đầu phân đoạn hợp lệ.
@@ -1843,7 +1836,6 @@ Video:
       InfoPanelLoading: Vẫn đang tải phân đoạn...
       InfoPanelHasSegments: Video này có phân đoạn trong cơ sở dữ liệu!
       InfoPanelNoSegments: Không tìm thấy phân đoạn
-      RefreshSegments: Làm mới phân đoạn
       RefreshInfo: Làm mới thông tin SponsorBlock
       ContributionStatsTitle: Đóng góp của bạn
       ContributionStatsLoading: Đang tải thống kê đóng góp...

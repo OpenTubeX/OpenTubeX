@@ -45,8 +45,6 @@ Unload Multiple Tabs Confirmation:
 Tabs Unloaded To Free Memory: برای آزاد کردن حافظه، {count} زبانه که اخیراً از آن استفاده نکرده‌اید از حافظه خارج شد | برای آزاد کردن حافظه، {count} زبانه که اخیراً از آن‌ها استفاده نکرده‌اید از حافظه خارج شدند
 Compact side navigation: فشرده کردن نوار پیمایش کناری
 Expand side navigation: گسترش نوار پیمایش کناری
-Use Vertical Tabs: استفاده از زبانه‌های عمودی
-Use Horizontal Tabs: استفاده از زبانه‌های افقی
 Resize Tab Bar: تغییر اندازه نوار زبانه‌ها
 Find in page: یافتن در صفحه
 Previous match: نتیجه قبلی
@@ -396,7 +394,6 @@ Settings:
     Add-ons: افزونه‌ها
     Add-ons Description: SponsorBlock، DeArrow، نپسندیدن‌ها، AiSList و ترجمه صوتی
     Privacy Description: تاریخچه، پیشنهادهای جست‌وجو، پیوندها و گذرواژه برنامه
-    Online activity: فعالیت آنلاین
     Data And Storage Description: پشتیبان‌ها، درون‌ریزی و برون‌بری، مصرف دیسک و پاک‌سازی
     Sync Description: حساب سرور همگام‌سازی، جفت‌سازی دستگاه‌ها و داده‌های همگام‌شده
     Advanced: پیشرفته
@@ -1039,8 +1036,6 @@ Settings:
     Update FFmpeg: به‌روزرسانی FFmpeg
     Checking FFmpeg: در حال بررسی FFmpeg…
     Downloading FFmpeg: در حال بارگیری FFmpeg…
-    FFmpeg Downloaded Template: FFmpeg {version} بارگیری شد
-    FFmpeg Download Error Template: 'بارگیری FFmpeg ناموفق بود: {error}'
     Detected FFprobe Version Template: 'نسخهٔ شناسایی‌شدهٔ FFprobe: {version}'
     FFprobe Managed Not Downloaded: FFprobe هنوز بارگیری نشده است. برای بارگیری آن همراه FFmpeg، روی دکمهٔ زیر کلیک کنید.
     System FFprobe Missing Warning: FFprobe در سیستم شما پیدا نشد. این ابزار برای بررسی رسانه هنگام پس‌پردازش لازم است. آن را کنار FFmpeg نصب کنید یا منبع را به «تحت مدیریت OpenTubeX» تغییر دهید.
@@ -1101,7 +1096,6 @@ Settings:
     Clear Video Metadata Cache: پاک‌کردن حافظهٔ نهان فرادادهٔ ویدیو
     Are you sure you want to clear the video metadata cache?: مطمئنید می‌خواهید عنوان‌ها، تصاویر بندانگشتی و توضیحات ذخیره‌شده در حافظهٔ نهان را پاک کنید؟
     Failed to clear video metadata cache: پاک‌کردن حافظهٔ نهان فرادادهٔ ویدیو ناموفق بود
-    Video metadata cache has been cleared: حافظهٔ نهان فرادادهٔ ویدیو پاک شد
     Video Metadata Cache Size: 'حافظهٔ نهان فرادادهٔ ویدیو: {size}'
   Storage Settings:
     Storage: فضای ذخیره‌سازی
@@ -1332,6 +1326,7 @@ Settings:
     Channel playback speeds imported: "سرعت پخش {count} کانال وارد شد | سرعت پخش {count} کانال وارد شد"
     Channels not found: "{count} کانال پیدا نشد | {count} کانال پیدا نشد"
   Sync Settings:
+    Signed Out After Restore: 'همگام‌سازی از حساب خارج شد، چون این داده‌های برنامه از یک نسخهٔ پشتیبان یا دستگاهی دیگر بازیابی شده‌اند. برای همگام‌سازی این دستگاه دوباره وارد شوید.'
     Revoke Session Tabs Warning: "مجموعه‌های برگهٔ همگام‌شدهٔ این دستگاه نیز حذف خواهند شد."
     Revoke Session Partial Failure: "مجموعه‌های زبانهٔ همگام‌شده حذف شدند، اما لغو دسترسی تأیید نشد. برای لغو دسترسی دوباره تلاش کنید."
     Tab Sync Revocation Pending: "همگام‌سازی زبانه‌ها تا زمان تکمیل لغو دسترسی این ورود متوقف شده است. لغو دسترسی را در تنظیمات همگام‌سازی دوباره امتحان کنید."
@@ -1883,8 +1878,6 @@ Video:
       EndTimeAfterStart: زمان پایان بخش باید پس از زمان شروع باشد.
       EndTimeBeforeVideoEnd: زمان پایان بخش باید در محدودهٔ مدت ویدیو باشد.
       EndTimeLabel: زمان پایان بخش
-      DisableAutoSkipTemporarily: غیرفعال کردن موقت ردکردن خودکار SponsorBlock
-      EnableAutoSkipTemporarily: فعال‌سازی دوبارهٔ ردکردن خودکار SponsorBlock
       Guidelines: دستورالعمل‌ها
       InspectSegment: بررسی
       InvalidStartTime: زمان شروع معتبری برای بخش وارد کنید.
@@ -1920,7 +1913,6 @@ Video:
       InfoPanelLoading: بخش‌ها هنوز در حال بارگیری‌اند...
       InfoPanelHasSegments: این ویدیو در پایگاه داده بخش دارد!
       InfoPanelNoSegments: بخشی پیدا نشد
-      RefreshSegments: تازه‌سازی بخش‌ها
       RefreshInfo: تازه‌سازی اطلاعات SponsorBlock
       ContributionStatsTitle: مشارکت‌های شما
       ContributionStatsLoading: آمار مشارکت در حال بارگیری است...

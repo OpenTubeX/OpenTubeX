@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { chmod, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
@@ -113,6 +113,24 @@ test('the desktop history persists changes and reports each one', async () => {
   } finally {
     await rm(directory, { recursive: true, force: true })
   }
+})
+
+test('a change whose write failed is saved by the next attempt, even one that changes nothing', { skip: process.platform === 'win32' }, async t => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'notification-history-'))
+  t.after(() => rm(directory, { recursive: true, force: true }))
+  t.mock.method(console, 'error', () => {})
+  const options = { file: path.join(directory, 'history.json'), dismissalsFile: path.join(directory, 'dismissals.json'), onChange: () => {} }
+  const history = createNotificationHistory(options)
+  const entry = await history.add(input('Upload', 1))
+  await chmod(directory, 0o500)
+  try {
+    await history.markRead(entry.id)
+  } finally {
+    await chmod(directory, 0o700)
+  }
+  await history.markRead(entry.id)
+  const restarted = createNotificationHistory(options)
+  assert.deepEqual((await restarted.list()).map(item => item.read), [true])
 })
 
 test('a corrupt desktop history starts empty', async () => {

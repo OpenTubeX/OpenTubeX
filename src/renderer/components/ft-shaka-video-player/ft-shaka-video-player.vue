@@ -1338,6 +1338,10 @@
               :title="getSponsorBlockPromptActionLabel(uuid)"
               @click.stop.prevent="skipPromptSponsorBlockSegment(uuid)"
             >
+              <ft-icon
+                :icon="getSponsorBlockActionIcon('prompt', uuid)"
+                aria-hidden="true"
+              />
               {{ getSponsorBlockPromptActionLabel(uuid) }}
             </button>
           </div>
@@ -1421,6 +1425,10 @@
               :title="getSponsorBlockToastActionLabel(true, uuid)"
               @click.stop.prevent="redoSkipSponsorBlockSegment(uuid)"
             >
+              <ft-icon
+                :icon="getSponsorBlockActionIcon('unskipped', uuid)"
+                aria-hidden="true"
+              />
               {{ getSponsorBlockToastActionLabel(true, uuid) }}
             </button>
             <button
@@ -1429,6 +1437,10 @@
               :title="getSponsorBlockToastActionLabel(false, uuid)"
               @click.stop.prevent="unskipSponsorBlockSegment(uuid)"
             >
+              <ft-icon
+                :icon="getSponsorBlockActionIcon('skipped', uuid)"
+                aria-hidden="true"
+              />
               {{ getSponsorBlockToastActionLabel(false, uuid) }}
             </button>
           </div>
@@ -1574,6 +1586,10 @@
                   class="sponsorBlockDraftActionButton"
                   @click="deleteSponsorBlockDraft(segment.id)"
                 >
+                  <ft-icon
+                    :icon="['fas', 'trash']"
+                    aria-hidden="true"
+                  />
                   {{ $t('Delete') }}
                 </button>
                 <button
@@ -1582,6 +1598,10 @@
                   :disabled="segment.endTime == null && !isSponsorBlockPointSegment(segment)"
                   @click="previewSponsorBlockDraft(segment.id, 'preview')"
                 >
+                  <ft-icon
+                    :icon="['fas', 'play']"
+                    aria-hidden="true"
+                  />
                   {{ $t('Video.Player.SponsorBlock.PreviewSegment') }}
                 </button>
                 <button
@@ -1589,6 +1609,10 @@
                   class="sponsorBlockDraftActionButton"
                   @click="previewSponsorBlockDraft(segment.id, 'inspect')"
                 >
+                  <ft-icon
+                    :icon="['fas', 'search']"
+                    aria-hidden="true"
+                  />
                   {{ $t('Video.Player.SponsorBlock.InspectSegment') }}
                 </button>
                 <button
@@ -1597,12 +1621,20 @@
                   :disabled="segment.endTime == null"
                   @click="previewSponsorBlockDraft(segment.id, 'end')"
                 >
+                  <ft-icon
+                    :icon="['fas', 'step-forward']"
+                    aria-hidden="true"
+                  />
                   {{ $t('Video.Player.SponsorBlock.EndActionLabel') }}
                 </button>
                 <button
                   class="sponsorBlockDraftActionButton"
                   @click="toggleSponsorBlockDraftEditing(segment.id)"
                 >
+                  <ft-icon
+                    :icon="['fas', isSponsorBlockDraftEditing(segment.id) ? 'check' : 'pencil']"
+                    aria-hidden="true"
+                  />
                   {{
                     isSponsorBlockDraftEditing(segment.id)
                       ? $t('Video.Player.SponsorBlock.SaveSegment')
@@ -1617,6 +1649,10 @@
               class="sponsorBlockSubmissionGuidelines"
               @click="openSponsorBlockGuidelines"
             >
+              <ft-icon
+                :icon="['fas', 'book-open']"
+                aria-hidden="true"
+              />
               {{ $t('Video.Player.SponsorBlock.Guidelines') }}
             </button>
             <button
@@ -1624,6 +1660,10 @@
               :disabled="sponsorBlockSubmissionPending"
               @click="submitSponsorBlockDrafts"
             >
+              <ft-icon
+                :icon="['fas', 'share-alt']"
+                aria-hidden="true"
+              />
               {{ $t('Video.Player.SponsorBlock.SubmitSegments') }}
             </button>
           </div>

@@ -3,19 +3,20 @@ import * as db from '../index'
 import { updateSettingIfUnchanged } from '../settingRepair'
 import { migrateStoredSettings } from '../settingsMigrations'
 import { MAIN_PROFILE_ID, PlaylistVideoAddResult } from '../../constants'
-import { hasReachedWatchedThreshold, migrateLegacyHistoryRecord, newestUniqueHistoryRecords } from '../../history'
-import { resolveSearchHistoryEntry } from '../../search-history'
+import { hasReachedWatchedThreshold, mergeTakeoutHistoryRecord, migrateLegacyHistoryRecord, newestUniqueHistoryRecords } from '../../history'
+import { mergeSearchHistoryEntries, resolveSearchHistoryEntry, sortSearchHistoryByLastUpdatedAt } from '../../search-history'
 import { createRecommendationStore } from '../recommendations'
 import { createIdQuery } from '../idQuery'
 import { MAX_SUBSCRIPTION_SEEN_VIDEOS, mergeSubscriptionSeenVideos, parseSubscriptionSeenVideos, nextSubscriptionSeenTimestamp } from '../../subscriptionSeenVideos'
 import { preserveSubscriptionSeenEntries, subscriptionFeedField } from '../../subscriptionFeedState'
 import { mergeSubscriptionSeenPosts, parseSubscriptionSeenPosts } from '../../subscriptionSeenPosts'
 import { createRssFeedSeenMarks, mergeRssFeedSeenItems, parseRssFeedSeenItems } from '../../renderer/helpers/rssFeedSeenItems'
-import { mergeBackupHistoryRecord, mergeBackupPlaylist, mergeBackupProfile, mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord, validateBackupWatchStats } from '../../renderer/helpers/unifiedBackup'
+import { mergeBackupHistoryRecord, mergeBackupPlaylist, mergeBackupProfile, mergeImportedProfile, mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord, validateBackupWatchStats } from '../../renderer/helpers/unifiedBackup'
 import { processToBeAddedPlaylistVideo } from '../../renderer/helpers/playlists'
 import { DEFAULT_PROFILE_ICON } from '../../renderer/helpers/profileIcons'
 import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings } from '../../renderer/helpers/subscription-channels'
 import { getProfileWithUpdatedSubscriptionDetails } from '../../renderer/helpers/subscription-profile-details'
+import { profileSyncSnapshot } from '../../renderer/helpers/profileSyncSnapshot'
 
 const recommendations = createRecommendationStore(db.recommendations)
 
@@ -341,11 +342,27 @@ class History {
    * @returns {Promise<object[]>} the merged records as saved
    */
   static mergeBackup(records) {
+    return this._mergeRecords(records, mergeBackupHistoryRecord)
+  }
+
+  /**
+   * Merges imported records with the saved ones when they are written, so a
+   * watch another window records during the import is kept.
+   * @param {object[]} records
+   * @param {'replace' | 'takeout'} rule whether imported records replace saved ones or only fill what they lack
+   * @returns {Promise<object[]>} the saved records
+   */
+  static importRecords(records, rule) {
+    return this._mergeRecords(records, rule === 'takeout' ? mergeTakeoutHistoryRecord : (_current, imported) => imported)
+  }
+
+  static _mergeRecords(records, merge) {
     return Settings.runSeenStateUpdate(async () => {
-      const merged = new Map((await db.history.findAsync(createIdQuery('videoId', records.map(record => record.videoId))))
+      const saved = new Map((await db.history.findAsync(createIdQuery('videoId', records.map(record => record.videoId))))
         .map(record => [record.videoId, record]))
+      const merged = new Map()
       for (const record of records) {
-        merged.set(record.videoId, mergeBackupHistoryRecord(merged.get(record.videoId), record))
+        merged.set(record.videoId, merge(merged.get(record.videoId) ?? saved.get(record.videoId), record))
       }
       const replacements = [...merged.values()].map(historyReplacement)
       throwHistoryUpdateError(await updateHistoryRecords(replacements.map(record => ({
@@ -894,6 +911,31 @@ class Profiles {
     ))
   }
 
+  /**
+   * Saves a profile from sync only while the saved one still matches
+   * `previous`, or `null` for a new profile, so a sync neither undoes an edit
+   * made meanwhile nor recreates a deleted profile.
+   * @returns {Promise<object | null>} the saved profile, or null if it changed
+   */
+  static async saveFromSyncIfUnchanged(profile, previous) {
+    if (previous === null) {
+      try {
+        return await db.profiles.insertAsync(profile)
+      } catch (error) {
+        if (error?.errorType === 'uniqueViolated') return null
+        throw error
+      }
+    }
+    const snapshot = profileSyncSnapshot(previous)
+    const { name, bgColor, textColor, subscriptions } = profile
+    const { affectedDocuments } = await db.profiles.updateAsync(
+      { _id: profile._id, $where() { return profileSyncSnapshot(this) === snapshot } },
+      { $set: { name, bgColor, textColor, subscriptions } },
+      { returnUpdatedDocs: true }
+    )
+    return affectedDocuments ?? null
+  }
+
   /** Saves `subscriptions` only while the saved ones still equal `previous`, returning the updated profile or null */
   static async updateSubscriptionsIfUnchanged(profileId, subscriptions, previous) {
     const snapshot = JSON.stringify(previous)
@@ -950,10 +992,19 @@ class Profiles {
    * @returns {Promise<object>} the merged profile as saved
    */
   static mergeBackup(imported) {
+    return this._saveMerged(imported, mergeBackupProfile)
+  }
+
+  /** Merges an imported profile when it is written, so subscriptions added meanwhile stay */
+  static mergeImported(imported) {
+    return this._saveMerged(imported, mergeImportedProfile)
+  }
+
+  static _saveMerged(imported, merge) {
     return saveRestoredRecord(db.profiles, imported._id, current => {
       const snapshot = JSON.stringify(current)
       return {
-        record: mergeBackupProfile(current, imported),
+        record: merge(current, imported),
         unchanged() { return JSON.stringify(this) === snapshot },
       }
     })
@@ -1291,11 +1342,30 @@ class Playlists {
 }
 
 class SearchHistory {
+  static writes = Promise.resolve()
+
+  /**
+   * Writes read the saved searches first, so they run one at a time and an
+   * import cannot replace a search saved between its read and its write.
+   * @template T
+   * @param {() => Promise<T>} operation
+   * @returns {Promise<T>}
+   */
+  static runWrite(operation) {
+    const write = this.writes.then(operation)
+    this.writes = write.catch(() => {})
+    return write
+  }
+
   static find() {
     return db.searchHistory.findAsync({}).sort({ lastUpdatedAt: -1 })
   }
 
-  static async upsert(searchHistoryEntry) {
+  static upsert(searchHistoryEntry) {
+    return this.runWrite(() => this._upsert(searchHistoryEntry))
+  }
+
+  static async _upsert(searchHistoryEntry) {
     const matchingCandidates = await db.searchHistory.findAsync({
       $or: [
         { _id: searchHistoryEntry._id },
@@ -1309,26 +1379,37 @@ class SearchHistory {
     return resolvedEntry
   }
 
-  static overwrite(records) {
-    // One transaction, so a failed import keeps the saved history
-    return db.searchHistory.replaceAllAsync(records)
+  /**
+   * Merges imported searches with the saved ones when they are written.
+   * @returns {Promise<object[]>} every saved search, newest first
+   */
+  static mergeImported(entries) {
+    return this.runWrite(async () => {
+      const merged = mergeSearchHistoryEntries(await db.searchHistory.findAsync({}), entries)
+      sortSearchHistoryByLastUpdatedAt(merged)
+      // One transaction, so a failed import keeps the saved history
+      await db.searchHistory.replaceAllAsync(merged)
+      return merged
+    })
   }
 
   static delete(_id) {
-    return db.searchHistory.removeAsync({ _id: _id })
+    return this.runWrite(() => db.searchHistory.removeAsync({ _id: _id }))
   }
 
   /**
    * @param {number} cutoff Searches last used before this timestamp are removed
    * @returns {Promise<object[] | null>} The remaining searches, or null when none were removed
    */
-  static async deleteOlderThan(cutoff) {
-    const removed = await db.searchHistory.removeAsync({ lastUpdatedAt: { $lt: cutoff } }, { multi: true })
-    return removed > 0 ? SearchHistory.find() : null
+  static deleteOlderThan(cutoff) {
+    return this.runWrite(async () => {
+      const removed = await db.searchHistory.removeAsync({ lastUpdatedAt: { $lt: cutoff } }, { multi: true })
+      return removed > 0 ? SearchHistory.find() : null
+    })
   }
 
   static deleteAll() {
-    return db.searchHistory.removeAsync({}, { multi: true })
+    return this.runWrite(() => db.searchHistory.removeAsync({}, { multi: true }))
   }
 }
 

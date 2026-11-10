@@ -175,3 +175,24 @@ export function newestUniqueHistoryRecords(records) {
   })
   return { records: unique, duplicateIds }
 }
+
+/**
+ * Takeout entries only know the title, channel and watch time, so the saved
+ * record keeps its details (duration, resume position, thumbnail) and the
+ * import only fills fields it lacks and moves the watch time forward.
+ */
+export function mergeTakeoutHistoryRecord(current, imported) {
+  if (!current) return imported
+  const merged = { ...current }
+  // The channel name and ID only belong together, so fill neither when the saved one points elsewhere
+  const sameChannel = (!current.authorId || current.authorId === imported.authorId) &&
+    (!current.author || current.author === imported.author)
+  for (const [key, value] of Object.entries(imported)) {
+    if ((key === 'author' || key === 'authorId') && !sameChannel) continue
+    if (merged[key] == null || merged[key] === '') merged[key] = value
+  }
+  merged.timeWatched = Math.max(current.timeWatched ?? 0, imported.timeWatched)
+  merged.watchProgress = Math.max(current.watchProgress ?? 0, imported.watchProgress)
+  merged.isWatched = current.isWatched === true || imported.isWatched === true
+  return merged
+}

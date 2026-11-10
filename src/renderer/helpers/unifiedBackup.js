@@ -8,6 +8,21 @@ const MAX_ARCHIVE_SIZE = 128 * 1024 * 1024
 const MAX_ENTRY_SIZE = 256 * 1024 * 1024
 const MAX_TOTAL_SIZE = 256 * 1024 * 1024
 
+/**
+ * Subscription imports add the channels a profile lacks and may set its icon.
+ * The saved name, colors, and channels with their settings stay as they are.
+ */
+export function mergeImportedProfile(current, imported) {
+  if (!current) return imported
+  const subscribedIds = new Set(current.subscriptions.map(channel => channel.id))
+  const added = imported.subscriptions.filter(channel => !subscribedIds.has(channel.id) && subscribedIds.add(channel.id))
+  return {
+    ...current,
+    ...(Object.hasOwn(imported, 'icon') ? { icon: imported.icon } : {}),
+    subscriptions: [...current.subscriptions, ...added],
+  }
+}
+
 export function mergeBackupProfile(current, imported) {
   if (!current) return imported
   const subscriptions = new Map(current.subscriptions.map(channel => [channel.id, channel]))

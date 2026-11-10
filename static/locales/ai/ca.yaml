@@ -43,8 +43,6 @@ Unload Multiple Tabs Confirmation:
   Message: Es descarregarà {count} pestanya. | Es descarregaran {count} pestanyes.
   Unload Tabs: Descarrega {count} pestanya | Descarrega {count} pestanyes
 Tabs Unloaded To Free Memory: 'S''ha descarregat {count} pestanya que no heu fet servir recentment per alliberar memòria | S''han descarregat {count} de pestanyes que no heu fet servir recentment per alliberar memòria | S''han descarregat {count} pestanyes que no heu fet servir recentment per alliberar memòria'
-Use Vertical Tabs: Utilitza pestanyes verticals
-Use Horizontal Tabs: Utilitza pestanyes horitzontals
 Resize Tab Bar: Redimensiona la barra de pestanyes
 Find in page: Cerca a la pàgina
 Previous match: Coincidència anterior
@@ -505,7 +503,6 @@ Settings:
     Add-ons: Complements
     Add-ons Description: SponsorBlock, DeArrow, no m'agrada, AiSList i traducció de veu en off
     Privacy Description: Historial, suggeriments de cerca, enllaços i contrasenya de l'aplicació
-    Online activity: Activitat en línia
     Data And Storage Description: Còpies de seguretat, importació i exportació, ús del disc i neteja
     Sync Description: Compte del servidor de sincronització, vinculació de dispositius i dades sincronitzades
     Advanced: Avançat
@@ -1255,8 +1252,6 @@ Settings:
     Update FFmpeg: Actualitza FFmpeg
     Checking FFmpeg: S'està comprovant FFmpeg…
     Downloading FFmpeg: S'està baixant FFmpeg…
-    FFmpeg Downloaded Template: S'ha baixat FFmpeg {version}
-    FFmpeg Download Error Template: 'Ha fallat la baixada de FFmpeg: {error}'
     Detected FFprobe Version Template: 'Versió de FFprobe detectada: {version}'
     FFprobe Managed Not Downloaded: Encara no s'ha baixat FFprobe. Feu clic al botó de sota per baixar-lo amb FFmpeg.
     System FFprobe Missing Warning: No s'ha trobat FFprobe al sistema. És necessari per inspeccionar els fitxers multimèdia durant el postprocessament. Instal·leu-lo al costat de FFmpeg o canvieu l'origen a "Gestionat per l'OpenTubeX".
@@ -1326,7 +1321,6 @@ Settings:
     Clear Video Metadata Cache: Neteja la memòria cau de metadades dels vídeos
     Are you sure you want to clear the video metadata cache?: Segur que voleu netejar de la memòria cau els títols, les miniatures i les descripcions dels vídeos?
     Failed to clear video metadata cache: No s'ha pogut netejar la memòria cau de metadades dels vídeos
-    Video metadata cache has been cleared: S'ha netejat la memòria cau de metadades dels vídeos
     Video Metadata Cache Size: 'Memòria cau de metadades dels vídeos: {size}'
     Are you sure you want to clear out your search history and cache?: Segur que voleu netejar l'historial de cerques i la memòria cau?
     Search history and cache have been cleared: S'han netejat l'historial de cerques i la memòria cau
@@ -1601,6 +1595,7 @@ Settings:
     Channel playback speeds imported: "S'ha importat la velocitat de reproducció de {count} canal | S'han importat les velocitats de reproducció de {count} canals | S'han importat les velocitats de reproducció de {count} canals"
     Channels not found: "No s'ha pogut trobar {count} canal | No s'han pogut trobar {count} canals | No s'han pogut trobar {count} canals"
   Sync Settings:
+    Signed Out After Restore: 'S''ha tancat la sessió de la sincronització perquè aquestes dades de l''aplicació s''han restaurat d''una còpia de seguretat o d''un altre dispositiu. Torna a iniciar la sessió per sincronitzar aquest dispositiu.'
     Revoke Session Tabs Warning: "També se suprimiran els conjunts de pestanyes sincronitzats d’aquest dispositiu."
     Revoke Session Partial Failure: "S'han suprimit els conjunts de pestanyes sincronitzats, però no s'ha pogut confirmar la revocació. Torneu a provar de revocar l'accés."
     Tab Sync Revocation Pending: "La sincronització de pestanyes està en pausa mentre la revocació d’aquest inici de sessió està pendent. Torneu a provar la revocació a la configuració de sincronització."
@@ -2289,8 +2284,6 @@ Video:
       EndTimeAfterStart: L'hora final del segment ha de ser posterior a l'hora inicial.
       EndTimeBeforeVideoEnd: L'hora final del segment ha d'estar dins la durada del vídeo.
       EndTimeLabel: Hora final del segment
-      DisableAutoSkipTemporarily: Desactiva temporalment l'omissió automàtica de SponsorBlock
-      EnableAutoSkipTemporarily: Torna a activar l'omissió automàtica de SponsorBlock
       Guidelines: Directrius
       InspectSegment: Inspecciona
       InvalidStartTime: Introduïu una hora inicial de segment vàlida.
@@ -2326,7 +2319,6 @@ Video:
       InfoPanelLoading: Encara s'estan carregant els segments…
       InfoPanelHasSegments: Aquest vídeo té segments a la base de dades.
       InfoPanelNoSegments: No s'ha trobat cap segment
-      RefreshSegments: Actualitza els segments
       RefreshInfo: Actualitza la informació de SponsorBlock
       ContributionStatsTitle: Les vostres contribucions
       ContributionStatsLoading: S'estan carregant les estadístiques de contribucions…

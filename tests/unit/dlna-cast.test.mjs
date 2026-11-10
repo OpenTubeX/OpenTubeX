@@ -272,3 +272,27 @@ test('reads the renderer SOAP playback position for cast recovery', async t => {
   }, 'GetPositionInfo', { InstanceID: 0 })
   assert.equal(body, xml)
 })
+
+test('stops reading a renderer response without a length once it is too large', async t => {
+  let sentBytes = 0
+  let closed
+  const responseClosed = new Promise(resolve => { closed = resolve })
+  const renderer = createServer((request, response) => {
+    // Chunked and endless, so neither Content-Length nor the timeout limits it
+    response.writeHead(200, { 'Content-Type': 'text/xml' })
+    const chunk = Buffer.alloc(64 * 1024, 'a')
+    const write = () => {
+      while (!response.destroyed && sentBytes < 64 * 1024 * 1024 && response.write(chunk)) sentBytes += chunk.length
+      if (!response.destroyed && sentBytes < 64 * 1024 * 1024) response.once('drain', write)
+    }
+    response.once('close', closed)
+    write()
+  })
+  const port = await listen(renderer)
+  t.after(() => close(renderer))
+  await assert.rejects(sendAvTransport({
+    controlUrl: `http://127.0.0.1:${port}/control`, serviceType: 'urn:schemas-upnp-org:service:AVTransport:1'
+  }, 'GetPositionInfo', { InstanceID: 0 }), /too large/)
+  await responseClosed
+  assert.ok(sentBytes < 16 * 1024 * 1024)
+})

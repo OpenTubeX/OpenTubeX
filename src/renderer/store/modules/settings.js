@@ -599,7 +599,29 @@ async function updateValidatedSetting(commit, settings, settingId, value) {
   }
 }
 
-let pendingPlaylistBookmarkUpdate = Promise.resolve()
+/** @type {Map<string, Promise<unknown>>} */
+const pendingLockedSettingUpdates = new Map()
+
+/**
+ * Runs `persist` inside a lock all windows share for `settingId`, or a queue
+ * where locks are missing, so read-modify-write updates cannot interleave.
+ * @param {string} settingId
+ * @param {() => Promise<void>} persist
+ * @returns {Promise<boolean>} whether the update was saved
+ */
+function runLockedSettingUpdate(settingId, persist) {
+  let updated
+  if (typeof navigator !== 'undefined' && navigator.locks) {
+    updated = navigator.locks.request(`opentubex-setting-${settingId}`, persist)
+  } else {
+    updated = (pendingLockedSettingUpdates.get(settingId) ?? Promise.resolve()).catch(() => {}).then(persist)
+    pendingLockedSettingUpdates.set(settingId, updated)
+  }
+  return updated.then(() => true, error => {
+    console.error(error)
+    return false
+  })
+}
 
 /**
  * Applies `update` to the saved bookmarks. Every bookmark write, including
@@ -616,13 +638,7 @@ function updateSavedPlaylistBookmarks(commit, update) {
     await DBSettingHandlers.upsert('playlistBookmarks', bookmarks)
     commit('setPlaylistBookmarks', bookmarks)
   }
-  const updated = typeof navigator !== 'undefined' && navigator.locks
-    ? navigator.locks.request('opentubex-playlist-bookmarks', persist)
-    : (pendingPlaylistBookmarkUpdate = pendingPlaylistBookmarkUpdate.catch(() => {}).then(persist))
-  return updated.then(() => true, error => {
-    console.error(error)
-    return false
-  })
+  return runLockedSettingUpdate('playlistBookmarks', persist)
 }
 
 const updateOptimisticSetting = createOptimisticSettingUpdater()
@@ -771,7 +787,17 @@ const customActions = {
   // Pin toggles build on the previous edit, so commit them before the save finishes.
   updatePinnedPlaylistIds: ({ commit, state }, value) => updateOrderedSetting(commit, state, 'pinnedPlaylistIds', value),
   updateUserPlaylistsPinnedIds: ({ commit, state }, value) => updateOrderedSetting(commit, state, 'userPlaylistsPinnedIds', value),
-  updateSubscriptionGroups: ({ commit, state }, value) => updateOrderedSetting(commit, state, 'subscriptionGroups', value),
+  // Takes the new groups (sync, imports) or a function that derives them from
+  // the saved ones. Edits read the saved groups inside a lock all windows
+  // share, so an edit in one window cannot undo another's.
+  updateSubscriptionGroups: ({ commit, state }, update) => runLockedSettingUpdate('subscriptionGroups', async () => {
+    // Read the datastore, as the broadcast of another window's edit may still be on its way.
+    const saved = await DBSettingHandlers.findValue('subscriptionGroups')
+    const groups = typeof update === 'function' ? update(saved === undefined ? state.subscriptionGroups : saved) : update
+    await DBSettingHandlers.upsert('subscriptionGroups', groups)
+    commit('setSubscriptionGroups', groups)
+    await recordSettingSyncTimestamp(commit, state, 'subscriptionGroups')
+  }),
   updateSubscribedChannelsCustomOrder: ({ commit, state }, value) => updateOrderedSetting(
     commit, state, 'subscribedChannelsCustomOrder', value
   ),

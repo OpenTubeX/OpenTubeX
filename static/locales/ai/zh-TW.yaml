@@ -43,8 +43,6 @@ Unload Multiple Tabs Confirmation:
   Message: 這會卸載 {count} 個分頁。
   Unload Tabs: 卸載 {count} 個分頁
 Tabs Unloaded To Free Memory: 為釋放記憶體，已卸載 {count} 個最近未使用的分頁
-Use Vertical Tabs: 使用垂直分頁
-Use Horizontal Tabs: 使用水平分頁
 Resize Tab Bar: 調整分頁列大小
 Find in page: 在頁面中尋找
 Previous match: 上一個相符項目
@@ -372,7 +370,6 @@ Settings:
     Add-ons: 附加元件
     Add-ons Description: SponsorBlock、DeArrow、倒讚數、AiSList 與配音翻譯
     Privacy Description: 歷史記錄、搜尋建議、連結與應用程式密碼
-    Online activity: 線上活動
     Data And Storage Description: 備份、匯入與匯出、磁碟使用量與清理
     Sync Description: 同步伺服器帳戶、裝置配對與已同步的資料
     Advanced: 進階
@@ -1002,8 +999,6 @@ Settings:
     Update FFmpeg: 更新 FFmpeg
     Checking FFmpeg: 正在檢查 FFmpeg…
     Downloading FFmpeg: 正在下載 FFmpeg…
-    FFmpeg Downloaded Template: 已下載 FFmpeg {version}
-    FFmpeg Download Error Template: '下載 FFmpeg 失敗：{error}'
     Detected FFprobe Version Template: '偵測到的 FFprobe 版本：{version}'
     FFprobe Managed Not Downloaded: 尚未下載 FFprobe。請按下方按鈕一併下載 FFmpeg 與 FFprobe。
     System FFprobe Missing Warning: 系統中找不到 FFprobe。後製處理時需要使用 FFprobe 檢查媒體。請將它與 FFmpeg 安裝在相同資料夾，或將來源切換為「由 OpenTubeX 管理」。
@@ -1064,7 +1059,6 @@ Settings:
     Clear Video Metadata Cache: 清除影片中繼資料快取
     Are you sure you want to clear the video metadata cache?: 確定要清除快取的影片標題、縮圖和說明嗎？
     Failed to clear video metadata cache: 無法清除影片中繼資料快取
-    Video metadata cache has been cleared: 已清除影片中繼資料快取
     Video Metadata Cache Size: '影片中繼資料快取：{size}'
   Storage Settings:
     Storage: 儲存空間
@@ -1278,6 +1272,7 @@ Settings:
     Channel playback speeds imported: "已匯入 {count} 個頻道的播放速度"
     Channels not found: "找不到 {count} 個頻道"
   Sync Settings:
+    Signed Out After Restore: '由於此應用程式資料是從備份或其他裝置還原的，同步已登出。請重新登入以同步此裝置。'
     Revoke Session Tabs Warning: "此裝置已同步的分頁集合也將被刪除。"
     Revoke Session Partial Failure: "已刪除同步的分頁組，但無法確認存取權限是否已撤銷。請重試撤銷存取權限。"
     Tab Sync Revocation Pending: "此登入的存取權限撤銷尚未完成，分頁同步已暫停。請在同步設定中重試撤銷。"
@@ -1803,8 +1798,6 @@ Video:
       EndTimeAfterStart: 片段結束時間必須晚於開始時間。
       EndTimeBeforeVideoEnd: 片段結束時間不可超過影片長度。
       EndTimeLabel: 片段結束時間
-      DisableAutoSkipTemporarily: 暫時停用 SponsorBlock 自動略過功能
-      EnableAutoSkipTemporarily: 重新啟用 SponsorBlock 自動略過功能
       Guidelines: 規範
       InspectSegment: 檢查
       InvalidStartTime: 請輸入有效的片段開始時間。
@@ -1840,7 +1833,6 @@ Video:
       InfoPanelLoading: 仍在載入片段...
       InfoPanelHasSegments: 此影片在資料庫中有片段！
       InfoPanelNoSegments: 找不到片段
-      RefreshSegments: 重新整理片段
       RefreshInfo: 重新整理 SponsorBlock 資訊
       ContributionStatsTitle: 您的貢獻
       ContributionStatsLoading: 正在載入貢獻統計資料...

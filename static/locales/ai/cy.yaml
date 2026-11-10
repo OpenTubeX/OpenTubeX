@@ -43,8 +43,6 @@ Unload Multiple Tabs Confirmation:
   Message: Bydd hyn yn dadlwytho {count} o dabiau. | Bydd hyn yn dadlwytho {count} tab. | Bydd hyn yn dadlwytho {count} dab. | Bydd hyn yn dadlwytho {count} thab. | Bydd hyn yn dadlwytho {count} thab. | Bydd hyn yn dadlwytho {count} tab.
   Unload Tabs: Dadlwytho {count} o dabiau | Dadlwytho {count} tab | Dadlwytho {count} dab | Dadlwytho {count} thab | Dadlwytho {count} thab | Dadlwytho {count} tab
 Tabs Unloaded To Free Memory: 'Wedi dadlwytho {count} o dabiau nad ydych wedi''u defnyddio''n ddiweddar i ryddhau cof | Wedi dadlwytho {count} tab nad ydych wedi''i ddefnyddio''n ddiweddar i ryddhau cof | Wedi dadlwytho {count} dab nad ydych wedi''u defnyddio''n ddiweddar i ryddhau cof | Wedi dadlwytho {count} thab nad ydych wedi''u defnyddio''n ddiweddar i ryddhau cof | Wedi dadlwytho {count} thab nad ydych wedi''u defnyddio''n ddiweddar i ryddhau cof | Wedi dadlwytho {count} tab nad ydych wedi''u defnyddio''n ddiweddar i ryddhau cof'
-Use Vertical Tabs: Defnyddio tabiau fertigol
-Use Horizontal Tabs: Defnyddio tabiau llorweddol
 Resize Tab Bar: Newid maint y bar tabiau
 Find in page: Canfod ar y dudalen
 Previous match: Cydweddiad blaenorol
@@ -373,7 +371,6 @@ Settings:
     Add-ons: Ychwanegion
     Add-ons Description: SponsorBlock, DeArrow, casbwyntiau, AiSList a chyfieithu troslais
     Privacy Description: Hanes, awgrymiadau chwilio, dolenni a chyfrinair yr ap
-    Online activity: Gweithgarwch ar-lein
     Data And Storage Description: Copïau wrth gefn, mewnforio ac allforio, defnydd disg a glanhau
     Sync Description: Cyfrif gweinydd cysoni, paru dyfeisiau a data wedi'i gysoni
     Advanced: Uwch
@@ -1005,8 +1002,6 @@ Settings:
     Update FFmpeg: Diweddaru FFmpeg
     Checking FFmpeg: Wrthi'n gwirio FFmpeg…
     Downloading FFmpeg: Wrthi'n lawrlwytho FFmpeg…
-    FFmpeg Downloaded Template: Mae FFmpeg {version} wedi'i lawrlwytho
-    FFmpeg Download Error Template: 'Methodd lawrlwytho FFmpeg: {error}'
     Detected FFprobe Version Template: 'Fersiwn FFprobe a ganfuwyd: {version}'
     FFprobe Managed Not Downloaded: Nid yw FFprobe wedi'i lawrlwytho eto. Cliciwch y botwm isod i'w lawrlwytho gyda FFmpeg.
     System FFprobe Missing Warning: Ni chanfuwyd FFprobe ar eich system. Mae ei angen i archwilio cyfryngau wrth ôl-brosesu. Gosodwch ef wrth ymyl FFmpeg, neu newidiwch y ffynhonnell i "Rheolir gan OpenTubeX".
@@ -1067,7 +1062,6 @@ Settings:
     Clear Video Metadata Cache: Clirio storfa metadata fideo
     Are you sure you want to clear the video metadata cache?: Ydych chi'n siŵr eich bod am glirio'r teitlau, y mân-luniau a'r disgrifiadau fideo sydd yn y storfa?
     Failed to clear video metadata cache: Methodd clirio storfa metadata fideo
-    Video metadata cache has been cleared: Mae storfa metadata fideo wedi'i chlirio
     Video Metadata Cache Size: 'Storfa metadata fideo: {size}'
   Storage Settings:
     Storage: Storfa
@@ -1281,6 +1275,7 @@ Settings:
     Channel playback speeds imported: "Wedi mewnforio cyflymderau chwarae {count} o sianeli | Wedi mewnforio cyflymder chwarae {count} sianel | Wedi mewnforio cyflymderau chwarae {count} sianel | Wedi mewnforio cyflymderau chwarae {count} sianel | Wedi mewnforio cyflymderau chwarae {count} sianel | Wedi mewnforio cyflymderau chwarae {count} o sianeli"
     Channels not found: "Methwyd dod o hyd i {count} o sianeli | Methwyd dod o hyd i {count} sianel | Methwyd dod o hyd i {count} sianel | Methwyd dod o hyd i {count} sianel | Methwyd dod o hyd i {count} sianel | Methwyd dod o hyd i {count} o sianeli"
   Sync Settings:
+    Signed Out After Restore: 'Cafodd cysoni ei allgofnodi oherwydd i ddata''r ap hwn gael ei adfer o gopi wrth gefn neu o ddyfais arall. Mewngofnodwch eto i gysoni''r ddyfais hon.'
     Revoke Session Tabs Warning: "Bydd setiau tabiau wedi’u cysoni’r ddyfais hon hefyd yn cael eu dileu."
     Revoke Session Partial Failure: "Cafodd y setiau tabiau wedi'u cysoni eu dileu, ond ni ellid cadarnhau dirymu mynediad. Ceisiwch ddirymu mynediad eto."
     Tab Sync Revocation Pending: "Mae cysoni tabiau wedi’i oedi tra bo dirymu’r mewngofnodi hwn yn yr arfaeth. Rhowch gynnig arall ar ddirymu yn y Gosodiadau Cysoni."
@@ -1826,8 +1821,6 @@ Video:
       EndTimeAfterStart: Rhaid i amser gorffen y segment fod ar ôl yr amser dechrau.
       EndTimeBeforeVideoEnd: Rhaid i amser gorffen y segment fod o fewn hyd y fideo.
       EndTimeLabel: Amser gorffen y segment
-      DisableAutoSkipTemporarily: Analluogi hepgor awtomatig SponsorBlock dros dro
-      EnableAutoSkipTemporarily: Ailalluogi hepgor awtomatig SponsorBlock
       Guidelines: Canllawiau
       InspectSegment: Archwilio
       InvalidStartTime: Rhowch amser dechrau dilys ar gyfer y segment.
@@ -1863,7 +1856,6 @@ Video:
       InfoPanelLoading: Mae'r segmentau'n dal i lwytho...
       InfoPanelHasSegments: Mae gan y fideo hwn segmentau yn y gronfa ddata!
       InfoPanelNoSegments: Ni chanfuwyd unrhyw segmentau
-      RefreshSegments: Adnewyddu segmentau
       RefreshInfo: Adnewyddu gwybodaeth SponsorBlock
       ContributionStatsTitle: Eich cyfraniadau
       ContributionStatsLoading: Wrthi'n llwytho ystadegau cyfraniadau...

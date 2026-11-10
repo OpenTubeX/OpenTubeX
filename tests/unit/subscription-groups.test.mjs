@@ -62,22 +62,29 @@ test('moving a channel within a group keeps hidden channels in place', () => {
   assert.deepEqual(moveItemByVisibleOffset(order, visible, 'UCa', 1), ['UChidden', 'UCb', 'UCa', 'UCc'])
 })
 
-test('saving a group that another device deleted meanwhile keeps the edits', async () => {
+test('group edits apply to the saved groups, so edits from other windows and devices stay', async () => {
   const { readFile } = await import('node:fs/promises')
   const vm = await import('node:vm')
   const source = await readFile(new URL('../../src/renderer/store/modules/subscription-groups.js', import.meta.url), 'utf8')
-  const start = source.indexOf('  saveSubscriptionGroup(')
-  const end = source.indexOf('\n  },\n', start) + 5
-  const { saveSubscriptionGroup } = vm.runInNewContext(`({${source.slice(start, end)}})`)
-  const save = (list, group) => {
-    let written = null
-    saveSubscriptionGroup({ getters: { getSubscriptionGroupList: list }, dispatch: (action, value) => { written = value; return true } }, group)
-    return JSON.parse(JSON.stringify(written))
-  }
+  const start = source.indexOf('const actions = {')
+  const actions = vm.runInNewContext(`${source.slice(start, source.indexOf('\nconst mutations', start))}\nactions`, {
+    normalizeSubscriptionGroups,
+    crypto,
+  })
+  let saved = []
+  // Every window's store reads and writes the same saved groups
+  const store = { state: {}, commit() {}, dispatch: async (action, update) => { saved = update(saved); return true } }
 
-  const music = { id: 'music', name: 'Music', channelIds: ['UCa'] }
-  const news = { id: 'news', name: 'News', channelIds: ['UCb'] }
-  const edited = { ...music, name: 'Songs', channelIds: ['UCa', 'UCc'] }
-  assert.deepEqual(save([music, news], edited), [edited, news])
-  assert.deepEqual(save([news], edited), [news, edited])
+  const id = await actions.createSubscriptionGroup(store, { name: 'Music', channelIds: [] })
+  // Two windows that both showed the empty group each add a channel
+  await actions.setChannelInSubscriptionGroup(store, { groupId: id, channelId: 'UCa', included: true })
+  await actions.setChannelInSubscriptionGroup(store, { groupId: id, channelId: 'UCb', included: true })
+  assert.deepEqual(structuredClone(saved).map(group => group.channelIds), [['UCa', 'UCb']])
+
+  // Saving a group that another device deleted meanwhile keeps the edits
+  const news = { id: 'news', name: 'News', channelIds: ['UCc'] }
+  saved = [news]
+  const edited = { id, name: 'Songs', channelIds: ['UCa'] }
+  await actions.saveSubscriptionGroup(store, edited)
+  assert.deepEqual(structuredClone(saved), [news, edited])
 })

@@ -56,6 +56,8 @@ test('mobile startup waits for saved settings before restoring tabs', async () =
   const { tabsReady } = vm.runInNewContext(`${initialization}; ({ tabsReady })`, {
     isElectron: false,
     isCapacitor: true,
+    isAndroid: true,
+    handleRestoredAndroidAppData: async () => {},
     pageSwipe: { value: null },
     organizerSwipeActive: { value: false },
     computed,

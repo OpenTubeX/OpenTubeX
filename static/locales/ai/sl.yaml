@@ -45,8 +45,6 @@ Tabs Unloaded To Free Memory: Za sprostitev pomnilnika je bil razbremenjen {coun
 Compact side navigation: Strni stransko krmarjenje
 Expand side navigation: Razširi stransko krmarjenje
 Right-click or hold to see history: Za ogled zgodovine kliknite z desno tipko ali pridržite
-Use Vertical Tabs: Uporabi navpične zavihke
-Use Horizontal Tabs: Uporabi vodoravne zavihke
 Resize Tab Bar: Spremeni velikost vrstice z zavihki
 Go to page: Pojdi na stran {page}
 Close Banner: Zapri pasico
@@ -497,7 +495,6 @@ Settings:
     Add-ons: Dodatki
     Add-ons Description: SponsorBlock, DeArrow, oznake »ni mi všeč«, AiSList in glasovni prevod
     Privacy Description: Zgodovina, predlogi iskanja, povezave in geslo aplikacije
-    Online activity: Dejavnost v spletu
     Data And Storage Description: Varnostne kopije, uvoz in izvoz, poraba diska in čiščenje
     Sync Description: Račun strežnika za sinhronizacijo, seznanjanje naprav in sinhronizirani podatki
     Advanced: Napredno
@@ -1222,8 +1219,6 @@ Settings:
     Update FFmpeg: Posodobi FFmpeg
     Checking FFmpeg: Preverjanje FFmpeg…
     Downloading FFmpeg: Prenašanje FFmpeg…
-    FFmpeg Downloaded Template: FFmpeg {version} je prenesen
-    FFmpeg Download Error Template: 'Prenos FFmpeg ni uspel: {error}'
     Detected FFprobe Version Template: 'Zaznana različica FFprobe: {version}'
     FFprobe Managed Not Downloaded: FFprobe še ni prenesen. Za prenos skupaj z orodjem FFmpeg kliknite spodnji gumb.
     System FFprobe Missing Warning: Orodja FFprobe ni bilo mogoče najti v sistemu. Potrebno je za pregled predstavnostnih datotek med naknadno obdelavo. Namestite ga poleg orodja FFmpeg ali kot vir izberite »Upravlja OpenTubeX«.
@@ -1292,7 +1287,6 @@ Settings:
     Clear Video Metadata Cache: Počisti predpomnilnik metapodatkov videoposnetkov
     Are you sure you want to clear the video metadata cache?: Ali res želite počistiti predpomnjene naslove, sličice in opise videoposnetkov?
     Failed to clear video metadata cache: Predpomnilnika metapodatkov videoposnetkov ni bilo mogoče počistiti
-    Video metadata cache has been cleared: Predpomnilnik metapodatkov videoposnetkov je počiščen
     Video Metadata Cache Size: 'Predpomnilnik metapodatkov videoposnetkov: {size}'
     Are you sure you want to clear out your search history and cache?: Ali res želite počistiti zgodovino iskanja in predpomnilnik?
     Search history and cache have been cleared: Zgodovina iskanja in predpomnilnik sta počiščena
@@ -1566,6 +1560,7 @@ Settings:
     Channel playback speeds imported: "Uvožena je hitrost predvajanja za {count} kanal | Uvoženi sta hitrosti predvajanja za {count} kanala | Uvožene so hitrosti predvajanja za {count} kanale | Uvožene so hitrosti predvajanja za {count} kanalov"
     Channels not found: "{count} kanal ni bil najden | {count} kanala nista bila najdena | {count} kanali niso bili najdeni | {count} kanalov ni bilo najdenih"
   Sync Settings:
+    Signed Out After Restore: 'Sinhronizacija je bila odjavljena, ker so bili ti podatki aplikacije obnovljeni iz varnostne kopije ali z druge naprave. Znova se prijavite, da sinhronizirate to napravo.'
     Revoke Session Tabs Warning: "Izbrisani bodo tudi sinhronizirani nabori zavihkov te naprave."
     Revoke Session Partial Failure: "Sinhronizirani nabori zavihkov so bili izbrisani, vendar preklica dostopa ni bilo mogoče potrditi. Poskusite ponovno preklicati dostop."
     Tab Sync Revocation Pending: "Sinhronizacija zavihkov je začasno ustavljena, dokler je preklic te prijave v teku. Znova poskusite preklic v nastavitvah sinhronizacije."
@@ -2268,8 +2263,6 @@ Video:
       EndTimeAfterStart: Končni čas odseka mora biti za začetnim časom.
       EndTimeBeforeVideoEnd: Končni čas odseka mora biti znotraj trajanja videoposnetka.
       EndTimeLabel: Končni čas odseka
-      DisableAutoSkipTemporarily: Začasno onemogoči samodejno preskakovanje SponsorBlock
-      EnableAutoSkipTemporarily: Znova omogoči samodejno preskakovanje SponsorBlock
       Guidelines: Smernice
       InspectSegment: Preglej
       InvalidStartTime: Vnesite veljaven začetni čas odseka.
@@ -2305,7 +2298,6 @@ Video:
       InfoPanelLoading: Odseki se še nalagajo …
       InfoPanelHasSegments: Ta videoposnetek ima odseke v zbirki podatkov!
       InfoPanelNoSegments: Ni odsekov
-      RefreshSegments: Osveži odseke
       RefreshInfo: Osveži podatke SponsorBlock
       ContributionStatsTitle: Vaši prispevki
       ContributionStatsLoading: Nalaganje statistike prispevkov …

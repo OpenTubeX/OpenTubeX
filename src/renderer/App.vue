@@ -657,6 +657,7 @@ import TabContent from './components/TabContent/TabContent.vue'
 import FtPrompt from './components/FtPrompt/FtPrompt.vue'
 import SharedYoutubeLinkPrompt from './components/SharedYoutubeLinkPrompt/SharedYoutubeLinkPrompt.vue'
 import { initializeAndroidIncomingShare } from './helpers/androidIncomingShare'
+import { handleRestoredAndroidAppData } from './helpers/androidStorage'
 import { extractSharedMediaLink, extractSharedYoutubeLink } from './helpers/sharedYoutubeLink'
 import { shouldOpenExternalMediaUrl } from './helpers/externalMediaUrl'
 import SubscriptionRefreshErrors from './components/SubscriptionRefreshErrors.vue'
@@ -779,6 +780,7 @@ const router = useRouter()
 const availableRoutePaths = new Set(router.getRoutes().map(candidate => candidate.path))
 const isElectron = process.env.IS_ELECTRON
 const isCapacitor = process.env.IS_CAPACITOR
+const isAndroid = isCapacitor && !process.env.IS_IOS
 const usesLogicalTabs = isElectron || isCapacitor
 const navigation = usesLogicalTabs ? getTabNavigationService() : null
 const capacitorTabService = isCapacitor
@@ -1785,6 +1787,7 @@ onMounted(async () => {
   }
 
   const settingsReady = store.dispatch('grabUserSettings').then(async tutorialState => {
+    if (isAndroid) await handleRestoredAndroidAppData(store)
     if (isCapacitor) {
       await store.dispatch('loadAndroidProxySettings').catch(() => {
         showToast({

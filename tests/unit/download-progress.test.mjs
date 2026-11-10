@@ -6,7 +6,7 @@ import vm from 'node:vm'
 const source = readFileSync(new URL('../../src/main/ytDlpDownloads.js', import.meta.url), 'utf8')
 const handler = source.slice(source.indexOf('  function setDownloadPhase(phase) {'), source.indexOf('\n  let stdoutBuffer', source.indexOf('  function handleStdoutLine(line) {')))
 
-function replay(lines, initialStatus = 'downloading') {
+function replay(lines, initialStatus = 'downloading', overrides = {}) {
   const status = { status: initialStatus, percent: 97.3, speed: '1MiB/s', eta: '00:00' }
   const entry = {}
   const updates = []
@@ -22,6 +22,9 @@ function replay(lines, initialStatus = 'downloading') {
     MERGER_REGEX: /^never$/,
     subtitlesOnly: false,
     ID_REGEX: /^[\w-]{11}$/,
+    downloadFolders: ['/downloads'],
+    isPathInsideFolders: () => true,
+    ...overrides,
   })
   vm.runInContext(`${handler}\nglobalThis.handleLine = handleStdoutLine`, context)
   for (const line of lines) context.handleLine(line)
@@ -38,6 +41,20 @@ test('preparation clears the previous playlist item progress and publishes immed
   assert.equal(status.percent, 0)
   assert.equal(status.eta, null)
   assert.equal(updates.at(-1).force, true)
+})
+
+test('destination lines outside the download folders are not recorded', () => {
+  // custom `--print` arguments can imitate yt-dlp's own lines
+  const { status } = replay([
+    '[download] Destination: /downloads/Video.mp4',
+    '[download] Destination: /home/user/.ssh/id_ed25519',
+    '[Merger] Merging formats into "/home/user/.bashrc"',
+  ], 'downloading', {
+    DESTINATION_REGEX: /^\[(?:download|ExtractAudio)\] Destination: (.+)$/,
+    MERGER_REGEX: /^\[Merger\] Merging formats into "(.+)"$/,
+    isPathInsideFolders: path => path.startsWith('/downloads/'),
+  })
+  assert.equal(status.destination, '/downloads/Video.mp4')
 })
 
 test('processing starts even when the final transfer percentage is below 100', () => {

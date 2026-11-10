@@ -161,6 +161,22 @@ const actions = {
     }
   },
 
+  /**
+   * @param {any} param0
+   * @param {{ records: object[], rule: 'replace' | 'takeout' }} payload imported records, which
+   *   replace the saved ones or, from Takeout, only fill what they lack
+   */
+  async importHistory({ commit }, { records, rule }) {
+    try {
+      const updates = await DBHistoryHandlers.importRecords(records, rule)
+      commit('applyHistorySyncChanges', { insertions: [], updates, deletions: [] })
+      return true
+    } catch (errMessage) {
+      console.error(errMessage)
+      return false
+    }
+  },
+
   async applyHistorySyncChanges({ commit }, changes) {
     const migratedChanges = {
       insertions: changes.insertions.map(migrateLegacyHistoryRecord),

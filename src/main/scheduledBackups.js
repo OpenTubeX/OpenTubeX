@@ -6,6 +6,19 @@ const DAY = 86_400_000
 const RETRY_INTERVAL = 300_000
 const BACKUP_FILENAME = /^opentubex-scheduled-backup-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-\d{3}Z-[\da-f-]{36}\.zip$/
 
+/**
+ * @param {string} filename
+ * @param {string} flags
+ */
+async function syncToDisk(filename, flags) {
+  const handle = await fs.open(filename, flags)
+  try {
+    await handle.sync()
+  } finally {
+    await handle.close()
+  }
+}
+
 async function cleanStaleTemporaryArchives(directory, timestamp) {
   try {
     for (const entry of await fs.readdir(directory, { withFileTypes: true })) {
@@ -77,8 +90,12 @@ export function createScheduledBackups({ readConfiguration, createArchive, saveS
       // Keep old backups until a complete new archive is committed in the selected folder.
       // A missing folder is an error, so an unmounted drive never redirects backups locally.
       await fs.writeFile(temporaryPath, archive, { flag: 'wx', mode: 0o600 })
+      // Older backups are deleted next, so the new one must survive a power loss first
+      await syncToDisk(temporaryPath, 'r+')
       if (!await configurationIsCurrent()) { cancelled = true; return }
       await fs.rename(temporaryPath, path.join(directory, filename))
+      // Windows cannot open folders for syncing and commits renames itself
+      await syncToDisk(directory, 'r').catch(() => {})
       nextStatus.lastBackupAt = timestamp
       try {
         // Keep the new archive even if older backups were named with an incorrect future clock.

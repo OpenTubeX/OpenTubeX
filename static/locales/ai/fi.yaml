@@ -43,8 +43,6 @@ Unload Multiple Tabs Confirmation:
   Message: Tämä poistaa {count} välilehteä muistista.
   Unload Tabs: Poista {count} välilehteä muistista
 Tabs Unloaded To Free Memory: Muistin vapauttamiseksi poistettiin {count} välilehti, jota et ole käyttänyt äskettäin | Muistin vapauttamiseksi poistettiin {count} välilehteä, joita et ole käyttänyt äskettäin
-Use Vertical Tabs: Käytä pystysuuntaisia välilehtiä
-Use Horizontal Tabs: Käytä vaakasuuntaisia välilehtiä
 Resize Tab Bar: Muuta välilehtipalkin kokoa
 Find in page: Hae sivulta
 Previous match: Edellinen osuma
@@ -372,7 +370,6 @@ Settings:
     Add-ons: Lisäosat
     Add-ons Description: SponsorBlock, DeArrow, ei-tykkäysten määrät, AiSList ja puhekäännös
     Privacy Description: Historia, hakuehdotukset, linkit ja sovelluksen salasana
-    Online activity: Verkkotoiminta
     Data And Storage Description: Varmuuskopiot, tuonti ja vienti, levyn käyttö ja siivous
     Sync Description: Synkronointipalvelimen tili, laitteiden yhdistäminen ja synkronoidut tiedot
     Advanced: Lisäasetukset
@@ -1002,8 +999,6 @@ Settings:
     Update FFmpeg: Päivitä FFmpeg
     Checking FFmpeg: Tarkistetaan FFmpeg-ohjelmaa…
     Downloading FFmpeg: Ladataan FFmpeg-ohjelmaa…
-    FFmpeg Downloaded Template: FFmpeg {version} ladattiin
-    FFmpeg Download Error Template: 'FFmpeg-ohjelman lataus epäonnistui: {error}'
     Detected FFprobe Version Template: 'Havaittu FFprobe-versio: {version}'
     FFprobe Managed Not Downloaded: FFprobe-ohjelmaa ei ole vielä ladattu. Lataa se FFmpeg-ohjelman kanssa napsauttamalla alla olevaa painiketta.
     System FFprobe Missing Warning: FFprobe-ohjelmaa ei löytynyt järjestelmästä. Sitä tarvitaan mediatiedostojen tutkimiseen jälkikäsittelyn aikana. Asenna se FFmpeg-ohjelman viereen tai vaihda lähteeksi "OpenTubeX:n hallitsema".
@@ -1064,7 +1059,6 @@ Settings:
     Clear Video Metadata Cache: Tyhjennä videon metatietovälimuisti
     Are you sure you want to clear the video metadata cache?: Haluatko varmasti poistaa välimuistissa olevat videoiden nimet, pikkukuvat ja kuvaukset?
     Failed to clear video metadata cache: Videon metatietovälimuistin tyhjentäminen epäonnistui
-    Video metadata cache has been cleared: Videon metatietovälimuisti on tyhjennetty
     Video Metadata Cache Size: 'Videon metatietovälimuisti: {size}'
   Storage Settings:
     Storage: Tallennustila
@@ -1278,6 +1272,7 @@ Settings:
     Channel playback speeds imported: "Tuotiin {count} kanavan toistonopeus | Tuotiin {count} kanavan toistonopeudet"
     Channels not found: "{count} kanavaa ei löytynyt | {count} kanavaa ei löytynyt"
   Sync Settings:
+    Signed Out After Restore: 'Synkronoinnista kirjauduttiin ulos, koska nämä sovelluksen tiedot palautettiin varmuuskopiosta tai toisesta laitteesta. Kirjaudu uudelleen sisään synkronoidaksesi tämän laitteen.'
     Revoke Session Tabs Warning: "Myös tämän laitteen synkronoidut välilehtijoukot poistetaan."
     Revoke Session Partial Failure: "Synkronoidut välilehtijoukot poistettiin, mutta käyttöoikeuden peruuttamista ei voitu vahvistaa. Yritä peruuttaa käyttöoikeus uudelleen."
     Tab Sync Revocation Pending: "Välilehtien synkronointi on keskeytetty, kun tämän kirjautumisen peruminen on kesken. Yritä perumista uudelleen synkronointiasetuksissa."
@@ -1802,8 +1797,6 @@ Video:
       EndTimeAfterStart: Osuuden lopetusajan on oltava aloitusajan jälkeen.
       EndTimeBeforeVideoEnd: Osuuden lopetusajan on oltava videon keston sisällä.
       EndTimeLabel: Osuuden lopetusaika
-      DisableAutoSkipTemporarily: Poista SponsorBlockin automaattinen ohitus väliaikaisesti käytöstä
-      EnableAutoSkipTemporarily: Ota SponsorBlockin automaattinen ohitus uudelleen käyttöön
       Guidelines: Ohjeet
       InspectSegment: Tarkastele
       InvalidStartTime: Anna kelvollinen osuuden aloitusaika.
@@ -1839,7 +1832,6 @@ Video:
       InfoPanelLoading: Osuuksia ladataan yhä...
       InfoPanelHasSegments: Tälle videolle on osuuksia tietokannassa!
       InfoPanelNoSegments: Osuuksia ei löytynyt
-      RefreshSegments: Päivitä osuudet
       RefreshInfo: Päivitä SponsorBlock-tiedot
       ContributionStatsTitle: Omat osallistumistiedot
       ContributionStatsLoading: Ladataan osallistumistilastoja...

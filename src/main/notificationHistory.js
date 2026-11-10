@@ -59,6 +59,7 @@ export function createNotificationHistory({ file, dismissalsFile, onChange, onDi
   /** @type {NotificationHistoryState | null} */
   let state = null
   let pending = Promise.resolve()
+  const unsaved = { entries: false, dismissals: false }
   /** @type {Promise<void> | null} */
   let loaded = null
 
@@ -82,7 +83,10 @@ export function createNotificationHistory({ file, dismissalsFile, onChange, onDi
       const { since = current.entries, ...next } = update(current)
       const entriesChanged = next.entries !== current.entries
       const dismissalsChanged = next.dismissals !== current.dismissals
-      if (!entriesChanged && !dismissalsChanged) return
+      // The state already shows a change whose write failed, so the next change saves it again.
+      const writeEntries = entriesChanged || unsaved.entries
+      const writeDismissals = dismissalsChanged || unsaved.dismissals
+      if (!writeEntries && !writeDismissals) return
       state = next
       if (entriesChanged) {
         onChange(next.entries)
@@ -90,8 +94,16 @@ export function createNotificationHistory({ file, dismissalsFile, onChange, onDi
         if (stale.length > 0) onStale?.(stale)
       }
       if (local && dismissalsChanged) onDismissalsChange?.()
-      if (entriesChanged) await writeJson(file, next.entries)
-      if (dismissalsChanged) await writeJson(dismissalsFile, next.dismissals)
+      unsaved.entries = writeEntries
+      unsaved.dismissals = writeDismissals
+      if (writeEntries) {
+        await writeJson(file, next.entries)
+        unsaved.entries = false
+      }
+      if (writeDismissals) {
+        await writeJson(dismissalsFile, next.dismissals)
+        unsaved.dismissals = false
+      }
     })
     pending = result.catch(error => console.error('Failed to save the notification history', error))
     return pending

@@ -190,16 +190,25 @@ async function removePlaylistItems(playlistId, playlistName, itemIds) {
     return
   }
 
-  const videos = playlist.videos.filter(video => !itemIds.has(video.playlistItemId))
-  const removed = playlist.videos.length - videos.length
+  const removedVideos = playlist.videos.filter(video => itemIds.has(video.playlistItemId))
+  const removed = removedVideos.length
   if (removed === 0) return
+  const keptVideoIds = new Set(playlist.videos.filter(video => !itemIds.has(video.playlistItemId)).map(video => video.videoId))
 
-  if (await store.dispatch('updatePlaylist', { ...playlist, videos })) {
+  try {
+    // Remove the entries instead of saving the rest, so videos another window
+    // added in the meantime stay
+    await store.dispatch('removeVideos', {
+      _id: playlistId,
+      playlistItemIds: removedVideos.map(video => video.playlistItemId),
+      videoIds: [...new Set(removedVideos.map(video => video.videoId))].filter(videoId => !keptVideoIds.has(videoId)),
+    })
     showToast({
       message: `${playlist.playlistName}: ${i18n.global.t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', { videoCount: removed }, removed)}`,
       icon: ['fas', 'trash'],
     })
-  } else {
+  } catch (error) {
+    console.error(error)
     showUpdateFailedToast(playlist.playlistName)
   }
 }

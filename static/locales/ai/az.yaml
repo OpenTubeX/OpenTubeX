@@ -43,8 +43,6 @@ Unload Multiple Tabs Confirmation:
   Message: Bu, {count} vərəqi yaddaşdan çıxaracaq.
   Unload Tabs: "{count} vərəqi yaddaşdan çıxar"
 Tabs Unloaded To Free Memory: Yaddaşı boşaltmaq üçün son vaxtlar istifadə etmədiyiniz {count} vərəq yaddaşdan çıxarıldı | Yaddaşı boşaltmaq üçün son vaxtlar istifadə etmədiyiniz {count} vərəq yaddaşdan çıxarıldı
-Use Vertical Tabs: Şaquli vərəqlərdən istifadə et
-Use Horizontal Tabs: Üfüqi vərəqlərdən istifadə et
 Resize Tab Bar: Vərəq panelinin ölçüsünü dəyiş
 Find in page: Səhifədə tap
 Previous match: Əvvəlki uyğunluq
@@ -374,7 +372,6 @@ Settings:
     Add-ons: Əlavələr
     Add-ons Description: SponsorBlock, DeArrow, bəyənməmələr, AiSList və səsli tərcümə
     Privacy Description: Tarixçə, axtarış təklifləri, keçidlər və tətbiq parolu
-    Online activity: Onlayn fəaliyyət
     Data And Storage Description: Ehtiyat nüsxələr, idxal və ixrac, disk istifadəsi və təmizləmə
     Sync Description: Sinxronizasiya serveri hesabı, cihazların qoşulması və sinxronlaşdırılan məlumatlar
     Advanced: Qabaqcıl
@@ -1004,8 +1001,6 @@ Settings:
     Update FFmpeg: FFmpeg yenilə
     Checking FFmpeg: FFmpeg yoxlanılır…
     Downloading FFmpeg: FFmpeg endirilir…
-    FFmpeg Downloaded Template: FFmpeg {version} endirildi
-    FFmpeg Download Error Template: 'FFmpeg endirmək alınmadı: {error}'
     Detected FFprobe Version Template: 'Aşkarlanan FFprobe versiyası: {version}'
     FFprobe Managed Not Downloaded: FFprobe hələ endirilməyib. Onu FFmpeg ilə birlikdə endirmək üçün aşağıdakı düyməni klikləyin.
     System FFprobe Missing Warning: Sisteminizdə FFprobe tapılmadı. O, sonrakı emal zamanı media fayllarını yoxlamaq üçün lazımdır. Onu FFmpeg ilə eyni yerə quraşdırın və ya mənbəni “OpenTubeX tərəfindən idarə olunur” seçiminə dəyişin.
@@ -1066,7 +1061,6 @@ Settings:
     Clear Video Metadata Cache: Video metaməlumat keşini təmizlə
     Are you sure you want to clear the video metadata cache?: Keşdəki video başlıqlarını, miniatürlərini və təsvirlərini təmizləmək istədiyinizə əminsiniz?
     Failed to clear video metadata cache: Video metaməlumat keşini təmizləmək alınmadı
-    Video metadata cache has been cleared: Video metaməlumat keşi təmizləndi
     Video Metadata Cache Size: 'Video metaməlumat keşi: {size}'
   Storage Settings:
     Storage: Yaddaş
@@ -1280,6 +1274,7 @@ Settings:
     Channel playback speeds imported: "{count} kanalın oynatma sürəti idxal edildi | {count} kanalın oynatma sürətləri idxal edildi"
     Channels not found: "{count} kanal tapılmadı | {count} kanal tapılmadı"
   Sync Settings:
+    Signed Out After Restore: 'Sinxronizasiyadan çıxış edildi, çünki bu tətbiq məlumatları ehtiyat nüsxədən və ya başqa cihazdan bərpa olunub. Bu cihazı sinxronlaşdırmaq üçün yenidən daxil olun.'
     Revoke Session Tabs Warning: "Bu cihazın sinxronlaşdırılmış vərəq dəstləri də silinəcək."
     Revoke Session Partial Failure: "Sinxronlaşdırılmış vərəq dəstləri silindi, lakin girişin ləğvi təsdiqlənmədi. Girişi ləğv etmək üçün yenidən cəhd edin."
     Tab Sync Revocation Pending: "Bu girişin ləğvi gözlənilərkən vərəqlərin sinxronlaşdırılması dayandırılıb. Sinxronlaşdırma ayarlarında ləğvi yenidən sınayın."
@@ -1808,8 +1803,6 @@ Video:
       EndTimeAfterStart: Seqmentin bitmə vaxtı başlama vaxtından sonra olmalıdır.
       EndTimeBeforeVideoEnd: Seqmentin bitmə vaxtı videonun müddəti daxilində olmalıdır.
       EndTimeLabel: Seqmentin bitmə vaxtı
-      DisableAutoSkipTemporarily: SponsorBlock avtomatik keçidini müvəqqəti bağla
-      EnableAutoSkipTemporarily: SponsorBlock avtomatik keçidini yenidən aktivləşdir
       Guidelines: Qaydalar
       InspectSegment: Yoxla
       InvalidStartTime: Düzgün seqment başlama vaxtı daxil edin.
@@ -1845,7 +1838,6 @@ Video:
       InfoPanelLoading: Seqmentlər hələ yüklənilir...
       InfoPanelHasSegments: Bu videonun verilənlər bazasında seqmentləri var!
       InfoPanelNoSegments: Seqment tapılmadı
-      RefreshSegments: Seqmentləri yenilə
       RefreshInfo: SponsorBlock məlumatını yenilə
       ContributionStatsTitle: Töhfələriniz
       ContributionStatsLoading: Töhfə statistikası yüklənilir...

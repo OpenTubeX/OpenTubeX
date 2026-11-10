@@ -33,6 +33,40 @@ export function displayAndroidPath(path) {
   }
 }
 
+const INSTALLATION_MARKER_KEY = 'opentubex-installation-marker'
+
+/**
+ * Checks whether the app data came from a backup or another device. Android
+ * backs up the WebView storage but not the marker kept natively, so restored
+ * data holds another installation's marker.
+ * @returns {Promise<{ restored: boolean, accept: () => void }>} `accept` records
+ *   this installation once the restored data is handled
+ */
+export async function checkAndroidAppDataRestore() {
+  const { marker } = await AndroidStorage.getInstallationMarker()
+  const saved = localStorage.getItem(INSTALLATION_MARKER_KEY)
+  return {
+    // Without a saved marker, this is the first launch since markers were added
+    restored: saved !== null && saved !== marker,
+    accept: () => localStorage.setItem(INSTALLATION_MARKER_KEY, marker),
+  }
+}
+
+/**
+ * Signs restored app data out of sync before sync starts, so it cannot sync
+ * as the installation it came from.
+ * @param {import('vuex').Store<any>} store
+ */
+export async function handleRestoredAndroidAppData(store) {
+  try {
+    const { restored, accept } = await checkAndroidAppDataRestore()
+    if (restored) await store.dispatch('forgetRestoredSyncServerDevice')
+    accept()
+  } catch (error) {
+    console.error('Could not check for restored app data', error)
+  }
+}
+
 export async function chooseAndroidDirectory() {
   const result = await AndroidStorage.chooseDirectory()
   return result.path

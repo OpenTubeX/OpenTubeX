@@ -21,6 +21,7 @@ import {
   SyncServerUnsupportedError,
   SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
   SYNC_SERVER_SESSION_EXPIRED_MESSAGE,
+  SYNC_SERVER_RESTORED_DEVICE_MESSAGE,
   isAccountDeletedError,
   isExpiredSessionReauthentication,
   isSessionExpiredError,
@@ -96,6 +97,7 @@ export {
   SyncServerUnsupportedError,
   SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
   SYNC_SERVER_SESSION_EXPIRED_MESSAGE,
+  SYNC_SERVER_RESTORED_DEVICE_MESSAGE,
   isAccountDeletedError,
   isExpiredSessionReauthentication,
   isSessionExpiredError,
@@ -1297,8 +1299,51 @@ function remoteProfileMetadata(group, fallback = {}) {
   }
 }
 
+const PROFILES_CHANGED = Symbol('profiles changed')
+
+// A profile edited, added, or deleted here while the server responds would be
+// overwritten or recreated, so merge again. The retry merges against the same
+// baseline, so remote changes the first attempt could not save locally are not
+// mistaken for local removals, plus the profiles deleted here meanwhile.
 export async function syncProfiles(client, store, previous = {}, options = {}) {
-  const profiles = store.state.profiles.profileList
+  let baseline = previous
+  let retryOptions = options
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const read = deepCopy(store.state.profiles.profileList)
+    const result = await mergeProfiles(client, store, baseline, retryOptions)
+    if (result !== PROFILES_CHANGED) return result
+    // A profile deleted here meanwhile would look new on the server without a
+    // baseline. Deleting it in the app confirms the deletion, so it needs no review.
+    const remaining = new Set(store.state.profiles.profileList.map(profile => profile._id))
+    const deleted = read.filter(profile => profile._id !== MAIN_PROFILE_ID && !remaining.has(profile._id))
+    if (deleted.length === 0) continue
+    baseline = { ...baseline }
+    for (const profile of deleted) {
+      baseline[profile._id] ??= {
+        metadata: profileMetadata(profile),
+        channels: profile.subscriptions.map(channel => channel.id),
+      }
+    }
+    const deletedIds = new Set(deleted.map(profile => profile._id))
+    const decision = retryOptions.deletions?.profiles
+    retryOptions = {
+      ...retryOptions,
+      deletions: {
+        ...retryOptions.deletions,
+        // Like syncDeletions.confirm, the new decision replaces an earlier one to keep it
+        profiles: {
+          confirmed: [...(decision?.confirmed ?? []), ...deletedIds],
+          kept: (decision?.kept ?? []).filter(id => !deletedIds.has(id)),
+        },
+      },
+    }
+  }
+  throw new Error('Profiles changed during sync. Try again.')
+}
+
+async function mergeProfiles(client, store, previous, options) {
+  // A copy, because channels added meanwhile are pushed into the stored profile
+  const profiles = deepCopy(store.state.profiles.profileList)
   const localProfiles = profiles.filter(profile => profile._id !== MAIN_PROFILE_ID)
   const localById = mapBy(localProfiles, profile => profile._id)
   const remoteGroups = await client.getSubscriptionGroups()
@@ -1416,8 +1461,9 @@ export async function syncProfiles(client, store, previous = {}, options = {}) {
       ...(local && Object.hasOwn(local, 'icon') ? { icon: local.icon } : {}),
       subscriptions: mergedSubscriptions,
     }
-    if (!local || !metadataEquals(local, mergedProfile)) {
-      if (!await store.dispatch('updateProfile', mergedProfile)) throw new Error('Could not save synced profile')
+    if ((!local || !metadataEquals(local, mergedProfile)) &&
+      !await store.dispatch('saveSyncedProfile', { profile: mergedProfile, previous: local ?? null })) {
+      return PROFILES_CHANGED
     }
 
     next[id] = {
@@ -1462,6 +1508,14 @@ async function repairCustomThemeReferences(store, previousThemes, themes) {
 
 const SYNC_DEVICE_ID_KEY = 'opentubex-sync-device-id'
 let volatileSyncDeviceId = null
+
+/** Forgets the device ID of another installation whose data was restored */
+export function forgetSyncDeviceId() {
+  volatileSyncDeviceId = null
+  try {
+    localStorage.removeItem(SYNC_DEVICE_ID_KEY)
+  } catch {}
+}
 
 function getSyncDeviceId() {
   try {

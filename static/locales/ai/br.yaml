@@ -43,8 +43,6 @@ Unload Multiple Tabs Confirmation:
   Message: "Diskarget e vo {count} ivinell. | Diskarget e vo {count} ivinell. | Diskarget e vo {count} ivinell. | Diskarget e vo {count} ivinell. | Diskarget e vo {count} ivinell."
   Unload Tabs: "Diskargañ {count} ivinell | Diskargañ {count} ivinell | Diskargañ {count} ivinell | Diskargañ {count} ivinell | Diskargañ {count} ivinell"
 Tabs Unloaded To Free Memory: 'Diskarget eo bet {count} ivinell n''ho peus ket implijet nevez zo evit frankaat memor | Diskarget eo bet {count} ivinell n''ho peus ket implijet nevez zo evit frankaat memor | Diskarget eo bet {count} ivinell n''ho peus ket implijet nevez zo evit frankaat memor | Diskarget eo bet {count} ivinell n''ho peus ket implijet nevez zo evit frankaat memor | Diskarget eo bet {count} ivinell n''ho peus ket implijet nevez zo evit frankaat memor'
-Use Vertical Tabs: "Implijout ivinelloù a-serzh"
-Use Horizontal Tabs: "Implijout ivinelloù a-blaen"
 Resize Tab Bar: "Kemmañ ment barrenn an ivinelloù"
 Find in page: "Klask er bajenn"
 Previous match: "Kenglotadenn gent"
@@ -372,7 +370,6 @@ Settings:
     Add-ons: "Askouezhioù"
     Add-ons Description: SponsorBlock, DeArrow, displijadennoù, AiSList ha treiñ ar vouezh
     Privacy Description: Roll-istor, kinnigoù klask, liammoù ha ger-tremen an arload
-    Online activity: "Obererezh enlinenn"
     Data And Storage Description: Gwaredoù, enporzhiañ hag ezporzhiañ, implij ar gantenn ha naetaat
     Sync Description: Kont ar servijer goubredañ, koublañ an trevnadoù ha roadennoù goubredet
     Advanced: "Araokaet"
@@ -1002,8 +999,6 @@ Settings:
     Update FFmpeg: "Hizivaat FFmpeg"
     Checking FFmpeg: "O wiriañ FFmpeg…"
     Downloading FFmpeg: "O pellgargañ FFmpeg…"
-    FFmpeg Downloaded Template: "Pellgarget eo bet FFmpeg {version}"
-    FFmpeg Download Error Template: "C'hwitet eo pellgargañ FFmpeg: {error}"
     Detected FFprobe Version Template: "Stumm FFprobe dinoet: {version}"
     FFprobe Managed Not Downloaded: "N'eo ket bet pellgarget FFprobe c'hoazh. Klikit war ar bouton amañ dindan evit e bellgargañ gant FFmpeg."
     System FFprobe Missing Warning: "N'eo ket bet kavet FFprobe war ho reizhiad. Rekis eo evit ensellet ar mediaoù e-pad an eiltretañ. Staliit anezhañ e-kichen FFmpeg pe dibabit «Meret gant OpenTubeX» evel tarzh."
@@ -1064,7 +1059,6 @@ Settings:
     Clear Video Metadata Cache: "Skarzhañ krubuilh metaroadennoù ar videoioù"
     Are you sure you want to clear the video metadata cache?: "Ha sur oc'h e faot deoc'h skarzhañ titloù, skeudennigoù ha deskrivadurioù ar videoioù er grubuilh?"
     Failed to clear video metadata cache: "C'hwitet eo skarzhañ krubuilh metaroadennoù ar videoioù"
-    Video metadata cache has been cleared: "Skarzhet eo bet krubuilh metaroadennoù ar videoioù"
     Video Metadata Cache Size: "Krubuilh metaroadennoù ar videoioù: {size}"
   Storage Settings:
     Storage: "Kadaviñ"
@@ -1277,6 +1271,7 @@ Settings:
     Channel playback speeds imported: "Enporzhiet eo bet tizh lenn {count} chadenn | Enporzhiet eo bet tizhoù lenn {count} chadenn | Enporzhiet eo bet tizhoù lenn {count} chadenn | Enporzhiet eo bet tizhoù lenn {count} chadenn | Enporzhiet eo bet tizhoù lenn {count} chadenn"
     Channels not found: "N'eus ket bet gallet kavout {count} chadenn | N'eus ket bet gallet kavout {count} chadenn | N'eus ket bet gallet kavout {count} chadenn | N'eus ket bet gallet kavout {count} chadenn | N'eus ket bet gallet kavout {count} chadenn"
   Sync Settings:
+    Signed Out After Restore: 'Digennasket eo bet ar goubredañ peogwir eo bet assavet roadennoù an arload-mañ eus un enrolladenn gwarez pe eus ur benveg all. Kevreit en-dro evit goubredañ ar benveg-mañ.'
     Revoke Session Tabs Warning: "Holladoù ivinelloù sinkronizet an trevnad-mañ a vo diverket ivez."
     Revoke Session Partial Failure: "Dilamet eo bet ar strolladoù ivinelloù goubredet, met n'eo ket bet kadarnaet torriñ ar moned. Klaskit en-dro torriñ ar moned."
     Tab Sync Revocation Pending: "Ehanet eo kenempunañ an ivinelloù e-pad ma c’hortoz tennadur aotre ar c’hennask-mañ. Klaskit adarre tennadur an aotre en Arventennoù kenempunañ."
@@ -1805,8 +1800,6 @@ Video:
       EndTimeAfterStart: "Mare dibenn ar rann a rank bezañ goude ar mare deroù."
       EndTimeBeforeVideoEnd: "Mare dibenn ar rann a rank bezañ e-pad ar video."
       EndTimeLabel: "Mare dibenn ar rann"
-      DisableAutoSkipTemporarily: "Diweredekaat lamm emgefreek SponsorBlock evit ur pennad"
-      EnableAutoSkipTemporarily: "Adweredekaat lamm emgefreek SponsorBlock"
       Guidelines: "Sturiadurioù"
       InspectSegment: "Ensellet"
       InvalidStartTime: "Lakait ur mare deroù rann talvoudek."
@@ -1842,7 +1835,6 @@ Video:
       InfoPanelLoading: "Ar rannoù zo o kargañ c'hoazh…"
       InfoPanelHasSegments: "Rannoù eus ar video-mañ zo er stlennvon!"
       InfoPanelNoSegments: "N'eus bet kavet rann ebet"
-      RefreshSegments: "Adkargañ ar rannoù"
       RefreshInfo: "Adkargañ titouroù SponsorBlock"
       ContributionStatsTitle: "Ho tegasadennoù"
       ContributionStatsLoading: "O kargañ stadegoù an degasadennoù…"

@@ -43,8 +43,6 @@ Unload Multiple Tabs Confirmation:
   Message: פעולה זו תפרוק {count} כרטיסייה. | פעולה זו תפרוק {count} כרטיסיות.
   Unload Tabs: פריקת {count} כרטיסייה | פריקת {count} כרטיסיות
 Tabs Unloaded To Free Memory: נפרקה {count} כרטיסייה שלא השתמשת בה לאחרונה כדי לפנות זיכרון | נפרקו {count} כרטיסיות שלא השתמשת בהן לאחרונה כדי לפנות זיכרון | נפרקו {count} כרטיסיות שלא השתמשת בהן לאחרונה כדי לפנות זיכרון
-Use Vertical Tabs: שימוש בכרטיסיות אנכיות
-Use Horizontal Tabs: שימוש בכרטיסיות אופקיות
 Resize Tab Bar: שינוי גודל סרגל הכרטיסיות
 Find in page: חיפוש בדף
 Previous match: התוצאה הקודמת
@@ -377,7 +375,6 @@ Settings:
     Add-ons: תוספים
     Add-ons Description: SponsorBlock, DeArrow, דירוגים שליליים, AiSList ותרגום קריינות
     Privacy Description: היסטוריה, הצעות חיפוש, קישורים וסיסמת היישום
-    Online activity: פעילות מקוונת
     Data And Storage Description: גיבויים, ייבוא וייצוא, שימוש בדיסק וניקוי
     Sync Description: חשבון שרת הסנכרון, צימוד מכשירים ונתונים מסונכרנים
     Advanced: מתקדם
@@ -1017,8 +1014,6 @@ Settings:
     Update FFmpeg: עדכון FFmpeg
     Checking FFmpeg: FFmpeg נבדק…
     Downloading FFmpeg: FFmpeg בהורדה…
-    FFmpeg Downloaded Template: FFmpeg {version} הורד
-    FFmpeg Download Error Template: 'הורדת FFmpeg נכשלה: {error}'
     Detected FFprobe Version Template: 'גרסת FFprobe שזוהתה: {version}'
     FFprobe Managed Not Downloaded: FFprobe עדיין לא הורד. לחצו על הכפתור למטה כדי להוריד אותו עם FFmpeg.
     System FFprobe Missing Warning: FFprobe לא נמצא במערכת. הוא דרוש לבדיקת מדיה במהלך עיבוד סופי. התקינו אותו לצד FFmpeg או החליפו את המקור ל"מנוהל בידי OpenTubeX".
@@ -1079,7 +1074,6 @@ Settings:
     Clear Video Metadata Cache: ניקוי מטמון מטא-נתוני הווידאו
     Are you sure you want to clear the video metadata cache?: האם לנקות את הכותרות, התמונות הממוזערות והתיאורים שנשמרו במטמון?
     Failed to clear video metadata cache: ניקוי מטמון מטא-נתוני הווידאו נכשל
-    Video metadata cache has been cleared: מטמון מטא-נתוני הווידאו נוקה
     Video Metadata Cache Size: 'מטמון מטא-נתוני וידאו: {size}'
   Storage Settings:
     Storage: אחסון
@@ -1304,6 +1298,7 @@ Settings:
     Channel playback speeds imported: "יובאה מהירות ההפעלה של {count} ערוץ | יובאו מהירויות ההפעלה של {count} ערוצים | יובאו מהירויות ההפעלה של {count} ערוצים"
     Channels not found: "{count} ערוץ לא נמצא | {count} ערוצים לא נמצאו | {count} ערוצים לא נמצאו"
   Sync Settings:
+    Signed Out After Restore: 'הסנכרון נותק כי נתוני האפליקציה האלה שוחזרו מגיבוי או ממכשיר אחר. יש להתחבר שוב כדי לסנכרן את המכשיר הזה.'
     Revoke Session Tabs Warning: "גם קבוצות הכרטיסיות המסונכרנות של המכשיר הזה יימחקו."
     Revoke Session Partial Failure: "קבוצות הכרטיסיות המסונכרנות נמחקו, אך לא ניתן היה לאשר את ביטול הגישה. יש לנסות שוב לבטל את הגישה."
     Tab Sync Revocation Pending: "סנכרון הלשוניות מושהה כל עוד ביטול הגישה של התחברות זו ממתין. יש לנסות שוב לבטל את הגישה בהגדרות הסנכרון."
@@ -1847,8 +1842,6 @@ Video:
       EndTimeAfterStart: זמן סיום הקטע חייב להיות אחרי זמן ההתחלה.
       EndTimeBeforeVideoEnd: זמן סיום הקטע חייב להיות בתוך משך הסרטון.
       EndTimeLabel: זמן סיום הקטע
-      DisableAutoSkipTemporarily: השבתת הדילוג האוטומטי של SponsorBlock באופן זמני
-      EnableAutoSkipTemporarily: הפעלה מחדש של הדילוג האוטומטי של SponsorBlock
       Guidelines: הנחיות
       InspectSegment: בדיקה
       InvalidStartTime: יש להזין זמן התחלה תקין לקטע.
@@ -1884,7 +1877,6 @@ Video:
       InfoPanelLoading: הקטעים עדיין נטענים...
       InfoPanelHasSegments: לסרטון הזה יש קטעים במסד הנתונים!
       InfoPanelNoSegments: לא נמצאו קטעים
-      RefreshSegments: רענון הקטעים
       RefreshInfo: רענון פרטי SponsorBlock
       ContributionStatsTitle: התרומות שלך
       ContributionStatsLoading: נתוני התרומות נטענים...

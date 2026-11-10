@@ -2072,6 +2072,7 @@ export default defineComponent({
       getSponsorBlockPromptTimeLabel,
       getSponsorBlockSeekBarTooltipLabel,
       getSponsorBlockToastActionLabel,
+      getSponsorBlockActionIcon,
       getSponsorBlockToastColors,
       getSponsorBlockToastLabel,
       getSponsorBlockToastTimeLabel,
@@ -7005,6 +7006,9 @@ export default defineComponent({
       container.value?.style.removeProperty('--shorts-menu-right')
     }
 
+    /** @type {HTMLElement | null} */
+    let shortsContextMenuElement = null
+
     function positionShortsContextMenu() {
       if (!props.shortsPlayer || !container.value) {
         return
@@ -7012,6 +7016,12 @@ export default defineComponent({
 
       const playerContainer = container.value
       const contextMenu = playerContainer.querySelector('.shaka-context-menu')
+      // A short player limits the menu's height, so it can scroll
+      if (contextMenu instanceof HTMLElement && contextMenu !== shortsContextMenuElement) {
+        if (shortsContextMenuElement) removeOverlayScrollbars(shortsContextMenuElement)
+        shortsContextMenuElement = contextMenu
+        addOverlayScrollbars(contextMenu)
+      }
       contextMenu?.style.removeProperty('--shorts-context-menu-x')
       contextMenu?.style.removeProperty('--shorts-context-menu-y')
 
@@ -10829,6 +10839,10 @@ export default defineComponent({
         removeOverlayScrollbars(overflowMenuElement)
         overflowMenuElement = null
       }
+      if (shortsContextMenuElement) {
+        removeOverlayScrollbars(shortsContextMenuElement)
+        shortsContextMenuElement = null
+      }
 
       destroyAdaptiveControlPanelLayout()
 
@@ -11480,6 +11494,7 @@ export default defineComponent({
       getSponsorBlockToastTimeLabel,
       isSponsorBlockToastCountdownPaused,
       getSponsorBlockToastActionLabel,
+      getSponsorBlockActionIcon,
       getSponsorBlockToastLabel,
       pauseSponsorBlockToastCountdown,
       resumeSponsorBlockToastCountdown,

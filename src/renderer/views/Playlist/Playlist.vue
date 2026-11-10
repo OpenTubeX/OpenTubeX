@@ -1307,24 +1307,7 @@ function moveVideoUp(videoId, playlistItemId) {
   playlistItems_[index] = playlistItems_[previousIndex]
   playlistItems_[previousIndex] = video
 
-  const playlist = {
-    playlistName: playlistTitle.value,
-    protected: selectedUserPlaylist.value.protected,
-    description: playlistDescription.value,
-    videos: deepCopy(playlistItems_),
-    _id: playlistId.value
-  }
-
-  try {
-    store.dispatch('updatePlaylist', playlist)
-    playlistItems.value = playlistItems_
-  } catch (e) {
-    showToast({
-      message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
-      icon: ['fas', 'circle-exclamation'],
-    })
-    console.error(e)
-  }
+  saveMovedVideos(playlistItems_)
 }
 
 /**
@@ -1357,24 +1340,7 @@ function moveVideoDown(videoId, playlistItemId) {
   playlistItems_[index] = playlistItems_[nextIndex]
   playlistItems_[nextIndex] = video
 
-  const playlist = {
-    playlistName: playlistTitle.value,
-    protected: selectedUserPlaylist.value.protected,
-    description: playlistDescription.value,
-    videos: deepCopy(playlistItems_),
-    _id: playlistId.value
-  }
-
-  try {
-    store.dispatch('updatePlaylist', playlist)
-    playlistItems.value = playlistItems_
-  } catch (e) {
-    showToast({
-      message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
-      icon: ['fas', 'circle-exclamation'],
-    })
-    console.error(e)
-  }
+  saveMovedVideos(playlistItems_)
 }
 
 /**
@@ -1404,21 +1370,7 @@ function moveVideoToTheTop(videoId, playlistItemId) {
   playlistItems_.splice(index, 1)
   playlistItems_.unshift(videoObject)
 
-  const playlist = {
-    playlistName: playlistTitle.value,
-    protected: selectedUserPlaylist.value.protected,
-    description: playlistDescription.value,
-    videos: deepCopy(playlistItems_),
-    _id: playlistId.value
-  }
-
-  try {
-    store.dispatch('updatePlaylist', playlist)
-    playlistItems.value = playlistItems_
-  } catch (e) {
-    showToast({ message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'), icon: ['fas', 'circle-exclamation'] })
-    console.error(e)
-  }
+  saveMovedVideos(playlistItems_)
 }
 
 /**
@@ -1448,21 +1400,7 @@ function moveVideoToTheBottom(videoId, playlistItemId) {
   playlistItems_.splice(index, 1)
   playlistItems_.push(videoObject)
 
-  const playlist = {
-    playlistName: playlistTitle.value,
-    protected: selectedUserPlaylist.value.protected,
-    description: playlistDescription.value,
-    videos: deepCopy(playlistItems_),
-    _id: playlistId.value
-  }
-
-  try {
-    store.dispatch('updatePlaylist', playlist)
-    playlistItems.value = playlistItems_
-  } catch (e) {
-    showToast({ message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'), icon: ['fas', 'circle-exclamation'] })
-    console.error(e)
-  }
+  saveMovedVideos(playlistItems_)
 }
 
 const { draggedId: draggedPlaylistItemId, onPointerDown: startVideoDrag } = useGridReorder({
@@ -1500,7 +1438,20 @@ function moveDraggedVideo(playlistItemId, order) {
 }
 
 /**
- * @param {string} id The playlist the drag happened in, which may no longer be the open one
+ * Shows the order from a move button right away and saves it after earlier moves and drags.
+ * @param {any[]} items
+ */
+function saveMovedVideos(items) {
+  playlistItems.value = items
+  const id = playlistId.value
+  const save = (draggedOrderSave ?? Promise.resolve()).then(() => saveDraggedOrder(id, items)).finally(() => {
+    if (draggedOrderSave === save) draggedOrderSave = null
+  })
+  draggedOrderSave = save
+}
+
+/**
+ * @param {string} id The playlist the drag or move happened in, which may no longer be the open one
  * @param {any[]} items
  */
 async function saveDraggedOrder(id, items) {

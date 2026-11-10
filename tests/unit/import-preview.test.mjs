@@ -3,7 +3,8 @@ import test from 'node:test'
 import vm from 'node:vm'
 import { readFile } from 'node:fs/promises'
 import { strToU8, zipSync } from 'fflate'
-import { previewBackupImport, previewTakeoutImport, parseTakeoutWatchHistory, mergeTakeoutHistoryRecord } from '../../src/renderer/helpers/import-preview.js'
+import { previewBackupImport, previewTakeoutImport, parseTakeoutWatchHistory } from '../../src/renderer/helpers/import-preview.js'
+import { mergeTakeoutHistoryRecord } from '../../src/history.js'
 import { mergeBackupProfile, mergeBackupPlaylist } from '../../src/renderer/helpers/unifiedBackup.js'
 import { processToBeAddedPlaylistVideo } from '../../src/renderer/helpers/playlists.js'
 import { SqliteDatastore } from '../../src/datastores/sqlite.js'
@@ -203,17 +204,17 @@ test('watch history with empty subtitles imports the record counted in the previ
   let imported
   const context = vm.createContext({
     parseTakeoutWatchHistory,
-    mergeTakeoutHistoryRecord,
-    historyCacheById: { value: {} },
-    deepCopy: structuredClone,
-    store: { dispatch: async (_action, records) => { imported = records; return true } },
+    store: { dispatch: async (action, payload) => { imported = { action, ...payload }; return true } },
     showToast() {},
     t: key => key,
   })
   vm.runInContext(componentSection('async function importYouTubeWatchHistory(', 'const showExportWatchHistoryPrompt'), context)
   await context.importYouTubeWatchHistory([record])
-  assert.equal(imported.get('abcdefghijk').isWatched, true)
-  assert.equal(imported.get('abcdefghijk').author, '')
+  // The datastore merges the records with the saved ones
+  assert.equal(imported.action, 'importHistory')
+  assert.equal(imported.rule, 'takeout')
+  assert.equal(imported.records[0].isWatched, true)
+  assert.equal(imported.records[0].author, '')
 })
 
 test('re-importing older watch history keeps the saved duration, resume position and newer watch time', async () => {
@@ -232,23 +233,8 @@ test('re-importing older watch history keeps the saved duration, resume position
     isWatched: false,
     lastViewedPlaylistId: 'PLsaved',
   }
-  let imported
-  const context = vm.createContext({
-    parseTakeoutWatchHistory,
-    mergeTakeoutHistoryRecord,
-    historyCacheById: { value: { abcdefghijk: saved } },
-    deepCopy: structuredClone,
-    store: { dispatch: async (_action, records) => { imported = records; return true } },
-    showToast() {},
-    t: key => key,
-  })
-  vm.runInContext(componentSection('async function importYouTubeWatchHistory(', 'const showExportWatchHistoryPrompt'), context)
-  // Takeout lists every watch of a video, newest first.
-  await context.importYouTubeWatchHistory([
-    takeout('abcdefghijk', '2025-01-01T00:00:00Z'), takeout('bcdefghijkl', '2025-03-01T00:00:00Z'), takeout('bcdefghijkl', '2025-02-01T00:00:00Z'),
-  ])
-  assert.deepEqual({ ...imported.get('abcdefghijk') }, { ...saved, author: 'Channel', isWatched: true, isLive: false })
-  assert.equal(imported.get('bcdefghijkl').timeWatched, Date.parse('2025-03-01T00:00:00Z'))
+  const [older] = parseTakeoutWatchHistory([takeout('abcdefghijk', '2025-01-01T00:00:00Z')]).entries
+  assert.deepEqual(mergeTakeoutHistoryRecord(saved, older), { ...saved, author: 'Channel', isWatched: true, isLive: false })
 
   const newer = mergeTakeoutHistoryRecord(saved, parseTakeoutWatchHistory([takeout('abcdefghijk', '2026-06-01T00:00:00Z')]).entries[0])
   assert.equal(newer.timeWatched, Date.parse('2026-06-01T00:00:00Z'))

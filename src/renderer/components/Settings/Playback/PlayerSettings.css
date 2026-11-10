@@ -152,17 +152,27 @@
   margin-inline: auto;
 }
 
+.quickPlaybackSpeedManager {
+  display: flex;
+  flex-direction: column;
+  block-size: 100%;
+}
+
+/* Keep the actions outside the list's scroll viewport. */
 .quickPlaybackSpeedToolbar {
-  position: sticky;
-  z-index: 2;
-  inset-block-start: -20px;
   flex: 0 0 auto;
-  margin-block-start: -20px;
-  margin-inline: -20px;
   padding-block: calc(20px + 0.5rem) 0.5rem;
   padding-inline: 20px;
-  background-color: var(--card-bg-color);
-  backdrop-filter: var(--card-bg-blur, none);
+}
+
+.quickPlaybackSpeedScroll {
+  position: relative;
+  flex: 1 1 auto;
+  min-block-size: 0;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-inline: 20px;
 }
 
 .quickPlaybackSpeedList {

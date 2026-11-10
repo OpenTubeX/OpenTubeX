@@ -210,11 +210,12 @@ export function createConfirmations({ isQuitting, isQuitConfirmed, confirmQuit, 
     const requestId = `${action}-multiple-tabs-${++multipleTabsActionRequestCount}`
     return new Promise(resolve => {
       /**
-       * @param {import('electron').IpcMainEvent} _event
+       * @param {import('electron').IpcMainEvent} event
        * @param {{ requestId?: string, confirmed?: boolean }} response
        */
-      const listener = (_event, response) => {
-        if (response?.requestId !== requestId) return
+      const listener = (event, response) => {
+        // Request IDs are sequential, so only the window that was asked may answer
+        if (event.sender !== browserWindow.webContents || response?.requestId !== requestId) return
 
         finish(response.confirmed === true)
       }

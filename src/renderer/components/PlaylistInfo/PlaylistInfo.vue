@@ -1241,12 +1241,16 @@ async function handleRemoveDuplicateVideosPromptAnswer(option) {
     return
   }
 
-  const playlist = {
-    ...selectedUserPlaylist.value,
-    videos: deepCopy(newVideoItems),
+  // Remove the entries instead of saving the rest, so videos another window
+  // added in the meantime stay. One copy of each video remains.
+  const kept = new Set(newVideoItems)
+  const removal = {
+    _id: selectedUserPlaylist.value._id,
+    playlistItemIds: selectedUserPlaylist.value.videos.filter(video => !kept.has(video)).map(video => video.playlistItemId),
+    videoIds: [],
   }
   try {
-    if (!await store.dispatch('updatePlaylist', playlist)) throw new Error('Could not update playlist')
+    await store.dispatch('removeVideos', removal)
     showToast({
       message: t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', {
         videoCount: removedVideosCount
@@ -1284,12 +1288,17 @@ async function handleRemoveVideosOnWatchPromptAnswer(option) {
     return
   }
 
-  const playlist = {
-    ...selectedUserPlaylist.value,
-    videos: deepCopy(videosToWatch),
+  // Remove the entries instead of saving the rest, so videos another window
+  // added in the meantime stay
+  const kept = new Set(videosToWatch)
+  const removed = selectedUserPlaylist.value.videos.filter(video => !kept.has(video))
+  const removal = {
+    _id: selectedUserPlaylist.value._id,
+    playlistItemIds: removed.map(video => video.playlistItemId),
+    videoIds: removed.map(video => video.videoId),
   }
   try {
-    if (!await store.dispatch('updatePlaylist', playlist)) throw new Error('Could not update playlist')
+    await store.dispatch('removeVideos', removal)
     showToast({
       message: t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', {
         videoCount: removedVideosCount

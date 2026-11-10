@@ -76,17 +76,13 @@ const actions = {
   },
 
   /**
+   * Merges imported searches with the saved ones, which another window may change meanwhile.
    * @param {any} param0
-   * @param {{ _id: string, lastUpdatedAt: number }[]} historyItems
+   * @param {{ _id: string, lastUpdatedAt: number }[]} entries
    */
-  async overwriteSearchHistory({ commit }, historyItems) {
+  async importSearchHistory({ commit }, entries) {
     try {
-      // sort before sending saving to the database and passing to other windows
-      // so that the other windows can use it as is, without having to sort the array themselves
-      sortSearchHistoryByLastUpdatedAt(historyItems)
-
-      await DBSearchHistoryHandlers.overwrite(historyItems)
-      commit('setSearchHistoryEntries', historyItems)
+      commit('setSearchHistoryEntries', await DBSearchHistoryHandlers.mergeImported(entries))
       return true
     } catch (errMessage) {
       console.error(errMessage)

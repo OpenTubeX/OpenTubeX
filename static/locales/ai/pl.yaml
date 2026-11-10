@@ -202,7 +202,6 @@ Settings:
     Add-ons: Dodatki
     Add-ons Description: SponsorBlock, DeArrow, oceny negatywne, AiSList i tłumaczenie lektorskie
     Privacy Description: Historia, podpowiedzi wyszukiwania, linki i hasło aplikacji
-    Online activity: Aktywność online
     Data And Storage Description: Kopie zapasowe, import i eksport, użycie dysku i czyszczenie
     Sync Description: Konto serwera synchronizacji, parowanie urządzeń i synchronizowane dane
     Advanced: Zaawansowane
@@ -603,7 +602,6 @@ Settings:
     Clear Video Metadata Cache: Wyczyść pamięć podręczną metadanych filmów
     Are you sure you want to clear the video metadata cache?: Czy na pewno wyczyścić zapisane tytuły, miniatury i opisy filmów?
     Failed to clear video metadata cache: Nie udało się wyczyścić pamięci podręcznej metadanych filmów
-    Video metadata cache has been cleared: Wyczyszczono pamięć podręczną metadanych filmów
     Video Metadata Cache Size: 'Pamięć podręczna metadanych filmów: {size}'
   Storage Settings:
     Storage: Pamięć
@@ -803,6 +801,7 @@ Settings:
     Open Profile Directory: Otwórz katalog profilu
     Invalid JSON row, skipping item: Nieprawidłowy JSON w wierszu {row}. Element zostanie pominięty
   Sync Settings:
+    Signed Out After Restore: 'Synchronizacja została wylogowana, ponieważ te dane aplikacji przywrócono z kopii zapasowej lub z innego urządzenia. Zaloguj się ponownie, aby synchronizować to urządzenie.'
     Revoke Session Tabs Warning: "Zsynchronizowane zestawy kart tego urządzenia również zostaną usunięte."
     Revoke Session Partial Failure: "Zsynchronizowane zestawy kart zostały usunięte, ale nie udało się potwierdzić cofnięcia dostępu. Spróbuj ponownie cofnąć dostęp."
     Tab Sync Revocation Pending: "Synchronizacja kart jest wstrzymana, dopóki cofnięcie dostępu dla tego logowania jest w toku. Ponów cofnięcie dostępu w ustawieniach synchronizacji."

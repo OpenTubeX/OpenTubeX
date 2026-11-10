@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
-import { migrateLegacyHistoryRecord, newestUniqueHistoryRecords } from '../../src/history.js'
+import { mergeTakeoutHistoryRecord, migrateLegacyHistoryRecord, newestUniqueHistoryRecords } from '../../src/history.js'
 import * as seenVideos from '../../src/subscriptionSeenVideos.js'
 import { migrateStoredSettings } from '../../src/datastores/settingsMigrations.js'
 import Datastore from '@seald-io/nedb'
@@ -30,6 +30,7 @@ async function fixture(t, createDatastore) {
       db,
       ...seenVideos,
       migrateLegacyHistoryRecord,
+      mergeTakeoutHistoryRecord,
       newestUniqueHistoryRecords,
       migrateStoredSettings,
       createIdQuery,
@@ -174,3 +175,32 @@ for (const [name, createDatastore] of Object.entries(backends)) {
     assert.equal((await db.history.findOneAsync({ videoId: 'video' })).watchProgress, 10)
   })
 }
+
+test('history imports merge with the records saved when they are written', async t => {
+  const { db, History } = await fixture(t, backends.SQLite)
+  await db.history.insertAsync([
+    record('saved', { lengthSeconds: 600, watchProgress: 321, timeWatched: 30 }),
+    // Another window records this watch while the import is parsed
+    record('meanwhile', { timeWatched: 40 }),
+  ])
+
+  // Takeout lists every watch of a video, newest first
+  await History.importRecords([
+    record('saved', { title: '', author: 'Channel', isWatched: true, timeWatched: 10 }),
+    record('new', { timeWatched: 20 }),
+    record('new', { timeWatched: 15 }),
+  ], 'takeout')
+  const byId = Object.fromEntries((await History.find()).map(saved => [saved.videoId, saved]))
+  assert.deepEqual(Object.keys(byId).sort(), ['meanwhile', 'new', 'saved'])
+  assert.deepEqual(
+    [byId.saved.title, byId.saved.author, byId.saved.lengthSeconds, byId.saved.watchProgress, byId.saved.timeWatched, byId.saved.isWatched],
+    ['saved', 'Channel', 600, 321, 30, true]
+  )
+  assert.equal(byId.new.timeWatched, 20)
+
+  // Other exports replace the saved record of each imported video
+  await History.importRecords([record('saved', { title: 'Imported', timeWatched: 5 })], 'replace')
+  const replaced = await History.find()
+  assert.deepEqual(replaced.map(saved => saved.videoId).sort(), ['meanwhile', 'new', 'saved'])
+  assert.equal(replaced.find(saved => saved.videoId === 'saved').title, 'Imported')
+})

@@ -43,8 +43,6 @@ Unload Multiple Tabs Confirmation:
   Message: 将卸载 {count} 个标签页。
   Unload Tabs: 卸载 {count} 个标签页
 Tabs Unloaded To Free Memory: 为释放内存，已卸载 {count} 个最近未使用的标签页
-Use Vertical Tabs: 使用垂直标签页
-Use Horizontal Tabs: 使用水平标签页
 Resize Tab Bar: 调整标签栏大小
 Find in page: 在页面中查找
 Previous match: 上一个匹配项
@@ -372,7 +370,6 @@ Settings:
     Add-ons: 扩展功能
     Add-ons Description: SponsorBlock、DeArrow、点踩、AiSList 和配音翻译
     Privacy Description: 历史记录、搜索建议、链接和应用密码
-    Online activity: 在线活动
     Data And Storage Description: 备份、导入和导出、磁盘占用和清理
     Sync Description: 同步服务器账户、设备配对和已同步数据
     Advanced: 高级
@@ -1002,8 +999,6 @@ Settings:
     Update FFmpeg: 更新 FFmpeg
     Checking FFmpeg: 正在检查 FFmpeg…
     Downloading FFmpeg: 正在下载 FFmpeg…
-    FFmpeg Downloaded Template: 已下载 FFmpeg {version}
-    FFmpeg Download Error Template: '下载 FFmpeg 失败：{error}'
     Detected FFprobe Version Template: '检测到的 FFprobe 版本：{version}'
     FFprobe Managed Not Downloaded: 尚未下载 FFprobe。点击下方按钮，将其与 FFmpeg 一起下载。
     System FFprobe Missing Warning: 系统中未找到 FFprobe。后处理期间检查媒体时需要该工具。请将其安装在 FFmpeg 旁边，或将来源切换为“由 OpenTubeX 管理”。
@@ -1064,7 +1059,6 @@ Settings:
     Clear Video Metadata Cache: 清除视频元数据缓存
     Are you sure you want to clear the video metadata cache?: 确定要清除缓存的视频标题、缩略图和说明吗？
     Failed to clear video metadata cache: 清除视频元数据缓存失败
-    Video metadata cache has been cleared: 已清除视频元数据缓存
     Video Metadata Cache Size: '视频元数据缓存：{size}'
   Storage Settings:
     Storage: 存储
@@ -1277,6 +1271,7 @@ Settings:
     Channel playback speeds imported: "已导入 {count} 个频道的播放速度"
     Channels not found: "未能找到 {count} 个频道"
   Sync Settings:
+    Signed Out After Restore: '由于此应用数据是从备份或其他设备恢复的，同步已退出登录。请重新登录以同步此设备。'
     Revoke Session Tabs Warning: "此设备已同步的标签页集合也将被删除。"
     Revoke Session Partial Failure: "已删除同步的标签页组，但无法确认访问权限是否已撤销。请重试撤销访问权限。"
     Tab Sync Revocation Pending: "此登录的访问权限撤销尚未完成，标签页同步已暂停。请在同步设置中重试撤销。"
@@ -1796,8 +1791,6 @@ Video:
       EndTimeAfterStart: 片段结束时间必须晚于开始时间。
       EndTimeBeforeVideoEnd: 片段结束时间必须在视频时长范围内。
       EndTimeLabel: 片段结束时间
-      DisableAutoSkipTemporarily: 暂时禁用 SponsorBlock 自动跳过
-      EnableAutoSkipTemporarily: 重新启用 SponsorBlock 自动跳过
       Guidelines: 指南
       InspectSegment: 查看
       InvalidStartTime: 请输入有效的片段开始时间。
@@ -1833,7 +1826,6 @@ Video:
       InfoPanelLoading: 仍在加载片段...
       InfoPanelHasSegments: 数据库中有此视频的片段！
       InfoPanelNoSegments: 未找到片段
-      RefreshSegments: 刷新片段
       RefreshInfo: 刷新 SponsorBlock 信息
       ContributionStatsTitle: 你的贡献
       ContributionStatsLoading: 正在加载贡献统计信息...
