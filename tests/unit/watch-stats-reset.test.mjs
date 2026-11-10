@@ -56,3 +56,18 @@ test('a failed deletion restores the previous reset marker', async () => {
   assert.equal(f.settings.syncServerWatchStatsReset, f.previous)
   assert.deepEqual(f.writes, [f.reset, 'delete', f.previous])
 })
+
+test('watch-time writes report whether the datastore saved them', async () => {
+  let fails = true
+  const commits = []
+  const store = loadStore({
+    addWatchTime: async () => { if (fails) throw new Error('Write failed') }
+  }, () => null, { error: () => {} })
+  const context = { commit: (name, value) => commits.push([name, value]) }
+  const payload = { date: '2026-10-20', seconds: 3 }
+  assert.equal(await store.actions.recordWatchTime(context, payload), false)
+  assert.deepEqual(commits, [])
+  fails = false
+  assert.equal(await store.actions.recordWatchTime(context, payload), true)
+  assert.deepEqual(commits, [['addWatchTime', payload]])
+})

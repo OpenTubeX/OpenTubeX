@@ -542,7 +542,7 @@ let seekTimer = null
 // Digital wellbeing limits count playback even when watch statistics are off.
 const watchTimeTracker = createWatchTimeTracker(
   () => !loading.value && player.value?.isPaused() === false,
-  (date, seconds) => store.dispatch('recordPlaybackTime', { date, seconds, isShort: false })
+  (date, seconds, retry) => store.dispatch('recordPlaybackTime', { date, seconds, isShort: false, retry })
 )
 watch(() => store.getters.getWatchStatsResetVersion, () => watchTimeTracker.clear())
 // Buffered time follows the recording policy it was watched under.

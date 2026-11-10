@@ -76,6 +76,40 @@ test('watch time ignores delayed ticks and records pending seconds per day', asy
   assert.equal(tracker.lastTick, null)
 })
 
+test('failed watch-time writes stay pending and retry without counting the time again', async () => {
+  let now = new Date(2026, 9, 20, 12).getTime()
+  let fails = true
+  const calls = []
+  const tracker = createWatchTimeTracker(() => true, async (date, seconds, retry) => {
+    calls.push([date, seconds, retry])
+    return !fails
+  }, () => now)
+  tracker.track()
+  now += 3000
+  tracker.track()
+  await tracker.flush()
+  assert.deepEqual(calls, [['2026-10-20', 3, false]])
+  assert.equal(tracker.pendingMilliseconds, 3000, 'A failed write keeps its seconds')
+
+  fails = false
+  tracker.track()
+  now += 2000
+  tracker.track()
+  await tracker.flush()
+  assert.deepEqual(calls.slice(1), [['2026-10-20', 2, false], ['2026-10-20', 3, true]],
+    'New time counts once and the failed batch is only written again')
+  assert.equal(tracker.pendingMilliseconds, 0)
+
+  fails = true
+  tracker.track()
+  now += 1000
+  tracker.track()
+  const write = tracker.flush()
+  tracker.clear()
+  await write
+  assert.equal(tracker.pendingMilliseconds, 0, 'Time cleared during a failed write is not restored')
+})
+
 test('timestamp actions use the active receiver position and return to local playback', () => {
   const view = {
     ...timestampMethods,

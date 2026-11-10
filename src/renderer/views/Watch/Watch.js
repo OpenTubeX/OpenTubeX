@@ -1553,7 +1553,7 @@ export default defineComponent({
     this.watchTimeIsShort = false
     this.watchTimeTracker = createWatchTimeTracker(
       () => !this.isPlaybackPaused() && !this.chromecastStatus?.buffering,
-      (date, seconds) => this.$store.dispatch('recordPlaybackTime', { date, seconds, isShort: this.watchTimeIsShort })
+      (date, seconds, retry) => this.$store.dispatch('recordPlaybackTime', { date, seconds, isShort: this.watchTimeIsShort, retry })
     )
     retainIosMediaSources(() => this.legacyFormats.map(format => format.url))
     this.theatreModeAnimator = createTheatreModeAnimator()
