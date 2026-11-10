@@ -30,6 +30,7 @@ async function fixture() {
       return { castId: 'cast-1' }
     },
     stopDlnaCast: async () => {},
+    isActiveDlnaCast: () => true,
     powerSaveBlocker: { start: () => 1, stop() {} },
     console,
     URL,
@@ -120,4 +121,15 @@ test('a stop that finishes after the next cast started keeps that cast awake', a
   finishStop()
   assert.equal(await stopping, true)
   assert.equal(active.size, 1)
+})
+
+test('a cast stopped while it was starting does not keep the machine awake', async () => {
+  const f = await fixture()
+  let started = 0
+  f.context.powerSaveBlocker = { start: () => ++started, stop() {} }
+  f.context.getDlnaFfmpegExecutable = async () => '/usr/bin/ffmpeg'
+  // e.g. the window closed during the initial seek and its listener stopped the cast
+  f.context.isActiveDlnaCast = () => false
+  assert.equal((await f.dlna.start({ ...payload, audioUrl: undefined, fallbackMediaUrl: undefined })).castId, 'cast-1')
+  assert.equal(started, 0)
 })

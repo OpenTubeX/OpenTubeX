@@ -6,7 +6,7 @@ import { randomUUID } from 'crypto'
 import { IpcChannels } from '../constants'
 import { applyTwitchPlaylistOrigin } from '../twitchPlaylistOrigin'
 import { fetchCastMedia, resolveCastMediaAddresses } from './castMediaServer'
-import { discoverDlnaDevices, startDlnaCast, stopDlnaCast, hasDlnaCastFailed, getDlnaCastPosition } from './dlnaCast'
+import { discoverDlnaDevices, startDlnaCast, stopDlnaCast, hasDlnaCastFailed, getDlnaCastPosition, isActiveDlnaCast } from './dlnaCast'
 import { isInvidiousInstanceUrl } from './invidiousAuthorization'
 import { createMainTranslator } from './mainTranslator'
 import { isOpenTubeXUrl } from './utils'
@@ -122,7 +122,10 @@ export function setupCastIpc({ chromecast, fcast, invidiousAuthorizations, getCo
     const result = await startDlnaCast(event.sender.id, payload, sourceHeaders, muxOptions, resolveAddresses, resolveProxy)
     if (result.castId) {
       if (dlnaPowerSaveBlocker !== null) powerSaveBlocker.stop(dlnaPowerSaveBlocker.id)
-      dlnaPowerSaveBlocker = { id: powerSaveBlocker.start('prevent-app-suspension') }
+      // a stop during startup, e.g. when the window closed while seeking, leaves nothing to keep awake
+      dlnaPowerSaveBlocker = isActiveDlnaCast(result.castId)
+        ? { id: powerSaveBlocker.start('prevent-app-suspension') }
+        : null
       if (event.sender.isDestroyed()) {
         stopDlna(event.sender.id).catch(console.error)
       } else if (!dlnaOwners.has(event.sender)) {
