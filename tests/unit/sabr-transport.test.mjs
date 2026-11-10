@@ -7,6 +7,7 @@ import * as protos from 'googlevideo/protos'
 import { CompositeBuffer, UmpReader, UmpWriter } from 'googlevideo/ump'
 import * as protocol from '../../src/renderer/helpers/player/sabrProtocol.js'
 import * as googleVideoFallback from '../../src/renderer/helpers/player/googleVideoFallback.js'
+import { isRecoverableNetworkError } from '../../src/renderer/helpers/networkRecovery.js'
 
 // shaka-player's compiled build reads `self` while loading, which Node lacks
 globalThis.self ??= globalThis
@@ -24,7 +25,7 @@ class ShakaError extends Error {
   static Severity = { RECOVERABLE: 1, CRITICAL: 2 }
   static Category = { NETWORK: 1 }
   static Code = { OPERATION_ABORTED: 7001, BAD_HTTP_STATUS: 1001, HTTP_ERROR: 1002 }
-  constructor(severity, category, code) { super(String(code)); this.code = code; this.severity = severity }
+  constructor(severity, category, code, ...data) { super(String(code)); this.code = code; this.severity = severity; this.data = data }
 }
 const audioFormatId = { itag: 140, lastModified: '123' }
 const videoFormatId = { itag: 137, lastModified: '456' }
@@ -259,6 +260,40 @@ test('rejects HTTP 403 even when it contains a complete init segment', async () 
   assert.equal(calls, 2, 'a failed init segment must not be cached')
   transport.cleanup()
 })
+
+test('a SABR redirect moves later requests and the reported server URL', async t => {
+  const hosts = []
+  const { createSabrTransport } = load(async url => {
+    hosts.push(new URL(url).hostname)
+    if (hosts.length > 1) return response([1, 2, 3])
+    const buffer = new CompositeBuffer([])
+    new UmpWriter(buffer).write(protos.UMPPartId.SABR_REDIRECT, protos.SabrRedirect.encode({ url: 'https://redirected.example/sabr' }).finish())
+    return new Response(utils.concatenateChunks(buffer.chunks))
+  })
+  const transport = createSabrTransport(sabrData, () => context)
+  t.after(() => transport.cleanup())
+  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+  await transport.request(uri, request(uri), 1).promise
+  assert.deepEqual(hosts, ['example.test', 'redirected.example'])
+  assert.equal(transport.getUrl(), 'https://redirected.example/sabr')
+})
+
+for (const connectionFailed of [true, false]) {
+  test(`an Android ${connectionFailed ? 'connection failure' : 'server 502'} is ${connectionFailed ? '' : 'not '}a lost connection`, async t => {
+    // Android's native error responses have an empty body
+    const { createSabrTransport } = load(async () => new Response('', {
+      status: 502,
+      headers: connectionFailed ? { 'X-OpenTubeX-Connection-Failed': '1' } : {}
+    }), { console: { ...console, warn () {} } })
+    const transport = createSabrTransport(sabrData, () => context)
+    t.after(() => transport.cleanup())
+    const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+    const error = await transport.request(uri, request(uri), 1).promise.catch(error => error)
+    assert.equal(error.code, connectionFailed ? ShakaError.Code.HTTP_ERROR : ShakaError.Code.BAD_HTTP_STATUS)
+    assert.equal(error.severity, ShakaError.Severity.RECOVERABLE)
+    assert.equal(isRecoverableNetworkError(error.data[1]), connectionFailed)
+  })
+}
 
 test('a SABR request switches to the backup server when its node cannot be reached', async t => {
   const hosts = []

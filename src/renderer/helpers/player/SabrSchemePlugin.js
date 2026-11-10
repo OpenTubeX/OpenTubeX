@@ -101,6 +101,7 @@ const ShakaError = shaka.util.Error
  * @type {object}
  * @property {(cb: ({backoffMs: number}) => void) => void} onBackoffRequested
  * @property {(cb: (reloadPlaybackContext?: ReloadPlaybackContext) => void) => void} onReloadOnce
+ * @property {() => string} getUrl the server URL after SABR redirects
  * @property {() => void | undefined} cleanup
  */
 
@@ -538,6 +539,11 @@ async function doRequest(
       response = await fetchGoogleVideo(sabrURL.toString(), currentState.requestInit, capacitorSabrFetch)
     } else {
       response = await fetchGoogleVideo(sabrURL.toString(), currentState.requestInit, fetch)
+    }
+    // Android's native transport answers a connection failure with this
+    // header, so it fails like a lost connection instead of a server's 502.
+    if (response.headers.has('X-OpenTubeX-Connection-Failed')) {
+      throw new Error('Connection to the googlevideo server failed')
     }
 
     operationInputs.headersReceived({})
@@ -1248,6 +1254,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
     onReloadOnce(callback) {
       eventEmitter.once('reload', callback)
     },
+    getUrl: () => sabrStreamState.sabrUrl,
     cleanup,
   }
 }

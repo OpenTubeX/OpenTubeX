@@ -317,6 +317,23 @@ export function withNetworkRecovery(input, init, task, { uncached = false, ...op
     .then(confirm)
 }
 
+/**
+ * Waits in the queue of `url`'s origin until its server replies, for clients
+ * with their own retries, such as Shaka Player, which resume a failed stream
+ * once its server is reachable again. Unlike the queued fetch, this keeps
+ * waiting while other internet hosts answer.
+ * @param {string} url
+ * @param {AbortSignal} signal
+ * @returns {Promise<void>}
+ */
+export function waitUntilReachable(url, signal) {
+  const probe = createInternetProbe((input, init) => withoutNetworkRecovery(() => window.fetch(input, init)), url)
+  return initializeNetworkRecovery().run(new URL(url).origin, async probeSignal => {
+    // Hostnames must stay out of the message, which classifies the failure
+    if (!await probe(probeSignal)) throw new Error('Connection failed')
+  }, { signal, retryDuringOutage: true })
+}
+
 let networkRecoveryBypasses = 0
 
 /**

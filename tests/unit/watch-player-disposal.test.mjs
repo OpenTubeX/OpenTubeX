@@ -20,6 +20,7 @@ test('closing a watch tab releases its player even when saving progress finishes
     tabId: 'closing-tab',
     handleRouteChange: () => new Promise(resolve => { finishSave = resolve }),
     deactivateWatchRuntime() {},
+    cancelPlaybackNetworkWait() {},
     shortsPreloadGeneration: 0,
     shortsPlaybackCache: {
       retain(keys, ids) {

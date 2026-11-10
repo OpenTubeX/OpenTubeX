@@ -6,7 +6,8 @@ import PhoneDescriptionButton from '../../components/PhoneDescriptionButton/Phon
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { isVerticalTabBarPosition } from '../../constants/tabBarPosition'
 import { holdRootClass } from '../../helpers/rootClasses'
-import { connectionEvents, initializeNetworkRecovery, getConnectionState, getWaitingOrigins, retryWaitingRequests } from '../../helpers/networkRecovery'
+import { connectionEvents, initializeNetworkRecovery, getConnectionState, getWaitingOrigins, isRecoverableNetworkError, retryWaitingRequests, waitUntilReachable } from '../../helpers/networkRecovery'
+import { getGoogleVideoProbeUrl } from '../../helpers/player/googleVideoFallback'
 import { ytDlp } from '../../helpers/ytDlp'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { probeHlsManifest } from '../../helpers/player/hlsManifest'
@@ -580,6 +581,12 @@ export default defineComponent({
       ipBlockRecoveryAttemptedForCurrentVideo: false,
       androidHttpErrorRecoveryAttemptedForCurrentVideo: false,
       streamErrorReloadAttemptedForCurrentVideo: false,
+      /** @type {string|null} the googlevideo origin the failed stream waits for */
+      playbackNetworkWaitOrigin: null,
+      // The stream was retried in place after its server became reachable,
+      // but hasn't played long enough since to prove the retry worked.
+      playbackNetworkRetryPending: false,
+      playbackNetworkRetryPlayedSeconds: 0,
       /**
        * Persistent explanation of the last automatic stream-failure recovery.
        * @type {string|null}
@@ -797,6 +804,10 @@ export default defineComponent({
     },
     apiServerUrl: function () {
       return this.$store.getters.getApiServerUrl
+    },
+    /** The player keeps a failed stream until its server answers again. */
+    waitingForPlaybackConnection: function () {
+      return this.playbackNetworkWaitOrigin !== null && this.waitingOrigins.includes(this.playbackNetworkWaitOrigin)
     },
     /** The page is loading, but its YouTube or API server requests wait to retry. */
     waitingForConnection: function () {
@@ -1429,6 +1440,10 @@ export default defineComponent({
       if (previousSummary.length > 0 && this.aiVideoSummaryMode !== 'hide') this.clampShortsAuxPanelScroll()
     },
     currentLocale: 'updateUpcomingTimestamp',
+    // The waiting player error and the pending retry belong to the replaced
+    // source. Recoveries that replace it spend their own bounded budgets.
+    activeFormat: 'resetPlaybackNetworkRecovery',
+    manifestSrc: 'resetPlaybackNetworkRecovery',
     dateFormatPreference: 'updateUpcomingTimestamp',
     timeFormatPreference: 'updateUpcomingTimestamp',
     theatrePossible(possible, wasPossible) {
@@ -1634,6 +1649,7 @@ export default defineComponent({
     connectionEvents.removeEventListener('change', this.handleDownloadConnectionChange)
     connectionEvents.removeEventListener('waiting', this.updateWaitingOrigins)
     clearTimeout(this.downloadedPlaybackFallbackTimer)
+    this.cancelPlaybackNetworkWait()
     this.shortsNavigation.removeListeners()
     window.removeEventListener('resize', this.updateShortsViewportHeight)
     window.removeEventListener('resize', this.updateTheatreLayoutAvailability)
@@ -2400,6 +2416,10 @@ export default defineComponent({
             requestedVideoId !== this.videoId &&
             this.$refs.player.hasLoaded
           if (retainShort) {
+            // The retained Short recovers from its stream error when it returns
+            const waitingError = this.playbackNetworkWaitError
+            this.cancelPlaybackNetworkWait()
+            if (waitingError) this.$refs.player.deferErrorUntilActivated(waitingError)
             this.$refs.player.suspendForShortsNavigation()
           } else {
             await this.destroyPlayer()
@@ -2420,6 +2440,7 @@ export default defineComponent({
           this.ipBlockRecoveryAttemptedForCurrentVideo = false
           this.androidHttpErrorRecoveryAttemptedForCurrentVideo = false
           this.streamErrorReloadAttemptedForCurrentVideo = false
+          this.playbackNetworkRetryPending = false
           this.streamRecoveryNotice = null
           this.playbackProgressedForCurrentVideo = false
           this.playbackEngineFallbackAttemptedForCurrentVideo = false
@@ -4692,6 +4713,12 @@ export default defineComponent({
         !this.isPlaybackPaused()
       ) {
         this.playbackProgressedForCurrentVideo = true
+        if (this.playbackNetworkRetryPending) {
+          this.playbackNetworkRetryPlayedSeconds += elapsedSeconds
+          if (this.playbackNetworkRetryPlayedSeconds >= SABR_ERROR_RECOVERY_SETTLE_SECONDS) {
+            this.playbackNetworkRetryPending = false
+          }
+        }
         // The recovered stream has proven itself after a stretch of natural playback.
         if (this.streamRecoveryNotice !== null) {
           this.streamRecoveryPlayedSeconds += elapsedSeconds
@@ -5836,6 +5863,61 @@ export default defineComponent({
       return true
     },
 
+    /**
+     * Keeps the player and page while the stream's server is unreachable,
+     * then retries the same stream. Reloading would also need YouTube, and
+     * would spend the SABR recovery budget on an outage.
+     * @param {import('shaka-player/dist/shaka-player.ui').default.util.Error} error
+     * @returns {Promise<boolean>} whether the error was handled
+     */
+    async retryStreamWhenReachable(error) {
+      // A stream that fails again soon after its retry needs fresh streaming data
+      if (this.playbackNetworkRetryPending) return false
+      const probeUrl = getGoogleVideoProbeUrl(this.isSabrVideoStream() ? this.$refs.player?.getSabrUrl() : error.data?.[0])
+      if (probeUrl === null) return false
+
+      const player = this.$refs.player
+      this.cancelPlaybackNetworkWait()
+      const controller = new AbortController()
+      this.playbackNetworkWaitController = controller
+      this.playbackNetworkWaitError = error
+      this.playbackNetworkWaitOrigin = new URL(probeUrl).origin
+      console.warn(`Waiting for ${this.playbackNetworkWaitOrigin} to answer before retrying the stream of ${this.videoId}`)
+      try {
+        await waitUntilReachable(probeUrl, controller.signal)
+      } catch {
+        // A cancelled wait belongs to a replaced player. Anything else still
+        // needs the normal recovery.
+        return controller.signal.aborted
+      } finally {
+        if (this.playbackNetworkWaitController === controller) {
+          this.playbackNetworkWaitController = null
+          this.playbackNetworkWaitError = null
+          this.playbackNetworkWaitOrigin = null
+        }
+      }
+      if (player !== this.$refs.player || this.isLoading) return true
+      // Whether or not the retry starts, a further failure needs fresh streaming data
+      this.playbackNetworkRetryPending = true
+      this.playbackNetworkRetryPlayedSeconds = 0
+      if (player?.retryStreaming() !== true) return false
+
+      console.warn(`Retrying the stream of ${this.videoId} after its server answered again`)
+      return true
+    },
+
+    cancelPlaybackNetworkWait() {
+      this.playbackNetworkWaitController?.abort()
+      this.playbackNetworkWaitController = null
+      this.playbackNetworkWaitError = null
+      this.playbackNetworkWaitOrigin = null
+    },
+
+    resetPlaybackNetworkRecovery() {
+      this.cancelPlaybackNetworkWait()
+      this.playbackNetworkRetryPending = false
+    },
+
     isAndroidTransientHttpRecoveryEnabled() {
       return process.env.IS_CAPACITOR
     },
@@ -5941,7 +6023,22 @@ export default defineComponent({
           return
         }
 
-        if (this.isAndroidTransientHttpRecoveryEnabled() && await this.retryAndroidTransientHttpError()) {
+        // YouTube can be unreachable while other hosts and the internet
+        // check answer, so the app doesn't count as offline.
+        if (
+          this.activePlaybackEngine !== 'yt-dlp' &&
+          isRecoverableNetworkError(error.data?.[1]) &&
+          await this.retryStreamWhenReachable(error)
+        ) {
+          return
+        }
+
+        // A stream that already failed its in-place retry needs fresh streaming data
+        if (
+          !this.playbackNetworkRetryPending &&
+          this.isAndroidTransientHttpRecoveryEnabled() &&
+          await this.retryAndroidTransientHttpError()
+        ) {
           return
         }
       }
@@ -7092,6 +7189,7 @@ export default defineComponent({
     },
 
     destroyPlayer: async function(player = this.$refs.player) {
+      this.cancelPlaybackNetworkWait()
       this.playerTeardownInProgress = true
       try {
         const miniPlayerStartHeight = player.getMiniPlayerHandoffHeight?.() ?? 0

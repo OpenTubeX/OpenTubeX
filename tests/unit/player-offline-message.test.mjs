@@ -36,7 +36,8 @@ test('offline warning stays hidden while seeking downloaded audio media', () => 
   const props = reactive({ localFilePlayback: true, format: 'audio' })
   const isOffline = ref(true)
   const isBuffering = ref(false)
-  const visible = vm.runInNewContext(`${expression}\nshowOfflineMessage`, { computed, props, isOffline, isBuffering })
+  const mediaWaiting = ref(false)
+  const visible = vm.runInNewContext(`${expression}\nshowOfflineMessage`, { computed, props, isOffline, isBuffering, mediaWaiting })
   assert.equal(visible.value, false)
   isBuffering.value = true
   assert.equal(visible.value, false, 'local seeking must not show a network warning')
@@ -47,6 +48,8 @@ test('offline warning stays hidden while seeking downloaded audio media', () => 
   isOffline.value = true
   isBuffering.value = false
   assert.equal(visible.value, false)
+  mediaWaiting.value = true
+  assert.equal(visible.value, true, 'Shaka stops reporting buffering after a failed stream, but the video still waits')
 })
 
 for (const [loaded, loading] of [[false, false], [true, false], [false, true]]) {

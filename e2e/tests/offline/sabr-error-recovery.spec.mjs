@@ -1,5 +1,5 @@
 import { choosePickerPaths, goTo, setWindowSize, test, expect } from '../../helpers/app.mjs'
-import { openMockedVideo } from '../../helpers/player.mjs'
+import { openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { demoPlayerResponse } from '../../helpers/media.mjs'
 import {
   mockPlayableWatchPage,
@@ -319,8 +319,8 @@ test('offline WebKit errors retain the player and reconnect restores error handl
     const video = document.querySelector('.ftVideoPlayer video')
     const player = video.ui.getControls().getPlayer()
     window.__offlineRecovery = { video, player, format: view.activeFormat, retries: 0 }
-    view.isAndroidTransientHttpRecoveryEnabled = () => true
-    view.retryAndroidTransientHttpError = async () => {
+    // Online, a lost connection waits for the stream's server to answer
+    view.retryStreamWhenReachable = async () => {
       window.__offlineRecovery.retries++
       return true
     }
@@ -348,6 +348,42 @@ test('offline WebKit errors retain the player and reconnect restores error handl
   } finally {
     await page.context().setOffline(false)
   }
+})
+
+test('a stream whose server is unreachable keeps the player and offers Retry now by keyboard', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  const player = page.locator('.ftVideoPlayer')
+  await expect(player).toBeVisible({ timeout: 30_000 })
+  // Startup playback would otherwise end the simulated stall below
+  await waitForPlayback(page)
+  const watchView = await watchViewHandle(page)
+  await watchView.evaluate(view => {
+    const video = document.querySelector('.ftVideoPlayer video')
+    video.pause()
+    view.handlePlayerError({
+      severity: 2,
+      category: 1,
+      code: 1002,
+      data: ['https://rr1---sn-abc.googlevideo.com/videoplayback?itag=18', new TypeError('Failed to fetch'), 1]
+    })
+    // Playback has run out of buffered media
+    video.dispatchEvent(new Event('waiting'))
+  })
+
+  const retry = player.locator('.streamRecoveryNotice').getByRole('button', { name: 'Retry now' })
+  await expect(retry).toBeVisible()
+  expect(await watchView.evaluate(view => ({ loading: view.isLoading, budget: view.sabrErrorRecoveryAttempts })))
+    .toEqual({ loading: false, budget: 0 })
+  await retry.evaluate(button => {
+    window.__retryClicks = 0
+    button.addEventListener('click', () => window.__retryClicks++)
+    button.focus()
+  })
+  await page.keyboard.press('Space')
+  expect(await page.evaluate(() => ({ clicks: window.__retryClicks, paused: document.querySelector('.ftVideoPlayer video').paused })))
+    .toEqual({ clicks: 1, paused: true })
 })
 
 test('Android transient HTTP recovery retries the current stream once', async ({ app, page }) => {
@@ -382,7 +418,8 @@ test('Android transient HTTP recovery retries the current stream once', async ({
         severity: 2,
         category: 1,
         code: 1002,
-        data: ['https://example.invalid/video', { message: 'Failed to fetch' }]
+        // A lost connection waits for the server instead, see retryStreamWhenReachable
+        data: ['https://example.invalid/video', { message: 'Incomplete segment, missing MEDIA_END part' }]
       }
       await view.handlePlayerError(error)
       const afterFirstError = { retries, existingRecoveries, errorMessage: view.errorMessage }

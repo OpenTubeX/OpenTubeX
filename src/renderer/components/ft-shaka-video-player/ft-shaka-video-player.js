@@ -24,7 +24,7 @@ import { bindIosFullscreen } from '../../helpers/player/iosFullscreen'
 import { bindIosNativeCaptions } from '../../helpers/player/iosNativeCaptions'
 import { bindNativeCaptionTiming } from '../../helpers/player/nativeCaptionTiming'
 import { createIOSMediaTransport } from '../../helpers/player/iosMediaTransport'
-import { withoutNetworkRecovery } from '../../helpers/networkRecovery'
+import { retryWaitingRequests, withoutNetworkRecovery } from '../../helpers/networkRecovery'
 import { holdForPlaybackStartup } from '../../helpers/playbackStartup'
 import { useI18n } from 'vue-i18n'
 import { createPopularityPath, isMostReplayed } from '../../helpers/player/videoPopularity'
@@ -674,6 +674,11 @@ export default defineComponent({
     streamRecoveryNotice: {
       type: String,
       default: null
+    },
+    /** The stream failed and waits for its server to answer again */
+    waitingForConnection: {
+      type: Boolean,
+      default: false
     },
     pauseForStreamRecovery: {
       type: Boolean,
@@ -5026,6 +5031,7 @@ export default defineComponent({
       hasPlaybackPosition.value = true
       // A decoded video frame replaces the retained startup/format-switch poster.
       showPoster.value = false
+      mediaWaiting.value = false
       startPaidPromotionTimer()
 
       if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
@@ -5035,6 +5041,7 @@ export default defineComponent({
     }
 
     function handleWaiting() {
+      mediaWaiting.value = true
       if (shortsNavigationSuspended.value) return
       if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
         window.ftElectron.tabs.setPlaybackState('waiting', tabId)
@@ -8830,6 +8837,12 @@ export default defineComponent({
         return
       }
 
+      // Notice buttons, such as Retry now, activate like other buttons
+      if ((isSpaceKey(event) || event.key === 'Enter') && event.target instanceof Element &&
+        event.target.closest('.streamRecoveryNotice button')) {
+        return
+      }
+
       const matches = shortcut => matchesKeyboardShortcut(event, shortcut)
 
       // exit fullscreen and/or fullwindow if keyboard shortcut modal is opened
@@ -9467,6 +9480,9 @@ export default defineComponent({
 
     const isOffline = ref(!navigator.onLine)
     const isBuffering = ref(false)
+    // Shaka stops reporting buffering once its streaming failed, but the
+    // media element still reports running out of data.
+    const mediaWaiting = ref(false)
 
     function onlineHandler() {
       isOffline.value = false
@@ -9747,7 +9763,12 @@ export default defineComponent({
     // If we briefly lose the connection but it comes back before the buffer is empty,
     // the user won't notice anything so we don't need to display the message.
     const showOfflineMessage = computed(() => {
-      return !props.localFilePlayback && isOffline.value && isBuffering.value
+      return !props.localFilePlayback && isOffline.value && (isBuffering.value || mediaWaiting.value)
+    })
+
+    // Like the offline message, only once the buffered video has played
+    const showConnectionWaitMessage = computed(() => {
+      return props.waitingForConnection && !isOffline.value && (isBuffering.value || mediaWaiting.value)
     })
 
     // #endregion offline message
@@ -10876,6 +10897,16 @@ export default defineComponent({
       tabMediaCoordinator.setPlaybackState(mediaTabId, 'none')
     }
 
+    /**
+     * Replays a stream error when this retained Short is presented again,
+     * after the watch page stopped waiting to recover it.
+     * @param {shaka.util.Error} error
+     */
+    function deferErrorUntilActivated(error) {
+      ignoreErrors = false
+      suspendedShortsError = { error, context: 'shaka error handler', details: undefined, resumePlayback: true }
+    }
+
     onDeactivated(suspendForShortsNavigation)
     onActivated(() => {
       if (!shortsNavigationSuspended.value) return
@@ -10896,9 +10927,15 @@ export default defineComponent({
         return
       }
       if (suspendedShortsError) {
-        const { error, context, details } = suspendedShortsError
+        const { error, context, details, resumePlayback } = suspendedShortsError
         suspendedShortsError = null
         handleError(error, context, details)
+        // The retried stream plays once its server answers
+        if (resumePlayback && resume && isTabPresented?.value !== false) {
+          video.value?.play().catch(error => {
+            console.warn('Could not resume retained Short', error)
+          })
+        }
         return
       }
       fullscreenChangeHandler()
@@ -10984,6 +11021,11 @@ export default defineComponent({
       // Once the first canplay has passed, a lower readyState only means seeking
       // or rebuffering. Queuing then would replay the target after canplay.
       if (pendingMetadataSeek !== null || !hasLoaded.value || !videoLayoutReady.value) pendingMetadataSeek = time
+    }
+
+    /** @returns {string | null} the SABR server URL, which redirects can change */
+    function getSabrUrl() {
+      return sabrStream?.getUrl() ?? null
     }
 
     function getSabrReloadState() {
@@ -11149,6 +11191,8 @@ export default defineComponent({
       getCurrentPlaybackRate,
       setCurrentTime,
       getSabrReloadState,
+      getSabrUrl,
+      deferErrorUntilActivated,
       getActiveCaption,
       retryStreaming,
       setFullscreenMetadata,
@@ -11457,6 +11501,8 @@ export default defineComponent({
       translateSponsorBlockCategory,
 
       showOfflineMessage,
+      showConnectionWaitMessage,
+      retryWaitingRequests,
       autoplayNextVideo,
       autoplayThumbnail,
       autoplayDuration,
