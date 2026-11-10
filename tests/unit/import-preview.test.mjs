@@ -175,6 +175,26 @@ test('duplicate backup identities accumulate subscriptions and videos promised b
   assert.deepEqual((await db.playlists.findOneAsync({ _id: 'same-playlist' })).videos.map(video => video.videoId), ['A', 'B'])
 })
 
+test('a backup whose settings fail to save reports them instead of the backup as imported', async () => {
+  const toasts = []
+  const context = vm.createContext({
+    backupBusy: { value: false },
+    backupData: { value: { settings: { uiScale: 125, rememberHistory: false } } },
+    selectedBackupSections: { value: ['settings'] },
+    authorizeAutomaticDownloadRulesWrite: () => null,
+    applyImportedSettings: async () => ({ total: 2, failed: 1 }),
+    compactAllDatastores: async () => true,
+    closeBackupImport () { toasts.push('closed') },
+    showToast: toast => toasts.push(toast.message),
+    t: (key, values) => values ? `${key} ${JSON.stringify(values)}` : key,
+  })
+  vm.runInContext(componentSection('async function importUnifiedBackup()', 'const showTakeoutImport'), context)
+  vm.runInContext(componentSection('function settingsImportFailureMessage(', 'async function applyImportedSettings('), context)
+  await context.importUnifiedBackup()
+  assert.deepEqual(toasts, ['Settings.Data Settings.Some settings could not be imported {"failed":1,"total":2}'])
+  assert.equal(context.backupBusy.value, false)
+})
+
 test('watch history with empty subtitles imports the record counted in the preview', async () => {
   const record = { products: ['YouTube'], title: 'Watched Example', titleUrl: 'https://www.youtube.com/watch?v=abcdefghijk', time: '2025-01-01T00:00:00Z', subtitles: [] }
   const file = new Blob([zipSync({ 'Takeout/YouTube/history/watch-history.json': strToU8(JSON.stringify([record])) })])

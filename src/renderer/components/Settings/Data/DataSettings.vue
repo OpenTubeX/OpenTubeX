@@ -530,8 +530,12 @@ async function importUnifiedBackup() {
       await DBWatchStatsHandlers.mergeBackup(data.watchStats)
       await store.dispatch('grabWatchStats')
     }
-    if (selected.has('settings') && (await applyImportedSettings(data.settings, authorizedRulesWrite)).failed > 0) {
-      throw new Error('Could not restore settings')
+    if (selected.has('settings')) {
+      const failure = settingsImportFailureMessage(await applyImportedSettings(data.settings, authorizedRulesWrite))
+      if (failure) {
+        showToast({ message: failure, icon: ['fas', 'circle-exclamation'] })
+        return
+      }
     }
     const compaction = await compactAllDatastores().catch(() => false)
     closeBackupImport()
@@ -2350,22 +2354,24 @@ async function importSettings() {
     return
   }
 
-  const { total, failed } = await applyImportedSettings(importedSettings, authorizedRulesWrite)
-  if (total === 0) return
+  const result = await applyImportedSettings(importedSettings, authorizedRulesWrite)
+  if (result.total === 0) return
 
-  if (failed === 0) {
-    showToast({
-      message: t('Settings.Data Settings.All settings have been successfully imported'),
-      icon: ['fas', 'sliders-h'],
-    })
-    return
-  }
-  showToast({
-    message: failed === total
-      ? t('Settings.Data Settings.Settings could not be imported')
-      : t('Settings.Data Settings.Some settings could not be imported', { failed, total }),
-    icon: ['fas', 'circle-exclamation'],
-  })
+  const failure = settingsImportFailureMessage(result)
+  showToast(failure
+    ? { message: failure, icon: ['fas', 'circle-exclamation'] }
+    : { message: t('Settings.Data Settings.All settings have been successfully imported'), icon: ['fas', 'sliders-h'] })
+}
+
+/**
+ * @param {{ total: number, failed: number }} result
+ * @returns {string | null}
+ */
+function settingsImportFailureMessage({ total, failed }) {
+  if (failed === 0) return null
+  return failed === total
+    ? t('Settings.Data Settings.Settings could not be imported')
+    : t('Settings.Data Settings.Some settings could not be imported', { failed, total })
 }
 
 async function applyImportedSettings(importedSettings, authorizedRulesWrite) {
