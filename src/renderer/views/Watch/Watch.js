@@ -1440,9 +1440,10 @@ export default defineComponent({
       if (previousSummary.length > 0 && this.aiVideoSummaryMode !== 'hide') this.clampShortsAuxPanelScroll()
     },
     currentLocale: 'updateUpcomingTimestamp',
-    // The waiting player error belongs to the replaced source
-    activeFormat: 'cancelPlaybackNetworkWait',
-    manifestSrc: 'cancelPlaybackNetworkWait',
+    // The waiting player error and the pending retry belong to the replaced
+    // source. Recoveries that replace it spend their own bounded budgets.
+    activeFormat: 'resetPlaybackNetworkRecovery',
+    manifestSrc: 'resetPlaybackNetworkRecovery',
     dateFormatPreference: 'updateUpcomingTimestamp',
     timeFormatPreference: 'updateUpcomingTimestamp',
     theatrePossible(possible, wasPossible) {
@@ -5903,6 +5904,11 @@ export default defineComponent({
       this.playbackNetworkWaitController?.abort()
       this.playbackNetworkWaitController = null
       this.playbackNetworkWaitOrigin = null
+    },
+
+    resetPlaybackNetworkRecovery() {
+      this.cancelPlaybackNetworkWait()
+      this.playbackNetworkRetryPending = false
     },
 
     isAndroidTransientHttpRecoveryEnabled() {
