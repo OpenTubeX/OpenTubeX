@@ -148,5 +148,6 @@ if (supportsYtDlp) {
     for (const download of downloads) {
       if (!removedDownloadIds.has(download.id)) store.commit('upsertYtDlpDownload', download)
     }
+    store.commit('setYtDlpDownloadsLoaded')
   }).catch(error => console.warn('Could not load download history', error))
 }

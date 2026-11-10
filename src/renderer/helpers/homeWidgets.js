@@ -48,14 +48,18 @@ export function syncHomeWidgets(store, watch) {
     }),
   ]
   if (supportsYtDlp) {
-    stops.push(syncWidget(watch, 'setDownloads', () => ({
-      downloads: createDownloadWidgetItems(Object.values(getters.getYtDlpDownloads), download => {
-        if (getters.getBlurThumbnails || getters.getThumbnailPreference === 'hidden') return null
-        // Single videos follow the thumbnail settings; playlists keep their own image.
-        return download.videoId && !download.playlistId ? videoThumbnail(download.videoId) : download.thumbnail
-      }),
-      authorization: authorization(),
-    })))
+    stops.push(syncWidget(watch, 'setDownloads', () => {
+      // Keep the cached list until the download history has loaded.
+      if (!store.state.downloads.ytDlpDownloadsLoaded) return null
+      return {
+        downloads: createDownloadWidgetItems(Object.values(getters.getYtDlpDownloads), download => {
+          if (getters.getBlurThumbnails || getters.getThumbnailPreference === 'hidden') return null
+          // Single videos follow the thumbnail settings; playlists keep their own image.
+          return download.videoId && !download.playlistId ? videoThumbnail(download.videoId) : download.thumbnail
+        }),
+        authorization: authorization(),
+      }
+    }))
   }
   return () => stops.forEach(stop => stop())
 }

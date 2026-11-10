@@ -113,6 +113,18 @@ public class HomeWidgetsTest {
             HomeWidgets.removeQuickAccessPages(context, new int[] { id });
         }
         assertEquals(HomeWidgets.DEFAULT_QUICK_ACCESS_PAGES, HomeWidgets.quickAccessPages(context, id));
+
+        // A restore can give one widget the old ID of another.
+        try {
+            HomeWidgets.setQuickAccessPages(context, id, List.of(HomeWidgets.Page.HISTORY));
+            HomeWidgets.setQuickAccessPages(context, id + 1, List.of(HomeWidgets.Page.PLAYLISTS));
+            new QuickAccessWidgetProvider().onRestored(context, new int[] { id, id + 1 }, new int[] { id + 1, id + 2 });
+            assertEquals(List.of(HomeWidgets.Page.HISTORY), HomeWidgets.quickAccessPages(context, id + 1));
+            assertEquals(List.of(HomeWidgets.Page.PLAYLISTS), HomeWidgets.quickAccessPages(context, id + 2));
+            assertEquals(HomeWidgets.DEFAULT_QUICK_ACCESS_PAGES, HomeWidgets.quickAccessPages(context, id));
+        } finally {
+            HomeWidgets.removeQuickAccessPages(context, new int[] { id, id + 1, id + 2 });
+        }
     }
 
     @Test
