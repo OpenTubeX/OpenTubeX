@@ -484,7 +484,7 @@ export function snapScrollMiniPlayerToEdge(rect, insets) {
  * @param {number} t
  * @returns {number}
  */
-function easeOutBack(t) {
+export function easeOutBack(t) {
   const c1 = 1.70158
   const c3 = c1 + 1
   return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2)
@@ -519,9 +519,6 @@ function getHeightForAspectRatio(width, aspectRatio) {
 function getWidthForAspectRatio(height, aspectRatio) {
   return Math.max(1, Math.round(height * normalizeAspectRatio(aspectRatio)))
 }
-
-// easeOutBack as a timing function, so the bounce can run on the compositor.
-export const BOUNCE_EASING = `linear(${Array.from({ length: 31 }, (_, step) => Math.round(easeOutBack(step / 30) * 10000) / 10000).join(', ')})`
 
 /**
  * @param {ScrollMiniPlayerRect} rect

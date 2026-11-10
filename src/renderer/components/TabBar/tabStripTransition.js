@@ -204,7 +204,7 @@ export function useTabStripTransition({ isVertical, shouldAnimateEnter, getStrip
 
   /** @param {Element} strip */
   function isRightToLeft(strip) {
-    return !isVertical() && getComputedStyle(strip).direction === 'rtl'
+    return getComputedStyle(strip).direction === 'rtl'
   }
 
   /**
@@ -445,18 +445,18 @@ export function useTabStripTransition({ isVertical, shouldAnimateEnter, getStrip
     // Along the strip, the closed tab has given up this part of its space
     // when it has squeezed into the dot.
     const squeezedShare = vertical ? 0 : (size - DOT_SIZE_PX) / (size + gap)
+    // The copy moves with the item before it, which moves only when the
+    // strip's scroll position shrinks with its range. Measure it before its
+    // slide draws it where it was.
+    const previous = remaining[index - 1]
+    const previousBefore = previous && before.get(previous)
+    const previousAfter = previous?.getBoundingClientRect()
     const timing = { duration: SQUEEZE_DURATION_MS, delay: SQUEEZE_DELAY_MS, easing: ACCELERATE, fill: /** @type {FillMode} */ ('backwards') }
     slide(before, remaining, ([x, y]) => [
       { translate: `${x}px ${y}px` },
       { translate: `${x * (1 - squeezedShare)}px ${y * (1 - squeezedShare)}px`, offset: SQUEEZED_OFFSET },
       { translate: '0px 0px' }
     ], timing)
-
-    // The copy moves with the item before it, which moves only when the
-    // strip's scroll position shrinks with its range.
-    const previous = remaining[index - 1]
-    const previousBefore = previous && before.get(previous)
-    const previousAfter = previous?.getBoundingClientRect()
     const [startX = 0, startY = 0] = ghostStyle.translate === 'none' ? [] : ghostStyle.translate.split(' ').map(parseFloat)
     const followX = previousBefore ? previousAfter.left - previousBefore.left : 0
     const followY = previousBefore ? previousAfter.top - previousBefore.top : 0
@@ -501,14 +501,16 @@ export function useTabStripTransition({ isVertical, shouldAnimateEnter, getStrip
    * its final layout.
    */
   function finishAll() {
+    // The strip takes its layout before completing openings, which may scroll
+    // to the opened tab.
+    slides.forEach(animation => animation.cancel())
+    slides.clear()
     for (const [wrapper, entry] of [...running]) {
       running.delete(wrapper)
       entry.animations.forEach(animation => animation.cancel())
       entry.tab.style.removeProperty('transform-origin')
       entry.done()
     }
-    slides.forEach(animation => animation.cancel())
-    slides.clear()
     for (const entry of ghosts) {
       entry.animations.forEach(animation => animation.cancel())
       entry.ghost.remove()
