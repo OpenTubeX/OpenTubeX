@@ -612,7 +612,10 @@
     position: fixed;
     inline-size: 200px;
     transform: translateX(-100%);
-    transition-property: transform;
+
+    /* Hide the closed side bar once it has slid out, so it leaves the tab order */
+    visibility: hidden;
+    transition-property: transform, visibility;
   }
 
   .watchSideNavOverlay.isLocaleRightToLeft :deep(.sideNav) {
@@ -621,6 +624,7 @@
 
   .watchSideNavOverlay :deep(.sideNav.opened) {
     transform: translateX(0);
+    visibility: visible;
   }
 
   .watchSideNavOverlay :deep(.sideNav .inner) {

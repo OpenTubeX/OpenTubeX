@@ -13,6 +13,7 @@
       >
         <button
           class="menuButton navButton"
+          data-tutorial="navigation-toggle"
           :aria-label="expandCollapseSideBarLabel"
           :title="expandCollapseSideBarLabel"
           @click="toggleSideNav"
