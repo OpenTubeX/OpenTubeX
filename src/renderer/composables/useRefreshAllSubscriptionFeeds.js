@@ -7,7 +7,8 @@ import {
   refreshSubscriptionLiveFromRemote,
   refreshSubscriptionPostsFromRemote,
   refreshSubscriptionShortsFromRemote,
-  refreshSubscriptionVideosFromRemote
+  refreshSubscriptionVideosFromRemote,
+  withSharedChannelUploads
 } from '../helpers/subscriptions'
 import { withAndroidSubscriptionRefreshBatch } from '../helpers/androidSubscriptionRefresh'
 import { getEnabledSubscriptionFeedSources } from '../helpers/newSubscriptionFeed'
@@ -61,7 +62,7 @@ export function useRefreshAllSubscriptionFeeds() {
 
     try {
       if (enabledFeeds.value.length === 0) return
-      await withAndroidSubscriptionRefreshBatch(async () => {
+      await withAndroidSubscriptionRefreshBatch(() => withSharedChannelUploads(async () => {
         for (const feed of enabledFeeds.value) {
           // Also covers a cancellation between two feeds, when no feed refresh
           // was running to receive it
@@ -71,7 +72,7 @@ export function useRefreshAllSubscriptionFeeds() {
 
           await feed.refresh({ t, errorChannels: errorChannels.value })
         }
-      }, { title: t('Subscriptions.Subscriptions'), cancelLabel: t('Feed.Cancel Refresh') })
+      }), { title: t('Subscriptions.Subscriptions'), cancelLabel: t('Feed.Cancel Refresh') })
     } finally {
       isRefreshing.value = false
     }

@@ -1521,6 +1521,7 @@ Settings:
   Search Settings: Подешавања претраге
   No Settings Found: Нису пронађена подешавања
   Experimental Settings:
+    Faster Subscription Refresh: "Брже освежавање праћења"
     Disable Hardware Acceleration: Онемогући хардверско убрзање
   Interface Customizer:
     Customize Interface: "Прилагоди интерфејс"
@@ -2353,6 +2354,7 @@ Tooltips:
     Use Grid Player Menu: Распоређује мени подешавања плејера као мрежу плочица уместо као листу редова.
     Modal Backdrop: "Одређује како апликација изгледа иза дијалога и менија. Замућење може бити споро на слабијим уређајима."
   Experimental Settings:
+    Faster Subscription Refresh: "Прво проверава RSS фид сваког канала и учитава видео снимке, Shorts и преносе уживо само са канала са новим отпремањима. Аутоматска освежавања такође прескачу канале учитане у последњих 10 минута. За канале без нових отпремања број прегледа, уклоњени видео снимци и промењени наслови ажурирају се само на сваких неколико сати, а нова отпремања могу се појавити касније када RSS фид касни. Није доступно са Invidious API-јем."
     Disable Hardware Acceleration: Онемогућава хардверско убрзање GPU-а. Може решити графичке проблеме, али ће вероватно смањити перформансе.
 The playlist is at the beginning. Enable loop to continue playing: Листа за репродукцију је на почетку. Укључите понављање да бисте наставили репродукцију
 External link opening has been disabled in Settings → Privacy: Отварање спољних веза је искључено у Подешавања → Приватност

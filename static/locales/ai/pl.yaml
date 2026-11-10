@@ -145,6 +145,8 @@ User Playlists:
     Adding missing videos to {playlistName}: 'Dodawanie brakujących filmów do {playlistName}'
     Checking {playlistName} for unavailable videos: 'Sprawdzanie niedostępnych filmów w {playlistName} ({checked}/{total})'
 Settings:
+  Experimental Settings:
+    Faster Subscription Refresh: "Szybsze odświeżanie subskrypcji"
   Diagnostics:
     Diagnostics: Diagnostyka
     Description: Gdy dziennik diagnostyczny jest włączony, OpenTubeX przechowuje ostatnie komunikaty dziennika w pamięci, aby można je było dołączyć do zgłoszeń błędów. Nigdy nie zapisuje ani nie wysyła ich samodzielnie, a wyłączenie dziennika je usuwa. Raporty pomijają pliki cookie, tokeny, adresy IP i parametry adresów URL, ale mogą zawierać identyfikatory odtwarzanych filmów, więc sprawdź raport przed udostępnieniem.
@@ -1412,6 +1414,8 @@ Description:
   Games: Gry
   Music: Muzyka
 Tooltips:
+  Experimental Settings:
+    Faster Subscription Refresh: "Najpierw sprawdza kanał RSS każdego kanału i wczytuje filmy, Shorts i transmisje na żywo tylko z kanałów z nowymi przesłanymi filmami. Automatyczne odświeżanie pomija też kanały wczytane w ciągu ostatnich 10 minut. W kanałach bez nowych filmów liczba wyświetleń, usunięte filmy i zmienione tytuły aktualizują się tylko co kilka godzin, a nowe filmy mogą pojawić się później, gdy kanał RSS jest opóźniony. Niedostępne z API Invidious."
   General Settings:
     Limit Titles to Two Lines: "Skraca tytuły filmów i playlist na listach i w siatkach do dwóch wierszy z wielokropkiem, aby karty były bardziej jednolite. Najedź kursorem na tytuł, aby zobaczyć go w całości."
     Close Window With Last Tab: 'Gdy wyłączone, zamknięcie ostatniej karty otwiera zamiast tego nową kartę, więc okno pozostaje otwarte, dopóki go nie zamkniesz.'

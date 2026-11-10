@@ -1479,6 +1479,7 @@ Settings:
   Search Settings: Gosodiadau chwilio
   No Settings Found: Ni chanfuwyd unrhyw osodiadau
   Experimental Settings:
+    Faster Subscription Refresh: "Adnewyddu tanysgrifiadau'n gyflymach"
     Disable Hardware Acceleration: Analluogi cyflymiad caledwedd
   Interface Customizer:
     Customize Interface: "Addasu'r rhyngwyneb"
@@ -2307,6 +2308,7 @@ Tooltips:
     Use Grid Player Menu: Mae'n trefnu dewislen gosodiadau'r chwaraewr fideo fel grid o deils yn lle rhestr o resi.
     Modal Backdrop: "Yn gosod sut mae’r ap yn edrych y tu ôl i ddeialogau a dewislenni. Gall niwlio fod yn araf ar ddyfeisiau llai pwerus."
   Experimental Settings:
+    Faster Subscription Refresh: "Yn gwirio ffrwd RSS pob sianel yn gyntaf a dim ond yn llwytho fideos, Shorts a ffrydiau byw sianeli sydd â llwythiadau newydd. Mae adnewyddiadau awtomatig hefyd yn hepgor sianeli a lwythwyd yn ystod y 10 munud diwethaf. Ar gyfer sianeli heb lwythiadau newydd, dim ond bob ychydig oriau y caiff nifer y gwyliadau, fideos a dynnwyd a theitlau a newidiwyd eu diweddaru, a gall llwythiadau newydd ymddangos yn hwyrach pan fydd y ffrwd RSS ar ei hôl hi. Ddim ar gael gydag API Invidious."
     Disable Hardware Acceleration: Yn analluogi cyflymiad caledwedd y GPU. Gall ddatrys problemau graffeg, ond mae'n debygol o leihau perfformiad.
 The playlist is at the beginning. Enable loop to continue playing: Mae'r rhestr chwarae ar y dechrau. Galluogwch ailadrodd i barhau i chwarae
 External link opening has been disabled in Settings → Privacy: Mae agor dolenni allanol wedi'i analluogi yn Gosodiadau → Preifatrwydd

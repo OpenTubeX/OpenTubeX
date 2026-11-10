@@ -299,7 +299,7 @@ function loadVideosFromRemoteFirstPerWindowSometimes() {
   }
 
   alreadyLoadedRemotely = true
-  loadVideosForSubscriptionsFromRemote()
+  loadVideosForSubscriptionsFromRemote(true)
   store.commit('setSubscriptionForVideosFirstAutoFetchRun')
 }
 
@@ -316,7 +316,7 @@ function loadVideosFromCacheSometimes() {
 
   if (fetchSubscriptionsAutomatically.value) {
     // `isLoading.value = false` is called inside `loadVideosForSubscriptionsFromRemote` when needed
-    loadVideosForSubscriptionsFromRemote()
+    loadVideosForSubscriptionsFromRemote(true)
     return
   }
 
@@ -344,7 +344,10 @@ useSubscriptionChannelUpdates('videos', () => {
   }
 }, () => isLargeCachedFeed.value)
 
-async function loadVideosForSubscriptionsFromRemote() {
+/**
+ * @param {boolean} [automatic] Leaves out channels fetched moments ago
+ */
+async function loadVideosForSubscriptionsFromRemote(automatic = false) {
   const wasShowingCache = !isLoading.value && videoList.value.length > 0
   isLoading.value = true
   attemptedFetch.value = true
@@ -358,6 +361,7 @@ async function loadVideosForSubscriptionsFromRemote() {
   try {
     const refreshedVideos = await refreshSubscriptionVideosFromRemote({
       t,
+      automatic,
       errorChannels: errorChannels.value
     })
     if (refreshedVideos !== null) {

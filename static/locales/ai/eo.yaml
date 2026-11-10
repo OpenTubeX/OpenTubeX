@@ -343,6 +343,8 @@ History:
   Custom: Laŭmenda
   History Older Than Days Removed: Spekthistorio pli malnova ol 1 tago estis forigita | Spekthistorio pli malnova ol {days} tagoj estis forigita
 Settings:
+  Experimental Settings:
+    Faster Subscription Refresh: "Pli rapida aktualigo de abonoj"
   Tab Unloading:
     Automatically unload tabs: Aŭtomate malŝargi langetojn
     Memory threshold: Memorsojlo
@@ -2197,6 +2199,8 @@ Description:
   Games: Ludoj
   Music: Muziko
 Tooltips:
+  Experimental Settings:
+    Faster Subscription Refresh: "Unue kontrolas la RSS-fluon de ĉiu kanalo kaj ŝargas videojn, Shorts kaj rektajn elsendojn nur de kanaloj kun novaj alŝutoj. Aŭtomataj aktualigoj ankaŭ preterlasas kanalojn ŝargitajn en la lastaj 10 minutoj. Por kanaloj sen novaj alŝutoj, spektokvantoj, forigitaj videoj kaj ŝanĝitaj titoloj ĝisdatiĝas nur ĉiujn kelkajn horojn, kaj novaj alŝutoj eble aperos poste, kiam la RSS-fluo malfruas. Ne disponebla kun la Invidious-API."
   General Settings:
     Limit Titles to Two Lines: "Mallongigas titolojn de videoj kaj ludlistoj en listoj kaj kradoj al du linioj kun tripunkto, por pli unuformaj kartoj. Ŝvebigu la musmontrilon super titolo por vidi ĝin tute."
     Preferred Video Codec: |

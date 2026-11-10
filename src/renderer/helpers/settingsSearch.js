@@ -111,6 +111,11 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     return usingElectron || (isCapacitor && !isIos)
   }
 
+  // These switch Electron command line flags
+  if (sectionType === 'experimental' && ['Replace HTTP Cache', 'Disable Hardware Acceleration'].includes(group)) {
+    return usingElectron
+  }
+
   // RSS feed items open through yt-dlp, and the manager needs the feature enabled
   if (sectionType === 'subscription' && ['RSS Feeds', 'Enable RSS Feeds', 'Manage RSS Feeds'].includes(group)) {
     return (usingElectron || isCapacitor) && !isLiteBuild &&

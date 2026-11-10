@@ -1646,6 +1646,7 @@ Settings:
   Search Settings: Innstillingar for søk
   No Settings Found: Fann ingen innstillingar
   Experimental Settings:
+    Faster Subscription Refresh: "Raskare oppdatering av abonnement"
     Disable Hardware Acceleration: Slå av maskinvareakselerasjon
   Interface Customizer:
     Customize Interface: "Tilpass grensesnitt"
@@ -2591,6 +2592,7 @@ Tooltips:
     UseDeArrowTitles: Byt ut videotitlar med titlar som brukarar har sendt inn til DeArrow.
     UseDeArrowThumbnails: Byt ut videominiatyrar med miniatyrar frå DeArrow.
   Experimental Settings:
+    Faster Subscription Refresh: "Sjekkar først RSS-straumen til kvar kanal og lastar berre inn videoar, Shorts og direktesendingar frå kanalar med nye opplastingar. Automatiske oppdateringar hoppar òg over kanalar som er lasta inn dei siste 10 minutta. For kanalar utan nye opplastingar vert visingstal, fjerna videoar og endra titlar berre oppdaterte med nokre timars mellomrom, og nye opplastingar kan dukke opp seinare når RSS-straumen heng etter. Ikkje tilgjengeleg med Invidious-API-et."
     Disable Hardware Acceleration: Slår av GPU-maskinvareakselerasjon. Kan løyse grafikkproblem, men vil truleg redusere ytinga.
 Autoplay Interruption Timer: Automatisk avspeling vart avbroten etter {autoplayInterruptionIntervalHours} timar utan aktivitet
 The playlist is at the beginning. Enable loop to continue playing: Spelelista er på byrjinga. Slå på gjentaking for å spele vidare

@@ -55,6 +55,11 @@ import { cancelAndroidSubscriptionRefresh, finishAndroidSubscriptionRefresh, isA
 import { isRecoverableNetworkError } from './networkRecovery'
 import { createSubscriptionNetworkRecovery, SubscriptionNetworkError } from './subscriptionNetworkRecovery'
 import { buildRequestDiagnostic, formatRequestDiagnostic } from './api/requestDiagnostics'
+import {
+  canKeepSubscriptionFeedWithoutNewUploads,
+  hasNoNewSubscriptionUploads,
+  isSubscriptionFeedRecentlyFetched
+} from './subscriptionUploadCheck'
 
 const AUTO_REFRESH_TOAST_DURATION = 5000
 export const SUBSCRIPTION_REFRESH_CHANNEL_EVENT = 'opentubex-subscription-refresh-channel'
@@ -87,6 +92,12 @@ const SUBSCRIPTION_FETCH_BATCH_DELAY_MS = 2000
 const SUBSCRIPTION_FETCH_CONCURRENCY = 8
 const RSS_ENRICHMENT_CONCURRENCY = 3
 const RSS_ENRICHMENT_TIMEOUT_MS = 15_000
+
+/**
+ * Channel upload feeds shared by the feed refreshes of one refresh-all.
+ * @type {Map<string, Promise<{ videoId: string, published: number, isShort?: boolean }[] | null>> | null}
+ */
+let sharedChannelUploads = null
 
 /**
  * Refresh only due premieres, preserving the channel's full-refresh timestamp
@@ -423,18 +434,164 @@ async function fetchSubscriptionsConcurrently(channels, fetchChannel) {
   )
 }
 
+/**
+ * Lets the feed refreshes run by `refresh` share each channel's upload feed.
+ * @template T
+ * @param {() => Promise<T>} refresh
+ * @returns {Promise<T>}
+ */
+export async function withSharedChannelUploads(refresh) {
+  sharedChannelUploads = new Map()
+  try {
+    return await refresh()
+  } finally {
+    sharedChannelUploads = null
+  }
+}
+
+/**
+ * Loads the newest uploads of all types from the channel's RSS feed.
+ * Resolves to null when the feed is unavailable.
+ * @param {string} channelId
+ */
+function getChannelUploads(channelId) {
+  const shared = sharedChannelUploads
+  const existing = shared?.get(channelId)
+  if (existing) return existing
+
+  const promise = (async () => {
+    const response = await localApiFetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`, {
+      signal: activeRefresh?.controller.signal
+    })
+    return response.status === 200 ? parseSubscriptionRss(await response.text(), channelId).videos : null
+  })().catch(() => null)
+
+  if (shared) {
+    shared.set(channelId, promise)
+    // Let the next feed retry a failed check
+    promise.then(uploads => {
+      if (uploads === null && shared.get(channelId) === promise) shared.delete(channelId)
+    })
+  }
+  return promise
+}
+
+/**
+ * With Faster Subscription Refresh, returns the cached entries when they can
+ * be kept because the channel's upload feed lists nothing new for them,
+ * otherwise null. A failed check
+ * falls through to the full fetch, which handles the errors.
+ * @param {'videos' | 'shorts' | 'live'} feed
+ * @param {string} channelId
+ * @param {string} backend
+ */
+async function getUnchangedSubscriptionFeed(feed, channelId, backend) {
+  if (!store.getters.getFastSubscriptionRefresh || !process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backend)) return null
+
+  const getCaches = () => ({
+    videos: store.getters.getVideoCache,
+    shorts: store.getters.getShortsCache,
+    live: store.getters.getLiveCache
+  })
+  if (!canKeepSubscriptionFeedWithoutNewUploads(getCaches()[feed][channelId], Date.now())) return null
+
+  const uploads = await getChannelUploads(channelId)
+  if (uploads === null) return null
+
+  const caches = getCaches()
+  const cacheEntry = caches[feed][channelId]
+  const knownVideoIds = new Set(Object.values(caches)
+    .flatMap(cache => cache[channelId]?.videos ?? [])
+    .map(video => video.videoId))
+  return canKeepSubscriptionFeedWithoutNewUploads(cacheEntry, Date.now()) &&
+    hasNoNewSubscriptionUploads(feed, cacheEntry, uploads, knownVideoIds)
+    ? cacheEntry.videos
+    : null
+}
+
+/**
+ * Keeps the cached feed of a channel without new uploads. Automatic downloads
+ * still run on it, so failed ones are retried as after a full fetch.
+ * @param {'videos' | 'shorts' | 'live'} feed
+ * @param {{ id: string }} channel
+ * @param {string} backend
+ * @param {(key: string, named?: Record<string, unknown>) => string} t
+ * @returns {Promise<boolean>} Whether the cached feed was kept
+ */
+async function keepUnchangedSubscriptionFeed(feed, channel, backend, t) {
+  const videos = await getUnchangedSubscriptionFeed(feed, channel.id, backend)
+  if (videos === null) return false
+  await startAutomaticDownloadsForChannel(channel, videos, feed, t, electronRefreshOwnerTabId)
+  return true
+}
+
+/**
+ * With Faster Subscription Refresh, automatic local API refreshes leave out
+ * channels fetched moments ago, for example by another window or right before
+ * a restart. Automatic downloads still run on their cached entries.
+ * @template {{ id: string }} T
+ * @param {T[]} channels
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} feed
+ * @param {boolean} automatic
+ * @param {(key: string, named?: Record<string, unknown>) => string} t
+ * @returns {Promise<T[]>}
+ */
+async function omitRecentlyFetchedChannels(channels, feed, automatic, t) {
+  if (
+    !automatic ||
+    !store.getters.getFastSubscriptionRefresh ||
+    !process.env.SUPPORTS_LOCAL_API ||
+    usesInvidiousApi(store.getters.getBackendPreference)
+  ) {
+    return channels
+  }
+
+  const cache = {
+    videos: store.getters.getVideoCache,
+    shorts: store.getters.getShortsCache,
+    live: store.getters.getLiveCache,
+    posts: store.getters.getPostsCache
+  }[feed]
+  const now = Date.now()
+  const remaining = []
+  for (const channel of channels) {
+    const cacheEntry = cache[channel.id]
+    if (!isSubscriptionFeedRecentlyFetched(cacheEntry, now)) {
+      remaining.push(channel)
+    } else if (feed !== 'posts') {
+      await startAutomaticDownloadsForChannel(channel, cacheEntry.videos, feed, t, electronRefreshOwnerTabId)
+    }
+  }
+  return remaining
+}
+
+/**
+ * Pauses between batches in proportion to the channels that were fetched in
+ * full, so channels kept unchanged after their upload check add no delay.
+ * @param {{ id: string }[]} channels
+ * @param {(channel: any, backend?: string) => Promise<unknown>} fetchChannel Resolves to false when it kept the cached feed
+ */
 async function fetchSubscriptionsInBatches(channels, fetchChannel) {
+  let fetchedInBatch = 0
+  const countFetch = async (channel, backend) => {
+    const result = await fetchChannel(channel, backend)
+    if (result !== false) fetchedInBatch++
+    return result
+  }
+
   for (let index = 0; index < channels.length; index += SUBSCRIPTION_FETCH_BATCH_SIZE) {
     if (isRefreshCancelled()) {
       break
     }
 
-    if (index > 0) {
-      await new Promise(resolve => setTimeout(resolve, SUBSCRIPTION_FETCH_BATCH_DELAY_MS))
+    if (fetchedInBatch > 0) {
+      const delay = SUBSCRIPTION_FETCH_BATCH_DELAY_MS * Math.min(fetchedInBatch / SUBSCRIPTION_FETCH_BATCH_SIZE, 1)
+      await new Promise(resolve => setTimeout(resolve, delay))
     }
 
+    fetchedInBatch = 0
     const batch = channels.slice(index, index + SUBSCRIPTION_FETCH_BATCH_SIZE)
-    await fetchSubscriptionsConcurrently(batch, fetchChannel)
+    await fetchSubscriptionsConcurrently(batch, countFetch)
   }
 }
 
@@ -842,10 +999,16 @@ export function refreshSubscriptionVideosFromRemote(options) {
 async function refreshSubscriptionVideosFromRemoteUnlocked({
   t,
   showStartToast = false,
-  errorChannels = []
+  errorChannels = [],
+  automatic = false
 }, activeProfile) {
   const activeSubscriptionList = getSubscriptionsForFeed(activeProfile.subscriptions, 'videos')
-  const subscriptionList = includeNotificationChannels(includeAutomaticDownloadChannels(activeSubscriptionList, 'videos'), 'videos')
+  const subscriptionList = await omitRecentlyFetchedChannels(
+    includeNotificationChannels(includeAutomaticDownloadChannels(activeSubscriptionList, 'videos'), 'videos'),
+    'videos',
+    automatic,
+    t
+  )
   if (subscriptionList.length === 0) {
     completeSubscriptionRefresh('videos', activeProfile._id)
     return []
@@ -864,6 +1027,12 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
 
   try {
     const fetchChannel = async (channel, backend = store.getters.getBackendPreference) => {
+      if (await keepUnchangedSubscriptionFeed('videos', channel, backend, t)) {
+        channelCount++
+        setSubscriptionRefreshProgress((channelCount / subscriptionList.length) * 100)
+        return false
+      }
+
       let videos, name, thumbnailUrl, handle
 
       if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backend)) {
@@ -952,10 +1121,16 @@ export function refreshSubscriptionShortsFromRemote(options) {
 async function refreshSubscriptionShortsFromRemoteUnlocked({
   t,
   showStartToast = false,
-  errorChannels = []
+  errorChannels = [],
+  automatic = false
 }, activeProfile) {
   const activeSubscriptionList = getSubscriptionsForFeed(activeProfile.subscriptions, 'shorts')
-  const subscriptionList = includeNotificationChannels(includeAutomaticDownloadChannels(activeSubscriptionList, 'shorts'), 'shorts')
+  const subscriptionList = await omitRecentlyFetchedChannels(
+    includeNotificationChannels(includeAutomaticDownloadChannels(activeSubscriptionList, 'shorts'), 'shorts'),
+    'shorts',
+    automatic,
+    t
+  )
   if (subscriptionList.length === 0) {
     completeSubscriptionRefresh('shorts', activeProfile._id)
     return []
@@ -973,6 +1148,12 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
 
   try {
     await fetchSubscriptionsConcurrently(subscriptionList, async (channel, backend = store.getters.getBackendPreference) => {
+      if (await keepUnchangedSubscriptionFeed('shorts', channel, backend, t)) {
+        channelCount++
+        setSubscriptionRefreshProgress((channelCount / subscriptionList.length) * 100)
+        return false
+      }
+
       let videos, name
 
       if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backend)) {
@@ -1047,10 +1228,16 @@ export function refreshSubscriptionLiveFromRemote(options) {
 async function refreshSubscriptionLiveFromRemoteUnlocked({
   t,
   showStartToast = false,
-  errorChannels = []
+  errorChannels = [],
+  automatic = false
 }, activeProfile) {
   const activeSubscriptionList = getSubscriptionsForFeed(activeProfile.subscriptions, 'live')
-  const subscriptionList = includeNotificationChannels(includeAutomaticDownloadChannels(activeSubscriptionList, 'live'), 'live')
+  const subscriptionList = await omitRecentlyFetchedChannels(
+    includeNotificationChannels(includeAutomaticDownloadChannels(activeSubscriptionList, 'live'), 'live'),
+    'live',
+    automatic,
+    t
+  )
   if (subscriptionList.length === 0) {
     completeSubscriptionRefresh('live', activeProfile._id)
     return []
@@ -1069,6 +1256,12 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
 
   try {
     const fetchChannel = async (channel, backend = store.getters.getBackendPreference) => {
+      if (await keepUnchangedSubscriptionFeed('live', channel, backend, t)) {
+        channelCount++
+        setSubscriptionRefreshProgress((channelCount / subscriptionList.length) * 100)
+        return false
+      }
+
       let videos, name, thumbnailUrl, handle
 
       if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backend)) {
@@ -1157,9 +1350,15 @@ export function refreshSubscriptionPostsFromRemote(options) {
 async function refreshSubscriptionPostsFromRemoteUnlocked({
   t,
   showStartToast = false,
-  errorChannels = []
+  errorChannels = [],
+  automatic = false
 }, activeProfile) {
-  const subscriptionList = includeNotificationChannels(getSubscriptionsForFeed(activeProfile.subscriptions, 'posts'), 'posts')
+  const subscriptionList = await omitRecentlyFetchedChannels(
+    includeNotificationChannels(getSubscriptionsForFeed(activeProfile.subscriptions, 'posts'), 'posts'),
+    'posts',
+    automatic,
+    t
+  )
   if (subscriptionList.length === 0) {
     completeSubscriptionRefresh('posts', activeProfile._id)
     return []

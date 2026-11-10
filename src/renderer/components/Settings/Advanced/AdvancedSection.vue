@@ -7,7 +7,7 @@
     <ExternalSoftwareSettings v-if="USING_ELECTRON || (IS_CAPACITOR && supportsYtDlp)" />
     <YtDlpStreamingSettings v-if="supportsYtDlp" />
     <ProxySettings v-if="USING_ELECTRON || IS_CAPACITOR" />
-    <ExperimentalSettings v-if="USING_ELECTRON" />
+    <ExperimentalSettings v-if="USING_ELECTRON || SUPPORTS_LOCAL_API" />
     <DiagnosticsSettings />
   </div>
 </template>
@@ -26,4 +26,5 @@ import { supportsYtDlp } from '../../../helpers/ytDlpCapabilities'
 
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR && !process.env.IS_IOS
 const USING_ELECTRON = !!process.env.IS_ELECTRON
+const SUPPORTS_LOCAL_API = !!process.env.SUPPORTS_LOCAL_API
 </script>

@@ -1551,6 +1551,7 @@ Settings:
   Parental Control Settings:
     Disable Channel Links: چینل لنکس غیر فعال کریں
   Experimental Settings:
+    Faster Subscription Refresh: "سبسکرپشنز کی تیز تر تازہ کاری"
     Disable Hardware Acceleration: ہارڈ ویئر ایکسلریشن غیر فعال کریں
   Diagnostics:
     Diagnostics: تشخیص
@@ -2384,6 +2385,7 @@ Tooltips:
     Compact Settings Categories: تفصیلات چھپاتا ہے اور سیٹنگز کیٹیگریز کی اونچائی کم کرتا ہے۔
     Modal Backdrop: "طے کرتا ہے کہ ڈائیلاگز اور مینیوز کے پیچھے ایپ کیسی دکھائی دے۔ دھندلا کرنا کم طاقتور آلات پر سست ہو سکتا ہے۔"
   Experimental Settings:
+    Faster Subscription Refresh: "پہلے ہر چینل کی RSS فیڈ چیک کرتا ہے اور صرف نئے اپ لوڈز والے چینلز کی ویڈیوز، Shorts اور لائیو اسٹریمز لوڈ کرتا ہے۔ خودکار تازہ کاریاں پچھلے 10 منٹ میں لوڈ کیے گئے چینلز کو بھی چھوڑ دیتی ہیں۔ نئے اپ لوڈز کے بغیر چینلز کے لیے، ویوز کی تعداد، ہٹائی گئی ویڈیوز اور تبدیل شدہ عنوانات صرف ہر چند گھنٹوں بعد اپ ڈیٹ ہوتے ہیں، اور RSS فیڈ پیچھے رہنے پر نئے اپ لوڈز بعد میں ظاہر ہو سکتے ہیں۔ Invidious API کے ساتھ دستیاب نہیں۔"
     Disable Hardware Acceleration: GPU ہارڈ ویئر ایکسلریشن غیر فعال کرتا ہے۔ گرافیکل مسائل حل ہو سکتے ہیں، لیکن کارکردگی غالباً کم ہو جائے گی۔
 Yattee Server:
   API Error (Click to copy): Yattee سرور ایرر (کاپی کرنے کے لیے کلک کریں)

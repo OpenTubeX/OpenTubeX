@@ -1501,6 +1501,7 @@ Settings:
   Search Settings: Buscar na configuración
   No Settings Found: Non se atopou ningún axuste
   Experimental Settings:
+    Faster Subscription Refresh: "Actualización máis rápida das subscricións"
     Disable Hardware Acceleration: Desactivar a aceleración por hardware
   Interface Customizer:
     Customize Interface: "Personalizar a interface"
@@ -2331,6 +2332,7 @@ Tooltips:
     Use Grid Player Menu: Organiza o menú de configuración do reprodutor de vídeo como unha grade de bloques en lugar dunha lista de filas.
     Modal Backdrop: "Define como se ve a aplicación detrás dos diálogos e menús. O desenfoque pode ser lento en dispositivos menos potentes."
   Experimental Settings:
+    Faster Subscription Refresh: "Primeiro comproba a fonte RSS de cada canle e só carga os vídeos, Shorts e emisións en directo das canles con novas subidas. As actualizacións automáticas tamén omiten as canles cargadas nos últimos 10 minutos. Nas canles sen novas subidas, as visualizacións, os vídeos eliminados e os títulos cambiados só se actualizan cada poucas horas, e as novas subidas poden aparecer máis tarde cando a fonte RSS vai atrasada. Non dispoñible coa API de Invidious."
     Disable Hardware Acceleration: Desactiva a aceleración por hardware da GPU. Pode resolver problemas gráficos, pero probablemente reducirá o rendemento.
 The playlist is at the beginning. Enable loop to continue playing: A lista de reprodución está no principio. Activa a repetición para continuar a reprodución
 External link opening has been disabled in Settings → Privacy: A apertura de ligazóns externas desactivouse en Configuración → Privacidade

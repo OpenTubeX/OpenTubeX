@@ -1748,6 +1748,7 @@ Settings:
     Set Password: Nustatyti slaptažodį
     Remove Password: Pašalinti slaptažodį
   Experimental Settings:
+    Faster Subscription Refresh: "Greitesnis prenumeratų atnaujinimas"
     Disable Hardware Acceleration: Išjungti aparatinį spartinimą
   Interface Customizer:
     Customize Interface: "Tinkinti sąsają"
@@ -2705,6 +2706,7 @@ Tooltips:
     UseDeArrowTitles: Vaizdo įrašų pavadinimus pakeisti naudotojų pateiktais DeArrow pavadinimais.
     UseDeArrowThumbnails: Vaizdo įrašų miniatiūras pakeisti DeArrow miniatiūromis.
   Experimental Settings:
+    Faster Subscription Refresh: "Pirmiausia patikrina kiekvieno kanalo RSS sklaidos kanalą ir įkelia vaizdo įrašus, Shorts ir tiesiogines transliacijas tik iš kanalų su naujais įkėlimais. Automatiniai atnaujinimai taip pat praleidžia kanalus, įkeltus per pastarąsias 10 minučių. Kanaluose be naujų įkėlimų peržiūrų skaičiai, pašalinti vaizdo įrašai ir pakeisti pavadinimai atnaujinami tik kas kelias valandas, o nauji įkėlimai gali pasirodyti vėliau, kai RSS sklaidos kanalas vėluoja. Nepasiekiama naudojant Invidious API."
     Disable Hardware Acceleration: Išjungia GPU aparatinį spartinimą. Gali išspręsti grafikos problemas, bet tikriausiai sumažins našumą.
 Autoplay Interruption Timer: Automatinis atkūrimas atšauktas dėl {autoplayInterruptionIntervalHours} val. neveiklumo
 The playlist is at the beginning. Enable loop to continue playing: Pasiekta grojaraščio pradžia. Įjunkite kartojimą, kad atkūrimas būtų tęsiamas

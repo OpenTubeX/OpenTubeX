@@ -1783,6 +1783,7 @@ Settings:
     Hide Search Bar: Skrij iskalno vrstico
     Disable Channel Links: Onemogoči povezave do kanalov
   Experimental Settings:
+    Faster Subscription Refresh: "Hitrejša osvežitev naročnin"
     Experimental Settings: Poskusno
     Warning: Te nastavitve so poskusne in lahko povzročijo sesutje aplikacije. Močno priporočamo izdelavo varnostnih kopij. Uporabljate jih na lastno odgovornost!
     Replace HTTP Cache: Zamenjaj predpomnilnik HTTP
@@ -2795,6 +2796,7 @@ Tooltips:
     Use Grid Player Menu: Meni z nastavitvami predvajalnika videoposnetkov je razporejen v mrežo ploščic namesto v seznam vrstic.
     Modal Backdrop: "Določa, kako je videti aplikacija za pogovornimi okni in meniji. Zabrisanje je lahko na manj zmogljivih napravah počasno."
   Experimental Settings:
+    Faster Subscription Refresh: "Najprej preveri vir RSS vsakega kanala in naloži videoposnetke, Shorts in prenose v živo samo s kanalov z novimi naloženimi vsebinami. Samodejne osvežitve preskočijo tudi kanale, naložene v zadnjih 10 minutah. Pri kanalih brez novih vsebin se število ogledov, odstranjeni videoposnetki in spremenjeni naslovi posodobijo le vsakih nekaj ur, nove vsebine pa se lahko prikažejo pozneje, ko vir RSS zaostaja. Ni na voljo z API-jem Invidious."
     Replace HTTP Cache: Onemogoči Electronov predpomnilnik HTTP na disku in omogoči prilagojen predpomnilnik slik v pomnilniku. Poraba pomnilnika RAM bo večja.
     Disable Hardware Acceleration: Onemogoči strojno pospeševanje GPU. Lahko odpravi grafične težave, vendar bo verjetno zmanjšalo zmogljivost.
   SponsorBlock Settings:

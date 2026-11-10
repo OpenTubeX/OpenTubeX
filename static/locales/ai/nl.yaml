@@ -1505,6 +1505,7 @@ Settings:
   Search Settings: Instellingen zoeken
   No Settings Found: Geen instellingen gevonden
   Experimental Settings:
+    Faster Subscription Refresh: "Snellere vernieuwing van abonnementen"
     Disable Hardware Acceleration: Hardwareversnelling uitschakelen
   Interface Customizer:
     Customize Interface: "Interface aanpassen"
@@ -2337,6 +2338,7 @@ Tooltips:
     Use Grid Player Menu: Rangschikt het instellingenmenu van de videospeler als een raster met tegels in plaats van een lijst met rijen.
     Modal Backdrop: "Bepaalt hoe de app er achter dialoogvensters en menu’s uitziet. Vervagen kan traag zijn op minder krachtige apparaten."
   Experimental Settings:
+    Faster Subscription Refresh: "Controleert eerst de RSS-feed van elk kanaal en laadt alleen de video's, Shorts en livestreams van kanalen met nieuwe uploads. Automatische vernieuwingen slaan ook kanalen over die in de afgelopen 10 minuten zijn geladen. Bij kanalen zonder nieuwe uploads worden weergaven, verwijderde video's en gewijzigde titels maar om de paar uur bijgewerkt, en nieuwe uploads kunnen later verschijnen als de RSS-feed achterloopt. Niet beschikbaar met de Invidious-API."
     Disable Hardware Acceleration: Schakelt GPU-hardwareversnelling uit. Kan grafische problemen oplossen, maar zal waarschijnlijk de prestaties verminderen.
 The playlist is at the beginning. Enable loop to continue playing: De afspeellijst staat aan het begin. Schakel herhalen in om door te gaan met afspelen
 External link opening has been disabled in Settings → Privacy: Het openen van externe links is uitgeschakeld via Instellingen → Privacy

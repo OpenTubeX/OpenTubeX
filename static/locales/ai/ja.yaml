@@ -306,6 +306,8 @@ History:
   Custom: カスタム
   History Older Than Days Removed: '{days}日より古い視聴履歴を削除しました'
 Settings:
+  Experimental Settings:
+    Faster Subscription Refresh: "登録チャンネルの高速更新"
   Diagnostics:
     Diagnostics: 診断
     Description: 診断ログが有効な間、OpenTubeX は最近のログメッセージをメモリに保持し、バグ報告に添付できるようにします。自動で保存や送信をすることはなく、ログを無効にすると削除されます。レポートには Cookie、トークン、IP アドレス、URL パラメーターは含まれませんが、再生した動画の ID が含まれる場合があるため、共有する前にレポートを確認してください。
@@ -2150,6 +2152,8 @@ Description:
   Games: ゲーム
   Music: 音楽
 Tooltips:
+  Experimental Settings:
+    Faster Subscription Refresh: "最初に各チャンネルの RSS フィードを確認し、新しいアップロードがあるチャンネルの動画、ショート、ライブ配信だけを読み込みます。自動更新では、過去 10 分以内に読み込んだチャンネルもスキップします。新しいアップロードがないチャンネルでは、再生回数、削除された動画、変更されたタイトルが数時間ごとにしか更新されず、RSS フィードが遅れている場合は新しいアップロードの表示が遅れることがあります。Invidious API では利用できません。"
   General Settings:
     Limit Titles to Two Lines: "リストやグリッドの動画と再生リストのタイトルを省略記号付きで2行までに短縮し、カードの見た目をそろえます。タイトルにカーソルを合わせると全文が表示されます。"
     Close Window With Last Tab: 'オフにすると、最後のタブを閉じたときに代わりに新しいタブが開き、ウィンドウを閉じるまで開いたままになります。'

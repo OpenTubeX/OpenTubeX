@@ -306,6 +306,8 @@ History:
   Custom: Personalizzato
   History Older Than Days Removed: La cronologia di visione più vecchia di 1 giorno è stata rimossa | La cronologia di visione più vecchia di {days} giorni è stata rimossa | La cronologia di visione più vecchia di {days} giorni è stata rimossa
 Settings:
+  Experimental Settings:
+    Faster Subscription Refresh: "Aggiornamento più rapido delle iscrizioni"
   Diagnostics:
     Diagnostics: Diagnostica
     Description: Finché il log diagnostico è attivo, OpenTubeX conserva in memoria i messaggi di log recenti per consentirti di allegarli alle segnalazioni di bug. Non li salva né li invia mai di sua iniziativa, e disattivare il log li elimina. I rapporti escludono cookie, token, indirizzi IP e parametri URL, ma possono contenere gli ID dei video che hai riprodotto, quindi controlla un rapporto prima di condividerlo.
@@ -2150,6 +2152,8 @@ Description:
   Games: Giochi
   Music: Musica
 Tooltips:
+  Experimental Settings:
+    Faster Subscription Refresh: "Controlla prima il feed RSS di ogni canale e carica video, Shorts e dirette solo dai canali con nuovi caricamenti. Gli aggiornamenti automatici saltano anche i canali caricati negli ultimi 10 minuti. Per i canali senza nuovi caricamenti, visualizzazioni, video rimossi e titoli modificati si aggiornano solo ogni poche ore, e i nuovi caricamenti potrebbero comparire più tardi quando il feed RSS è in ritardo. Non disponibile con l'API di Invidious."
   General Settings:
     Limit Titles to Two Lines: "Accorcia i titoli di video e playlist in elenchi e griglie a due righe con i puntini di sospensione, per schede più uniformi. Passa il puntatore su un titolo per vederlo per intero."
     Close Window With Last Tab: 'Se disattivato, chiudere l’ultima scheda ne apre una nuova e la finestra resta aperta finché non la chiudi.'

@@ -1495,6 +1495,7 @@ Settings:
   Search Settings: Caută în setări
   No Settings Found: Nu s-au găsit setări
   Experimental Settings:
+    Faster Subscription Refresh: "Reîmprospătare mai rapidă a abonamentelor"
     Disable Hardware Acceleration: Dezactivează accelerarea hardware
   Interface Customizer:
     Customize Interface: "Personalizează interfața"
@@ -2327,6 +2328,7 @@ Tooltips:
     Use Grid Player Menu: Aranjează meniul de setări al playerului video ca o grilă de dale, în locul unei liste de rânduri.
     Modal Backdrop: "Stabilește cum arată aplicația în spatele dialogurilor și meniurilor. Estomparea poate fi lentă pe dispozitivele mai puțin performante."
   Experimental Settings:
+    Faster Subscription Refresh: "Verifică mai întâi fluxul RSS al fiecărui canal și încarcă videoclipurile, Shorts și transmisiunile live doar de la canalele cu încărcări noi. Reîmprospătările automate omit și canalele încărcate în ultimele 10 minute. Pentru canalele fără încărcări noi, numărul de vizionări, videoclipurile eliminate și titlurile modificate se actualizează doar la câteva ore, iar încărcările noi pot apărea mai târziu când fluxul RSS rămâne în urmă. Indisponibil cu API-ul Invidious."
     Disable Hardware Acceleration: Dezactivează accelerarea hardware a GPU-ului. Poate rezolva problemele grafice, dar probabil va reduce performanța.
 The playlist is at the beginning. Enable loop to continue playing: Playlistul este la început. Activați redarea în buclă pentru a continua
 External link opening has been disabled in Settings → Privacy: Deschiderea linkurilor externe a fost dezactivată în Setări → Confidențialitate

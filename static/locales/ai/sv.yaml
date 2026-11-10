@@ -306,6 +306,8 @@ History:
   Custom: Anpassad
   History Older Than Days Removed: Visningshistorik äldre än 1 dag har tagits bort | Visningshistorik äldre än {days} dagar har tagits bort
 Settings:
+  Experimental Settings:
+    Faster Subscription Refresh: "Snabbare uppdatering av prenumerationer"
   Diagnostics:
     Diagnostics: Diagnostik
     Description: Medan diagnostikloggen är på sparar OpenTubeX de senaste loggmeddelandena i minnet så att du kan bifoga dem till felrapporter. Det sparar eller skickar dem aldrig på egen hand, och när du stänger av loggen raderas de. Rapporter utelämnar kakor, token, IP-adresser och URL-parametrar, men de kan innehålla id:n för videor du har spelat upp, så granska en rapport innan du delar den.
@@ -2151,6 +2153,8 @@ Description:
   Games: Spel
   Music: Musik
 Tooltips:
+  Experimental Settings:
+    Faster Subscription Refresh: "Kontrollerar först varje kanals RSS-flöde och läser bara in videor, Shorts och livesändningar från kanaler med nya uppladdningar. Automatiska uppdateringar hoppar också över kanaler som lästs in de senaste 10 minuterna. För kanaler utan nya uppladdningar uppdateras visningar, borttagna videor och ändrade titlar bara med några timmars mellanrum, och nya uppladdningar kan dyka upp senare när RSS-flödet släpar efter. Inte tillgängligt med Invidious-API:t."
   General Settings:
     Limit Titles to Two Lines: "Kortar video- och spellisttitlar i listor och rutnät till två rader med en ellips, för mer enhetliga kort. Håll pekaren över en titel för att se hela."
     Close Window With Last Tab: 'När detta är av öppnar stängning av den sista fliken en ny flik i stället, så att fönstret förblir öppet tills du stänger det.'

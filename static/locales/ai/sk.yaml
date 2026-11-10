@@ -306,6 +306,8 @@ History:
   Custom: Vlastné
   History Older Than Days Removed: História sledovania staršia ako 1 deň bola odstránená | História sledovania staršia ako {days} dni bola odstránená | História sledovania staršia ako {days} dní bola odstránená
 Settings:
+  Experimental Settings:
+    Faster Subscription Refresh: "Rýchlejšie obnovenie odberov"
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Kým je diagnostický denník zapnutý, OpenTubeX uchováva nedávne správy denníka v pamäti, aby ste ich mohli priložiť k hláseniam chýb. Nikdy ich sám neukladá ani neodosiela a vypnutím denníka sa vymažú. Hlásenia vynechávajú súbory cookie, tokeny, IP adresy a parametre URL, môžu však obsahovať ID prehratých videí, preto hlásenie pred zdieľaním skontrolujte.
@@ -2156,6 +2158,8 @@ Description:
   Games: Hry
   Music: Hudba
 Tooltips:
+  Experimental Settings:
+    Faster Subscription Refresh: "Najprv skontroluje RSS kanál každého kanála a videá, Shorts a živé prenosy načíta len z kanálov s novými nahratými videami. Automatické obnovenia navyše preskočia kanály načítané za posledných 10 minút. Pri kanáloch bez nových videí sa počty zhliadnutí, odstránené videá a zmenené názvy aktualizujú len raz za niekoľko hodín a nové videá sa môžu zobraziť neskôr, keď RSS kanál zaostáva. Nie je k dispozícii s Invidious API."
   General Settings:
     Limit Titles to Two Lines: "Skracuje názvy videí a playlistov v zoznamoch a mriežkach na dva riadky s trojbodkou, aby karty pôsobili jednotnejšie. Celý názov zobrazíte prejdením kurzorom."
     Close Window With Last Tab: 'Keď je vypnuté, zatvorenie poslednej karty namiesto toho otvorí novú kartu, takže okno zostane otvorené, kým ho nezatvoríte.'

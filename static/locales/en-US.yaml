@@ -2180,6 +2180,7 @@ Settings:
     Warning: These settings are experimental, they may cause crashes while enabled. Making backups is highly recommended. Use at your own risk!
     Replace HTTP Cache: Replace HTTP Cache
     Disable Hardware Acceleration: Disable Hardware Acceleration
+    Faster Subscription Refresh: Faster Subscription Refresh
   Diagnostics:
     Diagnostics: Diagnostics
     Description: While diagnostic logging is on, OpenTubeX keeps recent log messages in memory so you can attach them to bug reports. It never saves or sends them on its own, and turning logging off deletes them. Reports leave out cookies, tokens, IP addresses and URL parameters, but they can include IDs of videos you played, so check a report before you share it.
@@ -3412,6 +3413,7 @@ Tooltips:
   Experimental Settings:
     Replace HTTP Cache: Disables Electron's disk based HTTP cache and enables a custom in-memory image cache. Will lead to increased RAM usage.
     Disable Hardware Acceleration: Disables GPU hardware acceleration. May fix graphical issues, but will probably perform worse.
+    Faster Subscription Refresh: Checks each channel's RSS feed first and only loads the videos, Shorts and live streams of channels with new uploads. Automatic refreshes also skip channels loaded in the last 10 minutes. For channels without new uploads, view counts, removed videos and changed titles only update every few hours, and new uploads may appear later when the RSS feed lags behind. Not available with the Invidious API.
   SponsorBlock Settings:
     UseDeArrowTitles: Replace video titles with user-submitted titles from DeArrow.
     UseDeArrowThumbnails: Replace video thumbnails with thumbnails from DeArrow.

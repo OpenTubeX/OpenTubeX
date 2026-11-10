@@ -306,6 +306,8 @@ History:
   Custom: Kohandatud
   History Older Than Days Removed: Ühest päevast vanem vaatamisajalugu on eemaldatud | {days} päevast vanem vaatamisajalugu on eemaldatud
 Settings:
+  Experimental Settings:
+    Faster Subscription Refresh: "Kiirem tellimuste värskendamine"
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Kui diagnostikalogi on sisse lülitatud, hoiab OpenTubeX viimaseid logisõnumeid mälus, et saaksid need veateadetele lisada. See ei salvesta ega saada neid kunagi ise ning logi väljalülitamine kustutab need. Aruanded jätavad välja küpsised, märgid, IP-aadressid ja URL-i parameetrid, kuid võivad sisaldada esitatud videote ID-sid, seega kontrolli aruannet enne jagamist.
@@ -2153,6 +2155,8 @@ Description:
   Games: Mängud
   Music: Muusika
 Tooltips:
+  Experimental Settings:
+    Faster Subscription Refresh: "Kontrollib esmalt iga kanali RSS-voogu ja laadib videod, Shorts'id ja otseülekanded ainult uute üleslaadimistega kanalitest. Automaatsed värskendused jätavad vahele ka kanalid, mis laaditi viimase 10 minuti jooksul. Uute üleslaadimisteta kanalite puhul uuenevad vaatamiste arvud, eemaldatud videod ja muudetud pealkirjad vaid iga mõne tunni tagant ning uued üleslaadimised võivad ilmuda hiljem, kui RSS-voog jääb maha. Invidiouse API-ga pole saadaval."
   General Settings:
     Limit Titles to Two Lines: "Lühendab loendites ja ruudustikes videote ja esitusloendite pealkirjad kolmikpunktiga kahele reale, et kaardid oleksid ühtlasemad. Täispealkirja nägemiseks hoia kursorit pealkirja kohal."
     Close Window With Last Tab: 'Kui see on välja lülitatud, avab viimase vahekaardi sulgemine hoopis uue vahekaardi ja aken jääb avatuks, kuni selle sulgete.'
