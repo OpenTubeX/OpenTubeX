@@ -9688,7 +9688,8 @@ export default defineComponent({
     // #region setup
     let unbindAndroidMediaErrors = null
     let disableTwitchTsVideoGap = null
-    // Released once the first media loads, or when the player unmounts before that
+    // Released once the first media loads, or when the player unmounts before that.
+    // Legacy formats load after performFirstLoad returns, so wait for `loaded`.
     let releasePlaybackStartup = () => {}
 
     onMounted(async () => {
@@ -9972,6 +9973,7 @@ export default defineComponent({
       })
 
       player.addEventListener('loaded', handleLoaded)
+      player.addEventListener('loaded', () => releasePlaybackStartup())
       player.addEventListener('variantchanged', () => {
         if (props.format === 'legacy' || player.getConfiguration().abr.enabled) {
           return
@@ -10013,11 +10015,7 @@ export default defineComponent({
       // cursor is in the video player area when the video first loads
       container.value.classList.add('no-cursor')
 
-      try {
-        await performFirstLoad()
-      } finally {
-        releasePlaybackStartup()
-      }
+      await performFirstLoad()
       // Whatever runs after `performFirstLoad` might be after switching to another page due to SABR backoff
 
       player?.addEventListener('ratechange', () => {
