@@ -102,6 +102,8 @@ jobs:
         emulator-build: 15917651
         # A 411dp wide phone, at a resolution software rendering can keep up with.
         profile: pixel_6
+        # Gradle idles while the tests run, so the emulator gets every core.
+        cores: 4
         ram-size: 4096M
         disk-size: 6G
         # Several tests check WebView and system animations.
