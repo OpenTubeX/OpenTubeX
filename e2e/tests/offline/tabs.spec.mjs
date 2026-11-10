@@ -4016,7 +4016,7 @@ for (const tabBarPosition of ['top', 'left']) {
   test.describe(`tab open and close animation at ${tabBarPosition}`, () => {
     test.use({ seed: { settings: { tabBarPosition } } })
 
-    test('stretches opening tabs from a dot and closes the gap without a jump', { tag: '@scale' }, async ({ page }) => {
+    test('wipes tabs open and shut and closes the gap without a jump', { tag: '@scale' }, async ({ page }) => {
       const vertical = tabBarPosition === 'left'
       const create = title => page.evaluate(title => window.ftElectron.tabs.create({
         route: '/history', title, makeActive: false, lazyLoad: true
@@ -4043,9 +4043,9 @@ for (const tabBarPosition of ['top', 'left']) {
           for (const animation of animations) {
             animation.pause()
             const { endTime } = animation.effect.getComputedTiming()
-            animation.currentTime = { start: 0, nearEnd: endTime - 1, end: endTime }[moment]
+            animation.currentTime = { start: 0, middle: endTime / 2, nearEnd: endTime - 1, end: endTime }[moment]
           }
-          // Hit testing follows the clip and scale that draw the tab.
+          // Hit testing follows the clip that draws the tab.
           const rect = tab.getBoundingClientRect()
           const y = rect.top + rect.height / 2
           const visible = []
@@ -4057,7 +4057,7 @@ for (const tabBarPosition of ['top', 'left']) {
           const center = (visible[0] + visible.at(-1)) / 2
           const overlapsPrevious = Boolean(previous && visible.length > 0 &&
             center > previous.left && center < previous.right && y > previous.top && y < previous.bottom)
-          resolve({ id: tab.dataset.tabId, animations: tab.getAnimations().length, visibleSize: visible.length, overlapsPrevious, opacity: getComputedStyle(tab).opacity })
+          resolve({ id: tab.dataset.tabId, animations: tab.getAnimations().length, visibleSize: visible.length, overlapsPrevious })
         })
         observer.observe(bar, { childList: true, subtree: true })
         if (action.type === 'create') {
@@ -4085,19 +4085,23 @@ for (const tabBarPosition of ['top', 'left']) {
         return vertical ? rect.top : rect.left
       }, vertical)
 
-      // An opening tab starts as a transparent dot.
-      const opening = await pauseTransition({ type: 'create' }, 'start')
-      expect(opening.opacity).toBe('0')
+      // An opening tab starts clipped away entirely.
+      const hidden = await pauseTransition({ type: 'create' }, 'start')
+      expect(hidden.visibleSize).toBe(0)
+      expect(hidden.animations).toBeGreaterThan(0)
+      await finish()
+      await expectTabStripSettled(page)
+      expect(await visibleSize(hidden.id)).toBeGreaterThan(60)
+
+      // Halfway open, it is drawn in its own slot.
+      const opening = await pauseTransition({ type: 'create' }, 'middle')
       expect(opening.visibleSize).toBeGreaterThan(0)
-      expect(opening.visibleSize).toBeLessThanOrEqual(22)
       expect(opening.overlapsPrevious).toBe(false)
-      expect(opening.animations).toBeGreaterThan(0)
       const opened = opening.id
       await finish()
       await expectTabStripSettled(page)
-      expect(await visibleSize(opened)).toBeGreaterThan(60)
 
-      // A title that changes while the tab opens changes the size it stretches to.
+      // A title that changes while the tab opens changes the size it opens to.
       const retitled = (await pauseTransition({ type: 'create' }, 'nearEnd', 'Short')).id
       const retitledTab = page.locator(`.tabBar .tab[data-tab-id="${retitled}"]`)
       await page.evaluate(id => window.ftElectron.tabs.updateTitle('A considerably longer title for this tab', id), retitled)
@@ -4111,7 +4115,7 @@ for (const tabBarPosition of ['top', 'left']) {
       // closed tab's slot, so removing the closed tab does not move it.
       const closedSlot = await start(ids[1])
       const closing = await pauseTransition({ type: 'close', id: ids[1] }, 'end')
-      expect(closing).toMatchObject({ id: ids[1], opacity: '0' })
+      expect(closing).toMatchObject({ id: ids[1], visibleSize: 0 })
       expect(Math.abs(await start(ids[2]) - closedSlot)).toBeLessThan(0.5)
       await finish()
       await expect(page.locator(`.tabBar .tab[data-tab-id="${ids[1]}"]`)).toHaveCount(0)
@@ -4126,7 +4130,7 @@ for (const tabBarPosition of ['top', 'left']) {
         return document.querySelectorAll('.tabBar .tabGhostLayer > *').length
       })).toBe(0)
 
-      // A tab closed while it pops in does not move the tab after it on removal.
+      // A tab closed while it opens does not move the tab after it on removal.
       const popping = (await pauseTransition({ type: 'create' }, 'start')).id
       await page.evaluate(async id => {
         const ids = (await window.ftElectron.tabs.getState()).tabs.map(tab => tab.id).filter(tabId => tabId !== id)
