@@ -115,7 +115,7 @@
             show-data-when-empty
             @input="getSearchSuggestionsDebounce"
             @focus="getSearchSuggestionsDebounce(currentSearchText)"
-            @blur="cancelSearchSuggestions"
+            @blur="handleSearchBlur"
             @click="goToSearch"
             @clear="handleSearchInputClear"
             @remove="removeSearchHistoryEntryInDbAndCache"
@@ -135,6 +135,32 @@
                   :icon="['fas', 'filter']"
                 />
               </button>
+            </template>
+            <template
+              v-if="linkPreview"
+              #preview
+            >
+              <a
+                class="linkPreview"
+                :href="getSearchResultHref(linkPreview.queryText)"
+              >
+                <img
+                  v-if="linkPreviewThumbnail"
+                  class="linkPreviewThumbnail"
+                  :src="linkPreviewThumbnail"
+                  alt=""
+                >
+                <span
+                  class="linkPreviewText"
+                  aria-live="polite"
+                >
+                  <bdi class="linkPreviewTitle">{{ linkPreview.title ?? t('Share.Loading Video Information') }}</bdi>
+                  <bdi
+                    v-if="linkPreview.details"
+                    class="linkPreviewDetails"
+                  >{{ linkPreview.details }}</bdi>
+                </span>
+              </a>
             </template>
           </FtInput>
         </div>
@@ -283,7 +309,7 @@ import { usesInvidiousApi } from '../../../apiBackends'
 import { getConfiguredKeyboardShortcuts, SEARCH_RESULTS_DISPLAY_LIMIT } from '../../../constants'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
 import { getSearchFilterTabId, getSearchHistoryEntryQuery, getSearchSettingsFromRouteQuery } from '../../../search-history'
-import { CHANNEL_HANDLE_REGEX, isUnloadedBackgroundTabClick, localizeAndAddKeyboardShortcutToActionTitle, openInternalPath, searchFiltersMatch, showInvidiousFallbackToast } from '../../helpers/utils'
+import { CHANNEL_HANDLE_REGEX, formatDurationAsTimestamp, isUnloadedBackgroundTabClick, localizeAndAddKeyboardShortcutToActionTitle, openInternalPath, searchFiltersMatch, showInvidiousFallbackToast } from '../../helpers/utils'
 import { translateWindowTitle } from '../../helpers/strings'
 import { getLocalSearchSuggestions } from '../../helpers/api/local'
 import { getInvidiousSearchSuggestions } from '../../helpers/api/invidious'
@@ -292,7 +318,8 @@ import { shouldOpenExternalMediaUrl } from '../../helpers/externalMediaUrl'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { usesCapacitorTabletLayout } from '../../helpers/capacitorLayout'
-import { supportsNotificationHistory } from '../../helpers/notificationHistory'
+import { getNotificationThumbnailUrl, supportsNotificationHistory } from '../../helpers/notificationHistory'
+import { loadVideoMetadata } from '../../helpers/videoMetadata'
 
 const { t } = useI18n()
 const syncing = computed(() => store.getters.getSyncServerStatus === 'syncing')
@@ -395,6 +422,15 @@ const navigationHistoryDropdownOptions = computed(() => {
 })
 /** @type {import('vue').ShallowRef<string[]>} */
 const searchSuggestionsDataList = shallowRef([])
+// Shows which video a link opens before it is submitted. It belongs to the
+// search suggestions, as both request data for text that was not submitted.
+/** @type {import('vue').ShallowRef<{ queryText: string, videoId: string, title?: string, details?: string } | null>} */
+const linkPreview = shallowRef(null)
+// Follows the thumbnail settings, which can change while a preview is loaded.
+const linkPreviewThumbnail = computed(() => linkPreview.value && getNotificationThumbnailUrl(linkPreview.value.videoId))
+/** The text whose preview is shown or loading. */
+let linkPreviewQuery = null
+let linkPreviewController = null
 const lastSuggestionQuery = ref('')
 /** @type {AbortController | null} */
 let suggestionController = null
@@ -960,6 +996,13 @@ function isPlainSearchText(queryText) {
   return !queryText.includes(':') && !CHANNEL_HANDLE_REGEX.test(queryText)
 }
 
+/**
+ * @param {string} queryText trimmed text
+ */
+function isWebLink(queryText) {
+  return /^https?:\/\/\S/i.test(queryText)
+}
+
 // Links are resolved only for the rows FtInput renders, as the complete search
 // history can have thousands of entries. URL entries resolve asynchronously.
 let searchResultHrefs = new Map()
@@ -1036,6 +1079,7 @@ async function goToSearch(queryText, { event, dataListIndex }) {
   }
 
   cancelSearchSuggestions()
+  cancelLinkPreview()
 
   const selectedSearchHistoryEntry = activeDataListProperties.value[dataListIndex]?.isSearchHistory
     ? activeSearchHistoryEntries.value[dataListIndex]
@@ -1080,7 +1124,13 @@ function cancelSearchSuggestions() {
   suggestionController = null
 }
 
+function handleSearchBlur() {
+  cancelSearchSuggestions()
+  cancelLinkPreview()
+}
+
 function handleSearchInputClear() {
+  resetLinkPreview()
   lastSuggestionQuery.value = ''
   searchSuggestionsDataList.value = []
   currentSearchText.value = ''
@@ -1092,6 +1142,7 @@ function handleSearchInputClear() {
  */
 function updateSearchInputText(text) {
   cancelSearchSuggestions()
+  resetLinkPreview()
   lastSuggestionQuery.value = ''
   currentSearchText.value = text
   searchInput.value?.setText(text)
@@ -1102,13 +1153,15 @@ function updateSearchInputText(text) {
  */
 function getSearchSuggestionsDebounce(query) {
   currentSearchText.value = query
+  updateLinkPreview(query)
   if (query === lastSuggestionQuery.value &&
       (suggestionController != null || completedSuggestionQuery === query.trim())) return
 
   cancelSearchSuggestions()
   completedSuggestionQuery = null
   lastSuggestionQuery.value = query
-  if (!enableSearchSuggestions.value || query.trim() === '') {
+  // Suggestions for a link are never useful, and would send it to the suggestion service.
+  if (!enableSearchSuggestions.value || query.trim() === '' || isWebLink(query.trim())) {
     searchSuggestionsDataList.value = []
     return
   }
@@ -1125,6 +1178,7 @@ const backendFallback = computed(() => store.getters.getBackendFallback)
 
 watch([enableSearchSuggestions, backendPreference, backendFallback], () => {
   cancelSearchSuggestions()
+  resetLinkPreview()
   completedSuggestionQuery = null
   searchSuggestionsDataList.value = []
 })
@@ -1157,6 +1211,86 @@ async function loadSearchSuggestions(query, controller) {
     if (!signal.aborted) console.error('Error getting search suggestions', error)
   } finally {
     if (suggestionController === controller) suggestionController = null
+  }
+}
+
+/**
+ * @param {string} query
+ */
+function updateLinkPreview(query) {
+  const queryText = query.trim()
+  if (queryText === linkPreviewQuery) return
+
+  resetLinkPreview()
+  if (!enableSearchSuggestions.value || isPlainSearchText(queryText)) return
+
+  const controller = new AbortController()
+  linkPreviewQuery = queryText
+  linkPreviewController = controller
+  loadLinkPreview(queryText, controller.signal).catch(error => {
+    if (!controller.signal.aborted) console.error('Unable to load the link preview', error)
+  }).finally(() => {
+    if (linkPreviewController === controller) linkPreviewController = null
+  })
+}
+
+/** Stops loading, but keeps a loaded preview for when the search is focused again. */
+function cancelLinkPreview() {
+  if (linkPreviewController !== null) resetLinkPreview()
+}
+
+function resetLinkPreview() {
+  linkPreviewController?.abort()
+  linkPreviewController = null
+  linkPreviewQuery = null
+  linkPreview.value = null
+}
+
+/**
+ * @param {{ author?: string, lengthSeconds?: number }} video
+ */
+function getLinkPreviewDetails({ author, lengthSeconds }) {
+  return [author, lengthSeconds > 0 ? formatDurationAsTimestamp(lengthSeconds) : null]
+    .filter(Boolean)
+    .join(' • ')
+}
+
+/**
+ * @param {string} queryText
+ * @param {AbortSignal} signal
+ */
+async function loadLinkPreview(queryText, signal) {
+  // Wait until a link typed by hand is complete instead of loading every prefix.
+  await new Promise(resolve => setTimeout(resolve, 250))
+  if (signal.aborted) return
+
+  let result
+  try {
+    result = await store.dispatch('getYoutubeUrlInfo', queryText)
+  } catch {
+    return
+  }
+  if (signal.aborted || result.urlType !== 'video') return
+
+  const { videoId } = result
+  const preview = { queryText, videoId }
+  const watchedVideo = store.getters.getHistoryCacheById[videoId]
+  if (watchedVideo) {
+    linkPreview.value = { ...preview, title: watchedVideo.title, details: getLinkPreviewDetails(watchedVideo) }
+    return
+  }
+
+  linkPreview.value = preview
+  try {
+    const video = await loadVideoMetadata(videoId, signal)
+    linkPreview.value = { ...preview, title: video.title, details: getLinkPreviewDetails(video.isLive ? { author: video.author } : video) }
+  } catch (error) {
+    if (signal.aborted) return
+    // Submitting the link still opens the watch page, which explains the
+    // failure. Focusing the search again retries.
+    linkPreviewQuery = null
+    linkPreview.value = null
+    throw error
   }
 }
 

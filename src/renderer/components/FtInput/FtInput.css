@@ -528,6 +528,17 @@
   padding-inline: 15px 10px;
 }
 
+.list .previewOption {
+  padding-block: 6px;
+  line-height: normal;
+  cursor: pointer;
+}
+
+.previewOption:hover {
+  background-color: var(--dropdown-item-hover-color);
+  color: var(--dropdown-item-hover-text-color);
+}
+
 .optionWrapper {
   display: flex;
   align-items: center;
