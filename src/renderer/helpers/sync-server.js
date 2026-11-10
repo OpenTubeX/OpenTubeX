@@ -1373,7 +1373,9 @@ export async function syncProfiles(client, store, previous = {}, options = {}) {
     next[id] = {
       remoteId,
       metadata,
-      channels: Array.from(mergedChannelIds),
+      // Only record saved channels. A remote channel missing from the main
+      // profile would otherwise look like a local removal on the next sync.
+      channels: mergedSubscriptions.map(channel => channel.id),
     }
   }
 
