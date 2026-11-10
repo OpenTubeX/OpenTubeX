@@ -115,8 +115,10 @@
       </div>
     </Teleport>
     <div
+      ref="playlistsContainer"
       class="playlists-container"
       :class="playlistAppearance"
+      :style="{ minBlockSize: searchMinHeight === null ? null : `${searchMinHeight}px` }"
     >
       <FtFlexBox>
         <div
@@ -404,6 +406,32 @@ const anyPlaylistContainsVideosToBeAdded = computed(() => {
 })
 
 const searchBar = useTemplateRef('searchBar')
+const playlistsContainer = useTemplateRef('playlistsContainer')
+
+/**
+ * Keeps the prompt from shrinking and jumping while search results filter the playlists.
+ * @type {import('vue').Ref<number | null>}
+ */
+const searchMinHeight = ref(null)
+
+// The watcher runs before the DOM updates, so this measures the playlists shown before searching
+watch(processedQuery, (processedQuery_) => {
+  if (processedQuery_ === '') {
+    searchMinHeight.value = null
+  } else if (searchMinHeight.value === null && playlistsContainer.value) {
+    const container = playlistsContainer.value
+    const scroller = container.closest('.promptContentScroller')
+    const { height, bottom } = container.getBoundingClientRect()
+    // Only keep the part that fits in the scroll viewport, so the list cannot leave empty space to scroll through
+    const overflow = scroller ? Math.max(0, bottom + scroller.scrollTop - scroller.getBoundingClientRect().bottom) : 0
+    searchMinHeight.value = height - overflow
+  }
+})
+
+// The kept height no longer fits a resized window
+function releaseSearchMinHeight() {
+  searchMinHeight.value = null
+}
 
 watch(allPlaylistsLength, (val, oldVal) => {
   const allPlaylistIds = new Set()
@@ -594,6 +622,7 @@ const updateQueryDebounce = debounce(/** @param {string} query_ */(query_) => {
 
 onMounted(() => {
   document.addEventListener('keydown', keyboardShortcutHandler)
+  window.addEventListener('resize', releaseSearchMinHeight)
 
   // User might want to search first if they have many playlists
   nextTick(() => {
@@ -603,6 +632,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   document.removeEventListener('keydown', keyboardShortcutHandler)
+  window.removeEventListener('resize', releaseSearchMinHeight)
 })
 
 /**
