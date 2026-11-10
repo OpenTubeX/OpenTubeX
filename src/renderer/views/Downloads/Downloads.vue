@@ -15,37 +15,48 @@
           theme="primary"
           @click="showUrlPrompt = true"
         />
-        <FtButton
-          v-if="pausableDownloads.length > 0"
-          :label="t('Downloads.Pause All')"
-          :icon="['fas', 'pause']"
-          :text-color="null"
-          :background-color="null"
-          @click="queueAction('pause-all')"
-        />
-        <FtButton
-          v-if="resumableDownloads.length > 0"
-          :label="t('Downloads.Resume All')"
-          :icon="['fas', 'play']"
-          :text-color="null"
-          :background-color="null"
-          @click="queueAction('resume-all')"
-        />
-        <FtButton
-          v-if="failedDownloads.length > 0"
-          :label="t('Downloads.Retry All')"
-          :icon="['fas', 'sync']"
-          :text-color="null"
-          :background-color="null"
-          @click="queueAction('retry-all')"
-        />
-        <FtButton
-          v-if="clearableDownloads.length > 0"
-          :label="t('Downloads.Clear Failed Canceled Skipped And Missing')"
-          :icon="['fas', 'trash']"
-          :text-color="null"
-          :background-color="null"
-          @click="clearFailedAndMissing"
+        <div class="bulkActions">
+          <FtButton
+            v-if="pausableDownloads.length > 0"
+            :label="t('Downloads.Pause All')"
+            :icon="['fas', 'pause']"
+            :text-color="null"
+            :background-color="null"
+            @click="queueAction('pause-all')"
+          />
+          <FtButton
+            v-if="resumableDownloads.length > 0"
+            :label="t('Downloads.Resume All')"
+            :icon="['fas', 'play']"
+            :text-color="null"
+            :background-color="null"
+            @click="queueAction('resume-all')"
+          />
+          <FtButton
+            v-if="failedDownloads.length > 0"
+            :label="t('Downloads.Retry All')"
+            :icon="['fas', 'sync']"
+            :text-color="null"
+            :background-color="null"
+            @click="queueAction('retry-all')"
+          />
+          <FtButton
+            v-if="clearableDownloads.length > 0"
+            :label="t('Downloads.Clear Failed Canceled Skipped And Missing')"
+            :icon="['fas', 'trash']"
+            :text-color="null"
+            :background-color="null"
+            @click="clearFailedAndMissing"
+          />
+        </div>
+        <FtIconButton
+          v-if="bulkMenuItems.length > 0"
+          ref="bulkMenuButton"
+          class="bulkMenuButton"
+          :title="t('Video.More Options')"
+          :icon="['fas', 'ellipsis-v']"
+          theme="base-no-default"
+          @click="openBulkMenu"
         />
       </div>
     </div>
@@ -242,7 +253,7 @@
 <script setup>
 import { ytDlp } from '../../helpers/ytDlp'
 import { FtIcon } from '@opentubex/icons'
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import DownloadRow from './DownloadRow.vue'
@@ -259,6 +270,8 @@ import { formatBytes } from '../../helpers/fileSize'
 import { downloadQueueVideos, playDownloadedFile, refreshDownloadRecords } from '../../helpers/downloadPlayback'
 import { downloadFormats, filterCompletedDownloads } from '../../helpers/downloadFilters'
 import { showToast } from '../../helpers/utils'
+import { openButtonMenu } from '../../helpers/buttonMenu'
+import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 
 const { t } = useI18n()
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
@@ -318,6 +331,22 @@ const clearableDownloads = computed(() => downloads.value.filter(download => (
   ['failed', 'cancelled', 'skipped'].includes(download.status) ||
   (download.status === 'completed' && download.availability === 'missing')
 )))
+// narrow pages move the bulk actions into this menu instead of wrapping them
+const bulkMenuItems = computed(() => [
+  pausableDownloads.value.length > 0 && { label: t('Downloads.Pause All'), icon: ['fas', 'pause'], run: () => queueAction('pause-all') },
+  resumableDownloads.value.length > 0 && { label: t('Downloads.Resume All'), icon: ['fas', 'play'], run: () => queueAction('resume-all') },
+  failedDownloads.value.length > 0 && { label: t('Downloads.Retry All'), icon: ['fas', 'sync'], run: () => queueAction('retry-all') },
+  clearableDownloads.value.length > 0 && { label: t('Downloads.Clear Failed Canceled Skipped And Missing'), icon: ['fas', 'trash'], run: clearFailedAndMissing },
+].filter(Boolean).map(item => ({ enabled: true, ...item })))
+const bulkMenuButton = useTemplateRef('bulkMenuButton')
+function openBulkMenu() {
+  openButtonMenu(bulkMenuButton.value.$el.querySelector('button'), bulkMenuItems, t('Video.More Options'))
+}
+function closeBulkMenu() {
+  window.dispatchEvent(new CustomEvent('opentubex:close-context-menu', { detail: bulkMenuItems }))
+}
+useSettingsOverlay(closeBulkMenu)
+onBeforeUnmount(closeBulkMenu)
 const totalSizeBytes = computed(() => downloads.value.reduce((total, download) => total + (download.sizeBytes ?? 0), 0))
 const formattedTotalSize = computed(() => formatBytes(totalSizeBytes.value))
 

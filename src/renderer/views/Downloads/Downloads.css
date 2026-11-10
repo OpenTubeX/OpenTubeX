@@ -42,6 +42,10 @@
   max-inline-size: 100%;
 }
 
+.bulkActions {
+  display: contents;
+}
+
 .downloadHeaderActions :deep(.btn) {
   min-inline-size: 0;
   max-inline-size: 100%;
@@ -139,19 +143,6 @@
   object-fit: cover;
 }
 
-.compact.downloadRow {
-  gap: 12px;
-  padding: 12px;
-}
-
-.compact .downloadMain {
-  gap: 12px;
-}
-
-.compact .downloadThumbnail {
-  inline-size: 96px;
-}
-
 .downloadDetails {
   flex: 1 1 auto;
   min-inline-size: 0;
@@ -217,10 +208,6 @@
   gap: 6px;
 }
 
-.compact .downloadActions {
-  gap: 4px;
-}
-
 .progressTrack {
   background: color-mix(in srgb, var(--accent-color) 24%, var(--secondary-card-bg-color));
   block-size: 7px;
@@ -277,60 +264,6 @@
   }
 }
 
-@container downloads-page (width <= 600px) {
-  .downloadFilters {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .downloadRow:not(.compact) {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .downloadRow:not(.compact) .downloadActions {
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
-
-  .downloadThumbnail {
-    inline-size: 112px;
-  }
-
-  .compact .downloadThumbnail {
-    inline-size: 80px;
-  }
-}
-
-@container downloads-page (width <= 420px) {
-  .downloadFilters {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .compact.downloadRow {
-    gap: 4px;
-    padding: 8px;
-  }
-
-  .compact .downloadMain {
-    gap: 8px;
-  }
-
-  .downloadRow:not(.compact) .downloadMain {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .downloadThumbnail {
-    inline-size: min(180px, 100%);
-    margin-inline: auto;
-  }
-
-  .compact .downloadThumbnail {
-    inline-size: 64px;
-    margin-inline: 0;
-  }
-}
-
 .downloadActions :deep(.btn) {
   margin: 0;
 }
@@ -354,4 +287,129 @@
   display: block;
   inline-size: 144px;
   margin-inline: auto;
+}
+
+/* Phone rows give the title the full width beside the thumbnail and move the
+   progress bar and actions below it, so they don't squeeze the title. */
+.compact.downloadRow {
+  align-items: start;
+  display: grid;
+  gap: 0 12px;
+  grid-template-areas:
+    'thumbnail text text'
+    'thumbnail summary actions'
+    'notes notes notes';
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding: 12px;
+}
+
+.compact.downloadRow:has(.progressTrack) {
+  grid-template-areas:
+    'thumbnail text text'
+    'progress progress actions'
+    'summary summary actions'
+    'notes notes notes';
+}
+
+.compact .downloadMain,
+.compact .downloadDetails {
+  display: contents;
+}
+
+.compact .downloadThumbnail {
+  grid-area: thumbnail;
+  inline-size: 96px;
+}
+
+.compact .downloadText {
+  grid-area: text;
+}
+
+.compact .downloadText h3 {
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  display: -webkit-box;
+  line-clamp: 2;
+  margin-block-start: 0;
+  overflow: hidden;
+}
+
+.compact .progressTrack {
+  grid-area: progress;
+}
+
+.compact .downloadSummary {
+  align-self: center;
+  grid-area: summary;
+}
+
+.compact .downloadActions {
+  align-self: center;
+  gap: 4px;
+  grid-area: actions;
+}
+
+.compact .downloadNotes {
+  grid-area: notes;
+}
+
+@container downloads-page (width > 600px) {
+  .bulkMenuButton {
+    display: none;
+  }
+}
+
+@container downloads-page (width <= 600px) {
+  .bulkActions {
+    display: none;
+  }
+
+  /* wrapped below the total size, the buttons line up with it */
+  .downloadHeaderActions {
+    margin-inline-start: 0;
+  }
+
+  .downloadFilters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .downloadRow:not(.compact) {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .downloadRow:not(.compact) .downloadActions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .downloadThumbnail {
+    inline-size: 112px;
+  }
+}
+
+@container downloads-page (width <= 420px) {
+  .downloadFilters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .compact.downloadRow {
+    column-gap: 8px;
+    padding: 8px;
+  }
+
+  .downloadRow:not(.compact) .downloadMain {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .downloadThumbnail {
+    inline-size: min(180px, 100%);
+    margin-inline: auto;
+  }
+
+  .compact .downloadThumbnail {
+    inline-size: 80px;
+    margin-inline: 0;
+  }
 }

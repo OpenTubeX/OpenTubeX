@@ -40,30 +40,32 @@
           alt=""
         />
         <div class="downloadDetails">
-          <h3 dir="auto">
-            {{ download.title }}
-          </h3>
-          <p
-            v-if="download.status === 'completed' && channelName"
-            class="downloadChannel"
-            dir="auto"
-          >
-            {{ channelName }}
-          </p>
-          <p
-            v-if="statusText"
-            class="downloadStatus"
-            :aria-hidden="inProgress ? 'true' : undefined"
-          >
-            {{ statusText }}
-          </p>
-          <p
-            v-if="availabilityText"
-            class="downloadAvailability"
-            :class="{ missing: download.availability === 'missing' }"
-          >
-            {{ availabilityText }}
-          </p>
+          <div class="downloadText">
+            <h3 dir="auto">
+              {{ download.title }}
+            </h3>
+            <p
+              v-if="download.status === 'completed' && channelName"
+              class="downloadChannel"
+              dir="auto"
+            >
+              {{ channelName }}
+            </p>
+            <p
+              v-if="statusText"
+              class="downloadStatus"
+              :aria-hidden="inProgress ? 'true' : undefined"
+            >
+              {{ statusText }}
+            </p>
+            <p
+              v-if="availabilityText"
+              class="downloadAvailability"
+              :class="{ missing: download.availability === 'missing' }"
+            >
+              {{ availabilityText }}
+            </p>
+          </div>
           <div
             v-if="inProgress"
             class="progressTrack"
@@ -87,60 +89,62 @@
           >
             {{ COMPACT ? compactSummary : summary }}
           </p>
-          <p
-            v-if="spaceWarningText"
-            class="downloadSpaceWarning"
-          >
-            {{ spaceWarningText }}
-          </p>
-          <p
-            v-if="hasSkippedPlaylistVideos"
-            class="downloadWarning"
-          >
-            <FtIcon
-              :icon="['fas', 'triangle-exclamation']"
-              aria-hidden="true"
-            />
-            {{ t('Downloads.Some Videos Not Downloaded') }}
-          </p>
-          <p
-            v-if="errorText"
-            class="downloadError"
-            dir="auto"
-          >
-            {{ errorText }}
-          </p>
-          <p
-            v-if="!COMPACT && download.titleTruncated"
-            class="downloadWarning"
-          >
-            <FtIcon
-              :icon="['fas', 'triangle-exclamation']"
-              aria-hidden="true"
-            />
-            {{ t('Downloads.File Name Shortened') }}
-          </p>
-          <DownloadFailureHint v-if="download.status === 'failed'" />
-          <ul
-            v-if="!COMPACT && destinations.length > 0"
-            class="destinationList"
-          >
-            <li
-              v-for="destination in destinations"
-              :key="destination"
-              class="destination"
+          <div class="downloadNotes">
+            <p
+              v-if="spaceWarningText"
+              class="downloadSpaceWarning"
+            >
+              {{ spaceWarningText }}
+            </p>
+            <p
+              v-if="hasSkippedPlaylistVideos"
+              class="downloadWarning"
+            >
+              <FtIcon
+                :icon="['fas', 'triangle-exclamation']"
+                aria-hidden="true"
+              />
+              {{ t('Downloads.Some Videos Not Downloaded') }}
+            </p>
+            <p
+              v-if="errorText"
+              class="downloadError"
               dir="auto"
-              :title="destination"
             >
-              {{ destination }}
-            </li>
-            <li
-              v-if="hiddenDestinationCount > 0"
-              class="destination"
+              {{ errorText }}
+            </p>
+            <p
+              v-if="!COMPACT && download.titleTruncated"
+              class="downloadWarning"
             >
-              {{ t('Downloads.More Files', { count: hiddenDestinationCount }, hiddenDestinationCount) }}
-            </li>
-          </ul>
+              <FtIcon
+                :icon="['fas', 'triangle-exclamation']"
+                aria-hidden="true"
+              />
+              {{ t('Downloads.File Name Shortened') }}
+            </p>
+            <DownloadFailureHint v-if="download.status === 'failed'" />
+            <ul
+              v-if="!COMPACT && destinations.length > 0"
+              class="destinationList"
+            >
+              <li
+                v-for="destination in destinations"
+                :key="destination"
+                class="destination"
+                dir="auto"
+                :title="destination"
+              >
+                {{ destination }}
+              </li>
+              <li
+                v-if="hiddenDestinationCount > 0"
+                class="destination"
+              >
+                {{ t('Downloads.More Files', { count: hiddenDestinationCount }, hiddenDestinationCount) }}
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
       <div
