@@ -71,7 +71,11 @@ export function parseBackgroundSubscriptionResponse(format, text, feedType, chan
         (path && !selected.endpoint?.commandMetadata?.webCommandMetadata?.url?.endsWith(path)) ||
         data.alerts?.some(alert => alert.alertRenderer?.type === 'ERROR')) throw new Error('Channel unavailable')
     if (format === 'local' && feedType === 'videos' && data.metadata?.channelMetadataRenderer?.musicArtistName) {
-      if (!selected?.endpoint?.commandMetadata?.webCommandMetadata?.url?.endsWith('/videos')) throw new Error('Topic channel requires its uploads playlist')
+      if (!selected?.endpoint?.commandMetadata?.webCommandMetadata?.url?.endsWith('/videos')) {
+        const error = new Error('Topic channel requires its uploads playlist')
+        error.verifiedTopicChannel = data.metadata.channelMetadataRenderer.externalId === channelId
+        throw error
+      }
     }
     return { backgroundFormat: format, data }
   }
@@ -81,11 +85,17 @@ export function parseBackgroundSubscriptionResponse(format, text, feedType, chan
 
 export async function fetchBackgroundSubscriptionChannel(configuration, feedType, channelId, signal, fetchText, normalize = payload => payload) {
   let lastError
+  // A Topic channel without a Videos tab has uploads only if its uploads playlist exists.
+  let topicChannelWithoutVideosTab = false
   for (const plan of configuration.requests[feedType]) {
     signal.throwIfAborted()
     try {
       const request = resolveBackgroundSubscriptionRequest(plan, feedType, channelId)
-      const payload = parseBackgroundSubscriptionResponse(plan.format, await fetchText(request, signal), feedType, channelId)
+      const text = await fetchText(request, signal)
+      if (plan.format === 'localPlaylist' && topicChannelWithoutVideosTab && JSON.stringify(JSON.parse(text).alerts ?? null).includes('The playlist does not exist.')) {
+        return await normalize(emptyFeed(feedType))
+      }
+      const payload = parseBackgroundSubscriptionResponse(plan.format, text, feedType, channelId)
       if (payload.backgroundFormat === 'local' && feedType === 'live') {
         let page = payload.data
         for (let count = 0; ; count++) {
@@ -102,6 +112,7 @@ export async function fetchBackgroundSubscriptionChannel(configuration, feedType
       return await normalize(payload)
     } catch (error) {
       lastError = error
+      if (error.verifiedTopicChannel) topicChannelWithoutVideosTab = true
       if (plan.format === 'local' && OPTIONAL_TAB_PATHS[feedType] && error.message === 'HTTP 404') {
         try {
           signal.throwIfAborted()

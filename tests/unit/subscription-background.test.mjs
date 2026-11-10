@@ -515,6 +515,22 @@ for (const kind of ['channel', 'completion']) {
   })
 }
 
+test('background videos refresh accepts a Topic channel without uploads', async () => {
+  const requests = createBackgroundSubscriptionRequests({ useRss: false })
+  const missingPlaylist = { alerts: [{ alertRenderer: { type: 'ERROR', text: { simpleText: 'The playlist does not exist.' } } }] }
+  for (const id of ['UCtest', 'UCother']) {
+    const page = channelPage(id, ['/channel/UCtest/featured'])
+    page.metadata.channelMetadataRenderer.musicArtistName = 'Artist'
+    const fetchChannel = () => fetchBackgroundSubscriptionChannel({ requests }, 'videos', 'UCtest', new AbortController().signal, async request => {
+      if (request.format === 'rss') throw new Error('HTTP 404')
+      return JSON.stringify(request.format === 'local' ? page : missingPlaylist)
+    })
+    // Only the subscribed channel's page proves that the missing playlist means no uploads.
+    if (id === 'UCtest') assert.deepEqual(await fetchChannel(), { videos: [] })
+    else await assert.rejects(fetchChannel())
+  }
+})
+
 test('topic channels accept the selected videos tab in either browse layout', () => {
   for (const layout of ['singleColumnBrowseResultsRenderer', 'twoColumnBrowseResultsRenderer']) {
     const data = {
