@@ -23,7 +23,10 @@
         />
       </component>
     </div>
-    <div class="infoAndSubscribe">
+    <div
+      ref="infoAndSubscribe"
+      class="infoAndSubscribe"
+    >
       <div class="info">
         <component
           :is="enableChannelLinks ? 'router-link' : 'span'"
@@ -96,6 +99,7 @@
         :channel-name="name"
         :channel-thumbnail="thumbnail"
         :channel-handle="handle"
+        :compact="compactSubscribe"
       />
     </div>
   </div>
@@ -115,6 +119,7 @@ import store from '../../store/index'
 import { isOnAiSlopList } from '../../helpers/aiSlopList'
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { getOriginalChannelName } from '../../helpers/api/local'
+import { labeledSubscribeButtonWidth } from '../../helpers/subscribeButton'
 import { formatNumber, formatSubscriberCount } from '../../helpers/utils'
 
 const props = defineProps({
@@ -161,10 +166,44 @@ function updateMetadataWrapping() {
     Math.abs(firstItem.getBoundingClientRect().top - secondItem.getBoundingClientRect().top) > 1
 }
 
+const infoAndSubscribe = useTemplateRef('infoAndSubscribe')
+const compactSubscribe = ref(false)
+let subscribeResizeObserver = null
+
+/** Drops the subscribe label when the button group would overflow the card, like in narrow grid columns. */
+function updateSubscribeLayout() {
+  const buttonList = infoAndSubscribe.value?.querySelector('.buttonList')
+  const button = buttonList?.querySelector('.subscribeButton')
+  if (!button) return
+  const available = infoAndSubscribe.value.getBoundingClientRect().width
+  if (available <= 0) return
+  const style = getComputedStyle(buttonList)
+  const width = buttonList.getBoundingClientRect().width + (Number.parseFloat(style.marginInlineStart) || 0) +
+    (Number.parseFloat(style.marginInlineEnd) || 0) + labeledSubscribeButtonWidth(button) - button.getBoundingClientRect().width
+  const compact = width > available + 0.5
+  if (compact !== compactSubscribe.value) compactSubscribe.value = compact
+}
+
+function observeSubscribeButton() {
+  subscribeResizeObserver?.disconnect()
+  const buttonList = infoAndSubscribe.value?.querySelector('.buttonList')
+  if (subscribeResizeObserver && buttonList) {
+    subscribeResizeObserver.observe(infoAndSubscribe.value)
+    subscribeResizeObserver.observe(buttonList)
+    // The hidden label of the compact button changes width without resizing the group.
+    const label = buttonList.querySelector('.subscribeLabel')
+    if (label) subscribeResizeObserver.observe(label)
+  }
+  updateSubscribeLayout()
+}
+
+watch(hideUnsubscribeButton, observeSubscribeButton, { flush: 'post' })
+
 onMounted(() => {
   updateMetadataWrapping()
 
   if (typeof ResizeObserver !== 'function') {
+    updateSubscribeLayout()
     return
   }
 
@@ -173,9 +212,15 @@ onMounted(() => {
   for (const item of metadataLine.value.children) {
     metadataResizeObserver.observe(item)
   }
+
+  subscribeResizeObserver = new ResizeObserver(updateSubscribeLayout)
+  observeSubscribeButton()
 })
 
-onBeforeUnmount(() => metadataResizeObserver?.disconnect())
+onBeforeUnmount(() => {
+  metadataResizeObserver?.disconnect()
+  subscribeResizeObserver?.disconnect()
+})
 
 let id = ''
 let thumbnail = ''

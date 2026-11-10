@@ -119,11 +119,17 @@
   }
 
   .card :deep(.optionsButton .iconButton),
-  .card :deep(.ft-list-item .deArrowToggleButton),
-  .card :deep(.channelSubscribeButton button) {
+  .card :deep(.ft-list-item .deArrowToggleButton) {
     box-sizing: border-box;
     min-block-size: 48px;
     min-inline-size: 48px;
+  }
+
+  /* Narrower segments let the icon-only group fit a two-column grid. */
+  .card :deep(.channelSubscribeButton button) {
+    box-sizing: border-box;
+    min-block-size: 48px;
+    min-inline-size: 40px;
   }
 
   .getNextPage {

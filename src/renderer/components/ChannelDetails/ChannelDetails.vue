@@ -230,6 +230,7 @@ import store from '../../store/index'
 
 import { ctrlFHandler, formatSubscriberCount } from '../../helpers/utils'
 import { openButtonMenu } from '../../helpers/buttonMenu'
+import { labeledSubscribeButtonWidth } from '../../helpers/subscribeButton'
 import { useTabContext } from '../../tabs/TabContext'
 
 const props = defineProps({
@@ -447,15 +448,8 @@ function updateActionsLayout() {
   let width = children.reduce((sum, child) => sum + child.getBoundingClientRect().width, 0) +
     Math.max(0, children.length - 1) * px(getComputedStyle(row).columnGap)
   const button = row.querySelector('.subscribeButton')
-  const label = button?.querySelector('.subscribeLabel')
-  if (compactSubscribe.value && label) {
-    // The compact button has its own minimum, so rebuild the labeled width from its parts.
-    const style = getComputedStyle(button)
-    const icon = button.querySelector('.ft-icon')?.getBoundingClientRect().width ?? 0
-    const fullWidth = Math.max(px(style.getPropertyValue('--subscribe-button-min-size')),
-      px(style.paddingInlineStart) + px(style.paddingInlineEnd) + px(style.borderInlineStartWidth) +
-      px(style.borderInlineEndWidth) + icon + px(style.columnGap) + label.getBoundingClientRect().width)
-    width += fullWidth - button.getBoundingClientRect().width
+  if (button) {
+    width += labeledSubscribeButtonWidth(button) - button.getBoundingClientRect().width
   }
   const compact = width > available
   if (compact !== compactSubscribe.value) compactSubscribe.value = compact
