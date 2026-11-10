@@ -491,9 +491,12 @@ class History {
     )
   }
 
-  static async delete(videoId) {
-    await recommendations.remove([videoId])
-    return db.history.removeAsync({ videoId })
+  static delete(videoId) {
+    // Queue with the history writes, so an earlier pending upsert cannot recreate the record.
+    return Settings.runSeenStateUpdate(async () => {
+      await recommendations.remove([videoId])
+      return db.history.removeAsync({ videoId })
+    })
   }
 
   static deleteOlderThan(cutoff, excludedVideoIds = []) {
@@ -516,9 +519,11 @@ class History {
     })
   }
 
-  static async deleteAll() {
-    await recommendations.reset()
-    return db.history.removeAsync({}, { multi: true })
+  static deleteAll() {
+    return Settings.runSeenStateUpdate(async () => {
+      await recommendations.reset()
+      return db.history.removeAsync({}, { multi: true })
+    })
   }
 }
 

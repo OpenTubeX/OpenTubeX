@@ -87,3 +87,27 @@ test('deleting old history keeps a video watched again while the deletion runs',
   await rewatch
   assert.deepEqual((await db.history.findAsync({ videoId: 'video' })).map(record => record.timeWatched), [20])
 })
+
+test('clearing history waits for history writes queued before it', async () => {
+  const removingRecommendations = Promise.withResolvers()
+  const releaseRecommendations = Promise.withResolvers()
+  const { db, History } = fixture({
+    remove: async () => {
+      removingRecommendations.resolve()
+      await releaseRecommendations.promise
+    },
+    reset: async () => {},
+  })
+  await db.history.insertAsync({ videoId: 'old', title: 'Old', isWatched: true, watchProgress: 0, timeWatched: 1 })
+
+  // Hold the history queue, then queue a progress write before clearing.
+  const deletion = History.deleteOlderThan(10)
+  await removingRecommendations.promise
+  const progress = History.updateWatchProgress('video', 30)
+  const clear = History.deleteAll()
+  await new Promise(resolve => setImmediate(resolve))
+  releaseRecommendations.resolve()
+
+  await Promise.all([deletion, progress, clear])
+  assert.deepEqual(await db.history.findAsync({}), [])
+})
