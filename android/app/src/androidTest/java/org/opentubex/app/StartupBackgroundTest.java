@@ -74,6 +74,7 @@ public class StartupBackgroundTest {
                     // its pre-renderer state. No splash covers the measured surface.
                     scenario.recreate();
                     CountDownLatch rendererRequested = new CountDownLatch(1);
+                    CountDownLatch blankLoaded = new CountDownLatch(1);
                     scenario.onActivity(activity -> {
                         WebView nextView = activity.getBridge().getWebView();
                         reference.set(nextView);
@@ -86,10 +87,22 @@ public class StartupBackgroundTest {
                                 }
                                 return super.shouldInterceptRequest(webView, request);
                             }
+
+                            @Override
+                            public void onPageFinished(WebView webView, String url) {
+                                super.onPageFinished(webView, url);
+                                if ("about:blank".equals(url)) blankLoaded.countDown();
+                            }
                         });
+                        // Chromium holds the previous page's last frame on a same-origin
+                        // navigation until the new page paints content, which this blank
+                        // page never does. Leave the origin first, as a cold start has no
+                        // previous page.
                         nextView.stopLoading();
-                        nextView.loadUrl("https://localhost/");
+                        nextView.loadUrl("about:blank");
                     });
+                    assertTrue("The previous page is left", blankLoaded.await(10, TimeUnit.SECONDS));
+                    scenario.onActivity(activity -> activity.getBridge().getWebView().loadUrl("https://localhost/"));
                     view = reference.get();
                     assertTrue("The real renderer request is intercepted", rendererRequested.await(10, TimeUnit.SECONDS));
                     awaitCondition(view, "!!document.querySelector('#app') && !document.querySelector('#app').__vue_app__ && !document.querySelector('#startup-splash')");
