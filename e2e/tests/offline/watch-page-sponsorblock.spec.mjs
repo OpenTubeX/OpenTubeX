@@ -303,6 +303,51 @@ test.describe('watch page', () => {
     await expect(prompt).toHaveCount(0)
   })
 
+  test('stops at a SponsorBlock segment end finer than the media clock', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    // Chromium stores positions in microseconds, so the skip lands at 20.123456
+    await page.route('**/api/skipSegments/**', route => route.fulfill({
+      body: JSON.stringify([{
+        videoID: 'jNQXAC9IVRw',
+        segments: [{
+          UUID: 'precise-sponsor',
+          actionType: 'skip',
+          category: 'sponsor',
+          description: '',
+          locked: 0,
+          segment: [15, 20.1234567],
+          videoDuration: 30,
+          votes: 1
+        }]
+      }]),
+      contentType: 'application/json'
+    }))
+    await page.evaluate(() => {
+      const store = window.$store
+      store.commit('setUseSponsorBlock', true)
+    })
+    await openMockedVideo(page)
+    await expect(page.locator('.sponsorBlockMarker')).toHaveCount(1)
+
+    const video = page.locator('.ftVideoPlayer video')
+    await video.evaluate(element => {
+      element.pause()
+      element.currentTime = 16
+    })
+    await expect.poll(() => video.evaluate(element => !element.seeking && element.currentTime)).toBeCloseTo(20.1234567, 5)
+
+    const toast = page.locator('.skippedSegment')
+    await toast.locator('.closeSkippedSegmentButton').click()
+    await expect(toast).toHaveCount(0)
+    // a paused skip that still counts as inside the segment would skip again on every seek
+    const seekedAgain = await video.evaluate(element => new Promise(resolve => {
+      element.addEventListener('seeking', () => resolve(true), { once: true })
+      setTimeout(() => resolve(false), 1000)
+    }))
+    expect(seekedAgain).toBe(false)
+    await expect(toast).toHaveCount(0)
+  })
+
   test('shows one toast for SponsorBlock segments skipped together', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     // [15, 17] lies inside [13, 20], so the jump covers it without extending the skip

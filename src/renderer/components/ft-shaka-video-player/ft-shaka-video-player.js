@@ -193,6 +193,7 @@ import {
   SPONSORBLOCK_INFO_CATEGORIES,
   SPONSORBLOCK_PLAYBACK_ACTION_TYPES,
   SPONSORBLOCK_SEGMENT_START_TOLERANCE_SECONDS,
+  isBeforeSponsorBlockSegmentEnd,
   useSponsorBlockPlayback,
 } from './opentubex/useSponsorBlockPlayback'
 import { usePlayerAudioOutput } from './opentubex/usePlayerAudioOutput'
@@ -2268,7 +2269,7 @@ export default defineComponent({
       for (const [uuid, range] of sponsorBlockDoNotSkipSegments) {
         const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
         if (segment && !isSponsorBlockPointSegment(segment) &&
-          (currentTime < range.startTime - SPONSORBLOCK_SEGMENT_START_TOLERANCE_SECONDS || currentTime >= range.endTime)) {
+          (currentTime < range.startTime - SPONSORBLOCK_SEGMENT_START_TOLERANCE_SECONDS || !isBeforeSponsorBlockSegmentEnd(currentTime, range.endTime))) {
           sponsorBlockDoNotSkipSegments.delete(uuid)
           removeSponsorBlockToast(uuid)
         }
@@ -2287,7 +2288,7 @@ export default defineComponent({
       )
 
       autoSkipSegments.forEach(segment => {
-        if (currentTime < segment.endTime &&
+        if (isBeforeSponsorBlockSegmentEnd(currentTime, segment.endTime) &&
           (segment.startTime <= currentTime ||
             // if we already have a segment to skip, check if there are any that are less than 150ms later,
             // so that we can skip them all in one go (especially useful on slow connections)
@@ -2303,7 +2304,7 @@ export default defineComponent({
 
       // segments contained in the skipped range are jumped over too, so they belong to the same toast
       autoSkipSegments.forEach(segment => {
-        if (!skippedSegments.includes(segment) && segment.startTime < newTime && segment.endTime > currentTime) {
+        if (!skippedSegments.includes(segment) && segment.startTime < newTime && isBeforeSponsorBlockSegmentEnd(currentTime, segment.endTime)) {
           skippedSegments.push(segment)
         }
       })
