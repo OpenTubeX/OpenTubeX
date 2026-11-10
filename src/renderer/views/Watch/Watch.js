@@ -6009,7 +6009,12 @@ export default defineComponent({
           return
         }
 
-        if (this.isAndroidTransientHttpRecoveryEnabled() && await this.retryAndroidTransientHttpError()) {
+        // A stream that already failed its in-place retry needs fresh streaming data
+        if (
+          !this.playbackNetworkRetryPending &&
+          this.isAndroidTransientHttpRecoveryEnabled() &&
+          await this.retryAndroidTransientHttpError()
+        ) {
           return
         }
       }

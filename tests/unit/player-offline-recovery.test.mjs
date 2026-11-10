@@ -78,7 +78,8 @@ function createUnreachableStreamView() {
     sabrErrorRecoveryAttempts: 0,
     reloads: [],
     isSabrVideoStream: () => true,
-    isAndroidTransientHttpRecoveryEnabled: () => false,
+    isAndroidTransientHttpRecoveryEnabled: () => true,
+    retryAndroidTransientHttpError: async () => assert.fail('the quick Android retry must not delay recovery'),
     async reloadSabrStream (payload, message) {
       this.reloads.push(message)
       this.sabrErrorRecoveryAttempts++
@@ -113,6 +114,7 @@ test('an unreachable stream server keeps the player and retries it in place with
 
 test('a stream whose in-place retry cannot start reloads once the server answers', async () => {
   const { view, player, waits } = createUnreachableStreamView()
+  view.isAndroidTransientHttpRecoveryEnabled = () => false
   player.retryStreaming = () => false
   const handled = view.handlePlayerError(lostConnection())
   await Promise.resolve()
@@ -135,6 +137,7 @@ test('a replaced player ends the wait without retrying or reloading', async () =
 
 test('playback errors that need fresh streaming data do not wait for the network', async () => {
   const { view, waits } = createUnreachableStreamView()
+  view.isAndroidTransientHttpRecoveryEnabled = () => false
   await view.handlePlayerError({ code: 1002, data: ['sabr://video', new Error('Invalid PO token'), 1] })
   assert.equal(waits.length, 0)
   assert.equal(view.reloads.length, 1)
