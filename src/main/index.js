@@ -3462,11 +3462,9 @@ function runApp() {
         }
 
         case DBActions.PROFILES.MERGE_BACKUP: {
-          const profiles = await baseHandlers.profiles.mergeBackup(data)
-          for (const profile of profiles) {
-            syncOtherWindows(IpcChannels.SYNC_PROFILES, event, { event: SyncEvents.GENERAL.UPSERT, data: profile })
-          }
-          return profiles
+          const profile = await baseHandlers.profiles.mergeBackup(data)
+          syncOtherWindows(IpcChannels.SYNC_PROFILES, event, { event: SyncEvents.GENERAL.UPSERT, data: profile })
+          return profile
         }
 
         case DBActions.GENERAL.DELETE:
@@ -3542,12 +3540,10 @@ function runApp() {
 
         case DBActions.PLAYLISTS.MERGE_BACKUP: {
           if (typeof data === 'string') data = JSON.parse(data)
-          const playlists = await baseHandlers.playlists.mergeBackup(data)
-          for (const playlist of playlists) {
-            syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: SyncEvents.GENERAL.UPSERT, data: playlist })
-          }
+          const playlist = await baseHandlers.playlists.mergeBackup(data)
+          syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: SyncEvents.GENERAL.UPSERT, data: playlist })
           // Strings cross IPC and the context bridge far faster than records.
-          return JSON.stringify(playlists)
+          return JSON.stringify(playlist)
         }
 
         case DBActions.PLAYLISTS.UPSERT_IF_UNCHANGED: {

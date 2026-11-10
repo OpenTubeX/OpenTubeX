@@ -157,7 +157,12 @@ test('duplicate backup identities accumulate subscriptions and videos promised b
     selectedBackupSections: { value: ['profiles', 'playlists'] },
     DBProfileHandlers: Profiles,
     normalizeImportedPlaylistThumbnail: async () => {},
-    store: { dispatch: async (action, payload) => action !== 'mergePlaylistBackup' || (await Playlists.mergeBackup(payload), true) },
+    store: {
+      async dispatch(action, playlists) {
+        if (action === 'mergePlaylistBackup') for (const playlist of playlists) await Playlists.mergeBackup(playlist)
+        return true
+      },
+    },
     compactAllDatastores: async () => true,
     closeBackupImport() {},
     showToast() {},

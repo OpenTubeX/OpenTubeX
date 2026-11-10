@@ -248,8 +248,8 @@ class Profiles {
     return dbProfiles(DBActions.PROFILES.UPDATE_SUBSCRIPTIONS_IF_UNCHANGED, { profileId, subscriptions, previous })
   }
 
-  static mergeBackup(profiles) {
-    return dbProfiles(DBActions.PROFILES.MERGE_BACKUP, profiles)
+  static mergeBackup(profile) {
+    return dbProfiles(DBActions.PROFILES.MERGE_BACKUP, profile)
   }
 
   static delete(id) {
@@ -298,9 +298,10 @@ class Playlists {
     return dbPlaylists(DBActions.PLAYLISTS.REORDER_VIDEOS, { _id, lastUpdatedAt, playlistItemIds })
   }
 
-  static async mergeBackup(playlists) {
-    // Restored playlists can hold tens of thousands of videos
-    return JSON.parse(await dbPlaylists(DBActions.PLAYLISTS.MERGE_BACKUP, playlists, { inWorker: true }))
+  static async mergeBackup(playlist) {
+    return JSON.parse(await dbPlaylists(DBActions.PLAYLISTS.MERGE_BACKUP, playlist, {
+      inWorker: playlist.videos.length > LARGE_PLAYLIST_VIDEO_COUNT
+    }))
   }
 
   static upsertVideoByPlaylistId(_id, lastUpdatedAt, videoData) {

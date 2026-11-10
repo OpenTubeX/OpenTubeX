@@ -939,24 +939,19 @@ class Profiles {
   }
 
   /**
-   * Merges restored profiles with the saved ones. Each profile is merged with
-   * the record stored when it is written, so a subscription another window
-   * adds during the restore is kept.
-   * @param {object[]} profiles
-   * @returns {Promise<object[]>} the merged profiles as saved
+   * Merges a restored profile with the saved one when it is written, so a
+   * subscription another window adds during the restore is kept.
+   * @param {object} imported
+   * @returns {Promise<object>} the merged profile as saved
    */
-  static async mergeBackup(profiles) {
-    const saved = []
-    for (const imported of profiles) {
-      saved.push(await saveRestoredRecord(db.profiles, imported._id, current => {
-        const snapshot = JSON.stringify(current)
-        return {
-          record: mergeBackupProfile(current, imported),
-          unchanged() { return JSON.stringify(this) === snapshot },
-        }
-      }))
-    }
-    return saved
+  static mergeBackup(imported) {
+    return saveRestoredRecord(db.profiles, imported._id, current => {
+      const snapshot = JSON.stringify(current)
+      return {
+        record: mergeBackupProfile(current, imported),
+        unchanged() { return JSON.stringify(this) === snapshot },
+      }
+    })
   }
 
   static delete(id) {
@@ -1211,38 +1206,33 @@ class Playlists {
   }
 
   /**
-   * Merges restored playlists with the saved ones. Each playlist is merged with
-   * the record stored when it is written, so a video another window adds
-   * during the restore is kept.
-   * @param {object[]} playlists
-   * @returns {Promise<object[]>} the merged playlists as saved
+   * Merges a restored playlist with the saved one when it is written, so a
+   * video another window adds during the restore is kept.
+   * @param {object} imported
+   * @returns {Promise<object>} the merged playlist as saved
    */
-  static async mergeBackup(playlists) {
-    const saved = []
-    for (const imported of playlists) {
-      saved.push(await saveRestoredRecord(db.playlists, imported._id, current => {
-        const merged = mergeBackupPlaylist(current, imported)
-        // Reordering finds entries by playlistItemId, so restored entries need
-        // one. Copies keep the backup unchanged for a retry's duplicate check.
-        const videos = merged.videos.map(video => {
-          const copy = { ...video }
-          processToBeAddedPlaylistVideo(copy)
-          return copy
-        })
-        const record = { ...merged, videos }
-        if (!Number.isFinite(record.createdAt)) record.createdAt = record.lastUpdatedAt
-        const { videos: currentVideos = [], ...currentFields } = current ?? {}
-        const fieldSnapshot = JSON.stringify(currentFields)
-        return {
-          record,
-          unchanged() {
-            const { videos = [], ...fields } = this
-            return JSON.stringify(fields) === fieldSnapshot && Playlists._sameVideoEntries(videos, currentVideos)
-          },
-        }
-      }))
-    }
-    return saved
+  static mergeBackup(imported) {
+    return saveRestoredRecord(db.playlists, imported._id, current => {
+      const merged = mergeBackupPlaylist(current, imported)
+      // Reordering finds entries by playlistItemId, so restored entries need
+      // one. Copies keep the backup unchanged for a retry's duplicate check.
+      const videos = merged.videos.map(video => {
+        const copy = { ...video }
+        processToBeAddedPlaylistVideo(copy)
+        return copy
+      })
+      const record = { ...merged, videos }
+      if (!Number.isFinite(record.createdAt)) record.createdAt = record.lastUpdatedAt
+      const { videos: currentVideos = [], ...currentFields } = current ?? {}
+      const fieldSnapshot = JSON.stringify(currentFields)
+      return {
+        record,
+        unchanged() {
+          const { videos = [], ...fields } = this
+          return JSON.stringify(fields) === fieldSnapshot && Playlists._sameVideoEntries(videos, currentVideos)
+        },
+      }
+    })
   }
 
   static delete(_id) {

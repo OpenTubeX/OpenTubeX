@@ -511,7 +511,7 @@ async function importUnifiedBackup() {
     // The datastore merges each record with the one stored when it is
     // written, so edits other windows save during the restore are kept.
     if (selected.has('profiles')) {
-      await DBProfileHandlers.mergeBackup(data.profiles)
+      for (const profile of data.profiles) await DBProfileHandlers.mergeBackup(profile)
       await store.dispatch('grabAllProfiles')
     }
     if (selected.has('playlists')) {

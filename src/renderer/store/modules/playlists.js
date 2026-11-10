@@ -247,21 +247,23 @@ const actions = {
   },
 
   /**
-   * Merges playlists restored from a backup with the saved ones
+   * Merges playlists restored from a backup with the saved ones. Each is shown
+   * once saved, so a stale copy cannot replace edits other windows sync later.
    * @param {any} param0
    * @param {object[]} playlists
    * @returns {Promise<boolean>} whether every playlist was saved
    */
   async mergePlaylistBackup({ commit }, playlists) {
     const lastUpdatedAt = Date.now()
-    const prepared = playlists.map(playlist => ({
-      ...playlist,
-      playlistName: playlist.playlistName.trim(),
-      ...(typeof playlist.description === 'string' ? { description: playlist.description.trim() } : {}),
-      lastUpdatedAt,
-    }))
     try {
-      for (const playlist of await DBPlaylistHandlers.mergeBackup(prepared)) commit('upsertPlaylistToList', playlist)
+      for (const playlist of playlists) {
+        commit('upsertPlaylistToList', await DBPlaylistHandlers.mergeBackup({
+          ...playlist,
+          playlistName: playlist.playlistName.trim(),
+          ...(typeof playlist.description === 'string' ? { description: playlist.description.trim() } : {}),
+          lastUpdatedAt,
+        }))
+      }
       return true
     } catch (errMessage) {
       console.error(errMessage)
