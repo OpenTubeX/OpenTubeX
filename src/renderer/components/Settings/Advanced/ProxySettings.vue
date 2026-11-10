@@ -211,10 +211,6 @@ const videoIpBlockScriptPath = computed(() => {
   return store.getters.getVideoIpBlockScriptPath
 })
 
-const proxyUrl = computed(() => {
-  return `${proxyProtocol.value}://${proxyHostname.value}:${proxyPort.value}`
-})
-
 const proxyTestUrl = computed(() => getProxyTestUrl(locale.value))
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -241,13 +237,13 @@ function handleUpdateProxy(enabled) {
 /**
  * @param {string} value
  */
-async function handleUpdateProxyProtocol(value) {
-  // apply the new protocol, not the one that is still saved
-  await store.dispatch('updateProxyProtocol', value)
-
+function handleUpdateProxyProtocol(value) {
   if (useProxy.value) {
-    enableProxy()
+    // apply the new protocol, not the one that is still saved
+    enableProxy(value)
   }
+
+  store.dispatch('updateProxyProtocol', value)
 }
 
 /**
@@ -320,9 +316,9 @@ async function handlePickVideoIpBlockRecoveryScriptPath() {
   }
 }
 
-function enableProxy() {
+function enableProxy(protocol = proxyProtocol.value) {
   if (process.env.IS_ELECTRON) {
-    window.ftElectron.enableProxy(proxyUrl.value)
+    window.ftElectron.enableProxy(`${protocol}://${proxyHostname.value}:${proxyPort.value}`)
   }
 }
 
