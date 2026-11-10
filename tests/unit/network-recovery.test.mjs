@@ -300,11 +300,14 @@ test('a stream server that stops answering is awaited while the internet check s
   assert.deepEqual([...app.recovery.waitingOrigins], [origin])
   assert.equal(app.recovery.state, 'online')
   assert.deepEqual(probes, [{ input: `${origin}/generate_204`, method: 'HEAD', mode: 'no-cors', credentials: 'omit' }])
+  // Another player's wait follows the pending probe before its own succeeds
+  const following = app.waitUntilReachable(`${origin}/generate_204`, new AbortController().signal)
 
   reachable = true
   t.mock.timers.tick(5000)
   assert.equal(await waiting, true, 'a server that did not answer at first was unreachable')
-  assert.equal(probes.length, 2)
+  assert.equal(await following, true, 'a wait behind another probe was for an unreachable server')
+  assert.equal(probes.length, 3)
   assert.deepEqual([...app.recovery.waitingOrigins], [])
 
   const controller = new AbortController()

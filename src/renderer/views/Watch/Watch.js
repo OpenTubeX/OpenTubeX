@@ -5883,6 +5883,8 @@ export default defineComponent({
       if (probeUrl === null) return false
 
       const player = this.$refs.player
+      const loadGeneration = this.videoLoadGeneration
+      const routeVideoId = this.tabRoute.params.id
       this.cancelPlaybackNetworkWait()
       const controller = new AbortController()
       this.playbackNetworkWaitController = controller
@@ -5904,6 +5906,12 @@ export default defineComponent({
         }
       }
       if (player !== this.$refs.player || this.isLoading) return true
+      // Navigation starts a new load before it replaces the player. Keep the
+      // error pending, so a retained Short recovers when it returns.
+      if (!this.isCurrentVideoLoad(loadGeneration, routeVideoId)) {
+        if (!this.playbackNetworkWaitController) this.playbackNetworkWaitError = error
+        return true
+      }
       if (onlyIfUnreachable && !unreachable) return false
       // Whether or not the retry starts, a further failure needs fresh streaming data
       this.playbackNetworkRetryPending = true

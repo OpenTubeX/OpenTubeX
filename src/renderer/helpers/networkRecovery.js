@@ -110,7 +110,7 @@ export function createNetworkRecovery({ eventTarget, isOnline, visibilityTarget,
    * Requests that reach a real host keep their own backoff while the internet
    * check fails, so a blocked check endpoint cannot stop reachable services.
    */
-  async function run(originKey, task, { signal: callerSignal, retry = true, retryDuringOutage = false, isNetworkError = error => classifyRequestFailure(error) === 'network' } = {}) {
+  async function run(originKey, task, { signal: callerSignal, retry = true, retryDuringOutage = false, isNetworkError = error => classifyRequestFailure(error) === 'network', onWait = () => {} } = {}) {
     const canAttempt = retryDuringOutage ? isDeviceOnline : isOnline
     const signal = callerSignal ? AbortSignal.any([callerSignal, shutdown.signal]) : shutdown.signal
     if (signal.aborted) throw createAbortError()
@@ -126,11 +126,13 @@ export function createNetworkRecovery({ eventTarget, isOnline, visibilityTarget,
       for (;;) {
         if (signal.aborted) throw createAbortError()
         if (origin.probe) {
+          onWait()
           // A cancelled probe must release its followers, not cancel them.
           await waitForPromise(origin.probe, signal)
           continue
         }
         if (!canAttempt() || origin.failed) {
+          onWait()
           origin.failed = true
           let release
           origin.probe = new Promise(resolve => { release = resolve })
@@ -328,15 +330,11 @@ export function withNetworkRecovery(input, init, task, { uncached = false, ...op
  */
 export async function waitUntilReachable(url, signal) {
   const probe = createInternetProbe((input, init) => withoutNetworkRecovery(() => window.fetch(input, init)), url)
-  const recovery = initializeNetworkRecovery()
-  const origin = new URL(url).origin
-  let unreachable = navigator.onLine === false || recovery.waitingOrigins.includes(origin)
-  await recovery.run(origin, async probeSignal => {
-    if (await probe(probeSignal)) return
-    unreachable = true
+  let unreachable = false
+  await initializeNetworkRecovery().run(new URL(url).origin, async probeSignal => {
     // Hostnames must stay out of the message, which classifies the failure
-    throw new Error('Connection failed')
-  }, { signal, retryDuringOutage: true })
+    if (!await probe(probeSignal)) throw new Error('Connection failed')
+  }, { signal, retryDuringOutage: true, onWait: () => { unreachable = true } })
   return unreachable
 }
 
