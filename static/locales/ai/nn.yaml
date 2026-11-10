@@ -550,6 +550,7 @@ Settings:
     Invalid Engine: Skriv inn eit namn og ei gyldig HTTP- eller HTTPS-søkjeadresse som inneheld %s.
     Engine Limit: Du kan leggje til opptil {count} eigne søkjemotorar.
   Theme Settings:
+    Theme and Colors: "Tema og fargar"
     Font Size: Skriftstorleik
     Sections:
       Interface: "Grensesnitt"

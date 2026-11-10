@@ -554,6 +554,7 @@ Settings:
     Invalid Engine: Увядзіце назву і дапушчальны URL пошуку HTTP або HTTPS, які змяшчае %s.
     Engine Limit: Можна дадаць не больш за {count} уласных пошукавых сістэм.
   Theme Settings:
+    Theme and Colors: "Тэма і колеры"
     Font Size: Памер шрыфту
     Sections:
       Interface: "Інтэрфейс"

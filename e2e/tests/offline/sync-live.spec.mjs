@@ -367,8 +367,10 @@ test.describe('live sync', () => {
     await goToSettingsSection(page, 'sync')
     await activity.getByRole('button', { name: 'Base theme', exact: true }).focus()
     await page.keyboard.press('Enter')
-    await expect(page.locator('.select.settingsSearchTarget')).toContainText(/Base theme/i)
+    await expect(page.locator('.themeModes.settingsSearchTarget')).toHaveAttribute('aria-label', /Base theme/i)
     await expect.poll(() => page.evaluate(() => !!document.activeElement?.closest('.settingsWindow'))).toBe(true)
+    // Base theme lives on the theme gallery subpage.
+    await page.locator('.settingsBackButton').click()
     await goToSettingsSection(page, 'sync')
     await sync.locator('.activityList').getByRole('button', {
       name: 'Automatically save playback speed changes', exact: true

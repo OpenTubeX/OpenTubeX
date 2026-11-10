@@ -1,6 +1,6 @@
 <template>
   <Teleport
-    v-if="open"
+    v-if="open && isCurrent"
     :to="`#${settingsWindow.breadcrumbTargetId}`"
   >
     <slot name="breadcrumb-action" />
@@ -9,7 +9,9 @@
     v-if="open"
     :to="`#${settingsWindow.targetId}`"
   >
+    <!-- A subpage that opened another one stays mounted underneath it. -->
     <div
+      v-show="isCurrent"
       class="settingsSubpageContent"
       :class="{ growWithContent }"
     >
@@ -19,7 +21,7 @@
 </template>
 
 <script setup>
-import { inject, onBeforeUnmount, watch } from 'vue'
+import { computed, inject, onBeforeUnmount, watch } from 'vue'
 
 import { settingsSubpageKey } from './settingsSubpage'
 
@@ -52,6 +54,8 @@ const settingsWindow = inject(settingsSubpageKey)
 function close() {
   emit('close')
 }
+
+const isCurrent = computed(() => settingsWindow.isCurrent?.(close) ?? true)
 
 watch(
   () => [props.open, props.title, props.icon, props.flush],

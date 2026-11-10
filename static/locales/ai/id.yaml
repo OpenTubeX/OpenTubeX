@@ -531,6 +531,7 @@ Settings:
     Invalid Engine: Masukkan nama dan URL pencarian HTTP atau HTTPS valid yang berisi %s.
     Engine Limit: Anda dapat menambahkan hingga {count} mesin pencari khusus.
   Theme Settings:
+    Theme and Colors: "Tema dan warna"
     Font Size: Ukuran Font
     Sections:
       Interface: "Antarmuka"

@@ -531,6 +531,7 @@ Settings:
     Invalid Engine: Εισαγάγετε ένα όνομα και ένα έγκυρο URL αναζήτησης HTTP ή HTTPS που περιέχει %s.
     Engine Limit: Μπορείτε να προσθέσετε έως {count} προσαρμοσμένες μηχανές αναζήτησης.
   Theme Settings:
+    Theme and Colors: "Θέμα και χρώματα"
     Font Size: Μέγεθος γραμματοσειράς
     Sections:
       Interface: "Διεπαφή"

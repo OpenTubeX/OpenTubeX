@@ -218,7 +218,7 @@ test('settings search retains the subpage containing each control', () => {
       { type: 'playback', title: 'Playback', description: '' }
     ],
     tm: path => getAtPath(locale, path),
-    store: { getters: { getUseQuickPlaybackSpeedBar: true } },
+    store: { getters: { getUseQuickPlaybackSpeedBar: true, getBaseTheme: 'system', getCustomThemes: [] } },
     usingElectron: true,
   })
   for (const [section, label, subpage, subpageTab] of [
@@ -231,6 +231,8 @@ test('settings search retains the subpage containing each control', () => {
     ['appearance', 'Customize control bar', 'customize-interface', 'controlBar'],
     ['appearance', 'Add action', 'customize-interface', 'fullscreenActions'],
     ['appearance', 'Customize interface', undefined, undefined],
+    ['appearance', 'Theme and colors', undefined, undefined],
+    ['appearance', 'Light theme', 'theme', undefined],
     ['playback', 'Add Playback Speed', 'quick-playback-speed', undefined],
     ['playback', 'Playback Speed', 'quick-playback-speed', undefined],
     ['playback', 'Default Playback Rate', undefined, undefined]

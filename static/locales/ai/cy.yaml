@@ -531,6 +531,7 @@ Settings:
     Invalid Engine: Rhowch enw ac URL chwilio HTTP neu HTTPS dilys sy'n cynnwys %s.
     Engine Limit: Gallwch ychwanegu hyd at {count} o beiriannau chwilio personol.
   Theme Settings:
+    Theme and Colors: "Thema a lliwiau"
     Font Size: Maint y ffont
     Sections:
       Interface: "Rhyngwyneb"

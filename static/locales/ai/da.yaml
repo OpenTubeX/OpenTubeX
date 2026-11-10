@@ -542,6 +542,7 @@ Settings:
     Invalid Engine: Angiv et navn og en gyldig HTTP- eller HTTPS-søge-URL, der indeholder %s.
     Engine Limit: Du kan tilføje op til {count} brugerdefinerede søgemaskiner.
   Theme Settings:
+    Theme and Colors: "Tema og farver"
     Font Size: Skriftstørrelse
     Sections:
       Interface: "Brugerflade"

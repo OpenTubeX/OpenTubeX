@@ -100,6 +100,28 @@
             </span>
           </template>
           <template v-if="unlocked && !isStandaloneViewOpen && subpageTitle">
+            <template
+              v-for="(parent, depth) in parentSubpages"
+              :key="depth"
+            >
+              <FtIcon
+                class="settingsBreadcrumbSeparator"
+                :icon="['fas', 'angle-right']"
+              />
+              <button
+                type="button"
+                class="settingsBreadcrumbParent"
+                @click="closeSubpagesFrom(depth + 1)"
+              >
+                <FtIcon
+                  v-if="parent.icon"
+                  class="settingsBreadcrumbCategoryIcon settingsBreadcrumbSubpageIcon"
+                  :icon="parent.icon"
+                  aria-hidden="true"
+                />
+                <span class="settingsBreadcrumbText">{{ parent.title }}</span>
+              </button>
+            </template>
             <FtIcon
               class="settingsBreadcrumbSeparator"
               :icon="['fas', 'angle-right']"
@@ -415,6 +437,7 @@ import {
   onUpdated,
   provide,
   ref,
+  shallowRef,
   useId,
   useTemplateRef,
   watch
@@ -508,11 +531,6 @@ const LEGACY_SETTINGS_SECTION_MAP = {
 const { locale, t } = useI18n()
 const normalizeSearchText = value => normalizeSettingsSearchText(value, locale.value)
 initializePlatformInfo()
-const systemColorScheme = window.matchMedia('(prefers-color-scheme: dark)')
-const systemUsesDarkTheme = ref(systemColorScheme.matches)
-const updateSystemColorScheme = (event) => {
-  systemUsesDarkTheme.value = event.matches
-}
 const settingsSearchSubsectionTargets = computed(() => ({
   subscriptions: [{
     search: t('Settings.Subscription Settings.Subscription Settings'),
@@ -560,10 +578,44 @@ const subpageTargetId = `settings-subpage-${useId().replaceAll(':', '')}`
 const subpageBreadcrumbTargetId = `settings-subpage-breadcrumb-${useId().replaceAll(':', '')}`
 const sectionTabIdPrefix = `settings-section-tab-${useId().replaceAll(':', '')}`
 const sectionTabPanelId = `${sectionTabIdPrefix}-panel`
-const subpageTitle = ref('')
-const subpageIcon = ref(null)
-const subpageFlush = ref(false)
-let closeSubpage = null
+/**
+ * Open subpages, innermost last. A subpage can open another one, such as theme
+ * discovery from the theme gallery; only the innermost is shown.
+ * @type {import('vue').ShallowRef<{ title: string, icon: string[] | null, flush: boolean, close: () => void, scrollTop: number }[]>}
+ */
+const subpageStack = shallowRef([])
+const currentSubpage = computed(() => subpageStack.value.at(-1) ?? null)
+const parentSubpages = computed(() => subpageStack.value.slice(0, -1))
+const subpageTitle = computed(() => currentSubpage.value?.title ?? '')
+const subpageIcon = computed(() => currentSubpage.value?.icon ?? null)
+const subpageFlush = computed(() => currentSubpage.value?.flush ?? false)
+
+/**
+ * Removes the subpages from `depth` on, all of them by default, and asks them
+ * to close. `closedSelf` skips the one at `depth`, which is already closing.
+ */
+function closeSubpagesFrom(depth = 0, closedSelf = false) {
+  const closing = subpageStack.value.slice(depth + (closedSelf ? 1 : 0))
+  if (depth >= subpageStack.value.length) return
+  subpageStack.value = subpageStack.value.slice(0, depth)
+  closing.reverse().forEach(({ close }) => close())
+  restoreParentSubpageScroll()
+}
+
+function closeAllSubpages() {
+  closeSubpagesFrom(0)
+}
+
+function restoreParentSubpageScroll() {
+  const parent = currentSubpage.value
+  if (!parent) return
+  // The parent was hidden, and a flush child does not scroll the shared viewport.
+  nextTick(() => {
+    if (currentSubpage.value === parent && settingsSubpageContentRef.value) {
+      restoreOverlayScrollTop(settingsSubpageContentRef.value, parent.scrollTop)
+    }
+  })
+}
 let settingsResizeObserver = null
 let settingsSectionResizeObserver = null
 let profileManagerResizeObserver = null
@@ -756,7 +808,6 @@ const settingsSearchableValues = computed(() => createSettingsSearchIndex({
   isMac: IS_MAC,
   isLinuxWayland: isLinuxWayland.value,
   supportsAutoPictureInPictureMinimize: supportsAutoPictureInPictureMinimize.value,
-  systemUsesDarkTheme: systemUsesDarkTheme.value,
 }))
 provide(settingsSearchNavigationKey, {
   find(labels, settingKey) {
@@ -856,19 +907,23 @@ provide(settingsSubpageKey, {
   isActive: computed(() => store.getters.getSettingsWindowOpen && (unlocked.value || isStandaloneViewOpen.value)),
   targetId: subpageTargetId,
   breadcrumbTargetId: subpageBreadcrumbTargetId,
+  isCurrent: close => currentSubpage.value?.close === close,
   open(title, close, icon = null, flush = false) {
-    subpageTitle.value = title
-    subpageIcon.value = icon
-    subpageFlush.value = flush
-    closeSubpage = close
+    const stack = subpageStack.value
+    const index = stack.findIndex(entry => entry.close === close)
+    if (index !== -1) {
+      subpageStack.value = stack.with(index, { ...stack[index], title, icon, flush })
+      return
+    }
+    const parent = stack.at(-1)
+    if (parent) parent.scrollTop = settingsSubpageContentRef.value?.scrollTop ?? 0
+    subpageStack.value = [...stack, { title, icon, flush, close, scrollTop: 0 }]
   },
   close(close) {
-    if (closeSubpage === close) {
-      subpageTitle.value = ''
-      subpageIcon.value = null
-      subpageFlush.value = false
-      closeSubpage = null
-    }
+    const index = subpageStack.value.findIndex(entry => entry.close === close)
+    if (index === -1) return
+    // Closing a subpage also closes the ones it opened.
+    closeSubpagesFrom(index, true)
   }
 })
 
@@ -882,7 +937,6 @@ onUpdated(() => {
 })
 onMounted(() => {
   handleMounted()
-  systemColorScheme.addEventListener('change', updateSystemColorScheme)
 })
 onActivated(() => {
   windowActive.value = true
@@ -901,7 +955,6 @@ onDeactivated(() => {
   stopResizing()
 })
 onBeforeUnmount(() => {
-  systemColorScheme.removeEventListener('change', updateSystemColorScheme)
   stopObserving()
   stopDragging()
   stopResizing()
@@ -1186,10 +1239,7 @@ function navigateToSection(sectionType) {
   const content = settingsContentRef.value
   const resetScroll = previousSection !== sectionType && content &&
     (previousSection !== null || content.scrollTop !== 0 || content.scrollLeft !== 0)
-  closeSubpage?.()
-  subpageTitle.value = ''
-  subpageIcon.value = null
-  closeSubpage = null
+  closeAllSubpages()
   activeSection.value = sectionType
   if (resetScroll) {
     // Reconcile retained scrollbars after replacing an existing category.
@@ -1312,7 +1362,7 @@ async function openSearchResult(sectionType, match) {
     .some(value => normalizeSearchText(value ?? '') === normalizedLabel)
   const settingControl = match.settingKey
     ? [...content.querySelectorAll('[data-setting-key]')].find(element =>
-        element.dataset.settingKey === match.settingKey && element.getClientRects().length > 0)
+        element.dataset.settingKey === match.settingKey && isShown(element))
     : null
   let target = settingControl ?? (isSectionMatch
     ? content.querySelector(`.section[data-section="${sectionType}"]`)
@@ -1335,7 +1385,7 @@ async function openSearchResult(sectionType, match) {
     const visibleTextElements = [...content.querySelectorAll(
       'label, button, input[aria-label], p, h1, h2, h3, h4, span, legend, div'
     )]
-      .filter(element => element.getClientRects().length > 0)
+      .filter(isShown)
     const labelElement = visibleTextElements
       .find(element => normalizeSearchText(element.getAttribute('aria-label') ?? '') === normalizedLabel) ?? visibleTextElements
       .filter(element => getSearchTargetText(element) === normalizedLabel)
@@ -1347,7 +1397,7 @@ async function openSearchResult(sectionType, match) {
       : null
     const control = settingsSection ?? labelElement?.closest(
       '.switch-ctn, .select, .ft-input-component, .pure-material-slider, ' +
-      '.pure-checkbox, .captionControl, .preferenceToggle'
+      '.pure-checkbox, .captionControl, .preferenceToggle, .themePickerEntry'
     ) ?? labelElement
     target = control?.classList.contains('ft-input-component')
       ? control.querySelector('.ft-input')
@@ -1368,6 +1418,11 @@ async function openSearchResult(sectionType, match) {
   return target
 }
 
+/** Rendered and not hidden with visibility, which keeps layout space for controls that may return. */
+function isShown(element) {
+  return element.getClientRects().length > 0 && element.checkVisibility?.({ visibilityProperty: true }) !== false
+}
+
 function getSearchTargetText(element) {
   const clone = element.cloneNode(true)
   clone.querySelectorAll('.tooltip, .changedSettingIndicator, .changedSettingIndicatorPlaceholder')
@@ -1378,10 +1433,7 @@ function getSearchTargetText(element) {
 function handleSettingsSearch(value) {
   // FtInput emits the current text even while the keyboard is composing.
   settingsSearchQuery.value = value
-  closeSubpage?.()
-  subpageTitle.value = ''
-  subpageIcon.value = null
-  closeSubpage = null
+  closeAllSubpages()
   activeSection.value = settingsSearchQuery.value === '' && isInDesktopView.value
     ? getRememberedSection()
     : null
@@ -1403,8 +1455,8 @@ function goBack() {
     store.dispatch('hideKeyboardShortcutPrompt')
   } else if (isProfileManagerOpen.value) {
     returnToSettingsMenu()
-  } else if (subpageTitle.value) {
-    closeSubpage?.()
+  } else if (currentSubpage.value) {
+    closeSubpagesFrom(subpageStack.value.length - 1)
   } else {
     returnToSettingsMenu()
   }
@@ -1423,10 +1475,7 @@ function returnToSettingsMenu() {
     activeSection.value = isInDesktopView.value ? 'data' : null
     return
   }
-  closeSubpage?.()
-  subpageTitle.value = ''
-  subpageIcon.value = null
-  closeSubpage = null
+  closeAllSubpages()
   if (!isInDesktopView.value) {
     const previousSection = activeSection.value
     const content = settingsContentRef.value
@@ -1443,7 +1492,7 @@ function returnToSettingsMenu() {
 }
 
 function returnToCategory() {
-  closeSubpage?.()
+  closeAllSubpages()
 }
 
 function showKeyboardShortcutPrompt() {

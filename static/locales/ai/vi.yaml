@@ -530,6 +530,7 @@ Settings:
     Invalid Engine: Nhập tên và URL tìm kiếm HTTP hoặc HTTPS hợp lệ có chứa %s.
     Engine Limit: Bạn có thể thêm tối đa {count} công cụ tìm kiếm tùy chỉnh.
   Theme Settings:
+    Theme and Colors: "Chủ đề và màu sắc"
     Font Size: Cỡ chữ
     Sections:
       Interface: "Giao diện"

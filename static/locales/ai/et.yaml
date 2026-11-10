@@ -530,6 +530,7 @@ Settings:
     Invalid Engine: Sisestage nimi ja sobiv HTTP- või HTTPS-otsingu URL, mis sisaldab %s.
     Engine Limit: Saate lisada kuni {count} kohandatud otsingumootorit.
   Theme Settings:
+    Theme and Colors: "Kujundus ja värvid"
     Font Size: Fondi suurus
     Sections:
       Interface: "Liides"

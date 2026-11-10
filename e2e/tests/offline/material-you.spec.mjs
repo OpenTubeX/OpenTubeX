@@ -1,27 +1,6 @@
-import { test, expect, goToSettingsSection, setWindowSize, expectScrollAtRenderedEnd, readDatastore, latestSettings } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection, openThemeGallery, setWindowSize, readDatastore, latestSettings } from '../../helpers/app.mjs'
 
 test.use({ seed: { settings: { currentLocale: 'en-US', baseTheme: 'materialLight', materialSeedColor: '#ffff00' } } })
-
-test('hiding system accent controls clamps settings at the bottom', { tag: '@scale' }, async ({ page }) => {
-  const section = await goToSettingsSection(page, 'theme')
-  const scroller = page.locator('.settingsContent')
-  await expect(section.locator('.accentColorSettings')).toBeVisible()
-  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
-  await expectScrollAtRenderedEnd(scroller)
-  const oldRange = await scroller.evaluate(element => element.scrollHeight - element.clientHeight)
-  await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'dynamic'))
-  await expect(section.locator('.accentColorSettings')).toHaveCount(0)
-  await expectScrollAtRenderedEnd(scroller)
-  await expect.poll(() => scroller.evaluate(element => element.scrollHeight - element.clientHeight)).toBeLessThan(oldRange)
-  await expect.poll(() => scroller.evaluate(element => {
-    const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
-    const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
-    const thumb = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
-    return !scrollbar.classList.contains('os-scrollbar-unusable') &&
-      Math.abs(thumb.bottom - track.bottom) * devicePixelRatio <= 2 &&
-      Math.abs(thumb.height / track.height - element.clientHeight / element.scrollHeight) < 0.02
-  })).toBe(true)
-})
 
 function contrast(first, second) {
   const luminance = rgb => rgb.map(value => value / 255)
@@ -60,7 +39,8 @@ function setDesktopAccent(app, color) {
 }
 
 test('seed picker persists colors, system preferences select Material variants, and ordinary themes clear the palette', async ({ page }) => {
-  const section = await goToSettingsSection(page, 'theme')
+  await goToSettingsSection(page, 'theme')
+  const section = (await openThemeGallery(page)).getByRole('group', { name: 'Material accent color' })
   await section.getByRole('button', { name: 'Material accent color' }).click()
   const picker = page.getByRole('dialog', { name: 'Material accent color' })
   const hexField = picker.getByRole('textbox', { name: /^Hex color/ })
@@ -85,6 +65,7 @@ test('seed picker persists colors, system preferences select Material variants, 
   expect(await page.locator('body').evaluate(el => el.style.getPropertyValue('--primary-color'))).toBe(primary)
   await page.reload()
   await goToSettingsSection(page, 'theme')
+  await openThemeGallery(page)
   await expect(section.locator('.accentColorHeader code')).toHaveText('#00aaff')
   await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'dark'))
   await expect(page.locator('body')).not.toHaveClass(/dynamicColors/)
@@ -93,7 +74,8 @@ test('seed picker persists colors, system preferences select Material variants, 
 })
 
 test('Material seed picker fits narrow portrait and landscape layouts', async ({ app, page }) => {
-  const section = await goToSettingsSection(page, 'theme')
+  await goToSettingsSection(page, 'theme')
+  const section = (await openThemeGallery(page)).getByRole('group', { name: 'Material accent color' })
   await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setMinimumSize(0, 0))
   for (const size of [{ width: 375, height: 812 }, { width: 812, height: 375 }]) {
     await setWindowSize(app, page, size)
@@ -114,7 +96,8 @@ test('Material seed picker fits narrow portrait and landscape layouts', async ({
 test('Material preset swatches preview palettes and persist the selected seed', async ({ app, page }) => {
   // The host desktop's accent would add a system swatch
   await setDesktopAccent(app, '')
-  const section = await goToSettingsSection(page, 'theme')
+  await goToSettingsSection(page, 'theme')
+  const section = (await openThemeGallery(page)).getByRole('group', { name: 'Material accent color' })
   const swatches = section.locator('.accentColorSwatches > button')
   await expect(swatches).toHaveCount(8)
   for (const name of ['Purple', 'Blue', 'Teal', 'Green', 'Amber', 'Pink', 'Red', 'Indigo']) {
@@ -137,12 +120,14 @@ test('Material preset swatches preview palettes and persist the selected seed', 
   await expect.poll(savedSeed).toBe('#4285f4')
   await page.reload()
   await goToSettingsSection(page, 'theme')
+  await openThemeGallery(page)
   await expect(blue).toHaveAttribute('aria-pressed', 'true')
 })
 
 for (const movedAfterPreview of [false, true]) {
   test(`an interrupted drag does not overwrite a newer seed from elsewhere${movedAfterPreview ? ' after moving' : ''}`, async ({ page }) => {
-    const section = await goToSettingsSection(page, 'theme')
+    await goToSettingsSection(page, 'theme')
+    const section = (await openThemeGallery(page)).getByRole('group', { name: 'Material accent color' })
     await section.locator('.accentCustomSwatch .colorFieldTrigger').click()
     const picker = page.getByRole('dialog', { name: 'Material accent color' })
     const bounds = await picker.getByRole('slider', { name: 'Saturation and brightness' }).boundingBox()

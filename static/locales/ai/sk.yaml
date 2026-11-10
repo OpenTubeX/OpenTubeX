@@ -530,6 +530,7 @@ Settings:
     Invalid Engine: Zadajte názov a platnú adresu URL vyhľadávania cez HTTP alebo HTTPS, ktorá obsahuje %s.
     Engine Limit: Môžete pridať najviac {count} vlastných vyhľadávačov.
   Theme Settings:
+    Theme and Colors: "Téma a farby"
     Font Size: Veľkosť písma
     Sections:
       Interface: "Rozhranie"

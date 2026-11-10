@@ -535,6 +535,7 @@ Settings:
     Invalid Engine: Voer een naam en een geldige HTTP- of HTTPS-zoek-URL met %s in.
     Engine Limit: Je kunt maximaal {count} aangepaste zoekmachines toevoegen.
   Theme Settings:
+    Theme and Colors: "Thema en kleuren"
     Font Size: Lettergrootte
     Sections:
       Interface: "Interface"

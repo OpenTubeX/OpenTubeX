@@ -111,16 +111,14 @@ export function dynamicThemeColors(palette, dark, black = false) {
   return colors
 }
 
-export function applyDynamicColors(palette, dark, black = false) {
+/** Inline custom properties that render a dynamic Material theme. */
+export function dynamicColorStyles(palette, dark, black = false) {
   const colors = dynamicThemeColors(palette, dark, black)
   const roles = materialColorScheme(palette, dark, black)
-  for (const role of MATERIAL_COLOR_ROLES) {
-    document.body.style.setProperty(materialColorProperty(role), roles[role])
-  }
+  const style = Object.fromEntries(MATERIAL_COLOR_ROLES.map(role => [materialColorProperty(role), roles[role]]))
   for (const [key, property] of CUSTOM_THEME_COLORS) {
-    if (colors[key]) document.body.style.setProperty(property, colors[key])
+    if (colors[key]) style[property] = colors[key]
   }
-  if (colors.accent) {
-    document.body.style.setProperty('--accent-color-rgb', hexColorToRgbComponents(colors.accent))
-  }
+  if (colors.accent) style['--accent-color-rgb'] = hexColorToRgbComponents(colors.accent)
+  return style
 }

@@ -696,6 +696,7 @@ Settings:
     Invalid Engine: Voer ’n naam en ’n geldige HTTP- of HTTPS-soek-URL in wat %s bevat.
     Engine Limit: U kan tot {count} pasgemaakte soekenjins byvoeg.
   Theme Settings:
+    Theme and Colors: "Tema en kleure"
     Font Size: Lettergrootte
     Sections:
       Interface: "Koppelvlak"

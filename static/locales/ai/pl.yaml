@@ -295,6 +295,7 @@ Settings:
       Label: Automatyczne wczytywanie komentarzy
       Tooltip: Wczytuj komentarze po otwarciu strony i kolejne podczas przewijania.
   Theme Settings:
+    Theme and Colors: "Motyw i kolory"
     Font Size: Rozmiar czcionki
     Sections:
       Interface: "Interfejs"
