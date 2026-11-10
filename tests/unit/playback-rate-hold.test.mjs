@@ -3,7 +3,7 @@ import test from 'node:test'
 import { reactive, ref } from 'vue'
 import { usePlaybackRate } from '../../src/renderer/components/ft-shaka-video-player/opentubex/usePlaybackRate.js'
 
-function fixture({ paused = false } = {}) {
+function fixture({ paused = false, multiplier = 2 } = {}) {
   const video = {
     playbackRate: 1.5,
     defaultPlaybackRate: 1,
@@ -29,7 +29,7 @@ function fixture({ paused = false } = {}) {
     defaultPlaybackRate: ref(1),
     maxVideoPlaybackRate: ref(4),
     savedChannelPlaybackRate: ref(null),
-    holdToDoublePlaybackSpeed: ref(true),
+    holdPlaybackRateMultiplier: ref(multiplier),
     onPlaybackRateUpdated() {},
     onPlaybackRateUserSet: rate => userSet.push(rate),
     updatePendingPlaybackRateMenu() {},
@@ -40,9 +40,9 @@ function fixture({ paused = false } = {}) {
   return { api, video, userSet }
 }
 
-test('holding doubles the chosen speed after the hold delay and restores it on release', t => {
+test('holding multiplies the chosen speed after the hold delay and restores it on release', t => {
   t.mock.timers.enable({ apis: ['setTimeout'] })
-  const { api, video } = fixture()
+  const { api, video } = fixture({ multiplier: 2.5 })
   api.startTemporaryPlaybackRateHold('keyboard')
   assert.equal(api.isTemporaryPlaybackRateHoldPending('keyboard'), true)
   t.mock.timers.tick(624)
@@ -50,8 +50,8 @@ test('holding doubles the chosen speed after the hold delay and restores it on r
   t.mock.timers.tick(1)
   assert.equal(api.isTemporaryPlaybackRateSourceActive('keyboard'), true)
   assert.equal(api.isTemporaryPlaybackRateHoldPending('keyboard'), false)
-  assert.equal(video.playbackRate, 3)
-  assert.equal(api.temporaryPlaybackRateIndicatorMessage.value, '3x')
+  assert.equal(video.playbackRate, 3.75)
+  assert.equal(api.temporaryPlaybackRateIndicatorMessage.value, '3.75x')
   assert.equal(api.showTemporaryPlaybackRateIndicator.value, true)
   assert.equal(api.getCurrentPlaybackRate(), 1.5, 'a hold does not change the chosen speed')
 

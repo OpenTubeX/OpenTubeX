@@ -970,7 +970,9 @@ Settings:
       Russian: Russisk
       English: Engelsk
       Kazakh: Kasakhisk
-    Hold to Double Playback Speed: Hald inne for dobbel avspelingsfart
+    Hold to Speed Up:
+      Hold to Speed Up: Hald inne for å auke farten
+      Off: Av
     Use Quick Playback Speed Bar: Bruk hurtiglinje for avspelingsfart
     Customize Quick Playback Speed Bar: Tilpass hurtiglinja for avspelingsfart
     Quick Playback Speed Bar Manager: Hurtiglinje for avspelingsfart
@@ -2520,7 +2522,7 @@ Tooltips:
     Enable Seek History: Hugsar kvar du hoppa frå i kvar video til appen vert lukka. Viser hopphistorikklista i innstillingsmenyen til avspelaren og slår på snøggtastane for ho.
     Show Seek Bar Filmstrip: "Når du dreg knappen på tidslinja, vert ei stripe med bilete rundt staden du hamnar vist, og dreg du opp på henne, spolar du nøyaktig. Når dette er av, viser draging eitt enkelt miniatyrbilete, som når du held peikaren over."
     Voice-over Translation: Sender video-ID-en, lengda og det valde språket til den uoffisielle Yandex-tenesta for stemmeomsetjing når du ber om ei omsetjing. Av som standard.
-    Hold to Double Playback Speed: Hald inne mellomromstasten eller venstre museknapp over spelaren for å doble den gjeldande avspelingsfarten mellombels.
+    Hold to Speed Up: Hald inne mellomromstasten eller venstre museknapp over spelaren for å gonge den gjeldande avspelingsfarten mellombels med den valde verdien.
     Ambient Mode: Tonar videofargane inn i området rundt spelaren.
     Default Volume: Er slått av medan Hugs lydstyrke er slått på. Slå av Hugs lydstyrke for å velje ei fast lydstyrke ved starten av kvar video.
     Parallel Segment Loading: |

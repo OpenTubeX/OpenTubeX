@@ -879,7 +879,9 @@ Settings:
       Russian: Rússneska
       English: Enska
       Kazakh: Kasakska
-    Hold to Double Playback Speed: Halda inni til að tvöfalda spilunarhraða
+    Hold to Speed Up:
+      Hold to Speed Up: Halda inni til að hraða
+      Off: Slökkt
     Use Quick Playback Speed Bar: Nota flýtistiku fyrir spilunarhraða
     Customize Quick Playback Speed Bar: Sérsníða flýtistiku fyrir spilunarhraða
     Quick Playback Speed Bar Manager: Flýtistika fyrir spilunarhraða
@@ -2230,7 +2232,7 @@ Tooltips:
     Enable Seek History: Man hvaðan þú stökkst í hverju myndbandi þar til forritinu er lokað. Sýnir stökkferilinn í stillingavalmynd spilarans og virkjar flýtilykla hans.
     Show Seek Bar Filmstrip: "Þegar sleði leitarstikunnar er dreginn birtist ræma af römmum í kringum staðinn sem þú lendir á og ef þú dregur upp á hana spólarðu nákvæmlega. Þegar slökkt er á þessu sýnir dráttur eina smámynd, eins og þegar bendli er haldið yfir."
     Voice-over Translation: Sendir auðkenni og lengd myndbandsins ásamt völdu tungumáli til óopinberrar talsetningarþjónustu Yandex þegar beðið er um þýðingu. Sjálfgefið er slökkt á þessu.
-    Hold to Double Playback Speed: Haltu bilstönginni eða vinstri músarhnappi niðri yfir spilaranum til að tvöfalda núverandi spilunarhraða tímabundið.
+    Hold to Speed Up: Haltu bilstönginni eða vinstri músarhnappi niðri yfir spilaranum til að margfalda núverandi spilunarhraða tímabundið með völdu gildi.
     Ambient Mode: Blandar litum myndbandsins inn í svæðið umhverfis spilarann.
     Default Volume: Óvirkt meðan Muna hljóðstyrk er virkt. Slökktu á Muna hljóðstyrk til að velja fastan upphafshljóðstyrk fyrir hvert myndband.
     Parallel Segment Loading: |

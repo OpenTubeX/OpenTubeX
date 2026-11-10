@@ -880,7 +880,9 @@ Settings:
       Russian: Rusă
       English: Engleză
       Kazakh: Kazahă
-    Hold to Double Playback Speed: Menține apăsat pentru a dubla viteza de redare
+    Hold to Speed Up:
+      Hold to Speed Up: Menține apăsat pentru accelerare
+      Off: Dezactivat
     Use Quick Playback Speed Bar: Folosește bara rapidă pentru viteza de redare
     Customize Quick Playback Speed Bar: Personalizează bara rapidă pentru viteza de redare
     Quick Playback Speed Bar Manager: Bară rapidă pentru viteza de redare
@@ -2264,7 +2266,7 @@ Tooltips:
     Enable Seek History: Reține de unde ai sărit în fiecare videoclip până la închiderea aplicației. Afișează lista istoricului salturilor în meniul de setări al playerului și activează comenzile rapide de la tastatură ale acestuia.
     Show Seek Bar Filmstrip: "Tragerea cursorului barei de derulare afișează o bandă de cadre în jurul locului în care veți ajunge, iar tragerea în sus pe ea permite derularea precisă. Când este dezactivat, tragerea afișează o singură miniatură, ca la trecerea cursorului."
     Voice-over Translation: Trimite ID-ul videoclipului, durata și limba selectată serviciului neoficial Yandex de traducere vocală atunci când solicitați o traducere. Opțiunea este dezactivată implicit.
-    Hold to Double Playback Speed: Țineți apăsată bara de spațiu sau butonul stâng al mouse-ului deasupra playerului pentru a dubla temporar viteza de redare curentă.
+    Hold to Speed Up: Țineți apăsată bara de spațiu sau butonul stâng al mouse-ului deasupra playerului pentru a înmulți temporar viteza de redare curentă cu valoarea selectată.
     Ambient Mode: Îmbină culorile videoclipului cu zona din jurul playerului.
     Default Volume: Opțiune dezactivată cât timp „Reține volumul” este activată. Dezactivați „Reține volumul” pentru a seta un volum inițial fix pentru fiecare videoclip.
     Parallel Segment Loading: |

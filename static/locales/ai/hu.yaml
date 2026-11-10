@@ -877,7 +877,9 @@ Settings:
       Russian: Orosz
       English: Angol
       Kazakh: Kazah
-    Hold to Double Playback Speed: Nyomva tartás kétszeres lejátszási sebességhez
+    Hold to Speed Up:
+      Hold to Speed Up: Nyomva tartás a gyorsításhoz
+      Off: Ki
     Use Quick Playback Speed Bar: Gyors lejátszásisebesség-sáv használata
     Customize Quick Playback Speed Bar: Gyors lejátszásisebesség-sáv testreszabása
     Quick Playback Speed Bar Manager: Gyors lejátszásisebesség-sáv
@@ -2212,7 +2214,7 @@ Tooltips:
     Enable Seek History: Az alkalmazás bezárásáig megjegyzi, honnan ugrott el az egyes videókban. Megjeleníti az ugrási előzmények listáját a lejátszó beállítások menüjében, és engedélyezi a hozzá tartozó billentyűparancsokat.
     Show Seek Bar Filmstrip: "A tekerősáv csúszkájának húzásakor egy képkockasáv jelenik meg a célpont körül, és ha felfelé húzza rá, pontosan tekerhet. Kikapcsolva a húzás egyetlen bélyegképet mutat, mint az egérrel való rámutatáskor."
     Voice-over Translation: Fordítás kérésekor elküldi a videó azonosítóját, hosszát és a kiválasztott nyelvet a Yandex nem hivatalos szinkronfordítási szolgáltatásának. Alapértelmezés szerint ki van kapcsolva.
-    Hold to Double Playback Speed: Tartsa lenyomva a szóközbillentyűt vagy a bal egérgombot a lejátszó fölött az aktuális lejátszási sebesség ideiglenes megduplázásához.
+    Hold to Speed Up: Tartsa lenyomva a szóközbillentyűt vagy a bal egérgombot a lejátszó fölött az aktuális lejátszási sebesség ideiglenes megszorzásához a kiválasztott értékkel.
     Ambient Mode: A videó színeinek kiterjesztése a lejátszó körüli területre.
     Default Volume: Nem érhető el, amíg a hangerő megjegyzése engedélyezett. Kapcsolja ki a hangerő megjegyzését, hogy minden videóhoz rögzített kezdő hangerőt állíthasson be.
     Parallel Segment Loading: |

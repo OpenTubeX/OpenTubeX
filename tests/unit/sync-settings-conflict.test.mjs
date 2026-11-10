@@ -263,6 +263,14 @@ test('devices read the Video descriptions select from the Hide Video Description
     { ...pins, value: ['hideComments', key] })
 })
 
+test('devices read the Hold to Speed Up multiplier from the switch of older versions', () => {
+  const legacy = { key: 'holdToDoublePlaybackSpeed', value: false, updatedAt: 10 }
+  assert.deepEqual(migrateLegacySyncedSettings({ holdToDoublePlaybackSpeed: legacy }).holdPlaybackRateMultiplier,
+    { key: 'holdPlaybackRateMultiplier', value: 0, updatedAt: 10 })
+  const current = { key: 'holdPlaybackRateMultiplier', value: 3, updatedAt: 5 }
+  assert.equal(migrateLegacySyncedSettings({ holdToDoublePlaybackSpeed: legacy, holdPlaybackRateMultiplier: current }).holdPlaybackRateMultiplier, current)
+})
+
 test('devices read the scroll player select from the mini player switch of older versions', () => {
   const legacy = { key: 'scrollMiniPlayerEnabled', value: false, updatedAt: 10 }
   assert.deepEqual(migrateLegacySyncedSettings({ scrollMiniPlayerEnabled: legacy }).scrollPlayerMode,

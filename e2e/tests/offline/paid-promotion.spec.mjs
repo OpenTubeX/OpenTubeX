@@ -11,7 +11,7 @@ test.use({
       videoPlaybackEngine: 'built-in',
       ytDlpPlaybackEngineDefaultMigration: true,
       externalLinkHandling: 'openLinkAfterPrompt',
-      holdToDoublePlaybackSpeed: true
+      holdPlaybackRateMultiplier: 2
     }
   }
 })

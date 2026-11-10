@@ -877,7 +877,9 @@ Settings:
       Russian: Venäjä
       English: Englanti
       Kazakh: Kazakki
-    Hold to Double Playback Speed: Pidä painettuna käyttääksesi kaksinkertaista toistonopeutta
+    Hold to Speed Up:
+      Hold to Speed Up: Pidä painettuna nopeuttaaksesi
+      Off: Pois
     Use Quick Playback Speed Bar: Käytä toistonopeuden pikapalkkia
     Customize Quick Playback Speed Bar: Mukauta toistonopeuden pikapalkkia
     Quick Playback Speed Bar Manager: Toistonopeuden pikapalkki
@@ -2218,7 +2220,7 @@ Tooltips:
     Enable Seek History: Muistaa, mistä kohdasta siirryit kussakin videossa, kunnes sovellus suljetaan. Näyttää siirtymähistorian luettelon soittimen asetusvalikossa ja ottaa sen pikanäppäimet käyttöön.
     Show Seek Bar Filmstrip: "Hakupalkin liukusäätimen vetäminen näyttää kuvanauhan kohdasta, johon olet siirtymässä, ja vetämällä ylös sen päälle voit siirtyä tarkasti. Kun asetus on pois käytöstä, vetäminen näyttää yhden pikkukuvan kuten osoittimen viennissä palkin päälle."
     Voice-over Translation: Lähettää videon tunnuksen, keston ja valitun kielen epäviralliseen Yandexin selostuskäännöspalveluun, kun pyydät käännöstä. Oletusarvoisesti pois käytöstä.
-    Hold to Double Playback Speed: Voit kaksinkertaistaa nykyisen toistonopeuden tilapäisesti pitämällä välilyöntiä tai soittimen päällä olevaa hiiren ykköspainiketta painettuna.
+    Hold to Speed Up: Voit kertoa nykyisen toistonopeuden tilapäisesti valitulla arvolla pitämällä välilyöntiä tai hiiren ykköspainiketta painettuna soittimen päällä.
     Ambient Mode: Sulauttaa videon värit soitinta ympäröivään alueeseen.
     Default Volume: Ei käytettävissä, kun äänenvoimakkuuden muistaminen on käytössä. Poista äänenvoimakkuuden muistaminen käytöstä, jos haluat määrittää videoille kiinteän aloitusäänenvoimakkuuden.
     Parallel Segment Loading: |

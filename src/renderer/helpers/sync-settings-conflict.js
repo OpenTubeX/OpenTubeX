@@ -3,6 +3,7 @@ import { resolveBaseTheme, resolveSystemTheme } from '../../appearanceSettings.j
 import { CUSTOM_THEMES_SYNC_KEY, customThemeIdFromValue, normalizeCustomThemes } from '../../customTheme.js'
 import {
   hasReplacedSettingId,
+  holdPlaybackRateMultiplierFromSwitch,
   migrateSettingIds,
   scrollPlayerModeFromMiniPlayerSwitch,
   titleLineLimitFromSwitch,
@@ -55,6 +56,12 @@ export function migrateLegacySyncedSettings(remote) {
   if (limitTitles && !remote.titleLineLimit) {
     migrated.titleLineLimit = {
       ...limitTitles, key: 'titleLineLimit', value: titleLineLimitFromSwitch(limitTitles.value),
+    }
+  }
+  const holdToDouble = remote.holdToDoublePlaybackSpeed
+  if (holdToDouble && !remote.holdPlaybackRateMultiplier) {
+    migrated.holdPlaybackRateMultiplier = {
+      ...holdToDouble, key: 'holdPlaybackRateMultiplier', value: holdPlaybackRateMultiplierFromSwitch(holdToDouble.value),
     }
   }
   // Auto Load Next Page used to control comments too.

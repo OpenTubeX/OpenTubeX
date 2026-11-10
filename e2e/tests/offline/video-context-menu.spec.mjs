@@ -528,7 +528,7 @@ test('mobile context sheet moves between items and submenus with arrow keys', as
 })
 
 test.describe('mobile context sheet on a watch page', () => {
-  test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true, holdToDoublePlaybackSpeed: true } } })
+  test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true, holdPlaybackRateMultiplier: 2 } } })
 
   async function openSheet(page) {
     await page.evaluate(() => {

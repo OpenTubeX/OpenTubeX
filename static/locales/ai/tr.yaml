@@ -877,7 +877,9 @@ Settings:
       Russian: Rusça
       English: İngilizce
       Kazakh: Kazakça
-    Hold to Double Playback Speed: Oynatma Hızını İkiye Katlamak İçin Basılı Tut
+    Hold to Speed Up:
+      Hold to Speed Up: Hızlandırmak İçin Basılı Tut
+      Off: Kapalı
     Use Quick Playback Speed Bar: Hızlı Oynatma Hızı Çubuğunu Kullan
     Customize Quick Playback Speed Bar: Hızlı Oynatma Hızı Çubuğunu Özelleştir
     Quick Playback Speed Bar Manager: Hızlı Oynatma Hızı Çubuğu
@@ -2212,7 +2214,7 @@ Tooltips:
     Enable Seek History: Uygulama kapanana kadar her videoda nereden atladığınızı hatırlar. Oynatıcının ayarlar menüsünde atlama geçmişi listesini gösterir ve klavye kısayollarını etkinleştirir.
     Show Seek Bar Filmstrip: "Sarma çubuğunun düğmesini sürüklemek, varacağınız yerin çevresindeki karelerden oluşan bir şerit gösterir; şeridin üzerine yukarı çekmek hassas sarma sağlar. Devre dışı bırakıldığında sürükleme, üzerine gelindiğinde olduğu gibi tek bir küçük resim gösterir."
     Voice-over Translation: Çeviri istediğinizde video kimliğini, süresini ve seçili dili resmî olmayan Yandex seslendirme çevirisi hizmetine gönderir. Varsayılan olarak devre dışıdır.
-    Hold to Double Playback Speed: Geçerli oynatma hızını geçici olarak ikiye katlamak için oynatıcının üzerindeyken Boşluk tuşunu veya sol fare düğmesini basılı tutun.
+    Hold to Speed Up: Geçerli oynatma hızını geçici olarak seçilen değerle çarpmak için oynatıcının üzerindeyken Boşluk tuşunu veya sol fare düğmesini basılı tutun.
     Ambient Mode: Videonun renklerini oynatıcının çevresindeki alana yayar.
     Default Volume: Ses Düzeyini Hatırla etkinken devre dışıdır. Her video için sabit bir başlangıç ses düzeyi ayarlamak üzere Ses Düzeyini Hatırla'yı kapatın.
     Parallel Segment Loading: |

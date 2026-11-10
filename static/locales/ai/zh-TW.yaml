@@ -877,7 +877,9 @@ Settings:
       Russian: 俄文
       English: 英文
       Kazakh: 哈薩克文
-    Hold to Double Playback Speed: 按住即以兩倍速播放
+    Hold to Speed Up:
+      Hold to Speed Up: 按住即可加速
+      Off: 關閉
     Use Quick Playback Speed Bar: 使用快速播放速度列
     Customize Quick Playback Speed Bar: 自訂快速播放速度列
     Quick Playback Speed Bar Manager: 快速播放速度列
@@ -2218,7 +2220,7 @@ Tooltips:
     Enable Seek History: 在應用程式關閉前記住你在每部影片中從哪裡跳轉。在播放器設定選單中顯示跳轉紀錄清單，並啟用其鍵盤快速鍵。
     Show Seek Bar Filmstrip: "拖曳進度列滑桿時，會顯示目標位置附近的一排影格，向上拖曳到其上即可精確定位。停用後，拖曳時只會顯示一張縮圖，與滑鼠懸停時相同。"
     Voice-over Translation: 當您要求翻譯時，將影片 ID、長度與所選語言傳送至非官方 Yandex 語音翻譯服務。預設為停用。
-    Hold to Double Playback Speed: 在播放器上按住空白鍵或滑鼠左鍵，即可暫時將目前的播放速度加倍。
+    Hold to Speed Up: 在播放器上按住空白鍵或滑鼠左鍵，即可暫時將目前的播放速度乘以所選倍數。
     Ambient Mode: 將影片色彩融合至播放器周圍區域。
     Default Volume: 啟用「記住音量」時無法使用。關閉「記住音量」，即可為每部影片設定固定的起始音量。
     Parallel Segment Loading: |

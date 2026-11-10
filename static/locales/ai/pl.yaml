@@ -431,6 +431,9 @@ Settings:
       Dim and Blur: "Przyciemnij i rozmyj"
       Dim Only: "Tylko przyciemnij"
   Player Settings:
+    Hold to Speed Up:
+      Hold to Speed Up: Przytrzymaj, aby przyspieszyć
+      Off: Wyłączone
     Auto Picture in Picture:
       On Tab Change Mini Player: Przełączanie kart wyświetla zamiast tego mini odtwarzacz. Aby z tego korzystać, ustaw „Po opuszczeniu filmu” na „Zatrzymaj odtwarzanie”.
     Rewind on Resume: "Przewiń wstecz przy wznowieniu"
@@ -1442,6 +1445,7 @@ Tooltips:
     Proxy Videos Through Yattee Server: Przesyła strumienie wideo i audio przez serwer. Pozostaw tę opcję włączoną, chyba że serwer korzysta z tego samego połączenia internetowego co Ty, ponieważ YouTube udostępnia strumienie tylko adresowi, który o nie poprosił. Miniatury są zawsze wczytywane bezpośrednio z YouTube.
     Notifications: Wybierz, jak OpenTubeX powiadamia o transmisjach na żywo, nowych filmach i automatycznych pobraniach. Przy opcji Systemowe i w aplikacji powiadomienia pojawiają się w OpenTubeX podczas korzystania z niego, a w przeciwnym razie jako powiadomienia systemowe, a dzwonek je przechowuje. Wyłączone ukrywa też opcje powiadomień.
   Player Settings:
+    Hold to Speed Up: Przytrzymaj klawisz spacji lub lewy przycisk myszy nad odtwarzaczem, aby tymczasowo pomnożyć aktualną prędkość odtwarzania przez wybraną wartość.
     Rewind on Resume: "Cofa o tyle sekund po wznowieniu wstrzymanego filmu, aby można było ponownie zobaczyć ostatnie chwile. Ustaw 0, aby wyłączyć."
     Minimum Pause Before Rewinding: "Przewija wstecz tylko wtedy, gdy film był wstrzymany co najmniej tak długo. Ustaw 0, aby przewijać po każdej pauzie."
     Mono Audio: 'Odtwarza lewy i prawy kanał dźwięku w obu uszach. Użyj, gdy dźwięk filmu dochodzi tylko z jednej strony słuchawek.'

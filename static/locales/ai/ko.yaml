@@ -1051,7 +1051,9 @@ Settings:
       Russian: 러시아어
       English: 영어
       Kazakh: 카자흐어
-    Hold to Double Playback Speed: 길게 눌러 2배속 재생
+    Hold to Speed Up:
+      Hold to Speed Up: 길게 눌러 빠르게 재생
+      Off: 끄기
     Use Quick Playback Speed Bar: 빠른 재생 속도 표시줄 사용
     Customize Quick Playback Speed Bar: 빠른 재생 속도 표시줄 사용자 지정
     Quick Playback Speed Bar Manager: 빠른 재생 속도 표시줄
@@ -2596,7 +2598,7 @@ Tooltips:
     Enable Seek History: 앱을 닫을 때까지 각 동영상에서 이동하기 전의 위치를 기억합니다. 플레이어 설정 메뉴에 탐색 기록 목록을 표시하고 관련 키보드 단축키를 활성화합니다.
     Show Seek Bar Filmstrip: "탐색 바 손잡이를 끌면 이동할 위치 주변의 프레임 띠가 표시되고, 그 위로 끌어올리면 정밀하게 탐색할 수 있습니다. 비활성화하면 마우스를 올렸을 때처럼 끄는 동안 썸네일 하나만 표시됩니다."
     Voice-over Translation: 번역을 요청하면 동영상 ID, 재생 시간 및 선택한 언어를 비공식 Yandex 음성 번역 서비스로 전송합니다. 기본적으로 비활성화되어 있습니다.
-    Hold to Double Playback Speed: 플레이어 위에서 스페이스바 또는 마우스 왼쪽 버튼을 길게 누르면 현재 재생 속도가 일시적으로 두 배가 됩니다.
+    Hold to Speed Up: 플레이어 위에서 스페이스바 또는 마우스 왼쪽 버튼을 길게 누르면 현재 재생 속도에 선택한 배수가 일시적으로 곱해집니다.
     Ambient Mode: 동영상 색상을 플레이어 주변 영역에 혼합합니다.
     Default Volume: 음량 기억이 활성화된 동안에는 사용할 수 없습니다. 각 동영상의 시작 음량을 고정하려면 음량 기억을 끄세요.
     Parallel Segment Loading: |

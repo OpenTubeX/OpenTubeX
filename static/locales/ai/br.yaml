@@ -877,7 +877,9 @@ Settings:
       Russian: "Rusianeg"
       English: "Saozneg"
       Kazakh: "Kazakheg"
-    Hold to Double Playback Speed: "Derc'hel evit daougementiñ an tizh lenn"
+    Hold to Speed Up:
+      Hold to Speed Up: Derc'hel evit buanaat
+      Off: Lazhet
     Use Quick Playback Speed Bar: "Implijout barrenn prim an tizh lenn"
     Customize Quick Playback Speed Bar: "Personelaat barrenn prim an tizh lenn"
     Quick Playback Speed Bar Manager: "Barrenn prim an tizh lenn"
@@ -2220,7 +2222,7 @@ Tooltips:
     Enable Seek History: Derc'hel a ra soñj eus al lec'hioù ma oac'h lammet diouto e pep video betek ma vez serret an arload. Diskouez a ra roll istor al lammoù e lañser arventennoù al lenner hag e weredeka e berradennoù klavier.
     Show Seek Bar Filmstrip: "Riklañ bouton ar varrenn glask a ziskouez ur stribed skeudennoù tro-dro d'al lec'h ma tizhot, ha tennañ war-laez warnañ a glask resis. Pa vez diweredekaet, riklañ a ziskouez ur skeudennig hepken, evel pa dremenit a-us dezhi."
     Voice-over Translation: "Kas naoudi ar video, e badelezh hag ar yezh diuzet da wazerezh troidigezh ar vouezh dieub Yandex pa c'houlennit un droidigezh. Diweredekaet eo dre ziouer."
-    Hold to Double Playback Speed: "Dalc'hit ar varrenn esaouiñ pe bouton kleiz al logodenn war al lenner evit daougementiñ an tizh lenn bremanel evit ur pennad."
+    Hold to Speed Up: Dalc'hit ar varrenn esaouiñ pe bouton kleiz al logodenn war al lenner evit liesaat an tizh lenn bremanel gant an talvoud dibabet evit ur pennad.
     Ambient Mode: "Meskañ livioù ar video gant an takad tro-dro d'al lenner."
     Default Volume: "Diweredekaet eo pa vez gweredekaet Derc'hel soñj eus live ar son. Diweredekait anezhañ evit termenañ ul live son loc'hañ digemm evit pep video."
     Parallel Segment Loading: |

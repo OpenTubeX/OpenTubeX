@@ -1103,7 +1103,9 @@ Settings:
     Show Skip Silence Toggle: Schalter „Stille überspringen“ anzeigen
     Enable DLNA Casting: "DLNA-Casting aktivieren"
     Enable Skip Silence by Default: „Stille überspringen“ standardmäßig aktivieren
-    Hold to Double Playback Speed: Für doppelte Wiedergabegeschwindigkeit gedrückt halten
+    Hold to Speed Up:
+      Hold to Speed Up: Zum Beschleunigen gedrückt halten
+      Off: Aus
     Screenshot:
       Enable: Screenshots aktivieren
       Format Label: Format von Screenshots
@@ -2978,7 +2980,7 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: Wenn aktiviert und die Wiedergabegeschwindigkeit nicht 1x ist, zeigt der Player nach der normalen Zeitanzeige zusätzliche angepasste Zeitstempel in Klammern an.
     Show Skip Silence Toggle: Zeigt im Einstellungsmenü des Players einen Ein-/Aus-Schalter zum Überspringen von Stille an.
     Enable Skip Silence by Default: Aktiviert „Stille überspringen“ für neue Tabs. Änderungen in einem Tab wirken sich nicht auf andere Tabs aus.
-    Hold to Double Playback Speed: Halte die Leertaste oder die linke Maustaste über dem Player gedrückt, um die aktuelle Wiedergabegeschwindigkeit vorübergehend zu verdoppeln.
+    Hold to Speed Up: Halte die Leertaste oder die linke Maustaste über dem Player gedrückt, um die aktuelle Wiedergabegeschwindigkeit vorübergehend mit dem gewählten Wert zu multiplizieren.
     Ambient Mode: Lässt die Farben des Videos in den Bereich um den Player ausstrahlen.
     Mono Audio: Spielt den linken und rechten Audiokanal auf beiden Ohren ab. Nutze dies, wenn der Ton eines Videos nur auf einer Seite deiner Kopfhörer zu hören ist.
     Normalize Loudness: Macht Videos leiser, die lauter als die meisten sind, damit die Lautstärke zwischen Videos nicht springt. Leise Videos behalten ihre Lautstärke. Funktioniert nur bei Videos, die mit der lokalen API geladen wurden.

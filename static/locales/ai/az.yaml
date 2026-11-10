@@ -884,7 +884,9 @@ Settings:
       Russian: Rus dili
       English: İngilis dili
       Kazakh: Qazax dili
-    Hold to Double Playback Speed: Oynatma sürətini ikiqat artırmaq üçün basıb saxla
+    Hold to Speed Up:
+      Hold to Speed Up: Sürətləndirmək üçün basıb saxla
+      Off: Söndürülüb
     Use Quick Playback Speed Bar: Cəld oynatma sürəti panelindən istifadə et
     Customize Quick Playback Speed Bar: Cəld oynatma sürəti panelini fərdiləşdir
     Quick Playback Speed Bar Manager: Cəld oynatma sürəti paneli
@@ -2224,7 +2226,7 @@ Tooltips:
     Show Seek Bar Filmstrip: "İrəliləmə zolağının düyməsini sürüşdürdükdə keçəcəyiniz yerin ətrafındakı kadrlardan ibarət lent göstərilir, onun üzərinə yuxarı çəkmək isə dəqiq keçid edir. Deaktiv edildikdə, sürüşdürmə üzərinə gəldikdə olduğu kimi tək miniatür göstərir."
     Continue Playback When Screen Is Locked: Səsi arxa planda oynatmağa davam edir və Android media idarələrini təmin edir. Tətbiq artıq görünmədikdə oynatmanı dayandırmaq üçün bunu bağlayın.
     Voice-over Translation: Tərcümə istədiyinizdə videonun ID-sini, müddətini və seçilmiş dili qeyri-rəsmi Yandex səsli tərcümə xidmətinə göndərir. İlkin olaraq bağlıdır.
-    Hold to Double Playback Speed: Cari oynatma sürətini müvəqqəti ikiqat artırmaq üçün oynadıcı üzərində Boşluq düyməsini və ya siçanın sol düyməsini basıb saxlayın.
+    Hold to Speed Up: Cari oynatma sürətini müvəqqəti olaraq seçilmiş dəyərə vurmaq üçün oynadıcı üzərində Boşluq düyməsini və ya siçanın sol düyməsini basıb saxlayın.
     Ambient Mode: Videonun rənglərini oynadıcının ətrafındakı sahəyə yayır.
     Default Volume: Səsi yadda saxla aktiv olduqda bağlıdır. Hər video üçün sabit başlanğıc səs səviyyəsi təyin etmək üçün Səsi yadda saxla seçimini bağlayın.
     Parallel Segment Loading: |

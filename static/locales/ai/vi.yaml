@@ -877,7 +877,9 @@ Settings:
       Russian: Tiếng Nga
       English: Tiếng Anh
       Kazakh: Tiếng Kazakh
-    Hold to Double Playback Speed: Giữ để tăng gấp đôi tốc độ phát
+    Hold to Speed Up:
+      Hold to Speed Up: Giữ để tăng tốc
+      Off: Tắt
     Use Quick Playback Speed Bar: Dùng thanh tốc độ phát nhanh
     Customize Quick Playback Speed Bar: Tùy chỉnh thanh tốc độ phát nhanh
     Quick Playback Speed Bar Manager: Thanh tốc độ phát nhanh
@@ -2224,7 +2226,7 @@ Tooltips:
     Enable Seek History: Ghi nhớ vị trí bạn đã tua đi trong mỗi video cho đến khi đóng ứng dụng. Hiển thị danh sách lịch sử tua trong menu cài đặt của trình phát và bật các phím tắt của tính năng này.
     Show Seek Bar Filmstrip: "Kéo núm của thanh tua sẽ hiển thị một dải khung hình quanh vị trí bạn sẽ đến, và kéo lên trên dải đó để tua chính xác. Khi tắt, việc kéo chỉ hiển thị một hình thu nhỏ, giống như khi di chuột qua."
     Voice-over Translation: Gửi ID video, thời lượng và ngôn ngữ đã chọn đến dịch vụ dịch lồng tiếng Yandex không chính thức khi bạn yêu cầu dịch. Tính năng này mặc định tắt.
-    Hold to Double Playback Speed: Giữ phím cách hoặc nút chuột trái trên trình phát để tạm thời tăng gấp đôi tốc độ phát hiện tại.
+    Hold to Speed Up: Giữ phím cách hoặc nút chuột trái trên trình phát để tạm thời nhân tốc độ phát hiện tại với giá trị đã chọn.
     Ambient Mode: Hòa màu của video vào khu vực quanh trình phát.
     Default Volume: Không dùng được khi bật Ghi nhớ âm lượng. Tắt Ghi nhớ âm lượng để đặt mức âm lượng khởi đầu cố định cho mỗi video.
     Parallel Segment Loading: |

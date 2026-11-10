@@ -877,7 +877,9 @@ Settings:
       Russian: Ruština
       English: Angličtina
       Kazakh: Kazaština
-    Hold to Double Playback Speed: Podržením zdvojnásobit rychlost přehrávání
+    Hold to Speed Up:
+      Hold to Speed Up: Podržením zrychlit
+      Off: Vypnuto
     Use Quick Playback Speed Bar: Používat panel rychlé volby rychlosti přehrávání
     Customize Quick Playback Speed Bar: Přizpůsobit panel rychlé volby rychlosti přehrávání
     Quick Playback Speed Bar Manager: Panel rychlé volby rychlosti přehrávání
@@ -2211,7 +2213,7 @@ Tooltips:
     Enable Seek History: Pamatuje si, odkud jste v každém videu přeskočili, dokud aplikaci nezavřete. Zobrazí seznam historie přeskoků v nabídce nastavení přehrávače a povolí její klávesové zkratky.
     Show Seek Bar Filmstrip: "Tažení jezdce posuvníku zobrazí pás snímků kolem místa, kam se přesunete, a přetažením nahoru na něj můžete posouvat přesně. Je-li vypnuto, tažení zobrazí jedinou miniaturu jako při najetí myší."
     Voice-over Translation: Při požadavku na překlad odešle ID videa, délku a vybraný jazyk neoficiální službě Yandex pro překlad dabingu. Ve výchozím nastavení je vypnuto.
-    Hold to Double Playback Speed: Podržením mezerníku nebo levého tlačítka myši nad přehrávačem dočasně zdvojnásobíte aktuální rychlost přehrávání.
+    Hold to Speed Up: Podržením mezerníku nebo levého tlačítka myši nad přehrávačem dočasně vynásobíte aktuální rychlost přehrávání zvolenou hodnotou.
     Ambient Mode: Rozšíří barvy videa do prostoru kolem přehrávače.
     Default Volume: Není dostupné, když je zapnutá možnost Pamatovat si hlasitost. Chcete-li nastavit pevnou počáteční hlasitost každého videa, tuto možnost vypněte.
     Parallel Segment Loading: |
