@@ -100,3 +100,24 @@ test('a denied notification permission leaves reminders pending without uploadin
   assert.equal(await syncLiveReminders(client, [], reminderService), null)
   assert.equal(uploaded, false)
 })
+
+test('after an upload conflict, a downloaded reminder cancelled on the server stays cancelled', async () => {
+  const localReminder = { ...first, startTimestamp: Date.now() + 60_000 }
+  const remoteReminder = { ...second, startTimestamp: Date.now() + 120_000 }
+  const local = new Map([[localReminder.videoId, localReminder]])
+  const reminderService = {
+    list: async () => [...local.values()],
+    cancel: async id => { local.delete(id); return true },
+    schedule: async reminder => { local.set(reminder.videoId, reminder); return true },
+  }
+  let getRetryBaseline
+  await syncLiveReminders({ getLiveReminders: async () => [remoteReminder], putLiveReminders: async () => {} }, [],
+    reminderService, { onRetryBaseline: getBaseline => { getRetryBaseline = getBaseline } })
+  // The upload conflicts: another device cancelled the downloaded reminder.
+  let uploaded
+  const retried = await syncLiveReminders({ getLiveReminders: async () => [], putLiveReminders: async records => { uploaded = records } },
+    getRetryBaseline(), reminderService)
+  assert.deepEqual(retried, [localReminder])
+  assert.deepEqual(uploaded, [localReminder])
+  assert.deepEqual([...local.values()], [localReminder])
+})

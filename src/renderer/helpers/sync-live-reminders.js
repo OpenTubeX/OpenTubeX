@@ -39,11 +39,15 @@ export function mergeLiveReminders(localRecords, remoteRecords, previousRecords,
   return merged.sort((a, b) => a.videoId.localeCompare(b.videoId))
 }
 
-export async function syncLiveReminders(client, previousRecords = [], reminderService = liveReminder) {
+// `onRetryBaseline` receives a getter for the baseline to merge against if the
+// upload conflicts. It also holds the downloaded reminders, so their
+// cancellation on the server is not undone.
+export async function syncLiveReminders(client, previousRecords = [], reminderService = liveReminder, { onRetryBaseline } = {}) {
   const [local, remote] = await Promise.all([
     reminderService.list(), client.getLiveReminders()
   ])
   const now = Date.now()
+  onRetryBaseline?.(() => [...new Map([...byVideoId(previousRecords, now), ...byVideoId(remote, now)]).values()])
   const merged = mergeLiveReminders(local, remote, previousRecords, now)
   const localById = byVideoId(local, now)
   const mergedIds = new Set(merged.map(record => record.videoId))

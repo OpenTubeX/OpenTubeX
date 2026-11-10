@@ -660,3 +660,102 @@ test('a protected playlist deleted on another device is restored instead of fail
   await context.syncPlaylists(adapter, store, previous, { allowDataLoss: true })
   assert.deepEqual(Array.from(await adapter.getPlaylists(), item => item.title), [playlist.playlistName])
 })
+
+// Another device removes the downloaded items before this device's upload.
+// The retry merges against the conflict baseline the first merge reports.
+async function syncAgainAfterConflict(method, store, remote, removeDownloaded) {
+  let getRetryBaseline
+  const onRetryBaseline = getBaseline => { getRetryBaseline = getBaseline }
+  const options = method === 'syncHistory' ? [{}, { onRetryBaseline }] : [{ onRetryBaseline }]
+  await context[method](new EncryptedSyncAdapter(remote), store, {}, ...options)
+  removeDownloaded(remote)
+  const retried = new EncryptedSyncAdapter(remote)
+  await context[method](retried, store, getRetryBaseline())
+  return retried.document
+}
+
+test('after an upload conflict, playlists and videos removed on the server stay removed', async () => {
+  const localVideo = { videoId: 'local-video', title: 'Local video', authorId: 'channel-1' }
+  const remoteVideo = { id: 'remote-video', title: 'Remote video', uploader: { id: 'channel-1', name: 'A channel' }, upload_date: 0, duration: 0 }
+  const store = {
+    persistPlaylistSyncBaseline: async () => {},
+    state: { playlists: { playlists: [{ _id: 'shared', playlistName: 'Shared', videos: [localVideo] }, { _id: 'local-list', playlistName: 'Local', videos: [] }] } },
+    dispatch: async (action, value) => {
+      const { playlists } = store.state.playlists
+      if (action === 'addPlaylist') playlists.push(value)
+      else if (action === 'updatePlaylistFromSync') playlists.splice(playlists.findIndex(item => item._id === value.playlist._id), 1, value.playlist)
+      else if (action === 'removePlaylist') playlists.splice(playlists.findIndex(item => item._id === value), 1)
+      else assert.fail(action)
+      return true
+    },
+  }
+  const remote = createEmptySyncDocument()
+  remote.playlists = [
+    { playlist: { id: 'shared', title: 'Shared', description: '' }, videos: [remoteVideo] },
+    { playlist: { id: 'remote-list', title: 'Remote', description: '' }, videos: [] },
+  ]
+  const uploaded = await syncAgainAfterConflict('syncPlaylists', store, remote, document => {
+    document.playlists = [{ playlist: { id: 'shared', title: 'Shared', description: '' }, videos: [] }]
+  })
+  const contents = playlists => Object.fromEntries(Array.from(playlists, ({ id, videos }) => [id, Array.from(videos, video => video.id)]))
+  assert.deepEqual(contents(uploaded.playlists.map(entry => ({ id: entry.playlist.id, videos: entry.videos }))), { shared: ['local-video'], 'local-list': [] })
+  assert.deepEqual(contents(store.state.playlists.playlists.map(item => ({ id: item._id, videos: item.videos.map(video => ({ id: video.videoId })) }))),
+    { shared: ['local-video'], 'local-list': [] })
+})
+
+test('after an upload conflict, profiles and channels removed on the server stay removed, and unsubscribed ones stay', async () => {
+  const subscriptions = [{ id: 'local-channel', name: 'Local' }, { id: 'remote-channel', name: 'Remote' }]
+  const store = {
+    state: {
+      profiles: {
+        profileList: [
+          { _id: MAIN_PROFILE_ID, subscriptions },
+          { _id: 'shared', name: 'Shared', bgColor: '#000000', textColor: '#FFFFFF', subscriptions: [subscriptions[0]] },
+          { _id: 'local-profile', name: 'Local', bgColor: '#000000', textColor: '#FFFFFF', subscriptions: [] },
+        ],
+      },
+    },
+    dispatch: async (action, value) => {
+      const { profileList } = store.state.profiles
+      const index = profileList.findIndex(item => item._id === (value._id ?? value))
+      if (action === 'updateProfile') profileList.splice(index === -1 ? profileList.length : index, index === -1 ? 0 : 1, value)
+      else if (action === 'removeProfile') profileList.splice(index, 1)
+      else assert.fail(action)
+      return true
+    },
+  }
+  const group = (id, title) => ({ id, local_id: id, title, bg_color: '#000000', text_color: '#FFFFFF' })
+  const remote = createEmptySyncDocument()
+  remote.profiles = [
+    // This device is not subscribed to the other device's channel.
+    { group: group('shared', 'Shared'), channels: [{ id: 'remote-channel' }, { id: 'unsubscribed-channel' }] },
+    { group: group('remote-profile', 'Remote'), channels: [] },
+  ]
+  const uploaded = await syncAgainAfterConflict('syncProfiles', store, remote, document => {
+    document.profiles = [{ group: group('shared', 'Shared'), channels: [{ id: 'unsubscribed-channel' }] }]
+  })
+  assert.deepEqual(Object.fromEntries(uploaded.profiles.map(entry => [entry.group.id, entry.channels.map(item => item.id).sort()])),
+    { shared: ['local-channel', 'unsubscribed-channel'], 'local-profile': [] })
+  assert.deepEqual(Object.fromEntries(structuredClone(store.state.profiles.profileList.slice(1)).map(item => [item._id, item.subscriptions.map(item => item.id)])),
+    { shared: ['local-channel'], 'local-profile': [] })
+})
+
+test('after an upload conflict, history removed on the server stays removed', async () => {
+  const store = {
+    state: { history: { historyCacheSorted: [{ videoId: 'local-video', title: 'Local', authorId: 'channel-1', timeWatched: 1, watchProgress: 0 }] } },
+    dispatch: async (action, { insertions, updates, deletions }) => {
+      assert.equal(action, 'applyHistorySyncChanges')
+      const ids = new Set([...deletions, ...updates.map(item => item.videoId)])
+      store.state.history.historyCacheSorted = [...store.state.history.historyCacheSorted.filter(item => !ids.has(item.videoId)), ...updates, ...insertions]
+    },
+  }
+  const entry = id => ({
+    video: { id, title: id, uploader: { id: 'channel-1', name: 'A channel' }, upload_date: 0, duration: 0 },
+    metadata: { added_date: 2, watched_state: 'watching', position_millis: 1000 },
+  })
+  const remote = createEmptySyncDocument()
+  remote.history = [entry('kept-video'), entry('remote-video')]
+  const uploaded = await syncAgainAfterConflict('syncHistory', store, remote, document => { document.history = [entry('kept-video')] })
+  assert.deepEqual(uploaded.history.map(entry => entry.video.id).sort(), ['kept-video', 'local-video'])
+  assert.deepEqual(store.state.history.historyCacheSorted.map(item => item.videoId).sort(), ['kept-video', 'local-video'])
+})

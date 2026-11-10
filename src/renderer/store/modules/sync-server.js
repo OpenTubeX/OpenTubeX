@@ -382,7 +382,13 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   collectionCache.use(cacheIdentity)
   const previous = parseSnapshot(settings.syncServerSnapshot)
   const next = { ...previous }
-  let externalMediaBaseline = previous.externalMediaPositions
+  // After a conflicting upload, a collection merges again against the previous
+  // baseline plus what this sync downloaded. The previous baseline alone would
+  // undo removals of downloaded items, while the merged result would drop
+  // local items that were never uploaded.
+  /** @type {Record<string, () => unknown>} */
+  const retryBaselines = {}
+  const baseline = collection => retryBaselines[collection] ? retryBaselines[collection]() : previous[collection]
   const historyAccount = getSyncAccount(settings)
   const isSameAccount = () => isSameSyncAccount(rootState.settings, historyAccount)
   // Deletions made or reviewed before this sync; ones made while it runs wait for the next.
@@ -512,6 +518,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   }
 
   async function applyCollection(collection, targetClient) {
+    const onRetryBaseline = getBaseline => { retryBaselines[collection] = getBaseline }
     switch (collection) {
       case 'seenVideos':
         result.seenVideos = await syncSubscriptionSeenVideos(targetClient, store)
@@ -524,10 +531,9 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         break
       case 'externalMediaPositions': {
         const { synced, retryBaseline } = await syncExternalMediaPositions(
-          targetClient, externalMediaBaseline, rootGetters.getHistoryRetentionDays
+          targetClient, baseline(collection), rootGetters.getHistoryRetentionDays
         )
-        // A conflict retry must not mistake downloaded positions for new local ones.
-        externalMediaBaseline = retryBaseline
+        onRetryBaseline(() => retryBaseline)
         next.externalMediaPositions = synced
         result.externalMediaPositions = Object.keys(synced).length
         break
@@ -536,8 +542,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         next.subscriptions = await syncSubscriptions(
           targetClient,
           store,
-          previous.subscriptions,
-          { allowDataLoss, deletions }
+          baseline(collection),
+          { allowDataLoss, deletions, onRetryBaseline }
         )
         result.subscriptions = next.subscriptions.length
         break
@@ -545,10 +551,10 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         next.playlists = await syncPlaylists(
           targetClient,
           store,
-          previous.playlists,
+          baseline(collection),
           // Takeout only supplies video IDs. Encrypted sync can carry unknown
           // uploaders; the legacy server requires real channel metadata.
-          { allowDataLoss, deletions, allowMissingUploader: encrypted }
+          { allowDataLoss, deletions, allowMissingUploader: encrypted, onRetryBaseline }
         )
         result.playlists = Object.keys(next.playlists).length
         break
@@ -570,11 +576,11 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         const history = await syncHistory(
           targetClient,
           store,
-          previous.history,
+          baseline(collection),
           // Imported playlist videos can enter history without uploader metadata.
           { allowDataLoss, deletions, allowMissingUploader: encrypted },
           // Restoring entries can involve ones that did not change locally.
-          { changedIds: unchangedRemote && !deletions.history ? changedIds : null }
+          { changedIds: unchangedRemote && !deletions.history ? changedIds : null, onRetryBaseline }
         )
         if (history !== null) {
           commit('setSyncServerHistorySupported', true)
@@ -591,7 +597,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         break
       case 'liveReminders':
         {
-          const reminders = await syncLiveReminders(targetClient, previous.liveReminders)
+          const reminders = await syncLiveReminders(targetClient, baseline(collection), undefined, { onRetryBaseline })
           if (reminders === null) {
             skippedCollections.add('liveReminders')
             if ('liveReminders' in previous) next.liveReminders = previous.liveReminders
@@ -613,8 +619,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           const profiles = await syncProfiles(
             targetClient,
             store,
-            previous.profiles,
-            { allowDataLoss, deletions }
+            baseline(collection),
+            { allowDataLoss, deletions, onRetryBaseline }
           )
           if (profiles !== null) {
             next.profiles = profiles
@@ -632,8 +638,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           sessions = await syncSessions(
             targetClient,
             store,
-            getPreviousSyncSessions(previous),
-            { accountClient: networkClient }
+            retryBaselines.sessionsV2 ? retryBaselines.sessionsV2() : getPreviousSyncSessions(previous),
+            { accountClient: networkClient, onRetryBaseline }
           )
         } catch (error) {
           if (!(error instanceof SyncServerTabRevocationPendingError)) throw error
@@ -904,11 +910,13 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
               )
               const retryDocument = createEmptySyncDocument()
               const remoteData = remote.data ?? null
+              // The download the rejected upload was merged from.
+              const base = activityBefore
               activityBefore = remoteData
               if (collection === 'playlistBookmarks') {
                 revision = remote.revision
                 data = mergePlaylistBookmarkConflict({
-                  original: encryptedCollections.original.playlistBookmarks,
+                  original: base,
                   local: data,
                   remote: remoteData,
                 })
