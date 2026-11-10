@@ -20,6 +20,7 @@ import { getSubscriptionsForFeed } from '../../src/renderer/helpers/subscription
 import { extractAssignedJsonObject } from '../../src/renderer/helpers/assigned-json.js'
 import { getSubscriptionVideoSortTimestamp, updateUpcomingPremiereState, reconcileFetchedSubscriptionEntries } from '../../src/renderer/helpers/subscription-entries.js'
 import { usesInvidiousApi } from '../../src/apiBackends.js'
+import { canKeepSubscriptionFeedWithoutNewUploads, hasNoNewSubscriptionUploads, isSubscriptionFeedRecentlyFetched } from '../../src/renderer/helpers/subscriptionUploadCheck.js'
 
 const { parseLocalChannelShorts, parseLocalPlaylistVideos } = createLocalFeedParsers(() => false)
 
@@ -32,7 +33,7 @@ const source = (await readFile(new URL('../../src/renderer/helpers/subscriptions
 
 // Exercise the real refresh, fallback, cache, and notification paths with fake
 // platform APIs. Webpack-only imports are supplied in the isolated context.
-function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('Failed to fetch'), webCors = false, backend = 'local', fallbackWorks = false, rssStatus = 200, channelInfo = { has_shorts: true, getShorts: async () => ({ videos: [] }) }, playlistError = null, playlistItems = [], stallChannelProbe = false, channelStatus = rssStatus, scraperError = null, shortPublishDate = '2026-09-06T12:00:00Z', beforeShortMetadata = async () => {}, beforeWrite = async () => {}, finishNative = async () => {} } = {}) {
+function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('Failed to fetch'), webCors = false, backend = 'local', fallbackWorks = false, rssStatus = 200, channelInfo = { has_shorts: true, getShorts: async () => ({ videos: [] }) }, playlistError = null, playlistItems = [], stallChannelProbe = false, channelStatus = rssStatus, scraperError = null, shortPublishDate = '2026-09-06T12:00:00Z', beforeShortMetadata = async () => {}, beforeWrite = async () => {}, finishNative = async () => {}, useRssFeeds = true, channelFeeds = {} } = {}) {
   const window = new EventTarget()
   const navigator = { onLine: online }
   const toasts = []
@@ -43,12 +44,13 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
   const fallbackRequests = []
   const writes = []
   const events = []
+  const reports = []
   let fail = !webCors
   const getters = {
     getActiveProfile: { _id: 'all', subscriptions: Array.from({ length: 20 }, (_, i) => ({ id: `UC${i}` })) },
     getBackendPreference: backend,
     getBackendFallback: true,
-    getUseRssFeeds: true,
+    getUseRssFeeds: useRssFeeds,
     getCurrentInvidiousInstanceUrl: 'https://invidious.example',
     getVideoCache: {},
     getShortsCache: {},
@@ -61,6 +63,8 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
   const fetchChannel = async url => {
     requests.push(url)
     if (fail) throw typeof error === 'function' ? error(url) : error
+    const channelFeed = channelFeeds[new URL(url, 'https://www.youtube.com/').searchParams.get('channel_id')]
+    if (channelFeed) return { status: 200, text: async () => channelFeed }
     if (url.includes('/watch?v=')) {
       await beforeShortMetadata()
       const videoId = new URL(url).searchParams.get('v')
@@ -114,6 +118,9 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
     formatRequestDiagnostic,
     getSubscriptionsForFeed,
     reconcileFetchedSubscriptionEntries,
+    canKeepSubscriptionFeedWithoutNewUploads,
+    hasNoNewSubscriptionUploads,
+    isSubscriptionFeedRecentlyFetched,
     extractAssignedJsonObject,
     getSubscriptionVideoSortTimestamp,
     updateUpcomingPremiereState,
@@ -122,7 +129,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
     includeAutomaticDownloadChannels: channels => channels,
     includeNotificationChannels: channels => channels,
     startAutomaticDownloadsForChannel: async () => {},
-    reportSubscriptionUploads: () => {},
+    reportSubscriptionUploads: (channelId, feedType) => reports.push(`${channelId}:${feedType}`),
     getChannelPlaylistId: id => id,
     showApiErrorToast: (...args) => toasts.push(args),
     showInvidiousFallbackToast: () => warnings.push('direct fallback warning'),
@@ -187,6 +194,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
     copied,
     writes,
     events,
+    reports,
     getters,
     recovery: sharedRecovery,
     reconnect() {
@@ -218,6 +226,58 @@ test('a mobile feed does not release its refresh promise until native finishing 
     app.cancelSubscriptionRefresh()
     await refresh
   }
+})
+
+test('with Faster Subscription Refresh, a scraper refresh keeps cached feeds whose channel upload feed lists nothing new', async () => {
+  const now = Date.now()
+  const channelFeed = videoIds => `<feed xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://www.youtube.com/xml/schemas/2015"><author><name>Channel</name></author>${videoIds.map(videoId =>
+    `<entry><yt:videoId>${videoId}</yt:videoId><title>Upload</title><link rel="alternate" href="https://www.youtube.com/watch?v=${videoId}"/><published>${new Date(now - 3_600_000).toISOString()}</published></entry>`
+  ).join('')}</feed>`
+  const app = createRefresh({
+    feed: 'Videos',
+    useRssFeeds: false,
+    channelFeeds: { UC0: channelFeed(['known0']), UC1: channelFeed(['new1', 'known1']), UC2: channelFeed(['known2']) }
+  })
+  const timestamp = new Date(now - 1_800_000)
+  app.getters.getVideoCache = {
+    UC0: { timestamp, videos: [{ videoId: 'known0' }] },
+    UC1: { timestamp, videos: [{ videoId: 'known1' }] },
+    // Scheduled entries change state without a new upload
+    UC2: { timestamp, videos: [{ videoId: 'known2', isUpcoming: true }] }
+  }
+  app.getters.getFastSubscriptionRefresh = true
+  app.reconnect()
+
+  await app.refresh({ t: key => key })
+
+  const scraped = app.requests.filter(url => !url.includes('/feeds/'))
+  assert.equal(scraped.includes('UC0'), false)
+  assert.equal(scraped.includes('UC1'), true, 'a new upload loads the channel')
+  assert.equal(scraped.includes('UC2'), true, 'cached scheduled entries load the channel')
+  assert.equal(scraped.length, 19)
+  assert.equal(app.requests.some(url => url.includes('channel_id=UC2')), false, 'the upload feed is only loaded when the cache could be kept')
+  assert.equal(app.writes.some(write => write.value?.channelId === 'UC0'), false)
+  assert.ok(app.reports.includes('UC0:videos'), 'kept feeds still give upload notifications their baseline')
+  assert.deepEqual(app.events, ['completed', 'finished'])
+})
+
+test('with Faster Subscription Refresh, automatic refreshes leave out channels fetched moments ago, manual ones load them', async () => {
+  const app = createRefresh({ feed: 'Posts' })
+  app.getters.getPostsCache = { UC0: { timestamp: new Date(Date.now() - 60_000), posts: [] } }
+  app.reconnect()
+
+  await app.refresh({ t: key => key, automatic: true })
+  assert.equal(app.requests.includes('UC0'), true, 'Faster Subscription Refresh is off')
+
+  app.getters.getFastSubscriptionRefresh = true
+  app.requests.length = 0
+  await app.refresh({ t: key => key, automatic: true })
+  assert.equal(app.requests.includes('UC0'), false)
+  assert.equal(app.requests.length, 19)
+
+  app.requests.length = 0
+  await app.refresh({ t: key => key })
+  assert.equal(app.requests.includes('UC0'), true)
 })
 
 test('mobile Shorts refresh waits offline without requests or error toasts, then resumes', async () => {

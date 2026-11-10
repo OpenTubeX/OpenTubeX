@@ -306,6 +306,8 @@ History:
   Custom: Personalizado
   History Older Than Days Removed: Foi removido o histórico de reprodução com mais de 1 dia | Foi removido o histórico de reprodução com mais de {days} dias | Foi removido o histórico de reprodução com mais de {days} dias
 Settings:
+  Experimental Settings:
+    Faster Subscription Refresh: "Atualização mais rápida das subscrições"
   Diagnostics:
     Diagnostics: Diagnóstico
     Description: Enquanto o registo de diagnóstico estiver ativo, o OpenTubeX mantém as mensagens de registo recentes na memória para que as possa anexar a relatórios de erros. Nunca as guarda nem as envia por iniciativa própria, e desativar o registo elimina-as. Os relatórios omitem cookies, tokens, endereços IP e parâmetros de URL, mas podem incluir os ID dos vídeos que reproduziu, por isso verifique o relatório antes de o partilhar.
@@ -2151,6 +2153,8 @@ Description:
   Games: Jogos
   Music: Música
 Tooltips:
+  Experimental Settings:
+    Faster Subscription Refresh: "Verifica primeiro o feed RSS de cada canal e só carrega os vídeos, Shorts e emissões em direto dos canais com novos carregamentos. As atualizações automáticas também ignoram canais carregados nos últimos 10 minutos. Nos canais sem novos carregamentos, as visualizações, os vídeos removidos e os títulos alterados só são atualizados a cada poucas horas, e os novos carregamentos podem aparecer mais tarde quando o feed RSS está atrasado. Indisponível com a API do Invidious."
   General Settings:
     Limit Titles to Two Lines: "Encurta os títulos de vídeos e listas de reprodução em listas e grelhas para duas linhas com reticências, para cartões mais uniformes. Passe o cursor sobre um título para o ver completo."
     Close Window With Last Tab: 'Quando desativado, fechar o último separador abre um novo separador, pelo que a janela permanece aberta até a fechar.'

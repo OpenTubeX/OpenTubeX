@@ -1585,6 +1585,7 @@ Settings:
     Hide Search Bar: Ocultar barra de búsqueda
     Disable Channel Links: Deshabilitar Links de Canales
   Experimental Settings:
+    Faster Subscription Refresh: "Actualización más rápida de suscripciones"
     Experimental Settings: Experimental
     Warning: Estas configuraciones son experimentales, pueden causar fallos mientras están habilitadas. Es muy recomendable hacer copias de seguridad. ¡Úselo bajo su propio riesgo!
     Replace HTTP Cache: Reemplazar la caché HTTP
@@ -2744,6 +2745,7 @@ Tooltips:
     Use Grid Player Menu: Organiza el menú de ajustes del reproductor de video como una cuadrícula de mosaicos en lugar de una lista de filas.
     Modal Backdrop: "Define cómo se ve la aplicación detrás de los diálogos y menús. El desenfoque puede ser lento en dispositivos menos potentes."
   Experimental Settings:
+    Faster Subscription Refresh: "Primero revisa el feed RSS de cada canal y solo carga los videos, Shorts y transmisiones en vivo de los canales con subidas nuevas. Las actualizaciones automáticas también omiten los canales cargados en los últimos 10 minutos. En los canales sin subidas nuevas, las vistas, los videos eliminados y los títulos cambiados solo se actualizan cada pocas horas, y las subidas nuevas pueden aparecer más tarde cuando el feed RSS se atrasa. No disponible con la API de Invidious."
     Replace HTTP Cache: Desactiva la caché HTTP basada en Electron disk y habilite una caché para la imagen en la memoria personalizada. Esto aumentará el uso de la memoria RAM.
     Disable Hardware Acceleration: Desactiva la aceleración por hardware de la GPU. Puede resolver problemas gráficos, pero probablemente reducirá el rendimiento.
   SponsorBlock Settings:

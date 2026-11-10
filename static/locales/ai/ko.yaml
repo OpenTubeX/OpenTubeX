@@ -1727,6 +1727,7 @@ Settings:
   Search Settings: 설정 검색
   No Settings Found: 설정을 찾을 수 없습니다
   Experimental Settings:
+    Faster Subscription Refresh: "더 빠른 구독 새로 고침"
     Disable Hardware Acceleration: 하드웨어 가속 비활성화
   Interface Customizer:
     Customize Interface: "인터페이스 사용자 지정"
@@ -2664,6 +2665,7 @@ Tooltips:
     Use Grid Player Menu: 동영상 플레이어의 설정 메뉴를 행 목록 대신 타일 격자로 배치합니다.
     Modal Backdrop: "대화 상자와 메뉴 뒤에서 앱이 보이는 방식을 설정합니다. 흐림 효과는 성능이 낮은 기기에서 느릴 수 있습니다."
   Experimental Settings:
+    Faster Subscription Refresh: "먼저 각 채널의 RSS 피드를 확인하고 새 업로드가 있는 채널의 동영상, Shorts, 라이브 스트림만 불러옵니다. 자동 새로 고침은 지난 10분 이내에 불러온 채널도 건너뜁니다. 새 업로드가 없는 채널은 조회수, 삭제된 동영상, 변경된 제목이 몇 시간마다만 업데이트되며, RSS 피드가 늦어지면 새 업로드가 늦게 표시될 수 있습니다. Invidious API에서는 사용할 수 없습니다."
     Replace HTTP Cache: Electron의 디스크 기반 HTTP 캐시를 비활성화하고 사용자 지정 메모리 내 이미지 캐시를 활성화합니다. RAM 사용량이 늘어납니다.
     Disable Hardware Acceleration: GPU 하드웨어 가속을 비활성화합니다. 그래픽 문제를 해결할 수 있지만 성능이 저하될 수 있습니다.
   SponsorBlock Settings:

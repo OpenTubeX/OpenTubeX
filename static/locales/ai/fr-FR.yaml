@@ -306,6 +306,8 @@ History:
   Custom: Personnalisé
   History Older Than Days Removed: L’historique de visionnage datant de plus de 1 jour a été supprimé | L’historique de visionnage datant de plus de {days} jours a été supprimé | L’historique de visionnage datant de plus de {days} jours a été supprimé
 Settings:
+  Experimental Settings:
+    Faster Subscription Refresh: "Actualisation plus rapide des abonnements"
   Diagnostics:
     Diagnostics: Diagnostic
     Description: Tant que le journal de diagnostic est activé, OpenTubeX conserve les messages de journal récents en mémoire pour que vous puissiez les joindre à vos rapports de bogue. Il ne les enregistre ni ne les envoie jamais de lui-même, et désactiver le journal les supprime. Les rapports excluent les cookies, les jetons, les adresses IP et les paramètres d'URL, mais ils peuvent contenir les identifiants des vidéos que vous avez lues ; vérifiez donc un rapport avant de le partager.
@@ -2149,6 +2151,8 @@ Description:
   Games: Jeux
   Music: Musique
 Tooltips:
+  Experimental Settings:
+    Faster Subscription Refresh: "Vérifie d'abord le flux RSS de chaque chaîne et ne charge les vidéos, Shorts et diffusions en direct que des chaînes ayant de nouvelles mises en ligne. Les actualisations automatiques ignorent aussi les chaînes chargées au cours des 10 dernières minutes. Pour les chaînes sans nouvelles mises en ligne, le nombre de vues, les vidéos supprimées et les titres modifiés ne sont mis à jour que toutes les quelques heures, et les nouvelles mises en ligne peuvent apparaître plus tard lorsque le flux RSS est en retard. Non disponible avec l'API Invidious."
   General Settings:
     Limit Titles to Two Lines: "Raccourcit les titres des vidéos et des playlists dans les listes et les grilles à deux lignes avec des points de suspension, pour des cartes plus uniformes. Survolez un titre pour le voir en entier."
     Close Window With Last Tab: 'Si désactivé, fermer le dernier onglet en ouvre un nouveau à la place, et la fenêtre reste ouverte jusqu’à ce que vous la fermiez.'

@@ -361,7 +361,8 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
           cancelledSubscriptionAutoRefreshKeys.delete(key)
           const result = await getSubscriptionTabRefreshHandler(tab)({
             t,
-            showStartToast: true
+            showStartToast: true,
+            automatic: true
           })
           const wasCancelled = cancelledSubscriptionAutoRefreshKeys.delete(key)
 

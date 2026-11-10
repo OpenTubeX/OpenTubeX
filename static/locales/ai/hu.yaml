@@ -306,6 +306,8 @@ History:
   Custom: Egyéni
   History Older Than Days Removed: Az 1 napnál régebbi megtekintési előzmények eltávolítva | A(z) {days} napnál régebbi megtekintési előzmények eltávolítva
 Settings:
+  Experimental Settings:
+    Faster Subscription Refresh: "Gyorsabb feliratkozásfrissítés"
   Diagnostics:
     Diagnostics: Diagnosztika
     Description: Amíg a diagnosztikai naplózás be van kapcsolva, az OpenTubeX a legutóbbi naplóüzeneteket a memóriában tartja, hogy hibajelentésekhez csatolhasd őket. Soha nem menti és nem küldi el őket magától, a naplózás kikapcsolása pedig törli őket. A jelentések nem tartalmaznak sütiket, tokeneket, IP-címeket és URL-paramétereket, de tartalmazhatják a lejátszott videók azonosítóit, ezért megosztás előtt ellenőrizd a jelentést.
@@ -2151,6 +2153,8 @@ Description:
   Games: Játékok
   Music: Zene
 Tooltips:
+  Experimental Settings:
+    Faster Subscription Refresh: "Először minden csatorna RSS-hírcsatornáját ellenőrzi, és csak az új feltöltéssel rendelkező csatornák videóit, Shorts-videóit és élő közvetítéseit tölti be. Az automatikus frissítések az elmúlt 10 percben betöltött csatornákat is kihagyják. Az új feltöltés nélküli csatornáknál a megtekintések száma, az eltávolított videók és a módosított címek csak néhány óránként frissülnek, és az új feltöltések később jelenhetnek meg, ha az RSS-hírcsatorna lemarad. Az Invidious API-val nem érhető el."
   General Settings:
     Limit Titles to Two Lines: "A listákban és rácsokban két sorra rövidíti a videók és lejátszási listák címét három ponttal, hogy a kártyák egységesebbek legyenek. A teljes címet a kurzort fölé víve láthatja."
     Close Window With Last Tab: 'Kikapcsolva az utolsó lap bezárása helyette új lapot nyit, így az ablak nyitva marad, amíg be nem zárod.'

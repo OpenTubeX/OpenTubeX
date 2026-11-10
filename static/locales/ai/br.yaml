@@ -306,6 +306,8 @@ History:
   Custom: "Personelaet"
   History Older Than Days Removed: "Dilamet eo bet an istor sellout koshoc'h eget 1 devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} zevezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh."
 Settings:
+  Experimental Settings:
+    Faster Subscription Refresh: "Freskaat ar c'houmanantoù buanoc'h"
   Diagnostics:
     Diagnostics: Diagnoz
     Description: E-pad ma vez gweredekaet an deizlevr diagnoz, OpenTubeX a vir ar c'hemennadennoù deizlevr nevez er memor evit ma c'hallfec'h o stagañ ouzh danevelloù fazioù. Biskoazh ne enrollo na ne gaso anezho e-unan, ha diweredekaat an deizlevr a ziverk anezho. An danevelloù n'int ket enno toupinoù, jedouerioù, chomlec'hioù IP na arventennoù URL, met gallout a reont kaout IDoù ar videoioù ho peus lennet, setu gwiriit an danevell a-raok he rannañ.
@@ -2159,6 +2161,8 @@ Description:
   Games: "C'hoarioù"
   Music: Sonerezh
 Tooltips:
+  Experimental Settings:
+    Faster Subscription Refresh: "Gwiriañ a ra lanv RSS pep chadenn da gentañ ha ne garg nemet videoioù, Shorts ha skignadennoù war-eeun ar chadennoù o deus pellgasadennoù nevez. Ar freskadurioù emgefre a lez a-gostez ivez ar chadennoù karget e-pad an 10 munutenn diwezhañ. Evit ar chadennoù hep pellgasadennoù nevez, ne vez hizivaet an niver a selloù, ar videoioù dilamet hag an titloù kemmet nemet bep un nebeud eurioù, ha gallout a ra ar pellgasadennoù nevez dont war wel diwezhatoc'h pa vez dale gant al lanv RSS. N'eo ket hegerz gant API Invidious."
   General Settings:
     Limit Titles to Two Lines: "Berraat a ra titloù ar videoioù hag al listennoù lenn er rolloù hag er c'hrilhoù da zaou linenn gant ur poentoù kendalc'h, evit kartennoù unvanoc'h. Lakait al logodenn war un titl evit e welet en e bezh."
     Close Window With Last Tab: 'Pa vez lazhet, serriñ an ivinell ziwezhañ a zigor un ivinell nevez e-lec’h, ha chom a ra digor ar prenestr betek ma vo serret ganeoc’h.'

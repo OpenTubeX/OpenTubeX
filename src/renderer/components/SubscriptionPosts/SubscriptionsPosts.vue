@@ -234,7 +234,7 @@ function loadPostsFromRemoteFirstPerWindowSometimes() {
   }
 
   alreadyLoadedRemotely = true
-  loadPostsForSubscriptionsFromRemote()
+  loadPostsForSubscriptionsFromRemote(true)
   store.commit('setSubscriptionForPostsFirstAutoFetchRun')
 }
 
@@ -251,7 +251,7 @@ function loadPostsFromCacheSometimes() {
 
   if (fetchSubscriptionsAutomatically.value) {
     // `isLoading.value = false` is called inside `loadPostsForSubscriptionsFromRemote` when needed
-    loadPostsForSubscriptionsFromRemote()
+    loadPostsForSubscriptionsFromRemote(true)
     return
   }
 
@@ -280,7 +280,10 @@ useSubscriptionChannelUpdates('posts', () => {
   }
 })
 
-async function loadPostsForSubscriptionsFromRemote() {
+/**
+ * @param {boolean} [automatic] Leaves out channels fetched moments ago
+ */
+async function loadPostsForSubscriptionsFromRemote(automatic = false) {
   isLoading.value = true
   attemptedFetch.value = true
   errorChannels.value = []
@@ -294,6 +297,7 @@ async function loadPostsForSubscriptionsFromRemote() {
   try {
     const refreshedPosts = await refreshSubscriptionPostsFromRemote({
       t,
+      automatic,
       errorChannels: errorChannels.value
     })
     if (refreshedPosts !== null) {

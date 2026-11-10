@@ -1501,6 +1501,7 @@ Settings:
   Search Settings: إعدادات البحث
   No Settings Found: لم يتم العثور على إعدادات
   Experimental Settings:
+    Faster Subscription Refresh: "تحديث أسرع للاشتراكات"
     Disable Hardware Acceleration: تعطيل تسريع الأجهزة
   Interface Customizer:
     Customize Interface: "تخصيص الواجهة"
@@ -2307,6 +2308,7 @@ Tooltips:
     Use Grid Player Menu: يقوم بترتيب قائمة إعدادات مشغل الفيديو كشبكة من المربعات بدلاً من قائمة الصفوف.
     Modal Backdrop: "يحدد مظهر التطبيق خلف مربعات الحوار والقوائم. قد يكون التمويه بطيئًا على الأجهزة الأقل قوة."
   Experimental Settings:
+    Faster Subscription Refresh: "يتحقق أولاً من موجز RSS لكل قناة ولا يحمّل الفيديوهات وShorts والبث المباشر إلا من القنوات التي لديها رفعات جديدة. تتخطى التحديثات التلقائية أيضاً القنوات التي حُمّلت خلال آخر 10 دقائق. بالنسبة للقنوات التي ليس لديها رفعات جديدة، لا يتم تحديث عدد المشاهدات والفيديوهات المحذوفة والعناوين المتغيرة إلا كل بضع ساعات، وقد تظهر الرفعات الجديدة لاحقاً عندما يتأخر موجز RSS. غير متاح مع واجهة Invidious البرمجية."
     Disable Hardware Acceleration: يعطّل تسريع الأجهزة بواسطة وحدة معالجة الرسومات. قد يحل مشاكل الرسومات، لكنه سيؤدي على الأرجح إلى انخفاض الأداء.
 The playlist is at the beginning. Enable loop to continue playing: قائمة التشغيل في البداية. تمكين الحلقة لمواصلة اللعب
 External link opening has been disabled in Settings → Privacy: تم تعطيل فتح الرابط الخارجي في الإعدادات → الخصوصية

@@ -1459,6 +1459,7 @@ Settings:
   Search Settings: Search settings
   No Settings Found: No settings found
   Experimental Settings:
+    Faster Subscription Refresh: "Faster Subscription Refresh"
     Disable Hardware Acceleration: Disable Hardware Acceleration
   Interface Customizer:
     Customize Interface: "Customise interface"
@@ -2268,6 +2269,7 @@ Tooltips:
     Use Grid Player Menu: Arranges the video player's settings menu as a grid of tiles instead of a list of rows.
     Modal Backdrop: "Sets how the app looks behind dialogues and menus. Blurring it can be slow on less powerful devices."
   Experimental Settings:
+    Faster Subscription Refresh: "Checks each channel's RSS feed first and only loads the videos, Shorts and live streams of channels with new uploads. Automatic refreshes also skip channels loaded in the last 10 minutes. For channels without new uploads, view counts, removed videos and changed titles only update every few hours, and new uploads may appear later when the RSS feed lags behind. Not available with the Invidious API."
     Disable Hardware Acceleration: Disables GPU hardware acceleration. May fix graphical issues, but will probably perform worse.
 The playlist is at the beginning. Enable loop to continue playing: The playlist is at the beginning. Enable loop to continue playing
 External link opening has been disabled in Settings → Privacy: External link opening has been disabled in Settings → Privacy

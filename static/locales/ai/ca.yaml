@@ -1814,6 +1814,7 @@ Settings:
     Hide Search Bar: Oculta la barra de cerca
     Disable Channel Links: Desactiva els enllaços dels canals
   Experimental Settings:
+    Faster Subscription Refresh: "Actualització més ràpida de les subscripcions"
     Experimental Settings: Experimental
     Warning: Aquesta configuració és experimental i pot provocar fallades mentre estigui activada. Es recomana molt fer còpies de seguretat. Utilitzeu-la sota la vostra responsabilitat.
     Replace HTTP Cache: Substitueix la memòria cau HTTP
@@ -2835,6 +2836,7 @@ Tooltips:
     Use Grid Player Menu: Organitza el menú de configuració del reproductor de vídeo com una quadrícula de rajoles en lloc d'una llista de files.
     Modal Backdrop: "Defineix com es veu l’aplicació darrere dels diàlegs i els menús. El difuminat pot anar lent en dispositius menys potents."
   Experimental Settings:
+    Faster Subscription Refresh: "Primer comprova el canal RSS de cada canal i només carrega els vídeos, els Shorts i les emissions en directe dels canals amb pujades noves. Les actualitzacions automàtiques també ometen els canals carregats en els últims 10 minuts. Als canals sense pujades noves, el nombre de visualitzacions, els vídeos eliminats i els títols canviats només s'actualitzen cada poques hores, i les pujades noves poden aparèixer més tard quan el canal RSS va endarrerit. No disponible amb l'API d'Invidious."
     Replace HTTP Cache: Desactiva la memòria cau HTTP al disc d'Electron i activa una memòria cau d'imatges personalitzada a la memòria. Augmentarà l'ús de RAM.
     Disable Hardware Acceleration: Desactiva l'acceleració per maquinari de la GPU. Pot resoldre problemes gràfics, però probablement reduirà el rendiment.
   SponsorBlock Settings:

@@ -21,6 +21,10 @@ export function parseSubscriptionRss(rss, channelId) {
       const views = Number.parseInt(node.attributes.views?.value, 10)
       if (Number.isFinite(views)) entry.viewCount = views
     }
+    // Channel upload feeds link Shorts to /shorts/ instead of the watch page.
+    if (entry && node.local === 'link' && stack.length === 3 && node.attributes.href?.value.startsWith('https://www.youtube.com/shorts/')) {
+      entry.isShort = true
+    }
   }
   parser.ontext = parser.oncdata = text => {
     if (stack.length) stack.at(-1).text += text

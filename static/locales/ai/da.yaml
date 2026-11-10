@@ -1525,6 +1525,7 @@ Settings:
   Search Settings: Søgeindstillinger
   No Settings Found: Ingen indstillinger fundet
   Experimental Settings:
+    Faster Subscription Refresh: "Hurtigere opdatering af abonnementer"
     Disable Hardware Acceleration: Deaktiver hardwareacceleration
   Interface Customizer:
     Customize Interface: "Tilpas brugerflade"
@@ -2360,6 +2361,7 @@ Tooltips:
     Use Grid Player Menu: Arrangerer videoafspillerens indstillingsmenu som et gitter af felter i stedet for en liste med rækker.
     Modal Backdrop: "Angiver, hvordan appen ser ud bag dialoger og menuer. Sløring kan være langsom på mindre kraftige enheder."
   Experimental Settings:
+    Faster Subscription Refresh: "Tjekker først hver kanals RSS-feed og indlæser kun videoer, Shorts og livestreams fra kanaler med nye uploads. Automatiske opdateringer springer også kanaler over, der er indlæst inden for de sidste 10 minutter. For kanaler uden nye uploads opdateres visningstal, fjernede videoer og ændrede titler kun med nogle timers mellemrum, og nye uploads kan dukke op senere, når RSS-feedet halter bagefter. Ikke tilgængelig med Invidious API."
     Disable Hardware Acceleration: Deaktiverer GPU-hardwareacceleration. Kan løse grafikproblemer, men vil sandsynligvis forringe ydeevnen.
 The playlist is at the beginning. Enable loop to continue playing: Playlistens begyndelse er nået. Slå gentagelse til for at fortsætte afspilningen
 External link opening has been disabled in Settings → Privacy: Åbning af eksterne links er slået fra under Indstillinger → Privatliv

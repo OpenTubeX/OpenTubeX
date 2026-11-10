@@ -306,6 +306,8 @@ History:
   Custom: Vlastní
   History Older Than Days Removed: Historie sledování starší než 1 den byla odstraněna | Historie sledování starší než {days} dny byla odstraněna | Historie sledování starší než {days} dní byla odstraněna
 Settings:
+  Experimental Settings:
+    Faster Subscription Refresh: "Rychlejší obnovení odběrů"
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Když je diagnostický protokol zapnutý, OpenTubeX uchovává nedávné zprávy protokolu v paměti, abyste je mohli přiložit k hlášení chyb. Nikdy je sám neukládá ani neodesílá a vypnutím protokolu se smažou. Hlášení neobsahují soubory cookie, tokeny, IP adresy ani parametry URL, mohou však obsahovat ID přehraných videí, proto hlášení před sdílením zkontrolujte.
@@ -2150,6 +2152,8 @@ Description:
   Games: Hry
   Music: Hudba
 Tooltips:
+  Experimental Settings:
+    Faster Subscription Refresh: "Nejprve zkontroluje RSS kanál každého kanálu a videa, Shorts a živé přenosy načte jen z kanálů s novými nahranými videi. Automatická obnovení navíc přeskočí kanály načtené v posledních 10 minutách. U kanálů bez nových videí se počty zhlédnutí, odstraněná videa a změněné názvy aktualizují jen jednou za několik hodin a nová videa se mohou objevit později, když RSS kanál zaostává. Není k dispozici s Invidious API."
   General Settings:
     Limit Titles to Two Lines: "Zkracuje názvy videí a playlistů v seznamech a mřížkách na dva řádky s výpustkou, aby karty působily jednotněji. Celý název zobrazíte najetím kurzorem."
     Close Window With Last Tab: 'Když je vypnuto, zavření poslední karty místo toho otevře novou kartu, takže okno zůstane otevřené, dokud ho nezavřete.'

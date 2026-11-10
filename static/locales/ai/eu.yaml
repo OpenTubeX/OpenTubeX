@@ -306,6 +306,8 @@ History:
   Custom: Pertsonalizatua
   History Older Than Days Removed: Egun 1 baino zaharragoa den ikustaldi-historia kendu da | {days} egun baino zaharragoa den ikustaldi-historia kendu da
 Settings:
+  Experimental Settings:
+    Faster Subscription Refresh: "Harpidetzen freskatze azkarragoa"
   Diagnostics:
     Diagnostics: Diagnostikoa
     Description: Diagnostiko-erregistroa aktibatuta dagoen bitartean, OpenTubeX-ek azken erregistro-mezuak memorian gordetzen ditu, akats-txostenei erantsi ahal izateko. Ez ditu inoiz bere kabuz gordetzen edo bidaltzen, eta erregistroa desaktibatzean ezabatu egiten dira. Txostenek ez dituzte cookieak, tokenak, IP helbideak eta URL parametroak barne hartzen, baina erreproduzitu dituzun bideoen IDak izan ditzakete; beraz, berrikusi txostena partekatu aurretik.
@@ -2160,6 +2162,8 @@ Description:
   Games: Jokoak
   Music: Musika
 Tooltips:
+  Experimental Settings:
+    Faster Subscription Refresh: "Lehenik kanal bakoitzaren RSS jarioa egiaztatzen du, eta igoera berriak dituzten kanalen bideoak, Shorts-ak eta zuzeneko emanaldiak soilik kargatzen ditu. Freskatze automatikoek azken 10 minutuetan kargatutako kanalak ere saltatzen dituzte. Igoera berririk ez duten kanaletan, ikustaldi kopuruak, kendutako bideoak eta aldatutako izenburuak ordu batzuetan behin bakarrik eguneratzen dira, eta igoera berriak beranduago ager daitezke RSS jarioa atzeratuta dagoenean. Ez dago erabilgarri Invidious APIarekin."
   General Settings:
     Limit Titles to Two Lines: "Zerrenda eta saretetako bideo eta erreprodukzio-zerrenden izenburuak bi lerrora laburtzen ditu eten-puntuekin, txartelak uniformeagoak izan daitezen. Pasatu kurtsorea izenburu baten gainetik osorik ikusteko."
     Close Window With Last Tab: 'Desaktibatuta dagoenean, azken fitxa itxiz gero fitxa berri bat irekitzen da, eta leihoak irekita jarraitzen du zuk itxi arte.'

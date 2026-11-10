@@ -306,6 +306,8 @@ History:
   Custom: 自定义
   History Older Than Days Removed: 已删除 {days} 天前的观看历史记录
 Settings:
+  Experimental Settings:
+    Faster Subscription Refresh: "更快的订阅刷新"
   Diagnostics:
     Diagnostics: 诊断
     Description: 启用诊断日志后，OpenTubeX 会在内存中保留最近的日志消息，方便你将其附加到错误报告中。它绝不会自行保存或发送这些消息，关闭日志会将其删除。报告不包含 Cookie、令牌、IP 地址和 URL 参数，但可能包含你播放过的视频 ID，因此分享前请检查报告。
@@ -2150,6 +2152,8 @@ Description:
   Games: 游戏
   Music: 音乐
 Tooltips:
+  Experimental Settings:
+    Faster Subscription Refresh: "先检查每个频道的 RSS 订阅源，只加载有新上传内容的频道的视频、Shorts 和直播。自动刷新还会跳过过去 10 分钟内加载过的频道。对于没有新上传内容的频道，观看次数、已移除的视频和更改的标题每隔几小时才会更新一次，而且当 RSS 订阅源滞后时，新上传的内容可能会稍后才出现。使用 Invidious API 时不可用。"
   General Settings:
     Limit Titles to Two Lines: "将列表和网格中的视频与播放列表标题缩短为最多两行并以省略号结尾，使卡片更整齐。将指针悬停在标题上可查看完整标题。"
     Close Window With Last Tab: '关闭后，关闭最后一个标签页会改为打开一个新标签页，窗口会一直保持打开，直到你关闭它。'

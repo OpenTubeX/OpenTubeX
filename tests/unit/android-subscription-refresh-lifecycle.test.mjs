@@ -54,6 +54,7 @@ test('Refresh All holds its native batch until every feed and its native finish 
     refreshSubscriptionLiveFromRemote() {},
     refreshSubscriptionPostsFromRemote() {},
     withAndroidSubscriptionRefreshBatch: helpers.withAndroidSubscriptionRefreshBatch,
+    withSharedChannelUploads: refresh => refresh(),
   })
   const refresh = useRefreshAll()
   refresh.refresh()

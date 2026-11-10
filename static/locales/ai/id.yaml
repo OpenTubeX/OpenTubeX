@@ -307,6 +307,8 @@ History:
   Custom: Khusus
   History Older Than Days Removed: Riwayat tontonan yang lebih lama dari {days} hari telah dihapus
 Settings:
+  Experimental Settings:
+    Faster Subscription Refresh: "Penyegaran langganan lebih cepat"
   Diagnostics:
     Diagnostics: Diagnostik
     Description: Selama log diagnostik aktif, OpenTubeX menyimpan pesan log terbaru di memori agar Anda dapat melampirkannya ke laporan bug. Aplikasi ini tidak pernah menyimpan atau mengirimnya sendiri, dan menonaktifkan log akan menghapusnya. Laporan tidak menyertakan cookie, token, alamat IP, dan parameter URL, tetapi dapat berisi ID video yang Anda putar, jadi periksa laporan sebelum membagikannya.
@@ -2175,6 +2177,8 @@ Description:
   Games: Gim
   Music: Musik
 Tooltips:
+  Experimental Settings:
+    Faster Subscription Refresh: "Memeriksa umpan RSS setiap saluran terlebih dahulu dan hanya memuat video, Shorts, dan siaran langsung dari saluran yang memiliki unggahan baru. Penyegaran otomatis juga melewati saluran yang dimuat dalam 10 menit terakhir. Untuk saluran tanpa unggahan baru, jumlah penayangan, video yang dihapus, dan judul yang diubah hanya diperbarui setiap beberapa jam, dan unggahan baru mungkin muncul lebih lambat saat umpan RSS tertinggal. Tidak tersedia dengan API Invidious."
   General Settings:
     Limit Titles to Two Lines: "Memendekkan judul video dan playlist di daftar dan kisi menjadi dua baris dengan elipsis, agar kartu lebih seragam. Arahkan kursor ke judul untuk melihatnya secara lengkap."
     Close Window With Last Tab: 'Jika dinonaktifkan, menutup tab terakhir akan membuka tab baru, sehingga jendela tetap terbuka sampai Anda menutupnya.'
