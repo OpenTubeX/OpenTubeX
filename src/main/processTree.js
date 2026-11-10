@@ -50,6 +50,48 @@ export function signalProcessTree(child, signal = 'SIGTERM') {
 }
 
 /**
+ * @param {import('node:child_process').ChildProcess} child
+ * @returns {boolean} whether the child and, on POSIX, every process in its group has exited
+ */
+function isProcessTreeGone(child) {
+  if (child.pid === undefined || process.platform === 'win32') return !isRunning(child)
+  try {
+    process.kill(-child.pid, 0)
+    return false
+  } catch (error) {
+    return /** @type {NodeJS.ErrnoException} */ (error).code === 'ESRCH'
+  }
+}
+
+/**
+ * @param {import('node:child_process').ChildProcess} child
+ * @param {number} waitMs
+ */
+async function waitForProcessTreeExit(child, waitMs) {
+  const deadline = Date.now() + waitMs
+  while (!isProcessTreeGone(child) && Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, 100))
+  }
+  return isProcessTreeGone(child)
+}
+
+/**
+ * Terminates a child spawned with `PROCESS_TREE_SPAWN_OPTIONS` and every process it
+ * started, killing what is left after `waitMs`, and resolves once they have exited,
+ * or after waiting `waitMs` again for processes that cannot be stopped.
+ * On Windows, only the child's own exit can be observed.
+ * @param {import('node:child_process').ChildProcess} child
+ * @param {number} [waitMs]
+ * @returns {Promise<boolean>} whether the tree has exited
+ */
+export async function stopProcessTree(child, waitMs = 5000) {
+  signalProcessTree(child, 'SIGTERM')
+  if (await waitForProcessTreeExit(child, waitMs)) return true
+  signalProcessTree(child, 'SIGKILL')
+  return await waitForProcessTreeExit(child, waitMs)
+}
+
+/**
  * Synchronous best-effort termination of a process tree, for `process.on('exit')`,
  * where asynchronous work no longer runs.
  * @param {import('node:child_process').ChildProcess} child

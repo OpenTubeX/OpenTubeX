@@ -6,6 +6,7 @@ import asyncFs from 'fs/promises'
 import { IpcChannels } from '../constants'
 import * as baseHandlers from '../datastores/handlers/base'
 import { choosePathSetting } from './pathSettingPicker'
+import { PROCESS_TREE_SPAWN_OPTIONS, stopProcessTree } from './processTree'
 import { isOpenTubeXUrl } from './utils'
 
 /** @type {Promise<{ exitCode: number | null, signal: NodeJS.Signals | null, stdout: string, stderr: string }> | null} */
@@ -57,6 +58,7 @@ async function executeIpBlockRecoveryScript(scriptPath, timeoutMs = 5 * 60_000) 
 
   return new Promise((resolve, reject) => {
     const child = cp.spawn(command, args, {
+      ...PROCESS_TREE_SPAWN_OPTIONS,
       shell: false,
       // Close stdin so a script that prompts fails instead of waiting forever.
       stdio: ['ignore', 'pipe', 'pipe'],
@@ -64,8 +66,13 @@ async function executeIpBlockRecoveryScript(scriptPath, timeoutMs = 5 * 60_000) 
       windowsHide: true
     })
 
-    const timeout = setTimeout(() => {
-      child.kill()
+    let timedOut = false
+
+    const timeout = setTimeout(async () => {
+      timedOut = true
+      // Subprocesses such as a VPN client must not outlive a timed-out run, or
+      // they could still be running when the next run starts after the cooldown.
+      await stopProcessTree(child)
       reject(new Error(`Recovery script did not finish within ${timeoutMs / 1000} seconds`))
     }, timeoutMs)
 
@@ -88,11 +95,17 @@ async function executeIpBlockRecoveryScript(scriptPath, timeoutMs = 5 * 60_000) 
 
     child.once('error', (error) => {
       clearTimeout(timeout)
+      if (timedOut) {
+        return
+      }
       reject(error)
     })
 
     child.once('close', (exitCode, signal) => {
       clearTimeout(timeout)
+      if (timedOut) {
+        return
+      }
       resolve({
         exitCode,
         signal,
