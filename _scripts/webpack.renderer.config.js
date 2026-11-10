@@ -242,7 +242,7 @@ const config = {
           to: 'fonts/licenses/[path][name][ext]'
         },
         {
-          from: path.join(__dirname, '../node_modules/swiper/modules/{a11y,navigation,pagination}-element.css').replaceAll('\\', '/'),
+          from: path.join(__dirname, '../node_modules/swiper/modules/a11y-element.css').replaceAll('\\', '/'),
           to: `swiper-${swiperVersion}.css`,
           context: path.join(__dirname, '../node_modules/swiper/modules'),
           transformAll: (assets) => {
