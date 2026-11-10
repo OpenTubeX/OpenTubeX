@@ -22,9 +22,9 @@ html[data-overlayscrollbars-initialize]::-webkit-scrollbar,
   position: relative;
   overflow: auto;
 
-  /* The bars' scroll-linked animations run on the compositor. Chromium doesn't
-     always composite a container's scrolling, such as a transparent one in a
-     prompt, and the bars then run a wheel step ahead of the content. */
+  /* The handles' scroll-linked animations run on the compositor. Chromium
+     doesn't always composite a container's scrolling, such as a transparent
+     one in a prompt, and the handles then run ahead of the content. */
   will-change: scroll-position;
 }
 
@@ -55,10 +55,12 @@ html[data-overlayscrollbars-initialize]::-webkit-scrollbar,
 
   position: absolute;
 
-  /* Tracks move out of this box to follow the scroll offset. Layout
+  /* Tracks stick out of this box to follow the scroll offset. Layout
      containment draws and hit-tests them there without letting them extend
      the container's scroll range. */
   contain: size layout style;
+  container-type: size;
+  overflow-anchor: none;
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
@@ -123,12 +125,23 @@ body > .os-scrollbar-vertical {
   inset-block-start: var(--pinned-player-block-end, 0);
 }
 
+/* A sticky track can only move within its containing block, so this one
+   reaches as far as the container scrolls. */
+.os-scrollbar-track-host {
+  inline-size: calc(100cqi + var(--os-track-travel-inline, 0px));
+  block-size: calc(100cqb + var(--os-track-travel-block, 0px));
+}
+
+/* Sticky offsets follow the content's scroll offset in the same frame, also
+   when the compositor draws the content late. See updateStickyOffsets. */
 .os-scrollbar-track {
-  position: relative;
+  position: sticky;
+  inset-block-start: var(--os-track-sticky-block, auto);
+  inset-inline-start: var(--os-track-sticky-inline, auto);
   box-sizing: border-box;
   container-type: size;
-  inline-size: 100%;
-  block-size: 100%;
+  inline-size: 100cqi;
+  block-size: 100cqb;
   pointer-events: none;
 }
 
@@ -239,6 +252,12 @@ body > .os-scrollbar-vertical {
 
 .os-scrollbar-horizontal:active .os-scrollbar-handle {
   block-size: var(--os-handle-perpendicular-size-active);
+}
+
+/* The page's bars are fixed to the window. */
+body > .os-scrollbar .os-scrollbar-track {
+  position: relative;
+  inset: auto;
 }
 
 @media print {
