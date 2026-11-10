@@ -36,7 +36,7 @@ public class WebViewScreenshotTest {
             scenario.onActivity(activity -> view.set(activity.getBridge().getWebView()));
             WebView webView = view.get();
             awaitCondition(webView, "!!document.querySelector('.app.capacitorTabs')");
-            evaluate(webView, "document.querySelector('.tutorialActions button')?.click()");
+            evaluate(webView, "document.querySelector('.tutorialSkip button')?.click()");
             awaitCondition(webView, "!document.querySelector('.tutorialOverlay')");
             evaluate(webView, """
                 (async () => {
@@ -128,7 +128,7 @@ public class WebViewScreenshotTest {
             evaluate(webView, "document.querySelector('[data-subscription-feed-tab=\"all\"]').click()");
             awaitCondition(webView, "!!document.querySelector('.newFeedTab') && document.querySelectorAll('.ft-list-video').length > 0");
             // A fresh WebView profile can show the first-run tutorial over the feed.
-            evaluate(webView, "document.querySelector('.tutorialActions button')?.click()");
+            evaluate(webView, "document.querySelector('.tutorialSkip button')?.click()");
             awaitCondition(webView, "!document.querySelector('.tutorialOverlay')");
 
             evaluate(webView, "window.__firstCard = document.querySelector('.ft-list-video'); window.scrollTo(0, document.documentElement.scrollHeight)");
@@ -426,7 +426,7 @@ public class WebViewScreenshotTest {
             evaluate(webView, "document.querySelector('[data-subscription-feed-tab=\"all\"]').click()");
             awaitCondition(webView, "!!document.querySelector('.newFeedTab') && document.querySelectorAll('.ft-list-video').length > 0");
             // A fresh WebView profile can show the first-run tutorial over the feed.
-            evaluate(webView, "document.querySelector('.tutorialActions button')?.click()");
+            evaluate(webView, "document.querySelector('.tutorialSkip button')?.click()");
             awaitCondition(webView, "!document.querySelector('.tutorialOverlay')");
             evaluate(webView, """
                 (() => {

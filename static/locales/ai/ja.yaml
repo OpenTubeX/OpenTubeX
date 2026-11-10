@@ -1502,7 +1502,15 @@ Tutorial:
   Finish: 完了
   Welcome:
     Title: OpenTubeXへようこそ
-    Description: 最初に覚えておきたい操作を紹介します。
+    Description: 最初から始めるか、別のアプリやバックアップから登録チャンネル、履歴、プレイリストを取り込めます。
+    Start Fresh: 最初から始める
+    Import Data: データをインポート
+  Preferences:
+    Title: 好みに合わせて設定
+    Description: テーマ、スタートページ、地域を選べます。これらを含む各種設定は、いつでも設定から変更できます。
+  Playback:
+    Title: 再生とプライバシー
+    Description: 動画の再生方法、OpenTubeXが視聴内容を記憶するかどうか、使用するコミュニティ製アドオンを選べます。
   Navigation:
     Title: ライブラリへすぐにアクセス
     Description: ナビゲーションから登録チャンネル、プレイリスト、履歴などを開けます。
@@ -1511,16 +1519,11 @@ Tutorial:
     Description: 動画やチャンネルを検索できます。対応する動画URLを検索欄に直接貼り付けることもできます。
   Tabs:
     Title: ページをタブで開いたままに
-    Description: 現在の位置を失わずに複数のページを同時に開けます。レイアウトに合うタブの配置を選んでください。
-  Quick Settings:
-    Title: 好みに合わせて設定
-    Description: テーマと既定の動画品質を選択します。これらの設定はいつでもプロフィールメニューから変更できます。プロフィールを右クリックすると切り替えられます。
-    Touch Description: テーマと既定の動画品質を選択します。これらの設定はいつでもプロフィールメニューから変更できます。プロフィールを長押しすると切り替えられます。
-  Import Data:
-    Title: データを引き継ぐ
-    Description: 対応する別のアプリやバックアップから、登録チャンネル、履歴、プレイリスト、検索履歴、設定を必要に応じてインポートできます。
-    Action: データをインポート
-    Not Now: 後で
+    Description: 現在の位置を失うことなく、複数のページを同時に開けます。
+  Profile Menu:
+    Title: 設定とプロファイル
+    Description: プロファイルメニューには、クイック設定、ダウンロード、その他すべての設定がまとめられています。右クリックするとプロファイルを切り替えられます。
+    Touch Description: プロファイルメニューには、クイック設定、ダウンロード、その他すべての設定がまとめられています。長押しするとプロファイルを切り替えられます。
 About:
   Project: プロジェクト
   Community: コミュニティ
@@ -1531,6 +1534,7 @@ About:
   Commit: コミット
   Matrix: Matrix
   Email: メール
+  Show tutorial: チュートリアルを表示
 Profile:
   Customization: カスタマイズ
   Manage Profile Subscriptions: プロフィールの登録チャンネルを管理

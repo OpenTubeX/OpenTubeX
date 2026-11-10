@@ -2075,6 +2075,7 @@ About:
   Please check for duplicates before posting: Bitte überprüfe vor dem Erstellen, ob eine ähnliche Issue bereits existiert
   GitHub issues: GitHub Issue-Tracker
   Report a problem: Problem melden
+  Show tutorial: Tutorial anzeigen
   OpenTubeX Wiki: OpenTubeX-Wiki
   GitHub releases: GitHub-Veröffentlichungen
   Downloads: Downloads
@@ -3698,7 +3699,15 @@ Tutorial:
   Finish: Abschließen
   Welcome:
     Title: Willkommen bei OpenTubeX
-    Description: Hier sind einige Bedienelemente, mit denen du dich schnell zurechtfindest.
+    Description: Starte neu oder bring deine Abos, deinen Verlauf und deine Wiedergabelisten aus einer anderen App oder einer Sicherung mit.
+    Start Fresh: Neu starten
+    Import Data: Daten importieren
+  Preferences:
+    Title: Passe alles an dich an
+    Description: Wähle dein Design, deine Startseite und deine Region. Das und mehr kannst du jederzeit in den Einstellungen ändern.
+  Playback:
+    Title: Wiedergabe und Datenschutz
+    Description: Wähle, wie Videos abgespielt werden, ob OpenTubeX sich merkt, was du ansiehst, und welche Community-Erweiterungen es nutzt.
   Navigation:
     Title: Deine Mediathek ist immer in der Nähe
     Description: Über die Navigation erreichst du Abos, Wiedergabelisten, Verlauf und mehr.
@@ -3707,20 +3716,11 @@ Tutorial:
     Description: Suche Videos und Kanäle oder füge eine unterstützte Video-URL direkt in das Suchfeld ein.
   Tabs:
     Title: Seiten in Tabs geöffnet halten
-    Description: Öffne mehrere Seiten gleichzeitig und wechsle zwischen ihnen, ohne deine Position zu verlieren. Wähle, wo die Tabs in deinem Layout angezeigt werden sollen.
-  Quick Settings:
-    Title: Passe alles an dich an
-    Description: >-
-      Wähle ein Farbschema und die Standardqualität für Videos. Diese und weitere Einstellungen kannst du jederzeit
-      über dein Profilmenü ändern. Mit einem Rechtsklick auf dein Profil gelangst du direkt zur Profilauswahl.
-    Touch Description: >-
-      Wähle ein Farbschema und die Standardqualität für Videos. Diese und weitere Einstellungen kannst du jederzeit
-      über dein Profilmenü ändern. Wenn du lange auf dein Profil tippst, gelangst du direkt zur Profilauswahl.
-  Import Data:
-    Title: Nimm deine Daten mit
-    Description: Importiere bei Bedarf Abos, Verlauf, Playlists, Suchverlauf oder Einstellungen aus einer anderen unterstützten Anwendung oder Sicherung.
-    Action: Daten importieren
-    Not Now: Nicht jetzt
+    Description: Öffne mehrere Seiten gleichzeitig und wechsle zwischen ihnen, ohne deine Position zu verlieren.
+  Profile Menu:
+    Title: Einstellungen und Profile
+    Description: In deinem Profilmenü findest du Schnelleinstellungen, Downloads und alle weiteren Einstellungen. Mit einem Rechtsklick darauf wechselst du das Profil.
+    Touch Description: In deinem Profilmenü findest du Schnelleinstellungen, Downloads und alle weiteren Einstellungen. Tippe lange darauf, um das Profil zu wechseln.
 The playlist is at the beginning. Enable loop to continue playing: Die Wiedergabeliste ist am Anfang. Aktiviere die Wiederholung, um die Wiedergabe fortzusetzen
 Theme Discovery:
   Discover Themes: "Themes entdecken"

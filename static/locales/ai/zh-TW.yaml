@@ -1503,7 +1503,15 @@ Tutorial:
   Finish: 完成
   Welcome:
     Title: 歡迎使用 OpenTubeX
-    Description: 以下幾項控制功能能協助您快速熟悉操作。
+    Description: 從頭開始，或從其他應用程式或備份匯入您的訂閱內容、觀看紀錄和播放清單。
+    Start Fresh: 從頭開始
+    Import Data: 匯入資料
+  Preferences:
+    Title: 打造個人風格
+    Description: 選擇您的主題、起始頁面和地區。您隨時可以在設定中變更這些選項及更多內容。
+  Playback:
+    Title: 播放與隱私
+    Description: 選擇影片的播放方式、OpenTubeX 是否記住您觀看的內容，以及要使用哪些社群附加元件。
   Navigation:
     Title: 媒體庫隨手可用
     Description: 使用導覽列即可前往訂閱內容、播放清單、觀看紀錄等頁面。
@@ -1512,16 +1520,11 @@ Tutorial:
     Description: 尋找影片與頻道，或直接在搜尋欄位貼上支援的影片網址。
   Tabs:
     Title: 在分頁中保持頁面開啟
-    Description: 同時開啟多個頁面也不會遺失目前位置。您可以選擇最適合版面配置的分頁位置。
-  Quick Settings:
-    Title: 打造個人風格
-    Description: 選擇佈景主題與預設影片畫質。您隨時可以在個人檔案選單中變更這些及其他偏好設定，也可以按滑鼠右鍵切換個人檔案。
-    Touch Description: 選擇佈景主題與預設影片畫質。您隨時可以在個人檔案選單中變更這些及其他偏好設定，也可以長按來切換個人檔案。
-  Import Data:
-    Title: 帶著您的資料一起使用
-    Description: 您可以選擇從其他支援的應用程式或備份匯入訂閱內容、觀看紀錄、播放清單、搜尋紀錄或設定。
-    Action: 匯入資料
-    Not Now: 暫時不要
+    Description: 同時開啟多個頁面，不會遺失目前的位置。
+  Profile Menu:
+    Title: 設定與設定檔
+    Description: 設定檔選單包含快速設定、下載及所有其他設定。按右鍵即可切換設定檔。
+    Touch Description: 設定檔選單包含快速設定、下載及所有其他設定。長按即可切換設定檔。
 About:
   Project: 專案
   Community: 社群
@@ -1532,6 +1535,7 @@ About:
   Commit: 提交版本
   Matrix: Matrix
   Email: 電子郵件
+  Show tutorial: 顯示教學
 Profile:
   Customization: 自訂
   Manage Profile Subscriptions: 管理個人資料的訂閱

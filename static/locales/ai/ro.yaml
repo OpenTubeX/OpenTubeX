@@ -1526,7 +1526,15 @@ Tutorial:
   Finish: Finalizează
   Welcome:
     Title: Bun venit la OpenTubeX
-    Description: Iată câteva comenzi care vă vor ajuta să vă familiarizați cu aplicația.
+    Description: Începeți de la zero sau aduceți abonamentele, istoricul și playlisturile dintr-o altă aplicație sau dintr-o copie de rezervă.
+    Start Fresh: Începe de la zero
+    Import Data: Importă datele
+  Preferences:
+    Title: Personalizați aplicația
+    Description: Alegeți tema, pagina de pornire și regiunea. Le puteți modifica pe acestea și multe altele oricând din Setări.
+  Playback:
+    Title: Redare și confidențialitate
+    Description: Alegeți cum sunt redate videoclipurile, dacă OpenTubeX reține ce urmăriți și ce suplimente ale comunității folosește.
   Navigation:
     Title: Biblioteca este mereu la îndemână
     Description: Folosiți navigarea pentru a accesa abonamentele, playlisturile, istoricul și alte secțiuni.
@@ -1535,16 +1543,11 @@ Tutorial:
     Description: Găsiți videoclipuri și canale sau lipiți direct în câmpul de căutare adresa URL a unui videoclip acceptat.
   Tabs:
     Title: Păstrați paginile deschise în file
-    Description: Deschideți mai multe pagini simultan fără să pierdeți locul. Alegeți poziția filelor potrivită aranjamentului.
-  Quick Settings:
-    Title: Personalizați aplicația
-    Description: Alegeți o temă și calitatea video implicită. Puteți modifica oricând aceste preferințe și altele din meniul profilului sau puteți face clic dreapta pe el pentru a schimba profilul.
-    Touch Description: Alegeți o temă și calitatea video implicită. Puteți modifica oricând aceste preferințe și altele din meniul profilului sau puteți apăsa lung pe el pentru a schimba profilul.
-  Import Data:
-    Title: Transferați-vă datele
-    Description: Opțional, importați abonamente, istoricul vizionărilor, playlisturi, istoricul căutărilor sau setări din altă aplicație acceptată ori dintr-o copie de rezervă.
-    Action: Importă datele
-    Not Now: Nu acum
+    Description: Deschideți mai multe pagini simultan fără să pierdeți locul în care ați rămas.
+  Profile Menu:
+    Title: Setări și profiluri
+    Description: Meniul profilului conține setările rapide, descărcările și toate celelalte setări. Faceți clic dreapta pe el pentru a schimba profilul.
+    Touch Description: Meniul profilului conține setările rapide, descărcările și toate celelalte setări. Atingeți lung meniul pentru a schimba profilul.
 About:
   Project: Proiect
   Community: Comunitate
@@ -1558,6 +1561,7 @@ About:
   Email: E-mail
   Please read the {roomRulesLink}: Citiți {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX este posibil datorită {creditsPageLink}
+  Show tutorial: Afișează tutorialul
 Profile:
   Customization: Personalizare
   Manage Profile Subscriptions: Gestionează abonamentele profilului

@@ -1502,7 +1502,15 @@ Tutorial:
   Finish: Lõpeta
   Welcome:
     Title: Tere tulemast rakendusse OpenTubeX
-    Description: Siin on mõned juhtnupud, mis aitavad teil rakendusega tutvuda.
+    Description: Alustage nullist või tooge oma tellimused, ajalugu ja esitusloendid üle teisest rakendusest või varukoopiast.
+    Start Fresh: Alusta nullist
+    Import Data: Impordi andmed
+  Preferences:
+    Title: Kohandage rakendus endale sobivaks
+    Description: Valige teema, avaleht ja piirkond. Neid ja muud saate igal ajal seadistustes muuta.
+  Playback:
+    Title: Esitus ja privaatsus
+    Description: Valige, kuidas videoid esitatakse, kas OpenTubeX jätab meelde, mida te vaatate, ja milliseid kogukonna lisasid see kasutab.
   Navigation:
     Title: Teie kogu on alati käepärast
     Description: Navigeerimisriba kaudu pääsete tellimuste, esitusloendite, ajaloo ja muu juurde.
@@ -1511,16 +1519,11 @@ Tutorial:
     Description: Leidke videoid ja kanaleid või kleepige toetatud video URL otse otsinguväljale.
   Tabs:
     Title: Hoidke lehed vahekaartidel avatuna
-    Description: Avage korraga mitu lehte ja jätkake hiljem samast kohast. Valige, kus vahekaardid teie paigutusega kõige paremini sobivad.
-  Quick Settings:
-    Title: Kohandage rakendus endale sobivaks
-    Description: Valige kujundus ja video vaikekvaliteet. Neid ja muid eelistusi saate igal ajal profiilimenüüs muuta. Profiili vahetamiseks paremklõpsake oma profiili.
-    Touch Description: Valige kujundus ja video vaikekvaliteet. Neid ja muid eelistusi saate igal ajal profiilimenüüs muuta. Profiili vahetamiseks vajutage pikalt oma profiilile.
-  Import Data:
-    Title: Võtke oma andmed kaasa
-    Description: Soovi korral importige tellimused, ajalugu, esitusloendid, otsinguajalugu või seaded teisest toetatud rakendusest või varukoopiast.
-    Action: Impordi andmed
-    Not Now: Mitte praegu
+    Description: Avage korraga mitu lehte, ilma et kaotaksite oma kohta.
+  Profile Menu:
+    Title: Seadistused ja profiilid
+    Description: Teie profiilimenüüs on kiirseaded, allalaadimised ja kõik muud seaded. Profiili vahetamiseks paremklõpsake sellel.
+    Touch Description: Teie profiilimenüüs on kiirseaded, allalaadimised ja kõik muud seaded. Profiili vahetamiseks puudutage seda pikalt.
 About:
   Project: Projekt
   Community: Kogukond
@@ -1531,6 +1534,7 @@ About:
   Commit: Commit
   Matrix: Matrix
   Email: E-post
+  Show tutorial: Näita juhendit
 Profile:
   Customization: Kohandamine
   Manage Profile Subscriptions: Halda profiili tellimusi

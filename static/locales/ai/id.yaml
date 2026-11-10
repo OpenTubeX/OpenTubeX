@@ -1509,7 +1509,15 @@ Tutorial:
   Finish: Selesai
   Welcome:
     Title: Selamat datang di OpenTubeX
-    Description: Berikut beberapa kontrol dasar untuk mulai menggunakan aplikasi.
+    Description: Mulai dari awal, atau bawa langganan, riwayat, dan daftar putar Anda dari aplikasi lain atau cadangan.
+    Start Fresh: Mulai dari awal
+    Import Data: Impor data
+  Preferences:
+    Title: Sesuaikan dengan kebutuhan Anda
+    Description: Pilih tema, halaman awal, dan wilayah Anda. Anda dapat mengubah ini dan lainnya kapan saja di Pengaturan.
+  Playback:
+    Title: Pemutaran dan privasi
+    Description: Pilih cara video diputar, apakah OpenTubeX mengingat apa yang Anda tonton, dan pengaya komunitas mana yang digunakannya.
   Navigation:
     Title: Pustaka Anda selalu mudah dijangkau
     Description: Gunakan navigasi untuk membuka langganan, daftar putar, riwayat, dan lainnya.
@@ -1518,16 +1526,11 @@ Tutorial:
     Description: Temukan video dan saluran, atau tempel URL video yang didukung langsung ke kolom pencarian.
   Tabs:
     Title: Biarkan halaman terbuka dalam tab
-    Description: Buka beberapa halaman sekaligus tanpa kehilangan posisi. Pilih letak tab yang paling sesuai dengan tata letak Anda.
-  Quick Settings:
-    Title: Sesuaikan dengan kebutuhan Anda
-    Description: Pilih tema dan kualitas video bawaan. Ubah preferensi ini dan lainnya kapan saja melalui menu profil, atau klik kanan untuk berganti profil.
-    Touch Description: Pilih tema dan kualitas video bawaan. Ubah preferensi ini dan lainnya kapan saja melalui menu profil, atau ketuk lama untuk berganti profil.
-  Import Data:
-    Title: Bawa data Anda
-    Description: Jika diinginkan, impor langganan, riwayat, daftar putar, riwayat pencarian, atau pengaturan dari aplikasi lain yang didukung atau dari cadangan.
-    Action: Impor data
-    Not Now: Jangan sekarang
+    Description: Buka beberapa halaman sekaligus tanpa kehilangan posisi Anda.
+  Profile Menu:
+    Title: Pengaturan dan profil
+    Description: Menu profil Anda berisi pengaturan cepat, unduhan, dan semua pengaturan lainnya. Klik kanan menu tersebut untuk beralih profil.
+    Touch Description: Menu profil Anda berisi pengaturan cepat, unduhan, dan semua pengaturan lainnya. Ketuk dan tahan menu tersebut untuk beralih profil.
 About:
   Project: Proyek
   Community: Komunitas
@@ -1538,6 +1541,7 @@ About:
   Commit: Commit
   Matrix: Matrix
   Email: Email
+  Show tutorial: Tampilkan tutorial
 Profile:
   Customization: Penyesuaian
   Manage Profile Subscriptions: Kelola langganan profil

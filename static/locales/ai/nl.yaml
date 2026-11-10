@@ -1536,7 +1536,15 @@ Tutorial:
   Finish: Voltooien
   Welcome:
     Title: Welkom bij OpenTubeX
-    Description: Dit zijn de belangrijkste bedieningselementen om snel aan de slag te gaan.
+    Description: Begin vanaf nul, of neem je abonnementen, geschiedenis en afspeellijsten mee uit een andere app of een back-up.
+    Start Fresh: Vanaf nul beginnen
+    Import Data: Gegevens importeren
+  Preferences:
+    Title: Pas OpenTubeX aan
+    Description: Kies je thema, startpagina en regio. Je kunt dit en meer op elk moment wijzigen in Instellingen.
+  Playback:
+    Title: Afspelen en privacy
+    Description: Kies hoe video's worden afgespeeld, of OpenTubeX onthoudt wat je bekijkt en welke community-add-ons het gebruikt.
   Navigation:
     Title: Je bibliotheek is altijd dichtbij
     Description: Gebruik de navigatie om naar abonnementen, afspeellijsten, geschiedenis en meer te gaan.
@@ -1545,16 +1553,11 @@ Tutorial:
     Description: Zoek video's en kanalen of plak een ondersteunde video-URL rechtstreeks in het zoekveld.
   Tabs:
     Title: Pagina's openhouden in tabbladen
-    Description: Open meerdere pagina's tegelijk zonder je plek kwijt te raken. Kies waar tabbladen het beste in je indeling passen.
-  Quick Settings:
-    Title: Pas OpenTubeX aan
-    Description: Kies een thema en standaardvideokwaliteit. Wijzig deze en andere voorkeuren wanneer je wilt via je profielmenu of klik erop met de rechtermuisknop om van profiel te wisselen.
-    Touch Description: Kies een thema en standaardvideokwaliteit. Wijzig deze en andere voorkeuren wanneer je wilt via je profielmenu of druk er lang op om van profiel te wisselen.
-  Import Data:
-    Title: Neem je gegevens mee
-    Description: Importeer desgewenst abonnementen, geschiedenis, afspeellijsten, zoekgeschiedenis of instellingen uit een andere ondersteunde app of back-up.
-    Action: Gegevens importeren
-    Not Now: Niet nu
+    Description: Open meerdere pagina's tegelijk zonder je plek kwijt te raken.
+  Profile Menu:
+    Title: Instellingen en profielen
+    Description: Je profielmenu bevat snelle instellingen, downloads en alle andere instellingen. Klik er met de rechtermuisknop op om van profiel te wisselen.
+    Touch Description: Je profielmenu bevat snelle instellingen, downloads en alle andere instellingen. Tik erop en houd vast om van profiel te wisselen.
 About:
   Project: Project
   Community: Gemeenschap
@@ -1568,6 +1571,7 @@ About:
   Email: E-mail
   Please read the {roomRulesLink}: Lees de {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX wordt mogelijk gemaakt door {creditsPageLink}
+  Show tutorial: Rondleiding tonen
 Profile:
   Customization: Aanpassen
   Manage Profile Subscriptions: Profielabonnementen beheren

@@ -35,9 +35,7 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
     await page.locator('.profileTrigger').waitFor()
     const tutorial = page.locator('.tutorialOverlay')
     if (await tutorial.isVisible()) {
-      const skipTutorial = tutorial.getByRole('button', { name: 'Skip', exact: true })
-      if (await skipTutorial.isVisible()) await skipTutorial.click()
-      else await tutorial.locator('.tutorialActions').getByRole('button').last().click()
+      await tutorial.locator('.tutorialSkip button').click()
       await expect(tutorial).toBeHidden()
     }
     settings = await page.evaluate(() => {

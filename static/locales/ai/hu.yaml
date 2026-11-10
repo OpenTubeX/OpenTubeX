@@ -1502,7 +1502,15 @@ Tutorial:
   Finish: Befejezés
   Welcome:
     Title: Üdvözli az OpenTubeX
-    Description: Ezekkel az alapvető vezérlőkkel gyorsan kiismerheti az alkalmazást.
+    Description: Kezdjen tiszta lappal, vagy hozza át feliratkozásait, előzményeit és lejátszási listáit egy másik alkalmazásból vagy biztonsági mentésből.
+    Start Fresh: Kezdés tiszta lappal
+    Import Data: Adatok importálása
+  Preferences:
+    Title: Szabja személyre
+    Description: Válassza ki a témát, a kezdőlapot és a régiót. Ezeket és sok mást bármikor módosíthat a Beállításokban.
+  Playback:
+    Title: Lejátszás és adatvédelem
+    Description: Válassza ki, hogyan játssza le az OpenTubeX a videókat, megjegyezze-e, mit néz meg, és mely közösségi kiegészítőket használjon.
   Navigation:
     Title: A könyvtára mindig kéznél van
     Description: A navigációval elérheti a feliratkozásokat, lejátszási listákat, előzményeket és további tartalmakat.
@@ -1511,16 +1519,11 @@ Tutorial:
     Description: Keressen videókat és csatornákat, vagy illesszen be egy támogatott videó-URL-t közvetlenül a keresőmezőbe.
   Tabs:
     Title: Tartsa nyitva az oldalakat lapokon
-    Description: Nyisson meg egyszerre több oldalt anélkül, hogy elveszítené, hol tartott. Válassza ki, hol legyenek a lapok az elrendezésben.
-  Quick Settings:
-    Title: Szabja személyre
-    Description: Válasszon témát és alapértelmezett videóminőséget. Ezeket és más beállításokat bármikor módosíthatja a profilmenüben, a profilok közötti váltáshoz pedig kattintson rá jobb gombbal.
-    Touch Description: Válasszon témát és alapértelmezett videóminőséget. Ezeket és más beállításokat bármikor módosíthatja a profilmenüben, a profilok közötti váltáshoz pedig nyomja meg hosszan.
-  Import Data:
-    Title: Hozza magával az adatait
-    Description: Igény szerint importálhat feliratkozásokat, előzményeket, lejátszási listákat, keresési előzményeket vagy beállításokat egy másik támogatott alkalmazásból vagy biztonsági másolatból.
-    Action: Adatok importálása
-    Not Now: Most nem
+    Description: Nyisson meg egyszerre több oldalt anélkül, hogy elveszítené, hol tartott.
+  Profile Menu:
+    Title: Beállítások és profilok
+    Description: A profilmenüben megtalálja a gyorsbeállításokat, a letöltéseket és az összes többi beállítást. Profilváltáshoz kattintson rá a jobb gombbal.
+    Touch Description: A profilmenüben megtalálja a gyorsbeállításokat, a letöltéseket és az összes többi beállítást. Profilváltáshoz érintse meg és tartsa lenyomva.
 About:
   Project: Projekt
   Community: Közösség
@@ -1531,6 +1534,7 @@ About:
   Commit: Commit
   Matrix: Matrix
   Email: E-mail
+  Show tutorial: Bemutató megjelenítése
 Profile:
   Customization: Testreszabás
   Manage Profile Subscriptions: Profil feliratkozásainak kezelése

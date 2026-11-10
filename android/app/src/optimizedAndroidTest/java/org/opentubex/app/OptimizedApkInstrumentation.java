@@ -231,7 +231,7 @@ public class OptimizedApkInstrumentation extends Instrumentation {
         check(focused.get(), "Main activity regains focus after the camera check");
         await(web, "!!document.querySelector('.app') && document.visibilityState === 'visible'");
         // A fresh install may show the tutorial over the real player controls.
-        evaluate(web, "document.querySelector('.tutorialOverlay .tutorialActions button')?.click()");
+        evaluate(web, "document.querySelector('.tutorialOverlay .tutorialSkip button')?.click()");
         // Never persist this synthetic route for a later launch. Instrumentation
         // can end the process before WebView flushes the cleanup navigation.
         // Keep this narrow guard until the test process exits.

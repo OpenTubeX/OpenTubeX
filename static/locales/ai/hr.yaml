@@ -1515,7 +1515,15 @@ Tutorial:
   Finish: Završi
   Welcome:
     Title: Dobro došli u OpenTubeX
-    Description: Ove će vam kontrole pomoći da se lakše snađete.
+    Description: Počnite ispočetka ili prenesite svoje pretplate, povijest i popise za reprodukciju iz druge aplikacije ili sigurnosne kopije.
+    Start Fresh: Počni ispočetka
+    Import Data: Uvezi podatke
+  Preferences:
+    Title: Prilagodite aplikaciju sebi
+    Description: Odaberite temu, početnu stranicu i regiju. To i još mnogo toga možete bilo kada promijeniti u postavkama.
+  Playback:
+    Title: Reprodukcija i privatnost
+    Description: Odaberite kako se reproduciraju videozapisi, pamti li OpenTubeX što gledate te koje dodatke zajednice koristi.
   Navigation:
     Title: Vaša je zbirka uvijek nadohvat ruke
     Description: Pomoću navigacije pristupite pretplatama, popisima za reprodukciju, povijesti i ostalom sadržaju.
@@ -1524,16 +1532,11 @@ Tutorial:
     Description: Pronađite videozapise i kanale ili zalijepite podržani URL videozapisa izravno u polje za pretraživanje.
   Tabs:
     Title: Držite stranice otvorene u karticama
-    Description: Otvorite više stranica odjednom bez gubitka mjesta na kojem ste stali. Odaberite položaj kartica koji najbolje odgovara vašem rasporedu.
-  Quick Settings:
-    Title: Prilagodite aplikaciju sebi
-    Description: Odaberite temu i zadanu kvalitetu videozapisa. Te i druge postavke možete u bilo kojem trenutku promijeniti u izborniku profila ili ga kliknuti desnom tipkom miša da biste promijenili profil.
-    Touch Description: Odaberite temu i zadanu kvalitetu videozapisa. Te i druge postavke možete u bilo kojem trenutku promijeniti u izborniku profila ili ga dugo pritisnuti da biste promijenili profil.
-  Import Data:
-    Title: Prenesite svoje podatke
-    Description: Po želji uvezite pretplate, povijest, popise za reprodukciju, povijest pretraživanja ili postavke iz druge podržane aplikacije ili sigurnosne kopije.
-    Action: Uvezi podatke
-    Not Now: Ne sada
+    Description: Otvorite više stranica odjednom bez gubljenja mjesta na kojem ste stali.
+  Profile Menu:
+    Title: Postavke i profili
+    Description: Izbornik profila sadrži brze postavke, preuzimanja i sve ostale postavke. Desnom tipkom miša kliknite na njega za promjenu profila.
+    Touch Description: Izbornik profila sadrži brze postavke, preuzimanja i sve ostale postavke. Dodirnite ga i zadržite za promjenu profila.
 About:
   Project: Projekt
   Community: Zajednica
@@ -1544,6 +1547,7 @@ About:
   Commit: Commit
   Matrix: Matrix
   Email: E-pošta
+  Show tutorial: Prikaži vodič
 Profile:
   Customization: Prilagodba
   Manage Profile Subscriptions: Upravljaj pretplatama profila

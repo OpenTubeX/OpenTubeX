@@ -965,7 +965,15 @@ Tutorial:
   Finish: Zakończ
   Welcome:
     Title: Witamy w OpenTubeX
-    Description: Poznaj kilka elementów sterujących, które ułatwią rozpoczęcie pracy.
+    Description: Zacznij od zera albo przenieś subskrypcje, historię i playlisty z innej aplikacji lub kopii zapasowej.
+    Start Fresh: Zacznij od zera
+    Import Data: Importuj dane
+  Preferences:
+    Title: Dostosuj aplikację
+    Description: Wybierz motyw, stronę startową i region. Te i inne opcje możesz w każdej chwili zmienić w Ustawieniach.
+  Playback:
+    Title: Odtwarzanie i prywatność
+    Description: Wybierz, jak mają być odtwarzane filmy, czy OpenTubeX ma zapamiętywać, co oglądasz, i z jakich dodatków społeczności ma korzystać.
   Navigation:
     Title: Biblioteka zawsze pod ręką
     Description: Za pomocą nawigacji otworzysz subskrypcje, playlisty, historię i inne sekcje.
@@ -974,16 +982,11 @@ Tutorial:
     Description: Znajdź filmy i kanały albo wklej obsługiwany adres URL filmu bezpośrednio w polu wyszukiwania.
   Tabs:
     Title: Zachowuj otwarte strony na kartach
-    Description: Otwieraj kilka stron jednocześnie, nie tracąc bieżącego miejsca. Wybierz położenie kart najlepiej pasujące do układu.
-  Quick Settings:
-    Title: Dostosuj aplikację
-    Description: Wybierz motyw i domyślną jakość filmu. Te i inne ustawienia możesz później zmienić w menu profilu. Kliknij je prawym przyciskiem, aby przełączyć profil.
-    Touch Description: Wybierz motyw i domyślną jakość filmu. Te i inne ustawienia możesz później zmienić w menu profilu. Przytrzymaj je, aby przełączyć profil.
-  Import Data:
-    Title: Przenieś swoje dane
-    Description: Możesz zaimportować subskrypcje, historię, playlisty, historię wyszukiwania lub ustawienia z innej obsługiwanej aplikacji albo kopii zapasowej.
-    Action: Importuj dane
-    Not Now: Nie teraz
+    Description: Otwieraj kilka stron naraz bez utraty bieżącego miejsca.
+  Profile Menu:
+    Title: Ustawienia i profile
+    Description: Menu profilu zawiera szybkie ustawienia, pobieranie i wszystkie pozostałe ustawienia. Kliknij je prawym przyciskiem myszy, aby przełączyć profil.
+    Touch Description: Menu profilu zawiera szybkie ustawienia, pobieranie i wszystkie pozostałe ustawienia. Naciśnij i przytrzymaj je, aby przełączyć profil.
 About:
   Project: Projekt
   Community: Społeczność
@@ -993,6 +996,7 @@ About:
   Changelog: Lista zmian
   Commit: Commit
   Matrix: Matrix
+  Show tutorial: Pokaż samouczek
 Profile:
   Customization: Dostosowanie
   Manage Profile Subscriptions: Zarządzaj subskrypcjami profilu

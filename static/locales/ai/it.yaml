@@ -1502,7 +1502,15 @@ Tutorial:
   Finish: Fine
   Welcome:
     Title: Ti diamo il benvenuto in OpenTubeX
-    Description: Ecco i controlli principali per iniziare.
+    Description: Inizia da zero o porta le tue iscrizioni, la cronologia e le playlist da un'altra app o da un backup.
+    Start Fresh: Inizia da zero
+    Import Data: Importa dati
+  Preferences:
+    Title: Personalizza l'app
+    Description: Scegli il tema, la pagina iniziale e la regione. Puoi modificare queste e altre opzioni in qualsiasi momento nelle Impostazioni.
+  Playback:
+    Title: Riproduzione e privacy
+    Description: Scegli come vengono riprodotti i video, se OpenTubeX ricorda ciò che guardi e quali componenti aggiuntivi della community utilizza.
   Navigation:
     Title: La tua raccolta è sempre a portata di mano
     Description: Usa la navigazione per accedere a iscrizioni, playlist, cronologia e altro.
@@ -1511,16 +1519,11 @@ Tutorial:
     Description: Trova video e canali oppure incolla direttamente nel campo di ricerca l'URL di un video supportato.
   Tabs:
     Title: Mantieni le pagine aperte nelle schede
-    Description: Apri più pagine contemporaneamente senza perdere il punto in cui eri. Scegli la posizione delle schede più adatta alla disposizione.
-  Quick Settings:
-    Title: Personalizza l'app
-    Description: Scegli un tema e la qualità video predefinita. Puoi modificare queste e altre preferenze in qualsiasi momento dal menu del profilo oppure fare clic destro per cambiare profilo.
-    Touch Description: Scegli un tema e la qualità video predefinita. Puoi modificare queste e altre preferenze in qualsiasi momento dal menu del profilo oppure tenerlo premuto per cambiare profilo.
-  Import Data:
-    Title: Porta con te i tuoi dati
-    Description: Puoi importare iscrizioni, cronologia, playlist, cronologia delle ricerche o impostazioni da un'altra app supportata o da un backup.
-    Action: Importa dati
-    Not Now: Non ora
+    Description: Apri più pagine contemporaneamente senza perdere il punto in cui eri.
+  Profile Menu:
+    Title: Impostazioni e profili
+    Description: Il menu del profilo contiene le impostazioni rapide, i download e tutte le altre impostazioni. Fai clic con il tasto destro su di esso per cambiare profilo.
+    Touch Description: Il menu del profilo contiene le impostazioni rapide, i download e tutte le altre impostazioni. Tienilo premuto per cambiare profilo.
 About:
   Project: Progetto
   Community: Comunità
@@ -1531,6 +1534,7 @@ About:
   Commit: Commit
   Matrix: Matrix
   Email: Email
+  Show tutorial: Mostra il tutorial
 Profile:
   Customization: Personalizzazione
   Manage Profile Subscriptions: Gestisci le iscrizioni del profilo

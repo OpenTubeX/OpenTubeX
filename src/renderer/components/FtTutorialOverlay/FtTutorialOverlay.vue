@@ -15,15 +15,22 @@
       <FtCard
         ref="cardRef"
         class="tutorialCard"
-        :class="{ tutorialImportCard: step.showImportAction }"
+        :class="{ tutorialWideCard: step.id === 'preferences' }"
         :style="cardStyle"
         role="dialog"
         aria-modal="true"
         :aria-labelledby="titleId"
         :aria-describedby="descriptionId"
       >
+        <FtIconButton
+          class="tutorialSkip"
+          :title="t('Tutorial.Skip')"
+          :icon="['fas', 'xmark']"
+          :padding="8"
+          :size="18"
+          @click="finishTutorial"
+        />
         <div
-          v-if="steps.length > 1"
           class="tutorialProgress"
           aria-hidden="true"
         >
@@ -58,30 +65,45 @@
             <p :id="descriptionId">
               {{ step.description }}
             </p>
-            <FtSelect
-              v-if="step.showTabLayoutSelect"
-              class="tutorialTabLayoutSelect"
-              :placeholder="t('Settings.Theme Settings.Tab Layout.Tab Layout')"
-              :value="tabBarPosition"
-              setting-key="tabBarPosition"
-              :select-names="tabBarPositionNames"
-              :select-values="TAB_BAR_POSITIONS"
-              :icon="['fac', 'horizontal-tabs']"
-              @change="updateTabBarPosition"
-            />
             <div
-              v-if="step.showAppearanceSelects"
-              class="tutorialSelects"
+              v-if="step.id === 'preferences'"
+              class="tutorialPreferences"
             >
-              <FtSelect
-                :placeholder="t('Settings.Theme Settings.Base Theme.Base Theme')"
-                :value="baseTheme"
-                setting-key="baseTheme"
-                :select-names="baseThemeNames"
-                :select-values="BUILTIN_BASE_THEME_VALUES"
+              <ThemeModePicker />
+              <FtButton
+                class="tutorialMoreThemes"
+                :label="t('Settings.Theme Settings.Theme and Colors')"
                 :icon="['fas', 'palette']"
-                @change="updateBaseTheme"
+                :text-color="null"
+                :background-color="null"
+                @click="openSettings({ section: 'appearance', subpage: 'theme' }, stepIndex)"
               />
+              <div class="tutorialSelectRow">
+                <FtSelect
+                  :placeholder="t('Settings.General Settings.Default Landing Page')"
+                  :value="landingPage"
+                  setting-key="landingPage"
+                  :select-names="landingPageNames"
+                  :select-values="landingPageValues"
+                  :icon="['fas', 'location-dot']"
+                  @change="updateSetting('LandingPage', $event)"
+                />
+                <FtSelect
+                  v-if="regionValues.length > 0"
+                  :placeholder="t('Settings.General Settings.Region for Trending')"
+                  :value="region"
+                  setting-key="region"
+                  :select-names="regionNames"
+                  :select-values="regionValues"
+                  :icon="['fas', 'globe']"
+                  @change="updateSetting('Region', $event)"
+                />
+              </div>
+            </div>
+            <div
+              v-if="step.id === 'playback'"
+              class="tutorialControls"
+            >
               <FtSelect
                 :placeholder="t('Settings.Player Settings.Default Quality.Default Quality')"
                 :value="defaultQuality"
@@ -89,63 +111,66 @@
                 :select-names="qualityNames"
                 :select-values="qualityValues"
                 :icon="['fas', 'photo-film']"
-                @change="updateDefaultQuality"
+                @change="updateSetting('DefaultQuality', $event)"
+              />
+              <div class="tutorialSwitches">
+                <FtToggleSwitch
+                  v-for="toggle in playbackToggles"
+                  :key="toggle.settingKey"
+                  :label="toggle.label"
+                  :tooltip="toggle.tooltip"
+                  :default-value="store.getters[`get${toggle.action}`]"
+                  :disabled="toggle.disabled"
+                  :setting-key="toggle.settingKey"
+                  compact
+                  @change="updateSetting(toggle.action, $event)"
+                />
+              </div>
+            </div>
+            <div
+              v-if="step.id === 'tabs'"
+              class="tutorialControls"
+            >
+              <FtSelect
+                :placeholder="t('Settings.Theme Settings.Tab Layout.Tab Layout')"
+                :value="tabBarPosition"
+                setting-key="tabBarPosition"
+                :select-names="tabBarPositionNames"
+                :select-values="TAB_BAR_POSITIONS"
+                :icon="['fac', 'horizontal-tabs']"
+                @change="updateTabBarPosition"
               />
             </div>
             <div
-              class="tutorialActions"
-              :class="{ tutorialImportActions: step.showImportAction }"
+              v-if="step.id === 'welcome'"
+              class="tutorialActions tutorialChoices"
             >
               <FtButton
-                v-if="steps.length > 1 && stepIndex === 0"
-                :label="t('Tutorial.Skip')"
-                :icon="['fas', 'step-forward']"
-                :text-color="null"
-                :background-color="null"
-                @click="finishTutorial"
+                ref="primaryButtonRef"
+                :label="t('Tutorial.Welcome.Start Fresh')"
+                :icon="['fas', 'arrow-right']"
+                @click="advanceTutorial"
               />
               <FtButton
-                v-if="steps.length > 1 && stepIndex > 0"
-                class="tutorialCompactAction"
-                :aria-label="t('Back')"
+                :label="t('Tutorial.Welcome.Import Data')"
+                :text-color="null"
+                :background-color="null"
+                :icon="['fas', 'database']"
+                @click="openSettings('data', stepIndex + 1)"
+              />
+            </div>
+            <div
+              v-else
+              class="tutorialActions"
+            >
+              <FtButton
+                :label="t('Back')"
+                :icon="['fas', 'arrow-left']"
                 :text-color="null"
                 :background-color="null"
                 @click="retreatTutorial"
-              >
-                <FtIcon
-                  :icon="['fas', 'arrow-left']"
-                  aria-hidden="true"
-                />
-                <span class="tutorialActionText">{{ t('Back') }}</span>
-              </FtButton>
+              />
               <FtButton
-                v-if="step.showImportAction"
-                class="tutorialCompactAction"
-                :aria-label="t('Tutorial.Import Data.Not Now')"
-                :text-color="null"
-                :background-color="null"
-                @click="finishTutorial"
-              >
-                <FtIcon
-                  :icon="['fas', 'xmark']"
-                  aria-hidden="true"
-                />
-                <span class="tutorialActionText">{{ t('Tutorial.Import Data.Not Now') }}</span>
-              </FtButton>
-              <FtButton
-                v-if="step.showImportAction"
-                class="tutorialPrimaryAction"
-                :aria-label="t('Tutorial.Import Data.Action')"
-                @click="openDataImport"
-              >
-                <FtIcon
-                  :icon="['fas', 'database']"
-                  aria-hidden="true"
-                />
-                <span class="tutorialActionText">{{ t('Tutorial.Import Data.Action') }}</span>
-              </FtButton>
-              <FtButton
-                v-else
                 ref="primaryButtonRef"
                 :label="primaryButtonLabel"
                 :icon="isLastStep ? ['fas', 'check'] : ['fas', 'arrow-right']"
@@ -166,17 +191,25 @@ import { useI18n } from 'vue-i18n'
 
 import store from '../../store/index'
 import { normalizeTabBarPosition, TAB_BAR_POSITIONS } from '../../constants/tabBarPosition'
-import { BUILTIN_BASE_THEME_VALUES } from '../../../constants'
 import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
-import { useBaseThemeNames } from '../../composables/baseThemes'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { useLandingPageOptions } from '../../composables/useLandingPageOptions'
 
 import FtButton from '../FtButton/FtButton.vue'
 import FtCard from '../ft-card/ft-card.vue'
+import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
+import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
+import ThemeModePicker from '../Settings/Appearance/ThemeModePicker.vue'
 import { lockBodyScroll, unlockBodyScroll } from '../FtPrompt/scrollLock'
 
-const emit = defineEmits(['close'])
+const props = defineProps({
+  initialStep: { type: Number, default: 0 }
+})
+
+const emit = defineEmits(['close', 'open-settings'])
+
+const IS_ELECTRON = process.env.IS_ELECTRON
 
 const { t } = useI18n()
 const titleId = useId()
@@ -187,7 +220,7 @@ const primaryButtonRef = useTemplateRef('primaryButtonRef')
 const titleRef = useTemplateRef('titleRef')
 const scrollRef = useTemplateRef('scrollRef')
 const contentRef = useTemplateRef('contentRef')
-const stepIndex = ref(0)
+const stepIndex = ref(props.initialStep)
 const targetRect = ref(null)
 const cardStyle = ref({})
 let updateFrame = null
@@ -200,45 +233,55 @@ const RESOLUTION_VALUES = ['2160', '1440', '1080', '720', '480', '360', '240', '
 
 const steps = computed(() => [
   {
+    id: 'welcome',
     icon: ['fas', 'play'],
     title: t('Tutorial.Welcome.Title'),
     description: t('Tutorial.Welcome.Description'),
     target: null
   },
   {
+    id: 'preferences',
+    icon: ['fas', 'palette'],
+    title: t('Tutorial.Preferences.Title'),
+    description: t('Tutorial.Preferences.Description'),
+    target: null
+  },
+  {
+    id: 'playback',
+    icon: ['fas', 'circle-play'],
+    title: t('Tutorial.Playback.Title'),
+    description: t('Tutorial.Playback.Description'),
+    target: null
+  },
+  {
+    id: 'navigation',
     icon: ['fas', 'rss'],
     title: t('Tutorial.Navigation.Title'),
     description: t('Tutorial.Navigation.Description'),
     target: '[data-tutorial="navigation"]'
   },
   {
+    id: 'search',
     icon: ['fas', 'search'],
     title: t('Tutorial.Search.Title'),
     description: t('Tutorial.Search.Description'),
     target: '.searchContainer[data-tutorial="search"] .ft-input, .navSearchButton[data-tutorial="search"]'
   },
-  ...(process.env.IS_ELECTRON
+  ...(IS_ELECTRON
     ? [{
+        id: 'tabs',
         icon: ['fas', 'clone'],
         title: t('Tutorial.Tabs.Title'),
         description: t('Tutorial.Tabs.Description'),
-        target: '[data-tutorial="tabs"]',
-        showTabLayoutSelect: true
+        target: '[data-tutorial="tabs"]'
       }]
     : []),
   {
+    id: 'profile',
     icon: ['fas', 'sliders-h'],
-    title: t('Tutorial.Quick Settings.Title'),
-    description: process.env.IS_CAPACITOR ? t('Tutorial.Quick Settings.Touch Description') : t('Tutorial.Quick Settings.Description'),
-    target: '[data-tutorial="quick-settings"]',
-    showAppearanceSelects: true
-  },
-  {
-    icon: ['fas', 'database'],
-    title: t('Tutorial.Import Data.Title'),
-    description: t('Tutorial.Import Data.Description'),
-    target: null,
-    showImportAction: true
+    title: t('Tutorial.Profile Menu.Title'),
+    description: process.env.IS_CAPACITOR ? t('Tutorial.Profile Menu.Touch Description') : t('Tutorial.Profile Menu.Description'),
+    target: '[data-tutorial="quick-settings"]'
   }
 ])
 
@@ -254,8 +297,6 @@ const tabBarPositionNames = computed(() => [
   t('Settings.Theme Settings.Tab Layout.Vertical Right')
 ])
 const tabBarPosition = computed(() => normalizeTabBarPosition(store.getters.getTabBarPosition))
-const baseThemeNames = useBaseThemeNames()
-const baseTheme = computed(() => store.getters.getBaseTheme)
 const autoQualityAvailable = computed(() => playbackEngineSupportsAutoQuality(store.getters.getVideoPlaybackEngine))
 const qualityValues = computed(() => autoQualityAvailable.value ? [...RESOLUTION_VALUES, 'auto'] : RESOLUTION_VALUES)
 const qualityNames = computed(() => [
@@ -269,11 +310,43 @@ const qualityNames = computed(() => [
   t('Settings.Player Settings.Default Quality.144p'),
   ...(autoQualityAvailable.value ? [t('Settings.Player Settings.Default Quality.Auto')] : [])
 ])
+const { landingPageNames, landingPageValues } = useLandingPageOptions()
+const landingPage = computed(() => store.getters.getLandingPage)
+const regionNames = computed(() => store.getters.getRegionNames)
+const regionValues = computed(() => store.getters.getRegionValues)
+const region = computed(() => store.getters.getRegion)
+
+// Each action names both the store getter (get<Action>) and its update action (update<Action>)
+const playbackToggles = computed(() => [
+  {
+    settingKey: 'playNextVideo',
+    action: 'PlayNextVideo',
+    label: t('Settings.Player Settings.Play Next Video'),
+    disabled: store.getters.getHideRecommendedVideos
+  },
+  { settingKey: 'enableSubtitlesByDefault', action: 'EnableSubtitlesByDefault', label: t('Settings.Player Settings.Turn on Subtitles by Default') },
+  { settingKey: 'rememberHistory', action: 'RememberHistory', label: t('Settings.Privacy Settings.Remember History') },
+  { settingKey: 'useSponsorBlock', action: 'UseSponsorBlock', label: t('Settings.SponsorBlock Settings.Enable SponsorBlock') },
+  {
+    settingKey: 'useDeArrowTitles',
+    action: 'UseDeArrowTitles',
+    label: t('Settings.SponsorBlock Settings.UseDeArrowTitles'),
+    tooltip: t('Tooltips.SponsorBlock Settings.UseDeArrowTitles')
+  },
+  {
+    settingKey: 'useDeArrowThumbnails',
+    action: 'UseDeArrowThumbnails',
+    label: t('Settings.SponsorBlock Settings.UseDeArrowThumbnails'),
+    tooltip: t('Tooltips.SponsorBlock Settings.UseDeArrowThumbnails')
+  }
+].map(toggle => ({ tooltip: '', disabled: false, ...toggle })))
+
 const defaultQuality = computed(() => {
   const value = store.getters.getDefaultQuality
   return value === 'auto' && !autoQualityAvailable.value ? AUTO_QUALITY_FALLBACK : value
 })
 
+// The tabs step highlights the tab bar, which moves when its layout changes
 watch(tabBarPosition, schedulePositionUpdate, { flush: 'post' })
 
 const highlightStyle = computed(() => {
@@ -446,9 +519,13 @@ function handleDocumentKeydown(event) {
 function handleKeydown(event) {
   event.stopPropagation()
 
-  if (event.key !== 'Tab') return
+  // Select pickers open inside the card and handle their own Tab
+  if (event.key !== 'Tab' || event.target.closest?.('.mobileSheet, .selectDropdown')) return
 
-  const buttons = Array.from(cardRef.value?.$el.querySelectorAll('button:not(:disabled)') ?? [])
+  // A radio group is one stop at its checked radio; arrow keys move within it.
+  const buttons = Array.from(cardRef.value?.$el.querySelectorAll(
+    'button:not(:disabled), input[type="radio"]:checked, input[type="checkbox"]:not(:disabled)'
+  ) ?? [])
   if (buttons.length === 0) return
 
   const currentIndex = buttons.indexOf(document.activeElement)
@@ -465,19 +542,13 @@ async function updateTabBarPosition(value) {
   await store.dispatch('updateTabBarPosition', value)
 }
 
-function updateBaseTheme(value) {
-  store.dispatch('updateBaseTheme', value)
+function updateSetting(action, value) {
+  store.dispatch(`update${action}`, value)
 }
 
-function updateDefaultQuality(value) {
-  store.dispatch('updateDefaultQuality', value)
-}
-
-async function openDataImport() {
-  finishTutorial()
-  await nextTick()
-  store.commit('setSettingsWindowSection', 'data')
-  store.dispatch('showSettingsWindow')
+/** Opens a settings section, then the tutorial continues at resumeStep once the settings window closes */
+function openSettings(section, resumeStep) {
+  emit('open-settings', section, resumeStep)
 }
 
 async function advanceTutorial() {

@@ -174,7 +174,7 @@ public class SubscriptionRefreshUiTest {
                                 { id: 'UC-refresh-ui-test', name: 'Refresh test channel', thumbnail: '' }]
                         });
                         await store.dispatch('updateActiveProfile', 'allChannels');
-                        document.querySelector('.tutorialActions button')?.click();
+                        document.querySelector('.tutorialSkip button')?.click();
                         await document.querySelector('#app').__vue_app__.config.globalProperties.$router.push('/subscriptions?tab=videos');
                         window.__refreshUiReady = true;
                     })();

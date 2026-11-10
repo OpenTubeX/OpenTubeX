@@ -1502,7 +1502,15 @@ Tutorial:
   Finish: "Echuiñ"
   Welcome:
     Title: "Degemer mat e OpenTubeX"
-    Description: "Setu un nebeud reolerezhioù evit kregiñ gant an arload."
+    Description: Kregit a-nevez, pe degasit ho koumanantoù, ho roll istor hag ho rolloù-videoioù eus un arload all pe eus un eilenn gwarez.
+    Start Fresh: Kregiñ a-nevez
+    Import Data: "Enporzhiañ roadennoù"
+  Preferences:
+    Title: "Personelait an arload"
+    Description: Dibabit ho tem, ho pajenn degemer hag ho rannvro. Gallout a rit cheñch an dra-se ha kalz muioc'h en arventennoù forzh pegoulz.
+  Playback:
+    Title: Lenn ha prevezded
+    Description: Dibabit penaos e vez lennet ar videoioù, hag-eñ e talc'h OpenTubeX soñj eus ar pezh a sellit outañ, ha peseurt askouezhioù ar gumuniezh a implij.
   Navigation:
     Title: "Ho levraoueg zo atav tost"
     Description: "Implijit ar merdeiñ evit mont d'ar c'houmanantoù, d'ar rolloù-videoioù, d'an istor ha d'ar peurrest."
@@ -1511,16 +1519,11 @@ Tutorial:
     Description: "Kavit videoioù ha chadennoù, pe begit URL ur video skoret er vaezienn glask."
   Tabs:
     Title: "Derc'hel pajennoù digor en ivinelloù"
-    Description: "Digerit meur a bajenn war un dro hep koll ho lec'h. Dibabit al lec'h gwellañ evit an ivinelloù en hoc'h aozadur."
-  Quick Settings:
-    Title: "Personelait an arload"
-    Description: "Dibabit un neuz hag ur berzhded video dre ziouer. Gallout a rit kemmañ ar gwellvezioù-mañ hag ar re all eus lañser ho profil, pe klikañ a-zehou warnañ evit cheñch profil."
-    Touch Description: Dibabit un neuz hag ur berzhded video dre ziouer. Gallout a rit kemmañ ar gwellvezioù-mañ hag ar re all eus lañser ho profil, pe pouezañ hir warnañ evit cheñch profil.
-  Import Data:
-    Title: "Enporzhiañ ho roadennoù"
-    Description: "Gallout a rit enporzhiañ koumanantoù, istor, rolloù-videoioù, istor enklask pe arventennoù eus un arload skoret all pe un eiladenn-gwarediñ."
-    Action: "Enporzhiañ roadennoù"
-    Not Now: "Diwezhatoc'h"
+    Description: Digorit meur a bajenn war un dro hep koll ho lec’h.
+  Profile Menu:
+    Title: Arventennoù ha profiloù
+    Description: E lañser ho profil e kavit an arventennoù prim, ar pellgargadennoù hag an holl arventennoù all. Klikit a-zehou warnañ evit cheñch profil.
+    Touch Description: E lañser ho profil e kavit an arventennoù prim, ar pellgargadennoù hag an holl arventennoù all. Pouezit ha dalc’hit warnañ evit cheñch profil.
 About:
   Project: Raktres
   Community: Kumuniezh
@@ -1531,6 +1534,7 @@ About:
   Commit: "Engouestl"
   Matrix: Matrix
   Email: "Postel"
+  Show tutorial: Diskouez ar c’helenn
 Profile:
   Customization: Personelaat
   Manage Profile Subscriptions: Merañ koumanantoù ar profil

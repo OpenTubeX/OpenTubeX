@@ -23,8 +23,8 @@ final class TutorialTestHelper {
     static void dismissIfPending(WebView view) throws Exception {
         await(view, "!!document.querySelector('.app')", 60000);
         await(view, "localStorage.getItem('opentubex.tutorial.audience') !== 'new' || " +
-            "!!document.querySelector('.tutorialActions button')", 15000);
-        evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
+            "!!document.querySelector('.tutorialSkip button')", 15000);
+        evaluate(view, "document.querySelector('.tutorialSkip button')?.click()");
         await(view, "!document.querySelector('.tutorialOverlay')", 15000);
     }
 

@@ -2216,7 +2216,15 @@ Tutorial:
   Finish: Finish
   Welcome:
     Title: Welcome to OpenTubeX
-    Description: Here are the few controls that will help you feel at home.
+    Description: Start fresh, or bring your subscriptions, history, and playlists from another app or a backup.
+    Start Fresh: Start fresh
+    Import Data: Import data
+  Preferences:
+    Title: Make it yours
+    Description: Choose your theme, start page, and region. You can change these and more in Settings at any time.
+  Playback:
+    Title: Playback and privacy
+    Description: Choose how videos play, whether OpenTubeX remembers what you watch, and which community add-ons it uses.
   Navigation:
     Title: Your library is always nearby
     Description: Use the navigation to reach subscriptions, playlists, history, and more.
@@ -2225,16 +2233,11 @@ Tutorial:
     Description: Find videos and channels, or paste a supported video URL directly into the search field.
   Tabs:
     Title: Keep pages open in tabs
-    Description: Open several pages at once without losing your place. Choose where tabs fit best in your layout.
-  Quick Settings:
-    Title: Make it yours
-    Description: Choose a theme and default video quality. Change these and other preferences from your profile menu at any time, or right-click it to switch profiles.
-    Touch Description: Choose a theme and default video quality. Change these and other preferences from your profile menu at any time, or tap and hold it to switch profiles.
-  Import Data:
-    Title: Bring your data with you
-    Description: Optionally import subscriptions, history, playlists, search history, or settings from another supported app or backup.
-    Action: Import data
-    Not Now: Not now
+    Description: Open several pages at once without losing your place.
+  Profile Menu:
+    Title: Settings and profiles
+    Description: Your profile menu holds quick settings, downloads, and all other settings. Right-click it to switch profiles.
+    Touch Description: Your profile menu holds quick settings, downloads, and all other settings. Tap and hold it to switch profiles.
 About:
   #On About page
   About: About
@@ -2256,6 +2259,7 @@ About:
   Discussions: Discussions
   Matrix: Matrix
   Report a problem: Report a problem
+  Show tutorial: Show tutorial
   GitHub issues: GitHub issues
   Please check for duplicates before posting: Please check for duplicates before posting
   Website: Website

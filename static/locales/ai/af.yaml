@@ -1719,7 +1719,15 @@ Tutorial:
   Finish: Voltooi
   Welcome:
     Title: Welkom by OpenTubeX
-    Description: Hier is die paar kontroles wat u sal help om tuis te voel.
+    Description: Begin van voor af, of bring u intekeninge, geskiedenis en afspeellyste van ’n ander toepassing of ’n rugsteun saam.
+    Start Fresh: Begin van voor af
+    Import Data: Voer data in
+  Preferences:
+    Title: Maak dit u eie
+    Description: Kies u tema, beginblad en streek. U kan dit en meer enige tyd in Instellings verander.
+  Playback:
+    Title: Afspeel en privaatheid
+    Description: Kies hoe video’s speel, of OpenTubeX onthou wat u kyk, en watter gemeenskapsbyvoegings dit gebruik.
   Navigation:
     Title: U biblioteek is altyd naby
     Description: Gebruik die navigasie om intekeninge, afspeellyste, geskiedenis en meer te bereik.
@@ -1728,16 +1736,11 @@ Tutorial:
     Description: Vind video’s en kanale, of plak ’n ondersteunde video-URL direk in die soekveld.
   Tabs:
     Title: Hou blaaie oop in oortjies
-    Description: Maak verskeie blaaie gelyktydig oop sonder om u plek te verloor. Kies waar oortjies die beste in u uitleg pas.
-  Quick Settings:
-    Title: Maak dit u eie
-    Description: Kies ’n tema en verstekvideokwaliteit. Verander hierdie en ander voorkeure enige tyd vanuit u profielkieslys, of klik regs daarop om profiele te wissel.
-    Touch Description: Kies ’n tema en verstekvideokwaliteit. Verander hierdie en ander voorkeure enige tyd vanuit u profielkieslys, of druk en hou dit om profiele te wissel.
-  Import Data:
-    Title: Bring u data saam
-    Description: Voer opsioneel intekeninge, geskiedenis, afspeellyste, soekgeskiedenis of instellings in vanaf ’n ander ondersteunde toep of rugsteun.
-    Action: Voer data in
-    Not Now: Nie nou nie
+    Description: Maak verskeie blaaie gelyktydig oop sonder om u plek te verloor.
+  Profile Menu:
+    Title: Instellings en profiele
+    Description: U profielkieslys bevat vinnige instellings, aflaaie en alle ander instellings. Regskliek daarop om van profiel te wissel.
+    Touch Description: U profielkieslys bevat vinnige instellings, aflaaie en alle ander instellings. Tik en hou daarop om van profiel te wissel.
 About:
   Project: Projek
   Community: Gemeenskap
@@ -1751,6 +1754,7 @@ About:
   Email: E-pos
   Please read the {roomRulesLink}: Lees asseblief die {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX word moontlik gemaak deur {creditsPageLink}
+  Show tutorial: Wys tutoriaal
 Profile:
   Customization: Aanpassing
   Manage Profile Subscriptions: Bestuur profielintekeninge

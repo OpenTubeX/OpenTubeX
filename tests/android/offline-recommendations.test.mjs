@@ -19,7 +19,7 @@ test('Android swaps cached recommendations for saved thumbnails on disconnect an
     page = browser.contexts()[0].pages()[0]
     await page.locator('.profileTrigger').waitFor()
     const tutorial = page.locator('.tutorialOverlay')
-    if (await tutorial.isVisible()) await tutorial.locator('.tutorialActions').getByRole('button').last().click()
+    if (await tutorial.isVisible()) await tutorial.locator('.tutorialSkip button').click()
     saved = await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {

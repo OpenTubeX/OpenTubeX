@@ -50,10 +50,22 @@
           >
             <span
               v-for="item in line"
-              :key="item.href"
+              :key="item.href ?? item.label"
               class="linkItem"
             >
+              <button
+                v-if="item.action"
+                type="button"
+                class="link linkButton"
+                @click="item.action"
+              >
+                <FtIcon
+                  :icon="item.icon"
+                  class="linkIcon"
+                />{{ item.label }}
+              </button>
               <a
+                v-else
                 :href="item.href"
                 :lang="item.lang"
                 class="link"
@@ -89,6 +101,7 @@ import { useI18n } from 'vue-i18n'
 
 import FtLogoFull from '../../components/FtLogoFull/FtLogoFull.vue'
 import { getNightlyCommit } from '../../helpers/versionDisplay.js'
+import store from '../../store/index'
 
 import packageDetails from '../../../../package.json'
 
@@ -107,6 +120,11 @@ const runtimeVersions = process.env.IS_ELECTRON
       { name: 'V8', version: window.ftElectron.runtimeVersions.v8 }
     ]
   : null
+
+function showTutorial() {
+  store.dispatch('hideSettingsWindow')
+  store.commit('setTutorialStep', 0)
+}
 
 const chunks = computed(() => [
   {
@@ -129,6 +147,7 @@ const chunks = computed(() => [
         { icon: ['fas', 'book-open'], label: t('About.Documentation'), href: 'https://opentubex.org/docs/' },
         { icon: ['fas', 'comment'], label: t('About.Discussions'), href: 'https://github.com/OpenTubeX/OpenTubeX/discussions/' },
       ],
+      [{ icon: ['fas', 'graduation-cap'], label: t('About.Show tutorial'), action: showTutorial }],
       [{ icon: ['fas', 'exclamation-circle'], label: t('About.Report a problem'), href: 'https://github.com/OpenTubeX/OpenTubeX/issues' }],
     ],
     note: t('About.Please check for duplicates before posting'),

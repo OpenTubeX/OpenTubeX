@@ -1502,7 +1502,15 @@ Tutorial:
   Finish: Amaitu
   Welcome:
     Title: Ongi etorri OpenTubeX aplikaziora
-    Description: Kontrol hauek aplikazioa erabiltzen hasten lagunduko dizute.
+    Description: Hasi hutsetik, edo ekarri harpidetzak, historia eta erreprodukzio-zerrendak beste aplikazio batetik edo babeskopia batetik.
+    Start Fresh: Hasi hutsetik
+    Import Data: Inportatu datuak
+  Preferences:
+    Title: Pertsonalizatu aplikazioa
+    Description: Aukeratu gaia, hasierako orria eta eskualdea. Hauek eta beste hainbat ezarpen edonoiz alda ditzakezu Ezarpenak atalean.
+  Playback:
+    Title: Erreprodukzioa eta pribatutasuna
+    Description: Aukeratu nola erreproduzitzen diren bideoak, OpenTubeX-ek ikusten duzuna gogoratzen duen ala ez, eta komunitatearen zein gehigarri erabiltzen dituen.
   Navigation:
     Title: Liburutegia beti eskura
     Description: Erabili nabigazioa harpidetzak, erreprodukzio-zerrendak, historia eta beste atal batzuk irekitzeko.
@@ -1511,16 +1519,11 @@ Tutorial:
     Description: Bilatu bideoak eta kanalak, edo itsatsi bideo bateragarri baten URLa zuzenean bilaketa-eremuan.
   Tabs:
     Title: Mantendu orriak fitxetan irekita
-    Description: Ireki hainbat orri aldi berean uneko kokapena galdu gabe. Aukeratu fitxetarako kokapen egokiena zure diseinuan.
-  Quick Settings:
-    Title: Pertsonalizatu aplikazioa
-    Description: Aukeratu gai bat eta bideo-kalitate lehenetsia. Aldatu hobespen horiek eta beste batzuk profilaren menutik nahi duzunean, edo egin eskuineko klik menuan profila aldatzeko.
-    Touch Description: Aukeratu gai bat eta bideo-kalitate lehenetsia. Aldatu hobespen horiek eta beste batzuk profilaren menutik nahi duzunean, edo eduki menua sakatuta profila aldatzeko.
-  Import Data:
-    Title: Inportatu zure datuak
-    Description: Nahi izanez gero, inportatu harpidetzak, historia, erreprodukzio-zerrendak, bilaketa-historia edo ezarpenak beste aplikazio bateragarri edo babeskopia batetik.
-    Action: Inportatu datuak
-    Not Now: Orain ez
+    Description: Ireki hainbat orri aldi berean, zinen lekua galdu gabe.
+  Profile Menu:
+    Title: Ezarpenak eta profilak
+    Description: Profil-menuan ezarpen azkarrak, deskargak eta gainerako ezarpen guztiak dituzu. Egin klik eskuineko botoiarekin gainean profilez aldatzeko.
+    Touch Description: Profil-menuan ezarpen azkarrak, deskargak eta gainerako ezarpen guztiak dituzu. Sakatu eta eutsi gainean profilez aldatzeko.
 About:
   Project: Proiektua
   Community: Komunitatea
@@ -1531,6 +1534,7 @@ About:
   Commit: Commit-a
   Matrix: Matrix
   Email: Helbide elektronikoa
+  Show tutorial: Erakutsi tutoriala
 Profile:
   Customization: Pertsonalizazioa
   Manage Profile Subscriptions: Kudeatu profileko harpidetzak

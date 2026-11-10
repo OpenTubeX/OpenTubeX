@@ -122,6 +122,8 @@ const state = {
   isKeyboardShortcutPromptShown: false,
   settingsWindowOpen: false,
   settingsWindowMinimized: false,
+  /** Step the tutorial overlay opened at, or null while it is closed */
+  tutorialStep: null,
   settingsWindowMorphing: false,
   settingsWindowReturnView: null,
   settingsWindowView: null,
@@ -224,6 +226,10 @@ const getters = {
 
   getSettingsWindowOpen(state) {
     return state.settingsWindowOpen
+  },
+
+  getTutorialStep(state) {
+    return state.tutorialStep
   },
 
   getSettingsWindowMinimized(state) {
@@ -997,6 +1003,10 @@ const mutations = {
 
   setSettingsWindowOpen (state, payload) {
     state.settingsWindowOpen = payload
+  },
+
+  setTutorialStep (state, payload) {
+    state.tutorialStep = payload
   },
 
   setSettingsWindowMinimized (state, payload) {

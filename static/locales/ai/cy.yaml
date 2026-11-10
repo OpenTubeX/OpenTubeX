@@ -1510,7 +1510,15 @@ Tutorial:
   Finish: Gorffen
   Welcome:
     Title: Croeso i OpenTubeX
-    Description: Dyma'r rheolyddion a fydd yn eich helpu i ddechrau arni.
+    Description: Dechreuwch o'r newydd, neu dewch â'ch tanysgrifiadau, eich hanes a'ch rhestrau chwarae o ap arall neu o gopi wrth gefn.
+    Start Fresh: Dechrau o'r newydd
+    Import Data: Mewnforio data
+  Preferences:
+    Title: Addasu OpenTubeX
+    Description: Dewiswch eich thema, eich tudalen gychwyn a'ch rhanbarth. Gallwch newid y rhain a rhagor yn y Gosodiadau unrhyw bryd.
+  Playback:
+    Title: Chwarae a phreifatrwydd
+    Description: Dewiswch sut mae fideos yn chwarae, a yw OpenTubeX yn cofio'r hyn rydych chi'n ei wylio, a pha ychwanegion cymunedol y mae'n eu defnyddio.
   Navigation:
     Title: Mae eich llyfrgell wrth law bob amser
     Description: Defnyddiwch y llywio i gyrraedd tanysgrifiadau, rhestrau chwarae, hanes a rhagor.
@@ -1519,16 +1527,11 @@ Tutorial:
     Description: Dewch o hyd i fideos a sianeli, neu gludwch URL fideo a gynhelir yn uniongyrchol i'r maes chwilio.
   Tabs:
     Title: Cadw tudalennau ar agor mewn tabiau
-    Description: Agorwch sawl tudalen ar unwaith heb golli eich lle. Dewiswch ble mae tabiau'n gweddu orau i'ch cynllun.
-  Quick Settings:
-    Title: Addasu OpenTubeX
-    Description: Dewiswch thema ac ansawdd fideo rhagosodedig. Gallwch newid y dewisiadau hyn a rhai eraill o ddewislen eich proffil unrhyw bryd, neu dde-glicio'r ddewislen i newid proffil.
-    Touch Description: Dewiswch thema ac ansawdd fideo rhagosodedig. Gallwch newid y dewisiadau hyn a rhai eraill o ddewislen eich proffil unrhyw bryd, neu dapio a dal y ddewislen i newid proffil.
-  Import Data:
-    Title: Mewnforio eich data
-    Description: Gallwch fewnforio tanysgrifiadau, hanes, rhestrau chwarae, hanes chwilio neu osodiadau o ap arall a gynhelir neu o gopi wrth gefn.
-    Action: Mewnforio data
-    Not Now: Nid nawr
+    Description: Agorwch sawl tudalen ar unwaith heb golli'ch lle.
+  Profile Menu:
+    Title: Gosodiadau a phroffiliau
+    Description: Mae dewislen eich proffil yn cynnwys gosodiadau cyflym, llwythi i lawr a phob gosodiad arall. De-gliciwch arni i newid proffil.
+    Touch Description: Mae dewislen eich proffil yn cynnwys gosodiadau cyflym, llwythi i lawr a phob gosodiad arall. Tapiwch a daliwch hi i newid proffil.
 About:
   Project: Prosiect
   Community: Cymuned
@@ -1539,6 +1542,7 @@ About:
   Commit: Cyflwyniad
   Matrix: Matrix
   Email: E-bost
+  Show tutorial: Dangos y tiwtorial
 Profile:
   Customization: Addasu
   Manage Profile Subscriptions: Rheoli tanysgrifiadau proffil

@@ -14,6 +14,11 @@
     min-inline-size: 0;
     max-inline-size: 100%;
     inline-size: calc(100% - 32px);
+
+    // Compact switches have no side margins to leave room for.
+    &.compact {
+      inline-size: 100%;
+    }
   }
 }
 

@@ -1539,7 +1539,15 @@ Tutorial:
   Finish: Fini
   Welcome:
     Title: Bonvenon al OpenTubeX
-    Description: Jen la malmultaj regiloj, kiuj helpos vin senti vin hejme.
+    Description: Komencu de nulo, aŭ alportu viajn abonojn, historion kaj ludlistojn el alia aplikaĵo aŭ sekurkopio.
+    Start Fresh: Komenci de nulo
+    Import Data: Enporti datumojn
+  Preferences:
+    Title: Faru ĝin via
+    Description: Elektu vian etoson, ekan paĝon kaj regionon. Vi povas ŝanĝi tiujn kaj pli en Agordoj iam ajn.
+  Playback:
+    Title: Ludado kaj privateco
+    Description: Elektu, kiel videaĵoj ludiĝas, ĉu OpenTubeX memoru, kion vi spektas, kaj kiujn komunumajn aldonaĵojn ĝi uzu.
   Navigation:
     Title: Via biblioteko ĉiam estas proksime
     Description: Uzu la navigadon por atingi abonojn, ludlistojn, historion kaj pli.
@@ -1548,16 +1556,11 @@ Tutorial:
     Description: Trovu videaĵojn kaj kanalojn, aŭ algluu subtenatan URL de videaĵo rekte en la serĉkampon.
   Tabs:
     Title: Tenu paĝojn malfermitaj en langetoj
-    Description: Malfermu plurajn paĝojn samtempe sen perdi vian lokon. Elektu kie langetoj plej bone taŭgas en via aranĝo.
-  Quick Settings:
-    Title: Faru ĝin via
-    Description: Elektu etoson kaj defaŭltan videokvaliton. Ŝanĝu tiujn kaj aliajn preferojn el via profila menuo iam ajn, aŭ dekstre alklaku ĝin por ŝanĝi profilon.
-    Touch Description: Elektu etoson kaj defaŭltan videokvaliton. Ŝanĝu tiujn kaj aliajn preferojn el via profila menuo iam ajn, aŭ longe tuŝu ĝin por ŝanĝi profilon.
-  Import Data:
-    Title: Kunportu viajn datumojn
-    Description: Laŭvole enportu abonojn, historion, ludlistojn, serĉan historion aŭ agordojn el alia subtenata aplikaĵo aŭ savkopio.
-    Action: Enporti datumojn
-    Not Now: Ne nun
+    Description: Malfermu plurajn paĝojn samtempe sen perdi vian lokon.
+  Profile Menu:
+    Title: Agordoj kaj profiloj
+    Description: Via profila menuo enhavas rapidajn agordojn, elŝutojn kaj ĉiujn aliajn agordojn. Dekstre alklaku ĝin por ŝanĝi profilon.
+    Touch Description: Via profila menuo enhavas rapidajn agordojn, elŝutojn kaj ĉiujn aliajn agordojn. Tuŝu kaj tenu ĝin por ŝanĝi profilon.
 About:
   Project: Projekto
   Community: Komunumo
@@ -1568,6 +1571,7 @@ About:
   Commit: Enmeto
   Matrix: Matrix
   Email: Retpoŝto
+  Show tutorial: Montri gvidilon
 Profile:
   Customization: Personecigo
   Manage Profile Subscriptions: Administri profilajn abonojn
