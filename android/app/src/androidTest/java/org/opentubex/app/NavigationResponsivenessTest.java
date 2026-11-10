@@ -175,7 +175,7 @@ public class NavigationResponsivenessTest {
             if ("true".equals(evaluate(view, script))) return;
             Thread.sleep(100);
         }
-        assertEquals(script + "; page: " + evaluate(view, "JSON.stringify({route: location.hash, text: document.body.innerText.slice(0, 300)})"),
+        assertEquals(script + "; page: " + evaluate(view, "JSON.stringify({route: location.hash, actions: document.querySelector('.headingActions')?.outerHTML.slice(0, 600), text: document.body.innerText.slice(0, 300)})"),
             "true", evaluate(view, script));
     }
 }
