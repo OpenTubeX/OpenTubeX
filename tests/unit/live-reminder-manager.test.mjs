@@ -61,17 +61,25 @@ function reminder(startTimestamp, videoId = VIDEO_ID) {
   }
 }
 
-test('loads future reminders and removes expired reminders', async () => {
-  const future = reminder(5_000)
-  const expired = reminder(500, 'expired1234')
-  const harness = createHarness([future, expired])
+test('loads future reminders, notifies recently missed ones and removes expired ones', async () => {
+  const now = 3 * 60 * 60 * 1000
+  const future = reminder(now + 4_000)
+  const missed = reminder(now - 10 * 60 * 1000, 'missed12345')
+  const expired = reminder(now - 2 * 60 * 60 * 1000, 'expired1234')
+  const harness = createHarness([future, missed, expired])
+  harness.setNow(now)
 
   await harness.manager.initialize()
 
-  assert.deepEqual([...harness.records.keys()], [VIDEO_ID])
-  assert.equal(harness.scheduledTimers.length, 1)
-  assert.equal(harness.scheduledTimers[0].delay, 4_000)
+  assert.deepEqual([...harness.records.keys()].sort(), [VIDEO_ID, 'missed12345'].sort())
+  assert.deepEqual(harness.scheduledTimers.map(timer => timer.delay), [4_000, 0])
   assert.deepEqual(await harness.manager.get(VIDEO_ID), future)
+
+  // A stream that started while the app was closed is announced right away.
+  harness.scheduledTimers[1].callback()
+  await harness.manager.pendingOperation
+  assert.deepEqual(harness.notifications.map(notification => notification.videoId), ['missed12345'])
+  assert.deepEqual([...harness.records.keys()], [VIDEO_ID])
 })
 
 test('rescheduling replaces the timer and persisted timestamp', async () => {

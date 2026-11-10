@@ -1,5 +1,7 @@
 // @ts-check
 const MAX_TIMER_DELAY = 2_147_483_647
+// A stream that started while the app was closed is likely still live.
+const MISSED_REMINDER_GRACE_MS = 60 * 60 * 1000
 
 export class LiveReminderManager {
   constructor({
@@ -29,11 +31,12 @@ export class LiveReminderManager {
         if (
           typeof reminder.videoId !== 'string' ||
           !Number.isFinite(reminder.startTimestamp) ||
-          reminder.startTimestamp <= this.now()
+          reminder.startTimestamp <= this.now() - MISSED_REMINDER_GRACE_MS
         ) {
           await this.datastore.removeAsync({ _id: reminder._id })
         } else {
           this.reminders.set(reminder.videoId, reminder)
+          // A reminder that came due while the app was closed fires right away.
           this.armTimer(reminder)
         }
       }
@@ -120,7 +123,12 @@ export class LiveReminderManager {
         return
       }
 
-      await this.datastore.removeAsync({ _id: reminder._id })
+      try {
+        await this.datastore.removeAsync({ _id: reminder._id })
+      } catch (error) {
+        // Still notify; the next startup removes the expired record.
+        console.error('Failed to remove a due live stream reminder', error)
+      }
       this.reminders.delete(videoId)
       this.onChange(videoId, false)
       this.notify(reminder)
