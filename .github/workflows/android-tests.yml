@@ -112,10 +112,13 @@ jobs:
         # A hung test fails after ten minutes instead of using up the shard.
         # Gradle can report success after the emulator has crashed and skipped
         # the remaining tests, so require it to still be running.
-        # On a slow emulator, "isn't responding" dialogs take focus from the app.
+        # On a slow emulator, "isn't responding" dialogs take focus from the app,
+        # and notification banners cover it. FailureDiagnostics logs whatever
+        # window still held the screen when a test failed.
         script: |
           adb shell settings put global hide_error_dialogs 1
-          ./android/gradlew --project-dir android :app:connectedDebugAndroidTest -PtestAbi=x86_64 -Pandroid.testInstrumentationRunnerArguments.numShards=3 -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }} -Pandroid.testInstrumentationRunnerArguments.timeout_msec=600000
+          adb shell settings put global heads_up_notifications_enabled 0
+          ./android/gradlew --project-dir android :app:connectedDebugAndroidTest -PtestAbi=x86_64 -Pandroid.testInstrumentationRunnerArguments.numShards=3 -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }} -Pandroid.testInstrumentationRunnerArguments.timeout_msec=600000 -Pandroid.testInstrumentationRunnerArguments.listener=org.opentubex.app.FailureDiagnostics
           adb get-state
 
     - name: Show why the emulator stopped
