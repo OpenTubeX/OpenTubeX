@@ -184,3 +184,13 @@ test('merges playlist videos like comparing each with every saved one', () => {
   const merged = mergeBackupPlaylist(large(20_000), { ...large(20_000), videos: large(30_000).videos.slice(10_000) })
   assert.equal(merged.videos.length, 30_000)
 })
+
+test('restored playlist options become a new local edit so sync keeps them', () => {
+  const current = { _id: 'playlist', videos: [], shuffleByDefault: true, preferencesUpdatedAt: 20 }
+  const backup = { _id: 'playlist', videos: [], shuffleByDefault: false, preferencesUpdatedAt: 10 }
+  assert.ok(mergeBackupPlaylist(current, backup).preferencesUpdatedAt > 20)
+  // Unchanged options keep their edit time instead of the backup's older one.
+  assert.equal(mergeBackupPlaylist(current, { ...backup, shuffleByDefault: true }).preferencesUpdatedAt, 20)
+  assert.ok(mergeBackupPlaylist(undefined, backup).preferencesUpdatedAt > 10)
+  assert.equal(Object.hasOwn(mergeBackupPlaylist(undefined, { _id: 'old', videos: [] }), 'preferencesUpdatedAt'), false)
+})
