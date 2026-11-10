@@ -240,6 +240,8 @@ User Playlists:
   Reorder Hint: גררו או השתמשו במקשי החצים כדי לשנות את הסדר
   Add new videos to the top (custom order): "הוספת סרטונים חדשים לראש הרשימה (סדר מותאם אישית)"
   Shuffle videos by default: "ערבוב סרטונים כברירת מחדל"
+  Remove videos once watched: "הסרת סרטונים לאחר צפייה"
+  Remove videos once watched Tooltip: "כשמפעילים את הפלייליסט הזה, כל סרטון מוסר ממנו ברגע שהוא מגיע לסף אחוז הצפייה שהוגדר בהגדרות הפרטיות."
   Repair Playlists: תיקון רשימות השמעה
   Repair Description: שחזור פרטי סרטונים חסרים לאחר ייבוא ZIP של YouTube Takeout. סדר רשימות ההשמעה נשאר ללא שינוי.
   Remove Unavailable Videos: "הסר סרטונים לא זמינים"

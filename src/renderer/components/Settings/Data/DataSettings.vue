@@ -1789,8 +1789,11 @@ async function importPlaylistDatabase(data) {
     'customThumbnail',
     'addVideosToTop',
     'shuffleByDefault',
+    'removeWatchedVideos',
     'sortOrder',
   ]
+
+  const BOOLEAN_PLAYLIST_KEYS = ['addVideosToTop', 'shuffleByDefault', 'removeWatchedVideos']
 
   const ignoredKeys = [
     'title',
@@ -1880,7 +1883,7 @@ async function importPlaylistDatabase(data) {
         }
       } else if (!ignoredKeys.includes(key)) {
         // Do nothing for keys to be ignored
-        playlistObject[key] = key === 'addVideosToTop' || key === 'shuffleByDefault' ? playlistData[key] === true : playlistData[key]
+        playlistObject[key] = BOOLEAN_PLAYLIST_KEYS.includes(key) ? playlistData[key] === true : playlistData[key]
 
         if (requiredKeys.includes(key)) {
           countRequiredKeysPresent++
@@ -1974,6 +1977,7 @@ async function importPlaylistDatabase(data) {
       ...(Object.hasOwn(playlistObject, 'customThumbnail') ? { customThumbnail: playlistObject.customThumbnail } : {}),
       ...(Object.hasOwn(playlistObject, 'addVideosToTop') ? { addVideosToTop: playlistObject.addVideosToTop } : {}),
       ...(Object.hasOwn(playlistObject, 'shuffleByDefault') ? { shuffleByDefault: playlistObject.shuffleByDefault } : {}),
+      ...(Object.hasOwn(playlistObject, 'removeWatchedVideos') ? { removeWatchedVideos: playlistObject.removeWatchedVideos } : {}),
       ...(Object.hasOwn(playlistObject, 'sortOrder') ? { sortOrder: playlistObject.sortOrder } : {}),
       videos: orderedVideos
     })

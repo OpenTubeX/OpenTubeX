@@ -84,6 +84,12 @@
             :default-value="newShuffleByDefault"
             @change="newShuffleByDefault = $event"
           />
+          <FtToggleSwitch
+            :label="t('User Playlists.Remove videos once watched')"
+            :tooltip="t('User Playlists.Remove videos once watched Tooltip')"
+            :default-value="newRemoveWatchedVideos"
+            @change="newRemoveWatchedVideos = $event"
+          />
         </div>
       </div>
       <div class="editPickers">
@@ -537,6 +543,7 @@ const newTitle = ref(props.title)
 const newDescription = ref(props.description)
 const newAddVideosToTop = ref(false)
 const newShuffleByDefault = ref(false)
+const newRemoveWatchedVideos = ref(false)
 const newQuickBookmarkIcon = ref('bookmark')
 const newCustomThumbnail = ref('')
 const thumbnailLoading = ref(false)
@@ -969,6 +976,7 @@ async function savePlaylistInfo() {
     description: newDescription.value,
     addVideosToTop: newAddVideosToTop.value,
     shuffleByDefault: newShuffleByDefault.value,
+    removeWatchedVideos: newRemoveWatchedVideos.value,
     quickBookmarkIcon: newQuickBookmarkIcon.value,
     customThumbnail: newCustomThumbnail.value,
     _id: props.id,
@@ -996,6 +1004,7 @@ function enterEditMode() {
   newDescription.value = props.description
   newAddVideosToTop.value = selectedUserPlaylist.value.addVideosToTop === true
   newShuffleByDefault.value = selectedUserPlaylist.value.shuffleByDefault === true
+  newRemoveWatchedVideos.value = selectedUserPlaylist.value.removeWatchedVideos === true
   newQuickBookmarkIcon.value = getQuickBookmarkIconValue(selectedUserPlaylist.value)
   newCustomThumbnail.value = selectedUserPlaylist.value.customThumbnail || ''
   thumbnailLoading.value = false

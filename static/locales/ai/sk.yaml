@@ -237,6 +237,8 @@ User Playlists:
   Reorder Hint: Presuňte alebo použite klávesy so šípkami na zmenu poradia
   Add new videos to the top (custom order): "Pridávať nové videá na začiatok (vlastné poradie)"
   Shuffle videos by default: "Predvolene prehrávať videá náhodne"
+  Remove videos once watched: "Odstraňovať videá po pozretí"
+  Remove videos once watched Tooltip: "Keď prehrávate tento zoznam skladieb, každé video sa z neho odstráni, hneď ako dosiahne prah pozretia v percentách nastavený v nastaveniach súkromia."
   Repair Playlists: Opraviť playlisty
   Repair Description: Obnovte chýbajúce údaje o videách po importe ZIP archívu YouTube Takeout. Poradie v playlistoch sa nezmení.
   Remove Unavailable Videos: "Odstráňte nedostupné videá"

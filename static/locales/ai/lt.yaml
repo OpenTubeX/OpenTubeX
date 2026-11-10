@@ -274,6 +274,8 @@ User Playlists:
   Reorder Hint: Vilkite arba naudokite rodyklių klavišus, kad pakeistumėte tvarką
   Add new videos to the top (custom order): "Pridėti naujus vaizdo įrašus viršuje (pasirinktinė tvarka)"
   Shuffle videos by default: "Pagal numatytuosius nustatymus maišyti vaizdo įrašus"
+  Remove videos once watched: "Šalinti vaizdo įrašus po peržiūros"
+  Remove videos once watched Tooltip: "Kai leidžiate šį grojaraštį, kiekvienas vaizdo įrašas iš jo pašalinamas, kai tik pasiekia privatumo nustatymuose nustatytą peržiūrėtos dalies procentinę ribą."
   Repair Playlists: Taisyti grojaraščius
   Repair Description: Atkurkite trūkstamus vaizdo įrašų duomenis importavę YouTube Takeout ZIP. Grojaraščių tvarka nesikeičia.
   Remove Unavailable Videos: "Pašalinti nepasiekiamus vaizdo įrašus"

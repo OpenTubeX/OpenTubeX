@@ -1839,6 +1839,7 @@ defineExpose({
   shouldStopDueToPlaylistEnd,
   isFetchingPlaylistContinuation,
   isWaitingForNextVideo,
+  getPlayingItem: () => playlistItems.value[playingVideoIndex.value] ?? null,
   getState: () => ({
     index: reversePlaylist.value
       ? playlistItems.value.length - currentVideoIndexOneBased.value

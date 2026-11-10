@@ -254,6 +254,8 @@ User Playlists:
   Reorder Hint: 드래그하거나 화살표 키를 사용해 순서 변경
   Add new videos to the top (custom order): "새 동영상을 맨 위에 추가 (사용자 지정 순서)"
   Shuffle videos by default: "기본적으로 동영상 셔플 재생"
+  Remove videos once watched: "시청한 동영상 삭제"
+  Remove videos once watched Tooltip: "이 재생목록을 재생하면 각 동영상이 개인정보 보호 설정에서 지정한 시청 비율 기준에 도달하는 즉시 재생목록에서 삭제됩니다."
   Repair Playlists: 재생목록 복구
   Repair Description: YouTube Takeout ZIP을 가져온 후 누락된 동영상 정보를 복원합니다. 재생목록 순서는 변경되지 않습니다.
   Remove Unavailable Videos: "사용할 수 없는 동영상 삭제"

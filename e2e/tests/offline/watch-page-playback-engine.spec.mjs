@@ -1,9 +1,9 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { repoRoot, sel, test, expect } from '../../helpers/app.mjs'
+import { readDatastore, repoRoot, sel, test, expect } from '../../helpers/app.mjs'
 import { activeTab, openMockedVideo, waitForPlayback, openCaptionLanguages, openPlayerOptions } from '../../helpers/player.mjs'
-import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
+import { mockPlayableWatchPage, reloadWatchView, watchViewHandle } from '../../helpers/watch.mjs'
 import {
   DEMO_MEDIA_URL,
   POST_LIVE_AUDIO_URL,
@@ -573,6 +573,51 @@ test.describe('watch page', () => {
 
     await page.locator(`${activeTab} .watchVideoPlaylist`).getByRole('button', { name: 'Loop Playlist' }).click()
     await expect(page).toHaveURL(/watch\/dQw4w9WgXcQ.*playlistItemId=first/)
+  })
+
+  test('removes a watched video from its playlist and keeps playing the playlist', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+
+    const watchView = await watchViewHandle(page)
+    await watchView.evaluate(async view => {
+      await view.$store.dispatch('addPlaylist', {
+        _id: 'ft-playlist--watched-removal',
+        playlistName: 'Watched removal',
+        removeWatchedVideos: true,
+        videos: [
+          { videoId: 'jNQXAC9IVRw', playlistItemId: 'first', title: 'First' },
+          { videoId: 'dQw4w9WgXcQ', playlistItemId: 'second', title: 'Second' },
+          { videoId: '9bZkp7q19f0', playlistItemId: 'third', title: 'Third' },
+        ]
+      })
+      await view.$store.dispatch('updateUserPlaylistSortOrder', 'custom')
+      await view.$store.dispatch('updateDefaultInterval', 0)
+      await view.tabRouter.push({
+        path: '/watch/jNQXAC9IVRw',
+        query: { playlistId: 'ft-playlist--watched-removal', playlistType: 'user', playlistItemId: 'first' }
+      })
+    })
+    await expect.poll(() => watchView.evaluate(view => view.watchingPlaylist && !!view.$refs.watchVideoPlaylist)).toBe(true)
+    const video = await waitForPlayback(page)
+    const playlistItemIds = () => watchView.evaluate(view =>
+      view.$store.getters.getPlaylist('ft-playlist--watched-removal').videos.map(item => item.playlistItemId))
+    expect(await playlistItemIds()).toEqual(['first', 'second', 'third'])
+
+    await video.evaluate(element => { element.currentTime = element.duration - 2 })
+    await expect.poll(playlistItemIds).toEqual(['second', 'third'])
+    await expect.poll(() => {
+      const records = readDatastore(app.userDataDir, 'playlists').trim().split('\n').map(line => JSON.parse(line))
+      return records.findLast(record => record._id === 'ft-playlist--watched-removal')?.videos.map(item => item.playlistItemId)
+    }).toEqual(['second', 'third'])
+
+    // Reloading the removed video keeps the playlist, so it still plays the next video
+    await reloadWatchView(watchView)
+    await expect.poll(() => watchView.evaluate(view => view.watchingPlaylist && !!view.$refs.watchVideoPlaylist)).toBe(true)
+    const reloadedVideo = await waitForPlayback(page)
+    await reloadedVideo.evaluate(element => { element.currentTime = element.duration - 1 })
+    await expect(page).toHaveURL(/watch\/dQw4w9WgXcQ.*playlistItemId=second/)
+    expect(await playlistItemIds()).toEqual(['second', 'third'])
   })
 
   test('tries downloaded playback before reporting a private video', async ({ app, page }) => {

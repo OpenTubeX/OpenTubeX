@@ -239,6 +239,8 @@ User Playlists:
   Reorder Hint: Sıralamanı dəyişmək üçün sürükləyin və ya ox düymələrindən istifadə edin
   Add new videos to the top (custom order): "Yeni videoları yuxarıya əlavə et (fərdi sıra)"
   Shuffle videos by default: "Videoları defolt olaraq qarışıq sırada oynat"
+  Remove videos once watched: "Videoları baxıldıqdan sonra sil"
+  Remove videos once watched Tooltip: "Bu pleylisti oynatdığınız zaman hər video Məxfilik ayarlarında təyin edilmiş baxılma faizi həddinə çatan kimi ondan silinir."
   Repair Playlists: Pleylistləri düzəlt
   Repair Description: YouTube Takeout ZIP faylını idxal etdikdən sonra çatışmayan video məlumatlarını bərpa edin. Pleylist sırası dəyişmir.
   Remove Unavailable Videos: "Əlçatan olmayan videoları silin"

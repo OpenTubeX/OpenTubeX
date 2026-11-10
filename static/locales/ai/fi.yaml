@@ -237,6 +237,8 @@ User Playlists:
   Reorder Hint: Järjestä uudelleen vetämällä tai nuolinäppäimillä
   Add new videos to the top (custom order): "Lisää uudet videot alkuun (oma järjestys)"
   Shuffle videos by default: "Toista videot oletuksena satunnaisessa järjestyksessä"
+  Remove videos once watched: "Poista videot, kun ne on katsottu"
+  Remove videos once watched Tooltip: "Kun toistat tätä soittolistaa, jokainen video poistetaan siitä heti, kun se saavuttaa tietosuoja-asetuksissa määritetyn katsotun prosenttiosuuden kynnyksen."
   Repair Playlists: Korjaa soittolistat
   Repair Description: Palauta puuttuvat videotiedot YouTube Takeout -ZIP-tiedoston tuonnin jälkeen. Soittolistojen järjestys ei muutu.
   Remove Unavailable Videos: "Poista videot, jotka eivät ole käytettävissä"

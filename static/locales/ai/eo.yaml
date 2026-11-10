@@ -266,6 +266,8 @@ User Playlists:
   Saved Playlists Refresh Failed: 'Kelkaj konservitaj ludlistoj ne povis esti aktualigitaj.'
   Add new videos to the top (custom order): Aldoni novajn videaĵojn al la supro (laŭmenda ordo)
   Shuffle videos by default: Defaŭlte miksi videaĵojn
+  Remove videos once watched: "Forigi videojn post spektado"
+  Remove videos once watched Tooltip: "Kiam vi ludas ĉi tiun ludliston, ĉiu video estas forigita el ĝi tuj kiam ĝi atingas la sojlon de spektita procento agordita en la privatecaj agordoj."
   Repair Playlists: Ripari ludlistojn
   Repair Description: Restarigi mankantajn detalojn de videaĵoj post enporto de ZIP-dosiero de YouTube Takeout. La ordo de la ludlisto restas senŝanĝa.
   Add Missing Videos: Aldoni mankantajn videaĵojn el la fonta ludlisto

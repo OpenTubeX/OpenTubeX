@@ -237,6 +237,8 @@ User Playlists:
   Reorder Hint: Arrastatu edo erabili gezi-teklak berrordenatzeko
   Add new videos to the top (custom order): "Gehitu bideo berriak hasieran (ordena pertsonalizatua)"
   Shuffle videos by default: "Erreproduzitu bideoak ausazko ordenan modu lehenetsian"
+  Remove videos once watched: "Kendu bideoak ikusi ondoren"
+  Remove videos once watched Tooltip: "Erreprodukzio-zerrenda hau erreproduzitzen duzunean, bideo bakoitza zerrendatik kentzen da pribatutasun-ezarpenetan ezarritako ikusitako ehunekoaren atalasera iristen denean."
   Repair Playlists: Konpondu erreprodukzio-zerrendak
   Repair Description: Berreskuratu falta diren bideo-datuak YouTube Takeout ZIP bat inportatu ondoren. Zerrenden ordena ez da aldatzen.
   Remove Unavailable Videos: "Kendu erabilgarri ez dauden bideoak"

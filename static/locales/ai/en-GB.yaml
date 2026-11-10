@@ -239,6 +239,8 @@ User Playlists:
   Reorder Hint: Drag or use the arrow keys to reorder
   Add new videos to the top (custom order): "Add new videos to the top (custom order)"
   Shuffle videos by default: "Shuffle videos by default"
+  Remove videos once watched: "Remove videos once watched"
+  Remove videos once watched Tooltip: "When you play this playlist, each video is removed from it once it reaches the watched percentage threshold set in the Privacy settings."
   Repair Playlists: Repair Playlists
   Repair Description: Restore missing video details after importing a YouTube Takeout ZIP. Playlist order stays unchanged.
   Remove Unavailable Videos: "Remove unavailable videos"

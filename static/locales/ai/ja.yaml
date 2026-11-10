@@ -237,6 +237,8 @@ User Playlists:
   Reorder Hint: ドラッグするか矢印キーで並べ替え
   Add new videos to the top (custom order): "新しい動画を先頭に追加（カスタム順）"
   Shuffle videos by default: "デフォルトで動画をシャッフル再生"
+  Remove videos once watched: "視聴後に動画を削除"
+  Remove videos once watched Tooltip: "この再生リストを再生すると、各動画はプライバシー設定で指定した視聴済みの割合のしきい値に達した時点でリストから削除されます。"
   Repair Playlists: プレイリストを修復
   Repair Description: YouTube TakeoutのZIPをインポートした後、欠けている動画情報を復元します。プレイリストの順序は変わりません。
   Remove Unavailable Videos: "利用できない動画を削除する"

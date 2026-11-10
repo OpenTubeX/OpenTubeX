@@ -411,6 +411,8 @@ User Playlists:
   Saved Playlists Refresh Failed: Some saved playlists could not be refreshed.
   Add new videos to the top (custom order): "Add new videos to the top (custom order)"
   Shuffle videos by default: "Shuffle videos by default"
+  Remove videos once watched: "Remove videos once watched"
+  Remove videos once watched Tooltip: "When you play this playlist, each video is removed from it once it reaches the watched percentage threshold set in the Privacy settings."
   Repair Playlists: Repair Playlists
   Repair Description: Restore missing video details after importing a YouTube Takeout ZIP. Playlist order stays unchanged.
   Add Missing Videos: "Add missing videos from source playlist"

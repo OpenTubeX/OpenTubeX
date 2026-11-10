@@ -602,6 +602,8 @@ export default defineComponent({
       historyLastTouchedAt: 0,
       /** @type {Set<string>} videos whose watched mark is still being written */
       watchedMarkPendingVideoIds: new Set(),
+      /** @type {{ playlistId: string, videoId: string, playlistItemId: string | null } | null} the playlist entry removed once watched */
+      watchedPlaylistVideoRemoval: null,
     }
   },
   computed: {
@@ -2413,6 +2415,7 @@ export default defineComponent({
         this.videoId = this.tabRoute.params.id
         const videoIdChanged = this.videoId !== previousVideoId
         if (videoIdChanged) {
+          this.watchedPlaylistVideoRemoval = null
           this.useCustomShortsPlayerForCurrentVideo = this.$store.getters.getUseCustomShortsPlayer
           this.ipBlockRecoveryAttemptedForCurrentVideo = false
           this.androidHttpErrorRecoveryAttemptedForCurrentVideo = false
@@ -4785,6 +4788,8 @@ export default defineComponent({
     },
 
     markAsWatchedIfFinished(currentSeconds, isFinished = false) {
+      this.removeFromPlaylistIfWatched(currentSeconds, isFinished)
+
       if (
         !this.rememberHistory ||
         this.isUpcoming ||
@@ -4817,6 +4822,73 @@ export default defineComponent({
           this.watchedMarkPendingVideoIds.delete(videoId)
         })
       }
+    },
+
+    /**
+     * Removes the playing video from its user playlist once it reaches the
+     * watched threshold, even when it was already marked as watched before.
+     * @param {number} currentSeconds
+     * @param {boolean} isFinished
+     */
+    removeFromPlaylistIfWatched(currentSeconds, isFinished) {
+      const playlist = this.selectedUserPlaylist
+      if (
+        playlist?.removeWatchedVideos !== true ||
+        this.isUpcoming ||
+        this.isLive ||
+        this.isRemovedPlaylistEntry()
+      ) {
+        return
+      }
+
+      if (!isFinished && (this.isPlaybackPaused() || !hasReachedWatchedThreshold(
+        currentSeconds,
+        this.videoLengthSeconds,
+        this.watchedPercentageThreshold
+      ))) {
+        return
+      }
+
+      // Without an entry ID, remove the duplicate the playlist panel shows as playing
+      const shownItem = this.playlistItemId ? null : this.$refs.watchVideoPlaylist?.getPlayingItem()
+      const playlistItem = playlist.videos.find((video) => this.playlistItemId
+        ? video.playlistItemId === this.playlistItemId
+        : shownItem?.videoId === this.videoId && shownItem.playlistItemId
+          ? video.playlistItemId === shownItem.playlistItemId
+          : video.videoId === this.videoId)
+      if (playlistItem == null) { return }
+
+      // Without an entry ID, the playlist would take another entry of this video
+      // for the playing one once this one is gone, and skip it.
+      if (playlistItem.playlistItemId) this.playlistItemId = playlistItem.playlistItemId
+      // Set before the write so later time updates do not queue it again, and
+      // so reloading this video keeps playing the playlist it was removed from.
+      this.watchedPlaylistVideoRemoval = {
+        playlistId: playlist._id,
+        videoId: this.videoId,
+        playlistItemId: this.playlistItemId ?? null,
+      }
+      const playlistName = playlist.playlistName
+      this.$store.dispatch('removeVideo', {
+        _id: playlist._id,
+        videoId: playlistItem.videoId,
+        playlistItemId: playlistItem.playlistItemId,
+      }).then((removed) => {
+        showToast({
+          message: removed
+            ? this.$t('Video.Video has been removed from {playlistName}', { playlistName })
+            : this.$t('Video.There was a problem removing the video from {playlistName}', { playlistName }),
+          image: this.toastThumbnail,
+          icon: removed ? ['fas', 'trash'] : ['fas', 'circle-exclamation'],
+        })
+      })
+    },
+
+    /** Whether the playing playlist entry was removed once watched, unlike a later entry of the same video. */
+    isRemovedPlaylistEntry() {
+      const removal = this.watchedPlaylistVideoRemoval
+      return removal?.playlistId === this.playlistId && removal.videoId === this.videoId &&
+        removal.playlistItemId === (this.playlistItemId ?? null)
     },
 
     handleWatchProgressManualSave() {
@@ -5177,8 +5249,14 @@ export default defineComponent({
       // `playlistId` present
       if (this.selectedUserPlaylist != null) {
         // If the page is accessed through navigation via router history, 'playlistId' is still specified
-        // but the video could have been removed from the playlist in the meantime
-        if (!this.selectedUserPlaylist.videos.some((video) => video.videoId === this.videoId)) {
+        // but the video could have been removed from the playlist in the meantime.
+        // A reload of a video removed once watched keeps playing its playlist.
+        const removal = this.watchedPlaylistVideoRemoval
+        if (this.playlistItemId == null && removal?.playlistId === this.playlistId && removal.videoId === this.videoId) {
+          this.playlistItemId = removal.playlistItemId
+        }
+        const removedOnceWatched = this.isRemovedPlaylistEntry()
+        if (!removedOnceWatched && !this.selectedUserPlaylist.videos.some((video) => video.videoId === this.videoId)) {
           this.playlistId = ''
           this.playlistType = ''
           this.playlistItemId = null

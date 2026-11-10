@@ -117,6 +117,8 @@ User Playlists:
   Reorder Hint: Przeciągnij lub użyj klawiszy strzałek, aby zmienić kolejność
   Add new videos to the top (custom order): "Dodawaj nowe filmy na początku (kolejność niestandardowa)"
   Shuffle videos by default: "Domyślnie odtwarzaj filmy losowo"
+  Remove videos once watched: "Usuwaj filmy po obejrzeniu"
+  Remove videos once watched Tooltip: "Gdy odtwarzasz tę playlistę, każdy film jest z niej usuwany, gdy tylko osiągnie próg procentu obejrzenia ustawiony w ustawieniach prywatności."
   Repair Playlists: Napraw playlisty
   Repair Description: Przywróć brakujące dane filmów po zaimportowaniu archiwum ZIP z YouTube Takeout. Kolejność na playlistach pozostaje bez zmian.
   Remove Unavailable Videos: "Usuń niedostępne filmy"
