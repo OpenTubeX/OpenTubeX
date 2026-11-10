@@ -8,6 +8,10 @@ import { CompositeBuffer, UmpReader, UmpWriter } from 'googlevideo/ump'
 import * as protocol from '../../src/renderer/helpers/player/sabrProtocol.js'
 import * as googleVideoFallback from '../../src/renderer/helpers/player/googleVideoFallback.js'
 
+// shaka-player's compiled build reads `self` while loading, which Node lacks
+globalThis.self ??= globalThis
+const { default: shaka } = await import('shaka-player')
+
 const source = (await readFile(new URL('../../src/renderer/helpers/player/SabrSchemePlugin.js', import.meta.url), 'utf8'))
   .replace(/^import [\s\S]*? from ['"][^'"]+['"]\n/gm, '').replaceAll('export function ', 'function ')
 
@@ -278,7 +282,7 @@ test('a SABR request switches to the backup server when its node cannot be reach
 
 function load(fetch, globals = {}) {
   const schemes = new Map()
-  const api = vm.runInNewContext(`${source}\n({ createSabrTransport, setupSabrScheme })`, {
+  const api = vm.runInNewContext(`${source}\n({ createSabrTransport, setupSabrScheme, createBufferedRange })`, {
     ...utils,
     ...protos,
     ...protocol,
@@ -975,4 +979,132 @@ test('the Shaka adapter retains format selection, registration and teardown beha
   assert.equal(body.preferredVideoFormatIds[0].itag, 137)
   transport.cleanup()
   assert.equal(schemes.size, 0)
+})
+
+/**
+ * @param {number} headSequenceNumber
+ * @param {number[]} [segmentData] media of segment `headSequenceNumber - 4`, if any
+ */
+function liveResponse(headSequenceNumber, segmentData) {
+  const buffer = new CompositeBuffer([])
+  const writer = new UmpWriter(buffer)
+  writer.write(protos.UMPPartId.LIVE_METADATA, protos.LiveMetadata.encode({
+    headSequenceNumber: String(headSequenceNumber),
+    headTimeMs: String(headSequenceNumber * 5000),
+    minSeekableTimeTicks: String((headSequenceNumber - 100) * 5000 * 1000),
+    minSeekableTimescale: 1_000_000,
+    maxSeekableTimeTicks: String((headSequenceNumber - 4) * 5000 * 1000),
+    maxSeekableTimescale: 1_000_000,
+  }).finish())
+  if (segmentData) {
+    writer.write(protos.UMPPartId.MEDIA_HEADER, protos.MediaHeader.encode({
+      headerId: 1, formatId: audioFormatId, sequenceNumber: headSequenceNumber - 4,
+    }).finish())
+    writer.write(protos.UMPPartId.MEDIA, Uint8Array.of(1, ...segmentData))
+    writer.write(protos.UMPPartId.MEDIA_END, Uint8Array.of(1))
+  }
+  return utils.concatenateChunks(buffer.chunks)
+}
+
+test('a live head request returns the head without waiting for media', async () => {
+  let body
+  // The stream stays open, like a response that continues with media
+  const { createSabrTransport } = load(async (_uri, options) => {
+    body = protos.VideoPlaybackAbrRequest.decode(options.body)
+    return new Response(new ReadableStream({ start: controller => controller.enqueue(liveResponse(1000)) }))
+  })
+  const transport = createSabrTransport(sabrData, () => context)
+  const uri = 'sabr1:live?formatId=140-123-&videoFormatId=137-456-'
+  const { data } = await transport.request(uri, request(uri), 1).promise
+  transport.cleanup()
+
+  assert.equal(body.clientAbrState.playerTimeMs, protocol.SABR_LIVE_HEAD_TIME_MS)
+  const head = protocol.decodeSabrLiveHead(data)
+  assert.equal(head.sequenceNumber, 1000)
+  assert.equal(head.timeMs, 5_000_000)
+  assert.equal(head.minSeekableTimeMs, 4_500_000)
+  assert.equal(head.maxSeekableTimeMs, 4_980_000)
+})
+
+test('live segment responses report the head to the live window', async t => {
+  const heads = []
+  t.after(protocol.onSabrLiveHead('sabr1', head => heads.push(head.sequenceNumber)))
+  const { createSabrTransport } = load(async () => new Response(liveResponse(1005, [1, 2, 3])))
+  const transport = createSabrTransport(sabrData, () => context)
+  const uri = 'sabr1:audio?formatId=140-123-&startTimeMs=5002500&sq=1001'
+  const segment = await transport.request(uri, request(uri), 1).promise
+  transport.cleanup()
+
+  assert.deepEqual([...segment.data], [1, 2, 3])
+  assert.deepEqual(heads, [1005])
+})
+
+/** @param {...number} values */
+function varint(...values) {
+  return values.flatMap(value => {
+    const bytes = []
+    for (; value >= 0x80; value = Math.floor(value / 0x80)) bytes.push((value % 0x80) | 0x80)
+    return [...bytes, value]
+  })
+}
+
+/**
+ * @param {number} field
+ * @param {number[]} bytes
+ */
+function lengthDelimited(field, bytes) {
+  return [...varint(field * 8 + 2, bytes.length), ...bytes]
+}
+
+test('requests after an ad break carry its cue point so SABR resumes the stream', async t => {
+  // Captured from a live stream: SABR withholds the segment behind a cue point
+  // and backoffs until the request reports how the client handled the ad break
+  const duration = [...new Uint8Array(new Float64Array([60]).buffer)]
+  const cuepoint = [...varint(2 << 3, 1), (3 << 3) | 1, ...duration,
+    ...lengthDelimited(6, [...new TextEncoder().encode('ad-1')])]
+  const timeRange = varint(1 << 3, 7_170_358_133, 3 << 3, 1000)
+  const cuepointList = lengthDelimited(1, [...lengthDelimited(1, cuepoint), ...lengthDelimited(4, timeRange)])
+
+  const bodies = []
+  const { createSabrTransport } = load(async (_uri, options) => {
+    bodies.push(options.body)
+    if (bodies.length > 1) return response([1, 2])
+    const buffer = new CompositeBuffer([])
+    const writer = new UmpWriter(buffer)
+    writer.write(protocol.CUEPOINT_LIST_PART_ID, Uint8Array.from(cuepointList))
+    writer.write(protos.UMPPartId.NEXT_REQUEST_POLICY, protos.NextRequestPolicy.encode({ targetAudioReadaheadMs: 15000 }).finish())
+    return new Response(utils.concatenateChunks(buffer.chunks))
+  })
+  const transport = createSabrTransport(sabrData, () => context)
+  t.after(() => transport.cleanup())
+  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+  const segment = await transport.request(uri, request(uri), 1).promise
+
+  assert.deepEqual([...segment.data], [1, 2])
+  assert.equal(protocol.extractRawProtobufField(bodies[0], 24), undefined)
+  const ssapPlaybackInfo = protocol.extractRawProtobufField(bodies[1], 24)
+  assert.deepEqual([...ssapPlaybackInfo], [
+    ...lengthDelimited(7, [...new TextEncoder().encode('ad-1')]),
+    ...varint(8 << 3, 11, 10 << 3, 7_170_358_133, 11 << 3, 60_000),
+  ])
+  // The request stays valid for decoders that do not know the field
+  assert.deepEqual(protos.VideoPlaybackAbrRequest.decode(bodies[1]).selectedFormatIds,
+    protos.VideoPlaybackAbrRequest.decode(bodies[0]).selectedFormatIds)
+})
+
+test('a live buffered range ends with the last segment whose middle is buffered', () => {
+  const { createBufferedRange } = load(async () => new Response())
+  const references = [100, 101, 102, 103].map((sq, index) => {
+    const uris = [`sabr1:audio?formatId=140-123-&startTimeMs=${index * 5000 + 2500}&sq=${sq}`]
+    return new shaka.media.SegmentReference(index * 5, index * 5 + 5, () => uris, 0, null, null, 0, 0, Infinity)
+  })
+  const segmentIndex = new shaka.media.SegmentIndex(references)
+
+  // Media timestamps differ slightly from the estimated segment times. Claiming
+  // segment 102 would make SABR skip it and leave playback without it.
+  const range = createBufferedRange(audioFormatId, { start: -0.3, end: 10.002 }, segmentIndex, true)
+  assert.equal(range.startSegmentIndex, 100)
+  assert.equal(range.endSegmentIndex, 101)
+
+  assert.equal(createBufferedRange(audioFormatId, { start: 5.1, end: 7 }, segmentIndex, true), null)
 })

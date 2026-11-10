@@ -25,17 +25,22 @@ for (const playbackEngine of ['yt-dlp']) {
   }
 }
 
-for (const manifestMimeType of ['application/sabr+json', 'application/x-mpegurl']) {
-  test(`built-in live playback never offers seeking with ${manifestMimeType}`, () => {
-    for (const isLiveDvrEnabled of [true, false, null]) {
-      assert.equal(canSeekLive({
-        manifestMimeType,
-        manifestSrc: 'https://example.com/manifest_duration/3600/live',
-        isLiveDvrEnabled
-      }), false)
-    }
-  })
-}
+test('built-in live playback never offers seeking with HLS', () => {
+  for (const isLiveDvrEnabled of [true, false, null]) {
+    assert.equal(canSeekLive({
+      manifestMimeType: 'application/x-mpegurl',
+      manifestSrc: 'https://example.com/manifest_duration/3600/live',
+      isLiveDvrEnabled
+    }), false)
+  }
+})
+
+test('built-in live SABR playback offers seeking unless DVR is disabled', () => {
+  const manifestMimeType = 'application/sabr+json'
+  assert.equal(canSeekLive({ manifestMimeType, isLiveDvrEnabled: true }), true)
+  assert.equal(canSeekLive({ manifestMimeType, isLiveDvrEnabled: null }), true)
+  assert.equal(canSeekLive({ manifestMimeType, isLiveDvrEnabled: false }), false)
+})
 
 test('keeps yt-dlp seeking for DVR-enabled livestreams and premieres', () => {
   assert.equal(canSeekLive({ playbackEngine: 'yt-dlp', manifestMimeType: 'application/dash+xml', isLiveDvrEnabled: true }), true)

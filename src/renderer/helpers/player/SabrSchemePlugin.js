@@ -12,15 +12,23 @@ import {
   SabrContextWritePolicy,
   NextRequestPolicy,
   ReloadPlaybackContext,
+  LiveMetadata,
 } from 'googlevideo/protos'
 import shaka from 'shaka-player'
 
 import {
   createAbandonedSabrResponse,
+  CUEPOINT_LIST_PART_ID,
+  encodeSabrLiveHead,
+  encodeSsapPlaybackInfos,
   extractRawProtobufField,
   MAX_SABR_RESPONSE_BYTES,
+  parseSabrCuepoints,
   parseSabrFormatId,
-  readCompleteUmpParts
+  parseSabrLiveHead,
+  publishSabrLiveHead,
+  readCompleteUmpParts,
+  SABR_LIVE_HEAD_TIME_MS
 } from './sabrProtocol'
 import { fetchGoogleVideo } from './googleVideoFallback'
 
@@ -37,6 +45,7 @@ const ShakaError = shaka.util.Error
  * The following are calculated from above properties
  * @property {string} formatIdString
  * @property {boolean} isInit
+ * @property {boolean} isLiveHead - only asks for the live head, without media
  * @property {number} sequenceNumber
  * @property {string} streamKind
  */
@@ -64,6 +73,7 @@ const ShakaError = shaka.util.Error
  * @property {number} cumulativeRetries
  * @property {number} startedAtMs
  * @property {(() => number) | undefined} getBufferedAheadSeconds
+ * @property {string} scheme
  */
 /**
  * @typedef SabrStreamState
@@ -78,6 +88,7 @@ const ShakaError = shaka.util.Error
  * @property {Set<string>} deliveredMediaFor
  * @property {boolean} attestationPending
  * @property {boolean} mediaWithheld
+ * @property {Map<string, import('./sabrProtocol').SabrCuepoint>} cuepoints ongoing ad breaks
  */
 /**
  * @typedef TimeoutController
@@ -105,16 +116,58 @@ const WITHHELD_MEDIA_RELOAD_BUFFER_SECONDS = 10
 const WITHHELD_MEDIA_POLL_MS = 1000
 
 /**
- * @param {import('googlevideo/protos').FormatId} formatId
+ * @param {shaka.media.SegmentReference} reference
+ */
+function getSequenceNumber(reference) {
+  return parseInt(new URL(reference.getUris()[0]).searchParams.get('sq'))
+}
+
+/**
+ * Live media starts near, not exactly at, its estimated segment times, so a
+ * segment counts as buffered when its middle is.
  * @param {shaka.extern.BufferedRange} buffered
  * @param {shaka.media.SegmentIndex} segmentIndex
  */
-function createBufferedRange(formatId, buffered, segmentIndex) {
-  const startSegmentIndex = segmentIndex.find(buffered.start) ?? 0
-  let endSegmentIndex = segmentIndex.find(buffered.end)
-  if (endSegmentIndex == null) {
-    // Using Last end time will get `null` in `segmentIndex.find`
-    endSegmentIndex = segmentIndex.getNumReferences() - 1
+function getBufferedLiveSegments(buffered, segmentIndex) {
+  const middle = reference => (reference.startTime + reference.endTime) / 2
+
+  const firstPosition = segmentIndex.find(buffered.start) ?? segmentIndex.getNumEvicted()
+  let first = segmentIndex.get(firstPosition)
+  if (first && middle(first) < buffered.start) first = segmentIndex.get(firstPosition + 1) ?? first
+
+  const lastPosition = segmentIndex.find(buffered.end) ?? segmentIndex.getNumEvicted() + segmentIndex.getNumReferences() - 1
+  let last = segmentIndex.get(lastPosition)
+  if (last && middle(last) > buffered.end) last = segmentIndex.get(lastPosition - 1) ?? last
+
+  return {
+    startSegmentIndex: first ? getSequenceNumber(first) : 0,
+    endSegmentIndex: last ? getSequenceNumber(last) : 0,
+  }
+}
+
+/**
+ * @param {import('googlevideo/protos').FormatId} formatId
+ * @param {shaka.extern.BufferedRange} buffered
+ * @param {shaka.media.SegmentIndex} segmentIndex
+ * @param {boolean} isLive
+ * @returns {import('googlevideo/protos').BufferedRange | null}
+ */
+function createBufferedRange(formatId, buffered, segmentIndex, isLive) {
+  let startSegmentIndex
+  let endSegmentIndex
+
+  if (isLive) {
+    // Live sequence numbers are not positions in the moving window
+    ({ startSegmentIndex, endSegmentIndex } = getBufferedLiveSegments(buffered, segmentIndex))
+    // Less than half a segment is buffered
+    if (startSegmentIndex > endSegmentIndex) return null
+  } else {
+    startSegmentIndex = segmentIndex.find(buffered.start) ?? 0
+    endSegmentIndex = segmentIndex.find(buffered.end)
+    if (endSegmentIndex == null) {
+      // Using Last end time will get `null` in `segmentIndex.find`
+      endSegmentIndex = segmentIndex.getNumReferences() - 1
+    }
   }
 
   return {
@@ -158,6 +211,7 @@ function createFullBufferRange(formatId) {
  */
 function fillBufferedRanges(player, manifest, audioFormatsActive, streamIsVideo, streamIsAudio, bufferedRanges, activeVariant) {
   const bufferedInfo = player.getBufferedInfo()
+  const isLive = manifest.presentationTimeline.isLive()
 
   if (bufferedInfo.audio.length > 0 || bufferedInfo.video.length > 0) {
     let activeManifestVariant
@@ -179,7 +233,8 @@ function fillBufferedRanges(player, manifest, audioFormatsActive, streamIsVideo,
       bufferedRanges.push(createFullBufferRange(audioFormatId))
     } else {
       for (const buffered of bufferedInfo.audio) {
-        bufferedRanges.push(createBufferedRange(audioFormatId, buffered, audioSegmentIndex))
+        const range = createBufferedRange(audioFormatId, buffered, audioSegmentIndex, isLive)
+        if (range) bufferedRanges.push(range)
       }
     }
 
@@ -200,7 +255,8 @@ function fillBufferedRanges(player, manifest, audioFormatsActive, streamIsVideo,
           videoSegmentIndex = activeManifestVariant.video.segmentIndex
         }
 
-        bufferedRanges.push(createBufferedRange(videoFormatId, buffered, videoSegmentIndex))
+        const range = createBufferedRange(videoFormatId, buffered, videoSegmentIndex, isLive)
+        if (range) bufferedRanges.push(range)
       }
     }
   }
@@ -290,6 +346,21 @@ function prepareSabrContexts(sabrStreamState) {
 }
 
 /**
+ * @param {VideoPlaybackAbrRequest} abrRequest
+ * @param {SabrStreamState} sabrStreamState
+ */
+function encodeAbrRequest(abrRequest, sabrStreamState) {
+  const request = VideoPlaybackAbrRequest.encode(abrRequest).finish()
+  if (sabrStreamState.cuepoints.size === 0) return request
+
+  const ssapPlaybackInfos = encodeSsapPlaybackInfos(sabrStreamState.cuepoints.values())
+  const body = new Uint8Array(request.length + ssapPlaybackInfos.length)
+  body.set(request)
+  body.set(ssapPlaybackInfos, request.length)
+  return body
+}
+
+/**
  * @template T
  * @param {import('googlevideo/shared-types').Part} part
  * @param {{ decode: (data: Uint8Array) => T }} decoder
@@ -373,6 +444,8 @@ async function doRequest(
   let nextRequestBackoffUntilMs = 0
   let nextRequestBackoffTimeMs = 0
   let nextRequestPlaybackCookieBytes
+  /** @type {import('./sabrProtocol').SabrLiveHead | undefined} */
+  let liveHead
 
   let invalidPoToken = false
   let error
@@ -592,6 +665,30 @@ async function doRequest(
           case UMPPartId.FORMAT_INITIALIZATION_METADATA: {
             break
           }
+          case CUEPOINT_LIST_PART_ID: {
+            for (const cuepoint of decodePart(part, { decode: parseSabrCuepoints }) ?? []) {
+              if (cuepoint.stopped) {
+                currentState.sabrStreamState.cuepoints.delete(cuepoint.identifier)
+              } else if (!currentState.sabrStreamState.cuepoints.has(cuepoint.identifier)) {
+                currentState.sabrStreamState.cuepoints.set(cuepoint.identifier, cuepoint)
+              }
+            }
+            break
+          }
+          case UMPPartId.LIVE_METADATA: {
+            const liveMetadata = decodePart(part, LiveMetadata)
+            const head = liveMetadata && parseSabrLiveHead(liveMetadata, Date.now())
+            if (!head) break
+
+            publishSabrLiveHead(currentState.scheme, head)
+            if (operationInputs.isLiveHead) {
+              // The head arrives before the media at the live edge, which is not needed
+              liveHead = head
+              currentState.abortStatus.finished = true
+              currentState.abortController.abort()
+            }
+            break
+          }
           case UMPPartId.SABR_CONTEXT_UPDATE: {
             const sabrContextUpdate = decodePart(part, SabrContextUpdate)
             if (!sabrContextUpdate) break
@@ -702,7 +799,22 @@ async function doRequest(
     )
   }
 
-  if (responseDataChunks.length > 0 && segmentComplete) {
+  if (liveHead) {
+    if (nextRequestPlaybackCookieBytes !== undefined) {
+      currentState.sabrStreamState.playbackCookieBytes = nextRequestPlaybackCookieBytes
+    }
+
+    /** @type {shaka.extern.Response} */
+    return {
+      uri: operationInputs.uri,
+      originalUri: operationInputs.uri,
+      data: encodeSabrLiveHead(liveHead),
+      status: response.status,
+      headers: {},
+      fromCache: false,
+      originalRequest: operationInputs.request,
+    }
+  } else if (responseDataChunks.length > 0 && segmentComplete) {
     if (!operationInputs.isInit) {
       currentState.sabrStreamState.deliveredMediaFor.add(operationInputs.streamKind)
     }
@@ -775,7 +887,7 @@ async function doRequest(
     let body
 
     try {
-      body = VideoPlaybackAbrRequest.encode(currentState.abrRequest).finish()
+      body = encodeAbrRequest(currentState.abrRequest, currentState.sabrStreamState)
     } catch (error) {
       console.error('Invalid VideoPlaybackAbrRequest data', currentState.abrRequest)
       throw error
@@ -842,6 +954,22 @@ export function setupSabrScheme(sabrData, getPlayer, getManifest, playerWidth, p
     }
 
     const url = new URL(request.uris[0])
+
+    if (url.pathname === 'live') {
+      // Requested while parsing the manifest, so no variant exists yet
+      return {
+        audioFormatId: parseSabrFormatId(url.searchParams.get('formatId')),
+        videoFormatId: parseSabrFormatId(url.searchParams.get('videoFormatId')),
+        bufferedRanges: [],
+        drcEnabled: false,
+        enableVoiceBoost: false,
+        bandwidthEstimate: 0,
+        playbackRate: 1,
+        width: playerWidth.value,
+        height: playerHeight.value,
+        getBufferedAheadSeconds: () => 0,
+      }
+    }
 
     const isInit = url.searchParams.has('init')
     const formatIdString = url.searchParams.get('formatId')
@@ -948,6 +1076,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
     deliveredMediaFor: new Set(),
     attestationPending: false,
     mediaWithheld: false,
+    cuepoints: new Map(),
   }
 
   const requestSegment = (uri, request, requestType, _progressUpdated, headersReceived = () => {}) => {
@@ -963,8 +1092,9 @@ export function createSabrTransport(sabrData, getRequestContext) {
     }
     const streamIsAudio = url.pathname === 'audio'
     const streamIsVideo = url.pathname === 'video'
+    const isLiveHead = url.pathname === 'live'
     const resolution = streamIsVideo ? parseInt(url.searchParams.get('resolution')) : undefined
-    const playerTimeMs = url.searchParams.get('startTimeMs') ?? '0'
+    const playerTimeMs = isLiveHead ? SABR_LIVE_HEAD_TIME_MS : url.searchParams.get('startTimeMs') ?? '0'
     const { audioFormatId, videoFormatId, bufferedRanges, drcEnabled, enableVoiceBoost } = context
 
     const { sabrContexts, unsentSabrContexts } = prepareSabrContexts(sabrStreamState)
@@ -1004,7 +1134,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
     let body
 
     try {
-      body = VideoPlaybackAbrRequest.encode(requestData).finish()
+      body = encodeAbrRequest(requestData, sabrStreamState)
     } catch (error) {
       console.error('Invalid VideoPlaybackAbrRequest data', requestData)
       throw error
@@ -1024,6 +1154,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
 
       formatIdString,
       isInit,
+      isLiveHead,
       sequenceNumber,
       streamKind: url.pathname,
     }
@@ -1080,6 +1211,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
       cumulativeRetries: 0,
       startedAtMs: Date.now(),
       getBufferedAheadSeconds: context.getBufferedAheadSeconds,
+      scheme: sabrData.scheme,
     }
 
     const pendingRequest = doRequest(opInputs, currentState)
