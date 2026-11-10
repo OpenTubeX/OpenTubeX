@@ -1101,20 +1101,21 @@ watch(userPlaylistsReady, () => {
 
 // Fetch from local store when current user playlist changed
 watch(selectedUserPlaylist, () => {
-  if (!isUserPlaylistRequested.value) { return }
+  // A queued move or drag would be undone; the last save reloads the playlist
+  if (!isUserPlaylistRequested.value || draggedOrderSave) { return }
 
   getPlaylistInfoDebounce()
 })
 
 // Re-fetch from local store when current user playlist updated
 watch(selectedUserPlaylistLastUpdatedAt, () => {
-  if (!isUserPlaylistRequested.value) { return }
+  if (!isUserPlaylistRequested.value || draggedOrderSave) { return }
 
   getPlaylistInfoDebounce()
 })
 
 watch(selectedUserPlaylistVideoCount, async () => {
-  if (!isUserPlaylistRequested.value) { return }
+  if (!isUserPlaylistRequested.value || draggedOrderSave) { return }
 
   // Monitoring `selectedUserPlaylistVideos` makes this function called
   // Even when the same array object is returned
@@ -1431,7 +1432,7 @@ function moveDraggedVideo(playlistItemId, order) {
   tempShownPlaylistItems.value = items
   // A later drag can start before this save finishes, so save in order.
   const id = playlistId.value
-  const save = (draggedOrderSave ?? Promise.resolve()).then(() => saveDraggedOrder(id, items)).finally(() => {
+  const save = (draggedOrderSave ?? Promise.resolve()).then(() => saveDraggedOrder(id, items, () => draggedOrderSave === save)).finally(() => {
     if (draggedOrderSave === save) draggedOrderSave = null
   })
   draggedOrderSave = save
@@ -1444,7 +1445,7 @@ function moveDraggedVideo(playlistItemId, order) {
 function saveMovedVideos(items) {
   playlistItems.value = items
   const id = playlistId.value
-  const save = (draggedOrderSave ?? Promise.resolve()).then(() => saveDraggedOrder(id, items)).finally(() => {
+  const save = (draggedOrderSave ?? Promise.resolve()).then(() => saveDraggedOrder(id, items, () => draggedOrderSave === save)).finally(() => {
     if (draggedOrderSave === save) draggedOrderSave = null
   })
   draggedOrderSave = save
@@ -1453,8 +1454,9 @@ function saveMovedVideos(items) {
 /**
  * @param {string} id The playlist the drag or move happened in, which may no longer be the open one
  * @param {any[]} items
+ * @param {() => boolean} isLatest whether no later move or drag waits to be saved
  */
-async function saveDraggedOrder(id, items) {
+async function saveDraggedOrder(id, items, isLatest) {
   try {
     // Apply the shown order to the saved entries, so videos another window
     // added or removed in the meantime stay that way.
@@ -1463,7 +1465,6 @@ async function saveDraggedOrder(id, items) {
       playlistItemIds: items.map(video => video.playlistItemId),
     })
     if (!saved) throw new Error('Could not update playlist')
-    if (playlistId.value === id) playlistItems.value = selectedUserPlaylist.value.videos
   } catch (e) {
     showToast({
       message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
@@ -1471,6 +1472,10 @@ async function saveDraggedOrder(id, items) {
     })
     console.error(e)
   } finally {
+    // Show the saved playlist, which drops an order that failed to save and
+    // brings in changes from other windows. Until then, a later move builds on
+    // the order shown now.
+    if (playlistId.value === id && isLatest()) getPlaylistInfo()
     // The ref holds a reactive copy, so compare the original array.
     if (toRaw(tempShownPlaylistItems.value) === items) tempShownPlaylistItems.value = null
   }
