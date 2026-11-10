@@ -240,6 +240,8 @@ User Playlists:
   Reorder Hint: اسحب أو استخدم مفاتيح الأسهم لإعادة الترتيب
   Add new videos to the top (custom order): "إضافة الفيديوهات الجديدة في الأعلى (ترتيب مخصص)"
   Shuffle videos by default: "تشغيل الفيديوهات بترتيب عشوائي افتراضيًا"
+  Remove videos once watched: "إزالة مقاطع الفيديو بعد مشاهدتها"
+  Remove videos once watched Tooltip: "عند تشغيل قائمة التشغيل هذه، تتم إزالة كل فيديو منها بمجرد وصوله إلى حد نسبة المشاهدة المحدد في إعدادات الخصوصية."
   Repair Playlists: إصلاح قوائم التشغيل
   Repair Description: استعد تفاصيل الفيديو المفقودة بعد استيراد ملف ZIP من YouTube Takeout. يبقى ترتيب قوائم التشغيل دون تغيير.
   Remove Unavailable Videos: "إزالة مقاطع الفيديو غير المتاحة"

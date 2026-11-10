@@ -257,6 +257,8 @@ User Playlists:
   Reorder Hint: برای تغییر ترتیب، بکشید یا از کلیدهای جهت‌نما استفاده کنید
   Add new videos to the top (custom order): "افزودن ویدیوهای جدید به ابتدای فهرست (ترتیب سفارشی)"
   Shuffle videos by default: "پخش تصادفی ویدیوها به‌صورت پیش‌فرض"
+  Remove videos once watched: "حذف ویدیوها پس از تماشا"
+  Remove videos once watched Tooltip: "وقتی این فهرست پخش را پخش می‌کنید، هر ویدیو به‌محض رسیدن به آستانهٔ درصد تماشای تعیین‌شده در تنظیمات حریم خصوصی از آن حذف می‌شود."
   Repair Playlists: ترمیم فهرست‌های پخش
   Repair Description: جزئیات گم‌شدهٔ ویدیوها را پس از وارد کردن فایل ZIP از YouTube Takeout بازیابی کنید. ترتیب ویدیوها در فهرست‌های پخش تغییر نمی‌کند.
   Remove Unavailable Videos: "ویدیوهای غیرقابل دسترس را حذف کنید"

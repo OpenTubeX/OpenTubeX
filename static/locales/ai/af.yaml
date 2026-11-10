@@ -300,6 +300,8 @@ User Playlists:
   Saved Playlists Refresh Failed: 'Sommige gestoorde afspeellyste kon nie verfris word nie.'
   Add new videos to the top (custom order): Voeg nuwe video’s bo-aan by (pasgemaakte volgorde)
   Shuffle videos by default: Skommel video’s by verstek
+  Remove videos once watched: "Verwyder video's sodra hulle gekyk is"
+  Remove videos once watched Tooltip: "Wanneer jy hierdie snitlys speel, word elke video daaruit verwyder sodra dit die drempel vir gekykte persentasie in die privaatheidsinstellings bereik."
   Repair Playlists: Herstel afspeellyste
   Repair Description: Herstel ontbrekende videobesonderhede nadat ’n YouTube Takeout-ZIP ingevoer is. Die volgorde van die afspeellys bly onveranderd.
   Add Missing Videos: Voeg ontbrekende video’s van die bronafspeellys by

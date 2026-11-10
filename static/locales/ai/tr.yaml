@@ -237,6 +237,8 @@ User Playlists:
   Reorder Hint: Yeniden sıralamak için sürükleyin veya ok tuşlarını kullanın
   Add new videos to the top (custom order): "Yeni videoları en üste ekle (özel sıralama)"
   Shuffle videos by default: "Videoları varsayılan olarak karışık oynat"
+  Remove videos once watched: "Videoları izlendikten sonra kaldır"
+  Remove videos once watched Tooltip: "Bu oynatma listesini oynattığınızda, her video Gizlilik ayarlarında belirlenen izlenme yüzdesi eşiğine ulaştığı anda listeden kaldırılır."
   Repair Playlists: Oynatma listelerini onar
   Repair Description: YouTube Takeout ZIP dosyasını içe aktardıktan sonra eksik video bilgilerini geri yükleyin. Oynatma listesi sırası değişmez.
   Remove Unavailable Videos: "Kullanılamayan videoları kaldır"

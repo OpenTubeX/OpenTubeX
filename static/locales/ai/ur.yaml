@@ -277,6 +277,8 @@ User Playlists:
   Saved Playlists Refresh Failed: 'کچھ محفوظ شدہ پلے لسٹس ریفریش نہیں ہو سکیں۔'
   Add new videos to the top (custom order): نئی ویڈیوز سب سے اوپر شامل کریں (حسب ضرورت ترتیب)
   Shuffle videos by default: ڈیفالٹ کے طور پر ویڈیوز شفل کریں
+  Remove videos once watched: "دیکھنے کے بعد ویڈیوز ہٹائیں"
+  Remove videos once watched Tooltip: "جب آپ یہ پلے لسٹ چلاتے ہیں تو ہر ویڈیو رازداری کی ترتیبات میں مقرر کردہ دیکھے جانے کی فیصد حد تک پہنچتے ہی اس سے ہٹا دی جاتی ہے۔"
   Repair Playlists: پلے لسٹس کی مرمت کریں
   Repair Description: YouTube Takeout ZIP امپورٹ کرنے کے بعد ویڈیوز کی گمشدہ تفصیلات بحال کریں۔ پلے لسٹ کی ترتیب تبدیل نہیں ہوتی۔
   Add Missing Videos: سورس پلے لسٹ سے گمشدہ ویڈیوز شامل کریں

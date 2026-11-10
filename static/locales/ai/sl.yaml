@@ -284,6 +284,8 @@ User Playlists:
   Reorder Hint: Povlecite ali uporabite smerne tipke za spreminjanje vrstnega reda
   Add new videos to the top (custom order): "Dodaj nove videoposnetke na vrh (vrstni red po meri)"
   Shuffle videos by default: "Privzeto predvajaj videoposnetke v naključnem vrstnem redu"
+  Remove videos once watched: "Odstrani videoposnetke po ogledu"
+  Remove videos once watched Tooltip: "Ko predvajate ta seznam predvajanja, se vsak videoposnetek odstrani z njega, takoj ko doseže prag odstotka ogleda, nastavljen v nastavitvah zasebnosti."
   Repair Playlists: Popravi sezname predvajanja
   Repair Description: Obnovite manjkajoče podatke o videoposnetkih po uvozu ZIP-a YouTube Takeout. Vrstni red videoposnetkov na seznamih predvajanja ostane nespremenjen.
   Remove Unavailable Videos: "Odstranite videoposnetke, ki niso na voljo"

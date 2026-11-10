@@ -237,6 +237,8 @@ User Playlists:
   Reorder Hint: Kéo hoặc dùng phím mũi tên để sắp xếp lại
   Add new videos to the top (custom order): "Thêm video mới lên đầu (thứ tự tùy chỉnh)"
   Shuffle videos by default: "Phát ngẫu nhiên video theo mặc định"
+  Remove videos once watched: "Xóa video sau khi đã xem"
+  Remove videos once watched Tooltip: "Khi bạn phát danh sách phát này, mỗi video sẽ bị xóa khỏi danh sách ngay khi đạt ngưỡng phần trăm đã xem được đặt trong cài đặt quyền riêng tư."
   Repair Playlists: Sửa danh sách phát
   Repair Description: Khôi phục thông tin video bị thiếu sau khi nhập ZIP YouTube Takeout. Thứ tự danh sách phát không thay đổi.
   Remove Unavailable Videos: "Xóa video không có sẵn"

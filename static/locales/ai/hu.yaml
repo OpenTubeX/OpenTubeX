@@ -237,6 +237,8 @@ User Playlists:
   Reorder Hint: Húzza el, vagy használja a nyílbillentyűket az átrendezéshez
   Add new videos to the top (custom order): "Új videók hozzáadása felülre (egyéni sorrend)"
   Shuffle videos by default: "Videók alapértelmezetten véletlenszerű sorrendben"
+  Remove videos once watched: "Videók eltávolítása megnézés után"
+  Remove videos once watched Tooltip: "Amikor lejátssza ezt a lejátszási listát, minden videó lekerül róla, amint eléri az adatvédelmi beállításokban megadott megtekintési százalékküszöböt."
   Repair Playlists: Lejátszási listák javítása
   Repair Description: Állítsa vissza a hiányzó videóadatokat egy YouTube Takeout ZIP importálása után. A listák sorrendje nem változik.
   Remove Unavailable Videos: "Távolítsa el a nem elérhető videókat"

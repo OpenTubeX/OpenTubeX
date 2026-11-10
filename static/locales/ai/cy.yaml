@@ -238,6 +238,8 @@ User Playlists:
   Reorder Hint: Llusgwch neu defnyddiwch y bysellau saeth i aildrefnu
   Add new videos to the top (custom order): "Ychwanegu fideos newydd ar y brig (trefn bersonol)"
   Shuffle videos by default: "Cymysgu fideos yn ddiofyn"
+  Remove videos once watched: "Tynnu fideos ar ôl eu gwylio"
+  Remove videos once watched Tooltip: "Pan fyddwch yn chwarae'r rhestr chwarae hon, caiff pob fideo ei dynnu ohoni cyn gynted ag y bydd yn cyrraedd y trothwy canran gwylio a osodwyd yn y gosodiadau preifatrwydd."
   Repair Playlists: Atgyweirio rhestrau chwarae
   Repair Description: Adfer manylion fideo coll ar ôl mewnforio ZIP YouTube Takeout. Mae trefn y rhestrau chwarae yn aros yr un fath.
   Remove Unavailable Videos: "Dileu fideos nad ydynt ar gael"

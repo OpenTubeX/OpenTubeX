@@ -237,6 +237,8 @@ User Playlists:
   Reorder Hint: Σύρετε ή χρησιμοποιήστε τα πλήκτρα βέλους για αναδιάταξη
   Add new videos to the top (custom order): "Προσθήκη νέων βίντεο στην κορυφή (προσαρμοσμένη σειρά)"
   Shuffle videos by default: "Τυχαία σειρά βίντεο από προεπιλογή"
+  Remove videos once watched: "Αφαίρεση βίντεο μόλις τα δείτε"
+  Remove videos once watched Tooltip: "Όταν αναπαράγετε αυτή τη λίστα αναπαραγωγής, κάθε βίντεο αφαιρείται από αυτή μόλις φτάσει το όριο ποσοστού προβολής που ορίζεται στις ρυθμίσεις απορρήτου."
   Repair Playlists: Επιδιόρθωση λιστών αναπαραγωγής
   Repair Description: Επαναφέρετε τα στοιχεία βίντεο που λείπουν μετά την εισαγωγή ZIP από το YouTube Takeout. Η σειρά στις λίστες παραμένει ίδια.
   Remove Unavailable Videos: "Αφαίρεση μη διαθέσιμων βίντεο"

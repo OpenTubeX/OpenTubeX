@@ -210,6 +210,8 @@ User Playlists:
   Reorder Hint: Перетащите или используйте клавиши со стрелками, чтобы изменить порядок
   Add new videos to the top (custom order): "Добавлять новые видео в начало (свой порядок)"
   Shuffle videos by default: "Перемешивать видео по умолчанию"
+  Remove videos once watched: "Удалять видео после просмотра"
+  Remove videos once watched Tooltip: "Когда вы воспроизводите этот плейлист, каждое видео удаляется из него, как только достигает порога просмотра в процентах, заданного в настройках конфиденциальности."
   Repair Playlists: Восстановить плейлисты
   Repair Description: Восстановите недостающие сведения о видео после импорта ZIP-архива YouTube Takeout. Порядок в плейлистах не изменится.
   Remove Unavailable Videos: "Удалить недоступные видео"

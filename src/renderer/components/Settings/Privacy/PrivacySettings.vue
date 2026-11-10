@@ -90,7 +90,7 @@
         :max-value="100"
         :step="1"
         value-extension="%"
-        :disabled="!rememberHistory"
+        :disabled="!rememberHistory && !playlistRemovesWatchedVideos"
         :tooltip="$t('Settings.Privacy Settings.Watched Percentage Threshold Tooltip')"
         @change="updateWatchedPercentageThreshold"
       />
@@ -203,6 +203,10 @@ const watchedProgressSavingMode = computed(() => store.getters.getWatchedProgres
 function updateWatchedProgressSavingMode(value) {
   store.dispatch('updateWatchedProgressSavingMode', value)
 }
+
+// Playlists that remove watched videos use the threshold even without history
+/** @type {import('vue').ComputedRef<boolean>} */
+const playlistRemovesWatchedVideos = computed(() => store.getters.getAllPlaylists.some(playlist => playlist.removeWatchedVideos === true))
 
 /** @type {import('vue').ComputedRef<number>} */
 const watchedPercentageThreshold = computed(() => store.getters.getWatchedPercentageThreshold)

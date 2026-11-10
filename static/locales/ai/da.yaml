@@ -242,6 +242,8 @@ User Playlists:
   Reorder Hint: Træk eller brug piletasterne for at ændre rækkefølgen
   Add new videos to the top (custom order): "Tilføj nye videoer øverst (brugerdefineret rækkefølge)"
   Shuffle videos by default: "Bland videoer som standard"
+  Remove videos once watched: "Fjern videoer, når de er set"
+  Remove videos once watched Tooltip: "Når du afspiller denne playliste, fjernes hver video fra den, så snart den når grænsen for set procentdel, der er angivet i privatlivsindstillingerne."
   Repair Playlists: Reparer afspilningslister
   Repair Description: Gendan manglende videooplysninger efter import af en YouTube Takeout-ZIP. Rækkefølgen i afspilningslisterne ændres ikke.
   Remove Unavailable Videos: "Fjern utilgængelige videoer"

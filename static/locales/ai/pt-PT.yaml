@@ -240,6 +240,8 @@ User Playlists:
   Reorder Hint: Arraste ou utilize as teclas de seta para reordenar
   Add new videos to the top (custom order): "Adicionar novos vídeos no início (ordem personalizada)"
   Shuffle videos by default: "Reproduzir vídeos por ordem aleatória por predefinição"
+  Remove videos once watched: "Remover vídeos depois de vistos"
+  Remove videos once watched Tooltip: "Quando reproduz esta lista de reprodução, cada vídeo é removido dela assim que atinge o limiar de percentagem vista definido nas definições de privacidade."
   Repair Playlists: Reparar listas de reprodução
   Repair Description: Restaure os detalhes dos vídeos em falta após importar um ZIP do YouTube Takeout. A ordem dos vídeos nas listas mantém-se.
   Remove Unavailable Videos: "Remover vídeos indisponíveis"
