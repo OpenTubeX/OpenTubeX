@@ -94,21 +94,25 @@ export async function refreshPlaylistBookmarks() {
     })
 
     // A cancelled run saves nothing, so its late responses cannot overwrite
-    // the results of a newer refresh.
+    // the results of a newer refresh. The write checks again, as it can wait
+    // for another window's bookmark edit.
     if (signal.aborted) return null
 
     // Applying the results to the saved list keeps bookmarks that were saved
     // or removed in the meantime.
     const metadataById = new Map(results.filter(result => result !== null))
     if (metadataById.size > 0) {
-      const saved = await store.dispatch('updatePlaylistBookmarks', savedBookmarks => savedBookmarks.map(bookmark => {
-        const metadata = isValidPlaylistBookmark(bookmark) ? metadataById.get(bookmark.playlist.id) : undefined
-        return metadata ? updatePlaylistBookmarkMetadata(bookmark, metadata) : bookmark
-      }))
+      const saved = await store.dispatch('updatePlaylistBookmarks', savedBookmarks => {
+        if (signal.aborted) return savedBookmarks
+        return savedBookmarks.map(bookmark => {
+          const metadata = isValidPlaylistBookmark(bookmark) ? metadataById.get(bookmark.playlist.id) : undefined
+          return metadata ? updatePlaylistBookmarkMetadata(bookmark, metadata) : bookmark
+        })
+      })
       if (!saved) failed += metadataById.size
     }
 
-    return { failed }
+    return signal.aborted ? null : { failed }
   } finally {
     if (refreshController === controller) {
       refreshController = null
