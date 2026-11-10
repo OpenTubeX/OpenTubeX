@@ -2567,6 +2567,56 @@ test('a replaced OIDC sign-in leaves the newer one waiting', async () => {
   assert.equal(dispatched.at(-1)[1].token, 'a.b.c')
 })
 
+for (const supported of [true, false]) {
+  test(`OIDC sign-in ${supported ? 'accepts only callbacks with its state' : 'accepts callbacks without state from older servers'}`, async () => {
+    let state
+    const { actions, context, dispatched } = fixture({ syncServerToken: '' }, {
+      respond: url => new URL(url).pathname === '/meta' ? { oidc: true, oidc_state: supported } : { capabilities: {} },
+      openExternalLink: async (url) => {
+        state = new URL(url).searchParams.get('state')
+      },
+    })
+    const login = actions.loginSyncServerWithOidc(context, { serverUrl: 'https://sync.example', privacyPassphrase: '', deviceId: 'device-1' })
+    await new Promise(resolve => setTimeout(resolve, 10))
+    assert.match(state, /^[\w-]{43}$/)
+
+    if (supported) {
+      assert.equal(actions.receiveSyncServerOidcCallback(context, 'opentubex://oidc?token=forged.b.c&state=other'), false)
+      assert.equal(actions.receiveSyncServerOidcCallback(context, 'opentubex://oidc?token=forged.b.c'), false)
+    }
+    const callback = `opentubex://oidc?token=a.b.c${supported ? `&state=${state}` : ''}`
+    assert.equal(actions.receiveSyncServerOidcCallback(context, callback), true)
+    await login
+    assert.equal(dispatched.at(-1)[0], 'authenticateSyncServer')
+    assert.equal(dispatched.at(-1)[1].token, 'a.b.c')
+  })
+}
+
+test('OIDC deletion ignores callbacks without its state', async () => {
+  let deleted = false
+  let state
+  const { actions, context, dispatched } = fixture({ syncServerUsername: 'OIDC-ACCOUNT-1' }, {
+    respond: (url, options) => {
+      const { pathname } = new URL(url)
+      if (pathname === '/health') return { capabilities: { account_sessions: 1 } }
+      if (pathname === '/meta') return { oidc: true, oidc_state: true }
+      if (pathname === '/v1/account/oidc/delete') {
+        state = JSON.parse(options.body).state
+        return { authorization_url: 'https://auth.example/authorize' }
+      }
+      if (deleted) return new Response("account doesn't exist", { status: 404 })
+    },
+  })
+  const deletion = actions.deleteSyncServerOidcAccount(context)
+  await new Promise(resolve => setTimeout(resolve, 10))
+  assert.match(state, /^[\w-]{43}$/)
+  assert.equal(actions.receiveSyncServerOidcCallback(context, 'opentubex://oidc'), false)
+  deleted = true
+  assert.equal(actions.receiveSyncServerOidcCallback(context, `opentubex://oidc?state=${state}`), true)
+  await deletion
+  assert.equal(dispatched.some(([action]) => action === 'disconnectSyncServer'), true)
+})
+
 test('OIDC deletion does not take a revoked session as proof of deletion', async () => {
   let callbackSent = false
   const { actions, context, dispatched, settings } = fixture({}, {

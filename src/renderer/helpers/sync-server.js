@@ -250,6 +250,20 @@ export class SyncServerClient {
     return { name }
   }
 
+  /**
+   * Whether OIDC callbacks carry the `state` the app sent. Older servers do
+   * not serve `/meta`.
+   * @returns {Promise<boolean>}
+   */
+  async returnsOidcState() {
+    try {
+      return (await this.request('/meta'))?.oidc_state === true
+    } catch (error) {
+      if (error.status === 404) return false
+      throw error
+    }
+  }
+
   async supportsEncryptedSync() {
     const capabilities = await this.getCapabilities()
     return capabilities.encrypted_sync === 1
@@ -428,12 +442,13 @@ export class SyncServerClient {
    * Starts deleting an OIDC account. The server deletes it once its owner signs
    * in at the returned URL.
    * @param {string} redirectUrl
+   * @param {string} state returned in the callback by servers that support it
    * @returns {Promise<string>}
    */
-  async startOidcAccountDeletion(redirectUrl) {
+  async startOidcAccountDeletion(redirectUrl, state) {
     const response = await this.request('/v1/account/oidc/delete', {
       method: 'POST',
-      body: { redirect_url: redirectUrl },
+      body: { redirect_url: redirectUrl, state },
     })
     let url = null
     try {
