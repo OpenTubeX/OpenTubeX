@@ -187,8 +187,6 @@ Subscriptions:
   Show Combined View: Näytä yhdistettynä
   Newest First: Uusimmat ensin
   Oldest First: Vanhimmat ensin
-  Posts:
-    RSS Message: 'YouTube ei tarjoa julkaisuille RSS-syötteitä. Poista "{rssSetting}" käytöstä nähdäksesi julkaisut tai ota "{hideSetting}" käyttöön piilottaaksesi tämän välilehden.'
   RSS Feeds:
     Refreshing: Päivitetään RSS-syötteitä
     Tab: RSS
@@ -231,7 +229,6 @@ User Playlists:
   Saved Playlists Refresh Failed: 'Joitakin tallennettuja soittolistoja ei voitu päivittää.'
   Save: "Tallenna"
   Edit: "Muokkaa"
-  This playlist is private or does not exist.: "Tämä soittolista on yksityinen tai sitä ei ole olemassa."
   Pin to Navigation: "Kiinnitä navigointiin"
   Unpin from Navigation: "Irrota navigoinnista"
   Pin to Top: "Kiinnitä ylös"
@@ -250,8 +247,6 @@ User Playlists:
   Remove Saved Playlist: "Poista tallennettu soittolista"
   Load More Playlists: Lataa lisää soittolistoja
   Save to: Tallenna kohteeseen…
-  Move Video to the Top: Siirrä video ylimmäksi
-  Move Video to the Bottom: Siirrä video alimmaksi
   Quick Bookmark Icon: Pikakirjanmerkin kuvake
   Custom Emoji: Mukautettu emoji
   Choose Image: Valitse kuva
@@ -742,8 +737,6 @@ Settings:
     Minimum Pause Before Rewinding: "Vähimmäistauko ennen kelausta"
     Mono Audio: 'Monoääni'
     Show Mono Audio Toggle: 'Näytä monoäänen valitsin'
-    Default Media Format:
-      Default Media Format: 'Median oletusmuoto'
     Pause on Stream Recovery: "Keskeytä striimin palautuksessa"
     Buffering:
       Buffering: Puskurointi
@@ -832,10 +825,6 @@ Settings:
         Magenta: Magenta
         Red: Punainen
         Black: Musta
-    Default Viewing Mode:
-      Full Window (Always On): Koko ikkuna (aina käytössä)
-      Full Screen (Always On): Koko näyttö (aina käytössä)
-      Tooltip: Useimmat oletuskatselutilat otetaan käyttöön vain katselukerran alussa. Katselun aikana tehdyt muutokset pysyvät voimassa katselukerran loppuun. Aina käytössä olevat katselutilat otetaan käyttöön aina uuteen videoon siirryttäessä riippumatta edellisen videon katselutilaan tehdyistä muutoksista.
     Auto Picture in Picture:
       Auto Picture in Picture: Siirry automaattisesti kuva kuvassa -tilaan
       On Tab Change: Välilehteä vaihdettaessa
@@ -892,10 +881,6 @@ Settings:
     Playback Speed: Toistonopeus
     Parallel Segment Loading: Osien rinnakkainen lataus
     Screenshot:
-      Mode: Kuvakaappaustila
-      Modes:
-        Save To Folder: Tallenna kansioon
-        Clipboard: Kopioi leikepöydälle
       Legacy Formats: "Vanhemmat muodot"
       Modern Formats: "Nykyaikaiset muodot"
     Rotate Wide Videos to Landscape in Fullscreen: 'Kierrä leveät videot vaakasuuntaan koko näytöllä'
@@ -1228,8 +1213,6 @@ Settings:
     Show Video Title: Näytä videon nimi
     Show Bottom Right Actions Dock: Näytä toimintopalkki oikeassa alakulmassa
     Paused Interface Hide Delay: Keskeytetyn käyttöliittymän piilotusviive
-    Add: Lisää
-    Remove: Poista
     Hide Channel Shows: Piilota kanavan Ohjelmat-välilehti
   Data Settings:
     Scheduled backups: "Ajastetut varmuuskopiot"
@@ -1273,16 +1256,7 @@ Settings:
     Data And Storage: Tiedot ja tallennustila
     Profile Directory: Profiilikansio
     Open Profile Directory: Avaa profiilikansio
-    Settings File: Asetustiedosto
-    Import Settings: Tuo asetukset
-    Export Settings: Vie asetukset
-    Settings Tooltip: Käyttöjärjestelmä- tai käyttäjäkohtaisia ja kokeellisia asetuksia ei voi viedä tai tuoda (esim. välityspalvelin, ulkoinen soitin, kuvakaappauskansio...)
     Invalid JSON row, skipping item: Virheellinen JSON rivillä {row}, ohitetaan kohde
-    All settings have been successfully imported: Kaikki asetukset tuotiin onnistuneesti
-    All settings have been successfully exported: Kaikki asetukset vietiin onnistuneesti
-    Setting object has insufficient data, skipping item: Asetusobjektissa ei ole riittävästi tietoja, ohitetaan kohde
-    Unknown setting key: 'Tuntematon asetusavain: {key}'
-    Non-transferable setting key: 'Asetusavainta ei voi siirtää: {key}'
     Import subscriptions formats: 'Tuetut muodot: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube-varmuuskopio tai FreeTube-vienti (.json)'
     Import history formats: 'Tuetut muodot: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube-varmuuskopio (.json)'
     Import playlists formats: 'Tuetut muodot: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv)'
@@ -1471,9 +1445,6 @@ Settings:
     Reloading video after IP block recovery: Ladataan video uudelleen IP-eston palautuksen jälkeen
     Failed to select IP block recovery script: IP-eston palautuskomentosarjan valitseminen epäonnistui
   SponsorBlock Settings:
-    Excluded Channels:
-      Excluded Channels: "Poissuljetut kanavat"
-      Tooltip: "Anna kanavan tunnus, jotta SponsorBlock-jaksoja ei ohiteta sen videoissa. Tunnuksen on vastattava täsmälleen, kirjainkoko mukaan lukien."
     Enable SponsorBlock Submission: Ota SponsorBlock-ilmoitusten lähetys käyttöön
     SponsorBlock Private User ID (optional): Yksityinen käyttäjätunnus (valinnainen)
     SponsorBlock Private User ID Tooltip: Liitä selainlaajennuksen yksityinen SponsorBlock-käyttäjätunnus. Jätä kenttä tyhjäksi, jos haluat käyttää sovelluksen luomaa tunnusta.
@@ -1489,16 +1460,12 @@ Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Ota Return YouTube Dislike käyttöön
     Return YouTube Dislike Url: API-URL
-  Parental Control Settings:
-    Disable Channel Links: Poista kanavalinkit käytöstä
   Password Dialog:
     Incorrect Password: Virheellinen salasana
     Unlock: Avaa lukitus
     Unlocking: Avataan lukitusta…
   Search Settings: Hae asetuksista
   No Settings Found: Asetuksia ei löytynyt
-  Experimental Settings:
-    Disable Hardware Acceleration: Poista laitteistokiihdytys käytöstä
   Interface Customizer:
     Customize Interface: "Mukauta käyttöliittymää"
     Preview: "Esikatselu"
@@ -1584,15 +1551,12 @@ Profile:
   Use Initial: Käytä alkukirjainta
   The selected image could not be loaded: Valittua kuvaa ei voitu ladata
   Theme Color: Teemaväri
-  Go To Profile Manager: Siirry profiilien hallintaan
 Channel:
   Hide Watched: Piilota katsotut
   Fewer videos per day: "Vähemmän videoita päivässä"
   More videos per day: "Enemmän videoita päivässä"
   Verified: Vahvistettu
   Official Artist Channel: Virallinen artistikanava
-  About:
-    Links: Linkit
   Subscription settings: Tilausasetukset
   Failed to save subscription settings: Kanava-asetusten tallentaminen epäonnistui
   Videos per day: Videoita päivässä
@@ -1609,9 +1573,6 @@ Channel:
   Channel Name Unavailable: Kanavan nimeä ei ole saatavilla
   Search Result Types: Hakutulosten tyypit
   All Results: Kaikki
-  View All: Näytä kaikki
-  Videos:
-    This channel has videos but none could be displayed, try fetching more: "Tällä kanavalla on videoita, mutta yhtäkään ei voitu näyttää. Yritä ladata lisää"
   Posts:
     Original post unavailable: "Alkuperäinen julkaisu ei ole saatavilla"
     Members-only video hidden by OpenTubeX: "OpenTubeX piilotti vain jäsenille tarkoitetun videon"
@@ -1677,9 +1638,6 @@ Video:
   Configure Restricted Playback Cookies Hint: "Määritä evästeet kohdassa Asetukset → Lisäasetukset → Ulkoiset ohjelmistot → yt-dlp-evästeet."
   Try With Configured Cookies: Yritä määritetyillä evästeillä
   Restricted Playback Authentication Failed Template: 'yt-dlp ei voinut avata tätä videota määritetyillä evästeillä: {error}'
-  Private: Yksityisiä videoita ei voi katsoa OpenTubeXissä, koska ne edellyttävät Google-kirjautumista ja videon omistajuutta.
-  Collapse Playlist: Kutista soittolista
-  Expand Playlist: Laajenna soittolista
   Unmark As Watched: Merkitse katsomattomaksi
   Video has been unmarked as watched: Video merkittiin katsomattomaksi
   Save Channel Playback Speed: Tallenna kanavan toistonopeus
@@ -1705,7 +1663,6 @@ Video:
   Scheduled video starting: Ajastettu video alkaa
   Live notification body: '{videoTitle} alkaa nyt'
   Premiere: Ensi-ilta
-  AI: AI
   AI-generated content: Tekoälyllä luotu sisältö
   Collaborators: Yhteistyökumppanit
   Live Chat Replay: Livechatin tallenne
@@ -1944,8 +1901,6 @@ Video:
       Subtitle Files: "Tekstitystiedostot"
       Error: "Tekstitystiedostoa ei voitu ladata. Valitse SRT- tai WebVTT-tiedosto."
   Station: Asema
-  Playlist:
-    Unavailable videos are hidden: 1 video, joka ei ole saatavilla, on piilotettu | {count} videota, jotka eivät ole saatavilla, on piilotettu
   External Media:
     Dislikes: "Ei-tykkäys | Ei-tykkäystä"
     Reposts: "Uudelleenjulkaisu | Uudelleenjulkaisua"
@@ -1971,7 +1926,6 @@ Video:
       subscriber_only: "Vain tilaajat"
       needs_auth: "Kirjautuminen vaaditaan"
       unlisted: "Listaamaton"
-  How this was made: Miten tämä tehtiin
   Save Queue to Playlist: "Tallenna jono soittolistalle"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Live-keskustelua ei tällä hetkellä tueta Yattee-palvelimen kanssa. Suora yhteys YouTubeen vaaditaan.
   External Player:
@@ -1992,7 +1946,6 @@ Playlist:
   Playlist Preload Complete: "Esiladattuja videoita: {count}."
   Playlist Preload Partial: "Esiladattiin {preloaded}/{requested} videota. {failed} videon esilataus epäonnistui."
   Playlist Preload Pagination Failed: "Koko soittolistaa ei voitu ladata, joten esilataus peruttiin."
-  Unavailable videos are hidden: Videot, jotka eivät ole saatavilla, on piilotettu
   Add Playlist to Queue: "Lisää soittolista jonoon"
   Playlist Added to Queue: "Soittolista lisättiin jonoon"
 Change Format:
@@ -2166,7 +2119,6 @@ Comments:
   Getting comment replies, please wait: Haetaan kommentin vastauksia, odota
   Reload Comments: Lataa kommentit uudelleen
   Reply Count: 1 vastaus | {replyCount} vastausta
-  Comments are turned off: Kommentit on poistettu käytöstä
   YouTube did not provide advertised replies: YouTube ilmoitti, että kommenttiin on vastauksia, mutta ei toimittanut niitä. Ne on ehkä poistettu tai piilotettu, joten vastauspainike poistettiin.
   Pinned by you: Sinun kiinnittämäsi
   A reply is pinned: Vastaus on kiinnitetty
@@ -2313,12 +2265,8 @@ Tooltips:
     Use Fixed Tab Width: Tekee vaakasuuntaisen välilehtipalkin kaikista välilehdistä yhtä leveitä sen sijaan, että leveys määräytyisi nimen mukaan.
     Use Custom Title Bar: Korvaa järjestelmän otsikkopalkin välilehtipalkilla tai yläreunan navigoinnilla, kun välilehdet eivät ole ylhäällä, jotta pystysuuntaista tilaa säästyy. Ikkunan hallintapainikkeet näkyvät kyseisen palkin kulmassa.
     Use Grid Player Menu: Järjestää videosoittimen asetusvalikon ruudukoksi riviluettelon sijaan.
-  Experimental Settings:
-    Disable Hardware Acceleration: Poistaa GPU:n laitteistokiihdytyksen käytöstä. Saattaa korjata grafiikkaongelmia, mutta todennäköisesti heikentää suorituskykyä.
 The playlist is at the beginning. Enable loop to continue playing: Soittolista on alussa. Jatka toistoa ottamalla jatkuva toisto käyttöön
 External link opening has been disabled in Settings → Privacy: Ulkoisten linkkien avaaminen on poistettu käytöstä kohdassa Asetukset → Tietosuoja
-Screenshot Clipboard Success: Kuvakaappaus tallennettiin leikepöydälle
-Screenshot Clipboard Error: Kuvakaappauksen kopiointi leikepöydälle epäonnistui
 KeyboardShortcutPrompt:
   Toggle Quick Bookmark: Lisää pikakirjanmerkin soittolistaan tai poista siitä
   Reopen Closed Window: Avaa viimeksi suljettu ikkuna uudelleen
@@ -2514,7 +2462,6 @@ Channels:
 Search Bar:
   Use Suggestion: Käytä ehdotusta
   Open Search Container: Avaa hakukenttä
-  Search: Hae
 Theme Discovery:
   Discover Themes: "Löydä teemoja"
   Refresh: "Päivitä"

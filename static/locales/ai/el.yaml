@@ -229,7 +229,6 @@ User Playlists:
   Saved Playlists Refresh Failed: 'Δεν ήταν δυνατή η ανανέωση ορισμένων αποθηκευμένων λιστών αναπαραγωγής.'
   Save: "Αποθήκευση"
   Edit: "Επεξεργασία"
-  This playlist is private or does not exist.: "Αυτή η λίστα αναπαραγωγής είναι ιδιωτική ή δεν υπάρχει."
   Pin to Navigation: "Καρφίτσωμα στην πλοήγηση"
   Unpin from Navigation: "Ξεκαρφίτσωμα από την πλοήγηση"
   Pin to Top: "Καρφίτσωμα στην κορυφή"
@@ -738,8 +737,6 @@ Settings:
     Minimum Pause Before Rewinding: "Ελάχιστη παύση πριν την επαναφορά πίσω"
     Mono Audio: 'Μονοφωνικός ήχος'
     Show Mono Audio Toggle: 'Εμφάνιση διακόπτη μονοφωνικού ήχου'
-    Default Media Format:
-      Default Media Format: 'Προεπιλεγμένη μορφή πολυμέσων'
     Pause on Stream Recovery: "Παύση κατά την ανάκτηση ροής"
     Buffering:
       Buffering: Προσωρινή αποθήκευση
@@ -828,8 +825,6 @@ Settings:
         Magenta: Ματζέντα
         Red: Κόκκινο
         Black: Μαύρο
-    Default Viewing Mode:
-      Tooltip: Οι περισσότερες προεπιλεγμένες λειτουργίες προβολής εφαρμόζονται μόνο στην αρχή κάθε συνεδρίας παρακολούθησης. Οι αλλαγές που κάνετε κατά τη συνεδρία διατηρούνται μέχρι να τελειώσει. Οι μόνιμα ενεργές λειτουργίες προβολής εφαρμόζονται κάθε φορά που αλλάζετε βίντεο, ανεξάρτητα από τις αλλαγές που κάνατε κατά την προβολή του προηγούμενου βίντεο.
     Auto Picture in Picture:
       Auto Picture in Picture: Αυτόματη μετάβαση σε λειτουργία εικόνας εντός εικόνας
       On Tab Change: Κατά την αλλαγή καρτέλας
@@ -1563,15 +1558,12 @@ Profile:
   Use Initial: Χρήση αρχικού γράμματος
   The selected image could not be loaded: Δεν ήταν δυνατή η φόρτωση της επιλεγμένης εικόνας
   Theme Color: Χρώμα θέματος
-  Go To Profile Manager: Μετάβαση στη διαχείριση προφίλ
 Channel:
   Hide Watched: Απόκρυψη προβεβλημένων
   Fewer videos per day: "Λιγότερα βίντεο ανά ημέρα"
   More videos per day: "Περισσότερα βίντεο ανά ημέρα"
   Verified: Επαληθευμένο
   Official Artist Channel: Επίσημο κανάλι καλλιτέχνη
-  About:
-    Links: Σύνδεσμοι
   Subscription settings: Ρυθμίσεις συνδρομής
   Failed to save subscription settings: Δεν ήταν δυνατή η αποθήκευση των ρυθμίσεων καναλιού
   Videos per day: Βίντεο ανά ημέρα
@@ -1588,9 +1580,6 @@ Channel:
   Channel Name Unavailable: Το όνομα καναλιού δεν είναι διαθέσιμο
   Search Result Types: Τύποι αποτελεσμάτων αναζήτησης
   All Results: Όλα
-  View All: Προβολή όλων
-  Videos:
-    This channel has videos but none could be displayed, try fetching more: "Αυτό το κανάλι έχει βίντεο, αλλά κανένα δεν μπόρεσε να εμφανιστεί. Δοκιμάστε να φορτώσετε περισσότερα"
   Posts:
     Original post unavailable: "Η αρχική ανάρτηση δεν είναι διαθέσιμη"
     Members-only video hidden by OpenTubeX: "Το OpenTubeX απέκρυψε βίντεο μόνο για μέλη"
@@ -1625,8 +1614,6 @@ Video:
   Queue Item Cannot Move Down: Δεν είναι δυνατή η μετακίνηση του {title} προς τα κάτω. Βρίσκεται ήδη στη θέση {total} από {total}.
   Metadata: Πληροφορίες βίντεο
   Close Metadata: Κλείσιμο πληροφοριών βίντεο
-  Collapse Playlist: Σύμπτυξη λίστας αναπαραγωγής
-  Expand Playlist: Ανάπτυξη λίστας αναπαραγωγής
   Metadata Cache:
     Title History: Ιστορικό τίτλων
     Thumbnail History: Ιστορικό μικρογραφιών
@@ -1684,7 +1671,6 @@ Video:
   Scheduled video starting: Το προγραμματισμένο βίντεο ξεκινά
   Live notification body: 'Το {videoTitle} ξεκινά τώρα'
   Premiere: Πρεμιέρα
-  AI: AI
   AI-generated content: Περιεχόμενο παραγόμενο από AI
   Collaborators: Συνεργάτες
   Live Chat Replay: Επανάληψη ζωντανής συνομιλίας
@@ -1922,9 +1908,6 @@ Video:
       Load: "Φόρτωση αρχείου υποτίτλων…"
       Subtitle Files: "Αρχεία υποτίτλων"
       Error: "Δεν ήταν δυνατή η φόρτωση του αρχείου υποτίτλων. Επιλέξτε ένα αρχείο SRT ή WebVTT."
-  Station: Σταθμός
-  Playlist:
-    Unavailable videos are hidden: 1 μη διαθέσιμο βίντεο είναι κρυμμένο | {count} μη διαθέσιμα βίντεο είναι κρυμμένα
   External Media:
     Dislikes: "Αρνητική ψήφος | Αρνητικές ψήφοι"
     Reposts: "Αναδημοσίευση | Αναδημοσιεύσεις"
@@ -1950,7 +1933,6 @@ Video:
       subscriber_only: "Μόνο συνδρομητές"
       needs_auth: "Απαιτείται σύνδεση"
       unlisted: "Μη καταχωρημένο"
-  How this was made: Πώς δημιουργήθηκε αυτό
   Save Queue to Playlist: "Αποθήκευση ουράς αναπαραγωγής σε λίστα αναπαραγωγής"
   Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Η ζωντανή συνομιλία δεν υποστηρίζεται προς το παρόν με τον διακομιστή Yattee. Απαιτείται άμεση σύνδεση με το YouTube.
   External Player:
@@ -1971,7 +1953,6 @@ Playlist:
   Playlist Preload Complete: "Προφορτωμένα βίντεο: {count}."
   Playlist Preload Partial: "Προφορτώθηκαν {preloaded} από {requested} βίντεο. Απέτυχαν {failed}."
   Playlist Preload Pagination Failed: "Δεν ήταν δυνατή η φόρτωση ολόκληρης της λίστας, οπότε η προφόρτωση ακυρώθηκε."
-  Unavailable videos are hidden: Τα μη διαθέσιμα βίντεο είναι κρυμμένα
   Add Playlist to Queue: "Προσθήκη λίστας αναπαραγωγής στην ουρά αναπαραγωγής"
   Playlist Added to Queue: "Η λίστα αναπαραγωγής προστέθηκε στην ουρά αναπαραγωγής"
 Change Format:
@@ -2145,7 +2126,6 @@ Comments:
   Getting comment replies, please wait: Ανάκτηση απαντήσεων σχολίων, περιμένετε
   Reload Comments: Επαναφόρτωση σχολίων
   Reply Count: 1 απάντηση | {replyCount} απαντήσεις
-  Comments are turned off: Τα σχόλια είναι απενεργοποιημένα
   YouTube did not provide advertised replies: Το YouTube έδειξε ότι αυτό το σχόλιο έχει απαντήσεις, αλλά δεν τις παρείχε. Ίσως έχουν διαγραφεί ή αποκρυφτεί, γι' αυτό αφαιρέθηκε το κουμπί απαντήσεων.
   Pinned by you: Καρφιτσώθηκε από εσάς
   A reply is pinned: Μια απάντηση είναι καρφιτσωμένη
@@ -2292,12 +2272,8 @@ Tooltips:
     Use Fixed Tab Width: Δίνει σε κάθε καρτέλα της οριζόντιας γραμμής καρτελών το ίδιο πλάτος, αντί να προσαρμόζει το μέγεθός της στον τίτλο.
     Use Custom Title Bar: Αντικαθιστά τη γραμμή τίτλου του συστήματος με τη γραμμή καρτελών ή με την επάνω πλοήγηση όταν οι καρτέλες δεν βρίσκονται επάνω, για εξοικονόμηση κάθετου χώρου. Τα στοιχεία ελέγχου του παραθύρου εμφανίζονται στη γωνία αυτής της γραμμής.
     Use Grid Player Menu: Διατάσσει το μενού ρυθμίσεων του προγράμματος αναπαραγωγής βίντεο ως πλέγμα πλακιδίων αντί για λίστα γραμμών.
-  Experimental Settings:
-    Disable Hardware Acceleration: Απενεργοποιεί την επιτάχυνση υλικού GPU. Μπορεί να διορθώσει προβλήματα γραφικών, αλλά πιθανότατα θα μειώσει την απόδοση.
 The playlist is at the beginning. Enable loop to continue playing: Η λίστα αναπαραγωγής βρίσκεται στην αρχή. Ενεργοποιήστε την επανάληψη για να συνεχιστεί η αναπαραγωγή
 External link opening has been disabled in Settings → Privacy: Το άνοιγμα εξωτερικών συνδέσμων έχει απενεργοποιηθεί στις Ρυθμίσεις → Απόρρητο
-Screenshot Clipboard Success: Το στιγμιότυπο οθόνης αποθηκεύτηκε στο πρόχειρο
-Screenshot Clipboard Error: Η αντιγραφή του στιγμιότυπου οθόνης στο πρόχειρο απέτυχε
 KeyboardShortcutPrompt:
   Toggle Quick Bookmark: Προσθήκη ή αφαίρεση από τη λίστα αναπαραγωγής γρήγορου σελιδοδείκτη
   Reopen Closed Window: Επαναφορά του τελευταίου κλεισμένου παραθύρου
