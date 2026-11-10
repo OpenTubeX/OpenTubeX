@@ -225,6 +225,8 @@ Feed:
   Cancel Refresh: Hủy làm mới
   Next Auto Refresh: 'Lần tự động làm mới tiếp theo: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'Làm mới danh sách phát đã lưu'
+  Saved Playlists Refresh Failed: 'Không thể làm mới một số danh sách phát đã lưu.'
   Save: "Lưu"
   Edit: "Chỉnh sửa"
   Pin to Navigation: "Ghim vào thanh điều hướng"

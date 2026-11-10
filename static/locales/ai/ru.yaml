@@ -198,6 +198,8 @@ Feed:
   Cancel Refresh: Отменить обновление
   Next Auto Refresh: 'Следующее автоматическое обновление: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'Обновить сохранённые плейлисты'
+  Saved Playlists Refresh Failed: 'Не удалось обновить некоторые сохранённые плейлисты.'
   Save: "Сохранить"
   Edit: "Изменить"
   Pin to Navigation: "Закрепить в навигации"

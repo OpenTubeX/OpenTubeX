@@ -225,6 +225,8 @@ Feed:
   Cancel Refresh: Canslo'r adnewyddiad
   Next Auto Refresh: 'Adnewyddiad awtomatig nesaf: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'Adnewyddu rhestrau chwarae wedi’u cadw'
+  Saved Playlists Refresh Failed: 'Doedd dim modd adnewyddu rhai rhestrau chwarae wedi’u cadw.'
   Save: "Cadw"
   Edit: "Golygu"
   This playlist is private or does not exist.: "Mae'r rhestr chwarae hon yn breifat neu nid yw'n bodoli."

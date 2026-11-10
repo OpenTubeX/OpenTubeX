@@ -244,6 +244,8 @@ Feed:
   Cancel Refresh: لغو تازه‌سازی
   Next Auto Refresh: 'تازه‌سازی خودکار بعدی: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'تازه‌سازی فهرست‌های پخش ذخیره‌شده'
+  Saved Playlists Refresh Failed: 'برخی از فهرست‌های پخش ذخیره‌شده تازه‌سازی نشدند.'
   Save: "ذخیره"
   Edit: "ویرایش"
   This playlist is private or does not exist.: "این فهرست پخش خصوصی است یا وجود ندارد."

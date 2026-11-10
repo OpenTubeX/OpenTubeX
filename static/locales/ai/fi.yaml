@@ -227,6 +227,8 @@ Feed:
   Cancel Refresh: Peruuta päivitys
   Next Auto Refresh: 'Seuraava automaattinen päivitys: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'Päivitä tallennetut soittolistat'
+  Saved Playlists Refresh Failed: 'Joitakin tallennettuja soittolistoja ei voitu päivittää.'
   Save: "Tallenna"
   Edit: "Muokkaa"
   This playlist is private or does not exist.: "Tämä soittolista on yksityinen tai sitä ei ole olemassa."

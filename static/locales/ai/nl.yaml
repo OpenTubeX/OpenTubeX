@@ -227,6 +227,8 @@ Feed:
   Cancel Refresh: Vernieuwen annuleren
   Next Auto Refresh: 'Volgende automatische vernieuwing: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'Opgeslagen afspeellijsten vernieuwen'
+  Saved Playlists Refresh Failed: 'Sommige opgeslagen afspeellijsten konden niet worden vernieuwd.'
   Save: "Opslaan"
   Edit: "Bewerken"
   This playlist is private or does not exist.: "Deze afspeellijst is privé of bestaat niet."

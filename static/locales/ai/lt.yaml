@@ -261,6 +261,8 @@ Feed:
   Next Auto Refresh: 'Kitas automatinis atnaujinimas: {date}'
   Refresh Feed: Atnaujinti {subscriptionName}
 User Playlists:
+  Refresh Saved Playlists: 'Atnaujinti išsaugotus grojaraščius'
+  Saved Playlists Refresh Failed: 'Kai kurių išsaugotų grojaraščių nepavyko atnaujinti.'
   Save: "Išsaugoti"
   Edit: "Redaguoti"
   This playlist is private or does not exist.: "Šis grojaraštis yra privatus arba neegzistuoja."

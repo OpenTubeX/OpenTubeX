@@ -833,6 +833,70 @@ test.describe('saved playlist metadata', () => {
   })
 })
 
+test.describe('saved playlist refresh', () => {
+  const savedPlaylist = (id, title, savedAt) => ({
+    playlist: { id, title, description: '', thumbnail_url: null, video_count: 1 },
+    uploader: { id: `UC-${id}`, name: `${title} channel`, avatar: null, verified: false },
+    savedAt
+  })
+
+  test.use({
+    seed: {
+      settings: {
+        backendPreference: 'invidious',
+        backendFallback: false,
+        defaultInvidiousInstance: 'https://invidious.test',
+        userPlaylistsSortBy: 'latest_updated_first',
+        playlistBookmarks: [
+          savedPlaylist('saved-older', 'Saved older', 1),
+          savedPlaylist('saved-newer', 'Saved newer', 2),
+          savedPlaylist('saved-failing', 'Saved failing', 3)
+        ]
+      }
+    }
+  })
+
+  test('moves saved playlists the channel updated recently to the top', async ({ page }) => {
+    await page.route(/\/api\/v1\/playlists\/saved-(older|newer)\?/, route => {
+      const older = route.request().url().includes('saved-older')
+      return route.fulfill({
+        json: {
+          type: 'playlist',
+          title: older ? 'Saved older' : 'Saved newer',
+          playlistId: older ? 'saved-older' : 'saved-newer',
+          author: 'Saved channel',
+          authorId: 'UC-saved-channel',
+          authorThumbnails: [],
+          description: '',
+          videoCount: older ? 2 : 1,
+          viewCount: 1,
+          // The playlist saved first got a new video last
+          updated: older ? 1_700_000_000 : 1_600_000_000,
+          videos: []
+        }
+      })
+    })
+    await page.route(/\/api\/v1\/playlists\/saved-failing\?/, route => route.fulfill({ status: 500, json: { error: 'Synthetic failure' } }))
+
+    await goTo(page, 'userplaylists')
+    // The default playlists sort among them, but are not refreshed
+    const titles = page.locator('.playlistList .h3Title').filter({ hasText: /^Saved / })
+    await expect(titles).toHaveText(['Saved failing', 'Saved newer', 'Saved older'])
+
+    await page.getByRole('button', { name: /^Refresh saved playlists/ }).click()
+
+    await expect(page.locator('.toast').filter({ hasText: 'Some saved playlists could not be refreshed.' })).toBeVisible()
+    await expect(titles).toHaveText(['Saved older', 'Saved newer', 'Saved failing'])
+    expect(await page.evaluate(() => window.$store.getters.getPlaylistBookmarks.map(bookmark => [
+      bookmark.playlist.id, bookmark.playlist.video_count, bookmark.updatedAt ?? null
+    ]))).toEqual([
+      ['saved-older', 2, 1_700_000_000_000],
+      ['saved-newer', 1, 1_600_000_000_000],
+      ['saved-failing', 1, null]
+    ])
+  })
+})
+
 test.describe('playlist view type', () => {
   test.use({
     seed: {

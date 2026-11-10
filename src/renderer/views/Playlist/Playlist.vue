@@ -260,6 +260,7 @@ import { thumbnailSizeSettingKey } from '../../composables/useThumbnailSizeSlide
 import {
   extractLocalCacheablePlaylistContinuation,
   getLocalPlaylist,
+  getLocalPlaylistChannelName,
   getLocalPlaylistContinuation,
   parseLocalPlaylistVideos,
 } from '../../helpers/api/local'
@@ -277,9 +278,9 @@ import { hasMoreInvidiousPlaylistPages, mergeInvidiousPlaylistVideos } from '../
 import { runRetryablePlaylistRequest } from '../../helpers/playlist-pagination'
 import { formatDate } from '../../helpers/dateFormat'
 import {
-  canonicalChannelAvatarUrl,
-  canonicalPlaylistThumbnailUrl,
   createPlaylistBookmark,
+  parseLocalPlaylistLastUpdated,
+  updatePlaylistBookmarkMetadata,
 } from '../../helpers/playlist-bookmarks'
 import { fillMissingPlaylistVideoDurations, getSortedPlaylistItems, isPlaylistSortOrder, SORT_BY_VALUES } from '../../helpers/playlists'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
@@ -546,43 +547,30 @@ const isPlaylistBookmarked = computed(() => {
   return !isUserPlaylistRequested.value && store.getters.getPlaylistBookmark(playlistId.value) != null
 })
 
+// Invidious sends a timestamp, the local API the text shown in the header
+function remotePlaylistUpdatedAt() {
+  return lastUpdatedDate.value?.getTime() ?? parseLocalPlaylistLastUpdated(lastUpdated.value)
+}
+
 async function refreshPlaylistBookmarkMetadata() {
   const bookmark = store.getters.getPlaylistBookmark(playlistId.value)
   if (bookmark == null) return
 
-  const thumbnailUrl = playlistThumbnail.value || (firstVideoId.value
-    ? `https://i.ytimg.com/vi/${firstVideoId.value}/mqdefault.jpg`
-    : null)
-  const canonicalThumbnailUrl = canonicalPlaylistThumbnailUrl(thumbnailUrl)
-  const canonicalChannelAvatar = canonicalChannelAvatarUrl(channelThumbnail.value)
-  const refreshedChannelId = channelId.value || playlistId.value
-  const refreshedChannelName = channelName.value || playlistTitle.value
-  if (
-    bookmark.playlist.title === playlistTitle.value &&
-    bookmark.playlist.description === playlistDescription.value &&
-    bookmark.playlist.thumbnail_url === canonicalThumbnailUrl &&
-    bookmark.playlist.video_count === videoCount.value &&
-    bookmark.uploader.id === refreshedChannelId &&
-    bookmark.uploader.name === refreshedChannelName &&
-    bookmark.uploader.avatar === canonicalChannelAvatar
-  ) return
-
-  await store.dispatch('savePlaylistBookmark', {
-    ...bookmark,
-    playlist: {
-      ...bookmark.playlist,
-      title: playlistTitle.value,
-      description: playlistDescription.value,
-      thumbnail_url: canonicalThumbnailUrl,
-      video_count: videoCount.value,
-    },
-    uploader: {
-      ...bookmark.uploader,
-      id: refreshedChannelId,
-      name: refreshedChannelName,
-      avatar: canonicalChannelAvatar,
-    },
+  const updated = updatePlaylistBookmarkMetadata(bookmark, {
+    title: playlistTitle.value,
+    description: playlistDescription.value,
+    thumbnailUrl: playlistThumbnail.value || (firstVideoId.value
+      ? `https://i.ytimg.com/vi/${firstVideoId.value}/mqdefault.jpg`
+      : null),
+    videoCount: videoCount.value,
+    uploaderId: channelId.value || playlistId.value,
+    uploaderName: channelName.value || playlistTitle.value,
+    uploaderAvatar: channelThumbnail.value,
+    updatedAt: remotePlaylistUpdatedAt(),
   })
+  if (updated === bookmark) return
+
+  await store.dispatch('savePlaylistBookmark', updated)
 }
 
 async function togglePlaylistBookmark() {
@@ -603,6 +591,7 @@ async function togglePlaylistBookmark() {
           uploaderId: channelId.value || playlistId.value,
           uploaderName: channelName.value || playlistTitle.value,
           uploaderAvatar: channelThumbnail.value,
+          updatedAt: remotePlaylistUpdatedAt(),
         }))
 
     if (!saved) {
@@ -927,19 +916,7 @@ async function getPlaylistLocal() {
     const result = await getLocalPlaylist(requestedPlaylistId)
     if (!requestIsCurrent()) return
 
-    let channelName_
-
-    if (result.info.author) {
-      channelName_ = result.info.author.name
-    } else {
-      const subtitle = result.info.subtitle?.toString()
-      if (subtitle) {
-        const index = subtitle.lastIndexOf('•')
-        channelName_ = subtitle.substring(0, index).trim()
-      } else {
-        channelName_ = ''
-      }
-    }
+    const channelName_ = getLocalPlaylistChannelName(result.info)
 
     const playlistItems_ = parseLocalPlaylistVideos(result.items)
     fetchedLocalPlaylistItemCount = result.items.length

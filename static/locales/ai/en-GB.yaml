@@ -226,6 +226,8 @@ Feed:
   Cancel Refresh: Cancel refresh
   Next Auto Refresh: 'Next auto refresh: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'Refresh saved playlists'
+  Saved Playlists Refresh Failed: 'Some saved playlists could not be refreshed.'
   Save: "Save"
   Edit: "Edit"
   This playlist is private or does not exist.: "This playlist is private or does not exist."

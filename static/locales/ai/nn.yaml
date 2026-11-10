@@ -225,6 +225,8 @@ Feed:
   Cancel Refresh: Avbryt oppdateringa
   Next Auto Refresh: 'Neste automatiske oppdatering: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'Oppdater lagra spelelister'
+  Saved Playlists Refresh Failed: 'Nokre lagra spelelister kunne ikkje oppdaterast.'
   Save: "Lagre"
   Edit: "Rediger"
   This playlist is private or does not exist.: "Denne spelelista er privat eller finst ikkje."

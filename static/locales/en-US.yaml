@@ -407,6 +407,8 @@ Feed:
   Refresh Feed: Refresh {subscriptionName}
 Playlists: Playlists
 User Playlists:
+  Refresh Saved Playlists: Refresh saved playlists
+  Saved Playlists Refresh Failed: Some saved playlists could not be refreshed.
   Add new videos to the top (custom order): "Add new videos to the top (custom order)"
   Shuffle videos by default: "Shuffle videos by default"
   Repair Playlists: Repair Playlists

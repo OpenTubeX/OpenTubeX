@@ -227,6 +227,8 @@ Feed:
   Cancel Refresh: Yeniləməni ləğv et
   Next Auto Refresh: 'Növbəti avtomatik yeniləmə: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'Saxlanılmış pleylistləri yenilə'
+  Saved Playlists Refresh Failed: 'Bəzi saxlanılmış pleylistləri yeniləmək mümkün olmadı.'
   Save: "Saxla"
   Edit: "Düzəliş et"
   Pin to Navigation: "Naviqasiyaya bərkit"

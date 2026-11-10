@@ -40,7 +40,7 @@
             :label="t('History.Repair')"
             :aria-label="t('History.Repair')"
             :title="t('History.Repair')"
-            :icon="['fas', 'sync']"
+            :icon="['fas', 'wrench']"
             :disabled="metadataRepairBusy"
             @click="showRepairPrompt = true"
           >
@@ -78,7 +78,7 @@
             aria-live="polite"
           >
             <FtIcon
-              :icon="['fas', 'sync']"
+              :icon="['fas', 'wrench']"
               aria-hidden="true"
             />
             {{ repairPhaseLabel }}
@@ -302,7 +302,7 @@
             class="repairPromptTitle"
           >
             <FtIcon
-              :icon="['fas', 'sync']"
+              :icon="['fas', 'wrench']"
               class="headingIcon"
               aria-hidden="true"
             />
@@ -343,7 +343,7 @@
             />
             <FtButton
               :label="t('History.Start Repair')"
-              :icon="['fas', 'sync']"
+              :icon="['fas', 'wrench']"
               background-color="var(--primary-color)"
               text-color="var(--text-with-main-color)"
               :disabled="metadataRepairBusy"

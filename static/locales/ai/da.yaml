@@ -229,6 +229,8 @@ Feed:
   Cancel Refresh: Annuller opdatering
   Next Auto Refresh: 'Næste automatiske opdatering: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'Opdater gemte playlister'
+  Saved Playlists Refresh Failed: 'Nogle gemte playlister kunne ikke opdateres.'
   Save: "Gem"
   Edit: "Rediger"
   This playlist is private or does not exist.: "Denne playliste er privat eller findes ikke."

@@ -273,6 +273,8 @@ Feed:
   Cancel Refresh: ریفریش منسوخ کریں
   Next Auto Refresh: 'اگلی خودکار ریفریش: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'محفوظ شدہ پلے لسٹس ریفریش کریں'
+  Saved Playlists Refresh Failed: 'کچھ محفوظ شدہ پلے لسٹس ریفریش نہیں ہو سکیں۔'
   Add new videos to the top (custom order): نئی ویڈیوز سب سے اوپر شامل کریں (حسب ضرورت ترتیب)
   Shuffle videos by default: ڈیفالٹ کے طور پر ویڈیوز شفل کریں
   Repair Playlists: پلے لسٹس کی مرمت کریں

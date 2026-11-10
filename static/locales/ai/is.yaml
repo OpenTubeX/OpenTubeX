@@ -225,6 +225,8 @@ Feed:
   Cancel Refresh: Hætta við endurnýjun
   Next Auto Refresh: 'Næsta sjálfvirka endurnýjun: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'Endurnýja vistaða spilunarlista'
+  Saved Playlists Refresh Failed: 'Ekki tókst að endurnýja suma vistaða spilunarlista.'
   Save: "Vista"
   Edit: "Breyta"
   Pin to Navigation: "Festa við valmynd"

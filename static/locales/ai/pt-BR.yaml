@@ -194,6 +194,8 @@ Feed:
   Cancel Refresh: Cancelar atualização
   Next Auto Refresh: 'Próxima atualização automática: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'Atualizar playlists salvas'
+  Saved Playlists Refresh Failed: 'Não foi possível atualizar algumas playlists salvas.'
   Save: "Salvar"
   Edit: "Editar"
   Pin to Navigation: "Fixar na navegação"

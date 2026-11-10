@@ -225,6 +225,8 @@ Feed:
   Cancel Refresh: Annuler l’actualisation
   Next Auto Refresh: 'Prochaine actualisation automatique : {date}'
 User Playlists:
+  Refresh Saved Playlists: 'Actualiser les playlists enregistrées'
+  Saved Playlists Refresh Failed: 'Certaines playlists enregistrées n’ont pas pu être actualisées.'
   Save: "Enregistrer"
   Edit: "Modifier"
   Pin to Navigation: "Épingler à la navigation"

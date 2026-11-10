@@ -227,6 +227,8 @@ Feed:
   Cancel Refresh: Cancelar a actualización
   Next Auto Refresh: 'Seguinte actualización automática: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'Actualizar as listas de reprodución gardadas'
+  Saved Playlists Refresh Failed: 'Non se puideron actualizar algunhas listas de reprodución gardadas.'
   Save: "Gardar"
   Edit: "Editar"
   This playlist is private or does not exist.: "Esta lista de reprodución é privada ou non existe."

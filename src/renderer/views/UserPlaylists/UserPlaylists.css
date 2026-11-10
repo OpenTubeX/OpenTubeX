@@ -44,7 +44,7 @@
   padding-block: 6px;
 }
 
-.newPlaylistButton {
+.headingIconButton {
   flex: 0 0 auto;
 }
 
@@ -147,9 +147,27 @@
   margin: 0;
 }
 
-@media (width <= 680px) {
+/* Like the history actions, they take their own row on narrow screens */
+@media only screen and (width <= 800px) {
   .headingRow {
     flex-wrap: wrap;
+  }
+
+  .headingActions {
+    flex-basis: 100%;
+    justify-content: flex-start;
+    gap: 6px;
+    margin-inline-start: 0;
+  }
+
+  .headingActions > .btn {
+    flex: 1 0 auto;
+    min-block-size: var(--phone-touch-target, 48px);
+  }
+
+  .headingIconButton :deep(.iconButton) {
+    inline-size: var(--phone-touch-target, 48px);
+    block-size: var(--phone-touch-target, 48px);
   }
 }
 

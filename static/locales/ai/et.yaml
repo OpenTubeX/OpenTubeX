@@ -225,6 +225,8 @@ Feed:
   Cancel Refresh: Tühista värskendamine
   Next Auto Refresh: 'Järgmine automaatne värskendamine: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'Värskenda salvestatud esitusloendeid'
+  Saved Playlists Refresh Failed: 'Mõnda salvestatud esitusloendit ei õnnestunud värskendada.'
   Save: "Salvesta"
   Edit: "Muuda"
   Pin to Navigation: "Kinnita navigeerimisribale"

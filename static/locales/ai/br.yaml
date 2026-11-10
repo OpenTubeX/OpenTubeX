@@ -225,6 +225,8 @@ Feed:
   Cancel Refresh: "Nullañ an adkargañ"
   Next Auto Refresh: "Adkargañ emgefreek da-heul: {date}"
 User Playlists:
+  Refresh Saved Playlists: 'Adkargañ ar rolloù-lenn enrollet'
+  Saved Playlists Refresh Failed: 'N''eus ket bet gallet adkargañ rolloù-lenn enrollet zo.'
   Save: "Enrollañ"
   Edit: "Kemmañ"
   Pin to Navigation: "Spilhennañ er merdeiñ"

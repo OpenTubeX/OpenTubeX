@@ -225,6 +225,8 @@ Feed:
   Cancel Refresh: Yenilemeyi iptal et
   Next Auto Refresh: 'Sonraki otomatik yenileme: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'Kaydedilen oynatma listelerini yenile'
+  Saved Playlists Refresh Failed: 'Kaydedilen bazı oynatma listeleri yenilenemedi.'
   Save: "Kaydet"
   Edit: "Düzenle"
   Pin to Navigation: "Gezinmeye sabitle"

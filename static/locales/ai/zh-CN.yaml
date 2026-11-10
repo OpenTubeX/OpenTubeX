@@ -225,6 +225,8 @@ Feed:
   Cancel Refresh: 取消刷新
   Next Auto Refresh: '下次自动刷新：{date}'
 User Playlists:
+  Refresh Saved Playlists: '刷新已保存的播放列表'
+  Saved Playlists Refresh Failed: '部分已保存的播放列表无法刷新。'
   Save: "保存"
   Edit: "编辑"
   Pin to Navigation: "固定到导航栏"

@@ -227,6 +227,8 @@ Feed:
   Cancel Refresh: Скасувати оновлення
   Next Auto Refresh: 'Наступне автоматичне оновлення: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'Оновити збережені списки відтворення'
+  Saved Playlists Refresh Failed: 'Не вдалося оновити деякі збережені списки відтворення.'
   Save: "Зберегти"
   Edit: "Змінити"
   This playlist is private or does not exist.: "Цей плейлист приватний або не існує."

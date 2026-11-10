@@ -279,6 +279,8 @@ Feed:
   Next Auto Refresh: 'Propera actualització automàtica: {date}'
   Refresh Feed: Actualitza {subscriptionName}
 User Playlists:
+  Refresh Saved Playlists: 'Actualitza les llistes de reproducció desades'
+  Saved Playlists Refresh Failed: 'No s''han pogut actualitzar algunes llistes de reproducció desades.'
   Save: "Desa"
   Edit: "Edita"
   This playlist is private or does not exist.: "Aquesta llista de reproducció és privada o no existeix."

@@ -225,6 +225,8 @@ Feed:
   Cancel Refresh: Ακύρωση ανανέωσης
   Next Auto Refresh: 'Επόμενη αυτόματη ανανέωση: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'Ανανέωση αποθηκευμένων λιστών αναπαραγωγής'
+  Saved Playlists Refresh Failed: 'Δεν ήταν δυνατή η ανανέωση ορισμένων αποθηκευμένων λιστών αναπαραγωγής.'
   Save: "Αποθήκευση"
   Edit: "Επεξεργασία"
   This playlist is private or does not exist.: "Αυτή η λίστα αναπαραγωγής είναι ιδιωτική ή δεν υπάρχει."

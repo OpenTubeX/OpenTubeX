@@ -225,6 +225,8 @@ Feed:
   Cancel Refresh: Utzi freskatzeari
   Next Auto Refresh: 'Hurrengo freskatze automatikoa: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'Freskatu gordetako erreprodukzio-zerrendak'
+  Saved Playlists Refresh Failed: 'Gordetako erreprodukzio-zerrenda batzuk ezin izan dira freskatu.'
   Save: "Gorde"
   Edit: "Editatu"
   Pin to Navigation: "Ainguratu nabigazioan"
