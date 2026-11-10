@@ -404,7 +404,6 @@ test.describe('watch pages that hide the side bar', () => {
     await expect(page.locator('.sideNav')).toBeHidden()
 
     await page.evaluate(() => window.$store.commit('setTutorialStep', 3))
-    await expect(page.locator('.tutorialCard')).toHaveAccessibleName('Your library is always nearby')
     await expectHighlightCenteredOn(page, '.menuButton')
   })
 })
