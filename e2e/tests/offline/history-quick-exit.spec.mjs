@@ -35,7 +35,7 @@ function collectManifestWarnings(page) {
 for (const phase of ['metadata pending', 'media pending', 'first loaded data']) {
   test(`preserves the resume position when leaving with ${phase}`, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
-    await page.locator(sel.sideNavLink('history')).first().evaluate(element => element.click())
+    await page.locator(sel.sideNavRouteLink('history')).first().evaluate(element => element.click())
     await expect(page).toHaveURL(/#\/history/)
     let release
     const pending = new Promise(resolve => { release = resolve })
@@ -78,7 +78,7 @@ for (const phase of ['metadata pending', 'media pending', 'first loaded data']) 
 for (const position of [0, 12]) {
   test(`saves a deliberate seek to ${position} seconds after resuming`, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
-    await page.locator(sel.sideNavLink('history')).first().evaluate(element => element.click())
+    await page.locator(sel.sideNavRouteLink('history')).first().evaluate(element => element.click())
     await expect(page).toHaveURL(/#\/history/)
     const video = await openMockedVideo(page)
     await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(10)
@@ -115,7 +115,7 @@ for (const exit of ['navigate', 'close tab']) {
         })
       }, position)
       if (exit === 'navigate') {
-        await page.locator(sel.sideNavLink('history')).first().evaluate(element => element.click())
+        await page.locator(sel.sideNavRouteLink('history')).first().evaluate(element => element.click())
         await expect(page).toHaveURL(/#\/history/)
       } else {
         await page.keyboard.press('Control+w')
@@ -173,7 +173,7 @@ for (const existing of [true, false]) {
     if (!existing) {
       await page.evaluate(() => window.$store.dispatch('removeAllHistory'))
     }
-    await page.locator(sel.sideNavLink('history')).first().evaluate(element => element.click())
+    await page.locator(sel.sideNavRouteLink('history')).first().evaluate(element => element.click())
     await expect(page).toHaveURL(/#\/history/)
     await page.evaluate(backSelector => {
       document.addEventListener('loadedmetadata', event => {

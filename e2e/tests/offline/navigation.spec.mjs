@@ -484,7 +484,7 @@ test.describe('navigation history titles', () => {
       const tab = store.getters.getActiveTab
       tab.history[tab.historyIndex].titlePending = false
     })
-    await page.locator(sel.sideNavLink('history')).first().evaluate(link => link.click())
+    await page.locator(sel.sideNavRouteLink('history')).first().evaluate(link => link.click())
     await expect(page).toHaveURL(/#\/history/)
     await page.locator(sel.backButton).click()
     await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)

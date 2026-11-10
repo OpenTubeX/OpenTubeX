@@ -444,7 +444,7 @@ test.describe('fullscreen playlist dock', () => {
   })
 
   async function openFullscreenPlaylistVideo(page) {
-    await page.locator(sel.sideNavLink('userplaylists')).first().evaluate(element => element.click())
+    await page.locator(sel.sideNavRouteLink('userplaylists')).first().evaluate(element => element.click())
     await expect(page).toHaveURL(/#\/userplaylists/)
     await page.getByRole('link', { name: FULLSCREEN_PLAYLIST.playlistName }).first().click()
     await expect(page).toHaveURL(new RegExp(`#\\/playlist\\/${FULLSCREEN_PLAYLIST_ID}`))

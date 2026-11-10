@@ -1212,6 +1212,8 @@ export function expectAnimation(page, name) {
 export const sel = {
   searchInput: '.topNav .searchInput input.ft-input',
   sideNavLink: (route) => `:is(.sideNav, .moreOptionContainer) a[href="#/${route}"]:visible`,
+  // Watch pages hide the closed side bar, whose links scripts can still click
+  sideNavRouteLink: (route) => `:is(.sideNav, .moreOptionContainer) a[href="#/${route}"]`,
   tabs: '.tabBar .tab',
   activeTab: '.tabBar .tab.active',
   newTabButton: '.tabBar .newTabButton',
