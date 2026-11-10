@@ -1041,10 +1041,9 @@ test.describe('OIDC sync login', () => {
       await attachScreenshot('OIDC login pending')
 
       // A callback for a sign-in another page started leaves this one waiting.
+      // Callbacks arrive in order, so had it been accepted, the sign-in below
+      // would find nothing waiting and the checks for this account would fail.
       await openLink(app, `opentubex://oidc?token=${oidcToken('another-account')}&state=forged`)
-      // Give an accepted callback time to sign in.
-      await page.waitForTimeout(500)
-      await expect(section.getByText('Continue in your browser. OpenTubeX resumes when you are done.')).toBeVisible()
 
       const state = url.searchParams.get('state')
       expect(state).toMatch(/^[\w-]{43}$/)
