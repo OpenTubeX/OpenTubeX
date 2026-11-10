@@ -112,3 +112,19 @@ export async function fetchGoogleVideo(url, init = {}, fetchImpl = fetch) {
   markGoogleVideoHostUnreachable(url)
   return await fetchImpl(avoidUnreachableGoogleVideoHost(url), init)
 }
+
+/**
+ * @param {unknown} url a stream URL
+ * @returns {string | null} an empty-response endpoint on the googlevideo server that streams `url`,
+ *   or null for other hosts
+ */
+export function getGoogleVideoProbeUrl(url) {
+  let probeUrl
+  try {
+    probeUrl = new URL(avoidUnreachableGoogleVideoHost(String(url)))
+  } catch {
+    return null
+  }
+  if (probeUrl.protocol !== 'https:' || !probeUrl.hostname.endsWith('.googlevideo.com')) return null
+  return `${probeUrl.origin}/generate_204`
+}

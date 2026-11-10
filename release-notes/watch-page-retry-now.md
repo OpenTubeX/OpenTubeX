@@ -2,7 +2,7 @@
 category: improvement
 ---
 
-While a video page waits to reach YouTube or your API server again, it now says so and offers a Retry now button instead of showing only the loading placeholder.
+While a video page waits to reach YouTube or your API server again, it now says so and offers a Retry now button instead of showing only the loading placeholder. A playing video that loses YouTube resumes where it stopped instead of reloading the page.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/06f7324d-7628-4b1d-baad-70dc6977ce86">

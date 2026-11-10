@@ -301,6 +301,7 @@ test('queued autoplay ends after playback starts so later source loads obey the 
     shortsNavigationSuspended: { value: false },
     hasPlaybackPosition: { value: false },
     showPoster: { value: true },
+    mediaWaiting: { value: true },
     startPaidPromotionTimer() {},
     emit() {},
     process: { env: {} },

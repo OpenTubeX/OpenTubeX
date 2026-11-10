@@ -539,6 +539,11 @@ async function doRequest(
     } else {
       response = await fetchGoogleVideo(sabrURL.toString(), currentState.requestInit, fetch)
     }
+    // Android's native transport answers a connection failure with this
+    // header, so it fails like a lost connection instead of a server's 502.
+    if (response.headers.has('X-OpenTubeX-Connection-Failed')) {
+      throw new Error('Connection to the googlevideo server failed')
+    }
 
     operationInputs.headersReceived({})
 

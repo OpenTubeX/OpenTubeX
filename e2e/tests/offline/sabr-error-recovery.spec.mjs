@@ -319,8 +319,8 @@ test('offline WebKit errors retain the player and reconnect restores error handl
     const video = document.querySelector('.ftVideoPlayer video')
     const player = video.ui.getControls().getPlayer()
     window.__offlineRecovery = { video, player, format: view.activeFormat, retries: 0 }
-    view.isAndroidTransientHttpRecoveryEnabled = () => true
-    view.retryAndroidTransientHttpError = async () => {
+    // Online, a lost connection waits for the stream's server to answer
+    view.retryStreamWhenReachable = async () => {
       window.__offlineRecovery.retries++
       return true
     }
@@ -382,7 +382,8 @@ test('Android transient HTTP recovery retries the current stream once', async ({
         severity: 2,
         category: 1,
         code: 1002,
-        data: ['https://example.invalid/video', { message: 'Failed to fetch' }]
+        // A lost connection waits for the server instead, see retryStreamWhenReachable
+        data: ['https://example.invalid/video', { message: 'Incomplete segment, missing MEDIA_END part' }]
       }
       await view.handlePlayerError(error)
       const afterFirstError = { retries, existingRecoveries, errorMessage: view.errorMessage }

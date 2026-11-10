@@ -216,6 +216,7 @@
               :suppress-autoplay-after-sabr-reload="suppressAutoplayAfterSabrReload"
               :sabr-reload-state="sabrReloadState"
               :stream-recovery-notice="streamRecoveryNotice"
+              :waiting-for-connection="waitingForPlaybackConnection"
               :pause-for-stream-recovery="streamRecoveryNotice !== null && streamRecoveryPausesPlayback"
               :shorts-player="customShortsPlayerActive"
               :shorts-phone-panels="shortsPhonePanelsEnabled"

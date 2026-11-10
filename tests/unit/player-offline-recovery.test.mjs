@@ -2,6 +2,8 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
+import { isRecoverableNetworkError } from '../../src/renderer/helpers/networkRecovery.js'
+import { getGoogleVideoProbeUrl } from '../../src/renderer/helpers/player/googleVideoFallback.js'
 
 const watchSource = readFileSync(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
 const start = watchSource.indexOf('    handlePlayerError: async function (error) {')
@@ -24,17 +26,116 @@ test('offline HTTP failure preserves the stream for Failed to fetch', async () =
   assert.equal(retries, 0, 'offline errors must not spend the transient retry or reach format fallback')
 })
 
-test('online HTTP failures still use the bounded transient recovery', async () => {
+test('online HTTP failures that are not lost connections still use the bounded transient recovery', async () => {
   const handle = vm.runInNewContext(`({${watchSource.slice(start, end)}}).handlePlayerError`, {
-    navigator: { onLine: true }, shaka: { util: { Error: { Code: { HTTP_ERROR: 1002 } } } }
+    navigator: { onLine: true }, shaka: { util: { Error: { Code: { HTTP_ERROR: 1002 } } } }, isRecoverableNetworkError
   })
   let retries = 0
+  let waits = 0
   await handle.call({
     isLoading: false,
+    retryStreamWhenReachable: async () => { waits++; return true },
     isAndroidTransientHttpRecoveryEnabled: () => true,
     retryAndroidTransientHttpError: async () => { retries++; return true }
-  }, { code: 1002, data: ['https://example.invalid/segment', { message: 'Load failed' }] })
-  assert.equal(retries, 1)
+  }, { code: 1002, data: ['https://example.invalid/segment', new Error('Incomplete segment, missing MEDIA_END part')] })
+  assert.deepEqual({ waits, retries }, { waits: 0, retries: 1 })
+})
+
+function createUnreachableStreamView() {
+  const methodsStart = watchSource.indexOf('    async retryStreamWhenReachable(error) {')
+  const methodsEnd = watchSource.indexOf('\n    isAndroidTransientHttpRecoveryEnabled', methodsStart)
+  const waits = []
+  const methods = vm.runInNewContext(`({${watchSource.slice(start, end)}${watchSource.slice(methodsStart, methodsEnd)}})`, {
+    navigator: { onLine: true },
+    shaka: { util: { Error: { Code: { HTTP_ERROR: 1002, BAD_HTTP_STATUS: 1001, VIDEO_ERROR: 3016, TIMEOUT: 1003 } } } },
+    isRecoverableNetworkError,
+    getGoogleVideoProbeUrl,
+    AbortController,
+    URL,
+    console: { warn () {} },
+    // Resolves once the test makes the server reachable again
+    waitUntilReachable: (url, signal) => new Promise((resolve, reject) => {
+      waits.push({ url, resolve })
+      signal.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')))
+    })
+  })
+  const player = {
+    retries: 0,
+    retryStreaming () { this.retries++; return true },
+    getSabrReloadState: () => ({})
+  }
+  const view = {
+    ...methods,
+    isLoading: false,
+    videoId: 'video',
+    activePlaybackEngine: 'built-in',
+    activeFormat: 'dash',
+    sabrData: { url: 'https://rr1---sn-abc.googlevideo.com/videoplayback?mn=sn-abc,sn-def&fvip=2' },
+    $refs: { player },
+    playbackNetworkRetryPending: false,
+    sabrErrorRecoveryAttempts: 0,
+    reloads: [],
+    isSabrVideoStream: () => true,
+    isAndroidTransientHttpRecoveryEnabled: () => false,
+    async reloadSabrStream (payload, message) {
+      this.reloads.push(message)
+      this.sabrErrorRecoveryAttempts++
+      this.isLoading = true
+      return true
+    }
+  }
+  return { view, player, waits }
+}
+
+const lostConnection = () => ({ code: 1002, data: ['sabr://video', new TypeError('network error'), 1] })
+
+test('an unreachable stream server keeps the player and retries it in place without spending recovery budgets', async () => {
+  const { view, player, waits } = createUnreachableStreamView()
+  const handled = view.handlePlayerError(lostConnection())
+  await Promise.resolve()
+  assert.deepEqual(waits.map(wait => wait.url), ['https://rr1---sn-abc.googlevideo.com/generate_204'])
+  assert.equal(view.playbackNetworkWaitOrigin, 'https://rr1---sn-abc.googlevideo.com')
+  assert.deepEqual({ loading: view.isLoading, retries: player.retries, reloads: view.reloads, budget: view.sabrErrorRecoveryAttempts },
+    { loading: false, retries: 0, reloads: [], budget: 0 }, 'waiting must neither reload nor retry the stream')
+
+  waits[0].resolve()
+  await handled
+  assert.deepEqual({ retries: player.retries, reloads: view.reloads, budget: view.sabrErrorRecoveryAttempts, origin: view.playbackNetworkWaitOrigin },
+    { retries: 1, reloads: [], budget: 0, origin: null })
+
+  // The retried stream failed again before playing, so it needs fresh data
+  await view.handlePlayerError(lostConnection())
+  assert.equal(waits.length, 1)
+  assert.deepEqual(view.reloads, ['Refreshing SABR stream after playback error: [PLAYER_ERROR: 1002]'])
+})
+
+test('a stream whose in-place retry cannot start reloads once the server answers', async () => {
+  const { view, player, waits } = createUnreachableStreamView()
+  player.retryStreaming = () => false
+  const handled = view.handlePlayerError(lostConnection())
+  await Promise.resolve()
+  assert.deepEqual(view.reloads, [])
+  waits[0].resolve()
+  await handled
+  assert.deepEqual(view.reloads, ['Refreshing SABR stream after playback error: [PLAYER_ERROR: 1002]'])
+})
+
+test('a replaced player ends the wait without retrying or reloading', async () => {
+  const { view, player, waits } = createUnreachableStreamView()
+  const handled = view.handlePlayerError(lostConnection())
+  await Promise.resolve()
+  view.playbackNetworkWaitController.abort()
+  view.$refs.player = { retryStreaming: () => assert.fail('the new player must not be retried') }
+  await handled
+  assert.deepEqual({ waits: waits.length, retries: player.retries, reloads: view.reloads, origin: view.playbackNetworkWaitOrigin },
+    { waits: 1, retries: 0, reloads: [], origin: null })
+})
+
+test('playback errors that need fresh streaming data do not wait for the network', async () => {
+  const { view, waits } = createUnreachableStreamView()
+  await view.handlePlayerError({ code: 1002, data: ['sabr://video', new Error('Invalid PO token'), 1] })
+  assert.equal(waits.length, 0)
+  assert.equal(view.reloads.length, 1)
 })
 
 test('offline errors do not suppress later failures from the retained player', () => {

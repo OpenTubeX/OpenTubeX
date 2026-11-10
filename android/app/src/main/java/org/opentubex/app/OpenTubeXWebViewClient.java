@@ -27,6 +27,8 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
     private static final Pattern CONTENT_RANGE = Pattern.compile("bytes ([0-9]+)-([0-9]+)/", Pattern.CASE_INSENSITIVE);
     private static final int CONNECT_TIMEOUT_MS = 15_000;
     private static final int READ_TIMEOUT_MS = 30_000;
+    /** Read by SabrSchemePlugin.js */
+    static final String SABR_CONNECTION_FAILED_HEADER = "X-OpenTubeX-Connection-Failed";
     private final SabrRequestRegistry sabrRequests;
     private final ExternalStreamRequestRegistry externalStreams;
     private final okhttp3.OkHttpClient externalStreamClient;
@@ -237,7 +239,16 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
                 connection.disconnect();
             }
             sabrRequests.complete(request);
-            return errorResponse(502, "Bad Gateway");
+            // Fetch cannot fail an intercepted request, so tell the renderer
+            // that YouTube did not answer, unlike its own 502 responses.
+            return new WebResourceResponse(
+                "text/plain",
+                "UTF-8",
+                502,
+                "Bad Gateway",
+                Map.of("Cache-Control", "no-store", SABR_CONNECTION_FAILED_HEADER, "1"),
+                new ByteArrayInputStream(new byte[0])
+            );
         }
     }
 

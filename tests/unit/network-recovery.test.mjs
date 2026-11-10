@@ -278,6 +278,52 @@ test('a browser CORS failure checks only GrapheneOS without a native website pro
   assert.deepEqual(checkedUrls, [INTERNET_CHECK_URL, INTERNET_CHECK_URL])
 })
 
+test('a stream server that stops answering is awaited while the internet check still succeeds', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  let reachable = false
+  const probes = []
+  const app = await loadAppNetwork(t, async (input, init) => {
+    if (input === INTERNET_CHECK_URL) return new Response(null, { status: 204 })
+    probes.push({ input, method: init.method, mode: init.mode, credentials: init.credentials })
+    if (!reachable) throw new TypeError('Failed to fetch')
+    return new Response(null, { status: 204 })
+  }, undefined, { checkInternet: true })
+  await flush()
+  const origin = 'https://rr1---sn-abc.googlevideo.com'
+  let settled = false
+  const waiting = app.waitUntilReachable(`${origin}/generate_204`, new AbortController().signal).then(() => { settled = true })
+  await flush()
+  assert.equal(settled, false, 'a browser CORS heuristic must not end the wait')
+  assert.deepEqual([...app.recovery.waitingOrigins], [origin])
+  assert.equal(app.recovery.state, 'online')
+  assert.deepEqual(probes, [{ input: `${origin}/generate_204`, method: 'HEAD', mode: 'no-cors', credentials: 'omit' }])
+
+  reachable = true
+  t.mock.timers.tick(5000)
+  await waiting
+  assert.equal(probes.length, 2)
+  assert.deepEqual([...app.recovery.waitingOrigins], [])
+
+  const controller = new AbortController()
+  reachable = false
+  const cancelled = assert.rejects(app.waitUntilReachable(`${origin}/generate_204`, controller.signal), { name: 'AbortError' })
+  await flush()
+  controller.abort()
+  await cancelled
+  assert.deepEqual([...app.recovery.waitingOrigins], [])
+})
+
+test('a blocked internet check does not stop waiting for a stream server that answers', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const app = await loadAppNetwork(t, async input => {
+    if (input === INTERNET_CHECK_URL) throw new TypeError('Failed to fetch')
+    return new Response(null, { status: 204 })
+  }, undefined, { checkInternet: true })
+  await flush()
+  assert.equal(app.recovery.state, 'offline')
+  await app.waitUntilReachable('https://rr1---sn-abc.googlevideo.com/generate_204', new AbortController().signal)
+})
+
 test('the connection timeout stops after headers and does not abort streaming video bodies', async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] })
   let signal

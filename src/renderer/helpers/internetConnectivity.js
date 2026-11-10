@@ -1,14 +1,17 @@
 // A dedicated empty-response endpoint. No user data is included in the check.
 export const INTERNET_CHECK_URL = 'https://connectivitycheck.grapheneos.network/generate_204'
 
-/** Uses the original fetch, outside the retry queue and without cached replies. */
-export function createInternetProbe(fetch) {
+/**
+ * Uses the original fetch, outside the retry queue and without cached replies.
+ * Any reply from `url`'s server counts.
+ */
+export function createInternetProbe(fetch, url = INTERNET_CHECK_URL) {
   return async signal => {
     if (signal.aborted) return false
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), 5000)
     try {
-      const response = await fetch(INTERNET_CHECK_URL, {
+      const response = await fetch(url, {
         method: 'HEAD',
         mode: 'no-cors',
         cache: 'no-store',

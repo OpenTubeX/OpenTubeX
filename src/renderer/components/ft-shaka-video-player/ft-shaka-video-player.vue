@@ -356,6 +356,31 @@
           {{ $t('Dismiss') }}
         </button>
       </div>
+      <div
+        v-else-if="showConnectionWaitMessage"
+        class="streamRecoveryNotice shaka-no-propagation"
+        role="status"
+        @click.stop
+        @dblclick.stop
+      >
+        <ft-icon
+          class="streamRecoveryNoticeIcon"
+          :icon="['fas', 'wifi']"
+          aria-hidden="true"
+        />
+        <span class="streamRecoveryNoticeMessage">{{ $t('Video.Waiting For Connection') }}</span>
+        <button
+          type="button"
+          class="streamRecoveryNoticeButton"
+          @click="retryWaitingRequests"
+        >
+          <ft-icon
+            :icon="['fas', 'sync']"
+            aria-hidden="true"
+          />
+          {{ $t('Video.Retry Now') }}
+        </button>
+      </div>
       <FtPaidPromotionBadge
         v-if="showPaidPromotion"
         class="paidPromotionOverlay shaka-no-propagation"
