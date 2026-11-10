@@ -25,6 +25,7 @@ import { bindIosNativeCaptions } from '../../helpers/player/iosNativeCaptions'
 import { bindNativeCaptionTiming } from '../../helpers/player/nativeCaptionTiming'
 import { createIOSMediaTransport } from '../../helpers/player/iosMediaTransport'
 import { withoutNetworkRecovery } from '../../helpers/networkRecovery'
+import { holdForPlaybackStartup } from '../../helpers/playbackStartup'
 import { useI18n } from 'vue-i18n'
 import { createPopularityPath, isMostReplayed } from '../../helpers/player/videoPopularity'
 
@@ -9687,7 +9688,12 @@ export default defineComponent({
     // #region setup
     let unbindAndroidMediaErrors = null
     let disableTwitchTsVideoGap = null
+    // Released once the first media loads, or when the player unmounts before that.
+    // Legacy formats load after performFirstLoad returns, so wait for `loaded`.
+    let releasePlaybackStartup = () => {}
+
     onMounted(async () => {
+      releasePlaybackStartup = holdForPlaybackStartup()
       const videoElement = video.value
       if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
         unbindAndroidMediaErrors = bindAndroidMediaErrors(videoElement)
@@ -9967,6 +9973,7 @@ export default defineComponent({
       })
 
       player.addEventListener('loaded', handleLoaded)
+      player.addEventListener('loaded', () => releasePlaybackStartup())
       player.addEventListener('variantchanged', () => {
         if (props.format === 'legacy' || player.getConfiguration().abr.enabled) {
           return
@@ -10022,6 +10029,7 @@ export default defineComponent({
       })
     })
     onUnmounted(() => {
+      releasePlaybackStartup()
       unbindAndroidMediaErrors?.()
       clearSabrBackoffTimer()
       clearPreRollTimer()

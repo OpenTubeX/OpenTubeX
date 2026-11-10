@@ -44,6 +44,7 @@ import {
   updateUpcomingPremiereState
 } from './subscription-entries'
 import { mapConcurrently } from './concurrent-map'
+import { waitForPlaybackStartup } from './playbackStartup'
 import { includeAutomaticDownloadChannels, startAutomaticDownloadsForChannel } from './automaticDownloads'
 import { includeNotificationChannels, reportSubscriptionUploads } from './uploadNotifications'
 import { extractAssignedJsonObject } from './assigned-json'
@@ -371,13 +372,17 @@ function createSubscriptionErrorSummary(t) {
 }
 
 async function fetchSubscriptionsConcurrently(channels, fetchChannel) {
+  const refresh = activeRefresh
   await mapConcurrently(
     channels,
     SUBSCRIPTION_FETCH_CONCURRENCY,
     async channel => {
+      await waitForPlaybackStartup(refresh?.controller.signal)
+
       // Channels that haven't started yet are skipped, the ones in flight
-      // still finish and are cached.
-      if (isRefreshCancelled()) {
+      // still finish and are cached. Workers left over from a failed refresh
+      // don't start channels for a later one.
+      if (activeRefresh !== refresh || isRefreshCancelled()) {
         return
       }
 

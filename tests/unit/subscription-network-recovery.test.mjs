@@ -13,6 +13,7 @@ import { createNetworkRecovery } from '../../src/renderer/helpers/networkRecover
 import { createAbortError } from '../../src/renderer/helpers/api/requestErrors.js'
 import { createSubscriptionNetworkRecovery, SubscriptionNetworkError } from '../../src/renderer/helpers/subscriptionNetworkRecovery.js'
 import { mapConcurrently } from '../../src/renderer/helpers/concurrent-map.js'
+import { waitForPlaybackStartup } from '../../src/renderer/helpers/playbackStartup.js'
 import { buildRequestDiagnostic, classifyRequestFailure, formatRequestDiagnostic } from '../../src/renderer/helpers/api/requestDiagnostics.js'
 import { getSubscriptionsForFeed } from '../../src/renderer/helpers/subscription-channels.js'
 import { extractAssignedJsonObject } from '../../src/renderer/helpers/assigned-json.js'
@@ -105,6 +106,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
     createSubscriptionNetworkRecovery,
     SubscriptionNetworkError,
     mapConcurrently,
+    waitForPlaybackStartup,
     buildRequestDiagnostic,
     classifyRequestFailure,
     formatRequestDiagnostic,

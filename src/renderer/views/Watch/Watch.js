@@ -157,6 +157,7 @@ import { createWatchTimeTracker } from '../../helpers/watchTimeTracker'
 import { createUnavailableVideoThumbnail } from '../../helpers/unavailableVideoThumbnail'
 import { getLoadedIconData } from '../../icons/registerMappedIcons'
 import { resolveIconifyId } from '../../icons/resolveIconifyId'
+import { holdForPlaybackStartup } from '../../helpers/playbackStartup'
 
 /**
  * @typedef {{
@@ -1328,8 +1329,11 @@ export default defineComponent({
      * The metadata is rendered as soon as the backend responds, but the player can
      * only be created once the streams it is supposed to play are known.
      */
+    playerStreamsPending() {
+      return this.isLoading || this.ytDlpStreamsPending || (this.vrStreamsPending && !this.isYtDlpPlaybackRequested())
+    },
     playerReady() {
-      if (this.isLoading || this.ytDlpStreamsPending || (this.vrStreamsPending && !this.isYtDlpPlaybackRequested())) {
+      if (this.playerStreamsPending) {
         return false
       }
 
@@ -1364,6 +1368,14 @@ export default defineComponent({
     }
   },
   watch: {
+    playerStreamsPending: {
+      // The player holds subscription refreshes itself once it mounts
+      handler(pending) {
+        this.releasePlaybackStartup?.()
+        this.releasePlaybackStartup = pending ? holdForPlaybackStartup() : null
+      },
+      immediate: true
+    },
     '$store.getters.getPauseOnStreamRecovery'(enabled) {
       // Turning the setting off also drops the open notice and its pause.
       if (!enabled) this.streamRecoveryNotice = null
@@ -1612,6 +1624,7 @@ export default defineComponent({
     if (isOverlayScrollTopOutOfBounds(rail, contentEnd)) clampOverlayScrollTop(rail, contentEnd)
   },
   beforeUnmount: function () {
+    this.releasePlaybackStartup?.()
     keepTabLoaded(this.tabId, 'casting', false)
     this.releaseAmbientModeClass?.()
     this.releaseAmbientModeClass = null
