@@ -75,6 +75,7 @@
   );
   background-size: 1rem 1rem;
   block-size: 100%;
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- the fill grows with each sync step */
   transition: inline-size var(--motion-default-effects);
 }
 

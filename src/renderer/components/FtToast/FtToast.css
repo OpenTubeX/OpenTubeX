@@ -19,7 +19,7 @@
 
   /* The offsets shift when the persistent progress toast appears or goes away,
      so the stack slides across instead of jumping */
-  /* stylelint-disable-next-line liberty/use-logical-spec */
+  /* stylelint-disable-next-line liberty/use-logical-spec, plugin/no-low-performance-animation-properties -- toasts make and give up room in their stack */
   transition: transform var(--motion-default-effects), top var(--motion-default-effects), bottom var(--motion-default-effects);
 }
 
@@ -29,6 +29,7 @@
   display: flex;
   inline-size: 100%;
   pointer-events: none;
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- toasts make and give up room in their stack */
   transition: transform var(--toast-transition-duration) ease, opacity var(--toast-transition-duration), block-size var(--toast-transition-duration);
 }
 
@@ -39,10 +40,12 @@
    the stack lives on the scale instead, further down, which only the enter and
    the leave touch. */
 .toast-holder[data-sonner-toaster] [data-sonner-toast][data-mounted='true'] {
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- toasts make and give up room in their stack */
   transition: transform var(--toast-transition-duration) ease, opacity var(--toast-transition-duration), block-size var(--toast-transition-duration);
 }
 
 .toast-holder[data-sonner-toaster] [data-sonner-toast][data-removed='true'] {
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- toasts make and give up room in their stack */
   transition: transform var(--toast-transition-duration) ease-in, opacity var(--toast-transition-duration), block-size var(--toast-transition-duration);
 }
 

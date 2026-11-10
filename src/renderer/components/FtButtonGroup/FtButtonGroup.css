@@ -13,6 +13,7 @@
 
 .buttonGroup > :deep(.btn) {
   margin: 0;
+  /* stylelint-disable plugin/no-low-performance-animation-properties -- a pressed button makes room in its row */
   transition:
     background-color var(--motion-default-effects),
     border-color var(--motion-default-effects),
@@ -21,6 +22,7 @@
     padding-inline var(--motion-fast-spatial),
     margin-inline var(--motion-fast-spatial),
     min-inline-size var(--motion-fast-spatial);
+  /* stylelint-enable plugin/no-low-performance-animation-properties */
 }
 
 /* Buttons that show only their icon narrow to an icon button's width, so a

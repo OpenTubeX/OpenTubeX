@@ -70,6 +70,7 @@
   inline-size: 0;
   border-radius: calc(20px * var(--ui-roundness));
   background-color: var(--selected-container-color);
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- chart bars and the segment indicator change size on selection */
   transition: inset-inline-start var(--motion-default-effects), inline-size var(--motion-default-effects);
 }
 
@@ -361,6 +362,7 @@
   block-size: var(--bar-height);
   border-radius: var(--shape-corner-small);
   background: linear-gradient(to top, var(--primary-color), color-mix(in srgb, var(--primary-color) 55%, rgb(255 255 255)));
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- chart bars and the segment indicator change size on selection */
   transition: block-size var(--motion-slow-effects);
 }
 

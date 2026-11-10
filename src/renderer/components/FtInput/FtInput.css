@@ -156,10 +156,12 @@
   color: var(--secondary-text-color);
   transform: translateY(-50%);
   transform-origin: left top;
+  /* stylelint-disable plugin/no-low-performance-animation-properties -- the floating label moves inside its field */
   transition:
     inset-block-start var(--motion-fast-spatial),
     transform var(--motion-fast-spatial),
     color var(--motion-fast-effects);
+  /* stylelint-enable plugin/no-low-performance-animation-properties */
 }
 
 .floatingLabel .selectLabel:dir(rtl) {

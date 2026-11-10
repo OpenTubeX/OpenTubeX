@@ -7,6 +7,7 @@
   font-size: var(--caption-font-size, 20px) !important;
 
   /* Keep shaka's caption raise animation alongside the panel push. */
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- captions make room for the controls and docks */
   transition: inset-inline-end 250ms ease, bottom cubic-bezier(0.4, 0, 0.6, 1) 0.1s;
 }
 

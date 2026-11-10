@@ -168,6 +168,7 @@
   background: var(--card-bg-color);
   box-shadow: 0 -4px 18px rgb(0 0 0 / 20%);
   transform: translateY(var(--mobile-mini-dismiss-offset, 0));
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- the phone mini bar expands and its controls rearrange */
   transition: height var(--mobile-mini-expand-duration, 0ms) ease, top var(--mobile-mini-expand-duration, 0ms) ease, transform var(--mobile-mini-dismiss-duration, 0ms) ease-out;
 }
 
@@ -178,6 +179,7 @@
     var(--connection-progress-inset, 0px) +
     var(--connection-status-height, 0px)
   );
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- the phone mini bar expands and its controls rearrange */
   transition: height var(--mobile-mini-expand-duration, 0ms) ease, translate 280ms cubic-bezier(0.2, 0, 0, 1), transform var(--mobile-mini-dismiss-duration, 0ms) ease-out;
 }
 
@@ -199,6 +201,7 @@
   /* stylelint-disable-next-line selector-max-compound-selectors */
   :global(.app.capacitorPhoneLayout > .sideNav.scrollHidden:not(:has(:focus-visible)) ~ * .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar) {
     translate: 0 var(--mobile-nav-height);
+    /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- the phone mini bar expands and its controls rearrange */
     transition: height var(--mobile-mini-expand-duration, 0ms) ease, translate 220ms cubic-bezier(0.4, 0, 1, 1), transform var(--mobile-mini-dismiss-duration, 0ms) ease-out;
   }
 }
@@ -480,6 +483,7 @@
 
 .mobileMiniBarCompact .mobileMiniBarPlayback {
   inset: 64px 0 auto;
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- the phone mini bar expands and its controls rearrange */
   transition: top var(--mobile-mini-expand-duration) ease, left var(--mobile-mini-expand-duration) ease, right var(--mobile-mini-expand-duration) ease;
 }
 
@@ -492,6 +496,7 @@
 .mobileMiniBarCompact .mobileMiniBarDetails {
   inset-block: 0 auto;
   block-size: 64px;
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- the phone mini bar expands and its controls rearrange */
   transition: left var(--mobile-mini-expand-duration) ease, right var(--mobile-mini-expand-duration) ease;
   right: 56px;
 }
@@ -715,6 +720,7 @@
   margin-block: calc((12px - 4px) / 2);
   margin-inline: 0;
   overflow: visible;
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- the phone mini bar expands and its controls rearrange */
   transition: width 0.18s ease, opacity 0.18s ease, margin 0.18s ease;
 }
 

@@ -75,6 +75,7 @@
     position: absolute;
     inset-block-start: 50%;
     transform: translate(0, -50%);
+    /* stylelint-disable plugin/no-low-performance-animation-properties -- the thumb resizes inside the small switch */
     transition:
       background-color var(--motion-default-effects),
       border-color var(--motion-default-effects),
@@ -82,6 +83,7 @@
       block-size var(--motion-fast-spatial),
       inset-inline-start var(--motion-fast-spatial),
       box-shadow var(--motion-fast-effects);
+    /* stylelint-enable plugin/no-low-performance-animation-properties */
   }
 
   &::before {

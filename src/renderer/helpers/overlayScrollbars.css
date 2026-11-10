@@ -202,10 +202,12 @@ body > .os-scrollbar-vertical {
   block-size: calc(var(--os-viewport-percent) * 100%);
   min-block-size: var(--os-handle-min-size);
   max-block-size: var(--os-handle-max-size);
+  /* stylelint-disable plugin/no-low-performance-animation-properties -- the thumb grows inside its own small track */
   transition:
     opacity var(--motion-fast-effects),
     background-color var(--motion-fast-effects),
     inline-size var(--motion-fast-effects);
+  /* stylelint-enable plugin/no-low-performance-animation-properties */
 }
 
 .os-scrollbar-horizontal .os-scrollbar-handle {
@@ -215,10 +217,12 @@ body > .os-scrollbar-vertical {
   min-inline-size: var(--os-handle-min-size);
   max-inline-size: var(--os-handle-max-size);
   block-size: var(--os-handle-perpendicular-size);
+  /* stylelint-disable plugin/no-low-performance-animation-properties -- the thumb grows inside its own small track */
   transition:
     opacity var(--motion-fast-effects),
     background-color var(--motion-fast-effects),
     block-size var(--motion-fast-effects);
+  /* stylelint-enable plugin/no-low-performance-animation-properties */
 }
 
 .os-scrollbar-vertical:hover .os-scrollbar-handle {

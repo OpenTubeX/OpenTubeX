@@ -199,6 +199,7 @@
   background-color: transparent;
   line-height: 1;
   interpolate-size: allow-keywords;
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- the chapter button fits its new title */
   transition: inline-size 200ms ease, padding-inline 200ms ease, margin-inline 200ms ease;
 }
 
