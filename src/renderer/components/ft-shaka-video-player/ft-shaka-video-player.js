@@ -5798,7 +5798,10 @@ export default defineComponent({
      * over the mini player, or 0 when this one does not play there.
      */
     function getMiniPlayerHandoffHeight() {
-      return scrollMiniPlayerDetached.value || miniPlayerStartPending.value ? miniPlayerHandoffHeight : 0
+      // A mini player that turned into Picture-in-Picture docks again once the window closes.
+      return scrollMiniPlayerDetached.value || miniPlayerStartPending.value || pictureInPictureActive.value
+        ? miniPlayerHandoffHeight
+        : 0
     }
 
     watch([isActiveTab, isCrossTabMiniPlayerPresented, scrollMiniPlayerDismissed, audioPlayerMode], () => {

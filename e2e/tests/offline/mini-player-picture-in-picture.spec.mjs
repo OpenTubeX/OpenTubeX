@@ -116,4 +116,9 @@ test('plays the next playlist video in Picture-in-Picture opened from the mini p
   await expect.poll(() => pictureInPictureActive(page)).toBe(true)
   await expect.poll(() => video.evaluate(element => !element.paused && element.currentTime > 0.1)).toBe(true)
   await expect(page).toHaveURL(/#\/history$/)
+
+  await setFocused(app, page, true)
+  await expect.poll(() => pictureInPictureActive(page)).toBe(false)
+  await expect(player).toHaveClass(/scrollMiniPlayer/)
+  await expect(player).toBeVisible()
 })
