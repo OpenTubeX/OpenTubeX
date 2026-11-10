@@ -74,6 +74,7 @@
                   class="tabBarReorderItem collapsedTabGroup"
                   :class="{
                     active: item.isActive,
+                    unloaded: item.isUnloaded,
                     bottom: tabBarPosition === 'bottom',
                     noTransition: suppressTransitions,
                     vertical
@@ -236,7 +237,8 @@ function buildStripItems(currentTabs) {
       tabs: groupTabs,
       tabIds: groupTabs.map(groupTab => groupTab.id),
       isPinned: tab.isPinned,
-      isActive: groupTabs.some(groupTab => groupTab.isActive)
+      isActive: groupTabs.some(groupTab => groupTab.isActive),
+      isUnloaded: groupTabs.every(groupTab => groupTab.isUnloaded)
     })
   }
   return items
