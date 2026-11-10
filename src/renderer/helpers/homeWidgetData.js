@@ -75,16 +75,18 @@ export function createDownloadWidgetItems(downloads, getThumbnailUrl) {
 /**
  * Watched seconds for the last days up to today, keyed by local date. Widgets
  * draw their own week so they roll over at midnight without the app.
+ * Reading every entry lets a reactive caller also notice days added after midnight.
  * @param {Record<string, number>} secondsByDate
  * @param {number} now
  */
 export function createWatchTimeWidgetDays(secondsByDate, now = Date.now()) {
   const today = new Date(now)
+  const week = new Set(Array.from({ length: WATCH_TIME_WIDGET_DAYS }, (_, offset) =>
+    localDateKey(new Date(today.getFullYear(), today.getMonth(), today.getDate() - offset).getTime())))
   const days = {}
-  for (let offset = 0; offset < WATCH_TIME_WIDGET_DAYS; offset++) {
-    const key = localDateKey(new Date(today.getFullYear(), today.getMonth(), today.getDate() - offset).getTime())
-    const seconds = Math.floor(Number(secondsByDate[key]))
-    if (seconds > 0) days[key] = seconds
+  for (const [key, value] of Object.entries(secondsByDate)) {
+    const seconds = Math.floor(Number(value))
+    if (week.has(key) && seconds > 0) days[key] = seconds
   }
   return days
 }

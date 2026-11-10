@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { reactive, watch } from 'vue'
 
 import {
   createDownloadWidgetItems,
@@ -58,4 +59,15 @@ test('Watch time sends only the last seven local days', () => {
     '2026-02-24': 999,
     '2026-03-02': 0,
   }, now), { '2026-03-03': 61, '2026-03-01': 120, '2026-02-25': 30 })
+})
+
+test('Watch time notices a day recorded after midnight', () => {
+  const days = reactive({ '2026-03-03': 60 })
+  let now = new Date(2026, 2, 3, 23).getTime()
+  const sent = []
+  const stop = watch(() => createWatchTimeWidgetDays(days, now), value => sent.push(value), { flush: 'sync' })
+  now = new Date(2026, 2, 4, 1).getTime()
+  days['2026-03-04'] = 120
+  stop()
+  assert.deepEqual(sent.at(-1), { '2026-03-03': 60, '2026-03-04': 120 })
 })
