@@ -42,7 +42,7 @@
       @pointermove="moveMenuHold"
       @pointerup="cancelMenuHold"
       @pointercancel="cancelMenuHold"
-      @dragstart="cancelMenuHold"
+      @dragstart="handleMenuHoldDragStart"
       @keydown="handleContextMenuKeydown"
     >
       <div
@@ -1582,7 +1582,7 @@ const mobileThumbnailActions = computed(() => {
 
 const openMobileContextActions = inject('openMobileContextActions')
 
-const { startMenuHold, moveMenuHold, cancelMenuHold, suppressMenuHoldClick } = useContextMenuHold(openVideoContextMenu)
+const { startMenuHold, moveMenuHold, cancelMenuHold, handleMenuHoldDragStart, suppressMenuHoldClick } = useContextMenuHold(openVideoContextMenu)
 
 async function removeSwipeDownload(option) {
   const download = pendingSwipeRemoval.value
