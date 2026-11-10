@@ -844,7 +844,7 @@ Video:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Mainosta jäljellä: {remindingTimeSeconds} s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Jäljellä oleva SABR-perääntymisaika: {remindingTimeSeconds} s'
   Popout Live Chat: Popout-chat
-  Private: Yksityisiä videoita ei voi katsella FreeTubessa, sillä niiden katsominen edellyttää Google-kirjautumista ja videon omistusoikeutta.
+  Private: Yksityisiä videoita ei voi katsella OpenTubeX:ssä, sillä niiden katsominen edellyttää Google-kirjautumista ja videon omistusoikeutta.
   Enable SponsorBlock on Channel: Ota SponsorBlock käyttöön kanavalla
   Disable SponsorBlock on Channel: Poista SponsorBlock käytöstä kanavalla
   Collapse Playlist: Piilota soittolista
