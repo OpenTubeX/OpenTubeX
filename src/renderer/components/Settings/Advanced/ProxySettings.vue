@@ -230,6 +230,8 @@ function handleUpdateProxy(enabled) {
   if (enabled) {
     enableProxy()
   } else {
+    // an edit made just before disabling the proxy must not turn it back on
+    debouncedEnableProxy.cancel()
     disableProxy()
   }
 
@@ -324,7 +326,7 @@ function enableProxy() {
   }
 }
 
-// An edit followed quickly by disabling the proxy must not turn it back on
+// Quick Settings can disable the proxy while an edit here is still pending
 const debouncedEnableProxy = debounce(() => {
   if (useProxy.value) {
     enableProxy()
