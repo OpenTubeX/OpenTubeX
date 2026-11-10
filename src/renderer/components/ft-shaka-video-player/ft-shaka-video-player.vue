@@ -814,6 +814,16 @@
                 <FtIcon :icon="['fas', 'xmark']" />
               </button>
             </header>
+            <p
+              v-if="chaptersKind === 'autoChapters'"
+              class="chapterOverlayNote"
+            >
+              <FtIcon
+                :icon="['fas', 'circle-info']"
+                aria-hidden="true"
+              />
+              {{ $t('Chapters.Auto-generated') }}
+            </p>
             <WatchVideoChapters
               :chapters="chapters"
               :chapter-thumbnails="chapterThumbnails"

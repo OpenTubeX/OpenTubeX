@@ -124,6 +124,17 @@
   border-block-end: 1px solid var(--side-nav-hover-color);
 }
 
+.chaptersPanelNote {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding-block: 8px 0;
+  padding-inline: 16px;
+  color: var(--tertiary-text-color);
+  font-size: 13px;
+}
+
 .chaptersPanelTitle {
   margin: 0;
   font-size: 16px;

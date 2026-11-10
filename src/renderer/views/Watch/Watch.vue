@@ -1147,6 +1147,7 @@
           v-if="showSidebarChapters && !isLoading && videoChapters.length > 0"
           class="watchVideoSideBar"
           :title="videoChaptersKind === 'keyMoments' ? $t('Chapters.Key Moments') : $t('Chapters.Chapters')"
+          :note="videoChaptersKind === 'autoChapters' ? $t('Chapters.Auto-generated') : ''"
           :chapters="videoChapters"
           :chapter-thumbnails="videoChapterThumbnails"
           :current-chapter-index="videoCurrentChapterIndex"

@@ -17,6 +17,16 @@
         <FtIcon :icon="['fas', 'xmark']" />
       </button>
     </div>
+    <p
+      v-if="note"
+      class="chaptersPanelNote"
+    >
+      <FtIcon
+        :icon="['fas', 'circle-info']"
+        aria-hidden="true"
+      />
+      {{ note }}
+    </p>
     <WatchVideoChapters
       ref="chapterList"
       :chapters="chapters"
@@ -41,6 +51,7 @@ const HEIGHT_STORAGE_KEY = 'opentubex-chapters-panel-height'
 
 defineProps({
   title: { type: String, required: true },
+  note: { type: String, default: '' },
   chapters: { type: Array, required: true },
   currentChapterIndex: { type: Number, required: true },
   chapterThumbnails: { type: Array, default: () => [] },

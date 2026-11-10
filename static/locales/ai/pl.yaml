@@ -1854,6 +1854,7 @@ Yattee Fallback Warning: To żądanie pomija skonfigurowany serwer Yattee i łą
 Update With Package Manager: 'Zaktualizuj za pomocą {packageManager}:'
 Update Command Copied: 'Skopiowano polecenie aktualizacji'
 Chapters:
+  Auto-generated: Te rozdziały zostały wygenerowane automatycznie
   Loop Chapter: 'Zapętl rozdział: {chapter}'
   Looping Chapter: 'Zapętlanie rozdziału: {chapter}'
   Chapter Loop Stopped: 'Zatrzymano zapętlanie rozdziału'
