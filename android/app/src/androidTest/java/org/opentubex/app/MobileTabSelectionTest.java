@@ -504,9 +504,11 @@ public class MobileTabSelectionTest {
                     float y = Float.parseFloat(evaluate(view, "(() => { const r = document.querySelector('.topNav').getBoundingClientRect(); return (r.top + r.bottom) / 2 })()"));
                     float scale = view.getWidth() / Float.parseFloat(evaluate(view, "window.innerWidth"));
                     long downTime = SystemClock.uptimeMillis();
-                    touch(view, downTime, MotionEvent.ACTION_DOWN, x * scale, y * scale);
-                    touch(view, downTime, MotionEvent.ACTION_MOVE, (x + 80) * scale, y * scale);
-                    touch(view, downTime, MotionEvent.ACTION_UP, (x + 80) * scale, y * scale);
+                    // A fast release is measured from event times, so keep them a frame
+                    // apart even when the main thread stalls between injections.
+                    touch(view, downTime, downTime, MotionEvent.ACTION_DOWN, x * scale, y * scale);
+                    touch(view, downTime, downTime + 16, MotionEvent.ACTION_MOVE, (x + 80) * scale, y * scale);
+                    touch(view, downTime, downTime + 32, MotionEvent.ACTION_UP, (x + 80) * scale, y * scale);
                     await(view, STORE + ".getters.getActiveTabId === window.pageSwipeFirstId && " +
                         "!document.querySelector('.pageSwipeTo')");
                     assertEquals("A fast release animates both pages before selecting the neighboring tab", "true",
@@ -643,6 +645,10 @@ public class MobileTabSelectionTest {
     }
 
     private static void touch(WebView view, long downTime, int action, float x, float y) {
+        touch(view, downTime, SystemClock.uptimeMillis(), action, x, y);
+    }
+
+    private static void touch(WebView view, long downTime, long eventTime, int action, float x, float y) {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             MotionEvent.PointerProperties properties = new MotionEvent.PointerProperties();
             properties.id = 0;
@@ -652,7 +658,7 @@ public class MobileTabSelectionTest {
             coordinates.y = y;
             coordinates.pressure = 1;
             coordinates.size = 1;
-            MotionEvent event = MotionEvent.obtain(downTime, SystemClock.uptimeMillis(), action,
+            MotionEvent event = MotionEvent.obtain(downTime, eventTime, action,
                 1, new MotionEvent.PointerProperties[] {properties},
                 new MotionEvent.PointerCoords[] {coordinates}, 0, 0, 1, 1, 0, 0,
                 InputDevice.SOURCE_TOUCHSCREEN, 0);
