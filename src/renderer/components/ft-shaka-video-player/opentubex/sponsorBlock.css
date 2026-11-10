@@ -142,6 +142,15 @@
   cursor: pointer;
 }
 
+.unskipButton,
+.sponsorBlockDraftActionButton,
+.sponsorBlockSubmissionGuidelines,
+.sponsorBlockSubmissionButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .sponsorBlockDraftTimeInput {
   width: 78px;
   min-width: 78px;

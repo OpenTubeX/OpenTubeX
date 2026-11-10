@@ -45,8 +45,6 @@ Unload Multiple Tabs Confirmation:
 Tabs Unloaded To Free Memory: '{count} fane, du ikke har brugt for nylig, blev frigjort for at spare hukommelse | {count} faner, du ikke har brugt for nylig, blev frigjort for at spare hukommelse'
 Compact side navigation: Kompakt sidenavigation
 Expand side navigation: Udvid sidenavigation
-Use Vertical Tabs: Brug lodrette faner
-Use Horizontal Tabs: Brug vandrette faner
 Resize Tab Bar: Tilpas fanelinjens størrelse
 Find in page: Find på siden
 Previous match: Forrige resultat
@@ -383,7 +381,6 @@ Settings:
     Add-ons: Tilføjelser
     Add-ons Description: SponsorBlock, DeArrow, dislikes, AiSList og voiceoveroversættelse
     Privacy Description: Historik, søgeforslag, links og appadgangskode
-    Online activity: Onlineaktivitet
     Data And Storage Description: Sikkerhedskopier, import og eksport, diskforbrug og oprydning
     Sync Description: Synkroniseringsserverkonto, parring af enheder og synkroniserede data
     Advanced: Avanceret
@@ -1027,8 +1024,6 @@ Settings:
     Update FFmpeg: Opdater FFmpeg
     Checking FFmpeg: Kontrollerer FFmpeg…
     Downloading FFmpeg: Downloader FFmpeg…
-    FFmpeg Downloaded Template: FFmpeg {version} er downloadet
-    FFmpeg Download Error Template: 'Download af FFmpeg mislykkedes: {error}'
     Detected FFprobe Version Template: 'Registreret FFprobe-version: {version}'
     FFprobe Managed Not Downloaded: FFprobe er ikke downloadet endnu. Klik på knappen nedenfor for at downloade det sammen med FFmpeg.
     System FFprobe Missing Warning: FFprobe blev ikke fundet på dit system. Det kræves for at undersøge medier under efterbehandling. Installer det ved siden af FFmpeg, eller skift kilden til "Administreret af OpenTubeX".
@@ -1089,7 +1084,6 @@ Settings:
     Clear Video Metadata Cache: Ryd cache med videometadata
     Are you sure you want to clear the video metadata cache?: Er du sikker på, at du vil rydde de cachelagrede videotitler, miniaturebilleder og beskrivelser?
     Failed to clear video metadata cache: Cachen med videometadata kunne ikke ryddes
-    Video metadata cache has been cleared: Cachen med videometadata er blevet ryddet
     Video Metadata Cache Size: 'Cache med videometadata: {size}'
   Storage Settings:
     Storage: Lager
@@ -1321,6 +1315,7 @@ Settings:
     Channel playback speeds imported: "Importerede afspilningshastigheden for {count} kanal | Importerede afspilningshastighederne for {count} kanaler"
     Channels not found: "{count} kanal kunne ikke findes | {count} kanaler kunne ikke findes"
   Sync Settings:
+    Signed Out After Restore: 'Synkroniseringen blev logget ud, fordi disse appdata blev gendannet fra en sikkerhedskopi eller en anden enhed. Log ind igen for at synkronisere denne enhed.'
     Revoke Session Tabs Warning: "Denne enheds synkroniserede fanesæt vil også blive slettet."
     Revoke Session Partial Failure: "De synkroniserede fanesæt blev slettet, men tilbagekaldelsen kunne ikke bekræftes. Prøv at tilbagekalde adgangen igen."
     Tab Sync Revocation Pending: "Synkronisering af faner er sat på pause, mens tilbagekaldelse af dette login afventer. Prøv tilbagekaldelsen igen i synkroniseringsindstillingerne."
@@ -1871,8 +1866,6 @@ Video:
       EndTimeAfterStart: Segmentets sluttidspunkt skal ligge efter starttidspunktet.
       EndTimeBeforeVideoEnd: Segmentets sluttidspunkt skal ligge inden for videoens varighed.
       EndTimeLabel: Segmentets sluttidspunkt
-      DisableAutoSkipTemporarily: Slå automatisk overspringning med SponsorBlock fra midlertidigt
-      EnableAutoSkipTemporarily: Slå automatisk overspringning med SponsorBlock til igen
       Guidelines: Retningslinjer
       InspectSegment: Gennemse
       InvalidStartTime: Angiv et gyldigt starttidspunkt for segmentet.
@@ -1908,7 +1901,6 @@ Video:
       InfoPanelLoading: Segmenterne indlæses stadig…
       InfoPanelHasSegments: Denne video har segmenter i databasen!
       InfoPanelNoSegments: Ingen segmenter fundet
-      RefreshSegments: Opdater segmenter
       RefreshInfo: Opdater SponsorBlock-oplysninger
       ContributionStatsTitle: Dine bidrag
       ContributionStatsLoading: Indlæser bidragsstatistik…

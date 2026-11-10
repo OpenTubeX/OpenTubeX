@@ -43,8 +43,6 @@ Unload Multiple Tabs Confirmation:
   Message: Time će se iz memorije ukloniti {count} kartica. | Time će se iz memorije ukloniti {count} kartice. | Time će se iz memorije ukloniti {count} kartica.
   Unload Tabs: Ukloni {count} karticu iz memorije | Ukloni {count} kartice iz memorije | Ukloni {count} kartica iz memorije
 Tabs Unloaded To Free Memory: Radi oslobađanja memorije uklonjena je {count} kartica koju niste nedavno koristili | Radi oslobađanja memorije uklonjene su {count} kartice koje niste nedavno koristili | Radi oslobađanja memorije uklonjeno je {count} kartica koje niste nedavno koristili
-Use Vertical Tabs: Koristi okomite kartice
-Use Horizontal Tabs: Koristi vodoravne kartice
 Resize Tab Bar: Promijeni veličinu trake kartica
 Find in page: Pronađi na stranici
 Previous match: Prethodno podudaranje
@@ -375,7 +373,6 @@ Settings:
     Add-ons: Dodaci
     Add-ons Description: SponsorBlock, DeArrow, negativne ocjene, AiSList i glasovni prijevod
     Privacy Description: Povijest, prijedlozi pretraživanja, poveznice i lozinka aplikacije
-    Online activity: Aktivnost na internetu
     Data And Storage Description: Sigurnosne kopije, uvoz i izvoz, zauzeće diska i čišćenje
     Sync Description: Račun poslužitelja za sinkronizaciju, uparivanje uređaja i sinkronizirani podaci
     Advanced: Napredno
@@ -1007,8 +1004,6 @@ Settings:
     Update FFmpeg: Ažuriraj FFmpeg
     Checking FFmpeg: Provjera alata FFmpeg…
     Downloading FFmpeg: Preuzimanje alata FFmpeg…
-    FFmpeg Downloaded Template: Preuzet je FFmpeg {version}
-    FFmpeg Download Error Template: 'Preuzimanje alata FFmpeg nije uspjelo: {error}'
     Detected FFprobe Version Template: 'Otkrivena verzija alata FFprobe: {version}'
     FFprobe Managed Not Downloaded: FFprobe još nije preuzet. Kliknite gumb u nastavku da biste ga preuzeli zajedno s alatom FFmpeg.
     System FFprobe Missing Warning: FFprobe nije pronađen na sustavu. Potreban je za pregled medijskih sadržaja tijekom naknadne obrade. Instalirajte ga uz FFmpeg ili promijenite izvor na "Upravlja OpenTubeX".
@@ -1069,7 +1064,6 @@ Settings:
     Clear Video Metadata Cache: Očisti predmemoriju metapodataka videozapisa
     Are you sure you want to clear the video metadata cache?: Želite li doista iz predmemorije izbrisati naslove, minijature i opise videozapisa?
     Failed to clear video metadata cache: Čišćenje predmemorije metapodataka videozapisa nije uspjelo
-    Video metadata cache has been cleared: Predmemorija metapodataka videozapisa očišćena je
     Video Metadata Cache Size: 'Predmemorija metapodataka videozapisa: {size}'
   Storage Settings:
     Storage: Pohrana
@@ -1285,6 +1279,7 @@ Settings:
     Channel playback speeds imported: "Uvezena je brzina reprodukcije za {count} kanal | Uvezene su brzine reprodukcije za {count} kanala | Uvezene su brzine reprodukcije za {count} kanala"
     Channels not found: "{count} kanal nije pronađen | {count} kanala nisu pronađena | {count} kanala nije pronađeno"
   Sync Settings:
+    Signed Out After Restore: 'Sinkronizacija je odjavljena jer su ovi podaci aplikacije vraćeni iz sigurnosne kopije ili s drugog uređaja. Ponovno se prijavite kako biste sinkronizirali ovaj uređaj.'
     Revoke Session Tabs Warning: "Sinkronizirani skupovi kartica ovog uređaja također će biti izbrisani."
     Revoke Session Partial Failure: "Sinkronizirani skupovi kartica su izbrisani, ali opoziv pristupa nije moguće potvrditi. Pokušajte ponovno opozvati pristup."
     Tab Sync Revocation Pending: "Sinkronizacija kartica je pauzirana dok je opoziv ove prijave na čekanju. Ponovno pokušajte opoziv u postavkama sinkronizacije."
@@ -1826,8 +1821,6 @@ Video:
       EndTimeAfterStart: Vrijeme završetka segmenta mora biti nakon vremena početka.
       EndTimeBeforeVideoEnd: Vrijeme završetka segmenta mora biti unutar trajanja videozapisa.
       EndTimeLabel: Vrijeme završetka segmenta
-      DisableAutoSkipTemporarily: Privremeno onemogući automatsko preskakanje SponsorBlocka
-      EnableAutoSkipTemporarily: Ponovno omogući automatsko preskakanje SponsorBlocka
       Guidelines: Smjernice
       InspectSegment: Pregledaj
       InvalidStartTime: Unesite valjano vrijeme početka segmenta.
@@ -1863,7 +1856,6 @@ Video:
       InfoPanelLoading: Segmenti se još učitavaju…
       InfoPanelHasSegments: Ovaj videozapis ima segmente u bazi podataka!
       InfoPanelNoSegments: Nisu pronađeni segmenti
-      RefreshSegments: Osvježi segmente
       RefreshInfo: Osvježi informacije o SponsorBlocku
       ContributionStatsTitle: Vaši doprinosi
       ContributionStatsLoading: Učitavanje statistike doprinosa…

@@ -1041,11 +1041,12 @@ export function toDistractionFreeTitle(title, minUpperCase = 3) {
   const capitalizedWord = (word) => {
     const chars = word.split('')
     const index = firstValidCharIndex(word)
+    if (index === -1) return word
     chars[index] = chars[index].toUpperCase()
     return chars.join('')
   }
 
-  const reg = RegExp(`[\\p{Lu}|']{${minUpperCase},}`, 'ug')
+  const reg = RegExp(`[\\p{Lu}']{${minUpperCase},}`, 'ug')
   return title
     .replaceAll(/!{2,}/g, '!')
     .replaceAll(/[!?]{2,}/g, '?')

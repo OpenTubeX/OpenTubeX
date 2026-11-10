@@ -345,7 +345,6 @@ Settings:
     Add-ons: Дополнения
     Add-ons Description: SponsorBlock, DeArrow, отметки «Не нравится», AiSList и закадровый перевод
     Privacy Description: История, поисковые подсказки, ссылки и пароль приложения
-    Online activity: Сетевая активность
     Data And Storage Description: Резервные копии, импорт и экспорт, использование диска и очистка
     Sync Description: Учётная запись сервера синхронизации, сопряжение устройств и синхронизируемые данные
     Advanced: Дополнительно
@@ -975,8 +974,6 @@ Settings:
     Update FFmpeg: Обновить FFmpeg
     Checking FFmpeg: Проверка FFmpeg…
     Downloading FFmpeg: Загрузка FFmpeg…
-    FFmpeg Downloaded Template: FFmpeg {version} загружен
-    FFmpeg Download Error Template: 'Не удалось загрузить FFmpeg: {error}'
     Detected FFprobe Version Template: 'Обнаружена версия FFprobe: {version}'
     FFprobe Managed Not Downloaded: FFprobe ещё не загружен. Нажмите кнопку ниже, чтобы загрузить его вместе с FFmpeg.
     System FFprobe Missing Warning: FFprobe не найден в системе. Он необходим для проверки медиафайлов при постобработке. Установите его рядом с FFmpeg или выберите источник «Управляется OpenTubeX».
@@ -1037,7 +1034,6 @@ Settings:
     Clear Video Metadata Cache: Очистить кеш метаданных видео
     Are you sure you want to clear the video metadata cache?: Очистить кеш заголовков, миниатюр и описаний видео?
     Failed to clear video metadata cache: Не удалось очистить кеш метаданных видео
-    Video metadata cache has been cleared: Кеш метаданных видео очищен
     Video Metadata Cache Size: 'Кеш метаданных видео: {size}'
   Storage Settings:
     Storage: Хранилище
@@ -1251,6 +1247,7 @@ Settings:
     Channel playback speeds imported: "Импортирована скорость воспроизведения {count} канала | Импортированы скорости воспроизведения {count} каналов | Импортированы скорости воспроизведения {count} каналов"
     Channels not found: "Не удалось найти {count} канал | Не удалось найти {count} канала | Не удалось найти {count} каналов"
   Sync Settings:
+    Signed Out After Restore: 'Выполнен выход из синхронизации, так как эти данные приложения восстановлены из резервной копии или с другого устройства. Войдите снова, чтобы синхронизировать это устройство.'
     Revoke Session Tabs Warning: "Синхронизированные наборы вкладок этого устройства также будут удалены."
     Revoke Session Partial Failure: "Синхронизированные наборы вкладок удалены, но отзыв доступа не удалось подтвердить. Повторите попытку отзыва доступа."
     Tab Sync Revocation Pending: "Синхронизация вкладок приостановлена, пока ожидается отзыв доступа для этого входа. Повторите отзыв доступа в настройках синхронизации."
@@ -1776,8 +1773,6 @@ Video:
       EndTimeAfterStart: Время окончания фрагмента должно быть позже времени начала.
       EndTimeBeforeVideoEnd: Время окончания фрагмента не должно выходить за пределы видео.
       EndTimeLabel: Время окончания фрагмента
-      DisableAutoSkipTemporarily: Временно отключить автоматический пропуск SponsorBlock
-      EnableAutoSkipTemporarily: Снова включить автоматический пропуск SponsorBlock
       Guidelines: Правила
       InspectSegment: Проверить
       InvalidStartTime: Введите допустимое время начала фрагмента.
@@ -1813,7 +1808,6 @@ Video:
       InfoPanelLoading: Фрагменты всё ещё загружаются...
       InfoPanelHasSegments: В базе данных есть фрагменты для этого видео!
       InfoPanelNoSegments: Фрагменты не найдены
-      RefreshSegments: Обновить фрагменты
       RefreshInfo: Обновить сведения SponsorBlock
       ContributionStatsTitle: Ваш вклад
       ContributionStatsLoading: Загрузка статистики вклада...

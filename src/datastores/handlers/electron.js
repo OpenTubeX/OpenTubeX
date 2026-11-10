@@ -121,6 +121,10 @@ class History {
     return JSON.parse(await dbHistory(DBActions.HISTORY.MERGE_BACKUP, records, { inWorker: true }))
   }
 
+  static async importRecords(records, rule) {
+    return JSON.parse(await dbHistory(DBActions.HISTORY.IMPORT, { records, rule }, { inWorker: true }))
+  }
+
   static applySyncChanges(changes, assertActive) {
     // Large object graphs also block while crossing Electron's context bridge.
     return dbHistory(DBActions.HISTORY.APPLY_SYNC_CHANGES, changes, { inWorker: true, beforeSend: assertActive })
@@ -244,12 +248,20 @@ class Profiles {
     return dbProfiles(DBActions.PROFILES.UPDATE_SUBSCRIPTION_DETAILS, channels)
   }
 
+  static saveFromSyncIfUnchanged(profile, previous) {
+    return dbProfiles(DBActions.PROFILES.SAVE_FROM_SYNC_IF_UNCHANGED, { profile, previous })
+  }
+
   static updateSubscriptionsIfUnchanged(profileId, subscriptions, previous) {
     return dbProfiles(DBActions.PROFILES.UPDATE_SUBSCRIPTIONS_IF_UNCHANGED, { profileId, subscriptions, previous })
   }
 
   static mergeBackup(profile) {
     return dbProfiles(DBActions.PROFILES.MERGE_BACKUP, profile)
+  }
+
+  static mergeImported(profile) {
+    return dbProfiles(DBActions.PROFILES.MERGE_IMPORTED, profile)
   }
 
   static delete(id) {
@@ -358,8 +370,8 @@ class SearchHistory {
     return dbSearchHistory(DBActions.GENERAL.UPSERT, searchHistoryEntry)
   }
 
-  static overwrite(records) {
-    return dbSearchHistory(DBActions.GENERAL.OVERWRITE, records)
+  static mergeImported(entries) {
+    return dbSearchHistory(DBActions.SEARCH_HISTORY.MERGE_IMPORTED, entries)
   }
 
   static delete(_id) {

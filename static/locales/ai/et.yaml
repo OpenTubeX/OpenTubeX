@@ -43,8 +43,6 @@ Unload Multiple Tabs Confirmation:
   Message: See laadib {count} vahekaarti mälust välja.
   Unload Tabs: Laadi {count} vahekaarti mälust välja
 Tabs Unloaded To Free Memory: Mälu vabastamiseks laaditi välja {count} vahekaart, mida te pole hiljuti kasutanud | Mälu vabastamiseks laaditi välja {count} vahekaarti, mida te pole hiljuti kasutanud
-Use Vertical Tabs: Kasuta püstiseid vahekaarte
-Use Horizontal Tabs: Kasuta rõhtsaid vahekaarte
 Resize Tab Bar: Muuda vahekaardiriba suurust
 Find in page: Otsi lehelt
 Previous match: Eelmine vaste
@@ -372,7 +370,6 @@ Settings:
     Add-ons: Lisad
     Add-ons Description: SponsorBlock, DeArrow, mittemeeldimised, AiSList ja pealelugemise tõlge
     Privacy Description: Ajalugu, otsingusoovitused, lingid ja rakenduse parool
-    Online activity: Võrgutegevus
     Data And Storage Description: Varukoopiad, import ja eksport, kettakasutus ja puhastamine
     Sync Description: Sünkroonimisserveri konto, seadmete sidumine ja sünkroonitud andmed
     Advanced: Täpsemad seaded
@@ -1002,8 +999,6 @@ Settings:
     Update FFmpeg: Uuenda FFmpegi
     Checking FFmpeg: FFmpegi kontrollimine…
     Downloading FFmpeg: FFmpegi allalaadimine…
-    FFmpeg Downloaded Template: FFmpeg {version} on alla laaditud
-    FFmpeg Download Error Template: 'FFmpegi allalaadimine nurjus: {error}'
     Detected FFprobe Version Template: 'Tuvastatud FFprobe’i versioon: {version}'
     FFprobe Managed Not Downloaded: FFprobe pole veel alla laaditud. Selle koos FFmpegiga allalaadimiseks klõpsa allolevat nuppu.
     System FFprobe Missing Warning: Sinu süsteemist ei leitud FFprobe’i. Seda on vaja meedia kontrollimiseks järeltöötluse ajal. Paigalda see FFmpegi kõrvale või vali allikaks "OpenTubeXi hallatav".
@@ -1064,7 +1059,6 @@ Settings:
     Clear Video Metadata Cache: Tühjenda video metaandmete vahemälu
     Are you sure you want to clear the video metadata cache?: Kas soovid kindlasti vahemällu salvestatud videote pealkirjad, pisipildid ja kirjeldused kustutada?
     Failed to clear video metadata cache: Video metaandmete vahemälu tühjendamine nurjus
-    Video metadata cache has been cleared: Video metaandmete vahemälu on tühjendatud
     Video Metadata Cache Size: 'Video metaandmete vahemälu: {size}'
   Storage Settings:
     Storage: Salvestusruum
@@ -1277,6 +1271,7 @@ Settings:
     Channel playback speeds imported: "Imporditi {count} kanali esituskiirus | Imporditi {count} kanali esituskiirused"
     Channels not found: "{count} kanalit ei leitud | {count} kanalit ei leitud"
   Sync Settings:
+    Signed Out After Restore: 'Sünkroonimisest logiti välja, sest need rakenduse andmed taastati varukoopiast või teisest seadmest. Selle seadme sünkroonimiseks logi uuesti sisse.'
     Revoke Session Tabs Warning: "Samuti kustutatakse selle seadme sünkroonitud vahelehtede komplektid."
     Revoke Session Partial Failure: "Sünkroonitud vahekaartide komplektid kustutati, kuid juurdepääsu tühistamist ei saanud kinnitada. Proovi juurdepääs uuesti tühistada."
     Tab Sync Revocation Pending: "Vahelehtede sünkroonimine on peatatud, kuni selle sisselogimise tühistamine on ootel. Proovi tühistamist uuesti sünkroonimise seadetes."
@@ -1798,8 +1793,6 @@ Video:
       EndTimeAfterStart: Lõigu lõppaeg peab olema algusajast hilisem.
       EndTimeBeforeVideoEnd: Lõigu lõppaeg peab jääma video kestuse piiresse.
       EndTimeLabel: Lõigu lõppaeg
-      DisableAutoSkipTemporarily: Lülita SponsorBlocki automaatne vahelejätmine ajutiselt välja
-      EnableAutoSkipTemporarily: Lülita SponsorBlocki automaatne vahelejätmine uuesti sisse
       Guidelines: Juhised
       InspectSegment: Vaata üle
       InvalidStartTime: Sisesta sobiv lõigu algusaeg.
@@ -1835,7 +1828,6 @@ Video:
       InfoPanelLoading: Lõike alles laaditakse...
       InfoPanelHasSegments: Selle video lõigud on andmebaasis olemas!
       InfoPanelNoSegments: Lõike ei leitud
-      RefreshSegments: Värskenda lõike
       RefreshInfo: Värskenda SponsorBlocki teavet
       ContributionStatsTitle: Sinu panus
       ContributionStatsLoading: Panuse statistika laadimine...

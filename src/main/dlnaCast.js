@@ -10,6 +10,7 @@ export { parseDlnaDevice } from '../dlnaProtocol.js'
 
 const SSDP_ADDRESS = '239.255.255.250'
 const DISCOVERY_TIME_MS = 2500
+const MAX_RESPONSE_BYTES = 256_000
 
 /** @type {Map<string, { id: string, name: string, address: string, controlUrl: string, serviceType: string }>} */
 const discoveredDevices = new Map()
@@ -52,10 +53,9 @@ export async function discoverDlnaDevices() {
   const devices = await Promise.all([...locations].map(async ([location, address]) => {
     try {
       const response = await fetch(location, { signal: AbortSignal.timeout(3000), redirect: 'error' })
-      if (!response.ok || Number(response.headers.get('content-length')) > 256_000) return null
-      const description = await response.text()
-      if (description.length > 256_000) return null
-      return parseDlnaDevice(description, location, address)
+      if (!response.ok) return null
+      const description = await readLimitedText(response)
+      return description === null ? null : parseDlnaDevice(description, location, address)
     } catch {
       return null
     }
@@ -64,6 +64,34 @@ export async function discoverDlnaDevices() {
     if (device) discoveredDevices.set(device.id, device)
   }
   return devices.filter(Boolean).map(({ id, name }) => ({ id, name }))
+}
+
+/**
+ * Reads a device response without buffering more than the limit, since a
+ * device on the network can leave out or misstate its Content-Length.
+ * @param {Response} response
+ * @returns {Promise<string | null>} null when the response is too large
+ */
+async function readLimitedText(response) {
+  if (Number(response.headers.get('content-length')) > MAX_RESPONSE_BYTES) {
+    await response.body?.cancel()
+    return null
+  }
+  if (!response.body) return ''
+  const reader = response.body.getReader()
+  const chunks = []
+  let size = 0
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    size += value.byteLength
+    if (size > MAX_RESPONSE_BYTES) {
+      await reader.cancel()
+      return null
+    }
+    chunks.push(value)
+  }
+  return Buffer.concat(chunks).toString('utf8')
 }
 
 export async function sendAvTransport(device, action, fields) {
@@ -80,9 +108,8 @@ export async function sendAvTransport(device, action, fields) {
   })
   if (!response.ok) throw new Error(`${action} failed with HTTP ${response.status}`)
   if (action === 'GetPositionInfo') {
-    if (Number(response.headers.get('content-length')) > 256_000) throw new Error('DLNA response is too large')
-    const text = await response.text()
-    if (text.length > 256_000) throw new Error('DLNA response is too large')
+    const text = await readLimitedText(response)
+    if (text === null) throw new Error('DLNA response is too large')
     return text
   }
   await response.body?.cancel()

@@ -43,8 +43,6 @@ Unload Multiple Tabs Confirmation:
   Message: Iš atminties bus pašalinta {count} kortelė. | Iš atminties bus pašalintos {count} kortelės. | Iš atminties bus pašalinta {count} kortelių.
   Unload Tabs: Pašalinti iš atminties {count} kortelę | Pašalinti iš atminties {count} korteles | Pašalinti iš atminties {count} kortelių
 Tabs Unloaded To Free Memory: Atminčiai atlaisvinti pašalinta {count} kortelė, kurios neseniai nenaudojote | Atminčiai atlaisvinti pašalintos {count} kortelės, kurių neseniai nenaudojote | Atminčiai atlaisvinti pašalinta {count} kortelių, kurių neseniai nenaudojote
-Use Vertical Tabs: Naudoti vertikalias korteles
-Use Horizontal Tabs: Naudoti horizontalias korteles
 Resize Tab Bar: Keisti kortelių juostos dydį
 Find in page: Rasti puslapyje
 Previous match: Ankstesnis atitikmuo
@@ -487,7 +485,6 @@ Settings:
     Add-ons: Priedai
     Add-ons Description: SponsorBlock, DeArrow, „Nepatinka“ įvertinimai, AiSList ir įgarsintas vertimas
     Privacy Description: Istorija, paieškos pasiūlymai, nuorodos ir programos slaptažodis
-    Online activity: Veikla internete
     Data And Storage Description: Atsarginės kopijos, importavimas ir eksportavimas, disko naudojimas ir valymas
     Sync Description: Sinchronizavimo serverio paskyra, įrenginių susiejimas ir sinchronizuoti duomenys
     Advanced: Išplėstiniai
@@ -1205,8 +1202,6 @@ Settings:
     Update FFmpeg: Atnaujinti FFmpeg
     Checking FFmpeg: Tikrinama FFmpeg…
     Downloading FFmpeg: Atsisiunčiama FFmpeg…
-    FFmpeg Downloaded Template: Baigta atsisiųsti FFmpeg {version}
-    FFmpeg Download Error Template: 'Nepavyko atsisiųsti FFmpeg: {error}'
     Detected FFprobe Version Template: 'Aptikta FFprobe versija: {version}'
     FFprobe Managed Not Downloaded: FFprobe dar neatsisiųsta. Norėdami ją atsisiųsti kartu su FFmpeg, spustelėkite toliau esantį mygtuką.
     System FFprobe Missing Warning: Sistemoje nerasta FFprobe. Ji būtina medijos failams tikrinti po apdorojimo. Įdiekite ją šalia FFmpeg arba kaip šaltinį pasirinkite „Valdo OpenTubeX“.
@@ -1275,7 +1270,6 @@ Settings:
     Clear Video Metadata Cache: Išvalyti vaizdo įrašų metaduomenų podėlį
     Are you sure you want to clear the video metadata cache?: Ar tikrai norite išvalyti podėlyje saugomus vaizdo įrašų pavadinimus, miniatiūras ir aprašus?
     Failed to clear video metadata cache: Nepavyko išvalyti vaizdo įrašų metaduomenų podėlio
-    Video metadata cache has been cleared: Vaizdo įrašų metaduomenų podėlis išvalytas
     Video Metadata Cache Size: 'Vaizdo įrašų metaduomenų podėlis: {size}'
     Are you sure you want to clear out your search history and cache?: Ar tikrai norite išvalyti paieškos istoriją ir podėlį?
     Search history and cache have been cleared: Paieškos istorija ir podėlis išvalyti
@@ -1532,6 +1526,7 @@ Settings:
     Channel playback speeds imported: "Importuotas {count} kanalo atkūrimo greitis | Importuoti {count} kanalų atkūrimo greičiai | Importuoti {count} kanalų atkūrimo greičiai"
     Channels not found: "{count} kanalas nerastas | {count} kanalai nerasti | {count} kanalų nerasta"
   Sync Settings:
+    Signed Out After Restore: 'Sinchronizavimas atjungtas, nes šios programėlės duomenys buvo atkurti iš atsarginės kopijos arba kito įrenginio. Prisijunkite iš naujo, kad sinchronizuotumėte šį įrenginį.'
     Revoke Session Tabs Warning: "Taip pat bus ištrinti šio įrenginio sinchronizuoti skirtukų rinkiniai."
     Revoke Session Partial Failure: "Sinchronizuoti skirtukų rinkiniai buvo ištrinti, tačiau prieigos atšaukimo patvirtinti nepavyko. Bandykite dar kartą atšaukti prieigą."
     Tab Sync Revocation Pending: "Skirtukų sinchronizavimas pristabdytas, kol laukiama šio prisijungimo prieigos atšaukimo. Bandykite atšaukti dar kartą sinchronizavimo nustatymuose."
@@ -2186,8 +2181,6 @@ Video:
       EndTimeAfterStart: Segmento pabaigos laikas turi būti vėlesnis už pradžios laiką.
       EndTimeBeforeVideoEnd: Segmento pabaigos laikas negali būti vėlesnis už vaizdo įrašo pabaigą.
       EndTimeLabel: Segmento pabaigos laikas
-      DisableAutoSkipTemporarily: Laikinai išjungti automatinį SponsorBlock segmentų praleidimą
-      EnableAutoSkipTemporarily: Vėl įjungti automatinį SponsorBlock segmentų praleidimą
       Guidelines: Gairės
       InspectSegment: Patikrinti
       InvalidStartTime: Įveskite tinkamą segmento pradžios laiką.
@@ -2223,7 +2216,6 @@ Video:
       InfoPanelLoading: Segmentai vis dar įkeliami...
       InfoPanelHasSegments: Šio vaizdo įrašo segmentai rasti duomenų bazėje!
       InfoPanelNoSegments: Segmentų nerasta
-      RefreshSegments: Atnaujinti segmentus
       RefreshInfo: Atnaujinti SponsorBlock informaciją
       ContributionStatsTitle: Jūsų indėlis
       ContributionStatsLoading: Įkeliama indėlio statistika...

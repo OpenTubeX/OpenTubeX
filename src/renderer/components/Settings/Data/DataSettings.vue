@@ -367,7 +367,7 @@ import { parseOpmlFeeds } from '../../../helpers/opml'
 import { parseChannelPreferences } from '../../../helpers/channel-preferences'
 import { resolveChannelId } from '../../../helpers/channels'
 import { parseSpeedByChannelValues, resolveSpeedByChannelValues } from '../../../helpers/speed-by-channel-import'
-import { previewBackupImport, previewTakeoutImport, parseTakeoutSubscriptions, parseTakeoutWatchHistory, parseTakeoutSearchHistory, mergeTakeoutHistoryRecord } from '../../../helpers/import-preview'
+import { previewBackupImport, previewTakeoutImport, parseTakeoutSubscriptions, parseTakeoutWatchHistory, parseTakeoutSearchHistory } from '../../../helpers/import-preview'
 import FtImportPreview from '../../FtImportPreview/FtImportPreview.vue'
 import FtLoader from '../../FtLoader/FtLoader.vue'
 import { BACKUP_SECTIONS } from '../../../helpers/unifiedBackup'
@@ -375,7 +375,6 @@ import { runBackgroundJob } from '../../../helpers/background-jobs'
 import { compactAllDatastores, DBHistoryHandlers, DBPlaylistHandlers, DBProfileHandlers, DBSearchHistoryHandlers, DBWatchStatsHandlers } from '../../../../datastores/handlers/index'
 import { forEachTakeoutImportEntry, forEachTakeoutPlaylistFile, listYouTubeTakeoutZipEntries } from '../../../helpers/youtube-takeout-zip'
 import {
-  mergeSearchHistoryEntries,
   normalizeSearchHistoryEntry,
   normalizeSearchSettings,
 } from '../../../../search-history'
@@ -523,8 +522,7 @@ async function importUnifiedBackup() {
       throw new Error('Could not restore history')
     }
     if (selected.has('searchHistory')) {
-      const entries = mergeSearchHistoryEntries(await DBSearchHistoryHandlers.find(), data.searchHistory)
-      if (await store.dispatch('overwriteSearchHistory', entries) !== true) throw new Error('Could not restore search history')
+      if (await store.dispatch('importSearchHistory', data.searchHistory) !== true) throw new Error('Could not restore search history')
     }
     if (selected.has('watchStats')) {
       await DBWatchStatsHandlers.mergeBackup(data.watchStats)
@@ -896,9 +894,13 @@ function convertOldFreeTubeFormatToNew(oldData) {
  * @param {T[]} subscriptions
  * @returns {T[]}
  */
-function uniqueSubscriptions(subscriptions) {
-  const seen = new Set()
-  return subscriptions.filter(channel => !seen.has(channel.id) && seen.add(channel.id))
+/**
+ * The channels of an imported profile, or null when it has none to read
+ * @param {unknown} subscriptions
+ */
+function importedProfileChannels(subscriptions) {
+  if (!Array.isArray(subscriptions)) return null
+  return subscriptions.filter(channel => isJsonObject(channel) && typeof channel.id === 'string' && channel.id !== '')
 }
 
 /**
@@ -929,8 +931,11 @@ async function importFreeTubeSubscriptions(profileRecords) {
     'icon'
   ]
   const knownKeys = [...requiredKeys, ...optionalKeys]
-  const updatedPrimaryProfile = deepCopy(profileList.value[0])
+  // Each write merges with the saved profile, so changes made meanwhile stay.
+  // Every profile is checked before the first write, so a bad one cannot leave the import half done.
+  const importedPrimaryProfile = { _id: MAIN_PROFILE_ID, subscriptions: [] }
   let shouldUpdatePrimaryProfile = false
+  /** @type {(() => Promise<boolean>)[]} */
   const profileWrites = []
 
   profileRecords.forEach((profileData) => {
@@ -955,26 +960,23 @@ async function importFreeTubeSubscriptions(profileRecords) {
     })
 
     const hasAllRequiredKeys = requiredKeys.every(key => Object.hasOwn(profileObject, key))
-    if (!hasAllRequiredKeys) {
+    const channels = hasAllRequiredKeys ? importedProfileChannels(profileObject.subscriptions) : null
+    if (channels === null || typeof profileObject._id !== 'string' || typeof profileObject.name !== 'string') {
       const message = t('Settings.Data Settings.Profile object has insufficient data, skipping item')
       showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
     } else {
+      profileObject.subscriptions = channels
+      const icon = Object.hasOwn(profileObject, 'icon') ? { icon: profileObject.icon } : {}
       if (profileObject._id === MAIN_PROFILE_ID) {
-        if (Object.hasOwn(profileObject, 'icon')) {
-          updatedPrimaryProfile.icon = profileObject.icon
-        }
+        Object.assign(importedPrimaryProfile, icon)
       } else {
-        const existingProfileIndex = profileList.value.findIndex((profile) => {
+        const existingProfile = profileList.value.find((profile) => {
           return profile._id !== MAIN_PROFILE_ID && profile.name === profileObject.name
         })
 
-        if (existingProfileIndex !== -1) {
-          const existingProfile = deepCopy(profileList.value[existingProfileIndex])
-          if (Object.hasOwn(profileObject, 'icon')) {
-            existingProfile.icon = profileObject.icon
-          }
-          existingProfile.subscriptions = uniqueSubscriptions(existingProfile.subscriptions.concat(profileObject.subscriptions))
-          profileWrites.push(store.dispatch('updateProfile', existingProfile))
+        if (existingProfile !== undefined) {
+          // Recreated in full if another window deletes it meanwhile
+          profileWrites.push(() => store.dispatch('mergeImportedProfile', { ...profileObject, _id: existingProfile._id }))
         } else {
           const hasProfileIdCollision = profileList.value.some((profile) => {
             return profile._id === profileObject._id
@@ -983,14 +985,14 @@ async function importFreeTubeSubscriptions(profileRecords) {
           if (hasProfileIdCollision) {
             const newProfile = { ...profileObject }
             delete newProfile._id
-            profileWrites.push(store.dispatch('createProfile', newProfile))
+            profileWrites.push(() => store.dispatch('createProfile', newProfile))
           } else {
-            profileWrites.push(store.dispatch('updateProfile', profileObject))
+            profileWrites.push(() => store.dispatch('mergeImportedProfile', profileObject))
           }
         }
       }
 
-      updatedPrimaryProfile.subscriptions = uniqueSubscriptions(updatedPrimaryProfile.subscriptions.concat(profileObject.subscriptions))
+      importedPrimaryProfile.subscriptions.push(...channels)
       shouldUpdatePrimaryProfile = true
     }
   })
@@ -999,8 +1001,8 @@ async function importFreeTubeSubscriptions(profileRecords) {
     return
   }
 
-  profileWrites.push(store.dispatch('updateProfile', updatedPrimaryProfile))
-  const results = await Promise.all(profileWrites)
+  profileWrites.push(() => store.dispatch('mergeImportedProfile', importedPrimaryProfile))
+  const results = await Promise.all(profileWrites.map(write => write()))
   if (results.some(result => result !== true)) {
     throw new Error('Could not import profiles')
   }
@@ -1141,15 +1143,9 @@ function importLibreTubeSubscriptions(libreTubeSubscriptions) {
  * @param {{ id: string | null | undefined, name: string, thumbnail: string | null }[]} subscriptions
  */
 async function addSubscriptionsToPrimaryProfile(subscriptions) {
-  const profile = deepCopy(profileList.value[0])
-  const subscribedIds = new Set(profile.subscriptions.map(channel => channel.id))
-  for (const channel of subscriptions) {
-    if (channel.id == null || subscribedIds.has(channel.id)) continue
-    subscribedIds.add(channel.id)
-    profile.subscriptions.push(channel)
-  }
-
-  if (await store.dispatch('updateProfile', profile) !== true) {
+  // Merged with the saved subscriptions, which another window may change meanwhile
+  const profile = { _id: MAIN_PROFILE_ID, subscriptions: subscriptions.filter(channel => channel.id != null) }
+  if (await store.dispatch('mergeImportedProfile', profile) !== true) {
     throw new Error('Could not import subscriptions')
   }
   showToast({
@@ -1384,10 +1380,6 @@ const exportWatchSearchHistoryPromptNames = computed(() => [
 
 // #region watch history
 
-const historyCacheById = computed(() => {
-  return store.getters.getHistoryCacheById
-})
-
 const historyCacheSorted = computed(() => {
   return store.getters.getHistoryCacheSorted
 })
@@ -1474,8 +1466,9 @@ async function importFreeTubeWatchHistory(historyRecords) {
     'paid',
   ]
 
-  // deep copy so we don't get errors from Electron when we try to pass reactive objects through the IPC channels
-  const historyItems = new Map(deepCopy(Object.entries(historyCacheById.value)))
+  // Only the imported records are sent; the datastore merges them with the
+  // saved history, which another window may change meanwhile.
+  const historyItems = new Map()
   let importedCount = 0
 
   historyRecords.forEach((historyData) => {
@@ -1498,7 +1491,7 @@ async function importFreeTubeWatchHistory(historyRecords) {
       if (requiredKeys.includes(key) || optionalKeys.includes(key)) {
         historyObject[key] = historyData[key]
       } else if (!ignoredKeys.includes(key)) {
-        showToast({ message: `Unknown data key: ${key}`, icon: ['fas', 'circle-exclamation'] })
+        showToast({ message: `${t('Settings.Data Settings.Unknown data key')}: ${key}`, icon: ['fas', 'circle-exclamation'] })
       }
       // Else do not import the key
     })
@@ -1524,7 +1517,7 @@ async function importFreeTubeWatchHistory(historyRecords) {
     return
   }
 
-  if (await store.dispatch('overwriteHistory', historyItems) !== true) {
+  if (await store.dispatch('importHistory', { records: [...historyItems.values()], rule: 'replace' }) !== true) {
     throw new Error('Could not import history')
   }
 
@@ -1543,14 +1536,13 @@ async function importLibreTubeWatchHistory(backupData) {
     return
   }
 
-  const historyItems = new Map(deepCopy(Object.entries(historyCacheById.value)))
   const {
     historyItems: convertedHistoryItems,
     importedCount,
     skippedCount,
   } = convertLibreTubeWatchHistoryToOpenTubeX(
     backupData,
-    historyItems
+    []
   )
 
   if (importedCount === 0) {
@@ -1565,7 +1557,7 @@ async function importLibreTubeWatchHistory(backupData) {
     })
   }
 
-  if (await store.dispatch('overwriteHistory', convertedHistoryItems) !== true) {
+  if (await store.dispatch('importHistory', { records: [...convertedHistoryItems.values()], rule: 'replace' }) !== true) {
     throw new Error('Could not import history')
   }
 
@@ -1581,15 +1573,13 @@ async function importLibreTubeWatchHistory(backupData) {
 async function importYouTubeWatchHistory(historyData) {
   const { entries, skipped, unknownKeys } = parseTakeoutWatchHistory(historyData)
   for (const key of unknownKeys) {
-    showToast({ message: `Unknown data key: ${key}`, icon: ['fas', 'circle-exclamation'] })
+    showToast({ message: `${t('Settings.Data Settings.Unknown data key')}: ${key}`, icon: ['fas', 'circle-exclamation'] })
   }
   if (skipped > 0) {
     showToast({ message: t('Settings.Data Settings.History object has insufficient data, skipping item'), icon: ['fas', 'circle-exclamation'] })
   }
-  const historyItems = new Map(deepCopy(Object.entries(historyCacheById.value)))
-  for (const entry of entries) historyItems.set(entry.videoId, mergeTakeoutHistoryRecord(historyItems.get(entry.videoId), entry))
-
-  if (await store.dispatch('overwriteHistory', historyItems) !== true) {
+  // The datastore fills the saved records, which another window may change meanwhile
+  if (await store.dispatch('importHistory', { records: entries, rule: 'takeout' }) !== true) {
     throw new Error('Could not import history')
   }
 
@@ -1997,12 +1987,10 @@ async function importPlaylistDatabase(data) {
 
   const saved = await Promise.all(Array.from(updates.values(), playlist => store.dispatch('updatePlaylist', playlist)))
 
-  if (importedCount > 0 && newPlaylists.length > 0) {
-    await store.dispatch('addPlaylists', newPlaylists)
-  }
+  const added = importedCount === 0 || newPlaylists.length === 0 || await store.dispatch('addPlaylists', newPlaylists)
   // A playlist deleted in another window meanwhile isn't recreated, so report
   // that part of the import failed after saving the rest
-  if (saved.some(result => result !== true)) throw new Error('Could not import playlists')
+  if (!added || saved.some(result => result !== true)) throw new Error('Could not import playlists')
 
   if (importedCount === 0) {
     return
@@ -2083,8 +2071,6 @@ async function importSearchHistory() {
  * @param {unknown[]} searchHistoryRecords
  */
 async function importFreeTubeSearchHistory(searchHistoryRecords) {
-  // deep copy so we don't get errors from Electron when we try to pass reactive objects through the IPC channels
-  const currentEntries = deepCopy(searchHistoryEntries.value)
   const importedEntries = []
 
   searchHistoryRecords.forEach((entry) => {
@@ -2108,9 +2094,7 @@ async function importFreeTubeSearchHistory(searchHistoryRecords) {
     return
   }
 
-  const newSearchHistoryEntries = mergeSearchHistoryEntries(currentEntries, importedEntries)
-
-  if (await store.dispatch('overwriteSearchHistory', newSearchHistoryEntries) !== true) {
+  if (await store.dispatch('importSearchHistory', importedEntries) !== true) {
     throw new Error('Could not import search history')
   }
 
@@ -2124,16 +2108,12 @@ async function importFreeTubeSearchHistory(searchHistoryRecords) {
  * @param {any[]} historyData
  */
 async function importYouTubeSearchHistory(historyData) {
-  // deep copy so we don't get errors from Electron when we try to pass reactive objects through the IPC channels
-  const currentEntries = deepCopy(searchHistoryEntries.value)
   const { entries: importedEntries, skipped } = parseTakeoutSearchHistory(historyData)
   if (skipped > 0) {
     showToast({ message: t('Settings.Data Settings.History object has insufficient data, skipping item'), icon: ['fas', 'circle-exclamation'] })
   }
 
-  const newSearchHistoryEntries = mergeSearchHistoryEntries(currentEntries, importedEntries)
-
-  if (await store.dispatch('overwriteSearchHistory', newSearchHistoryEntries) !== true) {
+  if (await store.dispatch('importSearchHistory', importedEntries) !== true) {
     throw new Error('Could not import search history')
   }
 

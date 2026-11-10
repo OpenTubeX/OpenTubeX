@@ -43,8 +43,6 @@ Unload Multiple Tabs Confirmation:
   Message: Това ще освободи {count} раздела от паметта.
   Unload Tabs: Освободи {count} раздела
 Tabs Unloaded To Free Memory: '{count} раздел, който не сте използвали скоро, беше освободен от паметта | {count} раздела, които не сте използвали скоро, бяха освободени от паметта'
-Use Vertical Tabs: Използвай вертикални раздели
-Use Horizontal Tabs: Използвай хоризонтални раздели
 Resize Tab Bar: Преоразмеряване на лентата с раздели
 Find in page: Търсене в страницата
 Previous match: Предишно съвпадение
@@ -375,7 +373,6 @@ Settings:
     Add-ons: Добавки
     Add-ons Description: SponsorBlock, DeArrow, оценки „Не ми харесва“, AiSList и гласов превод
     Privacy Description: История, предложения при търсене, връзки и парола за приложението
-    Online activity: Дейност онлайн
     Data And Storage Description: Резервни копия, импортиране и експортиране, използване на диска и почистване
     Sync Description: Профил в сървъра за синхронизиране, сдвояване на устройства и синхронизирани данни
     Advanced: Разширени
@@ -1007,8 +1004,6 @@ Settings:
     Update FFmpeg: Обновяване на FFmpeg
     Checking FFmpeg: Проверява се FFmpeg…
     Downloading FFmpeg: Изтегля се FFmpeg…
-    FFmpeg Downloaded Template: FFmpeg {version} е изтеглен
-    FFmpeg Download Error Template: 'Изтеглянето на FFmpeg беше неуспешно: {error}'
     Detected FFprobe Version Template: 'Открита версия на FFprobe: {version}'
     FFprobe Managed Not Downloaded: FFprobe все още не е изтеглен. Натиснете бутона по-долу, за да го изтеглите заедно с FFmpeg.
     System FFprobe Missing Warning: FFprobe не е намерен в системата. Той е необходим за проверка на медийните файлове при последваща обработка. Инсталирайте го до FFmpeg или сменете източника на „Управляван от OpenTubeX“.
@@ -1069,7 +1064,6 @@ Settings:
     Clear Video Metadata Cache: Изчистване на кеша с метаданни за видеоклипове
     Are you sure you want to clear the video metadata cache?: Сигурни ли сте, че искате да изчистите кешираните заглавия, миниатюри и описания на видеоклиповете?
     Failed to clear video metadata cache: Кешът с метаданни за видеоклипове не можа да бъде изчистен
-    Video metadata cache has been cleared: Кешът с метаданни за видеоклипове е изчистен
     Video Metadata Cache Size: 'Кеш с метаданни за видеоклипове: {size}'
   Storage Settings:
     Storage: Съхранение
@@ -1285,6 +1279,7 @@ Settings:
     Channel playback speeds imported: "Внесена е скоростта на възпроизвеждане на {count} канал | Внесени са скоростите на възпроизвеждане на {count} канала"
     Channels not found: "{count} канал не може да бъде намерен | {count} канала не могат да бъдат намерени"
   Sync Settings:
+    Signed Out After Restore: 'Синхронизирането беше излязло от профила, защото тези данни на приложението бяха възстановени от резервно копие или от друго устройство. Влезте отново, за да синхронизирате това устройство.'
     Revoke Session Tabs Warning: "Синхронизираните набори от раздели на това устройство също ще бъдат изтрити."
     Revoke Session Partial Failure: "Синхронизираните набори от раздели бяха изтрити, но отнемането на достъпа не можа да бъде потвърдено. Опитайте отново да отнемете достъпа."
     Tab Sync Revocation Pending: "Синхронизирането на раздели е спряно, докато отнемането на достъпа за това влизане е в изчакване. Опитайте отново в настройките за синхронизация."
@@ -1822,8 +1817,6 @@ Video:
       EndTimeAfterStart: Крайният час на сегмента трябва да бъде след началния.
       EndTimeBeforeVideoEnd: Крайният час на сегмента трябва да бъде в рамките на времетраенето на видеоклипа.
       EndTimeLabel: Краен час на сегмента
-      DisableAutoSkipTemporarily: Временно изключване на автоматичното пропускане от SponsorBlock
-      EnableAutoSkipTemporarily: Повторно включване на автоматичното пропускане от SponsorBlock
       Guidelines: Указания
       InspectSegment: Преглед
       InvalidStartTime: Въведете валиден начален час на сегмента.
@@ -1859,7 +1852,6 @@ Video:
       InfoPanelLoading: Сегментите още се зареждат...
       InfoPanelHasSegments: За този видеоклип има сегменти в базата данни!
       InfoPanelNoSegments: Не са намерени сегменти
-      RefreshSegments: Обновяване на сегментите
       RefreshInfo: Обновяване на информацията от SponsorBlock
       ContributionStatsTitle: Вашият принос
       ContributionStatsLoading: Зареждане на статистиката за приноса...

@@ -53,8 +53,6 @@ Unload Multiple Tabs Confirmation:
 Tabs Unloaded To Free Memory: '{count} oortjie wat u onlangs nie gebruik het nie, is ontlaai om geheue vry te maak | {count} oortjies wat u onlangs nie gebruik het nie, is ontlaai om geheue vry te maak'
 Compact side navigation: Kompakte synavigasie
 Expand side navigation: Vou synavigasie uit
-Use Vertical Tabs: Gebruik vertikale oortjies
-Use Horizontal Tabs: Gebruik horisontale oortjies
 Resize Tab Bar: Verander grootte van oortjiebalk
 Find in page: Soek op bladsy
 Previous match: Vorige treffer
@@ -533,7 +531,6 @@ Settings:
     Add-ons: Byvoegings
     Add-ons Description: SponsorBlock, DeArrow, afkeure, AiSList en stemoorvertaling
     Privacy Description: Geskiedenis, soekvoorstelle, skakels en toepwagwoord
-    Online activity: Aanlynaktiwiteit
     Data And Storage Description: Rugsteune, invoer en uitvoer, skyfgebruik en opruiming
     Sync Description: Sinkroniseerbedienerrekening, toestelkoppeling en gesinkroniseerde data
     Advanced: Gevorderd
@@ -1181,8 +1178,6 @@ Settings:
     Update FFmpeg: Werk FFmpeg by
     Checking FFmpeg: Gaan FFmpeg na…
     Downloading FFmpeg: Laai FFmpeg af…
-    FFmpeg Downloaded Template: FFmpeg {version} is afgelaai
-    FFmpeg Download Error Template: 'Aflaai van FFmpeg het misluk: {error}'
     Detected FFprobe Version Template: 'Bespeurde FFprobe-weergawe: {version}'
     FFprobe Managed Not Downloaded: FFprobe is nog nie afgelaai nie. Klik op die knoppie hieronder om dit saam met FFmpeg af te laai.
     System FFprobe Missing Warning: FFprobe is nie op u stelsel gevind nie. Dit word benodig om media tydens naverwerking te ondersoek. Installeer dit langs FFmpeg, of skakel die bron oor na "Bestuur deur OpenTubeX".
@@ -1249,7 +1244,6 @@ Settings:
     Clear Video Metadata Cache: Wis videometadatakas
     Are you sure you want to clear the video metadata cache?: Is u seker u wil die gekaste videotitels, duimnaels en beskrywings wis?
     Failed to clear video metadata cache: Kon nie videometadatakas wis nie
-    Video metadata cache has been cleared: Videometadatakas is gewis
     Video Metadata Cache Size: 'Videometadatakas: {size}'
   Storage Settings:
     Storage: Berging
@@ -1483,6 +1477,7 @@ Settings:
     Channel playback speeds imported: Die afspeelspoed van {count} kanaal is ingevoer | Die afspeelspoed van {count} kanale is ingevoer
     Channels not found: '{count} kanaal kon nie gevind word nie | {count} kanale kon nie gevind word nie'
   Sync Settings:
+    Signed Out After Restore: 'Sinkronisering is afgemeld omdat hierdie toepassingsdata vanaf ''n rugsteun of ''n ander toestel herstel is. Meld weer aan om hierdie toestel te sinkroniseer.'
     Revoke Session Tabs Warning: Hierdie toestel se gesinkroniseerde oortjiestelle sal ook geskrap word.
     Revoke Session Partial Failure: Gesinkroniseerde oortjiestelle is geskrap, maar die herroeping kon nie bevestig word nie. Probeer weer om toegang te herroep.
     Tab Sync Revocation Pending: Oortjiesinkronisering is gepouseer terwyl herroeping van hierdie aanmelding hangende is. Probeer die herroeping weer in Sinkroniseringsinstellings.
@@ -2076,8 +2071,6 @@ Video:
       EndTimeAfterStart: Die eindtyd van die segment moet ná die begintyd wees.
       EndTimeBeforeVideoEnd: Die eindtyd van die segment moet binne die videoduur wees.
       EndTimeLabel: Eindtyd van segment
-      DisableAutoSkipTemporarily: Deaktiveer SponsorBlock se outomatiese oorslaan tydelik
-      EnableAutoSkipTemporarily: Heraktiveer SponsorBlock se outomatiese oorslaan
       Guidelines: Riglyne
       InspectSegment: Ondersoek
       InvalidStartTime: Voer ’n geldige begintyd vir die segment in.
@@ -2113,7 +2106,6 @@ Video:
       InfoPanelLoading: Segmente laai nog...
       InfoPanelHasSegments: Hierdie video het segmente in die databasis!
       InfoPanelNoSegments: Geen segmente gevind nie
-      RefreshSegments: Verfris segmente
       RefreshInfo: Verfris SponsorBlock-inligting
       ContributionStatsTitle: U bydraes
       ContributionStatsLoading: Laai bydraestatistieke...

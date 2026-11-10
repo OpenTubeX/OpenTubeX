@@ -318,7 +318,7 @@ async function handlePickVideoIpBlockRecoveryScriptPath() {
 
 function enableProxy(protocol = proxyProtocol.value) {
   if (process.env.IS_ELECTRON) {
-    window.ftElectron.enableProxy(`${protocol}://${proxyHostname.value}:${proxyPort.value}`)
+    return window.ftElectron.enableProxy(`${protocol}://${proxyHostname.value}:${proxyPort.value}`)
   }
 }
 
@@ -344,11 +344,10 @@ function disableProxy() {
 async function testProxy() {
   isLoading.value = true
 
-  if (!useProxy.value) {
-    enableProxy()
-  }
-
   try {
+    // Apply the proxy as edited now, so the test cannot run through the previous one
+    debouncedEnableProxy.cancel()
+    await enableProxy()
     if (IS_CAPACITOR) {
       await store.dispatch('waitForAndroidProxySettings')
       if (!useProxy.value) return

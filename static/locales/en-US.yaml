@@ -81,8 +81,6 @@ Back: Back
 Forward: Forward
 Right-click or hold to see history: Right-click or hold to see history
 Open New Window: Open New Window
-Use Vertical Tabs: Use Vertical Tabs
-Use Horizontal Tabs: Use Horizontal Tabs
 Resize Tab Bar: Resize Tab Bar
 Go to page: Go to {page}
 Close Banner: Close Banner
@@ -666,7 +664,6 @@ Settings:
     Add-ons: Add-ons
     Add-ons Description: SponsorBlock, DeArrow, dislikes, AiSList, and voice-over translation
     Privacy Description: History, search suggestions, links, and app password
-    Online activity: Online activity
     Data And Storage Description: Backups, import and export, disk usage, and cleanup
     Sync Description: Sync server account, device pairing, and synced data
     Advanced: Advanced
@@ -1525,8 +1522,6 @@ Settings:
     Update FFmpeg: Update FFmpeg
     Checking FFmpeg: Checking FFmpeg…
     Downloading FFmpeg: Downloading FFmpeg…
-    FFmpeg Downloaded Template: FFmpeg {version} has been downloaded
-    FFmpeg Download Error Template: 'Downloading FFmpeg failed: {error}'
     Detected FFprobe Version Template: 'Detected FFprobe version: {version}'
     FFprobe Managed Not Downloaded: FFprobe has not been downloaded yet. Click the button below to download it with FFmpeg.
     System FFprobe Missing Warning: FFprobe was not found on your system. It is required for inspecting media during post-processing. Install it next to FFmpeg, or switch the source to "Managed by OpenTubeX".
@@ -1600,7 +1595,6 @@ Settings:
     Clear Video Metadata Cache: Clear Video Metadata Cache
     Are you sure you want to clear the video metadata cache?: Are you sure you want to clear the cached video titles, thumbnails, and descriptions?
     Failed to clear video metadata cache: Failed to clear video metadata cache
-    Video metadata cache has been cleared: Video metadata cache has been cleared
     Video Metadata Cache Size: 'Video metadata cache: {size}'
     Are you sure you want to clear out your search history and cache?: Are you sure you want to
       clear out your search history and cache?
@@ -2106,6 +2100,7 @@ Settings:
     Keep Deleted Items: Keep items
     Confirm Data Loss: Delete and continue
     Server Update Required: "Update this server to support encrypted live sync."
+    Signed Out After Restore: Sync was signed out because this app data was restored from a backup or another device. Sign in again to sync this device.
   Proxy Settings:
     Proxy Settings: Proxy
     Proxy Warning: OpenTubeX doesn't have a built-in proxy but can connect to an external proxy, such as one running on your machine like Tor or an external proxy such-as a SOCKS5 proxy provided by some VPNs. If enabled, make sure your proxy/Tor is configured properly, or OpenTubeX won't be able to fetch any data.
@@ -2819,8 +2814,6 @@ Video:
       EndTimeAfterStart: The segment end time must be after the start time.
       EndTimeBeforeVideoEnd: The segment end time must be within the video duration.
       EndTimeLabel: Segment end time
-      DisableAutoSkipTemporarily: Temporarily disable SponsorBlock auto-skipping
-      EnableAutoSkipTemporarily: Re-enable SponsorBlock auto-skipping
       Guidelines: Guidelines
       InspectSegment: Inspect
       InvalidStartTime: Enter a valid segment start time.
@@ -2856,7 +2849,6 @@ Video:
       InfoPanelLoading: Segments still loading...
       InfoPanelHasSegments: 'This video has segments in the database!'
       InfoPanelNoSegments: No segments found
-      RefreshSegments: Refresh segments
       RefreshInfo: Refresh SponsorBlock information
       ContributionStatsTitle: Your contributions
       ContributionStatsLoading: Loading contribution stats...

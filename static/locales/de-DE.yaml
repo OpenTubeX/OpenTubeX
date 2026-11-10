@@ -21,8 +21,6 @@ Close: Schließen
 Close Tab: Tab schließen
 Back: Zurück
 Forward: Vorwärts
-Use Vertical Tabs: Vertikale Tabs verwenden
-Use Horizontal Tabs: Horizontale Tabs verwenden
 Resize Tab Bar: Größe der Tableiste ändern
 
 # Global
@@ -458,7 +456,6 @@ Settings:
     Add-ons: Erweiterungen
     Add-ons Description: SponsorBlock, DeArrow, Dislikes, AiSList und Voice-over-Übersetzung
     Privacy Description: Verlauf, Suchvorschläge, Links und App-Passwort
-    Online activity: Onlineaktivität
     Data And Storage Description: Sicherungen, Import und Export, Speicherbelegung und Bereinigung
     Sync Description: Synchronisierungskonto, Gerätekopplung und synchronisierte Daten
     Advanced: Erweitert
@@ -1275,7 +1272,6 @@ Settings:
     Clear Video Metadata Cache: Videometadaten-Cache leeren
     Are you sure you want to clear the video metadata cache?: Möchtest du die zwischengespeicherten Videotitel, Vorschaubilder und Beschreibungen wirklich löschen?
     Failed to clear video metadata cache: Videometadaten-Cache konnte nicht geleert werden
-    Video metadata cache has been cleared: Videometadaten-Cache wurde geleert
     Video Metadata Cache Size: 'Videometadaten-Cache: {size}'
   Storage Settings:
     Storage: Speicher
@@ -1717,8 +1713,6 @@ Settings:
     Update FFmpeg: FFmpeg aktualisieren
     Checking FFmpeg: FFmpeg wird überprüft…
     Downloading FFmpeg: FFmpeg wird heruntergeladen…
-    FFmpeg Downloaded Template: FFmpeg {version} wurde heruntergeladen
-    FFmpeg Download Error Template: 'Herunterladen von FFmpeg fehlgeschlagen: {error}'
     Managed Tool Already Current Template: '{tool} {version} ist bereits auf dem neuesten Stand'
     Managed Tool Errors:
       Removed: Die heruntergeladene Datei wurde entfernt, höchstwahrscheinlich von einer Antivirensoftware
@@ -2052,6 +2046,7 @@ Settings:
     Keep Deleted Items: Elemente behalten
     Confirm Data Loss: Löschen und fortfahren
     Server Update Required: "Aktualisiere diesen Server, um verschlüsselte Live-Synchronisierung zu unterstützen."
+    Signed Out After Restore: Die Synchronisierung wurde abgemeldet, weil diese App-Daten aus einer Sicherung oder von einem anderen Gerät wiederhergestellt wurden. Melde dich erneut an, um dieses Gerät zu synchronisieren.
   Search Settings: Einstellungen durchsuchen
   No Settings Found: Keine Einstellungen gefunden
 About:
@@ -2425,8 +2420,6 @@ Video:
       EndTimeAfterStart: Die Endzeit des Segments muss nach der Startzeit liegen.
       EndTimeBeforeVideoEnd: Die Endzeit des Segments muss innerhalb der Videodauer liegen.
       EndTimeLabel: Segmentendzeit
-      DisableAutoSkipTemporarily: SponsorBlock Überspringen vorübergehend deaktivieren
-      EnableAutoSkipTemporarily: SponsorBlock Überspringen wieder aktivieren
       Guidelines: Richtlinien
       InspectSegment: Überprüfen
       InvalidStartTime: Gib eine gültige Segmentstartzeit ein.
@@ -2460,7 +2453,6 @@ Video:
       InfoPanelLoading: Segmente werden noch geladen...
       InfoPanelHasSegments: 'Dieses Video hat Segmente in der Datenbank!'
       InfoPanelNoSegments: Keine Segmente gefunden
-      RefreshSegments: Segmente aktualisieren
       RefreshInfo: SponsorBlock-Informationen aktualisieren
       ContributionStatsTitle: Deine Beiträge
       ContributionStatsLoading: Beitragsstatistiken werden geladen...

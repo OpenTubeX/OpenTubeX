@@ -43,8 +43,6 @@ Unload Multiple Tabs Confirmation:
   Message: Θα αποφορτωθούν {count} καρτέλες.
   Unload Tabs: Αποφόρτωση {count} καρτελών
 Tabs Unloaded To Free Memory: Αποφορτώθηκε {count} καρτέλα που δεν έχετε χρησιμοποιήσει πρόσφατα για απελευθέρωση μνήμης | Αποφορτώθηκαν {count} καρτέλες που δεν έχετε χρησιμοποιήσει πρόσφατα για απελευθέρωση μνήμης
-Use Vertical Tabs: Χρήση κατακόρυφων καρτελών
-Use Horizontal Tabs: Χρήση οριζόντιων καρτελών
 Resize Tab Bar: Αλλαγή μεγέθους γραμμής καρτελών
 Find in page: Εύρεση στη σελίδα
 Previous match: Προηγούμενη αντιστοιχία
@@ -372,7 +370,6 @@ Settings:
     Add-ons: Πρόσθετα
     Add-ons Description: SponsorBlock, DeArrow, αρνητικές ψήφοι, AiSList και μετάφραση εκφώνησης
     Privacy Description: Ιστορικό, προτάσεις αναζήτησης, σύνδεσμοι και κωδικός πρόσβασης εφαρμογής
-    Online activity: Δραστηριότητα στο διαδίκτυο
     Data And Storage Description: Αντίγραφα ασφαλείας, εισαγωγή και εξαγωγή, χρήση δίσκου και εκκαθάριση
     Sync Description: Λογαριασμός διακομιστή συγχρονισμού, σύζευξη συσκευών και συγχρονισμένα δεδομένα
     Advanced: Για προχωρημένους
@@ -1002,8 +999,6 @@ Settings:
     Update FFmpeg: Ενημέρωση FFmpeg
     Checking FFmpeg: Έλεγχος FFmpeg…
     Downloading FFmpeg: Λήψη FFmpeg…
-    FFmpeg Downloaded Template: Έγινε λήψη του FFmpeg {version}
-    FFmpeg Download Error Template: 'Η λήψη του FFmpeg απέτυχε: {error}'
     Detected FFprobe Version Template: 'Εντοπίστηκε έκδοση FFprobe: {version}'
     FFprobe Managed Not Downloaded: Δεν έχει γίνει ακόμη λήψη του FFprobe. Κάντε κλικ στο παρακάτω κουμπί για να το κατεβάσετε μαζί με το FFmpeg.
     System FFprobe Missing Warning: Το FFprobe δεν βρέθηκε στο σύστημά σας. Απαιτείται για την εξέταση πολυμέσων κατά τη μετεπεξεργασία. Εγκαταστήστε το δίπλα στο FFmpeg ή αλλάξτε την προέλευση σε «Διαχείριση από το OpenTubeX».
@@ -1064,7 +1059,6 @@ Settings:
     Clear Video Metadata Cache: Εκκαθάριση κρυφής μνήμης μεταδεδομένων βίντεο
     Are you sure you want to clear the video metadata cache?: Θέλετε σίγουρα να διαγράψετε τους τίτλους, τις μικρογραφίες και τις περιγραφές βίντεο από την κρυφή μνήμη;
     Failed to clear video metadata cache: Απέτυχε η εκκαθάριση της κρυφής μνήμης μεταδεδομένων βίντεο
-    Video metadata cache has been cleared: Η κρυφή μνήμη μεταδεδομένων βίντεο εκκαθαρίστηκε
     Video Metadata Cache Size: 'Κρυφή μνήμη μεταδεδομένων βίντεο: {size}'
   Storage Settings:
     Storage: Αποθηκευτικός χώρος
@@ -1278,6 +1272,7 @@ Settings:
     Channel playback speeds imported: "Έγινε εισαγωγή της ταχύτητας αναπαραγωγής {count} καναλιού | Έγινε εισαγωγή των ταχυτήτων αναπαραγωγής {count} καναλιών"
     Channels not found: "Δεν ήταν δυνατή η εύρεση {count} καναλιού | Δεν ήταν δυνατή η εύρεση {count} καναλιών"
   Sync Settings:
+    Signed Out After Restore: 'Ο συγχρονισμός αποσυνδέθηκε επειδή αυτά τα δεδομένα εφαρμογής επαναφέρθηκαν από αντίγραφο ασφαλείας ή από άλλη συσκευή. Συνδεθείτε ξανά για να συγχρονίσετε αυτήν τη συσκευή.'
     Revoke Session Tabs Warning: "Τα συγχρονισμένα σύνολα καρτελών αυτής της συσκευής θα διαγραφούν επίσης."
     Revoke Session Partial Failure: "Τα συγχρονισμένα σύνολα καρτελών διαγράφηκαν, αλλά η ανάκληση δεν μπόρεσε να επιβεβαιωθεί. Δοκιμάστε ξανά να ανακαλέσετε την πρόσβαση."
     Tab Sync Revocation Pending: "Ο συγχρονισμός καρτελών έχει τεθεί σε παύση όσο εκκρεμεί η ανάκληση αυτής της σύνδεσης. Δοκιμάστε ξανά την ανάκληση στις ρυθμίσεις συγχρονισμού."
@@ -1810,8 +1805,6 @@ Video:
       EndTimeAfterStart: Η ώρα λήξης του τμήματος πρέπει να είναι μετά την ώρα έναρξης.
       EndTimeBeforeVideoEnd: Η ώρα λήξης του τμήματος πρέπει να βρίσκεται εντός της διάρκειας του βίντεο.
       EndTimeLabel: Ώρα λήξης τμήματος
-      DisableAutoSkipTemporarily: Προσωρινή απενεργοποίηση αυτόματης παράλειψης SponsorBlock
-      EnableAutoSkipTemporarily: Επανενεργοποίηση αυτόματης παράλειψης SponsorBlock
       Guidelines: Οδηγίες
       InspectSegment: Επιθεώρηση
       InvalidStartTime: Εισαγάγετε έγκυρη ώρα έναρξης τμήματος.
@@ -1847,7 +1840,6 @@ Video:
       InfoPanelLoading: Τα τμήματα φορτώνονται ακόμη...
       InfoPanelHasSegments: Αυτό το βίντεο έχει τμήματα στη βάση δεδομένων!
       InfoPanelNoSegments: Δεν βρέθηκαν τμήματα
-      RefreshSegments: Ανανέωση τμημάτων
       RefreshInfo: Ανανέωση πληροφοριών SponsorBlock
       ContributionStatsTitle: Οι συνεισφορές σας
       ContributionStatsLoading: Φόρτωση στατιστικών συνεισφορών...

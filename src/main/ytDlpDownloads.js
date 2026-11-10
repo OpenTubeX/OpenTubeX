@@ -5,8 +5,8 @@ import {
 } from '../ytDlpArguments'
 import { execFile, spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
-import { mkdtemp, readFile, rename, rm, stat, statfs, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { mkdtemp, readdir, readFile, rename, rm, stat, statfs, writeFile } from 'node:fs/promises'
+import { isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { promisify } from 'node:util'
 import { app, powerMonitor, shell } from 'electron'
 import { settings } from '../datastores/handlers/base'
@@ -123,6 +123,76 @@ const MERGER_REGEX = /^\[Merger\] Merging formats into "(.+)"$/
 const SUBTITLE_DESTINATION_REGEX = /^\[info\] Writing video subtitles to: (.+)$/
 const FINAL_PATH_PREFIX = '__OPENTUBEX_FILE__:'
 const FINAL_METADATA_PREFIX = '__OPENTUBEX_METADATA__:'
+const TEMPORARY_FOLDER_PREFIX = 'opentubex-download-'
+// Names the process whose download uses a temporary folder
+const TEMPORARY_FOLDER_OWNER_FILE = '.opentubex-owner'
+const TEMPORARY_FOLDER_LEGACY_MAX_AGE_MS = 24 * 60 * 60 * 1000
+
+/**
+ * Whether a download may still use a temporary folder. Development and test
+ * instances can run at the same time and share the downloads folder, so a
+ * folder is in use while the process that made it runs.
+ * @param {string} folder
+ */
+async function isTemporaryDownloadFolderInUse(folder) {
+  let pid
+  try {
+    pid = Number.parseInt(await readFile(join(folder, TEMPORARY_FOLDER_OWNER_FILE), 'utf8'), 10)
+  } catch {
+    // Older versions wrote no owner file, so only folders unchanged for a day are left over
+    try {
+      return Date.now() - (await stat(folder)).mtimeMs < TEMPORARY_FOLDER_LEGACY_MAX_AGE_MS
+    } catch {
+      return false
+    }
+  }
+  if (!Number.isSafeInteger(pid) || pid <= 0) return false
+  if (pid === process.pid) return true
+  try {
+    process.kill(pid, 0)
+    return true
+  } catch (error) {
+    return error.code === 'EPERM'
+  }
+}
+
+/**
+ * Removes the temporary folders of downloads that a crash or forced quit left
+ * behind, which can hold gigabytes of partial media.
+ * @param {string} downloadFolder
+ */
+async function removeStaleTemporaryDownloadFolders(downloadFolder) {
+  for (const [folder, prefix] of [[downloadFolder, `.${TEMPORARY_FOLDER_PREFIX}`], [app.getPath('temp'), TEMPORARY_FOLDER_PREFIX]]) {
+    let entries
+    try {
+      entries = await readdir(folder, { withFileTypes: true })
+    } catch {
+      continue
+    }
+    for (const entry of entries) {
+      // Symbolic links are not directories here, so their targets stay untouched
+      if (!entry.isDirectory() || !entry.name.startsWith(prefix)) continue
+      const temporaryFolder = join(folder, entry.name)
+      if (await isTemporaryDownloadFolderInUse(temporaryFolder)) continue
+      await rm(temporaryFolder, { recursive: true, force: true })
+        .catch(error => console.warn('Could not remove a left over temporary download folder', error))
+    }
+  }
+}
+
+/**
+ * Custom arguments can `--print` lines that look like yt-dlp's own output, so
+ * only paths inside the folders of the download are recorded as its files.
+ * @param {string} path
+ * @param {string[]} folders
+ */
+function isPathInsideFolders(path, folders) {
+  return folders.some((folder) => {
+    const relativePath = relative(resolve(folder), resolve(path))
+    return relativePath !== '' && relativePath !== '..' &&
+      !relativePath.startsWith(`..${sep}`) && !isAbsolute(relativePath)
+  })
+}
 
 let downloadCounter = 0
 let downloadQueuePositionCounter = 0
@@ -573,6 +643,8 @@ async function startYtDlpDownload(
   sendStatus(true)
   await saveDownloadRecords()
   onQueued?.({ id })
+  // A cancel while saving found no waiter, so one registered now would never resolve
+  if (status.status !== 'queued' && status.status !== 'paused') return { id }
 
   if (!await waitForDownloadSlot(id)) {
     return { id }
@@ -585,10 +657,10 @@ async function startYtDlpDownload(
   // when both variants have the same source extension.
   let temporaryDownloadFolder
   try {
-    temporaryDownloadFolder = await mkdtemp(join(downloadFolder, '.opentubex-download-'))
+    temporaryDownloadFolder = await mkdtemp(join(downloadFolder, `.${TEMPORARY_FOLDER_PREFIX}`))
   } catch {
     try {
-      temporaryDownloadFolder = await mkdtemp(join(app.getPath('temp'), 'opentubex-download-'))
+      temporaryDownloadFolder = await mkdtemp(join(app.getPath('temp'), TEMPORARY_FOLDER_PREFIX))
     } catch (error) {
       individuallyResumedDownloadIds.delete(id)
       status.status = 'failed'
@@ -599,6 +671,9 @@ async function startYtDlpDownload(
       return { id }
     }
   }
+  // Without the owner, another instance would remove the folder only once it is a day old
+  await writeFile(join(temporaryDownloadFolder, TEMPORARY_FOLDER_OWNER_FILE), String(process.pid))
+    .catch(error => console.warn('Could not mark the temporary download folder', error))
   args.push('--paths', `temp:${temporaryDownloadFolder}`)
   if (directoryFields.length > 0) {
     // Restricted names apply Unicode normalization, which can join an ASCII
@@ -641,7 +716,8 @@ async function startYtDlpDownload(
   }
 
   function queuedPreparationWasInterrupted() {
-    if (status.status !== 'queued') return true
+    // Keep the download queued for the next launch instead of spawning during shutdown
+    if (shuttingDownDownloads || status.status !== 'queued') return true
     if (!downloadQueuePaused || individuallyResumedDownloadIds.has(id)) return false
     status.status = 'paused'
     sendStatus(true)
@@ -682,6 +758,7 @@ async function startYtDlpDownload(
   const errorLines = []
   /** @type {Set<string>} */
   const subtitleDestinations = new Set()
+  const downloadFolders = [downloadFolder, temporaryDownloadFolder]
 
   /** @param {'preparing' | 'downloading' | 'processing'} phase */
   function setDownloadPhase(phase) {
@@ -767,7 +844,9 @@ async function startYtDlpDownload(
       const hasMediaMetadata = parts.length >= 5
       const [videoId, rawDuration, rawWidth, rawHeight] = parts
       const pathParts = parts.slice(hasMediaMetadata ? 4 : parts.length > 1 ? 1 : 0)
-      status.destination = pathParts.join('\t')
+      const destination = pathParts.join('\t')
+      if (!isPathInsideFolders(destination, downloadFolders)) return
+      status.destination = destination
       if (status.destination !== '' && !status.destinations.includes(status.destination)) {
         status.destinations.push(status.destination)
       }
@@ -792,6 +871,7 @@ async function startYtDlpDownload(
     const subtitleMatch = SUBTITLE_DESTINATION_REGEX.exec(line)
     if (subtitleMatch) {
       const subtitlePath = subtitleMatch[1]
+      if (!isPathInsideFolders(subtitlePath, downloadFolders)) return
       subtitleDestinations.add(subtitlePath)
       status.destination = subtitlePath
       if (!status.destinations.includes(subtitlePath)) status.destinations.push(subtitlePath)
@@ -813,7 +893,8 @@ async function startYtDlpDownload(
     // accounts for the extension a conversion gives them
     const destinationMatch = subtitlesOnly ? null : DESTINATION_REGEX.exec(line)
     if (destinationMatch) {
-      status.destination = destinationMatch[1]
+      // Removing a download falls back to this path when no file was recorded
+      if (isPathInsideFolders(destinationMatch[1], downloadFolders)) status.destination = destinationMatch[1]
 
       if (line.startsWith('[ExtractAudio]')) {
         setDownloadPhase('processing')
@@ -826,7 +907,7 @@ async function startYtDlpDownload(
     const mergerMatch = MERGER_REGEX.exec(line)
     if (mergerMatch) {
       setDownloadPhase('processing')
-      status.destination = mergerMatch[1]
+      if (isPathInsideFolders(mergerMatch[1], downloadFolders)) status.destination = mergerMatch[1]
       sendStatus(true)
     }
   }
@@ -984,6 +1065,12 @@ function queueYtDlpDownload(
 
 async function restartPersistedDownload(event, record, resumeIndividually = false) {
   if (!record?.retryPayload) return { error: 'download-not-resumable' }
+  // Callers iterate over snapshots, so the record may have been restarted,
+  // cancelled, or removed while an earlier restart was awaited
+  if (downloadRecords.get(record.id) !== record || !['queued', 'paused'].includes(record.status) ||
+    queuedDownloadWaiters.has(record.id) || activeDownloads.has(record.id)) {
+    return { error: 'download-not-resumable' }
+  }
   downloadRecords.delete(record.id)
   const result = await queueYtDlpDownload(
     event,
@@ -1021,6 +1108,12 @@ async function restartPersistedDownload(event, record, resumeIndividually = fals
 async function restorePersistedDownloadQueue(event) {
   persistedDownloadQueueRestorePromise ??= (async () => {
     await loadDownloadRecords()
+    try {
+      const downloadFolder = (await settings._findOne('ytDlpDownloadFolderPath'))?.value || app.getPath('downloads')
+      await removeStaleTemporaryDownloadFolders(downloadFolder)
+    } catch (error) {
+      console.warn('Could not remove left over temporary download folders', error)
+    }
     const persisted = [...downloadRecords.values()]
       .filter(record => record.status === 'queued' &&
         !queuedDownloadWaiters.has(record.id) && !activeDownloads.has(record.id))

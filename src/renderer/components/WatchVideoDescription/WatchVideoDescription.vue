@@ -543,7 +543,6 @@ function parseDescriptionHtml(descriptionText) {
     .replaceAll(/data-sessionlink="[^"\n]*"/g, '')
     .replaceAll('&amp;', '&')
     .replaceAll('href="/', 'href="https://www.youtube.com/')
-    .replaceAll('href="/hashtag/', 'href="https://wwww.youtube.com/hashtag/')
     .replaceAll('yt.www.watch.player.seekTo', 'changeDuration')
 }
 

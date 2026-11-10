@@ -43,8 +43,6 @@ Unload Multiple Tabs Confirmation:
   Message: '{count}個のタブをメモリから解放します。'
   Unload Tabs: '{count}個のタブを解放する'
 Tabs Unloaded To Free Memory: メモリを確保するため、最近使っていない{count}個のタブを解放しました
-Use Vertical Tabs: 縦型タブを使用
-Use Horizontal Tabs: 横型タブを使用
 Resize Tab Bar: タブバーのサイズを変更
 Find in page: ページ内検索
 Previous match: 前の一致
@@ -372,7 +370,6 @@ Settings:
     Add-ons: アドオン
     Add-ons Description: SponsorBlock、DeArrow、低評価、AiSList、吹き替え翻訳
     Privacy Description: 履歴、検索候補、リンク、アプリのパスワード
-    Online activity: オンラインでの動作
     Data And Storage Description: バックアップ、インポートとエクスポート、ディスク使用量、クリーンアップ
     Sync Description: 同期サーバーのアカウント、デバイスのペアリング、同期されたデータ
     Advanced: 詳細設定
@@ -1002,8 +999,6 @@ Settings:
     Update FFmpeg: FFmpegを更新
     Checking FFmpeg: FFmpegを確認中…
     Downloading FFmpeg: FFmpegをダウンロード中…
-    FFmpeg Downloaded Template: FFmpeg {version}をダウンロードしました
-    FFmpeg Download Error Template: 'FFmpegのダウンロードに失敗しました: {error}'
     Detected FFprobe Version Template: '検出したFFprobeのバージョン: {version}'
     FFprobe Managed Not Downloaded: FFprobeはまだダウンロードされていません。下のボタンからFFmpegと一緒にダウンロードしてください。
     System FFprobe Missing Warning: システムにFFprobeが見つかりません。後処理でメディアを検査するために必要です。FFmpegと同じ場所にインストールするか、入手元を「OpenTubeXで管理」に変更してください。
@@ -1064,7 +1059,6 @@ Settings:
     Clear Video Metadata Cache: 動画メタデータのキャッシュを消去
     Are you sure you want to clear the video metadata cache?: キャッシュした動画のタイトル、サムネイル、説明を消去してもよろしいですか？
     Failed to clear video metadata cache: 動画メタデータのキャッシュを消去できませんでした
-    Video metadata cache has been cleared: 動画メタデータのキャッシュを消去しました
     Video Metadata Cache Size: '動画メタデータのキャッシュ: {size}'
   Storage Settings:
     Storage: ストレージ
@@ -1277,6 +1271,7 @@ Settings:
     Channel playback speeds imported: "{count} チャンネルの再生速度をインポートしました"
     Channels not found: "{count} チャンネルが見つかりませんでした"
   Sync Settings:
+    Signed Out After Restore: 'このアプリのデータがバックアップまたは別のデバイスから復元されたため、同期からサインアウトしました。このデバイスを同期するには、もう一度サインインしてください。'
     Revoke Session Tabs Warning: "このデバイスの同期されたタブセットも削除されます。"
     Revoke Session Partial Failure: "同期されたタブセットは削除されましたが、アクセスの取り消しを確認できませんでした。もう一度アクセスの取り消しを試してください。"
     Tab Sync Revocation Pending: "このログインの取り消しが完了するまで、タブの同期は一時停止されます。同期設定で取り消しを再試行してください。"
@@ -1796,8 +1791,6 @@ Video:
       EndTimeAfterStart: 区間の終了時刻は開始時刻より後にしてください。
       EndTimeBeforeVideoEnd: 区間の終了時刻は動画の長さ以内にしてください。
       EndTimeLabel: 区間の終了時刻
-      DisableAutoSkipTemporarily: SponsorBlockの自動スキップを一時的に無効化
-      EnableAutoSkipTemporarily: SponsorBlockの自動スキップを再度有効化
       Guidelines: ガイドライン
       InspectSegment: 確認
       InvalidStartTime: 有効な区間の開始時刻を入力してください。
@@ -1833,7 +1826,6 @@ Video:
       InfoPanelLoading: 区間を読み込み中…
       InfoPanelHasSegments: この動画にはデータベースに登録された区間があります
       InfoPanelNoSegments: 区間が見つかりません
-      RefreshSegments: 区間を更新
       RefreshInfo: SponsorBlock情報を更新
       ContributionStatsTitle: 自分の貢献
       ContributionStatsLoading: 貢献の統計を読み込み中…

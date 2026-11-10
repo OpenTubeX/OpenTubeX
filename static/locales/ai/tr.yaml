@@ -43,8 +43,6 @@ Unload Multiple Tabs Confirmation:
   Message: Bu işlem {count} sekmeyi bellekten kaldıracak.
   Unload Tabs: '{count} Sekmeyi Bellekten Kaldır'
 Tabs Unloaded To Free Memory: Bellekte yer açmak için son zamanlarda kullanmadığınız {count} sekme bellekten kaldırıldı | Bellekte yer açmak için son zamanlarda kullanmadığınız {count} sekme bellekten kaldırıldı
-Use Vertical Tabs: Dikey Sekmeleri Kullan
-Use Horizontal Tabs: Yatay Sekmeleri Kullan
 Resize Tab Bar: Sekme Çubuğunu Yeniden Boyutlandır
 Find in page: Sayfada bul
 Previous match: Önceki eşleşme
@@ -372,7 +370,6 @@ Settings:
     Add-ons: Eklentiler
     Add-ons Description: SponsorBlock, DeArrow, beğenmeme sayıları, AiSList ve seslendirme çevirisi
     Privacy Description: Geçmiş, arama önerileri, bağlantılar ve uygulama parolası
-    Online activity: Çevrim içi etkinlik
     Data And Storage Description: Yedekler, içe ve dışa aktarma, disk kullanımı ve temizlik
     Sync Description: Eşitleme sunucusu hesabı, cihaz eşleştirme ve eşitlenen veriler
     Advanced: Gelişmiş
@@ -1002,8 +999,6 @@ Settings:
     Update FFmpeg: FFmpeg'i Güncelle
     Checking FFmpeg: FFmpeg Denetleniyor…
     Downloading FFmpeg: FFmpeg İndiriliyor…
-    FFmpeg Downloaded Template: 'FFmpeg {version} indirildi'
-    FFmpeg Download Error Template: 'FFmpeg indirilemedi: {error}'
     Detected FFprobe Version Template: 'Algılanan FFprobe sürümü: {version}'
     FFprobe Managed Not Downloaded: FFprobe henüz indirilmedi. FFmpeg ile birlikte indirmek için aşağıdaki düğmeye tıklayın.
     System FFprobe Missing Warning: FFprobe sisteminizde bulunamadı. İşlem sonrası medya incelemesi için gereklidir. FFmpeg'in yanına yükleyin veya kaynağı "OpenTubeX tarafından yönetilen" olarak değiştirin.
@@ -1064,7 +1059,6 @@ Settings:
     Clear Video Metadata Cache: Video Meta Verisi Önbelleğini Temizle
     Are you sure you want to clear the video metadata cache?: Önbelleğe alınmış video başlıklarını, küçük resimleri ve açıklamaları temizlemek istediğinizden emin misiniz?
     Failed to clear video metadata cache: Video meta verisi önbelleği temizlenemedi
-    Video metadata cache has been cleared: Video meta verisi önbelleği temizlendi
     Video Metadata Cache Size: 'Video meta verisi önbelleği: {size}'
   Storage Settings:
     Storage: Depolama
@@ -1277,6 +1271,7 @@ Settings:
     Channel playback speeds imported: "{count} kanalın oynatma hızı içe aktarıldı | {count} kanalın oynatma hızları içe aktarıldı"
     Channels not found: "{count} kanal bulunamadı | {count} kanal bulunamadı"
   Sync Settings:
+    Signed Out After Restore: 'Bu uygulama verileri bir yedekten veya başka bir cihazdan geri yüklendiği için eşitleme oturumu kapatıldı. Bu cihazı eşitlemek için yeniden oturum açın.'
     Revoke Session Tabs Warning: "Bu cihazın eşitlenmiş sekme kümeleri de silinecek."
     Revoke Session Partial Failure: "Eşitlenen sekme kümeleri silindi ancak erişimin iptali doğrulanamadı. Erişimi iptal etmeyi yeniden deneyin."
     Tab Sync Revocation Pending: "Bu oturumun erişiminin iptali beklenirken sekme eşitlemesi duraklatıldı. Eşitleme Ayarları’nda iptali yeniden deneyin."
@@ -1796,8 +1791,6 @@ Video:
       EndTimeAfterStart: Bölümün bitiş zamanı başlangıç zamanından sonra olmalıdır.
       EndTimeBeforeVideoEnd: Bölümün bitiş zamanı video süresi içinde olmalıdır.
       EndTimeLabel: Bölüm bitiş zamanı
-      DisableAutoSkipTemporarily: SponsorBlock otomatik atlamayı geçici olarak devre dışı bırak
-      EnableAutoSkipTemporarily: SponsorBlock otomatik atlamayı yeniden etkinleştir
       Guidelines: Kurallar
       InspectSegment: İncele
       InvalidStartTime: Geçerli bir bölüm başlangıç zamanı girin.
@@ -1833,7 +1826,6 @@ Video:
       InfoPanelLoading: Bölümler hâlâ yükleniyor...
       InfoPanelHasSegments: Bu videonun veri tabanında bölümleri var!
       InfoPanelNoSegments: Bölüm bulunamadı
-      RefreshSegments: Bölümleri yenile
       RefreshInfo: SponsorBlock bilgilerini yenile
       ContributionStatsTitle: Katkılarınız
       ContributionStatsLoading: Katkı istatistikleri yükleniyor...

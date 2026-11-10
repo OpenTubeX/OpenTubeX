@@ -833,6 +833,19 @@ export function useSponsorBlockPlayback({
     )
   }
 
+  /**
+   * The icon beside a toast's or prompt's action, which skips, mutes, or undoes either
+   * @param {'prompt' | 'skipped' | 'unskipped'} state
+   * @param {string} uuid
+   * @returns {string[]}
+   */
+  function getSponsorBlockActionIcon(state, uuid) {
+    const muted = getSegments().find(candidate => candidate.uuid === uuid)?.actionType === 'mute'
+    if (state === 'skipped') return ['fas', muted ? 'volume-high' : 'undo']
+    if (state === 'unskipped') return ['fas', muted ? 'volume-xmark' : 'redo']
+    return ['fas', muted ? 'volume-xmark' : 'forward-fast']
+  }
+
   function getSponsorBlockToastLabel(uuid, translatedCategory, isHighlight) {
     if (isHighlight) {
       return t('Video.Player.SponsorBlock.SkippedToHighlight')
@@ -1652,6 +1665,7 @@ export function useSponsorBlockPlayback({
     getSponsorBlockPromptTimeLabel,
     getSponsorBlockSeekBarTooltipLabel,
     getSponsorBlockToastActionLabel,
+    getSponsorBlockActionIcon,
     getSponsorBlockToastColors,
     getSponsorBlockToastLabel,
     getSponsorBlockToastTimeLabel,

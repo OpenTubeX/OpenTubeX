@@ -51,8 +51,6 @@ Unload Multiple Tabs Confirmation:
   Message: اس سے {count} ٹیبز ان لوڈ ہو جائیں گے۔
   Unload Tabs: '{count} ٹیبز ان لوڈ کریں'
 Tabs Unloaded To Free Memory: میموری خالی کرنے کے لیے {count} ٹیب ان لوڈ کیا گیا جسے آپ نے حال ہی میں استعمال نہیں کیا | میموری خالی کرنے کے لیے {count} ٹیبز ان لوڈ کیے گئے جنہیں آپ نے حال ہی میں استعمال نہیں کیا
-Use Vertical Tabs: عمودی ٹیبز استعمال کریں
-Use Horizontal Tabs: افقی ٹیبز استعمال کریں
 Resize Tab Bar: ٹیب بار کا سائز بدلیں
 Find in page: صفحے میں تلاش کریں
 Previous match: پچھلا نتیجہ
@@ -422,7 +420,6 @@ Settings:
     Add-ons: ایڈ آنز
     Add-ons Description: SponsorBlock، DeArrow، ناپسندیدگیاں، AiSList اور وائس اوور ترجمہ
     Privacy Description: ہسٹری، تلاش کی تجاویز، لنکس اور ایپ کا پاس ورڈ
-    Online activity: آن لائن سرگرمی
     Data And Storage Description: بیک اپس، امپورٹ اور ایکسپورٹ، ڈسک کا استعمال اور صفائی
     Sync Description: سنک سرور اکاؤنٹ، ڈیوائس جوڑنا اور سنک شدہ ڈیٹا
     Advanced: ایڈوانسڈ
@@ -1062,8 +1059,6 @@ Settings:
     Update FFmpeg: FFmpeg اپ ڈیٹ کریں
     Checking FFmpeg: FFmpeg چیک ہو رہا ہے…
     Downloading FFmpeg: FFmpeg ڈاؤن لوڈ ہو رہا ہے…
-    FFmpeg Downloaded Template: FFmpeg {version} ڈاؤن لوڈ ہو گیا ہے
-    FFmpeg Download Error Template: 'FFmpeg ڈاؤن لوڈ کرنا ناکام ہو گیا: {error}'
     Detected FFprobe Version Template: 'FFprobe کا ورژن ملا: {version}'
     FFprobe Managed Not Downloaded: FFprobe ابھی ڈاؤن لوڈ نہیں ہوا۔ اسے FFmpeg کے ساتھ ڈاؤن لوڈ کرنے کے لیے نیچے دیے گئے بٹن پر کلک کریں۔
     System FFprobe Missing Warning: آپ کے سسٹم پر FFprobe نہیں ملا۔ پوسٹ پروسیسنگ کے دوران میڈیا کا معائنہ کرنے کے لیے یہ ضروری ہے۔ اسے FFmpeg کے ساتھ انسٹال کریں، یا ماخذ کو "OpenTubeX کے زیر انتظام" پر تبدیل کریں۔
@@ -1124,7 +1119,6 @@ Settings:
     Clear Video Metadata Cache: ویڈیو میٹا ڈیٹا کیش صاف کریں
     Are you sure you want to clear the video metadata cache?: کیا آپ واقعی کیش شدہ ویڈیو عنوانات، تھمب نیلز اور تفصیلات صاف کرنا چاہتے ہیں؟
     Failed to clear video metadata cache: ویڈیو میٹا ڈیٹا کیش صاف کرنا ناکام ہو گیا
-    Video metadata cache has been cleared: ویڈیو میٹا ڈیٹا کیش صاف کر دیا گیا ہے
     Video Metadata Cache Size: 'ویڈیو میٹا ڈیٹا کیش: {size}'
   Storage Settings:
     Storage: اسٹوریج
@@ -1349,6 +1343,7 @@ Settings:
     Channel playback speeds imported: '{count} چینل کی پلے بیک اسپیڈ امپورٹ کی گئی | {count} چینلز کی پلے بیک اسپیڈز امپورٹ کی گئیں'
     Channels not found: '{count} چینل نہیں مل سکا | {count} چینلز نہیں مل سکے'
   Sync Settings:
+    Signed Out After Restore: 'مطابقت سے سائن آؤٹ کر دیا گیا کیونکہ اس ایپ کا ڈیٹا بیک اپ یا کسی دوسرے آلے سے بحال کیا گیا تھا۔ اس آلے کو مطابقت پذیر کرنے کے لیے دوبارہ سائن ان کریں۔'
     Revoke Session Tabs Warning: اس ڈیوائس کے سنک شدہ ٹیب سیٹس بھی حذف ہو جائیں گے۔
     Revoke Session Partial Failure: سنک شدہ ٹیب سیٹس حذف ہو گئے، لیکن رسائی منسوخ ہونے کی تصدیق نہیں ہو سکی۔ رسائی منسوخ کرنے کے لیے دوبارہ کوشش کریں۔
     Tab Sync Revocation Pending: اس لاگ ان کی منسوخی زیر التوا ہونے کے دوران ٹیب سنک روک دی گئی ہے۔ سنک سیٹنگز میں منسوخی دوبارہ آزمائیں۔
@@ -1935,8 +1930,6 @@ Video:
       EndTimeAfterStart: سیگمنٹ کا اختتامی وقت آغاز کے وقت کے بعد ہونا چاہیے۔
       EndTimeBeforeVideoEnd: سیگمنٹ کا اختتامی وقت ویڈیو کے دورانیے کے اندر ہونا چاہیے۔
       EndTimeLabel: سیگمنٹ کا اختتامی وقت
-      DisableAutoSkipTemporarily: SponsorBlock کی خودکار اسکیپنگ عارضی طور پر غیر فعال کریں
-      EnableAutoSkipTemporarily: SponsorBlock کی خودکار اسکیپنگ دوبارہ فعال کریں
       Guidelines: رہنما اصول
       InspectSegment: معائنہ کریں
       InvalidStartTime: سیگمنٹ کا درست آغاز کا وقت درج کریں۔
@@ -1972,7 +1965,6 @@ Video:
       InfoPanelLoading: سیگمنٹس ابھی لوڈ ہو رہے ہیں...
       InfoPanelHasSegments: اس ویڈیو کے سیگمنٹس ڈیٹا بیس میں موجود ہیں!
       InfoPanelNoSegments: کوئی سیگمنٹ نہیں ملا
-      RefreshSegments: سیگمنٹس ریفریش کریں
       RefreshInfo: SponsorBlock معلومات ریفریش کریں
       ContributionStatsTitle: آپ کی شراکتیں
       ContributionStatsLoading: شراکت کے اعداد و شمار لوڈ ہو رہے ہیں...

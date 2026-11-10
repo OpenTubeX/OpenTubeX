@@ -352,13 +352,17 @@ export default {
 
   /**
    * @param {string} url
+   * @returns {Promise<void>}
    */
   enableProxy: (url) => {
-    ipcRenderer.send(IpcChannels.ENABLE_PROXY, url)
+    return ipcRenderer.invoke(IpcChannels.ENABLE_PROXY, url)
   },
 
+  /**
+   * @returns {Promise<void>}
+   */
   disableProxy: () => {
-    ipcRenderer.send(IpcChannels.DISABLE_PROXY)
+    return ipcRenderer.invoke(IpcChannels.DISABLE_PROXY)
   },
 
   /**

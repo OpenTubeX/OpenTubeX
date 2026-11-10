@@ -21,12 +21,14 @@ function decodeXmlEntities(value) {
  * @returns {{ xmlUrl: string, title: string | null }[]}
  */
 export function parseOpmlFeeds(content) {
-  const body = content.search(/<body[\s>]/i)
+  // Commented-out outlines are not subscriptions
+  const markup = content.replaceAll(/<!--[\s\S]*?(?:-->|$)/g, '')
+  const body = markup.search(/<body[\s>]/i)
   if (body === -1) {
     return []
   }
   const feeds = []
-  for (const [, attributes] of content.slice(body).matchAll(OUTLINE_PATTERN)) {
+  for (const [, attributes] of markup.slice(body).matchAll(OUTLINE_PATTERN)) {
     const values = new Map()
     for (const [, name, doubleQuoted, singleQuoted] of attributes.matchAll(ATTRIBUTE_PATTERN)) {
       values.set(name.toLowerCase(), decodeXmlEntities(doubleQuoted ?? singleQuoted))

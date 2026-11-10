@@ -716,110 +716,121 @@
       :open="showQuickPlaybackSpeedBarManager"
       :title="t('Settings.Player Settings.Quick Playback Speed Bar Manager')"
       :icon="['fas', 'gauge-high']"
-      grow-with-content
+      flush
       @close="showQuickPlaybackSpeedBarManager = false"
     >
       <template #breadcrumb-action>
         <FtSyncedSettingIndicator setting-key="quickPlaybackSpeedBarOptions" />
       </template>
-      <div class="quickPlaybackSpeedToolbar">
-        <FtFlexBox class="quickPlaybackSpeedToolbarActions">
-          <FtButton
-            :label="t('Settings.Player Settings.Add Playback Speed')"
-            :icon="['fas', 'plus']"
-            :disabled="quickPlaybackSpeedBarEntries.length >= QUICK_PLAYBACK_SPEED_LIMIT"
-            @click="addQuickPlaybackSpeed"
-          />
-          <FtButton
-            :label="t('Settings.Player Settings.Reset Quick Playback Speed Bar')"
-            :icon="['fas', 'undo']"
-            :disabled="!hasModifiedQuickPlaybackSpeedBarOptions"
-            @click="resetQuickPlaybackSpeedBarOptions"
-          />
-        </FtFlexBox>
-      </div>
-      <div class="quickPlaybackSpeedList">
+      <div class="quickPlaybackSpeedManager">
+        <div class="quickPlaybackSpeedToolbar">
+          <FtFlexBox class="quickPlaybackSpeedToolbarActions">
+            <FtButton
+              :label="t('Settings.Player Settings.Add Playback Speed')"
+              :icon="['fas', 'plus']"
+              :disabled="quickPlaybackSpeedBarEntries.length >= QUICK_PLAYBACK_SPEED_LIMIT"
+              @click="addQuickPlaybackSpeed"
+            />
+            <FtButton
+              :label="t('Settings.Player Settings.Reset Quick Playback Speed Bar')"
+              :icon="['fas', 'undo']"
+              :disabled="!hasModifiedQuickPlaybackSpeedBarOptions"
+              @click="resetQuickPlaybackSpeedBarOptions"
+            />
+          </FtFlexBox>
+        </div>
         <div
-          v-for="(option, index) in quickPlaybackSpeedBarEntries"
-          :key="option.id"
-          class="quickPlaybackSpeedEntry"
-          :class="{
-            dragging: draggedQuickPlaybackSpeedId === option.id,
-            settling: isQuickPlaybackSpeedDragSettling,
-            suppressTransition: suppressQuickPlaybackSpeedDragTransitions
-          }"
-          :data-quick-playback-speed-index="index"
-          :data-quick-playback-speed-id="option.id"
-          :style="getQuickPlaybackSpeedEntryStyle(option.id)"
+          ref="quickPlaybackSpeedScrollRef"
+          v-overlay-scrollbars
+          class="quickPlaybackSpeedScroll"
         >
-          <button
-            class="quickPlaybackSpeedDragHandle"
-            type="button"
-            :title="t('Settings.Player Settings.Reorder Playback Speed')"
-            :aria-label="t('Settings.Player Settings.Reorder Playback Speed')"
-            @pointerdown.prevent="startQuickPlaybackSpeedDrag(index, $event)"
+          <div
+            ref="quickPlaybackSpeedListRef"
+            class="quickPlaybackSpeedList"
           >
-            <FtIcon :icon="['fas', 'bars']" />
-          </button>
-          <div class="quickPlaybackSpeedFields">
             <div
-              v-if="editingQuickPlaybackSpeedNameId !== option.id"
-              class="quickPlaybackSpeedNameRow"
+              v-for="(option, index) in quickPlaybackSpeedBarEntries"
+              :key="option.id"
+              class="quickPlaybackSpeedEntry"
+              :class="{
+                dragging: draggedQuickPlaybackSpeedId === option.id,
+                settling: isQuickPlaybackSpeedDragSettling,
+                suppressTransition: suppressQuickPlaybackSpeedDragTransitions
+              }"
+              :data-quick-playback-speed-index="index"
+              :data-quick-playback-speed-id="option.id"
+              :style="getQuickPlaybackSpeedEntryStyle(option.id)"
             >
-              <span class="quickPlaybackSpeedName">
-                {{ getQuickPlaybackSpeedDisplayName(option) }}
-              </span>
-              <FtIconButton
-                class="quickPlaybackSpeedIconButton"
-                :title="t('Settings.Player Settings.Edit Playback Speed Name')"
-                :icon="['fas', 'edit']"
-                theme="base-no-default"
-                @click="editingQuickPlaybackSpeedNameId = option.id"
-              />
-            </div>
-            <div
-              v-else
-              class="quickPlaybackSpeedNameEditRow"
-            >
+              <button
+                class="quickPlaybackSpeedDragHandle"
+                type="button"
+                :title="t('Settings.Player Settings.Reorder Playback Speed')"
+                :aria-label="t('Settings.Player Settings.Reorder Playback Speed')"
+                @pointerdown.prevent="startQuickPlaybackSpeedDrag(index, $event)"
+              >
+                <FtIcon :icon="['fas', 'bars']" />
+              </button>
+              <div class="quickPlaybackSpeedFields">
+                <div
+                  v-if="editingQuickPlaybackSpeedNameId !== option.id"
+                  class="quickPlaybackSpeedNameRow"
+                >
+                  <span class="quickPlaybackSpeedName">
+                    {{ getQuickPlaybackSpeedDisplayName(option) }}
+                  </span>
+                  <FtIconButton
+                    class="quickPlaybackSpeedIconButton"
+                    :title="t('Settings.Player Settings.Edit Playback Speed Name')"
+                    :icon="['fas', 'edit']"
+                    theme="base-no-default"
+                    @click="editingQuickPlaybackSpeedNameId = option.id"
+                  />
+                </div>
+                <div
+                  v-else
+                  class="quickPlaybackSpeedNameEditRow"
+                >
+                  <FtInput
+                    class="quickPlaybackSpeedNameInput"
+                    :label="t('Settings.Player Settings.Playback Speed Name')"
+                    :icon="['fas', 'font']"
+                    :placeholder="getAutomaticQuickPlaybackSpeedName(option.speed)"
+                    :value="option.name"
+                    :show-action-button="false"
+                    @input="(value) => updateQuickPlaybackSpeedName(option.id, value)"
+                  />
+                  <FtIconButton
+                    class="quickPlaybackSpeedIconButton"
+                    :title="t('Settings.Player Settings.Use Automatic Playback Speed Name')"
+                    :icon="['fas', 'undo']"
+                    theme="base-no-default"
+                    @click="resetQuickPlaybackSpeedName(option.id)"
+                  />
+                </div>
+              </div>
               <FtInput
-                class="quickPlaybackSpeedNameInput"
-                :label="t('Settings.Player Settings.Playback Speed Name')"
-                :icon="['fas', 'font']"
-                :placeholder="getAutomaticQuickPlaybackSpeedName(option.speed)"
-                :value="option.name"
+                class="quickPlaybackSpeedValueField"
+                :change-filter="normalizeQuickPlaybackSpeed"
+                :icon="['fas', 'gauge-high']"
+                input-type="number"
+                :label="t('Settings.Player Settings.Playback Speed')"
+                :placeholder="t('Form Inputs.Example', { example: '1.25' })"
+                min="0.01"
+                step="0.01"
+                :value="String(option.speed)"
                 :show-action-button="false"
-                @input="(value) => updateQuickPlaybackSpeedName(option.id, value)"
+                @change="updateQuickPlaybackSpeed(option.id, $event)"
               />
               <FtIconButton
-                class="quickPlaybackSpeedIconButton"
-                :title="t('Settings.Player Settings.Use Automatic Playback Speed Name')"
-                :icon="['fas', 'undo']"
+                class="quickPlaybackSpeedIconButton delete"
+                :disabled="quickPlaybackSpeedBarEntries.length <= 1"
+                :title="t('Delete')"
+                :icon="['fas', 'trash']"
                 theme="base-no-default"
-                @click="resetQuickPlaybackSpeedName(option.id)"
+                @click="deleteQuickPlaybackSpeed(option.id)"
               />
             </div>
           </div>
-          <FtInput
-            class="quickPlaybackSpeedValueField"
-            :change-filter="normalizeQuickPlaybackSpeed"
-            :icon="['fas', 'gauge-high']"
-            input-type="number"
-            :label="t('Settings.Player Settings.Playback Speed')"
-            :placeholder="t('Form Inputs.Example', { example: '1.25' })"
-            min="0.01"
-            step="0.01"
-            :value="String(option.speed)"
-            :show-action-button="false"
-            @change="updateQuickPlaybackSpeed(option.id, $event)"
-          />
-          <FtIconButton
-            class="quickPlaybackSpeedIconButton delete"
-            :disabled="quickPlaybackSpeedBarEntries.length <= 1"
-            :title="t('Delete')"
-            :icon="['fas', 'trash']"
-            theme="base-no-default"
-            @click="deleteQuickPlaybackSpeed(option.id)"
-          />
         </div>
       </div>
     </FtSettingsSubpage>
@@ -830,7 +841,7 @@
 import FtIconButton from '../../FtIconButton/FtIconButton.vue'
 import { displayAndroidPath, chooseAndroidDirectory } from '../../../helpers/androidStorage'
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
@@ -848,6 +859,7 @@ import FtSettingsSubpage from '../../FtSettingsSubpage/FtSettingsSubpage.vue'
 import store from '../../../store/index'
 import { showToast } from '../../../helpers/utils'
 import { DEFAULT_QUICK_PLAYBACK_SPEED_BAR_OPTIONS } from '../../../../constants'
+import { clampOverlayScrollTop } from '../../../helpers/overlayScrollbars'
 import { initializePlatformInfo, supportsAutoPictureInPictureMinimize } from '../../../helpers/platform'
 import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../../helpers/player/autoQuality'
 
@@ -1430,6 +1442,18 @@ function updateUseQuickPlaybackSpeedBar(value) {
 
 /** @type {import('vue').Ref<boolean>} */
 const showQuickPlaybackSpeedBarManager = ref(false)
+
+const quickPlaybackSpeedScrollRef = useTemplateRef('quickPlaybackSpeedScrollRef')
+const quickPlaybackSpeedListRef = useTemplateRef('quickPlaybackSpeedListRef')
+// Deleting, resetting, or a taller viewport can shorten the list below the scroll offset
+watch(quickPlaybackSpeedListRef, (list, _, onCleanup) => {
+  const scroller = quickPlaybackSpeedScrollRef.value
+  if (!list || !scroller) return
+  const observer = new ResizeObserver(() => clampOverlayScrollTop(scroller, list))
+  observer.observe(list)
+  observer.observe(scroller)
+  onCleanup(() => observer.disconnect())
+})
 
 /** @type {import('vue').Ref<string | null>} */
 const editingQuickPlaybackSpeedNameId = ref(null)

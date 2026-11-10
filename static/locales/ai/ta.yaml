@@ -43,8 +43,6 @@ Unload Multiple Tabs Confirmation:
   Message: இது {count} தாவல்களை இறக்கும்.
   Unload Tabs: '{count} தாவல்களை இறக்கு'
 Tabs Unloaded To Free Memory: நினைவகத்தை விடுவிக்க, சமீபத்தில் நீங்கள் பயன்படுத்தாத {count} தாவல் இறக்கப்பட்டது | நினைவகத்தை விடுவிக்க, சமீபத்தில் நீங்கள் பயன்படுத்தாத {count} தாவல்கள் இறக்கப்பட்டன
-Use Vertical Tabs: செங்குத்துத் தாவல்களைப் பயன்படுத்து
-Use Horizontal Tabs: கிடைமட்டத் தாவல்களைப் பயன்படுத்து
 Resize Tab Bar: தாவல் பட்டையின் அளவை மாற்று
 Find in page: பக்கத்தில் தேடு
 Previous match: முந்தைய பொருத்தம்
@@ -385,7 +383,6 @@ Settings:
     Add-ons: துணை நிரல்கள்
     Add-ons Description: SponsorBlock, DeArrow, விருப்பமின்மைகள், AiSList மற்றும் குரல்வழி மொழிபெயர்ப்பு
     Privacy Description: வரலாறு, தேடல் பரிந்துரைகள், இணைப்புகள் மற்றும் பயன்பாட்டுக் கடவுச்சொல்
-    Online activity: இணையச் செயல்பாடு
     Data And Storage Description: காப்புப்பிரதிகள், இறக்குமதி மற்றும் ஏற்றுமதி, வட்டுப் பயன்பாடு மற்றும் சுத்தம் செய்தல்
     Sync Description: ஒத்திசைவு சேவையகக் கணக்கு, சாதன இணைப்பு மற்றும் ஒத்திசைக்கப்பட்ட தரவு
     Advanced: மேம்பட்டவை
@@ -1023,8 +1020,6 @@ Settings:
     Update FFmpeg: FFmpeg-ஐப் புதுப்பி
     Checking FFmpeg: FFmpeg சரிபார்க்கப்படுகிறது…
     Downloading FFmpeg: FFmpeg பதிவிறக்கப்படுகிறது…
-    FFmpeg Downloaded Template: FFmpeg {version} பதிவிறக்கப்பட்டது
-    FFmpeg Download Error Template: 'FFmpeg பதிவிறக்கம் தோல்வியடைந்தது: {error}'
     Detected FFprobe Version Template: 'கண்டறிந்த FFprobe பதிப்பு: {version}'
     FFprobe Managed Not Downloaded: FFprobe இன்னும் பதிவிறக்கப்படவில்லை. அதை FFmpeg உடன் பதிவிறக்கக் கீழுள்ள பொத்தானைக் கிளிக் செய்யவும்.
     System FFprobe Missing Warning: உங்கள் கணினியில் FFprobe கிடைக்கவில்லை. பிந்தைய செயலாக்கத்தின்போது ஊடகத்தை ஆய்வு செய்ய இது தேவை. அதை FFmpeg-க்கு அருகில் நிறுவவும் அல்லது மூலத்தை "OpenTubeX நிர்வகிப்பது" என மாற்றவும்.
@@ -1085,7 +1080,6 @@ Settings:
     Clear Video Metadata Cache: காணொளி மெட்டாதரவுத் தேக்ககத்தை அழி
     Are you sure you want to clear the video metadata cache?: தேக்கப்பட்ட காணொளித் தலைப்புகள், சிறுபடங்கள் மற்றும் விளக்கங்களை அழிக்க விரும்புகிறீர்களா?
     Failed to clear video metadata cache: காணொளி மெட்டாதரவுத் தேக்ககத்தை அழிக்க முடியவில்லை
-    Video metadata cache has been cleared: காணொளி மெட்டாதரவுத் தேக்ககம் அழிக்கப்பட்டது
     Video Metadata Cache Size: 'காணொளி மெட்டாதரவுத் தேக்ககம்: {size}'
   Storage Settings:
     Storage: சேமிப்பகம்
@@ -1310,6 +1304,7 @@ Settings:
     Channel playback speeds imported: "{count} சேனலின் இயக்க வேகம் இறக்குமதி செய்யப்பட்டது | {count} சேனல்களின் இயக்க வேகங்கள் இறக்குமதி செய்யப்பட்டன"
     Channels not found: "{count} சேனலைக் கண்டறிய முடியவில்லை | {count} சேனல்களைக் கண்டறிய முடியவில்லை"
   Sync Settings:
+    Signed Out After Restore: 'இந்தப் பயன்பாட்டுத் தரவு காப்புப்பிரதியிலிருந்து அல்லது வேறொரு சாதனத்திலிருந்து மீட்டமைக்கப்பட்டதால் ஒத்திசைவிலிருந்து வெளியேற்றப்பட்டது. இந்தச் சாதனத்தை ஒத்திசைக்க மீண்டும் உள்நுழையவும்.'
     Revoke Session Tabs Warning: "இந்தச் சாதனத்தின் ஒத்திசைக்கப்பட்ட தாவல் தொகுப்புகளும் நீக்கப்படும்."
     Revoke Session Partial Failure: "ஒத்திசைக்கப்பட்ட தாவல் தொகுப்புகள் நீக்கப்பட்டன, ஆனால் அணுகல் ரத்துசெய்யப்பட்டதை உறுதிப்படுத்த முடியவில்லை. அணுகலை ரத்துசெய்ய மீண்டும் முயற்சிக்கவும்."
     Tab Sync Revocation Pending: "இந்த உள்நுழைவின் அணுகல் ரத்து நிலுவையில் உள்ளதால் தாவல் ஒத்திசைவு இடைநிறுத்தப்பட்டுள்ளது. ஒத்திசைவு அமைப்புகளில் அணுகல் ரத்துசெய்தலை மீண்டும் முயற்சிக்கவும்."
@@ -1855,8 +1850,6 @@ Video:
       EndTimeAfterStart: பகுதியின் முடிவு நேரம் தொடக்க நேரத்திற்குப் பிறகு இருக்க வேண்டும்.
       EndTimeBeforeVideoEnd: பகுதியின் முடிவு நேரம் காணொளியின் கால அளவுக்குள் இருக்க வேண்டும்.
       EndTimeLabel: பகுதி முடிவு நேரம்
-      DisableAutoSkipTemporarily: SponsorBlock தானியக்கத் தவிர்ப்பைத் தற்காலிகமாக முடக்கு
-      EnableAutoSkipTemporarily: SponsorBlock தானியக்கத் தவிர்ப்பை மீண்டும் இயக்கு
       Guidelines: வழிகாட்டுதல்கள்
       InspectSegment: ஆய்வுசெய்
       InvalidStartTime: சரியான பகுதி தொடக்க நேரத்தை உள்ளிடவும்.
@@ -1892,7 +1885,6 @@ Video:
       InfoPanelLoading: பகுதிகள் இன்னும் ஏற்றப்படுகின்றன...
       InfoPanelHasSegments: இந்தக் காணொளிக்கான பகுதிகள் தரவுத்தளத்தில் உள்ளன!
       InfoPanelNoSegments: பகுதிகள் எதுவும் கிடைக்கவில்லை
-      RefreshSegments: பகுதிகளைப் புதுப்பி
       RefreshInfo: SponsorBlock தகவலைப் புதுப்பி
       ContributionStatsTitle: உங்கள் பங்களிப்புகள்
       ContributionStatsLoading: பங்களிப்புப் புள்ளிவிவரங்கள் ஏற்றப்படுகின்றன...

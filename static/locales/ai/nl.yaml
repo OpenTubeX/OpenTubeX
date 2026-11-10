@@ -43,8 +43,6 @@ Unload Multiple Tabs Confirmation:
   Message: Hiermee worden {count} tabbladen uit het geheugen verwijderd.
   Unload Tabs: '{count} tabbladen uit het geheugen verwijderen'
 Tabs Unloaded To Free Memory: Om geheugen vrij te maken, is {count} tabblad dat je recent niet hebt gebruikt uit het geheugen verwijderd | Om geheugen vrij te maken, zijn {count} tabbladen die je recent niet hebt gebruikt uit het geheugen verwijderd
-Use Vertical Tabs: Verticale tabbladen gebruiken
-Use Horizontal Tabs: Horizontale tabbladen gebruiken
 Resize Tab Bar: Grootte van tabbladbalk aanpassen
 Find in page: Zoeken op pagina
 Previous match: Vorige overeenkomst
@@ -377,7 +375,6 @@ Settings:
     Add-ons: Add-ons
     Add-ons Description: SponsorBlock, DeArrow, dislikes, AiSList en voice-oververtaling
     Privacy Description: Geschiedenis, zoeksuggesties, links en app-wachtwoord
-    Online activity: Onlineactiviteit
     Data And Storage Description: Back-ups, importeren en exporteren, schijfgebruik en opschonen
     Sync Description: Account op de synchronisatieserver, apparaten koppelen en gesynchroniseerde gegevens
     Advanced: Geavanceerd
@@ -1017,8 +1014,6 @@ Settings:
     Update FFmpeg: FFmpeg bijwerken
     Checking FFmpeg: FFmpeg controleren…
     Downloading FFmpeg: FFmpeg downloaden…
-    FFmpeg Downloaded Template: FFmpeg {version} is gedownload
-    FFmpeg Download Error Template: 'Downloaden van FFmpeg mislukt: {error}'
     Detected FFprobe Version Template: 'Gedetecteerde FFprobe-versie: {version}'
     FFprobe Managed Not Downloaded: FFprobe is nog niet gedownload. Klik op de knop hieronder om het samen met FFmpeg te downloaden.
     System FFprobe Missing Warning: FFprobe is niet op je systeem gevonden. Het is vereist om media tijdens de nabewerking te inspecteren. Installeer het naast FFmpeg of wijzig de bron in "Beheerd door OpenTubeX".
@@ -1079,7 +1074,6 @@ Settings:
     Clear Video Metadata Cache: Cache met videometadata wissen
     Are you sure you want to clear the video metadata cache?: Weet je zeker dat je de gecachte videotitels, miniaturen en beschrijvingen wilt wissen?
     Failed to clear video metadata cache: Wissen van cache met videometadata mislukt
-    Video metadata cache has been cleared: Cache met videometadata is gewist
     Video Metadata Cache Size: 'Cache met videometadata: {size}'
   Storage Settings:
     Storage: Opslag
@@ -1304,6 +1298,7 @@ Settings:
     Channel playback speeds imported: "Afspeelsnelheid van {count} kanaal geïmporteerd | Afspeelsnelheden van {count} kanalen geïmporteerd"
     Channels not found: "{count} kanaal kon niet worden gevonden | {count} kanalen konden niet worden gevonden"
   Sync Settings:
+    Signed Out After Restore: 'Synchronisatie is afgemeld omdat deze app-gegevens zijn hersteld vanuit een back-up of vanaf een ander apparaat. Meld je opnieuw aan om dit apparaat te synchroniseren.'
     Revoke Session Tabs Warning: "De gesynchroniseerde tabbladsets van dit apparaat worden ook verwijderd."
     Revoke Session Partial Failure: "Gesynchroniseerde tabbladsets zijn verwijderd, maar het intrekken kon niet worden bevestigd. Probeer de toegang opnieuw in te trekken."
     Tab Sync Revocation Pending: "Tabsynchronisatie is gepauzeerd zolang de intrekking van deze aanmelding in behandeling is. Probeer de intrekking opnieuw in de synchronisatie-instellingen."
@@ -1853,8 +1848,6 @@ Video:
       EndTimeAfterStart: De eindtijd van het segment moet na de begintijd liggen.
       EndTimeBeforeVideoEnd: De eindtijd van het segment moet binnen de videoduur vallen.
       EndTimeLabel: Eindtijd van segment
-      DisableAutoSkipTemporarily: Automatisch overslaan door SponsorBlock tijdelijk uitschakelen
-      EnableAutoSkipTemporarily: Automatisch overslaan door SponsorBlock weer inschakelen
       Guidelines: Richtlijnen
       InspectSegment: Bekijken
       InvalidStartTime: Voer een geldige begintijd voor het segment in.
@@ -1890,7 +1883,6 @@ Video:
       InfoPanelLoading: Segmenten worden nog geladen...
       InfoPanelHasSegments: Deze video heeft segmenten in de database!
       InfoPanelNoSegments: Geen segmenten gevonden
-      RefreshSegments: Segmenten vernieuwen
       RefreshInfo: SponsorBlock-informatie vernieuwen
       ContributionStatsTitle: Jouw bijdragen
       ContributionStatsLoading: Bijdragestatistieken laden...

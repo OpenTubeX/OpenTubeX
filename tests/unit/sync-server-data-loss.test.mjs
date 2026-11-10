@@ -616,11 +616,11 @@ test('a remote profile that could not be saved locally is not deleted from the s
   const store = {
     state: { profiles: { profileList: [{ _id: MAIN_PROFILE_ID, subscriptions: [channel] }] } },
     dispatch: async action => {
-      assert.equal(action, 'updateProfile')
+      assert.equal(action, 'saveSyncedProfile')
       return false
     },
   }
-  await assert.rejects(context.syncProfiles(adapter, store), /Could not save synced profile/)
+  await assert.rejects(context.syncProfiles(adapter, store), /Profiles changed during sync/)
 })
 
 test('a profile deletion that could not be saved locally fails the sync', async () => {
@@ -717,8 +717,8 @@ test('after an upload conflict, profiles and channels removed on the server stay
     },
     dispatch: async (action, value) => {
       const { profileList } = store.state.profiles
-      const index = profileList.findIndex(item => item._id === (value._id ?? value))
-      if (action === 'updateProfile') profileList.splice(index === -1 ? profileList.length : index, index === -1 ? 0 : 1, value)
+      const index = profileList.findIndex(item => item._id === (value.profile?._id ?? value))
+      if (action === 'saveSyncedProfile') profileList.splice(index === -1 ? profileList.length : index, index === -1 ? 0 : 1, value.profile)
       else if (action === 'removeProfile') profileList.splice(index, 1)
       else assert.fail(action)
       return true

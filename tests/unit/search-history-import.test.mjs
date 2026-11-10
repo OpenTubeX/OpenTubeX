@@ -3,37 +3,42 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 import { createDesktopDatastore } from '../../src/datastores/sqliteNode.js'
+import { mergeSearchHistoryEntries, resolveSearchHistoryEntry, sortSearchHistoryByLastUpdatedAt } from '../../src/search-history.js'
 
 const source = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
 
-test('a failed search history import keeps the saved history', async (t) => {
+function createSearchHistory(db) {
+  return vm.runInNewContext(
+    source.slice(source.indexOf('class SearchHistory {'), source.indexOf('\nclass SubscriptionCache {')) + '\nSearchHistory',
+    { db, mergeSearchHistoryEntries, resolveSearchHistoryEntry, sortSearchHistoryByLastUpdatedAt }
+  )
+}
+
+test('a search history import keeps searches saved meanwhile, and a failed one keeps the saved history', async (t) => {
   const db = { searchHistory: createDesktopDatastore(':memory:') }
   t.after(() => db.searchHistory.driver.close())
-  const SearchHistory = vm.runInNewContext(
-    source.slice(source.indexOf('class SearchHistory {'), source.indexOf('\nclass SubscriptionCache {')) + '\nSearchHistory',
-    { db }
-  )
+  const SearchHistory = createSearchHistory(db)
   const saved = { _id: 'saved', query: 'saved', lastUpdatedAt: 1 }
   await db.searchHistory.insertAsync(saved)
 
-  // Duplicate IDs in an imported file make the insertion fail
-  await assert.rejects(SearchHistory.overwrite([
-    { _id: 'imported', query: 'a', lastUpdatedAt: 2 },
-    { _id: 'imported', query: 'b', lastUpdatedAt: 3 },
-  ]), error => error.errorType === 'uniqueViolated')
+  const replaceAll = db.searchHistory.replaceAllAsync.bind(db.searchHistory)
+  db.searchHistory.replaceAllAsync = async () => { throw new Error('disk full') }
+  await assert.rejects(SearchHistory.mergeImported([{ query: 'imported', lastUpdatedAt: 2 }]), /disk full/)
   assert.deepEqual(await SearchHistory.find(), [saved])
+  db.searchHistory.replaceAllAsync = replaceAll
 
-  await SearchHistory.overwrite([{ _id: 'imported', query: 'a', lastUpdatedAt: 2 }])
-  assert.deepEqual(await SearchHistory.find(), [{ _id: 'imported', query: 'a', lastUpdatedAt: 2 }])
+  // A search made in another window while the import runs is kept
+  await Promise.all([
+    SearchHistory.mergeImported([{ query: 'imported', lastUpdatedAt: 2 }]),
+    SearchHistory.upsert({ _id: 'meanwhile', query: 'meanwhile', lastUpdatedAt: 3 }),
+  ])
+  assert.deepEqual((await SearchHistory.find()).map(entry => entry.query), ['meanwhile', 'imported', 'saved'])
 })
 
 test('search history retention removes only searches last used before the cutoff', async (t) => {
   const db = { searchHistory: createDesktopDatastore(':memory:') }
   t.after(() => db.searchHistory.driver.close())
-  const SearchHistory = vm.runInNewContext(
-    source.slice(source.indexOf('class SearchHistory {'), source.indexOf('\nclass SubscriptionCache {')) + '\nSearchHistory',
-    { db }
-  )
+  const SearchHistory = createSearchHistory(db)
   const legacy = { _id: 'legacy', query: 'legacy' }
   await db.searchHistory.insertAsync([
     { _id: 'old', query: 'old', lastUpdatedAt: 1 },

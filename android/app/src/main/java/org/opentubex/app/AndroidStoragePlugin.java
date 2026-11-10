@@ -4,6 +4,7 @@ import android.content.Context;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.util.AtomicFile;
 import android.util.Base64;
 import androidx.activity.result.ActivityResult;
 import androidx.documentfile.provider.DocumentFile;
@@ -19,6 +20,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -35,6 +38,34 @@ public class AndroidStoragePlugin extends Plugin {
     @Override
     protected void handleOnDestroy() {
         if (records != null) records.close();
+    }
+
+    /**
+     * Returns the ID of this installation, creating it on first use. It is kept
+     * where backups and device transfers leave it out, so restored app data on
+     * another installation can be told apart.
+     */
+    @PluginMethod
+    public void getInstallationMarker(PluginCall call) {
+        AtomicFile file = new AtomicFile(new File(getContext().getNoBackupFilesDir(), "installation-marker"));
+        try {
+            String marker = "";
+            if (file.getBaseFile().exists()) marker = new String(file.readFully(), StandardCharsets.UTF_8).trim();
+            if (marker.isEmpty()) {
+                marker = UUID.randomUUID().toString();
+                FileOutputStream output = file.startWrite();
+                try {
+                    output.write(marker.getBytes(StandardCharsets.UTF_8));
+                    file.finishWrite(output);
+                } catch (IOException error) {
+                    file.failWrite(output);
+                    throw error;
+                }
+            }
+            call.resolve(new JSObject().put("marker", marker));
+        } catch (Exception error) {
+            call.reject("Unable to read the installation marker", error);
+        }
     }
 
     @PluginMethod

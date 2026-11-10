@@ -29,5 +29,9 @@ test('accepts malformed OPML and attributes containing angle brackets', () => {
     { xmlUrl: feed('UCd'), title: null },
   ])
   assert.deepEqual(parseOpmlFeeds('<opml><head></head></opml>'), [])
+  // commented-out subscriptions, including an unterminated comment, are not imported
+  assert.deepEqual(parseOpmlFeeds(`<opml><body><!-- <outline xmlUrl="${feed('UCe')}" /> --><outline xmlUrl="${feed('UCf')}" /><!-- <outline xmlUrl="${feed('UCg')}" />`), [
+    { xmlUrl: feed('UCf'), title: null },
+  ])
   assert.deepEqual(parseOpmlFeeds('not opml'), [])
 })

@@ -51,8 +51,6 @@ Unload Multiple Tabs Confirmation:
   Message: Tio malŝargos {count} langetojn.
   Unload Tabs: Malŝargi {count} langetojn
 Tabs Unloaded To Free Memory: Malŝargis {count} langeton, kiun vi ne uzis lastatempe, por liberigi memoron | Malŝargis {count} langetojn, kiujn vi ne uzis lastatempe, por liberigi memoron
-Use Vertical Tabs: Uzi vertikalajn langetojn
-Use Horizontal Tabs: Uzi horizontalajn langetojn
 Resize Tab Bar: Ŝanĝi grandecon de langetobreto
 Find in page: Serĉi en paĝo
 Previous match: Antaŭa trafo
@@ -408,7 +406,6 @@ Settings:
     Add-ons: Aldonaĵoj
     Add-ons Description: SponsorBlock, DeArrow, malŝatoj, AiSList kaj voĉa traduko
     Privacy Description: Historio, serĉaj sugestoj, ligiloj kaj pasvorto de la aplikaĵo
-    Online activity: Reta agado
     Data And Storage Description: Savkopioj, enporto kaj elporto, diskuzo kaj purigado
     Sync Description: Konto ĉe la sinkroniga servilo, parigo de aparatoj kaj sinkronigitaj datumoj
     Advanced: Altnivela
@@ -1038,8 +1035,6 @@ Settings:
     Update FFmpeg: Ĝisdatigi FFmpeg
     Checking FFmpeg: Kontrolado de FFmpeg…
     Downloading FFmpeg: Elŝutado de FFmpeg…
-    FFmpeg Downloaded Template: FFmpeg {version} estis elŝutita
-    FFmpeg Download Error Template: 'Elŝuto de FFmpeg malsukcesis: {error}'
     Detected FFprobe Version Template: 'Detektita versio de FFprobe: {version}'
     FFprobe Managed Not Downloaded: FFprobe ankoraŭ ne estas elŝutita. Alklaku la suban butonon por elŝuti ĝin kun FFmpeg.
     System FFprobe Missing Warning: FFprobe ne troviĝis en via sistemo. Ĝi necesas por ekzameni aŭdvidaĵojn dum postprilaborado. Instalu ĝin apud FFmpeg aŭ ŝanĝu la fonton al "Administrata de OpenTubeX".
@@ -1100,7 +1095,6 @@ Settings:
     Clear Video Metadata Cache: Viŝi kaŝmemoron de videaĵaj metadatumoj
     Are you sure you want to clear the video metadata cache?: Ĉu vi certas, ke vi volas viŝi la kaŝmemoritajn titolojn, bildetojn kaj priskribojn de videaĵoj?
     Failed to clear video metadata cache: Malsukcesis viŝi la kaŝmemoron de videaĵaj metadatumoj
-    Video metadata cache has been cleared: La kaŝmemoro de videaĵaj metadatumoj estis viŝita
     Video Metadata Cache Size: 'Kaŝmemoro de videaĵaj metadatumoj: {size}'
   Storage Settings:
     Storage: Konservejo
@@ -1313,6 +1307,7 @@ Settings:
     Channel playback speeds imported: Enportis la ludrapidon de {count} kanalo | Enportis la ludrapidojn de {count} kanaloj
     Channels not found: '{count} kanalo ne troviĝis | {count} kanaloj ne troviĝis'
   Sync Settings:
+    Signed Out After Restore: 'Sinkronigo estis elsalutita ĉar ĉi tiuj aplikaĵaj datumoj estis restaŭritaj el sekurkopio aŭ el alia aparato. Ensalutu denove por sinkronigi ĉi tiun aparaton.'
     Revoke Session Tabs Warning: La sinkronigitaj langetaroj de ĉi tiu aparato ankaŭ estos forigitaj.
     Revoke Session Partial Failure: Sinkronigitaj langetaroj estis forigitaj, sed la revoko ne povis esti konfirmita. Reprovu por revoki la aliron.
     Tab Sync Revocation Pending: Langeta sinkronigo estas paŭzigita dum la revoko de ĉi tiu ensaluto atendas. Reprovu la revokon en la sinkronigaj agordoj.
@@ -1874,8 +1869,6 @@ Video:
       EndTimeAfterStart: La fina tempo de la segmento devas esti post la komenca tempo.
       EndTimeBeforeVideoEnd: La fina tempo de la segmento devas esti ene de la daŭro de la videaĵo.
       EndTimeLabel: Fina tempo de segmento
-      DisableAutoSkipTemporarily: Provizore malŝalti aŭtomatan saltadon de SponsorBlock
-      EnableAutoSkipTemporarily: Reŝalti aŭtomatan saltadon de SponsorBlock
       Guidelines: Gvidlinioj
       InspectSegment: Ekzameni
       InvalidStartTime: Enigu validan komencan tempon de segmento.
@@ -1911,7 +1904,6 @@ Video:
       InfoPanelLoading: Segmentoj ankoraŭ ŝargiĝas...
       InfoPanelHasSegments: Ĉi tiu videaĵo havas segmentojn en la datumbazo!
       InfoPanelNoSegments: Neniu segmento trovita
-      RefreshSegments: Aktualigi segmentojn
       RefreshInfo: Aktualigi informojn de SponsorBlock
       ContributionStatsTitle: Viaj kontribuoj
       ContributionStatsLoading: Ŝargado de kontribuaj statistikoj...

@@ -6,7 +6,8 @@ import { PlaylistVideoAddResult } from '../../src/constants.js'
 import { SqliteDatastore } from '../../src/datastores/sqlite.js'
 import { createNodeSqliteDriver } from '../../src/datastores/sqliteNode.js'
 import { processToBeAddedPlaylistVideo } from '../../src/renderer/helpers/playlists.js'
-import { mergeBackupPlaylist, mergeBackupProfile } from '../../src/renderer/helpers/unifiedBackup.js'
+import { mergeBackupPlaylist, mergeBackupProfile, mergeImportedProfile } from '../../src/renderer/helpers/unifiedBackup.js'
+import { profileSyncSnapshot } from '../../src/renderer/helpers/profileSyncSnapshot.js'
 import { decrementPlaylistVideoCounts, incrementPlaylistVideoCounts } from '../../src/renderer/helpers/playlist-video-counts.js'
 import { toRaw } from 'vue'
 
@@ -28,6 +29,8 @@ async function fixture(t) {
     db,
     mergeBackupPlaylist,
     mergeBackupProfile,
+    mergeImportedProfile,
+    profileSyncSnapshot,
     processToBeAddedPlaylistVideo,
     PlaylistVideoAddResult,
     crypto,
@@ -119,4 +122,46 @@ test('restoring several playlists shows each one saved before another window syn
   const shown = state.playlists.find(item => item._id === 'a')
   assert.deepEqual(Array.from(shown.videos, video => video.videoId), ['saved-a', 'restored-a', 'added-meanwhile'])
   assert.deepEqual(JSON.parse(JSON.stringify(shown.videos)), (await db.playlists.findOneAsync({ _id: 'a' })).videos)
+})
+
+test('a profile saved from sync never overwrites an edit made meanwhile or recreates a deleted profile', async (t) => {
+  const { db, Profiles } = await fixture(t)
+  const read = { _id: 'music', name: 'Music', bgColor: '#000000', textColor: '#FFFFFF', subscriptions: [] }
+  await db.profiles.insertAsync(read)
+  const merged = { ...read, subscriptions: [{ id: 'remote' }] }
+
+  await Profiles.addChannelToProfiles({ id: 'added-meanwhile' }, ['music'])
+  assert.equal(await Profiles.saveFromSyncIfUnchanged(merged, read), null)
+  assert.deepEqual((await db.profiles.findOneAsync({ _id: 'music' })).subscriptions, [{ id: 'added-meanwhile' }])
+
+  const current = await db.profiles.findOneAsync({ _id: 'music' })
+  // The store adds an icon the datastore lacks, which sync leaves alone
+  const saved = await Profiles.saveFromSyncIfUnchanged({ ...merged, subscriptions: [{ id: 'added-meanwhile' }, { id: 'remote' }] }, { ...current, icon: { name: 'star' } })
+  assert.deepEqual(saved.subscriptions, [{ id: 'added-meanwhile' }, { id: 'remote' }])
+
+  await db.profiles.removeAsync({ _id: 'music' })
+  assert.equal(await Profiles.saveFromSyncIfUnchanged(merged, saved), null)
+  assert.equal(await db.profiles.findOneAsync({ _id: 'music' }), null)
+
+  assert.deepEqual(await Profiles.saveFromSyncIfUnchanged({ ...read, _id: 'new' }, null), { ...read, _id: 'new' })
+  assert.equal(await Profiles.saveFromSyncIfUnchanged({ ...read, _id: 'new' }, null), null)
+})
+
+test('importing subscriptions keeps channels added meanwhile and the settings of saved ones', async (t) => {
+  const { db, Profiles } = await fixture(t)
+  const saved = { id: 'saved', name: 'Saved', settings: { hideShorts: true } }
+  await db.profiles.insertAsync({ _id: 'allChannels', name: 'All Channels', subscriptions: [saved] })
+  editAfterFirstRead(db.profiles, () => Profiles.addChannelToProfiles({ id: 'added-meanwhile' }, ['allChannels']))
+
+  const profile = await Profiles.mergeImported({
+    _id: 'allChannels',
+    name: 'Imported name',
+    icon: { name: 'star' },
+    subscriptions: [{ id: 'saved', name: 'Saved' }, { id: 'imported' }, { id: 'imported' }],
+  })
+
+  assert.deepEqual(profile.subscriptions, [saved, { id: 'added-meanwhile' }, { id: 'imported' }])
+  assert.equal(profile.name, 'All Channels')
+  assert.deepEqual(profile.icon, { name: 'star' })
+  assert.deepEqual(await db.profiles.findOneAsync({ _id: 'allChannels' }), profile)
 })

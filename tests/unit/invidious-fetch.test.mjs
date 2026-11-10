@@ -119,3 +119,13 @@ test('cancelling Invidious preflight rejects before shared consent settles', { t
   await new Promise(resolve => setImmediate(resolve))
   assert.equal(fetched, false)
 })
+
+test('proxied video URLs keep the path of an instance served under one', () => {
+  const proxySource = source.match(/export function getProxyUrl\([\s\S]*?\n}\n/)[0].replace(/^export /, '')
+  for (const instance of ['https://video.example', 'https://video.example/proxy']) {
+    const getProxyUrl = vm.runInNewContext(`${proxySource}; getProxyUrl`, { URL, getCurrentInstanceUrl: () => instance })
+    assert.equal(getProxyUrl('https://rr1.googlevideo.com/videoplayback?id=1'), `${instance}/videoplayback?id=1&host=rr1.googlevideo.com`)
+    // URLs the instance returns already go through it
+    assert.equal(getProxyUrl(`${instance}/videoplayback?id=1&host=rr1.googlevideo.com`), `${instance}/videoplayback?id=1&host=rr1.googlevideo.com`)
+  }
+})

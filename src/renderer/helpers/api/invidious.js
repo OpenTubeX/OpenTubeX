@@ -92,7 +92,12 @@ export function getProxyUrl(uri) {
 
   const url = new URL(uri)
   const { origin } = url
-  if (!url.searchParams.has('host') && origin !== currentInstance) {
+  // Instances can be served under a path, so the origin alone does not show
+  // whether the URL already goes through the instance
+  if (origin === currentInstance || `${origin}${url.pathname}`.startsWith(`${currentInstance}/`)) {
+    return url.toString()
+  }
+  if (!url.searchParams.has('host')) {
     // invidious requires host param to be filled with the origin of the stream
     url.searchParams.append('host', origin.replace('https://', ''))
   }

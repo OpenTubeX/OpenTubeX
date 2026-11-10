@@ -45,8 +45,6 @@ Unload Multiple Tabs Confirmation:
 Tabs Unloaded To Free Memory: Para liberar memoria, se descargó {count} pestaña que no usaste recientemente | Para liberar memoria, se descargaron {count} de pestañas que no usaste recientemente | Para liberar memoria, se descargaron {count} pestañas que no usaste recientemente
 Compact side navigation: Navegación lateral compacta
 Expand side navigation: Expandir navegación lateral
-Use Vertical Tabs: Usar pestañas verticales
-Use Horizontal Tabs: Usar pestañas horizontales
 Resize Tab Bar: Cambiar el tamaño de la barra de pestañas
 Find in page: Buscar en la página
 Previous match: Coincidencia anterior
@@ -395,7 +393,6 @@ Settings:
     Add-ons: Complementos
     Add-ons Description: SponsorBlock, DeArrow, «No me gusta», AiSList y traducción por voz superpuesta
     Privacy Description: Historial, sugerencias de búsqueda, enlaces y contraseña de la aplicación
-    Online activity: Actividad en línea
     Data And Storage Description: Copias de seguridad, importación y exportación, uso del disco y limpieza
     Sync Description: Cuenta del servidor de sincronización, vinculación de dispositivos y datos sincronizados
     Advanced: Avanzado
@@ -1089,8 +1086,6 @@ Settings:
     Update FFmpeg: Actualizar FFmpeg
     Checking FFmpeg: Comprobando FFmpeg…
     Downloading FFmpeg: Descargando FFmpeg…
-    FFmpeg Downloaded Template: Se ha descargado FFmpeg {version}
-    FFmpeg Download Error Template: 'No se pudo descargar FFmpeg: {error}'
     Detected FFprobe Version Template: 'Versión de FFprobe detectada: {version}'
     FFprobe Managed Not Downloaded: FFprobe aún no se ha descargado. Hacé clic en el botón de abajo para descargarlo junto con FFmpeg.
     System FFprobe Missing Warning: No se encontró FFprobe en el sistema. Es necesario para inspeccionar archivos multimedia durante el posprocesamiento. Instalalo junto a FFmpeg o cambiá la fuente a «Gestionada por OpenTubeX».
@@ -1151,7 +1146,6 @@ Settings:
     Clear Video Metadata Cache: Borrar caché de metadatos de videos
     Are you sure you want to clear the video metadata cache?: ¿Seguro que querés borrar los títulos, las miniaturas y las descripciones de videos almacenados en caché?
     Failed to clear video metadata cache: No se pudo borrar la caché de metadatos de videos
-    Video metadata cache has been cleared: Se ha borrado la caché de metadatos de videos
     Video Metadata Cache Size: 'Caché de metadatos de videos: {size}'
   Storage Settings:
     Storage: Almacenamiento
@@ -1384,6 +1378,7 @@ Settings:
     Channel playback speeds imported: "Se importó la velocidad de reproducción de {count} canal | Se importaron las velocidades de reproducción de {count} canales | Se importaron las velocidades de reproducción de {count} canales"
     Channels not found: "No se pudo encontrar {count} canal | No se pudieron encontrar {count} canales | No se pudieron encontrar {count} canales"
   Sync Settings:
+    Signed Out After Restore: 'Se cerró la sesión de sincronización porque estos datos de la aplicación se restauraron desde una copia de seguridad o desde otro dispositivo. Volvé a iniciar sesión para sincronizar este dispositivo.'
     Revoke Session Tabs Warning: "También se eliminarán los conjuntos de pestañas sincronizados de este dispositivo."
     Revoke Session Partial Failure: "Se eliminaron los conjuntos de pestañas sincronizados, pero no se pudo confirmar la revocación. Volvé a intentar revocar el acceso."
     Tab Sync Revocation Pending: "La sincronización de pestañas está pausada mientras se revoca este inicio de sesión. Volvé a intentar la revocación en los ajustes de sincronización."
@@ -2179,8 +2174,6 @@ Video:
       EndTimeAfterStart: La hora de fin del segmento debe ser posterior a la hora de inicio.
       EndTimeBeforeVideoEnd: La hora de fin del segmento debe estar dentro de la duración del video.
       EndTimeLabel: Hora de fin del segmento
-      DisableAutoSkipTemporarily: Desactivar temporalmente la omisión automática de SponsorBlock
-      EnableAutoSkipTemporarily: Volver a activar la omisión automática de SponsorBlock
       Guidelines: Directrices
       InspectSegment: Inspeccionar
       InvalidStartTime: Ingresá una hora de inicio de segmento válida.
@@ -2216,7 +2209,6 @@ Video:
       InfoPanelLoading: Los segmentos todavía se están cargando...
       InfoPanelHasSegments: Este video tiene segmentos en la base de datos.
       InfoPanelNoSegments: No se encontraron segmentos
-      RefreshSegments: Actualizar segmentos
       RefreshInfo: Actualizar información de SponsorBlock
       ContributionStatsTitle: Tus contribuciones
       ContributionStatsLoading: Cargando estadísticas de contribuciones...

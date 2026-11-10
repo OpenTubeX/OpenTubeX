@@ -45,8 +45,6 @@ Unload Multiple Tabs Confirmation:
 Tabs Unloaded To Free Memory: 메모리를 확보하기 위해 최근에 사용하지 않은 탭 {count}개를 언로드했습니다
 Compact side navigation: 측면 탐색 메뉴 축소
 Expand side navigation: 측면 탐색 메뉴 펼치기
-Use Vertical Tabs: 세로 탭 사용
-Use Horizontal Tabs: 가로 탭 사용
 Resize Tab Bar: 탭 표시줄 크기 조절
 Find in page: 페이지에서 찾기
 Previous match: 이전 일치 항목
@@ -466,7 +464,6 @@ Settings:
     Add-ons: 부가 기능
     Add-ons Description: SponsorBlock, DeArrow, 싫어요, AiSList 및 음성 번역
     Privacy Description: 기록, 검색 제안, 링크 및 앱 비밀번호
-    Online activity: 온라인 활동
     Data And Storage Description: 백업, 가져오기 및 내보내기, 디스크 사용량 및 정리
     Sync Description: 동기화 서버 계정, 기기 페어링 및 동기화된 데이터
     Advanced: 고급
@@ -1184,8 +1181,6 @@ Settings:
     Update FFmpeg: FFmpeg 업데이트
     Checking FFmpeg: FFmpeg 확인 중…
     Downloading FFmpeg: FFmpeg 다운로드 중…
-    FFmpeg Downloaded Template: 'FFmpeg {version}을(를) 다운로드했습니다'
-    FFmpeg Download Error Template: 'FFmpeg 다운로드 실패: {error}'
     Detected FFprobe Version Template: '감지된 FFprobe 버전: {version}'
     FFprobe Managed Not Downloaded: 아직 FFprobe를 다운로드하지 않았습니다. 아래 버튼을 클릭하여 FFmpeg와 함께 다운로드하세요.
     System FFprobe Missing Warning: 시스템에서 FFprobe를 찾을 수 없습니다. 후처리 중 미디어를 검사하는 데 필요합니다. FFmpeg 옆에 설치하거나 소스를 "OpenTubeX에서 관리"로 변경하세요.
@@ -1255,7 +1250,6 @@ Settings:
     Clear Video Metadata Cache: 동영상 메타데이터 캐시 지우기
     Are you sure you want to clear the video metadata cache?: 캐시된 동영상 제목, 썸네일 및 설명을 지우시겠습니까?
     Failed to clear video metadata cache: 동영상 메타데이터 캐시를 지우지 못했습니다
-    Video metadata cache has been cleared: 동영상 메타데이터 캐시를 지웠습니다
     Video Metadata Cache Size: '동영상 메타데이터 캐시: {size}'
     Are you sure you want to clear out your search history and cache?: 검색 기록과 캐시를 지우시겠습니까?
     Search history and cache have been cleared: 검색 기록과 캐시를 지웠습니다
@@ -1519,6 +1513,7 @@ Settings:
     Channel playback speeds imported: "채널 {count}개의 재생 속도를 가져왔습니다"
     Channels not found: "채널 {count}개를 찾을 수 없습니다"
   Sync Settings:
+    Signed Out After Restore: '이 앱 데이터가 백업이나 다른 기기에서 복원되어 동기화에서 로그아웃되었습니다. 이 기기를 동기화하려면 다시 로그인하세요.'
     Revoke Session Tabs Warning: "이 기기의 동기화된 탭 모음도 삭제됩니다."
     Revoke Session Partial Failure: "동기화된 탭 모음이 삭제되었지만 접근 권한 취소를 확인할 수 없습니다. 접근 권한 취소를 다시 시도하세요."
     Tab Sync Revocation Pending: "이 로그인의 액세스 취소가 완료될 때까지 탭 동기화가 일시 중지됩니다. 동기화 설정에서 취소를 다시 시도하세요."
@@ -2152,8 +2147,6 @@ Video:
       EndTimeAfterStart: 구간 종료 시간은 시작 시간보다 뒤여야 합니다.
       EndTimeBeforeVideoEnd: 구간 종료 시간은 동영상 재생 시간 안에 있어야 합니다.
       EndTimeLabel: 구간 종료 시간
-      DisableAutoSkipTemporarily: SponsorBlock 자동 건너뛰기 일시 비활성화
-      EnableAutoSkipTemporarily: SponsorBlock 자동 건너뛰기 다시 활성화
       Guidelines: 가이드라인
       InspectSegment: 검사
       InvalidStartTime: 올바른 구간 시작 시간을 입력하세요.
@@ -2189,7 +2182,6 @@ Video:
       InfoPanelLoading: 구간 불러오는 중...
       InfoPanelHasSegments: 데이터베이스에 이 동영상의 구간이 있습니다!
       InfoPanelNoSegments: 구간을 찾을 수 없습니다
-      RefreshSegments: 구간 새로 고침
       RefreshInfo: SponsorBlock 정보 새로 고침
       ContributionStatsTitle: 내 기여
       ContributionStatsLoading: 기여 통계 불러오는 중...

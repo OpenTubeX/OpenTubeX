@@ -43,8 +43,6 @@ Unload Multiple Tabs Confirmation:
   Message: Esta ação descarregará {count} separador da memória. | Esta ação descarregará {count} separadores da memória.
   Unload Tabs: Descarregar {count} separador | Descarregar {count} separadores
 Tabs Unloaded To Free Memory: Para libertar memória, foi descarregado {count} separador que não utilizou recentemente | Para libertar memória, foram descarregados {count} de separadores que não utilizou recentemente | Para libertar memória, foram descarregados {count} separadores que não utilizou recentemente
-Use Vertical Tabs: Usar separadores verticais
-Use Horizontal Tabs: Usar separadores horizontais
 Resize Tab Bar: Redimensionar barra de separadores
 Find in page: Localizar na página
 Previous match: Correspondência anterior
@@ -372,7 +370,6 @@ Settings:
     Add-ons: Extensões
     Add-ons Description: SponsorBlock, DeArrow, «não gosto», AiSList e tradução de voz
     Privacy Description: Histórico, sugestões de pesquisa, ligações e palavra-passe da aplicação
-    Online activity: Atividade online
     Data And Storage Description: Cópias de segurança, importação e exportação, utilização do disco e limpeza
     Sync Description: Conta do servidor de sincronização, emparelhamento de dispositivos e dados sincronizados
     Advanced: Avançadas
@@ -1002,8 +999,6 @@ Settings:
     Update FFmpeg: Atualizar FFmpeg
     Checking FFmpeg: A verificar o FFmpeg…
     Downloading FFmpeg: A transferir o FFmpeg…
-    FFmpeg Downloaded Template: O FFmpeg {version} foi transferido
-    FFmpeg Download Error Template: 'Falha ao transferir o FFmpeg: {error}'
     Detected FFprobe Version Template: 'Versão do FFprobe detetada: {version}'
     FFprobe Managed Not Downloaded: O FFprobe ainda não foi transferido. Clique no botão abaixo para o transferir com o FFmpeg.
     System FFprobe Missing Warning: O FFprobe não foi encontrado no sistema. É necessário para inspecionar conteúdo multimédia durante o pós-processamento. Instale-o junto do FFmpeg ou altere a origem para «Gerido pelo OpenTubeX».
@@ -1064,7 +1059,6 @@ Settings:
     Clear Video Metadata Cache: Limpar cache de metadados dos vídeos
     Are you sure you want to clear the video metadata cache?: Tem a certeza de que pretende limpar os títulos, as miniaturas e as descrições dos vídeos em cache?
     Failed to clear video metadata cache: Falha ao limpar a cache de metadados dos vídeos
-    Video metadata cache has been cleared: A cache de metadados dos vídeos foi limpa
     Video Metadata Cache Size: 'Cache de metadados dos vídeos: {size}'
   Storage Settings:
     Storage: Armazenamento
@@ -1277,6 +1271,7 @@ Settings:
     Channel playback speeds imported: "Importada a velocidade de reprodução de {count} canal | Importadas as velocidades de reprodução de {count} de canais | Importadas as velocidades de reprodução de {count} canais"
     Channels not found: "{count} canal não foi encontrado | {count} de canais não foram encontrados | {count} canais não foram encontrados"
   Sync Settings:
+    Signed Out After Restore: 'A sincronização terminou a sessão porque estes dados da aplicação foram restaurados de uma cópia de segurança ou de outro dispositivo. Inicie sessão novamente para sincronizar este dispositivo.'
     Revoke Session Tabs Warning: "Os conjuntos de separadores sincronizados deste dispositivo também serão eliminados."
     Revoke Session Partial Failure: "Os conjuntos de separadores sincronizados foram eliminados, mas não foi possível confirmar a revogação. Tente revogar o acesso novamente."
     Tab Sync Revocation Pending: "A sincronização de separadores está em pausa enquanto a revogação deste início de sessão está pendente. Tente novamente a revogação nas definições de sincronização."
@@ -1797,8 +1792,6 @@ Video:
       EndTimeAfterStart: A hora de fim do segmento tem de ser posterior à hora de início.
       EndTimeBeforeVideoEnd: A hora de fim do segmento tem de estar dentro da duração do vídeo.
       EndTimeLabel: Hora de fim do segmento
-      DisableAutoSkipTemporarily: Desativar temporariamente o avanço automático do SponsorBlock
-      EnableAutoSkipTemporarily: Reativar o avanço automático do SponsorBlock
       Guidelines: Diretrizes
       InspectSegment: Inspecionar
       InvalidStartTime: Introduza uma hora de início válida para o segmento.
@@ -1834,7 +1827,6 @@ Video:
       InfoPanelLoading: Os segmentos ainda estão a carregar...
       InfoPanelHasSegments: Este vídeo tem segmentos na base de dados!
       InfoPanelNoSegments: Não foram encontrados segmentos
-      RefreshSegments: Atualizar segmentos
       RefreshInfo: Atualizar informações do SponsorBlock
       ContributionStatsTitle: As suas contribuições
       ContributionStatsLoading: A carregar estatísticas de contribuições...

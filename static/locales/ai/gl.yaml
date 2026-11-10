@@ -43,8 +43,6 @@ Unload Multiple Tabs Confirmation:
   Message: Isto descargará {count} lapelas.
   Unload Tabs: Descargar {count} lapelas
 Tabs Unloaded To Free Memory: Descargouse {count} lapela que non usaches recentemente para liberar memoria | Descargáronse {count} lapelas que non usaches recentemente para liberar memoria
-Use Vertical Tabs: Usar lapelas verticais
-Use Horizontal Tabs: Usar lapelas horizontais
 Resize Tab Bar: Redimensionar a barra de lapelas
 Find in page: Buscar na páxina
 Previous match: Coincidencia anterior
@@ -377,7 +375,6 @@ Settings:
     Add-ons: Complementos
     Add-ons Description: SponsorBlock, DeArrow, valoracións negativas, AiSList e tradución de voz
     Privacy Description: Historial, suxestións de busca, ligazóns e contrasinal da aplicación
-    Online activity: Actividade en liña
     Data And Storage Description: Copias de seguranza, importación e exportación, uso do disco e limpeza
     Sync Description: Conta do servidor de sincronización, vinculación de dispositivos e datos sincronizados
     Advanced: Avanzado
@@ -1013,8 +1010,6 @@ Settings:
     Update FFmpeg: Actualizar FFmpeg
     Checking FFmpeg: Comprobando FFmpeg…
     Downloading FFmpeg: Descargando FFmpeg…
-    FFmpeg Downloaded Template: Descargouse FFmpeg {version}
-    FFmpeg Download Error Template: 'Produciuse un erro ao descargar FFmpeg: {error}'
     Detected FFprobe Version Template: 'Versión de FFprobe detectada: {version}'
     FFprobe Managed Not Downloaded: Aínda non se descargou FFprobe. Preme o botón inferior para descargalo con FFmpeg.
     System FFprobe Missing Warning: Non se atopou FFprobe no sistema. É necesario para examinar os ficheiros multimedia durante o posprocesamento. Instálao xunto a FFmpeg ou cambia a orixe a «Xestionado por OpenTubeX».
@@ -1075,7 +1070,6 @@ Settings:
     Clear Video Metadata Cache: Baleirar a caché de metadatos dos vídeos
     Are you sure you want to clear the video metadata cache?: Seguro que queres borrar da caché os títulos, as miniaturas e as descricións dos vídeos?
     Failed to clear video metadata cache: Non se puido baleirar a caché de metadatos dos vídeos
-    Video metadata cache has been cleared: Baleirouse a caché de metadatos dos vídeos
     Video Metadata Cache Size: 'Caché de metadatos dos vídeos: {size}'
   Storage Settings:
     Storage: Almacenamento
@@ -1300,6 +1294,7 @@ Settings:
     Channel playback speeds imported: "Importouse a velocidade de reprodución de {count} canle | Importáronse as velocidades de reprodución de {count} canles"
     Channels not found: "Non se puido atopar {count} canle | Non se puideron atopar {count} canles"
   Sync Settings:
+    Signed Out After Restore: 'Pechouse a sesión da sincronización porque estes datos da aplicación restauráronse dunha copia de seguranza ou doutro dispositivo. Volve iniciar sesión para sincronizar este dispositivo.'
     Revoke Session Tabs Warning: "Tamén se eliminarán os conxuntos de lapelas sincronizados deste dispositivo."
     Revoke Session Partial Failure: "Elimináronse os conxuntos de lapelas sincronizados, pero non se puido confirmar a revogación. Tenta revogar o acceso de novo."
     Tab Sync Revocation Pending: "A sincronización de lapelas está pausada mentres a revogación deste inicio de sesión está pendente. Tenta de novo a revogación nos axustes de sincronización."
@@ -1850,8 +1845,6 @@ Video:
       EndTimeAfterStart: O tempo de fin do segmento debe ser posterior ao de inicio.
       EndTimeBeforeVideoEnd: O tempo de fin do segmento debe estar dentro da duración do vídeo.
       EndTimeLabel: Tempo de fin do segmento
-      DisableAutoSkipTemporarily: Desactivar temporalmente o salto automático de SponsorBlock
-      EnableAutoSkipTemporarily: Volver activar o salto automático de SponsorBlock
       Guidelines: Directrices
       InspectSegment: Examinar
       InvalidStartTime: Introduce un tempo de inicio do segmento válido.
@@ -1887,7 +1880,6 @@ Video:
       InfoPanelLoading: Aínda se están cargando os segmentos…
       InfoPanelHasSegments: Este vídeo ten segmentos na base de datos.
       InfoPanelNoSegments: Non se atoparon segmentos
-      RefreshSegments: Actualizar os segmentos
       RefreshInfo: Actualizar a información de SponsorBlock
       ContributionStatsTitle: As túas contribucións
       ContributionStatsLoading: Cargando as estatísticas das contribucións…

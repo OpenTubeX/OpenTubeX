@@ -43,8 +43,6 @@ Unload Multiple Tabs Confirmation:
   Message: Tímto uvolníte {count} kartu. | Tímto uvolníte {count} karty. | Tímto uvolníte {count} karet.
   Unload Tabs: Uvolnit {count} kartu | Uvolnit {count} karty | Uvolnit {count} karet
 Tabs Unloaded To Free Memory: Kvůli nedostatku paměti byla uvolněna {count} karta, kterou jste v poslední době nepoužili | Kvůli nedostatku paměti byly uvolněny {count} karty, které jste v poslední době nepoužili | Kvůli nedostatku paměti bylo uvolněno {count} karet, které jste v poslední době nepoužili
-Use Vertical Tabs: Používat svislé karty
-Use Horizontal Tabs: Používat vodorovné karty
 Resize Tab Bar: Změnit velikost panelu karet
 Find in page: Najít na stránce
 Previous match: Předchozí výskyt
@@ -372,7 +370,6 @@ Settings:
     Add-ons: Doplňky
     Add-ons Description: SponsorBlock, DeArrow, hodnocení Nelíbí se mi, AiSList a překlad dabingu
     Privacy Description: Historie, návrhy vyhledávání, odkazy a heslo aplikace
-    Online activity: Aktivita na internetu
     Data And Storage Description: Zálohy, import a export, využití disku a čištění
     Sync Description: Účet synchronizačního serveru, párování zařízení a synchronizovaná data
     Advanced: Pokročilé
@@ -1002,8 +999,6 @@ Settings:
     Update FFmpeg: Aktualizovat FFmpeg
     Checking FFmpeg: Kontrola FFmpeg…
     Downloading FFmpeg: Stahování FFmpeg…
-    FFmpeg Downloaded Template: FFmpeg {version} byl stažen
-    FFmpeg Download Error Template: 'Stažení FFmpeg se nezdařilo: {error}'
     Detected FFprobe Version Template: 'Zjištěná verze FFprobe: {version}'
     FFprobe Managed Not Downloaded: FFprobe zatím není stažený. Stáhnete jej spolu s FFmpeg kliknutím na tlačítko níže.
     System FFprobe Missing Warning: FFprobe nebyl v systému nalezen. Je nutný ke kontrole médií při následném zpracování. Nainstalujte jej vedle FFmpeg nebo změňte zdroj na „Spravováno aplikací OpenTubeX“.
@@ -1064,7 +1059,6 @@ Settings:
     Clear Video Metadata Cache: Vymazat mezipaměť metadat videí
     Are you sure you want to clear the video metadata cache?: Opravdu chcete vymazat uložené názvy, miniatury a popisy videí?
     Failed to clear video metadata cache: Mezipaměť metadat videí se nepodařilo vymazat
-    Video metadata cache has been cleared: Mezipaměť metadat videí byla vymazána
     Video Metadata Cache Size: 'Mezipaměť metadat videí: {size}'
   Storage Settings:
     Storage: Úložiště
@@ -1277,6 +1271,7 @@ Settings:
     Channel playback speeds imported: "Importována rychlost přehrávání {count} kanálu | Importovány rychlosti přehrávání {count} kanálů | Importovány rychlosti přehrávání {count} kanálů"
     Channels not found: "{count} kanál nebyl nalezen | {count} kanály nebyly nalezeny | {count} kanálů nebylo nalezeno"
   Sync Settings:
+    Signed Out After Restore: 'Synchronizace byla odhlášena, protože tato data aplikace byla obnovena ze zálohy nebo z jiného zařízení. Přihlaste se znovu, abyste toto zařízení synchronizovali.'
     Revoke Session Tabs Warning: "Synchronizované sady karet tohoto zařízení budou také odstraněny."
     Revoke Session Partial Failure: "Synchronizované sady karet byly smazány, ale odebrání přístupu se nepodařilo potvrdit. Zkuste přístup odebrat znovu."
     Tab Sync Revocation Pending: "Synchronizace panelů je pozastavena, dokud nebude dokončeno odvolání tohoto přihlášení. Zkuste odvolání znovu v nastavení synchronizace."
@@ -1796,8 +1791,6 @@ Video:
       EndTimeAfterStart: Čas konce úseku musí následovat po čase začátku.
       EndTimeBeforeVideoEnd: Čas konce úseku musí být v rámci délky videa.
       EndTimeLabel: Čas konce úseku
-      DisableAutoSkipTemporarily: Dočasně vypnout automatické přeskakování SponsorBlock
-      EnableAutoSkipTemporarily: Znovu zapnout automatické přeskakování SponsorBlock
       Guidelines: Pokyny
       InspectSegment: Zkontrolovat
       InvalidStartTime: Zadejte platný čas začátku úseku.
@@ -1833,7 +1826,6 @@ Video:
       InfoPanelLoading: Úseky se stále načítají…
       InfoPanelHasSegments: Toto video má v databázi úseky.
       InfoPanelNoSegments: Nebyly nalezeny žádné úseky
-      RefreshSegments: Obnovit úseky
       RefreshInfo: Obnovit informace SponsorBlock
       ContributionStatsTitle: Vaše příspěvky
       ContributionStatsLoading: Načítání statistik příspěvků…

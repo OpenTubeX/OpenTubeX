@@ -15,6 +15,9 @@ export class SyncServerError extends Error {
   }
 }
 
+export const SYNC_SERVER_RESTORED_DEVICE_MESSAGE =
+  'Sync was signed out because this app data was restored from a backup or another device.'
+
 export const SYNC_SERVER_UPDATE_REQUIRED_MESSAGE =
   'This server must be updated to support encrypted live sync.'
 

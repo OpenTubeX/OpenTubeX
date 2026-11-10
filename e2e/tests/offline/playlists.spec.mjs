@@ -787,6 +787,37 @@ test.describe('playlist cleanup', () => {
   })
 })
 
+test.describe('playlist duplicate cleanup', () => {
+  const video = (videoId, playlistItemId) => ({
+    videoId, playlistItemId, title: videoId, author: 'Test Channel', authorId: 'UC-test-channel-id', lengthSeconds: 60, type: 'video', timeAdded: 1,
+  })
+  test.use({
+    seed: {
+      playlists: [{
+        _id: 'duplicates',
+        playlistName: 'Duplicates test',
+        description: '',
+        protected: false,
+        createdAt: 1,
+        lastUpdatedAt: 1,
+        videos: [video('copy0000000', 'copy-1'), video('once0000000', 'once-1'), video('copy0000000', 'copy-2')],
+      }],
+    }
+  })
+
+  test('removes only the duplicate entries', async ({ app, page }) => {
+    await goTo(page, 'userplaylists')
+    await page.getByRole('link', { name: 'Duplicates test', exact: true }).click()
+    await (await openPlaylistMenuItem(page, 'Remove Duplicate Videos')).click()
+    const dialog = page.getByRole('dialog')
+    await expect(dialog).toContainText('remove 1 duplicate video')
+    await dialog.getByRole('button', { name: 'Yes, Delete' }).click()
+    // The removal deletes the entries rather than saving the rest, so only they are gone
+    await expect.poll(() => readDatastore(app.userDataDir, 'playlists').trim().split('\n').map(line => JSON.parse(line))
+      .find(playlist => playlist._id === 'duplicates').videos.map(video => video.playlistItemId)).toEqual(['copy-1', 'once-1'])
+  })
+})
+
 test.describe('saved playlist metadata', () => {
   test.use({
     seed: {
@@ -1682,16 +1713,39 @@ test.describe('custom playlist order', () => {
     })
   }
 
-  test('moves a video to the top from its options menu', async ({ page }) => {
+  test('moves videos to the top from their options menu, keeping quick moves and undoing a failed one', async ({ page }) => {
     await goTo(page, 'userplaylists')
     await page.getByText('Large custom playlist').click()
-
-    const thirdVideo = page.locator('.ft-list-video').filter({
-      has: page.getByText('Custom playlist video 3', { exact: true })
+    const titles = page.locator('.playlistItemsCard .h3Title')
+    const moveToTop = async title => {
+      await page.locator('.ft-list-video').filter({ has: page.getByText(title, { exact: true }) }).locator('.title').click({ button: 'right' })
+      await page.getByRole('menuitem', { name: 'Move Video to the Top' }).click()
+    }
+    const savedOrder = () => page.evaluate(() => window.$store.getters.getPlaylist('large-custom-playlist').videos.slice(0, 2).map(video => video.title))
+    // Hold the first save, so the next move waits behind it, and let the test fail saves
+    await page.evaluate(() => {
+      const actions = window.$store._actions.reorderPlaylistVideos
+      const save = actions[0]
+      window.reorderHeld = new Promise(resolve => { window.releaseReorder = resolve })
+      let calls = 0
+      actions[0] = async payload => {
+        if (calls++ === 0) await window.reorderHeld
+        return window.failReorder ? false : save(payload)
+      }
     })
-    await thirdVideo.locator('.title').click({ button: 'right' })
-    await page.getByRole('menuitem', { name: 'Move Video to the Top' }).click()
 
-    await expect(page.locator('.playlistItemsCard .h3Title').first()).toHaveText('Custom playlist video 3')
+    await moveToTop('Custom playlist video 3')
+    await expect(titles.first()).toHaveText('Custom playlist video 3')
+    await moveToTop('Custom playlist video 5')
+    await expect(titles.first()).toHaveText('Custom playlist video 5')
+    await page.evaluate(() => window.releaseReorder())
+    await expect.poll(savedOrder).toEqual(['Custom playlist video 5', 'Custom playlist video 3'])
+    await expect(titles.nth(1)).toHaveText('Custom playlist video 3')
+
+    await page.evaluate(() => { window.failReorder = true })
+    await moveToTop('Custom playlist video 7')
+    await expect(page.locator('.toast').filter({ hasText: 'There was an issue with updating this playlist.' })).toBeVisible()
+    await expect(titles.first()).toHaveText('Custom playlist video 5')
+    expect(await savedOrder()).toEqual(['Custom playlist video 5', 'Custom playlist video 3'])
   })
 })
