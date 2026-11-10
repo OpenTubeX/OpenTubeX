@@ -203,3 +203,34 @@ test('a playlist keeps the original subtitle when converting a skipped entry fai
   assert.equal(status.status, 'completed')
   assert.deepEqual(status.destinations, ['/downloads/First.en.srt', '/downloads/Second.en.vtt'])
 })
+
+test('a download that starts while FFmpeg is being validated waits for that installation', async () => {
+  const start = source.indexOf("  if (ffmpeg.source === 'managed') {")
+  const block = source.slice(start, source.indexOf("  } else if (ffmpeg.executable !== 'ffmpeg')", start))
+  let finishInstall
+  let installs = 0
+  const context = vm.createContext({
+    missingFfmpegInstall: null,
+    // the installation has already placed both files and is checking their versions
+    existsSync: () => installs > 0,
+    resolveFfprobeExecutable: async () => ({ executable: '/managed/ffprobe' }),
+    downloadManagedFfmpeg: () => {
+      installs++
+      return new Promise(resolve => { finishInstall = resolve })
+    },
+  })
+  vm.runInContext(`globalThis.prepare = async () => { const ffmpeg = { source: 'managed', executable: '/managed/ffmpeg' }; const args = []
+${block}  }
+  return args
+}`, context)
+  const first = context.prepare()
+  await new Promise(setImmediate)
+  let secondDone = false
+  const second = context.prepare().then(result => { secondDone = true; return result })
+  await new Promise(setImmediate)
+  assert.equal(secondDone, false, 'the second download must not use binaries that are still being validated')
+  finishInstall({ error: 'rejected' })
+  assert.equal((await first).error, 'rejected')
+  assert.equal((await second).error, 'rejected')
+  assert.equal(installs, 1)
+})

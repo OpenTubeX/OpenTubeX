@@ -461,7 +461,8 @@ async function startYtDlpDownload(
 
   if (ffmpeg.source === 'managed') {
     const ffprobe = await resolveFfprobeExecutable()
-    if (!existsSync(ffmpeg.executable) || !existsSync(ffprobe.executable)) {
+    // An installation places both files before it validates them, so wait for one in progress
+    if (missingFfmpegInstall !== null || !existsSync(ffmpeg.executable) || !existsSync(ffprobe.executable)) {
       // downloads that start together share one FFmpeg installation
       missingFfmpegInstall ??= downloadManagedFfmpeg().finally(() => {
         missingFfmpegInstall = null
