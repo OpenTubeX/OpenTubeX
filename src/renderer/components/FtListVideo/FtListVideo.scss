@@ -159,7 +159,21 @@
   margin-inline-start: 0;
 }
 
+.ft-list-video .info .titleRow {
+  display: flex;
+  align-items: flex-start;
+  grid-area: title;
+  min-inline-size: 0;
+
+  .title {
+    flex: 1;
+    min-inline-size: 0;
+  }
+}
+
 .deArrowToggleButton {
+  // Overlap the space around the title so the button never makes its row taller.
+  margin-block: -10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;

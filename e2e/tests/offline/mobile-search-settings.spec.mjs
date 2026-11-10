@@ -68,7 +68,7 @@ test.describe('mobile search and settings', { tag: '@scale' }, () => {
     await expect(title).toHaveText('Clear title')
     await expect(page.locator('.deArrowToggleButton')).toBeVisible()
     await page.evaluate(() => window.$store.dispatch('updateListType', 'grid'))
-    const desktopTextGap = await getVideoMetadataGap(title.locator('xpath=..'))
+    const desktopTextGap = await getVideoMetadataGap(page.locator('.ft-list-item .info').first())
 
     const touchSession = await page.context().newCDPSession(page)
     await touchSession.send('Emulation.setTouchEmulationEnabled', { enabled: true })
@@ -78,7 +78,7 @@ test.describe('mobile search and settings', { tag: '@scale' }, () => {
     await setWindowSize(app, page, { width: 460, height: 850 })
     const session = await page.context().newCDPSession(page)
     await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
-    const mobileTextGap = await getVideoMetadataGap(title.locator('xpath=..'))
+    const mobileTextGap = await getVideoMetadataGap(page.locator('.ft-list-item .info').first())
     expect(mobileTextGap).toBeLessThanOrEqual(desktopTextGap + 1)
 
     for (const listType of ['grid', 'list']) {

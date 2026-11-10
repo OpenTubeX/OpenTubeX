@@ -125,6 +125,11 @@
     min-inline-size: 48px;
   }
 
+  /* The DeArrow toggle sits beside the title, so it must not make that row taller. */
+  .card :deep(.ft-list-item .deArrowToggleButton) {
+    margin-block: -14px;
+  }
+
   /* Narrower segments let the icon-only group fit a two-column grid. */
   .card :deep(.channelSubscribeButton button) {
     box-sizing: border-box;

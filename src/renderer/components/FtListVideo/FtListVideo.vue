@@ -268,21 +268,57 @@
         draggable="true"
         @dragstart="onDragStart"
       >
-        <RouterLink
-          class="title"
-          :to="watchVideoRouterLink"
-          :title="fullTitleTooltip"
-          @click.capture="handleWatchPageLinkClick"
-          @auxclick="handleWatchPageLinkClick"
-        >
-          <h3
-            class="h3Title"
-            dir="auto"
+        <!-- Like the DeArrow extension, its toggle follows the title. -->
+        <div class="titleRow">
+          <RouterLink
+            class="title"
+            :to="watchVideoRouterLink"
+            :title="fullTitleTooltip"
+            @click.capture="handleWatchPageLinkClick"
+            @auxclick="handleWatchPageLinkClick"
           >
-            <FtNewContentDot v-if="showNewSubscriptionFeedIndicator" />
-            {{ displayTitle }}
-          </h3>
-        </RouterLink>
+            <h3
+              class="h3Title"
+              dir="auto"
+            >
+              <FtNewContentDot v-if="showNewSubscriptionFeedIndicator" />
+              {{ displayTitle }}
+            </h3>
+          </RouterLink>
+          <button
+            v-if="deArrowChangedContent || deArrowTogglePinned"
+            :title="deArrowToggleTitle"
+            class="optionsButton deArrowToggleButton"
+            :class="{ alwaysVisible: deArrowTogglePinned || showDeArrowBadge, showingOriginal: deArrowTogglePinned }"
+            @click="toggleDeArrow"
+          >
+            <!-- DeArrow's logo, so the button reads as the service's mark -->
+            <svg
+              class="deArrowToggleIcon"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="12"
+                fill="#1213bd"
+              />
+              <circle
+                cx="12"
+                cy="12"
+                r="8.3"
+                fill="#88c9f9"
+              />
+              <circle
+                cx="12"
+                cy="12"
+                r="3.8"
+                fill="#0a62a5"
+              />
+            </svg>
+          </button>
+        </div>
         <div class="infoLine">
           <button
             v-if="shouldShowChannelResolverButton"
@@ -467,39 +503,6 @@
             :size="16"
             @click="openVideoOptionsMenu"
           />
-          <button
-            v-if="deArrowChangedContent || deArrowTogglePinned"
-            :title="deArrowToggleTitle"
-            class="optionsButton deArrowToggleButton"
-            :class="{ alwaysVisible: deArrowTogglePinned || showDeArrowBadge, showingOriginal: deArrowTogglePinned }"
-            @click="toggleDeArrow"
-          >
-            <!-- DeArrow's logo, so the button reads as the service's mark -->
-            <svg
-              class="deArrowToggleIcon"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="12"
-                fill="#1213bd"
-              />
-              <circle
-                cx="12"
-                cy="12"
-                r="8.3"
-                fill="#88c9f9"
-              />
-              <circle
-                cx="12"
-                cy="12"
-                r="3.8"
-                fill="#0a62a5"
-              />
-            </svg>
-          </button>
         </div>
         <p
           v-if="description && effectiveListTypeIsList && appearance === 'result'"
