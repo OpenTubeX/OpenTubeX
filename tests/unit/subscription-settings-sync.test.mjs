@@ -447,3 +447,19 @@ test('the newer of two unsynced edits to the same item wins even when the older 
   const newer = mergeSettingItemsEntry({ key: playlistKey, value: { item: { value: { shuffleByDefault: false }, updatedAt: 200 } }, remoteEntry: older, now: 400 })
   assert.deepEqual(newer.value.item, { value: { shuffleByDefault: false }, updatedAt: 200 })
 })
+
+test('applying merged settings rejects instead of overwriting an edit made after the merge', async () => {
+  const device = createPlaylistDevice([{ _id: 'playlist', shuffleByDefault: true, preferencesUpdatedAt: 10 }], { playlist: { remoteId: 'playlist' } })
+  const merged = playlistPreferencesSync.getPlaylistPreferencesForSync(device.store.state.playlists.playlists, device.snapshot)
+  Object.assign(device.store.state.playlists.playlists[0], { shuffleByDefault: false, preferencesUpdatedAt: 20 })
+  device.store.dispatch = () => assert.fail('A newer local edit must not be overwritten')
+  await assert.rejects(playlistPreferencesSync.applyPlaylistPreferencesSync(device.store,
+    { playlist: { value: { shuffleByDefault: true }, updatedAt: 10 } }, device.snapshot, merged), /changed during sync/)
+
+  const store = createStore([{ id: 'channel', dailyVideoLimit: 2, subscriptionSettingsUpdatedAt: 10 }])
+  const mergedChannels = subscriptionSync.getSubscriptionSettingsForSync(store)
+  Object.assign(store.state.profiles.profileList[0].subscriptions[0], { dailyVideoLimit: 4, subscriptionSettingsUpdatedAt: 20 })
+  store.dispatch = () => assert.fail('A newer local edit must not be overwritten')
+  await assert.rejects(subscriptionSync.applySubscriptionSettingsSync(store,
+    { channel: { value: { dailyVideoLimit: 2 }, updatedAt: 10 } }, mergedChannels), /changed during sync/)
+})

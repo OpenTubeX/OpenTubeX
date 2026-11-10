@@ -1634,9 +1634,9 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
       : metadataEquals(currentValue, entry.value)
     if (!valuesEqual) {
       if (key === SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY) {
-        await applySubscriptionSettingsSync(store, entry.value)
+        await applySubscriptionSettingsSync(store, entry.value, value)
       } else if (key === PLAYLIST_PREFERENCES_SYNC_KEY) {
-        await applyPlaylistPreferencesSync(store, entry.value, playlistSnapshot)
+        await applyPlaylistPreferencesSync(store, entry.value, playlistSnapshot, value)
       } else if (key === CUSTOM_THEMES_SYNC_KEY) {
         const previousThemes = store.state.utils.customThemes
         const themes = await replaceCustomThemes(entry.value)
