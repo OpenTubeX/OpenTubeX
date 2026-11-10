@@ -10904,7 +10904,7 @@ export default defineComponent({
      */
     function deferErrorUntilActivated(error) {
       ignoreErrors = false
-      suspendedShortsError = { error, context: 'shaka error handler', details: undefined }
+      suspendedShortsError = { error, context: 'shaka error handler', details: undefined, resumePlayback: true }
     }
 
     onDeactivated(suspendForShortsNavigation)
@@ -10927,9 +10927,15 @@ export default defineComponent({
         return
       }
       if (suspendedShortsError) {
-        const { error, context, details } = suspendedShortsError
+        const { error, context, details, resumePlayback } = suspendedShortsError
         suspendedShortsError = null
         handleError(error, context, details)
+        // The retried stream plays once its server answers
+        if (resumePlayback && resume && isTabPresented?.value !== false) {
+          video.value?.play().catch(error => {
+            console.warn('Could not resume retained Short', error)
+          })
+        }
         return
       }
       fullscreenChangeHandler()

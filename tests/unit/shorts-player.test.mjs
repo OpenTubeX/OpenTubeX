@@ -446,13 +446,24 @@ test('a Short left during a connection wait replays its error when presented aga
     shaka: { util: { Error: { Category: { TEXT: 3 }, Code: {} } } },
     emit: (...args) => emitted.push(args),
     mediaTabId: 'shorts-tab',
-    tabMediaCoordinator: { setPlaybackState() {} },
+    tabMediaCoordinator: { setPlaybackState() {}, setActionHandlers() {} },
     process: { env: { IS_ELECTRON: false } },
     musicMode: ref(false),
     registerMediaSessionHandlers() {},
     onDeactivated() {},
     onActivated: callback => { activate = callback },
+    isTabPresented: ref(true),
+    video: ref({
+      paused: false,
+      pause() { this.paused = true },
+      play() { this.paused = false; return Promise.resolve() }
+    }),
+    sleepTimer: { pauseCountdown() {} },
+    cancelSponsorBlockSkipSchedule() {},
+    clearAbRepeatBoundarySchedule() {},
+    mediaSessionSource: 'player',
   })
+  context.props.shortsPlayer = true
   vm.runInContext(source, context)
   const lifecycleStart = playerSource.indexOf('    let resumeShortsAfterActivation = false')
   vm.runInContext(playerSource.slice(lifecycleStart, playerSource.indexOf('    function isPaused()', lifecycleStart)), context)
@@ -462,10 +473,12 @@ test('a Short left during a connection wait replays its error when presented aga
 
   // Watch hands the error back before the Short is suspended for navigation
   context.deferErrorUntilActivated(error)
-  context.shortsNavigationSuspended.value = true
+  context.suspendForShortsNavigation()
+  assert.equal(context.video.value.paused, true)
   activate()
   assert.deepEqual(emitted.map(([name, emittedError]) => [name, emittedError]), [['error', error], ['error', error]],
     'the returning Short must report its failed stream again')
+  assert.equal(context.video.value.paused, false, 'a Short that was playing resumes once its stream does')
 })
 
 test('an inactive Short defers player errors without changing current playback', () => {
