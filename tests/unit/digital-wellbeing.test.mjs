@@ -56,6 +56,10 @@ test('playback time counts toward limits and is only recorded when watch statist
   assert.equal(recording.state.day.unrecordedSeconds, 0)
   assert.equal(recording.state.day.shortsSeconds, 30)
   assert.equal(recording.state.sessionSeconds, 30)
+  wellbeing.actions.recordPlaybackTime(recording.context, { date, seconds: 30, isShort: true, retry: true })
+  assert.deepEqual(recording.dispatched[1], ['recordWatchTime', { date, seconds: 30 }], 'A retry writes the statistics again')
+  assert.equal(recording.state.day.shortsSeconds, 30, 'A retry does not count toward the limits again')
+  assert.equal(recording.state.sessionSeconds, 30)
 
   const private_ = createContext({ getRememberHistory: true, getEnableWatchStats: false })
   wellbeing.actions.recordPlaybackTime(private_.context, { date, seconds: 45, isShort: false })

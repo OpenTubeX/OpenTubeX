@@ -8,7 +8,9 @@ const FLUSH_THRESHOLD_MS = 10000
  * Accumulates played time per local day for the watch statistics.
  *
  * @param {() => boolean} isCounting whether elapsed time currently counts as watched
- * @param {(date: string, seconds: number) => Promise<unknown>} record persists watched seconds for a day
+ * @param {(date: string, seconds: number, retry: boolean) => Promise<unknown>} record persists watched seconds
+ *   for a day and resolves to `false` when the write failed. `retry` marks seconds that were already counted
+ *   once and are only written again.
  * @param {() => number} [now]
  */
 export function createWatchTimeTracker(isCounting, record, now = Date.now) {
@@ -16,11 +18,30 @@ export function createWatchTimeTracker(isCounting, record, now = Date.now) {
   let lastTick = null
   /** @type {Record<string, number>} */
   let pendingByDate = {}
+  // Time that was counted but failed to save.
+  /** @type {Record<string, number>} */
+  let unsavedByDate = {}
+  // Writes that fail after a clear() must not restore the cleared time.
+  let generation = 0
 
   function persistPending() {
-    const pending = Object.entries(pendingByDate)
+    const batches = [
+      ...Object.entries(pendingByDate).map(([date, milliseconds]) => ({ date, milliseconds, retry: false })),
+      ...Object.entries(unsavedByDate).map(([date, milliseconds]) => ({ date, milliseconds, retry: true })),
+    ]
     pendingByDate = {}
-    return Promise.all(pending.map(([date, milliseconds]) => record(date, milliseconds / 1000)))
+    unsavedByDate = {}
+    const written = generation
+    return Promise.all(batches.map(async ({ date, milliseconds, retry }) => {
+      if (await record(date, milliseconds / 1000, retry) === false && written === generation) {
+        unsavedByDate[date] = (unsavedByDate[date] ?? 0) + milliseconds
+      }
+    }))
+  }
+
+  /** @param {Record<string, number>} byDate */
+  function sum(byDate) {
+    return Object.values(byDate).reduce((total, milliseconds) => total + milliseconds, 0)
   }
 
   const tracker = {
@@ -28,7 +49,7 @@ export function createWatchTimeTracker(isCounting, record, now = Date.now) {
       return lastTick
     },
     get pendingMilliseconds() {
-      return Object.values(pendingByDate).reduce((total, milliseconds) => total + milliseconds, 0)
+      return sum(pendingByDate) + sum(unsavedByDate)
     },
     /** Call on every playback time update. */
     track() {
@@ -48,7 +69,8 @@ export function createWatchTimeTracker(isCounting, record, now = Date.now) {
       lastTick = time
 
       // Keep the baseline so continuous playback does not lose the next interval.
-      if (tracker.pendingMilliseconds >= FLUSH_THRESHOLD_MS) {
+      // Only new time triggers a write, so failed writes retry with the next batch instead of on every tick.
+      if (sum(pendingByDate) >= FLUSH_THRESHOLD_MS) {
         persistPending()
       }
     },
@@ -60,6 +82,8 @@ export function createWatchTimeTracker(isCounting, record, now = Date.now) {
     clear() {
       lastTick = null
       pendingByDate = {}
+      unsavedByDate = {}
+      generation++
     },
   }
 

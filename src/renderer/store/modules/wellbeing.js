@@ -120,14 +120,18 @@ const getters = {
 const actions = {
   /**
    * Counts played time for the limits and records it in the watch statistics when they are enabled.
-   * @param {{ date: string, seconds: number, isShort: boolean }} payload
+   * Resolves to `false` when the statistics failed to save, so the caller can retry with `retry` set.
+   * @param {{ date: string, seconds: number, isShort: boolean, retry?: boolean }} payload
    */
-  recordPlaybackTime({ commit, dispatch, state, rootGetters }, { date, seconds, isShort }) {
+  recordPlaybackTime({ commit, dispatch, state, rootGetters }, { date, seconds, isShort, retry = false }) {
     if (!Number.isFinite(seconds) || seconds <= 0) return
 
     const recorded = recordsWatchStats(rootGetters)
-    commit('addWellbeingPlayback', { date, seconds, isShort, recorded, now: Date.now() })
-    if (isShort) persist(state)
+    // A retry only writes the statistics again; the limits counted this time when it was played.
+    if (!retry) {
+      commit('addWellbeingPlayback', { date, seconds, isShort, recorded, now: Date.now() })
+      if (isShort) persist(state)
+    }
     return recorded ? dispatch('recordWatchTime', { date, seconds }) : undefined
   },
 

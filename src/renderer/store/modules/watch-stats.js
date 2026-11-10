@@ -56,8 +56,10 @@ const actions = {
     try {
       await DBWatchStatsHandlers.addWatchTime(date, seconds)
       commit('addWatchTime', { date, seconds })
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 
