@@ -585,6 +585,32 @@ export class TabNavigationService {
     }
   }
 
+  /**
+   * Updates the history entry of a Watch page that keeps playing behind
+   * browsing pages, so going back or returning opens the video it now plays.
+   *
+   * @param {string} tabId
+   * @param {number} historyIndex the entry the Watch page was left from
+   * @param {string} fullPath the route the retained Watch page plays
+   * @param {{ route?: import('vue-router').RouteLocationNormalized, title?: string }} update
+   */
+  updateRetainedWatchEntry(tabId, historyIndex, fullPath, { route, title }) {
+    const tab = this.store.getters.getTabById(tabId)
+    const entry = tab?.history[historyIndex]
+    // Later navigation can drop the entry, for example browsing on after Back.
+    if (!entry || historyIndex === tab.historyIndex || this.resolve(entry.route).fullPath !== fullPath) return
+    const history = tab.history.map(cloneHistoryEntry)
+    if (route) {
+      history[historyIndex] = { route: serializeResolvedRoute(route), title: route.fullPath, titlePending: true, scroll: { left: 0, top: 0 } }
+    }
+    if (typeof title === 'string' && title.length > 0) {
+      history[historyIndex].title = title
+      history[historyIndex].titlePending = false
+    }
+    this.store.commit('setTabNavigation', { tabId, route: tab.route, history, historyIndex: tab.historyIndex })
+    this.publishHistory(tabId)
+  }
+
   projectTitle(tabId) {
     const tab = this.store.getters.getTabById(tabId)
     if (tab) {

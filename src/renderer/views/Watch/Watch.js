@@ -290,6 +290,7 @@ export default defineComponent({
       startNextVideoInFullscreen: false,
       startNextVideoInFullwindow: false,
       startNextVideoInPip: false,
+      miniPlayerStartHeight: 0,
       nextVideoAutoPictureInPictureState: null,
       /** @type {import('../../components/ft-shaka-video-player/opentubex/dockedPanels').DockedPanel[]} */
       startNextVideoWithDockedPanels: [],
@@ -5017,6 +5018,15 @@ export default defineComponent({
     isCurrentlyPresented() {
       return this.isTabPresented == null || this.isTabPresented === true
     },
+    /**
+     * Whether the user can see this video: its tab is presented, or its player
+     * plays on in a mini player or Picture-in-Picture window.
+     *
+     * @returns {boolean}
+     */
+    isPlaybackPresented() {
+      return this.isCurrentlyPresented() || this.$refs.player?.presentedOutsideTab === true
+    },
 
     _saveWatchProgress() {
       if (!this.canSaveWatchProgress) { return }
@@ -5434,7 +5444,7 @@ export default defineComponent({
     },
 
     handlePlayerEnded: function (sleepTimerEnded = false) {
-      if (!this.isCurrentlyPresented()) {
+      if (!this.isPlaybackPresented()) {
         return
       }
       this.markAsWatchedIfFinished(this.videoLengthSeconds, true)
@@ -5452,7 +5462,7 @@ export default defineComponent({
     },
 
     handleVideoEnded: function () {
-      if (!this.isCurrentlyPresented()) {
+      if (!this.isPlaybackPresented()) {
         return
       }
       this.handleWatchProgressAutoSaveWhenProgressEnabled()
@@ -7002,10 +7012,12 @@ export default defineComponent({
     destroyPlayer: async function(player = this.$refs.player) {
       this.playerTeardownInProgress = true
       try {
+        const miniPlayerStartHeight = player.getMiniPlayerHandoffHeight?.() ?? 0
         const uiState = await player.destroyPlayer()
         this.startNextVideoInFullscreen = uiState.startNextVideoInFullscreen
         this.startNextVideoInFullwindow = uiState.startNextVideoInFullwindow
         this.startNextVideoInPip = uiState.startNextVideoInPip
+        this.miniPlayerStartHeight = miniPlayerStartHeight
         this.nextVideoAutoPictureInPictureState = uiState.autoPictureInPictureState
         this.startNextVideoWithDockedPanels = uiState.dockedPanels
       } finally {

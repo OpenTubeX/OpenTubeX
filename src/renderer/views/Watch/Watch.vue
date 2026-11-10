@@ -184,6 +184,7 @@
               :start-in-fullscreen="startNextVideoInFullscreen"
               :start-in-fullwindow="startNextVideoInFullwindow"
               :start-in-pip="startNextVideoInPip"
+              :mini-player-start-height="miniPlayerStartHeight"
               :auto-picture-in-picture-state="nextVideoAutoPictureInPictureState"
               :start-with-docked-panels="startNextVideoWithDockedPanels"
               :queue-available="$store.getters.getWatchQueueLength > 0 && (isFamilyFriendly !== false || !showFamilyFriendlyOnly)"

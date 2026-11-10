@@ -85,7 +85,9 @@ export function useAutoPictureInPicture({
     if (!autoPipEnabled.value || props.format === 'audio') return false
 
     const videoElement = video.value
-    return !!videoElement && !videoElement.ended && (!videoElement.paused || state.autoPipActive)
+    // An automatic PiP window stays open when its video pauses or ends, so the
+    // next video of a playlist or the queue starts in it as well.
+    return !!videoElement && (state.autoPipActive || (!videoElement.ended && !videoElement.paused))
   }
 
   function shouldAutoPipNow() {

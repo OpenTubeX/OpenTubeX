@@ -77,13 +77,14 @@ let pageScrollbarBlockEnd = 0
  *   getSeekRange: () => { start: number, end: number } | null | undefined,
  *   isActiveTab: import('vue').ComputedRef<boolean>,
  *   isPlayerSuspended?: import('vue').Ref<boolean> | null,
+ *   miniPlayerStartPending?: import('vue').Ref<boolean> | null,
  *   pictureInPictureActive: import('vue').Ref<boolean>,
- *   props: { format: string, videoId: string },
+ *   props: { format: string, videoId: string, miniPlayerStartHeight?: number },
  *   tabId?: string | null,
  *   video: import('vue').Ref<HTMLVideoElement | null>
  * }} options
  */
-export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindowEnabled, inlineSixteenByNine, getUi, getSeekRange, isActiveTab, isPlayerSuspended = null, pictureInPictureActive, props, tabId = null, video }) {
+export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindowEnabled, inlineSixteenByNine, getUi, getSeekRange, isActiveTab, isPlayerSuspended = null, miniPlayerStartPending = null, pictureInPictureActive, props, tabId = null, video }) {
   const watchNavigation = inject(watchNavigationKey, null)
   const playerSuspended = computed(() => isPlayerSuspended?.value === true)
   const scrollMiniVideoAspectRatio = ref(DEFAULT_ASPECT_RATIO)
@@ -202,7 +203,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   // The first click of a double-click on the video can reveal controls under
   // the pointer, so the second click lands on one of them.
   let scrollMiniClickStartedOnVideo = false
-  let lastKnownInlinePlayerHeight = 0
+  let lastKnownInlinePlayerHeight = props.miniPlayerStartHeight ?? 0
   /** @type {number | null} */
   let scrollMiniScrollFrame = null
 
@@ -521,6 +522,13 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     // Navigation hides the retained Watch view before it teleports the player.
     // The drag's original measurement remains valid during that handoff.
     if (inlineDrag) return Math.max(inlineDrag.from.height, inlineDrag.from.width * 9 / 16)
+    // A Watch view hidden behind browsing pages cannot measure its player when
+    // it docks again after Picture-in-Picture, and neither can a player that
+    // replaces the mini player of the previous video. Both keep its last
+    // inline size. Hidden tabs still cannot dock.
+    if (!container.value?.offsetWidth && (watchNavigation?.detached.value || miniPlayerStartPending?.value)) {
+      return lastKnownInlinePlayerHeight
+    }
     if (!scrollMiniPlayerActive.value) {
       const layoutHeight = getScrollMiniInlineLayoutHeight(container.value)
       if (layoutHeight >= SCROLL_MINI_MIN_INLINE_LAYOUT_HEIGHT) return layoutHeight
@@ -650,7 +658,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
       scrollMiniPlayerOnAllTabs.value &&
       canUseScrollMiniPlayerBase() &&
       ((store.getters.getKeepPlayingOnNavigation && watchNavigation?.detached.value) || watchNavigation?.minimized?.value ||
-        isCrossTabMiniPlayerOwner(crossTabMiniPlayerCandidate) || !videoElement.paused)
+        isCrossTabMiniPlayerOwner(crossTabMiniPlayerCandidate) || !videoElement.paused || miniPlayerStartPending?.value === true)
   }
 
   function canUseScrollMiniPlayer() {
@@ -1652,6 +1660,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
   let unregisterAndroidBackPlayer = null
   onMounted(() => {
+    // Take over the mini player of the player this one replaces.
+    if (miniPlayerStartPending?.value && !isActiveTab.value) markCrossTabMiniPlayerInactive(crossTabMiniPlayerCandidate)
     const sideNav = document.querySelector('.sideNav')
     const tabBar = document.querySelector('.tabBar')
     if (sideNav || tabBar) {

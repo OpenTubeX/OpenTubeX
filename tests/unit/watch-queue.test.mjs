@@ -209,18 +209,21 @@ test('queued downloads explicitly start after loading even when general autoplay
     videoId: 'previous',
     tabRoute: { fullPath: '/watch/previous', query: { downloadId: '42' } },
     isCurrentlyPresented: () => true,
+    isPlaybackPresented: () => true,
   }
   watch.playNextQueuedVideo()
   watch.videoId = 'saved'
-  const autoplay = active => runInNewContext(autoplaySource + '\nautoplayVideos.value', {
+  const autoplay = (active, presentedOutsideTab = false) => runInNewContext(autoplaySource + '\nautoplayVideos.value', {
     computed,
     suppressInitialAutoplay: false,
     autoplayRequested: { value: watch.queuedPlaybackVideoId === watch.videoId },
     store: watch.$store,
     isActiveTab: { value: active },
+    presentedOutsideTab: { value: presentedOutsideTab },
   })
   assert.equal(autoplay(true), true, 'the next queued file starts without enabling general autoplay')
   assert.equal(autoplay(false), false, 'a hidden tab must not start playing')
+  assert.equal(autoplay(false, true), true, 'the mini player of a hidden Watch page starts the next queued file')
   await watch.handleVideoLoaded({ duration: 4 })
   assert.equal(watch.queuedPlaybackVideoId, null, 'the start request is consumed for later visits')
 })
@@ -311,6 +314,7 @@ test('an explicit queue request starts a SABR replacement without re-enabling pr
   const autoplay = runInNewContext(autoplaySource + '\nautoplayVideos', {
     autoplayRequested,
     isActiveTab,
+    presentedOutsideTab: { value: false },
     computed,
     suppressInitialAutoplay: true,
     store: { getters: { getAutoplayVideos: true } },
