@@ -486,6 +486,7 @@
   border-radius: calc(15px * var(--ui-roundness));
   color: #fff;
   font-size: 13px;
+  line-height: 17px;
   font-weight: bold;
   font-family: var(--app-font-family);
   text-align: center;
@@ -496,11 +497,11 @@
   pointer-events: none;
   z-index: 11;
 
-  /* Three lines at most, so tall titles stay inside short players */
+  /* Three lines at most, fewer when the player is too short; set from JS */
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
+  -webkit-line-clamp: var(--ft-chapter-preview-lines, 3);
+  line-clamp: var(--ft-chapter-preview-lines, 3);
 }
 
 /* added to the body element, and appPlayerFullWindow to <html> */

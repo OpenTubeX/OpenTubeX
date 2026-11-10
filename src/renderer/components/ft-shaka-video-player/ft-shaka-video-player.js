@@ -219,6 +219,9 @@ const FULL_WINDOW_ANIMATION_DURATION_MS = 400
 const HTTP_IN_HEX = 0x68747470
 
 const USE_OVERFLOW_MENU_WIDTH_THRESHOLD = 634
+// Match the line-height and vertical padding of .ft-chapter-preview
+const CHAPTER_PREVIEW_LINE_HEIGHT = 17
+const CHAPTER_PREVIEW_PADDING_BLOCK = 12
 const TEMPORARY_PLAYBACK_RATE_KEYBOARD_SOURCE = 'keyboard'
 const TEMPORARY_PLAYBACK_RATE_POINTER_SOURCE = 'pointer'
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg'
@@ -3954,6 +3957,11 @@ export default defineComponent({
         bottomPx = seekBarContainer.offsetHeight + 8
       }
       chapterPreview.style.bottom = `${bottomPx}px`
+
+      // The player clips its overflow, so short players get fewer than three lines.
+      const spaceAbove = chapterPreview.getBoundingClientRect().bottom - playerRect.top - 4
+      const lines = Math.floor((spaceAbove - CHAPTER_PREVIEW_PADDING_BLOCK) / CHAPTER_PREVIEW_LINE_HEIGHT)
+      chapterPreview.style.setProperty('--ft-chapter-preview-lines', `${Math.max(1, Math.min(3, lines))}`)
 
       const previewWidth = chapterPreview.offsetWidth
       const minX = previewWidth / 2
