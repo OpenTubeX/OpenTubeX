@@ -2246,7 +2246,7 @@ Tooltips:
     Rewind on Resume: "Sare înapoi cu atâtea secunde când reiei un videoclip pus pe pauză, ca să poți revedea ultimele momente. Setează la 0 pentru a dezactiva."
     Minimum Pause Before Rewinding: "Derulează înapoi doar dacă videoclipul a fost pe pauză cel puțin atât timp. Setează la 0 pentru a derula după fiecare pauză."
     Mono Audio: 'Redă canalele audio stânga și dreapta în ambele urechi. Folosește această opțiune când sunetul unui videoclip se aude doar într-o parte a căștilor.'
-    Normalize Loudness: 'Reduce volumul videoclipurilor mai puternice decât majoritatea, astfel încât volumul să nu sară între videoclipuri. Videoclipurile încete își păstrează volumul. Funcționează doar pentru videoclipurile încărcate prin API-ul local.'
+    Normalize Loudness: 'Reduce volumul videoclipurilor mai puternice decât majoritatea, astfel încât volumul să nu sară între videoclipuri. Videoclipurile cu volum redus își păstrează volumul. Funcționează doar pentru videoclipurile încărcate prin API-ul local.'
     Pause on Stream Recovery: "Când fluxul video eșuează și playerul îl reîncarcă sau trece la alt format sau motor, redarea este pusă pe pauză, iar eroarea rămâne în partea de sus a playerului până când o închizi. Când este dezactivat, redarea continuă, iar eroarea apare pentru scurt timp ca notificare."
     Continue Playback When Screen Is Locked: 'Menține redarea audio în fundal și oferă comenzi media Android. Dezactivează pentru a întrerupe redarea când aplicația nu mai este vizibilă.'
     Enable Caption Translations: Când opțiunea este activată, butonul de subtitrări și comanda rapidă C preferă o pistă tradusă automat în limba preferată dacă videoclipul nu oferă o pistă originală corespunzătoare.
