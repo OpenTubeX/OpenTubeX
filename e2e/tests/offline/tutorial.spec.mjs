@@ -1,4 +1,7 @@
 import { test, expect, setWindowSize } from '../../helpers/app.mjs'
+import { openMockedVideo } from '../../helpers/player.mjs'
+import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
+import { WATCH_PAGE_SEED } from '../../helpers/watch-page.mjs'
 
 test.use({ showTutorial: true })
 
@@ -388,6 +391,21 @@ test('repositions the navigation highlight after crossing the mobile breakpoint'
 
   await setWindowSize(app, page, { width: 1000, height: 800 })
   await expectHighlightCenteredOn(page, '[data-tutorial="navigation"]')
+})
+
+test.describe('watch pages that hide the side bar', () => {
+  test.use({ seed: { settings: { ...WATCH_PAGE_SEED, hideSideBarOnWatchPages: true, tabBarPosition: 'left' } } })
+
+  test('point the navigation step at the menu button', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page, undefined, { waitForPlayback: false })
+    // The closed side bar slides behind the vertical tab bar and must not stay focusable there
+    await expect(page.locator('.app')).toHaveClass(/watchSideNavOverlay/)
+    await expect(page.locator('.sideNav')).toBeHidden()
+
+    await page.evaluate(() => window.$store.commit('setTutorialStep', 3))
+    await expectHighlightCenteredOn(page, '.menuButton')
+  })
 })
 
 test.describe('fresh profile relaunch', () => {

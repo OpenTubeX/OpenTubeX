@@ -258,7 +258,8 @@ const steps = computed(() => [
     icon: ['fas', 'rss'],
     title: t('Tutorial.Navigation.Title'),
     description: t('Tutorial.Navigation.Description'),
-    target: '[data-tutorial="navigation"]'
+    // Watch pages can slide the side bar out of view; the menu button opens it there
+    target: ['[data-tutorial="navigation"]', '[data-tutorial="navigation-toggle"]']
   },
   {
     id: 'search',
@@ -427,16 +428,29 @@ function observeTarget(target) {
   }
 }
 
+/**
+ * Whether the element takes up space and isn't hidden, like the side bar that watch pages slide out of view
+ * @param {Element} element
+ */
+function isTargetVisible(element) {
+  const rect = element.getBoundingClientRect()
+  return rect.width > 0 && rect.height > 0 && element.checkVisibility?.({ visibilityProperty: true }) !== false
+}
+
+/** Returns the first visible match, trying the step's selectors in priority order */
+function findTarget(selectors) {
+  for (const selector of [selectors].flat()) {
+    const target = Array.from(document.querySelectorAll(selector)).find(isTargetVisible)
+    if (target) return target
+  }
+  return null
+}
+
 async function updatePosition() {
-  const target = step.value.target === null
-    ? null
-    : Array.from(document.querySelectorAll(step.value.target)).find(element => {
-        const rect = element.getBoundingClientRect()
-        return rect.width > 0 && rect.height > 0
-      })
+  const target = step.value.target === null ? null : findTarget(step.value.target)
   observeTarget(target)
   const rect = target?.getBoundingClientRect()
-  targetRect.value = rect && rect.width > 0 && rect.height > 0
+  targetRect.value = rect
     ? {
         top: rect.top,
         left: rect.left,
