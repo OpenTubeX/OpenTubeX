@@ -39,7 +39,7 @@ public class NavigationResponsivenessTest {
                 "document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getActiveTab?.loadState === 'loaded'");
             TutorialTestHelper.dismissIfPending(view);
             evaluate(view, "document.querySelector('.sideNav .inner > a[href=\"#/userplaylists\"]').click()");
-            await(view, "!!document.querySelector('.newPlaylistButton')");
+            await(view, "!!document.querySelector('.pageTitle + .headingActions .headingIconButton')");
             evaluate(view, """
                 (() => {
                     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
@@ -78,7 +78,7 @@ public class NavigationResponsivenessTest {
                 })()
                 """);
             try {
-                await(view, "!!document.querySelector('.newPlaylistButton')");
+                await(view, "!!document.querySelector('.pageTitle + .headingActions .headingIconButton')");
                 if (route.equals("home")) {
                     evaluate(view, """
                         window.navigationHomeOverflow = false;
@@ -95,7 +95,7 @@ public class NavigationResponsivenessTest {
                 tap(view, route);
                 await(view, "!!document.querySelector('" + contentSelector + "')");
                 evaluate(view, "document.querySelector('.sideNav .inner > a[href=\"#/userplaylists\"]').click()");
-                await(view, "!!document.querySelector('.newPlaylistButton')");
+                await(view, "!!document.querySelector('.pageTitle + .headingActions .headingIconButton')");
                 evaluate(view, String.format("""
                     window.navigationContentSelector = '%s';
                     window.navigationSort = Array.prototype.sort;
