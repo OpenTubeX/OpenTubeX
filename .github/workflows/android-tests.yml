@@ -92,11 +92,12 @@ jobs:
         disk-size: 6G
         # Several tests check WebView and system animations.
         disable-animations: false
-        emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu swangle_indirect
-        script: >-
-          ./android/gradlew --project-dir android :app:connectedDebugAndroidTest -PtestAbi=x86_64
-          -Pandroid.testInstrumentationRunnerArguments.numShards=3
-          -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }}
+        emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu swangle
+        # Gradle can report success after the emulator has crashed and skipped
+        # the remaining tests, so require it to still be running.
+        script: |
+          ./android/gradlew --project-dir android :app:connectedDebugAndroidTest -PtestAbi=x86_64 -Pandroid.testInstrumentationRunnerArguments.numShards=3 -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }}
+          adb get-state
 
     - name: Upload test reports
       if: ${{ !cancelled() }}
