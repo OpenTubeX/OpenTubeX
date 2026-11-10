@@ -53,6 +53,7 @@ public class StartupBackgroundTest {
         }) {
             try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
                 AtomicReference<WebView> reference = new AtomicReference<>();
+                ActivityRecreation<MainActivity> recreation = new ActivityRecreation<>(scenario, MainActivity.class);
                 scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
                 WebView view = reference.get();
                 awaitReady(view);
@@ -72,10 +73,10 @@ public class StartupBackgroundTest {
                     assertEquals("The selected theme reaches the native launch cache", expectedColor, StartupBackground.getColor(context));
                     // Recreate the native window, then hold the real packaged page at
                     // its pre-renderer state. No splash covers the measured surface.
-                    scenario.recreate();
+                    recreation.recreate();
                     CountDownLatch rendererRequested = new CountDownLatch(1);
                     CountDownLatch blankLoaded = new CountDownLatch(1);
-                    scenario.onActivity(activity -> {
+                    recreation.onActivity(activity -> {
                         WebView nextView = activity.getBridge().getWebView();
                         reference.set(nextView);
                         activity.getBridge().setWebViewClient(new OpenTubeXWebViewClient(activity.getBridge()) {
@@ -102,13 +103,13 @@ public class StartupBackgroundTest {
                         nextView.loadUrl("about:blank");
                     });
                     assertTrue("The previous page is left", blankLoaded.await(10, TimeUnit.SECONDS));
-                    scenario.onActivity(activity -> activity.getBridge().getWebView().loadUrl("https://localhost/"));
+                    recreation.onActivity(activity -> activity.getBridge().getWebView().loadUrl("https://localhost/"));
                     view = reference.get();
                     assertTrue("The real renderer request is intercepted", rendererRequested.await(10, TimeUnit.SECONDS));
                     awaitCondition(view, "!!document.querySelector('#app') && !document.querySelector('#app').__vue_app__ && !document.querySelector('#startup-splash')");
                     CountDownLatch painted = new CountDownLatch(1);
                     WebView pausedView = view;
-                    scenario.onActivity(activity -> pausedView.postVisualStateCallback(1, new WebView.VisualStateCallback() {
+                    recreation.onActivity(activity -> pausedView.postVisualStateCallback(1, new WebView.VisualStateCallback() {
                         @Override public void onComplete(long requestId) {
                             pausedView.postOnAnimation(() -> pausedView.postOnAnimation(painted::countDown));
                         }
@@ -117,7 +118,7 @@ public class StartupBackgroundTest {
                     Bitmap screenshot = InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
                     // Says whether something else covered the app when the colors differ.
                     java.util.concurrent.atomic.AtomicBoolean focused = new java.util.concurrent.atomic.AtomicBoolean();
-                    scenario.onActivity(activity -> focused.set(activity.hasWindowFocus()));
+                    recreation.onActivity(activity -> focused.set(activity.hasWindowFocus()));
                     String screen = String.format(java.util.Locale.ROOT, " (focused %b, top #%06x, bottom #%06x)", focused.get(),
                         screenshot.getPixel(screenshot.getWidth() / 2, screenshot.getHeight() / 8) & 0xffffff,
                         screenshot.getPixel(screenshot.getWidth() / 2, screenshot.getHeight() * 7 / 8) & 0xffffff);
@@ -128,7 +129,7 @@ public class StartupBackgroundTest {
                     // A reload leaves the previous document usable briefly.
                     // Wait for the replacement before restoring persisted settings.
                     evaluate(view, "window.__startupPreviousDocument = true");
-                    scenario.onActivity(activity -> {
+                    recreation.onActivity(activity -> {
                         activity.getBridge().setWebViewClient(new OpenTubeXWebViewClient(activity.getBridge()));
                         activity.getBridge().getWebView().reload();
                     });
@@ -140,6 +141,7 @@ public class StartupBackgroundTest {
                     evaluate(view, "Promise.all([" + store + ".dispatch('updateHideStartupSplash', " + originalHideSplash + "), " +
                         store + ".dispatch('updateBaseTheme', " + originalTheme + ")]).then(() => window.__startupThemeRestored = true)");
                     awaitCondition(view, "window.__startupThemeRestored === true");
+                    recreation.finish();
                 }
             }
         }

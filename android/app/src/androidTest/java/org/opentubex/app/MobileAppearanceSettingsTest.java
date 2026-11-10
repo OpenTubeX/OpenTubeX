@@ -229,7 +229,7 @@ public class MobileAppearanceSettingsTest {
                     """);
                 for (boolean enabled : new boolean[] {false, true, false}) {
                     evaluate(view, store + ".commit('setAlwaysShowScrollbars', " + enabled + ")");
-                    awaitScrollbarFading(scenario, view, !enabled);
+                    awaitScrollbarFading(view, !enabled);
                     WebView currentView = view;
                     scenario.onActivity(activity -> {
                         assertTrue("The native page scrollbar stays enabled", currentView.isVerticalScrollBarEnabled());
@@ -244,13 +244,17 @@ public class MobileAppearanceSettingsTest {
                 evaluate(view, "window.scrollTo(0, 1500)");
                 awaitCondition(view, "window.scrollY >= 1499");
                 evaluate(view, store + ".commit('setAlwaysShowScrollbars', true)");
-                awaitScrollbarFading(scenario, view, false);
+                awaitScrollbarFading(view, false);
                 assertIdlePageScrollbar(scenario, view, true);
                 evaluate(view, store + ".dispatch('updateAlwaysShowScrollbars', true).then(() => window.__scrollbarSettingSaved = true)");
                 awaitCondition(view, "window.__scrollbarSettingSaved === true");
-                scenario.recreate();
-                view = webView(scenario);
-                awaitScrollbarFading(scenario, view, false);
+                ActivityRecreation<MainActivity> recreation = new ActivityRecreation<>(scenario, MainActivity.class);
+                recreation.recreate();
+                AtomicReference<WebView> recreatedView = new AtomicReference<>();
+                recreation.onActivity(activity -> recreatedView.set(activity.getBridge().getWebView()));
+                view = recreatedView.get();
+                awaitCondition(view, "!!document.querySelector('#app')?.__vue_app__?.config.globalProperties.$store && !!document.querySelector('.profileTrigger')");
+                awaitScrollbarFading(view, false);
             } finally {
                 evaluate(view, "document.querySelector('#native-scrollbar-test-style')?.remove(); document.querySelector('#native-scrollbar-test-content')?.remove(); window.scrollTo(0, 0)");
                 evaluate(view, store + ".dispatch('updateAlwaysShowScrollbars', " + saved + ").then(() => window.__scrollbarSettingRestored = true)");
@@ -260,12 +264,11 @@ public class MobileAppearanceSettingsTest {
         }
     }
 
-    private static void awaitScrollbarFading(ActivityScenario<MainActivity> scenario, WebView view,
-        boolean expected) throws Exception {
+    private static void awaitScrollbarFading(WebView view, boolean expected) throws Exception {
         long deadline = SystemClock.uptimeMillis() + 15000;
         AtomicReference<Boolean> fading = new AtomicReference<>();
         while (SystemClock.uptimeMillis() < deadline) {
-            scenario.onActivity(activity -> fading.set(view.isScrollbarFadingEnabled()));
+            InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> fading.set(view.isScrollbarFadingEnabled()));
             if (Boolean.valueOf(expected).equals(fading.get())) return;
             Thread.sleep(100);
         }
