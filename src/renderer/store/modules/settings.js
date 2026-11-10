@@ -1323,6 +1323,14 @@ const customActions = {
             commit('applyHistorySyncChanges', data)
             break
 
+          case SyncEvents.HISTORY.UNSET_PLAYLIST_FOR_VIDEOS:
+            commit('unsetRecordsLastViewedPlaylistIdInHistoryCache', data)
+            break
+
+          case SyncEvents.HISTORY.UNSET_PLAYLISTS:
+            commit('unsetRecordsLastViewedPlaylistIdsInHistoryCache', data)
+            break
+
           case SyncEvents.GENERAL.DELETE:
             commit('removeFromHistoryCacheById', data)
             break
