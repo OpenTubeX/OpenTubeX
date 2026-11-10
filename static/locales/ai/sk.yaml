@@ -225,6 +225,8 @@ Feed:
   Cancel Refresh: Zrušiť obnovenie
   Next Auto Refresh: 'Ďalšie automatické obnovenie: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'Obnoviť uložené zoznamy skladieb'
+  Saved Playlists Refresh Failed: 'Niektoré uložené zoznamy skladieb sa nepodarilo obnoviť.'
   Save: "Uložiť"
   Edit: "Upraviť"
   Pin to Navigation: "Pripnúť do navigácie"

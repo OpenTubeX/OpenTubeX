@@ -225,6 +225,8 @@ Feed:
   Cancel Refresh: 更新をキャンセル
   Next Auto Refresh: '次回の自動更新: {date}'
 User Playlists:
+  Refresh Saved Playlists: '保存した再生リストを更新'
+  Saved Playlists Refresh Failed: '一部の保存した再生リストを更新できませんでした。'
   Save: "保存"
   Edit: "編集"
   Pin to Navigation: "ナビゲーションに固定"

@@ -229,6 +229,8 @@ Feed:
   Cancel Refresh: Откажи освежавање
   Next Auto Refresh: 'Следеће аутоматско освежавање: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'Освежи сачуване плејлисте'
+  Saved Playlists Refresh Failed: 'Неке сачуване плејлисте није било могуће освежити.'
   Save: "Сачувај"
   Edit: "Измени"
   This playlist is private or does not exist.: "Ова плејлиста је приватна или не постоји."

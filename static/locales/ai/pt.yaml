@@ -225,6 +225,8 @@ Feed:
   Cancel Refresh: Cancelar atualização
   Next Auto Refresh: 'Próxima atualização automática: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'Atualizar listas de reprodução guardadas'
+  Saved Playlists Refresh Failed: 'Não foi possível atualizar algumas listas de reprodução guardadas.'
   Save: "Guardar"
   Edit: "Editar"
   Pin to Navigation: "Afixar na navegação"

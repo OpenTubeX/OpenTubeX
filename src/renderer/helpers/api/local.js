@@ -164,6 +164,18 @@ export async function getLocalPlaylist(id, signal) {
 }
 
 /**
+ * Playlists without an author link name their channel in the subtitle.
+ * @param {import('youtubei.js').YT.Playlist['info']} info
+ */
+export function getLocalPlaylistChannelName(info) {
+  if (info.author) return info.author.name
+
+  const subtitle = info.subtitle?.toString()
+  if (!subtitle) return ''
+  return subtitle.substring(0, subtitle.lastIndexOf('•')).trim()
+}
+
+/**
  * @typedef {object} SerializedContinuation
  * @property {import('youtubei.js').Context} context
  * @property {string} path

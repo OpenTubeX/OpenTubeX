@@ -21,15 +21,24 @@
               v-if="repairPlaylists.length > 0 || playlistRepairState.running"
               ref="repairAction"
               :label="t('User Playlists.Repair Playlists')"
-              :icon="['fas', 'sync']"
+              :icon="['fas', 'wrench']"
               :disabled="metadataRepairBusy"
               @click="showRepairPrompt = true"
+            />
+            <!-- While a refresh runs, the same button cancels it -->
+            <FtIconButton
+              v-if="hasPlaylistBookmarks"
+              :title="playlistBookmarkRefreshState.running ? t('Feed.Cancel Refresh') : refreshPlaylistBookmarksTitle"
+              :icon="playlistBookmarkRefreshState.running ? ['fas', 'xmark'] : ['fas', 'sync']"
+              theme="secondary"
+              class="headingIconButton"
+              @click="toggleBookmarkRefresh"
             />
             <FtIconButton
               :title="$t('User Playlists.Create New Playlist')"
               :icon="['fas', 'plus']"
               theme="secondary"
-              class="newPlaylistButton"
+              class="headingIconButton"
               @click="createNewPlaylist"
             />
           </div>
@@ -81,7 +90,7 @@
             aria-live="polite"
           >
             <FtIcon
-              :icon="['fas', 'sync']"
+              :icon="['fas', 'wrench']"
               aria-hidden="true"
             />
             {{ repairPhaseLabel }}
@@ -185,7 +194,7 @@
             class="repairPromptTitle"
           >
             <FtIcon
-              :icon="['fas', 'sync']"
+              :icon="['fas', 'wrench']"
               class="headingIcon"
               aria-hidden="true"
             />
@@ -234,7 +243,7 @@
             />
             <FtButton
               :label="t('History.Start Repair')"
-              :icon="['fas', 'sync']"
+              :icon="['fas', 'wrench']"
               background-color="var(--primary-color)"
               text-color="var(--text-with-main-color)"
               :disabled="selectedPlaylistIds.length === 0 || metadataRepairBusy"
@@ -269,15 +278,18 @@ import store from '../../store/index'
 import { playlistRepairRecords } from '../../../playlistRepair'
 import { metadataRepairBusy, repairCookiesConfigured } from '../../helpers/historyRepair'
 import { playlistRepairState, startPlaylistRepair, cancelPlaylistRepair } from '../../helpers/playlistRepair'
+import { cancelPlaylistBookmarkRefresh, playlistBookmarkRefreshState, refreshPlaylistBookmarks } from '../../helpers/playlistBookmarkRefresh'
+import { getConfiguredKeyboardShortcuts } from '../../../constants'
 
-import { ctrlFHandler, debounce, getIconForSortPreference } from '../../helpers/utils'
+import { addKeyboardShortcutToActionTitle, ctrlFHandler, debounce, getIconForSortPreference, showToast } from '../../helpers/utils'
 import { isValidPlaylistBookmark, playlistBookmarkToListData } from '../../helpers/playlist-bookmarks'
 import { playlistKey, sortUserPlaylists, USER_PLAYLISTS_SORT_BY_OPTIONS as SORT_BY_OPTIONS } from '../../helpers/playlists'
-import { useTabContext } from '../../tabs/TabContext'
+import { useTabContext, useTabLifecycle } from '../../tabs/TabContext'
 import { droppedIndex, useGridReorder } from '../../composables/useGridReorder'
+import { useFeedRefreshShortcut } from '../../composables/useFeedRefreshShortcut'
 
 const { locale, t } = useI18n()
-const { tabId } = useTabContext()
+const { tabId, isTabPresented } = useTabContext()
 const dataLimitStorageKey = tabId ? `UserPlaylists/${tabId}/dataLimit` : 'UserPlaylists/dataLimit'
 
 const sessionDataLimit = sessionStorage.getItem(dataLimitStorageKey)
@@ -343,6 +355,43 @@ const allPlaylists = computed(() => {
     cachedCollator.value,
     store.getters.getUserPlaylistsPinnedIds
   )
+})
+
+const hasPlaylistBookmarks = computed(() => store.getters.getPlaylistBookmarks.some(isValidPlaylistBookmark))
+
+const refreshPlaylistBookmarksTitle = computed(() => addKeyboardShortcutToActionTitle(
+  t('User Playlists.Refresh Saved Playlists'),
+  getConfiguredKeyboardShortcuts(store.getters.getKeyboardShortcuts).APP.SITUATIONAL.REFRESH
+))
+
+async function refreshBookmarks() {
+  const result = await refreshPlaylistBookmarks()
+  if (result?.failed > 0) {
+    showToast({
+      message: t('User Playlists.Saved Playlists Refresh Failed'),
+      icon: ['fas', 'circle-exclamation'],
+    })
+  }
+}
+
+function toggleBookmarkRefresh() {
+  if (playlistBookmarkRefreshState.running) {
+    cancelPlaylistBookmarkRefresh()
+  } else {
+    refreshBookmarks()
+  }
+}
+
+const canRefreshBookmarks = () => hasPlaylistBookmarks.value && !playlistBookmarkRefreshState.running
+useFeedRefreshShortcut(canRefreshBookmarks, refreshBookmarks)
+useTabLifecycle({
+  // Without saved playlists, pulling reloads the tab as on other pages
+  async pullToRefresh(request) {
+    if ((isTabPresented && !isTabPresented.value) || !hasPlaylistBookmarks.value) return
+    request.handled = true
+    // Keep the pull indicator until the refresh finishes
+    if (!playlistBookmarkRefreshState.running) await refreshBookmarks()
+  }
 })
 
 // Lets the playlist cards on this page offer pinning to the top.

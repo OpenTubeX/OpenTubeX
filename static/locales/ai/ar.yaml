@@ -227,6 +227,8 @@ Feed:
   Cancel Refresh: إلغاء التحديث
   Next Auto Refresh: 'التحديث التلقائي التالي: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'تحديث قوائم التشغيل المحفوظة'
+  Saved Playlists Refresh Failed: 'تعذّر تحديث بعض قوائم التشغيل المحفوظة.'
   Save: "حفظ"
   Edit: "تعديل"
   This playlist is private or does not exist.: "قائمة التشغيل هذه خاصة أو غير موجودة."

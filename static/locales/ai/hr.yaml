@@ -227,6 +227,8 @@ Feed:
   Cancel Refresh: Otkaži osvježavanje
   Next Auto Refresh: 'Sljedeće automatsko osvježavanje: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'Osvježi spremljene popise za reprodukciju'
+  Saved Playlists Refresh Failed: 'Neke spremljene popise za reprodukciju nije bilo moguće osvježiti.'
   Save: "Spremi"
   Edit: "Uredi"
   This playlist is private or does not exist.: "Ovaj popis za reprodukciju je privatan ili ne postoji."

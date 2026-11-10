@@ -4,8 +4,10 @@ import test from 'node:test'
 import {
   createPlaylistBookmark,
   mergePlaylistBookmarkConflict,
+  parseLocalPlaylistLastUpdated,
   playlistBookmarkForSync,
   playlistBookmarkToListData,
+  updatePlaylistBookmarkMetadata,
 } from '../../src/renderer/helpers/playlist-bookmarks.js'
 
 function bookmark (id, savedAt = 123) {
@@ -60,4 +62,39 @@ test('preserves playlist bookmark deletions during an encrypted sync conflict re
     local: [unchanged],
     remote: [deleted, remoteChanged, remoteAdded],
   }), [remoteChanged, remoteAdded])
+})
+
+test('parses the update date of YouTube playlist headers as a local day', (t) => {
+  t.mock.timers.enable({ apis: ['Date'], now: new Date(2026, 10, 10, 15, 30).getTime() })
+
+  assert.equal(parseLocalPlaylistLastUpdated('Last updated on Jun 17, 2014'), new Date(2014, 5, 17).getTime())
+  assert.equal(parseLocalPlaylistLastUpdated('Updated today'), new Date(2026, 10, 10).getTime())
+  assert.equal(parseLocalPlaylistLastUpdated('Updated yesterday'), new Date(2026, 10, 9).getTime())
+  assert.equal(parseLocalPlaylistLastUpdated('Updated 3 days ago'), new Date(2026, 10, 7).getTime())
+  assert.equal(parseLocalPlaylistLastUpdated('No views'), null)
+  assert.equal(parseLocalPlaylistLastUpdated(undefined), null)
+})
+
+test('sorts saved playlists by the channel update date without syncing it', () => {
+  const saved = bookmark('updated')
+  const metadata = {
+    title: saved.playlist.title,
+    description: saved.playlist.description,
+    thumbnailUrl: saved.playlist.thumbnail_url,
+    videoCount: 5,
+    uploaderId: saved.uploader.id,
+    uploaderName: saved.uploader.name,
+    uploaderAvatar: saved.uploader.avatar,
+    updatedAt: 456,
+  }
+
+  const updated = updatePlaylistBookmarkMetadata(saved, metadata)
+  assert.equal(updated.playlist.video_count, 5)
+  assert.equal(playlistBookmarkToListData(updated).lastUpdatedAt, 456)
+  assert.equal(playlistBookmarkToListData(updated).createdAt, 123)
+  assert.deepEqual(playlistBookmarkForSync(updated), playlistBookmarkForSync({ ...saved, playlist: updated.playlist }))
+
+  // Refreshing without changes or an update date keeps the saved entry as is
+  assert.equal(updatePlaylistBookmarkMetadata(updated, metadata), updated)
+  assert.equal(updatePlaylistBookmarkMetadata(updated, { ...metadata, updatedAt: null }), updated)
 })

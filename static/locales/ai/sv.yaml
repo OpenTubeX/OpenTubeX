@@ -225,6 +225,8 @@ Feed:
   Cancel Refresh: Avbryt uppdatering
   Next Auto Refresh: 'Nästa automatiska uppdatering: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'Uppdatera sparade spellistor'
+  Saved Playlists Refresh Failed: 'Vissa sparade spellistor kunde inte uppdateras.'
   Save: "Spara"
   Edit: "Redigera"
   Pin to Navigation: "Fäst i navigeringen"

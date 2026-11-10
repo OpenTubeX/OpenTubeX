@@ -1,3 +1,5 @@
+import { calculatePublishedDate } from './feed-metadata.js'
+
 const YOUTUBE_THUMBNAIL_ORIGIN = 'https://i.ytimg.com'
 const YOUTUBE_AVATAR_ORIGIN = 'https://yt3.googleusercontent.com'
 
@@ -34,9 +36,10 @@ export function createPlaylistBookmark({
   uploaderName,
   uploaderAvatar = null,
   uploaderVerified = false,
+  updatedAt = null,
   savedAt = Date.now(),
 }) {
-  return {
+  const bookmark = {
     playlist: {
       id,
       title,
@@ -52,6 +55,72 @@ export function createPlaylistBookmark({
     },
     savedAt,
   }
+  if (Number.isFinite(updatedAt)) bookmark.updatedAt = updatedAt
+  return bookmark
+}
+
+/**
+ * Applies freshly loaded playlist metadata to a saved playlist.
+ * `updatedAt` is when the channel last changed the playlist. It stays local,
+ * as sync only sends the `playlist` and `uploader` metadata.
+ * @param {any} bookmark
+ * @param {{ title: string, description: string, thumbnailUrl: string | null, videoCount: number,
+ *   uploaderId: string, uploaderName: string, uploaderAvatar: string | null, updatedAt: number | null }} metadata
+ * @returns {any} the same bookmark when nothing changed
+ */
+export function updatePlaylistBookmarkMetadata(bookmark, metadata) {
+  const updated = {
+    ...bookmark,
+    playlist: {
+      ...bookmark.playlist,
+      title: metadata.title,
+      description: metadata.description ?? '',
+      thumbnail_url: canonicalPlaylistThumbnailUrl(metadata.thumbnailUrl),
+      video_count: Number.isFinite(metadata.videoCount) ? metadata.videoCount : null,
+    },
+    uploader: {
+      ...bookmark.uploader,
+      id: metadata.uploaderId,
+      name: metadata.uploaderName,
+      avatar: canonicalChannelAvatarUrl(metadata.uploaderAvatar),
+    },
+  }
+  if (Number.isFinite(metadata.updatedAt)) updated.updatedAt = metadata.updatedAt
+  return JSON.stringify(updated) === JSON.stringify(bookmark) ? bookmark : updated
+}
+
+const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+const LAST_UPDATED_ON_REGEX = /\b([a-z]{3})[a-z]*\.?\s+(\d{1,2}),\s+(\d{4})\b/i
+
+/**
+ * Parses the English update text of a YouTube playlist, such as
+ * "Last updated on Jun 17, 2014", "Updated today" or "Updated 3 days ago".
+ * The text names a day, so this returns the start of that local day, which
+ * stays the same however often the playlist is refreshed that day.
+ * @param {unknown} text
+ * @returns {number | null}
+ */
+export function parseLocalPlaylistLastUpdated(text) {
+  if (typeof text !== 'string') return null
+
+  let date
+  if (/\btoday\b/i.test(text)) {
+    date = new Date()
+  } else if (/\byesterday\b/i.test(text)) {
+    date = new Date()
+    date.setDate(date.getDate() - 1)
+  } else if (/\bago\b/i.test(text)) {
+    const published = calculatePublishedDate(text)
+    if (published === undefined) return null
+    date = new Date(published)
+  } else {
+    const match = text.match(LAST_UPDATED_ON_REGEX)
+    const month = match ? MONTHS.indexOf(match[1].toLowerCase()) : -1
+    if (month === -1) return null
+    date = new Date(Number(match[3]), month, Number(match[2]))
+  }
+
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
 }
 
 export function isValidPlaylistBookmark(bookmark) {
@@ -79,7 +148,8 @@ export function playlistBookmarkToListData(bookmark) {
     authorThumbnails: uploader.avatar ? [{ url: uploader.avatar }] : [],
     videoCount: Number.isFinite(playlist.video_count) ? playlist.video_count : 0,
     createdAt: savedAt,
-    lastUpdatedAt: savedAt,
+    // Sort saved playlists by the channel's last change once it is known
+    lastUpdatedAt: Number.isFinite(bookmark.updatedAt) ? bookmark.updatedAt : savedAt,
     videos: [],
   }
 }

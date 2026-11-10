@@ -225,6 +225,8 @@ Feed:
   Cancel Refresh: Avbryt oppdatering
   Next Auto Refresh: 'Neste automatiske oppdatering: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'Oppdater lagrede spillelister'
+  Saved Playlists Refresh Failed: 'Noen lagrede spillelister kunne ikke oppdateres.'
   Save: "Lagre"
   Edit: "Rediger"
   Pin to Navigation: "Fest til navigasjonen"

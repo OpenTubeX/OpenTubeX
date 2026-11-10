@@ -296,6 +296,8 @@ Feed:
   Refresh Feed: Verfris {subscriptionName}
 Playlists: Afspeellyste
 User Playlists:
+  Refresh Saved Playlists: 'Verfris gestoorde afspeellyste'
+  Saved Playlists Refresh Failed: 'Sommige gestoorde afspeellyste kon nie verfris word nie.'
   Add new videos to the top (custom order): Voeg nuwe video’s bo-aan by (pasgemaakte volgorde)
   Shuffle videos by default: Skommel video’s by verstek
   Repair Playlists: Herstel afspeellyste

@@ -225,6 +225,8 @@ Feed:
   Cancel Refresh: Batalkan pembaruan
   Next Auto Refresh: 'Pembaruan otomatis berikutnya: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'Perbarui playlist tersimpan'
+  Saved Playlists Refresh Failed: 'Beberapa playlist tersimpan tidak dapat diperbarui.'
   Save: "Simpan"
   Edit: "Sunting"
   This playlist is private or does not exist.: "Daftar putar ini bersifat pribadi atau tidak ada."

@@ -237,6 +237,8 @@ Feed:
   Cancel Refresh: புதுப்பிப்பை ரத்துசெய்
   Next Auto Refresh: 'அடுத்த தானியக்கப் புதுப்பிப்பு: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'சேமித்த பிளேலிஸ்ட்களைப் புதுப்பி'
+  Saved Playlists Refresh Failed: 'சில சேமித்த பிளேலிஸ்ட்களைப் புதுப்பிக்க முடியவில்லை.'
   Save: "சேமி"
   Edit: "திருத்து"
   This playlist is private or does not exist.: "இந்தப் பிளேலிஸ்ட் தனிப்பட்டது அல்லது இல்லை."

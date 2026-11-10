@@ -262,6 +262,8 @@ Feed:
   Cancel Refresh: Nuligi aktualigon
   Next Auto Refresh: 'Sekva aŭtomata aktualigo: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'Aktualigi konservitajn ludlistojn'
+  Saved Playlists Refresh Failed: 'Kelkaj konservitaj ludlistoj ne povis esti aktualigitaj.'
   Add new videos to the top (custom order): Aldoni novajn videaĵojn al la supro (laŭmenda ordo)
   Shuffle videos by default: Defaŭlte miksi videaĵojn
   Repair Playlists: Ripari ludlistojn

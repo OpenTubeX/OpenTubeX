@@ -225,6 +225,8 @@ Feed:
   Cancel Refresh: 取消重新整理
   Next Auto Refresh: '下次自動重新整理：{date}'
 User Playlists:
+  Refresh Saved Playlists: '重新整理已儲存的播放清單'
+  Saved Playlists Refresh Failed: '部分已儲存的播放清單無法重新整理。'
   Save: "儲存"
   Edit: "編輯"
   Pin to Navigation: "釘選到導覽列"

@@ -793,6 +793,10 @@
     "ri": "wifi-line",
     "material": "wifi-rounded"
   },
+  "wrench": {
+    "ri": "tools-line",
+    "material": "build-rounded"
+  },
   "xmark": {
     "ri": "close-line",
     "material": "close-rounded"

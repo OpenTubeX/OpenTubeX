@@ -227,6 +227,8 @@ Feed:
   Cancel Refresh: Отмени обновяването
   Next Auto Refresh: 'Следващо автоматично обновяване: {date}'
 User Playlists:
+  Refresh Saved Playlists: 'Обнови запазените плейлисти'
+  Saved Playlists Refresh Failed: 'Някои запазени плейлисти не можаха да бъдат обновени.'
   Save: "Запази"
   Edit: "Редактирай"
   This playlist is private or does not exist.: "Този плейлист е частен или не съществува."
