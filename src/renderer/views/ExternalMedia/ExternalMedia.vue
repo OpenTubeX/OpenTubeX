@@ -893,9 +893,9 @@ function getPositionMedia() {
 
 function restoreCompanionPosition() {
   if (!source.value?.separateAudioUrl || startTime.value === null || !player.value?.hasLoaded) return
+  if (!hasCompanionMetadata()) return
   const video = getCompanionVideo()
   const audio = companionAudio.value
-  if (!Number.isFinite(video?.duration) || (companionAudioNeeded.value && !Number.isFinite(audio?.duration))) return
   // Separate tracks can have different lengths. Wait for metadata before
   // deciding whether the soundtrack or the video supplies the resume timeline.
   const media = getPositionMedia()
@@ -948,12 +948,24 @@ function handleMediaLoaded() {
   applyQueryTimestamp()
 }
 
+function hasCompanionMetadata() {
+  return Number.isFinite(getCompanionVideo()?.duration) &&
+    (!companionAudioNeeded.value || Number.isFinite(companionAudio.value?.duration))
+}
+
 function applyQueryTimestamp() {
   const seconds = getQueryTimestamp()
   if (seconds === null || loading.value || !player.value?.hasLoaded) return
-  // The link wins over a restore still waiting for companion metadata.
-  startTime.value = null
-  seekTo(seconds)
+  if (source.value?.separateAudioUrl && !hasCompanionMetadata()) {
+    // Only both tracks' lengths tell which one supplies the timeline, so the
+    // companion restore applies the link once the soundtrack's metadata arrives.
+    startTimestamp = seconds
+    startTime.value = seconds
+  } else {
+    // The link wins over a restore still waiting for companion metadata.
+    startTime.value = null
+    seekTo(seconds)
+  }
   consumeTimestamp()
 }
 

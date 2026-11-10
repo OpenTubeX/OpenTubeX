@@ -242,7 +242,7 @@ for (const seekBeforeMetadata of [false, true]) {
     ].join('\n'))
     await chmod(executable, 0o755)
     let releaseAudio
-    const audioReady = new Promise(resolve => { releaseAudio = resolve })
+    let audioReady = new Promise(resolve => { releaseAudio = resolve })
     for (const [url, file, contentType] of [
       [videoUrl, 'post-live-video.mp4.b64', 'video/mp4'],
       [audioUrl, 'post-live-long-audio.m4a.b64', 'audio/mp4'],
@@ -296,6 +296,29 @@ for (const seekBeforeMetadata of [false, true]) {
       await video.evaluate(element => element.pause())
       const position = await audio.evaluate(element => element.currentTime)
       await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeCloseTo(position, 1)
+
+      // A timestamp for the loaded video waits for the soundtrack's metadata
+      // too, since only then is the soundtrack known to supply the timeline.
+      const videoDuration = await video.evaluate(element => element.duration)
+      const timestamp = Math.floor(videoDuration) + 1
+      expect(timestamp).toBeLessThan(await audio.evaluate(element => element.duration))
+      audioReady = new Promise(resolve => { releaseAudio = resolve })
+      await goTo(page, 'history')
+      await page.locator(sel.searchInput).fill(mediaUrl)
+      await page.locator(sel.searchInput).press('Enter')
+      await expect.poll(() => video.evaluate(element => element.readyState).catch(() => 0)).toBeGreaterThanOrEqual(2)
+      await video.evaluate(element => element.pause())
+      expect(await audio.evaluate(element => Number.isFinite(element.duration))).toBe(false)
+      await app.electronApp.evaluate(({ BrowserWindow }, { channel, route }) => {
+        BrowserWindow.getAllWindows()[0].webContents.send(channel, route)
+      }, { channel: IpcChannels.CHANGE_VIEW, route: `/external-media?url=${encodeURIComponent(mediaUrl)}&timestamp=${timestamp}` })
+      await expect.poll(() => page.evaluate(async () => {
+        const state = await window.ftElectron.tabs.getState()
+        return state.tabs.find(tab => tab.id === state.activeTabId)?.route.query.timestamp ?? null
+      })).toBeNull()
+      releaseAudio()
+      await expect.poll(() => audio.evaluate(element => element.currentTime)).toBeCloseTo(timestamp, 1)
+      await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(timestamp % videoDuration, 1)
       return
     }
     await open()
