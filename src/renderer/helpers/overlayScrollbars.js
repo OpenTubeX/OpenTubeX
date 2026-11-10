@@ -17,11 +17,11 @@ import { setAndroidAlwaysShowScrollbars, setAndroidPageScrollbarsHidden } from '
  * display and drive it.
  *
  * Each bar is appended to its scroll container (the page's to the body) as
- * `.os-scrollbar > .os-scrollbar-track > .os-scrollbar-handle` and themed in
- * overlayScrollbars.css through --os-* custom properties. Scroll-linked
- * animations position tracks and handles, so they follow compositor-driven
- * scrolling in the same frame. Size and content observers only remeasure
- * their sizes.
+ * `.os-scrollbar > .os-scrollbar-track-host > .os-scrollbar-track >
+ * .os-scrollbar-handle` and themed in overlayScrollbars.css through --os-*
+ * custom properties. Nested tracks are sticky, so they stay in view with
+ * the content's own scroll offset, and scroll-linked animations move the
+ * handles along them. Size and content observers only remeasure their sizes.
  */
 
 const VIEWPORT_ATTRIBUTE = 'data-overlayscrollbars-viewport'
@@ -46,12 +46,13 @@ const PAINT_ONLY_PROPERTIES = new Set([
  * @typedef {object} Scrollbar
  * @property {'x' | 'y'} axis
  * @property {HTMLElement} scrollbar
+ * @property {HTMLElement} trackHost the sticky track's containing block
  * @property {HTMLElement} track
+ * @property {string} stickyGeometry the track's sticky offsets and travel of the last update
  * @property {HTMLElement} handle
  * @property {boolean} usable
  * @property {number} span how far the handle travels along the track
  * @property {Animation | null} handleAnimation
- * @property {{ x: Animation | null, y: Animation | null }} trackAnimations
  */
 
 /**
@@ -106,15 +107,18 @@ function createScrollbar(axis) {
   const scrollbar = document.createElement('div')
   scrollbar.className = `os-scrollbar os-scrollbar-${axis === 'x' ? 'horizontal' : 'vertical'} ` +
     'os-scrollbar-handle-interactive os-scrollbar-cornerless os-scrollbar-unusable'
+  const trackHost = document.createElement('div')
+  trackHost.className = 'os-scrollbar-track-host'
   const track = document.createElement('div')
   track.className = 'os-scrollbar-track'
   const handle = document.createElement('div')
   handle.className = 'os-scrollbar-handle'
   track.append(handle)
-  scrollbar.append(track)
+  trackHost.append(track)
+  scrollbar.append(trackHost)
 
   /** @type {Scrollbar} */
-  return { axis, scrollbar, track, handle, usable: false, span: 0, handleAnimation: null, trackAnimations: { x: null, y: null } }
+  return { axis, scrollbar, trackHost, track, stickyGeometry: '', handle, usable: false, span: 0, handleAnimation: null }
 }
 
 /**
@@ -143,6 +147,36 @@ function setScrollLinkedKeyframes(animation, target, keyframes, timeline) {
   // Without filling, an offset at the exact end of the range is outside the
   // animation's active interval and would drop the transform.
   return target.animate(keyframes, { timeline, fill: 'both' })
+}
+
+/**
+ * Nested bars are laid out at the scroll origin, where they can never extend
+ * the scroll range. Their sticky tracks hold their place in the scrollport,
+ * which Chromium measures from the container's content box, as the content
+ * scrolls. A scroll-linked animation of the tracks would run a frame ahead
+ * of the content whenever the compositor draws it late.
+ *
+ * @param {Scrollbar} bar
+ * @param {CSSStyleDeclaration} containerStyle
+ * @param {boolean} rtl
+ * @param {{ x: number, y: number }} ranges
+ */
+function updateStickyGeometry(bar, containerStyle, rtl, ranges) {
+  const style = getComputedStyle(bar.scrollbar)
+  const px = (value) => Number.parseFloat(value) || 0
+  const block = px(style.top) + px(style.borderTopWidth) + px(style.paddingTop) - px(containerStyle.paddingTop)
+  const inline = rtl
+    ? px(style.right) + px(style.borderRightWidth) + px(style.paddingRight) - px(containerStyle.paddingRight)
+    : px(style.left) + px(style.borderLeftWidth) + px(style.paddingLeft) - px(containerStyle.paddingLeft)
+  const geometry = `${block},${inline},${ranges.x},${ranges.y}`
+  if (geometry === bar.stickyGeometry) return
+  bar.stickyGeometry = geometry
+  bar.track.style.setProperty('--os-track-sticky-block', `${block}px`)
+  bar.track.style.setProperty('--os-track-sticky-inline', `${inline}px`)
+  // The extra pixel covers ranges rounded down at fractional zoom levels.
+  const travel = (range) => `${range > 0 ? range + 1 : 0}px`
+  bar.trackHost.style.setProperty('--os-track-travel-block', travel(ranges.y))
+  bar.trackHost.style.setProperty('--os-track-travel-inline', travel(ranges.x))
 }
 
 /**
@@ -234,7 +268,8 @@ function create(element) {
 
     const measurement = [
       sizes.x.scroll, sizes.x.client, sizes.y.scroll, sizes.y.client,
-      style.overflowX, style.overflowY, rtl
+      style.overflowX, style.overflowY, rtl,
+      style.paddingTop, style.paddingLeft, style.paddingRight
     ].join()
     if (!force && measurement === instance.measurement) return
     instance.measurement = measurement
@@ -266,6 +301,9 @@ function create(element) {
     scrollbars.forEach((bar, index) => {
       bar.span = Math.max(0, spans[index])
     })
+    if (!isPage) {
+      for (const bar of scrollbars) updateStickyGeometry(bar, style, rtl, ranges)
+    }
     if (!SCROLL_LINKED) {
       positionFromScroll()
       instance.drag?.()
@@ -276,10 +314,6 @@ function create(element) {
       if (!bar.usable) {
         bar.handleAnimation?.cancel()
         bar.handleAnimation = null
-        for (const axis of ['x', 'y']) {
-          bar.trackAnimations[axis]?.cancel()
-          bar.trackAnimations[axis] = null
-        }
         return
       }
 
@@ -289,27 +323,6 @@ function create(element) {
         { transform: `${translate}(0px)` },
         { transform: `${translate}(${bar.axis === 'x' && rtl ? -span : span}px)` }
       ], getTimeline(bar.axis))
-
-      // Nested bars are laid out at the scroll origin, where they can never
-      // extend the scroll range. Their tracks move back into view by
-      // the scrolled distance. The page's bars are fixed to the window.
-      for (const axis of /** @type {const} */ (['x', 'y'])) {
-        if (isPage || ranges[axis] === 0) {
-          bar.trackAnimations[axis]?.cancel()
-          bar.trackAnimations[axis] = null
-          continue
-        }
-        const offset = axis === 'x' && rtl ? -ranges.x : ranges[axis]
-        bar.trackAnimations[axis] = setScrollLinkedKeyframes(
-          bar.trackAnimations[axis],
-          bar.track,
-          // Separate properties, so both axes can be compensated at once.
-          axis === 'x'
-            ? [{ translate: '0px 0px' }, { translate: `${offset}px 0px` }]
-            : [{ transform: 'translateY(0px)' }, { transform: `translateY(${offset}px)` }],
-          getTimeline(axis)
-        )
-      }
     })
 
     instance.drag?.()
@@ -322,7 +335,6 @@ function create(element) {
     for (const bar of scrollbars) {
       if (!bar.usable) {
         bar.handle.style.removeProperty('transform')
-        bar.track.style.removeProperty('transform')
         continue
       }
       const range = instance.ranges[bar.axis]
@@ -331,8 +343,6 @@ function create(element) {
       bar.handle.style.transform = bar.axis === 'x'
         ? `translateX(${instance.rtl ? -travel : travel}px)`
         : `translateY(${travel}px)`
-      // Like the scroll-linked animations, which nested tracks need to stay in view.
-      if (!isPage) bar.track.style.transform = `translate(${scrollLeft}px, ${scrollTop}px)`
     }
   }
   const schedulePosition = () => {
@@ -463,8 +473,6 @@ function create(element) {
     }
     for (const bar of scrollbars) {
       bar.handleAnimation?.cancel()
-      bar.trackAnimations.x?.cancel()
-      bar.trackAnimations.y?.cancel()
       bar.scrollbar.remove()
     }
     instance.drag = null

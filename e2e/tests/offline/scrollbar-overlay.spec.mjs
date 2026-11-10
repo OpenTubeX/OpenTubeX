@@ -603,13 +603,12 @@ test.describe('overlay scrollbars', () => {
       expect(await viewport.evaluate(element => element.scrollTop)).toBe(0)
     })
 
-    test('keeps tracks in view with scroll-linked animations without extending the range', { tag: '@scale' }, async ({ page }) => {
+    test('keeps tracks in view without extending the range', { tag: '@scale' }, async ({ page }) => {
       const viewport = await addNestedCustomSpeedScroller(page, 'data-scroll-linked-scrollbar-test', 0)
       const scrollbar = viewport.locator(':scope > .os-scrollbar-vertical')
       await expect(scrollbar).toHaveClass(/os-scrollbar-visible/)
-      expect(await scrollbar.evaluate(element => ['.os-scrollbar-track', '.os-scrollbar-handle'].every(selector =>
-        element.querySelector(selector).getAnimations().some(animation => animation.timeline instanceof ScrollTimeline)
-      ))).toBe(true)
+      expect(await scrollbar.evaluate(element => element.querySelector('.os-scrollbar-handle').getAnimations()
+        .some(animation => animation.timeline instanceof ScrollTimeline))).toBe(true)
 
       const geometry = () => viewport.evaluate(element => {
         const view = element.getBoundingClientRect()
