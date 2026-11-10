@@ -816,7 +816,8 @@ async function performCleanup(action) {
       break
     case 'playlists':
       await requireCleanupSuccess(store.dispatch('removeAllPlaylists'))
-      await store.dispatch('updateQuickBookmarkTargetPlaylistId', 'favorites')
+      // Recreate the default playlists as on a fresh start; the first one becomes the quick bookmark target.
+      await store.dispatch('grabAllPlaylists')
       break
   }
 }

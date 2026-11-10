@@ -3627,8 +3627,11 @@ function runApp() {
 
         case DBActions.GENERAL.DELETE_ALL:
           await baseHandlers.playlists.deleteAll()
-          // TODO: Syncing (implement only when it starts being used)
-          // syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: '_', data })
+          syncOtherWindows(
+            IpcChannels.SYNC_PLAYLISTS,
+            event,
+            { event: SyncEvents.GENERAL.DELETE_ALL }
+          )
           return null
 
         default:

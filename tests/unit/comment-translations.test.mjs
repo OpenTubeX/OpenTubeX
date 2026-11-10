@@ -62,7 +62,7 @@ test('terminates in-flight language detection with its worker', async (t) => {
 test('requests a translation with sanitized text', async () => {
   const requests = []
   const translatedText = await requestCommentTranslation(
-    'Danke 💗',
+    'Danke 💗\nनमस्ते',
     'en',
     async (text, targetLanguage) => {
       requests.push({ text, targetLanguage })
@@ -71,7 +71,7 @@ test('requests a translation with sanitized text', async () => {
   )
 
   assert.equal(translatedText, 'Thanks')
-  assert.deepEqual(requests, [{ text: 'Danke ', targetLanguage: 'en' }])
+  assert.deepEqual(requests, [{ text: 'Danke  नमस्ते', targetLanguage: 'en' }])
 })
 
 test('escapes translated markup and links translated URLs', () => {

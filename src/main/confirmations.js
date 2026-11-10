@@ -225,13 +225,11 @@ export function createConfirmations({ isQuitting, isQuitConfirmed, confirmQuit, 
        * @param {boolean} confirmed
        */
       function finish(confirmed) {
-        clearTimeout(timeoutId)
         ipcMain.removeListener(IpcChannels.TABS_CONFIRM_MULTIPLE_ACTION_RESPONSE, listener)
         browserWindow.removeListener('closed', handleWindowClosed)
         resolve(confirmed)
       }
 
-      const timeoutId = setTimeout(() => finish(false), 30_000)
       ipcMain.on(IpcChannels.TABS_CONFIRM_MULTIPLE_ACTION_RESPONSE, listener)
       browserWindow.once('closed', handleWindowClosed)
       manager.bridge.send(IpcChannels.TABS_CONFIRM_MULTIPLE_ACTION, { requestId, count, action })

@@ -116,8 +116,10 @@ export function getCommentTranslationSource(runs) {
  */
 export function sanitizeCommentTranslationSource(text) {
   // InnerTube rejects emoji and other symbols with HTTP 400. Match the
-  // character set used by youtubei.js' CommentView translation method.
-  return text.replaceAll(/[^\p{L}\p{N}\p{P}\p{Z}]/gu, '')
+  // character set used by youtubei.js' CommentView translation method, plus
+  // combining marks, which many scripts such as Devanagari need. Line breaks
+  // become spaces so that words on separate lines stay separate.
+  return text.replaceAll(/\s/gu, ' ').replaceAll(/[^\p{L}\p{M}\p{N}\p{P}\p{Z}]/gu, '')
 }
 
 /**

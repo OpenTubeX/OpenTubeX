@@ -1,7 +1,7 @@
 import { DBActions, IpcChannels } from '../../../src/constants.js'
 import { access, mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { expect, goToSettingsSection, setWindowSize, test } from '../../helpers/app.mjs'
+import { expect, goToSettingsSection, openNewWindowFromTabBar, setWindowSize, test, waitForAppReady } from '../../helpers/app.mjs'
 
 test.use({
   seed: {
@@ -342,7 +342,7 @@ test('reports cleanup rejection instead of success', async ({ app, page }) => {
     .click()
 
   await expect(page.locator('.toast', { hasText: 'Cleanup failed' })).toBeVisible()
-  await expect(page.locator('.toast', { hasText: 'Cleanup complete' })).toHaveCount(0)
+  await expect(page.locator('.toast', { hasText: 'Storage cleanup finished' })).toHaveCount(0)
 })
 
 test('refreshes sizes when database compaction fails', async ({ app, page }) => {
@@ -372,7 +372,7 @@ test('refreshes sizes when database compaction fails', async ({ app, page }) => 
     .click()
 
   await expect(page.locator('.toast', { hasText: 'Cleanup failed' })).toBeVisible()
-  await expect(page.locator('.toast', { hasText: 'Cleanup complete' })).toHaveCount(0)
+  await expect(page.locator('.toast', { hasText: 'Storage cleanup finished' })).toHaveCount(0)
   await expect(searchHistory.locator('.storageSize')).toHaveText('0 B')
 })
 
@@ -401,7 +401,7 @@ test('reports rejected download record cleanup', async ({ app, page }) => {
     .click()
 
   await expect(page.locator('.toast', { hasText: 'Cleanup failed' })).toBeVisible()
-  await expect(page.locator('.toast', { hasText: 'Cleanup complete' })).toHaveCount(0)
+  await expect(page.locator('.toast', { hasText: 'Storage cleanup finished' })).toHaveCount(0)
 })
 
 test('reports rejected yt-dlp playback cleanup', async ({ app, page }) => {
@@ -434,7 +434,7 @@ test('reports rejected yt-dlp playback cleanup', async ({ app, page }) => {
     .click()
 
   await expect(page.locator('.toast', { hasText: 'Cleanup failed' })).toBeVisible()
-  await expect(page.locator('.toast', { hasText: 'Cleanup complete' })).toHaveCount(0)
+  await expect(page.locator('.toast', { hasText: 'Storage cleanup finished' })).toHaveCount(0)
   await expect(playbackCaches.locator('.storageSize')).toHaveText('1 KiB')
 })
 
@@ -494,6 +494,62 @@ test('clears bounded disk caches without touching user data', async ({ app, page
     window.$store
       .getters.getSearchHistoryEntries.length
   ))).toBe(1)
+})
+
+test.describe('clearing playlists', () => {
+  test.use({
+    seed: {
+      settings: { currentLocale: 'en-US', quickBookmarkTargetPlaylistId: 'mine' },
+      playlists: [{
+        _id: 'mine',
+        playlistName: 'Mine',
+        protected: false,
+        videos: [{ videoId: 'aaaaaaaaaaa', title: 'Saved video', playlistItemId: 'item-1', timeAdded: 1 }],
+        createdAt: 1,
+        lastUpdatedAt: 1
+      }],
+      history: [{
+        _id: 'aaaaaaaaaaa',
+        videoId: 'aaaaaaaaaaa',
+        title: 'Saved video',
+        author: 'Test Channel',
+        authorId: 'UC-test-channel-id',
+        lengthSeconds: 60,
+        watchProgress: 10,
+        timeWatched: 1,
+        type: 'video',
+        lastViewedPlaylistId: 'mine',
+        lastViewedPlaylistType: 'user',
+        lastViewedPlaylistItemId: 'item-1'
+      }]
+    }
+  })
+
+  test('recreates the default playlists and unlinks history in every window', async ({ app, page }) => {
+    const otherWindow = await openNewWindowFromTabBar(app, page)
+    await waitForAppReady(otherWindow)
+    const playlistIds = target => target.evaluate(() => window.$store.getters.getAllPlaylists.map(playlist => playlist._id).sort())
+    const lastViewedPlaylistId = target => target.evaluate(() => window.$store.getters.getHistoryCacheById.aaaaaaaaaaa?.lastViewedPlaylistId ?? null)
+    await expect.poll(() => playlistIds(otherWindow)).toEqual(['mine'])
+    await expect.poll(() => lastViewedPlaylistId(otherWindow)).toBe('mine')
+
+    const storage = await goToSettingsSection(page, 'storage')
+    await storage.getByRole('button', { name: 'Remove All Playlists' }).click()
+    await page.getByRole('dialog', { name: 'Are you sure you want to remove all your playlists?' })
+      .getByRole('button', { name: 'Yes, Delete' })
+      .click()
+    await expect(page.locator('.toast', { hasText: 'Storage cleanup finished' })).toBeVisible()
+
+    for (const target of [page, otherWindow]) {
+      await expect.poll(() => playlistIds(target)).toEqual(['favorites', 'watchLater'])
+      await expect.poll(() => lastViewedPlaylistId(target)).toBe(null)
+    }
+    const storedHistory = await page.evaluate(action => window.ftElectron.dbHistory(action), DBActions.GENERAL.FIND)
+    expect(storedHistory.map(record => JSON.parse(record)))
+      .toEqual([expect.not.objectContaining({ lastViewedPlaylistId: expect.anything() })])
+    // Quick bookmarks need a target that exists, without restarting the app.
+    expect(await page.evaluate(() => window.$store.getters.getQuickBookmarkTargetPlaylistId)).toBe('favorites')
+  })
 })
 
 test.describe('compact storage settings', () => {

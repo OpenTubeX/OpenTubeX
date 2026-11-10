@@ -9,7 +9,8 @@ const data = {
   settings: { theme: 'dark' },
   profiles: [{ _id: 'main', name: 'Main', subscriptions: [] }],
   playlists: [{ _id: 'favorites', playlistName: 'Favorites', videos: [] }],
-  history: [{ videoId: 'abcdefghijk', timeWatched: 1 }],
+  // Saving progress can create a record without `timeWatched`.
+  history: [{ videoId: 'abcdefghijk', timeWatched: 1 }, { videoId: 'lmnopqrstuv', watchProgress: 30 }],
   searchHistory: [{ _id: 'search', query: 'music' }],
   watchStats: {
     records: [{ date: '2026-09-26', seconds: 42, historyEstimateApplied: true }],

@@ -27,14 +27,19 @@ export function mergeSubscriptionSettingsEntry(options) {
   let updatedAt = options.remoteEntry?.updatedAt ?? options.old?.updatedAt ?? 0
   for (const [channelId, local] of Object.entries(options.value)) {
     const localUpdatedAt = local.updatedAt
-    const entry = mergeSettingEntry({
-      key: channelId,
-      value: local.value,
-      old: localUpdatedAt === undefined ? undefined : options.old?.value?.[channelId],
-      remoteEntry: remote[channelId],
-      localUpdatedAt,
-      now: options.now
-    })
+    const old = localUpdatedAt === undefined ? undefined : options.old?.value?.[channelId]
+    const remoteEntry = remote[channelId]
+    // Without a synced baseline for this channel, the newer edit wins.
+    const entry = !old && localUpdatedAt > remoteEntry?.updatedAt
+      ? { value: local.value, updatedAt: localUpdatedAt }
+      : mergeSettingEntry({
+          key: channelId,
+          value: local.value,
+          old,
+          remoteEntry,
+          localUpdatedAt,
+          now: options.now
+        })
     value[channelId] = { value: entry.value, updatedAt: entry.updatedAt }
     updatedAt = Math.max(updatedAt, entry.updatedAt)
   }

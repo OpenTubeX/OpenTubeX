@@ -86,6 +86,14 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(VoiceOverHttpPlugin.class);
         registerPlugin(AndroidSharePlugin.class);
         registerPlugin(HomeWidgetsPlugin.class);
+        // Android recreates an activity with the intent that first opened it, and
+        // Capacitor passes that intent to onNewIntent on every create. Handle a
+        // share or notification when it arrives, not again when the app comes
+        // back from Recents or is restored after the system stopped it.
+        if (savedInstanceState != null ||
+            (getIntent().getFlags() & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) != 0) {
+            setIntent(new Intent(Intent.ACTION_MAIN));
+        }
         super.onCreate(savedInstanceState);
         // Capacitor's cookie plugin makes HttpURLConnection share the WebView
         // cookie store, including the YouTube sign-in created for yt-dlp. Keep
@@ -119,8 +127,6 @@ public class MainActivity extends BridgeActivity {
         OpenTubeXNotificationChannels.createAll(this);
         inputManager = (InputManager) getSystemService(INPUT_SERVICE);
         inputManager.registerInputDeviceListener(inputDeviceListener, null);
-        // A restored activity gets the intent it was opened with again.
-        if (savedInstanceState == null) UploadNotifications.recordDismissed(this, getIntent());
     }
 
     @Override

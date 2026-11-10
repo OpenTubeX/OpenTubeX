@@ -22,7 +22,7 @@ function playlistBaseline(previous = {}) {
   const persistPlaylistSyncBaseline = vm.runInNewContext(`({${baselineMethod}}).persistPlaylistSyncBaseline`, {
     rootState: { settings },
     encrypted: false,
-    historyAccount: Array(5).fill(undefined),
+    isSameAccount: () => true,
     parseSnapshot: JSON.parse,
     dispatch: async (action, value) => { assert.equal(action, 'updateSyncServerSnapshot'); settings.syncServerSnapshot = value },
   })
@@ -492,7 +492,7 @@ test('an unchanged playlist baseline does not rewrite the saved sync snapshot', 
   const persist = vm.runInNewContext(`({${baselineMethod}}).persistPlaylistSyncBaseline`, {
     rootState: { settings: { syncServerSnapshot: JSON.stringify({ playlists: saved }) } },
     encrypted: false,
-    historyAccount: Array(5).fill(undefined),
+    isSameAccount: () => true,
     parseSnapshot: JSON.parse,
     dispatch: async () => { writes++ },
   })

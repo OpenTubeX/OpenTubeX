@@ -103,3 +103,30 @@ for (const deletedFrom of ['server', 'device']) {
     })
   })
 }
+
+test('a synced profile channel this device is not subscribed to is not removed later', async () => {
+  const channel = { id: 'channel-1', name: 'Subscribed channel' }
+  // Subscriptions sync is off, so the main profile lacks the other device's channel.
+  const profileList = [{ _id: MAIN_PROFILE_ID, subscriptions: [channel] }]
+  const group = { id: 'remote-profile', local_id: 'profile-1', title: 'Music', bg_color: '#123456', text_color: '#abcdef' }
+  const removed = []
+  const client = {
+    getSubscriptionGroups: async () => [{ group, channels: [{ id: channel.id }, { id: 'other-device-channel' }] }],
+    removeSubscriptionGroupChannel: async (groupId, channelId) => removed.push(channelId),
+  }
+  const store = {
+    state: { profiles: { profileList } },
+    dispatch: async (action, profile) => {
+      assert.equal(action, 'updateProfile')
+      const index = profileList.findIndex(saved => saved._id === profile._id)
+      profileList.splice(index === -1 ? profileList.length : index, 1, structuredClone(profile))
+      return true
+    },
+  }
+
+  const snapshot = await context.syncProfiles(client, store)
+  assert.deepEqual(profileList[1].subscriptions, [channel])
+  await context.syncProfiles(client, store, snapshot)
+
+  assert.deepEqual(removed, [])
+})

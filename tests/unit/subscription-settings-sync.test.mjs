@@ -253,6 +253,22 @@ test('newly subscribing a retained remote channel imports its settings without a
   assert.equal(synced.updatedAt, 100)
 })
 
+test('a newer local edit beats an older remote one for a channel missing from the last sync', async () => {
+  const store = createStore([{ id: 'other', dailyVideoLimit: 1 }])
+  const client = createClient()
+  const previous = await context.syncSettings(client, store)
+  const entry = client.entries.find(entry => entry.key === key)
+  for (const profile of store.state.profiles.profileList) {
+    profile.subscriptions.push({ id: 'channel', dailyVideoLimit: 9, subscriptionSettingsUpdatedAt: entry.updatedAt + 2 })
+  }
+  // Another device uploads an earlier edit of the same channel afterwards.
+  entry.value.channel = { value: { ...entry.value.other.value, dailyVideoLimit: 7 }, updatedAt: entry.updatedAt + 1 }
+  entry.updatedAt += 1
+  await context.syncSettings(client, store, previous)
+  assert.equal(store.state.profiles.profileList[0].subscriptions[1].dailyVideoLimit, 9)
+  assert.equal(client.entries.find(entry => entry.key === key).value.channel.value.dailyVideoLimit, 9)
+})
+
 test('a failed channel write cannot advance the saved edit timestamp', async () => {
   const profilesSource = await readFile(new URL('../../src/renderer/store/modules/profiles.js', import.meta.url), 'utf8')
   let timestamp = 100
