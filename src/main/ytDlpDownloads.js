@@ -13,6 +13,7 @@ import { settings } from '../datastores/handlers/base'
 import { isOpenTubeXUrl } from './utils'
 import { IpcChannels } from '../constants'
 import { shouldUseGioTrash } from './trashPlatform'
+import { killProcessTreeSync, PROCESS_TREE_SPAWN_OPTIONS, signalProcessTree } from './processTree'
 import {
   compareQueuedDownloads,
   normalizeDownloadBandwidth,
@@ -138,6 +139,11 @@ let powerSourcePollTimer = null
 
 /** @type {Map<number, { child: import('node:child_process').ChildProcess, cancelled: boolean, paused: boolean, restarting: boolean, restartStatus: 'queued' | 'paused' }>} */
 const activeDownloads = new Map()
+// Downloads run in their own process groups, so the terminal's SIGINT or
+// SIGHUP no longer reaches them. Stop any that `shutdownYtDlpDownloads` did not.
+process.on('exit', () => {
+  for (const { child } of activeDownloads.values()) killProcessTreeSync(child)
+})
 /** @type {Map<number, YtDlpDownloadStatus>} */
 const downloadRecords = new Map()
 const MAX_SAVED_FILELESS_DOWNLOAD_RECORDS = 200
@@ -351,8 +357,8 @@ export async function shutdownYtDlpDownloads() {
     entry.restarting = true
     const record = downloadRecords.get(id)
     entry.restartStatus = record && ['paused', 'pausing'].includes(record.status) ? 'paused' : 'queued'
-    if (entry.paused) entry.child.kill('SIGCONT')
-    entry.child.kill()
+    if (entry.paused) signalProcessTree(entry.child, 'SIGCONT')
+    signalProcessTree(entry.child)
   }
 
   await Promise.allSettled(settled)
@@ -658,7 +664,7 @@ async function startYtDlpDownload(
   individuallyResumedDownloadIds.delete(id)
   status.status = 'preparing'
   status.started = true
-  const child = spawn(executable, args, { windowsHide: true, env: ytDlpEnvironment() })
+  const child = spawn(executable, args, { ...PROCESS_TREE_SPAWN_OPTIONS, windowsHide: true, env: ytDlpEnvironment() })
   const entry = { child, cancelled: false, paused: false, restarting: false, restartStatus: 'queued' }
   activeDownloads.set(id, entry)
   showAutomaticDownloadNotification(payload, 'started')
@@ -1074,8 +1080,8 @@ export function handleYtDlpCancelDownload(event, id) {
   const entry = activeDownloads.get(id)
   if (entry) {
     entry.cancelled = true
-    if (entry.paused) entry.child.kill('SIGCONT')
-    entry.child.kill()
+    if (entry.paused) signalProcessTree(entry.child, 'SIGCONT')
+    signalProcessTree(entry.child)
     return
   }
 
@@ -1119,7 +1125,7 @@ export async function handleYtDlpControlDownload(event, id, action, value) {
       record.status = 'paused'
     } else if (entry && ['preparing', 'downloading', 'processing'].includes(record.status)) {
       entry.resumeStatus = record.status
-      if (process.platform !== 'win32' && entry.child.kill('SIGSTOP')) {
+      if (process.platform !== 'win32' && signalProcessTree(entry.child, 'SIGSTOP')) {
         entry.paused = true
         record.status = 'paused'
       } else {
@@ -1132,7 +1138,7 @@ export async function handleYtDlpControlDownload(event, id, action, value) {
     }
   } else if (action === 'resume') {
     if (entry?.paused && record.status === 'paused') {
-      entry.child.kill('SIGCONT')
+      signalProcessTree(entry.child, 'SIGCONT')
       entry.paused = false
       record.status = entry.resumeStatus ?? 'preparing'
     } else if (record.status === 'paused') {
@@ -1197,7 +1203,7 @@ export async function handleYtDlpQueueAction(event, action) {
       const record = downloadRecords.get(id)
       if (!record || entry.paused) continue
       if (record.status !== 'pausing') entry.resumeStatus = record.status
-      if (process.platform !== 'win32' && entry.child.kill('SIGSTOP')) {
+      if (process.platform !== 'win32' && signalProcessTree(entry.child, 'SIGSTOP')) {
         entry.paused = true
         record.status = 'paused'
       } else {
@@ -1214,7 +1220,7 @@ export async function handleYtDlpQueueAction(event, action) {
     for (const record of downloadRecords.values()) {
       const entry = activeDownloads.get(record.id)
       if (entry?.paused) {
-        entry.child.kill('SIGCONT')
+        signalProcessTree(entry.child, 'SIGCONT')
         entry.paused = false
         record.status = entry.resumeStatus ?? 'preparing'
         broadcastDownloadStatus(record)
