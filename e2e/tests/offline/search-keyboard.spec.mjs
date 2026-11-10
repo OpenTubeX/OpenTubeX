@@ -79,4 +79,6 @@ test('Shift+Enter searches in a new window', async ({ app, page }) => {
   await expect(newWindow).toHaveURL(/#\/search\/shift%20enter%20search/)
   await expect(newWindow.locator('.navFilterButton')).not.toHaveClass(/filterChanged/)
   await expect(page).not.toHaveURL(/#\/search\//)
+  await expect(newWindow.locator(sel.searchInput)).toHaveValue('shift enter search')
+  await expect(page.locator(sel.searchInput)).toHaveValue('')
 })
