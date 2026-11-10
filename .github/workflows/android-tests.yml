@@ -110,6 +110,12 @@ jobs:
           ./android/gradlew --project-dir android :app:connectedDebugAndroidTest -PtestAbi=x86_64 -Pandroid.testInstrumentationRunnerArguments.numShards=3 -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }}
           adb get-state
 
+    - name: Show why the emulator stopped
+      if: failure()
+      run: |
+        sudo dmesg --ctime | grep -iE 'out of memory|killed process|segfault|qemu' | tail -n 20 || true
+        free -m
+
     - name: Upload test reports
       if: ${{ !cancelled() }}
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
