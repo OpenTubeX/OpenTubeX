@@ -135,7 +135,10 @@ export function parseTakeoutWatchHistory(history) {
 export function mergeTakeoutHistoryRecord(current, imported) {
   if (!current) return imported
   const merged = { ...current }
+  const sameChannel = !current.authorId || current.authorId === imported.authorId
   for (const [key, value] of Object.entries(imported)) {
+    // A channel name from Takeout only belongs with its own channel ID
+    if (key === 'author' && !sameChannel) continue
     if (merged[key] == null || merged[key] === '') merged[key] = value
   }
   merged.timeWatched = Math.max(current.timeWatched ?? 0, imported.timeWatched)

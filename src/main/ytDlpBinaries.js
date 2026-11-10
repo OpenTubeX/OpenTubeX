@@ -512,6 +512,8 @@ function resolveFfmpegBuildUrl(latestUrl) {
     })
     request.on('response', () => {
       clearTimeout(timeout)
+      // A direct response could be the archive itself, so don't download it here
+      request.abort()
       reject(failure)
     })
     request.on('error', (error) => {
