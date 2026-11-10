@@ -1,5 +1,5 @@
 import { choosePickerPaths, goTo, setWindowSize, test, expect } from '../../helpers/app.mjs'
-import { openMockedVideo } from '../../helpers/player.mjs'
+import { openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { demoPlayerResponse } from '../../helpers/media.mjs'
 import {
   mockPlayableWatchPage,
@@ -356,6 +356,8 @@ test('a stream whose server is unreachable keeps the player and offers Retry now
   await page.getByText('SABR test video').click()
   const player = page.locator('.ftVideoPlayer')
   await expect(player).toBeVisible({ timeout: 30_000 })
+  // Startup playback would otherwise end the simulated stall below
+  await waitForPlayback(page)
   const watchView = await watchViewHandle(page)
   await watchView.evaluate(view => {
     const video = document.querySelector('.ftVideoPlayer video')
