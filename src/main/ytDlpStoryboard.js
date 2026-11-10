@@ -100,5 +100,5 @@ export function buildYtDlpStoryboardVtt(formats, videoDuration) {
     }
   }
 
-  return currentTime > 0 ? vtt : null
+  return generatedCueCount > 0 ? vtt : null
 }
