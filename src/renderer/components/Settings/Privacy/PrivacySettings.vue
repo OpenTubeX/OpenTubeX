@@ -54,6 +54,38 @@
         />
       </div>
     </div>
+    <FtFlexBox class="privacyRetention">
+      <FtInput
+        :placeholder="$t('Settings.Privacy Settings.Automatic History Retention Placeholder')"
+        :icon="['fas', 'clock']"
+        :label="$t('Settings.Privacy Settings.Automatic History Retention')"
+        input-type="number"
+        :value="historyRetentionDaysInput"
+        setting-key="historyRetentionDays"
+        :show-label="true"
+        :allow-action-button-when-empty="true"
+        :force-action-button-icon-name="['fas', 'check']"
+        :tooltip="$t('Settings.Privacy Settings.Automatic History Retention Tooltip')"
+        :disabled="!rememberHistory"
+        @input="historyRetentionDaysInput = $event"
+        @click="saveRetention('watch')"
+      />
+      <FtInput
+        :placeholder="$t('Settings.Privacy Settings.Automatic History Retention Placeholder')"
+        :icon="['fas', 'clock']"
+        :label="$t('Settings.Privacy Settings.Automatic Search History Retention')"
+        input-type="number"
+        :value="searchHistoryRetentionDaysInput"
+        setting-key="searchHistoryRetentionDays"
+        :show-label="true"
+        :allow-action-button-when-empty="true"
+        :force-action-button-icon-name="['fas', 'check']"
+        :tooltip="$t('Settings.Privacy Settings.Automatic Search History Retention Tooltip')"
+        :disabled="!rememberSearchHistory"
+        @input="searchHistoryRetentionDaysInput = $event"
+        @click="saveRetention('search')"
+      />
+    </FtFlexBox>
     <div class="privacyExternalLinkHandling">
       <FtSelect
         class="privacyExternalLinkSelect"
@@ -99,15 +131,18 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
+import FtInput from '../../FtInput/FtInput.vue'
 import FtSelect from '../../FtSelect/FtSelect.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtSlider from '../../FtSlider/FtSlider.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 
+import { compactAllDatastores } from '../../../../datastores/handlers/index'
+import { showToast } from '../../../helpers/utils'
 import store from '../../../store/index'
 
 const internetConnectivityChecks = computed(() => store.getters.getInternetConnectivityChecks)
@@ -137,6 +172,63 @@ const rememberSearchHistory = computed(() => store.getters.getRememberSearchHist
  */
 function updateRememberSearchHistory(value) {
   store.dispatch('updateRememberSearchHistory', value)
+}
+
+/** @type {import('vue').ComputedRef<string>} */
+const historyRetentionDays = computed(() => store.getters.getHistoryRetentionDays)
+const historyRetentionDaysInput = ref(historyRetentionDays.value)
+watch(historyRetentionDays, value => {
+  historyRetentionDaysInput.value = value
+})
+
+/** @type {import('vue').ComputedRef<string>} */
+const searchHistoryRetentionDays = computed(() => store.getters.getSearchHistoryRetentionDays)
+const searchHistoryRetentionDaysInput = ref(searchHistoryRetentionDays.value)
+watch(searchHistoryRetentionDays, value => {
+  searchHistoryRetentionDaysInput.value = value
+})
+
+const RETENTION_SETTINGS = {
+  watch: { input: historyRetentionDaysInput, update: 'updateHistoryRetentionDays', remove: 'removeHistoryOlderThan' },
+  search: { input: searchHistoryRetentionDaysInput, update: 'updateSearchHistoryRetentionDays', remove: 'removeSearchHistoryOlderThan' }
+}
+
+/**
+ * @param {string} value
+ * @returns {string | null} The whole number of days, an empty string to keep everything, or null if invalid
+ */
+function parseDays(value) {
+  if (value === '') return ''
+  const days = Number(value)
+  return Number.isInteger(days) && days > 0 ? String(days) : null
+}
+
+/**
+ * Saves a retention period and removes the entries it no longer keeps.
+ * @param {keyof typeof RETENTION_SETTINGS} kind
+ */
+async function saveRetention(kind) {
+  const { input, update, remove } = RETENTION_SETTINGS[kind]
+  const days = parseDays(input.value)
+  if (days === null) {
+    showToast({
+      message: t('Settings.Privacy Settings.Invalid History Retention Days'),
+      icon: ['fas', 'circle-exclamation']
+    })
+    return
+  }
+
+  input.value = days
+  await store.dispatch(update, days)
+  if (days !== '') {
+    await store.dispatch(remove, days)
+    // Frees the removed entries' pages on disk instead of leaving them until a later cleanup.
+    await compactAllDatastores().catch(() => {})
+  }
+  showToast({
+    message: t('Settings.Privacy Settings.History Retention Saved'),
+    icon: ['fas', 'check']
+  })
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -221,6 +313,11 @@ function updateWatchedPercentageThreshold(value) {
 </script>
 
 <style scoped>
+/* Matches the gap between the selects below */
+.privacyRetention {
+  margin-block-start: 6px;
+}
+
 .privacyWatchedProgressSelect.select.outlined :deep(.selectOutline) {
   position: relative;
   inset-block: auto;

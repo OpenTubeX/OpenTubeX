@@ -123,34 +123,13 @@
 }
 
 .storageControls :deep(.btn),
-.storageControls :deep(.switch-ctn),
-.storageControls :deep(.ft-input-component) {
+.storageControls :deep(.switch-ctn) {
   margin: 0;
 }
 
 .storageActions :deep(.btn) {
   max-inline-size: 100%;
   white-space: normal;
-}
-
-.storageSettingControl :deep(.ft-input-component) {
-  box-sizing: border-box;
-  inline-size: 100%;
-}
-
-.storageSettingControl :deep(.inputWrapper:has(.inputIndicators)) {
-  grid-template-columns: minmax(0, 1fr) max-content;
-  column-gap: 8px;
-}
-
-.storageSettingControl :deep(.inputAction) {
-  grid-area: 1 / 1 / 2 / 2;
-}
-
-.storageSettingControl :deep(.inputIndicators) {
-  grid-area: 1 / 2;
-  position: static;
-  transform: none;
 }
 
 .storageSettingControl :deep(.pure-material-slider) {

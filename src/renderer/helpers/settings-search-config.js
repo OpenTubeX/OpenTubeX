@@ -73,11 +73,6 @@ const SCHEDULED_BACKUP_KEYS = new Set([
 ])
 
 const PRIVACY_STORAGE_KEYS = new Set([
-  'Automatic History Retention',
-  'Automatic History Retention Placeholder',
-  'Automatic History Retention Tooltip',
-  'Automatic Search History Retention',
-  'Automatic Search History Retention Tooltip',
   'Cache Video Metadata',
   'Cache Video Metadata Tooltip',
   'Clear Search History and Cache',
