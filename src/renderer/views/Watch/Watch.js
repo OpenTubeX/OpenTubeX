@@ -4775,7 +4775,9 @@ export default defineComponent({
         this.isUpcoming ||
         this.isLive ||
         this.isPlaybackPaused() ||
-        now - this.historyLastTouchedAt < 60_000
+        // Retention counts whole days. Each touch also starts a sync, so refresh
+        // with the watch statistics sync instead of every minute.
+        now - this.historyLastTouchedAt < 10 * 60_000
       ) {
         return
       }

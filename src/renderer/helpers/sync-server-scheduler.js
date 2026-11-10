@@ -8,7 +8,10 @@ const EVENT_SYNC_DEBOUNCE_MS = 1500
 const EVENT_SYNC_DELAYS = {
   sessions: { delay: 10000, maxWait: 30000 },
   history: { delay: 30000, maxWait: 60000 },
-  watchStats: { delay: 30000, maxWait: 60000 },
+  // Playback records watch time every few seconds, and each upload replaces the
+  // whole collection. Sync soon after playback stops, but only every few
+  // minutes while it continues.
+  watchStats: { delay: 30000, maxWait: 10 * 60 * 1000 },
 }
 
 /**
