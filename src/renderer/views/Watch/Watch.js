@@ -3323,9 +3323,11 @@ export default defineComponent({
         const playabilityStatus = result.playability_status
         this.playabilityStatus = playabilityStatus.status
 
-        if (!metadataOnly && playabilityStatus.status === 'LOGIN_REQUIRED' && playabilityStatus.error_screen?.reason?.text === 'Private video') {
+        if (!metadataOnly && playabilityStatus.status === 'LOGIN_REQUIRED' &&
+            (playabilityStatus.error_screen?.reason?.text === 'Private video' || playabilityStatus.reason === 'Private video')) {
           // Private videos cannot be played in FreeTube, as they require to be logged as the owner of the video
           // so there is no point continuing or trying any other backends as it will always fail
+          if (this.finishDownloadedPlaybackWithoutMetadata()) return
           this.setNonRetryablePlaybackError('private')
           this.thumbnail = this.getUnavailableVideoThumbnail()
           this.isLoading = false

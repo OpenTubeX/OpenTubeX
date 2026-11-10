@@ -575,7 +575,7 @@ test.describe('watch page', () => {
     await expect(page).toHaveURL(/watch\/dQw4w9WgXcQ.*playlistItemId=first/)
   })
 
-  test('tries downloaded playback before reporting an Invidious private video', async ({ app, page }) => {
+  test('tries downloaded playback before reporting a private video', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
 
@@ -597,6 +597,23 @@ test.describe('watch page', () => {
     })
 
     await expect.poll(() => invidiousRequests).toBeGreaterThan(0)
+    await expect.poll(() => page.evaluate(() => window.__downloadFallbackUsed === true)).toBe(true)
+    expect(await watchView.evaluate(view => view.nonRetryablePlaybackError)).toBeNull()
+
+    // The Local API reports some private videos only in the top-level reason.
+    let localRequests = 0
+    await page.route('**/youtubei/v1/player*', route => {
+      localRequests++
+      return route.fulfill({ json: { playabilityStatus: { status: 'LOGIN_REQUIRED', reason: 'Private video' } } })
+    })
+    await watchView.evaluate(async view => {
+      window.__downloadFallbackUsed = false
+      await view.$store.dispatch('updateBackendPreference', 'local')
+      await view.$store.dispatch('updateBackendFallback', false)
+      view.getVideoInformationLocal()
+    })
+
+    await expect.poll(() => localRequests).toBeGreaterThan(0)
     await expect.poll(() => page.evaluate(() => window.__downloadFallbackUsed === true)).toBe(true)
     expect(await watchView.evaluate(view => view.nonRetryablePlaybackError)).toBeNull()
   })
