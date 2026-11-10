@@ -9,6 +9,7 @@
   z-index: 3;
   box-shadow: 1px -1px 1px -1px var(--primary-shadow-color);
   background-color: var(--side-nav-color);
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- the page reflows beside the navigation as it expands */
   transition: inline-size var(--motion-default-effects);
   user-select: none;
 }

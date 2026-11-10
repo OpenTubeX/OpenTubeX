@@ -31,6 +31,7 @@
   animation: notification-dismiss var(--motion-slow-effects) both;
 }
 
+/* stylelint-disable plugin/no-low-performance-animation-properties -- a dismissed notification closes its gap in the list */
 @keyframes notification-dismiss {
   50% {
     block-size: auto;
@@ -46,6 +47,7 @@
     translate: calc(100% * var(--dismiss-direction)) 0;
   }
 }
+/* stylelint-enable plugin/no-low-performance-animation-properties */
 
 /* Clearing every row slides them out together before the empty state fades in. */
 .notificationList-leave-active {

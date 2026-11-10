@@ -93,6 +93,7 @@
 }
 
 .ftVideoPlayer:is(:fullscreen, .fullWindow) :deep(.shaka-text-container) {
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- captions make room for the controls */
   transition: bottom cubic-bezier(0.4, 0, 0.6, 1) 0.1s;
 }
 

@@ -20,12 +20,13 @@
   pointer-events: none;
 
   /* Physical target coordinates must not mirror in RTL layouts. */
-  /* stylelint-disable-next-line liberty/use-logical-spec */
+  /* stylelint-disable liberty/use-logical-spec, plugin/no-low-performance-animation-properties -- the tutorial highlight follows its target */
   transition:
     inset-block-start var(--motion-default-spatial),
     left var(--motion-default-spatial),
     inline-size var(--motion-default-spatial),
     block-size var(--motion-default-spatial);
+  /* stylelint-enable liberty/use-logical-spec, plugin/no-low-performance-animation-properties */
 }
 
 .tutorialCard {
@@ -63,6 +64,7 @@
   block-size: 7px;
   border-radius: 50%;
   background-color: var(--subtle-surface-color);
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- the tutorial highlight follows its target */
   transition: inline-size var(--motion-fast-spatial), background-color var(--motion-fast-effects);
 }
 

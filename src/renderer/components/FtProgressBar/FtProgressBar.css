@@ -26,19 +26,31 @@
   border-radius: var(--shape-corner-full);
 }
 
+/* Both parts span the whole bar and clip-path cuts them to their share. A
+   subscription refresh updates the progress for every channel, and clipping
+   runs on the compositor, while resizing would lay out the page on every frame
+   of each transition. The clip also hides the stop indicator while the
+   remaining track is narrower than it. */
 .progressBarActive {
-  inset-inline-start: 0;
-  inline-size: calc(var(--progress-fraction) * 100%);
+  inset-inline: 0;
   background-color: var(--primary-color);
-  transition: inline-size var(--motion-slow-effects);
+  clip-path: inset(0 calc((1 - var(--progress-fraction)) * 100%) 0 0 round var(--shape-corner-full));
+  transition: clip-path var(--motion-slow-effects);
 }
 
-/* Clips the stop indicator while the remaining track is narrower than it. */
+.progressBarActive:dir(rtl) {
+  clip-path: inset(0 0 0 calc((1 - var(--progress-fraction)) * 100%) round var(--shape-corner-full));
+}
+
 .progressBarTrack {
-  inset-inline: calc(var(--progress-fraction) * 100% + 4px) 0;
-  overflow: hidden;
+  inset-inline: 0;
   background-color: color-mix(in srgb, var(--primary-color) 24%, var(--bg-color));
-  transition: inset-inline-start var(--motion-slow-effects);
+  clip-path: inset(0 0 0 calc(var(--progress-fraction) * 100% + 4px) round var(--shape-corner-full));
+  transition: clip-path var(--motion-slow-effects);
+}
+
+.progressBarTrack:dir(rtl) {
+  clip-path: inset(0 calc(var(--progress-fraction) * 100% + 4px) 0 0 round var(--shape-corner-full));
 }
 
 .progressBarTrack::after {

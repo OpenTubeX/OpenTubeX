@@ -26,6 +26,7 @@
           class="tabsContent"
           :css="false"
           data-skip-move
+          @before-enter="stripTransition.onBeforeEnter"
           @enter="stripTransition.onEnter"
           @enter-cancelled="stripTransition.onEnterCancelled"
           @leave="stripTransition.onLeave"
@@ -97,6 +98,11 @@
           </div>
         </TransitionGroup>
       </div>
+      <div
+        ref="tabGhostLayer"
+        class="tabGhostLayer"
+        aria-hidden="true"
+      />
     </div>
     <div class="tabBarActions">
       <button
@@ -400,15 +406,22 @@ watch(stripItems, (_items, previousItems) => {
   animateStripEnter = previousItems.length > 0
 })
 
+const tabGhostLayer = useTemplateRef('tabGhostLayer')
+/** @param {HTMLElement} item */
+function revealOpenedTab(item) {
+  if (!item.classList.contains('active')) return
+  revealActiveTabPending = true
+  revealActiveTab()
+}
 const stripTransition = useTabStripTransition({
   isVertical: () => vertical.value,
   shouldAnimateEnter: () => animateStripEnter,
-  // The tab was revealed while it was still a dot.
-  onEntered: (item) => {
-    if (!item.classList.contains('active')) return
-    revealActiveTabPending = true
-    revealActiveTab()
-  },
+  getStrip: () => tabsContentRef.value,
+  getGhostLayer: () => tabGhostLayer.value,
+  // Revealing the opened tab before the strip is measured lets the tabs
+  // slide to their scrolled positions.
+  onEnter: revealOpenedTab,
+  onEntered: revealOpenedTab,
   onLeft: () => clampTabsScroll()
 })
 const selectedTabIds = computed(() => new Set(store.getters.getSelectedTabIds))
@@ -1519,7 +1532,7 @@ function revealActiveTab() {
   if (!revealActiveTabPending) return
 
   const container = dropZoneRef.value
-  const activeItem = tabsContentRef.value?.querySelector('.tabStripItem:not([data-leaving]) > .tabBarReorderItem.active')
+  const activeItem = tabsContentRef.value?.querySelector('.tabStripItem > .tabBarReorderItem.active')
   if (!container?.clientWidth || !container.clientHeight || !activeItem) return
 
   revealActiveTabPending = false

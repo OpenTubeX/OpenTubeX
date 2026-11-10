@@ -38,6 +38,7 @@
   color: #fff;
   text-overflow: ellipsis;
   transform: translateX(0);
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- the label makes room in the control bar */
   transition: max-width 200ms ease, opacity 150ms ease, transform 200ms ease;
   white-space: nowrap;
 }

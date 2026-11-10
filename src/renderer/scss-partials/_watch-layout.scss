@@ -119,10 +119,12 @@
   .sidebar-panel-enter-active,
   .sidebar-panel-leave-active {
     overflow: hidden;
+    /* stylelint-disable plugin/no-low-performance-animation-properties -- an opening panel pushes the content below it */
     transition:
       opacity var(--motion-default-effects),
       max-block-size var(--motion-default-effects),
       margin-block-end var(--motion-default-effects);
+    /* stylelint-enable plugin/no-low-performance-animation-properties */
   }
 
   .chapters-panel-enter-from,

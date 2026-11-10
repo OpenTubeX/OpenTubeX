@@ -160,8 +160,12 @@ watch(
 const countdownStyle = computed(() => {
   const progress = Math.min(remaining.value / props.autoRefreshInterval, 1)
 
+  // The ring glides to each new offset over a second. Even the shortest
+  // interval moves it by a fraction of a pixel per second, so it only moves
+  // in half-pixel steps; otherwise its transition would render the page on
+  // every frame for as long as the countdown shows.
   return {
-    '--countdown-offset': COUNTDOWN_CIRCUMFERENCE * (1 - progress)
+    '--countdown-offset': Math.round(COUNTDOWN_CIRCUMFERENCE * (1 - progress) * 2) / 2
   }
 })
 

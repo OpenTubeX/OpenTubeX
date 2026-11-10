@@ -484,7 +484,7 @@ export function snapScrollMiniPlayerToEdge(rect, insets) {
  * @param {number} t
  * @returns {number}
  */
-function easeOutBack(t) {
+export function easeOutBack(t) {
   const c1 = 1.70158
   const c3 = c1 + 1
   return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2)
@@ -518,45 +518,6 @@ function getHeightForAspectRatio(width, aspectRatio) {
  */
 function getWidthForAspectRatio(height, aspectRatio) {
   return Math.max(1, Math.round(height * normalizeAspectRatio(aspectRatio)))
-}
-
-/**
- * @param {ScrollMiniPlayerRect} from
- * @param {ScrollMiniPlayerRect} to
- * @param {(rect: ScrollMiniPlayerRect) => void} onUpdate
- * @param {() => void} [onComplete]
- * @returns {() => void}
- */
-export function animateScrollMiniPlayerBounce(from, to, onUpdate, onComplete) {
-  const start = performance.now()
-  let rafId = 0
-
-  const tick = (now) => {
-    const elapsed = now - start
-    const progress = Math.min(1, elapsed / BOUNCE_MS)
-    const eased = easeOutBack(progress)
-
-    onUpdate({
-      ...from,
-      left: from.left + (to.left - from.left) * eased,
-      top: from.top + (to.top - from.top) * eased,
-      dock: to.dock,
-    })
-
-    if (progress < 1) {
-      rafId = requestAnimationFrame(tick)
-    } else if (onComplete) {
-      onComplete()
-    }
-  }
-
-  rafId = requestAnimationFrame(tick)
-
-  return () => {
-    if (rafId) {
-      cancelAnimationFrame(rafId)
-    }
-  }
 }
 
 /**

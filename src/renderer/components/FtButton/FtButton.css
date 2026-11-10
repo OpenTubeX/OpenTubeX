@@ -223,7 +223,7 @@ body:not(.custom) .btn.destructive:not(.variant-filled:not([aria-pressed='false'
 .ripple:not(:disabled):active::after {
   transform: scale(0, 0);
   opacity: 0.3;
-  transition: 0s;
+  transition: none;
 }
 
 @media (any-pointer: coarse), (width <= 680px) {

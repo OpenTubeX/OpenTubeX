@@ -112,9 +112,11 @@
   width: 100%;
 
   /* Animates dock pushes and user-selected video zoom levels. */
+  /* stylelint-disable plugin/no-low-performance-animation-properties -- docks push the player, and scaling it instead would stretch the video */
   transition:
     inline-size 250ms ease,
     transform 200ms ease-out;
+  /* stylelint-enable plugin/no-low-performance-animation-properties */
 }
 
 /*
@@ -146,8 +148,10 @@
   inset-block-start: 12px;
   inset-inline-start: 8px;
   opacity: 0.82;
+  /* stylelint-disable plugin/no-low-performance-animation-properties -- the small badge moves clear of the fullscreen title */
   transition: opacity 150ms ease,
     inset-block-start 150ms ease 450ms;
+  /* stylelint-enable plugin/no-low-performance-animation-properties */
 }
 
 .paidPromotionOverlay:hover,
@@ -168,6 +172,7 @@
 }
 
 .ftVideoPlayer :deep(.videoAnnotations) {
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- docks push the player, and scaling it instead would stretch the video */
   transition: inset-inline-end 250ms ease;
 }
 
@@ -289,6 +294,7 @@
   align-items: flex-end;
   pointer-events: none;
   z-index: 3;
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- docks push the player, and scaling it instead would stretch the video */
   transition: inset-inline-end 250ms ease;
 }
 
@@ -320,6 +326,7 @@
   min-width: min(420px, calc(100% - 16px));
   max-width: calc(100% - 16px);
   pointer-events: auto;
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties -- docks push the player, and scaling it instead would stretch the video */
   transition: inset-inline-end 250ms ease;
 }
 
@@ -398,9 +405,11 @@
   overflow: hidden;
 
   /* copied from .shaka-scrim-container */
+  /* stylelint-disable plugin/no-low-performance-animation-properties -- the title follows changes of the safe area, which are rare */
   transition: opacity cubic-bezier(0.4, 0, 0.6, 1) 0.6s,
     background-color 150ms ease,
     top 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* stylelint-enable plugin/no-low-performance-animation-properties */
 }
 
 :deep(.playerFullscreenTitleOverlay:dir(rtl)) {

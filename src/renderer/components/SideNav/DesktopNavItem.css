@@ -47,6 +47,16 @@
     transform: scaleX(0.6);
     transition:
       transform var(--motion-fast-spatial),
+      opacity var(--motion-fast-effects),
+      background-color var(--motion-default-effects);
+  }
+
+  /* Pressing an item tightens its indicator's corners. The radius only
+     transitions under the pointer, so expanding or collapsing the navigation
+     does not repaint every item's indicator on each frame. */
+  :is(.navOption, .navChannel):is(:hover, :active)::before {
+    transition:
+      transform var(--motion-fast-spatial),
       border-radius var(--motion-fast-spatial),
       opacity var(--motion-fast-effects),
       background-color var(--motion-default-effects);

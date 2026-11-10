@@ -354,9 +354,11 @@
     border-radius: var(--shape-corner-full);
     background-color: color-mix(in srgb, var(--primary-text-color) 38%, transparent);
     cursor: pointer;
+    /* stylelint-disable plugin/no-low-performance-animation-properties -- the active dot widens and moves the small dots beside it */
     transition:
       inline-size var(--motion-fast-spatial),
       background-color var(--motion-default-effects);
+    /* stylelint-enable plugin/no-low-performance-animation-properties */
 
     &:hover {
       background-color: color-mix(in srgb, var(--primary-text-color) 60%, transparent);

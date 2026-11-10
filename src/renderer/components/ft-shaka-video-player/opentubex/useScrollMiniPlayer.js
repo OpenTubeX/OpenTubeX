@@ -19,7 +19,8 @@ import { getPreviousBrowsingRoute } from '../../../tabs/playerDockDestination'
 import { registerAndroidBackPlayer } from '../../../helpers/androidBackGesture'
 import { setAndroidPageScrollbarInsetTop } from '../../../helpers/androidUi'
 import {
-  animateScrollMiniPlayerBounce,
+  BOUNCE_MS,
+  easeOutBack,
   clampScrollMiniPlayerRect,
   DEFAULT_ASPECT_RATIO,
   getAnchorVisibleRatio,
@@ -707,6 +708,15 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
     scrollMiniBounceCancel()
     scrollMiniBounceCancel = null
+  }
+
+  /** Stops a bounce where it is drawn, for a gesture that starts from there. */
+  function stopScrollMiniPlayerBounceInPlace() {
+    if (!scrollMiniBounceCancel) return
+
+    const drawn = container.value?.getBoundingClientRect()
+    cancelScrollMiniPlayerBounce()
+    if (drawn) applyScrollMiniPlayerRect({ ...scrollMiniPlayerRect.value, left: drawn.left, top: drawn.top })
   }
 
   function cancelScrollMiniPlayerLayoutAnimation() {
@@ -1507,21 +1517,35 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
         const targetRect = snapScrollMiniPlayerToEdge(currentRect, insets)
         const fromRect = { ...currentRect }
 
-        if (scrollMiniBounceCancel) {
-          scrollMiniBounceCancel()
+        cancelScrollMiniPlayerBounce()
+        const clampedTarget = clampScrollMiniPlayerRect(targetRect, scrollMiniVideoAspectRatio.value)
+        applyScrollMiniPlayerRect(clampedTarget, true)
+        // The player takes its new position at once and bounces there with
+        // `translate`. Moving its `left` and `top` on every frame instead
+        // would lay out and render the page, and measure it, each frame.
+        const playerContainer = container.value
+        if (playerContainer && !isReducedMotionEnabled()) {
+          // Samples the clamped path the player used to take frame by frame,
+          // so it overshoots only where the viewport leaves room.
+          const steps = 30
+          const bounce = applyAnimationSpeed(playerContainer.animate(
+            Array.from({ length: steps + 1 }, (_, step) => {
+              const eased = easeOutBack(step / steps)
+              const rect = clampScrollMiniPlayerRect({
+                ...fromRect,
+                left: fromRect.left + (clampedTarget.left - fromRect.left) * eased,
+                top: fromRect.top + (clampedTarget.top - fromRect.top) * eased,
+                dock: clampedTarget.dock,
+              }, scrollMiniVideoAspectRatio.value)
+              return { translate: `${rect.left - clampedTarget.left}px ${rect.top - clampedTarget.top}px` }
+            }),
+            { duration: BOUNCE_MS }
+          ))
+          scrollMiniBounceCancel = () => bounce.cancel()
+          bounce.finished.then(() => {
+            if (scrollMiniBounceCancel !== null) scrollMiniBounceCancel = null
+          }, () => {})
         }
-
-        scrollMiniBounceCancel = animateScrollMiniPlayerBounce(
-          fromRect,
-          targetRect,
-          (rect) => {
-            applyScrollMiniPlayerRect(clampScrollMiniPlayerRect(rect, scrollMiniVideoAspectRatio.value))
-          },
-          () => {
-            applyScrollMiniPlayerRect(clampScrollMiniPlayerRect(targetRect, scrollMiniVideoAspectRatio.value), true)
-            scrollMiniBounceCancel = null
-          }
-        )
       } else {
         applyScrollMiniPlayerRect(snapScrollMiniPlayerToEdge(currentRect, insets), true)
       }
@@ -1560,7 +1584,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
     event.preventDefault()
     event.stopPropagation()
-    cancelScrollMiniPlayerBounce()
+    stopScrollMiniPlayerBounceInPlace()
 
     scrollMiniPointerSession = {
       type: 'drag',
@@ -1581,7 +1605,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
     event.preventDefault()
     event.stopPropagation()
-    cancelScrollMiniPlayerBounce()
+    stopScrollMiniPlayerBounceInPlace()
 
     scrollMiniPointerSession = {
       type: 'resize',

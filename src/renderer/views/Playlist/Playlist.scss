@@ -370,7 +370,11 @@
 .playlistItem-move,
 .playlistItem-enter-active,
 .playlistItem-leave-active {
-  transition: all 0.2s ease;
+  // Only the properties that move or fade the items: `all` would also
+  // transition any other style that changes during the move, such as sizes.
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 
   // Hide action buttons during transitions
   // The class for icon container is mainly styled in `ft-list-item.scss`
