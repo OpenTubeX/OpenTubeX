@@ -178,8 +178,8 @@ function updateSubscribeLayout() {
   const available = infoAndSubscribe.value.getBoundingClientRect().width
   if (available <= 0) return
   const style = getComputedStyle(buttonList)
-  const width = buttonList.getBoundingClientRect().width + Number.parseFloat(style.marginInlineStart) +
-    Number.parseFloat(style.marginInlineEnd) + labeledSubscribeButtonWidth(button) - button.getBoundingClientRect().width
+  const width = buttonList.getBoundingClientRect().width + (Number.parseFloat(style.marginInlineStart) || 0) +
+    (Number.parseFloat(style.marginInlineEnd) || 0) + labeledSubscribeButtonWidth(button) - button.getBoundingClientRect().width
   const compact = width > available + 0.5
   if (compact !== compactSubscribe.value) compactSubscribe.value = compact
 }
