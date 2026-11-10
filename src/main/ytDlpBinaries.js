@@ -4,7 +4,7 @@ import { existsSync } from 'node:fs'
 import { chmod, mkdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises'
 import { delimiter, dirname, join } from 'node:path'
 import { promisify } from 'node:util'
-import { inflateRawSync } from 'node:zlib'
+import { inflateRaw } from 'node:zlib'
 import { app, BrowserWindow, net } from 'electron'
 import { settings } from '../datastores/handlers/base'
 import { buildProxyUrl, isOpenTubeXUrl } from './utils'
@@ -534,15 +534,17 @@ async function writeDownloadValidators(binaryPath, validators, source, channel) 
   }))
 }
 
+const MAX_EXTRACTED_BINARY_BYTES = 1024 * 1024 * 1024
+
 /**
  * Minimal ZIP extractor that reads a single file from an archive.
  * The FFmpeg builds only use stored or deflated entries,
  * so this avoids pulling in a full archive dependency.
  * @param {Buffer} zip
  * @param {(name: string) => boolean} matches
- * @returns {Buffer}
+ * @returns {Promise<Buffer>}
  */
-function extractZipEntry(zip, matches) {
+async function extractZipEntry(zip, matches) {
   // locate the end of central directory record,
   // which is at the very end of the file apart from an optional comment
   const earliestPossibleOffset = Math.max(zip.length - 65557, 0)
@@ -583,7 +585,10 @@ function extractZipEntry(zip, matches) {
       const data = zip.subarray(dataStart, dataStart + compressedSize)
 
       if (compressionMethod === 8) {
-        return inflateRawSync(data)
+        // inflate off the main thread, as FFmpeg is large enough to freeze every window
+        return await new Promise((resolve, reject) => {
+          inflateRaw(data, { maxOutputLength: MAX_EXTRACTED_BINARY_BYTES }, (error, result) => error ? reject(error) : resolve(result))
+        })
       } else if (compressionMethod === 0) {
         return Buffer.from(data)
       }
@@ -595,25 +600,6 @@ function extractZipEntry(zip, matches) {
   }
 
   throw managedToolError('MANAGED_TOOL_INVALID_ARCHIVE', 'Binary not found in the downloaded archive')
-}
-
-/**
- * @param {Buffer} data
- * @param {string} destinationPath
- */
-async function installBinary(data, destinationPath) {
-  await mkdir(getManagedBinariesDirectory(), { recursive: true })
-
-  // write to a temporary file first, so a failed download
-  // doesn't corrupt an existing working binary
-  const temporaryPath = `${destinationPath}.part`
-  await writeFile(temporaryPath, data)
-
-  if (process.platform !== 'win32') {
-    await chmod(temporaryPath, 0o755)
-  }
-
-  await rename(temporaryPath, destinationPath)
 }
 
 /**
@@ -749,6 +735,7 @@ async function updateManagedYtDlp(onProgress, onDownloadStart) {
 
   const managedPath = getManagedBinaryPath('yt-dlp')
   let download
+  let version
 
   try {
     // fetch the binary and its signed checksums from the same release,
@@ -765,13 +752,21 @@ async function updateManagedYtDlp(onProgress, onDownloadStart) {
       download.validators.signedAt = verifyYtDlpReleaseAsset(
         download.data, assetName, checksums, signature, validators?.signedAt
       )
-      await installBinary(download.data, managedPath)
+      // validate before committing, so an unusable download (for example one
+      // quarantined by antivirus software) restores the previous binary
+      version = await installBinariesAtomically([{ data: download.data, path: managedPath }], async () => {
+        const installedVersion = await getYtDlpVersion(managedPath)
+        if (installedVersion === null) {
+          throw unusableBinaryError('yt-dlp', managedPath)
+        }
+        return installedVersion
+      })
+    } else {
+      version = await getYtDlpVersion(managedPath)
     }
   } catch (error) {
     return toErrorResult(error)
   }
-
-  const version = await getYtDlpVersion(managedPath)
 
   if (version === null) {
     return toErrorResult(unusableBinaryError('yt-dlp', managedPath))
@@ -852,8 +847,8 @@ export async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
 
       if (download.data !== null) {
         pendingInstalls.push(
-          { data: extractZipEntry(download.data, name => name.endsWith('/bin/ffmpeg.exe')), path: ffmpegPath },
-          { data: extractZipEntry(download.data, name => name.endsWith('/bin/ffprobe.exe')), path: ffprobePath }
+          { data: await extractZipEntry(download.data, name => name.endsWith('/bin/ffmpeg.exe')), path: ffmpegPath },
+          { data: await extractZipEntry(download.data, name => name.endsWith('/bin/ffprobe.exe')), path: ffprobePath }
         )
         pendingValidatorWrites.push(
           { path: ffmpegPath, validators: download.validators, url },
@@ -884,7 +879,7 @@ export async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
 
         if (download.data !== null) {
           pendingInstalls.push({
-            data: extractZipEntry(download.data, name => name === binary.name),
+            data: await extractZipEntry(download.data, name => name === binary.name),
             path: binary.path
           })
           pendingValidatorWrites.push({ path: binary.path, validators: download.validators, url })

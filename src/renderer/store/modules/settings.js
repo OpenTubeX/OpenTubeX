@@ -607,7 +607,7 @@ let pendingPlaylistBookmarkUpdate = Promise.resolve()
 function updateSavedPlaylistBookmarks(commit, update) {
   const persist = async () => {
     // Read the datastore, as the broadcast of another window's edit may still be on its way.
-    const saved = (await DBSettingHandlers.find()).find(setting => setting._id === 'playlistBookmarks')?.value
+    const saved = await DBSettingHandlers.findValue('playlistBookmarks')
     const bookmarks = update(Array.isArray(saved) ? saved : [])
     await DBSettingHandlers.upsert('playlistBookmarks', bookmarks)
     commit('setPlaylistBookmarks', bookmarks)
@@ -642,8 +642,7 @@ let androidProxyUpdate = Promise.resolve()
 const customActions = {
   async updateSyncServerActivityClearedThrough({ commit }, value) {
     const persist = async () => {
-      const saved = await DBSettingHandlers.find()
-      const cutoffs = { ...saved.find(setting => setting._id === 'syncServerActivityClearedThrough')?.value }
+      const cutoffs = { ...await DBSettingHandlers.findValue('syncServerActivityClearedThrough') }
       for (const [account, cutoff] of Object.entries(value)) {
         if (!cutoffs[account] || cutoff > cutoffs[account]) cutoffs[account] = cutoff
       }

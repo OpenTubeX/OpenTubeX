@@ -73,6 +73,11 @@ class Settings {
     return dbSettings(DBActions.GENERAL.FIND)
   }
 
+  /** Reads one setting's value without transferring the whole settings store */
+  static findValue(_id) {
+    return dbSettings(DBActions.SETTINGS.FIND_ONE, _id)
+  }
+
   static upsert(_id, value) {
     return dbSettings(DBActions.GENERAL.UPSERT, { _id, value })
   }
@@ -110,6 +115,10 @@ class History {
     // Imports replace the whole history, which would block this window for
     // seconds while crossing the context bridge.
     return dbHistory(DBActions.GENERAL.OVERWRITE, records, { inWorker: true })
+  }
+
+  static async mergeBackup(records) {
+    return JSON.parse(await dbHistory(DBActions.HISTORY.MERGE_BACKUP, records, { inWorker: true }))
   }
 
   static applySyncChanges(changes, assertActive) {

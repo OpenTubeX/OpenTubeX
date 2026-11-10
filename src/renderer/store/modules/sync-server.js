@@ -1870,9 +1870,8 @@ const actions = {
             // A different window may have synced while this initializer waited.
             // Read the shared datastore after acquiring the sync lock, rather
             // than trusting a renderer snapshot whose IPC update is still queued.
-            const saved = await DBSettingHandlers.find()
+            const snapshot = await DBSettingHandlers.findValue('syncServerSnapshot') ?? '{}'
             if (!sameAccount()) throw new SyncServerCancelledError()
-            const snapshot = saved.find(setting => setting._id === 'syncServerSnapshot')?.value ?? '{}'
             await clearUnsupportedWatchStats({ commit, dispatch, rootState }, snapshot)
           })
         }

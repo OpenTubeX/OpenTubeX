@@ -20,6 +20,8 @@ function loadRunner(platform, spawn, fileStat = async () => ({ isFile: () => tru
     path: platform === 'win32' ? path.win32 : path.posix,
     process: { platform, env: { SystemRoot: 'C:\\Windows' } },
     cp: { spawn },
+    setTimeout,
+    clearTimeout,
     asyncFs: { stat: fileStat },
     baseHandlers: {
       settings: {
@@ -30,9 +32,9 @@ function loadRunner(platform, spawn, fileStat = async () => ({ isFile: () => tru
       }
     }
   })
-  return (scriptPath, configuredPath = scriptPath) => {
+  return (scriptPath, configuredPath = scriptPath, timeoutMs = undefined) => {
     savedPath = configuredPath
-    return execute(scriptPath)
+    return execute(scriptPath, timeoutMs)
   }
 }
 
@@ -73,6 +75,22 @@ for (const [extension, executable, expectedArgs] of [
     assert.equal(calls[0].options.windowsVerbatimArguments, extension === 'bat' || extension === 'cmd')
   })
 }
+
+test('stops a script that never exits and closes its stdin', async () => {
+  const calls = []
+  const run = loadRunner('linux', (command, args, options) => {
+    calls.push({ options })
+    const child = new EventEmitter()
+    child.kill = () => {
+      calls.push('kill')
+      queueMicrotask(() => child.emit('close', null, 'SIGTERM'))
+    }
+    return child
+  })
+  await assert.rejects(run('/scripts/recover.sh', '/scripts/recover.sh', 10), /did not finish/)
+  assert.deepEqual(Array.from(calls[0].options.stdio), ['ignore', 'pipe', 'pipe'])
+  assert.equal(calls[1], 'kill')
+})
 
 test('rejects missing files and directories before spawning', async () => {
   const calls = []

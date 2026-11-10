@@ -107,3 +107,23 @@ test('images fetched with account credentials are not shared through the cache',
   // Only the unauthenticated image comes from the cache.
   assert.equal(requests.length, 4)
 })
+
+test('stops reading an image response that exceeds the size limit', async () => {
+  let aborted = false
+  const request = () => {
+    const clientRequest = new EventEmitter()
+    clientRequest.abort = () => { aborted = true }
+    clientRequest.end = () => {
+      const response = new EventEmitter()
+      response.statusCode = 200
+      response.headers = { 'content-type': 'image/png' }
+      clientRequest.emit('response', response)
+      // an endless response stops being read once it passes the limit
+      for (let chunk = 0; chunk < 4 && !aborted; chunk++) response.emit('data', Buffer.alloc(6))
+    }
+    return clientRequest
+  }
+  const handle = createImageCacheHandler(new ImageCache(), () => undefined, request, 10)
+  await assert.rejects(handle(new Request(`imagecache://${encodeURIComponent('https://example.com/huge.png')}`)), /too large/)
+  assert.equal(aborted, true)
+})

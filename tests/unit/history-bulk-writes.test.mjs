@@ -8,6 +8,7 @@ import { migrateStoredSettings } from '../../src/datastores/settingsMigrations.j
 import { createIdQuery } from '../../src/datastores/idQuery.js'
 import { SqliteDatastore } from '../../src/datastores/sqlite.js'
 import { createNodeSqliteDriver } from '../../src/datastores/sqliteNode.js'
+import { mergeBackupHistoryRecord } from '../../src/renderer/helpers/unifiedBackup.js'
 
 const source = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
 const COUNT = 1000
@@ -30,6 +31,7 @@ async function fixture(t) {
     migrateLegacyHistoryRecord,
     migrateStoredSettings,
     createIdQuery,
+    mergeBackupHistoryRecord,
     recommendations: { remove: async () => {} },
     HISTORY_WATCHED_STATUS_MIGRATION_ID: 'historyWatchedStatusMigrated',
     console,
@@ -98,4 +100,22 @@ test('a metadata repair that cannot be applied is counted without losing the oth
   assert.equal(errors.length, 1)
   assert.deepEqual(Array.from(result.records, entry => entry.title), ['Renamed'])
   assert.equal((await db.history.findOneAsync({ videoId: 'video-1' })).title, 'Video 1')
+})
+
+test('restoring history merges into the saved records without dropping ones saved meanwhile', async (t) => {
+  const { db, History } = await fixture(t)
+  await db.history.insertAsync([record(1), record(2)])
+
+  // Playback saves progress for a new video while the restore is queued
+  const [, merged] = await Promise.all([
+    History.updateWatchProgress('video-9', 42),
+    History.mergeBackup([{ ...record(1), timeWatched: 0, title: 'Older title', watchProgress: 50 }, record(3)]),
+  ])
+
+  assert.deepEqual(Array.from(merged, entry => entry.videoId), ['video-1', 'video-3'])
+  const saved = new Map((await db.history.findAsync({})).map(entry => [entry.videoId, entry]))
+  assert.deepEqual([...saved.keys()].sort(), ['video-1', 'video-2', 'video-3', 'video-9'])
+  assert.equal(saved.get('video-1').title, 'Video 1')
+  assert.equal(saved.get('video-1').watchProgress, 50)
+  assert.equal(saved.get('video-9').watchProgress, 42)
 })

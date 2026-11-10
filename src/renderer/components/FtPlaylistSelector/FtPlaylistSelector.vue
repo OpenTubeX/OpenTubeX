@@ -2,6 +2,10 @@
   <div
     class="ft-playlist-selector"
     :class="[appearance, { selected }]"
+    role="checkbox"
+    tabindex="0"
+    :aria-checked="selected"
+    :aria-disabled="disabled"
     @click="toggleSelection"
     @keydown.enter.space.prevent="toggleSelection"
   >

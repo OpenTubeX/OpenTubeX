@@ -106,3 +106,22 @@ test('limits seekbar thumbnails from oversized yt-dlp storyboard metadata', () =
   assert.match(vtt, /00:00:49\.999 --> 00:00:50\.000/)
   assert.doesNotMatch(vtt, /00:00:50\.000 -->/)
 })
+
+test('skips storyboard fragment URLs that could add WebVTT cues', () => {
+  const format = { protocol: 'mhtml', width: 160, height: 90, fps: 0.5, rows: 1, columns: 1 }
+  const fragments = ['https://example.com/a.jpg\n\n00:00.000 --> 99:00.000\nfile:///etc/passwd', 'javascript:alert(1)', 'https://example.com/b-->c.jpg']
+    .map(url => ({ url, duration: 2 }))
+  assert.equal(buildYtDlpStoryboardVtt([{ ...format, fragments }], 10), null)
+
+  // a rejected fragment keeps its time span, so the next thumbnail stays in place
+  const vtt = buildYtDlpStoryboardVtt([{ ...format, fragments: [fragments[1], { url: 'https://example.com/d.jpg', duration: 2 }] }], 10)
+  assert.match(vtt, /^WEBVTT\n\n00:00:02\.000 --> 00:00:04\.000\nhttps:\/\/example\.com\/d\.jpg#/)
+
+  // skipping a rejected fragment of an oversized grid must not visit its cells
+  const huge = { ...format, rows: 1e8, columns: 1e8 }
+  const hugeVtt = buildYtDlpStoryboardVtt([{ ...huge, fragments: [{ url: 'javascript:bad' }, { url: 'https://example.com/ok.jpg', duration: 1 }] }], null)
+  assert.match(hugeVtt, /https:\/\/example\.com\/ok\.jpg#/)
+
+  // a rejected fragment that reaches the end of the video leaves no storyboard
+  assert.equal(buildYtDlpStoryboardVtt([{ ...format, fragments: [fragments[1], { url: 'https://example.com/d.jpg', duration: 2 }] }], 2), null)
+})

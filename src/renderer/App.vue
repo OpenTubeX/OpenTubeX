@@ -3191,7 +3191,7 @@ function handleKeyboardShortcuts(event) {
     if ([shortcuts.RELOAD_TAB, shortcuts.RELOAD_TAB_ALT]
       .some(shortcut => matchesKeyboardShortcut(event, shortcut))) {
       const tabIds = getShortcutTabIds()
-      if (tabIds.length === 1 && route.path.startsWith('/subscriptions')) {
+      if (tabIds.length === 1 && /^\/(?:subscriptions|trending|popular)(?:\/|$)/.test(route.path)) {
         event.preventDefault()
         return
       }
@@ -4362,9 +4362,15 @@ async function handleYoutubeLink(href, {
 
 function enableOpenUrl() {
   const removeOpenUrl = window.ftElectron.handleOpenUrl((url, tabId) => {
-    if (url) {
-      handleYoutubeLink(url, { tabId })
+    if (!url) return
+    // other sites must not reach the YouTube parser, which reads e.g. facebook.com/watch?v= as a video
+    if (supportsYtDlp && shouldOpenExternalMediaUrl(url, store.getters.getCurrentInvidiousInstanceUrl)) {
+      const route = { path: '/external-media', query: { url } }
+      if (tabId) navigation.push(tabId, route)
+      else openInternalPath(route)
+      return
     }
+    handleYoutubeLink(url, { tabId })
   })
   const removeOidcCallback = window.ftElectron.handleSyncServerOidcCallback(url => {
     store.dispatch('receiveSyncServerOidcCallback', url)

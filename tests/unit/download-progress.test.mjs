@@ -88,11 +88,15 @@ test('stderr progress is decoded across chunks and keeps diagnostic history boun
     handleStdoutLine: line => lines.push(line),
     stderrLines,
     errorLines: [],
+    FINAL_METADATA_PREFIX: '__OPENTUBEX_METADATA__:',
+    FINAL_PATH_PREFIX: '__OPENTUBEX_FILE__:',
   })
   listeners['stdout:data']('__OPENTUBEX_PREPARING__:aaaaaaaaaaa\n')
   listeners['stderr:data']('__OPENTUBEX_DOWN')
   assert.equal(lines.length, 1)
   listeners['stderr:data']('LOAD__:finished\t97.3%\t2MiB/s\t00:00\r\n__OPENTUBEX_PROCESSING__\n')
+  // only `--print` on stdout may report the files that get served and trashed
+  listeners['stderr:data']('__OPENTUBEX_FILE__:aaaaaaaaaaa\t/home/user/.ssh/id_ed25519\n__OPENTUBEX_METADATA__:"aaaaaaaaaaa"\t"Title"\n')
   assert.deepEqual(lines, [
     '__OPENTUBEX_PREPARING__:aaaaaaaaaaa',
     '__OPENTUBEX_DOWNLOAD__:finished\t97.3%\t2MiB/s\t00:00',
@@ -153,6 +157,8 @@ function finishDownload({ code, payload, destinations, stderr, subtitleFormat = 
     sendStatus() {},
     saveDownloadRecords: async () => {},
     showAutomaticDownloadNotification: (_, state) => notifications.push(state),
+    FINAL_METADATA_PREFIX: '__OPENTUBEX_METADATA__:',
+    FINAL_PATH_PREFIX: '__OPENTUBEX_FILE__:',
     child: { on: (event, callback) => { if (event === 'close') close = callback } },
     Date,
   })
@@ -196,4 +202,35 @@ test('a playlist keeps the original subtitle when converting a skipped entry fai
   })
   assert.equal(status.status, 'completed')
   assert.deepEqual(status.destinations, ['/downloads/First.en.srt', '/downloads/Second.en.vtt'])
+})
+
+test('a download that starts while FFmpeg is being validated waits for that installation', async () => {
+  const start = source.indexOf("  if (ffmpeg.source === 'managed') {")
+  const block = source.slice(start, source.indexOf("  } else if (ffmpeg.executable !== 'ffmpeg')", start))
+  let finishInstall
+  let installs = 0
+  const context = vm.createContext({
+    missingFfmpegInstall: null,
+    // the installation has already placed both files and is checking their versions
+    existsSync: () => installs > 0,
+    resolveFfprobeExecutable: async () => ({ executable: '/managed/ffprobe' }),
+    downloadManagedFfmpeg: () => {
+      installs++
+      return new Promise(resolve => { finishInstall = resolve })
+    },
+  })
+  vm.runInContext(`globalThis.prepare = async () => { const ffmpeg = { source: 'managed', executable: '/managed/ffmpeg' }; const args = []
+${block}  }
+  return args
+}`, context)
+  const first = context.prepare()
+  await new Promise(setImmediate)
+  let secondDone = false
+  const second = context.prepare().then(result => { secondDone = true; return result })
+  await new Promise(setImmediate)
+  assert.equal(secondDone, false, 'the second download must not use binaries that are still being validated')
+  finishInstall({ error: 'rejected' })
+  assert.equal((await first).error, 'rejected')
+  assert.equal((await second).error, 'rejected')
+  assert.equal(installs, 1)
 })

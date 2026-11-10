@@ -27,8 +27,9 @@ function fixture({ fail = false, locked = true } = {}) {
         }
       : {},
     DBSettingHandlers: {
-      async find() {
-        return [{ _id: 'syncServerActivityClearedThrough', value: { ...saved } }]
+      async findValue(_id) {
+        assert.equal(_id, 'syncServerActivityClearedThrough')
+        return { ...saved }
       },
       async upsert(_id, value) {
         if (fail) throw new Error('Disk full')

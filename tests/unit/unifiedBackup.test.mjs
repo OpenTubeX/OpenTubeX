@@ -138,6 +138,10 @@ test('older backups cannot reduce watch progress or daily watch time', () => {
   assert.deepEqual(mergeBackupHistoryRecord(currentHistory, olderHistory), currentHistory)
   assert.deepEqual(mergeBackupHistoryRecord(olderHistory, currentHistory), currentHistory)
 
+  // `updateWatchProgress` can save progress for a video before its history record exists
+  const progressOnly = { videoId: 'abcdefghijk', watchProgress: 95 }
+  assert.deepEqual(mergeBackupHistoryRecord(progressOnly, olderHistory), { ...olderHistory, watchProgress: 95 })
+
   const currentStats = { date: '2026-09-26', seconds: 90 }
   const olderStats = { date: '2026-09-26', seconds: 30 }
   assert.deepEqual(mergeBackupWatchStatsRecord(currentStats, olderStats), currentStats)

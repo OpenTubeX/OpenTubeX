@@ -35,6 +35,10 @@ class Settings {
     return baseHandlers.settings.find()
   }
 
+  static async findValue(_id) {
+    return (await baseHandlers.settings._findOne(_id))?.value
+  }
+
   static upsert(_id, value) {
     return baseHandlers.settings.upsert(_id, value)
   }

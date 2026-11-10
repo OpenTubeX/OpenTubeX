@@ -211,10 +211,6 @@ const videoIpBlockScriptPath = computed(() => {
   return store.getters.getVideoIpBlockScriptPath
 })
 
-const proxyUrl = computed(() => {
-  return `${proxyProtocol.value}://${proxyHostname.value}:${proxyPort.value}`
-})
-
 const proxyTestUrl = computed(() => getProxyTestUrl(locale.value))
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -230,6 +226,8 @@ function handleUpdateProxy(enabled) {
   if (enabled) {
     enableProxy()
   } else {
+    // an edit made just before disabling the proxy must not turn it back on
+    debouncedEnableProxy.cancel()
     disableProxy()
   }
 
@@ -241,7 +239,8 @@ function handleUpdateProxy(enabled) {
  */
 function handleUpdateProxyProtocol(value) {
   if (useProxy.value) {
-    enableProxy()
+    // apply the new protocol, not the one that is still saved
+    enableProxy(value)
   }
 
   store.dispatch('updateProxyProtocol', value)
@@ -317,13 +316,18 @@ async function handlePickVideoIpBlockRecoveryScriptPath() {
   }
 }
 
-function enableProxy() {
+function enableProxy(protocol = proxyProtocol.value) {
   if (process.env.IS_ELECTRON) {
-    window.ftElectron.enableProxy(proxyUrl.value)
+    window.ftElectron.enableProxy(`${protocol}://${proxyHostname.value}:${proxyPort.value}`)
   }
 }
 
-const debouncedEnableProxy = debounce(enableProxy, 200)
+// Quick Settings can disable the proxy while an edit here is still pending
+const debouncedEnableProxy = debounce(() => {
+  if (useProxy.value) {
+    enableProxy()
+  }
+}, 200)
 
 function disableProxy() {
   if (process.env.IS_ELECTRON) {

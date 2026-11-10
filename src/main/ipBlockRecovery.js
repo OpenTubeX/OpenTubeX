@@ -13,9 +13,10 @@ let ipBlockRecoveryScriptPromise = null
 
 /**
  * @param {string} scriptPath
+ * @param {number} [timeoutMs] subscription refreshes wait for the run, so a hung script must not block them for the rest of the session
  * @returns {Promise<{ exitCode: number | null, signal: NodeJS.Signals | null, stdout: string, stderr: string }>}
  */
-async function executeIpBlockRecoveryScript(scriptPath) {
+async function executeIpBlockRecoveryScript(scriptPath, timeoutMs = 5 * 60_000) {
   const configuredPath = (await baseHandlers.settings._findOne('videoIpBlockScriptPath'))?.value
   if (typeof configuredPath !== 'string' || configuredPath.trim().length === 0 ||
     path.resolve(scriptPath) !== path.resolve(configuredPath)) {
@@ -57,9 +58,16 @@ async function executeIpBlockRecoveryScript(scriptPath) {
   return new Promise((resolve, reject) => {
     const child = cp.spawn(command, args, {
       shell: false,
+      // Close stdin so a script that prompts fails instead of waiting forever.
+      stdio: ['ignore', 'pipe', 'pipe'],
       windowsVerbatimArguments,
       windowsHide: true
     })
+
+    const timeout = setTimeout(() => {
+      child.kill()
+      reject(new Error(`Recovery script did not finish within ${timeoutMs / 1000} seconds`))
+    }, timeoutMs)
 
     let stdout = ''
     let stderr = ''
@@ -79,10 +87,12 @@ async function executeIpBlockRecoveryScript(scriptPath) {
     })
 
     child.once('error', (error) => {
+      clearTimeout(timeout)
       reject(error)
     })
 
     child.once('close', (exitCode, signal) => {
+      clearTimeout(timeout)
       resolve({
         exitCode,
         signal,

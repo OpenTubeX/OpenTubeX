@@ -41,17 +41,22 @@ export function buildYtDlpStoryboardVtt(formats, videoDuration) {
     }
 
     const fragments = format.fragments.flatMap((fragment) => {
-      if (fragment === null || typeof fragment !== 'object' || typeof fragment.url !== 'string' || fragment.url === '') {
+      if (fragment === null || typeof fragment !== 'object') {
         return []
       }
 
+      // A line break or `-->` in the URL would start a new cue in the generated WebVTT.
+      // Such fragments keep their time span, so later thumbnails stay in place.
+      const url = typeof fragment.url === 'string' && /^https?:\/\/\S+$/.test(fragment.url) && !fragment.url.includes('-->')
+        ? fragment.url
+        : null
       return [{
-        url: fragment.url,
+        url,
         duration: finitePositiveNumber(fragment.duration)
       }]
     })
 
-    return fragments.length === 0
+    return fragments.every(fragment => fragment.url === null)
       ? []
       : [{ width, height, fps, rows: Math.floor(rows), columns: Math.floor(columns), fragments }]
   })
@@ -73,6 +78,11 @@ export function buildYtDlpStoryboardVtt(formats, videoDuration) {
 
     const fragmentDuration = fragment.duration ?? cellsPerFragment * interval
     const cueCount = Math.min(cellsPerFragment, Math.ceil((fragmentDuration / interval) - 1e-6))
+    if (fragment.url === null) {
+      // skip the time span in one step, as its cells add no cues
+      currentTime = Math.min(currentTime + cueCount * interval, durationLimit)
+      continue
+    }
 
     for (
       let index = 0;
@@ -90,5 +100,5 @@ export function buildYtDlpStoryboardVtt(formats, videoDuration) {
     }
   }
 
-  return currentTime > 0 ? vtt : null
+  return generatedCueCount > 0 ? vtt : null
 }

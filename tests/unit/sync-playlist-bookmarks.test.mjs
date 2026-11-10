@@ -131,8 +131,9 @@ function createSettingsStore(playlistBookmarks, savedBookmarks = playlistBookmar
     navigator,
     console,
     DBSettingHandlers: {
-      async find() {
-        return [{ _id: 'playlistBookmarks', value: structuredClone(saved) }]
+      async findValue(_id) {
+        assert.equal(_id, 'playlistBookmarks')
+        return structuredClone(saved)
       },
       async upsert(_id, value) {
         if (writes++ === 0) await heldWrite

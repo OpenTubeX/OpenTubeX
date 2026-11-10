@@ -33,10 +33,7 @@ export function createInvidiousFeedParsers(instanceUrl, proxyImages = () => true
       }
       currentInstance = getCurrentInstanceUrl()
     }
-    const newUrl = `${currentInstance}/ggpht`
-    return url.replace('https://yt3.ggpht.com', newUrl)
-      .replace('https://yt3.googleusercontent.com', newUrl)
-      .replace(/https:\/\/i\d*\.ytimg\.com/, newUrl)
+    return url.replace(/^https:\/\/(?:yt[34]\.ggpht\.com|yt3\.googleusercontent\.com|i\d*\.ytimg\.com)(?=[/?#]|$)/, `${currentInstance}/ggpht`)
   }
 
   /**

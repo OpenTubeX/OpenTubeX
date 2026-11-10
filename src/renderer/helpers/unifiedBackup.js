@@ -41,10 +41,11 @@ export function mergeBackupPlaylist(current, imported) {
 
 export function mergeBackupHistoryRecord(current, imported) {
   if (!current) return imported
-  const newer = imported.timeWatched > current.timeWatched ? imported : current
+  // `updateWatchProgress` can create a record with progress but no `timeWatched` or metadata
+  const currentTimeWatched = Number.isFinite(current.timeWatched) ? current.timeWatched : -Infinity
+  const newer = imported.timeWatched > currentTimeWatched ? imported : current
   return {
     ...newer,
-    timeWatched: Math.max(current.timeWatched, imported.timeWatched),
     watchProgress: Math.max(current.watchProgress ?? 0, imported.watchProgress ?? 0),
     isWatched: current.isWatched === true || imported.isWatched === true,
   }

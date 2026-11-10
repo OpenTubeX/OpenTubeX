@@ -27,6 +27,8 @@ test('normalizes selected Invidious URLs before constructing image proxies', () 
     assert.equal(state.currentInvidiousInstanceAuthorization, authorization)
     const { youtubeImageUrlToInvidious } = createInvidiousFeedParsers(() => state.currentInvidiousInstanceUrl)
     assert.equal(youtubeImageUrlToInvidious('https://yt3.ggpht.com/banner'), `${expected}/ggpht/banner`)
+    // comment authors can have avatars on yt4, which must not be requested from Google directly
+    assert.equal(youtubeImageUrlToInvidious('https://yt4.ggpht.com/avatar'), `${expected}/ggpht/avatar`)
   }
 })
 

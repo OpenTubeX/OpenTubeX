@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { buildProxyUrl, isNonPublicNetworkAddress, isOpenTubeXUrl } from '../../src/main/utils.js'
+import { buildProxyUrl, isConfiguredProxyChallenge, isNonPublicNetworkAddress, isOpenTubeXUrl } from '../../src/main/utils.js'
 
 test('identifies network addresses which are unsafe for untrusted fetches', () => {
   for (const address of [
@@ -101,4 +101,14 @@ test('recognizes the configured development server origin', () => {
     if (previousPort === undefined) delete process.env.OPENTUBEX_DEV_SERVER_PORT
     else process.env.OPENTUBEX_DEV_SERVER_PORT = previousPort
   }
+})
+
+test('only the enabled custom proxy receives the saved proxy credentials', () => {
+  const settings = { useProxy: true, hostname: 'Proxy.Example', port: '3128' }
+  assert.equal(isConfiguredProxyChallenge({ isProxy: true, host: 'proxy.example', port: 3128 }, settings), true)
+  assert.equal(isConfiguredProxyChallenge({ isProxy: true, host: '::1', port: 9050 }, { useProxy: true, hostname: '[::1]', port: '' }), true)
+  assert.equal(isConfiguredProxyChallenge({ isProxy: true, host: 'proxy.example', port: 3128 }, { ...settings, useProxy: false }), false)
+  assert.equal(isConfiguredProxyChallenge({ isProxy: true, host: 'system-proxy.example', port: 3128 }, settings), false)
+  assert.equal(isConfiguredProxyChallenge({ isProxy: true, host: 'proxy.example', port: 8080 }, settings), false)
+  assert.equal(isConfiguredProxyChallenge({ isProxy: false, host: 'proxy.example', port: 3128 }, settings), false)
 })

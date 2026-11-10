@@ -11,7 +11,7 @@ import { MAX_SUBSCRIPTION_SEEN_VIDEOS, mergeSubscriptionSeenVideos, parseSubscri
 import { preserveSubscriptionSeenEntries, subscriptionFeedField } from '../../subscriptionFeedState'
 import { mergeSubscriptionSeenPosts, parseSubscriptionSeenPosts } from '../../subscriptionSeenPosts'
 import { createRssFeedSeenMarks, mergeRssFeedSeenItems, parseRssFeedSeenItems } from '../../renderer/helpers/rssFeedSeenItems'
-import { mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord, validateBackupWatchStats } from '../../renderer/helpers/unifiedBackup'
+import { mergeBackupHistoryRecord, mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord, validateBackupWatchStats } from '../../renderer/helpers/unifiedBackup'
 import { DEFAULT_PROFILE_ICON } from '../../renderer/helpers/profileIcons'
 import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings } from '../../renderer/helpers/subscription-channels'
 import { getProfileWithUpdatedSubscriptionDetails } from '../../renderer/helpers/subscription-profile-details'
@@ -330,6 +330,28 @@ class History {
   static upsert(record) {
     const migratedRecord = historyReplacement(record)
     return Settings.runSeenStateUpdate(() => db.history.updateAsync({ videoId: migratedRecord.videoId }, migratedRecord, { upsert: true }))
+  }
+
+  /**
+   * Merges restored history records with the saved ones. Reading and writing in
+   * the history queue keeps playback, sync and other windows from saving a change
+   * in between that the merge would then overwrite.
+   * @param {object[]} records
+   * @returns {Promise<object[]>} the merged records as saved
+   */
+  static mergeBackup(records) {
+    return Settings.runSeenStateUpdate(async () => {
+      const merged = new Map((await db.history.findAsync(createIdQuery('videoId', records.map(record => record.videoId))))
+        .map(record => [record.videoId, record]))
+      for (const record of records) {
+        merged.set(record.videoId, mergeBackupHistoryRecord(merged.get(record.videoId), record))
+      }
+      const replacements = [...merged.values()].map(historyReplacement)
+      throwHistoryUpdateError(await updateHistoryRecords(replacements.map(record => ({
+        query: { videoId: record.videoId }, update: record, options: { upsert: true },
+      }))))
+      return replacements
+    })
   }
 
   static overwrite(records) {
@@ -1150,8 +1172,7 @@ class Playlists {
         {
           $pull: { videos: { playlistItemId } },
           $set: { lastUpdatedAt }
-        },
-        { upsert: true }
+        }
       )
     } else if (videoId != null) {
       return db.playlists.updateAsync(
@@ -1159,8 +1180,7 @@ class Playlists {
         {
           $pull: { videos: { videoId } },
           $set: { lastUpdatedAt }
-        },
-        { upsert: true }
+        }
       )
     } else {
       throw new Error(`Both videoId & playlistItemId are absent, _id: ${_id}`)
@@ -1173,8 +1193,7 @@ class Playlists {
       {
         $pull: { videos: createIdQuery('playlistItemId', playlistItemIds) },
         $set: { lastUpdatedAt }
-      },
-      { upsert: true }
+      }
     )
   }
 

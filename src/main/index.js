@@ -47,7 +47,7 @@ import { applyTwitchPlaylistOrigin } from '../twitchPlaylistOrigin'
 import { isYtDlpStoryboardUrl, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
 import { applyYtDlpPlaybackCacheSettings } from './ytDlpPlaybackCache'
 import { generatePoToken } from './poTokenGenerator'
-import { buildProxyUrl, DEFAULT_PROXY_SETTINGS, isExternalBrowserUrl, isOpenTubeXUrl } from './utils'
+import { buildProxyUrl, DEFAULT_PROXY_SETTINGS, isConfiguredProxyChallenge, isExternalBrowserUrl, isOpenTubeXUrl } from './utils'
 import { createBackgroundExternalLinkOpener } from './backgroundExternalLink'
 import { isInvidiousInstanceUrl } from './invidiousAuthorization'
 import { normalizeYatteeServerUrl, usesInvidiousApi, usesInvidiousInstance } from '../apiBackends'
@@ -1574,12 +1574,16 @@ function runApp() {
   })
 
   app.on('login', async (event, webContents, request, authInfo, callback) => {
-    if (authInfo.isProxy) {
-      event.preventDefault()
-      const proxyUsername = (await baseHandlers.settings._findOne('proxyUsername'))?.value
-      const proxyPassword = (await baseHandlers.settings._findOne('proxyPassword'))?.value
-      callback(proxyUsername, proxyPassword)
+    if (!authInfo.isProxy) return
+    // The settings are read asynchronously, so take over the challenge and cancel it with an empty callback when it is not ours.
+    event.preventDefault()
+    const setting = async id => (await baseHandlers.settings._findOne(id))?.value
+    const [useProxy, hostname, port] = await Promise.all([setting('useProxy'), setting('proxyHostname'), setting('proxyPort')])
+    if (!isConfiguredProxyChallenge(authInfo, { useProxy, hostname, port })) {
+      callback()
+      return
     }
+    callback(await setting('proxyUsername'), await setting('proxyPassword'))
   })
 
   function isTrayEnabled() {
@@ -2991,6 +2995,9 @@ function runApp() {
         case DBActions.GENERAL.FIND:
           return await baseHandlers.settings.find()
 
+        case DBActions.SETTINGS.FIND_ONE:
+          return typeof data === 'string' ? (await baseHandlers.settings._findOne(data))?.value : undefined
+
         case DBActions.GENERAL.UPSERT:
           // Destinations and executables require a native picker. Backup status is written by the scheduler.
           if (!canRendererWriteSetting(data._id, data.value)) {
@@ -3155,6 +3162,19 @@ function runApp() {
             { event: SyncEvents.GENERAL.OVERWRITE, data }
           )
           return null
+
+        case DBActions.HISTORY.MERGE_BACKUP: {
+          if (typeof data === 'string') data = JSON.parse(data)
+          const updates = await baseHandlers.history.mergeBackup(data)
+          const changes = { insertions: [], updates, deletions: [] }
+          syncOtherWindows(
+            IpcChannels.SYNC_HISTORY,
+            event,
+            { event: SyncEvents.HISTORY.APPLY_SYNC_CHANGES, data: changes }
+          )
+          // Strings cross IPC and the context bridge far faster than records.
+          return JSON.stringify(updates)
+        }
 
         case DBActions.HISTORY.APPLY_SYNC_CHANGES: {
           if (typeof data === 'string') data = JSON.parse(data)

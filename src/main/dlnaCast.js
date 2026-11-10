@@ -194,6 +194,10 @@ export async function stopDlnaCast(ownerId, castId) {
   return true
 }
 
+export function isActiveDlnaCast(castId) {
+  return activeCast?.castId === castId
+}
+
 export function hasDlnaCastFailed(ownerId, castId) {
   return activeCast?.ownerId === ownerId && activeCast.castId === castId && Boolean(activeCast.server.muxFailed)
 }

@@ -46,7 +46,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
+import { computed, onMounted, ref, shallowRef } from 'vue'
 
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtCard from '../../components/ft-card/ft-card.vue'
@@ -57,8 +57,7 @@ import store from '../../store/index'
 
 import { getInvidiousPopularFeed } from '../../helpers/api/invidious'
 import { getInvidiousApiErrorMessage, getRelativeTimeFromDate, showApiErrorToast } from '../../helpers/utils'
-import { KeyboardShortcuts } from '../../../constants'
-import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
+import { useFeedRefreshShortcut } from '../../composables/useFeedRefreshShortcut'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 
 const isElectron = process.env.IS_ELECTRON
@@ -82,15 +81,9 @@ const shownResults = shallowRef(popularCache.value || [])
 const hasLoaded = ref(popularCache.value !== null)
 
 onMounted(() => {
-  document.addEventListener('keydown', keyboardShortcutHandler)
-
   if (shownResults.value.length === 0) {
     fetchPopularInfo()
   }
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener('keydown', keyboardShortcutHandler)
 })
 
 async function fetchPopularInfo() {
@@ -112,24 +105,7 @@ async function fetchPopularInfo() {
   }
 }
 
-/**
- * @param {KeyboardEvent} event the keyboard event
- */
-function keyboardShortcutHandler(event) {
-  if (document.activeElement.classList.contains('ft-input')) {
-    return
-  }
-  // Avoid handling events due to user holding a key (not released)
-  // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/repeat
-  if (event.repeat) { return }
-
-  if (
-    matchesKeyboardShortcut(event, KeyboardShortcuts.APP.SITUATIONAL.REFRESH) &&
-    !isLoading.value
-  ) {
-    fetchPopularInfo()
-  }
-}
+useFeedRefreshShortcut(() => !isLoading.value, fetchPopularInfo)
 
 </script>
 <style scoped src="./Popular.css" />
