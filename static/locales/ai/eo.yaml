@@ -2502,6 +2502,7 @@ Downloads:
   Download Failed: Elŝuto malsukcesis
   File Name Shortened: La dosiernomo estis mallongigita, ĉar la titolo de la videaĵo estis tro longa.
   Some Videos Not Downloaded: Kelkaj videoj en ĉi tiu ludlisto ne estis elŝuteblaj.
+  Playlist Video Position: Video {index} el {count}
   Insufficient Disk Space: Ne sufiĉas diskospaco. Proksimume {required} necesas kaj {available} disponeblas.
   Unknown Download Size: La elŝuta grandeco estas nekonata. {available} disponeblas en la cela dosiersistemo.
   Disk Space Check Unavailable: La disponebla diskospaco ne povis esti kontrolita antaŭ la komenco de ĉi tiu elŝuto.

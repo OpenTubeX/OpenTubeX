@@ -52,6 +52,14 @@
               {{ channelName }}
             </p>
             <p
+              v-if="currentVideoText"
+              class="downloadCurrentVideo"
+              dir="auto"
+              :title="currentVideoText"
+            >
+              {{ currentVideoText }}
+            </p>
+            <p
               v-if="statusText"
               class="downloadStatus"
               :aria-hidden="inProgress ? 'true' : undefined"
@@ -493,6 +501,18 @@ const controllable = computed(() => ['queued', 'preparing', 'downloading', 'proc
 const queuePending = computed(() => (
   ['queued', 'paused'].includes(props.download.status) && props.download.started !== true
 ))
+// The progress bar restarts for each playlist video, so name the one it belongs to
+const currentVideoText = computed(() => {
+  const { currentTitle, currentVideoId, playlistIndex, playlistCount, retryPayload } = props.download
+  if (!controllable.value || retryPayload?.isPlaylist !== true) return ''
+  const videoIds = Array.isArray(retryPayload.videoIds) ? retryPayload.videoIds : []
+  const index = playlistIndex || videoIds.indexOf(currentVideoId) + 1
+  const count = playlistCount || videoIds.length
+  return [
+    index > 0 && count > 0 ? t('Downloads.Playlist Video Position', { index, count }) : '',
+    currentTitle
+  ].filter(Boolean).join(' • ')
+})
 const canRetry = computed(() => (
   ['failed', 'cancelled'].includes(props.download.status) &&
   (props.download.retryPayload || props.download.videoId || props.download.playlistId)

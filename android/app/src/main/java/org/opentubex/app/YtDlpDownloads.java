@@ -401,6 +401,14 @@ final class YtDlpDownloads {
     }
 
     static void updateProgress(JSONObject record, String line) throws org.json.JSONException {
+        if (line.startsWith("__OPENTUBEX_PREPARING__:")) {
+            String[] fields = line.substring("__OPENTUBEX_PREPARING__:".length()).split("\t", 4);
+            Object title = null;
+            try { title = fields.length > 3 ? new org.json.JSONTokener(fields[3]).nextValue() : null; } catch (org.json.JSONException ignored) { }
+            record.put("currentVideoId", fields[0].matches("[\\w-]{11}") ? fields[0] : "")
+                .put("currentTitle", title instanceof String ? ((String) title).substring(0, Math.min(255, ((String) title).length())) : "")
+                .put("playlistIndex", positiveInteger(fields, 1)).put("playlistCount", positiveInteger(fields, 2));
+        }
         if (line.startsWith("__OPENTUBEX_PREPARING__:") || line.equals("__OPENTUBEX_PROCESSING__") || line.startsWith("__OPENTUBEX_DOWNLOAD__:finished")) {
             record.put("status", line.startsWith("__OPENTUBEX_PREPARING__:") ? "preparing" : "processing")
                 .put("percent", 0).put("speed", JSONObject.NULL).put("eta", JSONObject.NULL);
@@ -420,6 +428,13 @@ final class YtDlpDownloads {
             record.put("percent", Double.parseDouble(match.group(1))).put("speed", match.group(2)).put("eta", match.group(3));
             record.put("status", Double.parseDouble(match.group(1)) == 100 && line.contains(" in ") ? "processing" : "downloading");
         } else if (line.startsWith("[Merger]") || line.startsWith("[ExtractAudio]")) record.put("status", "processing");
+    }
+
+    private static Object positiveInteger(String[] fields, int index) {
+        try {
+            int value = fields.length > index ? Integer.parseInt(fields[index]) : 0;
+            return value > 0 ? value : JSONObject.NULL;
+        } catch (NumberFormatException ignored) { return JSONObject.NULL; }
     }
 
     private synchronized void updateStatus(long id, String status, String error) {

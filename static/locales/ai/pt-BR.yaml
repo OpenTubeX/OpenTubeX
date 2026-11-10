@@ -2412,6 +2412,7 @@ Downloads:
   Download Failed: Falha no download
   File Name Shortened: O nome do arquivo foi abreviado porque o título do vídeo era demasiado longo.
   Some Videos Not Downloaded: Não foi possível baixar alguns vídeos desta playlist.
+  Playlist Video Position: Vídeo {index} de {count}
   Insufficient Disk Space: Não há espaço suficiente no disco. São necessários cerca de {required} e estão disponíveis {available}.
   Unknown Download Size: O tamanho do download é desconhecido. Estão disponíveis {available} no sistema de arquivos de destino.
   Disk Space Check Unavailable: Não foi possível verificar o espaço disponível no disco antes de iniciar este download.

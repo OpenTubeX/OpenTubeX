@@ -95,6 +95,10 @@ const execFileAsync = promisify(execFile)
  * @property {'unmetered' | 'charging' | null} [waitingFor] unmet automatic download requirement
  * @property {boolean} [started]
  * @property {number} percent
+ * @property {string} [currentVideoId] video yt-dlp is working on
+ * @property {string} [currentTitle]
+ * @property {number | null} [playlistIndex] position of the current video in a remote playlist download
+ * @property {number | null} [playlistCount]
  * @property {string | null} speed
  * @property {string | null} eta
  * @property {string | null} destination
@@ -694,6 +698,17 @@ async function startYtDlpDownload(
    * @param {string} line
    */
   function handleStdoutLine(line) {
+    if (line.startsWith('__OPENTUBEX_PREPARING__:')) {
+      const [videoId, rawIndex, rawCount, rawTitle] = line.slice('__OPENTUBEX_PREPARING__:'.length).split('\t')
+      let title = null
+      try { title = JSON.parse(rawTitle) } catch {}
+      const index = Number.parseInt(rawIndex, 10)
+      const count = Number.parseInt(rawCount, 10)
+      status.currentVideoId = ID_REGEX.test(videoId) ? videoId : ''
+      status.currentTitle = typeof title === 'string' ? title.slice(0, 255) : ''
+      status.playlistIndex = index > 0 ? index : null
+      status.playlistCount = count > 0 ? count : null
+    }
     if (line.startsWith('__OPENTUBEX_PREPARING__:') || line === '__OPENTUBEX_PROCESSING__' || line.startsWith('__OPENTUBEX_DOWNLOAD__:finished')) {
       setDownloadPhase(line.startsWith('__OPENTUBEX_PREPARING__:') ? 'preparing' : 'processing')
       status.percent = 0

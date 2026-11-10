@@ -2467,6 +2467,7 @@ Downloads:
   Download Failed: Unduhan gagal
   File Name Shortened: Nama berkas dipersingkat karena judul video terlalu panjang.
   Some Videos Not Downloaded: Beberapa video dalam playlist ini tidak dapat diunduh.
+  Playlist Video Position: Video {index} dari {count}
   Insufficient Disk Space: Ruang disk tidak cukup. Diperlukan sekitar {required} dan tersedia {available}.
   Unknown Download Size: Ukuran unduhan tidak diketahui. Tersedia {available} pada sistem berkas tujuan.
   Disk Space Check Unavailable: Ruang disk yang tersedia tidak dapat diperiksa sebelum unduhan dimulai.

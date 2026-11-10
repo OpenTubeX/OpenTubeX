@@ -2465,6 +2465,7 @@ Downloads:
   Download Failed: Niðurhal mistókst
   File Name Shortened: Skráarheitið var stytt vegna þess að titill myndbandsins var of langur.
   Some Videos Not Downloaded: Ekki tókst að sækja sum myndskeið á þessum spilunarlista.
+  Playlist Video Position: Myndskeið {index} af {count}
   Insufficient Disk Space: Ekki er nóg diskpláss. Niðurhalið þarf um {required}, en aðeins {available} er laust.
   Unknown Download Size: Stærð niðurhalsins er óþekkt. {available} er laust á skráakerfi áfangastaðarins.
   Disk Space Check Unavailable: Ekki tókst að kanna laust diskpláss áður en þetta niðurhal hófst.

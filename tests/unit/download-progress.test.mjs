@@ -21,6 +21,7 @@ function replay(lines, initialStatus = 'downloading') {
     DESTINATION_REGEX: /^never$/,
     MERGER_REGEX: /^never$/,
     subtitlesOnly: false,
+    ID_REGEX: /^[\w-]{11}$/,
   })
   vm.runInContext(`${handler}\nglobalThis.handleLine = handleStdoutLine`, context)
   for (const line of lines) context.handleLine(line)
@@ -28,7 +29,11 @@ function replay(lines, initialStatus = 'downloading') {
 }
 
 test('preparation clears the previous playlist item progress and publishes immediately', () => {
-  const { status, updates } = replay(['__OPENTUBEX_PREPARING__:aaaaaaaaaaa'])
+  const { status, updates } = replay(['__OPENTUBEX_PREPARING__:aaaaaaaaaaa\t3\t12\t"Caf\\u00e9\\tvideo"'])
+  assert.equal(status.currentVideoId, 'aaaaaaaaaaa')
+  assert.equal(status.currentTitle, 'Caf\u00e9\tvideo')
+  assert.equal(status.playlistIndex, 3)
+  assert.equal(status.playlistCount, 12)
   assert.equal(status.status, 'preparing')
   assert.equal(status.percent, 0)
   assert.equal(status.eta, null)

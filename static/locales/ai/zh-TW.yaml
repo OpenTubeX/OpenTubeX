@@ -2449,6 +2449,7 @@ Downloads:
   Download Failed: 下載失敗
   File Name Shortened: 影片標題過長，因此已縮短檔案名稱。
   Some Videos Not Downloaded: 無法下載此播放清單中的部分影片。
+  Playlist Video Position: 第 {index} 部影片，共 {count} 部
   Insufficient Disk Space: 磁碟空間不足。大約需要 {required}，目前可用空間為 {available}。
   Unknown Download Size: 下載大小不明。目標檔案系統有 {available} 可用空間。
   Disk Space Check Unavailable: 開始下載前無法檢查可用磁碟空間。

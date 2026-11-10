@@ -2442,6 +2442,7 @@ Downloads:
   Download Failed: ダウンロードに失敗しました
   File Name Shortened: 動画タイトルが長すぎるため、ファイル名を短縮しました。
   Some Videos Not Downloaded: このプレイリストの一部の動画をダウンロードできませんでした。
+  Playlist Video Position: 動画 {index}/{count}
   Insufficient Disk Space: ディスクの空き容量が不足しています。約{required}必要ですが、利用可能な容量は{available}です。
   Unknown Download Size: ダウンロードサイズは不明です。保存先のファイルシステムでは{available}利用できます。
   Disk Space Check Unavailable: ダウンロード開始前にディスクの空き容量を確認できませんでした。
