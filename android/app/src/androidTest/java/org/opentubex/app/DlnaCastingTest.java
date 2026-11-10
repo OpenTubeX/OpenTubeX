@@ -196,7 +196,16 @@ public class DlnaCastingTest {
                 (async () => {
                     const native = (method, options = {}) => window.Capacitor.nativePromise('Dlna', method, options);
                     try {
-                        const discovery = await native('discover');
+                        // The emulator's virtual Wi-Fi can drop for a moment, failing the multicast send.
+                        const discover = async attempt => {
+                            try { return await native('discover'); }
+                            catch (error) {
+                                if (attempt === 2) throw error;
+                                await new Promise(resolve => setTimeout(resolve, 1000));
+                                return discover(attempt + 1);
+                            }
+                        };
+                        const discovery = await discover(0);
                         const device = discovery.responses.find(item => item.message.includes('/otx-dlna-test.xml'));
                         if (!device) throw new Error('Fixture not discovered: ' + JSON.stringify(discovery));
                         const description = await native('request', {url: '%s'});
