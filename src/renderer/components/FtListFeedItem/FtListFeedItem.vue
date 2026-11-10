@@ -8,6 +8,7 @@
     @pointermove="moveMenuHold"
     @pointerup="cancelMenuHold"
     @pointercancel="cancelMenuHold"
+    @dragstart="handleMenuHoldDragStart"
   >
     <div class="videoThumbnail">
       <RouterLink
@@ -281,7 +282,7 @@ const menuItems = computed(() => {
 
 const menuButton = useTemplateRef('menuButton')
 const openMobileContextActions = inject('openMobileContextActions')
-const { startMenuHold, moveMenuHold, cancelMenuHold, suppressMenuHoldClick } = useContextMenuHold(openContextMenu)
+const { startMenuHold, moveMenuHold, cancelMenuHold, handleMenuHoldDragStart, suppressMenuHoldClick } = useContextMenuHold(openContextMenu)
 
 function openOptionsMenu() {
   cancelMenuHold()

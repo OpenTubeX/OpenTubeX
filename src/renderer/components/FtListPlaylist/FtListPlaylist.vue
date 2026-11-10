@@ -12,6 +12,7 @@
     @pointermove="moveMenuHold"
     @pointerup="cancelMenuHold"
     @pointercancel="cancelMenuHold"
+    @dragstart="handleMenuHoldDragStart"
   >
     <div
       v-if="showGrabBar"
@@ -251,7 +252,7 @@ const playlistMenuItems = computed(() => {
   return items.map(item => ({ enabled: true, ...item }))
 })
 
-const { startMenuHold, moveMenuHold, cancelMenuHold, suppressMenuHoldClick } = useContextMenuHold(openPlaylistContextMenu)
+const { startMenuHold, moveMenuHold, cancelMenuHold, handleMenuHoldDragStart, suppressMenuHoldClick } = useContextMenuHold(openPlaylistContextMenu)
 
 function openPlaylistOptionsMenu() {
   cancelMenuHold()
