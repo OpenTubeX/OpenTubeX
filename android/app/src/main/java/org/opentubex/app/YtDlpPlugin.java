@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
@@ -53,13 +54,18 @@ public final class YtDlpPlugin extends Plugin {
 
     private interface Operation { JSONObject run() throws Exception; }
     private void run(PluginCall call, Operation operation) {
-        executor.submit(() -> {
-            try { call.resolve(JSObject.fromJSONObject(operation.run())); }
-            catch (Exception error) {
-                Throwable cause = error.getCause() == null ? error : error.getCause();
-                call.reject(cause.getMessage() == null ? cause.getClass().getSimpleName() : cause.getMessage());
-            }
-        });
+        try {
+            executor.submit(() -> {
+                try { call.resolve(JSObject.fromJSONObject(operation.run())); }
+                catch (Exception error) {
+                    Throwable cause = error.getCause() == null ? error : error.getCause();
+                    call.reject(cause.getMessage() == null ? cause.getClass().getSimpleName() : cause.getMessage());
+                }
+            });
+        } catch (RejectedExecutionException error) {
+            // The renderer can still send calls while its activity is being destroyed.
+            call.reject("The app is closing");
+        }
     }
 
     @PluginMethod public void configure(PluginCall call) {

@@ -268,12 +268,15 @@ public class AndroidUiPlugin extends Plugin {
         getActivity().runOnUiThread(() -> {
             if (supportsPictureInPicture()) {
                 updateSourceRect(call);
-                PictureInPicture.configure(
+                if (!PictureInPicture.configure(
                     getActivity(),
                     pictureInPictureAspectRatio,
                     autoPictureInPictureEnabled && pictureInPictureSourceRect != null,
                     pictureInPictureSourceRect
-                );
+                )) {
+                    call.reject("Android rejected the Picture-in-Picture settings");
+                    return;
+                }
             }
             call.resolve();
         });
@@ -284,8 +287,11 @@ public class AndroidUiPlugin extends Plugin {
         getActivity().runOnUiThread(() -> {
             if (supportsPictureInPicture() && !getActivity().isInPictureInPictureMode()) {
                 updateSourceRect(call);
-                PictureInPicture.configure(getActivity(), pictureInPictureAspectRatio,
-                    autoPictureInPictureEnabled && pictureInPictureSourceRect != null, pictureInPictureSourceRect);
+                if (!PictureInPicture.configure(getActivity(), pictureInPictureAspectRatio,
+                    autoPictureInPictureEnabled && pictureInPictureSourceRect != null, pictureInPictureSourceRect)) {
+                    call.reject("Android rejected the Picture-in-Picture settings");
+                    return;
+                }
             }
             call.resolve();
         });
@@ -508,8 +514,16 @@ public class AndroidUiPlugin extends Plugin {
             return activity.enterPictureInPictureMode(buildParams(aspectRatio, automatic, sourceRect));
         }
 
-        static void configure(Activity activity, Rational aspectRatio, boolean automatic, Rect sourceRect) {
-            activity.setPictureInPictureParams(buildParams(aspectRatio, automatic, sourceRect));
+        /** @return false when Android rejects the settings, such as when it rate-limits aspect-ratio changes */
+        static boolean configure(Activity activity, Rational aspectRatio, boolean automatic, Rect sourceRect) {
+            try {
+                activity.setPictureInPictureParams(buildParams(aspectRatio, automatic, sourceRect));
+                return true;
+            } catch (IllegalStateException error) {
+                // The activity can close before a queued request runs. It has no
+                // Picture-in-Picture settings left to update then.
+                return activity.isFinishing() || activity.isDestroyed();
+            }
         }
 
         private static PictureInPictureParams buildParams(
