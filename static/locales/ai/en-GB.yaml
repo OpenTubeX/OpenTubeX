@@ -722,6 +722,10 @@ Settings:
         Destructive hover and focus: Destructive hover and focus
         Destructive pressed: Destructive pressed
         Text and icons on destructive actions: Text and icons on destructive actions
+    Modal Backdrop:
+      Modal Backdrop: "Dialogue Background"
+      Dim and Blur: "Dim and blur"
+      Dim Only: "Dim only"
   Player Settings:
     Rewind on Resume: "Rewind on resume"
     Minimum Pause Before Rewinding: "Minimum pause before rewinding"
@@ -892,6 +896,7 @@ Settings:
     Screenshot:
       Legacy Formats: "Legacy formats"
       Modern Formats: "Modern formats"
+    Ask Before Preloading Large Playlists: "Ask Before Preloading Large Playlists"
   Channel Settings:
     Channel Settings: Channel Settings
     Channel Settings Description: Remember the settings you pick while watching for each channel individually, so they are applied again the next time you watch one of its videos.
@@ -2207,6 +2212,7 @@ Tooltips:
     Upcoming Videos to Preload: "The maximum number of upcoming videos whose yt-dlp stream URLs are fetched in the background."
     Concurrent Preloads: "The maximum number of yt-dlp processes used to preload videos at once. Higher values use more CPU, memory, and network bandwidth."
     Ignore System Rotation Lock for Fullscreen: Use physical device rotation to enter and exit fullscreen even when Android's auto-rotate is off.
+    Ask Before Preloading Large Playlists: "Asks for confirmation before preloading all videos of a playlist with more than {count} videos."
   Download Settings:
     Download Folder: Videos are saved to this folder. Leave blank to use your system's Downloads folder.
     Global Additional yt-dlp Arguments: Additional command line arguments passed to yt-dlp for every download, for example --cookies-from-browser firefox.
@@ -2257,6 +2263,7 @@ Tooltips:
     Use Fixed Tab Width: Gives every tab in the horizontal tab bar the same width instead of sizing them to their title.
     Use Custom Title Bar: Replaces the system title bar with the tab bar, or with the top navigation when tabs are not at the top, to save vertical space. The window controls appear in the corner of that bar.
     Use Grid Player Menu: Arranges the video player's settings menu as a grid of tiles instead of a list of rows.
+    Modal Backdrop: "Sets how the app looks behind dialogues and menus. Blurring it can be slow on less powerful devices."
   Experimental Settings:
     Disable Hardware Acceleration: Disables GPU hardware acceleration. May fix graphical issues, but will probably perform worse.
 The playlist is at the beginning. Enable loop to continue playing: The playlist is at the beginning. Enable loop to continue playing

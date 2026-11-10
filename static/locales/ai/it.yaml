@@ -734,6 +734,10 @@ Settings:
         Destructive hover and focus: Azione distruttiva al passaggio del puntatore e con lo stato attivo
         Destructive pressed: Azione distruttiva premuta
         Text and icons on destructive actions: Testo e icone sulle azioni distruttive
+    Modal Backdrop:
+      Modal Backdrop: "Sfondo delle finestre di dialogo"
+      Dim and Blur: "Scurisci e sfoca"
+      Dim Only: "Solo scurisci"
   Player Settings:
     Rewind on Resume: "Riavvolgi alla ripresa"
     Minimum Pause Before Rewinding: "Pausa minima prima di riavvolgere"
@@ -904,6 +908,7 @@ Settings:
     Screenshot:
       Legacy Formats: "Formati tradizionali"
       Modern Formats: "Formati moderni"
+    Ask Before Preloading Large Playlists: "Chiedi prima di precaricare playlist grandi"
   Channel Settings:
     Channel Settings: Impostazioni dei canali
     Channel Settings Description: Ricorda separatamente per ogni canale le impostazioni scelte durante la visione e le riapplica quando guardi un altro video dello stesso canale.
@@ -2209,6 +2214,7 @@ Tooltips:
     Upcoming Videos to Preload: "Numero massimo di prossimi video i cui URL yt-dlp vengono recuperati in background."
     Concurrent Preloads: "Il numero massimo di processi yt-dlp usati per precaricare più video contemporaneamente. Valori più alti usano più CPU, memoria e larghezza di banda di rete."
     Ignore System Rotation Lock for Fullscreen: Ruota fisicamente il dispositivo per entrare e uscire dallo schermo intero anche quando la rotazione automatica di Android è disattivata.
+    Ask Before Preloading Large Playlists: "Chiede una conferma prima di precaricare tutti i video di una playlist con più di {count} video."
   Download Settings:
     Download Folder: I video vengono salvati in questa cartella. Lascia vuoto per usare la cartella Download del sistema.
     Global Additional yt-dlp Arguments: Argomenti aggiuntivi della riga di comando passati a yt-dlp per ogni download, ad esempio --cookies-from-browser firefox.
@@ -2260,6 +2266,7 @@ Tooltips:
     Use Fixed Tab Width: Assegna la stessa larghezza a tutte le schede nella barra orizzontale, invece di adattarle al titolo.
     Use Custom Title Bar: Sostituisce la barra del titolo di sistema con la barra delle schede, o con la navigazione superiore quando le schede non sono in alto, per risparmiare spazio verticale. I controlli della finestra compaiono nell'angolo di quella barra.
     Use Grid Player Menu: Dispone il menu delle impostazioni del lettore video come una griglia di riquadri invece di un elenco di righe.
+    Modal Backdrop: "Imposta l’aspetto dell’app dietro finestre di dialogo e menu. La sfocatura può essere lenta sui dispositivi meno potenti."
 The playlist is at the beginning. Enable loop to continue playing: La playlist è all'inizio. Abilita la ripetizione per continuare la riproduzione
 External link opening has been disabled in Settings → Privacy: L'apertura dei link esterni è stata disabilitata in Impostazioni → Privacy
 KeyboardShortcutPrompt:

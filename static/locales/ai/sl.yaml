@@ -929,6 +929,10 @@ Settings:
       Everforest Light Aqua: Everforest Light Aqua
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
+    Modal Backdrop:
+      Modal Backdrop: "Ozadje pogovornih oken"
+      Dim and Blur: "Zatemni in zabriši"
+      Dim Only: "Samo zatemni"
   Player Settings:
     Rewind on Resume: "Previj nazaj ob nadaljevanju"
     Minimum Pause Before Rewinding: "Najkrajši premor pred previjanjem"
@@ -1120,6 +1124,7 @@ Settings:
       Shorts: Shorts
       Screenshots: Posnetki zaslona
     Enable FCast: "Omogoči FCast"
+    Ask Before Preloading Large Playlists: "Vprašaj pred prednalaganjem velikih seznamov predvajanja"
   Channel Settings:
     Channel Settings: Nastavitve kanalov
     Channel Settings Description: Zapomni si nastavitve, ki jih med gledanjem izberete za vsak kanal posebej, in jih znova uporabi ob naslednjem ogledu enega od njegovih videoposnetkov.
@@ -2722,6 +2727,7 @@ Tooltips:
     Upcoming Videos to Preload: "Največje število naslednjih videov, katerih naslovi yt-dlp se pridobijo v ozadju."
     Concurrent Preloads: "Največje število procesov yt-dlp, ki se uporabljajo za sočasno prednalaganje videov. Višje vrednosti porabijo več procesorske moči, pomnilnika in omrežne pasovne širine."
     Ignore System Rotation Lock for Fullscreen: Fizično obrnite napravo za vstop in izstop iz celotnega zaslona, tudi ko je samodejno vrtenje v Androidu izklopljeno.
+    Ask Before Preloading Large Playlists: "Pred prednalaganjem vseh videoposnetkov s seznama predvajanja z več kot {count} videoposnetki zahteva potrditev."
   External Player Settings:
     External Player: Če izberete zunanji predvajalnik, se na sličici prikaže ikona za odpiranje videoposnetka oziroma seznama predvajanja, če je podprt, v zunanjem predvajalniku. Nastavitve Invidious ne vplivajo na zunanje predvajalnike.
     Custom External Player Executable: OpenTubeX privzeto predvideva, da je izbrani zunanji predvajalnik mogoče najti prek okoljske spremenljivke PATH. Po potrebi lahko tukaj nastavite pot po meri.
@@ -2784,6 +2790,7 @@ Tooltips:
     Use Fixed Tab Width: Vsi zavihki v vodoravni vrstici imajo enako širino, namesto da bi se prilagajali naslovu.
     Use Custom Title Bar: Sistemsko naslovno vrstico nadomesti z vrstico z zavihki ali z zgornjo navigacijo, kadar zavihki niso na vrhu, da prihrani navpični prostor. Gumbi za upravljanje okna se prikažejo v kotu te vrstice.
     Use Grid Player Menu: Meni z nastavitvami predvajalnika videoposnetkov je razporejen v mrežo ploščic namesto v seznam vrstic.
+    Modal Backdrop: "Določa, kako je videti aplikacija za pogovornimi okni in meniji. Zabrisanje je lahko na manj zmogljivih napravah počasno."
   Experimental Settings:
     Replace HTTP Cache: Onemogoči Electronov predpomnilnik HTTP na disku in omogoči prilagojen predpomnilnik slik v pomnilniku. Poraba pomnilnika RAM bo večja.
     Disable Hardware Acceleration: Onemogoči strojno pospeševanje GPU. Lahko odpravi grafične težave, vendar bo verjetno zmanjšalo zmogljivost.

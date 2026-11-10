@@ -739,6 +739,10 @@ Settings:
         Destructive hover and focus: Acción destrutiva ao pasar por riba ou enfocala
         Destructive pressed: Acción destrutiva premida
         Text and icons on destructive actions: Texto e iconas das accións destrutivas
+    Modal Backdrop:
+      Modal Backdrop: "Fondo dos diálogos"
+      Dim and Blur: "Escurecer e desenfocar"
+      Dim Only: "Só escurecer"
   Player Settings:
     Rewind on Resume: "Retroceder ao retomar"
     Minimum Pause Before Rewinding: "Pausa mínima antes de retroceder"
@@ -915,6 +919,7 @@ Settings:
     Screenshot:
       Legacy Formats: "Formatos antigos"
       Modern Formats: "Formatos modernos"
+    Ask Before Preloading Large Playlists: "Preguntar antes de precargar listas de reprodución grandes"
   Channel Settings:
     Channel Settings: Configuración das canles
     Channel Settings Description: Lembrar por separado os axustes escollidos mentres ves vídeos de cada canle para aplicalos de novo a próxima vez que vexas un dos seus vídeos.
@@ -2269,6 +2274,7 @@ Tooltips:
     Upcoming Videos to Preload: "Número máximo de vídeos seguintes cuxos URL de yt-dlp se obteñen en segundo plano."
     Concurrent Preloads: "Número máximo de procesos de yt-dlp utilizados para precargar vídeos ao mesmo tempo. Os valores máis altos usan máis CPU, memoria e largura de banda da rede."
     Ignore System Rotation Lock for Fullscreen: Xira fisicamente o dispositivo para entrar e saír de pantalla completa aínda que a rotación automática de Android estea desactivada.
+    Ask Before Preloading Large Playlists: "Pide confirmación antes de precargar todos os vídeos dunha lista de reprodución con máis de {count} vídeos."
   Download Settings:
     Download Folder: Os vídeos gárdanse neste cartafol. Déixao en branco para usar o cartafol Descargas do sistema.
     Global Additional yt-dlp Arguments: Argumentos adicionais da liña de ordes que se pasan a yt-dlp en todas as descargas, por exemplo --cookies-from-browser firefox.
@@ -2320,6 +2326,7 @@ Tooltips:
     Use Fixed Tab Width: Dálles a todas as lapelas da barra horizontal a mesma largura en lugar de adaptar o tamaño ao título.
     Use Custom Title Bar: Substitúe a barra de título do sistema pola barra de lapelas, ou pola navegación superior cando as lapelas non están arriba, para aforrar espazo vertical. Os controis da xanela aparecen na esquina desa barra.
     Use Grid Player Menu: Organiza o menú de configuración do reprodutor de vídeo como unha grade de bloques en lugar dunha lista de filas.
+    Modal Backdrop: "Define como se ve a aplicación detrás dos diálogos e menús. O desenfoque pode ser lento en dispositivos menos potentes."
   Experimental Settings:
     Disable Hardware Acceleration: Desactiva a aceleración por hardware da GPU. Pode resolver problemas gráficos, pero probablemente reducirá o rendemento.
 The playlist is at the beginning. Enable loop to continue playing: A lista de reprodución está no principio. Activa a repetición para continuar a reprodución

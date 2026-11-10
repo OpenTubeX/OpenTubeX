@@ -734,6 +734,10 @@ Settings:
         Destructive hover and focus: 危险操作悬停和聚焦状态
         Destructive pressed: 危险操作按下状态
         Text and icons on destructive actions: 危险操作的文本和图标
+    Modal Backdrop:
+      Modal Backdrop: "对话框背景"
+      Dim and Blur: "变暗并模糊"
+      Dim Only: "仅变暗"
   Player Settings:
     Rewind on Resume: "恢复播放时后退"
     Minimum Pause Before Rewinding: "后退前的最短暂停时间"
@@ -904,6 +908,7 @@ Settings:
     Screenshot:
       Legacy Formats: "传统格式"
       Modern Formats: "现代格式"
+    Ask Before Preloading Large Playlists: "预加载大型播放列表前询问"
   Channel Settings:
     Channel Settings: 频道设置
     Channel Settings Description: 分别记住观看各频道时选择的设置，以便下次观看该频道的视频时再次应用。
@@ -2209,6 +2214,7 @@ Tooltips:
     Upcoming Videos to Preload: "在后台获取 yt-dlp 流地址的后续视频数量上限。"
     Concurrent Preloads: "同时用于预加载视频的 yt-dlp 进程数上限。数值越高，使用的 CPU、内存和网络带宽越多。"
     Ignore System Rotation Lock for Fullscreen: 通过转动设备进入和退出全屏，即使 Android 的自动旋转已关闭。
+    Ask Before Preloading Large Playlists: "预加载超过 {count} 个视频的播放列表中的所有视频前请求确认。"
   Download Settings:
     Download Folder: 视频将保存到此文件夹。留空则使用系统的“下载”文件夹。
     Global Additional yt-dlp Arguments: 每次下载时传递给 yt-dlp 的额外命令行参数，例如 --cookies-from-browser firefox。
@@ -2260,6 +2266,7 @@ Tooltips:
     Use Fixed Tab Width: 让水平标签栏中的所有标签页宽度相同，而不是根据标题调整宽度。
     Use Custom Title Bar: 用标签栏（标签页不在顶部时则用顶部导航栏）替换系统标题栏，以节省垂直空间。窗口控制按钮会显示在该栏的角落。
     Use Grid Player Menu: 将视频播放器的设置菜单排列为磁贴网格，而不是行列表。
+    Modal Backdrop: "设置对话框和菜单后方应用的显示效果。模糊效果在性能较弱的设备上可能会较慢。"
 The playlist is at the beginning. Enable loop to continue playing: 播放列表已到开头。启用循环可继续播放
 External link opening has been disabled in Settings → Privacy: 已在“设置”→“隐私”中禁用打开外部链接
 KeyboardShortcutPrompt:

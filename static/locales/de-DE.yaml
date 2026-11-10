@@ -817,6 +817,10 @@ Settings:
     Expand Side Bar by Default: Seitenleiste standardmäßig erweitern
     Hide Side Bar Labels: Seitenleisten-Beschriftungen ausblenden
     Compact Settings Categories: Kompakte Einstellungskategorien
+    Modal Backdrop:
+      Modal Backdrop: Dialoghintergrund
+      Dim and Blur: Abdunkeln und weichzeichnen
+      Dim Only: Nur abdunkeln
     Hide OpenTubeX Header Logo: OpenTubeX-Titellogo ausblenden
     Hide Side Bar on Watch Pages: Seitenleiste auf den Wiedergabeseiten ausblenden
     Move Downloads to App Header: Downloads in die App-Kopfzeile verschieben
@@ -1129,6 +1133,7 @@ Settings:
     Preload Upcoming Videos: Bevorstehende Videos vorladen
     Upcoming Videos to Preload: Anzahl vorzuladender Videos
     Concurrent Preloads: Gleichzeitige Vorladungen
+    Ask Before Preloading Large Playlists: Vor dem Vorladen großer Playlists fragen
     Default Viewing Mode:
       Theater: Kinomodus
       Picture in Picture: Bild im Bild
@@ -3011,6 +3016,7 @@ Tooltips:
     Preload Upcoming Videos: Ruft die yt-dlp-Stream-URLs der Videos ab, die als Nächstes abgespielt werden können, und speichert sie zwischen. Die Warteschlange hat Vorrang vor Playlists und Empfehlungen.
     Upcoming Videos to Preload: Die Höchstzahl bevorstehender Videos, deren yt-dlp-Stream-URLs im Hintergrund abgerufen werden.
     Concurrent Preloads: Die maximale Anzahl von yt-dlp-Prozessen, die gleichzeitig Videos vorladen. Höhere Werte benötigen mehr Prozessorleistung, Arbeitsspeicher und Netzwerkbandbreite.
+    Ask Before Preloading Large Playlists: Fragt nach einer Bestätigung, bevor alle Videos einer Playlist mit mehr als {count} Videos vorgeladen werden.
     Ignore System Rotation Lock for Fullscreen: Durch Drehen des Geräts zum Vollbild wechseln und es verlassen, auch wenn die automatische Drehung in Android ausgeschaltet ist.
   External Player Settings:
     Custom External Player Arguments: Alle benutzerdefinierten Befehlszeilenargumente, die an den externen Video-Player übergeben werden sollen.
@@ -3080,6 +3086,7 @@ Tooltips:
     Use Custom Title Bar: Ersetzt die Titelleiste des Systems durch die Tableiste oder, wenn die Tabs nicht oben sind, durch die obere Navigation, um vertikalen Platz zu sparen. Die Fenstersteuerung erscheint in der Ecke dieser Leiste.
     Use Grid Player Menu: Ordnet das Einstellungsmenü des Videoplayers als Kachelraster statt als Liste an.
     Compact Settings Categories: Blendet die Beschreibungen aus und verringert die Höhe der Einstellungskategorien.
+    Modal Backdrop: Legt fest, wie die App hinter Dialogen und Menüs aussieht. Das Weichzeichnen kann auf leistungsschwächeren Geräten langsam sein.
 Playing Next Video Interval: Nächstes Video wird sofort abgespielt. Zum Abbrechen klicken. | Nächstes Video wird in {nextVideoInterval} Sekunden abgespielt. Zum Abbrechen klicken. | Nächstes Video wird in {nextVideoInterval} Sekunden abgespielt. Zum Abbrechen klicken.
 More: Mehr
 Unknown YouTube url type, cannot be opened in app: Unbekannter YouTube URL-Typ, kann in der App nicht geöffnet werden

@@ -735,6 +735,10 @@ Settings:
         Destructive hover and focus: Gweithred ddinistriol wrth hofran a chanolbwyntio
         Destructive pressed: Gweithred ddinistriol wedi'i gwasgu
         Text and icons on destructive actions: Testun ac eiconau ar weithredoedd dinistriol
+    Modal Backdrop:
+      Modal Backdrop: "Cefndir deialogau"
+      Dim and Blur: "Pylu a niwlio"
+      Dim Only: "Pylu yn unig"
   Player Settings:
     Rewind on Resume: "Ailddirwyn wrth ailddechrau"
     Minimum Pause Before Rewinding: "Saib lleiaf cyn ailddirwyn"
@@ -907,6 +911,7 @@ Settings:
     Screenshot:
       Legacy Formats: "Fformatau hŷn"
       Modern Formats: "Fformatau modern"
+    Ask Before Preloading Large Playlists: "Gofyn cyn rhaglwytho rhestrau chwarae mawr"
   Channel Settings:
     Channel Settings: Gosodiadau sianeli
     Channel Settings Description: Cofiwch y gosodiadau a ddewiswch wrth wylio ar gyfer pob sianel ar wahân, fel eu bod yn cael eu gosod eto y tro nesaf y byddwch yn gwylio un o'i fideos.
@@ -2245,6 +2250,7 @@ Tooltips:
     Upcoming Videos to Preload: "Uchafswm y fideos nesaf y nôlir eu URLau yt-dlp yn y cefndir."
     Concurrent Preloads: "Uchafswm nifer y prosesau yt-dlp a ddefnyddir i raglwytho fideos ar yr un pryd. Mae gwerthoedd uwch yn defnyddio mwy o CPU, cof a lled band rhwydwaith."
     Ignore System Rotation Lock for Fullscreen: Cylchdrowch y ddyfais yn gorfforol i agor a chau sgrin lawn hyd yn oed pan fydd cylchdroi awtomatig Android wedi’i ddiffodd.
+    Ask Before Preloading Large Playlists: "Yn gofyn am gadarnhad cyn rhaglwytho pob fideo mewn rhestr chwarae gyda mwy na {count} fideo."
   Download Settings:
     Download Folder: Caiff fideos eu cadw yn y ffolder hon. Gadewch yn wag i ddefnyddio ffolder Lawrlwythiadau eich system.
     Global Additional yt-dlp Arguments: Ymresymiadau llinell orchymyn ychwanegol a drosglwyddir i yt-dlp ar gyfer pob lawrlwythiad, er enghraifft --cookies-from-browser firefox.
@@ -2296,6 +2302,7 @@ Tooltips:
     Use Fixed Tab Width: Mae'n rhoi'r un lled i bob tab yn y bar tabiau llorweddol yn lle eu meintio yn ôl eu teitl.
     Use Custom Title Bar: Mae'n disodli bar teitl y system â'r bar tabiau, neu â'r llywio uchaf pan nad yw'r tabiau ar y brig, i arbed lle fertigol. Mae rheolyddion y ffenestr yn ymddangos yng nghornel y bar hwnnw.
     Use Grid Player Menu: Mae'n trefnu dewislen gosodiadau'r chwaraewr fideo fel grid o deils yn lle rhestr o resi.
+    Modal Backdrop: "Yn gosod sut mae’r ap yn edrych y tu ôl i ddeialogau a dewislenni. Gall niwlio fod yn araf ar ddyfeisiau llai pwerus."
   Experimental Settings:
     Disable Hardware Acceleration: Yn analluogi cyflymiad caledwedd y GPU. Gall ddatrys problemau graffeg, ond mae'n debygol o leihau perfformiad.
 The playlist is at the beginning. Enable loop to continue playing: Mae'r rhestr chwarae ar y dechrau. Galluogwch ailadrodd i barhau i chwarae

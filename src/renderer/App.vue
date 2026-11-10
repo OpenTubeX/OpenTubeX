@@ -2028,6 +2028,7 @@ onBeforeUnmount(() => {
   removeCapacitorTabAvatars?.()
   document.documentElement.classList.remove('hideOutlines', 'limitTitlesToTwoLines')
   delete document.documentElement.dataset.linkUnderline
+  delete document.documentElement.dataset.modalBackdrop
   removeGamepadNavigation()
   removeCustomThemeListener()
   cancelUtilityRoutePreload()
@@ -2565,6 +2566,10 @@ watch(() => store.getters.getLimitTitlesToTwoLines, limit => {
 
 watch(() => store.getters.getLinkUnderline, value => {
   document.documentElement.dataset.linkUnderline = value
+}, { flush: 'sync', immediate: true })
+
+watch(() => store.getters.getModalBackdrop, value => {
+  document.documentElement.dataset.modalBackdrop = value
 }, { flush: 'sync', immediate: true })
 
 const phoneLayout = usePhoneLayout()

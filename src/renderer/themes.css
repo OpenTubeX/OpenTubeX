@@ -2530,8 +2530,9 @@ a:visited {
 
 /* stylelint-enable no-descending-specificity */
 
-/* Set from the system Reduce Transparency setting by helpers/reducedTransparency.js */
-:root[data-reduced-transparency] body {
+/* Set from the system Reduce Transparency setting by helpers/reducedTransparency.js
+   and from the Modal Backdrop setting by App.vue */
+:root:is([data-reduced-transparency], [data-modal-backdrop='dim']) body {
   --modal-backdrop-blur: none;
 }
 

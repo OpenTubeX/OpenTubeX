@@ -734,6 +734,10 @@ Settings:
         Destructive hover and focus: Pöördumatu toiming kursoriga osutamisel ja fookuses
         Destructive pressed: Pöördumatu toiming vajutamisel
         Text and icons on destructive actions: Pöördumatute toimingute tekst ja ikoonid
+    Modal Backdrop:
+      Modal Backdrop: "Dialoogide taust"
+      Dim and Blur: "Tumenda ja hägusta"
+      Dim Only: "Ainult tumenda"
   Player Settings:
     Rewind on Resume: "Keri jätkamisel tagasi"
     Minimum Pause Before Rewinding: "Minimaalne paus enne tagasikerimist"
@@ -904,6 +908,7 @@ Settings:
     Screenshot:
       Legacy Formats: "Vanemad vormingud"
       Modern Formats: "Kaasaegsed vormingud"
+    Ask Before Preloading Large Playlists: "Küsi enne suurte esitusloendite eellaadimist"
   Channel Settings:
     Channel Settings: Kanali seaded
     Channel Settings Description: Jäta iga kanali jaoks eraldi meelde vaatamise ajal valitud seaded, et need rakenduksid uuesti, kui vaatad järgmisel korral selle kanali videot.
@@ -2212,6 +2217,7 @@ Tooltips:
     Upcoming Videos to Preload: "Taustal hangitavate yt-dlp aadressidega järgmiste videote suurim arv."
     Concurrent Preloads: "Suurim arv yt-dlp protsesse, mida kasutatakse videote samaaegseks eellaadimiseks. Suuremad väärtused kasutavad rohkem protsessorit, mälu ja võrgu läbilaskevõimet."
     Ignore System Rotation Lock for Fullscreen: Pööra seadet füüsiliselt täisekraani avamiseks ja sulgemiseks ka siis, kui Androidi automaatne pööramine on välja lülitatud.
+    Ask Before Preloading Large Playlists: "Küsib kinnitust enne, kui eellaaditakse kõik videod esitusloendist, milles on üle {count} video."
   Download Settings:
     Download Folder: Videod salvestatakse sellesse kausta. Süsteemi allalaadimiste kausta kasutamiseks jäta väli tühjaks.
     Global Additional yt-dlp Arguments: Täiendavad käsureaargumendid, mis edastatakse iga allalaadimise puhul yt-dlp-le, näiteks --cookies-from-browser firefox.
@@ -2263,6 +2269,7 @@ Tooltips:
     Use Fixed Tab Width: Annab horisontaalsel vaheleheribal igale vahelehele pealkirjast sõltumata sama laiuse.
     Use Custom Title Bar: Asendab süsteemi tiitliriba vahekaardiribaga või ülemise navigeerimisega, kui vahekaardid pole üleval, et säästa vertikaalset ruumi. Akna juhtnupud kuvatakse selle riba nurgas.
     Use Grid Player Menu: Paigutab videopleieri seadete menüü ridade loendi asemel paanide ruudustikuna.
+    Modal Backdrop: "Määrab, kuidas rakendus dialoogide ja menüüde taga välja näeb. Hägustamine võib vähem võimsatel seadmetel aeglane olla."
 The playlist is at the beginning. Enable loop to continue playing: Esitusloend on alguses. Esitamise jätkamiseks luba kordus
 External link opening has been disabled in Settings → Privacy: Väliste linkide avamine on jaotises Seaded → Privaatsus keelatud
 KeyboardShortcutPrompt:

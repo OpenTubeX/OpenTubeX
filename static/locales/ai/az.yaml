@@ -736,6 +736,10 @@ Settings:
         Destructive hover and focus: Silinmə elementinin üzərində göstərici olduqda və fokuslandıqda
         Destructive pressed: Silinmə elementi basıldıqda
         Text and icons on destructive actions: Silinmə əməliyyatlarında mətn və nişanlar
+    Modal Backdrop:
+      Modal Backdrop: "Dialoq arxa fonu"
+      Dim and Blur: "Qaralt və bulanıqlaşdır"
+      Dim Only: "Yalnız qaralt"
   Player Settings:
     Rewind on Resume: "Davam etdikdə geri çək"
     Minimum Pause Before Rewinding: "Geri çəkməzdən əvvəl minimum fasilə"
@@ -906,6 +910,7 @@ Settings:
     Screenshot:
       Legacy Formats: "Köhnə formatlar"
       Modern Formats: "Müasir formatlar"
+    Ask Before Preloading Large Playlists: "Böyük pleylistləri əvvəlcədən yükləməzdən əvvəl soruş"
   Channel Settings:
     Channel Settings: Kanal tənzimləmələri
     Channel Settings Description: Baxış zamanı seçdiyiniz tənzimləmələri hər kanal üçün ayrıca yadda saxlayın ki, həmin kanalın növbəti videosuna baxanda yenidən tətbiq edilsin.
@@ -2222,6 +2227,7 @@ Tooltips:
     Upcoming Videos to Preload: yt-dlp axın URL-ləri arxa planda alınan növbəti videoların maksimum sayı.
     Concurrent Preloads: Videoları eyni anda öncədən yükləmək üçün istifadə olunan yt-dlp proseslərinin maksimum sayı. Yüksək dəyərlər daha çox prosessor, yaddaş və şəbəkə resursu istifadə edir.
     Ignore System Rotation Lock for Fullscreen: Android-də avtomatik fırlanma söndürülsə belə, cihazı fiziki olaraq döndərərək tam ekrana keçin və çıxın.
+    Ask Before Preloading Large Playlists: "{count} videodan çox olan pleylistin bütün videolarını əvvəlcədən yükləməzdən əvvəl təsdiq istəyir."
   Download Settings:
     Download Folder: Videolar bu qovluqda saxlanır. Sistemin Yükləmələr qovluğunu istifadə etmək üçün boş buraxın.
     Global Additional yt-dlp Arguments: Hər endirmədə yt-dlp-yə ötürülən əlavə əmr sətri arqumentləri, məsələn --cookies-from-browser firefox.
@@ -2273,6 +2279,7 @@ Tooltips:
     Use Fixed Tab Width: Üfüqi vərəq zolağında bütün vərəqlərin enini başlıqlarına görə dəyişmək əvəzinə eyni edir.
     Use Custom Title Bar: Şaquli yerə qənaət etmək üçün sistemin başlıq zolağını vərəq paneli ilə, vərəqlər yuxarıda olmadıqda isə yuxarı naviqasiya ilə əvəz edir. Pəncərə idarəetmə düymələri həmin panelin küncündə görünür.
     Use Grid Player Menu: Video oynadıcısının tənzimləmələr menyusunu sətir siyahısı əvəzinə plitələr toru kimi düzür.
+    Modal Backdrop: "Dialoqların və menyuların arxasında tətbiqin necə görünəcəyini təyin edir. Bulanıqlaşdırma zəif cihazlarda yavaş işləyə bilər."
 The playlist is at the beginning. Enable loop to continue playing: Pleylist başlanğıcdadır. Oynatmağa davam etmək üçün təkrarlanmanı aktivləşdir
 External link opening has been disabled in Settings → Privacy: Xarici linklərin açılması Tənzimləmələr → Məxfilik bölməsində bağlanıb
 KeyboardShortcutPrompt:

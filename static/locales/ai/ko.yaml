@@ -898,6 +898,10 @@ Settings:
       Everforest Light Aqua: Everforest Light Aqua
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
+    Modal Backdrop:
+      Modal Backdrop: "대화 상자 배경"
+      Dim and Blur: "어둡게 하고 흐리게"
+      Dim Only: "어둡게만"
   Player Settings:
     Rewind on Resume: "재개 시 되감기"
     Minimum Pause Before Rewinding: "되감기 전 최소 일시 정지 시간"
@@ -1084,6 +1088,7 @@ Settings:
       Shorts: Shorts
       Screenshots: 스크린샷
     Enable FCast: "FCast 활성화"
+    Ask Before Preloading Large Playlists: "큰 재생목록을 미리 불러오기 전에 묻기"
   Channel Settings:
     Channel Settings: 채널 설정
     Channel Settings Description: 채널마다 시청 중 선택한 설정을 기억하고, 다음에 해당 채널의 동영상을 시청할 때 다시 적용합니다.
@@ -2597,6 +2602,7 @@ Tooltips:
     Upcoming Videos to Preload: "백그라운드에서 yt-dlp URL을 가져올 다음 동영상의 최대 개수입니다."
     Concurrent Preloads: "동시에 동영상을 미리 로드하는 데 사용할 yt-dlp 프로세스의 최대 개수입니다. 값이 높을수록 CPU, 메모리 및 네트워크 대역폭을 더 많이 사용합니다."
     Ignore System Rotation Lock for Fullscreen: Android 자동 회전이 꺼져 있어도 기기를 직접 회전하여 전체 화면으로 전환하거나 종료합니다.
+    Ask Before Preloading Large Playlists: "동영상이 {count}개를 넘는 재생목록의 모든 동영상을 미리 불러오기 전에 확인을 요청합니다."
   External Player Settings:
     Ignore Default Arguments: 동영상 URL 외의 기본 인수를 외부 플레이어에 보내지 않습니다. 예를 들어 재생 속도와 재생목록 URL이 해당됩니다. 사용자 지정 인수는 계속 전달됩니다.
   Download Settings:
@@ -2653,6 +2659,7 @@ Tooltips:
     Use Fixed Tab Width: 가로 탭 표시줄의 각 탭 너비를 제목에 맞추는 대신 모두 같은 너비로 설정합니다.
     Use Custom Title Bar: 세로 공간을 절약하기 위해 시스템 제목 표시줄을 탭 표시줄로 바꾸거나, 탭이 위쪽에 있지 않을 때는 상단 탐색 영역으로 바꿉니다. 창 제어 버튼은 해당 표시줄의 모서리에 표시됩니다.
     Use Grid Player Menu: 동영상 플레이어의 설정 메뉴를 행 목록 대신 타일 격자로 배치합니다.
+    Modal Backdrop: "대화 상자와 메뉴 뒤에서 앱이 보이는 방식을 설정합니다. 흐림 효과는 성능이 낮은 기기에서 느릴 수 있습니다."
   Experimental Settings:
     Replace HTTP Cache: Electron의 디스크 기반 HTTP 캐시를 비활성화하고 사용자 지정 메모리 내 이미지 캐시를 활성화합니다. RAM 사용량이 늘어납니다.
     Disable Hardware Acceleration: GPU 하드웨어 가속을 비활성화합니다. 그래픽 문제를 해결할 수 있지만 성능이 저하될 수 있습니다.

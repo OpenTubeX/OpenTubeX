@@ -9,6 +9,14 @@
         :tooltip="t('Tooltips.Player Settings.Preload Upcoming Videos')"
         @change="updateYtDlpPreloadEnabled"
       />
+      <FtToggleSwitch
+        :label="t('Settings.Player Settings.Ask Before Preloading Large Playlists')"
+        compact
+        :default-value="confirmLargePlaylistPreload"
+        setting-key="confirmLargePlaylistPreload"
+        :tooltip="t('Tooltips.Player Settings.Ask Before Preloading Large Playlists', { count: PLAYLIST_PRELOAD_CONFIRM_THRESHOLD })"
+        @change="store.dispatch('updateConfirmLargePlaylistPreload', $event)"
+      />
     </FtFlexBox>
     <FtSliderGrid>
       <FtSlider
@@ -58,6 +66,7 @@ import FtSliderGrid from '../../FtSliderGrid/FtSliderGrid.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../../store/index'
+import { PLAYLIST_PRELOAD_CONFIRM_THRESHOLD } from '../../../../constants'
 import {
   DEFAULT_SEGMENT_PREFETCH_LIMIT,
   MAX_SEGMENT_PREFETCH_LIMIT,
@@ -71,6 +80,7 @@ const { t } = useI18n()
 
 const segmentPrefetchLimit = computed(() => store.getters.getSegmentPrefetchLimit)
 const ytDlpPreloadEnabled = computed(() => store.getters.getYtDlpPreloadEnabled)
+const confirmLargePlaylistPreload = computed(() => store.getters.getConfirmLargePlaylistPreload)
 const ytDlpPreloadCount = computed(() => store.getters.getYtDlpPreloadCount)
 const ytDlpPreloadConcurrency = computed(() => store.getters.getYtDlpPreloadConcurrency)
 

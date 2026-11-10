@@ -761,6 +761,10 @@ Settings:
       Catppuccin Macchiato Lavender: "Catppuccin Macchiato بنفش کمرنگ"
       Catppuccin Latte Mauve: Catppuccin Latte Mauve
       Catppuccin Latte Red: Catppuccin Latte Red
+    Modal Backdrop:
+      Modal Backdrop: "پس‌زمینهٔ کادرهای گفتگو"
+      Dim and Blur: "تیره و مات"
+      Dim Only: "فقط تیره"
   Player Settings:
     Rewind on Resume: "عقب‌بردن هنگام ادامه"
     Minimum Pause Before Rewinding: "حداقل توقف پیش از عقب‌بردن"
@@ -941,6 +945,7 @@ Settings:
       Shorts: Shorts
       Screenshots: نماگرفت‌ها
     Enable FCast: "فعال کردن FCast"
+    Ask Before Preloading Large Playlists: "پرسیدن پیش از پیش‌بارگیری فهرست‌های پخش بزرگ"
   Channel Settings:
     Channel Settings: تنظیمات کانال
     Channel Settings Description: تنظیمات انتخابی هنگام تماشای هر کانال را جداگانه به‌خاطر بسپار تا دفعهٔ بعد برای ویدیوهای آن دوباره اعمال شوند.
@@ -2309,6 +2314,7 @@ Tooltips:
     Upcoming Videos to Preload: "بیشترین تعداد ویدیوهای بعدی که نشانی yt-dlp آن‌ها در پس‌زمینه دریافت می‌شود."
     Concurrent Preloads: "بیشترین تعداد فرایندهای yt-dlp که برای پیش‌بارگذاری هم‌زمان ویدیوها استفاده می‌شوند. مقادیر بالاتر از پردازنده، حافظه و پهنای باند شبکه بیشتری استفاده می‌کنند."
     Ignore System Rotation Lock for Fullscreen: با چرخاندن فیزیکی دستگاه وارد حالت تمام‌صفحه شوید یا از آن خارج شوید، حتی وقتی چرخش خودکار اندروید خاموش است.
+    Ask Before Preloading Large Playlists: "پیش از پیش‌بارگیری همهٔ ویدیوهای فهرست پخشی با بیش از {count} ویدیو، تأیید می‌خواهد."
   Download Settings:
     Download Folder: ویدیوها در این پوشه ذخیره می‌شوند. برای استفاده از پوشه «بارگیری‌ها»ی سیستم، خالی بگذارید.
     Global Additional yt-dlp Arguments: آرگومان‌های اضافی خط فرمان که برای هر بارگیری به yt-dlp فرستاده می‌شوند؛ برای مثال --cookies-from-browser firefox.
@@ -2360,6 +2366,7 @@ Tooltips:
     Use Fixed Tab Width: به‌جای تنظیم اندازه زبانه‌ها بر اساس عنوانشان، به همه زبانه‌های نوار افقی عرضی یکسان می‌دهد.
     Use Custom Title Bar: برای صرفه‌جویی در فضای عمودی، نوار عنوان سیستم را با نوار زبانه‌ها، یا وقتی زبانه‌ها در بالا نیستند با ناوبری بالا، جایگزین می‌کند. دکمه‌های کنترل پنجره در گوشه همان نوار نمایش داده می‌شوند.
     Use Grid Player Menu: منوی تنظیمات پخش‌کننده ویدیو را به‌جای فهرستی از ردیف‌ها، به‌صورت شبکه‌ای از کاشی‌ها می‌چیند.
+    Modal Backdrop: "تعیین می‌کند برنامه پشت کادرهای گفتگو و منوها چگونه دیده شود. مات‌کردن ممکن است در دستگاه‌های ضعیف‌تر کند باشد."
   Experimental Settings:
     Disable Hardware Acceleration: شتاب‌دهی سخت‌افزاری پردازندهٔ گرافیکی را غیرفعال می‌کند. ممکن است مشکلات گرافیکی را برطرف کند، اما احتمالاً کارایی را کاهش می‌دهد.
 The playlist is at the beginning. Enable loop to continue playing: فهرست پخش در ابتداست. برای ادامه پخش، تکرار را فعال کنید

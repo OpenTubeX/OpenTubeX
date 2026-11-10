@@ -734,6 +734,10 @@ Settings:
         Destructive hover and focus: Ekintza suntsitzailea seinalatzean eta fokuratzean
         Destructive pressed: Ekintza suntsitzailea sakatzean
         Text and icons on destructive actions: Ekintza suntsitzaileetako testua eta ikonoak
+    Modal Backdrop:
+      Modal Backdrop: "Elkarrizketa-koadroen atzeko planoa"
+      Dim and Blur: "Ilundu eta lausotu"
+      Dim Only: "Ilundu soilik"
   Player Settings:
     Rewind on Resume: "Atzera egin berrekitean"
     Minimum Pause Before Rewinding: "Atzera egin aurreko gutxieneko pausa"
@@ -904,6 +908,7 @@ Settings:
     Screenshot:
       Legacy Formats: "Formatu zaharrak"
       Modern Formats: "Formatu modernoak"
+    Ask Before Preloading Large Playlists: "Galdetu erreprodukzio-zerrenda handiak aurrekargatu aurretik"
   Channel Settings:
     Channel Settings: Kanalen ezarpenak
     Channel Settings Description: Gogoratu kanal bakoitzerako bideoak ikustean aukeratutako ezarpenak, kanal horretako beste bideo bat ikusten duzunean berriro aplikatzeko.
@@ -2219,6 +2224,7 @@ Tooltips:
     Upcoming Videos to Preload: "Atzeko planoan yt-dlp URLak eskuratuko zaizkien hurrengo bideoen gehieneko kopurua."
     Concurrent Preloads: "Bideoak aldi berean aurrekargatzeko erabilitako yt-dlp prozesuen gehieneko kopurua. Balio handiagoek PUZ, memoria eta sareko banda-zabalera gehiago erabiltzen dute."
     Ignore System Rotation Lock for Fullscreen: Biratu gailua fisikoki pantaila osoan sartzeko eta irteteko, Androiden biraketa automatikoa desaktibatuta badago ere.
+    Ask Before Preloading Large Playlists: "Berrespena eskatzen du {count} bideo baino gehiagoko erreprodukzio-zerrenda baten bideo guztiak aurrekargatu aurretik."
   Download Settings:
     Download Folder: Bideoak karpeta honetan gordetzen dira. Utzi hutsik sistemako Deskargak karpeta erabiltzeko.
     Global Additional yt-dlp Arguments: Deskarga bakoitzean yt-dlp-ri emandako komando-lerroko argumentu gehigarriak; adibidez, --cookies-from-browser firefox.
@@ -2270,6 +2276,7 @@ Tooltips:
     Use Fixed Tab Width: Fitxa horizontalen barrako fitxa guztiei zabalera bera ematen die, izenburuaren arabera tamainatu beharrean.
     Use Custom Title Bar: Sistemaren izenburu-barra fitxa-barrarekin ordezkatzen du, edo goiko nabigazioarekin fitxak goian ez daudenean, espazio bertikala aurrezteko. Leihoaren kontrolak barra horren izkinan agertzen dira.
     Use Grid Player Menu: Erreproduzigailuaren ezarpen-menua lauzaz osatutako sareta batean antolatzen du, errenkada-zerrenda baten ordez.
+    Modal Backdrop: "Aplikazioa elkarrizketa-koadroen eta menuen atzean nola ikusten den ezartzen du. Lausotzea motela izan daiteke gailu ez hain ahaltsuetan."
 The playlist is at the beginning. Enable loop to continue playing: Erreprodukzio-zerrenda hasieran dago. Gaitu begizta erreproduzitzen jarraitzeko
 External link opening has been disabled in Settings → Privacy: Kanpoko estekak irekitzea desgaitu da Ezarpenak → Pribatutasuna atalean
 KeyboardShortcutPrompt:

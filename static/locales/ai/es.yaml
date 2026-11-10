@@ -694,6 +694,10 @@ Settings:
         Destructive hover and focus: Acción destructiva al pasar el puntero o enfocarla
         Destructive pressed: Acción destructiva al pulsarla
         Text and icons on destructive actions: Texto e iconos de las acciones destructivas
+    Modal Backdrop:
+      Modal Backdrop: "Fondo de los diálogos"
+      Dim and Blur: "Oscurecer y desenfocar"
+      Dim Only: "Solo oscurecer"
   Player Settings:
     Rewind on Resume: "Retroceder al reanudar"
     Minimum Pause Before Rewinding: "Pausa mínima antes de retroceder"
@@ -866,6 +870,7 @@ Settings:
     Screenshot:
       Legacy Formats: "Formatos antiguos"
       Modern Formats: "Formatos modernos"
+    Ask Before Preloading Large Playlists: "Preguntar antes de precargar listas de reproducción grandes"
   Channel Settings:
     Channel Settings: Ajustes de canales
     Channel Settings Description: Recuerda por separado los ajustes que elijas al ver cada canal para volver a aplicarlos la próxima vez que veas uno de sus vídeos.
@@ -2184,6 +2189,7 @@ Tooltips:
     Upcoming Videos to Preload: "Número máximo de próximos vídeos cuyas URL de yt-dlp se obtienen en segundo plano."
     Concurrent Preloads: "El número máximo de procesos de yt-dlp utilizados para precargar vídeos al mismo tiempo. Los valores más altos usan más CPU, memoria y ancho de banda de red."
     Ignore System Rotation Lock for Fullscreen: Gira físicamente el dispositivo para entrar y salir de pantalla completa aunque la rotación automática de Android esté desactivada.
+    Ask Before Preloading Large Playlists: "Pide confirmación antes de precargar todos los vídeos de una lista de reproducción con más de {count} vídeos."
   Download Settings:
     Download Folder: Los vídeos se guardan en esta carpeta. Déjala en blanco para usar la carpeta Descargas del sistema.
     Global Additional yt-dlp Arguments: Argumentos de línea de comandos adicionales que se pasan a yt-dlp en todas las descargas, por ejemplo, --cookies-from-browser firefox.
@@ -2235,6 +2241,7 @@ Tooltips:
     Use Fixed Tab Width: Asigna el mismo ancho a todas las pestañas de la barra horizontal en lugar de adaptarlo a su título.
     Use Custom Title Bar: Reemplaza la barra de título del sistema por la barra de pestañas, o por la navegación superior cuando las pestañas no están arriba, para ahorrar espacio vertical. Los controles de la ventana aparecen en la esquina de esa barra.
     Use Grid Player Menu: Organiza el menú de ajustes del reproductor de vídeo como una cuadrícula de mosaicos en lugar de una lista de filas.
+    Modal Backdrop: "Define cómo se ve la aplicación detrás de los diálogos y menús. El desenfoque puede ser lento en dispositivos menos potentes."
 The playlist is at the beginning. Enable loop to continue playing: La lista de reproducción está al principio. Activa la repetición para seguir reproduciendo
 External link opening has been disabled in Settings → Privacy: La apertura de enlaces externos se ha desactivado en Ajustes → Privacidad
 KeyboardShortcutPrompt:

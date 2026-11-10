@@ -749,6 +749,10 @@ Settings:
       Catppuccin Macchiato Lavender: "Catppuccin Macchiato Lavendel"
       Catppuccin Latte Mauve: Catppuccin Latte Mauve
       Catppuccin Latte Red: Catppuccin Latte Red
+    Modal Backdrop:
+      Modal Backdrop: "Baggrund bag dialoger"
+      Dim and Blur: "Nedtonet og sløret"
+      Dim Only: "Kun nedtonet"
   Player Settings:
     Rewind on Resume: "Spol tilbage ved genoptagelse"
     Minimum Pause Before Rewinding: "Minimumspause før tilbagespoling"
@@ -929,6 +933,7 @@ Settings:
       Shorts: Shorts
       Screenshots: Skærmbilleder
     Enable FCast: "Aktivér FCast"
+    Ask Before Preloading Large Playlists: "Spørg før forudindlæsning af store playlister"
   Channel Settings:
     Channel Settings: Kanalindstillinger
     Channel Settings Description: Husk de indstillinger, du vælger under afspilning, for hver kanal, så de anvendes igen, næste gang du ser en af kanalens videoer.
@@ -2297,6 +2302,7 @@ Tooltips:
     Upcoming Videos to Preload: "Det højeste antal kommende videoer, hvis yt-dlp-streamadresser hentes i baggrunden."
     Concurrent Preloads: "Det højeste antal yt-dlp-processer, der bruges til at forudindlæse videoer samtidig. Højere værdier bruger mere CPU, hukommelse og netværksbåndbredde."
     Ignore System Rotation Lock for Fullscreen: Drej enheden fysisk for at åbne og afslutte fuld skærm, selv når automatisk rotation er slået fra i Android.
+    Ask Before Preloading Large Playlists: "Beder om bekræftelse, før alle videoer i en playliste med mere end {count} videoer forudindlæses."
   Download Settings:
     Download Folder: Videoer gemmes i denne mappe. Lad feltet stå tomt for at bruge systemets Downloads-mappe.
     Global Additional yt-dlp Arguments: Yderligere kommandolinjeargumenter, der sendes til yt-dlp ved hver download, f.eks. --cookies-from-browser firefox.
@@ -2349,6 +2355,7 @@ Tooltips:
     Use Fixed Tab Width: Giver alle faner i den vandrette fanelinje samme bredde i stedet for at tilpasse dem efter titlen.
     Use Custom Title Bar: Erstatter systemets titellinje med fanelinjen eller med den øverste navigation, når fanerne ikke er øverst, for at spare lodret plads. Vinduesknapperne vises i hjørnet af den linje.
     Use Grid Player Menu: Arrangerer videoafspillerens indstillingsmenu som et gitter af felter i stedet for en liste med rækker.
+    Modal Backdrop: "Angiver, hvordan appen ser ud bag dialoger og menuer. Sløring kan være langsom på mindre kraftige enheder."
   Experimental Settings:
     Disable Hardware Acceleration: Deaktiverer GPU-hardwareacceleration. Kan løse grafikproblemer, men vil sandsynligvis forringe ydeevnen.
 The playlist is at the beginning. Enable loop to continue playing: Playlistens begyndelse er nået. Slå gentagelse til for at fortsætte afspilningen

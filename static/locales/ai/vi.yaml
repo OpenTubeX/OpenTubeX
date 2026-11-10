@@ -734,6 +734,10 @@ Settings:
         Destructive hover and focus: Thao tác xóa khi di chuột và lấy nét
         Destructive pressed: Thao tác xóa khi nhấn
         Text and icons on destructive actions: Chữ và biểu tượng trên thao tác xóa
+    Modal Backdrop:
+      Modal Backdrop: "Nền hộp thoại"
+      Dim and Blur: "Làm tối và làm mờ"
+      Dim Only: "Chỉ làm tối"
   Player Settings:
     Rewind on Resume: "Tua lại khi tiếp tục"
     Minimum Pause Before Rewinding: "Thời gian tạm dừng tối thiểu trước khi tua lại"
@@ -904,6 +908,7 @@ Settings:
     Screenshot:
       Legacy Formats: "Định dạng cũ"
       Modern Formats: "Định dạng hiện đại"
+    Ask Before Preloading Large Playlists: "Hỏi trước khi tải trước danh sách phát lớn"
   Channel Settings:
     Channel Settings: Cài đặt kênh
     Channel Settings Description: Ghi nhớ riêng các cài đặt bạn chọn khi xem từng kênh để áp dụng lại vào lần sau khi bạn xem video của kênh đó.
@@ -2224,6 +2229,7 @@ Tooltips:
     Upcoming Videos to Preload: "Số video tiếp theo tối đa có URL yt-dlp được lấy trong nền."
     Concurrent Preloads: "Số tiến trình yt-dlp tối đa được dùng để tải trước nhiều video cùng lúc. Giá trị cao hơn sử dụng nhiều CPU, bộ nhớ và băng thông mạng hơn."
     Ignore System Rotation Lock for Fullscreen: Xoay thiết bị để vào và thoát toàn màn hình ngay cả khi tính năng tự động xoay của Android đang tắt.
+    Ask Before Preloading Large Playlists: "Yêu cầu xác nhận trước khi tải trước tất cả video của danh sách phát có hơn {count} video."
   Download Settings:
     Download Folder: Video được lưu vào thư mục này. Để trống để dùng thư mục Tải xuống của hệ thống.
     Global Additional yt-dlp Arguments: Đối số dòng lệnh bổ sung được chuyển cho yt-dlp trong mọi lượt tải, ví dụ --cookies-from-browser firefox.
@@ -2275,6 +2281,7 @@ Tooltips:
     Use Fixed Tab Width: Đặt cùng chiều rộng cho mọi thẻ trên thanh thẻ ngang thay vì điều chỉnh theo tiêu đề.
     Use Custom Title Bar: Thay thanh tiêu đề của hệ thống bằng thanh thẻ, hoặc bằng thanh điều hướng trên cùng khi các thẻ không ở trên cùng, để tiết kiệm không gian theo chiều dọc. Các nút điều khiển cửa sổ xuất hiện ở góc của thanh đó.
     Use Grid Player Menu: Sắp xếp menu cài đặt của trình phát video thành lưới ô thay vì danh sách hàng.
+    Modal Backdrop: "Đặt giao diện của ứng dụng phía sau hộp thoại và menu. Hiệu ứng làm mờ có thể chậm trên thiết bị yếu hơn."
   Experimental Settings:
     Disable Hardware Acceleration: Tắt tăng tốc phần cứng GPU. Có thể khắc phục sự cố đồ họa, nhưng có thể làm giảm hiệu suất.
 The playlist is at the beginning. Enable loop to continue playing: Danh sách phát đang ở đầu. Hãy bật lặp lại để tiếp tục phát

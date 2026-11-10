@@ -739,6 +739,10 @@ Settings:
         Destructive hover and focus: פעולה הרסנית במעבר עכבר ובמיקוד
         Destructive pressed: פעולה הרסנית בלחיצה
         Text and icons on destructive actions: טקסט וסמלים בפעולות הרסניות
+    Modal Backdrop:
+      Modal Backdrop: "רקע חלונות דו־שיח"
+      Dim and Blur: "הכהיה וטשטוש"
+      Dim Only: "הכהיה בלבד"
   Player Settings:
     Rewind on Resume: "הרצה לאחור בעת המשך"
     Minimum Pause Before Rewinding: "השהיה מינימלית לפני הרצה לאחור"
@@ -919,6 +923,7 @@ Settings:
       Shorts: Shorts
       Screenshots: צילומי מסך
     Enable FCast: "הפעלת FCast"
+    Ask Before Preloading Large Playlists: "לשאול לפני טעינה מראש של פלייליסטים גדולים"
   Channel Settings:
     Channel Settings: הגדרות ערוץ
     Channel Settings Description: שמירת ההגדרות שנבחרו בזמן צפייה לכל ערוץ בנפרד, כדי שיוחלו שוב בצפייה הבאה באחד מסרטוניו.
@@ -2266,6 +2271,7 @@ Tooltips:
     Upcoming Videos to Preload: "המספר המרבי של סרטונים הבאים שכתובות yt-dlp שלהם יאוחזרו ברקע."
     Concurrent Preloads: "המספר המרבי של תהליכי yt-dlp המשמשים לטעינה מראש של סרטונים בו־זמנית. ערכים גבוהים יותר משתמשים ביותר מעבד, זיכרון ורוחב פס רשת."
     Ignore System Rotation Lock for Fullscreen: סובבו את המכשיר כדי להיכנס למסך מלא ולצאת ממנו, גם כשהסיבוב האוטומטי של Android כבוי.
+    Ask Before Preloading Large Playlists: "מבקש אישור לפני טעינה מראש של כל הסרטונים בפלייליסט עם יותר מ־{count} סרטונים."
   Download Settings:
     Download Folder: הסרטונים נשמרים בתיקייה זו. השאירו ריק כדי להשתמש בתיקיית ההורדות של המערכת.
     Global Additional yt-dlp Arguments: ארגומנטים נוספים לשורת הפקודה שיועברו אל yt-dlp בכל הורדה, לדוגמה --cookies-from-browser firefox.
@@ -2317,6 +2323,7 @@ Tooltips:
     Use Fixed Tab Width: מקצה רוחב זהה לכל לשונית בסרגל הלשוניות האופקי, במקום להתאים את הרוחב לכותרת.
     Use Custom Title Bar: מחליף את שורת הכותרת של המערכת בסרגל הכרטיסיות, או בסרגל הניווט העליון כשהכרטיסיות אינן למעלה, כדי לחסוך מקום אנכי. לחצני החלון מופיעים בפינת אותו סרגל.
     Use Grid Player Menu: מסדר את תפריט ההגדרות של נגן הווידאו כרשת אריחים במקום כרשימת שורות.
+    Modal Backdrop: "קובע איך היישום נראה מאחורי חלונות דו־שיח ותפריטים. טשטוש עלול להיות איטי במכשירים חלשים יותר."
   Experimental Settings:
     Disable Hardware Acceleration: משבית את האצת החומרה של המעבד הגרפי. עשוי לפתור בעיות גרפיות, אך כנראה יפגע בביצועים.
 The playlist is at the beginning. Enable loop to continue playing: רשימת ההשמעה בתחילתה. הפעילו לולאה כדי להמשיך לנגן

@@ -739,6 +739,10 @@ Settings:
         Destructive hover and focus: تحوم المدمرة والتركيز
         Destructive pressed: الضغط المدمر
         Text and icons on destructive actions: النص والأيقونات على الإجراءات المدمرة
+    Modal Backdrop:
+      Modal Backdrop: "خلفية مربعات الحوار"
+      Dim and Blur: "تعتيم وتمويه"
+      Dim Only: "تعتيم فقط"
   Player Settings:
     Rewind on Resume: "الترجيع عند الاستئناف"
     Minimum Pause Before Rewinding: "الحد الأدنى للإيقاف قبل الترجيع"
@@ -915,6 +919,7 @@ Settings:
     Screenshot:
       Legacy Formats: "صيغ قديمة"
       Modern Formats: "صيغ حديثة"
+    Ask Before Preloading Large Playlists: "السؤال قبل التحميل المسبق لقوائم التشغيل الكبيرة"
   Channel Settings:
     Channel Settings: إعدادات القناة
     Channel Settings Description: تذكر الإعدادات التي تختارها أثناء المشاهدة لكل قناة على حدة، بحيث يتم تطبيقها مرة أخرى في المرة التالية التي تشاهد فيها أحد مقاطع الفيديو الخاصة بها.
@@ -2245,6 +2250,7 @@ Tooltips:
     Upcoming Videos to Preload: "الحد الأقصى لعدد الفيديوهات القادمة التي تُجلب روابط بثها في الخلفية."
     Concurrent Preloads: "الحد الأقصى لعدد عمليات yt-dlp المستخدمة لتحميل مقاطع الفيديو مسبقًا في الوقت نفسه. تستخدم القيم الأعلى مزيدًا من وحدة المعالجة المركزية والذاكرة وعرض النطاق الترددي للشبكة."
     Ignore System Rotation Lock for Fullscreen: استخدم دوران الجهاز الفعلي للدخول إلى ملء الشاشة والخروج منه حتى عند إيقاف التدوير التلقائي في أندرويد.
+    Ask Before Preloading Large Playlists: "يطلب التأكيد قبل التحميل المسبق لكل فيديوهات قائمة تشغيل تحتوي على أكثر من {count} فيديو."
   Download Settings:
     Download Folder: يتم حفظ مقاطع الفيديو في هذا المجلد. اتركه فارغًا لاستخدام مجلد التنزيلات الخاص بنظامك.
     Global Additional yt-dlp Arguments: يتم تمرير وسيطات سطر الأوامر الإضافية إلى yt-dlp لكل عملية تنزيل، على سبيل المثال --cookies-from-browser Firefox.
@@ -2296,6 +2302,7 @@ Tooltips:
     Use Fixed Tab Width: يمنح كل علامة تبويب في شريط علامات التبويب الأفقي نفس العرض بدلاً من تغيير حجمها حسب عنوانها.
     Use Custom Title Bar: يستبدل شريط عنوان النظام بشريط علامات التبويب، أو بشريط التنقل العلوي عندما لا تكون علامات التبويب في الأعلى، لتوفير المساحة العمودية. تظهر أزرار التحكم في النافذة في زاوية ذلك الشريط.
     Use Grid Player Menu: يقوم بترتيب قائمة إعدادات مشغل الفيديو كشبكة من المربعات بدلاً من قائمة الصفوف.
+    Modal Backdrop: "يحدد مظهر التطبيق خلف مربعات الحوار والقوائم. قد يكون التمويه بطيئًا على الأجهزة الأقل قوة."
   Experimental Settings:
     Disable Hardware Acceleration: يعطّل تسريع الأجهزة بواسطة وحدة معالجة الرسومات. قد يحل مشاكل الرسومات، لكنه سيؤدي على الأرجح إلى انخفاض الأداء.
 The playlist is at the beginning. Enable loop to continue playing: قائمة التشغيل في البداية. تمكين الحلقة لمواصلة اللعب

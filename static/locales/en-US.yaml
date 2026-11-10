@@ -948,6 +948,10 @@ Settings:
     Always Show Scrollbars: Always Show Scrollbars
     Hide Side Bar Labels: Hide Side Bar Labels
     Compact Settings Categories: Compact Settings Categories
+    Modal Backdrop:
+      Modal Backdrop: Dialog Background
+      Dim and Blur: Dim and blur
+      Dim Only: Dim only
     Hide OpenTubeX Header Logo: Hide OpenTubeX Header Logo
     Base Theme:
       Material Light: "Material Light"
@@ -1310,6 +1314,7 @@ Settings:
     Preload Upcoming Videos: Preload Upcoming Videos
     Upcoming Videos to Preload: Upcoming Videos to Preload
     Concurrent Preloads: Concurrent Preloads
+    Ask Before Preloading Large Playlists: Ask Before Preloading Large Playlists
     Fast-Forward / Rewind Interval: Fast-Forward / Rewind Interval
     Default Volume: Default Volume
     Remember Volume: Remember Volume
@@ -3319,6 +3324,7 @@ Tooltips:
     Preload Upcoming Videos: Fetches and caches yt-dlp stream URLs for videos that can play next. The watch queue takes priority over playlists and recommendations.
     Upcoming Videos to Preload: The maximum number of upcoming videos whose yt-dlp stream URLs are fetched in the background.
     Concurrent Preloads: The maximum number of yt-dlp processes used to preload videos at once. Higher values use more CPU, memory, and network bandwidth.
+    Ask Before Preloading Large Playlists: Asks for confirmation before preloading all videos of a playlist with more than {count} videos.
     Ignore System Rotation Lock for Fullscreen: Use physical device rotation to enter and exit fullscreen even when Android's auto-rotate is off.
   External Player Settings:
     External Player: Choosing an external player will display an icon, for opening the
@@ -3399,6 +3405,7 @@ Tooltips:
     Use Custom Title Bar: Replaces the system title bar with the tab bar, or with the top navigation when tabs are not at the top, to save vertical space. The window controls appear in the corner of that bar.
     Use Grid Player Menu: Arranges the video player's settings menu as a grid of tiles instead of a list of rows.
     Compact Settings Categories: Hides descriptions and reduces the height of settings categories.
+    Modal Backdrop: Sets how the app looks behind dialogs and menus. Blurring it can be slow on less powerful devices.
   Experimental Settings:
     Replace HTTP Cache: Disables Electron's disk based HTTP cache and enables a custom in-memory image cache. Will lead to increased RAM usage.
     Disable Hardware Acceleration: Disables GPU hardware acceleration. May fix graphical issues, but will probably perform worse.

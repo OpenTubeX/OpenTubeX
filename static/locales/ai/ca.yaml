@@ -953,6 +953,10 @@ Settings:
       Everforest Light Aqua: Everforest Light Aqua
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
+    Modal Backdrop:
+      Modal Backdrop: "Fons dels diàlegs"
+      Dim and Blur: "Enfosqueix i difumina"
+      Dim Only: "Només enfosqueix"
   Player Settings:
     Rewind on Resume: "Rebobina en reprendre"
     Minimum Pause Before Rewinding: "Pausa mínima abans de rebobinar"
@@ -1152,6 +1156,7 @@ Settings:
       Shorts: Shorts
       Screenshots: Captures de pantalla
     Enable FCast: "Activa FCast"
+    Ask Before Preloading Large Playlists: "Pregunta abans de precarregar llistes de reproducció grans"
   Channel Settings:
     Channel Settings: Configuració dels canals
     Channel Settings Description: Recorda per separat la configuració que trieu mentre mireu cada canal, per tornar-la a aplicar la propera vegada que mireu un dels seus vídeos.
@@ -2761,6 +2766,7 @@ Tooltips:
     Upcoming Videos to Preload: "Nombre màxim de vídeos següents els URL de yt-dlp dels quals s’obtenen en segon pla."
     Concurrent Preloads: "El nombre màxim de processos yt-dlp que s'utilitzen per precàrregar vídeos alhora. Els valors més alts utilitzen més CPU, memòria i amplada de banda de xarxa."
     Ignore System Rotation Lock for Fullscreen: Gira físicament el dispositiu per entrar i sortir de la pantalla completa encara que la rotació automàtica d'Android estigui desactivada.
+    Ask Before Preloading Large Playlists: "Demana confirmació abans de precarregar tots els vídeos d’una llista de reproducció amb més de {count} vídeos."
   External Player Settings:
     External Player: En triar un reproductor extern, es mostrarà a la miniatura una icona per obrir-hi el vídeo o, si s'admet, la llista de reproducció. La configuració d'Invidious no afecta els reproductors externs.
     Custom External Player Executable: De manera predeterminada, l'OpenTubeX suposa que el reproductor extern triat es pot trobar mitjançant la variable d'entorn PATH. Si cal, podeu definir aquí un camí personalitzat.
@@ -2824,6 +2830,7 @@ Tooltips:
     Use Fixed Tab Width: Dóna la mateixa amplada a totes les pestanyes de la barra horitzontal en lloc d'ajustar-les al títol.
     Use Custom Title Bar: Substitueix la barra de títol del sistema per la barra de pestanyes, o per la navegació superior quan les pestanyes no són a dalt, per estalviar espai vertical. Els controls de la finestra apareixen a la cantonada d'aquesta barra.
     Use Grid Player Menu: Organitza el menú de configuració del reproductor de vídeo com una quadrícula de rajoles en lloc d'una llista de files.
+    Modal Backdrop: "Defineix com es veu l’aplicació darrere dels diàlegs i els menús. El difuminat pot anar lent en dispositius menys potents."
   Experimental Settings:
     Replace HTTP Cache: Desactiva la memòria cau HTTP al disc d'Electron i activa una memòria cau d'imatges personalitzada a la memòria. Augmentarà l'ús de RAM.
     Disable Hardware Acceleration: Desactiva l'acceleració per maquinari de la GPU. Pot resoldre problemes gràfics, però probablement reduirà el rendiment.

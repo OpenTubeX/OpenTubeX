@@ -739,6 +739,10 @@ Settings:
         Destructive hover and focus: Ação destrutiva ao passar o rato ou focar
         Destructive pressed: Ação destrutiva ao premir
         Text and icons on destructive actions: Texto e ícones nas ações destrutivas
+    Modal Backdrop:
+      Modal Backdrop: "Fundo das caixas de diálogo"
+      Dim and Blur: "Escurecer e desfocar"
+      Dim Only: "Apenas escurecer"
   Player Settings:
     Rewind on Resume: "Recuar ao retomar"
     Minimum Pause Before Rewinding: "Pausa mínima antes de recuar"
@@ -915,6 +919,7 @@ Settings:
     Screenshot:
       Legacy Formats: "Formatos antigos"
       Modern Formats: "Formatos modernos"
+    Ask Before Preloading Large Playlists: "Perguntar antes de pré-carregar listas de reprodução grandes"
   Channel Settings:
     Channel Settings: Definições dos canais
     Channel Settings Description: Memorizar individualmente para cada canal as definições escolhidas durante a visualização, para que sejam aplicadas quando voltar a ver um dos seus vídeos.
@@ -2256,6 +2261,7 @@ Tooltips:
     Upcoming Videos to Preload: "Número máximo de próximos vídeos cujos URL do yt-dlp são obtidos em segundo plano."
     Concurrent Preloads: "O número máximo de processos do yt-dlp utilizados para pré-carregar vídeos ao mesmo tempo. Valores mais elevados utilizam mais CPU, memória e largura de banda da rede."
     Ignore System Rotation Lock for Fullscreen: Rode fisicamente o dispositivo para entrar e sair do ecrã inteiro, mesmo quando a rotação automática do Android está desligada.
+    Ask Before Preloading Large Playlists: "Pede confirmação antes de pré-carregar todos os vídeos de uma lista de reprodução com mais de {count} vídeos."
   Download Settings:
     Download Folder: Os vídeos são guardados nesta pasta. Deixe em branco para utilizar a pasta Transferências do sistema.
     Global Additional yt-dlp Arguments: Argumentos adicionais da linha de comandos passados ao yt-dlp em cada descarga, por exemplo --cookies-from-browser firefox.
@@ -2307,6 +2313,7 @@ Tooltips:
     Use Fixed Tab Width: Atribui a mesma largura a todos os separadores na barra horizontal, em vez de ajustar a largura ao respetivo título.
     Use Custom Title Bar: Substitui a barra de título do sistema pela barra de separadores ou, quando os separadores não estão no topo, pela navegação superior, para poupar espaço vertical. Os controlos da janela aparecem no canto dessa barra.
     Use Grid Player Menu: Organiza o menu de definições do reprodutor de vídeo numa grelha de mosaicos em vez de uma lista de linhas.
+    Modal Backdrop: "Define o aspeto da aplicação por trás das caixas de diálogo e dos menus. A desfocagem pode ser lenta em dispositivos menos potentes."
   Experimental Settings:
     Disable Hardware Acceleration: Desativa a aceleração por hardware da GPU. Pode resolver problemas gráficos, mas provavelmente reduzirá o desempenho.
 The playlist is at the beginning. Enable loop to continue playing: A lista de reprodução está no início. Ative a repetição para continuar a reproduzir

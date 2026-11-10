@@ -734,6 +734,10 @@ Settings:
         Destructive hover and focus: Yıkıcı işlem üzerine gelme ve odak
         Destructive pressed: Basılı yıkıcı işlem
         Text and icons on destructive actions: Yıkıcı işlemlerdeki metin ve simgeler
+    Modal Backdrop:
+      Modal Backdrop: "İletişim kutusu arka planı"
+      Dim and Blur: "Karart ve bulanıklaştır"
+      Dim Only: "Yalnızca karart"
   Player Settings:
     Rewind on Resume: "Devam ederken geri sar"
     Minimum Pause Before Rewinding: "Geri sarmadan önce en kısa duraklatma"
@@ -904,6 +908,7 @@ Settings:
     Screenshot:
       Legacy Formats: "Eski biçimler"
       Modern Formats: "Modern biçimler"
+    Ask Before Preloading Large Playlists: "Büyük oynatma listelerini önceden yüklemeden önce sor"
   Channel Settings:
     Channel Settings: Kanal Ayarları
     Channel Settings Description: İzlerken seçtiğiniz ayarları her kanal için ayrı ayrı hatırlayarak kanalın bir sonraki videosunda yeniden uygular.
@@ -2210,6 +2215,7 @@ Tooltips:
     Upcoming Videos to Preload: "yt-dlp adresleri arka planda alınacak sonraki videoların azami sayısı."
     Concurrent Preloads: "Videoları aynı anda önceden yüklemek için kullanılan en fazla yt-dlp işlemi sayısı. Daha yüksek değerler daha fazla CPU, bellek ve ağ bant genişliği kullanır."
     Ignore System Rotation Lock for Fullscreen: Android otomatik döndürmesi kapalı olsa bile tam ekrana girmek ve çıkmak için cihazı fiziksel olarak döndürün.
+    Ask Before Preloading Large Playlists: "{count} videodan fazla içeren bir oynatma listesinin tüm videolarını önceden yüklemeden önce onay ister."
   Download Settings:
     Download Folder: Videolar bu klasöre kaydedilir. Sisteminizin İndirilenler klasörünü kullanmak için boş bırakın.
     Global Additional yt-dlp Arguments: Her indirmede yt-dlp'ye iletilen ek komut satırı argümanları, örneğin --cookies-from-browser firefox.
@@ -2261,6 +2267,7 @@ Tooltips:
     Use Fixed Tab Width: Yatay sekme çubuğundaki her sekmeye başlığına göre boyut vermek yerine aynı genişliği verir.
     Use Custom Title Bar: Dikey alandan tasarruf etmek için sistem başlık çubuğunu sekme çubuğuyla, sekmeler üstte değilse üst gezinme çubuğuyla değiştirir. Pencere denetimleri bu çubuğun köşesinde görünür.
     Use Grid Player Menu: Video oynatıcısının ayarlar menüsünü satır listesi yerine döşeme ızgarası olarak düzenler.
+    Modal Backdrop: "İletişim kutularının ve menülerin arkasında uygulamanın nasıl görüneceğini belirler. Bulanıklaştırma daha az güçlü cihazlarda yavaş olabilir."
 The playlist is at the beginning. Enable loop to continue playing: Oynatma listesinin başındasınız. Oynatmaya devam etmek için döngüyü etkinleştirin
 External link opening has been disabled in Settings → Privacy: Harici bağlantıları açma, Ayarlar → Gizlilik bölümünde devre dışı bırakıldı
 KeyboardShortcutPrompt:
