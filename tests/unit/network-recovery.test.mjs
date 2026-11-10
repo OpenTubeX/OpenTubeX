@@ -291,17 +291,23 @@ test('a stream server that stops answering is awaited while the internet check s
   await flush()
   const origin = 'https://rr1---sn-abc.googlevideo.com'
   let settled = false
-  const waiting = app.waitUntilReachable(`${origin}/generate_204`, new AbortController().signal).then(() => { settled = true })
+  const waiting = app.waitUntilReachable(`${origin}/generate_204`, new AbortController().signal).then(unreachable => {
+    settled = true
+    return unreachable
+  })
   await flush()
   assert.equal(settled, false, 'a browser CORS heuristic must not end the wait')
   assert.deepEqual([...app.recovery.waitingOrigins], [origin])
   assert.equal(app.recovery.state, 'online')
   assert.deepEqual(probes, [{ input: `${origin}/generate_204`, method: 'HEAD', mode: 'no-cors', credentials: 'omit' }])
+  // Another player's wait follows the pending probe before its own succeeds
+  const following = app.waitUntilReachable(`${origin}/generate_204`, new AbortController().signal)
 
   reachable = true
   t.mock.timers.tick(5000)
-  await waiting
-  assert.equal(probes.length, 2)
+  assert.equal(await waiting, true, 'a server that did not answer at first was unreachable')
+  assert.equal(await following, true, 'a wait behind another probe was for an unreachable server')
+  assert.equal(probes.length, 3)
   assert.deepEqual([...app.recovery.waitingOrigins], [])
 
   const controller = new AbortController()
@@ -321,7 +327,8 @@ test('a blocked internet check does not stop waiting for a stream server that an
   }, undefined, { checkInternet: true })
   await flush()
   assert.equal(app.recovery.state, 'offline')
-  await app.waitUntilReachable('https://rr1---sn-abc.googlevideo.com/generate_204', new AbortController().signal)
+  assert.equal(await app.waitUntilReachable('https://rr1---sn-abc.googlevideo.com/generate_204', new AbortController().signal), false,
+    'a server that answers at once was reachable all along')
 })
 
 test('the connection timeout stops after headers and does not abort streaming video bodies', async t => {

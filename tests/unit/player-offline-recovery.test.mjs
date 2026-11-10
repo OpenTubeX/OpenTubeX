@@ -42,7 +42,7 @@ test('online HTTP failures that are not lost connections still use the bounded t
 })
 
 function createUnreachableStreamView() {
-  const methodsStart = watchSource.indexOf('    async retryStreamWhenReachable(error) {')
+  const methodsStart = watchSource.indexOf('    async retryStreamWhenReachable(error, onlyIfUnreachable = false) {')
   const methodsEnd = watchSource.indexOf('\n    isAndroidTransientHttpRecoveryEnabled', methodsStart)
   const waits = []
   const methods = vm.runInNewContext(`({${watchSource.slice(start, end)}${watchSource.slice(methodsStart, methodsEnd)}})`, {
@@ -77,6 +77,11 @@ function createUnreachableStreamView() {
     playbackNetworkRetryPending: false,
     sabrErrorRecoveryAttempts: 0,
     reloads: [],
+    videoLoadGeneration: 0,
+    tabRoute: { params: { id: 'video' } },
+    isCurrentVideoLoad (loadGeneration, videoId) {
+      return loadGeneration === this.videoLoadGeneration && videoId === this.tabRoute.params.id
+    },
     isSabrVideoStream: () => true,
     isAndroidTransientHttpRecoveryEnabled: () => true,
     retryAndroidTransientHttpError: async () => assert.fail('the quick Android retry must not delay recovery'),
@@ -110,6 +115,39 @@ test('an unreachable stream server keeps the player and retries it in place with
   await view.handlePlayerError(lostConnection())
   assert.equal(waits.length, 1)
   assert.deepEqual(view.reloads, ['Refreshing SABR stream after playback error: [PLAYER_ERROR: 1002]'])
+})
+
+test('a timeout waits for an unreachable stream server but reloads a stuck stream at once', async () => {
+  const timeout = () => ({ code: 1003, data: ['sabr://video', 1] })
+  const { view, player, waits } = createUnreachableStreamView()
+  const handled = view.handlePlayerError(timeout())
+  await Promise.resolve()
+  assert.equal(waits.length, 1)
+  assert.deepEqual(view.reloads, [], 'the wait must not spend the SABR recovery budget')
+  waits[0].resolve(true)
+  await handled
+  assert.deepEqual({ retries: player.retries, reloads: view.reloads }, { retries: 1, reloads: [] })
+
+  const stuck = createUnreachableStreamView()
+  const stuckHandled = stuck.view.handlePlayerError(timeout())
+  await Promise.resolve()
+  stuck.waits[0].resolve(false)
+  await stuckHandled
+  assert.deepEqual({ retries: stuck.player.retries, reloads: stuck.view.reloads.length }, { retries: 0, reloads: 1 })
+})
+
+test('navigation during the wait neither retries nor reloads the outgoing stream', async () => {
+  const { view, player, waits } = createUnreachableStreamView()
+  const error = { code: 1003, data: ['sabr://video', 1] }
+  const handled = view.handlePlayerError(error)
+  await Promise.resolve()
+  // The route changed and the new load awaits cleanup before it replaces the player
+  view.videoLoadGeneration++
+  view.tabRoute = { params: { id: 'next' } }
+  waits[0].resolve(false)
+  await handled
+  assert.deepEqual({ retries: player.retries, reloads: view.reloads }, { retries: 0, reloads: [] })
+  assert.equal(view.playbackNetworkWaitError, error, 'a retained Short must receive the error when navigation hands it over')
 })
 
 test('a stream whose in-place retry cannot start reloads once the server answers', async () => {
