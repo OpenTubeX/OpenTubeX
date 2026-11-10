@@ -102,7 +102,13 @@ public class StartupBackgroundTest {
                     }));
                     assertTrue("The startup page is painted", painted.await(5, TimeUnit.SECONDS));
                     Bitmap screenshot = InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
-                    assertEquals("The blank startup frame uses " + appearance[0] + ", without a white flash",
+                    // Says whether something else covered the app when the colors differ.
+                    java.util.concurrent.atomic.AtomicBoolean focused = new java.util.concurrent.atomic.AtomicBoolean();
+                    scenario.onActivity(activity -> focused.set(activity.hasWindowFocus()));
+                    String screen = String.format(java.util.Locale.ROOT, " (focused %b, top #%06x, bottom #%06x)", focused.get(),
+                        screenshot.getPixel(screenshot.getWidth() / 2, screenshot.getHeight() / 8) & 0xffffff,
+                        screenshot.getPixel(screenshot.getWidth() / 2, screenshot.getHeight() * 7 / 8) & 0xffffff);
+                    assertEquals("The blank startup frame uses " + appearance[0] + ", without a white flash" + screen,
                         expectedColor, screenshot.getPixel(screenshot.getWidth() / 2, screenshot.getHeight() / 2));
                     screenshot.recycle();
                 } finally {
