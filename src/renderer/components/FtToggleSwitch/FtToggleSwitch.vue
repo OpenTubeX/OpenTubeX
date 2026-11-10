@@ -42,7 +42,10 @@
           :tooltip="tooltip"
           :allow-newlines="tooltipAllowNewlines"
         />
-        <FtSyncedSettingIndicator :setting-key="settingKey" />
+        <FtSyncedSettingIndicator
+          :setting-key="settingKey"
+          :setting-keys="syncSettingKeys"
+        />
       </span>
       <FtPerformanceImpact :setting-key="settingKey" />
     </label>
@@ -101,6 +104,11 @@ const props = defineProps({
   settingKey: {
     type: String,
     default: ''
+  },
+  // Synced setting keys for a switch outside the settings, which has no `settingKey`
+  syncSettingKeys: {
+    type: Array,
+    default: () => []
   },
 })
 

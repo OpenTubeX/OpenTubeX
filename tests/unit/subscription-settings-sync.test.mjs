@@ -7,7 +7,8 @@ import vm from 'node:vm'
 import { DEFAULT_PROFILE_ICON } from '../../src/renderer/helpers/profileIcons.js'
 import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getNextSubscriptionSettingsTimestamp, isValidSubscriptionSettingsTimestamp } from '../../src/renderer/helpers/subscription-channels.js'
 import * as subscriptionSync from '../../src/renderer/helpers/subscription-settings-sync.js'
-import { areSyncSettingValuesEqual, mergeSettingEntry, migrateLegacySyncedSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
+import { areSyncSettingValuesEqual, mergeSettingEntry, mergeSettingItemsEntry, migrateLegacySyncedSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
+import * as playlistPreferencesSync from '../../src/renderer/helpers/playlist-preferences-sync.js'
 
 const key = subscriptionSync.SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY
 const source = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
@@ -20,14 +21,16 @@ const context = vm.createContext({
   mergeSyncIds,
   syncVideoToRemote,
   ...subscriptionSync,
+  ...playlistPreferencesSync,
   areSyncSettingValuesEqual,
   mergeSettingEntry,
+  mergeSettingItemsEntry,
   migrateLegacySyncedSettings,
   resolveMergedThemeEntry,
   CUSTOM_THEMES_SYNC_KEY: 'customThemes',
   normalizeCustomThemes: value => value,
   getSyncableSettingKeys: () => [],
-  isSettingSyncEnabled: settings => !settings.syncServerSettingsExcluded.includes(key),
+  isSettingSyncEnabled: (settings, settingKey) => !settings.syncServerSettingsExcluded.includes(settingKey),
   deepCopy: structuredClone,
 })
 vm.runInContext(source
@@ -364,4 +367,110 @@ test('records from clients without notification choices keep the local bell', as
   assert.deepEqual(saved[1].notificationFeedTypes, ['videos', 'live'])
   await subscriptionSync.applySubscriptionSettingsSync(store, { channel: { value: { notificationFeedTypes: [] }, updatedAt: 7 } })
   assert.deepEqual(saved[2].notificationFeedTypes, [])
+})
+
+const playlistKey = playlistPreferencesSync.PLAYLIST_PREFERENCES_SYNC_KEY
+
+function createPlaylistDevice(playlists, snapshot) {
+  const store = {
+    state: {
+      playlists: { playlists: structuredClone(playlists) },
+      profiles: { profileList: [{ subscriptions: [] }] },
+      settings: { syncServerSettingsExcluded: [] },
+      utils: { customThemes: [] },
+    },
+    dispatch: async (action, { playlist, previous, keepLastUpdatedAt }) => {
+      assert.equal(action, 'updatePlaylistFromSync')
+      assert.equal(keepLastUpdatedAt, true)
+      const current = store.state.playlists.playlists.find(item => item._id === playlist._id)
+      assert.deepEqual(current, previous)
+      Object.assign(current, playlist)
+      return true
+    },
+  }
+  return { store, snapshot, previous: {} }
+}
+
+function createPlaylistClient(entries = []) {
+  return { entries, async getSettings() { return this.entries }, async putSettings(value) { this.entries = structuredClone(value) } }
+}
+
+test('playlist preferences sync between devices that know the playlist by different local IDs', async () => {
+  const client = createPlaylistClient()
+  // The creating device keeps its own ID; the other device uses the server's.
+  const creator = createPlaylistDevice(
+    [{ _id: 'local-id', lastUpdatedAt: 1, shuffleByDefault: true, preferencesUpdatedAt: 10 }],
+    { 'local-id': { remoteId: 'remote-id' } }
+  )
+  const other = createPlaylistDevice([{ _id: 'remote-id', lastUpdatedAt: 2 }], { 'remote-id': { remoteId: 'remote-id' } })
+  creator.previous = await context.syncSettings(client, creator.store, creator.previous, creator.snapshot)
+  const uploaded = client.entries.find(entry => entry.key === playlistKey).value
+  assert.deepEqual(Object.keys(uploaded), ['remote-id'])
+
+  other.previous = await context.syncSettings(client, other.store, other.previous, other.snapshot)
+  assert.deepEqual(other.store.state.playlists.playlists[0], {
+    _id: 'remote-id', lastUpdatedAt: 2, addVideosToTop: false, shuffleByDefault: true, removeWatchedVideos: false, preferencesUpdatedAt: 10,
+  })
+
+  // Edits to different playlists on each device both survive.
+  creator.store.state.playlists.playlists.push({ _id: 'second-local', removeWatchedVideos: true, preferencesUpdatedAt: 20 })
+  creator.snapshot['second-local'] = { remoteId: 'second-remote' }
+  other.store.state.playlists.playlists.push({ _id: 'second-remote' })
+  other.snapshot['second-remote'] = { remoteId: 'second-remote' }
+  const edited = other.store.state.playlists.playlists[0]
+  Object.assign(edited, { shuffleByDefault: false, addVideosToTop: true, preferencesUpdatedAt: playlistPreferencesSync.getNextPlaylistPreferencesTimestamp(edited) })
+  other.previous = await context.syncSettings(client, other.store, other.previous, other.snapshot)
+  creator.previous = await context.syncSettings(client, creator.store, creator.previous, creator.snapshot)
+  other.previous = await context.syncSettings(client, other.store, other.previous, other.snapshot)
+  assert.deepEqual(creator.store.state.playlists.playlists.map(playlistPreferencesSync.normalizePlaylistPreferences), [
+    { addVideosToTop: true, shuffleByDefault: false, removeWatchedVideos: false },
+    { addVideosToTop: false, shuffleByDefault: false, removeWatchedVideos: true },
+  ])
+  assert.deepEqual(other.store.state.playlists.playlists.map(playlistPreferencesSync.normalizePlaylistPreferences),
+    creator.store.state.playlists.playlists.map(playlistPreferencesSync.normalizePlaylistPreferences))
+})
+
+test('playlist preferences without a playlist snapshot stay as the server has them', async () => {
+  const remote = { key: playlistKey, value: { 'remote-id': { value: { shuffleByDefault: true }, updatedAt: 5 } }, updatedAt: 5 }
+  const client = createPlaylistClient([structuredClone(remote)])
+  const device = createPlaylistDevice([{ _id: 'remote-id', removeWatchedVideos: true, preferencesUpdatedAt: 9 }], null)
+  device.store.dispatch = () => assert.fail('Playlists must not change without a playlist sync')
+  await context.syncSettings(client, device.store, {}, null)
+  assert.deepEqual(client.entries.find(entry => entry.key === playlistKey), remote)
+  // Playlists the server does not have yet wait for the next playlist sync.
+  assert.deepEqual(playlistPreferencesSync.getPlaylistPreferencesForSync(device.store.state.playlists.playlists, {}), {})
+})
+
+test('the newer of two unsynced edits to the same item wins even when the older one uploads first', () => {
+  const older = mergeSettingItemsEntry({ key: playlistKey, value: { item: { value: { shuffleByDefault: true }, updatedAt: 100 } }, now: 300 })
+  assert.equal(older.value.item.updatedAt, 100)
+  const newer = mergeSettingItemsEntry({ key: playlistKey, value: { item: { value: { shuffleByDefault: false }, updatedAt: 200 } }, remoteEntry: older, now: 400 })
+  assert.deepEqual(newer.value.item, { value: { shuffleByDefault: false }, updatedAt: 200 })
+})
+
+test('applying merged settings rejects instead of overwriting an edit made after the merge', async () => {
+  const device = createPlaylistDevice([{ _id: 'playlist', shuffleByDefault: true, preferencesUpdatedAt: 10 }], { playlist: { remoteId: 'playlist' } })
+  const merged = playlistPreferencesSync.getPlaylistPreferencesForSync(device.store.state.playlists.playlists, device.snapshot)
+  Object.assign(device.store.state.playlists.playlists[0], { shuffleByDefault: false, preferencesUpdatedAt: 20 })
+  device.store.dispatch = () => assert.fail('A newer local edit must not be overwritten')
+  await assert.rejects(playlistPreferencesSync.applyPlaylistPreferencesSync(device.store,
+    { playlist: { value: { shuffleByDefault: true }, updatedAt: 10 } }, device.snapshot, merged), /changed during sync/)
+
+  const store = createStore([{ id: 'channel', dailyVideoLimit: 2, subscriptionSettingsUpdatedAt: 10 }])
+  const mergedChannels = subscriptionSync.getSubscriptionSettingsForSync(store)
+  Object.assign(store.state.profiles.profileList[0].subscriptions[0], { dailyVideoLimit: 4, subscriptionSettingsUpdatedAt: 20 })
+  store.dispatch = () => assert.fail('A newer local edit must not be overwritten')
+  await assert.rejects(subscriptionSync.applySubscriptionSettingsSync(store,
+    { channel: { value: { dailyVideoLimit: 2 }, updatedAt: 10 } }, mergedChannels), /changed during sync/)
+})
+
+test('a newer local edit back to the synced value beats an older remote edit', () => {
+  const merged = mergeSettingItemsEntry({
+    key: playlistKey,
+    value: { item: { value: { shuffleByDefault: false }, updatedAt: 30 } },
+    old: { key: playlistKey, value: { item: { value: { shuffleByDefault: false }, updatedAt: 10 } }, updatedAt: 10 },
+    remoteEntry: { key: playlistKey, value: { item: { value: { shuffleByDefault: true }, updatedAt: 20 } }, updatedAt: 20 },
+    now: 40,
+  })
+  assert.deepEqual(merged.value.item, { value: { shuffleByDefault: false }, updatedAt: 30 })
 })

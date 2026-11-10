@@ -389,6 +389,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   /** @type {Record<string, () => unknown>} */
   const retryBaselines = {}
   const baseline = collection => retryBaselines[collection] ? retryBaselines[collection]() : previous[collection]
+  // Playlist preferences use the server's playlist IDs, which only this sync's playlist merge maps.
+  const playlistSnapshot = () => settings.syncServerSyncPlaylists ? next.playlists ?? null : null
   const historyAccount = getSyncAccount(settings)
   const isSameAccount = () => isSameSyncAccount(rootState.settings, historyAccount)
   // Deletions made or reviewed before this sync; ones made while it runs wait for the next.
@@ -629,7 +631,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         }
         break
       case 'settings':
-        next.settings = await syncSettings(targetClient, store, previous.settings)
+        next.settings = await syncSettings(targetClient, store, previous.settings, playlistSnapshot())
         result.settings = Object.keys(next.settings).length
         break
       case 'sessionsV2': {
@@ -858,7 +860,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
             const activity = createSyncActivity(
               collection, activityBefore, data, settings.syncServerDeviceId, settings.syncServerDeviceName,
               [...(encryptedCollections.original.subscriptions ?? []), ...(client.document.subscriptions ?? []),
-                ...(rootState.profiles.profileList.find(profile => profile._id === MAIN_PROFILE_ID)?.subscriptions ?? [])]
+                ...(rootState.profiles.profileList.find(profile => profile._id === MAIN_PROFILE_ID)?.subscriptions ?? [])],
+              [...(encryptedCollections.original.playlists ?? []), ...(client.document.playlists ?? [])].map(entry => entry?.playlist)
             )
             const activityPayload = activity
               ? await encryptSyncDocument(
@@ -936,7 +939,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
               }
               const retryClient = new EncryptedSyncAdapter(retryDocument)
               if (collection === 'settings') {
-                next.settings = await syncSettings(retryClient, store, next.settings)
+                next.settings = await syncSettings(retryClient, store, next.settings, playlistSnapshot())
                 result.settings = Object.keys(next.settings).length
               } else {
                 await applyCollection(collection, retryClient)

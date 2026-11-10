@@ -270,6 +270,9 @@ const detailLabels = {
   notificationFeedTypes: 'Channel.Notify about new uploads',
   dailyVideoLimit: 'Channel.Videos per day',
   showMembersOnly: 'Search Listing.Label.Members Only',
+  addVideosToTop: 'User Playlists.Add new videos to the top (custom order)',
+  shuffleByDefault: 'User Playlists.Shuffle videos by default',
+  removeWatchedVideos: 'User Playlists.Remove videos once watched',
 }
 const feedTypeLabels = {
   videos: 'Global.Videos', shorts: 'Global.Shorts', live: 'Global.Live', posts: 'Global.Posts',
@@ -364,7 +367,7 @@ const visibleEntries = computed(() => (showAll.value ? entries.value : entries.v
     const shortcutLabel = shortcutLabels.value.get(entry.detail)
     if (shortcutLabel) labels.push(shortcutLabel)
   }
-  const detailKey = entry.key === 'subscriptionChannelSettings'
+  const detailKey = entry.key === 'subscriptionChannelSettings' || entry.key === 'playlistPreferences'
     ? detailLabels[entry.detail]
     : entry.key === 'defaultCaptionSettings' && entry.detail
       ? `Settings.Player Settings.Caption Appearance.${entry.detail}`

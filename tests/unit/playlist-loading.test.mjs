@@ -4,6 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 import Datastore from '@seald-io/nedb'
 import * as videoCounts from '../../src/renderer/helpers/playlist-video-counts.js'
+import * as playlistPreferences from '../../src/renderer/helpers/playlist-preferences-sync.js'
 
 const source = await readFile(new URL('../../src/renderer/store/modules/playlists.js', import.meta.url), 'utf8')
 const handlers = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
@@ -38,7 +39,7 @@ async function fixture(records, { settingsDelay = false, settingsError = null } 
   }
   const module = vm.runInNewContext(
     source.slice(source.indexOf('function generateRandomPlaylistId()')).replace('export default', 'globalThis.playlistsModule =') + '\nplaylistsModule',
-    { DBPlaylistHandlers, ...videoCounts, deepCopy: value => structuredClone(value), processToBeAddedPlaylistVideo: () => {}, console: { error: error => errors.push(error) } }
+    { DBPlaylistHandlers, ...videoCounts, ...playlistPreferences, deepCopy: value => structuredClone(value), processToBeAddedPlaylistVideo: () => {}, console: { error: error => errors.push(error) } }
   )
   const context = {
     state: module.state,
@@ -157,6 +158,20 @@ test('metadata and last-played updates never recreate a playlist deleted in anot
 
   assert.equal(await db.playlists.findOneAsync({ _id: 'custom' }), null)
   assert.equal(module.state.playlists.find(item => item._id === 'custom').playlistName, 'Custom')
+})
+
+test('only preference edits record the edit time that sync merges them by', async () => {
+  const { db, dispatch, module, load } = await fixture([{ ...playlist('custom', 'Custom'), preferencesUpdatedAt: Date.now() + 60_000 }])
+  await load()
+  const saved = async () => (await db.playlists.findOneAsync({ _id: 'custom' })).preferencesUpdatedAt
+  const initial = await saved()
+
+  await dispatch('updatePlaylist', { _id: 'custom', playlistName: 'Renamed', shuffleByDefault: false })
+  assert.equal(await saved(), initial)
+  await dispatch('updatePlaylist', { _id: 'custom', shuffleByDefault: true })
+  // Later than the last synced edit, even when that came from a clock ahead of this one.
+  assert.equal(await saved(), initial + 1)
+  assert.equal(module.state.playlists.find(item => item._id === 'custom').preferencesUpdatedAt, initial + 1)
 })
 
 test('loading repairs a playlist stored without videos', async () => {

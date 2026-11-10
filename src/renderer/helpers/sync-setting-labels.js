@@ -363,6 +363,8 @@ export const SYNC_SETTING_LABELS = {
     'Global.Sort By'
   ],
   subscriptionChannelSettings: 'Channel.Subscription settings',
+  // Each activity entry names the playlist and the changed preference
+  playlistPreferences: 'Playlists',
   subscriptionFeedAutoRefreshInterval: 'Settings.Subscription Settings.Videos Auto Refresh Interval',
   subscriptionGroups: [
     'Subscriptions.Subscriptions',

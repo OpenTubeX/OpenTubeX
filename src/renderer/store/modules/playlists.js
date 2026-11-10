@@ -9,6 +9,7 @@ import {
 } from '../../helpers/playlist-video-counts'
 import { generateRandomUniqueId, processToBeAddedPlaylistVideo } from '../../helpers/playlists'
 import { getQuickBookmarkIconValue } from '../../helpers/quickBookmarkIcons'
+import { PLAYLIST_PREFERENCE_KEYS, getNextPlaylistPreferencesTimestamp } from '../../helpers/playlist-preferences-sync'
 import { deepCopy } from '../../helpers/utils'
 
 function generateRandomPlaylistId() {
@@ -223,7 +224,14 @@ const actions = {
     }
   },
 
-  async updatePlaylist({ commit }, playlist) {
+  async updatePlaylist({ commit, state }, playlist) {
+    const current = state.playlists.find(item => item._id === playlist._id)
+    // Sync merges these per playlist by their edit time
+    if (current && PLAYLIST_PREFERENCE_KEYS.some(key => (
+      Object.hasOwn(playlist, key) && (playlist[key] === true) !== (current[key] === true)
+    ))) {
+      playlist.preferencesUpdatedAt = getNextPlaylistPreferencesTimestamp(current)
+    }
     // Ensure playlist name trimmed
     if (typeof playlist.playlistName === 'string') {
       playlist.playlistName = playlist.playlistName.trim()

@@ -77,17 +77,20 @@
           <FtToggleSwitch
             :label="$t('User Playlists.Add new videos to the top (custom order)')"
             :default-value="newAddVideosToTop"
+            :sync-setting-keys="preferencesSyncKeys"
             @change="newAddVideosToTop = $event"
           />
           <FtToggleSwitch
             :label="t('User Playlists.Shuffle videos by default')"
             :default-value="newShuffleByDefault"
+            :sync-setting-keys="preferencesSyncKeys"
             @change="newShuffleByDefault = $event"
           />
           <FtToggleSwitch
             :label="t('User Playlists.Remove videos once watched')"
             :tooltip="t('User Playlists.Remove videos once watched Tooltip')"
             :default-value="newRemoveWatchedVideos"
+            :sync-setting-keys="preferencesSyncKeys"
             @change="newRemoveWatchedVideos = $event"
           />
         </div>
@@ -411,6 +414,7 @@ import {
 import { addingMissingVideos, addMissingPlaylistVideos, loadPlaylistVideos, scanPlaylistForUnavailableVideos, unavailableVideoScans } from '../../helpers/playlistTasks'
 import { isHistoryEntryWatched } from '../../helpers/history'
 import { getQuickBookmarkIconValue } from '../../helpers/quickBookmarkIcons'
+import { PLAYLIST_PREFERENCES_SYNC_KEY } from '../../helpers/playlist-preferences-sync'
 import { openButtonMenu } from '../../helpers/buttonMenu'
 import { useFittedButtonLabels } from '../../composables/useFittedButtonLabels'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
@@ -544,6 +548,8 @@ const newDescription = ref(props.description)
 const newAddVideosToTop = ref(false)
 const newShuffleByDefault = ref(false)
 const newRemoveWatchedVideos = ref(false)
+// Preferences sync only for playlists on the server
+const preferencesSyncKeys = computed(() => store.state.settings.syncServerSyncPlaylists ? [PLAYLIST_PREFERENCES_SYNC_KEY] : [])
 const newQuickBookmarkIcon = ref('bookmark')
 const newCustomThumbnail = ref('')
 const thumbnailLoading = ref(false)

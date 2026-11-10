@@ -18,6 +18,7 @@ getSyncableSettingKeys`,
     state: { pinnedChannelMetadata: {}, pinnedChannels: [], pinnedPlaylistIds: [], userPlaylistsPinnedIds: [], userPlaylistsSortBy: 'custom' },
     NON_TRANSFERABLE_SETTINGS: new Set(),
     SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY: 'subscriptionChannelSettings',
+    PLAYLIST_PREFERENCES_SYNC_KEY: 'playlistPreferences',
     isSettingSyncableOnPlatform: () => true,
   }
 )

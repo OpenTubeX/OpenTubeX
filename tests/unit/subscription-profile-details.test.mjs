@@ -7,7 +7,8 @@ import Datastore from '@seald-io/nedb'
 import { getProfileWithUpdatedSubscriptionDetails } from '../../src/renderer/helpers/subscription-profile-details.js'
 import { DEFAULT_PROFILE_ICON } from '../../src/renderer/helpers/profileIcons.js'
 import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getNextSubscriptionSettingsTimestamp, isValidSubscriptionSettingsTimestamp } from '../../src/renderer/helpers/subscription-channels.js'
-import { getSubscriptionSettingsForSync, mergeSubscriptionSettingsEntry } from '../../src/renderer/helpers/subscription-settings-sync.js'
+import { getSubscriptionSettingsForSync } from '../../src/renderer/helpers/subscription-settings-sync.js'
+import { mergeSettingItemsEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
 
 const profileSource = await readFile(new URL('../../src/renderer/store/modules/profiles.js', import.meta.url), 'utf8')
 const handlersSource = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
@@ -194,7 +195,7 @@ test('bulk edits keep one channel’s future timestamp out of other channels’ 
       second: { value: { ...value.second.value, showMembersOnly: true }, updatedAt: now + 1000 }
     }
   }
-  const merged = mergeSubscriptionSettingsEntry({ old, value, remoteEntry, now: now + 1000 })
+  const merged = mergeSettingItemsEntry({ old, value, remoteEntry, now: now + 1000 })
   assert.equal(merged.value.first.value.showMembersOnly, false)
   assert.equal(merged.value.second.value.showMembersOnly, true)
   assert.equal(merged.value.second.updatedAt, now + 1000)
@@ -304,7 +305,7 @@ for (const dailyVideoLimit of [7, undefined]) {
         }
       }
     }
-    const merged = mergeSubscriptionSettingsEntry({
+    const merged = mergeSettingItemsEntry({
       old,
       remoteEntry,
       now: Date.now(),
