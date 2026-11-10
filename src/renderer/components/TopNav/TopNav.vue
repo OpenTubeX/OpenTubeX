@@ -69,7 +69,7 @@
           ref="pinnedSearchTrigger"
           type="button"
           class="pinnedSearchTrigger"
-          :aria-label="t('Search / Go to URL')"
+          :aria-label="pinnedSearchText ? `${t('Search / Go to URL')}: ${pinnedSearchText}` : t('Search / Go to URL')"
           data-tutorial="search"
           @click="focusSearch"
         >
@@ -77,7 +77,7 @@
             :icon="['fas', 'search']"
             aria-hidden="true"
           />
-          <span class="pinnedSearchLabel">{{ t('Search / Go to URL') }}</span>
+          <span class="pinnedSearchLabel">{{ pinnedSearchText || t('Search / Go to URL') }}</span>
         </button>
         <div
           v-if="!hideSearchBar"
@@ -760,7 +760,9 @@ const searchInput = useTemplateRef('searchInput')
 // logical tab, so its text has to be persisted per tab to stay independent.
 // Mirror the live input value here since FtInput doesn't expose a getter.
 const searchTextByTabId = new Map()
-let currentSearchText = ''
+const currentSearchText = ref('')
+// The pinned phone search pill shows the text while the input is hidden.
+const pinnedSearchText = computed(() => currentSearchText.value.trim())
 
 /**
  * @param {string} path
@@ -835,7 +837,7 @@ if (usesLogicalTabs) {
       return
     }
 
-    searchTextByTabId.set(previousTabId, currentSearchText)
+    searchTextByTabId.set(previousTabId, currentSearchText.value)
     if (phoneLayout.value) closePhoneSearch()
     updateSearchInputText(tabId != null ? getSearchTextForTab(tabId) : '')
     cancelSearchSuggestions()
@@ -1080,7 +1082,7 @@ function cancelSearchSuggestions() {
 function handleSearchInputClear() {
   lastSuggestionQuery.value = ''
   searchSuggestionsDataList.value = []
-  currentSearchText = ''
+  currentSearchText.value = ''
   cancelSearchSuggestions()
 }
 
@@ -1090,7 +1092,7 @@ function handleSearchInputClear() {
 function updateSearchInputText(text) {
   cancelSearchSuggestions()
   lastSuggestionQuery.value = ''
-  currentSearchText = text
+  currentSearchText.value = text
   searchInput.value?.setText(text)
 }
 
@@ -1098,7 +1100,7 @@ function updateSearchInputText(text) {
  * @param {string} query
  */
 function getSearchSuggestionsDebounce(query) {
-  currentSearchText = query
+  currentSearchText.value = query
   if (query === lastSuggestionQuery.value &&
       (suggestionController != null || completedSuggestionQuery === query.trim())) return
 
@@ -1245,7 +1247,7 @@ onMounted(() => {
   if (usesLogicalTabs) {
     const tabId = store.getters.getPresentedTabId
     const searchText = tabId != null ? getSearchTextForTab(tabId) : ''
-    if (currentSearchText.length === 0 && searchText.length > 0) {
+    if (currentSearchText.value.length === 0 && searchText.length > 0) {
       updateSearchInputText(searchText)
     }
   }
