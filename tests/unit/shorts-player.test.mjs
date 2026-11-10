@@ -427,6 +427,47 @@ test('an inactive Short ignores fullscreen events and synchronizes when activate
   assert.equal(closed.length, 1, 'the returning player must synchronize its own presentation state')
 })
 
+test('a Short left during a connection wait replays its error when presented again', () => {
+  const start = playerSource.indexOf('    function handleError(')
+  const source = playerSource.slice(start, playerSource.indexOf('    // #region seek bar markers', start))
+  const emitted = []
+  let activate
+  const context = vm.createContext({
+    ignoreErrors: false,
+    shortsNavigationSuspended: ref(false),
+    suspendedShortsError: null,
+    suspendedShortsSabrReload: false,
+    ErrorCode: { HTTP_ERROR: 1002 },
+    ErrorSeverity: { RECOVERABLE: 1 },
+    ErrorCategory: { NETWORK: 1 },
+    navigator: { onLine: true },
+    logShakaError() {},
+    props: { videoId: 'short' },
+    shaka: { util: { Error: { Category: { TEXT: 3 }, Code: {} } } },
+    emit: (...args) => emitted.push(args),
+    mediaTabId: 'shorts-tab',
+    tabMediaCoordinator: { setPlaybackState() {} },
+    process: { env: { IS_ELECTRON: false } },
+    musicMode: ref(false),
+    registerMediaSessionHandlers() {},
+    onDeactivated() {},
+    onActivated: callback => { activate = callback },
+  })
+  vm.runInContext(source, context)
+  const lifecycleStart = playerSource.indexOf('    let resumeShortsAfterActivation = false')
+  vm.runInContext(playerSource.slice(lifecycleStart, playerSource.indexOf('    function isPaused()', lifecycleStart)), context)
+  const error = { code: 1002, severity: 2, category: 1, data: ['sabr://video', new TypeError('network error'), 1] }
+  context.handleError(error, 'shaka error handler')
+  assert.equal(emitted.length, 1)
+
+  // Watch hands the error back before the Short is suspended for navigation
+  context.deferErrorUntilActivated(error)
+  context.shortsNavigationSuspended.value = true
+  activate()
+  assert.deepEqual(emitted.map(([name, emittedError]) => [name, emittedError]), [['error', error], ['error', error]],
+    'the returning Short must report its failed stream again')
+})
+
 test('an inactive Short defers player errors without changing current playback', () => {
   const start = playerSource.indexOf('    function handleError(')
   const source = playerSource.slice(start, playerSource.indexOf('    // #region seek bar markers', start))

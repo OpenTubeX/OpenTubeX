@@ -2416,7 +2416,10 @@ export default defineComponent({
             requestedVideoId !== this.videoId &&
             this.$refs.player.hasLoaded
           if (retainShort) {
+            // The retained Short recovers from its stream error when it returns
+            const waitingError = this.playbackNetworkWaitError
             this.cancelPlaybackNetworkWait()
+            if (waitingError) this.$refs.player.deferErrorUntilActivated(waitingError)
             this.$refs.player.suspendForShortsNavigation()
           } else {
             await this.destroyPlayer()
@@ -5877,6 +5880,7 @@ export default defineComponent({
       this.cancelPlaybackNetworkWait()
       const controller = new AbortController()
       this.playbackNetworkWaitController = controller
+      this.playbackNetworkWaitError = error
       this.playbackNetworkWaitOrigin = new URL(probeUrl).origin
       console.warn(`Waiting for ${this.playbackNetworkWaitOrigin} to answer before retrying the stream of ${this.videoId}`)
       try {
@@ -5887,6 +5891,7 @@ export default defineComponent({
       } finally {
         if (this.playbackNetworkWaitController === controller) {
           this.playbackNetworkWaitController = null
+          this.playbackNetworkWaitError = null
           this.playbackNetworkWaitOrigin = null
         }
       }
@@ -5903,6 +5908,7 @@ export default defineComponent({
     cancelPlaybackNetworkWait() {
       this.playbackNetworkWaitController?.abort()
       this.playbackNetworkWaitController = null
+      this.playbackNetworkWaitError = null
       this.playbackNetworkWaitOrigin = null
     },
 

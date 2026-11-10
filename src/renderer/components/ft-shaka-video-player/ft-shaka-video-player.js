@@ -10891,6 +10891,16 @@ export default defineComponent({
       tabMediaCoordinator.setPlaybackState(mediaTabId, 'none')
     }
 
+    /**
+     * Replays a stream error when this retained Short is presented again,
+     * after the watch page stopped waiting to recover it.
+     * @param {shaka.util.Error} error
+     */
+    function deferErrorUntilActivated(error) {
+      ignoreErrors = false
+      suspendedShortsError = { error, context: 'shaka error handler', details: undefined }
+    }
+
     onDeactivated(suspendForShortsNavigation)
     onActivated(() => {
       if (!shortsNavigationSuspended.value) return
@@ -11170,6 +11180,7 @@ export default defineComponent({
       setCurrentTime,
       getSabrReloadState,
       getSabrUrl,
+      deferErrorUntilActivated,
       getActiveCaption,
       retryStreaming,
       setFullscreenMetadata,
