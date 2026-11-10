@@ -1443,6 +1443,10 @@ const customActions = {
             commit('removePlaylist', data)
             break
 
+          case SyncEvents.GENERAL.DELETE_ALL:
+            commit('removeAllPlaylists')
+            break
+
           case SyncEvents.GENERAL.UPSERT:
             commit('upsertPlaylistToList', data)
             break
