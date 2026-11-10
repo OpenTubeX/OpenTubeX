@@ -261,6 +261,23 @@ test('rejects HTTP 403 even when it contains a complete init segment', async () 
   transport.cleanup()
 })
 
+test('a SABR redirect moves later requests and the reported server URL', async t => {
+  const hosts = []
+  const { createSabrTransport } = load(async url => {
+    hosts.push(new URL(url).hostname)
+    if (hosts.length > 1) return response([1, 2, 3])
+    const buffer = new CompositeBuffer([])
+    new UmpWriter(buffer).write(protos.UMPPartId.SABR_REDIRECT, protos.SabrRedirect.encode({ url: 'https://redirected.example/sabr' }).finish())
+    return new Response(utils.concatenateChunks(buffer.chunks))
+  })
+  const transport = createSabrTransport(sabrData, () => context)
+  t.after(() => transport.cleanup())
+  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+  await transport.request(uri, request(uri), 1).promise
+  assert.deepEqual(hosts, ['example.test', 'redirected.example'])
+  assert.equal(transport.getUrl(), 'https://redirected.example/sabr')
+})
+
 for (const connectionFailed of [true, false]) {
   test(`an Android ${connectionFailed ? 'connection failure' : 'server 502'} is ${connectionFailed ? '' : 'not '}a lost connection`, async t => {
     // Android's native error responses have an empty body

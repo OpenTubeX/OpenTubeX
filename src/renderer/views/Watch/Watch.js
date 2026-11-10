@@ -807,8 +807,7 @@ export default defineComponent({
     },
     /** The player keeps a failed stream until its server answers again. */
     waitingForPlaybackConnection: function () {
-      return !this.isOffline && this.playbackNetworkWaitOrigin !== null &&
-        this.waitingOrigins.includes(this.playbackNetworkWaitOrigin)
+      return this.playbackNetworkWaitOrigin !== null && this.waitingOrigins.includes(this.playbackNetworkWaitOrigin)
     },
     /** The page is loading, but its YouTube or API server requests wait to retry. */
     waitingForConnection: function () {
@@ -5866,7 +5865,7 @@ export default defineComponent({
     async retryStreamWhenReachable(error) {
       // A stream that fails again soon after its retry needs fresh streaming data
       if (this.playbackNetworkRetryPending) return false
-      const probeUrl = getGoogleVideoProbeUrl(this.isSabrVideoStream() ? this.sabrData?.url : error.data?.[0])
+      const probeUrl = getGoogleVideoProbeUrl(this.isSabrVideoStream() ? this.$refs.player?.getSabrUrl() : error.data?.[0])
       if (probeUrl === null) return false
 
       const player = this.$refs.player

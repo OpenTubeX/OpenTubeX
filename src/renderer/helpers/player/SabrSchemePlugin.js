@@ -101,6 +101,7 @@ const ShakaError = shaka.util.Error
  * @type {object}
  * @property {(cb: ({backoffMs: number}) => void) => void} onBackoffRequested
  * @property {(cb: (reloadPlaybackContext?: ReloadPlaybackContext) => void) => void} onReloadOnce
+ * @property {() => string} getUrl the server URL after SABR redirects
  * @property {() => void | undefined} cleanup
  */
 
@@ -1253,6 +1254,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
     onReloadOnce(callback) {
       eventEmitter.once('reload', callback)
     },
+    getUrl: () => sabrStreamState.sabrUrl,
     cleanup,
   }
 }

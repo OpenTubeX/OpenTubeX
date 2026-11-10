@@ -11001,6 +11001,11 @@ export default defineComponent({
       if (pendingMetadataSeek !== null || !hasLoaded.value || !videoLayoutReady.value) pendingMetadataSeek = time
     }
 
+    /** @returns {string | null} the SABR server URL, which redirects can change */
+    function getSabrUrl() {
+      return sabrStream?.getUrl() ?? null
+    }
+
     function getSabrReloadState() {
       // A failed initial load has not emitted playing yet. Preserve its pending
       // autoplay through recovery unless the user canceled it.
@@ -11164,6 +11169,7 @@ export default defineComponent({
       getCurrentPlaybackRate,
       setCurrentTime,
       getSabrReloadState,
+      getSabrUrl,
       getActiveCaption,
       retryStreaming,
       setFullscreenMetadata,

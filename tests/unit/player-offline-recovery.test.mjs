@@ -62,7 +62,9 @@ function createUnreachableStreamView() {
   const player = {
     retries: 0,
     retryStreaming () { this.retries++; return true },
-    getSabrReloadState: () => ({})
+    getSabrReloadState: () => ({}),
+    // A SABR redirect moved the stream from the server in the watch page's data
+    getSabrUrl: () => 'https://rr1---sn-abc.googlevideo.com/videoplayback?mn=sn-abc,sn-def&fvip=2'
   }
   const view = {
     ...methods,
@@ -70,7 +72,7 @@ function createUnreachableStreamView() {
     videoId: 'video',
     activePlaybackEngine: 'built-in',
     activeFormat: 'dash',
-    sabrData: { url: 'https://rr1---sn-abc.googlevideo.com/videoplayback?mn=sn-abc,sn-def&fvip=2' },
+    sabrData: { url: 'https://rr4---sn-original.googlevideo.com/videoplayback' },
     $refs: { player },
     playbackNetworkRetryPending: false,
     sabrErrorRecoveryAttempts: 0,
