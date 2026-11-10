@@ -3958,8 +3958,13 @@ export default defineComponent({
       }
       chapterPreview.style.bottom = `${bottomPx}px`
 
-      // The player clips its overflow, so short players get fewer than three lines.
+      // The player clips its overflow, so short players get fewer than three lines,
+      // and the title overlaps the thumbnail when not even one line fits above it.
       const spaceAbove = chapterPreview.getBoundingClientRect().bottom - playerRect.top - 4
+      const oneLineHeight = CHAPTER_PREVIEW_PADDING_BLOCK + CHAPTER_PREVIEW_LINE_HEIGHT
+      if (spaceAbove < oneLineHeight) {
+        chapterPreview.style.bottom = `${bottomPx - (oneLineHeight - spaceAbove)}px`
+      }
       const lines = Math.floor((spaceAbove - CHAPTER_PREVIEW_PADDING_BLOCK) / CHAPTER_PREVIEW_LINE_HEIGHT)
       chapterPreview.style.setProperty('--ft-chapter-preview-lines', `${Math.max(1, Math.min(3, lines))}`)
 
