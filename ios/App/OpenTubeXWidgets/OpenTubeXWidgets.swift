@@ -266,15 +266,15 @@ struct WatchTimeProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<WatchTimeEntry>) -> Void) {
-        // The app reloads this timeline when its statistics change; the entries move on at midnight
-        // until every cached day has left the week.
+        // The app reloads this timeline when its statistics change; the entries move on at midnight,
+        // and WidgetKit asks for a new week after the last one.
         let watched = HomeWidgetStore.watchTime()
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: .now)
         let entries = [entry(for: .now, watched: watched)] + (1...HomeWidgetStore.watchTimeDays).compactMap { offset in
             calendar.date(byAdding: .day, value: offset, to: today).map { entry(for: $0, watched: watched) }
         }
-        completion(Timeline(entries: entries, policy: .never))
+        completion(Timeline(entries: entries, policy: .atEnd))
     }
 
     private func entry(for date: Date, watched: [String: Int]) -> WatchTimeEntry {
