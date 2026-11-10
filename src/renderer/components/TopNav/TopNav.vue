@@ -1244,12 +1244,9 @@ onMounted(() => {
 
   window.addEventListener('opentubex:focus-search', handleFocusSearch)
 
-  if (usesLogicalTabs) {
-    const tabId = store.getters.getPresentedTabId
-    const searchText = tabId != null ? getSearchTextForTab(tabId) : ''
-    if (currentSearchText.value.length === 0 && searchText.length > 0) {
-      updateSearchInputText(searchText)
-    }
+  const searchText = getSearchTextFromPath(presentedRoutePath.value)
+  if (currentSearchText.value.length === 0 && searchText) {
+    updateSearchInputText(searchText)
   }
 
   if (process.env.IS_ELECTRON) {
