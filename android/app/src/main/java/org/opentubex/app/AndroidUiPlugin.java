@@ -514,6 +514,7 @@ public class AndroidUiPlugin extends Plugin {
             } catch (IllegalStateException error) {
                 // The activity can close before a queued request runs. It has no
                 // Picture-in-Picture settings left to update then.
+                if (!activity.isFinishing() && !activity.isDestroyed()) throw error;
             }
         }
 
