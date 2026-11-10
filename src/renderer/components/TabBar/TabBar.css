@@ -52,9 +52,16 @@
   inline-size: max-content;
   min-inline-size: 100%;
   gap: 2px;
+}
 
-  /* Opening tabs stretch to their content-based size. */
-  interpolate-size: allow-keywords;
+/* Closing tabs leave the strip at once and finish closing in this layer, so
+   they neither hold the strip's scroll range nor take events. */
+.tabGhostLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: clip;
+  pointer-events: none;
 }
 
 /* The scrollbar's track and hit areas reach past the gap, so the tab row

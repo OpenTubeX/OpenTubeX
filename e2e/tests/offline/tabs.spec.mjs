@@ -623,7 +623,7 @@ test.describe('tab bar', () => {
     await expect(tab.locator('.playingIcon')).toBeVisible()
     await expect(line).toBeVisible()
 
-    const animationName = () => line.locator('path').evaluate(element => getComputedStyle(element).animationName)
+    const animationName = () => line.evaluate(element => getComputedStyle(element).animationName)
     await expect.poll(animationName).not.toBe('none')
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await expect.poll(animationName).toBe('none')
@@ -4025,38 +4025,61 @@ for (const tabBarPosition of ['top', 'left']) {
       await expect(page.locator(sel.tabs)).toHaveCount(4)
       await expectTabStripSettled(page)
 
-      // Pause the animations of the item that opens or closes during `action`
-      // as soon as they start, at the beginning or end of their timelines.
+      // Pause the strip's animations as soon as the item that opens or closes
+      // during `action` starts, at the beginning or end of their timelines.
+      // Closing tabs finish closing as copies in the ghost layer.
       const pauseTransition = (action, moment, title = 'Opened') => page.evaluate(({ action, moment, title }) => new Promise(resolve => {
-        const content = document.querySelector('.tabBar .tabsContent')
+        const bar = document.querySelector('.tabBar')
+        const content = bar.querySelector('.tabsContent')
         const known = new Set(content.querySelectorAll('.tab'))
         const observer = new MutationObserver(() => {
-          const item = action.type === 'create'
-            ? [...content.querySelectorAll('.tab')].find(tab => !known.has(tab))?.parentElement
-            : content.querySelector('.tabStripItem[data-leaving]')
-          if (!item) return
+          const tab = action.type === 'create'
+            ? [...content.querySelectorAll('.tab')].find(tab => !known.has(tab))
+            : bar.querySelector('.tabGhostLayer > .tab')
+          if (!tab) return
           observer.disconnect()
-          const animations = item.getAnimations({ subtree: true })
+          const animations = bar.getAnimations({ subtree: true })
+            .filter(animation => !(animation instanceof CSSAnimation) && !(animation instanceof CSSTransition))
           for (const animation of animations) {
             animation.pause()
             const { endTime } = animation.effect.getComputedTiming()
             animation.currentTime = { start: 0, nearEnd: endTime - 1, end: endTime }[moment]
           }
-          const tab = item.firstElementChild
-          const style = getComputedStyle(tab)
-          resolve({ id: tab.dataset.tabId, animations: animations.length, inlineSize: style.inlineSize, opacity: style.opacity })
+          // Hit testing follows the clip and scale that draw the tab.
+          const rect = tab.getBoundingClientRect()
+          const y = rect.top + rect.height / 2
+          const visible = []
+          for (let x = Math.floor(rect.left); x <= rect.right; x++) {
+            if (document.elementsFromPoint(x, y).some(element => tab.contains(element))) visible.push(x)
+          }
+          // Whether the visible part is drawn over the tab before it.
+          const previous = tab.parentElement.previousElementSibling?.firstElementChild?.getBoundingClientRect()
+          const center = (visible[0] + visible.at(-1)) / 2
+          const overlapsPrevious = Boolean(previous && visible.length > 0 &&
+            center > previous.left && center < previous.right && y > previous.top && y < previous.bottom)
+          resolve({ id: tab.dataset.tabId, animations: tab.getAnimations().length, visibleSize: visible.length, overlapsPrevious, opacity: getComputedStyle(tab).opacity })
         })
-        observer.observe(content, { childList: true, attributes: true, attributeFilter: ['data-leaving'], subtree: true })
+        observer.observe(bar, { childList: true, subtree: true })
         if (action.type === 'create') {
           window.ftElectron.tabs.create({ route: '/history', title, makeActive: false, lazyLoad: true })
         } else {
           window.ftElectron.tabs.close(action.id)
         }
       }), { action, moment, title })
-      const finish = tabId => page.evaluate(tabId => {
-        const item = document.querySelector(`.tabBar [data-tab-id="${tabId}"]`)?.parentElement
-        item?.getAnimations({ subtree: true }).forEach(animation => animation.finish())
-      }, tabId)
+      const finish = () => page.evaluate(() => {
+        document.querySelector('.tabBar').getAnimations({ subtree: true })
+          .filter(animation => !(animation instanceof CSSAnimation) && !(animation instanceof CSSTransition))
+          .forEach(animation => animation.finish())
+      })
+      const visibleSize = tabId => page.locator(`.tabBar .tabsContent .tab[data-tab-id="${tabId}"]`).evaluate(tab => {
+        const rect = tab.getBoundingClientRect()
+        const y = rect.top + rect.height / 2
+        let size = 0
+        for (let x = Math.floor(rect.left); x <= rect.right; x++) {
+          if (document.elementsFromPoint(x, y).some(element => tab.contains(element))) size++
+        }
+        return size
+      })
       const start = tabId => page.locator(`.tabBar .tab[data-tab-id="${tabId}"]`).evaluate((element, vertical) => {
         const rect = element.getBoundingClientRect()
         return vertical ? rect.top : rect.left
@@ -4065,24 +4088,24 @@ for (const tabBarPosition of ['top', 'left']) {
       // An opening tab starts as a transparent dot.
       const opening = await pauseTransition({ type: 'create' }, 'start')
       expect(opening.opacity).toBe('0')
-      // Fractional UI scales round the computed size.
-      expect(parseFloat(opening.inlineSize)).toBeCloseTo(22, 0)
+      expect(opening.visibleSize).toBeGreaterThan(0)
+      expect(opening.visibleSize).toBeLessThanOrEqual(22)
+      expect(opening.overlapsPrevious).toBe(false)
       expect(opening.animations).toBeGreaterThan(0)
       const opened = opening.id
-      const openedTab = page.locator(`.tabBar .tab[data-tab-id="${opened}"]`)
-      await finish(opened)
-      await expect.poll(() => openedTab.evaluate(element => element.parentElement.getAnimations({ subtree: true }).length)).toBe(0)
-      expect(await openedTab.evaluate(element => parseFloat(getComputedStyle(element).inlineSize))).toBeGreaterThan(22)
+      await finish()
+      await expectTabStripSettled(page)
+      expect(await visibleSize(opened)).toBeGreaterThan(60)
 
       // A title that changes while the tab opens changes the size it stretches to.
       const retitled = (await pauseTransition({ type: 'create' }, 'nearEnd', 'Short')).id
       const retitledTab = page.locator(`.tabBar .tab[data-tab-id="${retitled}"]`)
       await page.evaluate(id => window.ftElectron.tabs.updateTitle('A considerably longer title for this tab', id), retitled)
       await expect(retitledTab).toContainText('A considerably longer')
-      const stretchedSize = await retitledTab.evaluate(element => parseFloat(getComputedStyle(element).inlineSize))
-      await finish(retitled)
-      await expect.poll(() => retitledTab.evaluate(element => element.parentElement.getAnimations({ subtree: true }).length)).toBe(0)
-      expect(Math.abs(await retitledTab.evaluate(element => parseFloat(getComputedStyle(element).inlineSize)) - stretchedSize)).toBeLessThan(1)
+      const stretchedSize = await retitledTab.evaluate(element => element.getBoundingClientRect().width)
+      await finish()
+      await expectTabStripSettled(page)
+      expect(Math.abs(await visibleSize(retitled) - stretchedSize)).toBeLessThan(2)
 
       // At the end of the close animation, the next tab already sits in the
       // closed tab's slot, so removing the closed tab does not move it.
@@ -4090,7 +4113,7 @@ for (const tabBarPosition of ['top', 'left']) {
       const closing = await pauseTransition({ type: 'close', id: ids[1] }, 'end')
       expect(closing).toMatchObject({ id: ids[1], opacity: '0' })
       expect(Math.abs(await start(ids[2]) - closedSlot)).toBeLessThan(0.5)
-      await finish(ids[1])
+      await finish()
       await expect(page.locator(`.tabBar .tab[data-tab-id="${ids[1]}"]`)).toHaveCount(0)
       expect(Math.abs(await start(ids[2]) - closedSlot)).toBeLessThan(0.5)
 
@@ -4100,7 +4123,7 @@ for (const tabBarPosition of ['top', 'left']) {
       expect(await page.locator(`.tabBar .tab[data-tab-id="${ids[0]}"]`).evaluate(element => {
         element.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }))
         window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0 }))
-        return document.querySelectorAll('.tabBar .tabStripItem[data-leaving]').length
+        return document.querySelectorAll('.tabBar .tabGhostLayer > *').length
       })).toBe(0)
 
       // A tab closed while it pops in does not move the tab after it on removal.
@@ -4114,7 +4137,7 @@ for (const tabBarPosition of ['top', 'left']) {
       const follower = await page.locator(sel.tabs).nth(2).getAttribute('data-tab-id')
       await pauseTransition({ type: 'close', id: popping }, 'end')
       const followerAtCloseEnd = await start(follower)
-      await finish(popping)
+      await finish()
       await expect(page.locator(`.tabBar .tab[data-tab-id="${popping}"]`)).toHaveCount(0)
       expect(Math.abs(await start(follower) - followerAtCloseEnd)).toBeLessThan(0.5)
 
@@ -4137,7 +4160,7 @@ for (const tabBarPosition of ['top', 'left']) {
       const lastClosing = await pauseTransition({ type: 'close', id: lastId }, 'end')
       expect(lastClosing.id).toBe(lastId)
       const atCloseEnd = await scrollState()
-      await finish(lastId)
+      await finish()
       await expect(page.locator(`.tabBar .tab[data-tab-id="${lastId}"]`)).toHaveCount(0)
       const afterRemoval = await scrollState()
       expect(Math.abs(afterRemoval.range - atCloseEnd.range)).toBeLessThan(1)
