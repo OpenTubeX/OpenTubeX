@@ -35,9 +35,8 @@
   overflow: clip;
 }
 
-/* Override browser form fonts and Shaka's badge/tooltip fonts without changing their sizing. */
-.ftVideoPlayer :deep(:is(button, input, select, textarea, .shaka-overflow-playback-rate-mark, .shaka-overflow-quality-mark)),
-.ftVideoPlayer :deep(.shaka-tooltips-on > :is(.shaka-tooltip, .shaka-tooltip-status):is(:hover, :focus-visible, :active)::after) {
+/* Override browser form fonts and Shaka's badge fonts without changing their sizing. */
+.ftVideoPlayer :deep(:is(button, input, select, textarea, .shaka-overflow-playback-rate-mark, .shaka-overflow-quality-mark)) {
   font-family: var(--app-font-family);
 }
 

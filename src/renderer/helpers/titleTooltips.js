@@ -11,6 +11,8 @@ const COMPACT_WIDTH_PX = 320
 const ANCHOR_GAP_PX = 6
 const CURSOR_GAP_PX = 18
 const VIEWPORT_MARGIN_PX = 8
+// Inside these, such as the video player, tooltips open above like the player's control tooltips
+const ABOVE_SELECTOR = '[data-title-tooltips-above]'
 
 /** @type {HTMLDivElement} */
 let tooltip
@@ -228,7 +230,8 @@ function hide() {
 
 /**
  * Center the tooltip below small anchors and place it below the pointer on
- * large ones, flipping it above when there is no room.
+ * large ones, flipping it above when there is no room. Anchors that prefer
+ * the space above flip below instead.
  */
 function position() {
   const rect = anchor.getBoundingClientRect()
@@ -238,11 +241,16 @@ function position() {
   const centerX = compact ? rect.left + rect.width / 2 : origin.x
   const maxTop = window.innerHeight - height - VIEWPORT_MARGIN_PX
 
-  let top = compact ? rect.bottom + ANCHOR_GAP_PX : origin.y + CURSOR_GAP_PX
-  const above = top > maxTop
-  if (above) {
-    top = (compact ? rect.top - ANCHOR_GAP_PX : origin.y - ANCHOR_GAP_PX) - height
-  }
+  // Lets a group of anchors line its tooltips up with other tooltips nearby
+  const gap = compact
+    ? parseFloat(getComputedStyle(anchor).getPropertyValue('--title-tooltip-gap')) || ANCHOR_GAP_PX
+    : ANCHOR_GAP_PX
+  const belowTop = compact ? rect.bottom + gap : origin.y + CURSOR_GAP_PX
+  const aboveTop = (compact ? rect.top : origin.y) - gap - height
+  const above = anchor.closest(ABOVE_SELECTOR)
+    ? aboveTop >= VIEWPORT_MARGIN_PX || belowTop > maxTop
+    : belowTop > maxTop
+  const top = above ? aboveTop : belowTop
   // The open animation grows the tooltip out of the side facing its anchor
   tooltip.dataset.placement = above ? 'above' : 'below'
   const left = Math.min(Math.max(centerX - width / 2, VIEWPORT_MARGIN_PX), window.innerWidth - width - VIEWPORT_MARGIN_PX)
