@@ -23,6 +23,11 @@
           text-align: center;
         }
       }
+
+      // The centered group needs no side margins, which narrow columns cannot spare.
+      :deep(.buttonList) {
+        margin-inline: 0;
+      }
     }
   }
 
