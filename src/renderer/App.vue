@@ -4362,9 +4362,15 @@ async function handleYoutubeLink(href, {
 
 function enableOpenUrl() {
   const removeOpenUrl = window.ftElectron.handleOpenUrl((url, tabId) => {
-    if (url) {
-      handleYoutubeLink(url, { tabId })
+    if (!url) return
+    // other sites must not reach the YouTube parser, which reads e.g. facebook.com/watch?v= as a video
+    if (supportsYtDlp && shouldOpenExternalMediaUrl(url, store.getters.getCurrentInvidiousInstanceUrl)) {
+      const route = { path: '/external-media', query: { url } }
+      if (tabId) navigation.push(tabId, route)
+      else openInternalPath(route)
+      return
     }
+    handleYoutubeLink(url, { tabId })
   })
   const removeOidcCallback = window.ftElectron.handleSyncServerOidcCallback(url => {
     store.dispatch('receiveSyncServerOidcCallback', url)
