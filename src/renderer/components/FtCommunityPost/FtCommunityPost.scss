@@ -293,11 +293,15 @@
     --slider-button-fill: color-mix(in srgb, var(--primary-text-color) 12%, var(--slider-button-rest));
   }
 
-  // At either end the unavailable direction shrinks away instead of dimming.
+  // At either end the unavailable direction shrinks away instead of dimming,
+  // unless it still has keyboard focus.
   &.swiper-button-disabled {
-    opacity: 0;
     pointer-events: none;
-    scale: 0.6;
+
+    &:not(:focus-visible) {
+      opacity: 0;
+      scale: 0.6;
+    }
   }
 
   // A single slide needs no navigation.
@@ -306,7 +310,8 @@
   }
 }
 
-// Mice reveal the buttons on hover; touch screens swipe instead.
+// The buttons appear on hover and keyboard focus. Touch screens swipe
+// instead, so taps pass through the hidden buttons there.
 @media (hover: hover) {
   .sliderContainer:not(:hover, :has(:focus-visible)) .sliderButton {
     opacity: 0;
@@ -315,8 +320,10 @@
 }
 
 @media (hover: none) {
-  .sliderButton {
-    display: none;
+  .sliderContainer:not(:has(:focus-visible)) .sliderButton {
+    opacity: 0;
+    pointer-events: none;
+    scale: 0.6;
   }
 }
 
