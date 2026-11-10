@@ -1,4 +1,5 @@
 import { Comment, setTransitionHooks } from 'vue'
+import { takeOverLeavingModalBackdrop, trackLeavingModalBackdrop } from './modalBackdropHandoff'
 
 /**
  * @param {Element} element
@@ -11,6 +12,7 @@ async function leave(element, remove) {
     remove()
     return
   }
+  const release = element instanceof HTMLElement ? trackLeavingModalBackdrop(element) : () => {}
   element.classList.add('modal-leave-active')
   // A closing modal must not take input meant for what it uncovers. Inert only
   // moves focus out on the next rendering update, but focus restoration and
@@ -26,7 +28,20 @@ async function leave(element, remove) {
   const animations = element.getAnimations?.({ subtree: true })
     .filter(animation => animation.effect?.target === element || animation.effect?.target === dialog) ?? []
   await Promise.allSettled(animations.map(animation => animation.finished))
+  release()
   remove()
+}
+
+/**
+ * The backdrop's enter keyframes start from these properties when set.
+ * @param {Element} element
+ */
+function enter(element) {
+  if (!(element instanceof HTMLElement)) return
+  const from = takeOverLeavingModalBackdrop(element)
+  if (!from) return
+  element.style.setProperty('--modal-backdrop-enter-color', from.backgroundColor)
+  element.style.setProperty('--modal-backdrop-enter-filter', from.backdropFilter)
 }
 
 /** @type {import('vue').TransitionHooks} */
@@ -34,14 +49,15 @@ const hooks = {
   mode: 'default',
   persisted: false,
   beforeEnter() {},
-  enter() {},
+  enter,
   leave,
   clone: () => hooks
 }
 
 /**
  * Keeps a modal backdrop, whose first child is the dialog, in the document
- * while its `modal-leave-active` animations play. Unlike `<Transition>`, this
+ * while its `modal-leave-active` animations play, and lets a modal that opens
+ * meanwhile take over its dim and blur. Unlike `<Transition>`, this
  * also runs when the component rendering the modal unmounts, which is how
  * parents close modals.
  */
