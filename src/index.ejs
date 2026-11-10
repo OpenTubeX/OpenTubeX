@@ -5,6 +5,9 @@
 
   <head>
     <meta charset="utf-8" />
+    <!-- Electron's app:// handler sends this policy with frame-ancestors as a header. -->
+    <meta http-equiv="Content-Security-Policy"
+          content="object-src 'none'; base-uri 'self'; form-action 'none'" />
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <% if (!process.env.IS_ELECTRON && !process.env.IS_CAPACITOR) { %>
