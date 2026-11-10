@@ -523,6 +523,8 @@ Settings:
     Auto Load Comments:
       Label: Yorumları Otomatik Yükle
       Tooltip: Sayfa açıldığında yorumları yükle ve kaydırdıkça daha fazla yorum yükle.
+    Haptic Feedback: Dokunsal geri bildirim
+    Ignore System Haptics Setting: Sistemin dokunsal ayarını yok say
   Context Menu Search Settings:
     Context Menu Search Settings: Bağlam Menüsü Araması
     Description: Seçili metne sağ tıkladığınızda görünecek arama motorlarını seçin. Aramalar varsayılan tarayıcınızda açılır.
@@ -2191,6 +2193,7 @@ Tooltips:
     Yattee Server: OpenTubeX'un videoları, kanalları, oynatma listelerini ve arama sonuçlarını yüklediği yattee-server örneği. Kullanıcı adı ve parola yalnızca bu cihazda saklanır.
     Proxy Videos Through Yattee Server: Video ve ses akışlarını sunucu üzerinden aktarır. Sunucu sizinle aynı internet bağlantısını kullanmıyorsa bunu açık bırakın, çünkü YouTube akışları yalnızca onları isteyen adrese sunar. Önizleme görselleri her zaman doğrudan YouTube'dan yüklenir.
     Notifications: OpenTubeX’in sizi canlı yayınlar, yeni yüklemeler ve otomatik indirmeler hakkında nasıl bilgilendireceğini seçin. Sistem ve uygulama içi seçeneğinde bildirimler OpenTubeX’i kullanırken uygulamanın içinde, aksi hâlde sistem bildirimi olarak görünür ve zil onları saklar. Kapalı, bildirim seçeneklerini de gizler.
+    Ignore System Haptics Setting: Android ayarlarında dokunma geri bildirimi kapalı olsa bile uzun basmalarda ve hareketlerde titreşim ver.
   Proxy Settings:
     IP Block Recovery Script Path: IP engeli algılandığında çalıştırılacak betik dosyasının yolu. OpenTubeX betiğin tamamlanmasını bekler ve videoyu yeniden yükler. Yedek arka uç etkinse yalnızca yedek arka uç da başarısız olduğunda çalışır.
   Player Settings:

@@ -524,6 +524,8 @@ Settings:
     Auto Load Comments:
       Label: Otomatis Memuat Komentar
       Tooltip: Muat komentar saat halaman dibuka dan muat lebih banyak komentar saat Anda menggulir.
+    Haptic Feedback: Umpan balik haptik
+    Ignore System Haptics Setting: Abaikan setelan haptik sistem
   Context Menu Search Settings:
     Context Menu Search Settings: Pencarian Menu Konteks
     Description: Pilih mesin pencari yang muncul saat Anda mengeklik kanan teks terpilih. Pencarian dibuka di peramban bawaan.
@@ -2215,6 +2217,7 @@ Tooltips:
     Yattee Server: Instans yattee-server tempat OpenTubeX memuat video, kanal, daftar putar, dan hasil pencarian. Nama pengguna dan kata sandi hanya disimpan di perangkat ini.
     Proxy Videos Through Yattee Server: Meneruskan stream video dan audio melalui server. Biarkan tetap aktif kecuali server menggunakan koneksi internet yang sama dengan Anda, karena YouTube hanya mengirim stream ke alamat yang memintanya. Thumbnail selalu dimuat langsung dari YouTube.
     Notifications: Pilih cara OpenTubeX memberi tahu Anda tentang siaran langsung, unggahan baru, dan unduhan otomatis. Dengan Sistem dan di aplikasi, notifikasi muncul di dalam OpenTubeX saat Anda menggunakannya dan sebagai notifikasi sistem jika tidak, dan lonceng menyimpannya. Nonaktif juga menyembunyikan opsi notifikasi.
+    Ignore System Haptics Setting: Bergetar saat tekan lama dan gestur meskipun umpan balik sentuhan dinonaktifkan di setelan Android.
   Proxy Settings:
     IP Block Recovery Script Path: Jalur berkas skrip yang dijalankan saat blokir IP terdeteksi. OpenTubeX menunggu skrip selesai, lalu memuat ulang video. Jika metode cadangan diaktifkan, skrip hanya berjalan ketika metode cadangan juga gagal.
   Player Settings:

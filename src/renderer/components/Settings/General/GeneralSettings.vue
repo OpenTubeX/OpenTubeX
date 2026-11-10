@@ -106,6 +106,24 @@
         @change="store.dispatch('updateEnablePullToRefresh', $event)"
       />
       <FtToggleSwitch
+        v-if="IS_CAPACITOR"
+        :label="t('Settings.General Settings.Haptic Feedback')"
+        :default-value="store.getters.getHapticFeedback"
+        setting-key="hapticFeedback"
+        :compact="true"
+        @change="store.dispatch('updateHapticFeedback', $event)"
+      />
+      <FtToggleSwitch
+        v-if="IS_CAPACITOR && !IS_IOS"
+        :label="t('Settings.General Settings.Ignore System Haptics Setting')"
+        :tooltip="t('Tooltips.General Settings.Ignore System Haptics Setting')"
+        :disabled="!store.getters.getHapticFeedback"
+        :default-value="store.getters.getHapticFeedbackIgnoresSystemSetting"
+        setting-key="hapticFeedbackIgnoresSystemSetting"
+        :compact="true"
+        @change="store.dispatch('updateHapticFeedbackIgnoresSystemSetting', $event)"
+      />
+      <FtToggleSwitch
         :label="t('Settings.General Settings.Use AI Translation Completions')"
         :default-value="useAITranslationCompletions"
         setting-key="useAITranslationCompletions"

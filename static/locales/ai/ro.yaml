@@ -522,6 +522,8 @@ Settings:
     Auto Load Comments:
       Label: Încarcă automat comentariile
       Tooltip: Încarcă comentariile la deschiderea paginii și încarcă mai multe pe măsură ce derulezi.
+    Haptic Feedback: Feedback haptic
+    Ignore System Haptics Setting: Ignoră setarea haptică a sistemului
   Context Menu Search Settings:
     Context Menu Search Settings: Căutare din meniul contextual
     Description: Alegeți motoarele de căutare care apar când faceți clic dreapta pe textul selectat. Căutările se deschid în browserul implicit.
@@ -2243,6 +2245,7 @@ Tooltips:
     Yattee Server: Instanța yattee-server din care OpenTubeX încarcă videoclipuri, canale, liste de redare și rezultate ale căutării. Numele de utilizator și parola sunt stocate doar pe acest dispozitiv.
     Proxy Videos Through Yattee Server: Transmite fluxurile video și audio prin server. Lăsați opțiunea activată, cu excepția cazului în care serverul folosește aceeași conexiune la internet ca dvs., deoarece YouTube livrează fluxurile doar adresei care le-a solicitat. Miniaturile se încarcă întotdeauna direct de pe YouTube.
     Notifications: Alege cum te anunță OpenTubeX despre transmisiunile live, încărcările noi și descărcările automate. Cu Sistem și în aplicație, notificările apar în OpenTubeX cât timp îl folosești, iar altfel ca notificări de sistem, iar clopoțelul le păstrează. Dezactivate ascunde și opțiunile de notificare.
+    Ignore System Haptics Setting: Vibrează la apăsări lungi și gesturi chiar și când feedbackul la atingere este dezactivat în setările Android.
   Proxy Settings:
     IP Block Recovery Script Path: Calea fișierului script care se rulează când este detectată blocarea IP-ului. OpenTubeX așteaptă finalizarea acestuia, apoi reîncarcă videoclipul. Dacă este activată sursa de rezervă, scriptul rulează numai când și aceasta eșuează.
   Player Settings:

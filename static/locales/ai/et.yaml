@@ -523,6 +523,8 @@ Settings:
     Auto Load Comments:
       Label: Laadi kommentaarid automaatselt
       Tooltip: Laadi kommentaarid lehe avamisel ja laadi kerimisel rohkem kommentaare.
+    Haptic Feedback: Haptiline tagasiside
+    Ignore System Haptics Setting: Eira süsteemi haptika seadet
   Context Menu Search Settings:
     Context Menu Search Settings: Kontekstimenüü otsing
     Description: Valige otsingumootorid, mis kuvatakse valitud tekstil paremklõpsamisel. Otsingud avanevad vaikebrauseris.
@@ -2193,6 +2195,7 @@ Tooltips:
     Yattee Server: Server, millel töötab yattee-server ja kust OpenTubeX laadib videoid, kanaleid, esitusloendeid ja otsingutulemusi. Kasutajanimi ja salasõna salvestatakse ainult selles seadmes.
     Proxy Videos Through Yattee Server: Edastab video- ja helivood serveri kaudu. Jäta see sisse lülitatuks, kui server just ei kasuta sinuga sama internetiühendust, sest YouTube edastab vooge ainult aadressile, mis neid küsis. Pisipildid laaditakse alati otse YouTube'ist.
     Notifications: Vali, kuidas OpenTubeX sind otseülekannetest, uutest üleslaadimistest ja automaatsetest allalaadimistest teavitab. Valikuga Süsteem ja rakenduses ilmuvad teavitused OpenTubeXis selle kasutamise ajal, muidu süsteemiteavitustena, ja kell hoiab neid alles. Väljas peidab ka teavituste valikud.
+    Ignore System Haptics Setting: Vibreeri pikkadel vajutustel ja žestidel isegi siis, kui puutetagasiside on Androidi seadetes välja lülitatud.
   Proxy Settings:
     IP Block Recovery Script Path: Skriptifaili asukoht, mida kasutatakse IP-blokeeringu tuvastamisel. OpenTubeX ootab skripti lõppemist ja laadib seejärel video uuesti. Kui varumeetod on lubatud, käivitatakse skript ainult siis, kui ka varumeetod nurjub.
   Player Settings:

@@ -510,6 +510,8 @@ Settings:
     Auto Load Comments:
       Label: Auto load comments
       Tooltip: Load comments when the page opens and load more comments as you scroll.
+    Haptic Feedback: Haptic feedback
+    Ignore System Haptics Setting: Ignore system haptics setting
   Context Menu Search Settings:
     Context Menu Search Settings: Context Menu Search
     Description: Choose which search engines appear when you right-click selected text. Searches open in your default browser.
@@ -2185,6 +2187,7 @@ Tooltips:
     Yattee Server: The yattee-server instance that OpenTubeX loads videos, channels, playlists and search results from. The username and password are only stored on this device.
     Proxy Videos Through Yattee Server: Relays video and audio streams through the server. Leave this on unless the server shares your internet connection, because YouTube only serves streams to the address that requested them. Thumbnails always load directly from YouTube.
     Notifications: Choose how OpenTubeX notifies you about live streams, new uploads, and automatic downloads. With System and in-app, notifications appear inside OpenTubeX while you use it and as system notifications otherwise, and the bell keeps them. Off also hides the notification options.
+    Ignore System Haptics Setting: Vibrate on long presses and gestures even when touch feedback is turned off in Android's settings.
   Proxy Settings:
     IP Block Recovery Script Path: Script file path to run when an IP block is detected. OpenTubeX waits for it to finish, then reloads the video. If fallback is enabled, it runs only when fallback also fails.
   Player Settings:

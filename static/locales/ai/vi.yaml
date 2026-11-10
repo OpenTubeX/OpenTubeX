@@ -523,6 +523,8 @@ Settings:
     Auto Load Comments:
       Label: Tự động tải bình luận
       Tooltip: Tải bình luận khi mở trang và tải thêm khi bạn cuộn.
+    Haptic Feedback: Phản hồi xúc giác
+    Ignore System Haptics Setting: Bỏ qua cài đặt xúc giác của hệ thống
   Context Menu Search Settings:
     Context Menu Search Settings: Tìm kiếm trong menu ngữ cảnh
     Description: Chọn công cụ tìm kiếm xuất hiện khi bạn nhấp chuột phải vào văn bản đã chọn. Kết quả tìm kiếm sẽ mở trong trình duyệt mặc định.
@@ -2203,6 +2205,7 @@ Tooltips:
     Yattee Server: Máy chủ yattee-server mà OpenTubeX dùng để tải video, kênh, danh sách phát và kết quả tìm kiếm. Tên người dùng và mật khẩu chỉ được lưu trên thiết bị này.
     Proxy Videos Through Yattee Server: Chuyển tiếp luồng video và âm thanh qua máy chủ. Hãy giữ tùy chọn này bật, trừ khi máy chủ dùng chung kết nối Internet với bạn, vì YouTube chỉ cung cấp luồng cho địa chỉ đã yêu cầu chúng. Ảnh xem trước luôn được tải trực tiếp từ YouTube.
     Notifications: Chọn cách OpenTubeX thông báo cho bạn về phát trực tiếp, video mới và tải xuống tự động. Với Hệ thống và trong ứng dụng, thông báo xuất hiện trong OpenTubeX khi bạn đang dùng và dưới dạng thông báo hệ thống trong trường hợp khác, và chuông sẽ lưu giữ chúng. Tắt cũng ẩn các tùy chọn thông báo.
+    Ignore System Haptics Setting: Rung khi nhấn giữ và thực hiện cử chỉ ngay cả khi phản hồi chạm bị tắt trong cài đặt Android.
   Proxy Settings:
     IP Block Recovery Script Path: Đường dẫn tệp tập lệnh sẽ chạy khi phát hiện bị chặn IP. OpenTubeX chờ tập lệnh chạy xong rồi tải lại video. Nếu bật phương án dự phòng, tập lệnh chỉ chạy khi phương án đó cũng thất bại.
   Player Settings:

@@ -21,6 +21,8 @@ const GENERAL_EVERYDAY_KEYS = new Set([
   'Region for Trending',
   'Startup Behavior',
   'Swipe to refresh',
+  'Haptic Feedback',
+  'Ignore System Haptics Setting',
   'Thumbnail Swipe Gestures',
   'System Default',
   'Tab Close Focus',

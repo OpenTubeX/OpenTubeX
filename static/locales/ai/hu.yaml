@@ -523,6 +523,8 @@ Settings:
     Auto Load Comments:
       Label: Hozzászólások automatikus betöltése
       Tooltip: A hozzászólások betöltése az oldal megnyitásakor, görgetéskor pedig további hozzászólások betöltése.
+    Haptic Feedback: Haptikus visszajelzés
+    Ignore System Haptics Setting: Rendszer haptikus beállításának figyelmen kívül hagyása
   Context Menu Search Settings:
     Context Menu Search Settings: Keresés a helyi menüből
     Description: Válassza ki, mely keresőmotorok jelenjenek meg a kijelölt szövegre jobb gombbal kattintva. A keresések az alapértelmezett böngészőben nyílnak meg.
@@ -2191,6 +2193,7 @@ Tooltips:
     Yattee Server: Az a yattee-server-példány, amelyről az OpenTubeX a videókat, csatornákat, lejátszási listákat és keresési találatokat tölti be. A felhasználónév és a jelszó csak ezen az eszközön tárolódik.
     Proxy Videos Through Yattee Server: A videó- és hangadatfolyamokat a kiszolgálón keresztül továbbítja. Hagyja bekapcsolva, kivéve ha a kiszolgáló ugyanazt az internetkapcsolatot használja, mint Ön, mert a YouTube csak annak a címnek küldi az adatfolyamokat, amely kérte őket. A bélyegképek mindig közvetlenül a YouTube-ról töltődnek be.
     Notifications: Válaszd ki, hogyan értesítsen az OpenTubeX élő közvetítésekről, új feltöltésekről és automatikus letöltésekről. A Rendszer és alkalmazáson belül beállításnál az értesítések használat közben az OpenTubeX-ben jelennek meg, egyébként rendszerértesítésként, és a csengő megőrzi őket. A Ki az értesítési beállításokat is elrejti.
+    Ignore System Haptics Setting: Rezgés hosszú nyomáskor és kézmozdulatoknál akkor is, ha az érintési visszajelzés ki van kapcsolva az Android beállításaiban.
   Proxy Settings:
     IP Block Recovery Script Path: Az IP-cím letiltásának észlelésekor futtatandó parancsfájl elérési útja. Az OpenTubeX megvárja a befejezését, majd újratölti a videót. Ha a tartalék módszer engedélyezett, csak akkor fut le, ha az is sikertelen.
   Player Settings:

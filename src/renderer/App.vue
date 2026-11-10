@@ -763,6 +763,7 @@ import { preloadResolvedRoute, preloadUtilityRoutes } from './router/index'
 import { installRoutePreloadIntent } from './helpers/routePreloadIntent'
 import { getTabsKeptLoaded } from './tabs/TabResidency'
 import { initializeCapacitorPullToRefresh } from './helpers/capacitorPullToRefresh'
+import { initializeHapticFeedback } from './helpers/mobileHaptics'
 import { getWebViewHeapStatistics, startMemoryPressureMonitor } from './helpers/memoryPressure'
 import { collapseSeparators } from './helpers/menuSeparators'
 
@@ -1982,6 +1983,7 @@ onMounted(async () => {
     }
     scheduleUtilityRoutePreload()
     if (isCapacitor) {
+      initializeHapticFeedback(store)
       capacitorPullToRefreshSetup = initializeCapacitorPullToRefresh()
         .catch(error => console.error('Failed to initialize pull to refresh', error))
     }

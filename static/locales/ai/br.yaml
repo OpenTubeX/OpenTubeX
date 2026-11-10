@@ -523,6 +523,8 @@ Settings:
     Auto Load Comments:
       Label: Kargañ an evezhiadennoù ent emgefreek
       Tooltip: Kargañ an evezhiadennoù pa vez digoret ar bajenn ha kargañ muioc'h a evezhiadennoù en ur zibunañ.
+    Haptic Feedback: Adstumm haptek
+    Ignore System Haptics Setting: Na deurvout arventenn haptek ar reizhiad
   Context Menu Search Settings:
     Context Menu Search Settings: "Klask diwar ar roll lañser"
     Description: "Dibabit ar c'hefluskerioù enklask a vo diskouezet pa glikot a-zehou war destenn diuzet. Digoret e vo an enklaskoù en ho merdeer dre ziouer."
@@ -2199,6 +2201,7 @@ Tooltips:
     Yattee Server: An istañs yattee-server a vez implijet gant OpenTubeX evit kargañ videoioù, chadennoù, rolloù videoioù ha disoc'hoù klask. Ne vez enrollet an anv implijer hag ar ger-tremen nemet war an trevnad-mañ.
     Proxy Videos Through Yattee Server: Treuzkas a ra ar gwazhioù video ha son dre ar servijer. Lezit an dra-se gweredekaet nemet ma implij ar servijer an hevelep kennask internet ha c'hwi, rak YouTube ne gas ar gwazhioù nemet d'ar chomlec'h en deus o goulennet. Ar skeudennoùigoù a vez karget war-eeun diouzh YouTube bepred.
     Notifications: Dibabit penaos e kas OpenTubeX kemennoù deoc’h diwar-benn ar c’hwitelladennoù war-eeun, ar pellgasadennoù nevez hag ar pellgargadennoù emgefreek. Gant Reizhiad hag en arload e teu ar c’hemennoù war wel en OpenTubeX e-pad ma implijit anezhañ, ha evel kemennoù reizhiad en un doare all, hag ar c’hloc’h a vir anezho. Diweredekaet a guzh ivez dibarzhioù ar c’hemennoù.
+    Ignore System Haptics Setting: Bransellat pa vez pouezet pell hag e-pad ar jestroù, ha pa vez lazhet an adstumm stok en arventennoù Android zoken.
   Proxy Settings:
     IP Block Recovery Script Path: "Hent ar restr skript da erounit pa vez dinoet ur stankadur IP. Gortoz a ra OpenTubeX ma vo echu, hag adkargañ a ra ar video. Ma vez gweredekaet an diskoulm erlec'hiañ ne vez erounit ar skript nemet pa c'hwit an diskoulm-se ivez."
   Player Settings:

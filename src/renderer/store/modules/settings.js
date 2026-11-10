@@ -425,6 +425,8 @@ export const NON_SYNCABLE_SETTINGS = new Set([
   'capacitorLayoutMode',
   'alwaysShowMobileSearchBar',
   'continuePlaybackWhenScreenIsLocked',
+  'hapticFeedback',
+  'hapticFeedbackIgnoresSystemSetting',
   'uiScale',
   'fontSize',
   'verticalTabBarWidth',

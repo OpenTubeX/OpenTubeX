@@ -559,6 +559,8 @@ Settings:
     Auto Load Comments:
       Label: Aŭtomate ŝargi komentojn
       Tooltip: Ŝargi komentojn kiam la paĝo malfermiĝas kaj ŝargi pliajn dum vi rulumas.
+    Haptic Feedback: Haptika reago
+    Ignore System Haptics Setting: Ignori la sisteman agordon pri haptiko
   Context Menu Search Settings:
     Context Menu Search Settings: Serĉo per kunteksta menuo
     Description: Elektu, kiuj serĉiloj aperas kiam vi dekstre alklakas elektitan tekston. Serĉoj malfermiĝas en via defaŭlta retumilo.
@@ -2237,6 +2239,7 @@ Tooltips:
     Close Window With Last Tab: Kiam malŝaltita, fermi la lastan langeton anstataŭe malfermas novan langeton, do la fenestro restas malfermita ĝis vi fermas ĝin.
     Remember Tab Navigation History: La reena kaj antaŭena navigada historio de ĉiu langeto estas konservata kaj restarigata kiam OpenTubeX restartas.
     Notifications: Elektu kiel OpenTubeX sciigas vin pri rektaj elsendoj, novaj alŝutoj kaj aŭtomataj elŝutoj. Kun Sistemo kaj en la aplikaĵo, sciigoj aperas en OpenTubeX dum vi uzas ĝin kaj alie kiel sistemaj sciigoj, kaj la sonorilo konservas ilin. Malŝaltitaj ankaŭ kaŝas la sciigajn agordojn.
+    Ignore System Haptics Setting: Vibri ĉe longaj premoj kaj gestoj, eĉ kiam tuŝa reago estas malŝaltita en la agordoj de Android.
   Proxy Settings:
     IP Block Recovery Script Path: Vojo al skriptodosiero rulota kiam IP-bloko estas detektita. OpenTubeX atendas ĝis ĝi finiĝas, poste reŝargas la videaĵon. Se retropaŝo estas ŝaltita, ĝi ruliĝas nur kiam ankaŭ la retropaŝo malsukcesas.
   Player Settings:

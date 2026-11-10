@@ -622,6 +622,8 @@ Settings:
     Auto Load Comments:
       Label: 댓글 자동 불러오기
       Tooltip: 페이지를 열 때 댓글을 불러오고 스크롤하면 더 많은 댓글을 불러옵니다.
+    Haptic Feedback: 햅틱 피드백
+    Ignore System Haptics Setting: 시스템 햅틱 설정 무시
   Context Menu Search Settings:
     Context Menu Search Settings: 상황에 맞는 메뉴 검색
     Description: 선택한 텍스트를 마우스 오른쪽 버튼으로 클릭할 때 표시할 검색 엔진을 선택하세요. 검색 결과는 기본 브라우저에서 열립니다.
@@ -2575,6 +2577,7 @@ Tooltips:
     Yattee Server: OpenTubeX가 동영상, 채널, 재생 목록, 검색 결과를 불러오는 yattee-server 인스턴스입니다. 사용자 이름과 비밀번호는 이 기기에만 저장됩니다.
     Proxy Videos Through Yattee Server: 동영상 및 오디오 스트림을 서버를 통해 중계합니다. YouTube는 스트림을 요청한 주소에만 제공하므로, 서버가 사용자의 인터넷 연결을 공유하는 경우가 아니면 켜 두세요. 썸네일은 항상 YouTube에서 직접 불러옵니다.
     Notifications: OpenTubeX가 실시간 스트리밍, 새 업로드, 자동 다운로드를 알리는 방식을 선택합니다. 시스템 및 앱 내를 선택하면 OpenTubeX를 사용하는 동안에는 앱 안에, 그 외에는 시스템 알림으로 표시되고 벨에 보관됩니다. 끔을 선택하면 알림 옵션도 숨겨집니다.
+    Ignore System Haptics Setting: Android 설정에서 터치 피드백이 꺼져 있어도 길게 누르기와 제스처에 진동합니다.
   Proxy Settings:
     IP Block Recovery Script Path: IP 차단이 감지될 때 실행할 스크립트 파일 경로입니다. OpenTubeX는 실행이 끝날 때까지 기다린 후 동영상을 다시 불러옵니다. 대체 사용이 활성화된 경우 대체 방식도 실패했을 때만 실행합니다.
   Player Settings:

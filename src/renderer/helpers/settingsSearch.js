@@ -99,7 +99,7 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
   const [group, item] = path
 
   if (isIos && (
-    (sectionType === 'general' && ['Stream Extraction Method', 'Swipe to refresh'].includes(group)) ||
+    (sectionType === 'general' && ['Stream Extraction Method', 'Swipe to refresh', 'Ignore System Haptics Setting'].includes(group)) ||
     (sectionType === 'player' && group === 'Voice-over Translation')
   )) return false
 
@@ -155,7 +155,7 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     if (group === 'Thumbnail Swipe Gestures') return isCapacitor || phoneLayout
     if (group === 'Extra Thumbnail Action Button') return !isCapacitor && !phoneLayout
     if (['Stream Extraction Method', 'Automatically switch stream extraction methods'].includes(group)) return usingElectron || isCapacitor
-    if (['Enable Tabs', 'Mobile Layout', 'Swipe to refresh'].includes(group)) {
+    if (['Enable Tabs', 'Mobile Layout', 'Swipe to refresh', 'Haptic Feedback', 'Ignore System Haptics Setting'].includes(group)) {
       return isCapacitor
     }
     if (['Use tray icon', 'Close to system tray'].includes(group)) return usingElectron

@@ -687,6 +687,8 @@ Settings:
     Auto Load Comments:
       Label: Laai kommentaar outomaties
       Tooltip: Laai kommentaar wanneer die blad oopmaak en laai meer kommentaar soos jy blaai.
+    Haptic Feedback: Haptiese terugvoer
+    Ignore System Haptics Setting: Ignoreer stelsel se haptiese instelling
   Context Menu Search Settings:
     Context Menu Search Settings: Kontekskieslys-soektog
     Description: Kies watter soekenjins verskyn wanneer u regs op geselekteerde teks klik. Soektogte word in u verstekblaaier oopgemaak.
@@ -2443,6 +2445,7 @@ Tooltips:
     Close Window With Last Tab: Wanneer af, maak die sluiting van die laaste oortjie eerder ’n nuwe oortjie oop, sodat die venster oop bly totdat u dit sluit.
     Remember Tab Navigation History: Elke oortjie se terug- en vorentoe-navigasiegeskiedenis word gestoor en herstel wanneer OpenTubeX herbegin.
     Notifications: Kies hoe OpenTubeX jou van regstreekse uitsendings, nuwe oplaaie en outomatiese aflaaie in kennis stel. Met Stelsel en in die app verskyn kennisgewings in OpenTubeX terwyl jy dit gebruik, andersins as stelselkennisgewings, en die klok hou hulle. Af versteek ook die kennisgewingopsies.
+    Ignore System Haptics Setting: Vibreer by lang drukke en gebare, selfs wanneer aanraakterugvoer in Android se instellings af is.
   Proxy Settings:
     IP Block Recovery Script Path: Pad na skriplêer wat uitgevoer word wanneer ’n IP-blokkering bespeur word. OpenTubeX wag totdat dit klaar is en herlaai dan die video. As terugval geaktiveer is, loop dit slegs wanneer terugval ook misluk.
   Player Settings:

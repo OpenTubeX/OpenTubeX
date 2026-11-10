@@ -523,6 +523,8 @@ Settings:
     Auto Load Comments:
       Label: Automaticky načítať komentáre
       Tooltip: Načíta komentáre pri otvorení stránky a pri posúvaní načíta ďalšie.
+    Haptic Feedback: Haptická odozva
+    Ignore System Haptics Setting: Ignorovať systémové nastavenie haptiky
   Context Menu Search Settings:
     Context Menu Search Settings: Hľadanie v kontextovej ponuke
     Description: Vyberte vyhľadávače, ktoré sa zobrazia po kliknutí pravým tlačidlom na označený text. Výsledky hľadania sa otvoria v predvolenom prehliadači.
@@ -2196,6 +2198,7 @@ Tooltips:
     Yattee Server: Inštancia yattee-server, z ktorej OpenTubeX načítava videá, kanály, playlisty a výsledky vyhľadávania. Používateľské meno a heslo sa ukladajú iba v tomto zariadení.
     Proxy Videos Through Yattee Server: Smeruje video a zvukové streamy cez server. Nechajte túto možnosť zapnutú, pokiaľ server nepoužíva rovnaké internetové pripojenie ako vy, pretože YouTube poskytuje streamy iba adrese, ktorá si ich vyžiadala. Náhľady sa vždy načítavajú priamo z YouTube.
     Notifications: Vyberte, ako vás OpenTubeX upozorňuje na živé prenosy, nové videá a automatické sťahovania. Pri možnosti Systém a v aplikácii sa upozornenia zobrazujú v OpenTubeX, keď ho používate, inak ako systémové upozornenia, a zvonček ich uchováva. Vypnuté skryje aj možnosti upozornení.
+    Ignore System Haptics Setting: Vibrovať pri dlhom stlačení a gestách, aj keď je v nastaveniach Androidu vypnutá odozva pri dotyku.
   Proxy Settings:
     IP Block Recovery Script Path: Cesta k súboru skriptu, ktorý sa spustí po zistení zablokovania IP adresy. OpenTubeX počká na jeho dokončenie a potom znova načíta video. Ak je zapnutý záložný backend, skript sa spustí až po jeho zlyhaní.
   Player Settings:
