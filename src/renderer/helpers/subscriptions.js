@@ -511,7 +511,8 @@ async function getUnchangedSubscriptionFeed(feed, channelId, backend) {
 
 /**
  * Keeps the cached feed of a channel without new uploads. Automatic downloads
- * still run on it, so failed ones are retried as after a full fetch.
+ * and upload notifications still see it, so failed downloads are retried and
+ * newly enabled notifications get their baseline as after a full fetch.
  * @param {'videos' | 'shorts' | 'live'} feed
  * @param {{ id: string }} channel
  * @param {string} backend
@@ -522,13 +523,15 @@ async function keepUnchangedSubscriptionFeed(feed, channel, backend, t) {
   const videos = await getUnchangedSubscriptionFeed(feed, channel.id, backend)
   if (videos === null) return false
   await startAutomaticDownloadsForChannel(channel, videos, feed, t, electronRefreshOwnerTabId)
+  reportSubscriptionUploads(channel.id, feed, videos)
   return true
 }
 
 /**
  * With Faster Subscription Refresh, automatic local API refreshes leave out
  * channels fetched moments ago, for example by another window or right before
- * a restart. Automatic downloads still run on their cached entries.
+ * a restart. Automatic downloads and upload notifications still see their
+ * cached entries.
  * @template {{ id: string }} T
  * @param {T[]} channels
  * @param {'videos' | 'shorts' | 'live' | 'posts'} feed
@@ -558,8 +561,13 @@ async function omitRecentlyFetchedChannels(channels, feed, automatic, t) {
     const cacheEntry = cache[channel.id]
     if (!isSubscriptionFeedRecentlyFetched(cacheEntry, now)) {
       remaining.push(channel)
-    } else if (feed !== 'posts') {
+      continue
+    }
+    if (feed === 'posts') {
+      reportSubscriptionUploads(channel.id, feed, cacheEntry.posts)
+    } else {
       await startAutomaticDownloadsForChannel(channel, cacheEntry.videos, feed, t, electronRefreshOwnerTabId)
+      reportSubscriptionUploads(channel.id, feed, cacheEntry.videos)
     }
   }
   return remaining

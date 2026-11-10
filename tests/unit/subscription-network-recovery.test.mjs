@@ -44,6 +44,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
   const fallbackRequests = []
   const writes = []
   const events = []
+  const reports = []
   let fail = !webCors
   const getters = {
     getActiveProfile: { _id: 'all', subscriptions: Array.from({ length: 20 }, (_, i) => ({ id: `UC${i}` })) },
@@ -128,7 +129,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
     includeAutomaticDownloadChannels: channels => channels,
     includeNotificationChannels: channels => channels,
     startAutomaticDownloadsForChannel: async () => {},
-    reportSubscriptionUploads: () => {},
+    reportSubscriptionUploads: (channelId, feedType) => reports.push(`${channelId}:${feedType}`),
     getChannelPlaylistId: id => id,
     showApiErrorToast: (...args) => toasts.push(args),
     showInvidiousFallbackToast: () => warnings.push('direct fallback warning'),
@@ -193,6 +194,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
     copied,
     writes,
     events,
+    reports,
     getters,
     recovery: sharedRecovery,
     reconnect() {
@@ -255,6 +257,7 @@ test('with Faster Subscription Refresh, a scraper refresh keeps cached feeds who
   assert.equal(scraped.length, 19)
   assert.equal(app.requests.some(url => url.includes('channel_id=UC2')), false, 'the upload feed is only loaded when the cache could be kept')
   assert.equal(app.writes.some(write => write.value?.channelId === 'UC0'), false)
+  assert.ok(app.reports.includes('UC0:videos'), 'kept feeds still give upload notifications their baseline')
   assert.deepEqual(app.events, ['completed', 'finished'])
 })
 
