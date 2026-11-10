@@ -359,6 +359,16 @@ async function runOidcFlow(commit, kind, url, state) {
   }
 }
 
+/** The settings identifying a sync account and its privacy context. */
+function getSyncAccount(settings) {
+  return [settings.syncServerUrl, settings.syncServerToken, settings.syncServerPrivacyMode,
+    settings.syncServerPrivacyKey, settings.syncServerPrivacySalt]
+}
+
+function isSameSyncAccount(settings, account) {
+  return getSyncAccount(settings).every((value, index) => value === account[index])
+}
+
 async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, automatic = false, remoteOnly = false } = {}) {
   const { commit, dispatch, rootGetters, rootState } = context
   const settings = rootState.settings
@@ -373,8 +383,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   const previous = parseSnapshot(settings.syncServerSnapshot)
   const next = { ...previous }
   let externalMediaBaseline = previous.externalMediaPositions
-  const historyAccount = [settings.syncServerUrl, settings.syncServerToken,
-    settings.syncServerPrivacyMode, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt]
+  const historyAccount = getSyncAccount(settings)
+  const isSameAccount = () => isSameSyncAccount(rootState.settings, historyAccount)
   // Deletions made or reviewed before this sync; ones made while it runs wait for the next.
   const deletions = syncDeletions.snapshot()
   const result = {}
@@ -389,9 +399,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     async persistPlaylistSyncBaseline(id, { remoteId, metadata, applied = false, videos: syncedVideos, added = [], removed = [] }) {
       // Encrypted adapter mutations are only published in the final upload.
       if (encrypted) return
+      if (!isSameAccount()) return
       const current = rootState.settings
-      if (![current.syncServerUrl, current.syncServerToken, current.syncServerPrivacyMode,
-        current.syncServerPrivacyKey, current.syncServerPrivacySalt].every((value, index) => value === historyAccount[index])) return
       const saved = parseSnapshot(current.syncServerSnapshot)
       // Until the local save succeeds, retain the shared header baseline so a
       // retry can still distinguish a remote rename from a new local edit.
@@ -409,17 +418,12 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       }), { root: true })
     },
     async persistHistorySyncBaseline(changes) {
-      const sameAccount = () => {
-        const current = rootState.settings
-        return [current.syncServerUrl, current.syncServerToken, current.syncServerPrivacyMode,
-          current.syncServerPrivacyKey, current.syncServerPrivacySalt].every((value, index) => value === historyAccount[index])
-      }
       // A disable can cancel requests after they succeeded. Record those
       // effects, but never carry them into a different account/privacy context.
-      while (sameAccount()) {
+      while (isSameAccount()) {
         const snapshot = rootState.settings.syncServerSnapshot
         const updated = await runBackgroundJob('updateHistorySnapshot', { snapshot, ...changes })
-        if (!sameAccount()) return
+        if (!isSameAccount()) return
         if (snapshot !== rootState.settings.syncServerSnapshot) continue
         if (updated !== snapshot) await dispatch('updateSyncServerSnapshot', updated, { root: true })
         return
@@ -1875,10 +1879,9 @@ const actions = {
         commit('setSyncServerLiveRemindersSupported', privacySupported && capabilities.live_reminders === 1)
         commit('setSyncServerNotificationDismissalsSupported', privacySupported && capabilities.notification_dismissals === 1)
         if (!watchStatsSupported && rootState.settings.syncServerSyncWatchStats) {
-          const accountKeys = ['syncServerUrl', 'syncServerToken', 'syncServerPrivacyMode', 'syncServerPrivacyKey', 'syncServerPrivacySalt']
-          const account = accountKeys.map(key => rootState.settings[key])
+          const account = getSyncAccount(rootState.settings)
           await withSyncLock(async () => {
-            const sameAccount = () => accountKeys.every((key, index) => rootState.settings[key] === account[index])
+            const sameAccount = () => isSameSyncAccount(rootState.settings, account)
             if (!sameAccount()) throw new SyncServerCancelledError()
             // A different window may have synced while this initializer waited.
             // Read the shared datastore after acquiring the sync lock, rather
