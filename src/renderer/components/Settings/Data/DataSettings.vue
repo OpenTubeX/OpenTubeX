@@ -370,7 +370,7 @@ import { parseSpeedByChannelValues, resolveSpeedByChannelValues } from '../../..
 import { previewBackupImport, previewTakeoutImport, parseTakeoutSubscriptions, parseTakeoutWatchHistory, parseTakeoutSearchHistory, mergeTakeoutHistoryRecord } from '../../../helpers/import-preview'
 import FtImportPreview from '../../FtImportPreview/FtImportPreview.vue'
 import FtLoader from '../../FtLoader/FtLoader.vue'
-import { BACKUP_SECTIONS, mergeBackupPlaylist, mergeBackupProfile } from '../../../helpers/unifiedBackup'
+import { BACKUP_SECTIONS } from '../../../helpers/unifiedBackup'
 import { runBackgroundJob } from '../../../helpers/background-jobs'
 import { compactAllDatastores, DBHistoryHandlers, DBPlaylistHandlers, DBProfileHandlers, DBSearchHistoryHandlers, DBWatchStatsHandlers } from '../../../../datastores/handlers/index'
 import { forEachTakeoutImportEntry, forEachTakeoutPlaylistFile, listYouTubeTakeoutZipEntries } from '../../../helpers/youtube-takeout-zip'
@@ -508,30 +508,15 @@ async function importUnifiedBackup() {
   const selected = new Set(selectedBackupSections.value)
   const data = backupData.value
   try {
+    // The datastore merges each record with the one stored when it is
+    // written, so edits other windows save during the restore are kept.
     if (selected.has('profiles')) {
-      const currentProfiles = new Map((await DBProfileHandlers.find()).map(profile => [profile._id, profile]))
-      for (const profile of data.profiles) {
-        const merged = mergeBackupProfile(currentProfiles.get(profile._id), profile)
-        await DBProfileHandlers.upsert(merged)
-        currentProfiles.set(profile._id, merged)
-      }
+      for (const profile of data.profiles) await DBProfileHandlers.mergeBackup(profile)
       await store.dispatch('grabAllProfiles')
     }
     if (selected.has('playlists')) {
-      const currentPlaylists = new Map((await DBPlaylistHandlers.find()).map(playlist => [playlist._id, playlist]))
-      for (const playlist of data.playlists) {
-        await normalizeImportedPlaylistThumbnail(playlist)
-        const current = currentPlaylists.get(playlist._id)
-        const merged = mergeBackupPlaylist(current, playlist)
-        // Reordering finds entries by playlistItemId, so restored entries need one
-        merged.videos.forEach(processToBeAddedPlaylistVideo)
-        if (current === undefined) {
-          await store.dispatch('importPlaylist', { ...merged, lastUpdatedAt: Date.now() })
-        } else if (await store.dispatch('updatePlaylist', merged) !== true) {
-          throw new Error('Could not restore playlist')
-        }
-        currentPlaylists.set(playlist._id, merged)
-      }
+      for (const playlist of data.playlists) await normalizeImportedPlaylistThumbnail(playlist)
+      if (await store.dispatch('mergePlaylistBackup', data.playlists) !== true) throw new Error('Could not restore playlists')
     }
     if (selected.has('history') && await store.dispatch('mergeHistoryBackup', data.history) !== true) {
       throw new Error('Could not restore history')

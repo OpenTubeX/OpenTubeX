@@ -1,12 +1,14 @@
 import { expect, goToSettingsSection, test } from '../../helpers/app.mjs'
 import { readUnifiedBackup } from '../../../src/renderer/helpers/unifiedBackup.js'
 
-test('exports and imports search history through the unified ZIP', async ({ page }) => {
+test('exports and imports data through the unified ZIP', async ({ page }) => {
   const dataSection = await goToSettingsSection(page, 'data')
   await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateSearchHistoryEntry', { _id: 'backup-query', query: 'backup query', lastUpdatedAt: Date.now() })
     await store.dispatch('recordWatchTime', { date: '2026-09-26', seconds: 42 })
+    await store.dispatch('addChannelToProfiles', { channel: { id: 'UCbackupchannel0000000000', name: 'Backup channel', thumbnail: '' }, profileIds: ['allChannels'] })
+    await store.dispatch('addVideo', { _id: store.getters.getAllPlaylists[0]._id, videoData: { videoId: 'backupVideo', title: 'Backup video', author: 'Backup channel', authorId: 'UCbackupchannel0000000000', lengthSeconds: 60, type: 'video' } })
     window.backupArchive = null
     window.showSaveFilePicker = async () => ({
       createWritable: async () => ({
@@ -24,10 +26,22 @@ test('exports and imports search history through the unified ZIP', async ({ page
     const store = window.$store
     await store.dispatch('removeSearchHistoryEntry', 'backup-query')
     await store.dispatch('clearWatchStats')
+    await store.dispatch('removeChannelFromProfiles', { channelIds: ['UCbackupchannel0000000000'], profileIds: ['allChannels'] })
+    const playlist = store.getters.getAllPlaylists[0]
+    const video = playlist.videos.find(video => video.videoId === 'backupVideo')
+    await store.dispatch('removeVideo', { _id: playlist._id, videoId: video.videoId, playlistItemId: video.playlistItemId })
     window.showOpenFilePicker = async () => [{
       getFile: async () => new File([window.backupArchive], 'opentubex-backup.zip', { type: 'application/zip' }),
     }]
   })
+  const restoredState = () => page.evaluate(() => {
+    const store = window.$store
+    return [
+      store.getters.getProfileList.find(profile => profile._id === 'allChannels').subscriptions.some(channel => channel.id === 'UCbackupchannel0000000000'),
+      store.getters.getAllPlaylists[0].videos.some(video => video.videoId === 'backupVideo'),
+    ]
+  })
+  expect(await restoredState()).toEqual([false, false])
   await dataSection.getByRole('button', { name: 'Import backup' }).click()
   const subpage = page.locator('.settingsSubpageContent', { hasText: 'Select the data to import' })
   await expect(subpage.getByText('opentubex-backup.zip')).toBeVisible()
@@ -48,6 +62,8 @@ test('exports and imports search history through the unified ZIP', async ({ page
     const store = window.$store
     return store.getters.getWatchSecondsByDate['2026-09-26']
   })).toBe(42)
+  // The datastore merges restored profiles and playlists, then the window shows them
+  await expect.poll(restoredState).toEqual([true, true])
   await expect(page.locator('.toast', { hasText: 'Backup imported successfully' })).toBeVisible()
 })
 
