@@ -2452,6 +2452,7 @@ Downloads:
   Download Failed: Deskargak huts egin du
   File Name Shortened: Fitxategi-izena laburtu da, bideoaren izenburua luzeegia zelako.
   Some Videos Not Downloaded: Erreprodukzio-zerrenda honetako bideo batzuk ezin izan dira deskargatu.
+  Playlist Video Position: '{index}. bideoa {count}(e)tik'
   Insufficient Disk Space: Ez dago behar adina leku diskoan. {required} inguru behar dira eta {available} daude erabilgarri.
   Unknown Download Size: Deskargaren tamaina ezezaguna da. {available} daude erabilgarri helburuko fitxategi-sisteman.
   Disk Space Check Unavailable: Ezin izan da egiaztatu diskoan zenbat leku dagoen erabilgarri deskarga hasi aurretik.

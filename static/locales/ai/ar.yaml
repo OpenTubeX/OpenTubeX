@@ -2480,6 +2480,7 @@ Downloads:
   Download Failed: فشل التنزيل
   File Name Shortened: تم اختصار اسم الملف لأن عنوان الفيديو طويل جدًا.
   Some Videos Not Downloaded: تعذّر تنزيل بعض مقاطع الفيديو في قائمة التشغيل هذه.
+  Playlist Video Position: الفيديو {index} من {count}
   Insufficient Disk Space: لا توجد مساحة كافية على القرص. هناك حاجة إلى حوالي {required} و{available} متاح.
   Unknown Download Size: حجم التنزيل غير معروف. {available} متاح في نظام الملفات الوجهة.
   Disk Space Check Unavailable: تعذر التحقق من مساحة القرص المتوفرة قبل بدء هذا التنزيل.

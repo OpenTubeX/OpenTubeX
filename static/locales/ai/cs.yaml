@@ -2442,6 +2442,7 @@ Downloads:
   Download Failed: Stahování se nezdařilo
   File Name Shortened: Název souboru byl zkrácen, protože název videa byl příliš dlouhý.
   Some Videos Not Downloaded: Některá videa z tohoto playlistu se nepodařilo stáhnout.
+  Playlist Video Position: Video {index} z {count}
   Insufficient Disk Space: Na disku není dost místa. Je potřeba přibližně {required}, dostupné místo je {available}.
   Unknown Download Size: Velikost stahování není známá. V cílovém systému souborů je dostupné místo {available}.
   Disk Space Check Unavailable: Před zahájením stahování se nepodařilo zkontrolovat dostupné místo na disku.

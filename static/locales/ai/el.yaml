@@ -2456,6 +2456,7 @@ Downloads:
   Download Failed: Η λήψη απέτυχε
   File Name Shortened: Το όνομα αρχείου συντομεύτηκε επειδή ο τίτλος του βίντεο ήταν πολύ μεγάλος.
   Some Videos Not Downloaded: Ορισμένα βίντεο αυτής της λίστας αναπαραγωγής δεν ήταν δυνατό να ληφθούν.
+  Playlist Video Position: Βίντεο {index} από {count}
   Insufficient Disk Space: Δεν υπάρχει αρκετός χώρος στον δίσκο. Απαιτούνται περίπου {required} και είναι διαθέσιμα {available}.
   Unknown Download Size: Το μέγεθος της λήψης είναι άγνωστο. Στο σύστημα αρχείων προορισμού είναι διαθέσιμα {available}.
   Disk Space Check Unavailable: Δεν ήταν δυνατός ο έλεγχος του διαθέσιμου χώρου στον δίσκο πριν από την έναρξη αυτής της λήψης.

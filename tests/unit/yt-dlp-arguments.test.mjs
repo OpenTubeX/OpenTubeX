@@ -252,7 +252,7 @@ test('download phase hooks keep real downloads enabled and override custom progr
     videoId, mode: 'video', customArgs: '--progress-template "download:custom"'
   })
   assert.ok(args.includes('--no-simulate'))
-  assert.ok(args.includes('video:__OPENTUBEX_PREPARING__:%(id)s'))
+  assert.ok(args.includes('video:__OPENTUBEX_PREPARING__:%(id)s\t%(playlist_autonumber|)s\t%(n_entries|)s\t%(title)j'))
   const templates = args.flatMap((arg, index) => arg === '--progress-template' ? [args[index + 1]] : [])
   assert.match(templates.at(-2), /^download:__OPENTUBEX_DOWNLOAD__:%\(progress.status\)s/)
   assert.equal(templates.at(-1), 'postprocess:__OPENTUBEX_PROCESSING__')

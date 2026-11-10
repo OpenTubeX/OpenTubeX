@@ -2480,6 +2480,7 @@ Downloads:
   Download Failed: Preuzimanje nije uspjelo
   File Name Shortened: Naziv datoteke skraćen je jer je naslov videozapisa bio predug.
   Some Videos Not Downloaded: Neke videozapise s ovog popisa za reprodukciju nije bilo moguće preuzeti.
+  Playlist Video Position: Videozapis {index} od {count}
   Insufficient Disk Space: Nema dovoljno prostora na disku. Potrebno je oko {required}, a dostupno je {available}.
   Unknown Download Size: Veličina preuzimanja nije poznata. Na odredišnom datotečnom sustavu dostupno je {available}.
   Disk Space Check Unavailable: Dostupni prostor na disku nije bilo moguće provjeriti prije pokretanja ovog preuzimanja.

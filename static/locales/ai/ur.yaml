@@ -2572,6 +2572,7 @@ Downloads:
   Download Failed: ڈاؤن لوڈ ناکام ہو گیا
   File Name Shortened: فائل کا نام مختصر کر دیا گیا کیونکہ ویڈیو کا عنوان بہت طویل تھا۔
   Some Videos Not Downloaded: اس پلے لسٹ کی کچھ ویڈیوز ڈاؤن لوڈ نہیں ہو سکیں۔
+  Playlist Video Position: ویڈیو {index} از {count}
   Insufficient Disk Space: ڈسک میں کافی جگہ نہیں ہے۔ تقریباً {required} درکار ہے اور {available} دستیاب ہے۔
   Unknown Download Size: ڈاؤن لوڈ کا سائز نامعلوم ہے۔ منزل کے فائل سسٹم پر {available} دستیاب ہے۔
   Disk Space Check Unavailable: یہ ڈاؤن لوڈ شروع کرنے سے پہلے دستیاب ڈسک کی جگہ چیک نہیں ہو سکی۔

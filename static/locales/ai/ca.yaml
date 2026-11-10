@@ -3104,6 +3104,7 @@ Downloads:
   Download Failed: Ha fallat la baixada
   File Name Shortened: S'ha abreujat el nom del fitxer perquè el títol del vídeo era massa llarg.
   Some Videos Not Downloaded: No s'han pogut baixar alguns vídeos d'aquesta llista de reproducció.
+  Playlist Video Position: Vídeo {index} de {count}
   Insufficient Disk Space: No hi ha prou espai al disc. Se'n necessiten uns {required} i n'hi ha {available} disponibles.
   Unknown Download Size: Es desconeix la mida de la baixada. Hi ha {available} disponibles al sistema de fitxers de destinació.
   Disk Space Check Unavailable: No s'ha pogut comprovar l'espai disponible al disc abans d'iniciar la baixada.

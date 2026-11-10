@@ -2954,6 +2954,7 @@ Downloads:
   Download Failed: Atsisiųsti nepavyko
   File Name Shortened: Failo pavadinimas sutrumpintas, nes vaizdo įrašo pavadinimas buvo per ilgas.
   Some Videos Not Downloaded: Kai kurių šio grojaraščio vaizdo įrašų nepavyko atsisiųsti.
+  Playlist Video Position: Vaizdo įrašas {index} iš {count}
   Insufficient Disk Space: Diske nepakanka vietos. Reikia apie {required}, o yra {available}.
   Unknown Download Size: Atsisiuntimo dydis nežinomas. Paskirties failų sistemoje yra {available} laisvos vietos.
   Disk Space Check Unavailable: Prieš pradedant šį atsisiuntimą nepavyko patikrinti laisvos vietos diske.

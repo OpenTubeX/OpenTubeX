@@ -2476,6 +2476,7 @@ Downloads:
   Download Failed: Изтеглянето бе неуспешно
   File Name Shortened: Името на файла беше съкратено, защото заглавието на видеоклипа е твърде дълго.
   Some Videos Not Downloaded: Някои видеоклипове от този плейлист не можаха да бъдат изтеглени.
+  Playlist Video Position: Видео {index} от {count}
   Insufficient Disk Space: Няма достатъчно място на диска. Необходими са около {required}, а са налични {available}.
   Unknown Download Size: Размерът на изтеглянето е неизвестен. В целевата файлова система са налични {available}.
   Disk Space Check Unavailable: Наличното място на диска не можа да бъде проверено преди започване на изтеглянето.

@@ -152,7 +152,8 @@
   overflow-wrap: anywhere;
 }
 
-.downloadChannel {
+.downloadChannel,
+.downloadCurrentVideo {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -160,6 +161,7 @@
 
 .downloadStatus,
 .downloadChannel,
+.downloadCurrentVideo,
 .downloadAvailability,
 .downloadSpaceWarning,
 .downloadSummary,

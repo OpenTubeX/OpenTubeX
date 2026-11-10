@@ -2447,6 +2447,7 @@ Downloads:
   Download Failed: Nedlastingen mislyktes
   File Name Shortened: Filnavnet ble forkortet fordi videotittelen var for lang.
   Some Videos Not Downloaded: Noen videoer i denne spillelisten kunne ikke lastes ned.
+  Playlist Video Position: Video {index} av {count}
   Insufficient Disk Space: Ikke nok diskplass. Omtrent {required} kreves, og {available} er tilgjengelig.
   Unknown Download Size: Nedlastingsstørrelsen er ukjent. {available} er tilgjengelig i målfilsystemet.
   Disk Space Check Unavailable: Tilgjengelig diskplass kunne ikke kontrolleres før denne nedlastingen startet.

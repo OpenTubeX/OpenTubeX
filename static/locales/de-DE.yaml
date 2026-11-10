@@ -3572,6 +3572,7 @@ Downloads:
   Download Failed: Download fehlgeschlagen
   File Name Shortened: Der Dateiname wurde gekürzt, weil der Videotitel zu lang war.
   Some Videos Not Downloaded: Einige Videos dieser Wiedergabeliste konnten nicht heruntergeladen werden.
+  Playlist Video Position: Video {index} von {count}
   Insufficient Disk Space: Nicht genügend Speicherplatz. Ungefähr {required} werden benötigt und {available} sind verfügbar.
   Unknown Download Size: Die Downloadgröße ist unbekannt. Auf dem Zieldateisystem sind {available} verfügbar.
   Disk Space Check Unavailable: Der verfügbare Speicherplatz konnte vor Beginn dieses Downloads nicht geprüft werden.

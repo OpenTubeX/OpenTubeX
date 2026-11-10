@@ -2480,6 +2480,7 @@ Downloads:
   Download Failed: Methodd y lawrlwythiad
   File Name Shortened: Byrhawyd enw'r ffeil oherwydd bod teitl y fideo'n rhy hir.
   Some Videos Not Downloaded: Doedd dim modd llwytho rhai fideos yn y rhestr chwarae hon i lawr.
+  Playlist Video Position: Fideo {index} o {count}
   Insufficient Disk Space: Dim digon o le ar y ddisg. Mae angen tua {required} ac mae {available} ar gael.
   Unknown Download Size: Nid yw maint y lawrlwythiad yn hysbys. Mae {available} ar gael ar y system ffeiliau darged.
   Disk Space Check Unavailable: Nid oedd modd gwirio'r lle oedd ar gael ar y ddisg cyn dechrau'r lawrlwythiad hwn.

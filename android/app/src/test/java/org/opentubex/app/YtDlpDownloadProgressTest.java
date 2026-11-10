@@ -9,7 +9,11 @@ public class YtDlpDownloadProgressTest {
     @Test public void preparationAndProcessingClearStaleTransferMetrics() throws Exception {
         JSONObject record = new JSONObject().put("status", "downloading").put("percent", 97.3)
             .put("speed", "2MiB/s").put("eta", "00:00");
-        YtDlpDownloads.updateProgress(record, "__OPENTUBEX_PREPARING__:aaaaaaaaaaa");
+        YtDlpDownloads.updateProgress(record, "__OPENTUBEX_PREPARING__:aaaaaaaaaaa\t3\t12\t\"Caf\\u00e9\\tvideo\"");
+        assertEquals("aaaaaaaaaaa", record.getString("currentVideoId"));
+        assertEquals("Caf\u00e9\tvideo", record.getString("currentTitle"));
+        assertEquals(3, record.getInt("playlistIndex"));
+        assertEquals(12, record.getInt("playlistCount"));
         assertEquals("preparing", record.getString("status"));
         assertEquals(0, record.getDouble("percent"), 0);
         assertTrue(record.isNull("eta"));
@@ -38,7 +42,7 @@ public class YtDlpDownloadProgressTest {
     }
 
     @Test public void bridgeAcceptsPhaseReportingArguments() {
-        JSONArray args = new JSONArray().put("--no-simulate").put("--print").put("video:__OPENTUBEX_PREPARING__:%(id)s")
+        JSONArray args = new JSONArray().put("--no-simulate").put("--print").put("video:__OPENTUBEX_PREPARING__:%(id)s\t%(playlist_autonumber|)s\t%(n_entries|)s\t%(title)j")
             .put("--progress-template").put("postprocess:__OPENTUBEX_PROCESSING__");
         assertEquals(5, YtDlpArguments.validate(args).size());
     }
