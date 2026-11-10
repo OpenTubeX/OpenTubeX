@@ -1508,7 +1508,15 @@ Tutorial:
   Finish: Ljúka
   Welcome:
     Title: Velkomin í OpenTubeX
-    Description: Hér eru nokkrar stýringar sem hjálpa þér að komast fljótt af stað.
+    Description: Byrjaðu upp á nýtt eða fluttu inn áskriftir, feril og spilunarlista úr öðru forriti eða öryggisafriti.
+    Start Fresh: Byrja upp á nýtt
+    Import Data: Flytja inn gögn
+  Preferences:
+    Title: Stilltu að þínum þörfum
+    Description: Veldu þema, upphafssíðu og landssvæði. Þú getur breytt þessu og fleiru hvenær sem er í Stillingum.
+  Playback:
+    Title: Spilun og gagnaleynd
+    Description: Veldu hvernig myndbönd eru spiluð, hvort OpenTubeX muni hvað þú horfir á og hvaða viðbætur frá samfélaginu það notar.
   Navigation:
     Title: Safnið þitt er alltaf innan seilingar
     Description: Notaðu yfirlitsstikuna til að opna áskriftir, spilunarlista, feril og fleira.
@@ -1517,16 +1525,11 @@ Tutorial:
     Description: Finndu myndbönd og rásir eða límdu studda vefslóð myndbands beint í leitarreitinn.
   Tabs:
     Title: Hafðu síður opnar í flipum
-    Description: Opnaðu margar síður í einu án þess að missa hvar þú varst. Veldu þann stað fyrir flipana sem hentar uppsetningunni þinni best.
-  Quick Settings:
-    Title: Stilltu að þínum þörfum
-    Description: Veldu þema og sjálfgefin myndgæði. Þú getur breytt þessu og öðrum kjörstillingum hvenær sem er í valmynd notandasniðsins eða hægrismellt á það til að skipta um notandasnið.
-    Touch Description: Veldu þema og sjálfgefin myndgæði. Þú getur breytt þessu og öðrum kjörstillingum hvenær sem er í valmynd notandasniðsins eða haldið fingri á því til að skipta um notandasnið.
-  Import Data:
-    Title: Flyttu gögnin þín með þér
-    Description: Þú getur flutt inn áskriftir, áhorfsferil, spilunarlista, leitarferil eða stillingar úr öðru studdu forriti eða öryggisafriti.
-    Action: Flytja inn gögn
-    Not Now: Ekki núna
+    Description: Opnaðu margar síður í einu án þess að missa þráðinn.
+  Profile Menu:
+    Title: Stillingar og notkunarsnið
+    Description: Notkunarsniðsvalmyndin þín geymir flýtistillingar, niðurhal og allar aðrar stillingar. Hægrismelltu á hana til að skipta um notkunarsnið.
+    Touch Description: Notkunarsniðsvalmyndin þín geymir flýtistillingar, niðurhal og allar aðrar stillingar. Ýttu og haltu á henni til að skipta um notkunarsnið.
 About:
   Project: Verkefni
   Community: Samfélag
@@ -1537,6 +1540,7 @@ About:
   Commit: Git-vistun
   Matrix: Matrix
   Email: Netfang
+  Show tutorial: Sýna kynningu
 Profile:
   Customization: Sérsnið
   Manage Profile Subscriptions: Stjórna áskriftum prófíls

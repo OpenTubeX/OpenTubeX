@@ -1502,7 +1502,15 @@ Tutorial:
   Finish: Terminer
   Welcome:
     Title: Bienvenue dans OpenTubeX
-    Description: Voici quelques commandes qui vous aideront à prendre vos marques.
+    Description: Partez de zéro, ou récupérez vos abonnements, votre historique et vos playlists depuis une autre application ou une sauvegarde.
+    Start Fresh: Partir de zéro
+    Import Data: Importer des données
+  Preferences:
+    Title: Personnalisez l’application
+    Description: Choisissez votre thème, votre page de démarrage et votre région. Vous pouvez modifier ces réglages et bien d’autres à tout moment dans les Paramètres.
+  Playback:
+    Title: Lecture et confidentialité
+    Description: Choisissez comment les vidéos sont lues, si OpenTubeX mémorise ce que vous regardez et quelles extensions communautaires il utilise.
   Navigation:
     Title: Votre bibliothèque reste à portée de main
     Description: Utilisez la navigation pour accéder aux abonnements, aux playlists, à l’historique et à d’autres contenus.
@@ -1511,16 +1519,11 @@ Tutorial:
     Description: Trouvez des vidéos et des chaînes, ou collez directement une URL vidéo compatible dans le champ de recherche.
   Tabs:
     Title: Gardez des pages ouvertes dans des onglets
-    Description: Ouvrez plusieurs pages à la fois sans perdre votre position. Choisissez l’emplacement des onglets qui convient le mieux à votre disposition.
-  Quick Settings:
-    Title: Personnalisez l’application
-    Description: Choisissez un thème et une qualité vidéo par défaut. Modifiez ces préférences et d’autres à tout moment depuis le menu de votre profil, ou faites un clic droit dessus pour changer de profil.
-    Touch Description: Choisissez un thème et une qualité vidéo par défaut. Modifiez ces préférences et d’autres à tout moment depuis le menu de votre profil, ou appuyez longuement dessus pour changer de profil.
-  Import Data:
-    Title: Emportez vos données avec vous
-    Description: Vous pouvez importer les abonnements, l’historique, les playlists, l’historique de recherche ou les paramètres depuis une autre application compatible ou une sauvegarde.
-    Action: Importer des données
-    Not Now: Pas maintenant
+    Description: Ouvrez plusieurs pages à la fois sans perdre le fil.
+  Profile Menu:
+    Title: Paramètres et profils
+    Description: Votre menu de profil regroupe les paramètres rapides, les téléchargements et tous les autres paramètres. Faites un clic droit dessus pour changer de profil.
+    Touch Description: Votre menu de profil regroupe les paramètres rapides, les téléchargements et tous les autres paramètres. Appuyez longuement dessus pour changer de profil.
 About:
   Project: Projet
   Community: Communauté
@@ -1530,6 +1533,7 @@ About:
   Changelog: Journal des modifications
   Commit: Commit
   Matrix: Matrix
+  Show tutorial: Afficher le tutoriel
 Profile:
   Customization: Personnalisation
   Manage Profile Subscriptions: Gérer les abonnements du profil

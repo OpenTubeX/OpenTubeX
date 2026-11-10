@@ -67,29 +67,7 @@
       class="themeGallery"
     >
       <div class="themeHeader">
-        <div
-          class="themeModes"
-          role="radiogroup"
-          data-setting-key="baseTheme"
-          :aria-label="t('Settings.Theme Settings.Base Theme.Base Theme')"
-        >
-          <label
-            v-for="tile in modeTiles"
-            :key="tile.mode"
-            class="themeOption"
-          >
-            <input
-              type="radio"
-              name="themeMode"
-              :checked="mode === tile.mode"
-              @change="selectMode(tile.mode)"
-            >
-            <span class="optionPreview">
-              <ThemePreview v-bind="tile.preview" />
-            </span>
-            <span class="optionName">{{ tile.name }}</span>
-          </label>
-        </div>
+        <ThemeModePicker data-setting-key="baseTheme" />
 
         <!-- Every color control stays rendered in one cell and only the edited
              theme's is shown, so choosing a theme never moves the gallery. -->
@@ -285,6 +263,7 @@ import FtSyncedSettingIndicator from '../../FtSyncedSettingIndicator/FtSyncedSet
 import ThemeDiscovery from '../../ThemeDiscovery.vue'
 import CustomThemeEditor from '../../CustomThemeEditor/CustomThemeEditor.vue'
 import AccentColorSettings from './AccentColorSettings.vue'
+import ThemeModePicker from './ThemeModePicker.vue'
 import ThemePreview from './ThemePreview.vue'
 
 import store from '../../../store/index'
@@ -297,7 +276,7 @@ import { colors } from '../../../helpers/colors'
 import { androidDynamicColors, getSystemAccentColor } from '../../../helpers/dynamicColors.js'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../../helpers/overlayScrollbars'
 import { useColorTranslations } from '../../../composables/colors'
-import { baseThemeGroup, useBaseThemeOptions } from '../../../composables/baseThemes'
+import { baseThemeGroup, useThemeMode } from '../../../composables/baseThemes'
 import { useSystemDarkMode } from '../../../composables/useSystemDarkMode'
 
 const { t, tm } = useI18n()
@@ -315,31 +294,18 @@ function openCustomThemeEditor(themeId) {
 }
 const contentRef = useTemplateRef('contentRef')
 
-const customThemes = computed(() => store.getters.getCustomThemes)
-const { baseThemeValues, baseThemeNames, baseThemeGroupLabels } = useBaseThemeOptions(customThemes)
-const baseTheme = computed(() => store.getters.getBaseTheme)
-
-function themeName(value) {
-  return baseThemeNames.value[baseThemeValues.value.indexOf(value)] ?? ''
-}
-
-/** System default and Dynamic colors follow the system; every other theme is either light or dark. */
-const mode = computed(() => ['system', 'dynamic'].includes(baseTheme.value)
-  ? 'system'
-  : getThemeClassification(baseTheme.value, customThemes.value) ?? 'system')
-
-// The system theme settings remember the light and dark choices while a single theme is active.
-const lightTheme = computed(() => mode.value === 'light' ? baseTheme.value : store.getters.getSystemLightTheme)
-const darkTheme = computed(() => mode.value === 'dark' ? baseTheme.value : store.getters.getSystemDarkTheme)
-const systemPreview = computed(() => baseTheme.value === 'dynamic'
-  ? { theme: 'dynamic', darkTheme: 'dynamic' }
-  : { theme: lightTheme.value, darkTheme: darkTheme.value })
-
-const modeTiles = computed(() => [
-  { mode: 'system', name: themeName('system'), preview: systemPreview.value },
-  { mode: 'light', name: themeName('light'), preview: { theme: lightTheme.value } },
-  { mode: 'dark', name: themeName('dark'), preview: { theme: darkTheme.value, dark: true } },
-])
+const {
+  baseThemeValues,
+  baseThemeNames,
+  baseThemeGroupLabels,
+  customThemes,
+  baseTheme,
+  themeName,
+  mode,
+  lightTheme,
+  darkTheme,
+  systemPreview,
+} = useThemeMode()
 
 const systemDark = useSystemDarkMode()
 /** The theme list shown in System default mode; single theme modes always show their own. */
@@ -392,21 +358,6 @@ async function switchTab() {
   editing.value = editing.value === 'light' ? 'dark' : 'light'
   await nextTick()
   document.getElementById(`theme-tab-${editing.value}`)?.focus()
-}
-
-async function rememberSingleTheme() {
-  if (mode.value === 'light' && store.getters.getSystemLightTheme !== baseTheme.value) {
-    await store.dispatch('updateSystemLightTheme', baseTheme.value)
-  } else if (mode.value === 'dark' && store.getters.getSystemDarkTheme !== baseTheme.value) {
-    await store.dispatch('updateSystemDarkTheme', baseTheme.value)
-  }
-}
-
-async function selectMode(next) {
-  if (next === mode.value) return
-  const theme = next === 'system' ? 'system' : next === 'light' ? lightTheme.value : darkTheme.value
-  await rememberSingleTheme()
-  await store.dispatch('updateBaseTheme', theme)
 }
 
 async function selectTheme(section, value) {
@@ -517,6 +468,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 </script>
 
 <style scoped src="./themeSelectRow.css" />
+<style scoped src="./themeOption.css" />
 <style scoped>
 .themePickerEntry {
   container-type: inline-size;
@@ -649,12 +601,6 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
   gap: 16px 32px;
 }
 
-.themeModes {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-
 /* The color controls share one cell, so it is as tall as the tallest of them
    whichever is shown. */
 .themeColors {
@@ -775,50 +721,8 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
   min-inline-size: 0;
 }
 
-.themeOption {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-inline-size: 0;
-  cursor: pointer;
-}
-
-/* The preview is the control; the radio stays for keyboard and screen readers. */
-.themeOption input {
-  position: absolute;
-  z-index: 1;
-  inset: 0;
-  margin: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.optionPreview {
-  position: relative;
-  display: block;
-  border-radius: var(--shape-corner-medium);
-  outline: 1px solid var(--divider-color);
-  transition: outline-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
-}
-
-.themeOption:hover .optionPreview,
 .themeCard:has(.optionName:hover) .optionPreview {
   outline: 2px solid var(--tertiary-text-color);
-}
-
-.themeOption:has(:checked) .optionPreview {
-  outline: 3px solid var(--primary-color);
-  outline-offset: 2px;
-}
-
-.themeOption:has(:focus-visible) .optionPreview {
-  outline: 3px solid var(--primary-color);
-  outline-offset: 4px;
-}
-
-.themeOption:active .optionPreview {
-  border-radius: var(--shape-corner-small);
 }
 
 .selectedBadge {
@@ -847,12 +751,6 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
   cursor: pointer;
 }
 
-.optionName {
-  overflow-wrap: anywhere;
-  text-align: center;
-}
-
-.themeOption:has(:checked) .optionName,
 .themeCard:has(:checked) .optionName {
   font-weight: 600;
 }

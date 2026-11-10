@@ -1505,7 +1505,15 @@ Tutorial:
   Finish: Bitir
   Welcome:
     Title: OpenTubeX-ə xoş gəlmisiniz
-    Description: Tətbiqdən rahat istifadə etməyinizə kömək edəcək bir neçə idarəetmə elementi ilə tanış olun.
+    Description: Sıfırdan başlayın və ya abunəliklərinizi, tarixçənizi və pleylistlərinizi başqa tətbiqdən və ya ehtiyat nüsxədən gətirin.
+    Start Fresh: Sıfırdan başla
+    Import Data: Məlumatları idxal et
+  Preferences:
+    Title: Özünüzə uyğunlaşdırın
+    Description: Temanızı, başlanğıc səhifənizi və bölgənizi seçin. Bunları və daha çoxunu istənilən vaxt Tənzimləmələrdə dəyişə bilərsiniz.
+  Playback:
+    Title: Oynatma və məxfilik
+    Description: Videoların necə oynadılacağını, OpenTubeX-in nəyə baxdığınızı yadda saxlayıb-saxlamayacağını və hansı icma əlavələrindən istifadə edəcəyini seçin.
   Navigation:
     Title: Kitabxananız həmişə yaxındadır
     Description: Abunəliklərə, pleylistlərə, tarixçəyə və digər bölmələrə keçmək üçün naviqasiyadan istifadə edin.
@@ -1514,16 +1522,11 @@ Tutorial:
     Description: Video və kanallar tapın və ya dəstəklənən video URL-ini birbaşa axtarış sahəsinə yapışdırın.
   Tabs:
     Title: Səhifələri vərəqlərdə açıq saxlayın
-    Description: Olduğunuz yeri itirmədən eyni anda bir neçə səhifə açın. Vərəqlərin düzülüşünüzə ən uyğun yerini seçin.
-  Quick Settings:
-    Title: Özünüzə uyğunlaşdırın
-    Description: Mövzu və varsayılan video keyfiyyəti seçin. Bu və digər seçimləri istənilən vaxt profil menyusundan dəyişin və ya profilləri dəyişmək üçün ona sağ klikləyin.
-    Touch Description: Mövzu və varsayılan video keyfiyyəti seçin. Bu və digər seçimləri istənilən vaxt profil menyusundan dəyişin və ya profilləri dəyişmək üçün ona basıb saxlayın.
-  Import Data:
-    Title: Məlumatlarınızı özünüzlə gətirin
-    Description: İstəsəniz, abunəlikləri, tarixçəni, pleylistləri, axtarış tarixçəsini və ya tənzimləmələri başqa dəstəklənən tətbiqdən və ya ehtiyat nüsxədən idxal edin.
-    Action: Məlumatları idxal et
-    Not Now: İndi yox
+    Description: Yerinizi itirmədən bir neçə səhifəni eyni anda açın.
+  Profile Menu:
+    Title: Tənzimləmələr və profillər
+    Description: Profil menyunuzda cəld tənzimləmələr, yükləmələr və bütün digər tənzimləmələr var. Profillər arasında keçid etmək üçün onun üzərinə sağ klikləyin.
+    Touch Description: Profil menyunuzda cəld tənzimləmələr, yükləmələr və bütün digər tənzimləmələr var. Profillər arasında keçid etmək üçün ona toxunub saxlayın.
 About:
   Project: Layihə
   Community: İcma
@@ -1534,6 +1537,7 @@ About:
   Commit: Kommit
   Matrix: Matrix
   Email: E-poçt
+  Show tutorial: Təlimatı göstər
 Profile:
   Customization: Fərdiləşdirmə
   Manage Profile Subscriptions: Profil abunəliklərini idarə et

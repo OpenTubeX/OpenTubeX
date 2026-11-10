@@ -1502,7 +1502,15 @@ Tutorial:
   Finish: 完成
   Welcome:
     Title: 欢迎使用 OpenTubeX
-    Description: 下面介绍几个常用控件，帮助您快速上手。
+    Description: 从零开始，或从其他应用或备份中导入您的订阅、历史记录和播放列表。
+    Start Fresh: 从零开始
+    Import Data: 导入数据
+  Preferences:
+    Title: 按您的喜好设置
+    Description: 选择您的主题、起始页面和地区。您随时可以在设置中更改这些选项及更多内容。
+  Playback:
+    Title: 播放与隐私
+    Description: 选择视频的播放方式、OpenTubeX 是否记住您观看的内容，以及要使用哪些社区扩展功能。
   Navigation:
     Title: 随时访问您的媒体库
     Description: 使用导航栏可访问订阅、播放列表、历史记录等内容。
@@ -1511,16 +1519,11 @@ Tutorial:
     Description: 查找视频和频道，或直接将支持的视频 URL 粘贴到搜索框中。
   Tabs:
     Title: 在标签页中保留页面
-    Description: 同时打开多个页面，并保留每个页面的浏览位置。您还可以选择标签页在界面中的位置。
-  Quick Settings:
-    Title: 按您的喜好设置
-    Description: 选择主题和默认视频画质。您可以随时在配置文件菜单中更改这些选项和其他偏好设置，也可以右键单击该菜单来切换配置文件。
-    Touch Description: 选择主题和默认视频画质。您可以随时在配置文件菜单中更改这些选项和其他偏好设置，也可以长按该菜单来切换配置文件。
-  Import Data:
-    Title: 导入您的数据
-    Description: 您可以从其他受支持的应用或备份中导入订阅、历史记录、播放列表、搜索历史记录或设置。
-    Action: 导入数据
-    Not Now: 暂不
+    Description: 同时打开多个页面，而不会丢失当前位置。
+  Profile Menu:
+    Title: 设置与个人资料
+    Description: 个人资料菜单包含快速设置、下载以及所有其他设置。右键单击即可切换个人资料。
+    Touch Description: 个人资料菜单包含快速设置、下载以及所有其他设置。长按即可切换个人资料。
 About:
   Project: 项目
   Community: 社区
@@ -1531,6 +1534,7 @@ About:
   Commit: 提交
   Matrix: Matrix
   Email: 电子邮件
+  Show tutorial: 显示教程
 Profile:
   Customization: 自定义
   Manage Profile Subscriptions: 管理个人资料的订阅

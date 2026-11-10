@@ -304,7 +304,6 @@
 import { supportsYtDlp } from '../../../helpers/ytDlpCapabilities'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
 
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtSelect from '../../FtSelect/FtSelect.vue'
@@ -316,10 +315,9 @@ import store from '../../../store/index'
 import { localeTranslationPercentages } from '../../../i18n/index'
 
 import allLocales from '../../../../../static/locales/activeLocales.json'
-import { translateWindowTitle } from '../../../helpers/strings'
 import { initializePlatformInfo, supportsAutoPictureInPictureMinimize } from '../../../helpers/platform'
-import { filterAvailableNavigationItems } from '../../../../navigationAvailability'
 import { usePhoneLayout } from '../../../composables/usePhoneLayout'
+import { useLandingPageOptions } from '../../../composables/useLandingPageOptions'
 import {
   DATE_FORMAT_OPTIONS,
   TIME_FORMAT_OPTIONS,
@@ -371,7 +369,6 @@ const statsWeekStartsOn = computed(() => store.getters.getStatsWeekStartsOn)
 function updateStatsWeekStartsOn(value) {
   store.dispatch('updateStatsWeekStartsOn', value)
 }
-const router = useRouter()
 
 // The 'minimize' event doesn't fire on Wayland. This shared check starts during
 // app initialization, before settings can mount, and is cached for every view.
@@ -486,26 +483,7 @@ function updateRelativeTimestampsSetting(value) {
 /** @type {import('vue').ComputedRef<'local' | 'invidious' | 'yattee'>} */
 const backendPreference = computed(() => store.getters.getBackendPreference)
 
-const navigationItems = computed(() => store.getters.getNavigationItems)
-
-const defaultPages = computed(() => {
-  const routeByPath = new Map(router.getRoutes().map(route => [route.path.slice(1), route]))
-  return filterAvailableNavigationItems(navigationItems.value, {
-    supportsLocalApi: SUPPORTS_LOCAL_API,
-    backendPreference: backendPreference.value,
-    backendFallback: backendFallback.value,
-    showWatchStats: store.getters.getRememberHistory && store.getters.getEnableWatchStats,
-  })
-    .map(id => routeByPath.get(id))
-    .filter(route => route != null)
-})
-
-const defaultPageNames = computed(() => defaultPages.value.map((route) => translateWindowTitle(route.meta.title)))
-
-const defaultPageValues = computed(() => {
-  // avoid Vue parsing issues by excluding '/' from path values
-  return defaultPages.value.map((route) => route.path.slice(1))
-})
+const { landingPageNames: defaultPageNames, landingPageValues: defaultPageValues } = useLandingPageOptions()
 
 /** @type {import('vue').ComputedRef<'home' | 'subscriptions' | 'subscribedchannels' | 'popular' | 'userplaylists' | 'history' | 'trending' | 'stats'>} */
 const landingPage = computed(() => store.getters.getLandingPage)

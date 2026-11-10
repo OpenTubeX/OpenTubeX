@@ -21,7 +21,7 @@ public class YtDlpRuntimeTest {
             android.webkit.WebView view = reference.get();
             awaitRumble(view, "!!document.querySelector('.app.capacitorTabs')");
             awaitRumble(view, "!document.getElementById('startup-splash')");
-            evaluateRumble(view, "document.querySelector('.tutorialActions button')?.click()");
+            evaluateRumble(view, "document.querySelector('.tutorialSkip button')?.click()");
             awaitRumble(view, "!document.querySelector('.tutorialOverlay')");
             evaluateRumble(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$router.push({path:'/external-media',query:{url:" + JSONObject.quote(url) + "}})");
             awaitRumble(view, "document.querySelector('.externalMediaPlayer video')?.readyState >= 1");

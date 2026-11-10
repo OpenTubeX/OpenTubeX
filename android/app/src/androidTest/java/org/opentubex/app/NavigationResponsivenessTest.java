@@ -35,7 +35,7 @@ public class NavigationResponsivenessTest {
             scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
             WebView view = reference.get();
             await(view, "!!document.querySelector('.sideNav a[href=\"#/userplaylists\"]')");
-            evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
+            evaluate(view, "document.querySelector('.tutorialSkip button')?.click()");
             await(view, "!document.querySelector('.tutorialOverlay')");
             evaluate(view, "document.querySelector('.sideNav .inner > a[href=\"#/userplaylists\"]').click()");
             await(view, "!!document.querySelector('.newPlaylistButton')");

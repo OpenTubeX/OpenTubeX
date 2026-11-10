@@ -1502,7 +1502,15 @@ Tutorial:
   Finish: Slutför
   Welcome:
     Title: Välkommen till OpenTubeX
-    Description: Här är några kontroller som hjälper dig att komma igång.
+    Description: Börja från början, eller ta med dina prenumerationer, din historik och dina spellistor från en annan app eller en säkerhetskopia.
+    Start Fresh: Börja från början
+    Import Data: Importera data
+  Preferences:
+    Title: Anpassa appen
+    Description: Välj tema, startsida och region. Du kan när som helst ändra detta och mer i Inställningar.
+  Playback:
+    Title: Uppspelning och integritet
+    Description: Välj hur videor spelas upp, om OpenTubeX ska komma ihåg vad du tittar på och vilka tillägg från gemenskapen som används.
   Navigation:
     Title: Ditt bibliotek finns alltid nära till hands
     Description: Använd navigeringen för att öppna prenumerationer, spellistor, historik med mera.
@@ -1511,16 +1519,11 @@ Tutorial:
     Description: Hitta videor och kanaler eller klistra in en video-URL som stöds direkt i sökfältet.
   Tabs:
     Title: Håll sidor öppna i flikar
-    Description: Öppna flera sidor samtidigt utan att tappa bort var du var. Välj var flikarna passar bäst i din layout.
-  Quick Settings:
-    Title: Anpassa appen
-    Description: Välj tema och standardkvalitet för video. Du kan när som helst ändra dessa och andra inställningar från profilmenyn eller högerklicka på den för att byta profil.
-    Touch Description: Välj tema och standardkvalitet för video. Du kan när som helst ändra dessa och andra inställningar från profilmenyn eller trycka länge på den för att byta profil.
-  Import Data:
-    Title: Ta med dina data
-    Description: Du kan importera prenumerationer, historik, spellistor, sökhistorik eller inställningar från en annan app eller säkerhetskopia som stöds.
-    Action: Importera data
-    Not Now: Inte nu
+    Description: Öppna flera sidor samtidigt utan att tappa tråden.
+  Profile Menu:
+    Title: Inställningar och profiler
+    Description: Profilmenyn innehåller snabbinställningar, nedladdningar och alla andra inställningar. Högerklicka på den för att byta profil.
+    Touch Description: Profilmenyn innehåller snabbinställningar, nedladdningar och alla andra inställningar. Tryck och håll på den för att byta profil.
 About:
   Project: Projekt
   Community: Gemenskap
@@ -1531,6 +1534,7 @@ About:
   Commit: Incheckning
   Matrix: Matrix
   Email: E-post
+  Show tutorial: Visa guide
 Profile:
   Customization: Anpassning
   Manage Profile Subscriptions: Hantera profilens prenumerationer

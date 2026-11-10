@@ -1833,7 +1833,15 @@ Tutorial:
   Finish: Dokončaj
   Welcome:
     Title: Dobrodošli v aplikaciji OpenTubeX
-    Description: Tu je nekaj kontrolnikov, s katerimi se boste hitreje znašli.
+    Description: Začnite na novo ali prenesite naročnine, zgodovino in sezname predvajanja iz druge aplikacije ali varnostne kopije.
+    Start Fresh: Začni na novo
+    Import Data: Uvozi podatke
+  Preferences:
+    Title: Prilagodite po svoje
+    Description: Izberite temo, začetno stran in regijo. To in še več lahko kadar koli spremenite v nastavitvah.
+  Playback:
+    Title: Predvajanje in zasebnost
+    Description: Izberite, kako se predvajajo videoposnetki, ali si OpenTubeX zapomni, kaj gledate, in katere dodatke skupnosti uporablja.
   Navigation:
     Title: Vaša knjižnica je vedno pri roki
     Description: Z navigacijo odprite naročnine, sezname predvajanja, zgodovino in druge vsebine.
@@ -1842,16 +1850,11 @@ Tutorial:
     Description: Poiščite videoposnetke in kanale ali pa podprti URL videoposnetka prilepite neposredno v iskalno polje.
   Tabs:
     Title: Strani ohranite odprte v zavihkih
-    Description: Odprite več strani hkrati, ne da bi izgubili trenutno mesto. Izberite položaj zavihkov, ki najbolje ustreza vaši postavitvi.
-  Quick Settings:
-    Title: Prilagodite po svoje
-    Description: Izberite temo in privzeto kakovost videoposnetkov. Te in druge nastavitve lahko kadar koli spremenite v meniju profila. Z desnim klikom nanj lahko preklopite med profili.
-    Touch Description: Izberite temo in privzeto kakovost videoposnetkov. Te in druge nastavitve lahko kadar koli spremenite v meniju profila. Z dolgim pritiskom nanj lahko preklopite med profili.
-  Import Data:
-    Title: Prenesite svoje podatke
-    Description: Po želji uvozite naročnine, zgodovino, sezname predvajanja, zgodovino iskanja ali nastavitve iz druge podprte aplikacije ali varnostne kopije.
-    Action: Uvozi podatke
-    Not Now: Ne zdaj
+    Description: Odprite več strani hkrati, ne da bi izgubili mesto, kjer ste ostali.
+  Profile Menu:
+    Title: Nastavitve in profili
+    Description: Meni profila vsebuje hitre nastavitve, prenose in vse druge nastavitve. Z desno tipko kliknite nanj, da zamenjate profil.
+    Touch Description: Meni profila vsebuje hitre nastavitve, prenose in vse druge nastavitve. Pridržite ga, da zamenjate profil.
 About:
   Project: Projekt
   Community: Skupnost
@@ -1867,6 +1870,7 @@ About:
   Email: E-pošta
   Please read the {roomRulesLink}: Preberite {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX omogočajo {creditsPageLink}
+  Show tutorial: Prikaži vodnik
 Profile:
   Customization: Prilagoditev
   Manage Profile Subscriptions: Upravljaj naročnine profila

@@ -93,8 +93,8 @@ public class HomeWidgetsTest {
     }
 
     private static void skipTutorial(ActivityScenario<MainActivity> scenario) throws Exception {
-        await(scenario, "document.querySelector('.tutorialActions button') || !document.querySelector('.tutorialOverlay')");
-        evaluate(scenario, "document.querySelector('.tutorialActions button')?.click()");
+        await(scenario, "document.querySelector('.tutorialSkip button') || !document.querySelector('.tutorialOverlay')");
+        evaluate(scenario, "document.querySelector('.tutorialSkip button')?.click()");
         await(scenario, "!document.querySelector('.tutorialOverlay')");
     }
 

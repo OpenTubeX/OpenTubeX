@@ -1506,7 +1506,15 @@ Tutorial:
   Finish: Hoàn tất
   Welcome:
     Title: Chào mừng đến với OpenTubeX
-    Description: Sau đây là một vài điều khiển giúp bạn làm quen với ứng dụng.
+    Description: Bắt đầu mới, hoặc chuyển kênh đăng ký, lịch sử và danh sách phát từ ứng dụng khác hoặc từ bản sao lưu.
+    Start Fresh: Bắt đầu mới
+    Import Data: Nhập dữ liệu
+  Preferences:
+    Title: Tùy chỉnh theo ý bạn
+    Description: Chọn chủ đề, trang khởi động và khu vực của bạn. Bạn có thể thay đổi các mục này và nhiều mục khác bất cứ lúc nào trong Cài đặt.
+  Playback:
+    Title: Phát video và quyền riêng tư
+    Description: Chọn cách phát video, OpenTubeX có ghi nhớ nội dung bạn xem hay không và dùng những tiện ích bổ sung nào của cộng đồng.
   Navigation:
     Title: Thư viện luôn trong tầm tay
     Description: Dùng thanh điều hướng để mở kênh đăng ký, danh sách phát, lịch sử và các mục khác.
@@ -1515,16 +1523,11 @@ Tutorial:
     Description: Tìm video và kênh, hoặc dán trực tiếp URL video được hỗ trợ vào ô tìm kiếm.
   Tabs:
     Title: Giữ trang mở trong thẻ
-    Description: Mở nhiều trang cùng lúc mà không mất vị trí hiện tại. Chọn vị trí thẻ phù hợp nhất với bố cục của bạn.
-  Quick Settings:
-    Title: Tùy chỉnh theo ý bạn
-    Description: Chọn chủ đề và chất lượng video mặc định. Bạn có thể đổi các tùy chọn này và tùy chọn khác bất cứ lúc nào trong menu hồ sơ, hoặc nhấp chuột phải vào đó để chuyển hồ sơ.
-    Touch Description: Chọn chủ đề và chất lượng video mặc định. Bạn có thể đổi các tùy chọn này và tùy chọn khác bất cứ lúc nào trong menu hồ sơ, hoặc nhấn giữ vào đó để chuyển hồ sơ.
-  Import Data:
-    Title: Mang theo dữ liệu của bạn
-    Description: Bạn có thể nhập kênh đăng ký, lịch sử, danh sách phát, lịch sử tìm kiếm hoặc cài đặt từ ứng dụng hay bản sao lưu được hỗ trợ khác.
-    Action: Nhập dữ liệu
-    Not Now: Để sau
+    Description: Mở nhiều trang cùng lúc mà không mất vị trí đang xem.
+  Profile Menu:
+    Title: Cài đặt và hồ sơ
+    Description: Menu hồ sơ chứa cài đặt nhanh, tải xuống và mọi cài đặt khác. Nhấn chuột phải vào menu để chuyển hồ sơ.
+    Touch Description: Menu hồ sơ chứa cài đặt nhanh, tải xuống và mọi cài đặt khác. Nhấn giữ menu để chuyển hồ sơ.
 About:
   Project: Dự án
   Community: Cộng đồng
@@ -1535,6 +1538,7 @@ About:
   Commit: Bản commit
   Matrix: Matrix
   Email: Thư điện tử
+  Show tutorial: Hiện hướng dẫn
 Profile:
   Customization: Tùy chỉnh
   Manage Profile Subscriptions: Quản lý đăng ký của hồ sơ

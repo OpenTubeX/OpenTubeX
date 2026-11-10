@@ -1556,7 +1556,15 @@ Tutorial:
   Finish: Afslut
   Welcome:
     Title: Velkommen til OpenTubeX
-    Description: Her er de vigtigste funktioner, så du hurtigt kan komme i gang.
+    Description: Start på en frisk, eller hent dine abonnementer, din historik og dine playlister fra en anden app eller en sikkerhedskopi.
+    Start Fresh: Start på en frisk
+    Import Data: Importér data
+  Preferences:
+    Title: Tilpas appen
+    Description: Vælg dit tema, din startside og din region. Du kan til enhver tid ændre disse og meget mere i Indstillinger.
+  Playback:
+    Title: Afspilning og privatliv
+    Description: Vælg, hvordan videoer afspilles, om OpenTubeX skal huske, hvad du ser, og hvilke tilføjelser fra fællesskabet den bruger.
   Navigation:
     Title: Dit bibliotek er altid lige ved hånden
     Description: Brug navigationen til at åbne abonnementer, playlister, historik og meget mere.
@@ -1565,16 +1573,11 @@ Tutorial:
     Description: Find videoer og kanaler, eller indsæt URL'en til en understøttet video direkte i søgefeltet.
   Tabs:
     Title: Hold sider åbne i faner
-    Description: Åbn flere sider på én gang uden at miste din placering. Vælg, hvor fanerne passer bedst i dit layout.
-  Quick Settings:
-    Title: Tilpas appen
-    Description: Vælg et tema og en standardvideokvalitet. Du kan til enhver tid ændre disse og andre indstillinger i profilmenuen eller højreklikke på den for at skifte profil.
-    Touch Description: Vælg et tema og en standardvideokvalitet. Du kan til enhver tid ændre disse og andre indstillinger i profilmenuen eller trykke længe på den for at skifte profil.
-  Import Data:
-    Title: Tag dine data med
-    Description: Du kan vælge at importere abonnementer, historik, playlister, søgehistorik eller indstillinger fra en anden understøttet app eller sikkerhedskopi.
-    Action: Importér data
-    Not Now: Ikke nu
+    Description: Åbn flere sider på én gang uden at miste tråden.
+  Profile Menu:
+    Title: Indstillinger og profiler
+    Description: Din profilmenu indeholder hurtigindstillinger, downloads og alle andre indstillinger. Højreklik på den for at skifte profil.
+    Touch Description: Din profilmenu indeholder hurtigindstillinger, downloads og alle andre indstillinger. Tryk og hold på den for at skifte profil.
 About:
   Project: Projekt
   Community: Fællesskab
@@ -1588,6 +1591,7 @@ About:
   Email: E-mail
   Please read the {roomRulesLink}: Læs venligst {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX er gjort muligt af {creditsPageLink}
+  Show tutorial: Vis vejledning
 Profile:
   Customization: Tilpasning
   Manage Profile Subscriptions: Administrer profilens abonnementer

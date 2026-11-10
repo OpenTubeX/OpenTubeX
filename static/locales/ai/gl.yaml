@@ -1532,7 +1532,15 @@ Tutorial:
   Finish: Rematar
   Welcome:
     Title: Dámosche a benvida a OpenTubeX
-    Description: Estes controis básicos axudarante a familiarizarte coa aplicación.
+    Description: Comeza de cero ou trae as túas subscricións, o teu historial e as túas listas de reprodución doutra aplicación ou dunha copia de seguranza.
+    Start Fresh: Comezar de cero
+    Import Data: Importar datos
+  Preferences:
+    Title: Adapta a aplicación ao teu gusto
+    Description: Escolle o tema, a páxina de inicio e a rexión. Podes cambiar estas e outras opcións en Axustes cando queiras.
+  Playback:
+    Title: Reprodución e privacidade
+    Description: Escolle como se reproducen os vídeos, se OpenTubeX lembra o que ves e que complementos da comunidade usa.
   Navigation:
     Title: A túa biblioteca está sempre á man
     Description: Usa a navegación para acceder ás subscricións, ás listas de reprodución, ao historial e a outras seccións.
@@ -1541,16 +1549,11 @@ Tutorial:
     Description: Busca vídeos e canles ou pega directamente no campo de busca a URL dun vídeo compatible.
   Tabs:
     Title: Mantén as páxinas abertas en lapelas
-    Description: Abre varias páxinas á vez sen perder o punto onde estabas. Escolle onde encaixan mellor as lapelas na disposición.
-  Quick Settings:
-    Title: Adapta a aplicación ao teu gusto
-    Description: Escolle un tema e unha calidade de vídeo predeterminada. Podes cambiar estas e outras preferencias en calquera momento desde o menú do perfil ou premer nel co botón dereito para cambiar de perfil.
-    Touch Description: Escolle un tema e unha calidade de vídeo predeterminada. Podes cambiar estas e outras preferencias en calquera momento desde o menú do perfil ou mantelo premido para cambiar de perfil.
-  Import Data:
-    Title: Trae os teus datos
-    Description: Se queres, importa as subscricións, o historial, as listas de reprodución, o historial de buscas ou a configuración desde outra aplicación compatible ou unha copia de seguranza.
-    Action: Importar datos
-    Not Now: Agora non
+    Description: Abre varias páxinas á vez sen perder o punto onde estabas.
+  Profile Menu:
+    Title: Axustes e perfís
+    Description: O menú do teu perfil reúne a configuración rápida, as descargas e o resto dos axustes. Fai clic dereito nel para cambiar de perfil.
+    Touch Description: O menú do teu perfil reúne a configuración rápida, as descargas e o resto dos axustes. Mantéñeo premido para cambiar de perfil.
 About:
   Project: Proxecto
   Community: Comunidade
@@ -1561,6 +1564,7 @@ About:
   Commit: Commit
   Matrix: Matrix
   Email: Correo electrónico
+  Show tutorial: Amosar o titorial
 Profile:
   Customization: Personalización
   Manage Profile Subscriptions: Xestionar as subscricións do perfil

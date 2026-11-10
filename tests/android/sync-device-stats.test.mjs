@@ -115,11 +115,7 @@ test('Android repairs duplicate stats and reuses its identity when creating anot
     }, { key, salt, currentId })
     const tutorial = page.locator('.tutorialOverlay')
     if (await tutorial.isVisible()) {
-      const back = tutorial.getByRole('button', { name: 'Back', exact: true })
-      while (await back.isVisible()) await back.click()
-      const skip = tutorial.getByRole('button', { name: 'Skip', exact: true })
-      if (await skip.isVisible()) await skip.click()
-      else await tutorial.locator('.tutorialActions').getByRole('button').last().click()
+      await tutorial.getByRole('button', { name: 'Skip', exact: true }).click()
       await expect(tutorial).toBeHidden()
     }
     const picker = page.getByRole('group', { name: 'Devices' })

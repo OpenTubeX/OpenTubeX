@@ -1502,7 +1502,15 @@ Tutorial:
   Finish: Dokončit
   Welcome:
     Title: Vítejte v aplikaci OpenTubeX
-    Description: Seznamte se se základními ovládacími prvky.
+    Description: Začněte od nuly, nebo si přeneste odběry, historii a playlisty z jiné aplikace či ze zálohy.
+    Start Fresh: Začít od nuly
+    Import Data: Importovat data
+  Preferences:
+    Title: Přizpůsobte si aplikaci
+    Description: Vyberte si motiv, úvodní stránku a oblast. Tato a další nastavení můžete kdykoli změnit v Nastavení.
+  Playback:
+    Title: Přehrávání a soukromí
+    Description: Zvolte, jak se mají přehrávat videa, zda si má OpenTubeX pamatovat, co sledujete, a které komunitní doplňky má používat.
   Navigation:
     Title: Knihovnu máte vždy po ruce
     Description: Pomocí navigace přejdete k odběrům, playlistům, historii a dalším částem.
@@ -1511,16 +1519,11 @@ Tutorial:
     Description: Vyhledejte videa a kanály nebo vložte podporovanou adresu URL videa přímo do vyhledávacího pole.
   Tabs:
     Title: Nechte stránky otevřené na kartách
-    Description: Otevřete více stránek najednou a neztraťte místo, kde jste skončili. Zvolte umístění karet, které vám v rozvržení vyhovuje.
-  Quick Settings:
-    Title: Přizpůsobte si aplikaci
-    Description: Zvolte motiv a výchozí kvalitu videa. Tyto i další předvolby můžete kdykoli změnit v nabídce profilu. Kliknutím pravým tlačítkem můžete přepnout profil.
-    Touch Description: Zvolte motiv a výchozí kvalitu videa. Tyto i další předvolby můžete kdykoli změnit v nabídce profilu. Podržením prstu na profilu můžete přepnout profil.
-  Import Data:
-    Title: Importujte svá data
-    Description: Volitelně můžete importovat odběry, historii, playlisty, historii vyhledávání nebo nastavení z jiné podporované aplikace či zálohy.
-    Action: Importovat data
-    Not Now: Teď ne
+    Description: Otevřete několik stránek najednou, aniž byste ztratili místo, kde jste skončili.
+  Profile Menu:
+    Title: Nastavení a profily
+    Description: Nabídka profilu obsahuje rychlé nastavení, stahování a všechna ostatní nastavení. Kliknutím pravým tlačítkem na ni přepnete profil.
+    Touch Description: Nabídka profilu obsahuje rychlé nastavení, stahování a všechna ostatní nastavení. Klepnutím a podržením přepnete profil.
 About:
   Project: Projekt
   Community: Komunita
@@ -1531,6 +1534,7 @@ About:
   Commit: Commit
   Matrix: Matrix
   Email: E-mail
+  Show tutorial: Zobrazit průvodce
 Profile:
   Customization: Přizpůsobení
   Manage Profile Subscriptions: Spravovat odběry profilu

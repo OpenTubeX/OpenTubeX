@@ -94,9 +94,8 @@ test('blocks app shortcuts during the new-user tutorial and restores them after 
     minimized: false
   })
 
-  const primaryAction = tutorial.getByRole('button', { name: 'Next' })
-  await expect(primaryAction).toBeFocused()
-  await page.keyboard.press('Tab')
+  await expect(tutorial.getByRole('button', { name: 'Start fresh' })).toBeFocused()
+  await page.keyboard.press('Shift+Tab')
   const skipAction = tutorial.getByRole('button', { name: 'Skip', exact: true })
   await expect(skipAction).toBeFocused()
 
@@ -118,17 +117,25 @@ test('keeps the tutorial actions reachable in a short window', async ({ app, pag
   })
 
   const tutorial = page.getByRole('dialog', { name: 'Welcome to OpenTubeX' })
-  await expect(tutorial.getByRole('button', { name: 'Next' })).toBeVisible()
+  await expect(tutorial.getByRole('button', { name: 'Start fresh' })).toBeVisible()
   await expect.poll(() => tutorial.evaluate(element => {
     const bounds = element.getBoundingClientRect()
     return bounds.top >= 0 && bounds.bottom <= window.innerHeight
   })).toBe(true)
+
+  // Short windows open long selects as a modal picker inside the card, which keeps Tab to itself
+  await tutorial.getByRole('button', { name: 'Start fresh' }).click()
+  await page.locator('.tutorialCard').getByRole('combobox', { name: 'Region for Trending' }).click()
+  const picker = page.getByRole('listbox', { name: 'Region for Trending' })
+  await expect(picker).toBeFocused()
+  await page.keyboard.press('Tab')
+  await expect(picker.getByRole('option').first()).toBeFocused()
 })
 
-test.describe('translated import actions', () => {
+test.describe('translated welcome choices', () => {
   test.use({ seed: { settings: { currentLocale: 'de-DE' } } })
 
-  test('stay on one row in a narrow window', async ({ app, page }) => {
+  test('fit inside the card in a narrow window', async ({ app, page }) => {
     await app.electronApp.evaluate(({ BrowserWindow }) => {
       BrowserWindow.getAllWindows()[0].setSize(340, 600)
     })
@@ -137,13 +144,9 @@ test.describe('translated import actions', () => {
     await page.evaluate(() => window.ftElectron.setZoomFactor(1.05))
 
     const tutorial = page.locator('.tutorialCard')
-    for (let step = 0; step < 5; step++) {
-      await tutorial.getByRole('button', { name: 'Weiter' }).click()
-    }
-    await expect(tutorial).toHaveAccessibleName('Nimm deine Daten mit')
-
-    const actions = ['Zurück', 'Nicht jetzt', 'Daten importieren'].map(name => {
-      return tutorial.getByRole('button', { name })
+    await expect(tutorial).toHaveAccessibleName('Willkommen bei OpenTubeX')
+    const actions = ['Überspringen', 'Neu starten', 'Daten importieren'].map(name => {
+      return tutorial.getByRole('button', { name, exact: true })
     })
     await Promise.all(actions.map(action => expect(action).toBeVisible()))
     await expect.poll(async () => {
@@ -156,17 +159,7 @@ test.describe('translated import actions', () => {
           bounds.top >= cardBounds.top && bounds.bottom <= cardBounds.bottom
       })
     }).toBe(true)
-    await expect.poll(async () => {
-      const actionBounds = await Promise.all(actions.map(action => {
-        return action.evaluate(element => element.getBoundingClientRect().toJSON())
-      }))
-      return new Set(actionBounds.map(bounds => Math.round(bounds.top))).size
-    }).toBe(1)
-    // Buttons animate their padding into the compact layout.
-    await Promise.all(actions.map(action => action.evaluate(element => {
-      return Promise.all(element.getAnimations({ subtree: true }).map(animation => animation.finished.catch(() => {})))
-    })))
-    const actionWidths = await Promise.all(actions.map(action => {
+    const actionWidths = await Promise.all(actions.slice(1).map(action => {
       return action.evaluate(element => {
         const contentRange = document.createRange()
         contentRange.selectNodeContents(element)
@@ -192,10 +185,9 @@ test('resets the managed content viewport after a shorter step replaces it', asy
   await page.reload()
 
   const tutorial = page.locator('.tutorialCard')
-  for (let step = 0; step < 4; step++) {
-    await tutorial.getByRole('button', { name: 'Next' }).click()
-  }
-  await expect(tutorial).toHaveAccessibleName('Make it yours')
+  await tutorial.getByRole('button', { name: 'Start fresh' }).click()
+  await tutorial.getByRole('button', { name: 'Next' }).click()
+  await expect(tutorial).toHaveAccessibleName('Playback and privacy')
 
   const scrollViewport = tutorial.locator('.tutorialScroll')
   const scrollbar = scrollViewport.locator(':scope > .os-scrollbar-vertical')
@@ -204,7 +196,7 @@ test('resets the managed content viewport after a shorter step replaces it', asy
   await expect.poll(() => scrollViewport.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
 
   await tutorial.getByRole('button', { name: 'Next' }).click()
-  await expect(tutorial).toHaveAccessibleName('Bring your data with you')
+  await expect(tutorial).toHaveAccessibleName('Your library is always nearby')
   await expect.poll(() => scrollViewport.evaluate(element => ({
     scrollTop: element.scrollTop,
     scrollRange: element.scrollHeight - element.clientHeight
@@ -212,29 +204,74 @@ test('resets the managed content viewport after a shorter step replaces it', asy
   await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
 })
 
-test('walks new users through the essential controls', async ({ page }) => {
+test('walks new users through setup and the essential controls', async ({ page }) => {
   await page.evaluate(() => localStorage.setItem('opentubex.tutorial.audience', 'new'))
   await page.reload()
 
   const tutorial = page.locator('.tutorialCard')
   await expect(tutorial).toHaveAccessibleName('Welcome to OpenTubeX')
-  await expect(tutorial.locator('.tutorialProgress span')).toHaveCount(6)
-  const skip = tutorial.getByRole('button', { name: 'Skip' })
-  const next = tutorial.getByRole('button', { name: 'Next' })
-  await expect(skip).toBeVisible()
+  await expect(tutorial.locator('.tutorialProgress span')).toHaveCount(7)
+  await expect(tutorial.getByRole('button', { name: 'Import data' })).toBeVisible()
+  await expect(tutorial.getByRole('button', { name: 'Back' })).toHaveCount(0)
 
-  await next.click()
+  await tutorial.getByRole('button', { name: 'Start fresh' }).click()
+  await expect(tutorial).toHaveAccessibleName('Make it yours')
+  await expect(tutorial.getByRole('heading', { name: 'Make it yours' })).toBeFocused()
+  await expect(page.locator('.tutorialHighlight')).toHaveCount(0)
+
+  await tutorial.getByRole('button', { name: 'Back' }).click()
+  await expect(tutorial).toHaveAccessibleName('Welcome to OpenTubeX')
+  await tutorial.getByRole('button', { name: 'Start fresh' }).click()
+  await expect(tutorial).toHaveAccessibleName('Make it yours')
+
+  const themeModes = tutorial.getByRole('radiogroup', { name: 'Base Theme' })
+  await page.keyboard.press('Tab')
+  await page.keyboard.press('Tab')
+  await expect(themeModes.getByRole('radio', { name: 'System default' })).toBeFocused()
+  await page.keyboard.press('ArrowRight')
+  await expect(themeModes.getByRole('radio', { name: 'Light' })).toBeChecked()
+  await expect(page.locator('body')).toHaveClass(/light/)
+
+  await expect(tutorial.getByRole('combobox', { name: 'Default Landing Page' })).toBeVisible()
+  await expect(tutorial.getByRole('combobox', { name: 'Region for Trending' })).toBeVisible()
+
+  await tutorial.getByRole('button', { name: 'Next' }).click()
+  await expect(tutorial).toHaveAccessibleName('Playback and privacy')
+  const quality = tutorial.getByRole('combobox', { name: 'Default Quality' })
+  await quality.click()
+  await page.locator(`#${await quality.getAttribute('aria-controls')}`)
+    .getByRole('option', { name: '480p', exact: true }).click()
+  await expect(quality).toHaveText('480p')
+  const toggles = {
+    playNextVideo: 'Autoplay Recommended Videos',
+    enableSubtitlesByDefault: 'Enable Subtitles by Default',
+    rememberHistory: 'Remember Watch History',
+    useSponsorBlock: 'Enable SponsorBlock',
+    useDeArrowTitles: 'Use DeArrow Video Titles',
+    useDeArrowThumbnails: 'Use DeArrow for thumbnails'
+  }
+  for (const label of Object.values(toggles)) {
+    await tutorial.locator('label.switch-label').filter({ hasText: label }).click()
+  }
+  // Each switch saves its own setting; history starts on, the others off.
+  await expect.poll(() => page.evaluate(async (keys) => {
+    const settings = await window.ftElectron.dbSettings(1)
+    return Object.fromEntries(keys.map(key => [key, settings.find(({ _id }) => _id === key)?.value]))
+  }, Object.keys(toggles))).toEqual({
+    playNextVideo: true,
+    enableSubtitlesByDefault: true,
+    rememberHistory: false,
+    useSponsorBlock: true,
+    useDeArrowTitles: true,
+    useDeArrowThumbnails: true
+  })
+
+  await tutorial.getByRole('button', { name: 'Next' }).click()
   await expect(tutorial).toHaveAccessibleName('Your library is always nearby')
   await expect(tutorial).toContainText('Use the navigation to reach subscriptions, playlists, history, and more.')
   await expect(tutorial.getByRole('heading', { name: 'Your library is always nearby' })).toBeFocused()
-  await expect(tutorial.getByRole('button', { name: 'Skip' })).toHaveCount(0)
+  await expect(tutorial.getByRole('button', { name: 'Skip', exact: true })).toBeVisible()
   await expectHighlightCenteredOn(page, '[data-tutorial="navigation"]')
-  const back = tutorial.getByRole('button', { name: 'Back' })
-
-  await back.click()
-  await expect(tutorial).toHaveAccessibleName('Welcome to OpenTubeX')
-  await next.click()
-  await expect(tutorial).toHaveAccessibleName('Your library is always nearby')
 
   await tutorial.getByRole('button', { name: 'Next' }).click()
   await expect(tutorial).toHaveAccessibleName('Search or paste a link')
@@ -255,6 +292,7 @@ test('walks new users through the essential controls', async ({ page }) => {
   await expect(page.locator('.selectDropdown:visible')).toHaveCSS('text-align', 'start')
   await page.keyboard.press('Escape')
   await expect(layout).toHaveAttribute('aria-expanded', 'false')
+  await expect(tutorial).toBeVisible()
   await page.keyboard.press('Enter')
   await page.keyboard.press('ArrowDown')
   await page.keyboard.press('Enter')
@@ -280,27 +318,12 @@ test('walks new users through the essential controls', async ({ page }) => {
   }
 
   await tutorial.getByRole('button', { name: 'Next' }).click()
-  await expect(tutorial).toHaveAccessibleName('Make it yours')
-  await expect(tutorial).toContainText('right-click it to switch profiles.')
+  await expect(tutorial).toHaveAccessibleName('Settings and profiles')
+  await expect(tutorial).toContainText('Right-click it to switch profiles.')
   await expectHighlightCenteredOn(page, '[data-tutorial="quick-settings"]')
-  const baseTheme = tutorial.getByRole('combobox', { name: 'Base Theme' })
-  await baseTheme.click()
-  await page.locator(`#${await baseTheme.getAttribute('aria-controls')}`)
-    .getByRole('option', { name: 'Light', exact: true }).click()
-  await expect(page.locator('body')).toHaveClass(/light/)
-  const quality = tutorial.getByRole('combobox', { name: 'Default Quality' })
-  await quality.click()
-  await page.locator(`#${await quality.getAttribute('aria-controls')}`)
-    .getByRole('option', { name: '480p', exact: true }).click()
-  await expect(quality).toHaveText('480p')
 
-  await tutorial.getByRole('button', { name: 'Next' }).click()
-  await expect(tutorial).toHaveAccessibleName('Bring your data with you')
-  await expect(tutorial.getByRole('button', { name: 'Not now' })).toBeVisible()
-  await tutorial.getByRole('button', { name: 'Import data' }).click()
+  await tutorial.getByRole('button', { name: 'Finish' }).click()
   await expect(tutorial).toBeHidden()
-  await expect(page.locator('.settingsContent [data-section="data"]')
-    .getByRole('button', { name: 'Import subscriptions', exact: true })).toBeVisible()
   await expect.poll(() => page.evaluate(async () => {
     const settings = await window.ftElectron.dbSettings(1)
     return settings.find(({ _id }) => _id === 'tutorialAudience')?.value
@@ -310,6 +333,37 @@ test('walks new users through the essential controls', async ({ page }) => {
   await expect(page.locator('.tutorialOverlay')).toHaveCount(0)
 })
 
+test('resumes the tutorial after opening settings from it and replays it from About', async ({ page }) => {
+  await page.evaluate(() => localStorage.setItem('opentubex.tutorial.audience', 'new'))
+  await page.reload()
+
+  const tutorial = page.locator('.tutorialCard')
+  await tutorial.getByRole('button', { name: 'Import data' }).click()
+  await expect(tutorial).toBeHidden()
+  await expect(page.locator('.settingsContent [data-section="data"]')
+    .getByRole('button', { name: 'Import subscriptions', exact: true })).toBeVisible()
+
+  await page.locator('.settingsCloseButton').click()
+  await expect(tutorial).toHaveAccessibleName('Make it yours')
+  expect(await page.evaluate(() => localStorage.getItem('opentubex.tutorial.audience'))).toBe('new')
+
+  await tutorial.getByRole('button', { name: 'Theme and colors' }).click()
+  await expect(tutorial).toBeHidden()
+  await expect(page.locator('.themeGallery .themeSection')).toBeVisible()
+  await page.locator('.settingsCloseButton').click()
+  await expect(tutorial).toHaveAccessibleName('Make it yours')
+
+  await tutorial.getByRole('button', { name: 'Skip', exact: true }).click()
+  await expect(tutorial).toBeHidden()
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('opentubex.tutorial.audience'))).toBe('completed')
+
+  await page.locator('.profileTrigger').click()
+  await page.getByRole('dialog', { name: 'Quick settings' }).getByRole('button', { name: 'About' }).click()
+  await page.getByRole('dialog', { name: 'About' }).getByRole('button', { name: 'Show tutorial' }).click()
+  await expect(page.locator('.settingsWindow')).toHaveCount(0)
+  await expect(tutorial).toHaveAccessibleName('Welcome to OpenTubeX')
+})
+
 test('repositions the navigation highlight after crossing the mobile breakpoint', async ({ app, page }) => {
   await setWindowSize(app, page, { width: 600, height: 700 })
   await page.evaluate(() => localStorage.setItem('opentubex.tutorial.audience', 'new'))
@@ -317,6 +371,8 @@ test('repositions the navigation highlight after crossing the mobile breakpoint'
   await page.evaluate(() => window.ftElectron.setZoomFactor(1.05))
 
   const tutorial = page.locator('.tutorialCard')
+  await tutorial.getByRole('button', { name: 'Start fresh' }).click()
+  await tutorial.getByRole('button', { name: 'Next' }).click()
   await tutorial.getByRole('button', { name: 'Next' }).click()
   await expect(tutorial).toHaveAccessibleName('Your library is always nearby')
   await expectHighlightCenteredOn(page, '[data-tutorial="navigation"]')

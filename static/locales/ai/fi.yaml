@@ -1503,7 +1503,15 @@ Tutorial:
   Finish: Valmis
   Welcome:
     Title: Tervetuloa OpenTubeX-sovellukseen
-    Description: Näillä toiminnoilla pääset alkuun.
+    Description: Aloita alusta tai tuo tilauksesi, historiasi ja soittolistasi toisesta sovelluksesta tai varmuuskopiosta.
+    Start Fresh: Aloita alusta
+    Import Data: Tuo tiedot
+  Preferences:
+    Title: Tee sovelluksesta omasi
+    Description: Valitse teema, aloitussivu ja alue. Voit muuttaa näitä ja muita asetuksia milloin tahansa Asetuksissa.
+  Playback:
+    Title: Toisto ja yksityisyys
+    Description: Valitse, miten videot toistetaan, muistaako OpenTubeX, mitä katsot, ja mitä yhteisön lisäosia se käyttää.
   Navigation:
     Title: Kirjastosi on aina lähellä
     Description: Siirry siirtymisvalikosta tilauksiin, soittolistoihin, historiaan ja muihin näkymiin.
@@ -1512,16 +1520,11 @@ Tutorial:
     Description: Etsi videoita ja kanavia tai liitä tuetun videon URL-osoite suoraan hakukenttään.
   Tabs:
     Title: Pidä sivut auki välilehdissä
-    Description: Avaa useita sivuja yhtä aikaa kadottamatta kohtaasi. Valitse välilehdille asettelussasi parhaiten sopiva paikka.
-  Quick Settings:
-    Title: Tee sovelluksesta omasi
-    Description: Valitse teema ja videon oletuslaatu. Voit muuttaa näitä ja muita asetuksia milloin tahansa profiilivalikosta tai vaihtaa profiilia napsauttamalla valikkoa hiiren kakkospainikkeella.
-    Touch Description: Valitse teema ja videon oletuslaatu. Voit muuttaa näitä ja muita asetuksia milloin tahansa profiilivalikosta tai vaihtaa profiilia painamalla valikkoa pitkään.
-  Import Data:
-    Title: Tuo tietosi mukanasi
-    Description: Voit halutessasi tuoda tilaukset, historian, soittolistat, hakuhistorian tai asetukset toisesta tuetusta sovelluksesta tai varmuuskopiosta.
-    Action: Tuo tiedot
-    Not Now: Ei nyt
+    Description: Avaa useita sivuja kerralla menettämättä kohtaa, jossa olit.
+  Profile Menu:
+    Title: Asetukset ja profiilit
+    Description: Profiilivalikosta löydät pika-asetukset, lataukset ja kaikki muut asetukset. Vaihda profiilia napsauttamalla sitä hiiren kakkospainikkeella.
+    Touch Description: Profiilivalikosta löydät pika-asetukset, lataukset ja kaikki muut asetukset. Vaihda profiilia painamalla sitä pitkään.
 About:
   Project: Projekti
   Community: Yhteisö
@@ -1532,6 +1535,7 @@ About:
   Commit: Kommitti
   Matrix: Matrix
   Email: Sähköposti
+  Show tutorial: Näytä opastus
 Profile:
   Customization: Mukauttaminen
   Manage Profile Subscriptions: Hallitse profiilin tilauksia

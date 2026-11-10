@@ -13,7 +13,7 @@ async function collectSample(appRoot) {
     const { page } = app
     const tutorial = page.locator('.tutorialOverlay')
     if (await tutorial.isVisible()) {
-      await tutorial.locator('.tutorialActions').getByRole('button').last().click()
+      await tutorial.locator('.tutorialSkip button').click()
     }
     await expect(tutorial).toBeHidden()
     const session = await page.context().newCDPSession(page)

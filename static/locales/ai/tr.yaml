@@ -1502,7 +1502,15 @@ Tutorial:
   Finish: Bitir
   Welcome:
     Title: OpenTubeX'e Hoş Geldiniz
-    Description: Uygulamayı kullanmaya başlamanıza yardımcı olacak birkaç denetim burada.
+    Description: Sıfırdan başlayın veya aboneliklerinizi, geçmişinizi ve oynatma listelerinizi başka bir uygulamadan ya da yedekten getirin.
+    Start Fresh: Sıfırdan başla
+    Import Data: Verileri içe aktar
+  Preferences:
+    Title: Uygulamayı özelleştirin
+    Description: Temanızı, başlangıç sayfanızı ve bölgenizi seçin. Bunları ve daha fazlasını istediğiniz zaman Ayarlar'dan değiştirebilirsiniz.
+  Playback:
+    Title: Oynatma ve gizlilik
+    Description: Videoların nasıl oynatılacağını, OpenTubeX'in izlediklerinizi hatırlayıp hatırlamayacağını ve hangi topluluk eklentilerini kullanacağını seçin.
   Navigation:
     Title: Kitaplığınız her zaman elinizin altında
     Description: Aboneliklere, oynatma listelerine, geçmişe ve daha fazlasına ulaşmak için gezinme menüsünü kullanın.
@@ -1511,16 +1519,11 @@ Tutorial:
     Description: Video ve kanal bulun ya da desteklenen bir video URL'sini doğrudan arama alanına yapıştırın.
   Tabs:
     Title: Sayfaları sekmelerde açık tutun
-    Description: Kaldığınız yeri kaybetmeden birden fazla sayfayı aynı anda açın. Sekmeler için düzeninize en uygun konumu seçin.
-  Quick Settings:
-    Title: Uygulamayı özelleştirin
-    Description: Bir tema ve varsayılan video kalitesi seçin. Bunları ve diğer tercihleri istediğiniz zaman profil menüsünden değiştirebilir, profil değiştirmek için menüye sağ tıklayabilirsiniz.
-    Touch Description: Bir tema ve varsayılan video kalitesi seçin. Bunları ve diğer tercihleri istediğiniz zaman profil menüsünden değiştirebilir, profil değiştirmek için menüye uzun basabilirsiniz.
-  Import Data:
-    Title: Verilerinizi içe aktarın
-    Description: Abonelikleri, geçmişi, oynatma listelerini, arama geçmişini veya ayarları desteklenen başka bir uygulamadan ya da yedekten içe aktarabilirsiniz.
-    Action: Verileri içe aktar
-    Not Now: Şimdi değil
+    Description: Kaldığınız yeri kaybetmeden aynı anda birkaç sayfa açın.
+  Profile Menu:
+    Title: Ayarlar ve profiller
+    Description: Profil menünüzde hızlı ayarlar, indirmeler ve diğer tüm ayarlar bulunur. Profil değiştirmek için menüye sağ tıklayın.
+    Touch Description: Profil menünüzde hızlı ayarlar, indirmeler ve diğer tüm ayarlar bulunur. Profil değiştirmek için menüye dokunup basılı tutun.
 About:
   Project: Proje
   Community: Topluluk
@@ -1531,6 +1534,7 @@ About:
   Commit: Commit
   Matrix: Matrix
   Email: E-posta
+  Show tutorial: Eğitimi göster
 Profile:
   Customization: Özelleştirme
   Manage Profile Subscriptions: Profil aboneliklerini yönet

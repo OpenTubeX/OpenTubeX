@@ -1635,7 +1635,15 @@ Tutorial:
   Finish: Finalizar
   Welcome:
     Title: Te damos la bienvenida a OpenTubeX
-    Description: Estos son algunos controles que te ayudarán a familiarizarte con la aplicación.
+    Description: Empezá de cero o traé tus suscripciones, tu historial y tus listas de reproducción desde otra app o una copia de seguridad.
+    Start Fresh: Empezar de cero
+    Import Data: Importar datos
+  Preferences:
+    Title: Adáptalo a tus preferencias
+    Description: Elegí tu tema, tu página de inicio y tu región. Podés cambiar estas y otras opciones en Configuraciones en cualquier momento.
+  Playback:
+    Title: Reproducción y privacidad
+    Description: Elegí cómo se reproducen los videos, si OpenTubeX recuerda lo que mirás y qué complementos de la comunidad usa.
   Navigation:
     Title: Tu biblioteca siempre está a mano
     Description: Usa la navegación para acceder a suscripciones, listas de reproducción, historial y mucho más.
@@ -1644,16 +1652,11 @@ Tutorial:
     Description: Encuentra videos y canales o pega directamente una URL de video compatible en el campo de búsqueda.
   Tabs:
     Title: Mantené páginas abiertas en pestañas
-    Description: Abre varias páginas a la vez sin perder el punto en el que estabas. Elegí dónde encajan mejor las pestañas en la disposición.
-  Quick Settings:
-    Title: Adáptalo a tus preferencias
-    Description: Elegí un tema y una calidad de video predeterminada. Cambia estas y otras preferencias en cualquier momento desde el menú del perfil o haz clic derecho en él para cambiar de perfil.
-    Touch Description: Elegí un tema y una calidad de video predeterminada. Cambiá estas y otras preferencias en cualquier momento desde el menú del perfil o mantenelo presionado para cambiar de perfil.
-  Import Data:
-    Title: Trae tus datos contigo
-    Description: Si querés, importa suscripciones, historial, listas de reproducción, historial de búsquedas o ajustes desde otra aplicación compatible o una copia de seguridad.
-    Action: Importar datos
-    Not Now: Ahora no
+    Description: Abrí varias páginas a la vez sin perder tu lugar.
+  Profile Menu:
+    Title: Configuraciones y perfiles
+    Description: Tu menú de perfil reúne los ajustes rápidos, las descargas y todos los demás ajustes. Hacé clic derecho en él para cambiar de perfil.
+    Touch Description: Tu menú de perfil reúne los ajustes rápidos, las descargas y todos los demás ajustes. Mantenelo presionado para cambiar de perfil.
 About:
   Project: Proyecto
   Community: Comunidad
@@ -1686,6 +1689,7 @@ About:
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX es posible gracias a {creditsPageLink}
   these people and projects: estas personas y proyectos
   Donate: Donar
+  Show tutorial: Mostrar tutorial
 Profile:
   Customization: Personalización
   Manage Profile Subscriptions: Gestionar suscripciones del perfil

@@ -48,8 +48,15 @@
   position: relative;
 }
 
-.tutorialImportCard {
-  inline-size: min(440px, calc(100vw - 24px));
+/* Gives the theme preview names one line and the selects their usual width side by side */
+.tutorialWideCard {
+  inline-size: min(580px, calc(100vw - 24px));
+}
+
+.tutorialSkip {
+  position: absolute;
+  inset-block-start: 12px;
+  inset-inline-end: 12px;
 }
 
 .tutorialProgress {
@@ -112,6 +119,7 @@
   margin-block: 0 20px;
   color: var(--secondary-text-color);
   line-height: 1.5;
+  text-wrap: pretty;
 }
 
 .tutorialScroll {
@@ -119,13 +127,7 @@
   overflow-y: auto;
 }
 
-.tutorialTabLayoutSelect {
-  margin-block: 0 20px;
-  margin-inline: auto;
-  text-align: start;
-}
-
-.tutorialSelects {
+.tutorialPreferences {
   display: grid;
   gap: 16px;
   justify-items: center;
@@ -133,8 +135,73 @@
   text-align: start;
 }
 
-.tutorialSelects > :deep(.select) {
+.tutorialPreferences > .themeModes {
+  justify-self: stretch;
+
+  /* Room for the selection and focus outlines, which the scroll viewport would clip */
+  padding: 7px;
+  font-size: 0.875rem;
+}
+
+.tutorialControls {
+  display: grid;
+  gap: 20px;
+  justify-items: center;
+  margin-block-end: 20px;
+}
+
+/* Selects keep room for their reset and sync indicators at their end; the same
+   room at their start centers the visible field, also when it spans the card. */
+.tutorialControls > :deep(.select) {
+  max-inline-size: calc(100% - var(--select-indicator-space));
   margin-block: 0;
+  margin-inline-start: var(--select-indicator-space);
+  text-align: start;
+}
+
+.tutorialSwitches {
+  display: grid;
+  gap: 4px;
+  justify-self: stretch;
+  text-align: start;
+}
+
+.tutorialSwitches > :deep(.switch-ctn) {
+  margin: 0;
+}
+
+.tutorialSelectRow {
+  display: flex;
+  gap: 12px;
+  justify-self: stretch;
+  margin-block-start: 12px;
+}
+
+.tutorialSelectRow > :deep(.select) {
+  flex: 1 1 0;
+  inline-size: auto;
+  min-inline-size: 0;
+  margin-block: 0;
+}
+
+.tutorialSelectRow > :deep(.select:first-child) {
+  margin-inline-start: var(--select-indicator-space);
+}
+
+/* Side by side, narrower selects would cut off their labels and values. */
+@media only screen and (width <= 620px) {
+  .tutorialSelectRow {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .tutorialSelectRow > :deep(.select) {
+    margin-inline-start: var(--select-indicator-space);
+  }
+}
+
+.tutorialPreferences > .tutorialMoreThemes {
+  margin: 0;
 }
 
 .tutorialActions {
@@ -148,14 +215,9 @@
   margin: 0;
 }
 
-.tutorialImportActions {
-  display: grid;
-  grid-template-columns: repeat(3, auto);
-}
-
-.tutorialImportActions :deep(.btn) {
-  min-inline-size: 0;
-  padding-inline: 12px;
+.tutorialChoices {
+  flex-direction: column;
+  align-items: stretch;
 }
 
 @media only screen and (width <= 500px) {
@@ -163,30 +225,9 @@
     padding: 20px;
   }
 
-  .tutorialImportCard {
-    padding-inline: 16px;
-  }
-}
-
-@media only screen and (width <= 400px) {
-  .tutorialImportActions :deep(.tutorialCompactAction) {
-    padding-inline: 2px;
-  }
-
-  .tutorialImportActions {
-    grid-template-columns: 40px 40px minmax(0, 1fr);
-  }
-
-  .tutorialImportActions :deep(.tutorialCompactAction .tutorialActionText) {
-    display: none;
-  }
-
-  .tutorialImportActions :deep(.tutorialPrimaryAction) {
-    padding-inline: 4px;
-  }
-
-  .tutorialImportActions :deep(.tutorialPrimaryAction .ft-icon) {
-    display: none;
+  .tutorialSkip {
+    inset-block-start: 8px;
+    inset-inline-end: 8px;
   }
 }
 

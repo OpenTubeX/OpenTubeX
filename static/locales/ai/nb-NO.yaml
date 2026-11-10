@@ -1502,7 +1502,15 @@ Tutorial:
   Finish: Fullfør
   Welcome:
     Title: Velkommen til OpenTubeX
-    Description: Her er noen få funksjoner som hjelper deg i gang.
+    Description: Begynn på nytt, eller ta med abonnementene, historikken og spillelistene dine fra en annen app eller en sikkerhetskopi.
+    Start Fresh: Begynn på nytt
+    Import Data: Importer data
+  Preferences:
+    Title: Tilpass OpenTubeX
+    Description: Velg tema, startside og region. Du kan når som helst endre dette og mer i Innstillinger.
+  Playback:
+    Title: Avspilling og personvern
+    Description: Velg hvordan videoer spilles av, om OpenTubeX skal huske hva du ser på, og hvilke tillegg fra fellesskapet den bruker.
   Navigation:
     Title: Biblioteket er alltid i nærheten
     Description: Bruk navigasjonen for å gå til abonnementer, spillelister, historikk og mer.
@@ -1511,16 +1519,11 @@ Tutorial:
     Description: Finn videoer og kanaler, eller lim inn en støttet video-URL direkte i søkefeltet.
   Tabs:
     Title: Hold sider åpne i faner
-    Description: Åpne flere sider samtidig uten å miste oversikten. Velg hvor fanene passer best i oppsettet.
-  Quick Settings:
-    Title: Tilpass OpenTubeX
-    Description: Velg et tema og standard videokvalitet. Du kan når som helst endre disse og andre innstillinger fra profilmenyen, eller høyreklikke på den for å bytte profil.
-    Touch Description: Velg et tema og standard videokvalitet. Du kan når som helst endre disse og andre innstillinger fra profilmenyen, eller trykke lenge på den for å bytte profil.
-  Import Data:
-    Title: Ta med deg dataene dine
-    Description: Du kan importere abonnementer, historikk, spillelister, søkehistorikk eller innstillinger fra et annet støttet program eller en sikkerhetskopi.
-    Action: Importer data
-    Not Now: Ikke nå
+    Description: Åpne flere sider samtidig uten å miste tråden.
+  Profile Menu:
+    Title: Innstillinger og profiler
+    Description: Profilmenyen inneholder hurtiginnstillinger, nedlastinger og alle andre innstillinger. Høyreklikk på den for å bytte profil.
+    Touch Description: Profilmenyen inneholder hurtiginnstillinger, nedlastinger og alle andre innstillinger. Trykk og hold på den for å bytte profil.
 About:
   Project: Prosjekt
   Community: Fellesskap
@@ -1531,6 +1534,7 @@ About:
   Commit: Revisjon
   Matrix: Matrix
   Email: E-post
+  Show tutorial: Vis veiledning
 Profile:
   Customization: Tilpasning
   Manage Profile Subscriptions: Administrer profilens abonnementer

@@ -107,6 +107,22 @@
   gap: 5px;
 }
 
+.linkButton {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--link-color);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Follows the link underline setting like the links beside it */
+:root[data-link-underline='never'] .linkButton,
+:root[data-link-underline='hover'] .linkButton:not(:hover, :focus-visible) {
+  text-decoration: none;
+}
+
 .linkIcon {
   flex-shrink: 0;
   font-size: 0.95em;

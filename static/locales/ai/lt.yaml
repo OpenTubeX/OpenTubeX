@@ -1779,7 +1779,15 @@ Tutorial:
   Finish: Baigti
   Welcome:
     Title: Sveiki prisijungę prie OpenTubeX
-    Description: Susipažinkite su keliais valdikliais, kurie padės greitai apsiprasti.
+    Description: Pradėkite nuo nulio arba perkelkite prenumeratas, istoriją ir grojaraščius iš kitos programėlės ar atsarginės kopijos.
+    Start Fresh: Pradėti nuo nulio
+    Import Data: Importuoti duomenis
+  Preferences:
+    Title: Pritaikykite sau
+    Description: Pasirinkite temą, pradinį puslapį ir regioną. Šiuos ir kitus dalykus bet kada galite pakeisti nustatymuose.
+  Playback:
+    Title: Atkūrimas ir privatumas
+    Description: Pasirinkite, kaip atkuriami vaizdo įrašai, ar OpenTubeX įsimins, ką žiūrite, ir kokius bendruomenės priedus naudos.
   Navigation:
     Title: Jūsų mediateka visada pasiekiama
     Description: Naršymo meniu rasite prenumeratas, grojaraščius, istoriją ir daugiau.
@@ -1788,16 +1796,11 @@ Tutorial:
     Description: Raskite vaizdo įrašų ir kanalų arba tiesiai į paieškos lauką įklijuokite palaikomo vaizdo įrašo URL.
   Tabs:
     Title: Palikite puslapius atvertus kortelėse
-    Description: Atverkite kelis puslapius vienu metu ir nepameskite, kur buvote. Pasirinkite, kur jūsų išdėstyme patogiausia rodyti korteles.
-  Quick Settings:
-    Title: Pritaikykite sau
-    Description: Pasirinkite apipavidalinimą ir numatytąją vaizdo įrašų kokybę. Šias ir kitas nuostatas bet kada pakeisite profilio meniu, o spustelėję jį dešiniuoju pelės mygtuku galėsite perjungti profilį.
-    Touch Description: Pasirinkite apipavidalinimą ir numatytąją vaizdo įrašų kokybę. Šias ir kitas nuostatas bet kada pakeisite profilio meniu, o ilgai jį paspaudę galėsite perjungti profilį.
-  Import Data:
-    Title: Perkelkite savo duomenis
-    Description: Jei norite, importuokite prenumeratas, istoriją, grojaraščius, paieškos istoriją arba nustatymus iš kitos palaikomos programėlės ar atsarginės kopijos.
-    Action: Importuoti duomenis
-    Not Now: Ne dabar
+    Description: Atverkite kelis puslapius vienu metu neprarasdami vietos, kurioje buvote.
+  Profile Menu:
+    Title: Nustatymai ir profiliai
+    Description: Profilio meniu rasite sparčiuosius nustatymus, atsisiuntimus ir visus kitus nustatymus. Norėdami perjungti profilį, spustelėkite jį dešiniuoju pelės mygtuku.
+    Touch Description: Profilio meniu rasite sparčiuosius nustatymus, atsisiuntimus ir visus kitus nustatymus. Norėdami perjungti profilį, palieskite ir palaikykite jį.
 About:
   Project: Projektas
   Community: Bendruomenė
@@ -1813,6 +1816,7 @@ About:
   Email: El. paštas
   Please read the {roomRulesLink}: Susipažinkite su {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX sukurti padėjo {creditsPageLink}
+  Show tutorial: Rodyti mokomąjį vadovą
 Profile:
   Customization: Tinkinimas
   Manage Profile Subscriptions: Tvarkyti profilio prenumeratas

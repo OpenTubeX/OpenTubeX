@@ -1677,7 +1677,15 @@ Tutorial:
   Finish: Fullfør
   Welcome:
     Title: Velkomen til OpenTubeX
-    Description: Her er nokre få kontrollar som hjelper deg i gang.
+    Description: Byrj på nytt, eller ta med abonnementa, historikken og spelelistene dine frå ein annan app eller ein tryggingskopi.
+    Start Fresh: Byrj på nytt
+    Import Data: Importer data
+  Preferences:
+    Title: Gjer OpenTubeX til din eigen
+    Description: Vel tema, startside og region. Du kan når som helst endra dette og meir i Innstillingar.
+  Playback:
+    Title: Avspeling og personvern
+    Description: Vel korleis videoar skal spelast av, om OpenTubeX skal hugsa kva du ser på, og kva tillegg frå fellesskapet som skal brukast.
   Navigation:
     Title: Biblioteket er alltid i nærleiken
     Description: Bruk navigeringa for å opna abonnement, spelelister, historikk og meir.
@@ -1686,16 +1694,11 @@ Tutorial:
     Description: Finn videoar og kanalar, eller lim inn ei støtta videoadresse direkte i søkjefeltet.
   Tabs:
     Title: Hald sider opne i faner
-    Description: Opna fleire sider samstundes utan å mista plassen din. Vel kvar fanene passar best i oppsettet.
-  Quick Settings:
-    Title: Gjer OpenTubeX til din eigen
-    Description: Vel eit tema og standard videokvalitet. Du kan når som helst endra desse og andre innstillingar i profilmenyen, eller høgreklikka på han for å byta profil.
-    Touch Description: Vel eit tema og standard videokvalitet. Du kan når som helst endra desse og andre innstillingar i profilmenyen, eller trykkja lenge på han for å byta profil.
-  Import Data:
-    Title: Ta med deg dataa dine
-    Description: Du kan importera abonnement, historikk, spelelister, søkjehistorikk eller innstillingar frå ein annan støtta app eller ei tryggleikskopi.
-    Action: Importer data
-    Not Now: Ikkje no
+    Description: Opne fleire sider samstundes utan å mista tråden.
+  Profile Menu:
+    Title: Innstillingar og profilar
+    Description: Profilmenyen inneheld snøgginnstillingar, nedlastingar og alle andre innstillingar. Høgreklikk på menyen for å byta profil.
+    Touch Description: Profilmenyen inneheld snøgginnstillingar, nedlastingar og alle andre innstillingar. Trykk og hald på menyen for å byta profil.
 About:
   Project: Prosjekt
   Community: Fellesskap
@@ -1711,6 +1714,7 @@ About:
   Email: E-post
   Please read the {roomRulesLink}: Les {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX er gjort mogleg av {creditsPageLink}
+  Show tutorial: Vis rettleiing
 Profile:
   Customization: Tilpassing
   Manage Profile Subscriptions: Administrer abonnementa til profilen

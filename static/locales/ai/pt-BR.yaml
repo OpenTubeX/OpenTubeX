@@ -1471,7 +1471,15 @@ Tutorial:
   Finish: Concluir
   Welcome:
     Title: Bem-vindo ao OpenTubeX
-    Description: Estes são os controlos essenciais para se familiarizar com o aplicativo.
+    Description: Comece do zero ou traga suas inscrições, seu histórico e suas listas de reprodução de outro aplicativo ou de um backup.
+    Start Fresh: Começar do zero
+    Import Data: Importar dados
+  Preferences:
+    Title: Personalize o aplicativo
+    Description: Escolha seu tema, sua página inicial e sua região. Você pode alterar essas e outras opções em Configurações a qualquer momento.
+  Playback:
+    Title: Reprodução e privacidade
+    Description: Escolha como os vídeos são reproduzidos, se o OpenTubeX lembra o que você assiste e quais extensões da comunidade ele usa.
   Navigation:
     Title: A sua biblioteca está sempre à mão
     Description: Use a navegação para acessar às inscrições, listas de reprodução, histórico e muito mais.
@@ -1480,16 +1488,11 @@ Tutorial:
     Description: Encontre vídeos e canais ou cole o URL de um vídeo compatível diretamente no campo de pesquisa.
   Tabs:
     Title: Mantenha páginas abertas em guias
-    Description: Abra várias páginas ao mesmo tempo sem perder o ponto onde estava. Escolha onde as guias se adaptam melhor ao seu layout.
-  Quick Settings:
-    Title: Personalize o aplicativo
-    Description: Escolha um tema e a qualidade de vídeo padrão. Altere estas e outras preferências a qualquer momento no menu do perfil ou clique nele com o botão direito do mouse para mudar de perfil.
-    Touch Description: Escolha um tema e a qualidade de vídeo padrão. Altere estas e outras preferências a qualquer momento no menu do perfil ou toque nele e segure para mudar de perfil.
-  Import Data:
-    Title: Traga os seus dados consigo
-    Description: Se desejar, importe inscrições, histórico, listas de reprodução, histórico de pesquisa ou configurações de outro aplicativo compatível ou de uma backup.
-    Action: Importar dados
-    Not Now: Agora não
+    Description: Abra várias páginas ao mesmo tempo sem perder de onde parou.
+  Profile Menu:
+    Title: Configurações e perfis
+    Description: Seu menu de perfil reúne configurações rápidas, downloads e todas as outras configurações. Clique nele com o botão direito para trocar de perfil.
+    Touch Description: Seu menu de perfil reúne configurações rápidas, downloads e todas as outras configurações. Toque e segure nele para trocar de perfil.
 About:
   Project: Projeto
   Community: Comunidade
@@ -1500,6 +1503,7 @@ About:
   Commit: Commit
   Matrix: Matrix
   Email: Correio eletrónico
+  Show tutorial: Mostrar tutorial
 Profile:
   Customization: Personalização
   Manage Profile Subscriptions: Gerenciar inscrições do perfil

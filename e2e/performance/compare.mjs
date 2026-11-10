@@ -106,7 +106,7 @@ async function targetFor(name, root) {
 async function closeTutorial(page) {
   const tutorial = page.locator('.tutorialOverlay')
   if (!await tutorial.isVisible()) return
-  await tutorial.locator('.tutorialActions').getByRole('button').last().click()
+  await tutorial.locator('.tutorialSkip button').click()
   await expect(tutorial).toBeHidden()
 }
 

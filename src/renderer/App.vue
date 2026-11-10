@@ -112,7 +112,9 @@
     </Transition>
     <FtTutorialOverlay
       v-if="showTutorial"
+      :initial-step="tutorialStep"
       @close="completeTutorial"
+      @open-settings="openTutorialSettings"
     />
     <FtCommandPalette
       v-if="commandPaletteOpen"
@@ -1138,7 +1140,10 @@ watch(useTemplateRef('appRoot'), (app, _previous, onCleanup) => {
   if (app) onCleanup(mirrorAppState(app))
 }, { flush: 'sync' })
 useTitleBarOverlay(() => [dataReady.value, tabBarPosition.value])
-const showTutorial = ref(false)
+const tutorialStep = computed(() => store.getters.getTutorialStep)
+const showTutorial = computed(() => tutorialStep.value !== null)
+// The step to resume at once the settings window opened from the tutorial closes
+let tutorialResumeStep = null
 const findbarVisible = ref(false)
 const findbarQuery = ref('')
 const findbarMatchIndex = ref(0)
@@ -1707,17 +1712,36 @@ async function initializeTutorial(hasExistingInstallation, lastUsedVersion, pers
   }
 }
 
-async function completeTutorial() {
-  showTutorial.value = false
-  await nextTick()
-
-  if (isElectron) {
+if (isElectron) {
+  watch(showTutorial, async (blocked) => {
     try {
-      await window.ftElectron.tabs.setShortcutsBlocked(false)
+      await window.ftElectron.tabs.setShortcutsBlocked(blocked)
     } catch (error) {
-      console.error('Failed to restore tab shortcuts', error)
+      console.error('Failed to update tab shortcuts for the tutorial', error)
     }
+  })
+}
+
+watch(
+  () => !store.getters.getSettingsWindowOpen && !store.getters.getSettingsWindowMinimized,
+  (settingsWindowClosed) => {
+    if (!settingsWindowClosed || tutorialResumeStep === null) return
+
+    store.commit('setTutorialStep', tutorialResumeStep)
+    tutorialResumeStep = null
   }
+)
+
+async function openTutorialSettings(section, resumeStep) {
+  tutorialResumeStep = resumeStep
+  store.commit('setTutorialStep', null)
+  await nextTick()
+  store.commit('setSettingsWindowSection', section)
+  store.dispatch('showSettingsWindow')
+}
+
+async function completeTutorial() {
+  store.commit('setTutorialStep', null)
 
   try {
     await markTutorialCompleted()
@@ -1957,14 +1981,7 @@ onMounted(async () => {
       capacitorPullToRefreshSetup = initializeCapacitorPullToRefresh()
         .catch(error => console.error('Failed to initialize pull to refresh', error))
     }
-    if (isElectron && tutorialPending) {
-      try {
-        await window.ftElectron.tabs.setShortcutsBlocked(true)
-      } catch (error) {
-        console.error('Failed to block tab shortcuts for tutorial', error)
-      }
-    }
-    showTutorial.value = tutorialPending
+    if (tutorialPending) store.commit('setTutorialStep', 0)
     initializeManagedExternalSoftware().catch(error => console.error('Failed to initialize managed external software', error))
 
     setTimeout(() => {
