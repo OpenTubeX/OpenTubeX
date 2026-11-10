@@ -225,3 +225,41 @@ for (const keptBefore of [false, true]) {
     assert.deepEqual(remote, [])
   })
 }
+
+test('a retry keeps an edit made to a profile the failed attempt already saved', async () => {
+  const [added, other] = ['added-elsewhere', 'other-channel'].map(id => ({ id, name: id }))
+  const group = id => ({ id, local_id: id, title: id, bg_color: '#000000', text_color: '#FFFFFF' })
+  const profileList = [
+    { _id: MAIN_PROFILE_ID, subscriptions: [added, other] },
+    { _id: 'first', name: 'first', bgColor: '#000000', textColor: '#FFFFFF', subscriptions: [] },
+    { _id: 'second', name: 'second', bgColor: '#000000', textColor: '#FFFFFF', subscriptions: [] },
+  ]
+  const previous = Object.fromEntries(['first', 'second'].map(id => [id, { remoteId: id, metadata: { title: id, bgColor: '#000000', textColor: '#FFFFFF' }, channels: [] }]))
+  // Another device added a channel to each profile
+  const remote = { first: [added.id], second: [other.id] }
+  const client = {
+    getSubscriptionGroups: async () => Object.entries(remote).map(([id, channels]) => ({ group: group(id), channels: channels.map(channelId => ({ id: channelId })) })),
+    addSubscriptionGroupChannel: async (id, channelId) => { remote[id].push(channelId) },
+    removeSubscriptionGroupChannel: async (id, channelId) => { remote[id] = remote[id].filter(item => item !== channelId) },
+    updateSubscriptionGroup: async () => {},
+  }
+  const store = createConditionalStore(profileList)
+  const dispatch = store.dispatch
+  let edited = false
+  store.dispatch = async (action, value) => {
+    const saved = await dispatch(action, value)
+    if (saved && value.profile._id === 'first' && !edited) {
+      edited = true
+      // Another window removes the channel the sync just saved, and edits the second profile
+      profileList[1] = { ...profileList[1], subscriptions: [] }
+      profileList[2] = { ...profileList[2], name: 'second renamed' }
+    }
+    return saved
+  }
+
+  await context.syncProfiles(client, store, previous)
+
+  assert.deepEqual(profileList[1].subscriptions, [])
+  assert.deepEqual(remote.first, [])
+  assert.equal(profileList[2].name, 'second renamed')
+})

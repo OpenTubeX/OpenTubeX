@@ -1302,22 +1302,23 @@ function remoteProfileMetadata(group, fallback = {}) {
 const PROFILES_CHANGED = Symbol('profiles changed')
 
 // A profile edited, added, or deleted here while the server responds would be
-// overwritten or recreated, so merge again. The retry merges against the same
-// baseline, so remote changes the first attempt could not save locally are not
-// mistaken for local removals, plus the profiles deleted here meanwhile.
+// overwritten or recreated, so merge again. For profiles the attempt did not
+// save, the retry keeps the baseline, so their remote changes are not mistaken
+// for local removals. It adds the profiles deleted here meanwhile.
 export async function syncProfiles(client, store, previous = {}, options = {}) {
   let baseline = previous
   let retryOptions = options
   for (let attempt = 0; attempt < 3; attempt++) {
     const read = deepCopy(store.state.profiles.profileList)
     const result = await mergeProfiles(client, store, baseline, retryOptions)
-    if (result !== PROFILES_CHANGED) return result
+    if (result === null || !(PROFILES_CHANGED in result)) return result
+    // Profiles the attempt already saved are in sync, so later edits to them are local
+    baseline = { ...baseline, ...result[PROFILES_CHANGED] }
     // A profile deleted here meanwhile would look new on the server without a
     // baseline. Deleting it in the app confirms the deletion, so it needs no review.
     const remaining = new Set(store.state.profiles.profileList.map(profile => profile._id))
     const deleted = read.filter(profile => profile._id !== MAIN_PROFILE_ID && !remaining.has(profile._id))
     if (deleted.length === 0) continue
-    baseline = { ...baseline }
     for (const profile of deleted) {
       baseline[profile._id] ??= {
         metadata: profileMetadata(profile),
@@ -1463,7 +1464,7 @@ async function mergeProfiles(client, store, previous, options) {
     }
     if ((!local || !metadataEquals(local, mergedProfile)) &&
       !await store.dispatch('saveSyncedProfile', { profile: mergedProfile, previous: local ?? null })) {
-      return PROFILES_CHANGED
+      return { [PROFILES_CHANGED]: next }
     }
 
     next[id] = {
