@@ -164,7 +164,10 @@ final class YtDlpRuntime {
             FutureTask<Void> stdout = new FutureTask<>(() -> {
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(current.process.getInputStream(), StandardCharsets.UTF_8))) {
                     String first = reader.readLine();
-                    if (first == null || !first.startsWith(marker)) throw new IOException("Unable to start yt-dlp process group");
+                    // A process that exits before printing, such as when the dynamic
+                    // linker cannot load a library, explains why on stderr.
+                    if (first == null) return null;
+                    if (!first.startsWith(marker)) throw new IOException("Unable to start yt-dlp process group");
                     current.group.set(Integer.parseInt(first.substring(marker.length())));
                     if (current.stopped) current.stop();
                     String line;
