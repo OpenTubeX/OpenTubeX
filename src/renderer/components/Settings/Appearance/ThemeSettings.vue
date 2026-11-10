@@ -2,19 +2,10 @@
   <FtSettingsSection
     :title="$t('Settings.Theme Settings.Theme Settings')"
   >
+    <div class="themeGalleryEntry">
+      <ThemeGallery />
+    </div>
     <FtFlexBox class="themeSelectRow">
-      <FtSelect
-        size-to-content
-        :placeholder="$t('Settings.Theme Settings.Base Theme.Base Theme')"
-        :value="baseTheme"
-        setting-key="baseTheme"
-        :select-names="baseThemeNames"
-        :select-values="baseThemeValues"
-        :option-groups="baseThemeValues.map(baseThemeGroup)"
-        :option-group-labels="baseThemeGroupLabels"
-        :icon="['fas', 'palette']"
-        @change="updateBaseTheme"
-      />
       <FtSelect
         size-to-content
         :placeholder="$t('Settings.Theme Settings.Icon Pack.Icon Pack')"
@@ -25,37 +16,6 @@
         :icon="['fas', 'icons']"
         @change="updateIconPack"
       />
-    </FtFlexBox>
-    <FtFlexBox
-      v-if="baseTheme === 'system'"
-      class="themeSelectRow"
-    >
-      <FtSelect
-        size-to-content
-        :placeholder="t('Settings.Theme Settings.Light Theme')"
-        :value="systemLightTheme"
-        setting-key="systemLightTheme"
-        :select-names="systemLightThemeNames"
-        :select-values="systemLightThemeValues"
-        :option-groups="systemLightThemeValues.map(baseThemeGroup)"
-        :option-group-labels="baseThemeGroupLabels"
-        :icon="['fas', 'sun']"
-        @change="store.dispatch('updateSystemLightTheme', $event)"
-      />
-      <FtSelect
-        size-to-content
-        :placeholder="t('Settings.Theme Settings.Dark Theme')"
-        :value="systemDarkTheme"
-        setting-key="systemDarkTheme"
-        :select-names="systemDarkThemeNames"
-        :select-values="systemDarkThemeValues"
-        :option-groups="systemDarkThemeValues.map(baseThemeGroup)"
-        :option-group-labels="baseThemeGroupLabels"
-        :icon="['fas', 'moon']"
-        @change="store.dispatch('updateSystemDarkTheme', $event)"
-      />
-    </FtFlexBox>
-    <FtFlexBox class="themeSelectRow">
       <FtSelect
         size-to-content
         :placeholder="t('Settings.Theme Settings.Font.App Font')"
@@ -79,63 +39,6 @@
           >{{ label }}</span>
         </template>
       </FtSelect>
-      <FtSelect
-        v-if="!hasAccentPicker"
-        size-to-content
-        :placeholder="$t('Settings.Theme Settings.Main Color Theme.Main Color Theme')"
-        :value="mainColor"
-        setting-key="mainColor"
-        :select-names="colorNames"
-        :select-values="COLOR_VALUES"
-        :option-colors="COLOR_SWATCHES"
-        :disabled="!areColorThemesEnabled"
-        :icon="['fas', 'palette']"
-        icon-color="var(--primary-color)"
-        @change="updateMainColor"
-      />
-      <FtSelect
-        v-if="!hasAccentPicker"
-        size-to-content
-        :placeholder="$t('Settings.Theme Settings.Secondary Color Theme')"
-        :value="secColor"
-        setting-key="secColor"
-        :select-names="colorNames"
-        :select-values="COLOR_VALUES"
-        :option-colors="COLOR_SWATCHES"
-        :disabled="!areColorThemesEnabled"
-        :icon="['fas', 'palette']"
-        icon-color="var(--accent-color)"
-        @change="updateSecColor"
-      />
-    </FtFlexBox>
-    <AccentColorSettings
-      v-if="showMaterialSeedColor"
-      :model-value="materialSeedColor"
-      @update:model-value="store.dispatch('updateMaterialSeedColor', $event)"
-    />
-    <AccentColorSettings
-      v-if="showSignalAccentColor"
-      variant="signal"
-      :model-value="signalAccentColor"
-      @update:model-value="store.dispatch('updateSignalAccentColor', $event)"
-    />
-    <FtFlexBox class="customThemeActions">
-      <FtButton
-        :label="t('Theme Discovery.Discover Themes')"
-        :icon="['fas', 'search']"
-        @click="showThemeDiscovery = true"
-      />
-      <FtButton
-        :label="t('Settings.Theme Settings.Custom Theme.Create Custom Theme')"
-        :icon="['fas', 'palette']"
-        @click="openCustomThemeEditor(null)"
-      />
-      <FtButton
-        v-if="selectedCustomThemeId"
-        :label="t('Settings.Theme Settings.Custom Theme.Edit Custom Theme')"
-        :icon="['fas', 'pen']"
-        @click="openCustomThemeEditor(selectedCustomThemeId)"
-      />
     </FtFlexBox>
     <FtFlexBox
       v-if="IS_CAPACITOR || usingElectron"
@@ -144,42 +47,22 @@
       <AppIconSettings v-if="IS_CAPACITOR && !IS_IOS" />
       <TrayIconSettings v-if="usingElectron" />
     </FtFlexBox>
-    <ThemeDiscovery
-      :open="showThemeDiscovery"
-      @close="showThemeDiscovery = false"
-    />
-    <CustomThemeEditor
-      :open="showCustomThemeEditor"
-      :theme-id="editingCustomThemeId"
-      @close="showCustomThemeEditor = false"
-    />
   </FtSettingsSection>
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtSelect from '../../FtSelect/FtSelect.vue'
 import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
-import FtButton from '../../FtButton/FtButton.vue'
-import ThemeDiscovery from '../../ThemeDiscovery.vue'
-import CustomThemeEditor from '../../CustomThemeEditor/CustomThemeEditor.vue'
 import AppIconSettings from './AppIconSettings.vue'
-import AccentColorSettings from './AccentColorSettings.vue'
 import TrayIconSettings from './TrayIconSettings.vue'
+import ThemeGallery from './ThemeGallery.vue'
 
 import store from '../../../store/index'
-import { getThemeClassification, hasFixedThemeColors } from '../../../../appearanceSettings'
-import { customThemeIdFromValue } from '../../../../customTheme'
-import { MATERIAL_THEME_VALUES } from '../../../../materialTheme.js'
-import { SIGNAL_THEME_VALUES } from '../../../../signalTheme.js'
 
-import { colors } from '../../../helpers/colors'
-import { androidDynamicColors } from '../../../helpers/dynamicColors.js'
-import { useColorTranslations } from '../../../composables/colors'
-import { baseThemeGroup, useBaseThemeOptions } from '../../../composables/baseThemes'
 import { showToast } from '../../../helpers/utils'
 import { ICON_PACKS } from '../../../icons/iconPackState'
 import { DEFAULT_APP_FONT, getAppFontFamily, normalizeAppFont, SYSTEM_APP_FONT } from '../../../helpers/appFont'
@@ -190,33 +73,11 @@ const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 /** @type {boolean} */
 const usingElectron = process.env.IS_ELECTRON
 
-const customThemes = computed(() => store.getters.getCustomThemes)
-const { baseThemeValues, baseThemeNames, baseThemeGroupLabels } = useBaseThemeOptions(customThemes)
-function systemThemeOptions(classification) {
-  return baseThemeValues.value.flatMap((value, index) =>
-    getThemeClassification(value, customThemes.value) === classification
-      ? [{ name: baseThemeNames.value[index], value }]
-      : [])
-}
-
-const systemLightThemeOptions = computed(() => systemThemeOptions('light'))
-const systemLightThemeValues = computed(() => systemLightThemeOptions.value.map(({ value }) => value))
-const systemLightThemeNames = computed(() => systemLightThemeOptions.value.map(({ name }) => name))
-const systemDarkThemeOptions = computed(() => systemThemeOptions('dark'))
-const systemDarkThemeValues = computed(() => systemDarkThemeOptions.value.map(({ value }) => value))
-const systemDarkThemeNames = computed(() => systemDarkThemeOptions.value.map(({ name }) => name))
-
 const iconPackNames = computed(() => [
   t('Settings.Theme Settings.Icon Pack.Material Symbols'),
   t('Settings.Theme Settings.Icon Pack.Remix Icon')
 ])
 
-const COLOR_VALUES = colors.map(color => color.name)
-const COLOR_SWATCHES = colors.map(color => color.value)
-const colorNames = useColorTranslations()
-const showThemeDiscovery = ref(false)
-const showCustomThemeEditor = ref(false)
-const editingCustomThemeId = ref(null)
 const systemFonts = ref([])
 let systemFontsPromise = null
 
@@ -274,26 +135,6 @@ async function loadSystemFonts() {
   await systemFontsPromise
 }
 
-/** @type {import('vue').ComputedRef<string>} */
-const baseTheme = computed(() => {
-  return store.getters.getBaseTheme
-})
-const systemLightTheme = computed(() => store.getters.getSystemLightTheme)
-const systemDarkTheme = computed(() => store.getters.getSystemDarkTheme)
-const systemColorScheme = window.matchMedia('(prefers-color-scheme: dark)')
-const systemUsesDarkTheme = ref(systemColorScheme.matches)
-
-function updateSystemColorScheme(event) {
-  systemUsesDarkTheme.value = event.matches
-}
-
-/**
- * @param {string} value
- */
-function updateBaseTheme(value) {
-  store.dispatch('updateBaseTheme', value)
-}
-
 const iconPack = computed(() => store.getters.getIconPack)
 
 /**
@@ -302,66 +143,6 @@ const iconPack = computed(() => store.getters.getIconPack)
 function updateIconPack(value) {
   store.dispatch('updateIconPack', value)
 }
-
-// Material and Tally themes replace the main and secondary colors with their accent pickers.
-const hasAccentPicker = computed(() => [...MATERIAL_THEME_VALUES, ...SIGNAL_THEME_VALUES].includes(baseTheme.value === 'system'
-  ? (systemUsesDarkTheme.value ? systemDarkTheme.value : systemLightTheme.value)
-  : baseTheme.value))
-
-const materialSeedColor = computed(() => store.getters.getMaterialSeedColor)
-const usesMaterialSeedColor = theme => MATERIAL_THEME_VALUES.includes(theme) &&
-  !(theme === 'dynamic' && (usingElectron || androidDynamicColors.value.supported))
-const showMaterialSeedColor = computed(() => baseTheme.value === 'system'
-  ? [systemLightTheme.value, systemDarkTheme.value].some(usesMaterialSeedColor)
-  : usesMaterialSeedColor(baseTheme.value))
-
-const signalAccentColor = computed(() => store.getters.getSignalAccentColor)
-const showSignalAccentColor = computed(() => baseTheme.value === 'system'
-  ? [systemLightTheme.value, systemDarkTheme.value].some(theme => SIGNAL_THEME_VALUES.includes(theme))
-  : SIGNAL_THEME_VALUES.includes(baseTheme.value))
-
-const areColorThemesEnabled = computed(() => baseTheme.value === 'system'
-  ? !hasFixedThemeColors(systemUsesDarkTheme.value ? systemDarkTheme.value : systemLightTheme.value)
-  : !hasFixedThemeColors(baseTheme.value))
-const selectedCustomThemeId = computed(() => customThemeIdFromValue(baseTheme.value === 'system'
-  ? (systemUsesDarkTheme.value ? systemDarkTheme.value : systemLightTheme.value)
-  : baseTheme.value))
-
-function openCustomThemeEditor(themeId) {
-  editingCustomThemeId.value = themeId
-  showCustomThemeEditor.value = true
-}
-
-/** @type {import('vue').ComputedRef<string>} */
-const mainColor = computed(() => {
-  return store.getters.getMainColor
-})
-
-/**
- * @param {string} value
- */
-function updateMainColor(value) {
-  store.dispatch('updateMainColor', value)
-}
-
-/** @type {import('vue').ComputedRef<string>} */
-const secColor = computed(() => {
-  return store.getters.getSecColor
-})
-
-/**
- * @param {string} value
- */
-function updateSecColor(value) {
-  store.dispatch('updateSecColor', value)
-}
-
-onMounted(() => {
-  systemColorScheme.addEventListener('change', updateSystemColorScheme)
-})
-onUnmounted(() => {
-  systemColorScheme.removeEventListener('change', updateSystemColorScheme)
-})
 </script>
 
 <style scoped src="./themeSelectRow.css" />
@@ -383,7 +164,10 @@ onUnmounted(() => {
   font-family: inherit !important;
 }
 
-.customThemeActions,
+.themeGalleryEntry {
+  margin-block-end: 16px;
+}
+
 .appIconActions {
   margin-block-start: 24px;
 }

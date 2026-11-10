@@ -519,6 +519,7 @@ Settings:
     Invalid Engine: Enter a name and a valid HTTP or HTTPS search URL containing %s.
     Engine Limit: You can add up to {count} custom search engines.
   Theme Settings:
+    Theme and Colors: "Theme and colours"
     Font Size: Font Size
     Sections:
       Interface: "Interface"

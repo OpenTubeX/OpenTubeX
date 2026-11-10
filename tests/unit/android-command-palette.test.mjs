@@ -23,6 +23,7 @@ test('opening the ordinary command registry does not read the video library', ()
     getProfileList: [],
     getAllPlaylists: [],
     getYtDlpDownloads: {},
+    getCustomThemes: [],
   }
   Object.defineProperty(getters, 'getHistoryCacheSorted', {
     get: () => { throw new Error('History was scanned before searching') },
@@ -50,7 +51,7 @@ test('download settings commands respect Android availability', () => {
     routeAvailable: () => true,
     t: key => key,
     tm: path => path.split('.').reduce((value, key) => value?.[key], messages),
-    store: { getters: { getChannelsHiddenParsed: [], getForbiddenTitlesParsed: [], getTabs: [], getProfileList: [], getAllPlaylists: [], getYtDlpDownloads: {} } },
+    store: { getters: { getChannelsHiddenParsed: [], getForbiddenTitlesParsed: [], getTabs: [], getProfileList: [], getAllPlaylists: [], getYtDlpDownloads: {}, getCustomThemes: [] } },
     openSettingsSection: section => { openedSection = section },
     openSettingsSearchResult: (section, match) => { openedSearch = { section, match } },
   })
@@ -80,7 +81,7 @@ test('lite Android builds omit download commands', () => {
     routeAvailable: () => true,
     t: key => key,
     tm: path => path.split('.').reduce((value, key) => value?.[key], messages),
-    store: { getters: { getChannelsHiddenParsed: [], getForbiddenTitlesParsed: [], getTabs: [], getProfileList: [], getAllPlaylists: [], getYtDlpDownloads: {} } },
+    store: { getters: { getChannelsHiddenParsed: [], getForbiddenTitlesParsed: [], getTabs: [], getProfileList: [], getAllPlaylists: [], getYtDlpDownloads: {}, getCustomThemes: [] } },
   })
   assert.ok(commands.some(command => command.id === 'settings.root'))
   assert.ok(!commands.some(command => ['settings.download', 'downloads.open'].includes(command.id)))

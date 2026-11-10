@@ -1,4 +1,4 @@
-import { test, expect, goTo, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, setWindowSize, openCustomThemeEditor } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { IpcChannels } from '../../../src/constants.js'
@@ -70,8 +70,8 @@ test('download progress animates without changing layout width', { tag: '@scale'
 
 test('color picker batches theme previews and preserves release position at 0.95 UI scale', { tag: '@performance' }, async ({ page }) => {
   await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
-  const appearance = await goToSettingsSection(page, 'appearance')
-  await appearance.getByRole('button', { name: 'Create custom theme' }).click()
+  await goToSettingsSection(page, 'appearance')
+  await openCustomThemeEditor(page)
   await page.locator('.customThemeEditor .colorFieldTrigger').first().click()
   const surface = page.locator('.colorPickerPopover .saturationValue')
   await expect(surface).toBeVisible()

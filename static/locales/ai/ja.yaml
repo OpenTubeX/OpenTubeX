@@ -530,6 +530,7 @@ Settings:
     Invalid Engine: 名前と、%sを含む有効なHTTPまたはHTTPSの検索URLを入力してください。
     Engine Limit: カスタム検索エンジンは{count}件まで追加できます。
   Theme Settings:
+    Theme and Colors: "テーマと色"
     Font Size: フォントサイズ
     Sections:
       Interface: "インターフェース"

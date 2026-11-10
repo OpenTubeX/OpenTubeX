@@ -7,6 +7,14 @@ import {
   expect,
   goTo,
   goToSettingsSection,
+  chooseTheme,
+  expectOverlayScrollRange,
+  expectScrollAtRenderedEnd,
+  openCustomThemeEditor,
+  openThemeGallery,
+  setWindowSize,
+  showThemeList,
+  themeGalleryButton,
   sel,
   readDatastore,
   latestSettings,
@@ -67,38 +75,46 @@ test.describe('default appearance', () => {
     await page.emulateMedia({ colorScheme: 'light' })
     await goToSettingsSection(page, 'theme')
 
-    const lightTheme = page.getByRole('combobox', { name: 'Light theme' })
-    const darkTheme = page.getByRole('combobox', { name: 'Dark theme' })
-    const mainColorTheme = page.getByRole('combobox', { name: /Main colou?r theme/i })
-    const secondaryColorTheme = page.getByRole('combobox', { name: /Secondary colou?r theme/i })
-    await expect(lightTheme).toHaveText('Light')
-    await expect(darkTheme).toHaveText('Dark')
-    await expectHorizontalGap(lightTheme, darkTheme, 12)
+    await expect(themeGalleryButton(page)).toHaveAccessibleName('Theme and colors Light Dark Red Blue')
+    const gallery = await openThemeGallery(page)
+    const modes = gallery.getByRole('radiogroup', { name: 'Base Theme' })
+    await expect(modes.getByRole('radio', { name: 'System default', exact: true })).toBeChecked()
+    const mainColorTheme = gallery.getByRole('combobox', { name: /Main colou?r theme/i })
+    const secondaryColorTheme = gallery.getByRole('combobox', { name: /Secondary colou?r theme/i })
     await expectHorizontalGap(mainColorTheme, secondaryColorTheme, 12)
     await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
-    await expectHorizontalGap(lightTheme, darkTheme, 12)
     await expectHorizontalGap(mainColorTheme, secondaryColorTheme, 12)
-    await expect(page.locator('.select').filter({ has: lightTheme }).locator('.select-icon')).toBeVisible()
-    await expect(page.locator('.select').filter({ has: darkTheme }).locator('.select-icon')).toBeVisible()
 
-    await lightTheme.click()
-    const lightThemeOptions = page.locator(`#${await lightTheme.getAttribute('aria-controls')}`)
-    await expect(lightThemeOptions.getByRole('option', { name: 'Catppuccin Frappe', exact: true }))
-      .toHaveCount(0)
-    await expect(lightThemeOptions.getByRole('option', { name: 'Catppuccin Latte', exact: true }))
-      .toBeVisible()
-    await lightThemeOptions.getByRole('option', { name: 'Catppuccin Latte', exact: true }).click()
+    const lightThemes = await showThemeList(gallery, 'Light theme')
+    await expect(lightThemes.getByRole('radio', { name: 'Light', exact: true })).toBeChecked()
+    await expect(lightThemes.getByRole('radio', { name: 'Catppuccin Frappe', exact: true })).toHaveCount(0)
+    await lightThemes.getByRole('radio', { name: 'Catppuccin Latte', exact: true }).check()
     await expect(page.locator('body')).toHaveClass(/catppuccinLatte/)
 
-    await darkTheme.click()
-    const darkThemeOptions = page.locator(`#${await darkTheme.getAttribute('aria-controls')}`)
-    await expect(darkThemeOptions.getByRole('option', { name: 'Catppuccin Latte', exact: true }))
-      .toHaveCount(0)
-    await expect(darkThemeOptions.getByRole('option', { name: 'Catppuccin Mocha', exact: true }))
-      .toBeVisible()
-    await darkThemeOptions.getByRole('option', { name: 'Catppuccin Mocha', exact: true }).click()
+    const darkThemes = await showThemeList(gallery, 'Dark theme')
+    await expect(darkThemes.getByRole('radio', { name: 'Catppuccin Latte', exact: true })).toHaveCount(0)
+    await darkThemes.getByRole('radio', { name: 'Catppuccin Mocha', exact: true }).check()
     await page.emulateMedia({ colorScheme: 'dark' })
     await expect(page.locator('body')).toHaveClass(/catppuccinMocha/)
+    // Both tabs show their current choice.
+    await expect(gallery.getByRole('tab', { name: /^Light theme/ })).toContainText('Catppuccin Latte')
+
+    // A single mode keeps the chosen theme of that mode and lists only its themes.
+    await modes.getByRole('radio', { name: 'Light', exact: true }).check()
+    await expect(page.locator('body')).toHaveClass(/catppuccinLatte/)
+    await expect(gallery.getByRole('tab', { name: /^Dark theme/ })).toHaveCount(0)
+    await expect(lightThemes.getByRole('radio', { name: 'Catppuccin Latte', exact: true })).toBeChecked()
+    // Resetting the list resets the active theme, which stays reset when following the system again.
+    await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
+    await gallery.locator('.themeTabBar .changedSettingIndicator').click()
+    await expect(page.locator('body')).toHaveClass(/(^|\s)light(\s|$)/)
+    await expect(lightThemes.getByRole('radio', { name: 'Light', exact: true })).toBeChecked()
+    await modes.getByRole('radio', { name: 'System default', exact: true }).check()
+    await expect(page.locator('body')).toHaveClass(/catppuccinMocha/)
+    await expect(gallery.getByRole('tab', { name: /^Light theme/ })).toContainText(/Light$/)
+    await page.locator('.settingsBackButton').click()
+    await expect(themeGalleryButton(page))
+      .toHaveAccessibleName('Theme and colors Light Catppuccin Mocha Red Blue')
 
     ;({ page } = await app.relaunch())
     await page.emulateMedia({ colorScheme: 'dark' })
@@ -306,7 +322,7 @@ test.describe('custom theme editor', () => {
     theme.colors.watchedThumbnailOverlay = '#66339980'
     await app.electronApp.evaluate(({ clipboard }, text) => clipboard.writeText(text), JSON.stringify(theme))
     await goToSettingsSection(page, 'theme')
-    await page.getByRole('button', { name: 'Create custom theme' }).click()
+    await openCustomThemeEditor(page)
     const importButton = page.getByRole('button', { name: 'Import from clipboard' })
     await expect(importButton.locator('.ft-icon')).toBeVisible()
     await importButton.focus()
@@ -330,7 +346,7 @@ test.describe('custom theme editor', () => {
       await store.dispatch('updateSystemDarkTheme', `custom:${themeId}`)
       await store.dispatch('updateBaseTheme', 'system')
     }, saved[0].id)
-    await page.getByRole('button', { name: 'Edit custom theme' }).click()
+    await openCustomThemeEditor(page, 'Clipboard midnight')
     await importButton.click()
     await page.getByRole('button', { name: 'Save and apply' }).click()
     await expect(page.locator('.customThemeEditor')).toBeHidden()
@@ -351,7 +367,7 @@ test.describe('custom theme editor', () => {
     delete theme.colors.watchedThumbnailOverlay
     await app.electronApp.evaluate(({ clipboard }, text) => clipboard.writeText(text), JSON.stringify(theme))
     await goToSettingsSection(page, 'theme')
-    await page.getByRole('button', { name: 'Create custom theme' }).click()
+    await openCustomThemeEditor(page)
     await page.getByRole('button', { name: 'Import from clipboard' }).click()
     await expect(page.locator('body')).toHaveCSS('--watched-thumbnail-overlay-color', '#112233b3')
     await page.getByRole('button', { name: 'Save and apply' }).click()
@@ -363,7 +379,7 @@ test.describe('custom theme editor', () => {
 
   test('keeps clipboard import controls visible in narrow and scaled windows', async ({ app, page }, testInfo) => {
     await goToSettingsSection(page, 'theme')
-    await page.getByRole('button', { name: 'Create custom theme' }).click()
+    await openCustomThemeEditor(page)
     for (const [width, scale] of [[1200, 1], [420, 1], [500, 1.25]]) {
       await setWindowWidth(app, width)
       await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
@@ -381,7 +397,7 @@ test.describe('custom theme editor', () => {
 
   test('preserves the draft when clipboard themes are empty or invalid', async ({ app, page }) => {
     await goToSettingsSection(page, 'theme')
-    await page.getByRole('button', { name: 'Create custom theme' }).click()
+    await openCustomThemeEditor(page)
     const name = page.getByRole('textbox', { name: 'Theme name' })
     await name.fill('Keep my draft')
     const originalBackground = await page.locator('body').evaluate(element => element.style.getPropertyValue('--bg-color'))
@@ -398,7 +414,7 @@ test.describe('custom theme editor', () => {
   test('clamps the color-source list after a responsive reflow', async ({ app, page }) => {
     await setWindowWidth(app, 420)
     await goToSettingsSection(page, 'theme')
-    await page.getByRole('button', { name: 'Create custom theme' }).click()
+    await openCustomThemeEditor(page)
     await page.getByRole('button', { name: 'Page background', exact: true }).click()
     const picker = page.getByRole('dialog', { name: 'Page background' })
     await picker.getByRole('button', { name: 'Copy from another color' }).click()
@@ -422,7 +438,7 @@ test.describe('custom theme editor', () => {
     test.slow()
     await goToSettingsSection(page, 'theme')
     await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
-    await page.getByRole('button', { name: 'Create custom theme' }).click()
+    await openCustomThemeEditor(page)
 
     const creatorBreadcrumb = page.locator('.settingsBreadcrumbLabel')
       .filter({ hasText: 'Custom theme creator' })
@@ -616,6 +632,8 @@ test.describe('custom theme editor', () => {
     await expect.poll(async () => (await readSavedThemes(app.userDataDir)).map(({ name }) => name))
       .toEqual(['Midnight'])
     await expect(editor).toHaveCount(0)
+    // Saving returns to the theme gallery the editor was opened from.
+    await page.locator('.settingsBackButton').click()
     await goToSettingsSection(page, 'storage')
     const removeHistoryButton = page.getByRole('button', { name: 'Remove Watch History' })
     // Custom themes give destructive buttons their own state shades.
@@ -627,7 +645,7 @@ test.describe('custom theme editor', () => {
     await page.mouse.move(0, 0)
     await page.mouse.up()
     await goToSettingsSection(page, 'theme')
-    await page.getByRole('button', { name: 'Edit custom theme' }).click()
+    await openCustomThemeEditor(page, 'Midnight')
 
     await page.locator('.settingsCloseButton').click()
     await expect(page.locator('.settingsWindow')).toBeHidden()
@@ -662,15 +680,19 @@ test.describe('custom theme editor', () => {
     await expect(page.locator('body')).toHaveCSS('--bg-color', '#445566')
 
     await page.locator('.settingsBackButton').click()
-    await expect(page.getByRole('combobox', { name: /Main colou?r theme/i })).toBeDisabled()
-    await expect(page.getByRole('combobox', { name: /Secondary colou?r theme/i })).toBeDisabled()
+    const colorGallery = await openThemeGallery(page)
+    // Custom themes bring their own colors, so the color selects are hidden like the accent pickers.
+    await expect(colorGallery.getByRole('radiogroup', { name: 'Base Theme' })).toBeVisible()
+    await expect(colorGallery.getByRole('combobox', { name: /Main colou?r theme/i })).toHaveCount(0)
+    await expect(colorGallery.getByRole('combobox', { name: /Secondary colou?r theme/i })).toHaveCount(0)
+    await page.locator('.settingsBackButton').click()
 
-    await page.getByRole('button', { name: 'Edit custom theme' }).click()
+    await openCustomThemeEditor(page, 'Midnight')
     await page.locator('label.switch-label').filter({ hasText: 'Dark theme' }).click()
     await expect(darkTheme).toBeChecked()
     await saveAndApplyButton.click()
 
-    await page.getByRole('button', { name: 'Create custom theme' }).click()
+    await openCustomThemeEditor(page)
     await expect(backgroundValue).toHaveText('#445566')
     await expect(page.getByRole('combobox', { name: 'Based on' })).toHaveText('Dark')
     await expect(editor.getByRole('combobox', { name: /Main colou?r theme/i })).toHaveText('Orange')
@@ -689,16 +711,17 @@ test.describe('custom theme editor', () => {
     await expect(editor).toHaveCount(0)
 
     await page.emulateMedia({ colorScheme: 'light' })
-    const baseThemeSelect = page.getByRole('combobox', { name: 'Base Theme' })
-    await baseThemeSelect.click()
-    await page.locator(`#${await baseThemeSelect.getAttribute('aria-controls')}`)
-      .getByRole('option', { name: /System default/i }).click()
-    const darkSystemTheme = page.getByRole('combobox', { name: 'Dark theme' })
-    await darkSystemTheme.click()
-    const darkSystemThemeOptions = page.locator(`#${await darkSystemTheme.getAttribute('aria-controls')}`)
-    await expect(darkSystemThemeOptions.getByRole('option', { name: 'Paper', exact: true })).toHaveCount(0)
-    await expect(darkSystemThemeOptions.getByRole('option', { name: 'Midnight', exact: true })).toBeVisible()
-    await darkSystemThemeOptions.getByRole('option', { name: 'Midnight', exact: true }).click()
+    const systemGallery = await openThemeGallery(page)
+    await systemGallery.getByRole('radiogroup', { name: 'Base Theme' })
+      .getByRole('radio', { name: 'System default', exact: true }).check()
+    // Paper was the active light theme, so System default keeps it until another is chosen.
+    const lightSystemChoices = await showThemeList(systemGallery, 'Light theme')
+    await expect(lightSystemChoices.getByRole('radio', { name: 'Paper', exact: true })).toBeChecked()
+    await lightSystemChoices.getByRole('radio', { name: 'Light', exact: true }).check()
+    const darkSystemThemes = await showThemeList(systemGallery, 'Dark theme')
+    await expect(darkSystemThemes.getByRole('radio', { name: 'Paper', exact: true })).toHaveCount(0)
+    await darkSystemThemes.getByRole('radio', { name: 'Midnight', exact: true }).check()
+    await page.locator('.settingsBackButton').click()
 
     await page.locator('.settingsCloseButton').click()
     await page.locator('.topNav .profileTrigger').click()
@@ -718,35 +741,31 @@ test.describe('custom theme editor', () => {
     await goTo(page, 'settings')
     await expect(page.locator('.settingsContent > [data-section="appearance"]')).toBeVisible()
 
-    const lightSystemTheme = page.getByRole('combobox', { name: 'Light theme' })
-    await lightSystemTheme.click()
-    const lightSystemThemeOptions = page.locator(`#${await lightSystemTheme.getAttribute('aria-controls')}`)
-    await expect(lightSystemThemeOptions.getByRole('option', { name: 'Midnight', exact: true })).toHaveCount(0)
-    await lightSystemThemeOptions.getByRole('option', { name: 'Paper', exact: true }).click()
-    await expect(page.getByRole('button', { name: 'Edit custom theme' })).toBeVisible()
-    await page.getByRole('button', { name: 'Edit custom theme' }).click()
+    const lightSystemThemes = await showThemeList(await openThemeGallery(page), 'Light theme')
+    await expect(lightSystemThemes.getByRole('radio', { name: 'Midnight', exact: true })).toHaveCount(0)
+    await lightSystemThemes.getByRole('radio', { name: 'Paper', exact: true }).check()
+    await page.locator('.settingsBackButton').click()
+    await openCustomThemeEditor(page, 'Paper')
     await setEditorColor('Page background', '#abcdef')
     await expect(page.locator('body')).toHaveCSS('--bg-color', '#abcdef')
     await page.locator('.settingsBackButton').click()
     await expect(page.locator('body')).toHaveCSS('--bg-color', '#f1f1f1')
     await expect(page.locator('body')).toHaveClass(/custom/)
-    await page.getByRole('button', { name: 'Edit custom theme' }).click()
+    await openCustomThemeEditor(page, 'Paper')
     await setEditorColor('Page background', '#abcdef')
     await page.emulateMedia({ colorScheme: 'dark' })
     await page.getByRole('button', { name: 'Save and apply' }).click()
-    await expect(page.locator('.settingsWindow:visible')
-      .getByRole('combobox', { name: 'Base Theme' })).toHaveText('System default')
+    // Closing the editor returns to the gallery it was opened from.
+    await expect(page.locator('.themeGallery')).toBeVisible()
+    await page.locator('.settingsBackButton').click()
+    await expect(themeGalleryButton(page)).toHaveAccessibleName(/^Theme and colors Paper Midnight$/)
     await expect(page.locator('body')).toHaveCSS('--bg-color', '#445566')
     await page.emulateMedia({ colorScheme: 'light' })
     await expect(page.locator('body')).toHaveCSS('--bg-color', '#abcdef')
 
-    const activeBaseThemeSelect = page.locator('.settingsWindow:visible')
-      .getByRole('combobox', { name: 'Base Theme' })
-    await activeBaseThemeSelect.click()
-    await page.locator(`#${await activeBaseThemeSelect.getAttribute('aria-controls')}`)
-      .getByRole('option', { name: 'Midnight', exact: true }).click()
+    await chooseTheme(page, { mode: 'Dark', dark: 'Midnight' })
     await expect(page.locator('body')).toHaveCSS('--bg-color', '#445566')
-    await page.getByRole('button', { name: 'Edit custom theme' }).click()
+    await openCustomThemeEditor(page, 'Midnight')
     await expect(page.getByRole('combobox', { name: 'Based on' })).toHaveText('Dark')
     await expect(backgroundValue).toHaveText('#445566')
 
@@ -756,7 +775,7 @@ test.describe('custom theme editor', () => {
     await expect(page.locator('body')).toHaveAttribute('data-custom-theme', 'dark')
 
     await goToSettingsSection(page, 'theme')
-    await page.getByRole('button', { name: 'Edit custom theme' }).click()
+    await openCustomThemeEditor(page, 'Midnight')
     await page.getByRole('button', { name: 'Delete theme' }).click()
     const deletePrompt = page.getByRole('dialog', { name: /Delete “Midnight”/ })
     await expect(deletePrompt).toHaveClass(/autosize/)
@@ -946,36 +965,87 @@ test.describe('narrow layout top padding', () => {
   })
 })
 
+test('keeps the theme gallery scroll range valid when it gains columns or shows a shorter list @scale', async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 900, height: 700 })
+  await goToSettingsSection(page, 'theme')
+  const gallery = await openThemeGallery(page)
+  const scroller = page.locator('.settingsSubpageScroll').filter({ has: gallery })
+  await showThemeList(gallery, 'Dark theme')
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expectScrollAtRenderedEnd(scroller)
+  await setWindowSize(app, page, { width: 1600, height: 760 })
+  await expectOverlayScrollRange(scroller)
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  // The light list is shorter than the dark one.
+  await gallery.getByRole('tab', { name: /^Light theme/ }).click()
+  await expect(gallery.getByRole('tabpanel', { name: 'Light theme', exact: true })).toBeVisible()
+  await expectOverlayScrollRange(scroller)
+})
+
+test('returns from the theme editor to the gallery where it was left @scale', async ({ page }) => {
+  await goToSettingsSection(page, 'theme')
+  const gallery = await openThemeGallery(page)
+  const scroller = page.locator('.settingsSubpageScroll').filter({ has: gallery })
+  await showThemeList(gallery, 'Dark theme')
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight / 2 })
+  const scrollTop = await scroller.evaluate(element => element.scrollTop)
+  expect(scrollTop).toBeGreaterThan(0)
+  // Clicking without scrolling keeps the offset the gallery should return to.
+  const openEditor = async () => {
+    await gallery.getByRole('button', { name: 'Create custom theme', exact: true }).evaluate(button => button.click())
+    await expect(page.locator('.customThemeEditor')).toBeVisible()
+    await expect(gallery).toBeHidden()
+  }
+  const expectGalleryRestored = async () => {
+    await expect(page.locator('.customThemeEditor')).toHaveCount(0)
+    await expect(gallery).toBeVisible()
+    await expect.poll(async () => Math.abs(await scroller.evaluate(element => element.scrollTop) - scrollTop)).toBeLessThanOrEqual(1)
+  }
+  await openEditor()
+  await page.locator('.settingsBackButton').click()
+  await expectGalleryRestored()
+
+  await openEditor()
+  await page.locator('.settingsBreadcrumbParent').filter({ hasText: 'Theme and colors' }).click()
+  await expectGalleryRestored()
+})
+
 test.describe('Tally themes', () => {
   test('selects, persists, and follows the system with the Tally palettes', async ({ app, page, attachScreenshot }) => {
     await goToSettingsSection(page, 'theme')
     for (const mode of ['Light', 'Dark']) {
-      await page.getByRole('combobox', { name: /^Base theme/i }).click()
-      await page.getByRole('option', { name: `Tally ${mode}`, exact: true }).click()
+      const gallery = await openThemeGallery(page)
+      await gallery.getByRole('radiogroup', { name: 'Base Theme' }).getByRole('radio', { name: mode, exact: true }).check()
+      await (await showThemeList(gallery, `${mode} theme`))
+        .getByRole('radio', { name: `Tally ${mode}`, exact: true }).check()
       // The accent picker replaces the main and secondary colors.
-      await expect(page.getByRole('combobox', { name: /Main colou?r theme/i })).toHaveCount(0)
-      await expect(page.getByRole('combobox', { name: /Secondary colou?r theme/i })).toHaveCount(0)
+      await expect(gallery.getByRole('group', { name: 'Tally accent color' })).toBeVisible()
+      await expect(gallery.getByRole('combobox', { name: /Main colou?r theme/i })).toHaveCount(0)
+      await expect(gallery.getByRole('combobox', { name: /Secondary colou?r theme/i })).toHaveCount(0)
       await attachScreenshot(`Tally ${mode} settings`)
+      await page.locator('.settingsBackButton').click()
     }
 
     ;({ page } = await app.relaunch())
     await expect(page.locator('body')).toHaveClass(/openTubeXDark/)
     expect(await app.electronApp.evaluate(({ nativeTheme }) => nativeTheme.shouldUseDarkColors)).toBe(true)
     await goToSettingsSection(page, 'theme')
-    await page.getByRole('combobox', { name: /^Base theme/i }).click()
-    await page.getByRole('option', { name: /^System default$/i }).click()
+    const gallery = await openThemeGallery(page)
+    const modes = gallery.getByRole('radiogroup', { name: 'Base Theme' })
+    await modes.getByRole('radio', { name: 'System default', exact: true }).check()
     for (const [mode, other] of [['Light', 'Dark'], ['Dark', 'Light']]) {
-      await page.getByRole('combobox', { name: `${mode} theme`, exact: true }).click()
-      await expect(page.getByRole('option', { name: `Tally ${other}`, exact: true })).toHaveCount(0)
-      await page.getByRole('option', { name: `Tally ${mode}`, exact: true }).click()
+      const themes = await showThemeList(gallery, `${mode} theme`)
+      await expect(themes.getByRole('radio', { name: `Tally ${other}`, exact: true })).toHaveCount(0)
+      await themes.getByRole('radio', { name: `Tally ${mode}`, exact: true }).check()
       await page.emulateMedia({ colorScheme: mode.toLowerCase() })
       await expect(page.locator('body')).toHaveClass(new RegExp(`openTubeX${mode}`))
     }
 
     // Leaving a fixed palette restores the user's normal color controls.
-    await page.getByRole('combobox', { name: /^Base theme/i }).click()
-    await page.getByRole('option', { name: 'Light', exact: true }).click()
-    await expect(page.getByRole('combobox', { name: /Main colou?r theme/i })).toBeEnabled()
+    await modes.getByRole('radio', { name: 'Light', exact: true }).check()
+    await (await showThemeList(gallery, 'Light theme'))
+      .getByRole('radio', { name: 'Light', exact: true }).check()
+    await expect(gallery.getByRole('combobox', { name: /Main colou?r theme/i })).toBeEnabled()
     await expect(page.locator('body')).toHaveCSS('--primary-color', '#f44336')
   })
 })

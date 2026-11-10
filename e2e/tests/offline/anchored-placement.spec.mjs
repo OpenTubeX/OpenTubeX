@@ -1,12 +1,12 @@
-import { test, expect, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection, setWindowSize, openCustomThemeEditor } from '../../helpers/app.mjs'
 
 test.use({ seed: { settings: { currentLocale: 'en-US', fetchSubscriptionsAutomatically: false } } })
 
 test('color picker stays within bounds on opening when neither side fits', async ({ app, page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await setWindowSize(app, page, { width: 1200, height: 650 })
-  const appearance = await goToSettingsSection(page, 'appearance')
-  await appearance.getByRole('button', { name: 'Create custom theme' }).click()
+  await goToSettingsSection(page, 'appearance')
+  await openCustomThemeEditor(page)
   await page.locator('.settingsWindow').getByRole('button', { name: 'Maximize', exact: true }).click()
   const trigger = page.locator('.customThemeEditor .colorFieldTrigger').first()
   await trigger.evaluate(button => {

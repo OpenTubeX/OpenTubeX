@@ -543,6 +543,7 @@ Settings:
     Invalid Engine: பெயரையும் %s உள்ள சரியான HTTP அல்லது HTTPS தேடல் URL-ஐயும் உள்ளிடவும்.
     Engine Limit: அதிகபட்சம் {count} தனிப்பயன் தேடுபொறிகளைச் சேர்க்கலாம்.
   Theme Settings:
+    Theme and Colors: "கருப்பொருள் மற்றும் வண்ணங்கள்"
     Font Size: எழுத்துரு அளவு
     Sections:
       Interface: "இடைமுகம்"

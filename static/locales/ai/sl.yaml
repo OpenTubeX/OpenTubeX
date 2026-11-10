@@ -662,6 +662,7 @@ Settings:
     Invalid Engine: Vnesite ime in veljaven iskalni URL HTTP ali HTTPS, ki vsebuje %s.
     Engine Limit: Dodate lahko največ {count} iskalnikov po meri.
   Theme Settings:
+    Theme and Colors: "Tema in barve"
     Font Size: Velikost pisave
     Sections:
       Interface: "Vmesnik"

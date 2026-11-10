@@ -490,6 +490,7 @@ Settings:
     Invalid Engine: Introduce un nombre y una URL de búsqueda HTTP o HTTPS válida que contenga %s.
     Engine Limit: Puedes añadir hasta {count} motores de búsqueda personalizados.
   Theme Settings:
+    Theme and Colors: "Tema y colores"
     Font Size: Tamaño de la fuente
     Sections:
       Interface: "Interfaz"

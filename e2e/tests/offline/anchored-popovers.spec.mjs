@@ -1,4 +1,4 @@
-import { test, expect, goTo, goToSettingsSection, setWindowSize, waitForAppReady } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, setWindowSize, waitForAppReady, openCustomThemeEditor } from '../../helpers/app.mjs'
 
 test.use({
   seed: {
@@ -44,8 +44,8 @@ const surfaces = [
     popup: '.colorPickerPopover',
     alignment: 'start',
     async open(page, positionTrigger) {
-      const appearance = await goToSettingsSection(page, 'appearance')
-      await appearance.getByRole('button', { name: 'Create custom theme' }).click()
+      await goToSettingsSection(page, 'appearance')
+      await openCustomThemeEditor(page)
       await positionTrigger?.(page.locator(this.trigger).first())
       const button = page.locator(this.trigger).first()
       if (positionTrigger) await button.evaluate(element => element.click())

@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
 
-import { test, expect, goToSettingsSection, openNewWindowFromTabBar, setWindowSize, readDatastore, waitForAppReady } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection, openNewWindowFromTabBar, openThemeGallery, setWindowSize, readDatastore, waitForAppReady } from '../../helpers/app.mjs'
 import { expectImagesLoaded } from '../../helpers/visual-fixtures.mjs'
 
 // Fractional UI scales round innerWidth, so try neighbouring device widths
@@ -761,10 +761,11 @@ test.describe('profile manager', () => {
       await expect(profileIconInitial(page)).toHaveCSS('background-color', 'rgb(255, 152, 0)')
       // switching the theme color has to repaint the profile, without touching the profile itself
       await goToSettingsSection(page, 'theme')
+      const gallery = await openThemeGallery(page)
 
       // the labels are translated, so find the main color select and its 'Blue'
       // option through the values of the hidden native select instead
-      const mainColorSelect = page.locator('.settingsContent .select')
+      const mainColorSelect = gallery.locator('.select')
         .filter({ has: page.locator('select option[value="Blue"]') })
         .first()
       const blueIndex = await mainColorSelect.locator('option[value="Blue"]').evaluate(option => option.index)

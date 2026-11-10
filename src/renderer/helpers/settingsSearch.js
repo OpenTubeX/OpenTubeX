@@ -1,4 +1,4 @@
-import { customThemeIdFromValue } from '../../customTheme.js'
+import { getThemeClassification } from '../../appearanceSettings.js'
 import { usesInvidiousInstance } from '../../apiBackends.js'
 
 import {
@@ -95,7 +95,6 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     supportsLocalApi,
     isLinuxWayland,
     supportsAutoPictureInPictureMinimize = !isLinuxWayland,
-    systemUsesDarkTheme,
   } = options
   const [group, item] = path
 
@@ -331,17 +330,15 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     if (isCapacitor && group === 'Show Progress as Notification') {
       return false
     }
+    // Each custom theme in the theme gallery has an edit button.
     if (group === 'Custom Theme' && item === 'Edit Custom Theme') {
-      const baseTheme = store.getters.getBaseTheme
-      const selectedTheme = baseTheme === 'system'
-        ? (systemUsesDarkTheme
-            ? store.getters.getSystemDarkTheme
-            : store.getters.getSystemLightTheme)
-        : baseTheme
-      return customThemeIdFromValue(selectedTheme) !== null
+      return store.getters.getCustomThemes.length > 0
     }
     if (group === 'Light Theme' || group === 'Dark Theme') {
-      return store.getters.getBaseTheme === 'system'
+      // The theme gallery lists light and dark themes for its current mode.
+      const baseTheme = store.getters.getBaseTheme
+      const classification = getThemeClassification(baseTheme, store.getters.getCustomThemes)
+      return classification === null || classification === (group === 'Light Theme' ? 'light' : 'dark')
     }
     if (['Move Downloads to App Header', 'Move Settings to App Header', 'UI Scale'].includes(group)) {
       return usingElectron || isCapacitor

@@ -670,6 +670,7 @@ Settings:
     Invalid Engine: Introduïu un nom i un URL de cerca HTTP o HTTPS vàlid que contingui %s.
     Engine Limit: Podeu afegir fins a {count} motors de cerca personalitzats.
   Theme Settings:
+    Theme and Colors: "Tema i colors"
     Font Size: Mida de la lletra
     Sections:
       Interface: "Interfície"

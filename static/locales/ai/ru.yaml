@@ -503,6 +503,7 @@ Settings:
     Invalid Engine: Введите название и корректный URL поиска с HTTP или HTTPS, содержащий %s.
     Engine Limit: Можно добавить не более {count} своих поисковых систем.
   Theme Settings:
+    Theme and Colors: "Тема и цвета"
     Font Size: Размер шрифта
     Sections:
       Interface: "Интерфейс"

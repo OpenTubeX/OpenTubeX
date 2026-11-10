@@ -530,6 +530,7 @@ Settings:
     Invalid Engine: Idatzi izen bat eta %s duen baliozko HTTP edo HTTPS bilaketa-URL bat.
     Engine Limit: Gehienez {count} bilaketa-motor pertsonalizatu gehi ditzakezu.
   Theme Settings:
+    Theme and Colors: "Gaia eta koloreak"
     Font Size: Letra-tamaina
     Sections:
       Interface: "Interfazea"

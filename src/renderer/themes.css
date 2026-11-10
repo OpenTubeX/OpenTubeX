@@ -44,7 +44,6 @@ body {
 
   /* Form controls grow with the Font Size setting so their text keeps fitting. */
   --form-control-height: calc(45px * var(--font-scale));
-  --native-color-scheme: light;
   --form-control-value-padding: calc(18px * var(--font-scale)) 4px;
   --form-control-label-top: calc(4px * var(--font-scale));
   --switch-track-width: 40px;
@@ -52,6 +51,17 @@ body {
   --switch-thumb-inset: 3px;
   --switch-unchecked-thumb-size: calc(var(--switch-track-height) - 2 * var(--switch-thumb-inset));
   --switch-touch-height: 36px;
+  --scrollbar-thumb-width: 6px;
+  --scrollbar-track-width: calc(var(--scrollbar-thumb-width) + 4px);
+}
+
+/* Color defaults that themes override or derive from. Theme previews
+   (.themeScope) declare them again so derived colors follow the previewed
+   theme instead of resolving once on the body; :where() keeps every theme
+   class and inline theme property ahead of them. */
+body,
+:where(.themeScope) {
+  --native-color-scheme: light;
 
   /* Optional decorative layers, separate from colors used by contrast checks
      and native windows. Fixed backgrounds keep the field aligned on scroll;
@@ -59,8 +69,6 @@ body {
      FtFixedBackground. */
   --bg-image: none;
   --card-bg-image: none;
-  --scrollbar-thumb-width: 6px;
-  --scrollbar-track-width: calc(var(--scrollbar-thumb-width) + 4px);
   --border-color: var(--tertiary-text-color);
   --divider-color: color-mix(in srgb, var(--border-color) 45%, transparent);
   --subtle-surface-color: var(--tertiary-text-color);

@@ -2623,7 +2623,6 @@ const commandPaletteCommands = computed(() => createCommandPaletteRegistry({
   isMac: process.platform === 'darwin',
   isLinuxWayland: isLinuxWayland.value,
   supportsAutoPictureInPictureMinimize: supportsAutoPictureInPictureMinimize.value,
-  systemUsesDarkTheme: systemUsesDarkTheme.value,
 }))
 
 function openCommandPalette() {

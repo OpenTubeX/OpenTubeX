@@ -1,7 +1,7 @@
 import { readFile, readdir } from 'node:fs/promises'
 import path from 'node:path'
 import { cloneDefaultCustomTheme } from '../../../src/customTheme.js'
-import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection, openThemeDiscovery } from '../../helpers/app.mjs'
 
 test.use({ seed: { settings: { generalAutoLoadMorePaginatedItemsEnabled: false } } })
 
@@ -46,8 +46,8 @@ async function mockScreenshots(page) {
 }
 
 async function openDiscovery(page) {
-  const appearance = await goToSettingsSection(page, 'appearance')
-  await appearance.getByRole('button', { name: 'Discover themes', exact: true }).click()
+  await goToSettingsSection(page, 'appearance')
+  await openThemeDiscovery(page)
   await expect(page.locator('.themeDiscovery')).toBeVisible()
   return page.locator('.themeDiscovery')
 }
@@ -117,9 +117,9 @@ test('discovers, installs, persists and updates themes without overwriting local
     })
   })
   await routeFeed(page)
-  const appearance = await goToSettingsSection(page, 'appearance')
+  await goToSettingsSection(page, 'appearance')
   expect(requests).toBe(0)
-  await appearance.getByRole('button', { name: 'Discover themes', exact: true }).click()
+  await openThemeDiscovery(page)
   const gallery = page.locator('.themeDiscovery')
   await expect(gallery.locator('article')).toHaveCount(2)
   await expect(gallery.locator('.discoveryToolbar').getByRole('button', { name: 'View on GitHub' })).toHaveCount(0)

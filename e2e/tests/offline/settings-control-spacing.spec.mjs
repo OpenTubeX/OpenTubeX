@@ -121,7 +121,7 @@ test.describe('settings control spacing', { tag: '@scale' }, () => {
     await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'system'))
     const theme = appearance.locator('.settingsSection').first()
     const rows = theme.locator('.themeSelectRow')
-    await expect(rows).toHaveCount(3)
+    await expect(rows).toHaveCount(1)
     const content = page.locator('.settingsContent')
     for (const locale of ['en-US', 'de-DE']) {
       await page.evaluate(locale => window.$store.dispatch('updateCurrentLocale', locale), locale)
@@ -144,12 +144,7 @@ test.describe('settings control spacing', { tag: '@scale' }, () => {
           })
           const count = await row.locator('.select-text').count()
           const columns = width === 900 ? count : width === 650 ? 2 : 1
-          if (locale === 'de-DE' && width === 900) {
-            // Selects fit their full German captions, so a row of three may wrap after two.
-            expect.soft(geometry.columns[0], `${locale} ${width}px columns`).toBeGreaterThanOrEqual(Math.min(count, 2))
-          } else {
-            expect.soft(geometry.columns[0], `${locale} ${width}px columns`).toBe(columns)
-          }
+          expect.soft(geometry.columns[0], `${locale} ${width}px columns`).toBe(columns)
           for (const gap of geometry.gaps) expect.soft(gap, `${locale} ${width}px gap`).toBeCloseTo(20, 1)
         }
         await expect.poll(() => content.evaluate(element => {

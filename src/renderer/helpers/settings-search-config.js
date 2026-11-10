@@ -92,6 +92,20 @@ const DATA_STORAGE_KEYS = new Set([
   'Open Profile Directory'
 ])
 
+// Theme settings shown on the theme gallery subpage instead of the Appearance page.
+const THEME_GALLERY_KEYS = new Set([
+  'Base Theme',
+  'Light Theme',
+  'Dark Theme',
+  'Main Color Theme',
+  'Secondary Color Theme',
+  'Material Accent Color',
+  'Tally Accent Color',
+  'Material Wallpaper Colors',
+  'Material System Accent Color',
+  'Custom Theme'
+])
+
 const QUICK_PLAYBACK_SPEED_SUBPAGE_KEYS = new Set([
   'Quick Playback Speed Bar Manager',
   'Add Playback Speed',
@@ -126,7 +140,12 @@ export const SETTINGS_SEARCH_SOURCES = {
   appearance: [{
     type: 'theme',
     key: 'Settings.Theme Settings',
-    exclude: new Set(['Sections'])
+    exclude: new Set(['Sections', ...THEME_GALLERY_KEYS])
+  }, {
+    type: 'theme',
+    key: 'Settings.Theme Settings',
+    include: THEME_GALLERY_KEYS,
+    subpage: 'theme'
   }, {
     type: 'general',
     key: 'Settings.General Settings',

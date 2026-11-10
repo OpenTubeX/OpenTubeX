@@ -530,6 +530,7 @@ Settings:
     Invalid Engine: "Lakait un anv hag un URL enklask HTTP pe HTTPS talvoudek ennañ %s."
     Engine Limit: "Gallout a rit ouzhpennañ betek {count} keflusker enklask personelaet."
   Theme Settings:
+    Theme and Colors: "Tem ha livioù"
     Font Size: "Ment an nodrezh"
     Sections:
       Interface: "Etrefas"

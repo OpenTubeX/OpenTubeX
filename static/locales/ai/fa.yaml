@@ -554,6 +554,7 @@ Settings:
     Invalid Engine: نام و یک نشانی معتبر جست‌وجوی HTTP یا HTTPS حاوی %s وارد کنید.
     Engine Limit: می‌توانید حداکثر {count} موتور جست‌وجوی سفارشی بیفزایید.
   Theme Settings:
+    Theme and Colors: "طرح و رنگ‌ها"
     Font Size: اندازهٔ قلم
     Sections:
       Interface: "رابط کاربری"

@@ -1056,6 +1056,86 @@ export async function goToSettingsSection(page, section) {
   return content
 }
 
+/** The Appearance settings button that opens the theme gallery. */
+export function themeGalleryButton(page) {
+  return page.locator('.settingsWindow:visible .themePickerButton')
+}
+
+/**
+ * Opens the theme gallery from the Appearance settings and returns it.
+ * @param {import('@playwright/test').Page} page
+ */
+export async function openThemeGallery(page) {
+  const gallery = page.locator('.themeGallery')
+  // Closing theme discovery or the theme editor returns to an open gallery.
+  await expect(page.locator('.themeGallery:visible, .settingsWindow:visible .themePickerButton:visible').first()).toBeVisible()
+  if (!await gallery.isVisible()) await themeGalleryButton(page).click()
+  await expect(gallery).toBeVisible()
+  return gallery
+}
+
+/**
+ * Opens the custom theme editor from the theme gallery, for the named custom
+ * theme or for a new one.
+ * @param {import('@playwright/test').Page} page
+ * @param {string | null} [themeName]
+ */
+export async function openCustomThemeEditor(page, themeName = null) {
+  const gallery = await openThemeGallery(page)
+  if (themeName === null) {
+    await gallery.getByRole('button', { name: 'Create custom theme', exact: true }).click()
+  } else {
+    const card = gallery.locator('.themeCard').filter({ has: page.locator('.optionName').getByText(themeName, { exact: true }) })
+    // The theme is in the light or the dark list.
+    for (const tab of await gallery.getByRole('tab').all()) {
+      if (await card.count() > 0) break
+      await tab.click()
+    }
+    await card.getByRole('button', { name: 'Edit custom theme', exact: true }).click()
+  }
+  await expect(page.locator('.customThemeEditor')).toBeVisible()
+}
+
+/**
+ * Opens theme discovery from the theme gallery.
+ * @param {import('@playwright/test').Page} page
+ */
+export async function openThemeDiscovery(page) {
+  const gallery = await openThemeGallery(page)
+  await gallery.getByRole('button', { name: 'Discover themes', exact: true }).click()
+  await expect(page.locator('.themeDiscovery')).toBeVisible()
+}
+
+/**
+ * Shows the light or dark theme list of the theme gallery and returns it.
+ * @param {import('@playwright/test').Locator} gallery
+ * @param {'Light theme' | 'Dark theme'} list
+ */
+export async function showThemeList(gallery, list) {
+  await gallery.getByRole('tab', { name: new RegExp(`^${list}`) }).click()
+  const panel = gallery.getByRole('tabpanel', { name: list, exact: true })
+  await expect(panel).toBeVisible()
+  return panel
+}
+
+/**
+ * Picks a theme mode and the light or dark theme in the theme gallery, then
+ * returns to the Appearance settings.
+ * @param {import('@playwright/test').Page} page
+ * @param {{ mode?: 'System default' | 'Light' | 'Dark', light?: string, dark?: string }} choice
+ */
+export async function chooseTheme(page, { mode, light, dark }) {
+  const gallery = await openThemeGallery(page)
+  if (mode) {
+    await gallery.getByRole('radiogroup', { name: 'Base Theme' }).getByRole('radio', { name: mode, exact: true }).check()
+  }
+  for (const [list, theme] of [['Light theme', light], ['Dark theme', dark]]) {
+    if (theme) await (await showThemeList(gallery, list)).getByRole('radio', { name: theme, exact: true }).check()
+  }
+  await page.locator('.settingsBackButton').click()
+  await expect(gallery).toBeHidden()
+}
+
 const INTERFACE_CUSTOMIZER_TABS = {
   navigation: 'navigation',
   'quick settings': 'quickSettings',
