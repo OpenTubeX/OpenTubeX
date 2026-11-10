@@ -1367,6 +1367,8 @@ Settings:
     Add: Legg til
     Remove: Fjern
   Data Settings:
+    Settings could not be imported: "Innstillingane kunne ikkje importerast"
+    Some settings could not be imported: "Ikkje alle innstillingane kunne importerast ({failed} av {total} mislukkast)"
     Scheduled backups: "Planlagde tryggleikskopiar"
     Scheduled backup description: "Lagra fullstendige ZIP-kopiar medan OpenTubeX er ope. Uteblivne kopiar vert laga ved oppstart. Grensa gjeld berre planlagde kopiar i denne mappa."
     Choose backup folder: "Vel mappe for tryggleikskopiar"

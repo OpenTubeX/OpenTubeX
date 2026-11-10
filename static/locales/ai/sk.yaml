@@ -1222,6 +1222,8 @@ Settings:
     Paused Interface Hide Delay: Oneskorenie skrytia rozhrania pri pozastavení
     Hide Channel Shows: Skryť kartu kanálov "Relácie"
   Data Settings:
+    Settings could not be imported: "Nastavenia sa nepodarilo importovať"
+    Some settings could not be imported: "Niektoré nastavenia sa nepodarilo importovať (zlyhalo {failed} z {total})"
     Scheduled backups: "Plánované zálohy"
     Scheduled backup description: "Ukladajte úplné ZIP zálohy, kým je OpenTubeX otvorený. Zmeškané zálohy sa vytvoria pri spustení. Limit platí iba pre plánované zálohy v tomto priečinku."
     Choose backup folder: "Vybrať priečinok záloh"

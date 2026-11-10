@@ -24,10 +24,11 @@ function fixture({ saveFails = false, deleteFails = false } = {}) {
     state: store.state,
     rootState: { settings },
     dispatch: async (_name, value) => {
-    // Generated settings actions log persistence errors and resolve without committing.
-      if (saveFails) return
+      // Generated settings actions log persistence errors and resolve to false without committing.
+      if (saveFails) return false
       settings.syncServerWatchStatsReset = value
       writes.push(value)
+      return true
     },
     commit: name => writes.push(name)
   }

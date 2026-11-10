@@ -1229,6 +1229,8 @@ Settings:
     Remove: Премахване
     Hide Channel Shows: Скриване на раздел "Предавания"
   Data Settings:
+    Settings could not be imported: "Настройките не можаха да бъдат импортирани"
+    Some settings could not be imported: "Не всички настройки можаха да бъдат импортирани (неуспешни: {failed} от {total})"
     Scheduled backups: "Планирани резервни копия"
     Scheduled backup description: "Запазвайте пълни ZIP копия, докато OpenTubeX е отворен. Пропуснатите копия се създават при стартиране. Ограничението важи само за планираните копия в тази папка."
     Choose backup folder: "Избор на папка за резервни копия"

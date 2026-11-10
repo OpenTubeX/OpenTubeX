@@ -590,8 +590,10 @@ async function updateValidatedSetting(commit, settings, settingId, value) {
     await DBSettingHandlers.upsert(settingId, value)
     await recordSettingSyncTimestamp(commit, settings, settingId)
     commit(defaultMutationId(settingId), value)
+    return true
   } catch (error) {
     console.error(error)
+    return false
   }
 }
 
@@ -803,9 +805,12 @@ const customActions = {
   ),
 
   updateYtDlpAutomaticDownloadRules: ({ commit, state }, update) => {
+    // Imports pass a write they authorized when the user started them.
+    const authorizedWrite = update?.authorizedWrite
+    if (authorizedWrite) update = update.value
     // Capture authorization during the gesture, before earlier saves can delay this one.
     const persist = process.env.IS_ELECTRON
-      ? window.ftElectron.prepareAutomaticDownloadRulesWrite()
+      ? authorizedWrite ?? window.ftElectron.prepareAutomaticDownloadRulesWrite()
       : value => DBSettingHandlers.upsert('ytDlpAutomaticDownloadRules', value)
     // Apply every mutation to saved rules so later edits preserve intervening cleanups.
     pendingAutomaticDownloadRuleUpdate = pendingAutomaticDownloadRuleUpdate.then(async () => {
@@ -815,7 +820,11 @@ const customActions = {
       // Publish successful writes even if a later edit is queued and could fail.
       commit('setYtDlpAutomaticDownloadRules', value)
       await recordSettingSyncTimestamp(commit, state, 'ytDlpAutomaticDownloadRules')
-    }).catch(error => console.error(error))
+      return true
+    }).catch(error => {
+      console.error(error)
+      return false
+    })
     return pendingAutomaticDownloadRuleUpdate
   },
 
@@ -863,8 +872,10 @@ const customActions = {
       await recordSettingSyncTimestamp(commit, state, 'moveDownloadsToAppHeader')
       commit('setMoveDownloadsToAppHeader', value)
       await DBSettingHandlers.delete('moveDownloadsToQuickSettings')
+      return true
     } catch (error) {
       console.error(error)
+      return false
     }
   },
 
@@ -1553,9 +1564,11 @@ for (const settingId of Object.keys(state)) {
   const getterId = defaultGetterId(settingId)
   const mutationId = defaultMutationId(settingId)
   const updaterId = defaultUpdaterId(settingId)
+  // Resolves to whether the write was saved; superseded writes count as saved.
   const handleUpdateError = error => {
     console.error(error)
     if (['scheduledBackupEnabled', 'scheduledBackupInterval', 'scheduledBackupKeepCount'].includes(settingId)) throw error
+    return false
   }
 
   getters[getterId] = (state) => state[settingId]
@@ -1578,7 +1591,7 @@ for (const settingId of Object.keys(state)) {
         dispatch(triggerId, value)
 
         commit(mutationId, value)
-      }).catch(handleUpdateError)
+      }).then(() => true, handleUpdateError)
     )
   } else {
     actions[updaterId] = ({ commit, state }, value) => (
@@ -1589,7 +1602,7 @@ for (const settingId of Object.keys(state)) {
         await recordSettingSyncTimestamp(commit, state, settingId)
 
         if (isLatest()) commit(mutationId, value)
-      }).catch(handleUpdateError)
+      }).then(() => true, handleUpdateError)
     )
   }
 }

@@ -1221,6 +1221,8 @@ Settings:
     Show Bottom Right Actions Dock: "Diskouez kael an oberoù en traoñ a-zehou"
     Paused Interface Hide Delay: "Dale a-raok kuzhat an etrefas en ehan"
   Data Settings:
+    Settings could not be imported: "N'eus ket bet gallet enporzhiañ an arventennoù"
+    Some settings could not be imported: "N'eus ket bet gallet enporzhiañ an holl arventennoù ({failed} diwar {total} c'hwitet)"
     Scheduled backups: "Eiladennoù gwareziñ steuñvet"
     Scheduled backup description: "Enrollañ eiladennoù ZIP klok pa vez OpenTubeX digor. An eiladennoù manket a vez graet d’ar loc’hañ. An harz a dalvez evit an eiladennoù steuñvet en teuliad-mañ hepken."
     Choose backup folder: "Dibab teuliad ar gwareziñ"

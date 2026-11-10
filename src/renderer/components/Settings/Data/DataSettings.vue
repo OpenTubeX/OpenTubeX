@@ -504,6 +504,7 @@ async function selectUnifiedBackup() {
 
 async function importUnifiedBackup() {
   if (backupBusy.value || !backupData.value) return
+  const authorizedRulesWrite = authorizeAutomaticDownloadRulesWrite()
   backupBusy.value = true
   const selected = new Set(selectedBackupSections.value)
   const data = backupData.value
@@ -529,7 +530,13 @@ async function importUnifiedBackup() {
       await DBWatchStatsHandlers.mergeBackup(data.watchStats)
       await store.dispatch('grabWatchStats')
     }
-    if (selected.has('settings')) await applyImportedSettings(data.settings)
+    if (selected.has('settings')) {
+      const failure = settingsImportFailureMessage(await applyImportedSettings(data.settings, authorizedRulesWrite))
+      if (failure) {
+        showToast({ message: failure, icon: ['fas', 'circle-exclamation'] })
+        return
+      }
+    }
     const compaction = await compactAllDatastores().catch(() => false)
     closeBackupImport()
     showToast({ message: t('Settings.Data Settings.Backup imported'), icon: ['fas', 'check'] })
@@ -2282,7 +2289,16 @@ const transferableSettings = computed(() => {
   return store.getters.getTransferableSettings
 })
 
+/**
+ * Imports save automatic download rules after the click's user activation has
+ * expired, so authorize that write while the click is still active.
+ */
+function authorizeAutomaticDownloadRulesWrite() {
+  return process.env.IS_ELECTRON ? window.ftElectron.prepareAutomaticDownloadRulesWrite() : null
+}
+
 async function importSettings() {
+  const authorizedRulesWrite = authorizeAutomaticDownloadRulesWrite()
   let response
   try {
     response = await readFileWithPicker(
@@ -2338,20 +2354,33 @@ async function importSettings() {
     return
   }
 
-  if (!await applyImportedSettings(importedSettings)) return
+  const result = await applyImportedSettings(importedSettings, authorizedRulesWrite)
+  if (result.total === 0) return
 
-  showToast({
-    message: t('Settings.Data Settings.All settings have been successfully imported'),
-    icon: ['fas', 'sliders-h'],
-  })
+  const failure = settingsImportFailureMessage(result)
+  showToast(failure
+    ? { message: failure, icon: ['fas', 'circle-exclamation'] }
+    : { message: t('Settings.Data Settings.All settings have been successfully imported'), icon: ['fas', 'sliders-h'] })
 }
 
-async function applyImportedSettings(importedSettings) {
+/**
+ * @param {{ total: number, failed: number }} result
+ * @returns {string | null}
+ */
+function settingsImportFailureMessage({ total, failed }) {
+  if (failed === 0) return null
+  return failed === total
+    ? t('Settings.Data Settings.Settings could not be imported')
+    : t('Settings.Data Settings.Some settings could not be imported', { failed, total })
+}
+
+async function applyImportedSettings(importedSettings, authorizedRulesWrite) {
   importedSettings = migrateLegacySettings(importedSettings)
 
   const currentTransferableSettings = transferableSettings.value
   const currentSettings = store.state.settings
-  let acceptedSettings = 0
+  let total = 0
+  let failed = 0
 
   for (const [importedKey, importedValue] of Object.entries(importedSettings)) {
     if (!Object.hasOwn(currentSettings, importedKey)) {
@@ -2366,7 +2395,7 @@ async function applyImportedSettings(importedSettings) {
       continue
     }
 
-    acceptedSettings++
+    total++
     const currentValue = currentTransferableSettings[importedKey]
     const areValuesEqual = currentValue === importedValue ||
       (typeof importedValue === 'object' && JSON.stringify(currentValue) === JSON.stringify(importedValue))
@@ -2375,9 +2404,17 @@ async function applyImportedSettings(importedSettings) {
     }
 
     const updaterId = defaultUpdaterId(importedKey)
-    await store.dispatch(updaterId, importedValue)
+    const update = importedKey === 'ytDlpAutomaticDownloadRules' && authorizedRulesWrite
+      ? { value: importedValue, authorizedWrite: authorizedRulesWrite }
+      : importedValue
+    try {
+      if (await store.dispatch(updaterId, update) === false) failed++
+    } catch (error) {
+      console.error(error)
+      failed++
+    }
   }
-  return acceptedSettings > 0
+  return { total, failed }
 }
 
 async function exportSettings() {

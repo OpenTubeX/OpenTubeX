@@ -1284,6 +1284,8 @@ Settings:
     Remove: ہٹائیں
     Hide Channel Shows: چینل کا ”شوز“ ٹیب چھپائیں
   Data Settings:
+    Settings could not be imported: "ترتیبات درآمد نہیں کی جا سکیں"
+    Some settings could not be imported: "تمام ترتیبات درآمد نہیں کی جا سکیں ({total} میں سے {failed} ناکام)"
     Scheduled backups: شیڈول شدہ بیک اپس
     Scheduled backup description: OpenTubeX کھلا ہونے کے دوران مکمل ZIP بیک اپس محفوظ کریں۔ چھوٹ جانے والے بیک اپس آغاز پر چلتے ہیں۔ حد صرف اس فولڈر کے شیڈول شدہ بیک اپس پر لاگو ہوتی ہے۔
     Choose backup folder: بیک اپ فولڈر منتخب کریں

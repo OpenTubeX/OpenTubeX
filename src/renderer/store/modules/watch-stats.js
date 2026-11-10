@@ -68,8 +68,8 @@ const actions = {
       const reset = createWatchStatsReset(state.syncedWatchStats, rootState.settings.syncServerDeviceId, Date.now())
       const previous = rootState.settings.syncServerWatchStatsReset
       await dispatch('updateSyncServerWatchStatsReset', reset)
-      // Generated settings actions swallow write errors. Confirm persistence
-      // before deleting statistics, so a failed save cannot lose local history.
+      // Confirm this marker persisted, not just that the write did not fail: a newer
+      // write can supersede it. A failed save must not lose local history.
       if (rootState.settings.syncServerWatchStatsReset?.id !== reset.id) return false
       try {
         await DBWatchStatsHandlers.deleteAll()

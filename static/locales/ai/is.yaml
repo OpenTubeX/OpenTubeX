@@ -1224,6 +1224,8 @@ Settings:
     Paused Interface Hide Delay: Töf áður en viðmót er falið í hléi
     Hide Channel Shows: Fela flipann með rásinni "Þættir"
   Data Settings:
+    Settings could not be imported: "Ekki tókst að flytja inn stillingarnar"
+    Some settings could not be imported: "Ekki tókst að flytja inn allar stillingar ({failed} af {total} mistókust)"
     Scheduled backups: "Áætluð öryggisafrit"
     Scheduled backup description: "Vistaðu heil ZIP-öryggisafrit á meðan OpenTubeX er opið. Afrit sem gleymdust eru gerð við ræsingu. Hámarkið gildir aðeins um áætluð afrit í þessari möppu."
     Choose backup folder: "Velja möppu fyrir öryggisafrit"

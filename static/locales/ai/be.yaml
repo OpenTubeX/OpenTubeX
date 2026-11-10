@@ -1259,6 +1259,8 @@ Settings:
     Remove: Выдаліць
     Hide Channel Shows: Схаваць укладку «Шоу» канала
   Data Settings:
+    Settings could not be imported: "Не ўдалося імпартаваць налады"
+    Some settings could not be imported: "Не ўсе налады ўдалося імпартаваць (не ўдалося: {failed} з {total})"
     Scheduled backups: "Запланаваныя рэзервовыя копіі"
     Scheduled backup description: "Захоўвайце поўныя ZIP-копіі, пакуль OpenTubeX адкрыты. Прапушчаныя копіі ствараюцца пры запуску. Абмежаванне датычыцца толькі запланаваных копій у гэтай папцы."
     Choose backup folder: "Выбраць папку рэзервовых копій"

@@ -1206,6 +1206,8 @@ Settings:
     Remove: Remove
     Hide Channel Shows: Hide Channel "Shows" Tab
   Data Settings:
+    Settings could not be imported: "Settings could not be imported"
+    Some settings could not be imported: "{failed} of {total} settings could not be imported"
     Scheduled backups: "Scheduled backups"
     Scheduled backup description: "Save complete ZIP backups while OpenTubeX is open. Missed backups run on startup. The limit applies only to scheduled backups in this folder."
     Choose backup folder: "Choose backup folder"

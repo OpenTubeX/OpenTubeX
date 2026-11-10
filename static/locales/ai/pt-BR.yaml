@@ -1190,6 +1190,8 @@ Settings:
     Show Bottom Right Actions Dock: Mostrar barra de ações no canto inferior direito
     Paused Interface Hide Delay: Atraso até ocultar a interface durante a pausa
   Data Settings:
+    Settings could not be imported: "Não foi possível importar as configurações"
+    Some settings could not be imported: "Não foi possível importar todas as configurações ({failed} de {total} falharam)"
     Scheduled backups: "Backups agendados"
     Scheduled backup description: "Salve backups ZIP completos enquanto o OpenTubeX estiver aberto. Backups pendentes são feitos ao iniciar. O limite se aplica apenas aos backups agendados nesta pasta."
     Choose backup folder: "Escolher pasta de backup"

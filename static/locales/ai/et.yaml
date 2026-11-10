@@ -1221,6 +1221,8 @@ Settings:
     Show Bottom Right Actions Dock: Kuva all paremal toiminguriba
     Paused Interface Hide Delay: Liidese peitmise viivitus pausi ajal
   Data Settings:
+    Settings could not be imported: "Seadeid ei õnnestunud importida"
+    Some settings could not be imported: "Kõiki seadeid ei õnnestunud importida ({total}-st nurjus {failed})"
     Scheduled backups: "Ajastatud varukoopiad"
     Scheduled backup description: "Salvesta täielikud ZIP-varukoopiad, kui OpenTubeX on avatud. Vahele jäänud koopiad luuakse käivitamisel. Piirang kehtib ainult selle kausta ajastatud koopiatele."
     Choose backup folder: "Vali varukoopiate kaust"

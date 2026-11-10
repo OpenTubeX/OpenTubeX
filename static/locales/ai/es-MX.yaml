@@ -1380,6 +1380,8 @@ Settings:
     Add: Agregar
     Remove: Eliminar
   Data Settings:
+    Settings could not be imported: "No se pudo importar la configuración"
+    Some settings could not be imported: "No se pudo importar toda la configuración (fallaron {failed} de {total})"
     Scheduled backups: "Copias de seguridad programadas"
     Scheduled backup description: "Guarda copias ZIP completas mientras OpenTubeX está abierto. Las copias pendientes se realizan al iniciar. El límite solo se aplica a las copias programadas de esta carpeta."
     Choose backup folder: "Elegir carpeta de copias"

@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
 import test from 'node:test'
+import vm from 'node:vm'
 
 import { createOptimisticSettingUpdater, createSettingUpdateQueue } from '../../src/renderer/helpers/settingUpdateQueue.js'
 
@@ -157,4 +159,30 @@ test('continues with the latest setting write after an earlier write fails', asy
   await second
 
   assert.deepEqual(appliedValues, [8])
+})
+
+test('generated setting updaters report whether the write was saved', async () => {
+  const source = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
+  const generator = source.slice(source.indexOf('const getters = {}'), source.indexOf('// Add all custom data'))
+  let failWrites = false
+  const actions = vm.runInNewContext(`${generator}\nactions`, {
+    state: { uiScale: 100, theme: 'dark' },
+    settingsWithSideEffects: ['theme'],
+    sideEffectHandlers: { theme: () => {} },
+    defaultGetterId: id => `get${id}`,
+    defaultMutationId: id => `set${id}`,
+    defaultUpdaterId: id => `update${id}`,
+    defaultSideEffectsTriggerId: id => `trigger${id}`,
+    createSettingUpdateQueue,
+    recordSettingSyncTimestamp: async () => {},
+    DBSettingHandlers: { upsert: async () => { if (failWrites) throw new Error('disk full') } },
+    console: { error () {} },
+  })
+  const context = { commit () {}, dispatch () {}, state: {} }
+
+  assert.equal(await actions.updateuiScale(context, 125), true)
+  assert.equal(await actions.updatetheme(context, 'light'), true)
+  failWrites = true
+  assert.equal(await actions.updateuiScale(context, 150), false)
+  assert.equal(await actions.updatetheme(context, 'black'), false)
 })

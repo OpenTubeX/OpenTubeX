@@ -1221,6 +1221,8 @@ Settings:
     Show Bottom Right Actions Dock: Vis handlingsfelt nederst til høyre
     Paused Interface Hide Delay: Forsinkelse før grensesnittet skjules ved pause
   Data Settings:
+    Settings could not be imported: "Innstillingene kunne ikke importeres"
+    Some settings could not be imported: "Ikke alle innstillingene kunne importeres ({failed} av {total} mislyktes)"
     Scheduled backups: "Planlagte sikkerhetskopier"
     Scheduled backup description: "Lagre fullstendige ZIP-kopier mens OpenTubeX er åpent. Uteblitte kopier opprettes ved oppstart. Grensen gjelder bare planlagte kopier i denne mappen."
     Choose backup folder: "Velg mappe for sikkerhetskopier"

@@ -1261,6 +1261,8 @@ Settings:
     Remove: حذف
     Hide Channel Shows: پنهان کردن زبانه "برنامه‌ها" کانال
   Data Settings:
+    Settings could not be imported: "وارد کردن تنظیمات ممکن نشد"
+    Some settings could not be imported: "وارد کردن همه تنظیمات ممکن نشد ({failed} از {total} ناموفق بود)"
     Scheduled backups: "پشتیبان‌گیری زمان‌بندی‌شده"
     Scheduled backup description: "هنگام باز بودن OpenTubeX نسخه‌های کامل ZIP ذخیره کنید. پشتیبان‌های انجام‌نشده هنگام راه‌اندازی ساخته می‌شوند. محدودیت فقط برای پشتیبان‌های زمان‌بندی‌شده در این پوشه است."
     Choose backup folder: "انتخاب پوشهٔ پشتیبان"

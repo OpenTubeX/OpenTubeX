@@ -1221,6 +1221,8 @@ Settings:
     Show Bottom Right Actions Dock: Visa åtgärdsfältet längst ned till höger
     Paused Interface Hide Delay: Fördröjning innan pausgränssnittet döljs
   Data Settings:
+    Settings could not be imported: "Inställningarna kunde inte importeras"
+    Some settings could not be imported: "Alla inställningar kunde inte importeras ({failed} av {total} misslyckades)"
     Scheduled backups: "Schemalagda säkerhetskopior"
     Scheduled backup description: "Spara fullständiga ZIP-kopior medan OpenTubeX är öppet. Missade kopior skapas vid start. Gränsen gäller bara schemalagda kopior i den här mappen."
     Choose backup folder: "Välj mapp för säkerhetskopior"
