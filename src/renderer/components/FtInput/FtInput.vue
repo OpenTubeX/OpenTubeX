@@ -117,7 +117,7 @@
     </span>
     <div class="options">
       <ul
-        v-if="showOptions"
+        v-if="showOptions && (visibleDataList.length > 0 || $slots.preview)"
         ref="optionsList"
         v-overlay-scrollbars
         class="list"
@@ -125,6 +125,16 @@
         @mouseleave="searchState.isPointerInList = false"
       >
         <!-- eslint-disable vuejs-accessibility/click-events-have-key-events -->
+        <!-- Enter already opens what the preview shows, so it needs no key handler. -->
+        <li
+          v-if="$slots.preview"
+          class="previewOption"
+          @pointerdown.prevent
+          @click.prevent="handlePreviewClick"
+          @auxclick.middle="handlePreviewAuxClick"
+        >
+          <slot name="preview" />
+        </li>
         <li
           v-for="(entry, index) in renderedDataList"
           :key="index"
@@ -391,8 +401,9 @@ const removeButtonSelectedIndex = ref(-1)
 const removalMade = ref(false)
 const actionButtonIconName = shallowRef(props.forceActionButtonIconName ?? ['fas', 'search'])
 
+// The template also requires rows or a preview, as slots are not reactive here.
 const showOptions = computed(() => {
-  return (inputData.value !== '' || props.showDataWhenEmpty) && visibleDataList.value.length > 0 && searchState.showOptions
+  return (inputData.value !== '' || props.showDataWhenEmpty) && searchState.showOptions
 })
 
 const searchStateKeyboardSelectedOptionValue = computed(() => {
@@ -632,6 +643,27 @@ function handleOptionAuxClick(index, event) {
     event,
     dataListIndex: getDataListIndex(index)
   })
+}
+
+/**
+ * The preview shows what the input text opens, so it submits the text itself.
+ * @param {MouseEvent} event
+ */
+function handlePreviewClick(event) {
+  searchState.isPointerInList = false
+  searchState.keyboardSelectedOptionIndex = -1
+  handleClick(event, -1)
+}
+
+/**
+ * @param {MouseEvent} event
+ */
+function handlePreviewAuxClick(event) {
+  if (!process.env.IS_ELECTRON) return
+
+  event.preventDefault()
+  inputRef.value.focus()
+  emit('click', inputData.value, { event, dataListIndex: -1 })
 }
 
 function resetSelectedOption() {

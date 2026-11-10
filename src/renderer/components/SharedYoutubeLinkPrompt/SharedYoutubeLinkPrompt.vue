@@ -89,10 +89,7 @@ import FtButton from '../FtButton/FtButton.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 import store from '../../store'
-import { getLocalHistoryMetadata } from '../../helpers/api/local'
-import { getInvidiousHistoryMetadata } from '../../helpers/api/invidious'
-import { requestWithFallback } from '../../helpers/api/fallback'
-import { parseHistoryRepairPlayer } from '../../../historyRepair'
+import { loadVideoMetadata } from '../../helpers/videoMetadata'
 import { showToast } from '../../helpers/utils'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 
@@ -110,34 +107,12 @@ const controller = new AbortController()
 onBeforeUnmount(() => controller.abort())
 watch(enableDownloads, enabled => { if (!enabled) showDownloadPrompt.value = false })
 
-async function loadVideo(signal) {
-  const loadMetadata = async loader => {
-    const requestSignal = AbortSignal.any([signal, AbortSignal.timeout(20_000)])
-    const metadata = await loader(props.videoId, requestSignal)
-    requestSignal.throwIfAborted()
-    return metadata
-  }
-  const loadInvidious = async () => {
-    const info = await loadMetadata(getInvidiousHistoryMetadata)
-    if (info?.error || info?.videoId !== props.videoId) throw new Error('Video metadata unavailable')
-    return { ...info, published: info.published * 1000, isLive: info.liveNow }
-  }
-  const loadLocal = async () => parseHistoryRepairPlayer(await loadMetadata(getLocalHistoryMetadata), props.videoId)
-  const { result: info } = await requestWithFallback({ local: loadLocal, invidious: loadInvidious }, {
-    backend: store.getters.getBackendPreference,
-    fallback: store.getters.getBackendFallback,
-    signal,
-  })
-  if (typeof info.title !== 'string' || !info.title.trim()) throw new Error('Video title unavailable')
-  return { ...info, videoId: props.videoId, type: 'video', lengthSeconds: Number(info.lengthSeconds) || 0 }
-}
-
 async function addVideo(action) {
   if (loading.value) return
   loading.value = true
   failed.value = false
   try {
-    const video = await loadVideo(controller.signal)
+    const video = await loadVideoMetadata(props.videoId, controller.signal)
     controller.signal.throwIfAborted()
     if (action === 'playlist') {
       await store.dispatch('showAddToPlaylistPromptForManyVideos', { videos: [video] })

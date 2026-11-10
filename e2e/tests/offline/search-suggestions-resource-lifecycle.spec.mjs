@@ -3,7 +3,13 @@ import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 for (const backendPreference of ['local', 'invidious']) {
   test.describe(`${backendPreference} suggestions`, () => {
-    test.use({ seed: { settings: { backendPreference, backendFallback: true, enableSearchSuggestions: true, fetchSubscriptionsAutomatically: false } } })
+    test.use({
+      seed: {
+        settings: { backendPreference, backendFallback: true, enableSearchSuggestions: true, fetchSubscriptionsAutomatically: false },
+        // A watched video previews its link without network requests.
+        history: [{ _id: 'jNQXAC9IVRw', videoId: 'jNQXAC9IVRw', title: 'Me at the zoo', author: 'jawed', authorId: 'UC4QobU6STFB0P71PMvOGN5A', published: 0, lengthSeconds: 19, watchProgress: 0, timeWatched: 0, type: 'video' }]
+      }
+    })
     test('cancels obsolete suggestions when replacing, clearing, blurring and submitting queries', async ({ app, page }) => {
       await mockPlayableWatchPage(app, page)
       await page.evaluate(() => {
@@ -38,10 +44,14 @@ for (const backendPreference of ['local', 'invidious']) {
       await expect.poll(async () => (await requests()).length).toBe(4)
       await input.blur()
       await expect.poll(async () => (await requests())[3].aborted).toBe(true)
+      // Links get a preview, which waits longer than suggestions, but no suggestions.
       await input.fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+      await expect(page.locator('.linkPreview')).toBeVisible()
+      expect((await requests()).length).toBe(4)
+      await input.fill('fourth query')
       await expect.poll(async () => (await requests()).length).toBe(5)
       await input.press('Enter')
-      await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+      await expect(page).toHaveURL(/#\/search\/fourth%20query/)
       await expect.poll(async () => (await requests()).every(request => request.aborted)).toBe(true)
       // No further request may start after navigation.
       await page.waitForTimeout(300)
@@ -95,3 +105,31 @@ for (const backendPreference of ['local', 'invidious']) {
     })
   })
 }
+
+test.describe('link preview', () => {
+  test.use({ seed: { settings: { backendFallback: false } } })
+
+  test('retries a failed preview and opens the video from a loading preview', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    let failed = false
+    await page.route('**/youtubei/v1/player**', async route => {
+      if (!failed) {
+        failed = true
+        return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ playabilityStatus: { status: 'ERROR' } }) })
+      }
+      // Keep the retried preview loading.
+      await new Promise(() => {})
+    })
+    const input = page.locator(sel.searchInput)
+    const preview = page.locator('.linkPreview')
+    await input.fill('https://youtu.be/dQw4w9WgXcQ')
+    await expect.poll(() => failed).toBe(true)
+    await expect(preview).toHaveCount(0)
+    await input.blur()
+    await input.focus()
+    await expect(preview).toContainText('Loading video information')
+    // Pressing the row must not blur the search and cancel the preview before the click.
+    await preview.click()
+    await expect(page).toHaveURL(/#\/watch\/dQw4w9WgXcQ/)
+  })
+})

@@ -9,7 +9,9 @@ import { parseHistoryRepairPlayer } from '../../src/historyRepair.js'
 const app = readFileSync('src/renderer/App.vue', 'utf8')
 const component = readFileSync('src/renderer/components/SharedYoutubeLinkPrompt/SharedYoutubeLinkPrompt.vue', 'utf8')
 const handler = app.slice(app.indexOf('async function handleAndroidSharedText('), app.indexOf('async function enableCapacitorIntegrations()'))
-const actions = component.slice(component.indexOf('async function loadVideo('), component.indexOf('</script>'))
+const metadataSource = readFileSync('src/renderer/helpers/videoMetadata.js', 'utf8')
+const loadVideoMetadata = metadataSource.slice(metadataSource.indexOf('export async')).replace('export async', 'async')
+const actions = `${loadVideoMetadata}\n${component.slice(component.indexOf('async function addVideo('), component.indexOf('</script>'))}`
 const receiverSource = readFileSync('src/renderer/helpers/androidIncomingShare.js', 'utf8')
 const initializeReceiver = compileFunction(`${receiverSource.slice(receiverSource.indexOf('export async')).replace('export async', 'async')}\nreturn initializeAndroidIncomingShare`, ['AndroidShare'])
 const fallbackToasts = { show: () => {} }

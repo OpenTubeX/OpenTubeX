@@ -304,7 +304,7 @@
 // Show the configured number of suggestion rows, but stay inside the window.
 .searchInput :deep(.list) {
   max-block-size: min(
-    calc(var(--visible-search-suggestions) * var(--search-option-row-size)),
+    calc(var(--visible-search-suggestions) * var(--search-option-row-size) + var(--search-preview-row-size, 0px)),
     calc(100dvh - var(--top-nav-sticky-offset, 60px) - 20px)
   );
 
@@ -313,6 +313,53 @@
 
   // The field casts the panel's upper shadow, so keep this one off it.
   clip-path: inset(0 -10px -10px);
+}
+
+.searchInput :deep(.list:has(> .previewOption)) {
+  // Thumbnail height plus the row's block padding.
+  --search-preview-row-size: 66px;
+}
+
+.linkPreview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-inline-size: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.linkPreviewThumbnail {
+  flex-shrink: 0;
+  inline-size: 96px;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--shape-corner-small);
+}
+
+.linkPreviewText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+  line-height: 1.3;
+}
+
+.linkPreviewTitle {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.linkPreviewDetails {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.85em;
+  opacity: 0.75;
 }
 
 .searchInput:has(.list) :deep(.ft-input) {
