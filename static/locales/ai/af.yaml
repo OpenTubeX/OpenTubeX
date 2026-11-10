@@ -2629,6 +2629,7 @@ Downloads:
   No Matching Downloads: Geen voltooide aflaaie pas nie. Probeer ’n ander soektog of filter.
   Preparing: Berei voor…
   Export Failed: Kon nie die afgelaaide lêer stoor nie. Kies ’n aflaaivouer waarna geskryf kan word en probeer weer.
+  Native Code Blocked: "Android het verhoed dat yt-dlp sy inheemse biblioteke laai. Maak op GrapheneOS hierdie app se app-inligting oop, stel “Dynamic code loading via storage” onder “Exploit protection” op “Allowed” en probeer weer."
   Remove File Permanently Warning: Dit sal "{title}" permanent skrap.
   Download: Laai af
   Download Video: Laai video af

@@ -15,7 +15,7 @@ apks = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(apks)
 
 
-def elf(*needed):
+def elf(*needed, align=0x4000):
     """Build a minimal 64-bit ELF file that links the given libraries."""
     strings, offsets = b"\0", []
     for name in needed:
@@ -27,7 +27,7 @@ def elf(*needed):
     size = table + len(strings) + len(dynamic)
     return (b"\x7fELF\x02\x01\x01" + bytes(9)
             + struct.pack("<HHIQQQIHHHHHH", 3, 183, 1, 0, 64, 0, 0, 64, 56, 2, 0, 0, 0)
-            + struct.pack("<IIQQQQQQ", 1, 4, 0, 0, 0, size, size, 0x1000)
+            + struct.pack("<IIQQQQQQ", 1, 4, 0, 0, 0, size, size, align)
             + struct.pack("<IIQQQQQQ", 2, 4, table + len(strings), table + len(strings), 0,
                           len(dynamic), len(dynamic), 8)
             + strings + dynamic)
@@ -74,7 +74,7 @@ class ApkPackagingTest(unittest.TestCase):
                         apk.writestr(f"lib/{arch}/libffmpeg.so", b"fixture")
 
     def write_apk(self, name, abis, build_only=False, ffmpeg=b"fixture", python_files=(), ffmpeg_files=(),
-                  dex=b"fixture"):
+                  native_files=(), dex=b"fixture"):
         def runtime(files):
             data = io.BytesIO()
             with zipfile.ZipFile(data, "w") as archive:
@@ -93,6 +93,8 @@ class ApkPackagingTest(unittest.TestCase):
                 apk.writestr(f"lib/{abi}/libffmpeg.so", ffmpeg)
                 apk.writestr(f"lib/{abi}/libpython.zip.so", runtime(python_files))
                 apk.writestr(f"lib/{abi}/libffmpeg.zip.so", runtime(ffmpeg_files))
+                for entry, content in native_files:
+                    apk.writestr(f"lib/{abi}/{entry}", content)
 
     def test_names_and_reports_all_nightly_apks(self):
         report = apks.prepare(self.source, self.output)
@@ -188,6 +190,20 @@ class ApkPackagingTest(unittest.TestCase):
                                      symlink("usr/lib/libavcodec.so.61", "libavcodec.so.61.19.101")])
         apks.prepare(self.source, self.output)
         self.assertEqual(len(list(self.output.glob("*.apk"))), 5)
+
+    def test_resolves_runtime_libraries_from_the_native_library_directory(self):
+        self.write_apk("app-arm64-v8a-nightly.apk", {"arm64-v8a"}, ffmpeg=elf("libavcodec.so.61"),
+                       ffmpeg_files=[("usr/lib/libavcodec.so.61", elf("libwebp.so"))],
+                       native_files=[("libwebp.so", elf())])
+        apks.prepare(self.source, self.output)
+        self.assertEqual(len(list(self.output.glob("*.apk"))), 5)
+
+    def test_rejects_64_bit_libraries_not_aligned_for_16_kb_pages(self):
+        self.write_apk("app-arm64-v8a-nightly.apk", {"arm64-v8a"}, ffmpeg=elf("libwebp.so"),
+                       ffmpeg_files=[("usr/lib/libwebp.so", elf(align=0x1000))])
+        with self.assertRaisesRegex(ValueError, r"arm64-v8a: lib/arm64-v8a/libffmpeg\.zip\.so!usr/lib/libwebp\.so is not aligned"):
+            apks.prepare(self.source, self.output)
+        self.assertFalse(self.output.exists())
 
     def test_rejects_runtime_without_a_linked_library(self):
         self.write_apk("app-arm64-v8a-nightly.apk", {"arm64-v8a"}, ffmpeg=elf("libavcodec.so.61"),

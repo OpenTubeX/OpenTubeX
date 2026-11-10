@@ -1,6 +1,6 @@
 name: Update mobile dependencies
 
-# Dependabot cannot track the yt-dlp release that android/app/build.gradle bundles,
+# Dependabot cannot track the yt-dlp and libwebp releases that android/app/build.gradle bundles,
 # the Python runtime and PyPI pins that _scripts/setupIosYtDlp.sh installs, or the
 # FFmpegKit binaries that ios/App/FFmpegKit/Package.swift links, so this opens a PR
 # when any of them has a new stable release.
@@ -62,6 +62,22 @@ jobs:
               -e "s/^def ytDlpVersion = '[0-9.]+'$/def ytDlpVersion = '$latest'/" \
               -e "s/^def ytDlpSha256 = '[0-9a-f]{64}'$/def ytDlpSha256 = '$hash'/" "$file"
             echo "- Android: [yt-dlp $latest]($url) (from $current)" >> "$RUNNER_TEMP/changes.md"
+          fi
+
+          current=$(grep -oP "^def libwebpVersion = '\K[0-9.]+(?='$)" "$file")
+          version=$(gh api --paginate repos/webmproject/libwebp/tags --jq '.[].name' |
+            grep -oP '^v\K[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)
+          if [[ -z "$current" || -z "$version" ]]; then
+            echo "::error::Cannot update Android libwebp from ${current:-nothing} to ${version:-nothing}."
+            exit 1
+          fi
+          if newer "$current" "$version"; then
+            hash=$(curl -fsSL "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-$version.tar.gz" |
+              sha256sum | cut -d ' ' -f 1)
+            sed -i -E \
+              -e "s/^def libwebpVersion = '[0-9.]+'$/def libwebpVersion = '$version'/" \
+              -e "s/^def libwebpSha256 = '[0-9a-f]{64}'$/def libwebpSha256 = '$hash'/" "$file"
+            echo "- Android: [libwebp $version](https://chromium.googlesource.com/webm/libwebp/+/refs/tags/v$version/NEWS) (from $current)" >> "$RUNNER_TEMP/changes.md"
           fi
 
           # PyPI normalizes the release tag by dropping leading zeros (2026.08.19 -> 2026.8.19).
@@ -163,7 +179,7 @@ jobs:
 
             ${{ steps.update.outputs.changes }}
 
-            The Android yt-dlp and iOS FFmpegKit checksums come from the digests GitHub records for the release assets. Gradle and SwiftPM verify the downloads against them. The iOS `yt-dlp-ejs` pin follows the version yt-dlp requires.
+            The Android yt-dlp and iOS FFmpegKit checksums come from the digests GitHub records for the release assets. The libwebp checksum is the SHA-256 of the release tarball this workflow downloaded. Gradle, the libwebp build script and SwiftPM verify the downloads against them. The iOS `yt-dlp-ejs` pin follows the version yt-dlp requires.
 
             ## Release note
             - [x] No release note needed

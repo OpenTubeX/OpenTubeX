@@ -2755,6 +2755,7 @@ Downloads:
   Add Download: Legg til nedlasting
   Preparing: Førebur…
   Export Failed: "Klarte ikkje å lagre den nedlasta fila. Vel ei nedlastingsmappe med skrivetilgang og prøv igjen."
+  Native Code Blocked: "Android hindra yt-dlp i å laste inn dei native biblioteka sine. På GrapheneOS opnar du appinfo for denne appen, set “Dynamic code loading via storage” under “Exploit protection” til “Allowed” og prøver igjen."
   Remove File Permanently Warning: "Dette slettar «{title}» permanent."
   Download: Last ned
   Download Video: Last ned video

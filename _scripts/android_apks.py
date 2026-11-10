@@ -18,27 +18,41 @@ LITE_ABI_MIB, LITE_UNIVERSAL_MIB = 20, 35
 RUNTIME_LIBRARIES = ("python", "qjs", "ffmpeg", "ffprobe", "python.zip", "ffmpeg.zip", "opentubex_rumble_http")
 # Android provides these at runtime; every other dependency must be packaged.
 SYSTEM_LIBRARIES = {"libc.so", "libdl.so", "liblog.so", "libm.so"}
+# Devices with 16 KB memory pages refuse to load 64-bit libraries aligned for 4 KB.
+PAGE_SIZE_ABIS, PAGE_SIZE = {"arm64-v8a", "x86_64"}, 16 * 1024
 # F-Droid rejects APKs whose code references these, even if it never runs.
 PROPRIETARY_CLASS = re.compile(rb"Lcom/google/(?:mlkit|android/gms)/[^;]*;")
+
+
+def program_headers(data):
+    """Return an ELF file's (type, offset, address, file size, alignment) segments."""
+    wide, order = data[4] == 2, "<" if data[5] == 1 else ">"
+    if wide:
+        offset, = struct.unpack_from(order + "Q", data, 0x20)
+        size, count = struct.unpack_from(order + "HH", data, 0x36)
+    else:
+        offset, = struct.unpack_from(order + "I", data, 0x1C)
+        size, count = struct.unpack_from(order + "HH", data, 0x2A)
+    headers = []
+    for index in range(count):
+        if wide:
+            kind, _, file_offset, address, _, length, _, align = struct.unpack_from(
+                order + "IIQQQQQQ", data, offset + index * size)
+        else:
+            kind, file_offset, address, _, length, _, _, align = struct.unpack_from(
+                order + "IIIIIIII", data, offset + index * size)
+        headers.append((kind, file_offset, address, length, align))
+    return headers
 
 
 def elf_needed(data):
     """Return an ELF file's DT_NEEDED entries, or None for other files."""
     if data[:4] != b"\x7fELF":
         return None
-    wide, order = data[4] == 2, "<" if data[5] == 1 else ">"
-    if wide:
-        offset, = struct.unpack_from(order + "Q", data, 0x20)
-        size, count = struct.unpack_from(order + "HH", data, 0x36)
-        program, dynamic = "IIQQQQ", "qQ"
-    else:
-        offset, = struct.unpack_from(order + "I", data, 0x1C)
-        size, count = struct.unpack_from(order + "HH", data, 0x2A)
-        program, dynamic = "IIIII", "iI"
+    order = "<" if data[5] == 1 else ">"
+    dynamic = "qQ" if data[4] == 2 else "iI"
     loads, entries = [], []
-    for index in range(count):
-        values = struct.unpack_from(order + program, data, offset + index * size)
-        kind, (file_offset, address, _, length) = values[0], values[2:6] if wide else values[1:5]
+    for kind, file_offset, address, length, _ in program_headers(data):
         if kind == 1:
             loads.append((address, file_offset, length))
         elif kind == 2:
@@ -81,6 +95,10 @@ def check_dependencies(apk, arch):
                     # Python loads extension modules on import.
                     roots.append(name)
                     files[name] = data
+    # The APK's native library directory ends LD_LIBRARY_PATH.
+    for entry in apk.namelist():
+        if entry.startswith(f"lib/{arch}/") and entry.endswith(".so"):
+            files.setdefault(Path(entry).name, apk.read(entry))
     pending, seen = roots, set(roots)
     while pending:
         name = pending.pop()
@@ -91,6 +109,25 @@ def check_dependencies(apk, arch):
                 raise ValueError(f"{arch}: {name} needs {dependency}, which is not packaged")
             seen.add(dependency)
             pending.append(dependency)
+
+
+def check_page_alignment(apk, arch):
+    """Reject native code that devices with 16 KB pages cannot load."""
+    def check(name, data):
+        if data[:4] == b"\x7fELF" and any(kind == 1 and align < PAGE_SIZE
+                                          for kind, _, _, _, align in program_headers(data)):
+            raise ValueError(f"{arch}: {name} is not aligned for 16 KB pages")
+
+    for entry in apk.namelist():
+        if not entry.startswith(f"lib/{arch}/"):
+            continue
+        data = apk.read(entry)
+        check(entry, data)
+        if entry.endswith(".zip.so"):
+            with zipfile.ZipFile(io.BytesIO(data)) as archive:
+                for info in archive.infolist():
+                    if not info.is_dir():
+                        check(f"{entry}!{info.filename}", archive.read(info))
 
 
 def inspect_apk(path, abi, lite=False):
@@ -117,6 +154,8 @@ def inspect_apk(path, abi, lite=False):
                     if "usr/lib/quickjs/libquickjs.a" in archive.namelist():
                         raise ValueError(f"{path}: build-only QuickJS static library is packaged")
             check_dependencies(apk, arch)
+        for arch in expected & PAGE_SIZE_ABIS:
+            check_page_alignment(apk, arch)
         for entry in apk.infolist():
             name = entry.filename
             if name.endswith(".dex"):

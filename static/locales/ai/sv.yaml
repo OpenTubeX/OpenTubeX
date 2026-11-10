@@ -2359,6 +2359,7 @@ Downloads:
   Add Download: Lägg till nedladdning
   Preparing: Förbereder…
   Export Failed: "Det gick inte att spara den nedladdade filen. Välj en nedladdningsmapp med skrivbehörighet och försök igen."
+  Native Code Blocked: "Android hindrade yt-dlp från att läsa in sina inbyggda bibliotek. Öppna appinformationen för den här appen i GrapheneOS, ställ in “Dynamic code loading via storage” under “Exploit protection” på “Allowed” och försök igen."
   Remove File Permanently Warning: "Detta raderar ”{title}” permanent."
   Download: Ladda ned
   Download Video: Ladda ned video

@@ -2365,6 +2365,7 @@ Downloads:
   Add Download: 新增下載
   Preparing: 正在準備…
   Export Failed: "無法儲存已下載的檔案。請選擇有寫入權限的下載資料夾，然後重試。"
+  Native Code Blocked: "Android 已封鎖 yt-dlp 載入其原生程式庫。在 GrapheneOS 上，請開啟此應用程式的應用程式資訊，將 “Exploit protection” 下的 “Dynamic code loading via storage” 設為 “Allowed”，然後重試。"
   Remove File Permanently Warning: "這將永久刪除「{title}」。"
   Download: 下載
   Download Video: 下載影片

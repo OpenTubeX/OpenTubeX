@@ -90,6 +90,28 @@ def generateRumbleHttp = tasks.register('generateRumbleHttp', Exec) {
 }
 if (!liteBuild) tasks.named('preBuild').configure { dependsOn(generateRumbleHttp) }
 
+// Replaces youtubedl-android's 4 KB-aligned libwebp, which cannot load on 16 KB
+// page devices and would stop FFmpeg from starting.
+// .github/workflows/mobile-dependencies.yml opens a PR for each new release.
+def libwebpVersion = '1.6.0'
+def libwebpSha256 = 'e4ab7009bf0629fd11982d4c2aa83964cf244cffba7347ecd39019a9e38c4564'
+def libwebpOutput = layout.buildDirectory.dir('generated/libwebp')
+def generateLibwebp = tasks.register('generateLibwebp', Exec) {
+    workingDir rootProject.file('..')
+    inputs.file(rootProject.file('../_scripts/androidLibwebp.mjs'))
+    inputs.property('abis', project.findProperty('testAbi') ?: 'arm64-v8a,armeabi-v7a,x86_64,x86')
+    inputs.property('version', libwebpVersion)
+    inputs.property('sha256', libwebpSha256)
+    inputs.property('minSdk', rootProject.ext.minSdkVersion)
+    outputs.dir(libwebpOutput)
+    doFirst {
+        commandLine 'node', '_scripts/androidLibwebp.mjs', libwebpOutput.get().asFile.absolutePath,
+            nativeNdkDirectory.get().asFile.absolutePath, inputs.properties.abis, libwebpVersion, libwebpSha256,
+            inputs.properties.minSdk.toString()
+    }
+}
+if (!liteBuild) tasks.named('preBuild').configure { dependsOn(generateLibwebp) }
+
 // Replaces the older yt-dlp that youtubedl-android bundles, so fresh installs can
 // play videos before the first managed update.
 // .github/workflows/mobile-dependencies.yml opens a PR for each new release.
@@ -181,6 +203,8 @@ android {
         if (!liteBuild) {
             main.jniLibs.srcDirs += [new File(rumbleHttpOutput.get().asFile, 'jniLibs')]
             main.assets.srcDirs += [new File(rumbleHttpOutput.get().asFile, 'licenses')]
+            main.jniLibs.srcDirs += [new File(libwebpOutput.get().asFile, 'jniLibs')]
+            main.assets.srcDirs += [new File(libwebpOutput.get().asFile, 'licenses')]
             main.res.srcDirs += [new File(ytDlpOutput.get().asFile, 'res')]
         }
         main.manifest.srcFile new File(appIconOutput, 'AndroidManifest.xml')

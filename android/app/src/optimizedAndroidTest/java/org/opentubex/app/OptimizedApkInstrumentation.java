@@ -472,7 +472,8 @@ public class OptimizedApkInstrumentation extends Instrumentation {
         command.addAll(Arrays.asList(arguments));
         File log = new File(getTargetContext().getCacheDir(), "optimized-apk-process.log");
         ProcessBuilder builder = new ProcessBuilder(command).redirectErrorStream(true).redirectOutput(log);
-        builder.environment().put("LD_LIBRARY_PATH", new File(packages, "python/usr/lib") + ":" + new File(packages, "ffmpeg/usr/lib"));
+        // Match YtDlpRuntime: the APK's libraries replace runtime libraries trim-runtime.gradle removes.
+        builder.environment().put("LD_LIBRARY_PATH", new File(packages, "python/usr/lib") + ":" + new File(packages, "ffmpeg/usr/lib") + ":" + nativeDir);
         builder.environment().put("PYTHONHOME", new File(packages, "python/usr").getPath());
         Process process = builder.start();
         try {
