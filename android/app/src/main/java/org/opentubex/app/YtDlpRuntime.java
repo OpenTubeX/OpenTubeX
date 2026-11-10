@@ -94,7 +94,9 @@ final class YtDlpRuntime {
         ProcessBuilder builder = new ProcessBuilder(args);
         File packages = new File(context.getNoBackupFilesDir(), "youtubedl-android/packages");
         String python = new File(packages, "python/usr").getAbsolutePath();
-        builder.environment().put("LD_LIBRARY_PATH", python + "/lib:" + new File(packages, "ffmpeg/usr/lib").getAbsolutePath());
+        // The APK's libraries come last; they replace runtime libraries trim-runtime.gradle removes.
+        builder.environment().put("LD_LIBRARY_PATH", python + "/lib:" + new File(packages, "ffmpeg/usr/lib").getAbsolutePath()
+            + ":" + context.getApplicationInfo().nativeLibraryDir);
         builder.environment().put("SSL_CERT_FILE", python + "/etc/tls/cert.pem");
         builder.environment().put("PYTHONHOME", python);
         builder.environment().put("OPENTUBEX_RUMBLE_HTTP", new File(context.getApplicationInfo().nativeLibraryDir, "libopentubex_rumble_http.so").getAbsolutePath());

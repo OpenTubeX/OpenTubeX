@@ -43,7 +43,10 @@ abstract class PackNativeRuntime implements TransformAction<RuntimePackerParamet
         'libgobject-2.0', 'libgthread-2.0', 'libharfbuzz-cairo', 'libharfbuzz-gobject',
         'libharfbuzz-subset', 'liblzma', 'libout123', 'libpcre2-16', 'libpcre2-32',
         'libpcre2-posix', 'librubberband-jni', 'libsoxr-lsr', 'libsyn123', 'libtheora',
-        'libv4l1', 'libv4l2', 'libv4l2rds', 'libv4lconvert', 'libwebpdecoder', 'libwebpdemux', 'libz'
+        'libv4l1', 'libv4l2', 'libv4l2rds', 'libv4lconvert', 'libwebpdecoder', 'libwebpdemux', 'libz',
+        // _scripts/androidLibwebp.mjs builds 16 KB-aligned replacements into the
+        // APK's native library directory, which ends LD_LIBRARY_PATH.
+        'libsharpyuv', 'libwebp', 'libwebpmux'
     ]
     static final java.util.regex.Pattern UNUSED_FFMPEG = java.util.regex.Pattern.compile(
         '^usr/lib/(?:(?:girepository-1\\.0|glib-2\\.0|libv4l)/.*|libOpenCL\\.l?a|v4l1compat\\.so|v4l2convert\\.so|(?:' +
