@@ -82,7 +82,7 @@ function highlightHtmlText(inputHtml, query) {
 const displayText = computed(() => {
   // Tags are kept as they are, so times in attributes such as `href` stay intact.
   // Starting only at the beginning of a number keeps long digit runs in remote text from taking quadratic time
-  const timestampHtml = props.inputHtml.replaceAll(/<[^>]*>|(?<!\d)(?:(\d+):)?(\d+):(\d+)/gi, (timestamp, hours, minutes, seconds) => {
+  const timestampHtml = props.inputHtml.replaceAll(/<[^<>]*>|(?<!\d)(?:(\d+):)?(\d+):(\d+)/gi, (timestamp, hours, minutes, seconds) => {
     if (minutes === undefined) {
       return timestamp
     }
