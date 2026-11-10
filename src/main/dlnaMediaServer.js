@@ -30,6 +30,7 @@ export function createMediaServer(mediaUrl, deviceAddress, token, getHeaders = (
           const addresses = await resolveAddresses(url)
           if (!addresses) throw new Error('Media address is not allowed')
           const headers = new Headers(getHeaders(url.href))
+          headers.set('Accept-Encoding', 'identity')
           if (request.headers.range) headers.set('Range', request.headers.range)
           upstream = await fetchCastMedia(url.protocol === 'https:' ? https : http, url, {
             method: request.method,
@@ -50,7 +51,9 @@ export function createMediaServer(mediaUrl, deviceAddress, token, getHeaders = (
         clearTimeout(timeout)
       }
       const responseHeaders = { 'content-type': 'video/mp4', 'transfermode.dlna.org': 'Streaming' }
-      for (const name of ['content-length', 'content-range', 'accept-ranges']) {
+      // The body is decoded, so lengths and ranges of an encoded response don't apply to it.
+      const encoding = upstream.headers.get('content-encoding')
+      for (const name of encoding && encoding !== 'identity' ? [] : ['content-length', 'content-range', 'accept-ranges']) {
         const value = upstream.headers.get(name)
         if (value) responseHeaders[name] = value
       }

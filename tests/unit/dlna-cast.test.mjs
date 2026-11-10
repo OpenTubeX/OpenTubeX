@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
+import { gzipSync } from 'node:zlib'
 import test from 'node:test'
 
 import { createMediaServer, parseDlnaDevice, sendAvTransport } from '../../src/main/dlnaCast.js'
@@ -137,6 +138,28 @@ test('serves MP4 byte ranges only to the selected device and token', async t => 
   assert.equal(response.status, 206)
   assert.equal(response.headers.get('content-range'), 'bytes 2-5/10')
   assert.equal(await response.text(), 'cdef')
+})
+
+test('does not advertise the compressed length of a decoded response', async t => {
+  const media = Buffer.alloc(1024, 'a')
+  let encoding
+  const upstream = createServer((request, response) => {
+    encoding = request.headers['accept-encoding']
+    const compressed = gzipSync(media)
+    response.writeHead(200, { 'content-encoding': 'gzip', 'content-length': compressed.length, 'accept-ranges': 'bytes' }).end(compressed)
+  })
+  const upstreamPort = await listen(upstream)
+  t.after(() => close(upstream))
+
+  const proxy = createMediaServer(`http://127.0.0.1:${upstreamPort}/video`, '127.0.0.1', 'secret', undefined, allowLoopback)
+  const proxyPort = await listen(proxy)
+  t.after(() => close(proxy))
+
+  const response = await fetch(`http://127.0.0.1:${proxyPort}/secret/video.mp4`)
+  assert.deepEqual(Buffer.from(await response.arrayBuffer()), media)
+  assert.equal(response.headers.get('content-length'), null)
+  assert.equal(response.headers.get('accept-ranges'), null)
+  assert.equal(encoding, 'identity')
 })
 
 test('follows media redirects without forwarding credentials to another origin', async t => {
