@@ -2,7 +2,7 @@ import { jsRuntimeArguments } from '../ytDlpArguments'
 import { execFile } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { chmod, mkdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises'
-import { delimiter, dirname, join } from 'node:path'
+import { basename, delimiter, dirname, join } from 'node:path'
 import { promisify } from 'node:util'
 import { inflateRaw } from 'node:zlib'
 import { app, BrowserWindow, net } from 'electron'
@@ -10,7 +10,7 @@ import { settings } from '../datastores/handlers/base'
 import { buildProxyUrl, isOpenTubeXUrl } from './utils'
 import { IpcChannels } from '../constants'
 import { getMatchingDownloadValidators, getYtDlpAssetName } from './ytDlpAsset'
-import { verifyYtDlpReleaseAsset } from './ytDlpSignature'
+import { verifySha256Checksum, verifyYtDlpReleaseAsset } from './ytDlpSignature'
 
 const execFileAsync = promisify(execFile)
 
@@ -20,6 +20,14 @@ const YT_DLP_RELEASE_REPOSITORIES = {
   nightly: 'yt-dlp/yt-dlp-nightly-builds',
   master: 'yt-dlp/yt-dlp-master-builds'
 }
+
+// yt-dlp's own FFmpeg builds for Windows, patched for use with yt-dlp
+const WINDOWS_FFMPEG_RELEASE_URL = 'https://github.com/yt-dlp/FFmpeg-Builds/releases/latest/download'
+const WINDOWS_FFMPEG_ASSET_NAME = 'ffmpeg-master-latest-win64-gpl.zip'
+const WINDOWS_FFMPEG_URL = `${WINDOWS_FFMPEG_RELEASE_URL}/${WINDOWS_FFMPEG_ASSET_NAME}`
+
+// the Developer ID of Martin Riedl, who signs the macOS FFmpeg builds
+const MACOS_FFMPEG_CODE_REQUIREMENT = 'anchor apple generic and certificate leaf[subject.OU] = "KU3N25YGLU"'
 
 let binaryInstallCounter = 0
 let managedBinaryInstallQueue = Promise.resolve()
@@ -467,6 +475,54 @@ function getLatestReleaseDownloadUrl(repository) {
 }
 
 /**
+ * Daily builds of the latest FFmpeg release for Linux and macOS
+ * https://ffmpeg.martin-riedl.de
+ * @param {'ffmpeg' | 'ffprobe'} binaryName
+ * @returns {string} a redirect to the latest build
+ */
+function getLatestFfmpegBuildUrl(binaryName) {
+  const platform = process.platform === 'darwin' ? 'macos' : 'linux'
+  const arch = process.arch === 'arm64' ? 'arm64' : 'amd64'
+  return `https://ffmpeg.martin-riedl.de/redirect/latest/${platform}/${arch}/release/${binaryName}.zip`
+}
+
+/**
+ * Resolves the redirect from {@link getLatestFfmpegBuildUrl}, so a build and
+ * its checksum file are fetched from the same build, even if a newer one is
+ * published in between. The redirect answers HEAD requests with 404, so this
+ * sends a GET request that is cancelled at the redirect.
+ * @param {string} latestUrl
+ * @returns {Promise<string>}
+ */
+function resolveFfmpegBuildUrl(latestUrl) {
+  return new Promise((resolve, reject) => {
+    const failure = managedToolError('MANAGED_TOOL_RELEASE_NOT_FOUND', 'Could not find the latest FFmpeg build')
+    const request = net.request({ url: latestUrl, redirect: 'manual' })
+    const timeout = setTimeout(() => {
+      request.abort()
+      reject(new Error('Timed out resolving the latest FFmpeg build'))
+    }, MANAGED_BINARY_UPDATE_CHECK_TIMEOUT_MS)
+    request.on('redirect', (statusCode, method, redirectUrl) => {
+      clearTimeout(timeout)
+      if (redirectUrl.startsWith('https://ffmpeg.martin-riedl.de/download/')) {
+        resolve(redirectUrl)
+      } else {
+        reject(failure)
+      }
+    })
+    request.on('response', () => {
+      clearTimeout(timeout)
+      reject(failure)
+    })
+    request.on('error', (error) => {
+      clearTimeout(timeout)
+      reject(error)
+    })
+    request.end()
+  })
+}
+
+/**
  * Checks a managed download without transferring its payload.
  * A missing validator means there is no trustworthy installed-release baseline.
  * @param {string} url
@@ -798,6 +854,21 @@ function unusableBinaryError(name, path) {
 }
 
 /**
+ * Checks that installed macOS FFmpeg binaries are signed by their builder,
+ * before they are run for the first time.
+ * @param {string[]} paths
+ */
+async function verifyMacOsFfmpegSignatures(paths) {
+  await Promise.all(paths.map(async (path) => {
+    try {
+      await execFileAsync('/usr/bin/codesign', ['--verify', '--strict', `-R=${MACOS_FFMPEG_CODE_REQUIREMENT}`, path], { timeout: 60_000 })
+    } catch {
+      throw managedToolError('MANAGED_TOOL_VERIFICATION_FAILED', `The downloaded ${basename(path)} binary is not signed by its builder`)
+    }
+  }))
+}
+
+/**
  * Keeps the English message for logs and network failure detection while the
  * code lets the renderer translate known failures.
  * @param {string} code
@@ -833,9 +904,8 @@ export async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
   const pendingInstalls = []
 
   if (process.platform === 'win32') {
-    // yt-dlp's own FFmpeg builds, patched for use with yt-dlp,
-    // unfortunately they are only extractable without extra dependencies for Windows (zip)
-    const url = 'https://github.com/yt-dlp/FFmpeg-Builds/releases/latest/download/ffmpeg-master-latest-win64-gpl.zip'
+    // yt-dlp's FFmpeg builds are only extractable without extra dependencies for Windows (zip)
+    const url = WINDOWS_FFMPEG_URL
 
     try {
       // Existing FFmpeg-only installations must fetch the archive again so
@@ -846,6 +916,10 @@ export async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
       const download = await downloadFile(url, onProgress, onDownloadStart, validators)
 
       if (download.data !== null) {
+        // The `latest` release is replaced in place, so a build published
+        // between both requests fails verification until the next attempt.
+        const checksums = await fetchBuffer(`${WINDOWS_FFMPEG_RELEASE_URL}/checksums.sha256`)
+        verifySha256Checksum(download.data, WINDOWS_FFMPEG_ASSET_NAME, checksums)
         pendingInstalls.push(
           { data: await extractZipEntry(download.data, name => name.endsWith('/bin/ffmpeg.exe')), path: ffmpegPath },
           { data: await extractZipEntry(download.data, name => name.endsWith('/bin/ffprobe.exe')), path: ffprobePath }
@@ -859,25 +933,23 @@ export async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
       return toErrorResult(error)
     }
   } else {
-    // daily builds of the latest FFmpeg release for Linux and macOS
-    // https://ffmpeg.martin-riedl.de
-    const platform = process.platform === 'darwin' ? 'macos' : 'linux'
-    const arch = process.arch === 'arm64' ? 'arm64' : 'amd64'
     const binaries = [
       { name: 'ffmpeg', path: ffmpegPath },
       { name: 'ffprobe', path: ffprobePath }
     ]
     try {
       for (const [index, binary] of binaries.entries()) {
-        const url = `https://ffmpeg.martin-riedl.de/redirect/latest/${platform}/${arch}/release/${binary.name}.zip`
+        const url = getLatestFfmpegBuildUrl(binary.name)
+        const buildUrl = await resolveFfmpegBuildUrl(url)
         const download = await downloadFile(
-          url,
+          buildUrl,
           percent => onProgress?.(percent === null ? null : Math.round((index * 100 + percent) / binaries.length)),
           onDownloadStart,
           await readDownloadValidators(binary.path, url)
         )
 
         if (download.data !== null) {
+          verifySha256Checksum(download.data, `${binary.name}.zip`, await fetchBuffer(`${buildUrl}.sha256`))
           pendingInstalls.push({
             data: await extractZipEntry(download.data, name => name === binary.name),
             path: binary.path
@@ -893,6 +965,10 @@ export async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
   let version
   try {
     version = await installBinariesAtomically(pendingInstalls, async () => {
+      if (process.platform === 'darwin') {
+        await verifyMacOsFfmpegSignatures(pendingInstalls.map(binary => binary.path))
+      }
+
       const [ffmpegVersion, ffprobeVersion] = await Promise.all([
         getFfmpegVersion(ffmpegPath),
         getFfprobeVersion(ffprobePath)
@@ -938,16 +1014,13 @@ async function isManagedBinaryUpdateAvailable(binary) {
 
   const ffmpegPath = getManagedBinaryPath('ffmpeg')
   if (process.platform === 'win32') {
-    const url = 'https://github.com/yt-dlp/FFmpeg-Builds/releases/latest/download/ffmpeg-master-latest-win64-gpl.zip'
-    return isFileUpdateAvailable(url, await readDownloadValidators(ffmpegPath, url))
+    return isFileUpdateAvailable(WINDOWS_FFMPEG_URL, await readDownloadValidators(ffmpegPath, WINDOWS_FFMPEG_URL))
   }
 
-  const platform = process.platform === 'darwin' ? 'macos' : 'linux'
-  const arch = process.arch === 'arm64' ? 'arm64' : 'amd64'
   for (const binaryName of ['ffmpeg', 'ffprobe']) {
-    const url = `https://ffmpeg.martin-riedl.de/redirect/latest/${platform}/${arch}/release/${binaryName}.zip`
-    const binaryPath = getManagedBinaryPath(binaryName)
-    if (await isFileUpdateAvailable(url, await readDownloadValidators(binaryPath, url))) {
+    const url = getLatestFfmpegBuildUrl(binaryName)
+    const validators = await readDownloadValidators(getManagedBinaryPath(binaryName), url)
+    if (validators !== null && await isFileUpdateAvailable(await resolveFfmpegBuildUrl(url), validators)) {
       return true
     }
   }

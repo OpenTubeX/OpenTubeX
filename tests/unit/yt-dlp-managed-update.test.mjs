@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict'
+import { createHash } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
+
+import { verifySha256Checksum } from '../../src/main/ytDlpSignature.js'
 
 const source = readFileSync(new URL('../../src/main/ytDlpBinaries.js', import.meta.url), 'utf8')
 const start = source.indexOf('\n/**\n * Downloads the latest yt-dlp release into the user data directory')
@@ -96,4 +99,37 @@ test('a downloaded yt-dlp that cannot run is reported as unusable', async () => 
     error: 'The downloaded yt-dlp binary could not be run',
     errorCode: 'MANAGED_TOOL_UNUSABLE'
   })
+})
+
+test('managed FFmpeg downloads are checked against the checksum of the build they came from', async () => {
+  const ffmpegStart = source.indexOf('\n/**\n * Downloads up-to-date FFmpeg and FFprobe builds')
+  const ffmpegEnd = source.indexOf('\n/**\n * Checks whether the selected managed binary has a newer remote asset', ffmpegStart)
+  assert.ok(ffmpegStart !== -1 && ffmpegEnd > ffmpegStart, 'downloadManagedFfmpeg should be found in ytDlpBinaries.js')
+
+  const fetchedUrls = []
+  const installs = []
+  const context = vm.createContext({
+    getManagedBinaryPath: name => `/managed/${name}`,
+    getLatestFfmpegBuildUrl: name => `https://ffmpeg.martin-riedl.de/redirect/latest/linux/amd64/release/${name}.zip`,
+    resolveFfmpegBuildUrl: async url => url.replace('/redirect/latest/linux/amd64/release/', '/download/linux/amd64/1_9.0/'),
+    readDownloadValidators: async () => ({ etag: '"installed"', lastModified: null }),
+    // FFmpeg is unchanged, while the FFprobe archive was tampered with
+    downloadFile: async url => ({ data: url.endsWith('/ffprobe.zip') ? Buffer.from('tampered') : null, validators: {} }),
+    fetchBuffer: async (url) => {
+      fetchedUrls.push(url)
+      return Buffer.from(`${createHash('sha256').update('ffprobe').digest('hex')}  ffprobe.zip\n`)
+    },
+    verifySha256Checksum,
+    extractZipEntry: data => data,
+    installBinariesAtomically: async (binaries) => { installs.push(...binaries) },
+    toErrorResult: error => ({ error: error.message, errorCode: error.code }),
+    process: { platform: 'linux', arch: 'x64' }
+  })
+  vm.runInContext(`${source.slice(ffmpegStart, ffmpegEnd).replace('export async function', 'async function')}
+globalThis.downloadManagedFfmpeg = downloadManagedFfmpeg`, context)
+
+  const result = await context.downloadManagedFfmpeg()
+  assert.equal(result.errorCode, 'MANAGED_TOOL_VERIFICATION_FAILED')
+  assert.deepEqual(fetchedUrls, ['https://ffmpeg.martin-riedl.de/download/linux/amd64/1_9.0/ffprobe.zip.sha256'])
+  assert.deepEqual(installs, [])
 })
