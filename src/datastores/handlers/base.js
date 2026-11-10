@@ -1221,7 +1221,8 @@ class Playlists {
         processToBeAddedPlaylistVideo(copy)
         return copy
       })
-      const record = { ...merged, videos }
+      // The restore stamps the time it started, so keep a later edit's time
+      const record = { ...merged, videos, lastUpdatedAt: Math.max(current?.lastUpdatedAt ?? 0, merged.lastUpdatedAt ?? 0) }
       if (!Number.isFinite(record.createdAt)) record.createdAt = record.lastUpdatedAt
       const { videos: currentVideos = [], ...currentFields } = current ?? {}
       const fieldSnapshot = JSON.stringify(currentFields)

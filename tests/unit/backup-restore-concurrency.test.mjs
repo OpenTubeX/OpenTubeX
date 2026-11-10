@@ -67,13 +67,14 @@ test('restoring profiles keeps subscriptions another window adds meanwhile', asy
 test('restoring playlists keeps videos another window adds meanwhile', async (t) => {
   const { db, Playlists } = await fixture(t)
   await db.playlists.insertAsync({ _id: 'list', playlistName: 'List', lastUpdatedAt: 1, videos: [{ videoId: 'saved', playlistItemId: 'saved-item', timeAdded: 1 }] })
-  editAfterFirstRead(db.playlists, () => Playlists.upsertVideoByPlaylistId('list', 2, { videoId: 'added-meanwhile', playlistItemId: 'added-item', timeAdded: 2 }))
+  editAfterFirstRead(db.playlists, () => Playlists.upsertVideoByPlaylistId('list', 5, { videoId: 'added-meanwhile', playlistItemId: 'added-item', timeAdded: 2 }))
 
   const restored = { _id: 'list', playlistName: 'List', lastUpdatedAt: 3, videos: [{ videoId: 'restored', timeAdded: 3 }] }
   const saved = await Playlists.mergeBackup(restored)
 
   const stored = await db.playlists.findOneAsync({ _id: 'list' })
   assert.deepEqual(stored.videos.map(video => video.videoId), ['saved', 'added-meanwhile', 'restored'])
+  assert.equal(stored.lastUpdatedAt, 5, 'the restore started before the other edit')
   assert.deepEqual(JSON.parse(JSON.stringify(saved.videos)), stored.videos)
   // Restored entries need a playlistItemId for reordering, without changing the backup itself
   assert.equal(typeof stored.videos[2].playlistItemId, 'string')
