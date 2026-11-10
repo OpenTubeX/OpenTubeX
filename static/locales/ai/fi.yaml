@@ -1460,6 +1460,7 @@ Settings:
     Skip notification timeout: Ohitusilmoituksen näyttöaika
     Custom Color: Mukautettu väri
     DeArrow Settings: DeArrow
+    Show DeArrow Badge: Näytä DeArrow-merkki
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Ota Return YouTube Dislike käyttöön
@@ -2273,6 +2274,8 @@ Tooltips:
     Use Custom Title Bar: Korvaa järjestelmän otsikkopalkin välilehtipalkilla tai yläreunan navigoinnilla, kun välilehdet eivät ole ylhäällä, jotta pystysuuntaista tilaa säästyy. Ikkunan hallintapainikkeet näkyvät kyseisen palkin kulmassa.
     Use Grid Player Menu: Järjestää videosoittimen asetusvalikon ruudukoksi riviluettelon sijaan.
     Modal Backdrop: "Määrittää, miltä sovellus näyttää valintaikkunoiden ja valikoiden takana. Sumennus voi olla hidas tehottomammilla laitteilla."
+  SponsorBlock Settings:
+    Show DeArrow Badge: Merkitse videot, joiden otsikon tai pikkukuvan DeArrow on korvannut.
 The playlist is at the beginning. Enable loop to continue playing: Soittolista on alussa. Jatka toistoa ottamalla jatkuva toisto käyttöön
 External link opening has been disabled in Settings → Privacy: Ulkoisten linkkien avaaminen on poistettu käytöstä kohdassa Asetukset → Tietosuoja
 KeyboardShortcutPrompt:

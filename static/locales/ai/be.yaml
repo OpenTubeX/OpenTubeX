@@ -1517,6 +1517,7 @@ Settings:
     Skip notification timeout: Час паказу апавяшчэння пра пропуск
     Custom Color: Уласны колер
     DeArrow Settings: DeArrow
+    Show DeArrow Badge: Паказваць значок DeArrow
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Уключыць Return YouTube Dislike
@@ -2371,6 +2372,8 @@ Tooltips:
     Modal Backdrop: "Вызначае, як выглядае праграма за дыялогамі і меню. Размыццё можа запавольваць працу на менш магутных прыладах."
   Experimental Settings:
     Disable Hardware Acceleration: Адключае апаратнае паскарэнне GPU. Гэта можа вырашыць графічныя праблемы, але, верагодна, знізіць прадукцыйнасць.
+  SponsorBlock Settings:
+    Show DeArrow Badge: Пазначаць відэа, у якіх DeArrow замяніў назву або мініяцюру.
 The playlist is at the beginning. Enable loop to continue playing: Гэта пачатак спіса прайгравання. Уключыце паўтор, каб працягнуць прайграванне
 External link opening has been disabled in Settings → Privacy: Адкрыццё вонкавых спасылак адключана ў раздзеле «Налады» → «Прыватнасць»
 Screenshot Clipboard Success: Здымак экрана захаваны ў буферы абмену

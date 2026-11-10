@@ -1459,6 +1459,7 @@ Settings:
     Skip notification timeout: Saltatze-jakinarazpenaren denbora-muga
     Custom Color: Kolore pertsonalizatua
     DeArrow Settings: DeArrow
+    Show DeArrow Badge: Erakutsi DeArrow bereizgarria
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Gaitu Return YouTube Dislike
@@ -2276,6 +2277,8 @@ Tooltips:
     Use Custom Title Bar: Sistemaren izenburu-barra fitxa-barrarekin ordezkatzen du, edo goiko nabigazioarekin fitxak goian ez daudenean, espazio bertikala aurrezteko. Leihoaren kontrolak barra horren izkinan agertzen dira.
     Use Grid Player Menu: Erreproduzigailuaren ezarpen-menua lauzaz osatutako sareta batean antolatzen du, errenkada-zerrenda baten ordez.
     Modal Backdrop: "Aplikazioa elkarrizketa-koadroen eta menuen atzean nola ikusten den ezartzen du. Lausotzea motela izan daiteke gailu ez hain ahaltsuetan."
+  SponsorBlock Settings:
+    Show DeArrow Badge: Markatu DeArrow-ek izenburua edo miniatura ordeztu dien bideoak.
 The playlist is at the beginning. Enable loop to continue playing: Erreprodukzio-zerrenda hasieran dago. Gaitu begizta erreproduzitzen jarraitzeko
 External link opening has been disabled in Settings → Privacy: Kanpoko estekak irekitzea desgaitu da Ezarpenak → Pribatutasuna atalean
 KeyboardShortcutPrompt:

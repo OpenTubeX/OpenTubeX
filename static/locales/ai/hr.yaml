@@ -1470,6 +1470,7 @@ Settings:
     Skip notification timeout: Trajanje obavijesti o preskakanju
     Custom Color: Prilagođena boja
     DeArrow Settings: DeArrow
+    Show DeArrow Badge: Prikaži DeArrow oznaku
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Omogući Return YouTube Dislike
@@ -2304,6 +2305,8 @@ Tooltips:
     Modal Backdrop: "Određuje kako aplikacija izgleda iza dijaloga i izbornika. Zamućivanje može biti sporo na slabijim uređajima."
   Experimental Settings:
     Disable Hardware Acceleration: Onemogućuje hardversko ubrzanje GPU-a. Može riješiti grafičke probleme, ali će vjerojatno smanjiti performanse.
+  SponsorBlock Settings:
+    Show DeArrow Badge: Označi videozapise čiji je naslov ili minijaturu zamijenio DeArrow.
 The playlist is at the beginning. Enable loop to continue playing: Popis za reprodukciju je na početku. Omogućite ponavljanje za nastavak reprodukcije
 External link opening has been disabled in Settings → Privacy: Otvaranje vanjskih poveznica onemogućeno je u Postavke → Privatnost
 KeyboardShortcutPrompt:

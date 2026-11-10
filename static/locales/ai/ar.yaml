@@ -1485,6 +1485,7 @@ Settings:
     Skip notification timeout: تخطي مهلة الإخطار
     Custom Color: لون مخصص
     DeArrow Settings: DeArrow
+    Show DeArrow Badge: إظهار شارة DeArrow
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: إرجاع عدم الإعجاب على YouTube
     Enable Return YouTube Dislike: تمكين إرجاع عدم الإعجاب على YouTube
@@ -2304,6 +2305,8 @@ Tooltips:
     Modal Backdrop: "يحدد مظهر التطبيق خلف مربعات الحوار والقوائم. قد يكون التمويه بطيئًا على الأجهزة الأقل قوة."
   Experimental Settings:
     Disable Hardware Acceleration: يعطّل تسريع الأجهزة بواسطة وحدة معالجة الرسومات. قد يحل مشاكل الرسومات، لكنه سيؤدي على الأرجح إلى انخفاض الأداء.
+  SponsorBlock Settings:
+    Show DeArrow Badge: وضع علامة على مقاطع الفيديو التي استبدل DeArrow عنوانها أو صورتها المصغرة.
 The playlist is at the beginning. Enable loop to continue playing: قائمة التشغيل في البداية. تمكين الحلقة لمواصلة اللعب
 External link opening has been disabled in Settings → Privacy: تم تعطيل فتح الرابط الخارجي في الإعدادات → الخصوصية
 KeyboardShortcutPrompt:

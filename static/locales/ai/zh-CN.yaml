@@ -1459,6 +1459,7 @@ Settings:
     Skip notification timeout: 跳过通知显示时长
     Custom Color: 自定义颜色
     DeArrow Settings: DeArrow
+    Show DeArrow Badge: 显示 DeArrow 标记
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: 启用 Return YouTube Dislike
@@ -2266,6 +2267,8 @@ Tooltips:
     Use Custom Title Bar: 用标签栏（标签页不在顶部时则用顶部导航栏）替换系统标题栏，以节省垂直空间。窗口控制按钮会显示在该栏的角落。
     Use Grid Player Menu: 将视频播放器的设置菜单排列为磁贴网格，而不是行列表。
     Modal Backdrop: "设置对话框和菜单后方应用的显示效果。模糊效果在性能较弱的设备上可能会较慢。"
+  SponsorBlock Settings:
+    Show DeArrow Badge: 为标题或缩略图已被 DeArrow 替换的视频添加标记。
 The playlist is at the beginning. Enable loop to continue playing: 播放列表已到开头。启用循环可继续播放
 External link opening has been disabled in Settings → Privacy: 已在“设置”→“隐私”中禁用打开外部链接
 KeyboardShortcutPrompt:

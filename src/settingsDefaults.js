@@ -492,6 +492,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     settingsPassword: '',
     useDeArrowTitles: false,
     useDeArrowThumbnails: false,
+    showDeArrowBadge: false,
     deArrowThumbnailGeneratorUrl: 'https://dearrow-thumb.ajay.app',
     // This makes the `favorites` playlist uses as quick bookmark target
     // If the playlist is removed quick bookmark is disabled

@@ -186,12 +186,16 @@
 
     &.alwaysVisible {
       opacity: 1;
+    }
+
+    &.showingOriginal {
       filter: grayscale(1);
     }
   }
 }
 
 .deArrowToggleIcon {
+  block-size: 1em;
   inline-size: 1em;
 }
 

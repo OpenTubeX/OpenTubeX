@@ -1768,6 +1768,7 @@ Settings:
     Category Color: Barva kategorije
     Custom Color: Barva po meri
     DeArrow Settings: DeArrow
+    Show DeArrow Badge: Prikaži značko DeArrow
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Omogoči Return YouTube Dislike
@@ -2796,6 +2797,7 @@ Tooltips:
   SponsorBlock Settings:
     UseDeArrowTitles: Naslove videoposnetkov zamenja z naslovi, ki so jih uporabniki poslali v DeArrow.
     UseDeArrowThumbnails: Sličice videoposnetkov zamenja s sličicami iz DeArrow.
+    Show DeArrow Badge: Označi videoposnetke, katerih naslov ali sličico je zamenjal DeArrow.
 Unknown YouTube url type, cannot be opened in app: Tega URL-ja za YouTube ni mogoče odpreti v aplikaciji, ker njegova vrsta ni znana
 Autoplay Interruption Timer: Samodejno predvajanje je bilo preklicano zaradi {autoplayInterruptionIntervalHours} ur nedejavnosti
 Default Invidious instance has been set to {instance}: Privzeti primerek Invidious je nastavljen na {instance}

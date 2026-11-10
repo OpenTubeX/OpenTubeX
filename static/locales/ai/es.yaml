@@ -1424,6 +1424,7 @@ Settings:
     Skip notification timeout: Duración de la notificación de omisión
     Custom Color: Color personalizado
     DeArrow Settings: DeArrow
+    Show DeArrow Badge: Mostrar insignia de DeArrow
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Activar Return YouTube Dislike
@@ -2241,6 +2242,8 @@ Tooltips:
     Use Custom Title Bar: Reemplaza la barra de título del sistema por la barra de pestañas, o por la navegación superior cuando las pestañas no están arriba, para ahorrar espacio vertical. Los controles de la ventana aparecen en la esquina de esa barra.
     Use Grid Player Menu: Organiza el menú de ajustes del reproductor de vídeo como una cuadrícula de mosaicos en lugar de una lista de filas.
     Modal Backdrop: "Define cómo se ve la aplicación detrás de los diálogos y menús. El desenfoque puede ser lento en dispositivos menos potentes."
+  SponsorBlock Settings:
+    Show DeArrow Badge: Marca los vídeos cuyo título o miniatura ha sustituido DeArrow.
 The playlist is at the beginning. Enable loop to continue playing: La lista de reproducción está al principio. Activa la repetición para seguir reproduciendo
 External link opening has been disabled in Settings → Privacy: La apertura de enlaces externos se ha desactivado en Ajustes → Privacidad
 KeyboardShortcutPrompt:

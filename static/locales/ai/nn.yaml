@@ -1629,6 +1629,7 @@ Settings:
     DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): URL til DeArrow-miniatyr-API
     Custom Color: Tilpassa farge
     DeArrow Settings: DeArrow
+    Show DeArrow Badge: Vis DeArrow-merke
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Slå på Return YouTube Dislike
@@ -2586,6 +2587,7 @@ Tooltips:
   SponsorBlock Settings:
     UseDeArrowTitles: Byt ut videotitlar med titlar som brukarar har sendt inn til DeArrow.
     UseDeArrowThumbnails: Byt ut videominiatyrar med miniatyrar frå DeArrow.
+    Show DeArrow Badge: Merk videoar der tittelen eller miniatyrbiletet er bytt ut av DeArrow.
   Experimental Settings:
     Disable Hardware Acceleration: Slår av GPU-maskinvareakselerasjon. Kan løyse grafikkproblem, men vil truleg redusere ytinga.
 Autoplay Interruption Timer: Automatisk avspeling vart avbroten etter {autoplayInterruptionIntervalHours} timar utan aktivitet

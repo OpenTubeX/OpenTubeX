@@ -1799,6 +1799,7 @@ Settings:
     Category Color: Color de la categoria
     Custom Color: Color personalitzat
     DeArrow Settings: DeArrow
+    Show DeArrow Badge: Mostra la insígnia de DeArrow
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Activa Return YouTube Dislike
@@ -2836,6 +2837,7 @@ Tooltips:
   SponsorBlock Settings:
     UseDeArrowTitles: Substitueix els títols dels vídeos pels títols enviats pels usuaris de DeArrow.
     UseDeArrowThumbnails: Substitueix les miniatures dels vídeos per miniatures de DeArrow.
+    Show DeArrow Badge: Marca els vídeos dels quals DeArrow ha substituït el títol o la miniatura.
 Local API Error (Click to copy): Error de l'API local (feu clic per copiar-lo)
 Falling back to Local API: S'està utilitzant l'API local com a alternativa
 This video is unavailable because of missing formats. This can happen due to country unavailability.: Aquest vídeo no està disponible perquè falten formats. Pot ser que no estigui disponible al país.

@@ -1517,6 +1517,7 @@ Settings:
     Skip notification timeout: مهلت اعلان پرش
     Custom Color: رنگ سفارشی
     DeArrow Settings: DeArrow
+    Show DeArrow Badge: نمایش نشان DeArrow
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: فعال‌کردن Return YouTube Dislike
@@ -2368,6 +2369,8 @@ Tooltips:
     Modal Backdrop: "تعیین می‌کند برنامه پشت کادرهای گفتگو و منوها چگونه دیده شود. مات‌کردن ممکن است در دستگاه‌های ضعیف‌تر کند باشد."
   Experimental Settings:
     Disable Hardware Acceleration: شتاب‌دهی سخت‌افزاری پردازندهٔ گرافیکی را غیرفعال می‌کند. ممکن است مشکلات گرافیکی را برطرف کند، اما احتمالاً کارایی را کاهش می‌دهد.
+  SponsorBlock Settings:
+    Show DeArrow Badge: ویدیوهایی را که DeArrow عنوان یا تصویر بندانگشتی آن‌ها را جایگزین کرده است علامت‌گذاری کن.
 The playlist is at the beginning. Enable loop to continue playing: فهرست پخش در ابتداست. برای ادامه پخش، تکرار را فعال کنید
 External link opening has been disabled in Settings → Privacy: بازکردن پیوندهای خارجی در تنظیمات → حریم خصوصی غیرفعال شده است
 Screenshot Clipboard Success: نماگرفت در بریده‌دان ذخیره شد

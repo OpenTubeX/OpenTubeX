@@ -1618,6 +1618,7 @@ Settings:
     DeArrow Settings: DeArrow
     UseDeArrowTitles: DeArrow-Videotitel verwenden
     UseDeArrowThumbnails: DeArrow für Miniaturansichten verwenden
+    Show DeArrow Badge: DeArrow-Kennzeichnung anzeigen
     'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)': DeArrow-Vorschaubild-API-URL
   External Player Settings:
     Ignore Unsupported Action Warnings: Warnungen vor nicht unterstützten Aktionen ignorieren
@@ -3061,6 +3062,7 @@ Tooltips:
   SponsorBlock Settings:
     UseDeArrowTitles: Videotitel durch von der Community eingereichte Titel von DeArrow ersetzen.
     UseDeArrowThumbnails: Video-Miniaturansichten durch Miniaturansichten von DeArrow ersetzen.
+    Show DeArrow Badge: Videos kennzeichnen, deren Titel oder Miniaturansicht durch DeArrow ersetzt wurde.
   Theme Settings:
     Thumbnail Size: Skaliert Vorschaubilder in Rastern und Listen. Raster mit fester Spaltenanzahl oder der Ansicht „Volle Breite“ füllen stattdessen jede Zeile, dort ändert der Regler nur Listen-Vorschaubilder und Shorts. In Fenstern mit Smartphone-Größe sind Raster-Vorschaubilder auf 100 % begrenzt.
     Playlist Thumbnail Size: Skaliert Vorschaubilder auf Playlist-Seiten. Raster mit fester Spaltenanzahl oder der Ansicht „Volle Breite“ füllen stattdessen jede Zeile, dort ändert der Regler nur Listen-Vorschaubilder und Shorts. In Fenstern mit Smartphone-Größe sind Raster-Vorschaubilder auf 100 % begrenzt.

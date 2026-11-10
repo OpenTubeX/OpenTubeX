@@ -1459,6 +1459,7 @@ Settings:
     Skip notification timeout: Visningstid for varsel om hopp
     Custom Color: Egendefinert farge
     DeArrow Settings: DeArrow
+    Show DeArrow Badge: Vis DeArrow-merke
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Slå på Return YouTube Dislike
@@ -2271,6 +2272,8 @@ Tooltips:
     Use Custom Title Bar: Erstatter systemets tittellinje med fanelinjen, eller med den øverste navigasjonen når fanene ikke er øverst, for å spare loddrett plass. Vindusknappene vises i hjørnet av den linjen.
     Use Grid Player Menu: Ordner innstillingsmenyen til videospilleren som et rutenett med fliser i stedet for en liste med rader.
     Modal Backdrop: "Angir hvordan appen ser ut bak dialoger og menyer. Uskarphet kan være tregt på mindre kraftige enheter."
+  SponsorBlock Settings:
+    Show DeArrow Badge: Merk videoer der tittelen eller miniatyrbildet er erstattet av DeArrow.
 The playlist is at the beginning. Enable loop to continue playing: Spillelisten er ved begynnelsen. Slå på gjentakelse for å fortsette avspillingen
 External link opening has been disabled in Settings → Privacy: Åpning av eksterne lenker er slått av under Innstillinger → Personvern
 KeyboardShortcutPrompt:

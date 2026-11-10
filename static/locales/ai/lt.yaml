@@ -1723,6 +1723,7 @@ Settings:
     DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): DeArrow miniatiūrų API URL
     Custom Color: Pasirinktinė spalva
     DeArrow Settings: DeArrow
+    Show DeArrow Badge: Rodyti DeArrow ženklelį
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Įjungti „Return YouTube Dislike“
@@ -2700,6 +2701,7 @@ Tooltips:
   SponsorBlock Settings:
     UseDeArrowTitles: Vaizdo įrašų pavadinimus pakeisti naudotojų pateiktais DeArrow pavadinimais.
     UseDeArrowThumbnails: Vaizdo įrašų miniatiūras pakeisti DeArrow miniatiūromis.
+    Show DeArrow Badge: Pažymėti vaizdo įrašus, kurių pavadinimą ar miniatiūrą pakeitė DeArrow.
   Experimental Settings:
     Disable Hardware Acceleration: Išjungia GPU aparatinį spartinimą. Gali išspręsti grafikos problemas, bet tikriausiai sumažins našumą.
 Autoplay Interruption Timer: Automatinis atkūrimas atšauktas dėl {autoplayInterruptionIntervalHours} val. neveiklumo

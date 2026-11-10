@@ -471,13 +471,34 @@
             v-if="deArrowChangedContent || deArrowTogglePinned"
             :title="deArrowToggleTitle"
             class="optionsButton deArrowToggleButton"
-            :class="{ alwaysVisible: deArrowTogglePinned }"
+            :class="{ alwaysVisible: deArrowTogglePinned || showDeArrowBadge, showingOriginal: deArrowTogglePinned }"
             @click="toggleDeArrow"
           >
-            <FtIcon
+            <!-- DeArrow's logo, so the button reads as the service's mark -->
+            <svg
               class="deArrowToggleIcon"
-              :icon="['far', 'dot-circle']"
-            />
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="12"
+                fill="#1213bd"
+              />
+              <circle
+                cx="12"
+                cy="12"
+                r="8.3"
+                fill="#88c9f9"
+              />
+              <circle
+                cx="12"
+                cy="12"
+                r="3.8"
+                fill="#0a62a5"
+              />
+            </svg>
           </button>
         </div>
         <p
@@ -2081,10 +2102,14 @@ const showDeArrowTitle = computed(() => useDeArrowTitles.value && !deArrowToggle
 const showDeArrowThumbnail = computed(() => useDeArrowThumbnails.value && !deArrowTogglePinned.value)
 
 const deArrowChangedContent = computed(() => {
-  return (useDeArrowThumbnails.value && deArrowCache.value?.thumbnail) ||
+  return (useDeArrowThumbnails.value && thumbnailPreference.value !== 'hidden' && deArrowCache.value?.thumbnail) ||
       (useDeArrowTitles.value && deArrowCache.value?.title &&
         props.data.title.localeCompare(deArrowCache.value.title, undefined, { sensitivity: 'accent' }) !== 0)
 })
+
+// Keeps the DeArrow toggle visible as a badge on cards whose details DeArrow changed.
+/** @type {import('vue').ComputedRef<boolean>} */
+const showDeArrowBadge = computed(() => store.getters.getShowDeArrowBadge)
 
 const deArrowToggleTitle = computed(() => {
   return deArrowTogglePinned.value
@@ -2251,7 +2276,7 @@ async function fetchDeArrowData(videoId) {
 }
 
 function toggleDeArrow() {
-  if (!deArrowChangedContent.value) {
+  if (!deArrowChangedContent.value && !deArrowTogglePinned.value) {
     return
   }
 

@@ -1652,6 +1652,7 @@ Settings:
     Category Color: Color de categoría
     Custom Color: Color personalizado
     DeArrow Settings: DeArrow
+    Show DeArrow Badge: Mostrar insignia de DeArrow
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Activar Return YouTube Dislike
@@ -2637,6 +2638,7 @@ Tooltips:
   SponsorBlock Settings:
     UseDeArrowTitles: Sustituye los títulos de los videos por títulos enviados por los usuarios desde DeArrow.
     UseDeArrowThumbnails: Sustituye las miniaturas de video por miniaturas de DeArrow.
+    Show DeArrow Badge: Marca los videos cuyo título o miniatura fue reemplazado por DeArrow.
 Autoplay Interruption Timer: Reproducción automática cancelada debido a {autoplayInterruptionIntervalHours} horas de inactividad
 The playlist is at the beginning. Enable loop to continue playing: La lista de reproducción está al principio. Activa la repetición para seguir reproduciendo
 Age Restricted:

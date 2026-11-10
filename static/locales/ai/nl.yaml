@@ -1489,6 +1489,7 @@ Settings:
     Skip notification timeout: Weergaveduur van oversla-melding
     Custom Color: Aangepaste kleur
     DeArrow Settings: DeArrow
+    Show DeArrow Badge: DeArrow-badge tonen
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Return YouTube Dislike inschakelen
@@ -2334,6 +2335,8 @@ Tooltips:
     Modal Backdrop: "Bepaalt hoe de app er achter dialoogvensters en menu’s uitziet. Vervagen kan traag zijn op minder krachtige apparaten."
   Experimental Settings:
     Disable Hardware Acceleration: Schakelt GPU-hardwareversnelling uit. Kan grafische problemen oplossen, maar zal waarschijnlijk de prestaties verminderen.
+  SponsorBlock Settings:
+    Show DeArrow Badge: Markeer video's waarvan de titel of miniatuur door DeArrow is vervangen.
 The playlist is at the beginning. Enable loop to continue playing: De afspeellijst staat aan het begin. Schakel herhalen in om door te gaan met afspelen
 External link opening has been disabled in Settings → Privacy: Het openen van externe links is uitgeschakeld via Instellingen → Privacy
 Screenshot Clipboard Success: Schermafbeelding op klembord opgeslagen

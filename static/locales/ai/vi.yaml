@@ -1463,6 +1463,7 @@ Settings:
     Skip notification timeout: Thời gian hiện thông báo bỏ qua
     Custom Color: Màu tùy chỉnh
     DeArrow Settings: DeArrow
+    Show DeArrow Badge: Hiện huy hiệu DeArrow
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Bật Return YouTube Dislike
@@ -2283,6 +2284,8 @@ Tooltips:
     Modal Backdrop: "Đặt giao diện của ứng dụng phía sau hộp thoại và menu. Hiệu ứng làm mờ có thể chậm trên thiết bị yếu hơn."
   Experimental Settings:
     Disable Hardware Acceleration: Tắt tăng tốc phần cứng GPU. Có thể khắc phục sự cố đồ họa, nhưng có thể làm giảm hiệu suất.
+  SponsorBlock Settings:
+    Show DeArrow Badge: Gắn nhãn cho video có tiêu đề hoặc ảnh thu nhỏ đã được DeArrow thay thế.
 The playlist is at the beginning. Enable loop to continue playing: Danh sách phát đang ở đầu. Hãy bật lặp lại để tiếp tục phát
 External link opening has been disabled in Settings → Privacy: Tính năng mở liên kết bên ngoài đã bị tắt trong Cài đặt → Quyền riêng tư
 KeyboardShortcutPrompt:

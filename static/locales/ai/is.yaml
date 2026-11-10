@@ -1465,6 +1465,7 @@ Settings:
     Skip notification timeout: Birtingartími tilkynningar um sleppingu
     Custom Color: Sérsniðinn litur
     DeArrow Settings: DeArrow
+    Show DeArrow Badge: Sýna DeArrow-merki
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Virkja Return YouTube Dislike
@@ -2289,6 +2290,8 @@ Tooltips:
     Modal Backdrop: "Ákvarðar hvernig forritið lítur út á bak við glugga og valmyndir. Móðun getur verið hæg á aflminni tækjum."
   Experimental Settings:
     Disable Hardware Acceleration: Slekkur á vélbúnaðarhröðun skjákorts. Getur lagað myndrænar villur, en mun líklega draga úr afköstum.
+  SponsorBlock Settings:
+    Show DeArrow Badge: Merkja myndskeið þar sem DeArrow hefur skipt út titli eða smámynd.
 The playlist is at the beginning. Enable loop to continue playing: Þú ert við upphaf spilunarlistans. Kveiktu á endurtekningu til að halda spilun áfram
 External link opening has been disabled in Settings → Privacy: Slökkt hefur verið á opnun ytri tengla undir Stillingar → Persónuvernd
 KeyboardShortcutPrompt:
