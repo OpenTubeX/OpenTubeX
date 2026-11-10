@@ -88,18 +88,21 @@ test('a live SABR window follows reported heads and expects few segments without
   assert.equal(headRefreshes.length, 1)
 })
 
-test('live SABR requests stay inside their segment when segments outlast the target duration', t => {
-  const { scheme, stream } = load(t)
+for (const segmentDurationMs of [5040, 4960]) {
+  test(`live SABR segments keep the media times of ${segmentDurationMs} ms segments`, t => {
+    const { scheme, stream } = load(t)
 
-  // Each segment lasts 5.04 seconds, so after 100 segments the contiguous
-  // five-second times are four seconds early
-  for (let sequenceNumber = 1001; sequenceNumber <= 1100; sequenceNumber++) {
-    t.mock.timers.tick(5040)
-    protocol.publishSabrLiveHead(scheme, head(sequenceNumber, Date.now(), 5040))
-  }
-  const reference = stream.segmentIndex.get(stream.segmentIndex.find(5502))
-  assert.match(reference.getUris()[0], /&sq=1100$/)
-  const requestTimeMs = Number(new URL(reference.getUris()[0]).searchParams.get('startTimeMs'))
-  const { timeMs } = head(1100, 0, 5040)
-  assert.ok(requestTimeMs > timeMs && requestTimeMs < timeMs + 5040, `${requestTimeMs} is outside sq 1100`)
-})
+    // After 100 segments, five-second times would be four seconds off. The
+    // buffered ranges map media times to segments, and requests ask for times.
+    for (let sequenceNumber = 1001; sequenceNumber <= 1100; sequenceNumber++) {
+      t.mock.timers.tick(segmentDurationMs)
+      protocol.publishSabrLiveHead(scheme, head(sequenceNumber, Date.now(), segmentDurationMs))
+    }
+    const { timeMs } = head(1100, 0, segmentDurationMs)
+    const reference = stream.segmentIndex.get(stream.segmentIndex.find(timeMs / 1000 + 2.5))
+    assert.match(reference.getUris()[0], /&sq=1100$/)
+    assert.ok(Math.abs(reference.startTime - timeMs / 1000) < 0.1, `sq 1100 starts at ${reference.startTime}`)
+    const requestTimeMs = Number(new URL(reference.getUris()[0]).searchParams.get('startTimeMs'))
+    assert.ok(requestTimeMs > timeMs && requestTimeMs < timeMs + segmentDurationMs, `${requestTimeMs} is outside sq 1100`)
+  })
+}

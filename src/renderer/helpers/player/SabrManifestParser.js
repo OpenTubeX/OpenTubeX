@@ -1004,16 +1004,18 @@ class SabrLiveWindow {
       const estimatedStart = head.timeMs / 1000 + (sequenceNumber - head.sequenceNumber) * this._targetDuration
       const previous = this._segments.at(-1)
 
-      // Keep the timeline contiguous, unless the stream skipped ahead
-      const startTime = previous && estimatedStart < previous.endTime + this._targetDuration
-        ? previous.endTime
-        : estimatedStart
+      // Follow the newest head's estimate, so the times cannot drift from the
+      // media timestamps when segments differ from the target duration. The
+      // buffered ranges reported to SABR map media times to these segments.
+      // Segments must not overlap, so a segment starts no earlier than the
+      // previous one ends, and ends early to make up for it.
+      const startTime = previous ? Math.max(previous.endTime, estimatedStart) : estimatedStart
+      const estimatedEnd = estimatedStart + this._targetDuration
+      const endTime = estimatedEnd > startTime ? estimatedEnd : startTime + this._targetDuration
 
-      // SABR returns the segment containing the requested time. Ask for the
-      // middle of the newest head's estimate, which stays inside the segment
-      // even when the contiguous times drift from the media timestamps.
+      // SABR returns the segment containing the requested time, so ask for its middle
       const requestTimeMs = Math.round((estimatedStart + this._targetDuration / 2) * 1000)
-      const segment = { sequenceNumber, startTime, endTime: startTime + this._targetDuration, requestTimeMs }
+      const segment = { sequenceNumber, startTime, endTime, requestTimeMs }
       this._segments.push(segment)
       added.push(segment)
     }
