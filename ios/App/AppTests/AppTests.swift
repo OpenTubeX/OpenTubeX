@@ -1609,7 +1609,10 @@ final class AppTests: XCTestCase {
         let plugin = try await evaluate("Capacitor.isPluginAvailable('PoToken') && Capacitor.isPluginAvailable('SabrHttp') && Capacitor.isPluginAvailable('IOSStorage') && Capacitor.isPluginAvailable('YtDlp')") as? Bool
         XCTAssertEqual(plugin, true)
         // Dismiss the first-run tutorial through its real controls if present.
-        _ = try await evaluate("Array.from(document.querySelectorAll('button')).find(b => /^(Skip|Überspringen)$/.test(b.innerText.trim()))?.click(); true")
+        // The audience is decided before .app renders, but the overlay loads asynchronously.
+        try await wait("localStorage.getItem('opentubex.tutorial.audience') !== 'new' || !!document.querySelector('.tutorialSkip button')", timeout: 15)
+        _ = try await evaluate("document.querySelector('.tutorialSkip button')?.click(); true")
+        try await wait("!document.querySelector('.tutorialOverlay')", timeout: 15)
     }
 
     func testLibraryDatabaseStoresTypedValuesLargeRowsAndRollsBack() async throws {
