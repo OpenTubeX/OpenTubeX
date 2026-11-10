@@ -31,8 +31,17 @@ test('moves saved bounds back inside the work area they overlap most', () => {
   )
   assert.deepEqual(
     fitPictureInPictureBounds({ x: 0, y: 0, width: 4000, height: 2250 }, { x: 0, y: 0, width: 384, height: 216 }, [display]),
-    { x: 0, y: 0, width: 1849, height: 1040 }
+    { x: 71, y: 0, width: 1849, height: 1040 }
   )
+})
+
+test('keeps a window in its corner for a video with another aspect ratio', () => {
+  const corner = { x: 1520, y: 815, width: 400, height: 225 }
+  const portrait = { x: 0, y: 0, width: 225, height: 400 }
+  assert.deepEqual(fitPictureInPictureBounds(corner, portrait, [display]), { x: 1695, y: 640, width: 225, height: 400 })
+  // A size Chromium chose
+  assert.deepEqual(fitPictureInPictureBounds(corner, { x: 0, y: 0, width: 284, height: 400 }, [display], true), { x: 1636, y: 640, width: 284, height: 400 })
+  assert.deepEqual(fitPictureInPictureBounds({ ...corner, x: 0, y: 0 }, portrait, [display]), { x: 0, y: 0, width: 225, height: 400 })
 })
 
 test('ignores saved bounds on a disconnected display', () => {
@@ -99,7 +108,7 @@ function nativeFixture(saved) {
     fromNative: rect => Object.fromEntries(Object.entries(rect).map(([key, value]) => [key, value / 2])),
     pollInterval: 100
   })
-  return { tracker, calls, bounds, stored }
+  return { tracker, calls, bounds, stored, native }
 }
 
 test('restores the saved bounds each time the window shows', async t => {
@@ -118,6 +127,34 @@ test('restores the saved bounds each time the window shows', async t => {
   bounds.set(7, { x: 3000, y: 1600, width: 768, height: 432 })
   await tracker.shown({})
   assert.deepEqual(calls.at(-1), ['set', 7, { x: 200, y: 300, width: 800, height: 450 }])
+})
+
+test('saves only the user\'s changes to the window', async t => {
+  t.mock.timers.enable({ apis: ['setInterval'] })
+  const { tracker, calls, bounds, stored, native } = nativeFixture({ x: 1280, y: 680, width: 640, height: 360 })
+  const page = {}
+  await tracker.shown(page)
+  assert.deepEqual(calls.at(-1), ['set', 7, { x: 2560, y: 1360, width: 1280, height: 720 }])
+
+  // Chromium resizes the window for a 4:3 video, and the window stays in its corner
+  bounds.set(7, { x: 2560, y: 1360, width: 960, height: 720 })
+  t.mock.timers.tick(100)
+  assert.deepEqual(calls.at(-1), ['set', 7, { x: 2880, y: 1360, width: 960, height: 720 }])
+  t.mock.timers.tick(100)
+  tracker.hidden(page)
+
+  // Chromium widens a window for a portrait video to its minimum width right away
+  const set = native.setWindowBounds
+  native.setWindowBounds = (handle, value) => set(handle, { ...value, width: Math.max(value.width, 800) })
+  bounds.set(7, { x: 0, y: 0, width: 432, height: 768 })
+  await tracker.shown(page)
+  t.mock.timers.tick(100)
+  assert.deepEqual(calls.at(-1), ['set', 7, { x: 3040, y: 800, width: 800, height: 1280 }])
+  assert.deepEqual(stored, [])
+
+  bounds.set(7, { x: 100, y: 200, width: 800, height: 1280 })
+  t.mock.timers.tick(100)
+  assert.deepEqual(stored, [{ x: 50, y: 100, width: 400, height: 640 }])
 })
 
 test('leaves a window alone without saved bounds or a match', async t => {
@@ -173,7 +210,13 @@ function kwinWindow({ pid = 42, keepAbove = false, desktopFileName = '', normalW
     assignments: [],
     frameGeometryChanged: signal('frameGeometryChanged'),
     interactiveMoveResizeFinished: signal('interactiveMoveResizeFinished'),
-    emit: name => listeners[name]?.()
+    emit: name => listeners[name]?.(),
+    // A geometry change by KWin or Chromium
+    change: value => {
+      const old = geometry
+      geometry = value
+      listeners.frameGeometryChanged?.(old)
+    }
   }
   let geometry = { x: 516, y: 290, width: 888, height: 500 }
   Object.defineProperty(window, 'frameGeometry', {
@@ -210,8 +253,7 @@ test('the KWin script reports finished moves and reuses them in the session', ()
   assert.deepEqual(first.assignments, [])
 
   first.move = true
-  first.frameGeometry = { x: 100.4, y: 120, width: 480, height: 270 }
-  first.emit('frameGeometryChanged')
+  first.change({ x: 100.4, y: 120, width: 480, height: 270 })
   assert.deepEqual(reports, [])
   first.move = false
   first.emit('interactiveMoveResizeFinished')
@@ -221,6 +263,24 @@ test('the KWin script reports finished moves and reuses them in the session', ()
   const second = kwinWindow()
   add(second)
   assert.deepEqual(second.assignments.at(-1), { x: 100, y: 120, width: 480, height: 270 })
+})
+
+test('the KWin script keeps the saved bounds when the script or Chromium changes the window', () => {
+  const pip = kwinWindow()
+  const { add, reports } = runKwinScript({ x: 1280, y: 680, width: 640, height: 360 }, [])
+  add(pip)
+  // Chromium takes the resize the script asked for, then resizes the window
+  // for a video with another aspect ratio
+  pip.change({ x: 1280, y: 680, width: 640, height: 360 })
+  pip.change({ x: 1340, y: 680, width: 480, height: 360 })
+  assert.deepEqual(pip.assignments.at(-1), { x: 1440, y: 680, width: 480, height: 360 })
+  pip.change(pip.assignments.at(-1))
+  assert.deepEqual(reports, [])
+
+  // A move by the user, such as a keyboard shortcut
+  pip.change({ x: 20, y: 30, width: 480, height: 360 })
+  pip.change({ x: 1440, y: 680, width: 480, height: 360 })
+  assert.deepEqual(reports.map(report => report.slice(4)), [[20, 30, 480, 360], [1440, 680, 480, 360]])
 })
 
 test('inside Flatpak, the KWin script finds the Picture-in-Picture window by its main window\'s host PID', () => {

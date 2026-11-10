@@ -20,6 +20,8 @@ export function normalizePictureInPictureBounds(value) {
  * Returns the bounds to give a new Picture-in-Picture window, or null when the
  * saved ones are no longer on a display. The window keeps the saved area but
  * the current video's aspect ratio, and stays inside the work area it lands on.
+ * It keeps to the work area edges nearest the saved bounds, so a window placed
+ * in a corner stays there for a video with another aspect ratio.
  *
  * KWin runs this function as script source, so it must not use anything
  * outside its own body.
@@ -27,9 +29,10 @@ export function normalizePictureInPictureBounds(value) {
  * @param {Rect} saved
  * @param {Rect} current the window as Chromium opened it, which matches the video's aspect ratio
  * @param {Rect[]} workAreas
+ * @param {boolean} [keepSize] only move the window, for a size Chromium chose
  * @returns {Rect | null}
  */
-export function fitPictureInPictureBounds(saved, current, workAreas) {
+export function fitPictureInPictureBounds(saved, current, workAreas, keepSize = false) {
   const overlap = (/** @type {Rect} */ area) =>
     Math.max(0, Math.min(saved.x + saved.width, area.x + area.width) - Math.max(saved.x, area.x)) *
     Math.max(0, Math.min(saved.y + saved.height, area.y + area.height) - Math.max(saved.y, area.y))
@@ -40,16 +43,20 @@ export function fitPictureInPictureBounds(saved, current, workAreas) {
   }
   if (area === null || current.width <= 0 || current.height <= 0) return null
 
-  const scale = Math.min(
-    Math.sqrt((saved.width * saved.height) / (current.width * current.height)),
-    area.width / current.width,
-    area.height / current.height
-  )
+  const scale = keepSize
+    ? 1
+    : Math.min(
+        Math.sqrt((saved.width * saved.height) / (current.width * current.height)),
+        area.width / current.width,
+        area.height / current.height
+      )
   const width = Math.round(current.width * scale)
   const height = Math.round(current.height * scale)
+  const x = saved.x + saved.width / 2 > area.x + area.width / 2 ? saved.x + saved.width - width : saved.x
+  const y = saved.y + saved.height / 2 > area.y + area.height / 2 ? saved.y + saved.height - height : saved.y
   return {
-    x: Math.round(Math.min(Math.max(saved.x, area.x), area.x + area.width - width)),
-    y: Math.round(Math.min(Math.max(saved.y, area.y), area.y + area.height - height)),
+    x: Math.round(Math.min(Math.max(x, area.x), area.x + area.width - width)),
+    y: Math.round(Math.min(Math.max(y, area.y), area.y + area.height - height)),
     width,
     height
   }
@@ -105,7 +112,9 @@ export function createPictureInPictureBoundsStore(file) {
  * Electron has no API for Chromium's Picture-in-Picture window, so restore the
  * saved bounds each time it shows. Moves raise no event, and closing the window
  * from the system destroys it before the page hears about it, so poll the
- * bounds while it shows.
+ * bounds while it shows. Only save the user's changes: Chromium keeps the
+ * aspect ratio while the user resizes the window, and changes it only for a
+ * video with another one.
  *
  * @param {{
  *   native: NativePictureInPictureWindows,
@@ -130,19 +139,36 @@ export function createNativePictureInPictureBounds({
   const restoring = new Set()
   /** @type {Map<object, number>} */
   const visible = new Map()
-  let lastSaved = ''
+  /** @type {Map<number, Rect>} the bounds each window had when last checked */
+  const seen = new Map()
+  /** @type {Rect | null} */
+  let saved = null
   /** @type {ReturnType<typeof setInterval> | null} */
   let timer = null
 
   /** @param {number} handle */
+  const read = handle => {
+    const bounds = native.getWindowBounds(handle)
+    return bounds === null ? null : fromNative(bounds)
+  }
+  /** @param {number} handle */
   const save = handle => {
     if (restoring.has(handle)) return true
-    const bounds = native.getWindowBounds(handle)
-    if (bounds === null) return false
-    const value = fromNative(bounds)
-    const key = JSON.stringify(value)
-    if (key !== lastSaved) {
-      lastSaved = key
+    const value = read(handle)
+    if (value === null) {
+      seen.delete(handle)
+      return false
+    }
+    const previous = seen.get(handle)
+    seen.set(handle, value)
+    if (previous === undefined) return true
+    const aspectRatio = previous.width / previous.height
+    if (Math.abs(value.width / value.height - aspectRatio) > aspectRatio * 0.02) {
+      // Chromium resized the window for a video with another aspect ratio
+      const moved = saved && fitPictureInPictureBounds(saved, value, getWorkAreas(), true)
+      if (moved && native.setWindowBounds(handle, toNative(moved))) seen.set(handle, moved)
+    } else if (Object.keys(value).some(key => value[key] !== previous[key])) {
+      saved = value
       store.save(value)
     }
     return true
@@ -166,11 +192,14 @@ export function createNativePictureInPictureBounds({
       timer ??= setInterval(poll, pollInterval)
       restoring.add(handle)
       try {
-        const saved = await store.load()
-        const current = native.getWindowBounds(handle)
+        saved = await store.load()
+        const current = read(handle)
+        if (current !== null) seen.set(handle, current)
         if (saved === null || current === null) return
-        const bounds = fitPictureInPictureBounds(saved, fromNative(current), getWorkAreas())
-        if (bounds !== null) native.setWindowBounds(handle, toNative(bounds))
+        const bounds = fitPictureInPictureBounds(saved, current, getWorkAreas())
+        // Chromium can change the size it is given right away, such as to its
+        // minimum width, so compare later checks with what the window was given
+        if (bounds !== null && native.setWindowBounds(handle, toNative(bounds))) seen.set(handle, bounds)
       } finally {
         restoring.delete(handle)
       }
@@ -181,6 +210,7 @@ export function createNativePictureInPictureBounds({
       if (handle === undefined) return
       visible.delete(owner)
       save(handle)
+      seen.delete(handle)
       poll()
     }
   }
