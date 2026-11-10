@@ -6,6 +6,8 @@ import { strToU8, zipSync } from 'fflate'
 import { previewBackupImport, previewTakeoutImport, parseTakeoutWatchHistory, mergeTakeoutHistoryRecord } from '../../src/renderer/helpers/import-preview.js'
 import { mergeBackupProfile, mergeBackupPlaylist } from '../../src/renderer/helpers/unifiedBackup.js'
 import { processToBeAddedPlaylistVideo } from '../../src/renderer/helpers/playlists.js'
+import { SqliteDatastore } from '../../src/datastores/sqlite.js'
+import { createNodeSqliteDriver } from '../../src/datastores/sqliteNode.js'
 import { forEachTakeoutImportEntry, listYouTubeTakeoutZipEntries } from '../../src/renderer/helpers/youtube-takeout-zip.js'
 
 const counts = row => [row.added, row.existing, row.skipped]
@@ -131,26 +133,31 @@ test('Takeout selection opens before decoding and previews only selected categor
   assert.deepEqual(errors, [])
 })
 
-test('duplicate backup identities accumulate subscriptions and videos promised by the preview', async () => {
+test('duplicate backup identities accumulate subscriptions and videos promised by the preview', async (t) => {
   const data = {
     profiles: ['A', 'B'].map(id => ({ _id: 'same-profile', name: 'Profile', subscriptions: [{ id }] })),
     playlists: ['A', 'B'].map(videoId => ({ _id: 'same-playlist', playlistName: 'Playlist', videos: [{ videoId, timeAdded: 100 }] })),
   }
   const rows = previewBackupImport(data, { profiles: [], playlists: [] })
   assert.equal(rows.find(row => row.unit).added, 2)
-  const profiles = new Map()
-  const playlists = new Map()
+  const store = options => {
+    const driver = createNodeSqliteDriver(':memory:')
+    t.after(() => driver.close())
+    return new SqliteDatastore({ ...options, driver })
+  }
+  const db = { profiles: store(), playlists: store({ childField: 'videos' }) }
+  const handlers = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
+  const { Profiles, Playlists } = vm.runInNewContext(
+    handlers.slice(handlers.indexOf('async function saveRestoredRecord('), handlers.indexOf('\nclass SearchHistory {')) + '\n({ Profiles, Playlists })',
+    { db, mergeBackupProfile, mergeBackupPlaylist, processToBeAddedPlaylistVideo, crypto }
+  )
   const context = vm.createContext({
     backupBusy: { value: false },
     backupData: { value: data },
     selectedBackupSections: { value: ['profiles', 'playlists'] },
-    DBProfileHandlers: { find: async () => [], upsert: async record => profiles.set(record._id, record) },
-    DBPlaylistHandlers: { find: async () => [] },
-    mergeBackupProfile,
-    mergeBackupPlaylist,
-    processToBeAddedPlaylistVideo,
+    DBProfileHandlers: Profiles,
     normalizeImportedPlaylistThumbnail: async () => {},
-    store: { dispatch: async (action, record) => { if (action === 'updatePlaylist' || action === 'importPlaylist') playlists.set(record._id, record); return true } },
+    store: { dispatch: async (action, payload) => action !== 'mergePlaylistBackup' || (await Playlists.mergeBackup(payload), true) },
     compactAllDatastores: async () => true,
     closeBackupImport() {},
     showToast() {},
@@ -158,8 +165,8 @@ test('duplicate backup identities accumulate subscriptions and videos promised b
   })
   vm.runInContext(componentSection('async function importUnifiedBackup()', 'const showTakeoutImport'), context)
   await context.importUnifiedBackup()
-  assert.deepEqual(Array.from(profiles.get('same-profile').subscriptions, channel => channel.id), ['A', 'B'])
-  assert.deepEqual(Array.from(playlists.get('same-playlist').videos, video => video.videoId), ['A', 'B'])
+  assert.deepEqual((await db.profiles.findOneAsync({ _id: 'same-profile' })).subscriptions.map(channel => channel.id), ['A', 'B'])
+  assert.deepEqual((await db.playlists.findOneAsync({ _id: 'same-playlist' })).videos.map(video => video.videoId), ['A', 'B'])
 })
 
 test('watch history with empty subtitles imports the record counted in the preview', async () => {

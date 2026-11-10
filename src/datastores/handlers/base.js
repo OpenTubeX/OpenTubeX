@@ -11,7 +11,8 @@ import { MAX_SUBSCRIPTION_SEEN_VIDEOS, mergeSubscriptionSeenVideos, parseSubscri
 import { preserveSubscriptionSeenEntries, subscriptionFeedField } from '../../subscriptionFeedState'
 import { mergeSubscriptionSeenPosts, parseSubscriptionSeenPosts } from '../../subscriptionSeenPosts'
 import { createRssFeedSeenMarks, mergeRssFeedSeenItems, parseRssFeedSeenItems } from '../../renderer/helpers/rssFeedSeenItems'
-import { mergeBackupHistoryRecord, mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord, validateBackupWatchStats } from '../../renderer/helpers/unifiedBackup'
+import { mergeBackupHistoryRecord, mergeBackupPlaylist, mergeBackupProfile, mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord, validateBackupWatchStats } from '../../renderer/helpers/unifiedBackup'
+import { processToBeAddedPlaylistVideo } from '../../renderer/helpers/playlists'
 import { DEFAULT_PROFILE_ICON } from '../../renderer/helpers/profileIcons'
 import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings } from '../../renderer/helpers/subscription-channels'
 import { getProfileWithUpdatedSubscriptionDetails } from '../../renderer/helpers/subscription-profile-details'
@@ -771,6 +772,34 @@ class WatchStats {
   }
 }
 
+/**
+ * Saves a record merged with the stored one, retrying when another window
+ * changes or creates it between reading and writing.
+ * @param {object} datastore
+ * @param {string} _id
+ * @param {(current: object | null) => { record: object, unchanged: () => boolean }} merge
+ *   `unchanged` is a `$where` test that the stored record still equals `current`
+ * @returns {Promise<object>} the saved record
+ */
+async function saveRestoredRecord(datastore, _id, merge) {
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const current = await datastore.findOneAsync({ _id })
+    const { record, unchanged } = merge(current)
+    if (current === null) {
+      try {
+        await datastore.insertAsync(record)
+        return record
+      } catch (error) {
+        if (error?.errorType !== 'uniqueViolated') throw error
+        continue
+      }
+    }
+    const { numAffected } = await datastore.updateAsync({ _id, $where: unchanged }, record)
+    if (numAffected > 0) return record
+  }
+  throw new Error(`Unable to restore ${_id}: repeated concurrent changes`)
+}
+
 class Profiles {
   static create(profile) {
     return db.profiles.insertAsync(profile)
@@ -907,6 +936,27 @@ class Profiles {
       return { profileIds: updatedProfileIds, success: false }
     }
     return { profileIds: updatedProfileIds, success: true }
+  }
+
+  /**
+   * Merges restored profiles with the saved ones. Each profile is merged with
+   * the record stored when it is written, so a subscription another window
+   * adds during the restore is kept.
+   * @param {object[]} profiles
+   * @returns {Promise<object[]>} the merged profiles as saved
+   */
+  static async mergeBackup(profiles) {
+    const saved = []
+    for (const imported of profiles) {
+      saved.push(await saveRestoredRecord(db.profiles, imported._id, current => {
+        const snapshot = JSON.stringify(current)
+        return {
+          record: mergeBackupProfile(current, imported),
+          unchanged() { return JSON.stringify(this) === snapshot },
+        }
+      }))
+    }
+    return saved
   }
 
   static delete(id) {
@@ -1158,6 +1208,41 @@ class Playlists {
       if (numAffected > 0) return videos
     }
     throw new Error(`Unable to reorder playlist ${_id}: repeated concurrent changes`)
+  }
+
+  /**
+   * Merges restored playlists with the saved ones. Each playlist is merged with
+   * the record stored when it is written, so a video another window adds
+   * during the restore is kept.
+   * @param {object[]} playlists
+   * @returns {Promise<object[]>} the merged playlists as saved
+   */
+  static async mergeBackup(playlists) {
+    const saved = []
+    for (const imported of playlists) {
+      saved.push(await saveRestoredRecord(db.playlists, imported._id, current => {
+        const merged = mergeBackupPlaylist(current, imported)
+        // Reordering finds entries by playlistItemId, so restored entries need
+        // one. Copies keep the backup unchanged for a retry's duplicate check.
+        const videos = merged.videos.map(video => {
+          const copy = { ...video }
+          processToBeAddedPlaylistVideo(copy)
+          return copy
+        })
+        const record = { ...merged, videos }
+        if (!Number.isFinite(record.createdAt)) record.createdAt = record.lastUpdatedAt
+        const { videos: currentVideos = [], ...currentFields } = current ?? {}
+        const fieldSnapshot = JSON.stringify(currentFields)
+        return {
+          record,
+          unchanged() {
+            const { videos = [], ...fields } = this
+            return JSON.stringify(fields) === fieldSnapshot && Playlists._sameVideoEntries(videos, currentVideos)
+          },
+        }
+      }))
+    }
+    return saved
   }
 
   static delete(_id) {

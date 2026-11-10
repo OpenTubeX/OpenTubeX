@@ -23,6 +23,7 @@ export const SYNC_ACTION_REASONS = new Map([
   ['addPlaylist', 'playlists'],
   ['addPlaylists', 'playlists'],
   ['importPlaylist', 'playlists'],
+  ['mergePlaylistBackup', 'playlists'],
   ['repairPlaylistMetadata', 'playlists'],
   ['addVideo', 'playlists'],
   ['addVideos', 'playlists'],

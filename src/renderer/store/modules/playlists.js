@@ -246,6 +246,29 @@ const actions = {
     }
   },
 
+  /**
+   * Merges playlists restored from a backup with the saved ones
+   * @param {any} param0
+   * @param {object[]} playlists
+   * @returns {Promise<boolean>} whether every playlist was saved
+   */
+  async mergePlaylistBackup({ commit }, playlists) {
+    const lastUpdatedAt = Date.now()
+    const prepared = playlists.map(playlist => ({
+      ...playlist,
+      playlistName: playlist.playlistName.trim(),
+      ...(typeof playlist.description === 'string' ? { description: playlist.description.trim() } : {}),
+      lastUpdatedAt,
+    }))
+    try {
+      for (const playlist of await DBPlaylistHandlers.mergeBackup(prepared)) commit('upsertPlaylistToList', playlist)
+      return true
+    } catch (errMessage) {
+      console.error(errMessage)
+      return false
+    }
+  },
+
   async updatePlaylistFromSync({ state, commit }, { playlist, previous, keepLastUpdatedAt = false }) {
     if (!keepLastUpdatedAt) playlist.lastUpdatedAt = Date.now()
     const saved = await DBPlaylistHandlers.upsertIfUnchanged(playlist, previous)
