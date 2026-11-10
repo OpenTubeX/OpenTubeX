@@ -38,7 +38,7 @@ for (const playlistViewType of ['grid', 'list']) {
       },
     })
 
-    test('respects roundness and centers actions with and without a channel', async ({ page, attachScreenshot, uiScale }) => {
+    test('respects roundness and centers actions with and without a channel', async ({ page, attachScreenshot, uiScale }, testInfo) => {
       await page.route('https://invidious.test/vi/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
       await page.route('https://invidious.test/ggpht/**', route => fulfillVisualFixture(route, 'avatar'))
       await page.route(/\/api\/v1\/playlists\/panel-layout\?/, route => route.fulfill({
@@ -87,6 +87,12 @@ for (const playlistViewType of ['grid', 'list']) {
         })
         const unclipped = await page.screenshot({ clip, animations: 'disabled' })
         await infoLine.evaluate((element, previous) => { element.style.overflowX = previous }, previousOverflow)
+        if (!actual.equals(unclipped)) {
+          // This comparison flakes rarely on CI. Keep what differed for diagnosis.
+          await testInfo.attach(`${pack} avatar clipped`, { body: actual, contentType: 'image/png' })
+          await testInfo.attach(`${pack} avatar unclipped`, { body: unclipped, contentType: 'image/png' })
+          await testInfo.attach(`${pack} avatar markup`, { body: await avatar.evaluate(element => element.outerHTML), contentType: 'text/html' })
+        }
         expect(actual.equals(unclipped), `${pack} avatar should look the same without metadata clipping`).toBe(true)
       }
       await page.evaluate(() => window.$store.dispatch('updateIconPack', 'material'))

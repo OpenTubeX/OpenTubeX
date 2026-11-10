@@ -534,3 +534,37 @@ export async function expectVideoAction(page, name) {
   await page.keyboard.press('Escape')
   await expect(menu).toHaveCount(0)
 }
+
+/**
+ * Records changes to Watch view properties in `window.__e2eEvents`, which the
+ * app fixture attaches when a test fails. Each change keeps the stack that
+ * made it, so a flaky test's report shows what caused the state its trace
+ * only shows at the end.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string[]} keys
+ */
+export async function recordWatchViewChanges(page, keys) {
+  const view = await watchViewHandle(page)
+  await view.evaluate((view, keys) => {
+    const events = window.__e2eEvents ??= []
+    const getStack = () => {
+      const limit = Error.stackTraceLimit
+      // Vue's own frames come first, before the code that changed the value.
+      Error.stackTraceLimit = 30
+      const { stack } = new Error()
+      Error.stackTraceLimit = limit
+      return stack.split('\n').slice(2).map(line => line.trim())
+    }
+    for (const key of keys) {
+      view.$watch(key, (value, previous) => events.push({
+        t: Math.round(performance.now()),
+        key,
+        value,
+        previous,
+        stack: getStack()
+      }), { flush: 'sync' })
+    }
+  }, keys)
+  await view.dispose()
+}

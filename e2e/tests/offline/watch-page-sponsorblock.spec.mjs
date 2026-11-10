@@ -2,7 +2,7 @@ import crypto from 'node:crypto'
 
 import { chooseSelectOption, test, expect } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
-import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
+import { mockPlayableWatchPage, recordWatchViewChanges } from '../../helpers/watch.mjs'
 import { WATCH_PAGE_SEED } from '../../helpers/watch-page.mjs'
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
@@ -441,6 +441,28 @@ test.describe('watch page', () => {
     })
 
     await openMockedVideo(page)
+    // This test flakes rarely on CI with the info panel closed and no second
+    // userInfo request. Record what opens and closes it for the failure report.
+    await recordWatchViewChanges(page, ['showSidebarSponsorBlock', 'sponsorBlockContributionStatsLoaded', 'sponsorBlockContributionStatsLoading'])
+    await page.evaluate(() => {
+      const events = window.__e2eEvents
+      const record = (type, detail) => events.push({ t: Math.round(performance.now()), type, ...detail })
+      document.addEventListener('click', event => {
+        const button = event.target.closest('button')
+        record('click', { label: button?.getAttribute('aria-label') ?? button?.textContent.trim() ?? event.target.className })
+      }, true)
+      let submissionMenuOpen = false
+      new MutationObserver(() => {
+        const open = document.querySelector('.sponsorBlockSubmissionWrapper') !== null
+        if (open !== submissionMenuOpen) record('submission menu', { open: submissionMenuOpen = open })
+      }).observe(document.body, { childList: true, subtree: true })
+      const fetch = window.fetch
+      window.fetch = (input, init) => {
+        const url = String(input?.url ?? input)
+        if (url.includes('/api/')) record('fetch', { url: url.split('?')[0] })
+        return fetch(input, init)
+      }
+    })
     await page.getByRole('button', { name: 'Open SponsorBlock info' }).click()
     await expect.poll(() => userInfoRequests).toBe(1)
     await page.locator('.watchVideoSponsorBlock').getByRole('button', { name: 'Close' }).click()

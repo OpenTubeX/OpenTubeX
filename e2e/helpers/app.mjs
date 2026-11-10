@@ -695,6 +695,25 @@ export async function setPlayerFullscreen(page, fullscreen) {
 }
 
 /**
+ * Attaches the events a test pushed to `window.__e2eEvents`. Flaky tests use
+ * this to record how the app got into a state their failure trace only shows
+ * at the end. Like attachScreenshot, it never fails the test.
+ *
+ * @param {import('@playwright/test').TestInfo} testInfo
+ * @param {import('@playwright/test').Page} page
+ */
+async function attachRecordedEvents(testInfo, page) {
+  try {
+    const events = await page.evaluate(() => window.__e2eEvents)
+    if (events?.length) {
+      await testInfo.attach('recorded events', { body: JSON.stringify(events, null, 2), contentType: 'application/json' })
+    }
+  } catch {
+    // ignored on purpose, see above
+  }
+}
+
+/**
  * Base test with an `app` fixture that provides a freshly launched,
  * isolated app instance per test.
  *
@@ -914,6 +933,7 @@ export const test = base.extend({
       const failed = settingUp || testInfo.status !== testInfo.expectedStatus
       if (appHandle && failed) {
         await attachScreenshot(testInfo, appHandle.page, 'failure')
+        await attachRecordedEvents(testInfo, appHandle.page)
       }
       await diagnostics.finish(failed)
       if (appHandle) {

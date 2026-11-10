@@ -1,6 +1,6 @@
 import { test, expect, setWindowSize } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
-import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
+import { mockPlayableWatchPage, recordWatchViewChanges, watchViewHandle } from '../../helpers/watch.mjs'
 import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 
 test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
@@ -69,6 +69,19 @@ test('phone comment previews keep rotating while comments open and after focus r
 test('phone comment preview rotates the first five comments and opens the comments sheet', async ({ app, page }, testInfo) => {
   await page.clock.install()
   const button = await openPhoneVideo(app, page)
+  // This test flakes rarely on CI with the reopened comments sheet closing
+  // again. Record what opens and closes it for the failure report.
+  await recordWatchViewChanges(page, ['mobilePanel'])
+  await page.evaluate(() => {
+    const events = window.__e2eEvents
+    new MutationObserver(records => {
+      for (const { target } of records) {
+        if (target.matches('dialog.mobileSheet')) {
+          events.push({ t: Math.round(performance.now()), type: 'sheet', label: target.getAttribute('aria-label'), open: target.open })
+        }
+      }
+    }).observe(document.body, { attributes: true, attributeFilter: ['open'], subtree: true })
+  })
   const view = await watchViewHandle(page)
   const comments = await view.evaluate(component => component.commentPreviews)
   const excerpt = button.locator('.phoneCommentExcerpt')
