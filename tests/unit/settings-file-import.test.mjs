@@ -8,7 +8,7 @@ const source = await readFile(new URL('../../src/renderer/components/Settings/Da
 const helpers = source.slice(source.indexOf('function parseImportedLineDelimitedJson('), source.indexOf('const SUBSCRIPTIONS_PROMPT_VALUES'))
 const importer = source.slice(source.indexOf('async function importSettings()'), source.indexOf('async function exportSettings('))
 
-async function importFile(content) {
+async function importFile(content, failingKeys = []) {
   const changes = {}
   const toasts = []
   const settings = { uiScale: 100, rememberHistory: true, syncServerToken: 'private' }
@@ -19,9 +19,16 @@ async function importFile(content) {
     defaultUpdaterId: key => key,
     NON_TRANSFERABLE_SETTINGS: new Set(['syncServerToken']),
     transferableSettings: { value: { uiScale: 100, rememberHistory: true } },
-    store: { state: { settings }, dispatch: async (key, value) => { changes[key] = value } },
+    store: {
+      state: { settings },
+      dispatch: async (key, value) => {
+        if (failingKeys.includes(key)) return false
+        changes[key] = value
+        return true
+      },
+    },
     showToast: toast => toasts.push(toast),
-    t: key => key,
+    t: (key, values) => values ? `${key} ${JSON.stringify(values)}` : key,
     console: { error() {} },
     IMPORT_DIRECTORY_ID: 'test',
     START_IN_DIRECTORY: 'documents',
@@ -60,4 +67,16 @@ test('invalid settings files report failure without applying settings or announc
     assert.ok(result.toasts.length > 0, content)
     assert.ok(result.toasts.every(toast => toast.icon[1] === 'circle-exclamation'), content)
   }
+})
+
+test('settings that fail to save are reported instead of announcing success', async () => {
+  const toastText = toasts => toasts.map(toast => `${toast.icon[1]}: ${toast.message}`)
+  const partial = await importFile('{"uiScale":125,"rememberHistory":false}', ['uiScale'])
+  assert.deepEqual(partial.applied, [{ rememberHistory: false }])
+  assert.deepEqual(toastText(partial.toasts), [
+    'circle-exclamation: Settings.Data Settings.Some settings could not be imported {"failed":1,"total":2}',
+  ])
+
+  const failed = await importFile('{"uiScale":125}', ['uiScale'])
+  assert.deepEqual(toastText(failed.toasts), ['circle-exclamation: Settings.Data Settings.Settings could not be imported'])
 })

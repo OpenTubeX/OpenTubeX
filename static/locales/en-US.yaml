@@ -1915,6 +1915,8 @@ Settings:
       successfully exported
     All settings have been successfully imported: All settings have been
       successfully imported
+    Settings could not be imported: Settings could not be imported
+    Some settings could not be imported: '{failed} of {total} settings could not be imported'
     All settings have been successfully exported: All settings have been
       successfully exported
     Unable to read file: Unable to read file

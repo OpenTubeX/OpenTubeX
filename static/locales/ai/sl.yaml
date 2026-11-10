@@ -1487,6 +1487,8 @@ Settings:
     Add: Dodaj
     Remove: Odstrani
   Data Settings:
+    Settings could not be imported: "Nastavitev ni bilo mogoče uvoziti"
+    Some settings could not be imported: "Vseh nastavitev ni bilo mogoče uvoziti (neuspešno: {failed} od {total})"
     Scheduled backups: "Načrtovane varnostne kopije"
     Scheduled backup description: "Shranjujte celotne kopije ZIP, ko je OpenTubeX odprt. Zamujene kopije se ustvarijo ob zagonu. Omejitev velja le za načrtovane kopije v tej mapi."
     Choose backup folder: "Izberi mapo varnostnih kopij"

@@ -1222,6 +1222,8 @@ Settings:
     Paused Interface Hide Delay: Καθυστέρηση απόκρυψης περιβάλλοντος κατά την παύση
     Hide Channel Shows: Απόκρυψη της καρτέλας «Εκπομπές» του καναλιού
   Data Settings:
+    Settings could not be imported: "Δεν ήταν δυνατή η εισαγωγή των ρυθμίσεων"
+    Some settings could not be imported: "Δεν ήταν δυνατή η εισαγωγή όλων των ρυθμίσεων (απέτυχαν {failed} από {total})"
     Scheduled backups: "Προγραμματισμένα αντίγραφα ασφαλείας"
     Scheduled backup description: "Αποθήκευση πλήρων αντιγράφων ZIP όσο το OpenTubeX είναι ανοιχτό. Τα παραλειπόμενα αντίγραφα δημιουργούνται κατά την εκκίνηση. Το όριο ισχύει μόνο για προγραμματισμένα αντίγραφα σε αυτόν τον φάκελο."
     Choose backup folder: "Επιλογή φακέλου αντιγράφων"

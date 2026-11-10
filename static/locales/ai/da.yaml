@@ -1250,6 +1250,8 @@ Settings:
     Remove: Fjern
     Hide Channel Shows: Skjul "Serier"-fanen på kanaler
   Data Settings:
+    Settings could not be imported: "Indstillingerne kunne ikke importeres"
+    Some settings could not be imported: "Ikke alle indstillinger kunne importeres ({failed} af {total} mislykkedes)"
     Scheduled backups: "Planlagte sikkerhedskopier"
     Scheduled backup description: "Gem komplette ZIP-sikkerhedskopier, mens OpenTubeX er åbent. Manglende kopier oprettes ved opstart. Grænsen gælder kun planlagte kopier i denne mappe."
     Choose backup folder: "Vælg mappe til sikkerhedskopier"

@@ -1412,6 +1412,8 @@ Settings:
     Add: Voeg by
     Remove: Verwyder
   Data Settings:
+    Settings could not be imported: "Instellings kon nie ingevoer word nie"
+    Some settings could not be imported: "Nie alle instellings kon ingevoer word nie ({failed} van {total} het misluk)"
     Scheduled backups: Geskeduleerde rugsteune
     Scheduled backup description: Stoor volledige ZIP-rugsteune terwyl OpenTubeX oop is. Gemiste rugsteune loop by opstart. Die limiet geld slegs vir geskeduleerde rugsteune in hierdie vouer.
     Choose backup folder: Kies rugsteunvouer

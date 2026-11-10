@@ -1239,6 +1239,8 @@ Settings:
     Remove: הסרה
     Hide Channel Shows: הסתר את לשונית "תוכניות" של הערוץ
   Data Settings:
+    Settings could not be imported: "לא ניתן היה לייבא את ההגדרות"
+    Some settings could not be imported: "לא ניתן היה לייבא את כל ההגדרות ({failed} מתוך {total} נכשלו)"
     Scheduled backups: "גיבויים מתוזמנים"
     Scheduled backup description: "שמירת גיבויי ZIP מלאים כאשר OpenTubeX פתוח. גיבויים שהוחמצו מתבצעים בהפעלה. המגבלה חלה רק על גיבויים מתוזמנים בתיקייה זו."
     Choose backup folder: "בחירת תיקיית גיבוי"

@@ -1235,6 +1235,8 @@ Settings:
     Remove: إزالة
     Hide Channel Shows: إخفاء علامة التبويب "العروض" في القناة
   Data Settings:
+    Settings could not be imported: "تعذّر استيراد الإعدادات"
+    Some settings could not be imported: "تعذّر استيراد بعض الإعدادات (فشل {failed} من {total})"
     Scheduled backups: "النسخ الاحتياطية المجدولة"
     Scheduled backup description: "احفظ نسخ ZIP كاملة أثناء فتح OpenTubeX. تُنفّذ النسخ الفائتة عند بدء التشغيل. ينطبق الحد فقط على النسخ المجدولة في هذا المجلد."
     Choose backup folder: "اختيار مجلد النسخ الاحتياطي"

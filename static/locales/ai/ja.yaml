@@ -1221,6 +1221,8 @@ Settings:
     Show Bottom Right Actions Dock: 右下の操作ドックを表示
     Paused Interface Hide Delay: 一時停止中のインターフェースを隠すまでの時間
   Data Settings:
+    Settings could not be imported: "設定をインポートできませんでした"
+    Some settings could not be imported: "一部の設定をインポートできませんでした（{total} 件中 {failed} 件が失敗）"
     Scheduled backups: "定期バックアップ"
     Scheduled backup description: "OpenTubeX の起動中に完全な ZIP バックアップを保存します。実行できなかったバックアップは次回起動時に作成されます。保存数の上限は、このフォルダー内の定期バックアップにのみ適用されます。"
     Choose backup folder: "バックアップフォルダーを選択"

@@ -529,7 +529,9 @@ async function importUnifiedBackup() {
       await DBWatchStatsHandlers.mergeBackup(data.watchStats)
       await store.dispatch('grabWatchStats')
     }
-    if (selected.has('settings')) await applyImportedSettings(data.settings)
+    if (selected.has('settings') && (await applyImportedSettings(data.settings)).failed > 0) {
+      throw new Error('Could not restore settings')
+    }
     const compaction = await compactAllDatastores().catch(() => false)
     closeBackupImport()
     showToast({ message: t('Settings.Data Settings.Backup imported'), icon: ['fas', 'check'] })
@@ -2338,11 +2340,21 @@ async function importSettings() {
     return
   }
 
-  if (!await applyImportedSettings(importedSettings)) return
+  const { total, failed } = await applyImportedSettings(importedSettings)
+  if (total === 0) return
 
+  if (failed === 0) {
+    showToast({
+      message: t('Settings.Data Settings.All settings have been successfully imported'),
+      icon: ['fas', 'sliders-h'],
+    })
+    return
+  }
   showToast({
-    message: t('Settings.Data Settings.All settings have been successfully imported'),
-    icon: ['fas', 'sliders-h'],
+    message: failed === total
+      ? t('Settings.Data Settings.Settings could not be imported')
+      : t('Settings.Data Settings.Some settings could not be imported', { failed, total }),
+    icon: ['fas', 'circle-exclamation'],
   })
 }
 
@@ -2351,7 +2363,8 @@ async function applyImportedSettings(importedSettings) {
 
   const currentTransferableSettings = transferableSettings.value
   const currentSettings = store.state.settings
-  let acceptedSettings = 0
+  let total = 0
+  let failed = 0
 
   for (const [importedKey, importedValue] of Object.entries(importedSettings)) {
     if (!Object.hasOwn(currentSettings, importedKey)) {
@@ -2366,7 +2379,7 @@ async function applyImportedSettings(importedSettings) {
       continue
     }
 
-    acceptedSettings++
+    total++
     const currentValue = currentTransferableSettings[importedKey]
     const areValuesEqual = currentValue === importedValue ||
       (typeof importedValue === 'object' && JSON.stringify(currentValue) === JSON.stringify(importedValue))
@@ -2375,9 +2388,14 @@ async function applyImportedSettings(importedSettings) {
     }
 
     const updaterId = defaultUpdaterId(importedKey)
-    await store.dispatch(updaterId, importedValue)
+    try {
+      if (await store.dispatch(updaterId, importedValue) === false) failed++
+    } catch (error) {
+      console.error(error)
+      failed++
+    }
   }
-  return acceptedSettings > 0
+  return { total, failed }
 }
 
 async function exportSettings() {

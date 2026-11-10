@@ -1222,6 +1222,8 @@ Settings:
     Paused Interface Hide Delay: Keskeytetyn käyttöliittymän piilotusviive
     Hide Channel Shows: Piilota kanavan Ohjelmat-välilehti
   Data Settings:
+    Settings could not be imported: "Asetuksia ei voitu tuoda"
+    Some settings could not be imported: "Kaikkia asetuksia ei voitu tuoda ({failed}/{total} epäonnistui)"
     Scheduled backups: "Ajastetut varmuuskopiot"
     Scheduled backup description: "Tallenna täydellisiä ZIP-varmuuskopioita, kun OpenTubeX on auki. Väliin jääneet kopiot luodaan käynnistyessä. Raja koskee vain tämän kansion ajastettuja kopioita."
     Choose backup folder: "Valitse varmuuskopioiden kansio"

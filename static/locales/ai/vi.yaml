@@ -1222,6 +1222,8 @@ Settings:
     Paused Interface Hide Delay: Độ trễ ẩn giao diện khi tạm dừng
     Hide Channel Shows: Ẩn Tab "Chương trình" của Kênh
   Data Settings:
+    Settings could not be imported: "Không thể nhập cài đặt"
+    Some settings could not be imported: "Không thể nhập tất cả cài đặt ({failed}/{total} không thành công)"
     Scheduled backups: "Sao lưu theo lịch"
     Scheduled backup description: "Lưu bản sao ZIP đầy đủ khi OpenTubeX đang mở. Các lần sao lưu bị lỡ sẽ chạy khi khởi động. Giới hạn chỉ áp dụng cho bản sao theo lịch trong thư mục này."
     Choose backup folder: "Chọn thư mục sao lưu"

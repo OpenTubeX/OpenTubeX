@@ -1223,6 +1223,8 @@ Settings:
     Show Bottom Right Actions Dock: Aşağı sağdakı əməliyyat panelini göstər
     Paused Interface Hide Delay: Fasilə interfeysinin gizlənmə gecikməsi
   Data Settings:
+    Settings could not be imported: "Parametrləri idxal etmək mümkün olmadı"
+    Some settings could not be imported: "Bütün parametrləri idxal etmək mümkün olmadı ({total} parametrdən {failed} uğursuz oldu)"
     Scheduled backups: "Planlaşdırılmış ehtiyat nüsxələr"
     Scheduled backup description: "OpenTubeX açıq olduqda tam ZIP ehtiyat nüsxələri saxlanılır. Buraxılmış nüsxələr açılışda yaradılır. Limit yalnız bu qovluqdakı planlaşdırılmış nüsxələrə aiddir."
     Choose backup folder: "Ehtiyat nüsxə qovluğunu seç"

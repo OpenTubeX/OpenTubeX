@@ -1221,6 +1221,8 @@ Settings:
     Show Bottom Right Actions Dock: 显示右下角操作栏
     Paused Interface Hide Delay: 暂停界面隐藏延迟
   Data Settings:
+    Settings could not be imported: "无法导入设置"
+    Some settings could not be imported: "部分设置无法导入（{total} 项中有 {failed} 项失败）"
     Scheduled backups: "定时备份"
     Scheduled backup description: "在 OpenTubeX 打开时保存完整的 ZIP 备份。错过的备份将在启动时执行。保留数量限制仅适用于此文件夹中的定时备份。"
     Choose backup folder: "选择备份文件夹"

@@ -1239,6 +1239,8 @@ Settings:
     Remove: Verwijderen
     Hide Channel Shows: Kanaal­tabblad ‘Programma's’ verbergen
   Data Settings:
+    Settings could not be imported: "De instellingen konden niet worden geïmporteerd"
+    Some settings could not be imported: "Niet alle instellingen konden worden geïmporteerd ({failed} van {total} mislukt)"
     Scheduled backups: "Geplande back-ups"
     Scheduled backup description: "Bewaar volledige ZIP-back-ups terwijl OpenTubeX geopend is. Gemiste back-ups worden bij het opstarten gemaakt. De limiet geldt alleen voor geplande back-ups in deze map."
     Choose backup folder: "Back-upmap kiezen"

@@ -1221,6 +1221,8 @@ Settings:
     Show Bottom Right Actions Dock: Sağ Alt İşlem Panelini Göster
     Paused Interface Hide Delay: Duraklatılmış Arayüzü Gizleme Gecikmesi
   Data Settings:
+    Settings could not be imported: "Ayarlar içe aktarılamadı"
+    Some settings could not be imported: "Ayarların tümü içe aktarılamadı ({total} ayardan {failed} tanesi başarısız oldu)"
     Scheduled backups: "Zamanlanmış yedeklemeler"
     Scheduled backup description: "OpenTubeX açıkken tam ZIP yedekleri kaydedin. Kaçırılan yedeklemeler açılışta yapılır. Sınır yalnızca bu klasördeki zamanlanmış yedekler için geçerlidir."
     Choose backup folder: "Yedekleme klasörünü seç"

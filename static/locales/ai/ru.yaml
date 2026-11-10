@@ -1195,6 +1195,8 @@ Settings:
     Paused Interface Hide Delay: Задержка скрытия интерфейса во время паузы
     Hide Channel Shows: Скрыть вкладку «Шоу» канала
   Data Settings:
+    Settings could not be imported: "Не удалось импортировать настройки"
+    Some settings could not be imported: "Не все настройки удалось импортировать (не удалось: {failed} из {total})"
     Scheduled backups: "Резервное копирование по расписанию"
     Scheduled backup description: "Сохраняйте полные ZIP-копии, пока OpenTubeX открыт. Пропущенные копии создаются при запуске. Ограничение действует только на запланированные копии в этой папке."
     Choose backup folder: "Выбрать папку резервных копий"

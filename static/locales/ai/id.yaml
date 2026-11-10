@@ -1225,6 +1225,8 @@ Settings:
     Paused Interface Hide Delay: Jeda Sebelum Menyembunyikan Antarmuka yang Dijeda
     Hide Channel Shows: Sembunyikan Tab "Acara" Saluran
   Data Settings:
+    Settings could not be imported: "Pengaturan tidak dapat diimpor"
+    Some settings could not be imported: "Tidak semua pengaturan dapat diimpor ({failed} dari {total} gagal)"
     Scheduled backups: "Cadangan terjadwal"
     Scheduled backup description: "Simpan cadangan ZIP lengkap saat OpenTubeX terbuka. Cadangan yang terlewat dibuat saat aplikasi dimulai. Batas hanya berlaku untuk cadangan terjadwal di folder ini."
     Choose backup folder: "Pilih folder cadangan"

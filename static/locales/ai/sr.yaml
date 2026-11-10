@@ -1247,6 +1247,8 @@ Settings:
     Remove: Уклони
     Hide Channel Shows: Сакриј картицу „Емисије“ на каналу
   Data Settings:
+    Settings could not be imported: "Подешавања није могуће увести"
+    Some settings could not be imported: "Није могуће увести сва подешавања (неуспешно: {failed} од {total})"
     Scheduled backups: "Заказане резервне копије"
     Scheduled backup description: "Чувајте потпуне ZIP копије док је OpenTubeX отворен. Пропуштене копије праве се при покретању. Ограничење важи само за заказане копије у овој фасцикли."
     Choose backup folder: "Изабери фасциклу за копије"
