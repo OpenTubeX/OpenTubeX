@@ -3315,6 +3315,8 @@ export default defineComponent({
       if (!metadataOnly) this.scheduleDownloadedPlaybackFallback(loadGeneration, videoId)
 
       let backendFailed = false
+      // An early return or error leaves /next unapplied, so nothing waits for it then
+      let lateWatchNextStarted = false
       try {
         const shortsExtractionKey = this.customShortsPlayerActive && !metadataOnly
           ? this.getShortsExtractionKey(videoId, 'local')
@@ -4080,6 +4082,7 @@ export default defineComponent({
             this.refreshHistoryMetadata(loadGeneration, videoId)
           }
         } else if (watchNextPromise) {
+          lateWatchNextStarted = true
           this.applyLateWatchNext(loadGeneration, videoInfo)
         }
       } catch (err) {
@@ -4126,7 +4129,7 @@ export default defineComponent({
       } finally {
         if (this.isCurrentVideoLoad(loadGeneration, videoId)) {
           this.vrStreamsPending = false
-          if (lateWatchNext) this.watchNextPending = false
+          if (lateWatchNext || !lateWatchNextStarted) this.watchNextPending = false
         }
       }
     },
