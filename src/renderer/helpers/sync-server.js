@@ -808,12 +808,17 @@ function isSameLocalPlaylist(playlist, metadata, videos) {
     playlist.videos.every((video, index) => metadataEquals(video, videos[index]))
 }
 
+// `options.onRetryBaseline` receives a getter for the baseline to merge against
+// if the upload conflicts. It also holds the downloaded subscriptions, so their
+// removal on the server is not undone. Playlists and profiles accept it too.
 export async function syncSubscriptions(client, store, previousIds = [], options = {}) {
   // Subscriptions edited here or in another window while the server responds
   // would be overwritten, so merge again from the changed subscriptions.
   let baseline = previousIds
   for (let attempt = 0; attempt < 3; attempt++) {
     const result = await mergeSubscriptions(client, store, baseline, options)
+    // Later attempts also read this sync's own writes.
+    if (attempt === 0) options.onRetryBaseline?.(() => Array.from(new Set([...previousIds, ...result.remoteIds])))
     if (result.mergedIds) return result.mergedIds
     // The attempt already brought the server to its merge of the local
     // subscriptions it read, so the retry merges against those. Otherwise an
@@ -874,13 +879,13 @@ async function mergeSubscriptions(client, store, previousIds, options) {
       })
       if (!saved) {
         // Once the main profile holds the merge, both sides agree on it.
-        return { baseline: Array.from(mainProfileSaved ? mergedIds : localById.keys()) }
+        return { baseline: Array.from(mainProfileSaved ? mergedIds : localById.keys()), remoteIds: Array.from(remoteById.keys()) }
       }
     }
     if (profile._id === mainProfile._id) mainProfileSaved = true
   }
 
-  return { mergedIds: Array.from(mergedIds) }
+  return { mergedIds: Array.from(mergedIds), remoteIds: Array.from(remoteById.keys()) }
 }
 
 export async function syncPlaylistBookmarks(client, store, previousIds = [], options = {}) {
@@ -951,6 +956,20 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
     ...options,
     collection: 'playlists',
     getItemName: id => localById.get(id)?.playlistName || remoteById.get(id)?.playlist.title || previous[id]?.metadata?.title,
+  })
+  // A conflicting upload merges again, also against the downloaded playlists,
+  // so their removal on the server is not undone. The adapter replaces the
+  // entries it changes, so these stay as downloaded.
+  options.onRetryBaseline?.(() => {
+    const baseline = { ...previous }
+    for (const [id, remote] of remoteById) {
+      baseline[id] = {
+        remoteId: remote.remoteId,
+        metadata: playlistBaselineMetadata(playlistMetadataFromRemote({ ...remote.playlist, id }, features)),
+        videos: Array.from(new Set([...(previous[id]?.videos ?? []), ...remote.videos.map(video => video.id)])),
+      }
+    }
+    return baseline
   })
   // `removePlaylist` keeps protected playlists, so restore them remotely instead.
   for (const [id, local] of localById) {
@@ -1143,8 +1162,9 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
 }
 
 // `changedIds` lists the entries changed locally since the last merge, while
-// the remote history is still the one that merge produced.
-export async function syncHistory(client, store, previous = {}, options = {}, { changedIds = null } = {}) {
+// the remote history is still the one that merge produced. `onRetryBaseline`
+// receives a getter for the baseline of a merge after a conflicting upload.
+export async function syncHistory(client, store, previous = {}, options = {}, { changedIds = null, onRetryBaseline } = {}) {
   const historyChanged = new Error('Watch history changed during sync. Try again.')
   const legacy = typeof client.applyWatchHistoryChanges !== 'function'
   const acknowledgedUpserts = new Map()
@@ -1163,6 +1183,14 @@ export async function syncHistory(client, store, previous = {}, options = {}, { 
     store.assertActive?.()
     const remoteHistory = await client.getWatchHistory()
     if (remoteHistory === null) return null
+    if (attempt === 0) {
+      // The baseline also holds the downloaded entries, so their removal on the
+      // server is not undone. Later attempts also read this sync's own writes.
+      onRetryBaseline?.(() => ({
+        ...(Array.isArray(previous) ? Object.fromEntries(previous.map(id => [id, null])) : previous),
+        ...Object.fromEntries(remoteHistory.map(entry => [entry.video.id, entry.metadata])),
+      }))
+    }
     const revision = store.state.history.historyRevision
     const localHistory = toRaw(store.state.history.historyCacheSorted).slice()
     const assertHistoryCurrent = () => {
@@ -1283,6 +1311,19 @@ export async function syncProfiles(client, store, previous = {}, options = {}) {
     collection: 'profiles',
     getItemName: id => localById.get(id)?.name || remoteById.get(id)?.group.title || previous[id]?.metadata?.title,
   })
+  // A conflicting upload merges again, also against the downloaded profiles,
+  // so their removal on the server is not undone.
+  const retryBaseline = { ...previous }
+  for (const [id, remote] of remoteById) {
+    const old = previous[id]?.metadata
+    const local = localById.get(id)
+    retryBaseline[id] = {
+      remoteId: remote.remoteId,
+      metadata: remoteProfileMetadata(remote.group, old ?? (local ? profileMetadata(local, old) : {})),
+      channels: Array.from(new Set([...(previous[id]?.channels ?? []), ...remote.channels.map(channel => channel.id)])),
+    }
+  }
+  options.onRetryBaseline?.(() => retryBaseline)
   const mainSubscriptions = profiles.find(profile => profile._id === MAIN_PROFILE_ID)?.subscriptions ?? []
   const subscriptionsById = mapBy(mainSubscriptions, channel => channel.id)
   const next = {}
@@ -1459,7 +1500,7 @@ function getTabSyncAdapter() {
   return null
 }
 
-export async function syncSessions(client, store, previous = null, { accountClient = client } = {}) {
+export async function syncSessions(client, store, previous = null, { accountClient = client, onRetryBaseline } = {}) {
   if (process.env.IS_CAPACITOR && store.state.settings.enableMobileTabs === false) return null
 
   const tabs = getTabSyncAdapter()
@@ -1470,6 +1511,9 @@ export async function syncSessions(client, store, previous = null, { accountClie
 
   const local = await tabs.getSyncSessions()
   const remote = await client.getSessions()
+  // After a conflicting upload, merge against the downloaded document, so its
+  // changes do not look like local ones. Without one, keep the previous baseline.
+  onRetryBaseline?.(() => remote === null || (Array.isArray(remote) && remote.length === 0) ? previous : remote)
   if (process.env.IS_CAPACITOR && store.state.settings.enableMobileTabs === false) return null
   const { deviceId, legacyDeviceIds } = getTabSessionDeviceIdentity(store.state.settings)
   const revokedLogins = getRevokedSyncSessionLogins(remote, deviceId)

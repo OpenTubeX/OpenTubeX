@@ -110,7 +110,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
       : {}),
     ...(reminderService
       ? {
-          syncLiveReminders: (client, previous) => syncLiveReminders(client, previous, reminderService),
+          syncLiveReminders: (client, previous, _service, options) => syncLiveReminders(client, previous, reminderService, options),
           SyncLiveConnectionState: class { async isConnected() { return connected } setConnected() {} },
         }
       : {}),
@@ -706,6 +706,37 @@ test('an external media position removed during an upload conflict stays removed
   assert.deepEqual(entries.map(entry => entry.url), ['https://videos.example.test/local'])
   assert.equal(browserStorage.has('externalMediaPosition:https://videos.example.test/remote'), false)
   assert.deepEqual(JSON.parse(f.settings.syncServerSnapshot).externalMediaPositions, { 'https://videos.example.test/local': 2000 })
+})
+
+test('a subscription removed during an upload conflict stays removed, and unsent local ones survive', async () => {
+  let uploads = 0
+  let uploaded
+  const f = fixture({ syncServerSnapshot: JSON.stringify({ subscriptions: ['private-channel'] }) }, {
+    encrypted: true,
+    respond: async (url, options) => {
+      if (url.endsWith('/encrypted_sync')) return { collections: [{ collection: 'subscriptions', revision: 1 }], legacy_data: false }
+      if (!url.endsWith('/encrypted_sync/subscriptions')) return
+      if (options.method === 'PUT') {
+        if (++uploads === 1) return new Response('{}', { status: 409 })
+        uploaded = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey)
+        return { revision: 3 }
+      }
+      // Another device removed the downloaded subscription before this upload.
+      const channels = [{ id: 'private-channel', name: 'Private subscription' }]
+      if (uploads === 0) channels.push({ id: 'remote-channel', name: 'Remote subscription' })
+      return {
+        revision: uploads === 0 ? 1 : 2,
+        payload: await privacy.encryptSyncDocument(channels, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt),
+      }
+    },
+  })
+  f.context.rootState.profiles.profileList[0].subscriptions.push({ id: 'local-channel', name: 'Local subscription' })
+  await f.actions.syncWithSyncServer(f.context)
+  assert.equal(f.context.state.syncServerStatus, 'success')
+  assert.equal(uploads, 2)
+  assert.deepEqual(uploaded.map(channel => channel.id), ['private-channel', 'local-channel'])
+  assert.deepEqual(Array.from(f.context.rootState.profiles.profileList[0].subscriptions, channel => channel.id), ['private-channel', 'local-channel'])
+  assert.deepEqual(JSON.parse(f.settings.syncServerSnapshot).subscriptions, ['private-channel', 'local-channel'])
 })
 
 for (const overrides of [
@@ -1559,6 +1590,76 @@ test('bookmark upload conflicts persist the merged baseline and local bookmarks'
   assert.deepEqual(uploaded.map(item => item.playlist.id).sort(), ['local', 'remote'])
   assert.deepEqual(JSON.parse(f.settings.syncServerSnapshot).playlistBookmarks.sort(), ['local', 'remote'])
   assert.deepEqual(Array.from(f.settings.playlistBookmarks, item => item.playlist.id).sort(), ['local', 'remote'])
+})
+
+test('a shared tab closed during an upload conflict stays closed', async () => {
+  const first = { sessionId: 'first', updatedAt: 1, tabs: [{ route: '/first' }] }
+  const second = { sessionId: 'second', updatedAt: 5, tabs: [{ route: '/second' }] }
+  const document = shared => ({ version: sessions.SYNC_SESSIONS_VERSION, mode: 'shared', devices: {}, shared, deletedSessions: {} })
+  let local = [first]
+  let uploads = 0
+  let uploaded
+  const f = fixture({
+    syncServerSyncSubscriptions: false,
+    syncServerSyncSessions: true,
+    syncServerSharedTabs: true,
+    syncServerDeviceId: 'test-device',
+    syncServerSnapshot: JSON.stringify({ sessionsV2: document([first]) }),
+  }, {
+    encrypted: true,
+    desktopTabs: {
+      getSyncSessions: async () => local,
+      applySyncSessions: async sessions => { local = sessions; return true },
+    },
+    respond: async (url, options) => {
+      if (url.endsWith('/encrypted_sync')) return { collections: [{ collection: 'sessionsV2', revision: 1 }], legacy_data: false }
+      if (!url.endsWith('/encrypted_sync/sessionsV2')) return
+      if (options.method === 'PUT') {
+        if (++uploads === 1) return new Response('{}', { status: 409 })
+        uploaded = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey)
+        return { revision: 3 }
+      }
+      // Another device opens a shared tab, then closes it before this upload.
+      return {
+        revision: uploads + 1,
+        payload: await privacy.encryptSyncDocument(document(uploads === 0 ? [first, second] : [first]),
+          f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt),
+      }
+    },
+  })
+  await f.actions.syncWithSyncServer(f.context)
+  assert.equal(f.context.state.syncServerStatus, 'success')
+  assert.equal(uploads, 2)
+  assert.deepEqual(uploaded.shared.map(session => session.sessionId), ['first'])
+  assert.deepEqual(Array.from(local, session => session.sessionId), ['first'])
+})
+
+test('a bookmark removed during a second upload conflict stays removed', async () => {
+  const local = bookmarks.createPlaylistBookmark({ id: 'local', title: 'Local', uploaderId: 'channel', uploaderName: 'Channel', savedAt: 123 })
+  const remote = bookmarks.createPlaylistBookmark({ id: 'remote', title: 'Remote', uploaderId: 'channel', uploaderName: 'Channel', savedAt: 456 })
+  let uploads = 0
+  let uploaded
+  const f = fixture({ syncServerSyncSubscriptions: false, syncServerSyncPlaylists: true, playlistBookmarks: [local] }, {
+    encrypted: true,
+    respond: async (url, options) => {
+      if (!url.endsWith('/encrypted_sync/playlistBookmarks')) return undefined
+      if (options.method === 'PUT') {
+        if (++uploads < 3) return new Response('{}', { status: 409 })
+        uploaded = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey)
+        return { revision: 3 }
+      }
+      if (!uploads) return { revision: 0, payload: null }
+      // Another device saves a bookmark, then removes it before the third upload.
+      const entries = uploads === 1 ? [bookmarks.playlistBookmarkForSync(remote)] : []
+      return { revision: uploads, payload: await privacy.encryptSyncDocument(entries, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) }
+    },
+  })
+  await f.actions.syncWithSyncServer(f.context)
+  assert.equal(f.context.state.syncServerStatus, 'success')
+  assert.equal(uploads, 3)
+  assert.deepEqual(uploaded.map(item => item.playlist.id), ['local'])
+  assert.deepEqual(JSON.parse(f.settings.syncServerSnapshot).playlistBookmarks, ['local'])
+  assert.deepEqual(Array.from(f.settings.playlistBookmarks, item => item.playlist.id), ['local'])
 })
 
 test('automatic sync retries reminders after notification permission becomes available', async () => {
