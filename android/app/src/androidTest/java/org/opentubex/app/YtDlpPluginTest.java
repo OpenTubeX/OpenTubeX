@@ -26,4 +26,18 @@ public class YtDlpPluginTest {
             assertEquals(0, response.get(5, TimeUnit.SECONDS).length());
         } finally { ((ExecutorService) executor.get(plugin)).shutdownNow(); }
     }
+
+    @Test public void callsAfterDestroyAreRejected() throws Exception {
+        YtDlpPlugin plugin = new YtDlpPlugin();
+        // handleOnDestroy shuts the executor down while the renderer may still send calls.
+        var executor = YtDlpPlugin.class.getDeclaredField("executor");
+        executor.setAccessible(true);
+        ((ExecutorService) executor.get(plugin)).shutdownNow();
+        CompletableFuture<String> rejection = new CompletableFuture<>();
+        plugin.list(new PluginCall(null, "YtDlp", "test", "list", new JSObject()) {
+            @Override public void resolve(JSObject result) { rejection.completeExceptionally(new AssertionError("resolved")); }
+            @Override public void reject(String message) { rejection.complete(message); }
+        });
+        assertNotNull(rejection.get(5, TimeUnit.SECONDS));
+    }
 }

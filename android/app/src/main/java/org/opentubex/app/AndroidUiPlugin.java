@@ -509,7 +509,12 @@ public class AndroidUiPlugin extends Plugin {
         }
 
         static void configure(Activity activity, Rational aspectRatio, boolean automatic, Rect sourceRect) {
-            activity.setPictureInPictureParams(buildParams(aspectRatio, automatic, sourceRect));
+            try {
+                activity.setPictureInPictureParams(buildParams(aspectRatio, automatic, sourceRect));
+            } catch (IllegalStateException error) {
+                // The activity can close before a queued request runs. It has no
+                // Picture-in-Picture settings left to update then.
+            }
         }
 
         private static PictureInPictureParams buildParams(
