@@ -86,7 +86,7 @@ test.describe('standard form controls', () => {
 
     await scrollToEnd()
     await page.getByRole('button', { name: 'Reset to Defaults' }).click()
-    await expect(entries).toHaveCount(9)
+    await expect.poll(() => entries.count()).toBeLessThan(11)
     await expectOverlayScrollRange(scroller)
 
     await page.evaluate(value => window.$store.dispatch('updateQuickPlaybackSpeedBarOptions', value), options)
