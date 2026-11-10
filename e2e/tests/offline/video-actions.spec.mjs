@@ -870,7 +870,10 @@ test.describe('video downloads', () => {
     await expect(downloadRow.getByTitle('Play download')).toHaveCount(0)
     await expect(downloadRow.getByTitle('Show in Folder')).toHaveCount(0)
     await expect(downloadRow.getByTitle('Remove File')).toHaveCount(0)
-    await page.getByRole('button', { name: 'Clear failed, canceled, skipped, and missing' }).click()
+    // the narrow downloads window moves the bulk actions into a menu
+    await expect(page.getByRole('button', { name: 'Clear failed, canceled, skipped, and missing' })).toBeHidden()
+    await page.locator('.downloadHeaderActions').getByRole('button', { name: 'More options' }).click()
+    await page.getByRole('menuitem', { name: 'Clear failed, canceled, skipped, and missing' }).click()
     await expect(downloadRow).toHaveCount(0)
     await expect(page.locator('.downloadRow').filter({ hasText: 'Downloaded audio alternative' })).toHaveCount(0)
   })

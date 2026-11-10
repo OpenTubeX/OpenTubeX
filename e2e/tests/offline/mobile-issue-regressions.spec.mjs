@@ -148,22 +148,42 @@ test.describe('translated download actions', () => {
       })
       await store.dispatch('showSettingsWindow', 'downloads')
     })
-    const clear = page.locator('.downloadHeaderActions button').filter({ hasText: 'Fehlgeschlagene, abgebrochene, übersprungene und fehlende Einträge entfernen' })
-    await expect(clear).toHaveText('Fehlgeschlagene, abgebrochene, übersprungene und fehlende Einträge entfernen')
+    const label = 'Fehlgeschlagene, abgebrochene, übersprungene und fehlende Einträge entfernen'
+    const clear = page.locator('.downloadHeaderActions button').filter({ hasText: label })
+    const menuButton = page.locator('.downloadHeaderActions').getByRole('button', { name: 'Weitere Optionen' })
+    // Measure the label itself: the decorative ripple extends beyond the button.
+    const labelFits = (element, containerSelector) => {
+      const bounds = element.getBoundingClientRect()
+      const container = element.closest(containerSelector).getBoundingClientRect()
+      const isLabel = node => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+      const text = [...element.childNodes].find(isLabel) ??
+        [...element.querySelectorAll('*')].flatMap(node => [...node.childNodes]).find(isLabel)
+      const range = document.createRange()
+      range.selectNodeContents(text)
+      return bounds.left >= container.left - 1 && bounds.right <= container.right + 1 &&
+        [...range.getClientRects()].every(rect => rect.left >= bounds.left && rect.right <= bounds.right &&
+          rect.top >= bounds.top && rect.bottom <= bounds.bottom)
+    }
     for (const width of [375, 480, 850]) {
       if (width !== 375) await setWindowSize(app, page, { width, height: width === 480 ? 851 : 850 })
       await expect.poll(() => page.locator('.settingsDownloadsPage').evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
-      await expect.poll(() => clear.evaluate(element => {
+      // Pages up to 600px wide move the bulk actions into a menu. Whether a
+      // window width crosses that depends on the UI scale.
+      await expect(clear.or(menuButton).filter({ visible: true })).toHaveCount(1)
+      if (await clear.isVisible()) {
+        await expect.poll(() => clear.evaluate(labelFits, '.downloadsPage')).toBe(true)
+        continue
+      }
+      await expect.poll(() => menuButton.evaluate(element => {
         const bounds = element.getBoundingClientRect()
         const container = element.closest('.downloadsPage').getBoundingClientRect()
-        // Measure the label itself: the decorative ripple extends beyond the button.
-        const text = [...element.childNodes].find(node => node.nodeType === Node.TEXT_NODE && node.textContent.trim())
-        const range = document.createRange()
-        range.selectNodeContents(text)
-        return bounds.left >= container.left - 1 && bounds.right <= container.right + 1 &&
-          [...range.getClientRects()].every(rect => rect.left >= bounds.left && rect.right <= bounds.right &&
-            rect.top >= bounds.top && rect.bottom <= bounds.bottom)
+        return bounds.left >= container.left - 1 && bounds.right <= container.right + 1
       })).toBe(true)
+      await menuButton.click()
+      const item = page.getByRole('menuitem', { name: label })
+      await expect.poll(() => item.evaluate(labelFits, 'body')).toBe(true)
+      await page.keyboard.press('Escape')
+      await expect(item).toBeHidden()
     }
   })
 })
