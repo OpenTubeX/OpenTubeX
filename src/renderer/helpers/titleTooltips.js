@@ -234,7 +234,7 @@ function hide() {
  * the space above flip below instead.
  */
 function position() {
-  const rect = anchor.getBoundingClientRect()
+  const rect = getAnchorRect()
   const width = tooltip.offsetWidth
   const height = tooltip.offsetHeight
   const compact = rect.width <= COMPACT_WIDTH_PX && rect.height <= COMPACT_HEIGHT_PX
@@ -257,4 +257,16 @@ function position() {
 
   tooltip.style.left = `${Math.round(left)}px`
   tooltip.style.top = `${Math.round(Math.min(Math.max(top, VIEWPORT_MARGIN_PX), maxTop))}px`
+}
+
+/**
+ * An anchor with `display: contents` has no box of its own and measures as an
+ * empty rect at the viewport origin, so measure the boxes of its contents.
+ */
+function getAnchorRect() {
+  if (anchor.getClientRects().length > 0) return anchor.getBoundingClientRect()
+
+  const range = document.createRange()
+  range.selectNodeContents(anchor)
+  return range.getBoundingClientRect()
 }
