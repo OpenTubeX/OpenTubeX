@@ -357,8 +357,11 @@ function runApp() {
     if (manager && manager.tabs.size > 1 && !await confirmCloseWindowWithMultipleTabs(browserWindow, manager.tabs.size)) {
       return false
     }
-    // Closing the other windows meanwhile turns this close into a quit
-    return BrowserWindow.getAllWindows().length > 1 || confirmCloseApp(browserWindow)
+    // Closing the other windows meanwhile turns this close into a quit. A
+    // window stays in getAllWindows() until it is destroyed, after its close.
+    const openWindowCount = BrowserWindow.getAllWindows()
+      .filter(window => !closingWindowIds.has(window.id)).length
+    return openWindowCount > 1 || confirmCloseApp(browserWindow)
   }
 
   // Becomes true once the user asks the app to quit (e.g. Ctrl+Q / "Quit" menu
