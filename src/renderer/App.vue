@@ -3191,7 +3191,7 @@ function handleKeyboardShortcuts(event) {
     if ([shortcuts.RELOAD_TAB, shortcuts.RELOAD_TAB_ALT]
       .some(shortcut => matchesKeyboardShortcut(event, shortcut))) {
       const tabIds = getShortcutTabIds()
-      if (tabIds.length === 1 && route.path.startsWith('/subscriptions')) {
+      if (tabIds.length === 1 && /^\/(?:subscriptions|trending|popular)(?:\/|$)/.test(route.path)) {
         event.preventDefault()
         return
       }
