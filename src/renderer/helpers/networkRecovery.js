@@ -324,14 +324,20 @@ export function withNetworkRecovery(input, init, task, { uncached = false, ...op
  * waiting while other internet hosts answer.
  * @param {string} url
  * @param {AbortSignal} signal
- * @returns {Promise<void>}
+ * @returns {Promise<boolean>} whether the server was unreachable, false when it answered at once
  */
-export function waitUntilReachable(url, signal) {
+export async function waitUntilReachable(url, signal) {
   const probe = createInternetProbe((input, init) => withoutNetworkRecovery(() => window.fetch(input, init)), url)
-  return initializeNetworkRecovery().run(new URL(url).origin, async probeSignal => {
+  const recovery = initializeNetworkRecovery()
+  const origin = new URL(url).origin
+  let unreachable = navigator.onLine === false || recovery.waitingOrigins.includes(origin)
+  await recovery.run(origin, async probeSignal => {
+    if (await probe(probeSignal)) return
+    unreachable = true
     // Hostnames must stay out of the message, which classifies the failure
-    if (!await probe(probeSignal)) throw new Error('Connection failed')
+    throw new Error('Connection failed')
   }, { signal, retryDuringOutage: true })
+  return unreachable
 }
 
 let networkRecoveryBypasses = 0

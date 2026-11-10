@@ -291,7 +291,10 @@ test('a stream server that stops answering is awaited while the internet check s
   await flush()
   const origin = 'https://rr1---sn-abc.googlevideo.com'
   let settled = false
-  const waiting = app.waitUntilReachable(`${origin}/generate_204`, new AbortController().signal).then(() => { settled = true })
+  const waiting = app.waitUntilReachable(`${origin}/generate_204`, new AbortController().signal).then(unreachable => {
+    settled = true
+    return unreachable
+  })
   await flush()
   assert.equal(settled, false, 'a browser CORS heuristic must not end the wait')
   assert.deepEqual([...app.recovery.waitingOrigins], [origin])
@@ -300,7 +303,7 @@ test('a stream server that stops answering is awaited while the internet check s
 
   reachable = true
   t.mock.timers.tick(5000)
-  await waiting
+  assert.equal(await waiting, true, 'a server that did not answer at first was unreachable')
   assert.equal(probes.length, 2)
   assert.deepEqual([...app.recovery.waitingOrigins], [])
 
@@ -321,7 +324,8 @@ test('a blocked internet check does not stop waiting for a stream server that an
   }, undefined, { checkInternet: true })
   await flush()
   assert.equal(app.recovery.state, 'offline')
-  await app.waitUntilReachable('https://rr1---sn-abc.googlevideo.com/generate_204', new AbortController().signal)
+  assert.equal(await app.waitUntilReachable('https://rr1---sn-abc.googlevideo.com/generate_204', new AbortController().signal), false,
+    'a server that answers at once was reachable all along')
 })
 
 test('the connection timeout stops after headers and does not abort streaming video bodies', async t => {

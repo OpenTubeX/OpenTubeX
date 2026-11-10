@@ -5873,9 +5873,10 @@ export default defineComponent({
      * then retries the same stream. Reloading would also need YouTube, and
      * would spend the SABR recovery budget on an outage.
      * @param {import('shaka-player/dist/shaka-player.ui').default.util.Error} error
+     * @param {boolean} [onlyIfUnreachable] leave a server that answers at once to the normal recovery
      * @returns {Promise<boolean>} whether the error was handled
      */
-    async retryStreamWhenReachable(error) {
+    async retryStreamWhenReachable(error, onlyIfUnreachable = false) {
       // A stream that fails again soon after its retry needs fresh streaming data
       if (this.playbackNetworkRetryPending) return false
       const probeUrl = getGoogleVideoProbeUrl(this.isSabrVideoStream() ? this.$refs.player?.getSabrUrl() : error.data?.[0])
@@ -5888,8 +5889,9 @@ export default defineComponent({
       this.playbackNetworkWaitError = error
       this.playbackNetworkWaitOrigin = new URL(probeUrl).origin
       console.warn(`Waiting for ${this.playbackNetworkWaitOrigin} to answer before retrying the stream of ${this.videoId}`)
+      let unreachable
       try {
-        await waitUntilReachable(probeUrl, controller.signal)
+        unreachable = await waitUntilReachable(probeUrl, controller.signal)
       } catch {
         // A cancelled wait belongs to a replaced player. Anything else still
         // needs the normal recovery.
@@ -5902,6 +5904,7 @@ export default defineComponent({
         }
       }
       if (player !== this.$refs.player || this.isLoading) return true
+      if (onlyIfUnreachable && !unreachable) return false
       // Whether or not the retry starts, a further failure needs fresh streaming data
       this.playbackNetworkRetryPending = true
       this.playbackNetworkRetryPlayedSeconds = 0
@@ -6046,6 +6049,17 @@ export default defineComponent({
         ) {
           return
         }
+      }
+
+      // A request that hangs until its timeout can also mean a lost
+      // connection, such as a network that drops packets. A server that
+      // answers at once has a stuck stream instead, which needs a reload.
+      if (
+        error.code === Code.TIMEOUT &&
+        this.activePlaybackEngine !== 'yt-dlp' &&
+        await this.retryStreamWhenReachable(error, true)
+      ) {
+        return
       }
 
       // A terminal player error can still come from a transiently bad yt-dlp
