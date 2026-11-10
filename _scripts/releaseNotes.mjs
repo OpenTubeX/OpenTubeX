@@ -38,6 +38,10 @@ const PULL_REQUEST_FIELDS = `
   closingIssuesReferences(first: 100) {
     nodes { number }
   }
+  mergeCommit {
+    oid
+    parents { totalCount }
+  }
   mergedAt
   number
 `
@@ -491,10 +495,13 @@ export function validatePullRequest(body, changedFiles) {
  * Lists the commits that touched a release note since it was last added,
  * newest first. A reused file name does not pull in an earlier note's history.
  */
-export function listReleaseNoteHistory(file) {
-  // Merge commits list no files unless asked, which hides notes added while
-  // resolving a merge, such as an upstream sync.
-  const output = execFileSync('git', ['log', '--format=commit %H %ct', '--name-status', '--diff-merges=first-parent', 'HEAD', '--', file], {
+export function listReleaseNoteHistory(file, { cwd } = {}) {
+  // Only follow the target branch: each pull request's merge or squash commit
+  // carries its changes, including notes added while resolving a merge such as
+  // an upstream sync. Walking into merged branches would also list merges that
+  // never changed the note.
+  const output = execFileSync('git', ['log', '--format=commit %H %ct', '--name-status', '--first-parent', 'HEAD', '--', file], {
+    cwd,
     encoding: 'utf8',
     maxBuffer: 10 * 1024 * 1024,
   })
@@ -522,10 +529,13 @@ export function selectPullRequests(responses, { repository, target }) {
       for (const pullRequest of commit?.associatedPullRequests.nodes ?? []) {
         // Commits can also belong to open pull requests or to pull requests that
         // merged into another branch, so only keep those merged into the target.
+        // A pull request merged with a merge commit lands only through that
+        // commit, even when its branch also contains commits pushed directly.
         if (
           pullRequest.mergedAt &&
           pullRequest.baseRefName === target &&
-          pullRequest.baseRepository.nameWithOwner.toLowerCase() === repository.toLowerCase()
+          pullRequest.baseRepository.nameWithOwner.toLowerCase() === repository.toLowerCase() &&
+          (pullRequest.mergeCommit?.parents.totalCount === 1 || pullRequest.mergeCommit?.oid === commit.oid)
         ) {
           const commitPullRequests = pullRequests.get(alias) ?? new Map()
 
@@ -552,6 +562,7 @@ export function listPullRequestsByCommit(repository, target, commits) {
     const aliases = batch.map((oid, offset) => `
     commit${offset}: object(oid: "${oid}") {
       ... on Commit {
+        oid
         associatedPullRequests(first: 10) {
           nodes { ${PULL_REQUEST_FIELDS} }
         }
