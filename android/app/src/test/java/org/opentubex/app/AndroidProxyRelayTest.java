@@ -132,6 +132,68 @@ public class AndroidProxyRelayTest {
         }
     }
 
+    @Test public void silentUpstreamIsReleasedOnceTheRequestEnded() throws Exception {
+        try (ServerSocket destination = server(); Socket remote = new Socket("127.0.0.1", destination.getLocalPort());
+             Socket origin = destination.accept()) {
+            // The origin neither answers nor closes, like a peer whose network path died.
+            remote.setSoTimeout(100);
+            ByteArrayOutputStream received = new ByteArrayOutputStream();
+            Socket client = new Socket() {
+                @Override public OutputStream getOutputStream() { return received; }
+            };
+            CompletableFuture<Void> pump = CompletableFuture.runAsync(() -> {
+                try { AndroidProxyRelay.copyResponse(remote, client, () -> true); }
+                catch (IOException error) { throw new RuntimeException(error); }
+            });
+            pump.get(5, TimeUnit.SECONDS);
+            assertEquals(0, received.size());
+        }
+    }
+
+    @Test public void idleUpstreamStaysOpenWhileTheClientIsConnected() throws Exception {
+        try (ServerSocket destination = server(); Socket remote = new Socket("127.0.0.1", destination.getLocalPort());
+             Socket origin = destination.accept()) {
+            remote.setSoTimeout(100);
+            ByteArrayOutputStream received = new ByteArrayOutputStream();
+            Socket client = new Socket() {
+                @Override public OutputStream getOutputStream() { return received; }
+            };
+            CompletableFuture<Void> pump = CompletableFuture.runAsync(() -> {
+                try { AndroidProxyRelay.copyResponse(remote, client, () -> false); }
+                catch (IOException error) { throw new RuntimeException(error); }
+            });
+            // Several read timeouts pass before the response arrives.
+            Thread.sleep(500);
+            assertFalse(pump.isDone());
+            origin.getOutputStream().write(42);
+            origin.close();
+            pump.get(5, TimeUnit.SECONDS);
+            assertArrayEquals(new byte[] {42}, received.toByteArray());
+        }
+    }
+
+    @Test public void responseGetsAWholeTimeoutAfterTheRequestEnded() throws Exception {
+        try (ServerSocket destination = server(); Socket remote = new Socket("127.0.0.1", destination.getLocalPort());
+             Socket origin = destination.accept()) {
+            remote.setSoTimeout(400);
+            ByteArrayOutputStream received = new ByteArrayOutputStream();
+            Socket client = new Socket() {
+                @Override public OutputStream getOutputStream() { return received; }
+            };
+            // The request ends while the first read is waiting; the response follows soon after.
+            long requestEnd = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(300);
+            CompletableFuture<Void> pump = CompletableFuture.runAsync(() -> {
+                try { AndroidProxyRelay.copyResponse(remote, client, () -> System.nanoTime() >= requestEnd); }
+                catch (IOException error) { throw new RuntimeException(error); }
+            });
+            Thread.sleep(500);
+            origin.getOutputStream().write(42);
+            origin.close();
+            pump.get(5, TimeUnit.SECONDS);
+            assertArrayEquals(new byte[] {42}, received.toByteArray());
+        }
+    }
+
     @Test public void httpProxyReceivesRemoteHostnameAndCredentialsOnlyInHandshake() throws Exception {
         try (ServerSocket proxy = server(); AndroidProxyRelay relay = new AndroidProxyRelay(
             policy("http", proxy.getLocalPort(), "alice", "secret"), null)) {

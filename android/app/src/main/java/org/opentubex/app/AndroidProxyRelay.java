@@ -12,6 +12,7 @@ import java.net.Proxy;
 import java.net.ProxySelector;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -24,6 +25,8 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BooleanSupplier;
 
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocket;
@@ -178,15 +181,19 @@ final class AndroidProxyRelay implements AutoCloseable {
                 if (forwardHttp) forwarded.insert(forwarded.length() - 2, authorization(route));
                 output.write(forwarded.toString().getBytes(StandardCharsets.ISO_8859_1));
             }
-            // Read timeouts bound the handshake only. A download can keep receiving
-            // data without sending anything for much longer; the caller owns its
-            // transfer timeout and closing either socket still cancels both pumps.
+            // A download can keep receiving data without sending anything for much
+            // longer than a read timeout; the caller owns its transfer timeout and
+            // closing either socket still cancels both pumps.
             client.setSoTimeout(0);
-            remote.setSoTimeout(0);
+            remote.setSoTimeout(TIMEOUT);
             connected = true;
             // Half-close preserves responses after a client finishes sending its body.
-            threads.execute(() -> copyRequest(client, remote));
-            copy(remote.getInputStream(), client.getOutputStream());
+            AtomicBoolean requestEnded = new AtomicBoolean();
+            threads.execute(() -> {
+                copyRequest(client, remote);
+                requestEnded.set(true);
+            });
+            copyResponse(remote, client, requestEnded::get);
         } catch (Exception error) {
             if (!connected) {
                 try { client.getOutputStream().write("HTTP/1.1 502 Bad Gateway\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".getBytes(StandardCharsets.US_ASCII)); }
@@ -263,6 +270,29 @@ final class AndroidProxyRelay implements AutoCloseable {
                 // the response pump running until the peer closes or we cancel.
             }
         } catch (IOException ignored) { closeSocket(remote); }
+    }
+
+    /** Copies the response until the upstream closes. Some upstreams never close
+     * after the client finished, for example when the path to them died, so once
+     * the request has ended an upstream silent for a whole read timeout is given up.
+     * Otherwise each such tunnel keeps its thread and one of the relay's slots. */
+    static void copyResponse(Socket remote, Socket client, BooleanSupplier requestEnded) throws IOException {
+        InputStream input = remote.getInputStream();
+        OutputStream output = client.getOutputStream();
+        byte[] buffer = new byte[32768];
+        while (true) {
+            // Only a read that started after the request ended waited a whole timeout since.
+            boolean ended = requestEnded.getAsBoolean();
+            int count;
+            try {
+                count = input.read(buffer);
+            } catch (SocketTimeoutException idle) {
+                if (ended) return;
+                continue;
+            }
+            if (count == -1) return;
+            output.write(buffer, 0, count);
+        }
     }
 
     synchronized boolean proxies(URI target) {
