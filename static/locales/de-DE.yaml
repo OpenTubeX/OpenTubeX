@@ -1373,7 +1373,7 @@ Settings:
       Details effect: Vorhandene Abonnements oder Videos bleiben erhalten. Importierte Profil- oder Wiedergabelistendetails ersetzen die aktuellen Angaben.
       Merge effect: Vorhandene Daten bleiben erhalten und werden mit übereinstimmenden Einträgen zusammengeführt.
       Subscriptions effect: Vorhandene Abonnements bleiben erhalten. Nur neue Kanäle werden hinzugefügt.
-      History replace effect: Der Wiedergabeverlauf für übereinstimmende Videos wird ersetzt. Der übrige Verlauf bleibt erhalten.
+      History merge effect: Übereinstimmende Videos werden mit deinem Verlauf zusammengeführt. Gespeicherte Details und das neueste Wiedergabedatum bleiben erhalten. Der übrige Verlauf bleibt ebenfalls erhalten.
     Select export data: "Wähle die zu exportierenden Daten aus"
     Export selected data: "Ausgewählte Daten exportieren"
     Complete backup: Vollständige Sicherung

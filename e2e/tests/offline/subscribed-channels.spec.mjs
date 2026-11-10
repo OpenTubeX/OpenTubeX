@@ -330,7 +330,7 @@ test.describe('large subscribed channel lists', () => {
     await page.evaluate(() => {
       const store = window.$store
       store.commit('removeChannelFromProfiles', {
-        channelId: 'UC0000000000000000000000',
+        channelIds: ['UC0000000000000000000000'],
         profileIds: ['allChannels']
       })
     })

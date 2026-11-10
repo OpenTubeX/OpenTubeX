@@ -110,6 +110,7 @@ async function profileChangeFixture() {
     deepCopy: value => JSON.parse(JSON.stringify(value)),
     DBProfileHandlers: {
       upsert: async () => {},
+      updateDetails: async () => {},
       updateSubscriptionDetails: async () => ({ profileIds: [MAIN_PROFILE_ID, 'profile'], success: true }),
     },
   })
@@ -144,19 +145,21 @@ test('profile metadata and membership edits still schedule syncs after channel r
   const { store, scheduled } = await profileChangeFixture()
   await store.dispatch('batchUpdateSubscriptionDetails', [{ channelId: 'channel', channelName: 'Refreshed' }])
   scheduled.length = 0
-  for (const change of [{ name: 'Renamed' }, { bgColor: '#654321' }, { textColor: '#fedcba' },
-    { subscriptions: [{ id: 'other', name: 'Other channel' }] }]) {
+  for (const change of [{ name: 'Renamed' }, { bgColor: '#654321' }, { textColor: '#fedcba' }]) {
     const profile = JSON.parse(JSON.stringify(store.state.profiles.profileList.find(profile => profile._id === 'profile')))
-    await store.dispatch('updateProfile', { ...profile, ...change })
+    await store.dispatch('updateProfileDetails', { profileId: 'profile', details: { ...profile, ...change } })
   }
-  assert.deepEqual(scheduled, Array(4).fill('profilesOrSubscriptions'))
+  const profile = JSON.parse(JSON.stringify(store.state.profiles.profileList.find(profile => profile._id === 'profile')))
+  await store.dispatch('updateProfile', { ...profile, subscriptions: [{ id: 'other', name: 'Other channel' }] })
+  assert.deepEqual(scheduled, [...Array(3).fill('profiles'), 'profilesOrSubscriptions'])
 })
 
 test('local-only profile edits and identical saves do not schedule syncs', async () => {
   const { store, scheduled } = await profileChangeFixture()
-  await store.dispatch('updateProfile', { ...JSON.parse(JSON.stringify(store.state.profiles.profileList[0])), name: 'Local label', bgColor: '#fff' })
+  await store.dispatch('updateProfileDetails', { profileId: MAIN_PROFILE_ID, details: { ...JSON.parse(JSON.stringify(store.state.profiles.profileList[0])), name: 'Local label', bgColor: '#fff' } })
   const profile = JSON.parse(JSON.stringify(store.state.profiles.profileList[1]))
-  await store.dispatch('updateProfile', { ...profile, icon: { type: 'emoji', value: '🎵' } })
+  await store.dispatch('updateProfileDetails', { profileId: 'profile', details: { ...profile, icon: { type: 'emoji', value: '🎵' } } })
+  await store.dispatch('updateProfileDetails', { profileId: 'profile', details: JSON.parse(JSON.stringify(store.state.profiles.profileList[1])) })
   await store.dispatch('updateProfile', JSON.parse(JSON.stringify(store.state.profiles.profileList[1])))
   assert.deepEqual(scheduled, [])
 })
@@ -166,8 +169,8 @@ test('changing theme bgColor to its explicit fallback still schedules a profile 
   store.commit('setProfileList', store.state.profiles.profileList.map(profile =>
     profile._id === 'profile' ? { ...profile, bgColor: THEME_BG_COLOR } : profile))
   const profile = JSON.parse(JSON.stringify(store.state.profiles.profileList[1]))
-  await store.dispatch('updateProfile', { ...profile, bgColor: '#000000' })
-  assert.deepEqual(scheduled, ['profilesOrSubscriptions'])
+  await store.dispatch('updateProfileDetails', { profileId: 'profile', details: { ...profile, bgColor: '#000000' } })
+  assert.deepEqual(scheduled, ['profiles'])
 })
 
 test('remote actions do not schedule uploads while concurrent user actions still do', async () => {

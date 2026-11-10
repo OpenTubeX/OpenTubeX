@@ -3,7 +3,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 import { readFile } from 'node:fs/promises'
 import { strToU8, zipSync } from 'fflate'
-import { previewBackupImport, previewTakeoutImport, parseTakeoutWatchHistory } from '../../src/renderer/helpers/import-preview.js'
+import { previewBackupImport, previewTakeoutImport, parseTakeoutWatchHistory, mergeTakeoutHistoryRecord } from '../../src/renderer/helpers/import-preview.js'
 import { mergeBackupProfile, mergeBackupPlaylist } from '../../src/renderer/helpers/unifiedBackup.js'
 import { processToBeAddedPlaylistVideo } from '../../src/renderer/helpers/playlists.js'
 import { forEachTakeoutImportEntry, listYouTubeTakeoutZipEntries } from '../../src/renderer/helpers/youtube-takeout-zip.js'
@@ -170,6 +170,7 @@ test('watch history with empty subtitles imports the record counted in the previ
   let imported
   const context = vm.createContext({
     parseTakeoutWatchHistory,
+    mergeTakeoutHistoryRecord,
     historyCacheById: { value: {} },
     deepCopy: structuredClone,
     store: { dispatch: async (_action, records) => { imported = records; return true } },
@@ -180,6 +181,51 @@ test('watch history with empty subtitles imports the record counted in the previ
   await context.importYouTubeWatchHistory([record])
   assert.equal(imported.get('abcdefghijk').isWatched, true)
   assert.equal(imported.get('abcdefghijk').author, '')
+})
+
+test('re-importing older watch history keeps the saved duration, resume position and newer watch time', async () => {
+  const takeout = (videoId, time) => ({ products: ['YouTube'], title: 'Watched Takeout title', titleUrl: `https://www.youtube.com/watch?v=${videoId}`, time, subtitles: [{ name: 'Channel', url: 'https://www.youtube.com/channel/UCchannel' }] })
+  const saved = {
+    videoId: 'abcdefghijk',
+    title: 'Saved title',
+    author: '',
+    authorId: 'UCchannel',
+    type: 'video',
+    published: 1,
+    description: 'Saved description',
+    lengthSeconds: 600,
+    watchProgress: 321,
+    timeWatched: Date.parse('2026-01-01T00:00:00Z'),
+    isWatched: false,
+    lastViewedPlaylistId: 'PLsaved',
+  }
+  let imported
+  const context = vm.createContext({
+    parseTakeoutWatchHistory,
+    mergeTakeoutHistoryRecord,
+    historyCacheById: { value: { abcdefghijk: saved } },
+    deepCopy: structuredClone,
+    store: { dispatch: async (_action, records) => { imported = records; return true } },
+    showToast() {},
+    t: key => key,
+  })
+  vm.runInContext(componentSection('async function importYouTubeWatchHistory(', 'const showExportWatchHistoryPrompt'), context)
+  // Takeout lists every watch of a video, newest first.
+  await context.importYouTubeWatchHistory([
+    takeout('abcdefghijk', '2025-01-01T00:00:00Z'), takeout('bcdefghijkl', '2025-03-01T00:00:00Z'), takeout('bcdefghijkl', '2025-02-01T00:00:00Z'),
+  ])
+  assert.deepEqual({ ...imported.get('abcdefghijk') }, { ...saved, author: 'Channel', isWatched: true, isLive: false })
+  assert.equal(imported.get('bcdefghijkl').timeWatched, Date.parse('2025-03-01T00:00:00Z'))
+
+  const newer = mergeTakeoutHistoryRecord(saved, parseTakeoutWatchHistory([takeout('abcdefghijk', '2026-06-01T00:00:00Z')]).entries[0])
+  assert.equal(newer.timeWatched, Date.parse('2026-06-01T00:00:00Z'))
+  assert.deepEqual([newer.title, newer.lengthSeconds, newer.watchProgress, newer.published], ['Saved title', 600, 321, 1])
+
+  // Neither half of another channel's name and ID joins a record that has the other half
+  const otherChannel = mergeTakeoutHistoryRecord({ ...saved, authorId: 'UCsaved' }, parseTakeoutWatchHistory([takeout('abcdefghijk', '2025-01-01T00:00:00Z')]).entries[0])
+  assert.deepEqual([otherChannel.author, otherChannel.authorId], ['', 'UCsaved'])
+  const unnamedChannel = mergeTakeoutHistoryRecord({ ...saved, author: 'Other', authorId: '' }, parseTakeoutWatchHistory([takeout('abcdefghijk', '2025-01-01T00:00:00Z')]).entries[0])
+  assert.deepEqual([unnamedChannel.author, unnamedChannel.authorId], ['Other', ''])
 })
 
 test('watch history parsing excludes malformed records from preview counts and preserves usable entries', () => {

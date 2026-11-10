@@ -1248,7 +1248,7 @@ Settings:
       Details effect: As subscrições ou os vídeos existentes são mantidos. Os detalhes importados dos perfis ou listas de reprodução substituem os atuais.
       Merge effect: Os dados existentes são mantidos e combinados com os registos correspondentes.
       Subscriptions effect: As subscrições existentes são mantidas. Apenas são adicionados novos canais.
-      History replace effect: O histórico de visualização dos vídeos correspondentes é substituído. O restante histórico é mantido.
+      History merge effect: Os vídeos correspondentes são combinados com o histórico, mantendo os detalhes guardados e a data de visualização mais recente. O restante histórico é mantido.
     Select export data: "Selecione os dados a exportar"
     Export selected data: "Exportar dados selecionados"
     Complete backup: "Cópia de segurança completa"

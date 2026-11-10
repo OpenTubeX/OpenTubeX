@@ -1235,7 +1235,7 @@ Settings:
       Details effect: 現有訂閱或影片將被保留。匯入的設定檔或播放清單詳細資料將取代目前的詳細資料。
       Merge effect: 現有資料將被保留，並與相符的記錄合併。
       Subscriptions effect: 現有訂閱將被保留。僅新增頻道。
-      History replace effect: 相符影片的觀看記錄將被取代。其他記錄將被保留。
+      History merge effect: 相符的影片將與觀看記錄合併，保留已儲存的詳細資訊和最近的觀看日期。其他記錄將被保留。
     Select export data: "選擇要匯出的資料"
     Export selected data: "匯出所選資料"
     Complete backup: "完整備份"

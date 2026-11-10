@@ -1420,6 +1420,10 @@ const customActions = {
             commit('updateSubscriptionDetails', data)
             break
 
+          case SyncEvents.PROFILES.UPDATE_DETAILS:
+            commit('updateProfileDetails', data)
+            break
+
           case SyncEvents.GENERAL.DELETE:
             commit('removeProfileFromList', data)
             break

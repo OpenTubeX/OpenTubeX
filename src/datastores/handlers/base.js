@@ -808,19 +808,18 @@ class Profiles {
     }
   }
 
-  static removeChannelFromProfiles(channelId, profileIds) {
+  static removeChannelFromProfiles(channelIds, profileIds) {
+    const update = { $pull: { subscriptions: { id: { $in: channelIds } } } }
     if (profileIds.length === 1) {
-      return db.profiles.updateAsync(
-        { _id: profileIds[0] },
-        { $pull: { subscriptions: { id: channelId } } }
-      )
+      return db.profiles.updateAsync({ _id: profileIds[0] }, update)
     } else {
-      return db.profiles.updateAsync(
-        { _id: { $in: profileIds } },
-        { $pull: { subscriptions: { id: channelId } } },
-        { multi: true }
-      )
+      return db.profiles.updateAsync({ _id: { $in: profileIds } }, update, { multi: true })
     }
+  }
+
+  /** Saves the name, colors, and icon without rewriting subscriptions other windows or sync may have changed */
+  static updateDetails(profileId, { name, bgColor, textColor, icon }) {
+    return db.profiles.updateAsync({ _id: profileId }, { $set: { name, bgColor, textColor, icon } })
   }
 
   static async updateChannelSettings(channel, profileIds) {

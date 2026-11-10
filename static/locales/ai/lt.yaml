@@ -1474,7 +1474,7 @@ Settings:
       Details effect: Esamos prenumeratos ar vaizdo įrašai išsaugomi. Importuoti profilių ar grojaraščių duomenys pakeičia dabartinius.
       Merge effect: Esami duomenys išsaugomi ir sujungiami su atitinkamais įrašais.
       Subscriptions effect: Esamos prenumeratos išsaugomos. Pridedami tik nauji kanalai.
-      History replace effect: Atitinkamų vaizdo įrašų žiūrėjimo istorija pakeičiama. Kita istorija išsaugoma.
+      History merge effect: Atitinkami vaizdo įrašai sujungiami su jūsų istorija, išsaugant įrašytą informaciją ir naujausią žiūrėjimo datą. Kita istorija išsaugoma.
     Select export data: "Pasirinkite eksportuojamus duomenis"
     Export selected data: "Eksportuoti pasirinktus duomenis"
     Complete backup: "Pilna atsarginė kopija"

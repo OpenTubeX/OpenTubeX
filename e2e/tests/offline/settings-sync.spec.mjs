@@ -987,9 +987,9 @@ test.describe('OIDC sync login', () => {
 
     /**
      * @param {import('@playwright/test').Page} page
-     * @param {{ sessionDeviceId?: (deviceId: string) => string }} [options]
+     * @param {{ sessionDeviceId?: (deviceId: string) => string, oidcState?: boolean }} [options]
      */
-    async function routeOidcServer(page, { sessionDeviceId = deviceId => deviceId } = {}) {
+    async function routeOidcServer(page, { sessionDeviceId = deviceId => deviceId, oidcState = false } = {}) {
       const server = { deviceId: '' }
       await page.route('https://sync.example/**', async (route) => {
         const request = route.request()
@@ -997,7 +997,7 @@ test.describe('OIDC sync login', () => {
         if (pathname === '/health') {
           await route.fulfill({ json: { status: 'ok', capabilities: { encrypted_sync: 1, live_sync: 1, account_sessions: 1 } } })
         } else if (pathname === '/meta') {
-          await route.fulfill({ json: { oidc: true, oidc_display_name: 'Authelia' } })
+          await route.fulfill({ json: { oidc: true, oidc_display_name: 'Authelia', oidc_state: oidcState } })
         } else if (pathname === '/v1/account/sessions') {
           await route.fulfill({
             json: {
@@ -1022,7 +1022,7 @@ test.describe('OIDC sync login', () => {
 
     test('signs in through the server’s OIDC provider', async ({ app, page, attachScreenshot }) => {
       const externalLinks = await recordExternalLinks(app)
-      const server = await routeOidcServer(page)
+      const server = await routeOidcServer(page, { oidcState: true })
       const section = await goToSettingsSection(page, 'sync')
 
       await section.getByLabel(/Privacy passphrase/).fill('sync-privacy-passphrase')
@@ -1040,7 +1040,14 @@ test.describe('OIDC sync login', () => {
       await expect(section.getByRole('button', { name: 'Cancel' })).toBeVisible()
       await attachScreenshot('OIDC login pending')
 
-      await openLink(app, `opentubex://oidc?token=${oidcToken()}`)
+      // A callback for a sign-in another page started leaves this one waiting.
+      // Callbacks arrive in order, so had it been accepted, the sign-in below
+      // would find nothing waiting and the checks for this account would fail.
+      await openLink(app, `opentubex://oidc?token=${oidcToken('another-account')}&state=forged`)
+
+      const state = url.searchParams.get('state')
+      expect(state).toMatch(/^[\w-]{43}$/)
+      await openLink(app, `opentubex://oidc?token=${oidcToken()}&state=${state}`)
 
       await expect(section.getByText('Connected with single sign-on')).toBeVisible()
       await expect(section.getByLabel('Username')).toHaveCount(0)
@@ -1159,7 +1166,7 @@ test.describe('OIDC sync login', () => {
       await dialog.getByRole('button', { name: 'Delete account' }).click()
 
       await expect.poll(externalLinks).toEqual(['https://auth.example/authorize?state=abc'])
-      expect(deletionRequests).toEqual([{ redirect_url: 'opentubex://oidc' }])
+      expect(deletionRequests).toEqual([{ redirect_url: 'opentubex://oidc', state: expect.stringMatching(/^[\w-]{43}$/) }])
       await expect(dialog.getByText('Continue in your browser. OpenTubeX resumes when you are done.')).toBeVisible()
 
       // A connection drop while the browser is open cancels running sync requests.

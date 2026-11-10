@@ -1234,7 +1234,7 @@ Settings:
       Details effect: 既存の登録チャンネルや動画は保持されます。インポートしたプロフィールや再生リストの詳細で現在の詳細が置き換えられます。
       Merge effect: 既存のデータは保持され、一致する記録と統合されます。
       Subscriptions effect: 既存の登録チャンネルは保持されます。新しいチャンネルのみ追加されます。
-      History replace effect: 一致する動画の再生履歴は置き換えられます。その他の履歴は保持されます。
+      History merge effect: 一致する動画は履歴と統合され、保存済みの詳細と最新の視聴日時が保持されます。その他の履歴は保持されます。
     Select export data: "エクスポートするデータを選択"
     Export selected data: "選択したデータをエクスポート"
     Complete backup: "完全なバックアップ"

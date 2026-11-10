@@ -12,7 +12,7 @@ test('rejects a release signed before the installed one', () => {
   // the fixture signature was created at 1792619636 (2026-10-21)
   assert.throws(
     () => verifyYtDlpReleaseAsset(Buffer.from('not yt-dlp'), 'yt-dlp_linux', checksums, signature, 1792619636),
-    /does not match its signed checksum/
+    /does not match its checksum/
   )
   assert.throws(
     () => verifyYtDlpReleaseAsset(Buffer.from('not yt-dlp'), 'yt-dlp_linux', checksums, signature, 1792619637),

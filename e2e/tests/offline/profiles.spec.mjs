@@ -316,7 +316,7 @@ test.describe('profile selector', () => {
 
       store.commit('addChannelToProfiles', payload)
       store.commit('removeChannelFromProfiles', {
-        channelId: payload.channel.id,
+        channelIds: [payload.channel.id],
         profileIds: payload.profileIds
       })
 

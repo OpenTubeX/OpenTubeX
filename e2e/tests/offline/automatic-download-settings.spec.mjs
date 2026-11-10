@@ -158,7 +158,7 @@ test('preserves an intervening unsubscribe cleanup when the editor changes again
     await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.releaseAutomaticDownloadWrite)).toBe('function')
     await page.evaluate(betaId => {
       const store = window.$store
-      window.cleanupRuleUpdate = store.dispatch('removeChannelFromProfiles', { channelId: betaId, profileIds: ['allChannels'] })
+      window.cleanupRuleUpdate = store.dispatch('removeChannelFromProfiles', { channelIds: [betaId], profileIds: ['allChannels'] })
     }, BETA_CHANNEL_ID)
     await expect(beta).toHaveCount(0)
     await alpha.getByRole('textbox', { name: 'Title excludes', exact: true }).fill('Later edit')

@@ -115,6 +115,30 @@ test('isolates foreign frames and keeps their cross-origin requests restricted',
   )).toBe(true)
 })
 
+test('content security policy blocks framing the app and foreign base URLs', async ({ page }) => {
+  const result = await page.evaluate(async () => {
+    const baseURI = document.baseURI
+    const base = document.createElement('base')
+    base.href = 'https://base.otx-test.invalid/'
+    document.head.append(base)
+    const foreignBaseApplied = document.baseURI !== baseURI
+    base.remove()
+
+    // Chromium fires load for frames that frame-ancestors blocks too.
+    const frame = document.createElement('iframe')
+    frame.hidden = true
+    await new Promise(resolve => {
+      frame.onload = resolve
+      frame.src = 'app://bundle/index.html'
+      document.body.append(frame)
+    })
+    const framedAppLoaded = frame.contentDocument?.getElementById('app') != null
+    frame.remove()
+    return { foreignBaseApplied, framedAppLoaded }
+  })
+  expect(result).toEqual({ foreignBaseApplied: false, framedAppLoaded: false })
+})
+
 test('preserves app API requests, redirects, HTTP errors, ranges and image pixels', async ({ page }) => {
   const result = await page.evaluate(async url => {
     const response = await fetch(`${url}/api`, {

@@ -1242,7 +1242,7 @@ Settings:
       Details effect: Postojeće pretplate ili videozapisi zadržavaju se. Uvezeni detalji profila ili zbirki zamjenjuju trenutačne.
       Merge effect: Postojeći podaci zadržavaju se i spajaju s podudarnim zapisima.
       Subscriptions effect: Postojeće pretplate zadržavaju se. Dodaju se samo novi kanali.
-      History replace effect: Povijest gledanja podudarnih videozapisa zamjenjuje se. Ostala povijest zadržava se.
+      History merge effect: Podudarni videozapisi spajaju se s vašom poviješću, uz zadržavanje spremljenih pojedinosti i najnovijeg datuma gledanja. Ostala povijest zadržava se.
     Select export data: "Odaberite podatke za izvoz"
     Export selected data: "Izvezi odabrane podatke"
     Complete backup: "Potpuna sigurnosna kopija"

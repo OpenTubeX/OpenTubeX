@@ -1,5 +1,7 @@
 // @ts-check
 
+import { bytesToBase64Url } from './sync-server-protocol.js'
+
 /**
  * The URL sync servers redirect to after an OIDC login or account deletion.
  * Server operators must list it in `oidc.allowed_redirect_urls`. iOS nightly
@@ -73,15 +75,25 @@ export function isSyncServerOidcUsername(username) {
 }
 
 /**
+ * A random value that ties a callback to the flow that started it.
+ * @returns {string}
+ */
+export function createSyncServerOidcState() {
+  return bytesToBase64Url(crypto.getRandomValues(new Uint8Array(32)))
+}
+
+/**
  * The URL that starts an OIDC login in the browser.
  * @param {string} serverUrl normalized sync server URL
  * @param {string} deviceId
+ * @param {string} state returned in the callback by servers that support it
  * @returns {string}
  */
-export function syncServerOidcLoginUrl(serverUrl, deviceId) {
+export function syncServerOidcLoginUrl(serverUrl, deviceId, state) {
   const url = new URL(`${serverUrl}/v1/account/oidc/authenticate`)
   url.searchParams.set('redirect_url', SYNC_SERVER_OIDC_REDIRECT_URL)
   url.searchParams.set('device_id', deviceId)
+  url.searchParams.set('state', state)
   return url.href
 }
 
@@ -90,26 +102,31 @@ export function syncServerOidcLoginUrl(serverUrl, deviceId) {
  * while no flow waits are ignored, so a link alone cannot sign the app in.
  */
 export class SyncServerOidcCallbacks {
-  /** @type {{ resolve: (url: string) => void, reject: (error: Error) => void } | null} */
+  /** @type {{ state: string | null, resolve: (url: string) => void, reject: (error: Error) => void } | null} */
   #pending = null
 
   /**
    * Waits for the next callback. Cancel a previous wait first.
+   * @param {string | null} state the `state` the callback must carry, or null
+   * for servers that do not return it
    * @returns {Promise<string>}
    */
-  wait() {
+  wait(state = null) {
     return new Promise((resolve, reject) => {
-      this.#pending = { resolve, reject }
+      this.#pending = { state, resolve, reject }
     })
   }
 
   /**
+   * Callbacks for another flow leave the waiting one pending, so a forged link
+   * can neither replace nor end it.
    * @param {string} url
    * @returns {boolean} whether a flow was waiting for the callback
    */
   receive(url) {
     const pending = this.#pending
     if (!pending || !isSyncServerOidcCallbackUrl(url)) return false
+    if (pending.state !== null && parseUrl(url)?.searchParams.get('state') !== pending.state) return false
     this.#pending = null
     pending.resolve(url)
     return true

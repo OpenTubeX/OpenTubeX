@@ -3,6 +3,7 @@ import test from 'node:test'
 
 import {
   SyncServerOidcCallbacks,
+  createSyncServerOidcState,
   getSyncServerOidcCallbackToken,
   isSyncServerOidcCallbackUrl,
   isSyncServerOidcUsername,
@@ -36,11 +37,15 @@ test('reads the session token from login callbacks', () => {
   assert.equal(getSyncServerOidcCallbackToken('opentubex://oidc'), '')
 })
 
-test('starts the login with the redirect URL and this device', () => {
-  const url = new URL(syncServerOidcLoginUrl('https://sync.example/base', 'device-1'))
+test('starts the login with the redirect URL, this device, and the flow state', () => {
+  const state = createSyncServerOidcState()
+  assert.match(state, /^[\w-]{43}$/)
+  assert.notEqual(createSyncServerOidcState(), state)
+  const url = new URL(syncServerOidcLoginUrl('https://sync.example/base', 'device-1', state))
   assert.equal(url.origin + url.pathname, 'https://sync.example/base/v1/account/oidc/authenticate')
   assert.equal(url.searchParams.get('redirect_url'), 'opentubex://oidc')
   assert.equal(url.searchParams.get('device_id'), 'device-1')
+  assert.equal(url.searchParams.get('state'), state)
 })
 
 test('names OIDC accounts after the account the token belongs to', () => {
@@ -67,6 +72,16 @@ test('hands callbacks only to a waiting flow', async () => {
   assert.equal(callbacks.receive('opentubex://oidc?token=a'), true)
   assert.equal(await callback, 'opentubex://oidc?token=a')
   assert.equal(callbacks.receive('opentubex://oidc?token=b'), false)
+})
+
+test('ignores callbacks for another flow without ending the waiting one', async () => {
+  const callbacks = new SyncServerOidcCallbacks()
+  const callback = callbacks.wait('expected')
+  assert.equal(callbacks.receive('opentubex://oidc?token=forged'), false)
+  assert.equal(callbacks.receive('opentubex://oidc?token=forged&state=other'), false)
+  // Android WebViews before Chromium 130 put `//oidc` into the path.
+  assert.equal(callbacks.receive('opentubex://oidc/?token=a&state=expected'), true)
+  assert.equal(await callback, 'opentubex://oidc/?token=a&state=expected')
 })
 
 test('cancels a waiting flow', async () => {

@@ -1234,7 +1234,7 @@ Settings:
       Details effect: Dauden harpidetzak edo bideoak mantentzen dira. Inportatutako profilen edo erreprodukzio-zerrenden xehetasunek unekoak ordezten dituzte.
       Merge effect: Dauden datuak mantendu eta bat datozen erregistroekin bateratzen dira.
       Subscriptions effect: Dauden harpidetzak mantentzen dira. Kanal berriak soilik gehitzen dira.
-      History replace effect: Bat datozen bideoen ikustaldi-historia ordezten da. Gainerako historia mantentzen da.
+      History merge effect: Bat datozen bideoak historiarekin batzen dira, gordetako xehetasunak eta ikustaldi-data berriena mantenduz. Gainerako historia mantentzen da.
     Select export data: "Hautatu esportatu nahi dituzun datuak"
     Export selected data: "Esportatu hautatutako datuak"
     Complete backup: "Babeskopia osoa"

@@ -1234,7 +1234,7 @@ Settings:
       Details effect: Befintliga prenumerationer eller videor behålls. Importerade profil- eller spellistedetaljer ersätter de nuvarande.
       Merge effect: Befintliga data behålls och slås samman med matchande poster.
       Subscriptions effect: Befintliga prenumerationer behålls. Endast nya kanaler läggs till.
-      History replace effect: Visningshistorik för matchande videor ersätts. Övrig historik behålls.
+      History merge effect: Matchande videor slås ihop med din historik, och sparade detaljer och det senaste visningsdatumet behålls. Övrig historik behålls.
     Select export data: "Välj data att exportera"
     Export selected data: "Exportera valda data"
     Complete backup: "Fullständig säkerhetskopia"

@@ -1500,7 +1500,7 @@ Settings:
       Details effect: Obstoječe naročnine ali videoposnetki bodo ohranjeni. Uvožene podrobnosti profilov ali seznamov predvajanja bodo zamenjale trenutne.
       Merge effect: Obstoječi podatki bodo ohranjeni in združeni z ujemajočimi se vnosi.
       Subscriptions effect: Obstoječe naročnine bodo ohranjene. Dodani bodo samo novi kanali.
-      History replace effect: Zgodovina ogledov ujemajočih se videoposnetkov bo zamenjana. Druga zgodovina bo ohranjena.
+      History merge effect: Ujemajoči se videoposnetki bodo združeni z zgodovino, pri čemer se ohranijo shranjene podrobnosti in najnovejši datum ogleda. Druga zgodovina bo ohranjena.
     Select export data: "Izberite podatke za izvoz"
     Export selected data: "Izvozi izbrane podatke"
     Complete backup: "Celotna varnostna kopija"

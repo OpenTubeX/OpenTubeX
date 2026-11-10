@@ -37,7 +37,7 @@ const effects = computed(() => ({
   'Details effect': t('Settings.Data Settings.Import Preview.Details effect'),
   'Merge effect': t('Settings.Data Settings.Import Preview.Merge effect'),
   'Subscriptions effect': t('Settings.Data Settings.Import Preview.Subscriptions effect'),
-  'History replace effect': t('Settings.Data Settings.Import Preview.History replace effect'),
+  'History merge effect': t('Settings.Data Settings.Import Preview.History merge effect'),
 }))
 defineProps({
   rows: { type: Array, required: true },

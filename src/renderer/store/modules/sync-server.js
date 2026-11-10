@@ -67,6 +67,7 @@ import { syncDeletionKey, syncDeletions } from '../../helpers/sync-deletions.js'
 import {
   SYNC_SERVER_OIDC_REDIRECT_URL,
   SyncServerOidcCallbacks,
+  createSyncServerOidcState,
   getSyncServerOidcCallbackToken,
   syncServerOidcLoginUrl,
   syncServerOidcUsername,
@@ -335,12 +336,13 @@ function assertPrivacyPassphrase(supported, privacyPassphrase, password) {
  * @param {Function} commit
  * @param {'login' | 'delete'} kind
  * @param {string} url
+ * @param {string | null} state the `state` the callback must carry, or null
  * @returns {Promise<string>}
  */
-async function runOidcFlow(commit, kind, url) {
+async function runOidcFlow(commit, kind, url, state) {
   oidcCallbacks.cancel(new SyncServerCancelledError())
   const flow = ++oidcFlow
-  const callback = oidcCallbacks.wait()
+  const callback = oidcCallbacks.wait(state)
   // Not awaited yet while the browser opens; cancelling it then must not
   // become an unhandled rejection.
   callback.catch(() => {})
@@ -1618,14 +1620,22 @@ const actions = {
     }
     const normalizedUrl = normalizeSyncServerUrl(serverUrl)
     const client = trackSyncClient(new SyncServerClient(normalizedUrl))
+    let checksState
     try {
       // Check the passphrase before the user signs in at the provider.
       assertPrivacyPassphrase(await client.supportsEncryptedSync(), privacyPassphrase, '')
+      checksState = await client.returnsOidcState()
     } finally {
       releaseSyncClient(client)
     }
 
-    const callbackUrl = await runOidcFlow(commit, 'login', syncServerOidcLoginUrl(normalizedUrl, deviceId))
+    const state = createSyncServerOidcState()
+    const callbackUrl = await runOidcFlow(
+      commit,
+      'login',
+      syncServerOidcLoginUrl(normalizedUrl, deviceId, state),
+      checksState ? state : null
+    )
     const token = getSyncServerOidcCallbackToken(callbackUrl)
     if (!token) throw new Error('The sync server did not complete the sign-in')
     return dispatch('authenticateSyncServer', {
@@ -1730,13 +1740,16 @@ const actions = {
 
     const { syncServerUrl: url, syncServerToken: token, syncServerUsername: username } = rootState.settings
     let client = trackSyncClient(new SyncServerClient(url, token))
+    const state = createSyncServerOidcState()
     let authorizationUrl
+    let checksState
     try {
-      authorizationUrl = await client.startOidcAccountDeletion(SYNC_SERVER_OIDC_REDIRECT_URL)
+      checksState = await client.returnsOidcState()
+      authorizationUrl = await client.startOidcAccountDeletion(SYNC_SERVER_OIDC_REDIRECT_URL, state)
     } finally {
       releaseSyncClient(client)
     }
-    await runOidcFlow(commit, 'delete', authorizationUrl)
+    await runOidcFlow(commit, 'delete', authorizationUrl, checksState ? state : null)
 
     // The callback carries no proof, but the server reports the deleted
     // account. A 401 only means the session ended, for example because another

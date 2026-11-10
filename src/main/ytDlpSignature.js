@@ -157,18 +157,27 @@ export function verifyYtDlpReleaseAsset(data, assetName, checksums, signature, m
     throw Object.assign(new Error('The downloaded yt-dlp release is older than the installed one'), { code: 'MANAGED_TOOL_DOWNGRADE' })
   }
 
+  verifySha256Checksum(data, assetName, checksums)
+  return signedAt
+}
+
+/**
+ * Checks a download against its entry in a `sha256sum` style checksum file.
+ * @param {Buffer} data
+ * @param {string} fileName
+ * @param {Buffer} checksums
+ */
+export function verifySha256Checksum(data, fileName, checksums) {
   const expected = checksums.toString('utf8').split('\n')
     .map(line => /^([\da-f]{64}) [ *](.+?)\r?$/i.exec(line))
-    .find(match => match?.[2] === assetName)?.[1]
+    .find(match => match?.[2] === fileName)?.[1]
     .toLowerCase()
 
   if (expected === undefined) {
-    throw verificationError(`The signed yt-dlp checksum file has no entry for ${assetName}`)
+    throw verificationError(`The checksum file has no entry for ${fileName}`)
   }
 
   if (createHash('sha256').update(data).digest('hex') !== expected) {
-    throw verificationError('The downloaded yt-dlp binary does not match its signed checksum')
+    throw verificationError(`The downloaded ${fileName} does not match its checksum`)
   }
-
-  return signedAt
 }

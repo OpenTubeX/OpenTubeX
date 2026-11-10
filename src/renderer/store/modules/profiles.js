@@ -241,6 +241,18 @@ const actions = {
     }
   },
 
+  /** Saves the name, colors, and icon, keeping subscriptions that changed elsewhere */
+  async updateProfileDetails({ commit }, { profileId, details }) {
+    try {
+      await DBProfileHandlers.updateDetails(profileId, details)
+      commit('updateProfileDetails', { profileId, details })
+      return true
+    } catch (errMessage) {
+      console.error(errMessage)
+      return false
+    }
+  },
+
   /** Replaces subscriptions unless they changed since `previous`, here or in the datastore */
   async updateProfileSubscriptionsFromSync({ commit, state }, { profileId, subscriptions, previous }) {
     const current = state.profileList.find(profile => profile._id === profileId)
@@ -253,7 +265,8 @@ const actions = {
 
   async addChannelToProfiles({ commit }, { channel, profileIds }) {
     // If this is an Invidious URL, convert it to a YouTube one
-    if (!channel.thumbnail.startsWith('https://yt3.googleusercontent.com/')) {
+    // Imported channels may have no thumbnail
+    if (typeof channel.thumbnail === 'string' && !channel.thumbnail.startsWith('https://yt3.googleusercontent.com/')) {
       channel.thumbnail = channel.thumbnail.replace(/^https?:\/\/[^/]+\/ggpht/, 'https://yt3.googleusercontent.com')
     }
 
@@ -265,17 +278,17 @@ const actions = {
     }
   },
 
-  async removeChannelFromProfiles({ commit, dispatch }, { channelId, profileIds }) {
+  async removeChannelFromProfiles({ commit, dispatch }, { channelIds, profileIds }) {
     try {
-      await DBProfileHandlers.removeChannelFromProfiles(channelId, profileIds)
-      commit('removeChannelFromProfiles', { channelId, profileIds })
+      await DBProfileHandlers.removeChannelFromProfiles(channelIds, profileIds)
+      commit('removeChannelFromProfiles', { channelIds, profileIds })
 
       if (profileIds.includes(MAIN_PROFILE_ID)) {
         try {
           await dispatch('updateYtDlpAutomaticDownloadRules', value => {
             const rules = JSON.parse(value || '{}')
             if (rules === null || typeof rules !== 'object' || Array.isArray(rules)) return value
-            delete rules[channelId]
+            for (const channelId of channelIds) delete rules[channelId]
             return JSON.stringify(rules)
           })
         } catch (error) {
@@ -349,15 +362,23 @@ const mutations = {
     }
   },
 
-  removeChannelFromProfiles(state, { channelId, profileIds }) {
+  removeChannelFromProfiles(state, { channelIds, profileIds }) {
     for (const id of profileIds) {
       const profile = state.profileList.find(profile => profile._id === id)
       if (!profile) { continue }
 
       // use filter instead of splice in case the subscription appears multiple times
       // https://github.com/FreeTubeApp/FreeTube/pull/3468#discussion_r1179290877
-      profile.subscriptions = profile.subscriptions.filter(channel => channel.id !== channelId)
+      profile.subscriptions = profile.subscriptions.filter(channel => !channelIds.includes(channel.id))
     }
+  },
+
+  updateProfileDetails(state, { profileId, details: { name, bgColor, textColor, icon } }) {
+    const profile = state.profileList.find(profile => profile._id === profileId)
+    if (!profile) return
+
+    Object.assign(profile, { name, bgColor, textColor, icon: withDefaultProfileIcon({ _id: profileId, icon }).icon })
+    state.profileList.sort(profileSort)
   },
 
   updateChannelSettings(state, { channel, updates, profileIds }) {

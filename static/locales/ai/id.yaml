@@ -1238,7 +1238,7 @@ Settings:
       Details effect: Langganan atau video yang sudah ada dipertahankan. Detail profil atau daftar putar yang diimpor menggantikan detail saat ini.
       Merge effect: Data yang sudah ada dipertahankan dan digabungkan dengan catatan yang cocok.
       Subscriptions effect: Langganan yang sudah ada dipertahankan. Hanya saluran baru yang ditambahkan.
-      History replace effect: Riwayat tontonan video yang cocok diganti. Riwayat lainnya dipertahankan.
+      History merge effect: Video yang cocok digabungkan dengan riwayat Anda, dengan mempertahankan detail tersimpan dan tanggal tonton terbaru. Riwayat lainnya dipertahankan.
     Select export data: "Pilih data yang akan diekspor"
     Export selected data: "Ekspor data yang dipilih"
     Complete backup: "Cadangan lengkap"

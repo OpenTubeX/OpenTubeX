@@ -1135,11 +1135,20 @@ function runApp() {
             }
           })
         } else {
+          const headers = {
+            'Content-Type': contentTypeFromFileExtension(pathname.split('.').at(-1))
+          }
+
+          if (pathname.endsWith('.html')) {
+            // Restrict only what the renderer never uses. index.ejs repeats the
+            // directives a meta tag supports for dev, web and Capacitor builds;
+            // frame-ancestors only works as a header.
+            headers['Content-Security-Policy'] = "object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'"
+          }
+
           return new Response(contents.buffer, {
             status: 200,
-            headers: {
-              'Content-Type': contentTypeFromFileExtension(pathname.split('.').at(-1))
-            }
+            headers
           })
         }
       })
@@ -3393,13 +3402,25 @@ function runApp() {
           return null
 
         case DBActions.PROFILES.REMOVE_CHANNEL:
-          await baseHandlers.profiles.removeChannelFromProfiles(data.channelId, data.profileIds)
+          await baseHandlers.profiles.removeChannelFromProfiles(data.channelIds, data.profileIds)
           syncOtherWindows(
             IpcChannels.SYNC_PROFILES,
             event,
             { event: SyncEvents.PROFILES.REMOVE_CHANNEL, data }
           )
           return null
+
+        case DBActions.PROFILES.UPDATE_DETAILS: {
+          const { numAffected } = await baseHandlers.profiles.updateDetails(data.profileId, data.details)
+          if (numAffected > 0) {
+            syncOtherWindows(
+              IpcChannels.SYNC_PROFILES,
+              event,
+              { event: SyncEvents.PROFILES.UPDATE_DETAILS, data }
+            )
+          }
+          return null
+        }
 
         case DBActions.PROFILES.UPDATE_CHANNEL_SETTINGS:
         case DBActions.PROFILES.BATCH_UPDATE_CHANNEL_SETTINGS: {
