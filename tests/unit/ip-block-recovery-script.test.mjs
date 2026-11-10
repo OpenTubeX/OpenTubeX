@@ -15,13 +15,14 @@ const start = source.indexOf('\nasync function executeIpBlockRecoveryScript(')
 const end = source.indexOf('\nconst ipBlockRecoveryScriptCooldownMs', start)
 assert.ok(start > 0 && end > start)
 
-function loadRunner(platform, spawn, fileStat = async () => ({ isFile: () => true })) {
+function loadRunner(platform, spawn, fileStat = async () => ({ isFile: () => true }), stopTree = stopProcessTree) {
   let savedPath
   const execute = runInNewContext(`(${source.slice(start, end).trim()})`, {
     path: platform === 'win32' ? path.win32 : path.posix,
     process: { platform, env: { SystemRoot: 'C:\\Windows' } },
     PROCESS_TREE_SPAWN_OPTIONS,
-    stopProcessTree,
+    stopProcessTree: stopTree,
+    console: { error() {} },
     cp: { spawn },
     setTimeout,
     clearTimeout,
@@ -100,6 +101,16 @@ test('stops a timed-out script with the subprocesses it started and closes its s
   const pid = Number(await readFile(pidFile, 'utf8'))
   assert.ok(pid > 0)
   assert.throws(() => process.kill(pid, 0), { code: 'ESRCH' })
+})
+
+test('a timed-out run still ends when stopping its process tree fails', async () => {
+  const run = loadRunner('linux', () => {
+    const child = new EventEmitter()
+    child.stdout = new EventEmitter()
+    child.stderr = new EventEmitter()
+    return child
+  }, undefined, async () => { throw new Error('kill failed') })
+  await assert.rejects(run('/scripts/recover.sh', '/scripts/recover.sh', 10), /did not finish within/)
 })
 
 test('rejects missing files and directories before spawning', async () => {

@@ -72,7 +72,12 @@ async function executeIpBlockRecoveryScript(scriptPath, timeoutMs = 5 * 60_000) 
       timedOut = true
       // Subprocesses such as a VPN client must not outlive a timed-out run, or
       // they could still be running when the next run starts after the cooldown.
-      await stopProcessTree(child)
+      try {
+        await stopProcessTree(child)
+      } catch (error) {
+        // The run must still end, or no later recovery could start.
+        console.error('Could not stop the timed-out IP block recovery script', error)
+      }
       reject(new Error(`Recovery script did not finish within ${timeoutMs / 1000} seconds`))
     }, timeoutMs)
 
