@@ -366,7 +366,7 @@ test.describe('automatic download authorization', () => {
       `printf '__OPENTUBEX_FILE__:ccccccccccc\\t120\\t640\\t360\\t%s\\n' '${downloadedFile}'`
     ].join('\n'))
     await chmod(executable, 0o755)
-    await choosePickerPaths(app, page, { ytDlpPath: executable })
+    await choosePickerPaths(app, page, { ytDlpPath: executable, ytDlpDownloadFolderPath: app.userDataDir })
 
     const payload = {
       videoId: 'ccccccccccc',

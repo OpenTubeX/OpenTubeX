@@ -305,7 +305,7 @@ test.describe('video downloads', () => {
       `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t1\\t640\\t360\\t${downloadedFile}\\n'`
     ].join('\n'))
     await chmod(executable, 0o755)
-    await choosePickerPaths(app, page, { ytDlpPath: executable })
+    await choosePickerPaths(app, page, { ytDlpPath: executable, ytDlpDownloadFolderPath: app.userDataDir })
 
     await goTo(page, 'history')
     const video = page.locator('.ft-list-video').first()
@@ -660,7 +660,7 @@ test.describe('video downloads', () => {
       `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t1\\t640\\t360\\t${downloadedFile}\\n'`
     ].join('\n'))
     await chmod(executable, 0o755)
-    await choosePickerPaths(app, page, { ytDlpPath: executable })
+    await choosePickerPaths(app, page, { ytDlpPath: executable, ytDlpDownloadFolderPath: app.userDataDir })
 
     await page.bringToFront()
     await page.locator('body').click({ position: { x: 1, y: 1 } })
@@ -687,8 +687,8 @@ test.describe('video downloads', () => {
 
   test('plays a downloaded video locally and reconciles it after external deletion', async ({ app, page }) => {
     const downloadFolder = path.join(app.userDataDir, 'downloads')
-    const downloadedFile = path.join(app.userDataDir, 'downloaded-demo.webm')
-    const downloadedAudioFile = path.join(app.userDataDir, 'downloaded-audio-alternative.wav')
+    const downloadedFile = path.join(downloadFolder, 'downloaded-demo.webm')
+    const downloadedAudioFile = path.join(downloadFolder, 'downloaded-audio-alternative.wav')
     const downloadThumbnail = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="640" height="360"%3E%3Cpath fill="%23b00020" d="M0 0h640v360H0z"/%3E%3C/svg%3E'
     const executable = path.join(app.userDataDir, 'fake-yt-dlp.sh')
     const argumentsFile = path.join(app.userDataDir, 'yt-dlp-arguments.txt')
@@ -921,7 +921,7 @@ test.describe('video downloads', () => {
       `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t${duration}\\tNA\\tNA\\t${downloadedFile}\\n'`
     ].join('\n'))
     await chmod(executable, 0o755)
-    await choosePickerPaths(app, page, { ytDlpPath: executable })
+    await choosePickerPaths(app, page, { ytDlpPath: executable, ytDlpDownloadFolderPath: app.userDataDir })
 
     const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
       videoId: 'eeeeeeeeeee',
@@ -957,7 +957,7 @@ test.describe('video downloads', () => {
       `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t1\\tNA\\tNA\\t${downloadedDirectory}\\n'`
     ].join('\n'))
     await chmod(executable, 0o755)
-    await choosePickerPaths(app, page, { ytDlpPath: executable })
+    await choosePickerPaths(app, page, { ytDlpPath: executable, ytDlpDownloadFolderPath: app.userDataDir })
 
     const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
       videoId: 'eeeeeeeeeee',
@@ -985,7 +985,7 @@ test.describe('video downloads', () => {
       `printf '__OPENTUBEX_FILE__:fffffffffff\\t${missingFile}\\n'`
     ].join('\n'))
     await chmod(executable, 0o755)
-    await choosePickerPaths(app, page, { ytDlpPath: executable })
+    await choosePickerPaths(app, page, { ytDlpPath: executable, ytDlpDownloadFolderPath: app.userDataDir })
 
     const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
       playlistId: 'PL1234567890',
@@ -1104,11 +1104,11 @@ test.describe('video downloads', () => {
       '#!/bin/sh',
       'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
       `printf '%s\\n' "$@" > ${argumentsFile}`,
-      'printf "[info] Writing video subtitles to: /tmp/subtitles.en.srt\\n"',
-      'printf "[info] Writing video subtitles to: /tmp/subtitles.de.srt\\n"'
+      `printf "[info] Writing video subtitles to: ${path.join(app.userDataDir, 'subtitles.en.srt')}\\n"`,
+      `printf "[info] Writing video subtitles to: ${path.join(app.userDataDir, 'subtitles.de.srt')}\\n"`
     ].join('\n'))
     await chmod(executable, 0o755)
-    await choosePickerPaths(app, page, { ytDlpPath: executable })
+    await choosePickerPaths(app, page, { ytDlpPath: executable, ytDlpDownloadFolderPath: app.userDataDir })
 
     await goTo(page, 'history')
     const video = page.locator('.ft-list-video').first()
@@ -1144,8 +1144,8 @@ test.describe('video downloads', () => {
     const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Bookmarkable video' })
     await expect(downloadRow.locator('.downloadSummary')).toHaveText('Subtitles • Template: Subtitles - SRT')
     await expect(downloadRow.locator('.destination')).toHaveText([
-      '/tmp/subtitles.en.srt',
-      '/tmp/subtitles.de.srt'
+      path.join(app.userDataDir, 'subtitles.en.srt'),
+      path.join(app.userDataDir, 'subtitles.de.srt')
     ])
   })
 
@@ -1155,7 +1155,7 @@ test.describe('video downloads', () => {
     await writeFile(executable, [
       '#!/bin/sh',
       'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
-      'printf "[info] Writing video subtitles to: /tmp/subtitles.en.vtt\\n"',
+      `printf "[info] Writing video subtitles to: ${path.join(app.userDataDir, 'subtitles.en.vtt')}\\n"`,
       `if [ -f ${attemptMarker} ]; then exit 0; fi`,
       `printf retried > ${attemptMarker}`,
       'printf "Subtitle conversion failed\\n" >&2',
@@ -1163,7 +1163,7 @@ test.describe('video downloads', () => {
       'exit 1'
     ].join('\n'))
     await chmod(executable, 0o755)
-    await choosePickerPaths(app, page, { ytDlpPath: executable })
+    await choosePickerPaths(app, page, { ytDlpPath: executable, ytDlpDownloadFolderPath: app.userDataDir })
 
     await goTo(page, 'history')
     const video = page.locator('.ft-list-video').first()
@@ -1179,7 +1179,7 @@ test.describe('video downloads', () => {
     await page.getByRole('button', { name: 'Close', exact: true }).click()
     await goTo(page, 'downloads')
     const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Bookmarkable video' })
-    await expect(downloadRow.locator('.destination')).toHaveText('/tmp/subtitles.en.vtt')
+    await expect(downloadRow.locator('.destination')).toHaveText(path.join(app.userDataDir, 'subtitles.en.vtt'))
     await expect(downloadRow.locator('.downloadError')).toContainText('Subtitle conversion failed')
     await expect(downloadRow.getByRole('link', { name: 'recent yt-dlp issues for YouTube' })).toBeVisible()
     await expect(downloadRow).toContainText('then try switching the yt-dlp channel to Nightly or Master')
