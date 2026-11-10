@@ -69,6 +69,7 @@ public class SettingsSearchTest {
                 AtomicBoolean keyboardVisible = new AtomicBoolean(true);
                 long keyboardDeadline = SystemClock.uptimeMillis() + 15000;
                 long hiddenSince = -1;
+                boolean keyboardSettled = false;
                 while (SystemClock.uptimeMillis() < keyboardDeadline) {
                     scenario.onActivity(activity -> {
                         WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(view);
@@ -79,10 +80,13 @@ public class SettingsSearchTest {
                     });
                     if (keyboardVisible.get()) hiddenSince = -1;
                     else if (hiddenSince < 0) hiddenSince = SystemClock.uptimeMillis();
-                    else if (SystemClock.uptimeMillis() - hiddenSince >= 1000) break;
+                    else if (SystemClock.uptimeMillis() - hiddenSince >= 1000) {
+                        keyboardSettled = true;
+                        break;
+                    }
                     Thread.sleep(100);
                 }
-                assertTrue("System keyboard stays hidden before simulating composing input", !keyboardVisible.get());
+                assertTrue("System keyboard stays hidden before simulating composing input", keyboardSettled);
                 AtomicReference<InputConnection> connection = new AtomicReference<>();
                 long deadline = SystemClock.uptimeMillis() + 5000;
                 while (connection.get() == null && SystemClock.uptimeMillis() < deadline) {
