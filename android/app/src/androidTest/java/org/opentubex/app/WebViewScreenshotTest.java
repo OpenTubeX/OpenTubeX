@@ -305,9 +305,11 @@ public class WebViewScreenshotTest {
                                 tab.style.opacity = '1';
                                 // Opening the organizer can request a thumbnail immediately
                                 // after the swipe makes the target page visible.
-                                const {dataUrl} = await Capacitor.Plugins.Screenshot.take({
-                                    width:320, height:180, top:0.1, cropHeight:0.3
-                                });
+                                const options = {width:320, height:180, top:0.1, cropHeight:0.3};
+                                // PixelCopy can time out on a starved emulator. That says nothing
+                                // about which frame a capture shows, which the pixels below check.
+                                const {dataUrl} = await Capacitor.Plugins.Screenshot.take(options)
+                                    .catch(() => Capacitor.Plugins.Screenshot.take(options));
                                 const image = new Image();
                                 image.src = dataUrl;
                                 await image.decode();
