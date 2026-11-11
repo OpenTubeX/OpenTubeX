@@ -26,7 +26,7 @@ function deferred() {
   return { promise, resolve, reject }
 }
 
-function loader({ android = Promise.resolve({ data: {} }), token = Promise.resolve('token'), next = Promise.resolve({ data: {} }), createPlayer = async () => ({ signature_timestamp: 1, decipher: async url => url }), details = {}, embeddedNext = false, embeddedPlayer = true, playability = { status: 'OK' }, direct = null, visionOs = null } = {}) {
+function loader({ android = Promise.resolve({ data: {} }), token = Promise.resolve('token'), next = Promise.resolve({ data: {} }), createPlayer = async () => ({ signature_timestamp: 1, decipher: async url => url }), details = {}, embeddedNext = false, embeddedPlayer = true, playability = { status: 'OK' }, direct = null, visionOs = null, adTimeMs = () => 0 } = {}) {
   const requests = []
   const playerRequests = []
   const directPlayerFallbacks = []
@@ -77,7 +77,7 @@ function loader({ android = Promise.resolve({ data: {} }), token = Promise.resol
     resolveMusicMediaType: async () => 'unknown',
     decipherManifestUrl: async url => url,
     decipherFormats: async () => {},
-    extractTotalAdTimeMilliseconds: () => 0,
+    extractTotalAdTimeMilliseconds: adTimeMs,
     extractLocalContentDisclosures: () => null,
     extractLocalInfoPanels: () => null,
     Constants,
@@ -366,8 +366,13 @@ const visionOsResponse = {
 
 test('a cold load plays the visionOS streams without waiting for BotGuard', async () => {
   const token = deferred()
-  const { load, requests } = loader({ token: token.promise, visionOs: visionOsResponse })
+  const { load, requests } = loader({
+    token: token.promise,
+    visionOs: visionOsResponse,
+    adTimeMs: response => response === visionOsResponse ? 0 : 15_000,
+  })
   const result = await load('testVideo01', { lateWatchNext: true })
+  assert.ok(result.adEndTimeUnixMs <= Date.now(), 'The WEB preroll must not delay the visionOS streams')
   assert.ok(requests.includes('token'), 'Later videos need the attestation for their direct /player request')
   assert.equal(result.poToken, undefined)
   assert.equal(result.info.streaming_data.adaptive_formats[0].url, visionOsResponse.streamingData.adaptiveFormats[0].url)

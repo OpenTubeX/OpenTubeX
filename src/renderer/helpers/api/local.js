@@ -1134,7 +1134,7 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
 
   // Some time would be used for parsing and maybe additional requests so end time should be calculated sooner to reduce actual waiting time
   // Legacy format requires this
-  const adEndTimeUnixMs = responseTime + totalAdTimeMilliseconds
+  let adEndTimeUnixMs = responseTime + totalAdTimeMilliseconds
 
   let { clientName, clientVersion, osName, osVersion } = context.client
 
@@ -1212,6 +1212,8 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
     info.captions = visionOsInfo.captions
     // A WEB token would be added to the stream URLs
     player.po_token = undefined
+    // The WEB streams' preroll doesn't hold these back
+    adEndTimeUnixMs = responseTime + extractTotalAdTimeMilliseconds(visionOsStreams)
   }
   const streamPoToken = usesVisionOsStreams ? undefined : contentPoToken
 
