@@ -7,7 +7,6 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
@@ -83,7 +82,7 @@ public final class SubscriptionRefreshWorker extends Worker {
             service.putExtra("token", state.token).putExtra("title", state.title)
                 .putExtra("cancelLabel", state.cancelLabel);
             try {
-                ContextCompat.startForegroundService(context, service);
+                SubscriptionRefreshService.start(context, service);
             } catch (IllegalStateException | SecurityException error) {
                 Log.w(LOG_TAG, "Unable to start subscription refresh service", error);
                 publishNotification(context, state);
