@@ -2,9 +2,9 @@
 
 Browsers don't let web pages read YouTube's responses, so the OpenTubeX web app normally gets its content from Invidious. This extension changes the headers of the web app's requests to YouTube so that browsers allow them. With it, the web app can use the local API and play videos directly from YouTube.
 
-It only changes requests that OpenTubeX pages make. Other sites, including YouTube itself, are left alone. It also removes your YouTube cookies from these requests, so the web app never uses a YouTube account you're signed in to.
+It only changes requests that pages on opentubex.org, `localhost`, and the servers you add make, on any of their ports. Other sites, including YouTube itself, are left alone. It also removes your YouTube cookies from these requests, so the web app never uses a YouTube account you're signed in to.
 
-The extension works on opentubex.org and on `localhost`. To use it with your own server, open the extension's options and add the server's `https://` address. Browsers can't limit extensions to one port, so it then works on every port of that host name.
+The extension works on opentubex.org and on `localhost`. To use it with your own server, open the extension's options and add the server's `https://` address. Browsers can't limit extensions to one port, so it then also changes the YouTube requests of other web apps on other ports of that host name.
 
 ## Install
 
