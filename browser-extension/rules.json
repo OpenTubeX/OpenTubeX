@@ -1,0 +1,91 @@
+[
+  {
+    "id": 1,
+    "priority": 1,
+    "condition": {
+      "initiatorDomains": ["opentubex.org", "localhost", "127.0.0.1"],
+      "requestDomains": ["youtube.com", "googlevideo.com", "ytimg.com", "ggpht.com", "googleusercontent.com"],
+      "excludedResourceTypes": ["main_frame", "sub_frame"]
+    },
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        { "header": "cookie", "operation": "remove" }
+      ],
+      "responseHeaders": [
+        { "header": "access-control-allow-origin", "operation": "set", "value": "*" },
+        { "header": "access-control-allow-headers", "operation": "set", "value": "*" },
+        { "header": "access-control-allow-methods", "operation": "set", "value": "*" },
+        { "header": "access-control-expose-headers", "operation": "set", "value": "*" },
+        { "header": "access-control-allow-credentials", "operation": "remove" },
+        { "header": "set-cookie", "operation": "remove" }
+      ]
+    }
+  },
+  {
+    "id": 2,
+    "priority": 1,
+    "condition": {
+      "initiatorDomains": ["opentubex.org", "localhost", "127.0.0.1"],
+      "requestDomains": ["youtube.com"],
+      "excludedRequestMethods": ["options"],
+      "excludedResourceTypes": ["main_frame", "sub_frame"]
+    },
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        { "header": "origin", "operation": "set", "value": "https://www.youtube.com" },
+        { "header": "referer", "operation": "set", "value": "https://www.youtube.com/" },
+        { "header": "x-youtube-bootstrap-logged-in", "operation": "set", "value": "false" }
+      ]
+    }
+  },
+  {
+    "id": 3,
+    "priority": 1,
+    "condition": {
+      "initiatorDomains": ["opentubex.org", "localhost", "127.0.0.1"],
+      "requestDomains": ["youtube.com"],
+      "requestMethods": ["options"],
+      "excludedResourceTypes": ["main_frame", "sub_frame"]
+    },
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        { "header": "origin", "operation": "set", "value": "https://m.youtube.com" },
+        { "header": "access-control-request-headers", "operation": "remove" }
+      ]
+    }
+  },
+  {
+    "id": 4,
+    "priority": 2,
+    "condition": {
+      "initiatorDomains": ["opentubex.org", "localhost", "127.0.0.1"],
+      "urlFilter": "||www.youtube.com/api/timedtext",
+      "excludedResourceTypes": ["main_frame", "sub_frame"]
+    },
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        { "header": "referer", "operation": "set", "value": "https://www.youtube.com/sw.js" }
+      ]
+    }
+  },
+  {
+    "id": 5,
+    "priority": 1,
+    "condition": {
+      "initiatorDomains": ["opentubex.org", "localhost", "127.0.0.1"],
+      "requestDomains": ["googlevideo.com", "ytimg.com", "ggpht.com", "googleusercontent.com"],
+      "excludedResourceTypes": ["main_frame", "sub_frame"]
+    },
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        { "header": "origin", "operation": "set", "value": "https://www.youtube.com" },
+        { "header": "referer", "operation": "set", "value": "https://www.youtube.com/" }
+      ]
+    }
+  }
+]

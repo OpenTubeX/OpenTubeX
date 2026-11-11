@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OpenTubeX Local API</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <main>
+      <h1>OpenTubeX Local API</h1>
+      <p>
+        The extension works on opentubex.org and localhost. Add the address of
+        your own OpenTubeX server to use the local API there too.
+      </p>
+      <form id="add-form">
+        <label for="origin">Server address</label>
+        <div class="row">
+          <input id="origin" type="url" placeholder="https://tube.example.com" required />
+          <button type="submit">Add</button>
+        </div>
+        <p id="error" class="error" role="alert"></p>
+      </form>
+      <ul id="origins"></ul>
+    </main>
+    <script src="options.js"></script>
+  </body>
+</html>

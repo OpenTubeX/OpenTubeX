@@ -1,0 +1,48 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, sans-serif;
+}
+
+main {
+  max-inline-size: 36rem;
+  margin-block: 2rem;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+label {
+  display: block;
+  margin-block-end: 0.25rem;
+  font-weight: 600;
+}
+
+.row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+input {
+  flex: 1;
+  min-inline-size: 0;
+  padding-block: 0.4rem;
+  padding-inline: 0.4rem;
+}
+
+ul {
+  padding-inline-start: 0;
+  list-style: none;
+}
+
+li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-block: 0.25rem;
+  overflow-wrap: anywhere;
+}
+
+.error {
+  min-block-size: 1lh;
+  color: #d93025;
+}

@@ -53,7 +53,8 @@ const actions = {
 
     const fileData = await (await fetch(url)).json()
     const instances = fileData.filter(e => {
-      return process.env.SUPPORTS_LOCAL_API || e.cors
+      // The browser extension for the local API doesn't lift CORS for Invidious
+      return process.env.IS_ELECTRON || process.env.IS_CAPACITOR || e.cors
     }).map(e => {
       return e.url
     })
@@ -74,7 +75,7 @@ const actions = {
         return !(instance[0].includes('.onion') ||
           instance[0].includes('.i2p') ||
           !instance[1].api ||
-          (!process.env.SUPPORTS_LOCAL_API && !instance[1].cors))
+          (!process.env.IS_ELECTRON && !process.env.IS_CAPACITOR && !instance[1].cors))
       }).map((instance) => {
         return instance[1].uri.replace(/\/$/, '')
       })

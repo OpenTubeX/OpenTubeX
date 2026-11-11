@@ -51,14 +51,6 @@ const config = {
     path: outputPath,
     filename: '[name].js',
   },
-  ...(isCapacitor
-    ? {}
-    : {
-        externals: {
-          'youtubei.js': '{}',
-          googlevideo: '{}'
-        }
-      }),
   module: {
     rules: [
       {
@@ -194,7 +186,9 @@ const config = {
           ? 'opentubex-nightly'
           : 'opentubex'
       ),
-      'process.env.SUPPORTS_LOCAL_API': isCapacitor,
+      // The web app can only reach YouTube while the OpenTubeX Local API browser
+      // extension (browser-extension/) rewrites the CORS headers for it.
+      'process.env.SUPPORTS_LOCAL_API': isCapacitor || '(globalThis.opentubexExtension?.protocol === 1)',
       // The Docker image serves the web build in front of its own Invidious server.
       'process.env.IS_SELF_HOSTED': !isCapacitor && process.env.OPENTUBEX_SELF_HOSTED === 'true',
       'process.env.BUILD_COMMIT': JSON.stringify(getBuildCommit()),

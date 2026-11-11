@@ -66,6 +66,17 @@ export async function localApiFetch(input, init) {
     return await capacitorHttpFetch(input, init)
   }
 
+  if (!process.env.IS_ELECTRON) {
+    // Firefox sends a script's User-Agent header, which makes every request a
+    // preflighted one, and YouTube rejects preflights outside its API.
+    const headers = new Headers(init?.headers ?? (input instanceof Request ? input.headers : undefined))
+    headers.delete('user-agent')
+    // The browser extension allows any origin to read YouTube's responses,
+    // which browsers only accept for requests without credentials. It also
+    // keeps the browser's YouTube cookies out of these requests.
+    return await fetch(input, { ...init, headers, credentials: 'omit' })
+  }
+
   return await fetch(input, init)
 }
 
