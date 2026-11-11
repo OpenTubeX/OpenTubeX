@@ -2181,7 +2181,6 @@ Tooltips:
     Stream Extraction Method: |
       Válassza ki, hogyan szerezze be az OpenTubeX a videó-adatfolyamokat. A yt-dlp használatához annak elérhetőnek kell lennie.
       A videók indítása tovább tarthat a yt-dlp használatakor.
-      A beépített módszer élő közvetítéseknél és premiereknél nem támogatja a tekerést.
     Avoid translation: |
       A videócímek, -leírások és -fejezetek YouTube általi automatikus fordításának kikapcsolása.
       A túl sok kérés, például a videócímek lekérése több listán keresztül, átmenetileg

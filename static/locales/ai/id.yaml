@@ -2205,7 +2205,6 @@ Tooltips:
     Stream Extraction Method: |
       Pilih cara OpenTubeX memperoleh stream video. yt-dlp harus tersedia jika dipilih.
       Video mungkin membutuhkan waktu lebih lama untuk dimulai saat menggunakan yt-dlp.
-      Metode bawaan tidak mendukung pencarian posisi pada siaran langsung dan premiere.
     Avoid translation: |
       Nonaktifkan terjemahan otomatis YouTube untuk judul, deskripsi, dan bab video.
       Terlalu banyak permintaan, seperti mengambil judul video dari berbagai daftar, dapat

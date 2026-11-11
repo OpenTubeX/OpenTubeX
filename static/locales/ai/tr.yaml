@@ -2181,7 +2181,6 @@ Tooltips:
     Stream Extraction Method: |
       OpenTubeX'in video akışlarını nasıl alacağını seçin. yt-dlp seçildiğinde kullanılabilir olmalıdır.
       yt-dlp kullanıldığında videoların başlaması daha uzun sürebilir.
-      Yerleşik yöntem, canlı yayınlarda ve ilk gösterimlerde sarmayı desteklemez.
     Avoid translation: |
       YouTube'un video başlığı, açıklaması ve bölümleri için otomatik çevirisini devre dışı bırakır.
       Listelerdeki video başlıklarını getirmek gibi çok fazla istek, uygulamanın

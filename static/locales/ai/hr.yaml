@@ -2213,7 +2213,6 @@ Tooltips:
     Stream Extraction Method: |
       Odaberite kako OpenTubeX dohvaća tokove videozapisa. yt-dlp mora biti dostupan kada je odabran.
       Pri upotrebi alata yt-dlp pokretanje videozapisa može trajati dulje.
-      Ugrađena metoda ne podržava premotavanje prijenosa uživo i premijera.
     Avoid translation: |
       Onemogućuje YouTubeov automatski prijevod naslova, opisa i poglavlja videozapisa.
       Previše zahtjeva, primjerice pri dohvaćanju naslova videozapisa na popisima, može privremeno

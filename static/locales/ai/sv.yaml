@@ -2181,7 +2181,6 @@ Tooltips:
     Stream Extraction Method: |
       Välj hur OpenTubeX hämtar videoströmmar. yt-dlp måste vara tillgängligt när det väljs.
       Det kan ta längre tid att starta videor med yt-dlp.
-      Den inbyggda metoden stöder inte hoppning i liveströmmar och premiärer.
     Avoid translation: |
       Inaktivera YouTubes automatiska översättning av en videos titel, beskrivning och kapitel.
       För många förfrågningar, exempelvis när videotitlar hämtas för flera listor, kan tillfälligt

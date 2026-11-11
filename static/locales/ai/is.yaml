@@ -2199,7 +2199,6 @@ Tooltips:
     Stream Extraction Method: |
       Veldu hvernig OpenTubeX sækir myndbandsstreymi. yt-dlp þarf að vera tiltækt þegar sú aðferð er valin.
       Myndbönd geta verið lengur að hefja spilun þegar yt-dlp er notað.
-      Innbyggða aðferðin styður ekki leit í beinum útsendingum og frumsýningum.
     Avoid translation: |
       Slekkur á sjálfvirkri þýðingu YouTube á titli, lýsingu og köflum myndbandsins.
       Of margar beiðnir, til dæmis þegar titlar myndbanda eru sóttir í mörgum listum, geta tímabundið

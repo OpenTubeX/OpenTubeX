@@ -2193,7 +2193,6 @@ Tooltips:
     Stream Extraction Method: |
       OpenTubeX-in video axınlarını necə əldə etdiyini seçin. yt-dlp seçildikdə əlçatan olmalıdır.
       yt-dlp istifadə edildikdə videoların başlaması daha uzun çəkə bilər.
-      Daxili üsul canlı yayımlarda və premyeralarda vaxt üzrə keçidi dəstəkləmir.
     Avoid translation: |
       YouTube-un videonun başlığını, açıqlamasını və bölümlərini avtomatik tərcümə etməsini bağla.
       Siyahılardakı video başlıqlarının alınması kimi çoxsaylı sorğular tətbiqin

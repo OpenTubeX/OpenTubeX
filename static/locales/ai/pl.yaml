@@ -1442,7 +1442,6 @@ Tooltips:
     Stream Extraction Method: |
       Wybierz sposób pobierania strumieni filmów przez OpenTubeX. Po wybraniu yt-dlp musi być dostępny.
       Uruchamianie filmów za pomocą yt-dlp może trwać dłużej.
-      Wbudowany mechanizm nie obsługuje przewijania transmisji na żywo ani premier.
     Show Thumbnail Previews: Pokazuje animowany podgląd po najechaniu na miniaturę filmu.
     Yattee Server: Instancja yattee-server, z której OpenTubeX wczytuje filmy, kanały, playlisty i wyniki wyszukiwania. Nazwa użytkownika i hasło są przechowywane wyłącznie na tym urządzeniu.
     Proxy Videos Through Yattee Server: Przesyła strumienie wideo i audio przez serwer. Pozostaw tę opcję włączoną, chyba że serwer korzysta z tego samego połączenia internetowego co Ty, ponieważ YouTube udostępnia strumienie tylko adresowi, który o nie poprosił. Miniatury są zawsze wczytywane bezpośrednio z YouTube.

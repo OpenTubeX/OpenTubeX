@@ -2600,7 +2600,6 @@ Tooltips:
     Stream Extraction Method: |
       Pasirinkite, kaip OpenTubeX gauna vaizdo srautus. Pasirinkus yt-dlp, jis turi būti pasiekiamas.
       Naudojant yt-dlp vaizdo įrašai gali būti pradedami atkurti lėčiau.
-      Integruotas būdas nepalaiko tiesioginių transliacijų ir premjerų persukimo.
     Avoid translation: |
       Išjungti YouTube automatinį vaizdo įrašo pavadinimo, aprašo ir skyrių vertimą.
       Per daug užklausų, pavyzdžiui, gaunant vaizdo įrašų pavadinimus iš sąrašų, gali laikinai

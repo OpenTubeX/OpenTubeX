@@ -2488,7 +2488,6 @@ Tooltips:
     Stream Extraction Method: |
       Vel korleis OpenTubeX hentar videostraumar. yt-dlp må vere tilgjengeleg når det er valt.
       Videoar kan bruke lengre tid på å starte med yt-dlp.
-      Den innebygde metoden støttar ikkje spoling i direktesendingar og premierar.
     Avoid translation: |
       Slå av den automatiske YouTube-omsetjinga av tittel, skildring og kapittel i ein video.
       For mange førespurnader, til dømes ved henting av videotitlar frå fleire lister, kan mellombels

@@ -2716,7 +2716,6 @@ Tooltips:
     Stream Extraction Method: |
       Trieu com obté l'OpenTubeX els fluxos de vídeo. Si seleccioneu yt-dlp, ha d'estar disponible.
       Els vídeos poden trigar més a començar quan s'utilitza yt-dlp.
-      El motor integrat no permet fer salts a les emissions en directe ni a les estrenes.
     Avoid translation: |
       Desactiva la traducció automàtica de YouTube del títol, la descripció i els capítols dels vídeos.
       Massa sol·licituds, com ara obtenir els títols dels vídeos de les llistes, poden afectar

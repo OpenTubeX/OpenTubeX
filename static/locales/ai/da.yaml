@@ -2265,7 +2265,6 @@ Tooltips:
     Stream Extraction Method: |
       Vælg, hvordan OpenTubeX henter videostreams. yt-dlp skal være tilgængeligt, hvis det vælges.
       Det kan tage længere tid at starte videoer med yt-dlp.
-      Den indbyggede metode understøtter ikke spoling i livestreams og premierer.
     Avoid translation: |
       Slå YouTubes automatiske oversættelse af videoens titel, beskrivelse og kapitler fra.
       For mange anmodninger, f.eks. hentning af videotitler på tværs af lister, kan midlertidigt

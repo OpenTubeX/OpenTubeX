@@ -2183,7 +2183,6 @@ Tooltips:
     Stream Extraction Method: |
       Vali, kuidas OpenTubeX videovooge hangib. Valimise korral peab yt-dlp olema saadaval.
       yt-dlp kasutamisel võib videote käivitumine kauem aega võtta.
-      Sisseehitatud meetod ei toeta otseülekannetes ega esilinastustes ajas liikumist.
     Avoid translation: |
       Keela YouTube'i video pealkirja, kirjelduse ja peatükkide automaattõlge.
       Liiga palju päringuid, näiteks loendites olevate videote pealkirjade hankimine, võib ajutiselt

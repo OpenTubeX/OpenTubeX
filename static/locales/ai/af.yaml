@@ -2433,7 +2433,6 @@ Tooltips:
     Stream Extraction Method: |
       Kies hoe OpenTubeX videostrome verkry. yt-dlp moet beskikbaar wees wanneer dit gekies is.
       Video’s kan langer neem om te begin wanneer yt-dlp gebruik word.
-      Ingebou ondersteun nie spoel vir regstreekse uitsendings en premières nie.
     Avoid translation: |
       Deaktiveer YouTube se outomatiese vertaling van die titel, beskrywing en hoofstukke van ’n video.
       Te veel versoeke, soos om videotitels oor lyste heen op te haal, kan die toep se betroubaarheid

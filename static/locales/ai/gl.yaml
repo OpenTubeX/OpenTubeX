@@ -2237,7 +2237,6 @@ Tooltips:
     Stream Extraction Method: |
       Escolle como obtén OpenTubeX as emisións de vídeo. Se seleccionas yt-dlp, debe estar dispoñible.
       Con yt-dlp, os vídeos poden tardar máis en comezar.
-      O método integrado non permite saltar dentro das emisións en directo nin das estreas.
     Avoid translation: |
       Desactiva a tradución automática de YouTube do título, a descrición e os capítulos dun vídeo.
       Demasiadas solicitudes, como obter os títulos dos vídeos das listas, poden afectar temporalmente

@@ -2180,7 +2180,6 @@ Tooltips:
     Stream Extraction Method: |
       选择 OpenTubeX 获取视频流的方式。选择 yt-dlp 时，系统中必须有可用的 yt-dlp。
       使用 yt-dlp 时，视频可能需要更长时间才能开始播放。
-      内置方式不支持在直播和首映中跳转播放位置。
     Avoid translation: |
       禁用 YouTube 对视频标题、简介和章节的自动翻译。
       请求过多（例如获取多个列表中的视频标题）可能会暂时

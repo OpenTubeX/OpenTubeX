@@ -3256,7 +3256,6 @@ Tooltips:
     Stream Extraction Method: |
       Choose how OpenTubeX obtains video streams. yt-dlp must be available when selected.
       Videos may take longer to start when using yt-dlp.
-      Built-in does not support seeking for livestreams and premieres.
     Avoid translation: |
       Disable YouTube's autotranslation of title, description and chapters of a video.
       Too many requests, such as fetching video titles across lists, may temporarily

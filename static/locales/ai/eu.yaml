@@ -2190,7 +2190,6 @@ Tooltips:
     Stream Extraction Method: |
       Aukeratu OpenTubeX aplikazioak bideo-korronteak nola eskuratuko dituen. yt-dlp erabilgarri egon behar da hautatuta dagoenean.
       Baliteke bideoek denbora gehiago behar izatea hasteko yt-dlp erabiltzean.
-      Motor integratuak ez du onartzen zuzeneko emankizunetan eta estreinaldietan denbora jakin batera joatea.
     Avoid translation: |
       Desgaitu YouTube-k bideo baten izenburua, deskribapena eta kapituluak automatikoki itzultzea.
       Eskaera gehiegik, hala nola zerrendetako bideoen izenburuak eskuratzeak,

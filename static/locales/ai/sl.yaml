@@ -2679,7 +2679,6 @@ Tooltips:
     Stream Extraction Method: |
       Izberite, kako OpenTubeX pridobiva pretoke videoposnetkov. Če izberete yt-dlp, mora biti ta na voljo.
       Pri uporabi yt-dlp lahko traja dlje, da se videoposnetki začnejo predvajati.
-      Vgrajeni način ne podpira iskanja po časovnici prenosov v živo in premier.
     Avoid translation: |
       Onemogoči YouTubov samodejni prevod naslova, opisa in poglavij videoposnetka.
       Preveč zahtev, na primer pridobivanje naslovov videoposnetkov na seznamih, lahko začasno

@@ -2233,7 +2233,6 @@ Tooltips:
     Stream Extraction Method: |
       Alegeți modul în care OpenTubeX obține fluxurile video. yt-dlp trebuie să fie disponibil când este selectat.
       Este posibil ca videoclipurile să pornească mai greu când folosiți yt-dlp.
-      Metoda încorporată nu permite saltul în transmisiuni în direct și premiere.
     Avoid translation: |
       Dezactivează traducerea automată YouTube a titlului, descrierii și capitolelor unui videoclip.
       Prea multe solicitări, cum ar fi preluarea titlurilor videoclipurilor din liste, pot afecta

@@ -2958,7 +2958,7 @@ Tooltips:
     Automatically switch stream extraction methods: Versucht yt-dlp, wenn die integrierte Wiedergabe fehlschlägt, oder die integrierte Wiedergabe, wenn yt-dlp fehlschlägt.
     Stream Extraction Method: |
       Lege fest, wie OpenTubeX Videostreams abruft. Bei Auswahl von yt-dlp muss es verfügbar sein.
-      Die integrierte Methode unterstützt bei Livestreams und Premieren kein Spulen.
+      Mit yt-dlp kann es länger dauern, bis Videos starten.
     Notifications: Lege fest, wie OpenTubeX dich über Livestreams, neue Uploads und automatische Downloads benachrichtigt. Mit „System und in der App“ erscheinen Benachrichtigungen in OpenTubeX, während du es verwendest, sonst als Systembenachrichtigungen, und die Glocke bewahrt sie auf. „Aus“ blendet auch die Benachrichtigungsoptionen aus.
   Proxy Settings:
     IP Block Recovery Script Path: Pfad zur Skriptdatei, die bei erkannter IP-Sperre ausgeführt wird. OpenTubeX wartet bis zum Abschluss und lädt danach das Video neu. Wenn der Fallback aktiviert ist, wird das Skript nur ausgeführt, wenn auch der Fallback fehlschlägt.

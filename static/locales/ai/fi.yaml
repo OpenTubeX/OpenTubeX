@@ -2187,7 +2187,6 @@ Tooltips:
     Stream Extraction Method: |
       Valitse, miten OpenTubeX hakee videovirrat. Jos yt-dlp valitaan, sen on oltava käytettävissä.
       Videoiden toiston alkaminen voi kestää kauemmin yt-dlp:tä käytettäessä.
-      Sisäänrakennettu menetelmä ei tue suorien lähetysten eikä ensi-iltojen kelaamista.
     Avoid translation: |
       Estä YouTubea kääntämästä automaattisesti videon nimeä, kuvausta ja lukuja.
       Liian monet pyynnöt, kuten videoiden nimien hakeminen luetteloihin, voivat tilapäisesti

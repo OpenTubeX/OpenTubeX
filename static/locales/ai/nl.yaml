@@ -2243,7 +2243,6 @@ Tooltips:
     Stream Extraction Method: |
       Kies hoe OpenTubeX videostreams ophaalt. yt-dlp moet beschikbaar zijn als je deze optie selecteert.
       Met yt-dlp kan het langer duren voordat video's beginnen.
-      De ingebouwde methode ondersteunt zoeken in livestreams en premières niet.
     Avoid translation: |
       Schakel de automatische vertaling door YouTube van de titel, beschrijving en hoofdstukken van een video uit.
       Te veel aanvragen, bijvoorbeeld om videotitels in lijsten op te halen, kunnen de

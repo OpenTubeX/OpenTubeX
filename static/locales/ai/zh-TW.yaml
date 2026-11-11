@@ -2187,7 +2187,6 @@ Tooltips:
     Stream Extraction Method: |
       選擇 OpenTubeX 取得影片串流的方式。選擇 yt-dlp 時，系統必須能使用 yt-dlp。
       使用 yt-dlp 時，影片可能需要更久才會開始播放。
-      內建方式不支援在直播和首播中跳轉播放位置。
     Avoid translation: |
       停用 YouTube 自動翻譯影片標題、說明與章節的功能。
       提出過多請求（例如擷取多份清單中的影片標題）可能會暫時

@@ -2193,7 +2193,6 @@ Tooltips:
     Stream Extraction Method: |
       Chọn cách OpenTubeX lấy luồng video. yt-dlp phải dùng được khi được chọn.
       Video có thể mất nhiều thời gian hơn để bắt đầu khi dùng yt-dlp.
-      Phương thức tích hợp không hỗ trợ tua luồng trực tiếp và buổi công chiếu.
     Avoid translation: |
       Tắt tính năng tự động dịch tiêu đề, mô tả và chương video của YouTube.
       Quá nhiều yêu cầu, chẳng hạn lấy tiêu đề video trong nhiều danh sách, có thể tạm thời

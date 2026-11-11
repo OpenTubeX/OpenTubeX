@@ -2186,7 +2186,6 @@ Tooltips:
     Stream Extraction Method: |
       Vyberte spôsob, akým OpenTubeX získava streamy videí. Ak vyberiete yt-dlp, musí byť dostupný.
       Pri použití yt-dlp môže spustenie videa trvať dlhšie.
-      Vstavaný spôsob nepodporuje posúvanie v živých prenosoch a premiérach.
     Avoid translation: |
       Vypne automatický preklad názvu, opisu a kapitol videa službou YouTube.
       Príliš veľa požiadaviek, napríklad načítavanie názvov videí v zoznamoch, môže dočasne
