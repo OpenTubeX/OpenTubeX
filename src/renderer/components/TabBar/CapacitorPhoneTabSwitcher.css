@@ -149,6 +149,11 @@
   touch-action: manipulation;
 }
 
+.capacitorPhoneTabHeaderButton {
+  border-radius: var(--shape-corner-full);
+  font-size: 22px;
+}
+
 .capacitorPhoneTabHeaderButton:disabled {
   opacity: 0.45;
   cursor: default;
@@ -250,7 +255,12 @@
   touch-action: pan-y;
   transform: var(--tab-swipe-transform, none);
   opacity: var(--tab-swipe-opacity, 1);
-  transition: transform 160ms ease, opacity 160ms ease;
+  transition:
+    transform 160ms ease,
+    opacity 160ms ease,
+    border-color var(--motion-fast-effects),
+    background-color var(--motion-fast-effects),
+    border-radius var(--motion-default-spatial);
 }
 
 .capacitorPhoneTabRow[data-tab-swiping],
@@ -365,24 +375,60 @@
   border-block-end: 1px solid var(--border-color);
 }
 
-.capacitorPhoneTabFab {
+/* Mirrors the selection toolbar: secondary actions sit beside the FAB. */
+.capacitorPhoneTabBottomActions {
   position: absolute;
   inset-block-end: max(16px, var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
   inset-inline-end: 16px;
   z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.capacitorPhoneTabFab,
+.capacitorPhoneTabReopen {
   display: inline-grid;
   place-items: center;
-  inline-size: 56px;
-  block-size: 56px;
   padding: 0;
-  color: var(--text-with-main-color);
-  background-color: var(--primary-color);
   border: 0;
-  border-radius: 50%;
   box-shadow: 0 3px 8px rgb(0 0 0 / 45%);
   cursor: pointer;
-  font-size: 20px;
   touch-action: manipulation;
+  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
+}
+
+.capacitorPhoneTabFab {
+  inline-size: 56px;
+  block-size: 56px;
+  color: var(--text-with-main-color);
+  background-color: var(--primary-color);
+  border-radius: var(--shape-corner-large);
+  font-size: 22px;
+}
+
+.capacitorPhoneTabReopen {
+  inline-size: 48px;
+  block-size: 48px;
+  color: var(--on-selected-container-color);
+  background-color: var(--selected-container-color);
+  border-radius: var(--shape-corner-full);
+  font-size: 20px;
+}
+
+.capacitorPhoneTabReopen:is(:hover, :active) {
+  background-color: var(--selected-container-hover-color);
+}
+
+.capacitorPhoneTabFab:active,
+.capacitorPhoneTabReopen:active {
+  border-radius: var(--shape-corner-medium);
+}
+
+.capacitorPhoneTabReopen :deep(.ft-icon) {
+  display: block;
+  inline-size: 1em;
+  block-size: 1em;
 }
 
 .capacitorPhoneTabList,
@@ -529,7 +575,8 @@
   background-color: var(--primary-color-hover);
 }
 
-.capacitorPhoneTabFab:focus-visible {
+.capacitorPhoneTabFab:focus-visible,
+.capacitorPhoneTabReopen:focus-visible {
   outline: 2px solid var(--primary-color);
   outline-offset: -3px;
 }
@@ -579,11 +626,66 @@
   cursor: pointer;
 }
 
+/* The native checkbox stays focusable and announced; the badge draws its state. */
 .capacitorPhoneTabSelection input {
-  inline-size: 20px;
-  block-size: 20px;
-  accent-color: var(--primary-color);
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
   cursor: pointer;
+}
+
+.capacitorPhoneTabCheck {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  inline-size: 24px;
+  block-size: 24px;
+  border: 2px solid var(--secondary-text-color);
+  border-radius: var(--shape-corner-full);
+  color: transparent;
+  font-size: 12px;
+  pointer-events: none;
+  transition:
+    background-color var(--motion-fast-effects),
+    border-color var(--motion-fast-effects),
+    color var(--motion-fast-effects),
+    scale var(--motion-fast-spatial);
+}
+
+.capacitorPhoneTabSelection:active .capacitorPhoneTabCheck {
+  scale: 0.85;
+}
+
+.capacitorPhoneTabSelection input:checked + .capacitorPhoneTabCheck {
+  border-color: var(--primary-color);
+  color: var(--text-with-main-color);
+  background-color: var(--primary-color);
+}
+
+.capacitorPhoneTabSelection input:focus-visible + .capacitorPhoneTabCheck {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Selection takes over the outline, so the active tab no longer competes with it. */
+.capacitorPhoneOpenTabs:has(.capacitorPhoneTabSelection) .capacitorPhoneTabRow.active:not(.selected) {
+  border-color: var(--border-color);
+  background-color: var(--card-bg-color);
+}
+
+.capacitorPhoneTabRow.selected {
+  border-color: var(--primary-color);
+  border-radius: var(--shape-corner-extra-large);
+  background-color: var(--selected-container-color);
+}
+
+.capacitorPhoneTabRow.selected .capacitorPhoneTabTarget {
+  border-radius: calc(var(--shape-corner-extra-large) - 2px);
+}
+
+.capacitorPhoneTabHeader.selecting {
+  padding-inline-start: 8px;
 }
 
 .capacitorPhoneTabOverlay.organizerGesture {

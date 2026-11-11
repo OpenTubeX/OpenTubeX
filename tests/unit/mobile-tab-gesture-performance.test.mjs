@@ -61,6 +61,7 @@ function fixture({ reducedMotion = false, close = null, pinned = false } = {}) {
     releaseModalLock() {},
     console: { error: (...args) => errors.push(args) },
     selecting: ref(false),
+    selectedTabIds: new Set(),
     actionTab: ref(null),
     performance: { now: () => now },
     getTabGridReorder(...args) { layouts++; return getTabGridReorder(...args) },

@@ -713,8 +713,7 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
       },
       {
         label: contextMenuLabel('Load Tabs'),
-        visible: contextMenuTab != null && isBulkTabAction,
-        enabled: hasSelectedUnloadedTab,
+        visible: contextMenuTab != null && isBulkTabAction && hasSelectedUnloadedTab,
         click: async () => {
           if (!manager || !contextMenuTab) return
 
@@ -732,14 +731,14 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
         label: contextMenuLabel(
           isBulkTabAction ? 'Unload Tabs' : isContextMenuTabUnloaded ? 'Load Tab' : 'Unload Tab'
         ),
-        visible: contextMenuTab != null,
-        enabled: isBulkTabAction
-          ? hasSelectedLoadedTab
-          : contextMenuTab != null && (
+        visible: contextMenuTab != null && (!isBulkTabAction || hasSelectedLoadedTab),
+        enabled: isBulkTabAction || (
+          contextMenuTab != null && (
             isContextMenuTabUnloaded ||
               (contextMenuTab.loadState !== 'unloaded' &&
                 (contextMenuTab.id !== manager?.activeTabId || (manager?.tabs.size ?? 0) > 1))
-          ),
+          )
+        ),
         click: async () => {
           if (!manager || !contextMenuTab) return
 
