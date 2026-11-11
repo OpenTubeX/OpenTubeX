@@ -86,7 +86,8 @@
         @change="store.dispatch('updatePreferredVideoCodec', $event)"
       />
     </FtFlexBox>
-    <div v-if="usesInvidiousInstance(backendPreference, backendFallback)">
+    <!-- Self-hosted builds always use their own Invidious server -->
+    <div v-if="!IS_SELF_HOSTED && usesInvidiousInstance(backendPreference, backendFallback)">
       <FtFlexBox class="settingsFlexStart460px">
         <FtInput
           :icon="['fas', 'link']"
@@ -217,6 +218,7 @@ import { capacitorHttpFetch } from '../../../helpers/api/capacitor-http'
 const IS_IOS = !!process.env.IS_IOS
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 const SUPPORTS_LOCAL_API = !!process.env.SUPPORTS_LOCAL_API
+const IS_SELF_HOSTED = !!process.env.IS_SELF_HOSTED
 const PLAYBACK_ENGINE_VALUES = ['built-in', 'yt-dlp']
 
 const { t } = useI18n()

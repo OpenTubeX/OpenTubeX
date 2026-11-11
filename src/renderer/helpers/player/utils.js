@@ -307,7 +307,8 @@ export function repairInvidiousManifest(periods) {
           ?.children[0]
 
         if (baseUrl) {
-          const url = new URL(baseUrl.replaceAll('&amp;', '&'))
+          // Proxied manifests can use relative URLs, and only the query matters here
+          const url = new URL(baseUrl.replaceAll('&amp;', '&'), 'http://localhost')
 
           if (url.searchParams.has('xtags')) {
             const xtags = url.searchParams.get('xtags').split(':')

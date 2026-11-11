@@ -1,0 +1,85 @@
+name: Docker Image
+
+# Publishes the self-hosted web app image that docker/compose.yaml uses.
+# Releases and nightlies call this after they are published.
+on:
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
+      sha:
+        type: string
+        required: true
+        description: Commit the release was built from
+  workflow_dispatch:
+    inputs:
+      tag:
+        type: string
+        required: true
+        description: Release tag to build, for example v1.2.3 or v1.2.3-nightly-45. Stable tags also move `latest`.
+
+cache-mode: none
+permissions: {}
+
+jobs:
+  publish:
+    name: Publish web image
+    if: github.repository == 'OpenTubeX/OpenTubeX'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        # Manual runs only name a tag
+        ref: ${{ inputs.sha || format('refs/tags/{0}', inputs.tag) }}
+        persist-credentials: false
+
+    - name: Resolve image tags
+      id: image
+      env:
+        TAG: ${{ inputs.tag }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        image="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/opentubex-web"
+        version="${TAG#v}"
+        if [[ "$version" == *-nightly-* ]]; then
+          channel=nightly
+        else
+          channel=latest
+        fi
+        {
+          echo "tags=$image:$version,$image:$channel"
+          echo "version=$version"
+          echo "sha=$(git rev-parse HEAD)"
+        } >> "$GITHUB_OUTPUT"
+
+    - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+    - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
+
+    # The bundle builds once on the runner; only the Caddy base differs per platform.
+    - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+      with:
+        context: .
+        file: docker/Dockerfile
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: ${{ steps.image.outputs.tags }}
+        build-args: GITHUB_SHA=${{ steps.image.outputs.sha }}
+        labels: |
+          org.opencontainers.image.title=OpenTubeX
+          org.opencontainers.image.description=OpenTubeX web app, served in front of a self-hosted Invidious server
+          org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+          org.opencontainers.image.licenses=AGPL-3.0-or-later
+          org.opencontainers.image.version=${{ steps.image.outputs.version }}
+          org.opencontainers.image.revision=${{ steps.image.outputs.sha }}

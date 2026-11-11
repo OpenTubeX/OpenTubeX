@@ -25,6 +25,11 @@ function acquireLibraryLock() {
 }
 
 async function getPool() {
+  // Browsers provide neither locks nor OPFS on plain http:// addresses
+  if (!self.isSecureContext) {
+    throw new Error('Unable to open the library. OpenTubeX can only store it when opened over HTTPS or on localhost.')
+  }
+
   lock ??= acquireLibraryLock().catch(error => {
     lock = null
     throw error

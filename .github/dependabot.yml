@@ -98,6 +98,28 @@ updates:
     labels:
       - "PR: waiting for review"
       - "PR: dependencies"
+  - package-ecosystem: "docker"
+    directory: "/docker"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "PR: waiting for review"
+      - "PR: dependencies"
+    ignore:
+      # Stay on the Node.js release line that CI builds with.
+      - dependency-name: "node"
+        update-types: ["version-update:semver-major"]
+  - package-ecosystem: "docker-compose"
+    directory: "/docker"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "PR: waiting for review"
+      - "PR: dependencies"
+    ignore:
+      # Existing databases can't start on a new major version without a manual upgrade.
+      - dependency-name: "postgres"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
