@@ -57,9 +57,12 @@ export function generateContentPoToken(videoId, context, initialAttestationData,
  * @returns {Promise<string | null>} `null` when BotGuard would have to run first
  */
 export async function mintContentPoTokenFromAttestation(videoId) {
-  // Android and iOS keep their attestation in native code without a mint-only call
-  if (!process.env.IS_ELECTRON) return null
-  return await window.ftElectron.mintPoToken(videoId)
+  if (process.env.IS_ELECTRON) return await window.ftElectron.mintPoToken(videoId)
+  if (process.env.IS_CAPACITOR) {
+    const { mintCapacitorPoTokenFromAttestation } = await import('./capacitor-po-token')
+    return await mintCapacitorPoTokenFromAttestation(videoId)
+  }
+  return null
 }
 
 async function generateHostPoToken(videoId, context, initialAttestationData, ytConfig) {

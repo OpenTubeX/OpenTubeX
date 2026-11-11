@@ -33,6 +33,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 @CapacitorPlugin(name = "PoToken")
 public class PoTokenPlugin extends Plugin {
@@ -94,20 +95,42 @@ public class PoTokenPlugin extends Plugin {
         }
 
         getActivity().runOnUiThread(() -> requestQueue.enqueue(() -> {
-            if (attestationView != null && !canMintFrom(
-                attestationExpiresAt,
-                attestationProxy,
-                AndroidProxy.configuration(),
-                System.currentTimeMillis()
-            )) {
-                discardAttestation();
-            }
-
-            if (attestationView != null) {
-                mint(call, videoId, () -> attest(call, videoId, sessionContext, initialAttestationData, ytConfig));
-            } else {
+            discardUnusableAttestation();
+            if (attestationView == null) {
                 attest(call, videoId, sessionContext, initialAttestationData, ytConfig);
+                return;
             }
+            mintFromAttestation(
+                videoId,
+                token -> resolveCall(call, token),
+                () -> attest(call, videoId, sessionContext, initialAttestationData, ytConfig)
+            );
+        }));
+    }
+
+    /**
+     * Mints a token from the current attestation without running BotGuard.
+     * Resolves without a token when there is no usable, attested BotGuard run.
+     */
+    @PluginMethod
+    public void mint(PluginCall call) {
+        String videoId = call.getString("videoId");
+        if (videoId == null) {
+            call.reject("Missing PO token parameters");
+            return;
+        }
+
+        getActivity().runOnUiThread(() -> requestQueue.enqueue(() -> {
+            discardUnusableAttestation();
+            if (attestationView == null) {
+                resolveCall(call, null);
+                return;
+            }
+            mintFromAttestation(
+                videoId,
+                token -> resolveCall(call, isAttested(token) ? token : null),
+                () -> resolveCall(call, null)
+            );
         }));
     }
 
@@ -121,13 +144,25 @@ public class PoTokenPlugin extends Plugin {
         super.handleOnDestroy();
     }
 
-    private void mint(PluginCall call, String videoId, Runnable onFailure) {
+    private void discardUnusableAttestation() {
+        if (attestationView != null && !canMintFrom(
+            attestationExpiresAt,
+            attestationProxy,
+            AndroidProxy.configuration(),
+            System.currentTimeMillis()
+        )) {
+            discardAttestation();
+        }
+    }
+
+    /** Discards the attestation when it fails or mints a token pending attestation. */
+    private void mintFromAttestation(String videoId, Consumer<String> onToken, Runnable onFailure) {
         WebView view = attestationView;
         await(view, new Result() {
             @Override
             public void resolve(String token, double validForSecs) {
                 if (!isAttested(token)) discardAttestation();
-                resolveCall(call, token);
+                onToken.accept(token);
             }
 
             @Override
