@@ -512,11 +512,11 @@ const customGetters = {
 
   getNavigationItems: (state) => normalizeNavigationItems(state.navigationItems),
 
-  getLandingPage: (state) => resolveLandingPage(
+  getLandingPage: (state, getters) => resolveLandingPage(
     state.landingPage,
     filterAvailableNavigationItems(normalizeNavigationItems(state.navigationItems), {
       supportsLocalApi: !!process.env.SUPPORTS_LOCAL_API,
-      backendPreference: state.backendPreference,
+      backendPreference: getters.getBackendPreference,
       backendFallback: state.backendFallback,
       showWatchStats: state.rememberHistory && state.enableWatchStats,
     })
