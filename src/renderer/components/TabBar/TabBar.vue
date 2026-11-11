@@ -165,7 +165,6 @@ import { fetchTabAvatarBytes } from '../../helpers/tabAvatar'
 import { getMissingTabAvatarTabs, loadMissingTabAvatars } from '../../helpers/loadTabAvatars'
 import { computeReorderOffsets } from '../../helpers/reorderOffsets'
 import { clampOverlayScrollLeft, clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
-import { useRootClass } from '../../helpers/rootClasses'
 import SortableTab from './SortableTab.vue'
 import TabTooltip from './TabTooltip.vue'
 import TabTooltipOverlay from './TabTooltipOverlay.vue'
@@ -368,37 +367,6 @@ const tabsContentGroup = useTemplateRef('tabsContentGroup')
 /** @type {import('vue').ComputedRef<HTMLElement | null>} */
 const tabsContentRef = computed(() => tabsContentGroup.value?.$el ?? null)
 const dropZoneRef = useTemplateRef('dropZoneRef')
-// The app makes room for a visible horizontal scrollbar, which the overlay
-// scrollbar helper toggles through the class of the bar it adds to the container. Only
-// that class and the container's own children are watched, so the tabs' class
-// changes, which are frequent while loading, playing and dragging, cost nothing.
-const horizontalScrollbarVisible = ref(false)
-watch(dropZoneRef, (container, _previous, onCleanup) => {
-  /** @type {Element | null} */
-  let scrollbar = null
-  const update = () => {
-    horizontalScrollbarVisible.value = scrollbar?.classList.contains('os-scrollbar-visible') === true
-  }
-  const scrollbarObserver = new MutationObserver(update)
-  const locate = () => {
-    const found = container?.querySelector(':scope > .os-scrollbar-horizontal') ?? null
-    if (found !== scrollbar) {
-      scrollbar = found
-      scrollbarObserver.disconnect()
-      if (scrollbar) scrollbarObserver.observe(scrollbar, { attributes: true, attributeFilter: ['class'] })
-    }
-    update()
-  }
-  locate()
-  if (!container) return
-  const childrenObserver = new MutationObserver(locate)
-  childrenObserver.observe(container, { childList: true })
-  onCleanup(() => {
-    childrenObserver.disconnect()
-    scrollbarObserver.disconnect()
-  })
-}, { immediate: true, flush: 'sync' })
-useRootClass('appTabBarScrollbar', horizontalScrollbarVisible)
 const closeTooltipsSignal = ref(0)
 
 // Tabs that arrive with the first state update, such as a restored session,
