@@ -93,7 +93,7 @@
 import { inject, nextTick, useId, useTemplateRef } from 'vue'
 
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
-import { ModalLeaveTransition } from '../../helpers/modalTransition'
+import { afterModalLeave, ModalLeaveTransition } from '../../helpers/modalTransition'
 import { useFullscreenTeleportTarget } from '../../composables/useFullscreenTeleportTarget'
 import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 import { holdRootClass } from '../../helpers/rootClasses'
@@ -216,14 +216,18 @@ function activatePrompt() {
   })
 }
 
-function deactivatePrompt() {
+/**
+ * @param {import('vue').VNode} vnode
+ */
+function deactivatePrompt(vnode) {
   promptContentResizeObserver?.disconnect()
   promptContentResizeObserver = null
   document.removeEventListener('keydown', handleEscape, true)
   if (registered) {
     store.commit('removeOpenPrompt', id)
     registered = false
-    releaseRootClass()
+    // The prompt stays visible while its exit animation plays.
+    afterModalLeave(vnode.el, releaseRootClass)
     releaseRootClass = null
     nextTick(() => {
       if (settingsOverlayActive.value) lastActiveElement?.focus()
