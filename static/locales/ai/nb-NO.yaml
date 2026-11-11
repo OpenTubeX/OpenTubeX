@@ -2567,6 +2567,8 @@ Search Filters:
 Storage Startup Error:
   Title: "Kunne ikke laste appdata"
   Message: "Frigjør lagringsplass på enheten og prøv igjen. Synkronisering er satt på pause til dataene dine er lastet."
+  Web Message: "Hvis OpenTubeX er åpen i en annen fane, lukk den og prøv igjen."
+  Insecure Web Message: "OpenTubeX kan bare lagre dataene dine når den åpnes over HTTPS eller på localhost. Åpne denne adressen med https:// i stedet."
   Retry: "Prøv igjen"
 Native Permissions:
   Local Network Denied: "Tillatelse til enheter i nærheten ble avslått."

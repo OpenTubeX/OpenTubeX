@@ -2570,6 +2570,8 @@ Search Filters:
 Storage Startup Error:
   Title: "Tətbiq məlumatları yüklənmədi"
   Message: "Cihazda yaddaş sahəsi boşaldın və yenidən cəhd edin. Məlumatlarınız yüklənənədək sinxronizasiya dayandırılıb."
+  Web Message: "OpenTubeX başqa vərəqdə açıqdırsa, onu bağlayın və yenidən cəhd edin."
+  Insecure Web Message: "OpenTubeX məlumatlarınızı yalnız HTTPS üzərindən və ya localhost-da açıldıqda saxlaya bilər. Bu ünvanı əvəzinə https:// ilə açın."
   Retry: "Yenidən cəhd et"
 Search Bar:
   Use Suggestion: Təklifi istifadə et

@@ -2623,6 +2623,8 @@ Search Filters:
 Storage Startup Error:
   Title: "לא ניתן לטעון את נתוני האפליקציה"
   Message: "יש לפנות שטח אחסון במכשיר ולנסות שוב. הסנכרון מושהה עד לטעינת הנתונים שלך."
+  Web Message: "אם OpenTubeX פתוח בכרטיסייה אחרת, יש לסגור אותה ולנסות שוב."
+  Insecure Web Message: "OpenTubeX יכול לשמור את הנתונים שלך רק כשהוא נפתח דרך HTTPS או ב־localhost. יש לפתוח את הכתובת הזו עם https:// במקום."
   Retry: "ניסיון חוזר"
 Native Permissions:
   Local Network Denied: "ההרשאה למכשירים בקרבת מקום נדחתה."

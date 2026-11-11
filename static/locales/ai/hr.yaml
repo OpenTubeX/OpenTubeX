@@ -2600,6 +2600,8 @@ Search Filters:
 Storage Startup Error:
   Title: "Nije moguće učitati podatke aplikacije"
   Message: "Oslobodite prostor na uređaju i pokušajte ponovno. Sinkronizacija je pauzirana dok se vaši podaci ne učitaju."
+  Web Message: "Ako je OpenTubeX otvoren u drugoj kartici, zatvori je i pokušaj ponovno."
+  Insecure Web Message: "OpenTubeX može spremati tvoje podatke samo kad je otvoren putem HTTPS-a ili na localhostu. Umjesto toga otvori ovu adresu s https://."
   Retry: "Pokušaj ponovno"
 Native Permissions:
   Local Network Denied: "Dopuštenje za uređaje u blizini je odbijeno."

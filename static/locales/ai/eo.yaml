@@ -2601,6 +2601,8 @@ Form Inputs:
 Storage Startup Error:
   Title: Ne eblis ŝargi datumojn de la aplikaĵo
   Message: Liberigu konservejon de la aparato kaj provu denove. Sinkronigo estas paŭzigita ĝis viaj datumoj estos ŝargitaj.
+  Web Message: "Se OpenTubeX estas malfermita en alia langeto, fermu ĝin kaj reprovu."
+  Insecure Web Message: "OpenTubeX povas konservi viajn datumojn nur kiam ĝi estas malfermita per HTTPS aŭ ĉe localhost. Anstataŭe malfermu ĉi tiun adreson per https://."
   Retry: Reprovi
 Native Permissions:
   Local Network Denied: La permeso por proksimaj aparatoj estis rifuzita.

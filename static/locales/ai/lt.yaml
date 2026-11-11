@@ -3064,6 +3064,8 @@ Form Inputs:
 Storage Startup Error:
   Title: "Nepavyko įkelti programėlės duomenų"
   Message: "Atlaisvinkite vietos įrenginyje ir bandykite dar kartą. Sinchronizavimas pristabdytas, kol bus įkelti jūsų duomenys."
+  Web Message: "Jei OpenTubeX atidaryta kitame skirtuke, uždarykite jį ir bandykite dar kartą."
+  Insecure Web Message: "OpenTubeX gali saugoti jūsų duomenis tik atidaryta per HTTPS arba per localhost. Verčiau atidarykite šį adresą su https://."
   Retry: "Bandyti dar kartą"
 Native Permissions:
   Local Network Denied: "Leidimas pasiekti netoliese esančius įrenginius atmestas."

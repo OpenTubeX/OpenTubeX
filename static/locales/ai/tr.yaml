@@ -2561,6 +2561,8 @@ Search Filters:
 Storage Startup Error:
   Title: "Uygulama verileri yüklenemedi"
   Message: "Cihazda depolama alanı açıp tekrar deneyin. Verileriniz yüklenene kadar eşitleme duraklatılır."
+  Web Message: "OpenTubeX başka bir sekmede açıksa sekmeyi kapatıp yeniden deneyin."
+  Insecure Web Message: "OpenTubeX verilerinizi yalnızca HTTPS üzerinden veya localhost'ta açıldığında saklayabilir. Bunun yerine bu adresi https:// ile açın."
   Retry: "Tekrar dene"
 Search Bar:
   Use Suggestion: Öneriyi kullan

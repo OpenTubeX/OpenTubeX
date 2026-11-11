@@ -1805,6 +1805,8 @@ Search Filters:
 Storage Startup Error:
   Title: "Nie udało się wczytać danych aplikacji"
   Message: "Zwolnij miejsce na urządzeniu i spróbuj ponownie. Synchronizacja jest wstrzymana do czasu wczytania danych."
+  Web Message: "Jeśli OpenTubeX jest otwarty w innej karcie, zamknij ją i spróbuj ponownie."
+  Insecure Web Message: "OpenTubeX może zapisywać Twoje dane tylko wtedy, gdy jest otwarty przez HTTPS lub na localhost. Otwórz ten adres za pomocą https://."
   Retry: "Spróbuj ponownie"
 Search Bar:
   Use Suggestion: Użyj sugestii

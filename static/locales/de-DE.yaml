@@ -3809,6 +3809,8 @@ Form Inputs:
 Storage Startup Error:
   Title: "App-Daten konnten nicht geladen werden"
   Message: "Gib Speicherplatz auf dem Gerät frei und versuche es erneut. Die Synchronisierung bleibt pausiert, bis deine Daten geladen sind."
+  Web Message: "Wenn OpenTubeX in einem anderen Tab geöffnet ist, schließe ihn und versuche es erneut."
+  Insecure Web Message: "OpenTubeX kann deine Daten nur speichern, wenn es über HTTPS oder auf localhost geöffnet wird. Öffne diese Adresse stattdessen mit https://."
   Retry: "Erneut versuchen"
 Native Permissions:
   Local Network Denied: "Die Berechtigung für Geräte in der Nähe wurde verweigert."

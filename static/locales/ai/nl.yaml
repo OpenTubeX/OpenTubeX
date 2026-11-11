@@ -2632,6 +2632,8 @@ Search Filters:
 Storage Startup Error:
   Title: "Appgegevens konden niet worden geladen"
   Message: "Maak opslagruimte vrij op het apparaat en probeer het opnieuw. Synchronisatie is gepauzeerd totdat je gegevens zijn geladen."
+  Web Message: "Als OpenTubeX in een ander tabblad open is, sluit dat dan en probeer het opnieuw."
+  Insecure Web Message: "OpenTubeX kan je gegevens alleen opslaan als het via HTTPS of op localhost wordt geopend. Open dit adres in plaats daarvan met https://."
   Retry: "Opnieuw proberen"
 Native Permissions:
   Local Network Denied: "Toestemming voor apparaten in de buurt is geweigerd."

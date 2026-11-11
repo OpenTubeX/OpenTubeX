@@ -2657,6 +2657,8 @@ Search Filters:
 Storage Startup Error:
   Title: "Appdata kunne ikke indlæses"
   Message: "Frigør lagerplads på enheden, og prøv igen. Synkronisering er sat på pause, indtil dine data er indlæst."
+  Web Message: "Hvis OpenTubeX er åben i en anden fane, så luk den og prøv igen."
+  Insecure Web Message: "OpenTubeX kan kun gemme dine data, når den åbnes via HTTPS eller på localhost. Åbn i stedet denne adresse med https://."
   Retry: "Prøv igen"
 Native Permissions:
   Local Network Denied: "Tilladelse til enheder i nærheden blev afvist."

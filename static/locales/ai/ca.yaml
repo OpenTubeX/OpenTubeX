@@ -3208,6 +3208,8 @@ Form Inputs:
 Storage Startup Error:
   Title: "No s'han pogut carregar les dades de l'aplicació"
   Message: "Allibereu espai al dispositiu i torneu-ho a provar. La sincronització està en pausa fins que es carreguin les dades."
+  Web Message: "Si OpenTubeX està obert en una altra pestanya, tanqueu-la i torneu-ho a provar."
+  Insecure Web Message: "OpenTubeX només pot desar les vostres dades quan s'obre per HTTPS o a localhost. Obriu aquesta adreça amb https://."
   Retry: "Torna-ho a provar"
 Native Permissions:
   Local Network Denied: "S’ha denegat el permís per als dispositius propers."

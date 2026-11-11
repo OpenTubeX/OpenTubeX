@@ -2570,6 +2570,8 @@ Search Filters:
 Storage Startup Error:
   Title: "Sovelluksen tietoja ei voitu ladata"
   Message: "Vapauta laitteen tallennustilaa ja yritä uudelleen. Synkronointi on keskeytetty, kunnes tietosi on ladattu."
+  Web Message: "Jos OpenTubeX on auki toisessa välilehdessä, sulje se ja yritä uudelleen."
+  Insecure Web Message: "OpenTubeX voi tallentaa tietosi vain, kun se avataan HTTPS-yhteydellä tai localhostissa. Avaa tämä osoite sen sijaan https://-alkuisena."
   Retry: "Yritä uudelleen"
 Native Permissions:
   Local Network Denied: "Lähellä olevien laitteiden käyttöoikeus evättiin."

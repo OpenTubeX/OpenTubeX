@@ -2566,6 +2566,8 @@ Search Filters:
 Storage Startup Error:
   Title: "Údaje aplikácie sa nepodarilo načítať"
   Message: "Uvoľnite miesto v zariadení a skúste to znova. Synchronizácia je pozastavená, kým sa údaje nenačítajú."
+  Web Message: "Ak je OpenTubeX otvorený na inej karte, zatvorte ju a skúste to znova."
+  Insecure Web Message: "OpenTubeX môže ukladať vaše údaje, len keď je otvorený cez HTTPS alebo na localhost. Otvorte radšej túto adresu cez https://."
   Retry: "Skúsiť znova"
 Search Bar:
   Use Suggestion: Použiť návrh

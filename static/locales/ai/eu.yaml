@@ -2570,6 +2570,8 @@ Search Filters:
 Storage Startup Error:
   Title: "Ezin izan dira aplikazioaren datuak kargatu"
   Message: "Askatu biltegiratze-lekua gailuan eta saiatu berriro. Sinkronizazioa etenda dago zure datuak kargatu arte."
+  Web Message: "OpenTubeX beste fitxa batean irekita badago, itxi eta saiatu berriro."
+  Insecure Web Message: "OpenTubeX-ek zure datuak HTTPS bidez edo localhost-en irekitzen denean bakarrik gorde ditzake. Ireki helbide hau https:// erabiliz."
   Retry: "Saiatu berriro"
 Search Bar:
   Use Suggestion: Erabili iradokizuna

@@ -70,12 +70,14 @@ const dynamicColorsReady = process.env.IS_CAPACITOR
   : Promise.resolve()
 
 Promise.all([router.isReady(), dynamicColorsReady, networkMeteredReady]).then(async () => {
-  if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
+  // The web app's library lives in browser storage, which can be unavailable
+  // (plain http:// addresses) or held by another tab.
+  if (process.env.IS_CAPACITOR ? !process.env.IS_IOS : !process.env.IS_ELECTRON) {
     try {
       const { waitForDatastores } = await import('../datastores/index')
       await waitForDatastores()
     } catch (error) {
-      console.error('Android app storage is unavailable:', error)
+      console.error('App storage is unavailable:', error)
       // Use the system locale without reading or writing failed app storage.
       await store.dispatch('triggerCurrentLocaleSideEffects', 'system')
       const { setIconPack } = await import('./icons/iconPackState')
