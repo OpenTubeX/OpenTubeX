@@ -131,6 +131,14 @@ public class PullToRefreshLayoutTest {
                 assertEquals("DOM rejection prevents refresh", 1, refreshes.get());
 
                 evaluate(web, "window.acceptPull=true;window.scrollTo(0,300)");
+                // The native view learns the page's scroll offset asynchronously.
+                long scrolled = SystemClock.uptimeMillis() + 15000;
+                AtomicReference<Boolean> belowTop = new AtomicReference<>(false);
+                while (!belowTop.get() && SystemClock.uptimeMillis() < scrolled) {
+                    onMain(() -> belowTop.set(web.canScrollVertically(-1)));
+                    if (!belowTop.get()) SystemClock.sleep(50);
+                }
+                assertTrue("The WebView reports the scrolled page", belowTop.get());
                 swipe(layout, web, false, false, false);
                 assertEquals("scrolling back to the top is not a refresh", 1, refreshes.get());
                 evaluate(web, "window.scrollTo(0,0)");
