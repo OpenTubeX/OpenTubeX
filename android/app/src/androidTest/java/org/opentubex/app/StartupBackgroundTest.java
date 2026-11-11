@@ -116,12 +116,13 @@ public class StartupBackgroundTest {
                     }));
                     assertTrue("The startup page is painted", painted.await(5, TimeUnit.SECONDS));
                     // The blank page never paints content, so Chromium can keep showing
-                    // the recreated WebView's earlier frame until its paint-holding
+                    // the recreated WebView's earlier splash frame until its paint-holding
                     // timeout. A wrong background stays after that; a stale frame does not.
+                    // White is WebView's default background, so it fails at once.
                     Bitmap screenshot = InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
                     long screenshotDeadline = android.os.SystemClock.uptimeMillis() + 6000;
-                    while (screenshot.getPixel(screenshot.getWidth() / 2, screenshot.getHeight() / 2) != expectedColor &&
-                        android.os.SystemClock.uptimeMillis() < screenshotDeadline) {
+                    for (int center; (center = screenshot.getPixel(screenshot.getWidth() / 2, screenshot.getHeight() / 2)) != expectedColor &&
+                        center != Color.WHITE && android.os.SystemClock.uptimeMillis() < screenshotDeadline;) {
                         screenshot.recycle();
                         Thread.sleep(250);
                         screenshot = InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
