@@ -100,7 +100,8 @@ jobs:
         # Emulator 37.2.13 crashes partway through a shard; 37.1.11 runs the
         # whole suite.
         emulator-build: 15917651
-        # A 411dp wide phone, at a resolution software rendering can keep up with.
+        # A 411dp wide phone. Software rendering keeps up at 720x1600 and 280dpi,
+        # which keeps the Pixel 6 layout with less than half of its pixels.
         profile: pixel_6
         # Gradle idles while the tests run, so the emulator gets every core.
         cores: 4
@@ -108,7 +109,7 @@ jobs:
         disk-size: 6G
         # Several tests check WebView and system animations.
         disable-animations: false
-        emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu swangle
+        emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu swangle -skin 720x1600
         # A hung test fails after ten minutes instead of using up the shard.
         # Gradle can report success after the emulator has crashed and skipped
         # the remaining tests, so require it to still be running.
@@ -118,6 +119,9 @@ jobs:
         # changed and restored to apply it. FailureDiagnostics logs whatever
         # window still held the screen when a test failed.
         script: |
+          adb shell wm density 280
+          adb shell wm size
+          adb shell wm density
           adb shell settings put global hide_error_dialogs 1
           adb shell settings put secure anr_show_background 0
           adb shell settings put global heads_up_notifications_enabled 0
