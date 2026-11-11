@@ -71,6 +71,10 @@ self.addEventListener('fetch', function (event) {
   // fetch() calls from the app that must reach the server, such as connectivity checks, skip the cache.
   // Pages and assets the browser revalidates on reload keep it, so the app still opens offline.
   if (event.request.destination === '' && ['no-store', 'no-cache', 'reload'].includes(event.request.cache)) return
+  // Self-hosted servers proxy Invidious on the app's origin. Its responses contain
+  // expiring stream URLs, and the HTTP cache already handles its images.
+  const { origin, pathname } = new URL(event.request.url)
+  if (origin === self.location.origin && /^\/(api|companion|vi|ggpht|sb|videoplayback|latest_version)(\/|$)/.test(pathname)) return
 
   if (comparePaths(event.request.url, networkFirstPaths)) {
     networkFirstFetch(event)
