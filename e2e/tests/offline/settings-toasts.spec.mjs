@@ -140,7 +140,8 @@ test.describe('settings', () => {
     bounds = await toast.boundingBox()
     expect(bounds.x).toBeLessThan(50)
     // Below the horizontal tab bar
-    await expectToastInset(toast, 'top', 61)
+    const tabBar = await page.locator('.tabBar').boundingBox()
+    await expectToastInset(toast, 'top', tabBar.y + tabBar.height + 29)
     await dragToast(toast, -dismissDragDistance)
     await page.mouse.up()
     await expect(toast).toHaveCount(0)

@@ -66,7 +66,9 @@ test.describe('full-window connection banner', () => {
         }, position)
         const left = position === 'left' ? 280 : 0
         const right = position === 'right' ? 280 : 0
-        const bottom = position === 'bottom' ? 34 : 0
+        const tabBar = page.locator('.tabBar')
+        await expect(tabBar).toHaveClass(new RegExp(`position-${position}`))
+        const bottom = position === 'bottom' ? (await tabBar.boundingBox()).height : 0
         await expectBounds(left, right, bottom)
         await toggleFullWindow()
         await expect(player).toHaveClass(/fullWindow/)
