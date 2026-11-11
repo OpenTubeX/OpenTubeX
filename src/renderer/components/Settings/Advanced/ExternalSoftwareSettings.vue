@@ -265,6 +265,7 @@
           v-if="ytDlpPlaybackAuthMode === 'file'"
           :label="t('Settings.External Software Settings.Cookie File')"
           :icon="['fas', 'file-lines']"
+          placeholder="/path/to/cookies.txt"
           :value="ytDlpPlaybackCookiesPath"
           :tooltip="t('Tooltips.External Software Settings.Cookie File')"
           @browse="ytDlp.ytDlpChooseCookies()"
