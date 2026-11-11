@@ -680,14 +680,27 @@ const updateOptimisticSetting = createOptimisticSettingUpdater()
 // older write that finishes later cannot move it back.
 function persistOptimisticSetting(commit, settings, settingId, value) {
   const editedAt = Date.now()
-  if (isSettingSyncable(settingId)) {
+  const syncable = isSettingSyncable(settingId)
+  const previousEditedAt = getSettingSyncTimestamps(settings)[settingId]
+  if (syncable) {
     commit('setSyncServerSettingUpdatedAt', { ...getSettingSyncTimestamps(settings), [settingId]: editedAt })
   }
   return updateOptimisticSetting(settingId, value, {
     read: () => settings[settingId],
     commit: nextValue => commit(defaultMutationId(settingId), nextValue),
     persist: async (nextValue, isLatest) => {
-      await DBSettingHandlers.upsert(settingId, nextValue)
+      try {
+        await DBSettingHandlers.upsert(settingId, nextValue)
+      } catch (error) {
+        // A failed write restores the saved value, so restore its edit time too.
+        if (syncable && isLatest() && getSettingSyncTimestamps(settings)[settingId] === editedAt) {
+          const restored = { ...getSettingSyncTimestamps(settings) }
+          if (previousEditedAt === undefined) delete restored[settingId]
+          else restored[settingId] = previousEditedAt
+          commit('setSyncServerSettingUpdatedAt', restored)
+        }
+        throw error
+      }
       if (isLatest()) await recordSettingSyncTimestamp(commit, settings, settingId, editedAt)
     },
   })

@@ -202,6 +202,25 @@ test('an optimistic setting value is visible to sync only with its edit time', a
   assert.deepEqual(recorded, [['uiScale', 2000]])
 })
 
+test('a failed optimistic write restores the saved edit time with the saved value', async () => {
+  const state = { uiScale: 100, syncServerSettingUpdatedAt: { uiScale: 500 } }
+  const persistOptimisticSetting = vm.runInNewContext(`${optimisticPersistence}\npersistOptimisticSetting`, {
+    Date: { now: () => 1000 },
+    isSettingSyncable: () => true,
+    defaultMutationId: id => `set${id}`,
+    updateOptimisticSetting: createOptimisticSettingUpdater(),
+    recordSettingSyncTimestamp: async () => assert.fail('a failed write records no edit time'),
+    DBSettingHandlers: { upsert: async () => { throw new Error('disk full') } },
+  })
+  const commit = (name, value) => { state[name[3].toLowerCase() + name.slice(4)] = value }
+
+  const update = persistOptimisticSetting(commit, state, 'uiScale', 125)
+  assert.equal(state.syncServerSettingUpdatedAt.uiScale, 1000)
+  await assert.rejects(update)
+  assert.equal(state.uiScale, 100)
+  assert.equal(state.syncServerSettingUpdatedAt.uiScale, 500)
+})
+
 test('a pending edit time write keeps newer optimistic edit times', async () => {
   const start = settingsSource.indexOf('function recordSettingSyncTimestamp(')
   const recordSource = settingsSource.slice(start, settingsSource.indexOf('\n}\n', start) + 3)
