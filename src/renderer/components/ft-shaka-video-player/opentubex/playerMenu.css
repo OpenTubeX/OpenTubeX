@@ -850,11 +850,17 @@
     ft-menu-fade-in-again 150ms ease-out;
 }
 
-:deep(.phonePlayerOptions > .shaka-overflow-menu:is([data-ft-menu-transition='in'], :has([data-ft-menu-transition='in'])) > .shaka-sub-menu:not(.shaka-hidden):has(> .ft-submenu-header-action:not(.shaka-hidden)) > :not(.ft-submenu-header-action, .os-scrollbar)) {
+/*
+  The entries look for the action among their siblings themselves: Chromium
+  restyles everything after a `:has()` compound that could match whenever it
+  checks a `:has()` again, which here would be the whole watch page.
+  These views open from the menu, which carries their marker.
+*/
+:deep(.phonePlayerOptions > .shaka-overflow-menu[data-ft-menu-transition='in'] > .shaka-sub-menu:not(.shaka-hidden) > :not(.ft-submenu-header-action, .os-scrollbar):is(.ft-submenu-header-action:not(.shaka-hidden) ~ *, :has(~ .ft-submenu-header-action:not(.shaka-hidden)))) {
   animation: ft-menu-zoom-in 300ms cubic-bezier(0.2, 0, 0, 1);
 }
 
-:deep(.phonePlayerOptions > .shaka-overflow-menu:is([data-ft-menu-transition='out'], :has([data-ft-menu-transition='out'])) > .shaka-sub-menu:not(.shaka-hidden):has(> .ft-submenu-header-action:not(.shaka-hidden)) > :not(.ft-submenu-header-action, .os-scrollbar)) {
+:deep(.phonePlayerOptions > .shaka-overflow-menu[data-ft-menu-transition='out'] > .shaka-sub-menu:not(.shaka-hidden) > :not(.ft-submenu-header-action, .os-scrollbar):is(.ft-submenu-header-action:not(.shaka-hidden) ~ *, :has(~ .ft-submenu-header-action:not(.shaka-hidden)))) {
   animation: ft-menu-zoom-out 300ms cubic-bezier(0.2, 0, 0, 1);
 }
 
