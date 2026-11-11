@@ -209,11 +209,10 @@ export const tabMediaCoordinator = {
    */
   endPlayback(tabId) {
     const entry = mediaByTabId.get(tabId)
+    // Repeated reports of the same end keep the original deadline.
     if (process.env.IS_CAPACITOR && !process.env.IS_IOS && entry && ownerTabId === tabId &&
-      (entry.playbackState !== 'none' || endedHandoff?.tabId === tabId)) {
-      const state = endedHandoff?.tabId === tabId
-        ? endedHandoff.state
-        : { playbackState: 'paused', metadata: entry.metadata, positionState: entry.positionState, actionHandlers: {} }
+      entry.playbackState !== 'none' && endedHandoff?.tabId !== tabId) {
+      const state = { playbackState: 'paused', metadata: entry.metadata, positionState: entry.positionState, actionHandlers: {} }
       releaseEndedHandoff()
       endedHandoff = {
         tabId,

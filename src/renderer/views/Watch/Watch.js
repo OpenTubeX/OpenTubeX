@@ -7087,6 +7087,8 @@ export default defineComponent({
     },
 
     toggleAutoplay: function() {
+      // Nothing follows once the playlist stops waiting for its next page.
+      if (this.waitingForPlaylistContinuation) tabMediaCoordinator.releaseEndedPlayback(this.tabId ?? 'web')
       this.waitingForPlaylistContinuation = false
       if (this.isShort) {
         return

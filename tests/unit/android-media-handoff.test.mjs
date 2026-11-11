@@ -48,3 +48,18 @@ test('Android keeps the playback service from a video end until the next video p
   await setImmediate()
   assert.equal(calls.at(-1), 'clear')
 })
+
+test('repeated reports of the same end keep the handoff deadline', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  t.after(() => tabMediaCoordinator.unregister('deadline-tab'))
+  tabMediaCoordinator.setPresented('deadline-tab')
+  tabMediaCoordinator.setMetadata('deadline-tab', { title: 'Ended' })
+  tabMediaCoordinator.setPlaybackState('deadline-tab', 'playing')
+  tabMediaCoordinator.endPlayback('deadline-tab')
+  t.mock.timers.tick(60_000)
+  tabMediaCoordinator.endPlayback('deadline-tab')
+  t.mock.timers.tick(60_000)
+  assert.equal(tabMediaCoordinator.holdsEndedPlayback('deadline-tab'), false)
+  await setImmediate()
+  assert.equal(calls.at(-1), 'clear')
+})
