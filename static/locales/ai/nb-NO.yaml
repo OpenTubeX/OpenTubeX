@@ -523,6 +523,8 @@ Settings:
     Auto Load Comments:
       Label: Last inn kommentarer automatisk
       Tooltip: Last inn kommentarer når siden åpnes, og last inn flere mens du blar.
+    Haptic Feedback: Haptisk tilbakemelding
+    Ignore System Haptics Setting: Ignorer systemets innstilling for haptisk tilbakemelding
   Context Menu Search Settings:
     Context Menu Search Settings: Søk fra hurtigmenyen
     Description: Velg hvilke søkemotorer som vises når du høyreklikker på merket tekst. Søk åpnes i standardnettleseren din.
@@ -2195,6 +2197,7 @@ Tooltips:
     Yattee Server: Instansen av yattee-server som OpenTubeX laster inn videoer, kanaler, spillelister og søkeresultater fra. Brukernavnet og passordet lagres bare på denne enheten.
     Proxy Videos Through Yattee Server: Videresender video- og lydstrømmer gjennom tjeneren. La dette være på med mindre tjeneren deler internettforbindelsen din, fordi YouTube bare leverer strømmer til adressen som ba om dem. Miniatyrbilder lastes alltid direkte fra YouTube.
     Notifications: Velg hvordan OpenTubeX varsler deg om direktesendinger, nye opplastinger og automatiske nedlastinger. Med System og i appen vises varsler i OpenTubeX mens du bruker det, og ellers som systemvarsler, og bjellen tar vare på dem. Av skjuler også varselvalgene.
+    Ignore System Haptics Setting: Vibrer ved lange trykk og bevegelser selv når berøringstilbakemelding er slått av i Android-innstillingene.
   Proxy Settings:
     IP Block Recovery Script Path: Filbane til skriptet som skal kjøres når en IP-blokkering oppdages. OpenTubeX venter til det er ferdig og laster deretter inn videoen på nytt. Hvis reserveløsning er slått på, kjøres skriptet bare når også reserveløsningen mislykkes.
   Player Settings:

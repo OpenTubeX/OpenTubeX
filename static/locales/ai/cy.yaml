@@ -522,6 +522,8 @@ Settings:
     Auto Load Comments:
       Label: Llwytho Sylwadau yn Awtomatig
       Tooltip: Llwytho sylwadau pan fydd y dudalen yn agor a llwytho rhagor o sylwadau wrth i chi sgrolio.
+    Haptic Feedback: Adborth haptig
+    Ignore System Haptics Setting: Anwybyddu gosodiad haptig y system
   Context Menu Search Settings:
     Context Menu Search Settings: Chwilio o'r ddewislen cyd-destun
     Description: Dewiswch pa beiriannau chwilio sy'n ymddangos pan fyddwch yn de-glicio testun a ddewiswyd. Mae chwiliadau'n agor yn eich porwr rhagosodedig.
@@ -2223,6 +2225,7 @@ Tooltips:
     Yattee Server: Yr enghraifft yattee-server y mae OpenTubeX yn llwytho fideos, sianeli, rhestrau chwarae a chanlyniadau chwilio ohoni. Dim ond ar y ddyfais hon y caiff yr enw defnyddiwr a'r cyfrinair eu storio.
     Proxy Videos Through Yattee Server: Yn trosglwyddo ffrydiau fideo a sain drwy'r gweinydd. Gadewch hwn ymlaen oni bai bod y gweinydd yn rhannu eich cysylltiad rhyngrwyd, oherwydd dim ond i'r cyfeiriad a ofynnodd amdanynt y mae YouTube yn gweini ffrydiau. Mae lluniau bach bob amser yn llwytho'n uniongyrchol o YouTube.
     Notifications: Dewiswch sut mae OpenTubeX yn eich hysbysu am ffrydiau byw, lanlwythiadau newydd a lawrlwythiadau awtomatig. Gyda System ac yn yr ap, mae hysbysiadau’n ymddangos yn OpenTubeX tra byddwch yn ei ddefnyddio ac fel hysbysiadau system fel arall, ac mae’r gloch yn eu cadw. Mae I ffwrdd hefyd yn cuddio’r dewisiadau hysbysu.
+    Ignore System Haptics Setting: Dirgrynu wrth bwyso’n hir ac ar ystumiau hyd yn oed pan fydd adborth cyffwrdd wedi’i ddiffodd yng ngosodiadau Android.
   Proxy Settings:
     IP Block Recovery Script Path: Llwybr y ffeil sgript i'w rhedeg pan ganfyddir rhwystr IP. Mae OpenTubeX yn aros iddi orffen, yna'n ail-lwytho'r fideo. Os yw'r darparwr wrth gefn wedi'i alluogi, dim ond pan fydd y darparwr hwnnw hefyd yn methu y bydd y sgript yn rhedeg.
   Player Settings:

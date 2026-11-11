@@ -523,6 +523,8 @@ Settings:
     Auto Load Comments:
       Label: Hlaða athugasemdum sjálfvirkt
       Tooltip: Hlaða athugasemdum þegar síðan opnast og hlaða fleirum þegar þú flettir.
+    Haptic Feedback: Snertisvörun
+    Ignore System Haptics Setting: Hunsa kerfisstillingu snertisvörunar
   Context Menu Search Settings:
     Context Menu Search Settings: Leit í samhengisvalmynd
     Description: Veldu hvaða leitarvélar birtast þegar þú hægrismellir á valinn texta. Leitin opnast í sjálfgefna vafranum þínum.
@@ -2209,6 +2211,7 @@ Tooltips:
     Yattee Server: Tilvik yattee-server sem OpenTubeX sækir myndskeið, rásir, spilunarlista og leitarniðurstöður frá. Notandanafnið og lykilorðið eru aðeins geymd á þessu tæki.
     Proxy Videos Through Yattee Server: Beinir mynd- og hljóðstreymum í gegnum netþjóninn. Hafðu kveikt á þessu nema netþjónninn deili nettengingunni þinni, því YouTube afhendir streymi aðeins því vistfangi sem bað um þau. Smámyndir hlaðast alltaf beint frá YouTube.
     Notifications: Veldu hvernig OpenTubeX lætur þig vita af beinum útsendingum, nýjum myndskeiðum og sjálfvirkum niðurhölum. Með Kerfi og í forritinu birtast tilkynningar í OpenTubeX á meðan þú notar það og annars sem kerfistilkynningar, og bjallan geymir þær. Slökkt felur einnig tilkynningavalkostina.
+    Ignore System Haptics Setting: Titra við langt ýtt og bendingar jafnvel þegar slökkt er á snertisvörun í stillingum Android.
   Proxy Settings:
     IP Block Recovery Script Path: Slóð að skriftuskrá sem keyra skal þegar vart verður við að IP-tölu hafi verið lokað. OpenTubeX bíður eftir að keyrslu ljúki og endurhleður síðan myndbandinu. Ef varaleið er virk er skriftan aðeins keyrð þegar varaleiðin bregst einnig.
   Player Settings:

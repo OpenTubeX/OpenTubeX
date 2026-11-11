@@ -523,6 +523,8 @@ Settings:
     Auto Load Comments:
       Label: コメントを自動で読み込む
       Tooltip: ページを開いたときにコメントを読み込み、スクロールに合わせてさらに読み込みます。
+    Haptic Feedback: 触覚フィードバック
+    Ignore System Haptics Setting: システムの触覚フィードバック設定を無視
   Context Menu Search Settings:
     Context Menu Search Settings: コンテキストメニュー検索
     Description: 選択したテキストを右クリックしたときに表示する検索エンジンを選択します。検索結果は既定のブラウザーで開きます。
@@ -2190,6 +2192,7 @@ Tooltips:
     Yattee Server: OpenTubeX が動画、チャンネル、再生リスト、検索結果を読み込む yattee-server インスタンスです。ユーザー名とパスワードはこのデバイスにのみ保存されます。
     Proxy Videos Through Yattee Server: 動画と音声のストリームをサーバー経由で中継します。YouTube はリクエスト元のアドレスにのみストリームを提供するため、サーバーとインターネット接続を共有している場合を除き、オンのままにしてください。サムネイルは常に YouTube から直接読み込まれます。
     Notifications: ライブ配信、新しいアップロード、自動ダウンロードを OpenTubeX がどのように通知するかを選択します。「システムとアプリ内」では、OpenTubeX を使用中はアプリ内に、それ以外はシステム通知として表示され、ベルに保存されます。「オフ」では通知の設定項目も非表示になります。
+    Ignore System Haptics Setting: Android の設定でタッチ操作時のフィードバックがオフでも、長押しやジェスチャーで振動します。
   Proxy Settings:
     IP Block Recovery Script Path: IPブロックを検出したときに実行するスクリプトファイルのパスです。OpenTubeXは処理の完了を待ってから動画を再読み込みします。フォールバックが有効な場合は、フォールバックにも失敗したときだけ実行します。
   Player Settings:

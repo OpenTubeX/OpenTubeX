@@ -302,6 +302,8 @@ Settings:
     Auto Load Comments:
       Label: Automatyczne wczytywanie komentarzy
       Tooltip: Wczytuj komentarze po otwarciu strony i kolejne podczas przewijania.
+    Haptic Feedback: Reakcja haptyczna
+    Ignore System Haptics Setting: Ignoruj systemowe ustawienie haptyki
   Theme Settings:
     Theme and Colors: "Motyw i kolory"
     Font Size: Rozmiar czcionki
@@ -1441,6 +1443,7 @@ Tooltips:
     Yattee Server: Instancja yattee-server, z której OpenTubeX wczytuje filmy, kanały, playlisty i wyniki wyszukiwania. Nazwa użytkownika i hasło są przechowywane wyłącznie na tym urządzeniu.
     Proxy Videos Through Yattee Server: Przesyła strumienie wideo i audio przez serwer. Pozostaw tę opcję włączoną, chyba że serwer korzysta z tego samego połączenia internetowego co Ty, ponieważ YouTube udostępnia strumienie tylko adresowi, który o nie poprosił. Miniatury są zawsze wczytywane bezpośrednio z YouTube.
     Notifications: Wybierz, jak OpenTubeX powiadamia o transmisjach na żywo, nowych filmach i automatycznych pobraniach. Przy opcji Systemowe i w aplikacji powiadomienia pojawiają się w OpenTubeX podczas korzystania z niego, a w przeciwnym razie jako powiadomienia systemowe, a dzwonek je przechowuje. Wyłączone ukrywa też opcje powiadomień.
+    Ignore System Haptics Setting: Wibruj przy długim naciśnięciu i gestach, nawet gdy reakcja na dotyk jest wyłączona w ustawieniach Androida.
   Player Settings:
     Rewind on Resume: "Cofa o tyle sekund po wznowieniu wstrzymanego filmu, aby można było ponownie zobaczyć ostatnie chwile. Ustaw 0, aby wyłączyć."
     Minimum Pause Before Rewinding: "Przewija wstecz tylko wtedy, gdy film był wstrzymany co najmniej tak długo. Ustaw 0, aby przewijać po każdej pauzie."

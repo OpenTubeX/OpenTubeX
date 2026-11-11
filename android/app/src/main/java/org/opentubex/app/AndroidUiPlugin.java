@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
+import android.media.AudioAttributes;
 import android.content.res.Configuration;
 import android.hardware.input.InputManager;
 import android.graphics.Color;
@@ -14,7 +15,11 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.os.Build;
+import android.os.VibrationAttributes;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.util.Rational;
+import android.view.HapticFeedbackConstants;
 import android.view.InputDevice;
 import android.view.OrientationEventListener;
 import android.view.Surface;
@@ -354,6 +359,48 @@ public class AndroidUiPlugin extends Plugin {
             } catch (RuntimeException error) {
                 call.reject("Unable to restart app", error);
             }
+        });
+    }
+
+    @PluginMethod
+    public void performHapticFeedback(PluginCall call) {
+        if (Boolean.TRUE.equals(call.getBoolean("ignoreSystemSetting", false))) {
+            vibrateIgnoringTouchFeedbackSetting();
+            call.resolve();
+            return;
+        }
+        getActivity().runOnUiThread(() -> {
+            getBridge().getWebView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+            call.resolve();
+        });
+    }
+
+    // Android applies its touch feedback setting to short vibrations without a usage,
+    // so mark this one as media to follow the media vibration setting instead.
+    private void vibrateIgnoringTouchFeedbackSetting() {
+        Vibrator vibrator = getContext().getSystemService(Vibrator.class);
+        VibrationEffect effect = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+            ? VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
+            : VibrationEffect.createOneShot(20, VibrationEffect.DEFAULT_AMPLITUDE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            vibrator.vibrate(effect, VibrationAttributes.createForUsage(VibrationAttributes.USAGE_MEDIA));
+        } else {
+            vibrateWithAudioAttributes(vibrator, effect);
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private static void vibrateWithAudioAttributes(Vibrator vibrator, VibrationEffect effect) {
+        vibrator.vibrate(effect, new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build());
+    }
+
+    // The WebView also vibrates on its own when a long press opens a menu.
+    @PluginMethod
+    public void setHapticFeedbackEnabled(PluginCall call) {
+        boolean enabled = Boolean.TRUE.equals(call.getBoolean("enabled", true));
+        getActivity().runOnUiThread(() -> {
+            getBridge().getWebView().setHapticFeedbackEnabled(enabled);
+            call.resolve();
         });
     }
 

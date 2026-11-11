@@ -707,6 +707,8 @@ Settings:
     Tray required for background refresh: "The tray icon is required while background subscription refresh is enabled."
     Show Video Menu Button: Show video menu button
     Swipe to refresh: Swipe to refresh
+    Haptic Feedback: Haptic feedback
+    Ignore System Haptics Setting: Ignore system haptics setting
     Blur Thumbnails: Blur thumbnails
     General Settings: General
     Navigation:
@@ -3243,6 +3245,7 @@ Tooltips:
     Enable Tabs: "Keeps the current page open. Other tabs are kept until the app restarts; enable tabs again to restore them."
     Data Saver Thumbnails: "Use lower-resolution thumbnails to reduce data usage."
     Title Lines: Shortens video and playlist titles in lists and grids to the chosen number of lines with an ellipsis, for more uniform cards. Hover over a title to see it in full.
+    Ignore System Haptics Setting: Vibrate on long presses and gestures even when touch feedback is turned off in Android's settings.
     Use AI Translation Completions: Fill gaps in human translations with AI-generated text. Human translations always take priority.
     Update Relative Timestamps: Updates relative timestamps throughout the app while a page remains open. When disabled, they update only after reloading or revisiting the page.
     Automatically switch stream extraction methods: Try yt-dlp if built-in playback fails, or built-in playback if yt-dlp fails.

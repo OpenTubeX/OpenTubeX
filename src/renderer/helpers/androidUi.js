@@ -305,6 +305,14 @@ export async function observeIosReduceTransparency(callback) {
   if (!changed) callback(enabled)
 }
 
+export function performAndroidHapticFeedback(ignoreSystemSetting) {
+  return AndroidUi?.performHapticFeedback({ ignoreSystemSetting }) ?? Promise.resolve()
+}
+
+export function setAndroidHapticFeedbackEnabled(enabled) {
+  return AndroidUi?.setHapticFeedbackEnabled({ enabled }) ?? Promise.resolve()
+}
+
 export function getAndroidDeviceArchitecture() {
   return AndroidUi?.getDeviceArchitecture() ?? Promise.resolve({ architecture: '' })
 }

@@ -643,6 +643,8 @@ Settings:
     Auto Load Comments:
       Label: Automatiškai įkelti komentarus
       Tooltip: Įkelti komentarus atidarius puslapį ir slenkant įkelti daugiau.
+    Haptic Feedback: Haptinis atsakas
+    Ignore System Haptics Setting: Nepaisyti sistemos haptikos nustatymo
   Context Menu Search Settings:
     Context Menu Search Settings: Paieška kontekstiniame meniu
     Description: Pasirinkite paieškos sistemas, rodomas spustelėjus pažymėtą tekstą dešiniuoju pelės mygtuku. Paieškos rezultatai atveriami numatytojoje naršyklėje.
@@ -2611,6 +2613,7 @@ Tooltips:
     Yattee Server: Tai yattee-server egzempliorius, iš kurio OpenTubeX įkelia vaizdo įrašus, kanalus, grojaraščius ir paieškos rezultatus. Naudotojo vardas ir slaptažodis saugomi tik šiame įrenginyje.
     Proxy Videos Through Yattee Server: Perduoda vaizdo ir garso srautus per serverį. Palikite įjungtą, nebent serveris naudoja tą patį interneto ryšį kaip jūs, nes YouTube srautus teikia tik tam adresui, iš kurio jų buvo užklausta. Miniatiūros visada įkeliamos tiesiai iš YouTube.
     Notifications: Pasirinkite, kaip OpenTubeX praneš apie tiesiogines transliacijas, naujus įkėlimus ir automatinius atsisiuntimus. Pasirinkus Sistemos ir programoje, pranešimai rodomi OpenTubeX, kol juo naudojatės, kitu atveju – kaip sistemos pranešimai, o varpelis juos išsaugo. Išjungta taip pat paslepia pranešimų parinktis.
+    Ignore System Haptics Setting: Vibruoti ilgai paspaudus ir atliekant gestus, net kai lietimo atsakas išjungtas Android nustatymuose.
   Proxy Settings:
     IP Block Recovery Script Path: Scenarijaus failo, paleidžiamo aptikus IP blokavimą, kelias. OpenTubeX laukia, kol jis bus baigtas, tada iš naujo įkelia vaizdo įrašą. Jei įjungtas atsarginis būdas, scenarijus paleidžiamas tik tada, kai nepavyksta ir atsarginis būdas.
   Player Settings:

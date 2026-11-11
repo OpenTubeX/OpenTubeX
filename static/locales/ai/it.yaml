@@ -523,6 +523,8 @@ Settings:
     Auto Load Comments:
       Label: Carica automaticamente i commenti
       Tooltip: Carica i commenti all’apertura della pagina e caricane altri mentre scorri.
+    Haptic Feedback: Feedback aptico
+    Ignore System Haptics Setting: Ignora l’impostazione aptica di sistema
   Context Menu Search Settings:
     Context Menu Search Settings: Ricerca dal menu contestuale
     Description: Scegli quali motori di ricerca mostrare quando fai clic destro sul testo selezionato. Le ricerche si aprono nel browser predefinito.
@@ -2190,6 +2192,7 @@ Tooltips:
     Yattee Server: L’istanza di yattee-server da cui OpenTubeX carica video, canali, playlist e risultati di ricerca. Il nome utente e la password vengono salvati solo su questo dispositivo.
     Proxy Videos Through Yattee Server: Inoltra i flussi video e audio tramite il server. Lascia questa opzione attiva, a meno che il server non condivida la tua connessione a Internet, perché YouTube fornisce i flussi solo all’indirizzo che li ha richiesti. Le miniature vengono sempre caricate direttamente da YouTube.
     Notifications: Scegli come OpenTubeX ti avvisa di dirette, nuovi caricamenti e download automatici. Con Sistema e nell’app, le notifiche compaiono in OpenTubeX mentre lo usi e altrimenti come notifiche di sistema, e la campanella le conserva. Disattivate nasconde anche le opzioni di notifica.
+    Ignore System Haptics Setting: Vibra con le pressioni prolungate e i gesti anche quando il feedback al tocco è disattivato nelle impostazioni di Android.
   Proxy Settings:
     IP Block Recovery Script Path: Percorso del file di script da eseguire quando viene rilevato un blocco IP. OpenTubeX ne attende il completamento, quindi ricarica il video. Se è abilitato il metodo di riserva, lo script viene eseguito solo quando anche questo non riesce.
   Player Settings:

@@ -483,6 +483,8 @@ Settings:
     Tray required for background refresh: "Das Symbol im Infobereich ist erforderlich, solange die Hintergrundaktualisierung von Abonnements aktiviert ist."
     Show Video Menu Button: Videomenü-Schaltfläche anzeigen
     Swipe to refresh: Zum Aktualisieren wischen
+    Haptic Feedback: Haptisches Feedback
+    Ignore System Haptics Setting: Systemeinstellung für haptisches Feedback ignorieren
     Blur Thumbnails: Vorschaubilder weichzeichnen
     General Settings: Allgemein
     Navigation:
@@ -2924,6 +2926,7 @@ Tooltips:
     Enable Tabs: "Die aktuelle Seite bleibt geöffnet. Andere Tabs bleiben bis zum Neustart der App erhalten; aktiviere Tabs erneut, um sie wiederherzustellen."
     Data Saver Thumbnails: "Verwendet Vorschaubilder mit geringerer Auflösung, um den Datenverbrauch zu reduzieren."
     Title Lines: Kürzt Video- und Playlist-Titel in Listen und Rastern mit Auslassungspunkten auf die gewählte Anzahl an Zeilen, damit Karten einheitlicher aussehen. Fahre mit dem Mauszeiger über einen Titel, um ihn vollständig zu sehen.
+    Ignore System Haptics Setting: Bei langem Drücken und Gesten vibrieren, auch wenn das haptische Feedback in den Android-Einstellungen ausgeschaltet ist.
     Use AI Translation Completions: Füllt Lücken in den von Menschen erstellten Übersetzungen mit KI-generiertem Text. Menschliche Übersetzungen haben immer Vorrang.
     Playback Engine: Legt fest, welche Engine die Videostreams ermittelt. yt-dlp muss verfügbar sein, wenn es ausgewählt ist.
     Thumbnail Preference: Alle Vorschaubilder in OpenTubeX werden verpixelt, versteckt oder durch ein Einzelbild aus dem Video ersetzt, anstatt das Standard-Vorschaubild anzuzeigen.

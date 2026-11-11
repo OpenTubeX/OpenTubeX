@@ -511,6 +511,8 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     generalAutoLoadMorePaginatedItemsEnabled: true,
     autoLoadComments: true,
     enablePullToRefresh: true,
+    hapticFeedback: true,
+    hapticFeedbackIgnoresSystemSetting: false,
     useTrayIcon: true,
     trayIconPreset: 'default',
     hideToTrayOnClose: false,
