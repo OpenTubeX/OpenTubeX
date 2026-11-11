@@ -23,6 +23,8 @@ test('invalid appearance choices fall back to their defaults', () => {
   assert.equal(resolveBaseTheme('missing', 'system'), 'system')
   assert.equal(resolveBaseTheme('system', 'light', [], false), 'light')
   assert.equal(resolveBaseTheme('missing', 'dark', [], false), 'dark')
+  assert.equal(resolveSystemTheme('solarizedDark', 'light'), 'openTubeXLight')
+  assert.equal(resolveSystemTheme('missing', 'dark'), 'openTubeXDark')
 })
 
 test('built-in and available custom appearance choices are retained', () => {

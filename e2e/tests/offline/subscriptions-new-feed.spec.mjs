@@ -1,4 +1,4 @@
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { defaultThemeClass, test, expect, goTo } from '../../helpers/app.mjs'
 import { expectTabHighlightAligned, expectTabHighlightStyle } from '../../helpers/tabs.mjs'
 import { captureAppFramebuffer } from '../../helpers/screenshots.mjs'
 import { encryptSyncDocument, decryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
@@ -413,7 +413,7 @@ test.describe('new subscriptions feed', () => {
       if (scale === 95) {
         for (const colorScheme of ['dark', 'light']) {
           await page.emulateMedia({ colorScheme })
-          await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+          await expect(page.locator('body')).toHaveClass(defaultThemeClass(colorScheme))
           await captureAppFramebuffer(app, testInfo, `desktop-new-feed-tabs-${colorScheme}`)
         }
       }

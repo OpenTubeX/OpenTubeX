@@ -5,7 +5,7 @@
   place-items: center;
   padding-block: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-bottom));
   padding-inline: 24px;
-  background: var(--startup-background, #0f0f0f);
+  background: var(--startup-background, #111);
   color: var(--startup-foreground, #eee);
   font-family: system-ui, sans-serif;
   line-height: 1.5;

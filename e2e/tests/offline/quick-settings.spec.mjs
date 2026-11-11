@@ -363,7 +363,7 @@ test.describe('quick system themes', () => {
     await expect(reopened.locator('[data-setting-id="systemDarkTheme"]')).toHaveCount(0)
     await reopened.getByRole('combobox', { name: 'Base Theme' }).click()
     await page.getByRole('option', { name: /System default/i }).click()
-    for (const [id, label] of [['systemLightTheme', 'Light'], ['systemDarkTheme', 'Dark']]) {
+    for (const [id, label] of [['systemLightTheme', 'Tally Light'], ['systemDarkTheme', 'Tally Dark']]) {
       const control = reopened.locator(`[data-setting-id="${id}"]`)
       await control.getByRole('button', { name: 'Reset this setting to its default' }).click()
       await expect(control.getByRole('combobox')).toHaveText(label)
@@ -902,7 +902,11 @@ test.describe('customizable quick settings', () => {
   })
 
   test('rearranges categories together and controls within their category', async ({ page, attachScreenshot }) => {
-    await page.evaluate(quickSettings => window.$store.dispatch('updateQuickSettings', quickSettings), FORMER_DEFAULT_QUICK_SETTINGS)
+    await page.evaluate(async quickSettings => {
+      // The default Tally themes have no Main Color choice, so the editor would hide it.
+      await window.$store.dispatch('updateBaseTheme', 'dark')
+      await window.$store.dispatch('updateQuickSettings', quickSettings)
+    }, FORMER_DEFAULT_QUICK_SETTINGS)
     await openInterfaceCustomizer(page, 'quick settings')
 
     const selectedSettings = page.locator('.selectedSettings')

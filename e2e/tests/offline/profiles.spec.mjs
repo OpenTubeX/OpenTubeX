@@ -692,7 +692,8 @@ test.describe('profile manager', () => {
   })
 
   test.describe('theme color profiles', () => {
-    test.use({ seed: { settings: { mainColor: 'Green' } } })
+    // The default Tally themes have no main color, so use one that does.
+    test.use({ seed: { settings: { baseTheme: 'dark', mainColor: 'Green' } } })
 
     test('keeps a keyboard-selected swatch when the custom picker was open', async ({ app, page }) => {
       await openProfileList(page)

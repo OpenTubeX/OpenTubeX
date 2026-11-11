@@ -1594,7 +1594,14 @@ test.describe('list video actions', () => {
       await expect(video.locator('.quickBookmarkVideoIcon.bookmarked')).toBeVisible()
       await expect(video.locator('.quickBookmarkVideoIcon [data-icon="clock"]')).toBeVisible()
       await expect(video.locator('.quickBookmarkVideoIcon .overlayIcon')).toHaveCount(0)
-      await expect(video.locator('.quickBookmarkVideoIcon .iconButton')).toHaveCSS('color', 'rgb(110, 170, 115)')
+      await expect.poll(() => video.locator('.quickBookmarkVideoIcon .iconButton').evaluate(button => {
+        const favorite = document.createElement('span')
+        favorite.style.color = 'var(--favorite-icon-color)'
+        button.append(favorite)
+        const matches = getComputedStyle(button).color === getComputedStyle(favorite).color
+        favorite.remove()
+        return matches
+      })).toBe(true)
       await expect(page.locator('.toast .message', { hasText: 'Video has been saved to Favorites' })).toBeVisible()
 
       await expect.poll(async () => {

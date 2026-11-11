@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { DEFAULT_CUSTOM_THEME } from '../../../src/customTheme.js'
-import { test, expect, goToSettingsSection, latestSettings, setWindowSize, readDatastore } from '../../helpers/app.mjs'
+import { defaultThemeClass, test, expect, goToSettingsSection, latestSettings, setWindowSize, readDatastore } from '../../helpers/app.mjs'
 
 async function setSetting(page, name, value) {
   await page.evaluate(async ({ name, value }) => {
@@ -35,7 +35,8 @@ test('tray icon choices persist and follow the active app palette', async ({ app
   await expect.poll(() => cachedIcon(app)).not.toBeNull()
   const fixedIcon = await cachedIcon(app)
   await expect.poll(async () => latestSettings(readDatastore(app.userDataDir, 'settings')).trayIconPreset).toBe('dracula')
-  await setSetting(page, 'BaseTheme', 'light')
+  // The default light theme, which the System Default mode shows again below.
+  await setSetting(page, 'BaseTheme', 'openTubeXLight')
   await expect.poll(() => cachedIcon(app)).toBe(fixedIcon)
   await choices.locator('input[value="theme"]').check()
   await expect.poll(async () => [null, fixedIcon].includes(await cachedIcon(app))).toBe(false)
@@ -52,7 +53,7 @@ test('tray icon choices persist and follow the active app palette', async ({ app
   await setSetting(page, 'BaseTheme', 'system')
   for (const colorScheme of ['dark', 'light']) {
     await page.emulateMedia({ colorScheme })
-    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+    await expect(page.locator('body')).toHaveClass(defaultThemeClass(colorScheme))
     await expect.poll(() => choices.locator('img').evaluateAll(images => images.every(image => image.complete && image.naturalWidth > 0))).toBe(true)
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
     await page.locator('.settingsWindow').screenshot({ path: testInfo.outputPath(`tray-icon-selector-${colorScheme}.png`), animations: 'disabled' })

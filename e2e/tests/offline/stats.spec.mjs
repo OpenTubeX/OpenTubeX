@@ -1,4 +1,4 @@
-import { test, expect, goTo, goToSettingsSection, waitForAppReady, expectScrollAtRenderedEnd, setWindowSize } from '../../helpers/app.mjs'
+import { defaultThemeClass, test, expect, goTo, goToSettingsSection, waitForAppReady, expectScrollAtRenderedEnd, setWindowSize } from '../../helpers/app.mjs'
 import { decryptSyncDocument, encryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
 
 /**
@@ -197,7 +197,7 @@ test.describe('synced watch stats', () => {
       await expectIndicatorAligned()
     }
     await page.emulateMedia({ colorScheme: 'dark' })
-    await expect(page.locator('body')).toHaveClass(/\bdark\b/)
+    await expect(page.locator('body')).toHaveClass(defaultThemeClass('dark'))
     await expect.poll(() => picker.evaluate(element => element.getBoundingClientRect().width)).toBeGreaterThan(460)
     await expectNoOverflow()
     await expectSingleLineLabels()

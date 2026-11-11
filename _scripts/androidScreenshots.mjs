@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url'
 
 import { chromium, expect } from '@playwright/test'
 
-import { goToSettingsSection } from '../e2e/helpers/app.mjs'
+import { defaultThemeClass, goToSettingsSection } from '../e2e/helpers/app.mjs'
 import { expectPausedFrame, openScreenshotSubscriptions, openScreenshotWatch, prepareAppScreenshot } from '../e2e/helpers/screenshots.mjs'
 
 // Usage: node _scripts/androidScreenshots.mjs SERIAL
@@ -126,7 +126,7 @@ try {
   async function setTheme(theme) {
     // Exercise the default System theme without changing an app setting.
     adb('shell', 'cmd', 'uimode', 'night', theme === 'dark' ? 'yes' : 'no')
-    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+    await expect(page.locator('body')).toHaveClass(defaultThemeClass(theme))
   }
 
   const captures = []

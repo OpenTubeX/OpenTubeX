@@ -4,7 +4,7 @@ import {
   mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote, selectChangedHistory, mergeChangedHistoryBaseline,
 } from './sync-history-merge.js'
 import { runBackgroundJob } from './background-jobs.js'
-import { MAIN_PROFILE_ID } from '../../constants'
+import { DEFAULT_SYSTEM_THEMES, MAIN_PROFILE_ID } from '../../constants'
 import i18n from '../i18n/index'
 import packageDetails from '../../../package.json'
 import { applySyncServerUserAgent } from '../../syncServerUserAgent'
@@ -1488,8 +1488,8 @@ async function repairCustomThemeReferences(store, previousThemes, themes) {
   const previousById = new Map(previousThemes.map(theme => [theme.id, theme]))
   const fallbacks = {
     baseTheme: 'system',
-    systemLightTheme: 'light',
-    systemDarkTheme: 'dark',
+    systemLightTheme: DEFAULT_SYSTEM_THEMES.light,
+    systemDarkTheme: DEFAULT_SYSTEM_THEMES.dark,
   }
 
   for (const [key, defaultTheme] of Object.entries(fallbacks)) {

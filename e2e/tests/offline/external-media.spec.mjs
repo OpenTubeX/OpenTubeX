@@ -2,7 +2,7 @@ import { chmod, readFile, rm, writeFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import path from 'node:path'
 
-import { choosePickerPaths, expect, goTo, repoRoot, sel, setWindowSize, test } from '../../helpers/app.mjs'
+import { defaultThemeClass, choosePickerPaths, expect, goTo, repoRoot, sel, setWindowSize, test } from '../../helpers/app.mjs'
 import { activeTab, openMockedVideo, waitForPlayback, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { DEMO_MEDIA_PATH, DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
@@ -1439,7 +1439,7 @@ test('Twitch live chat scrolls like the YouTube chat panel', async ({ app, page,
   await expect(scroller.locator('.comment')).toHaveCount(101)
   expect(Math.abs((await scroller.evaluate(element => element.scrollTop)) - scrolledTop)).toBeLessThan(2)
   await page.emulateMedia({ colorScheme: 'dark' })
-  await expect(page.locator('body')).toHaveClass(/\bdark\b/)
+  await expect(page.locator('body')).toHaveClass(defaultThemeClass('dark'))
   await attachScreenshot('Twitch live chat scrolled up')
   await chat.getByRole('button', { name: 'Scroll to Bottom' }).click()
   await expect.poll(() => scroller.evaluate(element => element.scrollHeight - element.clientHeight - element.scrollTop)).toBeLessThan(2)
@@ -2084,7 +2084,7 @@ test('shows a recoverable extraction error in the player area', async ({ app, pa
   })
 
   await page.emulateMedia({ colorScheme: 'dark' })
-  await expect(page.locator('body')).toHaveClass(/\bdark\b/)
+  await expect(page.locator('body')).toHaveClass(defaultThemeClass('dark'))
   await page.locator(sel.searchInput).fill('https://videos.example.test/unavailable')
   await page.locator(sel.searchInput).press('Enter')
   const state = page.locator(`${activeTab} .externalMediaState`)
@@ -2106,7 +2106,7 @@ test('shows a recoverable extraction error in the player area', async ({ app, pa
   await expect(state.locator('.externalMediaDiagnostic')).toHaveCSS('text-align', 'center')
   for (const theme of ['dark', 'light']) {
     await page.emulateMedia({ colorScheme: theme })
-    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+    await expect(page.locator('body')).toHaveClass(defaultThemeClass(theme))
     await state.screenshot({ path: testInfo.outputPath(`external-media-error-${theme}.png`) })
   }
   await page.setViewportSize({ width: 375, height: 667 })

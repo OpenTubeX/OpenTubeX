@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises'
-import { test, expect } from '../../helpers/app.mjs'
+import { defaultThemeClass, test, expect } from '../../helpers/app.mjs'
 import { activeTab, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
@@ -38,7 +38,7 @@ for (const [publishedText, uploadedTime] of [['57\u00a0min ago', '57 minutes ago
     await expectImagesLoaded(recommendations.locator('img'))
     for (const colorScheme of ['dark', 'light']) {
       await page.emulateMedia({ colorScheme })
-      await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
+      await expect(page.locator('body')).toHaveClass(defaultThemeClass(colorScheme))
       await recommendations.screenshot({ path: testInfo.outputPath(`recommendation-metadata-${colorScheme}.png`) })
     }
   })

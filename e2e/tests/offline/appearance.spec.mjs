@@ -75,21 +75,22 @@ test.describe('default appearance', () => {
     await page.emulateMedia({ colorScheme: 'light' })
     await goToSettingsSection(page, 'theme')
 
-    await expect(themeGalleryButton(page)).toHaveAccessibleName('Theme and colors Light Dark Red Blue')
+    await expect(themeGalleryButton(page)).toHaveAccessibleName('Theme and colors Tally Light Tally Dark Red')
     const gallery = await openThemeGallery(page)
     const modes = gallery.getByRole('radiogroup', { name: 'Base Theme' })
     await expect(modes.getByRole('radio', { name: 'System default', exact: true })).toBeChecked()
+
+    const lightThemes = await showThemeList(gallery, 'Light theme')
+    await expect(lightThemes.getByRole('radio', { name: 'Tally Light', exact: true })).toBeChecked()
+    await expect(lightThemes.getByRole('radio', { name: 'Catppuccin Frappe', exact: true })).toHaveCount(0)
+    await lightThemes.getByRole('radio', { name: 'Catppuccin Latte', exact: true }).check()
+    await expect(page.locator('body')).toHaveClass(/catppuccinLatte/)
+    // The Tally themes have no color theme choices, unlike Catppuccin Latte.
     const mainColorTheme = gallery.getByRole('combobox', { name: /Main colou?r theme/i })
     const secondaryColorTheme = gallery.getByRole('combobox', { name: /Secondary colou?r theme/i })
     await expectHorizontalGap(mainColorTheme, secondaryColorTheme, 12)
     await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
     await expectHorizontalGap(mainColorTheme, secondaryColorTheme, 12)
-
-    const lightThemes = await showThemeList(gallery, 'Light theme')
-    await expect(lightThemes.getByRole('radio', { name: 'Light', exact: true })).toBeChecked()
-    await expect(lightThemes.getByRole('radio', { name: 'Catppuccin Frappe', exact: true })).toHaveCount(0)
-    await lightThemes.getByRole('radio', { name: 'Catppuccin Latte', exact: true }).check()
-    await expect(page.locator('body')).toHaveClass(/catppuccinLatte/)
 
     const darkThemes = await showThemeList(gallery, 'Dark theme')
     await expect(darkThemes.getByRole('radio', { name: 'Catppuccin Latte', exact: true })).toHaveCount(0)
@@ -107,14 +108,14 @@ test.describe('default appearance', () => {
     // Resetting the list resets the active theme, which stays reset when following the system again.
     await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
     await gallery.locator('.themeTabBar .changedSettingIndicator').click()
-    await expect(page.locator('body')).toHaveClass(/(^|\s)light(\s|$)/)
-    await expect(lightThemes.getByRole('radio', { name: 'Light', exact: true })).toBeChecked()
+    await expect(page.locator('body')).toHaveClass(/\bopenTubeXLight\b/)
+    await expect(lightThemes.getByRole('radio', { name: 'Tally Light', exact: true })).toBeChecked()
     await modes.getByRole('radio', { name: 'System default', exact: true }).check()
     await expect(page.locator('body')).toHaveClass(/catppuccinMocha/)
-    await expect(gallery.getByRole('tab', { name: /^Light theme/ })).toContainText(/Light$/)
+    await expect(gallery.getByRole('tab', { name: /^Light theme/ })).toContainText(/Tally Light$/)
     await page.locator('.settingsBackButton').click()
     await expect(themeGalleryButton(page))
-      .toHaveAccessibleName('Theme and colors Light Catppuccin Mocha Red Blue')
+      .toHaveAccessibleName('Theme and colors Tally Light Catppuccin Mocha Red Blue Red')
 
     ;({ page } = await app.relaunch())
     await page.emulateMedia({ colorScheme: 'dark' })
@@ -815,7 +816,7 @@ test.describe('invalid appearance values', () => {
         getters.getMainColor,
         getters.getSecColor
       ]
-    })).toEqual(['system', 'light', 'dark', 'Red', 'Blue'])
+    })).toEqual(['system', 'openTubeXLight', 'openTubeXDark', 'Red', 'Blue'])
   })
 })
 

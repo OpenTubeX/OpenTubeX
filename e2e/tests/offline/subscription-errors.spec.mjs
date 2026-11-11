@@ -1,4 +1,4 @@
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { defaultThemeClass, test, expect, goTo } from '../../helpers/app.mjs'
 
 for (const count of [2, 20]) {
   test.describe(`${count} unavailable channels`, () => {
@@ -56,7 +56,7 @@ for (const count of [2, 20]) {
       await expect(dialog).not.toContainText('lifecycle=')
       for (const colorScheme of ['dark', 'light']) {
         await page.emulateMedia({ colorScheme })
-        await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
+        await expect(page.locator('body')).toHaveClass(defaultThemeClass(colorScheme))
         await expect(page.locator('.prompt')).toHaveCSS('opacity', '1')
         await expect(dialog).toHaveCSS('opacity', '1')
         const dialogBounds = await dialog.boundingBox()

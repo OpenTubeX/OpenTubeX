@@ -1076,6 +1076,15 @@ export async function goToSettingsSection(page, section) {
   return content
 }
 
+/**
+ * Matches the body class of the theme that the default System Default mode
+ * shows for a color scheme: Tally Dark or Tally Light.
+ * @param {'dark' | 'light'} colorScheme
+ */
+export function defaultThemeClass(colorScheme) {
+  return new RegExp(`\\b${colorScheme === 'dark' ? 'openTubeXDark' : 'openTubeXLight'}\\b`)
+}
+
 /** The Appearance settings button that opens the theme gallery. */
 export function themeGalleryButton(page) {
   return page.locator('.settingsWindow:visible .themePickerButton')

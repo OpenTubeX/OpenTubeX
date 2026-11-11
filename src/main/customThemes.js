@@ -3,7 +3,7 @@ import path from 'path'
 import asyncFs from 'fs/promises'
 import { randomUUID } from 'crypto'
 
-import { IpcChannels } from '../constants'
+import { DEFAULT_SYSTEM_THEMES, IpcChannels } from '../constants'
 import {
   CUSTOM_THEMES_DIRECTORY,
   customThemeIdFromValue,
@@ -117,8 +117,8 @@ export function setupCustomThemes({ updateSettingFromMain, updateThemeSource }) 
       baseHandlers.settings._findOne('systemDarkTheme')
     ])
     const currentSettings = {
-      systemLightTheme: systemLightTheme?.value ?? 'light',
-      systemDarkTheme: systemDarkTheme?.value ?? 'dark',
+      systemLightTheme: systemLightTheme?.value ?? DEFAULT_SYSTEM_THEMES.light,
+      systemDarkTheme: systemDarkTheme?.value ?? DEFAULT_SYSTEM_THEMES.dark,
     }
     const resolvedSettings = resolveSystemThemeSettings(currentSettings, themes)
 

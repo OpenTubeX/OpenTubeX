@@ -1,4 +1,4 @@
-import { test, expect, setPlayerFullscreen, setWindowSize, openInterfaceCustomizer } from '../../helpers/app.mjs'
+import { defaultThemeClass, test, expect, setPlayerFullscreen, setWindowSize, openInterfaceCustomizer } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
@@ -11,7 +11,7 @@ for (const { uiScale, width, height, colorScheme } of [
     test('customizes, persists and uses the selected fullscreen actions', async ({ app, page }, testInfo) => {
       await setWindowSize(app, page, { width, height })
       await page.emulateMedia({ colorScheme })
-      await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
+      await expect(page.locator('body')).toHaveClass(defaultThemeClass(colorScheme))
       await openInterfaceCustomizer(page, 'fullscreen actions')
       const rows = page.locator('.selectedAction')
       await expect(rows).toHaveCount(9)
