@@ -79,7 +79,8 @@ Promise.all([router.isReady(), dynamicColorsReady, networkMeteredReady]).then(as
     } catch (error) {
       console.error('App storage is unavailable:', error)
       // Use the system locale without reading or writing failed app storage.
-      await store.dispatch('triggerCurrentLocaleSideEffects', 'system')
+      // A failed locale or region request must not keep the error hidden.
+      await store.dispatch('triggerCurrentLocaleSideEffects', 'system').catch(console.error)
       const { setIconPack } = await import('./icons/iconPackState')
       await setIconPack('material')
       const { default: StorageStartupError } = await import('./components/StorageStartupError/StorageStartupError.vue')
