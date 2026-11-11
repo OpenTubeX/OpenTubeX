@@ -2148,6 +2148,7 @@ Chapters:
   Loop Chapter: 'Ulangi bab: {chapter}'
   Looping Chapter: 'Mengulang bab: {chapter}'
   Chapter Loop Stopped: 'Berhenti mengulang bab'
+  Sync to Video Time: 'Sinkronkan dengan waktu video'
 Comments:
   Image unavailable: "Gambar tidak tersedia"
   Comment Count: '{count} Komentar'

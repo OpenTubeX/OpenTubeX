@@ -2123,6 +2123,7 @@ Chapters:
   Loop Chapter: 'Bölümü tekrarla: {chapter}'
   Looping Chapter: 'Bölüm tekrarlanıyor: {chapter}'
   Chapter Loop Stopped: 'Bölüm tekrarı durduruldu'
+  Sync to Video Time: 'Video zamanıyla eşitle'
 Comments:
   Image unavailable: "Görüntü kullanılamıyor"
   Comment Count: 1 Yorum | {count} Yorum

@@ -115,6 +115,22 @@
   backdrop-filter: var(--secondary-card-bg-blur, none);
 }
 
+.watchVideoChaptersPanel :deep(.chaptersSync) {
+  --chapters-sync-bg: var(--primary-color);
+
+  background-color: var(--chapters-sync-bg);
+  color: var(--text-with-main-color);
+}
+
+.watchVideoChaptersPanel :deep(.chaptersSync:hover),
+.watchVideoChaptersPanel :deep(.chaptersSync:focus-visible) {
+  background-color: color-mix(in srgb, currentcolor 8%, var(--chapters-sync-bg));
+}
+
+.watchVideoChaptersPanel :deep(.chaptersSync:active) {
+  background-color: color-mix(in srgb, currentcolor 12%, var(--chapters-sync-bg));
+}
+
 .chaptersPanelHeader {
   display: flex;
   flex: 0 0 46px;

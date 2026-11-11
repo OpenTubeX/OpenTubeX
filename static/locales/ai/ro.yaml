@@ -2174,6 +2174,7 @@ Chapters:
   Loop Chapter: 'Repetă capitolul: {chapter}'
   Looping Chapter: 'Se repetă capitolul: {chapter}'
   Chapter Loop Stopped: 'Repetarea capitolului a fost oprită'
+  Sync to Video Time: 'Sincronizează cu timpul videoclipului'
 Comments:
   Image unavailable: "Imagine indisponibilă"
   Comment Count: 1 comentariu | {count} comentarii | {count} de comentarii

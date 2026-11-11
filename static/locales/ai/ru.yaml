@@ -2105,6 +2105,7 @@ Chapters:
   Loop Chapter: 'Повторять главу: {chapter}'
   Looping Chapter: 'Глава повторяется: {chapter}'
   Chapter Loop Stopped: 'Повтор главы остановлен'
+  Sync to Video Time: 'Синхронизировать со временем видео'
 Comments:
   Image unavailable: "Изображение недоступно"
   Comment Count: 1 комментарий | {count} комментария | {count} комментариев

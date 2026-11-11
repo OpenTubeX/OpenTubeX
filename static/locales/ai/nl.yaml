@@ -2187,6 +2187,7 @@ Chapters:
   Loop Chapter: 'Hoofdstuk herhalen: {chapter}'
   Looping Chapter: 'Hoofdstuk wordt herhaald: {chapter}'
   Chapter Loop Stopped: 'Herhalen van hoofdstuk gestopt'
+  Sync to Video Time: 'Synchroniseren met videotijd'
 Comments:
   Image unavailable: "Afbeelding niet beschikbaar"
   Comment Count: 1 reactie | {count} reacties

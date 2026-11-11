@@ -2132,6 +2132,7 @@ Chapters:
   Loop Chapter: 'Lenn ar chabistr en-dro: {chapter}'
   Looping Chapter: 'O lenn ar chabistr en-dro: {chapter}'
   Chapter Loop Stopped: 'Paouezet eo da lenn ar chabistr en-dro'
+  Sync to Video Time: 'Sinkronelaat gant amzer ar video'
 Comments:
   Image unavailable: "Skeudenn n'eo ket hegerz"
   Comment Count: "1 evezhiadenn | {count} evezhiadenn | {count} evezhiadenn | {count} evezhiadenn | {count} evezhiadenn"

@@ -2188,6 +2188,7 @@ Chapters:
   Loop Chapter: 'அத்தியாயத்தை மீண்டும் இயக்கு: {chapter}'
   Looping Chapter: 'அத்தியாயம் மீண்டும் இயக்கப்படுகிறது: {chapter}'
   Chapter Loop Stopped: 'அத்தியாயத்தை மீண்டும் இயக்குவது நிறுத்தப்பட்டது'
+  Sync to Video Time: 'வீடியோ நேரத்துடன் ஒத்திசை'
 Comments:
   Image unavailable: "படம் கிடைக்கவில்லை"
   Comment Count: 1 கருத்து | {count} கருத்துகள்

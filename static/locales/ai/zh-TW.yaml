@@ -2130,6 +2130,7 @@ Chapters:
   Loop Chapter: '循環播放章節：{chapter}'
   Looping Chapter: '正在循環播放章節：{chapter}'
   Chapter Loop Stopped: '已停止循環播放章節'
+  Sync to Video Time: '同步至影片時間'
 Comments:
   Image unavailable: "圖片無法使用"
   Comment Count: '{count} 則留言'

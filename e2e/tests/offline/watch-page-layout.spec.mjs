@@ -500,10 +500,37 @@ test('chapters stay centered through layout changes until manually scrolled', { 
   await page.mouse.wheel(0, 2000)
   await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
   await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(2000)
+  // A list scrolled by hand stays put when playback reaches the next chapter
+  // and offers a button to follow playback again.
+  const sync = page.locator('.watchVideoChaptersPanel').getByRole('button', { name: 'Sync to video time' })
+  await expect(sync).toBeVisible()
+  await view.evaluate(async view => {
+    view.videoCurrentChapterIndex = 10
+    await view.$nextTick()
+  })
+  await expect(scroller.locator('.chapter.current .chapterTitle')).toHaveText('Chapter 11')
+  expect(await scroller.evaluate(async element => {
+    for (let frame = 0; frame < 10; frame++) {
+      await new Promise(resolve => requestAnimationFrame(resolve))
+    }
+    return Math.abs(element.scrollTop - (element.scrollHeight - element.clientHeight))
+  })).toBeLessThan(2)
+  // Space activates the button rather than the player's play shortcut.
+  await sync.press('Space')
+  await expectCentered()
+  expect(await video.evaluate(element => element.paused)).toBe(true)
+  await expect(sync).toHaveCount(0)
+  await expect(scroller.locator('.chapter.current .chapterSeek')).toBeFocused()
+  await scroller.hover()
+  await page.mouse.wheel(0, 2000)
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(2000)
   // Two padded segmented rows fit the 240px list without scrolling.
   await view.evaluate(view => { view.videoChapters = view.videoChapters.slice(0, 2) })
   await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
   await expect(scroller.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-unusable/)
+  // Without a scroll range there is nothing to sync back to.
+  await expect(sync).toHaveCount(0)
   await view.dispose()
 })
 

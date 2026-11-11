@@ -2172,6 +2172,7 @@ Chapters:
   Loop Chapter: 'تكرار الفصل: {chapter}'
   Looping Chapter: 'جارٍ تكرار الفصل: {chapter}'
   Chapter Loop Stopped: 'تم إيقاف تكرار الفصل'
+  Sync to Video Time: 'المزامنة مع وقت الفيديو'
 Comments:
   Image unavailable: "الصورة غير متاحة"
   Comment Count: 'لا توجد تعليقات ({count}) | تعليق واحد | تعليقان ({count}) | {count} تعليقات | {count} تعليقًا | {count} تعليق'

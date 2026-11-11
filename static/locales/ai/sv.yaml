@@ -2124,6 +2124,7 @@ Chapters:
   Loop Chapter: 'Upprepa kapitel: {chapter}'
   Looping Chapter: 'Upprepar kapitel: {chapter}'
   Chapter Loop Stopped: 'Slutade upprepa kapitel'
+  Sync to Video Time: 'Synka med videons tid'
 Comments:
   Image unavailable: "Bilden är inte tillgänglig"
   Comment Count: 1 kommentar | {count} kommentarer

@@ -2123,6 +2123,7 @@ Chapters:
   Loop Chapter: 'チャプターをループ: {chapter}'
   Looping Chapter: 'チャプターをループ中: {chapter}'
   Chapter Loop Stopped: 'チャプターのループを停止しました'
+  Sync to Video Time: '動画の再生位置に同期'
 Comments:
   Image unavailable: "画像は利用できません"
   Comment Count: '{count}件のコメント'
