@@ -115,7 +115,8 @@ jobs:
         emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu swangle -skin 720x1600
         # A hung test fails after ten minutes instead of using up the shard.
         # Gradle can report success after the emulator has crashed and skipped
-        # the remaining tests, so require it to still be running.
+        # the remaining tests, or after test discovery crashed before any test
+        # ran, so require the emulator to still run and the shard to report tests.
         # On a slow emulator, the launcher's "isn't responding" dialog takes focus
         # from the app, and notification banners cover it. Android reads the
         # dialog setting on configuration changes only, so the font scale is
@@ -137,6 +138,7 @@ jobs:
           adb shell settings put system font_scale 1.0 && timeout 60 sh -c "until adb shell dumpsys activity activities | grep -q '{1.0 '; do sleep 1; done"
           ./android/gradlew --project-dir android :app:connectedDebugAndroidTest -PtestAbi=x86_64 -Pandroid.testInstrumentationRunnerArguments.numShards=3 -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }} -Pandroid.testInstrumentationRunnerArguments.timeout_msec=600000 -Pandroid.testInstrumentationRunnerArguments.listener=org.opentubex.app.FailureDiagnostics
           adb get-state
+          grep -q '<testcase' android/app/build/outputs/androidTest-results/connected/debug/TEST-*.xml
 
     - name: Show why the emulator stopped
       if: failure()
