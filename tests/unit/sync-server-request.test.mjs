@@ -5,7 +5,8 @@ import { readFile } from 'node:fs/promises'
 import vm from 'node:vm'
 import { setImmediate as nextEventLoopTurn } from 'node:timers/promises'
 
-import { delegateRequests, withNetworkRecovery } from '../../src/renderer/helpers/networkRecovery.js'
+import { delegateRequests, isReadOnlyRequest, withNetworkRecovery } from '../../src/renderer/helpers/networkRecovery.js'
+import { BROKEN_CONNECTION_ERROR } from '../../src/renderer/helpers/api/requestDiagnostics.js'
 import { applySyncServerUserAgent } from '../../src/syncServerUserAgent.js'
 import { createSyncServerRequestHeaders } from '../../src/renderer/helpers/sync-server-request.js'
 import * as errors from '../../src/renderer/helpers/sync-server-errors.js'
@@ -18,6 +19,8 @@ async function loadClient(env, version, requests, nativeRequest, browserRequest,
     ...errors,
     delegateRequests,
     withNetworkRecovery,
+    isReadOnlyRequest,
+    BROKEN_CONNECTION_ERROR,
     process: { env },
     packageDetails: { version },
     createSyncServerRequestHeaders,

@@ -282,6 +282,19 @@ function confirmsInternetReachability(input, init, uncached) {
 }
 
 /**
+ * Whether sending the request again cannot change anything on the server.
+ * YouTube's metadata and chat APIs use POST for read-only queries.
+ * @param {URL} url
+ * @param {string | undefined} method
+ */
+export function isReadOnlyRequest(url, method = 'GET') {
+  method = method.toUpperCase()
+  return ['GET', 'HEAD'].includes(method) ||
+    (method === 'POST' && /(^|\.)youtube\.com$/.test(url.hostname) &&
+      /^\/youtubei\/v1\/(browse|search|player|next|guide|get_transcript|navigation\/resolve_url|updated_metadata|live_chat\/get_live_chat(?:_replay)?)$/.test(url.pathname))
+}
+
+/**
  * Use the same queue for native HTTP and WebView requests. Set `uncached` for
  * transports without a response cache, whose responses always prove that the
  * internet is reachable.
@@ -310,11 +323,7 @@ export function withNetworkRecovery(input, init, task, { uncached = false, ...op
     })
   }
   if (!['http:', 'https:'].includes(url.protocol) || url.origin === location.origin) return task(init?.signal ?? request?.signal)
-  const method = (init?.method ?? request?.method ?? 'GET').toUpperCase()
-  // YouTube's metadata and chat APIs use POST for read-only queries.
-  const retry = ['GET', 'HEAD'].includes(method) ||
-    (method === 'POST' && /(^|\.)youtube\.com$/.test(url.hostname) &&
-      /^\/youtubei\/v1\/(browse|search|player|next|guide|get_transcript|navigation\/resolve_url|updated_metadata|live_chat\/get_live_chat(?:_replay)?)$/.test(url.pathname))
+  const retry = isReadOnlyRequest(url, init?.method ?? request?.method)
   return initializeNetworkRecovery().run(url.origin, task, { ...options, signal: init?.signal ?? request?.signal, retry, retryDuringOutage: true })
     .then(confirm)
 }
