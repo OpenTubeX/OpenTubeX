@@ -1454,6 +1454,7 @@ Settings:
     Generated SponsorBlock User ID Copied: Generated SponsorBlock user ID copied to clipboard
     Custom Color: Custom colour
     DeArrow Settings: DeArrow
+    Always Show DeArrow Badge: Always show DeArrow badge
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Enable Return YouTube Dislike
@@ -2278,6 +2279,8 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Checks each channel's RSS feed first and only loads the videos, Shorts and live streams of channels with new uploads. Automatic refreshes also skip channels loaded in the last 10 minutes. For channels without new uploads, view counts, removed videos and changed titles only update every few hours, and new uploads may appear later when the RSS feed lags behind. Not available with the Invidious API."
     Disable Hardware Acceleration: Disables GPU hardware acceleration. May fix graphical issues, but will probably perform worse.
+  SponsorBlock Settings:
+    Always Show DeArrow Badge: Keep the DeArrow button visible on videos whose title or thumbnail DeArrow replaced, instead of only on hover.
 The playlist is at the beginning. Enable loop to continue playing: The playlist is at the beginning. Enable loop to continue playing
 External link opening has been disabled in Settings → Privacy: External link opening has been disabled in Settings → Privacy
 KeyboardShortcutPrompt:

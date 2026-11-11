@@ -1470,6 +1470,7 @@ Settings:
     Skip notification timeout: "Padelezh rebuad al lamm"
     Custom Color: "Liv personelaet"
     DeArrow Settings: DeArrow
+    Always Show DeArrow Badge: Diskouez atav ar badj DeArrow
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: "Gweredekaat Return YouTube Dislike"
@@ -2290,6 +2291,8 @@ Tooltips:
     Use Custom Title Bar: Erlec'hiañ a ra barrenn-ditl ar reizhiad gant barrenn an ivinelloù, pe gant ar merdeiñ uhel pa n'emañ ket an ivinelloù e krec'h, evit espern lec'h a-serzh. Boutonoù ar prenestr a zeu war wel e korn ar varrenn-se.
     Use Grid Player Menu: "Aozadur lañser arventennoù al lenner video evel ur gael karrelloù e-lec'h ur roll linennoù."
     Modal Backdrop: "Termeniñ a ra penaos e weler an arload a-dreñv ar boestoù-emziviz hag al lañserioù. Gorrek e c’hall bezañ an dispisaat war ar binvioù nebeutoc’h galloudek."
+  SponsorBlock Settings:
+    Always Show DeArrow Badge: Lakaat afell DeArrow da chom gwelus war ar videoioù ma'z eo bet erlec'hiet o zitl pe o skeudennig gant DeArrow, e plas nemet pa dremen al logodenn warnañ.
 The playlist is at the beginning. Enable loop to continue playing: "Ar roll-videoioù zo en e zerou. Gweredekait al lenn en ur voul evit kenderc'hel da lenn"
 External link opening has been disabled in Settings → Privacy: "Diweredekaet eo bet digeriñ al liammoù diavaez en Arventennoù → Prevezded"
 KeyboardShortcutPrompt:

@@ -2151,6 +2151,7 @@ Settings:
     DeArrow Settings: DeArrow
     UseDeArrowTitles: Use DeArrow Video Titles
     UseDeArrowThumbnails: Use DeArrow for thumbnails
+    Always Show DeArrow Badge: Always show DeArrow badge
     'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)': DeArrow thumbnail API URL
     Skip Options:
       Skip Option: Skip Option
@@ -3424,6 +3425,7 @@ Tooltips:
   SponsorBlock Settings:
     UseDeArrowTitles: Replace video titles with user-submitted titles from DeArrow.
     UseDeArrowThumbnails: Replace video thumbnails with thumbnails from DeArrow.
+    Always Show DeArrow Badge: Keep the DeArrow button visible on videos whose title or thumbnail DeArrow replaced, instead of only on hover.
 
 # Toast Messages
 Local API Error (Click to copy): Local API Error (Click to copy)

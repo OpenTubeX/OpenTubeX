@@ -159,7 +159,21 @@
   margin-inline-start: 0;
 }
 
+.ft-list-video .info .titleRow {
+  display: flex;
+  align-items: flex-start;
+  grid-area: title;
+  min-inline-size: 0;
+
+  .title {
+    flex: 1;
+    min-inline-size: 0;
+  }
+}
+
 .deArrowToggleButton {
+  // Overlap the space around the title so the button never makes its row taller.
+  margin-block: -10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -186,12 +200,26 @@
 
     &.alwaysVisible {
       opacity: 1;
+    }
+
+    &.showingOriginal {
       filter: grayscale(1);
     }
   }
 }
 
+// Match the kebab button's touch target without making the title row taller.
+@media (any-pointer: coarse), (width <= 680px) {
+  .deArrowToggleButton {
+    box-sizing: border-box;
+    min-block-size: 48px;
+    min-inline-size: 48px;
+    margin-block: -14px;
+  }
+}
+
 .deArrowToggleIcon {
+  block-size: 1em;
   inline-size: 1em;
 }
 

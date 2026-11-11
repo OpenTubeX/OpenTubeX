@@ -2,22 +2,36 @@
   <FtSettingsSection
     :title="$t('Settings.SponsorBlock Settings.DeArrow Settings')"
   >
-    <FtFlexBox class="settingsFlexStart500px">
-      <FtToggleSwitch
-        :label="$t('Settings.SponsorBlock Settings.UseDeArrowTitles')"
-        :default-value="useDeArrowTitles"
-        setting-key="useDeArrowTitles"
-        :tooltip="$t('Tooltips.SponsorBlock Settings.UseDeArrowTitles')"
-        @change="handleUpdateUseDeArrowTitles"
-      />
-      <FtToggleSwitch
-        :label="$t('Settings.SponsorBlock Settings.UseDeArrowThumbnails')"
-        :default-value="useDeArrowThumbnails"
-        setting-key="useDeArrowThumbnails"
-        :tooltip="$t('Tooltips.SponsorBlock Settings.UseDeArrowThumbnails')"
-        @change="handleUpdateUseDeArrowThumbnails"
-      />
-    </FtFlexBox>
+    <div class="switchColumnGrid">
+      <div class="switchColumn">
+        <FtToggleSwitch
+          compact
+          :label="$t('Settings.SponsorBlock Settings.UseDeArrowTitles')"
+          :default-value="useDeArrowTitles"
+          setting-key="useDeArrowTitles"
+          :tooltip="$t('Tooltips.SponsorBlock Settings.UseDeArrowTitles')"
+          @change="handleUpdateUseDeArrowTitles"
+        />
+        <FtToggleSwitch
+          compact
+          :label="$t('Settings.SponsorBlock Settings.UseDeArrowThumbnails')"
+          :default-value="useDeArrowThumbnails"
+          setting-key="useDeArrowThumbnails"
+          :tooltip="$t('Tooltips.SponsorBlock Settings.UseDeArrowThumbnails')"
+          @change="handleUpdateUseDeArrowThumbnails"
+        />
+      </div>
+      <div class="switchColumn">
+        <FtToggleSwitch
+          compact
+          :label="$t('Settings.SponsorBlock Settings.Always Show DeArrow Badge')"
+          :default-value="showDeArrowBadge"
+          setting-key="showDeArrowBadge"
+          :tooltip="$t('Tooltips.SponsorBlock Settings.Always Show DeArrow Badge')"
+          @change="handleUpdateShowDeArrowBadge"
+        />
+      </div>
+    </div>
     <FtFlexBox>
       <FtInput
         ref="deArrowThumbnailGeneratorUrl"
@@ -51,6 +65,9 @@ const useDeArrowTitles = computed(() => store.getters.getUseDeArrowTitles)
 /** @type {import('vue').ComputedRef<boolean>} */
 const useDeArrowThumbnails = computed(() => store.getters.getUseDeArrowThumbnails)
 
+/** @type {import('vue').ComputedRef<boolean>} */
+const showDeArrowBadge = computed(() => store.getters.getShowDeArrowBadge)
+
 /** @type {import('vue').ComputedRef<string>} */
 const deArrowThumbnailGeneratorUrl = computed(() => store.getters.getDeArrowThumbnailGeneratorUrl)
 
@@ -68,6 +85,13 @@ function handleUpdateUseDeArrowTitles(value) {
  */
 function handleUpdateUseDeArrowThumbnails(value) {
   store.dispatch('updateUseDeArrowThumbnails', value)
+}
+
+/**
+ * @param {boolean} value
+ */
+function handleUpdateShowDeArrowBadge(value) {
+  store.dispatch('updateShowDeArrowBadge', value)
 }
 
 /**

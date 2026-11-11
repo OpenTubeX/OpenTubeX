@@ -1477,6 +1477,7 @@ Settings:
     Skip notification timeout: Batas waktu notifikasi lewati
     Custom Color: Warna khusus
     DeArrow Settings: DeArrow
+    Always Show DeArrow Badge: Selalu tampilkan lencana DeArrow
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Aktifkan Return YouTube Dislike
@@ -2306,6 +2307,8 @@ Tooltips:
     Use Custom Title Bar: Mengganti bilah judul sistem dengan bilah tab, atau dengan navigasi atas saat tab tidak berada di atas, untuk menghemat ruang vertikal. Kontrol jendela muncul di sudut bilah tersebut.
     Use Grid Player Menu: Menyusun menu pengaturan pemutar video sebagai kisi ubin, bukan daftar baris.
     Modal Backdrop: "Mengatur tampilan aplikasi di belakang dialog dan menu. Efek buram dapat lambat pada perangkat yang kurang bertenaga."
+  SponsorBlock Settings:
+    Always Show DeArrow Badge: Biarkan tombol DeArrow tetap terlihat pada video yang judul atau kelukunya diganti oleh DeArrow, bukan hanya saat kursor diarahkan ke atasnya.
 The playlist is at the beginning. Enable loop to continue playing: Daftar putar berada di awal. Aktifkan pengulangan untuk melanjutkan pemutaran
 External link opening has been disabled in Settings → Privacy: Pembukaan tautan eksternal telah dinonaktifkan di Pengaturan → Privasi
 KeyboardShortcutPrompt:

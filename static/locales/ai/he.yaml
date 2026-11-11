@@ -1498,6 +1498,7 @@ Settings:
     Skip notification timeout: משך הצגת הודעת הדילוג
     Custom Color: צבע מותאם אישית
     DeArrow Settings: DeArrow
+    Always Show DeArrow Badge: הצגת תג DeArrow תמיד
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: הפעלת Return YouTube Dislike
@@ -2338,6 +2339,8 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "בודק תחילה את הזנת ה־RSS של כל ערוץ וטוען סרטונים, Shorts ושידורים חיים רק מערוצים עם העלאות חדשות. רענונים אוטומטיים גם מדלגים על ערוצים שנטענו ב־10 הדקות האחרונות. בערוצים ללא העלאות חדשות, מספר הצפיות, סרטונים שהוסרו וכותרות ששונו מתעדכנים רק כל כמה שעות, והעלאות חדשות עשויות להופיע מאוחר יותר כשהזנת ה־RSS מפגרת. לא זמין עם ה־API של Invidious."
     Disable Hardware Acceleration: משבית את האצת החומרה של המעבד הגרפי. עשוי לפתור בעיות גרפיות, אך כנראה יפגע בביצועים.
+  SponsorBlock Settings:
+    Always Show DeArrow Badge: משאיר את לחצן DeArrow גלוי בסרטונים שהכותרת או התמונה הממוזערת שלהם הוחלפו על ידי DeArrow, במקום רק במעבר עכבר מעליהם.
 The playlist is at the beginning. Enable loop to continue playing: רשימת ההשמעה בתחילתה. הפעילו לולאה כדי להמשיך לנגן
 External link opening has been disabled in Settings → Privacy: פתיחת קישורים חיצוניים הושבתה בהגדרות → פרטיות
 Screenshot Clipboard Success: צילום המסך נשמר בלוח

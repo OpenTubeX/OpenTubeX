@@ -118,8 +118,7 @@
     color: var(--side-nav-hover-text-color);
   }
 
-  .card :deep(.optionsButton .iconButton),
-  .card :deep(.ft-list-item .deArrowToggleButton) {
+  .card :deep(.optionsButton .iconButton) {
     box-sizing: border-box;
     min-block-size: 48px;
     min-inline-size: 48px;

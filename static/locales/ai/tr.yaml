@@ -1470,6 +1470,7 @@ Settings:
     Skip notification timeout: Atlama bildirimi süresi
     Custom Color: Özel renk
     DeArrow Settings: DeArrow
+    Always Show DeArrow Badge: DeArrow rozetini her zaman göster
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Return YouTube Dislike'ı Etkinleştir
@@ -2282,6 +2283,8 @@ Tooltips:
     Use Custom Title Bar: Dikey alandan tasarruf etmek için sistem başlık çubuğunu sekme çubuğuyla, sekmeler üstte değilse üst gezinme çubuğuyla değiştirir. Pencere denetimleri bu çubuğun köşesinde görünür.
     Use Grid Player Menu: Video oynatıcısının ayarlar menüsünü satır listesi yerine döşeme ızgarası olarak düzenler.
     Modal Backdrop: "İletişim kutularının ve menülerin arkasında uygulamanın nasıl görüneceğini belirler. Bulanıklaştırma daha az güçlü cihazlarda yavaş olabilir."
+  SponsorBlock Settings:
+    Always Show DeArrow Badge: Başlığı veya önizleme görseli DeArrow tarafından değiştirilen videolarda DeArrow düğmesini yalnızca üzerine gelindiğinde değil, her zaman görünür tut.
 The playlist is at the beginning. Enable loop to continue playing: Oynatma listesinin başındasınız. Oynatmaya devam etmek için döngüyü etkinleştirin
 External link opening has been disabled in Settings → Privacy: Harici bağlantıları açma, Ayarlar → Gizlilik bölümünde devre dışı bırakıldı
 KeyboardShortcutPrompt:

@@ -1470,6 +1470,7 @@ Settings:
     Skip notification timeout: Átugrási értesítés időtúllépése
     Custom Color: Egyéni szín
     DeArrow Settings: DeArrow
+    Always Show DeArrow Badge: DeArrow-jelvény mindig látható
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Return YouTube Dislike engedélyezése
@@ -2282,6 +2283,8 @@ Tooltips:
     Use Custom Title Bar: A rendszer címsorát a lapsávra cseréli, vagy a felső navigációra, ha a lapok nincsenek felül, így függőleges helyet takarít meg. Az ablakvezérlők a sáv sarkában jelennek meg.
     Use Grid Player Menu: A videólejátszó beállítási menüjének elrendezése csempékből álló rácsként, sorok listája helyett.
     Modal Backdrop: "Beállítja, hogyan nézzen ki az alkalmazás a párbeszédablakok és menük mögött. Az elmosás lassú lehet kevésbé erős eszközökön."
+  SponsorBlock Settings:
+    Always Show DeArrow Badge: A DeArrow gomb látható marad azokon a videókon, amelyek címét vagy bélyegképét a DeArrow lecserélte, nem csak egérrel fölé mutatva.
 The playlist is at the beginning. Enable loop to continue playing: A lejátszási lista elején jár. Kapcsolja be az ismétlést a lejátszás folytatásához
 External link opening has been disabled in Settings → Privacy: A külső hivatkozások megnyitása ki van kapcsolva a Beállítások → Adatvédelem menüben
 KeyboardShortcutPrompt:

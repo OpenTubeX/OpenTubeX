@@ -1517,6 +1517,7 @@ Settings:
     Skip notification timeout: Varighed af meddelelse om overspringning
     Custom Color: Brugerdefineret farve
     DeArrow Settings: DeArrow
+    Always Show DeArrow Badge: Vis altid DeArrow-mærke
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Slå Return YouTube Dislike til
@@ -2370,6 +2371,8 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Tjekker først hver kanals RSS-feed og indlæser kun videoer, Shorts og livestreams fra kanaler med nye uploads. Automatiske opdateringer springer også kanaler over, der er indlæst inden for de sidste 10 minutter. For kanaler uden nye uploads opdateres visningstal, fjernede videoer og ændrede titler kun med nogle timers mellemrum, og nye uploads kan dukke op senere, når RSS-feedet halter bagefter. Ikke tilgængelig med Invidious API."
     Disable Hardware Acceleration: Deaktiverer GPU-hardwareacceleration. Kan løse grafikproblemer, men vil sandsynligvis forringe ydeevnen.
+  SponsorBlock Settings:
+    Always Show DeArrow Badge: Hold DeArrow-knappen synlig på videoer, hvis titel eller miniaturebillede er erstattet af DeArrow, i stedet for kun når musen holdes over.
 The playlist is at the beginning. Enable loop to continue playing: Playlistens begyndelse er nået. Slå gentagelse til for at fortsætte afspilningen
 External link opening has been disabled in Settings → Privacy: Åbning af eksterne links er slået fra under Indstillinger → Privatliv
 Screenshot Clipboard Success: Skærmbilledet er gemt i udklipsholderen

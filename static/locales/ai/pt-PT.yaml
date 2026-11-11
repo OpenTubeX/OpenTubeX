@@ -1494,6 +1494,7 @@ Settings:
     Skip notification timeout: Duração da notificação de salto
     Custom Color: Cor personalizada
     DeArrow Settings: DeArrow
+    Always Show DeArrow Badge: Mostrar sempre o distintivo do DeArrow
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Ativar Return YouTube Dislike
@@ -2328,6 +2329,8 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Verifica primeiro o feed RSS de cada canal e só carrega os vídeos, Shorts e emissões em direto dos canais com novos carregamentos. As atualizações automáticas também ignoram canais carregados nos últimos 10 minutos. Nos canais sem novos carregamentos, as visualizações, os vídeos removidos e os títulos alterados só são atualizados a cada poucas horas, e os novos carregamentos podem aparecer mais tarde quando o feed RSS está atrasado. Indisponível com a API do Invidious."
     Disable Hardware Acceleration: Desativa a aceleração por hardware da GPU. Pode resolver problemas gráficos, mas provavelmente reduzirá o desempenho.
+  SponsorBlock Settings:
+    Always Show DeArrow Badge: Mantém o botão do DeArrow visível nos vídeos cujo título ou miniatura foi substituído pelo DeArrow, em vez de apenas ao passar o rato.
 The playlist is at the beginning. Enable loop to continue playing: A lista de reprodução está no início. Ative a repetição para continuar a reproduzir
 External link opening has been disabled in Settings → Privacy: A abertura de hiperligações externas foi desativada em Definições → Privacidade
 KeyboardShortcutPrompt:

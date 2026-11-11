@@ -1470,6 +1470,7 @@ Settings:
     Skip notification timeout: Doba zobrazení oznámení o přeskočení
     Custom Color: Vlastní barva
     DeArrow Settings: DeArrow
+    Always Show DeArrow Badge: Vždy zobrazovat štítek DeArrow
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Povolit Return YouTube Dislike
@@ -2281,6 +2282,8 @@ Tooltips:
     Use Custom Title Bar: Nahradí systémové záhlaví okna panelem karet, nebo horní navigací, pokud karty nejsou nahoře, a ušetří tak svislý prostor. Ovládací prvky okna se zobrazí v rohu tohoto panelu.
     Use Grid Player Menu: Uspořádá nabídku nastavení přehrávače videa do mřížky dlaždic místo seznamu řádků.
     Modal Backdrop: "Určuje, jak aplikace vypadá za dialogy a nabídkami. Rozmazání může být na méně výkonných zařízeních pomalé."
+  SponsorBlock Settings:
+    Always Show DeArrow Badge: Ponechat tlačítko DeArrow viditelné u videí, jejichž název nebo náhled DeArrow nahradil, místo jen při najetí myší.
 The playlist is at the beginning. Enable loop to continue playing: Playlist je na začátku. Chcete-li pokračovat v přehrávání, zapněte opakování
 External link opening has been disabled in Settings → Privacy: Otevírání externích odkazů bylo zakázáno v Nastavení → Soukromí
 KeyboardShortcutPrompt:

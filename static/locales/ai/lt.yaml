@@ -1732,6 +1732,7 @@ Settings:
     DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): DeArrow miniatiūrų API URL
     Custom Color: Pasirinktinė spalva
     DeArrow Settings: DeArrow
+    Always Show DeArrow Badge: Visada rodyti DeArrow ženklelį
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Įjungti „Return YouTube Dislike“
@@ -2712,6 +2713,7 @@ Tooltips:
   SponsorBlock Settings:
     UseDeArrowTitles: Vaizdo įrašų pavadinimus pakeisti naudotojų pateiktais DeArrow pavadinimais.
     UseDeArrowThumbnails: Vaizdo įrašų miniatiūras pakeisti DeArrow miniatiūromis.
+    Always Show DeArrow Badge: Palikti DeArrow mygtuką matomą prie vaizdo įrašų, kurių pavadinimą ar miniatiūrą pakeitė DeArrow, užuot rodžius tik užvedus žymiklį.
   Experimental Settings:
     Faster Subscription Refresh: "Pirmiausia patikrina kiekvieno kanalo RSS sklaidos kanalą ir įkelia vaizdo įrašus, Shorts ir tiesiogines transliacijas tik iš kanalų su naujais įkėlimais. Automatiniai atnaujinimai taip pat praleidžia kanalus, įkeltus per pastarąsias 10 minučių. Kanaluose be naujų įkėlimų peržiūrų skaičiai, pašalinti vaizdo įrašai ir pakeisti pavadinimai atnaujinami tik kas kelias valandas, o nauji įkėlimai gali pasirodyti vėliau, kai RSS sklaidos kanalas vėluoja. Nepasiekiama naudojant Invidious API."
     Disable Hardware Acceleration: Išjungia GPU aparatinį spartinimą. Gali išspręsti grafikos problemas, bet tikriausiai sumažins našumą.

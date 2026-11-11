@@ -1638,6 +1638,7 @@ Settings:
     DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): URL til DeArrow-miniatyr-API
     Custom Color: Tilpassa farge
     DeArrow Settings: DeArrow
+    Always Show DeArrow Badge: Vis alltid DeArrow-merke
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Slå på Return YouTube Dislike
@@ -2598,6 +2599,7 @@ Tooltips:
   SponsorBlock Settings:
     UseDeArrowTitles: Byt ut videotitlar med titlar som brukarar har sendt inn til DeArrow.
     UseDeArrowThumbnails: Byt ut videominiatyrar med miniatyrar frå DeArrow.
+    Always Show DeArrow Badge: Hald DeArrow-knappen synleg på videoar der tittelen eller miniatyrbiletet er bytt ut av DeArrow, i staden for berre når du held musepeikaren over.
   Experimental Settings:
     Faster Subscription Refresh: "Sjekkar først RSS-straumen til kvar kanal og lastar berre inn videoar, Shorts og direktesendingar frå kanalar med nye opplastingar. Automatiske oppdateringar hoppar òg over kanalar som er lasta inn dei siste 10 minutta. For kanalar utan nye opplastingar vert visingstal, fjerna videoar og endra titlar berre oppdaterte med nokre timars mellomrom, og nye opplastingar kan dukke opp seinare når RSS-straumen heng etter. Ikkje tilgjengeleg med Invidious-API-et."
     Disable Hardware Acceleration: Slår av GPU-maskinvareakselerasjon. Kan løyse grafikkproblem, men vil truleg redusere ytinga.

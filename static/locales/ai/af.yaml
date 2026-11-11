@@ -1679,6 +1679,7 @@ Settings:
     Excluded Channels:
       Excluded Channels: Uitgeslote kanale
       Tooltip: Voer ’n kanaal-ID in om te verhoed dat SponsorBlock-segmente in video’s van daardie kanaal oorgeslaan word. Die ID moet presies ooreenstem en is hooflettersensitief.
+    Always Show DeArrow Badge: Wys DeArrow-kenteken altyd
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Aktiveer Return YouTube Dislike
@@ -2537,6 +2538,8 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Gaan eers elke kanaal se RSS-voer na en laai slegs die video's, Shorts en regstreekse uitsendings van kanale met nuwe oplaaisels. Outomatiese verfrissings slaan ook kanale oor wat in die afgelope 10 minute gelaai is. Vir kanale sonder nuwe oplaaisels word kyktellings, verwyderde video's en veranderde titels slegs elke paar uur bygewerk, en nuwe oplaaisels kan later verskyn wanneer die RSS-voer agterloop. Nie beskikbaar met die Invidious-API nie."
     Disable Hardware Acceleration: Deaktiveer GPU-hardewareversnelling. Kan grafiese probleme oplos, maar sal waarskynlik swakker presteer.
+  SponsorBlock Settings:
+    Always Show DeArrow Badge: Hou die DeArrow-knoppie sigbaar op video's waarvan die titel of duimnael deur DeArrow vervang is, in plaas van net wanneer die muis daaroor beweeg.
 Yattee Server:
   API Error (Click to copy): Yattee-bedienerfout (klik om te kopieer)
   Errors:

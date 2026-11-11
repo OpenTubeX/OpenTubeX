@@ -1476,6 +1476,7 @@ Settings:
     Skip notification timeout: Birtingartími tilkynningar um sleppingu
     Custom Color: Sérsniðinn litur
     DeArrow Settings: DeArrow
+    Always Show DeArrow Badge: Sýna alltaf DeArrow-merki
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Virkja Return YouTube Dislike
@@ -2303,6 +2304,8 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Athugar fyrst RSS-straum hverrar rásar og hleður aðeins myndskeiðum, Shorts og beinum útsendingum frá rásum með nýjum upphleðslum. Sjálfvirkar uppfærslur sleppa einnig rásum sem hlaðið var á síðustu 10 mínútum. Fyrir rásir án nýrra upphleðslna uppfærast áhorfstölur, fjarlægð myndskeið og breyttir titlar aðeins á nokkurra klukkustunda fresti, og nýjar upphleðslur geta birst síðar þegar RSS-straumurinn er á eftir. Ekki í boði með Invidious API."
     Disable Hardware Acceleration: Slekkur á vélbúnaðarhröðun skjákorts. Getur lagað myndrænar villur, en mun líklega draga úr afköstum.
+  SponsorBlock Settings:
+    Always Show DeArrow Badge: Halda DeArrow-hnappnum sýnilegum á myndskeiðum þar sem DeArrow hefur skipt út titli eða smámynd, í stað þess að sýna hann aðeins þegar bendill er yfir.
 The playlist is at the beginning. Enable loop to continue playing: Þú ert við upphaf spilunarlistans. Kveiktu á endurtekningu til að halda spilun áfram
 External link opening has been disabled in Settings → Privacy: Slökkt hefur verið á opnun ytri tengla undir Stillingar → Persónuvernd
 KeyboardShortcutPrompt:

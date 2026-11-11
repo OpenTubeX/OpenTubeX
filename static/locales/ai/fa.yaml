@@ -1526,6 +1526,7 @@ Settings:
     Skip notification timeout: مهلت اعلان پرش
     Custom Color: رنگ سفارشی
     DeArrow Settings: DeArrow
+    Always Show DeArrow Badge: همیشه نمایش نشان DeArrow
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: فعال‌کردن Return YouTube Dislike
@@ -2381,6 +2382,8 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "ابتدا خوراک RSS هر کانال را بررسی می‌کند و ویدیوها، Shorts و پخش‌های زنده را فقط از کانال‌هایی که بارگذاری جدید دارند بار می‌کند. تازه‌سازی‌های خودکار همچنین از کانال‌هایی که در ۱۰ دقیقهٔ گذشته بار شده‌اند صرف‌نظر می‌کنند. برای کانال‌هایی که بارگذاری جدید ندارند، تعداد بازدیدها، ویدیوهای حذف‌شده و عنوان‌های تغییرکرده فقط هر چند ساعت یک‌بار به‌روز می‌شوند و بارگذاری‌های جدید ممکن است وقتی خوراک RSS عقب است دیرتر نمایش داده شوند. با API اینویدیوس در دسترس نیست."
     Disable Hardware Acceleration: شتاب‌دهی سخت‌افزاری پردازندهٔ گرافیکی را غیرفعال می‌کند. ممکن است مشکلات گرافیکی را برطرف کند، اما احتمالاً کارایی را کاهش می‌دهد.
+  SponsorBlock Settings:
+    Always Show DeArrow Badge: دکمه DeArrow را در ویدیوهایی که DeArrow عنوان یا تصویر بندانگشتی آن‌ها را جایگزین کرده است همیشه نشان بده، نه فقط هنگام قرار گرفتن نشانگر روی آن.
 The playlist is at the beginning. Enable loop to continue playing: فهرست پخش در ابتداست. برای ادامه پخش، تکرار را فعال کنید
 External link opening has been disabled in Settings → Privacy: بازکردن پیوندهای خارجی در تنظیمات → حریم خصوصی غیرفعال شده است
 Screenshot Clipboard Success: نماگرفت در بریده‌دان ذخیره شد

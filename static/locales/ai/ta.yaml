@@ -1504,6 +1504,7 @@ Settings:
     Skip notification timeout: தவிர்ப்பு அறிவிப்பு மறையும் நேரம்
     Custom Color: தனிப்பயன் நிறம்
     DeArrow Settings: DeArrow
+    Always Show DeArrow Badge: DeArrow பட்டையை எப்போதும் காட்டு
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Return YouTube Dislike-ஐ இயக்கு
@@ -2348,6 +2349,8 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "முதலில் ஒவ்வொரு சேனலின் RSS ஊட்டத்தைச் சரிபார்த்து, புதிய பதிவேற்றங்கள் உள்ள சேனல்களின் காணொளிகள், Shorts மற்றும் நேரலைகளை மட்டும் ஏற்றும். தானியங்கு புதுப்பிப்புகள் கடந்த 10 நிமிடங்களில் ஏற்றப்பட்ட சேனல்களையும் தவிர்க்கும். புதிய பதிவேற்றங்கள் இல்லாத சேனல்களுக்கு, பார்வை எண்ணிக்கைகள், அகற்றப்பட்ட காணொளிகள் மற்றும் மாற்றப்பட்ட தலைப்புகள் சில மணிநேரங்களுக்கு ஒருமுறை மட்டுமே புதுப்பிக்கப்படும், RSS ஊட்டம் பின்தங்கும்போது புதிய பதிவேற்றங்கள் தாமதமாகத் தோன்றலாம். Invidious API உடன் கிடைக்காது."
     Disable Hardware Acceleration: GPU வன்பொருள் முடுக்கத்தை முடக்குகிறது. வரைகலைச் சிக்கல்களைச் சரிசெய்யலாம், ஆனால் செயல்திறன் குறையக்கூடும்.
+  SponsorBlock Settings:
+    Always Show DeArrow Badge: DeArrow தலைப்பு அல்லது சிறுபடத்தை மாற்றிய வீடியோக்களில் DeArrow பொத்தானை, சுட்டி மேலே செல்லும்போது மட்டுமின்றி, எப்போதும் தெரியும்படி வைத்திருக்கவும்.
 The playlist is at the beginning. Enable loop to continue playing: பிளேலிஸ்ட் தொடக்கத்தில் உள்ளது. தொடர்ந்து இயக்கச் சுழற்சியை இயக்கு
 External link opening has been disabled in Settings → Privacy: அமைப்புகள் → தனியுரிமை என்பதில் வெளிப்புற இணைப்புகளைத் திறப்பது முடக்கப்பட்டுள்ளது
 Screenshot Clipboard Success: திரைப்பிடிப்பு இடைநிலைப் பலகையில் சேமிக்கப்பட்டது

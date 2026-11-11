@@ -1543,6 +1543,7 @@ Settings:
     Excluded Channels:
       Excluded Channels: خارج شدہ چینلز
       Tooltip: کسی چینل کی ویڈیوز میں SponsorBlock سیگمنٹس کو اسکیپ ہونے سے روکنے کے لیے اس چینل کی ID درج کریں۔ ID بالکل مماثل ہونی چاہیے اور اس میں بڑے اور چھوٹے حروف کا فرق ہوتا ہے۔
+    Always Show DeArrow Badge: DeArrow بیج ہمیشہ دکھائیں
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Return YouTube Dislike فعال کریں
@@ -2394,6 +2395,8 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "پہلے ہر چینل کی RSS فیڈ چیک کرتا ہے اور صرف نئے اپ لوڈز والے چینلز کی ویڈیوز، Shorts اور لائیو اسٹریمز لوڈ کرتا ہے۔ خودکار تازہ کاریاں پچھلے 10 منٹ میں لوڈ کیے گئے چینلز کو بھی چھوڑ دیتی ہیں۔ نئے اپ لوڈز کے بغیر چینلز کے لیے، ویوز کی تعداد، ہٹائی گئی ویڈیوز اور تبدیل شدہ عنوانات صرف ہر چند گھنٹوں بعد اپ ڈیٹ ہوتے ہیں، اور RSS فیڈ پیچھے رہنے پر نئے اپ لوڈز بعد میں ظاہر ہو سکتے ہیں۔ Invidious API کے ساتھ دستیاب نہیں۔"
     Disable Hardware Acceleration: GPU ہارڈ ویئر ایکسلریشن غیر فعال کرتا ہے۔ گرافیکل مسائل حل ہو سکتے ہیں، لیکن کارکردگی غالباً کم ہو جائے گی۔
+  SponsorBlock Settings:
+    Always Show DeArrow Badge: ان ویڈیوز پر جن کا عنوان یا تھمب نیل DeArrow نے تبدیل کیا ہے، DeArrow بٹن کو صرف ماؤس لے جانے پر نہیں بلکہ ہمیشہ نظر آنے دیں۔
 Yattee Server:
   API Error (Click to copy): Yattee سرور ایرر (کاپی کرنے کے لیے کلک کریں)
   Errors:
