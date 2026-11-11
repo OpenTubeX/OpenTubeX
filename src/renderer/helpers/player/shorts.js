@@ -62,6 +62,11 @@ export class ShortsPlaybackCache {
     this.entries.delete(key)
   }
 
+  /** Drops the metadata and streams, but keeps the playback positions */
+  clearEntries() {
+    this.entries.clear()
+  }
+
   retain(keys, videoIds) {
     const keptKeys = new Set(keys)
     const keptVideoIds = new Set(videoIds)

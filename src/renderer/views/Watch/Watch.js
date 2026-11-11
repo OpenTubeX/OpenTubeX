@@ -91,6 +91,7 @@ import {
   parseLocalTextRuns,
   parseLocalWatchNextVideo
 } from '../../helpers/api/local'
+import { disableVisionOsStreams, isVisionOsStreamUrl } from '../../helpers/api/visionos-streams'
 import { getAuthorVerification } from '../../helpers/api/local-feed-parsers'
 import {
   convertInvidiousToLocalFormat,
@@ -6215,6 +6216,14 @@ export default defineComponent({
             return
           case 403:
             this.handleWatchProgressAutoSaveWhenProgressEnabled()
+
+            // YouTube can stop serving these streams without a token, as it did
+            // for other clients, so the reload below uses the WEB streams.
+            if (this.activePlaybackEngine !== 'yt-dlp' && isVisionOsStreamUrl(error.data[0])) {
+              disableVisionOsStreams('googlevideo refused a visionOS stream with HTTP 403')
+              // Cached Shorts would reload with the same streams
+              this.shortsPlaybackCache.clearEntries()
+            }
 
             // Streaming URLs are bound to the IP they were issued to, so they also
             // start returning 403 when our own IP changes (reconnect, prefix rotation,

@@ -31,6 +31,7 @@ import { parseLocalCollaboratorItems, parseLocalVideoChannels } from '../video-c
 
 import { evaluatePlayerScript, generateContentPoToken, mintContentPoTokenFromAttestation, prewarmPlayerScriptEvaluator } from './local-api-platform'
 import { disableDirectPlayer, getDirectPlayerFallbackReason, isDirectPlayerEnabled } from './direct-player.js'
+import { getVisionOsStreamsFallbackReason, isVisionOsStreamsEnabled } from './visionos-streams.js'
 import { classifyRequestFailure } from './requestDiagnostics.js'
 import { calculatePublishedDate, deepCopy, extractNumberFromString, getChannelPlaylistId, getRelativeTimeFromDate } from '../utils'
 
@@ -693,6 +694,91 @@ async function getLocalVrHlsManifest(videoId, session, poToken) {
 let lastWatchPageClient = null
 const DIRECT_PLAYER_CLIENT_FIELDS = ['hl', 'gl', 'clientVersion', 'osName', 'osVersion', 'browserName', 'browserVersion', 'platform', 'clientFormFactor']
 
+// visionOS usually answers within half a second. A slower answer delays the WEB streams' token.
+const VISIONOS_STREAMS_TIMEOUT_MS = 5000
+
+/** @type {Promise<string> | null} */
+let spareVisitorData = null
+
+/**
+ * BotGuard's run for later direct /player requests. Minting from the
+ * attestation would wait for it, so loads use the watch page meanwhile.
+ * @type {Promise<unknown> | null}
+ */
+let backgroundAttestation = null
+
+async function fetchVisitorData() {
+  const response = await localApiFetch('https://www.youtube.com/youtubei/v1/visitor_id?prettyPrint=false', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ context: { client: { clientName: 'WEB', clientVersion: Constants.CLIENTS.WEB.VERSION } } }),
+    signal: AbortSignal.timeout(VISIONOS_STREAMS_TIMEOUT_MS)
+  })
+  if (!response.ok) throw new Error(`visitor_id responded with HTTP ${response.status}`)
+  const visitorData = (await response.json()).responseContext?.visitorData
+  if (typeof visitorData !== 'string') throw new Error('visitor_id responded without visitor data')
+  return visitorData
+}
+
+/**
+ * The visionOS client refuses the visitor data of locally generated sessions,
+ * so it uses one that YouTube issued. Each is only used for one video, which
+ * keeps the requests of different videos unlinked. The next one is fetched
+ * ahead, so only the first video waits for it.
+ * @returns {Promise<string>}
+ */
+function takeVisitorData() {
+  const visitorData = spareVisitorData ?? fetchVisitorData()
+  spareVisitorData = null
+  visitorData.then(() => {
+    if (spareVisitorData) return
+    const next = fetchVisitorData()
+    spareVisitorData = next
+    next.catch(() => {
+      if (spareVisitorData === next) spareVisitorData = null
+    })
+  }, () => {})
+  return visitorData
+}
+
+/**
+ * Requests the visionOS client's /player response, whose direct streams need
+ * neither a PO token nor the player script.
+ * @param {string} videoId
+ * @returns {Promise<any | null>} the raw response, `null` when it cannot provide the streams
+ */
+async function requestVisionOsStreams(videoId) {
+  try {
+    const signal = AbortSignal.timeout(VISIONOS_STREAMS_TIMEOUT_MS)
+    const [visitorData, { session }] = await Promise.all([
+      takeVisitorData(),
+      createInnertube({ generateSessionLocally: true, signal })
+    ])
+    session.context.client.visitorData = visitorData
+    // Keeps the caption and audio track names in the watch page's language
+    for (const field of ['hl', 'gl']) {
+      if (lastWatchPageClient?.client?.[field] !== undefined) session.context.client[field] = lastWatchPageClient.client[field]
+    }
+
+    const { data } = await session.actions.execute('/player', {
+      videoId,
+      client: 'VISIONOS',
+      racyCheckOk: true,
+      contentCheckOk: true,
+      parse: false,
+    })
+    const fallbackReason = getVisionOsStreamsFallbackReason(data, videoId)
+    if (fallbackReason !== null) {
+      console.warn(`Using the WEB streams for ${videoId}: ${fallbackReason}`)
+      return null
+    }
+    return data
+  } catch (error) {
+    console.warn(`Using the WEB streams for ${videoId}, as the visionOS request failed`, error)
+    return null
+  }
+}
+
 /**
  * Requests /player and /next directly with a locally generated session. The
  * watch page takes about a second longer, as YouTube only sends its end, with
@@ -705,6 +791,7 @@ const DIRECT_PLAYER_CLIENT_FIELDS = ['hl', 'gl', 'clientVersion', 'osName', 'osV
  *   `null` without an attestation. A `sessionWide` fallback is YouTube's answer, not a lost connection.
  */
 async function requestDirectPlayer(videoId, fetchFunc, reloadPlaybackContext) {
+  if (backgroundAttestation) return null
   const poToken = await mintContentPoTokenFromAttestation(videoId).catch(() => null)
   if (!poToken) return null
 
@@ -845,6 +932,12 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
   // Deciphering the streams needs the interpreter right after the watch page loads
   prewarmPlayerScriptEvaluator()
 
+  // Playback loads take their streams from visionOS while the metadata loads.
+  // SABR reloads stay with the WEB streams that requested them.
+  const visionOsStreamsRequest = lateWatchNext && !reloadPlaybackContext && isVisionOsStreamsEnabled() && shouldGeneratePoToken()
+    ? requestVisionOsStreams(id)
+    : Promise.resolve(null)
+
   let direct = null
   let directFallback = null
   if (lateWatchNext && isDirectPlayerEnabled() && shouldGeneratePoToken()) {
@@ -926,23 +1019,33 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
   async function loadPlayerResponse() {
     // Recheck load validity after script setup before occupying the token queue.
     await playerReady
+    const visionOsStreams = await visionOsStreamsRequest
     let contentPoToken = direct?.poToken
     if (direct) {
       player.po_token = contentPoToken
     } else if ((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) &&
         !watchPageIpBlocked && shouldGeneratePoToken()) {
-      try {
-        contentPoToken = await generateContentPoToken(
-          id,
-          htmlExtracts.session.context,
-          htmlExtracts.initialAttestationData,
-          htmlExtracts.ytConfig,
-          shouldGeneratePoToken
-        )
-        player.po_token = contentPoToken
-      } catch (error) {
-        console.error('Local API, poToken generation failed', error)
-        throw error
+      const requestToken = () => generateContentPoToken(
+        id,
+        htmlExtracts.session.context,
+        htmlExtracts.initialAttestationData,
+        htmlExtracts.ytConfig,
+        shouldGeneratePoToken
+      )
+      if (visionOsStreams && htmlExtracts.playerResponse) {
+        // The watch page's metadata and visionOS's streams need no token. Attest
+        // anyway, without waiting, so later videos can skip the watch page.
+        backgroundAttestation ??= requestToken()
+          .catch(error => console.warn('Local API, background attestation failed', error))
+          .finally(() => { backgroundAttestation = null })
+      } else {
+        try {
+          contentPoToken = await requestToken()
+          player.po_token = contentPoToken
+        } catch (error) {
+          console.error('Local API, poToken generation failed', error)
+          throw error
+        }
       }
     }
     // The direct request already sent the reload context
@@ -966,12 +1069,12 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
           }
         })
     const musicMediaType = await resolveMusicMediaType(playerResponse, htmlExtracts.session.actions, id)
-    return { playerResponse, contentPoToken, musicMediaType }
+    return { playerResponse, contentPoToken, musicMediaType, visionOsStreams }
   }
 
   // /next needs neither the playback token nor the player script.
   // Without the watch page, playback starts before /next arrives.
-  const [{ playerResponse, contentPoToken, musicMediaType }, nextResponse] = await Promise.all([
+  const [{ playerResponse, contentPoToken, musicMediaType, visionOsStreams }, nextResponse] = await Promise.all([
     loadPlayerResponse(),
     direct
       ? null
@@ -1099,6 +1202,19 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
     }
   }
 
+  const usesVisionOsStreams = visionOsStreams !== null && info.playability_status.status === 'OK'
+  if (usesVisionOsStreams) {
+    const visionOsInfo = new YT.VideoInfo([{ data: visionOsStreams }], htmlExtracts.session.actions, cpn)
+    info.streaming_data = visionOsInfo.streaming_data
+    // A SABR stream would need the WEB client's token
+    info.streaming_data.server_abr_streaming_url = undefined
+    // Unlike the WEB captions, these need no token either
+    info.captions = visionOsInfo.captions
+    // A WEB token would be added to the stream URLs
+    player.po_token = undefined
+  }
+  const streamPoToken = usesVisionOsStreams ? undefined : contentPoToken
+
   if (hasTrailer && info.playability_status.status !== 'OK') {
     const trailerInfo = info.getTrailerInfo()
 
@@ -1125,7 +1241,7 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
       info.streaming_data.dash_manifest_url = await decipherManifestUrl(
         info.streaming_data.dash_manifest_url,
         player,
-        contentPoToken,
+        streamPoToken,
         true
       )
     }
@@ -1134,7 +1250,7 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
       info.streaming_data.hls_manifest_url = await decipherManifestUrl(
         info.streaming_data.hls_manifest_url,
         player,
-        contentPoToken,
+        streamPoToken,
         false
       )
     }
@@ -1144,11 +1260,11 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
     for (const captionTrack of info.captions.caption_tracks) {
       const url = new URL(captionTrack.base_url)
 
-      if (contentPoToken) {
+      if (streamPoToken) {
         url.searchParams.set('potc', '1')
-        url.searchParams.set('pot', contentPoToken)
+        url.searchParams.set('pot', streamPoToken)
       }
-      url.searchParams.set('c', clientName)
+      url.searchParams.set('c', usesVisionOsStreams ? 'VISIONOS' : clientName)
 
       // Remove &xosf=1 as it adds `position:63% line:0%` to the subtitle lines
       // placing them in the top right corner
@@ -1160,7 +1276,7 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
 
   return {
     info,
-    poToken: contentPoToken,
+    poToken: streamPoToken,
     clientInfo,
     adEndTimeUnixMs,
     paidPromotionDurationMs,

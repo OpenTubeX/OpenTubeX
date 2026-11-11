@@ -36,8 +36,8 @@ export function createIOSMediaTransport(shaka, native, parse = shaka.net.HttpFet
         throw new shaka.util.Error(shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.NETWORK, shaka.util.Error.Code.OPERATION_ABORTED)
       }
-      operation = parse(
-        `/_opentubex_sabr/${encodeURIComponent(requestId)}`, request, ...args)
+      const localUri = `/_opentubex_sabr/${encodeURIComponent(requestId)}`
+      operation = parse(localUri, request, ...args)
       try {
         const response = await operation.promise
         // Keep relative playlist URLs based on the remote URL, including redirects.
@@ -47,6 +47,8 @@ export function createIOSMediaTransport(shaka, native, parse = shaka.net.HttpFet
         return response
       } catch (error) {
         await abortNative()
+        // Error handling inspects the stream's URL, not the local one
+        if (error instanceof shaka.util.Error && error.data?.[0] === localUri) error.data[0] = uri
         throw error
       }
     })()

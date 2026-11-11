@@ -135,6 +135,16 @@ test('minting without BotGuard needs an attestation', async () => {
   assert.equal(views.length, 2)
 })
 
+test('minting does not wait for a BotGuard run in progress', async () => {
+  let finishAttestation
+  const { generate, mintOnly } = load({ attest: () => new Promise(resolve => { finishAttestation = resolve }) })
+  const attesting = generate()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(await mintOnly(), null)
+  finishAttestation(attested)
+  assert.equal(await attesting, attested)
+})
+
 test('an attestation that mints a token pending attestation is replaced', async () => {
   const attestations = [pending, attested]
   const { generate, views, cleanups } = load({ attest: () => attestations.shift() })

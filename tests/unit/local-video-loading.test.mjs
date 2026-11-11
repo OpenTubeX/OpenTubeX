@@ -26,7 +26,7 @@ function deferred() {
   return { promise, resolve, reject }
 }
 
-function loader({ android = Promise.resolve({ data: {} }), token = Promise.resolve('token'), next = Promise.resolve({ data: {} }), createPlayer = async () => ({ signature_timestamp: 1, decipher: async url => url }), details = {}, embeddedNext = false, embeddedPlayer = true, playability = { status: 'OK' }, direct = null } = {}) {
+function loader({ android = Promise.resolve({ data: {} }), token = Promise.resolve('token'), next = Promise.resolve({ data: {} }), createPlayer = async () => ({ signature_timestamp: 1, decipher: async url => url }), details = {}, embeddedNext = false, embeddedPlayer = true, playability = { status: 'OK' }, direct = null, visionOs = null } = {}) {
   const requests = []
   const playerRequests = []
   const directPlayerFallbacks = []
@@ -53,6 +53,9 @@ function loader({ android = Promise.resolve({ data: {} }), token = Promise.resol
       return { session, playerResponse: embeddedPlayer ? playerResponse : undefined, nextResponse: embeddedNext ? {} : undefined }
     },
     isDirectPlayerEnabled: () => true,
+    isVisionOsStreamsEnabled: () => true,
+    requestVisionOsStreams: async () => { requests.push('VISIONOS'); return visionOs },
+    backgroundAttestation: null,
     requestDirectPlayer: async () => direct?.({ session, playerResponse }) ?? null,
     disableDirectPlayer: reason => directPlayerFallbacks.push(reason),
     mergeLateWatchNext,
@@ -336,4 +339,65 @@ test('loads without lateWatchNext keep using the watch page', async () => {
   const result = await load('testVideo01')
   assert.equal(watchPageLoads.count, 1)
   assert.equal(result.watchNextPromise, undefined)
+})
+
+const visionOsResponse = {
+  playabilityStatus: { status: 'OK' },
+  videoDetails: { videoId: 'testVideo01', title: 'Ready video', lengthSeconds: '30' },
+  streamingData: {
+    expiresInSeconds: '21540',
+    adaptiveFormats: [{
+      itag: 137,
+      url: 'https://rr1---sn-test.googlevideo.com/videoplayback?itag=137&c=VISIONOS',
+      mimeType: 'video/mp4; codecs="avc1.640028"',
+      bitrate: 4000000,
+      width: 1920,
+      height: 1080,
+      contentLength: '1000',
+      approxDurationMs: '30000',
+    }],
+  },
+  captions: {
+    playerCaptionsTracklistRenderer: {
+      captionTracks: [{ baseUrl: 'https://www.youtube.com/api/timedtext?v=testVideo01&xosf=1', name: { simpleText: 'English' }, languageCode: 'en', vssId: '.en' }],
+    },
+  },
+}
+
+test('a cold load plays the visionOS streams without waiting for BotGuard', async () => {
+  const token = deferred()
+  const { load, requests } = loader({ token: token.promise, visionOs: visionOsResponse })
+  const result = await load('testVideo01', { lateWatchNext: true })
+  assert.ok(requests.includes('token'), 'Later videos need the attestation for their direct /player request')
+  assert.equal(result.poToken, undefined)
+  assert.equal(result.info.streaming_data.adaptive_formats[0].url, visionOsResponse.streamingData.adaptiveFormats[0].url)
+  assert.equal(result.info.streaming_data.server_abr_streaming_url, undefined)
+  const captionUrl = new URL(result.info.captions.caption_tracks[0].base_url)
+  assert.equal(captionUrl.searchParams.get('c'), 'VISIONOS')
+  assert.equal(captionUrl.searchParams.has('pot'), false)
+
+  await load('testVideo01', { lateWatchNext: true })
+  assert.equal(requests.filter(request => request === 'token').length, 1, 'Loads during BotGuard share its run')
+  token.resolve('late-token')
+})
+
+test('a warm load keeps the minted token off the visionOS streams', async () => {
+  const player = { signature_timestamp: 1, decipher: async url => url, po_token: undefined }
+  const { load } = loader({
+    visionOs: visionOsResponse,
+    direct: ({ session, playerResponse }) => ({ session, player, playerResponse, poToken: 'minted-token', nextRequest: Promise.resolve({ data: {} }) })
+  })
+  const result = await load('testVideo01', { lateWatchNext: true })
+  assert.equal(result.poToken, undefined)
+  assert.equal(player.po_token, undefined)
+  assert.equal(result.info.streaming_data.adaptive_formats[0].itag, 137)
+})
+
+test('only playback loads without a SABR reload request the visionOS streams', async () => {
+  for (const options of [{}, { lateWatchNext: true, reloadPlaybackContext: { reloadPlaybackParams: { token: 'reload-token' } } }]) {
+    const { load, requests } = loader({ visionOs: visionOsResponse })
+    const result = await load('testVideo01', options)
+    assert.ok(!requests.includes('VISIONOS'))
+    assert.equal(result.poToken, 'token')
+  }
 })
