@@ -3552,6 +3552,7 @@ KeyboardShortcutPrompt:
   Navigate to Settings: Navigate to the Settings page
   Navigate to History: Navigate to the History page
   Refresh: Refresh feed with latest content
+  Mark Seen or Watched: Mark the focused item as seen, or toggle whether it is watched
   Find in Page: Find text on the current page
   Find Next Match: Jump to the next match
   Find Previous Match: Jump to the previous match

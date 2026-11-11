@@ -2271,6 +2271,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: Достигнуто начало плейлиста. Включите повтор, чтобы продолжить воспроизведение
 External link opening has been disabled in Settings → Privacy: Открытие внешних ссылок отключено в разделе «Настройки» → «Конфиденциальность»
 KeyboardShortcutPrompt:
+  Mark Seen or Watched: "Отметить выбранный элемент как просмотренный в ленте или переключить отметку о просмотре"
   Toggle Quick Bookmark: Добавить в плейлист закладок или удалить из него
   Reopen Closed Window: Открыть последнее закрытое окно
   Edit Hint: Выберите сочетание, затем нажмите новую комбинацию клавиш. Чтобы удалить назначение, нажмите Backspace или Delete.

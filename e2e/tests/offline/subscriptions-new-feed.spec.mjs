@@ -265,6 +265,36 @@ test.describe('new subscriptions feed', () => {
     await expect(page.locator('.headerRefreshWidget .lastRefreshTimestamp')).toHaveCount(0)
   })
 
+  test('moves between tiles with the arrow keys and marks the focused tile with M', async ({ page }) => {
+    const titleLink = ({ videoId }) => page.locator(`a.title[href$="/watch/${videoId}"]`)
+    const newVideoCard = page.locator('.ft-list-video').filter({ has: titleLink(newVideo) })
+
+    await goTo(page, 'subscriptions')
+    await titleLink(newVideo).focus()
+    await page.keyboard.press('ArrowRight')
+    await expect(titleLink(watchedVideo)).toBeFocused()
+    // Subscriptions switches tabs with left and right, but not while a tile takes them.
+    await page.keyboard.press('ArrowLeft')
+    await expect(titleLink(newVideo)).toBeFocused()
+
+    await expect(newVideoCard.locator('.newContentDot')).toBeVisible()
+    await page.keyboard.press('m')
+    await expect(newVideoCard.locator('.newContentDot')).toHaveCount(0)
+    await expect(newVideoCard).not.toHaveClass(/watched/)
+    // Once seen, the shortcut toggles watched instead.
+    await page.keyboard.press('m')
+    await expect(newVideoCard).toHaveClass(/watched/)
+    await expect(titleLink(newVideo)).toBeFocused()
+
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await expect(titleLink(newVideo)).toHaveCount(0)
+    await titleLink(newShort).focus()
+    await page.keyboard.press('m')
+    // The Shorts category closes with its last tile, so focus moves on to Live.
+    await expect(titleLink(newShort)).toHaveCount(0)
+    await expect(titleLink(newLive)).toBeFocused()
+  })
+
   async function expectCompactNewFeedTabs(app, page, testInfo, uiScale) {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
@@ -885,6 +915,32 @@ test.describe('new subscriptions feed', () => {
       const store = window.$store
       return JSON.parse(store.getters.getSubscriptionSeenVideos).length
     })).toBe(10000)
+  })
+})
+
+test.describe('tile keyboard navigation in a long feed', () => {
+  const videos = Array.from({ length: 30 }, (_, index) => (
+    video(`long-feed-${index}`, `Long feed video ${index}`, now - (index + 1) * HOUR)
+  ))
+
+  test.use({
+    seed: {
+      settings: { ...commonSettings, listType: 'list' },
+      profiles: [profile()],
+      subscriptionCache: [{ _id: CHANNEL_ID, videos, videosTimestamp: new Date(now - HOUR).toISOString() }]
+    }
+  })
+
+  test('moves down onto tiles that mount once they scroll into view', async ({ page }) => {
+    const titleLink = index => page.locator(`a.title[href$="/watch/long-feed-${index}"]`)
+
+    await goTo(page, 'subscriptions')
+    await titleLink(0).focus()
+    // Only the first screen of tiles mounts up front.
+    for (let index = 1; index <= 20; index++) {
+      await page.keyboard.press('ArrowDown')
+      await expect(titleLink(index)).toBeFocused()
+    }
   })
 })
 

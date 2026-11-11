@@ -6,7 +6,7 @@ import { getYoutubeVideoShareUrl } from '../../src/renderer/helpers/share.js'
 
 const source = await readFile(new URL('../../src/renderer/components/FtListVideo/FtListVideo.vue', import.meta.url), 'utf8')
 const start = source.indexOf('function openVideoContextMenu(event) {')
-const handler = source.slice(start, source.indexOf('\nfunction handleContextMenuKeydown', start))
+const handler = source.slice(start, source.indexOf('\nfunction handleTileKeydown', start))
 
 function openMenu ({ electron = false, capacitor = false, media = false, selected = false, unrelatedSelection = false, touch = false } = {}) {
   const dispatched = []

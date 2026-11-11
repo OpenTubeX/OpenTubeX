@@ -2415,6 +2415,7 @@ External link opening has been disabled in Settings → Privacy: بیرونی ل
 Screenshot Clipboard Success: اسکرین شاٹ کلپ بورڈ پر محفوظ ہو گیا
 Screenshot Clipboard Error: اسکرین شاٹ کلپ بورڈ پر کاپی کرنا ناکام ہو گیا
 KeyboardShortcutPrompt:
+  Mark Seen or Watched: "منتخب آئٹم کو دیکھا ہوا نشان زد کریں، یا اس کے دیکھے جانے کی حالت بدلیں"
   Reopen Closed Window: آخری بند ونڈو دوبارہ کھولیں
   Edit Hint: کوئی شارٹ کٹ منتخب کریں، پھر نیا کی کمبی نیشن دبائیں۔ اسے ہٹانے کے لیے Backspace یا Delete دبائیں۔
   Change Shortcut: '{action} کا شارٹ کٹ تبدیل کریں'

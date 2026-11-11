@@ -1393,7 +1393,9 @@ function switchTab(event, focusedTab, moveFocus = true) {
  * @param {KeyboardEvent} event
  */
 function handlePanelTabNavigation(event) {
+  // Tiles in the panel take the arrow keys while another tile lies that way.
   if (
+    event.defaultPrevented ||
     (isTabPresented && !isTabPresented.value) ||
     (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight')
   ) {

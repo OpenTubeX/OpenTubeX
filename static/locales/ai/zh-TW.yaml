@@ -2296,6 +2296,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: 播放清單已在開頭。啟用循環播放即可繼續播放
 External link opening has been disabled in Settings → Privacy: 已在「設定」→「隱私權」中停用開啟外部連結
 KeyboardShortcutPrompt:
+  Mark Seen or Watched: "將選取的項目標示為已看過，或切換其已觀看狀態"
   Toggle Quick Bookmark: 新增至快速書籤播放清單或從中移除
   Reopen Closed Window: 重新開啟最近關閉的視窗
   Edit Hint: 選取快捷鍵，然後按下新的按鍵組合。按 Backspace 或 Delete 可取消指派。

@@ -2641,6 +2641,7 @@ Keys:
   arrowright: Pil høgre
   arrowup: Pil opp
 KeyboardShortcutPrompt:
+  Mark Seen or Watched: "Merk det valde elementet som sett, eller byt om det er sett ferdig"
   Toggle Quick Bookmark: Legg til i eller fjern frå hurtigbokmerke-spelelista
   Reopen Closed Window: Opne det sist lukka vindauget igjen
   Keyboard Shortcuts: Hurtigtastar

@@ -2693,6 +2693,7 @@ Keys:
   arrowright: Flecha hacía la derecha
   arrowup: Flecha hacia arriba
 KeyboardShortcutPrompt:
+  Mark Seen or Watched: "Marcar el elemento seleccionado como visto o alternar si se reprodujo"
   Toggle Quick Bookmark: Agregar a la lista de reproducción de marcador rápido o quitar de ella
   Reopen Closed Window: Volver a abrir la última ventana cerrada
   Keyboard Shortcuts: Atajos de teclado

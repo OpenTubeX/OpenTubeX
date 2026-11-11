@@ -3,6 +3,7 @@
     class="ft-list-post"
     :appearance="appearance"
     :class="embedded ? 'sharedPostCard' : ['ft-list-item', 'outside', { list: listType === 'list', grid: listType !== 'list' }]"
+    @keydown="handleTileKeydown"
   >
     <div
       class="author-div"
@@ -228,7 +229,7 @@
 import FtRetryImage from '../FtRetryImage.vue'
 import { FtIcon } from '@opentubex/icons'
 import autolinker from 'autolinker'
-import { computed, onActivated, onMounted, useTemplateRef } from 'vue'
+import { computed, inject, onActivated, onMounted, provide, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtBlockedItem from '../FtBlockedItem/FtBlockedItem.vue'
@@ -255,6 +256,7 @@ import { isRoundedNumber } from '../../helpers/viewCounts'
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { loadSwiperModules } from './swiperLoader'
+import { isTileMarkShortcut, tileKeyboardShortcutsKey } from '../../helpers/tileNavigation'
 
 const props = defineProps({
   data: {
@@ -348,6 +350,17 @@ const dropdownOptions = computed(() => {
   }
   return options
 })
+
+const tileKeyboardShortcuts = inject(tileKeyboardShortcutsKey, false)
+// The post marks itself, including while its attached video has focus.
+provide(tileKeyboardShortcutsKey, false)
+
+function handleTileKeydown(event) {
+  if (!props.embedded && tileKeyboardShortcuts && showMarkAsSeen.value && isTileMarkShortcut(event)) {
+    event.preventDefault()
+    handleOptionsClick('markAsSeen')
+  }
+}
 
 /**
  * @param {string} option

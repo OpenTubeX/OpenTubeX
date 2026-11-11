@@ -43,6 +43,7 @@ export function getKeyboardShortcutLabelMappings(t, isCapacitor = false) {
     [t('Share.Copy Link'), ['COPY_CURRENT_URL']],
 
     [t('KeyboardShortcutPrompt.Refresh'), ['REFRESH']],
+    [t('KeyboardShortcutPrompt.Mark Seen or Watched'), ['MARK_SEEN_OR_WATCHED']],
 
     [t('KeyboardShortcutPrompt.Captions'), ['CAPTIONS']],
     [t('KeyboardShortcutPrompt.Theatre Mode'), ['THEATRE_MODE']],
