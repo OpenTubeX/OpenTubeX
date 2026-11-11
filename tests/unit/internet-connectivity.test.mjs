@@ -171,6 +171,39 @@ test('healthy connections stay idle and app resume checks reachability again', a
   assert.equal(calls, 2)
 })
 
+test('a check that fails while the app is hidden keeps it online until it is visible again', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  let calls = 0
+  let visible = true
+  let reachable = true
+  const visibilityTarget = new EventTarget()
+  const monitor = createInternetConnectivity({
+    eventTarget: new EventTarget(),
+    isOnline: () => true,
+    visibilityTarget,
+    isVisible: () => visible,
+    probe: async () => { calls++; return reachable }
+  })
+  t.after(() => monitor.dispose())
+  let offline = 0
+  monitor.events.addEventListener('offline', () => offline++)
+  await monitor.ready
+  // Android blocks the network of a hidden app.
+  visible = false
+  reachable = false
+  assert.equal(await monitor.check(), false, 'the failed request still counts as a network failure')
+  t.mock.timers.tick(3600000)
+  await flush()
+  assert.equal(calls, 2, 'a hidden app must not poll a blocked network')
+  assert.equal(monitor.online, true)
+  visible = true
+  reachable = true
+  visibilityTarget.dispatchEvent(new Event('visibilitychange'))
+  await flush()
+  assert.equal(calls, 3)
+  assert.equal(offline, 0, 'the connection must not flash as lost after resume')
+})
+
 test('a check that fails despite a working connection is ignored until the network changes', async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] })
   const eventTarget = new EventTarget()

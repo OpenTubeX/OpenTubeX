@@ -246,7 +246,9 @@ export function initializeNetworkRecovery({ checkInternet, internetChecksEnabled
       internetChecksEnabled,
       eventTarget: window,
       visibilityTarget: typeof document === 'undefined' ? undefined : document,
-      isVisible: () => !isAppHidden(),
+      // Android reports a hidden activity to the page only after Chromium has
+      // already hidden the document.
+      isVisible: () => !isAppHidden() && !globalThis.document?.hidden,
       isOnline: () => navigator.onLine !== false,
       onChange: state => connectionEvents.dispatchEvent(new CustomEvent('change', { detail: state })),
       onWaitingChange: origins => connectionEvents.dispatchEvent(new CustomEvent('waiting', { detail: origins }))

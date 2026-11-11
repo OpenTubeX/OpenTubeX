@@ -109,6 +109,7 @@ async function loadAppNetwork(t, fetch, nativeRequest, options = {}, localNetwor
     createInternetConnectivity,
     createInternetProbe,
     INTERNET_CHECK_URL,
+    isAppHidden: () => false,
     options,
     window,
     navigator: { onLine: true },
