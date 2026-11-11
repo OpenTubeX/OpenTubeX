@@ -222,7 +222,7 @@ function create(element) {
   const horizontal = createScrollbar('x')
   const vertical = createScrollbar('y')
   const scrollbars = [horizontal, vertical]
-  const clickScroll = !process.env.IS_CAPACITOR && element.matches('[data-scrollbar-click-scroll]')
+  const clickScroll = !process.env.IS_CAPACITOR
   // Windowed lists estimate rows that never mounted, so their range can grow
   // after a scroll to the end mounts the last rows.
   const keepEnd = !isPage && element.matches('[data-scrollbar-keep-end]')
