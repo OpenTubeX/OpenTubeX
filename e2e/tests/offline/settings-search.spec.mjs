@@ -41,18 +41,18 @@ test.describe('settings search category headings', () => {
 })
 
 test.describe('settings search in a partially translated locale', () => {
-  // en-GB lacks this label, so the toggle renders the en-US fallback.
+  // en-GB lacks this label, so the select renders the en-US fallback.
   test.use({ seed: { settings: { currentLocale: 'en-GB' } } })
 
   test('finds settings that use the en-US fallback label', async ({ page }) => {
     await goTo(page, 'settings')
     const search = page.getByRole('searchbox', { name: 'Search settings' })
 
-    await search.fill('Limit titles to two lines')
+    await search.fill('Title Lines')
     await expect(page.locator('.settingsSearchResultMatch'))
-      .toHaveText(['Limit titles to two lines'])
-    await page.getByRole('button', { name: 'Limit titles to two lines', exact: true }).click()
-    await expect(page.locator('.switch-ctn.settingsSearchTarget')).toContainText('Limit titles to two lines')
+      .toHaveText(['Title Lines'])
+    await page.getByRole('button', { name: 'Title Lines', exact: true }).click()
+    await expect(page.locator('.select.settingsSearchTarget')).toContainText('Title Lines')
   })
 })
 
