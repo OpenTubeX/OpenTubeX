@@ -17,7 +17,7 @@
 services:
   opentubex:
     image: ghcr.io/opentubex/opentubex-web:latest
-    restart: unless-stopped
+    restart: always
     ports:
       - "127.0.0.1:${OPENTUBEX_PORT:-8080}:80"
     depends_on:
@@ -26,7 +26,7 @@ services:
 
   invidious:
     image: quay.io/invidious/invidious:latest
-    restart: unless-stopped
+    restart: always
     environment:
       # Leave `domain` unset so Invidious returns relative URLs, which resolve
       # to whatever address OpenTubeX is opened on.
@@ -57,7 +57,7 @@ services:
 
   companion:
     image: quay.io/invidious/invidious-companion:latest
-    restart: unless-stopped
+    restart: always
     environment:
       SERVER_SECRET_KEY: "${INVIDIOUS_COMPANION_KEY:?Set INVIDIOUS_COMPANION_KEY in .env}"
     read_only: true
@@ -70,7 +70,7 @@ services:
 
   invidious-db:
     image: docker.io/postgres:18-alpine
-    restart: unless-stopped
+    restart: always
     environment:
       POSTGRES_DB: invidious
       POSTGRES_USER: kemal

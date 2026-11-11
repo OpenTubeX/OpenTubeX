@@ -19,7 +19,7 @@
 services:
   opentubex:
     image: ghcr.io/opentubex/opentubex-web:latest
-    restart: unless-stopped
+    restart: always
     environment:
       OPENTUBEX_INVIDIOUS: "false"
     ports:
