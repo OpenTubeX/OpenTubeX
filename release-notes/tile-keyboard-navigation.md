@@ -1,6 +1,5 @@
 ---
 category: feature
-platforms: [desktop]
 ---
 
 Once a video or other item in a feed or result list has focus, the arrow keys move between items. M marks a new item as seen, or toggles watched on an item already seen. You can change the M shortcut in Keyboard Shortcuts.
