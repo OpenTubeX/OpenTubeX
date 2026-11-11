@@ -2,6 +2,7 @@ import {
   test,
   expect,
   expectAnimation,
+  expectOverlayScrollRange,
   goTo,
   goToSettingsSection,
   recordAnimations,
@@ -529,7 +530,7 @@ test.describe('settings', () => {
     await expect.poll(() => page.locator('.settingsDownloadsPage').evaluate(element => element.scrollTop)).toBe(0)
   })
 
-  test('clamps the settings scroll position after repeated resizing', async ({ page }) => {
+  test('clamps the settings scroll position after repeated resizing', { tag: '@scale' }, async ({ page }) => {
     await goTo(page, 'settings')
     const settingsWindow = page.locator('.settingsWindow')
     const content = page.locator('.settingsContent')
@@ -557,13 +558,7 @@ test.describe('settings', () => {
     await page.mouse.move(smallerHandleBounds.x + 180, smallerHandleBounds.y + 180)
     await page.mouse.up()
 
-    await page.waitForTimeout(250)
-    expect(await content.evaluate(element => {
-      const section = element.querySelector('.section')
-      const contentEnd = section.offsetTop + section.offsetHeight +
-        Number.parseFloat(getComputedStyle(element).paddingBottom)
-      return element.scrollTop - Math.max(0, contentEnd - element.clientHeight)
-    })).toBeLessThanOrEqual(1)
+    await expectOverlayScrollRange(content)
 
     const restoredHandleBounds = await resizeHandle.boundingBox()
     await page.mouse.move(
@@ -587,10 +582,7 @@ test.describe('settings', () => {
     await page.mouse.move(compactHandleBounds.x + 180, compactHandleBounds.y + 180)
     await page.mouse.up()
 
-    await page.waitForTimeout(250)
-    expect(await menu.evaluate(element => (
-      element.scrollTop - Math.max(0, element.scrollHeight - element.clientHeight)
-    ))).toBeLessThanOrEqual(1)
+    await expectOverlayScrollRange(menu)
   })
 
   test('keeps the settings window inside the narrowest supported viewport', async ({ page }) => {
