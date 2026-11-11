@@ -1,10 +1,10 @@
 <template>
-  <div :class="{ communityPosts: isCommunity }">
+  <div>
     <FtLoader
-      v-if="displayIsLoading && activeVideoList.length === 0 && isCommunity"
+      v-if="showsLoadingPlaceholder && isCommunity"
     />
     <FtSkeletonGrid
-      v-if="displayIsLoading && activeVideoList.length === 0 && !isCommunity"
+      v-if="showsLoadingPlaceholder && !isCommunity"
       :youtube-style-shorts="youtubeStyleShorts"
     />
     <div
@@ -22,7 +22,7 @@
       </FtFlexBox>
     </div>
     <FtFlexBox
-      v-if="!displayIsLoading && activeVideoList.length === 0 && !hasAdditionalContent"
+      v-if="showsEmptyState"
     >
       <p
         v-if="!activeProfileHasSubscriptions"
@@ -60,6 +60,7 @@
       :has-visible-content="activeVideoList.length > 0"
     />
     <FtElementList
+      :class="{ communityPosts: isCommunity }"
       :data="activeVideoList"
       :data-overrides="dataOverrides"
       :subscription-feed-type="subscriptionFeedType ?? refreshTab"
@@ -177,6 +178,14 @@ const props = defineProps({
   youtubeStyleShorts: {
     type: Boolean,
     default: false
+  },
+  /**
+   * Shows a skeleton instead of the empty state while an empty feed loads.
+   * Without it, the empty state stays visible during refreshes.
+   */
+  showLoadingPlaceholder: {
+    type: Boolean,
+    default: true
   }
 })
 
@@ -234,6 +243,16 @@ const displayIsLoading = computed(() => {
     (props.refreshTab === null || subscriptionFeedRefreshTab.value === props.refreshTab)
 
   return props.isLoading || isRelevantGlobalRefresh
+})
+
+const showsLoadingPlaceholder = computed(() => {
+  return props.showLoadingPlaceholder && displayIsLoading.value && activeVideoList.value.length === 0
+})
+
+const showsEmptyState = computed(() => {
+  return activeVideoList.value.length === 0 &&
+    !props.hasAdditionalContent &&
+    (props.showLoadingPlaceholder ? !displayIsLoading.value : store.getters.getSubscriptionCacheReady)
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */
