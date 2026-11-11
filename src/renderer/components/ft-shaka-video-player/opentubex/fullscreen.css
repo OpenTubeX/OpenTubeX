@@ -518,20 +518,6 @@
   justify-content: flex-start;
 }
 
-.fullscreenMetadataTarget :deep(.shareButton .iconDropdown) {
-  color: var(--primary-text-color);
-  background-color: rgb(12 12 12 / 62%);
-  border: 1px solid rgb(255 255 255 / 10%);
-  border-radius: var(--shape-corner-large);
-  box-shadow: 0 6px 20px rgb(0 0 0 / 35%);
-  backdrop-filter: blur(14px) saturate(1.05);
-}
-
-.fullscreenMetadataTarget :deep(.shareButton .youtubeLogo) {
-  filter: brightness(0) invert(1);
-  opacity: 0.85;
-}
-
 .fullscreenTranscriptTarget,
 .fullscreenSponsorBlockTarget {
   position: absolute;
