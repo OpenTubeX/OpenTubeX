@@ -24,10 +24,11 @@ export const FULLSCREEN_DOCK_HEADER_SELECTOR = [
 /**
  * Lays out the information docks stacked beside the video in fullscreen and full window:
  * their order and heights, which the viewer can resize, reorder and collapse, and the
- * video's transition when the docks open or close.
+ * transitions of the video and the floating action dock when the docks open or close.
  * @param {{
  *   container: import('vue').Ref<HTMLElement | null>,
  *   video: import('vue').Ref<HTMLVideoElement | null>,
+ *   actionDock: import('vue').Ref<HTMLElement | null>,
  *   fullscreenDockOpen: import('vue').ComputedRef<boolean>,
  *   isFullscreenDockOpen: (dock: string) => boolean,
  *   isFullscreen: import('vue').Ref<boolean>,
@@ -39,6 +40,7 @@ export const FULLSCREEN_DOCK_HEADER_SELECTOR = [
 export function useFullscreenDocks({
   container,
   video,
+  actionDock,
   fullscreenDockOpen,
   isFullscreenDockOpen,
   isFullscreen,
@@ -48,14 +50,34 @@ export function useFullscreenDocks({
 }) {
   const fullscreenDockLayoutOpen = ref(false)
   let fullscreenDockLayoutFrame = null
-  /** @type {Animation | null} */
-  let fullscreenDockVideoAnimation = null
+  /** @type {Animation[]} */
+  let fullscreenDockAnimations = []
   let fullscreenDockAnimationGeneration = 0
 
-  function cancelFullscreenDockVideoAnimation() {
+  function cancelFullscreenDockAnimations() {
     fullscreenDockAnimationGeneration++
-    fullscreenDockVideoAnimation?.cancel()
-    fullscreenDockVideoAnimation = null
+    fullscreenDockAnimations.forEach(animation => animation.cancel())
+    fullscreenDockAnimations = []
+  }
+
+  /**
+   * @param {HTMLElement} element
+   * @param {Keyframe[]} keyframes
+   */
+  function animateFullscreenDockPush(element, keyframes) {
+    const animation = applyAnimationSpeed(element.animate(keyframes, { duration: 250, easing: 'ease' }))
+    fullscreenDockAnimations.push(animation)
+    animation.addEventListener('finish', () => {
+      fullscreenDockAnimations = fullscreenDockAnimations.filter(entry => entry !== animation)
+    })
+  }
+
+  /** The action dock is anchored to the video's inline end, so only that edge moves. */
+  function getActionDockInlineEnd() {
+    const element = actionDock.value
+    if (!element) return null
+    const bounds = element.getBoundingClientRect()
+    return getComputedStyle(element).direction === 'rtl' ? bounds.left : bounds.right
   }
 
   function getFullscreenDockVideoGeometry() {
@@ -70,38 +92,44 @@ export function useFullscreenDocks({
     }
   }
 
-  // Commit the final layout once, then animate the fitted video on the
-  // compositor. Animating its width also reflows Shaka, captions, annotations
-  // and ResizeObservers on every frame, even when the dock only slides in.
+  // Commit the final layout once, then animate the fitted video and the action
+  // dock on the compositor. Animating layout properties reflows Shaka, captions,
+  // annotations and ResizeObservers on every frame and stalls under load.
   watch(fullscreenDockLayoutOpen, async () => {
     const before = getFullscreenDockVideoGeometry()
-    cancelFullscreenDockVideoAnimation()
+    const actionDockBefore = getActionDockInlineEnd()
+    cancelFullscreenDockAnimations()
     const generation = fullscreenDockAnimationGeneration
-    if (!before || presentationModeChanging.value || isReducedMotionEnabled() ||
+    if (presentationModeChanging.value || isReducedMotionEnabled() ||
       (!isFullscreen.value && !isFullWindow())) return
 
     await nextTick()
     if (generation !== fullscreenDockAnimationGeneration || presentationModeChanging.value) return
+
+    const actionDockAfter = getActionDockInlineEnd()
+    if (actionDockBefore !== null && actionDockAfter !== null && Math.abs(actionDockBefore - actionDockAfter) >= 0.5) {
+      animateFullscreenDockPush(actionDock.value, [
+        { translate: `${actionDockBefore - actionDockAfter}px 0px` },
+        { translate: '0px 0px' },
+      ])
+    }
+
     const after = getFullscreenDockVideoGeometry()
-    if (!after || after.width <= 0) return
+    if (!before || !after || after.width <= 0) return
     const scale = before.width / after.width
     // Zoom/pan uses `transform`. Individual scale/translate keep that intact;
     // compensate for scaling its translation around the element's center.
     const transform = new DOMMatrix(getComputedStyle(video.value).transform)
     const x = before.x - after.x + transform.e * (1 - scale)
     const y = before.y - after.y + transform.f * (1 - scale)
-    const animation = applyAnimationSpeed(video.value.animate([
+    animateFullscreenDockPush(video.value, [
       { scale: String(scale), translate: `${x}px ${y}px` },
       { scale: '1', translate: '0px 0px' },
-    ], { duration: 250, easing: 'ease' }))
-    fullscreenDockVideoAnimation = animation
-    animation.addEventListener('finish', () => {
-      if (fullscreenDockVideoAnimation === animation) fullscreenDockVideoAnimation = null
-    })
+    ])
   })
 
   watch(presentationModeChanging, changing => {
-    if (changing) cancelFullscreenDockVideoAnimation()
+    if (changing) cancelFullscreenDockAnimations()
   })
 
   watch(fullscreenDockOpen, (open) => {
@@ -392,7 +420,7 @@ export function useFullscreenDocks({
     if (fullscreenDockLayoutFrame !== null) {
       cancelAnimationFrame(fullscreenDockLayoutFrame)
     }
-    cancelFullscreenDockVideoAnimation()
+    cancelFullscreenDockAnimations()
   })
 
   return {

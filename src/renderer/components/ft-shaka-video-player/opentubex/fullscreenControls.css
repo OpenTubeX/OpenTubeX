@@ -1,8 +1,10 @@
 /* stylelint-disable liberty/use-logical-spec */
 
-/* Keep the floating fullscreen actions next to the video instead of under the panel. */
-.ftVideoPlayer:fullscreen:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .fullscreenQueueOpen, .fullscreenRecommendationsOpen, .chaptersOverlayOpen) .fullscreenActions,
-.ftVideoPlayer.fullWindow:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .fullscreenQueueOpen, .fullscreenRecommendationsOpen, .chaptersOverlayOpen) .fullscreenActions {
+/*
+  Keep the floating fullscreen actions next to the video instead of under the
+  panel. They follow the layout class so they move in the same frame as the video.
+*/
+.ftVideoPlayer:is(:fullscreen, .fullWindow).fullscreenDockLayoutOpen .fullscreenActions {
   --fullscreen-actions-inline-end: calc(var(--side-panel-width) + 24px);
 }
 
