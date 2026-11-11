@@ -2914,6 +2914,21 @@ final class AppTests: XCTestCase {
         XCTAssertFalse(MPRemoteCommandCenter.shared().playCommand.isEnabled)
     }
 
+    func testNowPlayingArtworkRejectsLocalDestinations() throws {
+        XCTAssertTrue(isPublicArtworkURL(try XCTUnwrap(URL(string: "https://8.8.8.8/thumbnail.jpg"))))
+        XCTAssertTrue(isPublicArtworkURL(try XCTUnwrap(URL(string: "https://[2001:4860:4860::8888]/thumbnail.jpg"))))
+        for source in [
+            "http://8.8.8.8/thumbnail.jpg", "https://user:password@8.8.8.8/thumbnail.jpg",
+            "https://localhost/thumbnail.jpg", "https://127.1/thumbnail.jpg", "https://10.0.0.1/thumbnail.jpg",
+            "https://172.16.0.1/thumbnail.jpg", "https://192.168.0.1/thumbnail.jpg", "https://169.254.1.1/thumbnail.jpg",
+            "https://100.64.0.1/thumbnail.jpg", "https://[::1]/thumbnail.jpg", "https://[fc00::1]/thumbnail.jpg",
+            "https://[fe80::1]/thumbnail.jpg", "https://[::ffff:192.168.0.1]/thumbnail.jpg", "https://[64:ff9b::a00:1]/thumbnail.jpg",
+            "https://[64:ff9b:1::a00:1]/thumbnail.jpg"
+        ] {
+            XCTAssertFalse(isPublicArtworkURL(try XCTUnwrap(URL(string: source))), source)
+        }
+    }
+
     func testTouchSearchDismissal() async throws {
         try await openApplication()
         _ = try await webView.callAsyncJavaScript("await testStore.dispatch('hideSettingsWindow')", arguments: [:], in: nil, contentWorld: .page)
