@@ -25,6 +25,7 @@ import com.getcapacitor.PluginResult;
 import java.lang.reflect.Field;
 import java.io.InputStream;
 import java.util.Map;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -211,6 +212,28 @@ public class CapacitorShareResultTest {
             dismissChoosers(2);
         }
         assertNoShareRegistryEntries(registry[0]);
+    }
+
+    /**
+     * Each share opens a real system chooser in the app's task. One left behind
+     * is destroyed late when Orchestrator clears the app's data, and Android
+     * then kills the next test's process along with that task.
+     */
+    @After
+    public void closeLeftoverChoosers() throws Exception {
+        long deadline = SystemClock.uptimeMillis() + 30000;
+        while (shell("dumpsys activity activities").contains("ChooserActivity")) {
+            assertTrue("Every share chooser closes before the next test", SystemClock.uptimeMillis() < deadline);
+            shell("input keyevent BACK");
+            SystemClock.sleep(250);
+        }
+    }
+
+    private static String shell(String command) throws Exception {
+        try (InputStream input = new ParcelFileDescriptor.AutoCloseInputStream(
+            InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(command))) {
+            return new String(input.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        }
     }
 
     private static void dismissChoosers(int backPresses) throws Exception {
