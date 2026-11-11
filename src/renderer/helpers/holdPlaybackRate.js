@@ -2,13 +2,13 @@
 export const HOLD_PLAYBACK_RATE_MULTIPLIERS = Object.freeze([0, 1.25, 1.5, 1.75, 2, 2.5, 3, 4])
 
 /**
- * Settings aren't validated on import or sync, so a multiplier that would not
- * speed playback up turns holding off.
+ * Settings aren't validated on import or sync, so a multiplier the selects
+ * don't offer uses the default, keeping the player and the selects in agreement.
  * @param {unknown} multiplier
  * @returns {number}
  */
 export function normalizeHoldPlaybackRateMultiplier(multiplier) {
-  return typeof multiplier === 'number' && Number.isFinite(multiplier) && multiplier > 1 ? multiplier : 0
+  return HOLD_PLAYBACK_RATE_MULTIPLIERS.includes(/** @type {number} */ (multiplier)) ? /** @type {number} */ (multiplier) : 2
 }
 
 /**
