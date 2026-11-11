@@ -5,8 +5,20 @@
     <string name="widget_continue_watching_description">Nadaljujte videoposnetke, ki ste jih začeli gledati</string>
     <string name="widget_continue_watching_empty">Tukaj se prikažejo videoposnetki, ki jih začnete gledati</string>
     <string name="widget_quick_access_name">Hitri dostop</string>
-    <string name="widget_quick_access_description">Odpri Iskanje, Naročnine ali Za poznejši ogled</string>
+    <string name="widget_quick_access_description">Odpri do 4 strani po vaši izbiri</string>
+    <string name="widget_quick_access_choose">Izberite do 4 strani</string>
+    <string name="widget_quick_access_pages">Strani</string>
     <string name="widget_search">Iskanje</string>
     <string name="widget_subscriptions">Naročnine</string>
     <string name="widget_watch_later">Za poznejši ogled</string>
+    <string name="widget_history">Zgodovina</string>
+    <string name="widget_playlists">Seznami</string>
+    <string name="widget_downloads">Prenosi</string>
+    <string name="widget_watch_time_name">Čas gledanja</string>
+    <string name="widget_watch_time_description">Vaš čas gledanja v zadnjih 7 dneh</string>
+    <string name="widget_today">Danes</string>
+    <string name="widget_last_7_days">Zadnjih 7 dni</string>
+    <string name="widget_recent_downloads_name">Nedavni prenosi</string>
+    <string name="widget_recent_downloads_description">Predvajajte videoposnetke, ki ste jih prenesli</string>
+    <string name="widget_recent_downloads_empty">Tukaj se prikažejo videoposnetki, ki jih prenesete</string>
 </resources>

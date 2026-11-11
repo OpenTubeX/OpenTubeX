@@ -2603,10 +2603,22 @@ Home Widgets:
   Continue Watching Description: "Συνεχίστε τα βίντεο που αρχίσατε να βλέπετε"
   Continue Watching Empty: "Τα βίντεο που αρχίζετε να βλέπετε εμφανίζονται εδώ"
   Quick Access: "Γρήγορη πρόσβαση"
-  Quick Access Description: "Άνοιγμα Αναζήτησης, Συνδρομών ή Παρακολούθησης αργότερα"
+  Quick Access Description: "Άνοιγμα έως 4 σελίδων της επιλογής σας"
+  Choose Pages: "Επιλέξτε έως 4 σελίδες"
+  Pages: "Σελίδες"
   Search: "Αναζήτηση"
   Subscriptions: "Συνδρομές"
   Watch Later: "Παρακολούθηση αργότερα"
+  History: "Ιστορικό"
+  Playlists: "Λίστες"
+  Downloads: "Λήψεις"
+  Watch Time: "Χρόνος παρακολούθησης"
+  Watch Time Description: "Ο χρόνος παρακολούθησής σας τις τελευταίες 7 ημέρες"
+  Today: "Σήμερα"
+  Last 7 Days: "Τελευταίες 7 ημέρες"
+  Recent Downloads: "Πρόσφατες λήψεις"
+  Recent Downloads Description: "Αναπαραγωγή βίντεο που έχετε κατεβάσει"
+  Recent Downloads Empty: "Τα βίντεο που κατεβάζετε εμφανίζονται εδώ"
 Subscription Groups:
   Groups: Ομάδες
   All: Όλα

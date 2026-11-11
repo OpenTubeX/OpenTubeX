@@ -5,8 +5,20 @@
     <string name="widget_continue_watching_description">Jätka videoid, mida hakkasid vaatama</string>
     <string name="widget_continue_watching_empty">Siin kuvatakse videod, mida hakkad vaatama</string>
     <string name="widget_quick_access_name">Kiirjuurdepääs</string>
-    <string name="widget_quick_access_description">Ava Otsing, Tellimused või Vaata hiljem</string>
+    <string name="widget_quick_access_description">Ava kuni 4 enda valitud lehte</string>
+    <string name="widget_quick_access_choose">Vali kuni 4 lehte</string>
+    <string name="widget_quick_access_pages">Lehed</string>
     <string name="widget_search">Otsi</string>
     <string name="widget_subscriptions">Tellimused</string>
     <string name="widget_watch_later">Vaata hiljem</string>
+    <string name="widget_history">Ajalugu</string>
+    <string name="widget_playlists">Loendid</string>
+    <string name="widget_downloads">Allalaadimised</string>
+    <string name="widget_watch_time_name">Vaatamisaeg</string>
+    <string name="widget_watch_time_description">Sinu vaatamisaeg viimase 7 päeva jooksul</string>
+    <string name="widget_today">Täna</string>
+    <string name="widget_last_7_days">Viimased 7 päeva</string>
+    <string name="widget_recent_downloads_name">Hiljutised allalaadimised</string>
+    <string name="widget_recent_downloads_description">Esita allalaaditud videoid</string>
+    <string name="widget_recent_downloads_empty">Siin kuvatakse videod, mille alla laadid</string>
 </resources>

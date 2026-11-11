@@ -2598,10 +2598,22 @@ Home Widgets:
   Continue Watching Description: "Jatka videoita, joiden katselun aloitit"
   Continue Watching Empty: "Videot, joiden katselun aloitat, näkyvät täällä"
   Quick Access: "Pikakäyttö"
-  Quick Access Description: "Avaa Haku, Tilaukset tai Katso myöhemmin"
+  Quick Access Description: "Avaa enintään 4 valitsemaasi sivua"
+  Choose Pages: "Valitse enintään 4 sivua"
+  Pages: "Sivut"
   Search: "Hae"
   Subscriptions: "Tilaukset"
   Watch Later: "Katso myöhemmin"
+  History: "Historia"
+  Playlists: "Soittolistat"
+  Downloads: "Lataukset"
+  Watch Time: "Katseluaika"
+  Watch Time Description: "Katseluaikasi viimeisten 7 päivän aikana"
+  Today: "Tänään"
+  Last 7 Days: "Viimeiset 7 päivää"
+  Recent Downloads: "Viimeisimmät lataukset"
+  Recent Downloads Description: "Toista lataamiasi videoita"
+  Recent Downloads Empty: "Lataamasi videot näkyvät täällä"
 Subscription Groups:
   Groups: Ryhmät
   All: Kaikki

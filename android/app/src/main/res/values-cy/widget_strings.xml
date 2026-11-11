@@ -5,8 +5,20 @@
     <string name="widget_continue_watching_description">Ailddechrau fideos rydych chi wedi dechrau eu gwylio</string>
     <string name="widget_continue_watching_empty">Bydd fideos rydych chi\'n dechrau eu gwylio yn ymddangos yma</string>
     <string name="widget_quick_access_name">Mynediad cyflym</string>
-    <string name="widget_quick_access_description">Agor Chwilio, Tanysgrifiadau neu Gwylio Nes Ymlaen</string>
+    <string name="widget_quick_access_description">Agor hyd at 4 tudalen o\'ch dewis</string>
+    <string name="widget_quick_access_choose">Dewiswch hyd at 4 tudalen</string>
+    <string name="widget_quick_access_pages">Tudalennau</string>
     <string name="widget_search">Chwilio</string>
     <string name="widget_subscriptions">Tanysgrifiadau</string>
     <string name="widget_watch_later">Gwylio Nes Ymlaen</string>
+    <string name="widget_history">Hanes</string>
+    <string name="widget_playlists">Rhestrau</string>
+    <string name="widget_downloads">Lawrlwythiadau</string>
+    <string name="widget_watch_time_name">Amser gwylio</string>
+    <string name="widget_watch_time_description">Eich amser gwylio dros y 7 diwrnod diwethaf</string>
+    <string name="widget_today">Heddiw</string>
+    <string name="widget_last_7_days">Y 7 diwrnod diwethaf</string>
+    <string name="widget_recent_downloads_name">Lawrlwythiadau diweddar</string>
+    <string name="widget_recent_downloads_description">Chwarae fideos rydych chi wedi\'u lawrlwytho</string>
+    <string name="widget_recent_downloads_empty">Bydd fideos rydych chi\'n eu lawrlwytho yn ymddangos yma</string>
 </resources>

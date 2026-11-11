@@ -8,18 +8,16 @@ public class HomeWidgetsPlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "HomeWidgetsPlugin"
     public let jsName = "HomeWidgets"
     public let pluginMethods: [CAPPluginMethod] = [
-        CAPPluginMethod(name: "setContinueWatching", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "setContinueWatching", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "setDownloads", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "setWatchTime", returnType: CAPPluginReturnPromise),
     ]
     private let queue = DispatchQueue(label: "org.opentubex.home-widgets")
 
     @objc func setContinueWatching(_ call: CAPPluginCall) {
         let videos = Array((call.getArray("videos") as? [[String: Any]] ?? [])
             .compactMap(HomeWidgetVideo.init(json:)).prefix(HomeWidgetStore.maxVideos))
-        let authorization = call.getObject("authorization").flatMap { json -> (origin: URL, value: String)? in
-            guard let url = (json["url"] as? String).flatMap(URL.init(string:)),
-                  let value = json["value"] as? String, !value.isEmpty else { return nil }
-            return (url, value)
-        }
+        let authorization = Self.authorization(call)
         queue.async {
             do {
                 try HomeWidgetStore.save(videos)
@@ -29,27 +27,74 @@ public class HomeWidgetsPlugin: CAPPlugin, CAPBridgedPlugin {
             }
             WidgetCenter.shared.reloadTimelines(ofKind: HomeWidgetStore.continueWatchingKind)
             call.resolve()
-            if self.updateThumbnails(videos, authorization: authorization) {
+            let thumbnails = videos.compactMap { video in
+                HomeWidgetStore.thumbnailFile(for: video).flatMap { file in URL(string: video.thumbnail).map { (file, $0) } }
+            }
+            if let directory = HomeWidgetStore.directory, self.updateThumbnails(thumbnails, in: directory, authorization: authorization) {
                 WidgetCenter.shared.reloadTimelines(ofKind: HomeWidgetStore.continueWatchingKind)
             }
         }
     }
 
-    /// Downloads missing thumbnails and removes unused ones. Runs on the serial queue.
-    private func updateThumbnails(_ videos: [HomeWidgetVideo], authorization: (origin: URL, value: String)?) -> Bool {
-        guard let directory = HomeWidgetStore.directory else { return false }
-        var keep = Set(["continue-watching.json"])
+    @objc func setDownloads(_ call: CAPPluginCall) {
+        let downloads = Array((call.getArray("downloads") as? [[String: Any]] ?? [])
+            .compactMap(HomeWidgetDownload.init(json:)).prefix(HomeWidgetStore.maxVideos))
+        let authorization = Self.authorization(call)
+        queue.async {
+            do {
+                try HomeWidgetStore.save(downloads)
+            } catch {
+                call.reject("Unable to update home screen widgets", nil, error)
+                return
+            }
+            WidgetCenter.shared.reloadTimelines(ofKind: HomeWidgetStore.recentDownloadsKind)
+            call.resolve()
+            let thumbnails = downloads.compactMap { download in
+                HomeWidgetStore.thumbnailFile(for: download).flatMap { file in URL(string: download.thumbnail).map { (file, $0) } }
+            }
+            if let directory = HomeWidgetStore.downloadThumbnailDirectory,
+               self.updateThumbnails(thumbnails, in: directory, authorization: authorization) {
+                WidgetCenter.shared.reloadTimelines(ofKind: HomeWidgetStore.recentDownloadsKind)
+            }
+        }
+    }
+
+    @objc func setWatchTime(_ call: CAPPluginCall) {
+        let days = HomeWidgetStore.parseWatchTime(call.getObject("days") ?? [:])
+        queue.async {
+            do {
+                try HomeWidgetStore.saveWatchTime(days)
+            } catch {
+                call.reject("Unable to update home screen widgets", nil, error)
+                return
+            }
+            WidgetCenter.shared.reloadTimelines(ofKind: HomeWidgetStore.watchTimeKind)
+            call.resolve()
+        }
+    }
+
+    private static func authorization(_ call: CAPPluginCall) -> (origin: URL, value: String)? {
+        call.getObject("authorization").flatMap { json -> (origin: URL, value: String)? in
+            guard let url = (json["url"] as? String).flatMap(URL.init(string:)),
+                  let value = json["value"] as? String, !value.isEmpty else { return nil }
+            return (url, value)
+        }
+    }
+
+    /// Downloads missing thumbnails and removes the directory's other images. Runs on the serial queue.
+    private func updateThumbnails(_ thumbnails: [(file: URL, url: URL)], in directory: URL,
+                                  authorization: (origin: URL, value: String)?) -> Bool {
+        try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         var downloaded = false
-        for video in videos {
-            guard let file = HomeWidgetStore.thumbnailFile(for: video), let url = URL(string: video.thumbnail) else { continue }
-            keep.insert(file.lastPathComponent)
-            if FileManager.default.fileExists(atPath: file.path) { continue }
+        for (file, url) in thumbnails where !FileManager.default.fileExists(atPath: file.path) {
             guard let data = ThumbnailDownload.run(url, authorization: authorization), let image = Self.decode(data),
                   let jpeg = Self.thumbnail(from: image).jpegData(compressionQuality: 0.85) else { continue }
             downloaded = (try? jpeg.write(to: file, options: .atomic)) != nil || downloaded
         }
+        let keep = Set(thumbnails.map(\.file.lastPathComponent))
+        // Cached lists and other widgets' folders share the App Group directory.
         for file in (try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)) ?? []
-            where !keep.contains(file.lastPathComponent) {
+            where file.pathExtension == "jpg" && !keep.contains(file.lastPathComponent) {
             try? FileManager.default.removeItem(at: file)
         }
         return downloaded

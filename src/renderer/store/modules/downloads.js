@@ -2,7 +2,8 @@ import { localPlaybackDownloadIds } from '../../helpers/downloadPlayback.js'
 
 // replace with a Map after the Pinia migration
 const state = {
-  ytDlpDownloads: {}
+  ytDlpDownloads: {},
+  ytDlpDownloadsLoaded: false
 }
 
 const getters = {
@@ -28,6 +29,10 @@ const mutations = {
 
   removeYtDlpDownload(state, id) {
     delete state.ytDlpDownloads[id]
+  },
+
+  setYtDlpDownloadsLoaded(state) {
+    state.ytDlpDownloadsLoaded = true
   }
 }
 

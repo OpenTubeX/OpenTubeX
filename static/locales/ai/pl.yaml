@@ -1837,10 +1837,22 @@ Home Widgets:
   Continue Watching Description: "Wznów filmy, które zacząłeś oglądać"
   Continue Watching Empty: "Tutaj pojawią się filmy, które zaczniesz oglądać"
   Quick Access: "Szybki dostęp"
-  Quick Access Description: "Otwórz Szukaj, Subskrypcje lub Do obejrzenia"
+  Quick Access Description: "Otwórz do 4 wybranych stron"
+  Choose Pages: "Wybierz do 4 stron"
+  Pages: "Strony"
   Search: "Szukaj"
   Subscriptions: "Subskrypcje"
   Watch Later: "Do obejrzenia"
+  History: "Historia"
+  Playlists: "Playlisty"
+  Downloads: "Pobrane"
+  Watch Time: "Czas oglądania"
+  Watch Time Description: "Twój czas oglądania w ciągu ostatnich 7 dni"
+  Today: "Dzisiaj"
+  Last 7 Days: "Ostatnie 7 dni"
+  Recent Downloads: "Ostatnio pobrane"
+  Recent Downloads Description: "Odtwórz pobrane filmy"
+  Recent Downloads Empty: "Tutaj pojawią się pobrane filmy"
 Subscription Groups:
   Groups: Grupy
   All: Wszystkie

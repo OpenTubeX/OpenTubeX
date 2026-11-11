@@ -3093,10 +3093,22 @@ Home Widgets:
   Continue Watching Description: "Tęskite pradėtus žiūrėti vaizdo įrašus"
   Continue Watching Empty: "Čia rodomi vaizdo įrašai, kuriuos pradedate žiūrėti"
   Quick Access: "Greita prieiga"
-  Quick Access Description: "Atidaryti Paiešką, Prenumeratas arba Žiūrėti vėliau"
+  Quick Access Description: "Atidaryti iki 4 pasirinktų puslapių"
+  Choose Pages: "Pasirinkite iki 4 puslapių"
+  Pages: "Puslapiai"
   Search: "Ieškoti"
   Subscriptions: "Prenumeratos"
   Watch Later: "Žiūrėti vėliau"
+  History: "Istorija"
+  Playlists: "Grojaraščiai"
+  Downloads: "Atsisiuntimai"
+  Watch Time: "Žiūrėjimo laikas"
+  Watch Time Description: "Jūsų žiūrėjimo laikas per pastarąsias 7 dienas"
+  Today: "Šiandien"
+  Last 7 Days: "Pastarosios 7 dienos"
+  Recent Downloads: "Naujausi atsisiuntimai"
+  Recent Downloads Description: "Leiskite atsisiųstus vaizdo įrašus"
+  Recent Downloads Empty: "Čia rodomi vaizdo įrašai, kuriuos atsisiunčiate"
 Subscription Groups:
   Groups: Grupės
   All: Visi

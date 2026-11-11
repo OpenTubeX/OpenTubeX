@@ -24,7 +24,7 @@ import okhttp3.ResponseBody;
 
 /** Cancellable artwork loading, isolated from playback and notification state. */
 final class AndroidMediaArtwork implements AutoCloseable {
-    private static final int MAX_ARTWORK_REDIRECTS = 5;
+    static final int MAX_ARTWORK_REDIRECTS = 5;
     static final int MAX_ARTWORK_BYTES = 5 * 1024 * 1024;
     static final int MAX_ARTWORK_DIMENSION = 2048;
     static final long MAX_ARTWORK_PIXELS = 2048L * 2048L;
@@ -225,7 +225,7 @@ final class AndroidMediaArtwork implements AutoCloseable {
         return bytes.length != 16 || (Byte.toUnsignedInt(bytes[0]) & 0xfe) != 0xfc;
     }
 
-    private static boolean isRedirectStatus(int status) {
+    static boolean isRedirectStatus(int status) {
         return status == HttpURLConnection.HTTP_MOVED_PERM ||
             status == HttpURLConnection.HTTP_MOVED_TEMP ||
             status == HttpURLConnection.HTTP_SEE_OTHER ||

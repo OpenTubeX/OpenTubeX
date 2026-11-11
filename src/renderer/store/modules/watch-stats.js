@@ -4,6 +4,7 @@ import { createWatchStatsReset } from '../../helpers/sync-watch-stats'
 
 const state = {
   watchSecondsByDate: {},
+  watchStatsLoaded: false,
   syncedWatchStats: [],
   hasHistoricalWatchTimeEstimate: false,
   historicalWatchTimePlaybackSpeed: null,
@@ -106,6 +107,7 @@ const mutations = {
     state.watchSecondsByDate = Object.fromEntries(
       records.map(({ date, seconds }) => [date, seconds])
     )
+    state.watchStatsLoaded = true
   },
 
   setSyncedWatchStats(state, devices) {

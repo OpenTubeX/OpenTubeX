@@ -2592,10 +2592,22 @@ Home Widgets:
   Continue Watching Description: "Folytasd az elkezdett videókat"
   Continue Watching Empty: "Az elkezdett videók itt jelennek meg"
   Quick Access: "Gyors elérés"
-  Quick Access Description: "Keresés, Feliratkozások vagy Megnézendő megnyitása"
+  Quick Access Description: "Legfeljebb 4 választott oldal megnyitása"
+  Choose Pages: "Válassz legfeljebb 4 oldalt"
+  Pages: "Oldalak"
   Search: "Keresés"
   Subscriptions: "Feliratkozások"
   Watch Later: "Megnézendő"
+  History: "Előzmények"
+  Playlists: "Listák"
+  Downloads: "Letöltések"
+  Watch Time: "Nézési idő"
+  Watch Time Description: "Nézési időd az elmúlt 7 napban"
+  Today: "Ma"
+  Last 7 Days: "Az elmúlt 7 nap"
+  Recent Downloads: "Legutóbbi letöltések"
+  Recent Downloads Description: "Játszd le a letöltött videókat"
+  Recent Downloads Empty: "A letöltött videók itt jelennek meg"
 Subscription Groups:
   Groups: Csoportok
   All: Összes

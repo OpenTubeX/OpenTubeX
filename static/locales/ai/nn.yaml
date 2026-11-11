@@ -2986,10 +2986,22 @@ Home Widgets:
   Continue Watching Description: "Hald fram med videoar du har byrja å sjå"
   Continue Watching Empty: "Videoar du byrjar å sjå, blir viste her"
   Quick Access: "Snarvegar"
-  Quick Access Description: "Opna Søk, Abonnement eller Sjå seinare"
+  Quick Access Description: "Opna opptil 4 sider du vel"
+  Choose Pages: "Vel opptil 4 sider"
+  Pages: "Sider"
   Search: "Søkje"
   Subscriptions: "Abonnement"
   Watch Later: "Sjå seinare"
+  History: "Historikk"
+  Playlists: "Spelelistar"
+  Downloads: "Nedlastingar"
+  Watch Time: "Sjåtid"
+  Watch Time Description: "Sjåtida di dei siste 7 dagane"
+  Today: "I dag"
+  Last 7 Days: "Siste 7 dagar"
+  Recent Downloads: "Nylege nedlastingar"
+  Recent Downloads Description: "Spel av videoar du har lasta ned"
+  Recent Downloads Empty: "Videoar du lastar ned, blir viste her"
 Subscription Groups:
   Groups: Grupper
   All: Alle

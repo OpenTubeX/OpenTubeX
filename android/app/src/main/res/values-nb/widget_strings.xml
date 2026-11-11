@@ -5,8 +5,20 @@
     <string name="widget_continue_watching_description">Fortsett videoer du har begynt å se</string>
     <string name="widget_continue_watching_empty">Videoer du begynner å se, vises her</string>
     <string name="widget_quick_access_name">Hurtigtilgang</string>
-    <string name="widget_quick_access_description">Åpne Søk, Abonnementer eller Se senere</string>
+    <string name="widget_quick_access_description">Åpne opptil 4 sider du velger</string>
+    <string name="widget_quick_access_choose">Velg opptil 4 sider</string>
+    <string name="widget_quick_access_pages">Sider</string>
     <string name="widget_search">Søk</string>
     <string name="widget_subscriptions">Abonnementer</string>
     <string name="widget_watch_later">Se senere</string>
+    <string name="widget_history">Historikk</string>
+    <string name="widget_playlists">Spillelister</string>
+    <string name="widget_downloads">Nedlastinger</string>
+    <string name="widget_watch_time_name">Seertid</string>
+    <string name="widget_watch_time_description">Seertiden din de siste 7 dagene</string>
+    <string name="widget_today">I dag</string>
+    <string name="widget_last_7_days">Siste 7 dager</string>
+    <string name="widget_recent_downloads_name">Nylige nedlastinger</string>
+    <string name="widget_recent_downloads_description">Spill av videoer du har lastet ned</string>
+    <string name="widget_recent_downloads_empty">Videoer du laster ned, vises her</string>
 </resources>

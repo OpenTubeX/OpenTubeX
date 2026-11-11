@@ -2592,10 +2592,22 @@ Home Widgets:
   Continue Watching Description: "İzlemeye başladığınız videolara devam edin"
   Continue Watching Empty: "İzlemeye başladığınız videolar burada görünür"
   Quick Access: "Hızlı erişim"
-  Quick Access Description: "Arama, Abonelikler veya Daha sonra izle sayfasını açın"
+  Quick Access Description: "Seçtiğiniz en fazla 4 sayfayı açın"
+  Choose Pages: "En fazla 4 sayfa seçin"
+  Pages: "Sayfalar"
   Search: "Ara"
   Subscriptions: "Abonelikler"
   Watch Later: "Daha sonra izle"
+  History: "Geçmiş"
+  Playlists: "Listeler"
+  Downloads: "İndirilenler"
+  Watch Time: "İzleme süresi"
+  Watch Time Description: "Son 7 gündeki izleme süreniz"
+  Today: "Bugün"
+  Last 7 Days: "Son 7 gün"
+  Recent Downloads: "Son indirilenler"
+  Recent Downloads Description: "İndirdiğiniz videoları oynatın"
+  Recent Downloads Empty: "İndirdiğiniz videolar burada görünür"
 Subscription Groups:
   Groups: Gruplar
   All: Tümü

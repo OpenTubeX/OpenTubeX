@@ -2648,10 +2648,22 @@ Home Widgets:
   Continue Watching Description: "Reia videoclipurile pe care ai început să le vizionezi"
   Continue Watching Empty: "Videoclipurile pe care începi să le vizionezi apar aici"
   Quick Access: "Acces rapid"
-  Quick Access Description: "Deschide Căutare, Abonamente sau Vizionează mai târziu"
+  Quick Access Description: "Deschide până la 4 pagini alese de tine"
+  Choose Pages: "Alege până la 4 pagini"
+  Pages: "Pagini"
   Search: "Căutare"
   Subscriptions: "Abonamente"
   Watch Later: "Vizionează mai târziu"
+  History: "Istoric"
+  Playlists: "Liste"
+  Downloads: "Descărcări"
+  Watch Time: "Timp de vizionare"
+  Watch Time Description: "Timpul tău de vizionare în ultimele 7 zile"
+  Today: "Astăzi"
+  Last 7 Days: "Ultimele 7 zile"
+  Recent Downloads: "Descărcări recente"
+  Recent Downloads Description: "Redă videoclipurile pe care le-ai descărcat"
+  Recent Downloads Empty: "Videoclipurile pe care le descarci apar aici"
 Subscription Groups:
   Groups: Grupuri
   All: Toate

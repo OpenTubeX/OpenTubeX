@@ -5,8 +5,20 @@
     <string name="widget_continue_watching_description">Daŭrigi videaĵojn, kiujn vi ekspektis</string>
     <string name="widget_continue_watching_empty">Videaĵoj, kiujn vi ekspektas, aperas ĉi tie</string>
     <string name="widget_quick_access_name">Rapida aliro</string>
-    <string name="widget_quick_access_description">Malfermi serĉon, abonojn aŭ \"Spekti poste\"</string>
+    <string name="widget_quick_access_description">Malfermi ĝis 4 paĝojn laŭ via elekto</string>
+    <string name="widget_quick_access_choose">Elektu ĝis 4 paĝojn</string>
+    <string name="widget_quick_access_pages">Paĝoj</string>
     <string name="widget_search">Serĉi</string>
     <string name="widget_subscriptions">Abonoj</string>
     <string name="widget_watch_later">Spekti poste</string>
+    <string name="widget_history">Historio</string>
+    <string name="widget_playlists">Ludlistoj</string>
+    <string name="widget_downloads">Elŝutoj</string>
+    <string name="widget_watch_time_name">Spekttempo</string>
+    <string name="widget_watch_time_description">Via spekttempo dum la lastaj 7 tagoj</string>
+    <string name="widget_today">Hodiaŭ</string>
+    <string name="widget_last_7_days">Lastaj 7 tagoj</string>
+    <string name="widget_recent_downloads_name">Lastatempaj elŝutoj</string>
+    <string name="widget_recent_downloads_description">Ludi videaĵojn, kiujn vi elŝutis</string>
+    <string name="widget_recent_downloads_empty">Videaĵoj, kiujn vi elŝutas, aperas ĉi tie</string>
 </resources>

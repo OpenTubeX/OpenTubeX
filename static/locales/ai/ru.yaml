@@ -2571,10 +2571,22 @@ Home Widgets:
   Continue Watching Description: "Продолжайте видео, которые вы начали смотреть"
   Continue Watching Empty: "Здесь появятся видео, которые вы начнёте смотреть"
   Quick Access: "Быстрый доступ"
-  Quick Access Description: "Открыть Поиск, Подписки или «Смотреть позже»"
+  Quick Access Description: "Открыть до 4 выбранных вами страниц"
+  Choose Pages: "Выберите до 4 страниц"
+  Pages: "Страницы"
   Search: "Поиск"
   Subscriptions: "Подписки"
   Watch Later: "Смотреть позже"
+  History: "История"
+  Playlists: "Плейлисты"
+  Downloads: "Загрузки"
+  Watch Time: "Время просмотра"
+  Watch Time Description: "Ваше время просмотра за последние 7 дней"
+  Today: "Сегодня"
+  Last 7 Days: "Последние 7 дней"
+  Recent Downloads: "Недавние загрузки"
+  Recent Downloads Description: "Воспроизводите скачанные вами видео"
+  Recent Downloads Empty: "Здесь появятся видео, которые вы скачаете"
 Subscription Groups:
   Groups: Группы
   All: Все

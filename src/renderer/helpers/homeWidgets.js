@@ -1,49 +1,87 @@
 import { registerPlugin } from '@capacitor/core'
 
-import { createContinueWatchingWidgetVideos } from './homeWidgetData'
+import { createContinueWatchingWidgetVideos, createDownloadWidgetItems, createWatchTimeWidgetDays, isYouTubeThumbnailUrl } from './homeWidgetData'
+import { limitWatchSecondsByDate } from './sync-watch-stats'
 import { getVideoThumbnailUrl } from './utils'
+import { supportsYtDlp } from './ytDlpCapabilities'
 
 const HomeWidgets = process.env.IS_CAPACITOR ? registerPlugin('HomeWidgets') : null
 
 /**
- * Keeps the native widget cache in sync with Continue watching. Thumbnails
- * follow the hidden and blurred thumbnail settings; widgets never fetch data.
+ * Keeps the native widget caches in sync with Continue watching, downloads and
+ * watch statistics. Thumbnails follow the hidden and blurred thumbnail
+ * settings; widgets never fetch data.
  * @param {import('vuex').Store} store
  * @param {typeof import('vue').watch} watch
  * @returns {() => void}
  */
-export function syncContinueWatchingWidget(store, watch) {
+export function syncHomeWidgets(store, watch) {
   if (!HomeWidgets) return () => {}
-  let timeout = null
-  let lastSnapshot = null
-  const update = () => {
-    const { getThumbnailPreference: preference, getBlurThumbnails: blurred } = store.getters
-    const videos = createContinueWatchingWidgetVideos(store.getters.getContinueWatchingHistory(), videoId => {
-      if (blurred) return null
-      // Widgets show small images; maxresdefault is large and often missing.
-      return getVideoThumbnailUrl(videoId, store.getters.getBackendPreference,
-        store.getters.getCurrentInvidiousInstanceUrl, preference)?.replace(/\/maxresdefault\.jpg$/, '/mqdefault.jpg')
-    })
-    // Native downloads send this only to the instance's own origin.
-    const authorization = store.getters.getBackendPreference === 'invidious' && store.getters.getCurrentInvidiousInstanceAuthorization
-      ? { url: store.getters.getCurrentInvidiousInstanceUrl, value: store.getters.getCurrentInvidiousInstanceAuthorization }
-      : null
-    const snapshot = JSON.stringify({ videos, authorization })
-    if (snapshot === lastSnapshot) return
-    lastSnapshot = snapshot
-    HomeWidgets.setContinueWatching({ videos, authorization }).catch(error => console.error('Failed to update home screen widgets', error))
+  const { getters } = store
+  const videoThumbnail = videoId => {
+    if (getters.getBlurThumbnails) return null
+    // Widgets show small images; maxresdefault is large and often missing.
+    return getVideoThumbnailUrl(videoId, getters.getBackendPreference,
+      getters.getCurrentInvidiousInstanceUrl, getters.getThumbnailPreference)?.replace(/\/maxresdefault\.jpg$/, '/mqdefault.jpg')
   }
-  const stop = watch(() => [
-    store.state.history.continueWatchingRevision,
-    store.getters.getThumbnailPreference,
-    store.getters.getBlurThumbnails,
-    store.getters.getBackendPreference,
-    store.getters.getCurrentInvidiousInstanceUrl,
-    store.getters.getCurrentInvidiousInstanceAuthorization,
-  ], ([revision]) => {
+  // Native downloads send this only to the instance's own origin.
+  const authorization = () => getters.getBackendPreference === 'invidious' && getters.getCurrentInvidiousInstanceAuthorization
+    ? { url: getters.getCurrentInvidiousInstanceUrl, value: getters.getCurrentInvidiousInstanceAuthorization }
+    : null
+
+  const stops = [
+    syncWidget(watch, 'setContinueWatching', () => {
+      // Revision 0 means history has not loaded yet; keep the last cached list.
+      if (store.state.history.continueWatchingRevision === 0) return null
+      return {
+        videos: createContinueWatchingWidgetVideos(getters.getContinueWatchingHistory(), videoThumbnail),
+        authorization: authorization(),
+      }
+    }),
+    syncWidget(watch, 'setWatchTime', () => {
+      // Turning statistics off clears the widget even if they never loaded.
+      if (!getters.getRememberHistory || !getters.getEnableWatchStats) return { days: {} }
+      if (!store.state.watchStats.watchStatsLoaded) return null
+      return { days: createWatchTimeWidgetDays(limitWatchSecondsByDate(getters, 'all')) }
+    }),
+  ]
+  if (supportsYtDlp) {
+    stops.push(syncWidget(watch, 'setDownloads', () => {
+      // Keep the cached list until the download history has loaded.
+      if (!store.state.downloads.ytDlpDownloadsLoaded) return null
+      return {
+        downloads: createDownloadWidgetItems(Object.values(getters.getYtDlpDownloads), download => {
+          if (getters.getBlurThumbnails || getters.getThumbnailPreference === 'hidden') return null
+          // Single videos follow the thumbnail settings; playlists keep YouTube's own image.
+          if (download.videoId && !download.playlistId) return videoThumbnail(download.videoId)
+          return isYouTubeThumbnailUrl(download.thumbnail) ? download.thumbnail : null
+        }),
+        authorization: authorization(),
+      }
+    }))
+  }
+  return () => stops.forEach(stop => stop())
+}
+
+/**
+ * Sends a widget's data a second after it changes. `build` returns null until
+ * its data has loaded, so the widget keeps its last cache.
+ * @param {typeof import('vue').watch} watch
+ * @param {string} method
+ * @param {() => object | null} build
+ */
+function syncWidget(watch, method, build) {
+  let timeout = null
+  const stop = watch(() => {
+    const data = build()
+    return data && JSON.stringify(data)
+  }, snapshot => {
     clearTimeout(timeout)
-    // Revision 0 means history has not loaded yet; keep the last cached list.
-    if (revision > 0) timeout = setTimeout(update, 1000)
+    if (snapshot) {
+      timeout = setTimeout(() => {
+        HomeWidgets[method](JSON.parse(snapshot)).catch(error => console.error('Failed to update home screen widgets', error))
+      }, 1000)
+    }
   }, { immediate: true })
   return () => {
     clearTimeout(timeout)

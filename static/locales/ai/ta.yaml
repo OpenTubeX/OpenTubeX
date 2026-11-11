@@ -2652,10 +2652,22 @@ Home Widgets:
   Continue Watching Description: "பார்க்கத் தொடங்கிய வீடியோக்களைத் தொடரவும்"
   Continue Watching Empty: "நீங்கள் பார்க்கத் தொடங்கும் வீடியோக்கள் இங்கே தோன்றும்"
   Quick Access: "விரைவு அணுகல்"
-  Quick Access Description: "தேடல், சந்தாக்கள் அல்லது பின்னர் பார்க்க என்பதைத் திறக்கவும்"
+  Quick Access Description: "நீங்கள் தேர்வுசெய்யும் 4 பக்கங்கள் வரை திறக்கவும்"
+  Choose Pages: "4 பக்கங்கள் வரை தேர்வுசெய்யவும்"
+  Pages: "பக்கங்கள்"
   Search: "தேடு"
   Subscriptions: "சந்தாக்கள்"
   Watch Later: "பின்னர் பார்க்க"
+  History: "வரலாறு"
+  Playlists: "பட்டியல்"
+  Downloads: "பதிவிறக்கங்கள்"
+  Watch Time: "பார்த்த நேரம்"
+  Watch Time Description: "கடந்த 7 நாட்களில் நீங்கள் பார்த்த நேரம்"
+  Today: "இன்று"
+  Last 7 Days: "கடந்த 7 நாட்கள்"
+  Recent Downloads: "சமீபத்திய பதிவிறக்கங்கள்"
+  Recent Downloads Description: "நீங்கள் பதிவிறக்கிய வீடியோக்களை இயக்கவும்"
+  Recent Downloads Empty: "நீங்கள் பதிவிறக்கும் வீடியோக்கள் இங்கே தோன்றும்"
 Subscription Groups:
   Groups: குழுக்கள்
   All: அனைத்தும்

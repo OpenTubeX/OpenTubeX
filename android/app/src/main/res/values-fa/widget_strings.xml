@@ -5,8 +5,20 @@
     <string name="widget_continue_watching_description">ادامهٔ ویدیوهایی که تماشایشان را شروع کرده‌اید</string>
     <string name="widget_continue_watching_empty">ویدیوهایی که تماشایشان را شروع می‌کنید اینجا نمایش داده می‌شوند</string>
     <string name="widget_quick_access_name">دسترسی سریع</string>
-    <string name="widget_quick_access_description">باز کردن جستجو، دنبال کرده ها یا تماشا در آینده</string>
+    <string name="widget_quick_access_description">باز کردن حداکثر 4 صفحه به انتخاب شما</string>
+    <string name="widget_quick_access_choose">حداکثر 4 صفحه انتخاب کنید</string>
+    <string name="widget_quick_access_pages">صفحه‌ها</string>
     <string name="widget_search">جستجو</string>
     <string name="widget_subscriptions">دنبال کرده ها</string>
     <string name="widget_watch_later">تماشا در آینده</string>
+    <string name="widget_history">تاریخچه</string>
+    <string name="widget_playlists">فهرست‌ها</string>
+    <string name="widget_downloads">بارگیری‌ها</string>
+    <string name="widget_watch_time_name">زمان تماشا</string>
+    <string name="widget_watch_time_description">زمان تماشای شما در 7 روز گذشته</string>
+    <string name="widget_today">امروز</string>
+    <string name="widget_last_7_days">7 روز گذشته</string>
+    <string name="widget_recent_downloads_name">بارگیری‌های اخیر</string>
+    <string name="widget_recent_downloads_description">پخش ویدیوهایی که بارگیری کرده‌اید</string>
+    <string name="widget_recent_downloads_empty">ویدیوهایی که بارگیری می‌کنید اینجا نمایش داده می‌شوند</string>
 </resources>

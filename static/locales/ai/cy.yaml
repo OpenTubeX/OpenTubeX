@@ -2626,10 +2626,22 @@ Home Widgets:
   Continue Watching Description: "Ailddechrau fideos rydych chi wedi dechrau eu gwylio"
   Continue Watching Empty: "Bydd fideos rydych chi'n dechrau eu gwylio yn ymddangos yma"
   Quick Access: "Mynediad cyflym"
-  Quick Access Description: "Agor Chwilio, Tanysgrifiadau neu Gwylio Nes Ymlaen"
+  Quick Access Description: "Agor hyd at 4 tudalen o'ch dewis"
+  Choose Pages: "Dewiswch hyd at 4 tudalen"
+  Pages: "Tudalennau"
   Search: "Chwilio"
   Subscriptions: "Tanysgrifiadau"
   Watch Later: "Gwylio Nes Ymlaen"
+  History: "Hanes"
+  Playlists: "Rhestrau"
+  Downloads: "Lawrlwythiadau"
+  Watch Time: "Amser gwylio"
+  Watch Time Description: "Eich amser gwylio dros y 7 diwrnod diwethaf"
+  Today: "Heddiw"
+  Last 7 Days: "Y 7 diwrnod diwethaf"
+  Recent Downloads: "Lawrlwythiadau diweddar"
+  Recent Downloads Description: "Chwarae fideos rydych chi wedi'u lawrlwytho"
+  Recent Downloads Empty: "Bydd fideos rydych chi'n eu lawrlwytho yn ymddangos yma"
 Subscription Groups:
   Groups: Grwpiau
   All: Pob un

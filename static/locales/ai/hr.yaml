@@ -2628,10 +2628,22 @@ Home Widgets:
   Continue Watching Description: "Nastavi videozapise koje si počeo gledati"
   Continue Watching Empty: "Ovdje se prikazuju videozapisi koje počneš gledati"
   Quick Access: "Brzi pristup"
-  Quick Access Description: "Otvori Pretraživanje, Pretplate ili Pogledaj kasnije"
+  Quick Access Description: "Otvori do 4 stranice po izboru"
+  Choose Pages: "Odaberi do 4 stranice"
+  Pages: "Stranice"
   Search: "Pretraži"
   Subscriptions: "Pretplate"
   Watch Later: "Pogledaj kasnije"
+  History: "Povijest"
+  Playlists: "Zbirke"
+  Downloads: "Preuzimanja"
+  Watch Time: "Vrijeme gledanja"
+  Watch Time Description: "Tvoje vrijeme gledanja u posljednjih 7 dana"
+  Today: "Danas"
+  Last 7 Days: "Posljednjih 7 dana"
+  Recent Downloads: "Nedavna preuzimanja"
+  Recent Downloads Description: "Reproduciraj videozapise koje si preuzeo"
+  Recent Downloads Empty: "Ovdje se prikazuju videozapisi koje preuzmeš"
 Subscription Groups:
   Groups: Grupe
   All: Sve
