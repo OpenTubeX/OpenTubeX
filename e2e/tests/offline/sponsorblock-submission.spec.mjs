@@ -95,5 +95,24 @@ test.describe('SponsorBlock submission', () => {
         }
       })).toEqual({ gapToPanelEdge: true, clearOfContent: true })
     }
+
+    const list = menu.locator('.sponsorBlockSubmissionSegments')
+    expect(await list.evaluate(element => {
+      element.scrollTop = element.scrollHeight
+      return element.scrollTop
+    })).toBeGreaterThan(0)
+    await menu.locator('.sponsorBlockDraftSegment').last().getByRole('button', { name: 'Delete' }).click()
+    await expect(menu.locator('.sponsorBlockDraftSegment')).toHaveCount(3)
+    await expect.poll(() => list.evaluate(element => {
+      const viewportBottom = element.getBoundingClientRect().bottom
+      const contentBottom = [...element.querySelectorAll('.sponsorBlockDraftSegment')].at(-1).getBoundingClientRect().bottom
+      const maximumScrollTop = Math.max(0, element.scrollTop + contentBottom - viewportBottom)
+      const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+      return {
+        withinRenderedRange: element.scrollTop <= maximumScrollTop + 1,
+        noEmptySpace: element.scrollTop < 1 || viewportBottom - contentBottom < 1,
+        scrollbarMatchesOverflow: !scrollbar.classList.contains('os-scrollbar-unusable') === (maximumScrollTop > 1)
+      }
+    })).toEqual({ withinRenderedRange: true, noEmptySpace: true, scrollbarMatchesOverflow: true })
   })
 })
