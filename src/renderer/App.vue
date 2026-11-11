@@ -685,6 +685,7 @@ import {
 import {
   applyThemeToDocument,
   getThemeBackground,
+  getThemePrimaryColor,
   handleCustomThemeUpdated,
   loadCustomThemes,
 } from './helpers/customTheme'
@@ -2281,8 +2282,8 @@ watch(() => store.getters.getSystemDarkTheme, updateTheme)
 const mainColor = computed(() => store.getters.getMainColor)
 
 watch(mainColor, updateTheme)
-watch(() => store.getters.getHideStartupSplash, cacheCapacitorStartupAppearance)
-watch(() => store.getters.getCustomThemes, cacheCapacitorStartupAppearance)
+watch(() => store.getters.getHideStartupSplash, cacheNextStartupAppearance)
+watch(() => store.getters.getCustomThemes, cacheNextStartupAppearance)
 
 /** @type {import('vue').ComputedRef<string>} */
 const secColor = computed(() => store.getters.getSecColor)
@@ -2325,26 +2326,36 @@ function updateTheme() {
   const effectiveTheme = baseTheme.value === 'system'
     ? (systemUsesDarkTheme.value ? store.getters.getSystemDarkTheme : store.getters.getSystemLightTheme)
     : baseTheme.value
-  const customThemes = store.getters.getCustomThemes
-  const customTheme = customThemes.find(theme => `custom:${theme.id}` === effectiveTheme) ??
-    (effectiveTheme === 'custom' ? customThemes[0] : null) ?? null
   applyThemeToDocument(
-    effectiveTheme, mainColor.value, secColor.value, customTheme,
+    effectiveTheme, mainColor.value, secColor.value, findCustomTheme(effectiveTheme),
     store.getters.getMaterialSeedColor, store.getters.getSignalAccentColor
   )
-  cacheCapacitorStartupAppearance()
+  cacheNextStartupAppearance()
   if (store.getters.getTrayIconPreset === 'theme') refreshTrayIcon()
   updateSystemBarsStyle()
 }
 
-function cacheCapacitorStartupAppearance() {
-  if (!isCapacitor || !appearanceSettingsReady) return
+function findCustomTheme(theme) {
+  const customThemes = store.getters.getCustomThemes
+  return customThemes.find(({ id }) => `custom:${id}` === theme) ??
+    (theme === 'custom' ? customThemes[0] : null) ?? null
+}
+
+// The splash paints before the settings load. Electron's main process reads
+// the background from them; the primary color and Capacitor's whole
+// appearance come from this cache.
+function cacheNextStartupAppearance() {
+  if (!(isElectron || isCapacitor) || !appearanceSettingsReady) return
   const appearance = (dark) => {
     const theme = baseTheme.value === 'system'
       ? (dark ? store.getters.getSystemDarkTheme : store.getters.getSystemLightTheme)
       : baseTheme.value
-    const background = getThemeBackground(theme, store.getters.getCustomThemes, dark, store.getters.getMaterialSeedColor)
-    return { background, dark: calculateColorLuminance(background) !== '#000000' }
+    const seed = store.getters.getMaterialSeedColor
+    const background = getThemeBackground(theme, store.getters.getCustomThemes, dark, seed)
+    const primary = getThemePrimaryColor(
+      theme, mainColor.value, secColor.value, findCustomTheme(theme), seed, store.getters.getSignalAccentColor, dark
+    )
+    return { background, dark: calculateColorLuminance(background) !== '#000000', primary }
   }
   cacheStartupAppearance({
     light: appearance(false),

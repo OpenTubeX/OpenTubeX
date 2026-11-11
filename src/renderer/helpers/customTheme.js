@@ -35,6 +35,27 @@ export function getThemeBackground(baseTheme, customThemes, dark, seed) {
   }
 }
 
+/** Resolve a theme's primary color as rgb() without applying the theme. */
+export function getThemePrimaryColor(baseTheme, mainColor, secColor, customTheme, seed, signalAccent, dark) {
+  const { classes, customTheme: customThemeMode, style } = getThemeAppearance(
+    baseTheme, mainColor, secColor, customTheme, seed, signalAccent, dark
+  )
+  const probe = document.createElement('span')
+  probe.hidden = true
+  probe.classList.add('themeScope', ...classes)
+  probe.dataset.systemTheme = dark ? 'dark' : 'light'
+  if (customThemeMode) probe.dataset.customTheme = customThemeMode
+  for (const [property, value] of Object.entries(style)) probe.style.setProperty(property, value)
+  // Resolves color-mix() and relative colors for consumers outside the theme.
+  probe.style.color = 'var(--primary-color)'
+  document.body.appendChild(probe)
+  try {
+    return getComputedStyle(probe).color
+  } finally {
+    probe.remove()
+  }
+}
+
 /** Resolve the Tally accent setting, following the system accent when requested and available. */
 export function resolveSignalAccentColor(value) {
   return value === MATERIAL_SYSTEM_SEED ? getSystemAccentColor() ?? DEFAULT_SIGNAL_ACCENT_COLOR : value
