@@ -49,8 +49,9 @@
 }
 
 :global(body) {
-  /* stylelint-disable-next-line length-zero-no-unit */
-  --horizontal-tab-scrollbar-space: 0px;
+  /* Reserve the scrollbar's room even without one, so the gaps around the tabs
+     and the bar's height stay the same. */
+  --horizontal-tab-scrollbar-space: var(--scrollbar-track-width);
   --top-tab-bar-height: calc(32px + var(--horizontal-tab-scrollbar-space));
   --bottom-tab-bar-height: calc(34px + var(--horizontal-tab-scrollbar-space));
   --mobile-nav-content-height: 60px;
@@ -85,10 +86,6 @@
   font-family: var(--app-font-family);
   block-size: 100%;
   padding-block-start: var(--app-safe-area-inset-top);
-}
-
-:global(:root.appTabBarScrollbar body) {
-  --horizontal-tab-scrollbar-space: var(--scrollbar-track-width);
 }
 
 .app.capacitorTabs {
