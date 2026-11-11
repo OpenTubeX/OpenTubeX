@@ -99,9 +99,16 @@
               :key="feed.url"
               class="feedRow"
               :class="{ hasError: errorFeedUrls.has(feed.url) }"
+              :aria-busy="retryingFeedUrls.has(feed.url)"
             >
+              <FtLoader
+                v-if="retryingFeedUrls.has(feed.url)"
+                class="feedIcon"
+                inline
+                :tab-loading-indicator="false"
+              />
               <FtIcon
-                v-if="errorFeedUrls.has(feed.url)"
+                v-else-if="errorFeedUrls.has(feed.url)"
                 class="feedIcon"
                 :icon="['fas', 'circle-exclamation']"
                 aria-hidden="true"
@@ -163,6 +170,7 @@ import FtButton from '../../FtButton/FtButton.vue'
 import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 import FtIconButton from '../../FtIconButton/FtIconButton.vue'
 import FtInput from '../../FtInput/FtInput.vue'
+import FtLoader from '../../FtLoader/FtLoader.vue'
 import FtRetryImage from '../../FtRetryImage.vue'
 import FtSelect from '../../FtSelect/FtSelect.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
