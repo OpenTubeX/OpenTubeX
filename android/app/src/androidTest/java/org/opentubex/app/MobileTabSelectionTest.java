@@ -747,8 +747,9 @@ public class MobileTabSelectionTest {
                                         const app = document.querySelector('#app').__vue_app__.config.globalProperties;
                                         const count = document.querySelectorAll('%s input[type=checkbox]:checked').length;
                                         const label = app.$t('Context Menu.Close Multiple Tabs', { count }, count);
-                                        [...document.querySelectorAll('.capacitorTabSelectionControls button')]
-                                            .find(button => button.textContent.trim() === label).click();
+                                        // Phones show an icon-only floating button with the label as its name.
+                                        [...document.querySelectorAll('.capacitorTabSelectionControls button, .capacitorTabSelectionFab')]
+                                            .find(button => (button.getAttribute('aria-label') ?? button.textContent.trim()) === label).click();
                                     })()
                                     """, row));
                             } else {
@@ -762,7 +763,7 @@ public class MobileTabSelectionTest {
                                     ? "Context Menu.Close Other Tabs" : "Context Menu.Close Tabs " + closeMode);
                             }
                             await(view, "document.querySelectorAll('" + row + "').length === 1");
-                            await(view, "!document.querySelector('.capacitorTabSelectionControls')");
+                            await(view, "!document.querySelector('.capacitorTabSelectionControls, .capacitorTabSelectionFloating')");
                             if (closeMode.equals("selected")) {
                                 assertEquals("Every selected tab was removed, leaving the landing page", "true",
                                     evaluate(view, "!window.mobileTabsOriginalIds.includes(" + STORE + ".getters.getTabs[0].id)"));
