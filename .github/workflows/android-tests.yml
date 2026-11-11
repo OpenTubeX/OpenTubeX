@@ -115,10 +115,10 @@ jobs:
         # the remaining tests, so require it to still be running.
         # On a slow emulator, the launcher's "isn't responding" dialog takes focus
         # from the app, and notification banners cover it. Android reads the
-        # dialog setting on configuration changes only, so it is set before the
-        # density change, which also makes the launcher redraw on a busy device.
-        # FailureDiagnostics logs whatever window still held the screen when a
-        # test failed.
+        # dialog setting on configuration changes only, so the font scale is
+        # changed and restored, each time waiting until the configuration shows
+        # it. FailureDiagnostics closes another app's dialog that still appears
+        # and logs whatever window held the screen when a test failed.
         script: |
           adb shell settings put global hide_error_dialogs 1
           adb shell settings put secure anr_show_background 0
@@ -126,6 +126,8 @@ jobs:
           adb shell wm density 280
           adb shell wm size
           adb shell wm density
+          adb shell settings put system font_scale 1.01 && timeout 60 sh -c "until adb shell dumpsys activity activities | grep -q '{1.01 '; do sleep 1; done"
+          adb shell settings put system font_scale 1.0 && timeout 60 sh -c "until adb shell dumpsys activity activities | grep -q '{1.0 '; do sleep 1; done"
           ./android/gradlew --project-dir android :app:connectedDebugAndroidTest -PtestAbi=x86_64 -Pandroid.testInstrumentationRunnerArguments.numShards=3 -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }} -Pandroid.testInstrumentationRunnerArguments.timeout_msec=600000 -Pandroid.testInstrumentationRunnerArguments.listener=org.opentubex.app.FailureDiagnostics
           adb get-state
 
