@@ -742,6 +742,7 @@ Settings:
       Modal Backdrop: "對話方塊背景"
       Dim and Blur: "變暗並模糊"
       Dim Only: "僅變暗"
+    Click Scrollbar Track to Scroll: "點擊捲軸軌道來捲動"
   Player Settings:
     Rewind on Resume: "恢復播放時倒轉"
     Minimum Pause Before Rewinding: "倒轉前的最短暫停時間"
@@ -2289,6 +2290,7 @@ Tooltips:
     Use Custom Title Bar: 以分頁列（分頁不在頂端時則為頂端導覽列）取代系統標題列，以節省垂直空間。視窗控制按鈕會顯示在該列的角落。
     Use Grid Player Menu: 將影片播放器的設定選單排列成格狀方塊，而非逐列清單。
     Modal Backdrop: "設定對話方塊與選單後方應用程式的顯示效果。模糊效果在效能較弱的裝置上可能較慢。"
+    Click Scrollbar Track to Scroll: "點擊捲軸滑桿以外的位置，會朝點擊方向捲動約一頁。捲軸覆蓋在內容邊緣上，因此捲軸顯示時，無法點擊其下方的項目。分頁列的捲軸一律以這種方式運作。"
   SponsorBlock Settings:
     Always Show DeArrow Badge: 在標題或縮圖已被 DeArrow 取代的影片上一律顯示 DeArrow 按鈕，而非僅在滑鼠游標停留時顯示。
 The playlist is at the beginning. Enable loop to continue playing: 播放清單已在開頭。啟用循環播放即可繼續播放

@@ -741,6 +741,7 @@ Settings:
       Modal Backdrop: "Cefndir deialogau"
       Dim and Blur: "Pylu a niwlio"
       Dim Only: "Pylu yn unig"
+    Click Scrollbar Track to Scroll: "Clicio'r bar sgrolio i sgrolio"
   Player Settings:
     Rewind on Resume: "Ailddirwyn wrth ailddechrau"
     Minimum Pause Before Rewinding: "Saib lleiaf cyn ailddirwyn"
@@ -2315,6 +2316,7 @@ Tooltips:
     Use Custom Title Bar: Mae'n disodli bar teitl y system â'r bar tabiau, neu â'r llywio uchaf pan nad yw'r tabiau ar y brig, i arbed lle fertigol. Mae rheolyddion y ffenestr yn ymddangos yng nghornel y bar hwnnw.
     Use Grid Player Menu: Mae'n trefnu dewislen gosodiadau'r chwaraewr fideo fel grid o deils yn lle rhestr o resi.
     Modal Backdrop: "Yn gosod sut mae’r ap yn edrych y tu ôl i ddeialogau a dewislenni. Gall niwlio fod yn araf ar ddyfeisiau llai pwerus."
+    Click Scrollbar Track to Scroll: "Mae clicio bar sgrolio y tu allan i'w ddolen yn sgrolio tua un dudalen tuag at y clic. Mae bariau sgrolio yn gorgyffwrdd ag ymyl y cynnwys, felly tra bo un yn weladwy, does dim modd clicio eitemau oddi tano. Mae bar sgrolio'r bar tabiau bob amser yn gweithio fel hyn."
   Experimental Settings:
     Faster Subscription Refresh: "Yn gwirio ffrwd RSS pob sianel yn gyntaf a dim ond yn llwytho fideos, Shorts a ffrydiau byw sianeli sydd ag uwchlwythiadau newydd. Mae adnewyddiadau awtomatig hefyd yn hepgor sianeli a lwythwyd yn ystod y 10 munud diwethaf. Ar gyfer sianeli heb uwchlwythiadau newydd, dim ond bob ychydig oriau y caiff nifer y gwyliadau, fideos a dynnwyd a theitlau a newidiwyd eu diweddaru, a gall uwchlwythiadau newydd ymddangos yn hwyrach pan fydd y ffrwd RSS ar ei hôl hi. Ddim ar gael gydag API Invidious."
     Disable Hardware Acceleration: Yn analluogi cyflymiad caledwedd y GPU. Gall ddatrys problemau graffeg, ond mae'n debygol o leihau perfformiad.

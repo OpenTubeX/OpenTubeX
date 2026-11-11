@@ -60,6 +60,7 @@ const PAINT_ONLY_PROPERTIES = new Set([
  * @property {HTMLElement} element the element the bars were added to
  * @property {HTMLElement} scrollElement the element whose offsets scroll
  * @property {boolean} isPage
+ * @property {boolean} clickScrollOptIn whether the tracks take clicks regardless of the setting
  * @property {Scrollbar} horizontal
  * @property {Scrollbar} vertical
  * @property {{ x?: ScrollTimeline, y?: ScrollTimeline }} timelines
@@ -222,7 +223,6 @@ function create(element) {
   const horizontal = createScrollbar('x')
   const vertical = createScrollbar('y')
   const scrollbars = [horizontal, vertical]
-  const clickScroll = !process.env.IS_CAPACITOR
   // Windowed lists estimate rows that never mounted, so their range can grow
   // after a scroll to the end mounts the last rows.
   const keepEnd = !isPage && element.matches('[data-scrollbar-keep-end]')
@@ -234,6 +234,7 @@ function create(element) {
     element,
     scrollElement,
     isPage,
+    clickScrollOptIn: element.matches('[data-scrollbar-click-scroll]'),
     horizontal,
     vertical,
     timelines: {},
@@ -487,7 +488,8 @@ function create(element) {
 
   for (const bar of scrollbars) {
     addHandleDrag(instance, bar)
-    if (clickScroll) addClickScroll(instance, bar)
+    // Track taps on a phone are easy to trigger while using nearby content.
+    if (!process.env.IS_CAPACITOR) addClickScroll(instance, bar)
     observedElements.set(bar.track, instance)
     getResizeObserver().observe(bar.track)
   }
@@ -510,6 +512,7 @@ function create(element) {
     observeChildren(element.children, true)
     mutationObserver.observe(element, { childList: true, subtree: true, characterData: true })
   }
+  if (!process.env.IS_CAPACITOR) updateClickScroll(instance)
   element.append(horizontal.scrollbar, vertical.scrollbar)
   if (!SCROLL_LINKED) positionEventTarget.addEventListener('scroll', schedulePosition, { passive: true })
   for (const type of ANIMATION_END_EVENTS) {
@@ -646,16 +649,14 @@ function addHandleDrag(instance, bar) {
 }
 
 /**
- * Scrolls a page towards a pressed point on the track. Only bars in their own
- * strip opt in; elsewhere the empty track lets clicks reach the content below.
+ * Scrolls a page towards a pressed point on the track. The track only takes
+ * pointer input while `updateClickScroll` enables it.
  *
  * @param {Instance} instance
  * @param {Scrollbar} bar
  */
 function addClickScroll(instance, bar) {
-  const { scrollbar, track, handle, axis } = bar
-  scrollbar.classList.add('os-scrollbar-track-interactive')
-
+  const { track, handle, axis } = bar
   track.addEventListener('pointerdown', (event) => {
     if (event.button !== 0 || !event.isPrimary || !bar.usable || event.target !== track) return
     event.preventDefault()
@@ -668,6 +669,20 @@ function addClickScroll(instance, bar) {
     const page = (axis === 'x' ? scrollElement.clientWidth : scrollElement.clientHeight) * CLICK_SCROLL_DISTANCE
     scrollElement.scrollBy(axis === 'x' ? { left: direction * page } : { top: direction * page })
   })
+}
+
+/**
+ * Tracks overlay the content, so by default clicks on an empty track reach
+ * what is underneath. Bars in their own strip, such as the tab bar's, opt in
+ * to track clicks; the setting enables them everywhere.
+ *
+ * @param {Instance} instance
+ */
+function updateClickScroll(instance) {
+  const enabled = instance.clickScrollOptIn || store.getters.getScrollbarTrackClicks
+  for (const { scrollbar } of [instance.horizontal, instance.vertical]) {
+    setClass(scrollbar, 'os-scrollbar-track-interactive', enabled)
+  }
 }
 
 /** Change visibility policy without rebuilding the bars or losing offsets. */
@@ -783,6 +798,12 @@ export function initializeAppScrollbars({ useNativePageScrollbar = false } = {})
       if (instance) updatePageScrollbarPosition(instance)
     }
   )
+
+  if (!process.env.IS_CAPACITOR) {
+    watch(() => store.getters.getScrollbarTrackClicks, () => {
+      for (const instance of instances.values()) updateClickScroll(instance)
+    })
+  }
 
   // Cancel pending hides in place; retained tabs can have many live scrollers.
   watch(() => store.getters.getAlwaysShowScrollbars, enabled => {

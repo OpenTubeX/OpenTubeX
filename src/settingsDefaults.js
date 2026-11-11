@@ -49,6 +49,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     scrollMiniPlayerSavedRect: '',
     crossTabMiniPlayerSavedRect: '',
     scrollbarThumbWidth: DEFAULT_SCROLLBAR_THUMB_WIDTH,
+    scrollbarTrackClicks: false,
     scrollSpeed: DEFAULT_SCROLL_SPEED,
     visibleSearchSuggestions: 10,
     avoidTranslation: 'disabled',

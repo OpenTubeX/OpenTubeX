@@ -742,6 +742,7 @@ Settings:
       Modal Backdrop: "ダイアログの背景"
       Dim and Blur: "暗くしてぼかす"
       Dim Only: "暗くするだけ"
+    Click Scrollbar Track to Scroll: "スクロールバーのクリックでスクロール"
   Player Settings:
     Rewind on Resume: "再開時に巻き戻す"
     Minimum Pause Before Rewinding: "巻き戻しまでの最小一時停止時間"
@@ -2282,6 +2283,7 @@ Tooltips:
     Use Custom Title Bar: 縦方向のスペースを節約するため、システムのタイトルバーをタブバー（タブが上部にない場合は上部ナビゲーション）に置き換えます。ウィンドウ操作ボタンはそのバーの隅に表示されます。
     Use Grid Player Menu: 動画プレーヤーの設定メニューを行の一覧ではなく、タイル状のグリッドに配置します。
     Modal Backdrop: "ダイアログやメニューの背後にあるアプリの見え方を設定します。ぼかしは性能の低いデバイスでは動作が遅くなることがあります。"
+    Click Scrollbar Track to Scroll: "スクロールバーのつまみ以外の部分をクリックすると、クリックした方向へ約 1 ページ分スクロールします。スクロールバーはコンテンツの端に重なって表示されるため、表示中はその下にある項目をクリックできません。タブバーのスクロールバーは常にこのように動作します。"
   SponsorBlock Settings:
     Always Show DeArrow Badge: DeArrow によってタイトルまたはサムネイルが置き換えられた動画で、ホバー時だけでなく常に DeArrow ボタンを表示します。
 The playlist is at the beginning. Enable loop to continue playing: プレイリストの先頭です。続けて再生するにはループを有効にしてください

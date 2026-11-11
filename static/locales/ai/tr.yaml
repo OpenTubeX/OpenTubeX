@@ -742,6 +742,7 @@ Settings:
       Modal Backdrop: "İletişim kutusu arka planı"
       Dim and Blur: "Karart ve bulanıklaştır"
       Dim Only: "Yalnızca karart"
+    Click Scrollbar Track to Scroll: "Kaydırma çubuğuna tıklayarak kaydır"
   Player Settings:
     Rewind on Resume: "Devam ederken geri sar"
     Minimum Pause Before Rewinding: "Geri sarmadan önce en kısa duraklatma"
@@ -2283,6 +2284,7 @@ Tooltips:
     Use Custom Title Bar: Dikey alandan tasarruf etmek için sistem başlık çubuğunu sekme çubuğuyla, sekmeler üstte değilse üst gezinme çubuğuyla değiştirir. Pencere denetimleri bu çubuğun köşesinde görünür.
     Use Grid Player Menu: Video oynatıcısının ayarlar menüsünü satır listesi yerine döşeme ızgarası olarak düzenler.
     Modal Backdrop: "İletişim kutularının ve menülerin arkasında uygulamanın nasıl görüneceğini belirler. Bulanıklaştırma daha az güçlü cihazlarda yavaş olabilir."
+    Click Scrollbar Track to Scroll: "Bir kaydırma çubuğuna tutamacının dışında tıklamak, tıklama yönünde yaklaşık bir sayfa kaydırır. Kaydırma çubukları içeriğin kenarıyla örtüşür, bu nedenle bir çubuk görünürken altındaki öğelere tıklanamaz. Sekme çubuğunun kaydırma çubuğu her zaman bu şekilde çalışır."
   SponsorBlock Settings:
     Always Show DeArrow Badge: Başlığı veya önizleme görseli DeArrow tarafından değiştirilen videolarda DeArrow düğmesini yalnızca üzerine gelindiğinde değil, her zaman görünür tut.
 The playlist is at the beginning. Enable loop to continue playing: Oynatma listesinin başındasınız. Oynatmaya devam etmek için döngüyü etkinleştirin

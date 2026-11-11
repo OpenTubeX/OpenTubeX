@@ -948,6 +948,7 @@ Settings:
       Bundled Fonts: Bundled fonts
       System Fonts: System fonts
     Always Show Scrollbars: Always Show Scrollbars
+    Click Scrollbar Track to Scroll: Click Scrollbar Track to Scroll
     Hide Side Bar Labels: Hide Side Bar Labels
     Compact Settings Categories: Compact Settings Categories
     Modal Backdrop:
@@ -3411,6 +3412,7 @@ Tooltips:
     Show Progress as Notification: Shows a persistent notification with live progress for background operations, such as subscription refreshes and managed tool downloads, instead of using the global progress bar.
     Only Show Important Notifications: Hides in-app notifications that only confirm an action or report a status. Errors, warnings, reminders you set up, and notifications that offer an action, such as Undo, still appear. Background progress, such as subscription refreshes, shows in the global progress bar instead of a notification. System notifications are not affected.
     Always Show Scrollbars: Keeps the scrollbars visible at all times. When disabled, they fade out shortly after you stop moving the mouse and reappear as soon as you move it again.
+    Click Scrollbar Track to Scroll: Clicking a scrollbar outside its handle scrolls about one page toward the click. Scrollbars overlap the edge of the content, so while one is visible, items under it can't be clicked. The tab bar's scrollbar always works this way.
     Scroll Speed: Changes how far mouse-wheel and touchpad wheel gestures scroll.
     Visible Search Suggestions: Sets how many search history entries and suggestions the search bar shows before its list scrolls. The list never extends past the bottom of the window.
     Use Fixed Tab Width: Gives every tab in the horizontal tab bar the same width instead of sizing them to their title.

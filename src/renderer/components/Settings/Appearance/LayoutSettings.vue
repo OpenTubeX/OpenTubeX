@@ -306,6 +306,15 @@
         setting-key="alwaysShowScrollbars"
         @change="updateAlwaysShowScrollbars"
       />
+      <FtToggleSwitch
+        v-if="!IS_CAPACITOR"
+        :label="t('Settings.Theme Settings.Click Scrollbar Track to Scroll')"
+        :tooltip="t('Tooltips.Theme Settings.Click Scrollbar Track to Scroll')"
+        compact
+        :default-value="scrollbarTrackClicks"
+        setting-key="scrollbarTrackClicks"
+        @change="store.dispatch('updateScrollbarTrackClicks', $event)"
+      />
     </div>
     <FtSliderGrid>
       <FtSlider
@@ -580,6 +589,8 @@ const alwaysShowScrollbars = computed(() => {
 function updateAlwaysShowScrollbars(value) {
   store.dispatch('updateAlwaysShowScrollbars', value)
 }
+
+const scrollbarTrackClicks = computed(() => store.getters.getScrollbarTrackClicks)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideHeaderLogo = computed(() => {
