@@ -214,7 +214,12 @@ try {
   console.log('PASS: Android early splash, saved light/dark appearance, custom theme edits, ready tab reveal, reduced motion, and hide setting')
 } finally {
   if (browser) await browser.close()
-  if (port) adb('forward', '--remove', `tcp:${port}`)
+  try {
+    if (port) adb('forward', '--remove', `tcp:${port}`)
+  } catch {
+    // Closing the WebView's DevTools connection can end the forward first.
+    // Restore the rotation settings regardless.
+  }
   for (const [key, value] of rotationSettings) {
     if (value === 'null') adb('shell', 'settings', 'delete', 'system', key)
     else adb('shell', 'settings', 'put', 'system', key, value)

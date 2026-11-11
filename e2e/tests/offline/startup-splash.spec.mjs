@@ -56,7 +56,7 @@ for (const [theme, background, zoom] of [
             window.__startupPalettes.push(JSON.stringify({
               shape: getComputedStyle(splash.querySelector('.startupShape'), '::before').backgroundColor,
               logo: getComputedStyle(splash.querySelector('.startupShape')).color,
-              wave: getComputedStyle(splash.querySelector('.startupWave')).backgroundColor
+              wave: getComputedStyle(splash.querySelector('.startupWave')).stroke
             }))
             requestAnimationFrame(sampleColors)
           }
