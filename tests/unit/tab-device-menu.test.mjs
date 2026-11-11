@@ -92,6 +92,7 @@ for (const sameVideo of [false, true]) {
       prefetchLocalVideoInfo: () => null,
       handleRouteChange: () => routeChange,
       isCurrentVideoLoad: () => false,
+      isPlaybackPresented: () => true,
       $store: {
         commit(action, { tabId, value }) {
           assert.equal(action, 'setCurrentWatchTimestamp')

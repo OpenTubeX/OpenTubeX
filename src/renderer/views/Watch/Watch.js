@@ -160,7 +160,7 @@ import { createWatchTimeTracker } from '../../helpers/watchTimeTracker'
 import { createUnavailableVideoThumbnail } from '../../helpers/unavailableVideoThumbnail'
 import { getLoadedIconData } from '../../icons/registerMappedIcons'
 import { resolveIconifyId } from '../../icons/resolveIconifyId'
-import { holdForPlaybackStartup } from '../../helpers/playbackStartup'
+import { holdForPlaybackStartup, waitForBackgroundPlaybackTurn } from '../../helpers/playbackStartup'
 
 /**
  * @typedef {{
@@ -300,6 +300,7 @@ export default defineComponent({
       /** @type {import('../../components/ft-shaka-video-player/opentubex/dockedPanels').DockedPanel[]} */
       startNextVideoWithDockedPanels: [],
       isLoading: true,
+      waitingForBackgroundPlaybackTurn: false,
       firstLoad: true,
       // Whether this tab has been presented while showing the current video. A
       // watch tab loading a video in the background briefly attempts to autoplay
@@ -1366,6 +1367,12 @@ export default defineComponent({
     playerStreamsPending() {
       return this.isLoading || this.ytDlpStreamsPending || (this.vrStreamsPending && !this.isYtDlpPlaybackRequested())
     },
+    // A hidden tab waiting for its turn isn't starting playback yet. A reload
+    // starts before its loading state, while it replaces the previous player.
+    holdsPlaybackStartup() {
+      return (this.playerStreamsPending || this.preparingVideoLoadGeneration !== null) &&
+        !this.waitingForBackgroundPlaybackTurn
+    },
     playerReady() {
       if (this.playerStreamsPending) {
         return false
@@ -1402,11 +1409,11 @@ export default defineComponent({
     }
   },
   watch: {
-    playerStreamsPending: {
+    holdsPlaybackStartup: {
       // The player holds subscription refreshes itself once it mounts
       handler(pending) {
         this.releasePlaybackStartup?.()
-        this.releasePlaybackStartup = pending ? holdForPlaybackStartup() : null
+        this.releasePlaybackStartup = pending ? holdForPlaybackStartup(this.tabId ?? null) : null
       },
       immediate: true
     },
@@ -1509,6 +1516,7 @@ export default defineComponent({
       handler() {
         if (this.isCurrentlyPresented()) {
           this.hasBeenPresented = true
+          this.backgroundPlaybackTurnController?.abort()
         } else {
           this.mobilePanel = null
         }
@@ -1664,6 +1672,9 @@ export default defineComponent({
     if (isOverlayScrollTopOutOfBounds(rail, contentEnd)) clampOverlayScrollTop(rail, contentEnd)
   },
   beforeUnmount: function () {
+    // A load still waiting for its turn must not start after the tab closes
+    this.videoLoadGeneration++
+    this.backgroundPlaybackTurnController?.abort()
     this.releasePlaybackStartup?.()
     clearTimeout(this.secondaryContentTimer)
     keepTabLoaded(this.tabId, 'casting', false)
@@ -2380,6 +2391,23 @@ export default defineComponent({
       })
     },
 
+    /**
+     * Lets a hidden tab start its video only after other hidden tabs have
+     * started theirs, so a tab the user switches to doesn't compete with all of them.
+     * Showing the tab, a newer load or closing the tab stops the wait.
+     */
+    async waitForBackgroundPlaybackTurn() {
+      this.backgroundPlaybackTurnController?.abort()
+      const controller = new AbortController()
+      this.backgroundPlaybackTurnController = controller
+      this.waitingForBackgroundPlaybackTurn = true
+      await waitForBackgroundPlaybackTurn(this.tabId, controller.signal)
+      if (this.backgroundPlaybackTurnController === controller) {
+        this.backgroundPlaybackTurnController = null
+        this.waitingForBackgroundPlaybackTurn = false
+      }
+    },
+
     activateWatchRuntime() {
       if (this.isTabPresented === false) {
         return
@@ -2434,6 +2462,13 @@ export default defineComponent({
       this.loadingTheatreMode = this.useTheatreMode
       preserveTitle ||= this.preserveTitleOnNextReload
       this.preserveTitleOnNextReload = false
+      if (!this.isPlaybackPresented()) {
+        await this.waitForBackgroundPlaybackTurn()
+        if (!this.isCurrentVideoLoad(loadGeneration, requestedVideoId)) {
+          if (this.preparingVideoLoadGeneration === loadGeneration) this.preparingVideoLoadGeneration = null
+          return
+        }
+      }
       const videoInfoPrefetch = this.prefetchLocalVideoInfo(loadGeneration, requestedVideoId, reloadPlaybackContext)
 
       try {
@@ -2895,10 +2930,19 @@ export default defineComponent({
       this.setViewingModeOnFirstLoad()
 
       const loadGeneration = ++this.videoLoadGeneration
-      if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(this.backendPreference)) {
-        this.getVideoInformationInvidious(loadGeneration)
+      const loadVideo = () => {
+        if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(this.backendPreference)) {
+          this.getVideoInformationInvidious(loadGeneration)
+        } else {
+          this.getVideoInformationLocal(loadGeneration)
+        }
+      }
+      if (this.isPlaybackPresented()) {
+        loadVideo()
       } else {
-        this.getVideoInformationLocal(loadGeneration)
+        this.waitForBackgroundPlaybackTurn().then(() => {
+          if (loadGeneration === this.videoLoadGeneration) loadVideo()
+        })
       }
 
       window.addEventListener('beforeunload', this.handleWatchProgressAutoSave)

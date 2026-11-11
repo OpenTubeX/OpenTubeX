@@ -59,11 +59,14 @@ function resolveBufferSetting(key, value) {
 /**
  * @param {BufferSettings} settings
  * @param {boolean} [progressive] whether the browser loads a single file itself (src=) instead of shaka-player streaming segments
+ * @param {boolean} [hidden] whether a paused video in a hidden tab only buffers enough to start playing
  * @returns {Pick<shaka.extern.StreamingConfiguration, 'bufferingGoal' | 'bufferBehind' | 'rebufferingGoal'>}
  */
-export function getBufferingConfig(settings, progressive = false) {
+export function getBufferingConfig(settings, progressive = false, hidden = false) {
+  const bufferingGoal = resolveBufferSetting('bufferAhead', settings.bufferAhead)
   return {
-    bufferingGoal: resolveBufferSetting('bufferAhead', settings.bufferAhead),
+    // The lowest buffer ahead is also the highest rebuffering goal
+    bufferingGoal: hidden ? Math.min(bufferingGoal, BUFFER_SETTING_RANGES.bufferAhead.min) : bufferingGoal,
     bufferBehind: resolveBufferSetting('bufferBehind', settings.bufferBehind),
     // The browser decides how far ahead it loads a progressive file, which can be less than the
     // rebuffering goal (about 2 seconds for long downloads). shaka-player then holds playback forever.

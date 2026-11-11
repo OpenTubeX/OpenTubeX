@@ -1,7 +1,11 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 
-import { holdForPlaybackStartup, waitForPlaybackStartup } from '../../src/renderer/helpers/playbackStartup.js'
+import {
+  holdForPlaybackStartup,
+  waitForBackgroundPlaybackTurn,
+  waitForPlaybackStartup
+} from '../../src/renderer/helpers/playbackStartup.js'
 
 function settled(promise) {
   let done = false
@@ -41,4 +45,65 @@ test('a player load that never settles stops holding refreshes', async t => {
   assert.equal(await waited(), false)
   t.mock.timers.tick(1)
   assert.equal(await waited(), true)
+})
+
+// The turn passes on after the tick in which the Watch page hands its hold to the player
+const afterHandoff = () => new Promise(resolve => setTimeout(resolve, 5))
+
+/** Waits like a hidden Watch page, which holds once it starts loading */
+function startHiddenTab(owner, signal = new AbortController().signal) {
+  let release = null
+  const started = waitForBackgroundPlaybackTurn(owner, signal).then(() => {
+    if (!signal.aborted) release = holdForPlaybackStartup(owner)
+  })
+  return { started: settled(started), release: () => release?.() }
+}
+
+test('hidden tabs start their videos one at a time', async () => {
+  const first = startHiddenTab('first')
+  const shown = new AbortController()
+  const second = startHiddenTab('second', shown.signal)
+  const third = startHiddenTab('third')
+  assert.equal(await first.started(), true)
+
+  // The Watch page hands its hold to the mounting player in the same tick
+  first.release()
+  const releasePlayer = holdForPlaybackStartup('first')
+  await afterHandoff()
+  assert.equal(await third.started(), false)
+
+  // A tab the user switches to stops waiting and leaves the queue
+  shown.abort()
+  assert.equal(await second.started(), true)
+  assert.equal(await third.started(), false)
+
+  releasePlayer()
+  await afterHandoff()
+  assert.equal(await third.started(), true)
+  third.release()
+  await afterHandoff()
+})
+
+test('a hidden tab that doesn\'t start loading passes its turn on', async () => {
+  await waitForBackgroundPlaybackTurn('replaced', new AbortController().signal)
+  const next = startHiddenTab('next')
+  await afterHandoff()
+  assert.equal(await next.started(), true)
+  next.release()
+  await afterHandoff()
+})
+
+test('a hidden tab whose video never settles stops holding the turn', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const slow = startHiddenTab('slow')
+  assert.equal(await slow.started(), true)
+  t.mock.timers.tick(0)
+  const next = startHiddenTab('next')
+
+  t.mock.timers.tick(14_999)
+  assert.equal(await next.started(), false)
+  t.mock.timers.tick(1)
+  assert.equal(await next.started(), true)
+  next.release()
+  t.mock.timers.tick(0)
 })
