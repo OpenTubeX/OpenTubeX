@@ -909,6 +909,7 @@ Settings:
       Modal Backdrop: "Dialoogagtergrond"
       Dim and Blur: "Verdonker en vervaag"
       Dim Only: "Slegs verdonker"
+    Click Scrollbar Track to Scroll: "Klik op skuifbalk om te blaai"
   Player Settings:
     Rewind on Resume: "Spoel terug wanneer hervat word"
     Minimum Pause Before Rewinding: "Minimum pouse voor terugspoel"
@@ -2535,6 +2536,7 @@ Tooltips:
     Use Grid Player Menu: Rangskik die videospeler se instellingskieslys as ’n rooster van teëls in plaas van ’n lys rye.
     Compact Settings Categories: Versteek beskrywings en verminder die hoogte van instellingskategorieë.
     Modal Backdrop: "Bepaal hoe die toep agter dialoë en kieslyste lyk. Vervaging kan op minder kragtige toestelle stadig wees."
+    Click Scrollbar Track to Scroll: "Klik op 'n skuifbalk buite sy handvatsel blaai omtrent een bladsy in die rigting van die klik. Terwyl dit aan is, vang 'n sigbare skuifbalk klieke op items daaronder. Die oortjiebalk se skuifbalk werk altyd so."
   Experimental Settings:
     Faster Subscription Refresh: "Gaan eers elke kanaal se RSS-voer na en laai slegs die video's, Shorts en regstreekse uitsendings van kanale met nuwe oplaaisels. Outomatiese verfrissings slaan ook kanale oor wat in die afgelope 10 minute gelaai is. Vir kanale sonder nuwe oplaaisels word kyktellings, verwyderde video's en veranderde titels slegs elke paar uur bygewerk, en nuwe oplaaisels kan later verskyn wanneer die RSS-voer agterloop. Nie beskikbaar met die Invidious-API nie."
     Disable Hardware Acceleration: Deaktiveer GPU-hardewareversnelling. Kan grafiese probleme oplos, maar sal waarskynlik swakker presteer.

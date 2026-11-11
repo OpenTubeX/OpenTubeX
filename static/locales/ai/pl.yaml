@@ -432,6 +432,7 @@ Settings:
       Modal Backdrop: "Tło okien dialogowych"
       Dim and Blur: "Przyciemnij i rozmyj"
       Dim Only: "Tylko przyciemnij"
+    Click Scrollbar Track to Scroll: "Przewijaj kliknięciem paska przewijania"
   Player Settings:
     Hold to Speed Up:
       Hold to Speed Up: Przytrzymaj, aby przyspieszyć
@@ -1513,6 +1514,7 @@ Tooltips:
     Use Custom Title Bar: Zastępuje systemowy pasek tytułu paskiem kart lub, gdy karty nie są u góry, górną nawigacją, aby zaoszczędzić miejsce w pionie. Przyciski sterowania oknem pojawiają się w rogu tego paska.
     Use Grid Player Menu: Układa menu ustawień odtwarzacza filmu w siatkę kafelków zamiast listy wierszy.
     Modal Backdrop: "Określa, jak wygląda aplikacja za oknami dialogowymi i menu. Rozmycie może działać wolno na słabszych urządzeniach."
+    Click Scrollbar Track to Scroll: "Kliknięcie paska przewijania poza jego suwakiem przewija o mniej więcej jedną stronę w kierunku kliknięcia. Gdy ta opcja jest włączona, widoczny pasek przewijania przechwytuje kliknięcia przeznaczone dla elementów pod nim. Pasek przewijania paska kart zawsze działa w ten sposób."
   SponsorBlock Settings:
     Always Show DeArrow Badge: Przycisk DeArrow pozostaje widoczny na filmach, których tytuł lub miniaturkę zastąpił DeArrow, zamiast pojawiać się tylko po najechaniu kursorem.
 The playlist is at the beginning. Enable loop to continue playing: Playlista jest na początku. Włącz zapętlanie, aby kontynuować odtwarzanie

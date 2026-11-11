@@ -742,6 +742,7 @@ Settings:
       Modal Backdrop: "对话框背景"
       Dim and Blur: "变暗并模糊"
       Dim Only: "仅变暗"
+    Click Scrollbar Track to Scroll: "点击滚动条轨道进行滚动"
   Player Settings:
     Rewind on Resume: "恢复播放时后退"
     Minimum Pause Before Rewinding: "后退前的最短暂停时间"
@@ -2282,6 +2283,7 @@ Tooltips:
     Use Custom Title Bar: 用标签栏（标签页不在顶部时则用顶部导航栏）替换系统标题栏，以节省垂直空间。窗口控制按钮会显示在该栏的角落。
     Use Grid Player Menu: 将视频播放器的设置菜单排列为磁贴网格，而不是行列表。
     Modal Backdrop: "设置对话框和菜单后方应用的显示效果。模糊效果在性能较弱的设备上可能会较慢。"
+    Click Scrollbar Track to Scroll: "点击滚动条滑块以外的位置，会朝点击方向滚动约一页。启用此选项时，可见的滚动条会拦截原本针对其下方项目的点击。标签栏的滚动条始终以这种方式工作。"
   SponsorBlock Settings:
     Always Show DeArrow Badge: 在标题或缩略图已被 DeArrow 替换的视频上始终显示 DeArrow 按钮，而不是仅在鼠标悬停时显示。
 The playlist is at the beginning. Enable loop to continue playing: 播放列表已到开头。启用循环可继续播放

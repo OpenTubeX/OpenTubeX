@@ -742,6 +742,7 @@ Settings:
       Modal Backdrop: "Drekleur ar boestoù-emziviz"
       Dim and Blur: "Teñvalaat ha dispisaat"
       Dim Only: "Teñvalaat hepken"
+    Click Scrollbar Track to Scroll: "Klikañ war ar varrenn dibunañ evit dibunañ"
   Player Settings:
     Rewind on Resume: "Distreiñ en ur adkregiñ"
     Minimum Pause Before Rewinding: "Ehan izek a-raok distreiñ"
@@ -2291,6 +2292,7 @@ Tooltips:
     Use Custom Title Bar: Erlec'hiañ a ra barrenn-ditl ar reizhiad gant barrenn an ivinelloù, pe gant ar merdeiñ uhel pa n'emañ ket an ivinelloù e krec'h, evit espern lec'h a-serzh. Boutonoù ar prenestr a zeu war wel e korn ar varrenn-se.
     Use Grid Player Menu: "Aozadur lañser arventennoù al lenner video evel ur gael karrelloù e-lec'h ur roll linennoù."
     Modal Backdrop: "Termeniñ a ra penaos e weler an arload a-dreñv ar boestoù-emziviz hag al lañserioù. Gorrek e c’hall bezañ an dispisaat war ar binvioù nebeutoc’h galloudek."
+    Click Scrollbar Track to Scroll: "Klikañ war ur varrenn dibunañ er-maez eus he dorn a zibun war-dro ur bajenn war-du ar c'hlik. E-pad m'eo gweredekaet, ur varrenn dibunañ gwelus a dap ar c'hlikoù evit an elfennoù dindani. Barrenn dibunañ barrenn an ivinelloù a ya en doare-se bepred."
   SponsorBlock Settings:
     Always Show DeArrow Badge: Lakaat afell DeArrow da chom gwelus war ar videoioù ma'z eo bet erlec'hiet o zitl pe o skeudennig gant DeArrow, e plas nemet pa dremen al logodenn warnañ.
 The playlist is at the beginning. Enable loop to continue playing: "Ar roll-videoioù zo en e zerou. Gweredekait al lenn en ur voul evit kenderc'hel da lenn"

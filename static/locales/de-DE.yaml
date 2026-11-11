@@ -875,6 +875,7 @@ Settings:
       Bundled Fonts: Mitgelieferte Schriftarten
       System Fonts: Systemschriftarten
     Always Show Scrollbars: Scrollbars immer anzeigen
+    Click Scrollbar Track to Scroll: Durch Klick auf die Scrollbar scrollen
     Light Theme: Helles Design
     Dark Theme: Dunkles Design
     Custom Theme:
@@ -3090,6 +3091,10 @@ Tooltips:
     Always Show Scrollbars: >-
       Hält die Scrollbars immer sichtbar. Wenn deaktiviert, werden sie kurz nach dem Ende der Mausbewegung
       ausgeblendet und bei der nächsten Bewegung wieder eingeblendet.
+    Click Scrollbar Track to Scroll: >-
+      Ein Klick auf eine Scrollbar neben ihrem Griff scrollt etwa eine Seite in diese Richtung. Solange diese Option aktiv
+      ist, fängt eine sichtbare Scrollbar Klicks auf Elemente darunter ab. Die Scrollbar der Tableiste funktioniert
+      immer so.
     Scroll Speed: Ändert die Scrollweite von Mausrad- und Touchpad-Gesten.
     Visible Search Suggestions: Legt fest, wie viele Einträge aus dem Suchverlauf und Suchvorschläge die Suchleiste anzeigt, bevor ihre Liste scrollt. Die Liste reicht nie über den unteren Fensterrand hinaus.
     Use Fixed Tab Width: Gibt jedem Tab in der horizontalen Tableiste dieselbe Breite, statt sie an den Titel anzupassen.

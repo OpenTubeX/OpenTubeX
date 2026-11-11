@@ -270,6 +270,7 @@ export const SYNC_SETTING_LABELS = {
   scrollPlayerMode: 'Settings.Player Settings.Scroll Mini Player.Scroll Player Mode',
   scrollSpeed: 'Settings.Theme Settings.Scroll Speed',
   scrollbarThumbWidth: 'Settings.Theme Settings.Scrollbar Width',
+  scrollbarTrackClicks: 'Settings.Theme Settings.Click Scrollbar Track to Scroll',
   searchHistoryRetentionDays: 'Settings.Privacy Settings.Automatic Search History Retention',
   secColor: 'Settings.Theme Settings.Secondary Color Theme',
   seekIntervalMultiplyByPlaybackRate: 'Settings.Player Settings.Multiply Seek Interval by Playback Rate',

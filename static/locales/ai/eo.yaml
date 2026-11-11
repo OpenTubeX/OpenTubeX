@@ -778,6 +778,7 @@ Settings:
       Modal Backdrop: "Fono de dialogoj"
       Dim and Blur: "Malheligi kaj malklarigi"
       Dim Only: "Nur malheligi"
+    Click Scrollbar Track to Scroll: "Rulumi per klako sur la rulumskalo"
   Player Settings:
     Rewind on Resume: "Malantaŭeniri je daŭrigo"
     Minimum Pause Before Rewinding: "Minimuma paŭzo antaŭ malantaŭeniro"
@@ -2329,6 +2330,7 @@ Tooltips:
     Use Grid Player Menu: Aranĝas la agordan menuon de la videaĵa ludilo kiel kradon de kaheloj anstataŭ listo de vicoj.
     Compact Settings Categories: Kaŝas priskribojn kaj malpliigas la altecon de agordaj kategorioj.
     Modal Backdrop: "Agordas, kiel la aplikaĵo aspektas malantaŭ dialogoj kaj menuoj. Malklarigo povas esti malrapida en malpli potencaj aparatoj."
+    Click Scrollbar Track to Scroll: "Klako sur rulumskalo ekster ĝia tenilo rulumas proksimume unu paĝon al la direkto de la klako. Dum ĉi tio estas ŝaltita, videbla rulumskalo kaptas klakojn celitajn al eroj sub ĝi. La rulumskalo de la langeta breto ĉiam funkcias tiel."
   SponsorBlock Settings:
     Always Show DeArrow Badge: Konservi la butonon de DeArrow videbla ĉe videaĵoj, kies titolon aŭ bildeton anstataŭigis DeArrow, anstataŭ nur kiam la kursoro estas super ili.
 Yattee Server:

@@ -742,6 +742,7 @@ Settings:
       Modal Backdrop: "Pozadí dialogů"
       Dim and Blur: "Ztmavit a rozmazat"
       Dim Only: "Pouze ztmavit"
+    Click Scrollbar Track to Scroll: "Posouvat kliknutím na posuvník"
   Player Settings:
     Rewind on Resume: "Přetočit zpět při obnovení"
     Minimum Pause Before Rewinding: "Minimální pauza před přetočením"
@@ -2282,6 +2283,7 @@ Tooltips:
     Use Custom Title Bar: Nahradí systémové záhlaví okna panelem karet, nebo horní navigací, pokud karty nejsou nahoře, a ušetří tak svislý prostor. Ovládací prvky okna se zobrazí v rohu tohoto panelu.
     Use Grid Player Menu: Uspořádá nabídku nastavení přehrávače videa do mřížky dlaždic místo seznamu řádků.
     Modal Backdrop: "Určuje, jak aplikace vypadá za dialogy a nabídkami. Rozmazání může být na méně výkonných zařízeních pomalé."
+    Click Scrollbar Track to Scroll: "Kliknutí na posuvník mimo jeho úchyt posune obsah přibližně o jednu stránku směrem ke kliknutí. Když je tato možnost zapnutá, viditelný posuvník zachytává kliknutí určená pro položky pod ním. Posuvník panelu karet takto funguje vždy."
   SponsorBlock Settings:
     Always Show DeArrow Badge: Ponechat tlačítko DeArrow viditelné u videí, jejichž název nebo náhled DeArrow nahradil, místo jen při najetí myší.
 The playlist is at the beginning. Enable loop to continue playing: Playlist je na začátku. Chcete-li pokračovat v přehrávání, zapněte opakování

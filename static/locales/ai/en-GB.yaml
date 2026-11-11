@@ -728,6 +728,7 @@ Settings:
       Modal Backdrop: "Dialogue Background"
       Dim and Blur: "Dim and blur"
       Dim Only: "Dim only"
+    Click Scrollbar Track to Scroll: "Click Scrollbar Track to Scroll"
   Player Settings:
     Rewind on Resume: "Rewind on resume"
     Minimum Pause Before Rewinding: "Minimum pause before rewinding"
@@ -2276,6 +2277,7 @@ Tooltips:
     Use Custom Title Bar: Replaces the system title bar with the tab bar, or with the top navigation when tabs are not at the top, to save vertical space. The window controls appear in the corner of that bar.
     Use Grid Player Menu: Arranges the video player's settings menu as a grid of tiles instead of a list of rows.
     Modal Backdrop: "Sets how the app looks behind dialogues and menus. Blurring it can be slow on less powerful devices."
+    Click Scrollbar Track to Scroll: "Clicking a scrollbar outside its handle scrolls about one page towards the click. While this is on, a visible scrollbar catches clicks meant for items under it. The tab bar's scrollbar always works this way."
   Experimental Settings:
     Faster Subscription Refresh: "Checks each channel's RSS feed first and only loads the videos, Shorts and live streams of channels with new uploads. Automatic refreshes also skip channels loaded in the last 10 minutes. For channels without new uploads, view counts, removed videos and changed titles only update every few hours, and new uploads may appear later when the RSS feed lags behind. Not available with the Invidious API."
     Disable Hardware Acceleration: Disables GPU hardware acceleration. May fix graphical issues, but will probably perform worse.

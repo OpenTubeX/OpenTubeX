@@ -745,6 +745,7 @@ Settings:
       Modal Backdrop: "Fundo das caixas de diálogo"
       Dim and Blur: "Escurecer e desfocar"
       Dim Only: "Apenas escurecer"
+    Click Scrollbar Track to Scroll: "Deslocar ao clicar na barra de deslocamento"
   Player Settings:
     Rewind on Resume: "Recuar ao retomar"
     Minimum Pause Before Rewinding: "Pausa mínima antes de recuar"
@@ -2326,6 +2327,7 @@ Tooltips:
     Use Custom Title Bar: Substitui a barra de título do sistema pela barra de separadores ou, quando os separadores não estão no topo, pela navegação superior, para poupar espaço vertical. Os controlos da janela aparecem no canto dessa barra.
     Use Grid Player Menu: Organiza o menu de definições do reprodutor de vídeo numa grelha de mosaicos em vez de uma lista de linhas.
     Modal Backdrop: "Define o aspeto da aplicação por trás das caixas de diálogo e dos menus. A desfocagem pode ser lenta em dispositivos menos potentes."
+    Click Scrollbar Track to Scroll: "Clicar numa barra de deslocamento fora do respetivo controlo desloca cerca de uma página na direção do clique. Enquanto estiver ativado, uma barra de deslocamento visível captura os cliques destinados aos itens por baixo dela. A barra de deslocamento da barra de separadores funciona sempre assim."
   Experimental Settings:
     Faster Subscription Refresh: "Verifica primeiro o feed RSS de cada canal e só carrega os vídeos, Shorts e emissões em direto dos canais com novos carregamentos. As atualizações automáticas também ignoram canais carregados nos últimos 10 minutos. Nos canais sem novos carregamentos, as visualizações, os vídeos removidos e os títulos alterados só são atualizados a cada poucas horas, e os novos carregamentos podem aparecer mais tarde quando o feed RSS está atrasado. Indisponível com a API do Invidious."
     Disable Hardware Acceleration: Desativa a aceleração por hardware da GPU. Pode resolver problemas gráficos, mas provavelmente reduzirá o desempenho.

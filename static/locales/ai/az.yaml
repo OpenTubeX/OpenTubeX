@@ -744,6 +744,7 @@ Settings:
       Modal Backdrop: "Dialoq arxa fonu"
       Dim and Blur: "Qaralt və bulanıqlaşdır"
       Dim Only: "Yalnız qaralt"
+    Click Scrollbar Track to Scroll: "Sürüşdürmək üçün sürüşdürmə zolağına klikləyin"
   Player Settings:
     Rewind on Resume: "Davam etdikdə geri çək"
     Minimum Pause Before Rewinding: "Geri çəkməzdən əvvəl minimum fasilə"
@@ -2295,6 +2296,7 @@ Tooltips:
     Use Custom Title Bar: Şaquli yerə qənaət etmək üçün sistemin başlıq zolağını vərəq paneli ilə, vərəqlər yuxarıda olmadıqda isə yuxarı naviqasiya ilə əvəz edir. Pəncərə idarəetmə düymələri həmin panelin küncündə görünür.
     Use Grid Player Menu: Video oynadıcısının tənzimləmələr menyusunu sətir siyahısı əvəzinə plitələr toru kimi düzür.
     Modal Backdrop: "Dialoqların və menyuların arxasında tətbiqin necə görünəcəyini təyin edir. Bulanıqlaşdırma zəif cihazlarda yavaş işləyə bilər."
+    Click Scrollbar Track to Scroll: "Sürüşdürmə zolağına tutacağından kənarda klikləmək klik istiqamətində təxminən bir səhifə sürüşdürür. Bu aktiv olduqda, görünən sürüşdürmə zolağı altındakı elementlər üçün nəzərdə tutulan klikləri tutur. Tab panelinin sürüşdürmə zolağı həmişə belə işləyir."
   SponsorBlock Settings:
     Always Show DeArrow Badge: Başlığı və ya miniatürü DeArrow tərəfindən əvəz edilmiş videolarda DeArrow düyməsini yalnız üzərinə gəldikdə yox, həmişə görünən saxla.
 The playlist is at the beginning. Enable loop to continue playing: Pleylist başlanğıcdadır. Oynatmağa davam etmək üçün təkrarlanmanı aktivləşdir

@@ -742,6 +742,7 @@ Settings:
       Modal Backdrop: "Valintaikkunoiden tausta"
       Dim and Blur: "Himmennä ja sumenna"
       Dim Only: "Vain himmennä"
+    Click Scrollbar Track to Scroll: "Vieritä napsauttamalla vierityspalkkia"
   Player Settings:
     Rewind on Resume: "Kelaa taaksepäin jatkettaessa"
     Minimum Pause Before Rewinding: "Vähimmäistauko ennen kelausta"
@@ -2289,6 +2290,7 @@ Tooltips:
     Use Custom Title Bar: Korvaa järjestelmän otsikkopalkin välilehtipalkilla tai yläreunan navigoinnilla, kun välilehdet eivät ole ylhäällä, jotta pystysuuntaista tilaa säästyy. Ikkunan hallintapainikkeet näkyvät kyseisen palkin kulmassa.
     Use Grid Player Menu: Järjestää videosoittimen asetusvalikon ruudukoksi riviluettelon sijaan.
     Modal Backdrop: "Määrittää, miltä sovellus näyttää valintaikkunoiden ja valikoiden takana. Sumennus voi olla hidas tehottomammilla laitteilla."
+    Click Scrollbar Track to Scroll: "Vierityspalkin napsauttaminen sen kahvan ulkopuolelta vierittää noin yhden sivun napsautuksen suuntaan. Kun tämä on käytössä, näkyvä vierityspalkki sieppaa sen alla oleville kohteille tarkoitetut napsautukset. Välilehtipalkin vierityspalkki toimii aina näin."
   SponsorBlock Settings:
     Always Show DeArrow Badge: Pidä DeArrow-painike näkyvissä videoissa, joiden otsikon tai pikkukuvan DeArrow on korvannut, sen sijaan että se näkyisi vain osoitettaessa.
 The playlist is at the beginning. Enable loop to continue playing: Soittolista on alussa. Jatka toistoa ottamalla jatkuva toisto käyttöön

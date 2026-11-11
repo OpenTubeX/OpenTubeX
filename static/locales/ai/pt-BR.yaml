@@ -711,6 +711,7 @@ Settings:
       Modal Backdrop: "Fundo das caixas de diálogo"
       Dim and Blur: "Escurecer e desfocar"
       Dim Only: "Apenas escurecer"
+    Click Scrollbar Track to Scroll: "Rolar ao clicar na barra de rolagem"
   Player Settings:
     Rewind on Resume: "Voltar ao retomar"
     Minimum Pause Before Rewinding: "Pausa mínima antes de voltar"
@@ -2252,6 +2253,7 @@ Tooltips:
     Use Custom Title Bar: Substitui a barra de título do sistema pela barra de guias ou, quando as guias não estão no topo, pela navegação superior, para economizar espaço vertical. Os controles da janela aparecem no canto dessa barra.
     Use Grid Player Menu: Organiza o menu de configurações do reprodutor de vídeo numa grelha de mosaicos em vez de uma lista de linhas.
     Modal Backdrop: "Define a aparência do app atrás das caixas de diálogo e dos menus. O desfoque pode ficar lento em dispositivos menos potentes."
+    Click Scrollbar Track to Scroll: "Clicar em uma barra de rolagem fora do controle desliza cerca de uma página na direção do clique. Enquanto estiver ativado, uma barra de rolagem visível captura os cliques destinados aos itens abaixo dela. A barra de rolagem da barra de abas sempre funciona assim."
   SponsorBlock Settings:
     Always Show DeArrow Badge: Mantém o botão do DeArrow visível nos vídeos cujo título ou miniatura foi substituído pelo DeArrow, em vez de só ao passar o mouse.
 The playlist is at the beginning. Enable loop to continue playing: A lista de reprodução está no início. Ative a repetição para continuar reproduzindo

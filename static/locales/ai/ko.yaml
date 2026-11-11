@@ -904,6 +904,7 @@ Settings:
       Modal Backdrop: "대화 상자 배경"
       Dim and Blur: "어둡게 하고 흐리게"
       Dim Only: "어둡게만"
+    Click Scrollbar Track to Scroll: "스크롤바를 클릭하여 스크롤"
   Player Settings:
     Rewind on Resume: "재개 시 되감기"
     Minimum Pause Before Rewinding: "되감기 전 최소 일시 정지 시간"
@@ -2672,6 +2673,7 @@ Tooltips:
     Use Custom Title Bar: 세로 공간을 절약하기 위해 시스템 제목 표시줄을 탭 표시줄로 바꾸거나, 탭이 위쪽에 있지 않을 때는 상단 탐색 영역으로 바꿉니다. 창 제어 버튼은 해당 표시줄의 모서리에 표시됩니다.
     Use Grid Player Menu: 동영상 플레이어의 설정 메뉴를 행 목록 대신 타일 격자로 배치합니다.
     Modal Backdrop: "대화 상자와 메뉴 뒤에서 앱이 보이는 방식을 설정합니다. 흐림 효과는 성능이 낮은 기기에서 느릴 수 있습니다."
+    Click Scrollbar Track to Scroll: "스크롤바의 핸들 바깥쪽을 클릭하면 클릭한 방향으로 약 한 페이지씩 스크롤합니다. 이 설정이 켜져 있으면 보이는 스크롤바가 그 아래 항목을 향한 클릭을 가로챕니다. 탭 바의 스크롤바는 항상 이렇게 동작합니다."
   Experimental Settings:
     Faster Subscription Refresh: "먼저 각 채널의 RSS 피드를 확인하고 새 업로드가 있는 채널의 동영상, Shorts, 라이브 스트림만 불러옵니다. 자동 새로 고침은 지난 10분 이내에 불러온 채널도 건너뜁니다. 새 업로드가 없는 채널은 조회수, 삭제된 동영상, 변경된 제목이 몇 시간마다만 업데이트되며, RSS 피드가 늦어지면 새 업로드가 늦게 표시될 수 있습니다. Invidious API에서는 사용할 수 없습니다."
     Replace HTTP Cache: Electron의 디스크 기반 HTTP 캐시를 비활성화하고 사용자 지정 메모리 내 이미지 캐시를 활성화합니다. RAM 사용량이 늘어납니다.
