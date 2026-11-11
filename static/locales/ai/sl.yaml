@@ -1087,7 +1087,9 @@ Settings:
       Russian: Ruščina
       English: Angleščina
       Kazakh: Kazaščina
-    Hold to Double Playback Speed: Drži za dvojno hitrost predvajanja
+    Hold to Speed Up:
+      Hold to Speed Up: Drži za pospešitev
+      Off: Izklopljeno
     Use Quick Playback Speed Bar: Uporabi vrstico za hitro izbiro hitrosti predvajanja
     Customize Quick Playback Speed Bar: Prilagodi vrstico za hitro izbiro hitrosti predvajanja
     Quick Playback Speed Bar Manager: Vrstica za hitro izbiro hitrosti predvajanja
@@ -2724,7 +2726,7 @@ Tooltips:
     Enable Seek History: Do zaprtja aplikacije si zapomni, od kod ste skočili v vsakem videoposnetku. Prikaže seznam zgodovine skokov v meniju nastavitev predvajalnika in omogoči njene bližnjice na tipkovnici.
     Show Seek Bar Filmstrip: "Vlečenje drsnika vrstice za previjanje prikaže trak sličic okoli mesta, kamor boste prispeli, vlečenje navzgor nanj pa omogoča natančno previjanje. Ko je onemogočeno, vlečenje prikaže eno samo sličico, kot pri premiku kazalca nad vrstico."
     Voice-over Translation: Ob zahtevi za prevod pošlje ID videoposnetka, trajanje in izbrani jezik neuradni Yandexovi storitvi za glasovni prevod. Privzeto je onemogočeno.
-    Hold to Double Playback Speed: Pridržite preslednico ali levi miškin gumb nad predvajalnikom, da začasno podvojite trenutno hitrost predvajanja.
+    Hold to Speed Up: Pridržite preslednico ali levi miškin gumb nad predvajalnikom, da začasno pomnožite trenutno hitrost predvajanja z izbrano vrednostjo.
     Ambient Mode: Barve videoposnetka prelije v območje okoli predvajalnika.
     Default Volume: Onemogočeno, dokler je omogočena možnost »Zapomni si glasnost«. Izklopite jo, da nastavite stalno začetno glasnost za vsak videoposnetek.
     Parallel Segment Loading: |

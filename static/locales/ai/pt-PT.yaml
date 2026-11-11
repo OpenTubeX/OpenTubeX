@@ -888,7 +888,9 @@ Settings:
       Russian: Russo
       English: Inglês
       Kazakh: Cazaque
-    Hold to Double Playback Speed: Manter premido para duplicar a velocidade de reprodução
+    Hold to Speed Up:
+      Hold to Speed Up: Manter premido para acelerar
+      Off: Desativado
     Use Quick Playback Speed Bar: Usar barra rápida de velocidade de reprodução
     Customize Quick Playback Speed Bar: Personalizar barra rápida de velocidade de reprodução
     Quick Playback Speed Bar Manager: Barra rápida de velocidade de reprodução
@@ -2258,7 +2260,7 @@ Tooltips:
     Enable Seek History: Memoriza de onde saltou em cada vídeo até a aplicação ser fechada. Mostra a lista do histórico de saltos no menu de definições do reprodutor e ativa os respetivos atalhos de teclado.
     Show Seek Bar Filmstrip: "Arrastar o controlo da barra de progresso mostra uma tira de fotogramas à volta do ponto onde vai chegar, e arrastar para cima sobre ela permite procurar com precisão. Quando desativado, arrastar mostra uma única miniatura, como ao passar o cursor por cima."
     Voice-over Translation: Quando solicita uma tradução, envia o ID e a duração do vídeo e o idioma selecionado para o serviço não oficial de tradução por voz da Yandex. Está desativado por predefinição.
-    Hold to Double Playback Speed: Mantenha premida a barra de espaços ou o botão esquerdo do rato sobre o reprodutor para duplicar temporariamente a velocidade de reprodução atual.
+    Hold to Speed Up: Mantenha premida a barra de espaços ou o botão esquerdo do rato sobre o reprodutor para multiplicar temporariamente a velocidade de reprodução atual pelo valor selecionado.
     Ambient Mode: Mistura as cores do vídeo com a área em redor do reprodutor.
     Default Volume: Esta opção fica desativada enquanto Memorizar volume estiver ativo. Desative Memorizar volume para definir um volume inicial fixo para cada vídeo.
     Parallel Segment Loading: |

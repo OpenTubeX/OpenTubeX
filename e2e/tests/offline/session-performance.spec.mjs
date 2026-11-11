@@ -13,7 +13,7 @@ test.use({
       playNextVideo: false,
       keepPlayingOnNavigation: false,
       hideSideBarOnWatchPages: false,
-      holdToDoublePlaybackSpeed: true,
+      holdPlaybackRateMultiplier: 2,
     }
   }
 })

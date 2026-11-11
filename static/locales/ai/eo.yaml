@@ -907,7 +907,9 @@ Settings:
       Russian: Rusa
       English: Angla
       Kazakh: Kazaĥa
-    Hold to Double Playback Speed: Teni premita por duobligi ludrapidon
+    Hold to Speed Up:
+      Hold to Speed Up: Teni premita por plirapidigi
+      Off: Malŝaltita
     Use Quick Playback Speed Bar: Uzi breton de rapidaj ludrapidoj
     Customize Quick Playback Speed Bar: Personecigi breton de rapidaj ludrapidoj
     Quick Playback Speed Bar Manager: Breto de rapidaj ludrapidoj
@@ -2259,7 +2261,7 @@ Tooltips:
     Pause on Stream Recovery: Kiam la videofluo malsukcesas kaj la ludilo reŝargas ĝin aŭ ŝanĝas al alia formo aŭ motoro, paŭzigi la ludadon kaj teni la eraron supre de la ludilo ĝis vi fermas ĝin. Kiam malŝaltita, la ludado daŭras kaj la eraro aperas mallonge kiel sciigo.
     Continue Playback When Screen Is Locked: Daŭrigas la sonludadon fone kaj provizas Android-aŭdvidajn regilojn. Malŝaltu ĉi tion por paŭzigi kiam la aplikaĵo ne plu estas videbla.
     Voice-over Translation: Sendas la identigilon, daŭron kaj elektitan lingvon de la videaĵo al la neoficiala voĉtraduka servo de Yandex kiam vi petas tradukon. Defaŭlte malŝaltita.
-    Hold to Double Playback Speed: Tenu premita la spacoklavon aŭ la maldekstran musbutonon super la ludilo por provizore duobligi la aktualan ludrapidon.
+    Hold to Speed Up: Tenu premita la spacoklavon aŭ la maldekstran musbutonon super la ludilo por provizore multobligi la aktualan ludrapidon per la elektita valoro.
     Ambient Mode: Miksas la kolorojn de la videaĵo en la areon ĉirkaŭ la ludilo.
     Mono Audio: Ludas la maldekstran kaj dekstran sonkanalojn en ambaŭ oreloj. Uzu ĝin kiam la sono de videaĵo venas nur el unu flanko de viaj kapaŭskultiloj.
     Normalize Loudness: 'Mallaŭtigas videojn, kiuj estas pli laŭtaj ol la plimulto, por ke la laŭteco ne saltu inter videoj. Mallaŭtaj videoj konservas sian laŭtecon. Funkcias nur por videoj ŝargitaj per la Loka API.'

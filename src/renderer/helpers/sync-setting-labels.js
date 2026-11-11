@@ -186,7 +186,7 @@ export const SYNC_SETTING_LABELS = {
   hideWatchedSubs: 'Settings.Distraction Free Settings.Hide Videos on Watch',
   highlightChangedSettings: 'Settings.Highlight Changed Settings',
   historyRetentionDays: 'Settings.Privacy Settings.Automatic History Retention',
-  holdToDoublePlaybackSpeed: 'Settings.Player Settings.Hold to Double Playback Speed',
+  holdPlaybackRateMultiplier: 'Settings.Player Settings.Hold to Speed Up.Hold to Speed Up',
   homeSectionLayout: 'Home Page.Customize',
   iconPack: 'Settings.Theme Settings.Icon Pack.Icon Pack',
   internetConnectivityChecks: 'Settings.Privacy Settings.Internet Connectivity Checks',
@@ -502,6 +502,7 @@ export const SYNC_SETTING_VALUE_LABELS = {
     openYoutube: `${general}Extra Thumbnail Action Button.Open in YouTube`,
     download: 'Downloads.Download Video',
   },
+  holdPlaybackRateMultiplier: { 0: `${player}Hold to Speed Up.Off` },
   iconPack: { material: `${theme}Icon Pack.Material Symbols`, remix: `${theme}Icon Pack.Remix Icon` },
   landingPage: {
     home: 'Home Page.Home',

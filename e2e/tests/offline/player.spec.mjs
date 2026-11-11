@@ -327,9 +327,9 @@ test('keyboard shortcuts change the playback rate', async ({ app, page, attachSc
   await attachScreenshot('playback rate lowered')
 })
 
-for (const holdToDoublePlaybackSpeed of [false, true]) {
-  test.describe(`seekbar shortcuts with hold-to-double ${holdToDoublePlaybackSpeed ? 'enabled' : 'disabled'}`, () => {
-    test.use({ seed: { settings: { ...PLAYER_SEED, holdToDoublePlaybackSpeed } } })
+for (const holdPlaybackRateMultiplier of [0, 3]) {
+  test.describe(`seekbar shortcuts with hold to speed up ${holdPlaybackRateMultiplier ? 'enabled' : 'disabled'}`, () => {
+    test.use({ seed: { settings: { ...PLAYER_SEED, holdPlaybackRateMultiplier } } })
 
     test('Space toggles playback after clicking the seekbar', async ({ app, page }) => {
       const video = await openDemoVideo({ app, page })
@@ -354,10 +354,10 @@ for (const holdToDoublePlaybackSpeed of [false, true]) {
         await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
         await expect(seekBar).toBeFocused()
 
-        if (holdToDoublePlaybackSpeed) {
+        if (holdPlaybackRateMultiplier) {
           await page.keyboard.down('Space')
           try {
-            await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(2)
+            await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(holdPlaybackRateMultiplier)
           } finally {
             await page.keyboard.up('Space')
           }

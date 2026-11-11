@@ -879,7 +879,9 @@ Settings:
       Russian: Russo
       English: Inglese
       Kazakh: Kazako
-    Hold to Double Playback Speed: Tieni premuto per raddoppiare la velocità di riproduzione
+    Hold to Speed Up:
+      Hold to Speed Up: Tieni premuto per accelerare
+      Off: Disattivato
     Use Quick Playback Speed Bar: Usa barra rapida della velocità di riproduzione
     Customize Quick Playback Speed Bar: Personalizza barra rapida della velocità di riproduzione
     Quick Playback Speed Bar Manager: Barra rapida della velocità di riproduzione
@@ -2214,7 +2216,7 @@ Tooltips:
     Enable Seek History: Ricorda da dove sei saltato in ogni video fino alla chiusura dell'app. Mostra l'elenco della cronologia dei salti nel menu delle impostazioni del lettore e abilita le relative scorciatoie da tastiera.
     Show Seek Bar Filmstrip: "Trascinando il cursore della barra di avanzamento viene mostrata una striscia di fotogrammi attorno al punto di arrivo, e trascinando verso l’alto su di essa la ricerca diventa precisa. Se disattivato, il trascinamento mostra una sola miniatura, come al passaggio del mouse."
     Voice-over Translation: Quando richiedi una traduzione, invia l'ID e la durata del video e la lingua selezionata al servizio non ufficiale di traduzione vocale Yandex. Disabilitato per impostazione predefinita.
-    Hold to Double Playback Speed: Tieni premuta la barra spaziatrice o il pulsante sinistro del mouse sul lettore per raddoppiare temporaneamente la velocità di riproduzione corrente.
+    Hold to Speed Up: Tieni premuta la barra spaziatrice o il pulsante sinistro del mouse sul lettore per moltiplicare temporaneamente la velocità di riproduzione corrente per il valore selezionato.
     Ambient Mode: Sfuma i colori del video nell'area circostante il lettore.
     Default Volume: Non disponibile quando Ricorda il volume è abilitato. Disattiva Ricorda il volume per impostare un volume iniziale fisso per ogni video.
     Parallel Segment Loading: |

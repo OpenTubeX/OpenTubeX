@@ -1,5 +1,10 @@
 import { normalizeToastPosition, TOAST_POSITION_VALUES } from '../constants/toastPosition.js'
 import { MAX_FONT_SIZE, MIN_FONT_SIZE } from './appFont.js'
+import {
+  getHoldPlaybackRateMultiplierNames,
+  HOLD_PLAYBACK_RATE_MULTIPLIERS,
+  normalizeHoldPlaybackRateMultiplier,
+} from './holdPlaybackRate.js'
 
 const CORE_QUICK_SETTINGS = [
   ['baseTheme', 'appearance', 'Settings.Theme Settings.Base Theme.Base Theme', { control: 'select', icon: ['fas', 'palette'] }],
@@ -171,7 +176,16 @@ export const BASIC_QUICK_SETTING_DEFINITIONS = Object.freeze([
   ['loopShorts', 'Settings.Player Settings.Loop Shorts', 'playback', ['fas', 'replay'], { disabledWhen: settings => !settings.useCustomShortsPlayer }],
   ['rememberVolume', 'Settings.Player Settings.Remember Volume', 'playback', ['fas', 'volume-high'], { capacitorUnsupported: true }],
   ['enableSkipSilenceByDefault', 'Settings.Player Settings.Enable Skip Silence by Default', 'playback', ['fas', 'volume-mute'], { iosUnsupported: true, disabledWhen: settings => !settings.showSkipSilenceButton }],
-  ['holdToDoublePlaybackSpeed', 'Settings.Player Settings.Hold to Double Playback Speed', 'playback', ['fas', 'forward']],
+  {
+    id: 'holdPlaybackRateMultiplier',
+    section: 'playback',
+    labelKey: 'Settings.Player Settings.Hold to Speed Up.Hold to Speed Up',
+    control: 'select',
+    values: HOLD_PLAYBACK_RATE_MULTIPLIERS,
+    optionLabels: getHoldPlaybackRateMultiplierNames,
+    effectiveValue: settings => normalizeHoldPlaybackRateMultiplier(settings.holdPlaybackRateMultiplier),
+    icon: ['fas', 'forward-fast'],
+  },
   ['useQuickPlaybackSpeedBar', 'Settings.Player Settings.Use Quick Playback Speed Bar', 'playback', ['fas', 'sliders-h']],
   ['musicVisualizer', 'Settings.Player Settings.Music Visualizer', 'playback', ['fas', 'music']],
   ['useDeArrowTitles', 'Settings.SponsorBlock Settings.UseDeArrowTitles', 'add-ons', ['fas', 'pen']],

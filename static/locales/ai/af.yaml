@@ -1042,7 +1042,9 @@ Settings:
       Russian: Russies
       English: Engels
       Kazakh: Kazaks
-    Hold to Double Playback Speed: Hou in om afspeelspoed te verdubbel
+    Hold to Speed Up:
+      Hold to Speed Up: Hou in om te versnel
+      Off: Af
     Use Quick Playback Speed Bar: Gebruik vinnige afspeelspoedbalk
     Customize Quick Playback Speed Bar: Pas vinnige afspeelspoedbalk aan
     Quick Playback Speed Bar Manager: Vinnige afspeelspoedbalk
@@ -2465,7 +2467,7 @@ Tooltips:
     Pause on Stream Recovery: Wanneer die videostroom misluk en die speler dit herlaai of na ’n ander formaat of enjin oorskakel, pouseer afspeel en hou die fout bo-aan die speler totdat u dit toemaak. Wanneer gedeaktiveer, gaan afspeel voort en verskyn die fout kortliks as ’n kennisgewing.
     Continue Playback When Screen Is Locked: Hou oudio in die agtergrond aan die speel en verskaf Android-mediakontroles. Skakel dit af om te pouseer wanneer die toep nie meer sigbaar is nie.
     Voice-over Translation: Stuur die video-ID, duur en gekose taal na die nie-amptelike Yandex-stemoorvertaaldiens wanneer u ’n vertaling versoek. By verstek gedeaktiveer.
-    Hold to Double Playback Speed: Hou die spasiebalk of linkermuisknoppie oor die speler in om die huidige afspeelspoed tydelik te verdubbel.
+    Hold to Speed Up: Hou die spasiebalk of linkermuisknoppie oor die speler in om die huidige afspeelspoed tydelik met die gekose waarde te vermenigvuldig.
     Ambient Mode: Meng die video se kleure in die area rondom die speler in.
     Mono Audio: Speel die linker- en regteroudiokanale in albei ore. Gebruik dit wanneer ’n video se klank slegs uit een kant van u oorfone kom.
     Normalize Loudness: 'Maak video''s sagter wat harder as die meeste is, sodat die volume nie tussen video''s spring nie. Sagte video''s behou hul volume. Werk slegs vir video''s wat met die plaaslike API gelaai is.'

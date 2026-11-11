@@ -879,7 +879,9 @@ Settings:
       Russian: Ryska
       English: Engelska
       Kazakh: Kazakiska
-    Hold to Double Playback Speed: Håll ned för dubbel uppspelningshastighet
+    Hold to Speed Up:
+      Hold to Speed Up: Håll ned för att snabba upp
+      Off: Av
     Use Quick Playback Speed Bar: Använd snabbfältet för uppspelningshastighet
     Customize Quick Playback Speed Bar: Anpassa snabbfältet för uppspelningshastighet
     Quick Playback Speed Bar Manager: Snabbfält för uppspelningshastighet
@@ -2215,7 +2217,7 @@ Tooltips:
     Enable Seek History: Kommer ihåg var du hoppade ifrån i varje video tills appen stängs. Visar hopphistoriklistan i spelarens inställningsmeny och aktiverar dess kortkommandon.
     Show Seek Bar Filmstrip: "När du drar i tidslinjens reglage visas en remsa med bildrutor runt platsen där du hamnar, och drar du uppåt på den spolar du exakt. När detta är avaktiverat visar dragningen en enda miniatyrbild, som när du håller pekaren över."
     Voice-over Translation: Skickar videons ID, längd och valt språk till Yandex inofficiella tjänst för dubbningsöversättning när du begär en översättning. Funktionen är inaktiverad som standard.
-    Hold to Double Playback Speed: Håll ned mellanslagstangenten eller vänster musknapp över spelaren för att tillfälligt dubbla den aktuella uppspelningshastigheten.
+    Hold to Speed Up: Håll ned mellanslagstangenten eller vänster musknapp över spelaren för att tillfälligt multiplicera den aktuella uppspelningshastigheten med det valda värdet.
     Ambient Mode: Tonar ut videons färger i området runt spelaren.
     Default Volume: Inaktiverat medan Kom ihåg volymen är aktiverat. Stäng av Kom ihåg volymen för att ange en fast startvolym för varje video.
     Parallel Segment Loading: |

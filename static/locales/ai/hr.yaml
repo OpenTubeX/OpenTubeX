@@ -882,7 +882,9 @@ Settings:
       Russian: Ruski
       English: Engleski
       Kazakh: Kazaški
-    Hold to Double Playback Speed: Držite za udvostručavanje brzine reprodukcije
+    Hold to Speed Up:
+      Hold to Speed Up: Držite za ubrzavanje
+      Off: Isključeno
     Use Quick Playback Speed Bar: Upotrebljavaj traku za brzi odabir brzine reprodukcije
     Customize Quick Playback Speed Bar: Prilagodi traku za brzi odabir brzine reprodukcije
     Quick Playback Speed Bar Manager: Traka za brzi odabir brzine reprodukcije
@@ -2247,7 +2249,7 @@ Tooltips:
     Enable Seek History: Pamti odakle ste premotali u svakom videozapisu dok se aplikacija ne zatvori. Prikazuje popis povijesti premotavanja u izborniku postavki reproduktora i omogućuje njegove tipkovničke prečace.
     Show Seek Bar Filmstrip: "Povlačenje klizača trake za premotavanje prikazuje traku sličica oko mjesta na koje ćete stići, a povlačenje prema gore na nju omogućuje precizno premotavanje. Kada je onemogućeno, povlačenje prikazuje jednu minijaturu, kao pri prelasku pokazivačem."
     Voice-over Translation: Pri zahtjevu za prijevod šalje ID videozapisa, trajanje i odabrani jezik neslužbenoj Yandexovoj usluzi glasovnog prijevoda. Prema zadanim je postavkama isključena.
-    Hold to Double Playback Speed: Držite razmaknicu ili lijevu tipku miša iznad reproduktora kako biste privremeno udvostručili trenutačnu brzinu reprodukcije.
+    Hold to Speed Up: Držite razmaknicu ili lijevu tipku miša iznad reproduktora kako biste privremeno pomnožili trenutačnu brzinu reprodukcije odabranom vrijednošću.
     Ambient Mode: Stapa boje videozapisa s područjem oko reproduktora.
     Default Volume: Onemogućeno dok je uključena postavka Zapamti glasnoću. Isključite je kako biste postavili stalnu početnu glasnoću za svaki videozapis.
     Parallel Segment Loading: |

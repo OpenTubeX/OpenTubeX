@@ -879,7 +879,9 @@ Settings:
       Russian: Errusiera
       English: Ingelesa
       Kazakh: Kazakhera
-    Hold to Double Playback Speed: Eduki sakatuta erreprodukzio-abiadura bikoizteko
+    Hold to Speed Up:
+      Hold to Speed Up: Eduki sakatuta azkartzeko
+      Off: Desaktibatuta
     Use Quick Playback Speed Bar: Erabili erreprodukzio-abiaduraren barra azkarra
     Customize Quick Playback Speed Bar: Pertsonalizatu erreprodukzio-abiaduraren barra azkarra
     Quick Playback Speed Bar Manager: Erreprodukzio-abiaduraren barra azkarra
@@ -2224,7 +2226,7 @@ Tooltips:
     Enable Seek History: Bideo bakoitzean nondik egin duzun jauzi gogoratzen du aplikazioa itxi arte. Jauzien historiaren zerrenda erakusten du erreproduzigailuaren ezarpenen menuan eta haren laster-teklak gaitzen ditu.
     Show Seek Bar Filmstrip: "Bilaketa-barraren kontrola arrastatzean, iritsiko zaren lekuaren inguruko fotograma-zerrenda bat erakusten da, eta haren gainera gora arrastatuz gero zehatz bilatzen da. Desgaituta dagoenean, arrastatzean irudi txiki bakarra erakusten da, gainetik pasatzean bezala."
     Voice-over Translation: Itzulpena eskatzean bideoaren IDa, iraupena eta hautatutako hizkuntza bidaltzen dizkio Yandexen ahots bidezko itzulpen-zerbitzu ez-ofizialari. Modu lehenetsian desgaituta dago.
-    Hold to Double Playback Speed: Eduki sakatuta zuriune-barra edo saguaren ezkerreko botoia erreproduzigailuaren gainean uneko erreprodukzio-abiadura aldi baterako bikoizteko.
+    Hold to Speed Up: Eduki sakatuta zuriune-barra edo saguaren ezkerreko botoia erreproduzigailuaren gainean uneko erreprodukzio-abiadura aldi baterako hautatutako balioarekin biderkatzeko.
     Ambient Mode: Bideoaren koloreak erreproduzigailuaren inguruan hedatzen ditu.
     Default Volume: Desgaituta dago Gogoratu bolumena aukera gaituta dagoenean. Desgaitu aukera hori bideo bakoitzerako hasierako bolumen finko bat ezartzeko.
     Parallel Segment Loading: |

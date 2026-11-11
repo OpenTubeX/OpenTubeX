@@ -45,7 +45,7 @@ function fixture(music, controllerReady = false, { musicMode = false, sabrReload
     maxVideoPlaybackRate: ref(4),
     videoPlaybackRateInterval: ref(0.25),
     savedChannelPlaybackRate: ref(null),
-    holdToDoublePlaybackSpeed: ref(true),
+    holdPlaybackRateMultiplier: ref(2),
     onPlaybackRateUpdated: rate => { props.currentPlaybackRate = rate },
     onPlaybackRateUserSet() {},
     updatePendingPlaybackRateMenu() {},

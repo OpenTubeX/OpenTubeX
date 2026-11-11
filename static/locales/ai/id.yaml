@@ -882,7 +882,9 @@ Settings:
       Russian: Rusia
       English: Inggris
       Kazakh: Kazakh
-    Hold to Double Playback Speed: Tahan untuk Menggandakan Kecepatan Pemutaran
+    Hold to Speed Up:
+      Hold to Speed Up: Tahan untuk Mempercepat
+      Off: Mati
     Use Quick Playback Speed Bar: Gunakan Bilah Kecepatan Pemutaran Cepat
     Customize Quick Playback Speed Bar: Sesuaikan Bilah Kecepatan Pemutaran Cepat
     Quick Playback Speed Bar Manager: Bilah Kecepatan Pemutaran Cepat
@@ -2239,7 +2241,7 @@ Tooltips:
     Enable Seek History: Mengingat posisi tempat Anda melompat di setiap video hingga aplikasi ditutup. Menampilkan daftar riwayat lompatan di menu pengaturan pemutar dan mengaktifkan pintasan keyboard-nya.
     Show Seek Bar Filmstrip: "Menyeret kenop bilah progres menampilkan strip bingkai di sekitar tempat tujuan Anda, dan menarik ke atas ke strip tersebut memungkinkan pencarian secara presisi. Jika dinonaktifkan, menyeret hanya menampilkan satu gambar mini, seperti saat mengarahkan kursor."
     Voice-over Translation: Mengirim ID video, durasi, dan bahasa yang dipilih ke layanan tidak resmi terjemahan sulih suara Yandex saat Anda meminta terjemahan. Nonaktif secara bawaan.
-    Hold to Double Playback Speed: Tahan tombol Spasi atau tombol kiri tetikus di atas pemutar untuk menggandakan sementara kecepatan pemutaran saat ini.
+    Hold to Speed Up: Tahan tombol Spasi atau tombol kiri tetikus di atas pemutar untuk mengalikan sementara kecepatan pemutaran saat ini dengan nilai yang dipilih.
     Ambient Mode: Memadukan warna video dengan area di sekitar pemutar.
     Default Volume: Dinonaktifkan selama Ingat Volume aktif. Nonaktifkan Ingat Volume untuk menetapkan volume awal yang tetap bagi setiap video.
     Parallel Segment Loading: |

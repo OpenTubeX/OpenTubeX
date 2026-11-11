@@ -4,6 +4,7 @@ import { DEFAULT_QUICK_SETTINGS } from './quickSettings.js'
 import {
   FORMER_CHANNEL_SETTING_SWITCHES,
   isFormerDefaultQuickSettings,
+  holdPlaybackRateMultiplierFromSwitch,
   migrateSettingIds,
   scrollPlayerModeFromMiniPlayerSwitch,
   titleLineLimitFromSwitch,
@@ -126,6 +127,13 @@ export function migrateLegacySettings(settings) {
     delete migratedSettings.scrollMiniPlayerEnabled
   }
   delete migratedSettings.scrollMiniPlayerOnAllTabs
+
+  if (Object.hasOwn(migratedSettings, 'holdToDoublePlaybackSpeed')) {
+    if (!Object.hasOwn(migratedSettings, 'holdPlaybackRateMultiplier')) {
+      migratedSettings.holdPlaybackRateMultiplier = holdPlaybackRateMultiplierFromSwitch(migratedSettings.holdToDoublePlaybackSpeed)
+    }
+    delete migratedSettings.holdToDoublePlaybackSpeed
+  }
 
   if (Object.hasOwn(migratedSettings, 'moveDownloadsToQuickSettings')) {
     if (!Object.hasOwn(migratedSettings, 'moveDownloadsToAppHeader')) {

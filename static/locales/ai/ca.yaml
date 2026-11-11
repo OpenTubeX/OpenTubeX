@@ -1110,7 +1110,9 @@ Settings:
       Russian: Rus
       English: Anglès
       Kazakh: Kazakh
-    Hold to Double Playback Speed: Manteniu premut per duplicar la velocitat de reproducció
+    Hold to Speed Up:
+      Hold to Speed Up: Manteniu premut per accelerar
+      Off: Desactivat
     Use Quick Playback Speed Bar: Utilitza la barra ràpida de velocitat de reproducció
     Customize Quick Playback Speed Bar: Personalitza la barra ràpida de velocitat de reproducció
     Quick Playback Speed Bar Manager: Barra ràpida de velocitat de reproducció
@@ -2763,7 +2765,7 @@ Tooltips:
     Enable Seek History: Recorda des d'on has saltat en cada vídeo fins que es tanca l'aplicació. Mostra la llista de l'historial de salts al menú de configuració del reproductor i activa les seves dreceres de teclat.
     Show Seek Bar Filmstrip: "En arrossegar el control de la barra de cerca es mostra una tira de fotogrames al voltant d'on anireu, i estirar-la cap amunt permet cercar amb precisió. Quan està desactivat, en arrossegar es mostra una sola miniatura, com en passar-hi el cursor per sobre."
     Voice-over Translation: Envia l'ID, la durada i la llengua seleccionada del vídeo al servei no oficial de traducció de veu en off de Yandex quan sol·liciteu una traducció. Està desactivat de manera predeterminada.
-    Hold to Double Playback Speed: Manteniu premuda la barra espaiadora o el botó esquerre del ratolí sobre el reproductor per duplicar temporalment la velocitat de reproducció actual.
+    Hold to Speed Up: Manteniu premuda la barra espaiadora o el botó esquerre del ratolí sobre el reproductor per multiplicar temporalment la velocitat de reproducció actual pel valor seleccionat.
     Ambient Mode: Barreja els colors del vídeo amb l'àrea que envolta el reproductor.
     Default Volume: Està desactivat mentre Recorda el volum estigui activat. Desactiveu Recorda el volum per definir un volum inicial fix per a cada vídeo.
     Parallel Segment Loading: |

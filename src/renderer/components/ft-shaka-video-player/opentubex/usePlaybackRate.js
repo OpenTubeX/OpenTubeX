@@ -1,7 +1,6 @@
 import { computed, ref, watch } from 'vue'
 
 export const NORMAL_PLAYBACK_RATE = 1
-const TEMPORARY_PLAYBACK_RATE_MULTIPLIER = 2
 const TEMPORARY_PLAYBACK_RATE_HOLD_DELAY_MS = 625
 
 /**
@@ -52,7 +51,7 @@ export function getPlaybackRatePresets(step, maximum) {
  *   maxVideoPlaybackRate: import('vue').Ref<number>,
  *   videoPlaybackRateInterval: import('vue').Ref<number>,
  *   savedChannelPlaybackRate: import('vue').Ref<number | null>,
- *   holdToDoublePlaybackSpeed: import('vue').Ref<boolean>,
+ *   holdPlaybackRateMultiplier: import('vue').Ref<number>,
  *   onPlaybackRateUpdated: (rate: number) => void,
  *   onPlaybackRateUserSet: (rate: number) => void,
  *   updatePendingPlaybackRateMenu: () => void,
@@ -74,7 +73,7 @@ export function usePlaybackRate({
   maxVideoPlaybackRate,
   videoPlaybackRateInterval,
   savedChannelPlaybackRate,
-  holdToDoublePlaybackSpeed,
+  holdPlaybackRateMultiplier,
   onPlaybackRateUpdated,
   onPlaybackRateUserSet,
   updatePendingPlaybackRateMenu,
@@ -282,7 +281,7 @@ export function usePlaybackRate({
     temporaryPlaybackRateActive = true
 
     try {
-      const temporaryPlaybackRate = playbackRate * TEMPORARY_PLAYBACK_RATE_MULTIPLIER
+      const temporaryPlaybackRate = playbackRate * holdPlaybackRateMultiplier.value
       player.trickPlay(temporaryPlaybackRate, false)
       temporaryPlaybackRateIndicatorMessage.value = `${Number.parseFloat(temporaryPlaybackRate.toFixed(2))}x`
       showTemporaryPlaybackRateIndicator.value = true
@@ -308,7 +307,7 @@ export function usePlaybackRate({
       !getPlayer() ||
       !video.value ||
       !hasLoaded.value ||
-      !holdToDoublePlaybackSpeed.value ||
+      !holdPlaybackRateMultiplier.value ||
       temporaryPlaybackRateHoldTimeouts.has(source) ||
       temporaryPlaybackRateSources.has(source)
     ) {

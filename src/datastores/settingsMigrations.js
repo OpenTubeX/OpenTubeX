@@ -44,6 +44,7 @@ const REPLACED_SETTING_IDS = new Map([
   ['hideVideoDescription', 'videoDescriptionMode'],
   ['scrollMiniPlayerEnabled', 'scrollPlayerMode'],
   ['limitTitlesToTwoLines', 'titleLineLimit'],
+  ['holdToDoublePlaybackSpeed', 'holdPlaybackRateMultiplier'],
 ])
 
 /**
@@ -79,6 +80,15 @@ export function titleLineLimitFromSwitch(enabled) {
   return enabled === false ? 0 : 2
 }
 
+/**
+ * The Hold to Speed Up multiplier that replaced the former Hold to Double
+ * Playback Speed switch. 0 turns holding off.
+ * @param {unknown} enabled
+ */
+export function holdPlaybackRateMultiplierFromSwitch(enabled) {
+  return enabled === false ? 0 : 2
+}
+
 /** Apply the stored setting migrations shared by manual and scheduled backups. */
 export async function migrateStoredSettings(datastore) {
   const save = (key, value) => datastore.updateAsync({ _id: key }, { _id: key, value }, { upsert: true })
@@ -91,6 +101,7 @@ export async function migrateStoredSettings(datastore) {
         'hideVideoDescription', 'videoDescriptionMode', 'syncServerSettingsExcluded',
         'scrollMiniPlayerEnabled', 'scrollMiniPlayerOnAllTabs', 'scrollPlayerMode',
         'limitTitlesToTwoLines', 'titleLineLimit', 'syncServerSettingUpdatedAt',
+        'holdToDoublePlaybackSpeed', 'holdPlaybackRateMultiplier',
         ...FORMER_CHANNEL_SETTING_SWITCHES.flat(),
       ]
     }
@@ -187,6 +198,14 @@ export async function migrateStoredSettings(datastore) {
       await save('titleLineLimit', titleLineLimitFromSwitch(limitTitlesToTwoLines.value))
     }
     await datastore.removeAsync({ _id: 'limitTitlesToTwoLines' })
+  }
+  // Hold to Double Playback Speed became the Hold to Speed Up multiplier.
+  const holdToDoublePlaybackSpeed = stored.get('holdToDoublePlaybackSpeed')
+  if (holdToDoublePlaybackSpeed) {
+    if (holdToDoublePlaybackSpeed.value === false && !stored.has('holdPlaybackRateMultiplier')) {
+      await save('holdPlaybackRateMultiplier', 0)
+    }
+    await datastore.removeAsync({ _id: 'holdToDoublePlaybackSpeed' })
   }
   // Keep Playing When Navigating Away now also decides whether switching tabs
   // shows the mini player.

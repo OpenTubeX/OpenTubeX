@@ -59,7 +59,8 @@ const value = computed(() => (
   props.definition.effectiveValue?.(store.state.settings) ?? store.state.settings[props.definition.id]
 ))
 const disabled = computed(() => props.definition.disabledWhen?.(store.state.settings) ?? false)
-const selectNames = computed(() => props.definition.optionLabelKeys?.map((key) => {
+// Labels that aren't plain translations, such as multipliers, come from `optionLabels`.
+const selectNames = computed(() => props.definition.optionLabels?.(t) ?? props.definition.optionLabelKeys?.map((key) => {
   // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
   return t(key)
 }) ?? [])

@@ -879,7 +879,9 @@ Settings:
       Russian: Vene
       English: Inglise
       Kazakh: Kasahhi
-    Hold to Double Playback Speed: Hoia all, et esituskiirust kahekordistada
+    Hold to Speed Up:
+      Hold to Speed Up: Hoia all kiirendamiseks
+      Off: Väljas
     Use Quick Playback Speed Bar: Kasuta esituskiiruse kiirvalikuriba
     Customize Quick Playback Speed Bar: Kohanda esituskiiruse kiirvalikuriba
     Quick Playback Speed Bar Manager: Esituskiiruse kiirvalikuriba
@@ -2217,7 +2219,7 @@ Tooltips:
     Enable Seek History: Jätab meelde, kust sa igas videos edasi hüppasid, kuni rakendus suletakse. Näitab kerimisajaloo loendit pleieri seadete menüüs ja lubab selle kiirklahvid.
     Show Seek Bar Filmstrip: "Kerimisriba nupu lohistamine näitab kaadririba selle koha ümber, kuhu jõuad, ja selle peale üles tõmmates saad täpselt kerida. Kui see on keelatud, näitab lohistamine üht pisipilti nagu kursoriga üle liikudes."
     Voice-over Translation: Tõlkepäringu tegemisel saadab video ID, kestuse ja valitud keele mitteametlikule Yandexi pealelugemise tõlketeenusele. Vaikimisi välja lülitatud.
-    Hold to Double Playback Speed: Praeguse esituskiiruse ajutiseks kahekordistamiseks hoia pleieri kohal all tühikuklahvi või hiire vasakut nuppu.
+    Hold to Speed Up: Praeguse esituskiiruse ajutiseks korrutamiseks valitud väärtusega hoia pleieri kohal all tühikuklahvi või hiire vasakut nuppu.
     Ambient Mode: Sulandab video värvid pleieri ümbrusega.
     Default Volume: Pole kasutatav, kui helitugevuse meeldejätmine on lubatud. Iga video kindla algse helitugevuse määramiseks lülita helitugevuse meeldejätmine välja.
     Parallel Segment Loading: |

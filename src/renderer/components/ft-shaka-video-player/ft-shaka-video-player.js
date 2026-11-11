@@ -3,6 +3,7 @@ import { CONTROL_BAR_MENUS, setupSubmenuScrolling } from '../../helpers/player/s
 import { setupMenuTransitions } from '../../helpers/player/menuTransitions'
 import { chooseAndroidDirectory } from '../../helpers/androidStorage'
 import { isAppHidden, getAndroidAppActive, waitForAndroidAppState } from '../../helpers/appVisibility.js'
+import { normalizeHoldPlaybackRateMultiplier } from '../../helpers/holdPlaybackRate.js'
 import { playbackScreenWake } from '../../helpers/playbackScreenWake'
 import { createRepeatStatsTracker } from '../../helpers/player/repeatStats'
 import { computed, defineComponent, inject, nextTick, onActivated, onBeforeUnmount, onBeforeUpdate, onDeactivated, onMounted, onUnmounted, onUpdated, reactive, ref, shallowRef, useId, watch } from 'vue'
@@ -1920,12 +1921,13 @@ export default defineComponent({
       return store.getters.getVideoPlaybackRateMouseScroll
     })
 
-    const holdToDoublePlaybackSpeed = computed(() => {
-      return store.getters.getHoldToDoublePlaybackSpeed
+    /** The Hold to Speed Up multiplier, or 0 when holding is off. */
+    const holdPlaybackRateMultiplier = computed(() => {
+      return normalizeHoldPlaybackRateMultiplier(store.getters.getHoldPlaybackRateMultiplier)
     })
 
-    watch(holdToDoublePlaybackSpeed, (enabled) => {
-      if (!enabled) {
+    watch(holdPlaybackRateMultiplier, (multiplier) => {
+      if (!multiplier) {
         handleTemporaryPlaybackRateFocusLoss()
       }
     })
@@ -3757,7 +3759,7 @@ export default defineComponent({
         event.ctrlKey ||
         event.metaKey ||
         useVrMode.value ||
-        !holdToDoublePlaybackSpeed.value ||
+        !holdPlaybackRateMultiplier.value ||
         temporaryPlaybackRatePointerId !== null ||
         !isPlayerSurfaceTarget(event.target)
       ) {
@@ -8566,7 +8568,7 @@ export default defineComponent({
       maxVideoPlaybackRate,
       videoPlaybackRateInterval,
       savedChannelPlaybackRate,
-      holdToDoublePlaybackSpeed,
+      holdPlaybackRateMultiplier,
       onPlaybackRateUpdated: rate => emit('playback-rate-updated', rate),
       onPlaybackRateUserSet: rate => emit('playback-rate-user-set', rate),
       updatePendingPlaybackRateMenu,
@@ -9039,7 +9041,7 @@ export default defineComponent({
       switch (true) {
         case isSpaceKey(event) && !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey:
           event.preventDefault()
-          if (holdToDoublePlaybackSpeed.value) {
+          if (holdPlaybackRateMultiplier.value) {
             startTemporaryPlaybackRateHold(TEMPORARY_PLAYBACK_RATE_KEYBOARD_SOURCE)
           } else {
             video_.paused ? video_.play() : video_.pause()

@@ -1074,7 +1074,9 @@ Settings:
       Russian: Rusų
       English: Anglų
       Kazakh: Kazachų
-    Hold to Double Playback Speed: Laikykite, kad atkūrimo greitis padvigubėtų
+    Hold to Speed Up:
+      Hold to Speed Up: Laikykite, kad pagreitintumėte
+      Off: Išjungta
     Use Quick Playback Speed Bar: Naudoti sparčiojo atkūrimo greičio juostą
     Customize Quick Playback Speed Bar: Tinkinti sparčiojo atkūrimo greičio juostą
     Quick Playback Speed Bar Manager: Sparčiojo atkūrimo greičio juosta
@@ -2636,7 +2638,7 @@ Tooltips:
     Enable Seek History: Iki programos uždarymo įsimena, iš kur peršokote kiekviename vaizdo įraše. Rodo peršokimų istorijos sąrašą grotuvo nustatymų meniu ir įjungia jos sparčiuosius klavišus.
     Show Seek Bar Filmstrip: "Tempiant persukimo juostos rankenėlę rodoma kadrų juosta aplink vietą, į kurią pateksite, o patraukus aukštyn ant jos galima tiksliai persukti. Kai išjungta, tempiant rodoma viena miniatiūra, kaip užvedus žymeklį."
     Voice-over Translation: Paprašius vertimo siunčia vaizdo įrašo ID, trukmę ir pasirinktą kalbą neoficialiai Yandex vertimo užkadriniu balsu paslaugai. Pagal numatymą išjungta.
-    Hold to Double Playback Speed: Laikykite tarpo klavišą arba kairįjį pelės mygtuką virš leistuvo, kad laikinai padvigubintumėte dabartinį atkūrimo greitį.
+    Hold to Speed Up: Laikykite tarpo klavišą arba kairįjį pelės mygtuką virš leistuvo, kad laikinai padaugintumėte dabartinį atkūrimo greitį iš pasirinktos vertės.
     Ambient Mode: Sulieja vaizdo įrašo spalvas su sritimi aplink leistuvą.
     Default Volume: Nepasiekiama, kol įjungtas garsumo įsiminimas. Išjunkite garsumo įsiminimą, kad nustatytumėte vienodą pradinį kiekvieno vaizdo įrašo garsumą.
     Parallel Segment Loading: |

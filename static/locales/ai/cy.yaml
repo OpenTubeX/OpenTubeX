@@ -880,7 +880,9 @@ Settings:
       Russian: Rwsieg
       English: Saesneg
       Kazakh: Casacheg
-    Hold to Double Playback Speed: Dal i ddyblu'r cyflymder chwarae
+    Hold to Speed Up:
+      Hold to Speed Up: Dal i gyflymu
+      Off: I ffwrdd
     Use Quick Playback Speed Bar: Defnyddio'r bar cyflymder chwarae cyflym
     Customize Quick Playback Speed Bar: Addasu'r bar cyflymder chwarae cyflym
     Quick Playback Speed Bar Manager: Bar cyflymder chwarae cyflym
@@ -2247,7 +2249,7 @@ Tooltips:
     Enable Seek History: Yn cofio o ble y neidioch chi ym mhob fideo nes i'r ap gau. Yn dangos y rhestr hanes neidio yn newislen gosodiadau'r chwaraewr ac yn galluogi ei llwybrau byr bysellfwrdd.
     Show Seek Bar Filmstrip: "Mae llusgo bwlyn y bar chwilio’n dangos stribed o fframiau o amgylch lle byddwch chi’n glanio, ac mae tynnu i fyny arno’n chwilio’n fanwl. Pan fydd wedi’i analluogi, mae llusgo’n dangos un mân-lun, fel wrth hofran."
     Voice-over Translation: Mae'n anfon ID, hyd ac iaith ddewisol y fideo i wasanaeth cyfieithu troslais answyddogol Yandex pan fyddwch yn gofyn am gyfieithiad. Mae wedi'i analluogi yn ddiofyn.
-    Hold to Double Playback Speed: Daliwch y bylchwr neu fotwm chwith y llygoden dros y chwaraewr i ddyblu'r cyflymder chwarae presennol dros dro.
+    Hold to Speed Up: Daliwch y bylchwr neu fotwm chwith y llygoden dros y chwaraewr i luosi'r cyflymder chwarae presennol â'r gwerth a ddewiswyd dros dro.
     Ambient Mode: Mae'n cyfuno lliwiau'r fideo â'r ardal o amgylch y chwaraewr.
     Default Volume: Mae wedi'i analluogi tra bo Cofio lefel y sain wedi'i alluogi. Diffoddwch Cofio lefel y sain i osod lefel sain gychwyn sefydlog ar gyfer pob fideo.
     Parallel Segment Loading: |

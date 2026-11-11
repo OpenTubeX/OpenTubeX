@@ -465,6 +465,36 @@ test('migrates an imported Hide Video Description switch to the Video descriptio
   )
 })
 
+test('migrates Hold to Double Playback Speed to the Hold to Speed Up multiplier', async () => {
+  for (const [initial, expected] of [
+    [
+      [
+        { _id: 'holdToDoublePlaybackSpeed', value: false },
+        { _id: 'quickSettings', value: ['holdToDoublePlaybackSpeed', 'hideComments'] },
+      ],
+      { holdPlaybackRateMultiplier: 0, quickSettings: ['holdPlaybackRateMultiplier', 'hideComments'] },
+    ],
+    // On was the default, which the multiplier's default keeps.
+    [[{ _id: 'holdToDoublePlaybackSpeed', value: true }], {}],
+    [
+      [{ _id: 'holdToDoublePlaybackSpeed', value: false }, { _id: 'holdPlaybackRateMultiplier', value: 3 }],
+      { holdPlaybackRateMultiplier: 3 },
+    ],
+  ]) {
+    const settings = new Datastore()
+    await settings.insertAsync(initial)
+
+    await migrateStoredSettings(settings)
+    await migrateStoredSettings(settings)
+
+    const stored = Object.fromEntries((await settings.findAsync({})).map(({ _id, value }) => [_id, value]))
+    assert.deepEqual(stored, expected)
+  }
+
+  assert.deepEqual(migrateLegacySettings({ holdToDoublePlaybackSpeed: false }), { holdPlaybackRateMultiplier: 0 })
+  assert.deepEqual(migrateLegacySettings({ holdToDoublePlaybackSpeed: true }), { holdPlaybackRateMultiplier: 2 })
+})
+
 test('migrates the mini player switches to the scroll player select', async () => {
   for (const [initial, expected] of [
     [

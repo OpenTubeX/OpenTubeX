@@ -888,7 +888,9 @@ Settings:
       Russian: Russisch
       English: Engels
       Kazakh: Kazachs
-    Hold to Double Playback Speed: Ingedrukt houden voor dubbele afspeelsnelheid
+    Hold to Speed Up:
+      Hold to Speed Up: Ingedrukt houden om te versnellen
+      Off: Uit
     Use Quick Playback Speed Bar: Balk voor snelle afspeelsnelheid gebruiken
     Customize Quick Playback Speed Bar: Balk voor snelle afspeelsnelheid aanpassen
     Quick Playback Speed Bar Manager: Balk voor snelle afspeelsnelheid
@@ -2277,7 +2279,7 @@ Tooltips:
     Enable Seek History: Onthoudt vanaf waar je in elke video bent gesprongen totdat de app wordt gesloten. Toont de lijst met de spoelgeschiedenis in het instellingenmenu van de speler en schakelt de bijbehorende sneltoetsen in.
     Show Seek Bar Filmstrip: "Als je de knop van de zoekbalk sleept, verschijnt een strook frames rond de plek waar je uitkomt, en als je omhoog op de strook sleept, zoek je nauwkeurig. Indien uitgeschakeld, toont slepen één miniatuur, zoals bij aanwijzen."
     Voice-over Translation: Stuurt de video-ID, duur en geselecteerde taal naar de onofficiële voice-oververtaaldienst van Yandex wanneer je om een vertaling vraagt. Standaard uitgeschakeld.
-    Hold to Double Playback Speed: Houd de spatiebalk of linkermuisknop boven de speler ingedrukt om de huidige afspeelsnelheid tijdelijk te verdubbelen.
+    Hold to Speed Up: Houd de spatiebalk of linkermuisknop boven de speler ingedrukt om de huidige afspeelsnelheid tijdelijk met de gekozen waarde te vermenigvuldigen.
     Ambient Mode: Laat de kleuren van de video overvloeien in het gebied rond de speler.
     Default Volume: Uitgeschakeld zolang Volume onthouden is ingeschakeld. Schakel Volume onthouden uit om voor elke video een vast beginvolume in te stellen.
     Parallel Segment Loading: |

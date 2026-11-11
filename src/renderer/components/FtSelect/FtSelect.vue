@@ -286,7 +286,7 @@ const props = defineProps({
     required: true
   },
   value: {
-    type: String,
+    type: [String, Number],
     required: true
   },
   selectNames: {
@@ -875,7 +875,8 @@ function removeDropdownListeners() {
 function change(event) {
   if (!settingsOverlayActive.value) return
   const select = event.target
-  emit('change', select.value)
+  // Native options hold strings, so emit the matching value with its original type.
+  emit('change', props.selectValues.find(value => String(value) === select.value) ?? select.value)
   nextTick(() => {
     // Keep the native control driven by `value` when an async update is rejected.
     select.value = props.value

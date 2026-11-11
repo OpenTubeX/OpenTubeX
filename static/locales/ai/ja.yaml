@@ -879,7 +879,9 @@ Settings:
       Russian: ロシア語
       English: 英語
       Kazakh: カザフ語
-    Hold to Double Playback Speed: 長押しで2倍速再生
+    Hold to Speed Up:
+      Hold to Speed Up: 長押しで加速
+      Off: オフ
     Use Quick Playback Speed Bar: クイック再生速度バーを使用
     Customize Quick Playback Speed Bar: クイック再生速度バーをカスタマイズ
     Quick Playback Speed Bar Manager: クイック再生速度バー
@@ -2214,7 +2216,7 @@ Tooltips:
     Enable Seek History: アプリを閉じるまで、各動画でどこからジャンプしたかを記憶します。プレーヤーの設定メニューにシーク履歴の一覧を表示し、キーボードショートカットを有効にします。
     Show Seek Bar Filmstrip: "シークバーのつまみをドラッグすると、移動先付近のフレームが帯状に表示され、その上へ引き上げると細かくシークできます。無効にすると、ドラッグ中はホバー時と同じく 1 枚のサムネイルが表示されます。"
     Voice-over Translation: 翻訳を要求すると、動画ID、長さ、選択した言語を非公式のYandex吹き替え翻訳サービスへ送信します。既定では無効です。
-    Hold to Double Playback Speed: プレーヤー上でスペースキーまたはマウスの左ボタンを長押しすると、一時的に現在の2倍の速度で再生します。
+    Hold to Speed Up: プレーヤー上でスペースキーまたはマウスの左ボタンを長押しすると、一時的に現在の再生速度に選択した倍率を掛けて再生します。
     Ambient Mode: 動画の色をプレーヤー周辺の領域になじませます。
     Default Volume: 「音量を記憶」が有効な間は使用できません。動画ごとに起動時の音量を固定するには、「音量を記憶」をオフにしてください。
     Parallel Segment Loading: |

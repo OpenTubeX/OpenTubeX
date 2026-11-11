@@ -243,14 +243,6 @@
     </h4>
     <div class="playerSwitchGrid switchFlowGrid">
       <FtToggleSwitch
-        :label="t('Settings.Player Settings.Hold to Double Playback Speed')"
-        :compact="true"
-        :default-value="holdToDoublePlaybackSpeed"
-        setting-key="holdToDoublePlaybackSpeed"
-        :tooltip="t('Tooltips.Player Settings.Hold to Double Playback Speed')"
-        @change="updateHoldToDoublePlaybackSpeed"
-      />
-      <FtToggleSwitch
         :label="t('Settings.Player Settings.Show Playback Rate Adjusted Timestamp')"
         :compact="true"
         :default-value="showPlaybackRateAdjustedTimestamp"
@@ -269,6 +261,17 @@
         :select-values="PLAYBACK_RATE_INTERVAL_VALUES"
         :icon="['fas', 'gauge']"
         @change="updateVideoPlaybackRateInterval"
+      />
+      <FtSelect
+        size-to-content
+        :placeholder="t('Settings.Player Settings.Hold to Speed Up.Hold to Speed Up')"
+        :value="holdPlaybackRateMultiplier"
+        setting-key="holdPlaybackRateMultiplier"
+        :select-names="holdPlaybackRateMultiplierNames"
+        :select-values="HOLD_PLAYBACK_RATE_MULTIPLIERS"
+        :icon="['fas', 'forward-fast']"
+        :tooltip="t('Tooltips.Player Settings.Hold to Speed Up')"
+        @change="updateHoldPlaybackRateMultiplier"
       />
     </FtFlexBox>
     <FtSliderGrid>
@@ -869,6 +872,11 @@ import store from '../../../store/index'
 import { showToast } from '../../../helpers/utils'
 import { DEFAULT_QUICK_PLAYBACK_SPEED_BAR_OPTIONS } from '../../../../constants'
 import { clampOverlayScrollTop } from '../../../helpers/overlayScrollbars'
+import {
+  getHoldPlaybackRateMultiplierNames,
+  HOLD_PLAYBACK_RATE_MULTIPLIERS,
+  normalizeHoldPlaybackRateMultiplier,
+} from '../../../helpers/holdPlaybackRate.js'
 import { initializePlatformInfo, supportsAutoPictureInPictureMinimize } from '../../../helpers/platform'
 import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../../helpers/player/autoQuality'
 
@@ -961,14 +969,16 @@ function updateEnableVideoZoom(value) {
   store.dispatch('updateEnableVideoZoom', value)
 }
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const holdToDoublePlaybackSpeed = computed(() => store.getters.getHoldToDoublePlaybackSpeed)
+/** @type {import('vue').ComputedRef<number>} */
+const holdPlaybackRateMultiplier = computed(() => normalizeHoldPlaybackRateMultiplier(store.getters.getHoldPlaybackRateMultiplier))
+
+const holdPlaybackRateMultiplierNames = computed(() => getHoldPlaybackRateMultiplierNames(t))
 
 /**
- * @param {boolean} value
+ * @param {number} value
  */
-function updateHoldToDoublePlaybackSpeed(value) {
-  store.dispatch('updateHoldToDoublePlaybackSpeed', value)
+function updateHoldPlaybackRateMultiplier(value) {
+  store.dispatch('updateHoldPlaybackRateMultiplier', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
