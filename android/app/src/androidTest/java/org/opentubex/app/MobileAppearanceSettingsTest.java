@@ -37,7 +37,7 @@ public class MobileAppearanceSettingsTest {
                     """);
                 awaitCondition(view, "!!document.querySelector('.settingsMenu [data-section=general]')");
                 evaluate(view, "document.querySelector('.settingsMenu [data-section=general]').click()");
-                String control = "document.querySelector('.settingsContent [data-setting-key=updateRelativeTimestamps]')";
+                String control = "document.querySelector('.settingsContent [data-setting-key=generalAutoLoadMorePaginatedItemsEnabled]')";
                 awaitCondition(view, "!!" + control);
                 for (int scale : new int[] {100, 125, 150}) {
                     evaluate(view, String.format("""
