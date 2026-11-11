@@ -1,4 +1,5 @@
-.communityPosts {
+/* Space above the first post, without moving the loader or empty state */
+.communityPosts:not(:empty) {
   padding-block-start: 6px;
 }
 

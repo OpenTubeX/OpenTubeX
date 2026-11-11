@@ -5,8 +5,7 @@
     ref="rssFeed"
     class="newFeed"
   >
-    <FtSkeletonGrid v-if="rssFeedsRefreshing && newRssItems.length === 0" />
-    <FtFlexBox v-else-if="clearingVisibleContent || newRssItems.length === 0">
+    <FtFlexBox v-if="clearingVisibleContent || newRssItems.length === 0">
       <p class="message">
         {{ t('Subscriptions.No New Content') }}
       </p>
@@ -45,6 +44,7 @@
     :is-community="activeCategory === 'posts'"
     :youtube-style-shorts="activeCategory === 'shorts' && useCustomShortsPlayer"
     :track-global-refresh="false"
+    :show-loading-placeholder="false"
     stable-item-keys
     @refresh="refreshNewContent"
   >
@@ -134,6 +134,7 @@
     :error-channels="errorChannels"
     :only-show-new="true"
     :track-global-refresh="false"
+    :show-loading-placeholder="false"
     @refresh="refreshNewContent"
   />
   <FtPrompt
@@ -158,7 +159,6 @@ import FtElementList from './FtElementList/FtElementList.vue'
 import FtFlexBox from './ft-flex-box/ft-flex-box.vue'
 import FtListFeedItem from './FtListFeedItem/FtListFeedItem.vue'
 import FtPrompt from './FtPrompt/FtPrompt.vue'
-import FtSkeletonGrid from './FtSkeletonGrid/FtSkeletonGrid.vue'
 import SubscriptionsTabUi from './SubscriptionsTabUi/SubscriptionsTabUi.vue'
 
 import store from '../store/index'
