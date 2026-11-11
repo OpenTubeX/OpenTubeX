@@ -151,7 +151,7 @@ import { waitForYtDlpFormatAvailability } from '../../helpers/player/ytDlpFormat
 import { getDashQualityFromDimensions } from '../../helpers/player/videoQuality'
 import { DEFAULT_VIDEO_ZOOM, formatVideoZoom, VIDEO_ZOOM_LEVELS } from '../../helpers/player/videoZoom'
 import { DEFAULT_VOLUME_BOOST, sanitizeVolumeBoost, VOLUME_BOOST_LEVELS } from '../../helpers/player/volumeBoost'
-import { getLoudnessNormalizationGain } from '../../helpers/player/loudnessNormalization'
+import { getActiveAudioLoudnessDb, getLoudnessNormalizationGain } from '../../helpers/player/loudnessNormalization'
 import { shouldStartPaidPromotionTimer } from '../../helpers/player/paidPromotion'
 import { updateSponsorBlockSeekBarState } from '../../helpers/player/sponsorBlockSeekBar'
 import { formatAbRepeatTimestamp } from '../../helpers/player/abRepeat'
@@ -545,6 +545,11 @@ export default defineComponent({
     loudnessDb: {
       type: Number,
       default: null
+    },
+    /** Overrides `loudnessDb` for the audio formats it lists, keyed by Shaka's `originalAudioId` */
+    audioFormatLoudnessDb: {
+      type: Object,
+      default: () => ({})
     },
     startInFullscreen: {
       type: Boolean,
@@ -2668,8 +2673,17 @@ export default defineComponent({
     const monoAudio = computed(() => !process.env.IS_IOS && store.getters.getMonoAudio)
     watch(monoAudio, value => playerAudioOutput.setMono(value))
 
+    /** @type {import('vue').Ref<string | null>} */
+    const activeAudioId = ref(null)
+
+    function updateActiveAudioId() {
+      activeAudioId.value = player?.getVariantTracks().find(track => track.active)?.originalAudioId ?? null
+    }
+
     const loudnessGain = computed(() => !process.env.IS_IOS && store.getters.getNormalizeLoudness
-      ? getLoudnessNormalizationGain(props.loudnessDb)
+      ? getLoudnessNormalizationGain(
+          (activeAudioId.value !== null ? getActiveAudioLoudnessDb(props.audioFormatLoudnessDb, activeAudioId.value) : undefined) ?? props.loudnessDb
+        )
       : 1)
     watch(loudnessGain, value => playerAudioOutput.setGain('loudness', value))
 
@@ -10067,6 +10081,7 @@ export default defineComponent({
       window.addEventListener('blur', handleSeekBarWindowBlur)
 
       player.addEventListener('loading', () => {
+        activeAudioId.value = null
         chapterThumbnailLoadGeneration++
         chapterThumbnailsWanted = showChaptersOverlay.value || props.sidebarChaptersOpen
         silenceSkipping.reset()
@@ -10084,6 +10099,10 @@ export default defineComponent({
       })
 
       player.addEventListener('loaded', handleLoaded)
+      // Dubbed and Stable Volume tracks, and ABR switches between audio formats, can change the loudness
+      player.addEventListener('loaded', updateActiveAudioId)
+      player.addEventListener('variantchanged', updateActiveAudioId)
+      player.addEventListener('adaptation', updateActiveAudioId)
       player.addEventListener('loaded', () => releasePlaybackStartup())
       player.addEventListener('variantchanged', () => {
         if (props.format === 'legacy' || player.getConfiguration().abr.enabled) {

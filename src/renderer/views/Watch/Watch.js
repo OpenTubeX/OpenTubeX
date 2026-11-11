@@ -11,6 +11,7 @@ import { getGoogleVideoProbeUrl } from '../../helpers/player/googleVideoFallback
 import { ytDlp } from '../../helpers/ytDlp'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { probeHlsManifest } from '../../helpers/player/hlsManifest'
+import { getAudioFormatLoudness } from '../../helpers/player/loudnessNormalization'
 import { releaseAndroidRotationFullscreenHandoff } from '../../helpers/player/androidFullscreen'
 import { sampleRecommendationPlayback } from '../../../recommendation-learning'
 import { defineComponent, markRaw, shallowRef } from 'vue'
@@ -522,6 +523,8 @@ export default defineComponent({
       vrProjection: null,
       /** @type {number | null} */
       loudnessDb: null,
+      /** @type {Record<string, number>} */
+      audioFormatLoudnessDb: {},
       autoplayNextRecommendedVideo: false,
       autoplayNextPlaylistVideo: false,
       recommendedVideos: [],
@@ -2631,6 +2634,7 @@ export default defineComponent({
       this.videoChapterThumbnails = []
       this.vrProjection = null
       this.loudnessDb = null
+      this.audioFormatLoudnessDb = {}
       this.recommendedVideos = []
       this.playabilityStatus = ''
       this.adEndTimeUnixMs = 0
@@ -3946,6 +3950,10 @@ export default defineComponent({
 
           // The loudness describes the video's audio, so it also applies when yt-dlp provides the streams
           this.loudnessDb = result.player_config?.audio_config.loudness_db ?? null
+          this.audioFormatLoudnessDb = getAudioFormatLoudness(
+            result.streaming_data?.adaptive_formats ?? [],
+            result.player_config?.audio_config.enable_per_format_loudness
+          )
 
           let storyboard
 

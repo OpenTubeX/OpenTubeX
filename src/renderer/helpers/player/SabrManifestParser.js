@@ -2,6 +2,7 @@ import shaka from 'shaka-player'
 import { parseWebmSegmentIndex } from './WebmSegmentIndexParser'
 import { parseMp4SegmentIndex } from './Mp4SegmentIndexParser'
 import { decodeSabrLiveHead, onSabrLiveHead } from './sabrProtocol'
+import { getSabrFormatId } from './formatIds'
 
 /**
  * @typedef {{
@@ -204,7 +205,7 @@ class SabrManifestParser {
     let fakeVideoFormatId
 
     if (this._config.disableVideo) {
-      fakeVideoFormatId = buildFormatId(worstVideoFormat)
+      fakeVideoFormatId = getSabrFormatId(worstVideoFormat)
     }
 
     for (const format of manifestData.formats) {
@@ -333,13 +334,6 @@ class SabrManifestParser {
 
 /**
  * @param {SabrManifest['formats'][0]} format
- */
-function buildFormatId(format) {
-  return `${format.itag}-${format.lastModified ?? '0'}-${format.xtags ?? ''}`
-}
-
-/**
- * @param {SabrManifest['formats'][0]} format
  * @param {number} id
  * @param {boolean} hasDrcAudio
  * @param {boolean} hasVoiceBoostAudio
@@ -402,7 +396,7 @@ function createAudioStream(
   const stream = {
     type: 'audio',
     id,
-    originalId: buildFormatId(format),
+    originalId: getSabrFormatId(format),
     mimeType: format.mimeType.split(';', 1)[0],
     codecs: format.mimeType.match(CODECS_REGEX)[1],
     fullMimeTypes: new Set([format.mimeType]),
@@ -482,7 +476,7 @@ function createVideoStream(format, id, presentationTimeline, networkingEngine, s
   const stream = {
     type: 'video',
     id,
-    originalId: buildFormatId(format),
+    originalId: getSabrFormatId(format),
     mimeType: format.mimeType.split(';', 1)[0],
     codecs: format.mimeType.match(CODECS_REGEX)[1],
     fullMimeTypes: new Set([format.mimeType]),
@@ -835,8 +829,8 @@ function createVodMediaSegmentIndex(url, response, format, stream, duration) {
  * @param {shaka.net.NetworkingEngine} networkingEngine
  */
 async function requestLiveHead(scheme, audioFormat, videoFormat, networkingEngine) {
-  const uri = `${scheme}:live?formatId=${encodeURIComponent(buildFormatId(audioFormat))}` +
-    `&videoFormatId=${encodeURIComponent(buildFormatId(videoFormat))}`
+  const uri = `${scheme}:live?formatId=${encodeURIComponent(getSabrFormatId(audioFormat))}` +
+    `&videoFormatId=${encodeURIComponent(getSabrFormatId(videoFormat))}`
 
   const response = await networkingEngine.request(
     NetworkingEngine.RequestType.SEGMENT,

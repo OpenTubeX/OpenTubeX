@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { createRenderer, shallowRef } from 'vue'
+import { FormatUtils, Misc } from 'youtubei.js'
 
 import { usePlayerAudioOutput } from '../../src/renderer/components/ft-shaka-video-player/opentubex/usePlayerAudioOutput.js'
-import { getLoudnessNormalizationGain } from '../../src/renderer/helpers/player/loudnessNormalization.js'
+import { getActiveAudioLoudnessDb, getAudioFormatLoudness, getLoudnessNormalizationGain } from '../../src/renderer/helpers/player/loudnessNormalization.js'
+import { getSabrFormatId } from '../../src/renderer/helpers/player/formatIds.js'
 
 class FakeAudioNode {
   constructor () {
@@ -223,4 +225,41 @@ test('loudness normalization only turns loud videos down', () => {
   assert.equal(getLoudnessNormalizationGain(-4), 1)
   assert.equal(getLoudnessNormalizationGain(null), 1)
   assert.equal(getLoudnessNormalizationGain(Number.NaN), 1)
+})
+
+const DRC_XTAGS = 'ChEKBWFjb250EghvcmlnaW5hbAoICgNkcmMSATEKCgoEbGFuZxICZW4'
+
+test('per-format loudness is keyed by the audio IDs Shaka reports for DASH and SABR', async () => {
+  const audio = {
+    itag: 140,
+    mimeType: 'audio/mp4; codecs="mp4a.40.2"',
+    bitrate: 130000,
+    url: 'https://example.com/audio',
+    initRange: { start: '0', end: '600' },
+    indexRange: { start: '601', end: '900' },
+    approxDurationMs: '1000',
+    lastModified: '1700000000000000',
+    audioQuality: 'AUDIO_QUALITY_MEDIUM',
+    audioTrack: { id: 'en.4', displayName: 'English', audioIsDefault: true },
+  }
+  const formats = [
+    new Misc.Format({ ...audio, loudnessDb: 7.33, xtags: 'ChEKBWFjb250EghvcmlnaW5hbAoKCgRsYW5nEgJlbg' }),
+    new Misc.Format({ ...audio, loudnessDb: 0, isDrc: true, xtags: DRC_XTAGS }),
+    new Misc.Format({ ...audio, loudnessDb: -0.2, audioTrack: { id: 'de.3', displayName: 'German', audioIsDefault: false }, xtags: 'Cg8KBWFjb250EgZkdWJiZWQKCgoEbGFuZxICZGU' }),
+  ]
+
+  const loudness = getAudioFormatLoudness(formats, true)
+  const dash = await FormatUtils.toDash({ adaptive_formats: formats })
+  const dashIds = [...dash.matchAll(/<Representation id="([^"]+)"/g)].map(([, id]) => id)
+  assert.deepEqual(dashIds.map(id => loudness[id]), [7.33, 0, -0.2])
+  assert.equal(loudness[getSabrFormatId({ itag: 140, lastModified: audio.lastModified, xtags: DRC_XTAGS })], 0)
+  // yt-dlp can offer itags of a track that the response left out
+  assert.equal(getActiveAudioLoudnessDb(loudness, '139-de.3'), -0.2)
+  assert.equal(getActiveAudioLoudnessDb(loudness, '139-en.4-drc'), 0)
+
+  const { audioTrack, ...unlabelled } = audio
+  assert.equal(getActiveAudioLoudnessDb(getAudioFormatLoudness([new Misc.Format({ ...unlabelled, loudnessDb: 1.5 })], true), '139'), 1.5)
+
+  // Without the flag, YouTube's player uses the video's loudness for every track
+  assert.deepEqual(getAudioFormatLoudness(formats, false), {})
 })
