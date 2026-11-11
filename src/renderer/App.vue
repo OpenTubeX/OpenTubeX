@@ -1863,7 +1863,7 @@ onMounted(async () => {
   updateTheme()
   if (store.getters.getTrayIconPreset !== 'theme') refreshTrayIcon()
 
-  if (defaultInvidiousInstance.value === '' || process.env.IS_SELF_HOSTED) {
+  if (defaultInvidiousInstance.value === '' || process.env.SELF_HOSTED_INVIDIOUS) {
     await store.dispatch('setRandomCurrentInvidiousInstance')
   }
 

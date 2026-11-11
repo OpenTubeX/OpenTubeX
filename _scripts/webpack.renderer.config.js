@@ -205,6 +205,7 @@ const config = {
       'process.env.APP_URL_SCHEME': JSON.stringify('opentubex'),
       'process.env.SUPPORTS_LOCAL_API': true,
       'process.env.IS_SELF_HOSTED': false,
+      'process.env.SELF_HOSTED_INVIDIOUS': false,
       'process.env.BUILD_COMMIT': JSON.stringify(getBuildCommit()),
       __VUE_OPTIONS_API__: 'true',
       __VUE_PROD_DEVTOOLS__: 'false',

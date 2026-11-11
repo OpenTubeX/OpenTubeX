@@ -19,6 +19,7 @@ const {
 
 const isDevMode = process.env.NODE_ENV === 'development'
 const isCapacitor = process.env.IS_CAPACITOR === 'true'
+const isSelfHosted = !isCapacitor && process.env.OPENTUBEX_SELF_HOSTED === 'true'
 const outputPath = path.join(__dirname, isCapacitor ? '../dist/capacitor' : '../dist/web')
 
 const postcssLoader = {
@@ -51,14 +52,6 @@ const config = {
     path: outputPath,
     filename: '[name].js',
   },
-  ...(isCapacitor
-    ? {}
-    : {
-        externals: {
-          'youtubei.js': '{}',
-          googlevideo: '{}'
-        }
-      }),
   module: {
     rules: [
       {
@@ -194,9 +187,14 @@ const config = {
           ? 'opentubex-nightly'
           : 'opentubex'
       ),
-      'process.env.SUPPORTS_LOCAL_API': isCapacitor,
-      // The Docker image serves the web build in front of its own Invidious server.
-      'process.env.IS_SELF_HOSTED': !isCapacitor && process.env.OPENTUBEX_SELF_HOSTED === 'true',
+      // The web app can only reach YouTube while the OpenTubeX Local API browser
+      // extension (browser-extension/) rewrites the CORS headers for it.
+      'process.env.SUPPORTS_LOCAL_API': isCapacitor || '(globalThis.opentubexExtension?.protocol === 1)',
+      // The Docker image serves the web build, by default in front of its own
+      // Invidious server. Its Caddyfile serves self-hosted.js, which says whether
+      // the server runs one.
+      'process.env.IS_SELF_HOSTED': isSelfHosted,
+      'process.env.SELF_HOSTED_INVIDIOUS': isSelfHosted && '(globalThis.opentubexSelfHosted?.invidious !== false)',
       'process.env.BUILD_COMMIT': JSON.stringify(getBuildCommit()),
       __VUE_OPTIONS_API__: 'true',
       __VUE_PROD_DEVTOOLS__: 'false',
@@ -215,7 +213,7 @@ const config = {
       template: path.resolve(__dirname, '../src/index.ejs'),
       templateParameters: isCapacitor
         ? { startupSplash: getStartupSplash({ stillSplash: process.env.CAPACITOR_PLATFORM !== 'ios' }) }
-        : {}
+        : { selfHosted: isSelfHosted }
     }),
     new VueLoaderPlugin(),
     new MiniCssExtractPlugin({

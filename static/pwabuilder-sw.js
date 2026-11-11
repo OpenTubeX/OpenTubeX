@@ -18,6 +18,8 @@ const offlineFallbackPage = 'index.html'
 const networkFirstPaths = [
   /* Add an array of regex of paths that should go network first */
   // Example: /\/api\/.*/
+  // The settings of a self-hosted server, which its admin can change
+  /\/self-hosted\.js$/
 ]
 
 const avoidCachingPaths = [
@@ -68,13 +70,16 @@ self.addEventListener('activate', function (event) {
 // If any fetch fails, it will look for the request in the cache and serve it from there first
 self.addEventListener('fetch', function (event) {
   if (event.request.method !== 'GET') return
+  // Only the app itself is cached. Cached API responses, such as YouTube's
+  // watch pages, would come back with expired stream URLs.
+  const { origin, pathname } = new URL(event.request.url)
+  if (origin !== self.location.origin) return
   // fetch() calls from the app that must reach the server, such as connectivity checks, skip the cache.
   // Pages and assets the browser revalidates on reload keep it, so the app still opens offline.
   if (event.request.destination === '' && ['no-store', 'no-cache', 'reload'].includes(event.request.cache)) return
   // Self-hosted servers proxy Invidious on the app's origin. Its responses contain
   // expiring stream URLs, and the HTTP cache already handles its images.
-  const { origin, pathname } = new URL(event.request.url)
-  if (origin === self.location.origin && /^\/(api|companion|vi|ggpht|sb|videoplayback|latest_version)(\/|$)/.test(pathname)) return
+  if (/^\/(api|companion|vi|ggpht|sb|videoplayback|latest_version)(\/|$)/.test(pathname)) return
 
   if (comparePaths(event.request.url, networkFirstPaths)) {
     networkFirstFetch(event)

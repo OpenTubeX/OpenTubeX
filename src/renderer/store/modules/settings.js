@@ -347,8 +347,8 @@ const sideEffectHandlers = {
   },
 
   defaultInvidiousInstance: ({ commit, rootState }, value) => {
-    // Self-hosted builds always use their own Invidious server, even with synced settings
-    if (value !== '' && !process.env.IS_SELF_HOSTED && rootState.invidious.currentInvidiousInstance !== value) {
+    // Servers with their own Invidious server always use it, even with synced settings
+    if (value !== '' && !process.env.SELF_HOSTED_INVIDIOUS && rootState.invidious.currentInvidiousInstance !== value) {
       commit('setCurrentInvidiousInstance', value)
     }
   },
@@ -495,6 +495,11 @@ const customGetters = {
   getEnableDownloads: (state) => state.enableDownloads,
   // A synchronized preference must not expose a service absent on this device.
   getUseVoiceOverTranslation: (state) => !process.env.IS_IOS && state.useVoiceOverTranslation,
+  // The web app loses the local API when its browser extension is removed.
+  // Keep the saved choice for when the extension comes back.
+  getBackendPreference: (state) => !process.env.SUPPORTS_LOCAL_API && state.backendPreference === 'local'
+    ? 'invidious'
+    : state.backendPreference,
 
   getFullscreenActions: (state) => normalizeFullscreenActions(state.fullscreenActions),
   getControlBarButtons: (state) => normalizeControlBarButtons(state.controlBarButtons),
@@ -507,11 +512,11 @@ const customGetters = {
 
   getNavigationItems: (state) => normalizeNavigationItems(state.navigationItems),
 
-  getLandingPage: (state) => resolveLandingPage(
+  getLandingPage: (state, getters) => resolveLandingPage(
     state.landingPage,
     filterAvailableNavigationItems(normalizeNavigationItems(state.navigationItems), {
       supportsLocalApi: !!process.env.SUPPORTS_LOCAL_API,
-      backendPreference: state.backendPreference,
+      backendPreference: getters.getBackendPreference,
       backendFallback: state.backendFallback,
       showWatchStats: state.rememberHistory && state.enableWatchStats,
     })

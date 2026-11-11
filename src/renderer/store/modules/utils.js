@@ -817,7 +817,7 @@ const actions = {
             subPath = 'videos'
             break
           default:
-            subPath = rootState.settings.backendPreference === 'local' && !rootState.settings.hideChannelHome ? 'home' : 'videos'
+            subPath = rootGetters.getBackendPreference === 'local' && !rootState.settings.hideChannelHome ? 'home' : 'videos'
             break
         }
         return {

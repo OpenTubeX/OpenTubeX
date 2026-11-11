@@ -44,7 +44,7 @@ const getters = {
 const actions = {
   async fetchInvidiousInstancesFromFile({ commit }) {
     // The Docker image proxies its own Invidious server on the app's origin
-    if (process.env.IS_SELF_HOSTED) {
+    if (process.env.SELF_HOSTED_INVIDIOUS) {
       commit('setInvidiousInstancesList', [window.location.origin])
       return
     }
@@ -53,7 +53,8 @@ const actions = {
 
     const fileData = await (await fetch(url)).json()
     const instances = fileData.filter(e => {
-      return process.env.SUPPORTS_LOCAL_API || e.cors
+      // The browser extension for the local API doesn't lift CORS for Invidious
+      return process.env.IS_ELECTRON || process.env.IS_CAPACITOR || e.cors
     }).map(e => {
       return e.url
     })
@@ -64,7 +65,7 @@ const actions = {
   /// fetch invidious instances from site and overwrite static file.
   async fetchInvidiousInstances({ commit }) {
     // Don't contact the public instance directory or offer its instances
-    if (process.env.IS_SELF_HOSTED) return
+    if (process.env.SELF_HOSTED_INVIDIOUS) return
 
     const requestUrl = 'https://api.invidious.io/instances.json'
     try {
@@ -74,7 +75,7 @@ const actions = {
         return !(instance[0].includes('.onion') ||
           instance[0].includes('.i2p') ||
           !instance[1].api ||
-          (!process.env.SUPPORTS_LOCAL_API && !instance[1].cors))
+          (!process.env.IS_ELECTRON && !process.env.IS_CAPACITOR && !instance[1].cors))
       }).map((instance) => {
         return instance[1].uri.replace(/\/$/, '')
       })

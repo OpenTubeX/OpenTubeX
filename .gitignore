@@ -46,3 +46,4 @@ _scripts/macos-native/build/
 # Generated iOS Python runtime and bundled yt-dlp wheel
 ios/App/Python.xcframework/
 ios/App/python-packages/
+browser-extension/_metadata/

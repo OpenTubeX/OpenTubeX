@@ -28,6 +28,10 @@
     </div>
     <script><%= startupSplash.script %></script>
     <% } %>
+    <% if (typeof selfHosted !== 'undefined' && selfHosted) { %>
+    <!-- The server's settings, which the app reads when it starts -->
+    <script src="self-hosted.js"></script>
+    <% } %>
     <% if (!process.env.IS_ELECTRON && !process.env.IS_CAPACITOR) { %>
     <script>
     // This is the service worker with the Advanced caching
