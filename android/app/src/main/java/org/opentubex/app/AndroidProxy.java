@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 /** Installed before activities and background workers can send requests. */
 final class AndroidProxy {
@@ -130,9 +131,14 @@ final class AndroidProxy {
         return relay.proxies(target);
     }
 
-    /** Closes the relay's tunnels that carried no data since {@code nanoTime}. */
-    static void closeTunnelsIdleSince(long nanoTime) {
-        if (relay != null) relay.closeTunnelsIdleSince(nanoTime);
+    /**
+     * Closes the relay's tunnels that carried no data since {@code since}, from
+     * {@link AndroidProxyRelay#clock}, and for at least a minute. That is longer
+     * than a sync long poll waits silently, and replies still on their way
+     * survive a quick switch to another app.
+     */
+    static void closeStaleTunnels(long since) {
+        if (relay != null) relay.closeTunnelsIdleSince(Math.min(since, AndroidProxyRelay.clock.getAsLong() - TimeUnit.MINUTES.toNanos(1)));
     }
 
     static String connectionHost(URI target) {

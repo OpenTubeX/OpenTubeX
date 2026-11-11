@@ -2,6 +2,7 @@ package org.opentubex.app;
 
 import static org.junit.Assert.*;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 import java.io.InputStream;
 import java.io.ByteArrayInputStream;
@@ -22,6 +23,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class AndroidProxyRelayTest {
+    @BeforeClass public static void useJvmClock() { AndroidProxyRelay.clock = System::nanoTime; }
+
     @Test public void permissionPreflightUsesTheSameSystemProxyRouteWithoutResolvingTheDestination() throws Exception {
         java.net.ProxySelector selector = new java.net.ProxySelector() {
             @Override public java.util.List<Proxy> select(java.net.URI uri) {

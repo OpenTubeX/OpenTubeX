@@ -1,5 +1,7 @@
 package org.opentubex.app;
 
+import android.os.SystemClock;
+
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
@@ -30,6 +32,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BooleanSupplier;
+import java.util.function.LongSupplier;
 
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocket;
@@ -55,7 +58,9 @@ final class AndroidProxyRelay implements AutoCloseable {
     });
     private final Semaphore capacity = new Semaphore(64);
     private final Set<Socket> sockets = new HashSet<>();
-    /** When each connected client's tunnel last carried data, from System.nanoTime(). */
+    /** Includes deep sleep, so a tunnel left alone while the phone slept counts as idle. Tests use System.nanoTime. */
+    static LongSupplier clock = SystemClock::elapsedRealtimeNanos;
+    /** When each connected client's tunnel last carried data, from {@link #clock}. */
     private final Map<Socket, AtomicLong> tunnels = new ConcurrentHashMap<>();
     interface AddressResolver { InetAddress[] resolve(String host) throws IOException; }
     private final AddressResolver resolver;
@@ -176,7 +181,7 @@ final class AndroidProxyRelay implements AutoCloseable {
             upstream = transport;
             upstream = connect(upstream, route, host, port, forwardHttp);
             final Socket remote = upstream;
-            AtomicLong traffic = new AtomicLong(System.nanoTime());
+            AtomicLong traffic = new AtomicLong(clock.getAsLong());
             tunnels.put(client, traffic);
             synchronized (this) {
                 if (version != generation || client.isClosed()) throw new IOException("Proxy changed");
@@ -311,7 +316,7 @@ final class AndroidProxyRelay implements AutoCloseable {
                 continue;
             }
             if (count == -1) return;
-            traffic.set(System.nanoTime());
+            traffic.set(clock.getAsLong());
             output.write(buffer, 0, count);
         }
     }
@@ -479,7 +484,7 @@ final class AndroidProxyRelay implements AutoCloseable {
         byte[] buffer = new byte[32768];
         int count;
         while ((count = input.read(buffer)) != -1) {
-            traffic.set(System.nanoTime());
+            traffic.set(clock.getAsLong());
             output.write(buffer, 0, count);
         }
     }

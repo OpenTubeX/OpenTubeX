@@ -34,8 +34,6 @@ public final class SubscriptionRefreshWorker extends Worker {
     static final String FEED_TYPE_INPUT = "feedType";
     private static final long MAXIMUM_BATCH_MILLIS = 5 * 60 * 1000;
     private static final int FETCH_CONCURRENCY = 4;
-    // Longer than a sync long poll waits silently for its reply.
-    private static final long STALE_TUNNEL_IDLE_NANOS = TimeUnit.MINUTES.toNanos(1);
     private static final SubscriptionRefreshState STATE = new SubscriptionRefreshState();
     // Scheduled workers have no renderer state, but still need their last
     // progress and notification labels when the app returns to the background.
@@ -185,7 +183,7 @@ public final class SubscriptionRefreshWorker extends Worker {
         // Android freezes the hidden app between jobs, so a server may have closed
         // kept-alive connections unseen. Requests would reuse their relay tunnels
         // and wait for replies that never come, so close the ones idle for a while.
-        AndroidProxy.closeTunnelsIdleSince(System.nanoTime() - STALE_TUNNEL_IDLE_NANOS);
+        AndroidProxy.closeStaleTunnels(AndroidProxyRelay.clock.getAsLong());
         String feedType = getInputData().getString(FEED_TYPE_INPUT);
         if (feedType == null) return Result.failure();
 
