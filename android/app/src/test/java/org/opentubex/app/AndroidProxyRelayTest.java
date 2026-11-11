@@ -19,6 +19,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class AndroidProxyRelayTest {
     @Test public void permissionPreflightUsesTheSameSystemProxyRouteWithoutResolvingTheDestination() throws Exception {
@@ -101,7 +102,7 @@ public class AndroidProxyRelayTest {
             }
             @Override public void shutdownOutput() { throw new UnsupportedOperationException(); }
         };
-        AndroidProxyRelay.copyRequest(client, remote);
+        AndroidProxyRelay.copyRequest(client, remote, new AtomicLong());
         assertEquals("payload", sent.toString(StandardCharsets.US_ASCII));
         assertFalse(remote.isClosed());
         assertEquals("response", new String(remote.getInputStream().readAllBytes(), StandardCharsets.US_ASCII));
@@ -112,7 +113,7 @@ public class AndroidProxyRelayTest {
             @Override public InputStream getInputStream() throws IOException { throw new IOException("disconnected"); }
         };
         Socket remote = new Socket();
-        AndroidProxyRelay.copyRequest(client, remote);
+        AndroidProxyRelay.copyRequest(client, remote, new AtomicLong());
         assertTrue(remote.isClosed());
     }
 
@@ -122,7 +123,7 @@ public class AndroidProxyRelayTest {
             Socket client = new Socket() {
                 @Override public InputStream getInputStream() { return new ByteArrayInputStream(new byte[] {42}); }
             };
-            AndroidProxyRelay.copyRequest(client, remote);
+            AndroidProxyRelay.copyRequest(client, remote, new AtomicLong());
             origin.setSoTimeout(3000);
             assertEquals(42, origin.getInputStream().read());
             assertEquals(-1, origin.getInputStream().read());
@@ -142,7 +143,7 @@ public class AndroidProxyRelayTest {
                 @Override public OutputStream getOutputStream() { return received; }
             };
             CompletableFuture<Void> pump = CompletableFuture.runAsync(() -> {
-                try { AndroidProxyRelay.copyResponse(remote, client, () -> true); }
+                try { AndroidProxyRelay.copyResponse(remote, client, () -> true, new AtomicLong()); }
                 catch (IOException error) { throw new RuntimeException(error); }
             });
             pump.get(5, TimeUnit.SECONDS);
@@ -159,7 +160,7 @@ public class AndroidProxyRelayTest {
                 @Override public OutputStream getOutputStream() { return received; }
             };
             CompletableFuture<Void> pump = CompletableFuture.runAsync(() -> {
-                try { AndroidProxyRelay.copyResponse(remote, client, () -> false); }
+                try { AndroidProxyRelay.copyResponse(remote, client, () -> false, new AtomicLong()); }
                 catch (IOException error) { throw new RuntimeException(error); }
             });
             // Several read timeouts pass before the response arrives.
@@ -183,7 +184,7 @@ public class AndroidProxyRelayTest {
             // The request ends while the first read is waiting; the response follows soon after.
             long requestEnd = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(300);
             CompletableFuture<Void> pump = CompletableFuture.runAsync(() -> {
-                try { AndroidProxyRelay.copyResponse(remote, client, () -> System.nanoTime() >= requestEnd); }
+                try { AndroidProxyRelay.copyResponse(remote, client, () -> System.nanoTime() >= requestEnd, new AtomicLong()); }
                 catch (IOException error) { throw new RuntimeException(error); }
             });
             Thread.sleep(500);
@@ -304,6 +305,31 @@ public class AndroidProxyRelayTest {
             assertEquals(-1, client.getInputStream().read());
             remote.setSoTimeout(3000);
             assertEquals(-1, remote.getInputStream().read());
+        }
+    }
+
+    @Test public void returningToTheAppClosesOnlyTunnelsIdleSinceItWasHidden() throws Exception {
+        try (ServerSocket destination = server();
+             AndroidProxyRelay relay = new AndroidProxyRelay(new ProxyConfiguration(false, "", "", "", "", ""), null, LOOPBACK);
+             Socket idle = connect(relay, "destination.test:" + destination.getLocalPort());
+             Socket idleRemote = destination.accept();
+             Socket active = connect(relay, "destination.test:" + destination.getLocalPort());
+             Socket activeRemote = destination.accept()) {
+            assertTrue(AndroidProxyRelay.readHeaders(idle.getInputStream()).startsWith("HTTP/1.1 200"));
+            assertTrue(AndroidProxyRelay.readHeaders(active.getInputStream()).startsWith("HTTP/1.1 200"));
+            long hidden = System.nanoTime();
+            activeRemote.getOutputStream().write(1);
+            assertEquals(1, active.getInputStream().read());
+            relay.closeTunnelsIdleSince(hidden);
+            idle.setSoTimeout(3000);
+            assertEquals(-1, idle.getInputStream().read());
+            idleRemote.setSoTimeout(3000);
+            assertEquals(-1, idleRemote.getInputStream().read());
+            activeRemote.getOutputStream().write(2);
+            assertEquals(2, active.getInputStream().read());
+            active.getOutputStream().write(3);
+            activeRemote.setSoTimeout(3000);
+            assertEquals(3, activeRemote.getInputStream().read());
         }
     }
 

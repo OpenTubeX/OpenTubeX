@@ -14,6 +14,8 @@ import com.capacitorjs.plugins.share.SharePlugin;
 import java.net.CookieHandler;
 
 public class MainActivity extends BridgeActivity {
+    /** System.nanoTime() when the app was last hidden, kept if Android recreates the activity. */
+    private static Long hiddenAt;
     private InputManager inputManager;
     private int lastOrientation;
     private WebViewRotationFrame rotationFrame;
@@ -47,6 +49,11 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     public void onStart() {
+        // Android can freeze or firewall a hidden app, so a server may have closed
+        // a kept-alive connection unseen. Close those tunnels before the page
+        // learns it is visible and reuses them, which would wait for a reply that
+        // never comes. Tunnels that kept streaming, such as background playback, stay.
+        if (hiddenAt != null) AndroidProxy.closeTunnelsIdleSince(hiddenAt);
         super.onStart();
         AppVisibility.setVisible(true);
         SubscriptionRefreshWorker.onAppVisibilityChanged(this);
@@ -55,6 +62,7 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     public void onStop() {
+        hiddenAt = System.nanoTime();
         AppVisibility.setVisible(false);
         SubscriptionRefreshWorker.onAppVisibilityChanged(this);
         BackgroundSync.onAppVisibilityChanged(this);

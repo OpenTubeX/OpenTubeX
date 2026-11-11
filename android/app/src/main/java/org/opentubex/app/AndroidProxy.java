@@ -130,6 +130,11 @@ final class AndroidProxy {
         return relay.proxies(target);
     }
 
+    /** Closes the relay's tunnels that carried no data since {@code nanoTime}. */
+    static void closeTunnelsIdleSince(long nanoTime) {
+        if (relay != null) relay.closeTunnelsIdleSince(nanoTime);
+    }
+
     static String connectionHost(URI target) {
         return relay.connectionHost(target);
     }
