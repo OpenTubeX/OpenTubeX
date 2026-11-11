@@ -44,7 +44,10 @@ for (const [theme, background, zoom] of [
         expect(Math.abs(geometry.logoX - geometry.width / 2)).toBeLessThan(1)
         expect(Math.abs(geometry.logoY - geometry.height / 2)).toBeLessThan(1)
         expect(geometry.progressing).toBe(true)
-        await testInfo.attach(`${theme}-startup`, { body: await page.screenshot(), contentType: 'image/png' })
+        // Diagnostic only. On CI, Chromium can restart a GPU process that failed
+        // to initialize while this capture runs, which rejects it.
+        const screenshot = await page.screenshot().catch(() => null)
+        if (screenshot) await testInfo.attach(`${theme}-startup`, { body: screenshot, contentType: 'image/png' })
         await page.evaluate(() => {
           window.__startupReveal = null
           window.__startupColors = []

@@ -22,9 +22,11 @@ export function revealStartupSplash() {
   splash.setAttribute('aria-busy', 'false')
 
   let timeout
+  let frame = 0
   const finish = () => {
     if (!splash.isConnected) return
     clearTimeout(timeout)
+    cancelAnimationFrame(frame)
     document.removeEventListener('visibilitychange', onVisibilityChange)
     splash.remove()
     document.getElementById('app')?.removeAttribute('inert')
@@ -63,8 +65,16 @@ export function revealStartupSplash() {
     } else {
       reveal = splash.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 250, easing: 'ease-out', fill: 'forwards' })
     }
+    // The window is uncovered once the spring first reaches its target, about
+    // halfway through. Release the app then instead of waiting out the
+    // overshoot, which only moves the hole's edge beyond the window.
+    const uncovered = () => {
+      if (reveal.effect.getComputedTiming().progress >= 1) finish()
+      else frame = requestAnimationFrame(uncovered)
+    }
     document.addEventListener('visibilitychange', onVisibilityChange)
     timeout = setTimeout(finish, duration + 100)
+    frame = requestAnimationFrame(uncovered)
     reveal.finished.then(finish, finish)
   } catch {
     // The ready app must never wait for a failed reveal.
