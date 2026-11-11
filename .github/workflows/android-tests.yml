@@ -123,11 +123,17 @@ jobs:
         # changed and restored, each time waiting until the configuration shows
         # it. FailureDiagnostics closes another app's dialog that still appears
         # and logs whatever window held the screen when a test failed.
-        # netsimd sends the virtual access point's beacons. On a runner whose cores
-        # all run the emulator, a late beacon makes the guest drop Wi-Fi in the
-        # middle of casting tests, so the host schedules it first.
+        # A starved runner delays the virtual access point's beacons, and after a
+        # few missed ones the guest drops Wi-Fi. Android then often rejoins
+        # without the network's routes, which breaks casting tests for the rest
+        # of the shard. mac80211 reads the beacon loss limit when it associates,
+        # so raise it to ten seconds and rejoin, then wait for the Wi-Fi routes.
         script: |
-          sudo renice -n -15 -p $(ls /proc/$(pgrep -x netsimd)/task)
+          adb root && adb wait-for-device && timeout 30 sh -c "until adb shell id | grep -q uid=0; do sleep 1; done"
+          adb shell 'echo 100 > /sys/module/mac80211/parameters/beacon_loss_count'
+          adb unroot && adb wait-for-device && timeout 30 sh -c "until adb shell id | grep -q uid=2000; do sleep 1; done"
+          adb shell cmd wifi set-wifi-enabled disabled && adb shell cmd wifi set-wifi-enabled enabled
+          timeout 120 sh -c "until adb shell ip route show table all | grep -q 'default via .* dev wlan0 table'; do sleep 1; done"
           adb shell settings put global hide_error_dialogs 1
           adb shell settings put secure anr_show_background 0
           adb shell settings put global heads_up_notifications_enabled 0
