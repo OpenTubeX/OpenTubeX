@@ -1,6 +1,6 @@
 import { chmod, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { choosePickerPaths, test, expect, goTo } from '../../helpers/app.mjs'
+import { defaultThemeClass, choosePickerPaths, test, expect, goTo } from '../../helpers/app.mjs'
 
 const timeWatched = Date.now() - 1000
 const original = {
@@ -392,7 +392,7 @@ test.describe('history repair cookies', () => {
         if (mode === 'file') {
           for (const theme of ['dark', 'light']) {
             await page.emulateMedia({ colorScheme: theme })
-            await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+            await expect(page.locator('body')).toHaveClass(defaultThemeClass(theme))
             await dialog.screenshot({ path: testInfo.outputPath(`history-repair-cookies-${theme}.png`), animations: 'disabled' })
           }
         }

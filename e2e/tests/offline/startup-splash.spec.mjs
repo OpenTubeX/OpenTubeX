@@ -1,5 +1,5 @@
 import { readFile, readdir } from 'node:fs/promises'
-import { test, expect, goToSettingsSection, latestSettings, readDatastore } from '../../helpers/app.mjs'
+import { defaultThemeClass, test, expect, goToSettingsSection, latestSettings, readDatastore } from '../../helpers/app.mjs'
 
 for (const [theme, background, zoom] of [
   ['dark', 'rgb(15, 15, 15)', 1.25],
@@ -201,7 +201,7 @@ test('distraction-free switch disables the early splash in new windows and can r
     if (hidden) {
       for (const colorScheme of ['dark', 'light']) {
         await page.emulateMedia({ colorScheme })
-        await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+        await expect(page.locator('body')).toHaveClass(defaultThemeClass(colorScheme))
         await testInfo.attach(`hide-startup-splash-setting-${colorScheme}`, {
           body: await settings.locator('.switchColumnGrid').first().screenshot(), contentType: 'image/png'
         })

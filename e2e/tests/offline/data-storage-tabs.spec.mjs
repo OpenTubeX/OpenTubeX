@@ -1,4 +1,4 @@
-import { expect, expectScrollAtRenderedEnd, goTo, goToSettingsSection, setWindowSize, test } from '../../helpers/app.mjs'
+import { defaultThemeClass, expect, expectScrollAtRenderedEnd, goTo, goToSettingsSection, setWindowSize, test } from '../../helpers/app.mjs'
 
 test.use({ seed: { settings: { currentLocale: 'en-US' } } })
 
@@ -101,7 +101,7 @@ test('keeps both tabs above the scroller when scrolling, switching tabs and resi
   await scrollToBottom()
   for (const colorScheme of ['dark', 'light']) {
     await page.emulateMedia({ colorScheme })
-    await expect(page.locator('body')).toContainClass(colorScheme)
+    await expect(page.locator('body')).toHaveClass(defaultThemeClass(colorScheme))
     await page.locator('.settingsContentPane').screenshot({ path: testInfo.outputPath(`fixed-tabs-${colorScheme}.png`) })
   }
 

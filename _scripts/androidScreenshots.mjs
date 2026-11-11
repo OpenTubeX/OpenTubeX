@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url'
 
 import { chromium, expect } from '@playwright/test'
 
-import { goToSettingsSection } from '../e2e/helpers/app.mjs'
+import { defaultThemeClass, goToSettingsSection } from '../e2e/helpers/app.mjs'
 import { expectPausedFrame, openScreenshotSubscriptions, openScreenshotWatch, prepareAppScreenshot } from '../e2e/helpers/screenshots.mjs'
 
 // Usage: node _scripts/androidScreenshots.mjs SERIAL
@@ -24,8 +24,6 @@ const FASTLANE_DESTINATION = fileURLToPath(new URL('../fastlane/metadata/android
 const SIZE = '1080x2340'
 const DENSITY = '420'
 const THEMES = ['dark', 'light']
-// The System Default theme mode shows the Tally themes.
-const THEME_CLASSES = { dark: 'openTubeXDark', light: 'openTubeXLight' }
 
 const adb = (...args) => execFileSync('adb', ['-s', serial, ...args], { encoding: 'utf8' }).trim()
 const demo = (command, extras = {}) => adb('shell', 'am', 'broadcast', '-a', 'com.android.systemui.demo', '-e', 'command', command,
@@ -128,7 +126,7 @@ try {
   async function setTheme(theme) {
     // Exercise the default System theme without changing an app setting.
     adb('shell', 'cmd', 'uimode', 'night', theme === 'dark' ? 'yes' : 'no')
-    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${THEME_CLASSES[theme]}\\b`))
+    await expect(page.locator('body')).toHaveClass(defaultThemeClass(theme))
   }
 
   const captures = []

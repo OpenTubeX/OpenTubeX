@@ -1,4 +1,4 @@
-import { test, expect, setWindowSize } from '../../helpers/app.mjs'
+import { defaultThemeClass, test, expect, setWindowSize } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { WATCH_PAGE_SEED } from '../../helpers/watch-page.mjs'
@@ -233,7 +233,7 @@ test('walks new users through setup and the essential controls', async ({ page }
   await expect(themeModes.getByRole('radio', { name: 'System default' })).toBeFocused()
   await page.keyboard.press('ArrowRight')
   await expect(themeModes.getByRole('radio', { name: 'Light' })).toBeChecked()
-  await expect(page.locator('body')).toHaveClass(/\bopenTubeXLight\b/)
+  await expect(page.locator('body')).toHaveClass(defaultThemeClass('light'))
 
   await expect(tutorial.getByRole('combobox', { name: 'Default Landing Page' })).toBeVisible()
   await expect(tutorial.getByRole('combobox', { name: 'Region for Trending' })).toBeVisible()

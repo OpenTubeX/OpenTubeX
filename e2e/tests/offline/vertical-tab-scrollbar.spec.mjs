@@ -1,4 +1,4 @@
-import { test, expect, setWindowSize } from '../../helpers/app.mjs'
+import { defaultThemeClass, test, expect, setWindowSize } from '../../helpers/app.mjs'
 
 test.use({ seed: { settings: { alwaysShowScrollbars: true } } })
 
@@ -56,7 +56,7 @@ test('vertical tab scrollbars halve their idle thickness and keep their full hit
   await container.evaluate(element => { element.dir = 'ltr' })
   for (const colorScheme of ['dark', 'light']) {
     await page.emulateMedia({ colorScheme })
-    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+    await expect(page.locator('body')).toHaveClass(defaultThemeClass(colorScheme))
     await page.mouse.move(500, 300)
     await expectThickness(3)
     await page.screenshot({ path: testInfo.outputPath(`vertical-tab-scrollbar-${colorScheme}.png`), clip: { x: 0, y: 0, width: 220, height: 260 }, animations: 'disabled' })

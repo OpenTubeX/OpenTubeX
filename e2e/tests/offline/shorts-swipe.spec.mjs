@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
 
-import { test, expect, setWindowSize, setPlayerFullscreen, sel } from '../../helpers/app.mjs'
+import { defaultThemeClass, test, expect, setWindowSize, setPlayerFullscreen, sel } from '../../helpers/app.mjs'
 import { findWatchComponent } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { demoPlayerResponse, routeDemoMedia } from '../../helpers/media.mjs'
@@ -253,7 +253,7 @@ for (const mode of ['fullwindow', 'fullscreen']) {
     const { watch, cdp } = await openShorts({ app, page })
     const theme = mode === 'fullwindow' ? 'dark' : 'light'
     await page.emulateMedia({ colorScheme: theme })
-    await expect(page.locator('body')).toHaveClass(new RegExp(theme))
+    await expect(page.locator('body')).toHaveClass(defaultThemeClass(theme))
     const player = page.locator('.ftVideoPlayer.shortsPlayer')
     if (mode === 'fullscreen') await setPlayerFullscreen(page, true)
     else await player.locator('.full-window-button').evaluate(button => button.click())
@@ -351,7 +351,7 @@ for (const [stage, theme, direction] of [['metadata', 'dark', -1], ['streams', '
   test(`Shorts ${stage} loading placeholders follow the finger and allow skipping`, async ({ app, page }, testInfo) => {
     const { watch, touch, cdp } = await openShorts({ app, page })
     await page.emulateMedia({ colorScheme: theme })
-    await expect(page.locator('body')).toHaveClass(new RegExp(theme))
+    await expect(page.locator('body')).toHaveClass(defaultThemeClass(theme))
     await watch.evaluate((component, stage) => {
       if (stage === 'metadata') component.proxy.isLoading = true
       else component.proxy.ytDlpStreamsPending = true

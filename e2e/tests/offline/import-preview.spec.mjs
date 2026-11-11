@@ -1,5 +1,5 @@
 import { strToU8, zipSync } from 'fflate'
-import { expect, goToSettingsSection, test } from '../../helpers/app.mjs'
+import { defaultThemeClass, expect, goToSettingsSection, test } from '../../helpers/app.mjs'
 import { createUnifiedBackup } from '../../../src/renderer/helpers/unifiedBackup.js'
 
 async function chooseArchive(page, dataSection, archive, action, previewSelected = true) {
@@ -98,7 +98,7 @@ test('Takeout preview shows matching and new records and remains usable when its
   })).toBeLessThanOrEqual(1)
   for (const scheme of ['dark', 'light']) {
     await page.emulateMedia({ colorScheme: scheme })
-    await expect(page.locator('body')).toHaveClass(new RegExp(scheme))
+    await expect(page.locator('body')).toHaveClass(defaultThemeClass(scheme))
     await page.locator('.takeoutSelectionCentered').screenshot({ path: testInfo.outputPath(`import-preview-${scheme}.png`) })
   }
   const choices = page.locator('.takeoutSelectionCentered')
@@ -197,7 +197,7 @@ test('chooses and previews subscriptions without parsing an unselected large Tak
   expect(await page.evaluate(() => window.largeHistoryParseCount)).toBe(0)
   for (const scheme of ['dark', 'light']) {
     await page.emulateMedia({ colorScheme: scheme })
-    await expect(page.locator('body')).toHaveClass(new RegExp(scheme))
+    await expect(page.locator('body')).toHaveClass(defaultThemeClass(scheme))
     await choices.screenshot({ path: testInfo.outputPath(`takeout-selection-${scheme}.png`) })
   }
   await choices.getByRole('checkbox', { name: 'History', exact: true }).locator('+ label').click()

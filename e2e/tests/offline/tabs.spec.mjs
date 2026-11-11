@@ -4,7 +4,7 @@ import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { expectTabStripSettled } from '../../helpers/tabs.mjs'
 
-import { abortUnmockedRequest, test, expect, sel, goTo, goToSettingsSection, clickSearchCancel, expectScrollAtRenderedEnd, openNewWindowFromTabBar, setWindowSize, waitForAppReady } from '../../helpers/app.mjs'
+import { defaultThemeClass, abortUnmockedRequest, test, expect, sel, goTo, goToSettingsSection, clickSearchCancel, expectScrollAtRenderedEnd, openNewWindowFromTabBar, setWindowSize, waitForAppReady } from '../../helpers/app.mjs'
 import {
   encryptSyncServerDeviceInfo,
   randomSyncServerDeviceId,
@@ -127,7 +127,7 @@ test.describe('tab bar', () => {
     await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1100, 800))
     for (const colorScheme of ['dark', 'light']) {
       await page.emulateMedia({ colorScheme })
-      await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+      await expect(page.locator('body')).toHaveClass(defaultThemeClass(colorScheme))
       await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
       const box = await page.locator('.tabBar').boundingBox()
       const screenshot = await app.electronApp.evaluate(async ({ BrowserWindow }, box) => {
@@ -3439,7 +3439,7 @@ test.describe('tab organizer', () => {
     await boundingBoxWhenSettled(row)
     for (const colorScheme of ['dark', 'light']) {
       await page.emulateMedia({ colorScheme })
-      await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+      await expect(page.locator('body')).toHaveClass(defaultThemeClass(colorScheme))
       await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
       const box = await row.boundingBox()
       const screenshot = await app.electronApp.evaluate(async ({ BrowserWindow }, box) => {
