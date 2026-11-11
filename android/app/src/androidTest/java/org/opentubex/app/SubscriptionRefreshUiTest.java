@@ -17,6 +17,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -32,6 +33,15 @@ import java.util.concurrent.atomic.AtomicReference;
 public class SubscriptionRefreshUiTest {
     private final Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
     private static final String STORE = "document.querySelector('#app').__vue_app__.config.globalProperties.$store";
+
+    /** The app asks for notification access on launch; its dialog would cover the app. */
+    @Before
+    public void grantNotifications() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            InstrumentationRegistry.getInstrumentation().getUiAutomation().grantRuntimePermission(context.getPackageName(),
+                android.Manifest.permission.POST_NOTIFICATIONS);
+        }
+    }
 
     @Test
     public void notificationCancellationPostponesScheduledRefreshWithoutLocalOwner() throws Exception {
