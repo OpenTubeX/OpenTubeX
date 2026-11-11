@@ -96,6 +96,7 @@ import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { ModalLeaveTransition } from '../../helpers/modalTransition'
 import { useFullscreenTeleportTarget } from '../../composables/useFullscreenTeleportTarget'
 import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
+import { holdRootClass } from '../../helpers/rootClasses'
 import store from '../../store/index'
 
 import FtCard from '../ft-card/ft-card.vue'
@@ -181,6 +182,7 @@ let lastActiveElement = null
 let promptContentResizeObserver = null
 let scrollLocked = false
 let registered = false
+let releaseRootClass = null
 
 function preparePrompt() {
   if (props.lockScroll && settingsOverlayActive.value) {
@@ -195,6 +197,8 @@ function activatePrompt() {
   document.addEventListener('keydown', handleEscape, true)
   store.commit('addOpenPrompt', id)
   registered = true
+  // Lets app-wide overlays such as the connection status go below the prompt.
+  releaseRootClass = holdRootClass('appPromptOpen')
 
   nextTick(() => {
     if (!settingsOverlayActive.value || !promptCard.value) return
@@ -219,6 +223,8 @@ function deactivatePrompt() {
   if (registered) {
     store.commit('removeOpenPrompt', id)
     registered = false
+    releaseRootClass()
+    releaseRootClass = null
     nextTick(() => {
       if (settingsOverlayActive.value) lastActiveElement?.focus()
     })

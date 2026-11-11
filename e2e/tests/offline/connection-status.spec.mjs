@@ -356,6 +356,25 @@ test('connection banner follows navbar coverage', { tag: '@scale' }, async ({ pa
   await sheet.evaluate(element => element.close())
   await expect.poll(bottomGap).toBeCloseTo(84, 0)
   await sheet.evaluate(element => element.remove())
+
+  // Full-window prompts on phones must not show the banner over their actions.
+  // The banner ignores pointer events, so make it hit-testable while probing.
+  const bannerIsTopmost = () => banner.evaluate(element => {
+    const probe = document.createElement('style')
+    probe.textContent = '.connection-status-holder, .connection-status-holder * { pointer-events: auto !important; }'
+    document.head.append(probe)
+    const rect = element.getBoundingClientRect()
+    const topmost = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2)
+    probe.remove()
+    return element.contains(topmost)
+  })
+  await expect.poll(bannerIsTopmost).toBe(true)
+  await page.evaluate(() => window.$store.dispatch('showSearchFilters'))
+  await expect(page.locator('.searchFiltersCard')).toBeVisible()
+  await expect.poll(bannerIsTopmost).toBe(false)
+  await page.keyboard.press('Escape')
+  await expect(page.locator('.searchFiltersCard')).toBeHidden()
+  await expect.poll(bannerIsTopmost).toBe(true)
 })
 
 test('connection banner pauses requests and confirms recovery', { tag: '@scale' }, async ({ page }) => {
