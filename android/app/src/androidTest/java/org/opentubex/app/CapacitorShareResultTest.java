@@ -232,7 +232,7 @@ public class CapacitorShareResultTest {
     private static String shell(String command) throws Exception {
         try (InputStream input = new ParcelFileDescriptor.AutoCloseInputStream(
             InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(command))) {
-            return new String(input.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            return new String(YtDlpFiles.read(input, 16 * 1024 * 1024), java.nio.charset.StandardCharsets.UTF_8);
         }
     }
 
