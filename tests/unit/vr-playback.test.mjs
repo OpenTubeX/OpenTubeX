@@ -282,6 +282,7 @@ for (const backend of ['Local', 'Invidious']) {
       const dependencies = {
         result: { streaming_data: { hls_manifest_url: 'https://media.test/panorama.m3u8' }, hlsUrl: 'https://media.test/panorama.m3u8' },
         probeHlsManifest: () => probe,
+        isYattee: false,
       }
       const select = compileFunction(`return async function () {
         let vrHlsManifestUrl = null

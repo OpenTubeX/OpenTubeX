@@ -4379,10 +4379,12 @@ export default defineComponent({
               this.streamingDataExpiryDate = this.extractExpiryDateFromStreamingUrl(result.adaptiveFormats[0].url)
             }
 
-            if (this.proxyVideos && !isYattee) {
+            if (!isYattee) {
               // Invidious returns a relative URL when it has no domain configured
               const url = new URL(hlsManifestUrl, this.currentInvidiousInstanceUrl)
-              url.searchParams.set('local', 'true')
+              if (this.proxyVideos) {
+                url.searchParams.set('local', 'true')
+              }
               hlsManifestUrl = url.toString()
             }
 
@@ -4439,10 +4441,12 @@ export default defineComponent({
                 const switchGeneration = this.playbackEngineSwitchGeneration
                 let url = result.hlsUrl
                 // Invidious only: Yattee relays its own signed URLs
-                if (this.proxyVideos && !isYattee) {
-                  const proxyUrl = new URL(url, this.currentInvidiousInstanceUrl)
-                  proxyUrl.searchParams.set('local', 'true')
-                  url = proxyUrl.toString()
+                if (!isYattee) {
+                  const instanceUrl = new URL(url, this.currentInvidiousInstanceUrl)
+                  if (this.proxyVideos) {
+                    instanceUrl.searchParams.set('local', 'true')
+                  }
+                  url = instanceUrl.toString()
                 }
                 const playable = await probeHlsManifest(url)
                 if (!this.isCurrentVideoLoad(loadGeneration, videoId)) return
