@@ -4,7 +4,11 @@
 #      INVIDIOUS_HMAC_KEY=...
 #      INVIDIOUS_COMPANION_KEY=...
 #    For example, generate each with `openssl rand -hex 8`.
-# 2. Run `docker compose up -d` and open http://localhost:8080.
+# 2. Run `podman compose up -d` or `docker compose up -d` and open
+#    http://localhost:8080.
+#
+# On Linux, prefer rootless Podman: members of the docker group can gain root
+# access to the host.
 #
 # Browsers only store app data on secure origins. To use OpenTubeX from other
 # devices, serve it over HTTPS, for example with Tailscale Serve, Cloudflare
@@ -65,7 +69,7 @@ services:
       - companion-cache:/var/tmp/youtubei.js:rw
 
   invidious-db:
-    image: postgres:18-alpine
+    image: docker.io/postgres:18-alpine
     restart: unless-stopped
     environment:
       POSTGRES_DB: invidious
