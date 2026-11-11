@@ -380,8 +380,18 @@ const isLoading = computed(() => {
     return rssFeedsRefreshing.value
   }
 
-  return !store.getters.getSubscriptionCacheReady || isRefreshing.value ||
-    (showCombinedView.value && rssFeedsRefreshing.value)
+  if (!store.getters.getSubscriptionCacheReady) {
+    return true
+  }
+
+  // A category tab only waits for its own feed, not for every feed that the
+  // refresh still has to fetch before or after it
+  if (!showCombinedView.value) {
+    return store.getters.getSubscriptionFeedRefreshInProgress &&
+      store.getters.getSubscriptionFeedRefreshTab === props.activeCategory
+  }
+
+  return isRefreshing.value || rssFeedsRefreshing.value
 })
 
 const hasNewContent = computed(() => {
