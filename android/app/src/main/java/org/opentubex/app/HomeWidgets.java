@@ -499,7 +499,7 @@ final class HomeWidgets {
             client = new OkHttpClient.Builder()
                 .dns(AndroidMediaArtwork.publicDns(okhttp3.Dns.SYSTEM))
                 .proxyAuthenticator(AndroidProxy.proxyAuthenticator())
-                .followSslRedirects(false)
+                .followRedirects(false).followSslRedirects(false)
                 .connectTimeout(5, TimeUnit.SECONDS).readTimeout(5, TimeUnit.SECONDS)
                 .callTimeout(10, TimeUnit.SECONDS).build();
         }
@@ -508,28 +508,38 @@ final class HomeWidgets {
 
     private static boolean download(String source, File file, Authorization authorization) {
         HttpUrl url = HttpUrl.parse(source);
-        if (url == null) return false;
-        Request.Builder request = new Request.Builder().url(url);
-        // OkHttp drops this header when a redirect leaves the instance's host.
-        if (authorization != null && authorization.appliesTo(url)) request.header("Authorization", authorization.value());
-        try (Response response = client().newCall(request.build()).execute()) {
-            ResponseBody body = response.body();
-            if (!response.isSuccessful() || body == null) return false;
-            byte[] encoded = AndroidMediaArtwork.readArtworkBytes(body.byteStream(), body.contentLength());
-            if (encoded == null) return false;
-            Bitmap thumbnail = decodeThumbnail(encoded);
-            if (thumbnail == null) return false;
-            File temporary = new File(file.getPath() + ".tmp");
-            try (FileOutputStream output = new FileOutputStream(temporary)) {
-                thumbnail.compress(Bitmap.CompressFormat.JPEG, 85, output);
-            } finally {
-                thumbnail.recycle();
+        // Follow redirects here so every hop gets the artwork address checks.
+        for (int redirects = 0; url != null && redirects <= AndroidMediaArtwork.MAX_ARTWORK_REDIRECTS; redirects++) {
+            if (!AndroidMediaArtwork.isSafeArtworkUrl(url.url())) return false;
+            Request.Builder request = new Request.Builder().url(url);
+            // Credentials go only to the instance's own origin.
+            if (authorization != null && authorization.appliesTo(url)) request.header("Authorization", authorization.value());
+            try (Response response = client().newCall(request.build()).execute()) {
+                if (!AndroidMediaArtwork.isRedirectStatus(response.code())) return saveThumbnail(response, file);
+                String location = response.header("Location");
+                url = location == null ? null : url.resolve(location);
+            } catch (IOException | RuntimeException ignored) {
+                // The widget keeps its placeholder; the next update retries.
+                return false;
             }
-            return temporary.renameTo(file);
-        } catch (IOException | RuntimeException ignored) {
-            // The widget keeps its placeholder; the next update retries.
-            return false;
         }
+        return false;
+    }
+
+    private static boolean saveThumbnail(Response response, File file) throws IOException {
+        ResponseBody body = response.body();
+        if (!response.isSuccessful() || body == null) return false;
+        byte[] encoded = AndroidMediaArtwork.readArtworkBytes(body.byteStream(), body.contentLength());
+        if (encoded == null) return false;
+        Bitmap thumbnail = decodeThumbnail(encoded);
+        if (thumbnail == null) return false;
+        File temporary = new File(file.getPath() + ".tmp");
+        try (FileOutputStream output = new FileOutputStream(temporary)) {
+            thumbnail.compress(Bitmap.CompressFormat.JPEG, 85, output);
+        } finally {
+            thumbnail.recycle();
+        }
+        return temporary.renameTo(file);
     }
 
     /** Center-crops to a small 16:9 image. */
