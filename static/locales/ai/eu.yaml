@@ -2133,6 +2133,7 @@ Chapters:
   Loop Chapter: 'Errepikatu kapitulua: {chapter}'
   Looping Chapter: 'Kapitulua errepikatzen: {chapter}'
   Chapter Loop Stopped: 'Kapituluaren errepikapena gelditu da'
+  Sync to Video Time: 'Sinkronizatu bideoaren denborarekin'
 Comments:
   Image unavailable: "Irudia ez dago erabilgarri"
   Comment Count: Iruzkin 1 | {count} iruzkin

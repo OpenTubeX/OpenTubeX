@@ -2157,6 +2157,7 @@ Chapters:
   Loop Chapter: 'Ailadrodd y bennod: {chapter}'
   Looping Chapter: 'Yn ailadrodd y bennod: {chapter}'
   Chapter Loop Stopped: 'Wedi stopio ailadrodd y bennod'
+  Sync to Video Time: 'Cysoni ag amser y fideo'
 Comments:
   Image unavailable: "Delwedd ddim ar gael"
   Comment Count: '{count} o sylwadau | 1 sylw | {count} sylw | {count} sylw | {count} sylw | {count} o sylwadau'

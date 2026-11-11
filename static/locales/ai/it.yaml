@@ -2123,6 +2123,7 @@ Chapters:
   Loop Chapter: 'Ripeti capitolo: {chapter}'
   Looping Chapter: 'Ripetizione del capitolo: {chapter}'
   Chapter Loop Stopped: 'Ripetizione del capitolo interrotta'
+  Sync to Video Time: 'Sincronizza con il tempo del video'
 Comments:
   Image unavailable: "Immagine non disponibile"
   Comment Count: 1 commento | {count} commenti | {count} commenti

@@ -2638,6 +2638,7 @@ Chapters:
   Loop Chapter: 'Repeteix el capítol: {chapter}'
   Looping Chapter: 'S''està repetint el capítol: {chapter}'
   Chapter Loop Stopped: 'S''ha aturat la repetició del capítol'
+  Sync to Video Time: 'Sincronitza amb el temps del vídeo'
 Mini Player: Minireproductor
 Comments:
   Image unavailable: "Imatge no disponible"

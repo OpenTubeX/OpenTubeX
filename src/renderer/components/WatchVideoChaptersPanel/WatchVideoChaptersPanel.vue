@@ -72,12 +72,12 @@ function readStoredHeight() {
 const maxListHeight = ref(readStoredHeight())
 const chapterList = useTemplateRef('chapterList')
 const listStyleObserver = new MutationObserver(() => {
-  const height = Number.parseFloat(chapterList.value?.$el.style.height)
+  const height = Number.parseFloat(chapterList.value?.chaptersWrapper.style.height)
   if (!(height > 0) || height === maxListHeight.value) return
   maxListHeight.value = height
   localStorage.setItem(HEIGHT_STORAGE_KEY, String(height))
 })
-onMounted(() => listStyleObserver.observe(chapterList.value.$el, { attributeFilter: ['style'] }))
+onMounted(() => listStyleObserver.observe(chapterList.value.chaptersWrapper, { attributeFilter: ['style'] }))
 onBeforeUnmount(() => listStyleObserver.disconnect())
 </script>
 

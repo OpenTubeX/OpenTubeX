@@ -2136,6 +2136,7 @@ Chapters:
   Loop Chapter: 'Επανάληψη κεφαλαίου: {chapter}'
   Looping Chapter: 'Επαναλαμβάνεται το κεφάλαιο: {chapter}'
   Chapter Loop Stopped: 'Η επανάληψη του κεφαλαίου σταμάτησε'
+  Sync to Video Time: 'Συγχρονισμός με τον χρόνο του βίντεο'
 Comments:
   Image unavailable: "Η εικόνα δεν είναι διαθέσιμη"
   Comment Count: 1 σχόλιο | {count} σχόλια

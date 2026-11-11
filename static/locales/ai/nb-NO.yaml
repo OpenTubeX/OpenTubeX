@@ -2128,6 +2128,7 @@ Chapters:
   Loop Chapter: 'Gjenta kapittel: {chapter}'
   Looping Chapter: 'Gjentar kapittel: {chapter}'
   Chapter Loop Stopped: 'Sluttet å gjenta kapittel'
+  Sync to Video Time: 'Synkroniser med videotiden'
 Comments:
   Image unavailable: "Bildet er ikke tilgjengelig"
   Comment Count: 1 kommentar | {count} kommentarer

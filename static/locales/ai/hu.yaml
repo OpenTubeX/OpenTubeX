@@ -2123,6 +2123,7 @@ Chapters:
   Loop Chapter: 'Fejezet ismétlése: {chapter}'
   Looping Chapter: 'A fejezet ismétlődik: {chapter}'
   Chapter Loop Stopped: 'A fejezet ismétlése leállítva'
+  Sync to Video Time: 'Szinkronizálás a videó idejével'
 Comments:
   Image unavailable: "A kép nem érhető el"
   Comment Count: 1 hozzászólás | {count} hozzászólás

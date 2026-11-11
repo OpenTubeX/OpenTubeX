@@ -2129,6 +2129,7 @@ Chapters:
   Loop Chapter: 'Opakovať kapitolu: {chapter}'
   Looping Chapter: 'Opakuje sa kapitola: {chapter}'
   Chapter Loop Stopped: 'Opakovanie kapitoly zastavené'
+  Sync to Video Time: 'Synchronizovať s časom videa'
 Comments:
   Image unavailable: "Obrázok nie je dostupný"
   Comment Count: 1 komentár | {count} komentáre | {count} komentárov

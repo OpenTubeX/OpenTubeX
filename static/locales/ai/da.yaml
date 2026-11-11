@@ -2206,6 +2206,7 @@ Chapters:
   Loop Chapter: 'Gentag kapitel: {chapter}'
   Looping Chapter: 'Gentager kapitel: {chapter}'
   Chapter Loop Stopped: 'Gentagelse af kapitel stoppet'
+  Sync to Video Time: 'Synkroniser med videoens tid'
 Comments:
   Image unavailable: "Billedet er ikke tilgængeligt"
   Comment Count: 1 kommentar | {count} kommentarer

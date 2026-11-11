@@ -2144,6 +2144,7 @@ Chapters:
   Loop Chapter: 'Endurtaka kafla: {chapter}'
   Looping Chapter: 'Kafli endurtekinn: {chapter}'
   Chapter Loop Stopped: 'Hætt að endurtaka kafla'
+  Sync to Video Time: 'Samstilla við tíma myndskeiðs'
 Comments:
   Image unavailable: "Myndin er ekki tiltæk"
   Comment Count: 1 athugasemd | {count} athugasemdir

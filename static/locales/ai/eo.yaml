@@ -2170,6 +2170,7 @@ Chapters:
   Loop Chapter: 'Ripeti ĉapitron: {chapter}'
   Looping Chapter: 'Ripetado de ĉapitro: {chapter}'
   Chapter Loop Stopped: Ĉesis ripeti ĉapitron
+  Sync to Video Time: 'Sinkronigi kun la videotempo'
 Comments:
   Image unavailable: Bildo ne disponeblas
   Comment Count: 1 komento | {count} komentoj

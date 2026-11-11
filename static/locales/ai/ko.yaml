@@ -2501,6 +2501,7 @@ Chapters:
   Loop Chapter: '챕터 반복: {chapter}'
   Looping Chapter: '챕터 반복 중: {chapter}'
   Chapter Loop Stopped: '챕터 반복을 중지했습니다'
+  Sync to Video Time: '동영상 시간에 동기화'
 Comments:
   Image unavailable: "이미지를 사용할 수 없습니다"
   Comment Count: '댓글 {count}개'

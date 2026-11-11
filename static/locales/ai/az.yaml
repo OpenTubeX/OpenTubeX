@@ -2135,6 +2135,7 @@ Chapters:
   Loop Chapter: 'Fəsli təkrarla: {chapter}'
   Looping Chapter: 'Fəsil təkrarlanır: {chapter}'
   Chapter Loop Stopped: 'Fəslin təkrarı dayandırıldı'
+  Sync to Video Time: 'Video vaxtı ilə sinxronlaşdır'
 Comments:
   Image unavailable: "Şəkil mövcud deyil"
   Comment Count: 1 şərh | {count} şərh

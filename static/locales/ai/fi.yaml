@@ -2130,6 +2130,7 @@ Chapters:
   Loop Chapter: 'Toista lukua jatkuvasti: {chapter}'
   Looping Chapter: 'Lukua toistetaan: {chapter}'
   Chapter Loop Stopped: 'Luvun toisto lopetettu'
+  Sync to Video Time: 'Synkronoi videon aikaan'
 Comments:
   Image unavailable: "Kuva ei ole saatavilla"
   Comment Count: 1 kommentti | {count} kommenttia

@@ -2153,6 +2153,7 @@ Chapters:
   Loop Chapter: 'Повтаряне на главата: {chapter}'
   Looping Chapter: 'Главата се повтаря: {chapter}'
   Chapter Loop Stopped: 'Повтарянето на главата е спряно'
+  Sync to Video Time: 'Синхронизиране с времето на видеоклипа'
 Comments:
   Image unavailable: "Изображението не е налично"
   Comment Count: 1 коментар | {count} коментара

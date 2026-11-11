@@ -2535,6 +2535,7 @@ Chapters:
   Loop Chapter: 'Kartoti skyrių: {chapter}'
   Looping Chapter: 'Kartojamas skyrius: {chapter}'
   Chapter Loop Stopped: 'Skyriaus kartojimas sustabdytas'
+  Sync to Video Time: 'Sinchronizuoti su vaizdo įrašo laiku'
 Comments:
   Image unavailable: "Vaizdas nepasiekiamas"
   Comment Count: 1 komentaras | {count} komentarai | {count} komentarų

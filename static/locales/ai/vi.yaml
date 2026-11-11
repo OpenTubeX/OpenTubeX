@@ -2137,6 +2137,7 @@ Chapters:
   Loop Chapter: 'Lặp lại chương: {chapter}'
   Looping Chapter: 'Đang lặp lại chương: {chapter}'
   Chapter Loop Stopped: 'Đã dừng lặp lại chương'
+  Sync to Video Time: 'Đồng bộ với thời gian video'
 Comments:
   Image unavailable: "Hình ảnh không khả dụng"
   Comment Count: '{count} bình luận'

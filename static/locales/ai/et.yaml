@@ -2125,6 +2125,7 @@ Chapters:
   Loop Chapter: 'Korda peatükki: {chapter}'
   Looping Chapter: 'Peatükki korratakse: {chapter}'
   Chapter Loop Stopped: 'Peatüki kordamine peatatud'
+  Sync to Video Time: 'Sünkrooni video ajaga'
 Comments:
   Image unavailable: "Pilt pole saadaval"
   Comment Count: 1 kommentaar | {count} kommentaari

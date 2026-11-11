@@ -3150,6 +3150,7 @@ Chapters:
   Loop Chapter: 'Kapitel wiederholen: {chapter}'
   Looping Chapter: 'Kapitel wird wiederholt: {chapter}'
   Chapter Loop Stopped: 'Kapitelwiederholung beendet'
+  Sync to Video Time: Mit Videozeit synchronisieren
 Preferences: Einstellungen
 Ok: OK
 Hashtag:

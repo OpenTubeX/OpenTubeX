@@ -2548,6 +2548,7 @@ Chapters:
   Loop Chapter: 'Repetir capítulo: {chapter}'
   Looping Chapter: 'Repitiendo capítulo: {chapter}'
   Chapter Loop Stopped: 'Se dejó de repetir el capítulo'
+  Sync to Video Time: 'Sincronizar con el tiempo del video'
 Mini Player: Minirreproductor
 Comments:
   Image unavailable: "Imagen no disponible"

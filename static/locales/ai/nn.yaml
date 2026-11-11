@@ -2425,6 +2425,7 @@ Chapters:
   Loop Chapter: 'Gjenta kapittel: {chapter}'
   Looping Chapter: 'Gjentek kapittel: {chapter}'
   Chapter Loop Stopped: 'Slutta å gjenta kapittel'
+  Sync to Video Time: 'Synkroniser med videotida'
 Comments:
   Image unavailable: "Biletet er ikkje tilgjengeleg"
   Comment Count: 1 kommentar | {count} kommentarar

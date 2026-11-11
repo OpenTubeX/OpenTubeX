@@ -1890,6 +1890,7 @@ Chapters:
   Loop Chapter: 'Zapętl rozdział: {chapter}'
   Looping Chapter: 'Zapętlanie rozdziału: {chapter}'
   Chapter Loop Stopped: 'Zatrzymano zapętlanie rozdziału'
+  Sync to Video Time: 'Synchronizuj z czasem filmu'
 Digital Wellbeing:
   Watch time limit almost reached: "Pozostało {duration} do dziennego limitu czasu oglądania"
   Shorts limit almost reached: "Pozostało {duration} do dziennego limitu filmów Short"

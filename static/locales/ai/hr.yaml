@@ -2157,6 +2157,7 @@ Chapters:
   Loop Chapter: 'Ponavljaj poglavlje: {chapter}'
   Looping Chapter: 'Ponavlja se poglavlje: {chapter}'
   Chapter Loop Stopped: 'Ponavljanje poglavlja zaustavljeno'
+  Sync to Video Time: 'Sinkroniziraj s vremenom videozapisa'
 Comments:
   Image unavailable: "Slika nije dostupna"
   Comment Count: 1 komentar | {count} komentara | {count} komentara

@@ -2122,6 +2122,7 @@ Chapters:
   Loop Chapter: 'Lire le chapitre en boucle : {chapter}'
   Looping Chapter: 'Lecture en boucle du chapitre : {chapter}'
   Chapter Loop Stopped: 'Lecture en boucle du chapitre arrêtée'
+  Sync to Video Time: 'Synchroniser avec la vidéo'
 Comments:
   Image unavailable: "Image indisponible"
   Comment Count: 1 commentaire | {count} commentaires | {count} commentaires

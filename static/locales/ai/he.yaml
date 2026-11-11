@@ -2178,6 +2178,7 @@ Chapters:
   Loop Chapter: 'הפעלה חוזרת של הפרק: {chapter}'
   Looping Chapter: 'הפרק מופעל בלולאה: {chapter}'
   Chapter Loop Stopped: 'ההפעלה החוזרת של הפרק הופסקה'
+  Sync to Video Time: 'סנכרון לזמן הסרטון'
 Comments:
   Image unavailable: "התמונה אינה זמינה"
   Comment Count: 1 תגובה | {count} תגובות | {count} תגובות

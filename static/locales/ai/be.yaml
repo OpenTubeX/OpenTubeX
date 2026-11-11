@@ -2220,6 +2220,7 @@ Chapters:
   Loop Chapter: 'Паўтараць раздзел: {chapter}'
   Looping Chapter: 'Раздзел паўтараецца: {chapter}'
   Chapter Loop Stopped: 'Паўтор раздзела спынены'
+  Sync to Video Time: 'Сінхранізаваць з часам відэа'
 Comments:
   Image unavailable: "Відарыс недаступны"
   Comment Count: 1 каментарый | {count} каментары | {count} каментарыяў
