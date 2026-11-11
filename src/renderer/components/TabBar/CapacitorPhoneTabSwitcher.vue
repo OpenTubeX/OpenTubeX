@@ -46,12 +46,28 @@
             role="dialog"
             aria-modal="true"
             aria-labelledby="capacitor-phone-tab-dialog-title"
-            :data-android-back-nested="activeView === 'history' || undefined"
+            :data-android-back-nested="activeView === 'history' || selecting || undefined"
             :inert="organizerGesture || sessionToDelete !== null || sessionToOpen !== null"
           >
-            <header class="capacitorPhoneTabHeader">
+            <header
+              class="capacitorPhoneTabHeader"
+              :class="{ selecting }"
+            >
               <button
-                v-if="activeView === 'history'"
+                v-if="selecting"
+                type="button"
+                class="capacitorPhoneTabHeaderButton"
+                :aria-label="t('Cancel')"
+                :title="t('Cancel')"
+                @click="clearSelection"
+              >
+                <FtIcon
+                  :icon="['fas', 'xmark']"
+                  aria-hidden="true"
+                />
+              </button>
+              <button
+                v-else-if="activeView === 'history'"
                 type="button"
                 class="capacitorPhoneTabHeaderButton"
                 :aria-label="t('Back')"
@@ -64,7 +80,7 @@
               </button>
               <div class="capacitorPhoneTabHeading">
                 <h2 id="capacitor-phone-tab-dialog-title">
-                  {{ activeView === 'history' ? t('Tab Organizer.Tab History') : t('Tab Organizer.Title') }}
+                  {{ headerTitle }}
                 </h2>
                 <span v-if="activeView === 'open'">
                   {{ t('Tab Organizer.Open Tab Count', { count: tabs.length }, tabs.length) }}
@@ -76,20 +92,7 @@
                 <span v-else>{{ t('Settings.Sync Settings.Tabs From Other Devices') }}</span>
               </div>
               <button
-                v-if="activeView === 'open'"
-                type="button"
-                class="capacitorPhoneTabHeaderButton"
-                :disabled="closedTabs.length === 0"
-                :aria-label="t('KeyboardShortcutPrompt.Reopen Closed Tab')"
-                :title="t('KeyboardShortcutPrompt.Reopen Closed Tab')"
-                @click="restoreClosedTab"
-              >
-                <FtIcon
-                  :icon="['fas', 'clock-rotate-left']"
-                  aria-hidden="true"
-                />
-              </button>
-              <button
+                v-if="!selecting"
                 type="button"
                 class="capacitorPhoneTabHeaderButton"
                 :aria-label="t('Close')"
@@ -102,18 +105,6 @@
                 />
               </button>
             </header>
-            <CapacitorTabSelectionControls
-              v-if="selecting"
-              :count="selectedTabIds.size"
-              :busy="closingTabs || runningSelectionAction"
-              :can-pin="canPinSelectedTabs"
-              :can-unpin="canUnpinSelectedTabs"
-              :can-load="canLoadSelectedTabs"
-              :can-unload="canUnloadSelectedTabs"
-              @action="runSelectedTabAction"
-              @close="closeSelectedTabs"
-              @cancel="clearSelection"
-            />
             <FtTabs
               v-if="showSyncedTabsView && activeView !== 'history'"
               class="capacitorPhoneTabViewTabs"
@@ -168,6 +159,7 @@
                   class="capacitorPhoneTabRow"
                   :class="{
                     active: tab.id === activeTabId,
+                    selected: selecting && selectedTabIds.has(tab.id),
                     pinned: tab.isPinned,
                     unloaded: tab.isUnloaded,
                     holding: drag.tabId === tab.id && drag.ready,
@@ -216,6 +208,12 @@
                       :aria-label="t('Tab Organizer.Select Tab', { title: tabTitle(tab) })"
                       @change="toggleTabSelection(tab.id)"
                     >
+                    <span
+                      class="capacitorPhoneTabCheck"
+                      aria-hidden="true"
+                    >
+                      <FtIcon :icon="['fas', 'check']" />
+                    </span>
                   </label>
                   <button
                     v-else
@@ -370,19 +368,48 @@
                 </button>
               </div>
             </div>
-            <button
-              v-if="activeView === 'open' && !selecting"
-              type="button"
-              class="capacitorPhoneTabFab"
-              :aria-label="t('New Tab')"
-              :title="t('New Tab')"
-              @click="createTab"
+            <CapacitorTabSelectionControls
+              v-if="selecting && activeView === 'open'"
+              :count="selectedTabIds.size"
+              :busy="closingTabs || runningSelectionAction"
+              :can-pin="canPinSelectedTabs"
+              :can-unpin="canUnpinSelectedTabs"
+              :can-load="canLoadSelectedTabs"
+              :can-unload="canUnloadSelectedTabs"
+              floating
+              @action="runSelectedTabAction"
+              @close="closeSelectedTabs"
+            />
+            <div
+              v-else-if="activeView === 'open'"
+              class="capacitorPhoneTabBottomActions"
             >
-              <FtIcon
-                :icon="['fas', 'plus']"
-                aria-hidden="true"
-              />
-            </button>
+              <button
+                v-if="closedTabs.length > 0"
+                type="button"
+                class="capacitorPhoneTabReopen"
+                :aria-label="t('KeyboardShortcutPrompt.Reopen Closed Tab')"
+                :title="t('KeyboardShortcutPrompt.Reopen Closed Tab')"
+                @click="restoreClosedTab"
+              >
+                <FtIcon
+                  :icon="['fas', 'clock-rotate-left']"
+                  aria-hidden="true"
+                />
+              </button>
+              <button
+                type="button"
+                class="capacitorPhoneTabFab"
+                :aria-label="t('New Tab')"
+                :title="t('New Tab')"
+                @click="createTab"
+              >
+                <FtIcon
+                  :icon="['fas', 'plus']"
+                  aria-hidden="true"
+                />
+              </button>
+            </div>
             <CapacitorTabActionsMenu
               :related-tab-ids="relatedTabIds"
               :tab="actionTab"
@@ -756,6 +783,11 @@ const organizerSwipe = {
   }
 }
 defineExpose({ organizerSwipe })
+
+const headerTitle = computed(() => {
+  if (selecting.value) return t('Profile.{number} selected', { number: selectedTabIds.value.size })
+  return activeView.value === 'history' ? t('Tab Organizer.Tab History') : t('Tab Organizer.Title')
+})
 
 async function selectView(view, focus = false) {
   clearSelection()
@@ -1289,6 +1321,7 @@ function handleDialogKeydown(event) {
   if (event.key === 'Escape') {
     event.preventDefault()
     if (activeView.value === 'history') selectView('open', true)
+    else if (selecting.value) clearSelection()
     else closeSwitcher()
     return
   }
