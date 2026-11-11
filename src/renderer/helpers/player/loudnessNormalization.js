@@ -16,7 +16,7 @@ export function getLoudnessNormalizationGain(loudnessDb) {
  * Dubbed and Stable Volume tracks have their own loudness, which YouTube's
  * player uses instead of the video's when `enablePerFormatLoudness` is set.
  * The keys are the IDs Shaka reports as `originalAudioId` for the DASH and
- * SABR manifests.
+ * SABR manifests, plus the DASH ID without its itag for each audio track.
  *
  * @param {import('youtubei.js').Misc.Format[]} formats
  * @param {boolean | undefined} enablePerFormatLoudness
@@ -30,9 +30,31 @@ export function getAudioFormatLoudness(formats, enablePerFormatLoudness) {
   for (const format of formats) {
     if (!format.has_audio || !Number.isFinite(format.loudness_db)) continue
 
-    loudness[getDashAudioFormatId(format)] = format.loudness_db
+    const dashId = getDashAudioFormatId(format)
+    loudness[dashId] = format.loudness_db
     loudness[getSabrFormatId({ itag: format.itag, lastModified: format.last_modified_ms, xtags: format.xtags })] = format.loudness_db
+    const trackId = getAudioTrackId(dashId)
+    if (trackId !== '') loudness[trackId] ??= format.loudness_db
   }
 
   return loudness
+}
+
+/**
+ * yt-dlp can list itags of a track that the Local API response left out, so
+ * those use the loudness of the track's other formats.
+ *
+ * @param {Record<string, number>} audioFormatLoudness from {@link getAudioFormatLoudness}
+ * @param {string} audioId Shaka's `originalAudioId`
+ * @returns {number | undefined}
+ */
+export function getActiveAudioLoudnessDb(audioFormatLoudness, audioId) {
+  return audioFormatLoudness[audioId] ?? audioFormatLoudness[getAudioTrackId(audioId)]
+}
+
+/**
+ * @param {string} dashId
+ */
+function getAudioTrackId(dashId) {
+  return dashId.replace(/^\d+-?/, '')
 }
