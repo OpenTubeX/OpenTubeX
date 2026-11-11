@@ -293,6 +293,7 @@ export async function fetchRssFeed(url, signal) {
 
 const ITEMS_STORAGE_KEY = 'rssFeedItems'
 const NEXT_AUTO_REFRESH_STORAGE_KEY = 'rssFeedsNextAutoRefresh'
+const LAST_REFRESH_STORAGE_KEY = 'rssFeedsLastRefresh'
 const SEEN_HISTORY_STORAGE_KEY = 'rssFeedSeenHistory'
 const MAX_SEEN_HISTORY_PER_FEED = 500
 
@@ -392,14 +393,22 @@ function recordSeenHistory(history, feedUrl, items, previousItems) {
   ].slice(0, MAX_SEEN_HISTORY_PER_FEED))
 }
 
-/** @returns {number | null} */
-export function loadRssFeedsNextAutoRefresh() {
+/**
+ * @param {string} key
+ * @returns {number | null}
+ */
+function loadStoredTimestamp(key) {
   try {
-    const timestamp = Number(localStorage.getItem(NEXT_AUTO_REFRESH_STORAGE_KEY))
+    const timestamp = Number(localStorage.getItem(key))
     return timestamp > 0 ? timestamp : null
   } catch {
     return null
   }
+}
+
+/** @returns {number | null} */
+export function loadRssFeedsNextAutoRefresh() {
+  return loadStoredTimestamp(NEXT_AUTO_REFRESH_STORAGE_KEY)
 }
 
 /**
@@ -434,7 +443,10 @@ export const rssFeedItems = shallowRef(loadStoredItems())
 export const rssFeedErrors = shallowRef(/** @type {string[]} */ ([]))
 /** Whether the user closed the banner for the current failed feeds */
 export const rssFeedErrorsDismissed = shallowRef(false)
-export const rssFeedsLastRefresh = shallowRef(/** @type {number | null} */ (null))
+/** When any window last refreshed every feed, kept across restarts like the items */
+export const rssFeedsLastRefresh = shallowRef(loadStoredTimestamp(LAST_REFRESH_STORAGE_KEY))
+/** Whether this window refreshed every feed */
+let refreshedAllHere = false
 const refreshingHere = shallowRef(false)
 /** The locks that other windows hold while they refresh the feeds */
 const otherWindowRefreshes = shallowRef(/** @type {Set<string>} */ (new Set()))
@@ -472,6 +484,7 @@ if (typeof window !== 'undefined') {
     if (event.key === null || event.key === ITEMS_STORAGE_KEY) rssFeedItems.value = loadStoredItems()
     if (event.key === null || event.key === SEEN_HISTORY_STORAGE_KEY) seenHistory = loadSeenHistory()
     if (event.key === null || event.key === NEXT_AUTO_REFRESH_STORAGE_KEY) rssFeedsNextAutoRefresh.value = loadRssFeedsNextAutoRefresh()
+    if (event.key === null || event.key === LAST_REFRESH_STORAGE_KEY) rssFeedsLastRefresh.value = loadStoredTimestamp(LAST_REFRESH_STORAGE_KEY)
   })
 
   // Every window shows the refreshes of the others and can cancel them
@@ -587,7 +600,7 @@ onRssFeedSeenItemsSynced(entries => unwatchItemsMarkedUnseen(rssFeedItems.value,
  * @returns {Set<string>}
  */
 export function getCachedRssFeedUrls() {
-  if (rssFeedsLastRefresh.value !== null) return new Set(refreshedFeedUrls)
+  if (refreshedAllHere) return new Set(refreshedFeedUrls)
   if (store.getters.getFetchSubscriptionsAutomatically) return new Set()
   return new Set([...seenHistory.keys(), ...refreshedFeedUrls])
 }
@@ -728,7 +741,13 @@ export async function refreshRssFeeds(feeds, { automatic = false, cachedUrls = n
     ].sort(compareFeedItems))
     setRssFeedErrors([...rssFeedErrors.value.filter(url => cachedFeedUrls.has(url)), ...failedUrls])
     if (cachedFeedUrls.size === 0) {
+      refreshedAllHere = true
       rssFeedsLastRefresh.value = Date.now()
+      try {
+        localStorage.setItem(LAST_REFRESH_STORAGE_KEY, String(rssFeedsLastRefresh.value))
+      } catch (error) {
+        console.error('Failed to save the last RSS feed refresh', error)
+      }
       const interval = getRssFeedsAutoRefreshInterval()
       setRssFeedsNextAutoRefresh(interval > 0 ? Date.now() + interval : null)
     }
