@@ -22,6 +22,7 @@
         compact
         :default-value="replaceHttpCache"
         :disabled="replaceHttpCacheLoading"
+        performance-impact-key="replaceHttpCache"
         :tooltip="$t('Tooltips.Experimental Settings.Replace HTTP Cache')"
         @change="handleToggleReplaceHttpCache"
       />
@@ -32,6 +33,7 @@
         compact
         :default-value="disableHardwareAcceleration"
         :disabled="disableHardwareAccelerationLoading"
+        performance-impact-key="disableHardwareAcceleration"
         :tooltip="$t('Tooltips.Experimental Settings.Disable Hardware Acceleration')"
         @change="handleToggleDisableHardwareAcceleration"
       />

@@ -583,6 +583,19 @@ test.describe('settings', () => {
     await page.mouse.up()
 
     await expectOverlayScrollRange(menu)
+
+    // Slider badges wrap onto their own row, so hiding them shortens the page
+    await page.evaluate(() => window.$store.dispatch('updateShowPerformanceImpactIndicators', true))
+    await goToSettingsSection(page, 'advanced')
+    await expect(content.locator('.pure-material-slider .performanceImpact').first()).toBeVisible()
+    await content.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    const scrollHeightWithBadges = await content.evaluate(element => element.scrollHeight)
+
+    await page.evaluate(() => window.$store.dispatch('updateShowPerformanceImpactIndicators', false))
+    await expect(content.locator('.performanceImpact')).toHaveCount(0)
+    await expect.poll(() => content.evaluate(element => element.scrollHeight)).toBeLessThan(scrollHeightWithBadges)
+    await expectOverlayScrollRange(content)
   })
 
   test('keeps the settings window inside the narrowest supported viewport', async ({ page }) => {

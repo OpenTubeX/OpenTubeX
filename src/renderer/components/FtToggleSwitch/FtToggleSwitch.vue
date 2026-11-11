@@ -47,7 +47,7 @@
           :setting-keys="syncSettingKeys"
         />
       </span>
-      <FtPerformanceImpact :setting-key="settingKey" />
+      <FtPerformanceImpact :setting-key="performanceImpactKey || settingKey" />
     </label>
   </div>
 </template>
@@ -109,6 +109,11 @@ const props = defineProps({
   syncSettingKeys: {
     type: Array,
     default: () => []
+  },
+  // Performance impact key for a switch that is not backed by a setting, which has no `settingKey`
+  performanceImpactKey: {
+    type: String,
+    default: ''
   },
 })
 

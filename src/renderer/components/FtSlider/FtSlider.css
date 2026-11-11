@@ -17,6 +17,19 @@
 .labelRow {
   min-inline-size: 0;
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+}
+
+/* The row gap spaces the badge, so it lines up with the label once it wraps */
+.labelRow > .performanceImpact {
+  margin-inline: 0;
+}
+
+.labelMain {
+  min-inline-size: 0;
+  display: flex;
   align-items: center;
 }
 

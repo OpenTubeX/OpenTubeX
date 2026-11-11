@@ -4,37 +4,39 @@
     :for="id"
   >
     <span class="labelRow">
-      <span class="labelContent">
-        <I18nT
-          keypath="Display Label"
-          tag="span"
-          class="label"
-          scope="global"
-        >
-          <template #label>{{ label }}</template>
-          <template #value>
-            <span
-              class="value"
-              :data-width-value="widestValue"
-            >
-              <span class="valueText">
-                <span class="valueNumber">{{ displayValue }}</span>{{ valueExtension }}
+      <span class="labelMain">
+        <span class="labelContent">
+          <I18nT
+            keypath="Display Label"
+            tag="span"
+            class="label"
+            scope="global"
+          >
+            <template #label>{{ label }}</template>
+            <template #value>
+              <span
+                class="value"
+                :data-width-value="widestValue"
+              >
+                <span class="valueText">
+                  <span class="valueNumber">{{ displayValue }}</span>{{ valueExtension }}
+                </span>
               </span>
-            </span>
-          </template>
-        </I18nT>
-        <FtPerformanceImpact :setting-key="settingKey" />
+            </template>
+          </I18nT>
+        </span>
+        <FtTooltip
+          v-if="tooltip !== ''"
+          class="selectTooltip"
+          :tooltip="tooltip"
+        />
+        <FtSyncedSettingIndicator
+          :setting-key="settingKey"
+          :is-changed="isChanged"
+          @reset="emit('reset')"
+        />
       </span>
-      <FtTooltip
-        v-if="tooltip !== ''"
-        class="selectTooltip"
-        :tooltip="tooltip"
-      />
-      <FtSyncedSettingIndicator
-        :setting-key="settingKey"
-        :is-changed="isChanged"
-        @reset="emit('reset')"
-      />
+      <FtPerformanceImpact :setting-key="settingKey" />
     </span>
     <span
       class="sliderControl"
