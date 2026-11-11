@@ -100,10 +100,16 @@ test('a hidden tab whose video never settles stops holding the turn', async t =>
   t.mock.timers.tick(0)
   const next = startHiddenTab('next')
 
-  t.mock.timers.tick(14_999)
+  // Replacing the video doesn't restart the turn
+  t.mock.timers.tick(10_000)
+  const replacement = startHiddenTab('slow')
+  assert.equal(await replacement.started(), true)
+
+  t.mock.timers.tick(4_999)
   assert.equal(await next.started(), false)
   t.mock.timers.tick(1)
   assert.equal(await next.started(), true)
+  replacement.release()
   next.release()
   t.mock.timers.tick(0)
 })

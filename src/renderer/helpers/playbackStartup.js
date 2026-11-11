@@ -76,7 +76,12 @@ export function waitForBackgroundPlaybackTurn(owner, signal) {
       resolve()
       return
     }
-    if (turnOwner === null || turnOwner === owner) {
+    // A replacement load keeps the current turn, so it cannot extend it
+    if (turnOwner === owner) {
+      resolve()
+      return
+    }
+    if (turnOwner === null) {
       takeTurn(owner)
       resolve()
       return
