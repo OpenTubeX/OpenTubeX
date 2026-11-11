@@ -708,6 +708,7 @@ jobs:
     uses: ./.github/workflows/docker.yml
     with:
       tag: ${{ needs.publish-nightly.outputs.tag }}
+      sha: ${{ github.sha }}
 
   notify-nightly-repositories:
     name: Notify ${{ matrix.repository }} of nightly release

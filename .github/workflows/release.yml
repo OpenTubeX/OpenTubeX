@@ -515,7 +515,7 @@ jobs:
 
   publish-docker-image:
     name: Publish Docker image
-    needs: publish-release
+    needs: [resolve-target, publish-release]
     if: inputs.publishRelease
     permissions:
       contents: read
@@ -523,6 +523,7 @@ jobs:
     uses: ./.github/workflows/docker.yml
     with:
       tag: ${{ needs.publish-release.outputs.tag }}
+      sha: ${{ needs.resolve-target.outputs.sha }}
 
   notify-package-repositories:
     name: Notify ${{ matrix.repository }} of release

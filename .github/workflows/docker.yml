@@ -8,6 +8,10 @@ on:
       tag:
         type: string
         required: true
+      sha:
+        type: string
+        required: true
+        description: Commit the release was built from
   workflow_dispatch:
     inputs:
       tag:
@@ -31,7 +35,8 @@ jobs:
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
-        ref: refs/tags/${{ inputs.tag }}
+        # Manual runs only name a tag
+        ref: ${{ inputs.sha || format('refs/tags/{0}', inputs.tag) }}
         persist-credentials: false
 
     - name: Resolve image tags
