@@ -4152,6 +4152,8 @@ export default defineComponent({
     applyLateWatchNext: async function (loadGeneration, videoInfo) {
       const late = await videoInfo.watchNextPromise.catch(error => {
         console.warn(`Could not load the /next data of ${videoInfo.info.basic_info.id}`, error)
+        // The /player metadata fills in, but must not be cached as if it were complete
+        if (this.isCurrentVideoLoad(loadGeneration, videoInfo.info.basic_info.id)) this.videoMetadataIncomplete = true
         return null
       })
       await this.getVideoInformationLocal(
