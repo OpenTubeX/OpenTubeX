@@ -138,7 +138,7 @@
 :global([data-bottom-sheet]) {
   touch-action: none;
 
-  /* Stays on its own layer so the backdrop's does not re-raster when the
+  /* Stays on its own layer so the backdrop's layer does not re-raster when the
      sheet stops sliding, which flickers on Android. See FtPrompt's card. */
   will-change: transform;
 }
