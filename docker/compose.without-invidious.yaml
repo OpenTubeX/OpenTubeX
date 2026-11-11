@@ -5,8 +5,9 @@
 # OpenTubeX repository). Add this server's address in the extension's options.
 # Without the extension, the app uses public Invidious instances instead.
 #
-# Run `podman compose -f compose.without-invidious.yaml up -d` (or
-# `docker compose`) and open http://localhost:8080.
+# Run `podman compose -f compose.without-invidious.yaml up -d` or
+# `docker compose -f compose.without-invidious.yaml up -d` and open
+# http://localhost:8080.
 #
 # On Linux, prefer rootless Podman: members of the docker group can gain root
 # access to the host.
