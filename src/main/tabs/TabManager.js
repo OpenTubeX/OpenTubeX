@@ -2360,13 +2360,15 @@ export class TabManager {
     if (this._sessionChangedAt != null) this._updateSessionTimestamp()
   }
 
-  _scheduleSessionSave() {
+  // Pass syncChanged = false for local-only changes such as previews, so they
+  // do not make the synced session newer than its last real edit.
+  _scheduleSessionSave(syncChanged = true) {
     if (this._sessionPersistenceDisabled) return
     if (this._batchDepth > 0) {
       this._batchedSessionSavePending = true
       return
     }
-    this._sessionChangedAt = Date.now()
+    if (syncChanged) this._sessionChangedAt = Date.now()
     // Do not restart the timer: even continuous updates must reach disk.
     if (this._sessionSaveTimer != null) return
     this._sessionSaveTimer = setTimeout(() => {

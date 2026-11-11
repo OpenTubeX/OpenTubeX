@@ -527,7 +527,7 @@ for (const initialization of ['creation', 'restore', 'sync replacement']) {
     now = 2000
     tab.previewFileName = '00000000-0000-4000-8000-000000000001.jpg'
     tab.previewCapturedAt = now
-    manager._scheduleSessionSave()
+    manager._scheduleSessionSave(false)
     assert.deepEqual(manager.getSyncSession(), before)
     await manager._saveSession()
     assert.deepEqual(manager.getSyncSession(), before)
@@ -548,12 +548,15 @@ for (const initialization of ['creation', 'restore', 'sync replacement']) {
     assert.equal(tabSession.saved.updatedAt, 4000)
     assert.equal(tabSession.saved.tabs[0].title, 'Changed title')
 
-    // The latest of several unsaved changes dates the session.
+    // The latest of several unsaved edits dates the session, and a later
+    // local-only change does not.
     now = 5500
-    tab.previewCapturedAt = now
-    manager._scheduleSessionSave()
-    now = 5600
     manager.applyTabTitle(tab, 'Changed again')
+    now = 5600
+    manager.applyTabTitle(tab, 'Changed once more')
+    now = 5700
+    tab.previewCapturedAt = now
+    manager._scheduleSessionSave(false)
     assert.equal(manager.getSyncSession().updatedAt, 5600)
 
     now = 6000

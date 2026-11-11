@@ -402,10 +402,11 @@ async function handleFetchMore() {
   }
 
   const generation = requestGeneration
+  const tab = currentTab.value
   isLoadingMore.value = true
   nextPageFailed.value = false
   try {
-    if (currentTab.value === 'shorts') {
+    if (tab === 'shorts') {
       await getLocalHashtagShortsMore()
     } else if (process.env.SUPPORTS_LOCAL_API && apiUsed.value === 'local') {
       await getLocalHashtagMore(generation)
@@ -416,6 +417,8 @@ async function handleFetchMore() {
     if (generation === requestGeneration) {
       isLoadingMore.value = false
     }
+    // A failure from the previous tab must not pause the selected one.
+    if (currentTab.value !== tab) nextPageFailed.value = false
   }
 }
 </script>

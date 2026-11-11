@@ -234,7 +234,7 @@ export class TabPreviewController {
       return
     }
     this.manager._broadcastStateUpdate()
-    this.manager._scheduleSessionSave()
+    this.manager._scheduleSessionSave(false)
   }
 
   /**
@@ -350,7 +350,7 @@ export class TabPreviewController {
         tab.previewDataUrl = dataUrl
         tab.previewCapturedAt = Date.now()
         tab.previewFileName = await tabPreviewStorage.writePreview(previewBuffer, tab.previewFileName)
-        this.manager._scheduleSessionSave()
+        this.manager._scheduleSessionSave(false)
         return dataUrl
       } catch (error) {
         console.error('Failed to capture tab preview:', error)
@@ -484,7 +484,7 @@ export class TabPreviewController {
       }
       tab.avatarDataUrl = tabPreviewBufferToDataUrl(buffer)
       this.manager._broadcastStateUpdate()
-      this.manager._scheduleSessionSave()
+      this.manager._scheduleSessionSave(false)
       return true
     } catch (error) {
       console.error('Failed to cache tab avatar:', error)
@@ -512,7 +512,7 @@ export class TabPreviewController {
     })
     await Promise.all(fileNames.map(fileName => this.releaseAvatarFile(fileName)))
     this.manager._broadcastStateUpdate()
-    this.manager._scheduleSessionSave()
+    this.manager._scheduleSessionSave(false)
   }
 
   /**

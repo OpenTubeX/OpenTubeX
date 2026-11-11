@@ -555,9 +555,8 @@ async function performSearchInvidious(payload, options = { resetSearchPage: fals
   try {
     const results = await getInvidiousSearchResults(payload.query, searchPage.value, payload.searchSettings)
     if (requestId !== searchRequestId) return
-    if (!results) {
-      return
-    }
+    // An empty response is a failure; returning would leave the search loading.
+    if (!results) throw new Error('Invidious returned no search results')
 
     hasMoreResults.value = results.length > 0
 

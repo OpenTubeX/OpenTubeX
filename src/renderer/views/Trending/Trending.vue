@@ -278,11 +278,14 @@ async function getTrendingInfoLocal(category) {
     }
   } catch (error) {
     console.error(error)
-    errorMessages.value[category] = t('Trending.Load Error')
+    // A failure for a region changed while loading is refetched below.
+    if (requestedRegion === region.value) {
+      errorMessages.value[category] = t('Trending.Load Error')
 
-    if (currentTab.value === category) {
-      const errorMessage = t('Local API Error (Click to copy)')
-      showApiErrorToast(errorMessage, error, showTabToast)
+      if (currentTab.value === category) {
+        const errorMessage = t('Local API Error (Click to copy)')
+        showApiErrorToast(errorMessage, error, showTabToast)
+      }
     }
   } finally {
     isLoading.value[category] = false
@@ -347,7 +350,9 @@ function changeTab(tab) {
 }
 
 // Results cached for another region are stale, so a kept-alive page reloads.
+// Errors from that region must not keep the other categories from loading.
 watch(region, () => {
+  errorMessages.value = { gaming: null, music: null, sports: null, podcasts: null }
   if (trendingCache.value[currentTab.value] === null) getTrendingInfo()
 })
 

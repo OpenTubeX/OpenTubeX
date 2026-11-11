@@ -193,14 +193,12 @@ export function videoDurationWithFallback(video) {
 }
 
 /**
- * Fills playlist durations from matching history entries when possible.
+ * Returns the playlist items with missing durations filled from matching
+ * history entries. Only the items that need a duration are copied; the rest
+ * keep their identity.
  * @param {object[]} playlistItems
  * @param {Record<string, object>} historyCacheById
- * @returns {boolean} whether any playlist item still lacks a duration
- */
-/**
- * Returns the playlist items with missing durations filled from history.
- * Only the items that need a duration are copied; the rest keep their identity.
+ * @returns {{ items: object[], anyVideoMissingDuration: boolean }}
  */
 export function fillMissingPlaylistVideoDurations(playlistItems, historyCacheById) {
   let anyVideoMissingDuration = false
