@@ -14,6 +14,14 @@
 		file_server
 	}
 
+	# Tells the app whether this server runs its own Invidious server. Set
+	# OPENTUBEX_INVIDIOUS=false when it doesn't.
+	handle /self-hosted.js {
+		header Content-Type "text/javascript; charset=utf-8"
+		header Cache-Control no-cache
+		respond `globalThis.opentubexSelfHosted = Object.freeze({ invidious: '{$OPENTUBEX_INVIDIOUS:true}' !== 'false' })`
+	}
+
 	# Stream video straight from Invidious companion instead of through Invidious
 	handle /companion/* {
 		reverse_proxy companion:8282

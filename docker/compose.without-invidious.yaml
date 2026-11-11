@@ -1,0 +1,22 @@
+# OpenTubeX web app without an Invidious server of its own.
+#
+# The app requests YouTube itself through the local API, which browsers only
+# allow with the OpenTubeX Local API extension (browser-extension/ in the
+# OpenTubeX repository). Add this server's address in the extension's options.
+# Without the extension, the app uses public Invidious instances instead.
+#
+# Run `docker compose -f compose.without-invidious.yaml up -d` and open
+# http://localhost:8080.
+#
+# Browsers only store app data on secure origins. To use OpenTubeX from other
+# devices, serve it over HTTPS, for example with Tailscale Serve, Cloudflare
+# Tunnel, or your own reverse proxy.
+
+services:
+  opentubex:
+    image: ghcr.io/opentubex/opentubex-web:latest
+    restart: unless-stopped
+    environment:
+      OPENTUBEX_INVIDIOUS: "false"
+    ports:
+      - "127.0.0.1:${OPENTUBEX_PORT:-8080}:80"

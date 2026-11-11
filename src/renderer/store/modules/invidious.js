@@ -44,7 +44,7 @@ const getters = {
 const actions = {
   async fetchInvidiousInstancesFromFile({ commit }) {
     // The Docker image proxies its own Invidious server on the app's origin
-    if (process.env.IS_SELF_HOSTED) {
+    if (process.env.SELF_HOSTED_INVIDIOUS) {
       commit('setInvidiousInstancesList', [window.location.origin])
       return
     }
@@ -65,7 +65,7 @@ const actions = {
   /// fetch invidious instances from site and overwrite static file.
   async fetchInvidiousInstances({ commit }) {
     // Don't contact the public instance directory or offer its instances
-    if (process.env.IS_SELF_HOSTED) return
+    if (process.env.SELF_HOSTED_INVIDIOUS) return
 
     const requestUrl = 'https://api.invidious.io/instances.json'
     try {

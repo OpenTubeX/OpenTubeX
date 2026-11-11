@@ -347,8 +347,8 @@ const sideEffectHandlers = {
   },
 
   defaultInvidiousInstance: ({ commit, rootState }, value) => {
-    // Self-hosted builds always use their own Invidious server, even with synced settings
-    if (value !== '' && !process.env.IS_SELF_HOSTED && rootState.invidious.currentInvidiousInstance !== value) {
+    // Servers with their own Invidious server always use it, even with synced settings
+    if (value !== '' && !process.env.SELF_HOSTED_INVIDIOUS && rootState.invidious.currentInvidiousInstance !== value) {
       commit('setCurrentInvidiousInstance', value)
     }
   },
