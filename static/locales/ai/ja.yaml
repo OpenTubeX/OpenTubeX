@@ -392,6 +392,10 @@ Settings:
       Network: ネットワーク
       Disk: ディスク
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "組み込みストリーム"
+      Automatic: "自動"
+      SABR Only: "SABR のみ"
     Link Underlines:
       Link Underlines: "リンクの下線"
       On Hover: "ホバー時にリンクに下線を表示"
@@ -2164,6 +2168,9 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "最初に各チャンネルの RSS フィードを確認し、新しいアップロードがあるチャンネルの動画、ショート、ライブ配信だけを読み込みます。自動更新では、過去 10 分以内に読み込んだチャンネルもスキップします。新しいアップロードがないチャンネルでは、再生回数、削除された動画、変更されたタイトルが数時間ごとにしか更新されず、RSS フィードが遅れている場合は新しいアップロードの表示が遅れることがあります。Invidious API では利用できません。"
   General Settings:
+    Built-in Streams: |
+      自動では、ほとんどの動画を YouTube の visionOS クライアントで再生します。起動が速く、自動画質に対応しています。ライブ配信や再生できない動画には SABR を使用します。
+      SABR のみでは、常に YouTube のウェブクライアントを使用します。起動が遅く、自動画質はありません。
     Title Lines: "リストやグリッドの動画と再生リストのタイトルを省略記号付きで選択した行数までに短縮し、カードの見た目をそろえます。タイトルにカーソルを合わせると全文が表示されます。"
     Close Window With Last Tab: 'オフにすると、最後のタブを閉じたときに代わりに新しいタブが開き、ウィンドウを閉じるまで開いたままになります。'
     Preferred Video Codec: |

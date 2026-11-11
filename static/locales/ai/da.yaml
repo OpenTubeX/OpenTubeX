@@ -401,6 +401,10 @@ Settings:
       Network: netværk
       Disk: diskplads
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "Indbyggede streams"
+      Automatic: "Automatisk"
+      SABR Only: "Kun SABR"
     Link Underlines:
       Link Underlines: "Understregning af links"
       On Hover: "Understreg links, når markøren holdes over dem"
@@ -2249,6 +2253,9 @@ Description:
   Music: Musik
 Tooltips:
   General Settings:
+    Built-in Streams: |
+      Automatisk afspiller de fleste videoer via YouTubes visionOS-klient, som starter hurtigere og understøtter automatisk kvalitet. Livestreams og videoer, den ikke kan afspille, bruger SABR.
+      Kun SABR bruger altid YouTubes webklient, som starter langsommere og ikke har automatisk kvalitet.
     Title Lines: "Forkorter video- og playlistetitler i lister og gitre til det valgte antal linjer med en ellipse, så kortene bliver mere ensartede. Hold markøren over en titel for at se den i sin helhed."
     Close Window With Last Tab: 'Når det er slået fra, åbner lukning af den sidste fane i stedet en ny fane, så vinduet forbliver åbent, indtil du lukker det.'
     Preferred Video Codec: |

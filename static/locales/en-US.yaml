@@ -729,6 +729,10 @@ Settings:
       Stream Extraction Method: Stream extraction method
       yt-dlp: yt-dlp
       Built-in: Built-in
+    Built-in Streams:
+      Built-in Streams: Built-in streams
+      Automatic: Automatic
+      SABR Only: SABR only
     Check for Updates: Check for Updates
     Confirm Before: Confirm before…
     Confirmation Options:
@@ -3257,6 +3261,9 @@ Tooltips:
     Stream Extraction Method: |
       Choose how OpenTubeX obtains video streams. yt-dlp must be available when selected.
       Videos may take longer to start when using yt-dlp.
+    Built-in Streams: |
+      Automatic plays most videos through YouTube's visionOS client, which starts faster and supports automatic quality. Live streams and videos it can't play use SABR.
+      SABR only always uses YouTube's web client, which starts slower and has no automatic quality.
     Avoid translation: |
       Disable YouTube's autotranslation of title, description and chapters of a video.
       Too many requests, such as fetching video titles across lists, may temporarily

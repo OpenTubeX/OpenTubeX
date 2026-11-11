@@ -392,6 +392,10 @@ Settings:
       Network: rete
       Disk: disco
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "Flussi integrati"
+      Automatic: "Automatico"
+      SABR Only: "Solo SABR"
     Link Underlines:
       Link Underlines: "Sottolineatura dei link"
       On Hover: "Sottolinea i link al passaggio del mouse"
@@ -2164,6 +2168,9 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Controlla prima il feed RSS di ogni canale e carica video, Shorts e dirette solo dai canali con nuovi caricamenti. Gli aggiornamenti automatici saltano anche i canali caricati negli ultimi 10 minuti. Per i canali senza nuovi caricamenti, visualizzazioni, video rimossi e titoli modificati si aggiornano solo ogni poche ore, e i nuovi caricamenti potrebbero comparire più tardi quando il feed RSS è in ritardo. Non disponibile con l'API di Invidious."
   General Settings:
+    Built-in Streams: |
+      Automatico riproduce la maggior parte dei video tramite il client visionOS di YouTube, che si avvia più rapidamente e supporta la qualità automatica. Le dirette e i video che non può riprodurre usano SABR.
+      Solo SABR usa sempre il client web di YouTube, che si avvia più lentamente e non ha la qualità automatica.
     Title Lines: "Accorcia i titoli di video e playlist in elenchi e griglie al numero di righe scelto con i puntini di sospensione, per schede più uniformi. Passa il puntatore su un titolo per vederlo per intero."
     Close Window With Last Tab: 'Se disattivato, chiudere l’ultima scheda ne apre una nuova e la finestra resta aperta finché non la chiudi.'
     Preferred Video Codec: |

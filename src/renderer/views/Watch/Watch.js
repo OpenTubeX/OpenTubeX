@@ -979,6 +979,7 @@ export default defineComponent({
         this.playbackEngineFallbackTarget,
         this.ytDlpPlaybackCacheKey,
         this.alwaysUseYtDlpPlaybackCookies,
+        this.$store.getters.getBuiltInStreams,
       ])
     },
     hasPreviousSubscriptionShort: function () {
@@ -1785,6 +1786,7 @@ export default defineComponent({
         // Proxying decides whether the stream URLs point at the server or at YouTube
         backend === 'yattee' && this.$store.getters.getYatteeProxyVideos,
         backend === 'local' && process.env.IS_CAPACITOR && this.isYtDlpPlaybackRequested(),
+        backend === 'local' && this.$store.getters.getBuiltInStreams,
         videoId,
       ])
     },
@@ -7282,7 +7284,7 @@ export default defineComponent({
       // Auto is broken with SABR, so fall back to the default quality there.
       // The player checks the streams it actually received as well, as yt-dlp
       // can fall back to the built-in extraction method.
-      if (normalizedQuality === 'auto' && !playbackEngineSupportsAutoQuality(this.videoPlaybackEngine)) {
+      if (normalizedQuality === 'auto' && !playbackEngineSupportsAutoQuality(this.videoPlaybackEngine, this.$store.getters.getBuiltInStreams)) {
         return AUTO_QUALITY_FALLBACK
       }
 

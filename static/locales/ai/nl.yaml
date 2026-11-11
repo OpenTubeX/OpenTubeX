@@ -395,6 +395,10 @@ Settings:
       Network: netwerk
       Disk: schijf
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "Ingebouwde streams"
+      Automatic: "Automatisch"
+      SABR Only: "Alleen SABR"
     Link Underlines:
       Link Underlines: "Onderstreping van links"
       On Hover: "Links onderstrepen bij aanwijzen"
@@ -2227,6 +2231,9 @@ Description:
   Music: Muziek
 Tooltips:
   General Settings:
+    Built-in Streams: |
+      Automatisch speelt de meeste video's af via de visionOS-client van YouTube, die sneller start en automatische kwaliteit ondersteunt. Livestreams en video's die hij niet kan afspelen, gebruiken SABR.
+      Alleen SABR gebruikt altijd de webclient van YouTube, die langzamer start en geen automatische kwaliteit heeft.
     Title Lines: "Kort titels van video's en afspeellijsten in lijsten en rasters in tot het gekozen aantal regels met een beletselteken, voor gelijkmatigere kaarten. Beweeg de muis over een titel om deze volledig te zien."
     Close Window With Last Tab: 'Indien uitgeschakeld, opent het sluiten van het laatste tabblad in plaats daarvan een nieuw tabblad, zodat het venster open blijft totdat je het sluit.'
     Preferred Video Codec: |

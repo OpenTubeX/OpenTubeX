@@ -1314,12 +1314,12 @@ function updateDefaultVideoFormat(value) {
 const RESOLUTION_VALUES = ['2160', '1440', '1080', '720', '480', '360', '240', '144']
 
 /**
- * Auto quality is broken with SABR, so it is only offered for the
- * stream extraction methods that don't use it.
+ * Auto quality is broken with SABR, so it is only offered unless every
+ * video's streams use it.
  * @type {import('vue').ComputedRef<boolean>}
  */
 const autoQualityAvailable = computed(() => {
-  return playbackEngineSupportsAutoQuality(store.getters.getVideoPlaybackEngine)
+  return playbackEngineSupportsAutoQuality(store.getters.getVideoPlaybackEngine, store.getters.getBuiltInStreams)
 })
 
 const qualityValues = computed(() => {

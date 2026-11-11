@@ -211,6 +211,10 @@ Settings:
     Advanced Description: Backendy, buforowanie, narzędzia zewnętrzne, proxy i diagnostyka
     Alternative providers: Dostawcy filmów i metadanych
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "Wbudowane strumienie"
+      Automatic: "Automatycznie"
+      SABR Only: "Tylko SABR"
     Link Underlines:
       Link Underlines: "Podkreślanie linków"
       On Hover: "Podkreślaj linki po najechaniu kursorem"
@@ -1426,6 +1430,9 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Najpierw sprawdza kanał RSS każdego kanału i wczytuje filmy, Shorts i transmisje na żywo tylko z kanałów z nowymi przesłanymi filmami. Automatyczne odświeżanie pomija też kanały wczytane w ciągu ostatnich 10 minut. W kanałach bez nowych filmów liczba wyświetleń, usunięte filmy i zmienione tytuły aktualizują się tylko co kilka godzin, a nowe filmy mogą pojawić się później, gdy kanał RSS jest opóźniony. Niedostępne z API Invidious."
   General Settings:
+    Built-in Streams: |
+      Tryb automatyczny odtwarza większość filmów przez klienta visionOS YouTube, który uruchamia się szybciej i obsługuje automatyczną jakość. Transmisje na żywo i filmy, których nie może odtworzyć, używają SABR.
+      Tylko SABR zawsze używa klienta internetowego YouTube, który uruchamia się wolniej i nie ma automatycznej jakości.
     Title Lines: "Skraca tytuły filmów i playlist na listach i w siatkach do wybranej liczby wierszy z wielokropkiem, aby karty były bardziej jednolite. Najedź kursorem na tytuł, aby zobaczyć go w całości."
     Close Window With Last Tab: 'Gdy wyłączone, zamknięcie ostatniej karty otwiera zamiast tego nową kartę, więc okno pozostaje otwarte, dopóki go nie zamkniesz.'
     Preferred Video Codec: |

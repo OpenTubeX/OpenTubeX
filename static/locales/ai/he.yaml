@@ -395,6 +395,10 @@ Settings:
       Network: רשת
       Disk: כונן
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "זרמים מובנים"
+      Automatic: "אוטומטי"
+      SABR Only: "SABR בלבד"
     Link Underlines:
       Link Underlines: "קו תחתון לקישורים"
       On Hover: "הוספת קו תחתון לקישורים בריחוף"
@@ -2218,6 +2222,9 @@ Description:
   Music: מוזיקה
 Tooltips:
   General Settings:
+    Built-in Streams: |
+      מצב אוטומטי מנגן את רוב הסרטונים דרך לקוח visionOS של YouTube, שמתחיל מהר יותר ותומך באיכות אוטומטית. שידורים חיים וסרטונים שהוא לא יכול לנגן משתמשים ב־SABR.
+      ‏SABR בלבד משתמש תמיד בלקוח האינטרנט של YouTube, שמתחיל לאט יותר ואין בו איכות אוטומטית.
     Title Lines: "מקצר כותרות של סרטונים ורשימות השמעה ברשימות וברשתות למספר השורות שנבחר עם שלוש נקודות, לכרטיסים אחידים יותר. העבירו את הסמן מעל כותרת כדי לראות אותה במלואה."
     Close Window With Last Tab: 'כשהאפשרות כבויה, סגירת הלשונית האחרונה פותחת במקום זאת לשונית חדשה, כך שהחלון נשאר פתוח עד שתסגרו אותו.'
     Preferred Video Codec: |

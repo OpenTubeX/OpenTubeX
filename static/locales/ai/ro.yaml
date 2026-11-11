@@ -391,6 +391,10 @@ Settings:
       Network: rețea
       Disk: disc
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "Fluxuri integrate"
+      Automatic: "Automat"
+      SABR Only: "Doar SABR"
     Link Underlines:
       Link Underlines: "Sublinierea linkurilor"
       On Hover: "Subliniază linkurile la trecerea cursorului"
@@ -2217,6 +2221,9 @@ Description:
   Music: Muzică
 Tooltips:
   General Settings:
+    Built-in Streams: |
+      Modul automat redă majoritatea videoclipurilor prin clientul visionOS al YouTube, care pornește mai repede și acceptă calitatea automată. Transmisiunile live și videoclipurile pe care nu le poate reda folosesc SABR.
+      Doar SABR folosește întotdeauna clientul web al YouTube, care pornește mai încet și nu are calitate automată.
     Title Lines: "Scurtează titlurile videoclipurilor și playlisturilor din liste și grile la numărul de rânduri ales, cu puncte de suspensie, pentru carduri mai uniforme. Treci cursorul peste un titlu pentru a-l vedea complet."
     Close Window With Last Tab: 'Când este dezactivat, închiderea ultimei file deschide în schimb o filă nouă, astfel încât fereastra rămâne deschisă până când o închideți.'
     Preferred Video Codec: |

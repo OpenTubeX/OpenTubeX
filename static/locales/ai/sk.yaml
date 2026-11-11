@@ -392,6 +392,10 @@ Settings:
       Network: sieť
       Disk: disk
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "Vstavané streamy"
+      Automatic: "Automaticky"
+      SABR Only: "Iba SABR"
     Link Underlines:
       Link Underlines: "Podčiarknutie odkazov"
       On Hover: "Podčiarkovať odkazy pri prechode myšou"
@@ -2170,6 +2174,9 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Najprv skontroluje RSS kanál každého kanála a videá, Shorts a živé prenosy načíta len z kanálov s novými nahratými videami. Automatické obnovenia navyše preskočia kanály načítané za posledných 10 minút. Pri kanáloch bez nových videí sa počty zhliadnutí, odstránené videá a zmenené názvy aktualizujú len raz za niekoľko hodín a nové videá sa môžu zobraziť neskôr, keď RSS kanál zaostáva. Nie je k dispozícii s Invidious API."
   General Settings:
+    Built-in Streams: |
+      Automatický režim prehráva väčšinu videí cez klienta visionOS od YouTube, ktorý sa spúšťa rýchlejšie a podporuje automatickú kvalitu. Živé prenosy a videá, ktoré nedokáže prehrať, používajú SABR.
+      Iba SABR vždy používa webového klienta YouTube, ktorý sa spúšťa pomalšie a nemá automatickú kvalitu.
     Title Lines: "Skracuje názvy videí a playlistov v zoznamoch a mriežkach na zvolený počet riadkov s trojbodkou, aby karty pôsobili jednotnejšie. Celý názov zobrazíte prejdením kurzorom."
     Close Window With Last Tab: 'Keď je vypnuté, zatvorenie poslednej karty namiesto toho otvorí novú kartu, takže okno zostane otvorené, kým ho nezatvoríte.'
     Preferred Video Codec: |

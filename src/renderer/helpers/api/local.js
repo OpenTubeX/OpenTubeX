@@ -943,9 +943,10 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
   // Deciphering the streams needs the interpreter right after the watch page loads
   prewarmPlayerScriptEvaluator()
 
-  // Playback loads take their streams from visionOS while the metadata loads.
-  // SABR reloads stay with the WEB streams that requested them.
-  const visionOsStreamsRequest = lateWatchNext && !reloadPlaybackContext && isVisionOsStreamsEnabled() && shouldGeneratePoToken()
+  // Playback loads take their streams from visionOS while the metadata loads,
+  // unless the user chose SABR. SABR reloads stay with the WEB streams that requested them.
+  const visionOsStreamsRequest = lateWatchNext && !reloadPlaybackContext && store.getters.getBuiltInStreams !== 'sabr' &&
+    isVisionOsStreamsEnabled() && shouldGeneratePoToken()
     ? requestVisionOsStreams(id)
     : Promise.resolve(null)
 

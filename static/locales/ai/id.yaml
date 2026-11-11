@@ -393,6 +393,10 @@ Settings:
       Network: jaringan
       Disk: disk
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "Streaming bawaan"
+      Automatic: "Otomatis"
+      SABR Only: "Hanya SABR"
     Link Underlines:
       Link Underlines: "Garis bawah tautan"
       On Hover: "Garis bawahi tautan saat kursor di atasnya"
@@ -2189,6 +2193,9 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Memeriksa umpan RSS setiap saluran terlebih dahulu dan hanya memuat video, Shorts, dan siaran langsung dari saluran yang memiliki unggahan baru. Penyegaran otomatis juga melewati saluran yang dimuat dalam 10 menit terakhir. Untuk saluran tanpa unggahan baru, jumlah penayangan, video yang dihapus, dan judul yang diubah hanya diperbarui setiap beberapa jam, dan unggahan baru mungkin muncul lebih lambat saat umpan RSS tertinggal. Tidak tersedia dengan API Invidious."
   General Settings:
+    Built-in Streams: |
+      Otomatis memutar sebagian besar video melalui klien visionOS YouTube, yang dimulai lebih cepat dan mendukung kualitas otomatis. Siaran langsung dan video yang tidak dapat diputarnya menggunakan SABR.
+      Hanya SABR selalu menggunakan klien web YouTube, yang dimulai lebih lambat dan tidak memiliki kualitas otomatis.
     Title Lines: "Memendekkan judul video dan playlist di daftar dan kisi menjadi jumlah baris yang dipilih dengan elipsis, agar kartu lebih seragam. Arahkan kursor ke judul untuk melihatnya secara lengkap."
     Close Window With Last Tab: 'Jika dinonaktifkan, menutup tab terakhir akan membuka tab baru, sehingga jendela tetap terbuka sampai Anda menutupnya.'
     Preferred Video Codec: |

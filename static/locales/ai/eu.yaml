@@ -392,6 +392,10 @@ Settings:
       Network: sarea
       Disk: diskoa
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "Korronte integratuak"
+      Automatic: "Automatikoa"
+      SABR Only: "SABR soilik"
     Link Underlines:
       Link Underlines: "Esteken azpimarra"
       On Hover: "Azpimarratu estekak kurtsorea gainetik pasatzean"
@@ -2174,6 +2178,9 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Lehenik kanal bakoitzaren RSS jarioa egiaztatzen du, eta igoera berriak dituzten kanalen bideoak, Shorts-ak eta zuzeneko emanaldiak soilik kargatzen ditu. Freskatze automatikoek azken 10 minutuetan kargatutako kanalak ere saltatzen dituzte. Igoera berririk ez duten kanaletan, ikustaldi kopuruak, kendutako bideoak eta aldatutako izenburuak ordu batzuetan behin bakarrik eguneratzen dira, eta igoera berriak beranduago ager daitezke RSS jarioa atzeratuta dagoenean. Ez dago erabilgarri Invidious APIarekin."
   General Settings:
+    Built-in Streams: |
+      Automatikoak bideo gehienak YouTuberen visionOS bezeroaren bidez erreproduzitzen ditu; azkarrago hasten da eta kalitate automatikoa onartzen du. Zuzeneko emanaldiek eta erreproduzitu ezin dituen bideoek SABR erabiltzen dute.
+      SABR soilik aukerak beti YouTuberen web bezeroa erabiltzen du; motelago hasten da eta ez du kalitate automatikorik.
     Title Lines: "Zerrenda eta saretetako bideo eta erreprodukzio-zerrenden izenburuak aukeratutako lerro kopurura laburtzen ditu eten-puntuekin, txartelak uniformeagoak izan daitezen. Pasatu kurtsorea izenburu baten gainetik osorik ikusteko."
     Close Window With Last Tab: 'Desaktibatuta dagoenean, azken fitxa itxiz gero fitxa berri bat irekitzen da, eta leihoak irekita jarraitzen du zuk itxi arte.'
     Preferred Video Codec: |

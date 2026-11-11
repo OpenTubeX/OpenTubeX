@@ -26,9 +26,26 @@ test.describe('auto quality setting', () => {
       seed: {
         settings: {
           defaultQuality: 'auto',
+          videoPlaybackEngine: 'built-in'
+        }
+      }
+    })
+
+    test('is offered and kept with automatic streams', async ({ page }) => {
+      const defaultQuality = await openDefaultQualitySelect(page)
+
+      await expect(defaultQuality).toHaveValue('auto')
+      await expect(defaultQuality.locator('option[value="auto"]')).toHaveCount(1)
+    })
+  })
+
+  test.describe('with SABR only built-in streams', () => {
+    test.use({
+      seed: {
+        settings: {
+          defaultQuality: 'auto',
           videoPlaybackEngine: 'built-in',
-          // the built-in engine is migrated away from on startup otherwise
-          ytDlpPlaybackEngineDefaultMigration: true
+          builtInStreams: 'sabr'
         }
       }
     })

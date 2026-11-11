@@ -392,6 +392,10 @@ Settings:
       Network: verkko
       Disk: levytila
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "Sisäänrakennetut striimit"
+      Automatic: "Automaattinen"
+      SABR Only: "Vain SABR"
     Link Underlines:
       Link Underlines: "Linkkien alleviivaus"
       On Hover: "Alleviivaa linkit, kun osoitin on niiden päällä"
@@ -2171,6 +2175,9 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Tarkistaa ensin jokaisen kanavan RSS-syötteen ja lataa videot, Shorts-videot ja suoratoistot vain kanavilta, joilla on uusia latauksia. Automaattiset päivitykset ohittavat myös kanavat, jotka on ladattu viimeisen 10 minuutin aikana. Kanavilla, joilla ei ole uusia latauksia, katselukerrat, poistetut videot ja muuttuneet otsikot päivittyvät vain muutaman tunnin välein, ja uudet lataukset voivat näkyä myöhemmin, kun RSS-syöte on jäljessä. Ei käytettävissä Invidious-rajapinnan kanssa."
   General Settings:
+    Built-in Streams: |
+      Automaattinen toistaa useimmat videot YouTuben visionOS-asiakasohjelman kautta, joka käynnistyy nopeammin ja tukee automaattista laatua. Suorat lähetykset ja videot, joita se ei voi toistaa, käyttävät SABRia.
+      Vain SABR käyttää aina YouTuben verkkoasiakasohjelmaa, joka käynnistyy hitaammin eikä tue automaattista laatua.
     Title Lines: "Lyhentää videoiden ja soittolistojen otsikot luetteloissa ja ruudukoissa valittuun rivimäärään kolmella pisteellä, jotta kortit ovat yhtenäisempiä. Näet koko otsikon viemällä osoittimen sen päälle."
     Close Window With Last Tab: 'Kun tämä on pois päältä, viimeisen välilehden sulkeminen avaa sen sijaan uuden välilehden, joten ikkuna pysyy auki, kunnes suljet sen.'
     Preferred Video Codec: |

@@ -393,6 +393,10 @@ Settings:
       Network: mreže
       Disk: diska
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "Ugrađeni streamovi"
+      Automatic: "Automatski"
+      SABR Only: "Samo SABR"
     Link Underlines:
       Link Underlines: "Podcrtavanje poveznica"
       On Hover: "Podcrtaj poveznice pri prelasku pokazivačem"
@@ -2197,6 +2201,9 @@ Description:
   Music: Glazba
 Tooltips:
   General Settings:
+    Built-in Streams: |
+      Automatski način reproducira većinu videozapisa putem YouTubeova visionOS klijenta, koji se pokreće brže i podržava automatsku kvalitetu. Prijenosi uživo i videozapisi koje ne može reproducirati koriste SABR.
+      Samo SABR uvijek koristi YouTubeov web-klijent, koji se pokreće sporije i nema automatsku kvalitetu.
     Title Lines: "Skraćuje naslove videozapisa i popisa za reprodukciju u popisima i rešetkama na odabrani broj redaka s trotočjem, za ujednačenije kartice. Zadržite pokazivač iznad naslova da biste ga vidjeli u cijelosti."
     Close Window With Last Tab: 'Kada je isključeno, zatvaranje posljednje kartice umjesto toga otvara novu karticu, pa prozor ostaje otvoren dok ga ne zatvorite.'
     Preferred Video Codec: |

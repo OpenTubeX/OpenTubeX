@@ -390,6 +390,10 @@ Settings:
       Network: network
       Disk: disk
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "Built-in streams"
+      Automatic: "Automatic"
+      SABR Only: "SABR only"
     Link Underlines:
       Link Underlines: "Link Underlines"
       On Hover: "Underline links on hover"
@@ -2159,6 +2163,9 @@ Description:
   Music: Music
 Tooltips:
   General Settings:
+    Built-in Streams: |
+      Automatic plays most videos through YouTube's visionOS client, which starts faster and supports automatic quality. Live streams and videos it can't play use SABR.
+      SABR only always uses YouTube's web client, which starts slower and has no automatic quality.
     Title Lines: "Shortens video and playlist titles in lists and grids to the chosen number of lines with an ellipsis, for more uniform cards. Hover over a title to see it in full."
     Close Window With Last Tab: 'When off, closing the last tab opens a new tab instead, so the window stays open until you close it.'
     Preferred Video Codec: |

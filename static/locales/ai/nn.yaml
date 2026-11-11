@@ -404,6 +404,10 @@ Settings:
       Disk: disk
   Return to Settings Menu: Tilbake til innstillingsmenyen
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "Innebygde straumar"
+      Automatic: "Automatisk"
+      SABR Only: "Berre SABR"
     Link Underlines:
       Link Underlines: "Understreking av lenkjer"
       On Hover: "Understrek lenkjer når peikaren er over dei"
@@ -2472,6 +2476,9 @@ Description:
   Music: Musikk
 Tooltips:
   General Settings:
+    Built-in Streams: |
+      Automatisk spelar dei fleste videoane via visionOS-klienten til YouTube, som startar raskare og støttar automatisk kvalitet. Direktesendingar og videoar han ikkje kan spela av, brukar SABR.
+      Berre SABR brukar alltid nettklienten til YouTube, som startar seinare og ikkje har automatisk kvalitet.
     Title Lines: "Kortar ned video- og spelelistetitlar i lister og rutenett til valt tal på linjer med ein ellipse, for meir einsarta kort. Hald peikaren over ein tittel for å sjå heile."
     Close Window With Last Tab: 'Når dette er av, opnar lukking av den siste fana ei ny fane i staden, slik at vindauget held seg ope til du lukkar det.'
     Preferred Video Codec: |

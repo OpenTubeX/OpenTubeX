@@ -392,6 +392,10 @@ Settings:
       Network: hálózat
       Disk: lemez
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "Beépített streamek"
+      Automatic: "Automatikus"
+      SABR Only: "Csak SABR"
     Link Underlines:
       Link Underlines: "Hivatkozások aláhúzása"
       On Hover: "Hivatkozások aláhúzása rámutatáskor"
@@ -2165,6 +2169,9 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Először minden csatorna RSS-hírcsatornáját ellenőrzi, és csak az új feltöltéssel rendelkező csatornák videóit, Shorts-videóit és élő közvetítéseit tölti be. Az automatikus frissítések az elmúlt 10 percben betöltött csatornákat is kihagyják. Az új feltöltés nélküli csatornáknál a megtekintések száma, az eltávolított videók és a módosított címek csak néhány óránként frissülnek, és az új feltöltések később jelenhetnek meg, ha az RSS-hírcsatorna lemarad. Az Invidious API-val nem érhető el."
   General Settings:
+    Built-in Streams: |
+      Az automatikus mód a legtöbb videót a YouTube visionOS-kliensével játssza le, amely gyorsabban indul és támogatja az automatikus minőséget. Az élő közvetítések és az általa nem lejátszható videók SABR-t használnak.
+      A Csak SABR mindig a YouTube webes kliensét használja, amely lassabban indul, és nincs automatikus minősége.
     Title Lines: "A listákban és rácsokban a kiválasztott számú sorra rövidíti a videók és lejátszási listák címét három ponttal, hogy a kártyák egységesebbek legyenek. A teljes címet a kurzort fölé víve láthatja."
     Close Window With Last Tab: 'Kikapcsolva az utolsó lap bezárása helyette új lapot nyit, így az ablak nyitva marad, amíg be nem zárod.'
     Preferred Video Codec: |

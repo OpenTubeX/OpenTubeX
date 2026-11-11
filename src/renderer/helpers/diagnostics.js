@@ -17,6 +17,7 @@ const REPORTED_SETTINGS = [
   'backendFallback',
   'videoPlaybackEngine',
   'playbackEngineFallback',
+  'builtInStreams',
   'defaultVideoFormat',
   'defaultQuality',
   'preferredVideoCodec',

@@ -392,6 +392,10 @@ Settings:
       Network: 网络
       Disk: 磁盘
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "内置流"
+      Automatic: "自动"
+      SABR Only: "仅 SABR"
     Link Underlines:
       Link Underlines: "链接下划线"
       On Hover: "悬停时为链接添加下划线"
@@ -2164,6 +2168,9 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "先检查每个频道的 RSS 订阅源，只加载有新上传内容的频道的视频、Shorts 和直播。自动刷新还会跳过过去 10 分钟内加载过的频道。对于没有新上传内容的频道，观看次数、已移除的视频和更改的标题每隔几小时才会更新一次，而且当 RSS 订阅源滞后时，新上传的内容可能会稍后才出现。使用 Invidious API 时不可用。"
   General Settings:
+    Built-in Streams: |
+      自动模式通过 YouTube 的 visionOS 客户端播放大多数视频，启动更快并支持自动画质。直播和它无法播放的视频使用 SABR。
+      仅 SABR 始终使用 YouTube 的网页客户端，启动较慢且没有自动画质。
     Title Lines: "将列表和网格中的视频与播放列表标题缩短为所选行数并以省略号结尾，使卡片更整齐。将指针悬停在标题上可查看完整标题。"
     Close Window With Last Tab: '关闭后，关闭最后一个标签页会改为打开一个新标签页，窗口会一直保持打开，直到你关闭它。'
     Preferred Video Codec: |

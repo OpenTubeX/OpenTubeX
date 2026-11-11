@@ -391,6 +391,10 @@ Settings:
       Network: rhwydwaith
       Disk: disg
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "Ffrydiau adeiledig"
+      Automatic: "Awtomatig"
+      SABR Only: "SABR yn unig"
     Link Underlines:
       Link Underlines: "Tanlinellu dolenni"
       On Hover: "Tanlinellu dolenni wrth hofran"
@@ -2197,6 +2201,9 @@ Description:
   Music: Cerddoriaeth
 Tooltips:
   General Settings:
+    Built-in Streams: |
+      Mae Awtomatig yn chwarae'r rhan fwyaf o fideos drwy gleient visionOS YouTube, sy'n cychwyn yn gynt ac yn cefnogi ansawdd awtomatig. Mae ffrydiau byw a fideos na all eu chwarae yn defnyddio SABR.
+      Mae SABR yn unig bob amser yn defnyddio cleient gwe YouTube, sy'n cychwyn yn arafach ac nad oes ganddo ansawdd awtomatig.
     Title Lines: "Yn byrhau teitlau fideos a rhestrau chwarae mewn rhestrau a gridiau i'r nifer o linellau a ddewiswyd gydag elipsis, ar gyfer cardiau mwy unffurf. Hofran dros deitl i'w weld yn llawn."
     Close Window With Last Tab: 'Pan fydd i ffwrdd, mae cau’r tab olaf yn agor tab newydd yn lle hynny, felly mae’r ffenestr yn aros ar agor nes i chi ei chau.'
     Preferred Video Codec: |

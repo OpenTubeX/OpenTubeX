@@ -298,7 +298,7 @@ const tabBarPositionNames = computed(() => [
   t('Settings.Theme Settings.Tab Layout.Vertical Right')
 ])
 const tabBarPosition = computed(() => normalizeTabBarPosition(store.getters.getTabBarPosition))
-const autoQualityAvailable = computed(() => playbackEngineSupportsAutoQuality(store.getters.getVideoPlaybackEngine))
+const autoQualityAvailable = computed(() => playbackEngineSupportsAutoQuality(store.getters.getVideoPlaybackEngine, store.getters.getBuiltInStreams))
 const qualityValues = computed(() => autoQualityAvailable.value ? [...RESOLUTION_VALUES, 'auto'] : RESOLUTION_VALUES)
 const qualityNames = computed(() => [
   t('Settings.Player Settings.Default Quality.4k'),
