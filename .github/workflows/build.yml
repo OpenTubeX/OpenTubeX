@@ -697,6 +697,18 @@ jobs:
               gh release delete "$tag" --cleanup-tag --yes
             done
 
+  publish-nightly-docker-image:
+    name: Publish nightly Docker image
+    needs: publish-nightly
+    # Publication outputs remain usable if pruning old releases fails afterward.
+    if: ${{ !cancelled() && needs.publish-nightly.outputs.tag != '' }}
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/docker.yml
+    with:
+      tag: ${{ needs.publish-nightly.outputs.tag }}
+
   notify-nightly-repositories:
     name: Notify ${{ matrix.repository }} of nightly release
     needs: publish-nightly
