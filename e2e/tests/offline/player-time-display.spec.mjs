@@ -34,6 +34,9 @@ test('download options fit horizontally and its Cancel button retains a border',
 })
 
 test('changing fonts remeasures paused controls and clipped menu labels without resizing', async ({ app, page }) => {
+  // The threshold searches wait for well over a hundred frames at two zoom levels,
+  // which takes 45-60 seconds on CI runners.
+  test.slow()
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
   await video.evaluate(element => {
