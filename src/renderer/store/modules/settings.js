@@ -495,6 +495,11 @@ const customGetters = {
   getEnableDownloads: (state) => state.enableDownloads,
   // A synchronized preference must not expose a service absent on this device.
   getUseVoiceOverTranslation: (state) => !process.env.IS_IOS && state.useVoiceOverTranslation,
+  // The web app loses the local API when its browser extension is removed.
+  // Keep the saved choice for when the extension comes back.
+  getBackendPreference: (state) => !process.env.SUPPORTS_LOCAL_API && state.backendPreference === 'local'
+    ? 'invidious'
+    : state.backendPreference,
 
   getFullscreenActions: (state) => normalizeFullscreenActions(state.fullscreenActions),
   getControlBarButtons: (state) => normalizeControlBarButtons(state.controlBarButtons),

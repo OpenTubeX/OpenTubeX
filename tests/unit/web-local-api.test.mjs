@@ -63,3 +63,14 @@ test('the web build only offers Invidious instances that allow CORS, even with t
 
   assert.deepEqual([...instances], ['https://cors.example'])
 })
+
+test('a saved local API preference falls back to Invidious while the web app has no local API', async () => {
+  const getterSource = await extract('renderer/store/modules/settings.js', 'getBackendPreference: (state) =>', 'state.backendPreference,\n')
+  const getBackendPreference = supportsLocalApi => vm.runInNewContext(`({ ${getterSource} })`, {
+    process: { env: { SUPPORTS_LOCAL_API: supportsLocalApi } }
+  }).getBackendPreference
+
+  assert.equal(getBackendPreference(false)({ backendPreference: 'local' }), 'invidious')
+  assert.equal(getBackendPreference(false)({ backendPreference: 'yattee' }), 'yattee')
+  assert.equal(getBackendPreference(true)({ backendPreference: 'local' }), 'local')
+})

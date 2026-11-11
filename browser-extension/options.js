@@ -45,6 +45,18 @@ async function setOrigins(origins) {
   }
 }
 
+/**
+ * Changes the list in one step, even across several open options pages.
+ * @param {(origins: string[]) => string[]} change
+ */
+function updateOrigins(change) {
+  return navigator.locks.request(SCRIPT_ID, async () => {
+    const origins = await getOrigins()
+    const changed = change(origins)
+    if (changed !== origins) await setOrigins(changed)
+  })
+}
+
 async function render() {
   list.replaceChildren(...(await getOrigins()).map(origin => {
     const item = document.createElement('li')
@@ -54,7 +66,7 @@ async function render() {
     remove.type = 'button'
     remove.textContent = 'Remove'
     remove.addEventListener('click', async () => {
-      await setOrigins((await getOrigins()).filter(other => other !== origin))
+      await updateOrigins(origins => origins.filter(other => other !== origin))
       // Built-in origins, such as opentubex.org, keep their required permission
       await ext.permissions.remove({ origins: [`${origin}/*`] }).catch(() => {})
       await render()
@@ -84,8 +96,7 @@ form.addEventListener('submit', event => {
       errorText.textContent = 'The extension needs access to the server to work there.'
       return
     }
-    const origins = await getOrigins()
-    if (!origins.includes(origin)) await setOrigins([...origins, origin])
+    await updateOrigins(origins => origins.includes(origin) ? origins : [...origins, origin])
     input.value = ''
     await render()
   }).catch(error => {
