@@ -4,7 +4,14 @@
 #      INVIDIOUS_HMAC_KEY=...
 #      INVIDIOUS_COMPANION_KEY=...
 #    For example, generate each with `openssl rand -hex 8`.
-# 2. Run `docker compose up -d` and open http://localhost:8080.
+# 2. Run `podman compose up -d` or `docker compose up -d` and open
+#    http://localhost:8080.
+#
+# On Linux, prefer rootless Podman: members of the docker group can gain root
+# access to the host.
+# With Podman, run `systemctl --user enable podman-restart.service` and
+# `loginctl enable-linger` so the server keeps running after you log out and
+# starts at boot.
 #
 # Browsers only store app data on secure origins. To use OpenTubeX from other
 # devices, serve it over HTTPS, for example with Tailscale Serve, Cloudflare
@@ -13,7 +20,7 @@
 services:
   opentubex:
     image: ghcr.io/opentubex/opentubex-web:latest
-    restart: unless-stopped
+    restart: always
     ports:
       - "127.0.0.1:${OPENTUBEX_PORT:-8080}:80"
     depends_on:
@@ -22,7 +29,7 @@ services:
 
   invidious:
     image: quay.io/invidious/invidious:latest
-    restart: unless-stopped
+    restart: always
     environment:
       # Leave `domain` unset so Invidious returns relative URLs, which resolve
       # to whatever address OpenTubeX is opened on.
@@ -53,7 +60,7 @@ services:
 
   companion:
     image: quay.io/invidious/invidious-companion:latest
-    restart: unless-stopped
+    restart: always
     environment:
       SERVER_SECRET_KEY: "${INVIDIOUS_COMPANION_KEY:?Set INVIDIOUS_COMPANION_KEY in .env}"
     read_only: true
@@ -65,8 +72,8 @@ services:
       - companion-cache:/var/tmp/youtubei.js:rw
 
   invidious-db:
-    image: postgres:18-alpine
-    restart: unless-stopped
+    image: docker.io/postgres:18-alpine
+    restart: always
     environment:
       POSTGRES_DB: invidious
       POSTGRES_USER: kemal

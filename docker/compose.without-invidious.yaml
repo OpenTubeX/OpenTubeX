@@ -5,8 +5,15 @@
 # OpenTubeX repository). Add this server's address in the extension's options.
 # Without the extension, the app uses public Invidious instances instead.
 #
-# Run `docker compose -f compose.without-invidious.yaml up -d` and open
+# Run `podman compose -f compose.without-invidious.yaml up -d` or
+# `docker compose -f compose.without-invidious.yaml up -d` and open
 # http://localhost:8080.
+#
+# On Linux, prefer rootless Podman: members of the docker group can gain root
+# access to the host.
+# With Podman, run `systemctl --user enable podman-restart.service` and
+# `loginctl enable-linger` so the server keeps running after you log out and
+# starts at boot.
 #
 # Browsers only store app data on secure origins. To use OpenTubeX from other
 # devices, serve it over HTTPS, for example with Tailscale Serve, Cloudflare
@@ -15,7 +22,7 @@
 services:
   opentubex:
     image: ghcr.io/opentubex/opentubex-web:latest
-    restart: unless-stopped
+    restart: always
     environment:
       OPENTUBEX_INVIDIOUS: "false"
     ports:
