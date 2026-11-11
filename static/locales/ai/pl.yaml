@@ -1520,6 +1520,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: Playlista jest na początku. Włącz zapętlanie, aby kontynuować odtwarzanie
 External link opening has been disabled in Settings → Privacy: Otwieranie zewnętrznych odnośników wyłączono w sekcji Ustawienia → Prywatność
 KeyboardShortcutPrompt:
+  Mark Seen or Watched: "Oznacz wybrany element jako widziany lub przełącz, czy jest obejrzany"
   Toggle Quick Bookmark: Dodaj do playlisty Szybkiej Zakładki lub z niej usuń
   Reopen Closed Window: Otwórz ponownie ostatnio zamknięte okno
   Set A-B Repeat Point A: Ustaw punkt A powtarzania A-B

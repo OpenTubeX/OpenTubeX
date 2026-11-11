@@ -2391,6 +2391,7 @@ External link opening has been disabled in Settings → Privacy: بازکردن 
 Screenshot Clipboard Success: نماگرفت در بریده‌دان ذخیره شد
 Screenshot Clipboard Error: کپی نماگرفت در بریده‌دان ناموفق بود
 KeyboardShortcutPrompt:
+  Mark Seen or Watched: "علامت‌گذاری مورد انتخاب‌شده به‌عنوان دیده‌شده، یا تغییر وضعیت تماشای آن"
   Toggle Quick Bookmark: افزودن به فهرست پخش نشانک سریع یا حذف از آن
   Reopen Closed Window: باز کردن دوبارهٔ آخرین پنجرهٔ بسته‌شده
   Edit Hint: یک میان‌بر را انتخاب کنید، سپس ترکیب کلید جدید را فشار دهید. برای حذف انتساب، Backspace یا Delete را فشار دهید.

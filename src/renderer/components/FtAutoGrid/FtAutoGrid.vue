@@ -16,14 +16,15 @@
       thumbnailSizeReady: grid && thumbnailSizeReady,
       youtubeStyleShorts
     }"
-    @before-leave="captureLeavingItemLayout"
+    @before-leave="handleBeforeLeave"
+    @keydown="moveTileFocus"
   >
     <slot />
   </TransitionGroup>
 </template>
 
 <script setup>
-import { computed, inject, nextTick, onActivated, onBeforeUnmount, onBeforeUpdate, onDeactivated, onMounted, onUpdated, ref, useTemplateRef, watch } from 'vue'
+import { computed, inject, nextTick, onActivated, onBeforeUnmount, onBeforeUpdate, onDeactivated, onMounted, onUpdated, provide, ref, useTemplateRef, watch } from 'vue'
 
 import store from '../../store/index'
 
@@ -33,6 +34,7 @@ import { applyAnimationSpeed, getAnimationSpeedMultiplier } from '../../helpers/
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { measureStableGridWidth } from './gridWidth'
 import { measureLeavingItemLayouts } from './leavingItemLayout'
+import { findAdjacentTileIndex, focusTile, getPageTiles, getTileDirection, isTileFocusable, tileKeyboardShortcutsKey } from '../../helpers/tileNavigation'
 
 const props = defineProps({
   appear: {
@@ -69,6 +71,7 @@ const props = defineProps({
 const MOVE_TRANSITION_MAX_ITEMS = 50
 
 const gridElement = useTemplateRef('gridElement')
+provide(tileKeyboardShortcutsKey, true)
 const thumbnailSizeSetting = inject(thumbnailSizeSettingKey, 'thumbnailSize')
 const animationSpeedMultiplier = computed(() => getAnimationSpeedMultiplier(store.getters.getAnimationSpeed))
 const feedTransitionDuration = computed(() => `${300 / animationSpeedMultiplier.value}ms`)
@@ -249,6 +252,55 @@ function captureLeavingItemLayout(element) {
   applyLeavingItemLayout(element)
 }
 
+/**
+ * Moves focus between tiles with the arrow keys once a tile has focus.
+ * @param {KeyboardEvent} event
+ */
+function moveTileFocus(event) {
+  const grid = gridElement.value?.$el
+  if (!(grid instanceof Element) || !(event.target instanceof Element)) return
+  const direction = getTileDirection(event, getComputedStyle(grid).direction === 'rtl')
+  if (direction === null) return
+
+  const tiles = getPageTiles(grid).filter(isTileFocusable)
+  const index = tiles.findIndex(tile => tile.contains(event.target))
+  if (index === -1) return
+
+  const rects = tiles.map(tile => tile.getBoundingClientRect())
+  const adjacentIndex = findAdjacentTileIndex(rects, index, direction)
+  // Without a tile in that direction, the key keeps scrolling the page.
+  if (adjacentIndex === -1) return
+  event.preventDefault()
+  focusTile(tiles[adjacentIndex])
+  store.dispatch('showOutlines')
+}
+
+/**
+ * Hands focus to the next tile, or else the previous one, when the focused
+ * tile leaves, such as after it was marked as seen in the New feed.
+ * @param {Element} element
+ */
+function keepFocusOnTiles(element) {
+  const grid = gridElement.value?.$el
+  if (!(grid instanceof Element) || !element.contains(document.activeElement)) return
+  const tiles = getPageTiles(grid)
+  const index = tiles.indexOf(element)
+  const candidates = [...tiles.slice(index + 1), ...tiles.slice(0, index).reverse()]
+  // Wait until every tile that leaves in this update has been marked.
+  nextTick(() => {
+    const activeElement = document.activeElement
+    if (activeElement !== null && activeElement !== document.body && !element.contains(activeElement)) return
+    const tile = candidates.find(isTileFocusable)
+    if (tile) focusTile(tile)
+  })
+}
+
+/** @param {Element} element */
+function handleBeforeLeave(element) {
+  captureLeavingItemLayout(element)
+  keepFocusOnTiles(element)
+}
+
 let resizeObserver = null
 let phoneWidthQuery = null
 let observedScrollbarWidth = 0
@@ -356,6 +408,10 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  // A New feed category unmounts its whole grid once its last tile leaves.
+  const focusedTile = Array.from(gridElement.value?.$el?.children ?? [])
+    .find(tile => tile.contains(document.activeElement))
+  if (focusedTile) keepFocusOnTiles(focusedTile)
   keepBottomGeneration++
   active = false
   updateGridSliderLimit()

@@ -2558,6 +2558,7 @@ External link opening has been disabled in Settings → Privacy: Die oopmaak van
 Screenshot Clipboard Success: Skermkiekie na knipbord gestoor
 Screenshot Clipboard Error: Kopieer van skermkiekie na knipbord het misluk
 KeyboardShortcutPrompt:
+  Mark Seen or Watched: "Merk die gefokusde item as gesien, of wissel of dit gekyk is"
   Reopen Closed Window: Maak die laaste geslote venster weer oop
   Edit Hint: Kies ’n kortpad en druk dan ’n nuwe sleutelkombinasie. Druk Backspace of Delete om dit te ontken.
   Change Shortcut: Verander kortpad vir {action}

@@ -2347,6 +2347,7 @@ Yattee Server:
 The playlist is at the beginning. Enable loop to continue playing: La ludlisto estas ĉe la komenco. Ŝaltu la ripetadon por daŭrigi la ludadon
 External link opening has been disabled in Settings → Privacy: La malfermado de eksteraj ligiloj estis malŝaltita en Agordoj → Privateco
 KeyboardShortcutPrompt:
+  Mark Seen or Watched: "Marki la fokusitan eron kiel viditan, aŭ baskuligi ĉu ĝi estas spektita"
   Reopen Closed Window: Remalfermi la laste fermitan fenestron
   Edit Hint: Elektu fulmoklavon, poste premu novan klavkombinon. Premu Retropaŝon aŭ Forigon por malasigni ĝin.
   Change Shortcut: Ŝanĝi fulmoklavon por {action}

@@ -2906,6 +2906,7 @@ Keys:
   arrowright: Fletxa dreta
   arrowup: Fletxa amunt
 KeyboardShortcutPrompt:
+  Mark Seen or Watched: "Marca l'element enfocat com a vist o commuta si s'ha mirat"
   Toggle Quick Bookmark: Afegeix a la llista de reproducció d'adreces d'interès ràpides o elimina'n
   Reopen Closed Window: Torna a obrir l’última finestra tancada
   Keyboard Shortcuts: Dreceres de teclat

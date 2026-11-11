@@ -451,7 +451,8 @@ const DefaultKeyboardShortcuts = {
       TOGGLE_TAB_ORIENTATION: 'f1',
     },
     SITUATIONAL: {
-      REFRESH: 'r'
+      REFRESH: 'r',
+      MARK_SEEN_OR_WATCHED: 'm',
     },
   },
   VIDEO_PLAYER: {

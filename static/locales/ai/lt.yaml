@@ -2756,6 +2756,7 @@ Keys:
   arrowright: Rodyklė dešinėn
   arrowup: Rodyklė aukštyn
 KeyboardShortcutPrompt:
+  Mark Seen or Watched: "Pažymėti pasirinktą elementą kaip matytą arba perjungti, ar jis peržiūrėtas"
   Toggle Quick Bookmark: Pridėti į sparčiųjų žymių grojaraštį arba pašalinti iš jo
   Reopen Closed Window: Vėl atverti paskutinį užvertą langą
   Keyboard Shortcuts: Spartieji klavišai

@@ -2855,6 +2855,7 @@ Keys:
   arrowright: Puščica desno
   arrowup: Puščica gor
 KeyboardShortcutPrompt:
+  Mark Seen or Watched: "Označi izbrani element kot viden ali preklopi, ali je ogledan"
   Toggle Quick Bookmark: Dodaj na seznam predvajanja hitrega zaznamka ali odstrani z njega
   Reopen Closed Window: Znova odpri nazadnje zaprto okno
   Keyboard Shortcuts: Bližnjice na tipkovnici

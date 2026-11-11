@@ -96,6 +96,22 @@ $grid-mode-grab-bar-padding: 1em;
   padding: 6px;
   border-radius: var(--shape-corner-large);
 
+  // Keyboard focus on the title, where the arrow keys move between items,
+  // outlines the whole item. A post outlines its attached video instead.
+  :root:not(.hideOutlines) &:has(.title:focus-visible):not(:has(.ft-list-item .title:focus-visible)) {
+    // Outside the item, so the ring does not touch the thumbnail.
+    outline: 2px solid var(--primary-color);
+    outline-offset: 1px;
+    box-shadow: 0 0 0 1px var(--focus-ring-contrast-color);
+
+    // The item's outline replaces the title's.
+    // stylelint-disable-next-line a11y/no-outline-none
+    .title:focus-visible {
+      outline: none;
+      box-shadow: none;
+    }
+  }
+
   &.watched {
     background-color: var(--bg-color);
 

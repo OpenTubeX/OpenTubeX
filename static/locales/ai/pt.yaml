@@ -2290,6 +2290,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: A lista de reprodução está no início. Ative a repetição para continuar a reproduzir
 External link opening has been disabled in Settings → Privacy: A abertura de hiperligações externas foi desativada em Definições → Privacidade
 KeyboardShortcutPrompt:
+  Mark Seen or Watched: "Marcar o item selecionado como visto ou alternar se foi reproduzido"
   Toggle Quick Bookmark: Adicionar ou remover da lista de reprodução do marcador rápido
   Reopen Closed Window: Reabrir a última janela fechada
   Edit Hint: Selecione um atalho e prima uma nova combinação de teclas. Prima Backspace ou Delete para remover a atribuição.

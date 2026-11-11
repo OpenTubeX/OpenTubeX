@@ -2296,6 +2296,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: Soittolista on alussa. Jatka toistoa ottamalla jatkuva toisto käyttöön
 External link opening has been disabled in Settings → Privacy: Ulkoisten linkkien avaaminen on poistettu käytöstä kohdassa Asetukset → Tietosuoja
 KeyboardShortcutPrompt:
+  Mark Seen or Watched: "Merkitse valittu kohde nähdyksi tai vaihda, onko se katsottu"
   Toggle Quick Bookmark: Lisää pikakirjanmerkin soittolistaan tai poista siitä
   Reopen Closed Window: Avaa viimeksi suljettu ikkuna uudelleen
   Edit Hint: Valitse pikanäppäin ja paina sitten uutta näppäinyhdistelmää. Poista määritys painamalla Backspace- tai Delete-näppäintä.

@@ -2719,6 +2719,7 @@ Keys:
   arrowright: 오른쪽 화살표
   arrowup: 위쪽 화살표
 KeyboardShortcutPrompt:
+  Mark Seen or Watched: "선택한 항목을 확인함으로 표시하거나 시청함 상태를 전환"
   Toggle Quick Bookmark: 빠른 북마크 재생목록에 추가하거나 제거
   Reopen Closed Window: 마지막으로 닫은 창 다시 열기
   Keyboard Shortcuts: 키보드 단축키

@@ -3,7 +3,7 @@
     class="ft-list-video ft-list-item result"
     :class="{ grid: layout === 'grid', list: layout === 'list', watched: watchProgress?.watched }"
     @contextmenu="openContextMenu"
-    @keydown="handleContextMenuKeydown"
+    @keydown="handleTileKeydown"
     @pointerdown="startMenuHold"
     @pointermove="moveMenuHold"
     @pointerup="cancelMenuHold"
@@ -136,6 +136,7 @@ import { lightHaptic } from '../../helpers/mobileHaptics'
 import { markRssFeedItemsAsSeen, markRssFeedItemsAsUnseen } from '../../helpers/rssFeeds'
 import { copyToClipboard, getRelativeTimeFromDate, openInternalPath, showToast } from '../../helpers/utils'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
+import { isTileMarkShortcut, tileKeyboardShortcutsKey } from '../../helpers/tileNavigation'
 
 const props = defineProps({
   /** @type {import('vue').PropType<import('../../helpers/rssFeeds').RssFeedItem>} */
@@ -312,8 +313,20 @@ function openContextMenu(event) {
   }))
 }
 
-function handleContextMenuKeydown(event) {
-  if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) openContextMenu(event)
+const tileKeyboardShortcuts = inject(tileKeyboardShortcutsKey, false)
+
+function handleTileKeydown(event) {
+  if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
+    openContextMenu(event)
+  } else if (tileKeyboardShortcuts && isTileMarkShortcut(event)) {
+    // Like the menu, a new item is marked as seen first.
+    event.preventDefault()
+    if (showMarkAsSeen.value) {
+      markAsSeen()
+    } else {
+      setWatched(position.value?.watched !== true)
+    }
+  }
 }
 
 onBeforeUnmount(() => {

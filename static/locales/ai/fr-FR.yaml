@@ -2288,6 +2288,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: La playlist est au début. Activez la lecture en boucle pour continuer
 External link opening has been disabled in Settings → Privacy: L’ouverture des liens externes a été désactivée dans Paramètres → Confidentialité
 KeyboardShortcutPrompt:
+  Mark Seen or Watched: "Marquer l'élément sélectionné comme vu, ou basculer son état visionné"
   Toggle Quick Bookmark: Ajouter à la playlist du signet rapide ou en retirer
   Reopen Closed Window: Rouvrir la dernière fenêtre fermée
   Edit Hint: Sélectionnez un raccourci, puis appuyez sur une nouvelle combinaison de touches. Appuyez sur Retour arrière ou Suppr pour le désassigner.

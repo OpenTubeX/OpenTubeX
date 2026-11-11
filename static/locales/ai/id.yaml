@@ -2314,6 +2314,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: Daftar putar berada di awal. Aktifkan pengulangan untuk melanjutkan pemutaran
 External link opening has been disabled in Settings → Privacy: Pembukaan tautan eksternal telah dinonaktifkan di Pengaturan → Privasi
 KeyboardShortcutPrompt:
+  Mark Seen or Watched: "Tandai item yang difokuskan sebagai sudah dilihat, atau alihkan status ditontonnya"
   Toggle Quick Bookmark: Tambahkan ke atau hapus dari daftar putar penanda cepat
   Reopen Closed Window: Buka kembali jendela yang terakhir ditutup
   Edit Hint: Pilih pintasan, lalu tekan kombinasi tombol baru. Tekan Backspace atau Delete untuk menghapus penetapannya.

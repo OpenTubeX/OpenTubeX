@@ -43,7 +43,7 @@
       @pointerup="cancelMenuHold"
       @pointercancel="cancelMenuHold"
       @dragstart="handleMenuHoldDragStart"
-      @keydown="handleContextMenuKeydown"
+      @keydown="handleTileKeydown"
     >
       <div
         v-if="showGrabBar"
@@ -628,6 +628,7 @@ import { useHideSubscriptionFeedType } from '../../composables/useHideSubscripti
 import { useResultChannelAvatar } from '../../composables/useResultChannelAvatar.js'
 import { formatDate, formatDateTime } from '../../helpers/dateFormat.js'
 import { getYoutubeVideoShareUrl } from '../../helpers/share'
+import { isTileMarkShortcut, tileKeyboardShortcutsKey } from '../../helpers/tileNavigation'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
 const props = defineProps({
@@ -898,6 +899,7 @@ const effectiveListTypeIsList = computed(() => {
 })
 
 const thumbnailSizeSetting = inject(thumbnailSizeSettingKey, 'thumbnailSize')
+const tileKeyboardShortcuts = inject(tileKeyboardShortcutsKey, false)
 // Full width grid cards form a single column, so moving them goes up and down.
 const verticalMoveControls = computed(() => {
   return effectiveListTypeIsList.value ||
@@ -1743,9 +1745,23 @@ function openVideoContextMenu(event) {
   }))
 }
 
-function handleContextMenuKeydown(event) {
-  if (event.key !== 'ContextMenu' && !(event.shiftKey && event.key === 'F10')) return
-  openVideoContextMenu(event)
+function handleTileKeydown(event) {
+  if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
+    openVideoContextMenu(event)
+  } else if (tileKeyboardShortcuts && isTileMarkShortcut(event)) {
+    // Like the menu, a new subscription video is marked as seen first.
+    if (showMarkAsSeen.value) {
+      event.preventDefault()
+      markSubscriptionVideoAsSeen()
+    } else if (canMarkAsWatched.value) {
+      event.preventDefault()
+      if (isWatched.value) {
+        unmarkAsWatched()
+      } else {
+        markAsWatched()
+      }
+    }
+  }
 }
 
 /**
