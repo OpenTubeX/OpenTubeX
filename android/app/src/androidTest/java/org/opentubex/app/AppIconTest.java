@@ -348,8 +348,11 @@ public class AppIconTest {
     }
 
     private static void tap(LauncherSession scenario, String selector) throws Exception {
-        // Wait for the prompt's entry animation before locating a real touch.
-        Thread.sleep(250);
+        // Wait until the prompt's entry animation has stopped moving the target.
+        await(scenario, "(() => { const r = document.querySelector('" + selector + "').getBoundingClientRect();" +
+            "const key = [r.x, r.y, r.width, r.height].join(); const settled = window.__tapSettlingRect === key;" +
+            "window.__tapSettlingRect = key; return settled; })()");
+        evaluate(scenario, "delete window.__tapSettlingRect");
         JSONArray bounds = new JSONArray(evaluate(scenario, "(() => { const r = document.querySelector('" + selector + "').getBoundingClientRect(); return [r.x + r.width / 2, r.y + r.height / 2, innerWidth] })()"));
         float[] point = new float[2];
         scenario.onActivity(activity -> {
