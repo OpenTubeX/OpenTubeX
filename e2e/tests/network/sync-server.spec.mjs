@@ -626,12 +626,12 @@ test.describe('OpenTubeX sync server', () => {
       const settings = latestSettings(readDatastore(app.userDataDir, 'settings'))
       const snapshot = JSON.parse(settings.syncServerSnapshot).settings
       return [settings.systemDarkTheme, snapshot.baseTheme.value, snapshot.systemDarkTheme.value]
-    }).toEqual(['dark', theme.basedOn, 'dark'])
+    }).toEqual(['openTubeXDark', theme.basedOn, 'openTubeXDark'])
     await syncNow()
     await expect.poll(async () => {
       const settings = latestSettings(readDatastore(app.userDataDir, 'settings'))
       return [settings.baseTheme, settings.systemDarkTheme]
-    }).toEqual([theme.basedOn, 'dark'])
+    }).toEqual([theme.basedOn, 'openTubeXDark'])
   })
 
   test('migrates existing plaintext data before locking the account', async ({ app, page }, testInfo) => {
