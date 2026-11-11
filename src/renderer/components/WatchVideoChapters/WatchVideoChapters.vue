@@ -1,5 +1,8 @@
 <template>
-  <div class="chaptersList">
+  <div
+    class="chaptersList"
+    :class="{ desynced: !followCurrentChapter }"
+  >
     <div
       ref="chaptersWrapper"
       v-observe-visibility="observeVisibilityOptions"
@@ -143,7 +146,11 @@ const SCROLL_RANGE_TOLERANCE = 1
 
 function canScroll() {
   const container = chaptersWrapper.value
-  return !!container && container.scrollHeight - container.clientHeight > SCROLL_RANGE_TOLERANCE
+  if (!container || !chaptersContent.value) return false
+  // The room left below the last chapter for the sync button is not a range
+  // worth syncing.
+  const syncSpace = Number.parseFloat(getComputedStyle(chaptersContent.value, '::after').blockSize) || 0
+  return container.scrollHeight - container.clientHeight - syncSpace > SCROLL_RANGE_TOLERANCE
 }
 
 function stopFollowing() {
@@ -265,7 +272,8 @@ const observeVisibilityOptions = {
     if (isVisible) {
       // Wait for the panel/dock layout to settle; centering with a zero-height
       // container would scroll by half a row and clip the first chapter.
-      followCurrentChapter.value = true
+      // A list the user scrolled keeps its position, for example after the
+      // page scrolled it out of view; reopening the list mounts it anew.
       requestAnimationFrame(() => scrollToCurrentChapter())
     }
   },

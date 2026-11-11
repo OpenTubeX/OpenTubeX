@@ -167,6 +167,13 @@
   }
 }
 
+/* Lets the last chapter scroll up past the sync button. */
+.chaptersList.desynced .chaptersContent::after {
+  flex: none;
+  block-size: 64px;
+  content: '';
+}
+
 /* Brings a list scrolled by hand back to the current chapter. */
 .chaptersSync {
   display: flex;
@@ -177,8 +184,9 @@
   gap: 8px;
   inline-size: fit-content;
   max-inline-size: calc(100% - 24px);
-  block-size: 40px;
+  min-block-size: 40px;
   margin-inline: auto;
+  padding-block: 8px;
   padding-inline: 16px 20px;
   border: 0;
   border-radius: var(--shape-corner-full);
@@ -189,7 +197,8 @@
   font: inherit;
   font-size: 14px;
   font-weight: 500;
-  white-space: nowrap;
+  line-height: 1.3;
+  text-align: start;
   transition: background-color var(--motion-fast-effects);
 }
 
