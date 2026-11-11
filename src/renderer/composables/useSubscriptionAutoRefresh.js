@@ -974,7 +974,9 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
         ) {
           const diagnostic = formatRequestDiagnostic(result.diagnostic)
           console.error(`Closed-app subscription refresh request failed: ${diagnostic}`)
-          showApiErrorToast(store.getters.getBackendPreference === 'local' ? t('Local API Error (Click to copy)') : getInvidiousApiErrorMessage(store.getters.getBackendPreference), diagnostic)
+          // Like the foreground refresh, network failures stay quiet. The
+          // profile's refresh is not marked complete, so it is retried later.
+          if (result.diagnostic.failure !== 'network') showApiErrorToast(store.getters.getBackendPreference === 'local' ? t('Local API Error (Click to copy)') : getInvidiousApiErrorMessage(store.getters.getBackendPreference), diagnostic)
         }
 
         await acknowledgeAndroidSubscriptionRefreshResult(result.id)

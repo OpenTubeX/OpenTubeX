@@ -33,6 +33,31 @@ public class SubscriptionRefreshBackendTest {
     }
 
     @Test
+    public void resendsRequestsThatLostTheirConnectionOnly() throws Exception {
+        int[] calls = new int[1];
+        SubscriptionRefreshHttpClient.RequestFetcher closedOnce = SubscriptionRefreshHttpClient.resendingBrokenConnections((request, type, id) -> {
+            if (calls[0]++ == 0) throw new java.net.SocketException("Socket closed");
+            return "{}";
+        });
+        assertEquals("{}", closedOnce.fetch(new JSONObject(), "videos", "UCtest"));
+        assertEquals(2, calls[0]);
+
+        for (IOException error : new IOException[] {
+            new IOException("unexpected end of stream on com.android.okhttp.Address@1"),
+            new java.net.SocketTimeoutException("Read timed out"),
+            new IOException("HTTP 404"),
+        }) {
+            calls[0] = 0;
+            IOException thrown = assertThrows(IOException.class, () -> SubscriptionRefreshHttpClient.resendingBrokenConnections((request, type, id) -> {
+                calls[0]++;
+                throw error;
+            }).fetch(new JSONObject(), "videos", "UCtest"));
+            assertSame(error, thrown);
+            assertEquals(error.getMessage(), error instanceof java.net.SocketTimeoutException ? 2 : error.getMessage().startsWith("HTTP") ? 1 : 3, calls[0]);
+        }
+    }
+
+    @Test
     public void cancelledFetchesStopReadingTheirResponse() throws Exception {
         Thread.currentThread().interrupt();
         try {

@@ -128,6 +128,8 @@ final class SubscriptionRefreshRequestDiagnostic {
                 "background execution.*(not allowed|restrict)).*"
         )) return "background restriction";
         if (signature.matches(".*\\bhttp\\s+\\d{3}\\b.*")) return "http";
+        // A broken connection over TLS mentions SSL too, but is a network failure.
+        if (signature.matches(".*(eofexception|end of stream|broken pipe|connection reset|connection abort).*")) return "network";
         if (signature.matches(".*(ssl|tls|certificate|certpath|handshake).*")) return "tls";
         if (signature.matches(".*(json|parse|parsing|unexpected token).*")) return "parsing";
         if (signature.matches(
