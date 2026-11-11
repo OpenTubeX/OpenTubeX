@@ -203,7 +203,7 @@ test('bedtime and the daily limit stop autoplay only after the queued videos', a
     handleWatchProgressAutoSaveWhenProgressEnabled() {},
     playNextQueuedVideo() { return this.queued },
     $store: {
-      getters: { getWellbeingBedtimeWaiting: true, getWellbeingStopsAutoplay: true },
+      getters: { getWellbeingBedtimeWaiting: true, getWellbeingStopsAutoplay: true, getWellbeingPlaybackBlock: () => null },
       commit: (_name, prompt) => prompts.push(prompt),
     },
   }
@@ -212,6 +212,10 @@ test('bedtime and the daily limit stop autoplay only after the queued videos', a
   watch.queued = false
   assert.equal(continueAfterVideoEnded.call(watch), false)
   assert.deepEqual(prompts, ['bedtime'], 'the reminder waits for the end of the queue')
+  watch.queued = true
+  watch.$store.getters.getWellbeingPlaybackBlock = () => 'watch'
+  watch.playNextQueuedVideo = () => assert.fail('a limit that blocks playback must keep the queue')
+  assert.equal(continueAfterVideoEnded.call(watch), false)
 })
 
 test('queued downloads explicitly start after loading even when general autoplay is disabled', async () => {

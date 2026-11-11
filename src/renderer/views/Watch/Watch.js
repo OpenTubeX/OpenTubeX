@@ -5699,8 +5699,9 @@ export default defineComponent({
       // advancing. Playlist Shorts still follow the playlist autoplay setting.
       const standaloneShortStops = this.customShortsPlayerActive && this.isStandaloneShort
       // Queued videos were chosen by the user, unlike autoplay, so bedtime and
-      // the daily limit wait until the queue has finished.
-      if (!standaloneShortStops && this.playNextQueuedVideo()) {
+      // the daily limit wait until the queue has finished. A limit that blocks
+      // playback keeps the queue for later.
+      if (!standaloneShortStops && !this.$store.getters.getWellbeingPlaybackBlock(false) && this.playNextQueuedVideo()) {
         return true
       }
       // A bedtime reminder that waited for this video replaces whatever plays next.
