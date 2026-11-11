@@ -487,6 +487,15 @@ export default {
     return ipcRenderer.invoke(IpcChannels.GENERATE_PO_TOKEN, videoId, context, initialAttestationData, ytConfig)
   },
 
+  /**
+   * Mints a token from the current BotGuard attestation, without running BotGuard
+   * @param {string} videoId
+   * @returns {Promise<string | null>} `null` without an attestation
+   */
+  mintPoToken: (videoId) => {
+    return ipcRenderer.invoke(IpcChannels.MINT_PO_TOKEN, videoId)
+  },
+
   openProfileDirectory: () => {
     ipcRenderer.send(IpcChannels.OPEN_PROFILE_DIRECTORY)
   },

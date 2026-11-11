@@ -73,6 +73,26 @@ export function generatePoToken(videoId, context, initialAttestationData, ytConf
   return mintAttestedPoToken(() => enqueueAsyncFunction(mintPoToken, videoId, context, initialAttestationData, ytConfig, proxyUrl))
 }
 
+/**
+ * Mints a content-bound poToken from the current attestation without running BotGuard.
+ * @param {string} videoId
+ * @param {string|undefined} proxyUrl
+ * @returns {Promise<string|null>} `null` without a valid, attested BotGuard run
+ */
+export function mintPoTokenFromAttestation(videoId, proxyUrl) {
+  // Nothing was attested yet
+  if (firstTime) return Promise.resolve(null)
+
+  return enqueueAsyncFunction(async () => {
+    const token = await mintFromAttestation(videoId, proxyUrl)
+    if (token !== null && !isAttestedPoToken(token)) {
+      await discardAttestation()
+      return null
+    }
+    return token
+  })
+}
+
 /** @type {import('electron').Session} */
 let theSession
 /** @type {string} */
@@ -161,30 +181,38 @@ let attestation = null
  * @returns {Promise<string>}
  */
 async function mintPoToken(videoId, context, initialAttestationData, ytConfig, proxyUrl) {
-  if (attestation && (attestation.proxyUrl !== proxyUrl || Date.now() >= attestation.expiresAt)) {
-    await discardAttestation()
-  }
-
-  let token
-  if (attestation) {
-    try {
-      token = await withTimeout(
-        attestation.view.webContents.executeJavaScript(`window.ftMintPoToken(${JSON.stringify(videoId)})`),
-        GENERATE_TIMEOUT_MS,
-        `PO token minting timed out after ${GENERATE_TIMEOUT_MS}ms`
-      )
-    } catch (error) {
-      console.error('Failed to mint a PO token from the current attestation, attesting again', error)
-      await discardAttestation()
-    }
-  }
-  token ??= await attest(videoId, context, initialAttestationData, ytConfig, proxyUrl)
+  const token = await mintFromAttestation(videoId, proxyUrl) ??
+    await attest(videoId, context, initialAttestationData, ytConfig, proxyUrl)
 
   // Every token from an untrusted attestation is pending attestation too
   if (!isAttestedPoToken(token)) {
     await discardAttestation()
   }
   return token
+}
+
+/**
+ * @param {string} videoId
+ * @param {string|undefined} proxyUrl
+ * @returns {Promise<string|null>} `null` when there is no usable attestation
+ */
+async function mintFromAttestation(videoId, proxyUrl) {
+  if (attestation && (attestation.proxyUrl !== proxyUrl || Date.now() >= attestation.expiresAt)) {
+    await discardAttestation()
+  }
+  if (!attestation) return null
+
+  try {
+    return await withTimeout(
+      attestation.view.webContents.executeJavaScript(`window.ftMintPoToken(${JSON.stringify(videoId)})`),
+      GENERATE_TIMEOUT_MS,
+      `PO token minting timed out after ${GENERATE_TIMEOUT_MS}ms`
+    )
+  } catch (error) {
+    console.error('Failed to mint a PO token from the current attestation', error)
+    await discardAttestation()
+    return null
+  }
 }
 
 async function discardAttestation() {

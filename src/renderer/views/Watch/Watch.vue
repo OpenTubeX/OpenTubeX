@@ -1120,7 +1120,7 @@
         </div>
       </div>
       <div
-        v-if="isLoading && !hideRecommendedVideos"
+        v-if="(isLoading || (watchNextPending && displayedRecommendations.length === 0)) && !hideRecommendedVideos"
         class="recommendationsSkeleton"
         aria-hidden="true"
       >

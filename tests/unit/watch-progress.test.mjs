@@ -219,3 +219,39 @@ test('a seek before the first load creates a complete new history entry', () => 
   assert.equal(f.history.authorId, 'channel')
   assert.ok(f.history.timeWatched > 0)
 })
+
+test('late /next metadata replaces the /player metadata once the pending history write lands', async () => {
+  const { refreshHistoryMetadata } = runInNewContext(`({
+    ${source.slice(source.indexOf('    refreshHistoryMetadata:'), source.indexOf('    addToHistory:'))}
+  })`)
+  const history = new Map()
+  let finishFirstWrite
+  const view = {
+    refreshHistoryMetadata,
+    addToHistory,
+    isCurrentVideoLoad: () => true,
+    get historyEntry() { return history.get(this.videoId) },
+    get historyEntryExists() { return history.has(this.videoId) },
+    updateHistory: async record => { history.set(record.videoId, record) },
+    videoId: 'aaaaaaaaaaa',
+    videoTitle: '/next title',
+    videoLengthSeconds: 60,
+    channelId: 'channel',
+    // A history or progress write still in flight, which stores progress 42 when it lands
+    latestHistoryWrite: new Promise(resolve => { finishFirstWrite = resolve }),
+  }
+
+  const refresh = view.refreshHistoryMetadata(1, view.videoId)
+  history.set(view.videoId, { videoId: view.videoId, title: '/player title', watchProgress: 42 })
+  // A pause saves progress while the refresh waits
+  let finishProgressWrite
+  view.latestHistoryWrite = new Promise(resolve => { finishProgressWrite = resolve })
+  finishFirstWrite()
+  await new Promise(resolve => setTimeout(resolve))
+  assert.equal(history.get(view.videoId).title, '/player title')
+  history.get(view.videoId).watchProgress = 50
+  finishProgressWrite()
+  await refresh
+  assert.equal(history.get(view.videoId).title, '/next title')
+  assert.equal(history.get(view.videoId).watchProgress, 50)
+})

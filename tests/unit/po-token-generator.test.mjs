@@ -7,7 +7,7 @@ import { withTimeout } from '../../src/main/promiseTimeout.js'
 
 const source = (await readFile(new URL('../../src/main/poTokenGenerator.js', import.meta.url), 'utf8'))
   .replace(/^import .*\n/gm, '')
-  .replace('export function ', 'function ')
+  .replaceAll('export function ', 'function ')
 
 test('PO token generation preserves replacement sequences in YouTube JSON arguments', async () => {
   let received
@@ -85,7 +85,7 @@ function load({ attest, mint = () => attested, validForSecs = 600, clearData = a
       await clearData()
     },
   }
-  const { generatePoToken } = vm.runInNewContext(`${source}\n({ generatePoToken })`, {
+  const { generatePoToken, mintPoTokenFromAttestation } = vm.runInNewContext(`${source}\n({ generatePoToken, mintPoTokenFromAttestation })`, {
     session: { fromPartition: () => theSession, defaultSession: { getUserAgent: () => 'agent' } },
     WebContentsView,
     readFile: async () => 'function bg(){}export{bg as default};',
@@ -106,7 +106,8 @@ function load({ attest, mint = () => attested, validForSecs = 600, clearData = a
     console,
   })
   const generate = proxyUrl => generatePoToken('videoId', '{}', '{}', '{}', proxyUrl)
-  return { generate, views, proxies, cleanups: () => cleanups }
+  const mintOnly = proxyUrl => mintPoTokenFromAttestation('videoId', proxyUrl)
+  return { generate, mintOnly, views, proxies, cleanups: () => cleanups }
 }
 
 test('later tokens reuse the attestation', async () => {
@@ -116,6 +117,22 @@ test('later tokens reuse the attestation', async () => {
   assert.equal(views.length, 1)
   assert.equal(views[0].closed, false)
   assert.equal(cleanups(), 0)
+})
+
+test('minting without BotGuard needs an attestation', async () => {
+  let mints = 0
+  const { generate, mintOnly, views } = load({ attest: () => attested, mint: () => ++mints === 1 ? 'm'.repeat(120) : pending })
+  assert.equal(await mintOnly(), null)
+  assert.equal(views.length, 0, 'A mint-only request must not run BotGuard')
+  await generate()
+  assert.equal(await mintOnly(), 'm'.repeat(120))
+  assert.equal(await mintOnly('socks5://127.0.0.1:9050'), null, 'An attestation of another route does not count')
+  await generate()
+  // A token pending attestation discards it, so the next load attests from the watch page
+  assert.equal(await mintOnly(), null)
+  assert.equal(views.at(-1).closed, true)
+  assert.equal(await mintOnly(), null)
+  assert.equal(views.length, 2)
 })
 
 test('an attestation that mints a token pending attestation is replaced', async () => {

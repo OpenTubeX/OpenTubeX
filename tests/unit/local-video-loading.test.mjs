@@ -12,6 +12,12 @@ import { getAndroidLiveDashManifestUrl, getAndroidLiveHlsManifestUrl, getLiveDvr
 const source = await readFile(new URL('../../src/renderer/helpers/api/local.js', import.meta.url), 'utf8')
 const start = source.indexOf('export async function getLocalVideoInfo(')
 const end = source.indexOf('\n}\n', start) + 2
+const mergeStart = source.indexOf('export function mergeLateWatchNext(')
+const mergeEnd = source.indexOf('\n}\n', mergeStart) + 2
+const mergeLateWatchNext = compileFunction(
+  `${source.slice(mergeStart, mergeEnd).replace('export ', '')}\nreturn mergeLateWatchNext`,
+  ['normalizeVideoPopularityResponse', 'YT', 'extractLocalContentDisclosures', 'extractLocalInfoPanels']
+)(normalizeVideoPopularityResponse, YT, () => null, () => null)
 
 function deferred() {
   let resolve
@@ -20,11 +26,13 @@ function deferred() {
   return { promise, resolve, reject }
 }
 
-function loader({ android = Promise.resolve({ data: {} }), token = Promise.resolve('token'), next = Promise.resolve({ data: {} }), createPlayer = async () => ({ signature_timestamp: 1, decipher: async url => url }), details = {}, embeddedNext = false, embeddedPlayer = true } = {}) {
+function loader({ android = Promise.resolve({ data: {} }), token = Promise.resolve('token'), next = Promise.resolve({ data: {} }), createPlayer = async () => ({ signature_timestamp: 1, decipher: async url => url }), details = {}, embeddedNext = false, embeddedPlayer = true, playability = { status: 'OK' }, direct = null } = {}) {
   const requests = []
   const playerRequests = []
+  const directPlayerFallbacks = []
+  const watchPageLoads = { count: 0 }
   const playerResponse = {
-    playabilityStatus: { status: 'OK' },
+    playabilityStatus: playability,
     videoDetails: { videoId: 'testVideo01', title: 'Ready video', lengthSeconds: '30', ...details },
     streamingData: { formats: [], adaptiveFormats: [] },
   }
@@ -40,7 +48,14 @@ function loader({ android = Promise.resolve({ data: {} }), token = Promise.resol
     }
   }
   const dependencies = {
-    getWatchHTMLWatchPage: async () => ({ session, playerResponse: embeddedPlayer ? playerResponse : undefined, nextResponse: embeddedNext ? {} : undefined }),
+    getWatchHTMLWatchPage: async () => {
+      watchPageLoads.count++
+      return { session, playerResponse: embeddedPlayer ? playerResponse : undefined, nextResponse: embeddedNext ? {} : undefined }
+    },
+    isDirectPlayerEnabled: () => true,
+    requestDirectPlayer: async () => direct?.({ session, playerResponse }) ?? null,
+    disableDirectPlayer: reason => directPlayerFallbacks.push(reason),
+    mergeLateWatchNext,
     localApiFetch: () => assert.fail('Unexpected network request'),
     Player: { create: createPlayer },
     createBackgroundPlayer: createPlayer,
@@ -71,7 +86,7 @@ function loader({ android = Promise.resolve({ data: {} }), token = Promise.resol
     console,
   }
   const load = compileFunction(`${source.slice(start, end).replace('export ', '')}\nreturn getLocalVideoInfo`, Object.keys(dependencies))(...Object.values(dependencies))
-  return { load, requests, session, playerRequests }
+  return { load, requests, session, playerRequests, directPlayerFallbacks, watchPageLoads }
 }
 
 test('SABR reloads bypass the embedded player response and return the server context', async () => {
@@ -270,4 +285,55 @@ test('normalizes legacy popularity markers before parsing watch metadata', async
   })
   const result = await load('testVideo01')
   assert.deepEqual(getVideoPopularity(result.info), [{ startSeconds: 1, endSeconds: 2, intensity: 1 }])
+})
+
+test('a warm load plays before /next arrives and merges it into the processed playback data', async () => {
+  const next = deferred()
+  const { load, requests, watchPageLoads } = loader({
+    direct: ({ session, playerResponse }) => ({
+      session,
+      player: { signature_timestamp: 1, decipher: async url => url },
+      playerResponse,
+      poToken: 'minted-token',
+      nextRequest: next.promise,
+    })
+  })
+  const result = await load('testVideo01', { lateWatchNext: true })
+  assert.equal(watchPageLoads.count, 0)
+  assert.ok(!requests.includes('token'), 'The attestation mints the token without BotGuard')
+  assert.ok(!requests.includes('/next'), 'The direct request already asked for /next')
+  assert.equal(result.poToken, 'minted-token')
+  assert.equal(result.info.page[1], undefined)
+
+  next.resolve({ data: {} })
+  const late = await result.watchNextPromise
+  assert.notEqual(late.info.page[1], undefined)
+  // Deciphered streams and caption URLs with the token must survive the merge
+  assert.equal(late.info.streaming_data, result.info.streaming_data)
+  assert.equal(late.info.playability_status, result.info.playability_status)
+})
+
+for (const [name, fallback, watchPagePlays, disables] of [
+  ['YouTube refuses it and the watch page plays', { fallbackReason: 'playability status LOGIN_REQUIRED', sessionWide: true }, true, true],
+  ['the video is unavailable either way', { fallbackReason: 'playability status UNPLAYABLE', sessionWide: true }, false, false],
+  ['the connection drops', { fallbackReason: 'Failed to fetch', sessionWide: false }, true, false],
+]) {
+  test(`a direct request falls back to the watch page when ${name}${disables ? ', for the rest of the session' : ''}`, async () => {
+    const { load, requests, directPlayerFallbacks, watchPageLoads } = loader({
+      direct: () => fallback,
+      playability: watchPagePlays ? { status: 'OK' } : { status: 'UNPLAYABLE', reason: 'Video unavailable' },
+    })
+    const result = await load('testVideo01', { lateWatchNext: true })
+    assert.equal(watchPageLoads.count, 1)
+    assert.ok(requests.includes('token'))
+    assert.equal(result.watchNextPromise, undefined)
+    assert.deepEqual(directPlayerFallbacks, disables ? [fallback.fallbackReason] : [])
+  })
+}
+
+test('loads without lateWatchNext keep using the watch page', async () => {
+  const { load, watchPageLoads } = loader({ direct: () => assert.fail('Unexpected direct request') })
+  const result = await load('testVideo01')
+  assert.equal(watchPageLoads.count, 1)
+  assert.equal(result.watchNextPromise, undefined)
 })

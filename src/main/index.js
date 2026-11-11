@@ -46,7 +46,7 @@ import { handleTwitchChatReplayPage, handleTwitchSubOnlyVod } from './twitchChat
 import { applyTwitchPlaylistOrigin } from '../twitchPlaylistOrigin'
 import { isYtDlpStoryboardUrl, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
 import { applyYtDlpPlaybackCacheSettings } from './ytDlpPlaybackCache'
-import { generatePoToken } from './poTokenGenerator'
+import { generatePoToken, mintPoTokenFromAttestation } from './poTokenGenerator'
 import { buildProxyUrl, DEFAULT_PROXY_SETTINGS, isConfiguredProxyChallenge, isExternalBrowserUrl, isOpenTubeXUrl } from './utils'
 import { createBackgroundExternalLinkOpener } from './backgroundExternalLink'
 import { isInvidiousInstanceUrl } from './invidiousAuthorization'
@@ -2498,6 +2498,13 @@ function runApp() {
     if (isOpenTubeXUrl(event.senderFrame.url)) {
       return generatePoToken(videoId, context, initialAttestationData, ytConfig, proxyUrl)
     }
+  })
+
+  ipcMain.handle(IpcChannels.MINT_PO_TOKEN, (event, videoId) => {
+    if (isOpenTubeXUrl(event.senderFrame.url) && typeof videoId === 'string') {
+      return mintPoTokenFromAttestation(videoId, proxyUrl)
+    }
+    return null
   })
 
   // Resolve once requests use the new proxy, so a proxy test cannot reach the

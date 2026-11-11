@@ -1,5 +1,5 @@
 import { test, expect, sel } from '../../helpers/app.mjs'
-import { openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
+import { activeTab, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { DEMO_MEDIA_MIME_TYPE, DEMO_MEDIA_URL, demoPlayerResponse } from '../../helpers/media.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
@@ -238,6 +238,117 @@ test.describe('local player request concurrency', () => {
     } finally {
       finishPromotion()
     }
+  })
+
+  /**
+   * Lets the mocked attestation mint tokens, so loads skip the watch page.
+   * @param {import('@playwright/test').ElectronApplication} electronApp
+   */
+  function stubAttestation(electronApp) {
+    return electronApp.evaluate(({ ipcMain }) => {
+      ipcMain.removeHandler('mint-po-token')
+      globalThis.mintedTokenVideoIds = []
+      ipcMain.handle('mint-po-token', (_event, videoId) => {
+        globalThis.mintedTokenVideoIds.push(videoId)
+        return 'minted-po-token'
+      })
+    })
+  }
+
+  /** Counts loaded watch pages, and returns the /player of the locally generated sessions */
+  async function routeDirectPlayer(page, directResponse) {
+    const watchPages = []
+    page.on('request', request => {
+      if (request.url().startsWith('https://www.youtube.com/watch?')) watchPages.push(request.url())
+    })
+    await page.route('**/youtubei/v1/player**', route => {
+      const { videoId, context } = route.request().postDataJSON()
+      // The watch page's session has the visitor data of its ytcfg
+      if (context.client.clientName !== 'WEB' || context.client.visitorData === 'e2e-visitor-data') return route.fallback()
+      return route.fulfill({ json: directResponse(videoId) })
+    })
+    return watchPages
+  }
+
+  for (const changeVideo of [false, true]) {
+    test(changeVideo
+      ? 'late /next data of a previous video cannot replace the current one'
+      : 'plays a warm video before its /next data arrives and fills it in afterwards', async ({ app, page }, testInfo) => {
+      const nextVideoId = 'dQw4w9WgXc'
+      await mockPlayableWatchPage(app, page)
+      await stubAttestation(app.electronApp)
+      const watchPages = await routeDirectPlayer(page, id => {
+        const response = demoPlayerResponse(id)
+        response.streamingData.serverAbrStreamingUrl = 'https://rr1---sn-test.googlevideo.com/videoplayback?expire=4102444800'
+        Object.assign(response.videoDetails, { title: `Player title ${id}`, author: 'Test Channel', channelId: 'UC-test-channel-id' })
+        return response
+      })
+      let finishNext
+      const nextResponse = new Promise(resolve => { finishNext = resolve })
+      let nextPending = false
+      await page.route('**/youtubei/v1/next**', async route => {
+        const body = route.request().postDataJSON()
+        if (body.continuation) return route.fallback()
+        if (body.videoId === nextVideoId) return route.fulfill({ json: {} })
+        nextPending = true
+        await nextResponse
+        return route.fallback()
+      })
+      try {
+        await openMockedVideo(page)
+        expect(nextPending).toBe(true)
+        const watch = await watchViewHandle(page)
+        expect(await watch.evaluate(vm => [vm.isLoading, vm.watchNextPending, vm.recommendedVideos.length])).toEqual([false, true, 0])
+        await expect(page.locator('.videoTitle')).toHaveText(`Player title ${videoId}`)
+        await expect(page.locator('.infoSkeleton, .videoPlayerPlaceholder')).toHaveCount(0)
+
+        if (changeVideo) {
+          await openMockedVideo(page, nextVideoId)
+          await expect(page.locator('.videoTitle')).toHaveText(`Player title ${nextVideoId}`)
+          finishNext()
+          await expect.poll(() => watch.evaluate(vm => vm.watchNextPending)).toBe(false)
+          // Let the previous video's response settle before checking that it changed nothing
+          await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 500)))
+          expect(await watch.evaluate(vm => [vm.videoId, vm.recommendedVideos.length])).toEqual([nextVideoId, 0])
+          await expect(page.locator('.videoTitle')).toHaveText(`Player title ${nextVideoId}`)
+        } else {
+          await page.screenshot({ path: testInfo.outputPath('playback-before-next.png') })
+          const historyTitle = () => page.evaluate(id => window.$store.getters.getHistoryCacheById[id]?.title, videoId)
+          await expect.poll(historyTitle).toBe(`Player title ${videoId}`)
+          finishNext()
+          await expect.poll(() => watch.evaluate(vm => vm.watchNextPending)).toBe(false)
+          // Playback saved the /player title, which the /next data replaces
+          const nextTitle = await watch.evaluate(vm => vm.videoTitle)
+          expect(nextTitle).not.toBe(`Player title ${videoId}`)
+          await expect.poll(historyTitle).toBe(nextTitle)
+          expect(await watch.evaluate(vm => vm.recommendedVideos.length)).toBeGreaterThan(0)
+          expect(await watch.evaluate(vm => vm.channelThumbnail)).not.toBe('')
+          await expect(page.locator(`${activeTab} video`)).toHaveJSProperty('paused', false)
+          await page.screenshot({ path: testInfo.outputPath('late-next-filled-in.png') })
+        }
+        expect(watchPages).toEqual([])
+        expect(await app.electronApp.evaluate(() => globalThis.mintedTokenVideoIds))
+          .toEqual(changeVideo ? [videoId, nextVideoId] : [videoId])
+        await watch.dispose()
+      } finally {
+        finishNext()
+      }
+    })
+  }
+
+  test('loads the watch page instead when YouTube refuses the direct request, for the rest of the session', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await stubAttestation(app.electronApp)
+    const watchPages = await routeDirectPlayer(page, () => ({
+      playabilityStatus: { status: 'LOGIN_REQUIRED', reason: 'Sign in to confirm you’re not a bot' }
+    }))
+    await openMockedVideo(page)
+    await expect(page.locator('.errorMessage')).not.toBeVisible()
+    expect(watchPages).toHaveLength(1)
+    await openMockedVideo(page, 'dQw4w9WgXc')
+    expect(watchPages).toHaveLength(2)
+    // The second video doesn't try the direct request again
+    expect(await app.electronApp.evaluate(() => globalThis.mintedTokenVideoIds)).toEqual(['jNQXAC9IVRw'])
   })
 
   for (const changeVideo of [false, true]) {

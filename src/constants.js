@@ -183,6 +183,7 @@ const IpcChannels = {
   GET_REQUEST_ERROR: 'get-request-error',
 
   GENERATE_PO_TOKEN: 'generate-po-token',
+  MINT_PO_TOKEN: 'mint-po-token',
 
   OPEN_PROFILE_DIRECTORY: 'open-profile-directory',
   CREATE_BACKUP_ARCHIVE: 'create-backup-archive',
