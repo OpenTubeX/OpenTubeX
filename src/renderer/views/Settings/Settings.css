@@ -626,10 +626,12 @@
   animation: none;
 }
 
-:global(html.draggingSettingsWindow),
-:global(html.draggingSettingsWindow *) {
-  cursor: move !important;
-  user-select: none !important;
+/* On its own layer, a moving window is only recomposited instead of
+   repainting itself and the page below it on every frame. Promoting it only
+   during the gesture keeps subpixel text antialiasing while it rests. */
+:global(html.draggingSettingsWindow .settingsWindow),
+:global(html.resizingSettingsWindow .settingsWindow) {
+  will-change: translate;
 }
 
 .settingsResizeHandle {
@@ -703,11 +705,6 @@
   inset-block-start: var(--resize-corner-inset);
   inset-inline-start: var(--resize-corner-inset);
   cursor: nwse-resize;
-}
-
-:global(html.resizingSettingsWindow),
-:global(html.resizingSettingsWindow *) {
-  user-select: none !important;
 }
 
 @container settings-window (width < 760px) {

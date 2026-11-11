@@ -1084,13 +1084,7 @@ function handleMounted() {
           })
           scheduleBoundsSave()
         }
-        if (protectedSettingsVisible.value && settingsContentRef.value) {
-          clampOverlayScrollTop(
-            settingsContentRef.value,
-            getSettingsContentEnd(settingsContentRef.value)
-          )
-        }
-        scheduleStandaloneScrollClamp()
+        if (resizeSession === null) clampWindowContentScroll()
       }
     })
     settingsResizeObserver.observe(element)
@@ -1118,7 +1112,7 @@ function observeProfileManager() {
   if (!content || !(profileManager instanceof HTMLElement)) return
 
   profileManagerResizeObserver = new ResizeObserver(() => {
-    clampOverlayScrollTop(content, profileManager)
+    if (resizeSession === null) clampOverlayScrollTop(content, profileManager)
   })
   profileManagerResizeObserver.observe(profileManager)
   clampOverlayScrollTop(content, profileManager)
@@ -1135,7 +1129,9 @@ function observeStandaloneContent() {
   const content = scrollViewport?.firstElementChild
   if (!scrollViewport || !(content instanceof HTMLElement)) return
 
-  standaloneContentResizeObserver = new ResizeObserver(scheduleStandaloneScrollClamp)
+  standaloneContentResizeObserver = new ResizeObserver(() => {
+    if (resizeSession === null) scheduleStandaloneScrollClamp()
+  })
   standaloneContentResizeObserver.observe(content)
   scheduleStandaloneScrollClamp()
 }
@@ -1143,6 +1139,22 @@ function observeStandaloneContent() {
 function stopObservingStandaloneContent() {
   standaloneContentResizeObserver?.disconnect()
   standaloneContentResizeObserver = null
+}
+
+/**
+ * Clamping reads layout after the scrollbars restyled for the new size, which
+ * would force another layout on every frame of a resize gesture. Scrolling
+ * still limits the offset to the shrinking range then, so the content
+ * observers wait for the gesture to end, which clamps everything once.
+ */
+function clampWindowContentScroll() {
+  if (protectedSettingsVisible.value && settingsContentRef.value) {
+    clampOverlayScrollTop(
+      settingsContentRef.value,
+      getSettingsContentEnd(settingsContentRef.value)
+    )
+  }
+  scheduleStandaloneScrollClamp()
 }
 
 function clampProfileManagerScroll() {
@@ -1165,6 +1177,7 @@ function observeActiveSettingsSection() {
     const height = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height
     const contentShrank = previousHeight !== null && height < previousHeight
     previousHeight = height
+    if (resizeSession !== null) return
     if (isInDesktopView.value || content.scrollTop > 0 || contentShrank) {
       clampOverlayScrollTop(content, contentEnd)
     }
@@ -1685,11 +1698,25 @@ function startDragging(event) {
     dragOffsetY = event.clientY - bounds.y
   }
   draggingPointerId = event.pointerId
+  capturePointer(event)
   document.documentElement.classList.add('draggingSettingsWindow')
   window.addEventListener('pointermove', dragWindow)
   window.addEventListener('pointerup', stopDragging)
   window.addEventListener('pointercancel', stopDragging)
   event.preventDefault()
+}
+
+/**
+ * Keeps the handle's cursor and stops hover effects below the pointer while
+ * it leaves the handle, without restyling the whole page, as a cursor rule
+ * for every element would at the start and end of each gesture.
+ */
+function capturePointer(event) {
+  try {
+    event.currentTarget.setPointerCapture(event.pointerId)
+  } catch {
+    // A pointer that is no longer active cannot be captured.
+  }
 }
 
 function dragWindow(event) {
@@ -1754,8 +1781,8 @@ function startResizing(event, direction) {
     startY: event.clientY,
     bounds: { ...windowBounds.value }
   }
+  capturePointer(event)
   document.documentElement.classList.add('resizingSettingsWindow')
-  document.documentElement.style.cursor = getComputedStyle(event.currentTarget).cursor
   window.addEventListener('pointermove', resizeWindow)
   window.addEventListener('pointerup', stopResizing)
   window.addEventListener('pointercancel', stopResizing)
@@ -1811,11 +1838,12 @@ function stopResizing(event) {
   commitLiveBounds()
   resizeSession = null
   document.documentElement.classList.remove('resizingSettingsWindow')
-  document.documentElement.style.removeProperty('cursor')
   window.removeEventListener('pointermove', resizeWindow)
   window.removeEventListener('pointerup', stopResizing)
   window.removeEventListener('pointercancel', stopResizing)
   scheduleBoundsSave()
+  clampWindowContentScroll()
+  clampProfileManagerScroll()
 }
 
 function handleViewportResize() {
