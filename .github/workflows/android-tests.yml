@@ -132,7 +132,9 @@ jobs:
           adb root && adb wait-for-device && timeout 30 sh -c "until adb shell id | grep -q uid=0; do sleep 1; done"
           adb shell 'echo 100 > /sys/module/mac80211/parameters/beacon_loss_count'
           adb unroot && adb wait-for-device && timeout 30 sh -c "until adb shell id | grep -q uid=2000; do sleep 1; done"
-          adb shell cmd wifi set-wifi-enabled disabled && adb shell cmd wifi set-wifi-enabled enabled
+          adb shell cmd wifi set-wifi-enabled disabled
+          timeout 60 sh -c "while adb shell ip route show table all | grep -q 'default via .* dev wlan0 table'; do sleep 1; done"
+          adb shell cmd wifi set-wifi-enabled enabled
           timeout 120 sh -c "until adb shell ip route show table all | grep -q 'default via .* dev wlan0 table'; do sleep 1; done"
           adb shell settings put global hide_error_dialogs 1
           adb shell settings put secure anr_show_background 0
