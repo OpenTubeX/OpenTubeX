@@ -9,6 +9,7 @@ import { parseLocalVideoGames } from '../../src/renderer/helpers/video-games.js'
 import { parseLocalVideoMusicTracks } from '../../src/renderer/helpers/video-music.js'
 import { parseLocalVideoCollaborators } from '../../src/renderer/helpers/video-collaborators.js'
 import { getVideoPopularity } from '../../src/renderer/helpers/player/videoPopularity.js'
+import { getAudioFormatLoudness } from '../../src/renderer/helpers/player/loudnessNormalization.js'
 
 const { parseLocalSubscriberCount, parseLocalTextRuns } = createLocalFeedParsers(() => false)
 
@@ -38,6 +39,7 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
     parseLocalVideoMusicTracks,
     parseLocalVideoSummary,
     getVideoPopularity,
+    getAudioFormatLoudness,
     YTNodes,
     parseLocalTextRuns,
     MANIFEST_TYPE_DASH: 'dash',
