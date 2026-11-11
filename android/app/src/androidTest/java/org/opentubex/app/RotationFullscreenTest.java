@@ -205,9 +205,13 @@ public class RotationFullscreenTest {
                 shell("settings put system user_rotation 0");
             }
             try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
-                AtomicReference<WebView> reference = new AtomicReference<>();
-                scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
-                WebView view = reference.get();
+                // Video keeps the main thread from idling, so later checks run on the
+                // activity directly instead of through ActivityScenario's idle wait.
+                // It handles rotation itself and keeps this instance.
+                AtomicReference<MainActivity> reference = new AtomicReference<>();
+                scenario.onActivity(reference::set);
+                MainActivity main = reference.get();
+                WebView view = main.getBridge().getWebView();
                 awaitCondition(view, "!!document.querySelector('.tabContent[aria-hidden=\"false\"]') && !!document.querySelector('.profileTrigger')");
                 evaluate(view, """
                     (() => {
@@ -261,7 +265,7 @@ public class RotationFullscreenTest {
                         })()
                         """.replace("MEDIA", media));
                     awaitCondition(view, "document.querySelector('.ftVideoPlayer video')?.readyState >= 2");
-                    assertInlinePortrait(scenario, view);
+                    assertInlinePortrait(main, view);
 
                     // Android's rotation suggestion button changes the user-selected
                     // display rotation while accelerometer rotation remains disabled.
@@ -272,22 +276,22 @@ public class RotationFullscreenTest {
                             assertTrue("Host turns the device sideways", android.os.SystemClock.uptimeMillis() < deadline);
                             Thread.sleep(100);
                         }
-                        assertInlinePortrait(scenario, view);
+                        assertInlinePortrait(main, view);
                         evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setFullscreenRotationIgnoresSystemLock', true)");
                     } else {
                         assertTrue(InstrumentationRegistry.getInstrumentation().getUiAutomation().setRotation(UiAutomation.ROTATION_FREEZE_90));
                     }
                     awaitCondition(view, "innerWidth > innerHeight");
                     awaitCondition(view, "!!document.querySelector('.videoLayout:popover-open .ftVideoPlayer.fullWindow')");
-                    awaitPageScrollbarEnabled(scenario, view, false);
+                    awaitPageScrollbarEnabled(main, view, false);
                     awaitCondition(view, "(() => { const rect = document.querySelector('.ftVideoPlayer').getBoundingClientRect(); return rect.width >= innerWidth - 2 && rect.height >= innerHeight - 2; })()");
-                    scenario.onActivity(activity -> assertEquals("Only the explicit opt-in may force landscape",
+                    onMain(main, activity -> assertEquals("Only the explicit opt-in may force landscape",
                         physicalRotation, activity.getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE));
                     assertEquals("0", shell("settings get system accelerometer_rotation"));
                     if (swipeExit) {
                         // Swipe the center so side brightness/volume gestures do not intercept.
                         int[] size = new int[2];
-                        scenario.onActivity(activity -> {
+                        onMain(main, activity -> {
                             size[0] = view.getWidth();
                             size[1] = view.getHeight();
                         });
@@ -303,19 +307,19 @@ public class RotationFullscreenTest {
                         assertTrue(InstrumentationRegistry.getInstrumentation().getUiAutomation().setRotation(UiAutomation.ROTATION_FREEZE_0));
                     }
                     awaitCondition(view, "!document.body.classList.contains('playerFullWindow')");
-                    awaitPageScrollbarEnabled(scenario, view, true);
-                    assertInlinePortrait(scenario, view);
+                    awaitPageScrollbarEnabled(main, view, true);
+                    assertInlinePortrait(main, view);
                     if (swipeExit) {
                         Thread.sleep(1000);
                         assertEquals("Swipe must not enter native fullscreen or reopen rotation fullscreen", "false",
                             evaluate(view, "!!document.fullscreenElement || !!document.querySelector('.videoLayout:popover-open')"));
                     }
                     if (physicalRotation) {
-                        scenario.onActivity(activity -> assertEquals("Restore the user's orientation policy",
+                        onMain(main, activity -> assertEquals("Restore the user's orientation policy",
                             ActivityInfo.SCREEN_ORIENTATION_USER, activity.getRequestedOrientation()));
                     }
                 } finally {
-                    scenario.onActivity(activity -> activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER));
+                    onMain(main, activity -> activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER));
                     evaluate(view, """
                         (() => {
                             const app = document.querySelector('#app').__vue_app__.config.globalProperties;
@@ -345,14 +349,14 @@ public class RotationFullscreenTest {
         }
     }
 
-    private static void awaitPageScrollbarEnabled(ActivityScenario<MainActivity> scenario, WebView view,
+    private static void awaitPageScrollbarEnabled(MainActivity main, WebView view,
         boolean enabled) throws Exception {
         // The DOM update precedes the bridge worker and its native UI-thread
         // update. Main-looper idleness alone does not drain the bridge queue.
         AtomicReference<Boolean> actual = new AtomicReference<>();
         long deadline = android.os.SystemClock.uptimeMillis() + 5000;
         do {
-            scenario.onActivity(activity -> actual.set(view.isVerticalScrollBarEnabled()));
+            onMain(main, activity -> actual.set(view.isVerticalScrollBarEnabled()));
             if (actual.get() == enabled) return;
             Thread.sleep(100);
         } while (android.os.SystemClock.uptimeMillis() < deadline);
@@ -370,16 +374,20 @@ public class RotationFullscreenTest {
         shell("settings " + ("null".equals(value) ? "delete system " + name : "put system " + name + " " + value));
     }
 
-    private static void assertInlinePortrait(ActivityScenario<MainActivity> scenario, WebView view) throws Exception {
+    private static void assertInlinePortrait(MainActivity main, WebView view) throws Exception {
         assertEquals("Inline playback must not open fullscreen", "false",
             evaluate(view, "!!document.querySelector('.videoLayout:popover-open')"));
-        scenario.onActivity(activity -> {
+        onMain(main, activity -> {
             assertFalse("Inline playback must not force landscape",
                 activity.getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
         });
         awaitCondition(view, "innerHeight > innerWidth");
-        scenario.onActivity(activity -> assertEquals(Configuration.ORIENTATION_PORTRAIT,
+        onMain(main, activity -> assertEquals(Configuration.ORIENTATION_PORTRAIT,
             activity.getResources().getConfiguration().orientation));
+    }
+
+    private static void onMain(MainActivity main, ActivityScenario.ActivityAction<MainActivity> action) {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> action.perform(main));
     }
 
     private static String evaluate(WebView view, String script) throws Exception {
