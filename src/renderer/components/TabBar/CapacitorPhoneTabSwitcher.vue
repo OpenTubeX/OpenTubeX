@@ -59,7 +59,7 @@
                 class="capacitorPhoneTabHeaderButton"
                 :aria-label="t('Cancel')"
                 :title="t('Cancel')"
-                @click="clearSelection"
+                @click="cancelSelection"
               >
                 <FtIcon
                   :icon="['fas', 'xmark']"
@@ -1311,6 +1311,14 @@ function resetTabSwipe() {
   swipe.rowWidth = 0
 }
 
+// Cancelling removes the focused cancel button or checkbox, so keep focus in the dialog.
+async function cancelSelection() {
+  const hadFocus = dialogRef.value?.contains(document.activeElement)
+  clearSelection()
+  await nextTick()
+  if (hadFocus && !dialogRef.value?.contains(document.activeElement)) focusActiveTab()
+}
+
 function focusActiveTab() {
   dialogRef.value
     ?.querySelector('.capacitorPhoneTabTarget[aria-selected="true"]')
@@ -1321,7 +1329,7 @@ function handleDialogKeydown(event) {
   if (event.key === 'Escape') {
     event.preventDefault()
     if (activeView.value === 'history') selectView('open', true)
-    else if (selecting.value) clearSelection()
+    else if (selecting.value) cancelSelection()
     else closeSwitcher()
     return
   }

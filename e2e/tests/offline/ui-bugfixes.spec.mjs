@@ -1244,6 +1244,8 @@ test('mobile tab selection uses checkboxes and cancels without activating', { ta
   await page.getByRole('button', { name: 'Cancel', exact: true }).click()
   await expect(cards.getByRole('checkbox')).toHaveCount(0)
   await expect(page.locator('.capacitorPhoneTabFab')).toBeVisible()
+  // The cancel button disappears, so focus must stay in the dialog for keyboard use.
+  await expect(page.locator('.capacitorPhoneTabTarget[aria-selected="true"]')).toBeFocused()
   await expect.poll(async () => {
     const state = await phoneTabScrollState(page, '.capacitorPhoneOpenTabs')
     return state.scrollTop <= state.maximum + 1
