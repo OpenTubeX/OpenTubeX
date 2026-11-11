@@ -139,8 +139,8 @@ public class StartupBackgroundTest {
             darkConfiguration.uiMode = (darkConfiguration.uiMode & ~Configuration.UI_MODE_NIGHT_MASK) | Configuration.UI_MODE_NIGHT_YES;
             Context light = context.createConfigurationContext(lightConfiguration);
             Context dark = context.createConfigurationContext(darkConfiguration);
-            assertEquals("Fresh light launch", Color.rgb(241, 241, 241), StartupBackground.getColor(light));
-            assertEquals("Fresh dark launch", Color.rgb(15, 15, 15), StartupBackground.getColor(dark));
+            assertEquals("Fresh light launch", Color.rgb(246, 245, 244), StartupBackground.getColor(light));
+            assertEquals("Fresh dark launch", Color.rgb(17, 17, 17), StartupBackground.getColor(dark));
             for (Context mode : new Context[] { light, dark }) {
                 var launch = new android.view.ContextThemeWrapper(mode, R.style.AppTheme_NoActionBarLaunch);
                 var colors = launch.obtainStyledAttributes(new int[] {
