@@ -79,8 +79,8 @@ public class SubscriptionRefreshLifecycleTest {
                     held.countDown();
                     try { release.await(); } catch (InterruptedException ignored) { Thread.currentThread().interrupt(); }
                 });
-                assertTrue(held.await(10, TimeUnit.SECONDS));
                 try {
+                    assertTrue(held.await(10, TimeUnit.SECONDS));
                     assertTrue(SubscriptionRefreshWorker.finish(context, token.get()));
                     JSObject next = start(retained.get());
                     assertTrue("next start acquires ownership", next.getBool("acquired"));

@@ -82,7 +82,10 @@ public final class SubscriptionRefreshWorker extends Worker {
             service.putExtra("token", state.token).putExtra("title", state.title)
                 .putExtra("cancelLabel", state.cancelLabel);
             try {
-                SubscriptionRefreshService.start(context, service);
+                if (!SubscriptionRefreshService.start(context, service)) {
+                    Log.w(LOG_TAG, "Android declined the subscription refresh service");
+                    publishNotification(context, state);
+                }
             } catch (IllegalStateException | SecurityException error) {
                 Log.w(LOG_TAG, "Unable to start subscription refresh service", error);
                 publishNotification(context, state);

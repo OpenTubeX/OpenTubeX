@@ -6,7 +6,6 @@ import android.content.pm.ServiceInfo;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
-import androidx.core.content.ContextCompat;
 
 /** Protect a renderer refresh only while the app is out of view. */
 public final class SubscriptionRefreshService extends Service {
@@ -17,14 +16,17 @@ public final class SubscriptionRefreshService extends Service {
     private static int pendingStarts;
     private PowerManager.WakeLock wakeLock;
 
-    static void start(android.content.Context context, Intent service) {
+    /** Returns false when Android declines the start without an exception. */
+    static boolean start(android.content.Context context, Intent service) {
         pendingStarts++;
         try {
-            ContextCompat.startForegroundService(context, service);
+            if (context.startForegroundService(service) != null) return true;
         } catch (RuntimeException error) {
             pendingStarts--;
             throw error;
         }
+        pendingStarts--;
+        return false;
     }
 
     static void stopIfStarted(android.content.Context context) {
