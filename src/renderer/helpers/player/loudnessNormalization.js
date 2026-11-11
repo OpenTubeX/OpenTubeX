@@ -16,7 +16,8 @@ export function getLoudnessNormalizationGain(loudnessDb) {
  * Dubbed and Stable Volume tracks have their own loudness, which YouTube's
  * player uses instead of the video's when `enablePerFormatLoudness` is set.
  * The keys are the IDs Shaka reports as `originalAudioId` for the DASH and
- * SABR manifests, plus the DASH ID without its itag for each audio track.
+ * SABR manifests, plus the DASH ID without its itag for each audio track,
+ * which is empty for the only track of a video without labeled tracks.
  *
  * @param {import('youtubei.js').Misc.Format[]} formats
  * @param {boolean | undefined} enablePerFormatLoudness
@@ -33,8 +34,7 @@ export function getAudioFormatLoudness(formats, enablePerFormatLoudness) {
     const dashId = getDashAudioFormatId(format)
     loudness[dashId] = format.loudness_db
     loudness[getSabrFormatId({ itag: format.itag, lastModified: format.last_modified_ms, xtags: format.xtags })] = format.loudness_db
-    const trackId = getAudioTrackId(dashId)
-    if (trackId !== '') loudness[trackId] ??= format.loudness_db
+    loudness[getAudioTrackId(dashId)] ??= format.loudness_db
   }
 
   return loudness

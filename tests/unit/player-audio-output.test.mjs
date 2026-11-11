@@ -257,6 +257,9 @@ test('per-format loudness is keyed by the audio IDs Shaka reports for DASH and S
   assert.equal(getActiveAudioLoudnessDb(loudness, '139-de.3'), -0.2)
   assert.equal(getActiveAudioLoudnessDb(loudness, '139-en.4-drc'), 0)
 
+  const { audioTrack, ...unlabelled } = audio
+  assert.equal(getActiveAudioLoudnessDb(getAudioFormatLoudness([new Misc.Format({ ...unlabelled, loudnessDb: 1.5 })], true), '139'), 1.5)
+
   // Without the flag, YouTube's player uses the video's loudness for every track
   assert.deepEqual(getAudioFormatLoudness(formats, false), {})
 })
