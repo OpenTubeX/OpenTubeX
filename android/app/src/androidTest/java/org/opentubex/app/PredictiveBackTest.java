@@ -402,8 +402,12 @@ public class PredictiveBackTest {
         for (String panel : new String[] { "comments", "description", "chapters" }) {
             evaluate(view, "window.__backWatch().openPhonePanel('" + panel + "')");
             await(view, "!!document.querySelector('.dockedSheet[open]')");
-            Thread.sleep(300);
-            evaluate(view, "window.__backSheet = document.querySelector('.dockedSheet[open]');" +
+            // Record the resting position only after opening and content layout settle.
+            await(view, "(() => { const sheet = document.querySelector('.dockedSheet[open]');" +
+                "const top = sheet.getBoundingClientRect().top; const settled = window.__backSettlingTop === top;" +
+                "window.__backSettlingTop = top; return settled && sheet.getAnimations().length === 0; })()");
+            evaluate(view, "delete window.__backSettlingTop;" +
+                "window.__backSheet = document.querySelector('.dockedSheet[open]');" +
                 "window.__backSheetTop = window.__backSheet.getBoundingClientRect().top;" +
                 "window.__backEntry = " + STORE + ".getters.getActiveTab.historyIndex;" +
                 "window.__backScroll = window.__backSheet.querySelector('[data-overlayscrollbars-viewport]');" +
