@@ -161,6 +161,7 @@ Home Page:
   All sections hidden: Svi su odjeljci skriveni
   All sections hidden description: Prilagodite početnu stranicu kako biste ponovno prikazali odjeljak.
 Subscriptions:
+  Cache Load Error: Spremljeni feedovi pretplata nisu se mogli učitati.
   New video from {channel}: Novi video s kanala {channel}
   New short from {channel}: Novi kratki video s kanala {channel}
   '{channel} is live': "{channel} emitira uživo"

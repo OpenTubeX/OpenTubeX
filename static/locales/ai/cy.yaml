@@ -161,6 +161,7 @@ Home Page:
   All sections hidden: Mae pob adran wedi'i chuddio
   All sections hidden description: Addaswch yr hafan i ddangos adran eto.
 Subscriptions:
+  Cache Load Error: 'Nid oedd modd llwytho''ch ffrydiau tanysgrifio a gadwyd.'
   New video from {channel}: Fideo newydd gan {channel}
   New short from {channel}: Byr newydd gan {channel}
   '{channel} is live': Mae {channel} yn fyw

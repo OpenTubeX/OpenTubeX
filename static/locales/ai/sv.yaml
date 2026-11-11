@@ -161,6 +161,7 @@ Home Page:
   All sections hidden: Alla avsnitt är dolda
   All sections hidden description: Anpassa startsidan för att visa ett avsnitt igen.
 Subscriptions:
+  Cache Load Error: Dina sparade prenumerationsflöden kunde inte läsas in.
   New video from {channel}: Ny video från {channel}
   New short from {channel}: Ny Short från {channel}
   '{channel} is live': "{channel} sänder live"

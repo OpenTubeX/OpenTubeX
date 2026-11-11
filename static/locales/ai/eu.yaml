@@ -161,6 +161,7 @@ Home Page:
   All sections hidden: Atal guztiak ezkutatuta daude
   All sections hidden description: Pertsonalizatu hasiera atal bat berriro erakusteko.
 Subscriptions:
+  Cache Load Error: Ezin izan dira gordetako harpidetza-jarioak kargatu.
   New video from {channel}: "{channel} kanalaren bideo berria"
   New short from {channel}: "{channel} kanalaren labur berria"
   '{channel} is live': "{channel} zuzenean dago"

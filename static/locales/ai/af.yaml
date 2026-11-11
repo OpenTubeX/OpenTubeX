@@ -192,6 +192,7 @@ Home Page:
   All sections hidden: Alle afdelings is versteek
   All sections hidden description: Pas Tuis aan om ’n afdeling weer te wys.
 Subscriptions:
+  Cache Load Error: Jou gestoorde intekeningvoere kon nie gelaai word nie.
   New video from {channel}: Nuwe video van {channel}
   New short from {channel}: Nuwe kortvideo van {channel}
   '{channel} is live': '{channel} is regstreeks'

@@ -314,6 +314,7 @@ Subscriptions:
   Disabled Automatic Fetching: You have disabled automatic subscription fetching. Refresh subscriptions to see them here.
   Empty Channels: Your subscribed channels currently do not have any videos.
   Empty Posts: Your subscribed channels currently do not have any posts.
+  Cache Load Error: Your saved subscription feeds could not be loaded.
   Load More Videos: Load More Videos
   Load More Posts: Load More Posts
   Subscriptions Tabs: Subscriptions Tabs

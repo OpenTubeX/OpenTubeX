@@ -213,6 +213,10 @@ if (!subscriptionCacheReady.value) {
   watch(subscriptionCacheReady, () => {
     if (!alreadyLoadedRemotely) {
       loadPostsFromCacheSometimes()
+    } else if (!isLoading.value) {
+      // The automatic fetch finished before the cache loaded, for example
+      // when the startup load failed and was retried
+      loadPostsFromCacheForAllActiveProfileChannels()
     }
   })
 }
@@ -303,6 +307,9 @@ async function loadPostsForSubscriptionsFromRemote(automatic = false) {
     if (refreshedPosts !== null) {
       loadPostsFromCacheForAllActiveProfileChannels()
       lastRemoteRefreshSuccessTimestamp.value = store.getters.getSubscriptionPostsLastRefreshTimestamp
+    } else if (subscriptionCacheReady.value) {
+      // A cancelled refresh loads nothing, but a retried cache load waited for it
+      loadPostsFromCacheForAllActiveProfileChannels()
     }
   } finally {
     isLoading.value = false

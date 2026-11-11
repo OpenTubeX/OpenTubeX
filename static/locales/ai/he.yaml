@@ -161,6 +161,7 @@ Home Page:
   All sections hidden: כל המקטעים מוסתרים
   All sections hidden description: התאימו אישית את דף הבית כדי להציג שוב מקטע.
 Subscriptions:
+  Cache Load Error: לא ניתן היה לטעון את פידי המינויים השמורים שלך.
   New video from {channel}: סרטון חדש מ־{channel}
   New short from {channel}: Short חדש מ־{channel}
   '{channel} is live': "{channel} בשידור חי"

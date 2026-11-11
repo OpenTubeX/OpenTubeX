@@ -1,3 +1,4 @@
+import { DBActions, IpcChannels } from '../../../src/constants.js'
 import { defaultThemeClass, test, expect, goTo } from '../../helpers/app.mjs'
 
 for (const count of [2, 20]) {
@@ -149,3 +150,81 @@ for (const count of [2, 20]) {
     }
   })
 }
+
+test.describe('failed subscription cache load', () => {
+  const channelId = 'UCaaaaaaaaaaaaaaaaaaaaaa'
+  test.use({
+    seed: {
+      settings: {
+        backendPreference: 'invidious',
+        backendFallback: false,
+        defaultInvidiousInstance: 'https://feeds.example',
+        fetchSubscriptionsAutomatically: true,
+        useRssFeeds: true
+      },
+      profiles: [{
+        _id: 'allChannels',
+        name: 'All Channels',
+        bgColor: '#000000',
+        textColor: '#FFFFFF',
+        subscriptions: [{ id: channelId, name: 'Channel A', thumbnail: '' }]
+      }],
+      subscriptionCache: [{
+        _id: channelId,
+        videos: [{
+          videoId: 'video000000',
+          title: 'Cached video',
+          author: 'Channel A',
+          authorId: channelId,
+          published: Date.now(),
+          lengthSeconds: 120,
+          type: 'video'
+        }],
+        videosTimestamp: new Date().toISOString()
+      }]
+    }
+  })
+
+  for (const outcome of ['failed', 'is cancelled']) {
+    test(`retrying shows the cached feed when the automatic refresh ${outcome}`, async ({ page, app }) => {
+      await app.electronApp.evaluate(({ ipcMain }, { channel, find }) => {
+        const original = ipcMain._invokeHandlers.get(channel)
+        globalThis.__failSubscriptionCacheLoad = true
+        ipcMain.removeHandler(channel)
+        ipcMain.handle(channel, (event, request) => {
+          if (globalThis.__failSubscriptionCacheLoad && request.action === find) throw new Error('Cache unavailable')
+          return original(event, request)
+        })
+      }, { channel: IpcChannels.DB_SUBSCRIPTION_CACHE, find: DBActions.GENERAL.FIND })
+      let releaseRefresh
+      const refreshReleased = new Promise(resolve => { releaseRefresh = resolve })
+      await page.route('https://feeds.example/**', async route => {
+        if (outcome === 'is cancelled') await refreshReleased
+        await route.fulfill({ status: 404, body: 'Not found' }).catch(() => {})
+      })
+      try {
+        // Load the cache again, now through the failing handler
+        await page.reload()
+        await goTo(page, 'subscriptions')
+        await page.locator('[data-subscription-feed-tab="videos"]').click()
+        const error = page.getByText('Your saved subscription feeds could not be loaded.')
+        await expect(error).toBeVisible()
+        await expect(outcome === 'failed'
+          ? page.getByRole('heading', { name: 'Channels with Errors' })
+          : page.getByText('Refreshing subscription videos')).toBeVisible()
+
+        await app.electronApp.evaluate(() => { globalThis.__failSubscriptionCacheLoad = false })
+        await page.getByRole('button', { name: 'Retry' }).click()
+        await expect(error).toBeHidden()
+        if (outcome === 'is cancelled') {
+          await page.locator('[data-subscription-feed-tab="videos"]').click({ button: 'right' })
+          await page.getByRole('menuitem', { name: 'Cancel refresh' }).click()
+          releaseRefresh()
+        }
+        await expect(page.getByRole('link', { name: 'Cached video' }).first()).toBeVisible()
+      } finally {
+        releaseRefresh()
+      }
+    })
+  }
+})

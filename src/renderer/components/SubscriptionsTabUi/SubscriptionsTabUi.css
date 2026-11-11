@@ -7,3 +7,10 @@
   margin-block: 16px 0;
   color: var(--tertiary-text-color);
 }
+
+.cacheLoadError {
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}

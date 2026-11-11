@@ -241,6 +241,10 @@ if (!subscriptionCacheReady.value) {
   watch(subscriptionCacheReady, () => {
     if (!alreadyLoadedRemotely) {
       loadVideosFromCacheSometimes()
+    } else if (!isLoading.value) {
+      // The automatic fetch finished before the cache loaded, for example
+      // when the startup load failed and was retried
+      loadVideosFromCacheForAllActiveProfileChannels()
     }
   })
 }
@@ -336,6 +340,9 @@ async function loadVideosForSubscriptionsFromRemote(automatic = false) {
     if (refreshedVideos !== null) {
       loadVideosFromCacheForAllActiveProfileChannels()
       lastRemoteRefreshSuccessTimestamp.value = store.getters.getSubscriptionLiveLastRefreshTimestamp
+    } else if (subscriptionCacheReady.value) {
+      // A cancelled refresh loads nothing, but a retried cache load waited for it
+      loadVideosFromCacheForAllActiveProfileChannels()
     }
   } finally {
     isLoading.value = false

@@ -199,6 +199,7 @@ Home Page:
   All sections hidden: Totes les seccions estan ocultes
   All sections hidden description: Personalitzeu l'inici per tornar a mostrar una secció.
 Subscriptions:
+  Cache Load Error: 'No s''han pogut carregar els vostres canals de subscripcions desats.'
   New video from {channel}: Vídeo nou de {channel}
   New short from {channel}: Curt nou de {channel}
   '{channel} is live': "{channel} està en directe"

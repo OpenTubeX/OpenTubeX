@@ -161,6 +161,7 @@ Home Page:
   All sections hidden: Alle delar er gøymde
   All sections hidden description: Tilpass heimesida for å vise ein del igjen.
 Subscriptions:
+  Cache Load Error: Kunne ikkje lasta inn dei lagra abonnementsstraumane dine.
   New video from {channel}: Ny video frå {channel}
   New short from {channel}: Ny Shorts-video frå {channel}
   '{channel} is live': "{channel} sender direkte"

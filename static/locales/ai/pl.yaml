@@ -59,6 +59,7 @@ Home Page:
   All sections hidden: Wszystkie sekcje są ukryte
   All sections hidden description: Dostosuj stronę główną, aby ponownie wyświetlić sekcję.
 Subscriptions:
+  Cache Load Error: Nie udało się wczytać zapisanych kanałów subskrypcji.
   New video from {channel}: Nowy film od {channel}
   New short from {channel}: Nowy film Short od {channel}
   '{channel} is live': "{channel} nadaje na żywo"

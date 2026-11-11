@@ -163,6 +163,7 @@ Home Page:
   All sections hidden: Сви одељци су сакривени
   All sections hidden description: Прилагодите почетну страницу да бисте поново приказали одељак.
 Subscriptions:
+  Cache Load Error: Сачувани фидови претплата нису могли да се учитају.
   New video from {channel}: Нови видео снимак са канала {channel}
   New short from {channel}: Нови кратки снимак са канала {channel}
   '{channel} is live': "{channel} емитује уживо"

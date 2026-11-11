@@ -161,6 +161,7 @@ Home Page:
   All sections hidden: Kõik jaotised on peidetud
   All sections hidden description: Kohanda avalehte, et mõni jaotis uuesti kuvada.
 Subscriptions:
+  Cache Load Error: Salvestatud tellimuste vooge ei õnnestunud laadida.
   New video from {channel}: Uus video kanalilt {channel}
   New short from {channel}: Uus lühivideo kanalilt {channel}
   '{channel} is live': "{channel} on otse-eetris"

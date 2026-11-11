@@ -161,6 +161,7 @@ Home Page:
   All sections hidden: Semua bagian disembunyikan
   All sections hidden description: Sesuaikan Beranda untuk menampilkan kembali bagian.
 Subscriptions:
+  Cache Load Error: Feed langganan tersimpan Anda tidak dapat dimuat.
   New video from {channel}: Video baru dari {channel}
   New short from {channel}: Video singkat baru dari {channel}
   '{channel} is live': "{channel} sedang siaran langsung"

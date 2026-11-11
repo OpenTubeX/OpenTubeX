@@ -1,10 +1,25 @@
 <template>
   <div>
+    <FtFlexBox
+      v-if="subscriptionCacheLoadFailed"
+      class="cacheLoadError"
+    >
+      <p class="message">
+        {{ $t('Subscriptions.Cache Load Error') }}
+      </p>
+      <FtButton
+        :label="$t('User Playlists.SinglePlaylistView.Retry')"
+        :icon="['fas', 'sync']"
+        background-color="var(--primary-color)"
+        text-color="var(--text-with-main-color)"
+        @click="retrySubscriptionCacheLoad"
+      />
+    </FtFlexBox>
     <FtLoader
-      v-if="showsLoadingPlaceholder && isCommunity"
+      v-else-if="showsLoadingPlaceholder && isCommunity"
     />
     <FtSkeletonGrid
-      v-if="showsLoadingPlaceholder && !isCommunity"
+      v-else-if="showsLoadingPlaceholder && !isCommunity"
       :youtube-style-shorts="youtubeStyleShorts"
     />
     <div
@@ -227,6 +242,13 @@ const visibleErrorChannels = computed(() => {
 const activeGroupIsEmpty = computed(() => {
   return store.getters.getActiveSubscriptionGroup !== null && store.getters.getActiveGroupSubscriptions.length === 0
 })
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const subscriptionCacheLoadFailed = computed(() => store.getters.getSubscriptionCacheLoadFailed)
+
+function retrySubscriptionCacheLoad() {
+  store.dispatch('grabAllSubscriptions')
+}
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const subscriptionFeedRefreshInProgress = computed(() => {

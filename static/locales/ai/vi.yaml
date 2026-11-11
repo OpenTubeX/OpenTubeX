@@ -161,6 +161,7 @@ Home Page:
   All sections hidden: Tất cả các mục đều bị ẩn
   All sections hidden description: Tùy chỉnh Trang chủ để hiển thị lại một mục.
 Subscriptions:
+  Cache Load Error: Không thể tải các nguồn cấp dữ liệu kênh đăng ký đã lưu của bạn.
   New video from {channel}: Video mới từ {channel}
   New short from {channel}: Shorts mới từ {channel}
   '{channel} is live': "{channel} đang phát trực tiếp"
