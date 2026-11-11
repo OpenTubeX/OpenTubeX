@@ -362,6 +362,16 @@ public class AppIconTest {
             point[0] = location[0] + (float) (bounds.optDouble(0) * scale);
             point[1] = location[1] + (float) (bounds.optDouble(1) * scale);
         });
+        // The launcher briefly enlarges its taskbar window while it applies a
+        // component change, and that window would receive the touch. Tap once
+        // the app's window is the topmost one at the point again.
+        String cover = topWindowAt(point[0], point[1]);
+        long uncoveredDeadline = SystemClock.uptimeMillis() + 15000;
+        while (cover != null && SystemClock.uptimeMillis() < uncoveredDeadline) {
+            Thread.sleep(100);
+            cover = topWindowAt(point[0], point[1]);
+        }
+        assertNull("Another window covers the tap target " + selector, cover);
         long down = SystemClock.uptimeMillis();
         for (int action : new int[] {MotionEvent.ACTION_DOWN, MotionEvent.ACTION_UP}) {
             MotionEvent event = MotionEvent.obtain(down, SystemClock.uptimeMillis(), action, point[0], point[1], 0);
@@ -369,6 +379,27 @@ public class AppIconTest {
             InstrumentationRegistry.getInstrumentation().sendPointerSync(event);
             event.recycle();
         }
+    }
+
+    /** Returns the title of the topmost window at a screen point unless it belongs to this app. */
+    private static String topWindowAt(float x, float y) {
+        android.app.UiAutomation automation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
+        android.accessibilityservice.AccessibilityServiceInfo info = automation.getServiceInfo();
+        if ((info.flags & android.accessibilityservice.AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS) == 0) {
+            info.flags |= android.accessibilityservice.AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS;
+            automation.setServiceInfo(info);
+        }
+        android.graphics.Rect bounds = new android.graphics.Rect();
+        // getWindows lists windows from the top of the screen down.
+        for (android.view.accessibility.AccessibilityWindowInfo window : automation.getWindows()) {
+            window.getBoundsInScreen(bounds);
+            if (!bounds.contains((int) x, (int) y)) continue;
+            android.view.accessibility.AccessibilityNodeInfo root = window.getRoot();
+            String owner = root == null ? null : String.valueOf(root.getPackageName());
+            return InstrumentationRegistry.getInstrumentation().getTargetContext().getPackageName().equals(owner)
+                ? null : window.getTitle() + " (" + owner + ")";
+        }
+        return null;
     }
 
     /** Waits for the renderer and dismisses the first-run tutorial, which intercepts taps. */
