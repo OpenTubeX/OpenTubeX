@@ -100,7 +100,7 @@ test('non-idempotent operations wait offline but are never automatically replaye
 async function loadAppNetwork(t, fetch, nativeRequest, options = {}, localNetworkAccess) {
   const { readFile } = await import('node:fs/promises')
   const { default: vm } = await import('node:vm')
-  const { classifyRequestFailure } = await import('../../src/renderer/helpers/api/requestDiagnostics.js')
+  const { BROKEN_CONNECTION_ERROR, classifyRequestFailure } = await import('../../src/renderer/helpers/api/requestDiagnostics.js')
   const { createAbortError } = await import('../../src/renderer/helpers/api/requestErrors.js')
   const { waitForRequest } = await import('../../src/renderer/helpers/api/requestWait.js')
   const window = new EventTarget()
@@ -116,6 +116,7 @@ async function loadAppNetwork(t, fetch, nativeRequest, options = {}, localNetwor
     location: { href: 'https://localhost/', origin: 'https://localhost' },
     process: { env: { IS_IOS: false, IS_CAPACITOR: !!localNetworkAccess } },
     ensureAndroidLocalNetworkAccess: localNetworkAccess,
+    BROKEN_CONNECTION_ERROR,
     classifyRequestFailure,
     createAbortError,
     waitForRequest,

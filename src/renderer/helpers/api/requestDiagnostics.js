@@ -59,9 +59,11 @@ export function classifyRequestFailure(error) {
     (Number.isInteger(error?.status) && error.status >= 100 && error.status <= 599) ||
     /\bhttp\s+\d{3}\b|\bstatus(?: code)?[: ]+\d{3}\b/.test(signature)
   ) return 'http'
+  // A JSON parse error quotes the response, which can contain any words.
+  if (error instanceof SyntaxError) return 'parsing'
   if (BROKEN_CONNECTION_ERROR.test(message)) return 'network'
   if (/ssl|tls|certificate|certpath|handshake/.test(signature)) return 'tls'
-  if (error instanceof SyntaxError || /json|parse|parsing|unexpected token/.test(signature)) return 'parsing'
+  if (/json|parse|parsing|unexpected token/.test(signature)) return 'parsing'
   if (
     /unknownhost|unable to resolve host|gai|addrinfo|eai_|\b(?:enotfound|etimedout|econnreset|econnrefused|enetunreach|ehostunreach)\b|dns|network|socket|timeout|timed out|connect|failed to fetch|load failed/.test(signature)
   ) {
