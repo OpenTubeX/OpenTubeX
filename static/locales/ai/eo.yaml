@@ -1495,7 +1495,7 @@ Settings:
     Skip notification timeout: Daŭro de sciigo pri saltado
     DeArrow Settings: DeArrow
     Custom Color: Laŭmenda koloro
-    Show DeArrow Badge: Montri insignon de DeArrow
+    Always Show DeArrow Badge: Ĉiam montri insignon de DeArrow
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Ŝalti Return YouTube Dislike
@@ -2315,7 +2315,7 @@ Tooltips:
     Compact Settings Categories: Kaŝas priskribojn kaj malpliigas la altecon de agordaj kategorioj.
     Modal Backdrop: "Agordas, kiel la aplikaĵo aspektas malantaŭ dialogoj kaj menuoj. Malklarigo povas esti malrapida en malpli potencaj aparatoj."
   SponsorBlock Settings:
-    Show DeArrow Badge: Marki videaĵojn, kies titolon aŭ bildeton anstataŭigis DeArrow.
+    Always Show DeArrow Badge: Konservi la butonon de DeArrow videbla ĉe videaĵoj, kies titolon aŭ bildeton anstataŭigis DeArrow, anstataŭ nur kiam la kursoro estas super ili.
 Yattee Server:
   API Error (Click to copy): Eraro de Yattee-servilo (alklaku por kopii)
   Errors:

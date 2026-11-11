@@ -1710,7 +1710,7 @@ Settings:
     DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): DeArrow 썸네일 API URL
     Custom Color: 사용자 지정 색상
     DeArrow Settings: DeArrow
-    Show DeArrow Badge: DeArrow 배지 표시
+    Always Show DeArrow Badge: DeArrow 배지 항상 표시
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Return YouTube Dislike 활성화
@@ -2666,7 +2666,7 @@ Tooltips:
   SponsorBlock Settings:
     UseDeArrowTitles: 동영상 제목을 DeArrow에서 사용자가 제출한 제목으로 바꿉니다.
     UseDeArrowThumbnails: 동영상 썸네일을 DeArrow의 썸네일로 바꿉니다.
-    Show DeArrow Badge: DeArrow가 제목 또는 썸네일을 바꾼 동영상에 표시합니다.
+    Always Show DeArrow Badge: DeArrow가 제목 또는 썸네일을 바꾼 동영상에서 마우스를 올렸을 때만이 아니라 항상 DeArrow 버튼을 표시합니다.
 Autoplay Interruption Timer: '{autoplayInterruptionIntervalHours}시간 동안 활동이 없어 자동 재생을 취소했습니다'
 The playlist is at the beginning. Enable loop to continue playing: 재생목록의 시작입니다. 계속 재생하려면 반복을 활성화하세요
 Age Restricted:

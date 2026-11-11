@@ -1460,7 +1460,7 @@ Settings:
     Skip notification timeout: Trvanie oznámenia o preskočení
     Custom Color: Vlastná farba
     DeArrow Settings: DeArrow
-    Show DeArrow Badge: Zobraziť štítok DeArrow
+    Always Show DeArrow Badge: Vždy zobraziť štítok DeArrow
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Zapnúť Return YouTube Dislike
@@ -2274,7 +2274,7 @@ Tooltips:
     Use Grid Player Menu: Usporiada ponuku nastavení prehrávača videa do mriežky dlaždíc namiesto zoznamu riadkov.
     Modal Backdrop: "Určuje, ako aplikácia vyzerá za dialógmi a ponukami. Rozmazanie môže byť na menej výkonných zariadeniach pomalé."
   SponsorBlock Settings:
-    Show DeArrow Badge: Označí videá, ktorých názov alebo náhľad nahradil DeArrow.
+    Always Show DeArrow Badge: Ponechá tlačidlo DeArrow viditeľné na videách, ktorých názov alebo náhľad nahradil DeArrow, namiesto zobrazenia len pri prechode myšou.
 The playlist is at the beginning. Enable loop to continue playing: Zoznam videí je na začiatku. Ak chcete pokračovať v prehrávaní, zapnite opakovanie
 External link opening has been disabled in Settings → Privacy: Otváranie externých odkazov bolo vypnuté v časti Nastavenia → Súkromie
 KeyboardShortcutPrompt:

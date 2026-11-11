@@ -1465,7 +1465,7 @@ Settings:
     Skip notification timeout: Terfyn amser yr hysbysiad hepgor
     Custom Color: Lliw personol
     DeArrow Settings: DeArrow
-    Show DeArrow Badge: Dangos bathodyn DeArrow
+    Always Show DeArrow Badge: Dangos bathodyn DeArrow bob amser
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Galluogi Return YouTube Dislike
@@ -2306,7 +2306,7 @@ Tooltips:
   Experimental Settings:
     Disable Hardware Acceleration: Yn analluogi cyflymiad caledwedd y GPU. Gall ddatrys problemau graffeg, ond mae'n debygol o leihau perfformiad.
   SponsorBlock Settings:
-    Show DeArrow Badge: Labelu fideos y mae DeArrow wedi amnewid eu teitl neu eu llun bach.
+    Always Show DeArrow Badge: Cadw'r botwm DeArrow yn weladwy ar fideos y mae DeArrow wedi amnewid eu teitl neu eu llun bach, yn lle dim ond wrth hofran.
 The playlist is at the beginning. Enable loop to continue playing: Mae'r rhestr chwarae ar y dechrau. Galluogwch ailadrodd i barhau i chwarae
 External link opening has been disabled in Settings → Privacy: Mae agor dolenni allanol wedi'i analluogi yn Gosodiadau → Preifatrwydd
 KeyboardShortcutPrompt:

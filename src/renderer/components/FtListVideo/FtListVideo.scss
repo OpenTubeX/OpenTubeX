@@ -208,6 +208,16 @@
   }
 }
 
+// Match the kebab button's touch target without making the title row taller.
+@media (any-pointer: coarse), (width <= 680px) {
+  .deArrowToggleButton {
+    box-sizing: border-box;
+    min-block-size: 48px;
+    min-inline-size: 48px;
+    margin-block: -14px;
+  }
+}
+
 .deArrowToggleIcon {
   block-size: 1em;
   inline-size: 1em;

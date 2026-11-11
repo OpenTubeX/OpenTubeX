@@ -1505,7 +1505,7 @@ Settings:
     Skip notification timeout: Трајање обавештења о прескакању
     Custom Color: Прилагођена боја
     DeArrow Settings: DeArrow
-    Show DeArrow Badge: Прикажи DeArrow ознаку
+    Always Show DeArrow Badge: Увек прикажи DeArrow ознаку
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Омогући Return YouTube Dislike
@@ -2352,7 +2352,7 @@ Tooltips:
   Experimental Settings:
     Disable Hardware Acceleration: Онемогућава хардверско убрзање GPU-а. Може решити графичке проблеме, али ће вероватно смањити перформансе.
   SponsorBlock Settings:
-    Show DeArrow Badge: Означи видео снимке чији је наслов или сличицу заменио DeArrow.
+    Always Show DeArrow Badge: Задржи DeArrow дугме видљивим на видео снимцима чији је наслов или сличицу заменио DeArrow, уместо само при преласку мишем.
 The playlist is at the beginning. Enable loop to continue playing: Листа за репродукцију је на почетку. Укључите понављање да бисте наставили репродукцију
 External link opening has been disabled in Settings → Privacy: Отварање спољних веза је искључено у Подешавања → Приватност
 Screenshot Clipboard Success: Снимак екрана је копиран у привремену меморију

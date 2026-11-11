@@ -1495,7 +1495,7 @@ Settings:
     Skip notification timeout: தவிர்ப்பு அறிவிப்பு மறையும் நேரம்
     Custom Color: தனிப்பயன் நிறம்
     DeArrow Settings: DeArrow
-    Show DeArrow Badge: DeArrow பட்டையைக் காட்டு
+    Always Show DeArrow Badge: DeArrow பட்டையை எப்போதும் காட்டு
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Return YouTube Dislike-ஐ இயக்கு
@@ -2337,7 +2337,7 @@ Tooltips:
   Experimental Settings:
     Disable Hardware Acceleration: GPU வன்பொருள் முடுக்கத்தை முடக்குகிறது. வரைகலைச் சிக்கல்களைச் சரிசெய்யலாம், ஆனால் செயல்திறன் குறையக்கூடும்.
   SponsorBlock Settings:
-    Show DeArrow Badge: DeArrow தலைப்பு அல்லது சிறுபடத்தை மாற்றிய வீடியோக்களைக் குறிக்கவும்.
+    Always Show DeArrow Badge: DeArrow தலைப்பு அல்லது சிறுபடத்தை மாற்றிய வீடியோக்களில் DeArrow பொத்தானை, சுட்டி மேலே செல்லும்போது மட்டுமின்றி, எப்போதும் தெரியும்படி வைத்திருக்கவும்.
 The playlist is at the beginning. Enable loop to continue playing: பிளேலிஸ்ட் தொடக்கத்தில் உள்ளது. தொடர்ந்து இயக்கச் சுழற்சியை இயக்கு
 External link opening has been disabled in Settings → Privacy: அமைப்புகள் → தனியுரிமை என்பதில் வெளிப்புற இணைப்புகளைத் திறப்பது முடக்கப்பட்டுள்ளது
 Screenshot Clipboard Success: திரைப்பிடிப்பு இடைநிலைப் பலகையில் சேமிக்கப்பட்டது

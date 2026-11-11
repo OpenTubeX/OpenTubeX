@@ -24,10 +24,10 @@
       <div class="switchColumn">
         <FtToggleSwitch
           compact
-          :label="$t('Settings.SponsorBlock Settings.Show DeArrow Badge')"
+          :label="$t('Settings.SponsorBlock Settings.Always Show DeArrow Badge')"
           :default-value="showDeArrowBadge"
           setting-key="showDeArrowBadge"
-          :tooltip="$t('Tooltips.SponsorBlock Settings.Show DeArrow Badge')"
+          :tooltip="$t('Tooltips.SponsorBlock Settings.Always Show DeArrow Badge')"
           @change="handleUpdateShowDeArrowBadge"
         />
       </div>

@@ -1571,7 +1571,7 @@ Settings:
     Skip notification timeout: Duración de la notificación de omisión
     Custom Color: Color personalizado
     DeArrow Settings: DeArrow
-    Show DeArrow Badge: Mostrar insignia de DeArrow
+    Always Show DeArrow Badge: Mostrar siempre la insignia de DeArrow
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Activar Return YouTube Dislike
@@ -2746,7 +2746,7 @@ Tooltips:
   SponsorBlock Settings:
     UseDeArrowTitles: Sustituye los títulos de los videos por títulos enviados por los usuarios desde DeArrow.
     UseDeArrowThumbnails: Sustituye las miniaturas de video por miniaturas de DeArrow.
-    Show DeArrow Badge: Marca los videos cuyo título o miniatura fue reemplazado por DeArrow.
+    Always Show DeArrow Badge: Mantiene visible el botón de DeArrow en los videos cuyo título o miniatura fue reemplazado por DeArrow, en lugar de solo al pasar el cursor.
 Local API Error (Click to copy): Error de la API local (Clic para copiar el código)
 Invidious API Error (Click to copy): Error de la API de Invidious (Clic para copiar el código)
 Falling back to Invidious API: Recurriendo a la API de Invidious

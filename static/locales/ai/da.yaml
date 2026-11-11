@@ -1508,7 +1508,7 @@ Settings:
     Skip notification timeout: Varighed af meddelelse om overspringning
     Custom Color: Brugerdefineret farve
     DeArrow Settings: DeArrow
-    Show DeArrow Badge: Vis DeArrow-mærke
+    Always Show DeArrow Badge: Vis altid DeArrow-mærke
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Slå Return YouTube Dislike til
@@ -2359,7 +2359,7 @@ Tooltips:
   Experimental Settings:
     Disable Hardware Acceleration: Deaktiverer GPU-hardwareacceleration. Kan løse grafikproblemer, men vil sandsynligvis forringe ydeevnen.
   SponsorBlock Settings:
-    Show DeArrow Badge: Markér videoer, hvis titel eller miniaturebillede er erstattet af DeArrow.
+    Always Show DeArrow Badge: Hold DeArrow-knappen synlig på videoer, hvis titel eller miniaturebillede er erstattet af DeArrow, i stedet for kun når musen holdes over.
 The playlist is at the beginning. Enable loop to continue playing: Playlistens begyndelse er nået. Slå gentagelse til for at fortsætte afspilningen
 External link opening has been disabled in Settings → Privacy: Åbning af eksterne links er slået fra under Indstillinger → Privatliv
 Screenshot Clipboard Success: Skærmbilledet er gemt i udklipsholderen

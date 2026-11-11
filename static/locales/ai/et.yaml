@@ -1459,7 +1459,7 @@ Settings:
     Skip notification timeout: Vahelejätmisteavituse kuvamisaeg
     Custom Color: Kohandatud värv
     DeArrow Settings: DeArrow
-    Show DeArrow Badge: Näita DeArrow märki
+    Always Show DeArrow Badge: Näita DeArrow märki alati
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Luba Return YouTube Dislike
@@ -2271,7 +2271,7 @@ Tooltips:
     Use Grid Player Menu: Paigutab videopleieri seadete menüü ridade loendi asemel paanide ruudustikuna.
     Modal Backdrop: "Määrab, kuidas rakendus dialoogide ja menüüde taga välja näeb. Hägustamine võib vähem võimsatel seadmetel aeglane olla."
   SponsorBlock Settings:
-    Show DeArrow Badge: Märgi videod, mille pealkirja või pisipildi on DeArrow asendanud.
+    Always Show DeArrow Badge: Hoia DeArrow nupp nähtaval videotel, mille pealkirja või pisipildi on DeArrow asendanud, mitte ainult kursorit peale viies.
 The playlist is at the beginning. Enable loop to continue playing: Esitusloend on alguses. Esitamise jätkamiseks luba kordus
 External link opening has been disabled in Settings → Privacy: Väliste linkide avamine on jaotises Seaded → Privaatsus keelatud
 KeyboardShortcutPrompt:

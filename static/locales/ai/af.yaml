@@ -1670,7 +1670,7 @@ Settings:
     Excluded Channels:
       Excluded Channels: Uitgeslote kanale
       Tooltip: Voer ’n kanaal-ID in om te verhoed dat SponsorBlock-segmente in video’s van daardie kanaal oorgeslaan word. Die ID moet presies ooreenstem en is hooflettersensitief.
-    Show DeArrow Badge: Wys DeArrow-kenteken
+    Always Show DeArrow Badge: Wys DeArrow-kenteken altyd
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Aktiveer Return YouTube Dislike
@@ -2526,7 +2526,7 @@ Tooltips:
   Experimental Settings:
     Disable Hardware Acceleration: Deaktiveer GPU-hardewareversnelling. Kan grafiese probleme oplos, maar sal waarskynlik swakker presteer.
   SponsorBlock Settings:
-    Show DeArrow Badge: Merk video's waarvan die titel of duimnael deur DeArrow vervang is.
+    Always Show DeArrow Badge: Hou die DeArrow-knoppie sigbaar op video's waarvan die titel of duimnael deur DeArrow vervang is, in plaas van net wanneer die muis daaroor beweeg.
 Yattee Server:
   API Error (Click to copy): Yattee-bedienerfout (klik om te kopieer)
   Errors:

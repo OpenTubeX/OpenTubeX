@@ -1470,7 +1470,7 @@ Settings:
     Skip notification timeout: Продължителност на известието за пропускане
     Custom Color: Цвят по избор
     DeArrow Settings: DeArrow
-    Show DeArrow Badge: Показване на значка DeArrow
+    Always Show DeArrow Badge: Винаги показване на значка DeArrow
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Включване на Return YouTube Dislike
@@ -2302,7 +2302,7 @@ Tooltips:
   Experimental Settings:
     Disable Hardware Acceleration: Изключва хардуерното ускорение на графичния процесор. Може да отстрани графични проблеми, но вероятно ще намали производителността.
   SponsorBlock Settings:
-    Show DeArrow Badge: Отбелязва видеата, чието заглавие или миниатюра е заменено от DeArrow.
+    Always Show DeArrow Badge: Бутонът DeArrow да остава видим при видеа, чието заглавие или миниатюра е заменено от DeArrow, а не само при посочване с мишката.
 The playlist is at the beginning. Enable loop to continue playing: Плейлистът е в началото. Включете повтарянето, за да продължите възпроизвеждането
 External link opening has been disabled in Settings → Privacy: Отварянето на външни връзки е изключено в Настройки → Поверителност
 KeyboardShortcutPrompt:

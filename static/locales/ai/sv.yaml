@@ -1459,7 +1459,7 @@ Settings:
     Skip notification timeout: Tidsgräns för hoppavisering
     Custom Color: Egen färg
     DeArrow Settings: DeArrow
-    Show DeArrow Badge: Visa DeArrow-märke
+    Always Show DeArrow Badge: Visa alltid DeArrow-märke
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Aktivera Return YouTube Dislike
@@ -2269,7 +2269,7 @@ Tooltips:
     Use Grid Player Menu: Ordnar videospelarens inställningsmeny som ett rutnät med rutor i stället för en lista med rader.
     Modal Backdrop: "Anger hur appen ser ut bakom dialogrutor och menyer. Oskärpa kan vara långsam på mindre kraftfulla enheter."
   SponsorBlock Settings:
-    Show DeArrow Badge: Markera videor vars titel eller miniatyrbild har ersatts av DeArrow.
+    Always Show DeArrow Badge: Behåll DeArrow-knappen synlig på videor vars titel eller miniatyrbild har ersatts av DeArrow, i stället för bara vid hovring.
 The playlist is at the beginning. Enable loop to continue playing: Spellistan är vid början. Aktivera upprepning för att fortsätta spela
 External link opening has been disabled in Settings → Privacy: Öppning av externa länkar har inaktiverats under Inställningar → Integritet
 KeyboardShortcutPrompt:

@@ -118,16 +118,10 @@
     color: var(--side-nav-hover-text-color);
   }
 
-  .card :deep(.optionsButton .iconButton),
-  .card :deep(.ft-list-item .deArrowToggleButton) {
+  .card :deep(.optionsButton .iconButton) {
     box-sizing: border-box;
     min-block-size: 48px;
     min-inline-size: 48px;
-  }
-
-  /* The DeArrow toggle sits beside the title, so it must not make that row taller. */
-  .card :deep(.ft-list-item .deArrowToggleButton) {
-    margin-block: -14px;
   }
 
   /* Narrower segments let the icon-only group fit a two-column grid. */

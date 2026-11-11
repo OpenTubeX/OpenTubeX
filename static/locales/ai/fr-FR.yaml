@@ -1459,7 +1459,7 @@ Settings:
     Skip notification timeout: Durée de la notification de passage
     Custom Color: Couleur personnalisée
     DeArrow Settings: DeArrow
-    Show DeArrow Badge: Afficher le badge DeArrow
+    Always Show DeArrow Badge: Toujours afficher le badge DeArrow
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Activer Return YouTube Dislike
@@ -2267,7 +2267,7 @@ Tooltips:
     Use Grid Player Menu: Organise le menu des paramètres du lecteur vidéo sous forme de grille de vignettes au lieu d’une liste de lignes.
     Modal Backdrop: "Définit l’apparence de l’application derrière les boîtes de dialogue et les menus. Le flou peut être lent sur les appareils moins puissants."
   SponsorBlock Settings:
-    Show DeArrow Badge: Signale les vidéos dont le titre ou la miniature a été remplacé par DeArrow.
+    Always Show DeArrow Badge: Garde le bouton DeArrow visible sur les vidéos dont le titre ou la miniature a été remplacé par DeArrow, au lieu de ne l'afficher qu'au survol.
 The playlist is at the beginning. Enable loop to continue playing: La playlist est au début. Activez la lecture en boucle pour continuer
 External link opening has been disabled in Settings → Privacy: L’ouverture des liens externes a été désactivée dans Paramètres → Confidentialité
 KeyboardShortcutPrompt:

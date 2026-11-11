@@ -1463,7 +1463,7 @@ Settings:
     Skip notification timeout: Διάρκεια ειδοποίησης παράλειψης
     Custom Color: Προσαρμοσμένο χρώμα
     DeArrow Settings: DeArrow
-    Show DeArrow Badge: Εμφάνιση σήματος DeArrow
+    Always Show DeArrow Badge: Πάντα εμφάνιση σήματος DeArrow
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Ενεργοποίηση Return YouTube Dislike
@@ -2282,7 +2282,7 @@ Tooltips:
     Use Grid Player Menu: Διατάσσει το μενού ρυθμίσεων του προγράμματος αναπαραγωγής βίντεο ως πλέγμα πλακιδίων αντί για λίστα γραμμών.
     Modal Backdrop: "Ορίζει πώς φαίνεται η εφαρμογή πίσω από παράθυρα διαλόγου και μενού. Το θόλωμα μπορεί να είναι αργό σε λιγότερο ισχυρές συσκευές."
   SponsorBlock Settings:
-    Show DeArrow Badge: Επισήμανση βίντεο των οποίων ο τίτλος ή η μικρογραφία αντικαταστάθηκε από το DeArrow.
+    Always Show DeArrow Badge: Το κουμπί DeArrow παραμένει ορατό στα βίντεο των οποίων ο τίτλος ή η μικρογραφία αντικαταστάθηκε από το DeArrow, αντί μόνο κατά το πέρασμα του δείκτη.
 The playlist is at the beginning. Enable loop to continue playing: Η λίστα αναπαραγωγής βρίσκεται στην αρχή. Ενεργοποιήστε την επανάληψη για να συνεχιστεί η αναπαραγωγή
 External link opening has been disabled in Settings → Privacy: Το άνοιγμα εξωτερικών συνδέσμων έχει απενεργοποιηθεί στις Ρυθμίσεις → Απόρρητο
 KeyboardShortcutPrompt:

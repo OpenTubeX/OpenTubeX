@@ -1460,7 +1460,7 @@ Settings:
     Skip notification timeout: 略過通知顯示時間
     Custom Color: 自訂色彩
     DeArrow Settings: DeArrow
-    Show DeArrow Badge: 顯示 DeArrow 標記
+    Always Show DeArrow Badge: 一律顯示 DeArrow 標記
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: 啟用 Return YouTube Dislike
@@ -2275,7 +2275,7 @@ Tooltips:
     Use Grid Player Menu: 將影片播放器的設定選單排列成格狀方塊，而非逐列清單。
     Modal Backdrop: "設定對話方塊與選單後方應用程式的顯示效果。模糊效果在效能較弱的裝置上可能較慢。"
   SponsorBlock Settings:
-    Show DeArrow Badge: 為標題或縮圖已被 DeArrow 取代的影片加上標記。
+    Always Show DeArrow Badge: 在標題或縮圖已被 DeArrow 取代的影片上一律顯示 DeArrow 按鈕，而非僅在滑鼠游標停留時顯示。
 The playlist is at the beginning. Enable loop to continue playing: 播放清單已在開頭。啟用循環播放即可繼續播放
 External link opening has been disabled in Settings → Privacy: 已在「設定」→「隱私權」中停用開啟外部連結
 KeyboardShortcutPrompt:

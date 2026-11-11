@@ -390,7 +390,7 @@ export const SYNC_SETTING_LABELS = {
   useAiSlopList: 'Settings.AiSList Settings.Hide AI Slop Channels',
   useCustomShortsPlayer: 'Settings.Player Settings.Use YouTube-style Shorts',
   useDeArrowThumbnails: 'Settings.SponsorBlock Settings.UseDeArrowThumbnails',
-  showDeArrowBadge: 'Settings.SponsorBlock Settings.Show DeArrow Badge',
+  showDeArrowBadge: 'Settings.SponsorBlock Settings.Always Show DeArrow Badge',
   useDeArrowTitles: 'Settings.SponsorBlock Settings.UseDeArrowTitles',
   useFixedTabWidth: 'Settings.Theme Settings.Use Fixed Tab Width',
   usePlayerMenuGrid: 'Settings.Theme Settings.Use Grid Player Menu',

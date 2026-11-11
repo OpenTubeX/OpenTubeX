@@ -1479,7 +1479,7 @@ Settings:
     Skip notification timeout: Durata notificării de omitere
     Custom Color: Culoare personalizată
     DeArrow Settings: DeArrow
-    Show DeArrow Badge: Afișează insigna DeArrow
+    Always Show DeArrow Badge: Afișează întotdeauna insigna DeArrow
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Activează Return YouTube Dislike
@@ -2326,7 +2326,7 @@ Tooltips:
   Experimental Settings:
     Disable Hardware Acceleration: Dezactivează accelerarea hardware a GPU-ului. Poate rezolva problemele grafice, dar probabil va reduce performanța.
   SponsorBlock Settings:
-    Show DeArrow Badge: Marchează videoclipurile al căror titlu sau miniatură a fost înlocuit de DeArrow.
+    Always Show DeArrow Badge: Păstrează butonul DeArrow vizibil pe videoclipurile al căror titlu sau miniatură a fost înlocuit de DeArrow, în loc să apară doar la trecerea cursorului.
 The playlist is at the beginning. Enable loop to continue playing: Playlistul este la început. Activați redarea în buclă pentru a continua
 External link opening has been disabled in Settings → Privacy: Deschiderea linkurilor externe a fost dezactivată în Setări → Confidențialitate
 Screenshot Clipboard Success: Captura de ecran a fost salvată în clipboard

@@ -1462,7 +1462,7 @@ Settings:
     Skip notification timeout: Ötürmə bildirişinin göstərilmə müddəti
     Custom Color: Fərdi rəng
     DeArrow Settings: DeArrow
-    Show DeArrow Badge: DeArrow nişanını göstər
+    Always Show DeArrow Badge: DeArrow nişanını həmişə göstər
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Return YouTube Dislike aktivləşdir
@@ -2281,7 +2281,7 @@ Tooltips:
     Use Grid Player Menu: Video oynadıcısının tənzimləmələr menyusunu sətir siyahısı əvəzinə plitələr toru kimi düzür.
     Modal Backdrop: "Dialoqların və menyuların arxasında tətbiqin necə görünəcəyini təyin edir. Bulanıqlaşdırma zəif cihazlarda yavaş işləyə bilər."
   SponsorBlock Settings:
-    Show DeArrow Badge: Başlığı və ya miniatürü DeArrow tərəfindən əvəz edilmiş videoları işarələ.
+    Always Show DeArrow Badge: Başlığı və ya miniatürü DeArrow tərəfindən əvəz edilmiş videolarda DeArrow düyməsini yalnız üzərinə gəldikdə yox, həmişə görünən saxla.
 The playlist is at the beginning. Enable loop to continue playing: Pleylist başlanğıcdadır. Oynatmağa davam etmək üçün təkrarlanmanı aktivləşdir
 External link opening has been disabled in Settings → Privacy: Xarici linklərin açılması Tənzimləmələr → Məxfilik bölməsində bağlanıb
 KeyboardShortcutPrompt:
