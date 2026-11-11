@@ -95,7 +95,6 @@ const getters = {
 
 const actions = {
   async grabAllSubscriptions({ commit, dispatch, state, rootState, rootGetters }) {
-    commit('setSubscriptionCacheLoadFailed', false)
     try {
       const payload = await DBSubscriptionCacheHandlers.find()
 
@@ -149,6 +148,7 @@ const actions = {
       }
       commit('setCaches', { videos, liveStreams, shorts, communityPosts })
       commit('setSubscriptionCacheReady', true)
+      commit('setSubscriptionCacheLoadFailed', false)
     } catch (errMessage) {
       console.error(errMessage)
       // A failed reload keeps the loaded cache. Without one, the feeds offer a retry.

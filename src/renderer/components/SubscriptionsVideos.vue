@@ -62,6 +62,7 @@ const MAX_TIMEOUT_MS = 2 ** 31 - 1
 let premiereUpdateTimer = null
 
 let alreadyLoadedRemotely = false
+let remoteRefreshRunning = false
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const subscriptionCacheReady = computed(() => store.getters.getSubscriptionCacheReady)
@@ -280,8 +281,8 @@ if (!subscriptionCacheReady.value) {
   watch(subscriptionCacheReady, () => {
     if (!alreadyLoadedRemotely) {
       loadVideosFromCacheSometimes()
-    } else if (!isLoading.value) {
-      // The automatic fetch finished before the cache loaded, for example
+    } else if (!remoteRefreshRunning) {
+      // The automatic refresh ended before the cache loaded, for example
       // when the startup load failed and was retried
       loadVideosFromCacheForAllActiveProfileChannels()
     }
@@ -352,6 +353,7 @@ useSubscriptionChannelUpdates('videos', () => {
  * @param {boolean} [automatic] Leaves out channels fetched moments ago
  */
 async function loadVideosForSubscriptionsFromRemote(automatic = false) {
+  remoteRefreshRunning = true
   const wasShowingCache = !isLoading.value && videoList.value.length > 0
   isLoading.value = true
   attemptedFetch.value = true
@@ -374,10 +376,11 @@ async function loadVideosForSubscriptionsFromRemote(automatic = false) {
       }
       lastRemoteRefreshSuccessTimestamp.value = store.getters.getSubscriptionFeedLastRefreshTimestamp
     } else if (subscriptionCacheReady.value) {
-      // A cancelled refresh loads nothing, but a retried cache load waited for it
+      // The refresh was cancelled or never ran, but a retried cache load waited for it
       loadVideosFromCacheForAllActiveProfileChannels()
     }
   } finally {
+    remoteRefreshRunning = false
     isLoading.value = false
   }
 }

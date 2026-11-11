@@ -509,7 +509,10 @@ test('a failed startup cache load can be retried, and a failed reload keeps the 
   assert.equal(state.subscriptionCacheLoadFailed, true)
 
   failure = null
-  await actions.grabAllSubscriptions(actionContext)
+  const retry = actions.grabAllSubscriptions(actionContext)
+  // The error stays until the retry succeeds
+  assert.equal(state.subscriptionCacheLoadFailed, true)
+  await retry
   assert.equal(state.subscriptionCacheReady, true)
   assert.equal(state.subscriptionCacheLoadFailed, false)
   assert.equal(state.videoCache.channel.videos[0].videoId, 'video')

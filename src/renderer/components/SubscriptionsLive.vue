@@ -54,6 +54,7 @@ const dateFormat = computed(() => store.getters.getDateFormat)
 const timeFormat = computed(() => store.getters.getTimeFormat)
 
 let alreadyLoadedRemotely = false
+let remoteRefreshRunning = false
 
 const MAX_TIMEOUT_MS = 2 ** 31 - 1
 /** @type {number | null} */
@@ -241,8 +242,8 @@ if (!subscriptionCacheReady.value) {
   watch(subscriptionCacheReady, () => {
     if (!alreadyLoadedRemotely) {
       loadVideosFromCacheSometimes()
-    } else if (!isLoading.value) {
-      // The automatic fetch finished before the cache loaded, for example
+    } else if (!remoteRefreshRunning) {
+      // The automatic refresh ended before the cache loaded, for example
       // when the startup load failed and was retried
       loadVideosFromCacheForAllActiveProfileChannels()
     }
@@ -321,6 +322,7 @@ useSubscriptionChannelUpdates('live', () => {
  * @param {boolean} [automatic] Leaves out channels fetched moments ago
  */
 async function loadVideosForSubscriptionsFromRemote(automatic = false) {
+  remoteRefreshRunning = true
   isLoading.value = true
   attemptedFetch.value = true
   errorChannels.value = []
@@ -341,10 +343,11 @@ async function loadVideosForSubscriptionsFromRemote(automatic = false) {
       loadVideosFromCacheForAllActiveProfileChannels()
       lastRemoteRefreshSuccessTimestamp.value = store.getters.getSubscriptionLiveLastRefreshTimestamp
     } else if (subscriptionCacheReady.value) {
-      // A cancelled refresh loads nothing, but a retried cache load waited for it
+      // The refresh was cancelled or never ran, but a retried cache load waited for it
       loadVideosFromCacheForAllActiveProfileChannels()
     }
   } finally {
+    remoteRefreshRunning = false
     isLoading.value = false
   }
 }

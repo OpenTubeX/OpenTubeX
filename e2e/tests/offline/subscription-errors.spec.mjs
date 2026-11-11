@@ -160,14 +160,18 @@ test.describe('failed subscription cache load', () => {
         backendFallback: false,
         defaultInvidiousInstance: 'https://feeds.example',
         fetchSubscriptionsAutomatically: true,
-        useRssFeeds: true
+        useRssFeeds: true,
+        subscriptionGroups: [{ id: 'group', name: 'Group', channelIds: [channelId] }]
       },
       profiles: [{
         _id: 'allChannels',
         name: 'All Channels',
         bgColor: '#000000',
         textColor: '#FFFFFF',
-        subscriptions: [{ id: channelId, name: 'Channel A', thumbnail: '' }]
+        subscriptions: [
+          { id: channelId, name: 'Channel A', thumbnail: '' },
+          { id: 'UCbbbbbbbbbbbbbbbbbbbbbb', name: 'Channel B', thumbnail: '' }
+        ]
       }],
       subscriptionCache: [{
         _id: channelId,
@@ -212,6 +216,10 @@ test.describe('failed subscription cache load', () => {
         await expect(outcome === 'failed'
           ? page.getByRole('heading', { name: 'Channels with Errors' })
           : page.getByText('Refreshing subscription videos')).toBeVisible()
+
+        // Switching groups leaves the feed loading until the cache is available
+        await page.evaluate(() => window.$store.dispatch('selectSubscriptionGroup', 'group'))
+        if (outcome === 'failed') await expect(page.getByRole('button', { name: /Refresh Videos/ })).toBeDisabled()
 
         await app.electronApp.evaluate(() => { globalThis.__failSubscriptionCacheLoad = false })
         await page.getByRole('button', { name: 'Retry' }).click()
