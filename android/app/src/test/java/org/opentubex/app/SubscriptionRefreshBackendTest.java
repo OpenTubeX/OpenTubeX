@@ -45,6 +45,7 @@ public class SubscriptionRefreshBackendTest {
         for (IOException error : new IOException[] {
             new IOException("unexpected end of stream on com.android.okhttp.Address@1"),
             new java.net.SocketTimeoutException("Read timed out"),
+            new javax.net.ssl.SSLException("Read error: ssl=0x1: I/O error during system call, Connection reset by peer"),
             new IOException("HTTP 404"),
         }) {
             calls[0] = 0;
@@ -55,6 +56,14 @@ public class SubscriptionRefreshBackendTest {
             assertSame(error, thrown);
             assertEquals(error.getMessage(), error instanceof java.net.SocketTimeoutException ? 2 : error.getMessage().startsWith("HTTP") ? 1 : 3, calls[0]);
         }
+
+        // An attempt that already waited out a timeout gets no third try.
+        calls[0] = 0;
+        assertThrows(IOException.class, () -> SubscriptionRefreshHttpClient.resendingBrokenConnections((request, type, id) -> {
+            if (calls[0]++ == 0) throw new java.net.SocketTimeoutException("Read timed out");
+            throw new java.net.SocketException("Socket closed");
+        }).fetch(new JSONObject(), "videos", "UCtest"));
+        assertEquals(2, calls[0]);
     }
 
     @Test

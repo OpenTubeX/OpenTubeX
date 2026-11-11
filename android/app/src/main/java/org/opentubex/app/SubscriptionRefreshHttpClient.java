@@ -38,13 +38,14 @@ final class SubscriptionRefreshHttpClient {
      */
     static RequestFetcher resendingBrokenConnections(RequestFetcher fetcher) {
         return (request, type, channelId) -> {
+            boolean timedOut = false;
             for (int attempt = 0; ; attempt++) {
                 try {
                     return fetcher.fetch(request, type, channelId);
                 } catch (IOException error) {
                     checkInterrupted();
-                    int resends = error instanceof SocketTimeoutException ? 1 : 2;
-                    if (attempt >= resends || !isBrokenConnection(error)) throw error;
+                    timedOut |= error instanceof SocketTimeoutException;
+                    if (attempt >= (timedOut ? 1 : 2) || !isBrokenConnection(error)) throw error;
                 }
             }
         };
@@ -54,8 +55,10 @@ final class SubscriptionRefreshHttpClient {
         // Includes a reset, an aborted or closed socket, a broken pipe, and a timeout.
         if (error instanceof SocketException || error instanceof SocketTimeoutException ||
             error instanceof EOFException || error.getCause() instanceof EOFException) return true;
+        // TLS sockets report a reset or broken pipe as an SSLException.
         String message = error.getMessage();
-        return message != null && message.contains("unexpected end of stream");
+        return message != null && message.toLowerCase(java.util.Locale.ROOT)
+            .matches(".*(unexpected end of stream|connection reset|broken pipe).*");
     }
 
     static JSONObject fetch(SubscriptionRefreshConfiguration.Feed feed, String channelId, RequestFetcher fetcher)
