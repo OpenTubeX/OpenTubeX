@@ -119,7 +119,13 @@ jobs:
         # changed and restored, each time waiting until the configuration shows
         # it. FailureDiagnostics closes another app's dialog that still appears
         # and logs whatever window held the screen when a test failed.
+        # A starved runner can delay the virtual access point's beacons for a few
+        # seconds, and the guest's Wi-Fi stack then disconnects in the middle of
+        # casting tests. Let mac80211 wait longer before it gives up on the AP.
         script: |
+          adb root && adb wait-for-device
+          adb shell 'p=/sys/module/mac80211/parameters; echo 1000 > $p/beacon_loss_count && echo 100 > $p/max_probe_tries && echo 100 > $p/max_nullfunc_tries && echo 5000 > $p/probe_wait_ms'
+          adb unroot && adb wait-for-device
           adb shell settings put global hide_error_dialogs 1
           adb shell settings put secure anr_show_background 0
           adb shell settings put global heads_up_notifications_enabled 0
