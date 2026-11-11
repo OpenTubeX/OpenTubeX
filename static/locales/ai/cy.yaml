@@ -220,6 +220,7 @@ Trending:
   Load Error: Nid oedd modd llwytho Trendio.
   Unsupported Backend: Mae angen yr API Lleol ar Trendio. Dewiswch yr API Lleol neu alluogi'r darparwr wrth gefn.
 Most Popular Feed Empty: Mae ffrwd Mwyaf Poblogaidd yr enghraifft Invidious hon yn wag.
+Most Popular Load Error: "Nid oedd modd llwytho'r ffrwd Mwyaf Poblogaidd."
 Feed:
   Cancel Refresh: Canslo'r adnewyddiad
   Next Auto Refresh: 'Adnewyddiad awtomatig nesaf: {date}'

@@ -221,6 +221,7 @@ Trending:
   Load Error: Trending could not be loaded.
   Unsupported Backend: Trending requires the Local API. Select the Local API or enable backend fallback.
 Most Popular Feed Empty: This Invidious instance's Most Popular feed is empty.
+Most Popular Load Error: "The Most Popular feed could not be loaded."
 Feed:
   Cancel Refresh: Cancel refresh
   Next Auto Refresh: 'Next auto refresh: {date}'

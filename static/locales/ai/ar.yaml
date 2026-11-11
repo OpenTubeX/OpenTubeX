@@ -222,6 +222,7 @@ Trending:
   Load Error: تعذر تحميل العناصر الشائعة.
   Unsupported Backend: يتطلب الاتجاه واجهة برمجة التطبيقات المحلية. حدد واجهة برمجة التطبيقات المحلية أو قم بتمكين الخلفية الاحتياطية.
 Most Popular Feed Empty: الموجز الأكثر شهرة لهذا المثيل Invidious فارغ.
+Most Popular Load Error: "تعذّر تحميل الموجز الأكثر شهرة."
 Feed:
   Cancel Refresh: إلغاء التحديث
   Next Auto Refresh: 'التحديث التلقائي التالي: {date}'

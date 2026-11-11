@@ -220,6 +220,7 @@ Trending:
   Load Error: Không thể tải nội dung thịnh hành.
   Unsupported Backend: Nội dung thịnh hành cần Local API. Hãy chọn Local API hoặc bật phương án dự phòng cho dịch vụ nền.
 Most Popular Feed Empty: Bảng tin Phổ biến nhất của máy chủ Invidious này đang trống.
+Most Popular Load Error: "Không thể tải bảng tin Phổ biến nhất."
 Feed:
   Cancel Refresh: Hủy làm mới
   Next Auto Refresh: 'Lần tự động làm mới tiếp theo: {date}'

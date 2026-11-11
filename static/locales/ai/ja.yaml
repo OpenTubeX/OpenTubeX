@@ -220,6 +220,7 @@ Trending:
   Load Error: トレンドを読み込めませんでした。
   Unsupported Backend: トレンドにはLocal APIが必要です。Local APIを選択するか、バックエンドのフォールバックを有効にしてください。
 Most Popular Feed Empty: このInvidiousインスタンスの「人気」フィードは空です。
+Most Popular Load Error: "「人気」フィードを読み込めませんでした。"
 Feed:
   Cancel Refresh: 更新をキャンセル
   Next Auto Refresh: '次回の自動更新: {date}'

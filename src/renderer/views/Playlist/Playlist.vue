@@ -271,7 +271,6 @@ import {
   getVideoThumbnailUrl,
   showToast,
   showInvidiousFallbackToast,
-  deepCopy,
 } from '../../helpers/utils'
 import { invidiousGetPlaylistInfo, youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { hasMoreInvidiousPlaylistPages, mergeInvidiousPlaylistVideos } from '../../helpers/api/invidious-playlists'
@@ -397,7 +396,7 @@ const playlistPreloadAvailable = computed(() => {
   return supportsYtDlp && store.getters.getVideoPlaybackEngine === 'yt-dlp'
 })
 
-const playlistPreloadVideoIds = computed(() => [...new Set(playlistItems.value
+const playlistPreloadVideoIds = computed(() => [...new Set(toRaw(playlistItems.value)
   .map(video => video.videoId)
   .filter(videoId => typeof videoId === 'string' && videoId !== ''))])
 // Remote playlists only load their first page before preloading, so also use their reported total
@@ -1131,9 +1130,8 @@ watch(selectedUserPlaylistVideoCount, async () => {
 const historyCacheById = computed(() => store.getters.getHistoryCacheById)
 
 function getPlaylistItemsWithDuration() {
-  const modifiedPlaylistItems = deepCopy(shownPlaylistItems.value)
-  const anyVideoMissingDuration = fillMissingPlaylistVideoDurations(
-    modifiedPlaylistItems,
+  const { items, anyVideoMissingDuration } = fillMissingPlaylistVideoDurations(
+    shownPlaylistItems.value,
     historyCacheById.value
   )
 
@@ -1147,7 +1145,7 @@ function getPlaylistItemsWithDuration() {
     alreadyShownNotice = true
   }
 
-  return modifiedPlaylistItems
+  return items
 }
 
 async function getNextPage() {

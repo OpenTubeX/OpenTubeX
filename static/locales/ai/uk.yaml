@@ -222,6 +222,7 @@ Trending:
   Load Error: Не вдалося завантажити популярне.
   Unsupported Backend: Для популярного потрібен Local API. Виберіть Local API або ввімкніть резервний серверний модуль.
 Most Popular Feed Empty: Стрічка «Найпопулярніше» цього сервера Invidious порожня.
+Most Popular Load Error: "Не вдалося завантажити стрічку «Найпопулярніше»."
 Feed:
   Cancel Refresh: Скасувати оновлення
   Next Auto Refresh: 'Наступне автоматичне оновлення: {date}'

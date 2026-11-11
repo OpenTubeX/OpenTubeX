@@ -272,6 +272,7 @@ Trending:
   Load Error: No s'han pogut carregar les tendències.
   Unsupported Backend: Les tendències requereixen l'API local. Seleccioneu l'API local o activeu el motor alternatiu.
 Most Popular Feed Empty: El canal Més popular d'aquesta instància d'Invidious és buit.
+Most Popular Load Error: "No s'ha pogut carregar el canal Més popular."
 Feed:
   Cancel Refresh: Cancel·la l'actualització
   Feed Last Updated: 'Darrera actualització del canal {feedName}: {date}'

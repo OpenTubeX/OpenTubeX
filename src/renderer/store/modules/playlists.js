@@ -686,12 +686,12 @@ const mutations = {
   addVideo(state, payload) {
     const playlist = state.playlists.find(playlist => playlist._id === payload._id)
     if (playlist) {
-      if (payload.addVideosToTop === true) {
-        // Unshifting through the proxy would trigger every index it shifts.
-        playlist.videos = [payload.videoData, ...toRaw(playlist.videos)]
-      } else {
-        playlist.videos.push(payload.videoData)
-      }
+      // Video lists are always replaced, never changed in place, so readers
+      // can iterate the raw arrays of large playlists and still update.
+      const videos = toRaw(playlist.videos)
+      playlist.videos = payload.addVideosToTop === true
+        ? [payload.videoData, ...videos]
+        : [...videos, payload.videoData]
       playlist.lastUpdatedAt = payload.lastUpdatedAt
       incrementPlaylistVideoCounts(state.playlistVideoCounts, [payload.videoData])
     }

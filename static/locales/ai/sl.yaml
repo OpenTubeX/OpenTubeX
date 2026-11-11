@@ -264,6 +264,7 @@ Trending:
   Load Error: Priljubljene vsebine ni bilo mogoče naložiti.
   Unsupported Backend: Priljubljena vsebina zahteva Local API. Izberite Local API ali omogočite nadomestno zaledje.
 Most Popular Feed Empty: Vir »Najbolj priljubljeno« tega primerka Invidious je prazen.
+Most Popular Load Error: "Vira »Najbolj priljubljeno« ni bilo mogoče naložiti."
 Feed:
   Cancel Refresh: Prekliči osveževanje
   Feed Last Updated: 'Vir {feedName} je bil nazadnje posodobljen: {date}'

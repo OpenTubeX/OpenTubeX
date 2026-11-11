@@ -220,6 +220,7 @@ Trending:
   Load Error: 無法載入熱門趨勢。
   Unsupported Backend: 熱門趨勢需要 Local API。請選擇 Local API 或啟用後端備援。
 Most Popular Feed Empty: 此 Invidious 伺服器的「最熱門」動態消息沒有內容。
+Most Popular Load Error: "無法載入「最熱門」動態消息。"
 Feed:
   Cancel Refresh: 取消重新整理
   Next Auto Refresh: '下次自動重新整理：{date}'

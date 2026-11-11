@@ -222,6 +222,7 @@ Trending:
   Load Error: Popularni sadržaj nije moguće učitati.
   Unsupported Backend: Popularni sadržaj zahtijeva Local API. Odaberite Local API ili omogućite pričuvni pozadinski sustav.
 Most Popular Feed Empty: Izvor Najpopularnije na ovoj Invidious instanci je prazan.
+Most Popular Load Error: "Izvor Najpopularnije nije moguće učitati."
 Feed:
   Cancel Refresh: Otkaži osvježavanje
   Next Auto Refresh: 'Sljedeće automatsko osvježavanje: {date}'

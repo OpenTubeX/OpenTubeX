@@ -91,3 +91,27 @@ test('stable snapshots retain local navigation and acknowledge optimistic reorde
   store.commit('setTabsState', remote)
   assert.equal(store.getters.getTabById('tab-0').route.path, '/history')
 })
+
+test('unloading and reloading a tab keeps its back and forward history', () => {
+  const store = createTabStore()
+  const payload = snapshot(1)
+  store.commit('setTabsState', payload)
+  store.commit('setTabNavigation', {
+    tabId: 'tab-0',
+    route: { path: '/history', fullPath: '/history' },
+    history: [
+      { route: { path: '/home', fullPath: '/home' } },
+      { route: { path: '/history', fullPath: '/history' } },
+      { route: { path: '/trending', fullPath: '/trending' } }
+    ],
+    historyIndex: 1
+  })
+  for (const loadState of ['unloaded', 'mounting', 'loaded']) {
+    const next = structuredClone(payload)
+    next.tabs[0].loadState = loadState
+    store.commit('setTabsState', next)
+    const tab = store.getters.getTabById('tab-0')
+    assert.deepEqual(tab.history.map(entry => entry.route.path), ['/home', '/history', '/trending'], loadState)
+    assert.equal(tab.historyIndex, 1, loadState)
+  }
+})

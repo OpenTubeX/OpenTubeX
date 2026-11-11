@@ -1645,14 +1645,16 @@ for (const settingId of Object.keys(state)) {
       }).then(() => true, handleUpdateError)
     )
   } else {
+    // Settings without side effects apply at once, so toggles do not wait for
+    // two database writes. A failed write restores the saved value.
     actions[updaterId] = ({ commit, state }, value) => (
-      runSettingUpdate(settingId, async isLatest => {
-        await DBSettingHandlers.upsert(settingId, value)
-
-        if (!isLatest()) return
-        await recordSettingSyncTimestamp(commit, state, settingId)
-
-        if (isLatest()) commit(mutationId, value)
+      updateOptimisticSetting(settingId, value, {
+        read: () => state[settingId],
+        commit: nextValue => commit(mutationId, nextValue),
+        persist: async nextValue => {
+          await DBSettingHandlers.upsert(settingId, nextValue)
+          await recordSettingSyncTimestamp(commit, state, settingId)
+        },
       }).then(() => true, handleUpdateError)
     )
   }

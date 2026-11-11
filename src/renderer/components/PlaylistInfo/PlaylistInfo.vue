@@ -383,7 +383,7 @@
 <script setup>
 import FtRetryImage from '../FtRetryImage.vue'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, toRaw, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { FtIcon } from '@opentubex/icons'
@@ -672,18 +672,19 @@ const startVideo = computed(() => shuffledStartVideo.value ?? {
 const userPlaylistAnyVideoWatched = computed(() => {
   if (!isUserPlaylist.value) { return false }
 
-  const historyCacheById_ = historyCacheById.value
-  return selectedUserPlaylist.value.videos.some((video) => {
+  // Playlists replace their video lists, and the revision covers watched
+  // changes, so large playlists are scanned without tracking every entry.
+  store.state.history.historyEntriesRevision // eslint-disable-line no-unused-expressions
+  const historyCacheById_ = toRaw(historyCacheById.value)
+  return toRaw(selectedUserPlaylist.value.videos).some((video) => {
     return isHistoryEntryWatched(historyCacheById_[video.videoId])
   })
 })
 
 /** @type {import('vue').ComputedRef<number>} */
 const userPlaylistUniqueVideosCount = computed(() => {
-  return selectedUserPlaylist.value?.videos.reduce((set, video) => {
-    set.add(video.videoId)
-    return set
-  }, new Set()).size ?? 0
+  const videos = selectedUserPlaylist.value?.videos
+  return videos ? new Set(toRaw(videos).map(video => video.videoId)).size : 0
 })
 
 const userPlaylistDuplicateItemCount = computed(() => {

@@ -401,6 +401,7 @@ History:
   Custom: Benutzerdefiniert
   History Older Than Days Removed: Der Wiedergabeverlauf, der älter als {days} Tage ist, wurde gelöscht
 Most Popular Feed Empty: Der Feed „Am beliebtesten“ dieser Invidious-Instanz ist leer.
+Most Popular Load Error: Der Feed „Am beliebtesten“ konnte nicht geladen werden.
 Settings:
   Tab Unloading:
     Automatically unload tabs: "Tabs automatisch entladen"

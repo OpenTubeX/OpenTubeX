@@ -220,6 +220,7 @@ Trending:
   Load Error: Populært innhold kunne ikke lastes inn.
   Unsupported Backend: Populært innhold krever Local API. Velg Local API, eller slå på bruk av reserveleverandør.
 Most Popular Feed Empty: Most Popular-strømmen for denne Invidious-instansen er tom.
+Most Popular Load Error: "Kunne ikke laste inn Most Popular-strømmen."
 Feed:
   Cancel Refresh: Avbryt oppdatering
   Next Auto Refresh: 'Neste automatiske oppdatering: {date}'

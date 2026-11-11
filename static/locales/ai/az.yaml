@@ -222,6 +222,7 @@ Trending:
   Load Error: Trend məzmununu yükləmək mümkün olmadı.
   Unsupported Backend: Trend məzmunu üçün Yerli API tələb olunur. Yerli API-ni seçin və ya ehtiyat arxa xidmətə keçidi aktivləşdirin.
 Most Popular Feed Empty: Bu Invidious serverinin Ən Tanınmış lenti boşdur.
+Most Popular Load Error: "Ən Tanınmış lenti yüklənə bilmədi."
 Feed:
   Cancel Refresh: Yeniləməni ləğv et
   Next Auto Refresh: 'Növbəti avtomatik yeniləmə: {date}'

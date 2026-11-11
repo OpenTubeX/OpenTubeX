@@ -548,6 +548,14 @@ for (const initialization of ['creation', 'restore', 'sync replacement']) {
     assert.equal(tabSession.saved.updatedAt, 4000)
     assert.equal(tabSession.saved.tabs[0].title, 'Changed title')
 
+    // The latest of several unsaved changes dates the session.
+    now = 5500
+    tab.previewCapturedAt = now
+    manager._scheduleSessionSave()
+    now = 5600
+    manager.applyTabTitle(tab, 'Changed again')
+    assert.equal(manager.getSyncSession().updatedAt, 5600)
+
     now = 6000
     tab.title = 'Changed before closing'
     await manager._saveSession()

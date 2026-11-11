@@ -123,7 +123,8 @@ const mutations = {
     for (const tab of incomingTabs) {
       state.skipSilenceByTabId[tab.id] = tab.skipSilence === true
     }
-    state.selectedTabIds = state.selectedTabIds.filter(tabId => incomingIds.has(tabId))
+    // Keep the array when nothing was removed, so the tab bar does not re-render.
+    state.selectedTabIds = reuseEqualSnapshot(state.selectedTabIds, state.selectedTabIds.filter(tabId => incomingIds.has(tabId)))
     state.activeTabId = payload.activeTabId ?? null
     state.mainPresentedTabId = payload.presentedTabId ?? null
     state.selectionRevision = Number.isInteger(payload.selectionRevision)
@@ -530,12 +531,9 @@ function reconcileTab(previous, incoming) {
     route = incomingRoute
     pendingReloadRoute = null
     contentTitle = title
-  } else if (incoming.loadState === 'unloaded' && previous.loadState !== 'unloaded') {
-    const currentEntry = normalizeHistoryEntry(history[historyIndex] ?? { route })
-    history = [currentEntry]
-    historyIndex = 0
-    route = currentEntry.route
   }
+  // Unloading keeps the history: an unloaded tab still goes back and forward
+  // once it loads again, as it does after restoring a session.
 
   const next = {
     ...previous,

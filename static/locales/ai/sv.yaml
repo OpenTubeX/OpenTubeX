@@ -220,6 +220,7 @@ Trending:
   Load Error: Trendande innehåll kunde inte läsas in.
   Unsupported Backend: Trendande innehåll kräver lokalt API. Välj lokalt API eller aktivera reservserverdelen.
 Most Popular Feed Empty: Flödet Populärast på den här Invidious-instansen är tomt.
+Most Popular Load Error: "Flödet Populärast kunde inte läsas in."
 Feed:
   Cancel Refresh: Avbryt uppdatering
   Next Auto Refresh: 'Nästa automatiska uppdatering: {date}'

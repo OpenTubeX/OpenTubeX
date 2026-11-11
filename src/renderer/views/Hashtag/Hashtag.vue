@@ -96,6 +96,7 @@
           v-if="hasMoreResults"
           :key="currentTab"
           :loading="isLoadingMore"
+          :paused="nextPageFailed"
           @load-next-page="handleFetchMore"
         >
           <div
@@ -167,6 +168,8 @@ const apiUsed = ref('local')
 const pageNumber = ref(1)
 const isLoading = ref(true)
 const isLoadingMore = ref(false)
+// A failed continuation waits for the user to retry, so auto-loading cannot loop.
+const nextPageFailed = ref(false)
 const hasMoreVideos = ref(false)
 const unsupported = ref(false)
 
@@ -233,6 +236,7 @@ function resetData() {
   apiUsed.value = 'local'
   pageNumber.value = 1
   isLoadingMore.value = false
+  nextPageFailed.value = false
   hasMoreVideos.value = false
 }
 
@@ -271,7 +275,11 @@ async function getInvidiousHashtag(generation, page = 1) {
     if (!isUnsupported) {
       showApiErrorToast(getInvidiousApiErrorMessage(backendPreference.value), error)
     }
-    if (process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(backendPreference.value) && backendFallback.value) {
+    if (page > 1) {
+      // Another backend can only start over at its first page, which would
+      // replace the loaded videos, so keep them and let the user retry.
+      nextPageFailed.value = true
+    } else if (process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(backendPreference.value) && backendFallback.value) {
       showInvidiousFallbackToast(backendPreference.value)
       resetData()
       getLocalHashtag(generation)
@@ -327,13 +335,8 @@ async function getLocalHashtagMore(generation) {
     console.error(error)
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, error)
-    if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
-      resetData()
-      getInvidiousHashtag(generation)
-    } else {
-      isLoading.value = false
-    }
+    // Keep the loaded videos; see getInvidiousHashtag.
+    nextPageFailed.value = true
   }
 }
 
@@ -354,6 +357,7 @@ function focusTab(tab, event) {
  */
 async function changeTab(tab) {
   currentTab.value = tab
+  nextPageFailed.value = false
   if (tab !== 'shorts' || shortsLoaded.value || isLoadingShorts.value) {
     return
   }
@@ -385,8 +389,10 @@ async function getLocalHashtagShortsMore() {
     shortsContinuationData.value = continuation.has_continuation ? continuation : null
     shorts.value = shorts.value.concat(continuation.videos.map(short => parseShort(short)))
   } catch (error) {
+    if (feed !== hashtagFeed.value) return
     console.error(error)
     showApiErrorToast(t('Local API Error (Click to copy)'), error)
+    nextPageFailed.value = true
   }
 }
 
@@ -397,6 +403,7 @@ async function handleFetchMore() {
 
   const generation = requestGeneration
   isLoadingMore.value = true
+  nextPageFailed.value = false
   try {
     if (currentTab.value === 'shorts') {
       await getLocalHashtagShortsMore()

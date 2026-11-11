@@ -222,6 +222,7 @@ Trending:
   Load Error: לא ניתן לטעון את התוכן החם.
   Unsupported Backend: לתוכן החם דרוש Local API. יש לבחור ב־Local API או להפעיל מעבר לספק חלופי.
 Most Popular Feed Empty: עדכון התוכן הפופולרי ביותר של מופע Invidious זה ריק.
+Most Popular Load Error: "לא ניתן היה לטעון את עדכון התוכן הפופולרי ביותר."
 Feed:
   Cancel Refresh: ביטול הרענון
   Next Auto Refresh: 'הרענון האוטומטי הבא: {date}'

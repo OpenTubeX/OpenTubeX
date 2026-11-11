@@ -3536,7 +3536,9 @@ function runApp() {
           return null
 
         case DBActions.GENERAL.FIND:
-          return await baseHandlers.playlists.find()
+          // Strings cross IPC and the context bridge far faster than large
+          // playlists' object graphs, as with history.
+          return (await baseHandlers.playlists.find()).map(playlist => JSON.stringify(playlist))
 
         case DBActions.GENERAL.UPSERT:
           if (typeof data === 'string') data = JSON.parse(data)

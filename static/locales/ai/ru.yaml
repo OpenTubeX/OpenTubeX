@@ -195,6 +195,7 @@ Trending:
   Load Error: Не удалось загрузить популярные видео.
   Unsupported Backend: Для просмотра популярных видео требуется Local API. Выберите Local API или разрешите использовать резервный бэкенд.
 Most Popular Feed Empty: Лента «Самое популярное» на этом экземпляре Invidious пуста.
+Most Popular Load Error: "Не удалось загрузить ленту «Самое популярное»."
 Feed:
   Cancel Refresh: Отменить обновление
   Next Auto Refresh: 'Следующее автоматическое обновление: {date}'

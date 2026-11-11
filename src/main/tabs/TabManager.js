@@ -371,6 +371,8 @@ export class TabManager {
     this._sessionSaveTimer = null
     this._lastSessionSaveContent = null
     this._lastSyncSessionContent = null
+    /** @type {number | null} When the session last changed without its timestamp being updated */
+    this._sessionChangedAt = null
     this._sessionSavePromise = Promise.resolve()
     this._sessionPersistenceDisabled = false
     this.sessionUpdatedAt = 0
@@ -2344,11 +2346,18 @@ export class TabManager {
 
   // Local previews and window metadata must not make unchanged synced tabs newer.
   _updateSessionTimestamp(preserveUpdatedAt = false) {
-    const content = JSON.stringify({ ...this.getSyncSession(), updatedAt: undefined })
+    const content = JSON.stringify({ ...this._buildSyncSession(), updatedAt: undefined })
     if (content !== this._lastSyncSessionContent) {
-      if (!preserveUpdatedAt) this.sessionUpdatedAt = Date.now()
+      if (!preserveUpdatedAt) this.sessionUpdatedAt = this._sessionChangedAt ?? Date.now()
       this._lastSyncSessionContent = content
     }
+    this._sessionChangedAt = null
+  }
+
+  // Serializing the session on every tab switch and navigation is costly with
+  // long histories, so changes only note their time until the session is read.
+  _flushSessionTimestamp() {
+    if (this._sessionChangedAt != null) this._updateSessionTimestamp()
   }
 
   _scheduleSessionSave() {
@@ -2357,7 +2366,7 @@ export class TabManager {
       this._batchedSessionSavePending = true
       return
     }
-    this._updateSessionTimestamp()
+    this._sessionChangedAt = Date.now()
     // Do not restart the timer: even continuous updates must reach disk.
     if (this._sessionSaveTimer != null) return
     this._sessionSaveTimer = setTimeout(() => {
@@ -2396,6 +2405,7 @@ export class TabManager {
   }
 
   getSessionData() {
+    this._flushSessionTimestamp()
     const tabs = Array.from(this.tabs.values())
       // A presented tab stays mounted until its replacement is ready, but a
       // shutdown during that handoff must not resurrect the already-closed tab.
@@ -2457,6 +2467,11 @@ export class TabManager {
    * @returns {object}
    */
   getSyncSession() {
+    this._flushSessionTimestamp()
+    return this._buildSyncSession()
+  }
+
+  _buildSyncSession() {
     const tabs = Array.from(this.tabs.values())
       .filter(tab => !this._deferredCloseTabIds.has(tab.id))
       .map(tab => ({

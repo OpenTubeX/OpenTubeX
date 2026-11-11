@@ -174,15 +174,21 @@ test('generated setting updaters report whether the write was saved', async () =
     defaultUpdaterId: id => `update${id}`,
     defaultSideEffectsTriggerId: id => `trigger${id}`,
     createSettingUpdateQueue,
+    updateOptimisticSetting: createOptimisticSettingUpdater(),
     recordSettingSyncTimestamp: async () => {},
     DBSettingHandlers: { upsert: async () => { if (failWrites) throw new Error('disk full') } },
     console: { error () {} },
   })
-  const context = { commit () {}, dispatch () {}, state: {} }
+  const state = { uiScale: 100, theme: 'dark' }
+  const context = { commit (name, value) { state[name.slice(3)] = value }, dispatch () {}, state }
 
   assert.equal(await actions.updateuiScale(context, 125), true)
   assert.equal(await actions.updatetheme(context, 'light'), true)
   failWrites = true
-  assert.equal(await actions.updateuiScale(context, 150), false)
+  const failedUpdate = actions.updateuiScale(context, 150)
+  assert.equal(state.uiScale, 150, 'settings without side effects apply before their write')
+  assert.equal(await failedUpdate, false)
+  assert.equal(state.uiScale, 125, 'a failed write restores the saved value')
   assert.equal(await actions.updatetheme(context, 'black'), false)
+  assert.equal(state.theme, 'light')
 })

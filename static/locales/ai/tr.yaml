@@ -220,6 +220,7 @@ Trending:
   Load Error: Öne çıkanlar yüklenemedi.
   Unsupported Backend: Öne çıkanlar için Yerel API gerekir. Yerel API'yi seçin veya arka uç yedeğini etkinleştirin.
 Most Popular Feed Empty: Bu Invidious örneğinin Popüler Olanlar akışı boş.
+Most Popular Load Error: "Popüler Olanlar akışı yüklenemedi."
 Feed:
   Cancel Refresh: Yenilemeyi iptal et
   Next Auto Refresh: 'Sonraki otomatik yenileme: {date}'
