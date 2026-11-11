@@ -72,7 +72,20 @@ const PAINT_ONLY_PROPERTIES = new Set([
  * @property {(intended?: boolean) => void} syncScrollPosition
  * @property {(() => void) | null} drag reapplies an active handle drag
  * @property {(force?: boolean) => void} update
+ * @property {(force?: boolean) => UpdateStages | null} prepareUpdate
  * @property {() => void} destroy
+ */
+
+/**
+ * An update split into its layout reads and style writes. Running each stage
+ * for every bar that changed in a frame before the next keeps them from
+ * forcing a layout per container, such as while a window with several of
+ * them resizes.
+ *
+ * @typedef {object} UpdateStages
+ * @property {() => void} write
+ * @property {(() => void) | undefined} [measure]
+ * @property {(() => void) | undefined} [apply]
  */
 
 /** @type {Map<HTMLElement, Instance>} */
@@ -97,9 +110,21 @@ function getResizeObserver() {
     }
     // Updating inside the callback, after layout and before paint, keeps
     // the bars in step with the frame that changed the content.
-    for (const [instance, force] of changed) instance.update(force)
+    updateInstances(changed)
   })
   return resizeObserver
+}
+
+/** @param {Map<Instance, boolean>} changed instances and whether to force their update */
+function updateInstances(changed) {
+  const stages = []
+  for (const [instance, force] of changed) {
+    const instanceStages = instance.prepareUpdate(force)
+    if (instanceStages) stages.push(instanceStages)
+  }
+  for (const { write } of stages) write()
+  for (const { measure } of stages) measure?.()
+  for (const { apply } of stages) apply?.()
 }
 
 /** @param {'x' | 'y'} axis */
@@ -157,17 +182,25 @@ function setScrollLinkedKeyframes(animation, target, keyframes, timeline) {
  * of the content whenever the compositor draws it late.
  *
  * @param {Scrollbar} bar
- * @param {CSSStyleDeclaration} containerStyle
+ * @param {{ paddingTop: string, paddingLeft: string, paddingRight: string }} containerStyle
  * @param {boolean} rtl
- * @param {{ x: number, y: number }} ranges
  */
-function updateStickyGeometry(bar, containerStyle, rtl, ranges) {
+function measureStickyGeometry(bar, containerStyle, rtl) {
   const style = getComputedStyle(bar.scrollbar)
   const px = (value) => Number.parseFloat(value) || 0
   const block = px(style.top) + px(style.borderTopWidth) + px(style.paddingTop) - px(containerStyle.paddingTop)
   const inline = rtl
     ? px(style.right) + px(style.borderRightWidth) + px(style.paddingRight) - px(containerStyle.paddingRight)
     : px(style.left) + px(style.borderLeftWidth) + px(style.paddingLeft) - px(containerStyle.paddingLeft)
+  return { block, inline }
+}
+
+/**
+ * @param {Scrollbar} bar
+ * @param {{ block: number, inline: number }} offsets from measureStickyGeometry
+ * @param {{ x: number, y: number }} ranges
+ */
+function applyStickyGeometry(bar, { block, inline }, ranges) {
   const geometry = `${block},${inline},${ranges.x},${ranges.y}`
   if (geometry === bar.stickyGeometry) return
   bar.stickyGeometry = geometry
@@ -213,6 +246,7 @@ function create(element) {
     syncScrollPosition,
     drag: null,
     update,
+    prepareUpdate,
     destroy
   }
 
@@ -222,17 +256,35 @@ function create(element) {
   }
 
   function update(force = false) {
-    if (!element.isConnected) return
+    const stages = prepareUpdate(force)
+    if (!stages) return
+    stages.write()
+    stages.measure?.()
+    stages.apply?.()
+  }
+
+  /**
+   * Measures the container and returns the writes for its bars, or null when
+   * they are current.
+   *
+   * @param {boolean} force
+   * @returns {UpdateStages | null}
+   */
+  function prepareUpdate(force) {
+    if (!element.isConnected) return null
     // A hidden container has nothing to scroll. It reports its size again
     // once shown, so skip measuring it until then.
     if (!isPage && !element.checkVisibility()) {
-      for (const bar of scrollbars) {
-        bar.usable = false
-        setClass(bar.scrollbar, 'os-scrollbar-visible', false)
-        setClass(bar.scrollbar, 'os-scrollbar-unusable', true)
-      }
       instance.measurement = ''
-      return
+      return {
+        write() {
+          for (const bar of scrollbars) {
+            bar.usable = false
+            setClass(bar.scrollbar, 'os-scrollbar-visible', false)
+            setClass(bar.scrollbar, 'os-scrollbar-unusable', true)
+          }
+        }
+      }
     }
 
     const style = getComputedStyle(scrollElement)
@@ -266,66 +318,81 @@ function create(element) {
     instance.atEnd = ranges.y > SCROLL_BOUNDARY_TOLERANCE &&
       scrollElement.scrollTop >= ranges.y - SCROLL_BOUNDARY_TOLERANCE
 
+    // The computed style is live, so copy what later stages read before any
+    // write can make reading it restyle the document.
+    const { overflowX, overflowY, paddingTop, paddingLeft, paddingRight } = style
     const measurement = [
       sizes.x.scroll, sizes.x.client, sizes.y.scroll, sizes.y.client,
-      style.overflowX, style.overflowY, rtl,
-      style.paddingTop, style.paddingLeft, style.paddingRight
+      overflowX, overflowY, rtl,
+      paddingTop, paddingLeft, paddingRight
     ].join()
-    if (!force && measurement === instance.measurement) return
+    if (!force && measurement === instance.measurement) return null
     instance.measurement = measurement
+    const containerStyle = { paddingTop, paddingLeft, paddingRight }
+    /** @type {number[]} */
+    let spans = []
+    /** @type {{ block: number, inline: number }[]} */
+    let stickyOffsets = []
 
-    for (const bar of scrollbars) {
-      const overflow = bar.axis === 'x' ? style.overflowX : style.overflowY
-      bar.usable = !CLIPPED_OVERFLOW.has(overflow) && ranges[bar.axis] > SCROLL_BOUNDARY_TOLERANCE
-      const { scroll, client } = sizes[bar.axis]
-      bar.scrollbar.style.setProperty('--os-viewport-percent', String(bar.usable ? client / scroll : 1))
-    }
-    for (const bar of scrollbars) {
-      setClass(bar.scrollbar, 'os-scrollbar-visible', bar.usable)
-      setClass(bar.scrollbar, 'os-scrollbar-unusable', !bar.usable)
-      setClass(bar.scrollbar, 'os-scrollbar-cornerless', !horizontal.usable || !vertical.usable)
-      setClass(bar.scrollbar, 'os-scrollbar-rtl', rtl)
-    }
+    return {
+      write() {
+        for (const bar of scrollbars) {
+          const overflow = bar.axis === 'x' ? overflowX : overflowY
+          bar.usable = !CLIPPED_OVERFLOW.has(overflow) && ranges[bar.axis] > SCROLL_BOUNDARY_TOLERANCE
+          const { scroll, client } = sizes[bar.axis]
+          bar.scrollbar.style.setProperty('--os-viewport-percent', String(bar.usable ? client / scroll : 1))
+        }
+        for (const bar of scrollbars) {
+          setClass(bar.scrollbar, 'os-scrollbar-visible', bar.usable)
+          setClass(bar.scrollbar, 'os-scrollbar-unusable', !bar.usable)
+          setClass(bar.scrollbar, 'os-scrollbar-cornerless', !horizontal.usable || !vertical.usable)
+          setClass(bar.scrollbar, 'os-scrollbar-rtl', rtl)
+        }
+      },
+      // Measure every usable bar before writing any animation, so restyling one
+      // cannot force another layout for the next.
+      measure() {
+        spans = scrollbars.map(bar => {
+          if (!bar.usable) return 0
+          return bar.axis === 'x'
+            ? bar.track.clientWidth - bar.handle.offsetWidth
+            : bar.track.clientHeight - bar.handle.offsetHeight
+        })
+        if (!isPage) stickyOffsets = scrollbars.map(bar => measureStickyGeometry(bar, containerStyle, rtl))
+      },
+      apply() {
+        instance.ranges = ranges
+        instance.rtl = rtl
+        scrollbars.forEach((bar, index) => {
+          bar.span = Math.max(0, spans[index])
+        })
+        if (!isPage) {
+          scrollbars.forEach((bar, index) => applyStickyGeometry(bar, stickyOffsets[index], ranges))
+        }
+        if (!SCROLL_LINKED) {
+          positionFromScroll()
+          instance.drag?.()
+          return
+        }
 
-    // Measure every usable bar before writing any animation, so restyling one
-    // cannot force another layout for the next.
-    const spans = scrollbars.map(bar => {
-      if (!bar.usable) return 0
-      return bar.axis === 'x'
-        ? bar.track.clientWidth - bar.handle.offsetWidth
-        : bar.track.clientHeight - bar.handle.offsetHeight
-    })
+        scrollbars.forEach((bar) => {
+          if (!bar.usable) {
+            bar.handleAnimation?.cancel()
+            bar.handleAnimation = null
+            return
+          }
 
-    instance.ranges = ranges
-    instance.rtl = rtl
-    scrollbars.forEach((bar, index) => {
-      bar.span = Math.max(0, spans[index])
-    })
-    if (!isPage) {
-      for (const bar of scrollbars) updateStickyGeometry(bar, style, rtl, ranges)
-    }
-    if (!SCROLL_LINKED) {
-      positionFromScroll()
-      instance.drag?.()
-      return
-    }
+          const span = bar.span
+          const translate = bar.axis === 'x' ? 'translateX' : 'translateY'
+          bar.handleAnimation = setScrollLinkedKeyframes(bar.handleAnimation, bar.handle, [
+            { transform: `${translate}(0px)` },
+            { transform: `${translate}(${bar.axis === 'x' && rtl ? -span : span}px)` }
+          ], getTimeline(bar.axis))
+        })
 
-    scrollbars.forEach((bar) => {
-      if (!bar.usable) {
-        bar.handleAnimation?.cancel()
-        bar.handleAnimation = null
-        return
+        instance.drag?.()
       }
-
-      const span = bar.span
-      const translate = bar.axis === 'x' ? 'translateX' : 'translateY'
-      bar.handleAnimation = setScrollLinkedKeyframes(bar.handleAnimation, bar.handle, [
-        { transform: `${translate}(0px)` },
-        { transform: `${translate}(${bar.axis === 'x' && rtl ? -span : span}px)` }
-      ], getTimeline(bar.axis))
-    })
-
-    instance.drag?.()
+    }
   }
 
   let positionFrame = null
@@ -693,7 +760,7 @@ export function initializeAppScrollbars({ useNativePageScrollbar = false } = {})
   // Switching between LTR and RTL languages flips the direction every bar
   // inherits, which no size change reports.
   const directionObserver = new MutationObserver(() => {
-    for (const instance of instances.values()) instance.update()
+    updateInstances(new Map([...instances.values()].map(instance => [instance, false])))
   })
   for (const element of [document.documentElement, document.body]) {
     directionObserver.observe(element, { attributes: true, attributeFilter: ['dir'] })
