@@ -237,6 +237,7 @@ async function yatteeGetChannelId(url) {
 
 /**
  * @param {string} channelId
+ * @param {AbortSignal} [signal]
  * @returns {Promise<{
  *  author: string,
  *  authorId: string,
@@ -257,10 +258,11 @@ async function yatteeGetChannelId(url) {
  *  relatedChannels: InvidiousChannelObject[]
  * }>}
  */
-export async function invidiousGetChannelInfo(channelId) {
+export async function invidiousGetChannelInfo(channelId, signal) {
   const channelInfo = await invidiousAPICall({
     resource: 'channels',
     id: channelId,
+    signal,
   })
 
   if (isYatteeBackend()) {
