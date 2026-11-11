@@ -32,7 +32,7 @@ jobs:
     name: Instrumentation tests (API 35, shard ${{ matrix.shard }})
     if: github.repository == 'OpenTubeX/OpenTubeX' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 70
 
     # Software rendering makes long emulator sessions crash, so each shard
     # runs part of the suite on its own emulator.
@@ -92,6 +92,9 @@ jobs:
         sudo udevadm trigger --name-match=kvm
 
     - name: Run instrumentation tests
+      # A shard takes 20 to 40 minutes. Stop a stalled one early enough for the
+      # next step to read the still running emulator.
+      timeout-minutes: 50
       uses: ReactiveCircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
       with:
         api-level: 35
@@ -142,6 +145,16 @@ jobs:
       run: |
         sudo dmesg --ctime | grep -iE 'out of memory|killed process|segfault|qemu' | tail -n 20 || true
         free -m
+        # Saves the device state with the reports when the emulator still runs,
+        # since a stalled test never gets its own logcat.
+        out=android/app/build/outputs/androidTest-results/connected/device
+        if timeout 10 adb get-state; then
+          mkdir -p "$out"
+          timeout 60 adb logcat -d -b main,system,crash > "$out/logcat.txt" || true
+          timeout 60 adb shell dumpsys activity activities > "$out/activities.txt" || true
+          timeout 60 adb shell dumpsys window windows > "$out/windows.txt" || true
+          timeout 60 adb shell ps -A -o PID,PPID,STAT,WCHAN,TIME,NAME > "$out/processes.txt" || true
+        fi
 
     - name: Upload test reports
       # Also after a timeout, to show which test was running.
