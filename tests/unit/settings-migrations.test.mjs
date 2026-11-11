@@ -639,7 +639,11 @@ async function migrateAutoLoadComments(stored, startupEditTimes) {
       commits[mutation] = value
       if (mutation === 'setSyncServerSettingUpdatedAt') state.syncServerSettingUpdatedAt = value
     },
-    DBSettingHandlers: { upsert: async (key, value) => { stored[key] = value } },
+    DBSettingHandlers: {
+      upsert: async (key, value) => { stored[key] = value },
+      // Earlier startup writes saved startupEditTimes after the settings were read.
+      findValue: async key => key === 'syncServerSettingUpdatedAt' && startupEditTimes ? startupEditTimes : stored[key],
+    },
     isSettingSyncable: () => true,
     CUSTOM_THEMES_SYNC_KEY: 'customThemes',
     console,

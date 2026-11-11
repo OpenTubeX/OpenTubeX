@@ -162,7 +162,7 @@ test('continues with the latest setting write after an earlier write fails', asy
 })
 
 const settingsSource = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
-const optimisticPersistence = ['function getSettingSyncTimestamps(', 'function persistOptimisticSetting(']
+const optimisticPersistence = ['function getSettingSyncTimestamps(', 'function normalizeSettingSyncTimestamps(', 'function persistOptimisticSetting(']
   .map(start => {
     const index = settingsSource.indexOf(start)
     assert.ok(index >= 0, `Update the harness after renaming ${start}`)
@@ -221,11 +221,13 @@ test('a failed optimistic write restores the saved edit time with the saved valu
   assert.equal(state.syncServerSettingUpdatedAt.uiScale, 500)
 })
 
-test('a pending edit time write keeps newer optimistic edit times', async () => {
+test('edit time writes save only confirmed times and keep newer optimistic ones in memory', async () => {
   const start = settingsSource.indexOf('function recordSettingSyncTimestamp(')
   const recordSource = settingsSource.slice(start, settingsSource.indexOf('\n}\n', start) + 3)
   const write = deferred()
-  const state = { syncServerSettingUpdatedAt: { theme: 1 } }
+  const saved = []
+  // locale has an optimistic edit time whose write is still pending.
+  const state = { syncServerSettingUpdatedAt: { theme: 1, locale: 5000 } }
   const commit = (_name, value) => { state.syncServerSettingUpdatedAt = value }
   const recordSettingSyncTimestamp = vm.runInNewContext(`${optimisticPersistence}
     let settingSyncTimestampWrite = Promise.resolve()
@@ -233,7 +235,10 @@ test('a pending edit time write keeps newer optimistic edit times', async () => 
     recordSettingSyncTimestamp`, {
     isSettingSyncable: () => true,
     CUSTOM_THEMES_SYNC_KEY: 'customThemes',
-    DBSettingHandlers: { upsert: () => write.promise },
+    DBSettingHandlers: {
+      findValue: async () => ({ theme: 1 }),
+      upsert: (_id, value) => { saved.push({ ...value }); return write.promise },
+    },
     console,
   })
 
@@ -243,7 +248,8 @@ test('a pending edit time write keeps newer optimistic edit times', async () => 
   write.resolve()
   await recording
 
-  assert.deepEqual({ ...state.syncServerSettingUpdatedAt }, { theme: 3000, uiScale: 2000 })
+  assert.deepEqual(saved, [{ theme: 1, uiScale: 1000 }])
+  assert.deepEqual({ ...state.syncServerSettingUpdatedAt }, { theme: 3000, locale: 5000, uiScale: 2000 })
 })
 
 test('generated setting updaters report whether the write was saved', async () => {

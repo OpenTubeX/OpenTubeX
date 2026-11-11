@@ -467,19 +467,21 @@ const SUBSCRIPTION_FEED_CACHE_MUTATIONS = {
 let settingSyncTimestampWrite = Promise.resolve()
 
 function getSettingSyncTimestamps(settings) {
-  return settings.syncServerSettingUpdatedAt !== null &&
-    typeof settings.syncServerSettingUpdatedAt === 'object' &&
-    !Array.isArray(settings.syncServerSettingUpdatedAt)
-    ? settings.syncServerSettingUpdatedAt
-    : {}
+  return normalizeSettingSyncTimestamps(settings.syncServerSettingUpdatedAt)
+}
+
+function normalizeSettingSyncTimestamps(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value) ? value : {}
 }
 
 function recordSettingSyncTimestamp(commit, settings, settingId, editedAt = Date.now()) {
   if (!isSettingSyncable(settingId) && settingId !== CUSTOM_THEMES_SYNC_KEY) return
 
   settingSyncTimestampWrite = settingSyncTimestampWrite.then(async () => {
+    // Build on the saved times: the in-memory ones include optimistic edits of
+    // other settings whose writes can still fail.
     const updatedAt = {
-      ...getSettingSyncTimestamps(settings),
+      ...normalizeSettingSyncTimestamps(await DBSettingHandlers.findValue('syncServerSettingUpdatedAt')),
       [settingId]: editedAt,
     }
     await DBSettingHandlers.upsert('syncServerSettingUpdatedAt', updatedAt)
