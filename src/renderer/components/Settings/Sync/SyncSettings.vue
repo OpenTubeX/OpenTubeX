@@ -152,6 +152,7 @@
             :label="t('Settings.Sync Settings.Sync Automatically')"
             :default-value="autoSync"
             compact
+            performance-impact-key="syncServerAutoSync"
             @change="setAutoSync"
           />
           <FtToggleSwitch

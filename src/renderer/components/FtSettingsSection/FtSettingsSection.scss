@@ -186,7 +186,7 @@
       display: inline-flex;
     }
 
-    :deep(:not(.select, .selectLabel, .groupTitle, .selectIndicators, .inputIndicators, .labelRow, .switch-label-main) > .tooltip) {
+    :deep(:not(.select, .selectLabel, .groupTitle, .selectIndicators, .inputIndicators, .labelMain, .switch-label-main) > .tooltip) {
       display: inline-block;
       position: absolute;
       inset-inline-end: -25px;
