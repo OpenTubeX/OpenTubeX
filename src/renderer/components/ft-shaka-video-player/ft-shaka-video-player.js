@@ -2415,12 +2415,16 @@ export default defineComponent({
     /** Whether the current source is a single file that the browser buffers itself (src=) */
     const progressivePlayback = ref(false)
 
+    // A paused video in a hidden tab, such as one opened in the background,
+    // only buffers its start, so it doesn't slow down the video the user watches.
+    const bufferingHidden = computed(() => !playerIsPresented.value && !presentedOutsideTab.value && playerPaused.value)
+
     /** @type {import('vue').ComputedRef<ReturnType<typeof getBufferingConfig>>} */
     const bufferingConfig = computed(() => getBufferingConfig({
       bufferAhead: store.getters.getBufferAhead,
       bufferBehind: store.getters.getBufferBehind,
       bufferBeforePlaying: store.getters.getBufferBeforePlaying,
-    }, progressivePlayback.value))
+    }, progressivePlayback.value, bufferingHidden.value))
 
     watch(bufferingConfig, (newValue) => {
       player?.configure({ streaming: newValue })
@@ -9823,7 +9827,7 @@ export default defineComponent({
     let releasePlaybackStartup = () => {}
 
     onMounted(async () => {
-      releasePlaybackStartup = holdForPlaybackStartup()
+      releasePlaybackStartup = holdForPlaybackStartup(tabId ?? null)
       const videoElement = video.value
       if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
         unbindAndroidMediaErrors = bindAndroidMediaErrors(videoElement)

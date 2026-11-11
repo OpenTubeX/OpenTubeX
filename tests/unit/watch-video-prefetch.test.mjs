@@ -40,6 +40,7 @@ function watchFor(methods, { backendPreference = 'local', short = false } = {}) 
     saveShortsPlaybackPosition() {},
     handleRouteChange: () => new Promise(resolve => { releaseRouteChange = resolve }),
     isCurrentVideoLoad: () => current,
+    isPlaybackPresented: () => true,
     $store: { commit() {} },
   }
   return {
@@ -53,6 +54,22 @@ test('the next video is requested while the previous one is still saving its pro
   const requests = []
   const { watch, finish } = watchFor(load(requests))
   const reloading = watch.reloadView()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.deepEqual(requests, ['nextVideo01'])
+  finish()
+  await reloading
+})
+
+test('a hidden tab requests its video once it is its turn', async () => {
+  const requests = []
+  const { watch, finish } = watchFor(load(requests))
+  let grantTurn
+  watch.isPlaybackPresented = () => false
+  watch.waitForBackgroundPlaybackTurn = () => new Promise(resolve => { grantTurn = resolve })
+  const reloading = watch.reloadView()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.deepEqual(requests, [])
+  grantTurn()
   await new Promise(resolve => setImmediate(resolve))
   assert.deepEqual(requests, ['nextVideo01'])
   finish()
