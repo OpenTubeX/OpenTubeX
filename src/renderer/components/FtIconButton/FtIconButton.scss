@@ -78,11 +78,13 @@
     --icon-button-tint: var(--destructive-color);
   }
 
+  // Raised rows whose color matches the page hover color set
+  // --icon-button-hover-color so the hover fill stays visible on them.
   &.base-no-default:not(.disabled) {
     &:hover,
     &:focus-visible,
     &.pressed {
-      background-color: var(--side-nav-hover-color);
+      background-color: var(--icon-button-hover-color, var(--side-nav-hover-color));
       color: var(--side-nav-hover-text-color);
     }
 
