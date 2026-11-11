@@ -1722,7 +1722,11 @@ export default defineComponent({
     retryWaitingRequests,
     handleDownloadConnectionChange({ detail }) {
       this.isOffline = detail === 'offline'
-      if (this.isOffline && !this.watchingPlaylist) this.abortAutoplayCountdown(true)
+      if (this.isOffline && !this.watchingPlaylist) {
+        // The recommended video that the countdown would open needs the internet.
+        if (this.playNextTimeout) tabMediaCoordinator.releaseEndedPlayback(this.tabId ?? 'web')
+        this.abortAutoplayCountdown(true)
+      }
       if (detail !== 'offline' && this.downloadedPlaybackWithoutMetadata && !this.downloadedMetadataLoading) {
         this.downloadedMetadataLoading = true
         const loadGeneration = ++this.videoLoadGeneration
@@ -5661,11 +5665,13 @@ export default defineComponent({
 
     handlePlayerEnded: function (sleepTimerEnded = false) {
       if (!this.isPlaybackPresented()) {
+        tabMediaCoordinator.releaseEndedPlayback(this.tabId ?? 'web')
         return
       }
       this.markAsWatchedIfFinished(this.videoLengthSeconds, true)
 
       if (sleepTimerEnded) {
+        tabMediaCoordinator.releaseEndedPlayback(this.tabId ?? 'web')
         this.handleWatchProgressAutoSaveWhenProgressEnabled()
         return
       }
@@ -5678,31 +5684,38 @@ export default defineComponent({
     },
 
     handleVideoEnded: function () {
+      // Android keeps its playback service for the next video until this
+      // reports that nothing follows.
+      if (!this.continueAfterVideoEnded()) tabMediaCoordinator.releaseEndedPlayback(this.tabId ?? 'web')
+    },
+
+    /** @returns {boolean} whether another video starts or is still coming */
+    continueAfterVideoEnded: function () {
       if (!this.isPlaybackPresented()) {
-        return
+        return false
       }
       this.handleWatchProgressAutoSaveWhenProgressEnabled()
+      // Standalone YouTube-style Shorts stop for the replay control instead of
+      // advancing. Playlist Shorts still follow the playlist autoplay setting.
+      const standaloneShortStops = this.customShortsPlayerActive && this.isStandaloneShort
+      // Queued videos were chosen by the user, unlike autoplay, so bedtime and
+      // the daily limit wait until the queue has finished.
+      if (!standaloneShortStops && this.playNextQueuedVideo()) {
+        return true
+      }
       // A bedtime reminder that waited for this video replaces whatever plays next.
       if (this.$store.getters.getWellbeingBedtimeWaiting) {
         this.$store.commit('showWellbeingPrompt', 'bedtime')
-        return
+        return false
       }
-      // Standalone YouTube-style Shorts stop for the replay control instead of
-      // advancing. Playlist Shorts still follow the playlist autoplay setting.
-      if (this.customShortsPlayerActive && this.isStandaloneShort) {
-        return
-      }
-      if (this.$store.getters.getWellbeingStopsAutoplay) {
-        return
-      }
-      if (this.playNextQueuedVideo()) {
-        return
+      if (standaloneShortStops || this.$store.getters.getWellbeingStopsAutoplay) {
+        return false
       }
       if (this.isStandaloneShort) {
-        return
+        return false
       }
       if (!this.autoplayEnabled) {
-        return
+        return false
       }
 
       if (this.blockVideoAutoplay) {
@@ -5717,18 +5730,17 @@ export default defineComponent({
           important: true,
         })
         this.resetAutoplayInterruptionTimeout()
-        return
+        return false
       }
 
       if (this.watchingPlaylist && this.$refs.watchVideoPlaylist?.isWaitingForNextVideo) {
         this.waitingForPlaylistContinuation = true
-        return
+        return true
       }
 
       if (this.watchingPlaylist && this.$refs.watchVideoPlaylist?.shouldStopDueToPlaylistEnd) {
         // Let `watchVideoPlaylist` handle end of playlist, no countdown needed
-        this.$refs.watchVideoPlaylist.playNextVideo()
-        return
+        return this.$refs.watchVideoPlaylist.playNextVideo() != null
       }
 
       const nextVideo = this.watchingPlaylist
@@ -5736,7 +5748,7 @@ export default defineComponent({
         : this.nextRecommendedVideo
 
       if (!nextVideo?.videoId) {
-        return
+        return false
       }
 
       const nextVideoInterval = this.defaultInterval
@@ -5745,6 +5757,7 @@ export default defineComponent({
         const getters = this.$store.getters
         if (getters.getWellbeingBedtimeWaiting || getters.getWellbeingStopsAutoplay) {
           this.abortAutoplayCountdown(true)
+          tabMediaCoordinator.releaseEndedPlayback(this.tabId ?? 'web')
           if (getters.getWellbeingBedtimeWaiting) this.$store.commit('showWellbeingPrompt', 'bedtime')
           return
         }
@@ -5786,6 +5799,7 @@ export default defineComponent({
           }
         }, 250)
       }
+      return true
     },
 
     /**
@@ -5907,6 +5921,7 @@ export default defineComponent({
       this.autoplayCountdown = null
 
       if (!hideToast) {
+        tabMediaCoordinator.releaseEndedPlayback(this.tabId ?? 'web')
         showToast({ message: this.t('Canceled next video autoplay'), icon: ['fas', 'times-circle'] })
       }
     },

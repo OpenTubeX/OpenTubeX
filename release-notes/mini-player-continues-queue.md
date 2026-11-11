@@ -2,4 +2,4 @@
 category: fix
 ---
 
-The mini player and automatic Picture-in-Picture now go on to the next video in a playlist or the queue after you leave the video.
+The next video in a playlist or the queue now starts in the mini player, in automatic Picture-in-Picture, and on a locked Android screen. Videos you queued also play at bedtime, when only autoplay stops.

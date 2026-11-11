@@ -206,6 +206,7 @@ test.describe('bedtime without the reminder', () => {
     seed: {
       settings: {
         ...playbackSettings,
+        playNextVideo: true,
         stopAutoplayAtBedtimeAndLimit: true,
         bedtimeReminder: false,
         bedtimeStart: timeOfDay(-30),
@@ -214,18 +215,22 @@ test.describe('bedtime without the reminder', () => {
     },
   })
 
-  test('queued videos do not autoplay at bedtime', async ({ app, page }) => {
+  test('bedtime stops autoplay but still plays queued videos', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     const video = await openMockedVideo(page)
     await video.evaluate(element => element.pause())
-    await page.evaluate(() => {
-      window.$store.commit('addVideoToWatchQueue', { video: { videoId: '7JV7yHNQjm4', title: 'Queued video', lengthSeconds: 60 } })
-    })
 
     const watch = await watchViewHandle(page)
     await watch.evaluate(vm => vm.handleVideoEnded())
-    expect(await page.evaluate(() => window.$store.getters.getNextQueuedVideo?.videoId)).toBe('7JV7yHNQjm4')
+    expect(await watch.evaluate(vm => vm.autoplayCountdown)).toBeNull()
     expect(page.url()).toContain('jNQXAC9IVRw')
+
+    await page.evaluate(() => {
+      window.$store.commit('addVideoToWatchQueue', { video: { videoId: '7JV7yHNQjm4', title: 'Queued video', lengthSeconds: 60 } })
+    })
+    await watch.evaluate(vm => vm.handleVideoEnded())
+    await expect(page).toHaveURL(/7JV7yHNQjm4/)
+    expect(await page.evaluate(() => window.$store.getters.getNextQueuedVideo?.videoId)).toBeUndefined()
   })
 })
 

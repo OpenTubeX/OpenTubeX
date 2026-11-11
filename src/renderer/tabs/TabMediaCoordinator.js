@@ -17,6 +17,23 @@ let miniPlayerTabId = null
 let playSequence = 0
 let powerSaveBlocked = false
 
+// Android 12+ refuses to start a foreground service from the background, and
+// Android 16 also ignores audio focus requests from a background app without
+// one. Clearing the playback service when a video ends would leave the next
+// queued, playlist or autoplay video unable to play while the screen is
+// locked, so the service stays paused until the next video plays. The limit
+// covers the longest autoplay countdown (60 seconds) and loading the video.
+const ENDED_HANDOFF_MS = 120_000
+/** @type {{ tabId: string, state: object, timer: ReturnType<typeof setTimeout> } | null} */
+let endedHandoff = null
+
+function releaseEndedHandoff() {
+  if (!endedHandoff) return false
+  clearTimeout(endedHandoff.timer)
+  endedHandoff = null
+  return true
+}
+
 /**
  * @param {string | null | undefined} tabId
  * @param {boolean} [create] whether an unknown tab gets an entry. Calls that
@@ -113,12 +130,15 @@ function applyPositionState(owner, actionHandlers = getActionHandlers(owner)) {
     }
   }
 
-  updateAndroidMediaSession({
+  const state = {
     playbackState: owner?.playbackState,
     metadata: owner?.metadata,
     positionState: owner?.positionState,
     actionHandlers,
-  })
+  }
+  updateAndroidMediaSession(endedHandoff && !['playing', 'paused'].includes(state.playbackState)
+    ? endedHandoff.state
+    : state)
 }
 
 function applyOwner(playbackStartedTabId = null) {
@@ -175,9 +195,49 @@ export const tabMediaCoordinator = {
     }
 
     const handler = getActionHandlers(mediaByTabId.get(tabId))[action]
+    // Dismissing the notification of an ended video also ends its handoff.
+    if (action === 'stop' && releaseEndedHandoff() && typeof handler !== 'function') applyOwner()
     if (typeof handler === 'function') {
       handler(details)
     }
+  },
+
+  /**
+   * Reports that a tab's video ended. Android keeps its playback service until
+   * that tab plays again or {@link releaseEndedPlayback} reports that nothing follows.
+   * @param {string} tabId
+   */
+  endPlayback(tabId) {
+    const entry = mediaByTabId.get(tabId)
+    if (process.env.IS_CAPACITOR && !process.env.IS_IOS && entry && ownerTabId === tabId &&
+      (entry.playbackState !== 'none' || endedHandoff?.tabId === tabId)) {
+      const state = endedHandoff?.tabId === tabId
+        ? endedHandoff.state
+        : { playbackState: 'paused', metadata: entry.metadata, positionState: entry.positionState, actionHandlers: {} }
+      releaseEndedHandoff()
+      endedHandoff = {
+        tabId,
+        state,
+        timer: setTimeout(() => {
+          endedHandoff = null
+          applyOwner()
+        }, ENDED_HANDOFF_MS)
+      }
+    }
+    this.setPlaybackState(tabId, 'none')
+  },
+
+  /**
+   * Whether Android still runs the playback service for a video that ended in this tab.
+   * @param {string} tabId
+   */
+  holdsEndedPlayback(tabId) {
+    return endedHandoff?.tabId === tabId
+  },
+
+  /** @param {string} tabId */
+  releaseEndedPlayback(tabId) {
+    if (endedHandoff?.tabId === tabId && releaseEndedHandoff()) applyOwner()
   },
 
   pauseAll() {
@@ -226,6 +286,7 @@ export const tabMediaCoordinator = {
     }
 
     if (playbackState === 'playing' && entry.playbackState !== 'playing') pauseOtherAndroidTabs(tabId)
+    if (playbackState === 'playing') releaseEndedHandoff()
 
     entry.playbackState = playbackState
     if (playbackState === 'playing') {
@@ -265,6 +326,7 @@ export const tabMediaCoordinator = {
     const playbackChanged = playbackState !== null && entry.playbackState !== playbackState
     if (playbackState !== null) {
       if (playbackStarted) pauseOtherAndroidTabs(tabId)
+      if (playbackState === 'playing') releaseEndedHandoff()
       entry.playbackState = playbackState
       if (playbackStarted) entry.lastPlayedAt = ++playSequence
     }
@@ -312,6 +374,7 @@ export const tabMediaCoordinator = {
 
   unregister(tabId) {
     mediaByTabId.delete(tabId)
+    if (endedHandoff?.tabId === tabId) releaseEndedHandoff()
     if (pictureInPictureTabId === tabId) {
       pictureInPictureTabId = null
       keepTabLoaded(tabId, 'pictureInPicture', false)

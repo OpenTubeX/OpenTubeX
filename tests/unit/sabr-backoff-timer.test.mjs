@@ -54,6 +54,8 @@ function fixture() {
     clearAbRepeatBoundarySchedule: noop,
     tabMediaCoordinator: {
       setPlaybackState: (_id, state) => playbackStates.push(state),
+      endPlayback: () => playbackStates.push('none'),
+      holdsEndedPlayback: () => false,
       setActionHandlers: (_id, _source, handlers) => { context.handlers = handlers },
     },
     mediaTabId: 'test',
@@ -106,6 +108,19 @@ test('Android defers an already-hidden SABR autoplay load until it can establish
   visible.resolve(true)
   await loading
   assert.deepEqual(loads, ['playing'], 'protection must precede loading after returning')
+})
+
+test('Android loads the next SABR video while hidden when the ended video still holds its playback service', async () => {
+  const f = fixture()
+  f.context.process.env.IS_CAPACITOR = true
+  f.context.isAppHidden = () => true
+  f.context.tabMediaCoordinator.holdsEndedPlayback = () => true
+  f.context.waitForAndroidAppState = () => assert.fail('a locked screen must not wait for the app')
+  let loads = 0
+  f.context.player.load = async () => { loads++ }
+  f.video.value.autoplay = true
+  await f.loadPlaybackSource('fixture', null, 'sabr')
+  assert.equal(loads, 1)
 })
 
 test('Android defers SABR autoplay during the visibility grace period', async () => {
