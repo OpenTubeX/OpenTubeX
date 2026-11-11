@@ -66,11 +66,13 @@ const restore = window => {
     report(window)
   })
 }
-// Chromium's Picture-in-Picture window is the only window of the app without a
-// desktop file name. Its caption is translated, and on Wayland it is only
-// kept above others by a window rule.
+// Chromium's Picture-in-Picture window has no desktop file name, and Chromium
+// keeps it smaller than the screen. Electron's detached DevTools window has no
+// desktop file name either, but no maximum size. The caption is translated,
+// and on Wayland the window is only kept above others by a window rule.
+const fitsOnScreen = size => workspace.screens.some(output => size.width <= output.geometry.width && size.height <= output.geometry.height)
 const track = window => {
-  if (window.desktopFileName === '' && window.normalWindow && isOwn(window)) restore(window)
+  if (window.desktopFileName === '' && window.normalWindow && fitsOnScreen(window.maxSize) && isOwn(window)) restore(window)
 }
 workspace.windowList().forEach(track)
 workspace.windowAdded.connect(track)

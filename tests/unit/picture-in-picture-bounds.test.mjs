@@ -175,7 +175,7 @@ function runKwinScript(saved, windows, owner = { processId: 42, flatpakId: null 
   const reports = []
   const added = []
   const workspace = {
-    screens: [{}],
+    screens: [{ geometry: { x: 0, y: 0, width: 1920, height: 1080 } }],
     currentDesktop: {},
     clientArea: () => ({ ...display }),
     windowList: () => [...windows, ...added.windows].filter(window => window.listed),
@@ -193,7 +193,12 @@ function runKwinScript(saved, windows, owner = { processId: 42, flatpakId: null 
   }
 }
 
-function kwinWindow({ pid = 42, keepAbove = false, desktopFileName = '', normalWindow = true, listed = false } = {}) {
+// Chromium limits its Picture-in-Picture window to part of the screen
+const pictureInPictureMaxSize = { width: 1536, height: 864 }
+// KWin's maximum size of a window that sets none
+const unboundedMaxSize = { width: 2147483647, height: 2147483647 }
+
+function kwinWindow({ pid = 42, keepAbove = false, desktopFileName = '', normalWindow = true, maxSize = pictureInPictureMaxSize, listed = false } = {}) {
   const listeners = {}
   const signal = name => ({
     connect: listener => { listeners[name] = listener },
@@ -204,6 +209,7 @@ function kwinWindow({ pid = 42, keepAbove = false, desktopFileName = '', normalW
     keepAbove,
     desktopFileName,
     normalWindow,
+    maxSize,
     listed,
     move: false,
     resize: false,
@@ -231,15 +237,17 @@ function kwinWindow({ pid = 42, keepAbove = false, desktopFileName = '', normalW
 
 test('the KWin script moves, then resizes, only the Picture-in-Picture window', () => {
   const pip = kwinWindow()
-  const main = kwinWindow({ desktopFileName: 'opentubex', listed: true })
+  const main = kwinWindow({ desktopFileName: 'opentubex', maxSize: unboundedMaxSize, listed: true })
   // A window rule can keep the app's window above others
-  const ruled = kwinWindow({ keepAbove: true, desktopFileName: 'opentubex' })
+  const ruled = kwinWindow({ keepAbove: true, desktopFileName: 'opentubex', maxSize: unboundedMaxSize })
   const menu = kwinWindow({ normalWindow: false })
   const other = kwinWindow({ pid: 7 })
+  // Electron gives the detached DevTools window no app ID on Wayland
+  const devTools = kwinWindow({ maxSize: unboundedMaxSize })
   const { add } = runKwinScript({ x: 40, y: 50, width: 640, height: 360 }, [main])
-  for (const window of [ruled, menu, other, pip]) add(window)
+  for (const window of [ruled, menu, other, devTools, pip]) add(window)
 
-  for (const window of [main, ruled, menu, other]) assert.deepEqual(window.assignments, [])
+  for (const window of [main, ruled, menu, other, devTools]) assert.deepEqual(window.assignments, [])
   assert.deepEqual(pip.assignments, [
     { x: 40, y: 50, width: 888, height: 500 },
     { x: 40, y: 50, width: 640, height: 360 }
