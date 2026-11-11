@@ -466,32 +466,21 @@ const SUBSCRIPTION_FEED_CACHE_MUTATIONS = {
 
 let settingSyncTimestampWrite = Promise.resolve()
 
-function getSettingSyncTimestamps(settings) {
-  return normalizeSettingSyncTimestamps(settings.syncServerSettingUpdatedAt)
-}
-
-function normalizeSettingSyncTimestamps(value) {
-  return value !== null && typeof value === 'object' && !Array.isArray(value) ? value : {}
-}
-
 function recordSettingSyncTimestamp(commit, settings, settingId, editedAt = Date.now()) {
   if (!isSettingSyncable(settingId) && settingId !== CUSTOM_THEMES_SYNC_KEY) return
 
   settingSyncTimestampWrite = settingSyncTimestampWrite.then(async () => {
-    // Build on the saved times: the in-memory ones include optimistic edits of
-    // other settings whose writes can still fail.
+    const current = settings.syncServerSettingUpdatedAt !== null &&
+      typeof settings.syncServerSettingUpdatedAt === 'object' &&
+      !Array.isArray(settings.syncServerSettingUpdatedAt)
+      ? settings.syncServerSettingUpdatedAt
+      : {}
     const updatedAt = {
-      ...normalizeSettingSyncTimestamps(await DBSettingHandlers.findValue('syncServerSettingUpdatedAt')),
+      ...current,
       [settingId]: editedAt,
     }
     await DBSettingHandlers.upsert('syncServerSettingUpdatedAt', updatedAt)
-    // Optimistic edits commit their times while this write is pending, so merge
-    // into the current times and never move one back.
-    const current = getSettingSyncTimestamps(settings)
-    commit('setSyncServerSettingUpdatedAt', {
-      ...current,
-      [settingId]: Math.max(current[settingId] ?? editedAt, editedAt),
-    })
+    commit('setSyncServerSettingUpdatedAt', updatedAt)
   }).catch(error => {
     console.error('Failed to record the setting sync timestamp', error)
   })
@@ -677,39 +666,15 @@ function updateSavedPlaylistBookmarks(commit, update) {
 
 const updateOptimisticSetting = createOptimisticSettingUpdater()
 
-// Sync can read an optimistic value before its write finishes, so the value's
-// edit time is committed with it. Only the latest write saves that time, so an
-// older write that finishes later cannot move it back.
-function persistOptimisticSetting(commit, settings, settingId, value) {
-  const editedAt = Date.now()
-  const syncable = isSettingSyncable(settingId)
-  const previousEditedAt = getSettingSyncTimestamps(settings)[settingId]
-  if (syncable) {
-    commit('setSyncServerSettingUpdatedAt', { ...getSettingSyncTimestamps(settings), [settingId]: editedAt })
-  }
+function updateOrderedSetting(commit, settings, settingId, value) {
   return updateOptimisticSetting(settingId, value, {
     read: () => settings[settingId],
     commit: nextValue => commit(defaultMutationId(settingId), nextValue),
-    persist: async (nextValue, isLatest) => {
-      try {
-        await DBSettingHandlers.upsert(settingId, nextValue)
-      } catch (error) {
-        // A failed write restores the saved value, so restore its edit time too.
-        if (syncable && isLatest() && getSettingSyncTimestamps(settings)[settingId] === editedAt) {
-          const restored = { ...getSettingSyncTimestamps(settings) }
-          if (previousEditedAt === undefined) delete restored[settingId]
-          else restored[settingId] = previousEditedAt
-          commit('setSyncServerSettingUpdatedAt', restored)
-        }
-        throw error
-      }
-      if (isLatest()) await recordSettingSyncTimestamp(commit, settings, settingId, editedAt)
+    persist: async nextValue => {
+      await DBSettingHandlers.upsert(settingId, nextValue)
+      await recordSettingSyncTimestamp(commit, settings, settingId)
     },
-  })
-}
-
-function updateOrderedSetting(commit, settings, settingId, value) {
-  return persistOptimisticSetting(commit, settings, settingId, value).then(() => true).catch(error => {
+  }).then(() => true).catch(error => {
     console.error(error)
     return false
   })
@@ -1680,10 +1645,15 @@ for (const settingId of Object.keys(state)) {
       }).then(() => true, handleUpdateError)
     )
   } else {
-    // Settings without side effects apply at once, so toggles do not wait for
-    // two database writes. A failed write restores the saved value.
     actions[updaterId] = ({ commit, state }, value) => (
-      persistOptimisticSetting(commit, state, settingId, value).then(() => true, handleUpdateError)
+      runSettingUpdate(settingId, async isLatest => {
+        await DBSettingHandlers.upsert(settingId, value)
+
+        if (!isLatest()) return
+        await recordSettingSyncTimestamp(commit, state, settingId)
+
+        if (isLatest()) commit(mutationId, value)
+      }).then(() => true, handleUpdateError)
     )
   }
 }

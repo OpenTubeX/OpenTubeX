@@ -502,7 +502,7 @@ export async function setupTabsIPC(options = {}) {
     if (manager && tab && tab.skipSilence !== skipSilence) {
       tab.skipSilence = skipSilence
       manager._broadcastStateUpdate()
-      manager._scheduleSessionSave(false)
+      manager._scheduleSessionSave()
     }
   })
 
