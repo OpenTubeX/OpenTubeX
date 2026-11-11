@@ -93,8 +93,14 @@
 }
 
 .ftVideoPlayer.classicPlayerControls .chapterOverlay,
-.ftVideoPlayer.classicPlayerControls :deep(:is(.shaka-context-menu, .shareButton .iconDropdown, .transcriptLanguageMenu, .fullscreenSortMenu)) {
+.ftVideoPlayer.classicPlayerControls :deep(:is(.shaka-context-menu, .transcriptLanguageMenu, .fullscreenSortMenu)) {
   background-color: rgb(12 12 12 / 88%);
+}
+
+/* Fullscreen dropdowns, such as Share, move into the player and keep the theme's
+   card color, which translucent custom themes pair with a blur. */
+.ftVideoPlayer.classicPlayerControls :deep(.fullscreenDropdownLayer .iconDropdown) {
+  background-color: color-mix(in srgb, rgb(from var(--card-bg-color) r g b / 100%) 96%, rgb(from var(--bg-color) r g b / 100%));
 }
 
 /* Shaka creates this unused ad control alongside the playback time display. */
