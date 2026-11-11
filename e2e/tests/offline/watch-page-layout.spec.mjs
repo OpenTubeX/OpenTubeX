@@ -504,12 +504,6 @@ test('chapters stay centered through layout changes until manually scrolled', { 
   // and offers a button to follow playback again.
   const sync = page.locator('.watchVideoChaptersPanel').getByRole('button', { name: 'Sync to video time' })
   await expect(sync).toBeVisible()
-  // The last chapter scrolls up past the button rather than ending beneath it.
-  await expect.poll(async () => {
-    const lastChapter = await scroller.locator('.chapter').last().boundingBox()
-    const button = await sync.boundingBox()
-    return lastChapter.y + lastChapter.height - button.y
-  }).toBeLessThanOrEqual(0)
   await view.evaluate(async view => {
     view.videoCurrentChapterIndex = 10
     await view.$nextTick()

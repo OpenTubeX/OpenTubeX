@@ -167,13 +167,6 @@
   }
 }
 
-/* Lets the last chapter scroll up past the sync button. */
-.chaptersList.desynced .chaptersContent::after {
-  flex: none;
-  block-size: 64px;
-  content: '';
-}
-
 /* Brings a list scrolled by hand back to the current chapter. */
 .chaptersSync {
   display: flex;

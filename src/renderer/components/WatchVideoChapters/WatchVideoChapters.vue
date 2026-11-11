@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="chaptersList"
-    :class="{ desynced: !followCurrentChapter }"
-  >
+  <div class="chaptersList">
     <div
       ref="chaptersWrapper"
       v-observe-visibility="observeVisibilityOptions"
@@ -146,11 +143,7 @@ const SCROLL_RANGE_TOLERANCE = 1
 
 function canScroll() {
   const container = chaptersWrapper.value
-  if (!container || !chaptersContent.value) return false
-  // The room left below the last chapter for the sync button is not a range
-  // worth syncing.
-  const syncSpace = Number.parseFloat(getComputedStyle(chaptersContent.value, '::after').blockSize) || 0
-  return container.scrollHeight - container.clientHeight - syncSpace > SCROLL_RANGE_TOLERANCE
+  return !!container && container.scrollHeight - container.clientHeight > SCROLL_RANGE_TOLERANCE
 }
 
 function stopFollowing() {
