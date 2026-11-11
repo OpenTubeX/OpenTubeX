@@ -11,6 +11,9 @@
 #
 # On Linux, prefer rootless Podman: members of the docker group can gain root
 # access to the host.
+# With Podman, run `systemctl --user enable podman-restart.service` and
+# `loginctl enable-linger` so the server keeps running after you log out and
+# starts at boot.
 #
 # Browsers only store app data on secure origins. To use OpenTubeX from other
 # devices, serve it over HTTPS, for example with Tailscale Serve, Cloudflare
