@@ -11,24 +11,42 @@ import android.os.PowerManager;
 public final class SubscriptionRefreshService extends Service {
     // A pending foreground-service start must acknowledge Android's startup
     // deadline even if the refresh finishes before onStartCommand is delivered.
+    // Both fields are guarded by the SubscriptionRefreshWorker class lock.
     private static boolean started;
+    private static int pendingStarts;
     private PowerManager.WakeLock wakeLock;
 
+    /** Returns false when Android declines the start without an exception. */
+    static boolean start(android.content.Context context, Intent service) {
+        pendingStarts++;
+        try {
+            if (context.startForegroundService(service) != null) return true;
+        } catch (RuntimeException error) {
+            pendingStarts--;
+            throw error;
+        }
+        pendingStarts--;
+        return false;
+    }
+
     static void stopIfStarted(android.content.Context context) {
-        if (started) context.stopService(new Intent(context, SubscriptionRefreshService.class));
+        // Android crashes the app if a start that has not reached startForeground
+        // is stopped. The pending onStartCommand stops a finished refresh itself.
+        if (started && pendingStarts == 0) context.stopService(new Intent(context, SubscriptionRefreshService.class));
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         synchronized (SubscriptionRefreshWorker.class) {
-            return startRefresh(intent);
+            if (intent != null && pendingStarts > 0) pendingStarts--;
+            return startRefresh(intent, startId);
         }
     }
 
-    private int startRefresh(Intent intent) {
+    private int startRefresh(Intent intent, int startId) {
         SubscriptionRefreshState.Snapshot state = SubscriptionRefreshWorker.rendererSnapshot();
         if (state == null && intent == null) {
-            stopSelf();
+            stopSelf(startId);
             return START_NOT_STICKY;
         }
         android.app.Notification notification = SubscriptionRefreshNotification.build(
@@ -46,7 +64,8 @@ public final class SubscriptionRefreshService extends Service {
         started = true;
         if (state == null || AppVisibility.isVisible()) {
             stopForeground(STOP_FOREGROUND_REMOVE);
-            stopSelf();
+            // A newer start may already be queued; it keeps the service.
+            stopSelf(startId);
             return START_NOT_STICKY;
         }
         if (wakeLock == null) {

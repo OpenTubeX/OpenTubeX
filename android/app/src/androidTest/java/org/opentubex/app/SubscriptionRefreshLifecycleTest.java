@@ -57,6 +57,57 @@ public class SubscriptionRefreshLifecycleTest {
     }
 
     @Test
+    public void finishingARefreshSparesTheNextPendingForegroundStart() throws Exception {
+        AtomicReference<String> token = new AtomicReference<>();
+        AtomicReference<SubscriptionRefreshPlugin> retained = new AtomicReference<>();
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            try {
+                scenario.onActivity(activity -> {
+                    activity.getBridge().getWebView().loadUrl("about:blank");
+                    retained.set(plugin(activity));
+                    beginBatch(retained.get());
+                    token.set(start(retained.get()).getString("token"));
+                });
+                assertTrue(SubscriptionRefreshWorker.update(context, token.get(), 12));
+                scenario.moveToState(Lifecycle.State.CREATED);
+                await("the refresh runs in the foreground", this::hasRefreshNotification);
+                // A stopped service is destroyed on the main thread. Holding it keeps
+                // that instance alive while the next refresh asks for a new start.
+                CountDownLatch held = new CountDownLatch(1);
+                CountDownLatch release = new CountDownLatch(1);
+                new android.os.Handler(Looper.getMainLooper()).post(() -> {
+                    held.countDown();
+                    try { release.await(); } catch (InterruptedException ignored) { Thread.currentThread().interrupt(); }
+                });
+                try {
+                    assertTrue(held.await(10, TimeUnit.SECONDS));
+                    assertTrue(SubscriptionRefreshWorker.finish(context, token.get()));
+                    JSObject next = start(retained.get());
+                    assertTrue("next start acquires ownership", next.getBool("acquired"));
+                    token.set(next.getString("token"));
+                    // Android crashes the app when a pending foreground start is stopped
+                    // before the service calls startForeground.
+                    assertTrue(SubscriptionRefreshWorker.finish(context, token.get()));
+                } finally {
+                    release.countDown();
+                }
+                await("the refresh service stops", () -> !hasRefreshNotification() && !refreshServiceRunning());
+            } finally {
+                if (token.get() != null) SubscriptionRefreshWorker.finish(context, token.get());
+                if (retained.get() != null) {
+                    await("retained renderer cleaned up", () -> !retained.get().isRendererRetained());
+                }
+            }
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private boolean refreshServiceRunning() {
+        return context.getSystemService(android.app.ActivityManager.class).getRunningServices(Integer.MAX_VALUE).stream()
+            .anyMatch(service -> service.service.getClassName().equals(SubscriptionRefreshService.class.getName()));
+    }
+
+    @Test
     public void rejectedBackgroundServiceStartKeepsRefreshUsable() throws Exception {
         assertRejectedServiceStart(true);
     }
