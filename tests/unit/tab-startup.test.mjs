@@ -559,6 +559,13 @@ for (const initialization of ['creation', 'restore', 'sync replacement']) {
     manager._scheduleSessionSave(false)
     assert.equal(manager.getSyncSession().updatedAt, 5600)
 
+    // A session read inside a batch dates the batch's edits too.
+    now = 5800
+    await manager.runBatched(() => {
+      manager.applyTabTitle(tab, 'Changed in a batch')
+      assert.equal(manager.getSyncSession().updatedAt, 5800)
+    })
+
     now = 6000
     tab.title = 'Changed before closing'
     await manager._saveSession()

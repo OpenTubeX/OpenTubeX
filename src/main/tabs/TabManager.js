@@ -2095,13 +2095,15 @@ export class TabManager {
     const tab = this.tabs.get(tabId)
     if (!tab) return
 
+    // History is only part of the synced session while the tab persists it.
+    const wasSynced = Boolean(tab.persistNavigationHistory && tab.navigationHistory != null)
     const sanitized = sanitizeNavigationHistory(history, historyIndex)
     tab.navigationHistory = sanitized?.history ?? null
     tab.navigationHistoryIndex = sanitized?.historyIndex ?? 0
     if (typeof persistHistory === 'boolean') {
       tab.persistNavigationHistory = persistHistory && sanitized != null
     }
-    this._scheduleSessionSave()
+    this._scheduleSessionSave(wasSynced || Boolean(tab.persistNavigationHistory && tab.navigationHistory != null))
   }
 
   /**
@@ -2292,7 +2294,7 @@ export class TabManager {
           this._broadcastStateUpdate()
         }
         if (sessionSavePending) {
-          this._scheduleSessionSave()
+          this._scheduleSessionSave(false)
         }
       }
     }
@@ -2364,11 +2366,13 @@ export class TabManager {
   // do not make the synced session newer than its last real edit.
   _scheduleSessionSave(syncChanged = true) {
     if (this._sessionPersistenceDisabled) return
+    // Batched changes are dated when they happen, since the session can be read
+    // before the batch ends.
+    if (syncChanged) this._sessionChangedAt = Date.now()
     if (this._batchDepth > 0) {
       this._batchedSessionSavePending = true
       return
     }
-    if (syncChanged) this._sessionChangedAt = Date.now()
     // Do not restart the timer: even continuous updates must reach disk.
     if (this._sessionSaveTimer != null) return
     this._sessionSaveTimer = setTimeout(() => {

@@ -52,7 +52,7 @@ export function createOptimisticSettingUpdater() {
 
     return runUpdate(settingId, async isLatest => {
       try {
-        await persist(value)
+        await persist(value, isLatest)
         saved.value = value
       } catch (error) {
         if (isLatest() && read() === optimisticValue) commit(saved.value)

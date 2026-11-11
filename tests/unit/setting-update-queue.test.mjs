@@ -161,11 +161,51 @@ test('continues with the latest setting write after an earlier write fails', asy
   assert.deepEqual(appliedValues, [8])
 })
 
+const settingsSource = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
+const optimisticPersistence = ['function getSettingSyncTimestamps(', 'function persistOptimisticSetting(']
+  .map(start => {
+    const index = settingsSource.indexOf(start)
+    assert.ok(index >= 0, `Update the harness after renaming ${start}`)
+    return settingsSource.slice(index, settingsSource.indexOf('\n}\n', index) + 3)
+  })
+  .join('\n')
+
+test('an optimistic setting value is visible to sync only with its edit time', async () => {
+  const writes = []
+  const recorded = []
+  const state = { uiScale: 100, syncServerSettingUpdatedAt: { theme: 1 } }
+  let now = 1000
+  const persistOptimisticSetting = vm.runInNewContext(`${optimisticPersistence}\npersistOptimisticSetting`, {
+    Date: { now: () => now },
+    isSettingSyncable: () => true,
+    defaultMutationId: id => `set${id}`,
+    updateOptimisticSetting: createOptimisticSettingUpdater(),
+    recordSettingSyncTimestamp: async (_commit, _settings, settingId, editedAt) => { recorded.push([settingId, editedAt]) },
+    DBSettingHandlers: { upsert: () => { const write = deferred(); writes.push(write); return write.promise } },
+  })
+  const commit = (name, value) => { state[name[3].toLowerCase() + name.slice(4)] = value }
+
+  const first = persistOptimisticSetting(commit, state, 'uiScale', 125)
+  assert.equal(state.uiScale, 125)
+  assert.deepEqual({ ...state.syncServerSettingUpdatedAt }, { theme: 1, uiScale: 1000 })
+  await new Promise(resolve => setImmediate(resolve))
+
+  now = 2000
+  const second = persistOptimisticSetting(commit, state, 'uiScale', 150)
+  assert.equal(state.syncServerSettingUpdatedAt.uiScale, 2000)
+  writes[0].resolve()
+  await first
+  assert.deepEqual(recorded, [], 'a superseded write does not save its older edit time')
+  await new Promise(resolve => setImmediate(resolve))
+  writes[1].resolve()
+  await second
+  assert.deepEqual(recorded, [['uiScale', 2000]])
+})
+
 test('generated setting updaters report whether the write was saved', async () => {
-  const source = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
-  const generator = source.slice(source.indexOf('const getters = {}'), source.indexOf('// Add all custom data'))
+  const generator = settingsSource.slice(settingsSource.indexOf('const getters = {}'), settingsSource.indexOf('// Add all custom data'))
   let failWrites = false
-  const actions = vm.runInNewContext(`${generator}\nactions`, {
+  const actions = vm.runInNewContext(`${optimisticPersistence}\n${generator}\nactions`, {
     state: { uiScale: 100, theme: 'dark' },
     settingsWithSideEffects: ['theme'],
     sideEffectHandlers: { theme: () => {} },
@@ -176,6 +216,7 @@ test('generated setting updaters report whether the write was saved', async () =
     createSettingUpdateQueue,
     updateOptimisticSetting: createOptimisticSettingUpdater(),
     recordSettingSyncTimestamp: async () => {},
+    isSettingSyncable: () => false,
     DBSettingHandlers: { upsert: async () => { if (failWrites) throw new Error('disk full') } },
     console: { error () {} },
   })

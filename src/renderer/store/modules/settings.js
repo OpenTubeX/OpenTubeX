@@ -466,17 +466,20 @@ const SUBSCRIPTION_FEED_CACHE_MUTATIONS = {
 
 let settingSyncTimestampWrite = Promise.resolve()
 
+function getSettingSyncTimestamps(settings) {
+  return settings.syncServerSettingUpdatedAt !== null &&
+    typeof settings.syncServerSettingUpdatedAt === 'object' &&
+    !Array.isArray(settings.syncServerSettingUpdatedAt)
+    ? settings.syncServerSettingUpdatedAt
+    : {}
+}
+
 function recordSettingSyncTimestamp(commit, settings, settingId, editedAt = Date.now()) {
   if (!isSettingSyncable(settingId) && settingId !== CUSTOM_THEMES_SYNC_KEY) return
 
   settingSyncTimestampWrite = settingSyncTimestampWrite.then(async () => {
-    const current = settings.syncServerSettingUpdatedAt !== null &&
-      typeof settings.syncServerSettingUpdatedAt === 'object' &&
-      !Array.isArray(settings.syncServerSettingUpdatedAt)
-      ? settings.syncServerSettingUpdatedAt
-      : {}
     const updatedAt = {
-      ...current,
+      ...getSettingSyncTimestamps(settings),
       [settingId]: editedAt,
     }
     await DBSettingHandlers.upsert('syncServerSettingUpdatedAt', updatedAt)
@@ -666,15 +669,26 @@ function updateSavedPlaylistBookmarks(commit, update) {
 
 const updateOptimisticSetting = createOptimisticSettingUpdater()
 
-function updateOrderedSetting(commit, settings, settingId, value) {
+// Sync can read an optimistic value before its write finishes, so the value's
+// edit time is committed with it. Only the latest write saves that time, so an
+// older write that finishes later cannot move it back.
+function persistOptimisticSetting(commit, settings, settingId, value) {
+  const editedAt = Date.now()
+  if (isSettingSyncable(settingId)) {
+    commit('setSyncServerSettingUpdatedAt', { ...getSettingSyncTimestamps(settings), [settingId]: editedAt })
+  }
   return updateOptimisticSetting(settingId, value, {
     read: () => settings[settingId],
     commit: nextValue => commit(defaultMutationId(settingId), nextValue),
-    persist: async nextValue => {
+    persist: async (nextValue, isLatest) => {
       await DBSettingHandlers.upsert(settingId, nextValue)
-      await recordSettingSyncTimestamp(commit, settings, settingId)
+      if (isLatest()) await recordSettingSyncTimestamp(commit, settings, settingId, editedAt)
     },
-  }).then(() => true).catch(error => {
+  })
+}
+
+function updateOrderedSetting(commit, settings, settingId, value) {
+  return persistOptimisticSetting(commit, settings, settingId, value).then(() => true).catch(error => {
     console.error(error)
     return false
   })
@@ -1648,14 +1662,7 @@ for (const settingId of Object.keys(state)) {
     // Settings without side effects apply at once, so toggles do not wait for
     // two database writes. A failed write restores the saved value.
     actions[updaterId] = ({ commit, state }, value) => (
-      updateOptimisticSetting(settingId, value, {
-        read: () => state[settingId],
-        commit: nextValue => commit(mutationId, nextValue),
-        persist: async nextValue => {
-          await DBSettingHandlers.upsert(settingId, nextValue)
-          await recordSettingSyncTimestamp(commit, state, settingId)
-        },
-      }).then(() => true, handleUpdateError)
+      persistOptimisticSetting(commit, state, settingId, value).then(() => true, handleUpdateError)
     )
   }
 }

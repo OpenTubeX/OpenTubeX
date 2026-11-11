@@ -418,7 +418,7 @@ async function handleFetchMore() {
       isLoadingMore.value = false
     }
     // A failure from the previous tab must not pause the selected one.
-    if (currentTab.value !== tab) nextPageFailed.value = false
+    if (generation === requestGeneration && currentTab.value !== tab) nextPageFailed.value = false
   }
 }
 </script>
