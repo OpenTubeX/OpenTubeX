@@ -217,6 +217,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (optional)'
       Not Set: Nicht festgelegt
     Retry Feed: '{feed} erneut laden'
+    Reloading Feed: '{feed} wird neu geladen'
 Trending:
   Trending: Trends
   Trending Tabs: Trends-Tabs

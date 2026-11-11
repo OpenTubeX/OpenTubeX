@@ -259,6 +259,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (izbirno)'
       Not Set: Ni nastavljeno
     Retry Feed: Poskusi znova naložiti {feed}
+    Reloading Feed: Ponovno nalaganje {feed}
 Trending:
   Music: Glasba
   Trending Tabs: Zavihki priljubljene vsebine

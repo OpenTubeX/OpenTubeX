@@ -216,6 +216,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (nem kötelező)'
       Not Set: Nincs beállítva
     Retry Feed: '{feed} újrapróbálása'
+    Reloading Feed: '{feed} újratöltése'
 Trending:
   Music: Zene
   Load Error: A felkapott tartalmak nem tölthetők be.

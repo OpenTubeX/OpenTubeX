@@ -220,6 +220,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (опционо)'
       Not Set: Није подешено
     Retry Feed: Покушај поново да учиташ {feed}
+    Reloading Feed: Поново се учитава {feed}
 Trending:
   Music: Музика
   Load Error: Садржај у тренду није могао да се учита.

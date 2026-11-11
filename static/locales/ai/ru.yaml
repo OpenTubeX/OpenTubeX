@@ -191,6 +191,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (необязательно)'
       Not Set: Не задано
     Retry Feed: Повторить попытку для {feed}
+    Reloading Feed: Перезагрузка {feed}
 Trending:
   Music: Музыка
   Load Error: Не удалось загрузить популярные видео.

@@ -216,6 +216,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (προαιρετικό)'
       Not Set: Δεν έχει οριστεί
     Retry Feed: Νέα προσπάθεια για {feed}
+    Reloading Feed: Επαναφόρτωση {feed}
 Trending:
   Music: Μουσική
   Load Error: Δεν ήταν δυνατή η φόρτωση των τάσεων.

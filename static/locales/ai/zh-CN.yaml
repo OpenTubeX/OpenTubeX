@@ -216,6 +216,7 @@ Subscriptions:
       Optional Parameter: '{parameter}（可选）'
       Not Set: 未设置
     Retry Feed: 重试 {feed}
+    Reloading Feed: 正在重新加载 {feed}
 Trending:
   Music: 音乐
   Load Error: 无法加载热门内容。

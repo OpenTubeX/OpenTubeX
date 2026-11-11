@@ -236,6 +236,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (nedeviga)'
       Not Set: Ne agordita
     Retry Feed: Reprovi {feed}
+    Reloading Feed: Reŝargante {feed}
 Channels:
   Load More Channels: Ŝargi pli da kanaloj
 Subscription Groups:

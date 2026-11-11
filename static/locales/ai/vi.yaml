@@ -216,6 +216,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (không bắt buộc)'
       Not Set: Chưa đặt
     Retry Feed: Thử lại {feed}
+    Reloading Feed: Đang tải lại {feed}
 Trending:
   Music: Âm nhạc
   Load Error: Không thể tải nội dung thịnh hành.

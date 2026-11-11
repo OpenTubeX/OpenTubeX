@@ -218,6 +218,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (اختياري)'
       Not Set: غير محدد
     Retry Feed: أعد محاولة تحميل {feed}
+    Reloading Feed: جارٍ إعادة تحميل {feed}
 Trending:
   Music: موسيقى
   Load Error: تعذر تحميل العناصر الشائعة.

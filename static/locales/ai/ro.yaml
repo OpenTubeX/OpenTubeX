@@ -216,6 +216,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (opțional)'
       Not Set: Nesetat
     Retry Feed: Reîncearcă {feed}
+    Reloading Feed: Se reîncarcă {feed}
 Trending:
   Music: Muzică
   Load Error: Tendințele nu au putut fi încărcate.

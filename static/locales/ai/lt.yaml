@@ -250,6 +250,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (neprivaloma)'
       Not Set: Nenustatyta
     Retry Feed: Bandyti dar kartą įkelti {feed}
+    Reloading Feed: Iš naujo įkeliamas {feed}
 Trending:
   Music: Muzika
   Load Error: Nepavyko įkelti tendencijų.

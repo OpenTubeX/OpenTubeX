@@ -216,6 +216,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (valinnainen)'
       Not Set: Ei asetettu
     Retry Feed: Yritä ladata {feed} uudelleen
+    Reloading Feed: Ladataan {feed} uudelleen
 Trending:
   Music: Musiikki
   Load Error: Nousussa olevia videoita ei voitu ladata.

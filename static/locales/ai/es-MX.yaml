@@ -231,6 +231,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (opcional)'
       Not Set: Sin definir
     Retry Feed: Reintentar {feed}
+    Reloading Feed: Recargando {feed}
 Trending:
   Music: Música
   Sports: Deportes

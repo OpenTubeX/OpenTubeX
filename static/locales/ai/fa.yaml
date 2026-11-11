@@ -235,6 +235,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (اختیاری)'
       Not Set: تنظیم نشده
     Retry Feed: تلاش دوباره برای {feed}
+    Reloading Feed: در حال بارگذاری دوباره {feed}
 Trending:
   Music: موسیقی
   Load Error: موارد پرطرف‌دار بارگذاری نشدند.

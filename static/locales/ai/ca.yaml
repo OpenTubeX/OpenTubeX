@@ -262,6 +262,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (opcional)'
       Not Set: Sense definir
     Retry Feed: Torna a provar {feed}
+    Reloading Feed: 'S''està tornant a carregar {feed}'
 Channels:
   Load More Channels: "Carrega més canals"
   Count: S'ha trobat 1 canal. | S'han trobat {number} canals. | S'han trobat {number} canals.

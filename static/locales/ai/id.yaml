@@ -216,6 +216,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (opsional)'
       Not Set: Tidak diatur
     Retry Feed: Coba lagi {feed}
+    Reloading Feed: Memuat ulang {feed}
 Trending:
   Music: Musik
   Load Error: Trending tidak dapat dimuat.

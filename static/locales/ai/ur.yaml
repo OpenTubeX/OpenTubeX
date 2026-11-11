@@ -247,6 +247,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (اختیاری)'
       Not Set: سیٹ نہیں
     Retry Feed: '{feed} دوبارہ آزمائیں'
+    Reloading Feed: '{feed} دوبارہ لوڈ ہو رہا ہے'
 Channels:
   Load More Channels: مزید چینلز لوڈ کریں
 Subscription Groups:

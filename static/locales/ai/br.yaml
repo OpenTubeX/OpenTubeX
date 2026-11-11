@@ -216,6 +216,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (diret)'
       Not Set: Nann-termenet
     Retry Feed: Klask en-dro {feed}
+    Reloading Feed: O adkargañ {feed}
 Trending:
   Music: Sonerezh
   Load Error: "N'eus ket bet gallet kargañ ar re diouzh ar c'hiz."

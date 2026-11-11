@@ -216,6 +216,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (valfrjálst)'
       Not Set: Ekki stillt
     Retry Feed: Reyna {feed} aftur
+    Reloading Feed: Endurhleð {feed}
 Trending:
   Music: Tónlist
   Load Error: Ekki tókst að hlaða vinsælu efni.

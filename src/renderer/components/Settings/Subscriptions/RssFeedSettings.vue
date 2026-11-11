@@ -105,6 +105,7 @@
                 v-if="retryingFeedUrls.has(feed.url)"
                 class="feedIcon"
                 inline
+                :label="t('Subscriptions.RSS Feeds.Reloading Feed', { feed: feed.title || feed.url })"
                 :tab-loading-indicator="false"
               />
               <FtIcon

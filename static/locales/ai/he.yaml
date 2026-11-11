@@ -218,6 +218,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (רשות)'
       Not Set: לא מוגדר
     Retry Feed: ניסיון חוזר עבור {feed}
+    Reloading Feed: טוען מחדש את {feed}
 Trending:
   Music: מוזיקה
   Load Error: לא ניתן לטעון את התוכן החם.

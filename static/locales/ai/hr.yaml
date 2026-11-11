@@ -218,6 +218,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (neobavezno)'
       Not Set: Nije postavljeno
     Retry Feed: Pokušaj ponovno učitati {feed}
+    Reloading Feed: Ponovno učitavanje {feed}
 Trending:
   Music: Glazba
   Load Error: Popularni sadržaj nije moguće učitati.

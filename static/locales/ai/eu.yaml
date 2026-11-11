@@ -216,6 +216,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (aukerakoa)'
       Not Set: Ezarri gabe
     Retry Feed: Saiatu berriro {feed} kargatzen
+    Reloading Feed: '{feed} berriro kargatzen'
 Trending:
   Music: Musika
   Load Error: Ezin izan dira joerak kargatu.

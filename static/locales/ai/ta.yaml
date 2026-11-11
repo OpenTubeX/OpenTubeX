@@ -228,6 +228,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (விருப்பத்தேர்வு)'
       Not Set: அமைக்கப்படவில்லை
     Retry Feed: '{feed} ஐ மீண்டும் முயல்'
+    Reloading Feed: '{feed} மீண்டும் ஏற்றப்படுகிறது'
 Trending:
   Music: இசை
   Load Error: பிரபலமானவற்றை ஏற்ற முடியவில்லை.
