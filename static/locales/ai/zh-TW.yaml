@@ -397,7 +397,9 @@ Settings:
       On Hover: "游標停留時為連結加上底線"
       Never: "永不為連結加上底線"
       Always: "一律為連結加上底線"
-    Limit Titles to Two Lines: "標題最多顯示兩行"
+    Title Lines:
+      Title Lines: "標題行數"
+      Unlimited: "不限"
     Close Window With Last Tab: '關閉最後一個分頁時關閉視窗'
     Preferred Video Codec: 偏好的影片編解碼器
     Always Use Backup Media Server: "一律使用備用媒體伺服器"
@@ -2162,7 +2164,7 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "先檢查每個頻道的 RSS 資訊提供，只載入有新上傳內容的頻道的影片、Shorts 和直播。自動重新整理也會略過過去 10 分鐘內載入過的頻道。對於沒有新上傳內容的頻道，觀看次數、已移除的影片和變更的標題每隔幾小時才會更新一次，而且當 RSS 資訊提供延遲時，新上傳的內容可能會較晚出現。使用 Invidious API 時無法使用。"
   General Settings:
-    Limit Titles to Two Lines: "將清單和格狀檢視中的影片與播放清單標題縮短為最多兩行並以省略號結尾，讓卡片更整齊。將游標停留在標題上即可查看完整標題。"
+    Title Lines: "將清單和格狀檢視中的影片與播放清單標題縮短為所選行數並以省略號結尾，讓卡片更整齊。將游標停留在標題上即可查看完整標題。"
     Close Window With Last Tab: '關閉後，關閉最後一個分頁時會改為開啟新分頁，視窗會保持開啟，直到你將其關閉。'
     Preferred Video Codec: |
       自動模式優先使用裝置可以硬體解碼的編解碼器。

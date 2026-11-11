@@ -397,7 +397,9 @@ Settings:
       On Hover: "Üzerine gelindiğinde bağlantıların altını çiz"
       Never: "Bağlantıların altını asla çizme"
       Always: "Bağlantıların altını her zaman çiz"
-    Limit Titles to Two Lines: "Başlıkları iki satırla sınırla"
+    Title Lines:
+      Title Lines: "Başlık satırları"
+      Unlimited: "Sınırsız"
     Close Window With Last Tab: 'Son sekme kapatılınca pencereyi kapat'
     Preferred Video Codec: Tercih edilen video codec'i
     Always Use Backup Media Server: "Her zaman yedek medya sunucusunu kullan"
@@ -2156,7 +2158,7 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Önce her kanalın RSS akışını denetler ve yalnızca yeni yüklemesi olan kanalların videolarını, Shorts'larını ve canlı yayınlarını yükler. Otomatik yenilemeler son 10 dakikada yüklenen kanalları da atlar. Yeni yüklemesi olmayan kanallarda görüntüleme sayıları, kaldırılan videolar ve değişen başlıklar yalnızca birkaç saatte bir güncellenir ve RSS akışı geride kaldığında yeni yüklemeler daha geç görünebilir. Invidious API ile kullanılamaz."
   General Settings:
-    Limit Titles to Two Lines: "Listelerde ve ızgaralarda video ve oynatma listesi başlıklarını üç nokta ile iki satıra kısaltır, böylece kartlar daha düzenli görünür. Başlığın tamamını görmek için imleci üzerine getirin."
+    Title Lines: "Listelerde ve ızgaralarda video ve oynatma listesi başlıklarını üç nokta ile seçilen satır sayısına kısaltır, böylece kartlar daha düzenli görünür. Başlığın tamamını görmek için imleci üzerine getirin."
     Close Window With Last Tab: 'Kapalıyken son sekmeyi kapatmak bunun yerine yeni bir sekme açar; böylece pencere siz kapatana kadar açık kalır.'
     Preferred Video Codec: |
       Otomatik mod, cihazınızın donanımla çözebildiği kodekleri tercih eder.

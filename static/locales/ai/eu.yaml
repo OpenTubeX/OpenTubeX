@@ -397,7 +397,9 @@ Settings:
       On Hover: "Azpimarratu estekak kurtsorea gainetik pasatzean"
       Never: "Ez azpimarratu inoiz estekak"
       Always: "Azpimarratu beti estekak"
-    Limit Titles to Two Lines: "Mugatu izenburuak bi lerrora"
+    Title Lines:
+      Title Lines: "Izenburuaren lerroak"
+      Unlimited: "Mugagabea"
     Close Window With Last Tab: 'Itxi leihoa azken fitxa ixtean'
     Preferred Video Codec: Hobetsitako bideo-kodeka
     Always Use Backup Media Server: "Erabili beti babeskopia-multimedia zerbitzaria"
@@ -2165,7 +2167,7 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Lehenik kanal bakoitzaren RSS jarioa egiaztatzen du, eta igoera berriak dituzten kanalen bideoak, Shorts-ak eta zuzeneko emanaldiak soilik kargatzen ditu. Freskatze automatikoek azken 10 minutuetan kargatutako kanalak ere saltatzen dituzte. Igoera berririk ez duten kanaletan, ikustaldi kopuruak, kendutako bideoak eta aldatutako izenburuak ordu batzuetan behin bakarrik eguneratzen dira, eta igoera berriak beranduago ager daitezke RSS jarioa atzeratuta dagoenean. Ez dago erabilgarri Invidious APIarekin."
   General Settings:
-    Limit Titles to Two Lines: "Zerrenda eta saretetako bideo eta erreprodukzio-zerrenden izenburuak bi lerrora laburtzen ditu eten-puntuekin, txartelak uniformeagoak izan daitezen. Pasatu kurtsorea izenburu baten gainetik osorik ikusteko."
+    Title Lines: "Zerrenda eta saretetako bideo eta erreprodukzio-zerrenden izenburuak aukeratutako lerro kopurura laburtzen ditu eten-puntuekin, txartelak uniformeagoak izan daitezen. Pasatu kurtsorea izenburu baten gainetik osorik ikusteko."
     Close Window With Last Tab: 'Desaktibatuta dagoenean, azken fitxa itxiz gero fitxa berri bat irekitzen da, eta leihoak irekita jarraitzen du zuk itxi arte.'
     Preferred Video Codec: |
       Modu automatikoak zure gailuak hardware bidez deskodetu ditzakeen kodekak hobesten ditu.

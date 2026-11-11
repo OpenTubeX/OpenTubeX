@@ -146,7 +146,7 @@
               <h3
                 class="queueVideoTitle"
                 dir="auto"
-                :title="store.getters.getLimitTitlesToTwoLines ? item.title : null"
+                :title="store.getters.getTitleLineLimit > 0 ? item.title : null"
               >{{ item.title }}</h3>
               <span
                 class="queueAuthor"

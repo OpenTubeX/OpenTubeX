@@ -558,7 +558,9 @@ Settings:
       On Hover: "Onderstreep skakels wanneer die wyser daaroor beweeg"
       Never: "Onderstreep skakels nooit"
       Always: "Onderstreep skakels altyd"
-    Limit Titles to Two Lines: "Beperk titels tot twee reëls"
+    Title Lines:
+      Title Lines: "Titelreëls"
+      Unlimited: "Onbeperk"
     Preferred Video Codec: Voorkeur-videokodek
     Enable Tabs: Aktiveer oortjies
     Thumbnail Swipe Gestures:
@@ -2408,7 +2410,7 @@ Description:
   Music: Musiek
 Tooltips:
   General Settings:
-    Limit Titles to Two Lines: "Kort video- en snitlystitels in lyste en roosters tot twee reëls met 'n ellips in, vir meer eenvormige kaarte. Hou die muis oor 'n titel om dit volledig te sien."
+    Title Lines: "Kort video- en snitlystitels in lyste en roosters tot die gekose aantal reëls met 'n ellips in, vir meer eenvormige kaarte. Hou die muis oor 'n titel om dit volledig te sien."
     Preferred Video Codec: |
       Outomaties verkies kodeks wat u toestel in hardeware kan dekodeer.
       AV1: die beste kwaliteit vir die minste data, maar nie elke video het dit nie. Sonder hardeware-dekodering kan dit die battery uitput of rame laat val.

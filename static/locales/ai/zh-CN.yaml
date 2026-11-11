@@ -397,7 +397,9 @@ Settings:
       On Hover: "悬停时为链接添加下划线"
       Never: "从不为链接添加下划线"
       Always: "始终为链接添加下划线"
-    Limit Titles to Two Lines: "标题最多显示两行"
+    Title Lines:
+      Title Lines: "标题行数"
+      Unlimited: "不限"
     Close Window With Last Tab: '关闭最后一个标签页时关闭窗口'
     Preferred Video Codec: 首选视频编解码器
     Always Use Backup Media Server: "始终使用备用媒体服务器"
@@ -2155,7 +2157,7 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "先检查每个频道的 RSS 订阅源，只加载有新上传内容的频道的视频、Shorts 和直播。自动刷新还会跳过过去 10 分钟内加载过的频道。对于没有新上传内容的频道，观看次数、已移除的视频和更改的标题每隔几小时才会更新一次，而且当 RSS 订阅源滞后时，新上传的内容可能会稍后才出现。使用 Invidious API 时不可用。"
   General Settings:
-    Limit Titles to Two Lines: "将列表和网格中的视频与播放列表标题缩短为最多两行并以省略号结尾，使卡片更整齐。将指针悬停在标题上可查看完整标题。"
+    Title Lines: "将列表和网格中的视频与播放列表标题缩短为所选行数并以省略号结尾，使卡片更整齐。将指针悬停在标题上可查看完整标题。"
     Close Window With Last Tab: '关闭后，关闭最后一个标签页会改为打开一个新标签页，窗口会一直保持打开，直到你关闭它。'
     Preferred Video Codec: |
       自动模式优先使用设备可以硬件解码的编解码器。

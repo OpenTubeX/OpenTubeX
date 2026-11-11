@@ -397,7 +397,9 @@ Settings:
       On Hover: "Podtrhávat odkazy při najetí myší"
       Never: "Nikdy nepodtrhávat odkazy"
       Always: "Vždy podtrhávat odkazy"
-    Limit Titles to Two Lines: "Omezit názvy na dva řádky"
+    Title Lines:
+      Title Lines: "Řádky názvu"
+      Unlimited: "Neomezeno"
     Close Window With Last Tab: 'Zavřít okno při zavření poslední karty'
     Preferred Video Codec: Preferovaný videokodek
     Always Use Backup Media Server: "Vždy používat záložní mediální server"
@@ -2155,7 +2157,7 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Nejprve zkontroluje RSS kanál každého kanálu a videa, Shorts a živé přenosy načte jen z kanálů s novými nahranými videi. Automatická obnovení navíc přeskočí kanály načtené v posledních 10 minutách. U kanálů bez nových videí se počty zhlédnutí, odstraněná videa a změněné názvy aktualizují jen jednou za několik hodin a nová videa se mohou objevit později, když RSS kanál zaostává. Není k dispozici s Invidious API."
   General Settings:
-    Limit Titles to Two Lines: "Zkracuje názvy videí a playlistů v seznamech a mřížkách na dva řádky s výpustkou, aby karty působily jednotněji. Celý název zobrazíte najetím kurzorem."
+    Title Lines: "Zkracuje názvy videí a playlistů v seznamech a mřížkách na zvolený počet řádků s výpustkou, aby karty působily jednotněji. Celý název zobrazíte najetím kurzorem."
     Close Window With Last Tab: 'Když je vypnuto, zavření poslední karty místo toho otevře novou kartu, takže okno zůstane otevřené, dokud ho nezavřete.'
     Preferred Video Codec: |
       Automatický režim upřednostňuje kodeky, které vaše zařízení umí dekódovat hardwarově.

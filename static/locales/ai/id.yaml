@@ -398,7 +398,9 @@ Settings:
       On Hover: "Garis bawahi tautan saat kursor di atasnya"
       Never: "Jangan pernah garis bawahi tautan"
       Always: "Selalu garis bawahi tautan"
-    Limit Titles to Two Lines: "Batasi judul menjadi dua baris"
+    Title Lines:
+      Title Lines: "Baris judul"
+      Unlimited: "Tanpa batas"
     Close Window With Last Tab: 'Tutup jendela saat menutup tab terakhir'
     Preferred Video Codec: Codec video pilihan
     Always Use Backup Media Server: "Selalu gunakan server media cadangan"
@@ -2180,7 +2182,7 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Memeriksa umpan RSS setiap saluran terlebih dahulu dan hanya memuat video, Shorts, dan siaran langsung dari saluran yang memiliki unggahan baru. Penyegaran otomatis juga melewati saluran yang dimuat dalam 10 menit terakhir. Untuk saluran tanpa unggahan baru, jumlah penayangan, video yang dihapus, dan judul yang diubah hanya diperbarui setiap beberapa jam, dan unggahan baru mungkin muncul lebih lambat saat umpan RSS tertinggal. Tidak tersedia dengan API Invidious."
   General Settings:
-    Limit Titles to Two Lines: "Memendekkan judul video dan playlist di daftar dan kisi menjadi dua baris dengan elipsis, agar kartu lebih seragam. Arahkan kursor ke judul untuk melihatnya secara lengkap."
+    Title Lines: "Memendekkan judul video dan playlist di daftar dan kisi menjadi jumlah baris yang dipilih dengan elipsis, agar kartu lebih seragam. Arahkan kursor ke judul untuk melihatnya secara lengkap."
     Close Window With Last Tab: 'Jika dinonaktifkan, menutup tab terakhir akan membuka tab baru, sehingga jendela tetap terbuka sampai Anda menutupnya.'
     Preferred Video Codec: |
       Mode otomatis mengutamakan codec yang dapat didekode perangkat Anda secara hardware.

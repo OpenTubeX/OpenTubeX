@@ -395,7 +395,9 @@ Settings:
       On Hover: "Underline links on hover"
       Never: "Never underline links"
       Always: "Always underline links"
-    Limit Titles to Two Lines: "Limit titles to two lines"
+    Title Lines:
+      Title Lines: "Title Lines"
+      Unlimited: "Unlimited"
     Close Window With Last Tab: 'Close window when closing the last tab'
     Preferred Video Codec: Preferred video codec
     Always Use Backup Media Server: "Always use backup media server"
@@ -2150,7 +2152,7 @@ Description:
   Music: Music
 Tooltips:
   General Settings:
-    Limit Titles to Two Lines: "Shortens video and playlist titles in lists and grids to two lines with an ellipsis, for more uniform cards. Hover over a title to see it in full."
+    Title Lines: "Shortens video and playlist titles in lists and grids to the chosen number of lines with an ellipsis, for more uniform cards. Hover over a title to see it in full."
     Close Window With Last Tab: 'When off, closing the last tab opens a new tab instead, so the window stays open until you close it.'
     Preferred Video Codec: |
       Auto prefers codecs that your device can decode in hardware.

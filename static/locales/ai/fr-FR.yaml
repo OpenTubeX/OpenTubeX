@@ -397,7 +397,9 @@ Settings:
       On Hover: "Souligner les liens au survol"
       Never: "Ne jamais souligner les liens"
       Always: "Toujours souligner les liens"
-    Limit Titles to Two Lines: "Limiter les titres à deux lignes"
+    Title Lines:
+      Title Lines: "Lignes de titre"
+      Unlimited: "Illimité"
     Close Window With Last Tab: 'Fermer la fenêtre à la fermeture du dernier onglet'
     Preferred Video Codec: Codec vidéo préféré
     Always Use Backup Media Server: "Toujours utiliser le serveur multimédia de secours"
@@ -2154,7 +2156,7 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Vérifie d'abord le flux RSS de chaque chaîne et ne charge les vidéos, Shorts et diffusions en direct que des chaînes ayant de nouvelles mises en ligne. Les actualisations automatiques ignorent aussi les chaînes chargées au cours des 10 dernières minutes. Pour les chaînes sans nouvelles mises en ligne, le nombre de vues, les vidéos supprimées et les titres modifiés ne sont mis à jour que toutes les quelques heures, et les nouvelles mises en ligne peuvent apparaître plus tard lorsque le flux RSS est en retard. Non disponible avec l'API Invidious."
   General Settings:
-    Limit Titles to Two Lines: "Raccourcit les titres des vidéos et des playlists dans les listes et les grilles à deux lignes avec des points de suspension, pour des cartes plus uniformes. Survolez un titre pour le voir en entier."
+    Title Lines: "Raccourcit les titres des vidéos et des playlists dans les listes et les grilles au nombre de lignes choisi avec des points de suspension, pour des cartes plus uniformes. Survolez un titre pour le voir en entier."
     Close Window With Last Tab: 'Si désactivé, fermer le dernier onglet en ouvre un nouveau à la place, et la fenêtre reste ouverte jusqu’à ce que vous la fermiez.'
     Preferred Video Codec: |
       Le mode automatique privilégie les codecs que votre appareil peut décoder matériellement.

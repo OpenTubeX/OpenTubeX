@@ -216,7 +216,9 @@ Settings:
       On Hover: "Podkreślaj linki po najechaniu kursorem"
       Never: "Nigdy nie podkreślaj linków"
       Always: "Zawsze podkreślaj linki"
-    Limit Titles to Two Lines: "Ogranicz tytuły do dwóch wierszy"
+    Title Lines:
+      Title Lines: "Wiersze tytułu"
+      Unlimited: "Bez ograniczeń"
     Close Window With Last Tab: 'Zamykaj okno po zamknięciu ostatniej karty'
     Preferred Video Codec: Preferowany kodek wideo
     Always Use Backup Media Server: "Zawsze używaj zapasowego serwera multimediów"
@@ -1417,7 +1419,7 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Najpierw sprawdza kanał RSS każdego kanału i wczytuje filmy, Shorts i transmisje na żywo tylko z kanałów z nowymi przesłanymi filmami. Automatyczne odświeżanie pomija też kanały wczytane w ciągu ostatnich 10 minut. W kanałach bez nowych filmów liczba wyświetleń, usunięte filmy i zmienione tytuły aktualizują się tylko co kilka godzin, a nowe filmy mogą pojawić się później, gdy kanał RSS jest opóźniony. Niedostępne z API Invidious."
   General Settings:
-    Limit Titles to Two Lines: "Skraca tytuły filmów i playlist na listach i w siatkach do dwóch wierszy z wielokropkiem, aby karty były bardziej jednolite. Najedź kursorem na tytuł, aby zobaczyć go w całości."
+    Title Lines: "Skraca tytuły filmów i playlist na listach i w siatkach do wybranej liczby wierszy z wielokropkiem, aby karty były bardziej jednolite. Najedź kursorem na tytuł, aby zobaczyć go w całości."
     Close Window With Last Tab: 'Gdy wyłączone, zamknięcie ostatniej karty otwiera zamiast tego nową kartę, więc okno pozostaje otwarte, dopóki go nie zamkniesz.'
     Preferred Video Codec: |
       Tryb automatyczny preferuje kodeki, które urządzenie może dekodować sprzętowo.

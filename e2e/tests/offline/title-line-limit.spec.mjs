@@ -1,4 +1,4 @@
-import { test, expect, goTo, goToSettingsSection, latestSettings, readDatastore } from '../../helpers/app.mjs'
+import { chooseSelectOption, test, expect, goTo, goToSettingsSection, latestSettings, readDatastore } from '../../helpers/app.mjs'
 import { waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
@@ -41,12 +41,17 @@ function measure(heading) {
   })
 }
 
-async function disableLimitTitles(page) {
+/**
+ * @param {import('@playwright/test').Page} page
+ * @param {number} lines
+ */
+async function chooseTitleLines(page, lines) {
   const appearance = await goToSettingsSection(page, 'appearance')
-  const toggle = appearance.getByRole('checkbox', { name: /^Limit titles to two lines/ })
-  await expect(toggle).toBeChecked()
-  await appearance.locator('label.switch-label').filter({ hasText: 'Limit titles to two lines' }).click()
-  await expect(toggle).not.toBeChecked()
+  const select = appearance.locator('.select').filter({
+    has: page.getByRole('combobox', { name: 'Title Lines' })
+  }).locator('select')
+  await chooseSelectOption(select, String(lines))
+  await expect(select).toHaveValue(String(lines))
   await page.locator('.settingsWindow').getByRole('button', { name: 'Close', exact: true }).click()
   await expect(page.locator('.settingsWindow')).toBeHidden()
 }
@@ -54,18 +59,18 @@ async function disableLimitTitles(page) {
 /**
  * @param {import('@playwright/test').Locator} heading
  * @param {string} title
- * @param {boolean} clamped
+ * @param {number} limit the expected line limit, 0 for none
  */
-async function expectClamped(heading, title, clamped) {
+async function expectClamped(heading, title, limit) {
   await expect.poll(async () => {
     const { lines, truncated, tooltip } = await measure(heading)
-    // Exactly two line boxes, so descenders on the second line stay visible
-    return { twoLines: Math.abs(lines - 2) < 0.05, truncated, tooltip }
-  }).toEqual(clamped ? { twoLines: true, truncated: true, tooltip: title } : { twoLines: false, truncated: false, tooltip: null })
-  if (!clamped) expect((await measure(heading)).lines).toBeGreaterThan(2.5)
+    // Exactly the limit's line boxes, so descenders on the last line stay visible
+    return { atLimit: Math.abs(lines - limit) < 0.05, truncated, tooltip }
+  }).toEqual(limit > 0 ? { atLimit: true, truncated: true, tooltip: title } : { atLimit: false, truncated: false, tooltip: null })
+  if (limit === 0) expect((await measure(heading)).lines).toBeGreaterThan(2.5)
 }
 
-test.describe('limit titles to two lines', { tag: '@scale' }, () => {
+test.describe('title line limit', { tag: '@scale' }, () => {
   test.use({
     seed: {
       settings: { currentLocale: 'en-US' },
@@ -91,16 +96,16 @@ test.describe('limit titles to two lines', { tag: '@scale' }, () => {
     }
   })
 
-  test('clamps video and playlist titles in grids and lists by default until turned off', async ({ app, page }) => {
+  test('clamps video and playlist titles in grids and lists to two lines by default and to the chosen limit', async ({ app, page }) => {
     await goTo(page, 'history')
     const long = page.getByRole('heading', { name: LONG_TITLE, exact: true })
     const short = page.getByRole('heading', { name: SHORT_TITLE, exact: true })
     await expect(long).toBeVisible()
-    await expect(page.locator(':root')).toHaveClass(/\blimitTitlesToTwoLines\b/)
+    await expect(page.locator(':root')).toHaveClass(/\blimitTitleLines\b/)
     for (const listType of ['grid', 'list']) {
       await page.evaluate(listType => window.$store.dispatch('updateListType', listType), listType)
       await expect(page.locator(`.ft-list-video.${listType}`).first()).toBeVisible()
-      await expectClamped(long, LONG_TITLE, true)
+      await expectClamped(long, LONG_TITLE, 2)
       const shortTitle = await measure(short)
       expect(shortTitle.lines, listType).toBeCloseTo(1, 1)
       expect(shortTitle.truncated, listType).toBe(false)
@@ -114,22 +119,26 @@ test.describe('limit titles to two lines', { tag: '@scale' }, () => {
     await expect.poll(() => longLink.evaluate(element => element.matches(':focus-visible'))).toBe(true)
     await expect.poll(async () => (await measure(long)).lines).toBeGreaterThan(2.5)
     await longLink.blur()
-    await expectClamped(long, LONG_TITLE, true)
+    await expectClamped(long, LONG_TITLE, 2)
 
     await goTo(page, 'userplaylists')
     const playlist = page.getByRole('heading', { name: LONG_PLAYLIST, exact: true })
     await expect(playlist).toBeVisible()
-    await expectClamped(playlist, LONG_PLAYLIST, true)
+    await expectClamped(playlist, LONG_PLAYLIST, 2)
     const overlong = page.getByRole('heading', { name: `${OVERLONG_PLAYLIST.slice(0, 255)}...`, exact: true })
     await expect(overlong).toBeVisible()
     expect((await measure(overlong)).tooltip).toBe(OVERLONG_PLAYLIST)
 
-    await disableLimitTitles(page)
-    await expect(page.locator(':root')).not.toHaveClass(/\blimitTitlesToTwoLines\b/)
-    await expectClamped(playlist, LONG_PLAYLIST, false)
-    await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).limitTitlesToTwoLines).toBe(false)
+    await chooseTitleLines(page, 1)
+    await expectClamped(playlist, LONG_PLAYLIST, 1)
+    await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).titleLineLimit).toBe(1)
+
+    await chooseTitleLines(page, 0)
+    await expect(page.locator(':root')).not.toHaveClass(/\blimitTitleLines\b/)
+    await expectClamped(playlist, LONG_PLAYLIST, 0)
+    await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).titleLineLimit).toBe(0)
     await goTo(page, 'history')
-    await expectClamped(long, LONG_TITLE, false)
+    await expectClamped(long, LONG_TITLE, 0)
   })
 })
 
@@ -202,13 +211,13 @@ function scrollHeight(scroller) {
   return scroller.evaluate(element => (element === document.body ? document.documentElement : element).scrollHeight)
 }
 
-test.describe('enabling two-line titles while scrolled to the end', { tag: '@scale' }, () => {
+test.describe('limiting title lines while scrolled to the end', { tag: '@scale' }, () => {
   test.describe.configure({ timeout: 120_000 })
   test.use({
     seed: {
       settings: {
         currentLocale: 'en-US',
-        limitTitlesToTwoLines: false,
+        titleLineLimit: 0,
         animationSpeed: 0,
         userPlaylistSortOrder: 'custom',
         videoPlaybackEngine: 'built-in',
@@ -228,7 +237,7 @@ test.describe('enabling two-line titles while scrolled to the end', { tag: '@sca
   })
 
   test('clamps the page and the watch-page playlist panel to their shorter ranges', async ({ app, page }) => {
-    const enable = value => page.evaluate(value => window.$store.dispatch('updateLimitTitlesToTwoLines', value), value)
+    const enable = value => page.evaluate(value => window.$store.dispatch('updateTitleLineLimit', value ? 2 : 0), value)
 
     await goTo(page, 'history')
     await expect(page.getByRole('heading', { name: PLAYLIST_VIDEOS[1].title, exact: true })).toBeVisible()
@@ -315,13 +324,13 @@ async function expectAtEnd(scroller) {
   })).toBeLessThanOrEqual(2)
 }
 
-test.describe('toggling two-line titles with windowed rows', { tag: '@scale' }, () => {
+test.describe('changing the title line limit with windowed rows', { tag: '@scale' }, () => {
   test.describe.configure({ timeout: 120_000 })
   test.use({
     seed: {
       settings: {
         currentLocale: 'en-US',
-        limitTitlesToTwoLines: false,
+        titleLineLimit: 0,
         listType: 'list',
         animationSpeed: 0,
         userPlaylistSortOrder: 'custom',
@@ -342,7 +351,7 @@ test.describe('toggling two-line titles with windowed rows', { tag: '@scale' }, 
   })
 
   test('remeasures rows that were scrolled out of the page and the playlist panel', async ({ app, page }) => {
-    const enable = value => page.evaluate(value => window.$store.dispatch('updateLimitTitlesToTwoLines', value), value)
+    const enable = value => page.evaluate(value => window.$store.dispatch('updateTitleLineLimit', value ? 2 : 0), value)
 
     await goTo(page, 'history')
     await expect(page.getByRole('heading', { name: MANY_VIDEOS[1].title, exact: true })).toBeVisible()
@@ -376,7 +385,7 @@ test.describe('toggling two-line titles with windowed rows', { tag: '@scale' }, 
         }
       })
       observer.observe(element, { childList: true, subtree: true })
-      await window.$store.dispatch('updateLimitTitlesToTwoLines', true)
+      await window.$store.dispatch('updateTitleLineLimit', 2)
       for (let frame = 0; frame < 30; frame++) {
         await new Promise(resolve => requestAnimationFrame(resolve))
         observer.takeRecords().forEach(record => record.addedNodes.forEach(node => {

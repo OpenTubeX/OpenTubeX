@@ -397,7 +397,9 @@ Settings:
       On Hover: "Stryk under länkar vid hovring"
       Never: "Stryk aldrig under länkar"
       Always: "Stryk alltid under länkar"
-    Limit Titles to Two Lines: "Begränsa titlar till två rader"
+    Title Lines:
+      Title Lines: "Titelrader"
+      Unlimited: "Obegränsat"
     Close Window With Last Tab: 'Stäng fönstret när den sista fliken stängs'
     Preferred Video Codec: Föredragen videokodek
     Always Use Backup Media Server: "Använd alltid reservmedieservern"
@@ -2156,7 +2158,7 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Kontrollerar först varje kanals RSS-flöde och läser bara in videor, Shorts och livesändningar från kanaler med nya uppladdningar. Automatiska uppdateringar hoppar också över kanaler som lästs in de senaste 10 minuterna. För kanaler utan nya uppladdningar uppdateras visningar, borttagna videor och ändrade titlar bara med några timmars mellanrum, och nya uppladdningar kan dyka upp senare när RSS-flödet släpar efter. Inte tillgängligt med Invidious-API:t."
   General Settings:
-    Limit Titles to Two Lines: "Kortar video- och spellisttitlar i listor och rutnät till två rader med en ellips, för mer enhetliga kort. Håll pekaren över en titel för att se hela."
+    Title Lines: "Kortar video- och spellisttitlar i listor och rutnät till valt antal rader med en ellips, för mer enhetliga kort. Håll pekaren över en titel för att se hela."
     Close Window With Last Tab: 'När detta är av öppnar stängning av den sista fliken en ny flik i stället, så att fönstret förblir öppet tills du stänger det.'
     Preferred Video Codec: |
       Automatiskt föredrar kodekar som din enhet kan avkoda med hårdvara.

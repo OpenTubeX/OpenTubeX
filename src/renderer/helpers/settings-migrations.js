@@ -6,6 +6,7 @@ import {
   isFormerDefaultQuickSettings,
   migrateSettingIds,
   scrollPlayerModeFromMiniPlayerSwitch,
+  titleLineLimitFromSwitch,
 } from '../../datastores/settingsMigrations.js'
 
 export function migrateSyncServerUrl(value) {
@@ -149,6 +150,13 @@ export function migrateLegacySettings(settings) {
         : 'collapsed'
     }
     delete migratedSettings.hideVideoDescription
+  }
+
+  if (Object.hasOwn(migratedSettings, 'limitTitlesToTwoLines')) {
+    if (!Object.hasOwn(migratedSettings, 'titleLineLimit')) {
+      migratedSettings.titleLineLimit = titleLineLimitFromSwitch(migratedSettings.limitTitlesToTwoLines)
+    }
+    delete migratedSettings.limitTitlesToTwoLines
   }
 
   // Saved channel settings are always applied now. Automatic saving only ran

@@ -399,10 +399,10 @@
   }
 }
 
-:root.limitTitlesToTwoLines .externalQueueVideo:not(:focus-visible) .queueVideoTitle {
+:root.limitTitleLines .externalQueueVideo:not(:focus-visible) .queueVideoTitle {
   display: -webkit-box;
   overflow: hidden;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
+  -webkit-line-clamp: var(--title-line-limit);
+  line-clamp: var(--title-line-limit);
 }

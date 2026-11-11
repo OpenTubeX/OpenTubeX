@@ -1,7 +1,12 @@
 import { areJsonValuesEqual } from './jsonValues.js'
 import { resolveBaseTheme, resolveSystemTheme } from '../../appearanceSettings.js'
 import { CUSTOM_THEMES_SYNC_KEY, customThemeIdFromValue, normalizeCustomThemes } from '../../customTheme.js'
-import { hasReplacedSettingId, migrateSettingIds, scrollPlayerModeFromMiniPlayerSwitch } from '../../datastores/settingsMigrations.js'
+import {
+  hasReplacedSettingId,
+  migrateSettingIds,
+  scrollPlayerModeFromMiniPlayerSwitch,
+  titleLineLimitFromSwitch,
+} from '../../datastores/settingsMigrations.js'
 
 export function areSyncSettingValuesEqual(key, left, right) {
   if (key === CUSTOM_THEMES_SYNC_KEY) {
@@ -44,6 +49,12 @@ export function migrateLegacySyncedSettings(remote) {
   if (scrollMiniPlayer && !remote.scrollPlayerMode) {
     migrated.scrollPlayerMode = {
       ...scrollMiniPlayer, key: 'scrollPlayerMode', value: scrollPlayerModeFromMiniPlayerSwitch(scrollMiniPlayer.value),
+    }
+  }
+  const limitTitles = remote.limitTitlesToTwoLines
+  if (limitTitles && !remote.titleLineLimit) {
+    migrated.titleLineLimit = {
+      ...limitTitles, key: 'titleLineLimit', value: titleLineLimitFromSwitch(limitTitles.value),
     }
   }
   // Auto Load Next Page used to control comments too.

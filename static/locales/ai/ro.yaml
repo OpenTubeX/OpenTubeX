@@ -396,7 +396,9 @@ Settings:
       On Hover: "Subliniază linkurile la trecerea cursorului"
       Never: "Nu sublinia niciodată linkurile"
       Always: "Subliniază întotdeauna linkurile"
-    Limit Titles to Two Lines: "Limitează titlurile la două rânduri"
+    Title Lines:
+      Title Lines: "Rânduri pentru titlu"
+      Unlimited: "Nelimitat"
     Close Window With Last Tab: 'Închide fereastra la închiderea ultimei file'
     Preferred Video Codec: Codec video preferat
     Always Use Backup Media Server: "Folosește mereu serverul media de rezervă"
@@ -2208,7 +2210,7 @@ Description:
   Music: Muzică
 Tooltips:
   General Settings:
-    Limit Titles to Two Lines: "Scurtează titlurile videoclipurilor și playlisturilor din liste și grile la două rânduri cu puncte de suspensie, pentru carduri mai uniforme. Treci cursorul peste un titlu pentru a-l vedea complet."
+    Title Lines: "Scurtează titlurile videoclipurilor și playlisturilor din liste și grile la numărul de rânduri ales, cu puncte de suspensie, pentru carduri mai uniforme. Treci cursorul peste un titlu pentru a-l vedea complet."
     Close Window With Last Tab: 'Când este dezactivat, închiderea ultimei file deschide în schimb o filă nouă, astfel încât fereastra rămâne deschisă până când o închideți.'
     Preferred Video Codec: |
       Modul automat preferă codecurile pe care dispozitivul le poate decoda hardware.

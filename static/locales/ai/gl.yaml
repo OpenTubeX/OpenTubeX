@@ -400,7 +400,9 @@ Settings:
       On Hover: "Subliñar as ligazóns ao pasar o cursor"
       Never: "Non subliñar nunca as ligazóns"
       Always: "Subliñar sempre as ligazóns"
-    Limit Titles to Two Lines: "Limitar os títulos a dúas liñas"
+    Title Lines:
+      Title Lines: "Liñas do título"
+      Unlimited: "Sen límite"
     Close Window With Last Tab: 'Pechar a xanela ao pechar a última lapela'
     Preferred Video Codec: Códec de vídeo preferido
     Always Use Backup Media Server: "Usar sempre o servidor multimedia de reserva"
@@ -2212,7 +2214,7 @@ Description:
   Music: Música
 Tooltips:
   General Settings:
-    Limit Titles to Two Lines: "Acurta os títulos de vídeos e listas de reprodución en listas e grellas a dúas liñas con puntos suspensivos, para que as tarxetas sexan máis uniformes. Pasa o cursor por riba dun título para velo completo."
+    Title Lines: "Acurta os títulos de vídeos e listas de reprodución en listas e grellas ao número de liñas escollido con puntos suspensivos, para que as tarxetas sexan máis uniformes. Pasa o cursor por riba dun título para velo completo."
     Close Window With Last Tab: 'Se está desactivado, ao pechar a última lapela ábrese unha nova e a xanela permanece aberta ata que a peches.'
     Preferred Video Codec: |
       O modo automático prefire os códecs que o teu dispositivo pode descodificar por hardware.

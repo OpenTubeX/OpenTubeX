@@ -393,9 +393,9 @@ if (windowed) {
     }, { flush: 'post' })
   }
   watch(() => [props.data, props.layout, props.appearance], () => windowItem?.refresh(), { flush: 'post' })
-  // Two-line titles and text settings change row heights without a resize that remeasures shells.
+  // Title line limits and text settings change row heights without a resize that remeasures shells.
   watch(
-    [() => store.getters.getLimitTitlesToTwoLines, () => store.getters.getFontSize, () => store.getters.getAppFont],
+    [() => store.getters.getTitleLineLimit, () => store.getters.getFontSize, () => store.getters.getAppFont],
     () => windowItem?.remeasure(),
     { flush: 'post' }
   )

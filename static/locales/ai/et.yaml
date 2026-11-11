@@ -397,7 +397,9 @@ Settings:
       On Hover: "Jooni lingid alla, kui kursor on nende kohal"
       Never: "Ära kunagi jooni linke alla"
       Always: "Jooni lingid alati alla"
-    Limit Titles to Two Lines: "Piira pealkirjad kahe reaga"
+    Title Lines:
+      Title Lines: "Pealkirja read"
+      Unlimited: "Piiramatu"
     Close Window With Last Tab: 'Sulge aken viimase vahekaardi sulgemisel'
     Preferred Video Codec: Eelistatud videokoodek
     Always Use Backup Media Server: "Kasuta alati varumeediaserverit"
@@ -2158,7 +2160,7 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Kontrollib esmalt iga kanali RSS-voogu ja laadib videod, Shorts'id ja otseülekanded ainult uute üleslaadimistega kanalitest. Automaatsed värskendused jätavad vahele ka kanalid, mis laaditi viimase 10 minuti jooksul. Uute üleslaadimisteta kanalite puhul uuenevad vaatamiste arvud, eemaldatud videod ja muudetud pealkirjad vaid iga mõne tunni tagant ning uued üleslaadimised võivad ilmuda hiljem, kui RSS-voog jääb maha. Invidiouse API-ga pole saadaval."
   General Settings:
-    Limit Titles to Two Lines: "Lühendab loendites ja ruudustikes videote ja esitusloendite pealkirjad kolmikpunktiga kahele reale, et kaardid oleksid ühtlasemad. Täispealkirja nägemiseks hoia kursorit pealkirja kohal."
+    Title Lines: "Lühendab loendites ja ruudustikes videote ja esitusloendite pealkirjad kolmikpunktiga valitud arvule ridadele, et kaardid oleksid ühtlasemad. Täispealkirja nägemiseks hoia kursorit pealkirja kohal."
     Close Window With Last Tab: 'Kui see on välja lülitatud, avab viimase vahekaardi sulgemine hoopis uue vahekaardi ja aken jääb avatuks, kuni selle sulgete.'
     Preferred Video Codec: |
       Automaatrežiim eelistab koodekeid, mida su seade saab riistvaraliselt dekodeerida.

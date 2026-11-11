@@ -1952,7 +1952,7 @@ const displayTitle = computed(() => {
 })
 
 // Clamped titles show their full text on hover.
-const fullTitleTooltip = computed(() => store.getters.getLimitTitlesToTwoLines ? displayTitle.value : null)
+const fullTitleTooltip = computed(() => store.getters.getTitleLineLimit > 0 ? displayTitle.value : null)
 
 const displayDuration = computed(() => {
   if (useDeArrowTitles.value && (duration.value === '' || duration.value === '0:00') && deArrowCache.value?.videoDuration) {

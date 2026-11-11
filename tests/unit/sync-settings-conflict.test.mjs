@@ -270,3 +270,12 @@ test('devices read the scroll player select from the mini player switch of older
   const current = { key: 'scrollPlayerMode', value: 'pin', updatedAt: 5 }
   assert.equal(migrateLegacySyncedSettings({ scrollMiniPlayerEnabled: legacy, scrollPlayerMode: current }).scrollPlayerMode, current)
 })
+
+test('devices read the Title Lines select from the Limit Titles to Two Lines switch of older versions', () => {
+  const legacy = { key: 'limitTitlesToTwoLines', value: false, updatedAt: 10 }
+  assert.deepEqual(migrateLegacySyncedSettings({ limitTitlesToTwoLines: legacy }).titleLineLimit,
+    { key: 'titleLineLimit', value: 0, updatedAt: 10 })
+  assert.equal(migrateLegacySyncedSettings({ limitTitlesToTwoLines: { ...legacy, value: true } }).titleLineLimit.value, 2)
+  const current = { key: 'titleLineLimit', value: 3, updatedAt: 5 }
+  assert.equal(migrateLegacySyncedSettings({ limitTitlesToTwoLines: legacy, titleLineLimit: current }).titleLineLimit, current)
+})
