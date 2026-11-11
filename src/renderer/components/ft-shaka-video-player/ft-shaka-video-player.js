@@ -1926,8 +1926,8 @@ export default defineComponent({
       return normalizeHoldPlaybackRateMultiplier(store.getters.getHoldPlaybackRateMultiplier)
     })
 
-    watch(holdPlaybackRateMultiplier, (enabled) => {
-      if (!enabled) {
+    watch(holdPlaybackRateMultiplier, (multiplier) => {
+      if (!multiplier) {
         handleTemporaryPlaybackRateFocusLoss()
       }
     })
