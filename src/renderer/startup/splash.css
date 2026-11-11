@@ -2,7 +2,7 @@
   /* Keep the initial palette throughout startup: the renderer applies its
      default theme before the saved settings have finished loading. Without a
      cached primary color, the tonal shapes fall back to the text color. */
-  --splash-background: var(--startup-background, #0f0f0f);
+  --splash-background: var(--startup-background, #111);
   --splash-foreground: var(--startup-foreground, #eee);
   --splash-primary: var(--startup-primary, var(--splash-foreground));
   --splash-container: color-mix(in srgb, var(--splash-primary) 24%, var(--splash-background));

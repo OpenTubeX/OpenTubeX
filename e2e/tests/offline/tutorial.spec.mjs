@@ -233,7 +233,7 @@ test('walks new users through setup and the essential controls', async ({ page }
   await expect(themeModes.getByRole('radio', { name: 'System default' })).toBeFocused()
   await page.keyboard.press('ArrowRight')
   await expect(themeModes.getByRole('radio', { name: 'Light' })).toBeChecked()
-  await expect(page.locator('body')).toHaveClass(/light/)
+  await expect(page.locator('body')).toHaveClass(/\bopenTubeXLight\b/)
 
   await expect(tutorial.getByRole('combobox', { name: 'Default Landing Page' })).toBeVisible()
   await expect(tutorial.getByRole('combobox', { name: 'Region for Trending' })).toBeVisible()

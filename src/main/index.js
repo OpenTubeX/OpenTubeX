@@ -24,6 +24,7 @@ import {
   BASE_THEME_BACKGROUND_COLORS,
   LIGHT_BASE_THEMES,
   DARK_BASE_THEMES,
+  DEFAULT_SYSTEM_THEMES,
 } from '../constants'
 import { isCustomThemeValue } from '../customTheme'
 import { MATERIAL_SYSTEM_SEED, MATERIAL_THEME_VALUES, materialColorScheme, materialSeedPalette, materialThemeMode } from '../materialTheme.js'
@@ -1812,6 +1813,8 @@ function runApp() {
     } = { }) {
     await backgroundSubscriptions.setBackground(false)
     // Syncing new window background to theme choice.
+    const defaultBackground = () =>
+      BASE_THEME_BACKGROUND_COLORS[DEFAULT_SYSTEM_THEMES[nativeTheme.shouldUseDarkColors ? 'dark' : 'light']]
     const windowBackground = await baseHandlers.settings._findOne('baseTheme').then(async (setting) => {
       let theme = setting?.value ?? 'system'
       if (theme === 'system') {
@@ -1826,8 +1829,7 @@ function runApp() {
       // Determine window color to be shown (shown most prominently during initial app load)
       // Uses the --bg-color for each corresponding theme
       if (isCustomThemeValue(theme)) {
-        return (await getSelectedCustomTheme(theme))?.colors.background ??
-          (nativeTheme.shouldUseDarkColors ? '#0f0f0f' : '#f1f1f1')
+        return (await getSelectedCustomTheme(theme))?.colors.background ?? defaultBackground()
       }
       if (MATERIAL_THEME_VALUES.includes(theme)) {
         const mode = materialThemeMode(theme, nativeTheme.shouldUseDarkColors)
@@ -1836,12 +1838,11 @@ function runApp() {
         const color = theme === 'dynamic' || seed?.value === MATERIAL_SYSTEM_SEED ? getSystemAccentColor() ?? seed?.value : seed?.value
         return materialColorScheme(materialSeedPalette(color), mode === 'dark').surface
       }
-      return BASE_THEME_BACKGROUND_COLORS[theme] ??
-        (nativeTheme.shouldUseDarkColors ? '#0f0f0f' : '#f1f1f1')
+      return BASE_THEME_BACKGROUND_COLORS[theme] ?? defaultBackground()
     }).catch((error) => {
       console.error(error)
       // Default to nativeTheme settings if nothing is found.
-      return nativeTheme.shouldUseDarkColors ? '#0f0f0f' : '#f1f1f1'
+      return defaultBackground()
     })
 
     let savedBounds, savedMaximized

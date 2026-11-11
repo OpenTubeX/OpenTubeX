@@ -907,6 +907,8 @@ const PALETTE_BASE_THEMES = BUILTIN_BASE_THEMES.filter(({ fixedPalette }) => fix
 const FIXED_COLOR_BASE_THEMES = BUILTIN_BASE_THEMES.filter(({ fixedColors, fixedPalette }) => fixedColors || fixedPalette).map(({ value }) => value)
 const LIGHT_BASE_THEMES = BUILTIN_BASE_THEMES.filter(({ classification }) => classification === 'light').map(({ value }) => value)
 const DARK_BASE_THEMES = BUILTIN_BASE_THEMES.filter(({ classification }) => classification === 'dark').map(({ value }) => value)
+// The themes the System Default mode uses until the user picks others.
+const DEFAULT_SYSTEM_THEMES = Object.freeze({ light: 'openTubeXLight', dark: 'openTubeXDark' })
 
 export {
   IpcChannels,
@@ -949,5 +951,6 @@ export {
   FIXED_COLOR_BASE_THEMES,
   LIGHT_BASE_THEMES,
   DARK_BASE_THEMES,
+  DEFAULT_SYSTEM_THEMES,
   DOWNLOADED_MEDIA_MIME_TYPES,
 }

@@ -1,6 +1,6 @@
 import { DEFAULT_MATERIAL_SEED_COLOR } from './materialTheme.js'
 import { DEFAULT_SIGNAL_ACCENT_COLOR } from './signalTheme.js'
-import { DEFAULT_LANDING_PAGE, LEGACY_DEFAULT_LANDING_PAGE, DEFAULT_QUICK_PLAYBACK_SPEED_BAR_OPTIONS, DEFAULT_WATCHED_PERCENTAGE_THRESHOLD, MAIN_PROFILE_ID } from './constants.js'
+import { DEFAULT_LANDING_PAGE, DEFAULT_SYSTEM_THEMES, LEGACY_DEFAULT_LANDING_PAGE, DEFAULT_QUICK_PLAYBACK_SPEED_BAR_OPTIONS, DEFAULT_WATCHED_PERCENTAGE_THRESHOLD, MAIN_PROFILE_ID } from './constants.js'
 import { DEFAULT_THUMBNAIL_SIZE } from './renderer/constants/thumbnailSize.js'
 import { DEFAULT_FIXED_TAB_WIDTH } from './renderer/constants/tabWidth.js'
 import { DEFAULT_VERTICAL_TAB_HEIGHT } from './renderer/constants/tabHeight.js'
@@ -76,8 +76,8 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     baseTheme: 'system',
     materialSeedColor: DEFAULT_MATERIAL_SEED_COLOR,
     signalAccentColor: DEFAULT_SIGNAL_ACCENT_COLOR,
-    systemLightTheme: 'light',
-    systemDarkTheme: 'dark',
+    systemLightTheme: DEFAULT_SYSTEM_THEMES.light,
+    systemDarkTheme: DEFAULT_SYSTEM_THEMES.dark,
     iconPack: 'material',
     mainColor: 'Red',
     secColor: 'Blue',

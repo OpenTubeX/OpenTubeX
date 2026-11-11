@@ -4,6 +4,8 @@ import { test, expect, repoRoot } from '../helpers/app.mjs'
 import { captureAppScreenshot, copyScreenshots, openScreenshotSettings, openScreenshotSubscriptions, openScreenshotWatch, sizeScreenshotWindow } from '../helpers/screenshots.mjs'
 
 const THEMES = ['dark', 'light']
+// The System Default theme mode shows the Tally themes.
+const THEME_CLASSES = { dark: 'openTubeXDark', light: 'openTubeXLight' }
 
 test.use({
   launchArgs: ['--lang=en-US'],
@@ -32,7 +34,7 @@ test.afterEach(async ({ page }, testInfo) => {
 async function setTheme(app, theme) {
   // Exercise the default System theme without changing an app setting.
   await app.page.emulateMedia({ colorScheme: theme })
-  await expect(app.page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+  await expect(app.page.locator('body')).toHaveClass(new RegExp(`\\b${THEME_CLASSES[theme]}\\b`))
 }
 
 test('refresh README screenshots from the live app', async ({ app, page }, testInfo) => {

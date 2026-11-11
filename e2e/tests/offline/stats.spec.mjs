@@ -197,7 +197,7 @@ test.describe('synced watch stats', () => {
       await expectIndicatorAligned()
     }
     await page.emulateMedia({ colorScheme: 'dark' })
-    await expect(page.locator('body')).toHaveClass(/\bdark\b/)
+    await expect(page.locator('body')).toHaveClass(/\bopenTubeXDark\b/)
     await expect.poll(() => picker.evaluate(element => element.getBoundingClientRect().width)).toBeGreaterThan(460)
     await expectNoOverflow()
     await expectSingleLineLabels()

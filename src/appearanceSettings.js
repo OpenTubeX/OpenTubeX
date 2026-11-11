@@ -1,4 +1,4 @@
-import { BUILTIN_BASE_THEME_VALUES, DARK_BASE_THEMES, FIXED_COLOR_BASE_THEMES, LIGHT_BASE_THEMES } from './constants.js'
+import { BUILTIN_BASE_THEME_VALUES, DARK_BASE_THEMES, DEFAULT_SYSTEM_THEMES, FIXED_COLOR_BASE_THEMES, LIGHT_BASE_THEMES } from './constants.js'
 import { isCustomThemeValue } from './customTheme.js'
 
 const BUILTIN_BASE_THEMES = new Set(BUILTIN_BASE_THEME_VALUES)
@@ -28,7 +28,7 @@ function resolveBaseTheme(value, fallback, customThemes = [], allowSystem = true
 function resolveSystemTheme(value, classification, customThemes = []) {
   return getThemeClassification(value, customThemes) === classification
     ? value
-    : classification
+    : DEFAULT_SYSTEM_THEMES[classification]
 }
 
 function resolveSystemThemeSettings(settings, customThemes = []) {

@@ -1439,7 +1439,7 @@ test('Twitch live chat scrolls like the YouTube chat panel', async ({ app, page,
   await expect(scroller.locator('.comment')).toHaveCount(101)
   expect(Math.abs((await scroller.evaluate(element => element.scrollTop)) - scrolledTop)).toBeLessThan(2)
   await page.emulateMedia({ colorScheme: 'dark' })
-  await expect(page.locator('body')).toHaveClass(/\bdark\b/)
+  await expect(page.locator('body')).toHaveClass(/\bopenTubeXDark\b/)
   await attachScreenshot('Twitch live chat scrolled up')
   await chat.getByRole('button', { name: 'Scroll to Bottom' }).click()
   await expect.poll(() => scroller.evaluate(element => element.scrollHeight - element.clientHeight - element.scrollTop)).toBeLessThan(2)
@@ -2084,7 +2084,7 @@ test('shows a recoverable extraction error in the player area', async ({ app, pa
   })
 
   await page.emulateMedia({ colorScheme: 'dark' })
-  await expect(page.locator('body')).toHaveClass(/\bdark\b/)
+  await expect(page.locator('body')).toHaveClass(/\bopenTubeXDark\b/)
   await page.locator(sel.searchInput).fill('https://videos.example.test/unavailable')
   await page.locator(sel.searchInput).press('Enter')
   const state = page.locator(`${activeTab} .externalMediaState`)

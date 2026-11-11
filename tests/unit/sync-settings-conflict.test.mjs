@@ -91,7 +91,7 @@ for (const [change, edit] of [
 test('normalizes newer theme selections against a winning collection deletion', () => {
   const previousThemes = [{ id: 'removed', isDark: true, basedOn: 'solarizedDark' }]
   for (const [key, fallback] of Object.entries({
-    baseTheme: 'solarizedDark', systemLightTheme: 'light', systemDarkTheme: 'dark',
+    baseTheme: 'solarizedDark', systemLightTheme: 'openTubeXLight', systemDarkTheme: 'openTubeXDark',
   })) {
     const entry = mergeSettingEntry({
       key,
@@ -113,7 +113,7 @@ test('retains valid merged selections and repairs classification changes', () =>
   const entry = { key: 'systemLightTheme', value: 'custom:paper', updatedAt: 40 }
   assert.equal(resolveMergedThemeEntry(entry, themes, [], 100), entry)
   assert.deepEqual(resolveMergedThemeEntry({ ...entry, key: 'systemDarkTheme' }, themes, [], 100), {
-    key: 'systemDarkTheme', value: 'dark', updatedAt: 100,
+    key: 'systemDarkTheme', value: 'openTubeXDark', updatedAt: 100,
   })
 })
 
@@ -202,7 +202,7 @@ test('resets a system theme slot when a custom theme changes classification', as
   assert.deepEqual(calls, [
     ['dispatch', 'recordSyncSettingEdit', 'customThemes'],
     ['commit', 'setCustomThemes', themes],
-    ['dispatch', 'updateSystemLightTheme', 'light'],
+    ['dispatch', 'updateSystemLightTheme', 'openTubeXLight'],
   ])
 })
 

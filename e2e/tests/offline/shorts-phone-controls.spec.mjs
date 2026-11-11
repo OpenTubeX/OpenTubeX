@@ -307,7 +307,7 @@ test('landscape phone Shorts keep a portrait player and accessible controls', as
   expect(await streamPlaceholder.locator('.streamPlaceholderText').evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
   await expect(streamPlaceholder.locator('.streamPlaceholderOverlay')).toHaveCSS('flex-direction', 'column')
   await page.emulateMedia({ colorScheme: 'light' })
-  await expect(page.locator('body')).toHaveClass(/\blight\b/)
+  await expect(page.locator('body')).toHaveClass(/\bopenTubeXLight\b/)
   expect(await page.locator('.shortsExternalTitleButton').evaluate(element => getComputedStyle(element).color === getComputedStyle(document.body).color)).toBe(true)
   await watch.dispose()
 })
