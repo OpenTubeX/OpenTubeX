@@ -1,0 +1,11 @@
+# Only send what the web build needs to the builder
+*
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!patches
+!_icons
+!_scripts
+!src
+!static
+!docker/Caddyfile

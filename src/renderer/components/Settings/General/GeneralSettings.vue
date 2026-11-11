@@ -20,7 +20,9 @@
         setting-key="enableWatchStats"
         @change="updateEnableWatchStats"
       />
+      <!-- Self-hosted servers are updated by their admin -->
       <FtToggleSwitch
+        v-if="!IS_SELF_HOSTED"
         :label="t('Settings.General Settings.Check for Updates')"
         :default-value="checkForUpdates"
         setting-key="checkForUpdates"
@@ -346,6 +348,7 @@ import {
 } from '../../../helpers/dateFormat'
 
 const USING_ELECTRON = !!process.env.IS_ELECTRON
+const IS_SELF_HOSTED = !!process.env.IS_SELF_HOSTED
 const IS_IOS = !!process.env.IS_IOS
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 const phoneLayout = usePhoneLayout()

@@ -1863,7 +1863,7 @@ onMounted(async () => {
   updateTheme()
   if (store.getters.getTrayIconPreset !== 'theme') refreshTrayIcon()
 
-  if (defaultInvidiousInstance.value === '') {
+  if (defaultInvidiousInstance.value === '' || process.env.IS_SELF_HOSTED) {
     await store.dispatch('setRandomCurrentInvidiousInstance')
   }
 
@@ -2511,7 +2511,8 @@ function showAvailableUpdateToast() {
 }
 
 async function checkForNewUpdates() {
-  if (!checkForUpdates.value) {
+  // Self-hosted servers are updated by their admin
+  if (!checkForUpdates.value || process.env.IS_SELF_HOSTED) {
     return
   }
 

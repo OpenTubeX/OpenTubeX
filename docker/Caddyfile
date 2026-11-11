@@ -1,0 +1,34 @@
+{
+	admin off
+}
+
+:80 {
+	encode zstd gzip
+
+	root * /srv
+
+	# Serve the web build, and pass every other path (API, thumbnails, video
+	# streams) to Invidious, so both share one origin and need no CORS.
+	@app file {path} {path}index.html
+	handle @app {
+		file_server
+	}
+
+	# Stream video straight from Invidious companion instead of through Invidious
+	handle /companion/* {
+		reverse_proxy companion:8282
+	}
+
+	# Invidious fails to proxy channel avatars that aren't under /ggpht/ytc/, so
+	# fetch them directly, without any client headers, from the server's IP.
+	handle_path /ggpht/* {
+		reverse_proxy https://yt3.ggpht.com {
+			header_up -*
+			header_up Host {upstream_hostport}
+		}
+	}
+
+	handle {
+		reverse_proxy invidious:3000
+	}
+}

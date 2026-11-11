@@ -195,6 +195,8 @@ const config = {
           : 'opentubex'
       ),
       'process.env.SUPPORTS_LOCAL_API': isCapacitor,
+      // The Docker image serves the web build in front of its own Invidious server.
+      'process.env.IS_SELF_HOSTED': !isCapacitor && process.env.OPENTUBEX_SELF_HOSTED === 'true',
       'process.env.BUILD_COMMIT': JSON.stringify(getBuildCommit()),
       __VUE_OPTIONS_API__: 'true',
       __VUE_PROD_DEVTOOLS__: 'false',
