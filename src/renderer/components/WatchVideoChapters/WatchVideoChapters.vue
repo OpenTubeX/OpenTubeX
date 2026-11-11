@@ -189,7 +189,9 @@ function scheduleScrollClamp() {
   if (scrollFrame !== null) return
   scrollFrame = requestAnimationFrame(() => {
     scrollFrame = null
-    if (chaptersWrapper.value && chaptersContent.value) {
+    // A hidden tab has no layout and so no scroll range to judge; the
+    // observer runs again once the list is shown.
+    if (chaptersWrapper.value?.clientHeight > 0 && chaptersContent.value) {
       clampOverlayScrollTop(chaptersWrapper.value, chaptersContent.value)
       // Nothing is left to scroll away from, so there is nothing to sync back to.
       if (!canScroll()) followCurrentChapter.value = true
