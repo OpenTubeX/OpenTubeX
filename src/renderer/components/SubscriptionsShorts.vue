@@ -271,8 +271,9 @@ async function loadVideosForSubscriptionsFromRemote(automatic = false) {
     loadVideosFromCacheForAllActiveProfileChannels()
   }
 
+  let refreshedVideos = null
   try {
-    const refreshedVideos = await refreshSubscriptionShortsFromRemote({
+    refreshedVideos = await refreshSubscriptionShortsFromRemote({
       t,
       automatic,
       errorChannels: errorChannels.value
@@ -280,11 +281,13 @@ async function loadVideosForSubscriptionsFromRemote(automatic = false) {
     if (refreshedVideos !== null) {
       loadVideosFromCacheForAllActiveProfileChannels()
       lastRemoteRefreshSuccessTimestamp.value = store.getters.getSubscriptionShortsLastRefreshTimestamp
-    } else if (subscriptionCacheReady.value) {
-      // The refresh was cancelled or never ran, but a retried cache load waited for it
-      loadVideosFromCacheForAllActiveProfileChannels()
     }
   } finally {
+    // A refresh that was cancelled, never ran, or failed loads nothing, but a
+    // retried cache load waited for it
+    if (refreshedVideos === null && subscriptionCacheReady.value) {
+      loadVideosFromCacheForAllActiveProfileChannels()
+    }
     remoteRefreshRunning = false
     isLoading.value = false
   }

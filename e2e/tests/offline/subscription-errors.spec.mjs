@@ -216,6 +216,8 @@ test.describe('failed subscription cache load', () => {
         await expect(outcome === 'failed'
           ? page.getByRole('heading', { name: 'Channels with Errors' })
           : page.getByText('Refreshing subscription videos')).toBeVisible()
+        // The channels may well have videos, so no empty state goes with the error
+        await expect(page.getByText('Your subscribed channels currently do not have any videos.')).toBeHidden()
 
         // Switching groups leaves the feed loading until the cache is available
         await page.evaluate(() => window.$store.dispatch('selectSubscriptionGroup', 'group'))

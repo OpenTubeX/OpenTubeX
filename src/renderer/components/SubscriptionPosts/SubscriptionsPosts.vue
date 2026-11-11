@@ -300,8 +300,9 @@ async function loadPostsForSubscriptionsFromRemote(automatic = false) {
     loadPostsFromCacheForAllActiveProfileChannels()
   }
 
+  let refreshedPosts = null
   try {
-    const refreshedPosts = await refreshSubscriptionPostsFromRemote({
+    refreshedPosts = await refreshSubscriptionPostsFromRemote({
       t,
       automatic,
       errorChannels: errorChannels.value
@@ -309,11 +310,13 @@ async function loadPostsForSubscriptionsFromRemote(automatic = false) {
     if (refreshedPosts !== null) {
       loadPostsFromCacheForAllActiveProfileChannels()
       lastRemoteRefreshSuccessTimestamp.value = store.getters.getSubscriptionPostsLastRefreshTimestamp
-    } else if (subscriptionCacheReady.value) {
-      // The refresh was cancelled or never ran, but a retried cache load waited for it
-      loadPostsFromCacheForAllActiveProfileChannels()
     }
   } finally {
+    // A refresh that was cancelled, never ran, or failed loads nothing, but a
+    // retried cache load waited for it
+    if (refreshedPosts === null && subscriptionCacheReady.value) {
+      loadPostsFromCacheForAllActiveProfileChannels()
+    }
     remoteRefreshRunning = false
     isLoading.value = false
   }

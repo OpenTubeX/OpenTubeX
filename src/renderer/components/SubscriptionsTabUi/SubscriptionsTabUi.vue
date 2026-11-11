@@ -272,7 +272,9 @@ const showsLoadingPlaceholder = computed(() => {
 })
 
 const showsEmptyState = computed(() => {
-  return activeVideoList.value.length === 0 &&
+  // A failed cache load says nothing about whether the channels have content
+  return !subscriptionCacheLoadFailed.value &&
+    activeVideoList.value.length === 0 &&
     !props.hasAdditionalContent &&
     (props.showLoadingPlaceholder ? !displayIsLoading.value : store.getters.getSubscriptionCacheReady)
 })
