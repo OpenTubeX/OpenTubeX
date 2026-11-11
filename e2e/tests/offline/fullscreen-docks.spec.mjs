@@ -51,10 +51,12 @@ for (const { layout, width, height, uiScale, cpuThrottle = 1 } of [
           expect(samples.widths.length, 'Video layout must not change on every animation frame').toBeLessThanOrEqual(2)
           expect(samples.controlWidths.length, 'Controls must not reflow on every animation frame').toBeLessThanOrEqual(2)
           expect(samples.animationKeyframes.length, 'The fitted video uses a compositor animation').toBe(2)
+          expect(samples.actionDockEnds.length, 'The action dock must not reflow on every animation frame').toBeLessThanOrEqual(2)
           if (layout === 'phone portrait') {
             expect(samples.animationKeyframes[0].translate).not.toBe(samples.animationKeyframes[1].translate)
           } else {
             expect(samples.animationKeyframes[0].scale).not.toBe(samples.animationKeyframes[1].scale)
+            expect(samples.actionDockKeyframes.length, 'The action dock follows the video with a compositor animation').toBe(2)
           }
           if (open) {
             await expect(player.locator('.fullscreenMetadataOverlay.open')).toBeVisible()

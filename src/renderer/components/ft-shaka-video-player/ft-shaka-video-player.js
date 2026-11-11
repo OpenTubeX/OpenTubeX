@@ -1110,6 +1110,7 @@ export default defineComponent({
     } = useFullscreenDocks({
       container,
       video,
+      actionDock: fullscreenActionsElement,
       fullscreenDockOpen,
       isFullscreenDockOpen,
       isFullscreen,
