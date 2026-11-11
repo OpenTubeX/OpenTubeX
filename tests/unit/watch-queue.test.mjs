@@ -235,6 +235,7 @@ test('queued downloads explicitly start after loading even when general autoplay
     tabRoute: { fullPath: '/watch/previous', query: { downloadId: '42' } },
     isCurrentlyPresented: () => true,
     isPlaybackPresented: () => true,
+    showSecondaryContent() {},
   }
   watch.playNextQueuedVideo()
   watch.videoId = 'saved'

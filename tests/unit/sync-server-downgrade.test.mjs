@@ -2621,6 +2621,7 @@ for (const rememberHistory of [false, true]) {
         addToHistory(value) { savedPositions.push(value); this.historyEntry.watchProgress = value },
         handlePlaylistPersisting() {},
         updateLocalPlaylistLastPlayedAtSometimes() {},
+        showSecondaryContent() {},
         consumeTimestamp: () => consumeTimestamp.call(watch),
         tabRouter: { async replace(route) { watch.tabRoute = route } },
       })
