@@ -2563,6 +2563,8 @@ Search Filters:
 Storage Startup Error:
   Title: "Não foi possível carregar os dados da aplicação"
   Message: "Liberte espaço no dispositivo e tente novamente. A sincronização está em pausa até os seus dados serem carregados."
+  Web Message: "Se o OpenTubeX estiver aberto noutro separador, feche-o e tente novamente."
+  Insecure Web Message: "O OpenTubeX só pode guardar os seus dados quando é aberto através de HTTPS ou em localhost. Abra este endereço com https://."
   Retry: "Tentar novamente"
 Native Permissions:
   Local Network Denied: "A permissão para dispositivos próximos foi negada."

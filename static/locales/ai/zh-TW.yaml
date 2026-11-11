@@ -2567,6 +2567,8 @@ Search Filters:
 Storage Startup Error:
   Title: "無法載入應用程式資料"
   Message: "請釋放裝置儲存空間後重試。在資料載入完成前，同步將暫停。"
+  Web Message: "如果 OpenTubeX 已在其他分頁中開啟，請關閉該分頁後再試一次。"
+  Insecure Web Message: "只有透過 HTTPS 或在 localhost 上開啟時，OpenTubeX 才能儲存你的資料。請改用 https:// 開啟此網址。"
   Retry: "重試"
 Search Bar:
   Use Suggestion: 使用建議

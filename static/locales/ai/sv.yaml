@@ -2563,6 +2563,8 @@ Search Filters:
 Storage Startup Error:
   Title: "Kunde inte läsa in appdata"
   Message: "Frigör lagringsutrymme på enheten och försök igen. Synkroniseringen är pausad tills dina data har lästs in."
+  Web Message: "Om OpenTubeX är öppen i en annan flik stänger du den och försöker igen."
+  Insecure Web Message: "OpenTubeX kan bara spara dina data när den öppnas via HTTPS eller på localhost. Öppna den här adressen med https:// i stället."
   Retry: "Försök igen"
 Native Permissions:
   Local Network Denied: "Behörighet för enheter i närheten nekades."

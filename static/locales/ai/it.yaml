@@ -2560,6 +2560,8 @@ Search Filters:
 Storage Startup Error:
   Title: "Impossibile caricare i dati dell’app"
   Message: "Libera spazio sul dispositivo e riprova. La sincronizzazione è sospesa finché i dati non vengono caricati."
+  Web Message: "Se OpenTubeX è aperto in un'altra scheda, chiudila e riprova."
+  Insecure Web Message: "OpenTubeX può salvare i tuoi dati solo se viene aperto tramite HTTPS o su localhost. Apri invece questo indirizzo con https://."
   Retry: "Riprova"
 Search Bar:
   Use Suggestion: Usa suggerimento

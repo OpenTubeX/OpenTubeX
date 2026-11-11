@@ -2657,6 +2657,8 @@ Form Inputs:
 Storage Startup Error:
   Title: "داده‌های برنامه بارگیری نشد"
   Message: "فضای ذخیره‌سازی دستگاه را آزاد کنید و دوباره تلاش کنید. همگام‌سازی تا بارگیری داده‌های شما متوقف است."
+  Web Message: "اگر OpenTubeX در زبانهٔ دیگری باز است، آن را ببندید و دوباره تلاش کنید."
+  Insecure Web Message: "OpenTubeX فقط زمانی می‌تواند داده‌های شما را ذخیره کند که از طریق HTTPS یا روی localhost باز شده باشد. به‌جای آن، این نشانی را با https:// باز کنید."
   Retry: "تلاش دوباره"
 Native Permissions:
   Local Network Denied: "مجوز دستگاه‌های اطراف رد شد."

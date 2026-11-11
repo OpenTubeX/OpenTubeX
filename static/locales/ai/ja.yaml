@@ -2560,6 +2560,8 @@ Search Filters:
 Storage Startup Error:
   Title: "アプリのデータを読み込めませんでした"
   Message: "端末の空き容量を増やしてから、もう一度お試しください。データの読み込みが完了するまで同期は一時停止されます。"
+  Web Message: "OpenTubeX が別のタブで開いている場合は、そのタブを閉じてからもう一度お試しください。"
+  Insecure Web Message: "OpenTubeX がデータを保存できるのは、HTTPS 経由または localhost で開いた場合のみです。代わりに https:// でこのアドレスを開いてください。"
   Retry: "再試行"
 Search Bar:
   Use Suggestion: 候補を入力

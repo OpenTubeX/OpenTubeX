@@ -2560,6 +2560,8 @@ Search Filters:
 Storage Startup Error:
   Title: "无法加载应用数据"
   Message: "请释放设备存储空间后重试。在数据加载完成前，同步将暂停。"
+  Web Message: "如果 OpenTubeX 已在其他标签页中打开，请关闭该标签页后重试。"
+  Insecure Web Message: "只有通过 HTTPS 或在 localhost 上打开时，OpenTubeX 才能保存你的数据。请改用 https:// 打开此地址。"
   Retry: "重试"
 Search Bar:
   Use Suggestion: 使用建议

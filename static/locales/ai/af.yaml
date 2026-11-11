@@ -2812,6 +2812,8 @@ Form Inputs:
 Storage Startup Error:
   Title: Kon nie toepdata laai nie
   Message: Maak toestelberging vry en probeer weer. Sinkronisering is gepouseer totdat u data gelaai is.
+  Web Message: "As OpenTubeX in 'n ander oortjie oop is, maak dit toe en probeer weer."
+  Insecure Web Message: "OpenTubeX kan jou data slegs stoor wanneer dit oor HTTPS of op localhost oopgemaak word. Maak hierdie adres eerder met https:// oop."
   Retry: Probeer weer
 Native Permissions:
   Local Network Denied: Toestemming vir nabygeleë toestelle is geweier.

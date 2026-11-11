@@ -2569,6 +2569,8 @@ Search Filters:
 Storage Startup Error:
   Title: "N'eus ket bet gallet kargañ roadennoù an arload"
   Message: "Dieubit plas war an trevnad ha klaskit en-dro. Ehanet eo ar goubredañ betek ma vo karget ho roadennoù."
+  Web Message: "Ma'z eo digor OpenTubeX en ivinell all, serrit anezhi hag klaskit en-dro."
+  Insecure Web Message: "Ne c'hall OpenTubeX enrollañ ho roadennoù nemet pa vez digoret dre HTTPS pe war localhost. Digorit ar chomlec'h-mañ gant https:// e-lec'h."
   Retry: "Klask en-dro"
 Search Bar:
   Use Suggestion: Implij ar c’hinnig

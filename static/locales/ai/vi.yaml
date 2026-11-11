@@ -2578,6 +2578,8 @@ Search Filters:
 Storage Startup Error:
   Title: "Không thể tải dữ liệu ứng dụng"
   Message: "Giải phóng bộ nhớ thiết bị rồi thử lại. Đồng bộ hóa bị tạm dừng cho đến khi dữ liệu của bạn được tải."
+  Web Message: "Nếu OpenTubeX đang mở trong một thẻ khác, hãy đóng thẻ đó rồi thử lại."
+  Insecure Web Message: "OpenTubeX chỉ có thể lưu dữ liệu của bạn khi được mở qua HTTPS hoặc trên localhost. Thay vào đó, hãy mở địa chỉ này bằng https://."
   Retry: "Thử lại"
 Native Permissions:
   Local Network Denied: "Quyền truy cập thiết bị ở gần đã bị từ chối."

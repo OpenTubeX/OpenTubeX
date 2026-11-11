@@ -3822,6 +3822,8 @@ Form Inputs:
 Storage Startup Error:
   Title: "Could not load app data"
   Message: "Free up device storage and try again. Sync is paused until your data is loaded."
+  Web Message: "If OpenTubeX is open in another tab, close it and try again."
+  Insecure Web Message: "OpenTubeX can only store your data when it is opened over HTTPS or on localhost. Open this address with https:// instead."
   Retry: "Retry"
 Native Permissions:
   Local Network Denied: "Nearby devices permission was denied."

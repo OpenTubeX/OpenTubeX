@@ -2601,6 +2601,8 @@ Search Filters:
 Storage Startup Error:
   Title: "تعذر تحميل بيانات التطبيق"
   Message: "حرّر مساحة تخزين على الجهاز وحاول مجددًا. المزامنة متوقفة مؤقتًا حتى يتم تحميل بياناتك."
+  Web Message: "إذا كان OpenTubeX مفتوحًا في علامة تبويب أخرى، فأغلقها وحاول مرة أخرى."
+  Insecure Web Message: "لا يمكن لـ OpenTubeX حفظ بياناتك إلا عند فتحه عبر HTTPS أو على localhost. افتح هذا العنوان باستخدام https:// بدلًا من ذلك."
   Retry: "إعادة المحاولة"
 Native Permissions:
   Local Network Denied: "تم رفض إذن الوصول إلى الأجهزة القريبة."

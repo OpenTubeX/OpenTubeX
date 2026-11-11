@@ -2598,6 +2598,8 @@ Search Filters:
 Storage Startup Error:
   Title: "Methu llwytho data'r ap"
   Message: "Rhyddhewch le storio ar y ddyfais a cheisiwch eto. Mae cysoni wedi'i oedi nes bod eich data wedi'i lwytho."
+  Web Message: "Os yw OpenTubeX ar agor mewn tab arall, caewch ef a rhowch gynnig arall arni."
+  Insecure Web Message: "Dim ond pan gaiff ei agor dros HTTPS neu ar localhost y gall OpenTubeX gadw eich data. Agorwch y cyfeiriad hwn gyda https:// yn lle hynny."
   Retry: "Ceisio eto"
 Native Permissions:
   Local Network Denied: "Gwrthodwyd caniatâd dyfeisiau cyfagos."

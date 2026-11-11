@@ -2585,6 +2585,8 @@ Search Filters:
 Storage Startup Error:
   Title: "Data aplikasi tidak dapat dimuat"
   Message: "Kosongkan ruang penyimpanan perangkat dan coba lagi. Sinkronisasi dijeda hingga data Anda dimuat."
+  Web Message: "Jika OpenTubeX terbuka di tab lain, tutup tab tersebut dan coba lagi."
+  Insecure Web Message: "OpenTubeX hanya dapat menyimpan data Anda jika dibuka melalui HTTPS atau di localhost. Buka alamat ini dengan https://."
   Retry: "Coba lagi"
 Search Bar:
   Use Suggestion: Gunakan saran

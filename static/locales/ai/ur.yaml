@@ -2669,6 +2669,8 @@ Form Inputs:
 Storage Startup Error:
   Title: ایپ کا ڈیٹا لوڈ نہیں ہو سکا
   Message: ڈیوائس کی اسٹوریج خالی کر کے دوبارہ کوشش کریں۔ آپ کا ڈیٹا لوڈ ہونے تک سنک رکی ہوئی ہے۔
+  Web Message: "اگر OpenTubeX کسی دوسرے ٹیب میں کھلا ہے تو اسے بند کریں اور دوبارہ کوشش کریں۔"
+  Insecure Web Message: "OpenTubeX آپ کا ڈیٹا صرف اسی وقت محفوظ کر سکتا ہے جب اسے HTTPS کے ذریعے یا localhost پر کھولا جائے۔ اس کے بجائے یہ پتہ https:// کے ساتھ کھولیں۔"
   Retry: دوبارہ کوشش کریں
 Native Permissions:
   Local Network Denied: قریبی ڈیوائسز کی اجازت مسترد کر دی گئی۔

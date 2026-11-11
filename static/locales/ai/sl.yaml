@@ -3159,6 +3159,8 @@ Form Inputs:
 Storage Startup Error:
   Title: "Podatkov aplikacije ni bilo mogoče naložiti"
   Message: "Sprostite prostor v napravi in poskusite znova. Sinhronizacija je začasno ustavljena, dokler se podatki ne naložijo."
+  Web Message: "Če je OpenTubeX odprt v drugem zavihku, ga zaprite in poskusite znova."
+  Insecure Web Message: "OpenTubeX lahko shrani vaše podatke le, ko je odprt prek HTTPS ali na localhost. Namesto tega odprite ta naslov s https://."
   Retry: "Poskusi znova"
 Native Permissions:
   Local Network Denied: "Dovoljenje za naprave v bližini je bilo zavrnjeno."

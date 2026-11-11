@@ -2620,6 +2620,8 @@ Search Filters:
 Storage Startup Error:
   Title: "Datele aplicației nu au putut fi încărcate"
   Message: "Eliberează spațiu pe dispozitiv și încearcă din nou. Sincronizarea este suspendată până la încărcarea datelor."
+  Web Message: "Dacă OpenTubeX este deschis în altă filă, închide-o și încearcă din nou."
+  Insecure Web Message: "OpenTubeX îți poate salva datele doar când este deschis prin HTTPS sau pe localhost. Deschide această adresă cu https://."
   Retry: "Încearcă din nou"
 Native Permissions:
   Local Network Denied: "Permisiunea pentru dispozitivele din apropiere a fost refuzată."
