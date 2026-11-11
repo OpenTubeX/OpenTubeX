@@ -353,6 +353,17 @@ public class AppIconTest {
             "const key = [r.x, r.y, r.width, r.height].join(); const settled = window.__tapSettlingRect === key;" +
             "window.__tapSettlingRect = key; return settled; })()");
         evaluate(scenario, "delete window.__tapSettlingRect");
+        // A real tap reaches whatever the page shows on top at that point.
+        String hit = "(() => { const target = document.querySelector('" + selector + "'); const r = target.getBoundingClientRect();" +
+            "const top = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2); return target.contains(top) ? 'target' :" +
+            "top ? top.tagName + '.' + [...top.classList].join('.') : 'nothing'; })()";
+        long hitDeadline = SystemClock.uptimeMillis() + 15000;
+        String topElement = evaluate(scenario, hit);
+        while (!"\"target\"".equals(topElement) && SystemClock.uptimeMillis() < hitDeadline) {
+            Thread.sleep(100);
+            topElement = evaluate(scenario, hit);
+        }
+        assertEquals("The page shows " + selector + " on top at its center", "\"target\"", topElement);
         JSONArray bounds = new JSONArray(evaluate(scenario, "(() => { const r = document.querySelector('" + selector + "').getBoundingClientRect(); return [r.x + r.width / 2, r.y + r.height / 2, innerWidth] })()"));
         float[] point = new float[2];
         scenario.onActivity(activity -> {
