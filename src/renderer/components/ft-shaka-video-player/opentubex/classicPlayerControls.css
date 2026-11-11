@@ -63,6 +63,40 @@
   backdrop-filter: none;
 }
 
+/* Chromium can only hand the video to the GPU as an overlay, which RTX Video
+   Super Resolution and RTX HDR need, while no backdrop filter overlaps it, even a
+   faded-out one. The classic option drops every blur over the video and darkens
+   the surfaces that relied on it for contrast. */
+.ftVideoPlayer.classicPlayerControls,
+.ftVideoPlayer.classicPlayerControls :deep(*),
+.ftVideoPlayer.classicPlayerControls :deep(*::before),
+.ftVideoPlayer.classicPlayerControls :deep(*::after),
+.ftVideoPlayer.classicPlayerControls :deep(*::backdrop) {
+  backdrop-filter: none !important;
+}
+
+.ftVideoPlayer.classicPlayerControls .fullscreenActions {
+  background-color: rgb(0 0 0 / 55%);
+}
+
+.ftVideoPlayer.classicPlayerControls :is(
+  .fullscreenMetadataOverlay,
+  .fullscreenTranscriptOverlay,
+  .fullscreenSponsorBlockOverlay,
+  .fullscreenLiveChatOverlay,
+  .fullscreenCommentsOverlay,
+  .fullscreenPlaylistOverlay,
+  .fullscreenQueueOverlay,
+  .fullscreenRecommendationsOverlay
+)::before {
+  background-color: rgb(0 0 0 / 55%);
+}
+
+.ftVideoPlayer.classicPlayerControls .chapterOverlay,
+.ftVideoPlayer.classicPlayerControls :deep(:is(.shaka-context-menu, .shareButton .iconDropdown, .transcriptLanguageMenu, .fullscreenSortMenu)) {
+  background-color: rgb(12 12 12 / 88%);
+}
+
 /* Shaka creates this unused ad control alongside the playback time display. */
 :deep(.shaka-ad-info) {
   display: none !important;
