@@ -129,11 +129,11 @@ jobs:
         # of the shard. mac80211 reads the beacon loss limit when it associates,
         # so raise it to ten seconds and rejoin, then wait for the Wi-Fi routes.
         script: |
-          adb root && adb wait-for-device && timeout 30 sh -c "until adb shell id | grep -q uid=0; do sleep 1; done"
+          timeout 60 sh -c "until adb root; do sleep 2; done" && adb wait-for-device && timeout 30 sh -c "until adb shell id | grep -q uid=0; do sleep 1; done"
           adb shell 'echo 100 > /sys/module/mac80211/parameters/beacon_loss_count'
           adb unroot && adb wait-for-device && timeout 30 sh -c "until adb shell id | grep -q uid=2000; do sleep 1; done"
           adb shell cmd wifi set-wifi-enabled disabled
-          timeout 60 sh -c "while adb shell ip route show table all | grep -q 'default via .* dev wlan0 table'; do sleep 1; done"
+          timeout 60 sh -c "until adb shell cmd wifi status | grep -q 'Wifi is disabled'; do sleep 1; done"
           adb shell cmd wifi set-wifi-enabled enabled
           timeout 120 sh -c "until adb shell ip route show table all | grep -q 'default via .* dev wlan0 table'; do sleep 1; done"
           adb shell settings put global hide_error_dialogs 1
