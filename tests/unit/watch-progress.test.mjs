@@ -243,8 +243,15 @@ test('late /next metadata replaces the /player metadata once the pending history
 
   const refresh = view.refreshHistoryMetadata(1, view.videoId)
   history.set(view.videoId, { videoId: view.videoId, title: '/player title', watchProgress: 42 })
+  // A pause saves progress while the refresh waits
+  let finishProgressWrite
+  view.latestHistoryWrite = new Promise(resolve => { finishProgressWrite = resolve })
   finishFirstWrite()
+  await new Promise(resolve => setTimeout(resolve))
+  assert.equal(history.get(view.videoId).title, '/player title')
+  history.get(view.videoId).watchProgress = 50
+  finishProgressWrite()
   await refresh
   assert.equal(history.get(view.videoId).title, '/next title')
-  assert.equal(history.get(view.videoId).watchProgress, 42)
+  assert.equal(history.get(view.videoId).watchProgress, 50)
 })

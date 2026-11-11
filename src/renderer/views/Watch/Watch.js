@@ -4849,8 +4849,13 @@ export default defineComponent({
     },
 
     refreshHistoryMetadata: async function (loadGeneration, videoId) {
-      // A progress save still in flight would be overwritten with the older stored value
-      await this.latestHistoryWrite?.catch(() => {})
+      // A progress save still in flight would be overwritten with the older stored value,
+      // including one that starts while this waits
+      let write
+      do {
+        write = this.latestHistoryWrite
+        await write?.catch(() => {})
+      } while (write !== this.latestHistoryWrite)
       if (this.isCurrentVideoLoad(loadGeneration, videoId) && this.historyEntryExists) {
         this.addToHistory(this.historyEntry.watchProgress)
       }
