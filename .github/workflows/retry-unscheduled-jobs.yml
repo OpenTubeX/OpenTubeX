@@ -1,10 +1,10 @@
 name: Retry Unscheduled Jobs
 
 # Hosted macOS arm64 runners are sometimes unavailable, and GitHub cancels the job
-# after failing to acquire one. Rerun builds that failed only for that reason.
+# after failing to acquire one. Rerun runs that failed only for that reason.
 on:
   workflow_run:
-    workflows: [Build]
+    workflows: [Build, iOS and iPadOS]
     types: [completed]
 
 permissions: {}
@@ -32,6 +32,8 @@ jobs:
         RUN_EVENT: ${{ github.event.workflow_run.event }}
         HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
         HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        WORKFLOW_ID: ${{ github.event.workflow_run.workflow_id }}
+        WORKFLOW_PATH: ${{ github.event.workflow_run.path }}
       shell: bash
       run: |
         set -euo pipefail
@@ -54,6 +56,16 @@ jobs:
           branch_sha="$(gh api "repos/${GH_REPO}/commits/${HEAD_BRANCH}" --jq .sha)"
           if [[ "$branch_sha" != "$HEAD_SHA" ]]; then
             echo "$HEAD_BRANCH has moved on to $branch_sha; not retrying."
+            exit 0
+          fi
+        fi
+
+        # Every iOS run on a ref shares one concurrency group, so a rerun would
+        # cancel a newer run of any event.
+        if [[ "$WORKFLOW_PATH" == '.github/workflows/ios.yml' ]]; then
+          latest_run="$(gh api "repos/${GH_REPO}/actions/workflows/${WORKFLOW_ID}/runs?branch=${HEAD_BRANCH}&per_page=1" --jq '.workflow_runs[0].id')"
+          if [[ "$latest_run" != "$RUN_ID" ]]; then
+            echo "Run $latest_run is newer; not retrying."
             exit 0
           fi
         fi
