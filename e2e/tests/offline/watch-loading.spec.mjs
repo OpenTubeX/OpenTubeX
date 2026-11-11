@@ -351,6 +351,66 @@ test.describe('local player request concurrency', () => {
     expect(await app.electronApp.evaluate(() => globalThis.mintedTokenVideoIds)).toEqual(['jNQXAC9IVRw'])
   })
 
+  test('plays the WEB streams for the rest of the session when googlevideo refuses the visionOS streams', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.route('**/youtubei/v1/visitor_id**', route => route.fulfill({
+      json: { responseContext: { visitorData: 'e2e-visionos-visitor-data' } }
+    }))
+    const visionOsRequests = []
+    await page.route('**/youtubei/v1/player**', route => {
+      const { videoId, context } = route.request().postDataJSON()
+      if (context.client.clientName !== 'VISIONOS') return route.fallback()
+      visionOsRequests.push(videoId)
+      const url = itag => `https://rr1---sn-opentubex-visionos.googlevideo.com/videoplayback?id=${videoId}&itag=${itag}&c=VISIONOS`
+      const format = { lastModified: '1700000000000000', approxDurationMs: '30000', contentLength: '100000' }
+      return route.fulfill({
+        json: {
+          playabilityStatus: { status: 'OK' },
+          videoDetails: { videoId, lengthSeconds: '30' },
+          streamingData: {
+            expiresInSeconds: '21540',
+            adaptiveFormats: [{
+              ...format,
+              itag: 247,
+              url: url(247),
+              mimeType: 'video/webm; codecs="vp9"',
+              bitrate: 500_000,
+              width: 1280,
+              height: 720,
+              fps: 30,
+              quality: 'hd720',
+              qualityLabel: '720p',
+              initRange: { start: '0', end: '219' },
+              indexRange: { start: '220', end: '860' },
+            }, {
+              ...format,
+              itag: 251,
+              url: url(251),
+              mimeType: 'audio/webm; codecs="opus"',
+              bitrate: 128_000,
+              audioQuality: 'AUDIO_QUALITY_MEDIUM',
+              audioSampleRate: '48000',
+              audioChannels: 2,
+              initRange: { start: '0', end: '258' },
+              indexRange: { start: '259', end: '629' },
+            }]
+          }
+        }
+      })
+    })
+    let refusedStreams = 0
+    await page.route(/^https:\/\/rr1---sn-opentubex-visionos\.googlevideo\.com\//, route => {
+      refusedStreams++
+      return route.fulfill({ status: 403, body: '' })
+    })
+
+    // The reload after the refusal plays the watch page's demo stream
+    await openMockedVideo(page)
+    expect(refusedStreams).toBeGreaterThan(0)
+    await openMockedVideo(page, 'dQw4w9WgXc')
+    expect(visionOsRequests).toEqual(['jNQXAC9IVRw'])
+  })
+
   for (const changeVideo of [false, true]) {
     test(changeVideo ? 'only requests a token for the current video after navigation during player-script setup' : 'fetches watch metadata while the player script is pending', async ({ app, page }, testInfo) => {
       const currentVideoId = 'dQw4w9WgXc'

@@ -91,6 +91,7 @@ import {
   parseLocalTextRuns,
   parseLocalWatchNextVideo
 } from '../../helpers/api/local'
+import { disableVisionOsStreams, isVisionOsStreamUrl } from '../../helpers/api/visionos-streams'
 import { getAuthorVerification } from '../../helpers/api/local-feed-parsers'
 import {
   convertInvidiousToLocalFormat,
@@ -196,6 +197,8 @@ const STREAM_RECOVERY_NOTICE_SETTLE_SECONDS = 10
 // ever. This is the hard stop for a whole video: once it is spent the format
 // fallback runs and the video settles on something that plays.
 const MAX_SABR_ERROR_RECOVERIES_PER_VIDEO = 8
+// Comments and recommendations wait for the player's first media, or this long
+const SECONDARY_CONTENT_MAX_DELAY_MS = 2500
 const ANDROID_HTTP_ERROR_RETRY_DELAY_MS = 750
 // Network recovery retries unreachable YouTube metadata indefinitely while the
 // internet check succeeds, so a completed download stops waiting for it.
@@ -317,6 +320,10 @@ export default defineComponent({
       isFamilyFriendly: null,
       // The video plays while its /next data is still loading
       watchNextPending: false,
+      // Rendering comments and recommendations keeps the renderer busy for
+      // about a second, which the player's first media would wait for
+      secondaryContentReady: false,
+      secondaryContentTimer: null,
       commentsDisabled: false,
       commentsLoaded: false,
       commentPreviews: [],
@@ -1440,6 +1447,7 @@ export default defineComponent({
     },
     errorMessage(error) {
       if (error) {
+        this.showSecondaryContent()
         console.error(`Showing error for ${this.videoId}: ${error}`)
         if (process.env.IS_ELECTRON) {
           window.ftElectron?.tabs?.setPlaybackState('failed', this.tabId)
@@ -1469,6 +1477,7 @@ export default defineComponent({
       }
     },
     isLoading(loading) {
+      this.deferSecondaryContent(loading)
       if (!loading) {
         // Upcoming videos without a trailer never mount a player to report a
         // playback state. Their settled page must still release startup tabs.
@@ -1656,6 +1665,7 @@ export default defineComponent({
   },
   beforeUnmount: function () {
     this.releasePlaybackStartup?.()
+    clearTimeout(this.secondaryContentTimer)
     keepTabLoaded(this.tabId, 'casting', false)
     this.releaseAmbientModeClass?.()
     this.releaseAmbientModeClass = null
@@ -5316,8 +5326,30 @@ export default defineComponent({
       return isHistoryEntryWatched(this.$store.getters.getHistoryCacheById[videoId])
     },
 
+    /**
+     * Holds back comments and recommendations while the player loads its first media.
+     * @param {boolean} loading
+     */
+    deferSecondaryContent: function (loading) {
+      clearTimeout(this.secondaryContentTimer)
+      if (loading) {
+        this.secondaryContentReady = false
+      } else if (this.playerReady || this.ytDlpStreamsPending || this.vrStreamsPending) {
+        this.secondaryContentTimer = setTimeout(this.showSecondaryContent, SECONDARY_CONTENT_MAX_DELAY_MS)
+      } else {
+        // No player starts, e.g. for an upcoming or unavailable video
+        this.showSecondaryContent()
+      }
+    },
+
+    showSecondaryContent: function () {
+      clearTimeout(this.secondaryContentTimer)
+      this.secondaryContentReady = true
+    },
+
     handleVideoLoaded: async function (mediaMetadata) {
       if (this.isLoading || this.preparingVideoLoadGeneration !== null) { return }
+      this.showSecondaryContent()
 
       // Only used one time = remove after use
       this.oneTimeTimestamp = null
@@ -6215,6 +6247,14 @@ export default defineComponent({
             return
           case 403:
             this.handleWatchProgressAutoSaveWhenProgressEnabled()
+
+            // YouTube can stop serving these streams without a token, as it did
+            // for other clients, so the reload below uses the WEB streams.
+            if (this.activePlaybackEngine !== 'yt-dlp' && isVisionOsStreamUrl(error.data[0])) {
+              disableVisionOsStreams('googlevideo refused a visionOS stream with HTTP 403')
+              // Cached Shorts would reload with the same streams
+              this.shortsPlaybackCache.clearEntries()
+            }
 
             // Streaming URLs are bound to the IP they were issued to, so they also
             // start returning 403 when our own IP changes (reconnect, prefix rotation,

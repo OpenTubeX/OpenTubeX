@@ -84,3 +84,18 @@ test('unrelated hosts, HTTP and non-GET media requests keep the standard transpo
   assert.equal(f.prepared.length, 0)
   assert.equal(f.fetched.length, 5)
 })
+
+test('failed native requests report the stream URL instead of the local one', async () => {
+  const error = new Error('HTTP 403')
+  error.data = [null, 403]
+  const failing = createIOSMediaTransport({
+    util: { AbortableOperation: class { constructor(promise) { this.promise = promise } }, Error },
+    net: { HttpFetchPlugin: {} }
+  }, { prepare: async () => ({ requestId: 'refused' }), abort: async () => {} }, (url) => {
+    error.data[0] = url
+    return { promise: Promise.reject(error) }
+  })
+  const stream = 'https://rr1.googlevideo.com/videoplayback?itag=247&c=VISIONOS'
+  await assert.rejects(failing(stream, get, 0).promise, error)
+  assert.equal(error.data[0], stream)
+})

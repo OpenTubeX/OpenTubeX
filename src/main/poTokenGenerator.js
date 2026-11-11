@@ -80,8 +80,9 @@ export function generatePoToken(videoId, context, initialAttestationData, ytConf
  * @returns {Promise<string|null>} `null` without a valid, attested BotGuard run
  */
 export function mintPoTokenFromAttestation(videoId, proxyUrl) {
-  // Nothing was attested yet
-  if (firstTime) return Promise.resolve(null)
+  // Nothing was attested yet. Waiting for a BotGuard run in progress, possibly
+  // for another window, would delay a load that can use the watch page instead.
+  if (firstTime || !attestation) return Promise.resolve(null)
 
   return enqueueAsyncFunction(async () => {
     const token = await mintFromAttestation(videoId, proxyUrl)

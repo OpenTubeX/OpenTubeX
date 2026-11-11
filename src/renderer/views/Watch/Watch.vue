@@ -1121,7 +1121,7 @@
         </div>
       </div>
       <div
-        v-if="(isLoading || (watchNextPending && displayedRecommendations.length === 0)) && !hideRecommendedVideos"
+        v-if="(isLoading || !secondaryContentReady || (watchNextPending && displayedRecommendations.length === 0)) && !hideRecommendedVideos"
         class="recommendationsSkeleton"
         aria-hidden="true"
       >
@@ -1308,7 +1308,7 @@
         :disabled="!fullscreenRecommendationsOpen"
       >
         <watch-video-recommendations
-          v-if="!isLoading && !hideRecommendedVideos && displayedRecommendations.length > 0"
+          v-if="!isLoading && secondaryContentReady && !hideRecommendedVideos && displayedRecommendations.length > 0"
           ref="watchVideoRecommendations"
           :fullscreen-overlay="fullscreenRecommendationsOpen"
           :data="displayedRecommendations"
@@ -1341,7 +1341,7 @@
           @close="shortsPhonePanelsEnabled ? closeShortsPhonePanel() : mobilePanel = null"
         >
           <div
-            v-if="isLoading && commentsAvailable"
+            v-if="(isLoading || !secondaryContentReady) && commentsAvailable"
             class="watchVideo commentsSkeleton"
             :class="{ theatreWatchVideo: useTheatreMode }"
             aria-hidden="true"
@@ -1361,7 +1361,7 @@
             </div>
           </div>
           <CommentSection
-            v-if="!isLoading && commentsAvailable"
+            v-if="!isLoading && secondaryContentReady && commentsAvailable"
             :id="videoId"
             class="watchVideo"
             :class="{ theatreWatchVideo: useTheatreMode }"

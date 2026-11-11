@@ -179,7 +179,7 @@ patchedDependencies:
   '@material/material-color-utilities@0.4.0': b1ce5dea9a31733ac3ddd4b236a80185e050df5f98e48bb7fd93f8ccf3f58378
   '@sqlite.org/sqlite-wasm@3.53.4-build2': 579d3e536bc0f7ef69623a576db802fe6dc8d02cfb6d6f085f190534a88941a7
   '@vue/runtime-dom@3.5.44': c83073332910a00ffdd4471e0a1d9e44607292ac7992016492fbd5a237ba37fd
-  shaka-player@5.3.3: fa1b6ab9fc738ead0d00741bb8905f32e4f0943837ba396da504e50884a2f22b
+  shaka-player@5.3.3: 0459a582ca054acd87dbf4fd3251f0b5d3e74d472c5f4fb8d81afd196a3ab2c3
   vue-sonner@2.0.9: 34b2065fecd4314653c24cdfc38ff5f2910def4942ed265ec374d66c0e5c0940
   youtubei.js@18.3.0: 0003a0f2832c7de4790869f6008eb27a3d3fd9c6a8746042692b677c3f291a1e
 
@@ -333,7 +333,7 @@ importers:
         version: 1.6.1
       shaka-player:
         specifier: ^5.3.3
-        version: 5.3.3(patch_hash=fa1b6ab9fc738ead0d00741bb8905f32e4f0943837ba396da504e50884a2f22b)
+        version: 5.3.3(patch_hash=0459a582ca054acd87dbf4fd3251f0b5d3e74d472c5f4fb8d81afd196a3ab2c3)
       swiper:
         specifier: ^14.4.0
         version: 14.4.0
@@ -10151,7 +10151,7 @@ snapshots:
 
   setprototypeof@1.2.0: {}
 
-  shaka-player@5.3.3(patch_hash=fa1b6ab9fc738ead0d00741bb8905f32e4f0943837ba396da504e50884a2f22b): {}
+  shaka-player@5.3.3(patch_hash=0459a582ca054acd87dbf4fd3251f0b5d3e74d472c5f4fb8d81afd196a3ab2c3): {}
 
   shallow-clone@3.0.1:
     dependencies:
