@@ -363,6 +363,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 .placementItem {
   --reorder-row-color: color-mix(in srgb, var(--primary-text-color) 6%, var(--card-bg-color));
   --icon-button-hover-color: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
+  --icon-button-hover-text-color: var(--primary-text-color);
 
   align-items: center;
   background: var(--reorder-row-color);
