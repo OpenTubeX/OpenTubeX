@@ -161,6 +161,7 @@ Home Page:
   All sections hidden: 所有版块均已隐藏
   All sections hidden description: 自定义首页以重新显示版块。
 Subscriptions:
+  Cache Load Error: 无法加载已保存的订阅源。
   New video from {channel}: "{channel} 发布了新视频"
   New short from {channel}: "{channel} 发布了新短视频"
   '{channel} is live': "{channel} 正在直播"

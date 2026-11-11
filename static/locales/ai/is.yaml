@@ -161,6 +161,7 @@ Home Page:
   All sections hidden: Allir hlutar eru faldir
   All sections hidden description: Sérsníddu heimasíðuna til að sýna hluta aftur.
 Subscriptions:
+  Cache Load Error: Ekki tókst að hlaða vistuðum áskriftarstraumum þínum.
   New video from {channel}: Nýtt myndskeið frá {channel}
   New short from {channel}: Ný símamynd frá {channel}
   '{channel} is live': "{channel} er í beinni"

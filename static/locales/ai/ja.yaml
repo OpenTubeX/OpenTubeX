@@ -161,6 +161,7 @@ Home Page:
   All sections hidden: すべてのセクションが非表示です
   All sections hidden description: ホームをカスタマイズして、セクションを再表示してください。
 Subscriptions:
+  Cache Load Error: 保存済みの登録チャンネルのフィードを読み込めませんでした。
   New video from {channel}: "{channel}の新しい動画"
   New short from {channel}: "{channel}の新しいショート動画"
   '{channel} is live': "{channel}がライブ配信中"

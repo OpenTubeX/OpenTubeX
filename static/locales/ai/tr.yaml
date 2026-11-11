@@ -161,6 +161,7 @@ Home Page:
   All sections hidden: Tüm bölümler gizli
   All sections hidden description: Bir bölümü yeniden göstermek için Ana Sayfayı özelleştirin.
 Subscriptions:
+  Cache Load Error: Kaydedilmiş abonelik akışlarınız yüklenemedi.
   New video from {channel}: "{channel} kanalından yeni video"
   New short from {channel}: "{channel} kanalından yeni kısa video"
   '{channel} is live': "{channel} canlı yayında"

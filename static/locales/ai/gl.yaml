@@ -161,6 +161,7 @@ Home Page:
   All sections hidden: Todas as seccións están ocultas
   All sections hidden description: Personaliza o inicio para volver amosar unha sección.
 Subscriptions:
+  Cache Load Error: Non se puideron cargar as túas fontes de subscricións gardadas.
   New video from {channel}: Novo vídeo de {channel}
   New short from {channel}: Novo corto de {channel}
   '{channel} is live': "{channel} está en directo"

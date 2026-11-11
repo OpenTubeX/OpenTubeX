@@ -181,6 +181,7 @@ Home Page:
   All sections hidden: Ĉiuj sekcioj estas kaŝitaj
   All sections hidden description: Personecigu la hejmon por remontri sekcion.
 Subscriptions:
+  Cache Load Error: Viaj konservitaj abonaj fluoj ne povis esti ŝargitaj.
   New video from {channel}: Nova videaĵo de {channel}
   New short from {channel}: Nova videaĵeto de {channel}
   '{channel} is live': '{channel} nun tujelsendas'

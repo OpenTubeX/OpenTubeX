@@ -161,6 +161,7 @@ Home Page:
   All sections hidden: Toutes les sections sont masquées
   All sections hidden description: Personnalisez l’accueil pour afficher à nouveau une section.
 Subscriptions:
+  Cache Load Error: 'Impossible de charger vos flux d''abonnements enregistrés.'
   New video from {channel}: Nouvelle vidéo de {channel}
   New short from {channel}: Nouveau Short de {channel}
   '{channel} is live': "{channel} est en direct"

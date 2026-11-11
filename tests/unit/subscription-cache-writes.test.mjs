@@ -483,3 +483,43 @@ for (const profilesLoaded of [false, true]) {
     assert.deepEqual(structuredClone(dispatched), profilesLoaded ? [['clearSubscriptionsCacheForManyChannels', ['channel']]] : [])
   })
 }
+
+test('a failed startup cache load can be retried, and a failed reload keeps the loaded cache', async () => {
+  let failure = new Error('Database unavailable')
+  const context = vm.createContext({
+    console: { error() {} },
+    DBSubscriptionCacheHandlers: {
+      find: async () => {
+        if (failure) throw failure
+        return [{ _id: 'channel', videos: [{ videoId: 'video' }], videosTimestamp: new Date(1000) }]
+      },
+    },
+  })
+  vm.runInContext(moduleSource, context)
+  const { actions, mutations, state } = context.cacheModule
+  const actionContext = {
+    state,
+    rootState: { profiles: { profilesLoaded: true } },
+    rootGetters: { getSubscribedChannelIdSet: new Set(['channel']) },
+    commit: (type, payload) => mutations[type](state, payload),
+  }
+
+  await actions.grabAllSubscriptions(actionContext)
+  assert.equal(state.subscriptionCacheReady, false)
+  assert.equal(state.subscriptionCacheLoadFailed, true)
+
+  failure = null
+  const retry = actions.grabAllSubscriptions(actionContext)
+  // The error stays until the retry succeeds
+  assert.equal(state.subscriptionCacheLoadFailed, true)
+  await retry
+  assert.equal(state.subscriptionCacheReady, true)
+  assert.equal(state.subscriptionCacheLoadFailed, false)
+  assert.equal(state.videoCache.channel.videos[0].videoId, 'video')
+
+  failure = new Error('Database unavailable')
+  await actions.grabAllSubscriptions(actionContext)
+  assert.equal(state.subscriptionCacheReady, true)
+  assert.equal(state.subscriptionCacheLoadFailed, false)
+  assert.equal(state.videoCache.channel.videos[0].videoId, 'video')
+})

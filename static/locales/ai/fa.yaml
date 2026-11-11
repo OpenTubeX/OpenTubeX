@@ -178,6 +178,7 @@ Home Page:
   All sections hidden: همهٔ بخش‌ها پنهان هستند
   All sections hidden description: صفحهٔ اصلی را سفارشی کنید تا بخشی دوباره نمایش داده شود.
 Subscriptions:
+  Cache Load Error: فیدهای اشتراک ذخیره‌شده شما بارگیری نشدند.
   New video from {channel}: ویدئوی جدید از {channel}
   New short from {channel}: ویدئوی کوتاه جدید از {channel}
   '{channel} is live': "{channel} در حال پخش زنده است"

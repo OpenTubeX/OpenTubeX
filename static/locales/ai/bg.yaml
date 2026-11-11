@@ -161,6 +161,7 @@ Home Page:
   All sections hidden: Всички раздели са скрити
   All sections hidden description: Персонализирайте началната страница, за да покажете отново раздел.
 Subscriptions:
+  Cache Load Error: Запазените емисии на абонаментите ви не можаха да бъдат заредени.
   New video from {channel}: Ново видео от {channel}
   New short from {channel}: Ново кратко видео от {channel}
   '{channel} is live': "{channel} е на живо"

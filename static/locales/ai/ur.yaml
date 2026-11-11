@@ -190,6 +190,7 @@ Home Page:
   All sections hidden: تمام سیکشن پوشیدہ ہیں
   All sections hidden description: کسی سیکشن کو دوبارہ دکھانے کے لیے ہوم کو حسب ضرورت بنائیں۔
 Subscriptions:
+  Cache Load Error: آپ کی محفوظ کردہ سبسکرپشن فیڈز لوڈ نہیں ہو سکیں۔
   New video from {channel}: '{channel} کی نئی ویڈیو'
   New short from {channel}: '{channel} کا نیا شارٹ'
   '{channel} is live': '{channel} لائیو ہے'

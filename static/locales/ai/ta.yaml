@@ -171,6 +171,7 @@ Home Page:
   All sections hidden: அனைத்துப் பிரிவுகளும் மறைக்கப்பட்டுள்ளன
   All sections hidden description: ஒரு பிரிவை மீண்டும் காட்ட முகப்பைத் தனிப்பயனாக்கவும்.
 Subscriptions:
+  Cache Load Error: சேமிக்கப்பட்ட உங்கள் சந்தா ஊட்டங்களை ஏற்ற முடியவில்லை.
   New video from {channel}: "{channel} இலிருந்து புதிய வீடியோ"
   New short from {channel}: "{channel} இலிருந்து புதிய குறுகிய வீடியோ"
   '{channel} is live': "{channel} நேரலையில் உள்ளது"

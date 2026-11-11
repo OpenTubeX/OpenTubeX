@@ -161,6 +161,7 @@ Home Page:
   All sections hidden: Alle secties zijn verborgen
   All sections hidden description: Pas de startpagina aan om weer een sectie te tonen.
 Subscriptions:
+  Cache Load Error: Je opgeslagen abonnementsfeeds konden niet worden geladen.
   New video from {channel}: Nieuwe video van {channel}
   New short from {channel}: Nieuwe Short van {channel}
   '{channel} is live': "{channel} is live"

@@ -136,6 +136,7 @@ Home Page:
   All sections hidden: Все разделы скрыты
   All sections hidden description: Настройте главную, чтобы снова показать раздел.
 Subscriptions:
+  Cache Load Error: Не удалось загрузить сохранённые ленты подписок.
   New video from {channel}: Новое видео на канале {channel}
   New short from {channel}: Новый Шортс на канале {channel}
   '{channel} is live': "{channel} в эфире"

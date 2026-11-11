@@ -161,6 +161,7 @@ Home Page:
   All sections hidden: Todas as secções estão ocultas
   All sections hidden description: Personalize a página inicial para voltar a mostrar uma secção.
 Subscriptions:
+  Cache Load Error: Não foi possível carregar os seus feeds de subscrições guardados.
   New video from {channel}: Novo vídeo de {channel}
   New short from {channel}: Novo curto de {channel}
   '{channel} is live': "{channel} está em direto"

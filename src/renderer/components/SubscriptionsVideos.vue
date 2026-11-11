@@ -62,6 +62,7 @@ const MAX_TIMEOUT_MS = 2 ** 31 - 1
 let premiereUpdateTimer = null
 
 let alreadyLoadedRemotely = false
+let remoteRefreshRunning = false
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const subscriptionCacheReady = computed(() => store.getters.getSubscriptionCacheReady)
@@ -280,6 +281,10 @@ if (!subscriptionCacheReady.value) {
   watch(subscriptionCacheReady, () => {
     if (!alreadyLoadedRemotely) {
       loadVideosFromCacheSometimes()
+    } else if (!remoteRefreshRunning) {
+      // The automatic refresh ended before the cache loaded, for example
+      // when the startup load failed and was retried
+      loadVideosFromCacheForAllActiveProfileChannels()
     }
   })
 }
@@ -348,6 +353,7 @@ useSubscriptionChannelUpdates('videos', () => {
  * @param {boolean} [automatic] Leaves out channels fetched moments ago
  */
 async function loadVideosForSubscriptionsFromRemote(automatic = false) {
+  remoteRefreshRunning = true
   const wasShowingCache = !isLoading.value && videoList.value.length > 0
   isLoading.value = true
   attemptedFetch.value = true
@@ -358,8 +364,9 @@ async function loadVideosForSubscriptionsFromRemote(automatic = false) {
     loadVideosFromCacheForAllActiveProfileChannels()
   }
 
+  let refreshedVideos = null
   try {
-    const refreshedVideos = await refreshSubscriptionVideosFromRemote({
+    refreshedVideos = await refreshSubscriptionVideosFromRemote({
       t,
       automatic,
       errorChannels: errorChannels.value
@@ -371,6 +378,12 @@ async function loadVideosForSubscriptionsFromRemote(automatic = false) {
       lastRemoteRefreshSuccessTimestamp.value = store.getters.getSubscriptionFeedLastRefreshTimestamp
     }
   } finally {
+    // A refresh that was cancelled, never ran, or failed loads nothing, but a
+    // retried cache load waited for it
+    if (refreshedVideos === null && subscriptionCacheReady.value) {
+      loadVideosFromCacheForAllActiveProfileChannels()
+    }
+    remoteRefreshRunning = false
     isLoading.value = false
   }
 }

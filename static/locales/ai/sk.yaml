@@ -161,6 +161,7 @@ Home Page:
   All sections hidden: Všetky sekcie sú skryté
   All sections hidden description: Prispôsobte domovskú stránku a znova zobrazte sekciu.
 Subscriptions:
+  Cache Load Error: Uložené kanály odberov sa nepodarilo načítať.
   New video from {channel}: Nové video od {channel}
   New short from {channel}: Nové krátke video od {channel}
   '{channel} is live': "{channel} vysiela naživo"

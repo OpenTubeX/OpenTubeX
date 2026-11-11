@@ -65,6 +65,7 @@ const timeFormat = computed(() => store.getters.getTimeFormat)
 const now = useRelativeTimeClock()
 
 let alreadyLoadedRemotely = false
+let remoteRefreshRunning = false
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const subscriptionCacheReady = computed(() => store.getters.getSubscriptionCacheReady)
@@ -213,6 +214,10 @@ if (!subscriptionCacheReady.value) {
   watch(subscriptionCacheReady, () => {
     if (!alreadyLoadedRemotely) {
       loadPostsFromCacheSometimes()
+    } else if (!remoteRefreshRunning) {
+      // The automatic refresh ended before the cache loaded, for example
+      // when the startup load failed and was retried
+      loadPostsFromCacheForAllActiveProfileChannels()
     }
   })
 }
@@ -284,6 +289,7 @@ useSubscriptionChannelUpdates('posts', () => {
  * @param {boolean} [automatic] Leaves out channels fetched moments ago
  */
 async function loadPostsForSubscriptionsFromRemote(automatic = false) {
+  remoteRefreshRunning = true
   isLoading.value = true
   attemptedFetch.value = true
   errorChannels.value = []
@@ -294,8 +300,9 @@ async function loadPostsForSubscriptionsFromRemote(automatic = false) {
     loadPostsFromCacheForAllActiveProfileChannels()
   }
 
+  let refreshedPosts = null
   try {
-    const refreshedPosts = await refreshSubscriptionPostsFromRemote({
+    refreshedPosts = await refreshSubscriptionPostsFromRemote({
       t,
       automatic,
       errorChannels: errorChannels.value
@@ -305,6 +312,12 @@ async function loadPostsForSubscriptionsFromRemote(automatic = false) {
       lastRemoteRefreshSuccessTimestamp.value = store.getters.getSubscriptionPostsLastRefreshTimestamp
     }
   } finally {
+    // A refresh that was cancelled, never ran, or failed loads nothing, but a
+    // retried cache load waited for it
+    if (refreshedPosts === null && subscriptionCacheReady.value) {
+      loadPostsFromCacheForAllActiveProfileChannels()
+    }
+    remoteRefreshRunning = false
     isLoading.value = false
   }
 }

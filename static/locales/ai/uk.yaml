@@ -161,6 +161,7 @@ Home Page:
   All sections hidden: Усі розділи приховано
   All sections hidden description: Налаштуйте головну, щоб знову показати розділ.
 Subscriptions:
+  Cache Load Error: Не вдалося завантажити збережені стрічки підписок.
   New video from {channel}: Нове відео від {channel}
   New short from {channel}: Нове Shorts-відео від {channel}
   '{channel} is live': "{channel} в ефірі"

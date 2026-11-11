@@ -161,6 +161,7 @@ Home Page:
   All sections hidden: Toate secțiunile sunt ascunse
   All sections hidden description: Personalizează pagina principală pentru a afișa din nou o secțiune.
 Subscriptions:
+  Cache Load Error: Fluxurile de abonamente salvate nu au putut fi încărcate.
   New video from {channel}: Videoclip nou de la {channel}
   New short from {channel}: Short nou de la {channel}
   '{channel} is live': "{channel} transmite live"

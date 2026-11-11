@@ -161,6 +161,7 @@ Home Page:
   All sections hidden: Bütün bölmələr gizlədilib
   All sections hidden description: Bölməni yenidən göstərmək üçün ana səhifəni fərdiləşdirin.
 Subscriptions:
+  Cache Load Error: Saxlanmış abunəlik lentləriniz yüklənə bilmədi.
   New video from {channel}: "{channel} kanalından yeni video"
   New short from {channel}: "{channel} kanalından yeni Shorts"
   '{channel} is live': "{channel} canlı yayımdadır"

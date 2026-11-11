@@ -175,6 +175,7 @@ Home Page:
   All sections hidden: 모든 섹션이 숨겨져 있습니다
   All sections hidden description: 홈을 맞춤 설정하여 섹션을 다시 표시하세요.
 Subscriptions:
+  Cache Load Error: 저장된 구독 피드를 불러올 수 없습니다.
   New video from {channel}: "{channel}의 새 동영상"
   New short from {channel}: "{channel}의 새 쇼츠"
   '{channel} is live': "{channel}에서 라이브 방송 중"

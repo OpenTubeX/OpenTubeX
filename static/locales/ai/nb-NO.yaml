@@ -161,6 +161,7 @@ Home Page:
   All sections hidden: Alle deler er skjult
   All sections hidden description: Tilpass startsiden for å vise en del igjen.
 Subscriptions:
+  Cache Load Error: Kunne ikke laste inn de lagrede abonnementsstrømmene dine.
   New video from {channel}: Ny video fra {channel}
   New short from {channel}: Ny Shorts-video fra {channel}
   '{channel} is live': "{channel} sender direkte"

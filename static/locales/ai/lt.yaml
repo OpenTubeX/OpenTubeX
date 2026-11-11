@@ -190,6 +190,7 @@ Home Page:
   All sections hidden: Visi skyriai paslėpti
   All sections hidden description: Tinkinkite pradžios puslapį, kad vėl būtų rodomas skyrius.
 Subscriptions:
+  Cache Load Error: Nepavyko įkelti išsaugotų prenumeratų sklaidos kanalų.
   New video from {channel}: Naujas vaizdo įrašas iš {channel}
   New short from {channel}: Naujas šortas iš {channel}
   '{channel} is live': "{channel} transliuoja tiesiogiai"

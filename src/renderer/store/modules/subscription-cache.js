@@ -27,6 +27,7 @@ const state = {
   subscriptionVideosFeedVersion: 0,
 
   subscriptionCacheReady: false,
+  subscriptionCacheLoadFailed: false,
   subscriptionFeedRefreshInProgress: false,
   subscriptionFeedRefreshTab: null,
   subscriptionFeedRefreshProgress: 0,
@@ -42,6 +43,7 @@ const state = {
 
 const getters = {
   getSubscriptionCacheReady: (state) => state.subscriptionCacheReady,
+  getSubscriptionCacheLoadFailed: (state) => state.subscriptionCacheLoadFailed,
   getSubscriptionFeedRefreshInProgress: (state) => state.subscriptionFeedRefreshInProgress,
   getSubscriptionFeedRefreshTab: (state) => state.subscriptionFeedRefreshTab,
   getSubscriptionFeedRefreshProgress: (state) => state.subscriptionFeedRefreshProgress,
@@ -92,7 +94,7 @@ const getters = {
 }
 
 const actions = {
-  async grabAllSubscriptions({ commit, dispatch, rootState, rootGetters }) {
+  async grabAllSubscriptions({ commit, dispatch, state, rootState, rootGetters }) {
     try {
       const payload = await DBSubscriptionCacheHandlers.find()
 
@@ -146,8 +148,11 @@ const actions = {
       }
       commit('setCaches', { videos, liveStreams, shorts, communityPosts })
       commit('setSubscriptionCacheReady', true)
+      commit('setSubscriptionCacheLoadFailed', false)
     } catch (errMessage) {
       console.error(errMessage)
+      // A failed reload keeps the loaded cache. Without one, the feeds offer a retry.
+      if (!state.subscriptionCacheReady) commit('setSubscriptionCacheLoadFailed', true)
     }
   },
 
@@ -520,6 +525,9 @@ const mutations = {
 
   setSubscriptionCacheReady(state, payload) {
     state.subscriptionCacheReady = payload
+  },
+  setSubscriptionCacheLoadFailed(state, payload) {
+    state.subscriptionCacheLoadFailed = payload
   },
   setSubscriptionFeedRefreshInProgress(state, payload) {
     state.subscriptionFeedRefreshInProgress = payload

@@ -198,6 +198,7 @@ Home Page:
   All sections hidden: Vsi razdelki so skriti
   All sections hidden description: Prilagodite domačo stran, da znova prikažete razdelek.
 Subscriptions:
+  Cache Load Error: Shranjenih virov naročnin ni bilo mogoče naložiti.
   New video from {channel}: Nov videoposnetek kanala {channel}
   New short from {channel}: Nov posnetek Shorts kanala {channel}
   '{channel} is live': "{channel} predvaja v živo"

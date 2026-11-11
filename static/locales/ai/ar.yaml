@@ -161,6 +161,7 @@ Home Page:
   All sections hidden: جميع الأقسام مخفية
   All sections hidden description: خصّص الصفحة الرئيسية لإظهار قسم من جديد.
 Subscriptions:
+  Cache Load Error: تعذّر تحميل خلاصات الاشتراكات المحفوظة.
   New video from {channel}: فيديو جديد من {channel}
   New short from {channel}: فيديو قصير جديد من {channel}
   '{channel} is live': "{channel} يبث مباشرةً الآن"

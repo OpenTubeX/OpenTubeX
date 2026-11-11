@@ -163,6 +163,7 @@ Home Page:
   All sections hidden: Alle sektioner er skjult
   All sections hidden description: Tilpas startsiden for at vise en sektion igen.
 Subscriptions:
+  Cache Load Error: Dine gemte abonnementsfeeds kunne ikke indlæses.
   New video from {channel}: Ny video fra {channel}
   New short from {channel}: Ny Short fra {channel}
   '{channel} is live': "{channel} sender live"
