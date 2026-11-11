@@ -2293,7 +2293,7 @@ Tooltips:
     Use Custom Title Bar: Sistemaren izenburu-barra fitxa-barrarekin ordezkatzen du, edo goiko nabigazioarekin fitxak goian ez daudenean, espazio bertikala aurrezteko. Leihoaren kontrolak barra horren izkinan agertzen dira.
     Use Grid Player Menu: Erreproduzigailuaren ezarpen-menua lauzaz osatutako sareta batean antolatzen du, errenkada-zerrenda baten ordez.
     Modal Backdrop: "Aplikazioa elkarrizketa-koadroen eta menuen atzean nola ikusten den ezartzen du. Lausotzea motela izan daiteke gailu ez hain ahaltsuetan."
-    Click Scrollbar Track to Scroll: "Korritze-barra batean heldulekutik kanpo klik eginez gero, orrialde bat inguru korritzen da klikaren norabidean. Korritze-barrak edukiaren ertzaren gainean daude, beraz, bat ikusgai dagoen bitartean ezin da haren azpiko elementuetan klik egin. Fitxa-barraren korritze-barrak beti horrela funtzionatzen du."
+    Click Scrollbar Track to Scroll: "Korritze-barra batean heldulekutik kanpo klik eginez gero, orrialde bat inguru korritzen da klikaren norabidean. Hau aktibatuta dagoen bitartean, korritze-barra ikusgai batek azpiko elementuentzako klikak harrapatzen ditu. Fitxa-barraren korritze-barrak beti horrela funtzionatzen du."
   SponsorBlock Settings:
     Always Show DeArrow Badge: Mantendu DeArrow botoia ikusgai DeArrow-ek izenburua edo miniatura ordeztu dien bideoetan, kurtsorea gainetik pasatzen denean soilik erakutsi beharrean.
 The playlist is at the beginning. Enable loop to continue playing: Erreprodukzio-zerrenda hasieran dago. Gaitu begizta erreproduzitzen jarraitzeko

@@ -2284,7 +2284,7 @@ Tooltips:
     Use Custom Title Bar: A rendszer címsorát a lapsávra cseréli, vagy a felső navigációra, ha a lapok nincsenek felül, így függőleges helyet takarít meg. Az ablakvezérlők a sáv sarkában jelennek meg.
     Use Grid Player Menu: A videólejátszó beállítási menüjének elrendezése csempékből álló rácsként, sorok listája helyett.
     Modal Backdrop: "Beállítja, hogyan nézzen ki az alkalmazás a párbeszédablakok és menük mögött. Az elmosás lassú lehet kevésbé erős eszközökön."
-    Click Scrollbar Track to Scroll: "Ha a görgetősávra a csúszkán kívül kattint, a tartalom nagyjából egy oldalnyit görgetődik a kattintás irányába. A görgetősávok a tartalom szélét takarják, így amíg egy látható, az alatta lévő elemekre nem lehet kattintani. A lapsáv görgetősávja mindig így működik."
+    Click Scrollbar Track to Scroll: "Ha a görgetősávra a csúszkán kívül kattint, a tartalom nagyjából egy oldalnyit görgetődik a kattintás irányába. Amíg ez be van kapcsolva, a látható görgetősáv elfogja az alatta lévő elemeknek szánt kattintásokat. A lapsáv görgetősávja mindig így működik."
   SponsorBlock Settings:
     Always Show DeArrow Badge: A DeArrow gomb látható marad azokon a videókon, amelyek címét vagy bélyegképét a DeArrow lecserélte, nem csak egérrel fölé mutatva.
 The playlist is at the beginning. Enable loop to continue playing: A lejátszási lista elején jár. Kapcsolja be az ismétlést a lejátszás folytatásához

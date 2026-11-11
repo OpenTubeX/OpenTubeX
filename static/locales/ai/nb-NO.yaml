@@ -2288,7 +2288,7 @@ Tooltips:
     Use Custom Title Bar: Erstatter systemets tittellinje med fanelinjen, eller med den øverste navigasjonen når fanene ikke er øverst, for å spare loddrett plass. Vindusknappene vises i hjørnet av den linjen.
     Use Grid Player Menu: Ordner innstillingsmenyen til videospilleren som et rutenett med fliser i stedet for en liste med rader.
     Modal Backdrop: "Angir hvordan appen ser ut bak dialoger og menyer. Uskarphet kan være tregt på mindre kraftige enheter."
-    Click Scrollbar Track to Scroll: "Et klikk på et rullefelt utenfor håndtaket ruller omtrent én side i retning av klikket. Rullefelt overlapper kanten av innholdet, så mens et er synlig, kan du ikke klikke på elementer under det. Rullefeltet i fanelinjen fungerer alltid slik."
+    Click Scrollbar Track to Scroll: "Et klikk på et rullefelt utenfor håndtaket ruller omtrent én side i retning av klikket. Når dette er på, fanger et synlig rullefelt opp klikk som er ment for elementer under det. Rullefeltet i fanelinjen fungerer alltid slik."
   SponsorBlock Settings:
     Always Show DeArrow Badge: Hold DeArrow-knappen synlig på videoer der tittelen eller miniatyrbildet er erstattet av DeArrow, i stedet for bare når du holder musepekeren over.
 The playlist is at the beginning. Enable loop to continue playing: Spillelisten er ved begynnelsen. Slå på gjentakelse for å fortsette avspillingen

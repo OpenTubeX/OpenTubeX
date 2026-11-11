@@ -2711,7 +2711,7 @@ Tooltips:
     Use Custom Title Bar: Pakeičia sistemos pavadinimo juostą kortelių juosta arba, kai kortelės nėra viršuje, viršutine naršymo juosta, kad būtų sutaupyta vertikalios vietos. Lango valdikliai rodomi tos juostos kampe.
     Use Grid Player Menu: Vaizdo leistuvo nustatymų meniu elementus išdėsto plytelių tinkleliu, o ne eilučių sąrašu.
     Modal Backdrop: "Nustato, kaip programa atrodo už dialogų ir meniu. Suliejimas gali veikti lėtai mažiau galinguose įrenginiuose."
-    Click Scrollbar Track to Scroll: "Spustelėjus slinkties juostą už jos rankenėlės ribų, turinys paslenkamas maždaug vienu puslapiu spustelėjimo kryptimi. Slinkties juostos dengia turinio kraštą, todėl kol juosta matoma, po ja esančių elementų spustelėti negalima. Skirtukų juostos slinkties juosta visada veikia taip."
+    Click Scrollbar Track to Scroll: "Spustelėjus slinkties juostą už jos rankenėlės ribų, turinys paslenkamas maždaug vienu puslapiu spustelėjimo kryptimi. Kai tai įjungta, matoma slinkties juosta perima spustelėjimus, skirtus po ja esantiems elementams. Skirtukų juostos slinkties juosta visada veikia taip."
   SponsorBlock Settings:
     UseDeArrowTitles: Vaizdo įrašų pavadinimus pakeisti naudotojų pateiktais DeArrow pavadinimais.
     UseDeArrowThumbnails: Vaizdo įrašų miniatiūras pakeisti DeArrow miniatiūromis.

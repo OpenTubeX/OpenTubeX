@@ -2804,7 +2804,7 @@ Tooltips:
     Use Custom Title Bar: Sistemsko naslovno vrstico nadomesti z vrstico z zavihki ali z zgornjo navigacijo, kadar zavihki niso na vrhu, da prihrani navpični prostor. Gumbi za upravljanje okna se prikažejo v kotu te vrstice.
     Use Grid Player Menu: Meni z nastavitvami predvajalnika videoposnetkov je razporejen v mrežo ploščic namesto v seznam vrstic.
     Modal Backdrop: "Določa, kako je videti aplikacija za pogovornimi okni in meniji. Zabrisanje je lahko na manj zmogljivih napravah počasno."
-    Click Scrollbar Track to Scroll: "Klik na drsnik zunaj njegove ročice pomakne vsebino za približno eno stran v smeri klika. Drsniki prekrivajo rob vsebine, zato dokler je drsnik viden, elementov pod njim ni mogoče klikniti. Drsnik vrstice z zavihki vedno deluje tako."
+    Click Scrollbar Track to Scroll: "Klik na drsnik zunaj njegove ročice pomakne vsebino za približno eno stran v smeri klika. Dokler je to vklopljeno, viden drsnik prestreže klike, namenjene elementom pod njim. Drsnik vrstice z zavihki vedno deluje tako."
   Experimental Settings:
     Faster Subscription Refresh: "Najprej preveri vir RSS vsakega kanala in naloži videoposnetke, Shorts in prenose v živo samo s kanalov z novimi naloženimi vsebinami. Samodejne osvežitve preskočijo tudi kanale, naložene v zadnjih 10 minutah. Pri kanalih brez novih vsebin se število ogledov, odstranjeni videoposnetki in spremenjeni naslovi posodobijo le vsakih nekaj ur, nove vsebine pa se lahko prikažejo pozneje, ko vir RSS zaostaja. Ni na voljo z API-jem Invidious."
     Replace HTTP Cache: Onemogoči Electronov predpomnilnik HTTP na disku in omogoči prilagojen predpomnilnik slik v pomnilniku. Poraba pomnilnika RAM bo večja.

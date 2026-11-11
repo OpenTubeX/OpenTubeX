@@ -2369,7 +2369,7 @@ Tooltips:
     Use Custom Title Bar: Erstatter systemets titellinje med fanelinjen eller med den øverste navigation, når fanerne ikke er øverst, for at spare lodret plads. Vinduesknapperne vises i hjørnet af den linje.
     Use Grid Player Menu: Arrangerer videoafspillerens indstillingsmenu som et gitter af felter i stedet for en liste med rækker.
     Modal Backdrop: "Angiver, hvordan appen ser ud bag dialoger og menuer. Sløring kan være langsom på mindre kraftige enheder."
-    Click Scrollbar Track to Scroll: "Et klik på et rullepanel uden for dets håndtag ruller cirka én side i retning af klikket. Rullepaneler overlapper kanten af indholdet, så mens et er synligt, kan elementer under det ikke klikkes. Fanelinjens rullepanel fungerer altid sådan."
+    Click Scrollbar Track to Scroll: "Et klik på et rullepanel uden for dets håndtag ruller cirka én side i retning af klikket. Mens dette er slået til, opfanger et synligt rullepanel klik på elementer under det. Fanelinjens rullepanel fungerer altid sådan."
   Experimental Settings:
     Faster Subscription Refresh: "Tjekker først hver kanals RSS-feed og indlæser kun videoer, Shorts og livestreams fra kanaler med nye uploads. Automatiske opdateringer springer også kanaler over, der er indlæst inden for de sidste 10 minutter. For kanaler uden nye uploads opdateres visningstal, fjernede videoer og ændrede titler kun med nogle timers mellemrum, og nye uploads kan dukke op senere, når RSS-feedet halter bagefter. Ikke tilgængelig med Invidious API."
     Disable Hardware Acceleration: Deaktiverer GPU-hardwareacceleration. Kan løse grafikproblemer, men vil sandsynligvis forringe ydeevnen.

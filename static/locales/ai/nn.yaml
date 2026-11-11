@@ -2597,7 +2597,7 @@ Tooltips:
     Use Custom Title Bar: Byter ut tittellinja til systemet med fanelinja, eller med den øvste navigasjonen når fanene ikkje er øvst, for å spare loddrett plass. Vindaugsknappane blir viste i hjørnet av den linja.
     Use Grid Player Menu: Ordnar innstillingsmenyen til videospelaren som eit rutenett med felt i staden for ei liste med rader.
     Modal Backdrop: "Avgjer korleis appen ser ut bak dialogar og menyar. Uskarpleik kan vere tregt på mindre kraftige einingar."
-    Click Scrollbar Track to Scroll: "Eit klikk på eit rullefelt utanfor handtaket rullar om lag éi side i retning av klikket. Rullefelt overlappar kanten av innhaldet, så medan eitt er synleg, kan du ikkje klikke på element under det. Rullefeltet i fanelinja fungerer alltid slik."
+    Click Scrollbar Track to Scroll: "Eit klikk på eit rullefelt utanfor handtaket rullar om lag éi side i retning av klikket. Når dette er på, fangar eit synleg rullefelt opp klikk som er meinte for element under det. Rullefeltet i fanelinja fungerer alltid slik."
   SponsorBlock Settings:
     UseDeArrowTitles: Byt ut videotitlar med titlar som brukarar har sendt inn til DeArrow.
     UseDeArrowThumbnails: Byt ut videominiatyrar med miniatyrar frå DeArrow.

@@ -2283,7 +2283,7 @@ Tooltips:
     Use Custom Title Bar: Sostituisce la barra del titolo di sistema con la barra delle schede, o con la navigazione superiore quando le schede non sono in alto, per risparmiare spazio verticale. I controlli della finestra compaiono nell'angolo di quella barra.
     Use Grid Player Menu: Dispone il menu delle impostazioni del lettore video come una griglia di riquadri invece di un elenco di righe.
     Modal Backdrop: "Imposta l’aspetto dell’app dietro finestre di dialogo e menu. La sfocatura può essere lenta sui dispositivi meno potenti."
-    Click Scrollbar Track to Scroll: "Un clic su una barra di scorrimento al di fuori del cursore scorre di circa una pagina verso il punto del clic. Le barre di scorrimento si sovrappongono al bordo del contenuto, quindi mentre una è visibile non è possibile fare clic sugli elementi sottostanti. La barra di scorrimento della barra delle schede funziona sempre così."
+    Click Scrollbar Track to Scroll: "Un clic su una barra di scorrimento al di fuori del cursore scorre di circa una pagina verso il punto del clic. Quando questa opzione è attiva, una barra di scorrimento visibile intercetta i clic destinati agli elementi sottostanti. La barra di scorrimento della barra delle schede funziona sempre così."
   SponsorBlock Settings:
     Always Show DeArrow Badge: Mantiene visibile il pulsante DeArrow sui video il cui titolo o la cui miniatura è stato sostituito da DeArrow, invece che solo al passaggio del mouse.
 The playlist is at the beginning. Enable loop to continue playing: La playlist è all'inizio. Abilita la ripetizione per continuare la riproduzione

@@ -2286,7 +2286,7 @@ Tooltips:
     Use Custom Title Bar: Asendab süsteemi tiitliriba vahekaardiribaga või ülemise navigeerimisega, kui vahekaardid pole üleval, et säästa vertikaalset ruumi. Akna juhtnupud kuvatakse selle riba nurgas.
     Use Grid Player Menu: Paigutab videopleieri seadete menüü ridade loendi asemel paanide ruudustikuna.
     Modal Backdrop: "Määrab, kuidas rakendus dialoogide ja menüüde taga välja näeb. Hägustamine võib vähem võimsatel seadmetel aeglane olla."
-    Click Scrollbar Track to Scroll: "Kerimisribal väljaspool selle pidet klõpsamine kerib umbes ühe lehekülje klõpsu suunas. Kerimisribad katavad sisu serva, nii et kui riba on nähtav, ei saa selle all olevatel elementidel klõpsata. Vahekaardiriba kerimisriba töötab alati nii."
+    Click Scrollbar Track to Scroll: "Kerimisribal väljaspool selle pidet klõpsamine kerib umbes ühe lehekülje klõpsu suunas. Kui see on sees, püüab nähtav kerimisriba kinni klõpsud, mis on mõeldud selle all olevatele elementidele. Vahekaardiriba kerimisriba töötab alati nii."
   SponsorBlock Settings:
     Always Show DeArrow Badge: Hoia DeArrow nupp nähtaval videotel, mille pealkirja või pisipildi on DeArrow asendanud, mitte ainult kursorit peale viies.
 The playlist is at the beginning. Enable loop to continue playing: Esitusloend on alguses. Esitamise jätkamiseks luba kordus

@@ -2284,7 +2284,7 @@ Tooltips:
     Use Custom Title Bar: Ersätter systemets namnlist med flikfältet, eller med den övre navigeringen när flikarna inte är högst upp, för att spara vertikalt utrymme. Fönsterknapparna visas i hörnet av det fältet.
     Use Grid Player Menu: Ordnar videospelarens inställningsmeny som ett rutnät med rutor i stället för en lista med rader.
     Modal Backdrop: "Anger hur appen ser ut bakom dialogrutor och menyer. Oskärpa kan vara långsam på mindre kraftfulla enheter."
-    Click Scrollbar Track to Scroll: "Ett klick på en rullningslist utanför dess handtag rullar ungefär en sida i klickets riktning. Rullningslister överlappar innehållets kant, så medan en är synlig går det inte att klicka på objekt under den. Flikfältets rullningslist fungerar alltid så."
+    Click Scrollbar Track to Scroll: "Ett klick på en rullningslist utanför dess handtag rullar ungefär en sida i klickets riktning. När detta är på fångar en synlig rullningslist upp klick som är avsedda för objekt under den. Flikfältets rullningslist fungerar alltid så."
   SponsorBlock Settings:
     Always Show DeArrow Badge: Behåll DeArrow-knappen synlig på videor vars titel eller miniatyrbild har ersatts av DeArrow, i stället för bara vid hovring.
 The playlist is at the beginning. Enable loop to continue playing: Spellistan är vid början. Aktivera upprepning för att fortsätta spela

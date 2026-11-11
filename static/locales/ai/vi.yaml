@@ -2296,7 +2296,7 @@ Tooltips:
     Use Custom Title Bar: Thay thanh tiêu đề của hệ thống bằng thanh thẻ, hoặc bằng thanh điều hướng trên cùng khi các thẻ không ở trên cùng, để tiết kiệm không gian theo chiều dọc. Các nút điều khiển cửa sổ xuất hiện ở góc của thanh đó.
     Use Grid Player Menu: Sắp xếp menu cài đặt của trình phát video thành lưới ô thay vì danh sách hàng.
     Modal Backdrop: "Đặt giao diện của ứng dụng phía sau hộp thoại và menu. Hiệu ứng làm mờ có thể chậm trên thiết bị yếu hơn."
-    Click Scrollbar Track to Scroll: "Nhấp vào thanh cuộn bên ngoài tay cầm sẽ cuộn khoảng một trang về phía vị trí nhấp. Thanh cuộn chồng lên mép nội dung, nên khi thanh cuộn đang hiển thị, bạn không thể nhấp vào các mục bên dưới nó. Thanh cuộn của thanh thẻ luôn hoạt động theo cách này."
+    Click Scrollbar Track to Scroll: "Nhấp vào thanh cuộn bên ngoài tay cầm sẽ cuộn khoảng một trang về phía vị trí nhấp. Khi tùy chọn này bật, thanh cuộn đang hiển thị sẽ nhận các lần nhấp dành cho các mục bên dưới nó. Thanh cuộn của thanh thẻ luôn hoạt động theo cách này."
   Experimental Settings:
     Faster Subscription Refresh: "Trước tiên kiểm tra nguồn cấp RSS của từng kênh và chỉ tải video, Shorts và sự kiện trực tiếp từ các kênh có nội dung tải lên mới. Làm mới tự động cũng bỏ qua các kênh đã tải trong 10 phút qua. Với các kênh không có nội dung mới, lượt xem, video đã xóa và tiêu đề đã thay đổi chỉ được cập nhật vài giờ một lần, và nội dung mới có thể xuất hiện muộn hơn khi nguồn cấp RSS bị chậm. Không khả dụng với API Invidious."
     Disable Hardware Acceleration: Tắt tăng tốc phần cứng GPU. Có thể khắc phục sự cố đồ họa, nhưng có thể làm giảm hiệu suất.

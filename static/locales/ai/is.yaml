@@ -2302,7 +2302,7 @@ Tooltips:
     Use Custom Title Bar: Skiptir titilstiku kerfisins út fyrir flipastikuna, eða efri leiðsögnina þegar fliparnir eru ekki efst, til að spara lóðrétt pláss. Gluggahnapparnir birtast í horni þeirrar stiku.
     Use Grid Player Menu: Raðar stillingavalmynd myndbandsspilarans í reitanet í stað raðalista.
     Modal Backdrop: "Ákvarðar hvernig forritið lítur út á bak við glugga og valmyndir. Móðun getur verið hæg á aflminni tækjum."
-    Click Scrollbar Track to Scroll: "Smellur á skrunstiku utan við sleða hennar flettir um það bil einni síðu í átt að smellinum. Skrunstikur liggja yfir jaðri efnisins, svo meðan stika er sýnileg er ekki hægt að smella á atriði undir henni. Skrunstika flipastikunnar virkar alltaf svona."
+    Click Scrollbar Track to Scroll: "Smellur á skrunstiku utan við sleða hennar flettir um það bil einni síðu í átt að smellinum. Meðan þetta er virkt grípur sýnileg skrunstika smelli sem ætlaðir eru atriðum undir henni. Skrunstika flipastikunnar virkar alltaf svona."
   Experimental Settings:
     Faster Subscription Refresh: "Athugar fyrst RSS-straum hverrar rásar og hleður aðeins myndskeiðum, Shorts og beinum útsendingum frá rásum með nýjum upphleðslum. Sjálfvirkar uppfærslur sleppa einnig rásum sem hlaðið var á síðustu 10 mínútum. Fyrir rásir án nýrra upphleðslna uppfærast áhorfstölur, fjarlægð myndskeið og breyttir titlar aðeins á nokkurra klukkustunda fresti, og nýjar upphleðslur geta birst síðar þegar RSS-straumurinn er á eftir. Ekki í boði með Invidious API."
     Disable Hardware Acceleration: Slekkur á vélbúnaðarhröðun skjákorts. Getur lagað myndrænar villur, en mun líklega draga úr afköstum.
