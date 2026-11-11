@@ -5,7 +5,10 @@ import WebKit
 public class PoTokenPlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "PoTokenPlugin"
     public let jsName = "PoToken"
-    public let pluginMethods: [CAPPluginMethod] = [CAPPluginMethod(name: "generate", returnType: CAPPluginReturnPromise)]
+    public let pluginMethods: [CAPPluginMethod] = [
+        CAPPluginMethod(name: "generate", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "mint", returnType: CAPPluginReturnPromise)
+    ]
     /// BotGuard returns a longer token when it doesn't trust the attestation.
     static let maxAttestedPoTokenLength = 120
 
@@ -41,22 +44,55 @@ public class PoTokenPlugin: CAPPlugin, CAPBridgedPlugin {
         }
         DispatchQueue.main.async {
             self.enqueue {
-                if self.attestation != nil, Date() >= self.attestationExpiresAt { self.discardAttestation() }
-                guard let view = self.attestation else {
-                    self.attest(call, videoId, context, attestationData, config)
-                    return
-                }
-                view.mint(videoId) { token, _, error in
-                    guard let token = token else {
-                        NSLog("Failed to mint a PO token from the current attestation, attesting again: %@", error ?? "")
-                        self.discardAttestation()
+                self.mintFromAttestation(videoId) { token in
+                    if let token = token {
+                        self.resolve(call, token)
+                    } else {
                         self.attest(call, videoId, context, attestationData, config)
-                        return
                     }
-                    if !Self.isAttested(token) { self.discardAttestation() }
-                    self.resolve(call, token)
                 }
             }
+        }
+    }
+
+    /// Mints a token from the current attestation without running BotGuard.
+    /// Resolves without a token when there is no usable, attested BotGuard run.
+    @objc func mint(_ call: CAPPluginCall) {
+        guard let videoId = call.getString("videoId") else {
+            call.reject("Missing PO token parameters")
+            return
+        }
+        DispatchQueue.main.async {
+            self.enqueue {
+                self.mintFromAttestation(videoId) { token in
+                    if let token = token, Self.isAttested(token) {
+                        self.resolve(call, token)
+                    } else {
+                        call.resolve([:])
+                        self.complete()
+                    }
+                }
+            }
+        }
+    }
+
+    /// Passes nil without a usable attestation. Discards the attestation when
+    /// minting fails or returns a token pending attestation.
+    private func mintFromAttestation(_ videoId: String, completion: @escaping (String?) -> Void) {
+        if attestation != nil, Date() >= attestationExpiresAt { discardAttestation() }
+        guard let view = attestation else {
+            completion(nil)
+            return
+        }
+        view.mint(videoId) { token, _, error in
+            guard let token = token else {
+                NSLog("Failed to mint a PO token from the current attestation: %@", error ?? "")
+                self.discardAttestation()
+                completion(nil)
+                return
+            }
+            if !Self.isAttested(token) { self.discardAttestation() }
+            completion(token)
         }
     }
 

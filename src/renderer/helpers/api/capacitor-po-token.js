@@ -23,3 +23,12 @@ export function generateCapacitorPoToken(videoId, context, initialAttestationDat
 
   return mintAttestedPoToken(async () => (await PoToken.generate(options)).token)
 }
+
+/**
+ * Mints a video-bound PO token from the native attestation without running BotGuard.
+ * @param {string} videoId
+ * @returns {Promise<string | null>} `null` without a valid, attested BotGuard run
+ */
+export async function mintCapacitorPoTokenFromAttestation(videoId) {
+  return (await PoToken.mint({ videoId })).token ?? null
+}
