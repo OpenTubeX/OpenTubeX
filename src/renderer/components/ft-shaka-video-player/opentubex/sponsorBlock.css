@@ -154,6 +154,7 @@
 .sponsorBlockDraftTimeInput {
   width: 78px;
   min-width: 78px;
+  max-width: 100%;
   min-height: 30px;
   box-sizing: border-box;
   padding: 4px 8px;
@@ -161,6 +162,14 @@
   border-radius: calc(4px * var(--ui-roundness));
   background-color: rgb(0 0 0 / 35%);
   color: inherit;
+}
+
+/* Grow with the value so hour-long timestamps are not clipped. */
+@supports (field-sizing: content) {
+  .sponsorBlockDraftTimeInput {
+    width: auto;
+    field-sizing: content;
+  }
 }
 
 .sponsorBlockDraftTimeText {
