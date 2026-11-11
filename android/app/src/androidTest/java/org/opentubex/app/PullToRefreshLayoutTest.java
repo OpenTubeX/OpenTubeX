@@ -131,17 +131,11 @@ public class PullToRefreshLayoutTest {
                 assertEquals("DOM rejection prevents refresh", 1, refreshes.get());
 
                 evaluate(web, "window.acceptPull=true;window.scrollTo(0,300)");
-                // The native view learns the page's scroll offset asynchronously.
-                long scrolled = SystemClock.uptimeMillis() + 15000;
-                AtomicReference<Boolean> belowTop = new AtomicReference<>(false);
-                while (!belowTop.get() && SystemClock.uptimeMillis() < scrolled) {
-                    onMain(() -> belowTop.set(web.canScrollVertically(-1)));
-                    if (!belowTop.get()) SystemClock.sleep(50);
-                }
-                assertTrue("The WebView reports the scrolled page", belowTop.get());
+                awaitNativeScroll(web, true);
                 swipe(layout, web, false, false, false);
                 assertEquals("scrolling back to the top is not a refresh", 1, refreshes.get());
                 evaluate(web, "window.scrollTo(0,0)");
+                awaitNativeScroll(web, false);
 
                 swipe(layout, web, true, false, false);
                 assertEquals("horizontal swipe does not refresh", 1, refreshes.get());
@@ -166,6 +160,17 @@ public class PullToRefreshLayoutTest {
                 });
             }
         }
+    }
+
+    /** The native view learns the page's scroll offset asynchronously. */
+    private static void awaitNativeScroll(WebView web, boolean belowTop) {
+        long deadline = SystemClock.uptimeMillis() + 15000;
+        AtomicReference<Boolean> actual = new AtomicReference<>(!belowTop);
+        while (actual.get() != belowTop && SystemClock.uptimeMillis() < deadline) {
+            onMain(() -> actual.set(web.canScrollVertically(-1)));
+            if (actual.get() != belowTop) SystemClock.sleep(50);
+        }
+        assertEquals("The WebView reports the page " + (belowTop ? "below" : "at") + " the top", belowTop, actual.get());
     }
 
     private static void swipe(View layout, WebView web, boolean horizontal, boolean cancel, boolean multi) throws Exception {
