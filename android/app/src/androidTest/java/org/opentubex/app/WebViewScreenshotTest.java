@@ -330,7 +330,8 @@ public class WebViewScreenshotTest {
                     }
                 })();
                 """);
-            awaitCondition(webView, "window.__tabPreviewPixels !== null", 45000);
+            // Twenty captures, each of which may retry once.
+            awaitCondition(webView, "window.__tabPreviewPixels !== null", 90000);
             JSONObject result = new JSONObject((String) new JSONTokener(evaluate(webView,
                 "JSON.stringify(window.__tabPreviewPixels)")).nextValue());
             assertTrue("Thumbnail succeeds: " + result, !result.has("error"));
