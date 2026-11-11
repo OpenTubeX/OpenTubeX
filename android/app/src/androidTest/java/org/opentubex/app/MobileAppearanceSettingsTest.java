@@ -37,7 +37,7 @@ public class MobileAppearanceSettingsTest {
                     """);
                 awaitCondition(view, "!!document.querySelector('.settingsMenu [data-section=general]')");
                 evaluate(view, "document.querySelector('.settingsMenu [data-section=general]').click()");
-                String control = "document.querySelector('.settingsContent [data-setting-key=updateRelativeTimestamps]')";
+                String control = "document.querySelector('.settingsContent [data-setting-key=generalAutoLoadMorePaginatedItemsEnabled]')";
                 awaitCondition(view, "!!" + control);
                 for (int scale : new int[] {100, 125, 150}) {
                     evaluate(view, String.format("""
@@ -210,7 +210,8 @@ public class MobileAppearanceSettingsTest {
 
     @Test
     public void alwaysShowScrollbarsControlsNativePageFading() throws Exception {
-        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class);
+             ActivityRecreation<MainActivity> recreation = new ActivityRecreation<>(scenario, MainActivity.class)) {
             WebView view = webView(scenario);
             String store = "document.querySelector('#app').__vue_app__.config.globalProperties.$store";
             String saved = evaluate(view, store + ".getters.getAlwaysShowScrollbars");
@@ -229,7 +230,7 @@ public class MobileAppearanceSettingsTest {
                     """);
                 for (boolean enabled : new boolean[] {false, true, false}) {
                     evaluate(view, store + ".commit('setAlwaysShowScrollbars', " + enabled + ")");
-                    awaitScrollbarFading(scenario, view, !enabled);
+                    awaitScrollbarFading(view, !enabled);
                     WebView currentView = view;
                     scenario.onActivity(activity -> {
                         assertTrue("The native page scrollbar stays enabled", currentView.isVerticalScrollBarEnabled());
@@ -244,13 +245,16 @@ public class MobileAppearanceSettingsTest {
                 evaluate(view, "window.scrollTo(0, 1500)");
                 awaitCondition(view, "window.scrollY >= 1499");
                 evaluate(view, store + ".commit('setAlwaysShowScrollbars', true)");
-                awaitScrollbarFading(scenario, view, false);
+                awaitScrollbarFading(view, false);
                 assertIdlePageScrollbar(scenario, view, true);
                 evaluate(view, store + ".dispatch('updateAlwaysShowScrollbars', true).then(() => window.__scrollbarSettingSaved = true)");
                 awaitCondition(view, "window.__scrollbarSettingSaved === true");
-                scenario.recreate();
-                view = webView(scenario);
-                awaitScrollbarFading(scenario, view, false);
+                recreation.recreate();
+                AtomicReference<WebView> recreatedView = new AtomicReference<>();
+                recreation.onActivity(activity -> recreatedView.set(activity.getBridge().getWebView()));
+                view = recreatedView.get();
+                awaitCondition(view, "!!document.querySelector('#app')?.__vue_app__?.config.globalProperties.$store && !!document.querySelector('.profileTrigger')");
+                awaitScrollbarFading(view, false);
             } finally {
                 evaluate(view, "document.querySelector('#native-scrollbar-test-style')?.remove(); document.querySelector('#native-scrollbar-test-content')?.remove(); window.scrollTo(0, 0)");
                 evaluate(view, store + ".dispatch('updateAlwaysShowScrollbars', " + saved + ").then(() => window.__scrollbarSettingRestored = true)");
@@ -260,12 +264,11 @@ public class MobileAppearanceSettingsTest {
         }
     }
 
-    private static void awaitScrollbarFading(ActivityScenario<MainActivity> scenario, WebView view,
-        boolean expected) throws Exception {
+    private static void awaitScrollbarFading(WebView view, boolean expected) throws Exception {
         long deadline = SystemClock.uptimeMillis() + 15000;
         AtomicReference<Boolean> fading = new AtomicReference<>();
         while (SystemClock.uptimeMillis() < deadline) {
-            scenario.onActivity(activity -> fading.set(view.isScrollbarFadingEnabled()));
+            InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> fading.set(view.isScrollbarFadingEnabled()));
             if (Boolean.valueOf(expected).equals(fading.get())) return;
             Thread.sleep(100);
         }
@@ -1034,7 +1037,7 @@ public class MobileAppearanceSettingsTest {
             result.set(value);
             evaluated.countDown();
         }));
-        assertTrue("JavaScript responds", evaluated.await(5, TimeUnit.SECONDS));
+        assertTrue("JavaScript responds", evaluated.await(15, TimeUnit.SECONDS));
         return result.get();
     }
 

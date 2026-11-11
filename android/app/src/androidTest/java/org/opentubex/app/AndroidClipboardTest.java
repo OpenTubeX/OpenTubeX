@@ -161,7 +161,7 @@ public class AndroidClipboardTest {
             result.set(value);
             evaluated.countDown();
         }));
-        assertTrue("WebView responds", evaluated.await(5, TimeUnit.SECONDS));
+        assertTrue("WebView responds", evaluated.await(15, TimeUnit.SECONDS));
         return result.get();
     }
 }

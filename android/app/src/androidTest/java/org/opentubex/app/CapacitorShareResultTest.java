@@ -25,6 +25,7 @@ import com.getcapacitor.PluginResult;
 import java.lang.reflect.Field;
 import java.io.InputStream;
 import java.util.Map;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -48,7 +49,8 @@ public class CapacitorShareResultTest {
             }
         };
         ActivityLifecycleMonitorRegistry.getInstance().addLifecycleCallback(stopRenderer);
-        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class);
+             ActivityRecreation<MainActivity> recreation = new ActivityRecreation<>(scenario, MainActivity.class)) {
             scenario.onActivity(activity -> {
                 activity.getBridge().getWebView().loadUrl("about:blank");
                 SharePlugin plugin = (SharePlugin) activity.getBridge().getPlugin("Share").getInstance();
@@ -68,12 +70,12 @@ public class CapacitorShareResultTest {
             // chooser. Restore its pending snapshot in a new Activity, as after
             // process death, then exercise real recreation while still pending.
             dismissChoosers(1);
-            scenario.recreate();
-            scenario.onActivity(activity -> activity.getBridge().restoreInstanceState(saved[0]));
+            recreation.recreate();
+            recreation.onActivity(activity -> activity.getBridge().restoreInstanceState(saved[0]));
             for (int i = 0; i < 2; i++) {
-                scenario.recreate();
+                recreation.recreate();
             }
-            scenario.onActivity(activity -> {
+            recreation.onActivity(activity -> {
                 activity.getBridge().getWebView().loadUrl("about:blank");
                 SharePlugin plugin = (SharePlugin) activity.getBridge().getPlugin("Share").getInstance();
                 PluginResult[] restored = new PluginResult[1];
@@ -210,6 +212,28 @@ public class CapacitorShareResultTest {
             dismissChoosers(2);
         }
         assertNoShareRegistryEntries(registry[0]);
+    }
+
+    /**
+     * Each share opens a real system chooser in the app's task. One left behind
+     * is destroyed late when Orchestrator clears the app's data, and Android
+     * then kills the next test's process along with that task.
+     */
+    @After
+    public void closeLeftoverChoosers() throws Exception {
+        long deadline = SystemClock.uptimeMillis() + 30000;
+        while (shell("dumpsys activity activities").contains("ChooserActivity")) {
+            assertTrue("Every share chooser closes before the next test", SystemClock.uptimeMillis() < deadline);
+            shell("input keyevent BACK");
+            SystemClock.sleep(250);
+        }
+    }
+
+    private static String shell(String command) throws Exception {
+        try (InputStream input = new ParcelFileDescriptor.AutoCloseInputStream(
+            InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(command))) {
+            return new String(YtDlpFiles.read(input, 16 * 1024 * 1024), java.nio.charset.StandardCharsets.UTF_8);
+        }
     }
 
     private static void dismissChoosers(int backPresses) throws Exception {

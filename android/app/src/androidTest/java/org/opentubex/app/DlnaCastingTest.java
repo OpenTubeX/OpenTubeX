@@ -196,7 +196,16 @@ public class DlnaCastingTest {
                 (async () => {
                     const native = (method, options = {}) => window.Capacitor.nativePromise('Dlna', method, options);
                     try {
-                        const discovery = await native('discover');
+                        // The emulator's virtual Wi-Fi can drop for a moment, failing the multicast send.
+                        const discover = async attempt => {
+                            try { return await native('discover'); }
+                            catch (error) {
+                                if (attempt === 2) throw error;
+                                await new Promise(resolve => setTimeout(resolve, 1000));
+                                return discover(attempt + 1);
+                            }
+                        };
+                        const discovery = await discover(0);
                         const device = discovery.responses.find(item => item.message.includes('/otx-dlna-test.xml'));
                         if (!device) throw new Error('Fixture not discovered: ' + JSON.stringify(discovery));
                         const description = await native('request', {url: '%s'});
@@ -213,7 +222,17 @@ public class DlnaCastingTest {
                 """, descriptionUrl, host, fixture.getLocalPort(), host, fixture.getLocalPort(), host, fixture.getLocalPort()));
             await(webView, "window.__dlnaTest !== null");
             JSONObject result = new JSONObject(evaluate(webView, "window.__dlnaTest"));
-            assertFalse(result.toString(), result.has("error"));
+            // A failed multicast send depends on the network routes, so report them.
+            if (result.has("error")) {
+                StringBuilder network = new StringBuilder(result.toString());
+                for (String command : new String[] {"ip -4 addr show wlan0", "ip -4 rule", "ip -4 route show table all"}) {
+                    try (InputStream output = new android.os.ParcelFileDescriptor.AutoCloseInputStream(
+                        InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(command))) {
+                        network.append("\n$ ").append(command).append('\n').append(new String(readBody(output), StandardCharsets.UTF_8));
+                    }
+                }
+                fail(network.toString());
+            }
             assertTrue(result.getJSONObject("description").getString("body").contains("Android test TV"));
             assertEquals(200, result.getJSONObject("control").getInt("status"));
             assertTrue(result.getJSONObject("position").getString("body").contains("<RelTime>00:00:08</RelTime>"));
@@ -549,7 +568,7 @@ public class DlnaCastingTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> view.evaluateJavascript(script, value -> {
             result.set(value); done.countDown();
         }));
-        assertTrue("WebView evaluation timed out", done.await(5, TimeUnit.SECONDS));
+        assertTrue("WebView evaluation timed out", done.await(15, TimeUnit.SECONDS));
         return result.get();
     }
     private static void await(WebView view, String condition) throws Exception {

@@ -240,7 +240,7 @@ public class AndroidFileExportTest {
             result.set(value);
             evaluated.countDown();
         }));
-        assertTrue(evaluated.await(5, TimeUnit.SECONDS));
+        assertTrue(evaluated.await(15, TimeUnit.SECONDS));
         return result.get();
     }
 }

@@ -51,7 +51,8 @@ public class StartupBackgroundTest {
             {"dark", "#0f0f0f"}, {"light", "#f1f1f1"},
             {"openTubeXDark", "#111111"}, {"hotPink", "#dd197f"}
         }) {
-            try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class);
+                 ActivityRecreation<MainActivity> recreation = new ActivityRecreation<>(scenario, MainActivity.class)) {
                 AtomicReference<WebView> reference = new AtomicReference<>();
                 scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
                 WebView view = reference.get();
@@ -72,9 +73,10 @@ public class StartupBackgroundTest {
                     assertEquals("The selected theme reaches the native launch cache", expectedColor, StartupBackground.getColor(context));
                     // Recreate the native window, then hold the real packaged page at
                     // its pre-renderer state. No splash covers the measured surface.
-                    scenario.recreate();
+                    recreation.recreate();
                     CountDownLatch rendererRequested = new CountDownLatch(1);
-                    scenario.onActivity(activity -> {
+                    CountDownLatch blankLoaded = new CountDownLatch(1);
+                    recreation.onActivity(activity -> {
                         WebView nextView = activity.getBridge().getWebView();
                         reference.set(nextView);
                         activity.getBridge().setWebViewClient(new OpenTubeXWebViewClient(activity.getBridge()) {
@@ -86,30 +88,59 @@ public class StartupBackgroundTest {
                                 }
                                 return super.shouldInterceptRequest(webView, request);
                             }
+
+                            @Override
+                            public void onPageFinished(WebView webView, String url) {
+                                super.onPageFinished(webView, url);
+                                if ("about:blank".equals(url)) blankLoaded.countDown();
+                            }
                         });
+                        // Chromium holds the previous page's last frame on a same-origin
+                        // navigation until the new page paints content, which this blank
+                        // page never does. Leave the origin first, as a cold start has no
+                        // previous page.
                         nextView.stopLoading();
-                        nextView.loadUrl("https://localhost/");
+                        nextView.loadUrl("about:blank");
                     });
+                    assertTrue("The previous page is left", blankLoaded.await(10, TimeUnit.SECONDS));
+                    recreation.onActivity(activity -> activity.getBridge().getWebView().loadUrl("https://localhost/"));
                     view = reference.get();
                     assertTrue("The real renderer request is intercepted", rendererRequested.await(10, TimeUnit.SECONDS));
                     awaitCondition(view, "!!document.querySelector('#app') && !document.querySelector('#app').__vue_app__ && !document.querySelector('#startup-splash')");
                     CountDownLatch painted = new CountDownLatch(1);
                     WebView pausedView = view;
-                    scenario.onActivity(activity -> pausedView.postVisualStateCallback(1, new WebView.VisualStateCallback() {
+                    recreation.onActivity(activity -> pausedView.postVisualStateCallback(1, new WebView.VisualStateCallback() {
                         @Override public void onComplete(long requestId) {
                             pausedView.postOnAnimation(() -> pausedView.postOnAnimation(painted::countDown));
                         }
                     }));
                     assertTrue("The startup page is painted", painted.await(5, TimeUnit.SECONDS));
+                    // The blank page never paints content, so Chromium can keep showing
+                    // the recreated WebView's earlier splash frame until its paint-holding
+                    // timeout. A wrong background stays after that; a stale frame does not.
+                    // White is WebView's default background, so it fails at once.
                     Bitmap screenshot = InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
-                    assertEquals("The blank startup frame uses " + appearance[0] + ", without a white flash",
+                    long screenshotDeadline = android.os.SystemClock.uptimeMillis() + 6000;
+                    for (int center; (center = screenshot.getPixel(screenshot.getWidth() / 2, screenshot.getHeight() / 2)) != expectedColor &&
+                        center != Color.WHITE && android.os.SystemClock.uptimeMillis() < screenshotDeadline;) {
+                        screenshot.recycle();
+                        Thread.sleep(250);
+                        screenshot = InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
+                    }
+                    // Says whether something else covered the app when the colors differ.
+                    java.util.concurrent.atomic.AtomicBoolean focused = new java.util.concurrent.atomic.AtomicBoolean();
+                    recreation.onActivity(activity -> focused.set(activity.hasWindowFocus()));
+                    String screen = String.format(java.util.Locale.ROOT, " (focused %b, top #%06x, bottom #%06x)", focused.get(),
+                        screenshot.getPixel(screenshot.getWidth() / 2, screenshot.getHeight() / 8) & 0xffffff,
+                        screenshot.getPixel(screenshot.getWidth() / 2, screenshot.getHeight() * 7 / 8) & 0xffffff);
+                    assertEquals("The blank startup frame uses " + appearance[0] + ", without a white flash" + screen,
                         expectedColor, screenshot.getPixel(screenshot.getWidth() / 2, screenshot.getHeight() / 2));
                     screenshot.recycle();
                 } finally {
                     // A reload leaves the previous document usable briefly.
                     // Wait for the replacement before restoring persisted settings.
                     evaluate(view, "window.__startupPreviousDocument = true");
-                    scenario.onActivity(activity -> {
+                    recreation.onActivity(activity -> {
                         activity.getBridge().setWebViewClient(new OpenTubeXWebViewClient(activity.getBridge()));
                         activity.getBridge().getWebView().reload();
                     });
@@ -182,7 +213,7 @@ public class StartupBackgroundTest {
             result.set(value);
             evaluated.countDown();
         }));
-        assertTrue("JavaScript responds", evaluated.await(5, TimeUnit.SECONDS));
+        assertTrue("JavaScript responds", evaluated.await(15, TimeUnit.SECONDS));
         return result.get();
     }
 

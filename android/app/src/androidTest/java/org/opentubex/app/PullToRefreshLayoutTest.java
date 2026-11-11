@@ -63,7 +63,7 @@ public class PullToRefreshLayoutTest {
                     """);
                 AtomicReference<View> layout = new AtomicReference<>();
                 scenario.onActivity(activity -> layout.set((View) web.getParent()));
-                swipe(layout.get(), false, false, false);
+                swipe(layout.get(), web, false, false, false);
                 await(web, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPresentedTab.refreshKey === window.__pullRevision + 1");
                 assertEquals("Watch route remains current", "true", evaluate(web,
                     "document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPresentedTab.route.fullPath === window.__pullRoute"));
@@ -118,7 +118,7 @@ public class PullToRefreshLayoutTest {
             PullToRefreshLayout layout = layoutRef.get();
             WebView web = webRef.get();
             try {
-                swipe(layout, false, false, false);
+                swipe(layout, web, false, false, false);
                 assertEquals("one deliberate pull refreshes", 1, refreshes.get());
                 onMain(() -> {
                     assertTrue(layout.isRefreshing());
@@ -127,29 +127,31 @@ public class PullToRefreshLayoutTest {
                 SystemClock.sleep(250);
 
                 evaluate(web, "window.acceptPull=false");
-                swipe(layout, false, false, false);
+                swipe(layout, web, false, false, false);
                 assertEquals("DOM rejection prevents refresh", 1, refreshes.get());
 
                 evaluate(web, "window.acceptPull=true;window.scrollTo(0,300)");
-                swipe(layout, false, false, false);
+                awaitNativeScroll(web, true);
+                swipe(layout, web, false, false, false);
                 assertEquals("scrolling back to the top is not a refresh", 1, refreshes.get());
                 evaluate(web, "window.scrollTo(0,0)");
+                awaitNativeScroll(web, false);
 
-                swipe(layout, true, false, false);
+                swipe(layout, web, true, false, false);
                 assertEquals("horizontal swipe does not refresh", 1, refreshes.get());
-                swipe(layout, false, true, false);
+                swipe(layout, web, false, true, false);
                 assertEquals("cancel does not refresh", 1, refreshes.get());
-                swipe(layout, false, false, true);
+                swipe(layout, web, false, false, true);
                 assertEquals("a second finger cancels refresh", 1, refreshes.get());
 
-                swipe(layout, false, false, false);
+                swipe(layout, web, false, false, false);
                 assertEquals("a later valid gesture still works", 2, refreshes.get());
                 onMain(() -> {
                     assertTrue(layout.isRefreshing());
                     layout.setRefreshing(false);
                     layout.configure(web, false);
                 });
-                swipe(layout, false, false, false);
+                swipe(layout, web, false, false, false);
                 assertEquals("disabled plugin leaves touches alone", 2, refreshes.get());
             } finally {
                 onMain(() -> {
@@ -160,13 +162,25 @@ public class PullToRefreshLayoutTest {
         }
     }
 
-    private static void swipe(View layout, boolean horizontal, boolean cancel, boolean multi) {
+    /** The native view learns the page's scroll offset asynchronously. */
+    private static void awaitNativeScroll(WebView web, boolean belowTop) {
+        long deadline = SystemClock.uptimeMillis() + 15000;
+        AtomicReference<Boolean> actual = new AtomicReference<>(!belowTop);
+        while (actual.get() != belowTop && SystemClock.uptimeMillis() < deadline) {
+            onMain(() -> actual.set(web.canScrollVertically(-1)));
+            if (actual.get() != belowTop) SystemClock.sleep(50);
+        }
+        assertEquals("The WebView reports the page " + (belowTop ? "below" : "at") + " the top", belowTop, actual.get());
+    }
+
+    private static void swipe(View layout, WebView web, boolean horizontal, boolean cancel, boolean multi) throws Exception {
         long down = SystemClock.uptimeMillis();
         float x = layout.getWidth() * 0.2f;
         float y = layout.getHeight() * 0.2f;
         touch(layout, down, MotionEvent.ACTION_DOWN, x, y);
-        // The WebView hit test must return before interception can start.
-        SystemClock.sleep(150);
+        // The WebView hit test must return before interception can start. WebView
+        // answers evaluations in order, so this one returns after the hit test.
+        evaluate(web, "true");
         for (int i = 1; i <= 20; i++) {
             float fraction = i / 20f;
             touch(layout, down, MotionEvent.ACTION_MOVE,
@@ -204,7 +218,7 @@ public class PullToRefreshLayoutTest {
             value.set(result);
             evaluated.countDown();
         }));
-        assertTrue(evaluated.await(5, TimeUnit.SECONDS));
+        assertTrue(evaluated.await(15, TimeUnit.SECONDS));
         SystemClock.sleep(100);
         return value.get();
     }

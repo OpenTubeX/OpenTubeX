@@ -34,11 +34,12 @@ public class NavigationResponsivenessTest {
             AtomicReference<WebView> reference = new AtomicReference<>();
             scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
             WebView view = reference.get();
-            await(view, "!!document.querySelector('.sideNav a[href=\"#/userplaylists\"]')");
-            evaluate(view, "document.querySelector('.tutorialSkip button')?.click()");
-            await(view, "!document.querySelector('.tutorialOverlay')");
+            // Navigating before startup settles can be overridden by its landing page.
+            await(view, "!!document.querySelector('.sideNav a[href=\"#/userplaylists\"]') && " +
+                "document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getActiveTab?.loadState === 'loaded'");
+            TutorialTestHelper.dismissIfPending(view);
             evaluate(view, "document.querySelector('.sideNav .inner > a[href=\"#/userplaylists\"]').click()");
-            await(view, "!!document.querySelector('.newPlaylistButton')");
+            await(view, "!!document.querySelector('.pageTitle + .headingActions .headingIconButton')");
             evaluate(view, """
                 (() => {
                     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
@@ -77,7 +78,7 @@ public class NavigationResponsivenessTest {
                 })()
                 """);
             try {
-                await(view, "!!document.querySelector('.newPlaylistButton')");
+                await(view, "!!document.querySelector('.pageTitle + .headingActions .headingIconButton')");
                 if (route.equals("home")) {
                     evaluate(view, """
                         window.navigationHomeOverflow = false;
@@ -94,7 +95,7 @@ public class NavigationResponsivenessTest {
                 tap(view, route);
                 await(view, "!!document.querySelector('" + contentSelector + "')");
                 evaluate(view, "document.querySelector('.sideNav .inner > a[href=\"#/userplaylists\"]').click()");
-                await(view, "!!document.querySelector('.newPlaylistButton')");
+                await(view, "!!document.querySelector('.pageTitle + .headingActions .headingIconButton')");
                 evaluate(view, String.format("""
                     window.navigationContentSelector = '%s';
                     window.navigationSort = Array.prototype.sort;
@@ -174,6 +175,7 @@ public class NavigationResponsivenessTest {
             if ("true".equals(evaluate(view, script))) return;
             Thread.sleep(100);
         }
-        assertEquals(script, "true", evaluate(view, script));
+        assertEquals(script + "; page: " + evaluate(view, "JSON.stringify({route: location.hash, actions: document.querySelector('.headingActions')?.outerHTML.slice(0, 600), text: document.body.innerText.slice(0, 300)})"),
+            "true", evaluate(view, script));
     }
 }

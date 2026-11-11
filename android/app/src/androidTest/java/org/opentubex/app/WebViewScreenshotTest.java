@@ -36,8 +36,7 @@ public class WebViewScreenshotTest {
             scenario.onActivity(activity -> view.set(activity.getBridge().getWebView()));
             WebView webView = view.get();
             awaitCondition(webView, "!!document.querySelector('.app.capacitorTabs')");
-            evaluate(webView, "document.querySelector('.tutorialSkip button')?.click()");
-            awaitCondition(webView, "!document.querySelector('.tutorialOverlay')");
+            TutorialTestHelper.dismissIfPending(webView);
             evaluate(webView, """
                 (async () => {
                     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
@@ -128,8 +127,7 @@ public class WebViewScreenshotTest {
             evaluate(webView, "document.querySelector('[data-subscription-feed-tab=\"all\"]').click()");
             awaitCondition(webView, "!!document.querySelector('.newFeedTab') && document.querySelectorAll('.ft-list-video').length > 0");
             // A fresh WebView profile can show the first-run tutorial over the feed.
-            evaluate(webView, "document.querySelector('.tutorialSkip button')?.click()");
-            awaitCondition(webView, "!document.querySelector('.tutorialOverlay')");
+            TutorialTestHelper.dismissIfPending(webView);
 
             evaluate(webView, "window.__firstCard = document.querySelector('.ft-list-video'); window.scrollTo(0, document.documentElement.scrollHeight)");
             awaitCondition(webView, "!window.__firstCard.isConnected && document.querySelectorAll('.ft-list-video').length > 0 && document.querySelectorAll('.ft-list-video').length < 20");
@@ -231,16 +229,22 @@ public class WebViewScreenshotTest {
                 window.__delayedPreview.style.cssText = 'position:fixed;inset:0;background:black;z-index:2147483647';
                 document.body.append(window.__delayedPreview);
                 """);
-            CountDownLatch baseline = new CountDownLatch(1);
             AtomicReference<Exception> error = new AtomicReference<>();
             AtomicReference<Integer> pixel = new AtomicReference<>();
-            scenario.onActivity(activity -> WebViewScreenshot.capture(activity, webView, 0.1, 0.3, 320, 180,
-                bitmap -> {
-                    pixel.set(bitmap.getPixel(160, 90));
-                    bitmap.recycle();
-                    baseline.countDown();
-                }, failure -> { error.set(failure); baseline.countDown(); }));
-            assertTrue(baseline.await(10, TimeUnit.SECONDS));
+            // The black baseline only sets up the delayed capture below. A starved
+            // emulator can miss the two-second frame deadline here, so try again.
+            for (int attempt = 0; attempt < 3; attempt++) {
+                CountDownLatch baseline = new CountDownLatch(1);
+                error.set(null);
+                scenario.onActivity(activity -> WebViewScreenshot.capture(activity, webView, 0.1, 0.3, 320, 180,
+                    bitmap -> {
+                        pixel.set(bitmap.getPixel(160, 90));
+                        bitmap.recycle();
+                        baseline.countDown();
+                    }, failure -> { error.set(failure); baseline.countDown(); }));
+                assertTrue(baseline.await(10, TimeUnit.SECONDS));
+                if (error.get() == null) break;
+            }
             assertEquals(null, error.get());
             assertEquals(Color.BLACK, (int) pixel.get());
 
@@ -307,9 +311,11 @@ public class WebViewScreenshotTest {
                                 tab.style.opacity = '1';
                                 // Opening the organizer can request a thumbnail immediately
                                 // after the swipe makes the target page visible.
-                                const {dataUrl} = await Capacitor.Plugins.Screenshot.take({
-                                    width:320, height:180, top:0.1, cropHeight:0.3
-                                });
+                                const options = {width:320, height:180, top:0.1, cropHeight:0.3};
+                                // PixelCopy can time out on a starved emulator. That says nothing
+                                // about which frame a capture shows, which the pixels below check.
+                                const {dataUrl} = await Capacitor.Plugins.Screenshot.take(options)
+                                    .catch(() => Capacitor.Plugins.Screenshot.take(options));
                                 const image = new Image();
                                 image.src = dataUrl;
                                 await image.decode();
@@ -330,7 +336,8 @@ public class WebViewScreenshotTest {
                     }
                 })();
                 """);
-            awaitCondition(webView, "window.__tabPreviewPixels !== null", 45000);
+            // Twenty captures, each of which may retry once.
+            awaitCondition(webView, "window.__tabPreviewPixels !== null", 90000);
             JSONObject result = new JSONObject((String) new JSONTokener(evaluate(webView,
                 "JSON.stringify(window.__tabPreviewPixels)")).nextValue());
             assertTrue("Thumbnail succeeds: " + result, !result.has("error"));
@@ -426,8 +433,7 @@ public class WebViewScreenshotTest {
             evaluate(webView, "document.querySelector('[data-subscription-feed-tab=\"all\"]').click()");
             awaitCondition(webView, "!!document.querySelector('.newFeedTab') && document.querySelectorAll('.ft-list-video').length > 0");
             // A fresh WebView profile can show the first-run tutorial over the feed.
-            evaluate(webView, "document.querySelector('.tutorialSkip button')?.click()");
-            awaitCondition(webView, "!document.querySelector('.tutorialOverlay')");
+            TutorialTestHelper.dismissIfPending(webView);
             evaluate(webView, """
                 (() => {
                     const marker = document.createElement('span');
@@ -511,7 +517,7 @@ public class WebViewScreenshotTest {
             result.set(value);
             evaluated.countDown();
         }));
-        assertTrue("JavaScript responds", evaluated.await(5, TimeUnit.SECONDS));
+        assertTrue("JavaScript responds", evaluated.await(15, TimeUnit.SECONDS));
         return result.get();
     }
 

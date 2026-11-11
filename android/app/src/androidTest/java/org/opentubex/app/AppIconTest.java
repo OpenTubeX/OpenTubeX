@@ -57,7 +57,7 @@ public class AppIconTest {
         try {
             AppIconPlugin.select(context, "dracula");
             try (LauncherSession scenario = LauncherSession.launch(context)) {
-                await(scenario, "!!document.querySelector('#app')?.__vue_app__");
+                awaitApp(scenario);
                 assertRecentsIcon(scenario, "dracula");
                 evaluate(scenario, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow')");
                 await(scenario, "!!document.querySelector('.settingsMenu [data-section=appearance]')");
@@ -71,7 +71,7 @@ public class AppIconTest {
                 tap(scenario, ".appIconAppliedPrompt button:last-child");
             }
             try (LauncherSession scenario = LauncherSession.launch(context)) {
-                await(scenario, "!!document.querySelector('#app')?.__vue_app__");
+                awaitApp(scenario);
                 assertRecentsIcon(scenario, "light");
             }
         } finally {
@@ -79,7 +79,19 @@ public class AppIconTest {
         }
     }
 
-    private static void assertRecentsIcon(LauncherSession scenario, String preset) {
+    private static void assertRecentsIcon(LauncherSession scenario, String preset) throws Exception {
+        // The system updates the recent task's description asynchronously.
+        long deadline = SystemClock.uptimeMillis() + 5000;
+        String mismatch;
+        while ((mismatch = recentsIconMismatch(scenario, preset)) != null && SystemClock.uptimeMillis() < deadline) {
+            Thread.sleep(100);
+        }
+        assertNull(mismatch, mismatch);
+    }
+
+    /** Reads the icon on the main thread, so assertions stay on the test thread. */
+    private static String recentsIconMismatch(LauncherSession scenario, String preset) {
+        AtomicReference<String> mismatch = new AtomicReference<>();
         scenario.onActivity(activity -> {
             try {
                 int icon = activity.getPackageManager().getActivityInfo(
@@ -88,19 +100,23 @@ public class AppIconTest {
                 android.app.ActivityManager manager = activity.getSystemService(android.app.ActivityManager.class);
                 android.app.ActivityManager.RecentTaskInfo task = manager.getAppTasks().stream()
                     .map(android.app.ActivityManager.AppTask::getTaskInfo)
-                    .filter(info -> info.id == activity.getTaskId()).findFirst().orElseThrow();
-                android.graphics.Bitmap actual = task.taskDescription.getIcon();
-                assertNotNull("Recent apps has the selected bitmap", actual);
+                    .filter(info -> info.id == activity.getTaskId()).findFirst().orElse(null);
+                android.graphics.Bitmap actual = task == null ? null : task.taskDescription.getIcon();
+                if (actual == null) {
+                    mismatch.set("Recent apps has the selected bitmap");
+                    return;
+                }
                 android.graphics.Bitmap expected = android.graphics.Bitmap.createBitmap(
                     actual.getWidth(), actual.getHeight(), android.graphics.Bitmap.Config.ARGB_8888);
                 android.graphics.drawable.Drawable drawable = activity.getDrawable(icon);
                 drawable.setBounds(0, 0, expected.getWidth(), expected.getHeight());
                 drawable.draw(new android.graphics.Canvas(expected));
-                assertTrue("Recent apps should use " + preset, actual.sameAs(expected));
+                if (!actual.sameAs(expected)) mismatch.set("Recent apps should use " + preset);
             } catch (PackageManager.NameNotFoundException error) {
-                throw new AssertionError(error);
+                mismatch.set(error.toString());
             }
         });
+        return mismatch.get();
     }
 
     @Test
@@ -109,7 +125,7 @@ public class AppIconTest {
         String original = AppIconPlugin.current(context);
         String chosen = original.equals("dracula") ? "light" : "dracula";
         try (LauncherSession scenario = LauncherSession.launch(context)) {
-            await(scenario, "!!document.querySelector('#app')?.__vue_app__");
+            awaitApp(scenario);
             evaluate(scenario, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow')");
             await(scenario, "!!document.querySelector('.settingsMenu [data-section=appearance]')");
             evaluate(scenario, "document.querySelector('.settingsMenu [data-section=appearance]').click()");
@@ -151,7 +167,7 @@ public class AppIconTest {
         ShortcutManager shortcuts = context.getSystemService(ShortcutManager.class);
         AppIconPlugin.select(context, "default");
         try (LauncherSession scenario = LauncherSession.launch(context)) {
-            await(scenario, "!!document.querySelector('#app')?.__vue_app__");
+            awaitApp(scenario);
             evaluate(scenario, """
                 window.iconTestApp = document.querySelector('#app').__vue_app__.config.globalProperties;
                 window.iconTestOriginalScale = iconTestApp.$store.getters.getUiScale;
@@ -271,8 +287,9 @@ public class AppIconTest {
                 assertEquals(before, AppIconPlugin.current(context));
             }
             AppIconPlugin.select(context, "dracula");
-            try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
-                scenario.recreate();
+            try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class);
+                 ActivityRecreation<MainActivity> recreation = new ActivityRecreation<>(scenario, MainActivity.class)) {
+                recreation.recreate();
                 assertEquals("dracula", AppIconPlugin.current(context));
             }
             AppIconPlugin.select(context, "default");
@@ -326,13 +343,27 @@ public class AppIconTest {
             result.set(value);
             done.countDown();
         }));
-        assertTrue("WebView responds", done.await(5, TimeUnit.SECONDS));
+        assertTrue("WebView responds", done.await(15, TimeUnit.SECONDS));
         return result.get();
     }
 
     private static void tap(LauncherSession scenario, String selector) throws Exception {
-        // Wait for the prompt's entry animation before locating a real touch.
-        Thread.sleep(250);
+        // Wait until the prompt's entry animation has stopped moving the target.
+        await(scenario, "(() => { const r = document.querySelector('" + selector + "').getBoundingClientRect();" +
+            "const key = [r.x, r.y, r.width, r.height].join(); const settled = window.__tapSettlingRect === key;" +
+            "window.__tapSettlingRect = key; return settled; })()");
+        evaluate(scenario, "delete window.__tapSettlingRect");
+        // A real tap reaches whatever the page shows on top at that point.
+        String hit = "(() => { const target = document.querySelector('" + selector + "'); const r = target.getBoundingClientRect();" +
+            "const top = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2); return target.contains(top) ? 'target' :" +
+            "top ? top.tagName + '.' + [...top.classList].join('.') : 'nothing'; })()";
+        long hitDeadline = SystemClock.uptimeMillis() + 15000;
+        String topElement = evaluate(scenario, hit);
+        while (!"\"target\"".equals(topElement) && SystemClock.uptimeMillis() < hitDeadline) {
+            Thread.sleep(100);
+            topElement = evaluate(scenario, hit);
+        }
+        assertEquals("The page shows " + selector + " on top at its center", "\"target\"", topElement);
         JSONArray bounds = new JSONArray(evaluate(scenario, "(() => { const r = document.querySelector('" + selector + "').getBoundingClientRect(); return [r.x + r.width / 2, r.y + r.height / 2, innerWidth] })()"));
         float[] point = new float[2];
         scenario.onActivity(activity -> {
@@ -342,13 +373,55 @@ public class AppIconTest {
             point[0] = location[0] + (float) (bounds.optDouble(0) * scale);
             point[1] = location[1] + (float) (bounds.optDouble(1) * scale);
         });
+        // The launcher briefly enlarges its taskbar window while it applies a
+        // component change, and that window would receive the touch. Tap once
+        // the app's window is the topmost one at the point again.
+        String cover = topWindowAt(point[0], point[1]);
+        long uncoveredDeadline = SystemClock.uptimeMillis() + 15000;
+        while (cover != null && SystemClock.uptimeMillis() < uncoveredDeadline) {
+            Thread.sleep(100);
+            cover = topWindowAt(point[0], point[1]);
+        }
+        assertNull("Another window covers the tap target " + selector, cover);
+        // Queue the release right behind the press. Waiting for the press to be
+        // handled first can outlast the long-press timeout on a slow emulator,
+        // and a long press does not click.
         long down = SystemClock.uptimeMillis();
+        android.app.UiAutomation automation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
         for (int action : new int[] {MotionEvent.ACTION_DOWN, MotionEvent.ACTION_UP}) {
-            MotionEvent event = MotionEvent.obtain(down, SystemClock.uptimeMillis(), action, point[0], point[1], 0);
+            MotionEvent event = MotionEvent.obtain(down, action == MotionEvent.ACTION_DOWN ? down : down + 50,
+                action, point[0], point[1], 0);
             event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
-            InstrumentationRegistry.getInstrumentation().sendPointerSync(event);
+            assertTrue("The tap is injected", automation.injectInputEvent(event, action == MotionEvent.ACTION_UP));
             event.recycle();
         }
+    }
+
+    /** Returns the title of the topmost window at a screen point unless it belongs to this app. */
+    private static String topWindowAt(float x, float y) {
+        android.app.UiAutomation automation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
+        android.accessibilityservice.AccessibilityServiceInfo info = automation.getServiceInfo();
+        if ((info.flags & android.accessibilityservice.AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS) == 0) {
+            info.flags |= android.accessibilityservice.AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS;
+            automation.setServiceInfo(info);
+        }
+        android.graphics.Rect bounds = new android.graphics.Rect();
+        // getWindows lists windows from the top of the screen down.
+        for (android.view.accessibility.AccessibilityWindowInfo window : automation.getWindows()) {
+            window.getBoundsInScreen(bounds);
+            if (!bounds.contains((int) x, (int) y)) continue;
+            android.view.accessibility.AccessibilityNodeInfo root = window.getRoot();
+            String owner = root == null ? null : String.valueOf(root.getPackageName());
+            return InstrumentationRegistry.getInstrumentation().getTargetContext().getPackageName().equals(owner)
+                ? null : window.getTitle() + " (" + owner + ")";
+        }
+        return null;
+    }
+
+    /** Waits for the renderer and dismisses the first-run tutorial, which intercepts taps. */
+    private static void awaitApp(LauncherSession scenario) throws Exception {
+        await(scenario, "!!document.querySelector('#app')?.__vue_app__");
+        TutorialTestHelper.dismissIfPending(scenario.activity.getBridge().getWebView());
     }
 
     private static void await(LauncherSession scenario, String script) throws Exception {

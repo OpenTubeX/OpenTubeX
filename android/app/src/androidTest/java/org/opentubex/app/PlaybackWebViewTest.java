@@ -150,7 +150,7 @@ public class PlaybackWebViewTest {
             actual.set(result);
             evaluated.countDown();
         }));
-        assertTrue("page responds", evaluated.await(5, TimeUnit.SECONDS));
+        assertTrue("page responds", evaluated.await(15, TimeUnit.SECONDS));
         return actual.get();
     }
 

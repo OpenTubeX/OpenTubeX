@@ -1,0 +1,176 @@
+name: Android Tests
+
+on:
+  # The suite takes about an hour of emulator time, so pull requests run it
+  # only for native changes. The nightly run covers renderer changes.
+  pull_request:
+    branches: [ development ]
+    paths:
+      - 'android/**'
+      - '.github/workflows/android-tests.yml'
+      # Scripts the Android build runs, and fixtures the tests bundle
+      - '_scripts/*ndroid*'
+      - '_scripts/brand/**'
+      - '_scripts/cast-sender/**'
+      - '_scripts/castSender.mjs'
+      - '_scripts/goBuild.mjs'
+      - '_scripts/yt-dlp-http/**'
+      - 'e2e/fixtures/media/**'
+      - 'e2e/fixtures/player-scripts/**'
+  schedule:
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  instrumentation:
+    name: Instrumentation tests (API 35, shard ${{ matrix.shard }})
+    if: github.repository == 'OpenTubeX/OpenTubeX' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+
+    # Software rendering makes long emulator sessions crash, so each shard
+    # runs part of the suite on its own emulator.
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2]
+
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+
+    - name: Use Node.js 24
+      uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      with:
+        node-version: 24.x
+        package-manager-cache: false
+
+    - name: Set up Go for the Cast sender
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      with:
+        go-version-file: _scripts/cast-sender/go.mod
+        cache: false
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      with:
+        cache: false
+
+    - name: Use Java 21
+      uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
+      with:
+        distribution: temurin
+        java-version: 21
+
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+      with:
+        packages: platform-tools ndk;28.2.13676358
+
+    - run: pnpm run ci
+      shell: bash
+
+    - name: Build app and test APKs
+      run: |
+        pnpm run capacitor:sync:android
+        ./android/gradlew --project-dir android :app:assembleDebug :app:assembleDebugAndroidTest -PtestAbi=x86_64
+
+    - name: Enable KVM
+      run: |
+        echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger --name-match=kvm
+
+    - name: Run instrumentation tests
+      # A shard takes 20 to 40 minutes. Stop a stalled one early enough for the
+      # next step to read the still running emulator.
+      timeout-minutes: 50
+      uses: ReactiveCircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+      with:
+        api-level: 35
+        target: google_apis
+        arch: x86_64
+        # Emulator 37.2.13 crashes partway through a shard; 37.1.11 runs the
+        # whole suite.
+        emulator-build: 15917651
+        # A 411dp wide phone. Software rendering keeps up at 720x1600 and 280dpi,
+        # which keeps the Pixel 6 layout with less than half of its pixels.
+        profile: pixel_6
+        # Gradle idles while the tests run, so the emulator gets every core.
+        cores: 4
+        ram-size: 4096M
+        disk-size: 6G
+        # Several tests check WebView and system animations.
+        disable-animations: false
+        emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu swangle -skin 720x1600
+        # A hung test fails after ten minutes instead of using up the shard.
+        # Gradle can report success after the emulator has crashed and skipped
+        # the remaining tests, or after test discovery crashed before any test
+        # ran, so require the emulator to still run and the shard to report tests.
+        # On a slow emulator, the launcher's "isn't responding" dialog takes focus
+        # from the app, and notification banners cover it. Android reads the
+        # dialog setting on configuration changes only, so the font scale is
+        # changed and restored, each time waiting until the configuration shows
+        # it. FailureDiagnostics closes another app's dialog that still appears
+        # and logs whatever window held the screen when a test failed.
+        # A starved runner delays the virtual access point's beacons, and after a
+        # few missed ones the guest drops Wi-Fi. Android then often rejoins
+        # without the network's routes, which breaks casting tests for the rest
+        # of the shard. mac80211 reads the beacon loss limit when it associates,
+        # so raise it to ten seconds and rejoin, then wait for the Wi-Fi routes.
+        script: |
+          timeout 60 sh -c "until adb root; do sleep 2; done" && adb wait-for-device && timeout 30 sh -c "until adb shell id | grep -q uid=0; do sleep 1; done"
+          adb shell 'echo 100 > /sys/module/mac80211/parameters/beacon_loss_count'
+          adb unroot && adb wait-for-device && timeout 30 sh -c "until adb shell id | grep -q uid=2000; do sleep 1; done"
+          adb shell cmd wifi set-wifi-enabled disabled
+          timeout 60 sh -c "until adb shell cmd wifi status | grep -q 'Wifi is disabled'; do sleep 1; done"
+          adb shell cmd wifi set-wifi-enabled enabled
+          timeout 120 sh -c "until adb shell ip route show table all | grep -q 'default via .* dev wlan0 table'; do sleep 1; done"
+          adb shell settings put global hide_error_dialogs 1
+          adb shell settings put secure anr_show_background 0
+          adb shell settings put global heads_up_notifications_enabled 0
+          adb shell wm density 280
+          adb shell wm size
+          adb shell wm density
+          adb shell settings put system font_scale 1.01 && timeout 60 sh -c "until adb shell dumpsys activity activities | grep -q '{1.01 '; do sleep 1; done"
+          adb shell settings put system font_scale 1.0 && timeout 60 sh -c "until adb shell dumpsys activity activities | grep -q '{1.0 '; do sleep 1; done"
+          ./android/gradlew --project-dir android :app:connectedDebugAndroidTest -PtestAbi=x86_64 -Pandroid.testInstrumentationRunnerArguments.numShards=3 -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }} -Pandroid.testInstrumentationRunnerArguments.timeout_msec=600000 -Pandroid.testInstrumentationRunnerArguments.listener=org.opentubex.app.FailureDiagnostics
+          adb get-state
+          grep -q '<testcase' android/app/build/outputs/androidTest-results/connected/debug/TEST-*.xml
+
+    - name: Show why the emulator stopped
+      if: failure()
+      run: |
+        sudo dmesg --ctime | grep -iE 'out of memory|killed process|segfault|qemu' | tail -n 20 || true
+        free -m
+        # Saves the device state with the reports when the emulator still runs,
+        # since a stalled test never gets its own logcat.
+        out=android/app/build/outputs/androidTest-results/connected/device
+        if timeout 10 adb get-state; then
+          mkdir -p "$out"
+          timeout 60 adb logcat -d -b main,system,crash > "$out/logcat.txt" || true
+          timeout 60 adb shell dumpsys activity activities > "$out/activities.txt" || true
+          timeout 60 adb shell dumpsys window windows > "$out/windows.txt" || true
+          timeout 60 adb shell ps -A -o PID,PPID,STAT,WCHAN,TIME,NAME > "$out/processes.txt" || true
+        fi
+
+    - name: Upload test reports
+      # Also after a timeout, to show which test was running.
+      if: ${{ always() }}
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: android-test-reports-${{ matrix.shard }}
+        path: |
+          android/app/build/reports/androidTests/connected
+          android/app/build/outputs/androidTest-results/connected
+        if-no-files-found: ignore
