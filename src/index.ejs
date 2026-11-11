@@ -23,11 +23,8 @@
     <div id="app"<% if (typeof startupSplash !== 'undefined') { %> inert<% } %>></div>
     <% if (typeof startupSplash !== 'undefined') { %>
     <div id="startup-splash" class="startupSplash" role="status" aria-label="OpenTubeX" aria-busy="true">
-      <div class="startupCurtain startupCurtainLeft" aria-hidden="true"></div>
-      <div class="startupCurtain startupCurtainRight" aria-hidden="true"></div>
-      <canvas class="startupFabric" aria-hidden="true" hidden></canvas>
-      <div class="startupLogo" aria-hidden="true"><%= startupSplash.logo %></div>
-      <div class="startupTrack" aria-hidden="true"><div class="startupProgress"></div></div>
+      <div class="startupShape" aria-hidden="true"><%= startupSplash.logo %></div>
+      <div class="startupProgress" aria-hidden="true"><div class="startupIndicator"><span><svg class="startupWave" width="120" height="12"><path d="M-6 6Q0 0 6 6T18 6T30 6T42 6T54 6T66 6T78 6T90 6T102 6T114 6T126 6"/></svg></span></div></div>
     </div>
     <script><%= startupSplash.script %></script>
     <% } %>

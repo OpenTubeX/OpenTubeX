@@ -22,12 +22,13 @@ for (const [theme, background, zoom] of [
         await expect(page.locator('#startup-splash')).toBeVisible()
         await expect(page.locator('.topNav')).toHaveCount(0)
         await expect(page.locator('#app')).toHaveAttribute('inert', '')
-        expect(await page.locator('.startupCurtain').first().evaluate(element => getComputedStyle(element).backgroundColor)).toBe(background)
+        expect(await page.locator('#startup-splash').evaluate(element => getComputedStyle(element).backgroundColor)).toBe(background)
+        // The renderer cached the theme's primary color on the first launch.
+        expect(await page.locator('#startup-splash').evaluate(element => getComputedStyle(element).getPropertyValue('--splash-primary').trim())).toBe('rgb(244, 67, 54)')
         await expect(page.locator('.startupLabel')).toHaveCount(0)
         const geometry = await page.locator('#startup-splash').evaluate(element => {
           const bounds = element.getBoundingClientRect()
-          const logo = element.querySelector('.startupLogo').getBoundingClientRect()
-          const animation = element.querySelector('.startupProgress').getAnimations()[0]
+          const logo = element.querySelector('.startupShape').getBoundingClientRect()
           return {
             width: bounds.width,
             height: bounds.height,
@@ -35,26 +36,30 @@ for (const [theme, background, zoom] of [
             viewportHeight: innerHeight,
             logoX: logo.x + logo.width / 2,
             logoY: logo.y + logo.height / 2,
-            easing: animation.effect.getTiming().easing
+            progressing: element.querySelector('.startupIndicator').getAnimations().some(animation => animation.playState === 'running')
           }
         })
         expect(Math.abs(geometry.width - geometry.viewportWidth)).toBeLessThanOrEqual(1)
         expect(Math.abs(geometry.height - geometry.viewportHeight)).toBeLessThanOrEqual(1)
         expect(Math.abs(geometry.logoX - geometry.width / 2)).toBeLessThan(1)
         expect(Math.abs(geometry.logoY - geometry.height / 2)).toBeLessThan(1)
-        expect(geometry.easing).toBe('linear')
-        await testInfo.attach(`${theme}-startup`, { body: await page.screenshot(), contentType: 'image/png' })
+        expect(geometry.progressing).toBe(true)
+        // Diagnostic only. On CI, Chromium can restart a GPU process that failed
+        // to initialize while this capture runs, which rejects it.
+        const screenshot = await page.screenshot().catch(() => null)
+        if (screenshot) await testInfo.attach(`${theme}-startup`, { body: screenshot, contentType: 'image/png' })
         await page.evaluate(() => {
           window.__startupReveal = null
           window.__startupColors = []
           window.__startupPalettes = []
           const sampleColors = () => {
-            const curtain = document.querySelector('.startupCurtain')
-            if (!curtain) return
-            window.__startupColors.push(getComputedStyle(curtain).backgroundColor)
+            const splash = document.getElementById('startup-splash')
+            if (!splash) return
+            window.__startupColors.push(getComputedStyle(splash).backgroundColor)
             window.__startupPalettes.push(JSON.stringify({
-              folds: getComputedStyle(curtain).backgroundImage,
-              progress: getComputedStyle(document.querySelector('.startupProgress')).backgroundImage
+              shape: getComputedStyle(splash.querySelector('.startupShape'), '::before').backgroundColor,
+              logo: getComputedStyle(splash.querySelector('.startupShape')).color,
+              wave: getComputedStyle(splash.querySelector('.startupWave')).stroke
             }))
             requestAnimationFrame(sampleColors)
           }
@@ -62,10 +67,10 @@ for (const [theme, background, zoom] of [
           const splash = document.getElementById('startup-splash')
           new MutationObserver(() => {
             if (splash.dataset.revealing && !window.__startupReveal) {
-              const canvas = splash.querySelector('.startupFabric')
               window.__startupReveal = {
                 presented: !!document.querySelector('.tabContent[aria-hidden="false"] > .routerView'),
-                painted: !canvas.hidden && canvas.getContext('2d').getImageData(1, 1, 1, 1).data[3] > 0,
+                // The splash opens a hole for the app instead of fading.
+                opening: splash.getAnimations().some(animation => animation.effect.getKeyframes().some(keyframe => keyframe.maskSize)),
                 started: performance.now()
               }
             }
@@ -82,7 +87,7 @@ for (const [theme, background, zoom] of [
         expect(await page.evaluate(() => [...new Set(window.__startupColors)])).toEqual([background])
         expect(await page.evaluate(() => new Set(window.__startupPalettes).size)).toBe(1)
         expect(reveal.presented).toBe(true)
-        expect(reveal.painted).toBe(true)
+        expect(reveal.opening).toBe(true)
         expect(reveal.duration).toBeLessThan(850)
         expect(await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].isVisible())).toBe(true)
       } finally {
@@ -93,21 +98,21 @@ for (const [theme, background, zoom] of [
   })
 }
 
-test('reduced motion skips the curtain animation and releases the app', async ({ page }) => {
+test('reduced motion skips the reveal animation and releases the app', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.addInitScript(() => {
-    window.__startupCanvasDraws = 0
-    const drawImage = CanvasRenderingContext2D.prototype.drawImage
-    CanvasRenderingContext2D.prototype.drawImage = function (...args) {
-      if (this.canvas.classList.contains('startupFabric')) window.__startupCanvasDraws++
-      return drawImage.apply(this, args)
+    window.__startupRevealAnimations = 0
+    const animate = Element.prototype.animate
+    Element.prototype.animate = function (...args) {
+      if (this.closest('#startup-splash')) window.__startupRevealAnimations++
+      return animate.apply(this, args)
     }
   })
   await page.reload()
   await expect(page.locator('.topNav')).toBeVisible()
   await expect(page.locator('#startup-splash')).toHaveCount(0)
   await expect(page.locator('#app')).not.toHaveAttribute('inert')
-  expect(await page.evaluate(() => window.__startupCanvasDraws)).toBe(0)
+  expect(await page.evaluate(() => window.__startupRevealAnimations)).toBe(0)
 })
 
 test('shows a new window before its renderer loads and respects hiding during startup', async ({ app, page }) => {

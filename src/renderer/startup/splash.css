@@ -1,93 +1,141 @@
 .startupSplash {
   /* Keep the initial palette throughout startup: the renderer applies its
-     default theme before the saved settings have finished loading. */
+     default theme before the saved settings have finished loading. Without a
+     cached primary color, the tonal shapes fall back to the text color. */
   --splash-background: var(--startup-background, #0f0f0f);
   --splash-foreground: var(--startup-foreground, #eee);
-  --splash-shadow: color-mix(in srgb, var(--splash-background) 78%, #000);
-  --splash-face: color-mix(in srgb, var(--splash-background) 94%, var(--splash-foreground));
-  --splash-highlight: color-mix(in srgb, var(--splash-background) 85%, var(--splash-foreground));
+  --splash-primary: var(--startup-primary, var(--splash-foreground));
+  --splash-container: color-mix(in srgb, var(--splash-primary) 24%, var(--splash-background));
+  --splash-on-container: color-mix(in srgb, var(--splash-primary) 40%, var(--splash-foreground));
+  --splash-shape-size: 160px;
+
+  /* _scripts/startupSplash.js defines --splash-cookie and --splash-cookie-mask
+     from the app's 9-sided cookie shape. */
 
   position: fixed;
   z-index: 2147483647;
   inset: 0;
   overflow: clip;
+  background-color: var(--splash-background);
   color: var(--splash-foreground);
   font-family: system-ui, sans-serif;
   direction: ltr;
 }
 
-.startupCurtain {
-  position: absolute;
-  inset-block: 0;
-  inline-size: calc(50% + 0.5px);
-  background-color: var(--splash-background);
-  background-image:
-    linear-gradient(to bottom, var(--splash-shadow), transparent 24px),
-    linear-gradient(90deg, var(--splash-shadow) 0%, var(--splash-background) 12%, var(--splash-face) 32%, var(--splash-highlight) 49%, var(--splash-face) 64%, var(--splash-background) 85%, var(--splash-shadow) 100%);
-  background-size: 100% 100%, 20% 100%;
-  background-repeat: no-repeat, repeat-x;
-}
-
-.startupCurtainLeft {
-  inset-inline-start: 0;
-}
-
-.startupCurtainRight {
-  inset-inline-end: 0;
-}
-
-.startupFabric {
-  position: absolute;
-  inset: 0;
-  inline-size: 100%;
-  block-size: 100%;
-}
-
-.startupLogo {
+/* The logo stays upright on a slowly turning tonal cookie. */
+.startupShape {
   position: absolute;
   inset-block-start: 50%;
   inset-inline-start: 50%;
-  inline-size: 104px;
-  block-size: 104px;
-  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  inline-size: var(--splash-shape-size);
+  block-size: var(--splash-shape-size);
+  color: var(--splash-on-container);
+  translate: -50% -50%;
 }
 
-.startupLogo svg {
-  inline-size: 100%;
-  block-size: 100%;
-}
-
-.startupTrack {
+.startupShape::before {
   position: absolute;
-  inset-block-end: env(safe-area-inset-bottom, 0);
-  inline-size: 100%;
-  block-size: 3px;
-  overflow: clip;
-  background: color-mix(in srgb, var(--splash-foreground) 20%, var(--splash-background));
+  inset: 0;
+  background-color: var(--splash-container);
+  clip-path: var(--splash-cookie);
+  animation: startup-turn 12s linear infinite;
+  content: '';
 }
 
+.startupShape svg {
+  position: relative;
+  inline-size: 60%;
+  block-size: 60%;
+}
+
+/* Material 3 indeterminate wavy linear indicator. The active wave carries the
+   splash background around it as the gap to the flat track, and only
+   transforms move, so the compositor can run it without the main thread. */
 .startupProgress {
-  inline-size: 200%;
-  block-size: 100%;
-  background: linear-gradient(to right, var(--splash-foreground) 0 16%, transparent 16% 50%, var(--splash-foreground) 50% 66%, transparent 66% 100%);
-  animation: startup-progress 1.4s linear infinite;
+  position: absolute;
+  inset-block-start: calc(50% + var(--splash-shape-size) / 2 + 28px);
+  inset-inline-start: 50%;
+  inline-size: var(--splash-shape-size);
+  block-size: 12px;
+  overflow: clip;
+  translate: -50% 0;
 }
 
-@keyframes startup-progress {
-  from { transform: translateX(-50%); }
+.startupProgress::before {
+  position: absolute;
+  inset-block: 4px;
+  inset-inline: 0;
+  border-radius: 2px;
+  background-color: var(--splash-container);
+  content: '';
+}
+
+.startupIndicator {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: 45%;
+  padding-inline: 4px;
+  background-color: var(--splash-background);
+
+  /* Where it rests when animations are off. */
+  transform: translateX(60%);
+  animation: startup-indicator 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.startupIndicator > span {
+  display: block;
+  block-size: 100%;
+  overflow: clip;
+}
+
+/* Wide enough for the indicator plus one wavelength of travel. */
+.startupWave {
+  display: block;
+  fill: none;
+  stroke: var(--splash-primary);
+  stroke-linecap: round;
+  stroke-width: 4px;
+  animation: startup-wave 0.5s linear infinite;
+}
+
+@keyframes startup-turn {
+  to { transform: rotate(360deg); }
+}
+
+/* Turns around partly inside the track, so the slow start and end keep some
+   of the wave in view. */
+@keyframes startup-indicator {
+  from { transform: translateX(-60%); }
+  to { transform: translateX(190%); }
+}
+
+@keyframes startup-wave {
+  from { transform: translateX(-24px); }
   to { transform: translateX(0); }
+}
+
+/* The reveal grows a cookie-shaped hole from the logo until the app fills
+   the window; revealStartupSplash() animates its size. */
+@supports (mask-composite: exclude) {
+  .startupSplash[data-revealing] {
+    mask: var(--splash-cookie-mask) 50% 50% / 0 0 no-repeat, linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
 }
 
 /* The Reduced Motion setting resolves once the renderer bundle loads.
    Until then, follow the system preference. */
-:root[data-reduced-motion='reduce'] .startupProgress {
+:root[data-reduced-motion='reduce'] .startupSplash *,
+:root[data-reduced-motion='reduce'] .startupSplash *::before {
   animation: none;
-  transform: translateX(-35%);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :root:not([data-reduced-motion]) .startupProgress {
+  :root:not([data-reduced-motion]) .startupSplash *,
+  :root:not([data-reduced-motion]) .startupSplash *::before {
     animation: none;
-    transform: translateX(-35%);
   }
 }

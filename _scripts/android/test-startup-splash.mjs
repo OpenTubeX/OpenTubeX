@@ -98,12 +98,12 @@ try {
       const geometry = await inspect(`(() => {
         const splash = document.querySelector('#startup-splash')
         const bounds = splash.getBoundingClientRect()
-        const logo = splash.querySelector('.startupLogo').getBoundingClientRect()
+        const logo = splash.querySelector('.startupShape').getBoundingClientRect()
         return {
           width: bounds.width, height: bounds.height,
           viewportWidth: innerWidth, viewportHeight: innerHeight,
           logoX: logo.x + logo.width / 2, logoY: logo.y + logo.height / 2,
-          background: getComputedStyle(splash.querySelector('.startupCurtain')).backgroundColor,
+          background: getComputedStyle(splash).backgroundColor,
           inert: document.querySelector('#app').hasAttribute('inert'),
           shell: !!document.querySelector('.topNav')
         }
@@ -124,7 +124,7 @@ try {
           if (splash.dataset.revealing && !window.__startupReveal) {
             window.__startupReveal = {
               presented: !!document.querySelector('.tabContent[aria-hidden="false"] > .routerView'),
-              painted: !splash.querySelector('.startupFabric').hidden
+              animated: splash.getAnimations().length > 0
             }
           }
         }).observe(document.body, { attributes: true, childList: true, subtree: true })
@@ -133,7 +133,7 @@ try {
       await ready()
       const reveal = await page.evaluate(() => window.__startupReveal)
       assert.ok(reveal?.presented, 'The initial tab is presented before revealing')
-      assert.equal(reveal.painted, !reducedMotion, 'Reduced motion skips the fabric animation')
+      assert.equal(reveal.animated, !reducedMotion, 'Reduced motion skips the reveal animation')
     } finally {
       await debuggerSession.send('Debugger.resume').catch(() => {})
     }
@@ -164,7 +164,7 @@ try {
       }
       const inspect = await pauseRenderer()
       try {
-        assert.equal(await inspect("getComputedStyle(document.querySelector('.startupCurtain')).backgroundColor"), selection === 'system' ? 'rgb(250, 240, 221)' : 'rgb(52, 86, 120)')
+        assert.equal(await inspect("getComputedStyle(document.querySelector('#startup-splash')).backgroundColor"), selection === 'system' ? 'rgb(250, 240, 221)' : 'rgb(52, 86, 120)')
         await debuggerSession.send('Debugger.resume')
         await ready()
       } finally {
@@ -214,7 +214,12 @@ try {
   console.log('PASS: Android early splash, saved light/dark appearance, custom theme edits, ready tab reveal, reduced motion, and hide setting')
 } finally {
   if (browser) await browser.close()
-  if (port) adb('forward', '--remove', `tcp:${port}`)
+  try {
+    if (port) adb('forward', '--remove', `tcp:${port}`)
+  } catch {
+    // Closing the WebView's DevTools connection can end the forward first.
+    // Restore the rotation settings regardless.
+  }
   for (const [key, value] of rotationSettings) {
     if (value === 'null') adb('shell', 'settings', 'delete', 'system', key)
     else adb('shell', 'settings', 'put', 'system', key, value)
