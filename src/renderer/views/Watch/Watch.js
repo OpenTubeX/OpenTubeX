@@ -4373,6 +4373,9 @@ export default defineComponent({
               }
               this.streamingDataExpiryDate = getYatteeStreamExpiry(hlsManifestUrl)
             } else {
+              if (!hlsManifestUrl) {
+                throw new Error('Invidious returned no HLS manifest for this live stream')
+              }
               this.streamingDataExpiryDate = this.extractExpiryDateFromStreamingUrl(result.adaptiveFormats[0].url)
             }
 
