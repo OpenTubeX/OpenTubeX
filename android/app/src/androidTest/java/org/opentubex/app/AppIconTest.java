@@ -372,11 +372,16 @@ public class AppIconTest {
             cover = topWindowAt(point[0], point[1]);
         }
         assertNull("Another window covers the tap target " + selector, cover);
+        // Queue the release right behind the press. Waiting for the press to be
+        // handled first can outlast the long-press timeout on a slow emulator,
+        // and a long press does not click.
         long down = SystemClock.uptimeMillis();
+        android.app.UiAutomation automation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
         for (int action : new int[] {MotionEvent.ACTION_DOWN, MotionEvent.ACTION_UP}) {
-            MotionEvent event = MotionEvent.obtain(down, SystemClock.uptimeMillis(), action, point[0], point[1], 0);
+            MotionEvent event = MotionEvent.obtain(down, action == MotionEvent.ACTION_DOWN ? down : down + 50,
+                action, point[0], point[1], 0);
             event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
-            InstrumentationRegistry.getInstrumentation().sendPointerSync(event);
+            assertTrue("The tap is injected", automation.injectInputEvent(event, action == MotionEvent.ACTION_UP));
             event.recycle();
         }
     }
