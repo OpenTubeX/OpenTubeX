@@ -229,16 +229,22 @@ public class WebViewScreenshotTest {
                 window.__delayedPreview.style.cssText = 'position:fixed;inset:0;background:black;z-index:2147483647';
                 document.body.append(window.__delayedPreview);
                 """);
-            CountDownLatch baseline = new CountDownLatch(1);
             AtomicReference<Exception> error = new AtomicReference<>();
             AtomicReference<Integer> pixel = new AtomicReference<>();
-            scenario.onActivity(activity -> WebViewScreenshot.capture(activity, webView, 0.1, 0.3, 320, 180,
-                bitmap -> {
-                    pixel.set(bitmap.getPixel(160, 90));
-                    bitmap.recycle();
-                    baseline.countDown();
-                }, failure -> { error.set(failure); baseline.countDown(); }));
-            assertTrue(baseline.await(10, TimeUnit.SECONDS));
+            // The black baseline only sets up the delayed capture below. A starved
+            // emulator can miss the two-second frame deadline here, so try again.
+            for (int attempt = 0; attempt < 3; attempt++) {
+                CountDownLatch baseline = new CountDownLatch(1);
+                error.set(null);
+                scenario.onActivity(activity -> WebViewScreenshot.capture(activity, webView, 0.1, 0.3, 320, 180,
+                    bitmap -> {
+                        pixel.set(bitmap.getPixel(160, 90));
+                        bitmap.recycle();
+                        baseline.countDown();
+                    }, failure -> { error.set(failure); baseline.countDown(); }));
+                assertTrue(baseline.await(10, TimeUnit.SECONDS));
+                if (error.get() == null) break;
+            }
             assertEquals(null, error.get());
             assertEquals(Color.BLACK, (int) pixel.get());
 
