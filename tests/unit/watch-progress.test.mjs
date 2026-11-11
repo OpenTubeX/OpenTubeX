@@ -220,7 +220,7 @@ test('a seek before the first load creates a complete new history entry', () => 
   assert.ok(f.history.timeWatched > 0)
 })
 
-test('late /next metadata replaces the /player metadata once the first history write lands', async () => {
+test('late /next metadata replaces the /player metadata once the pending history write lands', async () => {
   const { refreshHistoryMetadata } = runInNewContext(`({
     ${source.slice(source.indexOf('    refreshHistoryMetadata:'), source.indexOf('    addToHistory:'))}
   })`)
@@ -237,8 +237,8 @@ test('late /next metadata replaces the /player metadata once the first history w
     videoTitle: '/next title',
     videoLengthSeconds: 60,
     channelId: 'channel',
-    // Started at a timestamp, while the store had no entry yet
-    firstHistoryWrite: new Promise(resolve => { finishFirstWrite = resolve }),
+    // A history or progress write still in flight, which stores progress 42 when it lands
+    latestHistoryWrite: new Promise(resolve => { finishFirstWrite = resolve }),
   }
 
   const refresh = view.refreshHistoryMetadata(1, view.videoId)

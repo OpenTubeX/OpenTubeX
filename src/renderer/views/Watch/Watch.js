@@ -611,8 +611,10 @@ export default defineComponent({
       recommendationWatchSession: null,
       recommendationLoadRetryAt: 0,
       historyLastTouchedAt: 0,
-      /** @type {Promise<unknown> | null} the first history write of the current video */
-      firstHistoryWrite: null,
+      /** @type {Promise<unknown> | null} the latest history write of the current video */
+      latestHistoryWrite: null,
+      // A direct load that ended without /next has only the unlocalized /player metadata
+      videoMetadataIncomplete: false,
       /** @type {Set<string>} videos whose watched mark is still being written */
       watchedMarkPendingVideoIds: new Set(),
       /** @type {{ playlistId: string, videoId: string, playlistItemId: string | null } | null} the playlist entry removed once watched */
@@ -1854,6 +1856,7 @@ export default defineComponent({
         this.isLoading ||
         // The /next data can localize the title and description
         this.watchNextPending ||
+        this.videoMetadataIncomplete ||
         !this.hasResolvedVideoTitle ||
         (this.localFilePlayback && !this.channelId) ||
         typeof window.ftElectron?.videoMetadataCache?.update !== 'function'
@@ -2482,7 +2485,8 @@ export default defineComponent({
 
       this.firstLoad = true
       this.videoPlayerLoaded = false
-      this.firstHistoryWrite = null
+      this.latestHistoryWrite = null
+      this.videoMetadataIncomplete = false
       // Re-evaluate per video: this instance is reused across same-tab
       // navigation, so a tab that was presented for the previous video must not
       // keep that state while it loads the next one in the background.
@@ -4129,7 +4133,13 @@ export default defineComponent({
       } finally {
         if (this.isCurrentVideoLoad(loadGeneration, videoId)) {
           this.vrStreamsPending = false
-          if (lateWatchNext || !lateWatchNextStarted) this.watchNextPending = false
+          if (!lateWatchNext && !lateWatchNextStarted && this.watchNextPending) {
+            // Nothing waits for /next anymore, but the cache must not keep the /player metadata
+            this.videoMetadataIncomplete = true
+            this.watchNextPending = false
+          } else if (lateWatchNext) {
+            this.watchNextPending = false
+          }
         }
       }
     },
@@ -4837,7 +4847,8 @@ export default defineComponent({
     },
 
     refreshHistoryMetadata: async function (loadGeneration, videoId) {
-      await this.firstHistoryWrite?.catch(() => {})
+      // A progress save still in flight would be overwritten with the older stored value
+      await this.latestHistoryWrite?.catch(() => {})
       if (this.isCurrentVideoLoad(loadGeneration, videoId) && this.historyEntryExists) {
         this.addToHistory(this.historyEntry.watchProgress)
       }
@@ -4870,7 +4881,8 @@ export default defineComponent({
       }
 
       this.historyLastTouchedAt = now
-      return this.updateHistory(videoData)
+      this.latestHistoryWrite = this.updateHistory(videoData)
+      return this.latestHistoryWrite
     },
 
     keepHistoryEntryAlive(currentSeconds) {
@@ -5234,7 +5246,7 @@ export default defineComponent({
         videoId: this.videoId,
         watchProgress: currentTime
       }
-      this.updateWatchProgress(payload)
+      this.latestHistoryWrite = this.updateWatchProgress(payload)
     },
 
     fetchVideoDislikes: function () {
@@ -5319,11 +5331,11 @@ export default defineComponent({
 
         if (this.rememberHistory) {
           if (this.timestamp !== null) {
-            this.firstHistoryWrite = this.addToHistory(this.timestamp)
+            this.addToHistory(this.timestamp)
           } else if (this.historyEntryExists) {
-            this.firstHistoryWrite = this.addToHistory(this.historyEntry.watchProgress)
+            this.addToHistory(this.historyEntry.watchProgress)
           } else {
-            this.firstHistoryWrite = this.addToHistory(0)
+            this.addToHistory(0)
           }
 
           // Must be called AFTER history entry inserted
