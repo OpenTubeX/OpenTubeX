@@ -57,6 +57,11 @@ for (const { layout, width, height, uiScale, cpuThrottle = 1 } of [
           } else {
             expect(samples.animationKeyframes[0].scale).not.toBe(samples.animationKeyframes[1].scale)
             expect(samples.actionDockKeyframes.length, 'The action dock follows the video with a compositor animation').toBe(2)
+            expect(samples.actionDockEnds.length).toBe(2)
+            // The animation starts at the previous position and ends at the new one.
+            const [actionDockStart, actionDockEnd] = samples.actionDockEnds
+            expect(parseFloat(samples.actionDockKeyframes[0].translate)).toBeCloseTo(actionDockStart - actionDockEnd, 0)
+            expect(parseFloat(samples.actionDockKeyframes[1].translate)).toBe(0)
           }
           if (open) {
             await expect(player.locator('.fullscreenMetadataOverlay.open')).toBeVisible()
