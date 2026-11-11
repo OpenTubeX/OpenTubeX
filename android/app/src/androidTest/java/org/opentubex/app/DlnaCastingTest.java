@@ -222,7 +222,17 @@ public class DlnaCastingTest {
                 """, descriptionUrl, host, fixture.getLocalPort(), host, fixture.getLocalPort(), host, fixture.getLocalPort()));
             await(webView, "window.__dlnaTest !== null");
             JSONObject result = new JSONObject(evaluate(webView, "window.__dlnaTest"));
-            assertFalse(result.toString(), result.has("error"));
+            // A failed multicast send depends on the network routes, so report them.
+            if (result.has("error")) {
+                StringBuilder network = new StringBuilder(result.toString());
+                for (String command : new String[] {"ip -4 addr show wlan0", "ip -4 rule", "ip -4 route show table all"}) {
+                    try (InputStream output = new android.os.ParcelFileDescriptor.AutoCloseInputStream(
+                        InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(command))) {
+                        network.append("\n$ ").append(command).append('\n').append(new String(readBody(output), StandardCharsets.UTF_8));
+                    }
+                }
+                fail(network.toString());
+            }
             assertTrue(result.getJSONObject("description").getString("body").contains("Android test TV"));
             assertEquals(200, result.getJSONObject("control").getInt("status"));
             assertTrue(result.getJSONObject("position").getString("body").contains("<RelTime>00:00:08</RelTime>"));
