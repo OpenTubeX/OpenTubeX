@@ -110,13 +110,15 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
     defaultInterval: 5,
     $store: { getters: { getAvoidTranslation: 'never', getWellbeingPlaybackBlock: () => null }, commit() {} },
   }
+  const tabMediaCoordinator = { releaseEndedPlayback() {} }
   const ended = vm.runInNewContext(`({${extractSourceBetweenMarkers(watchSource, '    handleVideoEnded: function () {', '\n    playNextVideoNow:')} })`, {
-    setTimeout: () => 1, setInterval: () => 1, Date,
-  }).handleVideoEnded
-  watch.handleVideoEnded = () => ended.call(watch)
+    setTimeout: () => 1, setInterval: () => 1, Date, tabMediaCoordinator,
+  })
+  watch.continueAfterVideoEnded = () => ended.continueAfterVideoEnded.call(watch)
+  watch.handleVideoEnded = () => ended.handleVideoEnded.call(watch)
   Object.assign(watch, vm.runInNewContext(`({${extractSourceBetweenMarkers(watchSource, '    handleUpcomingPlaylistVideosChange(videos) {', '\n    preloadUpcomingYtDlpPlaybackSources(')} })`))
   const cancel = vm.runInNewContext(`({${extractSourceBetweenMarkers(watchSource, '    abortAutoplayCountdown: function (', '\n    handleRouteChange:')} })`, {
-    clearTimeout() {}, clearInterval() {},
+    clearTimeout() {}, clearInterval() {}, tabMediaCoordinator,
   }).abortAutoplayCountdown
   const replay = vm.runInNewContext(`({${extractSourceBetweenMarkers(watchSource, '    handleVideoPlay() {', '\n    handlePlayerSeeking()')} })`).handleVideoPlay
   context.emit = (_name, videos) => watch.handleUpcomingPlaylistVideosChange(videos)
@@ -151,7 +153,7 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
     failContinuation,
     router,
     playNext,
-    endVideo: () => ended.call(watch),
+    endVideo: () => watch.handleVideoEnded(),
   }
 }
 

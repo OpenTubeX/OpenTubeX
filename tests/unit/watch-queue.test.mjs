@@ -193,6 +193,31 @@ function watchMethods(source, names) {
   }).join(',')} })`, { showToast() {}, process: { env: {} }, URL, navigationDownloadId })
 }
 
+test('bedtime and the daily limit stop autoplay only after the queued videos', async () => {
+  const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
+  const { continueAfterVideoEnded } = watchMethods(source, ['continueAfterVideoEnded'])
+  const prompts = []
+  const watch = {
+    queued: true,
+    isPlaybackPresented: () => true,
+    handleWatchProgressAutoSaveWhenProgressEnabled() {},
+    playNextQueuedVideo() { return this.queued },
+    $store: {
+      getters: { getWellbeingBedtimeWaiting: true, getWellbeingStopsAutoplay: true, getWellbeingPlaybackBlock: () => null },
+      commit: (_name, prompt) => prompts.push(prompt),
+    },
+  }
+  assert.equal(continueAfterVideoEnded.call(watch), true, 'the queued video plays during bedtime')
+  assert.deepEqual(prompts, [])
+  watch.queued = false
+  assert.equal(continueAfterVideoEnded.call(watch), false)
+  assert.deepEqual(prompts, ['bedtime'], 'the reminder waits for the end of the queue')
+  watch.queued = true
+  watch.$store.getters.getWellbeingPlaybackBlock = () => 'watch'
+  watch.playNextQueuedVideo = () => assert.fail('a limit that blocks playback must keep the queue')
+  assert.equal(continueAfterVideoEnded.call(watch), false)
+})
+
 test('queued downloads explicitly start after loading even when general autoplay is disabled', async () => {
   const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
   const methods = watchMethods(source, ['playNextQueuedVideo', 'handleVideoLoaded', 'watchRouteWithoutTimestamp'])

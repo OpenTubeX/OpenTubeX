@@ -5102,10 +5102,13 @@ export default defineComponent({
       cancelSponsorBlockSkipSchedule()
       clearAbRepeatBoundarySchedule()
 
-      tabMediaCoordinator.setPlaybackState(
-        mediaTabId,
-        mediaSessionStopped || video.value?.ended ? 'none' : 'paused'
-      )
+      if (mediaSessionStopped) {
+        tabMediaCoordinator.setPlaybackState(mediaTabId, 'none')
+      } else if (video.value?.ended) {
+        tabMediaCoordinator.endPlayback(mediaTabId)
+      } else {
+        tabMediaCoordinator.setPlaybackState(mediaTabId, 'paused')
+      }
 
       if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
         window.ftElectron.tabs.setPlaybackState('paused', tabId)
@@ -5151,7 +5154,7 @@ export default defineComponent({
       promptSponsorBlockSegments.value = []
       clearAbRepeatBoundarySchedule()
 
-      tabMediaCoordinator.setPlaybackState(mediaTabId, 'none')
+      tabMediaCoordinator.endPlayback(mediaTabId)
 
       if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
         window.ftElectron.tabs.setPlaybackState('none', tabId)
@@ -5442,6 +5445,7 @@ export default defineComponent({
         return
       }
 
+      const ended = !mediaSessionStopped && videoElement.ended
       tabMediaCoordinator.setPositionState(
         mediaTabId,
         {
@@ -5449,8 +5453,9 @@ export default defineComponent({
           position: Math.min(videoElement.duration, Math.max(0, videoElement.currentTime)),
           playbackRate: videoElement.playbackRate,
         },
-        mediaSessionStopped || videoElement.ended ? 'none' : videoElement.paused ? 'paused' : 'playing'
+        ended ? null : mediaSessionStopped ? 'none' : videoElement.paused ? 'paused' : 'playing'
       )
+      if (ended) tabMediaCoordinator.endPlayback(mediaTabId)
     }
 
     /**
@@ -10182,8 +10187,9 @@ export default defineComponent({
         mediaElement.played.length === 0 && isActiveTab.value) {
         // Android cannot start a fresh playback service from a hidden activity.
         // Metadata can finish after the app-state pause sweep, so defer this
-        // initial load until foreground protection can be established.
-        if (getAndroidAppActive() !== true) {
+        // initial load until foreground protection can be established, unless
+        // the service still runs for the video that ended before this one.
+        if (getAndroidAppActive() !== true && !tabMediaCoordinator.holdsEndedPlayback(mediaTabId)) {
           const controller = new AbortController()
           const generation = formatSwitchGeneration
           foregroundLoadAbortController = controller

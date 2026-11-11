@@ -158,7 +158,7 @@ test('the ended event keeps an eligible detached mini player and reveals replay'
     cancelSponsorBlockSkipSchedule: noop,
     promptSponsorBlockSegments: ref([]),
     clearAbRepeatBoundarySchedule: noop,
-    tabMediaCoordinator: { setPlaybackState: noop },
+    tabMediaCoordinator: { setPlaybackState: noop, endPlayback: noop },
     mediaTabId: 'tab',
     process: { env: { IS_ELECTRON: false } },
     updateAutoPip: noop,
