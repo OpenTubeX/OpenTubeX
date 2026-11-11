@@ -483,7 +483,13 @@ function recordSettingSyncTimestamp(commit, settings, settingId, editedAt = Date
       [settingId]: editedAt,
     }
     await DBSettingHandlers.upsert('syncServerSettingUpdatedAt', updatedAt)
-    commit('setSyncServerSettingUpdatedAt', updatedAt)
+    // Optimistic edits commit their times while this write is pending, so merge
+    // into the current times and never move one back.
+    const current = getSettingSyncTimestamps(settings)
+    commit('setSyncServerSettingUpdatedAt', {
+      ...current,
+      [settingId]: Math.max(current[settingId] ?? editedAt, editedAt),
+    })
   }).catch(error => {
     console.error('Failed to record the setting sync timestamp', error)
   })

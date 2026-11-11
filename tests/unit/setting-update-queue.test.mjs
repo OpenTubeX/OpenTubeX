@@ -202,6 +202,31 @@ test('an optimistic setting value is visible to sync only with its edit time', a
   assert.deepEqual(recorded, [['uiScale', 2000]])
 })
 
+test('a pending edit time write keeps newer optimistic edit times', async () => {
+  const start = settingsSource.indexOf('function recordSettingSyncTimestamp(')
+  const recordSource = settingsSource.slice(start, settingsSource.indexOf('\n}\n', start) + 3)
+  const write = deferred()
+  const state = { syncServerSettingUpdatedAt: { theme: 1 } }
+  const commit = (_name, value) => { state.syncServerSettingUpdatedAt = value }
+  const recordSettingSyncTimestamp = vm.runInNewContext(`${optimisticPersistence}
+    let settingSyncTimestampWrite = Promise.resolve()
+    ${recordSource}
+    recordSettingSyncTimestamp`, {
+    isSettingSyncable: () => true,
+    CUSTOM_THEMES_SYNC_KEY: 'customThemes',
+    DBSettingHandlers: { upsert: () => write.promise },
+    console,
+  })
+
+  const recording = recordSettingSyncTimestamp(commit, state, 'uiScale', 1000)
+  await new Promise(resolve => setImmediate(resolve))
+  state.syncServerSettingUpdatedAt = { ...state.syncServerSettingUpdatedAt, uiScale: 2000, theme: 3000 }
+  write.resolve()
+  await recording
+
+  assert.deepEqual({ ...state.syncServerSettingUpdatedAt }, { theme: 3000, uiScale: 2000 })
+})
+
 test('generated setting updaters report whether the write was saved', async () => {
   const generator = settingsSource.slice(settingsSource.indexOf('const getters = {}'), settingsSource.indexOf('// Add all custom data'))
   let failWrites = false
