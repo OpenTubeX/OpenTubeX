@@ -2,7 +2,7 @@
 category: improvement
 ---
 
-Tally Light and Tally Dark are the new default themes, matching the OpenTubeX website. If you never picked a theme, the app switches to them. To keep the previous look, choose Light and Dark in Appearance settings.
+Tally Light and Tally Dark, which match the OpenTubeX website, are the new default themes. If you never picked a theme, the app switches to them; to keep the previous look, choose Light and Dark in Appearance settings.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/a74980f5-fa2e-4c74-9303-6d0374118806">
