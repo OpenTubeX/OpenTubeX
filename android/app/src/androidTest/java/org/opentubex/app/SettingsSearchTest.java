@@ -9,13 +9,17 @@ import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONArray;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,12 +28,6 @@ import org.junit.runner.RunWith;
 public class SettingsSearchTest {
     @Test
     public void filtersBeforeTheKeyboardCommitsItsComposingText() throws Exception {
-        // This test acts as the IME. A system keyboard stays bound to the field
-        // even while hidden and can commit the test's composing text, so disable
-        // every keyboard until the test ends.
-        String defaultKeyboard = shell("settings get secure default_input_method");
-        String[] keyboards = shell("ime list -s").split("\\s+");
-        for (String keyboard : keyboards) shell("ime disable " + keyboard);
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             AtomicReference<WebView> reference = new AtomicReference<>();
             scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
@@ -66,6 +64,31 @@ public class SettingsSearchTest {
                 evaluate(view, "document.querySelector('.settingsSearch input').__composingTestInput = true");
                 tapSearch(scenario, view);
                 awaitCondition(view, "document.activeElement === document.querySelector('.settingsSearch input')");
+                // This test acts as the IME. Hide the system keyboard so it
+                // cannot commit or replace the test's composing region.
+                // A slow keyboard can show itself again after hiding, and its
+                // next hide commits the composing text, so wait until it stays hidden.
+                AtomicBoolean keyboardVisible = new AtomicBoolean(true);
+                long keyboardDeadline = SystemClock.uptimeMillis() + 15000;
+                long hiddenSince = -1;
+                boolean keyboardSettled = false;
+                while (SystemClock.uptimeMillis() < keyboardDeadline) {
+                    scenario.onActivity(activity -> {
+                        WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(view);
+                        keyboardVisible.set(insets == null || insets.isVisible(WindowInsetsCompat.Type.ime()));
+                        if (keyboardVisible.get()) {
+                            activity.getSystemService(InputMethodManager.class).hideSoftInputFromWindow(view.getWindowToken(), 0);
+                        }
+                    });
+                    if (keyboardVisible.get()) hiddenSince = -1;
+                    else if (hiddenSince < 0) hiddenSince = SystemClock.uptimeMillis();
+                    else if (SystemClock.uptimeMillis() - hiddenSince >= 1000) {
+                        keyboardSettled = true;
+                        break;
+                    }
+                    Thread.sleep(100);
+                }
+                assertTrue("System keyboard stays hidden before simulating composing input", keyboardSettled);
                 AtomicReference<InputConnection> connection = new AtomicReference<>();
                 long deadline = SystemClock.uptimeMillis() + 5000;
                 while (connection.get() == null && SystemClock.uptimeMillis() < deadline) {
@@ -75,7 +98,7 @@ public class SettingsSearchTest {
                 assertNotNull("Search exposes a native keyboard input connection", connection.get());
 
                 for (String text : new String[] {"roundn", "roundness", "roundnes"}) {
-                    scenario.onActivity(activity -> assertTrue(connection.get().setComposingText(text, 1)));
+                    compose(scenario, view, connection.get(), text);
                     awaitCondition(view, "document.querySelector('.settingsSearch input').value === '" + text + "'");
                     awaitCondition(view, "[...document.querySelectorAll('.settingsSearchResultMatch')].some(" +
                         "match => match.textContent.trim() === 'UI Roundness')");
@@ -84,9 +107,9 @@ public class SettingsSearchTest {
                     assertEquals("Filtering keeps keyboard focus", "true", evaluate(view,
                         "document.activeElement === document.querySelector('.settingsSearch input')"));
                 }
-                scenario.onActivity(activity -> assertTrue(connection.get().setComposingText("zzzzzz", 1)));
+                compose(scenario, view, connection.get(), "zzzzzz");
                 awaitCondition(view, "!!document.querySelector('.settingsNoResults')");
-                scenario.onActivity(activity -> assertTrue(connection.get().setComposingText("", 1)));
+                compose(scenario, view, connection.get(), "");
                 awaitCondition(view, "!document.querySelector('.settingsSearchResults') && " +
                     "document.querySelector('.settingsMenu').getBoundingClientRect().height > 0");
                 scenario.onActivity(activity -> {
@@ -113,17 +136,22 @@ public class SettingsSearchTest {
                 awaitCondition(view, "window.__settingsSearchRestored === true");
                 evaluate(view, "delete window.__settingsSearchRestored");
             }
-        } finally {
-            for (String keyboard : keyboards) shell("ime enable " + keyboard);
-            shell("ime set " + defaultKeyboard);
         }
     }
 
-    private static String shell(String command) throws Exception {
-        try (java.io.InputStream input = new android.os.ParcelFileDescriptor.AutoCloseInputStream(
-            InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(command))) {
-            return new String(input.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8).trim();
-        }
+    /**
+     * Replaces the field's word with composing text. Android can finish a
+     * composition when it restarts input, for example after the results change
+     * which elements follow the field, and the hidden system keyboard stays
+     * bound to the field. A real keyboard then marks its word as composing
+     * again, so this does too before typing.
+     */
+    private static void compose(ActivityScenario<MainActivity> scenario, WebView view, InputConnection connection, String text) throws Exception {
+        int length = Integer.parseInt(evaluate(view, "document.querySelector('.settingsSearch input').value.length"));
+        scenario.onActivity(activity -> {
+            assertTrue(connection.setComposingRegion(0, length));
+            assertTrue(connection.setComposingText(text, 1));
+        });
     }
 
     private static void tapSearch(ActivityScenario<MainActivity> scenario, WebView view) throws Exception {
