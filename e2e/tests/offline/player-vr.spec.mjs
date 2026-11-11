@@ -308,7 +308,10 @@ test('uses panoramic HLS for a YouTube mesh video', async ({ app, page }) => {
   })
   const bounds = await surface.boundingBox()
   const point = { x: bounds.x + bounds.width * 0.2, y: bounds.y + bounds.height * 0.2 }
+  // Pause the clock so only fastForward() moves Shaka's timers. A running one
+  // lets a slow run reach Shaka's idle delay, which hides the cursor.
   await page.clock.install()
+  await page.clock.pauseAt(Date.now() + 1000)
   await page.mouse.move(point.x, point.y)
   await page.mouse.down()
   await page.clock.fastForward(750)
