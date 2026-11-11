@@ -223,7 +223,10 @@ function isRefreshCancelled() {
  * @returns {Promise<T | null>}
  */
 async function withSubscriptionRefreshLock(tab, profileId, refresh, t) {
-  if (rendererRefreshReserved || store.getters.getSubscriptionFeedRefreshInProgress) {
+  // The store only mirrors the shared refresh state, and a progress update of
+  // the feed that just finished can still arrive after it. Refresh all would
+  // then skip its remaining feeds, so only the actual locks decide.
+  if (rendererRefreshReserved) {
     return null
   }
 
@@ -305,7 +308,9 @@ async function runWithSubscriptionRefreshLock(tab, profileId, refresh, t) {
     )
   }
 
-  return runRefresh()
+  // Without Web Locks, the synchronized state is the only sign of a refresh
+  // in another browser tab
+  return store.getters.getSubscriptionFeedRefreshInProgress ? null : runRefresh()
 }
 
 /**

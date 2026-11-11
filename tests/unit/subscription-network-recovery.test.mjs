@@ -228,6 +228,18 @@ test('a mobile feed does not release its refresh promise until native finishing 
   }
 })
 
+test('a feed refresh starts despite a late shared progress update of the previous feed', async () => {
+  const app = createRefresh({ feed: 'Live' })
+  app.navigator.locks = { request: async (_name, _options, callback) => callback({}) }
+  app.reconnect()
+  // Refresh all starts the next feed while the main process still reports the
+  // previous one, which finished in this renderer moments ago
+  app.getters.getSubscriptionFeedRefreshInProgress = true
+
+  assert.notEqual(await app.refresh({ t: key => key }), null)
+  assert.deepEqual(app.events, ['completed', 'finished'])
+})
+
 test('with Faster Subscription Refresh, a scraper refresh keeps cached feeds whose channel upload feed lists nothing new', async () => {
   const now = Date.now()
   const channelFeed = videoIds => `<feed xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://www.youtube.com/xml/schemas/2015"><author><name>Channel</name></author>${videoIds.map(videoId =>
