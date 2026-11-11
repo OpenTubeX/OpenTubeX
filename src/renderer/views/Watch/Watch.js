@@ -4377,7 +4377,8 @@ export default defineComponent({
             }
 
             if (this.proxyVideos && !isYattee) {
-              const url = new URL(hlsManifestUrl)
+              // Invidious returns a relative URL when it has no domain configured
+              const url = new URL(hlsManifestUrl, this.currentInvidiousInstanceUrl)
               url.searchParams.set('local', 'true')
               hlsManifestUrl = url.toString()
             }
@@ -4436,7 +4437,7 @@ export default defineComponent({
                 let url = result.hlsUrl
                 // Invidious only: Yattee relays its own signed URLs
                 if (this.proxyVideos && !isYattee) {
-                  const proxyUrl = new URL(url)
+                  const proxyUrl = new URL(url, this.currentInvidiousInstanceUrl)
                   proxyUrl.searchParams.set('local', 'true')
                   url = proxyUrl.toString()
                 }
