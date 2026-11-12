@@ -96,7 +96,9 @@ const twitch = {
 
   parseChannelUrl(url) {
     // Names alone are logins too, but here only addresses identify the platform
-    return /^https?:\/\//i.test(url) ? parseTwitchChannelLogin(url) : null
+    const login = /^https?:\/\//i.test(url) ? parseTwitchChannelLogin(url) : null
+    // All-digit logins exist, and an @ keeps them apart from user IDs
+    return login && ID_PATTERN.test(login) ? `@${login}` : login
   },
 
   parsePlaylistUrl() {
@@ -104,7 +106,7 @@ const twitch = {
   },
 
   async getChannel(fetch, id, signal) {
-    const variable = ID_PATTERN.test(id) ? { id } : { login: parseTwitchChannelLogin(id) }
+    const variable = !id.startsWith('@') && ID_PATTERN.test(id) ? { id } : { login: parseTwitchChannelLogin(id) }
     if (!variable.id && !variable.login) return null
     const data = await requestTwitch(fetch,
       `query($id: ID, $login: String) { user(id: $id, login: $login) { ${CHANNEL_FIELDS} } }`,

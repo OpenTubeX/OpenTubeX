@@ -136,3 +136,18 @@ test('notifications only lead to the live page of a valid channel, one per broad
   assert.equal(getTwitchLiveNotificationTarget('streamer', '1&url=https://example.test'), null)
   assert.equal(getTwitchLiveNotificationTarget({ login: 'streamer' }, '123'), null)
 })
+
+test('loads channels with all-digit logins by their login, not as user IDs', async () => {
+  const { default: twitch } = await import('../../src/platforms/twitch.js')
+  const requests = []
+  const fetcher = async (_url, options) => {
+    requests.push(JSON.parse(options.body).variables)
+    return Response.json({ data: { user: { id: '987', login: '123456', displayName: 'Digits' } } })
+  }
+
+  assert.equal(twitch.parseChannelUrl('https://www.twitch.tv/123456'), '@123456')
+  assert.equal(twitch.parseChannelUrl('https://www.twitch.tv/Streamer'), 'streamer')
+  assert.equal((await twitch.getChannel(fetcher, '@123456'))?.id, '987')
+  await twitch.getChannel(fetcher, '987')
+  assert.deepEqual(requests, [{ login: '123456' }, { id: '987' }])
+})
