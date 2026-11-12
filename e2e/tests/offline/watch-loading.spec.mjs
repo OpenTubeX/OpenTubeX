@@ -562,7 +562,7 @@ test.describe('local player request concurrency', () => {
       await expect.poll(playbackState).toEqual({ height: 360, subtitles: 'de' })
       expect(visionOsRequests).toEqual(['jNQXAC9IVRw', 'jNQXAC9IVRw'])
       // The new source loads the captions again, from their fresh URL
-      expect(captionRequests.at(-1)).toBe('1 de')
+      await expect.poll(() => captionRequests.at(-1)).toBe('1 de')
       expect(await watch.evaluate(view => view.streamErrorReloadAttemptedForCurrentVideo)).toBe(false)
     })
   })
