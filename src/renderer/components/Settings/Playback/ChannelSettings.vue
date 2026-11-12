@@ -372,6 +372,7 @@ import {
   parseChannelPreferences
 } from '../../../helpers/channel-preferences'
 import { showToast } from '../../../helpers/utils'
+import { matchesChannelQuery } from '../../../helpers/subscription-channels'
 import { clampOverlayScrollTop } from '../../../helpers/overlayScrollbars'
 import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../../helpers/player/autoQuality'
 
@@ -640,14 +641,6 @@ const availableSubscriptions = computed(() => {
     .filter(({ id }) => !savedChannelIds.has(id))
     .sort((a, b) => collator.value.compare(a.name, b.name))
 })
-
-/**
- * @param {{ id: string, name: string, handle: string | null }} channel
- * @param {string} query lowercase
- */
-function matchesChannelQuery({ id, name, handle }, query) {
-  return name.toLowerCase().includes(query) || id.toLowerCase().includes(query) || !!handle?.toLowerCase().includes(query)
-}
 
 const visibleAvailableSubscriptions = computed(() => {
   const query = addChannelSearchQuery.value.trim().toLowerCase()

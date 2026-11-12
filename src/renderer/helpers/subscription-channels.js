@@ -3,6 +3,14 @@ export const MAX_INCREMENTAL_SUBSCRIPTION_FEED_ENTRIES = 5000
 const CHANNEL_SETTING_KEYS = ['feedTypes', 'notificationFeedTypes', 'dailyVideoLimit', 'showMembersOnly']
 
 /**
+ * @param {{ id: string, name?: string, handle?: string | null }} channel
+ * @param {string} query lowercase
+ */
+export function matchesChannelQuery({ id, name, handle }, query) {
+  return !!name?.toLowerCase().includes(query) || id.toLowerCase().includes(query) || !!handle?.toLowerCase().includes(query)
+}
+
+/**
  * @param {(key: string) => string} t
  */
 export function getSubscriptionFeedTypeOptions(t) {

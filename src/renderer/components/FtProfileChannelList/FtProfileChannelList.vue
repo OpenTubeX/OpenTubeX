@@ -17,7 +17,7 @@
         <FtButton
           :label="$t('Profile.Select All')"
           :icon="['fas', 'check']"
-          :disabled="selected.size === subscriptions.length"
+          :disabled="allVisibleSelected"
           @click="selectAll"
         />
         <FtButton
@@ -34,9 +34,15 @@
           @click="displayDeletePrompt"
         />
       </FtFlexBox>
-      <FtFlexBox>
+      <p
+        v-if="visibleSubscriptions.length === 0 && subscriptions.length > 0"
+        class="noResults"
+      >
+        {{ $t('Settings.Channel Settings.No Matching Channels') }}
+      </p>
+      <FtFlexBox ref="channelGrid">
         <FtChannelBubble
-          v-for="channel in subscriptions"
+          v-for="channel in displayedSubscriptions"
           :key="channel.id"
           :channel-id="channel.id"
           :channel-name="channel.name"
@@ -46,6 +52,21 @@
           @change="handleChannelToggle(channel.id)"
         />
       </FtFlexBox>
+      <!-- Mounting every subscription at once takes seconds on slower devices -->
+      <FtAutoLoadNextPageWrapper
+        v-if="hasMoreSubscriptions"
+        :key="subscriptionPage"
+        class="loadMore"
+        @load-next-page="subscriptionPage++"
+      >
+        <FtFlexBox>
+          <FtButton
+            :label="$t('Channels.Load More Channels')"
+            :icon="['fas', 'arrow-down']"
+            @click="loadMoreSubscriptions"
+          />
+        </FtFlexBox>
+      </FtAutoLoadNextPageWrapper>
     </FtCard>
     <FtPrompt
       v-if="showDeletePrompt"
@@ -61,7 +82,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, shallowRef, watch } from 'vue'
+import { computed, reactive, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtCard from '../ft-card/ft-card.vue'
@@ -69,10 +90,13 @@ import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtChannelBubble from '../FtChannelBubble/FtChannelBubble.vue'
 import FtButton from '../FtButton/FtButton.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
+import FtAutoLoadNextPageWrapper from '../FtAutoLoadNextPageWrapper.vue'
 
 import store from '../../store/index'
 
+import { useListPagination } from '../../composables/useListPagination'
 import { deepCopy, showToast } from '../../helpers/utils'
+import { matchesChannelQuery } from '../../helpers/subscription-channels'
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 
 /**
@@ -98,6 +122,10 @@ const props = defineProps({
   isMainProfile: {
     type: Boolean,
     required: true
+  },
+  query: {
+    type: String,
+    default: ''
   }
 })
 
@@ -145,6 +173,24 @@ if (typeof props.profile.subscriptions !== 'undefined') {
   loadSubscriptions()
 }
 
+const visibleSubscriptions = computed(() => {
+  const query = props.query.trim().toLowerCase()
+  if (query === '') return subscriptions.value
+  return subscriptions.value.filter(channel => matchesChannelQuery(channel, query))
+})
+
+const allVisibleSelected = computed(() => {
+  return visibleSubscriptions.value.every(channel => selected.has(channel.id))
+})
+
+const channelGrid = useTemplateRef('channelGrid')
+const { page: subscriptionPage, displayedItems: displayedSubscriptions, hasMore: hasMoreSubscriptions, loadMore: loadMoreSubscriptions } = useListPagination(visibleSubscriptions, {
+  pageSize: 100,
+  append: true,
+  resetOn: () => props.query,
+  focusItem: index => channelGrid.value?.$el.querySelectorAll('.bubblePadding')[index]?.focus()
+})
+
 watch(() => props.profile, (profile, oldProfile) => {
   loadSubscriptions()
   if (profile._id !== oldProfile._id) {
@@ -156,7 +202,7 @@ watch(() => props.profile, (profile, oldProfile) => {
   selected.forEach(channelId => {
     if (!channelIds.has(channelId)) selected.delete(channelId)
   })
-}, { deep: true })
+}, { deep: 2 })
 
 /** @type {import('vue').Reactive<Set<string>>} */
 const selected = reactive(new Set())
@@ -165,8 +211,9 @@ const selectedText = computed(() => {
   return t('Profile.{number} selected', { number: selected.size })
 })
 
+// Selections outside the search results stay, so channels can be gathered across searches
 function selectAll() {
-  subscriptions.value.forEach(channel => {
+  visibleSubscriptions.value.forEach(channel => {
     return selected.add(channel.id)
   })
 }
