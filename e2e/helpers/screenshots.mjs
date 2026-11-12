@@ -171,7 +171,12 @@ export async function prepareAppScreenshot(page, view) {
 export async function captureAppScreenshot(page, view, destination) {
   await prepareAppScreenshot(page, view)
   await page.mouse.move(0, 0)
-  await page.screenshot({ path: destination, animations: 'disabled' })
+  // Moving the pointer shows auto-hidden overlay scrollbars again.
+  await page.screenshot({
+    path: destination,
+    animations: 'disabled',
+    style: '.os-scrollbar { visibility: hidden !important; } ::-webkit-scrollbar { display: none !important; }',
+  })
   if (view === 'watch') await expectPausedFrame(page)
 }
 
