@@ -2,8 +2,10 @@
 // This is the service worker with the Advanced caching
 
 // Each build registers the worker with its own version, so its files replace
-// older builds' instead of piling up in the cache
-const CACHE = 'pwabuilder-adv-cache-' + new URL(self.location.href).searchParams.get('v')
+// older builds' instead of piling up in the cache. Other apps on the same origin
+// have their own caches, which stay untouched.
+const CACHE_PREFIX = 'pwabuilder-adv-cache'
+const CACHE = CACHE_PREFIX + '-' + new URL(self.location.href).searchParams.get('v')
 // Production builds hash their scripts and styles, so only the page is
 // precached. Each asset is cached when the app first loads it.
 const offlineFallbackPage = 'index.html'
@@ -61,7 +63,7 @@ self.addEventListener('activate', function (event) {
   // worker may have cached this build's files. Caches are listed oldest first,
   // and a build whose install failed left a cache without the page.
   event.waitUntil(caches.keys().then(function (names) {
-    const older = names.filter(function (name) { return name !== CACHE })
+    const older = names.filter(function (name) { return name !== CACHE && name.startsWith(CACHE_PREFIX) })
     return Promise.all(older.map(function (name) {
       return caches.open(name).then(function (cache) { return cache.match(offlineFallbackPage) })
     })).then(function (pages) {
@@ -153,11 +155,14 @@ function fromCache(request) {
   // Check to see if you have it in the cache
   // Return response
   // If not in the cache, then return error page
-  // This build's cache comes first, then the previous build's
-  return caches.open(CACHE).then(function (cache) {
-    return cache.match(request)
-  }).then(function (matching) {
-    return matching || caches.match(request)
+  return caches.keys().then(function (names) {
+    // This build's cache comes first, then the previous build's
+    const own = [CACHE].concat(names.filter(function (name) { return name !== CACHE && name.startsWith(CACHE_PREFIX) }))
+    return own.reduce(function (found, name) {
+      return found.then(function (matching) {
+        return matching || caches.open(name).then(function (cache) { return cache.match(request) })
+      })
+    }, Promise.resolve(undefined))
   }).then(function (matching) {
     if (!matching || matching.status === 404) {
       return Promise.reject(new Error('no-match'))
