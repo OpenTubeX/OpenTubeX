@@ -2,7 +2,7 @@
 // This is the service worker with the Advanced caching
 
 // Each build registers the worker with its own version, so its files replace
-// the previous build's instead of piling up in the cache
+// older builds' instead of piling up in the cache
 const CACHE = 'pwabuilder-adv-cache-' + new URL(self.location.href).searchParams.get('v')
 // Production builds hash their scripts and styles, so only the page is
 // precached. Each asset is cached when the app first loads it.
@@ -57,8 +57,11 @@ self.addEventListener('install', function (event) {
 // Allow sw to control of current page
 self.addEventListener('activate', function (event) {
   console.log('[PWA Builder] Claiming clients for current page')
+  // Caches are listed oldest first. The previous build's cache stays until the
+  // next update, since the previous worker may have cached this build's files.
   event.waitUntil(caches.keys().then(function (names) {
-    return Promise.all(names.filter(function (name) { return name !== CACHE }).map(function (name) { return caches.delete(name) }))
+    const older = names.filter(function (name) { return name !== CACHE }).slice(0, -1)
+    return Promise.all(older.map(function (name) { return caches.delete(name) }))
   }).then(function () { return self.clients.claim() }))
 })
 
@@ -144,14 +147,17 @@ function fromCache(request) {
   // Check to see if you have it in the cache
   // Return response
   // If not in the cache, then return error page
+  // This build's cache comes first, then the previous build's
   return caches.open(CACHE).then(function (cache) {
-    return cache.match(request).then(function (matching) {
-      if (!matching || matching.status === 404) {
-        return Promise.reject(new Error('no-match'))
-      }
+    return cache.match(request)
+  }).then(function (matching) {
+    return matching || caches.match(request)
+  }).then(function (matching) {
+    if (!matching || matching.status === 404) {
+      return Promise.reject(new Error('no-match'))
+    }
 
-      return matching
-    })
+    return matching
   })
 }
 
