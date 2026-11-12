@@ -1032,7 +1032,9 @@ class SabrLiveWindow {
    * @param {LiveSegment} segment
    */
   _createReference(stream, url, segment) {
-    const uris = [`${url}&startTimeMs=${segment.requestTimeMs}&sq=${segment.sequenceNumber}`]
+    // The duration lets the transport correct a request time that SABR maps to another segment
+    const targetDurationMs = Math.round(this._targetDuration * 1000)
+    const uris = [`${url}&targetDurationMs=${targetDurationMs}&startTimeMs=${segment.requestTimeMs}&sq=${segment.sequenceNumber}`]
 
     // Live segments are self-initializing, so they have no init segment
     const reference = new shaka.media.SegmentReference(
