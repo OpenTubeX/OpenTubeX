@@ -137,6 +137,8 @@ let loadGeneration = 0
 async function loadPlaylist() {
   const generation = ++loadGeneration
   isLoading.value = true
+  // A page of the previous playlist may still be loading
+  loadingMore.value = false
   notFound.value = false
   pageError.value = false
   playlist.value = null

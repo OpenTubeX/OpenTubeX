@@ -5,6 +5,8 @@ import { fileURLToPath } from 'node:url'
 import { choosePickerPaths, expect, goTo, sel, test } from '../../helpers/app.mjs'
 import { waitForPlayback } from '../../helpers/player.mjs'
 import { DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
+import { SYNC_KEY, SYNC_SALT, mockSyncServer, syncWithSyncServer } from '../../helpers/sync-history.mjs'
+import { encryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
 
 const THUMBNAIL_PATH = fileURLToPath(new URL('../../fixtures/images/opentubex-playlist.jpg', import.meta.url))
 const AVATAR = 'https://twitch.example.test/avatar.jpg'
@@ -307,6 +309,31 @@ test.describe('Channels on other platforms', () => {
       await newTab.click({ button: 'right' })
       await page.getByRole('menu', { name: 'Context menu' }).getByRole('menuitem', { name: 'Reload All Feeds' }).click()
       await expect.poll(() => requests.length).toBeGreaterThan(requestCount)
+    })
+
+    test('brings back uploads that another device marked as unseen after they were watched here', async ({ page }) => {
+      await mockTwitch(page, { [CHANNEL.id]: twitchUser(CHANNEL) })
+      await goTo(page, 'subscriptions')
+      await page.locator('[data-platforms-tab]').click()
+      const panel = page.locator('#subscriptionsPanel')
+      const item = panel.locator('[data-platform-section="videos"] .ft-list-item', { hasText: 'Streamer newest VOD' })
+      await item.locator('.title').click({ button: 'right' })
+      await page.locator('.contextMenu').getByRole('menuitem', { name: 'Mark As Watched' }).click()
+      await expect(item).toHaveClass(/watched/)
+      const watchedAt = await page.evaluate(() => (
+        JSON.parse(localStorage.getItem('externalMediaPosition:https://www.twitch.tv/videos/10012')).updatedAt
+      ))
+
+      await mockSyncServer(page, {
+        history: await encryptSyncDocument([], SYNC_KEY, SYNC_SALT),
+        seenRssItems: await encryptSyncDocument([{ key: `twitch:${CHANNEL.id}\n10012`, unseenAt: watchedAt + 1000 }], SYNC_KEY, SYNC_SALT)
+      })
+      expect(await syncWithSyncServer(page)).toEqual(['success', ''])
+
+      // The later unseen mark wins over the earlier watch
+      await expect(item).not.toHaveClass(/watched/)
+      await page.locator('[data-subscription-feed-tab="all"]').click()
+      await expect(panel.locator('[data-new-feed-section="platforms"] .h3Title')).toHaveText(['Streamer newest VOD'])
     })
 
     test('reloads the feed and marks it as seen from the context menus of its tabs', async ({ page }) => {
