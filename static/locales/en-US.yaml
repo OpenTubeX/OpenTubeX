@@ -3266,7 +3266,8 @@ Tooltips:
       Automatic plays most videos through YouTube's visionOS client, which starts faster and supports automatic quality. Live streams and videos it can't play use SABR.
       SABR only always uses YouTube's web client, which starts slower and has no automatic quality.
     Avoid translation: |
-      Disable YouTube's autotranslation of title, description and chapters of a video.
+      Disable YouTube's autotranslation of video titles, descriptions and chapters.
+      Entire App also shows channel names and descriptions in their original language.
       Too many requests, such as fetching video titles across lists, may temporarily
       impact app reliability.
     Preferred API Backend: Choose the backend that OpenTubeX uses to obtain data. The

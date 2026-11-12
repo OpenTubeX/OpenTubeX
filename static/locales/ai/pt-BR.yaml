@@ -2161,6 +2161,7 @@ Tooltips:
       Os vídeos podem demorar mais a começar quando utiliza o yt-dlp.
     Avoid translation: |
       Desativa a tradução automática do título, da descrição e dos capítulos de um vídeo feita pelo YouTube.
+      "Em todo o aplicativo" também mostra os nomes e as descrições dos canais no idioma original.
       Um número excessivo de pedidos, como a obtenção de títulos de vídeos em várias listas, pode afetar
       temporariamente a fiabilidade do aplicativo.
     Show Thumbnail Previews: Mostra pré-visualizações animadas ao passar o cursor sobre as miniaturas dos vídeos.

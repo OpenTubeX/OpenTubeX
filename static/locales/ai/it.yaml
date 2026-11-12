@@ -2191,6 +2191,7 @@ Tooltips:
       Con yt-dlp l'avvio dei video potrebbe richiedere più tempo.
     Avoid translation: |
       Disabilita la traduzione automatica di YouTube per titolo, descrizione e capitoli di un video.
+      "Tutta l'app" mostra anche i nomi e le descrizioni dei canali nella lingua originale.
       Troppe richieste, ad esempio per recuperare i titoli dei video negli elenchi, possono ridurre
       temporaneamente l'affidabilità dell'app.
     Show Thumbnail Previews: Mostra anteprime animate al passaggio del puntatore sulle miniature dei video.

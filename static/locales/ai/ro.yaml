@@ -2244,6 +2244,7 @@ Tooltips:
       Este posibil ca videoclipurile să pornească mai greu când folosiți yt-dlp.
     Avoid translation: |
       Dezactivează traducerea automată YouTube a titlului, descrierii și capitolelor unui videoclip.
+      „Întreaga aplicație” afișează și numele și descrierile canalelor în limba originală.
       Prea multe solicitări, cum ar fi preluarea titlurilor videoclipurilor din liste, pot afecta
       temporar fiabilitatea aplicației.
     Show Thumbnail Previews: Afișează previzualizări animate la trecerea cursorului peste miniaturile videoclipurilor.

@@ -2196,6 +2196,7 @@ Tooltips:
       Det kan ta lengre tid å starte videoer med yt-dlp.
     Avoid translation: |
       Slå av YouTubes automatiske oversettelse av videotittel, beskrivelse og kapitler.
+      «Hele appen» viser også kanalnavn og -beskrivelser på originalspråket.
       For mange forespørsler, for eksempel henting av videotitler fra flere lister, kan midlertidig
       påvirke hvor pålitelig appen er.
     Show Thumbnail Previews: Vis animerte forhåndsvisninger når pekeren holdes over videominiatyrer.

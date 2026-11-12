@@ -2637,6 +2637,7 @@ Tooltips:
       Los videos pueden tardar más en empezar al usar yt-dlp.
     Avoid translation: |
       Desactivá la traducción automática de YouTube del título, la descripción y los capítulos de un video.
+      «En toda la aplicación» también muestra los nombres y las descripciones de los canales en su idioma original.
       Demasiadas solicitudes, como obtener títulos de videos en varias listas, pueden afectar
       temporalmente a la fiabilidad de la aplicación.
     Preferred API Backend: Elija el motor que debe utilizar OpenTubeX para obtener datos. La API local es un extractor incorporado. La API de Invidious requiere de un servidor Invidious al cual conectarse.

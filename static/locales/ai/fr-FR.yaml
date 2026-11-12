@@ -2190,6 +2190,7 @@ Tooltips:
       Le démarrage des vidéos peut prendre plus de temps avec yt-dlp.
     Avoid translation: |
       Désactivez la traduction automatique par YouTube du titre, de la description et des chapitres d’une vidéo.
+      « Toute l’application » affiche aussi les noms et les descriptions des chaînes dans leur langue d’origine.
       Un trop grand nombre de requêtes, par exemple lors de la récupération des titres de vidéos dans des listes, peut temporairement
       nuire à la fiabilité de l’application.
     Show Thumbnail Previews: Affiche des aperçus animés au survol des miniatures vidéo.

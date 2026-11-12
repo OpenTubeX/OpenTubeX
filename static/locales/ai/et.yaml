@@ -2194,6 +2194,7 @@ Tooltips:
       yt-dlp kasutamisel võib videote käivitumine kauem aega võtta.
     Avoid translation: |
       Keela YouTube'i video pealkirja, kirjelduse ja peatükkide automaattõlge.
+      Valik „Kogu rakenduses“ näitab ka kanalite nimesid ja kirjeldusi nende algkeeles.
       Liiga palju päringuid, näiteks loendites olevate videote pealkirjade hankimine, võib ajutiselt
       vähendada rakenduse töökindlust.
     Show Thumbnail Previews: Kuva videote pisipiltidele kursori viimisel animeeritud eelvaated.

@@ -2210,6 +2210,7 @@ Tooltips:
       Myndbönd geta verið lengur að hefja spilun þegar yt-dlp er notað.
     Avoid translation: |
       Slekkur á sjálfvirkri þýðingu YouTube á titli, lýsingu og köflum myndbandsins.
+      „Allt forritið“ sýnir einnig heiti og lýsingar rása á upprunalegu tungumáli.
       Of margar beiðnir, til dæmis þegar titlar myndbanda eru sóttir í mörgum listum, geta tímabundið
       dregið úr áreiðanleika forritsins.
     Show Thumbnail Previews: Sýna hreyfimyndaforskoðun þegar bendillinn er yfir smámynd myndbands.

@@ -2254,6 +2254,7 @@ Tooltips:
       Met yt-dlp kan het langer duren voordat video's beginnen.
     Avoid translation: |
       Schakel de automatische vertaling door YouTube van de titel, beschrijving en hoofdstukken van een video uit.
+      'Hele app' toont ook kanaalnamen en -beschrijvingen in hun oorspronkelijke taal.
       Te veel aanvragen, bijvoorbeeld om videotitels in lijsten op te halen, kunnen de
       betrouwbaarheid van de app tijdelijk verminderen.
     Show Thumbnail Previews: Toon bewegende voorbeelden wanneer je de aanwijzer boven videominiaturen houdt.

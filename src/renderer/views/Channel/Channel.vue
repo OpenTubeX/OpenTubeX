@@ -399,6 +399,7 @@ import {
   getLocalChannelSearchResultType,
 } from './channel-search'
 import { getChannelAboutLinks } from './channel-about-links'
+import { getOriginalChannelProfile } from '../../helpers/api/original-channel-name'
 
 const { locale, t } = useI18n()
 const route = useRoute()
@@ -958,7 +959,7 @@ async function getChannelLocal() {
     let tags_ = parsedHeader.tags
 
     channelThumbnailUrl = parsedHeader.thumbnailUrl ?? subscriptionInfo.value?.thumbnail
-    channelName_ = parsedHeader.name ?? subscriptionInfo.value?.name
+    channelName_ = getOriginalChannelText().name ?? parsedHeader.name ?? subscriptionInfo.value?.name
 
     if (channelThumbnailUrl?.startsWith('//')) {
       channelThumbnailUrl = `https:${channelThumbnailUrl}`
@@ -1089,6 +1090,11 @@ async function getChannelLocal() {
   }
 }
 
+function getOriginalChannelText() {
+  if (store.getters.getAvoidTranslation !== 'entire_app') return {}
+  return getOriginalChannelProfile(channelInstance.page.microformat)
+}
+
 async function getChannelAboutLocal() {
   const expectedId = id.value
   const expectedRouteGeneration = channelRouteGeneration
@@ -1128,6 +1134,11 @@ async function getChannelAboutLocal() {
       joined.value = about.metadata.joined_date && !about.metadata.joined_date.isEmpty() ? Date.parse(about.metadata.joined_date.text.replace('Joined').trim()) : 0
 
       location.value = about.metadata.country ?? null
+    }
+
+    const originalDescription = getOriginalChannelText().description
+    if (originalDescription) {
+      description.value = autolinker.link(originalDescription)
     }
   } catch (err) {
     if (!isCurrentRoute()) return

@@ -2224,6 +2224,7 @@ Tooltips:
       Pri upotrebi alata yt-dlp pokretanje videozapisa može trajati dulje.
     Avoid translation: |
       Onemogućuje YouTubeov automatski prijevod naslova, opisa i poglavlja videozapisa.
+      „Cijela aplikacija” prikazuje i nazive i opise kanala na izvornom jeziku.
       Previše zahtjeva, primjerice pri dohvaćanju naslova videozapisa na popisima, može privremeno
       utjecati na pouzdanost aplikacije.
     Show Thumbnail Previews: Prikazuje animirane pretpreglede pri prelasku pokazivačem preko minijatura videozapisa.

@@ -2185,7 +2185,8 @@ Tooltips:
       Choose how OpenTubeX obtains video streams. yt-dlp must be available when selected.
       Videos may take longer to start when using yt-dlp.
     Avoid translation: |
-      Disable YouTube's autotranslation of title, description and chapters of a video.
+      Disable YouTube's autotranslation of video titles, descriptions and chapters.
+      Entire App also shows channel names and descriptions in their original language.
       Too many requests, such as fetching video titles across lists, may temporarily
       impact app reliability.
     Show Thumbnail Previews: Show animated previews when hovering over video thumbnails.

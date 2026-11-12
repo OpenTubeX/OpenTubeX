@@ -2204,6 +2204,7 @@ Tooltips:
       Video có thể mất nhiều thời gian hơn để bắt đầu khi dùng yt-dlp.
     Avoid translation: |
       Tắt tính năng tự động dịch tiêu đề, mô tả và chương video của YouTube.
+      "Toàn bộ ứng dụng" cũng hiển thị tên và mô tả kênh bằng ngôn ngữ gốc.
       Quá nhiều yêu cầu, chẳng hạn lấy tiêu đề video trong nhiều danh sách, có thể tạm thời
       làm giảm độ ổn định của ứng dụng.
     Show Thumbnail Previews: Hiện bản xem trước động khi di chuột lên hình thu nhỏ của video.
