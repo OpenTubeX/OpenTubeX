@@ -4,6 +4,7 @@ import { LocalNotifications } from '@capacitor/local-notifications'
 import store from '../store/index'
 import i18n from '../i18n/index'
 import { getPlatformFetch } from './platformFetch'
+import { holdAndroidBackgroundWork } from './androidBackgroundSync.js'
 import { configureAndroidTwitchLive, observeAndroidTwitchLive } from './androidSubscriptionRefresh'
 import { isAppHidden } from './appVisibility'
 import { capacitorNotificationHistory } from './capacitorNotificationHistory'
@@ -475,6 +476,8 @@ export async function refreshPlatformFeed() {
   const controller = new AbortController()
   activeRefresh = controller
   platformFeedRefreshing.value = true
+  // Keep a hidden Android app running until the refresh ends
+  const releaseBackgroundHold = holdAndroidBackgroundWork()
   try {
     const followed = getFollowedChannels()
     /** @type {Map<string, FollowedChannel[]>} */
@@ -527,6 +530,7 @@ export async function refreshPlatformFeed() {
     setPlatformFeedNextAutoRefresh(interval > 0 ? Date.now() + interval : null)
     await updateChannelDetails(details)
   } finally {
+    releaseBackgroundHold()
     if (activeRefresh === controller) {
       activeRefresh = null
       platformFeedRefreshing.value = false
@@ -551,24 +555,31 @@ export class PlatformChannelInputError extends Error {}
 export async function followPlatformChannel(platformId, id) {
   const platform = getPlatform(platformId)
   if (!platform) throw new PlatformChannelInputError('Unknown platform')
-  const channel = await platform.getChannel(getPlatformFetch(platform.id), id)
-  if (channel === null) return null
-  const followedChannel = toFollowedChannel(channel)
-  const key = getPlatformChannelKey(channel)
-  if (getFollowedChannels().some(followed => getPlatformChannelKey(followed) === key)) {
-    return { channel: followedChannel, followed: false }
-  }
-  // Cached first, so that the tab shows the channel without a refresh. Its
-  // current items are where later ones are compared to. Without them, the next
-  // refresh loads them.
+  // Lets the channel load and save in a hidden Android app
+  const releaseBackgroundHold = holdAndroidBackgroundWork()
+  let followedChannel
   try {
-    const { live, videos } = splitLoadedItems(await loadChannelItems(platform, channel), [key])
-    replaceChannelItems(new Set([key]), { live, videos, clips: [] })
-  } catch (error) {
-    console.error('Failed to load the items of the followed channel', error)
-  }
-  if (await store.dispatch('updateFollowedChannels', [...getFollowedChannels(), followedChannel]) === false) {
-    throw new Error('The channel could not be saved')
+    const channel = await platform.getChannel(getPlatformFetch(platform.id), id)
+    if (channel === null) return null
+    followedChannel = toFollowedChannel(channel)
+    const key = getPlatformChannelKey(channel)
+    if (getFollowedChannels().some(followed => getPlatformChannelKey(followed) === key)) {
+      return { channel: followedChannel, followed: false }
+    }
+    // Cached first, so that the tab shows the channel without a refresh. Its
+    // current items are where later ones are compared to. Without them, the
+    // next refresh loads them.
+    try {
+      const { live, videos } = splitLoadedItems(await loadChannelItems(platform, channel), [key])
+      replaceChannelItems(new Set([key]), { live, videos, clips: [] })
+    } catch (error) {
+      console.error('Failed to load the items of the followed channel', error)
+    }
+    if (await store.dispatch('updateFollowedChannels', [...getFollowedChannels(), followedChannel]) === false) {
+      throw new Error('The channel could not be saved')
+    }
+  } finally {
+    releaseBackgroundHold()
   }
   if (process.env.IS_CAPACITOR && platformId === 'twitch' && store.getters.getTwitchLiveNotifications) {
     requestCapacitorNotificationPermission()
