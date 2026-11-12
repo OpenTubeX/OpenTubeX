@@ -24,7 +24,7 @@ test('shows an explicit status for an empty Popular feed', async ({ page }) => {
   await page.locator('.headerRefreshWidget .refreshButton').click()
 
   await expect(page.locator('.toast', { hasText: 'Invidious API Error' })).toBeVisible()
-  await expect(page.locator('.emptyMessage')).toHaveCount(0)
+  await expect(page.locator('.emptyMessage')).toHaveText('The Most Popular feed could not be loaded.')
 })
 
 test('does not present a failed Popular request as an empty feed', async ({ page }) => {
@@ -35,5 +35,5 @@ test('does not present a failed Popular request as an empty feed', async ({ page
   await goTo(page, 'popular')
 
   await expect(page.locator('.toast', { hasText: 'Invidious API Error' })).toBeVisible()
-  await expect(page.locator('.emptyMessage')).toHaveCount(0)
+  await expect(page.locator('.emptyMessage')).toHaveText('The Most Popular feed could not be loaded.')
 })

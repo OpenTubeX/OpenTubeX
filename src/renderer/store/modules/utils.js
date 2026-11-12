@@ -97,6 +97,7 @@ function getOrCreateSearchSettings(state, tabId) {
 // Each search keeps every loaded page of results, so a session only keeps the
 // most recently loaded ones to return to.
 const MAX_SESSION_SEARCHES = 30
+const EMPTY_TRENDING_CACHE = Object.freeze({ gaming: null, music: null, sports: null, podcasts: null })
 
 const state = {
   isSideNavOpen: false,
@@ -109,6 +110,7 @@ const state = {
     sports: null,
     podcasts: null
   },
+  trendingCacheRegion: null,
   cachedPlaylists: {},
   deArrowCache: {},
   // Seed the in-memory fallback once so upgraded sessions can migrate unloaded
@@ -193,8 +195,8 @@ const getters = {
     return state.popularCache
   },
 
-  getTrendingCache(state) {
-    return state.trendingCache
+  getTrendingCacheForRegion: (state) => (region) => {
+    return state.trendingCacheRegion === region ? state.trendingCache : EMPTY_TRENDING_CACHE
   },
 
   getCachedPlaylist: (state) => (tabId = 'web') => {
@@ -1074,7 +1076,11 @@ const mutations = {
     state.popularCache = value
   },
 
-  setTrendingCache (state, { value, page }) {
+  setTrendingCache (state, { value, page, region }) {
+    if (state.trendingCacheRegion !== region) {
+      state.trendingCache = { ...EMPTY_TRENDING_CACHE }
+      state.trendingCacheRegion = region
+    }
     state.trendingCache[page] = value
   },
 

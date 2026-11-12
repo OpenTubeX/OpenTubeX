@@ -106,6 +106,7 @@ Trending:
   Load Error: Nie udało się wczytać popularnych treści.
   Unsupported Backend: Popularne treści wymagają lokalnego API. Wybierz lokalne API lub włącz zapasowy backend.
 Most Popular Feed Empty: Kanał „Najpopularniejsze” tej instancji Invidious jest pusty.
+Most Popular Load Error: "Nie udało się wczytać kanału „Najpopularniejsze”."
 User Playlists:
   Refresh Saved Playlists: 'Odśwież zapisane playlisty'
   Saved Playlists Refresh Failed: 'Nie udało się odświeżyć niektórych zapisanych playlist.'

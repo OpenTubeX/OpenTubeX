@@ -225,6 +225,7 @@ Trending:
   Load Error: Populært indhold kunne ikke indlæses.
   Unsupported Backend: Populært indhold kræver Local API. Vælg Local API, eller slå reservebackend til.
 Most Popular Feed Empty: Denne Invidious-instans' feed med det mest populære indhold er tomt.
+Most Popular Load Error: "Feedet med det mest populære indhold kunne ikke indlæses."
 Feed:
   Cancel Refresh: Annuller opdatering
   Next Auto Refresh: 'Næste automatiske opdatering: {date}'

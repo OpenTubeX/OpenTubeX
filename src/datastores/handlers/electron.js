@@ -286,8 +286,9 @@ class Playlists {
     return dbPlaylists(DBActions.GENERAL.CREATE, playlists)
   }
 
-  static find() {
-    return dbPlaylists(DBActions.GENERAL.FIND)
+  static async find() {
+    // The main process sends each playlist as JSON text, see History.find.
+    return (await dbPlaylists(DBActions.GENERAL.FIND)).map(playlist => JSON.parse(playlist))
   }
 
   static sent() {

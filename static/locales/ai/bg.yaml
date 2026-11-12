@@ -223,6 +223,7 @@ Trending:
   Load Error: Съдържанието „Набиращи популярност“ не можа да бъде заредено.
   Unsupported Backend: За „Набиращи популярност“ е необходим Local API. Изберете Local API или включете резервния доставчик.
 Most Popular Feed Empty: Емисията „Най-популярни“ на тази инстанция на Invidious е празна.
+Most Popular Load Error: "Емисията „Най-популярни“ не можа да се зареди."
 Feed:
   Cancel Refresh: Отмени обновяването
   Next Auto Refresh: 'Следващо автоматично обновяване: {date}'

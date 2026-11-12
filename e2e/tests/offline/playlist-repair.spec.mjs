@@ -103,7 +103,7 @@ test('keeps dialog heading and actions visible at fractional zoom and small size
   await scroller.evaluate(el => { el.scrollTop = el.scrollHeight })
   await page.evaluate(() => window.$store.dispatch('removePlaylists', Array.from({ length: 20 }, (_, i) => `long-${i}`)))
   await expect.poll(() => page.evaluate(async action => (
-    (await window.ftElectron.dbPlaylists(action)).filter(playlist => playlist._id.startsWith('long-'))
+    (await window.ftElectron.dbPlaylists(action)).map(playlist => JSON.parse(playlist)).filter(playlist => playlist._id.startsWith('long-'))
   ), DBActions.GENERAL.FIND)).toEqual([])
   await expect.poll(() => scroller.evaluate(el => ({
     scrollTop: el.scrollTop,

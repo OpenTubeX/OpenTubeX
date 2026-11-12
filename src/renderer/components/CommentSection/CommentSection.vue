@@ -667,7 +667,7 @@ import CommentImageAttachment from './CommentImageAttachment.vue'
 import store from '../../store/index'
 import { usesInvidiousApi } from '../../../apiBackends'
 
-import { getInvidiousApiErrorMessage, showInvidiousFallbackToast, copyToClipboard, formatViewCount, getRelativeTimeFromDate, showApiErrorToast, showToast } from '../../helpers/utils'
+import { debounce, getInvidiousApiErrorMessage, showInvidiousFallbackToast, copyToClipboard, formatViewCount, getRelativeTimeFromDate, showApiErrorToast, showToast } from '../../helpers/utils'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import {
   getCommentReplyAccessibleLabel,
@@ -785,6 +785,8 @@ const commentFilterMenu = useTemplateRef('commentFilterMenu')
 const commentSearch = useTemplateRef('commentSearch')
 const commentSearchOpen = ref(false)
 const commentSearchQuery = ref('')
+// Filtering rebuilds every loaded thread, so it follows typing after a pause.
+const appliedCommentSearchQuery = ref('')
 const commentFilterMenuOpen = ref(false)
 const creatorCommentsOnly = ref(false)
 const timestampCommentsOnly = ref(false)
@@ -796,7 +798,9 @@ const initialCommentPinState = loadCommentPins(commentPinStorageKey.value)
 const personalPinnedCommentIds = ref(initialCommentPinState.commentIds)
 const personalPinnedCommentSnapshots = ref(initialCommentPinState.commentSnapshots)
 let fullscreenScrollTop = 0
-let highlightedTargetGeneration = 0
+// Bumped whenever the loaded list is replaced, so responses for the previous
+// list (another sort order, a reload, another highlighted comment) are dropped.
+let commentListGeneration = 0
 const MAX_HIGHLIGHTED_REPLY_PAGES = 20
 
 function rememberFullscreenScroll(event) {
@@ -858,7 +862,7 @@ function getCommentSearchText(comment) {
 }
 
 const normalizedCommentSearchQuery = computed(() => {
-  return commentSearchQuery.value.trim().toLocaleLowerCase()
+  return appliedCommentSearchQuery.value.trim().toLocaleLowerCase()
 })
 
 const filteredCommentThreadLineObservers = new WeakMap()
@@ -940,6 +944,10 @@ function replyNodeHasPersonalPin(node) {
 }
 
 function sortReplyNodesByPersonalPins(nodes) {
+  // Without pins the order stays, and keeping the nodes lets unchanged replies
+  // skip rendering when other comments load or change.
+  if (!nodes.some(replyNodeHasPersonalPin)) return nodes
+
   return nodes
     .map(node => ({
       ...node,
@@ -1084,9 +1092,21 @@ function clampCommentsScrollAfterRender() {
   })
 }
 
+const applyCommentSearchQueryDebounced = debounce(applyCommentSearchQuery, 200)
+
+function applyCommentSearchQuery() {
+  appliedCommentSearchQuery.value = commentSearchQuery.value
+  clampCommentsScrollAfterRender()
+}
+
 function updateCommentSearchQuery(query) {
   commentSearchQuery.value = query
-  clampCommentsScrollAfterRender()
+  if (query.trim() === '') {
+    applyCommentSearchQueryDebounced.cancel()
+    applyCommentSearchQuery()
+  } else {
+    applyCommentSearchQueryDebounced()
+  }
 }
 
 function toggleCommentSearch() {
@@ -1182,6 +1202,8 @@ watch(commentPinStorageKey, (contentKey) => {
   timestampCommentsOnly.value = false
   commentSearchOpen.value = false
   commentSearchQuery.value = ''
+  applyCommentSearchQueryDebounced.cancel()
+  appliedCommentSearchQuery.value = ''
   clampCommentsScrollAfterRender()
 })
 
@@ -1242,34 +1264,58 @@ function commentMatchesMention(comment, mention) {
     author === mention.author
 }
 
+/** @type {WeakMap<object, { replies: Comment[], nodes: object[] }>} */
+const replyTreeCache = new WeakMap()
+
 /**
+ * Builds the reply tree of a comment. Loaded replies are replaced, never
+ * changed in place, so a tree stays valid while its reply lists are the same.
  * @param {Comment} comment
  */
 function buildReplyTree(comment) {
+  const replies = comment.replies
+  const cached = replyTreeCache.get(toRaw(comment))
+
   if (comment.dataType === 'local') {
-    return comment.replies.map((reply, index) => {
-      return {
-        reply,
-        index,
-        children: buildReplyTree(reply)
-      }
-    })
+    const children = replies.map(buildReplyTree)
+    if (cached?.replies === toRaw(replies) && cached.nodes.every((node, index) => node.children === children[index])) {
+      return cached.nodes
+    }
+
+    const nodes = replies.map((reply, index) => ({ reply, index, children: children[index] }))
+    replyTreeCache.set(toRaw(comment), { replies: toRaw(replies), nodes })
+    return nodes
   }
 
+  if (cached?.replies === toRaw(replies)) return cached.nodes
+  const nodes = buildMentionReplyTree(comment)
+  replyTreeCache.set(toRaw(comment), { replies: toRaw(replies), nodes })
+  return nodes
+}
+
+/**
+ * @param {Comment} comment
+ */
+function buildMentionReplyTree(comment) {
   const roots = []
-  const previousNodes = []
+  // The latest earlier reply for each channel ID and normalized author, which
+  // is the one commentMatchesMention would find first when scanning backwards.
+  const latestByChannelId = new Map()
+  const latestByAuthor = new Map()
 
   comment.replies.forEach((reply, index) => {
     const node = { reply, index, children: [] }
-    const mention = getLeadingMention(reply.text)
+    const mention = getCachedLeadingMention(reply)
     let parent = null
 
     if (mention && !commentMatchesMention(comment, mention)) {
-      for (let previousIndex = previousNodes.length - 1; previousIndex >= 0; previousIndex--) {
-        if (commentMatchesMention(previousNodes[previousIndex].reply, mention)) {
-          parent = previousNodes[previousIndex]
-          break
-        }
+      const candidates = [
+        mention.channelId !== '' ? latestByChannelId.get(mention.channelId) : undefined,
+        mention.handle !== '' ? latestByAuthor.get(mention.handle) : undefined,
+        latestByAuthor.get(mention.author)
+      ]
+      for (const candidate of candidates) {
+        if (candidate && (parent === null || candidate.index > parent.index)) parent = candidate
       }
     }
 
@@ -1279,10 +1325,31 @@ function buildReplyTree(comment) {
       roots.push(node)
     }
 
-    previousNodes.push(node)
+    for (const channelId of [reply.authorId, reply.authorLink]) {
+      if (channelId) latestByChannelId.set(channelId, node)
+    }
+    latestByAuthor.set(normalizeCommentAuthor(reply.author), node)
   })
 
   return roots
+}
+
+/** @type {WeakMap<object, { text: string, mention: ReturnType<typeof getLeadingMention> }>} */
+const leadingMentionCache = new WeakMap()
+
+/**
+ * Parsing the reply HTML is the costly part of building reply trees, which
+ * rebuild whenever the visible comments change.
+ * @param {Comment} reply
+ */
+function getCachedLeadingMention(reply) {
+  const key = toRaw(reply)
+  const cached = leadingMentionCache.get(key)
+  if (cached?.text === reply.text) return cached.mention
+
+  const mention = getLeadingMention(reply.text)
+  leadingMentionCache.set(key, { text: reply.text, mention })
+  return mention
 }
 
 /** @type {import('youtubei.js').YT.Comments | undefined} */
@@ -1390,12 +1457,16 @@ const sortNewest = ref(false)
 // auto-load sentinel, which reports itself visible again at once. Without this
 // flag, a failing first load would retry in a loop instead of waiting for a click.
 let automaticInitialLoadFailed = false
+// A failed page brings back the sentinel the same way, so automatic loading
+// stops until the user asks for the next page again.
+const moreCommentsLoadFailed = ref(false)
 
 watch(() => props.highlightedCommentId, (commentId, previousCommentId) => {
   const targetChanged = previousCommentId !== undefined && previousCommentId !== commentId
   if (targetChanged) {
-    highlightedTargetGeneration++
+    commentListGeneration++
     automaticInitialLoadFailed = false
+    moreCommentsLoadFailed.value = false
     isLoading.value = false
     isLoadingMoreComments.value = false
     loadingReplyIds.value = new Set()
@@ -1426,12 +1497,13 @@ const canPerformMoreCommentLoading = computed(() => {
 const canAutomaticallyLoadMoreComments = computed(() => {
   return autoLoadComments.value &&
     !hasActiveCommentFilters.value &&
+    !moreCommentsLoadFailed.value &&
     canPerformMoreCommentLoading.value
 })
 
 const shouldShowManualLoadMoreComments = computed(() => {
   return canPerformMoreCommentLoading.value &&
-    (!autoLoadComments.value || hasActiveCommentFilters.value)
+    (!autoLoadComments.value || hasActiveCommentFilters.value || moreCommentsLoadFailed.value)
 })
 
 const shouldShowAutoLoadMoreCommentsSpinner = computed(() => {
@@ -1520,20 +1592,26 @@ function handleSortChange(value) {
   }
 
   sortNewest.value = newest
-  commentData.value = []
-  nextPageToken.value = null
-  resetCommentsScroll()
+  discardLoadedComments()
   getCommentData()
 }
 
 function reloadCommentData() {
   if (props.offline) return
-  commentData.value = []
-  nextPageToken.value = null
+  discardLoadedComments()
   localCommentsInstance = undefined
   replyTokens.clear()
-  resetCommentsScroll()
   getCommentData()
+}
+
+function discardLoadedComments() {
+  commentListGeneration++
+  moreCommentsLoadFailed.value = false
+  isLoadingMoreComments.value = false
+  loadingReplyIds.value = new Set()
+  commentData.value = []
+  nextPageToken.value = null
+  resetCommentsScroll()
 }
 
 function handleFullscreenActionsFocusout(event) {
@@ -1556,6 +1634,7 @@ watch(() => commentData.value.length > 0, loaded => emit('loaded', loaded))
 onBeforeUnmount(() => {
   emit('loaded', false)
   closeSortSheet()
+  applyCommentSearchQueryDebounced.cancel()
 })
 watch(() => props.offline, offline => {
   if (!offline) return
@@ -1684,7 +1763,9 @@ function getMoreComments() {
   if (commentData.value.length === 0 || nextPageToken.value == null) {
     showToast({ message: t('Comments.There are no more comments for this video'), icon: ['fas', 'comment'] })
   } else {
+    const generation = commentListGeneration
     isLoadingMoreComments.value = true
+    moreCommentsLoadFailed.value = false
     let commentLoadPromise
 
     if (typeof nextPageToken.value === 'string') {
@@ -1698,7 +1779,7 @@ function getMoreComments() {
     }
 
     commentLoadPromise?.finally(() => {
-      isLoadingMoreComments.value = false
+      if (generation === commentListGeneration) isLoadingMoreComments.value = false
     })
   }
 }
@@ -1742,7 +1823,7 @@ function toggleCommentReplies(index) {
  */
 async function getCommentReplies(index, commentId = null) {
   const replyId = commentId ?? commentData.value[index].id
-  const targetGeneration = highlightedTargetGeneration
+  const targetGeneration = commentListGeneration
   if (loadingReplyIds.value.has(replyId)) {
     return
   }
@@ -1766,7 +1847,7 @@ async function getCommentReplies(index, commentId = null) {
       await getCommentRepliesLocal(index, commentId)
     }
   } finally {
-    if (targetGeneration === highlightedTargetGeneration) {
+    if (targetGeneration === commentListGeneration) {
       const nextLoadingReplyIds = new Set(loadingReplyIds.value)
       nextLoadingReplyIds.delete(replyId)
       loadingReplyIds.value = nextLoadingReplyIds
@@ -1903,7 +1984,7 @@ async function loadHighlightedReply() {
  * @param {boolean | undefined} more
  */
 async function getCommentDataLocal(more = false) {
-  const requestedHighlightedCommentId = props.highlightedCommentId
+  const generation = commentListGeneration
 
   try {
     /** @type {import('youtubei.js').YT.Comments} */
@@ -1925,7 +2006,7 @@ async function getCommentDataLocal(more = false) {
       if (selectedSortIndex === 0 || selectedSortIndex === 1) loadedSortNewest = selectedSortIndex === 1
     }
 
-    if (requestedHighlightedCommentId !== props.highlightedCommentId) {
+    if (generation !== commentListGeneration) {
       return
     }
     if (!comments.page.on_response_received_endpoints?.[1]) {
@@ -1959,14 +2040,17 @@ async function getCommentDataLocal(more = false) {
       await loadHighlightedReply()
     }
   } catch (err) {
-    if (requestedHighlightedCommentId !== props.highlightedCommentId) {
+    if (generation !== commentListGeneration) {
       return
     }
 
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
-    if (backendFallback.value && backendPreference.value === 'local') {
+    if (more) {
+      // Another backend can only start at the first page, so keep the loaded comments.
+      moreCommentsLoadFailed.value = true
+    } else if (backendFallback.value && backendPreference.value === 'local') {
       localCommentsInstance = undefined
       showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
       if (props.isPostComments) {
@@ -1985,7 +2069,7 @@ async function getCommentDataLocal(more = false) {
  * @param {string | null} commentId
  */
 async function getCommentRepliesLocal(index, commentId = null) {
-  const targetGeneration = highlightedTargetGeneration
+  const targetGeneration = commentListGeneration
   const rootComment = commentData.value[index]
   const comment = rootComment ? findComment(rootComment, commentId) : null
   const continuation = comment && replyTokens.get(comment.id)
@@ -2022,7 +2106,7 @@ async function getCommentRepliesLocal(index, commentId = null) {
       nextContinuation = response.has_continuation ? response : null
     }
 
-    if (targetGeneration !== highlightedTargetGeneration) {
+    if (targetGeneration !== commentListGeneration) {
       return
     }
 
@@ -2065,7 +2149,7 @@ async function getCommentRepliesLocal(index, commentId = null) {
 
     comment.showReplies = replyLoadState.showReplies
   } catch (err) {
-    if (targetGeneration !== highlightedTargetGeneration) {
+    if (targetGeneration !== commentListGeneration) {
       return
     }
 
@@ -2112,7 +2196,8 @@ async function getCommentRepliesLocal(index, commentId = null) {
 }
 
 async function getCommentDataInvidious() {
-  const requestedHighlightedCommentId = props.highlightedCommentId
+  const generation = commentListGeneration
+  const more = nextPageToken.value != null
 
   try {
     let { response, commentData: comments } = await invidiousGetComments({
@@ -2121,7 +2206,7 @@ async function getCommentDataInvidious() {
       sortNewest: sortNewest.value
     })
 
-    if (requestedHighlightedCommentId !== props.highlightedCommentId) {
+    if (generation !== commentListGeneration) {
       return
     }
 
@@ -2143,7 +2228,15 @@ async function getCommentDataInvidious() {
     isLoading.value = false
     showComments.value = true
   } catch (err) {
-    if (requestedHighlightedCommentId !== props.highlightedCommentId) {
+    if (generation !== commentListGeneration) {
+      return
+    }
+
+    if (more) {
+      console.error(err)
+      showApiErrorToast(getInvidiousApiErrorMessage(backendPreference.value), err)
+      // Another backend can only start at the first page, so keep the loaded comments.
+      moreCommentsLoadFailed.value = true
       return
     }
 
@@ -2190,7 +2283,7 @@ async function getCommentRepliesInvidious(
   commentOverride = null,
   expectedReplyToken = null
 ) {
-  const targetGeneration = highlightedTargetGeneration
+  const targetGeneration = commentListGeneration
   const rootComment = commentData.value[index]
   const comment = commentOverride ?? (rootComment ? findComment(rootComment, commentId) : null)
   if (!comment) {
@@ -2203,7 +2296,7 @@ async function getCommentRepliesInvidious(
     const { commentData, continuation } = await invidiousGetCommentReplies({ id: props.id, replyToken })
 
     if (
-      targetGeneration !== highlightedTargetGeneration ||
+      targetGeneration !== commentListGeneration ||
       (expectedReplyToken && replyTokens.get(comment.id) !== expectedReplyToken)
     ) {
       return
@@ -2231,7 +2324,7 @@ async function getCommentRepliesInvidious(
 
     isLoading.value = false
   } catch (error) {
-    if (targetGeneration !== highlightedTargetGeneration) {
+    if (targetGeneration !== commentListGeneration) {
       return
     }
 
@@ -2243,11 +2336,14 @@ async function getCommentRepliesInvidious(
 }
 
 function getPostCommentsInvidious() {
+  const generation = commentListGeneration
+  const more = nextPageToken.value != null
   const fetchComments = nextPageToken.value == null
     ? getInvidiousCommunityPostComments({ postId: props.id, authorId: props.postAuthorId })
     : getInvidiousCommunityPostCommentReplies({ postId: props.id, replyToken: nextPageToken.value, authorId: props.postAuthorId })
 
   return fetchComments.then(({ response, commentData: comments, continuation }) => {
+    if (generation !== commentListGeneration) return
     setCommentCount(response?.commentCount)
 
     comments = comments.map(({ replyToken, ...comment }) => {
@@ -2265,11 +2361,14 @@ function getPostCommentsInvidious() {
     isLoading.value = false
     showComments.value = true
   }).catch((err) => {
+    if (generation !== commentListGeneration) return
     console.error(err)
     const errorMessage = getInvidiousApiErrorMessage(backendPreference.value)
     showApiErrorToast(errorMessage, err)
 
-    if (process.env.SUPPORTS_LOCAL_API && backendFallback.value && usesInvidiousApi(backendPreference.value)) {
+    if (more) {
+      moreCommentsLoadFailed.value = true
+    } else if (process.env.SUPPORTS_LOCAL_API && backendFallback.value && usesInvidiousApi(backendPreference.value)) {
       showInvidiousFallbackToast(backendPreference.value)
       return getCommentDataLocal()
     } else {
@@ -2279,7 +2378,7 @@ function getPostCommentsInvidious() {
 }
 
 async function getPostCommentRepliesInvidious(index) {
-  const targetGeneration = highlightedTargetGeneration
+  const targetGeneration = commentListGeneration
   const comment = commentData.value[index]
   const replyToken = replyTokens.get(comment.id)
 
@@ -2290,7 +2389,7 @@ async function getPostCommentRepliesInvidious(index) {
       authorId: props.postAuthorId
     })
 
-    if (targetGeneration !== highlightedTargetGeneration) {
+    if (targetGeneration !== commentListGeneration) {
       return
     }
 
@@ -2316,7 +2415,7 @@ async function getPostCommentRepliesInvidious(index) {
 
     isLoading.value = false
   } catch (error) {
-    if (targetGeneration !== highlightedTargetGeneration) {
+    if (targetGeneration !== commentListGeneration) {
       return
     }
 

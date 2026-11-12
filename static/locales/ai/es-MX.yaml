@@ -237,6 +237,7 @@ Trending:
   Load Error: No se pudo cargar Tendencias.
   Unsupported Backend: Tendencias requiere la API local. Selecciona la API local o activa la fuente alternativa del backend.
 Most Popular Feed Empty: El canal de contenido más popular de esta instancia de Invidious está vacío.
+Most Popular Load Error: "No se pudo cargar el canal de contenido más popular."
 Feed:
   Cancel Refresh: Cancelar actualización
   Next Auto Refresh: 'Próxima actualización automática: {date}'

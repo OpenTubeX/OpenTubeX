@@ -13,12 +13,13 @@ test('fills a missing playlist duration from the matching history entry', () => 
     'known-duration': { videoId: 'known-duration', lengthSeconds: 200 },
   }
 
-  const anyVideoMissingDuration = fillMissingPlaylistVideoDurations(
+  const { items, anyVideoMissingDuration } = fillMissingPlaylistVideoDurations(
     playlistItems,
     historyCacheById
   )
 
   assert.equal(anyVideoMissingDuration, false)
-  assert.equal(playlistItems[0].lengthSeconds, 125)
-  assert.equal(playlistItems[1].lengthSeconds, 90)
+  assert.equal(items[0].lengthSeconds, 125)
+  assert.equal(items[1].lengthSeconds, 90)
+  assert.equal(playlistItems[0].lengthSeconds, undefined)
 })

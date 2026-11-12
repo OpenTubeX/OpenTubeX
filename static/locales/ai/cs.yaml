@@ -221,6 +221,7 @@ Trending:
   Load Error: Trendy se nepodařilo načíst.
   Unsupported Backend: Trendy vyžadují místní API. Vyberte místní API nebo povolte záložního poskytovatele.
 Most Popular Feed Empty: Kanál Nejoblíbenější je na této instanci Invidious prázdný.
+Most Popular Load Error: "Kanál Nejoblíbenější se nepodařilo načíst."
 Feed:
   Cancel Refresh: Zrušit obnovení
   Next Auto Refresh: 'Další automatické obnovení: {date}'

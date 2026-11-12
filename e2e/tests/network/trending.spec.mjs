@@ -73,7 +73,7 @@ async function controlTrendingRequests(page) {
 async function trendingCache(page) {
   return await page.evaluate(() => {
     const store = window.$store
-    return Object.fromEntries(Object.entries(store.getters.getTrendingCache).map(([category, videos]) => [
+    return Object.fromEntries(Object.entries(store.getters.getTrendingCacheForRegion(store.getters.getRegion.toUpperCase())).map(([category, videos]) => [
       category,
       videos?.map(video => video.videoId) ?? null
     ]))

@@ -223,6 +223,7 @@ Trending:
   Load Error: Trending kan niet worden geladen.
   Unsupported Backend: Voor Trending is de Local API vereist. Selecteer de Local API of schakel terugvallen op een andere backend in.
 Most Popular Feed Empty: De feed Populairst van deze Invidious-instantie is leeg.
+Most Popular Load Error: "De feed Populairst kan niet worden geladen."
 Feed:
   Cancel Refresh: Vernieuwen annuleren
   Next Auto Refresh: 'Volgende automatische vernieuwing: {date}'

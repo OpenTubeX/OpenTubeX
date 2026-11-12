@@ -240,6 +240,7 @@ Trending:
   Load Error: موارد پرطرف‌دار بارگذاری نشدند.
   Unsupported Backend: نمایش موارد پرطرف‌دار به Local API نیاز دارد. Local API را انتخاب کنید یا بازگشت به بک‌اند را فعال کنید.
 Most Popular Feed Empty: خوراک Most Popular این نمونه Invidious خالی است.
+Most Popular Load Error: "خوراک Most Popular بارگیری نشد."
 Feed:
   Cancel Refresh: لغو تازه‌سازی
   Next Auto Refresh: 'تازه‌سازی خودکار بعدی: {date}'

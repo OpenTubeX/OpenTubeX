@@ -233,6 +233,7 @@ Trending:
   Load Error: பிரபலமானவற்றை ஏற்ற முடியவில்லை.
   Unsupported Backend: பிரபலமானவற்றுக்கு Local API தேவை. Local API-ஐத் தேர்ந்தெடுக்கவும் அல்லது பின்தள மாற்றுவழியை இயக்கவும்.
 Most Popular Feed Empty: இந்த Invidious நிகழ்வின் மிகவும் பிரபலமானவை ஊட்டம் காலியாக உள்ளது.
+Most Popular Load Error: "மிகவும் பிரபலமானவை ஊட்டத்தை ஏற்ற முடியவில்லை."
 Feed:
   Cancel Refresh: புதுப்பிப்பை ரத்துசெய்
   Next Auto Refresh: 'அடுத்த தானியக்கப் புதுப்பிப்பு: {date}'

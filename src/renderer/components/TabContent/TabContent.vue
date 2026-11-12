@@ -268,7 +268,9 @@ onMounted(() => {
   }
 
   if (typeof MutationObserver === 'function' && tabContentRef.value) {
-    loaderObserver = new MutationObserver(scheduleLoaderUpdate)
+    loaderObserver = new MutationObserver((records) => {
+      if (records.some(recordAffectsLoader)) scheduleLoaderUpdate()
+    })
     loaderObserver.observe(tabContentRef.value, {
       attributes: true,
       attributeFilter: ['data-tab-loading-indicator'],
@@ -321,6 +323,23 @@ function scheduleLoaderUpdate() {
     loaderAnimationFrameId = null
     updateLoaderState()
   })
+}
+
+/**
+ * Pages such as live chat and comments add nodes continuously. Only changes
+ * that add, remove or toggle a loading indicator can change the tab's state.
+ * @param {MutationRecord} record
+ */
+function recordAffectsLoader(record) {
+  if (record.type === 'attributes') return true
+  for (const nodes of [record.addedNodes, record.removedNodes]) {
+    for (const node of nodes) {
+      if (node instanceof Element && (node.matches(TAB_LOADER_SELECTOR) || node.querySelector(TAB_LOADER_SELECTOR) != null)) {
+        return true
+      }
+    }
+  }
+  return false
 }
 
 function hasCurrentPageLoader() {

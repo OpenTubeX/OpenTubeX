@@ -221,6 +221,7 @@ Trending:
   Load Error: Tendințele nu au putut fi încărcate.
   Unsupported Backend: Tendințele necesită API-ul local. Selectați API-ul local sau activați furnizorul de rezervă.
 Most Popular Feed Empty: Fluxul „Cele mai populare” al acestei instanțe Invidious este gol.
+Most Popular Load Error: "Fluxul „Cele mai populare” nu a putut fi încărcat."
 Feed:
   Cancel Refresh: Anulează reîmprospătarea
   Next Auto Refresh: 'Următoarea reîmprospătare automată: {date}'

@@ -255,6 +255,7 @@ Trending:
   Load Error: Nepavyko įkelti tendencijų.
   Unsupported Backend: Tendencijoms reikia Local API. Pasirinkite Local API arba įjunkite atsarginę serverio sąsają.
 Most Popular Feed Empty: Šio Invidious serverio „Populiariausių“ kanalas tuščias.
+Most Popular Load Error: "Nepavyko įkelti „Populiariausių“ kanalo."
 Feed:
   Cancel Refresh: Atšaukti atnaujinimą
   Feed Last Updated: 'Kanalas „{feedName}“ paskutinį kartą atnaujintas: {date}'

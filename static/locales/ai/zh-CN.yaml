@@ -221,6 +221,7 @@ Trending:
   Load Error: 无法加载热门内容。
   Unsupported Backend: 热门内容需要使用 Local API。请选择 Local API 或启用后端回退。
 Most Popular Feed Empty: 此 Invidious 实例的“最受欢迎”订阅源为空。
+Most Popular Load Error: "无法加载“最受欢迎”订阅源。"
 Feed:
   Cancel Refresh: 取消刷新
   Next Auto Refresh: '下次自动刷新：{date}'

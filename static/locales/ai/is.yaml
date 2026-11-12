@@ -221,6 +221,7 @@ Trending:
   Load Error: Ekki tókst að hlaða vinsælu efni.
   Unsupported Backend: Vinsælt efni krefst Local API. Veldu Local API eða virkjaðu varaleið bakenda.
 Most Popular Feed Empty: Straumurinn Vinsælast á þessu Invidious-tilviki er tómur.
+Most Popular Load Error: "Ekki tókst að hlaða straumnum Vinsælast."
 Feed:
   Cancel Refresh: Hætta við endurnýjun
   Next Auto Refresh: 'Næsta sjálfvirka endurnýjun: {date}'

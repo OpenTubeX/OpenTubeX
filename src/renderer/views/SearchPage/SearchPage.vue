@@ -97,6 +97,7 @@
         v-if="hasMoreResults"
         :key="autoLoadMore ? paginationRevision : 0"
         :loading="isLoadingMore"
+        :paused="nextPageFailed"
         @load-next-page="nextPage"
       >
         <div
@@ -183,6 +184,8 @@ const setTabTitle = useTabTitle()
 
 const isLoading = ref(false)
 const isLoadingMore = ref(false)
+// A failed continuation waits for the user to retry, so auto-loading cannot loop.
+const nextPageFailed = ref(false)
 const autoLoadMore = computed(() => store.getters.getGeneralAutoLoadMorePaginatedItemsEnabled)
 const hasMoreResults = ref(true)
 const apiUsed = ref('local')
@@ -344,6 +347,7 @@ function checkSearchCache(payload) {
   cookieSearchFailed.value = false
   isRetryingWithCookies.value = false
   isLoadingMore.value = false
+  nextPageFailed.value = false
 
   if (payload.query.length > SEARCH_CHAR_LIMIT) {
     isLoading.value = false
@@ -532,13 +536,9 @@ async function getNextpageLocal(payload) {
 
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
-
-    if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
-      await performSearchInvidious(payload)
-    } else {
-      isLoading.value = false
-    }
+    // Another backend can only start over at its first page, which would
+    // replace the loaded results, so keep them and let the user retry.
+    nextPageFailed.value = true
   }
 }
 
@@ -555,9 +555,8 @@ async function performSearchInvidious(payload, options = { resetSearchPage: fals
   try {
     const results = await getInvidiousSearchResults(payload.query, searchPage.value, payload.searchSettings)
     if (requestId !== searchRequestId) return
-    if (!results) {
-      return
-    }
+    // An empty response is a failure; returning would leave the search loading.
+    if (!results) throw new Error('Invidious returned no search results')
 
     hasMoreResults.value = results.length > 0
 
@@ -598,7 +597,10 @@ async function performSearchInvidious(payload, options = { resetSearchPage: fals
     const errorMessage = getInvidiousApiErrorMessage(backendPreference.value)
     showApiErrorToast(errorMessage, err)
 
-    if (process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(backendPreference.value) && backendFallback.value) {
+    if (searchPage.value > 1) {
+      // Keep the loaded results; see getNextpageLocal.
+      nextPageFailed.value = true
+    } else if (process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(backendPreference.value) && backendFallback.value) {
       showInvidiousFallbackToast(backendPreference.value)
       await performSearchLocal(payload)
     } else {
@@ -614,6 +616,7 @@ async function nextPage() {
   }
 
   const requestId = searchRequestId
+  nextPageFailed.value = false
   const payload = {
     query: processedQuery.value,
     searchSettings: searchSettings.value,

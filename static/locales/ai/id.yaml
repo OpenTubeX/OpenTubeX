@@ -221,6 +221,7 @@ Trending:
   Load Error: Trending tidak dapat dimuat.
   Unsupported Backend: Trending memerlukan Local API. Pilih Local API atau aktifkan backend cadangan.
 Most Popular Feed Empty: Umpan Paling Populer pada instans Invidious ini kosong.
+Most Popular Load Error: "Umpan Paling Populer tidak dapat dimuat."
 Feed:
   Cancel Refresh: Batalkan pembaruan
   Next Auto Refresh: 'Pembaruan otomatis berikutnya: {date}'

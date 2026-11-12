@@ -225,6 +225,7 @@ Trending:
   Load Error: Садржај у тренду није могао да се учита.
   Unsupported Backend: За садржај у тренду потребан је Local API. Изаберите Local API или укључите резервни начин рада.
 Most Popular Feed Empty: Извор „Најпопуларније“ ове Invidious инстанце је празан.
+Most Popular Load Error: "Извор „Најпопуларније“ није могуће учитати."
 Feed:
   Cancel Refresh: Откажи освежавање
   Next Auto Refresh: 'Следеће аутоматско освежавање: {date}'

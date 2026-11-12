@@ -272,11 +272,6 @@ const getCurrentContentByCategory = () => getNewSubscriptionFeedEntries({
   ...contentOptions.value
 })
 const newContentByCategory = computed(() => cachedContentDuringRefresh.value ?? getCurrentContentByCategory())
-const watchedHistoryState = computed(() => {
-  if (cachedContentDuringRefresh.value === null) return null
-  return store.getters.getHistoryCacheSorted
-    .map(({ videoId, isWatched }) => `${videoId}:${isWatched === true}`).join(',')
-})
 
 watch([
   () => store.getters.getSubscriptionFeedRefreshInProgress,
@@ -328,8 +323,10 @@ watch([
   }
 })
 
-watch(watchedHistoryState, (current, previous) => {
-  if (current !== null && previous !== null) {
+// Watched-state changes must reach the refresh snapshot. The revision skips
+// playback progress updates and avoids rescanning history on every publish.
+watch(() => store.state.history.historyEntriesRevision, () => {
+  if (cachedContentDuringRefresh.value !== null) {
     cachedContentDuringRefresh.value = getCurrentContentByCategory()
   }
 })

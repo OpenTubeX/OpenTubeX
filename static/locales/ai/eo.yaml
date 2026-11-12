@@ -258,6 +258,7 @@ Trending:
   Load Error: Ne eblis ŝargi tendencojn.
   Unsupported Backend: Tendencoj postulas la lokan API. Elektu la lokan API aŭ ŝaltu retropaŝon al alia interna API.
 Most Popular Feed Empty: La fluo de plej popularaj de ĉi tiu Invidious-servilo estas malplena.
+Most Popular Load Error: "Ne eblis ŝargi la fluon de plej popularaj."
 Feed:
   Cancel Refresh: Nuligi aktualigon
   Next Auto Refresh: 'Sekva aŭtomata aktualigo: {date}'

@@ -221,6 +221,7 @@ Trending:
   Load Error: Nousussa olevia videoita ei voitu ladata.
   Unsupported Backend: Nousussa olevat videot edellyttävät paikallista APIa. Valitse paikallinen API tai ota käyttöön varajärjestelmä.
 Most Popular Feed Empty: Tämän Invidious-instanssin Suosituimmat-syöte on tyhjä.
+Most Popular Load Error: "Suosituimmat-syötettä ei voitu ladata."
 Feed:
   Cancel Refresh: Peruuta päivitys
   Next Auto Refresh: 'Seuraava automaattinen päivitys: {date}'

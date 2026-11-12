@@ -289,6 +289,7 @@ Trending:
   Load Error: Stygend kon nie gelaai word nie.
   Unsupported Backend: Stygend vereis die lokale API. Kies die lokale API of aktiveer terugval na ’n ander agterent.
 Most Popular Feed Empty: Die Gewildste-voer van hierdie Invidious-instansie is leeg.
+Most Popular Load Error: "Die Gewildste-voer kon nie gelaai word nie."
 Feed:
   Cancel Refresh: Kanselleer verfrissing
   Feed Last Updated: '{feedName}-voer laas bygewerk: {date}'

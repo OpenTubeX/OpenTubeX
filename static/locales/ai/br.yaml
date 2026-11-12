@@ -221,6 +221,7 @@ Trending:
   Load Error: "N'eus ket bet gallet kargañ ar re diouzh ar c'hiz."
   Unsupported Backend: "Ezhomm ez eus eus an API lec'hel evit ar re diouzh ar c'hiz. Dibabit an API lec'hel pe gweredekait an diskoulm backend erlec'hiañ."
 Most Popular Feed Empty: "Goullo eo gwazh «Ar muiañ a verzh» an istañs Invidious-mañ."
+Most Popular Load Error: "N'eus ket bet gallet kargañ ar gwazh «Ar muiañ a verzh»."
 Feed:
   Cancel Refresh: "Nullañ an adkargañ"
   Next Auto Refresh: "Adkargañ emgefreek da-heul: {date}"

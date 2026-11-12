@@ -221,6 +221,7 @@ Trending:
   Load Error: Trendy sa nepodarilo načítať.
   Unsupported Backend: Trendy vyžadujú miestne API. Vyberte miestne API alebo zapnite použitie záložného backendu.
 Most Popular Feed Empty: Sekcia Najpopulárnejšie tejto inštancie Invidious je prázdna.
+Most Popular Load Error: "Sekciu Najpopulárnejšie sa nepodarilo načítať."
 Feed:
   Cancel Refresh: Zrušiť obnovenie
   Next Auto Refresh: 'Ďalšie automatické obnovenie: {date}'

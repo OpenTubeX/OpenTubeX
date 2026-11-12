@@ -140,7 +140,7 @@
 <script setup>
 import FtTabs from '../../components/FtTabs/FtTabs.vue'
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, onMounted, ref, useTemplateRef } from 'vue'
+import { computed, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtCard from '../../components/ft-card/ft-card.vue'
@@ -189,7 +189,7 @@ const region = computed(() => {
 
 /** @type {import('vue').ComputedRef<{ gaming: any[] | null, music: any[] | null, sports: any[] | null, podcasts: any[] | null }>} */
 const trendingCache = computed(() => {
-  return store.getters.getTrendingCache
+  return store.getters.getTrendingCacheForRegion(region.value)
 })
 
 const isLoading = ref({ gaming: false, music: false, sports: false, podcasts: false })
@@ -256,29 +256,43 @@ async function getTrendingInfoLocal(category) {
   isLoading.value[category] = true
   errorMessages.value[category] = null
 
+  const requestedRegion = region.value
   try {
-    const results = await getLocalTrending(region.value, category)
+    const results = await getLocalTrending(requestedRegion, category)
 
-    store.commit('setTrendingCache', { value: results, page: category })
-    store.commit('setLastTrendingRefreshTimestamp', { page: category, timestamp: new Date() })
+    // Results for a region changed while loading are stale and refetched below.
+    if (requestedRegion === region.value) {
+      store.commit('setTrendingCache', { value: results, page: category, region: requestedRegion })
+      store.commit('setLastTrendingRefreshTimestamp', { page: category, timestamp: new Date() })
 
-    if (currentTab.value === category) {
-      nextTick(() => {
-        if (currentTab.value === category) {
-          focusTab(category)
-        }
-      })
+      if (currentTab.value === category) {
+        nextTick(() => {
+          // Only recover focus lost to the disabled refresh button; never take
+          // it from an element the user moved to while the results loaded.
+          const activeElement = document.activeElement
+          if (currentTab.value === category && (activeElement === null || activeElement === document.body)) {
+            focusTab(category)
+          }
+        })
+      }
     }
   } catch (error) {
     console.error(error)
-    errorMessages.value[category] = t('Trending.Load Error')
+    // A failure for a region changed while loading is refetched below.
+    if (requestedRegion === region.value) {
+      errorMessages.value[category] = t('Trending.Load Error')
 
-    if (currentTab.value === category) {
-      const errorMessage = t('Local API Error (Click to copy)')
-      showApiErrorToast(errorMessage, error, showTabToast)
+      if (currentTab.value === category) {
+        const errorMessage = t('Local API Error (Click to copy)')
+        showApiErrorToast(errorMessage, error, showTabToast)
+      }
     }
   } finally {
     isLoading.value[category] = false
+  }
+
+  if (requestedRegion !== region.value && currentTab.value === category) {
+    getTrendingInfo()
   }
 }
 
@@ -334,6 +348,13 @@ function changeTab(tab) {
     getTrendingInfo()
   }
 }
+
+// Results cached for another region are stale, so a kept-alive page reloads.
+// Errors from that region must not keep the other categories from loading.
+watch(region, () => {
+  errorMessages.value = { gaming: null, music: null, sports: null, podcasts: null }
+  if (trendingCache.value[currentTab.value] === null) getTrendingInfo()
+})
 
 useFeedRefreshShortcut(() => !isLoading.value[currentTab.value], () => getTrendingInfo(true))
 </script>
