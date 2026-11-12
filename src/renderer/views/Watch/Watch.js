@@ -902,12 +902,16 @@ export default defineComponent({
     },
     shortsPlayerWidth: function () {
       // Page chrome above and below the player. A horizontal tab bar adds its
-      // 32px of tabs and the scrollbar track it always keeps room for.
+      // tabs (32px at the top, 34px at the bottom) and the scrollbar track it
+      // always keeps room for.
       let chromeHeight = 156
       if (this.isElectron) {
+        const position = this.$store.getters.getTabBarPosition
         // Matches --scrollbar-track-width
         const scrollbarTrackWidth = normalizeScrollbarThumbWidth(this.$store.getters.getScrollbarThumbWidth) + 4
-        chromeHeight = isVerticalTabBarPosition(this.$store.getters.getTabBarPosition) ? 124 : 124 + 32 + scrollbarTrackWidth
+        chromeHeight = isVerticalTabBarPosition(position)
+          ? 124
+          : 124 + (position === 'bottom' ? 34 : 32) + scrollbarTrackWidth
       }
       const playerHeight = Math.max(0, this.shortsViewportHeight - chromeHeight)
       return Math.min(600, playerHeight * (this.videoAspectRatio ?? 9 / 16))
