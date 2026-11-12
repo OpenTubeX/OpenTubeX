@@ -656,6 +656,38 @@ test.describe('profile manager', () => {
         return element.scrollTop - maximumScrollTop
       })).toBeLessThanOrEqual(1)
     })
+
+    test('clamps the scroll position after searching from the bottom', { tag: '@scale' }, async ({ page }) => {
+      await openProfileList(page)
+      await page.locator('.profilePanelHeader button').last().click()
+      await page.locator('.card .profileList').getByText('Second profile').click()
+      await page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true }).click()
+
+      const scroller = page.locator('.settingsSubpageScroll')
+      const search = page.getByRole('searchbox', { name: 'Search channels', exact: true })
+      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => search.evaluate(input => input.getBoundingClientRect().bottom)).toBeLessThan(
+        await scroller.evaluate(element => element.getBoundingClientRect().top)
+      )
+
+      // Typing would scroll the field into view, which hides the stale offset
+      await search.evaluate(input => {
+        input.value = 'no such channel'
+        input.dispatchEvent(new Event('input', { bubbles: true }))
+      })
+      await expect(page.getByText('No channels match your search', { exact: true })).toBeVisible()
+
+      await expect.poll(() => scroller.evaluate(element => {
+        const content = element.firstElementChild
+        const contentEnd = content.getBoundingClientRect().bottom -
+          element.getBoundingClientRect().top + element.scrollTop +
+          Number.parseFloat(getComputedStyle(element).paddingBottom)
+        const maximumScrollTop = Math.max(0, contentEnd - element.clientHeight)
+        const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+        return element.scrollTop <= maximumScrollTop + 1 &&
+          scrollbar.classList.contains('os-scrollbar-unusable') === (maximumScrollTop <= 1)
+      })).toBe(true)
+    })
   })
 
   test.describe('large subscription lists', () => {
