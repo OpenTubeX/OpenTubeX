@@ -5766,10 +5766,11 @@ export default defineComponent({
       const videoId = this.videoId
       const activeFormat = this.activeFormat
       const formatSelectionGeneration = this.formatSelectionGeneration
+      const sourceKey = this.playbackSourceKey
       const legacyFormatsReady = this.legacyFormatAvailable && await this.prepareLegacyFormats()
-      // Another video or format was chosen while the legacy formats loaded
+      // Another video, format or source was chosen while the legacy formats loaded
       if (!this.isCurrentVideoLoad(loadGeneration, videoId) || this.activeFormat !== activeFormat ||
-        this.formatSelectionGeneration !== formatSelectionGeneration) return
+        this.formatSelectionGeneration !== formatSelectionGeneration || sourceKey !== this.playbackSourceKey) return
 
       if (!legacyFormatsReady) {
         showToast({
@@ -6550,10 +6551,12 @@ export default defineComponent({
             const videoId = this.videoId
             const player = this.$refs.player
             const sourceKey = this.playbackSourceKey
+            const formatSelectionGeneration = this.formatSelectionGeneration
             const legacyFormatsReady = await this.prepareLegacyFormats()
-            // A source picked meanwhile, such as yt-dlp or a downloaded file, isn't the one that failed
+            // A source or format picked meanwhile, such as yt-dlp, a downloaded file or DASH again, replaces the failed one
             if (!this.isCurrentVideoLoad(loadGeneration, videoId) || this.activeFormat !== 'dash' ||
-              player !== this.$refs.player || sourceKey !== this.playbackSourceKey) return
+              player !== this.$refs.player || sourceKey !== this.playbackSourceKey ||
+              formatSelectionGeneration !== this.formatSelectionGeneration) return
 
             if (legacyFormatsReady) {
               console.error('Unable to play DASH formats. Reverting to legacy formats...')
