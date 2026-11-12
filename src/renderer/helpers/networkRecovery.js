@@ -267,6 +267,21 @@ function isLocalHostname(hostname) {
 }
 
 /**
+ * Whether a request reads one of the app's own static files, which the web
+ * build's service worker keeps for offline use.
+ * @param {RequestInfo | URL} input
+ * @returns {boolean}
+ */
+function isAppStaticFile(input) {
+  try {
+    const url = new URL(input instanceof Request ? input.url : input.toString(), location.href)
+    return url.origin === location.origin && url.pathname.startsWith(new URL('static/', location.href).pathname)
+  } catch {
+    return false
+  }
+}
+
+/**
  * A captive portal can answer plain HTTP, but not HTTPS with a valid
  * certificate. A response from the HTTP cache proves nothing either, so only
  * requests that bypass it count, unless their transport keeps no cache.
@@ -395,9 +410,10 @@ export function installNetworkFetch({ corsDisabled = false, getRequestError, che
   const fetch = async (input, init) => {
     // During an outage, the HTTP cache could answer a read without the
     // network. Revalidate it with the server, so its success proves that the
-    // internet is reachable again.
+    // internet is reachable again. The app's own files are left to the web
+    // build's offline cache, so the app can still start.
     if (appRecovery?.state === 'offline' && ['GET', 'HEAD'].includes((init?.method ?? (input instanceof Request ? input.method : 'GET')).toUpperCase()) &&
-      (init?.cache ?? (input instanceof Request ? input.cache : 'default')) === 'default') {
+      (init?.cache ?? (input instanceof Request ? input.cache : 'default')) === 'default' && !isAppStaticFile(input)) {
       init = { ...init, cache: 'no-cache' }
     }
     let response

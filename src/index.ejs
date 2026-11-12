@@ -12,6 +12,8 @@
           content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <% if (!process.env.IS_ELECTRON && !process.env.IS_CAPACITOR) { %>
     <link rel="manifest" href="static/manifest.json" />
+    <!-- Keeps the server's address from other services, like SponsorBlock -->
+    <meta name="referrer" content="no-referrer" />
     <% } %>
     <title></title>
     <% if (typeof startupSplash !== 'undefined') { %>
@@ -40,18 +42,14 @@
 
     // Check compatibility for the browser we're running this in
     if ("serviceWorker" in navigator) {
-      if (navigator.serviceWorker.controller) {
-        console.log("[PWA Builder] active service worker found, no need to register");
-      } else {
-        // Register the service worker
-        navigator.serviceWorker
-          .register("pwabuilder-sw.js", {
-            scope: "./"
-          })
-          .then(function (reg) {
-            console.log("[PWA Builder] Service worker has been registered for scope: " + reg.scope);
-          });
-      }
+      // Each build registers its own worker version, which replaces the previous build's cache
+      navigator.serviceWorker
+        .register("pwabuilder-sw.js?v=<%= compilation.hash %>", {
+          scope: "./"
+        })
+        .then(function (reg) {
+          console.log("[PWA Builder] Service worker has been registered for scope: " + reg.scope);
+        });
     }
     </script>
     <% } %>

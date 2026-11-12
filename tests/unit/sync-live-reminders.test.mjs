@@ -67,6 +67,30 @@ test('applies remote additions and cancellations through the local scheduler', a
   assert.deepEqual(remote, [currentSecond])
 })
 
+test('a reminder cancelled locally while sync applies others stays cancelled', async () => {
+  const currentFirst = { ...first, startTimestamp: Date.now() + 60_000 }
+  const currentSecond = { ...second, startTimestamp: Date.now() + 120_000 }
+  const rescheduledSecond = { ...currentSecond, startTimestamp: currentSecond.startTimestamp + 60_000 }
+  const local = new Map([[currentSecond.videoId, currentSecond]])
+  const reminderService = {
+    list: async () => [...local.values()],
+    cancel: async id => { local.delete(id); return true },
+    schedule: async reminder => {
+      // The user cancels the second reminder while the first one is scheduled
+      if (reminder.videoId === first.videoId) local.delete(second.videoId)
+      local.set(reminder.videoId, reminder)
+      return true
+    },
+  }
+  const client = {
+    getLiveReminders: async () => [currentFirst, rescheduledSecond],
+    putLiveReminders: async () => {},
+  }
+
+  await syncLiveReminders(client, [currentSecond], reminderService)
+  assert.deepEqual([...local.keys()], [first.videoId])
+})
+
 test('uploads a local reminder on first sync without scheduling it again', async () => {
   const localReminder = { ...first, startTimestamp: Date.now() + 60_000 }
   let uploaded

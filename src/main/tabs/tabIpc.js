@@ -35,7 +35,9 @@ export async function setupTabsIPC(options = {}) {
     return getManager(event)?.getState() ?? null
   })
 
-  ipcMain.handle(IpcChannels.TABS_GET_SYNC_SESSIONS, () => {
+  // Every window's tab URLs, so only app windows may read them
+  ipcMain.handle(IpcChannels.TABS_GET_SYNC_SESSIONS, (event) => {
+    if (!getManager(event)) return []
     return Array.from(TabManager.getAll(), manager => manager.getSyncSession())
   })
 

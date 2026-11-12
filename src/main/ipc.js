@@ -68,19 +68,3 @@ export function sendToOtherAppWindows(sender, channel, ...args) {
     }
   }
 }
-
-/**
- * Like `onTrusted`, but stops listening after the first trusted message, so
- * other senders cannot use it up.
- * @param {string} channel
- * @param {(event: import('electron').IpcMainEvent, ...args: unknown[]) => void} listener
- */
-export function onceTrusted(channel, listener) {
-  /** @param {import('electron').IpcMainEvent} event @param {...unknown} args */
-  function handle(event, ...args) {
-    if (!isTrustedSender(event)) return
-    ipcMain.removeListener(channel, handle)
-    listener(event, ...args)
-  }
-  ipcMain.on(channel, handle)
-}

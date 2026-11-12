@@ -175,7 +175,7 @@ function saveEntries() {
 
 export async function handleYtDlpPlaybackCacheGet(event, videoId, cacheKey) {
   if (
-    !isOpenTubeXUrl(event.senderFrame.url) ||
+    !isOpenTubeXUrl(event.senderFrame?.url) ||
     !VIDEO_ID_REGEX.test(videoId) ||
     !isValidCacheKey(cacheKey)
   ) return null
@@ -201,7 +201,7 @@ export async function handleYtDlpPlaybackCacheGet(event, videoId, cacheKey) {
 
 export async function handleYtDlpPlaybackCacheSet(event, videoId, cacheKey, expiryTime, source) {
   if (
-    !isOpenTubeXUrl(event.senderFrame.url) ||
+    !isOpenTubeXUrl(event.senderFrame?.url) ||
     !VIDEO_ID_REGEX.test(videoId) ||
     !isValidCacheKey(cacheKey)
   ) return false
@@ -247,7 +247,7 @@ export async function handleYtDlpPlaybackCacheSet(event, videoId, cacheKey, expi
 }
 
 export async function handleYtDlpPlaybackCacheDelete(event, videoId) {
-  if (!isOpenTubeXUrl(event.senderFrame.url) || !VIDEO_ID_REGEX.test(videoId)) return false
+  if (!isOpenTubeXUrl(event.senderFrame?.url) || !VIDEO_ID_REGEX.test(videoId)) return false
 
   await loadEntries()
   if (entries.delete(videoId)) await saveEntries()
@@ -255,7 +255,7 @@ export async function handleYtDlpPlaybackCacheDelete(event, videoId) {
 }
 
 export async function handleYtDlpPlaybackCacheClear(event) {
-  if (!isOpenTubeXUrl(event.senderFrame.url)) return false
+  if (!isOpenTubeXUrl(event.senderFrame?.url)) return false
 
   await clearYtDlpPlaybackCache()
   return true

@@ -371,6 +371,21 @@ test('Android waits for redirect consent, preserves 307 bodies and strips creden
   assert.ok(requests.every(options => options.disableRedirects))
 })
 
+test('iOS follows redirects itself, so an HTTPS request cannot be redirected to HTTP', async () => {
+  const requests = []
+  const ios = {
+    request: async (options) => {
+      requests.push(options)
+      return { status: 302, data: '', headers: { location: 'http://nas.local/health' }, url: options.url }
+    },
+    abort: async () => {}
+  }
+  const fetchNative = await loadNativeHttp(null, ios, 'capacitorHttpFetch', async () => assert.fail('only Android asks for local network access'))
+  await assert.rejects(fetchNative('https://sync.example/health'), /require HTTPS/)
+  assert.equal(requests.length, 1)
+  assert.equal(requests[0].disableRedirects, true)
+})
+
 for (const status of [302]) {
   test(`Android follows relative ${status} redirects with GET after POST`, async () => {
     const requests = []

@@ -8,7 +8,7 @@ import { migrateStoredSettings } from '../../src/datastores/settingsMigrations.j
 import { createScheduledBackups } from '../../src/main/scheduledBackups.js'
 import { createBackupArchiveFactory } from '../../src/main/backupArchive.js'
 import { readUnifiedBackup } from '../../src/renderer/helpers/unifiedBackup.js'
-import { NON_TRANSFERABLE_SETTINGS } from '../../src/nonTransferableSettings.js'
+import { getTransferableSettings, NON_TRANSFERABLE_SETTINGS } from '../../src/nonTransferableSettings.js'
 import { createDefaultSettings } from '../../src/settingsDefaults.js'
 
 const workerPath = new URL('../../src/main/backupArchiveWorker.js', import.meta.url)
@@ -23,7 +23,11 @@ const data = {
 }
 const transferableDefaults = Object.fromEntries(Object.entries(createDefaultSettings({ supportsLocalApi: true, isElectron: true }))
   .filter(([key]) => !NON_TRANSFERABLE_SETTINGS.has(key)))
-const expectedData = { ...data, settings: { ...transferableDefaults, ...data.settings, landingPage: 'subscriptions' } }
+const expectedData = {
+  ...data,
+  // The instance's username and password stay on this device
+  settings: { ...transferableDefaults, ...data.settings, landingPage: 'subscriptions', defaultInvidiousInstance: 'https://invidious.example' },
+}
 
 async function setup(t) {
   const directory = await mkdtemp(path.join(tmpdir(), 'opentubex-backups-'))
@@ -32,7 +36,8 @@ async function setup(t) {
   t.after(() => rm(profileDirectory, { recursive: true, force: true }))
   const collections = {
     settings: [...Object.entries(data.settings).map(([_id, value]) => ({ _id, value })),
-      { _id: 'syncServerToken', value: 'excluded-test-token' }, { _id: 'scheduledBackupEnabled', value: true }],
+      { _id: 'syncServerToken', value: 'excluded-test-token' }, { _id: 'scheduledBackupEnabled', value: true },
+      { _id: 'defaultInvidiousInstance', value: 'https://user:p%40ss@invidious.example' }],
     profiles: data.profiles,
     playlists: data.playlists,
     history: data.history,
@@ -83,6 +88,16 @@ async function setup(t) {
     backups: async () => (await readdir(directory)).filter(name => name.endsWith('.zip')).sort(),
   }
 }
+
+test('exports drop Invidious credentials however the instance URL is written', () => {
+  for (const [instance, expected] of [
+    ['https:user:pass@invidious.example', 'https:invidious.example'],
+    ['https:\\\\user:pass@invidious.example/', 'https:\\\\invidious.example/'],
+    ['https://invidious.example/watch@later', 'https://invidious.example/watch@later'],
+  ]) {
+    assert.equal(getTransferableSettings({ defaultInvidiousInstance: instance }).defaultInvidiousInstance, expected)
+  }
+})
 
 test('disabled and invalid schedules never read data or write files', async t => {
   const state = await setup(t)

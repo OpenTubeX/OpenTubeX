@@ -127,12 +127,12 @@ export function setupCustomThemes({ updateSettingFromMain, updateThemeSource }) 
   }
 
   ipcMain.handle(IpcChannels.CUSTOM_THEME_LOAD, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) return
+    if (!isOpenTubeXUrl(event.senderFrame?.url)) return
     return await loadCustomThemes()
   })
 
   ipcMain.handle(IpcChannels.CUSTOM_THEME_SAVE, async (event, theme) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) return
+    if (!isOpenTubeXUrl(event.senderFrame?.url)) return
 
     const themes = await saveCustomTheme(theme)
     await repairSystemThemeSettingsFromMain(themes)
@@ -141,7 +141,7 @@ export function setupCustomThemes({ updateSettingFromMain, updateThemeSource }) 
   })
 
   ipcMain.handle(IpcChannels.CUSTOM_THEME_REPLACE, async (event, themes) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) return
+    if (!isOpenTubeXUrl(event.senderFrame?.url)) return
 
     const normalizedThemes = await replaceCustomThemes(themes)
     await repairSystemThemeSettingsFromMain(normalizedThemes)
@@ -150,7 +150,7 @@ export function setupCustomThemes({ updateSettingFromMain, updateThemeSource }) 
   })
 
   ipcMain.handle(IpcChannels.CUSTOM_THEME_DELETE, async (event, themeId) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) return
+    if (!isOpenTubeXUrl(event.senderFrame?.url)) return
 
     const deletedTheme = (await loadCustomThemes()).find(({ id }) => id === themeId)
     const themes = await deleteCustomTheme(themeId)

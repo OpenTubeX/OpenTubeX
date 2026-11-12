@@ -1,18 +1,13 @@
 /* eslint-disable no-console */
 // This is the service worker with the Advanced caching
 
-const CACHE = 'pwabuilder-adv-cache'
-const precacheFiles = [
-  /* Add an array of files to precache for your app */
-  'index.html',
-  'web.js',
-  'web.css',
-  'static/*',
-  '_icons/*',
-  'fonts/*'
-]
-
-// TODO: replace the following with the correct offline fallback page i.e.: const offlineFallbackPage = "offline.html";
+// Each build registers the worker with its own version, so its files replace
+// older builds' instead of piling up in the cache. Other apps on the same origin
+// have their own caches, which stay untouched.
+const CACHE_PREFIX = 'pwabuilder-adv-cache'
+const CACHE = CACHE_PREFIX + '-' + new URL(self.location.href).searchParams.get('v')
+// Production builds hash their scripts and styles, so only the page is
+// precached. Each asset is cached when the app first loads it.
 const offlineFallbackPage = 'index.html'
 
 const networkFirstPaths = [
@@ -54,9 +49,9 @@ self.addEventListener('install', function (event) {
     caches.open(CACHE).then(function (cache) {
       console.log('[PWA Builder] Caching pages during install')
 
-      return cache.addAll(precacheFiles).then(function () {
-        return cache.add(offlineFallbackPage)
-      })
+      // Pages load before this worker controls them, so the app opens offline
+      // once a visit under its control has cached the files it uses
+      return cache.add(offlineFallbackPage)
     })
   )
 })
@@ -64,7 +59,18 @@ self.addEventListener('install', function (event) {
 // Allow sw to control of current page
 self.addEventListener('activate', function (event) {
   console.log('[PWA Builder] Claiming clients for current page')
-  event.waitUntil(self.clients.claim())
+  // The previous build's cache stays until the next update, since the previous
+  // worker may have cached this build's files. Caches are listed oldest first,
+  // and a build whose install failed left a cache without the page.
+  event.waitUntil(caches.keys().then(function (names) {
+    const older = names.filter(function (name) { return name !== CACHE && name.startsWith(CACHE_PREFIX) })
+    return Promise.all(older.map(function (name) {
+      return caches.open(name).then(function (cache) { return cache.match(offlineFallbackPage) })
+    })).then(function (pages) {
+      const previous = older.filter(function (name, index) { return pages[index] }).pop()
+      return Promise.all(older.filter(function (name) { return name !== previous }).map(function (name) { return caches.delete(name) }))
+    })
+  }).then(function () { return self.clients.claim() }))
 })
 
 // If any fetch fails, it will look for the request in the cache and serve it from there first
@@ -81,7 +87,8 @@ self.addEventListener('fetch', function (event) {
   // expiring stream URLs, and the HTTP cache already handles its images.
   if (/^\/(api|companion|vi|ggpht|sb|videoplayback|latest_version)(\/|$)/.test(pathname)) return
 
-  if (comparePaths(event.request.url, networkFirstPaths)) {
+  // The page goes network first, so it always loads the newest build's hashed assets when online.
+  if (event.request.mode === 'navigate' || comparePaths(event.request.url, networkFirstPaths)) {
     networkFirstFetch(event)
   } else {
     cacheFirstFetch(event)
@@ -113,18 +120,6 @@ function cacheFirstFetch(event) {
 
             return response
           })
-          .catch(function (error) {
-            // The following validates that the request was for a navigation to a new document
-            if (event.request.destination !== 'document' || event.request.mode !== 'navigate') {
-              return
-            }
-
-            console.error('[PWA Builder] Network request failed and no cache.' + error)
-            // Use the precached offline page as fallback
-            return caches.open(CACHE).then(function (cache) {
-              cache.match(offlineFallbackPage)
-            })
-          })
       }
     )
   )
@@ -134,13 +129,24 @@ function networkFirstFetch(event) {
   event.respondWith(
     fetch(event.request)
       .then(function (response) {
+        // A server error, such as a 502 while the server restarts, still opens the app
+        if (event.request.mode === 'navigate' && response.status >= 500) {
+          return caches.open(CACHE)
+            .then(function (cache) { return cache.match(offlineFallbackPage) })
+            .then(function (cached) { return cached || response })
+        }
         // If request was success, add or update it in the cache
         event.waitUntil(updateCache(event.request, response.clone()))
         return response
       })
       .catch(function (error) {
         console.error('[PWA Builder] Network request Failed. Serving content from cache: ' + error)
-        return fromCache(event.request)
+        return fromCache(event.request).catch(function () {
+          if (event.request.mode !== 'navigate') throw error
+          return caches.open(CACHE).then(function (cache) {
+            return cache.match(offlineFallbackPage)
+          })
+        })
       })
   )
 }
@@ -149,19 +155,26 @@ function fromCache(request) {
   // Check to see if you have it in the cache
   // Return response
   // If not in the cache, then return error page
-  return caches.open(CACHE).then(function (cache) {
-    return cache.match(request).then(function (matching) {
-      if (!matching || matching.status === 404) {
-        return Promise.reject(new Error('no-match'))
-      }
+  return caches.keys().then(function (names) {
+    // This build's cache comes first, then the previous build's
+    const own = [CACHE].concat(names.filter(function (name) { return name !== CACHE && name.startsWith(CACHE_PREFIX) }))
+    return own.reduce(function (found, name) {
+      return found.then(function (matching) {
+        return matching || caches.open(name).then(function (cache) { return cache.match(request) })
+      })
+    }, Promise.resolve(undefined))
+  }).then(function (matching) {
+    if (!matching || matching.status === 404) {
+      return Promise.reject(new Error('no-match'))
+    }
 
-      return matching
-    })
+    return matching
   })
 }
 
 function updateCache(request, response) {
-  if (!comparePaths(request.url, avoidCachingPaths)) {
+  // Keep error responses, such as a 502 during a server restart, out of the cache.
+  if (response.ok && !comparePaths(request.url, avoidCachingPaths)) {
     return caches.open(CACHE).then(function (cache) {
       return cache.put(request, response)
     })

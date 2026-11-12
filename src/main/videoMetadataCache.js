@@ -429,7 +429,7 @@ export function setupVideoMetadataCacheIpc({ getConfiguredApiServerUrl }) {
   }
 
   ipcMain.handle(IpcChannels.VIDEO_METADATA_CACHE_UPDATE, async (event, metadata) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || !isValidVideoId(metadata?.videoId)) {
+    if (!isOpenTubeXUrl(event.senderFrame?.url) || !isValidVideoId(metadata?.videoId)) {
       return null
     }
 
@@ -441,7 +441,7 @@ export function setupVideoMetadataCacheIpc({ getConfiguredApiServerUrl }) {
   })
 
   ipcMain.handle(IpcChannels.VIDEO_METADATA_CACHE_CLEAR, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) return false
+    if (!isOpenTubeXUrl(event.senderFrame?.url)) return false
 
     videoMetadataCacheGeneration += 1
     await clearVideoMetadataCache()
@@ -454,7 +454,7 @@ export function setupVideoMetadataCacheIpc({ getConfiguredApiServerUrl }) {
   })
 
   ipcMain.handle(IpcChannels.VIDEO_METADATA_CACHE_GET_SIZE, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) return 0
+    if (!isOpenTubeXUrl(event.senderFrame?.url)) return 0
     return getVideoMetadataCacheSize()
   })
 }

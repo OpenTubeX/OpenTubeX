@@ -101,7 +101,7 @@ import { setupIpBlockRecoveryIpc } from './ipBlockRecovery'
 import { isSubscriptionAutoRefreshInProgress, setupSubscriptionAutoRefreshIpc } from './subscriptionAutoRefresh'
 import { setupCastIpc } from './castIpc'
 import { createUrlOpener, getDirectOpenUrl } from './openUrl'
-import { handleTrusted, isTrustedSender, onceTrusted, onTrusted, sendToAppWindows } from './ipc'
+import { handleTrusted, isTrustedSender, onTrusted, sendToAppWindows } from './ipc'
 import { setupPlayerCacheIpc } from './playerCacheIpc'
 import { setupPowerSaveBlockerIpc } from './powerSaveBlockerIpc'
 import { setupScreenshotFolderIpc } from './screenshotFolderIpc'
@@ -2434,7 +2434,13 @@ function runApp() {
     }
   })
 
+  let isRelaunching = false
+
   function relaunch() {
+    // A second request would start a second instance
+    if (isRelaunching) return
+    isRelaunching = true
+
     if (process.env.NODE_ENV === 'development') {
       app.exit(parseInt(process.env.OPENTUBEX_RELAUNCH_EXIT_CODE))
       return
@@ -2448,36 +2454,44 @@ function runApp() {
     // executables' paths by checking the environmental variables
     const { env: { APPIMAGE, PORTABLE_EXECUTABLE_FILE } } = process
 
-    if (!APPIMAGE) {
-      // If it's a Windows portable, PORTABLE_EXECUTABLE_FILE will
-      // hold a value.
-      // Otherwise, `process.execPath` should be used instead.
-      const scheduled = app.relaunch({
-        args: process.argv.slice(1),
-        execPath: PORTABLE_EXECUTABLE_FILE || process.execPath
-      })
-      if (scheduled !== false) relaunchRequested = true
-    } else {
-      // If it's an AppImage, things must be done the "hard way"
-      // `app.relaunch` doesn't work because of FUSE limitations
-      // Spawn a new process using the APPIMAGE env variable
-      const subprocess = cp.spawn(APPIMAGE, { detached: true, stdio: 'ignore' })
-      subprocess.unref()
+    try {
+      if (!APPIMAGE) {
+        // If it's a Windows portable, PORTABLE_EXECUTABLE_FILE will
+        // hold a value.
+        // Otherwise, `process.execPath` should be used instead.
+        const scheduled = app.relaunch({
+          args: process.argv.slice(1),
+          execPath: PORTABLE_EXECUTABLE_FILE || process.execPath
+        })
+        if (scheduled !== false) relaunchRequested = true
+      } else {
+        // If it's an AppImage, things must be done the "hard way"
+        // `app.relaunch` doesn't work because of FUSE limitations
+        // Spawn a new process using the APPIMAGE env variable
+        const subprocess = cp.spawn(APPIMAGE, { detached: true, stdio: 'ignore' })
+        subprocess.unref()
+      }
+    } catch (error) {
+      // Let a later request try again
+      isRelaunching = false
+      throw error
     }
 
     isQuitConfirmed = true
     app.quit()
   }
 
-  onceTrusted(IpcChannels.RELAUNCH_REQUEST, relaunch)
+  onTrusted(IpcChannels.RELAUNCH_REQUEST, () => relaunch())
 
   nativeTheme.on('updated', () => {
     sendToAppWindows(IpcChannels.NATIVE_THEME_UPDATE, nativeTheme.shouldUseDarkColors)
   })
 
-  handleTrusted(IpcChannels.GENERATE_PO_TOKEN, (_event, videoId, context, initialAttestationData, ytConfig) => (
-    generatePoToken(videoId, context, initialAttestationData, ytConfig, proxyUrl)
-  ))
+  handleTrusted(IpcChannels.GENERATE_PO_TOKEN, (_event, videoId, context, initialAttestationData, ytConfig) => {
+    if ([videoId, context, initialAttestationData, ytConfig].every(value => typeof value === 'string')) {
+      return generatePoToken(videoId, context, initialAttestationData, ytConfig, proxyUrl)
+    }
+  })
 
   handleTrusted(IpcChannels.MINT_PO_TOKEN, (_event, videoId) => (
     typeof videoId === 'string' ? mintPoTokenFromAttestation(videoId, proxyUrl) : null
@@ -2623,31 +2637,32 @@ function runApp() {
 
   handleTrusted(IpcChannels.GET_REPLACE_HTTP_CACHE, () => replaceHttpCache)
 
-  onceTrusted(IpcChannels.TOGGLE_REPLACE_HTTP_CACHE, async () => {
-    if (replaceHttpCache) {
-      await asyncFs.rm(REPLACE_HTTP_CACHE_PATH)
-    } else {
-      // create an empty file
-      const handle = await asyncFs.open(REPLACE_HTTP_CACHE_PATH, 'w')
-      await handle.close()
-    }
+  /**
+   * Toggles a setting stored as a marker file, which only applies after a restart.
+   * @param {string} channel
+   * @param {boolean} isEnabled
+   * @param {string} markerPath
+   */
+  function onRestartSettingToggle(channel, isEnabled, markerPath) {
+    onTrusted(channel, async () => {
+      try {
+        if (isEnabled) {
+          await asyncFs.rm(markerPath, { force: true })
+        } else {
+          await asyncFs.writeFile(markerPath, '')
+        }
+        relaunch()
+      } catch (error) {
+        console.error(`Failed to toggle ${channel}`, error)
+      }
+    })
+  }
 
-    relaunch()
-  })
+  onRestartSettingToggle(IpcChannels.TOGGLE_REPLACE_HTTP_CACHE, replaceHttpCache, REPLACE_HTTP_CACHE_PATH)
 
   handleTrusted(IpcChannels.GET_DISABLE_HARDWARE_ACCELERATION, () => disableHardwareAcceleration)
 
-  onceTrusted(IpcChannels.TOGGLE_DISABLE_HARDWARE_ACCELERATION, async () => {
-    if (disableHardwareAcceleration) {
-      await asyncFs.rm(DISABLE_HARDWARE_ACCELERATION_PATH)
-    } else {
-      // create an empty file
-      const handle = await asyncFs.open(DISABLE_HARDWARE_ACCELERATION_PATH, 'w')
-      await handle.close()
-    }
-
-    relaunch()
-  })
+  onRestartSettingToggle(IpcChannels.TOGGLE_DISABLE_HARDWARE_ACCELERATION, disableHardwareAcceleration, DISABLE_HARDWARE_ACCELERATION_PATH)
 
   setupPlayerCacheIpc(PLAYER_CACHE_PATH)
 
@@ -2903,7 +2918,9 @@ function runApp() {
     event.preventDefault()
     if (sendSyncServerOidcCallback([url])) return
 
-    const newStartupUrl = baseUrl(url)
+    // Like links from the command line, only web links may open, not internal app routes
+    const newStartupUrl = getNormalizedLinkArg(url)
+    if (!newStartupUrl) return
     if (!(mainWindow && mainWindow.webContents)) {
       startupUrl = newStartupUrl
       if (app.isReady()) {
