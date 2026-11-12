@@ -1648,6 +1648,7 @@ Channel:
     Shows: Programma's
     This channel does not currently have any shows: Dit kanaal heeft momenteel geen programma's
 Video:
+  Play in Background: "Op de achtergrond afspelen"
   Info panel source: 'Bron: {source}'
   External DRM Protected: "Video's die beschermd worden door DRM kunnen niet worden afgespeeld in OpenTubeX omdat ze propriëtaire onderdelen met gesloten broncode vereisen."
   Invalid Media URL: "Ongeldige media-URL"

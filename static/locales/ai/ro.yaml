@@ -1638,6 +1638,7 @@ Channel:
     Shows: Emisiuni
     This channel does not currently have any shows: Acest canal nu are momentan emisiuni
 Video:
+  Play in Background: "Redă în fundal"
   Info panel source: 'Sursă: {source}'
   External DRM Protected: "Videoclipurile protejate DRM nu pot fi redate în OpenTubeX, deoarece necesită componente proprietare, cu sursă închisă."
   Invalid Media URL: "Adresă URL media nevalidă"

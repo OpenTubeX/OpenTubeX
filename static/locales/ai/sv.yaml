@@ -1603,6 +1603,7 @@ Channel:
     Members-only video hidden by OpenTubeX: "Video endast för medlemmar dold av OpenTubeX"
     Video hidden by OpenTubeX because of its title: "Video dold av OpenTubeX eftersom titeln innehåller dold text"
 Video:
+  Play in Background: "Spela upp i bakgrunden"
   Info panel source: 'Källa: {source}'
   External DRM Protected: "DRM-skyddade videor kan inte spelas upp i OpenTubeX eftersom de kräver proprietära komponenter med sluten källkod."
   Invalid Media URL: "Ogiltig medie-URL"

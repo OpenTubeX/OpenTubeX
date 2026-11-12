@@ -1607,6 +1607,7 @@ Channel:
     Shows: 節目
     This channel does not currently have any shows: 該頻道目前還沒有任何節目
 Video:
+  Play in Background: "背景播放"
   Info panel source: '來源：{source}'
   External DRM Protected: "受 DRM 保護的影片無法在 OpenTubeX 上播放，因為它們需要專屬的封閉原始碼元件。"
   Invalid Media URL: "無效的媒體網址"

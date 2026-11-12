@@ -629,6 +629,7 @@ import { useResultChannelAvatar } from '../../composables/useResultChannelAvatar
 import { formatDate, formatDateTime } from '../../helpers/dateFormat.js'
 import { getYoutubeVideoShareUrl } from '../../helpers/share'
 import { isTileMarkShortcut, tileKeyboardShortcutsKey } from '../../helpers/tileNavigation'
+import { playInBackgroundKey, watchNavigationKey } from '../../tabs/TabContext'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
 const props = defineProps({
@@ -900,6 +901,9 @@ const effectiveListTypeIsList = computed(() => {
 
 const thumbnailSizeSetting = inject(thumbnailSizeSettingKey, 'thumbnailSize')
 const tileKeyboardShortcuts = inject(tileKeyboardShortcutsKey, false)
+const playInBackground = inject(playInBackgroundKey, null)
+// Videos listed on a Watch page would replace the video that the page plays.
+const listedOnWatchPage = inject(watchNavigationKey, null) !== null
 // Full width grid cards form a single column, so moving them goes up and down.
 const verticalMoveControls = computed(() => {
   return effectiveListTypeIsList.value ||
@@ -1134,6 +1138,10 @@ const showInvidiousShareOptions = computed(() => usesInvidiousInstance(backendPr
 
 const { hideSubscriptionFeedType, hideSubscriptionFeedTypeOption } = useHideSubscriptionFeedType(() => channelId.value)
 
+// Only the mobile mini bar can dock an audio-only player.
+const canPlayInBackground = computed(() => process.env.IS_CAPACITOR && playInBackground !== null &&
+  !listedOnWatchPage && !isUpcoming.value && props.data.isShort !== true)
+
 const videoMenuOptions = computed(() => {
   const options = [
     ...(store.getters.getTabsEnabled
@@ -1151,6 +1159,13 @@ const videoMenuOptions = computed(() => {
         }]
       : []),
     { type: 'divider' },
+    ...(canPlayInBackground.value
+      ? [{
+          label: t('Video.Play in Background'),
+          value: 'playInBackground',
+          icon: ['fas', 'headphones']
+        }]
+      : []),
     {
       label: t('Video.Play Next'),
       value: 'playNext',
@@ -1793,6 +1808,10 @@ function handleOptionsClick(option) {
       break
     case 'hideSubscriptionFeedType':
       hideSubscriptionFeedType()
+      break
+    case 'playInBackground':
+      markSubscriptionVideoAsSeen()
+      playInBackground({ path: `/watch/${id.value}`, query: watchPageLinkQuery.value })
       break
     case 'playNext':
       addToWatchQueue(true)

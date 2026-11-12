@@ -34,6 +34,7 @@
     />
     <TabWatchContent
       v-if="initialized"
+      ref="watchContent"
       :key="tab.refreshKey || 0"
       :tab-id="tab.id"
       :route="resolvedRoute"
@@ -67,7 +68,7 @@ import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { getCapacitorTabService } from '../../tabs/CapacitorTabService'
 import { tabLifecycleService } from '../../tabs/TabLifecycleService'
 import { tabRuntimeRegistry } from '../../tabs/TabRuntimeRegistry'
-import { tabIdKey, tabLifecycleKey, tabPresentedKey } from '../../tabs/TabContext'
+import { playInBackgroundKey, tabIdKey, tabLifecycleKey, tabPresentedKey } from '../../tabs/TabContext'
 import { formatTabTitle } from '../../tabs/tabTitle'
 import { getPreviousBrowsingRoute } from '../../tabs/playerDockDestination'
 
@@ -93,6 +94,7 @@ const props = defineProps({
 const isCapacitor = process.env.IS_CAPACITOR
 const navigation = getTabNavigationService()
 const tabContentRef = useTemplateRef('tabContentRef')
+const watchContent = useTemplateRef('watchContent')
 const isPresented = computed(() => store.getters.getPresentedTabId === props.tab.id)
 const isSwipeFrom = computed(() => props.pageSwipe?.fromId === props.tab.id)
 const isSwipeTarget = computed(() => props.pageSwipe?.toId === props.tab.id)
@@ -144,6 +146,7 @@ const injectedRoute = reactive({})
 const resolvedComponent = computed(() => browsingRoute.value && resolveRouteComponent(browsingRoute.value))
 
 provide(tabIdKey, props.tab.id)
+provide(playInBackgroundKey, location => watchContent.value?.playInBackground(location))
 provide(tabPresentedKey, isBrowsingPresented)
 provide(tabLifecycleKey, tabLifecycleService)
 provide('tabId', props.tab.id)

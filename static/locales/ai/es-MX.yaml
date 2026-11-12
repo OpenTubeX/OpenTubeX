@@ -1867,6 +1867,7 @@ Channel:
     Shows: Programas
     This channel does not currently have any shows: Este canal no tiene programas en este momento
 Video:
+  Play in Background: "Reproducir en segundo plano"
   Info panel source: 'Fuente: {source}'
   External DRM Protected: "Los videos restringidos con DRM no pueden reproducirse en OpenTubeX, dado que requieren componentes propietarios de fuente cerrada."
   Invalid Media URL: "URL de contenido multimedia no válida"

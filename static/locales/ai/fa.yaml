@@ -1676,6 +1676,7 @@ Channel:
     Shows: برنامه‌ها
     This channel does not currently have any shows: این کانال در حال حاضر هیچ برنامه‌ای ندارد
 Video:
+  Play in Background: "پخش در پس‌زمینه"
   Info panel source: 'منبع: {source}'
   External DRM Protected: "ویدیوهای محافظت شده DRM را نمی توان در OpenTubeX پخش کرد، زیرا به اجزای اختصاصی و منبع بسته نیاز دارند."
   Invalid Media URL: "نشانی رسانه نامعتبر است"

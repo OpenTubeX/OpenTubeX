@@ -1070,6 +1070,7 @@ Channel:
     Members-only video hidden by OpenTubeX: "OpenTubeX ukrył film tylko dla członków"
     Video hidden by OpenTubeX because of its title: "OpenTubeX ukrył film, ponieważ jego tytuł zawiera ukryty tekst"
 Video:
+  Play in Background: "Odtwarzaj w tle"
   Info panel source: 'Źródło: {source}'
   Remove Video from Queue: Usuń z kolejki
   External DRM Protected: "OpenTubeX nie może odtwarzać filmów chronionych przez DRM, ponieważ wymagają one obsługi zastrzeżonych prawnie komponentów o zamkniętym kodzie."

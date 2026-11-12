@@ -1618,6 +1618,7 @@ Channel:
     Shows: Sioeau
     This channel does not currently have any shows: Nid oes gan y sianel hon unrhyw sioeau ar hyn o bryd
 Video:
+  Play in Background: "Chwarae yn y cefndir"
   Info panel source: 'Ffynhonnell: {source}'
   External DRM Protected: "Nid oes modd chwarae fideos gwarchodedig DRM yn OpenTubeX, gan fod angen cydrannau ffynhonnell gaeedig perchnogol arnynt."
   Invalid Media URL: "URL cyfryngau annilys"

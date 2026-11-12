@@ -1603,6 +1603,7 @@ Channel:
     Members-only video hidden by OpenTubeX: "Yalnızca üyelere özel video OpenTubeX tarafından gizlendi"
     Video hidden by OpenTubeX because of its title: "Başlığında gizlenen metin bulunduğu için video OpenTubeX tarafından gizlendi"
 Video:
+  Play in Background: "Arka Planda Oynat"
   Info panel source: 'Kaynak: {source}'
   External DRM Protected: "DRM korumalı videolar, özel kapalı kaynak bileşenleri gerektirdiğinden OpenTubeX ile oynatılamaz."
   Invalid Media URL: "Geçersiz medya URL'si"

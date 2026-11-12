@@ -1617,6 +1617,7 @@ Channel:
     Shows: Acara
     This channel does not currently have any shows: Saluran ini saat ini tidak memiliki acara apa pun
 Video:
+  Play in Background: "Putar di Latar Belakang"
   Info panel source: 'Sumber: {source}'
   External DRM Protected: "Video yang dilindungi DRM tidak dapat diputar di OpenTubeX, karena memerlukan komponen sumber tertutup dan berpemilik."
   Invalid Media URL: "URL media tidak valid"

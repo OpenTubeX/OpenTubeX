@@ -1603,6 +1603,7 @@ Channel:
     Members-only video hidden by OpenTubeX: "OpenTubeX-ek kideentzako soilik den bideoa ezkutatu du"
     Video hidden by OpenTubeX because of its title: "OpenTubeX-ek bideoa ezkutatu du, izenburuak testu ezkutatua duelako"
 Video:
+  Play in Background: "Erreproduzitu atzeko planoan"
   Info panel source: 'Iturria: {source}'
   External DRM Protected: "DRM babestutako bideoak ezin dira erreproduzitu OpenTubeXn, kode itxiko osagai jabedunak behar baitituzte."
   Invalid Media URL: "Multimedia URLa ez da baliozkoa"

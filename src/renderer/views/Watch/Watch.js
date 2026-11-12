@@ -14,7 +14,7 @@ import { probeHlsManifest } from '../../helpers/player/hlsManifest'
 import { getAudioFormatLoudness } from '../../helpers/player/loudnessNormalization'
 import { releaseAndroidRotationFullscreenHandoff } from '../../helpers/player/androidFullscreen'
 import { sampleRecommendationPlayback } from '../../../recommendation-learning'
-import { defineComponent, markRaw, shallowRef } from 'vue'
+import { defineComponent, inject, markRaw, shallowRef } from 'vue'
 import { Capacitor } from '@capacitor/core'
 import { useRoute, useRouter } from 'vue-router'
 import { mapActions } from 'vuex'
@@ -148,7 +148,8 @@ import { isAttestedPoToken } from '../../../main/attestedPoToken'
 import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
 import { limitQualityOnMeteredNetwork } from '../../helpers/player/meteredNetworkQuality'
 import { useI18n } from 'vue-i18n'
-import { useTabAvatar, useTabContext, useTabTitle } from '../../tabs/TabContext'
+import { useTabAvatar, useTabContext, useTabTitle, watchNavigationKey } from '../../tabs/TabContext'
+import { SCROLL_MINI_MIN_INLINE_LAYOUT_HEIGHT } from '../../helpers/scrollMiniPlayer'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 import { keepTabLoaded } from '../../tabs/TabResidency'
 import { useTabToast } from '../../composables/useTabToast'
@@ -263,6 +264,7 @@ export default defineComponent({
     const tabRoute = useRoute()
     const tabRouter = useRouter()
     const { tabId, isTabPresented, lifecycle: tabLifecycle } = useTabContext()
+    const watchNavigation = inject(watchNavigationKey, null)
     const setTabTitle = useTabTitle()
     const setTabAvatar = useTabAvatar()
     const showTabToast = useTabToast()
@@ -280,6 +282,7 @@ export default defineComponent({
       tabId,
       isTabPresented,
       tabLifecycle,
+      watchNavigation,
       tabRoute,
       tabRouter,
       setTabTitle,
@@ -1629,7 +1632,11 @@ export default defineComponent({
     this.isShort = this.tabRoute.query.short === 'true'
     this.useCustomShortsPlayerForCurrentVideo = this.$store.getters.getUseCustomShortsPlayer
     this.videoAspectRatio = this.isShort ? 9 / 16 : null
-    this.activeFormat = this.defaultVideoFormat
+    if (this.applyBackgroundStart()) {
+      // Its Watch page has never been shown, so it cannot measure the inline
+      // player. The smallest dockable height lets returning to it measure one.
+      this.miniPlayerStartHeight = SCROLL_MINI_MIN_INLINE_LAYOUT_HEIGHT
+    }
     // So that the value for this session remains unchanged even if setting changed
     this.autoplayNextRecommendedVideo = this.autoplayNextRecommendedVideoByDefault
     this.autoplayNextPlaylistVideo = this.autoplayNextPlaylistVideoByDefault
@@ -2410,6 +2417,30 @@ export default defineComponent({
       }
     },
 
+    /**
+     * Sets the format for a new video. Play in Background starts it with
+     * audio only and plays it even where videos do not autoplay.
+     *
+     * @returns {boolean} whether Play in Background started this video
+     */
+    applyBackgroundStart() {
+      const backgroundStart = this.watchNavigation?.takeBackgroundStart?.(this.tabRoute.fullPath) === true
+      this.activeFormat = backgroundStart ? 'audio' : this.defaultVideoFormat
+      if (backgroundStart) this.queuedPlaybackVideoId = this.tabRoute.params.id
+      return backgroundStart
+    },
+
+    /** Plays the current video with audio only, as Play in Background does. */
+    resumeInBackground() {
+      if (this.activeFormat === 'audio' || !this.audioFormatAvailable) {
+        this.$refs.player?.play()?.catch(() => {})
+        return
+      }
+      // The audio source starts playing once it loads.
+      this.queuedPlaybackVideoId = this.videoId
+      this.activeFormat = 'audio'
+    },
+
     activateWatchRuntime() {
       if (this.isTabPresented === false) {
         return
@@ -2545,7 +2576,7 @@ export default defineComponent({
       // navigation, so a tab that was presented for the previous video must not
       // keep that state while it loads the next one in the background.
       this.hasBeenPresented = this.isCurrentlyPresented()
-      this.activeFormat = this.defaultVideoFormat
+      this.applyBackgroundStart()
 
       this.checkIfTimestamp()
       this.checkIfPlaylist()

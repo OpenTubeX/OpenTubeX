@@ -48,6 +48,8 @@ function mountWatch(t, { tab = null, paused = false, hasLoaded = true, mounted =
     removeEventListener(name) { listeners.delete(name) }
   }
   let lifecycle
+  let exposed
+  let resumes = 0
   let disposals = 0
   async function navigate(path) {
     const to = { path, fullPath: path, params: {} }
@@ -84,9 +86,10 @@ function mountWatch(t, { tab = null, paused = false, hasLoaded = true, mounted =
     useRootClass: (name, active) => rootClasses.set(name, active),
     defineProps: () => props,
     defineEmits: () => () => {},
+    defineExpose: value => { exposed = value },
     // The native scroll mini player lives outside the watch view's DOM tree.
     // Its component reference must remain usable without a DOM video descendant.
-    useTemplateRef: name => name === 'watchRoot' ? ref(previewRoot) : name === 'previewHost' ? ref({ getBoundingClientRect: () => hostBounds, closest: () => ({ getBoundingClientRect: () => tabBounds }) }) : ref(mounted ? { $refs: { player: { hasLoaded: loaded, isPaused: () => video.paused, exitPresentationModes } }, querySelector: () => null } : null),
+    useTemplateRef: name => name === 'watchRoot' ? ref(previewRoot) : name === 'previewHost' ? ref({ getBoundingClientRect: () => hostBounds, closest: () => ({ getBoundingClientRect: () => tabBounds }) }) : ref(mounted ? { $refs: { player: { hasLoaded: loaded, isPaused: () => video.paused, exitPresentationModes } }, querySelector: () => null, resumeInBackground: () => { resumes++ } } : null),
     provide: (key, value) => provides.set(key, value),
     onBeforeUnmount: callback => unmount.push(callback),
     store: {
@@ -98,7 +101,7 @@ function mountWatch(t, { tab = null, paused = false, hasLoaded = true, mounted =
       }
     },
     resolveRouteComponent: () => ({}),
-    getTabNavigationService: () => ({ createRouterFacade: () => ({ beforeEach: guard => { navigationGuards.add(guard); return () => navigationGuards.delete(guard) } }), setTitle: (...args) => titles.push(args), back: () => navigate(props.route.path === '/subscriptions' ? '/watch/video' : previous), forward: () => navigate('/watch/video'), push: (_id, path) => navigate(path) }),
+    getTabNavigationService: () => ({ createRouterFacade: () => ({ beforeEach: guard => { navigationGuards.add(guard); return () => navigationGuards.delete(guard) } }), setTitle: (...args) => titles.push(args), resolve: path => ({ path, fullPath: path, params: {} }), updateRetainedWatchEntry: () => {}, back: () => navigate(props.route.path === '/subscriptions' ? '/watch/video' : previous), forward: () => navigate('/watch/video'), push: (_id, path) => navigate(path) }),
     tabLifecycleService: { register: (_id, hooks) => { lifecycle = hooks; return () => {} } },
     tabLifecycleKey: 'lifecycle',
     tabPresentedKey: 'presented',
@@ -137,6 +140,8 @@ function mountWatch(t, { tab = null, paused = false, hasLoaded = true, mounted =
     titles,
     updateTitle,
     disposals: () => disposals,
+    exposed: () => exposed,
+    resumes: () => resumes,
     savedBrowsingScroll: () => savedBrowsingScroll,
     navigate
   }
@@ -420,6 +425,34 @@ for (const commit of [true, false]) {
     assert.equal(mounted.props.route.path, '/watch/video')
   })
 }
+
+test('play in background docks a new player and switches it in place without leaving the page', async t => {
+  const mounted = mountWatch(t, { paused: true, enabled: false })
+  const navigation = mounted.provides.get('navigation')
+  await mounted.navigate('/subscriptions')
+  assert.equal(mounted.disposals(), 1)
+  assert.equal(navigation.detached.value, false)
+
+  await mounted.exposed().playInBackground('/watch/other')
+  assert.equal(mounted.props.route.path, '/subscriptions')
+  assert.equal(mounted.provides.get('route').fullPath, '/watch/other')
+  assert.equal(navigation.detached.value, true)
+  assert.equal(navigation.minimized.value, true, 'docks where navigation playback is off')
+  assert.equal(navigation.takeBackgroundStart('/watch/other'), true)
+  assert.equal(navigation.takeBackgroundStart('/watch/other'), false, 'a later reload uses the default format')
+
+  await mounted.exposed().playInBackground('/watch/third')
+  assert.equal(mounted.provides.get('route').fullPath, '/watch/third')
+  assert.equal(mounted.disposals(), 1, 'the docked Watch page loads the next video in place')
+  assert.equal(navigation.takeBackgroundStart('/watch/third'), true)
+  // The docked video itself has no route change to load audio from.
+  await mounted.exposed().playInBackground('/watch/third')
+  assert.equal(mounted.resumes(), 1)
+
+  await navigation.returnToVideo()
+  assert.equal(mounted.props.route.path, '/watch/third')
+  assert.equal(navigation.detached.value, false)
+})
 
 test('closing the retained mini player disposes and unmounts Watch', async t => {
   const mounted = mountWatch(t)

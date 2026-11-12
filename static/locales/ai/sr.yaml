@@ -1664,6 +1664,7 @@ Channel:
     Shows: Емисије
     This channel does not currently have any shows: Овај канал тренутно нема ниједну емисију
 Video:
+  Play in Background: "Репродукуј у позадини"
   Info panel source: 'Извор: {source}'
   External DRM Protected: "Видео снимци заштићени DRM не могу се репродуковати у OpenTubeX-у, јер захтевају власничке компоненте затвореног кода."
   Invalid Media URL: "Неважећа URL адреса медија"

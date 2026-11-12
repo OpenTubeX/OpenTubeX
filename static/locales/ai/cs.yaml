@@ -1603,6 +1603,7 @@ Channel:
     Members-only video hidden by OpenTubeX: "OpenTubeX skryl video pouze pro členy"
     Video hidden by OpenTubeX because of its title: "OpenTubeX skryl video, protože jeho název obsahuje skrytý text"
 Video:
+  Play in Background: "Přehrát na pozadí"
   Info panel source: 'Zdroj: {source}'
   External DRM Protected: "Videa chráněná DRM nelze v aplikaci OpenTubeX přehrávat, protože vyžadují proprietární komponenty s uzavřeným zdrojovým kódem."
   Invalid Media URL: "Neplatná adresa URL média"

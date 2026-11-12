@@ -1931,6 +1931,7 @@ Channel:
     Shows: Laidos
     This channel does not currently have any shows: Šiame kanale šiuo metu nėra laidų
 Video:
+  Play in Background: "Leisti fone"
   Info panel source: 'Šaltinis: {source}'
   External DRM Protected: "DRM apsaugotų vaizdo įrašų negalima leisti naudojant OpenTubeX, nes jiems reikia nuosavybinių uždarojo kodo komponentų."
   Invalid Media URL: "Neteisingas medijos URL"

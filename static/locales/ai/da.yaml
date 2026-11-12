@@ -1668,6 +1668,7 @@ Channel:
     Shows: Serier
     This channel does not currently have any shows: Denne kanal har i øjeblikket ingen serier
 Video:
+  Play in Background: "Afspil i baggrunden"
   Info panel source: 'Kilde: {source}'
   External DRM Protected: "DRM-beskyttede videoer kan ikke afspilles i OpenTubeX, da de kræver proprietære komponenter med lukket kilde."
   Invalid Media URL: "Ugyldig medie-URL"

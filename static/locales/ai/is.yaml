@@ -1614,6 +1614,7 @@ Channel:
     Shows: Þættir
     This channel does not currently have any shows: Þessi rás er ekki með neina þætti
 Video:
+  Play in Background: "Spila í bakgrunni"
   Info panel source: 'Heimild: {source}'
   External DRM Protected: "Ekki er hægt að spila DRM-varin myndskeið í OpenTubeX, þar sem þau krefjast notkunar lokaðs séreignarhugbúnaðar."
   Invalid Media URL: "Ógild slóð á miðil"

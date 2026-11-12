@@ -1645,6 +1645,7 @@ Channel:
     Shows: תוכניות
     This channel does not currently have any shows: ערוץ זה אינו כולל כרגע תוכניות
 Video:
+  Play in Background: "הפעלה ברקע"
   Info panel source: 'מקור: {source}'
   External DRM Protected: "סרטונים המוגנים ב-DRM אינם יכולים להתנגן ב-OpenTubeX, מכיוון שהם דורשים רכיבים קנייניים בקוד סגור."
   Invalid Media URL: "כתובת URL של מדיה אינה תקינה"

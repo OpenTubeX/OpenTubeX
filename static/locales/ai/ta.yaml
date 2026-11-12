@@ -1651,6 +1651,7 @@ Channel:
     Shows: நிகழ்ச்சிகள்
     This channel does not currently have any shows: இந்த சேனலில் தற்போது எந்த நிகழ்ச்சிகளும் இல்லை
 Video:
+  Play in Background: "பின்னணியில் இயக்கு"
   Info panel source: 'மூலம்: {source}'
   External DRM Protected: "டி.ஆர்.எம் பாதுகாக்கப்பட்ட வீடியோக்களை OpenTubeX-இல் இயக்க முடியாது, ஏனெனில் அவற்றுக்கு தனியுரிம, மூடிய மூல கூறுகள் தேவைப்படுகின்றன."
   Invalid Media URL: "தவறான ஊடக URL"

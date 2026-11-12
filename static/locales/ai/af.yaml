@@ -1833,6 +1833,7 @@ Channel:
     Shows: Programme
     This channel does not currently have any shows: Hierdie kanaal het tans geen programme nie
 Video:
+  Play in Background: "Speel in die agtergrond"
   Mark As Fully Watched: Merk as volledig gekyk
   AI-generated video summary: KI-gegenereerde video-opsomming
   Quality and accuracy may vary: Kwaliteit en akkuraatheid kan wissel

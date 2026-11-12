@@ -1598,6 +1598,7 @@ Channel:
     Shows: Shows
     This channel does not currently have any shows: This channel does not currently have any shows
 Video:
+  Play in Background: "Play in Background"
   Info panel source: 'Source: {source}'
   External DRM Protected: "DRM protected videos cannot be played in OpenTubeX, as they require proprietary, closed source components."
   Invalid Media URL: "Invalid media URL"

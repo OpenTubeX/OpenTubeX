@@ -76,6 +76,8 @@ let disposed = false
 let watchTitle = ''
 // The history entry of the Watch page while it plays on behind browsing pages.
 let retainedHistoryIndex = -1
+// The route that Play in Background starts, until its Watch page loads it.
+let backgroundStartPath = null
 let watchTitleOptions
 let disposalPromise = null
 
@@ -373,6 +375,38 @@ function clearMinimizePreview() {
   }
 }
 
+/**
+ * Plays a video in this tab's mini player while the browsing page stays.
+ * A player that already plays there switches to the video in place.
+ *
+ * @param {import('vue-router').RouteLocationRaw} location
+ */
+async function playInBackground(location) {
+  await disposalPromise
+  if (isWatchRoute.value) return
+  const route = navigation.resolve(location)
+  if (detached.value && !disposed) {
+    if (route.fullPath === watchRoute.value.fullPath) {
+      watchView.value?.resumeInBackground()
+      return
+    }
+    navigation.updateRetainedWatchEntry(props.tabId, retainedHistoryIndex, watchRoute.value.fullPath, { route })
+  } else {
+    disposed = false
+    retained.value = true
+    // Docks like a minimized Watch page, even where navigation playback is
+    // off. Its route has no history entry until the user opens the video.
+    minimized.value = true
+    retainedHistoryIndex = -1
+    watchTitleOptions = undefined
+  }
+  backgroundStartPath = route.fullPath
+  watchTitle = ''
+  setWatchRoute(route)
+}
+
+defineExpose({ playInBackground })
+
 async function dismiss() {
   if (!detached.value) return
   await dispose()
@@ -399,7 +433,13 @@ provide(watchNavigationKey, {
     watchTitleOptions = options
     if (options?.resolveHistoryEntry !== false) navigation.updateRetainedWatchEntry(props.tabId, retainedHistoryIndex, watchRoute.value.fullPath, { title })
   },
-  returnToVideo: () => navigation.push(props.tabId, watchRoute.value.fullPath)
+  returnToVideo: () => navigation.push(props.tabId, watchRoute.value.fullPath),
+  /** Whether Play in Background started this route, once per start. */
+  takeBackgroundStart: fullPath => {
+    const started = backgroundStartPath === fullPath
+    backgroundStartPath = null
+    return started
+  }
 })
 
 function setWatchRoute(route) {
