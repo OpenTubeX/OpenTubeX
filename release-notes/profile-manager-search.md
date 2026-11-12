@@ -1,8 +1,8 @@
 ---
-category: improvement
+category: feature
 ---
 
-The Profile Manager opens profiles with many subscriptions without freezing, and a new search field filters their channels.
+The Profile Manager has a search field for a profile's channels, and profiles with many subscriptions open without freezing.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/b43cf3be-1a3b-4183-bb20-ccc5f5d5c1c7">
