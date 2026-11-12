@@ -483,10 +483,15 @@ test.describe('Channels on other platforms', () => {
         channel: { name: 'makers', host: 'peertube.example.test', displayName: 'Makers' }
       })
       const peerTubeRequests = []
+      let failingVideoRequests = 0
       await mockTwitch(page, { [CHANNEL.id]: twitchUser(CHANNEL) })
       await page.route('https://peertube.example.test/**', (route) => {
         const url = new URL(route.request().url())
         peerTubeRequests.push(url.pathname)
+        if (url.pathname === '/api/v1/video-channels/makers/videos' && failingVideoRequests > 0) {
+          failingVideoRequests--
+          return route.fulfill({ status: 500, json: {} })
+        }
         if (url.pathname.startsWith('/lazy-static/')) return route.fulfill({ path: THUMBNAIL_PATH })
         if (url.pathname === '/api/v1/video-channels/makers') {
           return route.fulfill({ json: { name: 'makers', host: 'peertube.example.test', displayName: 'Makers', url: 'https://peertube.example.test/video-channels/makers', followersCount: 950, avatars: [{ path: '/lazy-static/avatars/makers.jpg', width: 120 }] } })
@@ -522,6 +527,8 @@ test.describe('Channels on other platforms', () => {
       await page.getByRole('button', { name: /Refresh Platforms/ }).click()
       await expect.poll(() => peerTubeRequests.slice(requestCount)).toContain('/api/v1/video-channels/makers/videos')
 
+      // The channel's first page fails once, and loads when tried again
+      failingVideoRequests = 1
       await page.locator('#subscriptionsPanel .channelName').first().click()
       await expect.poll(() => page.evaluate(() => {
         const { path, query } = window.$router.currentRoute.value
@@ -529,6 +536,8 @@ test.describe('Channels on other platforms', () => {
       })).toEqual({ path: '/external-channel', query: { platform: 'peertube', id: 'makers@peertube.example.test' } })
       await expect(page.locator('.channelHeader .channelName')).toHaveText('Makers')
       await expect(page.locator('.channelMeta')).toContainText('950 followers')
+      await expect(page.getByText('This page could not be loaded from PeerTube.')).toBeVisible()
+      await page.getByRole('button', { name: 'Retry' }).click()
       await expect(page.locator('.ft-list-item .h3Title')).toHaveText(['Makers newest video', 'Makers older video'])
 
       // The tabbed view has a tab for each kind of item the shown platforms have

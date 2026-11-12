@@ -9,6 +9,14 @@
       >
         {{ t('Platforms.Load Error', { platform: platform.name }) }}
       </p>
+      <!-- Later pages try again with their next page button -->
+      <FtFlexBox v-if="error && results.length === 0">
+        <FtButton
+          :label="t('User Playlists.SinglePlaylistView.Retry')"
+          :icon="['fas', 'sync']"
+          @click="search(false)"
+        />
+      </FtFlexBox>
       <PlatformResultList :results="results" />
       <!-- After a failed page, the button tries again -->
       <FtAutoLoadNextPageWrapper
@@ -45,6 +53,8 @@ import { useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
 
 import FtAutoLoadNextPageWrapper from '../FtAutoLoadNextPageWrapper.vue'
+import FtButton from '../FtButton/FtButton.vue'
+import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
 import PlatformResultList from '../PlatformResultList/PlatformResultList.vue'
 

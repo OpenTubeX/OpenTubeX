@@ -127,6 +127,14 @@
           >
             {{ t('Platforms.Empty Tab') }}
           </p>
+          <!-- Later pages try again with their next page button -->
+          <FtFlexBox v-if="page.error && !page.loaded">
+            <FtButton
+              :label="t('User Playlists.SinglePlaylistView.Retry')"
+              :icon="['fas', 'sync']"
+              @click="loadPage(currentTab)"
+            />
+          </FtFlexBox>
           <PlatformResultList
             :results="page.results"
             :avatar="channel.avatar ?? null"
