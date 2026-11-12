@@ -1,5 +1,5 @@
 import { createDefaultSettings, resolveDefaultLandingPage } from '../../../settingsDefaults.js'
-import { NON_TRANSFERABLE_SETTINGS } from '../../../nonTransferableSettings.js'
+import { getTransferableSettings, NON_TRANSFERABLE_SETTINGS } from '../../../nonTransferableSettings.js'
 import { normalizeMaterialSeedColor } from '../../../materialTheme.js'
 import { normalizeSignalAccentColor } from '../../../signalTheme.js'
 import i18n, { loadLocale, setAITranslationCompletionsEnabled } from '../../i18n/index'
@@ -587,13 +587,7 @@ const customGetters = {
   },
 
   getTransferableSettings: (state) => {
-    const transferableSettings = {}
-    for (const [key, value] of Object.entries(state)) {
-      if (!NON_TRANSFERABLE_SETTINGS.has(key)) {
-        transferableSettings[key] = value
-      }
-    }
-    return transferableSettings
+    return getTransferableSettings(state)
   },
 
   getDefaultPlayback(state) {

@@ -3,7 +3,7 @@ import { DatabaseSync } from 'node:sqlite'
 import { SqliteDatastore } from '../datastores/sqlite.js'
 import { desktopDatastorePaths } from '../datastores/sqliteNode.js'
 import { migrateLegacyHistoryRecord } from '../history.js'
-import { NON_TRANSFERABLE_SETTINGS } from '../nonTransferableSettings.js'
+import { getTransferableSettings } from '../nonTransferableSettings.js'
 import { createDefaultSettings, resolveDefaultLandingPage } from '../settingsDefaults.js'
 import { BACKUP_SECTIONS, createUnifiedBackup } from '../renderer/helpers/unifiedBackup.js'
 import { migrateLegacySettings } from '../renderer/helpers/settings-migrations.js'
@@ -45,7 +45,7 @@ async function prepareArchive() {
         landingPage: resolveDefaultLandingPage(isFreshInstallation),
         ...migrateLegacySettings(Object.fromEntries(savedSettings.map(setting => [setting._id, setting.value]))),
       }
-      return Object.fromEntries(Object.entries(resolvedSettings).filter(([key]) => !NON_TRANSFERABLE_SETTINGS.has(key)))
+      return getTransferableSettings(resolvedSettings)
     },
     profiles: () => open('profiles').findAsync({}),
     playlists: () => open('playlists', 'videos').findAsync({}),

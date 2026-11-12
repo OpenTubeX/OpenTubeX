@@ -23,7 +23,11 @@ const data = {
 }
 const transferableDefaults = Object.fromEntries(Object.entries(createDefaultSettings({ supportsLocalApi: true, isElectron: true }))
   .filter(([key]) => !NON_TRANSFERABLE_SETTINGS.has(key)))
-const expectedData = { ...data, settings: { ...transferableDefaults, ...data.settings, landingPage: 'subscriptions' } }
+const expectedData = {
+  ...data,
+  // The instance's username and password stay on this device
+  settings: { ...transferableDefaults, ...data.settings, landingPage: 'subscriptions', defaultInvidiousInstance: 'https://invidious.example' },
+}
 
 async function setup(t) {
   const directory = await mkdtemp(path.join(tmpdir(), 'opentubex-backups-'))
@@ -32,7 +36,8 @@ async function setup(t) {
   t.after(() => rm(profileDirectory, { recursive: true, force: true }))
   const collections = {
     settings: [...Object.entries(data.settings).map(([_id, value]) => ({ _id, value })),
-      { _id: 'syncServerToken', value: 'excluded-test-token' }, { _id: 'scheduledBackupEnabled', value: true }],
+      { _id: 'syncServerToken', value: 'excluded-test-token' }, { _id: 'scheduledBackupEnabled', value: true },
+      { _id: 'defaultInvidiousInstance', value: 'https://user:p%40ss@invidious.example' }],
     profiles: data.profiles,
     playlists: data.playlists,
     history: data.history,
