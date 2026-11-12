@@ -178,17 +178,19 @@ async function importSubscriptions() {
   importing.value = true
   // The profile active when the import started, even if the user switches meanwhile.
   const profileIds = new Set([MAIN_PROFILE_ID, store.getters.getActiveProfile._id])
+  // Signing out, or into another account, meanwhile drops the result.
   const refreshToken = account.value?.credentials.refresh_token
+  const sameSignIn = () => account.value?.credentials.refresh_token === refreshToken
   try {
     const channels = await getYouTubeAccountSubscriptions()
-    // Signed out, or into another account, meanwhile.
-    if (account.value?.credentials.refresh_token !== refreshToken) return
+    if (!sameSignIn()) return
     if (channels.length === 0) {
       showToast({ message: t('Settings.YouTube Account Settings.No Subscriptions to Import'), icon: ['fas', 'subscriptions'] })
       return
     }
 
     for (const profileId of profileIds) {
+      if (!sameSignIn()) return
       if (await store.dispatch('mergeImportedProfile', { _id: profileId, subscriptions: channels }) !== true) {
         throw new Error('Could not save the imported subscriptions')
       }

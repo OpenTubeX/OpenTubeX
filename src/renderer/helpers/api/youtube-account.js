@@ -263,13 +263,15 @@ async function getCredentials() {
 async function withAccount(callback, options = {}) {
   // Taken before waiting, so a channel switch meanwhile does not apply.
   const account = options.account === undefined ? getAccount() : options.account
+  if (!account) throw new Error('Not signed in to a YouTube account')
   const credentials = await getCredentials()
+  const innertube = await createAccountInnertube(credentials, { userAgent: options.userAgent, pageId: account.pageId ?? null })
   // Signed out, or into another account, while waiting.
-  if (!account || credentials.refresh_token !== account.credentials.refresh_token ||
+  if (credentials.refresh_token !== account.credentials.refresh_token ||
     getAccount()?.credentials.refresh_token !== account.credentials.refresh_token) {
     throw new Error('Not signed in to the YouTube account that started this')
   }
-  return await callback(await createAccountInnertube(credentials, { userAgent: options.userAgent, pageId: account.pageId ?? null }))
+  return await callback(innertube)
 }
 
 /**
