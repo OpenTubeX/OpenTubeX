@@ -236,6 +236,7 @@ jobs:
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-linux-x64-portable.zip
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}.zip
+        retention-days: 3
 
     - name: Upload Linux .7z x64 Artifact
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -243,6 +244,7 @@ jobs:
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-linux-x64-portable.7z
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}.7z
+        retention-days: 3
 
     - name: Upload Linux .zip ARM64 Artifact
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -250,6 +252,7 @@ jobs:
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-linux-arm64-portable.zip
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-arm64.zip
+        retention-days: 3
 
     - name: Upload Linux .7z ARM64 Artifact
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -257,6 +260,7 @@ jobs:
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-linux-arm64-portable.7z
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-arm64.7z
+        retention-days: 3
 
     - name: Upload .deb x64 Artifact
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -264,6 +268,7 @@ jobs:
       with:
         name: opentubex_${{ steps.versionNumber.outputs.version }}_amd64.deb
         path: build/opentubex_${{ steps.versionNumber.outputs.version }}_amd64.deb
+        retention-days: 3
 
     - name: Upload .deb ARM64 Artifact
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -271,6 +276,7 @@ jobs:
       with:
         name: opentubex_${{ steps.versionNumber.outputs.version }}_arm64.deb
         path: build/opentubex_${{ steps.versionNumber.outputs.version }}_arm64.deb
+        retention-days: 3
 
     - name: Upload AppImage x64 Artifact
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -278,6 +284,7 @@ jobs:
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-amd64.AppImage
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-amd64.AppImage
+        retention-days: 3
 
     - name: Upload AppImage ARM64 Artifact
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -285,6 +292,7 @@ jobs:
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-arm64.AppImage
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-arm64.AppImage
+        retention-days: 3
 
     - name: Upload .rpm x64 Artifact
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -292,6 +300,7 @@ jobs:
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}.amd64.rpm
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}.x86_64.rpm
+        retention-days: 3
 
     - name: Upload .rpm ARM64 Artifact
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -299,6 +308,7 @@ jobs:
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}.arm64.rpm
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}.aarch64.rpm
+        retention-days: 3
 
     - name: Upload Pacman .pacman x64 Artifact
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -306,6 +316,7 @@ jobs:
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-amd64.pacman
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}.pacman
+        retention-days: 3
 
     - name: Upload Windows x64 .exe Artifact
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -313,6 +324,7 @@ jobs:
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-setup-x64.exe
         path: build/opentubex Setup ${{ steps.versionNumber.outputs.version }}.exe
+        retention-days: 3
 
     - name: Upload Windows x64 .zip Artifact
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -320,6 +332,7 @@ jobs:
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-win-x64-portable.zip
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-win.zip
+        retention-days: 3
 
     - name: Upload Windows x64 .7z Artifact
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -327,6 +340,7 @@ jobs:
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-win-x64-portable.7z
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-win.7z
+        retention-days: 3
 
     - name: Upload Windows arm64 .exe Artifact
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -334,6 +348,7 @@ jobs:
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-setup-arm64.exe
         path: build/opentubex Setup ${{ steps.versionNumber.outputs.version }}.exe
+        retention-days: 3
 
     - name: Upload Windows arm64 .zip Artifact
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -342,6 +357,7 @@ jobs:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-win-arm64-portable.zip
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-arm64-win.zip
         if-no-files-found: error
+        retention-days: 3
 
     - name: Upload Windows arm64 .7z Artifact
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -350,6 +366,7 @@ jobs:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-win-arm64-portable.7z
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-arm64-win.7z
         if-no-files-found: error
+        retention-days: 3
 
     - name: Upload Mac x64 .dmg Artifact
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -357,6 +374,7 @@ jobs:
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-mac-x64.dmg
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}.dmg
+        retention-days: 3
 
     - name: Upload Mac x64 .zip Artifact
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -364,6 +382,7 @@ jobs:
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-mac-x64.zip
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-mac.zip
+        retention-days: 3
 
     - name: Upload Mac x64 .7z Artifact
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -371,6 +390,7 @@ jobs:
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-mac-x64.7z
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-mac.7z
+        retention-days: 3
 
     - name: Upload Mac arm64 .dmg Artifact
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -378,6 +398,7 @@ jobs:
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-mac-arm64.dmg
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-arm64.dmg
+        retention-days: 3
 
     - name: Upload Mac arm64 .zip Artifact
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -385,6 +406,7 @@ jobs:
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-mac-arm64.zip
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-arm64-mac.zip
+        retention-days: 3
 
     - name: Upload Mac arm64 .7z Artifact
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -392,6 +414,7 @@ jobs:
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-mac-arm64.7z
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-arm64-mac.7z
+        retention-days: 3
 
     - name: Save pnpm cache
       uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -511,6 +534,7 @@ jobs:
         name: opentubex-${{ steps.apk.outputs.version }}-android-arm64-v8a.apk
         path: android-apks/opentubex-${{ steps.apk.outputs.version }}-android-arm64-v8a.apk
         if-no-files-found: error
+        retention-days: 3
 
     - name: Upload Android armeabi-v7a APK
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -518,6 +542,7 @@ jobs:
         name: opentubex-${{ steps.apk.outputs.version }}-android-armeabi-v7a.apk
         path: android-apks/opentubex-${{ steps.apk.outputs.version }}-android-armeabi-v7a.apk
         if-no-files-found: error
+        retention-days: 3
 
     - name: Upload Android x86 APK
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -525,6 +550,7 @@ jobs:
         name: opentubex-${{ steps.apk.outputs.version }}-android-x86.apk
         path: android-apks/opentubex-${{ steps.apk.outputs.version }}-android-x86.apk
         if-no-files-found: error
+        retention-days: 3
 
     - name: Upload Android x86_64 APK
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -532,6 +558,7 @@ jobs:
         name: opentubex-${{ steps.apk.outputs.version }}-android-x86_64.apk
         path: android-apks/opentubex-${{ steps.apk.outputs.version }}-android-x86_64.apk
         if-no-files-found: error
+        retention-days: 3
 
     - name: Upload Android universal APK
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -539,6 +566,7 @@ jobs:
         name: opentubex-${{ steps.apk.outputs.version }}-android-universal.apk
         path: android-apks/opentubex-${{ steps.apk.outputs.version }}-android-universal.apk
         if-no-files-found: error
+        retention-days: 3
 
     - name: Upload Android lite arm64-v8a APK
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -546,6 +574,7 @@ jobs:
         name: opentubex-${{ steps.apk.outputs.version }}-android-lite-arm64-v8a.apk
         path: android-lite-apks/opentubex-${{ steps.apk.outputs.version }}-android-lite-arm64-v8a.apk
         if-no-files-found: error
+        retention-days: 3
 
     - name: Upload Android lite armeabi-v7a APK
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -553,6 +582,7 @@ jobs:
         name: opentubex-${{ steps.apk.outputs.version }}-android-lite-armeabi-v7a.apk
         path: android-lite-apks/opentubex-${{ steps.apk.outputs.version }}-android-lite-armeabi-v7a.apk
         if-no-files-found: error
+        retention-days: 3
 
     - name: Upload Android lite x86 APK
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -560,6 +590,7 @@ jobs:
         name: opentubex-${{ steps.apk.outputs.version }}-android-lite-x86.apk
         path: android-lite-apks/opentubex-${{ steps.apk.outputs.version }}-android-lite-x86.apk
         if-no-files-found: error
+        retention-days: 3
 
     - name: Upload Android lite x86_64 APK
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -567,6 +598,7 @@ jobs:
         name: opentubex-${{ steps.apk.outputs.version }}-android-lite-x86_64.apk
         path: android-lite-apks/opentubex-${{ steps.apk.outputs.version }}-android-lite-x86_64.apk
         if-no-files-found: error
+        retention-days: 3
 
     - name: Upload Android lite universal APK
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -574,6 +606,7 @@ jobs:
         name: opentubex-${{ steps.apk.outputs.version }}-android-lite-universal.apk
         path: android-lite-apks/opentubex-${{ steps.apk.outputs.version }}-android-lite-universal.apk
         if-no-files-found: error
+        retention-days: 3
 
   ios:
     name: Build iOS IPA
