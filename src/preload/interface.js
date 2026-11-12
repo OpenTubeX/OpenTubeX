@@ -18,6 +18,57 @@ if (process.platform === 'win32' || process.platform === 'darwin') {
   document.addEventListener('leavepictureinpicture', () => ipcRenderer.send(IpcChannels.PICTURE_IN_PICTURE_HIDDEN))
 }
 
+/**
+ * The tabs, the settings and the library are read while the renderer bundle
+ * is evaluated and the app mounts. The app's first full read of each takes
+ * that result instead of asking again, unless the datastore changed since.
+ * @type {Map<string, Promise<any>>}
+ */
+const startupReads = new Map()
+let startupReadsStarted = false
+
+function startStartupReads() {
+  if (startupReadsStarted) return
+  startupReadsStarted = true
+
+  startupReads.set(IpcChannels.TABS_GET_STATE, ipcRenderer.invoke(IpcChannels.TABS_GET_STATE))
+  for (const [channel, syncChannel] of [
+    [IpcChannels.DB_SETTINGS, IpcChannels.SYNC_SETTINGS],
+    [IpcChannels.DB_PROFILES, IpcChannels.SYNC_PROFILES],
+    [IpcChannels.DB_HISTORY, IpcChannels.SYNC_HISTORY],
+    [IpcChannels.DB_PLAYLISTS, IpcChannels.SYNC_PLAYLISTS],
+    [IpcChannels.DB_SUBSCRIPTION_CACHE, IpcChannels.SYNC_SUBSCRIPTION_CACHE],
+  ]) {
+    startupReads.set(channel, invokeDatastore(channel, { action: DBActions.GENERAL.FIND }))
+    // Another window changed the datastore before the app listens for that.
+    ipcRenderer.once(syncChannel, () => startupReads.delete(channel))
+  }
+  // A read that nothing takes must not report an unhandled rejection.
+  for (const read of startupReads.values()) read.catch(() => {})
+}
+
+/**
+ * @param {string} channel
+ * @returns {Promise<any> | undefined} the startup read, the first time it is asked for
+ */
+function takeStartupRead(channel) {
+  const read = startupReads.get(channel)
+  startupReads.delete(channel)
+  return read
+}
+
+/**
+ * @param {string} channel
+ * @param {number} action
+ * @param {any} [data]
+ */
+function requestDatastore(channel, action, data) {
+  const startupRead = takeStartupRead(channel)
+  // Any other request may change what the startup read would have returned.
+  if (startupRead && action === DBActions.GENERAL.FIND && !data) return startupRead
+  return invokeDatastore(channel, data ? { action, data } : { action })
+}
+
 let currentUpdateSearchInputTextListener
 let currentYtDlpBinaryDownloadProgressListener
 const ytDlpBinaryDownloadProgressListeners = new Set()
@@ -53,6 +104,16 @@ async function invokeSavingSettings(channel, request) {
   const { result, savedSetting } = await ipcRenderer.invoke(channel, request)
   if (savedSetting) recordSettingRevision(savedSetting._id, savedSetting.revision)
   return result
+}
+
+/**
+ * @param {string} channel
+ * @param {{ action: number, data?: any }} request
+ */
+function invokeDatastore(channel, request) {
+  return channel === IpcChannels.DB_SETTINGS || channel === IpcChannels.DB_HISTORY
+    ? invokeSavingSettings(channel, request)
+    : ipcRenderer.invoke(channel, request)
 }
 
 ipcRenderer.on(IpcChannels.CAST_PROGRESS, (_, progress) => {
@@ -179,6 +240,7 @@ export default {
   /** @param {string} url */
   openExternalLinkInBackground: url => ipcRenderer.invoke(IpcChannels.OPEN_EXTERNAL_LINK_IN_BACKGROUND, url),
   startupSplashReady: () => ipcRenderer.send(IpcChannels.STARTUP_SPLASH_READY),
+  startStartupReads,
   startupAppearance: {
     background: process.argv.find(argument => argument.startsWith('--startup-background='))?.slice('--startup-background='.length),
     dark: process.argv.includes('--startup-dark=true'),
@@ -894,7 +956,7 @@ export default {
       !navigator.userActivation.isActive) {
       return Promise.resolve(null)
     }
-    return invokeSavingSettings(IpcChannels.DB_SETTINGS, data ? { action, data } : { action })
+    return requestDatastore(IpcChannels.DB_SETTINGS, action, data)
   },
 
   /**
@@ -902,7 +964,7 @@ export default {
    * @param {any} [data]
    */
   dbHistory: (action, data) => {
-    return invokeSavingSettings(IpcChannels.DB_HISTORY, data ? { action, data } : { action })
+    return requestDatastore(IpcChannels.DB_HISTORY, action, data)
   },
 
   /**
@@ -924,7 +986,7 @@ export default {
    * @param {any} [data]
    */
   dbProfiles: (action, data) => {
-    return ipcRenderer.invoke(IpcChannels.DB_PROFILES, data ? { action, data } : { action })
+    return requestDatastore(IpcChannels.DB_PROFILES, action, data)
   },
 
   /**
@@ -932,7 +994,7 @@ export default {
    * @param {any} [data]
    */
   dbPlaylists: (action, data) => {
-    return ipcRenderer.invoke(IpcChannels.DB_PLAYLISTS, data ? { action, data } : { action })
+    return requestDatastore(IpcChannels.DB_PLAYLISTS, action, data)
   },
 
   /**
@@ -948,7 +1010,7 @@ export default {
    * @param {any} [data]
    */
   dbSubscriptionCache: (action, data) => {
-    return ipcRenderer.invoke(IpcChannels.DB_SUBSCRIPTION_CACHE, data ? { action, data } : { action })
+    return requestDatastore(IpcChannels.DB_SUBSCRIPTION_CACHE, action, data)
   },
 
   /**
@@ -1368,5 +1430,8 @@ export default {
   },
 
   // Tab management API
-  tabs
+  tabs: {
+    ...tabs,
+    getState: () => takeStartupRead(IpcChannels.TABS_GET_STATE) ?? tabs.getState(),
+  }
 }

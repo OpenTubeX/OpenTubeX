@@ -149,6 +149,10 @@ Options:
 function runApp() {
   let deferredDatastoresStarted = false
 
+  // Electron otherwise builds its default menu before the app is ready, only
+  // for the app's own menu to replace it with the first window.
+  Menu.setApplicationMenu(null)
+
   // Registered synchronously, before any datastore loading started above can finish.
   setupLibraryNotices()
   /** @type {Set<string>} */
@@ -983,7 +987,13 @@ function runApp() {
 
   const PLAYER_CACHE_PATH = `${userDataPath}/player_cache`
 
-  if (!isPortableBuild()) {
+  // Registering asks the desktop and blocks this process until it has answered,
+  // so it waits until the first window has shown its content.
+  let protocolClientRegistered = false
+  function registerProtocolClient() {
+    if (protocolClientRegistered || isPortableBuild()) return
+    protocolClientRegistered = true
+
     // See: https://stackoverflow.com/questions/45570589/electron-protocol-handler-not-working-on-windows
     // remove so we can register each time as we run the app.
     app.removeAsDefaultProtocolClient('opentubex')
@@ -1932,6 +1942,9 @@ function runApp() {
             height: 800
           }
     })
+    // Electron loads its fetch implementation when the first request reaches a
+    // protocol handler. Load it while the renderer process starts instead.
+    Reflect.get(globalThis, 'Request')
     newWindow.once('show', () => {
       if (deferredDatastoresStarted) return
       deferredDatastoresStarted = true
@@ -2227,6 +2240,7 @@ function runApp() {
     }
 
     const initialization = initializeTabs()
+    initialization.then(registerProtocolClient, registerProtocolClient)
     if (!waitForInitialization) {
       initialization.catch(error => {
         console.error('Failed to initialize tabs', error)

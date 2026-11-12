@@ -2,7 +2,7 @@ import { createDefaultSettings, resolveDefaultLandingPage } from '../../../setti
 import { getTransferableSettings, NON_TRANSFERABLE_SETTINGS } from '../../../nonTransferableSettings.js'
 import { normalizeMaterialSeedColor } from '../../../materialTheme.js'
 import { normalizeSignalAccentColor } from '../../../signalTheme.js'
-import i18n, { loadLocale, setAITranslationCompletionsEnabled } from '../../i18n/index'
+import i18n, { loadLocale, rememberStartupLocale, setAITranslationCompletionsEnabled } from '../../i18n/index'
 import allLocales from '../../../../static/locales/activeLocales.json'
 import { applyKeyboardShortcutOverrides, resolveLandingPage, sanitizeKeyboardShortcutOverrides, SyncEvents } from '../../../constants'
 import { DBProfileHandlers, DBSettingHandlers } from '../../../datastores/handlers/index'
@@ -348,6 +348,7 @@ const sideEffectHandlers = {
 
     if (!isLatest()) return
     i18n.global.locale.value = targetLocale
+    rememberStartupLocale(targetLocale)
     await dispatch('getRegionData', targetLocale)
   }),
 
@@ -1076,6 +1077,20 @@ const customActions = {
       const alreadyTriggeredSideEffects = []
       const sideEffectPromises = []
 
+      // The icons load alongside the other settings' side effects. A pack that
+      // cannot load is replaced by the other one, which is then saved.
+      let iconPackApplied
+      const applyIconPack = (value) => {
+        iconPackApplied = dispatch(defaultSideEffectsTriggerId('iconPack'), value).then(async (resolvedValue) => {
+          if (resolvedValue !== value) {
+            await DBSettingHandlers.upsert('iconPack', resolvedValue)
+            commit('setIconPack', resolvedValue)
+          }
+        })
+        // A failure is handled where the result is awaited below.
+        iconPackApplied.catch(() => {})
+      }
+
       for (const { _id, value } of userSettings) {
         let resolvedValue = value
         if (_id === 'syncServerUrl') {
@@ -1091,10 +1106,7 @@ const customActions = {
         }
         if (settingsWithSideEffects.includes(_id)) {
           if (_id === 'iconPack') {
-            resolvedValue = await dispatch(defaultSideEffectsTriggerId(_id), value)
-            if (resolvedValue !== value) {
-              await DBSettingHandlers.upsert(_id, resolvedValue)
-            }
+            applyIconPack(value)
           } else {
             sideEffectPromises.push(
               dispatch(defaultSideEffectsTriggerId(_id), value)
@@ -1308,12 +1320,7 @@ const customActions = {
       for (const _id of settingsWithSideEffects) {
         if (!alreadyTriggeredSideEffects.includes(_id)) {
           if (_id === 'iconPack') {
-            const value = state[_id]
-            const resolvedValue = await dispatch(defaultSideEffectsTriggerId(_id), value)
-            if (resolvedValue !== value) {
-              await DBSettingHandlers.upsert(_id, resolvedValue)
-              commit(defaultMutationId(_id), resolvedValue)
-            }
+            applyIconPack(state[_id])
           } else {
             sideEffectPromises.push(
               dispatch(defaultSideEffectsTriggerId(_id), state[_id])
@@ -1323,6 +1330,7 @@ const customActions = {
       }
 
       await Promise.allSettled(sideEffectPromises)
+      await iconPackApplied
       return {
         hasExistingSettings: userSettings.some(({ _id }) => !TUTORIAL_STATE_SETTING_IDS.has(_id)),
         landingPageToInitialize,

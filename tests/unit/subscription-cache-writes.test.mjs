@@ -9,6 +9,8 @@ import * as seenData from '../../src/subscriptionSeenVideos.js'
 import * as feedState from '../../src/subscriptionFeedState.js'
 import { applySubscriptionSeenVideosToCache, applySubscriptionSeenPostsToCache } from '../../src/renderer/helpers/subscription-seen-videos.js'
 import { DBActions } from '../../src/constants.js'
+import { SqliteDatastore } from '../../src/datastores/sqlite.js'
+import { createNodeSqliteDriver } from '../../src/datastores/sqliteNode.js'
 
 // The handlers module imports the platform datastore singleton through webpack.
 // Run the actual cache class with an isolated real NeDB for each interleaving.
@@ -407,6 +409,29 @@ test('cache requests keep their order around batched feed writes', async () => {
   await Promise.all([...writes, deletion])
 
   assert.deepEqual(structuredClone(requests), [['a'], ['b'], DBActions.GENERAL.DELETE_ALL, ['c']])
+})
+
+test('the cache loads from each channel\'s stored JSON text, including dates saved by older versions', async t => {
+  const store = new SqliteDatastore({ driver: createNodeSqliteDriver(':memory:') })
+  t.after(() => store.driver.close())
+  await store.insertAsync([
+    { _id: 'legacy', videos: [{ videoId: 'a', title: 'Mentions "$$date" in text' }], videosTimestamp: new Date(1000) },
+    { _id: 'current', shorts: [], shortsTimestamp: new Date(2000).toISOString() },
+  ])
+  const Cache = vm.runInNewContext(`${cacheSource}\nSubscriptionCache`, { db: { subscriptionCache: store }, ...feedState })
+
+  const bridgeSource = await readFile(new URL('../../src/datastores/handlers/electron.js', import.meta.url), 'utf8')
+  const start = bridgeSource.indexOf('// Subscription cache requests reach the main process')
+  const Bridge = vm.runInNewContext(`${bridgeSource.slice(start, bridgeSource.indexOf('\nfunction compactAllDatastores'))}\nSubscriptionCache`, {
+    DBActions,
+    // The copy across IPC.
+    dbSubscriptionCache: async () => structuredClone(await Cache._findSerialized()),
+  })
+
+  const loaded = await Bridge.find()
+  assert.deepEqual(JSON.parse(JSON.stringify(loaded)), JSON.parse(JSON.stringify(await Cache.find())))
+  assert.equal(new Date(loaded.find(({ _id }) => _id === 'legacy').videosTimestamp).getTime(), 1000)
+  assert.equal(typeof loaded.find(({ _id }) => _id === 'legacy').videosTimestamp.getTime, 'function')
 })
 
 test('marking many channel feeds seen is one write', async () => {
