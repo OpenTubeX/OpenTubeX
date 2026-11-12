@@ -309,8 +309,7 @@ History:
   Custom: Sérsniðið
   History Older Than Days Removed: Áhorfsferli eldri en {days} dags hefur verið eytt | Áhorfsferli eldri en {days} daga hefur verið eytt
 Settings:
-  Experimental Settings:
-    Faster Subscription Refresh: "Hraðari uppfærsla áskrifta"
+  Experimental Badge: Tilraun
   Diagnostics:
     Diagnostics: Greining
     Description: Á meðan greiningarannáll er virkur geymir OpenTubeX nýleg annálaskilaboð í minni svo þú getir hengt þau við villutilkynningar. Það vistar þau aldrei né sendir að eigin frumkvæði og ef slökkt er á annálnum er þeim eytt. Skýrslur sleppa vafrakökum, tókum, IP-tölum og URL-færibreytum, en þær geta innihaldið auðkenni myndskeiða sem þú spilaðir, svo farðu yfir skýrslu áður en þú deilir henni.
@@ -1179,6 +1178,7 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Uppfæra áskriftir þegar forritið er lokað"
     Notify About New Uploads: Tilkynna um nýtt efni
     RSS Feeds Auto Refresh Interval: Bil milli sjálfvirkra uppfærslna RSS-strauma
+    Faster Subscription Refresh: "Hraðari uppfærsla áskrifta"
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Telja áhorfstíma"
@@ -2301,6 +2301,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Endurnýjar efnisveitur með völdum stillingum. Á tölvu helst OpenTubeX í kerfisbakkanum þar til þú hættir. Android stjórnar því hvenær bakgrunnsuppfærslur fara fram."
     Notify About New Uploads: Birtir kerfistilkynningar á þessu tæki fyrir rásir sem þú hefur kveikt á tilkynningum fyrir í áskriftarstillingum þeirra. OpenTubeX athugar hvort nýtt efni sé komið þegar áskriftir eru uppfærðar, svo veldu bil milli sjálfvirkra uppfærslna. Til að fá tilkynningar þegar forritið er lokað skaltu einnig virkja uppfærslu þegar forritið er lokað.
     RSS Feeds Auto Refresh Interval: Hversu oft OpenTubeX uppfærir RSS-straumana þína sjálfvirkt á meðan forritið er opið.
+    Faster Subscription Refresh: "Athugar fyrst RSS-straum hverrar rásar og hleður aðeins myndskeiðum, Shorts og beinum útsendingum frá rásum með nýjum upphleðslum. Sjálfvirkar uppfærslur sleppa einnig rásum sem hlaðið var á síðustu 10 mínútum. Fyrir rásir án nýrra upphleðslna uppfærast áhorfstölur, fjarlægð myndskeið og breyttir titlar aðeins á nokkurra klukkustunda fresti, og nýjar upphleðslur geta birst síðar þegar RSS-straumurinn er á eftir. Ekki í boði með Invidious API."
   Theme Settings:
     Only Show Important Notifications: Felur tilkynningar í forritinu sem aðeins staðfesta aðgerð eða greina frá stöðu. Villur, viðvaranir, áminningar sem þú hefur sett upp og tilkynningar sem bjóða upp á aðgerð, eins og Afturkalla, birtast áfram. Framvinda bakgrunnsaðgerða, eins og uppfærsla áskrifta, birtist á almennu framvindustikunni í stað tilkynningar. Kerfistilkynningar verða ekki fyrir áhrifum.
     Visible Search Suggestions: "Stillir hversu margar færslur úr leitarferli og tillögur leitarstikan sýnir áður en fletta þarf listanum. Listinn nær aldrei út fyrir neðri brún gluggans."
@@ -2316,7 +2317,6 @@ Tooltips:
     Modal Backdrop: "Ákvarðar hvernig forritið lítur út á bak við glugga og valmyndir. Móðun getur verið hæg á aflminni tækjum."
     Click Scrollbar Track to Scroll: "Smellur á skrunstiku utan við sleða hennar flettir um það bil einni síðu í átt að smellinum. Meðan þetta er virkt grípur sýnileg skrunstika smelli sem ætlaðir eru atriðum undir henni. Skrunstika flipastikunnar virkar alltaf svona."
   Experimental Settings:
-    Faster Subscription Refresh: "Athugar fyrst RSS-straum hverrar rásar og hleður aðeins myndskeiðum, Shorts og beinum útsendingum frá rásum með nýjum upphleðslum. Sjálfvirkar uppfærslur sleppa einnig rásum sem hlaðið var á síðustu 10 mínútum. Fyrir rásir án nýrra upphleðslna uppfærast áhorfstölur, fjarlægð myndskeið og breyttir titlar aðeins á nokkurra klukkustunda fresti, og nýjar upphleðslur geta birst síðar þegar RSS-straumurinn er á eftir. Ekki í boði með Invidious API."
     Disable Hardware Acceleration: Slekkur á vélbúnaðarhröðun skjákorts. Getur lagað myndrænar villur, en mun líklega draga úr afköstum.
   SponsorBlock Settings:
     Always Show DeArrow Badge: Halda DeArrow-hnappnum sýnilegum á myndskeiðum þar sem DeArrow hefur skipt út titli eða smámynd, í stað þess að sýna hann aðeins þegar bendill er yfir.

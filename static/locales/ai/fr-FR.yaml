@@ -309,8 +309,7 @@ History:
   Custom: Personnalisé
   History Older Than Days Removed: L’historique de visionnage datant de plus de 1 jour a été supprimé | L’historique de visionnage datant de plus de {days} jours a été supprimé | L’historique de visionnage datant de plus de {days} jours a été supprimé
 Settings:
-  Experimental Settings:
-    Faster Subscription Refresh: "Actualisation plus rapide des abonnements"
+  Experimental Badge: Expérimental
   Diagnostics:
     Diagnostics: Diagnostic
     Description: Tant que le journal de diagnostic est activé, OpenTubeX conserve les messages de journal récents en mémoire pour que vous puissiez les joindre à vos rapports de bogue. Il ne les enregistre ni ne les envoie jamais de lui-même, et désactiver le journal les supprime. Les rapports excluent les cookies, les jetons, les adresses IP et les paramètres d'URL, mais ils peuvent contenir les identifiants des vidéos que vous avez lues ; vérifiez donc un rapport avant de le partager.
@@ -1177,6 +1176,7 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Actualiser les abonnements quand l'application est fermée"
     Notify About New Uploads: Notifier les nouvelles mises en ligne
     RSS Feeds Auto Refresh Interval: Intervalle d’actualisation automatique des flux RSS
+    Faster Subscription Refresh: "Actualisation plus rapide des abonnements"
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Compter le temps de visionnage depuis"
@@ -2168,8 +2168,6 @@ Description:
   Games: Jeux
   Music: Musique
 Tooltips:
-  Experimental Settings:
-    Faster Subscription Refresh: "Vérifie d'abord le flux RSS de chaque chaîne et ne charge les vidéos, Shorts et diffusions en direct que des chaînes ayant de nouvelles mises en ligne. Les actualisations automatiques ignorent aussi les chaînes chargées au cours des 10 dernières minutes. Pour les chaînes sans nouvelles mises en ligne, le nombre de vues, les vidéos supprimées et les titres modifiés ne sont mis à jour que toutes les quelques heures, et les nouvelles mises en ligne peuvent apparaître plus tard lorsque le flux RSS est en retard. Non disponible avec l'API Invidious."
   General Settings:
     Built-in Streams: |
       Automatique lit la plupart des vidéos via le client visionOS de YouTube, qui démarre plus vite et prend en charge la qualité automatique. Les diffusions en direct et les vidéos qu’il ne peut pas lire utilisent SABR.
@@ -2281,6 +2279,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Actualise les flux avec les paramètres choisis. Sur ordinateur, OpenTubeX reste dans la zone de notification jusqu’à ce que vous le quittiez. Android détermine quand les actualisations en arrière-plan s’exécutent."
     Notify About New Uploads: Affiche des notifications système sur cet appareil pour les chaînes dont vous avez activé les notifications dans leurs paramètres d’abonnement. OpenTubeX recherche du nouveau contenu lors de l’actualisation des abonnements ; choisissez donc un intervalle d’actualisation automatique. Pour être notifié lorsque l’application est fermée, activez aussi l’actualisation quand l’application est fermée.
     RSS Feeds Auto Refresh Interval: Fréquence à laquelle OpenTubeX actualise automatiquement vos flux RSS lorsque l’application est ouverte.
+    Faster Subscription Refresh: "Vérifie d'abord le flux RSS de chaque chaîne et ne charge les vidéos, Shorts et diffusions en direct que des chaînes ayant de nouvelles mises en ligne. Les actualisations automatiques ignorent aussi les chaînes chargées au cours des 10 dernières minutes. Pour les chaînes sans nouvelles mises en ligne, le nombre de vues, les vidéos supprimées et les titres modifiés ne sont mis à jour que toutes les quelques heures, et les nouvelles mises en ligne peuvent apparaître plus tard lorsque le flux RSS est en retard. Non disponible avec l'API Invidious."
   Theme Settings:
     Only Show Important Notifications: Masque les notifications de l’application qui se contentent de confirmer une action ou de signaler un état. Les erreurs, les avertissements, les rappels que vous avez configurés et les notifications qui proposent une action, comme Annuler, continuent de s’afficher. La progression des opérations en arrière-plan, comme l’actualisation des abonnements, s’affiche dans la barre de progression globale plutôt que dans une notification. Les notifications du système ne sont pas concernées.
     Visible Search Suggestions: "Définit le nombre d’entrées de l’historique de recherche et de suggestions affichées par la barre de recherche avant que sa liste ne défile. La liste ne dépasse jamais le bas de la fenêtre."

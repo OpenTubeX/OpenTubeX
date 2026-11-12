@@ -309,8 +309,7 @@ History:
   Custom: Vlastné
   History Older Than Days Removed: História sledovania staršia ako 1 deň bola odstránená | História sledovania staršia ako {days} dni bola odstránená | História sledovania staršia ako {days} dní bola odstránená
 Settings:
-  Experimental Settings:
-    Faster Subscription Refresh: "Rýchlejšie obnovenie odberov"
+  Experimental Badge: Experimentálne
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Kým je diagnostický denník zapnutý, OpenTubeX uchováva nedávne správy denníka v pamäti, aby ste ich mohli priložiť k hláseniam chýb. Nikdy ich sám neukladá ani neodosiela a vypnutím denníka sa vymažú. Hlásenia vynechávajú súbory cookie, tokeny, IP adresy a parametre URL, môžu však obsahovať ID prehratých videí, preto hlásenie pred zdieľaním skontrolujte.
@@ -1177,6 +1176,7 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Obnovovať odbery, keď je aplikácia zatvorená"
     Notify About New Uploads: Oznamovať nový obsah
     RSS Feeds Auto Refresh Interval: Interval automatického obnovenia RSS kanálov
+    Faster Subscription Refresh: "Rýchlejšie obnovenie odberov"
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Započítavať čas sledovania"
@@ -2175,8 +2175,6 @@ Description:
   Games: Hry
   Music: Hudba
 Tooltips:
-  Experimental Settings:
-    Faster Subscription Refresh: "Najprv skontroluje RSS kanál každého kanála a videá, Shorts a živé prenosy načíta len z kanálov s novými nahratými videami. Automatické obnovenia navyše preskočia kanály načítané za posledných 10 minút. Pri kanáloch bez nových videí sa počty zhliadnutí, odstránené videá a zmenené názvy aktualizujú len raz za niekoľko hodín a nové videá sa môžu zobraziť neskôr, keď RSS kanál zaostáva. Nie je k dispozícii s Invidious API."
   General Settings:
     Built-in Streams: |
       Automatický režim prehráva väčšinu videí cez klienta visionOS od YouTube, ktorý sa spúšťa rýchlejšie a podporuje automatickú kvalitu. Živé prenosy a videá, ktoré nedokáže prehrať, používajú SABR.
@@ -2288,6 +2286,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Obnovuje kanály podľa zvolených nastavení. Na počítači zostáva OpenTubeX v oblasti oznámení až do ukončenia. Android určuje čas obnovovania na pozadí."
     Notify About New Uploads: Zobrazuje na tomto zariadení systémové oznámenia pre kanály, pri ktorých ste v nastaveniach odberu zapli oznámenia. OpenTubeX kontroluje nový obsah pri obnovení odberov, preto zvoľte interval automatického obnovenia. Ak chcete dostávať oznámenia aj pri zatvorenej aplikácii, zapnite aj obnovovanie pri zatvorenej aplikácii.
     RSS Feeds Auto Refresh Interval: Ako často OpenTubeX automaticky obnovuje vaše RSS kanály, kým je aplikácia otvorená.
+    Faster Subscription Refresh: "Najprv skontroluje RSS kanál každého kanála a videá, Shorts a živé prenosy načíta len z kanálov s novými nahratými videami. Automatické obnovenia navyše preskočia kanály načítané za posledných 10 minút. Pri kanáloch bez nových videí sa počty zhliadnutí, odstránené videá a zmenené názvy aktualizujú len raz za niekoľko hodín a nové videá sa môžu zobraziť neskôr, keď RSS kanál zaostáva. Nie je k dispozícii s Invidious API."
   Theme Settings:
     Only Show Important Notifications: Skryje upozornenia v aplikácii, ktoré iba potvrdzujú akciu alebo hlásia stav. Chyby, varovania, nastavené pripomienky a upozornenia s akciou, napríklad Vrátiť späť, sa zobrazujú aj naďalej. Priebeh operácií na pozadí, napríklad obnovovania odberov, sa namiesto upozornenia zobrazuje v globálnom ukazovateli priebehu. Systémové upozornenia nie sú ovplyvnené.
     Visible Search Suggestions: "Určuje, koľko položiek histórie vyhľadávania a návrhov zobrazí vyhľadávacie pole, kým sa jeho zoznam začne posúvať. Zoznam nikdy nepresiahne spodný okraj okna."

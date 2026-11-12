@@ -148,8 +148,7 @@ User Playlists:
     Adding missing videos to {playlistName}: 'Dodawanie brakujących filmów do {playlistName}'
     Checking {playlistName} for unavailable videos: 'Sprawdzanie niedostępnych filmów w {playlistName} ({checked}/{total})'
 Settings:
-  Experimental Settings:
-    Faster Subscription Refresh: "Szybsze odświeżanie subskrypcji"
+  Experimental Badge: Eksperymentalne
   Diagnostics:
     Diagnostics: Diagnostyka
     Description: Gdy dziennik diagnostyczny jest włączony, OpenTubeX przechowuje ostatnie komunikaty dziennika w pamięci, aby można je było dołączyć do zgłoszeń błędów. Nigdy nie zapisuje ani nie wysyła ich samodzielnie, a wyłączenie dziennika je usuwa. Raporty pomijają pliki cookie, tokeny, adresy IP i parametry adresów URL, ale mogą zawierać identyfikatory odtwarzanych filmów, więc sprawdź raport przed udostępnieniem.
@@ -714,6 +713,7 @@ Settings:
     Enable RSS Feeds: Włącz kanały RSS dla innych platform
     Manage RSS Feeds: Zarządzaj kanałami RSS
     RSS Feeds Auto Refresh Interval: Interwał odświeżania kanałów RSS
+    Faster Subscription Refresh: "Szybsze odświeżanie subskrypcji"
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Licz czas oglądania"
@@ -1432,8 +1432,6 @@ Description:
   Games: Gry
   Music: Muzyka
 Tooltips:
-  Experimental Settings:
-    Faster Subscription Refresh: "Najpierw sprawdza kanał RSS każdego kanału i wczytuje filmy, Shorts i transmisje na żywo tylko z kanałów z nowymi przesłanymi filmami. Automatyczne odświeżanie pomija też kanały wczytane w ciągu ostatnich 10 minut. W kanałach bez nowych filmów liczba wyświetleń, usunięte filmy i zmienione tytuły aktualizują się tylko co kilka godzin, a nowe filmy mogą pojawić się później, gdy kanał RSS jest opóźniony. Niedostępne z API Invidious."
   General Settings:
     Built-in Streams: |
       Tryb automatyczny odtwarza większość filmów przez klienta visionOS YouTube, który uruchamia się szybciej i obsługuje automatyczną jakość. Transmisje na żywo i filmy, których nie może odtworzyć, używają SABR.
@@ -1514,6 +1512,7 @@ Tooltips:
     Notify About New Uploads: Wyświetla na tym urządzeniu powiadomienia systemowe dla kanałów, dla których włączono powiadomienia w ich ustawieniach subskrypcji. OpenTubeX sprawdza nowe treści podczas odświeżania subskrypcji, więc wybierz interwał odświeżania. Aby otrzymywać powiadomienia, gdy aplikacja jest zamknięta, włącz także odświeżanie, gdy aplikacja jest zamknięta.
     Enable RSS Feeds: Pokazuje zakładkę RSS na stronie Subskrypcje z elementami kanałów RSS lub Atom, aby można było obserwować twórców z innych platform. Jej elementy otwierają się za pomocą yt-dlp.
     RSS Feeds Auto Refresh Interval: Jak często OpenTubeX automatycznie odświeża Twoje kanały RSS, gdy aplikacja jest otwarta.
+    Faster Subscription Refresh: "Najpierw sprawdza kanał RSS każdego kanału i wczytuje filmy, Shorts i transmisje na żywo tylko z kanałów z nowymi przesłanymi filmami. Automatyczne odświeżanie pomija też kanały wczytane w ciągu ostatnich 10 minut. W kanałach bez nowych filmów liczba wyświetleń, usunięte filmy i zmienione tytuły aktualizują się tylko co kilka godzin, a nowe filmy mogą pojawić się później, gdy kanał RSS jest opóźniony. Niedostępne z API Invidious."
   Theme Settings:
     Only Show Important Notifications: Ukrywa powiadomienia w aplikacji, które jedynie potwierdzają działanie lub informują o stanie. Błędy, ostrzeżenia, ustawione przez Ciebie przypomnienia oraz powiadomienia oferujące działanie, takie jak Cofnij, nadal się wyświetlają. Postęp operacji w tle, takich jak odświeżanie subskrypcji, jest pokazywany na globalnym pasku postępu zamiast w powiadomieniu. Nie dotyczy to powiadomień systemowych.
     Visible Search Suggestions: "Określa, ile wpisów historii wyszukiwania i sugestii pokazuje pasek wyszukiwania, zanim jego lista zacznie się przewijać. Lista nigdy nie wychodzi poza dolną krawędź okna."

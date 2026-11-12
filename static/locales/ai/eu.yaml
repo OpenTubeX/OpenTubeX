@@ -309,8 +309,7 @@ History:
   Custom: Pertsonalizatua
   History Older Than Days Removed: Egun 1 baino zaharragoa den ikustaldi-historia kendu da | {days} egun baino zaharragoa den ikustaldi-historia kendu da
 Settings:
-  Experimental Settings:
-    Faster Subscription Refresh: "Harpidetzen freskatze azkarragoa"
+  Experimental Badge: Esperimentala
   Diagnostics:
     Diagnostics: Diagnostikoa
     Description: Diagnostiko-erregistroa aktibatuta dagoen bitartean, OpenTubeX-ek azken erregistro-mezuak memorian gordetzen ditu, akats-txostenei erantsi ahal izateko. Ez ditu inoiz bere kabuz gordetzen edo bidaltzen, eta erregistroa desaktibatzean ezabatu egiten dira. Txostenek ez dituzte cookieak, tokenak, IP helbideak eta URL parametroak barne hartzen, baina erreproduzitu dituzun bideoen IDak izan ditzakete; beraz, berrikusi txostena partekatu aurretik.
@@ -1177,6 +1176,7 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Freskatu harpidetzak aplikazioa itxita dagoenean"
     Notify About New Uploads: Jakinarazi igoera berriak
     RSS Feeds Auto Refresh Interval: RSS jarioen freskatze automatikoaren tartea
+    Faster Subscription Refresh: "Harpidetzen freskatze azkarragoa"
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Ikusteko denbora zenbatzeko iturria"
@@ -2179,8 +2179,6 @@ Description:
   Games: Jokoak
   Music: Musika
 Tooltips:
-  Experimental Settings:
-    Faster Subscription Refresh: "Lehenik kanal bakoitzaren RSS jarioa egiaztatzen du, eta igoera berriak dituzten kanalen bideoak, Shorts-ak eta zuzeneko emanaldiak soilik kargatzen ditu. Freskatze automatikoek azken 10 minutuetan kargatutako kanalak ere saltatzen dituzte. Igoera berririk ez duten kanaletan, ikustaldi kopuruak, kendutako bideoak eta aldatutako izenburuak ordu batzuetan behin bakarrik eguneratzen dira, eta igoera berriak beranduago ager daitezke RSS jarioa atzeratuta dagoenean. Ez dago erabilgarri Invidious APIarekin."
   General Settings:
     Built-in Streams: |
       Automatikoak bideo gehienak YouTuberen visionOS bezeroaren bidez erreproduzitzen ditu; azkarrago hasten da eta kalitate automatikoa onartzen du. Zuzeneko emanaldiek eta erreproduzitu ezin dituen bideoek SABR erabiltzen dute.
@@ -2292,6 +2290,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Jarioak hautatutako ezarpenekin eguneratzen ditu. Ordenagailuan, OpenTubeX sistemaren erretiluan geratzen da irten arte. Android-ek atzeko planoko eguneratzeen unea kontrolatzen du."
     Notify About New Uploads: Gailu honetan sistemaren jakinarazpenak erakusten ditu harpidetza-ezarpenetan jakinarazpenak aktibatu dituzun kanaletarako. OpenTubeX-ek eduki berria bilatzen du harpidetzak freskatzean; beraz, aukeratu freskatze automatikoaren tarte bat. Aplikazioa itxita dagoenean jakinarazpenak jasotzeko, gaitu ere freskatzea aplikazioa itxita dagoenean.
     RSS Feeds Auto Refresh Interval: Aplikazioa irekita dagoen bitartean OpenTubeX-ek zure RSS jarioak zenbatero freskatzen dituen automatikoki.
+    Faster Subscription Refresh: "Lehenik kanal bakoitzaren RSS jarioa egiaztatzen du, eta igoera berriak dituzten kanalen bideoak, Shorts-ak eta zuzeneko emanaldiak soilik kargatzen ditu. Freskatze automatikoek azken 10 minutuetan kargatutako kanalak ere saltatzen dituzte. Igoera berririk ez duten kanaletan, ikustaldi kopuruak, kendutako bideoak eta aldatutako izenburuak ordu batzuetan behin bakarrik eguneratzen dira, eta igoera berriak beranduago ager daitezke RSS jarioa atzeratuta dagoenean. Ez dago erabilgarri Invidious APIarekin."
   Theme Settings:
     Only Show Important Notifications: Ekintza bat berretsi edo egoera bat jakinarazi besterik egiten ez duten aplikazioko jakinarazpenak ezkutatzen ditu. Erroreak, abisuak, konfiguratu dituzun gogorarazpenak eta ekintza bat eskaintzen duten jakinarazpenak, Desegin adibidez, agertzen jarraitzen dute. Atzeko planoko eragiketen aurrerapena, harpidetzak freskatzea adibidez, aurrerapen-barra orokorrean erakusten da jakinarazpen baten ordez. Sistemaren jakinarazpenei ez die eragiten.
     Visible Search Suggestions: "Bilaketa-barrak bere zerrenda korritu aurretik zenbat bilaketa-historiako sarrera eta iradokizun erakusten dituen zehazten du. Zerrenda ez da inoiz leihoaren behealdetik haratago hedatzen."

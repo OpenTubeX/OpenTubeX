@@ -111,9 +111,9 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     return usingElectron || (isCapacitor && !isIos)
   }
 
-  // These switch Electron command line flags
-  if (sectionType === 'experimental' && ['Replace HTTP Cache', 'Disable Hardware Acceleration'].includes(group)) {
-    return usingElectron
+  // Uses the local API's channel feeds
+  if (sectionType === 'subscription' && group === 'Faster Subscription Refresh') {
+    return supportsLocalApi
   }
 
   // RSS feed items open through yt-dlp, and the manager needs the feature enabled

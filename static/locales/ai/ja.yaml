@@ -309,8 +309,7 @@ History:
   Custom: カスタム
   History Older Than Days Removed: '{days}日より古い視聴履歴を削除しました'
 Settings:
-  Experimental Settings:
-    Faster Subscription Refresh: "登録チャンネルの高速更新"
+  Experimental Badge: 試験的
   Diagnostics:
     Diagnostics: 診断
     Description: 診断ログが有効な間、OpenTubeX は最近のログメッセージをメモリに保持し、バグ報告に添付できるようにします。自動で保存や送信をすることはなく、ログを無効にすると削除されます。レポートには Cookie、トークン、IP アドレス、URL パラメーターは含まれませんが、再生した動画の ID が含まれる場合があるため、共有する前にレポートを確認してください。
@@ -1177,6 +1176,7 @@ Settings:
     Refresh Subscriptions While App Is Closed: "アプリを閉じている間も登録チャンネルを更新"
     Notify About New Uploads: 新着アップロードを通知
     RSS Feeds Auto Refresh Interval: RSS フィードの自動更新間隔
+    Faster Subscription Refresh: "登録チャンネルの高速更新"
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "視聴時間のカウント対象"
@@ -2169,8 +2169,6 @@ Description:
   Games: ゲーム
   Music: 音楽
 Tooltips:
-  Experimental Settings:
-    Faster Subscription Refresh: "最初に各チャンネルの RSS フィードを確認し、新しいアップロードがあるチャンネルの動画、ショート、ライブ配信だけを読み込みます。自動更新では、過去 10 分以内に読み込んだチャンネルもスキップします。新しいアップロードがないチャンネルでは、再生回数、削除された動画、変更されたタイトルが数時間ごとにしか更新されず、RSS フィードが遅れている場合は新しいアップロードの表示が遅れることがあります。Invidious API では利用できません。"
   General Settings:
     Built-in Streams: |
       自動では、ほとんどの動画を YouTube の visionOS クライアントで再生します。起動が速く、自動画質に対応しています。ライブ配信や再生できない動画には SABR を使用します。
@@ -2282,6 +2280,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "選択した設定でフィードを更新します。デスクトップでは、終了するまでOpenTubeXがシステムトレイに常駐します。Androidでは、バックグラウンド更新の実行時刻をシステムが制御します。"
     Notify About New Uploads: 登録設定で通知をオンにしたチャンネルについて、このデバイスにシステム通知を表示します。OpenTubeXは登録チャンネルの更新時に新着コンテンツを確認するため、自動更新の間隔を選択してください。アプリを閉じている間も通知を受け取るには、アプリを閉じている間の更新も有効にしてください。
     RSS Feeds Auto Refresh Interval: アプリを開いている間に OpenTubeX が RSS フィードを自動更新する間隔です。
+    Faster Subscription Refresh: "最初に各チャンネルの RSS フィードを確認し、新しいアップロードがあるチャンネルの動画、ショート、ライブ配信だけを読み込みます。自動更新では、過去 10 分以内に読み込んだチャンネルもスキップします。新しいアップロードがないチャンネルでは、再生回数、削除された動画、変更されたタイトルが数時間ごとにしか更新されず、RSS フィードが遅れている場合は新しいアップロードの表示が遅れることがあります。Invidious API では利用できません。"
   Theme Settings:
     Only Show Important Notifications: 操作の確認や状態を伝えるだけのアプリ内通知を非表示にします。エラー、警告、設定したリマインダー、および「元に戻す」などの操作を含む通知は引き続き表示されます。登録チャンネルの更新などのバックグラウンド処理の進捗は、通知ではなく全体の進捗バーに表示されます。システム通知には影響しません。
     Visible Search Suggestions: "検索バーがスクロールなしで表示する検索履歴と候補の数を設定します。リストがウィンドウの下端を超えることはありません。"

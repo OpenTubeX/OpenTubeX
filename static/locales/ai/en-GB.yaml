@@ -311,6 +311,7 @@ History:
   Custom: Custom
   History Older Than Days Removed: Watch history older than 1 day has been removed | Watch history older than {days} days has been removed
 Settings:
+  Experimental Badge: Experimental
   Diagnostics:
     Diagnostics: Diagnostics
     Description: While diagnostic logging is on, OpenTubeX keeps recent log messages in memory so you can attach them to bug reports. It never saves or sends them on its own, and turning logging off deletes them. Reports leave out cookies, tokens, IP addresses and URL parameters, but they can include IDs of videos you played, so check a report before you share it.
@@ -1162,6 +1163,7 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Refresh Subscriptions While App Is Closed"
     Notify About New Uploads: Notify About New Uploads
     RSS Feeds Auto Refresh Interval: RSS Feeds Auto Refresh Interval
+    Faster Subscription Refresh: "Faster Subscription Refresh"
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Count Watch Time From"
@@ -1475,7 +1477,6 @@ Settings:
   Search Settings: Search settings
   No Settings Found: No settings found
   Experimental Settings:
-    Faster Subscription Refresh: "Faster Subscription Refresh"
     Disable Hardware Acceleration: Disable Hardware Acceleration
   Interface Customizer:
     Customize Interface: "Customise interface"
@@ -2276,6 +2277,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Refreshes feeds using your selected settings. On desktop, OpenTubeX stays in the system tray until you quit. Android controls when background refreshes run."
     Notify About New Uploads: Shows system notifications on this device for channels whose notifications you turned on in their subscription settings. OpenTubeX checks for new content when subscriptions refresh, so choose an auto refresh interval. To be notified while the app is closed, also enable refreshing while the app is closed.
     RSS Feeds Auto Refresh Interval: How often OpenTubeX automatically refreshes your RSS feeds while the app is open.
+    Faster Subscription Refresh: "Checks each channel's RSS feed first and only loads the videos, Shorts and live streams of channels with new uploads. Automatic refreshes also skip channels loaded in the last 10 minutes. For channels without new uploads, view counts, removed videos and changed titles only update every few hours, and new uploads may appear later when the RSS feed lags behind. Not available with the Invidious API."
   Theme Settings:
     Only Show Important Notifications: Hides in-app notifications that only confirm an action or report a status. Errors, warnings, reminders you set up, and notifications that offer an action, such as Undo, still appear. Background progress, such as subscription refreshes, shows in the global progress bar instead of a notification. System notifications are not affected.
     Visible Search Suggestions: "Sets how many search history entries and suggestions the search bar shows before its list scrolls. The list never extends past the bottom of the window."
@@ -2291,7 +2293,6 @@ Tooltips:
     Modal Backdrop: "Sets how the app looks behind dialogues and menus. Blurring it can be slow on less powerful devices."
     Click Scrollbar Track to Scroll: "Clicking a scrollbar outside its handle scrolls about one page towards the click. While this is on, a visible scrollbar catches clicks meant for items under it. The tab bar's scrollbar always works this way."
   Experimental Settings:
-    Faster Subscription Refresh: "Checks each channel's RSS feed first and only loads the videos, Shorts and live streams of channels with new uploads. Automatic refreshes also skip channels loaded in the last 10 minutes. For channels without new uploads, view counts, removed videos and changed titles only update every few hours, and new uploads may appear later when the RSS feed lags behind. Not available with the Invidious API."
     Disable Hardware Acceleration: Disables GPU hardware acceleration. May fix graphical issues, but will probably perform worse.
   SponsorBlock Settings:
     Always Show DeArrow Badge: Keep the DeArrow button visible on videos whose title or thumbnail DeArrow replaced, instead of only on hover.

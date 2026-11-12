@@ -64,6 +64,16 @@
           />
         </div>
         <FtToggleSwitch
+          v-if="SUPPORTS_LOCAL_API"
+          :label="$t('Settings.Subscription Settings.Faster Subscription Refresh')"
+          :default-value="fastSubscriptionRefresh"
+          setting-key="fastSubscriptionRefresh"
+          experimental
+          :tooltip="$t('Tooltips.Subscription Settings.Faster Subscription Refresh')"
+          compact
+          @change="updateFastSubscriptionRefresh"
+        />
+        <FtToggleSwitch
           v-if="((IS_CAPACITOR && !IS_IOS) || IS_ELECTRON) && store.getters.getNotificationMode !== 'off'"
           :label="$t('Settings.Subscription Settings.Notify About New Uploads')"
           :default-value="enableUploadNotifications"
@@ -156,6 +166,7 @@ const { t } = useI18n()
 const IS_IOS = !!process.env.IS_IOS
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 const IS_ELECTRON = !!process.env.IS_ELECTRON
+const SUPPORTS_LOCAL_API = !!process.env.SUPPORTS_LOCAL_API
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const fetchSubscriptionsAutomatically = computed(() => store.getters.getFetchSubscriptionsAutomatically)
@@ -205,6 +216,16 @@ const enableUploadNotifications = computed(() => store.getters.getEnableUploadNo
  */
 function updateEnableUploadNotifications(value) {
   store.dispatch('updateEnableUploadNotifications', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const fastSubscriptionRefresh = computed(() => store.getters.getFastSubscriptionRefresh)
+
+/**
+ * @param {boolean} value
+ */
+function updateFastSubscriptionRefresh(value) {
+  store.dispatch('updateFastSubscriptionRefresh', value)
 }
 
 /** @type {import('vue').ComputedRef<string>} */

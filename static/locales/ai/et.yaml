@@ -309,8 +309,7 @@ History:
   Custom: Kohandatud
   History Older Than Days Removed: Ühest päevast vanem vaatamisajalugu on eemaldatud | {days} päevast vanem vaatamisajalugu on eemaldatud
 Settings:
-  Experimental Settings:
-    Faster Subscription Refresh: "Kiirem tellimuste värskendamine"
+  Experimental Badge: Eksperimentaalne
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Kui diagnostikalogi on sisse lülitatud, hoiab OpenTubeX viimaseid logisõnumeid mälus, et saaksid need veateadetele lisada. See ei salvesta ega saada neid kunagi ise ning logi väljalülitamine kustutab need. Aruanded jätavad välja küpsised, märgid, IP-aadressid ja URL-i parameetrid, kuid võivad sisaldada esitatud videote ID-sid, seega kontrolli aruannet enne jagamist.
@@ -1177,6 +1176,7 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Värskenda tellimusi, kui rakendus on suletud"
     Notify About New Uploads: Teavita uutest üleslaadimistest
     RSS Feeds Auto Refresh Interval: RSS-voogude automaatse värskendamise intervall
+    Faster Subscription Refresh: "Kiirem tellimuste värskendamine"
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Vaatamisaja arvestamise allikas"
@@ -2172,8 +2172,6 @@ Description:
   Games: Mängud
   Music: Muusika
 Tooltips:
-  Experimental Settings:
-    Faster Subscription Refresh: "Kontrollib esmalt iga kanali RSS-voogu ja laadib videod, Shorts'id ja otseülekanded ainult uute üleslaadimistega kanalitest. Automaatsed värskendused jätavad vahele ka kanalid, mis laaditi viimase 10 minuti jooksul. Uute üleslaadimisteta kanalite puhul uuenevad vaatamiste arvud, eemaldatud videod ja muudetud pealkirjad vaid iga mõne tunni tagant ning uued üleslaadimised võivad ilmuda hiljem, kui RSS-voog jääb maha. Invidiouse API-ga pole saadaval."
   General Settings:
     Built-in Streams: |
       Automaatne esitab enamikku videoid YouTube'i visionOS-i kliendi kaudu, mis käivitub kiiremini ja toetab automaatset kvaliteeti. Otseülekanded ja videod, mida see esitada ei saa, kasutavad SABR-i.
@@ -2285,6 +2283,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Värskendab vooge valitud seadistustega. Arvutis jääb OpenTubeX süsteemisalve kuni väljumiseni. Android määrab taustavärskenduste aja."
     Notify About New Uploads: Kuvab selles seadmes süsteemiteavitusi kanalite kohta, mille teavitused oled nende tellimuse seadetes sisse lülitanud. OpenTubeX kontrollib uut sisu tellimuste värskendamisel, seega vali automaatse värskendamise intervall. Et saada teavitusi ka siis, kui rakendus on suletud, luba ka värskendamine suletud rakenduse korral.
     RSS Feeds Auto Refresh Interval: Kui sageli OpenTubeX sinu RSS-voogusid automaatselt värskendab, kui rakendus on avatud.
+    Faster Subscription Refresh: "Kontrollib esmalt iga kanali RSS-voogu ja laadib videod, Shorts'id ja otseülekanded ainult uute üleslaadimistega kanalitest. Automaatsed värskendused jätavad vahele ka kanalid, mis laaditi viimase 10 minuti jooksul. Uute üleslaadimisteta kanalite puhul uuenevad vaatamiste arvud, eemaldatud videod ja muudetud pealkirjad vaid iga mõne tunni tagant ning uued üleslaadimised võivad ilmuda hiljem, kui RSS-voog jääb maha. Invidiouse API-ga pole saadaval."
   Theme Settings:
     Only Show Important Notifications: Peidab rakendusesisesed teavitused, mis ainult kinnitavad toimingut või teatavad olekust. Vead, hoiatused, teie seadistatud meeldetuletused ja toimingut pakkuvad teavitused, nagu Võta tagasi, kuvatakse endiselt. Taustatoimingute edenemine, näiteks tellimuste värskendamine, kuvatakse teavituse asemel üldisel edenemisribal. Süsteemiteavitusi see ei mõjuta.
     Visible Search Suggestions: "Määrab, mitu otsinguajaloo kirjet ja soovitust otsinguriba näitab, enne kui selle loendit tuleb kerida. Loend ei ulatu kunagi akna alumisest servast kaugemale."

@@ -309,8 +309,7 @@ History:
   Custom: Mukautettu
   History Older Than Days Removed: Yli päivän vanha katseluhistoria on poistettu | Yli {days} päivää vanha katseluhistoria on poistettu
 Settings:
-  Experimental Settings:
-    Faster Subscription Refresh: "Nopeampi tilausten päivitys"
+  Experimental Badge: Kokeellinen
   Diagnostics:
     Diagnostics: Vianmääritys
     Description: Kun vianmääritysloki on käytössä, OpenTubeX säilyttää viimeisimmät lokiviestit muistissa, jotta voit liittää ne virheraportteihin. Se ei koskaan tallenna tai lähetä niitä itsestään, ja lokin poistaminen käytöstä poistaa ne. Raportit jättävät pois evästeet, tunnukset, IP-osoitteet ja URL-parametrit, mutta ne voivat sisältää toistamiesi videoiden tunnuksia, joten tarkista raportti ennen kuin jaat sen.
@@ -1177,6 +1176,7 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Päivitä tilaukset sovelluksen ollessa suljettuna"
     Notify About New Uploads: Ilmoita uusista latauksista
     RSS Feeds Auto Refresh Interval: RSS-syötteiden automaattisen päivityksen aikaväli
+    Faster Subscription Refresh: "Nopeampi tilausten päivitys"
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Katseluaika lasketaan"
@@ -2176,8 +2176,6 @@ Description:
   Games: Pelit
   Music: Musiikki
 Tooltips:
-  Experimental Settings:
-    Faster Subscription Refresh: "Tarkistaa ensin jokaisen kanavan RSS-syötteen ja lataa videot, Shorts-videot ja suoratoistot vain kanavilta, joilla on uusia latauksia. Automaattiset päivitykset ohittavat myös kanavat, jotka on ladattu viimeisen 10 minuutin aikana. Kanavilla, joilla ei ole uusia latauksia, katselukerrat, poistetut videot ja muuttuneet otsikot päivittyvät vain muutaman tunnin välein, ja uudet lataukset voivat näkyä myöhemmin, kun RSS-syöte on jäljessä. Ei käytettävissä Invidious-rajapinnan kanssa."
   General Settings:
     Built-in Streams: |
       Automaattinen toistaa useimmat videot YouTuben visionOS-asiakasohjelman kautta, joka käynnistyy nopeammin ja tukee automaattista laatua. Suorat lähetykset ja videot, joita se ei voi toistaa, käyttävät SABRia.
@@ -2289,6 +2287,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Päivittää syötteet valitsemillasi asetuksilla. Tietokoneella OpenTubeX pysyy ilmoitusalueella lopettamiseen asti. Android päättää taustapäivitysten ajankohdan."
     Notify About New Uploads: Näyttää tällä laitteella järjestelmäilmoituksia kanavista, joiden ilmoitukset olet ottanut käyttöön niiden tilausasetuksissa. OpenTubeX tarkistaa uuden sisällön tilauksia päivitettäessä, joten valitse automaattisen päivityksen aikaväli. Jos haluat ilmoituksia myös sovelluksen ollessa suljettuna, ota käyttöön myös päivitys sovelluksen ollessa suljettuna.
     RSS Feeds Auto Refresh Interval: Kuinka usein OpenTubeX päivittää RSS-syötteesi automaattisesti, kun sovellus on auki.
+    Faster Subscription Refresh: "Tarkistaa ensin jokaisen kanavan RSS-syötteen ja lataa videot, Shorts-videot ja suoratoistot vain kanavilta, joilla on uusia latauksia. Automaattiset päivitykset ohittavat myös kanavat, jotka on ladattu viimeisen 10 minuutin aikana. Kanavilla, joilla ei ole uusia latauksia, katselukerrat, poistetut videot ja muuttuneet otsikot päivittyvät vain muutaman tunnin välein, ja uudet lataukset voivat näkyä myöhemmin, kun RSS-syöte on jäljessä. Ei käytettävissä Invidious-rajapinnan kanssa."
   Theme Settings:
     Only Show Important Notifications: Piilottaa sovelluksen sisäiset ilmoitukset, jotka vain vahvistavat toiminnon tai kertovat tilasta. Virheet, varoitukset, asettamasi muistutukset ja toimintoa tarjoavat ilmoitukset, kuten Kumoa, näytetään edelleen. Taustatoimintojen edistyminen, kuten tilausten päivitys, näytetään ilmoituksen sijaan yleisessä edistymispalkissa. Järjestelmäilmoituksiin tämä ei vaikuta.
     Visible Search Suggestions: "Määrittää, montako hakuhistorian merkintää ja ehdotusta hakupalkki näyttää ennen kuin sen luetteloa täytyy vierittää. Luettelo ei koskaan ulotu ikkunan alareunan yli."

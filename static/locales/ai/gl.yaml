@@ -314,6 +314,7 @@ History:
   Custom: Personalizado
   History Older Than Days Removed: Eliminouse o historial de visualización de máis de 1 día | Eliminouse o historial de visualización de máis de {days} días
 Settings:
+  Experimental Badge: Experimental
   Diagnostics:
     Diagnostics: Diagnóstico
     Description: Mentres o rexistro de diagnóstico está activado, OpenTubeX garda as mensaxes de rexistro recentes na memoria para que poidas achegalas aos informes de erros. Nunca as garda nin as envía pola súa conta, e desactivar o rexistro elimínaas. Os informes omiten cookies, tokens, enderezos IP e parámetros de URL, pero poden incluír os ID dos vídeos que reproduciches, así que revisa o informe antes de compartilo.
@@ -1186,6 +1187,7 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Actualizar as subscricións coa aplicación pechada"
     Notify About New Uploads: Notificar novas subidas
     RSS Feeds Auto Refresh Interval: Intervalo de actualización automática das fontes RSS
+    Faster Subscription Refresh: "Actualización máis rápida das subscricións"
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Contar o tempo de visualización de"
@@ -1517,7 +1519,6 @@ Settings:
   Search Settings: Buscar na configuración
   No Settings Found: Non se atopou ningún axuste
   Experimental Settings:
-    Faster Subscription Refresh: "Actualización máis rápida das subscricións"
     Disable Hardware Acceleration: Desactivar a aceleración por hardware
   Interface Customizer:
     Customize Interface: "Personalizar a interface"
@@ -2339,6 +2340,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Actualiza as fontes coa configuración seleccionada. No escritorio, OpenTubeX permanece na bandexa do sistema ata saír. Android controla cando se executan as actualizacións en segundo plano."
     Notify About New Uploads: Amosa notificacións do sistema neste dispositivo para as canles cuxas notificacións activaches na súa configuración de subscrición. OpenTubeX busca contido novo ao actualizar as subscricións, así que escolle un intervalo de actualización automática. Para recibir notificacións coa aplicación pechada, activa tamén a actualización coa aplicación pechada.
     RSS Feeds Auto Refresh Interval: Con que frecuencia OpenTubeX actualiza automaticamente as túas fontes RSS mentres a aplicación está aberta.
+    Faster Subscription Refresh: "Primeiro comproba a fonte RSS de cada canle e só carga os vídeos, Shorts e emisións en directo das canles con novas subidas. As actualizacións automáticas tamén omiten as canles cargadas nos últimos 10 minutos. Nas canles sen novas subidas, as visualizacións, os vídeos eliminados e os títulos cambiados só se actualizan cada poucas horas, e as novas subidas poden aparecer máis tarde cando a fonte RSS vai atrasada. Non dispoñible coa API de Invidious."
   Theme Settings:
     Only Show Important Notifications: Oculta as notificacións da aplicación que só confirman unha acción ou informan dun estado. Os erros, os avisos, os recordatorios que configuraches e as notificacións que ofrecen unha acción, como Desfacer, seguen aparecendo. O progreso das operacións en segundo plano, como a actualización das subscricións, móstrase na barra de progreso global en lugar dunha notificación. As notificacións do sistema non se ven afectadas.
     Visible Search Suggestions: "Define cantas entradas do historial de busca e suxestións mostra a barra de busca antes de que a súa lista se desprace. A lista nunca se estende máis alá da parte inferior da xanela."
@@ -2354,7 +2356,6 @@ Tooltips:
     Modal Backdrop: "Define como se ve a aplicación detrás dos diálogos e menús. O desenfoque pode ser lento en dispositivos menos potentes."
     Click Scrollbar Track to Scroll: "Ao facer clic nunha barra de desprazamento fóra do seu control, desprázase aproximadamente unha páxina cara ao clic. Mentres estea activado, unha barra de desprazamento visible captura os clics dirixidos aos elementos que ten debaixo. A barra de desprazamento da barra de lapelas sempre funciona así."
   Experimental Settings:
-    Faster Subscription Refresh: "Primeiro comproba a fonte RSS de cada canle e só carga os vídeos, Shorts e emisións en directo das canles con novas subidas. As actualizacións automáticas tamén omiten as canles cargadas nos últimos 10 minutos. Nas canles sen novas subidas, as visualizacións, os vídeos eliminados e os títulos cambiados só se actualizan cada poucas horas, e as novas subidas poden aparecer máis tarde cando a fonte RSS vai atrasada. Non dispoñible coa API de Invidious."
     Disable Hardware Acceleration: Desactiva a aceleración por hardware da GPU. Pode resolver problemas gráficos, pero probablemente reducirá o rendemento.
   SponsorBlock Settings:
     Always Show DeArrow Badge: Mantén visible o botón de DeArrow nos vídeos cuxo título ou miniatura substituíu DeArrow, en lugar de só ao pasar o cursor por riba.

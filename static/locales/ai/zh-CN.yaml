@@ -309,8 +309,7 @@ History:
   Custom: 自定义
   History Older Than Days Removed: 已删除 {days} 天前的观看历史记录
 Settings:
-  Experimental Settings:
-    Faster Subscription Refresh: "更快的订阅刷新"
+  Experimental Badge: 实验性
   Diagnostics:
     Diagnostics: 诊断
     Description: 启用诊断日志后，OpenTubeX 会在内存中保留最近的日志消息，方便你将其附加到错误报告中。它绝不会自行保存或发送这些消息，关闭日志会将其删除。报告不包含 Cookie、令牌、IP 地址和 URL 参数，但可能包含你播放过的视频 ID，因此分享前请检查报告。
@@ -1177,6 +1176,7 @@ Settings:
     Refresh Subscriptions While App Is Closed: "应用关闭时刷新订阅"
     Notify About New Uploads: 新上传通知
     RSS Feeds Auto Refresh Interval: RSS 订阅源自动刷新间隔
+    Faster Subscription Refresh: "更快的订阅刷新"
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "观看时长统计范围"
@@ -2169,8 +2169,6 @@ Description:
   Games: 游戏
   Music: 音乐
 Tooltips:
-  Experimental Settings:
-    Faster Subscription Refresh: "先检查每个频道的 RSS 订阅源，只加载有新上传内容的频道的视频、Shorts 和直播。自动刷新还会跳过过去 10 分钟内加载过的频道。对于没有新上传内容的频道，观看次数、已移除的视频和更改的标题每隔几小时才会更新一次，而且当 RSS 订阅源滞后时，新上传的内容可能会稍后才出现。使用 Invidious API 时不可用。"
   General Settings:
     Built-in Streams: |
       自动模式通过 YouTube 的 visionOS 客户端播放大多数视频，启动更快并支持自动画质。直播和它无法播放的视频使用 SABR。
@@ -2282,6 +2280,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "使用所选设置刷新订阅。在桌面端，OpenTubeX 会留在系统托盘中，直到您退出。Android 系统决定后台刷新的运行时间。"
     Notify About New Uploads: 在此设备上为你在订阅设置中开启了通知的频道显示系统通知。OpenTubeX 会在刷新订阅时检查新内容，因此请选择自动刷新间隔。若要在应用关闭时也收到通知，请同时启用应用关闭时刷新订阅。
     RSS Feeds Auto Refresh Interval: 应用打开时 OpenTubeX 自动刷新 RSS 订阅源的频率。
+    Faster Subscription Refresh: "先检查每个频道的 RSS 订阅源，只加载有新上传内容的频道的视频、Shorts 和直播。自动刷新还会跳过过去 10 分钟内加载过的频道。对于没有新上传内容的频道，观看次数、已移除的视频和更改的标题每隔几小时才会更新一次，而且当 RSS 订阅源滞后时，新上传的内容可能会稍后才出现。使用 Invidious API 时不可用。"
   Theme Settings:
     Only Show Important Notifications: 隐藏仅用于确认操作或报告状态的应用内通知。错误、警告、你设置的提醒以及提供操作（如撤销）的通知仍会显示。后台操作（如刷新订阅）的进度会显示在全局进度条中，而不是通知中。系统通知不受影响。
     Visible Search Suggestions: "设置搜索栏在列表需要滚动之前显示的搜索历史记录和建议数量。列表绝不会超出窗口底部。"

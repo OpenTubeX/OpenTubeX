@@ -403,6 +403,7 @@ History:
   Custom: 사용자 지정
   History Older Than Days Removed: '{days}일보다 오래된 시청 기록을 제거했습니다'
 Settings:
+  Experimental Badge: 실험적
   Diagnostics:
     Diagnostics: 진단
     Description: 진단 로그가 켜져 있는 동안 OpenTubeX는 최근 로그 메시지를 메모리에 보관하여 버그 보고서에 첨부할 수 있게 합니다. 스스로 저장하거나 전송하지 않으며, 로그를 끄면 삭제됩니다. 보고서에는 쿠키, 토큰, IP 주소, URL 매개변수가 포함되지 않지만 재생한 동영상의 ID가 포함될 수 있으므로 공유하기 전에 보고서를 확인하세요.
@@ -1374,6 +1375,7 @@ Settings:
     To: 다음으로
     Confirm Before Unsubscribing: 구독 취소 전 확인
     RSS Feeds Auto Refresh Interval: RSS 피드 자동 새로 고침 간격
+    Faster Subscription Refresh: "더 빠른 구독 새로 고침"
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "시청 시간 계산 기준"
@@ -1743,7 +1745,6 @@ Settings:
   Search Settings: 설정 검색
   No Settings Found: 설정을 찾을 수 없습니다
   Experimental Settings:
-    Faster Subscription Refresh: "더 빠른 구독 새로 고침"
     Disable Hardware Acceleration: 하드웨어 가속 비활성화
   Interface Customizer:
     Customize Interface: "인터페이스 사용자 지정"
@@ -2672,6 +2673,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "선택한 설정으로 피드를 새로고침합니다. 데스크톱에서는 종료할 때까지 OpenTubeX가 시스템 트레이에 남습니다. Android는 백그라운드 새로고침 시간을 결정합니다."
     Notify About New Uploads: 구독 설정에서 알림을 켠 채널에 대해 이 기기에 시스템 알림을 표시합니다. OpenTubeX는 구독을 새로 고칠 때 새 콘텐츠를 확인하므로 자동 새로 고침 간격을 선택하세요. 앱이 닫혀 있을 때도 알림을 받으려면 앱이 닫혀 있을 때 새로 고침도 사용하도록 설정하세요.
     RSS Feeds Auto Refresh Interval: 앱이 열려 있는 동안 OpenTubeX가 RSS 피드를 자동으로 새로 고치는 빈도입니다.
+    Faster Subscription Refresh: "먼저 각 채널의 RSS 피드를 확인하고 새 업로드가 있는 채널의 동영상, Shorts, 라이브 스트림만 불러옵니다. 자동 새로 고침은 지난 10분 이내에 불러온 채널도 건너뜁니다. 새 업로드가 없는 채널은 조회수, 삭제된 동영상, 변경된 제목이 몇 시간마다만 업데이트되며, RSS 피드가 늦어지면 새 업로드가 늦게 표시될 수 있습니다. Invidious API에서는 사용할 수 없습니다."
   Theme Settings:
     Only Show Important Notifications: 작업을 확인하거나 상태만 알려 주는 앱 내 알림을 숨깁니다. 오류, 경고, 직접 설정한 알림, 그리고 실행취소처럼 작업을 제공하는 알림은 계속 표시됩니다. 구독 새로 고침과 같은 백그라운드 작업의 진행 상황은 알림 대신 전역 진행 표시줄에 표시됩니다. 시스템 알림에는 영향을 주지 않습니다.
     Visible Search Suggestions: "검색창 목록이 스크롤되기 전에 표시할 검색 기록 항목과 추천 검색어의 수를 설정합니다. 목록은 창 아래쪽 가장자리를 넘어가지 않습니다."
@@ -2687,7 +2689,6 @@ Tooltips:
     Modal Backdrop: "대화 상자와 메뉴 뒤에서 앱이 보이는 방식을 설정합니다. 흐림 효과는 성능이 낮은 기기에서 느릴 수 있습니다."
     Click Scrollbar Track to Scroll: "스크롤바의 핸들 바깥쪽을 클릭하면 클릭한 방향으로 약 한 페이지씩 스크롤합니다. 이 설정이 켜져 있으면 보이는 스크롤바가 그 아래 항목을 향한 클릭을 가로챕니다. 탭 바의 스크롤바는 항상 이렇게 동작합니다."
   Experimental Settings:
-    Faster Subscription Refresh: "먼저 각 채널의 RSS 피드를 확인하고 새 업로드가 있는 채널의 동영상, Shorts, 라이브 스트림만 불러옵니다. 자동 새로 고침은 지난 10분 이내에 불러온 채널도 건너뜁니다. 새 업로드가 없는 채널은 조회수, 삭제된 동영상, 변경된 제목이 몇 시간마다만 업데이트되며, RSS 피드가 늦어지면 새 업로드가 늦게 표시될 수 있습니다. Invidious API에서는 사용할 수 없습니다."
     Replace HTTP Cache: Electron의 디스크 기반 HTTP 캐시를 비활성화하고 사용자 지정 메모리 내 이미지 캐시를 활성화합니다. RAM 사용량이 늘어납니다.
     Disable Hardware Acceleration: GPU 하드웨어 가속을 비활성화합니다. 그래픽 문제를 해결할 수 있지만 성능이 저하될 수 있습니다.
   SponsorBlock Settings:

@@ -309,8 +309,7 @@ History:
   Custom: Anpassad
   History Older Than Days Removed: Visningshistorik äldre än 1 dag har tagits bort | Visningshistorik äldre än {days} dagar har tagits bort
 Settings:
-  Experimental Settings:
-    Faster Subscription Refresh: "Snabbare uppdatering av prenumerationer"
+  Experimental Badge: Experimentell
   Diagnostics:
     Diagnostics: Diagnostik
     Description: Medan diagnostikloggen är på sparar OpenTubeX de senaste loggmeddelandena i minnet så att du kan bifoga dem till felrapporter. Det sparar eller skickar dem aldrig på egen hand, och när du stänger av loggen raderas de. Rapporter utelämnar kakor, token, IP-adresser och URL-parametrar, men de kan innehålla id:n för videor du har spelat upp, så granska en rapport innan du delar den.
@@ -1177,6 +1176,7 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Uppdatera prenumerationer medan appen är stängd"
     Notify About New Uploads: Avisera om nya uppladdningar
     RSS Feeds Auto Refresh Interval: Intervall för automatisk uppdatering av RSS-flöden
+    Faster Subscription Refresh: "Snabbare uppdatering av prenumerationer"
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Räkna visningstid från"
@@ -2170,8 +2170,6 @@ Description:
   Games: Spel
   Music: Musik
 Tooltips:
-  Experimental Settings:
-    Faster Subscription Refresh: "Kontrollerar först varje kanals RSS-flöde och läser bara in videor, Shorts och livesändningar från kanaler med nya uppladdningar. Automatiska uppdateringar hoppar också över kanaler som lästs in de senaste 10 minuterna. För kanaler utan nya uppladdningar uppdateras visningar, borttagna videor och ändrade titlar bara med några timmars mellanrum, och nya uppladdningar kan dyka upp senare när RSS-flödet släpar efter. Inte tillgängligt med Invidious-API:t."
   General Settings:
     Built-in Streams: |
       Automatiskt spelar de flesta videor via YouTubes visionOS-klient, som startar snabbare och stöder automatisk kvalitet. Direktsändningar och videor som den inte kan spela upp använder SABR.
@@ -2283,6 +2281,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Uppdaterar flöden med dina valda inställningar. På datorn stannar OpenTubeX i systemfältet tills du avslutar. Android bestämmer när bakgrundsuppdateringar körs."
     Notify About New Uploads: Visar systemaviseringar på den här enheten för kanaler vars aviseringar du har aktiverat i deras prenumerationsinställningar. OpenTubeX söker efter nytt innehåll när prenumerationer uppdateras, så välj ett intervall för automatisk uppdatering. Om du vill få aviseringar medan appen är stängd aktiverar du även uppdatering medan appen är stängd.
     RSS Feeds Auto Refresh Interval: Hur ofta OpenTubeX automatiskt uppdaterar dina RSS-flöden medan appen är öppen.
+    Faster Subscription Refresh: "Kontrollerar först varje kanals RSS-flöde och läser bara in videor, Shorts och livesändningar från kanaler med nya uppladdningar. Automatiska uppdateringar hoppar också över kanaler som lästs in de senaste 10 minuterna. För kanaler utan nya uppladdningar uppdateras visningar, borttagna videor och ändrade titlar bara med några timmars mellanrum, och nya uppladdningar kan dyka upp senare när RSS-flödet släpar efter. Inte tillgängligt med Invidious-API:t."
   Theme Settings:
     Only Show Important Notifications: Döljer aviseringar i appen som bara bekräftar en åtgärd eller rapporterar en status. Fel, varningar, påminnelser som du har ställt in och aviseringar som erbjuder en åtgärd, till exempel Ångra, visas fortfarande. Förloppet för bakgrundsåtgärder, till exempel uppdatering av prenumerationer, visas i den globala förloppsindikatorn i stället för som en avisering. Systemaviseringar påverkas inte.
     Visible Search Suggestions: "Anger hur många poster från sökhistoriken och förslag sökfältet visar innan listan behöver rullas. Listan sträcker sig aldrig förbi fönstrets nederkant."

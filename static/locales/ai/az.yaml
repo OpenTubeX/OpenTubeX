@@ -311,8 +311,7 @@ History:
   Custom: Fərdi
   History Older Than Days Removed: 1 gündən köhnə baxış tarixçəsi silindi | {days} gündən köhnə baxış tarixçəsi silindi
 Settings:
-  Experimental Settings:
-    Faster Subscription Refresh: "Abunəliklərin daha sürətli yenilənməsi"
+  Experimental Badge: Eksperimental
   Diagnostics:
     Diagnostics: Diaqnostika
     Description: Diaqnostika jurnalı aktiv olduqda OpenTubeX son jurnal mesajlarını yaddaşda saxlayır ki, onları xəta hesabatlarına əlavə edə biləsiniz. Onları heç vaxt özbaşına saxlamır və ya göndərmir, jurnalı söndürdükdə isə onlar silinir. Hesabatlara kukilər, tokenlər, IP ünvanları və URL parametrləri daxil edilmir, lakin oynatdığınız videoların ID-ləri ola bilər, ona görə də hesabatı paylaşmazdan əvvəl yoxlayın.
@@ -1179,6 +1178,7 @@ Settings:
     Refresh Subscriptions While App Is Closed: Tətbiq bağlı olarkən abunəlikləri yenilə
     Notify About New Uploads: Yeni yükləmələr barədə bildiriş göndər
     RSS Feeds Auto Refresh Interval: RSS axınlarının avtomatik yenilənmə aralığı
+    Faster Subscription Refresh: "Abunəliklərin daha sürətli yenilənməsi"
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Baxış Vaxtı Sayılan Cihazlar"
@@ -2182,8 +2182,6 @@ Description:
   Games: Oyunlar
   Music: Musiqi
 Tooltips:
-  Experimental Settings:
-    Faster Subscription Refresh: "Əvvəlcə hər kanalın RSS lentini yoxlayır və yalnız yeni yükləmələri olan kanalların videolarını, Shorts-larını və canlı yayımlarını yükləyir. Avtomatik yeniləmələr son 10 dəqiqədə yüklənmiş kanalları da ötürür. Yeni yükləməsi olmayan kanallarda baxış sayları, silinmiş videolar və dəyişdirilmiş başlıqlar yalnız bir neçə saatdan bir yenilənir və RSS lenti geri qaldıqda yeni yükləmələr daha gec görünə bilər. Invidious API ilə əlçatan deyil."
   General Settings:
     Built-in Streams: |
       Avtomatik rejim əksər videoları YouTube-un visionOS müştərisi ilə oynadır; o, daha tez başlayır və avtomatik keyfiyyəti dəstəkləyir. Canlı yayımlar və onun oynada bilmədiyi videolar SABR istifadə edir.
@@ -2295,6 +2293,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Lentləri seçdiyiniz parametrlərlə yeniləyir. Masaüstündə OpenTubeX çıxana qədər sistem treyində qalır. Android arxa plan yeniləmələrinin vaxtını müəyyən edir."
     Notify About New Uploads: Abunəlik ayarlarında bildirişlərini aktiv etdiyiniz kanallar üçün bu cihazda sistem bildirişləri göstərir. OpenTubeX yeni məzmunu abunəliklər yeniləndikdə yoxlayır, buna görə avtomatik yeniləmə aralığı seçin. Tətbiq bağlı olarkən bildiriş almaq üçün tətbiq bağlı olarkən yeniləməni də aktiv edin.
     RSS Feeds Auto Refresh Interval: Tətbiq açıq olarkən OpenTubeX-in RSS axınlarınızı nə qədər tez-tez avtomatik yenilədiyi.
+    Faster Subscription Refresh: "Əvvəlcə hər kanalın RSS lentini yoxlayır və yalnız yeni yükləmələri olan kanalların videolarını, Shorts-larını və canlı yayımlarını yükləyir. Avtomatik yeniləmələr son 10 dəqiqədə yüklənmiş kanalları da ötürür. Yeni yükləməsi olmayan kanallarda baxış sayları, silinmiş videolar və dəyişdirilmiş başlıqlar yalnız bir neçə saatdan bir yenilənir və RSS lenti geri qaldıqda yeni yükləmələr daha gec görünə bilər. Invidious API ilə əlçatan deyil."
   Theme Settings:
     Only Show Important Notifications: Yalnız əməliyyatı təsdiqləyən və ya vəziyyət bildirən tətbiqdaxili bildirişləri gizlədir. Xətalar, xəbərdarlıqlar, qurduğunuz xatırlatmalar və Geri al kimi əməliyyat təklif edən bildirişlər yenə də görünür. Abunəliklərin yenilənməsi kimi arxa fon əməliyyatlarının gedişatı bildiriş əvəzinə ümumi irəliləyiş zolağında göstərilir. Sistem bildirişlərinə təsir etmir.
     Visible Search Suggestions: "Axtarış panelinin siyahısı sürüşdürülməzdən əvvəl neçə axtarış tarixçəsi qeydi və təklif göstərdiyini müəyyən edir. Siyahı heç vaxt pəncərənin aşağı kənarından kənara çıxmır."

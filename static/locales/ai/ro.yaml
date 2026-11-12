@@ -310,6 +310,7 @@ History:
   Custom: Personalizat
   History Older Than Days Removed: Istoricul vizionărilor mai vechi de 1 zi a fost șters | Istoricul vizionărilor mai vechi de {days} zile a fost șters | Istoricul vizionărilor mai vechi de {days} de zile a fost șters
 Settings:
+  Experimental Badge: Experimental
   Diagnostics:
     Diagnostics: Diagnosticare
     Description: Cât timp jurnalul de diagnosticare este activ, OpenTubeX păstrează în memorie mesajele recente din jurnal, ca să le poți atașa la rapoartele de erori. Nu le salvează și nu le trimite niciodată de la sine, iar dezactivarea jurnalului le șterge. Rapoartele omit cookie-urile, tokenurile, adresele IP și parametrii URL, dar pot include ID-urile videoclipurilor redate, așa că verifică un raport înainte de a-l distribui.
@@ -1180,6 +1181,7 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Reîmprospătează abonamentele când aplicația este închisă"
     Notify About New Uploads: Notifică despre încărcări noi
     RSS Feeds Auto Refresh Interval: Interval de reîmprospătare automată a fluxurilor RSS
+    Faster Subscription Refresh: "Reîmprospătare mai rapidă a abonamentelor"
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Numără timpul de vizionare de pe"
@@ -1511,7 +1513,6 @@ Settings:
   Search Settings: Caută în setări
   No Settings Found: Nu s-au găsit setări
   Experimental Settings:
-    Faster Subscription Refresh: "Reîmprospătare mai rapidă a abonamentelor"
     Disable Hardware Acceleration: Dezactivează accelerarea hardware
   Interface Customizer:
     Customize Interface: "Personalizează interfața"
@@ -2335,6 +2336,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Actualizează fluxurile cu setările alese. Pe desktop, OpenTubeX rămâne în zona de notificare până la ieșire. Android stabilește când rulează actualizările în fundal."
     Notify About New Uploads: Afișează notificări de sistem pe acest dispozitiv pentru canalele ale căror notificări le-ați activat în setările lor de abonament. OpenTubeX caută conținut nou când abonamentele se reîmprospătează, așa că alegeți un interval de reîmprospătare automată. Pentru a primi notificări când aplicația este închisă, activați și reîmprospătarea când aplicația este închisă.
     RSS Feeds Auto Refresh Interval: Cât de des reîmprospătează OpenTubeX automat fluxurile RSS cât timp aplicația este deschisă.
+    Faster Subscription Refresh: "Verifică mai întâi fluxul RSS al fiecărui canal și încarcă videoclipurile, Shorts și transmisiunile live doar de la canalele cu încărcări noi. Reîmprospătările automate omit și canalele încărcate în ultimele 10 minute. Pentru canalele fără încărcări noi, numărul de vizionări, videoclipurile eliminate și titlurile modificate se actualizează doar la câteva ore, iar încărcările noi pot apărea mai târziu când fluxul RSS rămâne în urmă. Indisponibil cu API-ul Invidious."
   Theme Settings:
     Only Show Important Notifications: Ascunde notificările din aplicație care doar confirmă o acțiune sau raportează o stare. Erorile, avertismentele, mementourile pe care le-ați configurat și notificările care oferă o acțiune, precum Anulare, apar în continuare. Progresul operațiunilor din fundal, precum reîmprospătarea abonamentelor, este afișat în bara de progres globală în loc de o notificare. Notificările sistemului nu sunt afectate.
     Visible Search Suggestions: "Stabilește câte intrări din istoricul căutărilor și sugestii afișează bara de căutare înainte ca lista ei să fie derulată. Lista nu depășește niciodată marginea de jos a ferestrei."
@@ -2350,7 +2352,6 @@ Tooltips:
     Modal Backdrop: "Stabilește cum arată aplicația în spatele dialogurilor și meniurilor. Estomparea poate fi lentă pe dispozitivele mai puțin performante."
     Click Scrollbar Track to Scroll: "Un clic pe o bară de derulare în afara cursorului ei derulează aproximativ o pagină în direcția clicului. Cât timp opțiunea este activată, o bară de derulare vizibilă preia clicurile destinate elementelor de sub ea. Bara de derulare a barei de file funcționează întotdeauna așa."
   Experimental Settings:
-    Faster Subscription Refresh: "Verifică mai întâi fluxul RSS al fiecărui canal și încarcă videoclipurile, Shorts și transmisiunile live doar de la canalele cu încărcări noi. Reîmprospătările automate omit și canalele încărcate în ultimele 10 minute. Pentru canalele fără încărcări noi, numărul de vizionări, videoclipurile eliminate și titlurile modificate se actualizează doar la câteva ore, iar încărcările noi pot apărea mai târziu când fluxul RSS rămâne în urmă. Indisponibil cu API-ul Invidious."
     Disable Hardware Acceleration: Dezactivează accelerarea hardware a GPU-ului. Poate rezolva problemele grafice, dar probabil va reduce performanța.
   SponsorBlock Settings:
     Always Show DeArrow Badge: Păstrează butonul DeArrow vizibil pe videoclipurile al căror titlu sau miniatură a fost înlocuit de DeArrow, în loc să apară doar la trecerea cursorului.

@@ -328,7 +328,6 @@ export const SETTINGS_SEARCH_SOURCES = {
   }, {
     type: 'experimental',
     key: 'Settings.Experimental Settings',
-    capacitorSupported: true,
     electronOnly: true
   }, {
     type: 'diagnostics',
