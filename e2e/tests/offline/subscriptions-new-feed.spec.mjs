@@ -941,6 +941,22 @@ test.describe('tile keyboard navigation in a long feed', () => {
       await page.keyboard.press('ArrowDown')
       await expect(titleLink(index)).toBeFocused()
     }
+
+    for (let index = 19; index >= 0; index--) {
+      await page.keyboard.press('ArrowUp')
+      await expect(titleLink(index)).toBeFocused()
+    }
+    // The first row cannot scroll further down, so its focus ring needs room
+    // below the sticky header.
+    const { ringTop, headerBottom } = await titleLink(0).evaluate(title => {
+      const tile = title.closest('.ft-list-item')
+      const style = getComputedStyle(tile)
+      return {
+        ringTop: tile.getBoundingClientRect().top - parseFloat(style.outlineWidth) - parseFloat(style.outlineOffset),
+        headerBottom: document.querySelector('.subscriptionsHeader').getBoundingClientRect().bottom
+      }
+    })
+    expect(ringTop).toBeGreaterThanOrEqual(headerBottom)
   })
 })
 

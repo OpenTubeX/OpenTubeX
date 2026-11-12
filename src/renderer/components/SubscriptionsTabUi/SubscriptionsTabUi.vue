@@ -65,7 +65,6 @@
       :has-visible-content="activeVideoList.length > 0"
     />
     <FtElementList
-      :class="{ communityPosts: isCommunity }"
       :data="activeVideoList"
       :data-overrides="dataOverrides"
       :subscription-feed-type="subscriptionFeedType ?? refreshTab"
