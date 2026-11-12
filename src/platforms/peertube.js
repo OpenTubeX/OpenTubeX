@@ -457,7 +457,8 @@ async function getChannelPage(fetch, channel, tab, continuation, signal) {
 }
 
 /**
- * Lives come in upload order, since lists don't say which ones are on air.
+ * Lives come in upload order: lists mark which videos are lives, but not
+ * whether they are on air.
  * @param {PlatformFetch} fetch
  * @param {PlatformChannel} channel
  * @param {AbortSignal} [signal]

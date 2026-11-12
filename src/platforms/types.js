@@ -38,7 +38,7 @@
  *   isNew?: boolean
  * }} PlatformItem A video, track, clip or live stream. `url` is the page that
  * yt-dlp plays. `channelId` is the `id` of its PlatformChannel, or empty when
- * unknown. `published` is in milliseconds.
+ * unknown. `published` is in milliseconds, `duration` in seconds.
  *
  * @typedef {{
  *   platform: string,
@@ -79,7 +79,7 @@
  * - `getChannel` takes an ID from `parseChannelUrl` or from an earlier
  *   PlatformChannel, and returns null for unknown channels.
  * - `getLatestItems` returns the newest uploads for the subscription feed,
- *   newest first, about 20, and the live stream first where the platform has one.
+ *   newest first, a page of them, and the live stream first where the platform has one.
  * - `getFeed`, where a platform has it, loads the feed of many channels in a
  *   few requests, with their current details, instead of `getLatestItems`.
  */

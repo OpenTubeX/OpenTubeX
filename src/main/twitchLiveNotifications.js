@@ -96,8 +96,11 @@ export function createTwitchLiveNotifier({ file, fetch, show, onLive, intervalMs
       // Channels or notifications may have changed meanwhile
       if (checked !== configuration) return
       const state = await loadKnown()
+      // Notifications turned off meanwhile stay off, without recreating the state
+      if (!configuration.enabled) return
       const fresh = takeNewTwitchStreams(state, channelIds, feed.live)
       await saveKnown()
+      if (!configuration.enabled) return
       for (const stream of fresh) {
         const channel = checked.channels.find(({ id }) => id === stream.channelId)
         const target = channel && getTwitchLiveNotificationTarget(channel.login, stream.id)

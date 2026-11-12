@@ -707,7 +707,7 @@ function runApp() {
     onLive: live => sendToAppWindows(IpcChannels.TWITCH_LIVE_UPDATED, live)
   })
   handleTrusted(IpcChannels.TWITCH_LIVE_CONFIGURE, (_event, configuration) => twitchLiveNotifier.configure(configuration))
-  handleTrusted(IpcChannels.RUMBLE_FETCH, (_event, url) => fetchRumblePage(net.fetch, url))
+  handleTrusted(IpcChannels.RUMBLE_FETCH, (_event, url) => fetchRumblePage(net, url))
   const uploadNotifier = createUploadNotifier({
     file: path.join(userDataPath, 'upload-notifications.json'),
     show: showUrlNotification,

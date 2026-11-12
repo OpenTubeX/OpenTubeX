@@ -60,13 +60,18 @@ public class TwitchLiveNotificationsTest {
                 .put("id", "100").put("title", "Live").put("previewImageURL", "https://cdn.example.test/live.jpg")))
             .put(new JSONObject().put("id", "2").put("stream", JSONObject.NULL))
             .put(JSONObject.NULL)
-            .put(new JSONObject().put("id", "3").put("stream", new JSONObject().put("id", "1&x").put("previewImageURL", "http://cdn.example.test/live.jpg")))));
+            .put(new JSONObject().put("id", "3").put("stream", new JSONObject().put("id", "1&x").put("previewImageURL", "https://cdn.example.test/live.jpg")))
+            .put(new JSONObject().put("id", "4").put("stream", new JSONObject().put("id", "400").put("previewImageURL", "http://cdn.example.test/live.jpg")))));
         JSONArray streams = TwitchLiveNotifications.parseLiveStreams(response);
-        assertEquals(1, streams.length());
+        assertEquals(2, streams.length());
         JSONObject stream = streams.getJSONObject(0);
         assertEquals("1", stream.getString("channelId"));
         assertEquals("100", stream.getString("id"));
         assertEquals("https://cdn.example.test/live.jpg", stream.getString("thumbnail"));
+        // A stream with an insecure thumbnail is kept, without it
+        JSONObject insecure = streams.getJSONObject(1);
+        assertEquals("400", insecure.getString("id"));
+        assertFalse(insecure.has("thumbnail"));
 
         assertThrows(IOException.class, () -> TwitchLiveNotifications.parseLiveStreams(new JSONObject().put("errors", new JSONArray())));
     }

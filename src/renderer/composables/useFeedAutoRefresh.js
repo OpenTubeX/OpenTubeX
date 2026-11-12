@@ -66,7 +66,11 @@ export function useFeedAutoRefresh(dataReady, feed) {
 
       // Claimed before the refresh, which can fail or be replaced by a manual one
       feed.setNextAutoRefresh(Date.now() + interval.value)
-      await feed.refresh()
+      try {
+        await feed.refresh()
+      } catch (error) {
+        console.error('Failed to refresh a feed on its interval', error)
+      }
     })
   }
 

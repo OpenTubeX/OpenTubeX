@@ -119,9 +119,6 @@ export async function configureAndroidTwitchLive(configuration) {
 /**
  * Announces the streams that started since the last check, through the
  * notifications Android keeps for the notification history.
- * @param {{ channelId: string, id: string, title: string, thumbnail?: string }[]} streams
- */
-/**
  * @param {string[]} channelIds the channels the streams were requested for
  * @param {{ channelId: string, id: string, title: string, thumbnail?: string }[]} streams
  */
