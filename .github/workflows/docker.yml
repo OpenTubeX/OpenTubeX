@@ -78,8 +78,11 @@ jobs:
         build-args: GITHUB_SHA=${{ steps.image.outputs.sha }}
         labels: |
           org.opencontainers.image.title=OpenTubeX
-          org.opencontainers.image.description=OpenTubeX web app, served in front of a self-hosted Invidious server
+          org.opencontainers.image.description=OpenTubeX web app for self-hosting, with or without its own Invidious server
           org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+          org.opencontainers.image.url=https://opentubex.org
+          org.opencontainers.image.documentation=https://opentubex.org/docs/self-hosting/
+          org.opencontainers.image.vendor=OpenTubeX
           org.opencontainers.image.licenses=AGPL-3.0-or-later
           org.opencontainers.image.version=${{ steps.image.outputs.version }}
           org.opencontainers.image.revision=${{ steps.image.outputs.sha }}
