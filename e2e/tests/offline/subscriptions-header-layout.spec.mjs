@@ -82,14 +82,17 @@ test.describe('subscriptions header layout', () => {
       await expect(markAllSeen).toBeFocused()
       const controls = [
         '.headerViewToggle .iconButton',
-        '.headerSortSelect .select-text'
+        '.headerSortSelect .select-text',
+        '.refreshButton .iconButton'
       ]
-      if (compact) {
+      if (width <= 600) {
+        // Phones put Mark all as seen on its own row below the refresh button
         controls.push('.markAllSeenButton')
+      } else if (compact) {
+        controls.splice(2, 0, '.markAllSeenButton')
       } else {
         controls.unshift('.markAllSeenButton')
       }
-      controls.push('.refreshButton .iconButton')
 
       await page.locator('[data-subscription-feed-tab="all"]').focus()
       for (const selector of controls) {
@@ -153,19 +156,21 @@ test.describe('subscriptions header layout', () => {
     })
     expect(labelWidth).toBeGreaterThan(40)
 
-    const sharesControlRow = await page.evaluate(() => {
+    // The action moves below the sort control and refresh button so the sort
+    // value stays readable
+    const sortLayout = await page.evaluate(() => {
       const markRect = document.querySelector('.markAllSeenButton').getBoundingClientRect()
-      return ['.headerViewToggle', '.headerSortSelect'].some(selector => {
-        const rect = document.querySelector(selector).getBoundingClientRect()
-        return rect.top < markRect.bottom && rect.bottom > markRect.top
-      })
-    })
-    expect(sharesControlRow).toBe(true)
-    expect(await page.evaluate(() => {
-      const markRect = document.querySelector('.markAllSeenButton').getBoundingClientRect()
+      const select = document.querySelector('.headerSortSelect .select-text')
+      const selectRect = select.getBoundingClientRect()
       const refreshRect = document.querySelector('.refreshButton').getBoundingClientRect()
-      return refreshRect.top < markRect.bottom && refreshRect.bottom > markRect.top
-    })).toBe(true)
+      const value = select.querySelector('.selectedValue')
+      return {
+        markBelowSelect: markRect.top >= selectRect.bottom,
+        refreshBesideSelect: refreshRect.top < selectRect.bottom && refreshRect.bottom > selectRect.top,
+        valueClipped: value.scrollWidth > value.clientWidth
+      }
+    })
+    expect(sortLayout).toEqual({ markBelowSelect: true, refreshBesideSelect: true, valueClipped: false })
     await expect(page.locator('.headerRefreshWidget .lastRefreshTimestamp')).toHaveCount(0)
     await expect(page.locator('.headerRefreshWidget .nextAutoRefreshTimestamp')).toHaveCount(0)
     await attachScreenshot('portrait mobile New feed action')
@@ -267,6 +272,7 @@ test.describe('subscriptions header layout', () => {
         return { start: rect.left, end: rect.right, top: rect.top, bottom: rect.bottom }
       }
       const select = document.querySelector('.headerSortSelect .select-text')
+      const value = select.querySelector('.selectedValue')
 
       return {
         header: toBox(document.querySelector('.subscriptionsHeader')),
@@ -275,7 +281,8 @@ test.describe('subscriptions header layout', () => {
         label: toBox(document.querySelector('.headerSortSelect .select-label')),
         markAllSeen: toBox(document.querySelector('.markAllSeenButton')),
         refresh: toBox(document.querySelector('.headerRefreshWidget .refreshButton')),
-        selectedText: select.textContent.trim()
+        selectedText: select.textContent.trim(),
+        selectedValueClipped: value.scrollWidth > value.clientWidth
       }
     })
 
@@ -291,9 +298,11 @@ test.describe('subscriptions header layout', () => {
       (layout.viewToggle.top + layout.viewToggle.bottom) / 2 -
       (layout.select.top + layout.select.bottom) / 2
     )).toBeLessThanOrEqual(1)
+    expect(layout.markAllSeen.top).toBeGreaterThanOrEqual(layout.select.bottom)
+    expect(layout.selectedValueClipped).toBe(false)
     expect(Math.abs(
-      (layout.select.top + layout.select.bottom) / 2 -
-      (layout.markAllSeen.top + layout.markAllSeen.bottom) / 2
+      (layout.refresh.top + layout.refresh.bottom) / 2 -
+      (layout.select.top + layout.select.bottom) / 2
     )).toBeLessThanOrEqual(1)
     expect(layout.label.top).toBeGreaterThanOrEqual(layout.select.top)
     expect(layout.label.bottom).toBeLessThanOrEqual(layout.select.bottom)
