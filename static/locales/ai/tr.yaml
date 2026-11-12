@@ -2192,6 +2192,7 @@ Tooltips:
       yt-dlp kullanıldığında videoların başlaması daha uzun sürebilir.
     Avoid translation: |
       YouTube'un video başlığı, açıklaması ve bölümleri için otomatik çevirisini devre dışı bırakır.
+      "Tüm Uygulama", kanal adlarını ve açıklamalarını da orijinal dillerinde gösterir.
       Listelerdeki video başlıklarını getirmek gibi çok fazla istek, uygulamanın
       güvenilirliğini geçici olarak etkileyebilir.
     Show Thumbnail Previews: Video küçük resimlerinin üzerine gelindiğinde hareketli önizlemeler gösterir.

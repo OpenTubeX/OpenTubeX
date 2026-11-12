@@ -2444,6 +2444,7 @@ Tooltips:
       Video’s kan langer neem om te begin wanneer yt-dlp gebruik word.
     Avoid translation: |
       Deaktiveer YouTube se outomatiese vertaling van die titel, beskrywing en hoofstukke van ’n video.
+      „Hele toep” wys ook kanaalname en -beskrywings in hul oorspronklike taal.
       Te veel versoeke, soos om videotitels oor lyste heen op te haal, kan die toep se betroubaarheid
       tydelik beïnvloed.
     Always Use Backup Media Server: Stroom video’s vanaf die rugsteunbediener wat YouTube noem in plaas van die toegewysde een, byvoorbeeld wanneer u internetverskaffer se kas dikwels stadig is. Andersins skakel OpenTubeX slegs oor wanneer die toegewysde bediener nie antwoord nie.

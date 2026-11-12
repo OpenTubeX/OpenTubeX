@@ -2499,6 +2499,7 @@ Tooltips:
       Videoar kan bruke lengre tid på å starte med yt-dlp.
     Avoid translation: |
       Slå av den automatiske YouTube-omsetjinga av tittel, skildring og kapittel i ein video.
+      «Heile appen» viser òg kanalnamn og -skildringar på originalspråket.
       For mange førespurnader, til dømes ved henting av videotitlar frå fleire lister, kan mellombels
       gjere appen mindre påliteleg.
     Show Thumbnail Previews: Vis animerte førehandsvisingar når peikaren er over videominiatyrar.

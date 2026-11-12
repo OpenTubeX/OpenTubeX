@@ -2192,6 +2192,7 @@ Tooltips:
       A videók indítása tovább tarthat a yt-dlp használatakor.
     Avoid translation: |
       A videócímek, -leírások és -fejezetek YouTube általi automatikus fordításának kikapcsolása.
+      A „Teljes alkalmazás” beállítás a csatornák nevét és leírását is az eredeti nyelven jeleníti meg.
       A túl sok kérés, például a videócímek lekérése több listán keresztül, átmenetileg
       ronthatja az alkalmazás megbízhatóságát.
     Show Thumbnail Previews: Animált előnézet megjelenítése, amikor az egér a videó bélyegképe fölött van.

@@ -2201,6 +2201,7 @@ Tooltips:
       Baliteke bideoek denbora gehiago behar izatea hasteko yt-dlp erabiltzean.
     Avoid translation: |
       Desgaitu YouTube-k bideo baten izenburua, deskribapena eta kapituluak automatikoki itzultzea.
+      "Aplikazio osoan" aukerak kanalen izenak eta deskribapenak ere jatorrizko hizkuntzan erakusten ditu.
       Eskaera gehiegik, hala nola zerrendetako bideoen izenburuak eskuratzeak,
       aplikazioaren fidagarritasuna aldi baterako murriztu dezakete.
     Show Thumbnail Previews: Erakutsi aurrebista animatuak bideoen koadro txikiak seinalatzean.

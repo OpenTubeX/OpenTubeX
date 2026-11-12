@@ -2198,6 +2198,7 @@ Tooltips:
       Videoiden toiston alkaminen voi kestää kauemmin yt-dlp:tä käytettäessä.
     Avoid translation: |
       Estä YouTubea kääntämästä automaattisesti videon nimeä, kuvausta ja lukuja.
+      ”Koko sovelluksessa” näyttää myös kanavien nimet ja kuvaukset niiden alkuperäisellä kielellä.
       Liian monet pyynnöt, kuten videoiden nimien hakeminen luetteloihin, voivat tilapäisesti
       heikentää sovelluksen toimintavarmuutta.
     Show Thumbnail Previews: Näytä animoitu esikatselu, kun osoitin viedään videon pikkukuvan päälle.

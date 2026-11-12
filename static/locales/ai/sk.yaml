@@ -2197,6 +2197,7 @@ Tooltips:
       Pri použití yt-dlp môže spustenie videa trvať dlhšie.
     Avoid translation: |
       Vypne automatický preklad názvu, opisu a kapitol videa službou YouTube.
+      Možnosť „Celá aplikácia“ zobrazuje aj názvy a opisy kanálov v ich pôvodnom jazyku.
       Príliš veľa požiadaviek, napríklad načítavanie názvov videí v zoznamoch, môže dočasne
       ovplyvniť spoľahlivosť aplikácie.
     Show Thumbnail Previews: Pri ukázaní na miniatúru videa zobrazí animovaný náhľad.

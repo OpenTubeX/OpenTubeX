@@ -2238,6 +2238,7 @@ Tooltips:
       Videaĵoj eble bezonos pli longe por komenciĝi kiam oni uzas yt-dlp.
     Avoid translation: |
       Malŝalti la aŭtomatan tradukadon de YouTube por titolo, priskribo kaj ĉapitroj de videaĵo.
+      „Tuta aplikaĵo“ ankaŭ montras nomojn kaj priskribojn de kanaloj en ilia originala lingvo.
       Tro multaj petoj, ekzemple venigado de videaĵaj titoloj tra listoj, povas provizore
       malbonigi la fidindecon de la aplikaĵo.
     Always Use Backup Media Server: Fluigas videaĵojn el la rezerva servilo, kiun YouTube nomas, anstataŭ el la asignita, ekzemple kiam la kaŝmemoro de via interreta provizanto ofte estas malrapida. Alie OpenTubeX ŝanĝas nur kiam la asignita servilo ne respondas.

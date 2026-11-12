@@ -2216,6 +2216,7 @@ Tooltips:
       Video mungkin membutuhkan waktu lebih lama untuk dimulai saat menggunakan yt-dlp.
     Avoid translation: |
       Nonaktifkan terjemahan otomatis YouTube untuk judul, deskripsi, dan bab video.
+      "Seluruh Aplikasi" juga menampilkan nama dan deskripsi kanal dalam bahasa aslinya.
       Terlalu banyak permintaan, seperti mengambil judul video dari berbagai daftar, dapat
       mengurangi keandalan aplikasi untuk sementara.
     Show Thumbnail Previews: Tampilkan pratinjau animasi saat penunjuk berada di atas gambar mini video.

@@ -2690,6 +2690,7 @@ Tooltips:
       Pri uporabi yt-dlp lahko traja dlje, da se videoposnetki začnejo predvajati.
     Avoid translation: |
       Onemogoči YouTubov samodejni prevod naslova, opisa in poglavij videoposnetka.
+      Možnost »Celotna aplikacija« prikaže tudi imena in opise kanalov v izvirnem jeziku.
       Preveč zahtev, na primer pridobivanje naslovov videoposnetkov na seznamih, lahko začasno
       vpliva na zanesljivost aplikacije.
     Fallback to Non-Preferred Backend on Failure: Če ima prednostni API težavo, bo OpenTubeX ob vklopljeni možnosti samodejno poskusil uporabiti neprednostni API kot nadomestni način.

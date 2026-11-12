@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { createOriginalChannelNameResolver } from '../../src/renderer/helpers/api/original-channel-name.js'
+import { YTNodes } from 'youtubei.js'
+import { createOriginalChannelNameResolver, getOriginalChannelProfile } from '../../src/renderer/helpers/api/original-channel-name.js'
 
 const channelId = 'UCaaaaaaaaaaaaaaaaaaaaaa'
 const feed = name => new Response(`<feed xmlns="http://www.w3.org/2005/Atom">
@@ -65,4 +66,28 @@ test('bounds the cache when browsing many different channels', async () => {
   }
   await resolve(channelId)
   assert.equal(calls, 502)
+})
+
+test('reads the original name and description from a translated channel profile', () => {
+  const microformat = new YTNodes.MicroformatData({
+    title: 'Translated name',
+    description: 'Translated, shortened description...',
+    channelProfileMicroformatDetails: {
+      profilePage: {
+        mainEntity: { name: ' Original name — 原文 ', description: 'Original description\n\nwith paragraphs' }
+      }
+    }
+  })
+  assert.deepEqual(getOriginalChannelProfile(microformat), {
+    name: 'Original name — 原文',
+    description: 'Original description\n\nwith paragraphs'
+  })
+})
+
+test('keeps the page text for channels without a profile', () => {
+  for (const microformat of [new YTNodes.MicroformatData({ title: 'Music', description: '' }), undefined]) {
+    const { name, description } = getOriginalChannelProfile(microformat)
+    assert.equal(name, undefined)
+    assert.equal(description, undefined)
+  }
 })

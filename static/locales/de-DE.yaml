@@ -2955,7 +2955,8 @@ Tooltips:
     Close Window With Last Tab: Wenn deaktiviert, öffnet das Schließen des letzten Tabs stattdessen einen neuen Tab, sodass das Fenster geöffnet bleibt, bis du es schließt.
     Remember Tab Navigation History: Der Vor- und Zurück-Navigationsverlauf jedes Tabs wird gespeichert und beim Neustart von OpenTubeX wiederhergestellt.
     Avoid translation: |
-      YouTubes automatische Übersetzung für Titel, Beschreibung und Kapitel eines Videos deaktivieren.
+      YouTubes automatische Übersetzung von Videotiteln, -beschreibungen und -kapiteln deaktivieren.
+      „Komplette Anwendung“ zeigt auch Kanalnamen und -beschreibungen in ihrer Originalsprache.
       Zu viele Anfragen, wie Videotitel in Listen abfragen kann die Zuverlässigkeit der
       Anwendung temporär beeinträchtigen.
     Update Relative Timestamps: >-

@@ -168,6 +168,42 @@ index 8fcd5ecef6871bd8455f282783b47e052b8542fa..80cff0a5a1706146816b434137948494
  export default class MenuCustomIconItem extends YTNode {
      static type = 'MenuCustomIconItem';
      action_text;
+diff --git a/dist/src/parser/classes/MicroformatData.d.ts b/dist/src/parser/classes/MicroformatData.d.ts
+index 3712b6790af321bc9cd95815d0437b5c9d3eca70..de88e10f551f5fff550c84ea7e8df90142b88ebd 100644
+--- a/dist/src/parser/classes/MicroformatData.d.ts
++++ b/dist/src/parser/classes/MicroformatData.d.ts
+@@ -26,5 +26,7 @@ export default class MicroformatData extends YTNode {
+     is_family_safe: boolean;
+     tags: string[];
+     available_countries: string[];
++    profile_name?: string;
++    profile_description?: string;
+     constructor(data: RawNode);
+ }
+diff --git a/dist/src/parser/classes/MicroformatData.js b/dist/src/parser/classes/MicroformatData.js
+index 4caa06faf68c1a2c4a3a3421901a274177674650..085496a5085b8dd13ed032b83bd8d42a9ac2c223 100644
+--- a/dist/src/parser/classes/MicroformatData.js
++++ b/dist/src/parser/classes/MicroformatData.js
+@@ -25,6 +25,8 @@ export default class MicroformatData extends YTNode {
+     is_family_safe;
+     tags;
+     available_countries;
++    profile_name;
++    profile_description;
+     constructor(data) {
+         super();
+         this.url_canonical = data.urlCanonical;
+@@ -50,6 +52,10 @@ export default class MicroformatData extends YTNode {
+         this.is_family_safe = data.familySafe;
+         this.tags = data.tags;
+         this.available_countries = data.availableCountries;
++        // Channel profiles keep the original name and description when the rest of the response is translated.
++        const profile = data.channelProfileMicroformatDetails?.profilePage?.mainEntity;
++        this.profile_name = profile?.name;
++        this.profile_description = profile?.description;
+         // XXX: linkAlternatives?
+     }
+ }
 diff --git a/dist/src/parser/classes/RecognitionShelf.js b/dist/src/parser/classes/RecognitionShelf.js
 index 1c3582365177b9703a0eefa7d099ec24bf5728a1..44cfd978478531eb1975ba6c54b6033056668767 100644
 --- a/dist/src/parser/classes/RecognitionShelf.js
