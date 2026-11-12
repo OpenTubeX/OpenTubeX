@@ -2454,21 +2454,27 @@ function runApp() {
     // executables' paths by checking the environmental variables
     const { env: { APPIMAGE, PORTABLE_EXECUTABLE_FILE } } = process
 
-    if (!APPIMAGE) {
-      // If it's a Windows portable, PORTABLE_EXECUTABLE_FILE will
-      // hold a value.
-      // Otherwise, `process.execPath` should be used instead.
-      const scheduled = app.relaunch({
-        args: process.argv.slice(1),
-        execPath: PORTABLE_EXECUTABLE_FILE || process.execPath
-      })
-      if (scheduled !== false) relaunchRequested = true
-    } else {
-      // If it's an AppImage, things must be done the "hard way"
-      // `app.relaunch` doesn't work because of FUSE limitations
-      // Spawn a new process using the APPIMAGE env variable
-      const subprocess = cp.spawn(APPIMAGE, { detached: true, stdio: 'ignore' })
-      subprocess.unref()
+    try {
+      if (!APPIMAGE) {
+        // If it's a Windows portable, PORTABLE_EXECUTABLE_FILE will
+        // hold a value.
+        // Otherwise, `process.execPath` should be used instead.
+        const scheduled = app.relaunch({
+          args: process.argv.slice(1),
+          execPath: PORTABLE_EXECUTABLE_FILE || process.execPath
+        })
+        if (scheduled !== false) relaunchRequested = true
+      } else {
+        // If it's an AppImage, things must be done the "hard way"
+        // `app.relaunch` doesn't work because of FUSE limitations
+        // Spawn a new process using the APPIMAGE env variable
+        const subprocess = cp.spawn(APPIMAGE, { detached: true, stdio: 'ignore' })
+        subprocess.unref()
+      }
+    } catch (error) {
+      // Let a later request try again
+      isRelaunching = false
+      throw error
     }
 
     isQuitConfirmed = true
