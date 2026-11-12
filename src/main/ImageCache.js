@@ -150,11 +150,22 @@ export function createImageCacheHandler(imageCache, getAuthorizationHeaders, req
         return
       }
 
+      // A page that navigates away cancels its images, so their downloads stop
+      const { signal } = protocolRequest
+      if (signal.aborted) {
+        reject(signal.reason)
+        return
+      }
+
       const newRequest = request({
         method: protocolRequest.method,
         url,
         headers
       })
+      signal.addEventListener('abort', () => {
+        newRequest.abort()
+        reject(signal.reason)
+      }, { once: true })
 
       newRequest.on('response', (response) => {
         const chunks = []
