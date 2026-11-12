@@ -68,8 +68,15 @@ const continuation = ref(null)
 const loading = ref(false)
 const failed = ref(false)
 
+// TV tiles name the channel but carry no channel ID, so blocked channels
+// also match by the name saved with them.
+const blockedChannelNames = computed(() => new Set(store.getters.getActiveChannelsHidden
+  .map(channel => channel.preferredName)
+  .filter(Boolean)))
+
 // Shorts have their own feeds; this grid keeps to regular videos.
 const videos = computed(() => allVideos.value.filter(video => !video.isShort &&
+  !blockedChannelNames.value.has(video.author) &&
   !isVideoHiddenByPreferences(video, {
     hideLiveStreams: store.getters.getHideLiveStreams,
     hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
