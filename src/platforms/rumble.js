@@ -56,11 +56,17 @@ function decodeEntities(text) {
 
 /**
  * The text of an HTML fragment. Icons go first, since their titles, such as
- * "Verified", aren't part of names.
+ * "Verified", aren't part of names. Removing a block can join the parts of
+ * another one, so the removal repeats until none is left.
  * @param {string} html
  */
 function text(html) {
-  return decodeEntities(html.replaceAll(/<(svg|script|style)\b[\s\S]*?<\/\1\s*>/gi, '').replaceAll(/<[^>]*>/g, ' '))
+  let content = html
+  for (let previous; content !== previous;) {
+    previous = content
+    content = content.replaceAll(/<(svg|script|style)\b[\s\S]*?<\/\1\s*>/gi, '')
+  }
+  return decodeEntities(content.replaceAll(/<[^>]*>/g, ' '))
     .replaceAll(/\s+/g, ' ')
     .trim()
 }

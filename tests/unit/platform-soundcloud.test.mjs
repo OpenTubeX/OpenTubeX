@@ -133,7 +133,7 @@ test('gets a new client ID once when SoundCloud rejects the cached one', async (
 
   assert.equal((await soundcloud.getChannel(fetcher, '183'))?.id, '183')
   assert.equal(requests.filter(url => url === 'https://soundcloud.com/').length, 2)
-  assert.deepEqual(requests.filter(url => url.startsWith(API)).map(url => new URL(url).searchParams.get('client_id')),
+  assert.deepEqual(requests.filter(url => new URL(url).origin === API).map(url => new URL(url).searchParams.get('client_id')),
     [CLIENT_A, CLIENT_A, CLIENT_B])
 
   // An ID that the API keeps rejecting fails instead of looping

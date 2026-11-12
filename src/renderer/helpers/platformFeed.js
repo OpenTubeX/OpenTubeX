@@ -8,7 +8,8 @@ import { configureAndroidTwitchLive, observeAndroidTwitchLive } from './androidS
 import { isAppHidden } from './appVisibility'
 import { capacitorNotificationHistory } from './capacitorNotificationHistory'
 import { notificationThumbnailsAllowed, openNotificationEntry, showInAppNotification } from './notificationHistory'
-import { toRssFeedSeenMarks } from './rssFeedSeenItems'
+import { isRssFeedItemSeen, onRssFeedSeenItemsSynced, parseRssFeedSeenItems, toRssFeedSeenMarks } from './rssFeedSeenItems'
+import { unmarkExternalMediaWatchedBefore } from './externalMediaPosition'
 import { supportsYtDlp } from './ytDlpCapabilities'
 import {
   findPlatformChannel,
@@ -313,6 +314,25 @@ store.watch((_, getters) => getters.getRssFeedSeenItems, (value) => {
 })
 
 /**
+ * Devices can watch an upload and mark it as unseen without knowing about each
+ * other. As with RSS items, the later change wins, so an unseen mark after the
+ * upload was last saved as watched unmarks it as watched, and brings it back to
+ * the New feed. Live streams have no watched state.
+ * @param {PlatformItem[]} items
+ * @param {import('./rssFeedSeenItems').RssFeedSeenItem[]} entries
+ */
+function unwatchItemsMarkedUnseen(items, entries) {
+  const unseenAt = new Map(entries.filter(entry => !isRssFeedItemSeen(entry)).map(entry => [entry.key, entry.unseenAt ?? 0]))
+  if (unseenAt.size === 0) return
+  for (const item of items) {
+    const timestamp = item.isLive ? undefined : unseenAt.get(getPlatformItemKey(item))
+    if (timestamp !== undefined) unmarkExternalMediaWatchedBefore(item.url, timestamp)
+  }
+}
+
+onRssFeedSeenItemsSynced(entries => unwatchItemsMarkedUnseen(platformFeed.value.videos, entries))
+
+/**
  * @param {PlatformItem[]} items
  */
 function sortLive(items) {
@@ -496,6 +516,8 @@ export async function refreshPlatformFeed() {
     refreshedHere = true
     const loadedKeys = followed.map(getPlatformChannelKey).filter(key => !failed.has(key))
     const { live, videos } = splitLoadedItems(items, loadedKeys)
+    // Uploads can be marked on another device before they load here
+    unwatchItemsMarkedUnseen(videos, parseRssFeedSeenItems(store.getters.getRssFeedSeenItems))
     replaceChannelItems(new Set(loadedKeys), { live, videos, clips })
     platformFeedFailedChannels.value = [...failed]
     platformFeedLastRefresh.value = Date.now()
