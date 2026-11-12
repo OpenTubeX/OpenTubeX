@@ -123,6 +123,7 @@
     >
       <FtPathPicker
         :label="$t('Settings.Proxy Settings.IP Block Recovery Script Path')"
+        placeholder="/path/to/script"
         :value="videoIpBlockScriptPath"
         :tooltip="$t('Tooltips.Proxy Settings.IP Block Recovery Script Path')"
         @browse="handlePickVideoIpBlockRecoveryScriptPath"
