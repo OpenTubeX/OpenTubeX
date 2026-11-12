@@ -177,7 +177,7 @@ Subscriptions:
   Refreshing Subscription Posts: Endurnýja færslur úr áskriftum
   New Content: Nýtt efni
   New Feed Refresh Warning Title: Endurnýja alla áskriftarstrauma?
-  New Feed Refresh Warning: Það getur tekið langan tíma að endurnýja allar efnisgerðir fyrir 1 áskrift. Viltu halda áfram? | Það getur tekið langan tíma að endurnýja allar efnisgerðir fyrir {count} áskriftir. Viltu halda áfram?
+  New Feed Refresh Warning: Það getur tekið langan tíma að endurnýja allar efnisgerðir fyrir {count} áskrift. Viltu halda áfram? | Það getur tekið langan tíma að endurnýja allar efnisgerðir fyrir {count} áskriftir. Viltu halda áfram?
   New Since Last Refresh: Nýtt frá síðustu endurnýjun
   Mark As Seen: Merkja sem séð
   Mark All as Seen: Merkja allt sem séð
