@@ -17,7 +17,7 @@ on:
       tag:
         type: string
         required: true
-        description: Release tag to build, for example v1.2.3 or v1.2.3-nightly-45. Stable tags also move `latest`.
+        description: Release tag to build, for example v1.2.3 or v1.2.3-nightly-45. Stable tags also move `latest`, and `nightly` when it is older.
 
 cache-mode: none
 permissions: {}
@@ -38,6 +38,17 @@ jobs:
         # Manual runs only name a tag
         ref: ${{ inputs.sha || format('refs/tags/{0}', inputs.tag) }}
         persist-credentials: false
+        # Stable releases check whether the nightly image's commit is older
+        fetch-depth: 0
+        filter: blob:none
+
+    - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+    - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
 
     - name: Resolve image tags
       id: image
@@ -49,23 +60,23 @@ jobs:
         image="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/opentubex-web"
         version="${TAG#v}"
         if [[ "$version" == *-nightly-* ]]; then
-          channel=nightly
+          tags="$image:$version,$image:nightly"
         else
-          channel=latest
+          tags="$image:$version,$image:latest"
+          # Nightlies skip commits a release already contains, so move nightly to
+          # this release unless nightly already has newer commits.
+          nightly_sha="$(docker buildx imagetools inspect "$image:nightly" --format '{{json .Image}}' \
+            | jq -r '.["linux/amd64"].config.Labels["org.opencontainers.image.revision"]')"
+          if git merge-base --is-ancestor "$nightly_sha" HEAD; then
+            tags+=",$image:nightly"
+          fi
         fi
+        echo "Tags: $tags"
         {
-          echo "tags=$image:$version,$image:$channel"
+          echo "tags=$tags"
           echo "version=$version"
           echo "sha=$(git rev-parse HEAD)"
         } >> "$GITHUB_OUTPUT"
-
-    - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
-
-    - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ github.token }}
 
     # The bundle builds once on the runner; only the Caddy base differs per platform.
     - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
