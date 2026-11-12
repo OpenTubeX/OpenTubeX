@@ -1,11 +1,29 @@
 import { Comment, setTransitionHooks } from 'vue'
 import { takeOverLeavingModalBackdrop, trackLeavingModalBackdrop } from './modalBackdropHandoff'
 
+/** @type {WeakMap<Element, () => void>} */
+const afterLeaveCallbacks = new WeakMap()
+
+/**
+ * Runs `callback` once the leaving modal is removed, after its exit animation.
+ * Register it before the modal starts leaving, such as on before-unmount.
+ * @param {Element} element
+ * @param {() => void} callback
+ */
+export function afterModalLeave(element, callback) {
+  afterLeaveCallbacks.set(element, callback)
+}
+
 /**
  * @param {Element} element
- * @param {() => void} remove
+ * @param {() => void} removeElement
  */
-async function leave(element, remove) {
+async function leave(element, removeElement) {
+  const remove = () => {
+    removeElement()
+    afterLeaveCallbacks.get(element)?.()
+    afterLeaveCallbacks.delete(element)
+  }
   // Android predictive Back already played the exit and suppresses the leave
   // animation, then restores the styles once the modal should be gone.
   if (element instanceof HTMLElement && element.style.animationName === 'none') {

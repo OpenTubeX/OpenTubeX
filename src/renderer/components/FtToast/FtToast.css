@@ -817,3 +817,9 @@
   inset-block-end: calc(var(--connection-progress-inset, 0px) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
   transform: none;
 }
+
+/* Prompts cover the whole window, so keep the status below their backdrop
+   (z-index: 201) instead of floating over their content. */
+:root.appPromptOpen body .connection-status-holder {
+  z-index: 200;
+}
