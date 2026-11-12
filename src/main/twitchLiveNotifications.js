@@ -1,6 +1,7 @@
 // @ts-check
-import { readFile, rename, rm, writeFile } from 'node:fs/promises'
+import { readFile, rm } from 'node:fs/promises'
 
+import { writeFileAtomic } from './writeFileAtomic.js'
 import { fetchTwitchChannels, getTwitchLiveNotificationTarget, takeNewTwitchStreams } from '../twitchFollows.js'
 
 const CHECK_INTERVAL_MS = 3 * 60_000
@@ -68,8 +69,7 @@ export function createTwitchLiveNotifier({ file, fetch, show, onLive, intervalMs
   }
 
   async function saveKnown() {
-    await writeFile(`${file}.tmp`, JSON.stringify({ known }), { mode: 0o600 })
-    await rename(`${file}.tmp`, file)
+    await writeFileAtomic(file, JSON.stringify({ known }), { mode: 0o600 })
   }
 
   /**
