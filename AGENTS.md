@@ -116,6 +116,7 @@ When adding or changing translatable strings:
 1. Update the human `en-US` and `de-DE` translations; Weblate handles other human locales.
 2. Add or update AI completions for every other active locale in `static/locales/ai`, preserving placeholders and plural forms.
 3. Run `node _scripts/aiTranslations.mjs cleanup --all --write` to drop AI entries that now have human translations.
+4. In your final response, list every `de-DE` string you added or changed, with its key and the `en-US` source, so the user can review the German wording.
 
 ## Upstream, naming, and related repositories
 
