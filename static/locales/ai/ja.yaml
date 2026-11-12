@@ -177,7 +177,7 @@ Subscriptions:
   Refreshing Subscription Posts: 登録チャンネルの投稿を更新中
   New Content: 新着コンテンツ
   New Feed Refresh Warning Title: 登録チャンネルのすべてのフィードを更新しますか？
-  New Feed Refresh Warning: RSSを使用せずに{count}件の登録チャンネルですべてのコンテンツを更新すると、時間がかかる場合があります。続行しますか？
+  New Feed Refresh Warning: '{count}件の登録チャンネルですべてのコンテンツを更新すると、時間がかかる場合があります。続行しますか？'
   New Since Last Refresh: 前回の更新以降の新着
   Mark As Seen: 確認済みにする
   Mark All as Seen: すべて確認済みにする
@@ -444,6 +444,7 @@ Settings:
       Closing Tabs: 複数のタブを閉じるとき
       Loading Tabs: 複数のタブを読み込むとき
       Unloading Tabs: 複数のタブを解放するとき
+      Refreshing All Feeds: 多数の登録チャンネルを更新するとき
     Remember Tab Navigation History: タブの移動履歴を記憶
     New Tab Position:
       New Tab Position: 新しいタブの位置

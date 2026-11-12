@@ -213,6 +213,8 @@ Settings:
     Advanced Description: Backendy, buforowanie, narzędzia zewnętrzne, proxy i diagnostyka
     Alternative providers: Dostawcy filmów i metadanych
   General Settings:
+    Confirmation Options:
+      Refreshing All Feeds: Odświeżaniem wielu subskrypcji
     Built-in Streams:
       Built-in Streams: "Wbudowane strumienie"
       Automatic: "Automatycznie"

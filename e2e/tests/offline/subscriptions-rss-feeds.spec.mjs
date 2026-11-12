@@ -989,7 +989,9 @@ test.describe('with new items', () => {
     // Its refresh also refreshes the RSS feeds, and waits for them
     let release
     const held = new Promise(resolve => { release = resolve })
+    let rssRequests = 0
     await page.route(RSS_URL, async (route) => {
+      rssRequests++
       await held
       await route.fulfill({ contentType: 'application/rss+xml', body: updatedRssFeed })
     })
@@ -1002,8 +1004,21 @@ test.describe('with new items', () => {
     await expect(page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')).toHaveCount(0)
     await expect(refresh).toHaveAttribute('aria-disabled', 'false')
 
-    // As does the tabbed view
-    await page.locator('.subscriptionsHeader').getByRole('button', { name: 'Show Tabbed View' }).click()
+    // As does the tabbed view, from any of its tabs
+    await header.getByRole('button', { name: 'Show Tabbed View' }).click()
+    await page.locator('[data-new-feed-tab="videos"]').click()
+    await refresh.click()
+    await expect.poll(() => rssRequests).toBe(2)
+    await expect(refresh).toHaveAttribute('aria-disabled', 'false')
+
+    // And reloading all feeds from another tab
+    await page.locator('[data-subscription-feed-tab="videos"]').click()
+    await page.locator('[data-subscription-feed-tab="all"]').click({ button: 'right' })
+    await page.getByRole('menu', { name: 'Context menu' }).getByRole('menuitem', { name: 'Reload All Feeds' }).click()
+    await expect.poll(() => rssRequests).toBe(3)
+    await expect(page.locator('[data-rss-feeds-tab] .tabLoadingIndicator')).toHaveCount(0)
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+
     const rssTab = page.locator('[data-new-feed-rss-tab]')
     await expect(rssTab.locator('.newFeedTabDot')).toBeVisible()
     await rssTab.click()

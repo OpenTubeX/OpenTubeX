@@ -64,6 +64,7 @@ export const SYNC_SETTING_LABELS = {
   confirmCloseWindowWithMultipleTabs: 'Settings.General Settings.Confirmation Options.Closing Window',
   confirmLargePlaylistPreload: 'Settings.Player Settings.Ask Before Preloading Large Playlists',
   confirmLoadMultipleTabs: 'Settings.General Settings.Confirmation Options.Loading Tabs',
+  confirmRefreshAllFeeds: 'Settings.General Settings.Confirmation Options.Refreshing All Feeds',
   confirmUnloadMultipleTabs: 'Settings.General Settings.Confirmation Options.Unloading Tabs',
   contextMenuSearchEngines: 'Settings.Context Menu Search Settings.Context Menu Search Settings',
   continuePlaybackWhenScreenIsLocked: 'Settings.Player Settings.Continue Playback When Screen Is Locked',

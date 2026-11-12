@@ -177,7 +177,7 @@ Subscriptions:
   Refreshing Subscription Posts: Memperbarui postingan langganan
   New Content: Konten baru
   New Feed Refresh Warning Title: Perbarui semua umpan langganan?
-  New Feed Refresh Warning: Memperbarui semua jenis konten tanpa RSS untuk {count} langganan dapat memakan waktu lama. Ingin melanjutkan?
+  New Feed Refresh Warning: Memperbarui semua jenis konten untuk {count} langganan dapat memakan waktu lama. Ingin melanjutkan?
   New Since Last Refresh: Baru sejak pembaruan terakhir
   Mark As Seen: Tandai sudah dilihat
   Mark All as Seen: Tandai semua sudah dilihat
@@ -445,6 +445,7 @@ Settings:
       Closing Tabs: Menutup beberapa tab
       Loading Tabs: Memuat beberapa tab
       Unloading Tabs: Membongkar beberapa tab dari memori
+      Refreshing All Feeds: Memperbarui banyak langganan
     Remember Tab Navigation History: Ingat Riwayat Navigasi Tab
     New Tab Position:
       New Tab Position: Posisi Tab Baru

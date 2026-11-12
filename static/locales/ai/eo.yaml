@@ -197,7 +197,7 @@ Subscriptions:
   Refreshing Subscription Posts: Aktualigado de abonaj afiŝoj
   New Content: Nova enhavo
   New Feed Refresh Warning Title: Ĉu aktualigi ĉiujn abonfluojn?
-  New Feed Refresh Warning: Aktualigi ĉiujn enhavotipojn sen RSS por 1 abono povas daŭri longe. Ĉu vi volas daŭrigi? | Aktualigi ĉiujn enhavotipojn sen RSS por {count} abonoj povas daŭri longe. Ĉu vi volas daŭrigi?
+  New Feed Refresh Warning: Aktualigi ĉiujn enhavotipojn por 1 abono povas daŭri longe. Ĉu vi volas daŭrigi? | Aktualigi ĉiujn enhavotipojn por {count} abonoj povas daŭri longe. Ĉu vi volas daŭrigi?
   New Since Last Refresh: Nova ekde la lasta aktualigo
   Mark As Seen: Marki kiel vidita
   Mark All as Seen: Marki ĉion kiel vidita
@@ -480,6 +480,7 @@ Settings:
       Closing Tabs: Fermi plurajn langetojn
       Loading Tabs: Ŝargi plurajn langetojn
       Unloading Tabs: Malŝargi plurajn langetojn
+      Refreshing All Feeds: Aktualigi multajn abonojn
     Always Use Backup Media Server: Ĉiam uzi rezervan medioservilon
     Close Window With Last Tab: Fermi la fenestron kiam la lasta langeto estas fermita
     Remember Tab Navigation History: Memori navigan historion de langetoj

@@ -177,7 +177,7 @@ Subscriptions:
   Refreshing Subscription Posts: Actualizando as publicacións das subscricións
   New Content: Contido novo
   New Feed Refresh Warning Title: Queres actualizar todas as fontes das subscricións?
-  New Feed Refresh Warning: Actualizar todos os tipos de contido sen RSS para 1 subscrición pode levar moito tempo. Queres continuar? | Actualizar todos os tipos de contido sen RSS para {count} subscricións pode levar moito tempo. Queres continuar?
+  New Feed Refresh Warning: Actualizar todos os tipos de contido para 1 subscrición pode levar moito tempo. Queres continuar? | Actualizar todos os tipos de contido para {count} subscricións pode levar moito tempo. Queres continuar?
   New Since Last Refresh: Novo desde a última actualización
   Mark As Seen: Marcar como visto
   Mark All as Seen: Marcar todo como visto
@@ -447,6 +447,7 @@ Settings:
       Closing Tabs: Pechar varias lapelas
       Loading Tabs: Cargar varias lapelas
       Unloading Tabs: Descargar varias lapelas
+      Refreshing All Feeds: Actualizar moitas subscricións
     Remember Tab Navigation History: Lembrar o historial de navegación das lapelas
     New Tab Position:
       New Tab Position: Posición das lapelas novas

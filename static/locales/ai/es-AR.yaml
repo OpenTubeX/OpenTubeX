@@ -192,7 +192,7 @@ Subscriptions:
   Refreshing Subscription Posts: Actualizando publicaciones de las suscripciones
   New Content: Contenido nuevo
   New Feed Refresh Warning Title: ¿Actualizar todos los canales de suscripciones?
-  New Feed Refresh Warning: Actualizar sin RSS todos los tipos de contenido de 1 suscripción puede tardar mucho. ¿Quieres continuar? | Actualizar sin RSS todos los tipos de contenido de {count} suscripciones puede tardar mucho. ¿Quieres continuar? | Actualizar sin RSS todos los tipos de contenido de {count} suscripciones puede tardar mucho. ¿Quieres continuar?
+  New Feed Refresh Warning: Actualizar todos los tipos de contenido de 1 suscripción puede tardar mucho. ¿Quieres continuar? | Actualizar todos los tipos de contenido de {count} suscripciones puede tardar mucho. ¿Quieres continuar? | Actualizar todos los tipos de contenido de {count} suscripciones puede tardar mucho. ¿Quieres continuar?
   New Since Last Refresh: Nuevo desde la última actualización
   Mark As Seen: Marcar como visto
   Mark All as Seen: Marcar todo como visto
@@ -465,6 +465,7 @@ Settings:
       Closing Tabs: Cerrar varias pestañas
       Loading Tabs: Cargar varias pestañas
       Unloading Tabs: Descargar varias pestañas de la memoria
+      Refreshing All Feeds: Actualizar muchas suscripciones
     Minimize to system tray: Minimizar a la bandeja del sistema
     Remember Tab Navigation History: Recordar el historial de navegación de las pestañas
     New Tab Position:

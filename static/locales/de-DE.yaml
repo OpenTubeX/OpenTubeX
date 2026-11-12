@@ -176,7 +176,7 @@ Subscriptions:
   Refreshing Subscription Posts: Abo-Beiträge werden aktualisiert
   New Content: Neue Inhalte
   New Feed Refresh Warning Title: Alle Abo-Feeds aktualisieren?
-  New Feed Refresh Warning: Das Aktualisieren aller Inhaltstypen ohne RSS für {count} Abos kann lange dauern. Möchtest du fortfahren?
+  New Feed Refresh Warning: Das Aktualisieren aller Inhaltstypen für {count} Abos kann lange dauern. Möchtest du fortfahren?
   New Since Last Refresh: Neu seit der letzten Aktualisierung
   Mark All as Seen: Alle als gesehen markieren
   No New Content: Es gibt keine neuen Inhalte.
@@ -636,6 +636,7 @@ Settings:
       Closing Tabs: Schließen mehrerer Tabs
       Loading Tabs: Laden mehrerer Tabs
       Unloading Tabs: Entladen mehrerer Tabs
+      Refreshing All Feeds: Aktualisieren vieler Abos
     Tab Close Focus:
       Last active tab: "Zuletzt aktiver Tab"
       Next tab in tab order: "Nächster Tab in der Tab-Reihenfolge"

@@ -177,7 +177,7 @@ Subscriptions:
   Refreshing Subscription Posts: Oppdaterer abonnementsinnlegg
   New Content: Nytt innhald
   New Feed Refresh Warning Title: Vil du oppdatere alle abonnementsstraumane?
-  New Feed Refresh Warning: Det kan ta lang tid å oppdatere alle innhaldstypar utan RSS for 1 abonnement. Vil du halde fram? | Det kan ta lang tid å oppdatere alle innhaldstypar utan RSS for {count} abonnement. Vil du halde fram?
+  New Feed Refresh Warning: Det kan ta lang tid å oppdatere alle innhaldstypar for 1 abonnement. Vil du halde fram? | Det kan ta lang tid å oppdatere alle innhaldstypar for {count} abonnement. Vil du halde fram?
   New Since Last Refresh: Nytt sidan førre oppdatering
   Mark As Seen: Merk som sett
   Mark All as Seen: Merk alt som sett
@@ -456,6 +456,7 @@ Settings:
       Closing Tabs: Lukking av fleire faner
       Loading Tabs: Innlasting av fleire faner
       Unloading Tabs: Utlasting av fleire faner
+      Refreshing All Feeds: Oppdatering av mange abonnement
     Open Deep Links In New Window: Opne nettadresser sende til OpenTubeX i eit nytt vindauge
     Minimize to system tray: Minimer til systemtrauet
     Remember Tab Navigation History: Hugs navigasjonshistorikken for faner

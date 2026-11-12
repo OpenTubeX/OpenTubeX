@@ -177,7 +177,7 @@ Subscriptions:
   Refreshing Subscription Posts: 正在刷新订阅帖子
   New Content: 新内容
   New Feed Refresh Warning Title: 要刷新所有订阅源吗？
-  New Feed Refresh Warning: 为 {count} 个订阅刷新所有未使用 RSS 的内容类型可能需要很长时间。要继续吗？
+  New Feed Refresh Warning: 为 {count} 个订阅刷新所有内容类型可能需要很长时间。要继续吗？
   New Since Last Refresh: 上次刷新后的新内容
   Mark As Seen: 标记为已看
   Mark All as Seen: 全部标记为已看
@@ -444,6 +444,7 @@ Settings:
       Closing Tabs: 关闭多个标签页
       Loading Tabs: 加载多个标签页
       Unloading Tabs: 卸载多个标签页
+      Refreshing All Feeds: 刷新大量订阅
     Remember Tab Navigation History: 记住标签页导航历史记录
     New Tab Position:
       New Tab Position: 新标签页位置

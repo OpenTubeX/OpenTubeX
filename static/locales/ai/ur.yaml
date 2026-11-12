@@ -206,7 +206,7 @@ Subscriptions:
   Refreshing Subscription Posts: سبسکرپشن پوسٹس ریفریش ہو رہی ہیں
   New Content: نیا مواد
   New Feed Refresh Warning Title: سبسکرپشن کی تمام فیڈز ریفریش کریں؟
-  New Feed Refresh Warning: 1 سبسکرپشن کے لیے RSS کے بغیر تمام اقسام کا مواد ریفریش کرنے میں کافی وقت لگ سکتا ہے۔ کیا آپ جاری رکھنا چاہتے ہیں؟ | {count} سبسکرپشنز کے لیے RSS کے بغیر تمام اقسام کا مواد ریفریش کرنے میں کافی وقت لگ سکتا ہے۔ کیا آپ جاری رکھنا چاہتے ہیں؟
+  New Feed Refresh Warning: 1 سبسکرپشن کے لیے تمام اقسام کا مواد ریفریش کرنے میں کافی وقت لگ سکتا ہے۔ کیا آپ جاری رکھنا چاہتے ہیں؟ | {count} سبسکرپشنز کے لیے تمام اقسام کا مواد ریفریش کرنے میں کافی وقت لگ سکتا ہے۔ کیا آپ جاری رکھنا چاہتے ہیں؟
   New Since Last Refresh: پچھلی ریفریش کے بعد سے نیا
   Mark As Seen: دیکھا گیا نشان زد کریں
   Mark All as Seen: سب کو دیکھا گیا نشان زد کریں
@@ -492,6 +492,7 @@ Settings:
       Closing Tabs: متعدد ٹیبز بند کرنا
       Loading Tabs: متعدد ٹیبز لوڈ کرنا
       Unloading Tabs: متعدد ٹیبز ان لوڈ کرنا
+      Refreshing All Feeds: بہت سی سبسکرپشنز ریفریش کرنا
     Always Use Backup Media Server: ہمیشہ بیک اپ میڈیا سرور استعمال کریں
     Close Window With Last Tab: آخری ٹیب بند کرنے پر ونڈو بند کریں
     Remember Tab Navigation History: ٹیب کی نیویگیشن ہسٹری یاد رکھیں

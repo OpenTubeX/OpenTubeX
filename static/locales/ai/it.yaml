@@ -177,7 +177,7 @@ Subscriptions:
   Refreshing Subscription Posts: Aggiornamento dei post delle iscrizioni
   New Content: Nuovi contenuti
   New Feed Refresh Warning Title: Aggiornare tutti i feed delle iscrizioni?
-  New Feed Refresh Warning: Aggiornare tutti i tipi di contenuto senza RSS per 1 iscrizione può richiedere molto tempo. Vuoi continuare? | Aggiornare tutti i tipi di contenuto senza RSS per {count} iscrizioni può richiedere molto tempo. Vuoi continuare? | Aggiornare tutti i tipi di contenuto senza RSS per {count} iscrizioni può richiedere molto tempo. Vuoi continuare?
+  New Feed Refresh Warning: Aggiornare tutti i tipi di contenuto per 1 iscrizione può richiedere molto tempo. Vuoi continuare? | Aggiornare tutti i tipi di contenuto per {count} iscrizioni può richiedere molto tempo. Vuoi continuare? | Aggiornare tutti i tipi di contenuto per {count} iscrizioni può richiedere molto tempo. Vuoi continuare?
   New Since Last Refresh: Novità dall'ultimo aggiornamento
   Mark As Seen: Segna come visto
   Mark All as Seen: Segna tutto come visto
@@ -444,6 +444,7 @@ Settings:
       Closing Tabs: Chiudere più schede
       Loading Tabs: Caricare più schede
       Unloading Tabs: Scaricare più schede dalla memoria
+      Refreshing All Feeds: Aggiornare molte iscrizioni
     Remember Tab Navigation History: Ricorda la cronologia di navigazione delle schede
     New Tab Position:
       New Tab Position: Posizione delle nuove schede

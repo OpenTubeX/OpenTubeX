@@ -218,7 +218,7 @@ Subscriptions:
   Refreshing Subscription Posts: Osveževanje objav iz naročnin
   New Content: Nova vsebina
   New Feed Refresh Warning Title: Želite osvežiti vse vire naročnin?
-  New Feed Refresh Warning: Osveževanje vseh vrst vsebine brez RSS za 1 naročnino lahko traja dolgo. Ali želite nadaljevati? | Osveževanje vseh vrst vsebine brez RSS za {count} naročnini lahko traja dolgo. Ali želite nadaljevati? | Osveževanje vseh vrst vsebine brez RSS za {count} naročnine lahko traja dolgo. Ali želite nadaljevati? | Osveževanje vseh vrst vsebine brez RSS za {count} naročnin lahko traja dolgo. Ali želite nadaljevati?
+  New Feed Refresh Warning: Osveževanje vseh vrst vsebine za 1 naročnino lahko traja dolgo. Ali želite nadaljevati? | Osveževanje vseh vrst vsebine za {count} naročnini lahko traja dolgo. Ali želite nadaljevati? | Osveževanje vseh vrst vsebine za {count} naročnine lahko traja dolgo. Ali želite nadaljevati? | Osveževanje vseh vrst vsebine za {count} naročnin lahko traja dolgo. Ali želite nadaljevati?
   New Since Last Refresh: Novo od zadnje osvežitve
   Mark As Seen: Označi kot videno
   Mark All as Seen: Označi vse kot videno
@@ -568,6 +568,7 @@ Settings:
       Closing Tabs: zapiranjem več zavihkov
       Loading Tabs: nalaganjem več zavihkov
       Unloading Tabs: sproščanjem več zavihkov
+      Refreshing All Feeds: osveževanjem številnih naročnin
     Open Deep Links In New Window: Odpri URL-je, posredovane aplikaciji OpenTubeX, v novem oknu
     Minimize to system tray: Pomanjšaj v sistemsko vrstico
     Remember Tab Navigation History: Zapomni si zgodovino krmarjenja po zavihkih

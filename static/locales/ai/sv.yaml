@@ -177,7 +177,7 @@ Subscriptions:
   Refreshing Subscription Posts: Uppdaterar inlägg från prenumerationer
   New Content: Nytt innehåll
   New Feed Refresh Warning Title: Uppdatera alla prenumerationsflöden?
-  New Feed Refresh Warning: Det kan ta lång tid att uppdatera alla innehållstyper utan RSS för 1 prenumeration. Vill du fortsätta? | Det kan ta lång tid att uppdatera alla innehållstyper utan RSS för {count} prenumerationer. Vill du fortsätta?
+  New Feed Refresh Warning: Det kan ta lång tid att uppdatera alla innehållstyper för 1 prenumeration. Vill du fortsätta? | Det kan ta lång tid att uppdatera alla innehållstyper för {count} prenumerationer. Vill du fortsätta?
   New Since Last Refresh: Nytt sedan senaste uppdateringen
   Mark As Seen: Markera som sett
   Mark All as Seen: Markera allt som sett
@@ -444,6 +444,7 @@ Settings:
       Closing Tabs: Flera flikar stängs
       Loading Tabs: Flera flikar läses in
       Unloading Tabs: Flera flikar frigörs
+      Refreshing All Feeds: Många prenumerationer uppdateras
     Remember Tab Navigation History: Kom ihåg navigeringshistoriken för flikar
     New Tab Position:
       New Tab Position: Placering av ny flik

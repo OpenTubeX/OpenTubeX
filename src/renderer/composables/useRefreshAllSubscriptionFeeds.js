@@ -12,6 +12,8 @@ import {
 } from '../helpers/subscriptions'
 import { withAndroidSubscriptionRefreshBatch } from '../helpers/androidSubscriptionRefresh'
 import { getEnabledSubscriptionFeedSources } from '../helpers/newSubscriptionFeed'
+import { refreshRssFeeds } from '../helpers/rssFeeds'
+import { supportsYtDlp } from '../helpers/ytDlpCapabilities'
 
 const LARGE_SUBSCRIPTION_COUNT = 125
 
@@ -40,12 +42,20 @@ export function useRefreshAllSubscriptionFeeds() {
     }))
   })
 
+  const rssFeeds = computed(() => {
+    return supportsYtDlp && store.getters.getEnableRssFeeds ? store.getters.getFollowedRssFeeds : []
+  })
+
   function refresh() {
     if (isRefreshing.value || store.getters.getSubscriptionFeedRefreshInProgress) {
       return
     }
 
-    if (!store.getters.getUseRssFeeds && activeSubscriptionIds.value.size > LARGE_SUBSCRIPTION_COUNT) {
+    if (
+      store.getters.getConfirmRefreshAllFeeds &&
+      !store.getters.getUseRssFeeds &&
+      activeSubscriptionIds.value.size > LARGE_SUBSCRIPTION_COUNT
+    ) {
       showRefreshWarning.value = true
       return
     }
@@ -53,7 +63,13 @@ export function useRefreshAllSubscriptionFeeds() {
     refreshAllFeeds()
   }
 
+  // Also refreshes the RSS feeds, which run alongside the subscription feeds
   async function refreshAllFeeds() {
+    if (rssFeeds.value.length > 0) {
+      refreshRssFeeds(rssFeeds.value)
+    }
+    if (enabledFeeds.value.length === 0 || activeSubscriptionIds.value.size === 0) return
+
     isRefreshing.value = true
     attemptedFetch.value = true
     errorChannels.value = []
@@ -61,7 +77,6 @@ export function useRefreshAllSubscriptionFeeds() {
     const cancelCountAtStart = getSubscriptionRefreshCancelCount()
 
     try {
-      if (enabledFeeds.value.length === 0) return
       await withAndroidSubscriptionRefreshBatch(() => withSharedChannelUploads(async () => {
         for (const feed of enabledFeeds.value) {
           // Also covers a cancellation between two feeds, when no feed refresh
@@ -78,10 +93,16 @@ export function useRefreshAllSubscriptionFeeds() {
     }
   }
 
+  /**
+   * @param {'refresh' | 'cancel' | 'neverAskAgain' | null} action
+   */
   function handleRefreshWarning(action) {
     showRefreshWarning.value = false
 
-    if (action === 'refresh') {
+    if (action === 'neverAskAgain') {
+      store.dispatch('updateConfirmRefreshAllFeeds', false)
+    }
+    if (action === 'refresh' || action === 'neverAskAgain') {
       refreshAllFeeds()
     }
   }

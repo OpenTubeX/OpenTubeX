@@ -209,7 +209,7 @@ Subscriptions:
   Refreshing Subscription Posts: Atnaujinami prenumeratų įrašai
   New Content: Naujas turinys
   New Feed Refresh Warning Title: Atnaujinti visus prenumeratų kanalus?
-  New Feed Refresh Warning: Visų vienos prenumeratos turinio tipų atnaujinimas be RSS gali užtrukti. Ar norite tęsti? | Visų {count} prenumeratų turinio tipų atnaujinimas be RSS gali užtrukti. Ar norite tęsti? | Visų {count} prenumeratų turinio tipų atnaujinimas be RSS gali užtrukti. Ar norite tęsti?
+  New Feed Refresh Warning: Visų vienos prenumeratos turinio tipų atnaujinimas gali užtrukti. Ar norite tęsti? | Visų {count} prenumeratų turinio tipų atnaujinimas gali užtrukti. Ar norite tęsti? | Visų {count} prenumeratų turinio tipų atnaujinimas gali užtrukti. Ar norite tęsti?
   New Since Last Refresh: Nauja nuo paskutinio atnaujinimo
   Mark As Seen: Pažymėti kaip peržiūrėtą
   Mark All as Seen: Pažymėti viską kaip peržiūrėta
@@ -558,6 +558,7 @@ Settings:
       Closing Tabs: Užveriant kelis skirtukus
       Loading Tabs: Įkeliant kelis skirtukus
       Unloading Tabs: Iškeliant kelis skirtukus
+      Refreshing All Feeds: Atnaujinant daug prenumeratų
     Open Deep Links In New Window: „OpenTubeX“ perduotus URL atverti naujame lange
     Minimize to system tray: Sumažinti į sistemos dėklą
     Remember Tab Navigation History: Įsiminti naršymo skirtukuose istoriją

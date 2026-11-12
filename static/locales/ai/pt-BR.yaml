@@ -146,7 +146,7 @@ Subscriptions:
   Refreshing Subscription Posts: Atualizando as publicações das inscrições
   New Content: Novo conteúdo
   New Feed Refresh Warning Title: Atualizar todos os feeds de inscrições?
-  New Feed Refresh Warning: Atualizar todos os tipos de conteúdo sem RSS para 1 inscrição pode demorar bastante tempo. Deseja continuar? | Atualizar todos os tipos de conteúdo sem RSS para {count} inscrições pode demorar bastante tempo. Deseja continuar? | Atualizar todos os tipos de conteúdo sem RSS para {count} inscrições pode demorar bastante tempo. Deseja continuar?
+  New Feed Refresh Warning: Atualizar todos os tipos de conteúdo para 1 inscrição pode demorar bastante tempo. Deseja continuar? | Atualizar todos os tipos de conteúdo para {count} inscrições pode demorar bastante tempo. Deseja continuar? | Atualizar todos os tipos de conteúdo para {count} inscrições pode demorar bastante tempo. Deseja continuar?
   New Since Last Refresh: Novidades desde a última atualização
   Mark As Seen: Marcar como visto
   Mark All as Seen: Marcar tudo como visto
@@ -413,6 +413,7 @@ Settings:
       Closing Tabs: Fechar várias guias
       Loading Tabs: Carregar várias guias
       Unloading Tabs: Baixar várias guias
+      Refreshing All Feeds: Atualizar muitas inscrições
     Remember Tab Navigation History: Memorizar o histórico de navegação das guias
     New Tab Position:
       New Tab Position: Posição da nova guia

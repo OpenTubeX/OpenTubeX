@@ -187,7 +187,7 @@ Subscriptions:
   Refreshing Subscription Posts: சந்தாக்களின் இடுகைகள் புதுப்பிக்கப்படுகின்றன
   New Content: புதிய உள்ளடக்கம்
   New Feed Refresh Warning Title: எல்லாச் சந்தா ஊட்டங்களையும் புதுப்பிக்கவா?
-  New Feed Refresh Warning: RSS இல்லாமல் 1 சந்தாவின் எல்லா உள்ளடக்க வகைகளையும் புதுப்பிக்க அதிக நேரமாகலாம். தொடரவா? | RSS இல்லாமல் {count} சந்தாக்களின் எல்லா உள்ளடக்க வகைகளையும் புதுப்பிக்க அதிக நேரமாகலாம். தொடரவா?
+  New Feed Refresh Warning: 1 சந்தாவின் எல்லா உள்ளடக்க வகைகளையும் புதுப்பிக்க அதிக நேரமாகலாம். தொடரவா? | {count} சந்தாக்களின் எல்லா உள்ளடக்க வகைகளையும் புதுப்பிக்க அதிக நேரமாகலாம். தொடரவா?
   New Since Last Refresh: கடைசிப் புதுப்பிப்புக்குப் பிறகு புதியவை
   Mark As Seen: பார்த்ததாகக் குறி
   Mark All as Seen: அனைத்தையும் பார்த்ததாகக் குறி
@@ -455,6 +455,7 @@ Settings:
       Closing Tabs: பல தாவல்களை மூடுதல்
       Loading Tabs: பல தாவல்களை ஏற்றுதல்
       Unloading Tabs: பல தாவல்களை இறக்குதல்
+      Refreshing All Feeds: பல சந்தாக்களைப் புதுப்பித்தல்
     Remember Tab Navigation History: தாவல் வழிசெலுத்தல் வரலாற்றை நினைவில் கொள்
     New Tab Position:
       New Tab Position: புதிய தாவலின் இடம்

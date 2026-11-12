@@ -177,7 +177,7 @@ Subscriptions:
   Refreshing Subscription Posts: Se reîmprospătează postările din abonamente
   New Content: Conținut nou
   New Feed Refresh Warning Title: Reîmprospătați toate fluxurile de abonamente?
-  New Feed Refresh Warning: Reîmprospătarea fără RSS a tuturor tipurilor de conținut pentru 1 abonament poate dura mult. Doriți să continuați? | Reîmprospătarea fără RSS a tuturor tipurilor de conținut pentru {count} abonamente poate dura mult. Doriți să continuați? | Reîmprospătarea fără RSS a tuturor tipurilor de conținut pentru {count} de abonamente poate dura mult. Doriți să continuați?
+  New Feed Refresh Warning: Reîmprospătarea a tuturor tipurilor de conținut pentru 1 abonament poate dura mult. Doriți să continuați? | Reîmprospătarea a tuturor tipurilor de conținut pentru {count} abonamente poate dura mult. Doriți să continuați? | Reîmprospătarea a tuturor tipurilor de conținut pentru {count} de abonamente poate dura mult. Doriți să continuați?
   New Since Last Refresh: Nou de la ultima reîmprospătare
   Mark As Seen: Marchează ca văzut
   Mark All as Seen: Marchează totul ca văzut
@@ -443,6 +443,7 @@ Settings:
       Closing Tabs: Închiderea mai multor file
       Loading Tabs: Încărcarea mai multor file
       Unloading Tabs: Descărcarea din memorie a mai multor file
+      Refreshing All Feeds: Reîmprospătarea multor abonamente
     Remember Tab Navigation History: Reține istoricul de navigare al filelor
     New Tab Position:
       New Tab Position: Poziția filei noi

@@ -177,7 +177,7 @@ Subscriptions:
   Refreshing Subscription Posts: הפוסטים מהמינויים מתרעננים
   New Content: תוכן חדש
   New Feed Refresh Warning Title: לרענן את כל עדכוני המינויים?
-  New Feed Refresh Warning: רענון כל סוגי התוכן ללא RSS ל־1 מינוי עלול להימשך זמן רב. להמשיך? | רענון כל סוגי התוכן ללא RSS ל־{count} מינויים עלול להימשך זמן רב. להמשיך? | רענון כל סוגי התוכן ללא RSS ל־{count} מינויים עלול להימשך זמן רב. להמשיך?
+  New Feed Refresh Warning: רענון כל סוגי התוכן ל־1 מינוי עלול להימשך זמן רב. להמשיך? | רענון כל סוגי התוכן ל־{count} מינויים עלול להימשך זמן רב. להמשיך? | רענון כל סוגי התוכן ל־{count} מינויים עלול להימשך זמן רב. להמשיך?
   New Since Last Refresh: חדש מאז הרענון האחרון
   Mark As Seen: סימון כנצפה
   Mark All as Seen: סימון הכול כנצפה
@@ -447,6 +447,7 @@ Settings:
       Closing Tabs: סגירת כמה כרטיסיות
       Loading Tabs: טעינת כמה כרטיסיות
       Unloading Tabs: פריקת כמה כרטיסיות
+      Refreshing All Feeds: רענון מינויים רבים
     Remember Tab Navigation History: שמירת היסטוריית הניווט בכרטיסיות
     New Tab Position:
       New Tab Position: מיקום כרטיסייה חדשה

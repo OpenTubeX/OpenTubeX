@@ -191,7 +191,7 @@ Subscriptions:
   Refreshing Subscription Posts: 구독 게시물 새로 고치는 중
   New Content: 새 콘텐츠
   New Feed Refresh Warning Title: 모든 구독 피드를 새로 고치시겠습니까?
-  New Feed Refresh Warning: RSS 없이 구독 {count}개의 모든 콘텐츠 유형을 새로 고치면 시간이 오래 걸릴 수 있습니다. 계속하시겠습니까?
+  New Feed Refresh Warning: 구독 {count}개의 모든 콘텐츠 유형을 새로 고치면 시간이 오래 걸릴 수 있습니다. 계속하시겠습니까?
   New Since Last Refresh: 마지막 새로 고침 이후 신규 항목
   Mark As Seen: 확인함으로 표시
   Mark All as Seen: 모두 확인함으로 표시
@@ -537,6 +537,7 @@ Settings:
       Closing Tabs: 여러 탭 닫기
       Loading Tabs: 여러 탭 불러오기
       Unloading Tabs: 여러 탭 언로드
+      Refreshing All Feeds: 많은 구독 새로 고침
     Open Deep Links In New Window: OpenTubeX로 전달된 URL을 새 창에서 열기
     Minimize to system tray: 시스템 트레이로 최소화
     Remember Tab Navigation History: 탭 탐색 기록 저장

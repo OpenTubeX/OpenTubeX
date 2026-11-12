@@ -325,7 +325,7 @@ Subscriptions:
   Refreshing Subscription Posts: Refreshing subscription posts
   New Content: New content
   New Feed Refresh Warning Title: Refresh all subscription feeds?
-  New Feed Refresh Warning: Refreshing all content types without RSS for 1 subscription can take a long time. Do you want to continue? | Refreshing all content types without RSS for {count} subscriptions can take a long time. Do you want to continue?
+  New Feed Refresh Warning: Refreshing all content types for 1 subscription can take a long time. Do you want to continue? | Refreshing all content types for {count} subscriptions can take a long time. Do you want to continue?
   New Since Last Refresh: New since last refresh
   Mark As Seen: Mark As Seen
   Mark All as Seen: Mark all as seen
@@ -743,6 +743,7 @@ Settings:
       Closing Tabs: Closing multiple tabs
       Loading Tabs: Loading multiple tabs
       Unloading Tabs: Unloading multiple tabs
+      Refreshing All Feeds: Refreshing many subscriptions
     Fallback to Non-Preferred Backend on Failure: Fallback to Non-Preferred Backend
       on Failure
     Always Use Backup Media Server: Always use backup media server
