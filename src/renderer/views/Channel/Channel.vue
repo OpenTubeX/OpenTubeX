@@ -508,7 +508,7 @@ watch(thumbnailUrl, (thumbnail) => {
 watch(() => store.getters.getAvoidTranslation === 'entire_app', async () => {
   if (apiUsed !== 'local') return
 
-  const query = lastSearchQuery.value
+  const query = currentTab.value === 'search' ? lastSearchQuery.value : ''
   const load = loadChannelRoute()
   const generation = channelRouteGeneration
   await load
