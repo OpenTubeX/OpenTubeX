@@ -991,7 +991,7 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
     } catch (error) {
       console.error('Failed to reconcile closed-app subscription refresh data', error)
     } finally {
-      notifyNewSubscriptionChannelErrors(store.getters.getActiveProfile._id, newErrors, t)
+      notifyNewSubscriptionChannelErrors(newErrors, t)
     }
   }
 

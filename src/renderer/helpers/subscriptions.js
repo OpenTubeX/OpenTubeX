@@ -284,7 +284,6 @@ async function runWithSubscriptionRefreshLock(tab, profileId, refresh, { t, chan
       activeRefresh.networkRecovery?.cancel()
       if (!activeRefresh.cancelled) {
         notifyNewSubscriptionChannelErrors(
-          activeRefresh.profileId,
           [...activeRefresh.newErrorChannelIds].map(channelId => ({ feed: tab, channelId })),
           t
         )
@@ -389,14 +388,14 @@ function recordSubscriptionChannelResult(refresh, channel) {
 /**
  * Points to the error box when channels failed for the first time and the
  * user can't see the box already.
- * @param {string} profileId
  * @param {{ feed: import('./subscriptionRefreshErrors').SubscriptionFeed, channelId: string }[]} errors
  * @param {(key: string, named?: Record<string, unknown>, plural?: number) => string} t
  */
-export function notifyNewSubscriptionChannelErrors(profileId, errors, t) {
-  // Upload notifications, automatic downloads, and background refreshes also
-  // fetch channels of other profiles, which have no row in this profile's box
-  const profileChannelIds = new Set(store.getters.profileById(profileId)?.subscriptions.map(channel => channel.id))
+export function notifyNewSubscriptionChannelErrors(errors, t) {
+  // The box only lists the active profile's channels. Upload notifications,
+  // automatic downloads, and background refreshes also fetch other profiles'
+  // channels, and the user can switch profiles while a refresh runs.
+  const profileChannelIds = new Set(store.getters.getActiveProfile.subscriptions.map(channel => channel.id))
   // A later refresh in the same import can load the channel again
   const hiddenErrors = errors.filter(({ feed, channelId }) => (
     profileChannelIds.has(channelId) &&

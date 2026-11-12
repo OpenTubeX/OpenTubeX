@@ -169,7 +169,7 @@ test('channels that failed in a background refresh are listed above the feed', a
     getVideoCache: { UCrefreshed: { timestamp: new Date(2000) } },
   })
   hooks.setSubscriptionChannelError = (...args) => { errors.push(args); return true }
-  hooks.notifyNewSubscriptionChannelErrors = (profileId, newErrors) => notifications.push([profileId, newErrors])
+  hooks.notifyNewSubscriptionChannelErrors = newErrors => notifications.push(newErrors)
   const diagnostic = { category: 'subscription videos', backend: 'Subscription backend', lifecycle: 'background', failure: 'http', message: 'HTTP 404' }
   const failure = channelId => ({ id: channelId, kind: 'channelFailure', profileId: 'all', feedType: 'videos', channelId, timestamp: 1000, diagnostic })
   const results = [
@@ -187,7 +187,7 @@ test('channels that failed in a background refresh are listed above the feed', a
     trace: 'Subscribed creator (UCgone): request=subscription videos; backend=Subscription backend; lifecycle=background; failure=http; message=HTTP 404',
     unavailable: true
   }]])
-  assert.deepEqual(notifications, [['all', [{ feed: 'videos', channelId: 'UCgone' }]]])
+  assert.deepEqual(notifications, [[{ feed: 'videos', channelId: 'UCgone' }]])
 })
 
 test('background Yattee Shorts are dated through the server instead of YouTube', async t => {

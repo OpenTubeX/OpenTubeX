@@ -746,7 +746,7 @@ test('a channel failing in several feeds is listed once and clears each feed onc
   await app.refreshSubscriptionShortsFromRemote({ t: key => key })
   assert.equal(app.errors.size, 0)
   // A background import can load a channel after it reported its failure
-  app.notifyNewSubscriptionChannelErrors(app.getters.getActiveProfile._id, [{ feed: 'videos', channelId: 'UC0' }], key => key)
+  app.notifyNewSubscriptionChannelErrors([{ feed: 'videos', channelId: 'UC0' }], key => key)
   assert.equal(app.toasts.length, 1, 'a channel that loaded again is not reported')
 })
 
@@ -772,11 +772,14 @@ for (const shownChannels of ['all', 'all but one']) {
   })
 }
 
-test('failures of channels outside the refreshed profile need no notification', async () => {
+test('failures of channels outside the active profile need no notification', async () => {
   const app = createRefresh({ error: Object.assign(new Error('HTTP 500'), { status: 500 }) })
-  // Upload notifications and automatic downloads also fetch channels of other profiles
-  app.getters.profileById = () => ({ subscriptions: [] })
-  await app.refresh({ t: key => key })
+  const profiles = [app.getters.getActiveProfile, { _id: 'other', subscriptions: [] }]
+  app.getters.profileById = id => profiles.find(profile => profile._id === id)
+  const refreshing = app.refresh({ t: key => key })
+  // The user switches to a profile without these channels while the refresh runs
+  app.getters.getActiveProfile = profiles[1]
+  await refreshing
   assert.equal(app.errors.size, 20)
   assert.equal(app.toasts.length, 0)
 })
