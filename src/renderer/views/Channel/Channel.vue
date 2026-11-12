@@ -505,14 +505,19 @@ watch(thumbnailUrl, (thumbnail) => {
 })
 
 // Settings open over the channel page. Reload so the name, its saved copy and loaded items all follow the preference.
+let preferenceReloads = 0
 watch(() => store.getters.getAvoidTranslation === 'entire_app', async () => {
   if (apiUsed !== 'local') return
 
-  const query = currentTab.value === 'search' ? lastSearchQuery.value : ''
-  const load = loadChannelRoute()
-  const generation = channelRouteGeneration
-  await load
-  if (query && generation === channelRouteGeneration) newSearch(query)
+  // The route keeps the query only while the search is shown, and reloading leaves the route alone
+  const query = route.query.searchQueryText ?? ''
+  const channelId = id.value
+  const reload = ++preferenceReloads
+  await loadChannelRoute()
+  // Not the load generation: a fallback to Invidious starts a new one
+  if (query && reload === preferenceReloads && channelId === id.value && route.query.searchQueryText === query) {
+    newSearch(query)
+  }
 })
 
 const errorMessage = ref('')
@@ -1100,7 +1105,8 @@ async function getChannelLocal() {
     showApiErrorToast(errorMessage, err)
     if (backendPreference.value === 'local' && backendFallback.value) {
       showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
-      getChannelInfoInvidious()
+      // Callers that restore a search wait for the channel that replaces this one
+      return getChannelInfoInvidious()
     } else {
       isLoading.value = false
     }
