@@ -856,6 +856,17 @@ watch([() => props.id, () => store.getters.getYouTubeAccount?.pageId], () => {
 })
 
 /**
+ * Replies posted here before the thread's replies loaded come back from
+ * YouTube, so their loaded versions replace them.
+ * @param {Comment[]} replies
+ * @param {Comment[]} loadedReplies
+ */
+function mergeReplies(replies, loadedReplies) {
+  const loadedIds = new Set(loadedReplies.map(reply => reply.id))
+  return replies.filter(reply => !loadedIds.has(reply.id)).concat(loadedReplies)
+}
+
+/**
  * A personal pin would bring a deleted comment back from its saved snapshot.
  * @param {string} commentId
  * @param {string} rootId
@@ -2252,7 +2263,7 @@ async function getCommentRepliesLocal(index, commentId = null) {
       return
     }
 
-    comment.replies = comment.replies.concat(parsedReplies)
+    comment.replies = mergeReplies(comment.replies, parsedReplies)
 
     const replyLoadState = getReplyLoadState(
       comment.replies.length,
@@ -2427,7 +2438,7 @@ async function getCommentRepliesInvidious(
       return
     }
 
-    comment.replies = comment.replies.concat(commentData)
+    comment.replies = mergeReplies(comment.replies, commentData)
     const replyLoadState = getReplyLoadState(
       comment.replies.length,
       comment.numReplies,

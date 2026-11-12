@@ -21,12 +21,17 @@
         :grid="listType !== 'list'"
         :item-count="videos.length"
       >
-        <FtListVideo
+        <FtBlockedItem
           v-for="video in videos"
           :key="video.videoId"
-          :data="video"
-          appearance="result"
-        />
+          :blocked="isBlurred(video)"
+          :reveal-key="video.videoId"
+        >
+          <FtListVideo
+            :data="video"
+            appearance="result"
+          />
+        </FtBlockedItem>
       </FtAutoGrid>
       <FtLoader
         v-if="loading"
@@ -50,6 +55,7 @@ import { computed, onMounted, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtAutoGrid from '../../components/FtAutoGrid/FtAutoGrid.vue'
+import FtBlockedItem from '../../components/FtBlockedItem/FtBlockedItem.vue'
 import FtButton from '../../components/FtButton/FtButton.vue'
 import FtListVideo from '../../components/FtListVideo/FtListVideo.vue'
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
@@ -57,6 +63,7 @@ import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import store from '../../store/index'
 import { getYouTubeAccountRecommendations } from '../../helpers/api/youtube-account'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
+import { isBlurredByBlockLists } from '../../helpers/blockedItems'
 
 const { t } = useI18n()
 
@@ -74,9 +81,16 @@ const blockedChannelNames = computed(() => new Set(store.getters.getActiveChanne
   .map(channel => channel.preferredName)
   .filter(Boolean)))
 
+const blurBlockedItems = computed(() => store.getters.getBlurBlockedItemsActive)
+
+/** Blocked items stay in the list, blurred, when that is turned on. */
+function isBlurred(video) {
+  return blurBlockedItems.value && (blockedChannelNames.value.has(video.author) || isBlurredByBlockLists(video))
+}
+
 // Shorts have their own feeds; this grid keeps to regular videos.
 const videos = computed(() => allVideos.value.filter(video => !video.isShort &&
-  !blockedChannelNames.value.has(video.author) &&
+  (blurBlockedItems.value || !blockedChannelNames.value.has(video.author)) &&
   !isVideoHiddenByPreferences(video, {
     hideLiveStreams: store.getters.getHideLiveStreams,
     hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
