@@ -100,3 +100,4 @@ jobs:
         name: ${{ steps.package.outputs.name }}
         path: ios/${{ steps.package.outputs.name }}
         if-no-files-found: error
+        retention-days: 3
