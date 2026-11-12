@@ -426,11 +426,6 @@ let apiUsed = ''
  */
 const tabApiUsed = new Map()
 let mayContainContentFromOtherChannels = false
-// YouTube's possibly translated text, kept to switch with the untranslated text setting.
-/** @type {string?} */
-let localHeaderName = null
-/** @type {string?} */
-let localAboutDescription = null
 // Every tab is its own request, so a tab's content is fetched the first time it is shown.
 const loadedTabs = new Set()
 /** @type {Map<string, Promise<void>>} Tab loads that have not finished yet */
@@ -509,15 +504,19 @@ watch(thumbnailUrl, (thumbnail) => {
   }
 })
 
-// Settings open over the channel page, so a changed preference applies to the loaded channel.
-watch(() => store.getters.getAvoidTranslation, () => {
-  if (apiUsed !== 'local' || !channelInstance?.page) return
+// Settings open over the channel page. Reload so the name, its saved copy and loaded items all follow the preference.
+let preferenceReloads = 0
+watch(() => store.getters.getAvoidTranslation === 'entire_app', async () => {
+  if (apiUsed !== 'local') return
 
-  if (localHeaderName) {
-    channelName.value = getOriginalChannelText().name ?? localHeaderName
-  }
-  if (localAboutDescription !== null) {
-    showLocalAboutDescription()
+  // The route keeps the query only while the search is shown, and reloading leaves the route alone
+  const query = route.query.searchQueryText ?? ''
+  const channelId = id.value
+  const reload = ++preferenceReloads
+  await loadChannelRoute()
+  // Not the load generation: a fallback to Invidious starts a new one
+  if (query && reload === preferenceReloads && channelId === id.value && route.query.searchQueryText === query) {
+    newSearch(query)
   }
 })
 
@@ -729,6 +728,10 @@ watch(route, () => {
     return
   }
   ownRouteFullPaths.length = 0
+  loadChannelRoute()
+}, { deep: true })
+
+function loadChannelRoute() {
   channelRouteGeneration += 1
   hasLoadedDetails.value = false
   isLoading.value = true
@@ -761,8 +764,6 @@ watch(route, () => {
   searchResults.value = []
   apiUsed = ''
   channelInstance = null
-  localHeaderName = null
-  localAboutDescription = null
   mayContainContentFromOtherChannels = false
   loadedTabs.clear()
   pendingTabs.clear()
@@ -793,15 +794,15 @@ watch(route, () => {
 
   // Re-enable auto refresh on sort value change AFTER update done
   if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendPreference.value)) {
-    getChannelInfoInvidious().finally(() => {
+    return getChannelInfoInvidious().finally(() => {
       autoRefreshOnSortByChangeEnabled = true
     })
   } else {
-    getChannelLocal().finally(() => {
+    return getChannelLocal().finally(() => {
       autoRefreshOnSortByChangeEnabled = true
     })
   }
-}, { deep: true })
+}
 
 onMounted(async () => {
   document.addEventListener('keydown', handlePanelTabNavigation)
@@ -957,7 +958,7 @@ async function getChannelLocal() {
       /** @type {import('youtubei.js').YTNodes.ChannelAgeGate} */
       const ageGate = channelInstance.memo.get('ChannelAgeGate')[0]
 
-      channelName_ = ageGate.channel_title
+      channelName_ = getOriginalChannelText().name ?? ageGate.channel_title
       channelThumbnailUrl = ageGate.avatar[0].url
 
       channelName.value = channelName_
@@ -978,8 +979,8 @@ async function getChannelLocal() {
     let tags_ = parsedHeader.tags
 
     channelThumbnailUrl = parsedHeader.thumbnailUrl ?? subscriptionInfo.value?.thumbnail
-    localHeaderName = parsedHeader.name ?? null
-    channelName_ = getOriginalChannelText().name ?? localHeaderName ?? subscriptionInfo.value?.name
+    const pageName = parsedHeader.name ?? subscriptionInfo.value?.name
+    channelName_ = getOriginalChannelText().name ?? pageName
 
     if (channelThumbnailUrl?.startsWith('//')) {
       channelThumbnailUrl = `https:${channelThumbnailUrl}`
@@ -992,7 +993,8 @@ async function getChannelLocal() {
     channelHandle.value = parsedHeader.handle ?? savedHandle.value
     bannerUrl.value = parsedHeader.bannerUrl ?? null
     isFamilyFriendly.value = !!channelInstance.metadata.is_family_safe
-    isArtistTopicChannel.value = channelName_.endsWith('- Topic') && !!channelInstance.metadata.music_artist_name
+    // The original profile name may not have the suffix
+    isArtistTopicChannel.value = pageName.endsWith('- Topic') && !!channelInstance.metadata.music_artist_name
 
     mayContainContentFromOtherChannels = isArtistTopicChannel.value ||
       !!channelInstance.header?.is(YTNodes.CarouselHeader, YTNodes.InteractiveTabbedHeader) ||
@@ -1103,7 +1105,8 @@ async function getChannelLocal() {
     showApiErrorToast(errorMessage, err)
     if (backendPreference.value === 'local' && backendFallback.value) {
       showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
-      getChannelInfoInvidious()
+      // Callers that restore a search wait for the channel that replaces this one
+      return getChannelInfoInvidious()
     } else {
       isLoading.value = false
     }
@@ -1113,11 +1116,6 @@ async function getChannelLocal() {
 function getOriginalChannelText() {
   if (store.getters.getAvoidTranslation !== 'entire_app') return {}
   return getOriginalChannelProfile(channelInstance.page.microformat)
-}
-
-function showLocalAboutDescription() {
-  const text = getOriginalChannelText().description || localAboutDescription
-  description.value = text ? autolinker.link(text) : ''
 }
 
 async function getChannelAboutLocal() {
@@ -1136,8 +1134,9 @@ async function getChannelAboutLocal() {
     setElementListLoading('about', false)
     links.value = getChannelAboutLinks(about)
 
+    let aboutDescription
     if (about.is(YTNodes.ChannelAboutFullMetadata)) {
-      localAboutDescription = about.description.isEmpty() ? '' : about.description.text
+      aboutDescription = about.description.isEmpty() ? '' : about.description.text
 
       const viewCount_ = extractNumberFromString(about.view_count.text)
       viewCount.value = isNaN(viewCount_) ? null : viewCount_
@@ -1148,7 +1147,7 @@ async function getChannelAboutLocal() {
 
       location.value = about.country.isEmpty() ? null : about.country.text
     } else {
-      localAboutDescription = about.metadata.description ?? ''
+      aboutDescription = about.metadata.description
 
       const viewCount_ = extractNumberFromString(about.metadata.view_count)
       viewCount.value = isNaN(viewCount_) ? null : viewCount_
@@ -1161,7 +1160,8 @@ async function getChannelAboutLocal() {
       location.value = about.metadata.country ?? null
     }
 
-    showLocalAboutDescription()
+    aboutDescription = getOriginalChannelText().description || aboutDescription
+    description.value = aboutDescription ? autolinker.link(aboutDescription) : ''
   } catch (err) {
     if (!isCurrentRoute()) return
 
