@@ -678,9 +678,14 @@ function setRssFeedErrors(urls) {
  * @param {RssFeed} feed
  */
 export async function retryRssFeed(feed) {
-  const result = await fetchRssFeed(feed.url)
-  addLoadedRssFeed(feed, result)
-  updateMissingRssFeedAvatars([[feed, result]])
+  const releaseBackgroundHold = holdAndroidBackgroundWork()
+  try {
+    const result = await fetchRssFeed(feed.url)
+    addLoadedRssFeed(feed, result)
+    updateMissingRssFeedAvatars([[feed, result]])
+  } finally {
+    releaseBackgroundHold()
+  }
 }
 
 const AUTO_REFRESH_TOAST_DURATION = 5000
@@ -698,9 +703,6 @@ export async function refreshRssFeeds(feeds, { automatic = false, cachedUrls = n
   activeRefresh = controller
   loadedDuringRefresh = new Set()
   refreshingHere.value = true
-  // Keep a hidden Android app running until the refresh ends. Subscription
-  // refresh batches must not wait for RSS feeds, so this holds on its own.
-  const releaseBackgroundHold = holdAndroidBackgroundWork()
   let finish
   const finished = new Promise(resolve => { finish = resolve })
   if (refreshChannel) {
@@ -718,6 +720,9 @@ export async function refreshRssFeeds(feeds, { automatic = false, cachedUrls = n
     showToastOnAllTabs(message, AUTO_REFRESH_TOAST_DURATION, ['fas', 'rss'])
   }
 
+  // Keep a hidden Android app running until the refresh ends. Subscription
+  // refresh batches must not wait for RSS feeds, so this holds on its own.
+  const releaseBackgroundHold = holdAndroidBackgroundWork()
   try {
     const cachedFeedUrls = new Set(feeds.filter(feed => cachedUrls.has(feed.url)).map(feed => feed.url))
     const fetchedFeeds = feeds.filter(feed => !cachedFeedUrls.has(feed.url))

@@ -190,6 +190,7 @@ import {
   updateMissingRssFeedAvatars
 } from '../../../helpers/rssFeeds'
 import { showToast } from '../../../helpers/utils'
+import { holdAndroidBackgroundWork } from '../../../helpers/androidBackgroundSync.js'
 
 const RSSHUB_NAME = 'RSSHub'
 const RSSHUB_URL = 'https://github.com/DIYgod/RSSHub'
@@ -295,6 +296,8 @@ async function addFeed(text) {
   }
 
   isAdding.value = true
+  // Lets the feed load and save in a hidden Android app
+  const releaseBackgroundHold = holdAndroidBackgroundWork()
   try {
     // Loading the feed first rejects addresses that aren't feeds and finds its title
     const result = await fetchRssFeed(url)
@@ -310,6 +313,7 @@ async function addFeed(text) {
     showFeedError(error)
     return false
   } finally {
+    releaseBackgroundHold()
     isAdding.value = false
   }
 }
