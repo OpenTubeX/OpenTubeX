@@ -6,12 +6,14 @@ import { startProgressBarOperation } from './progressBar'
 import { shouldShowProgressStartToast } from './progressPresentation'
 import { showToastOnAllTabs } from './utils'
 import { appFetch } from './rssHub'
+import { mapConcurrently } from './concurrent-map'
 import { supportsYtDlp } from './ytDlpCapabilities'
 import { isRssFeedItemSeen, onRssFeedSeenItemsSynced, parseRssFeedSeenItems, toRssFeedSeenMarks } from './rssFeedSeenItems'
 import { unmarkExternalMediaWatchedBefore } from './externalMediaPosition'
 import { resolveYtDlpCreatorAvatarUrl } from '../../main/ytDlpCreatorAvatar'
 
 const FETCH_TIMEOUT_MS = 15_000
+const REFRESH_CONCURRENCY = 6
 const MAX_ITEMS_PER_FEED = 50
 
 /**
@@ -718,9 +720,13 @@ export async function refreshRssFeeds(feeds, { automatic = false, cachedUrls = n
     const cachedFeedUrls = new Set(feeds.filter(feed => cachedUrls.has(feed.url)).map(feed => feed.url))
     const fetchedFeeds = feeds.filter(feed => !cachedFeedUrls.has(feed.url))
     let settledCount = 0
-    const results = await Promise.allSettled(fetchedFeeds.map(feed => fetchRssFeed(feed.url, controller.signal).finally(() => {
+    // A few at a time, so many feeds don't hold all their responses in memory at once
+    const results = await mapConcurrently(fetchedFeeds, REFRESH_CONCURRENCY, feed => fetchRssFeed(feed.url, controller.signal).then(
+      value => ({ status: 'fulfilled', value }),
+      reason => ({ status: 'rejected', reason })
+    ).finally(() => {
       if (!controller.signal.aborted) progress.update({ percentage: (++settledCount / fetchedFeeds.length) * 100 })
-    })))
+    }))
     if (controller.signal.aborted) return
 
     // Feeds added or retried while this refresh ran keep their own, newer result,
