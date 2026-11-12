@@ -118,7 +118,7 @@ const bookmarkActions = settingsProgram
   .declarations[0].init.properties
   .filter(node => /PlaylistBookmark/.test(node.key?.name))
 const bookmarkHelpers = settingsProgram
-  .filter(node => /PlaylistBookmark|LockedSetting/.test(node.type === 'VariableDeclaration' ? node.declarations[0].id.name : node.id?.name))
+  .filter(node => /PlaylistBookmark|LockedSetting|^runLocked$|^pendingLocks$/.test(node.type === 'VariableDeclaration' ? node.declarations[0].id.name : node.id?.name))
 
 // The real settings actions, against a datastore whose first write waits for `releaseWrite`.
 function createSettingsStore(playlistBookmarks, savedBookmarks = playlistBookmarks) {

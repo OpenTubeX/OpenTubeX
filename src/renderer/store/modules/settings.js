@@ -497,7 +497,9 @@ function updateSettingSyncTimestamp(commit, settingId, update) {
  * - The edit time is saved first, so no window can pair the new value with the
  *   previous edit time.
  * - If either save fails, the edit fails and the previous edit time comes back,
- *   so sync doesn't count the unchanged value as a newer edit.
+ *   so sync doesn't count the unchanged value as a newer edit. Edits of a
+ *   setting take turns in all windows, so the previous edit time is always
+ *   that of a saved value.
  * @template T
  * @param {Function} commit
  * @param {string} settingId
@@ -505,22 +507,24 @@ function updateSettingSyncTimestamp(commit, settingId, update) {
  * @param {number} [editedAt]
  * @returns {Promise<T>}
  */
-async function saveSettingEdit(commit, settingId, save, editedAt = Date.now()) {
+function saveSettingEdit(commit, settingId, save, editedAt = Date.now()) {
   if (!isSettingSyncable(settingId) && settingId !== CUSTOM_THEMES_SYNC_KEY) return save()
 
-  let previous
-  const recorded = await updateSettingSyncTimestamp(commit, settingId, saved => {
-    previous = saved
-    return editedAt
+  return runLocked(`opentubex-setting-edit-${settingId}`, async () => {
+    let previous
+    const recorded = await updateSettingSyncTimestamp(commit, settingId, saved => {
+      previous = saved
+      return editedAt
+    })
+    if (!recorded) throw new Error(`Failed to save when ${settingId} was edited`)
+    try {
+      return await save()
+    } catch (error) {
+      // Keep an edit time that something else saved meanwhile.
+      await updateSettingSyncTimestamp(commit, settingId, saved => saved === editedAt ? previous : saved)
+      throw error
+    }
   })
-  if (!recorded) throw new Error(`Failed to save when ${settingId} was edited`)
-  try {
-    return await save()
-  } catch (error) {
-    // Unless a newer edit saved its own edit time.
-    await updateSettingSyncTimestamp(commit, settingId, saved => saved === editedAt ? previous : saved)
-    throw error
-  }
 }
 
 const settingWrites = createSettingWriteTracker(settingId => DBSettingHandlers.findValue(settingId))
@@ -680,24 +684,32 @@ function updateValidatedSetting(commit, settingId, value) {
 }
 
 /** @type {Map<string, Promise<unknown>>} */
-const pendingLockedSettingUpdates = new Map()
+const pendingLocks = new Map()
 
 /**
- * Runs `persist` inside a lock all windows share for `settingId`, or a queue
- * where locks are missing, so read-modify-write updates cannot interleave.
+ * Runs `run` inside the lock `name`, which all windows share, or a queue where
+ * locks are missing.
+ * @template T
+ * @param {string} name
+ * @param {() => Promise<T>} run
+ * @returns {Promise<T>}
+ */
+function runLocked(name, run) {
+  if (typeof navigator !== 'undefined' && navigator.locks) return navigator.locks.request(name, run)
+  const result = (pendingLocks.get(name) ?? Promise.resolve()).catch(() => {}).then(run)
+  pendingLocks.set(name, result)
+  return result
+}
+
+/**
+ * Runs `persist` inside a lock all windows share for `settingId`, so
+ * read-modify-write updates cannot interleave.
  * @param {string} settingId
  * @param {() => Promise<void>} persist
  * @returns {Promise<boolean>} whether the update was saved
  */
 function runLockedSettingUpdate(settingId, persist) {
-  let updated
-  if (typeof navigator !== 'undefined' && navigator.locks) {
-    updated = navigator.locks.request(`opentubex-setting-${settingId}`, persist)
-  } else {
-    updated = (pendingLockedSettingUpdates.get(settingId) ?? Promise.resolve()).catch(() => {}).then(persist)
-    pendingLockedSettingUpdates.set(settingId, updated)
-  }
-  return updated.then(() => true, error => {
+  return runLocked(`opentubex-setting-${settingId}`, persist).then(() => true, error => {
     console.error(error)
     return false
   })

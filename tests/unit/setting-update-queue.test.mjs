@@ -348,15 +348,17 @@ test('edit times stay with their values when windows edit settings at once or a 
   assert.deepEqual(saved.get('syncServerSettingUpdatedAt'), { baseTheme: 1, listType: 2 })
   assert.deepEqual({ ...second.settings.syncServerSettingUpdatedAt }, { baseTheme: 1, listType: 2 })
 
-  // Sync must not count the unchanged value as a newer edit.
-  await assert.rejects(first.save('baseTheme', async () => { throw new Error('disk full') }, 3), /disk full/)
+  // Sync must not count the unchanged value as a newer edit, even when both windows fail to save it.
+  const fail = async () => { throw new Error('disk full') }
+  await Promise.all([first.save('baseTheme', fail, 3), second.save('baseTheme', fail, 4)]
+    .map(edit => assert.rejects(edit, /disk full/)))
   assert.deepEqual(saved.get('syncServerSettingUpdatedAt'), { baseTheme: 1, listType: 2 })
   assert.deepEqual({ ...first.settings.syncServerSettingUpdatedAt }, { baseTheme: 1, listType: 2 })
 
   // Sync must not pair the new value with the previous edit time.
   failEditTimes = true
   let valueSaved = false
-  await assert.rejects(first.save('baseTheme', async () => { valueSaved = true }, 4))
+  await assert.rejects(first.save('baseTheme', async () => { valueSaved = true }, 5))
   assert.equal(valueSaved, false)
 })
 
