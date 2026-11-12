@@ -50,7 +50,10 @@ const config = {
   },
   output: {
     path: outputPath,
-    filename: '[name].js',
+    // Hashed names let the browser build's service worker cache assets
+    // cache-first without mixing files from different builds.
+    filename: isDevMode || isCapacitor ? '[name].js' : '[name].[contenthash].js',
+    chunkFilename: isDevMode || isCapacitor ? '[id].js' : '[id].[contenthash].js',
   },
   module: {
     rules: [

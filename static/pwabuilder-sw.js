@@ -2,17 +2,8 @@
 // This is the service worker with the Advanced caching
 
 const CACHE = 'pwabuilder-adv-cache'
-const precacheFiles = [
-  /* Add an array of files to precache for your app */
-  'index.html',
-  'web.js',
-  'web.css',
-  'static/*',
-  '_icons/*',
-  'fonts/*'
-]
-
-// TODO: replace the following with the correct offline fallback page i.e.: const offlineFallbackPage = "offline.html";
+// Production builds hash their scripts and styles, so only the page is
+// precached. Each asset is cached when the app first loads it.
 const offlineFallbackPage = 'index.html'
 
 const networkFirstPaths = [
@@ -54,9 +45,7 @@ self.addEventListener('install', function (event) {
     caches.open(CACHE).then(function (cache) {
       console.log('[PWA Builder] Caching pages during install')
 
-      return cache.addAll(precacheFiles).then(function () {
-        return cache.add(offlineFallbackPage)
-      })
+      return cache.add(offlineFallbackPage)
     })
   )
 })
@@ -81,7 +70,8 @@ self.addEventListener('fetch', function (event) {
   // expiring stream URLs, and the HTTP cache already handles its images.
   if (/^\/(api|companion|vi|ggpht|sb|videoplayback|latest_version)(\/|$)/.test(pathname)) return
 
-  if (comparePaths(event.request.url, networkFirstPaths)) {
+  // The page goes network first, so it always loads the newest build's hashed assets when online.
+  if (event.request.mode === 'navigate' || comparePaths(event.request.url, networkFirstPaths)) {
     networkFirstFetch(event)
   } else {
     cacheFirstFetch(event)
@@ -113,18 +103,6 @@ function cacheFirstFetch(event) {
 
             return response
           })
-          .catch(function (error) {
-            // The following validates that the request was for a navigation to a new document
-            if (event.request.destination !== 'document' || event.request.mode !== 'navigate') {
-              return
-            }
-
-            console.error('[PWA Builder] Network request failed and no cache.' + error)
-            // Use the precached offline page as fallback
-            return caches.open(CACHE).then(function (cache) {
-              cache.match(offlineFallbackPage)
-            })
-          })
       }
     )
   )
@@ -140,7 +118,12 @@ function networkFirstFetch(event) {
       })
       .catch(function (error) {
         console.error('[PWA Builder] Network request Failed. Serving content from cache: ' + error)
-        return fromCache(event.request)
+        return fromCache(event.request).catch(function () {
+          if (event.request.mode !== 'navigate') throw error
+          return caches.open(CACHE).then(function (cache) {
+            return cache.match(offlineFallbackPage)
+          })
+        })
       })
   )
 }
@@ -161,7 +144,8 @@ function fromCache(request) {
 }
 
 function updateCache(request, response) {
-  if (!comparePaths(request.url, avoidCachingPaths)) {
+  // Keep error responses, such as a 502 during a server restart, out of the cache.
+  if (response.ok && !comparePaths(request.url, avoidCachingPaths)) {
     return caches.open(CACHE).then(function (cache) {
       return cache.put(request, response)
     })
