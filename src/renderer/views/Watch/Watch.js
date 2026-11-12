@@ -575,6 +575,9 @@ export default defineComponent({
       musicMediaType: MUSIC_MEDIA_TYPE.UNKNOWN,
       /** @type {Date|null} */
       streamingDataExpiryDate: null,
+      /** @type {(() => Promise<import('youtubei.js').YT.VideoInfo | null>) | null} */
+      refreshVisionOsStreams: null,
+      visionOsStreamsRefreshPending: false,
       currentPlaybackRate: null,
       currentVideoQuality: null,
       /** @type {boolean|null} */
@@ -2697,6 +2700,8 @@ export default defineComponent({
       this.videoGenreIsMusic = false
       this.musicMediaType = MUSIC_MEDIA_TYPE.UNKNOWN
       this.streamingDataExpiryDate = null
+      this.refreshVisionOsStreams = null
+      this.visionOsStreamsRefreshPending = false
       this.ipBlockDetectedInCurrentChain = false
       // Cleared until the new player reports its ready state; otherwise the
       // manual save actions could persist the previous video's values.
@@ -4105,6 +4110,7 @@ export default defineComponent({
               if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
               this.manifestSrc = manifestSrc
               this.manifestMimeType = MANIFEST_TYPE_DASH
+              this.refreshVisionOsStreams = videoInfo.refreshVisionOsStreams ?? null
             } else {
               // Neither a SABR streaming URL nor playable adaptive format URLs,
               // so the only thing left is the 360p legacy stream. This is a
@@ -6073,6 +6079,68 @@ export default defineComponent({
     },
 
     /**
+     * Replaces expired visionOS streams in the current player. Unlike the WEB
+     * streams, they need neither a token nor the watch page, so the page stays.
+     * @returns {Promise<boolean>} whether the error was handled
+     */
+    refreshExpiredVisionOsStreams: async function () {
+      const refresh = this.refreshVisionOsStreams
+      if (refresh === null || this.manifestMimeType !== MANIFEST_TYPE_DASH || this.activeFormat === 'legacy') {
+        return false
+      }
+
+      const loadGeneration = this.videoLoadGeneration
+      const videoId = this.videoId
+      const player = this.$refs.player
+      // Picking a downloaded file also replaces the source while the request runs
+      const sourceKey = this.playbackSourceKey
+      const isCurrent = () => this.isCurrentVideoLoad(loadGeneration, videoId) && player === this.$refs.player &&
+        !this.isLoading && sourceKey === this.playbackSourceKey
+      this.visionOsStreamsRefreshPending = true
+      try {
+        const videoInfo = await refresh()
+        if (!isCurrent()) return true
+        // Streams that expire again right away would refresh in a loop
+        if (!videoInfo?.streaming_data || !(videoInfo.streaming_data.expires > new Date())) return false
+
+        const manifestSrc = await this.createLocalDashManifest(videoInfo)
+        if (!isCurrent()) return true
+
+        // Caption URLs expire with the streams. The player loads them again with the new source.
+        const freshCaptionUrls = new Map(videoInfo.captions?.caption_tracks?.map(track => [track.vss_id, track.base_url]) ?? [])
+        const refreshCaptionUrl = caption => {
+          const sourceId = caption.isAutotranslated ? caption.id.slice(0, -(caption.language.length + 1)) : caption.id
+          if (!freshCaptionUrls.has(sourceId)) return null
+          const url = new URL(freshCaptionUrls.get(sourceId))
+          const previous = new URL(caption.url)
+          for (const param of ['fmt', 'tlang']) {
+            if (previous.searchParams.has(param)) url.searchParams.set(param, previous.searchParams.get(param))
+          }
+          return { ...caption, url: url.toString() }
+        }
+        const captions = this.captions.map(refreshCaptionUrl)
+        const captionTranslations = this.captionTranslations.map(refreshCaptionUrl)
+        // The page reload loads every caption again, instead of keeping expired URLs
+        if (captions.includes(null) || captionTranslations.includes(null)) return false
+        this.captions = captions
+        this.captionTranslations = captionTranslations
+
+        this.showStreamRecoveryNotice(`${this.t('Video.Reloading video after streaming URL error')}: [BAD_HTTP_STATUS: 403] YouTube watch session expired`)
+        this.manifestSrc = manifestSrc
+        this.streamingDataExpiryDate = videoInfo.streaming_data.expires
+        this.playbackSourceKey++
+        console.warn(`Loaded fresh visionOS streams for ${videoId} after its streams expired`)
+        return true
+      } catch (error) {
+        console.warn(`Could not refresh the expired visionOS streams of ${videoId}`, error)
+        return false
+      } finally {
+        // A later video's load resets the flag and may have its own refresh pending
+        if (this.isCurrentVideoLoad(loadGeneration, videoId)) this.visionOsStreamsRefreshPending = false
+      }
+    },
+
+    /**
      * Keeps the player and page while the stream's server is unreachable,
      * then retries the same stream. Reloading would also need YouTube, and
      * would spend the SABR recovery budget on an outage.
@@ -6302,14 +6370,6 @@ export default defineComponent({
           case 403:
             this.handleWatchProgressAutoSaveWhenProgressEnabled()
 
-            // YouTube can stop serving these streams without a token, as it did
-            // for other clients, so the reload below uses the WEB streams.
-            if (this.activePlaybackEngine !== 'yt-dlp' && isVisionOsStreamUrl(error.data[0])) {
-              disableVisionOsStreams('googlevideo refused a visionOS stream with HTTP 403')
-              // Cached Shorts would reload with the same streams
-              this.shortsPlaybackCache.clearEntries()
-            }
-
             // Streaming URLs are bound to the IP they were issued to, so they also
             // start returning 403 when our own IP changes (reconnect, prefix rotation,
             // VPN switch). An expired watch session likewise needs a fresh fetch.
@@ -6318,6 +6378,22 @@ export default defineComponent({
             // apart from the extra reload before them.
             {
               const sessionExpired = new Date() > this.streamingDataExpiryDate
+
+              if (sessionExpired && this.activePlaybackEngine !== 'yt-dlp' && isVisionOsStreamUrl(error.data[0])) {
+                // Audio and video segments can both fail before the new streams load
+                if (this.visionOsStreamsRefreshPending) return
+                if (await this.refreshExpiredVisionOsStreams()) return
+              }
+
+              // YouTube can stop serving these streams without a token, as it did
+              // for other clients, so the reload below uses the WEB streams.
+              // Expired streams say nothing about that, so they reload from visionOS.
+              if (!sessionExpired && this.activePlaybackEngine !== 'yt-dlp' && isVisionOsStreamUrl(error.data[0])) {
+                disableVisionOsStreams('googlevideo refused a visionOS stream with HTTP 403')
+                // Cached Shorts would reload with the same streams
+                this.shortsPlaybackCache.clearEntries()
+              }
+
               const specificError = sessionExpired
                 ? '[BAD_HTTP_STATUS: 403] YouTube watch session expired. Please reopen this video.'
                 : this.isMusicVideo

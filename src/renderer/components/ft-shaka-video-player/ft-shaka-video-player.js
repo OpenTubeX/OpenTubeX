@@ -1376,6 +1376,8 @@ export default defineComponent({
 
     /** @type {number|null} */
     let restoreCaptionIndex = props.sabrReloadState?.captionIndex ?? null
+    // An auto-translation picked in the menu, which isn't in props.captions and has to be added again
+    let restoreCaptionTranslation = null
 
     // The channel's subtitles state is more specific than the global default, so it wins
     const enableSubtitlesInitially = getSavedChannelSubtitlesState() ?? store.getters.getEnableSubtitlesByDefault
@@ -10444,6 +10446,22 @@ export default defineComponent({
         }
       }
 
+      const translation = restoreCaptionTranslation
+      restoreCaptionTranslation = null
+      let translationTrack = null
+      if (translation !== null && restoreCaptionIndex !== null && !isLive.value) {
+        try {
+          // The source's captions can come with fresh URLs, such as after expired streams
+          translationTrack = await addCaptionTrack(props.captionTranslations.find(caption => caption.id === translation.id) ?? translation, loadedPlayer)
+        } catch (error) {
+          handleError(error, 'addTextTrackAsync', translation)
+        }
+
+        if (player !== loadedPlayer || !hasLoaded.value || generation !== loadGeneration) {
+          return
+        }
+      }
+
       loadChapterThumbnails()
 
       if (restoreCaptionIndex !== null) {
@@ -10451,7 +10469,8 @@ export default defineComponent({
         restoreCaptionIndex = null
 
         const textTracks = player.getTextTracks()
-        const textTrack = findMatchingTextTrack(textTracks, initialCaption) ?? textTracks[index]
+        // A translation that could not be added again must not fall back to the index of another track
+        const textTrack = translation !== null ? translationTrack : findMatchingTextTrack(textTracks, initialCaption) ?? textTracks[index]
         initialCaption = null
 
         if (textTrack) {
@@ -10551,7 +10570,8 @@ export default defineComponent({
      *   useAutoQuality: boolean,
      *   audioBandwidth: number|undefined,
      *   label: string|undefined,
-     *   previousQuality: number|undefined
+     *   previousQuality: number|undefined,
+     *   dashQuality: number|undefined
      * } | null}
      */
     let pendingFormatSwitchState = null
@@ -10613,6 +10633,9 @@ export default defineComponent({
             ? undefined
             : player.getVariantTracks().find(track => track.active)
           const activeCaptionIndex = player.getTextTracks().findIndex(caption => caption.active)
+          const activeCaption = activeCaptionIndex >= 0
+            ? captionSources.get(player)?.get(player.getTextTracks()[activeCaptionIndex].id)
+            : undefined
 
           // Queue the current speed before unloading so later user choices
           // replace it instead of being overwritten by a pre-switch snapshot.
@@ -10632,6 +10655,9 @@ export default defineComponent({
             label: activeVariant?.label || undefined,
             previousQuality: oldFormat === 'dash' && activeVariant
               ? (activeVariant.height > activeVariant.width ? activeVariant.width : activeVariant.height)
+              : undefined,
+            dashQuality: oldFormat === 'dash' && activeVariant
+              ? getDashQualityFromDimensions(activeVariant.width, activeVariant.height) ?? undefined
               : undefined
           }
 
@@ -10639,6 +10665,10 @@ export default defineComponent({
             video_.pause()
           }
 
+          restoreCaptionTranslation = activeCaption && !props.captions.some(caption => caption.id === activeCaption.id) &&
+            props.captionTranslations.some(caption => caption.id === activeCaption.id)
+            ? activeCaption
+            : null
           if (activeCaptionIndex >= 0) {
             restoreCaptionIndex = activeCaptionIndex
 
@@ -10669,7 +10699,8 @@ export default defineComponent({
           useAutoQuality,
           audioBandwidth,
           label,
-          previousQuality
+          previousQuality,
+          dashQuality
         } = pendingFormatSwitchState
 
         if (newFormat === 'audio' || newFormat === 'dash') {
@@ -10685,6 +10716,11 @@ export default defineComponent({
 
           if (sourceFormat === 'audio' && newFormat === 'dash' && !useAutoQuality) {
             dimension = preferredVideoQuality.value
+          }
+
+          // A new source for the same format, such as refreshed streams
+          if (sourceFormat === 'dash' && newFormat === 'dash' && !useAutoQuality) {
+            dimension = dashQuality
           }
 
           await unloadForFormatSwitch()

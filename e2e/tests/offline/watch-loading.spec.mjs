@@ -1,5 +1,8 @@
-import { test, expect, sel } from '../../helpers/app.mjs'
-import { activeTab, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
+
+import { test, expect, sel, repoRoot } from '../../helpers/app.mjs'
+import { activeTab, openCaptionLanguages, openMockedVideo, openPlayerOptions, waitForPlayback } from '../../helpers/player.mjs'
 import { DEMO_MEDIA_MIME_TYPE, DEMO_MEDIA_URL, demoPlayerResponse } from '../../helpers/media.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
@@ -351,8 +354,12 @@ test.describe('local player request concurrency', () => {
     expect(await app.electronApp.evaluate(() => globalThis.mintedTokenVideoIds)).toEqual(['jNQXAC9IVRw'])
   })
 
-  test('plays the WEB streams for the rest of the session when googlevideo refuses the visionOS streams', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
+  /**
+   * Answers the visionOS /player requests with direct streams.
+   * @param {import('@playwright/test').Page} page
+   * @param {(videoId: string, request: number) => { streamingData: object, captions?: object }} response
+   */
+  async function routeVisionOsPlayer(page, response) {
     await page.route('**/youtubei/v1/visitor_id**', route => route.fulfill({
       json: { responseContext: { visitorData: 'e2e-visionos-visitor-data' } }
     }))
@@ -361,42 +368,52 @@ test.describe('local player request concurrency', () => {
       const { videoId, context } = route.request().postDataJSON()
       if (context.client.clientName !== 'VISIONOS') return route.fallback()
       visionOsRequests.push(videoId)
-      const url = itag => `https://rr1---sn-opentubex-visionos.googlevideo.com/videoplayback?id=${videoId}&itag=${itag}&c=VISIONOS`
-      const format = { lastModified: '1700000000000000', approxDurationMs: '30000', contentLength: '100000' }
       return route.fulfill({
         json: {
           playabilityStatus: { status: 'OK' },
           videoDetails: { videoId, lengthSeconds: '30' },
-          streamingData: {
-            expiresInSeconds: '21540',
-            adaptiveFormats: [{
-              ...format,
-              itag: 247,
-              url: url(247),
-              mimeType: 'video/webm; codecs="vp9"',
-              bitrate: 500_000,
-              width: 1280,
-              height: 720,
-              fps: 30,
-              quality: 'hd720',
-              qualityLabel: '720p',
-              initRange: { start: '0', end: '219' },
-              indexRange: { start: '220', end: '860' },
-            }, {
-              ...format,
-              itag: 251,
-              url: url(251),
-              mimeType: 'audio/webm; codecs="opus"',
-              bitrate: 128_000,
-              audioQuality: 'AUDIO_QUALITY_MEDIUM',
-              audioSampleRate: '48000',
-              audioChannels: 2,
-              initRange: { start: '0', end: '258' },
-              indexRange: { start: '259', end: '629' },
-            }]
-          }
+          ...response(videoId, visionOsRequests.length - 1)
         }
       })
+    })
+    return visionOsRequests
+  }
+
+  test('plays the WEB streams for the rest of the session when googlevideo refuses the visionOS streams', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    const visionOsRequests = await routeVisionOsPlayer(page, videoId => {
+      const url = itag => `https://rr1---sn-opentubex-visionos.googlevideo.com/videoplayback?id=${videoId}&itag=${itag}&c=VISIONOS`
+      const format = { lastModified: '1700000000000000', approxDurationMs: '30000', contentLength: '100000' }
+      return {
+        streamingData: {
+          expiresInSeconds: '21540',
+          adaptiveFormats: [{
+            ...format,
+            itag: 247,
+            url: url(247),
+            mimeType: 'video/webm; codecs="vp9"',
+            bitrate: 500_000,
+            width: 1280,
+            height: 720,
+            fps: 30,
+            quality: 'hd720',
+            qualityLabel: '720p',
+            initRange: { start: '0', end: '219' },
+            indexRange: { start: '220', end: '860' },
+          }, {
+            ...format,
+            itag: 251,
+            url: url(251),
+            mimeType: 'audio/webm; codecs="opus"',
+            bitrate: 128_000,
+            audioQuality: 'AUDIO_QUALITY_MEDIUM',
+            audioSampleRate: '48000',
+            audioChannels: 2,
+            initRange: { start: '0', end: '258' },
+            indexRange: { start: '259', end: '629' },
+          }]
+        }
+      }
     })
     let refusedStreams = 0
     await page.route(/^https:\/\/rr1---sn-opentubex-visionos\.googlevideo\.com\//, route => {
@@ -409,6 +426,145 @@ test.describe('local player request concurrency', () => {
     expect(refusedStreams).toBeGreaterThan(0)
     await openMockedVideo(page, 'dQw4w9WgXc')
     expect(visionOsRequests).toEqual(['jNQXAC9IVRw'])
+  })
+
+  test.describe('with a fixed quality and subtitles', () => {
+    test.use({
+      seed: {
+        settings: {
+          videoPlaybackEngine: 'built-in',
+          ytDlpPlaybackEngineDefaultMigration: true,
+          useSponsorBlock: false,
+          defaultQuality: '360',
+          enableSubtitlesByDefault: true,
+        }
+      }
+    })
+
+    test('replaces expired visionOS streams without reloading the page', async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page, { captionTranslations: true })
+      const media = {
+        video: readFileSync(path.join(repoRoot, 'e2e', 'fixtures', 'media', 'dash-demo-video.webm')),
+        audio: readFileSync(path.join(repoRoot, 'e2e', 'fixtures', 'media', 'dash-demo-audio.webm')),
+      }
+      // WebM keeps its Cues right before the first Cluster
+      const ranges = body => {
+        const firstCluster = body.indexOf(Buffer.from([0x1F, 0x43, 0xB6, 0x75]))
+        const cues = body.lastIndexOf(Buffer.from([0x1C, 0x53, 0xBB, 0x6B]), firstCluster)
+        return {
+          initRange: { start: '0', end: String(cues - 1) },
+          indexRange: { start: String(cues), end: String(firstCluster - 1) },
+          contentLength: String(body.length),
+        }
+      }
+      const visionOsRequests = await routeVisionOsPlayer(page, (videoId, request) => {
+        const url = (itag, kind) => `https://rr1---sn-opentubex-visionos.googlevideo.com/videoplayback?id=${videoId}&itag=${itag}&kind=${kind}&c=VISIONOS&request=${request}`
+        const format = { lastModified: '1700000000000000', approxDurationMs: '6000' }
+        // Both video qualities serve the same file
+        const video = (itag, width, height) => ({
+          ...format,
+          ...ranges(media.video),
+          itag,
+          url: url(itag, 'video'),
+          mimeType: 'video/webm; codecs="vp9"',
+          bitrate: height * 1000,
+          width,
+          height,
+          fps: 30,
+          quality: 'medium',
+          qualityLabel: `${height}p`,
+        })
+        return {
+          streamingData: {
+            // The first streams stand in for a page left open overnight
+            expiresInSeconds: request === 0 ? '0' : '21540',
+            adaptiveFormats: [video(247, 1280, 720), video(243, 640, 360), {
+              ...format,
+              ...ranges(media.audio),
+              itag: 251,
+              url: url(251, 'audio'),
+              mimeType: 'audio/webm; codecs="opus"',
+              bitrate: 64_000,
+              audioQuality: 'AUDIO_QUALITY_MEDIUM',
+              audioSampleRate: '48000',
+              audioChannels: 2,
+            }]
+          },
+          captions: {
+            playerCaptionsTracklistRenderer: {
+              captionTracks: [{
+                baseUrl: `https://www.youtube.com/api/timedtext?v=${videoId}&lang=en&request=${request}`,
+                name: { simpleText: 'English' },
+                vssId: '.en',
+                languageCode: 'en',
+                isTranslatable: true,
+              }],
+              translationLanguages: [{ languageCode: 'de', languageName: { simpleText: 'German' } }],
+            }
+          },
+        }
+      })
+      await page.route(/^https:\/\/rr1---sn-opentubex-visionos\.googlevideo\.com\//, route => {
+        const url = new URL(route.request().url())
+        const body = media[url.searchParams.get('kind')]
+        const range = /bytes=(\d+)-(\d*)/.exec(route.request().headers().range ?? '') ??
+          /^(\d+)-(\d*)$/.exec(url.searchParams.get('range') ?? '')
+        const start = range ? Number(range[1]) : 0
+        const end = range?.[2] ? Math.min(Number(range[2]), body.length - 1) : body.length - 1
+        return route.fulfill({
+          status: range ? 206 : 200,
+          contentType: 'video/webm',
+          headers: range ? { 'content-range': `bytes ${start}-${end}/${body.length}` } : {},
+          body: body.subarray(start, end + 1),
+        })
+      })
+      const captionRequests = []
+      page.on('request', request => {
+        const url = new URL(request.url())
+        if (url.pathname === '/api/timedtext') captionRequests.push(`${url.searchParams.get('request')} ${url.searchParams.get('tlang')}`)
+      })
+
+      const video = await openMockedVideo(page)
+      const player = page.locator(`${activeTab} .ftVideoPlayer`)
+      const playbackState = () => player.evaluate(element => {
+        const shaka = element.ui.getControls().getPlayer()
+        return {
+          height: shaka.getVariantTracks().find(track => track.active)?.height,
+          subtitles: shaka.getTextTracks().find(track => track.active)?.language,
+        }
+      })
+      await expect.poll(playbackState).toEqual({ height: 360, subtitles: 'en' })
+      // An auto-translation picked in the menu isn't part of the video's captions
+      await player.hover()
+      // Keep the controls shown, they can fade out before the click on slow machines
+      const controls = player.locator('.shaka-controls-container')
+      await controls.evaluate(element => element.setAttribute('casting', 'true'))
+      await openPlayerOptions(player)
+      await openCaptionLanguages(player)
+      await player.locator('.shaka-text-languages').getByRole('button', { name: 'Auto-translate' }).click()
+      await player.locator('.ft-caption-translation-options').getByRole('button', { name: 'German' }).click()
+      await expect.poll(playbackState).toEqual({ height: 360, subtitles: 'de' })
+      await page.keyboard.press('Escape')
+      await controls.evaluate(element => element.removeAttribute('casting'))
+      // The demo file can end while the menu opens
+      await video.evaluate(element => { element.currentTime = 0; return element.play() })
+
+      // Once the buffered part has played, the next segment request gets this
+      // error. The demo file is buffered whole, so it is reported directly.
+      const watch = await watchViewHandle(page)
+      await watch.evaluate(view => view.handlePlayerError({
+        code: 1001,
+        data: [new URL(decodeURIComponent(view.manifestSrc).match(/<BaseURL>([^<]+)</)[1].replaceAll('&amp;', '&')).toString(), 403],
+      }))
+
+      await expect.poll(() => watch.evaluate(view => decodeURIComponent(view.manifestSrc).includes('request=1'))).toBe(true)
+      await expect.poll(() => video.evaluate(element => !element.paused && element.readyState >= 2)).toBe(true)
+      await expect.poll(playbackState).toEqual({ height: 360, subtitles: 'de' })
+      expect(visionOsRequests).toEqual(['jNQXAC9IVRw', 'jNQXAC9IVRw'])
+      // The new source loads the captions again, from their fresh URL
+      await expect.poll(() => captionRequests.at(-1)).toBe('1 de')
+      expect(await watch.evaluate(view => view.streamErrorReloadAttemptedForCurrentVideo)).toBe(false)
+    })
   })
 
   for (const changeVideo of [false, true]) {

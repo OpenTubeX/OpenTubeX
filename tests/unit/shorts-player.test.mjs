@@ -594,6 +594,7 @@ for (const paused of [true]) {
       hasMultipleAudioTracks: ref(false),
       togglePlaybackRate: null,
       restoreCaptionIndex: null,
+      restoreCaptionTranslation: null,
       mountedWithoutCaptions: false,
       suppressInitialAutoplay: false,
       props: { shortsPlayer: true, format: 'dash', captions: [], chapters: [] },
