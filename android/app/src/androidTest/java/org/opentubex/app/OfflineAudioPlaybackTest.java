@@ -55,6 +55,13 @@ public class OfflineAudioPlaybackTest {
                     store.commit('setAutoplayVideos', true);
                     store.commit('setReducedMotion', 'off');
                     window.__offlineAudioContexts = [];
+                    // Autoplay can finish the 4-second file before a slow emulator runs the next
+                    // evaluation, and replaying an ended file rebuilds the visualizer's graph.
+                    window.__offlineAudioProgress = 0;
+                    window.__offlineAudioLoop = event => { event.target.loop = true; };
+                    window.__offlineAudioCountProgress = () => window.__offlineAudioProgress++;
+                    document.addEventListener('play', window.__offlineAudioLoop, true);
+                    document.addEventListener('timeupdate', window.__offlineAudioCountProgress, true);
                     const OriginalAudioContext = window.AudioContext;
                     window.__offlineAudioOriginalContext = OriginalAudioContext;
                     window.AudioContext = class extends OriginalAudioContext {
@@ -75,12 +82,7 @@ public class OfflineAudioPlaybackTest {
                 """, JSONObject.quote(videoId), JSONObject.quote(media.getAbsolutePath())));
             try {
                 await(view, "!!document.querySelector('video')");
-                evaluate(view, """
-                    window.__offlineAudioProgress = 0;
-                    document.querySelector('video').addEventListener('timeupdate', () => window.__offlineAudioProgress++);
-                    document.querySelector('video').loop = true;
-                    document.querySelector('video').play(); true
-                    """);
+                evaluate(view, "document.querySelector('video').play(); true");
                 await(view, "document.querySelector('video').currentTime > 0.25 && window.__offlineAudioContexts.length > 0");
                 assertEquals("\"running\"", evaluate(view, "window.__offlineAudioContexts[0].state"));
                 for (int cycle = 0; cycle < 3; cycle++) {
@@ -166,6 +168,8 @@ public class OfflineAudioPlaybackTest {
                         app.$store.commit('removeYtDlpDownload', 943943);
                         for (const [key, value] of Object.entries(window.__offlineAudioSaved ?? {})) app.$store.commit('set' + key, value);
                         if (window.__offlineAudioOriginalContext) window.AudioContext = window.__offlineAudioOriginalContext;
+                        document.removeEventListener('play', window.__offlineAudioLoop, true);
+                        document.removeEventListener('timeupdate', window.__offlineAudioCountProgress, true);
                     })()
                     """);
                 await(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getActiveTab?.route.path === '/subscriptions'");
