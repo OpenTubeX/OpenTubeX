@@ -3,7 +3,12 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 
-import { createOptimisticSettingUpdater, createSettingUpdateQueue } from '../../src/renderer/helpers/settingUpdateQueue.js'
+import { createOptimisticSettingUpdater, createSettingUpdateQueue, createSettingWriteTracker } from '../../src/renderer/helpers/settingUpdateQueue.js'
+import { areSyncSettingValuesEqual, mergeSettingEntry, mergeSettingItemsEntry, migrateLegacySyncedSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
+
+const settingsSource = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
+const settingsSection = (start, end) => settingsSource.slice(settingsSource.indexOf(start), settingsSource.indexOf(end))
+const generatedSettingActions = settingsSection('const getters = {}', '// Add all custom data')
 
 function deferred () {
   let resolvePromise
@@ -162,10 +167,8 @@ test('continues with the latest setting write after an earlier write fails', asy
 })
 
 test('generated setting updaters report whether the write was saved', async () => {
-  const source = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
-  const generator = source.slice(source.indexOf('const getters = {}'), source.indexOf('// Add all custom data'))
   let failWrites = false
-  const actions = vm.runInNewContext(`${generator}\nactions`, {
+  const actions = vm.runInNewContext(`${generatedSettingActions}\nactions`, {
     state: { uiScale: 100, theme: 'dark' },
     settingsWithSideEffects: ['theme'],
     sideEffectHandlers: { theme: () => {} },
@@ -174,6 +177,7 @@ test('generated setting updaters report whether the write was saved', async () =
     defaultUpdaterId: id => `update${id}`,
     defaultSideEffectsTriggerId: id => `trigger${id}`,
     createSettingUpdateQueue,
+    settingWrites: createSettingWriteTracker(async () => undefined),
     recordSettingSyncTimestamp: async () => {},
     DBSettingHandlers: { upsert: async () => { if (failWrites) throw new Error('disk full') } },
     console: { error () {} },
@@ -185,4 +189,183 @@ test('generated setting updaters report whether the write was saved', async () =
   failWrites = true
   assert.equal(await actions.updateuiScale(context, 150), false)
   assert.equal(await actions.updatetheme(context, 'black'), false)
+})
+
+test('a setting saved by another window during this window\'s write shows the last saved value', async () => {
+  const saved = new Map([['theme', 'dark']])
+  const editTimes = new Map()
+  let valueSavedWithoutEditTime = false
+  const settingWrites = createSettingWriteTracker(async id => saved.get(id))
+  const started = deferred()
+  const release = deferred()
+  const actions = vm.runInNewContext(`${generatedSettingActions}\nactions`, {
+    state: { theme: 'dark' },
+    settingsWithSideEffects: [],
+    defaultGetterId: id => `get${id}`,
+    defaultMutationId: id => `set${id}`,
+    defaultUpdaterId: id => `update${id}`,
+    createSettingUpdateQueue,
+    settingWrites,
+    recordSettingSyncTimestamp: async (commit, id) => { editTimes.set(id, Date.now()) },
+    DBSettingHandlers: {
+      upsert: async (id, value) => {
+        valueSavedWithoutEditTime ||= !editTimes.has(id)
+        saved.set(id, value)
+        started.resolve()
+        await release.promise
+      },
+    },
+    console,
+  })
+  const settings = { theme: 'dark' }
+  const commit = (mutation, value) => { settings[mutation.slice(3)] = value }
+  const update = actions.updatetheme({ commit, dispatch () {} }, 'light')
+  await started.promise
+
+  // Another window saves its edit after this one, and its broadcast arrives before this write finishes.
+  saved.set('theme', 'black')
+  settingWrites.savedElsewhere('theme', value => { settings.theme = value })
+  settings.theme = 'black'
+  release.resolve()
+
+  assert.equal(await update, true)
+  assert.equal(settings.theme, 'black')
+  // Another window must not receive the new value with the previous edit time.
+  assert.equal(valueSavedWithoutEditTime, false)
+})
+
+test('an ordered setting saved by another window before this window\'s write shows this window\'s value', async () => {
+  const saved = new Map([['pinnedPlaylistIds', ['first']]])
+  const settingWrites = createSettingWriteTracker(async id => saved.get(id))
+  const started = deferred()
+  const release = deferred()
+  const updateOrderedSetting = vm.runInNewContext(`${settingsSection('const updateOptimisticSetting', 'let androidProxyUpdate')}\nupdateOrderedSetting`, {
+    createOptimisticSettingUpdater,
+    settingWrites,
+    defaultMutationId: id => `set${id}`,
+    recordSettingSyncTimestamp: async () => {},
+    DBSettingHandlers: {
+      upsert: async (id, value) => {
+        started.resolve()
+        await release.promise
+        saved.set(id, value)
+      },
+    },
+    console,
+  })
+  const settings = { pinnedPlaylistIds: ['first'] }
+  const commit = (mutation, value) => { settings[mutation.slice(3)] = value }
+  const update = updateOrderedSetting(commit, settings, 'pinnedPlaylistIds', ['first', 'local'])
+  await started.promise
+
+  // Another window saved its edit first, but its broadcast arrives after this window showed its own.
+  saved.set('pinnedPlaylistIds', ['first', 'other'])
+  settingWrites.savedElsewhere('pinnedPlaylistIds', value => { settings.pinnedPlaylistIds = value })
+  settings.pinnedPlaylistIds = ['first', 'other']
+  release.resolve()
+
+  assert.equal(await update, true)
+  assert.deepEqual(settings.pinnedPlaylistIds, ['first', 'local'])
+})
+
+test('windows editing different settings at once keep both edit times', async () => {
+  const saved = new Map()
+  const locks = new Map()
+  const timestampSection = settingsSection('function recordSettingSyncTimestamp(', 'const settingWrites =') +
+    settingsSection('/** @type {Map<string, Promise<unknown>>} */', '/**\n * Applies `update` to the saved bookmarks')
+  const createWindow = () => {
+    const settings = { syncServerSettingUpdatedAt: {} }
+    const recordSettingSyncTimestamp = vm.runInNewContext(`${timestampSection}\nrecordSettingSyncTimestamp`, {
+      isSettingSyncable: () => true,
+      CUSTOM_THEMES_SYNC_KEY: 'customThemes',
+      // Every window shares the database and its locks.
+      navigator: {
+        locks: {
+          request: (name, callback) => {
+            const run = (locks.get(name) ?? Promise.resolve()).then(() => callback())
+            locks.set(name, run.catch(() => {}))
+            return run
+          },
+        },
+      },
+      DBSettingHandlers: {
+        findValue: async id => structuredClone(saved.get(id)),
+        upsert: async (id, value) => {
+          await new Promise(resolve => setImmediate(resolve))
+          saved.set(id, structuredClone(value))
+        },
+      },
+      console,
+      Map,
+      Date,
+    })
+    return {
+      settings,
+      record: (id, editedAt) => recordSettingSyncTimestamp((mutation, value) => { settings.syncServerSettingUpdatedAt = value }, id, editedAt),
+    }
+  }
+  const first = createWindow()
+  const second = createWindow()
+
+  await Promise.all([first.record('theme', 1), second.record('uiScale', 2)])
+
+  assert.deepEqual(saved.get('syncServerSettingUpdatedAt'), { theme: 1, uiScale: 2 })
+  assert.deepEqual({ ...second.settings.syncServerSettingUpdatedAt }, { theme: 1, uiScale: 2 })
+})
+
+test('settings sync waits for an optimistic edit to save its edit time', async () => {
+  const syncSource = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
+  const key = 'pinnedPlaylistIds'
+  const settingWrites = createSettingWriteTracker(async () => undefined)
+  const context = vm.createContext({
+    areSyncSettingValuesEqual,
+    mergeSettingEntry,
+    mergeSettingItemsEntry,
+    migrateLegacySyncedSettings,
+    resolveMergedThemeEntry,
+    CUSTOM_THEMES_SYNC_KEY: 'customThemes',
+    SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY: 'subscriptionChannelSettings',
+    PLAYLIST_PREFERENCES_SYNC_KEY: 'playlistPreferences',
+    normalizeCustomThemes: value => value,
+    getSyncableSettingKeys: () => [key],
+    isSettingSyncEnabled: () => false,
+    settingWritesSettled: () => settingWrites.settled(),
+    deepCopy: structuredClone,
+  })
+  vm.runInContext(syncSource
+    .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
+    .replace(/^export \{[\s\S]*?\}\n/gm, '')
+    .replace(/^export (?=(async )?(function|class|const))/gm, ''), context)
+
+  const now = Date.now()
+  const previous = { [key]: { key, value: ['first'], updatedAt: now - 2000 } }
+  const settings = { [key]: ['first'], syncServerSettingUpdatedAt: { [key]: now - 2000 }, syncServerSettingsExcluded: [] }
+  const dispatched = []
+  const store = {
+    state: { settings, profiles: { profileList: [] }, utils: { customThemes: [] } },
+    dispatch: async (action, value) => { dispatched.push([action, value]) },
+  }
+  // Another device edited the list after the last sync but before this window's edit.
+  const client = {
+    entries: [{ key, value: ['remote'], updatedAt: now - 1000 }],
+    async getSettings() { return this.entries },
+    async putSettings(value) { this.entries = value },
+  }
+  const release = deferred()
+  const update = createOptimisticSettingUpdater()
+  const edit = settingWrites.track(key, () => update(key, ['first', 'local'], {
+    read: () => settings[key],
+    commit: value => { settings[key] = value },
+    persist: async () => {
+      await release.promise
+      settings.syncServerSettingUpdatedAt = { [key]: Date.now() }
+    },
+  }))
+
+  const syncing = context.syncSettings(client, store, previous)
+  setImmediate(release.resolve)
+  await Promise.all([edit, syncing])
+
+  assert.deepEqual(dispatched, [])
+  assert.deepEqual(client.entries.find(entry => entry.key === key).value, ['first', 'local'])
 })

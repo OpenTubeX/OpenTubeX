@@ -63,3 +63,70 @@ export function createOptimisticSettingUpdater() {
     })
   }
 }
+
+/**
+ * Tracks this window's setting writes:
+ * - Another window can save a setting while this window writes it, and either
+ *   save can end up last. Once this window's last write of the setting
+ *   finishes, it shows the saved value. Windows receive saves in the order the
+ *   database applied them, so a later one is newer than that value.
+ * - Sync waits for `settled`, so it reads each value with its edit time.
+ * @param {(settingId: string) => Promise<unknown>} readSaved
+ */
+export function createSettingWriteTracker(readSaved) {
+  const writes = new Map()
+  const running = new Set()
+
+  return {
+    /**
+     * Runs `write` for `settingId`.
+     * @template T
+     * @param {string} settingId
+     * @param {() => Promise<T>} write
+     * @returns {Promise<T>}
+     */
+    track(settingId, write) {
+      const entry = writes.get(settingId) ?? { count: 0, apply: null }
+      writes.set(settingId, entry)
+      entry.count++
+      const run = (async () => {
+        try {
+          return await write()
+        } finally {
+          try {
+            if (entry.apply && entry.count === 1) {
+              const saved = await readSaved(settingId)
+              // Otherwise a newer write started and shows the saved value when it finishes.
+              if (entry.count === 1) {
+                const apply = entry.apply
+                entry.apply = null
+                apply(saved)
+              }
+            }
+          } catch (error) {
+            console.error(`Failed to show the saved ${settingId} setting`, error)
+          }
+          if (--entry.count === 0) writes.delete(settingId)
+        }
+      })()
+      const settle = () => running.delete(run)
+      running.add(run)
+      run.then(settle, settle)
+      return run
+    },
+
+    /**
+     * Records that another window saved `settingId`. If this window is
+     * writing it, `apply` receives the saved value after the writes finish.
+     * @param {string} settingId
+     * @param {(saved: unknown) => void} apply
+     */
+    savedElsewhere(settingId, apply) {
+      const entry = writes.get(settingId)
+      if (entry) entry.apply = apply
+    },
+
+    /** A promise for the writes in flight, or `null` if there are none */
+    settled: () => running.size > 0 ? Promise.allSettled(running) : null,
+  }
+}

@@ -31,6 +31,7 @@ const context = vm.createContext({
   normalizeCustomThemes: value => value,
   getSyncableSettingKeys: () => [],
   isSettingSyncEnabled: (settings, settingKey) => !settings.syncServerSettingsExcluded.includes(settingKey),
+  settingWritesSettled: () => null,
   deepCopy: structuredClone,
 })
 vm.runInContext(source

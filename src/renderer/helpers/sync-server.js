@@ -27,7 +27,7 @@ import {
   isSessionExpiredError,
   syncServerResponseErrorMessage,
 } from './sync-server-errors'
-import { getSyncableSettingKeys, isSettingSyncEnabled } from '../store/modules/settings'
+import { getSyncableSettingKeys, isSettingSyncEnabled, settingWritesSettled } from '../store/modules/settings'
 import { deepCopy } from './utils'
 import { replaceCustomThemes } from './customTheme'
 import { repairSystemThemeSettings } from './customThemeSync'
@@ -1632,6 +1632,9 @@ export async function syncSessions(client, store, previous = null, { accountClie
 // as the server has them.
 export async function syncSettings(client, store, previousSnapshot = {}, playlistSnapshot = null) {
   const remoteEntries = await client.getSettings()
+  // Optimistic edits show their value before saving its edit time. Wait for
+  // them, then read the local settings without awaiting anything in between.
+  for (let pending = settingWritesSettled(); pending; pending = settingWritesSettled()) await pending
   // Migrate the last synced snapshot too, so local edits made before the first sync keep their edit time.
   const previous = migrateLegacySyncedSettings(previousSnapshot)
   const remote = migrateLegacySyncedSettings(Object.fromEntries(remoteEntries.map(entry => [entry.key, entry])))
