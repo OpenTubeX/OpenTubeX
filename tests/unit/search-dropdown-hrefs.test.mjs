@@ -63,9 +63,10 @@ test('URLs and handles resolve once through getYoutubeUrlInfo', async () => {
   assert.equal(f.getSearchResultHref(url), undefined)
   assert.equal(f.getSearchResultHref(url), undefined, 'a pending link is not requested again')
   f.getSearchResultHref('@handle')
-  assert.deepEqual(f.dispatched, [url, '@handle'])
+  f.getSearchResultHref('@日本語チャンネル')
+  assert.deepEqual(f.dispatched, [url, '@handle', '@日本語チャンネル'])
 
   await new Promise(resolve => setImmediate(resolve))
   assert.equal(f.getSearchResultHref(url), '#/watch/dQw4w9WgXcQ')
-  assert.equal(f.dispatched.length, 2)
+  assert.equal(f.dispatched.length, 3)
 })

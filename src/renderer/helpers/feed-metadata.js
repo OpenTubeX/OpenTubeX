@@ -1,7 +1,7 @@
-export const CHANNEL_HANDLE_REGEX = /^@[\w.-]{3,30}$/
+/** A handle as typed: 3 to 30 letters and digits from any script, `_`, `-`, `.`, and `·`. */
+export const CHANNEL_HANDLE_REGEX = /^@[\p{L}\p{M}\p{N}_.·-]{3,30}$/u
 
 /**
- * Handles can use letters from any script, unlike {@link CHANNEL_HANDLE_REGEX}.
  * Servers can send any text in their handle fields, so only handles are kept.
  * @param {unknown} value
  * @returns {string | null} the handle including its leading `@`
