@@ -579,6 +579,9 @@ export default defineComponent({
       /** @type {(() => Promise<import('youtubei.js').YT.VideoInfo | null>) | null} */
       refreshVisionOsStreams: null,
       visionOsStreamsRefreshPending: false,
+      /** @type {(() => Promise<import('youtubei.js').Misc.Format[]>) | null} */
+      loadWebLegacyFormats: null,
+      formatSelectionGeneration: 0,
       currentPlaybackRate: null,
       currentVideoQuality: null,
       /** @type {boolean|null} */
@@ -1146,7 +1149,11 @@ export default defineComponent({
       return this.manifestSrc !== null
     },
     legacyFormatAvailable: function () {
-      return !this.isLive && !this.isPostLiveDvr && this.legacyFormats.length > 0
+      return !this.isLive && !this.isPostLiveDvr && (this.legacyFormats.length > 0 || this.webLegacyFormatsLoadable)
+    },
+    /** visionOS's streams have no legacy formats, so the WEB ones load when they are needed */
+    webLegacyFormatsLoadable: function () {
+      return this.loadWebLegacyFormats !== null && this.activePlaybackEngine === 'built-in' && !this.localFilePlayback
     },
     audioFormatAvailable: function () {
       if (this.manifestSrc === null) {
@@ -2713,6 +2720,7 @@ export default defineComponent({
       this.streamingDataExpiryDate = null
       this.refreshVisionOsStreams = null
       this.visionOsStreamsRefreshPending = false
+      this.loadWebLegacyFormats = null
       this.ipBlockDetectedInCurrentChain = false
       // Cleared until the new player reports its ready state; otherwise the
       // manual save actions could persist the previous video's values.
@@ -4122,6 +4130,7 @@ export default defineComponent({
               this.manifestSrc = manifestSrc
               this.manifestMimeType = MANIFEST_TYPE_DASH
               this.refreshVisionOsStreams = videoInfo.refreshVisionOsStreams ?? null
+              this.loadWebLegacyFormats = videoInfo.loadLegacyFormats ?? null
             } else {
               // Neither a SABR streaming URL nor playable adaptive format URLs,
               // so the only thing left is the 360p legacy stream. This is a
@@ -5560,6 +5569,8 @@ export default defineComponent({
     },
 
     handleFormatChange: function (format) {
+      // Supersedes a legacy selection that is still loading, also when the format stays
+      this.formatSelectionGeneration++
       switch (format) {
         case 'dash':
           this.enableDashFormat()
@@ -5734,12 +5745,45 @@ export default defineComponent({
       this.activeFormat = 'dash'
     },
 
-    enableLegacyFormat: function () {
+    /**
+     * @returns {Promise<boolean>} whether the legacy formats are loaded, `false` for a superseded load
+     */
+    prepareLegacyFormats: async function () {
+      if (this.legacyFormats.length > 0) return true
+      if (!this.webLegacyFormatsLoadable) return false
+
+      const load = this.loadWebLegacyFormats
+      const loadGeneration = this.videoLoadGeneration
+      const videoId = this.videoId
+      try {
+        const formats = await load()
+        if (!this.isCurrentVideoLoad(loadGeneration, videoId) || this.loadWebLegacyFormats !== load || !this.webLegacyFormatsLoadable) {
+          return false
+        }
+        this.legacyFormats = formats.map(mapLocalLegacyFormat)
+        return this.legacyFormats.length > 0
+      } catch (error) {
+        console.error(`Could not load the legacy formats of ${videoId}`, error)
+        return false
+      }
+    },
+
+    enableLegacyFormat: async function () {
       if (this.activeFormat === 'legacy') {
         return
       }
 
-      if (!this.legacyFormatAvailable) {
+      const loadGeneration = this.videoLoadGeneration
+      const videoId = this.videoId
+      const activeFormat = this.activeFormat
+      const formatSelectionGeneration = this.formatSelectionGeneration
+      const sourceKey = this.playbackSourceKey
+      const legacyFormatsReady = this.legacyFormatAvailable && await this.prepareLegacyFormats()
+      // Another video, format or source was chosen while the legacy formats loaded
+      if (!this.isCurrentVideoLoad(loadGeneration, videoId) || this.activeFormat !== activeFormat ||
+        this.formatSelectionGeneration !== formatSelectionGeneration || sourceKey !== this.playbackSourceKey) return
+
+      if (!legacyFormatsReady) {
         showToast({
           message: this.t('Change Format.Legacy formats are not available for this video'),
           icon: ['fas', 'circle-exclamation'],
@@ -6139,6 +6183,11 @@ export default defineComponent({
         this.showStreamRecoveryNotice(`${this.t('Video.Reloading video after streaming URL error')}: [BAD_HTTP_STATUS: 403] YouTube watch session expired`)
         this.manifestSrc = manifestSrc
         this.streamingDataExpiryDate = videoInfo.streaming_data.expires
+        // The WEB legacy formats expired with the old streams, and the new expiry would hide that
+        if (this.loadWebLegacyFormats !== null) {
+          this.loadWebLegacyFormats = null
+          this.legacyFormats = []
+        }
         this.playbackSourceKey++
         console.warn(`Loaded fresh visionOS streams for ${videoId} after its streams expired`)
         return true
@@ -6508,8 +6557,19 @@ export default defineComponent({
         // stream must never silently turn into audio-only playback.
 
         switch (this.activeFormat) {
-          case 'dash':
-            if (this.legacyFormats.length > 0) {
+          case 'dash': {
+            const loadGeneration = this.videoLoadGeneration
+            const videoId = this.videoId
+            const player = this.$refs.player
+            const sourceKey = this.playbackSourceKey
+            const formatSelectionGeneration = this.formatSelectionGeneration
+            const legacyFormatsReady = await this.prepareLegacyFormats()
+            // A source or format picked meanwhile, such as yt-dlp, a downloaded file or DASH again, replaces the failed one
+            if (!this.isCurrentVideoLoad(loadGeneration, videoId) || this.activeFormat !== 'dash' ||
+              player !== this.$refs.player || sourceKey !== this.playbackSourceKey ||
+              formatSelectionGeneration !== this.formatSelectionGeneration) return
+
+            if (legacyFormatsReady) {
               console.error('Unable to play DASH formats. Reverting to legacy formats...')
               this.showStreamRecoveryNotice(this.t('Video.Player.Stream Recovery.Legacy Fallback', { error: errorLabel }))
               this.enableLegacyFormat()
@@ -6517,6 +6577,7 @@ export default defineComponent({
               await stopPlaybackRecovery()
             }
             break
+          }
           case 'legacy':
             await stopPlaybackRecovery()
             break
