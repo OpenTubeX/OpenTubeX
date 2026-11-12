@@ -332,6 +332,8 @@ Settings:
     Sign-In Failed: "无法登录：{error}"
     Signed In As: "已以 {name} 的身份登录 YouTube"
     Signed Out: "已退出 YouTube 账号"
+    Sign Out Failed: "无法退出登录：{error}"
+    Revoke Failed: "已退出 YouTube，但 Google 未确认登录已结束。你可以在 Google 账号的第三方关联中将其移除。"
     Signed out by YouTube: "YouTube 已终止登录。请在设置中重新登录以继续使用你的账号。"
     Subscribe on YouTube: "同时在 YouTube 上订阅"
     Add to YouTube Watch History: "将观看过的视频添加到 YouTube 历史记录"

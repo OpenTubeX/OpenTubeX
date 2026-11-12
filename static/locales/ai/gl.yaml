@@ -337,6 +337,8 @@ Settings:
     Sign-In Failed: "Non se puido iniciar sesión: {error}"
     Signed In As: "Sesión iniciada en YouTube como {name}"
     Signed Out: "Pechouse a sesión de YouTube"
+    Sign Out Failed: "Non se puido pechar a sesión: {error}"
+    Revoke Failed: "Pechaches a sesión de YouTube, pero Google non confirmou que o inicio de sesión rematase. Podes quitalo nas conexións con terceiros da túa conta de Google."
     Signed out by YouTube: "YouTube pechou a sesión. Volve iniciar sesión en Axustes para seguir usando a túa conta."
     Subscribe on YouTube: "Subscribirse tamén en YouTube"
     Add to YouTube Watch History: "Engadir os vídeos vistos ao historial de YouTube"

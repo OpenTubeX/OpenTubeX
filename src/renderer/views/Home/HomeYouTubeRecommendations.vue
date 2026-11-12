@@ -15,6 +15,13 @@
         :icon="['fas', 'sync']"
         @click="load()"
       />
+      <!-- Later pages can have videos that are not hidden. -->
+      <FtButton
+        v-else-if="continuation"
+        :label="t('Subscriptions.Load More Videos')"
+        :icon="['fas', 'angle-down']"
+        @click="load(continuation)"
+      />
     </div>
     <template v-else>
       <FtAutoGrid
@@ -64,6 +71,7 @@ import store from '../../store/index'
 import { getYouTubeAccountRecommendations } from '../../helpers/api/youtube-account'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { isBlurredByBlockLists } from '../../helpers/blockedItems'
+import { getYouTubeChannelKey } from '../../helpers/youtube-account-state'
 
 const { t } = useI18n()
 
@@ -134,7 +142,7 @@ async function load(token = null) {
 
 onMounted(() => load())
 // Another channel has its own recommendations.
-watch(() => store.getters.getYouTubeAccount?.pageId, () => {
+watch(() => getYouTubeChannelKey(store.getters.getYouTubeAccount), () => {
   allVideos.value = []
   continuation.value = null
   load()

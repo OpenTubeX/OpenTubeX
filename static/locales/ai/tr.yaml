@@ -332,6 +332,8 @@ Settings:
     Sign-In Failed: "Oturum açılamadı: {error}"
     Signed In As: "YouTube'da {name} olarak oturum açıldı"
     Signed Out: "YouTube oturumu kapatıldı"
+    Sign Out Failed: "Oturum kapatılamadı: {error}"
+    Revoke Failed: "YouTube oturumu kapatıldı, ancak Google oturumun sonlandığını onaylamadı. Bunu Google Hesabınızın üçüncü taraf bağlantılarından kaldırabilirsiniz."
     Signed out by YouTube: "YouTube oturumu sonlandırdı. Hesabınızı kullanmaya devam etmek için Ayarlar'da yeniden oturum açın."
     Subscribe on YouTube: "YouTube'da da abone ol"
     Add to YouTube Watch History: "İzlenen videoları YouTube geçmişine ekle"

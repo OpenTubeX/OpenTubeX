@@ -171,6 +171,8 @@ Settings:
     Sign-In Failed: "Nie udało się zalogować: {error}"
     Signed In As: "Zalogowano na YouTube jako {name}"
     Signed Out: "Wylogowano z YouTube"
+    Sign Out Failed: "Nie udało się wylogować: {error}"
+    Revoke Failed: "Wylogowano z YouTube, ale Google nie potwierdził zakończenia logowania. Możesz je usunąć w połączeniach z aplikacjami innych firm na swoim koncie Google."
     Signed out by YouTube: "YouTube zakończył logowanie. Zaloguj się ponownie w Ustawieniach, aby dalej korzystać ze swojego konta."
     Subscribe on YouTube: "Subskrybuj także na YouTube"
     Add to YouTube Watch History: "Dodawaj obejrzane filmy do historii YouTube"

@@ -332,6 +332,8 @@ Settings:
     Sign-In Failed: "Impossibile accedere: {error}"
     Signed In As: "Accesso a YouTube effettuato come {name}"
     Signed Out: "Disconnessione da YouTube effettuata"
+    Sign Out Failed: "Impossibile uscire: {error}"
+    Revoke Failed: "Uscita da YouTube completata, ma Google non ha confermato la fine dell'accesso. Puoi rimuoverlo nelle connessioni di terze parti del tuo account Google."
     Signed out by YouTube: "YouTube ha chiuso la sessione. Accedi di nuovo nelle Impostazioni per continuare a usare il tuo account."
     Subscribe on YouTube: "Iscriviti anche su YouTube"
     Add to YouTube Watch History: "Aggiungi i video guardati alla cronologia di YouTube"

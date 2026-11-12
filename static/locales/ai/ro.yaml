@@ -333,6 +333,8 @@ Settings:
     Sign-In Failed: "Conectarea nu a reușit: {error}"
     Signed In As: "V-ați conectat la YouTube ca {name}"
     Signed Out: "V-ați deconectat de la YouTube"
+    Sign Out Failed: "Deconectarea nu a reușit: {error}"
+    Revoke Failed: "V-ați deconectat de la YouTube, dar Google nu a confirmat încheierea conectării. O puteți elimina din conexiunile terță parte ale contului Google."
     Signed out by YouTube: "YouTube a încheiat conectarea. Conectați-vă din nou din Setări pentru a continua să folosiți contul."
     Subscribe on YouTube: "Abonați-vă și pe YouTube"
     Add to YouTube Watch History: "Adăugați videoclipurile vizionate în istoricul YouTube"

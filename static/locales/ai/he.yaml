@@ -337,6 +337,8 @@ Settings:
     Sign-In Failed: "לא ניתן להיכנס: {error}"
     Signed In As: "הכניסה ל־YouTube בוצעה בתור {name}"
     Signed Out: "היציאה מ־YouTube בוצעה"
+    Sign Out Failed: "היציאה נכשלה: {error}"
+    Revoke Failed: "היציאה מ-YouTube בוצעה, אך Google לא אישרה שהכניסה הסתיימה. אפשר להסיר אותה בחיבורים לצד שלישי בחשבון Google."
     Signed out by YouTube: "YouTube סיים את הכניסה לחשבון. יש להיכנס שוב בהגדרות כדי להמשיך להשתמש בחשבון."
     Subscribe on YouTube: "הרשמה למינוי גם ב־YouTube"
     Add to YouTube Watch History: "הוספת סרטונים שנצפו להיסטוריה ב־YouTube"

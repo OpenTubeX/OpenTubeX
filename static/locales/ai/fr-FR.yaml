@@ -332,6 +332,8 @@ Settings:
     Sign-In Failed: "Impossible de se connecter : {error}"
     Signed In As: "Connecté à YouTube en tant que {name}"
     Signed Out: "Déconnecté de YouTube"
+    Sign Out Failed: "Impossible de se déconnecter : {error}"
+    Revoke Failed: "Déconnexion de YouTube effectuée, mais Google n'a pas confirmé la fin de la connexion. Vous pouvez la supprimer dans les connexions tierces de votre compte Google."
     Signed out by YouTube: "YouTube a mis fin à la connexion. Reconnectez-vous dans les paramètres pour continuer à utiliser votre compte."
     Subscribe on YouTube: "S’abonner aussi sur YouTube"
     Add to YouTube Watch History: "Ajouter les vidéos regardées à l’historique YouTube"

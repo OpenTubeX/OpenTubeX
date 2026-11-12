@@ -159,16 +159,30 @@ onMounted(() => {
 })
 
 async function signOut() {
-  await signOutOfYouTubeAccount()
-  showToast({ message: t('Settings.YouTube Account Settings.Signed Out'), icon: ['fas', 'right-from-bracket'] })
+  try {
+    const revoked = await signOutOfYouTubeAccount()
+    showToast({
+      message: revoked ? t('Settings.YouTube Account Settings.Signed Out') : t('Settings.YouTube Account Settings.Revoke Failed'),
+      icon: ['fas', 'right-from-bracket']
+    })
+  } catch (error) {
+    console.error(error)
+    showToast({
+      message: t('Settings.YouTube Account Settings.Sign Out Failed', { error: error?.message ?? String(error) }),
+      icon: ERROR_TOAST_ICON
+    })
+  }
 }
 
 async function importSubscriptions() {
   importing.value = true
   // The profile active when the import started, even if the user switches meanwhile.
   const profileIds = new Set([MAIN_PROFILE_ID, store.getters.getActiveProfile._id])
+  const refreshToken = account.value?.credentials.refresh_token
   try {
     const channels = await getYouTubeAccountSubscriptions()
+    // Signed out, or into another account, meanwhile.
+    if (account.value?.credentials.refresh_token !== refreshToken) return
     if (channels.length === 0) {
       showToast({ message: t('Settings.YouTube Account Settings.No Subscriptions to Import'), icon: ['fas', 'subscriptions'] })
       return

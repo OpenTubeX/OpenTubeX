@@ -332,6 +332,8 @@ Settings:
     Sign-In Failed: "Sisselogimine nurjus: {error}"
     Signed In As: "Logitud YouTube'i sisse kasutajana {name}"
     Signed Out: "YouTube'ist välja logitud"
+    Sign Out Failed: "Väljalogimine ebaõnnestus: {error}"
+    Revoke Failed: "Logisid YouTube'ist välja, kuid Google ei kinnitanud, et sisselogimine lõppes. Saad selle eemaldada oma Google'i konto kolmandate osapoolte ühenduste alt."
     Signed out by YouTube: "YouTube lõpetas sisselogimise. Konto kasutamise jätkamiseks logi seadistustes uuesti sisse."
     Subscribe on YouTube: "Telli ka YouTube'is"
     Add to YouTube Watch History: "Lisa vaadatud videod YouTube'i ajalukku"

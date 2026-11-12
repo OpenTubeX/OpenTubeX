@@ -355,6 +355,8 @@ Settings:
     Sign-In Failed: "Не ўдалося ўвайсці: {error}"
     Signed In As: "Вы ўвайшлі ў YouTube як {name}"
     Signed Out: "Вы выйшлі з YouTube"
+    Sign Out Failed: "Не ўдалося выйсці: {error}"
+    Revoke Failed: "Вы выйшлі з YouTube, але Google не пацвердзіў, што сеанс завершаны. Яго можна выдаліць у раздзеле падключэнняў старонніх праграм ва ўліковым запісе Google."
     Signed out by YouTube: "YouTube завяршыў сеанс. Увайдзіце зноў у Наладах, каб і далей карыстацца ўліковым запісам."
     Subscribe on YouTube: "Падпісвацца таксама на YouTube"
     Add to YouTube Watch History: "Дадаваць прагледжаныя відэа ў гісторыю YouTube"

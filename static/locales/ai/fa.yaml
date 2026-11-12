@@ -356,6 +356,8 @@ Settings:
     Sign-In Failed: "ورود ممکن نشد: {error}"
     Signed In As: "با نام {name} وارد YouTube شدید"
     Signed Out: "از YouTube خارج شدید"
+    Sign Out Failed: "خروج ممکن نشد: {error}"
+    Revoke Failed: "از YouTube خارج شدید، اما Google پایان ورود را تأیید نکرد. می‌توانید آن را از بخش اتصال‌های شخص ثالث در حساب Google خود حذف کنید."
     Signed out by YouTube: "YouTube ورود شما را پایان داد. برای ادامهٔ استفاده از حساب خود، دوباره از تنظیمات وارد شوید."
     Subscribe on YouTube: "اشتراک همزمان در YouTube"
     Add to YouTube Watch History: "افزودن ویدیوهای تماشاشده به تاریخچهٔ YouTube"

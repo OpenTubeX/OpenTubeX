@@ -332,6 +332,8 @@ Settings:
     Sign-In Failed: "Ezin izan da saioa hasi: {error}"
     Signed In As: "YouTube-n saioa hasita {name} gisa"
     Signed Out: "YouTube-ko saioa amaitu da"
+    Sign Out Failed: "Ezin izan da saioa amaitu: {error}"
+    Revoke Failed: "YouTube-ko saioa amaitu da, baina Google-k ez du berretsi saioa amaitu denik. Zure Google kontuko hirugarrenen konexioetan ken dezakezu."
     Signed out by YouTube: "YouTube-k saioa amaitu du. Hasi saioa berriro Ezarpenetan zure kontua erabiltzen jarraitzeko."
     Subscribe on YouTube: "Harpidetu YouTube-n ere"
     Add to YouTube Watch History: "Gehitu ikusitako bideoak YouTube-ko historikora"

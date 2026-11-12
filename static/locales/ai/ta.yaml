@@ -345,6 +345,8 @@ Settings:
     Sign-In Failed: "உள்நுழைய முடியவில்லை: {error}"
     Signed In As: "{name} ஆக YouTube இல் உள்நுழைந்துள்ளீர்கள்"
     Signed Out: "YouTube இலிருந்து வெளியேறினீர்கள்"
+    Sign Out Failed: "வெளியேற முடியவில்லை: {error}"
+    Revoke Failed: "YouTube இலிருந்து வெளியேறிவிட்டீர்கள், ஆனால் உள்நுழைவு முடிந்ததை Google உறுதிப்படுத்தவில்லை. உங்கள் Google கணக்கின் மூன்றாம் தரப்பு இணைப்புகளில் அதை அகற்றலாம்."
     Signed out by YouTube: "YouTube உள்நுழைவை முடித்துவிட்டது. உங்கள் கணக்கைத் தொடர்ந்து பயன்படுத்த அமைப்புகளில் மீண்டும் உள்நுழையவும்."
     Subscribe on YouTube: "YouTube இலும் குழுசேர்"
     Add to YouTube Watch History: "பார்த்த வீடியோக்களை YouTube வரலாற்றில் சேர்"

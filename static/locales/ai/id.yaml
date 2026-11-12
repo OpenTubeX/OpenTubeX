@@ -333,6 +333,8 @@ Settings:
     Sign-In Failed: "Tidak dapat masuk: {error}"
     Signed In As: "Masuk ke YouTube sebagai {name}"
     Signed Out: "Keluar dari YouTube"
+    Sign Out Failed: "Tidak dapat keluar: {error}"
+    Revoke Failed: "Anda telah keluar dari YouTube, tetapi Google tidak mengonfirmasi bahwa sesi masuk telah berakhir. Anda dapat menghapusnya di koneksi pihak ketiga pada Akun Google Anda."
     Signed out by YouTube: "YouTube mengakhiri sesi masuk. Masuk lagi di Pengaturan untuk terus menggunakan akun Anda."
     Subscribe on YouTube: "Juga berlangganan di YouTube"
     Add to YouTube Watch History: "Tambahkan video yang ditonton ke riwayat YouTube"

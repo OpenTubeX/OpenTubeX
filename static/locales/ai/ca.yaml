@@ -469,6 +469,8 @@ Settings:
     Sign-In Failed: "No s'ha pogut iniciar la sessió: {error}"
     Signed In As: "Has iniciat la sessió a YouTube com a {name}"
     Signed Out: "Has tancat la sessió de YouTube"
+    Sign Out Failed: "No s'ha pogut tancar la sessió: {error}"
+    Revoke Failed: "S'ha tancat la sessió de YouTube, però Google no ha confirmat que l'inici de sessió hagi acabat. Pots eliminar-lo a les connexions amb tercers del teu compte de Google."
     Signed out by YouTube: "YouTube ha tancat la sessió. Torna a iniciar la sessió a la Configuració per continuar utilitzant el teu compte."
     Subscribe on YouTube: "Subscriu-te també a YouTube"
     Add to YouTube Watch History: "Afegeix els vídeos vistos a l'historial de YouTube"

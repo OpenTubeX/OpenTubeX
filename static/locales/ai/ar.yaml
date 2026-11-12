@@ -337,6 +337,8 @@ Settings:
     Sign-In Failed: "تعذّر تسجيل الدخول: {error}"
     Signed In As: "تم تسجيل الدخول إلى YouTube باسم {name}"
     Signed Out: "تم تسجيل الخروج من YouTube"
+    Sign Out Failed: "تعذّر تسجيل الخروج: {error}"
+    Revoke Failed: "تم تسجيل الخروج من YouTube، لكن Google لم تؤكد إنهاء تسجيل الدخول. يمكنك إزالته من اتصالات الجهات الخارجية في حسابك على Google."
     Signed out by YouTube: "أنهى YouTube تسجيل الدخول. سجّل الدخول مجددًا من الإعدادات لمواصلة استخدام حسابك."
     Subscribe on YouTube: "الاشتراك على YouTube أيضًا"
     Add to YouTube Watch History: "إضافة مقاطع الفيديو التي تمت مشاهدتها إلى سجلّ YouTube"

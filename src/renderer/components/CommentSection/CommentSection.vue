@@ -684,7 +684,7 @@ import CommentImageAttachment from './CommentImageAttachment.vue'
 
 import store from '../../store/index'
 import { usesInvidiousApi } from '../../../apiBackends'
-import { isSignedInToYouTube } from '../../helpers/youtube-account-state'
+import { getYouTubeChannelKey, isSignedInToYouTube } from '../../helpers/youtube-account-state'
 import { createPostedComment, getRootCommentId, youTubeCommentsKey } from './youTubeComments'
 
 import { debounce, getInvidiousApiErrorMessage, showInvidiousFallbackToast, copyToClipboard, formatViewCount, getRelativeTimeFromDate, showApiErrorToast, showToast } from '../../helpers/utils'
@@ -801,6 +801,9 @@ const nextPageToken = shallowRef(null)
 const commentData = ref([])
 const commentCount = ref(props.initialCommentCount)
 
+// Comments deleted here, for reply lists that were loading meanwhile.
+const deletedCommentIds = new Set()
+
 // The signed-in YouTube account can rate, write and delete video comments.
 const youTubeComments = {
   enabled: computed(() => !props.isPostComments && !props.offline && !props.commentsDisabled &&
@@ -833,6 +836,7 @@ const youTubeComments = {
     thread.showReplies = true
   },
   removeComment(commentId) {
+    deletedCommentIds.add(commentId)
     const rootId = getRootCommentId(commentId)
     if (rootId === commentId) {
       commentData.value = commentData.value.filter(comment => comment.id !== commentId)
@@ -856,7 +860,7 @@ watch(youTubeComments.replyingTo, () => clampCommentsScrollAfterRender())
 const canUseYouTubeComments = youTubeComments.enabled
 const youTubeReplyingTo = youTubeComments.replyingTo
 // Separate sources, so a token refresh that replaces the account keeps drafts.
-watch([() => props.id, () => store.getters.getYouTubeAccount?.pageId], () => {
+watch([() => props.id, () => getYouTubeChannelKey(store.getters.getYouTubeAccount)], () => {
   youTubeComments.replyingTo.value = null
   youTubeComments.ratings.clear()
 })
@@ -885,13 +889,15 @@ function addReplyToPinnedSnapshot(parentId, reply) {
 
 /**
  * Replies posted here before the thread's replies loaded come back from
- * YouTube, so their loaded versions replace them.
+ * YouTube, so their loaded versions replace them. Replies deleted while
+ * loading stay removed.
  * @param {Comment[]} replies
  * @param {Comment[]} loadedReplies
  */
 function mergeReplies(replies, loadedReplies) {
   const loadedIds = new Set(loadedReplies.map(reply => reply.id))
-  return replies.filter(reply => !loadedIds.has(reply.id)).concat(loadedReplies)
+  return replies.filter(reply => !loadedIds.has(reply.id))
+    .concat(loadedReplies.filter(reply => !deletedCommentIds.has(reply.id)))
 }
 
 /**

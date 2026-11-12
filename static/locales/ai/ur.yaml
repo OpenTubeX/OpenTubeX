@@ -383,6 +383,8 @@ Settings:
     Sign-In Failed: "سائن ان نہیں ہو سکا: {error}"
     Signed In As: "YouTube میں {name} کے طور پر سائن ان ہو گیا"
     Signed Out: "YouTube سے سائن آؤٹ ہو گیا"
+    Sign Out Failed: "سائن آؤٹ نہیں ہو سکا: {error}"
+    Revoke Failed: "YouTube سے سائن آؤٹ ہو گیا، لیکن Google نے سائن ان ختم ہونے کی تصدیق نہیں کی۔ آپ اسے اپنے Google اکاؤنٹ میں تھرڈ پارٹی کنکشنز سے ہٹا سکتے ہیں۔"
     Signed out by YouTube: "YouTube نے سائن ان ختم کر دیا۔ اپنا اکاؤنٹ استعمال جاری رکھنے کے لیے سیٹنگز میں دوبارہ سائن ان کریں۔"
     Subscribe on YouTube: "YouTube پر بھی سبسکرائب کریں"
     Add to YouTube Watch History: "دیکھی گئی ویڈیوز کو YouTube ہسٹری میں شامل کریں"

@@ -78,6 +78,7 @@ import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import store from '../../store/index'
 import { ERROR_TOAST_ICON, formatViewCount, showToast } from '../../helpers/utils'
 import { performYouTubeCommentAction } from '../../helpers/api/youtube-account'
+import { getYouTubeChannelKey } from '../../helpers/youtube-account-state'
 import { youTubeCommentsKey } from './youTubeComments'
 
 const props = defineProps({
@@ -100,8 +101,8 @@ const showDeletePrompt = ref(false)
 // Ratings go out one at a time, in the order they were clicked.
 let pendingRating = Promise.resolve()
 let pendingRatings = 0
-// The rating YouTube has, which a failed rating returns to.
-let confirmedRating = 'INDIFFERENT'
+// The rating YouTube has, which a failed rating returns to, and its channel.
+let confirmed = { channelKey: null, rating: 'INDIFFERENT' }
 
 /** @param {'LIKE' | 'DISLIKE'} type */
 function rate(type) {
@@ -109,21 +110,22 @@ function rate(type) {
   const videoId = comments.videoId.value
   const previous = rating.value
   const next = previous === type ? 'INDIFFERENT' : type
-  if (pendingRatings === 0) confirmedRating = previous
+  const channelKey = getYouTubeChannelKey(store.getters.getYouTubeAccount)
+  const sameChannel = () => getYouTubeChannelKey(store.getters.getYouTubeAccount) === channelKey
+  // Another channel's rating from earlier clicks does not apply.
+  if (pendingRatings === 0 || confirmed.channelKey !== channelKey) confirmed = { channelKey, rating: previous }
   setRating(commentId, next)
 
   // Liking replaces a dislike and the reverse, like on YouTube.
   const action = next === 'LIKE' ? 'like' : next === 'DISLIKE' ? 'dislike' : previous === 'LIKE' ? 'unlike' : 'undislike'
-  const pageId = store.getters.getYouTubeAccount?.pageId ?? null
-  const samePage = () => (store.getters.getYouTubeAccount?.pageId ?? null) === pageId
   pendingRatings++
   pendingRating = pendingRating.then(async () => {
     try {
-      // Switching channels before an earlier rating finished drops this one,
-      // so it cannot rate as the other channel.
-      if (!samePage()) return
+      // Switching channels or accounts before an earlier rating finished
+      // drops this one, so it cannot rate as the other channel.
+      if (!sameChannel()) return
       await performYouTubeCommentAction(action, commentId, videoId)
-      confirmedRating = next
+      if (sameChannel()) confirmed = { channelKey, rating: next }
     } catch (error) {
       console.error(error)
       showToast({
@@ -133,7 +135,7 @@ function rate(type) {
     } finally {
       pendingRatings--
       // Once every click went out, show the rating YouTube has.
-      if (pendingRatings === 0 && samePage()) setRating(commentId, confirmedRating)
+      if (pendingRatings === 0 && sameChannel()) setRating(commentId, confirmed.rating)
     }
   })
 }

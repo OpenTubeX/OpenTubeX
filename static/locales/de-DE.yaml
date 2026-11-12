@@ -427,6 +427,8 @@ Settings:
     Sign-In Failed: "Anmeldung fehlgeschlagen: {error}"
     Signed In As: "Bei YouTube angemeldet als {name}"
     Signed Out: "Von YouTube abgemeldet"
+    Sign Out Failed: "Abmeldung fehlgeschlagen: {error}"
+    Revoke Failed: "Von YouTube abgemeldet, aber Google hat nicht bestätigt, dass die Anmeldung beendet wurde. Du kannst sie in deinem Google-Konto unter den Verbindungen zu Drittanbieter-Apps entfernen."
     Signed out by YouTube: "YouTube hat die Anmeldung beendet. Melde dich in den Einstellungen erneut an, um dein Konto weiter zu nutzen."
     Subscribe on YouTube: "Auch auf YouTube abonnieren"
     Add to YouTube Watch History: "Angesehene Videos zum YouTube-Verlauf hinzufügen"

@@ -292,6 +292,8 @@ Settings:
     Sign-In Failed: "No se ha podido iniciar sesión: {error}"
     Signed In As: "Has iniciado sesión en YouTube como {name}"
     Signed Out: "Has cerrado sesión en YouTube"
+    Sign Out Failed: "No se ha podido cerrar la sesión: {error}"
+    Revoke Failed: "Has cerrado la sesión de YouTube, pero Google no ha confirmado que el inicio de sesión haya terminado. Puedes quitarlo en las conexiones con terceros de tu cuenta de Google."
     Signed out by YouTube: "YouTube ha cerrado la sesión. Vuelve a iniciar sesión en Configuración para seguir usando tu cuenta."
     Subscribe on YouTube: "Suscribirse también en YouTube"
     Add to YouTube Watch History: "Añadir los vídeos vistos al historial de YouTube"

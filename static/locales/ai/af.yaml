@@ -494,6 +494,8 @@ Settings:
     Sign-In Failed: "Kon nie aanmeld nie: {error}"
     Signed In As: "By YouTube aangemeld as {name}"
     Signed Out: "Van YouTube afgemeld"
+    Sign Out Failed: "Kon nie afmeld nie: {error}"
+    Revoke Failed: "Van YouTube afgemeld, maar Google het nie bevestig dat die aanmelding beëindig is nie. U kan dit onder derdeparty-verbindings in u Google-rekening verwyder."
     Signed out by YouTube: "YouTube het die aanmelding beëindig. Meld weer in Instellings aan om u rekening verder te gebruik."
     Subscribe on YouTube: "Teken ook op YouTube in"
     Add to YouTube Watch History: "Voeg gekykte video’s by YouTube-geskiedenis"

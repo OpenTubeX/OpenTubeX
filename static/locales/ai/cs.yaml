@@ -332,6 +332,8 @@ Settings:
     Sign-In Failed: "Nepodařilo se přihlásit: {error}"
     Signed In As: "Přihlášeno do YouTube jako {name}"
     Signed Out: "Odhlášeno z YouTube"
+    Sign Out Failed: "Odhlášení se nezdařilo: {error}"
+    Revoke Failed: "Odhlášení z YouTube proběhlo, ale Google nepotvrdil ukončení přihlášení. Můžete ho odebrat v propojeních s aplikacemi třetích stran ve svém účtu Google."
     Signed out by YouTube: "YouTube ukončil přihlášení. Chcete-li účet dál používat, přihlaste se znovu v Nastavení."
     Subscribe on YouTube: "Odebírat také na YouTube"
     Add to YouTube Watch History: "Přidávat zhlédnutá videa do historie YouTube"

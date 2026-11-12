@@ -451,6 +451,8 @@ Settings:
     Sign-In Failed: "Nepavyko prisijungti: {error}"
     Signed In As: "Prisijungta prie YouTube kaip {name}"
     Signed Out: "Atsijungta nuo YouTube"
+    Sign Out Failed: "Nepavyko atsijungti: {error}"
+    Revoke Failed: "Atsijungta nuo YouTube, bet Google nepatvirtino, kad prisijungimas baigtas. Jį galite pašalinti savo Google paskyros trečiųjų šalių ryšiuose."
     Signed out by YouTube: "YouTube nutraukė prisijungimą. Prisijunkite iš naujo nustatymuose, kad galėtumėte toliau naudoti savo paskyrą."
     Subscribe on YouTube: "Prenumeruoti ir YouTube"
     Add to YouTube Watch History: "Įtraukti žiūrėtus vaizdo įrašus į YouTube istoriją"

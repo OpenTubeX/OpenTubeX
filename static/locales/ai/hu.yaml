@@ -332,6 +332,8 @@ Settings:
     Sign-In Failed: "Nem sikerült bejelentkezni: {error}"
     Signed In As: "Bejelentkezve a YouTube-ra {name} néven"
     Signed Out: "Kijelentkezve a YouTube-ról"
+    Sign Out Failed: "Nem sikerült kijelentkezni: {error}"
+    Revoke Failed: "Kijelentkezett a YouTube-ról, de a Google nem erősítette meg, hogy a bejelentkezés megszűnt. Eltávolíthatja a Google-fiókja harmadik féltől származó kapcsolatai között."
     Signed out by YouTube: "A YouTube megszüntette a bejelentkezést. Jelentkezzen be újra a Beállításokban, hogy továbbra is használhassa fiókját."
     Subscribe on YouTube: "Feliratkozás a YouTube-on is"
     Add to YouTube Watch History: "Megtekintett videók hozzáadása a YouTube-előzményekhez"

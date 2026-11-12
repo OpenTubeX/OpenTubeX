@@ -461,6 +461,8 @@ Settings:
     Sign-In Failed: "Prijava ni uspela: {error}"
     Signed In As: "V storitev YouTube ste prijavljeni kot {name}"
     Signed Out: "Odjavljeni ste iz storitve YouTube"
+    Sign Out Failed: "Odjava ni uspela: {error}"
+    Revoke Failed: "Odjava iz YouTuba je uspela, vendar Google ni potrdil, da je prijava končana. Odstranite jo lahko med povezavami z drugimi ponudniki v svojem Google Računu."
     Signed out by YouTube: "YouTube je končal prijavo. Za nadaljnjo uporabo računa se znova prijavite v nastavitvah."
     Subscribe on YouTube: "Naroči se tudi v storitvi YouTube"
     Add to YouTube Watch History: "Dodaj ogledane videoposnetke v zgodovino storitve YouTube"

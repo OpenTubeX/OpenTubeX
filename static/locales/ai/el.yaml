@@ -332,6 +332,8 @@ Settings:
     Sign-In Failed: "Δεν ήταν δυνατή η σύνδεση: {error}"
     Signed In As: "Συνδεθήκατε στο YouTube ως {name}"
     Signed Out: "Αποσυνδεθήκατε από το YouTube"
+    Sign Out Failed: "Δεν ήταν δυνατή η αποσύνδεση: {error}"
+    Revoke Failed: "Αποσυνδεθήκατε από το YouTube, αλλά η Google δεν επιβεβαίωσε ότι η σύνδεση τερματίστηκε. Μπορείτε να την αφαιρέσετε από τις συνδέσεις τρίτων στον λογαριασμό σας Google."
     Signed out by YouTube: "Το YouTube τερμάτισε τη σύνδεση. Συνδεθείτε ξανά από τις Ρυθμίσεις για να συνεχίσετε να χρησιμοποιείτε τον λογαριασμό σας."
     Subscribe on YouTube: "Εγγραφή και στο YouTube"
     Add to YouTube Watch History: "Προσθήκη των βίντεο που παρακολουθήσατε στο ιστορικό του YouTube"

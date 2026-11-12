@@ -332,6 +332,8 @@ Settings:
     Sign-In Failed: "Không thể đăng nhập: {error}"
     Signed In As: "Đã đăng nhập YouTube với tên {name}"
     Signed Out: "Đã đăng xuất khỏi YouTube"
+    Sign Out Failed: "Không thể đăng xuất: {error}"
+    Revoke Failed: "Đã đăng xuất khỏi YouTube, nhưng Google chưa xác nhận rằng phiên đăng nhập đã kết thúc. Bạn có thể xóa phiên này trong mục kết nối với bên thứ ba của Tài khoản Google."
     Signed out by YouTube: "YouTube đã kết thúc phiên đăng nhập. Hãy đăng nhập lại trong Cài đặt để tiếp tục dùng tài khoản của bạn."
     Subscribe on YouTube: "Đăng ký cả trên YouTube"
     Add to YouTube Watch History: "Thêm video đã xem vào lịch sử YouTube"

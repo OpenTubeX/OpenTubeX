@@ -345,6 +345,8 @@ Settings:
     Sign-In Failed: "Klarte ikkje å logge inn: {error}"
     Signed In As: "Logga inn på YouTube som {name}"
     Signed Out: "Logga ut av YouTube"
+    Sign Out Failed: "Kunne ikkje logge ut: {error}"
+    Revoke Failed: "Logga ut av YouTube, men Google stadfesta ikkje at innlogginga vart avslutta. Du kan fjerne ho under tredjepartstilkoplingar i Google-kontoen din."
     Signed out by YouTube: "YouTube avslutta innlogginga. Logg inn att i innstillingane for å halde fram med å bruke kontoen din."
     Subscribe on YouTube: "Abonner òg på YouTube"
     Add to YouTube Watch History: "Legg sette videoar til i YouTube-historikken"

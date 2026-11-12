@@ -426,6 +426,8 @@ Settings:
     Sign-In Failed: "로그인할 수 없습니다: {error}"
     Signed In As: "{name}(으)로 YouTube에 로그인했습니다"
     Signed Out: "YouTube에서 로그아웃했습니다"
+    Sign Out Failed: "로그아웃할 수 없습니다: {error}"
+    Revoke Failed: "YouTube에서 로그아웃했지만 Google에서 로그인 종료를 확인하지 않았습니다. Google 계정의 서드 파티 연결에서 삭제할 수 있습니다."
     Signed out by YouTube: "YouTube에서 로그인을 종료했습니다. 계정을 계속 사용하려면 설정에서 다시 로그인하세요."
     Subscribe on YouTube: "YouTube에서도 구독"
     Add to YouTube Watch History: "시청한 동영상을 YouTube 기록에 추가"

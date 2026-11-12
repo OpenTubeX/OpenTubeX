@@ -333,6 +333,8 @@ Settings:
     Sign-In Failed: "Methu mewngofnodi: {error}"
     Signed In As: "Wedi mewngofnodi i YouTube fel {name}"
     Signed Out: "Wedi allgofnodi o YouTube"
+    Sign Out Failed: "Methu allgofnodi: {error}"
+    Revoke Failed: "Wedi allgofnodi o YouTube, ond ni chadarnhaodd Google fod y mewngofnodi wedi dod i ben. Gallwch ei dynnu o'r cysylltiadau trydydd parti yn eich cyfrif Google."
     Signed out by YouTube: "Daeth YouTube â'r mewngofnodi i ben. Mewngofnodwch eto yn y Gosodiadau i barhau i ddefnyddio'ch cyfrif."
     Subscribe on YouTube: "Tanysgrifio ar YouTube hefyd"
     Add to YouTube Watch History: "Ychwanegu fideos a wyliwyd at hanes YouTube"

@@ -337,6 +337,8 @@ Settings:
     Sign-In Failed: "Kan niet inloggen: {error}"
     Signed In As: "Ingelogd bij YouTube als {name}"
     Signed Out: "Uitgelogd bij YouTube"
+    Sign Out Failed: "Kan niet afmelden: {error}"
+    Revoke Failed: "Afgemeld bij YouTube, maar Google heeft niet bevestigd dat de aanmelding is beëindigd. U kunt deze verwijderen bij de verbindingen met derden in uw Google-account."
     Signed out by YouTube: "YouTube heeft de aanmelding beëindigd. Log opnieuw in via Instellingen om uw account te blijven gebruiken."
     Subscribe on YouTube: "Ook op YouTube abonneren"
     Add to YouTube Watch History: "Bekeken video's toevoegen aan de YouTube-geschiedenis"

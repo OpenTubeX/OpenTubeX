@@ -332,6 +332,8 @@ Settings:
     Sign-In Failed: "Ekki tókst að skrá inn: {error}"
     Signed In As: "Innskráning á YouTube sem {name}"
     Signed Out: "Skráð út af YouTube"
+    Sign Out Failed: "Ekki tókst að skrá út: {error}"
+    Revoke Failed: "Útskráning af YouTube tókst, en Google staðfesti ekki að innskráningunni væri lokið. Þú getur fjarlægt hana undir tengingum þriðju aðila á Google-reikningnum þínum."
     Signed out by YouTube: "YouTube batt enda á innskráninguna. Skráðu þig aftur inn í stillingum til að halda áfram að nota reikninginn þinn."
     Subscribe on YouTube: "Gerast líka áskrifandi á YouTube"
     Add to YouTube Watch History: "Bæta áhorfðum myndskeiðum við YouTube-feril"

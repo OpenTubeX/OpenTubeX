@@ -335,6 +335,8 @@ Settings:
     Sign-In Failed: "Неуспешен вход: {error}"
     Signed In As: "Влязохте в YouTube като {name}"
     Signed Out: "Излязохте от YouTube"
+    Sign Out Failed: "Излизането не бе успешно: {error}"
+    Revoke Failed: "Излязохте от YouTube, но Google не потвърди, че входът е прекратен. Можете да го премахнете от връзките с трети страни в профила си в Google."
     Signed out by YouTube: "YouTube прекрати входа. Влезте отново от Настройки, за да продължите да използвате профила си."
     Subscribe on YouTube: "Абониране и в YouTube"
     Add to YouTube Watch History: "Добавяне на гледаните видеа към историята в YouTube"

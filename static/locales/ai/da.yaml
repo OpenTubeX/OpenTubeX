@@ -343,6 +343,8 @@ Settings:
     Sign-In Failed: "Kunne ikke logge ind: {error}"
     Signed In As: "Logget ind på YouTube som {name}"
     Signed Out: "Logget ud af YouTube"
+    Sign Out Failed: "Kunne ikke logge ud: {error}"
+    Revoke Failed: "Logget ud af YouTube, men Google bekræftede ikke, at login blev afsluttet. Du kan fjerne det under tredjepartsforbindelser på din Google-konto."
     Signed out by YouTube: "YouTube har afsluttet login. Log ind igen i Indstillinger for at fortsætte med at bruge din konto."
     Subscribe on YouTube: "Abonnér også på YouTube"
     Add to YouTube Watch History: "Føj sete videoer til YouTube-historikken"

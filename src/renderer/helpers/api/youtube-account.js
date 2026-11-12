@@ -5,7 +5,7 @@ import i18n from '../../i18n/index'
 import { ERROR_TOAST_ICON, showToast } from '../utils'
 import { getLocalSignatureTimestamp, localApiFetch } from './local'
 import { YOUTUBE_USER_AGENT_HEADER, YOUTUBE_USER_AGENTS } from '../../../youTubeUserAgent.js'
-import { getSelectedYouTubeProfile, isSignedInToYouTube } from '../youtube-account-state.js'
+import { getSelectedYouTubeProfile, getYouTubeChannelKey, isSignedInToYouTube } from '../youtube-account-state.js'
 import {
   commentActionParams,
   createCommentParams,
@@ -253,17 +253,23 @@ async function getCredentials() {
 }
 
 /**
- * Runs the callback as the channel in use.
+ * Runs the callback as the channel in use when called.
  * @template T
  * @param {(innertube: Innertube) => Promise<T>} callback
- * @param {{ userAgent?: keyof typeof YOUTUBE_USER_AGENTS, pageId?: string | null }} [options]
- *   `pageId` keeps the channel that started a longer operation
+ * @param {{ userAgent?: keyof typeof YOUTUBE_USER_AGENTS, account?: YouTubeAccount | null }} [options]
+ *   `account` keeps the sign-in and channel that started a longer operation
  * @returns {Promise<T>}
  */
 async function withAccount(callback, options = {}) {
+  // Taken before waiting, so a channel switch meanwhile does not apply.
+  const account = options.account === undefined ? getAccount() : options.account
   const credentials = await getCredentials()
-  const pageId = options.pageId === undefined ? (getAccount()?.pageId ?? null) : options.pageId
-  return await callback(await createAccountInnertube(credentials, { ...options, pageId }))
+  // Signed out, or into another account, while waiting.
+  if (!account || credentials.refresh_token !== account.credentials.refresh_token ||
+    getAccount()?.credentials.refresh_token !== account.credentials.refresh_token) {
+    throw new Error('Not signed in to the YouTube account that started this')
+  }
+  return await callback(await createAccountInnertube(credentials, { userAgent: options.userAgent, pageId: account.pageId ?? null }))
 }
 
 /**
@@ -397,7 +403,14 @@ export async function completeYouTubeSignIn(code, signal) {
     const profile = profiles.find(entry => entry.pageId === selectedPageId) ?? profiles[0]
     const channelId = await resolveChannelId(credentials, profile)
     signal.throwIfAborted()
-    await store.dispatch('updateYouTubeAccount', { credentials, profiles, pageId: profile.pageId, channelId })
+    // Each sign-in asks again before changing the account's subscriptions or history.
+    const saved = await store.dispatch('updateYouTubeAccountMirrorSubscriptions', false) &&
+      await store.dispatch('updateYouTubeAccountWatchHistory', false) &&
+      await store.dispatch('updateYouTubeAccount', { credentials, profiles, pageId: profile.pageId, channelId })
+    if (!saved) {
+      await revokeSignIn(credentials.refresh_token)
+      throw new Error('Could not save the YouTube account on this device')
+    }
     return
   }
 
@@ -442,19 +455,34 @@ export async function selectYouTubeProfile(pageId) {
   await store.dispatch('updateYouTubeAccount', { ...latest, pageId, channelId })
 }
 
-/** Signs out on this device and revokes the sign-in at Google. */
-export async function signOutOfYouTubeAccount() {
-  const account = getAccount()
-  if (!account) return
-  signedOutRefreshTokens.add(account.credentials.refresh_token)
-  await store.dispatch('updateYouTubeAccount', null)
-
+/**
+ * @param {string} refreshToken
+ * @returns {Promise<boolean>} whether Google confirmed it
+ */
+async function revokeSignIn(refreshToken) {
   try {
     // Revoking the refresh token also ends its access tokens.
-    await localApiFetch(`${REVOKE_URL}?token=${encodeURIComponent(account.credentials.refresh_token)}`, { method: 'POST' })
+    const response = await localApiFetch(`${REVOKE_URL}?token=${encodeURIComponent(refreshToken)}`, { method: 'POST' })
+    return response.ok
   } catch (error) {
     console.warn('Could not revoke the YouTube account sign-in', error)
+    return false
   }
+}
+
+/**
+ * Signs out on this device and revokes the sign-in at Google.
+ * @returns {Promise<boolean>} whether Google confirmed the revocation
+ */
+export async function signOutOfYouTubeAccount() {
+  // Also a sign-out whose removal was not saved, so trying again works.
+  if (!isSignedInToYouTube(store.getters)) return true
+  const refreshToken = store.getters.getYouTubeAccount.credentials.refresh_token
+  signedOutRefreshTokens.add(refreshToken)
+  const removed = await store.dispatch('updateYouTubeAccount', null)
+  const revoked = await revokeSignIn(refreshToken)
+  if (!removed) throw new Error('Could not remove the YouTube account from this device')
+  return revoked
 }
 
 /**
@@ -505,22 +533,23 @@ export function mirrorYouTubeSubscription(channelIds, subscribed) {
 
   // Changes go out in the order they were made, so a quick unsubscribe
   // cannot finish before the subscribe it undoes.
-  const pageId = getAccount().pageId
-  mirrorQueue = mirrorQueue.then(() => sendMirroredSubscriptions(youTubeChannelIds, subscribed, pageId))
+  const account = getAccount()
+  mirrorQueue = mirrorQueue.then(() => sendMirroredSubscriptions(youTubeChannelIds, subscribed, account))
   return mirrorQueue
 }
 
 /**
  * @param {string[]} youTubeChannelIds
  * @param {boolean} subscribed
- * @param {string | null} pageId the channel in use when the change was made
+ * @param {YouTubeAccount} account the sign-in and channel in use when the change was made
  */
-async function sendMirroredSubscriptions(youTubeChannelIds, subscribed, pageId) {
+async function sendMirroredSubscriptions(youTubeChannelIds, subscribed, account) {
+  const channelKey = getYouTubeChannelKey(account)
   try {
     // One at a time, and stop at the first failure instead of repeating it.
     for (const channelId of youTubeChannelIds) {
-      // After a channel switch, the rest would change the other channel.
-      if (getAccount()?.pageId !== pageId) return
+      // After a channel switch or sign-out, the rest would change another channel.
+      if (getYouTubeChannelKey(getAccount()) !== channelKey) return
       if (subscribed) {
         await subscribeOnYouTube(channelId)
       } else {
@@ -562,9 +591,9 @@ export async function getYouTubeAccountRecommendations(continuation = null) {
  * @param {string} videoId
  * @param {string} text
  * @param {string} [parentCommentId] posts a reply to this top-level comment
- * @param {string | null} [pageId] posts as this channel instead of the one in use
+ * @param {YouTubeAccount | null} [account] posts as this sign-in and channel instead of the ones in use
  */
-export async function postYouTubeComment(videoId, text, parentCommentId, pageId) {
+export async function postYouTubeComment(videoId, text, parentCommentId, account) {
   return await withAccount(async innertube => {
     const response = parentCommentId
       ? await innertube.actions.execute('/comment/create_comment_reply', {
@@ -576,7 +605,7 @@ export async function postYouTubeComment(videoId, text, parentCommentId, pageId)
           commentText: text
         })
     return parseCreatedComment(response.data)
-  }, { pageId })
+  }, { account })
 }
 
 /**
@@ -606,7 +635,8 @@ let signatureTimestamp = null
 export async function addToYouTubeWatchHistory(videoId) {
   // The history belongs to the channel that started playback, even if the
   // user switches channels while this runs.
-  const pageId = getAccount()?.pageId ?? null
+  const account = getAccount()
+  const pageId = account?.pageId ?? null
 
   // An older player's timestamp keeps working for days.
   signatureTimestamp ??= getLocalSignatureTimestamp().catch(error => {
@@ -644,5 +674,5 @@ export async function addToYouTubeWatchHistory(videoId) {
       }
     })
     if (!ping.ok) throw new Error(`YouTube did not add the video to the watch history: ${ping.status}`)
-  }, { userAgent: 'tizen', pageId })
+  }, { userAgent: 'tizen', account })
 }

@@ -776,6 +776,45 @@ test.describe('manual comment loading', () => {
     await expect(commentLikes).toHaveText('0')
   })
 
+  test('drops a queued comment rating after signing in to another account', async ({ app, page }) => {
+    const signIn = name => page.evaluate(name => window.$store.dispatch('updateYouTubeAccount', {
+      credentials: { access_token: `${name}-access`, refresh_token: `${name}-refresh`, expiry_date: new Date(Date.now() + 3_600_000).toISOString(), client: { client_id: 'id', client_secret: 'secret' } },
+      profiles: [{ name, handle: null, thumbnail: null, pageId: null }],
+      pageId: null,
+      channelId: null
+    }), name)
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await signIn('first')
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+    const requests = []
+    const { promise: firstRatingHeld, resolve: releaseFirstRating } = Promise.withResolvers()
+    await page.route(/\/youtubei\/v1\/comment\/perform_comment_action/, async (route, request) => {
+      requests.push({ authorization: request.headers().authorization, action: JSON.parse(request.postData()).actions[0] })
+      if (requests.length === 1) await firstRatingHeld
+      return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ actionResults: [{ status: 'STATUS_SUCCEEDED' }] }) })
+    })
+
+    const like = page.locator('.commentAccountAction[aria-pressed]').first()
+    await like.click()
+    await expect.poll(() => requests.length).toBe(1)
+    // The unlike waits behind the first like, and both accounts use the
+    // Google account's own channel.
+    await like.click()
+    await signIn('second')
+    releaseFirstRating()
+
+    // Ratings go out in order, so the unlike would have gone before this like.
+    await like.click()
+    await expect.poll(() => requests.some(entry => entry.authorization === 'Bearer second-access' && entry.action === requests[0].action)).toBe(true)
+    expect(requests.map(entry => entry.authorization)).toEqual(['Bearer first-access', 'Bearer second-access'])
+  })
+
   test.describe('comment filtering at 125% UI scale', () => {
     test.use({
       seed: {

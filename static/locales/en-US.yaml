@@ -624,6 +624,8 @@ Settings:
     Sign-In Failed: "Could not sign in: {error}"
     Signed In As: "Signed in to YouTube as {name}"
     Signed Out: "Signed out of YouTube"
+    Sign Out Failed: "Could not sign out: {error}"
+    Revoke Failed: "Signed out of YouTube, but Google did not confirm that the sign-in ended. You can remove it under third-party connections in your Google account."
     Signed out by YouTube: "YouTube ended the sign-in. Sign in again in Settings to keep using your account."
     Subscribe on YouTube: "Subscribe on YouTube too"
     Add to YouTube Watch History: "Add watched videos to YouTube history"

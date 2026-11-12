@@ -332,6 +332,8 @@ Settings:
     Sign-In Failed: "ログインできませんでした: {error}"
     Signed In As: "{name} として YouTube にログインしました"
     Signed Out: "YouTube からログアウトしました"
+    Sign Out Failed: "ログアウトできませんでした: {error}"
+    Revoke Failed: "YouTube からログアウトしましたが、Google はログインの終了を確認しませんでした。Google アカウントのサードパーティとの接続から削除できます。"
     Signed out by YouTube: "YouTube によってログインが終了されました。アカウントを引き続き使用するには、設定から再度ログインしてください。"
     Subscribe on YouTube: "YouTube でもチャンネル登録する"
     Add to YouTube Watch History: "視聴した動画を YouTube の履歴に追加する"

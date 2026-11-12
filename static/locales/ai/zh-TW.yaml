@@ -332,6 +332,8 @@ Settings:
     Sign-In Failed: "無法登入：{error}"
     Signed In As: "已用 {name} 的身分登入 YouTube"
     Signed Out: "已登出 YouTube"
+    Sign Out Failed: "無法登出：{error}"
+    Revoke Failed: "已登出 YouTube，但 Google 未確認登入已結束。您可以在 Google 帳戶的第三方連結中將其移除。"
     Signed out by YouTube: "YouTube 已結束登入。請在設定中重新登入，以繼續使用您的帳戶。"
     Subscribe on YouTube: "同時在 YouTube 上訂閱"
     Add to YouTube Watch History: "將看過的影片加入 YouTube 觀看紀錄"

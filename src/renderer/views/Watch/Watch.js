@@ -58,7 +58,7 @@ import { clampOverlayScrollTop, isOverlayScrollTopOutOfBounds, restoreOverlayScr
 import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
 import { liveReminder, supportsLiveReminders } from '../../helpers/liveReminders'
 import { withThumbnail } from '../../helpers/notificationHistory'
-import { isSignedInToYouTube } from '../../helpers/youtube-account-state'
+import { getYouTubeChannelKey, isSignedInToYouTube } from '../../helpers/youtube-account-state'
 import { addToYouTubeWatchHistory } from '../../helpers/api/youtube-account'
 import { DOWNLOADED_MEDIA_MIME_TYPES } from '../../../constants'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
@@ -5233,8 +5233,8 @@ export default defineComponent({
     },
     // Like YouTube's apps, once playback starts, not when a video only loads.
     addToYouTubeWatchHistory() {
-      // Each channel of the account has its own history.
-      const key = `${this.videoId}:${this.$store.getters.getYouTubeAccount?.pageId ?? ''}`
+      // Each channel and sign-in has its own history.
+      const key = `${this.videoId}\n${getYouTubeChannelKey(this.$store.getters.getYouTubeAccount)}`
       if (this.youTubeHistoryKey === key || this.localFilePlayback || this.isOffline ||
         !isSignedInToYouTube(this.$store.getters) || !this.$store.getters.getYouTubeAccountWatchHistory) {
         return

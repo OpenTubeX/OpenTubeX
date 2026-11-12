@@ -369,6 +369,8 @@ Settings:
     Sign-In Failed: "Ne eblis ensaluti: {error}"
     Signed In As: "Ensalutinta al YouTube kiel {name}"
     Signed Out: "Elsalutinta el YouTube"
+    Sign Out Failed: "Ne eblis elsaluti: {error}"
+    Revoke Failed: "Vi elsalutis el YouTube, sed Google ne konfirmis, ke la ensaluto finiĝis. Vi povas forigi ĝin inter la konektoj al eksteraj aplikaĵoj en via Google-konto."
     Signed out by YouTube: "YouTube finis la ensaluton. Ensalutu denove en Agordoj por plu uzi vian konton."
     Subscribe on YouTube: "Aboni ankaŭ ĉe YouTube"
     Add to YouTube Watch History: "Aldoni spektitajn videaĵojn al la YouTube-historio"

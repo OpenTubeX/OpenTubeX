@@ -335,6 +335,8 @@ Settings:
     Sign-In Failed: "Prijava nije uspjela: {error}"
     Signed In As: "Prijavljeno na YouTube kao {name}"
     Signed Out: "Odjavljeno s YouTubea"
+    Sign Out Failed: "Odjava nije uspjela: {error}"
+    Revoke Failed: "Odjava s YouTubea je uspjela, ali Google nije potvrdio da je prijava prekinuta. Možeš je ukloniti u vezama s trećim stranama na svom Google računu."
     Signed out by YouTube: "YouTube je prekinuo prijavu. Ponovno se prijavi u postavkama za daljnje korištenje računa."
     Subscribe on YouTube: "Pretplati se i na YouTubeu"
     Add to YouTube Watch History: "Dodaj gledane videozapise u YouTube povijest"

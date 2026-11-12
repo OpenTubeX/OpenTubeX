@@ -80,7 +80,7 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
 import { ERROR_TOAST_ICON, formatNumber, showToast } from '../../helpers/utils'
-import { isSignedInToYouTube } from '../../helpers/youtube-account-state'
+import { getYouTubeChannelKey, isSignedInToYouTube } from '../../helpers/youtube-account-state'
 import { getYouTubeVideoRating, rateYouTubeVideo } from '../../helpers/api/youtube-account'
 import store from '../../store'
 
@@ -129,7 +129,7 @@ let confirmedRating = 'INDIFFERENT'
 
 // Each channel of the account has its own rating. Separate sources, so a
 // token refresh that replaces the account does not reload it.
-watch([() => props.videoId, canRate, () => store.getters.getYouTubeAccount?.pageId], async ([videoId, signedIn]) => {
+watch([() => props.videoId, canRate, () => getYouTubeChannelKey(store.getters.getYouTubeAccount)], async ([videoId, signedIn]) => {
   const load = ++ratingLoad
   rating.value = null
   loadedRating.value = null
@@ -160,13 +160,13 @@ function rate(type) {
   rating.value = next
 
   const load = ratingLoad
-  const pageId = store.getters.getYouTubeAccount?.pageId ?? null
+  const channelKey = getYouTubeChannelKey(store.getters.getYouTubeAccount)
   pendingRatings++
   pendingRating = pendingRating.then(async () => {
     try {
-      // Switching channels before an earlier rating finished drops this one,
-      // so it cannot rate as the other channel.
-      if ((store.getters.getYouTubeAccount?.pageId ?? null) !== pageId) return
+      // Switching channels or accounts before an earlier rating finished
+      // drops this one, so it cannot rate as the other channel.
+      if (getYouTubeChannelKey(store.getters.getYouTubeAccount) !== channelKey) return
       await rateYouTubeVideo(videoId, next)
       if (load === ratingLoad) confirmedRating = next
     } catch (error) {

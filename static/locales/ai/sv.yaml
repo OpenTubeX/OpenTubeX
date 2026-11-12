@@ -332,6 +332,8 @@ Settings:
     Sign-In Failed: "Det gick inte att logga in: {error}"
     Signed In As: "Inloggad på YouTube som {name}"
     Signed Out: "Utloggad från YouTube"
+    Sign Out Failed: "Det gick inte att logga ut: {error}"
+    Revoke Failed: "Utloggad från YouTube, men Google bekräftade inte att inloggningen avslutades. Du kan ta bort den under tredjepartsanslutningar i ditt Google-konto."
     Signed out by YouTube: "YouTube avslutade inloggningen. Logga in igen i Inställningar för att fortsätta använda ditt konto."
     Subscribe on YouTube: "Prenumerera även på YouTube"
     Add to YouTube Watch History: "Lägg till sedda videor i YouTube-historiken"

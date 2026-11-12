@@ -334,6 +334,8 @@ Settings:
     Sign-In Failed: "Daxil olmaq mümkün olmadı: {error}"
     Signed In As: "YouTube-a {name} kimi daxil olundu"
     Signed Out: "YouTube-dan çıxış edildi"
+    Sign Out Failed: "Çıxış etmək mümkün olmadı: {error}"
+    Revoke Failed: "YouTube-dan çıxış edildi, lakin Google girişin sonlandırıldığını təsdiqləmədi. Onu Google hesabınızda üçüncü tərəf bağlantıları bölməsindən silə bilərsiniz."
     Signed out by YouTube: "YouTube girişi sonlandırdı. Hesabınızdan istifadəyə davam etmək üçün Tənzimləmələrdə yenidən daxil olun."
     Subscribe on YouTube: "YouTube-da da abunə ol"
     Add to YouTube Watch History: "Baxılan videoları YouTube tarixçəsinə əlavə et"
