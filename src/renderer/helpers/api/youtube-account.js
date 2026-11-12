@@ -256,12 +256,13 @@ async function getCredentials() {
  * Runs the callback as the channel in use.
  * @template T
  * @param {(innertube: Innertube) => Promise<T>} callback
- * @param {{ userAgent?: keyof typeof YOUTUBE_USER_AGENTS }} [options]
+ * @param {{ userAgent?: keyof typeof YOUTUBE_USER_AGENTS, pageId?: string | null }} [options]
+ *   `pageId` keeps the channel that started a longer operation
  * @returns {Promise<T>}
  */
 async function withAccount(callback, options = {}) {
   const credentials = await getCredentials()
-  const pageId = getAccount()?.pageId ?? null
+  const pageId = options.pageId === undefined ? (getAccount()?.pageId ?? null) : options.pageId
   return await callback(await createAccountInnertube(credentials, { ...options, pageId }))
 }
 
@@ -602,6 +603,10 @@ let signatureTimestamp = null
  * @param {string} videoId
  */
 export async function addToYouTubeWatchHistory(videoId) {
+  // The history belongs to the channel that started playback, even if the
+  // user switches channels while this runs.
+  const pageId = getAccount()?.pageId ?? null
+
   // An older player's timestamp keeps working for days.
   signatureTimestamp ??= getLocalSignatureTimestamp().catch(error => {
     signatureTimestamp = null
@@ -631,7 +636,6 @@ export async function addToYouTubeWatchHistory(videoId) {
       url.searchParams.set(key, value)
     }
 
-    const pageId = getAccount()?.pageId
     const ping = await localApiFetch(url, {
       headers: {
         Authorization: `Bearer ${innertube.session.oauth.oauth2_tokens.access_token}`,
@@ -639,5 +643,5 @@ export async function addToYouTubeWatchHistory(videoId) {
       }
     })
     if (!ping.ok) throw new Error(`YouTube did not add the video to the watch history: ${ping.status}`)
-  }, { userAgent: 'tizen' })
+  }, { userAgent: 'tizen', pageId })
 }
