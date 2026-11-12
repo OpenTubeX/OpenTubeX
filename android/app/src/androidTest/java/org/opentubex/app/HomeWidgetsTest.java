@@ -170,7 +170,9 @@ public class HomeWidgetsTest {
         long deadline = System.currentTimeMillis() + 45000;
         String actual = null;
         while (System.currentTimeMillis() < deadline) {
-            actual = evaluate(scenario, "!!(" + expression + ")");
+            // A starved software-GPU emulator can hold the UI thread, which
+            // delivers the reply, for longer than one evaluation's budget.
+            actual = evaluate(scenario, "!!(" + expression + ")", Math.max(15000, deadline - System.currentTimeMillis()));
             if ("true".equals(actual)) return;
             Thread.sleep(100);
         }
@@ -178,13 +180,17 @@ public class HomeWidgetsTest {
     }
 
     private static String evaluate(ActivityScenario<MainActivity> scenario, String expression) throws Exception {
+        return evaluate(scenario, expression, 15000);
+    }
+
+    private static String evaluate(ActivityScenario<MainActivity> scenario, String expression, long timeoutMs) throws Exception {
         CountDownLatch evaluated = new CountDownLatch(1);
         AtomicReference<String> result = new AtomicReference<>();
         scenario.onActivity(activity -> activity.getBridge().getWebView().evaluateJavascript(expression, value -> {
             result.set(value);
             evaluated.countDown();
         }));
-        assertTrue("WebView responded", evaluated.await(15, TimeUnit.SECONDS));
+        assertTrue("WebView responded", evaluated.await(timeoutMs, TimeUnit.MILLISECONDS));
         return result.get();
     }
 }
