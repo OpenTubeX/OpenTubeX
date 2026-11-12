@@ -75,6 +75,17 @@ jobs:
         distribution: temurin
         java-version: 21
 
+    # Maven Central sometimes fails a download, which fails the whole shard, so
+    # reuse the Gradle distribution and dependencies of earlier runs.
+    - name: Cache Gradle dependencies
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        key: ${{ format('gradle-{0}-{1}-{2}', runner.os, runner.arch, hashFiles('android/**/*.gradle', 'android/gradle/wrapper/gradle-wrapper.properties', 'pnpm-lock.yaml')) }}
+        restore-keys: ${{ format('gradle-{0}-{1}-', runner.os, runner.arch) }}
+        path: |
+          ~/.gradle/caches/modules-2
+          ~/.gradle/wrapper
+
     - name: Set up Android SDK
       uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
       with:
