@@ -820,7 +820,10 @@ const youTubeComments = {
     }
 
     const thread = commentData.value.find(entry => entry.id === parentId)
-    if (!thread) return
+    if (!thread) {
+      addReplyToPinnedSnapshot(parentId, comment)
+      return
+    }
     // A new list, so the cached reply tree is rebuilt.
     thread.replies = [...thread.replies, comment]
     thread.numReplies++
@@ -854,6 +857,28 @@ watch([() => props.id, () => store.getters.getYouTubeAccount?.pageId], () => {
   youTubeComments.replyingTo.value = null
   youTubeComments.ratings.clear()
 })
+
+/**
+ * A personally pinned thread can show from its saved snapshot when it is not
+ * on the loaded pages, so a reply to it goes into the snapshot.
+ * @param {string} parentId
+ * @param {Comment} reply
+ */
+function addReplyToPinnedSnapshot(parentId, reply) {
+  const snapshot = personalPinnedCommentSnapshots.value.find(comment => comment.id === parentId)
+  if (!snapshot) return
+
+  const updated = createCommentPinSnapshot({
+    ...snapshot,
+    replies: [...snapshot.replies, reply],
+    numReplies: (snapshot.numReplies ?? 0) + 1,
+    showReplies: true
+  })
+  const commentIds = new Set(personalPinnedCommentIds.value)
+  const commentSnapshots = personalPinnedCommentSnapshots.value.map(comment => comment.id === parentId ? updated : comment)
+  personalPinnedCommentSnapshots.value = commentSnapshots
+  saveCommentPins(commentPinStorageKey.value, { commentIds, commentSnapshots })
+}
 
 /**
  * Replies posted here before the thread's replies loaded come back from
