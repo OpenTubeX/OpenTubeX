@@ -8,7 +8,7 @@ import { migrateStoredSettings } from '../../src/datastores/settingsMigrations.j
 import { createScheduledBackups } from '../../src/main/scheduledBackups.js'
 import { createBackupArchiveFactory } from '../../src/main/backupArchive.js'
 import { readUnifiedBackup } from '../../src/renderer/helpers/unifiedBackup.js'
-import { NON_TRANSFERABLE_SETTINGS } from '../../src/nonTransferableSettings.js'
+import { getTransferableSettings, NON_TRANSFERABLE_SETTINGS } from '../../src/nonTransferableSettings.js'
 import { createDefaultSettings } from '../../src/settingsDefaults.js'
 
 const workerPath = new URL('../../src/main/backupArchiveWorker.js', import.meta.url)
@@ -88,6 +88,16 @@ async function setup(t) {
     backups: async () => (await readdir(directory)).filter(name => name.endsWith('.zip')).sort(),
   }
 }
+
+test('exports drop Invidious credentials however the instance URL is written', () => {
+  for (const [instance, expected] of [
+    ['https:user:pass@invidious.example', 'https:invidious.example'],
+    ['https:\\\\user:pass@invidious.example/', 'https:\\\\invidious.example/'],
+    ['https://invidious.example/watch@later', 'https://invidious.example/watch@later'],
+  ]) {
+    assert.equal(getTransferableSettings({ defaultInvidiousInstance: instance }).defaultInvidiousInstance, expected)
+  }
+})
 
 test('disabled and invalid schedules never read data or write files', async t => {
   const state = await setup(t)

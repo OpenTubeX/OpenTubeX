@@ -116,7 +116,7 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
 export function getTransferableSettings(settings) {
   const transferable = Object.fromEntries(Object.entries(settings).filter(([key]) => !NON_TRANSFERABLE_SETTINGS.has(key)))
   if (typeof transferable.defaultInvidiousInstance === 'string') {
-    transferable.defaultInvidiousInstance = transferable.defaultInvidiousInstance.trim().replace(/^([a-z][\w+.-]*:\/\/)[^/?#]*@/i, '$1')
+    transferable.defaultInvidiousInstance = transferable.defaultInvidiousInstance.trim().replace(/^([a-z][\w+.-]*:[/\\]*)[^/\\?#]*@/i, '$1')
   }
   return transferable
 }
