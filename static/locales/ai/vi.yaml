@@ -309,8 +309,7 @@ History:
   Custom: Tùy chỉnh
   History Older Than Days Removed: Đã xóa lịch sử xem cũ hơn {days} ngày
 Settings:
-  Experimental Settings:
-    Faster Subscription Refresh: "Làm mới kênh đăng ký nhanh hơn"
+  Experimental Badge: Thử nghiệm
   Diagnostics:
     Diagnostics: Chẩn đoán
     Description: Khi nhật ký chẩn đoán đang bật, OpenTubeX giữ các thông báo nhật ký gần đây trong bộ nhớ để bạn có thể đính kèm chúng vào báo cáo lỗi. Ứng dụng không bao giờ tự lưu hay gửi chúng, và tắt nhật ký sẽ xóa chúng. Báo cáo bỏ qua cookie, token, địa chỉ IP và tham số URL, nhưng có thể chứa ID của các video bạn đã phát, vì vậy hãy kiểm tra báo cáo trước khi chia sẻ.
@@ -1177,6 +1176,7 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Làm mới đăng ký khi ứng dụng đã đóng"
     Notify About New Uploads: Thông báo nội dung mới tải lên
     RSS Feeds Auto Refresh Interval: Khoảng tự động làm mới nguồn cấp RSS
+    Faster Subscription Refresh: "Làm mới kênh đăng ký nhanh hơn"
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Tính thời gian xem từ"
@@ -2295,6 +2295,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Làm mới nguồn cấp theo cài đặt đã chọn. Trên máy tính, OpenTubeX ở trong khay hệ thống cho đến khi bạn thoát. Android quyết định thời điểm làm mới trong nền."
     Notify About New Uploads: Hiện thông báo hệ thống trên thiết bị này cho các kênh mà bạn đã bật thông báo trong cài đặt đăng ký của kênh. OpenTubeX kiểm tra nội dung mới khi làm mới đăng ký, vì vậy hãy chọn khoảng thời gian tự động làm mới. Để nhận thông báo khi ứng dụng đã đóng, hãy bật thêm tùy chọn làm mới khi ứng dụng đã đóng.
     RSS Feeds Auto Refresh Interval: Tần suất OpenTubeX tự động làm mới các nguồn cấp RSS của bạn khi ứng dụng đang mở.
+    Faster Subscription Refresh: "Trước tiên kiểm tra nguồn cấp RSS của từng kênh và chỉ tải video, Shorts và sự kiện trực tiếp từ các kênh có nội dung tải lên mới. Làm mới tự động cũng bỏ qua các kênh đã tải trong 10 phút qua. Với các kênh không có nội dung mới, lượt xem, video đã xóa và tiêu đề đã thay đổi chỉ được cập nhật vài giờ một lần, và nội dung mới có thể xuất hiện muộn hơn khi nguồn cấp RSS bị chậm. Không khả dụng với API Invidious."
   Theme Settings:
     Only Show Important Notifications: Ẩn các thông báo trong ứng dụng chỉ xác nhận một thao tác hoặc báo cáo trạng thái. Lỗi, cảnh báo, lời nhắc bạn đã thiết lập và các thông báo có thao tác, chẳng hạn như Hoàn tác, vẫn hiển thị. Tiến trình của các thao tác chạy nền, chẳng hạn như làm mới kênh đăng ký, được hiển thị trên thanh tiến trình chung thay vì trong thông báo. Thông báo hệ thống không bị ảnh hưởng.
     Visible Search Suggestions: "Đặt số mục lịch sử tìm kiếm và gợi ý mà thanh tìm kiếm hiển thị trước khi danh sách của nó phải cuộn. Danh sách không bao giờ vượt quá cạnh dưới của cửa sổ."
@@ -2310,7 +2311,6 @@ Tooltips:
     Modal Backdrop: "Đặt giao diện của ứng dụng phía sau hộp thoại và menu. Hiệu ứng làm mờ có thể chậm trên thiết bị yếu hơn."
     Click Scrollbar Track to Scroll: "Nhấp vào thanh cuộn bên ngoài tay cầm sẽ cuộn khoảng một trang về phía vị trí nhấp. Khi tùy chọn này bật, thanh cuộn đang hiển thị sẽ nhận các lần nhấp dành cho các mục bên dưới nó. Thanh cuộn của thanh thẻ luôn hoạt động theo cách này."
   Experimental Settings:
-    Faster Subscription Refresh: "Trước tiên kiểm tra nguồn cấp RSS của từng kênh và chỉ tải video, Shorts và sự kiện trực tiếp từ các kênh có nội dung tải lên mới. Làm mới tự động cũng bỏ qua các kênh đã tải trong 10 phút qua. Với các kênh không có nội dung mới, lượt xem, video đã xóa và tiêu đề đã thay đổi chỉ được cập nhật vài giờ một lần, và nội dung mới có thể xuất hiện muộn hơn khi nguồn cấp RSS bị chậm. Không khả dụng với API Invidious."
     Disable Hardware Acceleration: Tắt tăng tốc phần cứng GPU. Có thể khắc phục sự cố đồ họa, nhưng có thể làm giảm hiệu suất.
   SponsorBlock Settings:
     Always Show DeArrow Badge: Giữ nút DeArrow luôn hiển thị trên video có tiêu đề hoặc ảnh thu nhỏ đã được DeArrow thay thế, thay vì chỉ khi di chuột qua.

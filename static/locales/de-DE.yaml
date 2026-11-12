@@ -1240,6 +1240,7 @@ Settings:
     RSS Feeds Auto Refresh Interval: Automatisches Aktualisierungsintervall für RSS-Feeds
     Refresh Subscriptions While App Is Closed: Abos bei geschlossener App aktualisieren
     Notify About New Uploads: Über neue Uploads benachrichtigen
+    Faster Subscription Refresh: Schnellere Abo-Aktualisierung
   Privacy Settings:
     Internet Connectivity Checks: "Internetverbindung prüfen"
     Internet Connectivity Checks Tooltip: "Prüft den Internetzugang mit kleinen Anfragen an einen von GrapheneOS gehosteten Server."
@@ -1784,7 +1785,6 @@ Settings:
     Warning: Diese Einstellungen sind experimentell und können zu Abstürzen führen, wenn sie aktiviert sind. Es wird dringend empfohlen, Backups zu erstellen. Verwendung auf eigene Gefahr!
     Replace HTTP Cache: HTTP-Cache ersetzen
     Disable Hardware Acceleration: Hardwarebeschleunigung deaktivieren
-    Faster Subscription Refresh: Schnellere Abo-Aktualisierung
   Diagnostics:
     Diagnostics: Diagnose
     Description: Solange die Diagnoseprotokollierung aktiv ist, behält OpenTubeX aktuelle Protokollmeldungen im Arbeitsspeicher, damit du sie an Fehlerberichte anhängen kannst. Es speichert oder sendet sie nie von selbst, und beim Deaktivieren werden sie gelöscht. Berichte lassen Cookies, Tokens, IP-Adressen und URL-Parameter weg, können aber IDs abgespielter Videos enthalten. Prüfe einen Bericht deshalb, bevor du ihn teilst.
@@ -1837,6 +1837,7 @@ Settings:
     Profile Selector Touch Hint: Du kannst auch lange auf das Profilsymbol tippen, um das Profil zu wechseln
   Highlight Changed Settings: Von den Standardwerten abweichende Einstellungen hervorheben
   Reset Setting to Default: Diese Einstellung auf den Standardwert zurücksetzen
+  Experimental Badge: Experimentell
   Performance Impact:
     Show Performance Impact: Hinweise zu Leistungsauswirkungen anzeigen
     Moderate: Mittlere Auswirkung
@@ -2986,6 +2987,7 @@ Tooltips:
     RSS Feeds Auto Refresh Interval: Wie oft OpenTubeX deine RSS-Feeds automatisch aktualisiert, während die App geöffnet ist.
     Refresh Subscriptions While App Is Closed: "Aktualisiert Feeds mit deinen gewählten Einstellungen. Auf dem Desktop bleibt OpenTubeX bis zum Beenden im Infobereich aktiv. Android bestimmt, wann Aktualisierungen im Hintergrund ausgeführt werden."
     Notify About New Uploads: "Zeigt auf diesem Gerät Systembenachrichtigungen für Kanäle, deren Benachrichtigungen du in ihren Abo-Einstellungen aktiviert hast. OpenTubeX sucht beim Aktualisieren der Abos nach neuen Inhalten, wähle daher ein automatisches Aktualisierungsintervall. Um auch bei geschlossener App benachrichtigt zu werden, aktiviere zusätzlich die Aktualisierung bei geschlossener App."
+    Faster Subscription Refresh: Prüft zuerst den RSS-Feed jedes Kanals und lädt Videos, Shorts und Livestreams nur von Kanälen mit neuen Uploads. Automatische Aktualisierungen überspringen außerdem Kanäle, die in den letzten 10 Minuten geladen wurden. Bei Kanälen ohne neue Uploads werden Aufrufzahlen, entfernte Videos und geänderte Titel nur alle paar Stunden aktualisiert, und neue Uploads können später erscheinen, wenn der RSS-Feed hinterherhinkt. Mit der Invidious-API nicht verfügbar.
   Player Settings:
     Enable Caption Translations: Wenn aktiviert, bevorzugen die Untertitel-Schaltfläche und das Tastenkürzel C eine automatisch übersetzte Spur in der bevorzugten Untertitelsprache, wenn das Video keine passende Originalspur bereitstellt.
     Default Media Format: Lege die Formate fest, die bei der Wiedergabe eines Videos verwendet werden. DASH-Formate können höhere Auflösungen wiedergeben. Altformate sind auf maximal 360p beschränkt, verbrauchen aber weniger Bandbreite. Audioformate sind reine Audiostreams.
@@ -3067,7 +3069,6 @@ Tooltips:
   Experimental Settings:
     Replace HTTP Cache: Deaktiviert den festplattenbasierten HTTP-Cache von Electron und aktiviert einen benutzerdefinierten In-Memory-Image-Cache. Dies führt zu einer erhöhten RAM-Auslastung.
     Disable Hardware Acceleration: Deaktiviert die GPU-Hardwarebeschleunigung. Dies kann Grafikprobleme beheben, führt jedoch wahrscheinlich zu einer geringeren Leistung.
-    Faster Subscription Refresh: Prüft zuerst den RSS-Feed jedes Kanals und lädt Videos, Shorts und Livestreams nur von Kanälen mit neuen Uploads. Automatische Aktualisierungen überspringen außerdem Kanäle, die in den letzten 10 Minuten geladen wurden. Bei Kanälen ohne neue Uploads werden Aufrufzahlen, entfernte Videos und geänderte Titel nur alle paar Stunden aktualisiert, und neue Uploads können später erscheinen, wenn der RSS-Feed hinterherhinkt. Mit der Invidious-API nicht verfügbar.
   Distraction Free Settings:
     Count Watch Time From: "„Alle Geräte“ zählt jedes Gerät, das Wiedergabestatistiken synchronisiert. „Dieses Gerät“ zählt nur, was du hier ansiehst."
     When a Limit Is Reached: "„Wiedergabe pausieren“ bietet 15 Minuten mehr oder das Ignorieren des Limits für heute an. Mit einem Einstellungspasswort lässt sich ein Limit nur in den Einstellungen erhöhen."

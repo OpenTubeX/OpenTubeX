@@ -675,6 +675,7 @@ Settings:
     Alternative providers: Video and metadata providers
   Highlight Changed Settings: Highlight settings changed from defaults
   Reset Setting to Default: Reset this setting to its default
+  Experimental Badge: Experimental
   Performance Impact:
     Show Performance Impact: Show performance impact indicators
     Moderate: Moderate impact
@@ -1727,6 +1728,7 @@ Settings:
     RSS Feeds Auto Refresh Interval: RSS Feeds Auto Refresh Interval
     Refresh Subscriptions While App Is Closed: Refresh Subscriptions While App Is Closed
     Notify About New Uploads: Notify About New Uploads
+    Faster Subscription Refresh: Faster Subscription Refresh
     'Limit the number of videos displayed for each channel': 'Limit the number of videos displayed for each channel'
     To: To
     Confirm Before Unsubscribing: Confirm Before Unsubscribing
@@ -2196,7 +2198,6 @@ Settings:
     Warning: These settings are experimental, they may cause crashes while enabled. Making backups is highly recommended. Use at your own risk!
     Replace HTTP Cache: Replace HTTP Cache
     Disable Hardware Acceleration: Disable Hardware Acceleration
-    Faster Subscription Refresh: Faster Subscription Refresh
   Diagnostics:
     Diagnostics: Diagnostics
     Description: While diagnostic logging is on, OpenTubeX keeps recent log messages in memory so you can attach them to bug reports. It never saves or sends them on its own, and turning logging off deletes them. Reports leave out cookies, tokens, IP addresses and URL parameters, but they can include IDs of videos you played, so check a report before you share it.
@@ -3418,6 +3419,7 @@ Tooltips:
     RSS Feeds Auto Refresh Interval: How often OpenTubeX automatically refreshes your RSS feeds while the app is open.
     Refresh Subscriptions While App Is Closed: "Refreshes feeds using your selected settings. On desktop, OpenTubeX stays in the system tray until you quit. Android controls when background refreshes run."
     Notify About New Uploads: "Shows system notifications on this device for channels whose notifications you turned on in their subscription settings. OpenTubeX checks for new content when subscriptions refresh, so choose an auto refresh interval. To be notified while the app is closed, also enable refreshing while the app is closed."
+    Faster Subscription Refresh: Checks each channel's RSS feed first and only loads the videos, Shorts and live streams of channels with new uploads. Automatic refreshes also skip channels loaded in the last 10 minutes. For channels without new uploads, view counts, removed videos and changed titles only update every few hours, and new uploads may appear later when the RSS feed lags behind. Not available with the Invidious API.
   Theme Settings:
     Thumbnail Size: Scales video thumbnails in grids and lists. Grids with a fixed column count or the Full Width view type fill each row instead, so there it only changes list thumbnails and Shorts. Phone-sized windows limit grid thumbnails to 100%.
     Playlist Thumbnail Size: Scales video thumbnails on playlist pages. Grids with a fixed column count or the Full Width view type fill each row instead, so there it only changes list thumbnails and Shorts. Phone-sized windows limit grid thumbnails to 100%.
@@ -3435,7 +3437,6 @@ Tooltips:
   Experimental Settings:
     Replace HTTP Cache: Disables Electron's disk based HTTP cache and enables a custom in-memory image cache. Will lead to increased RAM usage.
     Disable Hardware Acceleration: Disables GPU hardware acceleration. May fix graphical issues, but will probably perform worse.
-    Faster Subscription Refresh: Checks each channel's RSS feed first and only loads the videos, Shorts and live streams of channels with new uploads. Automatic refreshes also skip channels loaded in the last 10 minutes. For channels without new uploads, view counts, removed videos and changed titles only update every few hours, and new uploads may appear later when the RSS feed lags behind. Not available with the Invidious API.
   SponsorBlock Settings:
     UseDeArrowTitles: Replace video titles with user-submitted titles from DeArrow.
     UseDeArrowThumbnails: Replace video thumbnails with thumbnails from DeArrow.

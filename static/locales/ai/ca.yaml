@@ -446,6 +446,7 @@ History:
   Custom: Personalitzat
   History Older Than Days Removed: S'ha suprimit l'historial de reproducció anterior a 1 dia | S'ha suprimit l'historial de reproducció anterior a {days} dies | S'ha suprimit l'historial de reproducció anterior a {days} dies
 Settings:
+  Experimental Badge: Experimental
   Diagnostics:
     Diagnostics: Diagnòstic
     Description: Mentre el registre de diagnòstic està activat, OpenTubeX conserva els missatges de registre recents a la memòria perquè els pugueu adjuntar als informes d'errors. Mai no els desa ni els envia pel seu compte, i desactivar el registre els elimina. Els informes ometen galetes, testimonis, adreces IP i paràmetres d'URL, però poden incloure identificadors dels vídeos que heu reproduït, així que reviseu l'informe abans de compartir-lo.
@@ -1445,6 +1446,7 @@ Settings:
     To: A
     Confirm Before Unsubscribing: Confirma abans de donar-se de baixa
     RSS Feeds Auto Refresh Interval: Interval d'actualització automàtica dels canals RSS
+    Faster Subscription Refresh: "Actualització més ràpida de les subscripcions"
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Compta el temps de visualització de"
@@ -1830,7 +1832,6 @@ Settings:
     Hide Search Bar: Oculta la barra de cerca
     Disable Channel Links: Desactiva els enllaços dels canals
   Experimental Settings:
-    Faster Subscription Refresh: "Actualització més ràpida de les subscripcions"
     Experimental Settings: Experimental
     Warning: Aquesta configuració és experimental i pot provocar fallades mentre estigui activada. Es recomana molt fer còpies de seguretat. Utilitzeu-la sota la vostra responsabilitat.
     Replace HTTP Cache: Substitueix la memòria cau HTTP
@@ -2843,6 +2844,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Actualitza els canals amb la configuració seleccionada. A l’escriptori, OpenTubeX es manté a la safata del sistema fins que en sortiu. Android controla quan s’executen les actualitzacions en segon pla."
     Notify About New Uploads: Mostra notificacions del sistema en aquest dispositiu per als canals dels quals heu activat les notificacions a la seva configuració de subscripció. OpenTubeX cerca contingut nou quan s'actualitzen les subscripcions, així que trieu un interval d'actualització automàtica. Per rebre notificacions amb l'aplicació tancada, activeu també l'actualització amb l'aplicació tancada.
     RSS Feeds Auto Refresh Interval: Amb quina freqüència OpenTubeX actualitza automàticament els vostres canals RSS mentre l'aplicació és oberta.
+    Faster Subscription Refresh: "Primer comprova el canal RSS de cada canal i només carrega els vídeos, els Shorts i les emissions en directe dels canals amb pujades noves. Les actualitzacions automàtiques també ometen els canals carregats en els últims 10 minuts. Als canals sense pujades noves, el nombre de visualitzacions, els vídeos eliminats i els títols canviats només s'actualitzen cada poques hores, i les pujades noves poden aparèixer més tard quan el canal RSS va endarrerit. No disponible amb l'API d'Invidious."
   Theme Settings:
     Only Show Important Notifications: Amaga les notificacions de l'aplicació que només confirmen una acció o informen d'un estat. Els errors, els avisos, els recordatoris que heu configurat i les notificacions que ofereixen una acció, com ara Desfés, continuen apareixent. El progrés de les operacions en segon pla, com ara l'actualització de les subscripcions, es mostra a la barra de progrés global en lloc d'una notificació. Les notificacions del sistema no es veuen afectades.
     Visible Search Suggestions: "Defineix quantes entrades de l’historial de cerca i suggeriments mostra la barra de cerca abans que la seva llista es desplaci. La llista mai no s’estén més enllà de la part inferior de la finestra."
@@ -2858,7 +2860,6 @@ Tooltips:
     Modal Backdrop: "Defineix com es veu l’aplicació darrere dels diàlegs i els menús. El difuminat pot anar lent en dispositius menys potents."
     Click Scrollbar Track to Scroll: "En fer clic en una barra de desplaçament fora del cursor, es desplaça aproximadament una pàgina cap al clic. Mentre està activat, una barra de desplaçament visible captura els clics destinats als elements de sota. La barra de desplaçament de la barra de pestanyes sempre funciona així."
   Experimental Settings:
-    Faster Subscription Refresh: "Primer comprova el canal RSS de cada canal i només carrega els vídeos, els Shorts i les emissions en directe dels canals amb pujades noves. Les actualitzacions automàtiques també ometen els canals carregats en els últims 10 minuts. Als canals sense pujades noves, el nombre de visualitzacions, els vídeos eliminats i els títols canviats només s'actualitzen cada poques hores, i les pujades noves poden aparèixer més tard quan el canal RSS va endarrerit. No disponible amb l'API d'Invidious."
     Replace HTTP Cache: Desactiva la memòria cau HTTP al disc d'Electron i activa una memòria cau d'imatges personalitzada a la memòria. Augmentarà l'ús de RAM.
     Disable Hardware Acceleration: Desactiva l'acceleració per maquinari de la GPU. Pot resoldre problemes gràfics, però probablement reduirà el rendiment.
   SponsorBlock Settings:

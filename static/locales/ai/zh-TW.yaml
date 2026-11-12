@@ -309,8 +309,7 @@ History:
   Custom: 自訂
   History Older Than Days Removed: 已移除超過 {days} 天的觀看記錄
 Settings:
-  Experimental Settings:
-    Faster Subscription Refresh: "更快的訂閱重新整理"
+  Experimental Badge: 實驗性
   Diagnostics:
     Diagnostics: 診斷
     Description: 啟用診斷記錄後，OpenTubeX 會在記憶體中保留最近的記錄訊息，方便你將其附加到錯誤回報中。它絕不會自行儲存或傳送這些訊息，關閉記錄會將其刪除。報告不包含 Cookie、權杖、IP 位址和 URL 參數，但可能包含你播放過的影片 ID，因此分享前請檢查報告。
@@ -1177,6 +1176,7 @@ Settings:
     Refresh Subscriptions While App Is Closed: "應用程式關閉時重新整理訂閱"
     Notify About New Uploads: 新上傳通知
     RSS Feeds Auto Refresh Interval: RSS 摘要自動重新整理間隔
+    Faster Subscription Refresh: "更快的訂閱重新整理"
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "觀看時間統計範圍"
@@ -2176,8 +2176,6 @@ Description:
   Games: 遊戲
   Music: 音樂
 Tooltips:
-  Experimental Settings:
-    Faster Subscription Refresh: "先檢查每個頻道的 RSS 資訊提供，只載入有新上傳內容的頻道的影片、Shorts 和直播。自動重新整理也會略過過去 10 分鐘內載入過的頻道。對於沒有新上傳內容的頻道，觀看次數、已移除的影片和變更的標題每隔幾小時才會更新一次，而且當 RSS 資訊提供延遲時，新上傳的內容可能會較晚出現。使用 Invidious API 時無法使用。"
   General Settings:
     Built-in Streams: |
       自動模式透過 YouTube 的 visionOS 用戶端播放大多數影片，啟動更快並支援自動畫質。直播和它無法播放的影片會使用 SABR。
@@ -2289,6 +2287,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "使用所選設定重新整理訂閱。在桌面版，OpenTubeX 會留在系統匣中，直到您結束程式。Android 系統決定背景重新整理的執行時間。"
     Notify About New Uploads: 在此裝置上為你在訂閱設定中開啟了通知的頻道顯示系統通知。OpenTubeX 會在重新整理訂閱時檢查新內容，因此請選擇自動重新整理間隔。若要在應用程式關閉時也收到通知，請同時啟用應用程式關閉時重新整理訂閱。
     RSS Feeds Auto Refresh Interval: 應用程式開啟時 OpenTubeX 自動重新整理 RSS 摘要的頻率。
+    Faster Subscription Refresh: "先檢查每個頻道的 RSS 資訊提供，只載入有新上傳內容的頻道的影片、Shorts 和直播。自動重新整理也會略過過去 10 分鐘內載入過的頻道。對於沒有新上傳內容的頻道，觀看次數、已移除的影片和變更的標題每隔幾小時才會更新一次，而且當 RSS 資訊提供延遲時，新上傳的內容可能會較晚出現。使用 Invidious API 時無法使用。"
   Theme Settings:
     Only Show Important Notifications: 隱藏僅用於確認操作或回報狀態的應用程式內通知。錯誤、警告、你設定的提醒，以及提供操作（例如復原）的通知仍會顯示。背景作業（例如重新整理訂閱）的進度會顯示在全域進度列中，而不是通知中。系統通知不受影響。
     Visible Search Suggestions: "設定搜尋列在清單需要捲動之前顯示的搜尋紀錄和建議數量。清單絕不會超出視窗底部。"

@@ -471,6 +471,7 @@ History:
   Custom: Pasgemaak
   History Older Than Days Removed: Kykgeskiedenis ouer as 1 dag is verwyder | Kykgeskiedenis ouer as {days} dae is verwyder
 Settings:
+  Experimental Badge: Eksperimenteel
   Tab Unloading:
     Automatically unload tabs: Ontlaai oortjies outomaties
     Memory threshold: Geheuedrempel
@@ -1360,6 +1361,7 @@ Settings:
     Refresh Subscriptions While App Is Closed: Verfris intekeninge terwyl die toep gesluit is
     Notify About New Uploads: Stel in kennis oor nuwe oplaaie
     RSS Feeds Auto Refresh Interval: Interval vir outomatiese verfrissing van RSS-voere
+    Faster Subscription Refresh: "Vinniger verfrissing van intekeninge"
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: Tel kyktyd vanaf
@@ -1704,7 +1706,6 @@ Settings:
     Hide Uploader on Watch page: Versteek oplaaier op kykblad
     Disable Channel Links: Deaktiveer kanaalskakels
   Experimental Settings:
-    Faster Subscription Refresh: "Vinniger verfrissing van intekeninge"
     Disable Hardware Acceleration: Deaktiveer hardewareversnelling
   Diagnostics:
     Diagnostics: Diagnostiek
@@ -2535,6 +2536,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: Verfris voere met u gekose instellings. Op rekenaars bly OpenTubeX in die stelselbak totdat u dit verlaat. Android beheer wanneer agtergrondverfrissings loop.
     Notify About New Uploads: Wys stelselkennisgewings op hierdie toestel vir kanale waarvoor u kennisgewings in hul intekeninginstellings aangeskakel het. OpenTubeX kyk vir nuwe inhoud wanneer intekeninge verfris, dus kies ’n outomatiese verfrissingsinterval. Om in kennis gestel te word terwyl die toep gesluit is, aktiveer ook verfrissing terwyl die toep gesluit is.
     RSS Feeds Auto Refresh Interval: Hoe gereeld OpenTubeX jou RSS-voere outomaties verfris terwyl die toep oop is.
+    Faster Subscription Refresh: "Gaan eers elke kanaal se RSS-voer na en laai slegs die video's, Shorts en regstreekse uitsendings van kanale met nuwe oplaaisels. Outomatiese verfrissings slaan ook kanale oor wat in die afgelope 10 minute gelaai is. Vir kanale sonder nuwe oplaaisels word kyktellings, verwyderde video's en veranderde titels slegs elke paar uur bygewerk, en nuwe oplaaisels kan later verskyn wanneer die RSS-voer agterloop. Nie beskikbaar met die Invidious-API nie."
   Theme Settings:
     Only Show Important Notifications: Versteek kennisgewings in die app wat slegs 'n aksie bevestig of 'n status meld. Foute, waarskuwings, herinneringe wat jy opgestel het en kennisgewings met 'n aksie, soos Ontdoen, verskyn steeds. Agtergrondvordering, soos die verfris van intekeninge, word in die globale vorderingsbalk gewys in plaas van as 'n kennisgewing. Stelselkennisgewings word nie geraak nie.
     Thumbnail Size: Skaal videoduimnaels in roosters en lyste. Roosters met ’n vaste aantal kolomme of die aansigtipe Volle breedte vul eerder elke ry, dus verander dit daar slegs lysduimnaels en kortvideo’s. Vensters van foongrootte beperk roosterduimnaels tot 100%.
@@ -2550,7 +2552,6 @@ Tooltips:
     Modal Backdrop: "Bepaal hoe die toep agter dialoë en kieslyste lyk. Vervaging kan op minder kragtige toestelle stadig wees."
     Click Scrollbar Track to Scroll: "Klik op 'n skuifbalk buite sy handvatsel blaai omtrent een bladsy in die rigting van die klik. Terwyl dit aan is, vang 'n sigbare skuifbalk klieke op items daaronder. Die oortjiebalk se skuifbalk werk altyd so."
   Experimental Settings:
-    Faster Subscription Refresh: "Gaan eers elke kanaal se RSS-voer na en laai slegs die video's, Shorts en regstreekse uitsendings van kanale met nuwe oplaaisels. Outomatiese verfrissings slaan ook kanale oor wat in die afgelope 10 minute gelaai is. Vir kanale sonder nuwe oplaaisels word kyktellings, verwyderde video's en veranderde titels slegs elke paar uur bygewerk, en nuwe oplaaisels kan later verskyn wanneer die RSS-voer agterloop. Nie beskikbaar met die Invidious-API nie."
     Disable Hardware Acceleration: Deaktiveer GPU-hardewareversnelling. Kan grafiese probleme oplos, maar sal waarskynlik swakker presteer.
   SponsorBlock Settings:
     Always Show DeArrow Badge: Hou die DeArrow-knoppie sigbaar op video's waarvan die titel of duimnael deur DeArrow vervang is, in plaas van net wanneer die muis daaroor beweeg.

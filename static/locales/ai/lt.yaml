@@ -428,6 +428,7 @@ History:
   Custom: Pasirinktinai
   History Older Than Days Removed: Pašalinti senesni nei {days} dienos žiūrėjimo istorijos įrašai | Pašalinti senesni nei {days} dienų žiūrėjimo istorijos įrašai | Pašalinti senesni nei {days} dienų žiūrėjimo istorijos įrašai
 Settings:
+  Experimental Badge: Eksperimentinis
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Kol diagnostikos žurnalas įjungtas, OpenTubeX laiko naujausius žurnalo pranešimus atmintyje, kad galėtumėte juos pridėti prie pranešimų apie klaidas. Jis niekada jų neišsaugo ir nesiunčia pats, o išjungus žurnalą jie ištrinami. Ataskaitose nėra slapukų, prieigos raktų, IP adresų ir URL parametrų, tačiau jose gali būti jūsų paleistų vaizdo įrašų ID, todėl prieš dalindamiesi ataskaita ją peržiūrėkite.
@@ -1394,6 +1395,7 @@ Settings:
     To: Iki
     Confirm Before Unsubscribing: Klausti prieš atsisakant prenumeratos
     RSS Feeds Auto Refresh Interval: RSS sklaidos kanalų automatinio atnaujinimo intervalas
+    Faster Subscription Refresh: "Greitesnis prenumeratų atnaujinimas"
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Skaičiuoti žiūrėjimo laiką"
@@ -1764,7 +1766,6 @@ Settings:
     Set Password: Nustatyti slaptažodį
     Remove Password: Pašalinti slaptažodį
   Experimental Settings:
-    Faster Subscription Refresh: "Greitesnis prenumeratų atnaujinimas"
     Disable Hardware Acceleration: Išjungti aparatinį spartinimą
   Interface Customizer:
     Customize Interface: "Tinkinti sąsają"
@@ -2710,6 +2711,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Atnaujina srautus pagal pasirinktus nustatymus. Kompiuteryje OpenTubeX lieka sistemos dėkle, kol išeinate. Android nustato foninių atnaujinimų laiką."
     Notify About New Uploads: Šiame įrenginyje rodo sistemos pranešimus apie kanalus, kurių pranešimus įjungėte jų prenumeratos nustatymuose. OpenTubeX naujo turinio ieško atnaujindama prenumeratas, todėl pasirinkite automatinio atnaujinimo intervalą. Kad gautumėte pranešimus, kai programa uždaryta, taip pat įjunkite atnaujinimą, kai programa uždaryta.
     RSS Feeds Auto Refresh Interval: Kaip dažnai OpenTubeX automatiškai atnaujina jūsų RSS sklaidos kanalus, kol programa atidaryta.
+    Faster Subscription Refresh: "Pirmiausia patikrina kiekvieno kanalo RSS sklaidos kanalą ir įkelia vaizdo įrašus, Shorts ir tiesiogines transliacijas tik iš kanalų su naujais įkėlimais. Automatiniai atnaujinimai taip pat praleidžia kanalus, įkeltus per pastarąsias 10 minučių. Kanaluose be naujų įkėlimų peržiūrų skaičiai, pašalinti vaizdo įrašai ir pakeisti pavadinimai atnaujinami tik kas kelias valandas, o nauji įkėlimai gali pasirodyti vėliau, kai RSS sklaidos kanalas vėluoja. Nepasiekiama naudojant Invidious API."
   Theme Settings:
     Only Show Important Notifications: Paslepia programos pranešimus, kurie tik patvirtina veiksmą arba praneša būseną. Klaidos, įspėjimai, jūsų nustatyti priminimai ir pranešimai, siūlantys veiksmą, pavyzdžiui, Anuliuoti, vis tiek rodomi. Foninių operacijų, pavyzdžiui, prenumeratų atnaujinimo, eiga rodoma bendrojoje eigos juostoje, o ne pranešime. Sistemos pranešimams tai neturi įtakos.
     Visible Search Suggestions: "Nustato, kiek paieškos istorijos įrašų ir pasiūlymų paieškos juosta rodo, kol jos sąrašą reikia slinkti. Sąrašas niekada nesiekia toliau už lango apačią."
@@ -2729,7 +2731,6 @@ Tooltips:
     UseDeArrowThumbnails: Vaizdo įrašų miniatiūras pakeisti DeArrow miniatiūromis.
     Always Show DeArrow Badge: Palikti DeArrow mygtuką matomą prie vaizdo įrašų, kurių pavadinimą ar miniatiūrą pakeitė DeArrow, užuot rodžius tik užvedus žymiklį.
   Experimental Settings:
-    Faster Subscription Refresh: "Pirmiausia patikrina kiekvieno kanalo RSS sklaidos kanalą ir įkelia vaizdo įrašus, Shorts ir tiesiogines transliacijas tik iš kanalų su naujais įkėlimais. Automatiniai atnaujinimai taip pat praleidžia kanalus, įkeltus per pastarąsias 10 minučių. Kanaluose be naujų įkėlimų peržiūrų skaičiai, pašalinti vaizdo įrašai ir pakeisti pavadinimai atnaujinami tik kas kelias valandas, o nauji įkėlimai gali pasirodyti vėliau, kai RSS sklaidos kanalas vėluoja. Nepasiekiama naudojant Invidious API."
     Disable Hardware Acceleration: Išjungia GPU aparatinį spartinimą. Gali išspręsti grafikos problemas, bet tikriausiai sumažins našumą.
 Autoplay Interruption Timer: Automatinis atkūrimas atšauktas dėl {autoplayInterruptionIntervalHours} val. neveiklumo
 The playlist is at the beginning. Enable loop to continue playing: Pasiekta grojaraščio pradžia. Įjunkite kartojimą, kad atkūrimas būtų tęsiamas

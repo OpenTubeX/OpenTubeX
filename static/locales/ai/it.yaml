@@ -309,8 +309,7 @@ History:
   Custom: Personalizzato
   History Older Than Days Removed: La cronologia di visione più vecchia di 1 giorno è stata rimossa | La cronologia di visione più vecchia di {days} giorni è stata rimossa | La cronologia di visione più vecchia di {days} giorni è stata rimossa
 Settings:
-  Experimental Settings:
-    Faster Subscription Refresh: "Aggiornamento più rapido delle iscrizioni"
+  Experimental Badge: Sperimentale
   Diagnostics:
     Diagnostics: Diagnostica
     Description: Finché il log diagnostico è attivo, OpenTubeX conserva in memoria i messaggi di log recenti per consentirti di allegarli alle segnalazioni di bug. Non li salva né li invia mai di sua iniziativa, e disattivare il log li elimina. I rapporti escludono cookie, token, indirizzi IP e parametri URL, ma possono contenere gli ID dei video che hai riprodotto, quindi controlla un rapporto prima di condividerlo.
@@ -1177,6 +1176,7 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Aggiorna le iscrizioni quando l'app è chiusa"
     Notify About New Uploads: Notifica nuovi caricamenti
     RSS Feeds Auto Refresh Interval: Intervallo di aggiornamento automatico dei feed RSS
+    Faster Subscription Refresh: "Aggiornamento più rapido delle iscrizioni"
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Conta il tempo di visione da"
@@ -2169,8 +2169,6 @@ Description:
   Games: Giochi
   Music: Musica
 Tooltips:
-  Experimental Settings:
-    Faster Subscription Refresh: "Controlla prima il feed RSS di ogni canale e carica video, Shorts e dirette solo dai canali con nuovi caricamenti. Gli aggiornamenti automatici saltano anche i canali caricati negli ultimi 10 minuti. Per i canali senza nuovi caricamenti, visualizzazioni, video rimossi e titoli modificati si aggiornano solo ogni poche ore, e i nuovi caricamenti potrebbero comparire più tardi quando il feed RSS è in ritardo. Non disponibile con l'API di Invidious."
   General Settings:
     Built-in Streams: |
       Automatico riproduce la maggior parte dei video tramite il client visionOS di YouTube, che si avvia più rapidamente e supporta la qualità automatica. Le dirette e i video che non può riprodurre usano SABR.
@@ -2282,6 +2280,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Aggiorna i feed con le impostazioni scelte. Sul desktop, OpenTubeX rimane nell’area di notifica fino all’uscita. Android decide quando eseguire gli aggiornamenti in background."
     Notify About New Uploads: Mostra notifiche di sistema su questo dispositivo per i canali di cui hai attivato le notifiche nelle relative impostazioni di iscrizione. OpenTubeX cerca nuovi contenuti quando aggiorna le iscrizioni, quindi scegli un intervallo di aggiornamento automatico. Per ricevere notifiche anche quando l'app è chiusa, attiva anche l'aggiornamento quando l'app è chiusa.
     RSS Feeds Auto Refresh Interval: Ogni quanto OpenTubeX aggiorna automaticamente i tuoi feed RSS mentre l'app è aperta.
+    Faster Subscription Refresh: "Controlla prima il feed RSS di ogni canale e carica video, Shorts e dirette solo dai canali con nuovi caricamenti. Gli aggiornamenti automatici saltano anche i canali caricati negli ultimi 10 minuti. Per i canali senza nuovi caricamenti, visualizzazioni, video rimossi e titoli modificati si aggiornano solo ogni poche ore, e i nuovi caricamenti potrebbero comparire più tardi quando il feed RSS è in ritardo. Non disponibile con l'API di Invidious."
   Theme Settings:
     Only Show Important Notifications: Nasconde le notifiche nell'app che si limitano a confermare un'azione o a segnalare uno stato. Errori, avvisi, promemoria che hai impostato e notifiche che offrono un'azione, come Rifai, continuano a essere mostrati. L'avanzamento delle operazioni in background, come l'aggiornamento delle iscrizioni, viene mostrato nella barra di avanzamento globale anziché in una notifica. Le notifiche di sistema non sono interessate.
     Visible Search Suggestions: "Imposta quante voci della cronologia di ricerca e quanti suggerimenti mostra la barra di ricerca prima che il suo elenco scorra. L’elenco non si estende mai oltre il bordo inferiore della finestra."

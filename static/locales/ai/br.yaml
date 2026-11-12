@@ -309,8 +309,7 @@ History:
   Custom: "Personelaet"
   History Older Than Days Removed: "Dilamet eo bet an istor sellout koshoc'h eget {days} devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} zevezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh."
 Settings:
-  Experimental Settings:
-    Faster Subscription Refresh: "Freskaat ar c'houmanantoù buanoc'h"
+  Experimental Badge: Arnodel
   Diagnostics:
     Diagnostics: Diagnoz
     Description: E-pad ma vez gweredekaet an deizlevr diagnoz, OpenTubeX a vir ar c'hemennadennoù deizlevr nevez er memor evit ma c'hallfec'h o stagañ ouzh danevelloù fazioù. Biskoazh ne enrollo na ne gaso anezho e-unan, ha diweredekaat an deizlevr a ziverk anezho. An danevelloù n'int ket enno toupinoù, jedouerioù, chomlec'hioù IP na arventennoù URL, met gallout a reont kaout IDoù ar videoioù ho peus lennet, setu gwiriit an danevell a-raok he rannañ.
@@ -1177,6 +1176,7 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Freskañ ar c'houmanantoù pa vez serret an arload"
     Notify About New Uploads: Rebuadiñ diwar-benn an endalc'had nevez
     RSS Feeds Auto Refresh Interval: Etrevez adkargañ emgefreek ar gwazhioù RSS
+    Faster Subscription Refresh: "Freskaat ar c'houmanantoù buanoc'h"
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Kontañ an amzer sellet diwar"
@@ -2178,8 +2178,6 @@ Description:
   Games: "C'hoarioù"
   Music: Sonerezh
 Tooltips:
-  Experimental Settings:
-    Faster Subscription Refresh: "Gwiriañ a ra lanv RSS pep chadenn da gentañ ha ne garg nemet videoioù, Shorts ha skignadennoù war-eeun ar chadennoù o deus pellgasadennoù nevez. Ar freskadurioù emgefre a lez a-gostez ivez ar chadennoù karget e-pad an 10 munutenn diwezhañ. Evit ar chadennoù hep pellgasadennoù nevez, ne vez hizivaet an niver a selloù, ar videoioù dilamet hag an titloù kemmet nemet bep un nebeud eurioù, ha gallout a ra ar pellgasadennoù nevez dont war wel diwezhatoc'h pa vez dale gant al lanv RSS. N'eo ket hegerz gant API Invidious."
   General Settings:
     Built-in Streams: |
       Emgefreek a lenn al lodenn vrasañ eus ar videoioù dre arval visionOS YouTube, a grog buanoc'h hag a skor ar perzhded emgefreek. Ar froudoù war-eeun hag ar videoioù n'hall ket lenn a implij SABR.
@@ -2291,6 +2289,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Hizivaat a ra al lanvioù gant an arventennoù dibabet. War an urzhiataer e chom OpenTubeX e takad ar c'hemennoù betek kuitaat. Android a ziviz pegoulz e vez hizivaet en drekleur."
     Notify About New Uploads: Diskouez a ra rebuadoù reizhiad war an trevnad-mañ evit ar chadennoù ho peus gweredekaet o rebuadoù en o arventennoù koumanant. OpenTubeX a wir ha bez ez eus endalc'had nevez pa vez freskaet ar c'houmanantoù, setu dibabit un etrevez adkargañ emgefreek. Evit bezañ kelaouet pa vez serret an arload, gweredekait ivez ar freskañ pa vez serret an arload.
     RSS Feeds Auto Refresh Interval: Pegen alies e vez adkarget ho kwazhioù RSS ent emgefreek gant OpenTubeX e-pad ma vez digor an arload.
+    Faster Subscription Refresh: "Gwiriañ a ra lanv RSS pep chadenn da gentañ ha ne garg nemet videoioù, Shorts ha skignadennoù war-eeun ar chadennoù o deus pellgasadennoù nevez. Ar freskadurioù emgefre a lez a-gostez ivez ar chadennoù karget e-pad an 10 munutenn diwezhañ. Evit ar chadennoù hep pellgasadennoù nevez, ne vez hizivaet an niver a selloù, ar videoioù dilamet hag an titloù kemmet nemet bep un nebeud eurioù, ha gallout a ra ar pellgasadennoù nevez dont war wel diwezhatoc'h pa vez dale gant al lanv RSS. N'eo ket hegerz gant API Invidious."
   Theme Settings:
     Only Show Important Notifications: Kuzhat a ra ar c'hemennoù en arload na reont nemet kadarnaat un ober pe reiñ ur stad. Diskouezet e vez c'hoazh ar fazioù, ar c'hemennoù-diwall, an degasoù-koun ho peus kefluniet hag ar c'hemennoù a ginnig un ober, evel Dizober. Diskouezet e vez araokadur an oberoù en drekleur, evel freskaat ar c'houmanantoù, er varrenn araokadur hollek e-lec'h en ur c'hemenn. Ar c'hemennoù reizhiad n'int ket tizhet.
     Visible Search Suggestions: "Termeniñ a ra pet enmont eus ar roll-istor klask ha pet kinnig a ziskouez ar varrenn glask a-raok ma ranker dibunañ he roll. Ne ya morse ar roll en tu all da draoñ ar prenestr."

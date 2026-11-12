@@ -312,6 +312,7 @@ History:
   Custom: Prilagođeno
   History Older Than Days Removed: Uklonjena je povijest gledanja starija od {days} dana | Uklonjena je povijest gledanja starija od {days} dana | Uklonjena je povijest gledanja starija od {days} dana
 Settings:
+  Experimental Badge: Eksperimentalno
   Diagnostics:
     Diagnostics: Dijagnostika
     Description: Dok je dijagnostički zapisnik uključen, OpenTubeX čuva nedavne poruke zapisnika u memoriji kako biste ih mogli priložiti izvješćima o greškama. Nikad ih ne sprema niti šalje sam, a isključivanje zapisnika ih briše. Izvješća izostavljaju kolačiće, tokene, IP adrese i URL parametre, ali mogu sadržavati ID-ove videozapisa koje ste reproducirali, stoga provjerite izvješće prije dijeljenja.
@@ -1180,6 +1181,7 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Osvježavaj pretplate dok je aplikacija zatvorena"
     Notify About New Uploads: Obavijesti o novom sadržaju
     RSS Feeds Auto Refresh Interval: Razmak automatskog osvježavanja RSS izvora
+    Faster Subscription Refresh: "Brže osvježavanje pretplata"
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Brojanje vremena gledanja s"
@@ -1500,7 +1502,6 @@ Settings:
   Search Settings: Postavke pretraživanja
   No Settings Found: Nisu pronađene postavke
   Experimental Settings:
-    Faster Subscription Refresh: "Brže osvježavanje pretplata"
     Disable Hardware Acceleration: Onemogući hardversko ubrzanje
   Interface Customizer:
     Customize Interface: "Prilagodi sučelje"
@@ -2315,6 +2316,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Osvježava sadržaj prema odabranim postavkama. Na računalu OpenTubeX ostaje u sistemskoj traci do izlaska. Android određuje vrijeme osvježavanja u pozadini."
     Notify About New Uploads: Prikazuje obavijesti sustava na ovom uređaju za kanale kojima ste uključili obavijesti u njihovim postavkama pretplate. OpenTubeX provjerava novi sadržaj pri osvježavanju pretplata, stoga odaberite razmak automatskog osvježavanja. Za obavijesti dok je aplikacija zatvorena uključite i osvježavanje dok je aplikacija zatvorena.
     RSS Feeds Auto Refresh Interval: Koliko često OpenTubeX automatski osvježava vaše RSS izvore dok je aplikacija otvorena.
+    Faster Subscription Refresh: "Najprije provjerava RSS feed svakog kanala i učitava videozapise, Shorts i prijenose uživo samo s kanala s novim sadržajem. Automatska osvježavanja također preskaču kanale učitane u posljednjih 10 minuta. Za kanale bez novog sadržaja broj pregleda, uklonjeni videozapisi i promijenjeni naslovi ažuriraju se samo svakih nekoliko sati, a novi sadržaj može se pojaviti kasnije kad RSS feed kasni. Nije dostupno s Invidious API-jem."
   Theme Settings:
     Only Show Important Notifications: Skriva obavijesti u aplikaciji koje samo potvrđuju radnju ili javljaju stanje. Pogreške, upozorenja, podsjetnici koje ste postavili i obavijesti koje nude radnju, poput Poništi, i dalje se prikazuju. Napredak pozadinskih radnji, poput osvježavanja pretplata, prikazuje se na globalnoj traci napretka umjesto u obavijesti. Obavijesti sustava nisu obuhvaćene.
     Visible Search Suggestions: "Određuje koliko unosa povijesti pretraživanja i prijedloga traka za pretraživanje prikazuje prije nego što se njezin popis počne pomicati. Popis se nikada ne proteže ispod donjeg ruba prozora."
@@ -2330,7 +2332,6 @@ Tooltips:
     Modal Backdrop: "Određuje kako aplikacija izgleda iza dijaloga i izbornika. Zamućivanje može biti sporo na slabijim uređajima."
     Click Scrollbar Track to Scroll: "Klik na traku za pomicanje izvan njezina klizača pomiče sadržaj za otprilike jednu stranicu u smjeru klika. Dok je ovo uključeno, vidljiva traka za pomicanje hvata klikove namijenjene stavkama ispod nje. Traka za pomicanje trake kartica uvijek radi ovako."
   Experimental Settings:
-    Faster Subscription Refresh: "Najprije provjerava RSS feed svakog kanala i učitava videozapise, Shorts i prijenose uživo samo s kanala s novim sadržajem. Automatska osvježavanja također preskaču kanale učitane u posljednjih 10 minuta. Za kanale bez novog sadržaja broj pregleda, uklonjeni videozapisi i promijenjeni naslovi ažuriraju se samo svakih nekoliko sati, a novi sadržaj može se pojaviti kasnije kad RSS feed kasni. Nije dostupno s Invidious API-jem."
     Disable Hardware Acceleration: Onemogućuje hardversko ubrzanje GPU-a. Može riješiti grafičke probleme, ali će vjerojatno smanjiti performanse.
   SponsorBlock Settings:
     Always Show DeArrow Badge: Zadrži DeArrow gumb vidljivim na videozapisima čiji je naslov ili minijaturu zamijenio DeArrow, umjesto samo pri prelasku mišem.

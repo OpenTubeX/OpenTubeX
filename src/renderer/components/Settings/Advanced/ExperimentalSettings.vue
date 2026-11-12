@@ -8,16 +8,6 @@
     <FtFlexBox>
       <FtToggleSwitch
         tooltip-position="top"
-        :label="$t('Settings.Experimental Settings.Faster Subscription Refresh')"
-        compact
-        :default-value="store.getters.getFastSubscriptionRefresh"
-        setting-key="fastSubscriptionRefresh"
-        :tooltip="$t('Tooltips.Experimental Settings.Faster Subscription Refresh')"
-        @change="store.dispatch('updateFastSubscriptionRefresh', $event)"
-      />
-      <FtToggleSwitch
-        v-if="USING_ELECTRON"
-        tooltip-position="top"
         :label="$t('Settings.Experimental Settings.Replace HTTP Cache')"
         compact
         :default-value="replaceHttpCache"
@@ -27,7 +17,6 @@
         @change="handleToggleReplaceHttpCache"
       />
       <FtToggleSwitch
-        v-if="USING_ELECTRON"
         tooltip-position="top"
         :label="$t('Settings.Experimental Settings.Disable Hardware Acceleration')"
         compact
@@ -53,8 +42,6 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 
-import store from '../../../store/index'
-
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
 import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
@@ -69,8 +56,6 @@ const disableHardwareAcceleration = ref(false)
 let disableHardwareAccelerationRunningState = null
 
 const showRestartPrompt = ref(false)
-
-const USING_ELECTRON = !!process.env.IS_ELECTRON
 
 onMounted(async () => {
   if (process.env.IS_ELECTRON) {

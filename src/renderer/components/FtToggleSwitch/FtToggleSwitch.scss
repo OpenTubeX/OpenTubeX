@@ -226,3 +226,21 @@
   inset-inline-start: calc(var(--switch-track-start) + var(--switch-track-width) - var(--switch-track-height) + 2px);
 }
 
+
+/* Matches the performance impact badge, in neutral colors. */
+.experimentalBadge {
+  align-items: center;
+  border: 1px solid var(--divider-color);
+  border-radius: var(--shape-corner-medium);
+  color: var(--secondary-text-color);
+  display: inline-flex;
+  font-size: 0.7em;
+  font-weight: 600;
+  gap: 4px;
+
+  /* Symmetric, like the performance impact badge it sits next to */
+  margin-inline: 6px;
+  padding-block: 1px;
+  padding-inline: 6px;
+  text-transform: uppercase;
+}

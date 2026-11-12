@@ -310,6 +310,7 @@ History:
   Custom: Personol
   History Older Than Days Removed: Mae hanes gwylio sy'n hŷn na {days} o ddiwrnodau wedi'i ddileu | Mae hanes gwylio sy'n hŷn nag 1 diwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} ddiwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} diwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} diwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} o ddiwrnodau wedi'i ddileu
 Settings:
+  Experimental Badge: Arbrofol
   Diagnostics:
     Diagnostics: Diagnosteg
     Description: Tra bo'r log diagnostig ymlaen, mae OpenTubeX yn cadw negeseuon log diweddar yn y cof fel y gallwch eu hatodi i adroddiadau bygiau. Nid yw byth yn eu cadw na'u hanfon ar ei ben ei hun, ac mae diffodd y log yn eu dileu. Mae adroddiadau'n hepgor cwcis, tocynnau, cyfeiriadau IP a pharamedrau URL, ond gallant gynnwys IDs fideos rydych wedi'u chwarae, felly gwiriwch adroddiad cyn ei rannu.
@@ -1178,6 +1179,7 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Adnewyddu tanysgrifiadau pan fydd yr ap ar gau"
     Notify About New Uploads: Hysbysu am gynnwys newydd
     RSS Feeds Auto Refresh Interval: Cyfwng adnewyddu ffrydiau RSS yn awtomatig
+    Faster Subscription Refresh: "Adnewyddu tanysgrifiadau'n gyflymach"
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Cyfrif Amser Gwylio O"
@@ -1495,7 +1497,6 @@ Settings:
   Search Settings: Gosodiadau chwilio
   No Settings Found: Ni chanfuwyd unrhyw osodiadau
   Experimental Settings:
-    Faster Subscription Refresh: "Adnewyddu tanysgrifiadau'n gyflymach"
     Disable Hardware Acceleration: Analluogi cyflymiad caledwedd
   Interface Customizer:
     Customize Interface: "Addasu'r rhyngwyneb"
@@ -2315,6 +2316,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Yn adnewyddu ffrydiau gan ddefnyddio eich gosodiadau. Ar y bwrdd gwaith, mae OpenTubeX yn aros yn hambwrdd y system nes i chi adael. Android sy’n rheoli pryd mae adnewyddu cefndirol yn digwydd."
     Notify About New Uploads: Yn dangos hysbysiadau system ar y ddyfais hon ar gyfer sianeli rydych wedi troi eu hysbysiadau ymlaen yn eu gosodiadau tanysgrifio. Mae OpenTubeX yn gwirio am gynnwys newydd pan fydd tanysgrifiadau'n cael eu hadnewyddu, felly dewiswch gyfwng adnewyddu awtomatig. I gael hysbysiadau pan fydd yr ap ar gau, galluogwch adnewyddu pan fydd yr ap ar gau hefyd.
     RSS Feeds Auto Refresh Interval: Pa mor aml mae OpenTubeX yn adnewyddu eich ffrydiau RSS yn awtomatig tra bod yr ap ar agor.
+    Faster Subscription Refresh: "Yn gwirio ffrwd RSS pob sianel yn gyntaf a dim ond yn llwytho fideos, Shorts a ffrydiau byw sianeli sydd ag uwchlwythiadau newydd. Mae adnewyddiadau awtomatig hefyd yn hepgor sianeli a lwythwyd yn ystod y 10 munud diwethaf. Ar gyfer sianeli heb uwchlwythiadau newydd, dim ond bob ychydig oriau y caiff nifer y gwyliadau, fideos a dynnwyd a theitlau a newidiwyd eu diweddaru, a gall uwchlwythiadau newydd ymddangos yn hwyrach pan fydd y ffrwd RSS ar ei hôl hi. Ddim ar gael gydag API Invidious."
   Theme Settings:
     Only Show Important Notifications: Yn cuddio hysbysiadau yn yr ap sydd ond yn cadarnhau gweithred neu'n adrodd statws. Mae gwallau, rhybuddion, nodiadau atgoffa rydych wedi'u gosod, a hysbysiadau sy'n cynnig gweithred, fel Dadwneud, yn dal i ymddangos. Mae cynnydd yn y cefndir, fel adnewyddu tanysgrifiadau, yn cael ei ddangos yn y bar cynnydd cyffredinol yn lle hysbysiad. Nid yw hysbysiadau'r system yn cael eu heffeithio.
     Visible Search Suggestions: "Yn gosod faint o gofnodion hanes chwilio ac awgrymiadau y mae’r bar chwilio’n eu dangos cyn i’w restr sgrolio. Nid yw’r rhestr byth yn ymestyn heibio gwaelod y ffenestr."
@@ -2330,7 +2332,6 @@ Tooltips:
     Modal Backdrop: "Yn gosod sut mae’r ap yn edrych y tu ôl i ddeialogau a dewislenni. Gall niwlio fod yn araf ar ddyfeisiau llai pwerus."
     Click Scrollbar Track to Scroll: "Mae clicio bar sgrolio y tu allan i'w ddolen yn sgrolio tua un dudalen tuag at y clic. Tra bo hyn ymlaen, mae bar sgrolio gweladwy yn dal cliciau sydd i fod ar gyfer eitemau oddi tano. Mae bar sgrolio'r bar tabiau bob amser yn gweithio fel hyn."
   Experimental Settings:
-    Faster Subscription Refresh: "Yn gwirio ffrwd RSS pob sianel yn gyntaf a dim ond yn llwytho fideos, Shorts a ffrydiau byw sianeli sydd ag uwchlwythiadau newydd. Mae adnewyddiadau awtomatig hefyd yn hepgor sianeli a lwythwyd yn ystod y 10 munud diwethaf. Ar gyfer sianeli heb uwchlwythiadau newydd, dim ond bob ychydig oriau y caiff nifer y gwyliadau, fideos a dynnwyd a theitlau a newidiwyd eu diweddaru, a gall uwchlwythiadau newydd ymddangos yn hwyrach pan fydd y ffrwd RSS ar ei hôl hi. Ddim ar gael gydag API Invidious."
     Disable Hardware Acceleration: Yn analluogi cyflymiad caledwedd y GPU. Gall ddatrys problemau graffeg, ond mae'n debygol o leihau perfformiad.
   SponsorBlock Settings:
     Always Show DeArrow Badge: Cadw'r botwm DeArrow yn weladwy ar fideos y mae DeArrow wedi amnewid eu teitl neu eu llun bach, yn lle dim ond wrth hofran.

@@ -320,6 +320,7 @@ History:
   Custom: Brugerdefineret
   History Older Than Days Removed: Visningshistorik, der er ældre end 1 dag, er blevet slettet | Visningshistorik, der er ældre end {days} dage, er blevet slettet
 Settings:
+  Experimental Badge: Eksperimentel
   Diagnostics:
     Diagnostics: Diagnostik
     Description: Mens diagnosticeringsloggen er slået til, gemmer OpenTubeX de seneste logbeskeder i hukommelsen, så du kan vedhæfte dem til fejlrapporter. Det gemmer eller sender dem aldrig af sig selv, og når du slår loggen fra, slettes de. Rapporter udelader cookies, tokens, IP-adresser og URL-parametre, men de kan indeholde id'er for videoer, du har afspillet, så tjek en rapport, før du deler den.
@@ -1201,6 +1202,7 @@ Settings:
     Notify About New Uploads: Giv besked om nye uploads
     Limit the number of videos displayed for each channel: Begræns antallet af viste videoer for hver kanal
     RSS Feeds Auto Refresh Interval: Interval for automatisk opdatering af RSS-feeds
+    Faster Subscription Refresh: "Hurtigere opdatering af abonnementer"
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Tæl visningstid fra"
@@ -1541,7 +1543,6 @@ Settings:
   Search Settings: Søgeindstillinger
   No Settings Found: Ingen indstillinger fundet
   Experimental Settings:
-    Faster Subscription Refresh: "Hurtigere opdatering af abonnementer"
     Disable Hardware Acceleration: Deaktiver hardwareacceleration
   Interface Customizer:
     Customize Interface: "Tilpas brugerflade"
@@ -2368,6 +2369,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Opdaterer feeds med dine valgte indstillinger. På computeren forbliver OpenTubeX i systembakken, indtil du afslutter. Android styrer, hvornår baggrundsopdateringer kører."
     Notify About New Uploads: Viser systemmeddelelser på denne enhed for kanaler, hvor du har slået meddelelser til i deres abonnementsindstillinger. OpenTubeX søger efter nyt indhold, når abonnementer opdateres, så vælg et interval for automatisk opdatering. Hvis du vil have besked, mens appen er lukket, skal du også aktivere opdatering, mens appen er lukket.
     RSS Feeds Auto Refresh Interval: Hvor ofte OpenTubeX automatisk opdaterer dine RSS-feeds, mens appen er åben.
+    Faster Subscription Refresh: "Tjekker først hver kanals RSS-feed og indlæser kun videoer, Shorts og livestreams fra kanaler med nye uploads. Automatiske opdateringer springer også kanaler over, der er indlæst inden for de sidste 10 minutter. For kanaler uden nye uploads opdateres visningstal, fjernede videoer og ændrede titler kun med nogle timers mellemrum, og nye uploads kan dukke op senere, når RSS-feedet halter bagefter. Ikke tilgængelig med Invidious API."
   Theme Settings:
     Only Show Important Notifications: Skjuler notifikationer i appen, der kun bekræfter en handling eller oplyser en status. Fejl, advarsler, påmindelser, du har oprettet, og notifikationer med en handling, såsom Fortryd, vises stadig. Fremskridt for baggrundshandlinger, såsom opdatering af abonnementer, vises i den globale statuslinje i stedet for som en notifikation. Systemnotifikationer påvirkes ikke.
     Visible Search Suggestions: "Angiver, hvor mange poster fra søgehistorikken og forslag søgefeltet viser, før dets liste skal rulles. Listen går aldrig ud over vinduets nederste kant."
@@ -2383,7 +2385,6 @@ Tooltips:
     Modal Backdrop: "Angiver, hvordan appen ser ud bag dialoger og menuer. Sløring kan være langsom på mindre kraftige enheder."
     Click Scrollbar Track to Scroll: "Et klik på et rullepanel uden for dets håndtag ruller cirka én side i retning af klikket. Mens dette er slået til, opfanger et synligt rullepanel klik på elementer under det. Fanelinjens rullepanel fungerer altid sådan."
   Experimental Settings:
-    Faster Subscription Refresh: "Tjekker først hver kanals RSS-feed og indlæser kun videoer, Shorts og livestreams fra kanaler med nye uploads. Automatiske opdateringer springer også kanaler over, der er indlæst inden for de sidste 10 minutter. For kanaler uden nye uploads opdateres visningstal, fjernede videoer og ændrede titler kun med nogle timers mellemrum, og nye uploads kan dukke op senere, når RSS-feedet halter bagefter. Ikke tilgængelig med Invidious API."
     Disable Hardware Acceleration: Deaktiverer GPU-hardwareacceleration. Kan løse grafikproblemer, men vil sandsynligvis forringe ydeevnen.
   SponsorBlock Settings:
     Always Show DeArrow Badge: Hold DeArrow-knappen synlig på videoer, hvis titel eller miniaturebillede er erstattet af DeArrow, i stedet for kun når musen holdes over.

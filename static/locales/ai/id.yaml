@@ -310,8 +310,7 @@ History:
   Custom: Khusus
   History Older Than Days Removed: Riwayat tontonan yang lebih lama dari {days} hari telah dihapus
 Settings:
-  Experimental Settings:
-    Faster Subscription Refresh: "Penyegaran langganan lebih cepat"
+  Experimental Badge: Eksperimental
   Diagnostics:
     Diagnostics: Diagnostik
     Description: Selama log diagnostik aktif, OpenTubeX menyimpan pesan log terbaru di memori agar Anda dapat melampirkannya ke laporan bug. Aplikasi ini tidak pernah menyimpan atau mengirimnya sendiri, dan menonaktifkan log akan menghapusnya. Laporan tidak menyertakan cookie, token, alamat IP, dan parameter URL, tetapi dapat berisi ID video yang Anda putar, jadi periksa laporan sebelum membagikannya.
@@ -1180,6 +1179,7 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Perbarui Langganan Saat Aplikasi Ditutup"
     Notify About New Uploads: Beri Notifikasi Unggahan Baru
     RSS Feeds Auto Refresh Interval: Interval Pembaruan Otomatis Umpan RSS
+    Faster Subscription Refresh: "Penyegaran langganan lebih cepat"
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Hitung Waktu Tonton Dari"
@@ -2194,8 +2194,6 @@ Description:
   Games: Gim
   Music: Musik
 Tooltips:
-  Experimental Settings:
-    Faster Subscription Refresh: "Memeriksa umpan RSS setiap saluran terlebih dahulu dan hanya memuat video, Shorts, dan siaran langsung dari saluran yang memiliki unggahan baru. Penyegaran otomatis juga melewati saluran yang dimuat dalam 10 menit terakhir. Untuk saluran tanpa unggahan baru, jumlah penayangan, video yang dihapus, dan judul yang diubah hanya diperbarui setiap beberapa jam, dan unggahan baru mungkin muncul lebih lambat saat umpan RSS tertinggal. Tidak tersedia dengan API Invidious."
   General Settings:
     Built-in Streams: |
       Otomatis memutar sebagian besar video melalui klien visionOS YouTube, yang dimulai lebih cepat dan mendukung kualitas otomatis. Siaran langsung dan video yang tidak dapat diputarnya menggunakan SABR.
@@ -2307,6 +2305,7 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Memperbarui feed sesuai setelan yang dipilih. Di desktop, OpenTubeX tetap di baki sistem sampai Anda keluar. Android menentukan waktu pembaruan latar belakang."
     Notify About New Uploads: Menampilkan notifikasi sistem di perangkat ini untuk channel yang notifikasinya Anda aktifkan di pengaturan langganannya. OpenTubeX memeriksa konten baru saat langganan diperbarui, jadi pilih interval pembaruan otomatis. Agar tetap mendapat notifikasi saat aplikasi ditutup, aktifkan juga pembaruan saat aplikasi ditutup.
     RSS Feeds Auto Refresh Interval: Seberapa sering OpenTubeX memperbarui umpan RSS Anda secara otomatis saat aplikasi terbuka.
+    Faster Subscription Refresh: "Memeriksa umpan RSS setiap saluran terlebih dahulu dan hanya memuat video, Shorts, dan siaran langsung dari saluran yang memiliki unggahan baru. Penyegaran otomatis juga melewati saluran yang dimuat dalam 10 menit terakhir. Untuk saluran tanpa unggahan baru, jumlah penayangan, video yang dihapus, dan judul yang diubah hanya diperbarui setiap beberapa jam, dan unggahan baru mungkin muncul lebih lambat saat umpan RSS tertinggal. Tidak tersedia dengan API Invidious."
   Theme Settings:
     Only Show Important Notifications: Menyembunyikan notifikasi dalam aplikasi yang hanya mengonfirmasi tindakan atau melaporkan status. Kesalahan, peringatan, pengingat yang Anda atur, dan notifikasi yang menawarkan tindakan, seperti Urungkan, tetap muncul. Progres operasi latar belakang, seperti penyegaran langganan, ditampilkan di bilah progres global, bukan sebagai notifikasi. Notifikasi sistem tidak terpengaruh.
     Visible Search Suggestions: "Menentukan berapa banyak entri riwayat pencarian dan saran yang ditampilkan bilah pencarian sebelum daftarnya perlu digulir. Daftar tidak pernah melewati bagian bawah jendela."
