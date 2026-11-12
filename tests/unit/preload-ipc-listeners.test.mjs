@@ -45,7 +45,7 @@ test('queued automatic rule writes require activation and authorize only one fix
   const writes = []
   ipcRenderer.invoke = (...args) => {
     writes.push(JSON.parse(JSON.stringify(args)))
-    return Promise.resolve(null)
+    return Promise.resolve({ result: null, savedSetting: null })
   }
   assert.equal(api.prepareAutomaticDownloadRulesWrite(), null)
   assert.equal(await api.dbSettings(2, { _id: 'ytDlpAutomaticDownloadRules', value: '{}' }), null)
@@ -73,6 +73,23 @@ test('queued automatic rule writers reject invalid values without invoking IPC',
   await assert.rejects(persist({ _id: 'other-setting', value: '{}' }), /must be a string/)
   await assert.rejects(persist('{}'), /already used/)
   assert.equal(writes, 0)
+})
+
+test('settings broadcasts older than a save this window already has are dropped', async () => {
+  const { api, ipcRenderer, IpcChannels } = await loadPreloadInterface()
+  const applied = []
+  api.handleSyncSettings((_event, data) => applied.push(data.value))
+  const broadcast = (value, revision) => ipcRenderer.emit(IpcChannels.SYNC_SETTINGS, {}, {
+    event: 2, data: { _id: 'toastPosition', value }, revision
+  })
+  ipcRenderer.invoke = () => Promise.resolve({ result: null, savedSetting: { _id: 'toastPosition', revision: 2 } })
+
+  // Another window's save 1 arrives after the reply to this window's save 2.
+  await api.dbSettings(2, { _id: 'toastPosition', value: 'mine' })
+  broadcast('older', 1)
+  broadcast('newer', 3)
+  broadcast('newer again', 3)
+  assert.deepEqual(applied, ['newer'])
 })
 
 test('Cast start checks activation before asynchronous payload preparation and invokes IPC once', async () => {

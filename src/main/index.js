@@ -17,7 +17,6 @@ import cp from 'child_process'
 
 import {
   IpcChannels,
-  SyncEvents,
   getConfiguredKeyboardShortcuts,
   getElectronAccelerator,
   SEARCH_CHAR_LIMIT,
@@ -90,6 +89,7 @@ import { createScheduledBackups } from './scheduledBackups'
 import { createBackupArchiveFactory } from './backupArchive'
 import { createDatastoreRequestTracker } from './datastoreRequests'
 import { setupDatastoreIpc } from './datastoreIpc'
+import { settingSyncMessage } from './settingRevisions'
 import { getWindowButtonLayout, onWindowButtonLayoutChanged } from './windowButtonLayout'
 import { watchTrayColorScheme } from './trayColorScheme'
 import { setDiagnosticLogging, setupDiagnosticLogIpc } from './diagnosticLog'
@@ -327,10 +327,7 @@ function runApp() {
     } else {
       await baseHandlers.settings.upsert(settingKey, value)
     }
-    const syncPayload = {
-      event: SyncEvents.GENERAL.UPSERT,
-      data: { _id: settingKey, value }
-    }
+    const syncPayload = settingSyncMessage(settingKey, value)
     for (const window of BrowserWindow.getAllWindows()) {
       if (!window.webContents.isDestroyed() && isOpenTubeXUrl(window.webContents.getURL())) {
         window.webContents.send(IpcChannels.SYNC_SETTINGS, syncPayload)
