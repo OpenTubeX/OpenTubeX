@@ -1091,7 +1091,7 @@ function getInfoProbeKey(options) {
  * @returns {Promise<{ ytDlp: YtDlpInfo, ffmpeg: YtDlpBinaryInfo, ffprobe: YtDlpBinaryInfo } | null>}
  */
 export async function handleYtDlpGetInfo(event, options) {
-  if (!isOpenTubeXUrl(event.senderFrame.url)) {
+  if (!isOpenTubeXUrl(event.senderFrame?.url)) {
     return null
   }
 
@@ -1159,7 +1159,7 @@ export async function handleYtDlpGetInfo(event, options) {
  * @returns {Promise<{ available: boolean } | { error: string } | null>}
  */
 export async function handleYtDlpCheckBinaryUpdate(event, binary) {
-  if (!isOpenTubeXUrl(event.senderFrame.url) || (binary !== 'yt-dlp' && binary !== 'ffmpeg')) {
+  if (!isOpenTubeXUrl(event.senderFrame?.url) || (binary !== 'yt-dlp' && binary !== 'ffmpeg')) {
     return null
   }
 
@@ -1176,7 +1176,7 @@ export async function handleYtDlpCheckBinaryUpdate(event, binary) {
  * @returns {Promise<{ version: string, updated: boolean } | { error: string, errorCode?: string } | null>}
  */
 export async function handleYtDlpDownloadBinary(event, binary) {
-  if (!isOpenTubeXUrl(event.senderFrame.url)) {
+  if (!isOpenTubeXUrl(event.senderFrame?.url)) {
     return null
   }
 

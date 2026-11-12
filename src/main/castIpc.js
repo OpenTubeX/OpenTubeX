@@ -62,7 +62,7 @@ export function setupCastIpc({ chromecast, fcast, invidiousAuthorizations, getCo
     return { privateInstance, resolveAddresses }
   }
   ipcMain.handle(IpcChannels.DLNA_DISCOVER, event => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused()) return []
+    if (!isOpenTubeXUrl(event.senderFrame?.url) || !event.sender.isFocused()) return []
     return discoverDlnaDevices()
   })
   const dlnaOwners = new WeakSet()
@@ -79,7 +79,7 @@ export function setupCastIpc({ chromecast, fcast, invidiousAuthorizations, getCo
     return stopped
   }
   const startDlnaForWindow = async (event, payload) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
+    if (!isOpenTubeXUrl(event.senderFrame?.url)) {
       return { error: 'Casting requires an active OpenTubeX window' }
     }
     const sourceHeaders = mediaUrl => {
@@ -154,7 +154,7 @@ export function setupCastIpc({ chromecast, fcast, invidiousAuthorizations, getCo
     return result
   })
   ipcMain.handle(IpcChannels.DLNA_RECOVER, async (event, castId, payload) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || typeof castId !== 'string' ||
+    if (!isOpenTubeXUrl(event.senderFrame?.url) || typeof castId !== 'string' ||
         payload?.audioUrl !== undefined || !hasDlnaCastFailed(event.sender.id, castId)) {
       return { error: 'No failed cast is available to recover' }
     }
@@ -165,27 +165,27 @@ export function setupCastIpc({ chromecast, fcast, invidiousAuthorizations, getCo
     })
   })
   ipcMain.handle(IpcChannels.DLNA_HAS_FAILED, (event, castId) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || typeof castId !== 'string') return false
+    if (!isOpenTubeXUrl(event.senderFrame?.url) || typeof castId !== 'string') return false
     return hasDlnaCastFailed(event.sender.id, castId)
   })
   ipcMain.handle(IpcChannels.DLNA_STOP, (event, castId) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || typeof castId !== 'string') return false
+    if (!isOpenTubeXUrl(event.senderFrame?.url) || typeof castId !== 'string') return false
     return stopDlna(event.sender.id, castId)
   })
 
   // Google Cast and FCast share the casting IPC, selected by `protocol`.
   const castManager = protocol => protocol === 'fcast' ? fcast : chromecast
   ipcMain.handle(IpcChannels.CAST_DISCOVER, async (event, protocol) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused()) return []
+    if (!isOpenTubeXUrl(event.senderFrame?.url) || !event.sender.isFocused()) return []
     try { return await castManager(protocol).discover() } catch (error) { return { error: error.message, ...(error.code ? { errorCode: error.code } : {}) } }
   })
   const castOwners = new WeakSet()
   const castPreparations = new Map()
   ipcMain.handle(IpcChannels.CAST_PREPARE, event => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused()) return { error: 'Casting requires an active OpenTubeX window', errorCode: 'CAST_NOT_AUTHORIZED' }
+    if (!isOpenTubeXUrl(event.senderFrame?.url) || !event.sender.isFocused()) return { error: 'Casting requires an active OpenTubeX window', errorCode: 'CAST_NOT_AUTHORIZED' }
     const ownerId = event.sender.id
     const preparationId = randomUUID()
-    castPreparations.set(ownerId, { preparationId, frameId: event.senderFrame.routingId, frameUrl: event.senderFrame.url })
+    castPreparations.set(ownerId, { preparationId, frameId: event.senderFrame?.routingId, frameUrl: event.senderFrame?.url })
     if (!castOwners.has(event.sender)) {
       castOwners.add(event.sender)
       event.sender.once('destroyed', () => {
@@ -198,15 +198,15 @@ export function setupCastIpc({ chromecast, fcast, invidiousAuthorizations, getCo
     return { preparationId }
   })
   ipcMain.on(IpcChannels.CAST_CANCEL_PREPARATION, (event, preparationId) => {
-    if (isOpenTubeXUrl(event.senderFrame.url) && castPreparations.get(event.sender.id)?.preparationId === preparationId) {
+    if (isOpenTubeXUrl(event.senderFrame?.url) && castPreparations.get(event.sender.id)?.preparationId === preparationId) {
       castPreparations.delete(event.sender.id)
     }
   })
   ipcMain.handle(IpcChannels.CAST_START, async (event, payload, preparationId, protocol) => {
     const ownerId = event.sender.id
     const preparation = castPreparations.get(ownerId)
-    if (!isOpenTubeXUrl(event.senderFrame.url) || !preparation || preparation.preparationId !== preparationId ||
-        preparation.frameId !== event.senderFrame.routingId || preparation.frameUrl !== event.senderFrame.url) {
+    if (!isOpenTubeXUrl(event.senderFrame?.url) || !preparation || preparation.preparationId !== preparationId ||
+        preparation.frameId !== event.senderFrame?.routingId || preparation.frameUrl !== event.senderFrame?.url) {
       return { error: 'Cast start is not authorized', errorCode: 'CAST_NOT_AUTHORIZED' }
     }
     // Consume the focused-window grant once, preserving it across subtitle work.
@@ -253,17 +253,17 @@ export function setupCastIpc({ chromecast, fcast, invidiousAuthorizations, getCo
     return result
   })
   ipcMain.handle(IpcChannels.CAST_STATUS, (event, castId, protocol) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || typeof castId !== 'string') return { connected: false }
+    if (!isOpenTubeXUrl(event.senderFrame?.url) || typeof castId !== 'string') return { connected: false }
     return castManager(protocol).status(event.sender.id, castId)
   })
   ipcMain.handle(IpcChannels.CAST_CONTROL, (event, castId, action, value, protocol) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused() || typeof castId !== 'string') {
+    if (!isOpenTubeXUrl(event.senderFrame?.url) || !event.sender.isFocused() || typeof castId !== 'string') {
       return { error: 'Casting requires an active OpenTubeX window', errorCode: 'CAST_NOT_AUTHORIZED' }
     }
     return castManager(protocol).control(event.sender.id, castId, action, value)
   })
   ipcMain.handle(IpcChannels.CAST_STOP, (event, castId, protocol) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || typeof castId !== 'string') return { connected: false }
+    if (!isOpenTubeXUrl(event.senderFrame?.url) || typeof castId !== 'string') return { connected: false }
     return castManager(protocol).stop(event.sender.id, castId)
   })
 }

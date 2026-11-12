@@ -292,7 +292,11 @@ async function attest(videoId, context, initialAttestationData, ytConfig, proxyU
       }
     })
 
-    const script = cachedScript.replace('FT_PARAMS', () => `"${videoId}",${context},${initialAttestationData},${ytConfig}`)
+    // Re-serialize every value, so nothing from the renderer runs as code here
+    const params = [videoId, ...[context, initialAttestationData, ytConfig].map(json => JSON.parse(json))]
+      .map(value => JSON.stringify(value))
+      .join(',')
+    const script = cachedScript.replace('FT_PARAMS', () => params)
 
     // The attestation's lifetime starts during this run, so count it from before
     const startedAt = Date.now()

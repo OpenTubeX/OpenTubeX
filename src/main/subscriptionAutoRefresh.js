@@ -107,7 +107,7 @@ export function setupSubscriptionAutoRefreshIpc({ backgroundSubscriptions, updat
         typeof tabId === 'string' &&
         manager.activeTabId === tabId &&
         !event.sender.isDestroyed() &&
-        isOpenTubeXUrl(event.senderFrame.url)
+        isOpenTubeXUrl(event.senderFrame?.url)
     }
 
     if (!canAcquire()) {
@@ -148,7 +148,7 @@ export function setupSubscriptionAutoRefreshIpc({ backgroundSubscriptions, updat
   }
 
   ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_GET_STATE, (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
+    if (!isOpenTubeXUrl(event.senderFrame?.url)) {
       return { inProgress: false, percentage: 0, tab: null }
     }
 
@@ -173,7 +173,7 @@ export function setupSubscriptionAutoRefreshIpc({ backgroundSubscriptions, updat
   })
 
   ipcMain.on(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_CANCEL, (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
+    if (!isOpenTubeXUrl(event.senderFrame?.url)) {
       return
     }
 

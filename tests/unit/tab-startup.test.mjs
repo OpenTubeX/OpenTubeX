@@ -574,7 +574,8 @@ test('extracted IPC handlers keep tab commands scoped to the sender window', asy
   assert.equal(created.route.path, '/stats')
   assert.equal(first.tabs.has(created.id), true)
   assert.equal(second.tabs.has(created.id), false)
-  assert.equal(handlers.get(IpcChannels.TABS_GET_SYNC_SESSIONS)().length, 2)
+  assert.equal(handlers.get(IpcChannels.TABS_GET_SYNC_SESSIONS)(sender).length, 2)
+  assert.deepEqual(handlers.get(IpcChannels.TABS_GET_SYNC_SESSIONS)({ sender: {} }), [])
 })
 
 test('a change reverted during an in-flight write still persists the latest state', async t => {

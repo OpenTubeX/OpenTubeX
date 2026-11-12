@@ -161,7 +161,7 @@ export function setupYtDlpIpc({ updateSettingFromMain }) {
   // Picked paths are saved here instead of by the renderer, which may only
   // reset them (see settingWriteGuard.js).
   ipcMain.handle(IpcChannels.CHOOSE_EXECUTABLE, async (event, settingId) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || !EXECUTABLE_PATH_SETTINGS.includes(settingId)) {
+    if (!isOpenTubeXUrl(event.senderFrame?.url) || !EXECUTABLE_PATH_SETTINGS.includes(settingId)) {
       return
     }
 
@@ -178,7 +178,7 @@ export function setupYtDlpIpc({ updateSettingFromMain }) {
 
   // yt-dlp saves the cookie jar back to this file, so it is a write path.
   ipcMain.handle(IpcChannels.YT_DLP_CHOOSE_COOKIES, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
+    if (!isOpenTubeXUrl(event.senderFrame?.url)) {
       return
     }
 
@@ -192,7 +192,7 @@ export function setupYtDlpIpc({ updateSettingFromMain }) {
   })
 
   ipcMain.handle(IpcChannels.YT_DLP_CHOOSE_BROWSER_PROFILE, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
+    if (!isOpenTubeXUrl(event.senderFrame?.url)) {
       return
     }
 
@@ -200,7 +200,7 @@ export function setupYtDlpIpc({ updateSettingFromMain }) {
   })
 
   ipcMain.handle(IpcChannels.YT_DLP_CHOOSE_DOWNLOAD_FOLDER, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
+    if (!isOpenTubeXUrl(event.senderFrame?.url)) {
       return
     }
 

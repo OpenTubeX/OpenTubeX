@@ -124,15 +124,17 @@ export function isExternalBrowserUrl(url) {
 }
 
 /**
- * @param {string | URL} url
+ * @param {string | URL | null | undefined} url `undefined` for an IPC message whose frame is gone
  */
 export function isOpenTubeXUrl(url) {
   let url_
 
   if (url instanceof URL) {
     url_ = url
-  } else {
+  } else if (typeof url === 'string') {
     url_ = URL.parse(url)
+  } else {
+    return false
   }
 
   if (process.env.NODE_ENV === 'development') {
