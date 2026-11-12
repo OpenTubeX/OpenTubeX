@@ -120,6 +120,10 @@ test.describe('channels that could not be refreshed in several New feed categori
     await expect(box.getByRole('link', { name: channels[0].name })).toBeVisible()
     expect(requests.length).toBeGreaterThanOrEqual(2)
     expect(requests.every(url => url.includes(channels[1].id.slice(2)))).toBe(true)
+
+    // Feed types turned off for a channel aren't fetched anymore, so their errors can't be retried
+    await page.evaluate(channelId => window.$store.dispatch('updateChannelSettings', { channelId, settings: { feedTypes: ['live'] } }), channels[0].id)
+    await expect(page.locator('.channelErrors.hasErrors')).toHaveCount(0)
   })
 })
 

@@ -112,6 +112,7 @@ import {
   registerShownSubscriptionErrorBox,
   subscriptionChannelErrors
 } from '../../helpers/subscriptionRefreshErrors'
+import { isSubscriptionFeedTypeEnabled } from '../../helpers/subscription-channels'
 import { retrySubscriptionChannel } from '../../helpers/subscriptions'
 import { copyToClipboard } from '../../helpers/utils'
 import { useTabContext } from '../../tabs/TabContext'
@@ -143,8 +144,10 @@ const rows = computed(() => {
   const rows = []
   for (const [channelId, errors] of subscriptionChannelErrors) {
     const channel = shownChannelsById.value.get(channelId)
-    const feeds = props.feeds.filter(feed => errors[feed] !== undefined)
-    if (channel === undefined || feeds.length === 0) continue
+    if (channel === undefined) continue
+    // Feeds turned off for the channel aren't fetched anymore, so they can't be retried
+    const feeds = props.feeds.filter(feed => errors[feed] !== undefined && isSubscriptionFeedTypeEnabled(channel, feed))
+    if (feeds.length === 0) continue
 
     const feedErrors = feeds.map(feed => errors[feed])
     rows.push({

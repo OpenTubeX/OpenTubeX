@@ -2,7 +2,7 @@
 category: improvement
 ---
 
-Channels that could not be refreshed now appear in a box above the subscription feeds instead of a lasting notification, each listed once. Open the channel, unsubscribe, or retry it right there.
+Channels that could not be refreshed now appear once each in a box above the subscription feeds instead of a dialog. Open a channel from there, unsubscribe from channels that no longer exist, or retry the others.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/0207ba25-f8e0-4564-bbbe-39c9b6d79d2f">

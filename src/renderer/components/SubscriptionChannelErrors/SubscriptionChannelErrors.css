@@ -1,6 +1,5 @@
 .channelErrors {
   container-type: inline-size;
-  outline: none;
 }
 
 /* Without errors, only the empty status message remains */
