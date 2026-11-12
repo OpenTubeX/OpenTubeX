@@ -149,6 +149,7 @@
                 <img
                   v-if="linkPreviewThumbnail"
                   class="linkPreviewThumbnail"
+                  :class="{ linkPreviewAvatar: !linkPreview.videoId }"
                   :src="linkPreviewThumbnail"
                   alt=""
                 >
@@ -311,10 +312,11 @@ import { usesInvidiousApi } from '../../../apiBackends'
 import { getConfiguredKeyboardShortcuts, SEARCH_RESULTS_DISPLAY_LIMIT } from '../../../constants'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
 import { getSearchFilterTabId, getSearchHistoryEntryQuery, getSearchSettingsFromRouteQuery } from '../../../search-history'
-import { CHANNEL_HANDLE_REGEX, formatDurationAsTimestamp, isUnloadedBackgroundTabClick, localizeAndAddKeyboardShortcutToActionTitle, openInternalPath, searchFiltersMatch, showInvidiousFallbackToast } from '../../helpers/utils'
+import { CHANNEL_HANDLE_REGEX, formatDurationAsTimestamp, formatSubscriberCount, isUnloadedBackgroundTabClick, localizeAndAddKeyboardShortcutToActionTitle, openInternalPath, searchFiltersMatch, showInvidiousFallbackToast } from '../../helpers/utils'
 import { translateWindowTitle } from '../../helpers/strings'
+import { getChannelHandleFromUrl } from '../../helpers/feed-metadata'
 import { getLocalSearchSuggestions } from '../../helpers/api/local'
-import { getInvidiousSearchSuggestions } from '../../helpers/api/invidious'
+import { getInvidiousSearchSuggestions, youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { shouldOpenExternalMediaUrl } from '../../helpers/externalMediaUrl'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
@@ -322,6 +324,7 @@ import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { usesCapacitorTabletLayout } from '../../helpers/capacitorLayout'
 import { getNotificationThumbnailUrl, supportsNotificationHistory } from '../../helpers/notificationHistory'
 import { loadVideoMetadata } from '../../helpers/videoMetadata'
+import { loadChannelSummary } from '../../helpers/channels'
 
 const { t } = useI18n()
 const syncing = computed(() => store.getters.getSyncServerStatus === 'syncing')
@@ -424,12 +427,15 @@ const navigationHistoryDropdownOptions = computed(() => {
 })
 /** @type {import('vue').ShallowRef<string[]>} */
 const searchSuggestionsDataList = shallowRef([])
-// Shows which video a link opens before it is submitted. It belongs to the
-// search suggestions, as both request data for text that was not submitted.
-/** @type {import('vue').ShallowRef<{ queryText: string, videoId: string, title?: string, details?: string } | null>} */
+// Shows which video or channel a link or handle opens before it is submitted. It
+// belongs to the search suggestions, as both request data for text that was not submitted.
+/** @type {import('vue').ShallowRef<{ queryText: string, videoId?: string, avatar?: string | null, title?: string, details?: string } | null>} */
 const linkPreview = shallowRef(null)
-// Follows the thumbnail settings, which can change while a preview is loaded.
-const linkPreviewThumbnail = computed(() => linkPreview.value && getNotificationThumbnailUrl(linkPreview.value.videoId))
+// Video thumbnails follow the thumbnail settings, which can change while a preview is loaded.
+const linkPreviewThumbnail = computed(() => {
+  if (!linkPreview.value) return null
+  return linkPreview.value.videoId ? getNotificationThumbnailUrl(linkPreview.value.videoId) : linkPreview.value.avatar
+})
 /** The text whose preview is shown or loading. */
 let linkPreviewQuery = null
 let linkPreviewController = null
@@ -1251,9 +1257,17 @@ async function loadLinkPreview(queryText, signal) {
   } catch {
     return
   }
-  if (signal.aborted || result.urlType !== 'video') return
+  if (signal.aborted) return
+  if (result.urlType === 'video') await loadVideoLinkPreview(queryText, result.videoId, signal)
+  else if (result.urlType === 'channel') await loadChannelLinkPreview(queryText, result, signal)
+}
 
-  const { videoId } = result
+/**
+ * @param {string} queryText
+ * @param {string} videoId
+ * @param {AbortSignal} signal
+ */
+async function loadVideoLinkPreview(queryText, videoId, signal) {
   const preview = { queryText, videoId }
   const watchedVideo = store.getters.getHistoryCacheById[videoId]
   if (watchedVideo) {
@@ -1272,6 +1286,72 @@ async function loadLinkPreview(queryText, signal) {
     linkPreviewQuery = null
     linkPreview.value = null
     throw error
+  }
+}
+
+/**
+ * @param {string | null | undefined} url
+ * @param {boolean} fromYoutube whether Invidious users get it proxied
+ */
+function getChannelPreviewAvatar(url, fromYoutube) {
+  if (typeof url !== 'string' || url === '') return null
+  // Twice the displayed size, instead of the 176px default.
+  url = url.replace(/=s\d+/, '=s108')
+  return fromYoutube && backendPreference.value === 'invidious' ? youtubeImageUrlToInvidious(url) : url
+}
+
+/**
+ * @param {string | null} handle
+ * @param {number | null} [subscriberCount]
+ */
+function getChannelPreviewDetails(handle, subscriberCount) {
+  return [
+    handle,
+    subscriberCount == null ? null : t('Global.Counts.Subscriber Count', { count: formatSubscriberCount(subscriberCount) }, subscriberCount)
+  ].filter(Boolean).join(' • ')
+}
+
+/**
+ * Unlike a video, a channel only shows a preview once it is found, as
+ * handles typed by hand often name no channel until they are complete.
+ * @param {string} queryText
+ * @param {{ channelId: string, url: string }} result
+ * @param {AbortSignal} signal
+ */
+async function loadChannelLinkPreview(queryText, { channelId, url }, signal) {
+  const urlHandle = getChannelHandleFromUrl(url)?.toLowerCase()
+  const subscriptions = store.getters.getSubscribedChannelsById
+  const subscribedChannel = subscriptions.get(channelId) ??
+    (urlHandle ? [...subscriptions.values()].find(channel => channel.handle?.toLowerCase() === urlHandle) : undefined)
+  if (subscribedChannel && typeof subscribedChannel.name === 'string' && subscribedChannel.name.trim()) {
+    linkPreview.value = {
+      queryText,
+      avatar: getChannelPreviewAvatar(subscribedChannel.thumbnail, true),
+      title: subscribedChannel.name,
+      details: getChannelPreviewDetails(subscribedChannel.handle ?? null)
+    }
+    return
+  }
+
+  let channel
+  try {
+    channel = await loadChannelSummary(channelId, url, { preference: backendPreference.value, fallback: backendFallback.value }, signal)
+  } catch (error) {
+    // Focusing the search again retries.
+    if (!signal.aborted) linkPreviewQuery = null
+    throw error
+  }
+  if (channel === null) {
+    // Resolving a handle also fails like this without a connection, so focusing the search again retries.
+    if (!signal.aborted) linkPreviewQuery = null
+    return
+  }
+
+  linkPreview.value = {
+    queryText,
+    avatar: getChannelPreviewAvatar(channel.thumbnail, false),
+    title: channel.name,
+    details: getChannelPreviewDetails(channel.handle ?? getChannelHandleFromUrl(url), channel.subscriberCount)
   }
 }
 

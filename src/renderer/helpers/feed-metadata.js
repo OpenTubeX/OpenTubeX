@@ -1,7 +1,10 @@
-export const CHANNEL_HANDLE_REGEX = /^@[\w.-]{3,30}$/
+/**
+ * A handle as typed: 3 to 30 letters and digits from any script, `_`, `-`, `.`, and `·`.
+ * Han and Hangul handles can be 1 character long, and Hiragana, Katakana, and Ethiopic ones 2.
+ */
+export const CHANNEL_HANDLE_REGEX = /^@(?:[\p{L}\p{M}\p{N}_.·-]{3,30}|[\p{scx=Han}\p{scx=Hangul}]{1,2}|[\p{scx=Hiragana}\p{scx=Katakana}\p{scx=Ethiopic}]{2})$/u
 
 /**
- * Handles can use letters from any script, unlike {@link CHANNEL_HANDLE_REGEX}.
  * Servers can send any text in their handle fields, so only handles are kept.
  * @param {unknown} value
  * @returns {string | null} the handle including its leading `@`
