@@ -88,9 +88,9 @@ export function setupScreenshotFolderIpc() {
 
     const filePath = path.resolve(directory, filename)
 
-    // Ensure that we are only writing inside of the expected directory
-    // 'path.dirname' does not return trailing slash, remove it from 'directory' path to ensure consistent comparison
-    if (path.dirname(filePath) !== directory.replace(/\/$/, '')) {
+    // Ensure that we are only writing inside of the expected directory.
+    // 'path.resolve' drops trailing separators except for a root folder, like 'path.dirname'.
+    if (path.dirname(filePath) !== path.resolve(directory)) {
       throw new Error('Invalid save location')
     }
 
