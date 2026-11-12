@@ -239,9 +239,13 @@ export async function expectPageScrollWithinRenderedRange(page) {
     const contentBox = content.getBoundingClientRect()
     // Negative margins do not shorten the element's scrollable overflow box.
     const contentMarginBottom = Math.max(0, Number.parseFloat(getComputedStyle(content).marginBottom) || 0)
+    // At fractional zoom, innerHeight and scrollHeight each round to whole CSS
+    // pixels. Measure the rendered end against the fractional viewport, so the
+    // comparison below carries only the document's rounding.
+    const viewportHeight = window.visualViewport?.height ?? window.innerHeight
     const renderedMaximumScrollY = Math.max(
       0,
-      contentBox.bottom + window.scrollY + contentMarginBottom - window.innerHeight
+      contentBox.bottom + window.scrollY + contentMarginBottom - viewportHeight
     )
     const documentMaximumScrollY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
     const scrollbar = document.querySelector('body > .os-scrollbar-vertical')
