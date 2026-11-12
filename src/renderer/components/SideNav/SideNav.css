@@ -217,6 +217,10 @@
     inset-block: auto 0;
     padding-block-end: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0));
     overflow-y: hidden;
+
+    /* Stay above sticky page headers, like the top navigation, so a header
+       taller than a short window cannot cover the destinations. */
+    z-index: 7;
     transform: none;
     transition: var(--mobile-nav-reveal-transition);
   }
