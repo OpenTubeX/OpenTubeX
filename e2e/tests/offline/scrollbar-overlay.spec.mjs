@@ -125,6 +125,8 @@ test.describe('overlay scrollbars', () => {
       try {
         for (let index = 0; index < 40; index++) {
           element.style.opacity = index % 2 ? '0.5' : '1'
+          // Like the player's time display, which replaces its text node.
+          element.textContent = String(index)
           await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
         }
         return reads

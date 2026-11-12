@@ -466,7 +466,9 @@ function create(element) {
         observeChildren(record.addedNodes, true)
         observeChildren(record.removedNodes, false)
       }
-      contentChanged ||= !(record.target instanceof Element && record.target.closest('.os-scrollbar'))
+      if (record.target instanceof Element && record.target.closest('.os-scrollbar')) continue
+      // Setting textContent replaces text nodes, which the page leaves out.
+      contentChanged ||= !isPage || [...record.addedNodes, ...record.removedNodes].some(node => node instanceof Element)
     }
     // Code that replaces a container's children takes the bars with them.
     for (const { scrollbar } of scrollbars) {
