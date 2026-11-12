@@ -4,9 +4,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
@@ -23,7 +26,39 @@ final class SubscriptionRefreshHttpClient {
 
     static JSONObject fetch(SubscriptionRefreshConfiguration.Feed feed, String channelId)
         throws IOException, JSONException {
-        return fetch(feed, channelId, SubscriptionRefreshHttpClient::fetchRequest);
+        return fetch(feed, channelId, resendingBrokenConnections(SubscriptionRefreshHttpClient::fetchRequest));
+    }
+
+    /**
+     * Background refresh requests only read, so one that lost its connection is
+     * sent again. HttpURLConnection reuses kept-alive connections that the server
+     * or the proxy relay already closed, and fails instead of retrying; each such
+     * connection fails at once, so a second resend covers another one from the
+     * pool. A timeout gets one resend, since each attempt waits a whole timeout.
+     */
+    static RequestFetcher resendingBrokenConnections(RequestFetcher fetcher) {
+        return (request, type, channelId) -> {
+            boolean timedOut = false;
+            for (int attempt = 0; ; attempt++) {
+                try {
+                    return fetcher.fetch(request, type, channelId);
+                } catch (IOException error) {
+                    checkInterrupted();
+                    timedOut |= error instanceof SocketTimeoutException;
+                    if (attempt >= (timedOut ? 1 : 2) || !isBrokenConnection(error)) throw error;
+                }
+            }
+        };
+    }
+
+    static boolean isBrokenConnection(IOException error) {
+        // Includes a reset, an aborted or closed socket, a broken pipe, and a timeout.
+        if (error instanceof SocketException || error instanceof SocketTimeoutException ||
+            error instanceof EOFException || error.getCause() instanceof EOFException) return true;
+        // TLS sockets report a reset or broken pipe as an SSLException.
+        String message = error.getMessage();
+        return message != null && message.toLowerCase(java.util.Locale.ROOT)
+            .matches(".*(unexpected end of stream|connection reset|broken pipe).*");
     }
 
     static JSONObject fetch(SubscriptionRefreshConfiguration.Feed feed, String channelId, RequestFetcher fetcher)

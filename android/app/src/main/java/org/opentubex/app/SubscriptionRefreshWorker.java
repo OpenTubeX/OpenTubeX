@@ -180,6 +180,10 @@ public final class SubscriptionRefreshWorker extends Worker {
     private Result doScheduledWork() {
         Context context = getApplicationContext();
         if (AppVisibility.isVisible()) return Result.success();
+        // Android freezes the hidden app between jobs, so a server may have closed
+        // kept-alive connections unseen. Requests would reuse their relay tunnels
+        // and wait for replies that never come, so close the ones idle for a while.
+        AndroidProxy.closeStaleTunnels(AndroidProxyRelay.clock.getAsLong());
         String feedType = getInputData().getString(FEED_TYPE_INPUT);
         if (feedType == null) return Result.failure();
 

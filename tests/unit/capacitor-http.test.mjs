@@ -5,8 +5,8 @@ import vm from 'node:vm'
 
 import { createAbortError } from '../../src/renderer/helpers/api/requestErrors.js'
 import { waitForRequest } from '../../src/renderer/helpers/api/requestWait.js'
-import { classifyRequestFailure } from '../../src/renderer/helpers/api/requestDiagnostics.js'
-import { createNetworkRecovery } from '../../src/renderer/helpers/networkRecovery.js'
+import { BROKEN_CONNECTION_ERROR, classifyRequestFailure } from '../../src/renderer/helpers/api/requestDiagnostics.js'
+import { createNetworkRecovery, isReadOnlyRequest } from '../../src/renderer/helpers/networkRecovery.js'
 import { createSubscriptionNetworkRecovery, SubscriptionNetworkError } from '../../src/renderer/helpers/subscriptionNetworkRecovery.js'
 
 import {
@@ -313,6 +313,8 @@ async function loadNativeHttp(request, ios = null, entryPoint = 'capacitorHttpFe
     registerPlugin: name => name === 'IOSHttp' ? ios : android,
     crypto: globalThis.crypto,
     withNetworkRecovery: (input, init, task) => task(init?.signal ?? (input instanceof Request ? input.signal : undefined)),
+    isReadOnlyRequest,
+    BROKEN_CONNECTION_ERROR,
     createAbortError,
     waitForRequest,
     Request,
@@ -484,6 +486,27 @@ for (const timeoutOption of ['readTimeout']) {
     }
   })
 }
+
+test('Android resends read-only requests once after a kept-alive connection broke, but not other POSTs', async () => {
+  const requests = []
+  const fetchNative = await loadNativeHttp(() => assert.fail('Abortable requests must not use CapacitorHttp'), null,
+    'capacitorHttpFetch', async () => {}, {
+      request: async options => {
+        requests.push(`${options.method} ${new URL(options.url).pathname}`)
+        if (requests.length % 2 === 1 || options.url.endsWith('/like/like')) {
+          throw Object.assign(new Error('unexpected end of stream on com.android.okhttp.Address@1'), { code: 'IOException' })
+        }
+        return { status: 200, data: 'ok', headers: {}, url: options.url }
+      },
+      abort: async () => {}
+    })
+  const search = await fetchNative('https://www.youtube.com/youtubei/v1/search', { method: 'POST', body: '{}' })
+  assert.equal(await search.text(), 'ok')
+  await assert.rejects(fetchNative('https://www.youtube.com/youtubei/v1/like/like', { method: 'POST', body: '{}' }),
+    { message: /unexpected end of stream/ })
+  assert.deepEqual(requests, ['POST /youtubei/v1/search', 'POST /youtubei/v1/search', 'POST /youtubei/v1/like/like'])
+  assert.equal(classifyRequestFailure(Object.assign(new Error('unexpected end of stream on Connection{cipherSuite=TLS_AES_128_GCM_SHA256}'), { code: 'IOException' })), 'network')
+})
 
 test('Android abort cancels the native API request as well as its JavaScript wait', async () => {
   const requests = []
