@@ -9,7 +9,7 @@ export async function handleTwitchSubOnlyVod(event, videoId) {
 }
 
 export async function handleTwitchChatReplayPage(event, videoId, position) {
-  if (!isOpenTubeXUrl(event.senderFrame?.url) || !/^\d{1,20}$/.test(videoId)) return null
+  if (!isOpenTubeXUrl(event.senderFrame?.url) || typeof videoId !== 'string' || !/^\d{1,20}$/.test(videoId)) return null
   const isCursor = typeof position === 'string' && position.length < 2048
   if (!isCursor && !(Number.isInteger(position) && position >= 0 && position <= 864000)) return null
 
