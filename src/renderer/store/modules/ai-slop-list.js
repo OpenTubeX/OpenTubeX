@@ -15,6 +15,7 @@ const EMPTY_SET = markRaw(new Set())
 /** @type {Promise<void> | null} */
 let pendingLoad = null
 let refreshListenersAdded = false
+let refreshAfterPendingLoad = false
 
 const state = {
   aiSlopBlockedChannels: EMPTY_SET,
@@ -61,7 +62,11 @@ const actions = {
       // Retry a failed download, and refresh an outdated list, when the app
       // comes back online or into view. Fresh lists return without a request.
       const refresh = () => {
-        if (rootGetters.getUseAiSlopList && document.visibilityState === 'visible') {
+        if (!rootGetters.getUseAiSlopList || document.visibilityState !== 'visible') return
+        // A download that started before the connection came back may still fail
+        if (pendingLoad) {
+          refreshAfterPendingLoad = true
+        } else {
           dispatch('loadAiSlopList')
         }
       }
@@ -101,6 +106,10 @@ const actions = {
         commit('setAiSlopListLoadFailed', true)
       } finally {
         pendingLoad = null
+        if (refreshAfterPendingLoad) {
+          refreshAfterPendingLoad = false
+          if (rootGetters.getUseAiSlopList) dispatch('loadAiSlopList')
+        }
       }
     })()
 
