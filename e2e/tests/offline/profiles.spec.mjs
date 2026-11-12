@@ -656,6 +656,99 @@ test.describe('profile manager', () => {
         return element.scrollTop - maximumScrollTop
       })).toBeLessThanOrEqual(1)
     })
+
+    test('clamps the scroll position after searching from the bottom', { tag: '@scale' }, async ({ page }) => {
+      await openProfileList(page)
+      await page.locator('.profilePanelHeader button').last().click()
+      await page.locator('.card .profileList').getByText('Second profile').click()
+      await page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true }).click()
+
+      const scroller = page.locator('.settingsSubpageScroll')
+      const search = page.getByRole('searchbox', { name: 'Search channels', exact: true })
+      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => search.evaluate(input => input.getBoundingClientRect().bottom)).toBeLessThan(
+        await scroller.evaluate(element => element.getBoundingClientRect().top)
+      )
+
+      // Typing would scroll the field into view, which hides the stale offset
+      await search.evaluate(input => {
+        input.value = 'no such channel'
+        input.dispatchEvent(new Event('input', { bubbles: true }))
+      })
+      await expect(page.getByText('No channels match your search', { exact: true })).toBeVisible()
+
+      await expect.poll(() => scroller.evaluate(element => {
+        const content = element.firstElementChild
+        const contentEnd = content.getBoundingClientRect().bottom -
+          element.getBoundingClientRect().top + element.scrollTop +
+          Number.parseFloat(getComputedStyle(element).paddingBottom)
+        const maximumScrollTop = Math.max(0, contentEnd - element.clientHeight)
+        const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+        return element.scrollTop <= maximumScrollTop + 1 &&
+          scrollbar.classList.contains('os-scrollbar-unusable') === (maximumScrollTop <= 1)
+      })).toBe(true)
+    })
+  })
+
+  test.describe('large subscription lists', () => {
+    const subscriptions = Array.from({ length: 101 }, (_, index) => ({
+      id: `UC${String(index).padStart(22, '0')}`,
+      name: `Channel ${String(index).padStart(3, '0')}`,
+      thumbnail: ''
+    }))
+    test.use({
+      seed: {
+        settings: { generalAutoLoadMorePaginatedItemsEnabled: false },
+        profiles: [{ ...mainProfile, subscriptions }, secondProfile]
+      }
+    })
+
+    test('pages channel lists and still selects and adds every channel', async ({ app, page }) => {
+      await openProfileList(page)
+      await page.locator('.profilePanelHeader button').last().click()
+      await page.locator('.card .profileList').getByText('Second profile').click()
+      await page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true }).click()
+
+      const lists = page.locator('.profileSettingsContent').getByRole('tabpanel').locator('.card')
+      const otherChannels = lists.nth(1)
+      await expect(otherChannels.getByRole('checkbox')).toHaveCount(100)
+      // Selection covers channels that have not been rendered yet
+      await otherChannels.getByRole('button', { name: 'Select All', exact: true }).click()
+      await expect(otherChannels.getByText('101 selected', { exact: true })).toBeVisible()
+      await otherChannels.getByRole('button', { name: 'Load more channels', exact: true }).focus()
+      await page.keyboard.press('Enter')
+      await expect(otherChannels.getByRole('checkbox')).toHaveCount(101)
+      await expect(otherChannels.getByRole('checkbox', { name: 'Channel 100', exact: true })).toBeFocused()
+      await expect(otherChannels.getByRole('checkbox', { name: 'Channel 100', exact: true })).toBeChecked()
+      await expect(otherChannels.getByRole('button', { name: 'Load more channels', exact: true })).toHaveCount(0)
+      await otherChannels.getByRole('button', { name: 'Add Selected To Profile', exact: true }).click()
+
+      const profileChannels = lists.first()
+      await expect(profileChannels.getByRole('checkbox')).toHaveCount(100)
+      await expect(profileChannels.getByRole('button', { name: 'Load more channels', exact: true })).toBeVisible()
+      const storedChannelIds = () => {
+        const records = readDatastore(app.userDataDir, 'profiles').trim().split('\n').map(line => JSON.parse(line))
+        return records.findLast(record => record._id === secondProfile._id)?.subscriptions.map(channel => channel.id)
+      }
+      await expect.poll(() => storedChannelIds()?.length).toBe(101)
+
+      // Select All and Delete Selected only cover the search results
+      const search = page.getByRole('searchbox', { name: 'Search channels', exact: true })
+      await search.fill('05')
+      await expect(profileChannels.getByRole('checkbox')).toHaveCount(11)
+      await expect(profileChannels.getByRole('button', { name: 'Load more channels', exact: true })).toHaveCount(0)
+      await profileChannels.getByRole('button', { name: 'Select All', exact: true }).click()
+      await expect(profileChannels.getByText('11 selected', { exact: true })).toBeVisible()
+      await profileChannels.getByRole('button', { name: 'Delete Selected', exact: true }).click()
+      await page.getByRole('button', { name: 'Yes, delete', exact: true }).click()
+      await expect(profileChannels.getByText('No channels match your search', { exact: true })).toBeVisible()
+      await expect.poll(() => storedChannelIds()?.length).toBe(90)
+      expect(storedChannelIds()).not.toContain(subscriptions[5].id)
+      expect(storedChannelIds()).toContain(subscriptions[60].id)
+
+      await search.fill('')
+      await expect(profileChannels.getByRole('checkbox')).toHaveCount(90)
+    })
   })
 
   test('a profile can be created through the UI and persists', async ({ app, page }) => {

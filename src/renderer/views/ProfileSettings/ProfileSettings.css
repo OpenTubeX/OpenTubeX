@@ -89,9 +89,20 @@ h2 {
   padding-block: 16px;
 }
 
+.subscriptionSearch {
+  --input-bottom-spacing: 0;
+
+  inline-size: 85%;
+
+  /* The outlined label sits above the field. */
+  margin-block: 7px 15px;
+  margin-inline: auto;
+}
+
 @media only screen and (width <= 680px) {
   .card,
-  .profileTabs {
+  .profileTabs,
+  .subscriptionSearch {
     inline-size: 90%;
   }
 }

@@ -3,7 +3,8 @@ h2 {
   letter-spacing: -0.01em;
 }
 
-.selected {
+.selected,
+.noResults {
   text-align: center;
 }
 

@@ -1,5 +1,6 @@
 h2,
-.selectedCount {
+.selectedCount,
+.noResults {
   text-align: center;
 }
 
@@ -19,6 +20,11 @@ h2 {
 
 .selectionActions:has(+ .ft-flex-box:empty) {
   margin-block-end: 0;
+}
+
+/* The card has no bottom padding, as the bubbles bring their own */
+.loadMore {
+  padding-block-end: 16px;
 }
 
 .card {

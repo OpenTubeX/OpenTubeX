@@ -123,14 +123,31 @@
         role="tabpanel"
         :aria-labelledby="subscriptionsTabId"
       >
-        <FtProfileChannelList
-          :profile="openSettingsProfile"
-          :is-main-profile="isMainProfile"
-        />
-        <FtProfileFilterChannelsList
-          v-if="!isMainProfile"
-          :profile="openSettingsProfile"
-        />
+        <!-- Mounted on first open, as large subscription lists slow down opening a profile -->
+        <template v-if="subscriptionsTabOpened">
+          <div class="subscriptionSearch">
+            <FtInput
+              input-type="search"
+              :label="$t('Channels.Search bar placeholder')"
+              :icon="['fas', 'search']"
+              :placeholder="$t('Form Inputs.Search Text Hint')"
+              :show-action-button="false"
+              :value="subscriptionQuery"
+              :maxlength="255"
+              @input="subscriptionQuery = $event"
+            />
+          </div>
+          <FtProfileChannelList
+            :profile="openSettingsProfile"
+            :is-main-profile="isMainProfile"
+            :query="subscriptionQuery"
+          />
+          <FtProfileFilterChannelsList
+            v-if="!isMainProfile"
+            :profile="openSettingsProfile"
+            :query="subscriptionQuery"
+          />
+        </template>
       </div>
     </div>
   </div>
@@ -143,6 +160,7 @@ import { FtIcon } from '@opentubex/icons'
 
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
+import FtInput from '../../components/FtInput/FtInput.vue'
 import FtProfileBubble from '../../components/FtProfileBubble/FtProfileBubble.vue'
 import FtProfileEdit from '../../components/FtProfileEdit/FtProfileEdit.vue'
 import FtProfileChannelList from '../../components/FtProfileChannelList/FtProfileChannelList.vue'
@@ -169,6 +187,8 @@ import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
 const isNewProfileOpen = ref(false)
 const activeTab = ref('customization')
+const subscriptionsTabOpened = ref(false)
+const subscriptionQuery = ref('')
 const rootRef = useTemplateRef('rootRef')
 const customizationTabRef = useTemplateRef('customizationTabRef')
 const subscriptionsTabRef = useTemplateRef('subscriptionsTabRef')
@@ -190,7 +210,7 @@ const profileList = computed(() => {
 
 watch(profileList, () => {
   openSettingsProfile.value = getProfileById(openSettingsProfileId.value)
-}, { deep: true })
+}, { deep: 1 })
 
 const isMainProfile = computed(() => {
   return MAIN_PROFILE_ID === openSettingsProfileId.value
@@ -220,6 +240,8 @@ function openSettingsForProfileWithId(profileId) {
 
   isNewProfileOpen.value = false
   activeTab.value = 'customization'
+  subscriptionsTabOpened.value = false
+  subscriptionQuery.value = ''
   openSettingsProfileId.value = profileId
   openSettingsProfile.value = getProfileById(profileId)
 }
@@ -227,6 +249,7 @@ function openSettingsForProfileWithId(profileId) {
 async function activateTab(tab, focus = false) {
   const changed = activeTab.value !== tab
   activeTab.value = tab
+  if (tab === 'subscriptions') subscriptionsTabOpened.value = true
   await nextTick()
 
   if (focus) {
