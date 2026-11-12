@@ -23,6 +23,12 @@
 
 .promptCard {
   animation: prompt-card-enter var(--motion-default-spatial);
+
+  /* Keep the card on its own compositor layer while it is open. Otherwise the
+     end of the enter animation paints it into the backdrop's layer, and
+     Android WebView can show a frame before those tiles are rastered: the dim
+     and the card vanish and the page flashes through. */
+  will-change: transform;
   overflow-y: auto;
   max-block-size: 95%;
   box-shadow: 0 12px 40px rgb(0 0 0 / 38%);

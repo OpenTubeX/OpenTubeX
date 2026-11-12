@@ -33,6 +33,10 @@
   max-block-size: min(680px, calc(100vh - min(14vh, 120px) - 48px));
   min-block-size: 260px;
   overflow: hidden;
+
+  /* Stays on its own layer so the backdrop's layer does not re-raster when the
+     animation ends, which flickers on Android. See FtPrompt's card. */
+  will-change: transform;
 }
 
 .commandPaletteHeader {
