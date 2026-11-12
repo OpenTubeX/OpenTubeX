@@ -31,9 +31,9 @@ const HOME_DIRECTORY_PATTERN = /(\/home\/|\/Users\/|[A-Z]:\\{1,2}Users\\{1,2})(?
 const GOOGLEVIDEO_NODE_PATTERN = /\brr\d+---sn-[\da-z-]+\.googlevideo\.com\b/gi
 // Long opaque path segments are usually tokens, signatures or session IDs
 const OPAQUE_PATH_SEGMENT = /^[\w%=.~-]{40,}$/
-// Video, channel and playlist IDs show what the user watched. Words, even
-// long ones like `performance`, have no digits or capitals.
-const MEDIA_ID_PATH_SEGMENT = /^(?=[\w-]*[\dA-Z])[\w-]{11,}$/
+// Video, channel and playlist IDs and channel handles show what the user
+// watched. Words, even long ones like `performance`, have no digits or capitals.
+const MEDIA_ID_PATH_SEGMENT = /^(?:(?=[\w-]*[\dA-Z])[\w-]{11,}|@.+)$/
 // The app's routes live in the hash, like `#/watch/<id>`. Only their name is
 // kept, since the rest can be a search, a handle or an ID.
 const APP_PROTOCOLS = ['app:', 'capacitor:']
