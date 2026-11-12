@@ -660,7 +660,7 @@ test.describe('profile manager', () => {
       })).toBeLessThanOrEqual(1)
     })
 
-    test('clamps the scroll positions after searching from the bottom', { tag: '@scale' }, async ({ page }) => {
+    test('clamps the scroll positions after searching and deleting from the bottom', { tag: '@scale' }, async ({ page }) => {
       await openProfileList(page)
       await page.locator('.profilePanelHeader button').last().click()
       await page.locator('.card .profileList').getByText('Second profile').click()
@@ -699,12 +699,30 @@ test.describe('profile manager', () => {
         input.dispatchEvent(new Event('input', { bubbles: true }))
       })
       await expect(channelScroller.getByRole('checkbox')).toHaveCount(11)
-      await expect.poll(() => channelScroller.evaluate(element => {
-        const maximumScrollTop = Math.max(0, element.scrollHeight - element.clientHeight)
+      const channelScrollRangeIsValid = () => channelScroller.evaluate(element => {
+        const content = [...element.children].filter(child => !child.classList.contains('os-scrollbar')).at(-1)
+        const contentEnd = content.getBoundingClientRect().bottom - element.getBoundingClientRect().top + element.scrollTop
+        const maximumScrollTop = Math.max(0, contentEnd - element.clientHeight)
         const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
         return element.scrollTop <= maximumScrollTop + 1 &&
           scrollbar.classList.contains('os-scrollbar-unusable') === (maximumScrollTop <= 1)
-      })).toBe(true)
+      })
+      await expect.poll(channelScrollRangeIsValid).toBe(true)
+
+      // Deleting the channels at the end shortens the list below its offset
+      await search.fill('')
+      await expect(channelScroller.getByRole('checkbox')).toHaveCount(30)
+      const actions = page.locator('.selectionActions')
+      await actions.getByRole('button', { name: 'Select All', exact: true }).click()
+      for (const index of [0, 1, 10, 11]) {
+        await channelScroller.getByRole('checkbox', { name: `Channel ${index}`, exact: true }).click()
+      }
+      await channelScroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => channelScroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+      await actions.getByRole('button', { name: 'Delete Selected', exact: true }).click()
+      await page.getByRole('button', { name: 'Yes, delete', exact: true }).click()
+      await expect(channelScroller.getByRole('checkbox')).toHaveCount(4)
+      await expect.poll(channelScrollRangeIsValid).toBe(true)
     })
   })
 
