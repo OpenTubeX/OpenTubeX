@@ -1102,11 +1102,16 @@ export default defineComponent({
       fullscreenDockReordering,
       fullscreenDockResizing,
       fullscreenDockStyle,
+      fullscreenDockWidthResizing,
+      fullscreenDockWidthStyle,
       handleFullscreenDockHeaderDoubleClick,
       handleFullscreenDockReorderPointerDown,
       handleFullscreenDockResizeKeydown,
       handleFullscreenDockResizePointerDown,
+      handleFullscreenDockWidthKeydown,
+      handleFullscreenDockWidthPointerDown,
       resetFullscreenDockHeights,
+      resetFullscreenDockWidth,
     } = useFullscreenDocks({
       container,
       video,
@@ -3576,7 +3581,7 @@ export default defineComponent({
         return
       }
 
-      if (event.target.closest(`${FULLSCREEN_DOCK_HEADER_SELECTOR}, .fullscreenDockResizeHandle`)) {
+      if (event.target.closest(`${FULLSCREEN_DOCK_HEADER_SELECTOR}, .fullscreenDockResizeHandle, .fullscreenDockWidthHandle`)) {
         return
       }
 
@@ -11428,17 +11433,22 @@ export default defineComponent({
       fullscreenDockCanReorder,
       fullscreenDockResizing,
       fullscreenDockReordering,
+      fullscreenDockWidthResizing,
+      fullscreenDockWidthStyle,
       enableMobileFullscreenSwipe,
       mobileFullscreenSwiping,
       mobileFullscreenSwipeSettling,
       mobileFullscreenSwipeStyle,
       mobileSeekPreview,
       resetFullscreenDockHeights,
+      resetFullscreenDockWidth,
       handleDocumentClick,
       handleFullscreenDockHeaderDoubleClick,
       handleFullscreenDockResizePointerDown,
       handleFullscreenDockResizeKeydown,
       handleFullscreenDockReorderPointerDown,
+      handleFullscreenDockWidthPointerDown,
+      handleFullscreenDockWidthKeydown,
       fullscreenMetadataOverlay,
       fullscreenMetadataTarget,
       showFullscreenMetadata,

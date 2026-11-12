@@ -102,6 +102,7 @@
         fullscreenAmbientBarsVisible,
         fullscreenDockResizing,
         fullscreenDockReordering,
+        fullscreenDockWidthResizing,
         mobileFullscreenSwipeEnabled: enableMobileFullscreenSwipe,
         mobileFullscreenSwiping,
         mobileFullscreenSwipeSettling,
@@ -120,6 +121,7 @@
       }"
       :style="[
         captionPlayerVariables,
+        fullscreenDockWidthStyle,
         { '--inline-player-aspect-ratio': audioPlayerMode || forceAspectRatio ? 16 / 9 : (annotationVideoAspectRatio ?? 16 / 9) },
         scrollMiniPlayerActive ? scrollMiniPlayerStyle : undefined,
         scrollMiniPlayerDragStyle,
@@ -765,6 +767,16 @@
         fullscreen
         @close="closePortraitFullscreenDock"
       >
+        <button
+          v-if="fullscreenDockOpen && !portraitFullscreenDocks"
+          type="button"
+          class="fullscreenDockWidthHandle shaka-no-propagation"
+          :aria-label="$t('Video.Player.Resize dock width', 'Resize dock width')"
+          :title="$t('Video.Player.Resize dock width', 'Resize dock width')"
+          @pointerdown="handleFullscreenDockWidthPointerDown"
+          @keydown="handleFullscreenDockWidthKeydown"
+          @dblclick.stop.prevent="resetFullscreenDockWidth"
+        />
         <Transition name="chapter-slide">
           <aside
             v-if="showChaptersOverlay && (isFullscreen || fullWindowEnabled) && chapters.length > 0"

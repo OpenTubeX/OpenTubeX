@@ -295,6 +295,8 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     playlistGridColumns: 0,
     quickSettings: [...DEFAULT_QUICK_SETTINGS],
     fullscreenActions: [...DEFAULT_FULLSCREEN_ACTIONS],
+    // 0 keeps the dock column's automatic width.
+    fullscreenDockWidth: 0,
     controlBarButtons: [...DEFAULT_CONTROL_BAR_BUTTONS],
     playerMenuControls: getDefaultPlayerMenuControls(),
     hiddenPlayerMenuControls: [],

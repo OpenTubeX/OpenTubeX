@@ -1777,6 +1777,7 @@ Video:
     Auto-generated Caption Template: '{language}（自动生成）'
     Up next in {seconds}: '{seconds} 秒后播放下一个'
     Resize dock: 调整停靠栏大小
+    Resize dock width: 调整停靠栏宽度
     Play now: 立即播放
     MusicPlaybackRateOverride: 检测到音乐视频，将以 1 倍速播放
     Normal: 正常

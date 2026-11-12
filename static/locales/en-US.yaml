@@ -2775,6 +2775,7 @@ Video:
     Autoplay is on: Autoplay is on
     Up next in {seconds}: Up next in {seconds}
     Resize dock: Resize dock
+    Resize dock width: Resize dock width
     Play now: Play now
     MusicPlaybackRateOverride: Detected music video, playing back at 1x
     Normal: Normal

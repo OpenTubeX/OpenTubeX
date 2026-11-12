@@ -2224,6 +2224,7 @@ Video:
     Autoplay is on: Samodejno predvajanje je vklopljeno
     Up next in {seconds}: Naslednji videoposnetek čez {seconds}
     Resize dock: Spremeni velikost plošče
+    Resize dock width: Spremeni širino plošče
     Play now: Predvajaj zdaj
     MusicPlaybackRateOverride: Zaznan je glasbeni videoposnetek, zato je hitrost predvajanja 1x
     Normal: Običajno

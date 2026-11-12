@@ -1782,6 +1782,7 @@ Video:
     Auto-generated Caption Template: '{language} (automatisk generert)'
     Up next in {seconds}: Neste om {seconds}
     Resize dock: Endre størrelsen på dokken
+    Resize dock width: Endre bredden på dokken
     Play now: Spill av nå
     MusicPlaybackRateOverride: Musikkvideo oppdaget, spilles av med 1x hastighet
     Normal: Normal

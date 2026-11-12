@@ -2245,6 +2245,7 @@ Video:
     Autoplay is on: La reproducció automàtica està activada
     Up next in {seconds}: A continuació d'aquí a {seconds}
     Resize dock: Redimensiona el plafó
+    Resize dock width: Canvia l'amplada del plafó
     Play now: Reprodueix ara
     MusicPlaybackRateOverride: S'ha detectat un vídeo musical; es reprodueix a 1x
     Normal: Normal

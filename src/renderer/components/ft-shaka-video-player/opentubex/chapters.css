@@ -58,6 +58,44 @@
   opacity: 1;
 }
 
+/* Fills the gap between the pushed video and the dock column. */
+.fullscreenDockWidthHandle {
+  display: none;
+  position: absolute;
+  z-index: 5;
+  inset-block: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + 12px)
+    calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + 12px + var(--fullscreen-actions-footer-space, 0px));
+  inset-inline-end: calc(var(--side-panel-width) - 12px);
+  inline-size: 12px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.ftVideoPlayer:is(:fullscreen, .fullWindow) .fullscreenDockWidthHandle {
+  display: block;
+}
+
+.fullscreenDockWidthHandle::after {
+  content: '';
+  position: absolute;
+  inset-block-start: calc(50% - 21px);
+  inset-inline-start: calc(50% - 1.5px);
+  inline-size: 3px;
+  block-size: 42px;
+  background-color: rgb(255 255 255 / 42%);
+  border-radius: calc(999px * var(--ui-roundness));
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.fullscreenDockWidthHandle:is(:hover, :focus-visible, :active)::after,
+.ftVideoPlayer.fullscreenDockWidthResizing .fullscreenDockWidthHandle::after {
+  opacity: 1;
+}
+
 .fullscreenDockReorderable :is(.chapterOverlayHeader, .fullscreenMetadataHeader),
 .fullscreenDockReorderable :deep(.transcriptHeader),
 .fullscreenDockReorderable :deep(.sponsorBlockHeader),
@@ -87,6 +125,11 @@
 .ftVideoPlayer.fullscreenDockResizing,
 .ftVideoPlayer.fullscreenDockResizing :deep(*) {
   cursor: row-resize !important;
+}
+
+.ftVideoPlayer.fullscreenDockWidthResizing,
+.ftVideoPlayer.fullscreenDockWidthResizing :deep(*) {
+  cursor: col-resize !important;
 }
 
 .ftVideoPlayer.fullscreenDockReordering,
