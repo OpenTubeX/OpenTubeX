@@ -69,6 +69,38 @@ test('treats an empty comments response as no comments', { tag: '@scale' }, asyn
   await expect.poll(() => page.locator('.mobileSheet[open] .noComments').evaluate(element => element.scrollWidth > element.clientWidth + 1)).toBe(false)
   await expect(page.locator('.toast', { hasText: 'Local API Error' })).toHaveCount(0)
   expect(commentRequestCount).toBe(1)
+
+  // Without comments, shortening or closing a long comment draft at the
+  // bottom shortens the panel too.
+  await page.evaluate(() => window.$store.dispatch('updateYouTubeAccount', {
+    credentials: { access_token: 'token', refresh_token: 'token', expiry_date: new Date(Date.now() + 3_600_000).toISOString(), client: { client_id: 'id', client_secret: 'secret' } },
+    profiles: [{ name: 'Commenter', handle: null, thumbnail: null, pageId: null }],
+    pageId: null,
+    channelId: null
+  }))
+  const sheet = page.locator('.mobileSheet[open]')
+  const scroller = sheet.locator('.commentsContentWrapper')
+  const expectScrollInRange = () => expect.poll(() => scroller.evaluate(element => (
+    element.scrollTop + element.clientHeight <= element.scrollHeight + 1 &&
+    element.scrollTop <= Math.max(0, element.scrollHeight - element.clientHeight) + 1
+  ))).toBe(true)
+  const scrollToBottom = async () => {
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  }
+  const longDraft = Array.from({ length: 30 }, (_, line) => `Line ${line + 1}`).join('\n')
+  await sheet.getByRole('button', { name: 'Add a comment' }).click()
+  const draft = sheet.locator('.topCommentComposer textarea')
+  await draft.fill(longDraft)
+  await scrollToBottom()
+  await draft.fill('Short comment')
+  await expectScrollInRange()
+
+  await draft.fill(longDraft)
+  await scrollToBottom()
+  await sheet.locator('.topCommentComposer').getByRole('button', { name: 'Cancel' }).click()
+  await expect(draft).toHaveCount(0)
+  await expectScrollInRange()
 })
 
 const headerOnlyResponse = JSON.parse(emptyCommentsResponse)
