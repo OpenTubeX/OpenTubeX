@@ -79,6 +79,8 @@ const videos = computed(() => allVideos.value.filter(video => !video.isShort &&
   })))
 
 let generation = 0
+// Pages that only add hidden videos load the next one, up to this many.
+const MAX_HIDDEN_PAGES = 3
 
 /** @param {string | null} [token] the next page */
 async function load(token = null) {
@@ -86,13 +88,19 @@ async function load(token = null) {
   loading.value = true
   failed.value = false
   try {
-    const page = await getYouTubeAccountRecommendations(token)
-    // A channel switch started a newer load.
-    if (current !== generation) return
-    const seen = new Set(token ? allVideos.value.map(video => video.videoId) : [])
-    const added = page.videos.filter(video => !seen.has(video.videoId) && seen.add(video.videoId))
-    allVideos.value = token ? [...allVideos.value, ...added] : added
-    continuation.value = page.continuation
+    let nextToken = token
+    for (let page = 0; page < MAX_HIDDEN_PAGES; page++) {
+      const visibleBefore = nextToken ? videos.value.length : 0
+      const result = await getYouTubeAccountRecommendations(nextToken)
+      // A channel switch started a newer load.
+      if (current !== generation) return
+      const seen = new Set(nextToken ? allVideos.value.map(video => video.videoId) : [])
+      const added = result.videos.filter(video => !seen.has(video.videoId) && seen.add(video.videoId))
+      allVideos.value = nextToken ? [...allVideos.value, ...added] : added
+      continuation.value = result.continuation
+      if (videos.value.length > visibleBefore || !result.continuation) break
+      nextToken = result.continuation
+    }
   } catch (error) {
     if (current !== generation) return
     console.error(error)

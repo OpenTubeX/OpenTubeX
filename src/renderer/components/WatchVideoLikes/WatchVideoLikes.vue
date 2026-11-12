@@ -151,7 +151,11 @@ function rate(type) {
   rating.value = next
 
   const load = ratingLoad
+  const pageId = store.getters.getYouTubeAccount?.pageId ?? null
   pendingRating = pendingRating.then(async () => {
+    // Switching channels before an earlier rating finished drops this one,
+    // so it cannot rate as the other channel.
+    if ((store.getters.getYouTubeAccount?.pageId ?? null) !== pageId) return
     try {
       await rateYouTubeVideo(videoId, next)
     } catch (error) {

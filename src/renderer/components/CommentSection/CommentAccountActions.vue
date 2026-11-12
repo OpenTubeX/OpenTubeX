@@ -73,6 +73,7 @@ import { FtIcon } from '@opentubex/icons'
 
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 
+import store from '../../store/index'
 import { ERROR_TOAST_ICON, formatViewCount, showToast } from '../../helpers/utils'
 import { performYouTubeCommentAction } from '../../helpers/api/youtube-account'
 import { youTubeCommentsKey } from './youTubeComments'
@@ -107,7 +108,11 @@ function rate(type) {
 
   // Liking replaces a dislike and the reverse, like on YouTube.
   const action = next === 'LIKE' ? 'like' : next === 'DISLIKE' ? 'dislike' : previous === 'LIKE' ? 'unlike' : 'undislike'
+  const pageId = store.getters.getYouTubeAccount?.pageId ?? null
   pendingRating = pendingRating.then(async () => {
+    // Switching channels before an earlier rating finished drops this one,
+    // so it cannot rate as the other channel.
+    if ((store.getters.getYouTubeAccount?.pageId ?? null) !== pageId) return
     try {
       await performYouTubeCommentAction(action, commentId, videoId)
     } catch (error) {
