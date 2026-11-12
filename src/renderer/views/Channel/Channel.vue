@@ -426,11 +426,6 @@ let apiUsed = ''
  */
 const tabApiUsed = new Map()
 let mayContainContentFromOtherChannels = false
-// YouTube's possibly translated text, kept to switch with the untranslated text setting.
-/** @type {string?} */
-let localHeaderName = null
-/** @type {string?} */
-let localAboutDescription = null
 // Every tab is its own request, so a tab's content is fetched the first time it is shown.
 const loadedTabs = new Set()
 /** @type {Map<string, Promise<void>>} Tab loads that have not finished yet */
@@ -509,16 +504,9 @@ watch(thumbnailUrl, (thumbnail) => {
   }
 })
 
-// Settings open over the channel page, so a changed preference applies to the loaded channel.
-watch(() => store.getters.getAvoidTranslation, () => {
-  if (apiUsed !== 'local' || !channelInstance?.page) return
-
-  if (localHeaderName) {
-    channelName.value = getOriginalChannelText().name ?? localHeaderName
-  }
-  if (localAboutDescription !== null) {
-    showLocalAboutDescription()
-  }
+// Settings open over the channel page. Reload so the name, its saved copy and loaded items all follow the preference.
+watch(() => store.getters.getAvoidTranslation === 'entire_app', () => {
+  if (apiUsed === 'local') loadChannelRoute()
 })
 
 const errorMessage = ref('')
@@ -729,6 +717,10 @@ watch(route, () => {
     return
   }
   ownRouteFullPaths.length = 0
+  loadChannelRoute()
+}, { deep: true })
+
+function loadChannelRoute() {
   channelRouteGeneration += 1
   hasLoadedDetails.value = false
   isLoading.value = true
@@ -761,8 +753,6 @@ watch(route, () => {
   searchResults.value = []
   apiUsed = ''
   channelInstance = null
-  localHeaderName = null
-  localAboutDescription = null
   mayContainContentFromOtherChannels = false
   loadedTabs.clear()
   pendingTabs.clear()
@@ -801,7 +791,7 @@ watch(route, () => {
       autoRefreshOnSortByChangeEnabled = true
     })
   }
-}, { deep: true })
+}
 
 onMounted(async () => {
   document.addEventListener('keydown', handlePanelTabNavigation)
@@ -957,7 +947,7 @@ async function getChannelLocal() {
       /** @type {import('youtubei.js').YTNodes.ChannelAgeGate} */
       const ageGate = channelInstance.memo.get('ChannelAgeGate')[0]
 
-      channelName_ = ageGate.channel_title
+      channelName_ = getOriginalChannelText().name ?? ageGate.channel_title
       channelThumbnailUrl = ageGate.avatar[0].url
 
       channelName.value = channelName_
@@ -978,8 +968,8 @@ async function getChannelLocal() {
     let tags_ = parsedHeader.tags
 
     channelThumbnailUrl = parsedHeader.thumbnailUrl ?? subscriptionInfo.value?.thumbnail
-    localHeaderName = parsedHeader.name ?? null
-    channelName_ = getOriginalChannelText().name ?? localHeaderName ?? subscriptionInfo.value?.name
+    const pageName = parsedHeader.name ?? subscriptionInfo.value?.name
+    channelName_ = getOriginalChannelText().name ?? pageName
 
     if (channelThumbnailUrl?.startsWith('//')) {
       channelThumbnailUrl = `https:${channelThumbnailUrl}`
@@ -992,7 +982,8 @@ async function getChannelLocal() {
     channelHandle.value = parsedHeader.handle ?? savedHandle.value
     bannerUrl.value = parsedHeader.bannerUrl ?? null
     isFamilyFriendly.value = !!channelInstance.metadata.is_family_safe
-    isArtistTopicChannel.value = channelName_.endsWith('- Topic') && !!channelInstance.metadata.music_artist_name
+    // The original profile name may not have the suffix
+    isArtistTopicChannel.value = pageName.endsWith('- Topic') && !!channelInstance.metadata.music_artist_name
 
     mayContainContentFromOtherChannels = isArtistTopicChannel.value ||
       !!channelInstance.header?.is(YTNodes.CarouselHeader, YTNodes.InteractiveTabbedHeader) ||
@@ -1115,11 +1106,6 @@ function getOriginalChannelText() {
   return getOriginalChannelProfile(channelInstance.page.microformat)
 }
 
-function showLocalAboutDescription() {
-  const text = getOriginalChannelText().description || localAboutDescription
-  description.value = text ? autolinker.link(text) : ''
-}
-
 async function getChannelAboutLocal() {
   const expectedId = id.value
   const expectedRouteGeneration = channelRouteGeneration
@@ -1136,8 +1122,9 @@ async function getChannelAboutLocal() {
     setElementListLoading('about', false)
     links.value = getChannelAboutLinks(about)
 
+    let aboutDescription
     if (about.is(YTNodes.ChannelAboutFullMetadata)) {
-      localAboutDescription = about.description.isEmpty() ? '' : about.description.text
+      aboutDescription = about.description.isEmpty() ? '' : about.description.text
 
       const viewCount_ = extractNumberFromString(about.view_count.text)
       viewCount.value = isNaN(viewCount_) ? null : viewCount_
@@ -1148,7 +1135,7 @@ async function getChannelAboutLocal() {
 
       location.value = about.country.isEmpty() ? null : about.country.text
     } else {
-      localAboutDescription = about.metadata.description ?? ''
+      aboutDescription = about.metadata.description
 
       const viewCount_ = extractNumberFromString(about.metadata.view_count)
       viewCount.value = isNaN(viewCount_) ? null : viewCount_
@@ -1161,7 +1148,8 @@ async function getChannelAboutLocal() {
       location.value = about.metadata.country ?? null
     }
 
-    showLocalAboutDescription()
+    aboutDescription = getOriginalChannelText().description || aboutDescription
+    description.value = aboutDescription ? autolinker.link(aboutDescription) : ''
   } catch (err) {
     if (!isCurrentRoute()) return
 
