@@ -49,6 +49,7 @@ test('Refresh All holds its native batch until every feed and its native finish 
     store: { getters: { getActiveProfile: { subscriptions: [{ id: 'UC1' }] }, getUseRssFeeds: true } },
     supportsYtDlp: false,
     refreshRssFeeds() {},
+    rssFeedsRefreshing: { value: false },
     getEnabledSubscriptionFeedSources: () => [{ category: 'videos' }, { category: 'shorts' }],
     getSubscriptionRefreshCancelCount: () => 0,
     refreshSubscriptionVideosFromRemote: refreshFeed(1),
