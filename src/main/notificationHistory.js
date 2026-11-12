@@ -1,5 +1,5 @@
 // @ts-check
-import { readFile, rename, writeFile } from 'node:fs/promises'
+import { readFile } from 'node:fs/promises'
 
 import {
   addNotificationHistoryEntries,
@@ -13,6 +13,8 @@ import {
   recordNotificationDismissals,
   removeNotificationHistoryEntry
 } from '../notificationHistory.js'
+import { createSerialQueue } from './serialQueue.js'
+import { writeFileAtomic } from './writeFileAtomic.js'
 
 /**
  * @typedef {import('../notificationHistory.js').NotificationHistoryEntry} NotificationHistoryEntry
@@ -37,9 +39,8 @@ function readJson(file, label) {
  * @param {string} file
  * @param {unknown} value
  */
-async function writeJson(file, value) {
-  await writeFile(file + '.tmp', JSON.stringify(value), { mode: 0o600 })
-  await rename(file + '.tmp', file)
+function writeJson(file, value) {
+  return writeFileAtomic(file, JSON.stringify(value), { mode: 0o600 })
 }
 
 /**
@@ -58,7 +59,7 @@ async function writeJson(file, value) {
 export function createNotificationHistory({ file, dismissalsFile, onChange, onDismissalsChange, onStale }) {
   /** @type {NotificationHistoryState | null} */
   let state = null
-  let pending = Promise.resolve()
+  const enqueue = createSerialQueue()
   const unsaved = { entries: false, dismissals: false }
   /** @type {Promise<void> | null} */
   let loaded = null
@@ -78,7 +79,7 @@ export function createNotificationHistory({ file, dismissalsFile, onChange, onDi
    * @param {boolean} [local] whether the change dismisses notifications here
    */
   function change(update, local = false) {
-    const result = pending.then(async () => {
+    return enqueue(async () => {
       const current = await load()
       const { since = current.entries, ...next } = update(current)
       const entriesChanged = next.entries !== current.entries
@@ -104,13 +105,11 @@ export function createNotificationHistory({ file, dismissalsFile, onChange, onDi
         await writeJson(dismissalsFile, next.dismissals)
         unsaved.dismissals = false
       }
-    })
-    pending = result.catch(error => console.error('Failed to save the notification history', error))
-    return pending
+    }).catch(error => console.error('Failed to save the notification history', error))
   }
 
   return {
-    list: () => pending.then(load).then(current => current.entries),
+    list: () => enqueue(load).then(current => current.entries),
     /**
      * @param {import('../notificationHistory.js').NotificationHistoryInput & { createdAt?: number }} entry
      * @returns {Promise<NotificationHistoryEntry | null | undefined>} the saved entry, already read when
@@ -146,7 +145,7 @@ export function createNotificationHistory({ file, dismissalsFile, onChange, onDi
     clear: () => change(current => current.entries.length === 0
       ? current
       : { entries: [], dismissals: recordNotificationDismissals(current.dismissals, current.entries, { removed: true, through: true }) }, true),
-    getDismissals: () => pending.then(load).then(current => current.dismissals),
+    getDismissals: () => enqueue(load).then(current => current.dismissals),
     /**
      * Adds the dismissals of other devices and applies them.
      * @param {unknown} remote

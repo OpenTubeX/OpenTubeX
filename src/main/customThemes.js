@@ -15,6 +15,7 @@ import {
 import { resolveSystemTheme, resolveSystemThemeSettings } from '../appearanceSettings'
 import * as baseHandlers from '../datastores/handlers/base'
 import { isOpenTubeXUrl } from './utils'
+import { writeFileAtomic } from './writeFileAtomic'
 
 /**
  * Stores each custom theme as its own JSON file in the profile and registers
@@ -33,9 +34,7 @@ export function setupCustomThemes({ updateSettingFromMain, updateThemeSource }) 
 
   async function writeCustomThemeFile(theme) {
     const themePath = getCustomThemePath(theme.id)
-    const temporaryPath = `${themePath}.${randomUUID()}.tmp`
-    await asyncFs.writeFile(temporaryPath, `${JSON.stringify(theme, null, 2)}\n`, 'utf8')
-    await asyncFs.rename(temporaryPath, themePath)
+    await writeFileAtomic(themePath, `${JSON.stringify(theme, null, 2)}\n`, { temporaryFile: `${themePath}.${randomUUID()}.tmp` })
   }
 
   async function loadCustomThemes() {

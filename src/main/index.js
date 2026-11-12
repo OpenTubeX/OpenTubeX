@@ -1,7 +1,9 @@
 import { ClosedWindowHistory } from './tabs/ClosedWindowHistory.js'
 import { createFileWatchQueue } from './watchQueue.js'
+import { createSerialQueue } from './serialQueue.js'
+import { writeFileAtomic } from './writeFileAtomic.js'
 import {
-  app, BrowserWindow, dialog, Menu, ipcMain,
+  app, BrowserWindow, Menu, ipcMain,
   powerSaveBlocker, screen, session,
   nativeTheme, net, protocol, clipboard, ClipboardItem,
   shell, Tray, Notification, ShareMenu, nativeImage,
@@ -15,9 +17,7 @@ import cp from 'child_process'
 
 import {
   IpcChannels,
-  DBActions,
   SyncEvents,
-  PlaylistVideoAddResult,
   getConfiguredKeyboardShortcuts,
   getElectronAccelerator,
   SEARCH_CHAR_LIMIT,
@@ -33,7 +33,7 @@ import { applySyncServerUserAgent } from '../syncServerUserAgent'
 import * as baseHandlers from '../datastores/handlers/base'
 import { liveReminders, waitForDatastores } from '../datastores'
 import { createImageCacheHandler, ImageCache } from './ImageCache'
-import { constants as fsConstants, existsSync } from 'fs'
+import { existsSync } from 'fs'
 import asyncFs from 'fs/promises'
 import { promisify } from 'util'
 import { brotliDecompress } from 'zlib'
@@ -62,7 +62,7 @@ import { isShareableOpenTubeXRoute, transformOpenTubeXRouteUrl } from '../render
 import { DEFAULT_SEARCH_ENGINES_SETTING } from '../searchEngines'
 import { LiveReminderManager } from './LiveReminderManager'
 import { requestVoiceOverTranslation } from './voiceOverTranslation'
-import { recordSubscriptionFeedTitles, setupVideoMetadataCacheIpc } from './videoMetadataCache'
+import { setupVideoMetadataCacheIpc } from './videoMetadataCache'
 import { shouldAdvanceDockMediaSequence } from './dockMediaSession'
 import { setupStorageIpc } from './storage'
 import {
@@ -89,6 +89,7 @@ import { getTrayMenuIcon } from './trayMenuIcons'
 import { createScheduledBackups } from './scheduledBackups'
 import { createBackupArchiveFactory } from './backupArchive'
 import { createDatastoreRequestTracker } from './datastoreRequests'
+import { setupDatastoreIpc } from './datastoreIpc'
 import { getWindowButtonLayout, onWindowButtonLayoutChanged } from './windowButtonLayout'
 import { watchTrayColorScheme } from './trayColorScheme'
 import { setDiagnosticLogging, setupDiagnosticLogIpc } from './diagnosticLog'
@@ -97,11 +98,13 @@ import { createConfirmations } from './confirmations'
 import { setupCustomThemes } from './customThemes'
 import { contextMenuLabel, setupContextMenu, truncateSelectionForLabel } from './contextMenu'
 import { setupIpBlockRecoveryIpc } from './ipBlockRecovery'
-import { canRendererWriteSetting } from './settingWriteGuard'
 import { isSubscriptionAutoRefreshInProgress, setupSubscriptionAutoRefreshIpc } from './subscriptionAutoRefresh'
 import { setupCastIpc } from './castIpc'
 import { createUrlOpener, getDirectOpenUrl } from './openUrl'
-import { handleTrusted, sendToAppWindows } from './ipc'
+import { handleTrusted, isTrustedSender, onceTrusted, onTrusted, sendToAppWindows } from './ipc'
+import { setupPlayerCacheIpc } from './playerCacheIpc'
+import { setupPowerSaveBlockerIpc } from './powerSaveBlockerIpc'
+import { setupScreenshotFolderIpc } from './screenshotFolderIpc'
 import { setupBackupIpc } from './backupIpc'
 import { setupLibraryNotices } from './libraryNotices'
 import { setupLiveReminderIpc } from './liveReminderIpc'
@@ -649,12 +652,12 @@ function runApp() {
             fromNative: rect => screen.screenToDipRect(null, rect)
           })
         })
-        ipcMain.on(IpcChannels.PICTURE_IN_PICTURE_SHOWN, event => {
+        onTrusted(IpcChannels.PICTURE_IN_PICTURE_SHOWN, event => {
           pictureInPictureBounds.shown(event.sender).catch(error => {
             console.error('Failed to restore the Picture-in-Picture bounds', error)
           })
         })
-        ipcMain.on(IpcChannels.PICTURE_IN_PICTURE_HIDDEN, event => pictureInPictureBounds.hidden(event.sender))
+        onTrusted(IpcChannels.PICTURE_IN_PICTURE_HIDDEN, event => pictureInPictureBounds.hidden(event.sender))
       }
     } catch (error) {
       console.error('Failed to load the Picture-in-Picture window integration', error)
@@ -706,13 +709,6 @@ function runApp() {
   // The worker reads from its own connection, so an archive includes a write
   // only once its request has finished.
   const datastoreRequests = createDatastoreRequestTracker()
-  /**
-   * @param {string} channel
-   * @param {(event: import('electron').IpcMainInvokeEvent, request: { action: number, data: unknown }) => Promise<unknown>} handler
-   */
-  function handleDatastoreRequests(channel, handler) {
-    ipcMain.handle(channel, (event, request) => datastoreRequests.track(handler(event, request)))
-  }
   const createBackupArchive = createBackupArchiveFactory(userDataPath,
     path.join(__dirname, process.env.NODE_ENV === 'development' ? '../../dist/backupArchiveWorker.js' : 'backupArchiveWorker.js'), {
       waitForDatastores: async () => {
@@ -737,8 +733,8 @@ function runApp() {
   let scheduledBackupTimer
   let keepRefreshingInBackground = false
 
-  ipcMain.handle(IpcChannels.SUBSCRIPTION_BACKGROUND, async (event, method, value) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || !TabManager.getFromWebContents(event.sender)) return
+  handleTrusted(IpcChannels.SUBSCRIPTION_BACKGROUND, async (event, method, value) => {
+    if (!TabManager.getFromWebContents(event.sender)) return
     switch (method) {
       case 'processFeed': return backgroundSubscriptions.processFeed(value)
       case 'configure':
@@ -788,9 +784,9 @@ function runApp() {
     }
   }
   app.whenReady().then(updateTrayColorSchemeWatcher)
-  let trayIconWrite = Promise.resolve()
-  ipcMain.handle(IpcChannels.SET_TRAY_ICON, async (event, dataUrl, monochrome) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || !TabManager.getFromWebContents(event.sender)) return
+  const enqueueTrayIconWrite = createSerialQueue()
+  handleTrusted(IpcChannels.SET_TRAY_ICON, async (event, dataUrl, monochrome) => {
+    if (!TabManager.getFromWebContents(event.sender)) return
     if (dataUrl !== null && (typeof dataUrl !== 'string' || dataUrl.length > 65536 || !dataUrl.startsWith('data:image/png;base64,'))) return
     if (typeof monochrome !== 'boolean') return
     const image = dataUrl === null ? nativeImage.createEmpty() : nativeImage.createFromDataURL(dataUrl)
@@ -802,13 +798,12 @@ function runApp() {
     const cachePath = isTrayIconMonochrome ? monochromeTrayIconCachePath : trayIconCachePath
     const otherCachePath = isTrayIconMonochrome ? trayIconCachePath : monochromeTrayIconCachePath
     // Serialize writes so rapid palette changes also preserve the latest icon on restart.
-    trayIconWrite = trayIconWrite.catch(() => {}).then(async () => {
+    await enqueueTrayIconWrite(async () => {
       await asyncFs.rm(otherCachePath, { force: true })
       await (dataUrl === null
         ? asyncFs.rm(cachePath, { force: true })
-        : asyncFs.writeFile(cachePath, image.toPNG()))
+        : writeFileAtomic(cachePath, image.toPNG()))
     })
-    await trayIconWrite
   })
 
   /**
@@ -2142,11 +2137,11 @@ function runApp() {
       newWindow.once('closed', onWindowButtonLayoutChanged(sendWindowControlsState))
 
       newWindow.webContents.ipc.handle(IpcChannels.WINDOW_CONTROLS_GET, (event) => {
-        if (!isOpenTubeXUrl(event.senderFrame.url)) return null
+        if (!isTrustedSender(event)) return null
         return getWindowControlsState()
       })
       newWindow.webContents.ipc.on(IpcChannels.WINDOW_CONTROL_ACTION, (event, action) => {
-        if (!isOpenTubeXUrl(event.senderFrame.url) || newWindow.isDestroyed()) return
+        if (!isTrustedSender(event) || newWindow.isDestroyed()) return
         if (action === 'minimize') {
           newWindow.minimize()
         } else if (action === 'maximize') {
@@ -2163,7 +2158,7 @@ function runApp() {
       // The renderer reports the colors and height of the bar under the
       // window controls whenever its theme, layout or UI scale changes.
       newWindow.webContents.ipc.on(IpcChannels.SET_TITLE_BAR_OVERLAY, (event, overlay) => {
-        if (!isOpenTubeXUrl(event.senderFrame.url) || newWindow.isDestroyed()) return
+        if (!isTrustedSender(event) || newWindow.isDestroyed()) return
         const { color, symbolColor, height } = overlay ?? {}
         if (typeof color !== 'string' || typeof symbolColor !== 'string' ||
           !Number.isFinite(height) || height <= 0) return
@@ -2393,7 +2388,7 @@ function runApp() {
 
   ipcMain.handle(IpcChannels.SHARE_LINK, createDesktopShareHandler({
     platform: process.platform,
-    isTrustedSender: event => event.senderFrame === event.sender.mainFrame && isOpenTubeXUrl(event.senderFrame.url),
+    isTrustedSender: event => event.senderFrame === event.sender.mainFrame && isTrustedSender(event),
     getWindow: event => BrowserWindow.fromWebContents(event.sender),
     ShareMenu,
     loadWindowsShare: () => loadWindowsShare(__dirname, process.env.NODE_ENV === 'development')
@@ -2405,10 +2400,9 @@ function runApp() {
     loadWindowsNative: () => loadWindowsShare(__dirname, process.env.NODE_ENV === 'development')
   })
 
-  ipcMain.handle(IpcChannels.OPEN_EXTERNAL_LINK_IN_BACKGROUND, async (event, url) => {
+  handleTrusted(IpcChannels.OPEN_EXTERNAL_LINK_IN_BACKGROUND, async (event, url) => {
     const parsedUrl = typeof url === 'string' ? URL.parse(url) : null
-    if (event.senderFrame !== event.sender.mainFrame || !isOpenTubeXUrl(event.senderFrame.url) ||
-      parsedUrl === null || !isExternalBrowserUrl(parsedUrl)) {
+    if (event.senderFrame !== event.sender.mainFrame || parsedUrl === null || !isExternalBrowserUrl(parsedUrl)) {
       return
     }
     try {
@@ -2418,9 +2412,7 @@ function runApp() {
     }
   })
 
-  ipcMain.on(IpcChannels.APP_READY, (event) => {
-    openPendingUrlForReadyWebContents(event)
-  })
+  onTrusted(IpcChannels.APP_READY, openPendingUrlForReadyWebContents)
 
   setupToastIpc()
   setupLiveReminderIpc(liveReminderManager)
@@ -2431,11 +2423,7 @@ function runApp() {
 
   setupSubscriptionAutoRefreshIpc({ backgroundSubscriptions, updateBackgroundSubscriptionVisibility })
 
-  ipcMain.on(IpcChannels.SET_WINDOW_TITLE, (event, payload) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
+  onTrusted(IpcChannels.SET_WINDOW_TITLE, (event, payload) => {
     const title = payload?.title
     const tabId = payload?.tabId
     const manager = TabManager.getFromWebContents(event.sender)
@@ -2481,40 +2469,23 @@ function runApp() {
     app.quit()
   }
 
-  ipcMain.once(IpcChannels.RELAUNCH_REQUEST, () => {
-    relaunch()
-  })
+  onceTrusted(IpcChannels.RELAUNCH_REQUEST, relaunch)
 
   nativeTheme.on('updated', () => {
-    const allWindows = BrowserWindow.getAllWindows()
-
-    allWindows.forEach((window) => {
-      if (!window.webContents.isDestroyed() && isOpenTubeXUrl(window.webContents.getURL())) {
-        window.webContents.send(IpcChannels.NATIVE_THEME_UPDATE, nativeTheme.shouldUseDarkColors)
-      }
-    })
+    sendToAppWindows(IpcChannels.NATIVE_THEME_UPDATE, nativeTheme.shouldUseDarkColors)
   })
 
-  ipcMain.handle(IpcChannels.GENERATE_PO_TOKEN, (event, videoId, context, initialAttestationData, ytConfig) => {
-    if (isOpenTubeXUrl(event.senderFrame.url)) {
-      return generatePoToken(videoId, context, initialAttestationData, ytConfig, proxyUrl)
-    }
-  })
+  handleTrusted(IpcChannels.GENERATE_PO_TOKEN, (_event, videoId, context, initialAttestationData, ytConfig) => (
+    generatePoToken(videoId, context, initialAttestationData, ytConfig, proxyUrl)
+  ))
 
-  ipcMain.handle(IpcChannels.MINT_PO_TOKEN, (event, videoId) => {
-    if (isOpenTubeXUrl(event.senderFrame.url) && typeof videoId === 'string') {
-      return mintPoTokenFromAttestation(videoId, proxyUrl)
-    }
-    return null
-  })
+  handleTrusted(IpcChannels.MINT_PO_TOKEN, (_event, videoId) => (
+    typeof videoId === 'string' ? mintPoTokenFromAttestation(videoId, proxyUrl) : null
+  ), null)
 
   // Resolve once requests use the new proxy, so a proxy test cannot reach the
   // IP check through the previous connection.
-  ipcMain.handle(IpcChannels.ENABLE_PROXY, async (event, url) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
+  handleTrusted(IpcChannels.ENABLE_PROXY, async (_event, url) => {
     proxyUrl = url
     await session.defaultSession.setProxy({
       proxyRules: url
@@ -2522,29 +2493,15 @@ function runApp() {
     await session.defaultSession.closeAllConnections()
   })
 
-  ipcMain.handle(IpcChannels.DISABLE_PROXY, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
+  handleTrusted(IpcChannels.DISABLE_PROXY, async () => {
     proxyUrl = undefined
     await session.defaultSession.setProxy({ mode: 'system' })
     await session.defaultSession.closeAllConnections()
   })
 
-  // #region navigation history
-
-  ipcMain.handle(IpcChannels.GET_NAVIGATION_HISTORY, ({ senderFrame }) => {
-    if (!isOpenTubeXUrl(senderFrame.url)) {
-      return
-    }
-
-    // Logical tab history is renderer-owned. The retained API returns an empty
-    // list for older callers; TopNav reads the active tab runtime directly.
-    return []
-  })
-
-  // #endregion navigation history
+  // Logical tab history is renderer-owned. The retained API returns an empty
+  // list for older callers; TopNav reads the active tab runtime directly.
+  handleTrusted(IpcChannels.GET_NAVIGATION_HISTORY, () => [])
 
   setupSystemInfoIpc()
   setupDiagnosticLogIpc()
@@ -2552,30 +2509,14 @@ function runApp() {
     setDiagnosticLogging(setting?.value === true)
   }).catch(error => console.error('Failed to read the diagnostic logging setting', error))
 
-  ipcMain.handle(IpcChannels.GET_SYSTEM_LOCALE, (event) => {
-    if (isOpenTubeXUrl(event.senderFrame.url)) {
-      // we should switch to getPreferredSystemLanguages at some point and iterate through until we find a supported locale
-      return app.getSystemLocale()
-    }
-  })
+  // we should switch to getPreferredSystemLanguages at some point and iterate through until we find a supported locale
+  handleTrusted(IpcChannels.GET_SYSTEM_LOCALE, () => app.getSystemLocale())
 
-  ipcMain.handle(IpcChannels.IS_WAYLAND_PLATFORM, (event) => {
-    if (isOpenTubeXUrl(event.senderFrame.url)) {
-      return isWaylandPlatform
-    }
-  })
+  handleTrusted(IpcChannels.IS_WAYLAND_PLATFORM, () => isWaylandPlatform)
 
-  ipcMain.handle(IpcChannels.SUPPORTS_AUTO_PICTURE_IN_PICTURE_MINIMIZE, async (event) => {
-    if (isOpenTubeXUrl(event.senderFrame.url)) {
-      return supportsAutoPictureInPictureMinimize
-    }
-  })
+  handleTrusted(IpcChannels.SUPPORTS_AUTO_PICTURE_IN_PICTURE_MINIMIZE, () => supportsAutoPictureInPictureMinimize)
 
-  ipcMain.on(IpcChannels.OPEN_PROFILE_DIRECTORY, (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
+  onTrusted(IpcChannels.OPEN_PROFILE_DIRECTORY, () => {
     shell.openPath(app.getPath('userData')).then((error) => {
       if (error) {
         console.error(`Unable to open profile directory: ${error}`)
@@ -2587,125 +2528,14 @@ function runApp() {
 
   setupBackupIpc({ createBackupArchive, updateSettingFromMain, checkScheduledBackup })
 
-  /**
-   * @param {import('electron').WebContents} webContents
-   * @param {string | undefined} [currentPath]
-   */
-  async function chooseDefaultFolder(webContents, currentPath) {
-    if (typeof currentPath !== 'string' || currentPath.length === 0) {
-      currentPath = app.getPath('pictures')
-    }
-
-    const dialogOptions = {
-      defaultPath: currentPath,
-      properties: ['openDirectory']
-    }
-
-    let result
-
-    const window = BrowserWindow.fromWebContents(webContents)
-    if (window) {
-      result = await dialog.showOpenDialog(window, dialogOptions)
-    } else {
-      result = await dialog.showOpenDialog(dialogOptions)
-    }
-
-    if (result.canceled) {
-      return
-    }
-
-    const settingId = 'screenshotFolderPath'
-
-    await baseHandlers.settings.upsert(settingId, result.filePaths[0])
-
-    const syncPayload = {
-      event: SyncEvents.GENERAL.UPSERT,
-      data: {
-        _id: settingId,
-        value: result.filePaths[0]
-      }
-    }
-
-    BrowserWindow.getAllWindows().forEach((window) => {
-      if (isOpenTubeXUrl(window.webContents.getURL())) {
-        window.webContents.send(IpcChannels.SYNC_SETTINGS, syncPayload)
-      }
-    })
-
-    return result.filePaths[0]
-  }
-
-  ipcMain.on(IpcChannels.CHOOSE_DEFAULT_FOLDER, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
-    const currentPath = (await baseHandlers.settings._findOne('screenshotFolderPath'))?.value
-
-    await chooseDefaultFolder(event.sender, currentPath)
-  })
-
-  ipcMain.handle(IpcChannels.WRITE_TO_DEFAULT_FOLDER, async (event, filename, arrayBuffer) => {
-    if (
-      !isOpenTubeXUrl(event.senderFrame.url) ||
-      typeof filename !== 'string' ||
-      !(arrayBuffer instanceof ArrayBuffer)) {
-      return
-    }
-
-    const folderPath = (await baseHandlers.settings._findOne('screenshotFolderPath'))?.value
-
-    let directory
-    if (typeof folderPath === 'string' && folderPath.length > 0) {
-      try {
-        await asyncFs.access(path.normalize(folderPath), fsConstants.W_OK)
-        directory = folderPath
-      } catch {}
-    }
-
-    // if setting is not set or we do not have write access to the folder
-    // prompt the user for a folder
-    // not having write access can happen if the user copies their settings to different machines
-    // or if they revoke a previously permitted folder in flatseal
-    if (directory === undefined) {
-      directory = await chooseDefaultFolder(event.sender)
-
-      if (typeof directory !== 'string' || directory.length === 0) {
-        return false
-      }
-    }
-
-    directory = path.normalize(directory)
-
-    const filePath = path.resolve(directory, filename)
-
-    // Ensure that we are only writing inside of the expected directory
-    // 'path.dirname' does not return trailing slash, remove it from 'directory' path to ensure consistent comparison
-    if (path.dirname(filePath) !== directory.replace(/\/$/, '')) {
-      throw new Error('Invalid save location')
-    }
-
-    try {
-      await asyncFs.mkdir(directory, { recursive: true })
-
-      await asyncFs.writeFile(filePath, new DataView(arrayBuffer))
-    } catch (error) {
-      console.error('WRITE_TO_DEFAULT_FOLDER failed', error)
-      // throw a new error so that we don't expose the real error to the renderer
-      // eslint-disable-next-line preserve-caught-error
-      throw new Error('Failed to save')
-    }
-
-    return true
-  })
+  setupScreenshotFolderIpc()
 
   setupIpBlockRecoveryIpc({ updateSettingFromMain })
 
-  /** @type {Map<number, number>} */
-  const activePowerSaveBlockers = new Map()
+  const { stopPowerSaveBlockerForWindow } = setupPowerSaveBlockerIpc()
 
-  ipcMain.handle(IpcChannels.TABS_SET_SHORTCUTS_BLOCKED, (event, blocked) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || typeof blocked !== 'boolean') {
+  handleTrusted(IpcChannels.TABS_SET_SHORTCUTS_BLOCKED, (event, blocked) => {
+    if (typeof blocked !== 'boolean') {
       return
     }
 
@@ -2719,57 +2549,13 @@ function runApp() {
     }
   })
 
-  /**
-   * @param {BrowserWindow} window
-   */
-  function stopPowerSaveBlockerForWindow(window) {
-    const powerSaveBlockerId = activePowerSaveBlockers.get(window.id)
-
-    if (typeof powerSaveBlockerId === 'number') {
-      powerSaveBlocker.stop(powerSaveBlockerId)
-
-      activePowerSaveBlockers.delete(window.id)
-    }
-  }
-
-  ipcMain.on(IpcChannels.STOP_POWER_SAVE_BLOCKER, (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
-    const browserWindow = BrowserWindow.fromWebContents(event.sender)
-
-    if (browserWindow) {
-      stopPowerSaveBlockerForWindow(browserWindow)
-    }
-  })
-
-  ipcMain.on(IpcChannels.START_POWER_SAVE_BLOCKER, (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
-    const browserWindow = BrowserWindow.fromWebContents(event.sender)
-
-    if (browserWindow && !activePowerSaveBlockers.has(browserWindow.id)) {
-      const powerSaveBlockerId = powerSaveBlocker.start('prevent-display-sleep')
-
-      activePowerSaveBlockers.set(browserWindow.id, powerSaveBlockerId)
-    }
-  })
-
-  ipcMain.on(IpcChannels.RESTORE_CLOSED_WINDOW, (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) return
+  onTrusted(IpcChannels.RESTORE_CLOSED_WINDOW, (event) => {
     const browserWindow = BrowserWindow.fromWebContents(event.sender)
     if (!browserWindow || appShortcutBlockedWindows.has(browserWindow)) return
     reopenClosedWindow()
   })
 
-  ipcMain.on(IpcChannels.CREATE_NEW_WINDOW, (event, path, query, searchQueryText) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
+  onTrusted(IpcChannels.CREATE_NEW_WINDOW, (event, path, query, searchQueryText) => {
     if (
       typeof path !== 'string' ||
       (query != null && typeof query !== 'object') ||
@@ -2806,11 +2592,7 @@ function runApp() {
   })
 
   // Handler for creating new tab from renderer
-  ipcMain.on(IpcChannels.CREATE_NEW_TAB, (event, path, query) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
+  onTrusted(IpcChannels.CREATE_NEW_TAB, (event, path, query) => {
     const manager = TabManager.getFromWebContents(event.sender)
     if (manager) {
       manager.createTabWithPreference({ route: path, query, makeActive: true }).catch(error => {
@@ -2839,17 +2621,9 @@ function runApp() {
   ipcMain.handle(IpcChannels.TWITCH_CHAT_REPLAY_PAGE, handleTwitchChatReplayPage)
   ipcMain.handle(IpcChannels.TWITCH_SUB_ONLY_VOD, handleTwitchSubOnlyVod)
 
-  ipcMain.handle(IpcChannels.GET_REPLACE_HTTP_CACHE, (event) => {
-    if (isOpenTubeXUrl(event.senderFrame.url)) {
-      return replaceHttpCache
-    }
-  })
+  handleTrusted(IpcChannels.GET_REPLACE_HTTP_CACHE, () => replaceHttpCache)
 
-  ipcMain.once(IpcChannels.TOGGLE_REPLACE_HTTP_CACHE, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
+  onceTrusted(IpcChannels.TOGGLE_REPLACE_HTTP_CACHE, async () => {
     if (replaceHttpCache) {
       await asyncFs.rm(REPLACE_HTTP_CACHE_PATH)
     } else {
@@ -2861,17 +2635,9 @@ function runApp() {
     relaunch()
   })
 
-  ipcMain.handle(IpcChannels.GET_DISABLE_HARDWARE_ACCELERATION, (event) => {
-    if (isOpenTubeXUrl(event.senderFrame.url)) {
-      return disableHardwareAcceleration
-    }
-  })
+  handleTrusted(IpcChannels.GET_DISABLE_HARDWARE_ACCELERATION, () => disableHardwareAcceleration)
 
-  ipcMain.once(IpcChannels.TOGGLE_DISABLE_HARDWARE_ACCELERATION, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
+  onceTrusted(IpcChannels.TOGGLE_DISABLE_HARDWARE_ACCELERATION, async () => {
     if (disableHardwareAcceleration) {
       await asyncFs.rm(DISABLE_HARDWARE_ACCELERATION_PATH)
     } else {
@@ -2883,75 +2649,20 @@ function runApp() {
     relaunch()
   })
 
-  function playerCachePathForKey(key) {
-    // Remove path separators and period characters,
-    // to prevent any files outside of the player_cache directory,
-    // from being read or written
-    const sanitizedKey = `${key}`.replaceAll(/[./\\]/g, '__')
+  setupPlayerCacheIpc(PLAYER_CACHE_PATH)
 
-    return path.join(PLAYER_CACHE_PATH, sanitizedKey)
-  }
-
-  ipcMain.handle(IpcChannels.PLAYER_CACHE_GET, async (event, key) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
-    const filePath = playerCachePathForKey(key)
-
-    try {
-      const contents = await asyncFs.readFile(filePath)
-
-      return contents.buffer
-    } catch (e) {
-      // Don't log the error if the file doesn't exist as we'll just fetch it from YouTube
-      // this usually happens when YouTube updates their player JavaScript
-      if (e.code !== 'ENOENT') {
-        console.error(e)
-      }
-
-      return undefined
-    }
-  })
-
-  ipcMain.handle(IpcChannels.PLAYER_CACHE_SET, async (event, key, value) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
-    const filePath = playerCachePathForKey(key)
-
-    await asyncFs.mkdir(PLAYER_CACHE_PATH, { recursive: true })
-
-    await asyncFs.writeFile(filePath, new Uint8Array(value))
-  })
-
-  ipcMain.handle(IpcChannels.VOICE_OVER_TRANSLATION_REQUEST, async (event, payload) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
-    return await requestVoiceOverTranslation(payload)
-  })
+  handleTrusted(IpcChannels.VOICE_OVER_TRANSLATION_REQUEST, (_event, payload) => requestVoiceOverTranslation(payload))
 
   /** @type {Map<number, { url: string, authorization: string }>} */
   const invidiousAuthorizations = new Map()
 
   const requestErrors = new RequestErrors()
 
-  ipcMain.handle(IpcChannels.GET_REQUEST_ERROR, (event, url) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || typeof url !== 'string') {
-      return null
-    }
+  handleTrusted(IpcChannels.GET_REQUEST_ERROR, (event, url) => (
+    typeof url === 'string' ? requestErrors.getError(event.sender.id, url) : null
+  ), null)
 
-    return requestErrors.getError(event.sender.id, url)
-  })
-
-  ipcMain.on(IpcChannels.SET_INVIDIOUS_AUTHORIZATION, (event, authorization, url) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
+  onTrusted(IpcChannels.SET_INVIDIOUS_AUTHORIZATION, (event, authorization, url) => {
     if (!authorization) {
       invidiousAuthorizations.delete(event.sender.id)
     } else if (typeof authorization === 'string' && typeof url === 'string') {
@@ -2967,961 +2678,100 @@ function runApp() {
           : 'system')
   }
 
-  ipcMain.handle(IpcChannels.READ_CLIPBOARD, (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) throw new Error('Untrusted clipboard request')
-    return clipboard.readText()
-  })
+  handleTrusted(IpcChannels.READ_CLIPBOARD, () => clipboard.readText())
 
   const { loadCustomThemes, getSelectedCustomTheme } = setupCustomThemes({ updateSettingFromMain, updateThemeSource })
   setupCastIpc({ chromecast, fcast, invidiousAuthorizations, getConfiguredApiServerUrl })
 
-  // ************************************************* //
-  // DB related IPC calls
-  // *********** //
-
-  // Settings
-  handleDatastoreRequests(IpcChannels.DB_SETTINGS, async (event, { action, data }) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
-    try {
-      switch (action) {
-        case DBActions.SETTINGS.MERGE_SEEN_VIDEOS: {
-          const value = await baseHandlers.settings.mergeSeenVideos(data)
-          syncOtherWindows(IpcChannels.SYNC_SETTINGS, event, {
-            event: SyncEvents.GENERAL.UPSERT,
-            data: { _id: 'subscriptionSeenVideos', value }
-          })
-          return value
-        }
-
-        case DBActions.SETTINGS.MERGE_SEEN_POSTS: {
-          const value = await baseHandlers.settings.mergeSeenPosts(data)
-          syncOtherWindows(IpcChannels.SYNC_SETTINGS, event, {
-            event: SyncEvents.GENERAL.UPSERT,
-            data: { _id: 'subscriptionSeenPosts', value }
-          })
-          return value
-        }
-
-        case DBActions.SETTINGS.MERGE_SEEN_RSS_ITEMS: {
-          const value = await baseHandlers.settings.mergeSeenRssItems(data)
-          syncOtherWindows(IpcChannels.SYNC_SETTINGS, event, {
-            event: SyncEvents.GENERAL.UPSERT,
-            data: { _id: 'rssFeedSeenItems', value }
-          })
-          return value
-        }
-
-        case DBActions.GENERAL.FIND:
-          return await baseHandlers.settings.find()
-
-        case DBActions.SETTINGS.FIND_ONE:
-          return typeof data === 'string' ? (await baseHandlers.settings._findOne(data))?.value : undefined
-
-        case DBActions.GENERAL.UPSERT:
-          // Destinations and executables require a native picker. Backup status is written by the scheduler.
-          if (!canRendererWriteSetting(data._id, data.value)) {
-            console.warn(`Refused a renderer write to the ${String(data._id)} setting`)
-            return null
-          }
-
-          await baseHandlers.settings.upsert(data._id, data.value)
-          syncOtherWindows(
-            IpcChannels.SYNC_SETTINGS,
-            event,
-            { event: SyncEvents.GENERAL.UPSERT, data }
-          )
-          switch (data._id) {
-            case 'scheduledBackupEnabled':
-            case 'scheduledBackupInterval':
-            case 'scheduledBackupKeepCount':
-              checkScheduledBackup()
-              break
-            case 'contextMenuSearchEngines':
-              contextMenu.setSearchEngines(data.value)
-              break
-            // Update app menu on related setting update
-            case 'backendFallback':
-              backendFallback = data.value
-              await setMenu()
-              break
-            case 'backendPreference':
-              backendPreference = data.value
-              await setMenu()
-              break
-            case 'keyboardShortcuts':
-              await setMenu()
-              break
-            case 'tabCloseFocus':
-              TabManager.setTabCloseFocus(data.value)
-              break
-            case 'diagnosticLogging':
-              setDiagnosticLogging(data.value === true)
-              break
-            case 'showSkipSilenceButton':
-              TabManager.setShowSkipSilenceButton(data.value)
-              break
-            case 'enableSkipSilenceByDefault':
-              TabManager.setEnableSkipSilenceByDefault(data.value)
-              break
-            case 'useTrayIcon':
-              useTrayIcon = data.value
-              updateTrayEnabled()
-              break
-            case 'hideToTrayOnClose':
-              trayOnClose = data.value
-              break
-            case 'hideToTrayOnMinimize':
-              trayOnMinimize = data.value
-              break
-            case 'iconPack':
-              trayMenuIconPack = data.value
-              createTrayContextMenu()
-              break
-            case 'notificationMode':
-              if (['both', 'system', 'off'].includes(data.value)) notificationMode = data.value
-              break
-            case 'thumbnailPreference':
-              thumbnailPreference = data.value
-              break
-            case 'blurThumbnails':
-              blurThumbnails = data.value === true
-              break
-            case 'baseTheme':
-              if (isCustomThemeValue(data.value)) {
-                nativeTheme.themeSource = (await getSelectedCustomTheme(data.value))?.isDark ? 'dark' : 'light'
-              } else {
-                updateThemeSource(data.value)
-              }
-              break
-            case 'ytDlpMaxConcurrentDownloads':
-            case 'ytDlpDownloadBandwidthLimit':
-            case 'ytDlpAutomaticDownloadsRequireCharging':
-              await refreshYtDlpDownloadQueue()
-              break
-            case 'ytDlpPlaybackCacheMaxEntrySize':
-              try {
-                await applyYtDlpPlaybackCacheSettings()
-              } catch (error) {
-                console.warn('Could not apply the yt-dlp playback cache settings', error)
-              }
-              break
-
-            default:
-              // Do nothing for unmatched settings
-          }
-          return null
-
-        case DBActions.GENERAL.DELETE:
-          await baseHandlers.settings.delete(data)
-          if (data === 'contextMenuSearchEngines') {
-            contextMenu.setSearchEngines(DEFAULT_SEARCH_ENGINES_SETTING)
-          }
-          return null
-
-        default:
-          // eslint-disable-next-line no-throw-literal
-          throw 'invalid settings db action'
-      }
-    } catch (err) {
-      if (typeof err === 'string') throw err
-      else throw err.toString()
+  setupDatastoreIpc({
+    datastoreRequests,
+    onSettingUpserted: applyUpdatedSetting,
+    onSettingDeleted: id => {
+      if (id === 'contextMenuSearchEngines') contextMenu.setSearchEngines(DEFAULT_SEARCH_ENGINES_SETTING)
     }
   })
 
-  // *********** //
-  // History
-  handleDatastoreRequests(IpcChannels.DB_HISTORY, async (event, { action, data }) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
+  /** @param {{ _id: string, value: any }} data */
+  async function applyUpdatedSetting(data) {
+    switch (data._id) {
+      case 'scheduledBackupEnabled':
+      case 'scheduledBackupInterval':
+      case 'scheduledBackupKeepCount':
+        checkScheduledBackup()
+        break
+      case 'contextMenuSearchEngines':
+        contextMenu.setSearchEngines(data.value)
+        break
+        // Update app menu on related setting update
+      case 'backendFallback':
+        backendFallback = data.value
+        await setMenu()
+        break
+      case 'backendPreference':
+        backendPreference = data.value
+        await setMenu()
+        break
+      case 'keyboardShortcuts':
+        await setMenu()
+        break
+      case 'tabCloseFocus':
+        TabManager.setTabCloseFocus(data.value)
+        break
+      case 'diagnosticLogging':
+        setDiagnosticLogging(data.value === true)
+        break
+      case 'showSkipSilenceButton':
+        TabManager.setShowSkipSilenceButton(data.value)
+        break
+      case 'enableSkipSilenceByDefault':
+        TabManager.setEnableSkipSilenceByDefault(data.value)
+        break
+      case 'useTrayIcon':
+        useTrayIcon = data.value
+        updateTrayEnabled()
+        break
+      case 'hideToTrayOnClose':
+        trayOnClose = data.value
+        break
+      case 'hideToTrayOnMinimize':
+        trayOnMinimize = data.value
+        break
+      case 'iconPack':
+        trayMenuIconPack = data.value
+        createTrayContextMenu()
+        break
+      case 'notificationMode':
+        if (['both', 'system', 'off'].includes(data.value)) notificationMode = data.value
+        break
+      case 'thumbnailPreference':
+        thumbnailPreference = data.value
+        break
+      case 'blurThumbnails':
+        blurThumbnails = data.value === true
+        break
+      case 'baseTheme':
+        if (isCustomThemeValue(data.value)) {
+          nativeTheme.themeSource = (await getSelectedCustomTheme(data.value))?.isDark ? 'dark' : 'light'
+        } else {
+          updateThemeSource(data.value)
+        }
+        break
+      case 'ytDlpMaxConcurrentDownloads':
+      case 'ytDlpDownloadBandwidthLimit':
+      case 'ytDlpAutomaticDownloadsRequireCharging':
+        await refreshYtDlpDownloadQueue()
+        break
+      case 'ytDlpPlaybackCacheMaxEntrySize':
+        try {
+          await applyYtDlpPlaybackCacheSettings()
+        } catch (error) {
+          console.warn('Could not apply the yt-dlp playback cache settings', error)
+        }
+        break
+
+      default:
+      // Do nothing for unmatched settings
     }
-
-    try {
-      switch (action) {
-        case DBActions.HISTORY.UPDATE_SUBSCRIPTION_STATE: {
-          const result = await baseHandlers.history.updateSubscriptionState(data)
-          if (result.records.length > 0) {
-            syncOtherWindows(IpcChannels.SYNC_HISTORY, event, result.records.length === 1
-              ? { event: SyncEvents.GENERAL.UPSERT, data: result.records[0] }
-              : {
-                  event: SyncEvents.HISTORY.APPLY_SYNC_CHANGES,
-                  data: { insertions: [], updates: result.records, deletions: [] }
-                })
-          }
-          if (result.seenVideos != null) {
-            syncOtherWindows(IpcChannels.SYNC_SETTINGS, event, {
-              event: SyncEvents.GENERAL.UPSERT,
-              data: { _id: 'subscriptionSeenVideos', value: result.seenVideos }
-            })
-          }
-          return result
-        }
-
-        case DBActions.GENERAL.FIND:
-          // Strings cross IPC and the context bridge far faster than records.
-          return await baseHandlers.history._findSerialized()
-
-        case DBActions.HISTORY.REMOVE_DUPLICATES:
-          return await baseHandlers.history.find()
-
-        case DBActions.GENERAL.UPSERT:
-          await baseHandlers.history.upsert(data)
-          syncOtherWindows(
-            IpcChannels.SYNC_HISTORY,
-            event,
-            { event: SyncEvents.GENERAL.UPSERT, data }
-          )
-          return null
-
-        case DBActions.GENERAL.OVERWRITE:
-          if (typeof data === 'string') data = JSON.parse(data)
-          await baseHandlers.history.overwrite(data)
-          syncOtherWindows(
-            IpcChannels.SYNC_HISTORY,
-            event,
-            { event: SyncEvents.GENERAL.OVERWRITE, data }
-          )
-          return null
-
-        case DBActions.HISTORY.MERGE_BACKUP:
-        case DBActions.HISTORY.IMPORT: {
-          if (typeof data === 'string') data = JSON.parse(data)
-          const updates = action === DBActions.HISTORY.IMPORT
-            ? await baseHandlers.history.importRecords(data.records, data.rule)
-            : await baseHandlers.history.mergeBackup(data)
-          const changes = { insertions: [], updates, deletions: [] }
-          syncOtherWindows(
-            IpcChannels.SYNC_HISTORY,
-            event,
-            { event: SyncEvents.HISTORY.APPLY_SYNC_CHANGES, data: changes }
-          )
-          // Strings cross IPC and the context bridge far faster than records.
-          return JSON.stringify(updates)
-        }
-
-        case DBActions.HISTORY.APPLY_SYNC_CHANGES: {
-          if (typeof data === 'string') data = JSON.parse(data)
-          // Other windows must keep stored records that were newer than the sync.
-          const skipped = new Set(await baseHandlers.history.applySyncChanges(data))
-          if (skipped.size > 0) data.insertions = data.insertions.filter(record => !skipped.has(record.videoId))
-          syncOtherWindows(
-            IpcChannels.SYNC_HISTORY,
-            event,
-            { event: SyncEvents.HISTORY.APPLY_SYNC_CHANGES, data }
-          )
-          return [...skipped]
-        }
-
-        case DBActions.HISTORY.UPDATE_WATCH_PROGRESS:
-          await baseHandlers.history.updateWatchProgress(data.videoId, data.watchProgress)
-          syncOtherWindows(
-            IpcChannels.SYNC_HISTORY,
-            event,
-            { event: SyncEvents.HISTORY.UPDATE_WATCH_PROGRESS, data }
-          )
-          return null
-
-        case DBActions.HISTORY.UPDATE_PLAYLIST:
-          await baseHandlers.history.updateLastViewedPlaylist(data.videoId, data.lastViewedPlaylistId, data.lastViewedPlaylistType, data.lastViewedPlaylistItemId)
-          syncOtherWindows(
-            IpcChannels.SYNC_HISTORY,
-            event,
-            { event: SyncEvents.HISTORY.UPDATE_PLAYLIST, data }
-          )
-          return null
-
-        case DBActions.HISTORY.UNSET_PLAYLIST_FOR_VIDEOS:
-          await baseHandlers.history.unsetLastViewedPlaylistForVideos(data.videoIds, data.lastViewedPlaylistId)
-          syncOtherWindows(
-            IpcChannels.SYNC_HISTORY,
-            event,
-            { event: SyncEvents.HISTORY.UNSET_PLAYLIST_FOR_VIDEOS, data }
-          )
-          return null
-
-        case DBActions.HISTORY.UNSET_PLAYLISTS:
-          await baseHandlers.history.unsetLastViewedPlaylists(data)
-          syncOtherWindows(
-            IpcChannels.SYNC_HISTORY,
-            event,
-            { event: SyncEvents.HISTORY.UNSET_PLAYLISTS, data }
-          )
-          return null
-
-        case DBActions.GENERAL.DELETE:
-          await baseHandlers.history.delete(data)
-          syncOtherWindows(
-            IpcChannels.SYNC_HISTORY,
-            event,
-            { event: SyncEvents.GENERAL.DELETE, data }
-          )
-          return null
-
-        case DBActions.HISTORY.DELETE_OLDER_THAN: {
-          if (
-            typeof data !== 'number' ||
-            !Number.isFinite(data) ||
-            data < 0 ||
-            data > Date.now()
-          ) {
-            throw new TypeError('invalid history cutoff')
-          }
-
-          const videoIds = await baseHandlers.history.deleteOlderThan(data, getPlayingVideoIds())
-          if (videoIds.length > 0) {
-            syncOtherWindows(
-              IpcChannels.SYNC_HISTORY,
-              event,
-              { event: SyncEvents.GENERAL.DELETE_MULTIPLE, data: videoIds }
-            )
-          }
-          return videoIds
-        }
-
-        case DBActions.GENERAL.DELETE_ALL:
-          await baseHandlers.history.deleteAll()
-          syncOtherWindows(
-            IpcChannels.SYNC_HISTORY,
-            event,
-            { event: SyncEvents.GENERAL.DELETE_ALL }
-          )
-          return null
-
-        default:
-          // eslint-disable-next-line no-throw-literal
-          throw 'invalid history db action'
-      }
-    } catch (err) {
-      if (typeof err === 'string') throw err
-      else throw err.toString()
-    }
-  })
-
-  // *********** //
-  // Recommendation learning
-  handleDatastoreRequests(IpcChannels.DB_RECOMMENDATIONS, async (event, { action, data }) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) return
-    let result
-    if (action === DBActions.GENERAL.FIND) result = await baseHandlers.recommendations.find()
-    else if (action === DBActions.GENERAL.UPSERT) result = await baseHandlers.recommendations.record(data)
-    else if (action === DBActions.GENERAL.DELETE_MULTIPLE) result = await baseHandlers.recommendations.remove(data)
-    else if (action === DBActions.GENERAL.DELETE_ALL) result = await baseHandlers.recommendations.reset()
-    else throw new Error('Invalid recommendation action')
-    syncOtherWindows(IpcChannels.SYNC_RECOMMENDATIONS, event, result)
-    return result
-  })
-
-  // Watch Stats
-  handleDatastoreRequests(IpcChannels.DB_WATCH_STATS, async (event, { action, data }) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
-    try {
-      switch (action) {
-        case DBActions.GENERAL.FIND:
-          return await baseHandlers.watchStats.find()
-
-        case DBActions.WATCH_STATS.MERGE_BACKUP: {
-          const merged = await baseHandlers.watchStats.mergeBackup(data)
-          syncOtherWindows(IpcChannels.SYNC_WATCH_STATS, event, { event: SyncEvents.GENERAL.OVERWRITE, data: merged })
-          return merged
-        }
-
-        case DBActions.WATCH_STATS.ADD_WATCH_TIME:
-          await baseHandlers.watchStats.addWatchTime(data.date, data.seconds)
-          syncOtherWindows(
-            IpcChannels.SYNC_WATCH_STATS,
-            event,
-            { event: SyncEvents.WATCH_STATS.ADD_WATCH_TIME, data }
-          )
-          return null
-
-        case DBActions.WATCH_STATS.MIGRATE_HISTORY:
-          return await baseHandlers.watchStats.migrateHistory()
-
-        case DBActions.WATCH_STATS.GET_HISTORICAL_ADJUSTMENT:
-          return await baseHandlers.watchStats.getHistoricalAdjustment()
-
-        case DBActions.WATCH_STATS.ADJUST_HISTORICAL_WATCH_TIME: {
-          const result = await baseHandlers.watchStats.adjustHistoricalWatchTime(
-            data.defaultSpeed,
-            data.channelPlaybackSpeeds
-          )
-          syncOtherWindows(
-            IpcChannels.SYNC_WATCH_STATS,
-            event,
-            { event: SyncEvents.WATCH_STATS.ADJUST_HISTORICAL_WATCH_TIME, data: result }
-          )
-          return result
-        }
-
-        case DBActions.GENERAL.DELETE_ALL:
-          await baseHandlers.watchStats.deleteAll()
-          syncOtherWindows(
-            IpcChannels.SYNC_WATCH_STATS,
-            event,
-            { event: SyncEvents.GENERAL.DELETE_ALL }
-          )
-          return null
-
-        default:
-          // eslint-disable-next-line no-throw-literal
-          throw 'invalid watch stats db action'
-      }
-    } catch (err) {
-      if (typeof err === 'string') throw err
-      else throw err.toString()
-    }
-  })
-
-  // *********** //
-  // Profiles
-  handleDatastoreRequests(IpcChannels.DB_PROFILES, async (event, { action, data }) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
-    try {
-      switch (action) {
-        case DBActions.GENERAL.CREATE: {
-          const newProfile = await baseHandlers.profiles.create(data)
-          syncOtherWindows(
-            IpcChannels.SYNC_PROFILES,
-            event,
-            { event: SyncEvents.GENERAL.CREATE, data: newProfile }
-          )
-          return newProfile
-        }
-
-        case DBActions.GENERAL.FIND:
-          return await baseHandlers.profiles.find()
-
-        case DBActions.GENERAL.UPSERT:
-          await baseHandlers.profiles.upsert(data)
-          syncOtherWindows(
-            IpcChannels.SYNC_PROFILES,
-            event,
-            { event: SyncEvents.GENERAL.UPSERT, data }
-          )
-          return null
-
-        case DBActions.PROFILES.ADD_CHANNEL:
-          await baseHandlers.profiles.addChannelToProfiles(data.channel, data.profileIds)
-          syncOtherWindows(
-            IpcChannels.SYNC_PROFILES,
-            event,
-            { event: SyncEvents.PROFILES.ADD_CHANNEL, data }
-          )
-          return null
-
-        case DBActions.PROFILES.REMOVE_CHANNEL:
-          await baseHandlers.profiles.removeChannelFromProfiles(data.channelIds, data.profileIds)
-          syncOtherWindows(
-            IpcChannels.SYNC_PROFILES,
-            event,
-            { event: SyncEvents.PROFILES.REMOVE_CHANNEL, data }
-          )
-          return null
-
-        case DBActions.PROFILES.UPDATE_DETAILS: {
-          const { numAffected } = await baseHandlers.profiles.updateDetails(data.profileId, data.details)
-          if (numAffected > 0) {
-            syncOtherWindows(
-              IpcChannels.SYNC_PROFILES,
-              event,
-              { event: SyncEvents.PROFILES.UPDATE_DETAILS, data }
-            )
-          }
-          return null
-        }
-
-        case DBActions.PROFILES.UPDATE_CHANNEL_SETTINGS:
-        case DBActions.PROFILES.BATCH_UPDATE_CHANNEL_SETTINGS: {
-          const profileIds = data.updates
-            ? await baseHandlers.profiles.batchUpdateChannelSettings(data.updates, data.profileIds)
-            : await baseHandlers.profiles.updateChannelSettings(data.channel, data.profileIds)
-          if (profileIds.length > 0) {
-            syncOtherWindows(
-              IpcChannels.SYNC_PROFILES,
-              event,
-              {
-                event: SyncEvents.PROFILES.UPDATE_CHANNEL_SETTINGS,
-                data: { ...data, profileIds }
-              }
-            )
-          }
-          return profileIds
-        }
-
-        case DBActions.PROFILES.UPDATE_SUBSCRIPTION_DETAILS: {
-          const result = await baseHandlers.profiles.updateSubscriptionDetails(data)
-          const { profileIds } = result
-          if (profileIds.length > 0) {
-            syncOtherWindows(
-              IpcChannels.SYNC_PROFILES,
-              event,
-              { event: SyncEvents.PROFILES.UPDATE_SUBSCRIPTION_DETAILS, data: { channels: data, profileIds } }
-            )
-          }
-          return result
-        }
-
-        case DBActions.PROFILES.SAVE_FROM_SYNC_IF_UNCHANGED: {
-          const profile = await baseHandlers.profiles.saveFromSyncIfUnchanged(data.profile, data.previous)
-          if (profile !== null) {
-            syncOtherWindows(IpcChannels.SYNC_PROFILES, event, { event: SyncEvents.GENERAL.UPSERT, data: profile })
-          }
-          return profile
-        }
-
-        case DBActions.PROFILES.UPDATE_SUBSCRIPTIONS_IF_UNCHANGED: {
-          const profile = await baseHandlers.profiles.updateSubscriptionsIfUnchanged(data.profileId, data.subscriptions, data.previous)
-          if (profile !== null) {
-            syncOtherWindows(IpcChannels.SYNC_PROFILES, event, { event: SyncEvents.GENERAL.UPSERT, data: profile })
-          }
-          return profile
-        }
-
-        case DBActions.PROFILES.MERGE_BACKUP:
-        case DBActions.PROFILES.MERGE_IMPORTED: {
-          const profile = action === DBActions.PROFILES.MERGE_IMPORTED
-            ? await baseHandlers.profiles.mergeImported(data)
-            : await baseHandlers.profiles.mergeBackup(data)
-          syncOtherWindows(IpcChannels.SYNC_PROFILES, event, { event: SyncEvents.GENERAL.UPSERT, data: profile })
-          return profile
-        }
-
-        case DBActions.GENERAL.DELETE:
-          await baseHandlers.profiles.delete(data)
-          syncOtherWindows(
-            IpcChannels.SYNC_PROFILES,
-            event,
-            { event: SyncEvents.GENERAL.DELETE, data }
-          )
-          return null
-
-        default:
-          // eslint-disable-next-line no-throw-literal
-          throw 'invalid profile db action'
-      }
-    } catch (err) {
-      if (typeof err === 'string') throw err
-      else throw err.toString()
-    }
-  })
-
-  // *********** //
-  // Playlists
-  // ! NOTE: A lot of these actions are currently not used for anything
-  // As such, only the currently used actions have synchronization implemented
-  // The remaining should have it implemented only when playlists
-  // get fully implemented into the app
-  handleDatastoreRequests(IpcChannels.DB_PLAYLISTS, async (event, { action, data }) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
-    try {
-      switch (action) {
-        case DBActions.GENERAL.CREATE:
-          await baseHandlers.playlists.create(data)
-          syncOtherWindows(
-            IpcChannels.SYNC_PLAYLISTS,
-            event,
-            { event: SyncEvents.GENERAL.CREATE, data }
-          )
-          return null
-
-        case DBActions.GENERAL.FIND:
-          // Strings cross IPC and the context bridge far faster than large
-          // playlists' object graphs, as with history.
-          return (await baseHandlers.playlists.find()).map(playlist => JSON.stringify(playlist))
-
-        case DBActions.GENERAL.UPSERT:
-          if (typeof data === 'string') data = JSON.parse(data)
-          await baseHandlers.playlists.upsert(data)
-          syncOtherWindows(
-            IpcChannels.SYNC_PLAYLISTS,
-            event,
-            { event: SyncEvents.GENERAL.UPSERT, data }
-          )
-          return null
-
-        case DBActions.PLAYLISTS.UPDATE: {
-          if (typeof data === 'string') data = JSON.parse(data)
-          const saved = await baseHandlers.playlists.update(data)
-          if (saved) {
-            syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: SyncEvents.GENERAL.UPSERT, data })
-          }
-          return saved
-        }
-
-        case DBActions.PLAYLISTS.REORDER_VIDEOS: {
-          const videos = await baseHandlers.playlists.reorderVideos(data._id, data.lastUpdatedAt, data.playlistItemIds)
-          if (videos) {
-            syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: SyncEvents.GENERAL.UPSERT, data: { _id: data._id, lastUpdatedAt: data.lastUpdatedAt, videos } })
-          }
-          return videos
-        }
-
-        case DBActions.PLAYLISTS.MERGE_BACKUP: {
-          if (typeof data === 'string') data = JSON.parse(data)
-          const playlist = await baseHandlers.playlists.mergeBackup(data)
-          syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: SyncEvents.GENERAL.UPSERT, data: playlist })
-          // Strings cross IPC and the context bridge far faster than records.
-          return JSON.stringify(playlist)
-        }
-
-        case DBActions.PLAYLISTS.UPSERT_IF_UNCHANGED: {
-          const saved = await baseHandlers.playlists.upsertIfUnchanged(data.playlist, data.previous)
-          if (saved) {
-            syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: SyncEvents.GENERAL.UPSERT, data: data.playlist })
-          }
-          return saved
-        }
-
-        case DBActions.PLAYLISTS.UPDATE_SORT_ORDER: {
-          const saved = await baseHandlers.playlists.updateSortOrder(data._id, data.sortOrder)
-          if (saved) {
-            syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: SyncEvents.GENERAL.UPSERT, data })
-          }
-          return saved
-        }
-
-        case DBActions.PLAYLISTS.REPAIR_METADATA:
-          return await baseHandlers.playlists.repairMetadata(data, update => {
-            syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: SyncEvents.PLAYLISTS.REPAIR_METADATA, data: update })
-          })
-
-        case DBActions.PLAYLISTS.UPSERT_VIDEO: {
-          const result = await baseHandlers.playlists.upsertVideoByPlaylistId(data._id, data.lastUpdatedAt, data.videoData)
-
-          // Nothing was written when the video is already in the playlist or the
-          // playlist is gone, so the other windows have nothing to apply
-          if (result.status === PlaylistVideoAddResult.ADDED) {
-            data.addVideosToTop = result.addVideosToTop
-            data.lastUpdatedAt = result.lastUpdatedAt
-            syncOtherWindows(
-              IpcChannels.SYNC_PLAYLISTS,
-              event,
-              { event: SyncEvents.PLAYLISTS.UPSERT_VIDEO, data }
-            )
-          }
-
-          return result
-        }
-
-        case DBActions.PLAYLISTS.UPSERT_VIDEOS: {
-          const result = await baseHandlers.playlists.upsertVideosByPlaylistId(data._id, data.lastUpdatedAt, data.videos, data.deduplicate)
-          if (result.status === PlaylistVideoAddResult.ADDED) {
-            data.videos = result.videos
-            data.addVideosToTop = result.addVideosToTop
-            data.lastUpdatedAt = result.lastUpdatedAt
-            syncOtherWindows(
-              IpcChannels.SYNC_PLAYLISTS,
-              event,
-              { event: SyncEvents.PLAYLISTS.UPSERT_VIDEOS, data }
-            )
-          }
-          return result
-        }
-
-        case DBActions.GENERAL.DELETE:
-          await baseHandlers.playlists.delete(data)
-          syncOtherWindows(
-            IpcChannels.SYNC_PLAYLISTS,
-            event,
-            { event: SyncEvents.GENERAL.DELETE, data }
-          )
-          return null
-
-        case DBActions.PLAYLISTS.DELETE_VIDEO_ID:
-          await baseHandlers.playlists.deleteVideoIdByPlaylistId(data._id, data.lastUpdatedAt, data.videoId, data.playlistItemId)
-          syncOtherWindows(
-            IpcChannels.SYNC_PLAYLISTS,
-            event,
-            { event: SyncEvents.PLAYLISTS.DELETE_VIDEO, data }
-          )
-          return null
-
-        case DBActions.PLAYLISTS.DELETE_VIDEO_IDS:
-          await baseHandlers.playlists.deleteVideoIdsByPlaylistId(data._id, data.lastUpdatedAt, data.playlistItemIds)
-          syncOtherWindows(
-            IpcChannels.SYNC_PLAYLISTS,
-            event,
-            { event: SyncEvents.PLAYLISTS.DELETE_VIDEOS, data }
-          )
-          return null
-
-        case DBActions.PLAYLISTS.DELETE_ALL_VIDEOS:
-          await baseHandlers.playlists.deleteAllVideosByPlaylistId(data)
-          // TODO: Syncing (implement only when it starts being used)
-          // syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: '_', data })
-          return null
-
-        case DBActions.GENERAL.DELETE_MULTIPLE:
-          await baseHandlers.playlists.deleteMultiple(data)
-          // TODO: Syncing (implement only when it starts being used)
-          // syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: '_', data })
-          return null
-
-        case DBActions.GENERAL.DELETE_ALL:
-          await baseHandlers.playlists.deleteAll()
-          syncOtherWindows(
-            IpcChannels.SYNC_PLAYLISTS,
-            event,
-            { event: SyncEvents.GENERAL.DELETE_ALL }
-          )
-          return null
-
-        default:
-          // eslint-disable-next-line no-throw-literal
-          throw 'invalid playlist db action'
-      }
-    } catch (err) {
-      if (typeof err === 'string') throw err
-      else throw err.toString()
-    }
-  })
-
-  // *********** //
-
-  // ************** //
-  // Search History
-  handleDatastoreRequests(IpcChannels.DB_SEARCH_HISTORY, async (event, { action, data }) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
-    try {
-      switch (action) {
-        case DBActions.GENERAL.FIND:
-          return await baseHandlers.searchHistory.find()
-
-        case DBActions.GENERAL.UPSERT: {
-          const updatedEntry = await baseHandlers.searchHistory.upsert(data)
-          syncOtherWindows(
-            IpcChannels.SYNC_SEARCH_HISTORY,
-            event,
-            { event: SyncEvents.GENERAL.UPSERT, data: updatedEntry }
-          )
-          return updatedEntry
-        }
-
-        case DBActions.SEARCH_HISTORY.MERGE_IMPORTED: {
-          const entries = await baseHandlers.searchHistory.mergeImported(data)
-          syncOtherWindows(
-            IpcChannels.SYNC_SEARCH_HISTORY,
-            event,
-            { event: SyncEvents.GENERAL.OVERWRITE, data: entries }
-          )
-          return entries
-        }
-
-        case DBActions.GENERAL.DELETE:
-          await baseHandlers.searchHistory.delete(data)
-          syncOtherWindows(
-            IpcChannels.SYNC_SEARCH_HISTORY,
-            event,
-            { event: SyncEvents.GENERAL.DELETE, data }
-          )
-          return null
-
-        case DBActions.SEARCH_HISTORY.DELETE_OLDER_THAN: {
-          if (
-            typeof data !== 'number' ||
-            !Number.isFinite(data) ||
-            data < 0 ||
-            data > Date.now()
-          ) {
-            throw new TypeError('invalid search history cutoff')
-          }
-
-          const remaining = await baseHandlers.searchHistory.deleteOlderThan(data)
-          if (remaining !== null) {
-            // find() sorts the list, as OVERWRITE expects.
-            syncOtherWindows(
-              IpcChannels.SYNC_SEARCH_HISTORY,
-              event,
-              { event: SyncEvents.GENERAL.OVERWRITE, data: remaining }
-            )
-          }
-          return remaining
-        }
-
-        case DBActions.GENERAL.DELETE_ALL:
-          await baseHandlers.searchHistory.deleteAll()
-          syncOtherWindows(
-            IpcChannels.SYNC_SEARCH_HISTORY,
-            event,
-            { event: SyncEvents.GENERAL.DELETE_ALL }
-          )
-          return null
-
-        default:
-          // eslint-disable-next-line no-throw-literal
-          throw 'invalid search history db action'
-      }
-    } catch (err) {
-      if (typeof err === 'string') throw err
-      else throw err.toString()
-    }
-  })
-
-  // *********** //
-  // Profiles
-  handleDatastoreRequests(IpcChannels.DB_SUBSCRIPTION_CACHE, async (event, { action, data }) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
-    try {
-      switch (action) {
-        case DBActions.GENERAL.FIND:
-          return await baseHandlers.subscriptionCache.find()
-
-        case DBActions.SUBSCRIPTION_CACHE.UPDATE_VIDEOS_BY_CHANNEL:
-          if (!await baseHandlers.subscriptionCache.updateVideosByChannelId(data.channelId, data.entries, data.timestamp)) return false
-          syncOtherWindows(
-            IpcChannels.SYNC_SUBSCRIPTION_CACHE,
-            event,
-            { event: SyncEvents.SUBSCRIPTION_CACHE.UPDATE_VIDEOS_BY_CHANNEL, data }
-          )
-          return null
-
-        case DBActions.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN:
-          await baseHandlers.subscriptionCache.markEntriesAsSeen(data.channelId, data.tab, data.entries)
-          syncOtherWindows(
-            IpcChannels.SYNC_SUBSCRIPTION_CACHE,
-            event,
-            { event: SyncEvents.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN, data }
-          )
-          return null
-
-        case DBActions.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN_MANY:
-          await baseHandlers.subscriptionCache.markEntriesAsSeenMany(data)
-          syncOtherWindows(
-            IpcChannels.SYNC_SUBSCRIPTION_CACHE,
-            event,
-            { event: SyncEvents.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN_MANY, data }
-          )
-          return null
-
-        case DBActions.SUBSCRIPTION_CACHE.UPDATE_FEEDS: {
-          const applied = await baseHandlers.subscriptionCache.updateFeeds(data)
-          const updates = data.filter((_, index) => applied[index])
-          recordSubscriptionFeedTitles(updates)
-          if (updates.length > 0) {
-            syncOtherWindows(
-              IpcChannels.SYNC_SUBSCRIPTION_CACHE,
-              event,
-              { event: SyncEvents.SUBSCRIPTION_CACHE.UPDATE_FEEDS, data: updates }
-            )
-          }
-          return applied
-        }
-
-        case DBActions.SUBSCRIPTION_CACHE.UPDATE_LIVE_STREAMS_BY_CHANNEL:
-          if (!await baseHandlers.subscriptionCache.updateLiveStreamsByChannelId(data.channelId, data.entries, data.timestamp)) return false
-          syncOtherWindows(
-            IpcChannels.SYNC_SUBSCRIPTION_CACHE,
-            event,
-            { event: SyncEvents.SUBSCRIPTION_CACHE.UPDATE_LIVE_STREAMS_BY_CHANNEL, data }
-          )
-          return null
-
-        case DBActions.SUBSCRIPTION_CACHE.UPDATE_SHORTS_BY_CHANNEL:
-          if (!await baseHandlers.subscriptionCache.updateShortsByChannelId(data.channelId, data.entries, data.timestamp)) return false
-          syncOtherWindows(
-            IpcChannels.SYNC_SUBSCRIPTION_CACHE,
-            event,
-            { event: SyncEvents.SUBSCRIPTION_CACHE.UPDATE_SHORTS_BY_CHANNEL, data }
-          )
-          return null
-
-        case DBActions.SUBSCRIPTION_CACHE.UPDATE_SHORTS_WITH_CHANNEL_PAGE_SHORTS_BY_CHANNEL:
-          await baseHandlers.subscriptionCache.updateShortsWithChannelPageShortsByChannelId(data.channelId, data.entries)
-          syncOtherWindows(
-            IpcChannels.SYNC_SUBSCRIPTION_CACHE,
-            event,
-            { event: SyncEvents.SUBSCRIPTION_CACHE.UPDATE_SHORTS_WITH_CHANNEL_PAGE_SHORTS_BY_CHANNEL, data }
-          )
-          return null
-
-        case DBActions.SUBSCRIPTION_CACHE.UPDATE_COMMUNITY_POSTS_BY_CHANNEL:
-          if (!await baseHandlers.subscriptionCache.updateCommunityPostsByChannelId(data.channelId, data.entries, data.timestamp)) return false
-          syncOtherWindows(
-            IpcChannels.SYNC_SUBSCRIPTION_CACHE,
-            event,
-            { event: SyncEvents.SUBSCRIPTION_CACHE.UPDATE_COMMUNITY_POSTS_BY_CHANNEL, data }
-          )
-          return null
-
-        case DBActions.GENERAL.DELETE_MULTIPLE:
-          await baseHandlers.subscriptionCache.deleteMultipleChannels(data)
-          syncOtherWindows(
-            IpcChannels.SYNC_SUBSCRIPTION_CACHE,
-            event,
-            { event: SyncEvents.GENERAL.DELETE_MULTIPLE, data }
-          )
-          return null
-
-        case DBActions.GENERAL.DELETE_ALL:
-          await baseHandlers.subscriptionCache.deleteAll()
-          syncOtherWindows(
-            IpcChannels.SYNC_SUBSCRIPTION_CACHE,
-            event,
-            { event: SyncEvents.GENERAL.DELETE_ALL, data }
-          )
-          return null
-
-        default:
-          // eslint-disable-next-line no-throw-literal
-          throw 'invalid subscriptionCache db action'
-      }
-    } catch (err) {
-      if (typeof err === 'string') throw err
-      else throw err.toString()
-    }
-  })
-
-  // *********** //
-
-  function syncOtherWindows(channel, event, payload) {
-    const allWindows = BrowserWindow.getAllWindows()
-
-    for (const window of allWindows) {
-      if (
-        window.webContents.id !== event.sender.id &&
-        !window.webContents.isDestroyed() &&
-        isOpenTubeXUrl(window.webContents.getURL())
-      ) {
-        window.webContents.send(channel, payload)
-      }
-    }
-  }
-
-  function getPlayingVideoIds() {
-    const videoIds = []
-
-    for (const window of BrowserWindow.getAllWindows()) {
-      const tabManager = TabManager.getForWindow(window.id)
-      if (!tabManager) { continue }
-
-      for (const tab of tabManager.tabs.values()) {
-        if (!tab.isPlaying) { continue }
-
-        const videoId = URL.parse(tab.url)?.hash.match(/^#\/watch\/(?<videoId>[^/?]+)/)?.groups?.videoId
-        if (videoId) {
-          videoIds.push(decodeURIComponent(videoId))
-        }
-      }
-    }
-
-    return videoIds
   }
 
   // ************************************************* //
@@ -4004,7 +2854,7 @@ function runApp() {
       await Promise.all(windowSessionWrites)
 
       await Promise.allSettled([
-        trayIconWrite,
+        enqueueTrayIconWrite(() => {}),
         // A script left in KWin would act on a later process with the same ID
         closeKwinPictureInPictureBounds.then(close => close?.())
           .finally(() => pictureInPictureBoundsStore.settled()),

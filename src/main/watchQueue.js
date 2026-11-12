@@ -1,6 +1,8 @@
 // @ts-check
 import { createWatchQueueState, watchQueueMutations, PERSISTED_MUTATIONS } from '../watchQueue.js'
-import { readFile, writeFile, rename } from 'node:fs/promises'
+import { readFile } from 'node:fs/promises'
+import { createSerialQueue } from './serialQueue.js'
+import { writeFileAtomic } from './writeFileAtomic.js'
 
 /** @typedef {{ items: object[], revision: number }} WatchQueueSnapshot */
 
@@ -13,8 +15,7 @@ import { readFile, writeFile, rename } from 'node:fs/promises'
 export function createSharedWatchQueue(storage) {
   let state
   let revision = 0
-  /** @type {Promise<unknown>} */
-  let previousRequest = Promise.resolve()
+  const enqueue = createSerialQueue()
   const apply = async request => {
     if (!state) {
       const restoredState = createWatchQueueState()
@@ -41,11 +42,7 @@ export function createSharedWatchQueue(storage) {
     // IPC serializes the reply, so it only needs the current order.
     return { items: state.items.slice(), revision }
   }
-  return request => {
-    const result = previousRequest.then(() => apply(request))
-    previousRequest = result.catch(() => {})
-    return result
-  }
+  return request => enqueue(() => apply(request))
 }
 
 export function createFileWatchQueue(filename) {
@@ -58,9 +55,6 @@ export function createFileWatchQueue(filename) {
         throw error
       }
     },
-    write: async items => {
-      await writeFile(`${filename}.tmp`, JSON.stringify(items))
-      await rename(`${filename}.tmp`, filename)
-    }
+    write: items => writeFileAtomic(filename, JSON.stringify(items))
   })
 }

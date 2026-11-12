@@ -25,7 +25,7 @@ function lifecycle(platform) {
     scheduledBackupTimer: {},
     scheduledBackups: { stop: async () => calls.push('stop backups') },
     windowSessionWrites: new Set(),
-    trayIconWrite: Promise.resolve(),
+    enqueueTrayIconWrite: async () => {},
     updateWatchQueue: async () => {},
     baseHandlers: { compactAllDatastores: async () => {} },
     shutdownYtDlpDownloads: async () => {},

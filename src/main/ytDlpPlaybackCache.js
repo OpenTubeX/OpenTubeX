@@ -1,7 +1,7 @@
 import { app } from 'electron'
 import { Buffer } from 'node:buffer'
 import { createHash } from 'node:crypto'
-import { readFile, rename, rm, writeFile } from 'node:fs/promises'
+import { readFile, rm } from 'node:fs/promises'
 import { join } from 'node:path'
 
 import { settings } from '../datastores/handlers/base'
@@ -9,8 +9,10 @@ import {
   DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB,
   normalizeYtDlpPlaybackCacheMaxEntrySize
 } from '../ytDlpPlaybackCacheSettings'
+import { createSerialQueue } from './serialQueue'
 import { TabManager } from './tabs/TabManager'
 import { isOpenTubeXUrl } from './utils'
+import { writeFileAtomic } from './writeFileAtomic'
 
 const CACHE_FILENAME = 'yt-dlp-playback-cache.json'
 const MAX_ENTRIES = 50
@@ -29,7 +31,7 @@ const entries = new Map()
  */
 const entrySizes = new WeakMap()
 let loadPromise = null
-let writeQueue = Promise.resolve()
+const enqueueWrite = createSerialQueue()
 let pendingWrite = null
 let cacheEnabled = true
 let maxEntryLength = DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB * BYTES_PER_MEGABYTE
@@ -162,17 +164,11 @@ function saveEntries() {
   // every change, so a burst of updates (for example preloading the upcoming
   // playlist videos) shares one write that snapshots the latest entries.
   if (pendingWrite === null) {
-    const write = writeQueue
-      .catch(() => {})
-      .then(async () => {
-        if (pendingWrite === write) pendingWrite = null
-        const path = cachePath()
-        const temporaryPath = `${path}.tmp`
-        await writeFile(temporaryPath, JSON.stringify([...entries.values()]), 'utf8')
-        await rename(temporaryPath, path)
-      })
+    const write = enqueueWrite(() => {
+      if (pendingWrite === write) pendingWrite = null
+      return writeFileAtomic(cachePath(), JSON.stringify([...entries.values()]))
+    })
     pendingWrite = write
-    writeQueue = write
   }
   return pendingWrite
 }
@@ -268,16 +264,14 @@ export async function handleYtDlpPlaybackCacheClear(event) {
 export async function clearYtDlpPlaybackCache() {
   await loadEntries()
   entries.clear()
-  writeQueue = writeQueue
-    .catch(() => {})
-    .then(() => Promise.all([
-      rm(cachePath(), { force: true }),
-      rm(`${cachePath()}.tmp`, { force: true })
-    ]))
+  const clear = enqueueWrite(() => Promise.all([
+    rm(cachePath(), { force: true }),
+    rm(`${cachePath()}.tmp`, { force: true })
+  ]))
   // A save requested from now on must run after the clear, not share a
   // write that was queued before it.
   pendingWrite = null
-  await writeQueue
+  await clear
 }
 
 // Startup applies the settings without waiting, so the handlers wait for them

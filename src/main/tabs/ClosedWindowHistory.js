@@ -1,6 +1,8 @@
+import { createSerialQueue } from '../serialQueue.js'
+
 export class ClosedWindowHistory {
   sessions = []
-  pendingRestore = Promise.resolve()
+  enqueueRestore = createSerialQueue()
 
   remember(session) {
     if (session.tabs.length === 0) return
@@ -16,7 +18,7 @@ export class ClosedWindowHistory {
   }
 
   restore(createWindow) {
-    const restored = this.pendingRestore.then(async () => {
+    return this.enqueueRestore(async () => {
       const session = this.sessions.at(-1)
       if (!session) return
       await createWindow(session)
@@ -25,7 +27,5 @@ export class ClosedWindowHistory {
       const index = this.sessions.indexOf(session)
       if (index !== -1) this.sessions.splice(index, 1)
     })
-    this.pendingRestore = restored.catch(() => {})
-    return restored
   }
 }
