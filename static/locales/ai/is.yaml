@@ -198,7 +198,7 @@ Subscriptions:
     Feed Already Followed: Þú fylgist nú þegar með þessum straumi.
     Feed Could Not Be Loaded: Ekki tókst að hlaða inn straumnum. Gakktu úr skugga um að slóðin vísi á RSS- eða Atom-straum.
     Feed Requires Browser Check: Þessi vefur krefst vafraathugunar sem OpenTubeX getur ekki lokið. Prófaðu aðra slóð eða annað RSSHub-tilvik fyrir þetta streymi.
-    Refresh Errors: Ekki tókst að uppfæra 1 straum. | Ekki tókst að uppfæra {count} strauma.
+    Refresh Errors: Ekki tókst að uppfæra {count} straum. | Ekki tókst að uppfæra {count} strauma.
     Description: Bættu við RSS- eða Atom-straumi til að fylgjast með höfundum á öðrum kerfum. {rssHub}-tilvik bjóða upp á strauma fyrir mörg vefsvæði, til dæmis Twitch.
     Empty Items: Straumarnir þínir innihalda engin atriði eins og er.
     No Feeds: Þú fylgist ekki með neinum RSS-straumum ennþá.
@@ -306,7 +306,7 @@ History:
   1 Year: 1 ár
   All Time: Allur tíminn
   Custom: Sérsniðið
-  History Older Than Days Removed: Áhorfsferli eldri en 1 dags hefur verið eytt | Áhorfsferli eldri en {days} daga hefur verið eytt
+  History Older Than Days Removed: Áhorfsferli eldri en {days} dags hefur verið eytt | Áhorfsferli eldri en {days} daga hefur verið eytt
 Settings:
   Experimental Settings:
     Faster Subscription Refresh: "Hraðari uppfærsla áskrifta"
@@ -2155,11 +2155,11 @@ Chapters:
   Sync to Video Time: 'Samstilla við tíma myndskeiðs'
 Comments:
   Image unavailable: "Myndin er ekki tiltæk"
-  Comment Count: 1 athugasemd | {count} athugasemdir
+  Comment Count: '{count} athugasemd | {count} athugasemdir'
   Show Comments: Sýna athugasemdir
   Getting comment replies, please wait: Sæki svör við athugasemd. Bíddu aðeins
   Reload Comments: Endurhlaða athugasemdum
-  Reply Count: 1 svar | {replyCount} svör
+  Reply Count: '{replyCount} svar | {replyCount} svör'
   YouTube did not provide advertised replies: YouTube sýndi að svör væru við þessa athugasemd en lét þau ekki fylgja. Þeim kann að hafa verið eytt eða þau falin og því var svarhnappurinn fjarlægður.
   Pinned by you: Fest af þér
   A reply is pinned: Svar er fest
@@ -2173,7 +2173,7 @@ Comments:
   Highlighted comment: Auðkennd athugasemd
   Highlighted reply: Auðkennt svar
   Search loaded comments: Leita í sóttum athugasemdum
-  Loaded comment search result count: 1 af {total} sóttum athugasemdum | {count} af {total} sóttum athugasemdum
+  Loaded comment search result count: '{count} af {total} sóttum athugasemdum | {count} af {total} sóttum athugasemdum'
   No loaded comments match your filters: Engar sóttar athugasemdir passa við síurnar
   YouTube comment link copied to clipboard: Tengill á YouTube-athugasemd afritaður á klippispjaldið
   Translate to {language}: Þýða á {language}
@@ -2440,7 +2440,7 @@ Downloads:
   Download Missing: Niðurhal ekki tiltækt
   Files Missing: Sótta skráin er ekki lengur tiltæk í skráakerfinu. | Sóttu skrárnar eru ekki lengur tiltækar í skráakerfinu.
   Files Available: 'Tiltækar skrár: {available} af {total} sóttum skrám.'
-  More Files: 1 skrá í viðbót | {count} skrár í viðbót
+  More Files: '{count} skrá í viðbót | {count} skrár í viðbót'
   Template Used: 'Sniðmát: {name}'
   Download Type: Tegund niðurhals
   Template: Sniðmát

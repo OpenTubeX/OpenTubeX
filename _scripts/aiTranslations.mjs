@@ -80,6 +80,14 @@ function oneCoversOtherCounts(locale) {
   return [21, 101].some(count => pluralRules.select(count) === 'one')
 }
 
+/**
+ * The English "one" form can name the count 1, but in locales whose "one"
+ * also covers counts like 21, that form has to show the count like "other".
+ */
+function sourceCategory(locale, category) {
+  return category === 'one' && oneCoversOtherCounts(locale) ? 'other' : category
+}
+
 function sourceFormForCategory(sourceForms, category) {
   if (sourceForms.length === 1) return sourceForms[0]
   if (sourceForms.length === 2) return sourceForms[category === 'one' ? 0 : 1]
@@ -98,7 +106,7 @@ function expandPluralSkeleton(locale, path, value) {
   if (sourceForms.length === 1 && !multipleOnly) return value
 
   return getPluralCategories(locale, multipleOnly ? 2 : 0)
-    .map(category => sourceFormForCategory(sourceForms, category))
+    .map(category => sourceFormForCategory(sourceForms, sourceCategory(locale, category)))
     .join(PLURAL_SEPARATOR)
 }
 
@@ -226,14 +234,10 @@ function validateTranslation(locale, path, source, translation, errors) {
   }
 
   for (const [index, category] of categories.entries()) {
-    const expected = placeholders(sourceFormForCategory(sourceForms, category))
+    const expected = placeholders(sourceFormForCategory(sourceForms, sourceCategory(locale, category)))
     const actual = placeholders(translatedForms[index])
-    // The English "one" form can name the count 1, but in locales whose "one"
-    // also covers counts like 21, that form has to show the count
-    const countForm = category === 'one' && oneCoversOtherCounts(locale) &&
-      sameStrings(placeholders(sourceFormForCategory(sourceForms, 'other')), actual)
 
-    if (!sameStrings(expected, actual) && !countForm) {
+    if (!sameStrings(expected, actual)) {
       errors.push(`${path} [${category}]: expected placeholders ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`)
     }
   }

@@ -173,7 +173,7 @@ Subscriptions:
     Feed Already Followed: Вы уже отслеживаете эту ленту.
     Feed Could Not Be Loaded: Не удалось загрузить ленту. Проверьте, что адрес ведёт на RSS- или Atom-ленту.
     Feed Requires Browser Check: Этот сайт требует проверки браузера, которую OpenTubeX не может пройти. Попробуйте другой адрес или другой экземпляр RSSHub для этой ленты.
-    Refresh Errors: Не удалось обновить 1 ленту. | Не удалось обновить {count} ленты. | Не удалось обновить {count} лент.
+    Refresh Errors: Не удалось обновить {count} ленту. | Не удалось обновить {count} ленты. | Не удалось обновить {count} лент.
     Description: Добавьте RSS- или Atom-ленту, чтобы следить за авторами с других платформ. Экземпляры {rssHub} предоставляют ленты для многих сайтов, например Twitch.
     Empty Items: В ваших лентах пока нет элементов.
     No Feeds: Вы пока не отслеживаете ни одной RSS-ленты.
@@ -281,7 +281,7 @@ History:
   1 Year: 1 год
   All Time: За всё время
   Custom: Другое
-  History Older Than Days Removed: История просмотра старше 1 дня удалена | История просмотра старше {days} дней удалена | История просмотра старше {days} дней удалена
+  History Older Than Days Removed: История просмотра старше {days} дня удалена | История просмотра старше {days} дней удалена | История просмотра старше {days} дней удалена
 Settings:
   Experimental Settings:
     Faster Subscription Refresh: "Быстрое обновление подписок"
@@ -2116,11 +2116,11 @@ Chapters:
   Sync to Video Time: 'Синхронизировать со временем видео'
 Comments:
   Image unavailable: "Изображение недоступно"
-  Comment Count: 1 комментарий | {count} комментария | {count} комментариев
+  Comment Count: '{count} комментарий | {count} комментария | {count} комментариев'
   Show Comments: Показать комментарии
   Getting comment replies, please wait: Загрузка ответов на комментарий…
   Reload Comments: Перезагрузить комментарии
-  Reply Count: 1 ответ | {replyCount} ответа | {replyCount} ответов
+  Reply Count: '{replyCount} ответ | {replyCount} ответа | {replyCount} ответов'
   YouTube did not provide advertised replies: YouTube указал, что на этот комментарий есть ответы, но не предоставил их. Возможно, они удалены или скрыты, поэтому кнопка ответов убрана.
   Pinned by you: Закреплено вами
   A reply is pinned: Ответ закреплён
@@ -2134,7 +2134,7 @@ Comments:
   Highlighted comment: Выделенный комментарий
   Highlighted reply: Выделенный ответ
   Search loaded comments: Поиск по загруженным комментариям
-  Loaded comment search result count: 1 из {total} загруженных комментариев | {count} из {total} загруженных комментариев | {count} из {total} загруженных комментариев
+  Loaded comment search result count: '{count} из {total} загруженных комментариев | {count} из {total} загруженных комментариев | {count} из {total} загруженных комментариев'
   No loaded comments match your filters: Нет загруженных комментариев, соответствующих фильтрам
   YouTube comment link copied to clipboard: Ссылка на комментарий YouTube скопирована в буфер обмена
   Translate to {language}: Перевести на {language}
@@ -2398,7 +2398,7 @@ Downloads:
   Download Missing: Загрузка недоступна
   Files Missing: Загруженный файл больше недоступен в файловой системе. | Загруженные файлы больше недоступны в файловой системе. | Загруженные файлы больше недоступны в файловой системе.
   Files Available: 'Доступно загруженных файлов: {available} из {total}.'
-  More Files: Ещё 1 файл | Ещё {count} файла | Ещё {count} файлов
+  More Files: Ещё {count} файл | Ещё {count} файла | Ещё {count} файлов
   Template Used: 'Шаблон: {name}'
   Template: Шаблон
   Unsaved: Не сохранено

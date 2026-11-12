@@ -232,7 +232,7 @@ Subscriptions:
     Feed Already Followed: Jūs jau stebite šį sklaidos kanalą.
     Feed Could Not Be Loaded: Nepavyko įkelti sklaidos kanalo. Patikrinkite, ar adresas nurodo į RSS arba Atom sklaidos kanalą.
     Feed Requires Browser Check: Ši svetainė reikalauja naršyklės patikros, kurios OpenTubeX negali atlikti. Šiam srautui išbandykite kitą adresą arba kitą RSSHub serverį.
-    Refresh Errors: Nepavyko atnaujinti 1 sklaidos kanalo. | Nepavyko atnaujinti {count} sklaidos kanalų. | Nepavyko atnaujinti {count} sklaidos kanalų.
+    Refresh Errors: Nepavyko atnaujinti {count} sklaidos kanalo. | Nepavyko atnaujinti {count} sklaidos kanalų. | Nepavyko atnaujinti {count} sklaidos kanalų.
     Description: Pridėkite RSS arba Atom sklaidos kanalą, kad galėtumėte stebėti kūrėjus kitose platformose. {rssHub} serveriai teikia sklaidos kanalus daugeliui svetainių, pavyzdžiui, Twitch.
     Empty Items: Jūsų sklaidos kanaluose šiuo metu nėra jokių elementų.
     No Feeds: Dar nestebite jokių RSS sklaidos kanalų.
@@ -316,8 +316,8 @@ User Playlists:
   Export Playlist: Eksportuoti šį grojaraštį
   Export list of URLs: Eksportuoti URL sąrašą
   The playlist has been successfully exported: Grojaraštis sėkmingai eksportuotas
-  Are you sure you want to remove {playlistItemCount} duplicate videos from this playlist? This cannot be undone: Ar tikrai norite iš šio grojaraščio pašalinti 1 pasikartojantį vaizdo įrašą? Šio veiksmo anuliuoti negalima. | Ar tikrai norite iš šio grojaraščio pašalinti {playlistItemCount} pasikartojančius vaizdo įrašus? Šio veiksmo anuliuoti negalima. | Ar tikrai norite iš šio grojaraščio pašalinti {playlistItemCount} pasikartojančių vaizdo įrašų? Šio veiksmo anuliuoti negalima.
-  Are you sure you want to remove {playlistItemCount} watched videos from this playlist? This cannot be undone: Ar tikrai norite iš šio grojaraščio pašalinti 1 peržiūrėtą vaizdo įrašą? Šio veiksmo anuliuoti negalima. | Ar tikrai norite iš šio grojaraščio pašalinti {playlistItemCount} peržiūrėtus vaizdo įrašus? Šio veiksmo anuliuoti negalima. | Ar tikrai norite iš šio grojaraščio pašalinti {playlistItemCount} peržiūrėtų vaizdo įrašų? Šio veiksmo anuliuoti negalima.
+  Are you sure you want to remove {playlistItemCount} duplicate videos from this playlist? This cannot be undone: Ar tikrai norite iš šio grojaraščio pašalinti {playlistItemCount} pasikartojantį vaizdo įrašą? Šio veiksmo anuliuoti negalima. | Ar tikrai norite iš šio grojaraščio pašalinti {playlistItemCount} pasikartojančius vaizdo įrašus? Šio veiksmo anuliuoti negalima. | Ar tikrai norite iš šio grojaraščio pašalinti {playlistItemCount} pasikartojančių vaizdo įrašų? Šio veiksmo anuliuoti negalima.
+  Are you sure you want to remove {playlistItemCount} watched videos from this playlist? This cannot be undone: Ar tikrai norite iš šio grojaraščio pašalinti {playlistItemCount} peržiūrėtą vaizdo įrašą? Šio veiksmo anuliuoti negalima. | Ar tikrai norite iš šio grojaraščio pašalinti {playlistItemCount} peržiūrėtus vaizdo įrašus? Šio veiksmo anuliuoti negalima. | Ar tikrai norite iš šio grojaraščio pašalinti {playlistItemCount} peržiūrėtų vaizdo įrašų? Šio veiksmo anuliuoti negalima.
   Delete Playlist: Ištrinti grojaraštį
   Cannot delete the quick bookmark target playlist.: Negalima ištrinti sparčiosioms žymėms naudojamo grojaraščio.
   Are you sure you want to delete this playlist? This cannot be undone: Ar tikrai norite ištrinti šį grojaraštį? Šio veiksmo anuliuoti negalima.
@@ -350,24 +350,24 @@ User Playlists:
       Playlist name cannot be empty. Please input a name.: Grojaraščio pavadinimas negali būti tuščias. Įveskite pavadinimą.
       Playlist has been updated.: Grojaraštis atnaujintas.
       There was an issue with updating this playlist.: Atnaujinant šį grojaraštį kilo klaida.
-      '{videoCount} video(s) have been removed': Pašalintas 1 vaizdo įrašas | Pašalinti {videoCount} vaizdo įrašai | Pašalinta {videoCount} vaizdo įrašų
+      '{videoCount} video(s) have been removed': Pašalintas {videoCount} vaizdo įrašas | Pašalinti {videoCount} vaizdo įrašai | Pašalinta {videoCount} vaizdo įrašų
       There were no videos to remove.: Nėra šalintinų vaizdo įrašų.
       This playlist is protected and cannot be removed.: Šis grojaraštis apsaugotas, todėl jo pašalinti negalima.
       Playlist {playlistName} has been deleted.: Grojaraštis {playlistName} ištrintas.
       This playlist does not exist: Šio grojaraščio nėra
       This playlist has a video with a duration error: Šiame grojaraštyje yra bent vienas vaizdo įrašas, kurio trukmė nenurodyta. Rikiuojant bus laikoma, kad jo trukmė lygi nuliui.
   AddVideoPrompt:
-    Select a playlist to add your N videos to: Pasirinkite grojaraštį, prie kurio norite pridėti vaizdo įrašą | Pasirinkite grojaraštį, prie kurio norite pridėti {videoCount} vaizdo įrašus | Pasirinkite grojaraštį, prie kurio norite pridėti {videoCount} vaizdo įrašų
+    Select a playlist to add your N videos to: Pasirinkite grojaraštį, prie kurio norite pridėti {videoCount} vaizdo įrašą | Pasirinkite grojaraštį, prie kurio norite pridėti {videoCount} vaizdo įrašus | Pasirinkite grojaraštį, prie kurio norite pridėti {videoCount} vaizdo įrašų
     N playlists selected: 'Pasirinkta: {playlistCount}'
     Search in Playlists: Ieškoti grojaraščiuose
     Allow Adding Duplicate Video(s): Leisti pridėti pasikartojančius vaizdo įrašus
     Save: Išsaugoti
-    Added {count} Times: Jau pridėta | Pridėta {count} kartus | Pridėta {count} kartų
+    Added {count} Times: Pridėta {count} kartą | Pridėta {count} kartus | Pridėta {count} kartų
     '{videoCount}/{totalVideoCount} Videos Will Be Added': 'Bus pridėta vaizdo įrašų: {videoCount}/{totalVideoCount}'
     '{videoCount}/{totalVideoCount} Videos Already Added': 'Jau pridėta vaizdo įrašų: {videoCount}/{totalVideoCount}'
     Toast:
       You haven't selected any playlist yet.: Dar nepasirinkote grojaraščio.
-      Video(s) added to {playlistCount} playlists: Pridėta prie 1 grojaraščio | Pridėta prie {playlistCount} grojaraščių | Pridėta prie {playlistCount} grojaraščių
+      Video(s) added to {playlistCount} playlists: Pridėta prie {playlistCount} grojaraščio | Pridėta prie {playlistCount} grojaraščių | Pridėta prie {playlistCount} grojaraščių
     And N more videos: 'ir dar {count} vaizdo įrašas | ir dar {count} vaizdo įrašai | ir dar {count} vaizdo įrašų'
   CreatePlaylistPrompt:
     New Playlist Name: Naujo grojaraščio pavadinimas
@@ -425,7 +425,7 @@ History:
   1 Year: 1 metai
   All Time: Visas laikas
   Custom: Pasirinktinai
-  History Older Than Days Removed: Pašalinti senesni nei 1 dienos žiūrėjimo istorijos įrašai | Pašalinti senesni nei {days} dienų žiūrėjimo istorijos įrašai | Pašalinti senesni nei {days} dienų žiūrėjimo istorijos įrašai
+  History Older Than Days Removed: Pašalinti senesni nei {days} dienos žiūrėjimo istorijos įrašai | Pašalinti senesni nei {days} dienų žiūrėjimo istorijos įrašai | Pašalinti senesni nei {days} dienų žiūrėjimo istorijos įrašai
 Settings:
   Diagnostics:
     Diagnostics: Diagnostika
@@ -1920,7 +1920,7 @@ Channel:
     Location: Vieta
   Posts:
     This channel currently does not have any posts: Šiame kanale šiuo metu nėra įrašų
-    votes: 1 balsas | {votes} balsai | {votes} balsų
+    votes: '{votes} balsas | {votes} balsai | {votes} balsų'
     View Full Post: Rodyti visą įrašą
     Reveal Answers: Rodyti atsakymus
     Hide Answers: Slėpti atsakymus
@@ -2313,7 +2313,7 @@ Video:
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Likęs SABR delsos laikas: {remindingTimeSeconds} s'
   Station: Stotis
   Playlist:
-    Unavailable videos are hidden: 1 nepasiekiamas vaizdo įrašas paslėptas | {count} nepasiekiami vaizdo įrašai paslėpti | {count} nepasiekiamų vaizdo įrašų paslėpta
+    Unavailable videos are hidden: '{count} nepasiekiamas vaizdo įrašas paslėptas | {count} nepasiekiami vaizdo įrašai paslėpti | {count} nepasiekiamų vaizdo įrašų paslėpta'
   External Media:
     Dislikes: "Nepatinka | Nepatinka | Nepatinka"
     Reposts: "Pakartotinis įrašas | Pakartotiniai įrašai | Pakartotinių įrašų"
@@ -2546,13 +2546,13 @@ Chapters:
   Sync to Video Time: 'Sinchronizuoti su vaizdo įrašo laiku'
 Comments:
   Image unavailable: "Vaizdas nepasiekiamas"
-  Comment Count: 1 komentaras | {count} komentarai | {count} komentarų
+  Comment Count: '{count} komentaras | {count} komentarai | {count} komentarų'
   Show Comments: Rodyti komentarus
   Getting comment replies, please wait: Gaunami atsakymai į komentarą, palaukite
   Reload Comments: Iš naujo įkelti komentarus
-  Reply Count: 1 atsakymas | {replyCount} atsakymai | {replyCount} atsakymų
-  View {replyCount} replies: Rodyti 1 atsakymą | Rodyti {replyCount} atsakymus | Rodyti {replyCount} atsakymų
-  Hide {replyCount} replies: Slėpti 1 atsakymą | Slėpti {replyCount} atsakymus | Slėpti {replyCount} atsakymų
+  Reply Count: '{replyCount} atsakymas | {replyCount} atsakymai | {replyCount} atsakymų'
+  View {replyCount} replies: Rodyti {replyCount} atsakymą | Rodyti {replyCount} atsakymus | Rodyti {replyCount} atsakymų
+  Hide {replyCount} replies: Slėpti {replyCount} atsakymą | Slėpti {replyCount} atsakymus | Slėpti {replyCount} atsakymų
   View 1 reply from {channelName}: Rodyti 1 kanalo {channelName} atsakymą
   View {replyCount} replies from {channelName} and others: Rodyti {replyCount} kanalo {channelName} ir kitų atsakymus
   There are no comments available for this post: Šiam įrašui komentarų nėra
@@ -2572,7 +2572,7 @@ Comments:
   Highlighted comment: Paryškintas komentaras
   Highlighted reply: Paryškintas atsakymas
   Search loaded comments: Ieškoti įkeltuose komentaruose
-  Loaded comment search result count: 1 iš {total} įkeltų komentarų | {count} iš {total} įkeltų komentarų | {count} iš {total} įkeltų komentarų
+  Loaded comment search result count: '{count} iš {total} įkeltų komentarų | {count} iš {total} įkeltų komentarų | {count} iš {total} įkeltų komentarų'
   No loaded comments match your filters: Nė vienas įkeltas komentaras neatitinka filtrų
   YouTube comment link copied to clipboard: YouTube komentaro nuoroda nukopijuota į iškarpinę
   Translate to {language}: Versti į {language}
@@ -2740,7 +2740,7 @@ Screenshot Clipboard Success: Ekrano kopija išsaugota iškarpinėje
 Screenshot Clipboard Error: Nepavyko nukopijuoti ekrano kopijos į iškarpinę
 Channel Hidden: '{channel} pridėtas prie kanalų filtro'
 Channel Unhidden: '{channel} pašalintas iš kanalų filtro'
-Trimmed input must be at least N characters long: Įvestį be tarpų pradžioje ir pabaigoje turi sudaryti bent 1 simbolis | Įvestį be tarpų pradžioje ir pabaigoje turi sudaryti bent {length} simboliai | Įvestį be tarpų pradžioje ir pabaigoje turi sudaryti bent {length} simbolių
+Trimmed input must be at least N characters long: Įvestį be tarpų pradžioje ir pabaigoje turi sudaryti bent {length} simbolis | Įvestį be tarpų pradžioje ir pabaigoje turi sudaryti bent {length} simboliai | Įvestį be tarpų pradžioje ir pabaigoje turi sudaryti bent {length} simbolių
 Tag already exists: 'Žyma „{tagName}“ jau yra'
 Hashtag:
   Hashtag: Saitažodis
@@ -2927,7 +2927,7 @@ Downloads:
   Download Missing: Atsisiuntimas nepasiekiamas
   Files Missing: Failų sistemoje atsisiųsto failo nebėra. | Failų sistemoje atsisiųstų failų nebėra. | Failų sistemoje atsisiųstų failų nebėra.
   Files Available: 'Pasiekiama {available} iš {total} atsisiųstų failų.'
-  More Files: Dar 1 failas | Dar {count} failai | Dar {count} failų
+  More Files: Dar {count} failas | Dar {count} failai | Dar {count} failų
   Template Used: 'Šablonas: {name}'
   Download Type: Atsisiuntimo tipas
   Template: Šablonas

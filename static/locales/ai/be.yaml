@@ -213,7 +213,7 @@ Subscriptions:
     Feed Already Followed: Вы ўжо падпісаныя на гэту стужку.
     Feed Could Not Be Loaded: Не ўдалося загрузіць стужку. Праверце, ці вядзе адрас на RSS- або Atom-стужку.
     Feed Requires Browser Check: Гэты сайт патрабуе праверкі браўзера, якую OpenTubeX не можа прайсці. Паспрабуйце іншы адрас або іншы асобнік RSSHub для гэтай стужкі.
-    Refresh Errors: Не ўдалося абнавіць 1 стужку. | Не ўдалося абнавіць {count} стужкі. | Не ўдалося абнавіць {count} стужак.
+    Refresh Errors: Не ўдалося абнавіць {count} стужку. | Не ўдалося абнавіць {count} стужкі. | Не ўдалося абнавіць {count} стужак.
     Description: Дадайце RSS- або Atom-стужку, каб сачыць за аўтарамі на іншых платформах. Асобнікі {rssHub} даюць стужкі для многіх сайтаў, напрыклад Twitch.
     Empty Items: У вашых стужках пакуль няма элементаў.
     No Feeds: Вы пакуль не падпісаны ні на адну RSS-стужку.
@@ -279,7 +279,7 @@ User Playlists:
     More videos could not be loaded.: Не ўдалося загрузіць іншыя відэа.
   AddVideoPrompt:
     Toast:
-      Video(s) added to {playlistCount} playlists: Відэа дададзена ў 1 спіс прайгравання | Відэа дададзена ў {playlistCount} спісы прайгравання | Відэа дададзена ў {playlistCount} спісаў прайгравання
+      Video(s) added to {playlistCount} playlists: Відэа дададзена ў {playlistCount} спіс прайгравання | Відэа дададзена ў {playlistCount} спісы прайгравання | Відэа дададзена ў {playlistCount} спісаў прайгравання
     And N more videos: 'і яшчэ {count} відэа | і яшчэ {count} відэа | і яшчэ {count} відэа'
   Playlist Thumbnail: "Мініяцюра плэйліста"
   Restore Default Thumbnail: "Аднавіць стандартную мініяцюру"
@@ -329,7 +329,7 @@ History:
   1 Year: 1 год
   All Time: За ўвесь час
   Custom: Уласны перыяд
-  History Older Than Days Removed: Гісторыя прагляду, старэйшая за 1 дзень, выдаленая | Гісторыя прагляду, старэйшая за {days} дні, выдаленая | Гісторыя прагляду, старэйшая за {days} дзён, выдаленая
+  History Older Than Days Removed: Гісторыя прагляду, старэйшая за {days} дзень, выдаленая | Гісторыя прагляду, старэйшая за {days} дні, выдаленая | Гісторыя прагляду, старэйшая за {days} дзён, выдаленая
 Settings:
   Diagnostics:
     Diagnostics: Дыягностыка
@@ -2012,7 +2012,7 @@ Video:
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Да паўторнай спробы SABR: {remindingTimeSeconds} с'
   Station: Станцыя
   Playlist:
-    Unavailable videos are hidden: 1 недаступнае відэа схавана | {count} недаступныя відэа схаваныя | {count} недаступных відэа схавана
+    Unavailable videos are hidden: '{count} недаступнае відэа схавана | {count} недаступныя відэа схаваныя | {count} недаступных відэа схавана'
   External Media:
     Dislikes: "Дызлайк | Дызлайкі | Дызлайкаў"
     Reposts: "Рэпост | Рэпосты | Рэпостаў"
@@ -2231,12 +2231,12 @@ Chapters:
   Sync to Video Time: 'Сінхранізаваць з часам відэа'
 Comments:
   Image unavailable: "Відарыс недаступны"
-  Comment Count: 1 каментарый | {count} каментары | {count} каментарыяў
+  Comment Count: '{count} каментарый | {count} каментары | {count} каментарыяў'
   Show Comments: Паказаць каментары
   Getting comment replies, please wait: Атрыманне адказаў на каментарый, пачакайце
   Reload Comments: Перазагрузіць каментары
-  Reply Count: 1 адказ | {replyCount} адказы | {replyCount} адказаў
-  Hide {replyCount} replies: Схаваць 1 адказ | Схаваць {replyCount} адказы | Схаваць {replyCount} адказаў
+  Reply Count: '{replyCount} адказ | {replyCount} адказы | {replyCount} адказаў'
+  Hide {replyCount} replies: Схаваць {replyCount} адказ | Схаваць {replyCount} адказы | Схаваць {replyCount} адказаў
   View 1 reply from {channelName}: Паказаць 1 адказ ад {channelName}
   View {replyCount} replies from {channelName} and others: Паказаць адказы ({replyCount}) ад {channelName} і іншых
   Comments are turned off: Каментары адключаныя
@@ -2253,7 +2253,7 @@ Comments:
   Highlighted comment: Вылучаны каментарый
   Highlighted reply: Вылучаны адказ
   Search loaded comments: Шукаць у загружаных каментарах
-  Loaded comment search result count: 1 з {total} загружаных каментароў | {count} з {total} загружаных каментароў | {count} з {total} загружаных каментароў
+  Loaded comment search result count: '{count} з {total} загружаных каментароў | {count} з {total} загружаных каментароў | {count} з {total} загружаных каментароў'
   No loaded comments match your filters: Ніводзін загружаны каментарый не адпавядае вашым фільтрам
   YouTube comment link copied to clipboard: Спасылка на каментарый YouTube скапіяваная ў буфер абмену
   Translate to {language}: Перакласці на {language}
@@ -2525,7 +2525,7 @@ Downloads:
   Download Missing: Спампоўванне недаступнае
   Files Missing: Спампаваны файл больш не даступны ў файлавай сістэме. | Спампаваныя файлы больш не даступныя ў файлавай сістэме. | Спампаваныя файлы больш не даступныя ў файлавай сістэме.
   Files Available: 'Даступна {available} з {total} спампаваных файлаў.'
-  More Files: Яшчэ 1 файл | Яшчэ {count} файлы | Яшчэ {count} файлаў
+  More Files: Яшчэ {count} файл | Яшчэ {count} файлы | Яшчэ {count} файлаў
   Template Used: 'Шаблон: {name}'
   Download Type: Тып спампоўвання
   Template: Шаблон

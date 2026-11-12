@@ -200,7 +200,7 @@ Subscriptions:
     Feed Already Followed: Već pratite ovaj izvor.
     Feed Could Not Be Loaded: Izvor nije moguće učitati. Provjerite vodi li adresa na RSS ili Atom izvor.
     Feed Requires Browser Check: Ova stranica traži provjeru preglednika koju OpenTubeX ne može dovršiti. Pokušajte drugu adresu ili drugu RSSHub instancu za ovaj feed.
-    Refresh Errors: 1 izvor nije moguće osvježiti. | {count} izvora nije moguće osvježiti. | {count} izvora nije moguće osvježiti.
+    Refresh Errors: '{count} izvor nije moguće osvježiti. | {count} izvora nije moguće osvježiti. | {count} izvora nije moguće osvježiti.'
     Description: Dodajte RSS ili Atom izvor kako biste pratili autore s drugih platformi. {rssHub} instance pružaju izvore za mnoge web-stranice, primjerice Twitch.
     Empty Items: Vaši izvori trenutačno nemaju nijednu stavku.
     No Feeds: Još ne pratite nijedan RSS izvor.
@@ -309,7 +309,7 @@ History:
   1 Year: 1 godina
   All Time: Cijelo vrijeme
   Custom: Prilagođeno
-  History Older Than Days Removed: Uklonjena je povijest gledanja starija od 1 dana | Uklonjena je povijest gledanja starija od {days} dana | Uklonjena je povijest gledanja starija od {days} dana
+  History Older Than Days Removed: Uklonjena je povijest gledanja starija od {days} dana | Uklonjena je povijest gledanja starija od {days} dana | Uklonjena je povijest gledanja starija od {days} dana
 Settings:
   Diagnostics:
     Diagnostics: Dijagnostika
@@ -1950,7 +1950,7 @@ Video:
       Error: "Datoteku titlova nije moguće učitati. Odaberite SRT ili WebVTT datoteku."
   Station: Postaja
   Playlist:
-    Unavailable videos are hidden: 1 nedostupan videozapis je skriven | {count} nedostupna videozapisa su skrivena | {count} nedostupnih videozapisa je skriveno
+    Unavailable videos are hidden: '{count} nedostupan videozapis je skriven | {count} nedostupna videozapisa su skrivena | {count} nedostupnih videozapisa je skriveno'
   External Media:
     Dislikes: "Nesviđanje | Nesviđanja | Nesviđanja"
     Reposts: "Ponovna objava | Ponovne objave | Ponovnih objava"
@@ -2168,11 +2168,11 @@ Chapters:
   Sync to Video Time: 'Sinkroniziraj s vremenom videozapisa'
 Comments:
   Image unavailable: "Slika nije dostupna"
-  Comment Count: 1 komentar | {count} komentara | {count} komentara
+  Comment Count: '{count} komentar | {count} komentara | {count} komentara'
   Show Comments: Prikaži komentare
   Getting comment replies, please wait: Pričekajte, dohvaćaju se odgovori na komentar
   Reload Comments: Ponovno učitaj komentare
-  Reply Count: 1 odgovor | {replyCount} odgovora | {replyCount} odgovora
+  Reply Count: '{replyCount} odgovor | {replyCount} odgovora | {replyCount} odgovora'
   Comments are turned off: Komentari su isključeni
   YouTube did not provide advertised replies: YouTube je prikazao da ovaj komentar ima odgovore, ali ih nije poslao. Možda su izbrisani ili skriveni pa je uklonjen gumb za prikaz odgovora.
   Pinned by you: Prikvačili ste ovaj komentar
@@ -2187,7 +2187,7 @@ Comments:
   Highlighted comment: Istaknuti komentar
   Highlighted reply: Istaknuti odgovor
   Search loaded comments: Pretraži učitane komentare
-  Loaded comment search result count: 1 od {total} učitanih komentara | {count} od {total} učitanih komentara | {count} od {total} učitanih komentara
+  Loaded comment search result count: '{count} od {total} učitanih komentara | {count} od {total} učitanih komentara | {count} od {total} učitanih komentara'
   No loaded comments match your filters: Nijedan učitani komentar ne odgovara vašim filtrima
   YouTube comment link copied to clipboard: Poveznica na YouTube komentar kopirana je u međuspremnik
   Translate to {language}: Prevedi na {language}
@@ -2454,7 +2454,7 @@ Downloads:
   Download Missing: Preuzimanje nije dostupno
   Files Missing: Preuzeta datoteka više nije dostupna u datotečnom sustavu. | Preuzete datoteke više nisu dostupne u datotečnom sustavu. | Preuzete datoteke više nisu dostupne u datotečnom sustavu.
   Files Available: 'Dostupno je {available} od {total} preuzetih datoteka.'
-  More Files: Još 1 datoteka | Još {count} datoteke | Još {count} datoteka
+  More Files: Još {count} datoteka | Još {count} datoteke | Još {count} datoteka
   Template Used: 'Predložak: {name}'
   Download Type: Vrsta preuzimanja
   Template: Predložak

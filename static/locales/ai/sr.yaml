@@ -202,7 +202,7 @@ Subscriptions:
     Feed Already Followed: Већ пратите овај фид.
     Feed Could Not Be Loaded: Фид није могуће учитати. Проверите да ли адреса води до RSS или Atom фида.
     Feed Requires Browser Check: Овај сајт захтева проверу прегледача коју OpenTubeX не може да заврши. Пробајте другу адресу или другу RSSHub инстанцу за овај фид.
-    Refresh Errors: 1 фид није могуће освежити. | {count} фида није могуће освежити. | {count} фидова није могуће освежити.
+    Refresh Errors: '{count} фид није могуће освежити. | {count} фида није могуће освежити. | {count} фидова није могуће освежити.'
     Description: Додајте RSS или Atom фид да бисте пратили ауторе са других платформи. {rssHub} инстанце пружају фидове за многе сајтове, као што је Twitch.
     Empty Items: Ваши фидови тренутно немају ниједну ставку.
     No Feeds: Још увек не пратите ниједан RSS фид.
@@ -268,7 +268,7 @@ User Playlists:
     More videos could not be loaded.: Још видео-снимака није могло да се учита.
   AddVideoPrompt:
     Toast:
-      Video(s) added to {playlistCount} playlists: Видео-снимци су додати на 1 листу за репродукцију | Видео-снимци су додати на {playlistCount} листе за репродукцију | Видео-снимци су додати на {playlistCount} листа за репродукцију
+      Video(s) added to {playlistCount} playlists: Видео-снимци су додати на {playlistCount} листу за репродукцију | Видео-снимци су додати на {playlistCount} листе за репродукцију | Видео-снимци су додати на {playlistCount} листа за репродукцију
     And N more videos: 'и још {count} видео-снимак | и још {count} видео-снимка | и још {count} видео-снимака'
   Playlist Thumbnail: "Сличица плејлисте"
   Restore Default Thumbnail: "Врати подразумевану сличицу"
@@ -316,7 +316,7 @@ History:
   1 Year: 1 година
   All Time: Све време
   Custom: Прилагођено
-  History Older Than Days Removed: Историја гледања старија од 1 дана је обрисана | Историја гледања старија од {days} дана је обрисана | Историја гледања старија од {days} дана је обрисана
+  History Older Than Days Removed: Историја гледања старија од {days} дана је обрисана | Историја гледања старија од {days} дана је обрисана | Историја гледања старија од {days} дана је обрисана
 Settings:
   Diagnostics:
     Diagnostics: Дијагностика
@@ -1992,7 +1992,7 @@ Video:
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Преостало време до поновног покушаја SABR-а: {remindingTimeSeconds}s'
   Station: Станица
   Playlist:
-    Unavailable videos are hidden: 1 недоступан видео-снимак је скривен | {count} недоступна видео-снимка су скривена | {count} недоступних видео-снимака је скривено
+    Unavailable videos are hidden: '{count} недоступан видео-снимак је скривен | {count} недоступна видео-снимка су скривена | {count} недоступних видео-снимака је скривено'
   External Media:
     Dislikes: "Негативна оцена | Негативне оцене | Негативних оцена"
     Reposts: "Поновна објава | Поновне објаве | Поновних објава"
@@ -2211,12 +2211,12 @@ Chapters:
   Sync to Video Time: 'Синхронизуј са временом видео снимка'
 Comments:
   Image unavailable: "Слика није доступна"
-  Comment Count: 1 коментар | {count} коментара | {count} коментара
+  Comment Count: '{count} коментар | {count} коментара | {count} коментара'
   Show Comments: Прикажи коментаре
   Getting comment replies, please wait: Преузимају се одговори на коментар, сачекајте
   Reload Comments: Поново учитај коментаре
-  Reply Count: 1 одговор | {replyCount} одговора | {replyCount} одговора
-  Hide {replyCount} replies: Сакриј 1 одговор | Сакриј {replyCount} одговора | Сакриј {replyCount} одговора
+  Reply Count: '{replyCount} одговор | {replyCount} одговора | {replyCount} одговора'
+  Hide {replyCount} replies: Сакриј {replyCount} одговор | Сакриј {replyCount} одговора | Сакриј {replyCount} одговора
   View 1 reply from {channelName}: Прикажи 1 одговор канала {channelName}
   View {replyCount} replies from {channelName} and others: Прикажи {replyCount} одговора канала {channelName} и других
   Comments are turned off: Коментари су искључени
@@ -2233,7 +2233,7 @@ Comments:
   Highlighted comment: Истакнути коментар
   Highlighted reply: Истакнути одговор
   Search loaded comments: Претражи учитане коментаре
-  Loaded comment search result count: 1 од {total} учитаних коментара | {count} од {total} учитаних коментара | {count} од {total} учитаних коментара
+  Loaded comment search result count: '{count} од {total} учитаних коментара | {count} од {total} учитаних коментара | {count} од {total} учитаних коментара'
   No loaded comments match your filters: Ниједан учитани коментар не одговара вашим филтерима
   YouTube comment link copied to clipboard: Веза YouTube коментара је копирана у привремену меморију
   Translate to {language}: Преведи на {language}
@@ -2502,7 +2502,7 @@ Downloads:
   Download Missing: Преузимање није доступно
   Files Missing: Преузета датотека више није доступна у систему датотека. | Преузете датотеке више нису доступне у систему датотека. | Преузете датотеке више нису доступне у систему датотека.
   Files Available: 'Доступно је {available} од {total} преузетих датотека.'
-  More Files: Још 1 датотека | Још {count} датотеке | Још {count} датотека
+  More Files: Још {count} датотека | Још {count} датотеке | Још {count} датотека
   Template Used: 'Шаблон: {name}'
   Download Type: Врста преузимања
   Template: Шаблон

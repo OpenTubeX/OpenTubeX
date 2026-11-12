@@ -64,13 +64,13 @@ Global:
   Posts: Objave
   New: Novo
   Counts:
-    Video Count: 1 videoposnetek | {count} videoposnetka | {count} videoposnetki | {count} videoposnetkov
-    Channel Count: 1 kanal | {count} kanala | {count} kanali | {count} kanalov
-    Subscriber Count: 1 naročnik | {count} naročnika | {count} naročniki | {count} naročnikov
-    View Count: 1 ogled | {count} ogleda | {count} ogledi | {count} ogledov
-    Like Count: 1 všeček | {count} všečka | {count} všečki | {count} všečkov
-    Comment Count: 1 komentar | {count} komentarja | {count} komentarji | {count} komentarjev
-    Watching Count: 1 gledalec | {count} gledalca | {count} gledalci | {count} gledalcev
+    Video Count: '{count} videoposnetek | {count} videoposnetka | {count} videoposnetki | {count} videoposnetkov'
+    Channel Count: '{count} kanal | {count} kanala | {count} kanali | {count} kanalov'
+    Subscriber Count: '{count} naročnik | {count} naročnika | {count} naročniki | {count} naročnikov'
+    View Count: '{count} ogled | {count} ogleda | {count} ogledi | {count} ogledov'
+    Like Count: '{count} všeček | {count} všečka | {count} všečki | {count} všečkov'
+    Comment Count: '{count} komentar | {count} komentarja | {count} komentarji | {count} komentarjev'
+    Watching Count: '{count} gledalec | {count} gledalca | {count} gledalci | {count} gledalcev'
   Show Blocked Item: Prikaži blokiran element
 Search Bar:
   Use Suggestion: Uporabi predlog
@@ -241,7 +241,7 @@ Subscriptions:
     Feed Already Followed: Ta vir že spremljate.
     Feed Could Not Be Loaded: Vira ni bilo mogoče naložiti. Preverite, ali naslov kaže na vir RSS ali Atom.
     Feed Requires Browser Check: To spletno mesto zahteva preverjanje brskalnika, ki ga OpenTubeX ne more opraviti. Za ta vir poskusite drug naslov ali drug primerek RSSHub.
-    Refresh Errors: 1 vira ni bilo mogoče osvežiti. | {count} virov ni bilo mogoče osvežiti. | {count} virov ni bilo mogoče osvežiti. | {count} virov ni bilo mogoče osvežiti.
+    Refresh Errors: '{count} vira ni bilo mogoče osvežiti. | {count} virov ni bilo mogoče osvežiti. | {count} virov ni bilo mogoče osvežiti. | {count} virov ni bilo mogoče osvežiti.'
     Description: Dodajte vir RSS ali Atom, če želite spremljati ustvarjalce z drugih platform. Primerki {rssHub} ponujajo vire za številna spletna mesta, na primer Twitch.
     Empty Items: Vaši viri trenutno nimajo nobenih elementov.
     No Feeds: Ne spremljate še nobenega vira RSS.
@@ -326,8 +326,8 @@ User Playlists:
   Export Playlist: Izvozi ta seznam predvajanja
   Export list of URLs: Izvozi seznam URL-jev
   The playlist has been successfully exported: Seznam predvajanja je uspešno izvožen
-  Are you sure you want to remove {playlistItemCount} duplicate videos from this playlist? This cannot be undone: Ali res želite s tega seznama predvajanja odstraniti 1 podvojen videoposnetek? Tega ni mogoče razveljaviti. | Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} podvojena videoposnetka? Tega ni mogoče razveljaviti. | Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} podvojene videoposnetke? Tega ni mogoče razveljaviti. | Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} podvojenih videoposnetkov? Tega ni mogoče razveljaviti.
-  Are you sure you want to remove {playlistItemCount} watched videos from this playlist? This cannot be undone: Ali res želite s tega seznama predvajanja odstraniti 1 ogledan videoposnetek? Tega ni mogoče razveljaviti. | Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} ogledana videoposnetka? Tega ni mogoče razveljaviti. | Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} ogledane videoposnetke? Tega ni mogoče razveljaviti. | Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} ogledanih videoposnetkov? Tega ni mogoče razveljaviti.
+  Are you sure you want to remove {playlistItemCount} duplicate videos from this playlist? This cannot be undone: Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} podvojen videoposnetek? Tega ni mogoče razveljaviti. | Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} podvojena videoposnetka? Tega ni mogoče razveljaviti. | Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} podvojene videoposnetke? Tega ni mogoče razveljaviti. | Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} podvojenih videoposnetkov? Tega ni mogoče razveljaviti.
+  Are you sure you want to remove {playlistItemCount} watched videos from this playlist? This cannot be undone: Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} ogledan videoposnetek? Tega ni mogoče razveljaviti. | Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} ogledana videoposnetka? Tega ni mogoče razveljaviti. | Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} ogledane videoposnetke? Tega ni mogoče razveljaviti. | Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} ogledanih videoposnetkov? Tega ni mogoče razveljaviti.
   Delete Playlist: Izbriši seznam predvajanja
   Cannot delete the quick bookmark target playlist.: Ciljnega seznama predvajanja za hitri zaznamek ni mogoče izbrisati.
   Are you sure you want to delete this playlist? This cannot be undone: Ali res želite izbrisati ta seznam predvajanja? Tega ni mogoče razveljaviti.
@@ -360,24 +360,24 @@ User Playlists:
       Playlist name cannot be empty. Please input a name.: Ime seznama predvajanja ne sme biti prazno. Vnesite ime.
       Playlist has been updated.: Seznam predvajanja je posodobljen.
       There was an issue with updating this playlist.: Pri posodabljanju seznama predvajanja je prišlo do težave.
-      '{videoCount} video(s) have been removed': Odstranjen je bil 1 videoposnetek | Odstranjena sta bila {videoCount} videoposnetka | Odstranjeni so bili {videoCount} videoposnetki | Odstranjenih je bilo {videoCount} videoposnetkov
+      '{videoCount} video(s) have been removed': Odstranjen je bil {videoCount} videoposnetek | Odstranjena sta bila {videoCount} videoposnetka | Odstranjeni so bili {videoCount} videoposnetki | Odstranjenih je bilo {videoCount} videoposnetkov
       There were no videos to remove.: Ni bilo videoposnetkov za odstranitev.
       This playlist is protected and cannot be removed.: Ta seznam predvajanja je zaščiten in ga ni mogoče odstraniti.
       Playlist {playlistName} has been deleted.: Seznam predvajanja {playlistName} je izbrisan.
       This playlist does not exist: Ta seznam predvajanja ne obstaja
       This playlist has a video with a duration error: Ta seznam predvajanja vsebuje vsaj en videoposnetek brez podatka o trajanju. Pri razvrščanju bo njegovo trajanje obravnavano kot nič.
   AddVideoPrompt:
-    Select a playlist to add your N videos to: Izberite seznam predvajanja, na katerega želite dodati videoposnetek | Izberite seznam predvajanja, na katerega želite dodati {videoCount} videoposnetka | Izberite seznam predvajanja, na katerega želite dodati {videoCount} videoposnetke | Izberite seznam predvajanja, na katerega želite dodati {videoCount} videoposnetkov
+    Select a playlist to add your N videos to: Izberite seznam predvajanja, na katerega želite dodati {videoCount} videoposnetek | Izberite seznam predvajanja, na katerega želite dodati {videoCount} videoposnetka | Izberite seznam predvajanja, na katerega želite dodati {videoCount} videoposnetke | Izberite seznam predvajanja, na katerega želite dodati {videoCount} videoposnetkov
     N playlists selected: 'Izbranih seznamov: {playlistCount}'
     Search in Playlists: Išči po seznamih predvajanja
     Allow Adding Duplicate Video(s): Dovoli dodajanje podvojenih videoposnetkov
     Save: Shrani
-    Added {count} Times: Dodano enkrat | Dodano {count}-krat | Dodano {count}-krat | Dodano {count}-krat
+    Added {count} Times: Dodano {count}-krat | Dodano {count}-krat | Dodano {count}-krat | Dodano {count}-krat
     '{videoCount}/{totalVideoCount} Videos Will Be Added': 'Dodanih bo {videoCount}/{totalVideoCount} videoposnetkov'
     '{videoCount}/{totalVideoCount} Videos Already Added': 'Že dodanih: {videoCount}/{totalVideoCount} videoposnetkov'
     Toast:
       You haven't selected any playlist yet.: Izbrali niste še nobenega seznama predvajanja.
-      Video(s) added to {playlistCount} playlists: Videoposnetki so dodani na 1 seznam predvajanja | Videoposnetki so dodani na {playlistCount} seznama predvajanja | Videoposnetki so dodani na {playlistCount} sezname predvajanja | Videoposnetki so dodani na {playlistCount} seznamov predvajanja
+      Video(s) added to {playlistCount} playlists: Videoposnetki so dodani na {playlistCount} seznam predvajanja | Videoposnetki so dodani na {playlistCount} seznama predvajanja | Videoposnetki so dodani na {playlistCount} sezname predvajanja | Videoposnetki so dodani na {playlistCount} seznamov predvajanja
     And N more videos: 'in še {count} videoposnetek | in še {count} videoposnetka | in še {count} videoposnetki | in še {count} videoposnetkov'
   CreatePlaylistPrompt:
     New Playlist Name: Ime novega seznama predvajanja
@@ -435,7 +435,7 @@ History:
   1 Year: 1 leto
   All Time: Ves čas
   Custom: Po meri
-  History Older Than Days Removed: Zgodovina ogledov, starejša od 1 dneva, je odstranjena | Zgodovina ogledov, starejša od {days} dni, je odstranjena | Zgodovina ogledov, starejša od {days} dni, je odstranjena | Zgodovina ogledov, starejša od {days} dni, je odstranjena
+  History Older Than Days Removed: Zgodovina ogledov, starejša od {days} dneva, je odstranjena | Zgodovina ogledov, starejša od {days} dni, je odstranjena | Zgodovina ogledov, starejša od {days} dni, je odstranjena | Zgodovina ogledov, starejša od {days} dni, je odstranjena
 Settings:
   Diagnostics:
     Diagnostics: Diagnostika
@@ -1973,7 +1973,7 @@ Channel:
     Location: Lokacija
   Posts:
     This channel currently does not have any posts: Ta kanal trenutno nima objav
-    votes: 1 glas | {votes} glasova | {votes} glasovi | {votes} glasov
+    votes: '{votes} glas | {votes} glasova | {votes} glasovi | {votes} glasov'
     View Full Post: Prikaži celotno objavo
     Reveal Answers: Prikaži odgovore
     Hide Answers: Skrij odgovore
@@ -2395,7 +2395,7 @@ Video:
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Preostali čas zakasnitve SABR: {remindingTimeSeconds}s'
   Station: Postaja
   Playlist:
-    Unavailable videos are hidden: 1 nedostopen videoposnetek je skrit | {count} nedostopna videoposnetka sta skrita | {count} nedostopni videoposnetki so skriti | {count} nedostopnih videoposnetkov je skritih
+    Unavailable videos are hidden: '{count} nedostopen videoposnetek je skrit | {count} nedostopna videoposnetka sta skrita | {count} nedostopni videoposnetki so skriti | {count} nedostopnih videoposnetkov je skritih'
   External Media:
     Dislikes: "Negativna ocena | Negativni oceni | Negativne ocene | Negativnih ocen"
     Reposts: "Ponovna objava | Ponovni objavi | Ponovne objave | Ponovnih objav"
@@ -2624,13 +2624,13 @@ Chapters:
   Sync to Video Time: 'Sinhroniziraj s časom videoposnetka'
 Comments:
   Image unavailable: "Slika ni na voljo"
-  Comment Count: 1 komentar | {count} komentarja | {count} komentarji | {count} komentarjev
+  Comment Count: '{count} komentar | {count} komentarja | {count} komentarji | {count} komentarjev'
   Show Comments: Prikaži komentarje
   Getting comment replies, please wait: Pridobivanje odgovorov na komentar. Počakajte …
   Reload Comments: Znova naloži komentarje
-  Reply Count: 1 odgovor | {replyCount} odgovora | {replyCount} odgovori | {replyCount} odgovorov
-  View {replyCount} replies: Prikaži 1 odgovor | Prikaži {replyCount} odgovora | Prikaži {replyCount} odgovore | Prikaži {replyCount} odgovorov
-  Hide {replyCount} replies: Skrij 1 odgovor | Skrij {replyCount} odgovora | Skrij {replyCount} odgovore | Skrij {replyCount} odgovorov
+  Reply Count: '{replyCount} odgovor | {replyCount} odgovora | {replyCount} odgovori | {replyCount} odgovorov'
+  View {replyCount} replies: Prikaži {replyCount} odgovor | Prikaži {replyCount} odgovora | Prikaži {replyCount} odgovore | Prikaži {replyCount} odgovorov
+  Hide {replyCount} replies: Skrij {replyCount} odgovor | Skrij {replyCount} odgovora | Skrij {replyCount} odgovore | Skrij {replyCount} odgovorov
   View 1 reply from {channelName}: Prikaži 1 odgovor kanala {channelName}
   View {replyCount} replies from {channelName} and others: Prikaži {replyCount} odgovorov kanala {channelName} in drugih
   There are no comments available for this post: Za to objavo ni komentarjev
@@ -2651,7 +2651,7 @@ Comments:
   Highlighted comment: Poudarjen komentar
   Highlighted reply: Poudarjen odgovor
   Search loaded comments: Išči po naloženih komentarjih
-  Loaded comment search result count: 1 od {total} naloženih komentarjev | {count} od {total} naloženih komentarjev | {count} od {total} naloženih komentarjev | {count} od {total} naloženih komentarjev
+  Loaded comment search result count: '{count} od {total} naloženih komentarjev | {count} od {total} naloženih komentarjev | {count} od {total} naloženih komentarjev | {count} od {total} naloženih komentarjev'
   No loaded comments match your filters: Noben naložen komentar ne ustreza vašim filtrom
   YouTube comment link copied to clipboard: Povezava do komentarja v YouTubu je kopirana v odložišče
   Translate to {language}: Prevedi v jezik {language}
@@ -2839,7 +2839,7 @@ Screenshot Error: Zajem zaslona ni uspel. {error}
 Screenshot Clipboard Error: Kopiranje posnetka zaslona v odložišče ni uspelo
 Channel Hidden: '{channel} je dodan v filter kanalov'
 Channel Unhidden: '{channel} je odstranjen iz filtra kanalov'
-Trimmed input must be at least N characters long: Vnos brez okoliških presledkov mora biti dolg najmanj 1 znak | Vnos brez okoliških presledkov mora biti dolg najmanj {length} znaka | Vnos brez okoliških presledkov mora biti dolg najmanj {length} znake | Vnos brez okoliških presledkov mora biti dolg najmanj {length} znakov
+Trimmed input must be at least N characters long: Vnos brez okoliških presledkov mora biti dolg najmanj {length} znak | Vnos brez okoliških presledkov mora biti dolg najmanj {length} znaka | Vnos brez okoliških presledkov mora biti dolg najmanj {length} znake | Vnos brez okoliških presledkov mora biti dolg najmanj {length} znakov
 Tag already exists: Oznaka »{tagName}« že obstaja
 Hashtag:
   Hashtag: Ključnik
@@ -3026,7 +3026,7 @@ Downloads:
   Download Missing: Prenos ni na voljo
   Files Missing: Prenesena datoteka ni več na voljo v datotečnem sistemu. | Preneseni datoteki nista več na voljo v datotečnem sistemu. | Prenesene datoteke niso več na voljo v datotečnem sistemu. | Prenesene datoteke niso več na voljo v datotečnem sistemu.
   Files Available: 'Na voljo je {available} od {total} prenesenih datotek.'
-  More Files: Še 1 datoteka | Še {count} datoteki | Še {count} datoteke | Še {count} datotek
+  More Files: Še {count} datoteka | Še {count} datoteki | Še {count} datoteke | Še {count} datotek
   Template Used: 'Predloga: {name}'
   Download Type: Vrsta prenosa
   Template: Predloga

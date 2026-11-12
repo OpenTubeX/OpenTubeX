@@ -198,7 +198,7 @@ Subscriptions:
     Feed Already Followed: Heuliañ a rit ar gwazh-mañ dija.
     Feed Could Not Be Loaded: N'eus ket bet gallet kargañ ar gwazh. Gwiriit e kas ar chomlec'h d'ur gwazh RSS pe Atom.
     Feed Requires Browser Check: Ul gwiriadur merdeer a c’houlenn al lec’hienn-mañ ha n’hall ket OpenTubeX e seveniñ. Klaskit ur chomlec’h all pe un istañs RSSHub all evit al lanvad-mañ.
-    Refresh Errors: N'eus ket bet gallet adkargañ 1 gwazh. | N'eus ket bet gallet adkargañ {count} wazh. | N'eus ket bet gallet adkargañ {count} gwazh. | N'eus ket bet gallet adkargañ {count} a wazhioù. | N'eus ket bet gallet adkargañ {count} gwazh.
+    Refresh Errors: N'eus ket bet gallet adkargañ {count} gwazh. | N'eus ket bet gallet adkargañ {count} wazh. | N'eus ket bet gallet adkargañ {count} gwazh. | N'eus ket bet gallet adkargañ {count} a wazhioù. | N'eus ket bet gallet adkargañ {count} gwazh.
     Description: Ouzhpennit ur gwazh RSS pe Atom evit heuliañ krouerien war savennoù all. An istañsoù {rssHub} a bourchas gwazhioù evit kalz lec'hiennoù, evel Twitch.
     Empty Items: N'eus elfenn ebet en ho kwazhioù evit poent.
     No Feeds: N'heuliit gwazh RSS ebet c'hoazh.
@@ -306,7 +306,7 @@ History:
   1 Year: "1 bloaz"
   All Time: An holl amzer
   Custom: "Personelaet"
-  History Older Than Days Removed: "Dilamet eo bet an istor sellout koshoc'h eget 1 devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} zevezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh."
+  History Older Than Days Removed: "Dilamet eo bet an istor sellout koshoc'h eget {days} devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} zevezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh."
 Settings:
   Experimental Settings:
     Faster Subscription Refresh: "Freskaat ar c'houmanantoù buanoc'h"
@@ -2143,11 +2143,11 @@ Chapters:
   Sync to Video Time: 'Sinkronelaat gant amzer ar video'
 Comments:
   Image unavailable: "Skeudenn n'eo ket hegerz"
-  Comment Count: "1 evezhiadenn | {count} evezhiadenn | {count} evezhiadenn | {count} evezhiadenn | {count} evezhiadenn"
+  Comment Count: "{count} evezhiadenn | {count} evezhiadenn | {count} evezhiadenn | {count} evezhiadenn | {count} evezhiadenn"
   Show Comments: "Diskouez an evezhiadennoù"
   Getting comment replies, please wait: "Oc'h adtapout respontoù an evezhiadenn, gortozit"
   Reload Comments: "Adkargañ an evezhiadennoù"
-  Reply Count: "1 respont | {replyCount} respont | {replyCount} respont | {replyCount} respont | {replyCount} respont"
+  Reply Count: "{replyCount} respont | {replyCount} respont | {replyCount} respont | {replyCount} respont | {replyCount} respont"
   YouTube did not provide advertised replies: "YouTube en deus diskouezet ez eus respontoù d'an evezhiadenn-mañ, met n'en deus ket pourchaset anezho. Gallout a reont bezañ bet dilamet pe guzh, setu perak eo bet lamet ar bouton respont."
   Pinned by you: "Spilhennet ganeoc'h"
   A reply is pinned: "Spilhennet ez eus ur respont"
@@ -2161,7 +2161,7 @@ Comments:
   Highlighted comment: "Evezhiadenn usskedet"
   Highlighted reply: "Respont usskedet"
   Search loaded comments: "Klask en evezhiadennoù karget"
-  Loaded comment search result count: "1 diwar {total} evezhiadenn garg | {count} diwar {total} evezhiadenn garg | {count} diwar {total} evezhiadenn garg | {count} diwar {total} evezhiadenn garg | {count} diwar {total} evezhiadenn garg"
+  Loaded comment search result count: "{count} diwar {total} evezhiadenn garg | {count} diwar {total} evezhiadenn garg | {count} diwar {total} evezhiadenn garg | {count} diwar {total} evezhiadenn garg | {count} diwar {total} evezhiadenn garg"
   No loaded comments match your filters: "N'eus evezhiadenn garg ebet o klotañ gant ho siloù"
   YouTube comment link copied to clipboard: "Eilet eo bet liamm an evezhiadenn YouTube er golver"
   Translate to {language}: "Treiñ e {language}"
@@ -2427,7 +2427,7 @@ Downloads:
   Download Missing: "N'eo ket hegerz ar pellgargadenn"
   Files Missing: "N'eo ket hegerz ken ar restr pellgarget war ar reizhiad restroù. | N'eo ket hegerz ken ar restroù pellgarget war ar reizhiad restroù. | N'eo ket hegerz ken ar restroù pellgarget war ar reizhiad restroù. | N'eo ket hegerz ken ar restroù pellgarget war ar reizhiad restroù. | N'eo ket hegerz ken ar restroù pellgarget war ar reizhiad restroù."
   Files Available: "{available} diwar {total} restr pellgarget zo hegerz."
-  More Files: "1 restr ouzhpenn | {count} restr ouzhpenn | {count} restr ouzhpenn | {count} restr ouzhpenn | {count} restr ouzhpenn"
+  More Files: "{count} restr ouzhpenn | {count} restr ouzhpenn | {count} restr ouzhpenn | {count} restr ouzhpenn | {count} restr ouzhpenn"
   Template Used: "Patrom: {name}"
   Download Type: "Doare pellgargadenn"
   Template: "Patrom"
