@@ -3,7 +3,7 @@ import { createFileWatchQueue } from './watchQueue.js'
 import { createSerialQueue } from './serialQueue.js'
 import { writeFileAtomic } from './writeFileAtomic.js'
 import {
-  app, BrowserWindow, dialog, Menu, ipcMain,
+  app, BrowserWindow, Menu, ipcMain,
   powerSaveBlocker, screen, session,
   nativeTheme, net, protocol, clipboard, ClipboardItem,
   shell, Tray, Notification, ShareMenu, nativeImage,
@@ -33,7 +33,7 @@ import { applySyncServerUserAgent } from '../syncServerUserAgent'
 import * as baseHandlers from '../datastores/handlers/base'
 import { liveReminders, waitForDatastores } from '../datastores'
 import { createImageCacheHandler, ImageCache } from './ImageCache'
-import { constants as fsConstants, existsSync } from 'fs'
+import { existsSync } from 'fs'
 import asyncFs from 'fs/promises'
 import { promisify } from 'util'
 import { brotliDecompress } from 'zlib'
@@ -101,7 +101,10 @@ import { setupIpBlockRecoveryIpc } from './ipBlockRecovery'
 import { isSubscriptionAutoRefreshInProgress, setupSubscriptionAutoRefreshIpc } from './subscriptionAutoRefresh'
 import { setupCastIpc } from './castIpc'
 import { createUrlOpener, getDirectOpenUrl } from './openUrl'
-import { handleTrusted, sendToAppWindows } from './ipc'
+import { handleTrusted, isTrustedSender, onceTrusted, onTrusted, sendToAppWindows } from './ipc'
+import { setupPlayerCacheIpc } from './playerCacheIpc'
+import { setupPowerSaveBlockerIpc } from './powerSaveBlockerIpc'
+import { setupScreenshotFolderIpc } from './screenshotFolderIpc'
 import { setupBackupIpc } from './backupIpc'
 import { setupLibraryNotices } from './libraryNotices'
 import { setupLiveReminderIpc } from './liveReminderIpc'
@@ -649,12 +652,12 @@ function runApp() {
             fromNative: rect => screen.screenToDipRect(null, rect)
           })
         })
-        ipcMain.on(IpcChannels.PICTURE_IN_PICTURE_SHOWN, event => {
+        onTrusted(IpcChannels.PICTURE_IN_PICTURE_SHOWN, event => {
           pictureInPictureBounds.shown(event.sender).catch(error => {
             console.error('Failed to restore the Picture-in-Picture bounds', error)
           })
         })
-        ipcMain.on(IpcChannels.PICTURE_IN_PICTURE_HIDDEN, event => pictureInPictureBounds.hidden(event.sender))
+        onTrusted(IpcChannels.PICTURE_IN_PICTURE_HIDDEN, event => pictureInPictureBounds.hidden(event.sender))
       }
     } catch (error) {
       console.error('Failed to load the Picture-in-Picture window integration', error)
@@ -730,8 +733,8 @@ function runApp() {
   let scheduledBackupTimer
   let keepRefreshingInBackground = false
 
-  ipcMain.handle(IpcChannels.SUBSCRIPTION_BACKGROUND, async (event, method, value) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || !TabManager.getFromWebContents(event.sender)) return
+  handleTrusted(IpcChannels.SUBSCRIPTION_BACKGROUND, async (event, method, value) => {
+    if (!TabManager.getFromWebContents(event.sender)) return
     switch (method) {
       case 'processFeed': return backgroundSubscriptions.processFeed(value)
       case 'configure':
@@ -782,8 +785,8 @@ function runApp() {
   }
   app.whenReady().then(updateTrayColorSchemeWatcher)
   const enqueueTrayIconWrite = createSerialQueue()
-  ipcMain.handle(IpcChannels.SET_TRAY_ICON, async (event, dataUrl, monochrome) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || !TabManager.getFromWebContents(event.sender)) return
+  handleTrusted(IpcChannels.SET_TRAY_ICON, async (event, dataUrl, monochrome) => {
+    if (!TabManager.getFromWebContents(event.sender)) return
     if (dataUrl !== null && (typeof dataUrl !== 'string' || dataUrl.length > 65536 || !dataUrl.startsWith('data:image/png;base64,'))) return
     if (typeof monochrome !== 'boolean') return
     const image = dataUrl === null ? nativeImage.createEmpty() : nativeImage.createFromDataURL(dataUrl)
@@ -2134,11 +2137,11 @@ function runApp() {
       newWindow.once('closed', onWindowButtonLayoutChanged(sendWindowControlsState))
 
       newWindow.webContents.ipc.handle(IpcChannels.WINDOW_CONTROLS_GET, (event) => {
-        if (!isOpenTubeXUrl(event.senderFrame.url)) return null
+        if (!isTrustedSender(event)) return null
         return getWindowControlsState()
       })
       newWindow.webContents.ipc.on(IpcChannels.WINDOW_CONTROL_ACTION, (event, action) => {
-        if (!isOpenTubeXUrl(event.senderFrame.url) || newWindow.isDestroyed()) return
+        if (!isTrustedSender(event) || newWindow.isDestroyed()) return
         if (action === 'minimize') {
           newWindow.minimize()
         } else if (action === 'maximize') {
@@ -2155,7 +2158,7 @@ function runApp() {
       // The renderer reports the colors and height of the bar under the
       // window controls whenever its theme, layout or UI scale changes.
       newWindow.webContents.ipc.on(IpcChannels.SET_TITLE_BAR_OVERLAY, (event, overlay) => {
-        if (!isOpenTubeXUrl(event.senderFrame.url) || newWindow.isDestroyed()) return
+        if (!isTrustedSender(event) || newWindow.isDestroyed()) return
         const { color, symbolColor, height } = overlay ?? {}
         if (typeof color !== 'string' || typeof symbolColor !== 'string' ||
           !Number.isFinite(height) || height <= 0) return
@@ -2385,7 +2388,7 @@ function runApp() {
 
   ipcMain.handle(IpcChannels.SHARE_LINK, createDesktopShareHandler({
     platform: process.platform,
-    isTrustedSender: event => event.senderFrame === event.sender.mainFrame && isOpenTubeXUrl(event.senderFrame.url),
+    isTrustedSender: event => event.senderFrame === event.sender.mainFrame && isTrustedSender(event),
     getWindow: event => BrowserWindow.fromWebContents(event.sender),
     ShareMenu,
     loadWindowsShare: () => loadWindowsShare(__dirname, process.env.NODE_ENV === 'development')
@@ -2397,10 +2400,9 @@ function runApp() {
     loadWindowsNative: () => loadWindowsShare(__dirname, process.env.NODE_ENV === 'development')
   })
 
-  ipcMain.handle(IpcChannels.OPEN_EXTERNAL_LINK_IN_BACKGROUND, async (event, url) => {
+  handleTrusted(IpcChannels.OPEN_EXTERNAL_LINK_IN_BACKGROUND, async (event, url) => {
     const parsedUrl = typeof url === 'string' ? URL.parse(url) : null
-    if (event.senderFrame !== event.sender.mainFrame || !isOpenTubeXUrl(event.senderFrame.url) ||
-      parsedUrl === null || !isExternalBrowserUrl(parsedUrl)) {
+    if (event.senderFrame !== event.sender.mainFrame || parsedUrl === null || !isExternalBrowserUrl(parsedUrl)) {
       return
     }
     try {
@@ -2410,9 +2412,7 @@ function runApp() {
     }
   })
 
-  ipcMain.on(IpcChannels.APP_READY, (event) => {
-    openPendingUrlForReadyWebContents(event)
-  })
+  onTrusted(IpcChannels.APP_READY, openPendingUrlForReadyWebContents)
 
   setupToastIpc()
   setupLiveReminderIpc(liveReminderManager)
@@ -2423,11 +2423,7 @@ function runApp() {
 
   setupSubscriptionAutoRefreshIpc({ backgroundSubscriptions, updateBackgroundSubscriptionVisibility })
 
-  ipcMain.on(IpcChannels.SET_WINDOW_TITLE, (event, payload) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
+  onTrusted(IpcChannels.SET_WINDOW_TITLE, (event, payload) => {
     const title = payload?.title
     const tabId = payload?.tabId
     const manager = TabManager.getFromWebContents(event.sender)
@@ -2473,40 +2469,23 @@ function runApp() {
     app.quit()
   }
 
-  ipcMain.once(IpcChannels.RELAUNCH_REQUEST, () => {
-    relaunch()
-  })
+  onceTrusted(IpcChannels.RELAUNCH_REQUEST, relaunch)
 
   nativeTheme.on('updated', () => {
-    const allWindows = BrowserWindow.getAllWindows()
-
-    allWindows.forEach((window) => {
-      if (!window.webContents.isDestroyed() && isOpenTubeXUrl(window.webContents.getURL())) {
-        window.webContents.send(IpcChannels.NATIVE_THEME_UPDATE, nativeTheme.shouldUseDarkColors)
-      }
-    })
+    sendToAppWindows(IpcChannels.NATIVE_THEME_UPDATE, nativeTheme.shouldUseDarkColors)
   })
 
-  ipcMain.handle(IpcChannels.GENERATE_PO_TOKEN, (event, videoId, context, initialAttestationData, ytConfig) => {
-    if (isOpenTubeXUrl(event.senderFrame.url)) {
-      return generatePoToken(videoId, context, initialAttestationData, ytConfig, proxyUrl)
-    }
-  })
+  handleTrusted(IpcChannels.GENERATE_PO_TOKEN, (_event, videoId, context, initialAttestationData, ytConfig) => (
+    generatePoToken(videoId, context, initialAttestationData, ytConfig, proxyUrl)
+  ))
 
-  ipcMain.handle(IpcChannels.MINT_PO_TOKEN, (event, videoId) => {
-    if (isOpenTubeXUrl(event.senderFrame.url) && typeof videoId === 'string') {
-      return mintPoTokenFromAttestation(videoId, proxyUrl)
-    }
-    return null
-  })
+  handleTrusted(IpcChannels.MINT_PO_TOKEN, (_event, videoId) => (
+    typeof videoId === 'string' ? mintPoTokenFromAttestation(videoId, proxyUrl) : null
+  ), null)
 
   // Resolve once requests use the new proxy, so a proxy test cannot reach the
   // IP check through the previous connection.
-  ipcMain.handle(IpcChannels.ENABLE_PROXY, async (event, url) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
+  handleTrusted(IpcChannels.ENABLE_PROXY, async (_event, url) => {
     proxyUrl = url
     await session.defaultSession.setProxy({
       proxyRules: url
@@ -2514,29 +2493,15 @@ function runApp() {
     await session.defaultSession.closeAllConnections()
   })
 
-  ipcMain.handle(IpcChannels.DISABLE_PROXY, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
+  handleTrusted(IpcChannels.DISABLE_PROXY, async () => {
     proxyUrl = undefined
     await session.defaultSession.setProxy({ mode: 'system' })
     await session.defaultSession.closeAllConnections()
   })
 
-  // #region navigation history
-
-  ipcMain.handle(IpcChannels.GET_NAVIGATION_HISTORY, ({ senderFrame }) => {
-    if (!isOpenTubeXUrl(senderFrame.url)) {
-      return
-    }
-
-    // Logical tab history is renderer-owned. The retained API returns an empty
-    // list for older callers; TopNav reads the active tab runtime directly.
-    return []
-  })
-
-  // #endregion navigation history
+  // Logical tab history is renderer-owned. The retained API returns an empty
+  // list for older callers; TopNav reads the active tab runtime directly.
+  handleTrusted(IpcChannels.GET_NAVIGATION_HISTORY, () => [])
 
   setupSystemInfoIpc()
   setupDiagnosticLogIpc()
@@ -2544,30 +2509,14 @@ function runApp() {
     setDiagnosticLogging(setting?.value === true)
   }).catch(error => console.error('Failed to read the diagnostic logging setting', error))
 
-  ipcMain.handle(IpcChannels.GET_SYSTEM_LOCALE, (event) => {
-    if (isOpenTubeXUrl(event.senderFrame.url)) {
-      // we should switch to getPreferredSystemLanguages at some point and iterate through until we find a supported locale
-      return app.getSystemLocale()
-    }
-  })
+  // we should switch to getPreferredSystemLanguages at some point and iterate through until we find a supported locale
+  handleTrusted(IpcChannels.GET_SYSTEM_LOCALE, () => app.getSystemLocale())
 
-  ipcMain.handle(IpcChannels.IS_WAYLAND_PLATFORM, (event) => {
-    if (isOpenTubeXUrl(event.senderFrame.url)) {
-      return isWaylandPlatform
-    }
-  })
+  handleTrusted(IpcChannels.IS_WAYLAND_PLATFORM, () => isWaylandPlatform)
 
-  ipcMain.handle(IpcChannels.SUPPORTS_AUTO_PICTURE_IN_PICTURE_MINIMIZE, async (event) => {
-    if (isOpenTubeXUrl(event.senderFrame.url)) {
-      return supportsAutoPictureInPictureMinimize
-    }
-  })
+  handleTrusted(IpcChannels.SUPPORTS_AUTO_PICTURE_IN_PICTURE_MINIMIZE, () => supportsAutoPictureInPictureMinimize)
 
-  ipcMain.on(IpcChannels.OPEN_PROFILE_DIRECTORY, (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
+  onTrusted(IpcChannels.OPEN_PROFILE_DIRECTORY, () => {
     shell.openPath(app.getPath('userData')).then((error) => {
       if (error) {
         console.error(`Unable to open profile directory: ${error}`)
@@ -2579,125 +2528,14 @@ function runApp() {
 
   setupBackupIpc({ createBackupArchive, updateSettingFromMain, checkScheduledBackup })
 
-  /**
-   * @param {import('electron').WebContents} webContents
-   * @param {string | undefined} [currentPath]
-   */
-  async function chooseDefaultFolder(webContents, currentPath) {
-    if (typeof currentPath !== 'string' || currentPath.length === 0) {
-      currentPath = app.getPath('pictures')
-    }
-
-    const dialogOptions = {
-      defaultPath: currentPath,
-      properties: ['openDirectory']
-    }
-
-    let result
-
-    const window = BrowserWindow.fromWebContents(webContents)
-    if (window) {
-      result = await dialog.showOpenDialog(window, dialogOptions)
-    } else {
-      result = await dialog.showOpenDialog(dialogOptions)
-    }
-
-    if (result.canceled) {
-      return
-    }
-
-    const settingId = 'screenshotFolderPath'
-
-    await baseHandlers.settings.upsert(settingId, result.filePaths[0])
-
-    const syncPayload = {
-      event: SyncEvents.GENERAL.UPSERT,
-      data: {
-        _id: settingId,
-        value: result.filePaths[0]
-      }
-    }
-
-    BrowserWindow.getAllWindows().forEach((window) => {
-      if (isOpenTubeXUrl(window.webContents.getURL())) {
-        window.webContents.send(IpcChannels.SYNC_SETTINGS, syncPayload)
-      }
-    })
-
-    return result.filePaths[0]
-  }
-
-  ipcMain.on(IpcChannels.CHOOSE_DEFAULT_FOLDER, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
-    const currentPath = (await baseHandlers.settings._findOne('screenshotFolderPath'))?.value
-
-    await chooseDefaultFolder(event.sender, currentPath)
-  })
-
-  ipcMain.handle(IpcChannels.WRITE_TO_DEFAULT_FOLDER, async (event, filename, arrayBuffer) => {
-    if (
-      !isOpenTubeXUrl(event.senderFrame.url) ||
-      typeof filename !== 'string' ||
-      !(arrayBuffer instanceof ArrayBuffer)) {
-      return
-    }
-
-    const folderPath = (await baseHandlers.settings._findOne('screenshotFolderPath'))?.value
-
-    let directory
-    if (typeof folderPath === 'string' && folderPath.length > 0) {
-      try {
-        await asyncFs.access(path.normalize(folderPath), fsConstants.W_OK)
-        directory = folderPath
-      } catch {}
-    }
-
-    // if setting is not set or we do not have write access to the folder
-    // prompt the user for a folder
-    // not having write access can happen if the user copies their settings to different machines
-    // or if they revoke a previously permitted folder in flatseal
-    if (directory === undefined) {
-      directory = await chooseDefaultFolder(event.sender)
-
-      if (typeof directory !== 'string' || directory.length === 0) {
-        return false
-      }
-    }
-
-    directory = path.normalize(directory)
-
-    const filePath = path.resolve(directory, filename)
-
-    // Ensure that we are only writing inside of the expected directory
-    // 'path.dirname' does not return trailing slash, remove it from 'directory' path to ensure consistent comparison
-    if (path.dirname(filePath) !== directory.replace(/\/$/, '')) {
-      throw new Error('Invalid save location')
-    }
-
-    try {
-      await asyncFs.mkdir(directory, { recursive: true })
-
-      await asyncFs.writeFile(filePath, new DataView(arrayBuffer))
-    } catch (error) {
-      console.error('WRITE_TO_DEFAULT_FOLDER failed', error)
-      // throw a new error so that we don't expose the real error to the renderer
-      // eslint-disable-next-line preserve-caught-error
-      throw new Error('Failed to save')
-    }
-
-    return true
-  })
+  setupScreenshotFolderIpc()
 
   setupIpBlockRecoveryIpc({ updateSettingFromMain })
 
-  /** @type {Map<number, number>} */
-  const activePowerSaveBlockers = new Map()
+  const { stopPowerSaveBlockerForWindow } = setupPowerSaveBlockerIpc()
 
-  ipcMain.handle(IpcChannels.TABS_SET_SHORTCUTS_BLOCKED, (event, blocked) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || typeof blocked !== 'boolean') {
+  handleTrusted(IpcChannels.TABS_SET_SHORTCUTS_BLOCKED, (event, blocked) => {
+    if (typeof blocked !== 'boolean') {
       return
     }
 
@@ -2711,57 +2549,13 @@ function runApp() {
     }
   })
 
-  /**
-   * @param {BrowserWindow} window
-   */
-  function stopPowerSaveBlockerForWindow(window) {
-    const powerSaveBlockerId = activePowerSaveBlockers.get(window.id)
-
-    if (typeof powerSaveBlockerId === 'number') {
-      powerSaveBlocker.stop(powerSaveBlockerId)
-
-      activePowerSaveBlockers.delete(window.id)
-    }
-  }
-
-  ipcMain.on(IpcChannels.STOP_POWER_SAVE_BLOCKER, (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
-    const browserWindow = BrowserWindow.fromWebContents(event.sender)
-
-    if (browserWindow) {
-      stopPowerSaveBlockerForWindow(browserWindow)
-    }
-  })
-
-  ipcMain.on(IpcChannels.START_POWER_SAVE_BLOCKER, (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
-    const browserWindow = BrowserWindow.fromWebContents(event.sender)
-
-    if (browserWindow && !activePowerSaveBlockers.has(browserWindow.id)) {
-      const powerSaveBlockerId = powerSaveBlocker.start('prevent-display-sleep')
-
-      activePowerSaveBlockers.set(browserWindow.id, powerSaveBlockerId)
-    }
-  })
-
-  ipcMain.on(IpcChannels.RESTORE_CLOSED_WINDOW, (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) return
+  onTrusted(IpcChannels.RESTORE_CLOSED_WINDOW, (event) => {
     const browserWindow = BrowserWindow.fromWebContents(event.sender)
     if (!browserWindow || appShortcutBlockedWindows.has(browserWindow)) return
     reopenClosedWindow()
   })
 
-  ipcMain.on(IpcChannels.CREATE_NEW_WINDOW, (event, path, query, searchQueryText) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
+  onTrusted(IpcChannels.CREATE_NEW_WINDOW, (event, path, query, searchQueryText) => {
     if (
       typeof path !== 'string' ||
       (query != null && typeof query !== 'object') ||
@@ -2798,11 +2592,7 @@ function runApp() {
   })
 
   // Handler for creating new tab from renderer
-  ipcMain.on(IpcChannels.CREATE_NEW_TAB, (event, path, query) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
+  onTrusted(IpcChannels.CREATE_NEW_TAB, (event, path, query) => {
     const manager = TabManager.getFromWebContents(event.sender)
     if (manager) {
       manager.createTabWithPreference({ route: path, query, makeActive: true }).catch(error => {
@@ -2831,17 +2621,9 @@ function runApp() {
   ipcMain.handle(IpcChannels.TWITCH_CHAT_REPLAY_PAGE, handleTwitchChatReplayPage)
   ipcMain.handle(IpcChannels.TWITCH_SUB_ONLY_VOD, handleTwitchSubOnlyVod)
 
-  ipcMain.handle(IpcChannels.GET_REPLACE_HTTP_CACHE, (event) => {
-    if (isOpenTubeXUrl(event.senderFrame.url)) {
-      return replaceHttpCache
-    }
-  })
+  handleTrusted(IpcChannels.GET_REPLACE_HTTP_CACHE, () => replaceHttpCache)
 
-  ipcMain.once(IpcChannels.TOGGLE_REPLACE_HTTP_CACHE, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
+  onceTrusted(IpcChannels.TOGGLE_REPLACE_HTTP_CACHE, async () => {
     if (replaceHttpCache) {
       await asyncFs.rm(REPLACE_HTTP_CACHE_PATH)
     } else {
@@ -2853,17 +2635,9 @@ function runApp() {
     relaunch()
   })
 
-  ipcMain.handle(IpcChannels.GET_DISABLE_HARDWARE_ACCELERATION, (event) => {
-    if (isOpenTubeXUrl(event.senderFrame.url)) {
-      return disableHardwareAcceleration
-    }
-  })
+  handleTrusted(IpcChannels.GET_DISABLE_HARDWARE_ACCELERATION, () => disableHardwareAcceleration)
 
-  ipcMain.once(IpcChannels.TOGGLE_DISABLE_HARDWARE_ACCELERATION, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
+  onceTrusted(IpcChannels.TOGGLE_DISABLE_HARDWARE_ACCELERATION, async () => {
     if (disableHardwareAcceleration) {
       await asyncFs.rm(DISABLE_HARDWARE_ACCELERATION_PATH)
     } else {
@@ -2875,75 +2649,20 @@ function runApp() {
     relaunch()
   })
 
-  function playerCachePathForKey(key) {
-    // Remove path separators and period characters,
-    // to prevent any files outside of the player_cache directory,
-    // from being read or written
-    const sanitizedKey = `${key}`.replaceAll(/[./\\]/g, '__')
+  setupPlayerCacheIpc(PLAYER_CACHE_PATH)
 
-    return path.join(PLAYER_CACHE_PATH, sanitizedKey)
-  }
-
-  ipcMain.handle(IpcChannels.PLAYER_CACHE_GET, async (event, key) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
-    const filePath = playerCachePathForKey(key)
-
-    try {
-      const contents = await asyncFs.readFile(filePath)
-
-      return contents.buffer
-    } catch (e) {
-      // Don't log the error if the file doesn't exist as we'll just fetch it from YouTube
-      // this usually happens when YouTube updates their player JavaScript
-      if (e.code !== 'ENOENT') {
-        console.error(e)
-      }
-
-      return undefined
-    }
-  })
-
-  ipcMain.handle(IpcChannels.PLAYER_CACHE_SET, async (event, key, value) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
-    const filePath = playerCachePathForKey(key)
-
-    await asyncFs.mkdir(PLAYER_CACHE_PATH, { recursive: true })
-
-    await asyncFs.writeFile(filePath, new Uint8Array(value))
-  })
-
-  ipcMain.handle(IpcChannels.VOICE_OVER_TRANSLATION_REQUEST, async (event, payload) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
-    return await requestVoiceOverTranslation(payload)
-  })
+  handleTrusted(IpcChannels.VOICE_OVER_TRANSLATION_REQUEST, (_event, payload) => requestVoiceOverTranslation(payload))
 
   /** @type {Map<number, { url: string, authorization: string }>} */
   const invidiousAuthorizations = new Map()
 
   const requestErrors = new RequestErrors()
 
-  ipcMain.handle(IpcChannels.GET_REQUEST_ERROR, (event, url) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || typeof url !== 'string') {
-      return null
-    }
+  handleTrusted(IpcChannels.GET_REQUEST_ERROR, (event, url) => (
+    typeof url === 'string' ? requestErrors.getError(event.sender.id, url) : null
+  ), null)
 
-    return requestErrors.getError(event.sender.id, url)
-  })
-
-  ipcMain.on(IpcChannels.SET_INVIDIOUS_AUTHORIZATION, (event, authorization, url) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
+  onTrusted(IpcChannels.SET_INVIDIOUS_AUTHORIZATION, (event, authorization, url) => {
     if (!authorization) {
       invidiousAuthorizations.delete(event.sender.id)
     } else if (typeof authorization === 'string' && typeof url === 'string') {
@@ -2959,10 +2678,7 @@ function runApp() {
           : 'system')
   }
 
-  ipcMain.handle(IpcChannels.READ_CLIPBOARD, (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) throw new Error('Untrusted clipboard request')
-    return clipboard.readText()
-  })
+  handleTrusted(IpcChannels.READ_CLIPBOARD, () => clipboard.readText())
 
   const { loadCustomThemes, getSelectedCustomTheme } = setupCustomThemes({ updateSettingFromMain, updateThemeSource })
   setupCastIpc({ chromecast, fcast, invidiousAuthorizations, getConfiguredApiServerUrl })
