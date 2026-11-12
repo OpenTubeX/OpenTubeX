@@ -386,7 +386,10 @@ function recordSubscriptionChannelResult(refresh, channel) {
  * @param {(key: string, named?: Record<string, unknown>, plural?: number) => string} t
  */
 function notifyNewSubscriptionErrors(refresh, t) {
-  const channelIds = [...refresh.newErrorChannelIds]
+  // Upload notifications and automatic downloads also fetch channels of other
+  // profiles, which have no row in this profile's box
+  const profileChannelIds = new Set(store.getters.profileById(refresh.profileId)?.subscriptions.map(channel => channel.id))
+  const channelIds = [...refresh.newErrorChannelIds].filter(channelId => profileChannelIds.has(channelId))
   if (refresh.cancelled || channelIds.every(channelId => isSubscriptionChannelErrorShown(refresh.tab, channelId))) return
 
   showToast({

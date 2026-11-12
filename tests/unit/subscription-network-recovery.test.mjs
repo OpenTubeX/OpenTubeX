@@ -52,6 +52,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
   const getters = {
     getActiveProfile: { _id: 'all', subscriptions: Array.from({ length: 20 }, (_, i) => ({ id: `UC${i}` })) },
     get getActiveGroupSubscriptions() { return this.getActiveProfile.subscriptions },
+    profileById(id) { return id === this.getActiveProfile._id ? this.getActiveProfile : undefined },
     getBackendPreference: backend,
     getBackendFallback: true,
     getUseRssFeeds: useRssFeeds,
@@ -767,6 +768,15 @@ for (const shownChannels of ['all', 'all but one']) {
     }
   })
 }
+
+test('failures of channels outside the refreshed profile need no notification', async () => {
+  const app = createRefresh({ error: Object.assign(new Error('HTTP 500'), { status: 500 }) })
+  // Upload notifications and automatic downloads also fetch channels of other profiles
+  app.getters.profileById = () => ({ subscriptions: [] })
+  await app.refresh({ t: key => key })
+  assert.equal(app.errors.size, 20)
+  assert.equal(app.toasts.length, 0)
+})
 
 test('retrying a channel fetches only that channel without counting as a feed refresh', async () => {
   const app = createRefresh({ error: Object.assign(new Error('HTTP 500'), { status: 500 }) })
