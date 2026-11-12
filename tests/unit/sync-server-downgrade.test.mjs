@@ -168,7 +168,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
       const timeout = (timer ?? setTimeout)(callback, ms)
       return () => clearTimeout(timeout)
     },
-    holdBackgroundSync: () => () => {},
+    holdAndroidBackgroundWork: () => () => {},
     setPeriodicBackgroundSync: () => {},
     onPeriodicBackgroundSync: () => {},
     structuredClone,

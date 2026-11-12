@@ -11,8 +11,9 @@ import java.util.UUID;
 import java.util.function.BooleanSupplier;
 
 /**
- * Keeps the renderer running while it syncs out of view. Android freezes a
- * hidden app, which would stall a sync until the app is opened again.
+ * Keeps the renderer running while it syncs or refreshes RSS feeds out of view.
+ * Android freezes a hidden app, which would stall that work until the app is
+ * opened again.
  */
 final class BackgroundSync {
     private static final Handler MAIN = new Handler(Looper.getMainLooper());

@@ -1,5 +1,5 @@
 // @ts-check
-import { holdBackgroundSync, setPeriodicBackgroundSync } from './androidBackgroundSync.js'
+import { holdAndroidBackgroundWork, setPeriodicBackgroundSync } from './androidBackgroundSync.js'
 import { isAppHidden } from './appVisibility.js'
 import { AUTO_SYNC_INTERVAL_MS, isRecentSync, isSyncReasonEnabled } from './sync-server-scheduling'
 
@@ -93,7 +93,7 @@ export function createSyncScheduler({
     // A remote-only check may skip all merges, so it cannot consume local work.
     if (activeSyncPromise && activeSyncRemoteOnly && !options.remoteOnly) {
       // The running check releases its hold before the queued sync takes one.
-      const releaseHold = holdBackgroundSync()
+      const releaseHold = holdAndroidBackgroundWork()
       return activeSyncPromise.catch(() => {}).then(() => {
         if (options.automatic && autoSyncSignal.aborted) return null
         return sync(options)
@@ -102,7 +102,7 @@ export function createSyncScheduler({
     if (!activeSyncPromise) {
       activeSyncRemoteOnly = options.remoteOnly === true
       let syncStarted = false
-      const releaseHold = holdBackgroundSync()
+      const releaseHold = holdAndroidBackgroundWork()
       activeSyncPromise = withSyncLock(() => {
         if (!getSettings().syncServerEnabled || isOffline() ||
             (options.automatic && autoSyncSignal.aborted)) return null
@@ -201,7 +201,7 @@ export function createSyncScheduler({
     clearTimeout(previous?.timer ?? undefined)
     // Keep a hidden Android app running until the pending edits are synced.
     /** @type {{ firstChangeAt: number, timer: ReturnType<typeof setTimeout> | null, releaseHold: () => void }} */
-    const pending = { firstChangeAt, timer: null, releaseHold: previous?.releaseHold ?? holdBackgroundSync() }
+    const pending = { firstChangeAt, timer: null, releaseHold: previous?.releaseHold ?? holdAndroidBackgroundWork() }
     eventSyncTimers.set(reason, pending)
     pending.timer = setTimeout(async () => {
       // Edits made during a sync retain their own deadline. Once due, wait for

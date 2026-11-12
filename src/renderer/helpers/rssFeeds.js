@@ -10,6 +10,7 @@ import { supportsYtDlp } from './ytDlpCapabilities'
 import { isRssFeedItemSeen, onRssFeedSeenItemsSynced, parseRssFeedSeenItems, toRssFeedSeenMarks } from './rssFeedSeenItems'
 import { unmarkExternalMediaWatchedBefore } from './externalMediaPosition'
 import { resolveYtDlpCreatorAvatarUrl } from '../../main/ytDlpCreatorAvatar'
+import { holdAndroidBackgroundWork } from './androidBackgroundSync.js'
 
 const FETCH_TIMEOUT_MS = 15_000
 const MAX_ITEMS_PER_FEED = 50
@@ -697,6 +698,9 @@ export async function refreshRssFeeds(feeds, { automatic = false, cachedUrls = n
   activeRefresh = controller
   loadedDuringRefresh = new Set()
   refreshingHere.value = true
+  // Keep a hidden Android app running until the refresh ends. Subscription
+  // refresh batches must not wait for RSS feeds, so this holds on its own.
+  const releaseBackgroundHold = holdAndroidBackgroundWork()
   let finish
   const finished = new Promise(resolve => { finish = resolve })
   if (refreshChannel) {
@@ -762,6 +766,7 @@ export async function refreshRssFeeds(feeds, { automatic = false, cachedUrls = n
       return result.status === 'fulfilled' ? [[feed, result.value]] : []
     }))
   } finally {
+    releaseBackgroundHold()
     finish()
     progress.finish()
     if (activeRefresh === controller) {
