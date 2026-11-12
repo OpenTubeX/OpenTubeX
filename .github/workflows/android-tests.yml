@@ -121,8 +121,11 @@ jobs:
         # from the app, and notification banners cover it. Android reads the
         # dialog setting on configuration changes only, so the font scale is
         # changed and restored, each time waiting until the configuration shows
-        # it. FailureDiagnostics closes another app's dialog that still appears
-        # and logs whatever window held the screen when a test failed.
+        # it. Android writes each applied font scale back to the setting, and on a
+        # busy device writing back 1.01 can overwrite the restored 1.0, so the
+        # restore is repeated until it shows. FailureDiagnostics closes another
+        # app's dialog that still appears and logs whatever window held the
+        # screen when a test failed.
         # A starved runner delays the virtual access point's beacons, and after a
         # few missed ones the guest drops Wi-Fi. Android then often rejoins
         # without the network's routes, which breaks casting tests for the rest
@@ -143,7 +146,7 @@ jobs:
           adb shell wm size
           adb shell wm density
           adb shell settings put system font_scale 1.01 && timeout 60 sh -c "until adb shell dumpsys activity activities | grep -q '{1.01 '; do sleep 1; done"
-          adb shell settings put system font_scale 1.0 && timeout 60 sh -c "until adb shell dumpsys activity activities | grep -q '{1.0 '; do sleep 1; done"
+          timeout 60 sh -c "until adb shell settings put system font_scale 1.0 && adb shell dumpsys activity activities | grep -q '{1.0 '; do sleep 1; done"
           ./android/gradlew --project-dir android :app:connectedDebugAndroidTest -PtestAbi=x86_64 -Pandroid.testInstrumentationRunnerArguments.numShards=3 -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }} -Pandroid.testInstrumentationRunnerArguments.timeout_msec=600000 -Pandroid.testInstrumentationRunnerArguments.listener=org.opentubex.app.FailureDiagnostics
           adb get-state
           grep -q '<testcase' android/app/build/outputs/androidTest-results/connected/debug/TEST-*.xml
