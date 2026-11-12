@@ -6548,8 +6548,12 @@ export default defineComponent({
           case 'dash': {
             const loadGeneration = this.videoLoadGeneration
             const videoId = this.videoId
+            const player = this.$refs.player
+            const sourceKey = this.playbackSourceKey
             const legacyFormatsReady = await this.prepareLegacyFormats()
-            if (!this.isCurrentVideoLoad(loadGeneration, videoId) || this.activeFormat !== 'dash') return
+            // A source picked meanwhile, such as yt-dlp or a downloaded file, isn't the one that failed
+            if (!this.isCurrentVideoLoad(loadGeneration, videoId) || this.activeFormat !== 'dash' ||
+              player !== this.$refs.player || sourceKey !== this.playbackSourceKey) return
 
             if (legacyFormatsReady) {
               console.error('Unable to play DASH formats. Reverting to legacy formats...')
