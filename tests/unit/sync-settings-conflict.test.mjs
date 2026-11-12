@@ -167,12 +167,16 @@ test('does not treat reordered object keys as a local setting edit', () => {
   assert.deepEqual(entry, remoteEntry)
 })
 
-test('records a custom-theme edit before saving and publishing the new theme list', async () => {
+test('saves a custom-theme edit with its edit time before publishing the new theme list', async () => {
   const calls = []
   const themes = [{ id: 'theme-1', name: 'Test theme' }]
 
   await commitCustomThemesEdit({
-    dispatch: async (action, payload) => calls.push(['dispatch', action, payload]),
+    dispatch: async (action, payload) => {
+      if (action !== 'saveSyncSettingEdit') return calls.push(['dispatch', action, payload])
+      calls.push(['dispatch', action, payload.settingId])
+      return payload.save()
+    },
     commit: (mutation, payload) => calls.push(['commit', mutation, payload]),
     rootGetters: {
       getSystemLightTheme: 'light',
@@ -184,7 +188,7 @@ test('records a custom-theme edit before saving and publishing the new theme lis
   })
 
   assert.deepEqual(calls, [
-    ['dispatch', 'recordSyncSettingEdit', 'customThemes'],
+    ['dispatch', 'saveSyncSettingEdit', 'customThemes'],
     ['save'],
     ['commit', 'setCustomThemes', themes],
   ])
@@ -195,7 +199,11 @@ test('resets a system theme slot when a custom theme changes classification', as
   const themes = [{ id: 'theme-1', name: 'Test theme', isDark: true }]
 
   await commitCustomThemesEdit({
-    dispatch: async (action, payload) => calls.push(['dispatch', action, payload]),
+    dispatch: async (action, payload) => {
+      if (action !== 'saveSyncSettingEdit') return calls.push(['dispatch', action, payload])
+      calls.push(['dispatch', action, payload.settingId])
+      return payload.save()
+    },
     commit: (mutation, payload) => calls.push(['commit', mutation, payload]),
     rootGetters: {
       getSystemLightTheme: 'custom:theme-1',
@@ -204,7 +212,7 @@ test('resets a system theme slot when a custom theme changes classification', as
   }, async () => themes)
 
   assert.deepEqual(calls, [
-    ['dispatch', 'recordSyncSettingEdit', 'customThemes'],
+    ['dispatch', 'saveSyncSettingEdit', 'customThemes'],
     ['commit', 'setCustomThemes', themes],
     ['dispatch', 'updateSystemLightTheme', 'openTubeXLight'],
   ])

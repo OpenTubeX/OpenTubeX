@@ -226,7 +226,7 @@ for (const [name, initialSettings, expectedMode] of [
           assert.equal(key, 'setAiVideoSummaryMode')
           state.aiVideoSummaryMode = value
         },
-        recordSettingSyncTimestamp: async () => {},
+        saveSettingEdit: (commit, id, save) => save(),
         migrateStoredAiVideoSummarySetting,
         console,
       })
@@ -605,7 +605,7 @@ test('a failed control bar migration retries on the next launch', async () => {
 const autoLoadCommentsMigrationStart = settingsSource.indexOf('      // Auto Load Next Page used to control comments too')
 const autoLoadCommentsMigrationEnd = settingsSource.indexOf('      if (legacyHideAiVideoSummariesEntry)', autoLoadCommentsMigrationStart)
 
-const syncTimestampWriterStart = settingsSource.indexOf('function recordSettingSyncTimestamp(')
+const syncTimestampWriterStart = settingsSource.indexOf('function updateSettingSyncTimestamp(')
 const syncTimestampWriterEnd = settingsSource.indexOf('const settingWrites =', syncTimestampWriterStart)
 const lockedSettingUpdateStart = settingsSource.indexOf('/** @type {Map<string, Promise<unknown>>} */')
 const lockedSettingUpdateEnd = settingsSource.indexOf('/**\n * Applies `update` to the saved bookmarks', lockedSettingUpdateStart)

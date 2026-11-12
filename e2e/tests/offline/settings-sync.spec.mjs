@@ -577,7 +577,7 @@ test.describe('sync settings', () => {
     const otherWindow = await openNewWindowFromTabBar(app, page)
     await waitForAppReady(otherWindow)
     const recordEdits = (target, settingIds) => target.evaluate(ids => (
-      Promise.all(ids.map(id => window.$store.dispatch('recordSyncSettingEdit', id)))
+      Promise.all(ids.map(settingId => window.$store.dispatch('saveSyncSettingEdit', { settingId, save: async () => {} })))
     ), settingIds)
 
     await Promise.all([

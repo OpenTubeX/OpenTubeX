@@ -465,26 +465,57 @@ const SUBSCRIPTION_FEED_CACHE_MUTATIONS = {
 }
 
 /**
- * Saves when `settingId` was edited, for sync. Save it before the value, so no
- * window can pair the new value with the previous edit time. Windows can edit
- * different settings at once, so it reads the saved times inside a lock they share.
+ * Saves the edit time `update` returns for `settingId`, for sync, or removes it
+ * for `undefined`. Windows can edit different settings at once, so it reads the
+ * saved times inside a lock they share.
  * @param {Function} commit
  * @param {string} settingId
- * @param {number} [editedAt]
+ * @param {(editedAt: number | undefined) => number | undefined} update
+ * @returns {Promise<boolean>} whether the edit time was saved
  */
-function recordSettingSyncTimestamp(commit, settingId, editedAt = Date.now()) {
-  if (!isSettingSyncable(settingId) && settingId !== CUSTOM_THEMES_SYNC_KEY) return
-
+function updateSettingSyncTimestamp(commit, settingId, update) {
   return runLockedSettingUpdate('syncServerSettingUpdatedAt', async () => {
     // Read the datastore, as the broadcast of another window's edit may still be on its way.
     const saved = await DBSettingHandlers.findValue('syncServerSettingUpdatedAt')
-    const updatedAt = {
-      ...(saved !== null && typeof saved === 'object' && !Array.isArray(saved) ? saved : {}),
-      [settingId]: editedAt,
-    }
+    const updatedAt = { ...(saved !== null && typeof saved === 'object' && !Array.isArray(saved) ? saved : {}) }
+    const editedAt = update(updatedAt[settingId])
+    if (editedAt === updatedAt[settingId]) return
+    if (editedAt === undefined) delete updatedAt[settingId]
+    else updatedAt[settingId] = editedAt
     await DBSettingHandlers.upsert('syncServerSettingUpdatedAt', updatedAt)
     commit('setSyncServerSettingUpdatedAt', updatedAt)
   })
+}
+
+/**
+ * Saves an edit of `settingId` with `save`, and its edit time for sync:
+ * - The edit time is saved first, so no window can pair the new value with the
+ *   previous edit time.
+ * - If either save fails, the edit fails and the previous edit time comes back,
+ *   so sync doesn't count the unchanged value as a newer edit.
+ * @template T
+ * @param {Function} commit
+ * @param {string} settingId
+ * @param {() => Promise<T>} save
+ * @param {number} [editedAt]
+ * @returns {Promise<T>}
+ */
+async function saveSettingEdit(commit, settingId, save, editedAt = Date.now()) {
+  if (!isSettingSyncable(settingId) && settingId !== CUSTOM_THEMES_SYNC_KEY) return save()
+
+  let previous
+  const recorded = await updateSettingSyncTimestamp(commit, settingId, saved => {
+    previous = saved
+    return editedAt
+  })
+  if (!recorded) throw new Error(`Failed to save when ${settingId} was edited`)
+  try {
+    return await save()
+  } catch (error) {
+    // Unless a newer edit saved its own edit time.
+    await updateSettingSyncTimestamp(commit, settingId, saved => saved === editedAt ? previous : saved)
+    throw error
+  }
 }
 
 const settingWrites = createSettingWriteTracker(settingId => DBSettingHandlers.findValue(settingId))
@@ -635,8 +666,7 @@ const customMutations = {
 
 function updateValidatedSetting(commit, settingId, value) {
   return settingWrites.track(settingId, async () => {
-    await recordSettingSyncTimestamp(commit, settingId)
-    await DBSettingHandlers.upsert(settingId, value)
+    await saveSettingEdit(commit, settingId, () => DBSettingHandlers.upsert(settingId, value))
     commit(defaultMutationId(settingId), value)
   }).then(() => true, error => {
     console.error(error)
@@ -692,10 +722,7 @@ function updateOrderedSetting(commit, settings, settingId, value) {
   return settingWrites.track(settingId, () => updateOptimisticSetting(settingId, value, {
     read: () => settings[settingId],
     commit: nextValue => commit(defaultMutationId(settingId), nextValue),
-    persist: async nextValue => {
-      await recordSettingSyncTimestamp(commit, settingId)
-      await DBSettingHandlers.upsert(settingId, nextValue)
-    },
+    persist: nextValue => saveSettingEdit(commit, settingId, () => DBSettingHandlers.upsert(settingId, nextValue)),
   })).then(() => true).catch(error => {
     console.error(error)
     return false
@@ -780,7 +807,8 @@ const customActions = {
     ))
     if (value !== state.subscriptionSeenVideos) commit('setSubscriptionSeenVideos', value)
   },
-  recordSyncSettingEdit: ({ commit }, settingId) => recordSettingSyncTimestamp(commit, settingId),
+  // Saves an edit of a synced value that is not a setting, such as the custom themes.
+  saveSyncSettingEdit: ({ commit }, { settingId, save }) => saveSettingEdit(commit, settingId, save),
   updateFullscreenActions: ({ commit, state }, value) => updateOrderedSetting(
     commit,
     state,
@@ -837,8 +865,7 @@ const customActions = {
     // Read the datastore, as the broadcast of another window's edit may still be on its way.
     const saved = await DBSettingHandlers.findValue('subscriptionGroups')
     const groups = typeof update === 'function' ? update(saved === undefined ? state.subscriptionGroups : saved) : update
-    await recordSettingSyncTimestamp(commit, 'subscriptionGroups')
-    await DBSettingHandlers.upsert('subscriptionGroups', groups)
+    await saveSettingEdit(commit, 'subscriptionGroups', () => DBSettingHandlers.upsert('subscriptionGroups', groups))
     commit('setSubscriptionGroups', groups)
   })),
   updateSubscribedChannelsCustomOrder: ({ commit, state }, value) => updateOrderedSetting(
@@ -887,8 +914,7 @@ const customActions = {
     pendingAutomaticDownloadRuleUpdate = pendingAutomaticDownloadRuleUpdate.then(async () => {
       if (persist === null) throw new Error('Automatic download rules require a user action')
       const value = typeof update === 'function' ? update(state.ytDlpAutomaticDownloadRules) : update
-      await recordSettingSyncTimestamp(commit, 'ytDlpAutomaticDownloadRules')
-      await persist(value)
+      await saveSettingEdit(commit, 'ytDlpAutomaticDownloadRules', () => persist(value))
       // Publish successful writes even if a later edit is queued and could fail.
       commit('setYtDlpAutomaticDownloadRules', value)
       return true
@@ -936,8 +962,7 @@ const customActions = {
   ),
 
   updateMoveDownloadsToAppHeader: ({ commit }, value) => settingWrites.track('moveDownloadsToAppHeader', async () => {
-    await recordSettingSyncTimestamp(commit, 'moveDownloadsToAppHeader')
-    await DBSettingHandlers.upsert('moveDownloadsToAppHeader', value)
+    await saveSettingEdit(commit, 'moveDownloadsToAppHeader', () => DBSettingHandlers.upsert('moveDownloadsToAppHeader', value))
     commit('setMoveDownloadsToAppHeader', value)
     await DBSettingHandlers.delete('moveDownloadsToQuickSettings')
   }).then(() => true, error => {
@@ -996,8 +1021,7 @@ const customActions = {
     }
 
     try {
-      await recordSettingSyncTimestamp(commit, 'iconPack')
-      await DBSettingHandlers.upsert('iconPack', value)
+      await saveSettingEdit(commit, 'iconPack', () => DBSettingHandlers.upsert('iconPack', value))
       commit('setIconPack', value)
       return true
     } catch (error) {
@@ -1200,7 +1224,7 @@ const customActions = {
         const editedAt = userSettings.find(entry => entry._id === 'syncServerSettingUpdatedAt')
           ?.value?.generalAutoLoadMorePaginatedItemsEnabled
         if (typeof editedAt === 'number') {
-          await recordSettingSyncTimestamp(commit, 'autoLoadComments', editedAt)
+          await updateSettingSyncTimestamp(commit, 'autoLoadComments', () => editedAt)
         }
       }
 
@@ -1213,8 +1237,7 @@ const customActions = {
             legacyValue: legacyHideAiVideoSummariesEntry.value,
             hasCurrentSetting: hasAiVideoSummaryModeSetting,
             saveCurrentSetting: async (value) => {
-              await recordSettingSyncTimestamp(commit, 'aiVideoSummaryMode')
-              await DBSettingHandlers.upsert('aiVideoSummaryMode', value)
+              await saveSettingEdit(commit, 'aiVideoSummaryMode', () => DBSettingHandlers.upsert('aiVideoSummaryMode', value))
               commit('setAiVideoSummaryMode', value)
             },
             deleteLegacySetting: () => DBSettingHandlers.delete('hideAiVideoSummaries'),
@@ -1643,10 +1666,9 @@ for (const settingId of Object.keys(state)) {
 
     actions[updaterId] = ({ commit, dispatch }, value) => (
       settingWrites.track(settingId, () => runSettingUpdate(settingId, async isLatest => {
-        await recordSettingSyncTimestamp(commit, settingId)
-
-        if (!isLatest()) return
-        await DBSettingHandlers.upsert(settingId, value)
+        await saveSettingEdit(commit, settingId, async () => {
+          if (isLatest()) await DBSettingHandlers.upsert(settingId, value)
+        })
 
         if (!isLatest()) return
         dispatch(triggerId, value)
@@ -1657,10 +1679,9 @@ for (const settingId of Object.keys(state)) {
   } else {
     actions[updaterId] = ({ commit }, value) => (
       settingWrites.track(settingId, () => runSettingUpdate(settingId, async isLatest => {
-        await recordSettingSyncTimestamp(commit, settingId)
-
-        if (!isLatest()) return
-        await DBSettingHandlers.upsert(settingId, value)
+        await saveSettingEdit(commit, settingId, async () => {
+          if (isLatest()) await DBSettingHandlers.upsert(settingId, value)
+        })
 
         if (isLatest()) commit(mutationId, value)
       })).then(() => true, handleUpdateError)

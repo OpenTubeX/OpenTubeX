@@ -178,7 +178,7 @@ test('generated setting updaters report whether the write was saved', async () =
     defaultSideEffectsTriggerId: id => `trigger${id}`,
     createSettingUpdateQueue,
     settingWrites: createSettingWriteTracker(async () => undefined),
-    recordSettingSyncTimestamp: async () => {},
+    saveSettingEdit: (commit, id, save) => save(),
     DBSettingHandlers: { upsert: async () => { if (failWrites) throw new Error('disk full') } },
     console: { error () {} },
   })
@@ -206,7 +206,10 @@ test('a setting saved by another window during this window\'s write shows the la
     defaultUpdaterId: id => `update${id}`,
     createSettingUpdateQueue,
     settingWrites,
-    recordSettingSyncTimestamp: async (commit, id) => { editTimes.set(id, Date.now()) },
+    saveSettingEdit: (commit, id, save) => {
+      editTimes.set(id, Date.now())
+      return save()
+    },
     DBSettingHandlers: {
       upsert: async (id, value) => {
         valueSavedWithoutEditTime ||= !editTimes.has(id)
@@ -243,7 +246,7 @@ test('an ordered setting saved by another window before this window\'s write sho
     createOptimisticSettingUpdater,
     settingWrites,
     defaultMutationId: id => `set${id}`,
-    recordSettingSyncTimestamp: async () => {},
+    saveSettingEdit: (commit, id, save) => save(),
     DBSettingHandlers: {
       upsert: async (id, value) => {
         started.resolve()
@@ -268,15 +271,16 @@ test('an ordered setting saved by another window before this window\'s write sho
   assert.deepEqual(settings.pinnedPlaylistIds, ['first', 'local'])
 })
 
-test('windows editing different settings at once keep both edit times', async () => {
+test('edit times stay with their values when windows edit settings at once or a save fails', async () => {
   const saved = new Map()
   const locks = new Map()
-  const timestampSection = settingsSection('function recordSettingSyncTimestamp(', 'const settingWrites =') +
+  let failEditTimes = false
+  const timestampSection = settingsSection('function updateSettingSyncTimestamp(', 'const settingWrites =') +
     settingsSection('/** @type {Map<string, Promise<unknown>>} */', '/**\n * Applies `update` to the saved bookmarks')
   const createWindow = () => {
     const settings = { syncServerSettingUpdatedAt: {} }
-    const recordSettingSyncTimestamp = vm.runInNewContext(`${timestampSection}\nrecordSettingSyncTimestamp`, {
-      isSettingSyncable: () => true,
+    const saveSettingEdit = vm.runInNewContext(`${timestampSection}\nsaveSettingEdit`, {
+      isSettingSyncable: id => ['baseTheme', 'listType'].includes(id),
       CUSTOM_THEMES_SYNC_KEY: 'customThemes',
       // Every window shares the database and its locks.
       navigator: {
@@ -292,25 +296,37 @@ test('windows editing different settings at once keep both edit times', async ()
         findValue: async id => structuredClone(saved.get(id)),
         upsert: async (id, value) => {
           await new Promise(resolve => setImmediate(resolve))
+          if (failEditTimes) throw new Error('disk full')
           saved.set(id, structuredClone(value))
         },
       },
-      console,
+      console: { error () {} },
       Map,
       Date,
     })
     return {
       settings,
-      record: (id, editedAt) => recordSettingSyncTimestamp((mutation, value) => { settings.syncServerSettingUpdatedAt = value }, id, editedAt),
+      save: (id, save, editedAt) => saveSettingEdit((mutation, value) => { settings.syncServerSettingUpdatedAt = value }, id, save, editedAt),
     }
   }
   const first = createWindow()
   const second = createWindow()
 
-  await Promise.all([first.record('theme', 1), second.record('uiScale', 2)])
+  await Promise.all([first.save('baseTheme', async () => {}, 1), second.save('listType', async () => {}, 2)])
 
-  assert.deepEqual(saved.get('syncServerSettingUpdatedAt'), { theme: 1, uiScale: 2 })
-  assert.deepEqual({ ...second.settings.syncServerSettingUpdatedAt }, { theme: 1, uiScale: 2 })
+  assert.deepEqual(saved.get('syncServerSettingUpdatedAt'), { baseTheme: 1, listType: 2 })
+  assert.deepEqual({ ...second.settings.syncServerSettingUpdatedAt }, { baseTheme: 1, listType: 2 })
+
+  // Sync must not count the unchanged value as a newer edit.
+  await assert.rejects(first.save('baseTheme', async () => { throw new Error('disk full') }, 3), /disk full/)
+  assert.deepEqual(saved.get('syncServerSettingUpdatedAt'), { baseTheme: 1, listType: 2 })
+  assert.deepEqual({ ...first.settings.syncServerSettingUpdatedAt }, { baseTheme: 1, listType: 2 })
+
+  // Sync must not pair the new value with the previous edit time.
+  failEditTimes = true
+  let valueSaved = false
+  await assert.rejects(first.save('baseTheme', async () => { valueSaved = true }, 4))
+  assert.equal(valueSaved, false)
 })
 
 test('settings sync waits for an optimistic edit to save its edit time', async () => {

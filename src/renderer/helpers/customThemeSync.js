@@ -17,16 +17,14 @@ export async function repairSystemThemeSettings({ dispatch, getters, rootGetters
 }
 
 /**
- * Saves a custom-theme edit with `save`, which resolves to the saved themes.
- * The edit time is recorded first, so no window can pair the new themes with
- * the previous edit time.
+ * Saves a custom-theme edit with `save`, which resolves to the saved themes,
+ * and its edit time for sync.
  * @param {object} context store action context
  * @param {() => Promise<object[]>} save
  */
 export async function commitCustomThemesEdit(context, save) {
   const { commit, dispatch } = context
-  await dispatch('recordSyncSettingEdit', CUSTOM_THEMES_SYNC_KEY)
-  const themes = await save()
+  const themes = await dispatch('saveSyncSettingEdit', { settingId: CUSTOM_THEMES_SYNC_KEY, save })
   const getters = context.rootGetters ?? context.getters
   const baseTheme = getters.getBaseTheme
   if (isCustomThemeValue(baseTheme) && !themes.some(theme => customThemeValue(theme.id) === baseTheme)) {
