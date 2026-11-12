@@ -506,8 +506,7 @@ public class MobileTabSelectionTest {
                     long downTime = SystemClock.uptimeMillis();
                     // A fast release is measured from event times, so keep them a frame
                     // apart even when the main thread stalls between injections.
-                    touch(view, downTime, downTime, MotionEvent.ACTION_DOWN, x * scale, y * scale);
-                    touch(view, downTime, downTime + 16, MotionEvent.ACTION_MOVE, (x + 80) * scale, y * scale);
+                    touchDownAndMove(view, downTime, downTime + 16, x * scale, (x + 80) * scale, y * scale);
                     touch(view, downTime, downTime + 32, MotionEvent.ACTION_UP, (x + 80) * scale, y * scale);
                     await(view, STORE + ".getters.getActiveTabId === window.pageSwipeFirstId && " +
                         "!document.querySelector('.pageSwipeTo')");
@@ -517,8 +516,7 @@ public class MobileTabSelectionTest {
 
                     evaluate(view, "window.pageSwipeTransitions = []");
                     downTime = SystemClock.uptimeMillis();
-                    touch(view, downTime, MotionEvent.ACTION_DOWN, x * scale, y * scale);
-                    touch(view, downTime, MotionEvent.ACTION_MOVE, (x - 80) * scale, y * scale);
+                    touchDownAndMove(view, downTime, x * scale, (x - 80) * scale, y * scale);
                     await(view, "!!document.querySelector('.pageSwipeTo')");
                     touch(view, downTime, MotionEvent.ACTION_CANCEL, (x - 80) * scale, y * scale);
                     await(view, "!document.querySelector('.pageSwipeTo')");
@@ -563,8 +561,7 @@ public class MobileTabSelectionTest {
                 assertTrue("App bar has enough empty space for a swipe", distance > 80);
                 evaluate(view, "document.querySelector('.app > .routerView').style.direction = 'rtl'");
                 long downTime = SystemClock.uptimeMillis();
-                touch(view, downTime, MotionEvent.ACTION_DOWN, x * scale, y * scale);
-                touch(view, downTime, MotionEvent.ACTION_MOVE, (x + distance / 2) * scale, y * scale);
+                touchDownAndMove(view, downTime, x * scale, (x + distance / 2) * scale, y * scale);
                 await(view, "!!document.querySelector('.pageSwipeTo') && " +
                     STORE + ".getters.getPresentedTabId !== window.pageSwipeFirstId");
                 assertEquals("The neighboring page stays flush with the moving page", "true",
@@ -577,8 +574,7 @@ public class MobileTabSelectionTest {
                 float leftDistance = Math.min(150, x - 20);
                 assertTrue("App bar has enough empty space in both directions", leftDistance > 80);
                 downTime = SystemClock.uptimeMillis();
-                touch(view, downTime, MotionEvent.ACTION_DOWN, x * scale, y * scale);
-                touch(view, downTime, MotionEvent.ACTION_MOVE, (x - leftDistance) * scale, y * scale);
+                touchDownAndMove(view, downTime, x * scale, (x - leftDistance) * scale, y * scale);
                 touch(view, downTime, MotionEvent.ACTION_UP, (x - leftDistance) * scale, y * scale);
                 await(view, STORE + ".getters.getPresentedTabId === window.pageSwipeSecondId && " +
                     STORE + ".getters.getActiveTabId === window.pageSwipeSecondId && " +
@@ -596,8 +592,7 @@ public class MobileTabSelectionTest {
                     STORE + ".getters.getActiveTabId === window.pageSwipeSecondId && " +
                     "!!document.querySelector('.pageSwipePrewarm[data-tab-id=\"' + window.pageSwipeThirdId + '\"]')");
                 downTime = SystemClock.uptimeMillis();
-                touch(view, downTime, MotionEvent.ACTION_DOWN, x * scale, y * scale);
-                touch(view, downTime, MotionEvent.ACTION_MOVE, (x + distance / 2) * scale, y * scale);
+                touchDownAndMove(view, downTime, x * scale, (x + distance / 2) * scale, y * scale);
                 await(view, "document.querySelector('.pageSwipeTo')?.dataset.tabId === String(window.pageSwipeFirstId)");
                 assertEquals("The previous tab paints above the other prewarmed tab", "true",
                     evaluate(view, """
@@ -649,22 +644,41 @@ public class MobileTabSelectionTest {
     }
 
     private static void touch(WebView view, long downTime, long eventTime, int action, float x, float y) {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> dispatchTouch(view, downTime, eventTime, action, x, y));
+    }
+
+    private static void touchDownAndMove(WebView view, long downTime, float x, float moveX, float y) {
+        touchDownAndMove(view, downTime, SystemClock.uptimeMillis(), x, moveX, y);
+    }
+
+    /**
+     * The WebView's long-press timeout runs on the main thread. On a starved emulator it
+     * can run between separately posted down and move injections, and the long press
+     * then cancels the touch sequence. Dispatching both in one task moves the touch past
+     * the slop, as a finger does, before the timeout can run.
+     */
+    private static void touchDownAndMove(WebView view, long downTime, long moveTime, float x, float moveX, float y) {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            MotionEvent.PointerProperties properties = new MotionEvent.PointerProperties();
-            properties.id = 0;
-            properties.toolType = MotionEvent.TOOL_TYPE_FINGER;
-            MotionEvent.PointerCoords coordinates = new MotionEvent.PointerCoords();
-            coordinates.x = x;
-            coordinates.y = y;
-            coordinates.pressure = 1;
-            coordinates.size = 1;
-            MotionEvent event = MotionEvent.obtain(downTime, eventTime, action,
-                1, new MotionEvent.PointerProperties[] {properties},
-                new MotionEvent.PointerCoords[] {coordinates}, 0, 0, 1, 1, 0, 0,
-                InputDevice.SOURCE_TOUCHSCREEN, 0);
-            view.dispatchTouchEvent(event);
-            event.recycle();
+            dispatchTouch(view, downTime, downTime, MotionEvent.ACTION_DOWN, x, y);
+            dispatchTouch(view, downTime, moveTime, MotionEvent.ACTION_MOVE, moveX, y);
         });
+    }
+
+    private static void dispatchTouch(WebView view, long downTime, long eventTime, int action, float x, float y) {
+        MotionEvent.PointerProperties properties = new MotionEvent.PointerProperties();
+        properties.id = 0;
+        properties.toolType = MotionEvent.TOOL_TYPE_FINGER;
+        MotionEvent.PointerCoords coordinates = new MotionEvent.PointerCoords();
+        coordinates.x = x;
+        coordinates.y = y;
+        coordinates.pressure = 1;
+        coordinates.size = 1;
+        MotionEvent event = MotionEvent.obtain(downTime, eventTime, action,
+            1, new MotionEvent.PointerProperties[] {properties},
+            new MotionEvent.PointerCoords[] {coordinates}, 0, 0, 1, 1, 0, 0,
+            InputDevice.SOURCE_TOUCHSCREEN, 0);
+        view.dispatchTouchEvent(event);
+        event.recycle();
     }
 
     @Test
