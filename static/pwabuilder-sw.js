@@ -45,7 +45,16 @@ self.addEventListener('install', function (event) {
     caches.open(CACHE).then(function (cache) {
       console.log('[PWA Builder] Caching pages during install')
 
+      // The page's own scripts and styles loaded before this worker could
+      // cache them, so fetch them now for the app to open offline next time.
+      // One that fails is cached when the app next loads it.
       return cache.add(offlineFallbackPage)
+        .then(function () { return cache.match(offlineFallbackPage) })
+        .then(function (response) { return response.text() })
+        .then(function (html) {
+          const assets = Array.from(html.matchAll(/(?:src|href)="([^":]+\.(?:js|css))"/g), function (match) { return match[1] })
+          return Promise.allSettled(assets.map(function (asset) { return cache.add(asset) }))
+        })
     })
   )
 })
