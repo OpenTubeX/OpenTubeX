@@ -508,8 +508,10 @@ function readColor(probe, property) {
 async function saveAndApply() {
   try {
     flushColorPreviews()
-    const themes = await store.dispatch('updateCustomThemes', () => saveCustomTheme(draft))
-    const savedTheme = themes.find(({ id }) => id === draft.id)
+    // The user can keep editing before the save starts, so save the theme as it is now.
+    const theme = normalizeCustomTheme(draft)
+    const themes = await store.dispatch('updateCustomThemes', () => saveCustomTheme(theme))
+    const savedTheme = themes.find(({ id }) => id === theme.id)
     setDraft(savedTheme)
     if (!keepSystemThemeOnSave) {
       await store.dispatch('updateBaseTheme', customThemeValue(savedTheme.id))
@@ -529,7 +531,9 @@ async function handleDeletePrompt(value) {
   if (value !== 'delete') return
 
   try {
-    await store.dispatch('updateCustomThemes', () => deleteCustomTheme(draft.id))
+    // The user can open another theme before the deletion starts.
+    const { id } = draft
+    await store.dispatch('updateCustomThemes', () => deleteCustomTheme(id))
     showToast({
       message: t('Settings.Theme Settings.Custom Theme.Theme Deleted'),
       icon: ['fas', 'trash']
