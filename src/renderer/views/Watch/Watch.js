@@ -6128,7 +6128,8 @@ export default defineComponent({
         console.warn(`Could not refresh the expired visionOS streams of ${videoId}`, error)
         return false
       } finally {
-        this.visionOsStreamsRefreshPending = false
+        // A later video's load resets the flag and may have its own refresh pending
+        if (this.isCurrentVideoLoad(loadGeneration, videoId)) this.visionOsStreamsRefreshPending = false
       }
     },
 

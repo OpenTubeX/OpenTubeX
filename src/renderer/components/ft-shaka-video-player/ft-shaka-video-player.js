@@ -10548,7 +10548,8 @@ export default defineComponent({
      *   useAutoQuality: boolean,
      *   audioBandwidth: number|undefined,
      *   label: string|undefined,
-     *   previousQuality: number|undefined
+     *   previousQuality: number|undefined,
+     *   dashQuality: number|undefined
      * } | null}
      */
     let pendingFormatSwitchState = null
