@@ -251,6 +251,26 @@ Subscriptions:
       Not Set: Nenustatyta
     Retry Feed: Bandyti dar kartą įkelti {feed}
     Reloading Feed: Iš naujo įkeliamas {feed}
+  Platforms:
+    Tab: Platformos
+    Platform: Platforma
+    All Platforms: Visos platformos
+    Followed Channels: Sekami kanalai kitose platformose
+    Description: Sekite kanalus Twitch, SoundCloud, PeerTube, Rumble ir Odysee platformose, kad jų įkeltą turinį matytumėte savo prenumeratų skirtuke „Platformos“. Raskite kanalus paieška arba pridėkite juos pagal jų puslapio adresą. Jų medija atkuriama naudojant yt-dlp.
+    Add Channel: Pridėti kanalą
+    Channel URL: Kanalo adresas
+    Invalid Channel: Įveskite kanalo puslapio adresą Twitch, SoundCloud, PeerTube, Rumble arba Odysee platformoje.
+    Channel Not Found: Šiuo adresu kanalo nėra.
+    Channel Already Followed: Jūs jau sekate šį kanalą.
+    Channel Could Not Be Loaded: Nepavyko įkelti kanalo.
+    No Channels: Dar nesekate jokių kanalų kitose platformose.
+    Unfollow Channel: Nebesekti {channel}
+    Go To Channel: Eiti į kanalą {channel}
+    Follow: Sekti
+    Following: Sekama
+    Clips: Klipai
+    Refresh Errors: Nepavyko atnaujinti {count} kanalo. | Nepavyko atnaujinti {count} kanalų. | Nepavyko atnaujinti {count} kanalų.
+    Content Tabs: Platformų turinio kortelės
 Trending:
   Music: Muzika
   Load Error: Nepavyko įkelti tendencijų.
@@ -1396,6 +1416,11 @@ Settings:
     Confirm Before Unsubscribing: Klausti prieš atsisakant prenumeratos
     RSS Feeds Auto Refresh Interval: RSS sklaidos kanalų automatinio atnaujinimo intervalas
     Faster Subscription Refresh: "Greitesnis prenumeratų atnaujinimas"
+    Platforms:
+      Other Platforms: Kitos platformos
+      Manage Channels: Tvarkyti sekamus kanalus
+      Notify When Live: Pranešti, kai sekami Twitch kanalai pradeda tiesioginę transliaciją
+      Auto Refresh Interval: Kitų platformų automatinio atnaujinimo intervalas
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Skaičiuoti žiūrėjimo laiką"
@@ -2429,6 +2454,7 @@ Context Menu:
   Reload Posts: Įkelti įrašus iš naujo
   Reload All Feeds: Iš naujo įkelti visus kanalus
   Reload RSS Feeds: Iš naujo įkelti RSS sklaidos kanalus
+  Reload Platforms: Iš naujo įkelti platformas
   Close Multiple Tabs: Uždaryti {count} kortelę | Uždaryti {count} korteles | Uždaryti {count} kortelių
   Duplicate Tab: Dubliuoti kortelę
   Duplicate Multiple Tabs: Dubliuoti {count} kortelę | Dubliuoti {count} korteles | Dubliuoti {count} kortelių
@@ -2712,6 +2738,8 @@ Tooltips:
     Notify About New Uploads: Šiame įrenginyje rodo sistemos pranešimus apie kanalus, kurių pranešimus įjungėte jų prenumeratos nustatymuose. OpenTubeX naujo turinio ieško atnaujindama prenumeratas, todėl pasirinkite automatinio atnaujinimo intervalą. Kad gautumėte pranešimus, kai programa uždaryta, taip pat įjunkite atnaujinimą, kai programa uždaryta.
     RSS Feeds Auto Refresh Interval: Kaip dažnai OpenTubeX automatiškai atnaujina jūsų RSS sklaidos kanalus, kol programa atidaryta.
     Faster Subscription Refresh: "Pirmiausia patikrina kiekvieno kanalo RSS sklaidos kanalą ir įkelia vaizdo įrašus, Shorts ir tiesiogines transliacijas tik iš kanalų su naujais įkėlimais. Automatiniai atnaujinimai taip pat praleidžia kanalus, įkeltus per pastarąsias 10 minučių. Kanaluose be naujų įkėlimų peržiūrų skaičiai, pašalinti vaizdo įrašai ir pakeisti pavadinimai atnaujinami tik kas kelias valandas, o nauji įkėlimai gali pasirodyti vėliau, kai RSS sklaidos kanalas vėluoja. Nepasiekiama naudojant Invidious API."
+    Platforms Auto Refresh Interval: Kaip dažnai OpenTubeX automatiškai atnaujina kanalus, kuriuos sekate kitose platformose, kol programa atidaryta.
+    Twitch Notify When Live: Praneša, kai vienas iš jūsų sekamų Twitch kanalų pradeda transliaciją. OpenTubeX tikrina kas kelias minutes, kol yra atidaryta, ir taip pat, kai yra uždaryta, jei tuo metu atnaujina prenumeratas.
   Theme Settings:
     Only Show Important Notifications: Paslepia programos pranešimus, kurie tik patvirtina veiksmą arba praneša būseną. Klaidos, įspėjimai, jūsų nustatyti priminimai ir pranešimai, siūlantys veiksmą, pavyzdžiui, Anuliuoti, vis tiek rodomi. Foninių operacijų, pavyzdžiui, prenumeratų atnaujinimo, eiga rodoma bendrojoje eigos juostoje, o ne pranešime. Sistemos pranešimams tai neturi įtakos.
     Visible Search Suggestions: "Nustato, kiek paieškos istorijos įrašų ir pasiūlymų paieškos juosta rodo, kol jos sąrašą reikia slinkti. Sąrašas niekada nesiekia toliau už lango apačią."
@@ -3181,3 +3209,12 @@ Notification Center:
   Clear: "Išvalyti"
   Empty: "Pranešimų dar nėra"
   Empty Hint: "Čia bus rodomi tiesioginių transliacijų priminimai ir nauji įkėlimai iš kanalų su įjungtais pranešimais."
+Platforms:
+  Tracks: Takeliai
+  Playlists: Grojaraščiai
+  Follower Count: '{count} sekėjas | {count} sekėjai | {count} sekėjų'
+  Open Website: Atidaryti platformoje {platform}
+  Channel Not Found: Šio kanalo rasti nepavyko.
+  Playlist Not Found: Šio grojaraščio rasti nepavyko.
+  Load Error: Nepavyko įkelti šio puslapio iš {platform}.
+  Empty Tab: Čia dar nieko nėra.

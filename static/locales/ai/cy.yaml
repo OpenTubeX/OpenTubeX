@@ -217,6 +217,26 @@ Subscriptions:
       Not Set: Heb ei osod
     Retry Feed: Rhoi cynnig arall ar {feed}
     Reloading Feed: Yn ail-lwytho {feed}
+  Platforms:
+    Tab: Llwyfannau
+    Platform: Llwyfan
+    All Platforms: Pob llwyfan
+    Followed Channels: Sianeli rydych chi'n eu dilyn ar lwyfannau eraill
+    Description: Dilynwch sianeli ar Twitch, SoundCloud, PeerTube, Rumble ac Odysee i weld eu huwchlwythiadau yn y tab Llwyfannau yn eich tanysgrifiadau. Dewch o hyd i sianeli gyda'r chwiliad, neu ychwanegwch nhw drwy gyfeiriad eu tudalen. Mae eu cyfryngau'n chwarae gyda yt-dlp.
+    Add Channel: Ychwanegu Sianel
+    Channel URL: Cyfeiriad y sianel
+    Invalid Channel: Rhowch gyfeiriad tudalen sianel ar Twitch, SoundCloud, PeerTube, Rumble neu Odysee.
+    Channel Not Found: Does dim sianel yn y cyfeiriad hwn.
+    Channel Already Followed: Rydych eisoes yn dilyn y sianel hon.
+    Channel Could Not Be Loaded: Doedd dim modd llwytho'r sianel.
+    No Channels: Dydych chi ddim yn dilyn unrhyw sianeli ar lwyfannau eraill eto.
+    Unfollow Channel: Dad-ddilyn {channel}
+    Go To Channel: Mynd i {channel}
+    Follow: Dilyn
+    Following: Yn dilyn
+    Clips: Clipiau
+    Refresh Errors: Methwyd adnewyddu {count} o sianeli. | Methwyd adnewyddu 1 sianel. | Methwyd adnewyddu {count} sianel. | Methwyd adnewyddu {count} sianel. | Methwyd adnewyddu {count} sianel. | Methwyd adnewyddu {count} o sianeli.
+    Content Tabs: Tabiau cynnwys llwyfannau
 Trending:
   Music: Cerddoriaeth
   Load Error: Nid oedd modd llwytho Trendio.
@@ -1180,6 +1200,11 @@ Settings:
     Notify About New Uploads: Hysbysu am gynnwys newydd
     RSS Feeds Auto Refresh Interval: Cyfwng adnewyddu ffrydiau RSS yn awtomatig
     Faster Subscription Refresh: "Adnewyddu tanysgrifiadau'n gyflymach"
+    Platforms:
+      Other Platforms: Llwyfannau Eraill
+      Manage Channels: Rheoli Sianeli a Ddilynir
+      Notify When Live: Hysbysu Pan Fydd Sianeli Twitch a Ddilynir yn Mynd yn Fyw
+      Auto Refresh Interval: Cyfwng adnewyddu llwyfannau eraill yn awtomatig
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Cyfrif Amser Gwylio O"
@@ -2052,6 +2077,7 @@ Context Menu:
   Reload Posts: Ail-lwytho postiadau
   Reload All Feeds: Ail-lwytho pob ffrwd
   Reload RSS Feeds: Ail-lwytho ffrydiau RSS
+  Reload Platforms: Ail-lwytho llwyfannau
   Close Multiple Tabs: Cau {count} o dabiau | Cau {count} tab | Cau {count} dab | Cau {count} thab | Cau {count} thab | Cau {count} tab
   Duplicate Tab: Dyblygu'r tab
   Duplicate Multiple Tabs: Dyblygu {count} o dabiau | Dyblygu {count} tab | Dyblygu {count} dab | Dyblygu {count} thab | Dyblygu {count} thab | Dyblygu {count} tab
@@ -2317,6 +2343,8 @@ Tooltips:
     Notify About New Uploads: Yn dangos hysbysiadau system ar y ddyfais hon ar gyfer sianeli rydych wedi troi eu hysbysiadau ymlaen yn eu gosodiadau tanysgrifio. Mae OpenTubeX yn gwirio am gynnwys newydd pan fydd tanysgrifiadau'n cael eu hadnewyddu, felly dewiswch gyfwng adnewyddu awtomatig. I gael hysbysiadau pan fydd yr ap ar gau, galluogwch adnewyddu pan fydd yr ap ar gau hefyd.
     RSS Feeds Auto Refresh Interval: Pa mor aml mae OpenTubeX yn adnewyddu eich ffrydiau RSS yn awtomatig tra bod yr ap ar agor.
     Faster Subscription Refresh: "Yn gwirio ffrwd RSS pob sianel yn gyntaf a dim ond yn llwytho fideos, Shorts a ffrydiau byw sianeli sydd ag uwchlwythiadau newydd. Mae adnewyddiadau awtomatig hefyd yn hepgor sianeli a lwythwyd yn ystod y 10 munud diwethaf. Ar gyfer sianeli heb uwchlwythiadau newydd, dim ond bob ychydig oriau y caiff nifer y gwyliadau, fideos a dynnwyd a theitlau a newidiwyd eu diweddaru, a gall uwchlwythiadau newydd ymddangos yn hwyrach pan fydd y ffrwd RSS ar ei hôl hi. Ddim ar gael gydag API Invidious."
+    Platforms Auto Refresh Interval: Pa mor aml mae OpenTubeX yn adnewyddu'r sianeli rydych chi'n eu dilyn ar lwyfannau eraill yn awtomatig tra bod yr ap ar agor.
+    Twitch Notify When Live: Yn eich hysbysu pan fydd un o'r sianeli Twitch rydych yn eu dilyn yn dechrau ffrydio. Mae OpenTubeX yn gwirio bob ychydig funudau tra bo ar agor, a hefyd tra bo ar gau os yw'n adnewyddu tanysgrifiadau bryd hynny.
   Theme Settings:
     Only Show Important Notifications: Yn cuddio hysbysiadau yn yr ap sydd ond yn cadarnhau gweithred neu'n adrodd statws. Mae gwallau, rhybuddion, nodiadau atgoffa rydych wedi'u gosod, a hysbysiadau sy'n cynnig gweithred, fel Dadwneud, yn dal i ymddangos. Mae cynnydd yn y cefndir, fel adnewyddu tanysgrifiadau, yn cael ei ddangos yn y bar cynnydd cyffredinol yn lle hysbysiad. Nid yw hysbysiadau'r system yn cael eu heffeithio.
     Visible Search Suggestions: "Yn gosod faint o gofnodion hanes chwilio ac awgrymiadau y mae’r bar chwilio’n eu dangos cyn i’w restr sgrolio. Nid yw’r rhestr byth yn ymestyn heibio gwaelod y ffenestr."
@@ -2715,3 +2743,12 @@ Notification Center:
   Clear: "Clirio"
   Empty: "Dim hysbysiadau eto"
   Empty Hint: "Bydd nodiadau atgoffa ffrydiau byw a lanlwythiadau newydd gan sianeli gyda hysbysiadau ymlaen yn ymddangos yma."
+Platforms:
+  Tracks: Traciau
+  Playlists: Rhestrau Chwarae
+  Follower Count: '{count} o ddilynwyr | 1 dilynwr | {count} dilynwr | {count} dilynwr | {count} dilynwr | {count} o ddilynwyr'
+  Open Website: Agor ar {platform}
+  Channel Not Found: Doedd dim modd dod o hyd i'r sianel hon.
+  Playlist Not Found: Doedd dim modd dod o hyd i'r rhestr chwarae hon.
+  Load Error: Doedd dim modd llwytho'r dudalen hon o {platform}.
+  Empty Tab: Does dim byd yma eto.

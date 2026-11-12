@@ -217,6 +217,26 @@ Subscriptions:
       Not Set: 未設定
     Retry Feed: '{feed} を再試行'
     Reloading Feed: '{feed} を再読み込み中'
+  Platforms:
+    Tab: プラットフォーム
+    Platform: プラットフォーム
+    All Platforms: すべてのプラットフォーム
+    Followed Channels: 他のプラットフォームでフォロー中のチャンネル
+    Description: Twitch、SoundCloud、PeerTube、Rumble、Odysee のチャンネルをフォローすると、その投稿が登録チャンネルの「プラットフォーム」タブに表示されます。チャンネルは検索で見つけるか、ページのアドレスで追加できます。メディアは yt-dlp で再生されます。
+    Add Channel: チャンネルを追加
+    Channel URL: チャンネルのアドレス
+    Invalid Channel: Twitch、SoundCloud、PeerTube、Rumble、Odysee のチャンネルページのアドレスを入力してください。
+    Channel Not Found: このアドレスにチャンネルはありません。
+    Channel Already Followed: このチャンネルは既にフォローしています。
+    Channel Could Not Be Loaded: チャンネルを読み込めませんでした。
+    No Channels: まだ他のプラットフォームのチャンネルをフォローしていません。
+    Unfollow Channel: '{channel} のフォローを解除'
+    Go To Channel: '{channel} に移動'
+    Follow: フォロー
+    Following: フォロー中
+    Clips: クリップ
+    Refresh Errors: '{count} 件のチャンネルを更新できませんでした。'
+    Content Tabs: プラットフォームのコンテンツのタブ
 Trending:
   Music: 音楽
   Load Error: トレンドを読み込めませんでした。
@@ -1177,6 +1197,11 @@ Settings:
     Notify About New Uploads: 新着アップロードを通知
     RSS Feeds Auto Refresh Interval: RSS フィードの自動更新間隔
     Faster Subscription Refresh: "登録チャンネルの高速更新"
+    Platforms:
+      Other Platforms: 他のプラットフォーム
+      Manage Channels: フォロー中のチャンネルを管理
+      Notify When Live: フォロー中の Twitch チャンネルが配信を開始したら通知
+      Auto Refresh Interval: 他のプラットフォームの自動更新間隔
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "視聴時間のカウント対象"
@@ -2017,6 +2042,7 @@ Context Menu:
   Reload Posts: 投稿を再読み込み
   Reload All Feeds: すべてのフィードを再読み込み
   Reload RSS Feeds: RSS フィードを再読み込み
+  Reload Platforms: プラットフォームを再読み込み
   Close Multiple Tabs: '{count}個のタブを閉じる'
   Duplicate Tab: タブを複製
   Duplicate Multiple Tabs: '{count}個のタブを複製'
@@ -2281,6 +2307,8 @@ Tooltips:
     Notify About New Uploads: 登録設定で通知をオンにしたチャンネルについて、このデバイスにシステム通知を表示します。OpenTubeXは登録チャンネルの更新時に新着コンテンツを確認するため、自動更新の間隔を選択してください。アプリを閉じている間も通知を受け取るには、アプリを閉じている間の更新も有効にしてください。
     RSS Feeds Auto Refresh Interval: アプリを開いている間に OpenTubeX が RSS フィードを自動更新する間隔です。
     Faster Subscription Refresh: "最初に各チャンネルの RSS フィードを確認し、新しいアップロードがあるチャンネルの動画、ショート、ライブ配信だけを読み込みます。自動更新では、過去 10 分以内に読み込んだチャンネルもスキップします。新しいアップロードがないチャンネルでは、再生回数、削除された動画、変更されたタイトルが数時間ごとにしか更新されず、RSS フィードが遅れている場合は新しいアップロードの表示が遅れることがあります。Invidious API では利用できません。"
+    Platforms Auto Refresh Interval: アプリを開いている間に OpenTubeX が他のプラットフォームでフォロー中のチャンネルを自動更新する間隔です。
+    Twitch Notify When Live: フォロー中の Twitch チャンネルが配信を開始すると通知します。OpenTubeX は開いている間は数分ごとに確認し、閉じている間も登録チャンネルを更新する設定であれば確認します。
   Theme Settings:
     Only Show Important Notifications: 操作の確認や状態を伝えるだけのアプリ内通知を非表示にします。エラー、警告、設定したリマインダー、および「元に戻す」などの操作を含む通知は引き続き表示されます。登録チャンネルの更新などのバックグラウンド処理の進捗は、通知ではなく全体の進捗バーに表示されます。システム通知には影響しません。
     Visible Search Suggestions: "検索バーがスクロールなしで表示する検索履歴と候補の数を設定します。リストがウィンドウの下端を超えることはありません。"
@@ -2678,3 +2706,12 @@ Notification Center:
   Clear: "消去"
   Empty: "まだ通知はありません"
   Empty Hint: "ライブ配信のリマインダーと、通知をオンにしたチャンネルの新しいアップロードがここに表示されます。"
+Platforms:
+  Tracks: トラック
+  Playlists: 再生リスト
+  Follower Count: フォロワー {count} 人
+  Open Website: '{platform} で開く'
+  Channel Not Found: このチャンネルは見つかりませんでした。
+  Playlist Not Found: この再生リストは見つかりませんでした。
+  Load Error: '{platform} からこのページを読み込めませんでした。'
+  Empty Tab: まだ何もありません。

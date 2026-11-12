@@ -217,6 +217,26 @@ Subscriptions:
       Not Set: Non impostato
     Retry Feed: Riprova {feed}
     Reloading Feed: Ricaricamento di {feed}
+  Platforms:
+    Tab: Piattaforme
+    Platform: Piattaforma
+    All Platforms: Tutte le piattaforme
+    Followed Channels: Canali seguiti su altre piattaforme
+    Description: Segui canali su Twitch, SoundCloud, PeerTube, Rumble e Odysee per vedere i loro caricamenti nella scheda Piattaforme delle tue iscrizioni. Trova i canali con la ricerca o aggiungili tramite l’indirizzo della loro pagina. I loro contenuti vengono riprodotti con yt-dlp.
+    Add Channel: Aggiungi canale
+    Channel URL: Indirizzo del canale
+    Invalid Channel: Inserisci l’indirizzo della pagina di un canale su Twitch, SoundCloud, PeerTube, Rumble o Odysee.
+    Channel Not Found: Non esiste alcun canale a questo indirizzo.
+    Channel Already Followed: Segui già questo canale.
+    Channel Could Not Be Loaded: Impossibile caricare il canale.
+    No Channels: Non segui ancora nessun canale su altre piattaforme.
+    Unfollow Channel: Smetti di seguire {channel}
+    Go To Channel: Vai a {channel}
+    Follow: Segui
+    Following: Seguito
+    Clips: Clip
+    Refresh Errors: Impossibile aggiornare 1 canale. | Impossibile aggiornare {count} canali. | Impossibile aggiornare {count} canali.
+    Content Tabs: Schede dei contenuti delle piattaforme
 Trending:
   Music: Musica
   Load Error: Impossibile caricare le tendenze.
@@ -1177,6 +1197,11 @@ Settings:
     Notify About New Uploads: Notifica nuovi caricamenti
     RSS Feeds Auto Refresh Interval: Intervallo di aggiornamento automatico dei feed RSS
     Faster Subscription Refresh: "Aggiornamento più rapido delle iscrizioni"
+    Platforms:
+      Other Platforms: Altre piattaforme
+      Manage Channels: Gestisci i canali seguiti
+      Notify When Live: Avvisa quando i canali Twitch seguiti vanno in diretta
+      Auto Refresh Interval: Intervallo di aggiornamento automatico delle altre piattaforme
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Conta il tempo di visione da"
@@ -2017,6 +2042,7 @@ Context Menu:
   Reload Posts: Ricarica post
   Reload All Feeds: Ricarica tutti i feed
   Reload RSS Feeds: Ricarica i feed RSS
+  Reload Platforms: Ricarica piattaforme
   Close Multiple Tabs: Chiudi {count} scheda | Chiudi {count} schede
   Duplicate Tab: Duplica scheda
   Duplicate Multiple Tabs: Duplica {count} scheda | Duplica {count} schede
@@ -2281,6 +2307,8 @@ Tooltips:
     Notify About New Uploads: Mostra notifiche di sistema su questo dispositivo per i canali di cui hai attivato le notifiche nelle relative impostazioni di iscrizione. OpenTubeX cerca nuovi contenuti quando aggiorna le iscrizioni, quindi scegli un intervallo di aggiornamento automatico. Per ricevere notifiche anche quando l'app è chiusa, attiva anche l'aggiornamento quando l'app è chiusa.
     RSS Feeds Auto Refresh Interval: Ogni quanto OpenTubeX aggiorna automaticamente i tuoi feed RSS mentre l'app è aperta.
     Faster Subscription Refresh: "Controlla prima il feed RSS di ogni canale e carica video, Shorts e dirette solo dai canali con nuovi caricamenti. Gli aggiornamenti automatici saltano anche i canali caricati negli ultimi 10 minuti. Per i canali senza nuovi caricamenti, visualizzazioni, video rimossi e titoli modificati si aggiornano solo ogni poche ore, e i nuovi caricamenti potrebbero comparire più tardi quando il feed RSS è in ritardo. Non disponibile con l'API di Invidious."
+    Platforms Auto Refresh Interval: Ogni quanto OpenTubeX aggiorna automaticamente i canali che segui su altre piattaforme mentre l'app è aperta.
+    Twitch Notify When Live: Ti avvisa quando uno dei canali Twitch che segui inizia a trasmettere. OpenTubeX controlla ogni pochi minuti mentre è aperto, e anche mentre è chiuso se in quel momento aggiorna le iscrizioni.
   Theme Settings:
     Only Show Important Notifications: Nasconde le notifiche nell'app che si limitano a confermare un'azione o a segnalare uno stato. Errori, avvisi, promemoria che hai impostato e notifiche che offrono un'azione, come Rifai, continuano a essere mostrati. L'avanzamento delle operazioni in background, come l'aggiornamento delle iscrizioni, viene mostrato nella barra di avanzamento globale anziché in una notifica. Le notifiche di sistema non sono interessate.
     Visible Search Suggestions: "Imposta quante voci della cronologia di ricerca e quanti suggerimenti mostra la barra di ricerca prima che il suo elenco scorra. L’elenco non si estende mai oltre il bordo inferiore della finestra."
@@ -2678,3 +2706,12 @@ Notification Center:
   Clear: "Cancella"
   Empty: "Ancora nessuna notifica"
   Empty Hint: "Qui compariranno i promemoria delle dirette e i nuovi caricamenti dei canali con le notifiche attive."
+Platforms:
+  Tracks: Brani
+  Playlists: Playlist
+  Follower Count: 1 follower | {count} di follower | {count} follower
+  Open Website: Apri su {platform}
+  Channel Not Found: Impossibile trovare questo canale.
+  Playlist Not Found: Impossibile trovare questa playlist.
+  Load Error: Impossibile caricare questa pagina da {platform}.
+  Empty Tab: Non c’è ancora niente qui.

@@ -217,6 +217,26 @@ Subscriptions:
       Not Set: Təyin edilməyib
     Retry Feed: '{feed} axınını yenidən sına'
     Reloading Feed: '{feed} yenidən yüklənir'
+  Platforms:
+    Tab: Platformalar
+    Platform: Platforma
+    All Platforms: Bütün platformalar
+    Followed Channels: Digər platformalarda izlənilən kanallar
+    Description: Abunəliklərinizin Platformalar tabında yükləmələrini görmək üçün Twitch, SoundCloud, PeerTube, Rumble və Odysee platformalarındakı kanalları izləyin. Kanalları axtarışla tapın və ya səhifələrinin ünvanı ilə əlavə edin. Onların mediası yt-dlp ilə oynadılır.
+    Add Channel: Kanal əlavə et
+    Channel URL: Kanal ünvanı
+    Invalid Channel: Twitch, SoundCloud, PeerTube, Rumble və ya Odysee platformasında kanal səhifəsinin ünvanını daxil edin.
+    Channel Not Found: Bu ünvanda kanal yoxdur.
+    Channel Already Followed: Bu kanalı artıq izləyirsiniz.
+    Channel Could Not Be Loaded: Kanal yüklənə bilmədi.
+    No Channels: Hələ digər platformalarda heç bir kanalı izləmirsiniz.
+    Unfollow Channel: '{channel} izləməni dayandır'
+    Go To Channel: '{channel} kanalına keç'
+    Follow: İzlə
+    Following: İzlənilir
+    Clips: Kliplər
+    Refresh Errors: 1 kanal yenilənə bilmədi. | {count} kanal yenilənə bilmədi.
+    Content Tabs: Platforma məzmunu vərəqləri
 Channels:
   Load More Channels: Daha çox kanal yüklə
 Trending:
@@ -1179,6 +1199,11 @@ Settings:
     Notify About New Uploads: Yeni yükləmələr barədə bildiriş göndər
     RSS Feeds Auto Refresh Interval: RSS axınlarının avtomatik yenilənmə aralığı
     Faster Subscription Refresh: "Abunəliklərin daha sürətli yenilənməsi"
+    Platforms:
+      Other Platforms: Digər platformalar
+      Manage Channels: İzlənilən kanalları idarə et
+      Notify When Live: İzlənilən Twitch kanalları canlı yayına başlayanda bildiriş göndər
+      Auto Refresh Interval: Digər platformaların avtomatik yenilənmə aralığı
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Baxış Vaxtı Sayılan Cihazlar"
@@ -2029,6 +2054,7 @@ Context Menu:
   Reload Posts: Postları yenidən yüklə
   Reload All Feeds: Bütün axınları yenidən yüklə
   Reload RSS Feeds: RSS lentlərini yenidən yüklə
+  Reload Platforms: Platformaları yenidən yüklə
   Close Multiple Tabs: "{count} vərəqni bağla"
   Duplicate Tab: Vərəqnin surətini yarat
   Duplicate Multiple Tabs: "{count} vərəqnin surətini yarat"
@@ -2294,6 +2320,8 @@ Tooltips:
     Notify About New Uploads: Abunəlik ayarlarında bildirişlərini aktiv etdiyiniz kanallar üçün bu cihazda sistem bildirişləri göstərir. OpenTubeX yeni məzmunu abunəliklər yeniləndikdə yoxlayır, buna görə avtomatik yeniləmə aralığı seçin. Tətbiq bağlı olarkən bildiriş almaq üçün tətbiq bağlı olarkən yeniləməni də aktiv edin.
     RSS Feeds Auto Refresh Interval: Tətbiq açıq olarkən OpenTubeX-in RSS axınlarınızı nə qədər tez-tez avtomatik yenilədiyi.
     Faster Subscription Refresh: "Əvvəlcə hər kanalın RSS lentini yoxlayır və yalnız yeni yükləmələri olan kanalların videolarını, Shorts-larını və canlı yayımlarını yükləyir. Avtomatik yeniləmələr son 10 dəqiqədə yüklənmiş kanalları da ötürür. Yeni yükləməsi olmayan kanallarda baxış sayları, silinmiş videolar və dəyişdirilmiş başlıqlar yalnız bir neçə saatdan bir yenilənir və RSS lenti geri qaldıqda yeni yükləmələr daha gec görünə bilər. Invidious API ilə əlçatan deyil."
+    Platforms Auto Refresh Interval: Tətbiq açıq olarkən OpenTubeX-in digər platformalarda izlədiyiniz kanalları nə qədər tez-tez avtomatik yenilədiyi.
+    Twitch Notify When Live: İzlədiyiniz Twitch kanallarından biri yayına başlayanda sizə bildiriş göndərir. OpenTubeX açıq olarkən hər bir neçə dəqiqədən bir yoxlayır, bağlı olarkən isə abunəlikləri yeniləyirsə, onda da yoxlayır.
   Theme Settings:
     Only Show Important Notifications: Yalnız əməliyyatı təsdiqləyən və ya vəziyyət bildirən tətbiqdaxili bildirişləri gizlədir. Xətalar, xəbərdarlıqlar, qurduğunuz xatırlatmalar və Geri al kimi əməliyyat təklif edən bildirişlər yenə də görünür. Abunəliklərin yenilənməsi kimi arxa fon əməliyyatlarının gedişatı bildiriş əvəzinə ümumi irəliləyiş zolağında göstərilir. Sistem bildirişlərinə təsir etmir.
     Visible Search Suggestions: "Axtarış panelinin siyahısı sürüşdürülməzdən əvvəl neçə axtarış tarixçəsi qeydi və təklif göstərdiyini müəyyən edir. Siyahı heç vaxt pəncərənin aşağı kənarından kənara çıxmır."
@@ -2688,3 +2716,12 @@ Notification Center:
   Clear: "Təmizlə"
   Empty: "Hələ bildiriş yoxdur"
   Empty Hint: "Canlı yayım xatırlatmaları və bildirişləri aktiv olan kanalların yeni yükləmələri burada görünəcək."
+Platforms:
+  Tracks: Treklər
+  Playlists: Pleylistlər
+  Follower Count: 1 izləyici | {count} izləyici
+  Open Website: '{platform} saytında aç'
+  Channel Not Found: Bu kanal tapılmadı.
+  Playlist Not Found: Bu pleylist tapılmadı.
+  Load Error: Bu səhifə {platform} saytından yüklənə bilmədi.
+  Empty Tab: Burada hələ heç nə yoxdur.

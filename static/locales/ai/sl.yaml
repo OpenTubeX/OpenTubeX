@@ -260,6 +260,26 @@ Subscriptions:
       Not Set: Ni nastavljeno
     Retry Feed: Poskusi znova naložiti {feed}
     Reloading Feed: Ponovno nalaganje {feed}
+  Platforms:
+    Tab: Platforme
+    Platform: Platforma
+    All Platforms: Vse platforme
+    Followed Channels: Spremljani kanali na drugih platformah
+    Description: Spremljajte kanale na platformah Twitch, SoundCloud, PeerTube, Rumble in Odysee, da boste njihove objave videli na zavihku Platforme med svojimi naročninami. Kanale poiščite z iskanjem ali jih dodajte z naslovom njihove strani. Njihove vsebine se predvajajo z yt-dlp.
+    Add Channel: Dodaj kanal
+    Channel URL: Naslov kanala
+    Invalid Channel: Vnesite naslov strani kanala na platformi Twitch, SoundCloud, PeerTube, Rumble ali Odysee.
+    Channel Not Found: Na tem naslovu ni kanala.
+    Channel Already Followed: Ta kanal že spremljate.
+    Channel Could Not Be Loaded: Kanala ni bilo mogoče naložiti.
+    No Channels: Ne spremljate še nobenega kanala na drugih platformah.
+    Unfollow Channel: Prenehaj spremljati {channel}
+    Go To Channel: Pojdi na kanal {channel}
+    Follow: Spremljaj
+    Following: Spremljate
+    Clips: Izrezki
+    Refresh Errors: '{count} kanala ni bilo mogoče osvežiti. | {count} kanalov ni bilo mogoče osvežiti. | {count} kanalov ni bilo mogoče osvežiti. | {count} kanalov ni bilo mogoče osvežiti.'
+    Content Tabs: Zavihki vsebine platform
 Trending:
   Music: Glasba
   Trending Tabs: Zavihki priljubljene vsebine
@@ -1413,6 +1433,11 @@ Settings:
     Confirm Before Unsubscribing: Zahtevaj potrditev pred odjavo
     RSS Feeds Auto Refresh Interval: Interval samodejnega osveževanja virov RSS
     Faster Subscription Refresh: "Hitrejša osvežitev naročnin"
+    Platforms:
+      Other Platforms: Druge platforme
+      Manage Channels: Upravljaj spremljane kanale
+      Notify When Live: Obvesti, ko spremljani kanali Twitch začnejo prenos v živo
+      Auto Refresh Interval: Interval samodejnega osveževanja drugih platform
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Štej čas gledanja"
@@ -2507,6 +2532,7 @@ Context Menu:
   Reload Posts: Znova naloži objave
   Reload All Feeds: Znova naloži vse vire
   Reload RSS Feeds: Znova naloži vire RSS
+  Reload Platforms: Znova naloži platforme
   Close Multiple Tabs: Zapri {count} zavihek | Zapri {count} zavihka | Zapri {count} zavihke | Zapri {count} zavihkov
   Duplicate Tab: Podvoji zavihek
   Duplicate Multiple Tabs: Podvoji {count} zavihek | Podvoji {count} zavihka | Podvoji {count} zavihke | Podvoji {count} zavihkov
@@ -2805,6 +2831,8 @@ Tooltips:
     Notify About New Uploads: Prikazuje sistemska obvestila v tej napravi za kanale, ki ste jim obvestila vklopili v njihovih nastavitvah naročnine. OpenTubeX preveri novo vsebino ob osvežitvi naročnin, zato izberite interval samodejnega osveževanja. Če želite prejemati obvestila tudi, ko je aplikacija zaprta, vklopite še osveževanje, ko je aplikacija zaprta.
     RSS Feeds Auto Refresh Interval: Kako pogosto OpenTubeX samodejno osveži vaše vire RSS, ko je aplikacija odprta.
     Faster Subscription Refresh: "Najprej preveri vir RSS vsakega kanala in naloži videoposnetke, Shorts in prenose v živo samo s kanalov z novimi naloženimi vsebinami. Samodejne osvežitve preskočijo tudi kanale, naložene v zadnjih 10 minutah. Pri kanalih brez novih vsebin se število ogledov, odstranjeni videoposnetki in spremenjeni naslovi posodobijo le vsakih nekaj ur, nove vsebine pa se lahko prikažejo pozneje, ko vir RSS zaostaja. Ni na voljo z API-jem Invidious."
+    Platforms Auto Refresh Interval: Kako pogosto OpenTubeX samodejno osveži kanale, ki jih spremljate na drugih platformah, ko je aplikacija odprta.
+    Twitch Notify When Live: Obvesti vas, ko eden od kanalov Twitch, ki jih spremljate, začne oddajati. OpenTubeX preverja vsakih nekaj minut, ko je odprt, in tudi ko je zaprt, če takrat osvežuje naročnine.
   Theme Settings:
     Only Show Important Notifications: Skrije obvestila v aplikaciji, ki le potrdijo dejanje ali sporočijo stanje. Napake, opozorila, opomniki, ki ste jih nastavili, in obvestila, ki ponujajo dejanje, na primer Razveljavi, se še vedno prikažejo. Napredek opravil v ozadju, na primer osveževanja naročnin, je namesto v obvestilu prikazan v splošni vrstici napredka. Sistemska obvestila niso prizadeta.
     Visible Search Suggestions: "Določa, koliko vnosov zgodovine iskanja in predlogov prikaže iskalna vrstica, preden se njen seznam začne pomikati. Seznam nikoli ne sega čez spodnji rob okna."
@@ -3276,3 +3304,12 @@ Notification Center:
   Clear: "Počisti"
   Empty: "Še ni obvestil"
   Empty Hint: "Tukaj bodo prikazani opomniki za prenose v živo in novi posnetki kanalov z vklopljenimi obvestili."
+Platforms:
+  Tracks: Skladbe
+  Playlists: Seznami predvajanja
+  Follower Count: '{count} sledilec | {count} sledilca | {count} sledilci | {count} sledilcev'
+  Open Website: Odpri v {platform}
+  Channel Not Found: Tega kanala ni bilo mogoče najti.
+  Playlist Not Found: Tega seznama predvajanja ni bilo mogoče najti.
+  Load Error: Te strani ni bilo mogoče naložiti s platforme {platform}.
+  Empty Tab: Tukaj še ni ničesar.

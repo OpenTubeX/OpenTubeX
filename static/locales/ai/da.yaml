@@ -221,6 +221,26 @@ Subscriptions:
       Not Set: Ikke angivet
     Retry Feed: Prøv {feed} igen
     Reloading Feed: Genindlæser {feed}
+  Platforms:
+    Tab: Platforme
+    Platform: Platform
+    All Platforms: Alle platforme
+    Followed Channels: Fulgte kanaler på andre platforme
+    Description: Følg kanaler på Twitch, SoundCloud, PeerTube, Rumble og Odysee for at se deres uploads under fanen Platforme i dine abonnementer. Find kanaler med søgningen, eller tilføj dem med adressen på deres side. Deres medier afspilles med yt-dlp.
+    Add Channel: Tilføj kanal
+    Channel URL: Kanaladresse
+    Invalid Channel: Indtast adressen på en kanalside på Twitch, SoundCloud, PeerTube, Rumble eller Odysee.
+    Channel Not Found: Der er ingen kanal på denne adresse.
+    Channel Already Followed: Du følger allerede denne kanal.
+    Channel Could Not Be Loaded: Kanalen kunne ikke indlæses.
+    No Channels: Du følger ikke nogen kanaler på andre platforme endnu.
+    Unfollow Channel: Stop med at følge {channel}
+    Go To Channel: Gå til {channel}
+    Follow: Følg
+    Following: Følger
+    Clips: Klip
+    Refresh Errors: 1 kanal kunne ikke opdateres. | {count} kanaler kunne ikke opdateres.
+    Content Tabs: Faner med platformindhold
 Trending:
   Music: Musik
   Load Error: Populært indhold kunne ikke indlæses.
@@ -1203,6 +1223,11 @@ Settings:
     Limit the number of videos displayed for each channel: Begræns antallet af viste videoer for hver kanal
     RSS Feeds Auto Refresh Interval: Interval for automatisk opdatering af RSS-feeds
     Faster Subscription Refresh: "Hurtigere opdatering af abonnementer"
+    Platforms:
+      Other Platforms: Andre platforme
+      Manage Channels: Administrer fulgte kanaler
+      Notify When Live: Giv besked, når fulgte Twitch-kanaler går live
+      Auto Refresh Interval: Interval for automatisk opdatering af andre platforme
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Tæl visningstid fra"
@@ -2101,6 +2126,7 @@ Context Menu:
   Reload Posts: Genindlæs opslag
   Reload All Feeds: Genindlæs alle feeds
   Reload RSS Feeds: Genindlæs RSS-feeds
+  Reload Platforms: Genindlæs platforme
   Close Multiple Tabs: Luk {count} faner
   Duplicate Tab: Dupliker fane
   Duplicate Multiple Tabs: Dupliker {count} faner
@@ -2370,6 +2396,8 @@ Tooltips:
     Notify About New Uploads: Viser systemmeddelelser på denne enhed for kanaler, hvor du har slået meddelelser til i deres abonnementsindstillinger. OpenTubeX søger efter nyt indhold, når abonnementer opdateres, så vælg et interval for automatisk opdatering. Hvis du vil have besked, mens appen er lukket, skal du også aktivere opdatering, mens appen er lukket.
     RSS Feeds Auto Refresh Interval: Hvor ofte OpenTubeX automatisk opdaterer dine RSS-feeds, mens appen er åben.
     Faster Subscription Refresh: "Tjekker først hver kanals RSS-feed og indlæser kun videoer, Shorts og livestreams fra kanaler med nye uploads. Automatiske opdateringer springer også kanaler over, der er indlæst inden for de sidste 10 minutter. For kanaler uden nye uploads opdateres visningstal, fjernede videoer og ændrede titler kun med nogle timers mellemrum, og nye uploads kan dukke op senere, når RSS-feedet halter bagefter. Ikke tilgængelig med Invidious API."
+    Platforms Auto Refresh Interval: Hvor ofte OpenTubeX automatisk opdaterer de kanaler, du følger på andre platforme, mens appen er åben.
+    Twitch Notify When Live: Giver dig besked, når en af dine fulgte Twitch-kanaler begynder at streame. OpenTubeX tjekker hvert par minutter, mens den er åben, og også mens den er lukket, hvis den opdaterer abonnementer da.
   Theme Settings:
     Only Show Important Notifications: Skjuler notifikationer i appen, der kun bekræfter en handling eller oplyser en status. Fejl, advarsler, påmindelser, du har oprettet, og notifikationer med en handling, såsom Fortryd, vises stadig. Fremskridt for baggrundshandlinger, såsom opdatering af abonnementer, vises i den globale statuslinje i stedet for som en notifikation. Systemnotifikationer påvirkes ikke.
     Visible Search Suggestions: "Angiver, hvor mange poster fra søgehistorikken og forslag søgefeltet viser, før dets liste skal rulles. Listen går aldrig ud over vinduets nederste kant."
@@ -2774,3 +2802,12 @@ Notification Center:
   Clear: "Ryd"
   Empty: "Ingen notifikationer endnu"
   Empty Hint: "Påmindelser om livestreams og nye uploads fra kanaler med notifikationer slået til vises her."
+Platforms:
+  Tracks: Numre
+  Playlists: Playlister
+  Follower Count: 1 følger | {count} følgere
+  Open Website: Åbn på {platform}
+  Channel Not Found: Denne kanal blev ikke fundet.
+  Playlist Not Found: Denne playliste blev ikke fundet.
+  Load Error: Denne side kunne ikke indlæses fra {platform}.
+  Empty Tab: Der er intet her endnu.

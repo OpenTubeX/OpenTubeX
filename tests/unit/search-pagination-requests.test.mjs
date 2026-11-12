@@ -77,6 +77,7 @@ function createSearch (backend, { searchResults = [], missingPublicationDates = 
     ...state,
     processedQuery: { get value () { return state.query.value.trim() } },
     sessionSearchHistory: { value: history },
+    searchPlatform: { value: 'youtube' },
     backendPreference: { value: backend },
     backendFallback: { value: true },
     rememberSearchHistory: { value: false },

@@ -218,6 +218,26 @@ Subscriptions:
       Not Set: Nicht festgelegt
     Retry Feed: '{feed} erneut laden'
     Reloading Feed: '{feed} wird neu geladen'
+  Platforms:
+    Tab: Plattformen
+    Platform: Plattform
+    All Platforms: Alle Plattformen
+    Followed Channels: Gefolgte Kanäle auf anderen Plattformen
+    Description: Folge Kanälen auf Twitch, SoundCloud, PeerTube, Rumble und Odysee, um ihre Uploads im Plattformen-Tab deiner Abos zu sehen. Finde Kanäle über die Suche oder füge sie über die Adresse ihrer Seite hinzu. Ihre Medien werden mit yt-dlp abgespielt.
+    Add Channel: Kanal hinzufügen
+    Channel URL: Kanaladresse
+    Invalid Channel: Gib die Adresse einer Kanalseite auf Twitch, SoundCloud, PeerTube, Rumble oder Odysee ein.
+    Channel Not Found: Unter dieser Adresse gibt es keinen Kanal.
+    Channel Already Followed: Du folgst diesem Kanal bereits.
+    Channel Could Not Be Loaded: Der Kanal konnte nicht geladen werden.
+    No Channels: Du folgst noch keinen Kanälen auf anderen Plattformen.
+    Unfollow Channel: '{channel} entfolgen'
+    Go To Channel: '{channel} öffnen'
+    Follow: Folgen
+    Following: Gefolgt
+    Clips: Clips
+    Refresh Errors: 1 Kanal konnte nicht aktualisiert werden. | {count} Kanäle konnten nicht aktualisiert werden.
+    Content Tabs: Registerkarten für Plattforminhalte
 Trending:
   Trending: Trends
   Trending Tabs: Trends-Tabs
@@ -1226,6 +1246,11 @@ Settings:
     RSS Feeds: RSS-Feeds
     Enable RSS Feeds: RSS-Feeds für andere Plattformen aktivieren
     Manage RSS Feeds: RSS-Feeds verwalten
+    Platforms:
+      Other Platforms: Andere Plattformen
+      Manage Channels: Gefolgte Kanäle verwalten
+      Notify When Live: Benachrichtigen, wenn gefolgte Twitch-Kanäle live gehen
+      Auto Refresh Interval: Automatisches Aktualisierungsintervall für andere Plattformen
     Show New Content Indicators: Markierungen für neue Inhalte anzeigen
     Show Scheduled Live Streams / Premieres First: Geplante Livestreams / Premieren zuerst anzeigen
     Confirm Before Unsubscribing: Unbeabsichtigtes Deabonnieren verhindern
@@ -2985,6 +3010,8 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: Zeigt bevorstehende Livestreams und Premieren oben im Abo-Feed an. Wenn deaktiviert, bleiben sie bis zum Start an der Position ihrer Ankündigung. Aktualisiere den Abo-Feed nach dem Deaktivieren einmal, um die Ankündigungszeitpunkte bestehender geplanter Einträge abzurufen.
     Auto Refresh Interval: "Wie oft OpenTubeX automatisch deine Abos aktualisiert während die Anwendung geöffnet ist. Unter Android wird der Feed bei einem Intervall ungleich null auch aktualisiert, während die App geschlossen ist."
     RSS Feeds Auto Refresh Interval: Wie oft OpenTubeX deine RSS-Feeds automatisch aktualisiert, während die App geöffnet ist.
+    Platforms Auto Refresh Interval: Wie oft OpenTubeX die Kanäle, denen du auf anderen Plattformen folgst, automatisch aktualisiert, während die App geöffnet ist.
+    Twitch Notify When Live: Benachrichtigt dich, wenn einer deiner gefolgten Twitch-Kanäle einen Stream startet. OpenTubeX prüft alle paar Minuten, während es geöffnet ist, und auch, während es geschlossen ist, sofern es dann Abos aktualisiert.
     Refresh Subscriptions While App Is Closed: "Aktualisiert Feeds mit deinen gewählten Einstellungen. Auf dem Desktop bleibt OpenTubeX bis zum Beenden im Infobereich aktiv. Android bestimmt, wann Aktualisierungen im Hintergrund ausgeführt werden."
     Notify About New Uploads: "Zeigt auf diesem Gerät Systembenachrichtigungen für Kanäle, deren Benachrichtigungen du in ihren Abo-Einstellungen aktiviert hast. OpenTubeX sucht beim Aktualisieren der Abos nach neuen Inhalten, wähle daher ein automatisches Aktualisierungsintervall. Um auch bei geschlossener App benachrichtigt zu werden, aktiviere zusätzlich die Aktualisierung bei geschlossener App."
     Faster Subscription Refresh: Prüft zuerst den RSS-Feed jedes Kanals und lädt Videos, Shorts und Livestreams nur von Kanälen mit neuen Uploads. Automatische Aktualisierungen überspringen außerdem Kanäle, die in den letzten 10 Minuten geladen wurden. Bei Kanälen ohne neue Uploads werden Aufrufzahlen, entfernte Videos und geänderte Titel nur alle paar Stunden aktualisiert, und neue Uploads können später erscheinen, wenn der RSS-Feed hinterherhinkt. Mit der Invidious-API nicht verfügbar.
@@ -3374,6 +3401,7 @@ Context Menu:
   Reload Posts: Beiträge neu laden
   Reload All Feeds: Alle Feeds neu laden
   Reload RSS Feeds: RSS-Feeds neu laden
+  Reload Platforms: Plattformen neu laden
   Close Multiple Tabs: '{count} Tabs schließen'
   Duplicate Tab: Tab duplizieren
   Duplicate Multiple Tabs: '{count} Tabs duplizieren'
@@ -3882,3 +3910,12 @@ Digital Wellbeing:
   Time for bed: "Zeit fürs Bett"
   Bedtime started at: "Deine Schlafenszeit hat um {time} begonnen."
   Remind Me in 10 Minutes: "In 10 Minuten erinnern"
+Platforms:
+  Tracks: Tracks
+  Playlists: Playlists
+  Follower Count: 1 Follower | {count} Follower
+  Open Website: Auf {platform} öffnen
+  Channel Not Found: Dieser Kanal wurde nicht gefunden.
+  Playlist Not Found: Diese Playlist wurde nicht gefunden.
+  Load Error: Diese Seite konnte nicht von {platform} geladen werden.
+  Empty Tab: Hier gibt es noch nichts.

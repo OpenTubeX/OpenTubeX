@@ -237,6 +237,26 @@ Subscriptions:
       Not Set: Ne agordita
     Retry Feed: Reprovi {feed}
     Reloading Feed: Reŝargante {feed}
+  Platforms:
+    Tab: Platformoj
+    Platform: Platformo
+    All Platforms: Ĉiuj platformoj
+    Followed Channels: Sekvataj kanaloj en aliaj platformoj
+    Description: Sekvu kanalojn en Twitch, SoundCloud, PeerTube, Rumble kaj Odysee por vidi iliajn alŝutaĵojn en la langeto Platformoj de viaj abonoj. Trovu kanalojn per la serĉo, aŭ aldonu ilin per la adreso de ilia paĝo. Iliaj aŭdvidaĵoj ludiĝas per yt-dlp.
+    Add Channel: Aldoni kanalon
+    Channel URL: Adreso de kanalo
+    Invalid Channel: Enigu la adreson de kanala paĝo en Twitch, SoundCloud, PeerTube, Rumble aŭ Odysee.
+    Channel Not Found: Ne estas kanalo ĉe ĉi tiu adreso.
+    Channel Already Followed: Vi jam sekvas ĉi tiun kanalon.
+    Channel Could Not Be Loaded: Ne eblis ŝargi la kanalon.
+    No Channels: Vi ankoraŭ sekvas neniun kanalon en aliaj platformoj.
+    Unfollow Channel: Ĉesi sekvi {channel}
+    Go To Channel: Iri al {channel}
+    Follow: Sekvi
+    Following: Sekvata
+    Clips: Eltondaĵoj
+    Refresh Errors: 1 kanalo ne povis esti aktualigita. | {count} kanaloj ne povis esti aktualigitaj.
+    Content Tabs: Langetoj de platforma enhavo
 Channels:
   Load More Channels: Ŝargi pli da kanaloj
 Subscription Groups:
@@ -1213,6 +1233,11 @@ Settings:
     Notify About New Uploads: Sciigi pri novaj alŝutoj
     RSS Feeds Auto Refresh Interval: Intervalo de aŭtomata aktualigo de RSS-fluoj
     Faster Subscription Refresh: "Pli rapida aktualigo de abonoj"
+    Platforms:
+      Other Platforms: Aliaj platformoj
+      Manage Channels: Administri sekvatajn kanalojn
+      Notify When Live: Sciigi kiam sekvataj Twitch-kanaloj komencas rektan elsendon
+      Auto Refresh Interval: Intervalo de aŭtomata aktualigo de aliaj platformoj
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: Kalkuli spekttempon de
@@ -2064,6 +2089,7 @@ Context Menu:
   Reload Posts: Reŝargi afiŝojn
   Reload All Feeds: Reŝargi ĉiujn fluojn
   Reload RSS Feeds: Reŝargi RSS-fluojn
+  Reload Platforms: Reŝargi platformojn
   Close Multiple Tabs: Fermi {count} langetojn
   Duplicate Tab: Duobligi langeton
   Duplicate Multiple Tabs: Duobligi {count} langetojn
@@ -2328,6 +2354,8 @@ Tooltips:
     Notify About New Uploads: Montras sistemajn sciigojn en ĉi tiu aparato por kanaloj, kies sciigojn vi ŝaltis en iliaj abonaj agordoj. OpenTubeX kontrolas novan enhavon kiam abonoj aktualiĝas, do elektu intervalon de aŭtomata aktualigo. Por esti sciigita dum la aplikaĵo estas fermita, ankaŭ ŝaltu aktualigadon dum la aplikaĵo estas fermita.
     RSS Feeds Auto Refresh Interval: Kiom ofte OpenTubeX aŭtomate aktualigas viajn RSS-fluojn dum la aplikaĵo estas malfermita.
     Faster Subscription Refresh: "Unue kontrolas la RSS-fluon de ĉiu kanalo kaj ŝargas videojn, Shorts kaj rektajn elsendojn nur de kanaloj kun novaj alŝutoj. Aŭtomataj aktualigoj ankaŭ preterlasas kanalojn ŝargitajn en la lastaj 10 minutoj. Por kanaloj sen novaj alŝutoj, spektokvantoj, forigitaj videoj kaj ŝanĝitaj titoloj ĝisdatiĝas nur ĉiujn kelkajn horojn, kaj novaj alŝutoj eble aperos poste, kiam la RSS-fluo malfruas. Ne disponebla kun la Invidious-API."
+    Platforms Auto Refresh Interval: Kiom ofte OpenTubeX aŭtomate aktualigas la kanalojn, kiujn vi sekvas en aliaj platformoj, dum la aplikaĵo estas malfermita.
+    Twitch Notify When Live: Sciigas vin kiam unu el viaj sekvataj Twitch-kanaloj komencas elsendi. OpenTubeX kontrolas ĉiujn kelkajn minutojn dum ĝi estas malfermita, kaj ankaŭ dum ĝi estas fermita, se ĝi tiam aktualigas abonojn.
   Theme Settings:
     Only Show Important Notifications: Kaŝas sciigojn en la aplikaĵo, kiuj nur konfirmas agon aŭ raportas staton. Eraroj, avertoj, memorigoj, kiujn vi agordis, kaj sciigoj, kiuj proponas agon, ekzemple Malfari, ankoraŭ aperas. Fona progreso, ekzemple aktualigo de abonoj, montriĝas en la ĝenerala progresbreto anstataŭ kiel sciigo. Sistemaj sciigoj ne estas tuŝitaj.
     Thumbnail Size: Skalas bildetojn de videaĵoj en kradoj kaj listoj. Kradoj kun fiksa nombro de kolumnoj aŭ la aranĝo "Plena larĝo" anstataŭe plenigas ĉiun vicon, do tie ĝi ŝanĝas nur listajn bildetojn kaj videaĵetojn. Telefongrandaj fenestroj limigas kradajn bildetojn al 100%.
@@ -2677,3 +2705,12 @@ Notification Center:
   Clear: "Forigi"
   Empty: "Ankoraŭ neniuj sciigoj"
   Empty Hint: "Memorigoj pri rektaj elsendoj kaj novaj alŝutoj de kanaloj kun ŝaltitaj sciigoj aperos ĉi tie."
+Platforms:
+  Tracks: Trakoj
+  Playlists: Ludlistoj
+  Follower Count: 1 sekvanto | {count} sekvantoj
+  Open Website: Malfermi en {platform}
+  Channel Not Found: Ĉi tiu kanalo ne troviĝis.
+  Playlist Not Found: Ĉi tiu ludlisto ne troviĝis.
+  Load Error: Ne eblis ŝargi ĉi tiun paĝon de {platform}.
+  Empty Tab: Ankoraŭ estas nenio ĉi tie.

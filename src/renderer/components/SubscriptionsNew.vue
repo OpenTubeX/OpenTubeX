@@ -1,31 +1,44 @@
 <template>
   <div
-    v-if="showsOnlyRssItems"
+    v-if="showsOnlyOtherItems"
     v-bind="$attrs"
-    ref="rssFeed"
+    ref="otherFeed"
     class="newFeed"
   >
-    <FtFlexBox v-if="clearingVisibleContent || newRssItems.length === 0">
+    <FtFlexBox v-if="clearingVisibleContent || shownOtherSections.length === 0">
       <p class="message">
         {{ t('Subscriptions.No New Content') }}
       </p>
     </FtFlexBox>
-    <FtAutoGrid
-      v-if="!clearingVisibleContent"
-      :grid="rssLayout === 'grid'"
-      :item-count="newRssItems.length"
-      :item-keys="newRssItemKeys"
-    >
-      <FtListFeedItem
-        v-for="(item, index) in newRssItems"
-        :key="newRssItemKeys[index]"
-        :data-feed-item-key="newRssItemKeys[index]"
-        :data="item"
-        :layout="rssLayout"
-        :avatar="rssFeedAvatars.get(item.feedUrl)"
-        in-new-feed
-      />
-    </FtAutoGrid>
+    <template v-if="!clearingVisibleContent">
+      <section
+        v-for="section in shownOtherSections"
+        :key="section.id"
+        :class="{ mediaSection: shownOtherSections.length > 1 }"
+        :data-new-feed-section="section.id"
+      >
+        <!-- Headings only tell sources apart -->
+        <h3 v-if="shownOtherSections.length > 1">
+          {{ section.title }}
+        </h3>
+        <FtAutoGrid
+          :grid="feedItemLayout === 'grid'"
+          :item-count="section.items.length"
+          :item-keys="section.keys"
+        >
+          <FtListFeedItem
+            v-for="(item, index) in section.items"
+            :key="section.keys[index]"
+            :data-feed-item-key="section.keys[index]"
+            :data="item"
+            :layout="feedItemLayout"
+            :avatar="section.avatar(item)"
+            :seen-marks="section.seenMarks"
+            in-new-feed
+          />
+        </FtAutoGrid>
+      </section>
+    </template>
   </div>
   <SubscriptionsTabUi
     v-else-if="!clearingVisibleContent"
@@ -39,8 +52,8 @@
     :error-channels="errorChannels"
     :attempted-fetch="attemptedFetch"
     :only-show-new="true"
-    :has-additional-content="showCombinedView && (hasAdditionalContent || newRssItems.length > 0)"
-    :has-other-refresh-sources="rssFeeds.length > 0"
+    :has-additional-content="showCombinedView && (hasAdditionalContent || newRssItems.length > 0 || newPlatformItems.length > 0)"
+    :has-other-refresh-sources="rssFeeds.length > 0 || platformChannels.length > 0"
     :is-community="activeCategory === 'posts'"
     :youtube-style-shorts="activeCategory === 'shorts' && useCustomShortsPlayer"
     :track-global-refresh="false"
@@ -103,29 +116,36 @@
         />
       </section>
     </Transition>
-    <Transition name="new-feed-section">
-      <section
-        v-if="showCombinedView && newRssItems.length > 0"
-        class="mediaSection"
-      >
-        <h3>{{ $t('Subscriptions.RSS Feeds.Tab') }}</h3>
-        <FtAutoGrid
-          :grid="rssLayout === 'grid'"
-          :item-count="newRssItems.length"
-          :item-keys="newRssItemKeys"
+    <template
+      v-for="section in otherSections"
+      :key="section.id"
+    >
+      <Transition name="new-feed-section">
+        <section
+          v-if="showCombinedView && section.items.length > 0"
+          class="mediaSection"
+          :data-new-feed-section="section.id"
         >
-          <FtListFeedItem
-            v-for="(item, index) in newRssItems"
-            :key="newRssItemKeys[index]"
-            :data-feed-item-key="newRssItemKeys[index]"
-            :data="item"
-            :layout="rssLayout"
-            :avatar="rssFeedAvatars.get(item.feedUrl)"
-            in-new-feed
-          />
-        </FtAutoGrid>
-      </section>
-    </Transition>
+          <h3>{{ section.title }}</h3>
+          <FtAutoGrid
+            :grid="feedItemLayout === 'grid'"
+            :item-count="section.items.length"
+            :item-keys="section.keys"
+          >
+            <FtListFeedItem
+              v-for="(item, index) in section.items"
+              :key="section.keys[index]"
+              :data-feed-item-key="section.keys[index]"
+              :data="item"
+              :layout="feedItemLayout"
+              :avatar="section.avatar(item)"
+              :seen-marks="section.seenMarks"
+              in-new-feed
+            />
+          </FtAutoGrid>
+        </section>
+      </Transition>
+    </template>
   </SubscriptionsTabUi>
   <SubscriptionsTabUi
     v-else
@@ -154,7 +174,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onDeactivated, ref, shallowRef, toRaw, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onActivated, onBeforeUnmount, onDeactivated, ref, shallowRef, toRaw, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtAutoGrid from './FtAutoGrid/FtAutoGrid.vue'
@@ -179,6 +199,16 @@ import { isReducedMotionEnabled } from '../helpers/reducedMotion'
 import { getExternalMediaProgress } from '../helpers/externalMediaPosition'
 import { getRssFeedItemKey, refreshRssFeeds, rssFeedsRefreshing } from '../helpers/rssFeeds'
 import { supportsYtDlp } from '../helpers/ytDlpCapabilities'
+import {
+  getFollowedChannels,
+  platformFeed,
+  platformFeedRefreshing,
+  platformSeenMarks,
+  refreshPlatformFeed,
+  refreshPlatformFeedIfNeeded
+} from '../helpers/platformFeed'
+import { sortNewestFirst } from '../../twitchFollows'
+import { getPlatformChannelKey, getPlatformItemKey } from '../../platforms/index'
 
 defineOptions({ inheritAttrs: false })
 
@@ -186,14 +216,14 @@ const props = defineProps({
   activeCategory: {
     type: String,
     default: null,
-    validator: value => value === null || ['videos', 'shorts', 'live', 'posts', 'feeds'].includes(value)
+    validator: value => value === null || ['videos', 'shorts', 'live', 'posts', 'feeds', 'platforms'].includes(value)
   }
 })
 
 const { t } = useI18n()
 const isElectron = process.env.IS_ELECTRON
 const feed = useTemplateRef('feed')
-const rssFeed = useTemplateRef('rssFeed')
+const otherFeed = useTemplateRef('otherFeed')
 const clearingVisibleContent = ref(false)
 let removalAnimation = null
 
@@ -210,7 +240,7 @@ onBeforeUnmount(cancelRemovalAnimation)
 /** @param {() => Promise<unknown>} markSeen */
 async function markAllAsSeen(markSeen) {
   try {
-    const element = showsOnlyRssItems.value ? rssFeed.value : feed.value?.$el
+    const element = showsOnlyOtherItems.value ? otherFeed.value : feed.value?.$el
     if (element && !isReducedMotionEnabled()) {
       const animation = applyAnimationSpeed(element.animate([
         { opacity: 1, transform: 'translateY(0)' },
@@ -363,21 +393,65 @@ const newRssItems = computed(() => {
   return sortBy.value === 'oldest' ? items.toReversed() : items
 })
 const newRssItemKeys = computed(() => newRssItems.value.map(getRssFeedItemKey))
-// Full width is a single-column grid, so its items render as grid cards.
-const rssLayout = computed(() => store.getters.getListType === 'list' ? 'list' : 'grid')
-// The RSS tab, or the combined feed while every subscription feed is hidden
-const showsOnlyRssItems = computed(() => {
-  return props.activeCategory === 'feeds' ||
-    (showCombinedView.value && enableRssFeeds.value && enabledFeeds.value.length === 0)
+
+const platformChannels = computed(() => getFollowedChannels())
+const platformAvatars = computed(() => new Map(platformChannels.value.map(channel => [getPlatformChannelKey(channel), channel.avatar ?? null])))
+// Clips come from viewers, so only live streams and uploads are new content
+const newPlatformItems = computed(() => {
+  const keys = new Set(platformChannels.value.map(getPlatformChannelKey))
+  const { live, videos } = platformFeed.value
+  const items = sortNewestFirst([...live, ...videos].filter(item => (
+    item.isNew === true && keys.has(getPlatformChannelKey({ platform: item.platform, id: item.channelId })) &&
+    // Every broadcast of a channel shares its address, so live streams are never watched
+    (item.isLive === true || !getExternalMediaProgress(item.url)?.watched)
+  )))
+  return sortBy.value === 'oldest' ? items.toReversed() : items
 })
+// The New feed lists the new items of followed channels without opening their tab first
+watch(platformChannels, refreshPlatformFeedIfNeeded, { immediate: true })
+onActivated(refreshPlatformFeedIfNeeded)
+
+// Full width is a single-column grid, so its items render as grid cards.
+const feedItemLayout = computed(() => store.getters.getListType === 'list' ? 'list' : 'grid')
+/** Items from other platforms, after the subscription feeds */
+const otherSections = computed(() => [
+  {
+    id: 'platforms',
+    title: t('Subscriptions.Platforms.Tab'),
+    items: newPlatformItems.value,
+    keys: newPlatformItems.value.map(getPlatformItemKey),
+    avatar: item => platformAvatars.value.get(getPlatformChannelKey({ platform: item.platform, id: item.channelId })),
+    seenMarks: platformSeenMarks
+  },
+  {
+    id: 'feeds',
+    title: t('Subscriptions.RSS Feeds.Tab'),
+    items: newRssItems.value,
+    keys: newRssItemKeys.value,
+    avatar: item => rssFeedAvatars.value.get(item.feedUrl),
+    seenMarks: null
+  }
+])
+// The tab of another platform, or the combined feed while every subscription feed is hidden
+const showsOnlyOtherItems = computed(() => {
+  return props.activeCategory === 'feeds' || props.activeCategory === 'platforms' ||
+    (showCombinedView.value && (enableRssFeeds.value || platformChannels.value.length > 0) && enabledFeeds.value.length === 0)
+})
+const shownOtherSections = computed(() => otherSections.value.filter(section => (
+  section.items.length > 0 && (showCombinedView.value || section.id === props.activeCategory)
+)))
 
 const hasAdditionalContent = computed(() => {
   return newShorts.value.length > 0 || newLive.value.length > 0 || newPosts.value.length > 0
 })
 
 const isLoading = computed(() => {
-  if (showsOnlyRssItems.value) {
-    return rssFeedsRefreshing.value
+  if (props.activeCategory === 'platforms') {
+    return platformFeedRefreshing.value
+  }
+
+  if (showsOnlyOtherItems.value) {
+    return rssFeedsRefreshing.value || (showCombinedView.value && platformFeedRefreshing.value)
   }
 
   if (!store.getters.getSubscriptionCacheReady) {
@@ -391,19 +465,20 @@ const isLoading = computed(() => {
       store.getters.getSubscriptionFeedRefreshTab === props.activeCategory
   }
 
-  return isRefreshing.value || rssFeedsRefreshing.value
+  return isRefreshing.value || rssFeedsRefreshing.value || platformFeedRefreshing.value
 })
 
 const hasNewContent = computed(() => {
-  if (showsOnlyRssItems.value) {
-    return newRssItems.value.length > 0
+  if (showsOnlyOtherItems.value) {
+    return shownOtherSections.value.length > 0
   }
 
   if (!showCombinedView.value) {
     return displayedEntries.value.length > 0
   }
 
-  return newVideos.value.length > 0 || hasAdditionalContent.value || newRssItems.value.length > 0
+  return newVideos.value.length > 0 || hasAdditionalContent.value || newRssItems.value.length > 0 ||
+    newPlatformItems.value.length > 0
 })
 
 const hasNewContentByCategory = computed(() => ({
@@ -411,21 +486,24 @@ const hasNewContentByCategory = computed(() => ({
   shorts: newShorts.value.length > 0,
   live: newLive.value.length > 0,
   posts: newPosts.value.length > 0,
-  feeds: newRssItems.value.length > 0
+  feeds: newRssItems.value.length > 0,
+  platforms: newPlatformItems.value.length > 0
 }))
 
 function refreshNewContent() {
-  if (!showsOnlyRssItems.value) {
-    // Refreshes the RSS feeds too
+  if (props.activeCategory === 'platforms') {
+    if (platformChannels.value.length > 0) refreshPlatformFeed()
+  } else if (props.activeCategory === 'feeds') {
+    if (rssFeeds.value.length > 0) refreshRssFeeds(rssFeeds.value)
+  } else {
+    // Refreshes the RSS feeds and the channels on other platforms too
     refresh()
-  } else if (rssFeeds.value.length > 0) {
-    refreshRssFeeds(rssFeeds.value)
   }
 }
 
 // The subscription feeds handle the shortcut themselves
 useFeedRefreshShortcut(
-  () => showsOnlyRssItems.value && rssFeeds.value.length > 0 && !rssFeedsRefreshing.value,
+  () => showsOnlyOtherItems.value && (rssFeeds.value.length > 0 || platformChannels.value.length > 0) && !isLoading.value,
   refreshNewContent
 )
 

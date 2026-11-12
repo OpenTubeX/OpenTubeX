@@ -217,6 +217,26 @@ Subscriptions:
       Not Set: Non défini
     Retry Feed: Réessayer {feed}
     Reloading Feed: Rechargement de {feed}
+  Platforms:
+    Tab: Plateformes
+    Platform: Plateforme
+    All Platforms: Toutes les plateformes
+    Followed Channels: Chaînes suivies sur d’autres plateformes
+    Description: Suivez des chaînes sur Twitch, SoundCloud, PeerTube, Rumble et Odysee pour voir leurs mises en ligne dans l’onglet Plateformes de vos abonnements. Trouvez des chaînes avec la recherche ou ajoutez-les par l’adresse de leur page. Leurs médias sont lus avec yt-dlp.
+    Add Channel: Ajouter une chaîne
+    Channel URL: Adresse de la chaîne
+    Invalid Channel: Saisissez l’adresse de la page d’une chaîne sur Twitch, SoundCloud, PeerTube, Rumble ou Odysee.
+    Channel Not Found: Il n’y a aucune chaîne à cette adresse.
+    Channel Already Followed: Vous suivez déjà cette chaîne.
+    Channel Could Not Be Loaded: Impossible de charger la chaîne.
+    No Channels: Vous ne suivez encore aucune chaîne sur d’autres plateformes.
+    Unfollow Channel: Ne plus suivre {channel}
+    Go To Channel: Accéder à {channel}
+    Follow: Suivre
+    Following: Suivi
+    Clips: Clips
+    Refresh Errors: 1 chaîne n’a pas pu être actualisée. | {count} chaînes n’ont pas pu être actualisées. | {count} chaînes n’ont pas pu être actualisées.
+    Content Tabs: Onglets des contenus des plateformes
 Trending:
   Music: Musique
   Load Error: Les tendances n’ont pas pu être chargées.
@@ -1177,6 +1197,11 @@ Settings:
     Notify About New Uploads: Notifier les nouvelles mises en ligne
     RSS Feeds Auto Refresh Interval: Intervalle d’actualisation automatique des flux RSS
     Faster Subscription Refresh: "Actualisation plus rapide des abonnements"
+    Platforms:
+      Other Platforms: Autres plateformes
+      Manage Channels: Gérer les chaînes suivies
+      Notify When Live: Notifier quand les chaînes Twitch suivies passent en direct
+      Auto Refresh Interval: Intervalle d’actualisation automatique des autres plateformes
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Compter le temps de visionnage depuis"
@@ -2016,6 +2041,7 @@ Context Menu:
   Reload Posts: Recharger les publications
   Reload All Feeds: Recharger tous les flux
   Reload RSS Feeds: Recharger les flux RSS
+  Reload Platforms: Recharger les plateformes
   Close Multiple Tabs: Fermer {count} onglets | Fermer {count} onglets
   Duplicate Tab: Dupliquer l’onglet
   Duplicate Multiple Tabs: Dupliquer {count} onglets | Dupliquer {count} onglets
@@ -2280,6 +2306,8 @@ Tooltips:
     Notify About New Uploads: Affiche des notifications système sur cet appareil pour les chaînes dont vous avez activé les notifications dans leurs paramètres d’abonnement. OpenTubeX recherche du nouveau contenu lors de l’actualisation des abonnements ; choisissez donc un intervalle d’actualisation automatique. Pour être notifié lorsque l’application est fermée, activez aussi l’actualisation quand l’application est fermée.
     RSS Feeds Auto Refresh Interval: Fréquence à laquelle OpenTubeX actualise automatiquement vos flux RSS lorsque l’application est ouverte.
     Faster Subscription Refresh: "Vérifie d'abord le flux RSS de chaque chaîne et ne charge les vidéos, Shorts et diffusions en direct que des chaînes ayant de nouvelles mises en ligne. Les actualisations automatiques ignorent aussi les chaînes chargées au cours des 10 dernières minutes. Pour les chaînes sans nouvelles mises en ligne, le nombre de vues, les vidéos supprimées et les titres modifiés ne sont mis à jour que toutes les quelques heures, et les nouvelles mises en ligne peuvent apparaître plus tard lorsque le flux RSS est en retard. Non disponible avec l'API Invidious."
+    Platforms Auto Refresh Interval: Fréquence à laquelle OpenTubeX actualise automatiquement les chaînes que vous suivez sur d’autres plateformes lorsque l’application est ouverte.
+    Twitch Notify When Live: Vous avertit lorsqu’une de vos chaînes Twitch suivies commence un stream. OpenTubeX vérifie toutes les quelques minutes tant qu’il est ouvert, et aussi lorsqu’il est fermé s’il actualise alors les abonnements.
   Theme Settings:
     Only Show Important Notifications: Masque les notifications de l’application qui se contentent de confirmer une action ou de signaler un état. Les erreurs, les avertissements, les rappels que vous avez configurés et les notifications qui proposent une action, comme Annuler, continuent de s’afficher. La progression des opérations en arrière-plan, comme l’actualisation des abonnements, s’affiche dans la barre de progression globale plutôt que dans une notification. Les notifications du système ne sont pas concernées.
     Visible Search Suggestions: "Définit le nombre d’entrées de l’historique de recherche et de suggestions affichées par la barre de recherche avant que sa liste ne défile. La liste ne dépasse jamais le bas de la fenêtre."
@@ -2677,3 +2705,12 @@ Notification Center:
   Clear: "Effacer"
   Empty: "Aucune notification pour le moment"
   Empty Hint: "Les rappels de diffusions en direct et les nouvelles mises en ligne des chaînes dont les notifications sont activées apparaîtront ici."
+Platforms:
+  Tracks: Titres
+  Playlists: Playlists
+  Follower Count: 1 abonné | {count} d’abonnés | {count} abonnés
+  Open Website: Ouvrir sur {platform}
+  Channel Not Found: Cette chaîne est introuvable.
+  Playlist Not Found: Cette playlist est introuvable.
+  Load Error: Impossible de charger cette page depuis {platform}.
+  Empty Tab: Il n’y a encore rien ici.

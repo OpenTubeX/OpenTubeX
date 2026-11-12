@@ -217,6 +217,26 @@ Subscriptions:
       Not Set: Nenastaveno
     Retry Feed: Zkusit znovu načíst {feed}
     Reloading Feed: Znovu se načítá {feed}
+  Platforms:
+    Tab: Platformy
+    Platform: Platforma
+    All Platforms: Všechny platformy
+    Followed Channels: Sledované kanály na jiných platformách
+    Description: Sledujte kanály na platformách Twitch, SoundCloud, PeerTube, Rumble a Odysee a jejich nově nahraný obsah uvidíte na kartě Platformy ve svých odběrech. Kanály najdete pomocí vyhledávání, nebo je přidejte podle adresy jejich stránky. Jejich média se přehrávají pomocí yt-dlp.
+    Add Channel: Přidat kanál
+    Channel URL: Adresa kanálu
+    Invalid Channel: Zadejte adresu stránky kanálu na platformě Twitch, SoundCloud, PeerTube, Rumble nebo Odysee.
+    Channel Not Found: Na této adrese není žádný kanál.
+    Channel Already Followed: Tento kanál již sledujete.
+    Channel Could Not Be Loaded: Kanál se nepodařilo načíst.
+    No Channels: Zatím nesledujete žádné kanály na jiných platformách.
+    Unfollow Channel: Přestat sledovat {channel}
+    Go To Channel: Přejít na kanál {channel}
+    Follow: Sledovat
+    Following: Sledováno
+    Clips: Klipy
+    Refresh Errors: 1 kanál se nepodařilo obnovit. | {count} kanály se nepodařilo obnovit. | {count} kanálů se nepodařilo obnovit.
+    Content Tabs: Karty s obsahem platforem
 Trending:
   Music: Hudba
   Load Error: Trendy se nepodařilo načíst.
@@ -1177,6 +1197,11 @@ Settings:
     Notify About New Uploads: Oznamovat nový obsah
     RSS Feeds Auto Refresh Interval: Interval automatického obnovení RSS kanálů
     Faster Subscription Refresh: "Rychlejší obnovení odběrů"
+    Platforms:
+      Other Platforms: Jiné platformy
+      Manage Channels: Spravovat sledované kanály
+      Notify When Live: Upozornit, když sledované kanály na Twitchi začnou vysílat
+      Auto Refresh Interval: Interval automatického obnovení jiných platforem
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Počítat dobu sledování z"
@@ -2017,6 +2042,7 @@ Context Menu:
   Reload Posts: Znovu načíst příspěvky
   Reload All Feeds: Znovu načíst všechny kanály
   Reload RSS Feeds: Znovu načíst kanály RSS
+  Reload Platforms: Znovu načíst platformy
   Close Multiple Tabs: Zavřít {count} kartu | Zavřít {count} karty | Zavřít {count} karet
   Duplicate Tab: Duplikovat kartu
   Duplicate Multiple Tabs: Duplikovat {count} kartu | Duplikovat {count} karty | Duplikovat {count} karet
@@ -2281,6 +2307,8 @@ Tooltips:
     Notify About New Uploads: Zobrazuje na tomto zařízení systémová oznámení pro kanály, u kterých jste v nastavení odběru zapnuli oznámení. OpenTubeX kontroluje nový obsah při obnovení odběrů, proto zvolte interval automatického obnovení. Chcete-li dostávat oznámení i při zavřené aplikaci, zapněte také obnovování při zavřené aplikaci.
     RSS Feeds Auto Refresh Interval: Jak často OpenTubeX automaticky obnovuje vaše RSS kanály, když je aplikace otevřená.
     Faster Subscription Refresh: "Nejprve zkontroluje RSS kanál každého kanálu a videa, Shorts a živé přenosy načte jen z kanálů s novými nahranými videi. Automatická obnovení navíc přeskočí kanály načtené v posledních 10 minutách. U kanálů bez nových videí se počty zhlédnutí, odstraněná videa a změněné názvy aktualizují jen jednou za několik hodin a nová videa se mohou objevit později, když RSS kanál zaostává. Není k dispozici s Invidious API."
+    Platforms Auto Refresh Interval: Jak často OpenTubeX automaticky obnovuje kanály, které sledujete na jiných platformách, když je aplikace otevřená.
+    Twitch Notify When Live: Upozorní vás, když některý z vašich sledovaných kanálů na Twitchi začne vysílat. OpenTubeX kontroluje každých několik minut, když je otevřený, a také když je zavřený, pokud v tu dobu aktualizuje odběry.
   Theme Settings:
     Only Show Important Notifications: Skryje oznámení v aplikaci, která pouze potvrzují akci nebo hlásí stav. Chyby, varování, nastavená připomenutí a oznámení s akcí, například Zpět, se zobrazují i nadále. Průběh operací na pozadí, například obnovování odběrů, se místo oznámení zobrazuje v globálním ukazateli průběhu. Systémová oznámení nejsou ovlivněna.
     Visible Search Suggestions: "Určuje, kolik položek historie vyhledávání a návrhů zobrazí vyhledávací pole, než se jeho seznam začne posouvat. Seznam nikdy nepřesáhne spodní okraj okna."
@@ -2678,3 +2706,12 @@ Notification Center:
   Clear: "Vymazat"
   Empty: "Zatím žádná oznámení"
   Empty Hint: "Zde se zobrazí připomínky živých přenosů a nová videa z kanálů se zapnutými oznámeními."
+Platforms:
+  Tracks: Skladby
+  Playlists: Playlisty
+  Follower Count: 1 sledující | {count} sledující | {count} sledujících
+  Open Website: Otevřít na webu {platform}
+  Channel Not Found: Tento kanál nebyl nalezen.
+  Playlist Not Found: Tento playlist nebyl nalezen.
+  Load Error: Tuto stránku se nepodařilo načíst z platformy {platform}.
+  Empty Tab: Zatím tu nic není.

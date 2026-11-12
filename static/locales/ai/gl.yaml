@@ -219,6 +219,26 @@ Subscriptions:
       Not Set: Sen definir
     Retry Feed: Tentar de novo {feed}
     Reloading Feed: Recargando {feed}
+  Platforms:
+    Tab: Plataformas
+    Platform: Plataforma
+    All Platforms: Todas as plataformas
+    Followed Channels: Canles seguidas noutras plataformas
+    Description: Segue canles de Twitch, SoundCloud, PeerTube, Rumble e Odysee para ver as súas publicacións na lapela Plataformas das túas subscricións. Atopa canles coa busca ou engádeas co enderezo da súa páxina. O seu contido reprodúcese con yt-dlp.
+    Add Channel: Engadir canle
+    Channel URL: Enderezo da canle
+    Invalid Channel: Introduce o enderezo da páxina dunha canle de Twitch, SoundCloud, PeerTube, Rumble ou Odysee.
+    Channel Not Found: Non hai ningunha canle neste enderezo.
+    Channel Already Followed: Xa segues esta canle.
+    Channel Could Not Be Loaded: Non se puido cargar a canle.
+    No Channels: Aínda non segues ningunha canle doutras plataformas.
+    Unfollow Channel: Deixar de seguir {channel}
+    Go To Channel: Ir a {channel}
+    Follow: Seguir
+    Following: Seguindo
+    Clips: Clips
+    Refresh Errors: Non se puido actualizar 1 canle. | Non se puideron actualizar {count} canles.
+    Content Tabs: Lapelas de contido das plataformas
 Trending:
   Music: Música
   Load Error: Non se puideron cargar as tendencias.
@@ -1188,6 +1208,11 @@ Settings:
     Notify About New Uploads: Notificar novas subidas
     RSS Feeds Auto Refresh Interval: Intervalo de actualización automática das fontes RSS
     Faster Subscription Refresh: "Actualización máis rápida das subscricións"
+    Platforms:
+      Other Platforms: Outras plataformas
+      Manage Channels: Xestionar canles seguidas
+      Notify When Live: Notificar cando as canles de Twitch seguidas comecen un directo
+      Auto Refresh Interval: Intervalo de actualización automática doutras plataformas
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Contar o tempo de visualización de"
@@ -2076,6 +2101,7 @@ Context Menu:
   Reload Posts: Recargar as publicacións
   Reload All Feeds: Recargar todas as fontes
   Reload RSS Feeds: Recargar as fontes RSS
+  Reload Platforms: Recargar as plataformas
   Close Multiple Tabs: Pechar {count} lapelas
   Duplicate Tab: Duplicar a lapela
   Duplicate Multiple Tabs: Duplicar {count} lapelas
@@ -2341,6 +2367,8 @@ Tooltips:
     Notify About New Uploads: Amosa notificacións do sistema neste dispositivo para as canles cuxas notificacións activaches na súa configuración de subscrición. OpenTubeX busca contido novo ao actualizar as subscricións, así que escolle un intervalo de actualización automática. Para recibir notificacións coa aplicación pechada, activa tamén a actualización coa aplicación pechada.
     RSS Feeds Auto Refresh Interval: Con que frecuencia OpenTubeX actualiza automaticamente as túas fontes RSS mentres a aplicación está aberta.
     Faster Subscription Refresh: "Primeiro comproba a fonte RSS de cada canle e só carga os vídeos, Shorts e emisións en directo das canles con novas subidas. As actualizacións automáticas tamén omiten as canles cargadas nos últimos 10 minutos. Nas canles sen novas subidas, as visualizacións, os vídeos eliminados e os títulos cambiados só se actualizan cada poucas horas, e as novas subidas poden aparecer máis tarde cando a fonte RSS vai atrasada. Non dispoñible coa API de Invidious."
+    Platforms Auto Refresh Interval: Con que frecuencia OpenTubeX actualiza automaticamente as canles que segues noutras plataformas mentres a aplicación está aberta.
+    Twitch Notify When Live: Avísate cando unha das canles de Twitch que segues comeza a emitir. OpenTubeX compróbao cada poucos minutos mentres está aberto, e tamén mentres está pechado se entón actualiza as subscricións.
   Theme Settings:
     Only Show Important Notifications: Oculta as notificacións da aplicación que só confirman unha acción ou informan dun estado. Os erros, os avisos, os recordatorios que configuraches e as notificacións que ofrecen unha acción, como Desfacer, seguen aparecendo. O progreso das operacións en segundo plano, como a actualización das subscricións, móstrase na barra de progreso global en lugar dunha notificación. As notificacións do sistema non se ven afectadas.
     Visible Search Suggestions: "Define cantas entradas do historial de busca e suxestións mostra a barra de busca antes de que a súa lista se desprace. A lista nunca se estende máis alá da parte inferior da xanela."
@@ -2741,3 +2769,12 @@ Notification Center:
   Clear: "Borrar"
   Empty: "Aínda non hai notificacións"
   Empty Hint: "Aquí aparecerán os recordatorios de directos e os vídeos novos das canles coas notificacións activadas."
+Platforms:
+  Tracks: Pistas
+  Playlists: Listaxes de reprodución
+  Follower Count: 1 seguidor | {count} seguidores
+  Open Website: Abrir en {platform}
+  Channel Not Found: Non se puido atopar esta canle.
+  Playlist Not Found: Non se puido atopar esta listaxe de reprodución.
+  Load Error: Non se puido cargar esta páxina desde {platform}.
+  Empty Tab: Aínda non hai nada aquí.

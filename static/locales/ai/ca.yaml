@@ -263,6 +263,26 @@ Subscriptions:
       Not Set: Sense definir
     Retry Feed: Torna a provar {feed}
     Reloading Feed: 'S''està tornant a carregar {feed}'
+  Platforms:
+    Tab: Plataformes
+    Platform: Plataforma
+    All Platforms: Totes les plataformes
+    Followed Channels: Canals seguits en altres plataformes
+    Description: Seguiu canals de Twitch, SoundCloud, PeerTube, Rumble i Odysee per veure'n les publicacions a la pestanya Plataformes de les vostres subscripcions. Cerqueu canals amb el cercador o afegiu-los amb l'adreça de la seva pàgina. El seu contingut es reprodueix amb yt-dlp.
+    Add Channel: Afegeix un canal
+    Channel URL: Adreça del canal
+    Invalid Channel: Introduïu l'adreça de la pàgina d'un canal de Twitch, SoundCloud, PeerTube, Rumble o Odysee.
+    Channel Not Found: No hi ha cap canal en aquesta adreça.
+    Channel Already Followed: Ja seguiu aquest canal.
+    Channel Could Not Be Loaded: No s'ha pogut carregar el canal.
+    No Channels: Encara no seguiu cap canal en altres plataformes.
+    Unfollow Channel: Deixa de seguir {channel}
+    Go To Channel: Ves a {channel}
+    Follow: Segueix
+    Following: Seguint
+    Clips: Clips
+    Refresh Errors: No s'ha pogut actualitzar 1 canal. | No s'han pogut actualitzar {count} canals. | No s'han pogut actualitzar {count} canals.
+    Content Tabs: Pestanyes de contingut de plataformes
 Channels:
   Load More Channels: "Carrega més canals"
   Count: S'ha trobat 1 canal. | S'han trobat {number} canals. | S'han trobat {number} canals.
@@ -1447,6 +1467,11 @@ Settings:
     Confirm Before Unsubscribing: Confirma abans de donar-se de baixa
     RSS Feeds Auto Refresh Interval: Interval d'actualització automàtica dels canals RSS
     Faster Subscription Refresh: "Actualització més ràpida de les subscripcions"
+    Platforms:
+      Other Platforms: Altres plataformes
+      Manage Channels: Gestiona els canals seguits
+      Notify When Live: Notifica quan els canals de Twitch seguits comencin una emissió en directe
+      Auto Refresh Interval: Interval d'actualització automàtica d'altres plataformes
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Compta el temps de visualització de"
@@ -2531,6 +2556,7 @@ Context Menu:
   Reload Posts: Torna a carregar les publicacions
   Reload All Feeds: Torna a carregar tots els canals
   Reload RSS Feeds: Torna a carregar els canals RSS
+  Reload Platforms: Torna a carregar les plataformes
   Close Multiple Tabs: Tanca {count} pestanya | Tanca {count} pestanyes
   Duplicate Tab: Duplica la pestanya
   Duplicate Multiple Tabs: Duplica {count} pestanya | Duplica {count} pestanyes
@@ -2845,6 +2871,8 @@ Tooltips:
     Notify About New Uploads: Mostra notificacions del sistema en aquest dispositiu per als canals dels quals heu activat les notificacions a la seva configuració de subscripció. OpenTubeX cerca contingut nou quan s'actualitzen les subscripcions, així que trieu un interval d'actualització automàtica. Per rebre notificacions amb l'aplicació tancada, activeu també l'actualització amb l'aplicació tancada.
     RSS Feeds Auto Refresh Interval: Amb quina freqüència OpenTubeX actualitza automàticament els vostres canals RSS mentre l'aplicació és oberta.
     Faster Subscription Refresh: "Primer comprova el canal RSS de cada canal i només carrega els vídeos, els Shorts i les emissions en directe dels canals amb pujades noves. Les actualitzacions automàtiques també ometen els canals carregats en els últims 10 minuts. Als canals sense pujades noves, el nombre de visualitzacions, els vídeos eliminats i els títols canviats només s'actualitzen cada poques hores, i les pujades noves poden aparèixer més tard quan el canal RSS va endarrerit. No disponible amb l'API d'Invidious."
+    Platforms Auto Refresh Interval: Amb quina freqüència OpenTubeX actualitza automàticament els canals que seguiu en altres plataformes mentre l'aplicació és oberta.
+    Twitch Notify When Live: Et notifica quan un dels canals de Twitch que segueixes comença a emetre. OpenTubeX ho comprova cada pocs minuts mentre és obert, i també mentre és tancat si llavors actualitza les subscripcions.
   Theme Settings:
     Only Show Important Notifications: Amaga les notificacions de l'aplicació que només confirmen una acció o informen d'un estat. Els errors, els avisos, els recordatoris que heu configurat i les notificacions que ofereixen una acció, com ara Desfés, continuen apareixent. El progrés de les operacions en segon pla, com ara l'actualització de les subscripcions, es mostra a la barra de progrés global en lloc d'una notificació. Les notificacions del sistema no es veuen afectades.
     Visible Search Suggestions: "Defineix quantes entrades de l’historial de cerca i suggeriments mostra la barra de cerca abans que la seva llista es desplaci. La llista mai no s’estén més enllà de la part inferior de la finestra."
@@ -3325,3 +3353,12 @@ Notification Center:
   Clear: "Esborra"
   Empty: "Encara no hi ha notificacions"
   Empty Hint: "Aquí apareixeran els recordatoris de directes i els vídeos nous dels canals amb les notificacions activades."
+Platforms:
+  Tracks: Pistes
+  Playlists: Llistes de reproducció
+  Follower Count: 1 seguidor | {count} de seguidors | {count} seguidors
+  Open Website: Obre a {platform}
+  Channel Not Found: No s'ha pogut trobar aquest canal.
+  Playlist Not Found: No s'ha pogut trobar aquesta llista de reproducció.
+  Load Error: No s'ha pogut carregar aquesta pàgina des de {platform}.
+  Empty Tab: Encara no hi ha res aquí.

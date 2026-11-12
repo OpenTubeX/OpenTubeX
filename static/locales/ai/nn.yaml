@@ -217,6 +217,26 @@ Subscriptions:
       Not Set: Ikkje sett
     Retry Feed: Prøv {feed} på nytt
     Reloading Feed: Lastar inn {feed} på nytt
+  Platforms:
+    Tab: Plattformer
+    Platform: Plattform
+    All Platforms: Alle plattformer
+    Followed Channels: Følgde kanalar på andre plattformer
+    Description: Følg kanalar på Twitch, SoundCloud, PeerTube, Rumble og Odysee for å sjå opplastingane deira i Plattformer-fana i abonnementa dine. Finn kanalar med søket, eller legg dei til med adressa til sida deira. Media deira vert spela av med yt-dlp.
+    Add Channel: Legg til kanal
+    Channel URL: Kanaladresse
+    Invalid Channel: Skriv inn adressa til ei kanalside på Twitch, SoundCloud, PeerTube, Rumble eller Odysee.
+    Channel Not Found: Det finst ingen kanal på denne adressa.
+    Channel Already Followed: Du følgjer allereie denne kanalen.
+    Channel Could Not Be Loaded: Kunne ikkje lasta inn kanalen.
+    No Channels: Du følgjer ingen kanalar på andre plattformer enno.
+    Unfollow Channel: Slutt å følgja {channel}
+    Go To Channel: Gå til {channel}
+    Follow: Følg
+    Following: Følgjer
+    Clips: Klipp
+    Refresh Errors: 1 kanal kunne ikkje oppdaterast. | {count} kanalar kunne ikkje oppdaterast.
+    Content Tabs: Faner for plattforminnhald
 Trending:
   Music: Musikk
   Load Error: Klarte ikkje å laste inn populært innhald.
@@ -1295,6 +1315,11 @@ Settings:
     Confirm Before Unsubscribing: Stadfest før du avsluttar abonnement
     RSS Feeds Auto Refresh Interval: Intervall for automatisk oppdatering av RSS-straumar
     Faster Subscription Refresh: "Raskare oppdatering av abonnement"
+    Platforms:
+      Other Platforms: Andre plattformer
+      Manage Channels: Administrer følgde kanalar
+      Notify When Live: Varsle når følgde Twitch-kanalar startar direktesending
+      Auto Refresh Interval: Intervall for automatisk oppdatering av andre plattformer
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Tel sjåtid frå"
@@ -2319,6 +2344,7 @@ Context Menu:
   Reload Posts: Last inn innlegg på nytt
   Reload All Feeds: Last inn alle straumane på nytt
   Reload RSS Feeds: Last inn RSS-straumar på nytt
+  Reload Platforms: Last inn plattformer på nytt
   Close Multiple Tabs: Lukk {count} faner
   Duplicate Tab: Dupliser fana
   Duplicate Multiple Tabs: Dupliser {count} faner
@@ -2598,6 +2624,8 @@ Tooltips:
     Notify About New Uploads: Viser systemvarsel på denne eininga for kanalar du har slått på varsel for i abonnementinnstillingane deira. OpenTubeX ser etter nytt innhald når abonnement vert oppdaterte, så vel eit intervall for automatisk oppdatering. For å bli varsla medan appen er lukka, må du også slå på oppdatering medan appen er lukka.
     RSS Feeds Auto Refresh Interval: Kor ofte OpenTubeX automatisk oppdaterer RSS-straumane dine medan appen er open.
     Faster Subscription Refresh: "Sjekkar først RSS-straumen til kvar kanal og lastar berre inn videoar, Shorts og direktesendingar frå kanalar med nye opplastingar. Automatiske oppdateringar hoppar òg over kanalar som er lasta inn dei siste 10 minutta. For kanalar utan nye opplastingar vert visingstal, fjerna videoar og endra titlar berre oppdaterte med nokre timars mellomrom, og nye opplastingar kan dukke opp seinare når RSS-straumen heng etter. Ikkje tilgjengeleg med Invidious-API-et."
+    Platforms Auto Refresh Interval: Kor ofte OpenTubeX automatisk oppdaterer kanalane du følgjer på andre plattformer medan appen er open.
+    Twitch Notify When Live: Varslar deg når ein av Twitch-kanalane du følgjer, byrjar å strøyma. OpenTubeX sjekkar med nokre minutts mellomrom medan det er ope, og òg medan det er lukka dersom det då oppdaterer abonnement.
   Theme Settings:
     Only Show Important Notifications: Gøymer varsel i appen som berre stadfestar ei handling eller melder ein status. Feil, åtvaringar, påminningar du har sett opp, og varsel som tilbyr ei handling, som Angre, blir framleis viste. Framdrift for bakgrunnsoperasjonar, som oppdatering av abonnement, blir vist i den globale framdriftslinja i staden for som eit varsel. Systemvarsel blir ikkje påverka.
     Visible Search Suggestions: "Set kor mange oppføringar frå søkjeloggen og forslag søkjefeltet viser før lista må rullast. Lista går aldri forbi nedkanten av vindauget."
@@ -3074,3 +3102,12 @@ Notification Center:
   Clear: "Fjern"
   Empty: "Ingen varsel enno"
   Empty Hint: "Påminningar om direktesendingar og nye opplastingar frå kanalar med varsel slått på blir viste her."
+Platforms:
+  Tracks: Spor
+  Playlists: Spelelistar
+  Follower Count: 1 følgjar | {count} følgjarar
+  Open Website: Opne på {platform}
+  Channel Not Found: Fann ikkje denne kanalen.
+  Playlist Not Found: Fann ikkje denne spelelista.
+  Load Error: Kunne ikkje lasta inn denne sida frå {platform}.
+  Empty Tab: Det er ingenting her enno.

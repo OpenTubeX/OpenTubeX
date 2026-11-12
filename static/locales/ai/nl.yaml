@@ -219,6 +219,26 @@ Subscriptions:
       Not Set: Niet ingesteld
     Retry Feed: '{feed} opnieuw proberen'
     Reloading Feed: '{feed} opnieuw laden'
+  Platforms:
+    Tab: Platforms
+    Platform: Platform
+    All Platforms: Alle platforms
+    Followed Channels: Gevolgde kanalen op andere platforms
+    Description: Volg kanalen op Twitch, SoundCloud, PeerTube, Rumble en Odysee om hun uploads te zien op het tabblad Platforms van je abonnementen. Zoek kanalen met de zoekfunctie, of voeg ze toe via het adres van hun pagina. Hun media worden afgespeeld met yt-dlp.
+    Add Channel: Kanaal toevoegen
+    Channel URL: Kanaaladres
+    Invalid Channel: Voer het adres in van een kanaalpagina op Twitch, SoundCloud, PeerTube, Rumble of Odysee.
+    Channel Not Found: Er is geen kanaal op dit adres.
+    Channel Already Followed: Je volgt dit kanaal al.
+    Channel Could Not Be Loaded: Het kanaal kon niet worden geladen.
+    No Channels: Je volgt nog geen kanalen op andere platforms.
+    Unfollow Channel: '{channel} ontvolgen'
+    Go To Channel: '{channel} openen'
+    Follow: Volgen
+    Following: Volgend
+    Clips: Clips
+    Refresh Errors: 1 kanaal kon niet worden vernieuwd. | {count} kanalen konden niet worden vernieuwd.
+    Content Tabs: Tabbladen voor platformcontent
 Trending:
   Music: Muziek
   Load Error: Trending kan niet worden geladen.
@@ -1192,6 +1212,11 @@ Settings:
     Notify About New Uploads: Melden bij nieuwe uploads
     RSS Feeds Auto Refresh Interval: Interval voor automatisch vernieuwen van RSS-feeds
     Faster Subscription Refresh: "Snellere vernieuwing van abonnementen"
+    Platforms:
+      Other Platforms: Andere platforms
+      Manage Channels: Gevolgde kanalen beheren
+      Notify When Live: Melden wanneer gevolgde Twitch-kanalen live gaan
+      Auto Refresh Interval: Interval voor automatisch vernieuwen van andere platforms
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Kijktijd tellen van"
@@ -2082,6 +2107,7 @@ Context Menu:
   Reload Posts: Berichten opnieuw laden
   Reload All Feeds: Alle feeds opnieuw laden
   Reload RSS Feeds: RSS-feeds opnieuw laden
+  Reload Platforms: Platforms opnieuw laden
   Close Multiple Tabs: '{count} tabbladen sluiten'
   Duplicate Tab: Tabblad dupliceren
   Duplicate Multiple Tabs: '{count} tabbladen dupliceren'
@@ -2347,6 +2373,8 @@ Tooltips:
     Notify About New Uploads: Toont systeemmeldingen op dit apparaat voor kanalen waarvan je de meldingen hebt ingeschakeld in hun abonnementsinstellingen. OpenTubeX controleert op nieuwe inhoud wanneer abonnementen worden vernieuwd, dus kies een interval voor automatisch vernieuwen. Om ook meldingen te krijgen terwijl de app gesloten is, schakel je ook vernieuwen terwijl de app gesloten is in.
     RSS Feeds Auto Refresh Interval: Hoe vaak OpenTubeX je RSS-feeds automatisch vernieuwt terwijl de app geopend is.
     Faster Subscription Refresh: "Controleert eerst de RSS-feed van elk kanaal en laadt alleen de video's, Shorts en livestreams van kanalen met nieuwe uploads. Automatische vernieuwingen slaan ook kanalen over die in de afgelopen 10 minuten zijn geladen. Bij kanalen zonder nieuwe uploads worden weergaven, verwijderde video's en gewijzigde titels maar om de paar uur bijgewerkt, en nieuwe uploads kunnen later verschijnen als de RSS-feed achterloopt. Niet beschikbaar met de Invidious-API."
+    Platforms Auto Refresh Interval: Hoe vaak OpenTubeX de kanalen die je op andere platforms volgt automatisch vernieuwt terwijl de app geopend is.
+    Twitch Notify When Live: Geeft een melding wanneer een van je gevolgde Twitch-kanalen begint met streamen. OpenTubeX controleert om de paar minuten zolang het geopend is, en ook wanneer het gesloten is als het dan abonnementen vernieuwt.
   Theme Settings:
     Only Show Important Notifications: Verbergt meldingen in de app die alleen een actie bevestigen of een status melden. Fouten, waarschuwingen, herinneringen die je hebt ingesteld en meldingen met een actie, zoals Ongedaan maken, worden nog steeds getoond. De voortgang van achtergrondtaken, zoals het vernieuwen van abonnementen, wordt in de algemene voortgangsbalk getoond in plaats van in een melding. Systeemmeldingen worden niet beïnvloed.
     Visible Search Suggestions: "Bepaalt hoeveel items uit de zoekgeschiedenis en suggesties de zoekbalk toont voordat de lijst gaat scrollen. De lijst loopt nooit door voorbij de onderkant van het venster."
@@ -2749,3 +2777,12 @@ Notification Center:
   Clear: "Wissen"
   Empty: "Nog geen meldingen"
   Empty Hint: "Herinneringen aan livestreams en nieuwe uploads van kanalen met ingeschakelde meldingen verschijnen hier."
+Platforms:
+  Tracks: Nummers
+  Playlists: Afspeellijsten
+  Follower Count: 1 volger | {count} volgers
+  Open Website: Openen op {platform}
+  Channel Not Found: Dit kanaal kon niet worden gevonden.
+  Playlist Not Found: Deze afspeellijst kon niet worden gevonden.
+  Load Error: Deze pagina kon niet worden geladen van {platform}.
+  Empty Tab: Er is hier nog niets.

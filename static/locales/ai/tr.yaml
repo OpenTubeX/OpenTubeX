@@ -217,6 +217,26 @@ Subscriptions:
       Not Set: Ayarlanmadı
     Retry Feed: '{feed} akışını yeniden dene'
     Reloading Feed: '{feed} yeniden yükleniyor'
+  Platforms:
+    Tab: Platformlar
+    Platform: Platform
+    All Platforms: Tüm platformlar
+    Followed Channels: Diğer platformlarda takip edilen kanallar
+    Description: Aboneliklerinizin Platformlar sekmesinde yüklemelerini görmek için Twitch, SoundCloud, PeerTube, Rumble ve Odysee'deki kanalları takip edin. Kanalları aramayla bulun veya sayfalarının adresiyle ekleyin. Medyaları yt-dlp ile oynatılır.
+    Add Channel: Kanal Ekle
+    Channel URL: Kanal adresi
+    Invalid Channel: Twitch, SoundCloud, PeerTube, Rumble veya Odysee'deki bir kanal sayfasının adresini girin.
+    Channel Not Found: Bu adreste kanal yok.
+    Channel Already Followed: Bu kanalı zaten takip ediyorsunuz.
+    Channel Could Not Be Loaded: Kanal yüklenemedi.
+    No Channels: Henüz diğer platformlarda hiçbir kanalı takip etmiyorsunuz.
+    Unfollow Channel: '{channel} takibini bırak'
+    Go To Channel: '{channel} kanalına git'
+    Follow: Takip Et
+    Following: Takip Ediliyor
+    Clips: Klipler
+    Refresh Errors: 1 kanal yenilenemedi. | {count} kanal yenilenemedi.
+    Content Tabs: Platform içeriği sekmeleri
 Trending:
   Music: Müzik
   Load Error: Öne çıkanlar yüklenemedi.
@@ -1177,6 +1197,11 @@ Settings:
     Notify About New Uploads: Yeni Yüklemeleri Bildir
     RSS Feeds Auto Refresh Interval: RSS Akışlarının Otomatik Yenileme Aralığı
     Faster Subscription Refresh: "Daha hızlı abonelik yenileme"
+    Platforms:
+      Other Platforms: Diğer Platformlar
+      Manage Channels: Takip Edilen Kanalları Yönet
+      Notify When Live: Takip Edilen Twitch Kanalları Canlı Yayına Başladığında Bildir
+      Auto Refresh Interval: Diğer Platformların Otomatik Yenileme Aralığı
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "İzleme Süresi Kaynağı"
@@ -2017,6 +2042,7 @@ Context Menu:
   Reload Posts: Gönderileri Yeniden Yükle
   Reload All Feeds: Tüm Akışları Yeniden Yükle
   Reload RSS Feeds: RSS beslemelerini yeniden yükle
+  Reload Platforms: Platformları Yeniden Yükle
   Close Multiple Tabs: '{count} Sekmeyi Kapat'
   Duplicate Tab: Sekmeyi Çoğalt
   Duplicate Multiple Tabs: '{count} Sekmeyi Çoğalt'
@@ -2282,6 +2308,8 @@ Tooltips:
     Notify About New Uploads: Abonelik ayarlarında bildirimlerini açtığınız kanallar için bu cihazda sistem bildirimleri gösterir. OpenTubeX yeni içeriği abonelikler yenilendiğinde denetler, bu nedenle bir otomatik yenileme aralığı seçin. Uygulama kapalıyken de bildirim almak için uygulama kapalıyken yenilemeyi de etkinleştirin.
     RSS Feeds Auto Refresh Interval: Uygulama açıkken OpenTubeX'in RSS akışlarınızı ne sıklıkla otomatik olarak yenilediği.
     Faster Subscription Refresh: "Önce her kanalın RSS akışını denetler ve yalnızca yeni yüklemesi olan kanalların videolarını, Shorts'larını ve canlı yayınlarını yükler. Otomatik yenilemeler son 10 dakikada yüklenen kanalları da atlar. Yeni yüklemesi olmayan kanallarda görüntüleme sayıları, kaldırılan videolar ve değişen başlıklar yalnızca birkaç saatte bir güncellenir ve RSS akışı geride kaldığında yeni yüklemeler daha geç görünebilir. Invidious API ile kullanılamaz."
+    Platforms Auto Refresh Interval: Uygulama açıkken OpenTubeX'in diğer platformlarda takip ettiğiniz kanalları ne sıklıkla otomatik olarak yenilediği.
+    Twitch Notify When Live: Takip ettiğiniz Twitch kanallarından biri yayına başladığında size bildirir. OpenTubeX açıkken birkaç dakikada bir kontrol eder; kapalıyken de o sırada abonelikleri yeniliyorsa kontrol eder.
   Theme Settings:
     Only Show Important Notifications: Yalnızca bir işlemi onaylayan veya bir durumu bildiren uygulama içi bildirimleri gizler. Hatalar, uyarılar, ayarladığınız hatırlatıcılar ve Geri al gibi bir işlem sunan bildirimler görünmeye devam eder. Abonelikleri yenileme gibi arka plan işlemlerinin ilerlemesi bildirim yerine genel ilerleme çubuğunda gösterilir. Sistem bildirimleri etkilenmez.
     Visible Search Suggestions: "Arama çubuğunun listesi kaydırılmadan önce kaç arama geçmişi girdisi ve öneri göstereceğini belirler. Liste hiçbir zaman pencerenin alt kenarını aşmaz."
@@ -2679,3 +2707,12 @@ Notification Center:
   Clear: "Temizle"
   Empty: "Henüz bildirim yok"
   Empty Hint: "Canlı yayın hatırlatıcıları ve bildirimleri açık kanalların yeni yüklemeleri burada görünür."
+Platforms:
+  Tracks: Parçalar
+  Playlists: Oynatma Listeleri
+  Follower Count: 1 takipçi | {count} takipçi
+  Open Website: '{platform} üzerinde aç'
+  Channel Not Found: Bu kanal bulunamadı.
+  Playlist Not Found: Bu oynatma listesi bulunamadı.
+  Load Error: Bu sayfa {platform} üzerinden yüklenemedi.
+  Empty Tab: Burada henüz bir şey yok.

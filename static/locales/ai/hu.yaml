@@ -217,6 +217,26 @@ Subscriptions:
       Not Set: Nincs beállítva
     Retry Feed: '{feed} újrapróbálása'
     Reloading Feed: '{feed} újratöltése'
+  Platforms:
+    Tab: Platformok
+    Platform: Platform
+    All Platforms: Összes platform
+    Followed Channels: Követett csatornák más platformokon
+    Description: Kövessen csatornákat a Twitch, SoundCloud, PeerTube, Rumble és Odysee platformon, hogy feltöltéseiket a feliratkozásai Platformok lapján lássa. Keressen csatornákat a keresővel, vagy adja hozzá őket az oldaluk címével. Médiatartalmaik a yt-dlp segítségével játszhatók le.
+    Add Channel: Csatorna hozzáadása
+    Channel URL: Csatorna címe
+    Invalid Channel: Adja meg egy Twitch-, SoundCloud-, PeerTube-, Rumble- vagy Odysee-csatornaoldal címét.
+    Channel Not Found: Ezen a címen nincs csatorna.
+    Channel Already Followed: Már követi ezt a csatornát.
+    Channel Could Not Be Loaded: A csatornát nem sikerült betölteni.
+    No Channels: Még nem követ egyetlen csatornát sem más platformokon.
+    Unfollow Channel: '{channel} követésének megszüntetése'
+    Go To Channel: Ugrás a(z) {channel} csatornára
+    Follow: Követés
+    Following: Követve
+    Clips: Klipek
+    Refresh Errors: 1 csatornát nem sikerült frissíteni. | {count} csatornát nem sikerült frissíteni.
+    Content Tabs: Platformtartalmak lapjai
 Trending:
   Music: Zene
   Load Error: A felkapott tartalmak nem tölthetők be.
@@ -1177,6 +1197,11 @@ Settings:
     Notify About New Uploads: Értesítés új feltöltésekről
     RSS Feeds Auto Refresh Interval: RSS-hírcsatornák automatikus frissítésének időköze
     Faster Subscription Refresh: "Gyorsabb feliratkozásfrissítés"
+    Platforms:
+      Other Platforms: Más platformok
+      Manage Channels: Követett csatornák kezelése
+      Notify When Live: Értesítés, amikor a követett Twitch-csatornák élő adást indítanak
+      Auto Refresh Interval: Más platformok automatikus frissítésének időköze
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Nézési idő számításának forrása"
@@ -2017,6 +2042,7 @@ Context Menu:
   Reload Posts: Bejegyzések újratöltése
   Reload All Feeds: Összes hírfolyam újratöltése
   Reload RSS Feeds: RSS-hírcsatornák újratöltése
+  Reload Platforms: Platformok újratöltése
   Close Multiple Tabs: Lapok bezárása ({count})
   Duplicate Tab: Lap megkettőzése
   Duplicate Multiple Tabs: Lapok megkettőzése ({count})
@@ -2282,6 +2308,8 @@ Tooltips:
     Notify About New Uploads: Rendszerértesítéseket jelenít meg ezen az eszközön azokról a csatornákról, amelyeknek a feliratkozási beállításaiban bekapcsolta az értesítéseket. Az OpenTubeX a feliratkozások frissítésekor keres új tartalmat, ezért válasszon automatikus frissítési időközt. Ha bezárt alkalmazásnál is értesítést szeretne kapni, kapcsolja be a bezárt alkalmazásnál történő frissítést is.
     RSS Feeds Auto Refresh Interval: Milyen gyakran frissíti automatikusan az OpenTubeX az RSS-hírcsatornáidat, amíg az alkalmazás nyitva van.
     Faster Subscription Refresh: "Először minden csatorna RSS-hírcsatornáját ellenőrzi, és csak az új feltöltéssel rendelkező csatornák videóit, Shorts-videóit és élő közvetítéseit tölti be. Az automatikus frissítések az elmúlt 10 percben betöltött csatornákat is kihagyják. Az új feltöltés nélküli csatornáknál a megtekintések száma, az eltávolított videók és a módosított címek csak néhány óránként frissülnek, és az új feltöltések később jelenhetnek meg, ha az RSS-hírcsatorna lemarad. Az Invidious API-val nem érhető el."
+    Platforms Auto Refresh Interval: Milyen gyakran frissíti automatikusan az OpenTubeX a más platformokon követett csatornáidat, amíg az alkalmazás nyitva van.
+    Twitch Notify When Live: Értesít, amikor valamelyik követett Twitch-csatornád adást indít. Az OpenTubeX néhány percenként ellenőriz, amíg nyitva van, és akkor is, amikor be van zárva, ha ilyenkor frissíti a feliratkozásokat.
   Theme Settings:
     Only Show Important Notifications: Elrejti azokat az alkalmazáson belüli értesítéseket, amelyek csak egy műveletet erősítenek meg vagy állapotot jeleznek. A hibák, figyelmeztetések, az Ön által beállított emlékeztetők és a műveletet kínáló értesítések, például a Visszavonás, továbbra is megjelennek. A háttérfolyamatok, például a feliratkozások frissítésének állapota értesítés helyett a globális folyamatjelző sávon jelenik meg. A rendszerértesítéseket nem érinti.
     Visible Search Suggestions: "Megadja, hány keresési előzményt és javaslatot jelenít meg a keresősáv, mielőtt a listáját görgetni kellene. A lista soha nem nyúlik túl az ablak alsó szélén."
@@ -2679,3 +2707,12 @@ Notification Center:
   Clear: "Törlés"
   Empty: "Még nincsenek értesítések"
   Empty Hint: "Itt jelennek meg az élő közvetítések emlékeztetői és a bekapcsolt értesítésű csatornák új feltöltései."
+Platforms:
+  Tracks: Számok
+  Playlists: Lejátszási listák
+  Follower Count: 1 követő | {count} követő
+  Open Website: 'Megnyitás itt: {platform}'
+  Channel Not Found: Ez a csatorna nem található.
+  Playlist Not Found: Ez a lejátszási lista nem található.
+  Load Error: 'Ezt az oldalt nem sikerült betölteni innen: {platform}.'
+  Empty Tab: Itt még nincs semmi.

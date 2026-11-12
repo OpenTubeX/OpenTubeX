@@ -217,6 +217,26 @@ Subscriptions:
       Not Set: Inte angivet
     Retry Feed: Försök med {feed} igen
     Reloading Feed: Läser in {feed} igen
+  Platforms:
+    Tab: Plattformar
+    Platform: Plattform
+    All Platforms: Alla plattformar
+    Followed Channels: Följda kanaler på andra plattformar
+    Description: Följ kanaler på Twitch, SoundCloud, PeerTube, Rumble och Odysee för att se deras uppladdningar på fliken Plattformar i dina prenumerationer. Hitta kanaler med sökningen eller lägg till dem med adressen till deras sida. Deras media spelas upp med yt-dlp.
+    Add Channel: Lägg till kanal
+    Channel URL: Kanaladress
+    Invalid Channel: Ange adressen till en kanalsida på Twitch, SoundCloud, PeerTube, Rumble eller Odysee.
+    Channel Not Found: Det finns ingen kanal på den här adressen.
+    Channel Already Followed: Du följer redan den här kanalen.
+    Channel Could Not Be Loaded: Kanalen kunde inte läsas in.
+    No Channels: Du följer inga kanaler på andra plattformar än.
+    Unfollow Channel: Sluta följa {channel}
+    Go To Channel: Gå till {channel}
+    Follow: Följ
+    Following: Följer
+    Clips: Klipp
+    Refresh Errors: 1 kanal kunde inte uppdateras. | {count} kanaler kunde inte uppdateras.
+    Content Tabs: Flikar för plattformsinnehåll
 Trending:
   Music: Musik
   Load Error: Trendande innehåll kunde inte läsas in.
@@ -1177,6 +1197,11 @@ Settings:
     Notify About New Uploads: Avisera om nya uppladdningar
     RSS Feeds Auto Refresh Interval: Intervall för automatisk uppdatering av RSS-flöden
     Faster Subscription Refresh: "Snabbare uppdatering av prenumerationer"
+    Platforms:
+      Other Platforms: Andra plattformar
+      Manage Channels: Hantera följda kanaler
+      Notify When Live: Meddela när följda Twitch-kanaler börjar sända live
+      Auto Refresh Interval: Intervall för automatisk uppdatering av andra plattformar
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Räkna visningstid från"
@@ -2018,6 +2043,7 @@ Context Menu:
   Reload Posts: Läs in inlägg igen
   Reload All Feeds: Läs in alla flöden igen
   Reload RSS Feeds: Läs in RSS-flöden igen
+  Reload Platforms: Läs in plattformar igen
   Close Multiple Tabs: Stäng {count} flikar
   Duplicate Tab: Duplicera flik
   Duplicate Multiple Tabs: Duplicera {count} flikar
@@ -2282,6 +2308,8 @@ Tooltips:
     Notify About New Uploads: Visar systemaviseringar på den här enheten för kanaler vars aviseringar du har aktiverat i deras prenumerationsinställningar. OpenTubeX söker efter nytt innehåll när prenumerationer uppdateras, så välj ett intervall för automatisk uppdatering. Om du vill få aviseringar medan appen är stängd aktiverar du även uppdatering medan appen är stängd.
     RSS Feeds Auto Refresh Interval: Hur ofta OpenTubeX automatiskt uppdaterar dina RSS-flöden medan appen är öppen.
     Faster Subscription Refresh: "Kontrollerar först varje kanals RSS-flöde och läser bara in videor, Shorts och livesändningar från kanaler med nya uppladdningar. Automatiska uppdateringar hoppar också över kanaler som lästs in de senaste 10 minuterna. För kanaler utan nya uppladdningar uppdateras visningar, borttagna videor och ändrade titlar bara med några timmars mellanrum, och nya uppladdningar kan dyka upp senare när RSS-flödet släpar efter. Inte tillgängligt med Invidious-API:t."
+    Platforms Auto Refresh Interval: Hur ofta OpenTubeX automatiskt uppdaterar kanalerna du följer på andra plattformar medan appen är öppen.
+    Twitch Notify When Live: Meddelar dig när en av dina följda Twitch-kanaler börjar streama. OpenTubeX kontrollerar med några minuters mellanrum medan det är öppet, och även medan det är stängt om det då uppdaterar prenumerationer.
   Theme Settings:
     Only Show Important Notifications: Döljer aviseringar i appen som bara bekräftar en åtgärd eller rapporterar en status. Fel, varningar, påminnelser som du har ställt in och aviseringar som erbjuder en åtgärd, till exempel Ångra, visas fortfarande. Förloppet för bakgrundsåtgärder, till exempel uppdatering av prenumerationer, visas i den globala förloppsindikatorn i stället för som en avisering. Systemaviseringar påverkas inte.
     Visible Search Suggestions: "Anger hur många poster från sökhistoriken och förslag sökfältet visar innan listan behöver rullas. Listan sträcker sig aldrig förbi fönstrets nederkant."
@@ -2678,3 +2706,12 @@ Notification Center:
   Clear: "Rensa"
   Empty: "Inga aviseringar ännu"
   Empty Hint: "Påminnelser om livesändningar och nya uppladdningar från kanaler med aviseringar påslagna visas här."
+Platforms:
+  Tracks: Spår
+  Playlists: Spellistor
+  Follower Count: 1 följare | {count} följare
+  Open Website: Öppna på {platform}
+  Channel Not Found: Den här kanalen kunde inte hittas.
+  Playlist Not Found: Den här spellistan kunde inte hittas.
+  Load Error: Den här sidan kunde inte läsas in från {platform}.
+  Empty Tab: Här finns inget ännu.

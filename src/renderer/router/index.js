@@ -55,6 +55,8 @@ const Playlist = createAsyncRoute(() => import('../views/Playlist/Playlist.vue')
 const Channel = createAsyncRoute(() => import('../views/Channel/Channel.vue'))
 const Watch = createAsyncRoute(() => import('../views/Watch/Watch.vue'))
 const ExternalMedia = createAsyncRoute(() => import('../views/ExternalMedia/ExternalMedia.vue'))
+const ExternalChannel = createAsyncRoute(() => import('../views/ExternalChannel/ExternalChannel.vue'))
+const ExternalPlaylist = createAsyncRoute(() => import('../views/ExternalPlaylist/ExternalPlaylist.vue'))
 const Hashtag = createAsyncRoute(() => import('../views/Hashtag/Hashtag.vue'))
 const Post = createAsyncRoute(() => import('../views/Post.vue'))
 
@@ -215,8 +217,29 @@ export const routes = [
           hasDynamicTitle: true
         },
         component: ExternalMedia
+      }, {
+        // Channels and playlists of other platforms, whose items play through yt-dlp
+        path: '/external-channel',
+        meta: {
+          title: 'Channel',
+          hasDynamicTitle: true,
+          hasResizableThumbnails: true
+        },
+        component: ExternalChannel
+      }, {
+        path: '/external-playlist',
+        meta: {
+          title: 'Playlist',
+          hasDynamicTitle: true,
+          hasResizableThumbnails: true
+        },
+        component: ExternalPlaylist
       }]
-    : [{ path: '/external-media', redirect: '/' }]),
+    : [
+        { path: '/external-media', redirect: '/' },
+        { path: '/external-channel', redirect: '/' },
+        { path: '/external-playlist', redirect: '/' }
+      ]),
   {
     path: '/hashtag/:hashtag',
     meta: {

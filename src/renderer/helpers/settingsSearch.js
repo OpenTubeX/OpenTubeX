@@ -116,6 +116,11 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     return supportsLocalApi
   }
 
+  // Items from other platforms open through yt-dlp
+  if (sectionType === 'subscription' && group === 'Platforms') {
+    return (usingElectron || isCapacitor) && !isLiteBuild
+  }
+
   // RSS feed items open through yt-dlp, and the manager needs the feature enabled
   if (sectionType === 'subscription' && ['RSS Feeds', 'Enable RSS Feeds', 'Manage RSS Feeds'].includes(group)) {
     return (usingElectron || isCapacitor) && !isLiteBuild &&
