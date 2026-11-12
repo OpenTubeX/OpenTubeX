@@ -5,6 +5,7 @@ import PhoneCommentsButton from '../../components/PhoneCommentsButton/PhoneComme
 import PhoneDescriptionButton from '../../components/PhoneDescriptionButton/PhoneDescriptionButton.vue'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { isVerticalTabBarPosition } from '../../constants/tabBarPosition'
+import { normalizeScrollbarThumbWidth } from '../../constants/scrollbar'
 import { holdRootClass } from '../../helpers/rootClasses'
 import { connectionEvents, initializeNetworkRecovery, getConnectionState, getWaitingOrigins, isRecoverableNetworkError, retryWaitingRequests, waitUntilReachable } from '../../helpers/networkRecovery'
 import { getGoogleVideoProbeUrl } from '../../helpers/player/googleVideoFallback'
@@ -900,8 +901,14 @@ export default defineComponent({
       return this.isShort && !this.watchingPlaylist
     },
     shortsPlayerWidth: function () {
-      // Page chrome above and below the player, 32px of it the horizontal tab bar
-      const chromeHeight = this.isElectron && isVerticalTabBarPosition(this.$store.getters.getTabBarPosition) ? 124 : 156
+      // Page chrome above and below the player. A horizontal tab bar adds its
+      // 32px of tabs and the scrollbar track it always keeps room for.
+      let chromeHeight = 156
+      if (this.isElectron) {
+        // Matches --scrollbar-track-width
+        const scrollbarTrackWidth = normalizeScrollbarThumbWidth(this.$store.getters.getScrollbarThumbWidth) + 4
+        chromeHeight = isVerticalTabBarPosition(this.$store.getters.getTabBarPosition) ? 124 : 124 + 32 + scrollbarTrackWidth
+      }
       const playerHeight = Math.max(0, this.shortsViewportHeight - chromeHeight)
       return Math.min(600, playerHeight * (this.videoAspectRatio ?? 9 / 16))
     },

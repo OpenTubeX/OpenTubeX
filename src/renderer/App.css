@@ -538,7 +538,7 @@
 }
 
 .app.capacitorPhoneLayout .crossTabMiniPlayerLayer {
-  /* A dismissing bottom bar slides behind the navigation (z-index: 3). */
+  /* A dismissing bottom bar slides behind the navigation (z-index: 4). */
   z-index: 2;
 }
 

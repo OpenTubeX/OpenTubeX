@@ -16,20 +16,9 @@
   }
 }
 
-/* Matches only the horizontal tab bar: the vertical layout sits beside the
-   content, so it doesn't add to the top chrome height. */
-@mixin has-tab-bar {
-  @at-root {
-    .app.topTabs &,
-    .app.topTabs#{&} {
-      @content;
-    }
-  }
-}
-
 @mixin fixed-top-bar {
   position: fixed;
-  inset-block-start: 60px;
+  inset-block-start: var(--top-nav-sticky-offset);
   inset-inline-end: 0;
   inline-size: calc(100% - var(--desktop-nav-rail-width));
   margin-inline: 0;
@@ -43,10 +32,6 @@
     inline-size: calc(100% - 60px);
   }
 
-  @include has-tab-bar {
-    inset-block-start: 92px;
-  }
-
   @media only screen and (width <= 680px) {
     /* stylelint-disable-next-line no-invalid-position-declaration */
     inline-size: 100%;
@@ -57,10 +42,6 @@
 
     @include are-side-bar-labels-hidden {
       inline-size: 100%;
-    }
-
-    @include has-tab-bar {
-      inset-block-start: 92px;
     }
   }
 }
