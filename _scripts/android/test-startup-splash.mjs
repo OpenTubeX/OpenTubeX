@@ -147,7 +147,7 @@ try {
       await page.evaluate(async ({ theme, lightTheme, selection }) => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
         localStorage.setItem('opentubex-custom-theme', JSON.stringify([theme, lightTheme]))
-        await store.dispatch('updateCustomThemes', [theme, lightTheme])
+        await store.dispatch('updateCustomThemes', async () => [theme, lightTheme])
         await store.dispatch('updateSystemLightTheme', `custom:${lightTheme.id}`)
         await store.dispatch('updateSystemDarkTheme', `custom:${theme.id}`)
         await store.dispatch('updateBaseTheme', selection)
@@ -157,7 +157,7 @@ try {
       lightTheme.colors.background = '#faf0dd'
       await page.evaluate(async themes => {
         localStorage.setItem('opentubex-custom-theme', JSON.stringify(themes))
-        await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCustomThemes', themes)
+        await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCustomThemes', async () => themes)
       }, [theme, lightTheme])
       for (const mode of ['light', 'dark']) {
         await expect.poll(() => page.evaluate(mode => JSON.parse(localStorage.getItem('opentubex-startup-appearance'))[mode].background, mode)).toBe(selection === 'system' && mode === 'light' ? '#faf0dd' : '#345678')
@@ -179,7 +179,7 @@ try {
       await store.dispatch('updateBaseTheme', 'dark')
       await store.dispatch('updateSystemLightTheme', 'light')
       await store.dispatch('updateSystemDarkTheme', 'dark')
-      await store.dispatch('updateCustomThemes', original === null ? [] : JSON.parse(original))
+      await store.dispatch('updateCustomThemes', async () => original === null ? [] : JSON.parse(original))
     }, originalThemes)
   }
 
