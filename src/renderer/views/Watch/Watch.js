@@ -2426,19 +2426,19 @@ export default defineComponent({
     applyBackgroundStart() {
       const backgroundStart = this.watchNavigation?.takeBackgroundStart?.(this.tabRoute.fullPath) === true
       this.activeFormat = backgroundStart ? 'audio' : this.defaultVideoFormat
-      if (backgroundStart) this.queuedPlaybackVideoId = this.tabRoute.params.id
+      if (backgroundStart) {
+        this.queuedPlaybackVideoId = this.tabRoute.params.id
+        // The user chose to play it in the mini player, unlike a background tab.
+        this.hasBeenPresented = true
+      }
       return backgroundStart
     },
 
     /** Plays the current video with audio only, as Play in Background does. */
     resumeInBackground() {
-      if (this.activeFormat === 'audio' || !this.audioFormatAvailable) {
-        this.$refs.player?.play()?.catch(() => {})
-        return
-      }
-      // The audio source starts playing once it loads.
-      this.queuedPlaybackVideoId = this.videoId
-      this.activeFormat = 'audio'
+      // Play first: a format switch restores the paused state it started from.
+      this.$refs.player?.play()?.catch(() => {})
+      if (this.audioFormatAvailable) this.activeFormat = 'audio'
     },
 
     activateWatchRuntime() {
@@ -5342,7 +5342,7 @@ export default defineComponent({
       // A background tab force-pauses its brief autoplay attempt, which would
       // otherwise save a spurious ~1 second resume point. Only persist progress
       // for tabs the user has actually presented.
-      if (!this.isCurrentlyPresented() || !this.hasBeenPresented) { return }
+      if (!this.isPlaybackPresented() || !this.hasBeenPresented) { return }
       if (this.playerTeardownInProgress) { return }
       const player = this.$refs.player
       // A seek establishes a position before its media segment finishes loading.

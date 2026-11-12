@@ -843,19 +843,13 @@ const canToggleLiveReminder = computed(() => (
   premiereTimestamp.value > premiereNow.value
 ))
 
-const canMarkAsWatched = computed(() => {
-  if (isLive.value) {
-    return false
-  }
+// A scheduled premiere can only be watched once its start time has passed,
+// even if a cached entry still carries a stale upcoming flag.
+const upcoming = computed(() => premiereTimestamp.value != null
+  ? premiereTimestamp.value > premiereNow.value
+  : isUpcoming.value)
 
-  // A scheduled premiere can only be watched once its start time has passed,
-  // even if a cached entry still carries a stale upcoming flag.
-  if (premiereTimestamp.value != null) {
-    return premiereTimestamp.value <= premiereNow.value
-  }
-
-  return !isUpcoming.value
-})
+const canMarkAsWatched = computed(() => !isLive.value && !upcoming.value)
 
 function clearPremiereStartTimer() {
   if (premiereStartTimer != null) {
@@ -1140,7 +1134,7 @@ const { hideSubscriptionFeedType, hideSubscriptionFeedTypeOption } = useHideSubs
 
 // Only the mobile mini bar can dock an audio-only player.
 const canPlayInBackground = computed(() => process.env.IS_CAPACITOR && playInBackground !== null &&
-  !listedOnWatchPage && !isUpcoming.value && props.data.isShort !== true)
+  !listedOnWatchPage && !upcoming.value && props.data.isShort !== true)
 
 const videoMenuOptions = computed(() => {
   const options = [
