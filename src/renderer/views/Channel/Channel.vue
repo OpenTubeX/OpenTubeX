@@ -505,8 +505,14 @@ watch(thumbnailUrl, (thumbnail) => {
 })
 
 // Settings open over the channel page. Reload so the name, its saved copy and loaded items all follow the preference.
-watch(() => store.getters.getAvoidTranslation === 'entire_app', () => {
-  if (apiUsed === 'local') loadChannelRoute()
+watch(() => store.getters.getAvoidTranslation === 'entire_app', async () => {
+  if (apiUsed !== 'local') return
+
+  const query = lastSearchQuery.value
+  const load = loadChannelRoute()
+  const generation = channelRouteGeneration
+  await load
+  if (query && generation === channelRouteGeneration) newSearch(query)
 })
 
 const errorMessage = ref('')
@@ -783,11 +789,11 @@ function loadChannelRoute() {
 
   // Re-enable auto refresh on sort value change AFTER update done
   if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendPreference.value)) {
-    getChannelInfoInvidious().finally(() => {
+    return getChannelInfoInvidious().finally(() => {
       autoRefreshOnSortByChangeEnabled = true
     })
   } else {
-    getChannelLocal().finally(() => {
+    return getChannelLocal().finally(() => {
       autoRefreshOnSortByChangeEnabled = true
     })
   }
