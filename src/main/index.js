@@ -3102,7 +3102,11 @@ function runApp() {
   }
 
   async function setMenu() {
-    const keyboardShortcutsSetting = await baseHandlers.settings._findOne('keyboardShortcuts')
+    // The app has no other menu to fall back on, so a failed read uses the default shortcuts.
+    const keyboardShortcutsSetting = await baseHandlers.settings._findOne('keyboardShortcuts').catch((error) => {
+      console.error('Could not read the keyboard shortcuts for the menu', error)
+      return null
+    })
     const keyboardShortcuts = getConfiguredKeyboardShortcuts(keyboardShortcutsSetting?.value)
     const reloadTabs = (_menuItem, browserWindow) => {
       if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {

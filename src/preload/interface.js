@@ -940,10 +940,7 @@ export default {
       if (used) return Promise.reject(new Error('Automatic download rule writer already used'))
       used = true
       if (typeof value !== 'string') return Promise.reject(new Error('Automatic download rules must be a string'))
-      return invokeSavingSettings(IpcChannels.DB_SETTINGS, {
-        action: DBActions.GENERAL.UPSERT,
-        data: { _id: 'ytDlpAutomaticDownloadRules', value }
-      })
+      return requestDatastore(IpcChannels.DB_SETTINGS, DBActions.GENERAL.UPSERT, { _id: 'ytDlpAutomaticDownloadRules', value })
     }
   },
 

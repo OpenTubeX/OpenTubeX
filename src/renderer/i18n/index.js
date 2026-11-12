@@ -172,7 +172,6 @@ export function preloadStartupLocales() {
   for (const locale of locales) {
     // `loadLocale` reports a failed request when it waits for the same one.
     loadHumanMessages(locale).catch(() => {})
-    loadAIMessages(locale)
   }
 }
 
