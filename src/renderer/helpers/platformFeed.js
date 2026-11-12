@@ -7,6 +7,7 @@ import { getPlatformFetch } from './platformFetch'
 import { configureAndroidTwitchLive, observeAndroidTwitchLive } from './androidSubscriptionRefresh'
 import { isAppHidden } from './appVisibility'
 import { capacitorNotificationHistory } from './capacitorNotificationHistory'
+import { getTwitchLocalNotificationId } from './capacitorSystemNotifications'
 import { notificationThumbnailsAllowed, openNotificationEntry, showInAppNotification } from './notificationHistory'
 import { isRssFeedItemSeen, onRssFeedSeenItemsSynced, parseRssFeedSeenItems, toRssFeedSeenMarks } from './rssFeedSeenItems'
 import { unmarkExternalMediaWatchedBefore } from './externalMediaPosition'
@@ -641,18 +642,6 @@ function getLiveConfiguration() {
 }
 
 /**
- * @param {string} id
- */
-function capacitorNotificationId(id) {
-  let hash = 0x811c9dc5
-  for (const character of `twitch:${id}`) {
-    hash ^= character.codePointAt(0)
-    hash = Math.imul(hash, 0x01000193)
-  }
-  return hash >>> 1
-}
-
-/**
  * Announces a stream on iOS, where the app checks only while it runs.
  * @param {TwitchLiveConfiguration} configuration
  * @param {PlatformItem} stream
@@ -682,7 +671,7 @@ async function announceStream(configuration, stream) {
   if (!granted) return
   await LocalNotifications.schedule({
     notifications: [{
-      id: capacitorNotificationId(stream.id),
+      id: getTwitchLocalNotificationId(stream.id),
       title: notification.title,
       body: notification.body,
       // Shown right away, so it needs no exact alarm, which the system would ask the user to allow
