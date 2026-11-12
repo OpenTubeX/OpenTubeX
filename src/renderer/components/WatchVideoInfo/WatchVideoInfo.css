@@ -138,6 +138,13 @@
   font-size: 14px;
   color: var(--tertiary-text-color);
   flex-wrap: wrap;
+
+  /*
+    Reserve the height of the like bar and counts (WatchVideoLikes) so the
+    channel row keeps the same distance when likes, dislikes or the bar are
+    hidden or unavailable.
+  */
+  min-block-size: calc(20px + 1lh);
 }
 
 .datePublishedAndViewCount {
