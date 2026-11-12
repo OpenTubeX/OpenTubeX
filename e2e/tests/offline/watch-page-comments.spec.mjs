@@ -797,7 +797,9 @@ test.describe('manual comment loading', () => {
     await page.route(/\/youtubei\/v1\/comment\/perform_comment_action/, async (route, request) => {
       requests.push({ authorization: request.headers().authorization, action: JSON.parse(request.postData()).actions[0] })
       if (requests.length === 1) await firstRatingHeld
-      return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ actionResults: [{ status: 'STATUS_SUCCEEDED' }] }) })
+      // The first account's like goes through and the second account's fails.
+      const status = requests.length === 1 ? 'STATUS_SUCCEEDED' : 'STATUS_FAILED'
+      return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ actionResults: [{ status }] }) })
     })
 
     const like = page.locator('.commentAccountAction[aria-pressed]').first()
@@ -807,12 +809,18 @@ test.describe('manual comment loading', () => {
     // Google account's own channel.
     await like.click()
     await signIn('second')
+    await expect(like).toHaveAttribute('aria-pressed', 'false')
+    // Ratings go out in order, so the unlike would go before this like.
+    await like.click()
+    await expect(like).toHaveAttribute('aria-pressed', 'true')
     releaseFirstRating()
 
-    // Ratings go out in order, so the unlike would have gone before this like.
-    await like.click()
-    await expect.poll(() => requests.some(entry => entry.authorization === 'Bearer second-access' && entry.action === requests[0].action)).toBe(true)
+    await expect.poll(() => requests.length).toBe(2)
     expect(requests.map(entry => entry.authorization)).toEqual(['Bearer first-access', 'Bearer second-access'])
+    expect(requests[1].action).toBe(requests[0].action)
+    // The failed like shows the second account's own rating, not the first account's like.
+    await expect(like).toHaveAttribute('aria-pressed', 'false')
+    expect(requests).toHaveLength(2)
   })
 
   test.describe('comment filtering at 125% UI scale', () => {

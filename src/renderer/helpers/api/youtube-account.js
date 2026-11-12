@@ -404,13 +404,16 @@ export async function completeYouTubeSignIn(code, signal) {
     const { profiles, selectedPageId } = await fetchProfiles(credentials)
     const profile = profiles.find(entry => entry.pageId === selectedPageId) ?? profiles[0]
     const channelId = await resolveChannelId(credentials, profile)
-    signal.throwIfAborted()
     // Each sign-in asks again before changing the account's subscriptions or history.
-    const saved = await store.dispatch('updateYouTubeAccountMirrorSubscriptions', false) &&
+    const saved = !signal.aborted &&
+      await store.dispatch('updateYouTubeAccountMirrorSubscriptions', false) &&
       await store.dispatch('updateYouTubeAccountWatchHistory', false) &&
+      !signal.aborted &&
       await store.dispatch('updateYouTubeAccount', { credentials, profiles, pageId: profile.pageId, channelId })
     if (!saved) {
+      // Cancelled or not saved, so Google can forget this sign-in too.
       await revokeSignIn(credentials.refresh_token)
+      signal.throwIfAborted()
       throw new Error('Could not save the YouTube account on this device')
     }
     return
