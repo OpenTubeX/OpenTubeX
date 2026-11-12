@@ -3,6 +3,7 @@ import { BrowserWindow, ipcMain } from 'electron'
 import { IpcChannels } from '../constants'
 import { getIpBlockRecoveryScriptRun } from './ipBlockRecovery'
 import { TabManager } from './tabs/TabManager'
+import { createSerialQueue } from './serialQueue'
 import { isOpenTubeXUrl } from './utils'
 
 /** @type {{ webContents: import('electron').WebContents, tabId: string } | null} */
@@ -84,13 +85,12 @@ export function setupSubscriptionAutoRefreshIpc({ backgroundSubscriptions, updat
 
   // A failed acquisition restores the background work, so a concurrent one
   // must not leave the background before that
-  let acquisition = Promise.resolve(false)
+  const enqueueAcquisition = createSerialQueue()
   ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_ACQUIRE, (event, tabId, feedTab) => {
     // The renderer that asked can reload or crash while this waits
     trackRendererLifecycle(event.sender)
     const generation = rendererGenerations.get(event.sender)
-    acquisition = acquisition.catch(() => {}).then(() => acquire(event, generation, tabId, feedTab))
-    return acquisition
+    return enqueueAcquisition(() => acquire(event, generation, tabId, feedTab))
   })
 
   /**

@@ -1,7 +1,10 @@
 // @ts-check
-import { readFile, rename, writeFile } from 'node:fs/promises'
+import { readFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import path from 'node:path'
+
+import { createSerialQueue } from './serialQueue.js'
+import { writeFileAtomic } from './writeFileAtomic.js'
 
 /** @typedef {{ x: number, y: number, width: number, height: number }} Rect */
 
@@ -71,7 +74,8 @@ export function fitPictureInPictureBounds(saved, current, workAreas, keepSize = 
 export function createPictureInPictureBoundsStore(file) {
   /** @type {Promise<Rect | null> | null} */
   let loaded = null
-  let pending = Promise.resolve()
+  const enqueue = createSerialQueue()
+  const settled = () => enqueue(() => {})
 
   const load = () => {
     loaded ??= readFile(file, 'utf8')
@@ -88,15 +92,12 @@ export function createPictureInPictureBoundsStore(file) {
     /** @param {Rect} bounds */
     save: bounds => {
       const value = normalizePictureInPictureBounds(bounds)
-      if (value === null) return pending
+      if (value === null) return settled()
       loaded = Promise.resolve(value)
-      pending = pending.then(async () => {
-        await writeFile(file + '.tmp', JSON.stringify(value))
-        await rename(file + '.tmp', file)
-      }).catch(error => console.error('Failed to save the Picture-in-Picture bounds', error))
-      return pending
+      return enqueue(() => writeFileAtomic(file, JSON.stringify(value)))
+        .catch(error => console.error('Failed to save the Picture-in-Picture bounds', error))
     },
-    settled: () => pending
+    settled
   }
 }
 

@@ -235,7 +235,7 @@ test('quit waits for pending watch queue writes', async () => {
   let finishWrite
   const queueWrite = new Promise(resolve => { finishWrite = resolve })
   const context = vm.createContext({
-    trayIconWrite: Promise.resolve(),
+    enqueueTrayIconWrite: async () => {},
     clearInterval,
     scheduledBackupTimer: undefined,
     scheduledBackups: { stop: async () => {} },
@@ -262,7 +262,7 @@ test('quit waits for the session write of a window closed just before', async ()
   let finishWrite
   const sessionWrite = new Promise(resolve => { finishWrite = resolve })
   const context = vm.createContext({
-    trayIconWrite: Promise.resolve(),
+    enqueueTrayIconWrite: async () => {},
     clearInterval,
     scheduledBackupTimer: undefined,
     scheduledBackups: { stop: async () => {} },

@@ -77,7 +77,7 @@ test('loads future reminders, notifies recently missed ones and removes expired 
 
   // A stream that started while the app was closed is announced right away.
   harness.scheduledTimers[1].callback()
-  await harness.manager.pendingOperation
+  await harness.manager.list()
   assert.deepEqual(harness.notifications.map(notification => notification.videoId), ['missed12345'])
   assert.deepEqual([...harness.records.keys()], [VIDEO_ID])
 })
@@ -104,7 +104,7 @@ test('fires and removes a reminder at its scheduled time', async () => {
   await harness.manager.schedule(scheduledReminder)
   harness.setNow(5_000)
   harness.scheduledTimers[0].callback()
-  await harness.manager.pendingOperation
+  await harness.manager.list()
 
   assert.equal(harness.records.has(VIDEO_ID), false)
   assert.deepEqual(harness.notifications, [{ ...scheduledReminder, _id: VIDEO_ID }])

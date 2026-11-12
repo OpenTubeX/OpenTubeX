@@ -1,5 +1,7 @@
 import { ClosedWindowHistory } from './tabs/ClosedWindowHistory.js'
 import { createFileWatchQueue } from './watchQueue.js'
+import { createSerialQueue } from './serialQueue.js'
+import { writeFileAtomic } from './writeFileAtomic.js'
 import {
   app, BrowserWindow, dialog, Menu, ipcMain,
   powerSaveBlocker, screen, session,
@@ -788,7 +790,7 @@ function runApp() {
     }
   }
   app.whenReady().then(updateTrayColorSchemeWatcher)
-  let trayIconWrite = Promise.resolve()
+  const enqueueTrayIconWrite = createSerialQueue()
   ipcMain.handle(IpcChannels.SET_TRAY_ICON, async (event, dataUrl, monochrome) => {
     if (!isOpenTubeXUrl(event.senderFrame.url) || !TabManager.getFromWebContents(event.sender)) return
     if (dataUrl !== null && (typeof dataUrl !== 'string' || dataUrl.length > 65536 || !dataUrl.startsWith('data:image/png;base64,'))) return
@@ -802,13 +804,12 @@ function runApp() {
     const cachePath = isTrayIconMonochrome ? monochromeTrayIconCachePath : trayIconCachePath
     const otherCachePath = isTrayIconMonochrome ? trayIconCachePath : monochromeTrayIconCachePath
     // Serialize writes so rapid palette changes also preserve the latest icon on restart.
-    trayIconWrite = trayIconWrite.catch(() => {}).then(async () => {
+    await enqueueTrayIconWrite(async () => {
       await asyncFs.rm(otherCachePath, { force: true })
       await (dataUrl === null
         ? asyncFs.rm(cachePath, { force: true })
-        : asyncFs.writeFile(cachePath, image.toPNG()))
+        : writeFileAtomic(cachePath, image.toPNG()))
     })
-    await trayIconWrite
   })
 
   /**
@@ -4004,7 +4005,7 @@ function runApp() {
       await Promise.all(windowSessionWrites)
 
       await Promise.allSettled([
-        trayIconWrite,
+        enqueueTrayIconWrite(() => {}),
         // A script left in KWin would act on a later process with the same ID
         closeKwinPictureInPictureBounds.then(close => close?.())
           .finally(() => pictureInPictureBoundsStore.settled()),

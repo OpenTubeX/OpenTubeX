@@ -1,5 +1,5 @@
 import { app } from 'electron'
-import { mkdir, readdir, readFile, rename, unlink, writeFile } from 'fs/promises'
+import { mkdir, readdir, readFile, unlink } from 'fs/promises'
 import { join } from 'path'
 import {
   createTabAvatarFileName,
@@ -10,6 +10,7 @@ import {
   selectOrphanedTabPreviews,
   tabPreviewBufferToDataUrl
 } from './tabPreviewCache.js'
+import { writeFileAtomic } from '../writeFileAtomic.js'
 
 /** Disk storage shared by all windows. Tab ownership stays in TabManager. */
 export class TabPreviewStorage {
@@ -98,14 +99,9 @@ export class TabPreviewStorage {
     const directory = this.directory()
     await mkdir(directory, { recursive: true })
     // A failed write must not truncate an existing cached image.
-    const temporary = join(directory, createTabPreviewTempFileName())
-    try {
-      await writeFile(temporary, buffer)
-      await rename(temporary, join(directory, fileName))
-    } catch (error) {
-      await unlink(temporary).catch(() => {})
-      throw error
-    }
+    await writeFileAtomic(join(directory, fileName), buffer, {
+      temporaryFile: join(directory, createTabPreviewTempFileName())
+    })
   }
 }
 

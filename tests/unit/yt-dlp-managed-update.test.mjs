@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 
+import { createSerialQueue } from '../../src/main/serialQueue.js'
 import { verifySha256Checksum } from '../../src/main/ytDlpSignature.js'
 
 const source = readFileSync(new URL('../../src/main/ytDlpBinaries.js', import.meta.url), 'utf8')
@@ -47,7 +48,7 @@ test('concurrent managed yt-dlp updates verify against the baseline the previous
     IpcChannels: {},
     process: { platform: 'linux', arch: 'x64' },
     setTimeout,
-    managedYtDlpUpdateQueue: Promise.resolve()
+    enqueueManagedYtDlpUpdate: createSerialQueue()
   })
   vm.runInContext(`${source.slice(start, end).replaceAll('export async function', 'async function').replaceAll('export function', 'function')}
 globalThis.downloadManagedYtDlp = downloadManagedYtDlp`, context)
@@ -80,7 +81,7 @@ async function downloadUnusableYtDlp(binaryExists) {
     broadcastToRenderers: () => {},
     IpcChannels: {},
     process: { platform: 'win32', arch: 'x64' },
-    managedYtDlpUpdateQueue: Promise.resolve()
+    enqueueManagedYtDlpUpdate: createSerialQueue()
   })
   vm.runInContext(`${source.slice(start, end).replaceAll('export async function', 'async function').replaceAll('export function', 'function')}
 globalThis.downloadManagedYtDlp = downloadManagedYtDlp`, context)

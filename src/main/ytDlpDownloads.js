@@ -5,13 +5,15 @@ import {
 } from '../ytDlpArguments'
 import { execFile, spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
-import { mkdtemp, readdir, readFile, rename, rm, stat, statfs, writeFile } from 'node:fs/promises'
+import { mkdtemp, readdir, readFile, rm, stat, statfs, writeFile } from 'node:fs/promises'
 import { isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { promisify } from 'node:util'
 import { app, powerMonitor, shell } from 'electron'
 import { settings } from '../datastores/handlers/base'
 import { isOpenTubeXUrl } from './utils'
 import { IpcChannels } from '../constants'
+import { createSerialQueue } from './serialQueue'
+import { writeFileAtomic } from './writeFileAtomic'
 import { shouldUseGioTrash } from './trashPlatform'
 import { killProcessTreeSync, PROCESS_TREE_SPAWN_OPTIONS, signalProcessTree } from './processTree'
 import {
@@ -197,7 +199,7 @@ function isPathInsideFolders(path, folders) {
 
 let downloadCounter = 0
 let downloadQueuePositionCounter = 0
-let downloadRecordsSaveQueue = Promise.resolve()
+const enqueueDownloadRecordsSave = createSerialQueue()
 const retryingDownloadIds = new Set()
 let downloadQueueDrainRunning = false
 let downloadQueueDrainRequested = false
@@ -389,35 +391,29 @@ function hasAutomaticDownloadRecord(videoId) {
 }
 
 function saveDownloadRecords() {
-  downloadRecordsSaveQueue = downloadRecordsSaveQueue
-    .catch(() => {})
-    .then(async () => {
-      const records = [...downloadRecords.values()]
-        .map(record => ['preparing', 'downloading', 'processing', 'pausing'].includes(record.status)
-          ? { ...record, status: record.status === 'pausing' ? 'paused' : 'queued', speed: null, eta: null }
-          : record)
-      // Completed and unfinished downloads stay listed and playable. Records
-      // without a file have their own limit, so recent failures stay retryable
-      // however many downloads completed.
-      let excessRecords = records.filter(record => FILELESS_DOWNLOAD_STATUSES.includes(record.status)).length -
-        MAX_SAVED_FILELESS_DOWNLOAD_RECORDS
-      const savedRecords = records.filter(record => {
-        if (excessRecords <= 0 || !FILELESS_DOWNLOAD_STATUSES.includes(record.status)) return true
-        excessRecords--
-        return false
-      })
-      // Write atomically so a crash mid-write cannot wipe the download history
-      // and reset the id counter.
-      const path = getDownloadRecordsPath()
-      const temporaryPath = `${path}.tmp`
-      await writeFile(temporaryPath, JSON.stringify(savedRecords), 'utf8')
-      await rename(temporaryPath, path)
+  return enqueueDownloadRecordsSave(() => {
+    const records = [...downloadRecords.values()]
+      .map(record => ['preparing', 'downloading', 'processing', 'pausing'].includes(record.status)
+        ? { ...record, status: record.status === 'pausing' ? 'paused' : 'queued', speed: null, eta: null }
+        : record)
+    // Completed and unfinished downloads stay listed and playable. Records
+    // without a file have their own limit, so recent failures stay retryable
+    // however many downloads completed.
+    let excessRecords = records.filter(record => FILELESS_DOWNLOAD_STATUSES.includes(record.status)).length -
+      MAX_SAVED_FILELESS_DOWNLOAD_RECORDS
+    const savedRecords = records.filter(record => {
+      if (excessRecords <= 0 || !FILELESS_DOWNLOAD_STATUSES.includes(record.status)) return true
+      excessRecords--
+      return false
     })
-  return downloadRecordsSaveQueue
+    // Write atomically so a crash mid-write cannot wipe the download history
+    // and reset the id counter.
+    return writeFileAtomic(getDownloadRecordsPath(), JSON.stringify(savedRecords))
+  })
 }
 
 export function flushYtDlpDownloadRecords() {
-  return downloadRecordsSaveQueue
+  return enqueueDownloadRecordsSave(() => {})
 }
 
 export async function shutdownYtDlpDownloads() {
