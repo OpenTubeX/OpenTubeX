@@ -53,6 +53,7 @@ function createPlayer() {
     androidFullscreenCleanup: null,
     iosFullscreenCleanup: null,
     iosCaptionsCleanup: null,
+    captionCueLayoutCleanup: null,
     nativeCaptionTiming: null,
     captionTextDisplayer: null,
     process: { env: {} },

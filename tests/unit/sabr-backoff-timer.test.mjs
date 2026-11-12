@@ -310,6 +310,7 @@ test('destroying the player aborts SABR backoff before waiting for Shaka', async
     androidFullscreenCleanup: null,
     iosFullscreenCleanup: null,
     iosCaptionsCleanup: null,
+    captionCueLayoutCleanup: null,
     nativeCaptionTiming: null,
     captionTextDisplayer: null,
     applyCaptionTiming() {},

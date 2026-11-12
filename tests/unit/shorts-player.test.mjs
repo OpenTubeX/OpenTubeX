@@ -544,6 +544,7 @@ test('evicting an inactive Short does not close the current player panels', () =
     androidFullscreenCleanup: null,
     iosFullscreenCleanup: null,
     iosCaptionsCleanup: null,
+    captionCueLayoutCleanup: null,
     nativeCaptionTiming: null,
     captionTextDisplayer: null,
     applyCaptionTiming() {},
