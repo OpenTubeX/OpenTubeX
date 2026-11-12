@@ -250,7 +250,10 @@
             <div
               v-if="currentTabPanel !== null"
               class="headerActions"
-              :class="{ hasAutoRefreshStatus: currentTabPanel.lastRefreshTimestamp && currentTabPanel.nextAutoRefreshTimestamp }"
+              :class="{
+                newFeedActions: currentTab === 'new',
+                hasAutoRefreshStatus: currentTabPanel.lastRefreshTimestamp && currentTabPanel.nextAutoRefreshTimestamp
+              }"
             >
               <FtIconButton
                 v-if="currentTab === 'new'"
@@ -290,17 +293,23 @@
                 :to="tabsRowRef"
                 :disabled="!headerFitsOneRow"
               >
-                <button
+                <FtButton
                   class="markAllSeenButton"
                   type="button"
+                  theme="primary"
+                  variant="outlined"
+                  size="extra-small"
                   :disabled="markingSeenTab !== null || currentTabRefreshing"
                   @click="markAllAsSeen(currentTab)"
                 >
-                  <FtIcon :icon="['fas', 'check']" />
+                  <FtIcon
+                    :icon="['fas', 'check-double']"
+                    aria-hidden="true"
+                  />
                   <span class="markAllSeenLabel">
                     {{ $t('Subscriptions.Mark All as Seen') }}
                   </span>
-                </button>
+                </FtButton>
               </Teleport>
               <FtRefreshWidget
                 embedded
@@ -453,6 +462,7 @@ import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, useTemplat
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
+import FtButton from '../../components/FtButton/FtButton.vue'
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtFixedBackground from '../../components/FtFixedBackground/FtFixedBackground.vue'
 import FtLoader from '../../components/FtLoader/FtLoader.vue'

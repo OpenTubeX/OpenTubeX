@@ -62,37 +62,11 @@
   border-block-end: 1px solid var(--primary-shadow-color);
 }
 
-.markAllSeenButton {
-  align-items: center;
-  background: transparent;
-  border: 0;
-
-  /* Half the height rather than full, so the press morph is smooth. */
-  border-radius: calc(13px * var(--ui-roundness));
-  color: var(--primary-color);
-  cursor: pointer;
-  display: inline-flex;
-  font: inherit;
-  font-size: 0.85em;
-  gap: 6px;
-  padding-block: 5px;
-  padding-inline: 7px;
-  white-space: nowrap;
-  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
-}
-
-.markAllSeenButton:hover,
-.markAllSeenButton:focus-visible {
-  background-color: var(--side-nav-hover-color);
-}
-
-.markAllSeenButton:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.markAllSeenButton:not(:disabled):active {
-  border-radius: var(--shape-corner-small);
+/* Doubled to outrank FtButton's own margin and minimum width. */
+.markAllSeenButton.markAllSeenButton {
+  flex-shrink: 0;
+  margin: 0;
+  min-inline-size: 0;
 }
 
 .headerActions {
@@ -510,9 +484,12 @@
     display: none;
   }
 
-  .markAllSeenButton {
+  /* Matches the view toggle and sort select, instead of FtButton's 48px phone
+     height. Outranks FtButton's phone rules. */
+  .headerActions > .markAllSeenButton.markAllSeenButton {
+    --button-height: 36px;
+
     min-block-size: 36px;
-    border-radius: calc(18px * var(--ui-roundness));
     order: 2;
   }
 
@@ -529,6 +506,46 @@
 
     flex-wrap: nowrap;
     gap: 0;
+  }
+}
+
+/* Too narrow for the New feed's controls on one row, so Mark all as seen moves
+   to its own row and the sort control keeps room to show its value. The width
+   leaves room for longer translations. */
+@media only screen and (width <= 600px) {
+  .newFeedActions:has(> .markAllSeenButton) {
+    display: grid;
+    grid-template-areas:
+      '. sort refresh'
+      'mark mark mark';
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    row-gap: 12px;
+
+    /* Keyboard focus follows the rows, reaching Mark all as seen last. */
+    reading-flow: source-order;
+  }
+
+  .newFeedActions:has(> .markAllSeenButton):has(> .headerManageFeeds) {
+    grid-template-areas:
+      '. . sort refresh'
+      'mark mark mark mark';
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+  }
+
+  .newFeedActions:has(> .markAllSeenButton) > .headerSortSelect {
+    grid-area: sort;
+    inline-size: auto;
+  }
+
+  .newFeedActions > .markAllSeenButton {
+    grid-area: mark;
+    justify-self: start;
+    reading-order: 1;
+  }
+
+  .newFeedActions:has(> .markAllSeenButton) :deep(.refreshActions) {
+    grid-area: refresh;
   }
 }
 
