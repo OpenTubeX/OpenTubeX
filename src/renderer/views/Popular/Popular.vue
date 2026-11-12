@@ -1,7 +1,6 @@
 <template>
   <div
     class="popularPage"
-    :class="{ hasTabBar: hasHorizontalTabBar }"
   >
     <ft-card
       class="card"
@@ -66,11 +65,6 @@ import { getInvidiousPopularFeed } from '../../helpers/api/invidious'
 import { getInvidiousApiErrorMessage, getRelativeTimeFromDate, showApiErrorToast } from '../../helpers/utils'
 import { useFeedRefreshShortcut } from '../../composables/useFeedRefreshShortcut'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
-
-const isElectron = process.env.IS_ELECTRON
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const hasHorizontalTabBar = computed(() => isElectron && store.getters.getTabBarPosition === 'top')
 
 const isLoading = ref(false)
 const relativeTimeNow = useRelativeTimeClock()

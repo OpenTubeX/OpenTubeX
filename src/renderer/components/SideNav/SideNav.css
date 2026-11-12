@@ -210,6 +210,9 @@
     box-sizing: border-box;
     inset-inline-start: 0;
     position: fixed;
+
+    /* Above sticky page headers (z-index: 3), which reach the bar in short windows. */
+    z-index: 4;
     display: flex;
     margin-block-start: 0;
     block-size: var(--mobile-nav-height);

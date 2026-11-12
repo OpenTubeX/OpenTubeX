@@ -1,7 +1,6 @@
 <template>
   <div
     class="subscriptionsPage"
-    :class="{ hasTabBar: hasHorizontalTabBar }"
     @contextmenu="handleFeedContextMenu"
     @pointerdown="startFeedTabHold"
     @pointermove="moveFeedTabHold"
@@ -612,9 +611,6 @@ function handleFeedContextMenu(event) {
   }
   openMobileContextActions({ title: tab.textContent.trim(), actions })
 }
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const hasHorizontalTabBar = computed(() => isElectron && store.getters.getTabBarPosition === 'top')
 
 const { tabId, isTabPresented } = useTabContext()
 

@@ -224,7 +224,8 @@ test('mobile header hides fully and returns on a deliberate upward scroll', { ta
   const header = page.locator('.subscriptionsHeader')
   const headerBottom = () => header.evaluate(element => element.getBoundingClientRect().bottom)
   const headerTop = () => header.evaluate(element => element.getBoundingClientRect().top)
-  const stickyOffset = () => header.evaluate(element => Number.parseFloat(getComputedStyle(element).top))
+  // The header sticks right below the top chrome, whatever the tab bar adds to it.
+  const stickyOffset = () => page.locator('.topNav').evaluate(element => element.getBoundingClientRect().bottom)
 
   await scrollFeedTo(page, 600)
   await expect.poll(headerBottom).toBeLessThanOrEqual(0)
