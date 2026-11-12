@@ -936,11 +936,48 @@ test.describe('manual comment loading', () => {
 
       await dock.getByRole('button', { name: 'Filter loaded comments' }).click()
       await dock.getByRole('checkbox', { name: 'Search loaded comments' }).click()
-      await dock.getByRole('searchbox', { name: 'Search loaded comments' }).fill('honored')
+      const search = dock.getByRole('searchbox', { name: 'Search loaded comments' })
+      await search.fill('honored')
 
       await expect(dock.locator('.commentThread')).toHaveCount(1)
       await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
       await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+
+      // Deleting your own comment from the bottom shortens the list too.
+      await search.fill('')
+      await search.press('Escape')
+      const lastThread = dock.locator('.commentThread').last()
+      const authorId = (await lastThread.locator('a[href*="/channel/"]').first().getAttribute('href')).split('/channel/')[1]
+      await page.route(/\/youtubei\/v1\/comment\/perform_comment_action/, (route, request) => {
+        // The action's third field is the comment ID.
+        const action = [...Buffer.from(decodeURIComponent(JSON.parse(request.postData()).actions[0]), 'base64')]
+        const commentId = Buffer.from(action.slice(6, 6 + action[5])).toString()
+        return route.fulfill({
+          contentType: 'application/json',
+          body: JSON.stringify({ actions: [{ removeCommentAction: { commentId, actionResult: { status: 'STATUS_SUCCEEDED' } } }] })
+        })
+      })
+      await page.evaluate(channelId => window.$store.dispatch('updateYouTubeAccount', {
+        credentials: { access_token: 'token', refresh_token: 'token', expiry_date: new Date(Date.now() + 3_600_000).toISOString(), client: { client_id: 'id', client_secret: 'secret' } },
+        profiles: [{ name: 'Commenter', handle: null, thumbnail: null, pageId: null }],
+        pageId: null,
+        channelId
+      }), authorId)
+      const threadCount = await dock.locator('.commentThread').count()
+      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+      await lastThread.getByRole('button', { name: 'Delete comment' }).first().click()
+      await page.locator('.prompt').getByRole('button', { name: 'Delete comment', includeHidden: true }).click({ force: true })
+      await expect(dock.locator('.commentThread')).toHaveCount(threadCount - 1)
+      await expect.poll(() => scroller.evaluate(element => (
+        element.scrollTop + element.clientHeight <= element.scrollHeight + 1 &&
+        element.scrollTop <= element.scrollHeight - element.clientHeight + 1
+      ))).toBe(true)
+      await expect.poll(() => scroller.evaluate(element => {
+        const list = element.querySelector('.commentThread:last-of-type').getBoundingClientRect()
+        return Math.round(element.getBoundingClientRect().bottom - list.bottom)
+      })).toBeLessThanOrEqual(200)
     })
   })
 

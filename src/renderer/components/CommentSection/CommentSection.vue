@@ -820,7 +820,8 @@ const youTubeComments = {
 
     const thread = commentData.value.find(entry => entry.id === parentId)
     if (!thread) return
-    thread.replies.push(comment)
+    // A new list, so the cached reply tree is rebuilt.
+    thread.replies = [...thread.replies, comment]
     thread.numReplies++
     thread.showReplies = true
   },
@@ -829,14 +830,15 @@ const youTubeComments = {
     if (rootId === commentId) {
       commentData.value = commentData.value.filter(comment => comment.id !== commentId)
       if (commentCount.value !== null) commentCount.value = Math.max(0, commentCount.value - 1)
-      return
+    } else {
+      const thread = commentData.value.find(entry => entry.id === rootId)
+      const parent = thread && findCommentParent(thread, commentId)
+      if (!parent) return
+      parent.replies = parent.replies.filter(reply => reply.id !== commentId)
+      thread.numReplies = Math.max(0, thread.numReplies - 1)
     }
-
-    const thread = commentData.value.find(entry => entry.id === rootId)
-    const parent = thread && findCommentParent(thread, commentId)
-    if (!parent) return
-    parent.replies = parent.replies.filter(reply => reply.id !== commentId)
-    thread.numReplies = Math.max(0, thread.numReplies - 1)
+    // Removing content can shorten the list below the scroll position.
+    clampCommentsScrollAfterRender()
   }
 }
 provide(youTubeCommentsKey, youTubeComments)
