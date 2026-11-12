@@ -4,7 +4,8 @@ import { parseSubscriptionRss, parseRssUpcomingInfo, isRssUpcomingPremiereCandid
 import {
   clearSubscriptionChannelErrors,
   isSubscriptionChannelErrorShown,
-  setSubscriptionChannelError
+  setSubscriptionChannelError,
+  subscriptionChannelErrors
 } from './subscriptionRefreshErrors'
 import { isMissingChannelError } from './channels'
 import store from '../store/index'
@@ -396,8 +397,11 @@ export function notifyNewSubscriptionChannelErrors(profileId, errors, t) {
   // Upload notifications, automatic downloads, and background refreshes also
   // fetch channels of other profiles, which have no row in this profile's box
   const profileChannelIds = new Set(store.getters.profileById(profileId)?.subscriptions.map(channel => channel.id))
+  // A later refresh in the same import can load the channel again
   const hiddenErrors = errors.filter(({ feed, channelId }) => (
-    profileChannelIds.has(channelId) && !isSubscriptionChannelErrorShown(feed, channelId)
+    profileChannelIds.has(channelId) &&
+    subscriptionChannelErrors.get(channelId)?.[feed] !== undefined &&
+    !isSubscriptionChannelErrorShown(feed, channelId)
   ))
   if (hiddenErrors.length === 0) return
 

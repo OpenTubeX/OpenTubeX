@@ -180,7 +180,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
       init?.signal?.addEventListener('abort', () => reject(createAbortError()), { once: true })
     })
   }
-  vm.runInContext(`${errorStoreSource}\n${source}\nglobalThis.api = { refreshSubscriptionVideosFromRemote, refreshSubscriptionShortsFromRemote, refreshSubscriptionLiveFromRemote, refreshSubscriptionPostsFromRemote, retrySubscriptionChannel, cancelSubscriptionRefresh, updateVideoListAfterProcessing, subscriptionChannelErrors, registerShownSubscriptionErrorBox }`, context)
+  vm.runInContext(`${errorStoreSource}\n${source}\nglobalThis.api = { refreshSubscriptionVideosFromRemote, refreshSubscriptionShortsFromRemote, refreshSubscriptionLiveFromRemote, refreshSubscriptionPostsFromRemote, retrySubscriptionChannel, cancelSubscriptionRefresh, updateVideoListAfterProcessing, subscriptionChannelErrors, registerShownSubscriptionErrorBox, notifyNewSubscriptionChannelErrors }`, context)
   return {
     get details() {
       return [...context.api.subscriptionChannelErrors.values()].flatMap(errors => Object.values(errors).map(error => error.trace)).join('\n')
@@ -745,6 +745,9 @@ test('a channel failing in several feeds is listed once and clears each feed onc
   assert.deepEqual(Object.keys(app.errors.get('UC0')), ['shorts'])
   await app.refreshSubscriptionShortsFromRemote({ t: key => key })
   assert.equal(app.errors.size, 0)
+  // A background import can load a channel after it reported its failure
+  app.notifyNewSubscriptionChannelErrors(app.getters.getActiveProfile._id, [{ feed: 'videos', channelId: 'UC0' }], key => key)
+  assert.equal(app.toasts.length, 1, 'a channel that loaded again is not reported')
 })
 
 for (const shownChannels of ['all', 'all but one']) {
