@@ -439,6 +439,36 @@ History:
   History Older Than Days Removed: Zgodovina ogledov, starejša od {days} dneva, je odstranjena | Zgodovina ogledov, starejša od {days} dni, je odstranjena | Zgodovina ogledov, starejša od {days} dni, je odstranjena | Zgodovina ogledov, starejša od {days} dni, je odstranjena
 Settings:
   Experimental Badge: Eksperimentalno
+  YouTube Account Settings:
+    YouTube Account Settings: "Račun YouTube"
+    Unofficial App Warning: "OpenTubeX ni uradna aplikacija storitve YouTube. Ob prijavi se to, kar počnete tukaj, poveže z vašim Google računom, Google pa lahko omeji ali prepove račune, ki uporabljajo neuradne aplikacije. Prijavite se samo z računom, ki si ga lahko privoščite izgubiti."
+    Sign In Explanation: "OpenTubeX se prijavi kot aplikacija za televizor: prijavo odobrite na spletnem mestu Google, OpenTubeX pa nikoli ne vidi vašega gesla. Prijava ostane v tej napravi in se ne sinhronizira ali varnostno kopira."
+    Sign In: "Prijava"
+    Sign In Anyway: "Vseeno se prijavi"
+    Sign Out: "Odjava"
+    Getting Sign-In Code: "Pridobivanje kode za prijavo"
+    Sign In Instructions: "Odprite stran za prijavo in izberite svoj račun Google. Koda se izpolni samodejno."
+    Other Device Instructions: "V drugi napravi pojdite na ta naslov in vnesite kodo:"
+    YouTube Channel: "Kanal YouTube"
+    Using Channel: "YouTube zdaj uporabljate kot {name}"
+    Switch Channel Failed: "Kanala YouTube ni bilo mogoče zamenjati: {error}"
+    Sign-In Code: "Koda za prijavo {code}"
+    Open Sign-In Page: "Odpri stran za prijavo"
+    Copy Code: "Kopiraj kodo"
+    Code Copied: "Koda je kopirana"
+    Waiting for Approval: "Čakanje, da odobrite prijavo"
+    Sign-In Denied: "Prijava je bila zavrnjena."
+    Sign-In Code Expired: "Koda je potekla. Poskusite znova, da dobite novo."
+    Sign-In Failed: "Prijava ni uspela: {error}"
+    Signed In As: "V storitev YouTube ste prijavljeni kot {name}"
+    Signed Out: "Odjavljeni ste iz storitve YouTube"
+    Signed out by YouTube: "YouTube je končal prijavo. Za nadaljnjo uporabo računa se znova prijavite v nastavitvah."
+    Subscribe on YouTube: "Naroči se tudi v storitvi YouTube"
+    Add to YouTube Watch History: "Dodaj ogledane videoposnetke v zgodovino storitve YouTube"
+    Import Subscriptions: "Uvozi naročnine iz storitve YouTube"
+    Imported Subscriptions: "Uvožen {count} kanal | Uvožena {count} kanala | Uvoženi {count} kanali | Uvoženih {count} kanalov"
+    No Subscriptions to Import: "Ta račun YouTube nima naročnin"
+    Import Subscriptions Failed: "Naročnin ni bilo mogoče uvoziti: {error}"
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Dokler je diagnostični dnevnik vklopljen, OpenTubeX hrani nedavna sporočila dnevnika v pomnilniku, da jih lahko priložite poročilom o napakah. Nikoli jih ne shrani ali pošlje sam, izklop dnevnika pa jih izbriše. Poročila izpustijo piškotke, žetone, naslove IP in parametre URL, vendar lahko vsebujejo ID-je predvajanih videoposnetkov, zato poročilo pred deljenjem preglejte.
@@ -2671,6 +2701,9 @@ Description:
   Games: Igre
   Music: Glasba
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Naročanje na kanal ali preklic naročnine v OpenTubeX enako stori tudi v vašem računu YouTube."
+    Add to YouTube Watch History: "Videoposnetki, ki jih predvajate, se dodajo v vašo zgodovino predvajanj v storitvi YouTube, zato se priporočila YouTube učijo iz njih. Ko je zgodovina v storitvi YouTube začasno zaustavljena, se ne doda nič."
   General Settings:
     Built-in Streams: |
       Samodejni način predvaja večino videoposnetkov prek YouTubovega odjemalca visionOS, ki se zažene hitreje in podpira samodejno kakovost. Prenosi v živo in videoposnetki, ki jih ne more predvajati, uporabljajo SABR.
@@ -3276,3 +3309,22 @@ Notification Center:
   Clear: "Počisti"
   Empty: "Še ni obvestil"
   Empty Hint: "Tukaj bodo prikazani opomniki za prenose v živo in novi posnetki kanalov z vklopljenimi obvestili."
+YouTube Account:
+  Like: "Všeč mi je"
+  Dislike: "Ni mi všeč"
+  Rating Failed: "Ocenjevanje v storitvi YouTube ni uspelo: {error}"
+  Subscribe Failed: "Naročanje v storitvi YouTube ni uspelo: {error}"
+  Unsubscribe Failed: "Preklic naročnine v storitvi YouTube ni uspel: {error}"
+  Add a comment: "Dodajte komentar"
+  Add a reply: "Dodajte odgovor"
+  Comment: "Komentiraj"
+  Reply: "Odgovori"
+  Comment Posted: "Komentar je objavljen"
+  Reply Posted: "Odgovor je objavljen"
+  Comment Failed: "Komentarja ni bilo mogoče objaviti: {error}"
+  Delete Comment: "Izbriši komentar"
+  Delete Comment Confirmation: "Želite izbrisati svoj komentar iz storitve YouTube?"
+  Comment Deleted: "Komentar je izbrisan"
+  Delete Comment Failed: "Komentarja ni bilo mogoče izbrisati: {error}"
+  Recommendations: "Priporočila YouTube"
+  Recommendations Failed: "Vaših priporočil YouTube ni bilo mogoče naložiti."

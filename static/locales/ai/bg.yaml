@@ -313,6 +313,36 @@ History:
   History Older Than Days Removed: Историята на гледане отпреди повече от 1 ден е премахната | Историята на гледане отпреди повече от {days} дни е премахната
 Settings:
   Experimental Badge: Експериментална
+  YouTube Account Settings:
+    YouTube Account Settings: "Профил в YouTube"
+    Unofficial App Warning: "OpenTubeX не е официално приложение на YouTube. При влизане действията ви тук се свързват с профила ви в Google, а Google може да ограничи или блокира профили, които използват неофициални приложения. Влизайте само с профил, който можете да си позволите да загубите."
+    Sign In Explanation: "OpenTubeX влиза като приложение за телевизор: одобрявате входа на уебсайта на Google и OpenTubeX никога не вижда паролата ви. Входът остава на това устройство и не се синхронизира и не се архивира."
+    Sign In: "Вход"
+    Sign In Anyway: "Вход въпреки това"
+    Sign Out: "Изход"
+    Getting Sign-In Code: "Получаване на код за вход"
+    Sign In Instructions: "Отворете страницата за вход и изберете профила си в Google. Кодът се попълва автоматично."
+    Other Device Instructions: "На друго устройство отидете на този адрес и въведете кода:"
+    YouTube Channel: "Канал в YouTube"
+    Using Channel: "Вече използвате YouTube като {name}"
+    Switch Channel Failed: "Каналът в YouTube не можа да бъде сменен: {error}"
+    Sign-In Code: "Код за вход {code}"
+    Open Sign-In Page: "Отваряне на страницата за вход"
+    Copy Code: "Копиране на кода"
+    Code Copied: "Кодът е копиран"
+    Waiting for Approval: "Изчаква се да одобрите входа"
+    Sign-In Denied: "Входът беше отказан."
+    Sign-In Code Expired: "Кодът изтече. Опитайте отново, за да получите нов."
+    Sign-In Failed: "Неуспешен вход: {error}"
+    Signed In As: "Влязохте в YouTube като {name}"
+    Signed Out: "Излязохте от YouTube"
+    Signed out by YouTube: "YouTube прекрати входа. Влезте отново от Настройки, за да продължите да използвате профила си."
+    Subscribe on YouTube: "Абониране и в YouTube"
+    Add to YouTube Watch History: "Добавяне на гледаните видеа към историята в YouTube"
+    Import Subscriptions: "Внасяне на абонаменти от YouTube"
+    Imported Subscriptions: "Внесен е {count} канал | Внесени са {count} канала"
+    No Subscriptions to Import: "Този профил в YouTube няма абонаменти"
+    Import Subscriptions Failed: "Абонаментите не можаха да бъдат внесени: {error}"
   Diagnostics:
     Diagnostics: Диагностика
     Description: Докато диагностичният журнал е включен, OpenTubeX пази последните съобщения от журнала в паметта, за да можете да ги прикачите към доклади за грешки. Никога не ги запазва и не ги изпраща сам, а изключването на журнала ги изтрива. Докладите не съдържат бисквитки, токени, IP адреси и параметри на URL адреси, но може да съдържат идентификатори на пуснати от вас видеоклипове, затова прегледайте доклада, преди да го споделите.
@@ -2201,6 +2231,9 @@ Description:
   Games: Игри
   Music: Музика
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Абонирането за канал или отписването от него в OpenTubeX прави същото и в профила ви в YouTube."
+    Add to YouTube Watch History: "Видеата, които пускате, се добавят към историята на гледанията ви в YouTube, така че препоръките на YouTube се учат от тях. Нищо не се добавя, докато историята е на пауза в YouTube."
   General Settings:
     Built-in Streams: |
       Автоматичният режим възпроизвежда повечето видеоклипове чрез клиента visionOS на YouTube, който стартира по-бързо и поддържа автоматично качество. Излъчванията на живо и видеоклиповете, които той не може да възпроизведе, използват SABR.
@@ -2713,3 +2746,22 @@ Notification Center:
   Clear: "Изчистване"
   Empty: "Все още няма известия"
   Empty Hint: "Тук ще се появяват напомняния за предавания на живо и нови качвания от канали с включени известия."
+YouTube Account:
+  Like: "Харесване"
+  Dislike: "Нехаресване"
+  Rating Failed: "Оценяването в YouTube не беше успешно: {error}"
+  Subscribe Failed: "Абонирането в YouTube не беше успешно: {error}"
+  Unsubscribe Failed: "Отписването в YouTube не беше успешно: {error}"
+  Add a comment: "Добавете коментар"
+  Add a reply: "Добавете отговор"
+  Comment: "Коментиране"
+  Reply: "Отговор"
+  Comment Posted: "Коментарът е публикуван"
+  Reply Posted: "Отговорът е публикуван"
+  Comment Failed: "Коментарът не можа да бъде публикуван: {error}"
+  Delete Comment: "Изтриване на коментара"
+  Delete Comment Confirmation: "Да се изтрие ли коментарът ви от YouTube?"
+  Comment Deleted: "Коментарът е изтрит"
+  Delete Comment Failed: "Коментарът не можа да бъде изтрит: {error}"
+  Recommendations: "Препоръки от YouTube"
+  Recommendations Failed: "Препоръките ви от YouTube не можаха да бъдат заредени."

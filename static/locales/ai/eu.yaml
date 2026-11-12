@@ -310,6 +310,36 @@ History:
   History Older Than Days Removed: Egun 1 baino zaharragoa den ikustaldi-historia kendu da | {days} egun baino zaharragoa den ikustaldi-historia kendu da
 Settings:
   Experimental Badge: Esperimentala
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube kontua"
+    Unofficial App Warning: "OpenTubeX ez da YouTube-ren aplikazio ofiziala. Saioa hastean, hemen egiten duzuna zure Google kontuarekin lotzen da, eta Google-k aplikazio ez-ofizialak erabiltzen dituzten kontuak mugatu edo blokeatu ditzake. Hasi saioa galtzea axola ez zaizun kontu batekin soilik."
+    Sign In Explanation: "OpenTubeX-ek telebista-aplikazio batek bezala hasten du saioa: Google-ren webgunean onartzen duzu, eta OpenTubeX-ek ez du inoiz zure pasahitza ikusten. Saioa gailu honetan geratzen da, eta ez da sinkronizatzen ez babeskopietan gordetzen."
+    Sign In: "Hasi saioa"
+    Sign In Anyway: "Hasi saioa hala ere"
+    Sign Out: "Amaitu saioa"
+    Getting Sign-In Code: "Saioa hasteko kodea lortzen"
+    Sign In Instructions: "Ireki saioa hasteko orria eta aukeratu zure Google kontua. Kodea automatikoki betetzen da."
+    Other Device Instructions: "Beste gailu batean, joan helbide honetara eta idatzi kodea:"
+    YouTube Channel: "YouTube kanala"
+    Using Channel: "Orain YouTube {name} gisa erabiltzen ari zara"
+    Switch Channel Failed: "Ezin izan da YouTube kanala aldatu: {error}"
+    Sign-In Code: "Saioa hasteko kodea {code}"
+    Open Sign-In Page: "Ireki saioa hasteko orria"
+    Copy Code: "Kopiatu kodea"
+    Code Copied: "Kodea kopiatu da"
+    Waiting for Approval: "Saioa hastea onartu arte zain"
+    Sign-In Denied: "Saioa hastea ukatu da."
+    Sign-In Code Expired: "Kodea iraungi da. Saiatu berriro beste bat lortzeko."
+    Sign-In Failed: "Ezin izan da saioa hasi: {error}"
+    Signed In As: "YouTube-n saioa hasita {name} gisa"
+    Signed Out: "YouTube-ko saioa amaitu da"
+    Signed out by YouTube: "YouTube-k saioa amaitu du. Hasi saioa berriro Ezarpenetan zure kontua erabiltzen jarraitzeko."
+    Subscribe on YouTube: "Harpidetu YouTube-n ere"
+    Add to YouTube Watch History: "Gehitu ikusitako bideoak YouTube-ko historikora"
+    Import Subscriptions: "Inportatu harpidetzak YouTube-tik"
+    Imported Subscriptions: "{count} kanal inportatu da | {count} kanal inportatu dira"
+    No Subscriptions to Import: "YouTube kontu honek ez du harpidetzarik"
+    Import Subscriptions Failed: "Ezin izan dira harpidetzak inportatu: {error}"
   Diagnostics:
     Diagnostics: Diagnostikoa
     Description: Diagnostiko-erregistroa aktibatuta dagoen bitartean, OpenTubeX-ek azken erregistro-mezuak memorian gordetzen ditu, akats-txostenei erantsi ahal izateko. Ez ditu inoiz bere kabuz gordetzen edo bidaltzen, eta erregistroa desaktibatzean ezabatu egiten dira. Txostenek ez dituzte cookieak, tokenak, IP helbideak eta URL parametroak barne hartzen, baina erreproduzitu dituzun bideoen IDak izan ditzakete; beraz, berrikusi txostena partekatu aurretik.
@@ -2179,6 +2209,9 @@ Description:
   Games: Jokoak
   Music: Musika
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "OpenTubeX-en kanal batera harpidetzean edo harpidetza kentzean, gauza bera egiten da zure YouTube kontuan."
+    Add to YouTube Watch History: "Erreproduzitzen dituzun bideoak zure YouTube-ko ikustaldi-historikora gehitzen dira, YouTube-ren gomendioek haietatik ikas dezaten. Historikoa YouTube-n pausatuta dagoen bitartean, ez da ezer gehitzen."
   General Settings:
     Built-in Streams: |
       Automatikoak bideo gehienak YouTuberen visionOS bezeroaren bidez erreproduzitzen ditu; azkarrago hasten da eta kalitate automatikoa onartzen du. Zuzeneko emanaldiek eta erreproduzitu ezin dituen bideoek SABR erabiltzen dute.
@@ -2688,3 +2721,22 @@ Notification Center:
   Clear: "Garbitu"
   Empty: "Oraindik ez dago jakinarazpenik"
   Empty Hint: "Zuzeneko emanaldien gogorarazpenak eta jakinarazpenak aktibatuta dituzten kanalen igoera berriak hemen agertuko dira."
+YouTube Account:
+  Like: "Atsegin dut"
+  Dislike: "Ez dut atsegin"
+  Rating Failed: "Ezin izan da YouTube-n balorazioa eman: {error}"
+  Subscribe Failed: "Ezin izan da YouTube-n harpidetu: {error}"
+  Unsubscribe Failed: "Ezin izan da YouTube-ko harpidetza kendu: {error}"
+  Add a comment: "Gehitu iruzkin bat"
+  Add a reply: "Gehitu erantzun bat"
+  Comment: "Iruzkindu"
+  Reply: "Erantzun"
+  Comment Posted: "Iruzkina argitaratu da"
+  Reply Posted: "Erantzuna argitaratu da"
+  Comment Failed: "Ezin izan da iruzkina argitaratu: {error}"
+  Delete Comment: "Ezabatu iruzkina"
+  Delete Comment Confirmation: "Zure iruzkina YouTube-tik ezabatu?"
+  Comment Deleted: "Iruzkina ezabatu da"
+  Delete Comment Failed: "Ezin izan da iruzkina ezabatu: {error}"
+  Recommendations: "YouTube-ren gomendioak"
+  Recommendations Failed: "Ezin izan dira zure YouTube gomendioak kargatu."

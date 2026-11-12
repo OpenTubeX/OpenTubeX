@@ -310,6 +310,36 @@ History:
   History Older Than Days Removed: Ühest päevast vanem vaatamisajalugu on eemaldatud | {days} päevast vanem vaatamisajalugu on eemaldatud
 Settings:
   Experimental Badge: Eksperimentaalne
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube'i konto"
+    Unofficial App Warning: "OpenTubeX ei ole YouTube'i ametlik rakendus. Sisselogimisel seotakse see, mida siin teed, sinu Google'i kontoga, ja Google võib mitteametlikke rakendusi kasutavaid kontosid piirata või blokeerida. Logi sisse ainult kontoga, mille kaotamist saad endale lubada."
+    Sign In Explanation: "OpenTubeX logib sisse nagu teleri rakendus: kinnitad selle Google'i veebisaidil ja OpenTubeX ei näe kunagi sinu parooli. Sisselogimine jääb sellesse seadmesse ning seda ei sünkroonita ega varundata."
+    Sign In: "Logi sisse"
+    Sign In Anyway: "Logi ikkagi sisse"
+    Sign Out: "Logi välja"
+    Getting Sign-In Code: "Sisselogimiskoodi hankimine"
+    Sign In Instructions: "Ava sisselogimisleht ja vali oma Google'i konto. Kood täidetakse automaatselt."
+    Other Device Instructions: "Mine teises seadmes sellele aadressile ja sisesta kood:"
+    YouTube Channel: "YouTube'i kanal"
+    Using Channel: "Kasutad nüüd YouTube'i kasutajana {name}"
+    Switch Channel Failed: "YouTube'i kanali vahetamine nurjus: {error}"
+    Sign-In Code: "Sisselogimiskood {code}"
+    Open Sign-In Page: "Ava sisselogimisleht"
+    Copy Code: "Kopeeri kood"
+    Code Copied: "Kood kopeeriti"
+    Waiting for Approval: "Ootan, kuni kinnitad sisselogimise"
+    Sign-In Denied: "Sisselogimine keelati."
+    Sign-In Code Expired: "Kood aegus. Uue saamiseks proovi uuesti."
+    Sign-In Failed: "Sisselogimine nurjus: {error}"
+    Signed In As: "Logitud YouTube'i sisse kasutajana {name}"
+    Signed Out: "YouTube'ist välja logitud"
+    Signed out by YouTube: "YouTube lõpetas sisselogimise. Konto kasutamise jätkamiseks logi seadistustes uuesti sisse."
+    Subscribe on YouTube: "Telli ka YouTube'is"
+    Add to YouTube Watch History: "Lisa vaadatud videod YouTube'i ajalukku"
+    Import Subscriptions: "Impordi tellimused YouTube'ist"
+    Imported Subscriptions: "Imporditi {count} kanal | Imporditi {count} kanalit"
+    No Subscriptions to Import: "Sellel YouTube'i kontol pole tellimusi"
+    Import Subscriptions Failed: "Tellimuste importimine nurjus: {error}"
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Kui diagnostikalogi on sisse lülitatud, hoiab OpenTubeX viimaseid logisõnumeid mälus, et saaksid need veateadetele lisada. See ei salvesta ega saada neid kunagi ise ning logi väljalülitamine kustutab need. Aruanded jätavad välja küpsised, märgid, IP-aadressid ja URL-i parameetrid, kuid võivad sisaldada esitatud videote ID-sid, seega kontrolli aruannet enne jagamist.
@@ -2172,6 +2202,9 @@ Description:
   Games: Mängud
   Music: Muusika
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Kui tellid OpenTubeXis kanali või lõpetad selle tellimuse, tehakse sama ka sinu YouTube'i kontol."
+    Add to YouTube Watch History: "Sinu esitatud videod lisatakse sinu YouTube'i vaatamiste ajalukku, nii et YouTube'i soovitused õpivad neist. Kui ajalugu on YouTube'is peatatud, ei lisata midagi."
   General Settings:
     Built-in Streams: |
       Automaatne esitab enamikku videoid YouTube'i visionOS-i kliendi kaudu, mis käivitub kiiremini ja toetab automaatset kvaliteeti. Otseülekanded ja videod, mida see esitada ei saa, kasutavad SABR-i.
@@ -2681,3 +2714,22 @@ Notification Center:
   Clear: "Tühjenda"
   Empty: "Teavitusi veel pole"
   Empty Hint: "Siia ilmuvad otseülekannete meeldetuletused ja uued üleslaadimised kanalitelt, mille teavitused on sisse lülitatud."
+YouTube Account:
+  Like: "Meeldib"
+  Dislike: "Ei meeldi"
+  Rating Failed: "YouTube'is hindamine nurjus: {error}"
+  Subscribe Failed: "YouTube'is tellimine nurjus: {error}"
+  Unsubscribe Failed: "YouTube'is tellimuse lõpetamine nurjus: {error}"
+  Add a comment: "Lisa kommentaar"
+  Add a reply: "Lisa vastus"
+  Comment: "Kommenteeri"
+  Reply: "Vasta"
+  Comment Posted: "Kommentaar avaldati"
+  Reply Posted: "Vastus avaldati"
+  Comment Failed: "Kommentaari avaldamine nurjus: {error}"
+  Delete Comment: "Kustuta kommentaar"
+  Delete Comment Confirmation: "Kas kustutada sinu kommentaar YouTube'ist?"
+  Comment Deleted: "Kommentaar kustutati"
+  Delete Comment Failed: "Kommentaari kustutamine nurjus: {error}"
+  Recommendations: "YouTube'i soovitused"
+  Recommendations Failed: "Sinu YouTube'i soovituste laadimine nurjus."

@@ -334,6 +334,36 @@ History:
   History Older Than Days Removed: تاریخچه تماشای قدیمی‌تر از 1 روز حذف شد | تاریخچه تماشای قدیمی‌تر از {days} روز حذف شد
 Settings:
   Experimental Badge: آزمایشی
+  YouTube Account Settings:
+    YouTube Account Settings: "حساب YouTube"
+    Unofficial App Warning: "OpenTubeX برنامهٔ رسمی YouTube نیست. با ورود به حساب، کارهایی که اینجا انجام می‌دهید به حساب Google شما پیوند می‌خورد و Google ممکن است حساب‌هایی را که از برنامه‌های غیررسمی استفاده می‌کنند محدود یا مسدود کند. فقط با حسابی وارد شوید که از دست دادنش برایتان مهم نیست."
+    Sign In Explanation: "OpenTubeX مانند یک برنامهٔ تلویزیون وارد می‌شود: شما ورود را در وب‌سایت Google تأیید می‌کنید و OpenTubeX هرگز گذرواژهٔ شما را نمی‌بیند. این ورود فقط روی همین دستگاه می‌ماند و همگام‌سازی یا پشتیبان‌گیری نمی‌شود."
+    Sign In: "ورود"
+    Sign In Anyway: "در هر حال وارد شوید"
+    Sign Out: "خروج"
+    Getting Sign-In Code: "در حال دریافت کد ورود"
+    Sign In Instructions: "صفحهٔ ورود را باز کنید و حساب Google خود را انتخاب کنید. کد به‌طور خودکار وارد می‌شود."
+    Other Device Instructions: "در دستگاهی دیگر، به این نشانی بروید و کد را وارد کنید:"
+    YouTube Channel: "کانال YouTube"
+    Using Channel: "اکنون با نام {name} از YouTube استفاده می‌کنید"
+    Switch Channel Failed: "تغییر کانال YouTube ممکن نشد: {error}"
+    Sign-In Code: "کد ورود {code}"
+    Open Sign-In Page: "باز کردن صفحهٔ ورود"
+    Copy Code: "کپی کد"
+    Code Copied: "کد کپی شد"
+    Waiting for Approval: "در انتظار تأیید ورود توسط شما"
+    Sign-In Denied: "ورود رد شد."
+    Sign-In Code Expired: "کد منقضی شد. برای دریافت کد جدید دوباره تلاش کنید."
+    Sign-In Failed: "ورود ممکن نشد: {error}"
+    Signed In As: "با نام {name} وارد YouTube شدید"
+    Signed Out: "از YouTube خارج شدید"
+    Signed out by YouTube: "YouTube ورود شما را پایان داد. برای ادامهٔ استفاده از حساب خود، دوباره از تنظیمات وارد شوید."
+    Subscribe on YouTube: "اشتراک همزمان در YouTube"
+    Add to YouTube Watch History: "افزودن ویدیوهای تماشاشده به تاریخچهٔ YouTube"
+    Import Subscriptions: "وارد کردن اشتراک‌ها از YouTube"
+    Imported Subscriptions: "{count} کانال وارد شد | {count} کانال وارد شد"
+    No Subscriptions to Import: "این حساب YouTube هیچ اشتراکی ندارد"
+    Import Subscriptions Failed: "وارد کردن اشتراک‌ها ممکن نشد: {error}"
   Diagnostics:
     Diagnostics: عیب‌یابی
     Description: تا زمانی که گزارش رویداد عیب‌یابی روشن است، OpenTubeX پیام‌های اخیر گزارش رویداد را در حافظه نگه می‌دارد تا بتوانید آن‌ها را به گزارش‌های اشکال پیوست کنید. هرگز آن‌ها را خودسرانه ذخیره یا ارسال نمی‌کند و خاموش کردن گزارش رویداد آن‌ها را حذف می‌کند. گزارش‌ها کوکی‌ها، توکن‌ها، نشانی‌های IP و پارامترهای URL را شامل نمی‌شوند، اما ممکن است شناسه ویدیوهایی را که پخش کرده‌اید داشته باشند، پس پیش از هم‌رسانی گزارش آن را بررسی کنید.
@@ -2269,6 +2299,9 @@ Description:
   Games: بازی‌ها
   Music: موسیقی
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "اشتراک یا لغو اشتراک یک کانال در OpenTubeX، همین کار را در حساب YouTube شما هم انجام می‌دهد."
+    Add to YouTube Watch History: "ویدیوهایی که پخش می‌کنید به تاریخچهٔ تماشای YouTube شما افزوده می‌شوند تا پیشنهادهای YouTube از آن‌ها یاد بگیرند. تا زمانی که تاریخچه در YouTube متوقف باشد، چیزی افزوده نمی‌شود."
   General Settings:
     Built-in Streams: |
       حالت خودکار بیشتر ویدیوها را با کلاینت visionOS یوتیوب پخش می‌کند که سریع‌تر شروع می‌شود و از کیفیت خودکار پشتیبانی می‌کند. پخش‌های زنده و ویدیوهایی که نمی‌تواند پخش کند از SABR استفاده می‌کنند.
@@ -2774,3 +2807,22 @@ Notification Center:
   Clear: "پاک کردن"
   Empty: "هنوز اعلانی وجود ندارد"
   Empty Hint: "یادآوری‌های پخش زنده و ویدیوهای جدید کانال‌هایی که اعلانشان روشن است اینجا نمایش داده می‌شوند."
+YouTube Account:
+  Like: "پسندیدن"
+  Dislike: "نپسندیدن"
+  Rating Failed: "امتیازدهی در YouTube ممکن نشد: {error}"
+  Subscribe Failed: "اشتراک در YouTube ممکن نشد: {error}"
+  Unsubscribe Failed: "لغو اشتراک در YouTube ممکن نشد: {error}"
+  Add a comment: "افزودن نظر"
+  Add a reply: "افزودن پاسخ"
+  Comment: "ارسال نظر"
+  Reply: "پاسخ"
+  Comment Posted: "نظر ارسال شد"
+  Reply Posted: "پاسخ ارسال شد"
+  Comment Failed: "ارسال نظر ممکن نشد: {error}"
+  Delete Comment: "حذف نظر"
+  Delete Comment Confirmation: "نظر شما از YouTube حذف شود؟"
+  Comment Deleted: "نظر حذف شد"
+  Delete Comment Failed: "حذف نظر ممکن نشد: {error}"
+  Recommendations: "پیشنهادهای YouTube"
+  Recommendations Failed: "بارگیری پیشنهادهای YouTube شما ممکن نشد."

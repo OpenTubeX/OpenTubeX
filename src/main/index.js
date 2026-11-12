@@ -29,6 +29,7 @@ import { isCustomThemeValue } from '../customTheme'
 import { MATERIAL_SYSTEM_SEED, MATERIAL_THEME_VALUES, materialColorScheme, materialSeedPalette, materialThemeMode } from '../materialTheme.js'
 import { resolveSystemTheme } from '../appearanceSettings'
 import { applySyncServerUserAgent } from '../syncServerUserAgent'
+import { applyYouTubeUserAgent } from '../youTubeUserAgent'
 import * as baseHandlers from '../datastores/handlers/base'
 import { liveReminders, waitForDatastores } from '../datastores'
 import { createImageCacheHandler, ImageCache } from './ImageCache'
@@ -1332,6 +1333,7 @@ function runApp() {
 
       if (webContents && isOpenTubeXUrl(webContents.getURL())) {
         applySyncServerUserAgent(requestHeaders)
+        applyYouTubeUserAgent(url, requestHeaders)
       }
 
       if (url.startsWith('https://www.youtube.com/youtubei/')) {

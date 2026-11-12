@@ -361,6 +361,36 @@ History:
   History Older Than Days Removed: 1 دن سے پرانی دیکھنے کی ہسٹری ہٹا دی گئی ہے | {days} دن سے پرانی دیکھنے کی ہسٹری ہٹا دی گئی ہے
 Settings:
   Experimental Badge: تجرباتی
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube اکاؤنٹ"
+    Unofficial App Warning: "OpenTubeX، YouTube کی آفیشل ایپ نہیں ہے۔ سائن ان کرنے سے یہاں آپ جو کچھ کرتے ہیں وہ آپ کے Google اکاؤنٹ سے منسلک ہو جاتا ہے، اور Google غیر آفیشل ایپس استعمال کرنے والے اکاؤنٹس کو محدود یا بین کر سکتا ہے۔ صرف ایسے اکاؤنٹ سے سائن ان کریں جسے کھونا آپ برداشت کر سکیں۔"
+    Sign In Explanation: "OpenTubeX ایک ٹی وی ایپ کی طرح سائن ان کرتا ہے: آپ Google کی ویب سائٹ پر اسے منظور کرتے ہیں، اور OpenTubeX کبھی آپ کا پاس ورڈ نہیں دیکھتا۔ سائن ان اسی آلے پر رہتا ہے اور نہ مطابقت پذیر ہوتا ہے نہ اس کا بیک اپ بنتا ہے۔"
+    Sign In: "سائن ان کریں"
+    Sign In Anyway: "پھر بھی سائن ان کریں"
+    Sign Out: "سائن آؤٹ کریں"
+    Getting Sign-In Code: "سائن ان کوڈ حاصل کیا جا رہا ہے"
+    Sign In Instructions: "سائن ان صفحہ کھولیں اور اپنا Google اکاؤنٹ منتخب کریں۔ کوڈ خود بخود بھر دیا جائے گا۔"
+    Other Device Instructions: "کسی دوسرے آلے پر اس پتے پر جائیں اور کوڈ درج کریں:"
+    YouTube Channel: "YouTube چینل"
+    Using Channel: "آپ اب YouTube کو {name} کے طور پر استعمال کر رہے ہیں"
+    Switch Channel Failed: "YouTube چینل تبدیل نہیں ہو سکا: {error}"
+    Sign-In Code: "سائن ان کوڈ {code}"
+    Open Sign-In Page: "سائن ان صفحہ کھولیں"
+    Copy Code: "کوڈ کاپی کریں"
+    Code Copied: "کوڈ کاپی ہو گیا"
+    Waiting for Approval: "آپ کی جانب سے سائن ان کی منظوری کا انتظار ہے"
+    Sign-In Denied: "سائن ان مسترد کر دیا گیا۔"
+    Sign-In Code Expired: "کوڈ کی میعاد ختم ہو گئی۔ نیا کوڈ حاصل کرنے کے لیے دوبارہ کوشش کریں۔"
+    Sign-In Failed: "سائن ان نہیں ہو سکا: {error}"
+    Signed In As: "YouTube میں {name} کے طور پر سائن ان ہو گیا"
+    Signed Out: "YouTube سے سائن آؤٹ ہو گیا"
+    Signed out by YouTube: "YouTube نے سائن ان ختم کر دیا۔ اپنا اکاؤنٹ استعمال جاری رکھنے کے لیے سیٹنگز میں دوبارہ سائن ان کریں۔"
+    Subscribe on YouTube: "YouTube پر بھی سبسکرائب کریں"
+    Add to YouTube Watch History: "دیکھی گئی ویڈیوز کو YouTube ہسٹری میں شامل کریں"
+    Import Subscriptions: "YouTube سے سبسکرپشنز امپورٹ کریں"
+    Imported Subscriptions: "{count} چینل امپورٹ ہو گیا | {count} چینلز امپورٹ ہو گئے"
+    No Subscriptions to Import: "اس YouTube اکاؤنٹ میں کوئی سبسکرپشن نہیں ہے"
+    Import Subscriptions Failed: "سبسکرپشنز امپورٹ نہیں ہو سکیں: {error}"
   Tab Unloading:
     Automatically unload tabs: ٹیبز خود بخود ان لوڈ کریں
     Memory threshold: میموری کی حد
@@ -2282,6 +2312,9 @@ Description:
   Games: گیمز
   Music: موسیقی
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "OpenTubeX میں کسی چینل کو سبسکرائب یا ان سبسکرائب کرنے سے آپ کے YouTube اکاؤنٹ پر بھی یہی ہوتا ہے۔"
+    Add to YouTube Watch History: "آپ جو ویڈیوز چلاتے ہیں وہ آپ کی YouTube واچ ہسٹری میں شامل ہو جاتی ہیں، تاکہ YouTube کی تجاویز ان سے سیکھیں۔ جب YouTube پر ہسٹری موقوف ہو تو کچھ بھی شامل نہیں کیا جاتا۔"
   General Settings:
     Built-in Streams: |
       خودکار زیادہ تر ویڈیوز کو YouTube کے visionOS کلائنٹ سے چلاتا ہے، جو تیزی سے شروع ہوتا ہے اور خودکار معیار کو سپورٹ کرتا ہے۔ لائیو اسٹریمز اور وہ ویڈیوز جو یہ نہیں چلا سکتا، SABR استعمال کرتی ہیں۔
@@ -2747,3 +2780,22 @@ Notification Center:
   Clear: "صاف کریں"
   Empty: "ابھی تک کوئی اطلاع نہیں"
   Empty Hint: "لائیو اسٹریم کی یاد دہانیاں اور اطلاعات آن والے چینلز کے نئے اپ لوڈز یہاں نظر آئیں گے۔"
+YouTube Account:
+  Like: "پسند کریں"
+  Dislike: "ناپسند کریں"
+  Rating Failed: "YouTube پر ریٹنگ نہیں ہو سکی: {error}"
+  Subscribe Failed: "YouTube پر سبسکرائب نہیں ہو سکا: {error}"
+  Unsubscribe Failed: "YouTube پر ان سبسکرائب نہیں ہو سکا: {error}"
+  Add a comment: "کمنٹ شامل کریں"
+  Add a reply: "جواب شامل کریں"
+  Comment: "کمنٹ کریں"
+  Reply: "جواب دیں"
+  Comment Posted: "کمنٹ پوسٹ ہو گیا"
+  Reply Posted: "جواب پوسٹ ہو گیا"
+  Comment Failed: "کمنٹ پوسٹ نہیں ہو سکا: {error}"
+  Delete Comment: "کمنٹ حذف کریں"
+  Delete Comment Confirmation: "اپنا کمنٹ YouTube سے حذف کریں؟"
+  Comment Deleted: "کمنٹ حذف ہو گیا"
+  Delete Comment Failed: "کمنٹ حذف نہیں ہو سکا: {error}"
+  Recommendations: "YouTube کی تجاویز"
+  Recommendations Failed: "آپ کی YouTube تجاویز لوڈ نہیں ہو سکیں۔"

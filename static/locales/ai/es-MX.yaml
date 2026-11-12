@@ -345,6 +345,36 @@ History:
   History Older Than Days Removed: Se ha eliminado el historial de reproducción de más de 1 día | Se ha eliminado el historial de reproducción de más de {days} días | Se ha eliminado el historial de reproducción de más de {days} días
 Settings:
   Experimental Badge: Experimental
+  YouTube Account Settings:
+    YouTube Account Settings: "Cuenta de YouTube"
+    Unofficial App Warning: "OpenTubeX no es una app oficial de YouTube. Al iniciar sesión, lo que haces aquí queda vinculado a tu cuenta de Google, y Google puede restringir o bloquear las cuentas que usan apps no oficiales. Solo inicia sesión con una cuenta que puedas darte el lujo de perder."
+    Sign In Explanation: "OpenTubeX inicia sesión como una app de TV: lo apruebas en el sitio web de Google y OpenTubeX nunca ve tu contraseña. La sesión se queda en este dispositivo y no se sincroniza ni se respalda."
+    Sign In: "Iniciar sesión"
+    Sign In Anyway: "Iniciar sesión de todos modos"
+    Sign Out: "Cerrar sesión"
+    Getting Sign-In Code: "Obteniendo un código de inicio de sesión"
+    Sign In Instructions: "Abre la página de inicio de sesión y elige tu cuenta de Google. El código se completa automáticamente."
+    Other Device Instructions: "En otro dispositivo, ve a esta dirección e ingresa el código:"
+    YouTube Channel: "Canal de YouTube"
+    Using Channel: "Ahora usas YouTube como {name}"
+    Switch Channel Failed: "No se pudo cambiar el canal de YouTube: {error}"
+    Sign-In Code: "Código de inicio de sesión {code}"
+    Open Sign-In Page: "Abrir página de inicio de sesión"
+    Copy Code: "Copiar código"
+    Code Copied: "Código copiado"
+    Waiting for Approval: "Esperando a que apruebes el inicio de sesión"
+    Sign-In Denied: "Se rechazó el inicio de sesión."
+    Sign-In Code Expired: "El código expiró. Inténtalo de nuevo para obtener uno nuevo."
+    Sign-In Failed: "No se pudo iniciar sesión: {error}"
+    Signed In As: "Sesión iniciada en YouTube como {name}"
+    Signed Out: "Sesión cerrada en YouTube"
+    Signed out by YouTube: "YouTube cerró la sesión. Vuelve a iniciar sesión en Ajustes para seguir usando tu cuenta."
+    Subscribe on YouTube: "Suscribirse también en YouTube"
+    Add to YouTube Watch History: "Agregar videos vistos al historial de YouTube"
+    Import Subscriptions: "Importar suscripciones de YouTube"
+    Imported Subscriptions: "Se importó {count} canal | Se importaron {count} de canales | Se importaron {count} canales"
+    No Subscriptions to Import: "Esta cuenta de YouTube no tiene suscripciones"
+    Import Subscriptions Failed: "No se pudieron importar las suscripciones: {error}"
   Diagnostics:
     Diagnostics: Diagnóstico
     Description: Mientras el registro de diagnóstico está activado, OpenTubeX guarda los mensajes de registro recientes en la memoria para que puedas adjuntarlos a reportes de errores. Nunca los guarda ni los envía por su cuenta, y desactivar el registro los elimina. Los reportes omiten cookies, tokens, direcciones IP y parámetros de URL, pero pueden incluir los ID de los videos que reprodujiste, así que revisa el reporte antes de compartirlo.
@@ -2527,6 +2557,9 @@ Description:
   Games: Juegos
   Music: Música
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Suscribirte a un canal o desuscribirte de él en OpenTubeX hace lo mismo en tu cuenta de YouTube."
+    Add to YouTube Watch History: "Los videos que reproduces se agregan a tu historial de reproducciones de YouTube, para que las recomendaciones de YouTube aprendan de ellos. No se agrega nada mientras el historial esté en pausa en YouTube."
   General Settings:
     Built-in Streams: |
       Automático reproduce la mayoría de los videos con el cliente visionOS de YouTube, que inicia más rápido y admite la calidad automática. Las transmisiones en vivo y los videos que no puede reproducir usan SABR.
@@ -3118,3 +3151,22 @@ Notification Center:
   Clear: "Borrar"
   Empty: "Aún no hay notificaciones"
   Empty Hint: "Aquí aparecerán los recordatorios de transmisiones en vivo y los videos nuevos de los canales con notificaciones activadas."
+YouTube Account:
+  Like: "Me gusta"
+  Dislike: "No me gusta"
+  Rating Failed: "No se pudo calificar en YouTube: {error}"
+  Subscribe Failed: "No se pudo suscribir en YouTube: {error}"
+  Unsubscribe Failed: "No se pudo desuscribir en YouTube: {error}"
+  Add a comment: "Agrega un comentario"
+  Add a reply: "Agrega una respuesta"
+  Comment: "Comentar"
+  Reply: "Responder"
+  Comment Posted: "Comentario publicado"
+  Reply Posted: "Respuesta publicada"
+  Comment Failed: "No se pudo publicar el comentario: {error}"
+  Delete Comment: "Eliminar comentario"
+  Delete Comment Confirmation: "¿Eliminar tu comentario de YouTube?"
+  Comment Deleted: "Comentario eliminado"
+  Delete Comment Failed: "No se pudo eliminar el comentario: {error}"
+  Recommendations: "Recomendaciones de YouTube"
+  Recommendations Failed: "No se pudieron cargar tus recomendaciones de YouTube."

@@ -333,6 +333,36 @@ History:
   History Older Than Days Removed: Гісторыя прагляду, старэйшая за {days} дзень, выдаленая | Гісторыя прагляду, старэйшая за {days} дні, выдаленая | Гісторыя прагляду, старэйшая за {days} дзён, выдаленая
 Settings:
   Experimental Badge: Эксперыментальная
+  YouTube Account Settings:
+    YouTube Account Settings: "Уліковы запіс YouTube"
+    Unofficial App Warning: "OpenTubeX не з'яўляецца афіцыйнай праграмай YouTube. Пры ўваходзе вашы дзеянні тут звязваюцца з вашым уліковым запісам Google, а Google можа абмежаваць або заблакіраваць уліковыя запісы, якія карыстаюцца неафіцыйнымі праграмамі. Уваходзьце толькі з уліковым запісам, які вы гатовыя страціць."
+    Sign In Explanation: "OpenTubeX уваходзіць як праграма для тэлевізара: вы пацвярджаеце ўваход на сайце Google, і OpenTubeX ніколі не бачыць ваш пароль. Уваход захоўваецца толькі на гэтай прыладзе, не сінхранізуецца і не трапляе ў рэзервовыя копіі."
+    Sign In: "Увайсці"
+    Sign In Anyway: "Усё роўна ўвайсці"
+    Sign Out: "Выйсці"
+    Getting Sign-In Code: "Атрыманне кода для ўваходу"
+    Sign In Instructions: "Адкрыйце старонку ўваходу і выберыце ўліковы запіс Google. Код будзе ўведзены аўтаматычна."
+    Other Device Instructions: "На іншай прыладзе перайдзіце па гэтым адрасе і ўвядзіце код:"
+    YouTube Channel: "Канал YouTube"
+    Using Channel: "Цяпер вы карыстаецеся YouTube як {name}"
+    Switch Channel Failed: "Не ўдалося змяніць канал YouTube: {error}"
+    Sign-In Code: "Код для ўваходу {code}"
+    Open Sign-In Page: "Адкрыць старонку ўваходу"
+    Copy Code: "Скапіяваць код"
+    Code Copied: "Код скапіяваны"
+    Waiting for Approval: "Чакаем, пакуль вы пацвердзіце ўваход"
+    Sign-In Denied: "Уваход адхілены."
+    Sign-In Code Expired: "Тэрмін дзеяння кода скончыўся. Паспрабуйце зноў, каб атрымаць новы."
+    Sign-In Failed: "Не ўдалося ўвайсці: {error}"
+    Signed In As: "Вы ўвайшлі ў YouTube як {name}"
+    Signed Out: "Вы выйшлі з YouTube"
+    Signed out by YouTube: "YouTube завяршыў сеанс. Увайдзіце зноў у Наладах, каб і далей карыстацца ўліковым запісам."
+    Subscribe on YouTube: "Падпісвацца таксама на YouTube"
+    Add to YouTube Watch History: "Дадаваць прагледжаныя відэа ў гісторыю YouTube"
+    Import Subscriptions: "Імпартаваць падпіскі з YouTube"
+    Imported Subscriptions: "Імпартаваны {count} канал | Імпартаваны {count} каналы | Імпартавана {count} каналаў"
+    No Subscriptions to Import: "У гэтым уліковым запісе YouTube няма падпісак"
+    Import Subscriptions Failed: "Не ўдалося імпартаваць падпіскі: {error}"
   Diagnostics:
     Diagnostics: Дыягностыка
     Description: Пакуль дыягнастычны журнал уключаны, OpenTubeX захоўвае апошнія паведамленні журнала ў памяці, каб вы маглі далучыць іх да справаздач пра памылкі. Ён ніколі не захоўвае і не адпраўляе іх сам, а выключэнне журнала выдаляе іх. Справаздачы не ўключаюць файлы cookie, токены, IP-адрасы і параметры URL, але могуць змяшчаць ідэнтыфікатары прайграных відэа, таму праверце справаздачу перад тым, як падзяліцца ёю.
@@ -2271,6 +2301,9 @@ Description:
   Games: Гульні
   Music: Музыка
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Калі вы падпісваецеся на канал або адпісваецеся ад яго ў OpenTubeX, тое ж самае адбываецца ў вашым уліковым запісе YouTube."
+    Add to YouTube Watch History: "Відэа, якія вы прайграеце, дадаюцца ў вашу гісторыю прагляду YouTube, і рэкамендацыі YouTube улічваюць іх. Пакуль гісторыя прыпынена на YouTube, нічога не дадаецца."
   General Settings:
     Built-in Streams: |
       Аўтаматычны рэжым прайгравае большасць відэа праз кліент visionOS ад YouTube, які запускаецца хутчэй і падтрымлівае аўтаматычную якасць. Прамыя трансляцыі і відэа, якія ён не можа прайграць, выкарыстоўваюць SABR.
@@ -2779,3 +2812,22 @@ Notification Center:
   Clear: "Ачысціць"
   Empty: "Пакуль няма апавяшчэнняў"
   Empty Hint: "Тут з’явяцца напаміны пра трансляцыі і новыя відэа з каналаў з уключанымі апавяшчэннямі."
+YouTube Account:
+  Like: "Падабаецца"
+  Dislike: "Не падабаецца"
+  Rating Failed: "Не ўдалося ацаніць на YouTube: {error}"
+  Subscribe Failed: "Не ўдалося падпісацца на YouTube: {error}"
+  Unsubscribe Failed: "Не ўдалося адпісацца на YouTube: {error}"
+  Add a comment: "Дадаць каментарый"
+  Add a reply: "Дадаць адказ"
+  Comment: "Каментаваць"
+  Reply: "Адказаць"
+  Comment Posted: "Каментарый апублікаваны"
+  Reply Posted: "Адказ апублікаваны"
+  Comment Failed: "Не ўдалося апублікаваць каментарый: {error}"
+  Delete Comment: "Выдаліць каментарый"
+  Delete Comment Confirmation: "Выдаліць ваш каментарый з YouTube?"
+  Comment Deleted: "Каментарый выдалены"
+  Delete Comment Failed: "Не ўдалося выдаліць каментарый: {error}"
+  Recommendations: "Рэкамендацыі YouTube"
+  Recommendations Failed: "Не ўдалося загрузіць вашы рэкамендацыі YouTube."

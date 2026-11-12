@@ -447,6 +447,36 @@ History:
   History Older Than Days Removed: S'ha suprimit l'historial de reproducció anterior a 1 dia | S'ha suprimit l'historial de reproducció anterior a {days} dies | S'ha suprimit l'historial de reproducció anterior a {days} dies
 Settings:
   Experimental Badge: Experimental
+  YouTube Account Settings:
+    YouTube Account Settings: "Compte de YouTube"
+    Unofficial App Warning: "OpenTubeX no és una aplicació oficial de YouTube. En iniciar la sessió, el que facis aquí queda vinculat al teu compte de Google, i Google pot restringir o bloquejar els comptes que fan servir aplicacions no oficials. Inicia la sessió només amb un compte que et puguis permetre perdre."
+    Sign In Explanation: "OpenTubeX inicia la sessió com una aplicació de televisor: l'aproves al lloc web de Google i OpenTubeX no veu mai la teva contrasenya. La sessió es queda en aquest dispositiu i no se sincronitza ni s'inclou a les còpies de seguretat."
+    Sign In: "Inicia la sessió"
+    Sign In Anyway: "Inicia la sessió igualment"
+    Sign Out: "Tanca la sessió"
+    Getting Sign-In Code: "S'està obtenint un codi d'inici de sessió"
+    Sign In Instructions: "Obre la pàgina d'inici de sessió i tria el teu compte de Google. El codi s'emplena automàticament."
+    Other Device Instructions: "En un altre dispositiu, ves a aquesta adreça i introdueix el codi:"
+    YouTube Channel: "Canal de YouTube"
+    Using Channel: "Ara utilitzes YouTube com a {name}"
+    Switch Channel Failed: "No s'ha pogut canviar el canal de YouTube: {error}"
+    Sign-In Code: "Codi d'inici de sessió {code}"
+    Open Sign-In Page: "Obre la pàgina d'inici de sessió"
+    Copy Code: "Copia el codi"
+    Code Copied: "S'ha copiat el codi"
+    Waiting for Approval: "S'està esperant que aprovis l'inici de sessió"
+    Sign-In Denied: "S'ha denegat l'inici de sessió."
+    Sign-In Code Expired: "El codi ha caducat. Torna-ho a provar per obtenir-ne un de nou."
+    Sign-In Failed: "No s'ha pogut iniciar la sessió: {error}"
+    Signed In As: "Has iniciat la sessió a YouTube com a {name}"
+    Signed Out: "Has tancat la sessió de YouTube"
+    Signed out by YouTube: "YouTube ha tancat la sessió. Torna a iniciar la sessió a la Configuració per continuar utilitzant el teu compte."
+    Subscribe on YouTube: "Subscriu-te també a YouTube"
+    Add to YouTube Watch History: "Afegeix els vídeos vistos a l'historial de YouTube"
+    Import Subscriptions: "Importa les subscripcions de YouTube"
+    Imported Subscriptions: "S'ha importat {count} canal | S'han importat {count} de canals | S'han importat {count} canals"
+    No Subscriptions to Import: "Aquest compte de YouTube no té cap subscripció"
+    Import Subscriptions Failed: "No s'han pogut importar les subscripcions: {error}"
   Diagnostics:
     Diagnostics: Diagnòstic
     Description: Mentre el registre de diagnòstic està activat, OpenTubeX conserva els missatges de registre recents a la memòria perquè els pugueu adjuntar als informes d'errors. Mai no els desa ni els envia pel seu compte, i desactivar el registre els elimina. Els informes ometen galetes, testimonis, adreces IP i paràmetres d'URL, però poden incloure identificadors dels vídeos que heu reproduït, així que reviseu l'informe abans de compartir-lo.
@@ -2708,6 +2738,9 @@ Description:
   Games: Jocs
   Music: Música
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Subscriure't a un canal o cancel·lar-ne la subscripció a OpenTubeX fa el mateix al teu compte de YouTube."
+    Add to YouTube Watch History: "Els vídeos que reprodueixes s'afegeixen al teu historial de visualitzacions de YouTube, perquè les recomanacions de YouTube n'aprenguin. No s'hi afegeix res mentre l'historial està en pausa a YouTube."
   General Settings:
     Built-in Streams: |
       Automàtic reprodueix la majoria de vídeos amb el client visionOS de YouTube, que comença més ràpid i admet la qualitat automàtica. Les emissions en directe i els vídeos que no pot reproduir fan servir SABR.
@@ -3325,3 +3358,22 @@ Notification Center:
   Clear: "Esborra"
   Empty: "Encara no hi ha notificacions"
   Empty Hint: "Aquí apareixeran els recordatoris de directes i els vídeos nous dels canals amb les notificacions activades."
+YouTube Account:
+  Like: "M'agrada"
+  Dislike: "No m'agrada"
+  Rating Failed: "No s'ha pogut valorar a YouTube: {error}"
+  Subscribe Failed: "No s'ha pogut fer la subscripció a YouTube: {error}"
+  Unsubscribe Failed: "No s'ha pogut cancel·lar la subscripció a YouTube: {error}"
+  Add a comment: "Afegeix un comentari"
+  Add a reply: "Afegeix una resposta"
+  Comment: "Comenta"
+  Reply: "Respon"
+  Comment Posted: "S'ha publicat el comentari"
+  Reply Posted: "S'ha publicat la resposta"
+  Comment Failed: "No s'ha pogut publicar el comentari: {error}"
+  Delete Comment: "Suprimeix el comentari"
+  Delete Comment Confirmation: "Vols suprimir el teu comentari de YouTube?"
+  Comment Deleted: "S'ha suprimit el comentari"
+  Delete Comment Failed: "No s'ha pogut suprimir el comentari: {error}"
+  Recommendations: "Recomanacions de YouTube"
+  Recommendations Failed: "No s'han pogut carregar les teves recomanacions de YouTube."

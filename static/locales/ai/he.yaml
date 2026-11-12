@@ -315,6 +315,36 @@ History:
   History Older Than Days Removed: היסטוריית צפייה מלפני יותר מ־1 יום נמחקה | היסטוריית צפייה מלפני יותר מ־{days} ימים נמחקה | היסטוריית צפייה מלפני יותר מ־{days} ימים נמחקה
 Settings:
   Experimental Badge: ניסיוני
+  YouTube Account Settings:
+    YouTube Account Settings: "חשבון YouTube"
+    Unofficial App Warning: "OpenTubeX אינה אפליקציה רשמית של YouTube. הכניסה לחשבון מקשרת את מה שנעשה כאן לחשבון Google, ו־Google עלולה להגביל או לחסום חשבונות שמשתמשים באפליקציות לא רשמיות. יש להיכנס רק עם חשבון שאין בעיה לאבד."
+    Sign In Explanation: "OpenTubeX נכנס לחשבון כמו אפליקציית טלוויזיה: האישור מתבצע באתר של Google, ו־OpenTubeX אף פעם לא רואה את הסיסמה שלך. הכניסה נשמרת במכשיר הזה בלבד ואינה מסונכרנת או מגובה."
+    Sign In: "כניסה"
+    Sign In Anyway: "כניסה בכל זאת"
+    Sign Out: "יציאה"
+    Getting Sign-In Code: "מתקבל קוד כניסה"
+    Sign In Instructions: "יש לפתוח את דף הכניסה ולבחור את חשבון Google. הקוד ימולא באופן אוטומטי."
+    Other Device Instructions: "במכשיר אחר, יש לעבור לכתובת הזו ולהזין את הקוד:"
+    YouTube Channel: "ערוץ YouTube"
+    Using Channel: "השימוש ב־YouTube מתבצע כעת בתור {name}"
+    Switch Channel Failed: "לא ניתן להחליף ערוץ YouTube: {error}"
+    Sign-In Code: "קוד כניסה {code}"
+    Open Sign-In Page: "פתיחת דף הכניסה"
+    Copy Code: "העתקת הקוד"
+    Code Copied: "הקוד הועתק"
+    Waiting for Approval: "בהמתנה לאישור הכניסה שלך"
+    Sign-In Denied: "הכניסה נדחתה."
+    Sign-In Code Expired: "תוקף הקוד פג. יש לנסות שוב כדי לקבל קוד חדש."
+    Sign-In Failed: "לא ניתן להיכנס: {error}"
+    Signed In As: "הכניסה ל־YouTube בוצעה בתור {name}"
+    Signed Out: "היציאה מ־YouTube בוצעה"
+    Signed out by YouTube: "YouTube סיים את הכניסה לחשבון. יש להיכנס שוב בהגדרות כדי להמשיך להשתמש בחשבון."
+    Subscribe on YouTube: "הרשמה למינוי גם ב־YouTube"
+    Add to YouTube Watch History: "הוספת סרטונים שנצפו להיסטוריה ב־YouTube"
+    Import Subscriptions: "ייבוא מינויים מ־YouTube"
+    Imported Subscriptions: "יובא {count} ערוץ | יובאו {count} ערוצים | יובאו {count} ערוצים"
+    No Subscriptions to Import: "אין מינויים בחשבון YouTube הזה"
+    Import Subscriptions Failed: "לא ניתן לייבא מינויים: {error}"
   Diagnostics:
     Diagnostics: אבחון
     Description: כל עוד יומן האבחון פועל, OpenTubeX שומר הודעות יומן אחרונות בזיכרון כדי שתוכלו לצרף אותן לדיווחי באגים. הוא אף פעם לא שומר או שולח אותן מעצמו, וכיבוי היומן מוחק אותן. הדוחות אינם כוללים קובצי Cookie, אסימונים, כתובות IP ופרמטרים של כתובות URL, אך הם עשויים לכלול מזהים של סרטונים שניגנתם, לכן בדקו דוח לפני שתשתפו אותו.
@@ -2226,6 +2256,9 @@ Description:
   Games: משחקים
   Music: מוזיקה
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "הרשמה למינוי על ערוץ או ביטול המינוי ב־OpenTubeX מתבצעים גם בחשבון YouTube שלך."
+    Add to YouTube Watch History: "סרטונים שמופעלים נוספים להיסטוריית הצפייה שלך ב־YouTube, כך שההמלצות של YouTube לומדות מהם. כשההיסטוריה מושהית ב־YouTube, שום דבר לא נוסף."
   General Settings:
     Built-in Streams: |
       מצב אוטומטי מנגן את רוב הסרטונים דרך לקוח visionOS של YouTube, שמתחיל מהר יותר ותומך באיכות אוטומטית. שידורים חיים וסרטונים שהוא לא יכול לנגן משתמשים ב־SABR.
@@ -2740,3 +2773,22 @@ Notification Center:
   Clear: "ניקוי"
   Empty: "אין עדיין התראות"
   Empty Hint: "תזכורות לשידורים חיים והעלאות חדשות מערוצים שההתראות שלהם מופעלות יופיעו כאן."
+YouTube Account:
+  Like: "לייק"
+  Dislike: "דיסלייק"
+  Rating Failed: "לא ניתן לדרג ב־YouTube: {error}"
+  Subscribe Failed: "לא ניתן להירשם למינוי ב־YouTube: {error}"
+  Unsubscribe Failed: "לא ניתן לבטל את המינוי ב־YouTube: {error}"
+  Add a comment: "הוספת תגובה"
+  Add a reply: "הוספת תשובה"
+  Comment: "תגובה"
+  Reply: "תשובה"
+  Comment Posted: "התגובה פורסמה"
+  Reply Posted: "התשובה פורסמה"
+  Comment Failed: "לא ניתן לפרסם את התגובה: {error}"
+  Delete Comment: "מחיקת התגובה"
+  Delete Comment Confirmation: "למחוק את התגובה שלך מ־YouTube?"
+  Comment Deleted: "התגובה נמחקה"
+  Delete Comment Failed: "לא ניתן למחוק את התגובה: {error}"
+  Recommendations: "המלצות YouTube"
+  Recommendations Failed: "לא ניתן לטעון את ההמלצות שלך מ־YouTube."

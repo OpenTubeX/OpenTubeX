@@ -310,6 +310,36 @@ History:
   History Older Than Days Removed: 1 günden eski izleme geçmişi kaldırıldı | {days} günden eski izleme geçmişi kaldırıldı
 Settings:
   Experimental Badge: Deneysel
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube Hesabı"
+    Unofficial App Warning: "OpenTubeX resmi bir YouTube uygulaması değildir. Oturum açtığınızda burada yaptıklarınız Google hesabınızla ilişkilendirilir ve Google resmi olmayan uygulamalar kullanan hesapları kısıtlayabilir veya yasaklayabilir. Yalnızca kaybetmeyi göze alabileceğiniz bir hesapla oturum açın."
+    Sign In Explanation: "OpenTubeX bir TV uygulaması gibi oturum açar: oturum açmayı Google'ın web sitesinde onaylarsınız ve OpenTubeX şifrenizi hiçbir zaman görmez. Oturum bu cihazda kalır; eşitlenmez ve yedeklenmez."
+    Sign In: "Oturum aç"
+    Sign In Anyway: "Yine de oturum aç"
+    Sign Out: "Oturumu kapat"
+    Getting Sign-In Code: "Oturum açma kodu alınıyor"
+    Sign In Instructions: "Oturum açma sayfasını açın ve Google hesabınızı seçin. Kod otomatik olarak doldurulur."
+    Other Device Instructions: "Başka bir cihazda bu adrese gidin ve kodu girin:"
+    YouTube Channel: "YouTube kanalı"
+    Using Channel: "YouTube artık {name} olarak kullanılıyor"
+    Switch Channel Failed: "YouTube kanalı değiştirilemedi: {error}"
+    Sign-In Code: "Oturum açma kodu {code}"
+    Open Sign-In Page: "Oturum açma sayfasını aç"
+    Copy Code: "Kodu kopyala"
+    Code Copied: "Kod kopyalandı"
+    Waiting for Approval: "Oturum açmayı onaylamanız bekleniyor"
+    Sign-In Denied: "Oturum açma reddedildi."
+    Sign-In Code Expired: "Kodun süresi doldu. Yeni bir kod almak için tekrar deneyin."
+    Sign-In Failed: "Oturum açılamadı: {error}"
+    Signed In As: "YouTube'da {name} olarak oturum açıldı"
+    Signed Out: "YouTube oturumu kapatıldı"
+    Signed out by YouTube: "YouTube oturumu sonlandırdı. Hesabınızı kullanmaya devam etmek için Ayarlar'da yeniden oturum açın."
+    Subscribe on YouTube: "YouTube'da da abone ol"
+    Add to YouTube Watch History: "İzlenen videoları YouTube geçmişine ekle"
+    Import Subscriptions: "Abonelikleri YouTube'dan içe aktar"
+    Imported Subscriptions: "{count} kanal içe aktarıldı | {count} kanal içe aktarıldı"
+    No Subscriptions to Import: "Bu YouTube hesabının aboneliği yok"
+    Import Subscriptions Failed: "Abonelikler içe aktarılamadı: {error}"
   Diagnostics:
     Diagnostics: Tanılama
     Description: Tanılama günlüğü açıkken OpenTubeX, hata raporlarına ekleyebilmeniz için son günlük iletilerini bellekte tutar. Bunları hiçbir zaman kendiliğinden kaydetmez veya göndermez ve günlüğü kapatmak bunları siler. Raporlar çerezleri, belirteçleri, IP adreslerini ve URL parametrelerini içermez, ancak oynattığınız videoların kimliklerini içerebilir; bu yüzden paylaşmadan önce raporu kontrol edin.
@@ -2170,6 +2200,9 @@ Description:
   Games: Oyunlar
   Music: Müzik
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "OpenTubeX'te bir kanala abone olmak veya abonelikten çıkmak, YouTube hesabınızda da aynısını yapar."
+    Add to YouTube Watch History: "Oynattığınız videolar YouTube izleme geçmişinize eklenir, böylece YouTube önerileri bunlardan öğrenir. Geçmiş YouTube'da duraklatılmışken hiçbir şey eklenmez."
   General Settings:
     Built-in Streams: |
       Otomatik, çoğu videoyu YouTube'un visionOS istemcisiyle oynatır; bu istemci daha hızlı başlar ve otomatik kaliteyi destekler. Canlı yayınlar ve oynatamadığı videolar SABR kullanır.
@@ -2679,3 +2712,22 @@ Notification Center:
   Clear: "Temizle"
   Empty: "Henüz bildirim yok"
   Empty Hint: "Canlı yayın hatırlatıcıları ve bildirimleri açık kanalların yeni yüklemeleri burada görünür."
+YouTube Account:
+  Like: "Beğen"
+  Dislike: "Beğenme"
+  Rating Failed: "YouTube'da oy verilemedi: {error}"
+  Subscribe Failed: "YouTube'da abone olunamadı: {error}"
+  Unsubscribe Failed: "YouTube'da abonelikten çıkılamadı: {error}"
+  Add a comment: "Yorum ekleyin"
+  Add a reply: "Yanıt ekleyin"
+  Comment: "Yorum yap"
+  Reply: "Yanıtla"
+  Comment Posted: "Yorum gönderildi"
+  Reply Posted: "Yanıt gönderildi"
+  Comment Failed: "Yorum gönderilemedi: {error}"
+  Delete Comment: "Yorumu sil"
+  Delete Comment Confirmation: "Yorumunuz YouTube'dan silinsin mi?"
+  Comment Deleted: "Yorum silindi"
+  Delete Comment Failed: "Yorum silinemedi: {error}"
+  Recommendations: "YouTube önerileri"
+  Recommendations Failed: "YouTube önerileriniz yüklenemedi."

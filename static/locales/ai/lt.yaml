@@ -429,6 +429,36 @@ History:
   History Older Than Days Removed: Pašalinti senesni nei {days} dienos žiūrėjimo istorijos įrašai | Pašalinti senesni nei {days} dienų žiūrėjimo istorijos įrašai | Pašalinti senesni nei {days} dienų žiūrėjimo istorijos įrašai
 Settings:
   Experimental Badge: Eksperimentinis
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube paskyra"
+    Unofficial App Warning: "OpenTubeX nėra oficiali YouTube programa. Prisijungus tai, ką čia darote, susiejama su jūsų Google paskyra, o Google gali apriboti arba užblokuoti paskyras, kurios naudoja neoficialias programas. Prisijunkite tik su paskyra, kurios netekti jums nebūtų gaila."
+    Sign In Explanation: "OpenTubeX prisijungia kaip TV programėlė: prisijungimą patvirtinate Google svetainėje, o OpenTubeX niekada nemato jūsų slaptažodžio. Prisijungimas lieka šiame įrenginyje ir nėra sinchronizuojamas ar įtraukiamas į atsargines kopijas."
+    Sign In: "Prisijungti"
+    Sign In Anyway: "Vis tiek prisijungti"
+    Sign Out: "Atsijungti"
+    Getting Sign-In Code: "Gaunamas prisijungimo kodas"
+    Sign In Instructions: "Atidarykite prisijungimo puslapį ir pasirinkite savo Google paskyrą. Kodas įvedamas automatiškai."
+    Other Device Instructions: "Kitame įrenginyje eikite šiuo adresu ir įveskite kodą:"
+    YouTube Channel: "YouTube kanalas"
+    Using Channel: "Dabar naudojate YouTube kaip {name}"
+    Switch Channel Failed: "Nepavyko perjungti YouTube kanalo: {error}"
+    Sign-In Code: "Prisijungimo kodas {code}"
+    Open Sign-In Page: "Atidaryti prisijungimo puslapį"
+    Copy Code: "Kopijuoti kodą"
+    Code Copied: "Kodas nukopijuotas"
+    Waiting for Approval: "Laukiama, kol patvirtinsite prisijungimą"
+    Sign-In Denied: "Prisijungimas atmestas."
+    Sign-In Code Expired: "Kodo galiojimas baigėsi. Bandykite dar kartą, kad gautumėte naują."
+    Sign-In Failed: "Nepavyko prisijungti: {error}"
+    Signed In As: "Prisijungta prie YouTube kaip {name}"
+    Signed Out: "Atsijungta nuo YouTube"
+    Signed out by YouTube: "YouTube nutraukė prisijungimą. Prisijunkite iš naujo nustatymuose, kad galėtumėte toliau naudoti savo paskyrą."
+    Subscribe on YouTube: "Prenumeruoti ir YouTube"
+    Add to YouTube Watch History: "Įtraukti žiūrėtus vaizdo įrašus į YouTube istoriją"
+    Import Subscriptions: "Importuoti prenumeratas iš YouTube"
+    Imported Subscriptions: "Importuotas {count} kanalas | Importuoti {count} kanalai | Importuota {count} kanalų"
+    No Subscriptions to Import: "Ši YouTube paskyra neturi prenumeratų"
+    Import Subscriptions Failed: "Nepavyko importuoti prenumeratų: {error}"
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Kol diagnostikos žurnalas įjungtas, OpenTubeX laiko naujausius žurnalo pranešimus atmintyje, kad galėtumėte juos pridėti prie pranešimų apie klaidas. Jis niekada jų neišsaugo ir nesiunčia pats, o išjungus žurnalą jie ištrinami. Ataskaitose nėra slapukų, prieigos raktų, IP adresų ir URL parametrų, tačiau jose gali būti jūsų paleistų vaizdo įrašų ID, todėl prieš dalindamiesi ataskaita ją peržiūrėkite.
@@ -2592,6 +2622,9 @@ Description:
   Games: Žaidimai
   Music: Muzika
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Užsiprenumeravus kanalą arba atšaukus jo prenumeratą programoje OpenTubeX, tas pats atliekama ir jūsų YouTube paskyroje."
+    Add to YouTube Watch History: "Jūsų paleisti vaizdo įrašai įtraukiami į jūsų YouTube žiūrėjimo istoriją, kad YouTube rekomendacijos iš jų mokytųsi. Kol istorija YouTube pristabdyta, niekas neįtraukiama."
   General Settings:
     Built-in Streams: |
       Automatinis režimas daugumą vaizdo įrašų leidžia per YouTube visionOS klientą, kuris paleidžia greičiau ir palaiko automatinę kokybę. Tiesioginės transliacijos ir vaizdo įrašai, kurių jis negali paleisti, naudoja SABR.
@@ -3181,3 +3214,22 @@ Notification Center:
   Clear: "Išvalyti"
   Empty: "Pranešimų dar nėra"
   Empty Hint: "Čia bus rodomi tiesioginių transliacijų priminimai ir nauji įkėlimai iš kanalų su įjungtais pranešimais."
+YouTube Account:
+  Like: "Patinka"
+  Dislike: "Nepatinka"
+  Rating Failed: "Nepavyko įvertinti YouTube: {error}"
+  Subscribe Failed: "Nepavyko užsiprenumeruoti YouTube: {error}"
+  Unsubscribe Failed: "Nepavyko atšaukti prenumeratos YouTube: {error}"
+  Add a comment: "Pridėti komentarą"
+  Add a reply: "Pridėti atsakymą"
+  Comment: "Komentuoti"
+  Reply: "Atsakyti"
+  Comment Posted: "Komentaras paskelbtas"
+  Reply Posted: "Atsakymas paskelbtas"
+  Comment Failed: "Nepavyko paskelbti komentaro: {error}"
+  Delete Comment: "Ištrinti komentarą"
+  Delete Comment Confirmation: "Ištrinti jūsų komentarą iš YouTube?"
+  Comment Deleted: "Komentaras ištrintas"
+  Delete Comment Failed: "Nepavyko ištrinti komentaro: {error}"
+  Recommendations: "YouTube rekomendacijos"
+  Recommendations Failed: "Nepavyko įkelti jūsų YouTube rekomendacijų."

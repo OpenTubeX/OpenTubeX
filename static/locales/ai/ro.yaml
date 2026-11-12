@@ -311,6 +311,36 @@ History:
   History Older Than Days Removed: Istoricul vizionărilor mai vechi de 1 zi a fost șters | Istoricul vizionărilor mai vechi de {days} zile a fost șters | Istoricul vizionărilor mai vechi de {days} de zile a fost șters
 Settings:
   Experimental Badge: Experimental
+  YouTube Account Settings:
+    YouTube Account Settings: "Cont YouTube"
+    Unofficial App Warning: "OpenTubeX nu este o aplicație oficială YouTube. La conectare, ceea ce faceți aici este asociat contului dvs. Google, iar Google poate restricționa sau bloca conturile care folosesc aplicații neoficiale. Conectați-vă doar cu un cont pe care vă permiteți să îl pierdeți."
+    Sign In Explanation: "OpenTubeX se conectează ca o aplicație TV: aprobați conectarea pe site-ul Google, iar OpenTubeX nu vă vede niciodată parola. Conectarea rămâne pe acest dispozitiv și nu este sincronizată sau inclusă în copiile de rezervă."
+    Sign In: "Conectați-vă"
+    Sign In Anyway: "Conectați-vă oricum"
+    Sign Out: "Deconectați-vă"
+    Getting Sign-In Code: "Se obține un cod de conectare"
+    Sign In Instructions: "Deschideți pagina de conectare și alegeți contul Google. Codul este completat automat."
+    Other Device Instructions: "Pe alt dispozitiv, accesați această adresă și introduceți codul:"
+    YouTube Channel: "Canal YouTube"
+    Using Channel: "Acum folosiți YouTube ca {name}"
+    Switch Channel Failed: "Canalul YouTube nu a putut fi schimbat: {error}"
+    Sign-In Code: "Cod de conectare {code}"
+    Open Sign-In Page: "Deschideți pagina de conectare"
+    Copy Code: "Copiați codul"
+    Code Copied: "Cod copiat"
+    Waiting for Approval: "Se așteaptă să aprobați conectarea"
+    Sign-In Denied: "Conectarea a fost refuzată."
+    Sign-In Code Expired: "Codul a expirat. Încercați din nou pentru a obține unul nou."
+    Sign-In Failed: "Conectarea nu a reușit: {error}"
+    Signed In As: "V-ați conectat la YouTube ca {name}"
+    Signed Out: "V-ați deconectat de la YouTube"
+    Signed out by YouTube: "YouTube a încheiat conectarea. Conectați-vă din nou din Setări pentru a continua să folosiți contul."
+    Subscribe on YouTube: "Abonați-vă și pe YouTube"
+    Add to YouTube Watch History: "Adăugați videoclipurile vizionate în istoricul YouTube"
+    Import Subscriptions: "Importați abonamentele de pe YouTube"
+    Imported Subscriptions: "{count} canal importat | {count} canale importate | {count} de canale importate"
+    No Subscriptions to Import: "Acest cont YouTube nu are abonamente"
+    Import Subscriptions Failed: "Abonamentele nu au putut fi importate: {error}"
   Diagnostics:
     Diagnostics: Diagnosticare
     Description: Cât timp jurnalul de diagnosticare este activ, OpenTubeX păstrează în memorie mesajele recente din jurnal, ca să le poți atașa la rapoartele de erori. Nu le salvează și nu le trimite niciodată de la sine, iar dezactivarea jurnalului le șterge. Rapoartele omit cookie-urile, tokenurile, adresele IP și parametrii URL, dar pot include ID-urile videoclipurilor redate, așa că verifică un raport înainte de a-l distribui.
@@ -2225,6 +2255,9 @@ Description:
   Games: Jocuri
   Music: Muzică
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Abonarea la un canal sau dezabonarea de la acesta în OpenTubeX face același lucru în contul dvs. YouTube."
+    Add to YouTube Watch History: "Videoclipurile pe care le redați sunt adăugate în istoricul vizionărilor YouTube, astfel încât recomandările YouTube să învețe din ele. Nu se adaugă nimic cât timp istoricul este întrerupt pe YouTube."
   General Settings:
     Built-in Streams: |
       Modul automat redă majoritatea videoclipurilor prin clientul visionOS al YouTube, care pornește mai repede și acceptă calitatea automată. Transmisiunile live și videoclipurile pe care nu le poate reda folosesc SABR.
@@ -2737,3 +2770,22 @@ Notification Center:
   Clear: "Șterge"
   Empty: "Încă nu există notificări"
   Empty Hint: "Aici vor apărea mementourile pentru transmisiunile live și încărcările noi de pe canalele cu notificări activate."
+YouTube Account:
+  Like: "Îmi place"
+  Dislike: "Nu îmi place"
+  Rating Failed: "Evaluarea pe YouTube nu a reușit: {error}"
+  Subscribe Failed: "Abonarea pe YouTube nu a reușit: {error}"
+  Unsubscribe Failed: "Dezabonarea pe YouTube nu a reușit: {error}"
+  Add a comment: "Adăugați un comentariu"
+  Add a reply: "Adăugați un răspuns"
+  Comment: "Comentați"
+  Reply: "Răspundeți"
+  Comment Posted: "Comentariu publicat"
+  Reply Posted: "Răspuns publicat"
+  Comment Failed: "Comentariul nu a putut fi publicat: {error}"
+  Delete Comment: "Ștergeți comentariul"
+  Delete Comment Confirmation: "Ștergeți comentariul dvs. de pe YouTube?"
+  Comment Deleted: "Comentariu șters"
+  Delete Comment Failed: "Comentariul nu a putut fi șters: {error}"
+  Recommendations: "Recomandări YouTube"
+  Recommendations Failed: "Recomandările dvs. YouTube nu au putut fi încărcate."

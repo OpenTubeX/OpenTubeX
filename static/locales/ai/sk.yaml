@@ -310,6 +310,36 @@ History:
   History Older Than Days Removed: História sledovania staršia ako 1 deň bola odstránená | História sledovania staršia ako {days} dni bola odstránená | História sledovania staršia ako {days} dní bola odstránená
 Settings:
   Experimental Badge: Experimentálne
+  YouTube Account Settings:
+    YouTube Account Settings: "Účet YouTube"
+    Unofficial App Warning: "OpenTubeX nie je oficiálna aplikácia YouTube. Prihlásením sa to, čo tu robíte, prepojí s vaším účtom Google a Google môže účty, ktoré používajú neoficiálne aplikácie, obmedziť alebo zablokovať. Prihlasujte sa iba účtom, o ktorý si môžete dovoliť prísť."
+    Sign In Explanation: "OpenTubeX sa prihlasuje ako aplikácia pre televízory: prihlásenie schválite na webe Google a OpenTubeX nikdy neuvidí vaše heslo. Prihlásenie zostáva v tomto zariadení a nesynchronizuje sa ani nezálohuje."
+    Sign In: "Prihlásiť sa"
+    Sign In Anyway: "Napriek tomu sa prihlásiť"
+    Sign Out: "Odhlásiť sa"
+    Getting Sign-In Code: "Získava sa prihlasovací kód"
+    Sign In Instructions: "Otvorte prihlasovaciu stránku a vyberte svoj účet Google. Kód sa vyplní automaticky."
+    Other Device Instructions: "Na inom zariadení prejdite na túto adresu a zadajte kód:"
+    YouTube Channel: "Kanál YouTube"
+    Using Channel: "Teraz používate YouTube ako {name}"
+    Switch Channel Failed: "Kanál YouTube sa nepodarilo prepnúť: {error}"
+    Sign-In Code: "Prihlasovací kód {code}"
+    Open Sign-In Page: "Otvoriť prihlasovaciu stránku"
+    Copy Code: "Kopírovať kód"
+    Code Copied: "Kód bol skopírovaný"
+    Waiting for Approval: "Čaká sa na schválenie prihlásenia"
+    Sign-In Denied: "Prihlásenie bolo zamietnuté."
+    Sign-In Code Expired: "Platnosť kódu vypršala. Skúste to znova a získajte nový."
+    Sign-In Failed: "Nepodarilo sa prihlásiť: {error}"
+    Signed In As: "Ste prihlásení do YouTube ako {name}"
+    Signed Out: "Ste odhlásení z YouTube"
+    Signed out by YouTube: "YouTube ukončil prihlásenie. Ak chcete účet ďalej používať, znova sa prihláste v Nastaveniach."
+    Subscribe on YouTube: "Odoberať aj na YouTube"
+    Add to YouTube Watch History: "Pridávať pozreté videá do histórie YouTube"
+    Import Subscriptions: "Importovať odbery z YouTube"
+    Imported Subscriptions: "Importovaný {count} kanál | Importované {count} kanály | Importovaných {count} kanálov"
+    No Subscriptions to Import: "Tento účet YouTube nemá žiadne odbery"
+    Import Subscriptions Failed: "Odbery sa nepodarilo importovať: {error}"
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Kým je diagnostický denník zapnutý, OpenTubeX uchováva nedávne správy denníka v pamäti, aby ste ich mohli priložiť k hláseniam chýb. Nikdy ich sám neukladá ani neodosiela a vypnutím denníka sa vymažú. Hlásenia vynechávajú súbory cookie, tokeny, IP adresy a parametre URL, môžu však obsahovať ID prehratých videí, preto hlásenie pred zdieľaním skontrolujte.
@@ -2175,6 +2205,9 @@ Description:
   Games: Hry
   Music: Hudba
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Začatie alebo zrušenie odberu kanála v OpenTubeX urobí to isté aj vo vašom účte YouTube."
+    Add to YouTube Watch History: "Prehrávané videá sa pridávajú do vašej histórie pozerania na YouTube, aby sa z nich učili odporúčania YouTube. Keď je história na YouTube pozastavená, nič sa nepridáva."
   General Settings:
     Built-in Streams: |
       Automatický režim prehráva väčšinu videí cez klienta visionOS od YouTube, ktorý sa spúšťa rýchlejšie a podporuje automatickú kvalitu. Živé prenosy a videá, ktoré nedokáže prehrať, používajú SABR.
@@ -2684,3 +2717,22 @@ Notification Center:
   Clear: "Vymazať"
   Empty: "Zatiaľ žiadne upozornenia"
   Empty Hint: "Tu sa zobrazia pripomienky živých prenosov a nové videá z kanálov so zapnutými upozorneniami."
+YouTube Account:
+  Like: "Páči sa mi to"
+  Dislike: "Nepáči sa mi to"
+  Rating Failed: "Hodnotenie na YouTube sa nepodarilo: {error}"
+  Subscribe Failed: "Odber na YouTube sa nepodarilo začať: {error}"
+  Unsubscribe Failed: "Odber na YouTube sa nepodarilo zrušiť: {error}"
+  Add a comment: "Pridať komentár"
+  Add a reply: "Pridať odpoveď"
+  Comment: "Komentovať"
+  Reply: "Odpovedať"
+  Comment Posted: "Komentár bol uverejnený"
+  Reply Posted: "Odpoveď bola uverejnená"
+  Comment Failed: "Komentár sa nepodarilo uverejniť: {error}"
+  Delete Comment: "Odstrániť komentár"
+  Delete Comment Confirmation: "Odstrániť váš komentár z YouTube?"
+  Comment Deleted: "Komentár bol odstránený"
+  Delete Comment Failed: "Komentár sa nepodarilo odstrániť: {error}"
+  Recommendations: "Odporúčania YouTube"
+  Recommendations Failed: "Vaše odporúčania YouTube sa nepodarilo načítať."

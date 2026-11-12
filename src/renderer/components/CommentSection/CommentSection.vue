@@ -225,6 +225,10 @@
         @keydown.space.enter.stop
         @keyup.space.stop
       />
+      <CommentComposer
+        v-if="canUseYouTubeComments && showComments && !isLoading"
+        class="topCommentComposer"
+      />
       <div
         v-if="commentEntries.length > 0 && showComments"
         ref="commentsList"
@@ -400,8 +404,14 @@
             :attachment="comment.imageAttachment"
           />
           <p class="commentLikeCount">
+            <CommentAccountActions
+              v-if="canUseYouTubeComments"
+              :comment="comment"
+              :hide-count="hideCommentLikes"
+              :shorten-view-counts="shortenViewCounts"
+            />
             <template
-              v-if="!hideCommentLikes"
+              v-else-if="!hideCommentLikes"
             >
               <FtIcon
                 :icon="['fas', 'thumbs-up']"
@@ -430,6 +440,12 @@
               />
             </span>
           </p>
+          <CommentComposer
+            v-if="canUseYouTubeComments && youTubeReplyingTo === comment.id"
+            class="replyComposer"
+            :parent-id="comment.id"
+            @done="youTubeComments.replyingTo.value = null"
+          />
           <div
             v-if="index !== null && shouldShowCommentReplyToggle(comment, replyNodes)"
             class="commentReplyContinuation commentReplyRootToggle"
@@ -646,12 +662,14 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { inject, computed, nextTick, onBeforeUnmount, ref, shallowRef, toRaw, useTemplateRef, watch } from 'vue'
+import { inject, computed, nextTick, onBeforeUnmount, provide, reactive, ref, shallowRef, toRaw, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
 
 import FtButton from '../FtButton/FtButton.vue'
 import FtCard from '../ft-card/ft-card.vue'
+import CommentAccountActions from './CommentAccountActions.vue'
+import CommentComposer from './CommentComposer.vue'
 import CommentFilterMenu from './CommentFilterMenu.vue'
 import CommentReply from './CommentReply.vue'
 import CommentTranslationButton from './CommentTranslationButton.vue'
@@ -666,6 +684,8 @@ import CommentImageAttachment from './CommentImageAttachment.vue'
 
 import store from '../../store/index'
 import { usesInvidiousApi } from '../../../apiBackends'
+import { isSignedInToYouTube } from '../../helpers/youtube-account-state'
+import { createPostedComment, getRootCommentId, youTubeCommentsKey } from './youTubeComments'
 
 import { debounce, getInvidiousApiErrorMessage, showInvidiousFallbackToast, copyToClipboard, formatViewCount, getRelativeTimeFromDate, showApiErrorToast, showToast } from '../../helpers/utils'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
@@ -716,7 +736,8 @@ function formatCommentLikeCount(likeCount) {
 
 function formatCommentTime(comment) {
   return comment.published
-    ? getRelativeTimeFromDate(comment.published, false, true, relativeTimeNow.value)
+    // A comment posted since the clock last ticked would read "in a few seconds".
+    ? getRelativeTimeFromDate(comment.published, false, true, Math.max(relativeTimeNow.value, comment.published))
     : comment.time
 }
 
@@ -779,6 +800,68 @@ const nextPageToken = shallowRef(null)
 // we need to react to new replies and showReplies being toggled
 const commentData = ref([])
 const commentCount = ref(props.initialCommentCount)
+
+// The signed-in YouTube account can rate, write and delete video comments.
+const youTubeComments = {
+  enabled: computed(() => !props.isPostComments && !props.offline && !props.commentsDisabled &&
+    isSignedInToYouTube(store.getters)),
+  videoId: computed(() => props.id),
+  channelId: computed(() => store.getters.getYouTubeAccount?.channelId ?? null),
+  replyingTo: ref(null),
+  ratings: reactive(new Map()),
+  addComment(posted, text, parentId) {
+    const comment = createPostedComment(posted, text, store.getters.getYouTubeAccount)
+    youTubeComments.replyingTo.value = null
+    if (parentId === null) {
+      commentData.value.unshift(comment)
+      if (commentCount.value !== null) commentCount.value++
+      return
+    }
+
+    const thread = commentData.value.find(entry => entry.id === parentId)
+    if (!thread) return
+    thread.replies.push(comment)
+    thread.numReplies++
+    thread.showReplies = true
+  },
+  removeComment(commentId) {
+    const rootId = getRootCommentId(commentId)
+    if (rootId === commentId) {
+      commentData.value = commentData.value.filter(comment => comment.id !== commentId)
+      if (commentCount.value !== null) commentCount.value = Math.max(0, commentCount.value - 1)
+      return
+    }
+
+    const thread = commentData.value.find(entry => entry.id === rootId)
+    const parent = thread && findCommentParent(thread, commentId)
+    if (!parent) return
+    parent.replies = parent.replies.filter(reply => reply.id !== commentId)
+    thread.numReplies = Math.max(0, thread.numReplies - 1)
+  }
+}
+provide(youTubeCommentsKey, youTubeComments)
+const canUseYouTubeComments = youTubeComments.enabled
+const youTubeReplyingTo = youTubeComments.replyingTo
+// Separate sources, so a token refresh that replaces the account keeps drafts.
+watch([() => props.id, () => store.getters.getYouTubeAccount?.pageId], () => {
+  youTubeComments.replyingTo.value = null
+  youTubeComments.ratings.clear()
+})
+
+/**
+ * @param {Comment} comment
+ * @param {string} commentId
+ * @returns {Comment | null} the comment whose replies contain the comment
+ */
+function findCommentParent(comment, commentId) {
+  if (comment.replies.some(reply => reply.id === commentId)) return comment
+  for (const reply of comment.replies) {
+    const parent = findCommentParent(reply, commentId)
+    if (parent) return parent
+  }
+  return null
+}
+
 const commentsContentWrapper = useTemplateRef('commentsContentWrapper')
 const commentsList = useTemplateRef('commentsList')
 const commentFilterMenu = useTemplateRef('commentFilterMenu')

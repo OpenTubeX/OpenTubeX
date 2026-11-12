@@ -566,6 +566,10 @@
     "ri": "restart-line",
     "material": "replay-rounded"
   },
+  "reply": {
+    "ri": "reply-line",
+    "material": "reply-rounded"
+  },
   "rewind-10": {
     "ri": "replay-10-line",
     "material": "replay-10-rounded"
