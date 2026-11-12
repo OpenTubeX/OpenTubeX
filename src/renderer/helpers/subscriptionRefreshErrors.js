@@ -45,24 +45,25 @@ export function clearSubscriptionChannelErrors(channelId, feeds) {
 }
 
 /**
- * The feeds listed by each error box the user can see right now.
- * @type {Set<() => SubscriptionFeed[]>}
+ * Whether each error box the user can see right now lists a channel's error in a feed.
+ * @type {Set<(feed: SubscriptionFeed, channelId: string) => boolean>}
  */
 const shownErrorBoxes = new Set()
 
 /**
  * Registers a visible error box, so that refreshes don't notify about
  * failures the user can already see. Returns a function to unregister it.
- * @param {() => SubscriptionFeed[]} getFeeds
+ * @param {(feed: SubscriptionFeed, channelId: string) => boolean} listsError
  */
-export function registerShownSubscriptionErrorBox(getFeeds) {
-  shownErrorBoxes.add(getFeeds)
-  return () => shownErrorBoxes.delete(getFeeds)
+export function registerShownSubscriptionErrorBox(listsError) {
+  shownErrorBoxes.add(listsError)
+  return () => shownErrorBoxes.delete(listsError)
 }
 
 /**
  * @param {SubscriptionFeed} feed
+ * @param {string} channelId
  */
-export function isSubscriptionFeedErrorShown(feed) {
-  return [...shownErrorBoxes].some(getFeeds => getFeeds().includes(feed))
+export function isSubscriptionChannelErrorShown(feed, channelId) {
+  return [...shownErrorBoxes].some(listsError => listsError(feed, channelId))
 }

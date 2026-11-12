@@ -3,7 +3,7 @@ import { enrichShortPublicationDates } from './api/short-publication'
 import { parseSubscriptionRss, parseRssUpcomingInfo, isRssUpcomingPremiereCandidate } from './api/feed-rss'
 import {
   clearSubscriptionChannelErrors,
-  isSubscriptionFeedErrorShown,
+  isSubscriptionChannelErrorShown,
   setSubscriptionChannelError
 } from './subscriptionRefreshErrors'
 import { isMissingChannelError } from './channels'
@@ -83,7 +83,7 @@ let electronRefreshOwnerTabId = null
 /**
  * Cancellation state of the refresh this renderer is running, if any.
  * `partial` refreshes only fetch some channels again, so they don't count as a refresh of the feed.
- * @type {{ cancelled: boolean, tab: 'videos' | 'shorts' | 'live' | 'posts', profileId: string, refreshId: number, controller: AbortController, errors: Map<string, Map<string, string>>, unavailableChannelIds: Set<string>, newErrorCount: number, partial: boolean, networkRecovery: ReturnType<typeof createSubscriptionNetworkRecovery> | null } | null}
+ * @type {{ cancelled: boolean, tab: 'videos' | 'shorts' | 'live' | 'posts', profileId: string, refreshId: number, controller: AbortController, errors: Map<string, Map<string, string>>, unavailableChannelIds: Set<string>, newErrorChannelIds: Set<string>, partial: boolean, networkRecovery: ReturnType<typeof createSubscriptionNetworkRecovery> | null } | null}
  */
 let activeRefresh = null
 let nextRefreshId = 0
@@ -258,7 +258,7 @@ async function runWithSubscriptionRefreshLock(tab, profileId, refresh, { t, chan
       cancelled: false,
       errors: new Map(),
       unavailableChannelIds: new Set(),
-      newErrorCount: 0,
+      newErrorChannelIds: new Set(),
       partial: channelIds !== null,
       controller,
       tab,
@@ -376,7 +376,7 @@ function recordSubscriptionChannelResult(refresh, channel) {
     trace: [...messages.keys()].join('\n'),
     unavailable: refresh.unavailableChannelIds.has(channel.id)
   })
-  if (isNew) refresh.newErrorCount++
+  if (isNew) refresh.newErrorChannelIds.add(channel.id)
 }
 
 /**
@@ -386,11 +386,10 @@ function recordSubscriptionChannelResult(refresh, channel) {
  * @param {(key: string, named?: Record<string, unknown>, plural?: number) => string} t
  */
 function notifyNewSubscriptionErrors(refresh, t) {
-  const count = refresh.newErrorCount
-  if (refresh.cancelled || count === 0 || isSubscriptionFeedErrorShown(refresh.tab)) return
+  if (refresh.cancelled || [...refresh.newErrorChannelIds].every(channelId => isSubscriptionChannelErrorShown(refresh.tab, channelId))) return
 
   showToast({
-    message: t('Subscriptions.Channel Errors.Toast', { count }, count),
+    message: t('Subscriptions.Channel Errors.Toast'),
     icon: ['fas', 'circle-exclamation'],
     action: () => openInternalPath({
       path: '/subscriptions',

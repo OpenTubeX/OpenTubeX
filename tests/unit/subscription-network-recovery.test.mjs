@@ -743,14 +743,19 @@ test('a channel failing in several feeds is listed once and clears each feed onc
   assert.equal(app.errors.size, 0)
 })
 
-test('failures shown in an error box need no notification', async () => {
-  const app = createRefresh({ error: Object.assign(new Error('HTTP 500'), { status: 500 }) })
-  const unregister = app.registerShownSubscriptionErrorBox(() => ['shorts'])
-  await app.refresh({ t: key => key })
-  unregister()
-  assert.equal(app.errors.size, 20)
-  assert.equal(app.toasts.length, 0)
-})
+for (const shownChannels of ['all', 'all but one']) {
+  test(`failures ${shownChannels === 'all' ? 'shown' : 'not all shown'} in an error box ${shownChannels === 'all' ? 'need no' : 'get a'} notification`, async () => {
+    const app = createRefresh({ error: Object.assign(new Error('HTTP 500'), { status: 500 }) })
+    // A box for a subscription group only lists the group's channels
+    const unregister = app.registerShownSubscriptionErrorBox((feed, channelId) => (
+      feed === 'shorts' && (shownChannels === 'all' || channelId !== 'UC5')
+    ))
+    await app.refresh({ t: key => key })
+    unregister()
+    assert.equal(app.errors.size, 20)
+    assert.equal(app.toasts.length, shownChannels === 'all' ? 0 : 1)
+  })
+}
 
 test('retrying a channel fetches only that channel without counting as a feed refresh', async () => {
   const app = createRefresh({ error: Object.assign(new Error('HTTP 500'), { status: 500 }) })

@@ -188,7 +188,9 @@ onDeactivated(() => { isActive.value = false })
 // Refreshes only point to errors the user can't see here
 watch(() => isActive.value && isTabPresented?.value !== false, (shown, _, onCleanup) => {
   if (shown) {
-    onCleanup(registerShownSubscriptionErrorBox(() => props.feeds))
+    onCleanup(registerShownSubscriptionErrorBox((feed, channelId) => (
+      props.feeds.includes(feed) && shownChannelsById.value.has(channelId)
+    )))
   }
 }, { immediate: true })
 </script>
