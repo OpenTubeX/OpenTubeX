@@ -508,8 +508,7 @@ function readColor(probe, property) {
 async function saveAndApply() {
   try {
     flushColorPreviews()
-    const themes = await saveCustomTheme(draft)
-    await store.dispatch('updateCustomThemes', themes)
+    const themes = await store.dispatch('updateCustomThemes', () => saveCustomTheme(draft))
     const savedTheme = themes.find(({ id }) => id === draft.id)
     setDraft(savedTheme)
     if (!keepSystemThemeOnSave) {
@@ -530,8 +529,7 @@ async function handleDeletePrompt(value) {
   if (value !== 'delete') return
 
   try {
-    const themes = await deleteCustomTheme(draft.id)
-    await store.dispatch('updateCustomThemes', themes)
+    await store.dispatch('updateCustomThemes', () => deleteCustomTheme(draft.id))
     showToast({
       message: t('Settings.Theme Settings.Custom Theme.Theme Deleted'),
       icon: ['fas', 'trash']

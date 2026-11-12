@@ -167,7 +167,7 @@ test('does not treat reordered object keys as a local setting edit', () => {
   assert.deepEqual(entry, remoteEntry)
 })
 
-test('records a custom-theme edit before publishing the new theme list', async () => {
+test('records a custom-theme edit before saving and publishing the new theme list', async () => {
   const calls = []
   const themes = [{ id: 'theme-1', name: 'Test theme' }]
 
@@ -178,10 +178,14 @@ test('records a custom-theme edit before publishing the new theme list', async (
       getSystemLightTheme: 'light',
       getSystemDarkTheme: 'dark',
     },
-  }, themes)
+  }, async () => {
+    calls.push(['save'])
+    return themes
+  })
 
   assert.deepEqual(calls, [
     ['dispatch', 'recordSyncSettingEdit', 'customThemes'],
+    ['save'],
     ['commit', 'setCustomThemes', themes],
   ])
 })
@@ -197,7 +201,7 @@ test('resets a system theme slot when a custom theme changes classification', as
       getSystemLightTheme: 'custom:theme-1',
       getSystemDarkTheme: 'dark',
     },
-  }, themes)
+  }, async () => themes)
 
   assert.deepEqual(calls, [
     ['dispatch', 'recordSyncSettingEdit', 'customThemes'],

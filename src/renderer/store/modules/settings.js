@@ -499,6 +499,18 @@ export function settingWritesSettled() {
   return settingWrites.settled()
 }
 
+/**
+ * Runs a write of a synchronized value saved outside this module, such as
+ * custom themes, so sync waits for it too.
+ * @template T
+ * @param {string} settingId
+ * @param {() => Promise<T>} write
+ * @returns {Promise<T>}
+ */
+export function trackSettingWrite(settingId, write) {
+  return settingWrites.track(settingId, write)
+}
+
 const customState = {
 }
 
@@ -821,14 +833,14 @@ const customActions = {
   // Takes the new groups (sync, imports) or a function that derives them from
   // the saved ones. Edits read the saved groups inside a lock all windows
   // share, so an edit in one window cannot undo another's.
-  updateSubscriptionGroups: ({ commit, state }, update) => runLockedSettingUpdate('subscriptionGroups', async () => {
+  updateSubscriptionGroups: ({ commit, state }, update) => settingWrites.track('subscriptionGroups', () => runLockedSettingUpdate('subscriptionGroups', async () => {
     // Read the datastore, as the broadcast of another window's edit may still be on its way.
     const saved = await DBSettingHandlers.findValue('subscriptionGroups')
     const groups = typeof update === 'function' ? update(saved === undefined ? state.subscriptionGroups : saved) : update
     await recordSettingSyncTimestamp(commit, 'subscriptionGroups')
     await DBSettingHandlers.upsert('subscriptionGroups', groups)
     commit('setSubscriptionGroups', groups)
-  }),
+  })),
   updateSubscribedChannelsCustomOrder: ({ commit, state }, value) => updateOrderedSetting(
     commit, state, 'subscribedChannelsCustomOrder', value
   ),

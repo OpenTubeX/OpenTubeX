@@ -94,11 +94,12 @@ export function createSettingWriteTracker(readSaved) {
           return await write()
         } finally {
           try {
-            if (entry.apply && entry.count === 1) {
+            const apply = entry.count === 1 ? entry.apply : null
+            if (apply) {
               const saved = await readSaved(settingId)
-              // Otherwise a newer write started and shows the saved value when it finishes.
-              if (entry.count === 1) {
-                const apply = entry.apply
+              // Otherwise a newer write started and shows the saved value when
+              // it finishes, or a newer save arrived and was already shown.
+              if (entry.count === 1 && entry.apply === apply) {
                 entry.apply = null
                 apply(saved)
               }
