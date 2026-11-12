@@ -89,7 +89,7 @@ const ShakaError = shaka.util.Error
  * @property {Set<string>} deliveredMediaFor
  * @property {boolean} attestationPending
  * @property {boolean} mediaWithheld
- * @property {Map<string, import('./sabrProtocol').SabrCuepoint>} cuepoints ongoing ad breaks
+ * @property {Map<string, import('./sabrProtocol').SabrCuepoint>} cuepoints recent ad breaks, oldest first
  */
 /**
  * @typedef TimeoutController
@@ -116,6 +116,11 @@ const BACKOFF_ROUNDS_WITHOUT_MEDIA = 6
 /** Leaves time for a reload before playback runs out of withheld media. */
 const WITHHELD_MEDIA_RELOAD_BUFFER_SECONDS = 10
 const WITHHELD_MEDIA_POLL_MS = 1000
+/**
+ * Ad breaks are minutes apart, so this keeps the ones around the playhead.
+ * SABR sends an evicted break's cue point again when playback returns to it.
+ */
+const MAX_REPORTED_CUEPOINTS = 8
 
 /**
  * @param {shaka.media.SegmentReference} reference
@@ -677,12 +682,14 @@ async function doRequest(
             break
           }
           case CUEPOINT_LIST_PART_ID: {
+            // Keep reporting a break after its STOP event: SABR withholds the
+            // segment that ends the break until the request reports it
+            const { cuepoints } = currentState.sabrStreamState
             for (const cuepoint of decodePart(part, { decode: parseSabrCuepoints }) ?? []) {
-              if (cuepoint.stopped) {
-                currentState.sabrStreamState.cuepoints.delete(cuepoint.identifier)
-              } else if (!currentState.sabrStreamState.cuepoints.has(cuepoint.identifier)) {
-                currentState.sabrStreamState.cuepoints.set(cuepoint.identifier, cuepoint)
-              }
+              if (cuepoints.has(cuepoint.identifier)) continue
+
+              cuepoints.set(cuepoint.identifier, cuepoint)
+              if (cuepoints.size > MAX_REPORTED_CUEPOINTS) cuepoints.delete(cuepoints.keys().next().value)
             }
             break
           }

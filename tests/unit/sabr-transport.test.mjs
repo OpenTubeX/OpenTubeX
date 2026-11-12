@@ -1095,19 +1095,20 @@ function lengthDelimited(field, bytes) {
   return [...varint(field * 8 + 2, bytes.length), ...bytes]
 }
 
-test('requests after an ad break carry its cue point so SABR resumes the stream', async t => {
-  // Captured from a live stream: SABR withholds the segment behind a cue point
-  // and backoffs until the request reports how the client handled the ad break
-  const duration = [...new Uint8Array(new Float64Array([60]).buffer)]
-  const cuepoint = [...varint(2 << 3, 1), (3 << 3) | 1, ...duration,
+test('requests at the end of an ad break carry its cue point so SABR resumes the stream', async t => {
+  // Captured from a live stream: SABR withholds the segment that ends an ad
+  // break, sending its STOP cue point 58s into the 60s break, and backoffs
+  // until the request reports how the client handled the break
+  const double = value => [...new Uint8Array(new Float64Array([value]).buffer)]
+  const cuepoint = [...varint(1 << 3, 1, 2 << 3, 3), (3 << 3) | 1, ...double(60), (4 << 3) | 1, ...double(58),
     ...lengthDelimited(6, [...new TextEncoder().encode('ad-1')])]
-  const timeRange = varint(1 << 3, 7_170_358_133, 3 << 3, 1000)
+  const timeRange = varint(1 << 3, 7_228_000, 3 << 3, 1000)
   const cuepointList = lengthDelimited(1, [...lengthDelimited(1, cuepoint), ...lengthDelimited(4, timeRange)])
 
   const bodies = []
   const { createSabrTransport } = load(async (_uri, options) => {
     bodies.push(options.body)
-    if (bodies.length > 1) return response([1, 2])
+    if (protocol.extractRawProtobufField(options.body, 24)) return response([1, 2])
     const buffer = new CompositeBuffer([])
     const writer = new UmpWriter(buffer)
     writer.write(protocol.CUEPOINT_LIST_PART_ID, Uint8Array.from(cuepointList))
@@ -1120,11 +1121,12 @@ test('requests after an ad break carry its cue point so SABR resumes the stream'
   const segment = await transport.request(uri, request(uri), 1).promise
 
   assert.deepEqual([...segment.data], [1, 2])
+  assert.equal(bodies.length, 2)
   assert.equal(protocol.extractRawProtobufField(bodies[0], 24), undefined)
   const ssapPlaybackInfo = protocol.extractRawProtobufField(bodies[1], 24)
   assert.deepEqual([...ssapPlaybackInfo], [
     ...lengthDelimited(7, [...new TextEncoder().encode('ad-1')]),
-    ...varint(8 << 3, 11, 10 << 3, 7_170_358_133, 11 << 3, 60_000),
+    ...varint(8 << 3, 11, 10 << 3, 7_170_000, 11 << 3, 60_000),
   ])
   // The request stays valid for decoders that do not know the field
   assert.deepEqual(protos.VideoPlaybackAbrRequest.decode(bodies[1]).selectedFormatIds,
