@@ -5194,15 +5194,21 @@ export default defineComponent({
     // Start positions are applied before the first frame and keep the poster.
     let mediaFrameLoaded = false
     let seekRevealsFrame = false
+    // Chromium can report the first frame before the seeking event of a start
+    // position requested at loadedmetadata, so that seek is marked instead.
+    let startPositionSeekPending = false
 
     /** @param {boolean} loaded */
     function handleMediaFrameLoaded(loaded) {
       mediaFrameLoaded = loaded
+      // A replaced source never seeks to the old start position.
+      if (!loaded) startPositionSeekPending = false
     }
 
     function handleSeeking() {
       if (shortsNavigationSuspended.value) return
-      seekRevealsFrame = mediaFrameLoaded
+      seekRevealsFrame = mediaFrameLoaded && !startPositionSeekPending
+      startPositionSeekPending = false
       hasPlaybackPosition.value = true
       // A position chosen while paused is where playback should resume.
       if (video.value?.paused) rewindOnResumePausedAt = null
@@ -10228,6 +10234,7 @@ export default defineComponent({
       const restoreNativeStart = () => {
         if (player !== loadingPlayer || pendingMetadataSeek !== null ||
           hasPlaybackPosition.value || mediaElement.seeking || startTime == null) return
+        startPositionSeekPending = true
         mediaElement.currentTime = startTime
       }
       const prepareStartTime = () => {
