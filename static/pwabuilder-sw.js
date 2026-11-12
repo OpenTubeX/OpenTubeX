@@ -1,7 +1,9 @@
 /* eslint-disable no-console */
 // This is the service worker with the Advanced caching
 
-const CACHE = 'pwabuilder-adv-cache'
+// Each build registers the worker with its own version, so its files replace
+// the previous build's instead of piling up in the cache
+const CACHE = 'pwabuilder-adv-cache-' + new URL(self.location.href).searchParams.get('v')
 // Production builds hash their scripts and styles, so only the page is
 // precached. Each asset is cached when the app first loads it.
 const offlineFallbackPage = 'index.html'
@@ -45,16 +47,9 @@ self.addEventListener('install', function (event) {
     caches.open(CACHE).then(function (cache) {
       console.log('[PWA Builder] Caching pages during install')
 
-      // The page's own scripts and styles loaded before this worker could
-      // cache them, so fetch them now for the app to open offline next time.
-      // One that fails is cached when the app next loads it.
+      // Pages load before this worker controls them, so the app opens offline
+      // once a visit under its control has cached the files it uses
       return cache.add(offlineFallbackPage)
-        .then(function () { return cache.match(offlineFallbackPage) })
-        .then(function (response) { return response.text() })
-        .then(function (html) {
-          const assets = Array.from(html.matchAll(/(?:src|href)="([^":]+\.(?:js|css))"/g), function (match) { return match[1] })
-          return Promise.allSettled(assets.map(function (asset) { return cache.add(asset) }))
-        })
     })
   )
 })
@@ -62,7 +57,9 @@ self.addEventListener('install', function (event) {
 // Allow sw to control of current page
 self.addEventListener('activate', function (event) {
   console.log('[PWA Builder] Claiming clients for current page')
-  event.waitUntil(self.clients.claim())
+  event.waitUntil(caches.keys().then(function (names) {
+    return Promise.all(names.filter(function (name) { return name !== CACHE }).map(function (name) { return caches.delete(name) }))
+  }).then(function () { return self.clients.claim() }))
 })
 
 // If any fetch fails, it will look for the request in the cache and serve it from there first
@@ -121,6 +118,12 @@ function networkFirstFetch(event) {
   event.respondWith(
     fetch(event.request)
       .then(function (response) {
+        // A server error, such as a 502 while the server restarts, still opens the app
+        if (event.request.mode === 'navigate' && response.status >= 500) {
+          return caches.open(CACHE)
+            .then(function (cache) { return cache.match(offlineFallbackPage) })
+            .then(function (cached) { return cached || response })
+        }
         // If request was success, add or update it in the cache
         event.waitUntil(updateCache(event.request, response.clone()))
         return response
