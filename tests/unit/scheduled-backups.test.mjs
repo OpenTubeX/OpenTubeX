@@ -23,7 +23,7 @@ const data = {
 }
 const transferableDefaults = Object.fromEntries(Object.entries(createDefaultSettings({ supportsLocalApi: true, isElectron: true }))
   .filter(([key]) => !NON_TRANSFERABLE_SETTINGS.has(key)))
-const expectedData = { ...data, settings: { ...transferableDefaults, ...data.settings, landingPage: 'subscriptions', aiVideoSummaryMode: 'hide' } }
+const expectedData = { ...data, settings: { ...transferableDefaults, ...data.settings, landingPage: 'subscriptions' } }
 
 async function setup(t) {
   const directory = await mkdtemp(path.join(tmpdir(), 'opentubex-backups-'))

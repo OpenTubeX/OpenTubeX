@@ -1213,14 +1213,6 @@ const customActions = {
         } catch (error) {
           console.error('Failed to migrate AI video summary visibility', error)
         }
-      } else if (!hasAiVideoSummaryModeSetting) {
-        // Only fresh installations receive the new default. Persist it so
-        // their next startup does not mistake them for an existing installation.
-        const hasExistingSettings = userSettings.some(({ _id }) => !TUTORIAL_STATE_SETTING_IDS.has(_id))
-        const isFreshInstallation = !hasExistingSettings && (await DBProfileHandlers.find()).length === 0
-        const mode = isFreshInstallation ? 'collapsed' : 'hide'
-        commit('setAiVideoSummaryMode', mode)
-        await dispatch('updateAiVideoSummaryMode', mode)
       }
 
       // Migrate the legacy auto Picture-in-Picture setting to the combinable triggers array.

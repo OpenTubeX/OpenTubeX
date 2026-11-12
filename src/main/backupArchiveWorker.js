@@ -43,7 +43,6 @@ async function prepareArchive() {
       const resolvedSettings = {
         ...createDefaultSettings({ supportsLocalApi: true, isElectron: true }),
         landingPage: resolveDefaultLandingPage(isFreshInstallation),
-        aiVideoSummaryMode: isFreshInstallation ? 'collapsed' : 'hide',
         ...migrateLegacySettings(Object.fromEntries(savedSettings.map(setting => [setting._id, setting.value]))),
       }
       return Object.fromEntries(Object.entries(resolvedSettings).filter(([key]) => !NON_TRANSFERABLE_SETTINGS.has(key)))
