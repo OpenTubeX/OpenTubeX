@@ -2574,8 +2574,9 @@ export default defineComponent({
       this.videoMetadataIncomplete = false
       // Re-evaluate per video: this instance is reused across same-tab
       // navigation, so a tab that was presented for the previous video must not
-      // keep that state while it loads the next one in the background.
-      this.hasBeenPresented = this.isCurrentlyPresented()
+      // keep that state while it loads the next one in the background. A mini
+      // player that moves on to the next video keeps showing it, though.
+      this.hasBeenPresented = this.isCurrentlyPresented() || this.miniPlayerStartHeight > 0
       this.applyBackgroundStart()
 
       this.checkIfTimestamp()
