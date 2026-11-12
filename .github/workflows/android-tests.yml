@@ -1,9 +1,10 @@
 name: Android Tests
 
 on:
-  # The suite takes about an hour of emulator time, so pull requests run it
-  # only for native changes. The nightly run covers renderer changes.
-  pull_request:
+  # Each run takes three shards of up to an hour, so pull requests don't run
+  # it. Each push to development that changes native code runs it, and the
+  # nightly run covers renderer changes.
+  push:
     branches: [ development ]
     paths:
       - 'android/**'
@@ -23,9 +24,11 @@ on:
 
 permissions: {}
 
+# A running suite finishes, and only the latest waiting run starts next, so one
+# run can cover several merges.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   instrumentation:
