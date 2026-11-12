@@ -99,7 +99,6 @@
               :key="feed.url"
               class="feedRow"
               :class="{ hasError: errorFeedUrls.has(feed.url) }"
-              :aria-busy="retryingFeedUrls.has(feed.url)"
             >
               <FtLoader
                 v-if="retryingFeedUrls.has(feed.url)"
