@@ -34,6 +34,9 @@ const OPAQUE_PATH_SEGMENT = /^[\w%=.~-]{40,}$/
 // Video, channel and playlist IDs and channel handles show what the user
 // watched. Words, even long ones like `performance`, have no digits or capitals.
 const MEDIA_ID_PATH_SEGMENT = /^(?:(?=[\w-]*[\dA-Z])[\w-]{11,}|@.+)$/
+// Segments followed by an ID or name, which can be all lowercase, like
+// `/vi/<video ID>/` or `/api/v1/channels/<channel ID>`
+const MEDIA_ID_PARENT_SEGMENTS = new Set(['vi', 'vi_webp', 'shorts', 'embed', 'live', 'v', 'channel', 'c', 'user', 'videos', 'channels', 'playlists', 'comments', 'captions', 'storyboards', 'post'])
 // The app's routes live in the hash, like `#/watch/<id>`. Only their name is
 // kept, since the rest can be a search, a handle or an ID.
 const APP_PROTOCOLS = ['app:', 'capacitor:']
@@ -43,9 +46,19 @@ const APP_PROTOCOLS = ['app:', 'capacitor:']
  * @returns {string}
  */
 function redactPath(path) {
-  return path
-    .split('/')
-    .map(segment => OPAQUE_PATH_SEGMENT.test(segment) || MEDIA_ID_PATH_SEGMENT.test(segment) ? REDACTED : segment)
+  const segments = path.split('/')
+  return segments
+    .map((segment, index) => {
+      // Handles can be percent-encoded, like `%40name`
+      let decoded = segment
+      try {
+        decoded = decodeURIComponent(segment)
+      } catch {}
+      return OPAQUE_PATH_SEGMENT.test(segment) || MEDIA_ID_PATH_SEGMENT.test(decoded) ||
+        (segment !== '' && MEDIA_ID_PARENT_SEGMENTS.has(segments[index - 1]?.toLowerCase()))
+        ? REDACTED
+        : segment
+    })
     .join('/')
 }
 
