@@ -289,6 +289,7 @@ public final class SubscriptionRefreshWorker extends Worker {
                                 context,
                                 Collections.singletonList(profileId),
                                 feedType,
+                                null,
                                 "Android result store",
                                 error
                             );
@@ -309,6 +310,7 @@ public final class SubscriptionRefreshWorker extends Worker {
                         context,
                         profileIds,
                         feedType,
+                        channelId,
                         "Subscription backend",
                         error
                     );
@@ -362,6 +364,7 @@ public final class SubscriptionRefreshWorker extends Worker {
                         context,
                         Collections.singletonList(profileFeed.profileId),
                         feedType,
+                        null,
                         "Android result store",
                         error
                     );
@@ -379,6 +382,7 @@ public final class SubscriptionRefreshWorker extends Worker {
                 context,
                 profileIds,
                 feedType,
+                null,
                 "Android background worker",
                 error
             );
@@ -417,26 +421,39 @@ public final class SubscriptionRefreshWorker extends Worker {
         }
     }
 
+    /**
+     * @param channelId the channel that failed, which the app lists above its
+     *     feeds, or null for a failure of the whole feed
+     */
     private static void recordFailure(
         Context context,
         List<String> profileIds,
         String feedType,
+        String channelId,
         String backend,
         Throwable error
     ) {
         SubscriptionRefreshRequestDiagnostic diagnostic =
             SubscriptionRefreshRequestDiagnostic.create(feedType, backend, error);
         Log.w(LOG_TAG, diagnostic.toString());
+        boolean unavailable = error instanceof SubscriptionRefreshHttpClient.RequestsFailedException failure &&
+            failure.channelUnavailable;
         long timestamp = System.currentTimeMillis();
         for (String profileId : profileIds) {
             try {
-                SubscriptionRefreshResultStore.writeFailure(
-                    context,
-                    profileId,
-                    feedType,
-                    diagnostic,
-                    timestamp
-                );
+                if (channelId == null) {
+                    SubscriptionRefreshResultStore.writeFailure(context, profileId, feedType, diagnostic, timestamp);
+                } else {
+                    SubscriptionRefreshResultStore.writeChannelFailure(
+                        context,
+                        profileId,
+                        feedType,
+                        channelId,
+                        diagnostic,
+                        unavailable,
+                        timestamp
+                    );
+                }
             } catch (Exception storageError) {
                 Log.e(
                     LOG_TAG,

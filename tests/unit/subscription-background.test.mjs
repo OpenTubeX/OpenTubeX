@@ -158,6 +158,17 @@ for (const [feed, path] of Object.entries({ shorts: 'shorts', live: 'streams', p
   })
 }
 
+test('a channel that YouTube reports as gone fails as unavailable, even when later sources fail differently', async () => {
+  const requests = createBackgroundSubscriptionRequests({ useRss: false })
+  const gone = { ...channelPage('UCtest', ['/@channel/videos']), alerts: [{ alertRenderer: { type: 'ERROR' } }] }
+  const fetchChannel = page => fetchBackgroundSubscriptionChannel({ requests }, 'videos', 'UCtest', new AbortController().signal, async request => {
+    if (request.format !== 'local') throw new Error('HTTP 404')
+    return JSON.stringify(page)
+  })
+  await assert.rejects(fetchChannel(gone), { message: 'HTTP 404', channelUnavailable: true })
+  await assert.rejects(fetchChannel({}), { channelUnavailable: false })
+})
+
 function configuration(interval = 100) {
   return {
     intervals: { videos: interval },
@@ -188,6 +199,34 @@ test('background scheduling respects deadlines, deduplicates channels, and exclu
   now = 200
   await scheduler.tick()
   assert.equal(fetched.length, 3)
+})
+
+test('a failed channel is saved for each profile, so the app lists it above the feed', async () => {
+  let now = 0
+  const saved = []
+  const scheduler = createSubscriptionBackgroundScheduler({
+    now: () => now,
+    fetchChannel: async (_, feed, id) => {
+      if (id === 'UC1') throw Object.assign(new Error('HTTP 404'), { channelUnavailable: true })
+      return { videos: [] }
+    },
+    saveResult: async result => saved.push(result)
+  })
+  scheduler.configure(configuration())
+  await scheduler.setBackground(true)
+  now = 100
+  await scheduler.tick()
+  const failures = saved.filter(result => result.kind === 'channelFailure')
+  assert.deepEqual(failures.map(result => result.profileId).sort(), ['all', 'custom'])
+  assert.deepEqual(failures[0], {
+    kind: 'channelFailure',
+    profileId: failures[0].profileId,
+    feedType: 'videos',
+    channelId: 'UC1',
+    timestamp: 100,
+    diagnostic: { category: 'subscription videos', backend: 'Subscription backend', lifecycle: 'background', failure: 'http', message: 'HTTP 404' },
+    unavailable: true
+  })
 })
 
 test('profiles sharing a channel get one fetch time, so the app imports it once', async () => {
@@ -255,6 +294,13 @@ test('saved results survive restart and stale acknowledgements cannot remove a n
     assert.equal(next.payload.entries[0].videoId, 'new')
     await reopened.acknowledge(next.id)
     assert.equal(await reopened.next(), null)
+
+    // A failure does not replace a fetched feed the app has not imported yet
+    await reopened.save({ ...first, timestamp: 300 })
+    await reopened.save({ kind: 'channelFailure', profileId: 'all', feedType: 'videos', channelId: 'UC1', timestamp: 400, diagnostic: {} })
+    await reopened.retain(configuration())
+    assert.equal((await readdir(directory)).length, 2)
+    assert.equal((await reopened.next()).kind, 'channel')
   } finally { await rm(directory, { recursive: true, force: true }) }
 })
 

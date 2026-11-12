@@ -281,7 +281,13 @@ async function runWithSubscriptionRefreshLock(tab, profileId, refresh, { t, chan
       return await refresh()
     } finally {
       activeRefresh.networkRecovery?.cancel()
-      notifyNewSubscriptionErrors(activeRefresh, t)
+      if (!activeRefresh.cancelled) {
+        notifyNewSubscriptionChannelErrors(
+          activeRefresh.profileId,
+          [...activeRefresh.newErrorChannelIds].map(channelId => ({ feed: tab, channelId })),
+          t
+        )
+      }
       activeRefresh = null
       window.dispatchEvent(new CustomEvent(SUBSCRIPTION_REFRESH_FINISHED_EVENT, {
         detail: { tab, profileId, refreshId }
@@ -382,15 +388,18 @@ function recordSubscriptionChannelResult(refresh, channel) {
 /**
  * Points to the error box when channels failed for the first time and the
  * user can't see the box already.
- * @param {NonNullable<typeof activeRefresh>} refresh
+ * @param {string} profileId
+ * @param {{ feed: import('./subscriptionRefreshErrors').SubscriptionFeed, channelId: string }[]} errors
  * @param {(key: string, named?: Record<string, unknown>, plural?: number) => string} t
  */
-function notifyNewSubscriptionErrors(refresh, t) {
-  // Upload notifications and automatic downloads also fetch channels of other
-  // profiles, which have no row in this profile's box
-  const profileChannelIds = new Set(store.getters.profileById(refresh.profileId)?.subscriptions.map(channel => channel.id))
-  const channelIds = [...refresh.newErrorChannelIds].filter(channelId => profileChannelIds.has(channelId))
-  if (refresh.cancelled || channelIds.every(channelId => isSubscriptionChannelErrorShown(refresh.tab, channelId))) return
+export function notifyNewSubscriptionChannelErrors(profileId, errors, t) {
+  // Upload notifications, automatic downloads, and background refreshes also
+  // fetch channels of other profiles, which have no row in this profile's box
+  const profileChannelIds = new Set(store.getters.profileById(profileId)?.subscriptions.map(channel => channel.id))
+  const hiddenErrors = errors.filter(({ feed, channelId }) => (
+    profileChannelIds.has(channelId) && !isSubscriptionChannelErrorShown(feed, channelId)
+  ))
+  if (hiddenErrors.length === 0) return
 
   showToast({
     message: t('Subscriptions.Channel Errors.Toast'),
@@ -398,12 +407,13 @@ function notifyNewSubscriptionErrors(refresh, t) {
     action: () => {
       // The box only lists the selected group's channels
       const groupChannelIds = new Set(store.getters.getActiveGroupSubscriptions.map(channel => channel.id))
-      if (!channelIds.every(channelId => groupChannelIds.has(channelId))) {
+      if (!hiddenErrors.every(({ channelId }) => groupChannelIds.has(channelId))) {
         store.dispatch('selectSubscriptionGroup', null)
       }
+      const { feed } = hiddenErrors[0]
       openInternalPath({
         path: '/subscriptions',
-        query: { tab: refresh.tab === 'posts' ? 'community' : refresh.tab }
+        query: { tab: feed === 'posts' ? 'community' : feed }
       })
     }
   })

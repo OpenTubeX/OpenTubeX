@@ -64,6 +64,10 @@ export function parseBackgroundSubscriptionResponse(format, text, feedType, chan
   if (format === 'local' || format === 'localPlaylist') {
     // A request for a missing tab can redirect to the channel's Videos or Home tab.
     if (format === 'local' && channelHasNoFeed(data, feedType, channelId)) return emptyFeed(feedType)
+    // YouTube explains with an error alert why a channel is gone
+    if (format === 'local' && data.alerts?.some(alert => alert.alertRenderer?.type === 'ERROR')) {
+      throw Object.assign(new Error('Channel unavailable'), { channelUnavailable: true })
+    }
     const tabs = data.contents?.twoColumnBrowseResultsRenderer?.tabs ?? data.contents?.singleColumnBrowseResultsRenderer?.tabs
     const selected = Array.isArray(tabs) ? tabs.find(tab => tab.tabRenderer?.selected === true)?.tabRenderer : null
     const path = format === 'local' && OPTIONAL_TAB_PATHS[feedType]
@@ -85,6 +89,7 @@ export function parseBackgroundSubscriptionResponse(format, text, feedType, chan
 
 export async function fetchBackgroundSubscriptionChannel(configuration, feedType, channelId, signal, fetchText, normalize = payload => payload) {
   let lastError
+  let channelUnavailable = false
   // A Topic channel without a Videos tab has uploads only if its uploads playlist exists.
   let topicChannelWithoutVideosTab = false
   for (const plan of configuration.requests[feedType]) {
@@ -112,6 +117,7 @@ export async function fetchBackgroundSubscriptionChannel(configuration, feedType
       return await normalize(payload)
     } catch (error) {
       lastError = error
+      channelUnavailable ||= error.channelUnavailable === true
       if (error.verifiedTopicChannel) topicChannelWithoutVideosTab = true
       if (plan.format === 'local' && OPTIONAL_TAB_PATHS[feedType] && error.message === 'HTTP 404') {
         try {
@@ -129,7 +135,8 @@ export async function fetchBackgroundSubscriptionChannel(configuration, feedType
     }
   }
   signal.throwIfAborted()
-  throw lastError ?? new Error('No background subscription backend configured')
+  // Later sources fail for a channel that is gone too, with less telling errors
+  throw Object.assign(lastError ?? new Error('No background subscription backend configured'), { channelUnavailable })
 }
 
 /** YouTube sometimes returns only a continuation on the Live tab. */

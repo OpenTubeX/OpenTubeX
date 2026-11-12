@@ -161,6 +161,35 @@ test('background playlist imports restore missing authors and keep explicit byli
   assert.deepEqual(clearedErrors, [['UCchannel', ['shorts']]], 'a successful import clears the feed error shown above the feeds')
 })
 
+test('channels that failed in a background refresh are listed above the feed', async t => {
+  const errors = []
+  const notifications = []
+  hooks.store = createStore({
+    getSubscribedChannelsById: new Map(['UCgone', 'UCrefreshed', 'UCoffline'].map(id => [id, { id, name: 'Subscribed creator' }])),
+    getVideoCache: { UCrefreshed: { timestamp: new Date(2000) } },
+  })
+  hooks.setSubscriptionChannelError = (...args) => { errors.push(args); return true }
+  hooks.notifyNewSubscriptionChannelErrors = (profileId, newErrors) => notifications.push([profileId, newErrors])
+  const diagnostic = { category: 'subscription videos', backend: 'Subscription backend', lifecycle: 'background', failure: 'http', message: 'HTTP 404' }
+  const failure = channelId => ({ id: channelId, kind: 'channelFailure', profileId: 'all', feedType: 'videos', channelId, timestamp: 1000, diagnostic })
+  const results = [
+    { ...failure('UCgone'), unavailable: true },
+    // A foreground refresh succeeded after the background one failed
+    failure('UCrefreshed'),
+    { ...failure('UCoffline'), diagnostic: { ...diagnostic, failure: 'network' } },
+  ]
+  hooks.getNextResult = async () => results.shift() ?? null
+  start(t, android, { env: { IS_CAPACITOR: 'true' } })
+  showApp()
+  await settle()
+  assert.deepEqual(errors, [['UCgone', 'videos', {
+    reasons: ['HTTP 404'],
+    trace: 'Subscribed creator (UCgone): request=subscription videos; backend=Subscription backend; lifecycle=background; failure=http; message=HTTP 404',
+    unavailable: true
+  }]])
+  assert.deepEqual(notifications, [['all', [{ feed: 'videos', channelId: 'UCgone' }]]])
+})
+
 test('background Yattee Shorts are dated through the server instead of YouTube', async t => {
   const cache = { UCchannel: { videos: [{ videoId: 'known', published: 1000 }] } }
   const lookups = []

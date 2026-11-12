@@ -35,11 +35,12 @@ import { formatRequestDiagnostic } from '../helpers/api/requestDiagnostics'
 import { reconcileFetchedSubscriptionEntries } from '../helpers/subscription-entries'
 import { parseSubscriptionRss } from '../helpers/api/feed-rss'
 import { cancelRssFeedsRefresh } from '../helpers/rssFeeds'
-import { clearSubscriptionChannelErrors } from '../helpers/subscriptionRefreshErrors'
+import { clearSubscriptionChannelErrors, setSubscriptionChannelError } from '../helpers/subscriptionRefreshErrors'
 import {
   enrichSubscriptionRssEntries,
   enrichSubscriptionShortDates,
   cancelSubscriptionRefresh,
+  notifyNewSubscriptionChannelErrors,
   notifySubscriptionChannelRefreshed,
   refreshSubscriptionLiveFromRemote,
   refreshSubscriptionPostsFromRemote,
@@ -939,6 +940,7 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
   }
 
   async function importAndroidSubscriptionRefreshResults() {
+    const newErrors = []
     try {
       while (true) {
         const result = await getNextAndroidSubscriptionRefreshResult()
@@ -960,6 +962,10 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
             acknowledgeAndroidSubscriptionRefreshResult
           )
           continue
+        } else if (result.kind === 'channelFailure') {
+          if (importSubscriptionChannelFailure(result)) {
+            newErrors.push({ feed: result.feedType, channelId: result.channelId })
+          }
         } else if (result.kind === 'completion' && store.getters.profileById(result.profileId)) {
           handleSubscriptionRefreshCompleted({
             detail: {
@@ -984,7 +990,32 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
       }
     } catch (error) {
       console.error('Failed to reconcile closed-app subscription refresh data', error)
+    } finally {
+      notifyNewSubscriptionChannelErrors(store.getters.getActiveProfile._id, newErrors, t)
     }
+  }
+
+  /**
+   * Lists a channel that failed in a background refresh above its feed, like
+   * a foreground refresh does.
+   * @returns {boolean} whether the channel had no errors before
+   */
+  function importSubscriptionChannelFailure(result) {
+    const channel = store.getters.getSubscribedChannelsById.get(result.channelId)
+    // Like the foreground refresh, network failures stay quiet
+    if (channel === undefined || typeof result.diagnostic?.message !== 'string' || result.diagnostic.failure === 'network') {
+      return false
+    }
+    // A later refresh of the channel succeeded
+    const cache = getAndroidSubscriptionCacheConfig(result.feedType).getCache()[result.channelId]
+    if (cache?.timestamp >= new Date(Number(result.timestamp))) return false
+
+    const channelLabel = channel.name ? `${channel.name} (${channel.id})` : channel.id
+    return setSubscriptionChannelError(channel.id, result.feedType, {
+      reasons: [result.diagnostic.message],
+      trace: `${channelLabel}: ${formatRequestDiagnostic(result.diagnostic)}`,
+      unavailable: result.unavailable === true
+    })
   }
 
   async function reconcileAndroidSubscriptionRefreshChannelResult(result) {

@@ -242,6 +242,35 @@ public class SubscriptionRefreshBackgroundTest {
         }
     }
 
+    @Test
+    public void aFailedChannelGetsItsNextUnchangedFeedImported() throws Exception {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        File results = new File(context.getFilesDir(), "subscription-refresh-results");
+        String profileId = "background-test-" + UUID.randomUUID();
+        String slot = profileId + "\nvideos\nUCtest";
+        File feed = new File(results, slotName(slot) + ".json");
+        File failure = new File(results, slotName(slot + "\nfailure") + ".json");
+        JSONObject payload = new JSONObject().put("videos", new JSONArray());
+        try {
+            SubscriptionRefreshResultStore.writeChannel(context, profileId, "videos", "UCtest", payload, 1);
+            assertTrue(SubscriptionRefreshResultStore.acknowledge(context, SubscriptionRefreshResultStore.readId(feed)));
+            SubscriptionRefreshResultStore.writeChannelFailure(context, profileId, "videos", "UCtest",
+                SubscriptionRefreshRequestDiagnostic.create("videos", "Subscription backend", new java.io.IOException("HTTP 500")), true, 2);
+            SubscriptionRefreshResultStore.writeChannel(context, profileId, "videos", "UCtest", payload, 3);
+            assertTrue("the unchanged feed is saved again, so that the app stops listing the channel", feed.exists());
+            JSONObject saved = savedResult(results, slot + "\nfailure");
+            assertEquals("the failure does not replace the feed", "channelFailure", saved.getString("kind"));
+            assertEquals("UCtest", saved.getString("channelId"));
+            assertTrue(saved.getBoolean("unavailable"));
+            assertEquals("HTTP 500", saved.getJSONObject("diagnostic").getString("message"));
+        } finally {
+            for (File file : new File[] { feed, failure }) {
+                if (file.exists()) SubscriptionRefreshResultStore.acknowledge(context, SubscriptionRefreshResultStore.readId(file));
+            }
+            new File(results, slotName(slot) + ".fingerprint").delete();
+        }
+    }
+
     private static String slotName(String slot) {
         return UUID.nameUUIDFromBytes(slot.getBytes(StandardCharsets.UTF_8)).toString();
     }

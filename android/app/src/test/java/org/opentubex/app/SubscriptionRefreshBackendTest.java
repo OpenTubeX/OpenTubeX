@@ -213,6 +213,29 @@ public class SubscriptionRefreshBackendTest {
     }
 
     @Test
+    public void aChannelThatYouTubeReportsAsGoneFailsAsUnavailable() throws Exception {
+        JSONArray requests = new JSONArray()
+            .put(new JSONObject().put("format", "local"))
+            .put(new JSONObject().put("format", "rss"));
+        JSONObject gone = channelPage("UCtest", "videos").put("alerts", new JSONArray().put(new JSONObject()
+            .put("alertRenderer", new JSONObject().put("type", "ERROR"))));
+        SubscriptionRefreshHttpClient.RequestsFailedException failure = assertThrows(
+            SubscriptionRefreshHttpClient.RequestsFailedException.class,
+            () -> SubscriptionRefreshHttpClient.fetch(feed(requests), "UCtest", (request, type, id) -> {
+                if (request.getString("format").equals("rss")) throw new IOException("HTTP 404");
+                return gone.toString();
+            })
+        );
+        assertTrue("a later source does not hide that the channel is gone", failure.channelUnavailable);
+        assertFalse(assertThrows(
+            SubscriptionRefreshHttpClient.RequestsFailedException.class,
+            () -> SubscriptionRefreshHttpClient.fetch(feed(requests), "UCtest", (request, type, id) -> {
+                throw new IOException("HTTP 404");
+            })
+        ).channelUnavailable);
+    }
+
+    @Test
     public void localRefreshDoesNotRequireAnInvidiousInstance() throws Exception {
         JSONArray requests = new JSONArray().put(new JSONObject().put("format", "local").put("url", "https://www.youtube.com/youtubei/v1/browse"));
         SubscriptionRefreshConfiguration.Feed feed = feed(requests);

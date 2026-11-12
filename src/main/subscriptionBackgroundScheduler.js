@@ -1,4 +1,7 @@
+import { buildRequestDiagnostic } from '../renderer/helpers/api/requestDiagnostics.js'
+
 const FEED_TYPES = ['videos', 'shorts', 'live', 'posts']
+const CATEGORIES = { videos: 'subscription videos', shorts: 'subscription Shorts', live: 'subscription live streams', posts: 'subscription posts' }
 
 /** Native/background scheduling is independent of renderer timers and visibility. */
 export function createSubscriptionBackgroundScheduler({ fetchChannel, saveResult, now = Date.now }) {
@@ -74,7 +77,25 @@ export function createSubscriptionBackgroundScheduler({ fetchChannel, saveResult
                 }
               } catch (error) {
                 for (const feed of targets) failed.add(feed.key)
-                if (!controller.signal.aborted) console.error('Background subscription refresh failed', error)
+                if (controller.signal.aborted) return
+                console.error('Background subscription refresh failed', error)
+                // The app lists the channel above its feeds, like after a foreground refresh
+                const failure = {
+                  kind: 'channelFailure',
+                  feedType,
+                  channelId,
+                  timestamp: now(),
+                  diagnostic: buildRequestDiagnostic(error, { category: CATEGORIES[feedType], backend: 'Subscription backend', lifecycle: 'background' }),
+                  unavailable: error.channelUnavailable === true
+                }
+                for (const feed of targets) {
+                  if (controller.signal.aborted) return
+                  try {
+                    await saveResult({ ...failure, profileId: feed.profileId })
+                  } catch (saveError) {
+                    console.error('Background subscription failure could not be saved', saveError)
+                  }
+                }
               }
             }))
           }

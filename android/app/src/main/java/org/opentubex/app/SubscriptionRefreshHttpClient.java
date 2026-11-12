@@ -19,6 +19,24 @@ final class SubscriptionRefreshHttpClient {
 
     private SubscriptionRefreshHttpClient() {}
 
+    /** YouTube explained with an error alert why the channel is gone. */
+    static final class ChannelUnavailableException extends IOException {
+        ChannelUnavailableException() {
+            super("Channel unavailable");
+        }
+    }
+
+    /** Every configured source failed for the channel. */
+    static final class RequestsFailedException extends IOException {
+        // Later sources fail for a channel that is gone too, with less telling errors
+        final boolean channelUnavailable;
+
+        RequestsFailedException(Exception cause, boolean channelUnavailable) {
+            super("Background subscription requests failed", cause);
+            this.channelUnavailable = channelUnavailable;
+        }
+    }
+
     @FunctionalInterface
     interface RequestFetcher {
         String fetch(JSONObject request, String type, String channelId) throws IOException, JSONException;
@@ -67,6 +85,7 @@ final class SubscriptionRefreshHttpClient {
         // by the settings snapshot when the updated app first opens.
         if (feed.requests == null) throw new IOException("Open the app to update background refresh settings");
         Exception lastError = null;
+        boolean channelUnavailable = false;
         // A Topic channel without a Videos tab has uploads only if its uploads playlist exists.
         boolean topicChannelWithoutVideosTab = false;
         for (int index = 0; index < feed.requests.length(); index++) {
@@ -91,6 +110,9 @@ final class SubscriptionRefreshHttpClient {
                 }
                 if (format.equals("local") || format.equals("localPlaylist")) {
                     if (format.equals("local") && channelHasNoFeed(response, feed.type, channelId)) return emptyFeed(feed.type);
+                    if (format.equals("local") && response.optString("alerts").contains("\"type\":\"ERROR\"")) {
+                        throw new ChannelUnavailableException();
+                    }
                     if (format.equals("localPlaylist") && topicChannelWithoutVideosTab &&
                         response.optString("alerts").contains("The playlist does not exist.")) return emptyFeed(feed.type);
                     if (!hasSelectedContentTab(response.optJSONObject("contents"), format.equals("local") ? optionalTabPath(feed.type) : null) || response.optString("alerts").contains("\"type\":\"ERROR\"")) {
@@ -131,6 +153,7 @@ final class SubscriptionRefreshHttpClient {
             } catch (IOException | JSONException error) {
                 checkInterrupted();
                 lastError = error;
+                channelUnavailable |= error instanceof ChannelUnavailableException;
                 if (request.optString("format").equals("local") && optionalTabPath(feed.type) != null && "HTTP 404".equals(error.getMessage())) {
                     try {
                         checkInterrupted();
@@ -148,7 +171,7 @@ final class SubscriptionRefreshHttpClient {
                 }
             }
         }
-        throw new IOException("Background subscription requests failed", lastError);
+        throw new RequestsFailedException(lastError, channelUnavailable);
     }
 
     private static void checkInterrupted() throws IOException {
