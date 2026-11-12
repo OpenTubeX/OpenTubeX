@@ -38,6 +38,7 @@
       <RouterLink
         class="title"
         :to="route"
+        :title="titleLineLimit > 0 ? playlist.title : null"
       >
         <h3
           class="h3Title"
@@ -88,6 +89,8 @@ const props = defineProps({
 })
 
 const blurThumbnails = computed(() => store.getters.getBlurThumbnails)
+// Titles cut to a few lines show in full on hover
+const titleLineLimit = computed(() => store.getters.getTitleLineLimit)
 const platform = computed(() => getPlatform(props.playlist.platform))
 const route = computed(() => getPlatformPlaylistRoute(props.playlist.platform, props.playlist.id))
 const channelRoute = computed(() => props.playlist.channelId

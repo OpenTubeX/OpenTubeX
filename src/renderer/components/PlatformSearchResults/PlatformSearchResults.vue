@@ -10,10 +10,12 @@
         {{ t('Platforms.Load Error', { platform: platform.name }) }}
       </p>
       <PlatformResultList :results="results" />
+      <!-- After a failed page, the button tries again -->
       <FtAutoLoadNextPageWrapper
-        v-if="continuation !== null && !error"
+        v-if="continuation !== null"
         :key="`${platform.id}:${type}:${query}`"
         :loading="loading"
+        :paused="error"
         @load-next-page="loadMore"
       >
         <div

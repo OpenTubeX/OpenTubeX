@@ -118,6 +118,7 @@
 /* Without animations, a full bar still shows that the channel loads */
 :root[data-reduced-motion='reduce'] .addChannelProgress::before {
   inline-size: 100%;
+  animation: none;
 }
 
 @keyframes add-channel-progress {

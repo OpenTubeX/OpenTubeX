@@ -131,10 +131,12 @@
             :results="page.results"
             :avatar="channel.avatar ?? null"
           />
+          <!-- After a failed page, the button tries again -->
           <FtAutoLoadNextPageWrapper
-            v-if="page.continuation !== null && !page.error"
+            v-if="page.continuation !== null"
             :key="currentTab"
             :loading="page.loading"
+            :paused="page.error"
             @load-next-page="loadMore"
           >
             <div

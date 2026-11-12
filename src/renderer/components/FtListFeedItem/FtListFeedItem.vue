@@ -398,7 +398,7 @@ function handleTileKeydown(event) {
     event.preventDefault()
     if (showMarkAsSeen.value) {
       markAsSeen()
-    } else {
+    } else if (!props.data.isLive) {
       setWatched(position.value?.watched !== true)
     }
   }

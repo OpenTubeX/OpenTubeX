@@ -157,7 +157,10 @@ const errorDismissed = ref(false)
 const isBannerShown = computed(() => !isLoading.value && failedChannels.value.length > 0 && !errorDismissed.value)
 
 // A closed banner stays closed until the set of failed channels changes
-watch(platformFeedFailedChannels, () => { errorDismissed.value = false })
+watch(platformFeedFailedChannels, (value, previous) => {
+  const before = new Set(previous)
+  if (value.length !== before.size || value.some(key => !before.has(key))) errorDismissed.value = false
+})
 
 // Runs before the banner unmounts, so a focused close button doesn't take the focus with it
 watch(isBannerShown, shown => {

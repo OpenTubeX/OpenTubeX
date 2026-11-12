@@ -74,9 +74,11 @@
         {{ t('Platforms.Empty Tab') }}
       </p>
       <PlatformResultList :results="results" />
+      <!-- After a failed page, the button tries again -->
       <FtAutoLoadNextPageWrapper
-        v-if="continuation !== null && !pageError"
+        v-if="continuation !== null"
         :loading="loadingMore"
+        :paused="pageError"
         @load-next-page="loadMore"
       >
         <div
@@ -170,6 +172,7 @@ async function loadMore() {
   if (loadingMore.value || continuation.value === null) return
   const generation = loadGeneration
   loadingMore.value = true
+  pageError.value = false
   try {
     const result = await platform.value.getPlaylist(getPlatformFetch(platform.value.id), playlistId.value, continuation.value)
     if (generation !== loadGeneration) return
