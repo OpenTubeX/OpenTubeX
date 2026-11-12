@@ -201,7 +201,7 @@
         class="replyComposer"
         :parent-id="getRootCommentId(reply.id)"
         :initial-text="reply.author.startsWith('@') ? `${reply.author} ` : ''"
-        @done="youTubeComments.replyingTo.value = null"
+        @done="youTubeComments.closeReply(reply.id)"
       />
     </div>
     <div

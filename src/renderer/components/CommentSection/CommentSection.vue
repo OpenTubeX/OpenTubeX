@@ -444,7 +444,7 @@
             v-if="canUseYouTubeComments && youTubeReplyingTo === comment.id"
             class="replyComposer"
             :parent-id="comment.id"
-            @done="youTubeComments.replyingTo.value = null"
+            @done="youTubeComments.closeReply(comment.id)"
           />
           <div
             v-if="index !== null && shouldShowCommentReplyToggle(comment, replyNodes)"
@@ -810,9 +810,12 @@ const youTubeComments = {
   replyingTo: ref(null),
   ratings: reactive(new Map()),
   clampScroll: () => clampCommentsScrollAfterRender(),
+  // A reply that finishes posting late must not close another reply box.
+  closeReply(commentId) {
+    if (youTubeComments.replyingTo.value === commentId) youTubeComments.replyingTo.value = null
+  },
   addComment(posted, text, parentId, account) {
     const comment = createPostedComment(posted, text, account)
-    youTubeComments.replyingTo.value = null
     if (parentId === null) {
       commentData.value.unshift(comment)
       if (commentCount.value !== null) commentCount.value++

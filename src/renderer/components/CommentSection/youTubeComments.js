@@ -13,6 +13,7 @@ import { getSelectedYouTubeProfile } from '../../helpers/youtube-account-state.j
  *   replyingTo: import('vue').Ref<string | null>,
  *   ratings: Map<string, 'LIKE' | 'DISLIKE'>,
  *   clampScroll: () => void,
+ *   closeReply: (commentId: string) => void,
  *   addComment: (posted: { id: string, author: string, authorThumb: string }, text: string, parentId: string | null, account: import('../../helpers/api/youtube-account').YouTubeAccount | null) => void,
  *   removeComment: (commentId: string) => void
  * }>}
