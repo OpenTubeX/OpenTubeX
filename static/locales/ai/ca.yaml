@@ -525,6 +525,10 @@ Settings:
       Disk: disc
   Return to Settings Menu: Torna al menú de configuració
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "Fluxos integrats"
+      Automatic: "Automàtic"
+      SABR Only: "Només SABR"
     Link Underlines:
       Link Underlines: "Subratllat dels enllaços"
       On Hover: "Subratlla els enllaços en passar-hi el cursor"
@@ -2701,6 +2705,9 @@ Description:
   Music: Música
 Tooltips:
   General Settings:
+    Built-in Streams: |
+      Automàtic reprodueix la majoria de vídeos amb el client visionOS de YouTube, que comença més ràpid i admet la qualitat automàtica. Les emissions en directe i els vídeos que no pot reproduir fan servir SABR.
+      Només SABR sempre fa servir el client web de YouTube, que comença més lentament i no té qualitat automàtica.
     Title Lines: "Escurça els títols de vídeos i llistes de reproducció de les llistes i quadrícules al nombre de línies triat amb punts suspensius, perquè les targetes siguin més uniformes. Passeu el cursor per sobre d'un títol per veure'l sencer."
     Close Window With Last Tab: 'Si està desactivat, en tancar l’última pestanya se n’obre una de nova i la finestra continua oberta fins que la tanquis.'
     Preferred Video Codec: |

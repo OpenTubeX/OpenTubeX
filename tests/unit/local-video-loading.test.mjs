@@ -26,7 +26,7 @@ function deferred() {
   return { promise, resolve, reject }
 }
 
-function loader({ android = Promise.resolve({ data: {} }), token = Promise.resolve('token'), next = Promise.resolve({ data: {} }), createPlayer = async () => ({ signature_timestamp: 1, decipher: async url => url }), details = {}, embeddedNext = false, embeddedPlayer = true, playability = { status: 'OK' }, direct = null, visionOs = null, adTimeMs = () => 0 } = {}) {
+function loader({ android = Promise.resolve({ data: {} }), token = Promise.resolve('token'), next = Promise.resolve({ data: {} }), createPlayer = async () => ({ signature_timestamp: 1, decipher: async url => url }), details = {}, embeddedNext = false, embeddedPlayer = true, playability = { status: 'OK' }, direct = null, visionOs = null, builtInStreams = 'auto', adTimeMs = () => 0 } = {}) {
   const requests = []
   const playerRequests = []
   const directPlayerFallbacks = []
@@ -53,6 +53,7 @@ function loader({ android = Promise.resolve({ data: {} }), token = Promise.resol
       return { session, playerResponse: embeddedPlayer ? playerResponse : undefined, nextResponse: embeddedNext ? {} : undefined }
     },
     isDirectPlayerEnabled: () => true,
+    store: { getters: { getBuiltInStreams: builtInStreams } },
     isVisionOsStreamsEnabled: () => true,
     requestVisionOsStreams: async () => { requests.push('VISIONOS'); return visionOs },
     backgroundAttestation: null,
@@ -398,9 +399,13 @@ test('a warm load keeps the minted token off the visionOS streams', async () => 
   assert.equal(result.info.streaming_data.adaptive_formats[0].itag, 137)
 })
 
-test('only playback loads without a SABR reload request the visionOS streams', async () => {
-  for (const options of [{}, { lateWatchNext: true, reloadPlaybackContext: { reloadPlaybackParams: { token: 'reload-token' } } }]) {
-    const { load, requests } = loader({ visionOs: visionOsResponse })
+test('only playback loads without a SABR reload or the SABR only setting request the visionOS streams', async () => {
+  for (const [options, builtInStreams] of [
+    [{}, 'auto'],
+    [{ lateWatchNext: true, reloadPlaybackContext: { reloadPlaybackParams: { token: 'reload-token' } } }, 'auto'],
+    [{ lateWatchNext: true }, 'sabr'],
+  ]) {
+    const { load, requests } = loader({ visionOs: visionOsResponse, builtInStreams })
     const result = await load('testVideo01', options)
     assert.ok(!requests.includes('VISIONOS'))
     assert.equal(result.poToken, 'token')

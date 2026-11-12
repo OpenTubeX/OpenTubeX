@@ -486,6 +486,10 @@ Settings:
       Disk: 디스크
   Return to Settings Menu: 설정 메뉴로 돌아가기
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "내장 스트림"
+      Automatic: "자동"
+      SABR Only: "SABR만"
     Link Underlines:
       Link Underlines: "링크 밑줄"
       On Hover: "마우스를 올리면 링크에 밑줄 표시"
@@ -2549,6 +2553,9 @@ Description:
   Music: 음악
 Tooltips:
   General Settings:
+    Built-in Streams: |
+      자동은 대부분의 동영상을 YouTube의 visionOS 클라이언트로 재생하며, 더 빨리 시작되고 자동 화질을 지원합니다. 실시간 스트림과 재생할 수 없는 동영상은 SABR을 사용합니다.
+      SABR만은 항상 YouTube의 웹 클라이언트를 사용하며, 더 느리게 시작되고 자동 화질이 없습니다.
     Title Lines: "목록과 그리드의 동영상 및 재생목록 제목을 말줄임표와 함께 선택한 줄 수로 줄여 카드를 더 균일하게 보이게 합니다. 제목 위에 마우스를 올리면 전체 제목을 볼 수 있습니다."
     Close Window With Last Tab: '끄면 마지막 탭을 닫을 때 대신 새 탭이 열리므로 창을 직접 닫을 때까지 창이 열려 있습니다.'
     Preferred Video Codec: |

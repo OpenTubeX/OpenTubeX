@@ -393,6 +393,10 @@ Settings:
       Network: nets
       Disk: disks
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "Innbyggðir straumar"
+      Automatic: "Sjálfvirkt"
+      SABR Only: "Aðeins SABR"
     Link Underlines:
       Link Underlines: "Undirstrikun tengla"
       On Hover: "Undirstrika tengla þegar bendill er yfir þeim"
@@ -2184,6 +2188,9 @@ Description:
   Music: Tónlist
 Tooltips:
   General Settings:
+    Built-in Streams: |
+      Sjálfvirkt spilar flest myndskeið í gegnum visionOS-biðlara YouTube, sem byrjar hraðar og styður sjálfvirk gæði. Beinar útsendingar og myndskeið sem hann getur ekki spilað nota SABR.
+      Aðeins SABR notar alltaf vefbiðlara YouTube, sem byrjar hægar og hefur engin sjálfvirk gæði.
     Title Lines: "Styttir titla myndskeiða og spilunarlista í listum og reitum í valinn fjölda lína með úrfellingarmerki, svo spjöldin verði samræmdari. Haltu bendlinum yfir titli til að sjá hann allan."
     Close Window With Last Tab: 'Þegar slökkt er á þessu opnar lokun síðasta flipans nýjan flipa í staðinn, svo glugginn helst opinn þar til þú lokar honum.'
     Preferred Video Codec: |

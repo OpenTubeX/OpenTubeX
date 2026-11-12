@@ -554,6 +554,10 @@ Settings:
   Return to Settings Menu: Keer terug na instellingskieslys
   The app needs to restart for changes to take effect. Restart and apply change?: Die toep moet herbegin vir die veranderinge om in werking te tree. Herbegin en pas die verandering toe?
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "Ingeboude strome"
+      Automatic: "Outomaties"
+      SABR Only: "Slegs SABR"
     Link Underlines:
       Link Underlines: "Skakelonderstreping"
       On Hover: "Onderstreep skakels wanneer die wyser daaroor beweeg"
@@ -2418,6 +2422,9 @@ Description:
   Music: Musiek
 Tooltips:
   General Settings:
+    Built-in Streams: |
+      Outomaties speel die meeste video's deur YouTube se visionOS-kliënt, wat vinniger begin en outomatiese kwaliteit ondersteun. Regstreekse strome en video's wat dit nie kan speel nie, gebruik SABR.
+      Slegs SABR gebruik altyd YouTube se webkliënt, wat stadiger begin en geen outomatiese kwaliteit het nie.
     Title Lines: "Kort video- en snitlystitels in lyste en roosters tot die gekose aantal reëls met 'n ellips in, vir meer eenvormige kaarte. Hou die muis oor 'n titel om dit volledig te sien."
     Preferred Video Codec: |
       Outomaties verkies kodeks wat u toestel in hardeware kan dekodeer.

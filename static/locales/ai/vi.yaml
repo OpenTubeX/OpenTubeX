@@ -393,6 +393,10 @@ Settings:
       Network: mạng
       Disk: ổ đĩa
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "Luồng tích hợp"
+      Automatic: "Tự động"
+      SABR Only: "Chỉ SABR"
     Link Underlines:
       Link Underlines: "Gạch chân liên kết"
       On Hover: "Gạch chân liên kết khi di chuột qua"
@@ -2178,6 +2182,9 @@ Description:
   Music: Âm nhạc
 Tooltips:
   General Settings:
+    Built-in Streams: |
+      Tự động phát hầu hết video qua ứng dụng khách visionOS của YouTube, khởi động nhanh hơn và hỗ trợ chất lượng tự động. Các buổi phát trực tiếp và video mà nó không phát được sẽ dùng SABR.
+      Chỉ SABR luôn dùng ứng dụng khách web của YouTube, khởi động chậm hơn và không có chất lượng tự động.
     Title Lines: "Rút gọn tiêu đề video và danh sách phát trong danh sách và lưới theo số dòng đã chọn kèm dấu chấm lửng, để các thẻ đồng đều hơn. Di chuột lên tiêu đề để xem đầy đủ."
     Close Window With Last Tab: 'Khi tắt, việc đóng thẻ cuối cùng sẽ mở một thẻ mới thay vào đó, nên cửa sổ vẫn mở cho đến khi bạn đóng nó.'
     Preferred Video Codec: |

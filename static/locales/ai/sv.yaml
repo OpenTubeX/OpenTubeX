@@ -393,6 +393,10 @@ Settings:
       Network: nätverk
       Disk: diskutrymme
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "Inbyggda strömmar"
+      Automatic: "Automatiskt"
+      SABR Only: "Endast SABR"
     Link Underlines:
       Link Underlines: "Understrykning av länkar"
       On Hover: "Stryk under länkar vid hovring"
@@ -2166,6 +2170,9 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Kontrollerar först varje kanals RSS-flöde och läser bara in videor, Shorts och livesändningar från kanaler med nya uppladdningar. Automatiska uppdateringar hoppar också över kanaler som lästs in de senaste 10 minuterna. För kanaler utan nya uppladdningar uppdateras visningar, borttagna videor och ändrade titlar bara med några timmars mellanrum, och nya uppladdningar kan dyka upp senare när RSS-flödet släpar efter. Inte tillgängligt med Invidious-API:t."
   General Settings:
+    Built-in Streams: |
+      Automatiskt spelar de flesta videor via YouTubes visionOS-klient, som startar snabbare och stöder automatisk kvalitet. Direktsändningar och videor som den inte kan spela upp använder SABR.
+      Endast SABR använder alltid YouTubes webbklient, som startar långsammare och saknar automatisk kvalitet.
     Title Lines: "Kortar video- och spellisttitlar i listor och rutnät till valt antal rader med en ellips, för mer enhetliga kort. Håll pekaren över en titel för att se hela."
     Close Window With Last Tab: 'När detta är av öppnar stängning av den sista fliken en ny flik i stället, så att fönstret förblir öppet tills du stänger det.'
     Preferred Video Codec: |

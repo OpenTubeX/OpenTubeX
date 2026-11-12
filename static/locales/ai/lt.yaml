@@ -507,6 +507,10 @@ Settings:
       Disk: disko
   Return to Settings Menu: Grįžti į nustatymų meniu
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "Integruoti srautai"
+      Automatic: "Automatiškai"
+      SABR Only: "Tik SABR"
     Link Underlines:
       Link Underlines: "Nuorodų pabraukimas"
       On Hover: "Pabraukti nuorodas užvedus žymeklį"
@@ -2585,6 +2589,9 @@ Description:
   Music: Muzika
 Tooltips:
   General Settings:
+    Built-in Streams: |
+      Automatinis režimas daugumą vaizdo įrašų leidžia per YouTube visionOS klientą, kuris paleidžia greičiau ir palaiko automatinę kokybę. Tiesioginės transliacijos ir vaizdo įrašai, kurių jis negali paleisti, naudoja SABR.
+      Tik SABR visada naudoja YouTube žiniatinklio klientą, kuris paleidžia lėčiau ir neturi automatinės kokybės.
     Title Lines: "Sąrašuose ir tinkleliuose sutrumpina vaizdo įrašų ir grojaraščių pavadinimus iki pasirinkto eilučių skaičiaus su daugtaškiu, kad kortelės būtų vienodesnės. Užveskite žymeklį ant pavadinimo, kad pamatytumėte visą."
     Close Window With Last Tab: 'Išjungus, uždarius paskutinį skirtuką vietoj to atidaromas naujas skirtukas, todėl langas lieka atidarytas, kol jį uždarysite.'
     Preferred Video Codec: |

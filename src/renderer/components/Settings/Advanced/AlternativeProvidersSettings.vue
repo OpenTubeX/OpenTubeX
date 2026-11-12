@@ -62,6 +62,18 @@
         @change="updateVideoPlaybackEngine"
       />
       <FtSelect
+        v-if="SUPPORTS_LOCAL_API"
+        size-to-content
+        :placeholder="t('Settings.General Settings.Built-in Streams.Built-in Streams')"
+        :value="store.getters.getBuiltInStreams"
+        setting-key="builtInStreams"
+        :select-names="builtInStreamsNames"
+        :select-values="BUILT_IN_STREAMS_VALUES"
+        :tooltip="t('Tooltips.General Settings.Built-in Streams')"
+        :icon="['fas', 'film']"
+        @change="store.dispatch('updateBuiltInStreams', $event)"
+      />
+      <FtSelect
         size-to-content
         :placeholder="t('Settings.General Settings.Preferred API Backend.Preferred API Backend')"
         :value="backendPreference"
@@ -71,10 +83,8 @@
         :icon="['fas', 'server']"
         @change="updateBackendPreference"
       />
-    </div>
-    <FtFlexBox>
       <FtSelect
-        class="codecSelect"
+        size-to-content
         :placeholder="t('Settings.General Settings.Preferred Video Codec')"
         :value="store.getters.getPreferredVideoCodec"
         setting-key="preferredVideoCodec"
@@ -85,7 +95,7 @@
         :icon="['fas', 'file-video']"
         @change="store.dispatch('updatePreferredVideoCodec', $event)"
       />
-    </FtFlexBox>
+    </div>
     <!-- Servers with their own Invidious server always use it -->
     <div v-if="!SELF_HOSTED_INVIDIOUS && usesInvidiousInstance(backendPreference, backendFallback)">
       <FtFlexBox class="settingsFlexStart460px">
@@ -220,12 +230,18 @@ const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 const SUPPORTS_LOCAL_API = !!process.env.SUPPORTS_LOCAL_API
 const SELF_HOSTED_INVIDIOUS = !!process.env.SELF_HOSTED_INVIDIOUS
 const PLAYBACK_ENGINE_VALUES = ['built-in', 'yt-dlp']
+const BUILT_IN_STREAMS_VALUES = ['auto', 'sabr']
 
 const { t } = useI18n()
 
 const playbackEngineNames = computed(() => [
   t('Settings.General Settings.Stream Extraction Method.Built-in'),
   t('Settings.General Settings.Stream Extraction Method.yt-dlp')
+])
+
+const builtInStreamsNames = computed(() => [
+  t('Settings.General Settings.Built-in Streams.Automatic'),
+  t('Settings.General Settings.Built-in Streams.SABR Only')
 ])
 
 /** @type {import('vue').ComputedRef<'yt-dlp' | 'built-in'>} */
@@ -439,8 +455,3 @@ function handleClearDefaultInstanceClick() {
 </script>
 
 <style scoped src="../generalSelectGrid.css" />
-<style scoped>
-.codecSelect {
-  inline-size: min(100%, 360px);
-}
-</style>

@@ -144,6 +144,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     showAddedExternalPlayerCustomArgs: true,
     videoPlaybackEngine: 'built-in',
     playbackEngineFallback: true,
+    builtInStreams: 'auto',
     alwaysUseBackupMediaServer: false,
     ytDlpSource: 'system',
     ytDlpChannel: 'stable',

@@ -393,6 +393,10 @@ Settings:
       Network: 網路
       Disk: 磁碟
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "內建串流"
+      Automatic: "自動"
+      SABR Only: "僅 SABR"
     Link Underlines:
       Link Underlines: "連結底線"
       On Hover: "游標停留時為連結加上底線"
@@ -2172,6 +2176,9 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "先檢查每個頻道的 RSS 資訊提供，只載入有新上傳內容的頻道的影片、Shorts 和直播。自動重新整理也會略過過去 10 分鐘內載入過的頻道。對於沒有新上傳內容的頻道，觀看次數、已移除的影片和變更的標題每隔幾小時才會更新一次，而且當 RSS 資訊提供延遲時，新上傳的內容可能會較晚出現。使用 Invidious API 時無法使用。"
   General Settings:
+    Built-in Streams: |
+      自動模式透過 YouTube 的 visionOS 用戶端播放大多數影片，啟動更快並支援自動畫質。直播和它無法播放的影片會使用 SABR。
+      僅 SABR 一律使用 YouTube 的網頁用戶端，啟動較慢且沒有自動畫質。
     Title Lines: "將清單和格狀檢視中的影片與播放清單標題縮短為所選行數並以省略號結尾，讓卡片更整齊。將游標停留在標題上即可查看完整標題。"
     Close Window With Last Tab: '關閉後，關閉最後一個分頁時會改為開啟新分頁，視窗會保持開啟，直到你將其關閉。'
     Preferred Video Codec: |

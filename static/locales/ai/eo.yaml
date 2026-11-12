@@ -429,6 +429,10 @@ Settings:
       Network: reto
       Disk: disko
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "Enkonstruitaj fluoj"
+      Automatic: "Aŭtomata"
+      SABR Only: "Nur SABR"
     Link Underlines:
       Link Underlines: "Substrekado de ligiloj"
       On Hover: "Substreki ligilojn dum ŝvebado"
@@ -2212,6 +2216,9 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Unue kontrolas la RSS-fluon de ĉiu kanalo kaj ŝargas videojn, Shorts kaj rektajn elsendojn nur de kanaloj kun novaj alŝutoj. Aŭtomataj aktualigoj ankaŭ preterlasas kanalojn ŝargitajn en la lastaj 10 minutoj. Por kanaloj sen novaj alŝutoj, spektokvantoj, forigitaj videoj kaj ŝanĝitaj titoloj ĝisdatiĝas nur ĉiujn kelkajn horojn, kaj novaj alŝutoj eble aperos poste, kiam la RSS-fluo malfruas. Ne disponebla kun la Invidious-API."
   General Settings:
+    Built-in Streams: |
+      Aŭtomata ludas la plimulton de videoj per la visionOS-kliento de YouTube, kiu komenciĝas pli rapide kaj subtenas aŭtomatan kvaliton. Rektaj elsendoj kaj videoj, kiujn ĝi ne povas ludi, uzas SABR.
+      Nur SABR ĉiam uzas la retan klienton de YouTube, kiu komenciĝas pli malrapide kaj ne havas aŭtomatan kvaliton.
     Title Lines: "Mallongigas titolojn de videoj kaj ludlistoj en listoj kaj kradoj al la elektita nombro de linioj kun tripunkto, por pli unuformaj kartoj. Ŝvebigu la musmontrilon super titolo por vidi ĝin tute."
     Preferred Video Codec: |
       Aŭtomata preferas kodekojn, kiujn via aparato povas malkodi per aparataro.

@@ -395,6 +395,10 @@ Settings:
       Network: şəbəkə
       Disk: disk
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "Daxili yayımlar"
+      Automatic: "Avtomatik"
+      SABR Only: "Yalnız SABR"
     Link Underlines:
       Link Underlines: "Keçidlərin altından xətt"
       On Hover: "Üzərinə gəldikdə keçidlərin altından xətt çək"
@@ -2178,6 +2182,9 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Əvvəlcə hər kanalın RSS lentini yoxlayır və yalnız yeni yükləmələri olan kanalların videolarını, Shorts-larını və canlı yayımlarını yükləyir. Avtomatik yeniləmələr son 10 dəqiqədə yüklənmiş kanalları da ötürür. Yeni yükləməsi olmayan kanallarda baxış sayları, silinmiş videolar və dəyişdirilmiş başlıqlar yalnız bir neçə saatdan bir yenilənir və RSS lenti geri qaldıqda yeni yükləmələr daha gec görünə bilər. Invidious API ilə əlçatan deyil."
   General Settings:
+    Built-in Streams: |
+      Avtomatik rejim əksər videoları YouTube-un visionOS müştərisi ilə oynadır; o, daha tez başlayır və avtomatik keyfiyyəti dəstəkləyir. Canlı yayımlar və onun oynada bilmədiyi videolar SABR istifadə edir.
+      Yalnız SABR həmişə YouTube-un veb müştərisindən istifadə edir; o, daha gec başlayır və avtomatik keyfiyyət yoxdur.
     Title Lines: "Siyahı və şəbəkələrdəki video və pleylist başlıqlarını üç nöqtə ilə seçilmiş sətir sayına qədər qısaldır ki, kartlar daha vahid görünsün. Başlığın tam mətnini görmək üçün kursoru onun üzərinə gətirin."
     Close Window With Last Tab: 'Söndürüldükdə son tabı bağlamaq əvəzinə yeni tab açır, beləliklə pəncərə siz onu bağlayana qədər açıq qalır.'
     Preferred Video Codec: |

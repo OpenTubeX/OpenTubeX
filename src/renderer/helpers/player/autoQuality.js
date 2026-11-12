@@ -4,8 +4,8 @@
  * the initial selection works, but any later switch (changing network conditions,
  * resizing the player or the picture-in-picture window) runs into errors.
  *
- * Streams that don't go through SABR, like yt-dlp's and Invidious' manifests,
- * are unaffected, so auto quality can be offered for those.
+ * Streams that don't go through SABR, like the visionOS client's, yt-dlp's and
+ * Invidious' manifests, are unaffected, so auto quality can be offered for those.
  */
 
 /**
@@ -27,11 +27,14 @@ export function streamsSupportAutoQuality(format, isSabr) {
 }
 
 /**
- * Whether the settings should offer auto as a quality, which depends on the
- * stream extraction method, as only the built-in one uses SABR.
+ * Whether the settings should offer auto as a quality. Only the built-in stream
+ * extraction method uses SABR, and only for all videos when the user chose it.
+ * Otherwise most videos play its visionOS DASH streams, and the player falls
+ * back to a fixed quality for those that still use SABR.
  * @param {string} videoPlaybackEngine
+ * @param {string} builtInStreams
  * @returns {boolean}
  */
-export function playbackEngineSupportsAutoQuality(videoPlaybackEngine) {
-  return !process.env.SUPPORTS_LOCAL_API || videoPlaybackEngine === 'yt-dlp'
+export function playbackEngineSupportsAutoQuality(videoPlaybackEngine, builtInStreams) {
+  return !process.env.SUPPORTS_LOCAL_API || videoPlaybackEngine === 'yt-dlp' || builtInStreams !== 'sabr'
 }

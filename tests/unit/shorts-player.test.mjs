@@ -82,6 +82,7 @@ test('a SABR reload refreshes cached Shorts metadata with the server context', a
     backendPreference: 'local',
     isYtDlpPlaybackRequested: () => false,
     shortsPlaybackCache: new ShortsPlaybackCache(),
+    $store: { getters: { getBuiltInStreams: 'auto' } },
   }
   const original = await watch.getShortsVideoInformation('short')
   const reloadPlaybackContext = { reloadPlaybackParams: { token: 'reload-token' } }
@@ -90,6 +91,11 @@ test('a SABR reload refreshes cached Shorts metadata with the server context', a
   assert.equal(requests[1].reloadPlaybackContext, reloadPlaybackContext)
   assert.equal(await watch.getShortsVideoInformation('short'), reloaded)
   assert.equal(requests.length, 2)
+
+  // Prefetched visionOS streams must not outlive a switch to SABR only
+  watch.$store.getters.getBuiltInStreams = 'sabr'
+  assert.notEqual(await watch.getShortsVideoInformation('short'), reloaded)
+  assert.equal(requests.length, 3)
 })
 
 for (const failure of [
@@ -112,6 +118,7 @@ for (const failure of [
       backendPreference: 'local',
       isYtDlpPlaybackRequested: () => false,
       shortsPlaybackCache: new ShortsPlaybackCache(),
+      $store: { getters: { getBuiltInStreams: 'auto' } },
     }
     await watch.getShortsVideoInformation('short')
     const recovered = await watch.getShortsVideoInformation('short')

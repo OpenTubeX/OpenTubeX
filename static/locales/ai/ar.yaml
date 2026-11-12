@@ -396,6 +396,10 @@ Settings:
       Network: شبكة
       Disk: القرص
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "البث المدمج"
+      Automatic: "تلقائي"
+      SABR Only: "SABR فقط"
     Link Underlines:
       Link Underlines: "تسطير الروابط"
       On Hover: "تسطير الروابط عند تمرير المؤشر فوقها"
@@ -2213,6 +2217,9 @@ Description:
   Music: الموسيقى
 Tooltips:
   General Settings:
+    Built-in Streams: |
+      يشغّل الوضع التلقائي معظم الفيديوهات عبر عميل visionOS من YouTube، الذي يبدأ أسرع ويدعم الجودة التلقائية. تستخدم البثوث المباشرة والفيديوهات التي لا يستطيع تشغيلها SABR.
+      يستخدم وضع SABR فقط دائمًا عميل الويب من YouTube، الذي يبدأ أبطأ ولا يدعم الجودة التلقائية.
     Title Lines: "يختصر عناوين الفيديوهات وقوائم التشغيل في القوائم والشبكات إلى عدد الأسطر المختار مع علامة حذف، لتبدو البطاقات أكثر تناسقًا. مرّر المؤشر فوق العنوان لرؤيته كاملًا."
     Close Window With Last Tab: 'عند الإيقاف، يؤدي إغلاق آخر علامة تبويب إلى فتح علامة تبويب جديدة بدلًا من ذلك، فتبقى النافذة مفتوحة حتى تغلقها.'
     Preferred Video Codec: |

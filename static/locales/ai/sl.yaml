@@ -517,6 +517,10 @@ Settings:
       Disk: disk
   Return to Settings Menu: Nazaj v meni z nastavitvami
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "Vgrajeni tokovi"
+      Automatic: "Samodejno"
+      SABR Only: "Samo SABR"
     Link Underlines:
       Link Underlines: "Podčrtovanje povezav"
       On Hover: "Podčrtaj povezave ob prehodu s kazalcem"
@@ -2664,6 +2668,9 @@ Description:
   Music: Glasba
 Tooltips:
   General Settings:
+    Built-in Streams: |
+      Samodejni način predvaja večino videoposnetkov prek YouTubovega odjemalca visionOS, ki se zažene hitreje in podpira samodejno kakovost. Prenosi v živo in videoposnetki, ki jih ne more predvajati, uporabljajo SABR.
+      Samo SABR vedno uporablja YouTubov spletni odjemalec, ki se zažene počasneje in nima samodejne kakovosti.
     Title Lines: "Skrajša naslove videoposnetkov in seznamov predvajanja na seznamih in v mrežah na izbrano število vrstic s tropičjem, za enotnejše kartice. Premaknite kazalec nad naslov, da ga vidite v celoti."
     Close Window With Last Tab: 'Ko je izklopljeno, zaprtje zadnjega zavihka namesto tega odpre nov zavihek, zato okno ostane odprto, dokler ga ne zaprete.'
     Preferred Video Codec: |

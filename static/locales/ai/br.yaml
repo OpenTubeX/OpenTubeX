@@ -393,6 +393,10 @@ Settings:
       Network: "ar rouedad"
       Disk: "ar bladenn"
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "Froudoù enframmet"
+      Automatic: "Emgefreek"
+      SABR Only: "SABR hepken"
     Link Underlines:
       Link Underlines: "Islinennañ al liammoù"
       On Hover: "Islinennañ al liammoù pa vez tremenet warno"
@@ -2174,6 +2178,9 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Gwiriañ a ra lanv RSS pep chadenn da gentañ ha ne garg nemet videoioù, Shorts ha skignadennoù war-eeun ar chadennoù o deus pellgasadennoù nevez. Ar freskadurioù emgefre a lez a-gostez ivez ar chadennoù karget e-pad an 10 munutenn diwezhañ. Evit ar chadennoù hep pellgasadennoù nevez, ne vez hizivaet an niver a selloù, ar videoioù dilamet hag an titloù kemmet nemet bep un nebeud eurioù, ha gallout a ra ar pellgasadennoù nevez dont war wel diwezhatoc'h pa vez dale gant al lanv RSS. N'eo ket hegerz gant API Invidious."
   General Settings:
+    Built-in Streams: |
+      Emgefreek a lenn al lodenn vrasañ eus ar videoioù dre arval visionOS YouTube, a grog buanoc'h hag a skor ar perzhded emgefreek. Ar froudoù war-eeun hag ar videoioù n'hall ket lenn a implij SABR.
+      SABR hepken a implij atav arval web YouTube, a grog gorrekoc'h ha n'en deus perzhded emgefreek ebet.
     Title Lines: "Berraat a ra titloù ar videoioù hag al listennoù lenn er rolloù hag er c'hrilhoù d'an niver a linennoù dibabet gant poentoù kendalc'h, evit kartennoù unvanoc'h. Lakait al logodenn war un titl evit e welet en e bezh."
     Close Window With Last Tab: 'Pa vez lazhet, serriñ an ivinell ziwezhañ a zigor un ivinell nevez e-lec’h, ha chom a ra digor ar prenestr betek ma vo serret ganeoc’h.'
     Preferred Video Codec: |

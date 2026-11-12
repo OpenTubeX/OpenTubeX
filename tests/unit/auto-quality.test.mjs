@@ -16,14 +16,15 @@ test('auto quality is unavailable for SABR streams', () => {
   assert.equal(streamsSupportAutoQuality('audio', true), false)
 })
 
-test('only the built-in stream extraction method loses auto quality', () => {
+test('only the built-in stream extraction method loses auto quality, and only with SABR only', () => {
   process.env.SUPPORTS_LOCAL_API = true
 
-  assert.equal(playbackEngineSupportsAutoQuality('yt-dlp'), true)
-  assert.equal(playbackEngineSupportsAutoQuality('built-in'), false)
+  assert.equal(playbackEngineSupportsAutoQuality('yt-dlp', 'sabr'), true)
+  assert.equal(playbackEngineSupportsAutoQuality('built-in', 'auto'), true)
+  assert.equal(playbackEngineSupportsAutoQuality('built-in', 'sabr'), false)
 })
 
 test('builds without the local API always support auto quality', () => {
   // those never use SABR, as they get their streams from Invidious
-  assert.equal(playbackEngineSupportsAutoQuality('built-in'), true)
+  assert.equal(playbackEngineSupportsAutoQuality('built-in', 'sabr'), true)
 })

@@ -174,7 +174,7 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     ].includes(group)) {
       return usingElectron
     }
-    if (group === 'Fallback to Non-Preferred Backend on Failure') {
+    if (['Fallback to Non-Preferred Backend on Failure', 'Always Use Backup Media Server', 'Built-in Streams'].includes(group)) {
       return supportsLocalApi
     }
     if (group === 'Comment Translation') {

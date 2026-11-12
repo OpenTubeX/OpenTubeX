@@ -624,6 +624,10 @@ Settings:
       Stream Extraction Method: Methode zur Stream-Extraktion
       yt-dlp: yt-dlp
       Built-in: Integriert
+    Built-in Streams:
+      Built-in Streams: Integrierte Streams
+      Automatic: Automatisch
+      SABR Only: Nur SABR
     Confirm Before: Bestätigen vor…
     Confirmation Options:
       Closing App: Schließen von OpenTubeX
@@ -2961,6 +2965,9 @@ Tooltips:
     Stream Extraction Method: |
       Lege fest, wie OpenTubeX Videostreams abruft. Bei Auswahl von yt-dlp muss es verfügbar sein.
       Mit yt-dlp kann es länger dauern, bis Videos starten.
+    Built-in Streams: |
+      „Automatisch“ spielt die meisten Videos über den visionOS-Client von YouTube ab, der schneller startet und die automatische Qualität unterstützt. Livestreams und Videos, die er nicht abspielen kann, nutzen SABR.
+      „Nur SABR“ nutzt immer den Web-Client von YouTube, der langsamer startet und keine automatische Qualität bietet.
     Notifications: Lege fest, wie OpenTubeX dich über Livestreams, neue Uploads und automatische Downloads benachrichtigt. Mit „System und in der App“ erscheinen Benachrichtigungen in OpenTubeX, während du es verwendest, sonst als Systembenachrichtigungen, und die Glocke bewahrt sie auf. „Aus“ blendet auch die Benachrichtigungsoptionen aus.
   Proxy Settings:
     IP Block Recovery Script Path: Pfad zur Skriptdatei, die bei erkannter IP-Sperre ausgeführt wird. OpenTubeX wartet bis zum Abschluss und lädt danach das Video neu. Wenn der Fallback aktiviert ist, wird das Skript nur ausgeführt, wenn auch der Fallback fehlschlägt.

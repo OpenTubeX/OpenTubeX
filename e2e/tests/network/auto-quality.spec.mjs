@@ -55,9 +55,29 @@ test.describe('auto quality', () => {
       seed: {
         settings: {
           defaultQuality: 'auto',
+          videoPlaybackEngine: 'built-in'
+        }
+      }
+    })
+
+    test('is offered and used with the visionOS streams', async ({ page, innertube }) => {
+      test.skip(innertube.replay, 'needs the adaptive formats of the real API')
+      await openVideoOrSkip(test, page, VIDEO)
+      await waitForPlaybackOrSkip(test, page)
+
+      const { abrEnabled, autoButtonVisible } = await readAbrState(page)
+      expect(abrEnabled).toBe(true)
+      expect(autoButtonVisible).toBe(true)
+    })
+  })
+
+  test.describe('with SABR only built-in streams', () => {
+    test.use({
+      seed: {
+        settings: {
+          defaultQuality: 'auto',
           videoPlaybackEngine: 'built-in',
-          // the built-in engine is migrated away from on startup otherwise
-          ytDlpPlaybackEngineDefaultMigration: true
+          builtInStreams: 'sabr'
         }
       }
     })

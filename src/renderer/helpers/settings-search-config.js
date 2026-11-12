@@ -51,7 +51,9 @@ const GENERAL_PRIVACY_KEYS = new Set([
 ])
 
 const GENERAL_PROVIDER_KEYS = new Set([
+  'Always Use Backup Media Server',
   'Automatically switch stream extraction methods',
+  'Built-in Streams',
   'Clear Default Instance',
   'Current instance will be randomized on startup',
   'Current Invidious Instance',
@@ -374,6 +376,7 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
   },
   general: {
     'Stream Extraction Method': ['Stream Extraction Method'],
+    'Built-in Streams': ['Built-in Streams'],
     'Mobile Layout': ['Mobile Layout'],
     'New Tab Position': ['New Tab Position'],
     'Tab Close Focus': ['Tab Close Focus'],

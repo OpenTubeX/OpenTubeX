@@ -393,6 +393,10 @@ Settings:
       Network: võrgu
       Disk: ketta
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "Sisseehitatud vood"
+      Automatic: "Automaatne"
+      SABR Only: "Ainult SABR"
     Link Underlines:
       Link Underlines: "Linkide allajoonimine"
       On Hover: "Jooni lingid alla, kui kursor on nende kohal"
@@ -2168,6 +2172,9 @@ Tooltips:
   Experimental Settings:
     Faster Subscription Refresh: "Kontrollib esmalt iga kanali RSS-voogu ja laadib videod, Shorts'id ja otseülekanded ainult uute üleslaadimistega kanalitest. Automaatsed värskendused jätavad vahele ka kanalid, mis laaditi viimase 10 minuti jooksul. Uute üleslaadimisteta kanalite puhul uuenevad vaatamiste arvud, eemaldatud videod ja muudetud pealkirjad vaid iga mõne tunni tagant ning uued üleslaadimised võivad ilmuda hiljem, kui RSS-voog jääb maha. Invidiouse API-ga pole saadaval."
   General Settings:
+    Built-in Streams: |
+      Automaatne esitab enamikku videoid YouTube'i visionOS-i kliendi kaudu, mis käivitub kiiremini ja toetab automaatset kvaliteeti. Otseülekanded ja videod, mida see esitada ei saa, kasutavad SABR-i.
+      Ainult SABR kasutab alati YouTube'i veebiklienti, mis käivitub aeglasemalt ja millel pole automaatset kvaliteeti.
     Title Lines: "Lühendab loendites ja ruudustikes videote ja esitusloendite pealkirjad kolmikpunktiga valitud arvule ridadele, et kaardid oleksid ühtlasemad. Täispealkirja nägemiseks hoia kursorit pealkirja kohal."
     Close Window With Last Tab: 'Kui see on välja lülitatud, avab viimase vahekaardi sulgemine hoopis uue vahekaardi ja aken jääb avatuks, kuni selle sulgete.'
     Preferred Video Codec: |

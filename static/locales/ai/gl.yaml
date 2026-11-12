@@ -396,6 +396,10 @@ Settings:
       Network: rede
       Disk: disco
   General Settings:
+    Built-in Streams:
+      Built-in Streams: "Fluxos integrados"
+      Automatic: "Automático"
+      SABR Only: "Só SABR"
     Link Underlines:
       Link Underlines: "Subliñado das ligazóns"
       On Hover: "Subliñar as ligazóns ao pasar o cursor"
@@ -2222,6 +2226,9 @@ Description:
   Music: Música
 Tooltips:
   General Settings:
+    Built-in Streams: |
+      Automático reproduce a maioría dos vídeos co cliente visionOS de YouTube, que comeza máis rápido e admite a calidade automática. As emisións en directo e os vídeos que non pode reproducir usan SABR.
+      Só SABR usa sempre o cliente web de YouTube, que comeza máis lento e non ten calidade automática.
     Title Lines: "Acurta os títulos de vídeos e listas de reprodución en listas e grellas ao número de liñas escollido con puntos suspensivos, para que as tarxetas sexan máis uniformes. Pasa o cursor por riba dun título para velo completo."
     Close Window With Last Tab: 'Se está desactivado, ao pechar a última lapela ábrese unha nova e a xanela permanece aberta ata que a peches.'
     Preferred Video Codec: |
