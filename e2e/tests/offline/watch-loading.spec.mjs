@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 
 import { test, expect, sel, repoRoot } from '../../helpers/app.mjs'
-import { activeTab, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
+import { activeTab, openCaptionLanguages, openMockedVideo, openPlayerOptions, waitForPlayback } from '../../helpers/player.mjs'
 import { DEMO_MEDIA_MIME_TYPE, DEMO_MEDIA_URL, demoPlayerResponse } from '../../helpers/media.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
@@ -442,7 +442,7 @@ test.describe('local player request concurrency', () => {
     })
 
     test('replaces expired visionOS streams without reloading the page', async ({ app, page }) => {
-      await mockPlayableWatchPage(app, page, { includeCaptions: true })
+      await mockPlayableWatchPage(app, page, { captionTranslations: true })
       const media = {
         video: readFileSync(path.join(repoRoot, 'e2e', 'fixtures', 'media', 'dash-demo-video.webm')),
         audio: readFileSync(path.join(repoRoot, 'e2e', 'fixtures', 'media', 'dash-demo-audio.webm')),
@@ -499,7 +499,7 @@ test.describe('local player request concurrency', () => {
                 languageCode: 'en',
                 isTranslatable: true,
               }],
-              translationLanguages: [],
+              translationLanguages: [{ languageCode: 'de', languageName: { simpleText: 'German' } }],
             }
           },
         }
@@ -521,7 +521,7 @@ test.describe('local player request concurrency', () => {
       const captionRequests = []
       page.on('request', request => {
         const url = new URL(request.url())
-        if (url.pathname === '/api/timedtext') captionRequests.push(url.searchParams.get('request'))
+        if (url.pathname === '/api/timedtext') captionRequests.push(`${url.searchParams.get('request')} ${url.searchParams.get('tlang')}`)
       })
 
       const video = await openMockedVideo(page)
@@ -530,10 +530,24 @@ test.describe('local player request concurrency', () => {
         const shaka = element.ui.getControls().getPlayer()
         return {
           height: shaka.getVariantTracks().find(track => track.active)?.height,
-          subtitles: shaka.getTextTracks().some(track => track.active),
+          subtitles: shaka.getTextTracks().find(track => track.active)?.language,
         }
       })
-      await expect.poll(playbackState).toEqual({ height: 360, subtitles: true })
+      await expect.poll(playbackState).toEqual({ height: 360, subtitles: 'en' })
+      // An auto-translation picked in the menu isn't part of the video's captions
+      await player.hover()
+      // Keep the controls shown, they can fade out before the click on slow machines
+      const controls = player.locator('.shaka-controls-container')
+      await controls.evaluate(element => element.setAttribute('casting', 'true'))
+      await openPlayerOptions(player)
+      await openCaptionLanguages(player)
+      await player.locator('.shaka-text-languages').getByRole('button', { name: 'Auto-translate' }).click()
+      await player.locator('.ft-caption-translation-options').getByRole('button', { name: 'German' }).click()
+      await expect.poll(playbackState).toEqual({ height: 360, subtitles: 'de' })
+      await page.keyboard.press('Escape')
+      await controls.evaluate(element => element.removeAttribute('casting'))
+      // The demo file can end while the menu opens
+      await video.evaluate(element => { element.currentTime = 0; return element.play() })
 
       // Once the buffered part has played, the next segment request gets this
       // error. The demo file is buffered whole, so it is reported directly.
@@ -545,10 +559,10 @@ test.describe('local player request concurrency', () => {
 
       await expect.poll(() => watch.evaluate(view => decodeURIComponent(view.manifestSrc).includes('request=1'))).toBe(true)
       await expect.poll(() => video.evaluate(element => !element.paused && element.readyState >= 2)).toBe(true)
-      await expect.poll(playbackState).toEqual({ height: 360, subtitles: true })
+      await expect.poll(playbackState).toEqual({ height: 360, subtitles: 'de' })
       expect(visionOsRequests).toEqual(['jNQXAC9IVRw', 'jNQXAC9IVRw'])
       // The new source loads the captions again, from their fresh URL
-      expect(captionRequests.at(-1)).toBe('1')
+      expect(captionRequests.at(-1)).toBe('1 de')
       expect(await watch.evaluate(view => view.streamErrorReloadAttemptedForCurrentVideo)).toBe(false)
     })
   })
