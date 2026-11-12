@@ -266,12 +266,20 @@ async function withAccount(callback, options = {}) {
   if (!account) throw new Error('Not signed in to a YouTube account')
   const credentials = await getCredentials()
   const innertube = await createAccountInnertube(credentials, { userAgent: options.userAgent, pageId: account.pageId ?? null })
-  // Signed out, or into another account, while waiting.
-  if (credentials.refresh_token !== account.credentials.refresh_token ||
-    getAccount()?.credentials.refresh_token !== account.credentials.refresh_token) {
+  // Signed out, or into another account, while waiting. A sign-in's
+  // token is never reused, so the credentials belong to it as well.
+  throwIfSignedOut(account)
+  return await callback(innertube)
+}
+
+/**
+ * Stops work after its sign-in ended or another account signed in.
+ * @param {YouTubeAccount} account the sign-in the work started with
+ */
+function throwIfSignedOut(account) {
+  if (getAccount()?.credentials.refresh_token !== account.credentials.refresh_token) {
     throw new Error('Not signed in to the YouTube account that started this')
   }
-  return await callback(innertube)
 }
 
 /**
@@ -672,6 +680,8 @@ export async function addToYouTubeWatchHistory(videoId) {
       url.searchParams.set(key, value)
     }
 
+    // Signing out while the player loaded must not add the video afterwards.
+    throwIfSignedOut(account)
     const ping = await localApiFetch(url, {
       headers: {
         Authorization: `Bearer ${innertube.session.oauth.oauth2_tokens.access_token}`,
