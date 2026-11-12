@@ -833,10 +833,12 @@ const youTubeComments = {
     } else {
       const thread = commentData.value.find(entry => entry.id === rootId)
       const parent = thread && findCommentParent(thread, commentId)
-      if (!parent) return
-      parent.replies = parent.replies.filter(reply => reply.id !== commentId)
-      thread.numReplies = Math.max(0, thread.numReplies - 1)
+      if (parent) {
+        parent.replies = parent.replies.filter(reply => reply.id !== commentId)
+        thread.numReplies = Math.max(0, thread.numReplies - 1)
+      }
     }
+    forgetDeletedCommentPins(commentId, rootId)
     // Removing content can shorten the list below the scroll position.
     clampCommentsScrollAfterRender()
   }
@@ -849,6 +851,41 @@ watch([() => props.id, () => store.getters.getYouTubeAccount?.pageId], () => {
   youTubeComments.replyingTo.value = null
   youTubeComments.ratings.clear()
 })
+
+/**
+ * A personal pin would bring a deleted comment back from its saved snapshot.
+ * @param {string} commentId
+ * @param {string} rootId
+ */
+function forgetDeletedCommentPins(commentId, rootId) {
+  const snapshot = personalPinnedCommentSnapshots.value.find(comment => comment.id === rootId)
+  const commentIds = new Set(personalPinnedCommentIds.value)
+  commentIds.delete(commentId)
+  if (commentId !== rootId) commentIds.delete(getCommentReplyPinMarker(rootId, commentId))
+  if (!snapshot && commentIds.size === personalPinnedCommentIds.value.size) return
+
+  const commentSnapshots = personalPinnedCommentSnapshots.value.filter(comment => comment.id !== rootId)
+  if (snapshot && commentId !== rootId && (commentIds.has(rootId) || hasPinnedCommentReply(commentIds, rootId))) {
+    const thread = commentData.value.find(entry => entry.id === rootId) ?? withoutReply(snapshot, commentId)
+    commentSnapshots.push(createCommentPinSnapshot(thread))
+  }
+
+  personalPinnedCommentIds.value = commentIds
+  personalPinnedCommentSnapshots.value = commentSnapshots
+  saveCommentPins(commentPinStorageKey.value, { commentIds, commentSnapshots })
+}
+
+/**
+ * @param {Comment} comment
+ * @param {string} replyId
+ * @returns {Comment} the comment without the reply anywhere in its thread
+ */
+function withoutReply(comment, replyId) {
+  return {
+    ...comment,
+    replies: (comment.replies ?? []).filter(reply => reply.id !== replyId).map(reply => withoutReply(reply, replyId))
+  }
+}
 
 /**
  * @param {Comment} comment
