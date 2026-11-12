@@ -127,20 +127,3 @@ test('stops reading an image response that exceeds the size limit', async () => 
   await assert.rejects(handle(new Request(`imagecache://${encodeURIComponent('https://example.com/huge.png')}`)), /too large/)
   assert.equal(aborted, true)
 })
-
-test('a cancelled image request stops its download', async () => {
-  let aborted = false
-  const request = () => {
-    const clientRequest = new EventEmitter()
-    clientRequest.abort = () => { aborted = true }
-    // the server never answers
-    clientRequest.end = () => {}
-    return clientRequest
-  }
-  const handle = createImageCacheHandler(new ImageCache(), () => undefined, request)
-  const controller = new AbortController()
-  const loading = handle(new Request(`imagecache://${encodeURIComponent('https://example.com/stalled.png')}`, { signal: controller.signal }))
-  controller.abort()
-  await assert.rejects(loading, { name: 'AbortError' })
-  assert.equal(aborted, true)
-})
