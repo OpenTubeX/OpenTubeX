@@ -809,6 +809,7 @@ const youTubeComments = {
   channelId: computed(() => store.getters.getYouTubeAccount?.channelId ?? null),
   replyingTo: ref(null),
   ratings: reactive(new Map()),
+  clampScroll: () => clampCommentsScrollAfterRender(),
   addComment(posted, text, parentId) {
     const comment = createPostedComment(posted, text, store.getters.getYouTubeAccount)
     youTubeComments.replyingTo.value = null
@@ -844,6 +845,8 @@ const youTubeComments = {
   }
 }
 provide(youTubeCommentsKey, youTubeComments)
+// Closing a comment box shortens the list too.
+watch(youTubeComments.replyingTo, () => clampCommentsScrollAfterRender())
 const canUseYouTubeComments = youTubeComments.enabled
 const youTubeReplyingTo = youTubeComments.replyingTo
 // Separate sources, so a token refresh that replaces the account keeps drafts.

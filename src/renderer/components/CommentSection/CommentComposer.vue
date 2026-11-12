@@ -100,8 +100,13 @@ function cancel() {
   if (props.parentId) {
     emit('done')
   } else {
-    expanded.value = false
+    collapse()
   }
+}
+
+function collapse() {
+  expanded.value = false
+  comments.clampScroll()
 }
 
 async function submit() {
@@ -113,7 +118,7 @@ async function submit() {
     const posted = await postYouTubeComment(comments.videoId.value, commentText, props.parentId ?? undefined)
     comments.addComment(posted, commentText, props.parentId)
     text.value = ''
-    if (!props.parentId) expanded.value = false
+    if (!props.parentId) collapse()
     showToast({
       message: props.parentId ? t('YouTube Account.Reply Posted') : t('YouTube Account.Comment Posted'),
       icon: ['fas', 'comment']

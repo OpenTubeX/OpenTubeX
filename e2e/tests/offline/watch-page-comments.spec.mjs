@@ -963,6 +963,20 @@ test.describe('manual comment loading', () => {
         pageId: null,
         channelId
       }), authorId)
+      const expectScrollInRange = () => expect.poll(() => scroller.evaluate(element => (
+        element.scrollTop + element.clientHeight <= element.scrollHeight + 1 &&
+        element.scrollTop <= element.scrollHeight - element.clientHeight + 1
+      ))).toBe(true)
+
+      // So does closing a long reply at the bottom.
+      await lastThread.getByRole('button', { name: 'Reply', exact: true }).click()
+      await lastThread.locator('.replyComposer textarea').fill(Array.from({ length: 30 }, (_, line) => `Line ${line + 1}`).join('\n'))
+      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+      await lastThread.locator('.replyComposer').getByRole('button', { name: 'Cancel' }).click()
+      await expect(lastThread.locator('.replyComposer')).toHaveCount(0)
+      await expectScrollInRange()
+
       const threadCount = await dock.locator('.commentThread').count()
       await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
       await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
@@ -970,10 +984,7 @@ test.describe('manual comment loading', () => {
       await lastThread.getByRole('button', { name: 'Delete comment' }).first().click()
       await page.locator('.prompt').getByRole('button', { name: 'Delete comment', includeHidden: true }).click({ force: true })
       await expect(dock.locator('.commentThread')).toHaveCount(threadCount - 1)
-      await expect.poll(() => scroller.evaluate(element => (
-        element.scrollTop + element.clientHeight <= element.scrollHeight + 1 &&
-        element.scrollTop <= element.scrollHeight - element.clientHeight + 1
-      ))).toBe(true)
+      await expectScrollInRange()
       await expect.poll(() => scroller.evaluate(element => {
         const list = element.querySelector('.commentThread:last-of-type').getBoundingClientRect()
         return Math.round(element.getBoundingClientRect().bottom - list.bottom)
