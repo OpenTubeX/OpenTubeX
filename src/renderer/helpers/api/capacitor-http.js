@@ -136,7 +136,8 @@ async function nativeHttpFetch(input, init) {
     headers: Object.fromEntries(headers),
     data: await getRequestBody(input, init),
     responseType: init?.responseType ?? 'text',
-    disableRedirects: isAndroid || redirect !== 'follow',
+    // Native automatic redirects would skip the checks below on later hops
+    disableRedirects: true,
     connectTimeout: init?.nativeTimeoutMs ?? DEFAULT_NATIVE_TIMEOUT_MS,
     readTimeout: init?.nativeTimeoutMs ?? DEFAULT_NATIVE_TIMEOUT_MS,
   }
@@ -144,7 +145,6 @@ async function nativeHttpFetch(input, init) {
   let redirects = 0
   for (;;) {
     if (isAndroid) {
-      // Native automatic redirects would bypass permission checks on later hops.
       await waitForRequest(ensureAndroidLocalNetworkAccess({ url: url.toString() }), signal)
       if (signal?.aborted) throw createAbortError()
     }
@@ -152,7 +152,7 @@ async function nativeHttpFetch(input, init) {
       isReadOnlyRequest(url, options.method))
     if (!REDIRECT_STATUSES.has(nativeResponse.status)) break
     if (redirect === 'error') throw new TypeError('Redirects are not allowed for this request')
-    if (!isAndroid || redirect !== 'follow') break
+    if (redirect !== 'follow') break
     const location = new Headers(nativeResponse.headers).get('location')
     if (location === null) break
     if (redirects++ >= 20) throw new TypeError('Too many redirects')
@@ -188,7 +188,7 @@ async function nativeHttpFetch(input, init) {
   })
 
   Object.defineProperty(response, 'url', { value: nativeResponse.url })
-  if (isAndroid) Object.defineProperty(response, 'redirected', { value: redirects > 0 })
+  Object.defineProperty(response, 'redirected', { value: redirects > 0 })
   return response
 }
 
