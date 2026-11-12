@@ -232,7 +232,7 @@ export const ERROR_TOAST_ICON = ['fas', 'circle-exclamation']
  * @property {[string, string]} [icon] optional semantic icon (e.g. `['fas', 'trash']`) shown
  *   alongside the message, ignored when an image is given
  * @property {boolean} [important] keeps the toast when only important notifications are allowed,
- *   for reminders the user set up. Errors, warnings, and toasts with actions are kept regardless
+ *   for reminders the user set up. Errors, warnings, and toasts with buttons other than Undo are kept regardless
  */
 
 /**
