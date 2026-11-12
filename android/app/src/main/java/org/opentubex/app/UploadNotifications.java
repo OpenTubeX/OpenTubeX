@@ -148,14 +148,24 @@ final class UploadNotifications {
         boolean silent = isWithinQuietHours(configuration.optJSONObject("quietHours"), LocalTime.now());
         // With both, the app keeps a history and shows notifications itself while visible.
         boolean history = "both".equals(configuration.optString("mode", "both"));
-        boolean inApp = history && AppVisibility.isVisible();
         String thumbnail = thumbnailUrl(configuration, feedType, upload.getString("id"));
+        deliver(context, feedType, upload.getString("id"), upload.optBoolean("live"), title, body, thumbnail, history, silent);
+    }
+
+    /**
+     * Shows a notification, or leaves it to the visible app. With a history, it
+     * is queued until the app adds it to its notification history. Also used for
+     * Twitch streams, whose `feedType` is `twitch` and whose ID is `login/streamId`.
+     */
+    static synchronized void deliver(Context context, String feedType, String id, boolean live, String title,
+        String body, String thumbnail, boolean history, boolean silent) {
+        boolean inApp = history && AppVisibility.isVisible();
         if (history) {
             try {
                 recordShown(shownFile(context), new JSONArray().put(new JSONObject()
                     .put("feedType", feedType)
-                    .put("id", upload.getString("id"))
-                    .put("live", upload.optBoolean("live"))
+                    .put("id", id)
+                    .put("live", live)
                     .put("title", title)
                     .put("body", body)
                     .put("createdAt", System.currentTimeMillis())
@@ -173,7 +183,7 @@ final class UploadNotifications {
             return;
         }
         try {
-            show(context, title, body, feedType, upload.getString("id"), upload.optBoolean("live"), history, silent, thumbnail);
+            show(context, title, body, feedType, id, live, history, silent, thumbnail);
         } catch (RuntimeException error) {
             // One failed notification must not skip the others.
             android.util.Log.w("OpenTubeXUploads", "Unable to show an upload notification", error);
@@ -509,6 +519,8 @@ final class UploadNotifications {
     }
 
     static String url(String feedType, String id) {
+        // Twitch notifications lead to the live stream of the channel
+        if (feedType.equals("twitch")) return "https://www.twitch.tv/" + Uri.encode(id.substring(0, Math.max(0, id.indexOf('/'))));
         String encoded = Uri.encode(id);
         if (feedType.equals("posts")) return "https://www.youtube.com/post/" + encoded;
         if (feedType.equals("shorts")) return "https://www.youtube.com/shorts/" + encoded;

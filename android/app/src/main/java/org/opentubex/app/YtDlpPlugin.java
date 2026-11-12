@@ -244,6 +244,9 @@ public final class YtDlpPlugin extends Plugin {
             .put("ffprobe", new JSONObject(binary.toString()).put("version", ffprobeVersion));
     }
     @PluginMethod public void info(PluginCall call) { run(call, this::infoResult); }
+    @PluginMethod public void fetchRumblePage(PluginCall call) {
+        run(call, () -> RumblePages.fetch(call.getString("url"), payload -> RumbleManifestTransport.send(getContext(), payload)));
+    }
 
     private static String repository(String channel) {
         return "nightly".equals(channel) ? "yt-dlp/yt-dlp-nightly-builds" : "master".equals(channel) ? "yt-dlp/yt-dlp-master-builds" : "yt-dlp/yt-dlp";

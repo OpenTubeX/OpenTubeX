@@ -107,6 +107,28 @@ export async function cancelAndroidUploadNotifications(uploads) {
   if (SubscriptionRefresh) await SubscriptionRefresh.cancelUploadNotifications({ uploads })
 }
 
+/**
+ * Which followed Twitch channels Android checks for live streams, also while
+ * the app is closed if it may refresh subscriptions then.
+ * @param {{ enabled: boolean, mode: string, closedApp: boolean, thumbnails: boolean, title: string, channels: { id: string, login: string, name: string }[] }} configuration
+ */
+export async function configureAndroidTwitchLive(configuration) {
+  if (SubscriptionRefresh) await SubscriptionRefresh.configureTwitchLive({ configuration })
+}
+
+/**
+ * Announces the streams that started since the last check, through the
+ * notifications Android keeps for the notification history.
+ * @param {{ channelId: string, id: string, title: string, thumbnail?: string }[]} streams
+ */
+/**
+ * @param {string[]} channelIds the channels the streams were requested for
+ * @param {{ channelId: string, id: string, title: string, thumbnail?: string }[]} streams
+ */
+export async function observeAndroidTwitchLive(channelIds, streams) {
+  if (SubscriptionRefresh) await SubscriptionRefresh.observeTwitchLive({ channelIds, streams })
+}
+
 export async function isAndroidSubscriptionRefreshActive() {
   if (!SubscriptionRefresh) return false
   const { active } = await SubscriptionRefresh.isActive()

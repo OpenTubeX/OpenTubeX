@@ -1,6 +1,7 @@
 import { LocalNotifications } from '@capacitor/local-notifications'
 import { REMINDER_EARLY_MS } from '../../notificationHistory.js'
 import { cancelAndroidUploadNotifications } from './androidSubscriptionRefresh.js'
+import { getTwitchNotificationId, parseTwitchChannelLogin } from '../../twitchFollows.js'
 
 const UPLOAD_FEED_TYPES = { video: 'videos', live: 'live', short: 'shorts', post: 'posts' }
 
@@ -35,9 +36,11 @@ export async function closeCapacitorSystemNotifications(entries) {
   /** @type {Map<string, number>} */
   const reminders = new Map()
   const uploads = []
-  for (const { kind, path, createdAt } of entries) {
+  for (const { kind, path, query, createdAt } of entries) {
     const id = path.split('/').at(-1)
+    const twitchLogin = path === '/external-media' ? parseTwitchChannelLogin(query?.url) : null
     if (kind === 'live-reminder') reminders.set(id, createdAt)
+    else if (twitchLogin && query?.stream) uploads.push({ feedType: 'twitch', id: getTwitchNotificationId(twitchLogin, query.stream) })
     else if (kind in UPLOAD_FEED_TYPES) uploads.push({ feedType: UPLOAD_FEED_TYPES[kind], id })
   }
   try {

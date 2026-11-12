@@ -157,6 +157,9 @@ test('iOS excludes external HLS manifests whose segments cannot use native trans
     mapExternalPlaybackMetadata: () => null,
     mapPlaybackFormat: value => value,
     buildYtDlpStoryboardVtt: () => null,
+    getTwitchCreatorUrl: () => null,
+    resolveYtDlpCreatorAvatarUrl: async () => null,
+    appFetch: async () => { throw new Error('Unexpected request') },
     toNonEmptyString: value => typeof value === 'string' && value.length > 0 ? value : null,
     toFiniteNumber: value => Number.isFinite(value) ? value : null,
   })
@@ -203,6 +206,9 @@ test('iOS native subtitle registration retains translated and authored track ide
     mapExternalPlaybackMetadata: () => null,
     mapPlaybackFormat: value => value,
     buildYtDlpStoryboardVtt: () => null,
+    getTwitchCreatorUrl: () => null,
+    resolveYtDlpCreatorAvatarUrl: async () => null,
+    appFetch: async () => { throw new Error('Unexpected request') },
     toNonEmptyString: value => typeof value === 'string' && value.length > 0 ? value : null,
     toFiniteNumber: value => Number.isFinite(value) ? value : null,
   })
@@ -251,6 +257,9 @@ test('iOS routes YouTube playback formats through the native media bridge', asyn
     mapExternalPlaybackMetadata: () => null,
     mapPlaybackFormat: value => value,
     buildYtDlpStoryboardVtt: () => null,
+    getTwitchCreatorUrl: () => null,
+    resolveYtDlpCreatorAvatarUrl: async () => null,
+    appFetch: async () => { throw new Error('Unexpected request') },
     toNonEmptyString: value => typeof value === 'string' && value.length > 0 ? value : null,
     toFiniteNumber: value => Number.isFinite(value) ? value : null,
   })
