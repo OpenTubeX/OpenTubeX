@@ -2,6 +2,7 @@
   <div
     ref="rootRef"
     class="profileSettingsContent"
+    :class="{ subscriptionsOpen: openSettingsProfile && !isNewProfileOpen && activeTab === 'subscriptions' }"
   >
     <FtCard
       v-if="!isNewProfileOpen"
@@ -49,6 +50,7 @@
     <div
       v-if="openSettingsProfile"
       :key="openSettingsProfileId"
+      class="profilePanels"
     >
       <FtTabs
         v-if="!isNewProfileOpen"
@@ -120,6 +122,7 @@
         v-if="!isNewProfileOpen"
         v-show="activeTab === 'subscriptions'"
         :id="subscriptionsPanelId"
+        class="subscriptionsPanel"
         role="tabpanel"
         :aria-labelledby="subscriptionsTabId"
       >
@@ -138,12 +141,14 @@
             />
           </div>
           <FtProfileChannelList
+            class="channelList"
             :profile="openSettingsProfile"
             :is-main-profile="isMainProfile"
             :query="subscriptionQuery"
           />
           <FtProfileFilterChannelsList
             v-if="!isMainProfile"
+            class="channelList"
             :profile="openSettingsProfile"
             :query="subscriptionQuery"
           />

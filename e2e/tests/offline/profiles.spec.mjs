@@ -452,8 +452,11 @@ test.describe('profile manager presentation', () => {
           await page.emulateMedia({ colorScheme: theme })
           await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
           await expectImagesLoaded(page.locator('.profileSettingsContent img:visible'))
+          // Scroll-linked scrollbar handles never finish
           await page.locator('.profileSettingsContent').evaluate(element => Promise.all(
-            element.getAnimations({ subtree: true }).map(animation => animation.finished.catch(() => {}))
+            element.getAnimations({ subtree: true })
+              .filter(animation => animation.timeline === document.timeline)
+              .map(animation => animation.finished.catch(() => {}))
           ))
           const path = testInfo.outputPath(`profile-tabs-${theme}.png`)
           await page.locator('.profileSettingsContent').screenshot({ path })
@@ -657,20 +660,22 @@ test.describe('profile manager', () => {
       })).toBeLessThanOrEqual(1)
     })
 
-    test('clamps the scroll position after searching from the bottom', { tag: '@scale' }, async ({ page }) => {
+    test('clamps the scroll positions after searching from the bottom', { tag: '@scale' }, async ({ page }) => {
       await openProfileList(page)
       await page.locator('.profilePanelHeader button').last().click()
       await page.locator('.card .profileList').getByText('Second profile').click()
       await page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true }).click()
 
+      // The channels scroll on their own, inside the scrolling settings window
       const scroller = page.locator('.settingsSubpageScroll')
-      const search = page.getByRole('searchbox', { name: 'Search channels', exact: true })
-      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
-      await expect.poll(() => search.evaluate(input => input.getBoundingClientRect().bottom)).toBeLessThan(
-        await scroller.evaluate(element => element.getBoundingClientRect().top)
-      )
+      const channelScroller = page.locator('.channelScroller').first()
+      for (const element of [scroller, channelScroller]) {
+        await element.evaluate(element => { element.scrollTop = element.scrollHeight })
+        await expect.poll(() => element.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+      }
 
       // Typing would scroll the field into view, which hides the stale offset
+      const search = page.getByRole('searchbox', { name: 'Search channels', exact: true })
       await search.evaluate(input => {
         input.value = 'no such channel'
         input.dispatchEvent(new Event('input', { bubbles: true }))
@@ -683,6 +688,19 @@ test.describe('profile manager', () => {
           element.getBoundingClientRect().top + element.scrollTop +
           Number.parseFloat(getComputedStyle(element).paddingBottom)
         const maximumScrollTop = Math.max(0, contentEnd - element.clientHeight)
+        const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+        return element.scrollTop <= maximumScrollTop + 1 &&
+          scrollbar.classList.contains('os-scrollbar-unusable') === (maximumScrollTop <= 1)
+      })).toBe(true)
+      await expect(channelScroller).toBeHidden()
+
+      await search.evaluate(input => {
+        input.value = 'Channel 1'
+        input.dispatchEvent(new Event('input', { bubbles: true }))
+      })
+      await expect(channelScroller.getByRole('checkbox')).toHaveCount(11)
+      await expect.poll(() => channelScroller.evaluate(element => {
+        const maximumScrollTop = Math.max(0, element.scrollHeight - element.clientHeight)
         const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
         return element.scrollTop <= maximumScrollTop + 1 &&
           scrollbar.classList.contains('os-scrollbar-unusable') === (maximumScrollTop <= 1)
