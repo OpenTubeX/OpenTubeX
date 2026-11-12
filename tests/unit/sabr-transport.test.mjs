@@ -1133,6 +1133,39 @@ test('requests at the end of an ad break carry its cue point so SABR resumes the
     protos.VideoPlaybackAbrRequest.decode(bodies[0]).selectedFormatIds)
 })
 
+test('a live request that SABR answers with a neighboring segment asks again within the requested one', async t => {
+  // As on a live stream after a short segment, the estimated segment times are
+  // off by more than half a segment, so SABR answers the requested time with a
+  // neighbor. Segment 10 lasts only 0.4s.
+  const timeline = [
+    { sequenceNumber: 9, startMs: 16_000 },
+    { sequenceNumber: 10, startMs: 18_000 },
+    { sequenceNumber: 11, startMs: 18_400 },
+  ]
+  const requestedTimes = []
+  const { createSabrTransport } = load(async (_uri, options) => {
+    const playerTimeMs = Number(protos.VideoPlaybackAbrRequest.decode(options.body).clientAbrState.playerTimeMs)
+    requestedTimes.push(playerTimeMs)
+    const { sequenceNumber, startMs } = timeline.findLast(segment => segment.startMs <= playerTimeMs)
+    const buffer = new CompositeBuffer([])
+    const writer = new UmpWriter(buffer)
+    writer.write(protos.UMPPartId.NEXT_REQUEST_POLICY, protos.NextRequestPolicy.encode({ targetAudioReadaheadMs: 15000 }).finish())
+    writer.write(protos.UMPPartId.MEDIA_HEADER, protos.MediaHeader.encode({
+      headerId: 1, formatId: audioFormatId, sequenceNumber, startMs: String(startMs),
+    }).finish())
+    writer.write(protos.UMPPartId.MEDIA, Uint8Array.of(1, sequenceNumber))
+    writer.write(protos.UMPPartId.MEDIA_END, Uint8Array.of(1))
+    return new Response(utils.concatenateChunks(buffer.chunks))
+  })
+  const transport = createSabrTransport(sabrData, () => context)
+  t.after(() => transport.cleanup())
+  const uri = 'sabr1:audio?formatId=140-123-&targetDurationMs=2000&startTimeMs=19000&sq=10'
+  const segment = await transport.request(uri, request(uri), 1).promise
+
+  assert.deepEqual([...segment.data], [10])
+  assert.ok(requestedTimes.length <= 5, `requested ${requestedTimes.join(', ')}`)
+})
+
 test('a live buffered range ends with the last segment whose middle is buffered', () => {
   const { createBufferedRange } = load(async () => new Response())
   const references = [100, 101, 102, 103].map((sq, index) => {
@@ -1143,9 +1176,16 @@ test('a live buffered range ends with the last segment whose middle is buffered'
 
   // Media timestamps differ slightly from the estimated segment times. Claiming
   // segment 102 would make SABR skip it and leave playback without it.
-  const range = createBufferedRange(audioFormatId, { start: -0.3, end: 10.002 }, segmentIndex, true)
+  const range = createBufferedRange(audioFormatId, { start: -0.3, end: 10.002 }, segmentIndex, true, new Map())
   assert.equal(range.startSegmentIndex, 100)
   assert.equal(range.endSegmentIndex, 101)
 
-  assert.equal(createBufferedRange(audioFormatId, { start: 5.1, end: 7 }, segmentIndex, true), null)
+  assert.equal(createBufferedRange(audioFormatId, { start: 5.1, end: 7 }, segmentIndex, true, new Map()), null)
+
+  // A short segment shifted the media 3s from the estimates, so the reported
+  // starts of the delivered segments decide which of them are buffered
+  const delivered = new Map([[101, 2_000], [102, 7_000], [103, 12_000]])
+  const shifted = createBufferedRange(audioFormatId, { start: 2.01, end: 12 }, segmentIndex, true, delivered)
+  assert.equal(shifted.startSegmentIndex, 101)
+  assert.equal(shifted.endSegmentIndex, 102)
 })
