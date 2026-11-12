@@ -24,6 +24,37 @@ const ytDlpBinaryDownloadProgressListeners = new Set()
 const ytDlpBinaryUpdatedListeners = new Set()
 const castProgressListeners = new Map()
 
+/**
+ * The newest revision of each setting this window has. Settings broadcasts and
+ * the replies to this window's saves can arrive out of order, so a broadcast
+ * not newer than a save this window already has is dropped.
+ * @type {Map<string, number>}
+ */
+const settingRevisions = new Map()
+
+/**
+ * Records `revision` of setting `id`.
+ * @param {string} id
+ * @param {number} revision
+ * @returns {boolean} whether it is newer than the one this window has
+ */
+function recordSettingRevision(id, revision) {
+  if (revision <= (settingRevisions.get(id) ?? 0)) return false
+  settingRevisions.set(id, revision)
+  return true
+}
+
+/**
+ * Invokes a datastore request that can save a setting, see `handleRequestsSavingSettings` in the main process.
+ * @param {string} channel
+ * @param {{ action: number, data?: any }} request
+ */
+async function invokeSavingSettings(channel, request) {
+  const { result, savedSetting } = await ipcRenderer.invoke(channel, request)
+  if (savedSetting) recordSettingRevision(savedSetting._id, savedSetting.revision)
+  return result
+}
+
 ipcRenderer.on(IpcChannels.CAST_PROGRESS, (_, progress) => {
   castProgressListeners.get(progress?.preparationId)?.(progress.stage)
 })
@@ -847,7 +878,7 @@ export default {
       if (used) return Promise.reject(new Error('Automatic download rule writer already used'))
       used = true
       if (typeof value !== 'string') return Promise.reject(new Error('Automatic download rules must be a string'))
-      return ipcRenderer.invoke(IpcChannels.DB_SETTINGS, {
+      return invokeSavingSettings(IpcChannels.DB_SETTINGS, {
         action: DBActions.GENERAL.UPSERT,
         data: { _id: 'ytDlpAutomaticDownloadRules', value }
       })
@@ -863,7 +894,7 @@ export default {
       !navigator.userActivation.isActive) {
       return Promise.resolve(null)
     }
-    return ipcRenderer.invoke(IpcChannels.DB_SETTINGS, data ? { action, data } : { action })
+    return invokeSavingSettings(IpcChannels.DB_SETTINGS, data ? { action, data } : { action })
   },
 
   /**
@@ -871,7 +902,7 @@ export default {
    * @param {any} [data]
    */
   dbHistory: (action, data) => {
-    return ipcRenderer.invoke(IpcChannels.DB_HISTORY, data ? { action, data } : { action })
+    return invokeSavingSettings(IpcChannels.DB_HISTORY, data ? { action, data } : { action })
   },
 
   /**
@@ -1277,8 +1308,8 @@ export default {
    * @param {(event: number, data: any) => void} handler
    */
   handleSyncSettings: (handler) => {
-    ipcRenderer.on(IpcChannels.SYNC_SETTINGS, (_, { event, data }) => {
-      handler(event, data)
+    ipcRenderer.on(IpcChannels.SYNC_SETTINGS, (_, { event, data, revision }) => {
+      if (recordSettingRevision(data._id, revision)) handler(event, data)
     })
   },
 
