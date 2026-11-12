@@ -237,6 +237,37 @@ test('a setting saved by another window during this window\'s write shows the la
   assert.equal(valueSavedWithoutEditTime, false)
 })
 
+test('the last locale change wins when an earlier locale finishes loading later', async () => {
+  const loads = new Map()
+  const i18n = { global: { locale: { value: 'en-US' } } }
+  const handlers = vm.runInNewContext(`({${settingsSection('  currentLocale:', '  defaultInvidiousInstance:')}})`, {
+    runLocaleChange: createSettingUpdateQueue(),
+    i18n,
+    loadLocale: locale => {
+      if (locale === 'en-US') return Promise.resolve()
+      const load = deferred()
+      loads.set(locale, load)
+      return load.promise
+    },
+  })
+  const dispatch = async () => {}
+  const tick = () => new Promise(resolve => setImmediate(resolve))
+
+  // Another window's change applies, then this window's own write shows its value.
+  const first = handlers.currentLocale({ dispatch }, 'de-DE')
+  await tick()
+  const second = handlers.currentLocale({ dispatch }, 'fr-FR')
+  await tick()
+  loads.get('fr-FR')?.resolve()
+  await tick()
+  loads.get('de-DE').resolve()
+  await tick()
+  loads.get('fr-FR')?.resolve()
+  await Promise.all([first, second])
+
+  assert.equal(i18n.global.locale.value, 'fr-FR')
+})
+
 test('an ordered setting saved by another window before this window\'s write shows this window\'s value', async () => {
   const saved = new Map([['pinnedPlaylistIds', ['first']]])
   const settingWrites = createSettingWriteTracker(async id => saved.get(id))

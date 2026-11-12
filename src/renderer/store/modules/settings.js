@@ -214,6 +214,8 @@ const state = createDefaultSettings({
 // be compared with and restored to their original values.
 export const DEFAULT_SETTINGS = Object.freeze(structuredClone(state))
 
+const runLocaleChange = createSettingUpdateQueue()
+
 const sideEffectHandlers = {
   diagnosticLogging: (_store, value) => {
     setDiagnosticLogging(value === true)
@@ -277,7 +279,9 @@ const sideEffectHandlers = {
     setAnimationSpeed(value)
   },
 
-  currentLocale: async ({ dispatch }, value) => {
+  // Locale changes run in order, and one replaced while its locale loads is
+  // skipped, so the last change wins.
+  currentLocale: ({ dispatch }, value) => runLocaleChange('currentLocale', async isLatest => {
     const fallbackLocale = 'en-US'
 
     let targetLocale = value
@@ -342,9 +346,10 @@ const sideEffectHandlers = {
 
     await Promise.allSettled(loadPromises)
 
+    if (!isLatest()) return
     i18n.global.locale.value = targetLocale
     await dispatch('getRegionData', targetLocale)
-  },
+  }),
 
   defaultInvidiousInstance: ({ commit, rootState }, value) => {
     // Servers with their own Invidious server always use it, even with synced settings
