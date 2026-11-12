@@ -1283,8 +1283,8 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
     removeAndroidSubscriptionRefreshCancelledListener =
       await addAndroidSubscriptionRefreshCancelledListener(() => {
         cancelSubscriptionRefresh()
-        // Only YouTube refreshes show the notification, but the combined New
-        // feed refreshes RSS feeds alongside them.
+        // Only YouTube refreshes show the notification, but refreshing all
+        // feeds refreshes the RSS feeds alongside them.
         cancelRssFeedsRefresh()
       })
   }

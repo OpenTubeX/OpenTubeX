@@ -755,8 +755,12 @@ const currentTabRefreshing = computed(() => {
 
 // Includes the RSS refresh where the current tab shows its items
 const currentTabRefreshInProgress = computed(() => {
-  if (currentTab.value === 'feeds' || currentNewFeedRssTab.value) {
+  if (currentTab.value === 'feeds') {
     return rssFeedsRefreshing.value
+  }
+  // Reloading all feeds from the New feed's RSS tab refreshes the subscriptions too
+  if (currentNewFeedRssTab.value) {
+    return rssFeedsRefreshing.value || subscriptionFeedRefreshInProgress.value
   }
   return subscriptionFeedRefreshInProgress.value ||
     (newFeedRefreshesRssFeeds.value && rssFeedsRefreshing.value)
@@ -1443,7 +1447,7 @@ function cancelRefresh() {
   if (rssTab || newFeedRefreshesRssFeeds.value) {
     cancelRssFeedsRefresh()
   }
-  if (!rssTab) {
+  if (currentTab.value !== 'feeds') {
     // The refresh may be owned by another window, so it is cancelled everywhere
     requestSubscriptionRefreshCancellation()
   }

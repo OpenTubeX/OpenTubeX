@@ -1,4 +1,4 @@
-import { abortUnmockedRequest, defaultThemeClass, test, expect, goTo } from '../../helpers/app.mjs'
+import { defaultThemeClass, test, expect, goTo } from '../../helpers/app.mjs'
 import { expectTabHighlightAligned, expectTabHighlightStyle } from '../../helpers/tabs.mjs'
 import { captureAppFramebuffer } from '../../helpers/screenshots.mjs'
 import { encryptSyncDocument, decryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
@@ -1471,8 +1471,8 @@ test.describe('large new feed refresh', () => {
       }
     })
 
-    test('reloading all feeds from the RSS tab asks too', async ({ page }) => {
-      await page.route(/^https?:\/\//, abortUnmockedRequest)
+    test('reloading all feeds from the RSS tab asks too and can be cancelled there', async ({ page }) => {
+      await page.route(/^https?:\/\//, route => route.fulfill({ status: 404, body: '' }))
       await goTo(page, 'subscriptions')
       const newTab = page.locator('[data-subscription-feed-tab="all"]')
       await newTab.click()
@@ -1480,8 +1480,13 @@ test.describe('large new feed refresh', () => {
       await newTab.click({ button: 'right' })
       await page.getByRole('menu', { name: 'Context menu' }).getByRole('menuitem', { name: 'Reload All Feeds' }).click()
       await expect(page.getByRole('heading', { name: 'Refresh all subscription feeds?' })).toBeVisible()
-      await page.getByRole('button', { name: 'No', exact: true }).click()
+      await page.getByRole('button', { name: 'Yes', exact: true }).click()
       await expect(page.getByRole('heading', { name: 'Refresh all subscription feeds?' })).toHaveCount(0)
+
+      // The RSS tab shows and cancels the subscription refresh it started
+      await expect.poll(() => page.evaluate(() => window.$store.getters.getSubscriptionFeedRefreshInProgress)).toBe(true)
+      await page.locator('.subscriptionsHeader').getByRole('button', { name: 'Cancel Refresh' }).click()
+      await expect.poll(() => page.evaluate(() => window.$store.getters.getSubscriptionFeedRefreshInProgress)).toBe(false)
     })
   })
 
