@@ -580,6 +580,7 @@ export default defineComponent({
       visionOsStreamsRefreshPending: false,
       /** @type {(() => Promise<import('youtubei.js').Misc.Format[]>) | null} */
       loadWebLegacyFormats: null,
+      formatSelectionGeneration: 0,
       currentPlaybackRate: null,
       currentVideoQuality: null,
       /** @type {boolean|null} */
@@ -5557,6 +5558,8 @@ export default defineComponent({
     },
 
     handleFormatChange: function (format) {
+      // Supersedes a legacy selection that is still loading, also when the format stays
+      this.formatSelectionGeneration++
       switch (format) {
         case 'dash':
           this.enableDashFormat()
@@ -5747,7 +5750,6 @@ export default defineComponent({
           return false
         }
         this.legacyFormats = formats.map(mapLocalLegacyFormat)
-        this.loadWebLegacyFormats = null
         return this.legacyFormats.length > 0
       } catch (error) {
         console.error(`Could not load the legacy formats of ${videoId}`, error)
@@ -5763,9 +5765,11 @@ export default defineComponent({
       const loadGeneration = this.videoLoadGeneration
       const videoId = this.videoId
       const activeFormat = this.activeFormat
+      const formatSelectionGeneration = this.formatSelectionGeneration
       const legacyFormatsReady = this.legacyFormatAvailable && await this.prepareLegacyFormats()
       // Another video or format was chosen while the legacy formats loaded
-      if (!this.isCurrentVideoLoad(loadGeneration, videoId) || this.activeFormat !== activeFormat) return
+      if (!this.isCurrentVideoLoad(loadGeneration, videoId) || this.activeFormat !== activeFormat ||
+        this.formatSelectionGeneration !== formatSelectionGeneration) return
 
       if (!legacyFormatsReady) {
         showToast({
@@ -6167,6 +6171,11 @@ export default defineComponent({
         this.showStreamRecoveryNotice(`${this.t('Video.Reloading video after streaming URL error')}: [BAD_HTTP_STATUS: 403] YouTube watch session expired`)
         this.manifestSrc = manifestSrc
         this.streamingDataExpiryDate = videoInfo.streaming_data.expires
+        // The WEB legacy formats expired with the old streams, and the new expiry would hide that
+        if (this.loadWebLegacyFormats !== null) {
+          this.loadWebLegacyFormats = null
+          this.legacyFormats = []
+        }
         this.playbackSourceKey++
         console.warn(`Loaded fresh visionOS streams for ${videoId} after its streams expired`)
         return true

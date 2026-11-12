@@ -585,6 +585,8 @@ test.describe('local player request concurrency', () => {
       // Once the buffered part has played, the next segment request gets this
       // error. The demo file is buffered whole, so it is reported directly.
       const watch = await watchViewHandle(page)
+      // The WEB legacy formats expire with the first streams
+      expect(await watch.evaluate(view => view.prepareLegacyFormats())).toBe(true)
       await watch.evaluate(view => view.handlePlayerError({
         code: 1001,
         data: [new URL(decodeURIComponent(view.manifestSrc).match(/<BaseURL>([^<]+)</)[1].replaceAll('&amp;', '&')).toString(), 403],
@@ -597,6 +599,7 @@ test.describe('local player request concurrency', () => {
       // The new source loads the captions again, from their fresh URL
       await expect.poll(() => captionRequests.at(-1)).toBe('1 de')
       expect(await watch.evaluate(view => view.streamErrorReloadAttemptedForCurrentVideo)).toBe(false)
+      expect(await watch.evaluate(view => view.legacyFormatAvailable)).toBe(false)
     })
   })
 
