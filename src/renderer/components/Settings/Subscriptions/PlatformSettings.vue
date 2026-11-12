@@ -7,7 +7,7 @@
         setting-key="twitchLiveNotifications"
         :tooltip="t('Tooltips.Subscription Settings.Twitch Notify When Live')"
         :compact="true"
-        @change="value => store.dispatch('updateTwitchLiveNotifications', value)"
+        @change="updateLiveNotifications"
       />
     </FtFlexBox>
     <FtFlexBox>
@@ -149,7 +149,13 @@ import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../../store/index'
 import { AUTO_REFRESH_INTERVAL_VALUES, getAutoRefreshIntervalNames } from '../../../helpers/autoRefreshIntervals'
 import { clampOverlayScrollTop } from '../../../helpers/overlayScrollbars'
-import { followChannelByUrl, getFollowedChannels, PlatformChannelInputError, unfollowPlatformChannel } from '../../../helpers/platformFeed'
+import {
+  followChannelByUrl,
+  getFollowedChannels,
+  PlatformChannelInputError,
+  requestCapacitorNotificationPermission,
+  unfollowPlatformChannel
+} from '../../../helpers/platformFeed'
 import { showToast } from '../../../helpers/utils'
 import { getPlatform, getPlatformChannelRoute, PLATFORM_ICONS } from '../../../../platforms/index'
 
@@ -157,6 +163,18 @@ const { t } = useI18n()
 const router = useRouter()
 
 const liveNotifications = computed(() => store.getters.getTwitchLiveNotifications)
+
+/**
+ * Like following a Twitch channel with notifications on, turning them on for
+ * followed channels asks for the permission to show them.
+ * @param {boolean} value
+ */
+function updateLiveNotifications(value) {
+  store.dispatch('updateTwitchLiveNotifications', value)
+  if (process.env.IS_CAPACITOR && value && channels.value.some(channel => channel.platform === 'twitch')) {
+    requestCapacitorNotificationPermission()
+  }
+}
 const autoRefreshInterval = computed(() => store.getters.getPlatformFeedAutoRefreshInterval)
 const autoRefreshIntervalNames = computed(() => getAutoRefreshIntervalNames(t))
 const channels = computed(() => getFollowedChannels())
