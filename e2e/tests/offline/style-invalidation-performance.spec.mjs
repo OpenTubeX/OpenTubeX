@@ -1,5 +1,7 @@
 import { test, expect, goTo } from '../../helpers/app.mjs'
+import { openMockedVideo } from '../../helpers/player.mjs'
 import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
+import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 test.use({ seed: { settings: { currentLocale: 'en-US' } } })
 
@@ -10,7 +12,7 @@ test.use({ seed: { settings: { currentLocale: 'en-US' } } })
  * @param {import('@playwright/test').Page} page
  * @param {string} name
  * @param {string} selector
- * @param {{ class: string } | { scrollbarState: true } | { properties: string[] }} change
+ * @param {{ class: string } | { scrollbarState: true } | { properties: string[], target?: string }} change
  * @param {number} [maxRestyled]
  */
 async function expectLocalRestyle(page, name, selector, change, maxRestyled = 10) {
@@ -40,10 +42,11 @@ async function expectLocalRestyle(page, name, selector, change, maxRestyled = 10
           scrollbar.style.setProperty('--os-viewport-percent', viewportPercent)
         }
       }
-      const values = change.properties.map(property => [property, element.style.getPropertyValue(property)])
-      for (const [property] of values) element.style.setProperty(property, '123px')
+      const target = change.target ? element.querySelector(change.target) : element
+      const values = change.properties.map(property => [property, target.style.getPropertyValue(property)])
+      for (const [property] of values) target.style.setProperty(property, '123px')
       return () => {
-        for (const [property, value] of values) element.style.setProperty(property, value)
+        for (const [property, value] of values) target.style.setProperty(property, value)
       }
     }
     // Reading a computed value flushes pending style work.
@@ -130,5 +133,31 @@ test.describe('thumbnail grid', () => {
     await expectLocalRestyle(page, 'grid column size', grid, {
       properties: ['--thumbnail-grid-size', '--thumbnail-grid-stretch', '--shorts-thumbnail-grid-min-size']
     }, 200)
+  })
+})
+
+test.describe('player', () => {
+  test.use({
+    seed: {
+      settings: { currentLocale: 'en-US', videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true }
+    }
+  })
+
+  // Shaka moves the seek bar preview with inline styles on every pointer move.
+  // A `:has()` that matches inline styles makes Chromium check every `:has()`
+  // on the page again, restyling the watch page on each move.
+  test('seek bar preview moves restyle only the preview', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+    await video.evaluate(element => element.pause())
+    const player = page.locator('.ftVideoPlayer')
+    await player.hover()
+    const bar = await player.locator('.shaka-seek-bar').boundingBox()
+    await page.mouse.move(bar.x + bar.width / 2, bar.y + bar.height / 2)
+    await expect(player.locator('.shaka-player-ui-thumbnail-container')).toHaveCSS('visibility', 'visible')
+    await expectLocalRestyle(page, 'seek bar preview position', '.videoLayout', {
+      properties: ['left'],
+      target: '.shaka-player-ui-thumbnail-container'
+    }, 20)
   })
 })

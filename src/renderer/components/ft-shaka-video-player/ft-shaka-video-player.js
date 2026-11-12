@@ -1,6 +1,7 @@
 import { setupPhoneOptionsMenu } from '../../helpers/player/phoneOptionsMenu'
 import { CONTROL_BAR_MENUS, setupSubmenuScrolling } from '../../helpers/player/submenuScrolling'
 import { setupMenuTransitions } from '../../helpers/player/menuTransitions'
+import { setupCaptionCueLayout } from '../../helpers/player/captionCueLayout'
 import { chooseAndroidDirectory } from '../../helpers/androidStorage'
 import { isAppHidden, getAndroidAppActive, waitForAndroidAppState } from '../../helpers/appVisibility.js'
 import { normalizeHoldPlaybackRateMultiplier } from '../../helpers/holdPlaybackRate.js'
@@ -869,6 +870,7 @@ export default defineComponent({
     let androidFullscreenCleanup = null
     let androidFullscreenEntering = false
     let iosCaptionsCleanup = null
+    let captionCueLayoutCleanup = null
     let nativeCaptionTiming = null
     /** @type {shaka.extern.TextDisplayer | null} */
     let captionTextDisplayer = null
@@ -9881,6 +9883,7 @@ export default defineComponent({
       }
 
       const controls = ui.getControls()
+      captionCueLayoutCleanup = setupCaptionCueLayout(container.value)
       if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
         androidFullscreenCleanup = bindAndroidFullscreen(controls, {
           isActive: () => isActiveTab.value,
@@ -10793,6 +10796,8 @@ export default defineComponent({
       iosFullscreenCleanup = null
       iosCaptionsCleanup?.()
       iosCaptionsCleanup = null
+      captionCueLayoutCleanup?.()
+      captionCueLayoutCleanup = null
       nativeCaptionTiming?.release()
       nativeCaptionTiming = null
       captionTextDisplayer = null
@@ -11150,6 +11155,8 @@ export default defineComponent({
       iosFullscreenCleanup = null
       iosCaptionsCleanup?.()
       iosCaptionsCleanup = null
+      captionCueLayoutCleanup?.()
+      captionCueLayoutCleanup = null
       nativeCaptionTiming?.release()
       nativeCaptionTiming = null
       captionTextDisplayer = null
