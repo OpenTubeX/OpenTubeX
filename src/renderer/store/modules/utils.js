@@ -4,6 +4,8 @@ import i18n from '../../i18n/index'
 
 import { checkYoutubeChannelId } from '../../helpers/channels'
 import { commitCustomThemesEdit } from '../../helpers/customThemeSync.js'
+import { CUSTOM_THEMES_SYNC_KEY } from '../../../customTheme.js'
+import { trackSettingWrite } from './settings'
 import {
   CHANNEL_HANDLE_REGEX,
   createWebURL,
@@ -350,7 +352,8 @@ const getters = {
 }
 
 const actions = {
-  updateCustomThemes: commitCustomThemesEdit,
+  // Takes a function that saves the themes and resolves to the saved list.
+  updateCustomThemes: (context, save) => trackSettingWrite(CUSTOM_THEMES_SYNC_KEY, () => commitCustomThemesEdit(context, save)),
 
   showOutlines({ commit }) {
     commit('setOutlinesHidden', false)

@@ -598,8 +598,7 @@ test.describe('OpenTubeX sync server', () => {
     await page.evaluate(async () => {
       const store = window.$store
       await store.dispatch('updateBaseTheme', 'custom:synced-theme')
-      const themes = await window.ftElectron.replaceCustomThemes([])
-      await store.dispatch('updateCustomThemes', themes)
+      await store.dispatch('updateCustomThemes', () => window.ftElectron.replaceCustomThemes([]))
     })
     await syncNow()
 

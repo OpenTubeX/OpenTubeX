@@ -354,8 +354,7 @@ async function install(entry) {
   installing.value = entry.theme.id
   try {
     if (!installed(entry) || hasUpdate(entry)) {
-      const themes = await saveCustomTheme(entry.theme)
-      await store.dispatch('updateCustomThemes', themes)
+      await store.dispatch('updateCustomThemes', () => saveCustomTheme(entry.theme))
     }
     await store.dispatch('updateBaseTheme', customThemeValue(entry.theme.id))
     showToast({ message: t('Settings.Theme Settings.Custom Theme.Theme Saved'), icon: ['fas', 'check'] })

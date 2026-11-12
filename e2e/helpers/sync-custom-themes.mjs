@@ -111,7 +111,7 @@ export async function verifyCustomThemeSync(page, { phone = false } = {}) {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const edited = JSON.parse(JSON.stringify(store.state.utils.customThemes))
       edited.find(theme => theme.id === 'd3sox').colors.primaryText = '#abcdef'
-      await store.dispatch('updateCustomThemes', edited)
+      await store.dispatch('updateCustomThemes', async () => edited)
       await store.dispatch('syncWithSyncServer')
     })
     expect(uploads).toHaveLength(1)

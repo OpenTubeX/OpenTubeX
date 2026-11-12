@@ -226,7 +226,7 @@ for (const [name, initialSettings, expectedMode] of [
           assert.equal(key, 'setAiVideoSummaryMode')
           state.aiVideoSummaryMode = value
         },
-        recordSettingSyncTimestamp: async () => {},
+        saveSettingEdit: (commit, id, save) => save(),
         migrateStoredAiVideoSummarySetting,
         console,
       })
@@ -605,27 +605,31 @@ test('a failed control bar migration retries on the next launch', async () => {
 const autoLoadCommentsMigrationStart = settingsSource.indexOf('      // Auto Load Next Page used to control comments too')
 const autoLoadCommentsMigrationEnd = settingsSource.indexOf('      if (legacyHideAiVideoSummariesEntry)', autoLoadCommentsMigrationStart)
 
-const syncTimestampWriterStart = settingsSource.indexOf('let settingSyncTimestampWrite')
-const syncTimestampWriterEnd = settingsSource.indexOf('const customState', syncTimestampWriterStart)
+const syncTimestampWriterStart = settingsSource.indexOf('function updateSettingSyncTimestamp(')
+const syncTimestampWriterEnd = settingsSource.indexOf('const settingWrites =', syncTimestampWriterStart)
+const lockedSettingUpdateStart = settingsSource.indexOf('/** @type {Map<string, Promise<unknown>>} */')
+const lockedSettingUpdateEnd = settingsSource.indexOf('/**\n * Applies `update` to the saved bookmarks', lockedSettingUpdateStart)
 
 /**
  * @param {Record<string, unknown>} stored
  * @param {Record<string, number>} [startupEditTimes] edit times saved earlier in startup
  */
 async function migrateAutoLoadComments(stored, startupEditTimes) {
-  const state = { syncServerSettingUpdatedAt: startupEditTimes ?? stored.syncServerSettingUpdatedAt ?? {} }
+  const userSettings = Object.entries(stored).map(([_id, value]) => ({ _id, value }))
+  // Earlier startup steps save edit times after reading the settings.
+  if (startupEditTimes) stored.syncServerSettingUpdatedAt = startupEditTimes
   const commits = {}
   await vm.runInNewContext(`(async () => {
     ${settingsSource.slice(syncTimestampWriterStart, syncTimestampWriterEnd)}
+    ${settingsSource.slice(lockedSettingUpdateStart, lockedSettingUpdateEnd)}
     ${settingsSource.slice(autoLoadCommentsMigrationStart, autoLoadCommentsMigrationEnd)}
   })()`, {
-    userSettings: Object.entries(stored).map(([_id, value]) => ({ _id, value })),
-    state,
-    commit: (mutation, value) => {
-      commits[mutation] = value
-      if (mutation === 'setSyncServerSettingUpdatedAt') state.syncServerSettingUpdatedAt = value
+    userSettings,
+    commit: (mutation, value) => { commits[mutation] = value },
+    DBSettingHandlers: {
+      findValue: async key => stored[key],
+      upsert: async (key, value) => { stored[key] = value },
     },
-    DBSettingHandlers: { upsert: async (key, value) => { stored[key] = value } },
     isSettingSyncable: () => true,
     CUSTOM_THEMES_SYNC_KEY: 'customThemes',
     console,

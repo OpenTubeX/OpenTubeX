@@ -34,7 +34,7 @@ import { normalizeQuickSettings } from '../../helpers/quickSettings.js'
 import { normalizeFullscreenActions } from '../../helpers/fullscreenActions.js'
 import { normalizeControlBarButtons } from '../../helpers/controlBarButtons.js'
 import { normalizeHiddenPlayerMenuControls, normalizePlayerMenuControls, withoutControlBarButtons } from '../../helpers/playerMenuControls.js'
-import { createOptimisticSettingUpdater, createSettingUpdateQueue } from '../../helpers/settingUpdateQueue.js'
+import { createOptimisticSettingUpdater, createSettingUpdateQueue, createSettingWriteTracker } from '../../helpers/settingUpdateQueue.js'
 import { mergeSubscriptionSeenVideos } from '../../../subscriptionSeenVideos.js'
 import { mergeSubscriptionSeenPosts } from '../../../subscriptionSeenPosts.js'
 import { mergeRssFeedSeenItems } from '../../helpers/rssFeedSeenItems.js'
@@ -214,6 +214,8 @@ const state = createDefaultSettings({
 // be compared with and restored to their original values.
 export const DEFAULT_SETTINGS = Object.freeze(structuredClone(state))
 
+const runLocaleChange = createSettingUpdateQueue()
+
 const sideEffectHandlers = {
   diagnosticLogging: (_store, value) => {
     setDiagnosticLogging(value === true)
@@ -277,7 +279,9 @@ const sideEffectHandlers = {
     setAnimationSpeed(value)
   },
 
-  currentLocale: async ({ dispatch }, value) => {
+  // Locale changes run in order, and one replaced while its locale loads is
+  // skipped, so the last change wins.
+  currentLocale: ({ dispatch }, value) => runLocaleChange('currentLocale', async isLatest => {
     const fallbackLocale = 'en-US'
 
     let targetLocale = value
@@ -342,9 +346,10 @@ const sideEffectHandlers = {
 
     await Promise.allSettled(loadPromises)
 
+    if (!isLatest()) return
     i18n.global.locale.value = targetLocale
     await dispatch('getRegionData', targetLocale)
-  },
+  }),
 
   defaultInvidiousInstance: ({ commit, rootState }, value) => {
     // Servers with their own Invidious server always use it, even with synced settings
@@ -464,28 +469,86 @@ const SUBSCRIPTION_FEED_CACHE_MUTATIONS = {
   communityPosts: 'updatePostsCacheByChannel',
 }
 
-let settingSyncTimestampWrite = Promise.resolve()
-
-function recordSettingSyncTimestamp(commit, settings, settingId, editedAt = Date.now()) {
-  if (!isSettingSyncable(settingId) && settingId !== CUSTOM_THEMES_SYNC_KEY) return
-
-  settingSyncTimestampWrite = settingSyncTimestampWrite.then(async () => {
-    const current = settings.syncServerSettingUpdatedAt !== null &&
-      typeof settings.syncServerSettingUpdatedAt === 'object' &&
-      !Array.isArray(settings.syncServerSettingUpdatedAt)
-      ? settings.syncServerSettingUpdatedAt
-      : {}
-    const updatedAt = {
-      ...current,
-      [settingId]: editedAt,
-    }
+/**
+ * Saves the edit time `update` returns for `settingId`, for sync, or removes it
+ * for `undefined`. Windows can edit different settings at once, so it reads the
+ * saved times inside a lock they share.
+ * @param {Function} commit
+ * @param {string} settingId
+ * @param {(editedAt: number | undefined) => number | undefined} update
+ * @returns {Promise<boolean>} whether the edit time was saved
+ */
+function updateSettingSyncTimestamp(commit, settingId, update) {
+  return runLockedSettingUpdate('syncServerSettingUpdatedAt', async () => {
+    // Read the datastore, as the broadcast of another window's edit may still be on its way.
+    const saved = await DBSettingHandlers.findValue('syncServerSettingUpdatedAt')
+    const updatedAt = { ...(saved !== null && typeof saved === 'object' && !Array.isArray(saved) ? saved : {}) }
+    const editedAt = update(updatedAt[settingId])
+    if (editedAt === updatedAt[settingId]) return
+    if (editedAt === undefined) delete updatedAt[settingId]
+    else updatedAt[settingId] = editedAt
     await DBSettingHandlers.upsert('syncServerSettingUpdatedAt', updatedAt)
     commit('setSyncServerSettingUpdatedAt', updatedAt)
-  }).catch(error => {
-    console.error('Failed to record the setting sync timestamp', error)
   })
+}
 
-  return settingSyncTimestampWrite
+/**
+ * Saves an edit of `settingId` with `save`, and its edit time for sync:
+ * - The edit time is saved first, so no window can pair the new value with the
+ *   previous edit time.
+ * - If either save fails, the edit fails and the previous edit time comes back,
+ *   so sync doesn't count the unchanged value as a newer edit. Edits of a
+ *   setting take turns in all windows, so the previous edit time is always
+ *   that of a saved value.
+ * @template T
+ * @param {Function} commit
+ * @param {string} settingId
+ * @param {() => Promise<T>} save
+ * @param {number} [editedAt]
+ * @returns {Promise<T>}
+ */
+function saveSettingEdit(commit, settingId, save, editedAt = Date.now()) {
+  if (!isSettingSyncable(settingId) && settingId !== CUSTOM_THEMES_SYNC_KEY) return save()
+
+  return runLocked(`opentubex-setting-edit-${settingId}`, async () => {
+    let previous
+    const recorded = await updateSettingSyncTimestamp(commit, settingId, saved => {
+      previous = saved
+      return editedAt
+    })
+    if (!recorded) throw new Error(`Failed to save when ${settingId} was edited`)
+    try {
+      return await save()
+    } catch (error) {
+      // Keep an edit time that something else saved meanwhile.
+      await updateSettingSyncTimestamp(commit, settingId, saved => saved === editedAt ? previous : saved)
+      throw error
+    }
+  })
+}
+
+const settingWrites = createSettingWriteTracker(settingId => DBSettingHandlers.findValue(settingId))
+
+/**
+ * Optimistic edits show their value before their edit time is saved, so sync
+ * waits for this window's setting writes.
+ * @returns {Promise<unknown> | null} settles once the writes in flight finish,
+ * or `null` if there are none
+ */
+export function settingWritesSettled() {
+  return settingWrites.settled()
+}
+
+/**
+ * Runs a write of a synchronized value saved outside this module, such as
+ * custom themes, so sync waits for it too.
+ * @template T
+ * @param {string} settingId
+ * @param {() => Promise<T>} write
+ * @returns {Promise<T>}
+ */
+export function trackSettingWrite(settingId, write) {
+  return settingWrites.track(settingId, write)
 }
 
 const customState = {
@@ -604,37 +667,43 @@ const customMutations = {
   }
 }
 
-async function updateValidatedSetting(commit, settings, settingId, value) {
-  try {
-    await DBSettingHandlers.upsert(settingId, value)
-    await recordSettingSyncTimestamp(commit, settings, settingId)
+function updateValidatedSetting(commit, settingId, value) {
+  return settingWrites.track(settingId, async () => {
+    await saveSettingEdit(commit, settingId, () => DBSettingHandlers.upsert(settingId, value))
     commit(defaultMutationId(settingId), value)
-    return true
-  } catch (error) {
+  }).then(() => true, error => {
     console.error(error)
     return false
-  }
+  })
 }
 
 /** @type {Map<string, Promise<unknown>>} */
-const pendingLockedSettingUpdates = new Map()
+const pendingLocks = new Map()
 
 /**
- * Runs `persist` inside a lock all windows share for `settingId`, or a queue
- * where locks are missing, so read-modify-write updates cannot interleave.
+ * Runs `run` inside the lock `name`, which all windows share, or a queue where
+ * locks are missing.
+ * @template T
+ * @param {string} name
+ * @param {() => Promise<T>} run
+ * @returns {Promise<T>}
+ */
+function runLocked(name, run) {
+  if (typeof navigator !== 'undefined' && navigator.locks) return navigator.locks.request(name, run)
+  const result = (pendingLocks.get(name) ?? Promise.resolve()).catch(() => {}).then(run)
+  pendingLocks.set(name, result)
+  return result
+}
+
+/**
+ * Runs `persist` inside a lock all windows share for `settingId`, so
+ * read-modify-write updates cannot interleave.
  * @param {string} settingId
  * @param {() => Promise<void>} persist
  * @returns {Promise<boolean>} whether the update was saved
  */
 function runLockedSettingUpdate(settingId, persist) {
-  let updated
-  if (typeof navigator !== 'undefined' && navigator.locks) {
-    updated = navigator.locks.request(`opentubex-setting-${settingId}`, persist)
-  } else {
-    updated = (pendingLockedSettingUpdates.get(settingId) ?? Promise.resolve()).catch(() => {}).then(persist)
-    pendingLockedSettingUpdates.set(settingId, updated)
-  }
-  return updated.then(() => true, error => {
+  return runLocked(`opentubex-setting-${settingId}`, persist).then(() => true, error => {
     console.error(error)
     return false
   })
@@ -661,14 +730,11 @@ function updateSavedPlaylistBookmarks(commit, update) {
 const updateOptimisticSetting = createOptimisticSettingUpdater()
 
 function updateOrderedSetting(commit, settings, settingId, value) {
-  return updateOptimisticSetting(settingId, value, {
+  return settingWrites.track(settingId, () => updateOptimisticSetting(settingId, value, {
     read: () => settings[settingId],
     commit: nextValue => commit(defaultMutationId(settingId), nextValue),
-    persist: async nextValue => {
-      await DBSettingHandlers.upsert(settingId, nextValue)
-      await recordSettingSyncTimestamp(commit, settings, settingId)
-    },
-  }).then(() => true).catch(error => {
+    persist: nextValue => saveSettingEdit(commit, settingId, () => DBSettingHandlers.upsert(settingId, nextValue)),
+  })).then(() => true).catch(error => {
     console.error(error)
     return false
   })
@@ -752,9 +818,8 @@ const customActions = {
     ))
     if (value !== state.subscriptionSeenVideos) commit('setSubscriptionSeenVideos', value)
   },
-  recordSyncSettingEdit: ({ commit, state }, settingId) => (
-    recordSettingSyncTimestamp(commit, state, settingId)
-  ),
+  // Saves an edit of a synced value that is not a setting, such as the custom themes.
+  saveSyncSettingEdit: ({ commit }, { settingId, save }) => saveSettingEdit(commit, settingId, save),
   updateFullscreenActions: ({ commit, state }, value) => updateOrderedSetting(
     commit,
     state,
@@ -807,14 +872,13 @@ const customActions = {
   // Takes the new groups (sync, imports) or a function that derives them from
   // the saved ones. Edits read the saved groups inside a lock all windows
   // share, so an edit in one window cannot undo another's.
-  updateSubscriptionGroups: ({ commit, state }, update) => runLockedSettingUpdate('subscriptionGroups', async () => {
+  updateSubscriptionGroups: ({ commit, state }, update) => settingWrites.track('subscriptionGroups', () => runLockedSettingUpdate('subscriptionGroups', async () => {
     // Read the datastore, as the broadcast of another window's edit may still be on its way.
     const saved = await DBSettingHandlers.findValue('subscriptionGroups')
     const groups = typeof update === 'function' ? update(saved === undefined ? state.subscriptionGroups : saved) : update
-    await DBSettingHandlers.upsert('subscriptionGroups', groups)
+    await saveSettingEdit(commit, 'subscriptionGroups', () => DBSettingHandlers.upsert('subscriptionGroups', groups))
     commit('setSubscriptionGroups', groups)
-    await recordSettingSyncTimestamp(commit, state, 'subscriptionGroups')
-  }),
+  })),
   updateSubscribedChannelsCustomOrder: ({ commit, state }, value) => updateOrderedSetting(
     commit, state, 'subscribedChannelsCustomOrder', value
   ),
@@ -861,16 +925,15 @@ const customActions = {
     pendingAutomaticDownloadRuleUpdate = pendingAutomaticDownloadRuleUpdate.then(async () => {
       if (persist === null) throw new Error('Automatic download rules require a user action')
       const value = typeof update === 'function' ? update(state.ytDlpAutomaticDownloadRules) : update
-      await persist(value)
+      await saveSettingEdit(commit, 'ytDlpAutomaticDownloadRules', () => persist(value))
       // Publish successful writes even if a later edit is queued and could fail.
       commit('setYtDlpAutomaticDownloadRules', value)
-      await recordSettingSyncTimestamp(commit, state, 'ytDlpAutomaticDownloadRules')
       return true
     }).catch(error => {
       console.error(error)
       return false
     })
-    return pendingAutomaticDownloadRuleUpdate
+    return settingWrites.track('ytDlpAutomaticDownloadRules', () => pendingAutomaticDownloadRuleUpdate)
   },
 
   savePlaylistBookmark: ({ commit }, bookmark) => updateSavedPlaylistBookmarks(commit, bookmarks => [
@@ -897,32 +960,26 @@ const customActions = {
     typeof update === 'function' ? update : () => update
   ),
 
-  updatePreferredCaptionLocale: ({ commit, state }, value) => updateValidatedSetting(
+  updatePreferredCaptionLocale: ({ commit }, value) => updateValidatedSetting(
     commit,
-    state,
     'preferredCaptionLocale',
     normalizeYouTubeCaptionLanguageCode(value)
   ),
 
-  updateAppFont: ({ commit, state }, value) => updateValidatedSetting(
+  updateAppFont: ({ commit }, value) => updateValidatedSetting(
     commit,
-    state,
     'appFont',
     normalizeAppFont(value)
   ),
 
-  updateMoveDownloadsToAppHeader: async ({ commit, state }, value) => {
-    try {
-      await DBSettingHandlers.upsert('moveDownloadsToAppHeader', value)
-      await recordSettingSyncTimestamp(commit, state, 'moveDownloadsToAppHeader')
-      commit('setMoveDownloadsToAppHeader', value)
-      await DBSettingHandlers.delete('moveDownloadsToQuickSettings')
-      return true
-    } catch (error) {
-      console.error(error)
-      return false
-    }
-  },
+  updateMoveDownloadsToAppHeader: ({ commit }, value) => settingWrites.track('moveDownloadsToAppHeader', async () => {
+    await saveSettingEdit(commit, 'moveDownloadsToAppHeader', () => DBSettingHandlers.upsert('moveDownloadsToAppHeader', value))
+    commit('setMoveDownloadsToAppHeader', value)
+    await DBSettingHandlers.delete('moveDownloadsToQuickSettings')
+  }).then(() => true, error => {
+    console.error(error)
+    return false
+  }),
 
   updateMaterialSeedColor: ({ commit, state }, value) => updateOrderedSetting(
     commit, state, 'materialSeedColor', normalizeMaterialSeedColor(value)
@@ -932,57 +989,50 @@ const customActions = {
     commit, state, 'signalAccentColor', normalizeSignalAccentColor(value)
   ),
 
-  updateBaseTheme: ({ commit, rootGetters, state }, value) => updateValidatedSetting(
+  updateBaseTheme: ({ commit, rootGetters }, value) => updateValidatedSetting(
     commit,
-    state,
     'baseTheme',
     resolveBaseTheme(value, 'system', rootGetters.getCustomThemes)
   ),
 
-  updateSystemLightTheme: ({ commit, rootGetters, state }, value) => updateValidatedSetting(
+  updateSystemLightTheme: ({ commit, rootGetters }, value) => updateValidatedSetting(
     commit,
-    state,
     'systemLightTheme',
     resolveSystemTheme(value, 'light', rootGetters.getCustomThemes)
   ),
 
-  updateSystemDarkTheme: ({ commit, rootGetters, state }, value) => updateValidatedSetting(
+  updateSystemDarkTheme: ({ commit, rootGetters }, value) => updateValidatedSetting(
     commit,
-    state,
     'systemDarkTheme',
     resolveSystemTheme(value, 'dark', rootGetters.getCustomThemes)
   ),
 
-  updateMainColor: ({ commit, state }, value) => updateValidatedSetting(
+  updateMainColor: ({ commit }, value) => updateValidatedSetting(
     commit,
-    state,
     'mainColor',
     resolveColor(value, 'Red')
   ),
 
-  updateSecColor: ({ commit, state }, value) => updateValidatedSetting(
+  updateSecColor: ({ commit }, value) => updateValidatedSetting(
     commit,
-    state,
     'secColor',
     resolveColor(value, 'Blue')
   ),
 
-  updateTabBarPosition: ({ commit, state }, value) => updateValidatedSetting(
+  updateTabBarPosition: ({ commit }, value) => updateValidatedSetting(
     commit,
-    state,
     'tabBarPosition',
     normalizeTabBarPosition(value)
   ),
 
-  updateIconPack: async ({ commit, state }, value) => {
+  updateIconPack: ({ commit }, value) => settingWrites.track('iconPack', async () => {
     const previousIconPack = currentIconPack.value
     if (!isIconPack(value) || !await setIconPack(value)) {
       return false
     }
 
     try {
-      await DBSettingHandlers.upsert('iconPack', value)
-      await recordSettingSyncTimestamp(commit, state, 'iconPack')
+      await saveSettingEdit(commit, 'iconPack', () => DBSettingHandlers.upsert('iconPack', value))
       commit('setIconPack', value)
       return true
     } catch (error) {
@@ -992,7 +1042,7 @@ const customActions = {
       console.error(error)
       return false
     }
-  },
+  }),
 
   resetSettingToDefault: ({ dispatch }, settingKey) => {
     if (!Object.prototype.hasOwnProperty.call(DEFAULT_SETTINGS, settingKey)) {
@@ -1185,7 +1235,7 @@ const customActions = {
         const editedAt = userSettings.find(entry => entry._id === 'syncServerSettingUpdatedAt')
           ?.value?.generalAutoLoadMorePaginatedItemsEnabled
         if (typeof editedAt === 'number') {
-          await recordSettingSyncTimestamp(commit, state, 'autoLoadComments', editedAt)
+          await updateSettingSyncTimestamp(commit, 'autoLoadComments', () => editedAt)
         }
       }
 
@@ -1198,8 +1248,7 @@ const customActions = {
             legacyValue: legacyHideAiVideoSummariesEntry.value,
             hasCurrentSetting: hasAiVideoSummaryModeSetting,
             saveCurrentSetting: async (value) => {
-              await DBSettingHandlers.upsert('aiVideoSummaryMode', value)
-              await recordSettingSyncTimestamp(commit, state, 'aiVideoSummaryMode')
+              await saveSettingEdit(commit, 'aiVideoSummaryMode', () => DBSettingHandlers.upsert('aiVideoSummaryMode', value))
               commit('setAiVideoSummaryMode', value)
             },
             deleteLegacySetting: () => DBSettingHandlers.delete('hideAiVideoSummaries'),
@@ -1309,31 +1358,40 @@ const customActions = {
   // Should be a root action, but we'll tolerate
   setupListenersToSyncWindows: ({ commit, dispatch }) => {
     if (process.env.IS_ELECTRON) {
+      const applySavedSetting = (settingId, value) => {
+        if (settingsWithSideEffects.includes(settingId)) {
+          dispatch(defaultSideEffectsTriggerId(settingId), value)
+        }
+
+        commit(defaultMutationId(settingId), value)
+        if (
+          settingId === 'navigationItems' &&
+          !normalizeNavigationItems(value).includes('home')
+        ) {
+          dispatch('redirectHomeTabsToLandingPage').catch(error => {
+            console.error('Failed to redirect Home tabs after syncing navigation items', error)
+          })
+        }
+        if (settingId === 'syncServerEnabled') {
+          dispatch('applySyncServerEnabled', value, { root: true })
+        } else if (settingId === 'syncServerAutoSync') {
+          dispatch(value ? 'startSyncServerAutoSync' : 'stopSyncServerAutoSync', null, { root: true })
+        } else if (settingId === 'syncServerToken') {
+          dispatch('applySyncServerToken', null, { root: true }).catch(error => {
+            console.error('Failed to refresh sync after a token change in another window', error)
+          })
+        }
+      }
+
       window.ftElectron.handleSyncSettings((event, data) => {
         switch (event) {
           case SyncEvents.GENERAL.UPSERT:
-            if (settingsWithSideEffects.includes(data._id)) {
-              dispatch(defaultSideEffectsTriggerId(data._id), data.value)
-            }
-
-            commit(defaultMutationId(data._id), data.value)
-            if (
-              data._id === 'navigationItems' &&
-              !normalizeNavigationItems(data.value).includes('home')
-            ) {
-              dispatch('redirectHomeTabsToLandingPage').catch(error => {
-                console.error('Failed to redirect Home tabs after syncing navigation items', error)
-              })
-            }
-            if (data._id === 'syncServerEnabled') {
-              dispatch('applySyncServerEnabled', data.value, { root: true })
-            } else if (data._id === 'syncServerAutoSync') {
-              dispatch(data.value ? 'startSyncServerAutoSync' : 'stopSyncServerAutoSync', null, { root: true })
-            } else if (data._id === 'syncServerToken') {
-              dispatch('applySyncServerToken', null, { root: true }).catch(error => {
-                console.error('Failed to refresh sync after a token change in another window', error)
-              })
-            }
+            // If this window is writing the setting too, either save can end
+            // up last, so this window shows the saved value once its writes finish.
+            settingWrites.savedElsewhere(data._id, saved => {
+              if (saved !== undefined) applySavedSetting(data._id, saved)
+            })
+            applySavedSetting(data._id, data.value)
             break
 
           default:
@@ -1617,29 +1675,25 @@ for (const settingId of Object.keys(state)) {
     // If setting has side effects, generate action to handle them
     actions[triggerId] = sideEffectHandlers[settingId]
 
-    actions[updaterId] = ({ commit, dispatch, state }, value) => (
-      runSettingUpdate(settingId, async isLatest => {
-        await DBSettingHandlers.upsert(settingId, value)
-
-        if (!isLatest()) return
-        await recordSettingSyncTimestamp(commit, state, settingId)
+    actions[updaterId] = ({ commit, dispatch }, value) => (
+      settingWrites.track(settingId, () => runSettingUpdate(settingId, async isLatest => {
+        // Once its edit time is saved, the value must be saved too, even if a newer update replaced it.
+        await saveSettingEdit(commit, settingId, () => DBSettingHandlers.upsert(settingId, value))
 
         if (!isLatest()) return
         dispatch(triggerId, value)
 
         commit(mutationId, value)
-      }).then(() => true, handleUpdateError)
+      })).then(() => true, handleUpdateError)
     )
   } else {
-    actions[updaterId] = ({ commit, state }, value) => (
-      runSettingUpdate(settingId, async isLatest => {
-        await DBSettingHandlers.upsert(settingId, value)
-
-        if (!isLatest()) return
-        await recordSettingSyncTimestamp(commit, state, settingId)
+    actions[updaterId] = ({ commit }, value) => (
+      settingWrites.track(settingId, () => runSettingUpdate(settingId, async isLatest => {
+        // Once its edit time is saved, the value must be saved too, even if a newer update replaced it.
+        await saveSettingEdit(commit, settingId, () => DBSettingHandlers.upsert(settingId, value))
 
         if (isLatest()) commit(mutationId, value)
-      }).then(() => true, handleUpdateError)
+      })).then(() => true, handleUpdateError)
     )
   }
 }

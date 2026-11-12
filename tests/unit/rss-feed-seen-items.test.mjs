@@ -29,7 +29,7 @@ async function settingsDatabase() {
 async function windowStore(Settings) {
   const source = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
   const context = vm.createContext({ ...rssSeenItems, DBSettingHandlers: Settings, ANDROID_PROXY_SETTING_KEYS: [] })
-  vm.runInContext(source.slice(source.indexOf('const customActions ='), source.indexOf('  recordSyncSettingEdit:')) +
+  vm.runInContext(source.slice(source.indexOf('const customActions ='), source.indexOf('  saveSyncSettingEdit:')) +
     '\n}\nglobalThis.actions = customActions', context)
   const state = { rssFeedSeenItems: '[]' }
   const module = {
