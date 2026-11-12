@@ -51,6 +51,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
   let fail = !webCors
   const getters = {
     getActiveProfile: { _id: 'all', subscriptions: Array.from({ length: 20 }, (_, i) => ({ id: `UC${i}` })) },
+    get getActiveGroupSubscriptions() { return this.getActiveProfile.subscriptions },
     getBackendPreference: backend,
     getBackendFallback: true,
     getUseRssFeeds: useRssFeeds,
@@ -700,7 +701,9 @@ for (const feed of ['Videos', 'Shorts', 'Live', 'Posts']) {
     assert.equal(app.toasts.length, 1)
     assert.equal(app.toasts[0][0].message, 'Some subscribed channels could not be refreshed. Click to view them.')
     app.toasts[0][0].action()
+    await settle()
     assert.deepEqual(JSON.parse(JSON.stringify(app.navigations)), [{ path: '/subscriptions', query: { tab: feed === 'Posts' ? 'community' : feed.toLowerCase() } }])
+    assert.equal(app.writes.some(write => write.key === 'selectSubscriptionGroup'), false, 'the selected group lists every failed channel')
   })
 }
 
@@ -754,6 +757,14 @@ for (const shownChannels of ['all', 'all but one']) {
     unregister()
     assert.equal(app.errors.size, 20)
     assert.equal(app.toasts.length, shownChannels === 'all' ? 0 : 1)
+    if (shownChannels !== 'all') {
+      // The notification shows all channels when the selected group hides one
+      Object.defineProperty(app.getters, 'getActiveGroupSubscriptions', { value: app.getters.getActiveProfile.subscriptions.filter(({ id }) => id !== 'UC5') })
+      app.toasts[0][0].action()
+      await settle()
+      assert.deepEqual(app.writes.filter(write => write.key === 'selectSubscriptionGroup').map(write => write.value), [null])
+      assert.equal(app.navigations.length, 1)
+    }
   })
 }
 

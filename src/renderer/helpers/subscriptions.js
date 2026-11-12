@@ -386,15 +386,23 @@ function recordSubscriptionChannelResult(refresh, channel) {
  * @param {(key: string, named?: Record<string, unknown>, plural?: number) => string} t
  */
 function notifyNewSubscriptionErrors(refresh, t) {
-  if (refresh.cancelled || [...refresh.newErrorChannelIds].every(channelId => isSubscriptionChannelErrorShown(refresh.tab, channelId))) return
+  const channelIds = [...refresh.newErrorChannelIds]
+  if (refresh.cancelled || channelIds.every(channelId => isSubscriptionChannelErrorShown(refresh.tab, channelId))) return
 
   showToast({
     message: t('Subscriptions.Channel Errors.Toast'),
     icon: ['fas', 'circle-exclamation'],
-    action: () => openInternalPath({
-      path: '/subscriptions',
-      query: { tab: refresh.tab === 'posts' ? 'community' : refresh.tab }
-    })
+    action: () => {
+      // The box only lists the selected group's channels
+      const groupChannelIds = new Set(store.getters.getActiveGroupSubscriptions.map(channel => channel.id))
+      if (!channelIds.every(channelId => groupChannelIds.has(channelId))) {
+        store.dispatch('selectSubscriptionGroup', null)
+      }
+      openInternalPath({
+        path: '/subscriptions',
+        query: { tab: refresh.tab === 'posts' ? 'community' : refresh.tab }
+      })
+    }
   })
 }
 
