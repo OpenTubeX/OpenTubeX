@@ -126,6 +126,9 @@ function adjustCount(count, type) {
 let ratingLoad = 0
 // The rating YouTube has, which a failed rating returns to.
 let confirmedRating = 'INDIFFERENT'
+// Ratings go out one at a time, in the order they were clicked.
+let pendingRating = Promise.resolve()
+let pendingRatings = 0
 
 // Each channel of the account has its own rating. Separate sources, so a
 // token refresh that replaces the account does not reload it.
@@ -137,6 +140,9 @@ watch([() => props.videoId, canRate, () => getYouTubeChannelKey(store.getters.ge
 
   let current
   try {
+    // A rating still going out, for example from before switching channels
+    // and back, would make the loaded one outdated.
+    await pendingRating
     current = await getYouTubeVideoRating(videoId)
   } catch (error) {
     console.error(error)
@@ -148,10 +154,6 @@ watch([() => props.videoId, canRate, () => getYouTubeChannelKey(store.getters.ge
   loadedRating.value = current ?? null
   confirmedRating = rating.value
 }, { immediate: true })
-
-// Ratings go out one at a time, in the order they were clicked.
-let pendingRating = Promise.resolve()
-let pendingRatings = 0
 
 /** @param {'LIKE' | 'DISLIKE'} type */
 function rate(type) {

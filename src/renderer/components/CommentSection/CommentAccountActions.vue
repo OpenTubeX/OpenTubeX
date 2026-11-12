@@ -93,7 +93,8 @@ const comments = inject(youTubeCommentsKey)
 // and only ratings made here show.
 const rating = computed(() => comments.ratings.get(props.comment.id) ?? 'INDIFFERENT')
 const likeCount = computed(() => (props.comment.likes ?? 0) + (rating.value === 'LIKE' ? 1 : 0))
-const isOwnComment = computed(() => comments.channelId.value !== null && props.comment.authorId === comments.channelId.value)
+const isOwnComment = computed(() => (comments.channelId.value !== null && props.comment.authorId === comments.channelId.value) ||
+  (comments.postedBy.has(props.comment.id) && comments.postedBy.get(props.comment.id) === getYouTubeChannelKey(store.getters.getYouTubeAccount)))
 
 const deleting = ref(false)
 const showDeletePrompt = ref(false)

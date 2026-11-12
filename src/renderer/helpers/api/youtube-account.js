@@ -474,7 +474,9 @@ export async function selectYouTubeProfile(pageId) {
   const channelId = await resolveChannelId(credentials, profile)
   const latest = getAccount()
   if (latest?.credentials.refresh_token !== credentials.refresh_token) return
-  await store.dispatch('updateYouTubeAccount', { ...latest, pageId, channelId })
+  if (!await store.dispatch('updateYouTubeAccount', { ...latest, pageId, channelId })) {
+    throw new Error('Could not save the YouTube channel on this device')
+  }
 }
 
 /**
@@ -570,8 +572,9 @@ async function sendMirroredSubscriptions(youTubeChannelIds, subscribed, account)
   try {
     // One at a time, and stop at the first failure instead of repeating it.
     for (const channelId of youTubeChannelIds) {
-      // After a channel switch or sign-out, the rest would change another channel.
-      if (getYouTubeChannelKey(getAccount()) !== channelKey) return
+      // After turning mirroring off, a channel switch, or signing out, the
+      // rest would change subscriptions the user no longer wants changed.
+      if (!store.getters.getYouTubeAccountMirrorSubscriptions || getYouTubeChannelKey(getAccount()) !== channelKey) return
       if (subscribed) {
         await subscribeOnYouTube(channelId)
       } else {

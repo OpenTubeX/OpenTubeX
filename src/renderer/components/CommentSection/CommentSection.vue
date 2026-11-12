@@ -801,7 +801,7 @@ const nextPageToken = shallowRef(null)
 const commentData = ref([])
 const commentCount = ref(props.initialCommentCount)
 
-// Comments deleted here, for reply lists that were loading meanwhile.
+// Comments deleted here, for comment lists that were loading meanwhile.
 const deletedCommentIds = new Set()
 
 // The signed-in YouTube account can rate, write and delete video comments.
@@ -812,6 +812,9 @@ const youTubeComments = {
   channelId: computed(() => store.getters.getYouTubeAccount?.channelId ?? null),
   replyingTo: ref(null),
   ratings: reactive(new Map()),
+  // The channel each comment posted here belongs to, as its author ID can be
+  // missing. Kept in memory only, as the key contains the sign-in token.
+  postedBy: reactive(new Map()),
   clampScroll: () => clampCommentsScrollAfterRender(),
   // A reply that finishes posting late must not close another reply box.
   closeReply(commentId) {
@@ -819,7 +822,10 @@ const youTubeComments = {
   },
   addComment(posted, text, parentId, account) {
     const comment = createPostedComment(posted, text, account)
+    youTubeComments.postedBy.set(comment.id, getYouTubeChannelKey(account))
     if (parentId === null) {
+      // A reload while posting can have loaded it already.
+      if (commentData.value.some(entry => entry.id === comment.id)) return
       commentData.value.unshift(comment)
       if (commentCount.value !== null) commentCount.value++
       return
@@ -830,6 +836,7 @@ const youTubeComments = {
       addReplyToPinnedSnapshot(parentId, comment)
       return
     }
+    if (thread.replies.some(reply => reply.id === comment.id)) return
     // A new list, so the cached reply tree is rebuilt.
     thread.replies = [...thread.replies, comment]
     thread.numReplies++
@@ -896,8 +903,15 @@ function addReplyToPinnedSnapshot(parentId, reply) {
  */
 function mergeReplies(replies, loadedReplies) {
   const loadedIds = new Set(loadedReplies.map(reply => reply.id))
-  return replies.filter(reply => !loadedIds.has(reply.id))
-    .concat(loadedReplies.filter(reply => !deletedCommentIds.has(reply.id)))
+  return replies.filter(reply => !loadedIds.has(reply.id)).concat(withoutDeletedComments(loadedReplies))
+}
+
+/**
+ * YouTube can still return a comment shortly after it was deleted here.
+ * @param {Comment[]} comments
+ */
+function withoutDeletedComments(comments) {
+  return deletedCommentIds.size === 0 ? comments : comments.filter(comment => !deletedCommentIds.has(comment.id))
 }
 
 /**
@@ -2197,9 +2211,9 @@ async function getCommentDataLocal(more = false) {
     )
 
     if (more) {
-      commentData.value = commentData.value.concat(parsedComments)
+      commentData.value = commentData.value.concat(withoutDeletedComments(parsedComments))
     } else {
-      commentData.value = parsedComments
+      commentData.value = withoutDeletedComments(parsedComments)
     }
 
     nextPageToken.value = comments.has_continuation ? comments : null
@@ -2393,7 +2407,7 @@ async function getCommentDataInvidious() {
     })
     comments = prioritizeHighlightedComment(comments)
 
-    commentData.value = commentData.value.concat(comments)
+    commentData.value = commentData.value.concat(withoutDeletedComments(comments))
     nextPageToken.value = response.continuation
     isLoading.value = false
     showComments.value = true
@@ -2526,7 +2540,7 @@ function getPostCommentsInvidious() {
       return comment
     })
 
-    commentData.value = commentData.value.concat(comments)
+    commentData.value = commentData.value.concat(withoutDeletedComments(comments))
     nextPageToken.value = response?.continuation ?? continuation
     isLoading.value = false
     showComments.value = true
