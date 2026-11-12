@@ -216,6 +216,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (valfritt)'
       Not Set: Ikkje sett
     Retry Feed: Prøv {feed} på nytt
+    Reloading Feed: Lastar inn {feed} på nytt
 Trending:
   Music: Musikk
   Load Error: Klarte ikkje å laste inn populært innhald.

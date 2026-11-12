@@ -218,6 +218,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (по избор)'
       Not Set: Не е зададено
     Retry Feed: Повторен опит за {feed}
+    Reloading Feed: Презареждане на {feed}
 Trending:
   Music: Музика
   Load Error: Съдържанието „Набиращи популярност“ не можа да бъде заредено.

@@ -216,6 +216,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (isteğe bağlı)'
       Not Set: Ayarlanmadı
     Retry Feed: '{feed} akışını yeniden dene'
+    Reloading Feed: '{feed} yeniden yükleniyor'
 Trending:
   Music: Müzik
   Load Error: Öne çıkanlar yüklenemedi.

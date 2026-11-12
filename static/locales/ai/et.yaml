@@ -216,6 +216,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (valikuline)'
       Not Set: Määramata
     Retry Feed: Proovi {feed} uuesti
+    Reloading Feed: Laadin {feed} uuesti
 Trending:
   Music: Muusika
   Load Error: Trende ei saanud laadida.

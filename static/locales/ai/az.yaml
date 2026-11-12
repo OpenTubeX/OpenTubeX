@@ -216,6 +216,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (istəyə bağlı)'
       Not Set: Təyin edilməyib
     Retry Feed: '{feed} axınını yenidən sına'
+    Reloading Feed: '{feed} yenidən yüklənir'
 Channels:
   Load More Channels: Daha çox kanal yüklə
 Trending:

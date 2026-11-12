@@ -232,6 +232,7 @@ Subscriptions:
       Optional Parameter: '{parameter}(선택 사항)'
       Not Set: 설정 안 함
     Retry Feed: '{feed} 다시 시도'
+    Reloading Feed: '{feed} 다시 불러오는 중'
 Trending:
   Music: 음악
   Load Error: 인기 급상승 콘텐츠를 불러올 수 없습니다.

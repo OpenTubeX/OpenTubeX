@@ -216,6 +216,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (dewisol)'
       Not Set: Heb ei osod
     Retry Feed: Rhoi cynnig arall ar {feed}
+    Reloading Feed: Yn ail-lwytho {feed}
 Trending:
   Music: Cerddoriaeth
   Load Error: Nid oedd modd llwytho Trendio.

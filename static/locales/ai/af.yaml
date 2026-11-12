@@ -259,6 +259,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (opsioneel)'
       Not Set: Nie gestel nie
     Retry Feed: Probeer {feed} weer
+    Reloading Feed: Laai {feed} weer
 Channels:
   Load More Channels: Laai meer kanale
   Channels: Kanale

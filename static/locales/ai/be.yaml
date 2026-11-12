@@ -231,6 +231,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (неабавязкова)'
       Not Set: Не зададзена
     Retry Feed: Паўтарыць спробу для {feed}
+    Reloading Feed: Перазагрузка {feed}
 Trending:
   Music: Музыка
   Load Error: Не ўдалося загрузіць папулярнае.

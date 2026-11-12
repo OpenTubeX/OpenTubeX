@@ -218,6 +218,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (opcional)'
       Not Set: Sen definir
     Retry Feed: Tentar de novo {feed}
+    Reloading Feed: Recargando {feed}
 Trending:
   Music: Música
   Load Error: Non se puideron cargar as tendencias.

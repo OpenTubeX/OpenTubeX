@@ -218,6 +218,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (optioneel)'
       Not Set: Niet ingesteld
     Retry Feed: '{feed} opnieuw proberen'
+    Reloading Feed: '{feed} opnieuw laden'
 Trending:
   Music: Muziek
   Load Error: Trending kan niet worden geladen.

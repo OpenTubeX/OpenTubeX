@@ -216,6 +216,7 @@ Subscriptions:
       Optional Parameter: '{parameter} (volitelné)'
       Not Set: Nenastaveno
     Retry Feed: Zkusit znovu načíst {feed}
+    Reloading Feed: Znovu se načítá {feed}
 Trending:
   Music: Hudba
   Load Error: Trendy se nepodařilo načíst.
