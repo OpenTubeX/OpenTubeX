@@ -166,8 +166,10 @@ test('continues with the latest setting write after an earlier write fails', asy
   assert.deepEqual(appliedValues, [8])
 })
 
-test('generated setting updaters report whether the write was saved', async () => {
+test('generated setting updaters report whether the write was saved and save every value they timestamp', async () => {
   let failWrites = false
+  let editTimeSaved = Promise.resolve()
+  const writes = []
   const actions = vm.runInNewContext(`${generatedSettingActions}\nactions`, {
     state: { uiScale: 100, theme: 'dark' },
     settingsWithSideEffects: ['theme'],
@@ -178,8 +180,16 @@ test('generated setting updaters report whether the write was saved', async () =
     defaultSideEffectsTriggerId: id => `trigger${id}`,
     createSettingUpdateQueue,
     settingWrites: createSettingWriteTracker(async () => undefined),
-    saveSettingEdit: (commit, id, save) => save(),
-    DBSettingHandlers: { upsert: async () => { if (failWrites) throw new Error('disk full') } },
+    saveSettingEdit: async (commit, id, save) => {
+      await editTimeSaved
+      return save()
+    },
+    DBSettingHandlers: {
+      upsert: async (id, value) => {
+        if (failWrites) throw new Error('disk full')
+        writes.push(value)
+      },
+    },
     console: { error () {} },
   })
   const context = { commit () {}, dispatch () {}, state: {} }
@@ -189,6 +199,21 @@ test('generated setting updaters report whether the write was saved', async () =
   failWrites = true
   assert.equal(await actions.updateuiScale(context, 150), false)
   assert.equal(await actions.updatetheme(context, 'black'), false)
+
+  // A newer update replaces the older one while the older one saves its edit
+  // time. Otherwise the unchanged value would keep the newer edit time.
+  failWrites = false
+  for (const [update, values] of [[actions.updateuiScale, [175, 200]], [actions.updatetheme, ['light', 'dark']]]) {
+    const release = deferred()
+    editTimeSaved = release.promise
+    writes.length = 0
+    const older = update(context, values[0])
+    await new Promise(resolve => setImmediate(resolve))
+    const newer = update(context, values[1])
+    release.resolve()
+    await Promise.all([older, newer])
+    assert.deepEqual(writes, values)
+  }
 })
 
 test('a setting saved by another window during this window\'s write shows the last saved value', async () => {

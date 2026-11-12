@@ -1683,9 +1683,8 @@ for (const settingId of Object.keys(state)) {
 
     actions[updaterId] = ({ commit, dispatch }, value) => (
       settingWrites.track(settingId, () => runSettingUpdate(settingId, async isLatest => {
-        await saveSettingEdit(commit, settingId, async () => {
-          if (isLatest()) await DBSettingHandlers.upsert(settingId, value)
-        })
+        // Once its edit time is saved, the value must be saved too, even if a newer update replaced it.
+        await saveSettingEdit(commit, settingId, () => DBSettingHandlers.upsert(settingId, value))
 
         if (!isLatest()) return
         dispatch(triggerId, value)
@@ -1696,9 +1695,8 @@ for (const settingId of Object.keys(state)) {
   } else {
     actions[updaterId] = ({ commit }, value) => (
       settingWrites.track(settingId, () => runSettingUpdate(settingId, async isLatest => {
-        await saveSettingEdit(commit, settingId, async () => {
-          if (isLatest()) await DBSettingHandlers.upsert(settingId, value)
-        })
+        // Once its edit time is saved, the value must be saved too, even if a newer update replaced it.
+        await saveSettingEdit(commit, settingId, () => DBSettingHandlers.upsert(settingId, value))
 
         if (isLatest()) commit(mutationId, value)
       })).then(() => true, handleUpdateError)
