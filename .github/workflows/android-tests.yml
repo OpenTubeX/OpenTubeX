@@ -27,7 +27,7 @@ permissions: {}
 # A running suite finishes, and only the latest waiting run starts next, so one
 # run can cover several merges.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
