@@ -165,6 +165,13 @@ export function useFullscreenDocks({
   let resizingFullscreenDockWeightBefore = 0
   let resizingFullscreenDockTotalWeight = 0
   let resizingFullscreenDockBounds = null
+  // Each drag follows the pointer that started it, so a second touch cannot move or end it.
+  let fullscreenDockGesturePointerId = null
+
+  /** @param {PointerEvent} [event] */
+  function isOtherFullscreenDockPointer(event) {
+    return event != null && event.pointerId !== fullscreenDockGesturePointerId
+  }
 
   function getFullscreenOpenDocks(includeDock) {
     const openDocks = fullscreenDockOrder.filter(isFullscreenDockOpen)
@@ -282,9 +289,11 @@ export function useFullscreenDocks({
   }
 
   function handleFullscreenDockResizePointerDown(event, dock) {
-    if (event.button !== 0 || !fullscreenDockCanResize(dock)) {
+    if (event.button !== 0 || fullscreenDockGesturePointerId !== null || !fullscreenDockCanResize(dock)) {
       return
     }
+
+    fullscreenDockGesturePointerId = event.pointerId
 
     const openDocks = getFullscreenOpenDocks()
     const index = openDocks.indexOf(dock)
@@ -303,12 +312,15 @@ export function useFullscreenDocks({
   }
 
   function handleFullscreenDockResizePointerMove(event) {
+    if (isOtherFullscreenDockPointer(event)) return
     const pointerWeight = (event.clientY - resizingFullscreenDockBounds.top) /
       resizingFullscreenDockBounds.height * resizingFullscreenDockTotalWeight
     setFullscreenDockBoundary(resizingFullscreenDock, pointerWeight - resizingFullscreenDockWeightBefore)
   }
 
-  function stopFullscreenDockResize() {
+  function stopFullscreenDockResize(event) {
+    if (isOtherFullscreenDockPointer(event)) return
+    fullscreenDockGesturePointerId = null
     fullscreenDockResizing.value = false
     resizingFullscreenDock = null
     resizingFullscreenDockBounds = null
@@ -363,9 +375,11 @@ export function useFullscreenDocks({
   }
 
   function handleFullscreenDockWidthPointerDown(event) {
-    if (event.button !== 0 || isPortraitLayout()) {
+    if (event.button !== 0 || fullscreenDockGesturePointerId !== null || isPortraitLayout()) {
       return
     }
+
+    fullscreenDockGesturePointerId = event.pointerId
 
     // Keep the grabbed point under the pointer instead of snapping the edge to it.
     resizingFullscreenDockWidthOffset = getRenderedFullscreenDockWidth(event.currentTarget) -
@@ -378,11 +392,13 @@ export function useFullscreenDocks({
   }
 
   function handleFullscreenDockWidthPointerMove(event) {
+    if (isOtherFullscreenDockPointer(event)) return
     setFullscreenDockWidth(getFullscreenDockWidthAt(event.clientX) + resizingFullscreenDockWidthOffset)
   }
 
-  function stopFullscreenDockWidthResize() {
-    if (!fullscreenDockWidthResizing.value) return
+  function stopFullscreenDockWidthResize(event) {
+    if (!fullscreenDockWidthResizing.value || isOtherFullscreenDockPointer(event)) return
+    fullscreenDockGesturePointerId = null
     fullscreenDockWidthResizing.value = false
     window.removeEventListener('pointermove', handleFullscreenDockWidthPointerMove)
     window.removeEventListener('pointerup', stopFullscreenDockWidthResize)
@@ -429,11 +445,13 @@ export function useFullscreenDocks({
     const header = target?.closest(FULLSCREEN_DOCK_HEADER_SELECTOR)
     const interactiveTarget = target?.closest('button, a, input, select, textarea, [role="button"]')
     if (
-      event.button !== 0 || !fullscreenDockCanReorder(dock) || !header ||
-      interactiveTarget || !event.currentTarget.contains(header)
+      event.button !== 0 || fullscreenDockGesturePointerId !== null || !fullscreenDockCanReorder(dock) ||
+      !header || interactiveTarget || !event.currentTarget.contains(header)
     ) {
       return
     }
+
+    fullscreenDockGesturePointerId = event.pointerId
 
     fullscreenDockReordering.value = true
     reorderingFullscreenDock = dock
@@ -445,6 +463,7 @@ export function useFullscreenDocks({
   }
 
   function handleFullscreenDockReorderPointerMove(event) {
+    if (isOtherFullscreenDockPointer(event)) return
     const openDocks = getFullscreenOpenDocks()
     const currentIndex = openDocks.indexOf(reorderingFullscreenDock)
     const otherDocks = openDocks.filter(dock => dock !== reorderingFullscreenDock)
@@ -483,7 +502,9 @@ export function useFullscreenDocks({
     }
   }
 
-  function stopFullscreenDockReorder() {
+  function stopFullscreenDockReorder(event) {
+    if (isOtherFullscreenDockPointer(event)) return
+    fullscreenDockGesturePointerId = null
     fullscreenDockReordering.value = false
     reorderingFullscreenDock = null
     reorderingFullscreenDockBounds = null
