@@ -34,7 +34,8 @@ const OPAQUE_PATH_SEGMENT = /^[\w%=.~-]{40,}$/
 // Video, channel and playlist IDs show what the user watched. Words, even
 // long ones like `performance`, have no digits or capitals.
 const MEDIA_ID_PATH_SEGMENT = /^(?=[\w-]*[\dA-Z])[\w-]{11,}$/
-// The app's routes live in the hash, like `#/watch/<id>`
+// The app's routes live in the hash, like `#/watch/<id>`. Only their name is
+// kept, since the rest can be a search, a handle or an ID.
 const APP_PROTOCOLS = ['app:', 'capacitor:']
 
 /**
@@ -78,9 +79,8 @@ function redactUrl(match) {
   const query = url.search ? `?${REDACTED}` : ''
   let hash = url.hash ? `#${REDACTED}` : ''
   if (APP_PROTOCOLS.includes(url.protocol) && url.hash.startsWith('#/')) {
-    const queryStart = url.hash.indexOf('?')
-    const route = redactPath(queryStart === -1 ? url.hash.slice(1) : url.hash.slice(1, queryStart))
-    hash = `#${route}${queryStart === -1 ? '' : `?${REDACTED}`}`
+    const [, name, rest] = url.hash.match(/^#\/([^/?]*)(.*)$/)
+    hash = `#/${name}${rest ? `/${REDACTED}` : ''}`
   }
   const origin = url.protocol === 'file:' ? 'file://' : `${url.protocol}//${url.host}`
   return `${origin}${path}${query}${hash}${trailing}`

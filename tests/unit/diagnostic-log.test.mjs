@@ -24,8 +24,8 @@ test('URLs keep their origin and path but lose parameters and opaque segments', 
     'https://i.ytimg.com/vi/<redacted>/hqdefault.jpg https://www.youtube.com/channel/<redacted>/videos'
   )
   assert.equal(
-    redactDiagnosticText('app://bundle/index.html#/watch/aB3dE_fG-h1?playlistId=PLa1B2c3D4e5F6 app://bundle/index.html#/settings/performance'),
-    'app://bundle/index.html#/watch/<redacted>?<redacted> app://bundle/index.html#/settings/performance'
+    redactDiagnosticText('app://bundle/index.html#/watch/aB3dE_fG-h1?playlistId=PLa1B2c3D4e5F6 app://bundle/index.html#/search/private%20search app://bundle/index.html#/history'),
+    'app://bundle/index.html#/watch/<redacted> app://bundle/index.html#/search/<redacted> app://bundle/index.html#/history'
   )
   assert.equal(
     redactDiagnosticText('see (https://example.com/a?filters[]=private&q=(secret)) and [https://[2001:db8::5]/watch?account=alice].'),
