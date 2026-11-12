@@ -14,6 +14,7 @@ const EMPTY_SET = markRaw(new Set())
 
 /** @type {Promise<void> | null} */
 let pendingLoad = null
+let refreshListenersAdded = false
 
 const state = {
   aiSlopBlockedChannels: EMPTY_SET,
@@ -54,7 +55,20 @@ async function fetchList(url) {
 }
 
 const actions = {
-  loadAiSlopList({ commit, state, rootGetters }) {
+  loadAiSlopList({ commit, dispatch, state, rootGetters }) {
+    if (!refreshListenersAdded) {
+      refreshListenersAdded = true
+      // Retry a failed download, and refresh an outdated list, when the app
+      // comes back online or into view. Fresh lists return without a request.
+      const refresh = () => {
+        if (rootGetters.getUseAiSlopList && document.visibilityState === 'visible') {
+          dispatch('loadAiSlopList')
+        }
+      }
+      window.addEventListener('online', refresh)
+      document.addEventListener('visibilitychange', refresh)
+    }
+
     if (state.aiSlopListFetchedAt === null) {
       const cached = loadCachedAiSlopList()
 
