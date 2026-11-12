@@ -741,6 +741,9 @@ test('a local, plain HTTP, or possibly cached response does not clear an interne
   await app.window.fetch('https://localhost/static/locales/en-US.json')
   assert.equal(cacheModes.at(-1), undefined)
   assert.equal(app.recovery.state, 'offline')
+  // A self-hosted server's Invidious API on the app's origin still revalidates
+  await app.window.fetch('https://localhost/api/v1/trending')
+  assert.equal(cacheModes.at(-1), 'no-cache')
   // A default read must reach the server during the outage, so it proves reachability
   await app.window.fetch('https://api.github.com/repos/OpenTubeX/OpenTubeX/releases')
   assert.equal(cacheModes.at(-1), 'no-cache')
