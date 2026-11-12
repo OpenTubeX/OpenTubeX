@@ -899,6 +899,7 @@ export function mergeLateWatchNext(info, playerResponse, nextResponse, actions) 
  *   androidLiveHlsManifestUrl: string | null,
  *   androidLiveDashManifestUrl: string | null,
  *   getVrHlsManifest: () => Promise<string | null>,
+ *   refreshVisionOsStreams?: (() => Promise<import('youtubei.js').YT.VideoInfo | null>) | null,
  *   contentDisclosures: { label: string, description: string, attribution: string }[] | null,
  *   infoPanels: LocalInfoPanel[] | null,
  *   musicMediaType: import('../player/musicMediaType').MusicMediaType,
@@ -1270,15 +1271,20 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
     }
   }
 
-  if (info.captions?.caption_tracks) {
-    for (const captionTrack of info.captions.caption_tracks) {
+  /**
+   * @param {import('youtubei.js').YTNodes.PlayerCaptionsTracklist | undefined} captions
+   * @param {string | undefined} poToken
+   * @param {string} captionClientName
+   */
+  const prepareCaptionUrls = (captions, poToken, captionClientName) => {
+    for (const captionTrack of captions?.caption_tracks ?? []) {
       const url = new URL(captionTrack.base_url)
 
-      if (streamPoToken) {
+      if (poToken) {
         url.searchParams.set('potc', '1')
-        url.searchParams.set('pot', streamPoToken)
+        url.searchParams.set('pot', poToken)
       }
-      url.searchParams.set('c', usesVisionOsStreams ? 'VISIONOS' : clientName)
+      url.searchParams.set('c', captionClientName)
 
       // Remove &xosf=1 as it adds `position:63% line:0%` to the subtitle lines
       // placing them in the top right corner
@@ -1287,6 +1293,7 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
       captionTrack.base_url = url.toString()
     }
   }
+  prepareCaptionUrls(info.captions, streamPoToken, usesVisionOsStreams ? 'VISIONOS' : clientName)
 
   return {
     info,
@@ -1304,6 +1311,16 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
     contentDisclosures: extractLocalContentDisclosures(info),
     infoPanels: extractLocalInfoPanels(info),
     getVrHlsManifest: () => getLocalVrHlsManifest(id, htmlExtracts.session, contentPoToken),
+    // Expired visionOS streams only need a new /player response, not the watch page
+    refreshVisionOsStreams: usesVisionOsStreams
+      ? async () => {
+        const data = isVisionOsStreamsEnabled() ? await requestVisionOsStreams(id) : null
+        if (!data) return null
+        const refreshed = new YT.VideoInfo([{ data }], htmlExtracts.session.actions, cpn)
+        prepareCaptionUrls(refreshed.captions, undefined, 'VISIONOS')
+        return refreshed
+      }
+      : null,
     watchNextPromise: getWatchNextPromise(),
   }
 }

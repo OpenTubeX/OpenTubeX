@@ -10629,6 +10629,9 @@ export default defineComponent({
             label: activeVariant?.label || undefined,
             previousQuality: oldFormat === 'dash' && activeVariant
               ? (activeVariant.height > activeVariant.width ? activeVariant.width : activeVariant.height)
+              : undefined,
+            dashQuality: oldFormat === 'dash' && activeVariant
+              ? getDashQualityFromDimensions(activeVariant.width, activeVariant.height) ?? undefined
               : undefined
           }
 
@@ -10666,7 +10669,8 @@ export default defineComponent({
           useAutoQuality,
           audioBandwidth,
           label,
-          previousQuality
+          previousQuality,
+          dashQuality
         } = pendingFormatSwitchState
 
         if (newFormat === 'audio' || newFormat === 'dash') {
@@ -10682,6 +10686,11 @@ export default defineComponent({
 
           if (sourceFormat === 'audio' && newFormat === 'dash' && !useAutoQuality) {
             dimension = preferredVideoQuality.value
+          }
+
+          // A new source for the same format, such as refreshed streams
+          if (sourceFormat === 'dash' && newFormat === 'dash' && !useAutoQuality) {
+            dimension = dashQuality
           }
 
           await unloadForFormatSwitch()
