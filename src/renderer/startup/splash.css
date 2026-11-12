@@ -1,10 +1,14 @@
 .startupSplash {
   /* Keep the initial palette throughout startup: the renderer applies its
-     default theme before the saved settings have finished loading. Without a
-     cached primary color, the tonal shapes fall back to the text color. */
-  --splash-background: var(--startup-background, #111);
-  --splash-foreground: var(--startup-foreground, #eee);
-  --splash-primary: var(--startup-primary, var(--splash-foreground));
+     default theme before the saved settings have finished loading. Until the
+     first launch caches the saved appearance, use the default Tally theme's
+     colors with its default Red accent. */
+  --splash-default-background: #111;
+  --splash-default-foreground: #eee;
+  --splash-default-primary: #ff6e5b;
+  --splash-background: var(--startup-background, var(--splash-default-background));
+  --splash-foreground: var(--startup-foreground, var(--splash-default-foreground));
+  --splash-primary: var(--startup-primary, var(--splash-default-primary));
   --splash-container: color-mix(in srgb, var(--splash-primary) 24%, var(--splash-background));
   --splash-on-container: color-mix(in srgb, var(--splash-primary) 40%, var(--splash-foreground));
   --splash-shape-size: 160px;
@@ -20,6 +24,14 @@
   color: var(--splash-foreground);
   font-family: system-ui, sans-serif;
   direction: ltr;
+}
+
+@media (prefers-color-scheme: light) {
+  .startupSplash {
+    --splash-default-background: #f6f5f4;
+    --splash-default-foreground: #212121;
+    --splash-default-primary: #ba0c06;
+  }
 }
 
 /* The logo stays upright on a slowly turning tonal cookie. */
