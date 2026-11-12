@@ -274,6 +274,18 @@ function isLocalHostname(hostname) {
  * @param {RequestInit | undefined} init
  * @param {boolean} uncached
  */
+/**
+ * @param {RequestInfo | URL} input
+ * @returns {boolean}
+ */
+function isAppOrigin(input) {
+  try {
+    return new URL(input instanceof Request ? input.url : input.toString(), location.href).origin === location.origin
+  } catch {
+    return false
+  }
+}
+
 function confirmsInternetReachability(input, init, uncached) {
   const request = input instanceof Request ? input : null
   const url = new URL(request?.url ?? input.toString(), location.href)
@@ -395,9 +407,10 @@ export function installNetworkFetch({ corsDisabled = false, getRequestError, che
   const fetch = async (input, init) => {
     // During an outage, the HTTP cache could answer a read without the
     // network. Revalidate it with the server, so its success proves that the
-    // internet is reachable again.
+    // internet is reachable again. The app's own files are left to the web
+    // build's offline cache, so the app can still start.
     if (appRecovery?.state === 'offline' && ['GET', 'HEAD'].includes((init?.method ?? (input instanceof Request ? input.method : 'GET')).toUpperCase()) &&
-      (init?.cache ?? (input instanceof Request ? input.cache : 'default')) === 'default') {
+      (init?.cache ?? (input instanceof Request ? input.cache : 'default')) === 'default' && !isAppOrigin(input)) {
       init = { ...init, cache: 'no-cache' }
     }
     let response
