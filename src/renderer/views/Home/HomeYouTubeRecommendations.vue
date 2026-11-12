@@ -73,9 +73,10 @@ const videos = computed(() => allVideos.value.filter(video => !video.isShort &&
   !isVideoHiddenByPreferences(video, {
     hideLiveStreams: store.getters.getHideLiveStreams,
     hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
-    hiddenChannelNames: store.getters.getActiveChannelsHiddenNames,
+    // Lists keep blocked items and blur them when that is turned on.
+    hiddenChannelNames: store.getters.getChannelsHiddenNamesToRemove,
     aiSlopChannels: store.getters.getAiSlopBlockedChannels,
-    forbiddenTitles: store.getters.getActiveForbiddenTitles,
+    forbiddenTitles: store.getters.getForbiddenTitlesToRemove,
   })))
 
 let generation = 0

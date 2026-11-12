@@ -212,8 +212,10 @@ export function parseTile(tile) {
   const badges = lines.flat().map(item => item?.badge?.metadataBadgeRenderer).filter(Boolean)
 
   // The first line names the channel, unless it is the views and date line.
-  const author = lineTexts.length > 1 ? (lineTexts[0][0] ?? '') : ''
-  const details = lineTexts.length > 1 ? lineTexts.slice(1).flat() : lineTexts.flat()
+  const isDetail = text => /\b(?:views?|watching|ago)\b/i.test(text)
+  const hasAuthorLine = lineTexts.length > 1 && !lineTexts[0].some(isDetail)
+  const author = hasAuthorLine ? (lineTexts[0][0] ?? '') : ''
+  const details = (hasAuthorLine ? lineTexts.slice(1) : lineTexts).flat()
   const viewsText = details.find(text => /\b(?:views?|watching)\b/i.test(text))
   const publishedText = details.find(text => /\bago\b/i.test(text))
 

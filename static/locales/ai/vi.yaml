@@ -323,7 +323,6 @@ Settings:
     YouTube Channel: "Kênh YouTube"
     Using Channel: "Đang dùng YouTube với tên {name}"
     Switch Channel Failed: "Không thể chuyển kênh YouTube: {error}"
-    Sign-In Code: "Mã đăng nhập {code}"
     Open Sign-In Page: "Mở trang đăng nhập"
     Copy Code: "Sao chép mã"
     Code Copied: "Đã sao chép mã"

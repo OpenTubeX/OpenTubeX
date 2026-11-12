@@ -323,7 +323,6 @@ Settings:
     YouTube Channel: "Kanál YouTube"
     Using Channel: "Nyní používáte YouTube jako {name}"
     Switch Channel Failed: "Kanál YouTube se nepodařilo přepnout: {error}"
-    Sign-In Code: "Přihlašovací kód {code}"
     Open Sign-In Page: "Otevřít přihlašovací stránku"
     Copy Code: "Kopírovat kód"
     Code Copied: "Kód zkopírován"

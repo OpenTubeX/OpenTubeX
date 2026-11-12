@@ -417,7 +417,6 @@ Settings:
     YouTube Channel: "YouTube 채널"
     Using Channel: "이제 {name}(으)로 YouTube를 사용합니다"
     Switch Channel Failed: "YouTube 채널을 전환할 수 없습니다: {error}"
-    Sign-In Code: "로그인 코드 {code}"
     Open Sign-In Page: "로그인 페이지 열기"
     Copy Code: "코드 복사"
     Code Copied: "코드를 복사했습니다"

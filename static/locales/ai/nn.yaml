@@ -336,7 +336,6 @@ Settings:
     YouTube Channel: "YouTube-kanal"
     Using Channel: "Brukar no YouTube som {name}"
     Switch Channel Failed: "Klarte ikkje å byte YouTube-kanal: {error}"
-    Sign-In Code: "Innloggingskode {code}"
     Open Sign-In Page: "Opne innloggingssida"
     Copy Code: "Kopier koden"
     Code Copied: "Koden er kopiert"

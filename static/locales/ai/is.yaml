@@ -323,7 +323,6 @@ Settings:
     YouTube Channel: "YouTube-rás"
     Using Channel: "Þú notar nú YouTube sem {name}"
     Switch Channel Failed: "Ekki tókst að skipta um YouTube-rás: {error}"
-    Sign-In Code: "Innskráningarkóði {code}"
     Open Sign-In Page: "Opna innskráningarsíðu"
     Copy Code: "Afrita kóða"
     Code Copied: "Kóði afritaður"

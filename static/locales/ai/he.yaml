@@ -328,7 +328,6 @@ Settings:
     YouTube Channel: "ערוץ YouTube"
     Using Channel: "השימוש ב־YouTube מתבצע כעת בתור {name}"
     Switch Channel Failed: "לא ניתן להחליף ערוץ YouTube: {error}"
-    Sign-In Code: "קוד כניסה {code}"
     Open Sign-In Page: "פתיחת דף הכניסה"
     Copy Code: "העתקת הקוד"
     Code Copied: "הקוד הועתק"

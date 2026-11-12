@@ -323,7 +323,6 @@ Settings:
     YouTube Channel: "YouTube 頻道"
     Using Channel: "現在以 {name} 的身分使用 YouTube"
     Switch Channel Failed: "無法切換 YouTube 頻道：{error}"
-    Sign-In Code: "登入代碼 {code}"
     Open Sign-In Page: "開啟登入頁面"
     Copy Code: "複製代碼"
     Code Copied: "已複製代碼"

@@ -323,7 +323,6 @@ Settings:
     YouTube Channel: "YouTube-kanal"
     Using Channel: "Bruker nå YouTube som {name}"
     Switch Channel Failed: "Kunne ikke bytte YouTube-kanal: {error}"
-    Sign-In Code: "Innloggingskode {code}"
     Open Sign-In Page: "Åpne innloggingssiden"
     Copy Code: "Kopier koden"
     Code Copied: "Koden er kopiert"

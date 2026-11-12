@@ -323,7 +323,6 @@ Settings:
     YouTube Channel: "YouTube チャンネル"
     Using Channel: "{name} として YouTube を使用しています"
     Switch Channel Failed: "YouTube チャンネルを切り替えられませんでした: {error}"
-    Sign-In Code: "ログインコード {code}"
     Open Sign-In Page: "ログインページを開く"
     Copy Code: "コードをコピー"
     Code Copied: "コードをコピーしました"

@@ -4,7 +4,9 @@
       type="button"
       class="commentAccountAction"
       :aria-pressed="rating === 'LIKE'"
-      :aria-label="t('YouTube Account.Like')"
+      :aria-label="hideCount
+        ? t('YouTube Account.Like')
+        : t('Display Label', { label: t('YouTube Account.Like'), value: formatViewCount(likeCount, shortenViewCounts) })"
       :title="t('YouTube Account.Like')"
       @click="rate('LIKE')"
     >
@@ -97,6 +99,9 @@ const showDeletePrompt = ref(false)
 
 // Ratings go out one at a time, in the order they were clicked.
 let pendingRating = Promise.resolve()
+let pendingRatings = 0
+// The rating YouTube has, which a failed rating returns to.
+let confirmedRating = 'INDIFFERENT'
 
 /** @param {'LIKE' | 'DISLIKE'} type */
 function rate(type) {
@@ -104,24 +109,31 @@ function rate(type) {
   const videoId = comments.videoId.value
   const previous = rating.value
   const next = previous === type ? 'INDIFFERENT' : type
+  if (pendingRatings === 0) confirmedRating = previous
   setRating(commentId, next)
 
   // Liking replaces a dislike and the reverse, like on YouTube.
   const action = next === 'LIKE' ? 'like' : next === 'DISLIKE' ? 'dislike' : previous === 'LIKE' ? 'unlike' : 'undislike'
   const pageId = store.getters.getYouTubeAccount?.pageId ?? null
+  const samePage = () => (store.getters.getYouTubeAccount?.pageId ?? null) === pageId
+  pendingRatings++
   pendingRating = pendingRating.then(async () => {
-    // Switching channels before an earlier rating finished drops this one,
-    // so it cannot rate as the other channel.
-    if ((store.getters.getYouTubeAccount?.pageId ?? null) !== pageId) return
     try {
+      // Switching channels before an earlier rating finished drops this one,
+      // so it cannot rate as the other channel.
+      if (!samePage()) return
       await performYouTubeCommentAction(action, commentId, videoId)
+      confirmedRating = next
     } catch (error) {
       console.error(error)
-      if ((comments.ratings.get(commentId) ?? 'INDIFFERENT') === next) setRating(commentId, previous)
       showToast({
         message: t('YouTube Account.Rating Failed', { error: error?.message ?? String(error) }),
         icon: ERROR_TOAST_ICON
       })
+    } finally {
+      pendingRatings--
+      // Once every click went out, show the rating YouTube has.
+      if (pendingRatings === 0 && samePage()) setRating(commentId, confirmedRating)
     }
   })
 }

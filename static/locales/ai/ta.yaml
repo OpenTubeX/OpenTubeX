@@ -336,7 +336,6 @@ Settings:
     YouTube Channel: "YouTube சேனல்"
     Using Channel: "இப்போது {name} ஆக YouTube ஐப் பயன்படுத்துகிறீர்கள்"
     Switch Channel Failed: "YouTube சேனலை மாற்ற முடியவில்லை: {error}"
-    Sign-In Code: "உள்நுழைவுக் குறியீடு {code}"
     Open Sign-In Page: "உள்நுழைவுப் பக்கத்தைத் திற"
     Copy Code: "குறியீட்டை நகலெடு"
     Code Copied: "குறியீடு நகலெடுக்கப்பட்டது"

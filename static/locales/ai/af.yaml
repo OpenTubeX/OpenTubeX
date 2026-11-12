@@ -485,7 +485,6 @@ Settings:
     YouTube Channel: "YouTube-kanaal"
     Using Channel: "YouTube word nou as {name} gebruik"
     Switch Channel Failed: "Kon nie die YouTube-kanaal wissel nie: {error}"
-    Sign-In Code: "Aanmeldkode {code}"
     Open Sign-In Page: "Maak aanmeldbladsy oop"
     Copy Code: "Kopieer kode"
     Code Copied: "Kode gekopieer"

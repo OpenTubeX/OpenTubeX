@@ -298,7 +298,6 @@ Settings:
     YouTube Channel: "Канал YouTube"
     Using Channel: "Теперь вы используете YouTube как {name}"
     Switch Channel Failed: "Не удалось сменить канал YouTube: {error}"
-    Sign-In Code: "Код для входа {code}"
     Open Sign-In Page: "Открыть страницу входа"
     Copy Code: "Копировать код"
     Code Copied: "Код скопирован"

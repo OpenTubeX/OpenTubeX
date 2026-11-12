@@ -187,7 +187,7 @@ function expiryDate(expiresIn) {
   return new Date(Date.now() + seconds * 1000).toISOString()
 }
 
-/** @type {Promise<YouTubeAccountCredentials> | null} */
+/** @type {{ refreshToken: string, promise: Promise<YouTubeAccountCredentials> } | null} */
 let pendingRefresh = null
 
 /** @param {YouTubeAccountCredentials} credentials */
@@ -239,8 +239,17 @@ async function getCredentials() {
     return credentials
   }
 
-  pendingRefresh ??= refreshCredentials(credentials).finally(() => { pendingRefresh = null })
-  return await pendingRefresh
+  // A refresh still running for an account signed out since must not be reused.
+  if (pendingRefresh?.refreshToken !== credentials.refresh_token) {
+    const refresh = {
+      refreshToken: credentials.refresh_token,
+      promise: refreshCredentials(credentials).finally(() => {
+        if (pendingRefresh === refresh) pendingRefresh = null
+      })
+    }
+    pendingRefresh = refresh
+  }
+  return await pendingRefresh.promise
 }
 
 /**
@@ -478,17 +487,32 @@ export async function unsubscribeOnYouTube(channelId) {
   await withAccount(innertube => innertube.interact.unsubscribe(channelId))
 }
 
+let mirrorQueue = Promise.resolve()
+
 /**
  * Repeats a subscription change in OpenTubeX on the YouTube account, when
  * the user turned that on.
  * @param {string | string[]} channelIds
  * @param {boolean} subscribed
  */
-export async function mirrorYouTubeSubscription(channelIds, subscribed) {
+export function mirrorYouTubeSubscription(channelIds, subscribed) {
   // Only YouTube channels can be subscribed to on YouTube.
   const youTubeChannelIds = [channelIds].flat().filter(channelId => /^UC[\w-]{22}$/.test(channelId))
-  if (!getAccount() || !store.getters.getYouTubeAccountMirrorSubscriptions || youTubeChannelIds.length === 0) return
+  if (!getAccount() || !store.getters.getYouTubeAccountMirrorSubscriptions || youTubeChannelIds.length === 0) {
+    return Promise.resolve()
+  }
 
+  // Changes go out in the order they were made, so a quick unsubscribe
+  // cannot finish before the subscribe it undoes.
+  mirrorQueue = mirrorQueue.then(() => sendMirroredSubscriptions(youTubeChannelIds, subscribed))
+  return mirrorQueue
+}
+
+/**
+ * @param {string[]} youTubeChannelIds
+ * @param {boolean} subscribed
+ */
+async function sendMirroredSubscriptions(youTubeChannelIds, subscribed) {
   try {
     // One at a time, and stop at the first failure instead of repeating it.
     for (const channelId of youTubeChannelIds) {

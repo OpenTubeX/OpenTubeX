@@ -323,7 +323,6 @@ Settings:
     YouTube Channel: "Chaîne YouTube"
     Using Channel: "Vous utilisez maintenant YouTube en tant que {name}"
     Switch Channel Failed: "Impossible de changer de chaîne YouTube : {error}"
-    Sign-In Code: "Code de connexion {code}"
     Open Sign-In Page: "Ouvrir la page de connexion"
     Copy Code: "Copier le code"
     Code Copied: "Code copié"

@@ -615,7 +615,6 @@ Settings:
     YouTube Channel: "YouTube channel"
     Using Channel: "Now using YouTube as {name}"
     Switch Channel Failed: "Could not switch the YouTube channel: {error}"
-    Sign-In Code: "Sign-in code {code}"
     Open Sign-In Page: "Open sign-in page"
     Copy Code: "Copy code"
     Code Copied: "Code copied"

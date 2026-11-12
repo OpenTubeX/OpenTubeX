@@ -1,3 +1,5 @@
+import Autolinker from 'autolinker'
+
 import { escapeHTML } from '../../helpers/feed-metadata.js'
 import { getSelectedYouTubeProfile } from '../../helpers/youtube-account-state.js'
 
@@ -43,8 +45,9 @@ export function createPostedComment(posted, text, account) {
     isPinned: false,
     isOwner: false,
     isMember: false,
-    // Comment text keeps its line breaks with pre-wrap.
-    text: escapeHTML(text),
+    // Comment text keeps its line breaks with pre-wrap. Links work like in
+    // loaded comments.
+    text: Autolinker.link(escapeHTML(text)),
     translationText: null,
     imageAttachment: null,
     isHearted: false,

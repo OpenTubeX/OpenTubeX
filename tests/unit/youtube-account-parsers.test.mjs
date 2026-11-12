@@ -13,6 +13,7 @@ import {
   parseVideoRating,
   parseWatchHistoryUrl
 } from '../../src/renderer/helpers/api/youtube-account-parsers.js'
+import { applyYouTubeUserAgent, YOUTUBE_USER_AGENTS } from '../../src/youTubeUserAgent.js'
 
 const decodeParams = params => [...Buffer.from(decodeURIComponent(params), 'base64')]
 const bytes = text => [...Buffer.from(text)]
@@ -272,4 +273,17 @@ test('only uses the watch history URL of a playable TV player response', () => {
   const tracking = { videostatsPlaybackUrl: { baseUrl: 'https://s.youtube.com/api/stats/playback?docid=video000001' } }
   assert.equal(parseWatchHistoryUrl({ playabilityStatus: { status: 'OK' }, playbackTracking: tracking }), tracking.videostatsPlaybackUrl.baseUrl)
   assert.equal(parseWatchHistoryUrl({ playabilityStatus: { status: 'UNPLAYABLE' }, playbackTracking: tracking }), null)
+})
+
+test('only YouTube requests get the TV user agent, and the marker never leaves the app', () => {
+  const youTubeHeaders = { 'OpenTubeX-YouTube-User-Agent': 'tizen', 'User-Agent': 'Electron' }
+  assert.deepEqual(applyYouTubeUserAgent('https://www.youtube.com/youtubei/v1/player', youTubeHeaders), {
+    'User-Agent': YOUTUBE_USER_AGENTS.tizen
+  })
+
+  for (const [url, client] of [['https://tracker.example/youtube.com/', 'tv'], ['https://www.youtube.com/tv', 'unknown']]) {
+    assert.deepEqual(applyYouTubeUserAgent(url, { 'opentubex-youtube-user-agent': client, 'User-Agent': 'Electron' }), {
+      'User-Agent': 'Electron'
+    })
+  }
 })

@@ -452,7 +452,6 @@ Settings:
     YouTube Channel: "Kanal YouTube"
     Using Channel: "YouTube zdaj uporabljate kot {name}"
     Switch Channel Failed: "Kanala YouTube ni bilo mogoče zamenjati: {error}"
-    Sign-In Code: "Koda za prijavo {code}"
     Open Sign-In Page: "Odpri stran za prijavo"
     Copy Code: "Kopiraj kodo"
     Code Copied: "Koda je kopirana"

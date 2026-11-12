@@ -804,7 +804,7 @@ const commentCount = ref(props.initialCommentCount)
 // The signed-in YouTube account can rate, write and delete video comments.
 const youTubeComments = {
   enabled: computed(() => !props.isPostComments && !props.offline && !props.commentsDisabled &&
-    isSignedInToYouTube(store.getters)),
+    !areCommentsDisabled.value && isSignedInToYouTube(store.getters)),
   videoId: computed(() => props.id),
   channelId: computed(() => store.getters.getYouTubeAccount?.channelId ?? null),
   replyingTo: ref(null),

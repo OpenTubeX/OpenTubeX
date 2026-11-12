@@ -328,7 +328,6 @@ Settings:
     YouTube Channel: "قناة YouTube"
     Using Channel: "أنت الآن تستخدم YouTube باسم {name}"
     Switch Channel Failed: "تعذّر تبديل قناة YouTube: {error}"
-    Sign-In Code: "رمز تسجيل الدخول {code}"
     Open Sign-In Page: "فتح صفحة تسجيل الدخول"
     Copy Code: "نسخ الرمز"
     Code Copied: "تم نسخ الرمز"

@@ -323,7 +323,6 @@ Settings:
     YouTube Channel: "YouTube 频道"
     Using Channel: "现在以 {name} 的身份使用 YouTube"
     Switch Channel Failed: "无法切换 YouTube 频道：{error}"
-    Sign-In Code: "登录代码 {code}"
     Open Sign-In Page: "打开登录页面"
     Copy Code: "复制代码"
     Code Copied: "代码已复制"

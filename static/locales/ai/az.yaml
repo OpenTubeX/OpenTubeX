@@ -325,7 +325,6 @@ Settings:
     YouTube Channel: "YouTube kanalı"
     Using Channel: "YouTube indi {name} kimi istifadə olunur"
     Switch Channel Failed: "YouTube kanalını dəyişmək mümkün olmadı: {error}"
-    Sign-In Code: "Giriş kodu {code}"
     Open Sign-In Page: "Giriş səhifəsini aç"
     Copy Code: "Kodu köçür"
     Code Copied: "Kod köçürüldü"

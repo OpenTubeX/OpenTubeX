@@ -326,7 +326,6 @@ Settings:
     YouTube Channel: "YouTube kanal"
     Using Channel: "Sada koristiš YouTube kao {name}"
     Switch Channel Failed: "Promjena YouTube kanala nije uspjela: {error}"
-    Sign-In Code: "Kod za prijavu {code}"
     Open Sign-In Page: "Otvori stranicu za prijavu"
     Copy Code: "Kopiraj kod"
     Code Copied: "Kod je kopiran"

@@ -17,7 +17,9 @@
           type="button"
           class="likeCount rateButton"
           :aria-pressed="rating === 'LIKE'"
-          :aria-label="t('YouTube Account.Like')"
+          :aria-label="shownLikeCount !== null && !hideVideoLikesAndDislikes
+            ? t('Display Label', { label: t('YouTube Account.Like'), value: formatNumber(shownLikeCount) })
+            : t('YouTube Account.Like')"
           :title="t('YouTube Account.Like')"
           :disabled="rating === null"
           @click="rate('LIKE')"
@@ -32,7 +34,9 @@
           type="button"
           class="dislikeCount rateButton"
           :aria-pressed="rating === 'DISLIKE'"
-          :aria-label="t('YouTube Account.Dislike')"
+          :aria-label="shownDislikeCount !== null && !hideVideoLikesAndDislikes
+            ? t('Display Label', { label: t('YouTube Account.Dislike'), value: formatNumber(shownDislikeCount) })
+            : t('YouTube Account.Dislike')"
           :title="t('YouTube Account.Dislike')"
           :disabled="rating === null"
           @click="rate('DISLIKE')"
@@ -114,10 +118,14 @@ const likePercentageRatio = computed(() => {
  */
 function adjustCount(count, type) {
   if (count === null) return null
+  // Without the earlier rating, it is unknown whether the count includes it.
+  if (loadedRating.value === null) return count
   return Math.max(0, count + (rating.value === type ? 1 : 0) - (loadedRating.value === type ? 1 : 0))
 }
 
 let ratingLoad = 0
+// The rating YouTube has, which a failed rating returns to.
+let confirmedRating = 'INDIFFERENT'
 
 // Each channel of the account has its own rating. Separate sources, so a
 // token refresh that replaces the account does not reload it.
@@ -137,34 +145,40 @@ watch([() => props.videoId, canRate, () => store.getters.getYouTubeAccount?.page
   if (load !== ratingLoad) return
   // Without the earlier rating, rating still works.
   rating.value = current ?? 'INDIFFERENT'
-  loadedRating.value = rating.value
+  loadedRating.value = current ?? null
+  confirmedRating = rating.value
 }, { immediate: true })
 
 // Ratings go out one at a time, in the order they were clicked.
 let pendingRating = Promise.resolve()
+let pendingRatings = 0
 
 /** @param {'LIKE' | 'DISLIKE'} type */
 function rate(type) {
   const videoId = props.videoId
-  const previous = rating.value
-  const next = previous === type ? 'INDIFFERENT' : type
+  const next = rating.value === type ? 'INDIFFERENT' : type
   rating.value = next
 
   const load = ratingLoad
   const pageId = store.getters.getYouTubeAccount?.pageId ?? null
+  pendingRatings++
   pendingRating = pendingRating.then(async () => {
-    // Switching channels before an earlier rating finished drops this one,
-    // so it cannot rate as the other channel.
-    if ((store.getters.getYouTubeAccount?.pageId ?? null) !== pageId) return
     try {
+      // Switching channels before an earlier rating finished drops this one,
+      // so it cannot rate as the other channel.
+      if ((store.getters.getYouTubeAccount?.pageId ?? null) !== pageId) return
       await rateYouTubeVideo(videoId, next)
+      if (load === ratingLoad) confirmedRating = next
     } catch (error) {
       console.error(error)
-      if (load === ratingLoad && rating.value === next) rating.value = previous
       showToast({
         message: t('YouTube Account.Rating Failed', { error: error?.message ?? String(error) }),
         icon: ERROR_TOAST_ICON
       })
+    } finally {
+      pendingRatings--
+      // Once every click went out, show the rating YouTube has.
+      if (load === ratingLoad && pendingRatings === 0) rating.value = confirmedRating
     }
   })
 }

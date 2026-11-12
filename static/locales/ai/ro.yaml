@@ -324,7 +324,6 @@ Settings:
     YouTube Channel: "Canal YouTube"
     Using Channel: "Acum folosiți YouTube ca {name}"
     Switch Channel Failed: "Canalul YouTube nu a putut fi schimbat: {error}"
-    Sign-In Code: "Cod de conectare {code}"
     Open Sign-In Page: "Deschideți pagina de conectare"
     Copy Code: "Copiați codul"
     Code Copied: "Cod copiat"

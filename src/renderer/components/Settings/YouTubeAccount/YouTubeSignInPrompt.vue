@@ -40,10 +40,7 @@
         <p class="signInUrl">
           {{ code.verificationUrl }}
         </p>
-        <p
-          class="signInCode"
-          :aria-label="t('Settings.YouTube Account Settings.Sign-In Code', { code: code.userCode })"
-        >
+        <p class="signInCode">
           {{ code.userCode }}
         </p>
         <FtFlexBox class="signInActions">

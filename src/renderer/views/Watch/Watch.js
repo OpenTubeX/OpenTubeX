@@ -5242,6 +5242,8 @@ export default defineComponent({
       this.youTubeHistoryKey = key
       addToYouTubeWatchHistory(this.videoId).catch(error => {
         console.error('Could not add the video to the YouTube watch history', error)
+        // Playing again retries.
+        if (this.youTubeHistoryKey === key) this.youTubeHistoryKey = null
       })
     },
     handleVideoPlay() {

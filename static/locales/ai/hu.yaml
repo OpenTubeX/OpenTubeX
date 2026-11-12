@@ -323,7 +323,6 @@ Settings:
     YouTube Channel: "YouTube-csatorna"
     Using Channel: "Most {name} néven használja a YouTube-ot"
     Switch Channel Failed: "Nem sikerült YouTube-csatornát váltani: {error}"
-    Sign-In Code: "Bejelentkezési kód: {code}"
     Open Sign-In Page: "Bejelentkezési oldal megnyitása"
     Copy Code: "Kód másolása"
     Code Copied: "Kód másolva"

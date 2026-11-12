@@ -328,7 +328,6 @@ Settings:
     YouTube Channel: "YouTube-kanaal"
     Using Channel: "U gebruikt YouTube nu als {name}"
     Switch Channel Failed: "Kan niet van YouTube-kanaal wisselen: {error}"
-    Sign-In Code: "Inlogcode {code}"
     Open Sign-In Page: "Inlogpagina openen"
     Copy Code: "Code kopiëren"
     Code Copied: "Code gekopieerd"

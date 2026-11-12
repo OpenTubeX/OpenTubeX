@@ -323,7 +323,6 @@ Settings:
     YouTube Channel: "YouTube'i kanal"
     Using Channel: "Kasutad nüüd YouTube'i kasutajana {name}"
     Switch Channel Failed: "YouTube'i kanali vahetamine nurjus: {error}"
-    Sign-In Code: "Sisselogimiskood {code}"
     Open Sign-In Page: "Ava sisselogimisleht"
     Copy Code: "Kopeeri kood"
     Code Copied: "Kood kopeeriti"

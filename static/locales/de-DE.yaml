@@ -418,7 +418,6 @@ Settings:
     YouTube Channel: "YouTube-Kanal"
     Using Channel: "YouTube wird jetzt als {name} genutzt"
     Switch Channel Failed: "YouTube-Kanal konnte nicht gewechselt werden: {error}"
-    Sign-In Code: "Anmeldecode {code}"
     Open Sign-In Page: "Anmeldeseite öffnen"
     Copy Code: "Code kopieren"
     Code Copied: "Code kopiert"

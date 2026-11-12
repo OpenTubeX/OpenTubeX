@@ -323,7 +323,6 @@ Settings:
     YouTube Channel: "YouTube-kanava"
     Using Channel: "Käytät nyt YouTubea käyttäjänä {name}"
     Switch Channel Failed: "YouTube-kanavan vaihtaminen epäonnistui: {error}"
-    Sign-In Code: "Kirjautumiskoodi {code}"
     Open Sign-In Page: "Avaa kirjautumissivu"
     Copy Code: "Kopioi koodi"
     Code Copied: "Koodi kopioitu"

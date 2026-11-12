@@ -323,7 +323,6 @@ Settings:
     YouTube Channel: "Κανάλι YouTube"
     Using Channel: "Χρησιμοποιείτε πλέον το YouTube ως {name}"
     Switch Channel Failed: "Δεν ήταν δυνατή η αλλαγή καναλιού YouTube: {error}"
-    Sign-In Code: "Κωδικός σύνδεσης {code}"
     Open Sign-In Page: "Άνοιγμα σελίδας σύνδεσης"
     Copy Code: "Αντιγραφή κωδικού"
     Code Copied: "Ο κωδικός αντιγράφηκε"

@@ -442,7 +442,6 @@ Settings:
     YouTube Channel: "YouTube kanalas"
     Using Channel: "Dabar naudojate YouTube kaip {name}"
     Switch Channel Failed: "Nepavyko perjungti YouTube kanalo: {error}"
-    Sign-In Code: "Prisijungimo kodas {code}"
     Open Sign-In Page: "Atidaryti prisijungimo puslapį"
     Copy Code: "Kopijuoti kodą"
     Code Copied: "Kodas nukopijuotas"

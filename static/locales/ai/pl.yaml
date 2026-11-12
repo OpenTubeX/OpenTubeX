@@ -162,7 +162,6 @@ Settings:
     YouTube Channel: "Kanał YouTube"
     Using Channel: "Teraz korzystasz z YouTube jako {name}"
     Switch Channel Failed: "Nie udało się przełączyć kanału YouTube: {error}"
-    Sign-In Code: "Kod logowania {code}"
     Open Sign-In Page: "Otwórz stronę logowania"
     Copy Code: "Kopiuj kod"
     Code Copied: "Skopiowano kod"

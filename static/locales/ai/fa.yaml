@@ -347,7 +347,6 @@ Settings:
     YouTube Channel: "کانال YouTube"
     Using Channel: "اکنون با نام {name} از YouTube استفاده می‌کنید"
     Switch Channel Failed: "تغییر کانال YouTube ممکن نشد: {error}"
-    Sign-In Code: "کد ورود {code}"
     Open Sign-In Page: "باز کردن صفحهٔ ورود"
     Copy Code: "کپی کد"
     Code Copied: "کد کپی شد"
