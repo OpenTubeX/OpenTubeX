@@ -562,8 +562,9 @@ export async function getYouTubeAccountRecommendations(continuation = null) {
  * @param {string} videoId
  * @param {string} text
  * @param {string} [parentCommentId] posts a reply to this top-level comment
+ * @param {string | null} [pageId] posts as this channel instead of the one in use
  */
-export async function postYouTubeComment(videoId, text, parentCommentId) {
+export async function postYouTubeComment(videoId, text, parentCommentId, pageId) {
   return await withAccount(async innertube => {
     const response = parentCommentId
       ? await innertube.actions.execute('/comment/create_comment_reply', {
@@ -575,7 +576,7 @@ export async function postYouTubeComment(videoId, text, parentCommentId) {
           commentText: text
         })
     return parseCreatedComment(response.data)
-  })
+  }, { pageId })
 }
 
 /**

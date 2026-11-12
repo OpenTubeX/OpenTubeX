@@ -810,8 +810,8 @@ const youTubeComments = {
   replyingTo: ref(null),
   ratings: reactive(new Map()),
   clampScroll: () => clampCommentsScrollAfterRender(),
-  addComment(posted, text, parentId) {
-    const comment = createPostedComment(posted, text, store.getters.getYouTubeAccount)
+  addComment(posted, text, parentId, account) {
+    const comment = createPostedComment(posted, text, account)
     youTubeComments.replyingTo.value = null
     if (parentId === null) {
       commentData.value.unshift(comment)

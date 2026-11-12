@@ -110,9 +110,11 @@ async function submit() {
   if (commentText === '' || posting.value) return
 
   posting.value = true
+  // The comment belongs to the channel in use now, even after a switch while it posts.
+  const account = store.getters.getYouTubeAccount
   try {
-    const posted = await postYouTubeComment(comments.videoId.value, commentText, props.parentId ?? undefined)
-    comments.addComment(posted, commentText, props.parentId)
+    const posted = await postYouTubeComment(comments.videoId.value, commentText, props.parentId ?? undefined, account?.pageId ?? null)
+    comments.addComment(posted, commentText, props.parentId, account)
     text.value = ''
     if (!props.parentId) expanded.value = false
     showToast({
