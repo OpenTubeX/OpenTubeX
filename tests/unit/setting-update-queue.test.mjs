@@ -265,9 +265,11 @@ test('a setting saved by another window during this window\'s write shows the la
 test('the last locale change wins when an earlier locale finishes loading later', async () => {
   const loads = new Map()
   const i18n = { global: { locale: { value: 'en-US' } } }
+  const remembered = []
   const handlers = vm.runInNewContext(`({${settingsSection('  currentLocale:', '  defaultInvidiousInstance:')}})`, {
     runLocaleChange: createSettingUpdateQueue(),
     i18n,
+    rememberStartupLocale: locale => remembered.push(locale),
     loadLocale: locale => {
       if (locale === 'en-US') return Promise.resolve()
       const load = deferred()
@@ -291,6 +293,8 @@ test('the last locale change wins when an earlier locale finishes loading later'
   await Promise.all([first, second])
 
   assert.equal(i18n.global.locale.value, 'fr-FR')
+  // The next launch preloads the locale that won.
+  assert.deepEqual(remembered, ['fr-FR'])
 })
 
 test('an ordered setting saved by another window before this window\'s write shows this window\'s value', async () => {
