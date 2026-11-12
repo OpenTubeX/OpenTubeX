@@ -177,7 +177,7 @@ Subscriptions:
   Refreshing Subscription Posts: Actualisation des publications des abonnements
   New Content: Nouveau contenu
   New Feed Refresh Warning Title: Actualiser tous les flux d’abonnements ?
-  New Feed Refresh Warning: L’actualisation de tous les types de contenu sans RSS pour 1 abonnement peut prendre beaucoup de temps. Voulez-vous continuer ? | L’actualisation de tous les types de contenu sans RSS pour {count} abonnements peut prendre beaucoup de temps. Voulez-vous continuer ? | L’actualisation de tous les types de contenu sans RSS pour {count} abonnements peut prendre beaucoup de temps. Voulez-vous continuer ?
+  New Feed Refresh Warning: L’actualisation de tous les types de contenu pour 1 abonnement peut prendre beaucoup de temps. Voulez-vous continuer ? | L’actualisation de tous les types de contenu pour {count} abonnements peut prendre beaucoup de temps. Voulez-vous continuer ? | L’actualisation de tous les types de contenu pour {count} abonnements peut prendre beaucoup de temps. Voulez-vous continuer ?
   New Since Last Refresh: Nouveau depuis la dernière actualisation
   Mark As Seen: Marquer comme vu
   Mark All as Seen: Tout marquer comme vu
@@ -444,6 +444,7 @@ Settings:
       Closing Tabs: De fermer plusieurs onglets
       Loading Tabs: De charger plusieurs onglets
       Unloading Tabs: De décharger plusieurs onglets
+      Refreshing All Feeds: D’actualiser de nombreux abonnements
     Remember Tab Navigation History: Mémoriser l’historique de navigation des onglets
     New Tab Position:
       New Tab Position: Position des nouveaux onglets

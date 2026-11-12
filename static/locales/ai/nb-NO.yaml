@@ -177,7 +177,7 @@ Subscriptions:
   Refreshing Subscription Posts: Oppdaterer innlegg fra abonnementer
   New Content: Nytt innhold
   New Feed Refresh Warning Title: Oppdatere alle abonnementsstrømmer?
-  New Feed Refresh Warning: Det kan ta lang tid å oppdatere alle innholdstyper uten RSS for 1 abonnement. Vil du fortsette? | Det kan ta lang tid å oppdatere alle innholdstyper uten RSS for {count} abonnementer. Vil du fortsette?
+  New Feed Refresh Warning: Det kan ta lang tid å oppdatere alle innholdstyper for 1 abonnement. Vil du fortsette? | Det kan ta lang tid å oppdatere alle innholdstyper for {count} abonnementer. Vil du fortsette?
   New Since Last Refresh: Nytt siden forrige oppdatering
   Mark As Seen: Merk som sett
   Mark All as Seen: Merk alle som sett
@@ -444,6 +444,7 @@ Settings:
       Closing Tabs: Flere faner lukkes
       Loading Tabs: Flere faner lastes inn
       Unloading Tabs: Flere faner frigjøres
+      Refreshing All Feeds: Mange abonnementer oppdateres
     Remember Tab Navigation History: Husk navigasjonshistorikken for faner
     New Tab Position:
       New Tab Position: Plassering av ny fane

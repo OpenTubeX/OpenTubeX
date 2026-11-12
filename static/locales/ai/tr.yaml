@@ -177,7 +177,7 @@ Subscriptions:
   Refreshing Subscription Posts: Abonelik gönderileri yenileniyor
   New Content: Yeni içerik
   New Feed Refresh Warning Title: Tüm abonelik akışları yenilensin mi?
-  New Feed Refresh Warning: RSS kullanmadan 1 aboneliğin tüm içerik türlerini yenilemek uzun sürebilir. Devam etmek istiyor musunuz? | RSS kullanmadan {count} aboneliğin tüm içerik türlerini yenilemek uzun sürebilir. Devam etmek istiyor musunuz?
+  New Feed Refresh Warning: 1 aboneliğin tüm içerik türlerini yenilemek uzun sürebilir. Devam etmek istiyor musunuz? | {count} aboneliğin tüm içerik türlerini yenilemek uzun sürebilir. Devam etmek istiyor musunuz?
   New Since Last Refresh: Son yenilemeden beri yeni
   Mark As Seen: Görüldü olarak işaretle
   Mark All as Seen: Tümünü görüldü olarak işaretle
@@ -444,6 +444,7 @@ Settings:
       Closing Tabs: Birden fazla sekmeyi kapatma
       Loading Tabs: Birden fazla sekmeyi yükleme
       Unloading Tabs: Birden fazla sekmeyi bellekten kaldırma
+      Refreshing All Feeds: Çok sayıda aboneliği yenileme
     Remember Tab Navigation History: Sekme Gezinme Geçmişini Hatırla
     New Tab Position:
       New Tab Position: Yeni Sekme Konumu

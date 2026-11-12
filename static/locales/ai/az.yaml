@@ -177,7 +177,7 @@ Subscriptions:
   Refreshing Subscription Posts: Abunəlik postları yenilənir
   New Content: Yeni məzmun
   New Feed Refresh Warning Title: Bütün abunəlik lentləri yenilənsin?
-  New Feed Refresh Warning: 1 abunəliyin bütün məzmun növlərinin RSS olmadan yenilənməsi uzun çəkə bilər. Davam etmək istəyirsiniz? | {count} abunəliyin bütün məzmun növlərinin RSS olmadan yenilənməsi uzun çəkə bilər. Davam etmək istəyirsiniz?
+  New Feed Refresh Warning: 1 abunəliyin bütün məzmun növlərinin yenilənməsi uzun çəkə bilər. Davam etmək istəyirsiniz? | {count} abunəliyin bütün məzmun növlərinin yenilənməsi uzun çəkə bilər. Davam etmək istəyirsiniz?
   New Since Last Refresh: Son yeniləmədən bəri yeniliklər
   Mark As Seen: Görülmüş kimi işarələ
   Mark All as Seen: Hamısını görülmüş kimi işarələ
@@ -448,6 +448,7 @@ Settings:
       Closing Tabs: Bir neçə vərəq bağlanarkən
       Loading Tabs: Bir neçə vərəq yüklənərkən
       Unloading Tabs: Bir neçə vərəq yaddaşdan çıxarılarkən
+      Refreshing All Feeds: Çoxlu abunəlik yenilənərkən
     Remember Tab Navigation History: Vərəqlərin naviqasiya tarixçəsini yadda saxla
     New Tab Position:
       New Tab Position: Yeni vərəqin mövqeyi

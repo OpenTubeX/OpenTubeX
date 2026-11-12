@@ -177,7 +177,7 @@ Subscriptions:
   Refreshing Subscription Posts: Wrthi'n adnewyddu postiadau tanysgrifiadau
   New Content: Cynnwys newydd
   New Feed Refresh Warning Title: Adnewyddu pob ffrwd tanysgrifiadau?
-  New Feed Refresh Warning: Gall adnewyddu pob math o gynnwys heb RSS ar gyfer {count} o danysgrifiadau gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys heb RSS ar gyfer 1 tanysgrifiad gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys heb RSS ar gyfer {count} danysgrifiad gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys heb RSS ar gyfer {count} thanysgrifiad gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys heb RSS ar gyfer {count} thanysgrifiad gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys heb RSS ar gyfer {count} o danysgrifiadau gymryd amser hir. Ydych chi am barhau?
+  New Feed Refresh Warning: Gall adnewyddu pob math o gynnwys ar gyfer {count} o danysgrifiadau gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys ar gyfer 1 tanysgrifiad gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys ar gyfer {count} danysgrifiad gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys ar gyfer {count} thanysgrifiad gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys ar gyfer {count} thanysgrifiad gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys ar gyfer {count} o danysgrifiadau gymryd amser hir. Ydych chi am barhau?
   New Since Last Refresh: Newydd ers yr adnewyddiad diwethaf
   Mark As Seen: Marcio fel wedi'i weld
   Mark All as Seen: Marcio'r cyfan fel wedi'u gweld
@@ -443,6 +443,7 @@ Settings:
       Closing Tabs: Cau mwy nag un tab
       Loading Tabs: Llwytho mwy nag un tab
       Unloading Tabs: Dadlwytho mwy nag un tab
+      Refreshing All Feeds: Adnewyddu llawer o danysgrifiadau
     Remember Tab Navigation History: Cofio hanes llywio tabiau
     New Tab Position:
       New Tab Position: Safle tab newydd

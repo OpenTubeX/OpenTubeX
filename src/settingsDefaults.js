@@ -70,6 +70,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     confirmCloseWindowWithMultipleTabs: true,
     confirmLoadMultipleTabs: true,
     confirmUnloadMultipleTabs: true,
+    confirmRefreshAllFeeds: true,
     autoUnloadTabs: true,
     autoUnloadMemoryThreshold: 50,
     autoUnloadTabPercentage: 50,

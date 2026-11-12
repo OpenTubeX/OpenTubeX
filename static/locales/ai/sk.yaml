@@ -177,7 +177,7 @@ Subscriptions:
   Refreshing Subscription Posts: Obnovujú sa príspevky z odberov
   New Content: Nový obsah
   New Feed Refresh Warning Title: Obnoviť všetky kanály odberov?
-  New Feed Refresh Warning: Obnovenie všetkých typov obsahu bez RSS pre 1 odber môže trvať dlho. Chcete pokračovať? | Obnovenie všetkých typov obsahu bez RSS pre {count} odbery môže trvať dlho. Chcete pokračovať? | Obnovenie všetkých typov obsahu bez RSS pre {count} odberov môže trvať dlho. Chcete pokračovať?
+  New Feed Refresh Warning: Obnovenie všetkých typov obsahu pre 1 odber môže trvať dlho. Chcete pokračovať? | Obnovenie všetkých typov obsahu pre {count} odbery môže trvať dlho. Chcete pokračovať? | Obnovenie všetkých typov obsahu pre {count} odberov môže trvať dlho. Chcete pokračovať?
   New Since Last Refresh: Nové od posledného obnovenia
   Mark As Seen: Označiť ako zobrazené
   Mark All as Seen: Označiť všetko ako zobrazené
@@ -444,6 +444,7 @@ Settings:
       Closing Tabs: Zavretím viacerých kariet
       Loading Tabs: Načítaním viacerých kariet
       Unloading Tabs: Uvoľnením viacerých kariet
+      Refreshing All Feeds: Obnovením mnohých odberov
     Remember Tab Navigation History: Zapamätať si históriu prechádzania kariet
     New Tab Position:
       New Tab Position: Umiestnenie novej karty

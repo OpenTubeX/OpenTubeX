@@ -317,7 +317,7 @@
                 :disable-refresh="currentTab === 'feeds' || currentNewFeedRssTab
                   ? currentTabPanel.isLoading || followedRssFeeds.length === 0
                   : subscriptionFeedRefreshInProgress || currentTabPanel.isLoading ||
-                    (activeSubscriptionList.length === 0 && !combinedNewFeedRefreshesRssFeeds)"
+                    (activeSubscriptionList.length === 0 && !newFeedRefreshesRssFeeds)"
                 :last-refresh-timestamp="currentTabPanel.lastRefreshTimestamp"
                 :next-auto-refresh-timestamp="currentTabPanel.nextAutoRefreshTimestamp"
                 :next-auto-refresh-tooltip="currentTabPanel.nextAutoRefreshTooltip"
@@ -444,10 +444,13 @@
         v-if="showAllFeedsRefreshWarning"
         theme="readable-width"
         :label="$t('Subscriptions.New Feed Refresh Warning Title')"
-        :extra-labels="[$t('Subscriptions.New Feed Refresh Warning', { count: allFeedsActiveSubscriptionIds.size }, allFeedsActiveSubscriptionIds.size)]"
-        :option-names="[$t('Yes'), $t('No')]"
-        :option-values="['refresh', 'cancel']"
-        :option-icons="[['fas', 'sync'], ['fas', 'xmark']]"
+        :extra-labels="[
+          $t('Subscriptions.New Feed Refresh Warning', { count: allFeedsActiveSubscriptionIds.size }, allFeedsActiveSubscriptionIds.size),
+          $t('Confirmations.Settings Hint')
+        ]"
+        :option-names="[$t('Yes'), $t('No'), $t('Confirmations.Never Ask Again')]"
+        :option-values="['refresh', 'cancel', 'neverAskAgain']"
+        :option-icons="[['fas', 'sync'], ['fas', 'xmark'], ['fas', 'eye-slash']]"
         autosize
         @click="handleAllFeedsRefreshWarning"
       />
@@ -585,9 +588,8 @@ function handleFeedContextMenu(event) {
     all: t('Context Menu.Reload All Feeds'),
     feeds: t('Context Menu.Reload RSS Feeds')
   }
-  // RSS feeds refresh separately, and the combined New feed refreshes them too
-  const newFeedHasRss = feedTab === 'all' && newFeedView.value === 'combined' && enableRssFeeds.value &&
-    followedRssFeeds.value.length > 0
+  // RSS feeds refresh separately, and refreshing all feeds refreshes them too
+  const newFeedHasRss = feedTab === 'all' && enableRssFeeds.value && followedRssFeeds.value.length > 0
   const cancelsRss = (feedTab === 'feeds' || newFeedHasRss) && rssFeedsRefreshing.value
   const cancelsSubscriptions = feedTab !== 'feeds' && subscriptionFeedRefreshInProgress.value
   const cancels = cancelsRss || cancelsSubscriptions
@@ -753,11 +755,15 @@ const currentTabRefreshing = computed(() => {
 
 // Includes the RSS refresh where the current tab shows its items
 const currentTabRefreshInProgress = computed(() => {
-  if (currentTab.value === 'feeds' || currentNewFeedRssTab.value) {
+  if (currentTab.value === 'feeds') {
     return rssFeedsRefreshing.value
   }
+  // Reloading all feeds from the New feed's RSS tab refreshes the subscriptions too
+  if (currentNewFeedRssTab.value) {
+    return rssFeedsRefreshing.value || subscriptionFeedRefreshInProgress.value
+  }
   return subscriptionFeedRefreshInProgress.value ||
-    (combinedNewFeedRefreshesRssFeeds.value && rssFeedsRefreshing.value)
+    (newFeedRefreshesRssFeeds.value && rssFeedsRefreshing.value)
 })
 
 /** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'community' | 'new' | 'feeds' | null>} */
@@ -922,10 +928,9 @@ const rssFeedsHaveNewContent = computed(() => {
   const urls = new Set(followedRssFeeds.value.map(feed => feed.url))
   return rssFeedItems.value.some(item => item.isNew === true && urls.has(item.feedUrl))
 })
-/** The combined New feed also refreshes the RSS feeds */
-const combinedNewFeedRefreshesRssFeeds = computed(() => {
-  return currentTab.value === 'new' && newFeedView.value === 'combined' && enableRssFeeds.value &&
-    followedRssFeeds.value.length > 0
+/** The New feed refreshes all feeds, including the RSS feeds */
+const newFeedRefreshesRssFeeds = computed(() => {
+  return currentTab.value === 'new' && enableRssFeeds.value && followedRssFeeds.value.length > 0
 })
 /**
  * Whether the New feed shows only the items of the RSS feeds: its RSS tab, or
@@ -1439,10 +1444,10 @@ function refreshCurrentTab() {
 
 function cancelRefresh() {
   const rssTab = currentTab.value === 'feeds' || currentNewFeedRssTab.value
-  if (rssTab || combinedNewFeedRefreshesRssFeeds.value) {
+  if (rssTab || newFeedRefreshesRssFeeds.value) {
     cancelRssFeedsRefresh()
   }
-  if (!rssTab) {
+  if (currentTab.value !== 'feeds') {
     // The refresh may be owned by another window, so it is cancelled everywhere
     requestSubscriptionRefreshCancellation()
   }
@@ -1463,7 +1468,8 @@ async function handleFeedReloadRequest(payload) {
   const viewTab = payload.feedTab === 'posts'
     ? 'community'
     : payload.feedTab === 'all' ? 'new' : payload.feedTab
-  if (viewTab === currentTab.value) {
+  // The New feed's RSS tab only refreshes the RSS feeds
+  if (viewTab === currentTab.value && !currentNewFeedRssTab.value) {
     refreshCurrentTab()
     return
   }

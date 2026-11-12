@@ -177,7 +177,7 @@ Subscriptions:
   Refreshing Subscription Posts: Đang làm mới bài đăng từ kênh đăng ký
   New Content: Nội dung mới
   New Feed Refresh Warning Title: Làm mới tất cả bảng tin đăng ký?
-  New Feed Refresh Warning: Việc làm mới mọi loại nội dung không qua RSS cho {count} kênh đăng ký có thể mất nhiều thời gian. Bạn có muốn tiếp tục không?
+  New Feed Refresh Warning: Việc làm mới mọi loại nội dung cho {count} kênh đăng ký có thể mất nhiều thời gian. Bạn có muốn tiếp tục không?
   New Since Last Refresh: Mới kể từ lần làm mới trước
   Mark As Seen: Đánh dấu đã xem
   Mark All as Seen: Đánh dấu tất cả là đã xem
@@ -444,6 +444,7 @@ Settings:
       Closing Tabs: Đóng nhiều thẻ
       Loading Tabs: Tải nhiều thẻ
       Unloading Tabs: Dỡ nhiều thẻ
+      Refreshing All Feeds: Làm mới nhiều kênh đăng ký
     Remember Tab Navigation History: Ghi nhớ lịch sử điều hướng của thẻ
     New Tab Position:
       New Tab Position: Vị trí thẻ mới

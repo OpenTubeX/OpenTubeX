@@ -194,7 +194,7 @@ Subscriptions:
   Refreshing Subscription Posts: در حال تازه‌سازی پست‌های اشتراک‌ها
   New Content: محتوای جدید
   New Feed Refresh Warning Title: همه خوراک‌های اشتراک تازه‌سازی شوند؟
-  New Feed Refresh Warning: تازه‌سازی همه انواع محتوا بدون RSS برای 1 اشتراک ممکن است زمان زیادی ببرد. می‌خواهید ادامه دهید؟ | تازه‌سازی همه انواع محتوا بدون RSS برای {count} اشتراک ممکن است زمان زیادی ببرد. می‌خواهید ادامه دهید؟
+  New Feed Refresh Warning: تازه‌سازی همه انواع محتوا برای 1 اشتراک ممکن است زمان زیادی ببرد. می‌خواهید ادامه دهید؟ | تازه‌سازی همه انواع محتوا برای {count} اشتراک ممکن است زمان زیادی ببرد. می‌خواهید ادامه دهید؟
   New Since Last Refresh: جدید از آخرین تازه‌سازی
   Mark As Seen: علامت‌گذاری به‌عنوان دیده‌شده
   Mark All as Seen: علامت‌گذاری همه به‌عنوان دیده‌شده
@@ -466,6 +466,7 @@ Settings:
       Closing Tabs: بستن چند زبانه
       Loading Tabs: بارگذاری چند زبانه
       Unloading Tabs: خارج کردن چند زبانه از حافظه
+      Refreshing All Feeds: تازه‌سازی اشتراک‌های زیاد
     Remember Tab Navigation History: به خاطر سپردن تاریخچه پیمایش زبانه‌ها
     New Tab Position:
       New Tab Position: جای زبانه جدید

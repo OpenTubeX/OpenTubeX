@@ -218,7 +218,7 @@ Subscriptions:
   Refreshing Subscription Posts: Verfris intekeningplasings
   New Content: Nuwe inhoud
   New Feed Refresh Warning Title: Verfris alle intekeningvoere?
-  New Feed Refresh Warning: Om alle inhoudtipes sonder RSS vir 1 intekening te verfris, kan lank duur. Wil u voortgaan? | Om alle inhoudtipes sonder RSS vir {count} intekeninge te verfris, kan lank duur. Wil u voortgaan?
+  New Feed Refresh Warning: Om alle inhoudtipes vir 1 intekening te verfris, kan lank duur. Wil u voortgaan? | Om alle inhoudtipes vir {count} intekeninge te verfris, kan lank duur. Wil u voortgaan?
   New Since Last Refresh: Nuut sedert laaste verfrissing
   Mark As Seen: Merk as gesien
   Mark All as Seen: Merk alles as gesien
@@ -607,6 +607,7 @@ Settings:
       Closing Tabs: Veelvuldige oortjies gesluit word
       Loading Tabs: Veelvuldige oortjies gelaai word
       Unloading Tabs: Veelvuldige oortjies ontlaai word
+      Refreshing All Feeds: Baie intekeninge verfris word
     Always Use Backup Media Server: Gebruik altyd rugsteunmediabediener
     Close Window With Last Tab: Sluit venster wanneer die laaste oortjie gesluit word
     Minimize to system tray: Minimaliseer na stelselbak

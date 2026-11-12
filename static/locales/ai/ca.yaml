@@ -221,7 +221,7 @@ Subscriptions:
   Refreshing Subscription Posts: S'estan actualitzant les publicacions de les subscripcions
   New Content: Contingut nou
   New Feed Refresh Warning Title: Voleu actualitzar tots els canals de subscripcions?
-  New Feed Refresh Warning: Actualitzar tots els tipus de contingut sense RSS d'1 subscripció pot trigar molt. Voleu continuar? | Actualitzar tots els tipus de contingut sense RSS de {count} subscripcions pot trigar molt. Voleu continuar? | Actualitzar tots els tipus de contingut sense RSS de {count} subscripcions pot trigar molt. Voleu continuar?
+  New Feed Refresh Warning: Actualitzar tots els tipus de contingut d'1 subscripció pot trigar molt. Voleu continuar? | Actualitzar tots els tipus de contingut de {count} subscripcions pot trigar molt. Voleu continuar? | Actualitzar tots els tipus de contingut de {count} subscripcions pot trigar molt. Voleu continuar?
   New Since Last Refresh: Nou des de la darrera actualització
   Mark As Seen: Marca com a vist
   Mark All as Seen: Marca-ho tot com a vist
@@ -576,6 +576,7 @@ Settings:
       Closing Tabs: Tancar diverses pestanyes
       Loading Tabs: Carregar diverses pestanyes
       Unloading Tabs: Descarregar diverses pestanyes
+      Refreshing All Feeds: Actualitzar moltes subscripcions
     Open Deep Links In New Window: Obre en una finestra nova els URL passats a l'OpenTubeX
     Minimize to system tray: Minimitza a la safata del sistema
     Remember Tab Navigation History: Recorda l'historial de navegació de les pestanyes

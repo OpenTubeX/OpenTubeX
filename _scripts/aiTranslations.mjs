@@ -75,6 +75,11 @@ function missingSourceStrings(locale) {
   return new Map([...source].filter(([path]) => !human.has(path)))
 }
 
+function oneCoversOtherCounts(locale) {
+  const pluralRules = new Intl.PluralRules(locale)
+  return [21, 101].some(count => pluralRules.select(count) === 'one')
+}
+
 function sourceFormForCategory(sourceForms, category) {
   if (sourceForms.length === 1) return sourceForms[0]
   if (sourceForms.length === 2) return sourceForms[category === 'one' ? 0 : 1]
@@ -223,8 +228,12 @@ function validateTranslation(locale, path, source, translation, errors) {
   for (const [index, category] of categories.entries()) {
     const expected = placeholders(sourceFormForCategory(sourceForms, category))
     const actual = placeholders(translatedForms[index])
+    // The English "one" form can name the count 1, but in locales whose "one"
+    // also covers counts like 21, that form has to show the count
+    const countForm = category === 'one' && oneCoversOtherCounts(locale) &&
+      sameStrings(placeholders(sourceFormForCategory(sourceForms, 'other')), actual)
 
-    if (!sameStrings(expected, actual)) {
+    if (!sameStrings(expected, actual) && !countForm) {
       errors.push(`${path} [${category}]: expected placeholders ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`)
     }
   }

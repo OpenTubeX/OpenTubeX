@@ -165,11 +165,15 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     if (['New Tab Position', 'Tab Close Focus', 'Startup Behavior', 'Remember Tab Navigation History'].includes(group)) {
       return usingElectron || isCapacitor
     }
+    // Matches the options that the Confirm before list shows
+    if (group === 'Confirmation Options') {
+      if (item === 'Refreshing All Feeds') return true
+      if (item === 'Closing App') return usingElectron || isCapacitor
+      return usingElectron
+    }
     if ([
       'Open Deep Links In New Window',
       'Close Window With Last Tab',
-      'Confirm Before',
-      'Confirmation Options',
       'Stream Extraction Method'
     ].includes(group)) {
       return usingElectron

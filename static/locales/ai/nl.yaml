@@ -177,7 +177,7 @@ Subscriptions:
   Refreshing Subscription Posts: Berichten van abonnementen vernieuwen
   New Content: Nieuwe content
   New Feed Refresh Warning Title: Alle abonnementsfeeds vernieuwen?
-  New Feed Refresh Warning: Alle contenttypen zonder RSS vernieuwen voor 1 abonnement kan lang duren. Wil je doorgaan? | Alle contenttypen zonder RSS vernieuwen voor {count} abonnementen kan lang duren. Wil je doorgaan?
+  New Feed Refresh Warning: Alle contenttypen vernieuwen voor 1 abonnement kan lang duren. Wil je doorgaan? | Alle contenttypen vernieuwen voor {count} abonnementen kan lang duren. Wil je doorgaan?
   New Since Last Refresh: Nieuw sinds de laatste vernieuwing
   Mark As Seen: Markeren als gezien
   Mark All as Seen: Alles markeren als gezien
@@ -447,6 +447,7 @@ Settings:
       Closing Tabs: Meerdere tabbladen sluiten
       Loading Tabs: Meerdere tabbladen laden
       Unloading Tabs: Meerdere tabbladen uit het geheugen verwijderen
+      Refreshing All Feeds: Veel abonnementen vernieuwen
     Remember Tab Navigation History: Navigatiegeschiedenis van tabbladen onthouden
     New Tab Position:
       New Tab Position: Positie van nieuw tabblad

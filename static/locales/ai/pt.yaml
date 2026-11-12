@@ -177,7 +177,7 @@ Subscriptions:
   Refreshing Subscription Posts: A atualizar as publicações das subscrições
   New Content: Novo conteúdo
   New Feed Refresh Warning Title: Atualizar todos os feeds de subscrições?
-  New Feed Refresh Warning: Atualizar todos os tipos de conteúdo sem RSS para 1 subscrição pode demorar bastante tempo. Pretende continuar? | Atualizar todos os tipos de conteúdo sem RSS para {count} subscrições pode demorar bastante tempo. Pretende continuar? | Atualizar todos os tipos de conteúdo sem RSS para {count} subscrições pode demorar bastante tempo. Pretende continuar?
+  New Feed Refresh Warning: Atualizar todos os tipos de conteúdo para 1 subscrição pode demorar bastante tempo. Pretende continuar? | Atualizar todos os tipos de conteúdo para {count} subscrições pode demorar bastante tempo. Pretende continuar? | Atualizar todos os tipos de conteúdo para {count} subscrições pode demorar bastante tempo. Pretende continuar?
   New Since Last Refresh: Novidades desde a última atualização
   Mark As Seen: Marcar como visto
   Mark All as Seen: Marcar tudo como visto
@@ -444,6 +444,7 @@ Settings:
       Closing Tabs: Fechar vários separadores
       Loading Tabs: Carregar vários separadores
       Unloading Tabs: Descarregar vários separadores
+      Refreshing All Feeds: Atualizar muitas subscrições
     Remember Tab Navigation History: Memorizar o histórico de navegação dos separadores
     New Tab Position:
       New Tab Position: Posição do novo separador

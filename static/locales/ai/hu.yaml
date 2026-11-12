@@ -177,7 +177,7 @@ Subscriptions:
   Refreshing Subscription Posts: Feliratkozások bejegyzéseinek frissítése
   New Content: Új tartalom
   New Feed Refresh Warning Title: Frissíti az összes feliratkozási hírfolyamot?
-  New Feed Refresh Warning: Az összes tartalomtípus RSS nélküli frissítése 1 feliratkozásnál sokáig tarthat. Folytatja? | Az összes tartalomtípus RSS nélküli frissítése {count} feliratkozásnál sokáig tarthat. Folytatja?
+  New Feed Refresh Warning: Az összes tartalomtípus frissítése 1 feliratkozásnál sokáig tarthat. Folytatja? | Az összes tartalomtípus frissítése {count} feliratkozásnál sokáig tarthat. Folytatja?
   New Since Last Refresh: Új az utolsó frissítés óta
   Mark As Seen: Megjelölés látottként
   Mark All as Seen: Összes megjelölése látottként
@@ -444,6 +444,7 @@ Settings:
       Closing Tabs: Több lap bezárása
       Loading Tabs: Több lap betöltése
       Unloading Tabs: Több lap kiürítése
+      Refreshing All Feeds: Sok feliratkozás frissítése
     Remember Tab Navigation History: Lapnavigációs előzmények megjegyzése
     New Tab Position:
       New Tab Position: Új lap helye

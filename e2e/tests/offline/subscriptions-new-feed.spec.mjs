@@ -1419,7 +1419,7 @@ test.describe('large new feed refresh', () => {
     }
   })
 
-  test('warns before refreshing all non-RSS feeds', async ({ page }) => {
+  test('warns before refreshing all feeds', async ({ page }) => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await expect(page.getByText('There is no new content.')).toBeVisible()
@@ -1436,6 +1436,58 @@ test.describe('large new feed refresh', () => {
     await page.getByRole('button', { name: 'No', exact: true }).click()
     await expect(page.getByRole('heading', { name: 'Refresh all subscription feeds?' })).toHaveCount(0)
     await expect(page.getByText('There is no new content.')).toBeVisible()
+
+    // "Never ask again" refreshes and turns the confirmation off
+    await page.route(/^https?:\/\//, route => route.fulfill({ status: 404, body: '' }))
+    await page.evaluate(() => {
+      window.__refreshStarts = 0
+      window.$store.watch(state => state.subscriptionCache.subscriptionFeedRefreshInProgress, refreshing => {
+        if (refreshing) window.__refreshStarts++
+      })
+    })
+    await refreshNewContent.click()
+    await page.getByRole('button', { name: 'Never ask again' }).click()
+    await expect(page.getByRole('heading', { name: 'Refresh all subscription feeds?' })).toHaveCount(0)
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getConfirmRefreshAllFeeds)).toBe(false)
+    await expect.poll(() => page.evaluate(() => window.__refreshStarts)).toBe(1)
+
+    await page.locator('.subscriptionsHeader').getByRole('button', { name: 'Cancel Refresh' }).click()
+    await expect(refreshNewContent).toHaveAttribute('aria-disabled', 'false')
+    await refreshNewContent.click()
+    await expect.poll(() => page.evaluate(() => window.__refreshStarts)).toBe(2)
+    await expect(page.getByRole('heading', { name: 'Refresh all subscription feeds?' })).toHaveCount(0)
+  })
+
+  test.describe('with RSS feeds', () => {
+    test.use({
+      seed: {
+        settings: {
+          ...commonSettings,
+          newSubscriptionFeedView: 'tabbed',
+          enableRssFeeds: true,
+          followedRssFeeds: [{ url: 'https://rss.example.test/feed.xml', title: 'Example feed' }]
+        },
+        profiles: [profile(subscriptions)]
+      }
+    })
+
+    test('reloading all feeds from the RSS tab asks too and can be cancelled there', async ({ page }) => {
+      await page.route(/^https?:\/\//, route => route.fulfill({ status: 404, body: '' }))
+      await goTo(page, 'subscriptions')
+      const newTab = page.locator('[data-subscription-feed-tab="all"]')
+      await newTab.click()
+      await page.locator('[data-new-feed-rss-tab]').click()
+      await newTab.click({ button: 'right' })
+      await page.getByRole('menu', { name: 'Context menu' }).getByRole('menuitem', { name: 'Reload All Feeds' }).click()
+      await expect(page.getByRole('heading', { name: 'Refresh all subscription feeds?' })).toBeVisible()
+      await page.getByRole('button', { name: 'Yes', exact: true }).click()
+      await expect(page.getByRole('heading', { name: 'Refresh all subscription feeds?' })).toHaveCount(0)
+
+      // The RSS tab shows and cancels the subscription refresh it started
+      await expect.poll(() => page.evaluate(() => window.$store.getters.getSubscriptionFeedRefreshInProgress)).toBe(true)
+      await page.locator('.subscriptionsHeader').getByRole('button', { name: 'Cancel Refresh' }).click()
+      await expect.poll(() => page.evaluate(() => window.$store.getters.getSubscriptionFeedRefreshInProgress)).toBe(false)
+    })
   })
 
   for (const view of ['combined', 'tabbed']) {

@@ -177,7 +177,7 @@ Subscriptions:
   Refreshing Subscription Posts: Harpidetzetako argitalpenak freskatzen
   New Content: Eduki berria
   New Feed Refresh Warning Title: Harpidetza-jario guztiak freskatu?
-  New Feed Refresh Warning: RSS erabili gabe harpidetza 1eko eduki mota guztiak freskatzeak luze jo dezake. Jarraitu nahi duzu? | RSS erabili gabe {count} harpidetzatako eduki mota guztiak freskatzeak luze jo dezake. Jarraitu nahi duzu?
+  New Feed Refresh Warning: Harpidetza 1eko eduki mota guztiak freskatzeak luze jo dezake. Jarraitu nahi duzu? | {count} harpidetzatako eduki mota guztiak freskatzeak luze jo dezake. Jarraitu nahi duzu?
   New Since Last Refresh: Azken freskatzetik berria
   Mark As Seen: Markatu ikusita
   Mark All as Seen: Markatu guztiak ikusita
@@ -444,6 +444,7 @@ Settings:
       Closing Tabs: Hainbat fitxa ixtea
       Loading Tabs: Hainbat fitxa kargatzea
       Unloading Tabs: Hainbat fitxa memoriatik kentzea
+      Refreshing All Feeds: Harpidetza asko freskatzea
     Remember Tab Navigation History: Gogoratu fitxen nabigazio-historia
     New Tab Position:
       New Tab Position: Fitxa berriaren kokapena

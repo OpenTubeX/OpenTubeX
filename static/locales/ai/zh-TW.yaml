@@ -177,7 +177,7 @@ Subscriptions:
   Refreshing Subscription Posts: 正在重新整理訂閱貼文
   New Content: 新內容
   New Feed Refresh Warning Title: 要重新整理所有訂閱動態消息嗎？
-  New Feed Refresh Warning: 為 {count} 個訂閱重新整理所有未使用 RSS 的內容類型可能需要很長時間。要繼續嗎？
+  New Feed Refresh Warning: 為 {count} 個訂閱重新整理所有內容類型可能需要很長時間。要繼續嗎？
   New Since Last Refresh: 上次重新整理後的新內容
   Mark As Seen: 標示為已看過
   Mark All as Seen: 全部標示為已看過
@@ -444,6 +444,7 @@ Settings:
       Closing Tabs: 關閉多個分頁
       Loading Tabs: 載入多個分頁
       Unloading Tabs: 卸載多個分頁
+      Refreshing All Feeds: 重新整理大量訂閱
     Remember Tab Navigation History: 記住分頁瀏覽記錄
     New Tab Position:
       New Tab Position: 新分頁位置

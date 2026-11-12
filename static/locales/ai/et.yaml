@@ -177,7 +177,7 @@ Subscriptions:
   Refreshing Subscription Posts: Tellimuste postituste värskendamine
   New Content: Uus sisu
   New Feed Refresh Warning Title: Kas värskendada kõiki tellimuste vooge?
-  New Feed Refresh Warning: Ühe tellimuse kõigi sisutüüpide värskendamine ilma RSS-ita võib võtta kaua aega. Kas soovite jätkata? | {count} tellimuse kõigi sisutüüpide värskendamine ilma RSS-ita võib võtta kaua aega. Kas soovite jätkata?
+  New Feed Refresh Warning: Ühe tellimuse kõigi sisutüüpide värskendamine võib võtta kaua aega. Kas soovite jätkata? | {count} tellimuse kõigi sisutüüpide värskendamine võib võtta kaua aega. Kas soovite jätkata?
   New Since Last Refresh: Uus pärast viimast värskendamist
   Mark As Seen: Märgi nähtuks
   Mark All as Seen: Märgi kõik nähtuks
@@ -444,6 +444,7 @@ Settings:
       Closing Tabs: Mitme vahekaardi sulgemist
       Loading Tabs: Mitme vahekaardi laadimist
       Unloading Tabs: Mitme vahekaardi mälust eemaldamist
+      Refreshing All Feeds: Paljude tellimuste värskendamist
     Remember Tab Navigation History: Jäta vahekaartidel liikumise ajalugu meelde
     New Tab Position:
       New Tab Position: Uue vahekaardi asukoht

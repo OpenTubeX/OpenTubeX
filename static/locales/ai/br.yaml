@@ -177,7 +177,7 @@ Subscriptions:
   Refreshing Subscription Posts: "Oc'h adkargañ pennadoù ar c'houmanantoù"
   New Content: "Endalc'had nevez"
   New Feed Refresh Warning Title: "Adkargañ holl wazhioù ar c'houmanantoù?"
-  New Feed Refresh Warning: "Adkargañ an holl zoareoù endalc'had hep RSS evit 1 c'houmanant a c'hall padout pell. Kenderc'hel? | Adkargañ an holl zoareoù endalc'had hep RSS evit {count} goumanant a c'hall padout pell. Kenderc'hel? | Adkargañ an holl zoareoù endalc'had hep RSS evit {count} c'houmanant a c'hall padout pell. Kenderc'hel? | Adkargañ an holl zoareoù endalc'had hep RSS evit {count} c'houmanant a c'hall padout pell. Kenderc'hel? | Adkargañ an holl zoareoù endalc'had hep RSS evit {count} koumanant a c'hall padout pell. Kenderc'hel?"
+  New Feed Refresh Warning: "Adkargañ an holl zoareoù endalc'had evit {count} c'houmanant a c'hall padout pell. Kenderc'hel? | Adkargañ an holl zoareoù endalc'had evit {count} goumanant a c'hall padout pell. Kenderc'hel? | Adkargañ an holl zoareoù endalc'had evit {count} c'houmanant a c'hall padout pell. Kenderc'hel? | Adkargañ an holl zoareoù endalc'had evit {count} c'houmanant a c'hall padout pell. Kenderc'hel? | Adkargañ an holl zoareoù endalc'had evit {count} koumanant a c'hall padout pell. Kenderc'hel?"
   New Since Last Refresh: "Nevez abaoe an adkargañ diwezhañ"
   Mark As Seen: "Merkañ evel gwelet"
   Mark All as Seen: "Merkañ pep tra evel gwelet"
@@ -444,6 +444,7 @@ Settings:
       Closing Tabs: "Serriñ meur a ivinell"
       Loading Tabs: "Kargañ meur a ivinell"
       Unloading Tabs: "Diskargañ meur a ivinell"
+      Refreshing All Feeds: "Freskaat kalz a goumanantoù"
     Remember Tab Navigation History: "Derc'hel soñj eus istor merdeiñ an ivinelloù"
     New Tab Position:
       New Tab Position: "Lec'h an ivinell nevez"

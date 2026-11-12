@@ -177,7 +177,7 @@ Subscriptions:
   Refreshing Subscription Posts: Päivitetään tilausten julkaisuja
   New Content: Uusi sisältö
   New Feed Refresh Warning Title: Päivitetäänkö kaikki tilaussyötteet?
-  New Feed Refresh Warning: Kun RSS ei ole käytössä, yhden tilauksen kaikkien sisältötyyppien päivittäminen voi kestää kauan. Haluatko jatkaa? | Kun RSS ei ole käytössä, {count} tilauksen kaikkien sisältötyyppien päivittäminen voi kestää kauan. Haluatko jatkaa?
+  New Feed Refresh Warning: Yhden tilauksen kaikkien sisältötyyppien päivittäminen voi kestää kauan. Haluatko jatkaa? | {count} tilauksen kaikkien sisältötyyppien päivittäminen voi kestää kauan. Haluatko jatkaa?
   New Since Last Refresh: Uutta viime päivityksen jälkeen
   Mark As Seen: Merkitse nähdyksi
   Mark All as Seen: Merkitse kaikki nähdyiksi
@@ -444,6 +444,7 @@ Settings:
       Closing Tabs: Useiden välilehtien sulkemista
       Loading Tabs: Useiden välilehtien lataamista
       Unloading Tabs: Useiden välilehtien poistamista muistista
+      Refreshing All Feeds: Monien tilausten päivittämistä
     Remember Tab Navigation History: Muista välilehtien selaushistoria
     New Tab Position:
       New Tab Position: Uuden välilehden sijainti

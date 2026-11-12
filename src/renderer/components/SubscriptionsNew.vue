@@ -40,7 +40,7 @@
     :attempted-fetch="attemptedFetch"
     :only-show-new="true"
     :has-additional-content="showCombinedView && (hasAdditionalContent || newRssItems.length > 0)"
-    :has-other-refresh-sources="showCombinedView && rssFeeds.length > 0"
+    :has-other-refresh-sources="rssFeeds.length > 0"
     :is-community="activeCategory === 'posts'"
     :youtube-style-shorts="activeCategory === 'shorts' && useCustomShortsPlayer"
     :track-global-refresh="false"
@@ -141,10 +141,13 @@
     v-if="showRefreshWarning"
     theme="readable-width"
     :label="$t('Subscriptions.New Feed Refresh Warning Title')"
-    :extra-labels="[$t('Subscriptions.New Feed Refresh Warning', { count: activeSubscriptionIds.size }, activeSubscriptionIds.size)]"
-    :option-names="[$t('Yes'), $t('No')]"
-    :option-values="['refresh', 'cancel']"
-    :option-icons="[['fas', 'sync'], ['fas', 'xmark']]"
+    :extra-labels="[
+      $t('Subscriptions.New Feed Refresh Warning', { count: activeSubscriptionIds.size }, activeSubscriptionIds.size),
+      $t('Confirmations.Settings Hint')
+    ]"
+    :option-names="[$t('Yes'), $t('No'), $t('Confirmations.Never Ask Again')]"
+    :option-values="['refresh', 'cancel', 'neverAskAgain']"
+    :option-icons="[['fas', 'sync'], ['fas', 'xmark'], ['fas', 'eye-slash']]"
     autosize
     @click="handleRefreshWarning"
   />
@@ -412,10 +415,10 @@ const hasNewContentByCategory = computed(() => ({
 }))
 
 function refreshNewContent() {
-  if (!showsOnlyRssItems.value && enabledFeeds.value.length > 0 && activeSubscriptions.value.length > 0) {
+  if (!showsOnlyRssItems.value) {
+    // Refreshes the RSS feeds too
     refresh()
-  }
-  if ((showsOnlyRssItems.value || showCombinedView.value) && rssFeeds.value.length > 0) {
+  } else if (rssFeeds.value.length > 0) {
     refreshRssFeeds(rssFeeds.value)
   }
 }
