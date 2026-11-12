@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: Tüm bölümler gizli
   All sections hidden description: Bir bölümü yeniden göstermek için Ana Sayfayı özelleştirin.
 Subscriptions:
+  Channel Errors:
+    Summary: "1 kanal yenilenemedi. | {count} kanal yenilenemedi."
+    Toast: "Abone olunan bazı kanallar yenilenemedi. Görmek için tıklayın."
+    Retry Channel: "{channel} için yeniden dene"
+    Show All: "Tümünü göster"
+    Show Fewer: "Daha az göster"
   Cache Load Error: Kaydedilmiş abonelik akışlarınız yüklenemedi.
   New video from {channel}: "{channel} kanalından yeni video"
   New short from {channel}: "{channel} kanalından yeni kısa video"
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: "{channel} kanalından yeni gönderi"
   Mark As Unseen: Görülmedi olarak işaretle
   Copy Error Details: "Teknik ayrıntıları kopyala"
-  Refresh Errors: "Yenilenemeyen kanallar: {channels}. Ayrıntıları görmek için tıklayın."
-  Refresh Error Channels More: "{channels} ve {count} kanal daha | {channels} ve {count} kanal daha"
   Never show {type} from this channel in feeds again: Bu kanalın {type} içeriklerini akışlarda bir daha gösterme
   Refreshing Subscription Videos: Abonelik videoları yenileniyor
   Refreshing Subscription Shorts: Abonelik kısa videoları yenileniyor

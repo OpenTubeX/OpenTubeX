@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: Alle deler er skjult
   All sections hidden description: Tilpass startsiden for å vise en del igjen.
 Subscriptions:
+  Channel Errors:
+    Summary: "1 kanal kunne ikke oppdateres. | {count} kanaler kunne ikke oppdateres."
+    Toast: "Noen abonnerte kanaler kunne ikke oppdateres. Klikk for å se dem."
+    Retry Channel: "Prøv {channel} igjen"
+    Show All: "Vis alle"
+    Show Fewer: "Vis færre"
   Cache Load Error: Kunne ikke laste inn de lagrede abonnementsstrømmene dine.
   New video from {channel}: Ny video fra {channel}
   New short from {channel}: Ny Shorts-video fra {channel}
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: Nytt innlegg fra {channel}
   Mark As Unseen: Merk som ikke sett
   Copy Error Details: "Kopier tekniske detaljer"
-  Refresh Errors: "Kanaler som ikke kunne oppdateres: {channels}. Klikk for å se detaljer."
-  Refresh Error Channels More: "{channels} og {count} til | {channels} og {count} til"
   Never show {type} from this channel in feeds again: Vis aldri {type} fra denne kanalen i strømmer igjen
   Refreshing Subscription Videos: Oppdaterer abonnementsvideoer
   Refreshing Subscription Shorts: Oppdaterer Shorts fra abonnementer

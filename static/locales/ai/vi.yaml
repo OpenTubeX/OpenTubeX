@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: Tất cả các mục đều bị ẩn
   All sections hidden description: Tùy chỉnh Trang chủ để hiển thị lại một mục.
 Subscriptions:
+  Channel Errors:
+    Summary: "Không thể làm mới {count} kênh."
+    Toast: "Không thể làm mới một số kênh đã đăng ký. Nhấp để xem."
+    Retry Channel: "Thử lại {channel}"
+    Show All: "Hiển thị tất cả"
+    Show Fewer: "Hiển thị ít hơn"
   Cache Load Error: Không thể tải các nguồn cấp dữ liệu kênh đăng ký đã lưu của bạn.
   New video from {channel}: Video mới từ {channel}
   New short from {channel}: Shorts mới từ {channel}
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: Bài đăng mới từ {channel}
   Mark As Unseen: Đánh dấu là chưa xem
   Copy Error Details: "Sao chép chi tiết kỹ thuật"
-  Refresh Errors: "Các kênh không thể làm mới: {channels}. Nhấp để xem chi tiết."
-  Refresh Error Channels More: "{channels} và {count} kênh khác"
   Never show {type} from this channel in feeds again: Không bao giờ hiển thị {type} từ kênh này trong bảng tin nữa
   Refreshing Subscription Videos: Đang làm mới video từ kênh đăng ký
   Refreshing Subscription Shorts: Đang làm mới video ngắn từ kênh đăng ký

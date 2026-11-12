@@ -1,155 +1,127 @@
 import { DBActions, IpcChannels } from '../../../src/constants.js'
 import { defaultThemeClass, test, expect, goTo } from '../../helpers/app.mjs'
 
-for (const count of [2, 20]) {
-  test.describe(`${count} unavailable channels`, () => {
-    const channels = Array.from({ length: count }, (_, index) => ({
-      id: `UC${String(index).padStart(22, '0')}`,
-      name: `Unavailable channel ${index + 1}`,
-      thumbnail: ''
-    }))
-    test.use({
-      seed: {
-        settings: {
-          baseTheme: 'system',
-          themeColorMode: 'standard',
-          mainColor: 'Red',
-          secColor: 'Blue',
-          backendPreference: 'invidious',
-          backendFallback: false,
-          defaultInvidiousInstance: 'https://feeds.example',
-          fetchSubscriptionsAutomatically: false,
-          useRssFeeds: true,
-          hideSubscriptionsVideos: true,
-          hideSubscriptionsLive: true,
-          hideSubscriptionsCommunity: true
-        },
-        profiles: [{
-          _id: 'allChannels',
-          name: 'All Channels',
-          bgColor: '#000000',
-          textColor: '#FFFFFF',
-          subscriptions: channels
-        }]
-      }
-    })
+const channel = index => ({ id: `UC${String(index).padStart(22, '0')}`, name: `Channel ${index + 1}`, thumbnail: '' })
 
-    test('shows channel names and opens failure reasons before copying technical details', async ({ page, app }, testInfo) => {
-      await page.setViewportSize({ width: count === 2 ? 375 : 480, height: 800 })
-      await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
-      await page.route('https://feeds.example/**', route => route.fulfill({ status: 404, body: 'Not found' }))
-      await goTo(page, 'subscriptions')
-      await page.locator('[data-subscription-feed-tab="shorts"]').click()
-      await page.getByRole('button', { name: /Refresh Shorts/ }).click()
-      const toast = page.locator('.toast', { hasText: 'Channels that could not be refreshed:' })
-      await expect(toast).toContainText(channels[0].name)
-      await expect(page.locator('.toast')).toHaveCount(1)
-      await expect(page.locator('.connectionStatus')).toBeHidden()
-      const bounds = await toast.boundingBox()
-      expect(bounds.height).toBeLessThan(160)
-      expect(bounds.width).toBeLessThanOrEqual(480)
-      await toast.click()
-      const dialog = page.getByRole('dialog', { name: 'Channels with Errors' })
-      await expect(dialog).toBeVisible()
-      await expect(toast).toBeHidden({ timeout: 2000 })
-      for (const channel of channels) await expect(dialog).toContainText(channel.name)
-      await expect(dialog).toContainText('HTTP 404')
-      await expect(dialog).not.toContainText('lifecycle=')
-      for (const colorScheme of ['dark', 'light']) {
-        await page.emulateMedia({ colorScheme })
-        await expect(page.locator('body')).toHaveClass(defaultThemeClass(colorScheme))
-        await expect(page.locator('.prompt')).toHaveCSS('opacity', '1')
-        await expect(dialog).toHaveCSS('opacity', '1')
-        const dialogBounds = await dialog.boundingBox()
-        // Electron reports CSS bounds before UI zoom; screenshot clips use physical pixels.
-        const clip = Object.fromEntries(Object.entries(dialogBounds).map(([key, value]) => [key, value * 1.25]))
-        await testInfo.attach(`subscription refresh failure reasons ${colorScheme}`, {
-          body: await page.screenshot({ clip }),
-          contentType: 'image/png'
-        })
-      }
-      if (count === 20) {
-        const scroller = dialog.locator('.promptContentScroller')
-        await expect(scroller).toHaveAttribute('data-overlayscrollbars-viewport')
-        await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
-        await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
-        await expect(dialog.getByRole('heading', { level: 2 })).toBeInViewport()
-        await expect(dialog.getByRole('button', { name: 'Copy technical details' })).toBeInViewport()
-        await page.setViewportSize({ width: 1100, height: 1000 })
-        await expect.poll(() => scroller.evaluate(element => {
-          const content = element.querySelector('.promptContent').getBoundingClientRect()
-          return Math.abs(content.bottom - element.getBoundingClientRect().bottom)
-        })).toBeLessThan(2)
-        await expect(scroller.locator(':scope > .os-scrollbar-vertical')).not.toHaveClass(/os-scrollbar-unusable/)
-      }
-      await dialog.getByRole('button', { name: 'Copy technical details' }).click()
-      await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toContain(channels.at(-1).id)
-      const details = await app.electronApp.evaluate(({ clipboard }) => clipboard.readText())
-      for (const channel of channels) expect(details).toContain(`${channel.name} (${channel.id})`)
-      expect(details).toContain('HTTP 404')
-      await page.keyboard.press('Escape')
-      await expect(dialog).toBeHidden()
-    })
-
-    if (count === 2) {
-      test('an open dialog receives later failures', async ({ page, app }) => {
-        let releaseSecond
-        const secondReady = new Promise(resolve => { releaseSecond = resolve })
-        await page.route('https://feeds.example/**', async route => {
-          if (route.request().url().includes(channels[1].id.slice(2))) await secondReady
-          return route.fulfill({ status: 404, body: 'Not found' })
-        })
-        try {
-          await goTo(page, 'subscriptions')
-          await page.locator('[data-subscription-feed-tab="shorts"]').click()
-          await page.getByRole('button', { name: /Refresh Shorts/ }).click()
-          const toast = page.locator('.toast', { hasText: 'Channels that could not be refreshed:' })
-          await expect(toast).toContainText(channels[0].name)
-          await toast.click()
-          const dialog = page.getByRole('dialog', { name: 'Channels with Errors' })
-          await expect(dialog).toContainText(channels[0].name)
-          releaseSecond()
-          await expect(dialog).toContainText(channels[1].name)
-          await expect(toast).toBeHidden()
-          await dialog.getByRole('button', { name: 'Copy technical details' }).click()
-          await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toContain(channels[1].id)
-        } finally {
-          releaseSecond()
-        }
-      })
-
-      test('later failures notify again after closing the details dialog', async ({ page, app }) => {
-        let releaseSecond
-        const secondReady = new Promise(resolve => { releaseSecond = resolve })
-        await page.route('https://feeds.example/**', async route => {
-          if (route.request().url().includes(channels[1].id.slice(2))) await secondReady
-          return route.fulfill({ status: 404, body: 'Not found' })
-        })
-        try {
-          await goTo(page, 'subscriptions')
-          await page.locator('[data-subscription-feed-tab="shorts"]').click()
-          await page.getByRole('button', { name: /Refresh Shorts/ }).click()
-          const toast = page.locator('.toast', { hasText: 'Channels that could not be refreshed:' })
-          await expect(toast).toContainText(channels[0].name)
-          await toast.click()
-          const dialog = page.getByRole('dialog', { name: 'Channels with Errors' })
-          await expect(dialog).toContainText(channels[0].name)
-          await dialog.getByRole('button', { name: 'Close', exact: true }).click()
-          await expect(dialog).toBeHidden()
-          releaseSecond()
-          await expect(toast).toContainText(channels[1].name)
-          await toast.click()
-          await expect(dialog).toContainText(channels[1].name)
-          await expect(toast).toBeHidden()
-          await dialog.getByRole('button', { name: 'Copy technical details' }).click()
-          await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toContain(channels[1].id)
-        } finally {
-          releaseSecond()
-        }
-      })
-    }
-  })
+function seed(channels, settings = {}) {
+  return {
+    settings: {
+      baseTheme: 'system',
+      themeColorMode: 'standard',
+      mainColor: 'Red',
+      secColor: 'Blue',
+      backendPreference: 'invidious',
+      backendFallback: false,
+      defaultInvidiousInstance: 'https://feeds.example',
+      fetchSubscriptionsAutomatically: false,
+      useRssFeeds: true,
+      hideSubscriptionsVideos: true,
+      hideSubscriptionsLive: true,
+      hideSubscriptionsCommunity: true,
+      ...settings
+    },
+    profiles: [{
+      _id: 'allChannels',
+      name: 'All Channels',
+      bgColor: '#000000',
+      textColor: '#FFFFFF',
+      subscriptions: channels
+    }]
+  }
 }
+
+test.describe('unavailable channels', () => {
+  const channels = Array.from({ length: 20 }, (_, index) => channel(index))
+  test.use({ seed: seed(channels) })
+
+  test('are listed above the feed with links, technical details, and an unsubscribe button', async ({ page, app }, testInfo) => {
+    await page.setViewportSize({ width: 375, height: 800 })
+    await page.route('https://feeds.example/**', route => route.fulfill({ status: 404, body: 'Not found' }))
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="shorts"]').click()
+    await page.getByRole('button', { name: /Refresh Shorts/ }).click()
+
+    const box = page.locator('.channelErrors.hasErrors')
+    await expect(box.getByRole('status')).toHaveText('20 channels could not be refreshed.')
+    const rows = box.getByRole('listitem')
+    await expect(rows).toHaveCount(3)
+    // The box is visible, so the refresh doesn't point to it
+    await expect(page.locator('.toast', { hasText: 'could not be refreshed' })).toHaveCount(0)
+
+    const firstRow = rows.first()
+    const channelLink = firstRow.getByRole('link', { name: channels[0].name })
+    await expect(channelLink).toHaveAttribute('href', new RegExp(`/channel/${channels[0].id}$`))
+    await expect(channelLink.locator('.channelAvatar')).toBeVisible()
+    await expect(firstRow).toContainText('This channel does not exist')
+    await expect(firstRow.getByRole('button', { name: 'Unsubscribe' })).toBeVisible()
+
+    await box.getByRole('button', { name: 'Show all' }).click()
+    await expect(rows).toHaveCount(20)
+    await expect(box.getByRole('button', { name: 'Show fewer' })).toHaveAttribute('aria-expanded', 'true')
+    const overflow = await box.evaluate(element => element.scrollWidth - element.clientWidth)
+    expect(overflow).toBeLessThanOrEqual(0)
+    expect(await page.evaluate(() => document.scrollingElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0)
+
+    for (const colorScheme of ['dark', 'light']) {
+      await page.emulateMedia({ colorScheme })
+      await expect(page.locator('body')).toHaveClass(defaultThemeClass(colorScheme))
+      await testInfo.attach(`unavailable channels ${colorScheme}`, { body: await box.screenshot(), contentType: 'image/png' })
+    }
+
+    await box.getByRole('button', { name: 'Copy technical details' }).click()
+    await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toContain(channels.at(-1).id)
+    const details = await app.electronApp.evaluate(({ clipboard }) => clipboard.readText())
+    for (const { id, name } of channels) expect(details).toContain(`${name} (${id})`)
+    expect(details).toContain('HTTP 404')
+
+    await firstRow.getByRole('button', { name: 'Unsubscribe' }).click()
+    await expect(box.getByRole('status')).toHaveText('19 channels could not be refreshed.')
+    await expect(box.getByRole('link', { name: channels[0].name, exact: true })).toHaveCount(0)
+    expect(await page.evaluate(id => window.$store.getters.getActiveProfile.subscriptions.some(channel => channel.id === id), channels[0].id)).toBe(false)
+
+    await box.getByRole('button', { name: 'Close' }).click()
+    await expect(page.locator('.channelErrors.hasErrors')).toHaveCount(0)
+    // The focus stays where the box was instead of falling back to the page
+    await expect(page.locator('.channelErrors')).toBeFocused()
+  })
+})
+
+test.describe('channels that could not be refreshed in several New feed categories', () => {
+  const channels = [channel(0), channel(1)]
+  test.use({ seed: seed(channels, { hideSubscriptionsVideos: false }) })
+
+  test('are listed once and can be retried on their own', async ({ page }) => {
+    const failing = new Set(channels.map(({ id }) => id.slice(2)))
+    const requests = []
+    await page.route('https://feeds.example/**', route => {
+      const url = route.request().url()
+      requests.push(url)
+      return [...failing].some(id => url.includes(id))
+        ? route.fulfill({ status: 500, body: 'Failed' })
+        : route.fulfill({ contentType: 'application/atom+xml', body: '<feed xmlns="http://www.w3.org/2005/Atom"><author><name>Channel</name></author></feed>' })
+    })
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await page.getByRole('button', { name: /Refresh New content/ }).click()
+
+    const box = page.locator('.channelErrors.hasErrors')
+    await expect(box.getByRole('status')).toHaveText('2 channels could not be refreshed.')
+    // Both the videos and the Shorts of each channel failed
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getSubscriptionFeedRefreshInProgress)).toBe(false)
+    await expect(box.getByRole('listitem')).toHaveCount(2)
+    await expect(box.getByRole('button', { name: 'Unsubscribe' })).toHaveCount(0)
+    await expect(box.getByRole('listitem').first()).toContainText('HTTP 500')
+    await expect(box).not.toContainText('lifecycle=')
+
+    failing.delete(channels[1].id.slice(2))
+    requests.length = 0
+    await box.getByRole('button', { name: `Retry ${channels[1].name}` }).click()
+    await expect(box.getByRole('listitem')).toHaveCount(1)
+    await expect(box.getByRole('link', { name: channels[0].name })).toBeVisible()
+    expect(requests.length).toBeGreaterThanOrEqual(2)
+    expect(requests.every(url => url.includes(channels[1].id.slice(2)))).toBe(true)
+  })
+})
 
 test.describe('failed subscription cache load', () => {
   const channelId = 'UCaaaaaaaaaaaaaaaaaaaaaa'
@@ -214,7 +186,7 @@ test.describe('failed subscription cache load', () => {
         const error = page.getByText('Your saved subscription feeds could not be loaded.')
         await expect(error).toBeVisible()
         await expect(outcome === 'failed'
-          ? page.getByRole('heading', { name: 'Channels with Errors' })
+          ? page.getByText('2 channels could not be refreshed.', { exact: true })
           : page.getByText('Refreshing subscription videos')).toBeVisible()
         // The channels may well have videos, so no empty state goes with the error
         await expect(page.getByText('Your subscribed channels currently do not have any videos.')).toBeHidden()

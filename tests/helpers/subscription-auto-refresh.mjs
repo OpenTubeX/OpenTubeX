@@ -22,6 +22,7 @@ function resetHooks() {
     cancelSubscriptionRefresh: () => {},
     cancelRssFeedsRefresh: () => {},
     notifySubscriptionChannelRefreshed: () => {},
+    clearSubscriptionChannelErrors: () => {},
     refresh: async () => [],
     enrichSubscriptionRssEntries: async entries => entries,
     enrichSubscriptionShortDates: async entries => entries,
@@ -134,6 +135,9 @@ export async function loadSubscriptionAutoRefresh(env) {
       reconcileFetchedSubscriptionEntries: call('reconcileFetchedSubscriptionEntries'),
     },
     [sourceUrl('src/renderer/helpers/rssFeeds.js')]: { cancelRssFeedsRefresh: call('cancelRssFeedsRefresh') },
+    [sourceUrl('src/renderer/helpers/subscriptionRefreshErrors.js')]: {
+      clearSubscriptionChannelErrors: call('clearSubscriptionChannelErrors'),
+    },
     [sourceUrl('src/renderer/helpers/subscriptions.js')]: {
       enrichSubscriptionRssEntries: call('enrichSubscriptionRssEntries'),
       enrichSubscriptionShortDates: call('enrichSubscriptionShortDates'),

@@ -1,5 +1,5 @@
 diff --git a/lib/index.js b/lib/index.js
-index cd01bb1f1563571946c1470dfdea9d009655d9cd..2ea8cf1d5fa885a7073a80adec85c06428732dca 100644
+index cd01bb1f1563571946c1470dfdea9d009655d9cd..903e2ccb13d79b451e183a61425773546e38e19c 100644
 --- a/lib/index.js
 +++ b/lib/index.js
 @@ -305,12 +305,12 @@ const TIME_BEFORE_UNMOUNT = 200;
@@ -17,17 +17,7 @@ index cd01bb1f1563571946c1470dfdea9d009655d9cd..2ea8cf1d5fa885a7073a80adec85c064
  	});
  	return { isDocumentHidden };
  }
-@@ -482,6 +482,9 @@ var Toast_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineCo
- 		const offset = computed(() => heightIndex.value * props.gap + toastsHeightBefore.value || 0);
- 		const closeButton = computed(() => props.toast.closeButton ?? props.closeButton);
- 		const duration = computed(() => props.toast.duration || props.duration || TOAST_LIFETIME);
-+		watch(duration, (value) => {
-+			remainingTime.value = value;
-+		}, { flush: "sync" });
- 		const closeTimerStartTimeRef = ref(0);
- 		const lastCloseTimerStartTimeRef = ref(0);
- 		const pointerStartRef = ref(null);
-@@ -514,6 +517,7 @@ var Toast_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineCo
+@@ -514,6 +514,7 @@ var Toast_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineCo
  		function deleteToast() {
  			removed.value = true;
  			offsetBeforeRemove.value = offset.value;
@@ -35,7 +25,7 @@ index cd01bb1f1563571946c1470dfdea9d009655d9cd..2ea8cf1d5fa885a7073a80adec85c064
  			setTimeout(() => {
  				emit("removeToast", props.toast);
  			}, TIME_BEFORE_UNMOUNT);
-@@ -980,6 +984,9 @@ var Toaster_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ define
+@@ -980,6 +981,9 @@ var Toaster_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ define
  		const hotkeyLabel = props.hotkey.join("+").replace(/Key/g, "").replace(/Digit/g, "");
  		function removeToast(toastToRemove) {
  			if (!toasts.value.find((toast$1) => toast$1.id === toastToRemove.id)?.delete) ToastState.dismiss(toastToRemove.id);

@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: Atal guztiak ezkutatuta daude
   All sections hidden description: Pertsonalizatu hasiera atal bat berriro erakusteko.
 Subscriptions:
+  Channel Errors:
+    Summary: "Ezin izan da kanal 1 freskatu. | Ezin izan dira {count} kanal freskatu."
+    Toast: "Harpidetutako kanal batzuk ezin izan dira freskatu. Egin klik ikusteko."
+    Retry Channel: "Saiatu berriro: {channel}"
+    Show All: "Erakutsi guztiak"
+    Show Fewer: "Erakutsi gutxiago"
   Cache Load Error: Ezin izan dira gordetako harpidetza-jarioak kargatu.
   New video from {channel}: "{channel} kanalaren bideo berria"
   New short from {channel}: "{channel} kanalaren labur berria"
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: "{channel} kanalaren argitalpen berria"
   Mark As Unseen: Markatu ikusi gabeko gisa
   Copy Error Details: "Kopiatu xehetasun teknikoak"
-  Refresh Errors: "Eguneratu ezin izan diren kanalak: {channels}. Egin klik xehetasunak ikusteko."
-  Refresh Error Channels More: "{channels} eta beste {count} | {channels} eta beste {count}"
   Never show {type} from this channel in feeds again: Ez erakutsi berriro kanal honetako {type} jarioetan
   Refreshing Subscription Videos: Harpidetzetako bideoak freskatzen
   Refreshing Subscription Shorts: Harpidetzetako bideo laburrak freskatzen

@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: Όλες οι ενότητες είναι κρυφές
   All sections hidden description: Προσαρμόστε την αρχική για να εμφανίσετε ξανά μια ενότητα.
 Subscriptions:
+  Channel Errors:
+    Summary: "Δεν ήταν δυνατή η ανανέωση 1 καναλιού. | Δεν ήταν δυνατή η ανανέωση {count} καναλιών."
+    Toast: "Δεν ήταν δυνατή η ανανέωση ορισμένων εγγεγραμμένων καναλιών. Κάντε κλικ για να τα δείτε."
+    Retry Channel: "Επανάληψη για {channel}"
+    Show All: "Εμφάνιση όλων"
+    Show Fewer: "Εμφάνιση λιγότερων"
   Cache Load Error: Δεν ήταν δυνατή η φόρτωση των αποθηκευμένων ροών συνδρομών σας.
   New video from {channel}: Νέο βίντεο από {channel}
   New short from {channel}: Νέο σύντομο βίντεο από {channel}
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: Νέα ανάρτηση από {channel}
   Mark As Unseen: Επισήμανση ως μη προβεβλημένου
   Copy Error Details: "Αντιγραφή τεχνικών λεπτομερειών"
-  Refresh Errors: "Κανάλια που δεν ήταν δυνατό να ανανεωθούν: {channels}. Κάντε κλικ για προβολή λεπτομερειών."
-  Refresh Error Channels More: "{channels} και {count} ακόμη | {channels} και {count} ακόμη"
   Never show {type} from this channel in feeds again: Να μην εμφανίζεται ξανά περιεχόμενο τύπου {type} από αυτό το κανάλι στις ροές
   Refreshing Subscription Videos: Ανανέωση βίντεο συνδρομών
   Refreshing Subscription Shorts: Ανανέωση σύντομων βίντεο συνδρομών

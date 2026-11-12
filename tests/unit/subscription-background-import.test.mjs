@@ -123,6 +123,7 @@ async function importChannelResult(t, result) {
 
 test('background playlist imports restore missing authors and keep explicit bylines', async t => {
   const published = []
+  const clearedErrors = []
   const cache = { UCchannel: { videos: [{ videoId: 'missing', thumbnailUrl: 'https://images.example/portrait.jpg' }] } }
   let saved
   hooks.store = createStore({
@@ -132,6 +133,7 @@ test('background playlist imports restore missing authors and keep explicit byli
   })
   hooks.store.onDispatch = (_action, value) => { saved = value.videos; cache.UCchannel = value; return true }
   hooks.notifySubscriptionChannelRefreshed = tab => published.push(tab)
+  hooks.clearSubscriptionChannelErrors = (...args) => clearedErrors.push(args)
   hooks.enrichSubscriptionShortDates = async entries => entries.map(entry => ({ ...entry, published: 123456 }))
   await importChannelResult(t, {
     channelId: 'UCchannel',
@@ -156,6 +158,7 @@ test('background playlist imports restore missing authors and keep explicit byli
   assert.ok(saved.every(video => video.isShort))
   assert.ok(saved.every(video => video.published === 123456))
   assert.deepEqual(published, ['shorts'], 'publish imported videos while the native refresh is still active')
+  assert.deepEqual(clearedErrors, [['UCchannel', ['shorts']]], 'a successful import clears the feed error shown above the feeds')
 })
 
 test('background Yattee Shorts are dated through the server instead of YouTube', async t => {

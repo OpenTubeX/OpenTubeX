@@ -653,8 +653,7 @@ test.describe('refresh errors in a group', () => {
     await goTo(page, 'subscriptions')
     await page.getByRole('button', { name: /Refresh Videos/ }).click()
 
-    const errorChannels = page.getByRole('heading', { name: 'Channels with Errors', level: 3 })
-      .locator('xpath=..').locator('.channelName')
+    const errorChannels = page.locator('.channelErrors .channelName')
     await expect(errorChannels).toHaveText(['Alpha Channel', 'Beta Channel', 'Gamma Channel'])
     await groups(page).getByRole('tab', { name: 'Music' }).click()
     await expect(errorChannels).toHaveText(['Alpha Channel', 'Gamma Channel'])

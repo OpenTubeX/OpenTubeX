@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: Kuzhet eo an holl rannoù
   All sections hidden description: Personelait ar bajenn degemer evit diskouez ur rann en-dro.
 Subscriptions:
+  Channel Errors:
+    Summary: "N'eus ket bet gallet adkargañ {count} chadenn. | N'eus ket bet gallet adkargañ {count} chadenn. | N'eus ket bet gallet adkargañ {count} chadenn. | N'eus ket bet gallet adkargañ {count} a chadennoù. | N'eus ket bet gallet adkargañ {count} chadenn."
+    Toast: "N'eus ket bet gallet adkargañ chadennoù koumanantet zo. Klikit evit o gwelout."
+    Retry Channel: "Klask en-dro {channel}"
+    Show All: "Diskouez pep tra"
+    Show Fewer: "Diskouez nebeutoc'h"
   Cache Load Error: 'N''eus ket bet gallet kargañ ho lanvioù koumanantoù enrollet.'
   New video from {channel}: Video nevez gant {channel}
   New short from {channel}: Video berr nevez gant {channel}
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: Pennad nevez gant {channel}
   Mark As Unseen: Merkañ evel nann gwelet
   Copy Error Details: "Eilañ ar munudoù teknikel"
-  Refresh Errors: "Kanolioù n'int ket bet hizivaet: {channels}. Klikit evit gwelet ar munudoù."
-  Refresh Error Channels More: "{channels} ha {count} all | {channels} ha {count} all | {channels} ha {count} all | {channels} ha {count} all | {channels} ha {count} all"
   Never show {type} from this channel in feeds again: Na ziskouez biken {type} eus ar chadenn-mañ er gwazhioù en-dro
   Refreshing Subscription Videos: "Oc'h adkargañ videoioù ar c'houmanantoù"
   Refreshing Subscription Shorts: "Oc'h adkargañ videoioù berr (Shorts) ar c'houmanantoù"

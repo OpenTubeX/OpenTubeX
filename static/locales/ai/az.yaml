@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: Bütün bölmələr gizlədilib
   All sections hidden description: Bölməni yenidən göstərmək üçün ana səhifəni fərdiləşdirin.
 Subscriptions:
+  Channel Errors:
+    Summary: "1 kanal yenilənə bilmədi. | {count} kanal yenilənə bilmədi."
+    Toast: "Abunə olduğunuz bəzi kanallar yenilənə bilmədi. Baxmaq üçün klikləyin."
+    Retry Channel: "{channel} üçün yenidən cəhd edin"
+    Show All: "Hamısını göstər"
+    Show Fewer: "Daha az göstər"
   Cache Load Error: Saxlanmış abunəlik lentləriniz yüklənə bilmədi.
   New video from {channel}: "{channel} kanalından yeni video"
   New short from {channel}: "{channel} kanalından yeni Shorts"
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: "{channel} kanalından yeni post"
   Mark As Unseen: Görülməmiş kimi işarələ
   Copy Error Details: "Texniki təfərrüatları kopyala"
-  Refresh Errors: "Yenilənə bilməyən kanallar: {channels}. Təfərrüatlara baxmaq üçün klikləyin."
-  Refresh Error Channels More: "{channels} və daha {count} kanal | {channels} və daha {count} kanal"
   Never show {type} from this channel in feeds again: Bu kanaldan {type} məzmununu lentlərdə bir daha göstərmə
   Refreshing Subscription Videos: Abunəlik videoları yenilənir
   Refreshing Subscription Shorts: Abunəlik qısa videoları yenilənir

@@ -160,6 +160,12 @@ Home Page:
   All sections hidden: All sections are hidden
   All sections hidden description: Customise Home to show a section again.
 Subscriptions:
+  Channel Errors:
+    Summary: "1 channel could not be refreshed. | {count} channels could not be refreshed."
+    Toast: "Some subscribed channels could not be refreshed. Click to view them."
+    Retry Channel: "Retry {channel}"
+    Show All: "Show all"
+    Show Fewer: "Show fewer"
   Cache Load Error: Your saved subscription feeds could not be loaded.
   New video from {channel}: New video from {channel}
   New short from {channel}: New short from {channel}
@@ -167,8 +173,6 @@ Subscriptions:
   New post from {channel}: New post from {channel}
   Mark As Unseen: Mark As Unseen
   Copy Error Details: "Copy technical details"
-  Refresh Errors: "Channels that could not be refreshed: {channels}. Click to view details."
-  Refresh Error Channels More: "{channels} and {count} more | {channels} and {count} more"
   Never show {type} from this channel in feeds again: Never show {type} from this channel in feeds again
   Refreshing Subscription Videos: Refreshing subscription videos
   Refreshing Subscription Shorts: Refreshing subscription shorts

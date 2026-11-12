@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: جميع الأقسام مخفية
   All sections hidden description: خصّص الصفحة الرئيسية لإظهار قسم من جديد.
 Subscriptions:
+  Channel Errors:
+    Summary: "تعذّر تحديث {count} قناة. | تعذّر تحديث قناة واحدة. | تعذّر تحديث قناتين ({count}). | تعذّر تحديث {count} قنوات. | تعذّر تحديث {count} قناةً. | تعذّر تحديث {count} قناة."
+    Toast: "تعذّر تحديث بعض القنوات المشترك فيها. انقر لعرضها."
+    Retry Channel: "إعادة محاولة {channel}"
+    Show All: "عرض الكل"
+    Show Fewer: "عرض أقل"
   Cache Load Error: تعذّر تحميل خلاصات الاشتراكات المحفوظة.
   New video from {channel}: فيديو جديد من {channel}
   New short from {channel}: فيديو قصير جديد من {channel}
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: منشور جديد من {channel}
   Mark As Unseen: وضع علامة كغير مُشاهَد
   Copy Error Details: "نسخ التفاصيل التقنية"
-  Refresh Errors: "القنوات التي تعذر تحديثها: {channels}. انقر لعرض التفاصيل."
-  Refresh Error Channels More: "{channels} و{count} أخرى | {channels} و{count} أخرى | {channels} و{count} أخرى | {channels} و{count} أخرى | {channels} و{count} أخرى | {channels} و{count} أخرى"
   Never show {type} from this channel in feeds again: عدم عرض {type} من هذه القناة في الخلاصات مجددًا
   Refreshing Subscription Videos: تحديث مقاطع الفيديو الخاصة بالاشتراك
   Refreshing Subscription Shorts: 'تحديث الفيديوهات القصيرة للاشتراكات'

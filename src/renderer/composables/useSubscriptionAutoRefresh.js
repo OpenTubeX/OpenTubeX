@@ -35,6 +35,7 @@ import { formatRequestDiagnostic } from '../helpers/api/requestDiagnostics'
 import { reconcileFetchedSubscriptionEntries } from '../helpers/subscription-entries'
 import { parseSubscriptionRss } from '../helpers/api/feed-rss'
 import { cancelRssFeedsRefresh } from '../helpers/rssFeeds'
+import { clearSubscriptionChannelErrors } from '../helpers/subscriptionRefreshErrors'
 import {
   enrichSubscriptionRssEntries,
   enrichSubscriptionShortDates,
@@ -1059,6 +1060,7 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
     if (!(committedTimestamp instanceof Date) || committedTimestamp.getTime() < timestamp.getTime()) {
       throw new Error(`The ${feedType} cache write did not complete`)
     }
+    clearSubscriptionChannelErrors(result.channelId, [feedType])
     notifySubscriptionChannelRefreshed(feedType)
   }
 

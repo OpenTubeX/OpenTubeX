@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: Alle secties zijn verborgen
   All sections hidden description: Pas de startpagina aan om weer een sectie te tonen.
 Subscriptions:
+  Channel Errors:
+    Summary: "1 kanaal kon niet worden vernieuwd. | {count} kanalen konden niet worden vernieuwd."
+    Toast: "Sommige geabonneerde kanalen konden niet worden vernieuwd. Klik om ze te bekijken."
+    Retry Channel: "{channel} opnieuw proberen"
+    Show All: "Alles tonen"
+    Show Fewer: "Minder tonen"
   Cache Load Error: Je opgeslagen abonnementsfeeds konden niet worden geladen.
   New video from {channel}: Nieuwe video van {channel}
   New short from {channel}: Nieuwe Short van {channel}
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: Nieuwe post van {channel}
   Mark As Unseen: Markeren als ongezien
   Copy Error Details: "Technische details kopiëren"
-  Refresh Errors: "Kanalen die niet konden worden vernieuwd: {channels}. Klik om details te bekijken."
-  Refresh Error Channels More: "{channels} en nog {count} | {channels} en nog {count}"
   Never show {type} from this channel in feeds again: Nooit meer {type} van dit kanaal in feeds tonen
   Refreshing Subscription Videos: Abonnementsvideo's vernieuwen
   Refreshing Subscription Shorts: Shorts van abonnementen vernieuwen

@@ -154,15 +154,18 @@ Subscriptions:
   New post from {channel}: Neuer Beitrag von {channel}
   Mark As Unseen: Als ungesehen markieren
   Copy Error Details: "Technische Details kopieren"
-  Refresh Errors: "Nicht aktualisierte Kanäle: {channels}. Klicken, um Details anzuzeigen."
-  Refresh Error Channels More: "{channels} und {count} weiterer | {channels} und {count} weitere"
+  Channel Errors:
+    Summary: 1 Kanal konnte nicht aktualisiert werden. | {count} Kanäle konnten nicht aktualisiert werden.
+    Toast: Einige abonnierte Kanäle konnten nicht aktualisiert werden. Klicken, um sie anzuzeigen.
+    Retry Channel: '{channel} erneut versuchen'
+    Show All: Alle anzeigen
+    Show Fewer: Weniger anzeigen
   Never show {type} from this channel in feeds again: Nie wieder {type} von diesem Kanal in Feeds anzeigen
     # On Subscriptions Page
   Subscriptions: Abos
   'Your Subscription list is currently empty. Start adding subscriptions to see them here.': Deine Aboliste ist derzeit leer. Wenn du deine Abos importieren möchtest, wähle in den Einstellungen unter dem Bereich „Daten“ „Abos importieren“. Alternativ kannst du nach einem Kanal suchen und diesen abonnieren.
   This profile has a large number of subscriptions. Forcing RSS to avoid rate limiting: Dieses Profil hat eine große Anzahl von Abos.  RSS zur Vermeidung von Geschwindigkeitsbeschränkungen erzwingen
   Load More Videos: Weitere Videos laden
-  Error Channels: Kanäle mit Fehlern
   Disabled Automatic Fetching: Du hast den automatischen Abruf von Abos deaktiviert. Aktualisiere die Abos, um sie hier zu sehen.
   Empty Channels: Deine abonnierten Kanäle haben derzeit keine Videos.
   Subscriptions Tabs: Registerkarten für Abos

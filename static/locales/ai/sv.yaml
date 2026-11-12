@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: Alla avsnitt är dolda
   All sections hidden description: Anpassa startsidan för att visa ett avsnitt igen.
 Subscriptions:
+  Channel Errors:
+    Summary: "1 kanal kunde inte uppdateras. | {count} kanaler kunde inte uppdateras."
+    Toast: "Vissa prenumererade kanaler kunde inte uppdateras. Klicka för att visa dem."
+    Retry Channel: "Försök igen med {channel}"
+    Show All: "Visa alla"
+    Show Fewer: "Visa färre"
   Cache Load Error: Dina sparade prenumerationsflöden kunde inte läsas in.
   New video from {channel}: Ny video från {channel}
   New short from {channel}: Ny Short från {channel}
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: Nytt inlägg från {channel}
   Mark As Unseen: Markera som osedd
   Copy Error Details: "Kopiera tekniska detaljer"
-  Refresh Errors: "Kanaler som inte kunde uppdateras: {channels}. Klicka för att visa detaljer."
-  Refresh Error Channels More: "{channels} och {count} till | {channels} och {count} till"
   Never show {type} from this channel in feeds again: Visa aldrig {type} från den här kanalen i flöden igen
   Refreshing Subscription Videos: Uppdaterar prenumerationsvideor
   Refreshing Subscription Shorts: Uppdaterar Shorts från prenumerationer

@@ -198,6 +198,12 @@ Home Page:
   All sections hidden: Vsi razdelki so skriti
   All sections hidden description: Prilagodite domačo stran, da znova prikažete razdelek.
 Subscriptions:
+  Channel Errors:
+    Summary: "{count} kanala ni bilo mogoče osvežiti. | {count} kanalov ni bilo mogoče osvežiti. | {count} kanalov ni bilo mogoče osvežiti. | {count} kanalov ni bilo mogoče osvežiti."
+    Toast: "Nekaterih naročenih kanalov ni bilo mogoče osvežiti. Kliknite za ogled."
+    Retry Channel: "Poskusi znova: {channel}"
+    Show All: "Pokaži vse"
+    Show Fewer: "Pokaži manj"
   Cache Load Error: Shranjenih virov naročnin ni bilo mogoče naložiti.
   New video from {channel}: Nov videoposnetek kanala {channel}
   New short from {channel}: Nov posnetek Shorts kanala {channel}
@@ -205,8 +211,6 @@ Subscriptions:
   New post from {channel}: Nova objava kanala {channel}
   Mark As Unseen: Označi kot nevideno
   Copy Error Details: "Kopiraj tehnične podrobnosti"
-  Refresh Errors: "Kanali, ki jih ni bilo mogoče osvežiti: {channels}. Kliknite za ogled podrobnosti."
-  Refresh Error Channels More: "{channels} in še {count} | {channels} in še {count} | {channels} in še {count} | {channels} in še {count}"
   Never show {type} from this channel in feeds again: Nikoli več ne prikazuj vsebine vrste {type} s tega kanala v virih
   Empty Posts: Kanali, na katere ste naročeni, trenutno nimajo objav.
   Load More Posts: Naloži več objav

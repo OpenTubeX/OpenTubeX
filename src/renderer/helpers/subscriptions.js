@@ -1,8 +1,12 @@
 import { isOnAiSlopList } from './aiSlopList'
 import { enrichShortPublicationDates } from './api/short-publication'
 import { parseSubscriptionRss, parseRssUpcomingInfo, isRssUpcomingPremiereCandidate } from './api/feed-rss'
-import { shallowReactive } from 'vue'
-import { subscriptionRefreshErrors } from './subscriptionRefreshErrors'
+import {
+  clearSubscriptionChannelErrors,
+  isSubscriptionFeedErrorShown,
+  setSubscriptionChannelError
+} from './subscriptionRefreshErrors'
+import { isMissingChannelError } from './channels'
 import store from '../store/index'
 import { usesInvidiousApi } from '../../apiBackends'
 import {
@@ -28,6 +32,7 @@ import {
   getInvidiousApiErrorMessage,
   showInvidiousFallbackToast,
   getChannelPlaylistId,
+  openInternalPath,
   showApiErrorToast,
   showToast,
   showToastOnAllTabs,
@@ -77,7 +82,8 @@ let electronRefreshOwnerTabId = null
 
 /**
  * Cancellation state of the refresh this renderer is running, if any.
- * @type {{ cancelled: boolean, tab: string, profileId: string, refreshId: number, controller: AbortController, errors: Map<string, Map<string, string>>, errorSummary: ReturnType<typeof createSubscriptionErrorSummary>, networkRecovery: ReturnType<typeof createSubscriptionNetworkRecovery> | null } | null}
+ * `partial` refreshes only fetch some channels again, so they don't count as a refresh of the feed.
+ * @type {{ cancelled: boolean, tab: 'videos' | 'shorts' | 'live' | 'posts', profileId: string, refreshId: number, controller: AbortController, errors: Map<string, Map<string, string>>, unavailableChannelIds: Set<string>, newErrorCount: number, partial: boolean, networkRecovery: ReturnType<typeof createSubscriptionNetworkRecovery> | null } | null}
  */
 let activeRefresh = null
 let nextRefreshId = 0
@@ -220,9 +226,10 @@ function isRefreshCancelled() {
  * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
  * @param {string} profileId
  * @param {() => Promise<T>} refresh
+ * @param {{ t: (key: string, named?: Record<string, unknown>, plural?: number) => string, channelIds?: string[] | null }} options
  * @returns {Promise<T | null>}
  */
-async function withSubscriptionRefreshLock(tab, profileId, refresh, t) {
+async function withSubscriptionRefreshLock(tab, profileId, refresh, options) {
   // The store only mirrors the shared refresh state, and a progress update of
   // the feed that just finished can still arrive after it. Refresh all would
   // then skip its remaining feeds, so only the actual locks decide.
@@ -232,13 +239,13 @@ async function withSubscriptionRefreshLock(tab, profileId, refresh, t) {
 
   rendererRefreshReserved = true
   try {
-    return await runWithSubscriptionRefreshLock(tab, profileId, refresh, t)
+    return await runWithSubscriptionRefreshLock(tab, profileId, refresh, options)
   } finally {
     rendererRefreshReserved = false
   }
 }
 
-async function runWithSubscriptionRefreshLock(tab, profileId, refresh, t) {
+async function runWithSubscriptionRefreshLock(tab, profileId, refresh, { t, channelIds = null }) {
   if (process.env.IS_CAPACITOR && await isAndroidSubscriptionRefreshActive()) {
     return null
   }
@@ -250,7 +257,9 @@ async function runWithSubscriptionRefreshLock(tab, profileId, refresh, t) {
     activeRefresh = {
       cancelled: false,
       errors: new Map(),
-      errorSummary: createSubscriptionErrorSummary(t),
+      unavailableChannelIds: new Set(),
+      newErrorCount: 0,
+      partial: channelIds !== null,
       controller,
       tab,
       profileId,
@@ -272,7 +281,7 @@ async function runWithSubscriptionRefreshLock(tab, profileId, refresh, t) {
       return await refresh()
     } finally {
       activeRefresh.networkRecovery?.cancel()
-      activeRefresh.errorSummary.finish()
+      notifyNewSubscriptionErrors(activeRefresh, t)
       activeRefresh = null
       window.dispatchEvent(new CustomEvent(SUBSCRIPTION_REFRESH_FINISHED_EVENT, {
         detail: { tab, profileId, refreshId }
@@ -318,6 +327,7 @@ async function runWithSubscriptionRefreshLock(tab, profileId, refresh, t) {
  * @param {string} profileId
  */
 function completeSubscriptionRefresh(tab, profileId) {
+  if (activeRefresh?.partial) return
   const timestamp = Date.now()
   window.dispatchEvent(new CustomEvent(SUBSCRIPTION_REFRESH_COMPLETED_EVENT, {
     detail: { tab, profileId, timestamp }
@@ -348,44 +358,45 @@ export function notifySubscriptionChannelRefreshed(tab) {
   }))
 }
 
-/** Keep confirmed channel failures visible even when another channel keeps retrying. */
-function createSubscriptionErrorSummary(t) {
-  const errors = shallowReactive(new Map())
-  /** @type {import('./utils').ToastControl | null} */
-  let toastControl = null
-  let shown = false
-  return {
-    add(channel, messages) {
-      if (!messages?.size) return
-      errors.set(channel.id, {
-        id: channel.id,
-        name: channel.name || channel.id,
-        reasons: [...new Set(messages.values())],
-        trace: [...messages.keys()].join('\n')
-      })
-      if (shown || subscriptionRefreshErrors.value === errors) return
-      shown = true
-      toastControl = showToast({
-        message: () => {
-          const names = [...errors.values()].slice(0, 3).map(channel => channel.name).join(', ')
-          const channels = errors.size > 3
-            ? t('Subscriptions.Refresh Error Channels More', { channels: names, count: errors.size - 3 }, errors.size - 3)
-            : names
-          return t('Subscriptions.Refresh Errors', { channels })
-        },
-        time: Infinity,
-        action: () => {
-          shown = false
-          subscriptionRefreshErrors.value = errors
-        },
-        icon: ['fas', 'circle-exclamation']
-      })
-    },
-    finish() {
-      // Keep the final details available briefly after completion or cancellation.
-      if (shown) toastControl?.startTimeout(10000)
-    }
+/**
+ * Keeps the channel's errors from this refresh for the error boxes above the feeds,
+ * or clears its earlier ones when it loaded.
+ * @param {NonNullable<typeof activeRefresh>} refresh
+ * @param {{ id: string }} channel
+ */
+function recordSubscriptionChannelResult(refresh, channel) {
+  const messages = refresh.errors.get(channel.id)
+  if (!messages?.size) {
+    clearSubscriptionChannelErrors(channel.id, [refresh.tab])
+    return
   }
+
+  const isNew = setSubscriptionChannelError(channel.id, refresh.tab, {
+    reasons: [...new Set(messages.values())],
+    trace: [...messages.keys()].join('\n'),
+    unavailable: refresh.unavailableChannelIds.has(channel.id)
+  })
+  if (isNew) refresh.newErrorCount++
+}
+
+/**
+ * Points to the error box when channels failed for the first time and the
+ * user can't see the box already.
+ * @param {NonNullable<typeof activeRefresh>} refresh
+ * @param {(key: string, named?: Record<string, unknown>, plural?: number) => string} t
+ */
+function notifyNewSubscriptionErrors(refresh, t) {
+  const count = refresh.newErrorCount
+  if (refresh.cancelled || count === 0 || isSubscriptionFeedErrorShown(refresh.tab)) return
+
+  showToast({
+    message: t('Subscriptions.Channel Errors.Toast', { count }, count),
+    icon: ['fas', 'circle-exclamation'],
+    action: () => openInternalPath({
+      path: '/subscriptions',
+      query: { tab: refresh.tab === 'posts' ? 'community' : refresh.tab }
+    })
+  })
 }
 
 // mapConcurrently waits for the channels in flight before it rejects, so the
@@ -430,7 +441,7 @@ async function fetchSubscriptionsConcurrently(channels, fetchChannel) {
       }
 
       if (!refresh.cancelled) {
-        refresh.errorSummary.add(channel, refresh.errors.get(channel.id))
+        recordSubscriptionChannelResult(refresh, channel)
       }
 
       // Let input and navigation tasks run between parsing/cache updates.
@@ -533,6 +544,16 @@ async function keepUnchangedSubscriptionFeed(feed, channel, backend, t) {
 }
 
 /**
+ * @template {{ id: string }} T
+ * @param {T[]} channels
+ * @param {string[] | null} channelIds only these channels, or all when null
+ * @returns {T[]}
+ */
+function onlyRequestedChannels(channels, channelIds) {
+  return channelIds === null ? channels : channels.filter(channel => channelIds.includes(channel.id))
+}
+
+/**
  * With Faster Subscription Refresh, automatic local API refreshes leave out
  * channels fetched moments ago, for example by another window or right before
  * a restart. Automatic downloads and upload notifications still see their
@@ -619,8 +640,9 @@ function showSubscriptionFallbackToast(options) {
  * @param {unknown} error
  * @param {string} title
  * @param {{ category: string, backend: string }} context
+ * @param {boolean} [unavailable] the channel does not exist anymore or was terminated
  */
-function handleSubscriptionFetchError(channel, error, title, context) {
+function handleSubscriptionFetchError(channel, error, title, context, unavailable = isMissingChannelError(error)) {
   if (activeRefresh?.controller.signal.aborted) throw error
   if (activeRefresh?.networkRecovery && isRecoverableNetworkError(error)) {
     // Let the shared queue probe both enabled backends after backoff without
@@ -637,6 +659,7 @@ function handleSubscriptionFetchError(channel, error, title, context) {
   if (activeRefresh) {
     if (!activeRefresh.errors.has(channel.id)) activeRefresh.errors.set(channel.id, new Map())
     activeRefresh.errors.get(channel.id).set(message, details.message)
+    if (unavailable) activeRefresh.unavailableChannelIds.add(channel.id)
   } else {
     showApiErrorToast(title, message)
   }
@@ -996,7 +1019,8 @@ async function enrichScrapedUpcomingPublicationDates(channelId, videos) {
  * @param {{
  *  t: (key: string, named?: Record<string, unknown>) => string,
  *  showStartToast?: boolean,
- *  errorChannels?: any[]
+ *  automatic?: boolean,
+ *  channelIds?: string[] | null
  * }} options
  */
 export function refreshSubscriptionVideosFromRemote(options) {
@@ -1005,19 +1029,19 @@ export function refreshSubscriptionVideosFromRemote(options) {
     'videos',
     activeProfile._id,
     () => refreshSubscriptionVideosFromRemoteUnlocked(options, activeProfile),
-    options.t
+    options
   )
 }
 
 async function refreshSubscriptionVideosFromRemoteUnlocked({
   t,
   showStartToast = false,
-  errorChannels = [],
+  channelIds = null,
   automatic = false
 }, activeProfile) {
   const activeSubscriptionList = getSubscriptionsForFeed(activeProfile.subscriptions, 'videos')
   const subscriptionList = await omitRecentlyFetchedChannels(
-    includeNotificationChannels(includeAutomaticDownloadChannels(activeSubscriptionList, 'videos'), 'videos'),
+    onlyRequestedChannels(includeNotificationChannels(includeAutomaticDownloadChannels(activeSubscriptionList, 'videos'), 'videos'), channelIds),
     'videos',
     automatic,
     t
@@ -1050,15 +1074,15 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
 
       if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backend)) {
         if (useRss && hasInvidiousRssFeeds()) {
-          ({ videos, name, thumbnailUrl, handle } = await getChannelVideosInvidiousRSS(channel, t, errorChannels))
+          ({ videos, name, thumbnailUrl, handle } = await getChannelVideosInvidiousRSS(channel, t))
         } else {
-          ({ videos, name, thumbnailUrl, handle } = await getChannelVideosInvidiousScraper(channel, t, errorChannels))
+          ({ videos, name, thumbnailUrl, handle } = await getChannelVideosInvidiousScraper(channel, t))
         }
       } else {
         if (useRss) {
-          ({ videos, name, thumbnailUrl, handle } = await getChannelVideosLocalRSS(channel, t, errorChannels))
+          ({ videos, name, thumbnailUrl, handle } = await getChannelVideosLocalRSS(channel, t))
         } else {
-          ({ videos, name, thumbnailUrl, handle } = await getChannelVideosLocalScraper(channel, t, errorChannels))
+          ({ videos, name, thumbnailUrl, handle } = await getChannelVideosLocalScraper(channel, t))
         }
       }
 
@@ -1118,7 +1142,8 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
  * @param {{
  *  t: (key: string, named?: Record<string, unknown>) => string,
  *  showStartToast?: boolean,
- *  errorChannels?: any[]
+ *  automatic?: boolean,
+ *  channelIds?: string[] | null
  * }} options
  */
 export function refreshSubscriptionShortsFromRemote(options) {
@@ -1127,19 +1152,19 @@ export function refreshSubscriptionShortsFromRemote(options) {
     'shorts',
     activeProfile._id,
     () => refreshSubscriptionShortsFromRemoteUnlocked(options, activeProfile),
-    options.t
+    options
   )
 }
 
 async function refreshSubscriptionShortsFromRemoteUnlocked({
   t,
   showStartToast = false,
-  errorChannels = [],
+  channelIds = null,
   automatic = false
 }, activeProfile) {
   const activeSubscriptionList = getSubscriptionsForFeed(activeProfile.subscriptions, 'shorts')
   const subscriptionList = await omitRecentlyFetchedChannels(
-    includeNotificationChannels(includeAutomaticDownloadChannels(activeSubscriptionList, 'shorts'), 'shorts'),
+    onlyRequestedChannels(includeNotificationChannels(includeAutomaticDownloadChannels(activeSubscriptionList, 'shorts'), 'shorts'), channelIds),
     'shorts',
     automatic,
     t
@@ -1171,10 +1196,10 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
 
       if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backend)) {
         ({ videos, name } = hasInvidiousRssFeeds()
-          ? await getChannelShortsInvidious(channel, t, errorChannels)
-          : await getChannelShortsYattee(channel, t, errorChannels))
+          ? await getChannelShortsInvidious(channel, t)
+          : await getChannelShortsYattee(channel, t))
       } else {
-        ({ videos, name } = await getChannelShortsLocal(channel, t, errorChannels))
+        ({ videos, name } = await getChannelShortsLocal(channel, t))
       }
 
       channelCount++
@@ -1225,7 +1250,8 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
  * @param {{
  *  t: (key: string, named?: Record<string, unknown>) => string,
  *  showStartToast?: boolean,
- *  errorChannels?: any[]
+ *  automatic?: boolean,
+ *  channelIds?: string[] | null
  * }} options
  */
 export function refreshSubscriptionLiveFromRemote(options) {
@@ -1234,19 +1260,19 @@ export function refreshSubscriptionLiveFromRemote(options) {
     'live',
     activeProfile._id,
     () => refreshSubscriptionLiveFromRemoteUnlocked(options, activeProfile),
-    options.t
+    options
   )
 }
 
 async function refreshSubscriptionLiveFromRemoteUnlocked({
   t,
   showStartToast = false,
-  errorChannels = [],
+  channelIds = null,
   automatic = false
 }, activeProfile) {
   const activeSubscriptionList = getSubscriptionsForFeed(activeProfile.subscriptions, 'live')
   const subscriptionList = await omitRecentlyFetchedChannels(
-    includeNotificationChannels(includeAutomaticDownloadChannels(activeSubscriptionList, 'live'), 'live'),
+    onlyRequestedChannels(includeNotificationChannels(includeAutomaticDownloadChannels(activeSubscriptionList, 'live'), 'live'), channelIds),
     'live',
     automatic,
     t
@@ -1279,15 +1305,15 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
 
       if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backend)) {
         if (useRss && hasInvidiousRssFeeds()) {
-          ({ videos, name, thumbnailUrl, handle } = await getChannelLiveInvidiousRSS(channel, t, errorChannels))
+          ({ videos, name, thumbnailUrl, handle } = await getChannelLiveInvidiousRSS(channel, t))
         } else {
-          ({ videos, name, thumbnailUrl, handle } = await getChannelLiveInvidious(channel, t, errorChannels))
+          ({ videos, name, thumbnailUrl, handle } = await getChannelLiveInvidious(channel, t))
         }
       } else {
         if (useRss) {
-          ({ videos, name, thumbnailUrl, handle } = await getChannelLiveLocalRSS(channel, t, errorChannels))
+          ({ videos, name, thumbnailUrl, handle } = await getChannelLiveLocalRSS(channel, t))
         } else {
-          ({ videos, name, thumbnailUrl, handle } = await getChannelLiveLocal(channel, t, errorChannels))
+          ({ videos, name, thumbnailUrl, handle } = await getChannelLiveLocal(channel, t))
         }
       }
 
@@ -1347,7 +1373,8 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
  * @param {{
  *  t: (key: string, named?: Record<string, unknown>) => string,
  *  showStartToast?: boolean,
- *  errorChannels?: any[]
+ *  automatic?: boolean,
+ *  channelIds?: string[] | null
  * }} options
  */
 export function refreshSubscriptionPostsFromRemote(options) {
@@ -1356,18 +1383,18 @@ export function refreshSubscriptionPostsFromRemote(options) {
     'posts',
     activeProfile._id,
     () => refreshSubscriptionPostsFromRemoteUnlocked(options, activeProfile),
-    options.t
+    options
   )
 }
 
 async function refreshSubscriptionPostsFromRemoteUnlocked({
   t,
   showStartToast = false,
-  errorChannels = [],
+  channelIds = null,
   automatic = false
 }, activeProfile) {
   const subscriptionList = await omitRecentlyFetchedChannels(
-    includeNotificationChannels(getSubscriptionsForFeed(activeProfile.subscriptions, 'posts'), 'posts'),
+    onlyRequestedChannels(includeNotificationChannels(getSubscriptionsForFeed(activeProfile.subscriptions, 'posts'), 'posts'), channelIds),
     'posts',
     automatic,
     t
@@ -1402,11 +1429,11 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
 
       if (backend === 'yattee') {
         // Yattee servers have no posts, so only the fallback can load them
-        posts = await getChannelPostsLocal(channel, t, errorChannels)
+        posts = await getChannelPostsLocal(channel, t)
       } else if (!process.env.SUPPORTS_LOCAL_API || backend === 'invidious') {
-        posts = await getChannelPostsInvidious(channel, t, errorChannels)
+        posts = await getChannelPostsInvidious(channel, t)
       } else {
-        posts = await getChannelPostsLocal(channel, t, errorChannels)
+        posts = await getChannelPostsLocal(channel, t)
       }
 
       channelCount++
@@ -1462,16 +1489,34 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
   }
 }
 
-async function getChannelPostsLocal(channel, t, errorChannels) {
+/**
+ * Fetches the given feeds of a single channel again.
+ * @param {string} channelId
+ * @param {('videos' | 'shorts' | 'live' | 'posts')[]} feeds
+ * @param {(key: string, named?: Record<string, unknown>) => string} t
+ */
+export async function retrySubscriptionChannel(channelId, feeds, t) {
+  const refreshers = {
+    videos: refreshSubscriptionVideosFromRemote,
+    shorts: refreshSubscriptionShortsFromRemote,
+    live: refreshSubscriptionLiveFromRemote,
+    posts: refreshSubscriptionPostsFromRemote
+  }
+  for (const feed of feeds) {
+    // Cancelled, or another refresh is running
+    if (await refreshers[feed]({ t, channelIds: [channelId] }) === null) return
+  }
+}
+
+async function getChannelPostsLocal(channel, t) {
   try {
     const posts = await getLocalChannelCommunity(channel.id, activeRefresh?.controller.signal)
 
     if (posts === null) {
-      errorChannels.push(channel)
       handleSubscriptionFetchError(channel, new Error('Channel unavailable'), t('Local API Error (Click to copy)'), {
         category: 'subscription posts',
         backend: 'local API'
-      })
+      }, true)
       return null
     }
 
@@ -1484,14 +1529,14 @@ async function getChannelPostsLocal(channel, t, errorChannels) {
 
     if (store.getters.getBackendPreference === 'local' && store.getters.getBackendFallback) {
       showSubscriptionFallbackToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
-      return await getChannelPostsInvidious(channel, t, errorChannels)
+      return await getChannelPostsInvidious(channel, t)
     }
 
     return null
   }
 }
 
-async function getChannelPostsInvidious(channel, t, errorChannels) {
+async function getChannelPostsInvidious(channel, t) {
   try {
     const result = await invidiousGetCommunityPosts(channel.id, null, activeRefresh?.controller.signal)
 
@@ -1508,23 +1553,22 @@ async function getChannelPostsInvidious(channel, t, errorChannels) {
       store.getters.getBackendFallback
     ) {
       showInvidiousFallbackToast('invidious')
-      return await getChannelPostsLocal(channel, t, errorChannels)
+      return await getChannelPostsLocal(channel, t)
     }
 
     return null
   }
 }
 
-async function getChannelVideosLocalScraper(channel, t, errorChannels, failedAttempts = 0) {
+async function getChannelVideosLocalScraper(channel, t, failedAttempts = 0) {
   try {
     const result = await getLocalChannelVideos(channel.id, false, activeRefresh?.controller.signal)
 
     if (result === null) {
-      errorChannels.push(channel)
       handleSubscriptionFetchError(channel, new Error('Channel unavailable'), t('Local API Error (Click to copy)'), {
         category: 'subscription videos',
         backend: 'local API'
-      })
+      }, true)
       return { videos: null }
     }
 
@@ -1540,15 +1584,15 @@ async function getChannelVideosLocalScraper(channel, t, errorChannels, failedAtt
 
     switch (failedAttempts) {
       case 0:
-        return await getChannelVideosLocalRSS(channel, t, errorChannels, failedAttempts + 1)
+        return await getChannelVideosLocalRSS(channel, t, failedAttempts + 1)
       case 1:
         if (store.getters.getBackendFallback) {
           showSubscriptionFallbackToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
-          return await getChannelVideosInvidiousScraper(channel, t, errorChannels, failedAttempts + 1)
+          return await getChannelVideosInvidiousScraper(channel, t, failedAttempts + 1)
         }
         return { videos: null }
       case 2:
-        return await getChannelVideosLocalRSS(channel, t, errorChannels, failedAttempts + 1)
+        return await getChannelVideosLocalRSS(channel, t, failedAttempts + 1)
       default:
         return { videos: null }
     }
@@ -1564,7 +1608,7 @@ function checkSubscriptionFeedResponse(response) {
   }
 }
 
-async function getChannelVideosLocalRSS(channel, t, errorChannels, failedAttempts = 0) {
+async function getChannelVideosLocalRSS(channel, t, failedAttempts = 0) {
   const playlistId = getChannelPlaylistId(channel.id, 'videos', 'newest')
   const feedUrl = `https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`
 
@@ -1574,7 +1618,7 @@ async function getChannelVideosLocalRSS(channel, t, errorChannels, failedAttempt
     if (response.status === 404) {
       // RSS can return 404 for channels that still exist. Verify through
       // the API instead of treating a second RSS response as channel removal.
-      return await getChannelVideosLocalScraper(channel, t, errorChannels, 3)
+      return await getChannelVideosLocalScraper(channel, t, 3)
     }
 
     checkSubscriptionFeedResponse(response)
@@ -1587,22 +1631,22 @@ async function getChannelVideosLocalRSS(channel, t, errorChannels, failedAttempt
 
     switch (failedAttempts) {
       case 0:
-        return await getChannelVideosLocalScraper(channel, t, errorChannels, failedAttempts + 1)
+        return await getChannelVideosLocalScraper(channel, t, failedAttempts + 1)
       case 1:
         if (store.getters.getBackendFallback) {
           showSubscriptionFallbackToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
-          return await getChannelVideosInvidiousRSS(channel, t, errorChannels, failedAttempts + 1)
+          return await getChannelVideosInvidiousRSS(channel, t, failedAttempts + 1)
         }
         return { videos: null }
       case 2:
-        return await getChannelVideosLocalScraper(channel, t, errorChannels, failedAttempts + 1)
+        return await getChannelVideosLocalScraper(channel, t, failedAttempts + 1)
       default:
         return { videos: null }
     }
   }
 }
 
-async function getChannelVideosInvidiousScraper(channel, t, errorChannels, failedAttempts = 0) {
+async function getChannelVideosInvidiousScraper(channel, t, failedAttempts = 0) {
   try {
     const result = await getInvidiousChannelVideos(channel.id, undefined, undefined, { signal: activeRefresh?.controller.signal })
     let name
@@ -1625,29 +1669,29 @@ async function getChannelVideosInvidiousScraper(channel, t, errorChannels, faile
       if (process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
         showInvidiousFallbackToast('yattee')
         // Skips the local API's own fallback to Invidious
-        return await getChannelVideosLocalScraper(channel, t, errorChannels, 2)
+        return await getChannelVideosLocalScraper(channel, t, 2)
       }
       return { videos: null }
     }
 
     switch (failedAttempts) {
       case 0:
-        return await getChannelVideosInvidiousRSS(channel, t, errorChannels, failedAttempts + 1)
+        return await getChannelVideosInvidiousRSS(channel, t, failedAttempts + 1)
       case 1:
         if (process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
           showInvidiousFallbackToast('invidious')
-          return await getChannelVideosLocalScraper(channel, t, errorChannels, failedAttempts + 1)
+          return await getChannelVideosLocalScraper(channel, t, failedAttempts + 1)
         }
         return { videos: null }
       case 2:
-        return await getChannelVideosInvidiousRSS(channel, t, errorChannels, failedAttempts + 1)
+        return await getChannelVideosInvidiousRSS(channel, t, failedAttempts + 1)
       default:
         return { videos: null }
     }
   }
 }
 
-async function getChannelVideosInvidiousRSS(channel, t, errorChannels, failedAttempts = 0) {
+async function getChannelVideosInvidiousRSS(channel, t, failedAttempts = 0) {
   const playlistId = getChannelPlaylistId(channel.id, 'videos', 'newest')
   const feedUrl = `${store.getters.getCurrentInvidiousInstanceUrl}/feed/playlist/${playlistId}`
 
@@ -1661,11 +1705,10 @@ async function getChannelVideosInvidiousRSS(channel, t, errorChannels, failedAtt
       })
 
       if (response2.status === 404) {
-        errorChannels.push(channel)
         handleSubscriptionFetchError(channel, Object.assign(new Error('Subscription feed returned HTTP 404'), { status: 404 }), t('Invidious API Error (Click to copy)'), {
           category: 'subscription videos',
           backend: 'Invidious RSS'
-        })
+        }, true)
         return { videos: null }
       }
 
@@ -1683,22 +1726,22 @@ async function getChannelVideosInvidiousRSS(channel, t, errorChannels, failedAtt
 
     switch (failedAttempts) {
       case 0:
-        return await getChannelVideosInvidiousScraper(channel, t, errorChannels, failedAttempts + 1)
+        return await getChannelVideosInvidiousScraper(channel, t, failedAttempts + 1)
       case 1:
         if (process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
           showInvidiousFallbackToast('invidious')
-          return await getChannelVideosLocalRSS(channel, t, errorChannels, failedAttempts + 1)
+          return await getChannelVideosLocalRSS(channel, t, failedAttempts + 1)
         }
         return { videos: null }
       case 2:
-        return await getChannelVideosInvidiousScraper(channel, t, errorChannels, failedAttempts + 1)
+        return await getChannelVideosInvidiousScraper(channel, t, failedAttempts + 1)
       default:
         return { videos: null }
     }
   }
 }
 
-async function getChannelShortsLocal(channel, t, errorChannels, failedAttempts = 0) {
+async function getChannelShortsLocal(channel, t, failedAttempts = 0) {
   const playlistId = getChannelPlaylistId(channel.id, 'shorts', 'newest')
   const feedUrl = `https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`
 
@@ -1708,11 +1751,10 @@ async function getChannelShortsLocal(channel, t, errorChannels, failedAttempts =
     if (response.status === 404) {
       const channelPage = await getLocalChannel(channel.id, activeRefresh?.controller.signal)
       if (channelPage.alert) {
-        errorChannels.push(channel)
         handleSubscriptionFetchError(channel, new Error(String(channelPage.alert)), t('Local API Error (Click to copy)'), {
           category: 'subscription Shorts',
           backend: 'local API'
-        })
+        }, true)
         return { videos: null }
       }
       if (!channelPage.has_shorts) return { videos: [] }
@@ -1756,7 +1798,7 @@ async function getChannelShortsLocal(channel, t, errorChannels, failedAttempts =
 
     if (failedAttempts === 0 && store.getters.getBackendFallback) {
       showSubscriptionFallbackToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
-      return await getChannelShortsInvidious(channel, t, errorChannels, failedAttempts + 1)
+      return await getChannelShortsInvidious(channel, t, failedAttempts + 1)
     }
 
     return { videos: null }
@@ -1824,7 +1866,7 @@ function hasInvidiousRssFeeds() {
   return store.getters.getBackendPreference !== 'yattee'
 }
 
-async function getChannelShortsYattee(channel, t, errorChannels) {
+async function getChannelShortsYattee(channel, t) {
   try {
     const result = await getInvidiousChannelShorts(channel.id)
     return { videos: await fillYatteeShortDates(result.videos, store.getters.getShortsCache[channel.id]?.videos, invidiousGetVideoInformation) }
@@ -1837,14 +1879,14 @@ async function getChannelShortsYattee(channel, t, errorChannels) {
     if (process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
       showInvidiousFallbackToast('yattee')
       // Skips the local API's own fallback to Invidious
-      return await getChannelShortsLocal(channel, t, errorChannels, 1)
+      return await getChannelShortsLocal(channel, t, 1)
     }
 
     return { videos: null }
   }
 }
 
-async function getChannelShortsInvidious(channel, t, errorChannels, failedAttempts = 0) {
+async function getChannelShortsInvidious(channel, t, failedAttempts = 0) {
   const playlistId = getChannelPlaylistId(channel.id, 'shorts', 'newest')
   const feedUrl = `${store.getters.getCurrentInvidiousInstanceUrl}/feed/playlist/${playlistId}`
 
@@ -1861,11 +1903,10 @@ async function getChannelShortsInvidious(channel, t, errorChannels, failedAttemp
       })
 
       if (response2.status === 404) {
-        errorChannels.push(channel)
         handleSubscriptionFetchError(channel, Object.assign(new Error('Subscription feed returned HTTP 404'), { status: 404 }), t('Invidious API Error (Click to copy)'), {
           category: 'subscription Shorts',
           backend: 'Invidious RSS'
-        })
+        }, true)
         return { videos: null }
       }
 
@@ -1885,23 +1926,22 @@ async function getChannelShortsInvidious(channel, t, errorChannels, failedAttemp
 
     if (failedAttempts === 0 && process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
       showInvidiousFallbackToast('invidious')
-      return await getChannelShortsLocal(channel, t, errorChannels, failedAttempts + 1)
+      return await getChannelShortsLocal(channel, t, failedAttempts + 1)
     }
 
     return { videos: null }
   }
 }
 
-async function getChannelLiveLocal(channel, t, errorChannels, failedAttempts = 0) {
+async function getChannelLiveLocal(channel, t, failedAttempts = 0) {
   try {
     const result = await getLocalChannelLiveStreams(channel.id, activeRefresh?.controller.signal)
 
     if (result === null) {
-      errorChannels.push(channel)
       handleSubscriptionFetchError(channel, new Error('Channel unavailable'), t('Local API Error (Click to copy)'), {
         category: 'subscription live streams',
         backend: 'local API'
-      })
+      }, true)
       return { videos: null }
     }
 
@@ -1917,22 +1957,22 @@ async function getChannelLiveLocal(channel, t, errorChannels, failedAttempts = 0
 
     switch (failedAttempts) {
       case 0:
-        return await getChannelLiveLocalRSS(channel, t, errorChannels, failedAttempts + 1)
+        return await getChannelLiveLocalRSS(channel, t, failedAttempts + 1)
       case 1:
         if (store.getters.getBackendFallback) {
           showSubscriptionFallbackToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
-          return await getChannelLiveInvidious(channel, t, errorChannels, failedAttempts + 1)
+          return await getChannelLiveInvidious(channel, t, failedAttempts + 1)
         }
         return { videos: null }
       case 2:
-        return await getChannelLiveLocalRSS(channel, t, errorChannels, failedAttempts + 1)
+        return await getChannelLiveLocalRSS(channel, t, failedAttempts + 1)
       default:
         return { videos: null }
     }
   }
 }
 
-async function getChannelLiveLocalRSS(channel, t, errorChannels, failedAttempts = 0) {
+async function getChannelLiveLocalRSS(channel, t, failedAttempts = 0) {
   const playlistId = getChannelPlaylistId(channel.id, 'live', 'newest')
   const feedUrl = `https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`
 
@@ -1940,7 +1980,7 @@ async function getChannelLiveLocalRSS(channel, t, errorChannels, failedAttempts 
     const response = await localApiFetch(feedUrl, { signal: activeRefresh?.controller.signal })
 
     if (response.status === 404) {
-      return await getChannelLiveLocal(channel, t, errorChannels, 3)
+      return await getChannelLiveLocal(channel, t, 3)
     }
 
     checkSubscriptionFeedResponse(response)
@@ -1953,22 +1993,22 @@ async function getChannelLiveLocalRSS(channel, t, errorChannels, failedAttempts 
 
     switch (failedAttempts) {
       case 0:
-        return await getChannelLiveLocal(channel, t, errorChannels, failedAttempts + 1)
+        return await getChannelLiveLocal(channel, t, failedAttempts + 1)
       case 1:
         if (store.getters.getBackendFallback) {
           showSubscriptionFallbackToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
-          return await getChannelLiveInvidiousRSS(channel, t, errorChannels, failedAttempts + 1)
+          return await getChannelLiveInvidiousRSS(channel, t, failedAttempts + 1)
         }
         return { videos: null }
       case 2:
-        return await getChannelLiveLocal(channel, t, errorChannels, failedAttempts + 1)
+        return await getChannelLiveLocal(channel, t, failedAttempts + 1)
       default:
         return { videos: null }
     }
   }
 }
 
-async function getChannelLiveInvidious(channel, t, errorChannels, failedAttempts = 0) {
+async function getChannelLiveInvidious(channel, t, failedAttempts = 0) {
   try {
     const result = await getInvidiousChannelLive(channel.id, undefined, undefined, activeRefresh?.controller.signal)
     let name
@@ -1991,29 +2031,29 @@ async function getChannelLiveInvidious(channel, t, errorChannels, failedAttempts
       if (process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
         showInvidiousFallbackToast('yattee')
         // Skips the local API's own fallback to Invidious
-        return await getChannelLiveLocal(channel, t, errorChannels, 2)
+        return await getChannelLiveLocal(channel, t, 2)
       }
       return { videos: null }
     }
 
     switch (failedAttempts) {
       case 0:
-        return await getChannelLiveInvidiousRSS(channel, t, errorChannels, failedAttempts + 1)
+        return await getChannelLiveInvidiousRSS(channel, t, failedAttempts + 1)
       case 1:
         if (process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
           showInvidiousFallbackToast('invidious')
-          return await getChannelLiveLocal(channel, t, errorChannels, failedAttempts + 1)
+          return await getChannelLiveLocal(channel, t, failedAttempts + 1)
         }
         return { videos: null }
       case 2:
-        return await getChannelLiveInvidiousRSS(channel, t, errorChannels, failedAttempts + 1)
+        return await getChannelLiveInvidiousRSS(channel, t, failedAttempts + 1)
       default:
         return { videos: null }
     }
   }
 }
 
-async function getChannelLiveInvidiousRSS(channel, t, errorChannels, failedAttempts = 0) {
+async function getChannelLiveInvidiousRSS(channel, t, failedAttempts = 0) {
   const playlistId = getChannelPlaylistId(channel.id, 'live', 'newest')
   const feedUrl = `${store.getters.getCurrentInvidiousInstanceUrl}/feed/playlist/${playlistId}`
 
@@ -2027,11 +2067,10 @@ async function getChannelLiveInvidiousRSS(channel, t, errorChannels, failedAttem
       })
 
       if (response2.status === 404) {
-        errorChannels.push(channel)
         handleSubscriptionFetchError(channel, Object.assign(new Error('Subscription feed returned HTTP 404'), { status: 404 }), t('Invidious API Error (Click to copy)'), {
           category: 'subscription live streams',
           backend: 'Invidious RSS'
-        })
+        }, true)
         return { videos: null }
       }
 
@@ -2049,15 +2088,15 @@ async function getChannelLiveInvidiousRSS(channel, t, errorChannels, failedAttem
 
     switch (failedAttempts) {
       case 0:
-        return await getChannelLiveInvidious(channel, t, errorChannels, failedAttempts + 1)
+        return await getChannelLiveInvidious(channel, t, failedAttempts + 1)
       case 1:
         if (process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
           showInvidiousFallbackToast('invidious')
-          return await getChannelLiveLocalRSS(channel, t, errorChannels, failedAttempts + 1)
+          return await getChannelLiveLocalRSS(channel, t, failedAttempts + 1)
         }
         return { videos: null }
       case 2:
-        return await getChannelLiveInvidious(channel, t, errorChannels, failedAttempts + 1)
+        return await getChannelLiveInvidious(channel, t, failedAttempts + 1)
       default:
         return { videos: null }
     }

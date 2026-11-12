@@ -36,7 +36,7 @@
     :video-list="displayedEntries"
     :data-overrides="newFeedDataOverrides"
     :subscription-feed-type="activeCategory ?? 'videos'"
-    :error-channels="errorChannels"
+    :error-feeds="errorFeeds"
     :attempted-fetch="attemptedFetch"
     :only-show-new="true"
     :has-additional-content="showCombinedView && (hasAdditionalContent || newRssItems.length > 0)"
@@ -131,7 +131,7 @@
     v-else
     v-bind="$attrs"
     class="newFeed"
-    :error-channels="errorChannels"
+    :error-feeds="errorFeeds"
     :only-show-new="true"
     :track-global-refresh="false"
     :show-loading-placeholder="false"
@@ -244,12 +244,12 @@ const {
   activeSubscriptionIds,
   attemptedFetch,
   enabledFeeds,
-  errorChannels,
   handleRefreshWarning,
   isRefreshing,
   refresh,
   showRefreshWarning
 } = useRefreshAllSubscriptionFeeds()
+const errorFeeds = computed(() => enabledFeeds.value.map(feed => feed.category))
 
 const forbiddenTitles = computed(() => store.getters.getForbiddenTitlesToRemove)
 const sortBy = computed(() => {
