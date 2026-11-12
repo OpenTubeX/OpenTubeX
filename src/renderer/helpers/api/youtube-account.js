@@ -504,18 +504,22 @@ export function mirrorYouTubeSubscription(channelIds, subscribed) {
 
   // Changes go out in the order they were made, so a quick unsubscribe
   // cannot finish before the subscribe it undoes.
-  mirrorQueue = mirrorQueue.then(() => sendMirroredSubscriptions(youTubeChannelIds, subscribed))
+  const pageId = getAccount().pageId
+  mirrorQueue = mirrorQueue.then(() => sendMirroredSubscriptions(youTubeChannelIds, subscribed, pageId))
   return mirrorQueue
 }
 
 /**
  * @param {string[]} youTubeChannelIds
  * @param {boolean} subscribed
+ * @param {string | null} pageId the channel in use when the change was made
  */
-async function sendMirroredSubscriptions(youTubeChannelIds, subscribed) {
+async function sendMirroredSubscriptions(youTubeChannelIds, subscribed, pageId) {
   try {
     // One at a time, and stop at the first failure instead of repeating it.
     for (const channelId of youTubeChannelIds) {
+      // After a channel switch, the rest would change the other channel.
+      if (getAccount()?.pageId !== pageId) return
       if (subscribed) {
         await subscribeOnYouTube(channelId)
       } else {
