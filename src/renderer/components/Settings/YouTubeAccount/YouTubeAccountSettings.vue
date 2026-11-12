@@ -165,6 +165,8 @@ async function signOut() {
 
 async function importSubscriptions() {
   importing.value = true
+  // The profile active when the import started, even if the user switches meanwhile.
+  const profileIds = new Set([MAIN_PROFILE_ID, store.getters.getActiveProfile._id])
   try {
     const channels = await getYouTubeAccountSubscriptions()
     if (channels.length === 0) {
@@ -172,8 +174,7 @@ async function importSubscriptions() {
       return
     }
 
-    const profileIds = [MAIN_PROFILE_ID, store.getters.getActiveProfile._id]
-    for (const profileId of new Set(profileIds)) {
+    for (const profileId of profileIds) {
       if (await store.dispatch('mergeImportedProfile', { _id: profileId, subscriptions: channels }) !== true) {
         throw new Error('Could not save the imported subscriptions')
       }

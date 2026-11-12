@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="root"
     class="commentComposer"
     :class="{ topLevelComposer: !parentId }"
     @keydown.stop
@@ -57,7 +58,7 @@
 </template>
 
 <script setup>
-import { computed, inject, nextTick, onMounted, ref, useTemplateRef } from 'vue'
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
@@ -100,13 +101,8 @@ function cancel() {
   if (props.parentId) {
     emit('done')
   } else {
-    collapse()
+    expanded.value = false
   }
-}
-
-function collapse() {
-  expanded.value = false
-  comments.clampScroll()
 }
 
 async function submit() {
@@ -118,7 +114,7 @@ async function submit() {
     const posted = await postYouTubeComment(comments.videoId.value, commentText, props.parentId ?? undefined)
     comments.addComment(posted, commentText, props.parentId)
     text.value = ''
-    if (!props.parentId) collapse()
+    if (!props.parentId) expanded.value = false
     showToast({
       message: props.parentId ? t('YouTube Account.Reply Posted') : t('YouTube Account.Comment Posted'),
       icon: ['fas', 'comment']
@@ -135,11 +131,23 @@ async function submit() {
   }
 }
 
+// A shorter text shrinks the auto-sized box and with it the comment list.
+const root = useTemplateRef('root')
+let lastHeight = 0
+const resizeObserver = new ResizeObserver(([entry]) => {
+  const height = entry.contentRect.height
+  if (height < lastHeight) comments.clampScroll()
+  lastHeight = height
+})
+
 onMounted(async () => {
+  if (root.value) resizeObserver.observe(root.value)
   if (!props.parentId) return
   await nextTick()
   input.value?.focus?.()
 })
+
+onBeforeUnmount(() => resizeObserver.disconnect())
 </script>
 
 <style scoped>

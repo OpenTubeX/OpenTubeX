@@ -968,9 +968,17 @@ test.describe('manual comment loading', () => {
         element.scrollTop <= element.scrollHeight - element.clientHeight + 1
       ))).toBe(true)
 
-      // So does closing a long reply at the bottom.
+      // So do shortening and closing a long reply at the bottom.
+      const longReply = Array.from({ length: 30 }, (_, line) => `Line ${line + 1}`).join('\n')
       await lastThread.getByRole('button', { name: 'Reply', exact: true }).click()
-      await lastThread.locator('.replyComposer textarea').fill(Array.from({ length: 30 }, (_, line) => `Line ${line + 1}`).join('\n'))
+      const replyInput = lastThread.locator('.replyComposer textarea')
+      await replyInput.fill(longReply)
+      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+      await replyInput.fill('Short reply')
+      await expectScrollInRange()
+
+      await replyInput.fill(longReply)
       await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
       await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
       await lastThread.locator('.replyComposer').getByRole('button', { name: 'Cancel' }).click()
