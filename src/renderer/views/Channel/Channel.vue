@@ -426,6 +426,11 @@ let apiUsed = ''
  */
 const tabApiUsed = new Map()
 let mayContainContentFromOtherChannels = false
+// YouTube's possibly translated text, kept to switch with the untranslated text setting.
+/** @type {string?} */
+let localHeaderName = null
+/** @type {string?} */
+let localAboutDescription = null
 // Every tab is its own request, so a tab's content is fetched the first time it is shown.
 const loadedTabs = new Set()
 /** @type {Map<string, Promise<void>>} Tab loads that have not finished yet */
@@ -501,6 +506,18 @@ watch(thumbnailUrl, (thumbnail) => {
   if (id.value && thumbnail) {
     store.commit('setChannelThumbnail', { channelId: id.value, thumbnail })
     setTabAvatar(thumbnail)
+  }
+})
+
+// Settings open over the channel page, so a changed preference applies to the loaded channel.
+watch(() => store.getters.getAvoidTranslation, () => {
+  if (apiUsed !== 'local' || !channelInstance?.page) return
+
+  if (localHeaderName) {
+    channelName.value = getOriginalChannelText().name ?? localHeaderName
+  }
+  if (localAboutDescription !== null) {
+    showLocalAboutDescription()
   }
 })
 
@@ -744,6 +761,8 @@ watch(route, () => {
   searchResults.value = []
   apiUsed = ''
   channelInstance = null
+  localHeaderName = null
+  localAboutDescription = null
   mayContainContentFromOtherChannels = false
   loadedTabs.clear()
   pendingTabs.clear()
@@ -959,7 +978,8 @@ async function getChannelLocal() {
     let tags_ = parsedHeader.tags
 
     channelThumbnailUrl = parsedHeader.thumbnailUrl ?? subscriptionInfo.value?.thumbnail
-    channelName_ = getOriginalChannelText().name ?? parsedHeader.name ?? subscriptionInfo.value?.name
+    localHeaderName = parsedHeader.name ?? null
+    channelName_ = getOriginalChannelText().name ?? localHeaderName ?? subscriptionInfo.value?.name
 
     if (channelThumbnailUrl?.startsWith('//')) {
       channelThumbnailUrl = `https:${channelThumbnailUrl}`
@@ -1095,6 +1115,11 @@ function getOriginalChannelText() {
   return getOriginalChannelProfile(channelInstance.page.microformat)
 }
 
+function showLocalAboutDescription() {
+  const text = getOriginalChannelText().description || localAboutDescription
+  description.value = text ? autolinker.link(text) : ''
+}
+
 async function getChannelAboutLocal() {
   const expectedId = id.value
   const expectedRouteGeneration = channelRouteGeneration
@@ -1112,7 +1137,7 @@ async function getChannelAboutLocal() {
     links.value = getChannelAboutLinks(about)
 
     if (about.is(YTNodes.ChannelAboutFullMetadata)) {
-      description.value = about.description.isEmpty() ? '' : autolinker.link(about.description.text)
+      localAboutDescription = about.description.isEmpty() ? '' : about.description.text
 
       const viewCount_ = extractNumberFromString(about.view_count.text)
       viewCount.value = isNaN(viewCount_) ? null : viewCount_
@@ -1123,7 +1148,7 @@ async function getChannelAboutLocal() {
 
       location.value = about.country.isEmpty() ? null : about.country.text
     } else {
-      description.value = about.metadata.description ? autolinker.link(about.metadata.description) : ''
+      localAboutDescription = about.metadata.description ?? ''
 
       const viewCount_ = extractNumberFromString(about.metadata.view_count)
       viewCount.value = isNaN(viewCount_) ? null : viewCount_
@@ -1136,10 +1161,7 @@ async function getChannelAboutLocal() {
       location.value = about.metadata.country ?? null
     }
 
-    const originalDescription = getOriginalChannelText().description
-    if (originalDescription) {
-      description.value = autolinker.link(originalDescription)
-    }
+    showLocalAboutDescription()
   } catch (err) {
     if (!isCurrentRoute()) return
 
