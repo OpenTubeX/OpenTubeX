@@ -409,18 +409,22 @@ export async function completeYouTubeSignIn(code, signal) {
       expiry_date: expiryDate(data.expires_in),
       client: code.client
     }
-    const { profiles, selectedPageId } = await fetchProfiles(credentials)
-    const profile = profiles.find(entry => entry.pageId === selectedPageId) ?? profiles[0]
-    const channelId = await resolveChannelId(credentials, profile)
-    // Each sign-in asks again before changing the account's subscriptions or history.
-    const saved = !signal.aborted &&
-      await store.dispatch('updateYouTubeAccountMirrorSubscriptions', false) &&
-      await store.dispatch('updateYouTubeAccountWatchHistory', false) &&
-      !signal.aborted &&
-      await store.dispatch('updateYouTubeAccount', { credentials, profiles, pageId: profile.pageId, channelId })
+    let saved = false
+    try {
+      const { profiles, selectedPageId } = await fetchProfiles(credentials)
+      const profile = profiles.find(entry => entry.pageId === selectedPageId) ?? profiles[0]
+      const channelId = await resolveChannelId(credentials, profile)
+      // Each sign-in asks again before changing the account's subscriptions or history.
+      saved = !signal.aborted &&
+        await store.dispatch('updateYouTubeAccountMirrorSubscriptions', false) &&
+        await store.dispatch('updateYouTubeAccountWatchHistory', false) &&
+        !signal.aborted &&
+        await store.dispatch('updateYouTubeAccount', { credentials, profiles, pageId: profile.pageId, channelId })
+    } finally {
+      // Cancelled, failed, or not saved, so Google can forget this sign-in too.
+      if (!saved) await revokeSignIn(credentials.refresh_token)
+    }
     if (!saved) {
-      // Cancelled or not saved, so Google can forget this sign-in too.
-      await revokeSignIn(credentials.refresh_token)
       signal.throwIfAborted()
       throw new Error('Could not save the YouTube account on this device')
     }
