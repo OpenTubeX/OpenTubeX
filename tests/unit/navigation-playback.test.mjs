@@ -101,7 +101,7 @@ function mountWatch(t, { tab = null, paused = false, hasLoaded = true, mounted =
       }
     },
     resolveRouteComponent: () => ({}),
-    getTabNavigationService: () => ({ createRouterFacade: () => ({ beforeEach: guard => { navigationGuards.add(guard); return () => navigationGuards.delete(guard) } }), setTitle: (...args) => titles.push(args), resolve: path => ({ path, fullPath: path, params: {} }), updateRetainedWatchEntry: () => {}, back: () => navigate(props.route.path === '/subscriptions' ? '/watch/video' : previous), forward: () => navigate('/watch/video'), push: (_id, path) => navigate(path) }),
+    getTabNavigationService: () => ({ createRouterFacade: () => ({ beforeEach: guard => { navigationGuards.add(guard); return () => navigationGuards.delete(guard) } }), setTitle: (...args) => titles.push(args), resolve: path => ({ path, fullPath: path, params: { id: path.split(/[/?]/)[2] } }), updateRetainedWatchEntry: () => {}, back: () => navigate(props.route.path === '/subscriptions' ? '/watch/video' : previous), forward: () => navigate('/watch/video'), push: (_id, path) => navigate(path) }),
     tabLifecycleService: { register: (_id, hooks) => { lifecycle = hooks; return () => {} } },
     tabLifecycleKey: 'lifecycle',
     tabPresentedKey: 'presented',
@@ -445,9 +445,12 @@ test('play in background docks a new player and switches it in place without lea
   assert.equal(mounted.provides.get('route').fullPath, '/watch/third')
   assert.equal(mounted.disposals(), 1, 'the docked Watch page loads the next video in place')
   assert.equal(navigation.takeBackgroundStart('/watch/third'), true)
-  // The docked video itself has no route change to load audio from.
+  // The docked video itself has no route change to load audio from, even
+  // through a route that differs only in its timestamp.
   await mounted.exposed().playInBackground('/watch/third')
-  assert.equal(mounted.resumes(), 1)
+  await mounted.exposed().playInBackground('/watch/third?timestamp=60')
+  assert.equal(mounted.resumes(), 2)
+  assert.equal(mounted.provides.get('route').fullPath, '/watch/third')
 
   await navigation.returnToVideo()
   assert.equal(mounted.props.route.path, '/watch/third')

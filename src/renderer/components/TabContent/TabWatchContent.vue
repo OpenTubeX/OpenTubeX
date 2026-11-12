@@ -386,7 +386,9 @@ async function playInBackground(location) {
   if (isWatchRoute.value) return
   const route = navigation.resolve(location)
   if (detached.value && !disposed) {
-    if (route.fullPath === watchRoute.value.fullPath) {
+    // Another route to the same video, such as one without its timestamp,
+    // would not reload it.
+    if (route.params.id === watchRoute.value.params.id) {
       watchView.value?.resumeInBackground()
       return
     }
