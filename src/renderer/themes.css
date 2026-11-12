@@ -2739,7 +2739,7 @@ a:visited {
 
 .openTubeXLight {
   --toggle-track-color: #b5b0ad;
-  --toggle-checked-track-color: rgb(from oklch(from var(--signal-accent-color) 78% min(c, 0.1) h) clamp(0, r, 255) clamp(0, g, 255) clamp(0, b, 255));
+  --toggle-checked-thumb-color: #fff;
   --toggle-thumb-color: #3a3a3a;
   --bg-glow-ink: rgb(26 26 26 / 5%);
   --bg-gradient-start: color-mix(in srgb, var(--signal-accent-color) 2%, #faf9f8);
