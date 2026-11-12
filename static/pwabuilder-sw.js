@@ -57,11 +57,17 @@ self.addEventListener('install', function (event) {
 // Allow sw to control of current page
 self.addEventListener('activate', function (event) {
   console.log('[PWA Builder] Claiming clients for current page')
-  // Caches are listed oldest first. The previous build's cache stays until the
-  // next update, since the previous worker may have cached this build's files.
+  // The previous build's cache stays until the next update, since the previous
+  // worker may have cached this build's files. Caches are listed oldest first,
+  // and a build whose install failed left a cache without the page.
   event.waitUntil(caches.keys().then(function (names) {
-    const older = names.filter(function (name) { return name !== CACHE }).slice(0, -1)
-    return Promise.all(older.map(function (name) { return caches.delete(name) }))
+    const older = names.filter(function (name) { return name !== CACHE })
+    return Promise.all(older.map(function (name) {
+      return caches.open(name).then(function (cache) { return cache.match(offlineFallbackPage) })
+    })).then(function (pages) {
+      const previous = older.filter(function (name, index) { return pages[index] }).pop()
+      return Promise.all(older.filter(function (name) { return name !== previous }).map(function (name) { return caches.delete(name) }))
+    })
   }).then(function () { return self.clients.claim() }))
 })
 
