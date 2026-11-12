@@ -6092,7 +6092,10 @@ export default defineComponent({
       const loadGeneration = this.videoLoadGeneration
       const videoId = this.videoId
       const player = this.$refs.player
-      const isCurrent = () => this.isCurrentVideoLoad(loadGeneration, videoId) && player === this.$refs.player && !this.isLoading
+      // Picking a downloaded file also replaces the source while the request runs
+      const sourceKey = this.playbackSourceKey
+      const isCurrent = () => this.isCurrentVideoLoad(loadGeneration, videoId) && player === this.$refs.player &&
+        !this.isLoading && sourceKey === this.playbackSourceKey
       this.visionOsStreamsRefreshPending = true
       try {
         const videoInfo = await refresh()
@@ -6107,7 +6110,7 @@ export default defineComponent({
         const freshCaptionUrls = new Map(videoInfo.captions?.caption_tracks?.map(track => [track.vss_id, track.base_url]) ?? [])
         const refreshCaptionUrl = caption => {
           const sourceId = caption.isAutotranslated ? caption.id.slice(0, -(caption.language.length + 1)) : caption.id
-          if (!freshCaptionUrls.has(sourceId)) return caption
+          if (!freshCaptionUrls.has(sourceId)) return null
           const url = new URL(freshCaptionUrls.get(sourceId))
           const previous = new URL(caption.url)
           for (const param of ['fmt', 'tlang']) {
@@ -6115,8 +6118,12 @@ export default defineComponent({
           }
           return { ...caption, url: url.toString() }
         }
-        this.captions = this.captions.map(refreshCaptionUrl)
-        this.captionTranslations = this.captionTranslations.map(refreshCaptionUrl)
+        const captions = this.captions.map(refreshCaptionUrl)
+        const captionTranslations = this.captionTranslations.map(refreshCaptionUrl)
+        // The page reload loads every caption again, instead of keeping expired URLs
+        if (captions.includes(null) || captionTranslations.includes(null)) return false
+        this.captions = captions
+        this.captionTranslations = captionTranslations
 
         this.showStreamRecoveryNotice(`${this.t('Video.Reloading video after streaming URL error')}: [BAD_HTTP_STATUS: 403] YouTube watch session expired`)
         this.manifestSrc = manifestSrc
