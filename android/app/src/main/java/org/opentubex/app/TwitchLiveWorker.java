@@ -18,6 +18,9 @@ public final class TwitchLiveWorker extends Worker {
     public Result doWork() {
         // The visible app checks more often itself.
         if (AppVisibility.isVisible()) return Result.success();
+        // The request goes through the app's proxy relay, whose kept-alive tunnels
+        // the server may have closed while the app was frozen.
+        AndroidProxy.closeStaleTunnels(AndroidProxyRelay.clock.getAsLong());
         try {
             TwitchLiveNotifications.check(getApplicationContext());
         } catch (Exception error) {

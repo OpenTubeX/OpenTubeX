@@ -23,6 +23,8 @@ const PAGE_SIZE = 20
 // clips, so channel pages load as many as one request allows
 const CHANNEL_PAGE_SIZE = 100
 const ID_PATTERN = /^\d{1,20}$/
+/** Clip and video pages name their channel, but aren't its pages */
+const CONTENT_PAGE_PATTERN = /^https?:\/\/[^/?#]+\/[^/?#]+\/(?:clip|v|video)(?:[/?#]|$)/i
 const CURSOR_PATTERN = /^[\w|:=+/.-]{1,300}$/
 const CHANNEL_FIELDS = 'id login displayName profileImageURL(width: 300) bannerImageURL description followers { totalCount }'
 const STREAM_FIELDS = 'stream { id title createdAt viewersCount previewImageURL(width: 640, height: 360) game { displayName } archiveVideo { id } }'
@@ -96,7 +98,7 @@ const twitch = {
 
   parseChannelUrl(url) {
     // Names alone are logins too, but here only addresses identify the platform
-    const login = /^https?:\/\//i.test(url) ? parseTwitchChannelLogin(url) : null
+    const login = /^https?:\/\//i.test(url) && !CONTENT_PAGE_PATTERN.test(url) ? parseTwitchChannelLogin(url) : null
     // All-digit logins exist, and an @ keeps them apart from user IDs
     return login && ID_PATTERN.test(login) ? `@${login}` : login
   },

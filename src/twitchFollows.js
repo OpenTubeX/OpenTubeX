@@ -327,8 +327,8 @@ export function getTwitchNotificationId(login, streamId) {
  * @param {unknown} id
  */
 export function parseTwitchNotificationId(id) {
-  const [login, streamId] = typeof id === 'string' ? id.split('/') : []
-  return getTwitchLiveNotificationTarget(login, streamId)
+  const parts = typeof id === 'string' ? id.split('/') : []
+  return parts.length === 2 ? getTwitchLiveNotificationTarget(parts[0], parts[1]) : null
 }
 
 /**

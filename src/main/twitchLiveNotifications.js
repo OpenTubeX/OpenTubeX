@@ -69,7 +69,13 @@ export function createTwitchLiveNotifier({ file, fetch, show, onLive, intervalMs
   }
 
   async function saveKnown() {
-    await writeFileAtomic(file, JSON.stringify({ known }), { mode: 0o600 })
+    try {
+      await writeFileAtomic(file, JSON.stringify({ known }), { mode: 0o600 })
+    } catch (error) {
+      // Reload the last saved state, so the next check finds these streams again
+      known = null
+      throw error
+    }
   }
 
   /**
@@ -100,14 +106,16 @@ export function createTwitchLiveNotifier({ file, fetch, show, onLive, intervalMs
       if (!configuration.enabled) return
       const fresh = takeNewTwitchStreams(state, channelIds, feed.live)
       await saveKnown()
-      if (!configuration.enabled) return
       for (const stream of fresh) {
-        const channel = checked.channels.find(({ id }) => id === stream.channelId)
+        // Nothing is announced once notifications are off, nor for channels unfollowed meanwhile
+        const current = configuration
+        if (!current.enabled) return
+        const channel = current.channels.find(({ id }) => id === stream.channelId)
         const target = channel && getTwitchLiveNotificationTarget(channel.login, stream.id)
         if (!target) continue
         try {
           await show({
-            title: checked.title.replaceAll('{channel}', channel.name),
+            title: current.title.replaceAll('{channel}', channel.name),
             body: stream.title,
             url: target.query.url,
             ...(stream.thumbnail ? { thumbnail: stream.thumbnail } : {}),

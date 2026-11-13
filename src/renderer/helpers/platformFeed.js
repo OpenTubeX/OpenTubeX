@@ -579,9 +579,14 @@ export async function followPlatformChannel(platformId, id) {
     } catch (error) {
       console.error('Failed to load the items of the followed channel', error)
     }
-    if (await store.dispatch('updateFollowedChannels', [...getFollowedChannels(), followedChannel]) === false) {
-      throw new Error('The channel could not be saved')
+    let saved = false
+    try {
+      saved = await store.dispatch('updateFollowedChannels', [...getFollowedChannels(), followedChannel]) !== false
+    } finally {
+      // The channel isn't followed, so it keeps neither the items cached for it nor their history
+      if (!saved) forgetChannel(key)
     }
+    if (!saved) throw new Error('The channel could not be saved')
   } finally {
     releaseBackgroundHold()
   }
@@ -607,8 +612,16 @@ export function followChannelByUrl(input) {
 export async function unfollowPlatformChannel(channel) {
   const key = getPlatformChannelKey(channel)
   await store.dispatch('updateFollowedChannels', getFollowedChannels().filter(followed => getPlatformChannelKey(followed) !== key))
+  forgetChannel(key)
+}
+
+/**
+ * Removes the cached items of a channel and their history, so that following
+ * it again starts over.
+ * @param {string} key
+ */
+function forgetChannel(key) {
   replaceChannelItems(new Set([key]), { live: [], videos: [], clips: [] }, false)
-  // Following it again starts over
   const history = loadHistory()
   delete history[key]
   saveHistory(history)

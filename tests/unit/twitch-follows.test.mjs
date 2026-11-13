@@ -147,6 +147,10 @@ test('loads channels with all-digit logins by their login, not as user IDs', asy
 
   assert.equal(twitch.parseChannelUrl('https://www.twitch.tv/123456'), '@123456')
   assert.equal(twitch.parseChannelUrl('https://www.twitch.tv/Streamer'), 'streamer')
+  assert.equal(twitch.parseChannelUrl('https://www.twitch.tv/streamer/videos?filter=archives'), 'streamer')
+  // Clips and videos aren't pages of the channel
+  assert.equal(twitch.parseChannelUrl('https://www.twitch.tv/streamer/clip/Some-Slug_1'), null)
+  assert.equal(twitch.parseChannelUrl('https://www.twitch.tv/streamer/v/123'), null)
   assert.equal((await twitch.getChannel(fetcher, '@123456'))?.id, '987')
   await twitch.getChannel(fetcher, '987')
   assert.deepEqual(requests, [{ login: '123456' }, { id: '987' }])

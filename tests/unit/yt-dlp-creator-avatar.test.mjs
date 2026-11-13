@@ -97,6 +97,8 @@ test('does not derive Twitch profiles from unrelated URLs or invalid logins', ()
 test('does not replace an invalid clip broadcaster with its numeric curator ID', async () => {
   const info = { webpage_url: 'https://clips.twitch.tv/SomeClip', channel: 'Creator name', uploader_id: '12345' }
   assert.equal(getTwitchCreatorUrl(info), null)
+  // Nor without a broadcaster, as the uploader made the clip
+  assert.equal(getTwitchCreatorUrl({ webpage_url: info.webpage_url, uploader_id: 'clip_maker' }), null)
   assert.equal(await resolveYtDlpCreatorAvatarUrl(info, () => { throw new Error('unexpected curator lookup') }), null)
 })
 

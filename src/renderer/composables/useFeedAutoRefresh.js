@@ -2,6 +2,9 @@ import { computed, watch } from 'vue'
 
 import { isAppHidden } from '../helpers/appVisibility.js'
 
+/** The longest delay that `setTimeout` takes */
+const MAX_TIMER_DELAY_MS = 2 ** 31 - 1
+
 /**
  * @typedef {object} AutoRefreshedFeed
  * @property {string} lockName Held by the window that refreshes the feed
@@ -40,7 +43,8 @@ export function useFeedAutoRefresh(dataReady, feed) {
       feed.setNextAutoRefresh(Date.now() + interval.value)
       return
     }
-    timer = setTimeout(refreshIfDue, Math.max(0, deadline - Date.now()))
+    // Later deadlines would overflow the timer, which then fires right away
+    timer = setTimeout(refreshIfDue, Math.min(Math.max(0, deadline - Date.now()), MAX_TIMER_DELAY_MS))
   }
 
   async function refreshIfDue() {

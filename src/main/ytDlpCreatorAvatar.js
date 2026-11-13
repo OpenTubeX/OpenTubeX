@@ -125,7 +125,9 @@ export function getTwitchCreatorUrl(info) {
     // Clips name the broadcaster's display name, which can differ from the
     // login, and their uploader is whoever made the clip. The clip page names the login.
     const clipLogin = pageUrl.pathname.match(/^\/([a-zA-Z0-9_]+)\/clip\//)?.[1]
-    const login = [clipLogin, info.channel ?? info.uploader_id].find(value => typeof value === 'string' && /^[a-zA-Z0-9_]+$/.test(value))
+    const isClip = pageUrl.hostname === 'clips.twitch.tv' || clipLogin !== undefined
+    const login = [clipLogin, isClip ? info.channel : info.channel ?? info.uploader_id]
+      .find(value => typeof value === 'string' && /^[a-zA-Z0-9_]+$/.test(value))
     return login ? `https://www.twitch.tv/${login.toLowerCase()}` : null
   } catch {
     return null
