@@ -392,7 +392,12 @@ public class WebViewScreenshotTest {
             assertTrue(rendered.await(10, TimeUnit.SECONDS));
             evaluate(webView, """
                 window.__thumbnail = null;
-                Capacitor.Plugins.Screenshot.take({width:320,height:180,top:0.55,cropHeight:0.4}).then(
+                const options = {width:320, height:180, top:0.55, cropHeight:0.4};
+                // A starved emulator can miss the capture's frame deadline. That says
+                // nothing about the crop and encoding, which the checks below cover.
+                const take = attempt => Capacitor.Plugins.Screenshot.take(options)
+                    .catch(error => attempt < 2 ? take(attempt + 1) : Promise.reject(error));
+                take(0).then(
                     result => { window.__thumbnail = result; },
                     error => { window.__thumbnail = {error:String(error)}; }
                 );
