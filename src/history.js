@@ -204,10 +204,15 @@ export function mergeTakeoutHistoryRecord(current, imported) {
  */
 export function mergeLibreTubeHistoryRecord(current, imported) {
   if (!current) return imported
+  const merged = mergeTakeoutHistoryRecord(current, imported)
+  const watchProgress = current.watchProgress ?? imported.watchProgress
   return {
-    ...mergeTakeoutHistoryRecord(current, imported),
+    ...merged,
     timeWatched: current.timeWatched ?? imported.timeWatched,
-    watchProgress: current.watchProgress ?? imported.watchProgress,
-    isWatched: current.isWatched ?? imported.isWatched,
+    watchProgress,
+    // Records that only save the position have no watched status
+    isWatched: current.isWatched ?? (current.watchProgress != null
+      ? hasReachedWatchedThreshold(watchProgress, merged.lengthSeconds)
+      : imported.isWatched),
   }
 }

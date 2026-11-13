@@ -204,10 +204,15 @@ test('history imports merge with the records saved when they are written', async
   await History.importRecords([record('saved', { title: 'LibreTube', watchProgress: 600, isWatched: true, timeWatched: 99 })], 'libretube')
   const libreTube = (await History.find()).find(saved => saved.videoId === 'saved')
   assert.deepEqual([libreTube.title, libreTube.watchProgress, libreTube.timeWatched], ['saved', 321, 30])
+  // A record that only saved the position stays unwatched
+  await db.history.insertAsync({ videoId: 'position', watchProgress: 60, lengthSeconds: 600 })
+  await History.importRecords([record('position', { watchProgress: 600, isWatched: true, timeWatched: 99 })], 'libretube')
+  const position = (await History.find()).find(saved => saved.videoId === 'position')
+  assert.deepEqual([position.watchProgress, position.isWatched], [60, false])
 
   // Other exports replace the saved record of each imported video
   await History.importRecords([record('saved', { title: 'Imported', timeWatched: 5 })], 'replace')
   const replaced = await History.find()
-  assert.deepEqual(replaced.map(saved => saved.videoId).sort(), ['meanwhile', 'new', 'saved'])
+  assert.deepEqual(replaced.map(saved => saved.videoId).sort(), ['meanwhile', 'new', 'position', 'saved'])
   assert.equal(replaced.find(saved => saved.videoId === 'saved').title, 'Imported')
 })
