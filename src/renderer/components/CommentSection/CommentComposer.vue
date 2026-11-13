@@ -162,8 +162,10 @@ onBeforeUnmount(() => resizeObserver.disconnect())
   margin-block: 8px 16px;
 }
 
+/* With the first comment's 15px top padding, this matches the visible gap
+   between comment threads. */
 .topLevelComposer {
-  margin-block: 16px 8px;
+  margin-block: 16px 34px;
 }
 
 .commentComposerAvatar {
