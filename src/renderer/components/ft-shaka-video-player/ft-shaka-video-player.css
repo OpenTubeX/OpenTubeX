@@ -40,6 +40,15 @@
   font-family: var(--app-font-family);
 }
 
+/*
+  The watch layout caps the player width at 80vh * 16:9. Videos taller than
+  16:9 also need a height cap to fit the window; above it they keep the full
+  width with black bars at the sides. Capacitor builds set their own cap.
+*/
+.ftVideoPlayer:where(:not(:fullscreen, .fullWindow, .scrollMiniPlayer, .shortsPlayer)) {
+  max-block-size: 80vh;
+}
+
 .ftVideoPlayer:not(:fullscreen, .fullWindow) {
   border-radius: var(--inline-player-radius);
 }
@@ -110,6 +119,9 @@
 
 .player {
   width: 100%;
+
+  /* Follows the inline player's height cap, and none in other modes. */
+  max-block-size: inherit;
 
   /* Animates dock pushes and user-selected video zoom levels. */
   /* stylelint-disable plugin/no-low-performance-animation-properties -- docks push the player, and scaling it instead would stretch the video */

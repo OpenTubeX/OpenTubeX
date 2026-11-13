@@ -1285,7 +1285,6 @@ export default defineComponent({
     }
 
     const onlyUseOverFlowMenu = ref(false)
-    const forceAspectRatio = ref(false)
 
     const activeLegacyFormat = shallowRef(null)
 
@@ -5624,7 +5623,7 @@ export default defineComponent({
       container,
       mobileMiniBarOverlay,
       fullWindowEnabled,
-      inlineSixteenByNine: computed(() => audioPlayerMode.value || forceAspectRatio.value || (!props.shortsPlayer && !videoLayoutReady.value)),
+      inlineSixteenByNine: computed(() => audioPlayerMode.value || (!props.shortsPlayer && !videoLayoutReady.value)),
       getUi: () => ui,
       getSeekRange: () => hasLoaded.value ? player?.seekRange() : null,
       isActiveTab,
@@ -10149,24 +10148,6 @@ export default defineComponent({
         }
       })
 
-      if (props.format !== 'legacy') {
-        player.addEventListener('streaming', () => {
-          if (props.format === 'dash') {
-            const firstVariant = player.getVariantTracks()[0]
-
-            // force the player aspect ratio to 16:9 to avoid overflowing the layout
-            forceAspectRatio.value = firstVariant != null && !props.shortsPlayer &&
-              firstVariant.width / firstVariant.height < 1.5
-          }
-        })
-      } else if (props.legacyFormats.length > 0) {
-        // force the player aspect ratio to 16:9 to avoid overflowing the layout, when the video is too tall
-
-        const firstFormat = props.legacyFormats[0]
-        forceAspectRatio.value = !props.shortsPlayer &&
-          firstFormat.width / firstFormat.height < 1.5
-      }
-
       if (useSponsorBlock.value) {
         setupSponsorBlock()
         if (sponsorBlockInfoOpen.value) {
@@ -11560,7 +11541,6 @@ export default defineComponent({
 
       fullWindowEnabled,
       fullWindowPlaceholderHeight,
-      forceAspectRatio,
 
       showStats,
       stats,

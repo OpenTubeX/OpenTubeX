@@ -77,7 +77,7 @@
         fullWindow: fullWindowEnabled || androidFullscreenHostActive,
         shortsPlayer,
         shortsPaused: shortsPaused && hasLoaded,
-        sixteenByNine: (audioPlayerMode || forceAspectRatio || (!shortsPlayer && !videoLayoutReady)) &&
+        sixteenByNine: (audioPlayerMode || (!shortsPlayer && !videoLayoutReady)) &&
           !fullWindowEnabled && !scrollMiniPlayerActive,
         musicAudioPlayer: audioPlayerMode,
         scrollMiniPlayer: scrollMiniPlayerActive,
@@ -122,7 +122,7 @@
       :style="[
         captionPlayerVariables,
         fullscreenDockWidthStyle,
-        { '--inline-player-aspect-ratio': audioPlayerMode || forceAspectRatio ? 16 / 9 : (annotationVideoAspectRatio ?? 16 / 9) },
+        { '--inline-player-aspect-ratio': audioPlayerMode ? 16 / 9 : (annotationVideoAspectRatio ?? 16 / 9) },
         scrollMiniPlayerActive ? scrollMiniPlayerStyle : undefined,
         scrollMiniPlayerDragStyle,
         mobileFullscreenSwipeStyle,
