@@ -452,6 +452,8 @@ Settings:
     Privacy Description: Előzmények, keresési javaslatok, hivatkozások és alkalmazásjelszó
     Data And Storage Description: Biztonsági mentések, importálás és exportálás, lemezhasználat és tisztítás
     Sync Description: Szinkronizálási szerverfiók, eszközpárosítás és szinkronizált adatok
+    Accounts and Sync: "Fiókok és szinkronizálás"
+    Accounts and Sync Description: "YouTube-fiók, szinkronizálási kiszolgálófiók és eszközpárosítás"
     Advanced: Speciális
     Advanced Description: Háttérszolgáltatások, pufferelés, külső eszközök, proxy és diagnosztika
     Alternative providers: Videó- és metaadat-szolgáltatók

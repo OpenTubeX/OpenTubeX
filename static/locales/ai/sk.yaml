@@ -452,6 +452,8 @@ Settings:
     Privacy Description: História, návrhy vyhľadávania, odkazy a heslo aplikácie
     Data And Storage Description: Zálohy, import a export, využitie disku a čistenie
     Sync Description: Účet synchronizačného servera, párovanie zariadení a synchronizované údaje
+    Accounts and Sync: "Účty a synchronizácia"
+    Accounts and Sync Description: "Účet YouTube, účet synchronizačného servera a párovanie zariadení"
     Advanced: Rozšírené
     Advanced Description: Backendy, vyrovnávacia pamäť, externé nástroje, proxy a diagnostika
     Alternative providers: Poskytovatelia videí a metaúdajov

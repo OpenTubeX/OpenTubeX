@@ -453,6 +453,8 @@ Settings:
     Privacy Description: Istoric, sugestii de căutare, linkuri și parola aplicației
     Data And Storage Description: Copii de rezervă, import și export, utilizarea discului și curățare
     Sync Description: Cont pe serverul de sincronizare, asocierea dispozitivelor și date sincronizate
+    Accounts and Sync: "Conturi și sincronizare"
+    Accounts and Sync Description: "Cont YouTube, cont pe serverul de sincronizare și asocierea dispozitivelor"
     Advanced: Avansat
     Advanced Description: Backenduri, memorie tampon, instrumente externe, proxy și diagnosticare
     Alternative providers: Furnizori de videoclipuri și metadate

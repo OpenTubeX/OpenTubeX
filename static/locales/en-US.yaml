@@ -742,6 +742,8 @@ Settings:
     Privacy Description: History, search suggestions, links, and app password
     Data And Storage Description: Backups, import and export, disk usage, and cleanup
     Sync Description: Sync server account, device pairing, and synced data
+    Accounts and Sync: Accounts & Sync
+    Accounts and Sync Description: YouTube account, sync server account, and device pairing
     Advanced: Advanced
     Advanced Description: Backends, buffering, external tools, proxy, and diagnostics
     Alternative providers: Video and metadata providers

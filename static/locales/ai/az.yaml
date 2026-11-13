@@ -454,6 +454,8 @@ Settings:
     Privacy Description: Tarixçə, axtarış təklifləri, keçidlər və tətbiq parolu
     Data And Storage Description: Ehtiyat nüsxələr, idxal və ixrac, disk istifadəsi və təmizləmə
     Sync Description: Sinxronizasiya serveri hesabı, cihazların qoşulması və sinxronlaşdırılan məlumatlar
+    Accounts and Sync: "Hesablar və sinxronizasiya"
+    Accounts and Sync Description: "YouTube hesabı, sinxronizasiya serveri hesabı və cihaz cütləşdirməsi"
     Advanced: Qabaqcıl
     Advanced Description: Backend-lər, buferləmə, xarici alətlər, proksi və diaqnostika
     Alternative providers: Video və metaməlumat təminatçıları

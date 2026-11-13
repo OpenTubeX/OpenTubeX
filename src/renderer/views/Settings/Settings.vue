@@ -423,6 +423,7 @@
 import FtInput from '../../components/FtInput/FtInput.vue'
 import FtTabs from '../../components/FtTabs/FtTabs.vue'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
+import { supportsYouTubeAccount } from '../../helpers/youtube-account-state'
 import { useRootClass } from '../../helpers/rootClasses'
 import { FtIcon } from '@opentubex/icons'
 import {
@@ -447,7 +448,7 @@ import { tmWithFallback } from '../../i18n/index'
 
 import DownloadSettings from '../../components/Settings/Downloads/DownloadSettings.vue'
 import DataSection from '../../components/Settings/Data/DataSection.vue'
-import SyncSettings from '../../components/Settings/Sync/SyncSettings.vue'
+import AccountsSection from '../../components/Settings/Accounts/AccountsSection.vue'
 import PasswordDialog from '../../components/PasswordDialog/PasswordDialog.vue'
 import FtSettingsMenu from '../../components/FtSettingsMenu/FtSettingsMenu.vue'
 import FtKeyboardShortcutPrompt from '../../components/FtKeyboardShortcutPrompt/FtKeyboardShortcutPrompt.vue'
@@ -555,6 +556,7 @@ const activeSection = ref(
 // Legacy sections that are tabs of their category open on that tab.
 const LEGACY_SETTINGS_SECTION_TABS = {
   storage: 'storage',
+  sync: 'sync',
   distraction: 'distraction',
   'parental-control': 'parental'
 }
@@ -774,10 +776,28 @@ const settingsComponentsData = computed(() => [
   },
   {
     type: 'sync',
-    title: t('Settings.Sync Settings.Sync Settings'),
-    description: t('Settings.Categories.Sync Description'),
+    title: supportsYouTubeAccount
+      ? t('Settings.Categories.Accounts and Sync')
+      : t('Settings.Sync Settings.Sync Settings'),
+    description: supportsYouTubeAccount
+      ? t('Settings.Categories.Accounts and Sync Description')
+      : t('Settings.Categories.Sync Description'),
     icon: ['fas', 'sync'],
-    component: SyncSettings
+    component: AccountsSection,
+    ...(supportsYouTubeAccount && {
+      tabs: [
+        {
+          id: 'sync',
+          label: t('Settings.Sync Settings.Sync Settings'),
+          icon: ['fas', 'sync']
+        },
+        {
+          id: 'youtube-account',
+          label: t('Settings.YouTube Account Settings.YouTube Account Settings'),
+          icon: ['fas', 'circle-user']
+        }
+      ]
+    })
   },
   {
     type: 'advanced',
@@ -1372,8 +1392,10 @@ async function openSearchResult(sectionType, match) {
   if (!content) return
   const findTarget = () => {
     const section = settingsSectionComponents.value.find(({ type }) => type === sectionType)
+    // Tabbed categories hide their sections' headings, so a tab's label matches its panel.
     const isSectionMatch = [section?.title, section?.description]
-      .some(value => normalizeSearchText(value ?? '') === normalizedLabel)
+      .some(value => normalizeSearchText(value ?? '') === normalizedLabel) ||
+      section?.tabs?.some(tab => tab.id === activeSectionTab.value && normalizeSearchText(tab.label) === normalizedLabel)
     const settingControl = match.settingKey
       ? [...content.querySelectorAll('[data-setting-key]')].find(element =>
           element.dataset.settingKey === match.settingKey && isShown(element))

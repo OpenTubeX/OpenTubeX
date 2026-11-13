@@ -1390,7 +1390,7 @@ let idleStartupWorkUsesIdleCallback = false
 
 function isSyncSettingsVisible() {
   const section = document.querySelector(
-    '.settingsWindow .settingsContent > [data-section="sync"]'
+    '.settingsWindow .settingsContent > [data-section="sync"] .syncSettings'
   )
   return settingsWindowOpen.value && section !== null && section.getClientRects().length > 0
 }

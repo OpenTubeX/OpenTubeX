@@ -545,6 +545,8 @@ Settings:
     Privacy Description: 기록, 검색 제안, 링크 및 앱 비밀번호
     Data And Storage Description: 백업, 가져오기 및 내보내기, 디스크 사용량 및 정리
     Sync Description: 동기화 서버 계정, 기기 페어링 및 동기화된 데이터
+    Accounts and Sync: "계정 및 동기화"
+    Accounts and Sync Description: "YouTube 계정, 동기화 서버 계정 및 기기 페어링"
     Advanced: 고급
     Advanced Description: 백엔드, 버퍼링, 외부 도구, 프록시 및 진단
     Alternative providers: 동영상 및 메타데이터 제공자

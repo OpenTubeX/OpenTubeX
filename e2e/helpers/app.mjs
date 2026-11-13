@@ -1051,7 +1051,8 @@ const SETTINGS_CATEGORY_BY_LEGACY_SECTION = {
   'context-menu-search': 'general',
   storage: 'data',
   experimental: 'advanced',
-  wellbeing: 'focus'
+  wellbeing: 'focus',
+  'youtube-account': 'sync'
 }
 
 // Sections shown as tabs of their category.
@@ -1060,7 +1061,9 @@ const SETTINGS_TAB_BY_SECTION = {
   storage: 'storage',
   distraction: 'distraction',
   wellbeing: 'wellbeing',
-  'parental-control': 'parental'
+  'parental-control': 'parental',
+  sync: 'sync',
+  'youtube-account': 'youtube-account'
 }
 
 /** Opens Settings and selects one category in the two-column modal layout. */

@@ -12,8 +12,8 @@ const source = (await readFile(new URL('../../src/renderer/helpers/commandPalett
 const shortcuts = { APP: { GENERAL: {} }, VIDEO_PLAYER: { GENERAL: {}, PLAYBACK: {} } }
 const loadRegistry = isLiteBuild => new Function('createSettingsSearchIndex', 'getConfiguredKeyboardShortcuts',
   'DefaultKeyboardShortcuts', 'KeyboardShortcuts', 'shouldShowKeyboardShortcutCommand',
-  'isTrendingAvailable', 'isMostPopularAvailable', 'isLiteBuild', 'isPlayerRoutePath', `${source}\nreturn createCommandPaletteRegistry`)(
-  createSettingsSearchIndex, () => shortcuts, shortcuts, shortcuts, () => false, () => false, () => false, isLiteBuild, isPlayerRoutePath
+  'isTrendingAvailable', 'isMostPopularAvailable', 'isLiteBuild', 'isPlayerRoutePath', 'supportsYouTubeAccount', `${source}\nreturn createCommandPaletteRegistry`)(
+  createSettingsSearchIndex, () => shortcuts, shortcuts, shortcuts, () => false, () => false, () => false, isLiteBuild, isPlayerRoutePath, true
 )
 const createRegistry = loadRegistry(false)
 

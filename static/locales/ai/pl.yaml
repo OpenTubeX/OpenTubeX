@@ -268,6 +268,8 @@ Settings:
     Privacy Description: Historia, podpowiedzi wyszukiwania, linki i hasło aplikacji
     Data And Storage Description: Kopie zapasowe, import i eksport, użycie dysku i czyszczenie
     Sync Description: Konto serwera synchronizacji, parowanie urządzeń i synchronizowane dane
+    Accounts and Sync: "Konta i synchronizacja"
+    Accounts and Sync Description: "Konto YouTube, konto serwera synchronizacji i parowanie urządzeń"
     Advanced: Zaawansowane
     Advanced Description: Backendy, buforowanie, narzędzia zewnętrzne, proxy i diagnostyka
     Alternative providers: Dostawcy filmów i metadanych

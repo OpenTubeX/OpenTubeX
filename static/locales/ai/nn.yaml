@@ -464,6 +464,8 @@ Settings:
     Privacy Description: Historikk, søkjeforslag, lenkjer og app-passord
     Data And Storage Description: Tryggingskopiar, import og eksport, diskbruk og opprydding
     Sync Description: Synkroniseringstenarkonto, samankopling av einingar og synkroniserte data
+    Accounts and Sync: "Kontoar og synkronisering"
+    Accounts and Sync Description: "YouTube-konto, synkroniseringstenarkonto og samankopling av einingar"
     Advanced: Avansert
     Advanced Description: Bakgrunnstenester, bufring, eksterne verktøy, mellomtenar og diagnostikk
     Alternative providers: Tilbydarar av video og metadata

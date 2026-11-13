@@ -452,6 +452,8 @@ Settings:
     Privacy Description: Ajalugu, otsingusoovitused, lingid ja rakenduse parool
     Data And Storage Description: Varukoopiad, import ja eksport, kettakasutus ja puhastamine
     Sync Description: Sünkroonimisserveri konto, seadmete sidumine ja sünkroonitud andmed
+    Accounts and Sync: "Kontod ja sünkroonimine"
+    Accounts and Sync Description: "YouTube'i konto, sünkroonimisserveri konto ja seadmete sidumine"
     Advanced: Täpsemad seaded
     Advanced Description: Taustateenused, puhverdamine, välised tööriistad, puhverserver ja diagnostika
     Alternative providers: Video- ja metaandmete pakkujad

@@ -453,6 +453,8 @@ Settings:
     Privacy Description: Hanes, awgrymiadau chwilio, dolenni a chyfrinair yr ap
     Data And Storage Description: Copïau wrth gefn, mewnforio ac allforio, defnydd disg a glanhau
     Sync Description: Cyfrif gweinydd cysoni, paru dyfeisiau a data wedi'i gysoni
+    Accounts and Sync: "Cyfrifon a chysoni"
+    Accounts and Sync Description: "Cyfrif YouTube, cyfrif gweinydd cysoni a pharu dyfeisiau"
     Advanced: Uwch
     Advanced Description: Cefnlenni, byffro, offer allanol, dirprwy a diagnosteg
     Alternative providers: Darparwyr fideo a metadata

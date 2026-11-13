@@ -452,6 +452,8 @@ Settings:
     Privacy Description: 歷史記錄、搜尋建議、連結與應用程式密碼
     Data And Storage Description: 備份、匯入與匯出、磁碟使用量與清理
     Sync Description: 同步伺服器帳戶、裝置配對與已同步的資料
+    Accounts and Sync: "帳戶與同步"
+    Accounts and Sync Description: "YouTube 帳戶、同步伺服器帳戶與裝置配對"
     Advanced: 進階
     Advanced Description: 後端、緩衝、外部工具、Proxy 與診斷
     Alternative providers: 影片與中繼資料提供者

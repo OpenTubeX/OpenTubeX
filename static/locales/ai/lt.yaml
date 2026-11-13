@@ -566,6 +566,8 @@ Settings:
     Privacy Description: Istorija, paieškos pasiūlymai, nuorodos ir programos slaptažodis
     Data And Storage Description: Atsarginės kopijos, importavimas ir eksportavimas, disko naudojimas ir valymas
     Sync Description: Sinchronizavimo serverio paskyra, įrenginių susiejimas ir sinchronizuoti duomenys
+    Accounts and Sync: "Paskyros ir sinchronizavimas"
+    Accounts and Sync Description: "YouTube paskyra, sinchronizavimo serverio paskyra ir įrenginių susiejimas"
     Advanced: Išplėstiniai
     Advanced Description: Vidinės sistemos, buferizavimas, išoriniai įrankiai, tarpinis serveris ir diagnostika
     Alternative providers: Vaizdo įrašų ir metaduomenų teikėjai

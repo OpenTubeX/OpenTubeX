@@ -452,6 +452,8 @@ Settings:
     Privacy Description: Historia, bilaketa-iradokizunak, estekak eta aplikazioaren pasahitza
     Data And Storage Description: Babeskopiak, inportazioa eta esportazioa, diskoaren erabilera eta garbiketa
     Sync Description: Sinkronizazio-zerbitzariko kontua, gailuen parekatzea eta sinkronizatutako datuak
+    Accounts and Sync: "Kontuak eta sinkronizazioa"
+    Accounts and Sync Description: "YouTube kontua, sinkronizazio-zerbitzariaren kontua eta gailuen parekatzea"
     Advanced: Aurreratua
     Advanced Description: Backendak, bufferra, kanpoko tresnak, proxya eta diagnostikoa
     Alternative providers: Bideoen eta metadatuen hornitzaileak

@@ -290,7 +290,15 @@ export const SETTINGS_SEARCH_SOURCES = {
   }],
   sync: [{
     type: 'sync',
-    key: 'Settings.Sync Settings'
+    key: 'Settings.Sync Settings',
+    tab: 'sync'
+  }, {
+    type: 'youtube-account',
+    key: 'Settings.YouTube Account Settings',
+    include: new Set(['YouTube Account Settings', 'Sign In', 'Sign Out', 'Sync Subscriptions', 'Sync Playlists', 'Add to YouTube Watch History']),
+    electronOnly: true,
+    capacitorSupported: true,
+    tab: 'youtube-account'
   }],
   advanced: [{
     type: 'tab-unloading',
@@ -315,12 +323,6 @@ export const SETTINGS_SEARCH_SOURCES = {
     key: 'Settings.External Software Settings',
     exclude: new Set(['Managed Tool Errors']),
     electronOnly: true
-  }, {
-    type: 'youtube-account',
-    key: 'Settings.YouTube Account Settings',
-    include: new Set(['YouTube Account Settings', 'Sign In', 'Sign Out', 'Sync Subscriptions', 'Sync Playlists', 'Add to YouTube Watch History', 'Sync Now']),
-    electronOnly: true,
-    capacitorSupported: true
   }, {
     type: 'yt-dlp-streaming',
     key: 'Settings.Player Settings',
