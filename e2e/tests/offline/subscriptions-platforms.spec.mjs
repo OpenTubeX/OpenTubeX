@@ -239,6 +239,13 @@ test.describe('Channels on other platforms', () => {
       await manager.getByRole('button', { name: 'Unfollow Streamer' }).click()
       await expect(rows).toHaveCount(1)
       expect(await page.evaluate(() => window.$store.getters.getFollowedChannels)).toEqual([followed(OTHER_CHANNEL)])
+      // Its items and history are forgotten as soon as the setting changes, as for
+      // channels unfollowed through sync, so following it again starts over
+      await expect.poll(() => page.evaluate((key) => {
+        const feed = JSON.parse(localStorage.getItem('platformFeed'))
+        const items = [...feed.live, ...feed.videos, ...feed.clips].filter(item => `${item.platform}:${item.channelId}` === key)
+        return { items: items.length, cached: feed.channelKeys.includes(key), history: key in JSON.parse(localStorage.getItem('platformFeedHistory') ?? '{}') }
+      }, `twitch:${CHANNEL.id}`)).toEqual({ items: 0, cached: false, history: false })
 
       await page.locator('.settingsCloseButton').click()
       await expect(titles).toHaveText(['Other newest VOD', 'Other older VOD'])
