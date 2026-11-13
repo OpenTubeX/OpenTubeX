@@ -188,6 +188,9 @@ const actions = {
       deletions: changes.deletions,
     }
     const skipped = new Set(await DBHistoryHandlers.applySyncChanges(migratedChanges, changes.assertActive))
+    // An edit committed during the write reached the datastore after it, so
+    // only the cache would keep the stale record. The sync retries instead.
+    changes.assertActive?.()
     if (skipped.size > 0) migratedChanges.insertions = migratedChanges.insertions.filter(record => !skipped.has(record.videoId))
     commit('applyHistorySyncChanges', migratedChanges)
   },

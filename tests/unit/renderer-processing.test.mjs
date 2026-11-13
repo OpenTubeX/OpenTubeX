@@ -174,6 +174,30 @@ test('history edits during serialization prevent stale writes and retry with fre
   } finally { jobs.dispose() }
 })
 
+test('a playback save while the datastore applies a sync is not overwritten', async () => {
+  const jobs = createJobs()
+  let edited = false
+  const store = historyStore({
+    applySyncChanges: async (changes, assertActive) => {
+      assertActive?.()
+      if (!edited) {
+        edited = true
+        // The save commits while the sync's write is still on its way to the datastore.
+        store.commit('updateRecordWatchProgressInHistoryCache', { videoId: 'video', watchProgress: 99 })
+      }
+      return []
+    },
+  })
+  store.commit('upsertToHistoryCache', historyRecord('video'))
+  try {
+    await syncContext((...args) => jobs.run(...args)).syncHistory({
+      getWatchHistory: async () => [remoteRecord('video', 30)],
+      applyWatchHistoryChanges: async () => {},
+    }, store)
+    assert.equal(store.state.history.historyCacheById.video.watchProgress, 99)
+  } finally { jobs.dispose() }
+})
+
 for (const backend of ['encrypted', 'legacy']) {
   for (const baseline of ['states', 'ids']) {
     test(`history re-added during ${backend} deletion survives and uploads with the next sync from a ${baseline} baseline`, async () => {
