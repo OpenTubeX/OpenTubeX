@@ -1130,11 +1130,15 @@ export function getRelativeTimeFromDate(date, hideSeconds = false, useThirtyDayM
   }
 
   // Convert from ms to second
-  // For easier code interpretation the value is made to be positive
-  let timeDiffFromNow = ((now - date) / 1000)
+  // For easier code interpretation the value is made to be positive,
+  // also for dates in the future, such as upcoming live streams
+  const isFuture = date > now
+  let timeDiffFromNow = Math.abs(now - date) / 1000
   let timeUnit = 'second'
 
-  if (timeDiffFromNow < 60 && hideSeconds) {
+  // Callers that hide seconds show past events, which only look upcoming
+  // while their clock lags behind
+  if (hideSeconds && (timeDiffFromNow < 60 || isFuture)) {
     return i18n.global.t('Moments Ago')
   }
 
@@ -1173,9 +1177,11 @@ export function getRelativeTimeFromDate(date, hideSeconds = false, useThirtyDayM
     timeUnit = 'year'
   }
 
-  // Using `Math.ceil` so that -1.x days ago displayed as 1 day ago
-  // Notice that the value is turned to negative to be displayed as "ago"
-  return getCachedRelativeTimeFormat(i18n.global.locale.value).format(Math.ceil(-timeDiffFromNow), timeUnit)
+  // Rounding down so that 1.x days ago is displayed as 1 day ago
+  // Notice that past values are turned negative to be displayed as "ago",
+  // and that future ones are at least 1, so nothing is due "in 0 seconds"
+  const value = Math.floor(timeDiffFromNow)
+  return getCachedRelativeTimeFormat(i18n.global.locale.value).format(isFuture ? Math.max(value, 1) : -value, timeUnit)
 }
 
 /**
