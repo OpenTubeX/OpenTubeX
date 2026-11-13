@@ -45,7 +45,7 @@
     v-bind="forwardedAttrs"
     :data-prefix="semanticIcon?.[0]"
     :data-icon="semanticIcon?.[1]"
-    :data-icon-pack="currentIconPack"
+    :data-icon-pack="pack ?? currentIconPack"
     class="ft-icon"
     :class="[{ 'ft-icon--fw': fixedWidth, 'ft-icon--spin': spin }, iconClass]"
     :style="iconifyWrapperStyle"
@@ -98,6 +98,11 @@ const props = defineProps({
   spin: {
     type: Boolean,
     default: false
+  },
+  /** Draw from this pack instead of the selected one. It must be loaded. */
+  pack: {
+    type: String,
+    default: null
   }
 })
 
@@ -145,7 +150,7 @@ function checkCachedImage({ el: image, props: imageProps }) {
     failedCustomImage.value = imageProps.src
   }
 }
-const iconifyId = computed(() => resolveIconifyId(props.icon))
+const iconifyId = computed(() => resolveIconifyId(props.icon, props.pack ?? currentIconPack.value))
 
 // Preserve the stable semantic metadata used by existing styling and consumers,
 // independently of the active pack's visual name.
