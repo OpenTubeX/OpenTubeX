@@ -3,10 +3,18 @@ import { BrowserWindow } from 'electron'
 import { DBActions, IpcChannels, PlaylistVideoAddResult, SyncEvents } from '../constants'
 import * as baseHandlers from '../datastores/handlers/base'
 import { handleTrusted, sendToOtherAppWindows } from './ipc'
-import { settingSyncMessage } from './settingRevisions'
+import { numberSyncMessage, readSynced, settingSyncMessage, writeSynced } from './datastoreSync'
 import { canRendererWriteSetting } from './settingWriteGuard'
 import { TabManager } from './tabs/TabManager'
 import { recordSubscriptionFeedTitles } from './videoMetadataCache'
+
+/**
+ * Whether a datastore request reads the whole datastore.
+ * @param {{ action: number, data?: unknown }} request
+ */
+function isFullRead({ action, data }) {
+  return action === DBActions.GENERAL.FIND && data === undefined
+}
 
 /**
  * Registers the handlers through which windows read and write the datastores.
@@ -27,36 +35,69 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
   }
 
   function syncOtherWindows(channel, event, payload) {
-    sendToOtherAppWindows(event.sender, channel, payload)
+    sendToOtherAppWindows(event.sender, channel, numberSyncMessage(payload))
   }
 
   /**
-   * Like `handleDatastoreRequests` for requests that can save settings. They
-   * reply with `{ result, savedSetting }`, where `savedSetting` holds the
-   * revision of the setting the request saved, so the window can drop older
-   * broadcasts that arrive after the reply.
+   * Like `handleDatastoreRequests` for datastores whose changes are sent to the
+   * other windows on `syncChannel`. Replies are `{ result, revision }` for full
+   * reads, which a starting window uses to skip the messages they contain, and
+   * `{ result }` otherwise. Other requests can change the datastore, so they
+   * hold back full reads until their messages are sent, along with those on
+   * `otherSyncChannels`.
    * @param {string} channel
+   * @param {string} syncChannel
+   * @param {(event: import('electron').IpcMainInvokeEvent, request: { action: number, data: any }) => Promise<unknown>} handler
+   * @param {string[]} [otherSyncChannels]
+   */
+  function handleSyncedDatastoreRequests(channel, syncChannel, handler, otherSyncChannels = []) {
+    handleDatastoreRequests(channel, async (event, request) => {
+      if (isFullRead(request)) return readSynced(syncChannel, () => handler(event, request))
+      return { result: await writeSynced([syncChannel, ...otherSyncChannels], () => handler(event, request)) }
+    })
+  }
+
+  /**
+   * Like `handleSyncedDatastoreRequests` for requests that can save settings.
+   * Their replies also hold `savedSetting`, the revision of the setting the
+   * request saved, so the window can drop older broadcasts that arrive after
+   * the reply. `afterSave` runs when full reads may run again, as it can save
+   * settings itself.
+   * @param {string} channel
+   * @param {string} syncChannel
    * @param {(
    *   event: import('electron').IpcMainInvokeEvent,
    *   request: { action: number, data: any },
    *   syncSetting: (_id: string, value: unknown) => void
    * ) => Promise<unknown>} handler
+   * @param {(request: { action: number, data: any }) => Promise<void> | void} [afterSave]
    */
-  function handleRequestsSavingSettings(channel, handler) {
+  function handleRequestsSavingSettings(channel, syncChannel, handler, afterSave = () => {}) {
     handleDatastoreRequests(channel, async (event, request) => {
       /** @type {{ _id: string, revision: number } | null} */
       let savedSetting = null
-      const result = await handler(event, request, (_id, value) => {
+      /** @type {(_id: string, value: unknown) => void} */
+      const syncSetting = (_id, value) => {
         const message = settingSyncMessage(_id, value)
-        syncOtherWindows(IpcChannels.SYNC_SETTINGS, event, message)
+        sendToOtherAppWindows(event.sender, IpcChannels.SYNC_SETTINGS, message)
         savedSetting = { _id, revision: message.revision }
-      })
+      }
+      if (isFullRead(request)) return readSynced(syncChannel, () => handler(event, request, syncSetting))
+
+      const result = await writeSynced([syncChannel, IpcChannels.SYNC_SETTINGS], () => handler(event, request, syncSetting))
+      if (savedSetting) {
+        try {
+          await afterSave(request)
+        } catch (err) {
+          throw typeof err === 'string' ? err : err.toString()
+        }
+      }
       return { result, savedSetting }
     })
   }
 
   // Settings
-  handleRequestsSavingSettings(IpcChannels.DB_SETTINGS, async (event, { action, data }, syncSetting) => {
+  handleRequestsSavingSettings(IpcChannels.DB_SETTINGS, IpcChannels.SYNC_SETTINGS, async (event, { action, data }, syncSetting) => {
     try {
       switch (action) {
         case DBActions.SETTINGS.MERGE_SEEN_VIDEOS: {
@@ -92,7 +133,6 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
 
           await baseHandlers.settings.upsert(data._id, data.value)
           syncSetting(data._id, data.value)
-          await onSettingUpserted(data)
           return null
 
         case DBActions.GENERAL.DELETE:
@@ -108,10 +148,10 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
       if (typeof err === 'string') throw err
       else throw err.toString()
     }
-  })
+  }, ({ action, data }) => action === DBActions.GENERAL.UPSERT ? onSettingUpserted(data) : undefined)
 
   // History
-  handleRequestsSavingSettings(IpcChannels.DB_HISTORY, async (event, { action, data }, syncSetting) => {
+  handleRequestsSavingSettings(IpcChannels.DB_HISTORY, IpcChannels.SYNC_HISTORY, async (event, { action, data }, syncSetting) => {
     try {
       switch (action) {
         case DBActions.HISTORY.UPDATE_SUBSCRIPTION_STATE: {
@@ -276,7 +316,8 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
     else if (action === DBActions.GENERAL.DELETE_MULTIPLE) result = await baseHandlers.recommendations.remove(data)
     else if (action === DBActions.GENERAL.DELETE_ALL) result = await baseHandlers.recommendations.reset()
     else throw new Error('Invalid recommendation action')
-    syncOtherWindows(IpcChannels.SYNC_RECOMMENDATIONS, event, result)
+    // The result carries its own revision.
+    sendToOtherAppWindows(event.sender, IpcChannels.SYNC_RECOMMENDATIONS, result)
     return result
   })
 
@@ -341,7 +382,7 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
   })
 
   // Profiles
-  handleDatastoreRequests(IpcChannels.DB_PROFILES, async (event, { action, data }) => {
+  handleSyncedDatastoreRequests(IpcChannels.DB_PROFILES, IpcChannels.SYNC_PROFILES, async (event, { action, data }) => {
     try {
       switch (action) {
         case DBActions.GENERAL.CREATE: {
@@ -476,7 +517,7 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
   // As such, only the currently used actions have synchronization implemented
   // The remaining should have it implemented only when playlists
   // get fully implemented into the app
-  handleDatastoreRequests(IpcChannels.DB_PLAYLISTS, async (event, { action, data }) => {
+  handleSyncedDatastoreRequests(IpcChannels.DB_PLAYLISTS, IpcChannels.SYNC_PLAYLISTS, async (event, { action, data }) => {
     try {
       switch (action) {
         case DBActions.GENERAL.CREATE:
@@ -642,7 +683,7 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
 
   // ************** //
   // Search History
-  handleDatastoreRequests(IpcChannels.DB_SEARCH_HISTORY, async (event, { action, data }) => {
+  handleSyncedDatastoreRequests(IpcChannels.DB_SEARCH_HISTORY, IpcChannels.SYNC_SEARCH_HISTORY, async (event, { action, data }) => {
     try {
       switch (action) {
         case DBActions.GENERAL.FIND:
@@ -719,7 +760,7 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
   })
 
   // Subscription cache
-  handleDatastoreRequests(IpcChannels.DB_SUBSCRIPTION_CACHE, async (event, { action, data }) => {
+  handleSyncedDatastoreRequests(IpcChannels.DB_SUBSCRIPTION_CACHE, IpcChannels.SYNC_SUBSCRIPTION_CACHE, async (event, { action, data }) => {
     try {
       switch (action) {
         case DBActions.GENERAL.FIND:

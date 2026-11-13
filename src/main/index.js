@@ -92,7 +92,7 @@ import { createScheduledBackups } from './scheduledBackups'
 import { createBackupArchiveFactory } from './backupArchive'
 import { createDatastoreRequestTracker } from './datastoreRequests'
 import { setupDatastoreIpc } from './datastoreIpc'
-import { settingSyncMessage } from './settingRevisions'
+import { settingSyncMessage, writeSynced } from './datastoreSync'
 import { getWindowButtonLayout, onWindowButtonLayoutChanged } from './windowButtonLayout'
 import { watchTrayColorScheme } from './trayColorScheme'
 import { setDiagnosticLogging, setupDiagnosticLogIpc } from './diagnosticLog'
@@ -328,18 +328,15 @@ function runApp() {
    * @param {unknown} value
    * @param {unknown} [expectedValue] Only repair a value that has not changed.
    */
-  async function updateSettingFromMain(settingKey, value, expectedValue) {
-    if (expectedValue !== undefined) {
-      if (!await baseHandlers.settings._updateIfUnchanged(settingKey, expectedValue, value)) return
-    } else {
-      await baseHandlers.settings.upsert(settingKey, value)
-    }
-    const syncPayload = settingSyncMessage(settingKey, value)
-    for (const window of BrowserWindow.getAllWindows()) {
-      if (!window.webContents.isDestroyed() && isOpenTubeXUrl(window.webContents.getURL())) {
-        window.webContents.send(IpcChannels.SYNC_SETTINGS, syncPayload)
+  function updateSettingFromMain(settingKey, value, expectedValue) {
+    return writeSynced([IpcChannels.SYNC_SETTINGS], async () => {
+      if (expectedValue !== undefined) {
+        if (!await baseHandlers.settings._updateIfUnchanged(settingKey, expectedValue, value)) return
+      } else {
+        await baseHandlers.settings.upsert(settingKey, value)
       }
-    }
+      sendToAppWindows(IpcChannels.SYNC_SETTINGS, settingSyncMessage(settingKey, value))
+    })
   }
 
   const {

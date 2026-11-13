@@ -1365,6 +1365,51 @@ const customActions = {
     await Promise.all(homeTabs.map(tab => navigation.replace(tab.id, landingRoute)))
   },
 
+  // Separate, so the subscription cache sees subscriptions made in other
+  // windows while the window starts before it drops unsubscribed channels.
+  setupProfileListenerToSyncWindows: ({ commit }) => {
+    if (process.env.IS_ELECTRON) {
+      window.ftElectron.handleSyncProfiles((event, data) => {
+        switch (event) {
+          case SyncEvents.GENERAL.CREATE:
+            commit('addProfileToList', data)
+            break
+
+          case SyncEvents.GENERAL.UPSERT:
+            commit('upsertProfileToList', data)
+            break
+
+          case SyncEvents.PROFILES.ADD_CHANNEL:
+            commit('addChannelToProfiles', data)
+            break
+
+          case SyncEvents.PROFILES.REMOVE_CHANNEL:
+            commit('removeChannelFromProfiles', data)
+            break
+
+          case SyncEvents.PROFILES.UPDATE_CHANNEL_SETTINGS:
+            commit('updateChannelSettings', data)
+            break
+
+          case SyncEvents.PROFILES.UPDATE_SUBSCRIPTION_DETAILS:
+            commit('updateSubscriptionDetails', data)
+            break
+
+          case SyncEvents.PROFILES.UPDATE_DETAILS:
+            commit('updateProfileDetails', data)
+            break
+
+          case SyncEvents.GENERAL.DELETE:
+            commit('removeProfileFromList', data)
+            break
+
+          default:
+            console.error('profiles: invalid sync event received')
+        }
+      })
+    }
+  },
+
   // Should be a root action, but we'll tolerate
   setupListenersToSyncWindows: ({ commit, dispatch }) => {
     if (process.env.IS_ELECTRON) {
@@ -1515,45 +1560,6 @@ const customActions = {
 
           default:
             console.error('search history: invalid sync event received')
-        }
-      })
-
-      window.ftElectron.handleSyncProfiles((event, data) => {
-        switch (event) {
-          case SyncEvents.GENERAL.CREATE:
-            commit('addProfileToList', data)
-            break
-
-          case SyncEvents.GENERAL.UPSERT:
-            commit('upsertProfileToList', data)
-            break
-
-          case SyncEvents.PROFILES.ADD_CHANNEL:
-            commit('addChannelToProfiles', data)
-            break
-
-          case SyncEvents.PROFILES.REMOVE_CHANNEL:
-            commit('removeChannelFromProfiles', data)
-            break
-
-          case SyncEvents.PROFILES.UPDATE_CHANNEL_SETTINGS:
-            commit('updateChannelSettings', data)
-            break
-
-          case SyncEvents.PROFILES.UPDATE_SUBSCRIPTION_DETAILS:
-            commit('updateSubscriptionDetails', data)
-            break
-
-          case SyncEvents.PROFILES.UPDATE_DETAILS:
-            commit('updateProfileDetails', data)
-            break
-
-          case SyncEvents.GENERAL.DELETE:
-            commit('removeProfileFromList', data)
-            break
-
-          default:
-            console.error('profiles: invalid sync event received')
         }
       })
 

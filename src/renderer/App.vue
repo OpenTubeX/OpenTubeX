@@ -1826,7 +1826,10 @@ onMounted(async () => {
   // (subscriptions). Load it during the remaining startup work instead of after.
   const libraryReady = Promise.all([
     settingsReady.then(() => Promise.all([store.dispatch('grabHistory'), store.dispatch('grabAllPlaylists')])),
-    profilesReady.then(() => store.dispatch('grabAllSubscriptions')),
+    profilesReady.then(() => {
+      if (process.env.IS_ELECTRON) store.dispatch('setupProfileListenerToSyncWindows')
+      return store.dispatch('grabAllSubscriptions')
+    }),
   ])
   tabsReady.then(() => {
     const initialRoute = usesLogicalTabs ? store.getters.getActiveTab?.route : route
@@ -1905,7 +1908,7 @@ onMounted(async () => {
       await setLastUsedVersion(packageDetails.version)
     }
 
-    store.dispatch('grabSearchHistoryEntries')
+    const searchHistoryReady = store.dispatch('grabSearchHistoryEntries')
 
     // YouTube links have to be caught in both builds, otherwise the browser
     // navigates away from the app instead of opening the linked video,
@@ -1917,7 +1920,6 @@ onMounted(async () => {
     })
 
     if (process.env.IS_ELECTRON) {
-      store.dispatch('setupListenersToSyncWindows')
       removeOpenUrlListener = enableOpenUrl()
       store.dispatch('getExternalPlayerCmdArgumentsData')
       removeReloadRequestListener = window.ftElectron.tabs.onRequestReload(prepareAndReloadTab)
@@ -1928,6 +1930,12 @@ onMounted(async () => {
     }
 
     await libraryReady
+    if (process.env.IS_ELECTRON) {
+      // The preload holds back other windows' changes until the app listens,
+      // then passes on those that the reads above do not contain.
+      await searchHistoryReady
+      store.dispatch('setupListenersToSyncWindows')
+    }
     store.dispatch('initializeSyncServer').catch(error => {
       console.error('Initial sync server sync failed', error)
     })
