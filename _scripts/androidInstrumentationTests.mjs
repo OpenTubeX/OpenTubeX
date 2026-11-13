@@ -52,7 +52,8 @@ function testCases() {
       .map(([, attributes, body = '']) => ({
         className: attribute(attributes, 'classname'),
         name: attribute(attributes, 'name'),
-        failed: /<(?:failure|error)\b/.test(body)
+        failed: /<(?:failure|error)\b/.test(body),
+        skipped: /<skipped\b/.test(body)
       })))
 }
 
@@ -95,9 +96,10 @@ const pattern = ids.map(id => id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|
 const retryPassed = runTests([runnerArgument('tests_regex', `'^(${pattern})$'`)])
 const retried = testCases()
 
-const flaky = failed
-  .filter(test => retried.some(retry => retry.className === test.className && retry.name === test.name && !retry.failed))
-  .map(test => ({ project: 'instrumentation', title: `${test.className.split('.').pop()} › ${test.name}`, ...location(test) }))
+// A retry that skips on an assumption does not show that the test passes.
+const passedOnRetry = failed.filter(test => retried.some(retry =>
+  retry.className === test.className && retry.name === test.name && !retry.failed && !retry.skipped))
+const flaky = passedOnRetry.map(test => ({ project: 'instrumentation', title: `${test.className.split('.').pop()} › ${test.name}`, ...location(test) }))
 if (flaky.length > 0) {
   if (process.env.ANDROID_FLAKY_REPORT) writeFileSync(process.env.ANDROID_FLAKY_REPORT, JSON.stringify(flaky))
   for (const { title, file, line } of flaky) {
@@ -105,4 +107,4 @@ if (flaky.length > 0) {
   }
 }
 
-process.exit(retryPassed && emulatorRunning() && retried.length >= failed.length ? 0 : 1)
+process.exit(retryPassed && emulatorRunning() && passedOnRetry.length === failed.length ? 0 : 1)
