@@ -305,6 +305,37 @@ History:
   History Older Than Days Removed: История просмотра старше {days} дня удалена | История просмотра старше {days} дней удалена | История просмотра старше {days} дней удалена
 Settings:
   Experimental Badge: Экспериментальная
+  YouTube Account Settings:
+    YouTube Account Settings: "Аккаунт YouTube"
+    Unofficial App Warning: "OpenTubeX не является официальным приложением YouTube. При входе ваши действия здесь связываются с вашим аккаунтом Google, а Google может ограничить или заблокировать аккаунты, которые пользуются неофициальными приложениями. Входите только с аккаунтом, который не жалко потерять."
+    Sign In Explanation: "OpenTubeX входит в аккаунт как приложение для телевизора: вы подтверждаете вход на сайте Google, а OpenTubeX никогда не видит ваш пароль. Вход сохраняется только на этом устройстве, не синхронизируется и не попадает в резервные копии."
+    Sign In: "Войти"
+    Sign In Anyway: "Всё равно войти"
+    Sign Out: "Выйти"
+    Getting Sign-In Code: "Получение кода для входа"
+    Sign In Instructions: "Откройте страницу входа и выберите аккаунт Google. Код будет введён автоматически."
+    Other Device Instructions: "На другом устройстве перейдите по этому адресу и введите код:"
+    YouTube Channel: "Канал YouTube"
+    Using Channel: "Теперь вы используете YouTube как {name}"
+    Switch Channel Failed: "Не удалось сменить канал YouTube: {error}"
+    Open Sign-In Page: "Открыть страницу входа"
+    Copy Code: "Копировать код"
+    Code Copied: "Код скопирован"
+    Waiting for Approval: "Ожидание подтверждения входа"
+    Sign-In Denied: "Вход отклонён."
+    Sign-In Code Expired: "Срок действия кода истёк. Повторите попытку, чтобы получить новый."
+    Sign-In Failed: "Не удалось войти: {error}"
+    Signed In As: "Выполнен вход в YouTube как {name}"
+    Signed Out: "Выполнен выход из YouTube"
+    Sign Out Failed: "Не удалось выйти: {error}"
+    Revoke Failed: "Вы вышли из YouTube, но Google не подтвердил завершение сеанса. Его можно удалить в разделе сторонних подключений в аккаунте Google."
+    Signed out by YouTube: "YouTube завершил сеанс. Войдите снова в настройках, чтобы продолжить пользоваться аккаунтом."
+    Subscribe on YouTube: "Также подписываться на YouTube"
+    Add to YouTube Watch History: "Добавлять просмотренные видео в историю YouTube"
+    Import Subscriptions: "Импортировать подписки из YouTube"
+    Imported Subscriptions: "Импортирован {count} канал | Импортировано {count} канала | Импортировано {count} каналов"
+    No Subscriptions to Import: "В этом аккаунте YouTube нет подписок"
+    Import Subscriptions Failed: "Не удалось импортировать подписки: {error}"
   Diagnostics:
     Diagnostics: Диагностика
     Description: Пока диагностический журнал включён, OpenTubeX хранит последние сообщения журнала в памяти, чтобы вы могли приложить их к отчётам об ошибках. Он никогда не сохраняет и не отправляет их сам, а при отключении журнала они удаляются. Отчёты не включают файлы cookie, токены, IP-адреса и параметры URL, но могут содержать идентификаторы воспроизведённых видео, поэтому проверьте отчёт перед тем, как им поделиться.
@@ -2177,6 +2208,9 @@ Description:
   Games: Игры
   Music: Музыка
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Подписка на канал или отписка от него в OpenTubeX выполняет то же действие в вашем аккаунте YouTube."
+    Add to YouTube Watch History: "Воспроизводимые видео добавляются в вашу историю просмотра YouTube, чтобы рекомендации YouTube учитывали их. Пока история приостановлена на YouTube, ничего не добавляется."
   General Settings:
     Built-in Streams: |
       Автоматический режим воспроизводит большинство видео через клиент visionOS от YouTube, который запускается быстрее и поддерживает автоматическое качество. Прямые трансляции и видео, которые он не может воспроизвести, используют SABR.
@@ -2695,3 +2729,22 @@ Platforms:
   Playlist Not Found: Этот плейлист не найден.
   Load Error: Не удалось загрузить эту страницу с {platform}.
   Empty Tab: Здесь пока ничего нет.
+YouTube Account:
+  Like: "Нравится"
+  Dislike: "Не нравится"
+  Rating Failed: "Не удалось поставить оценку на YouTube: {error}"
+  Subscribe Failed: "Не удалось подписаться на YouTube: {error}"
+  Unsubscribe Failed: "Не удалось отписаться на YouTube: {error}"
+  Add a comment: "Добавить комментарий"
+  Add a reply: "Добавить ответ"
+  Comment: "Комментировать"
+  Reply: "Ответить"
+  Comment Posted: "Комментарий опубликован"
+  Reply Posted: "Ответ опубликован"
+  Comment Failed: "Не удалось опубликовать комментарий: {error}"
+  Delete Comment: "Удалить комментарий"
+  Delete Comment Confirmation: "Удалить ваш комментарий с YouTube?"
+  Comment Deleted: "Комментарий удалён"
+  Delete Comment Failed: "Не удалось удалить комментарий: {error}"
+  Recommendations: "Рекомендации YouTube"
+  Recommendations Failed: "Не удалось загрузить ваши рекомендации YouTube."

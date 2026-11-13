@@ -704,6 +704,11 @@
   margin-block-start: 0;
 }
 
+/* Lines up with the comment text. */
+.replyComposer {
+  margin-inline-start: 60px;
+}
+
 .commentCopyLink,
 .commentPinButton {
   display: inline-flex;

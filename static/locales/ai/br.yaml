@@ -330,6 +330,37 @@ History:
   History Older Than Days Removed: "Dilamet eo bet an istor sellout koshoc'h eget {days} devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} zevezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh."
 Settings:
   Experimental Badge: Arnodel
+  YouTube Account Settings:
+    YouTube Account Settings: "Kont YouTube"
+    Unofficial App Warning: "OpenTubeX n'eo ket un arload ofisiel YouTube. Pa gennaskit e vez liammet ar pezh a rit amañ ouzh ho kont Google, ha Google a c'hall bevenniñ pe stankañ ar c'hontoù a implij arloadoù n'int ket ofisiel. Na gennaskit nemet gant ur gont a c'hallit koll hep keuz."
+    Sign In Explanation: "OpenTubeX a gennask evel un arload skinwel: aprouiñ a rit anezhañ war lec'hienn Google, ha ne wel morse OpenTubeX ho ker-tremen. Ar c'hennaskañ a chom war an trobarzhell-mañ ha n'eo ket goubredet nag enrollet en un enrolladenn gwarez."
+    Sign In: "Kennaskañ"
+    Sign In Anyway: "Kennaskañ memes tra"
+    Sign Out: "Digennaskañ"
+    Getting Sign-In Code: "O kaout ur c'hod kennaskañ"
+    Sign In Instructions: "Digorit ar bajenn gennaskañ ha dibabit ho kont Google. Leuniet e vo ar c'hod ent emgefreek."
+    Other Device Instructions: "War ur benveg all, it d'ar chomlec'h-mañ ha roit ar c'hod:"
+    YouTube Channel: "Chadenn YouTube"
+    Using Channel: "Implijout a rit YouTube evel {name} bremañ"
+    Switch Channel Failed: "N'eus ket bet gallet cheñch ar chadenn YouTube: {error}"
+    Open Sign-In Page: "Digeriñ ar bajenn gennaskañ"
+    Copy Code: "Eilañ ar c'hod"
+    Code Copied: "Kod eilet"
+    Waiting for Approval: "O c'hortoz ma aprouot ar c'hennaskañ"
+    Sign-In Denied: "Nac'het eo bet ar c'hennaskañ."
+    Sign-In Code Expired: "Aet eo ar c'hod d'e dermen. Klaskit en-dro evit kaout unan nevez."
+    Sign-In Failed: "N'eus ket bet gallet kennaskañ: {error}"
+    Signed In As: "Kennasket ouzh YouTube evel {name}"
+    Signed Out: "Digennasket eus YouTube"
+    Sign Out Failed: "N'haller ket digennaskañ: {error}"
+    Revoke Failed: "Digennasket eus YouTube, met n'en deus ket kadarnaet Google eo bet echuet ar c'hennaskañ. Gallout a rit e zilemel e-touez ar c'hennaskoù gant an trede strolladoù en ho kont Google."
+    Signed out by YouTube: "YouTube en deus echuet ar c'hennaskañ. Kennaskit en-dro en Arventennoù evit kenderc'hel da implijout ho kont."
+    Subscribe on YouTube: "Koumanantiñ war YouTube ivez"
+    Add to YouTube Watch History: "Ouzhpennañ ar videoioù sellet ouzh roll istor YouTube"
+    Import Subscriptions: "Enporzhiañ ar c'houmanantoù eus YouTube"
+    Imported Subscriptions: "{count} chadenn enporzhiet | {count} chadenn enporzhiet | {count} chadenn enporzhiet | {count} a chadennoù enporzhiet | {count} chadenn enporzhiet"
+    No Subscriptions to Import: "N'eus koumanant ebet gant ar gont YouTube-mañ"
+    Import Subscriptions Failed: "N'eus ket bet gallet enporzhiañ ar c'houmanantoù: {error}"
   Diagnostics:
     Diagnostics: Diagnoz
     Description: E-pad ma vez gweredekaet an deizlevr diagnoz, OpenTubeX a vir ar c'hemennadennoù deizlevr nevez er memor evit ma c'hallfec'h o stagañ ouzh danevelloù fazioù. Biskoazh ne enrollo na ne gaso anezho e-unan, ha diweredekaat an deizlevr a ziverk anezho. An danevelloù n'int ket enno toupinoù, jedouerioù, chomlec'hioù IP na arventennoù URL, met gallout a reont kaout IDoù ar videoioù ho peus lennet, setu gwiriit an danevell a-raok he rannañ.
@@ -2204,6 +2235,9 @@ Description:
   Games: "C'hoarioù"
   Music: Sonerezh
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Koumanantiñ pe digoumanantiñ ouzh ur chadenn en OpenTubeX a ra an hevelep tra war ho kont YouTube."
+    Add to YouTube Watch History: "Ar videoioù a lennit a vez ouzhpennet ouzh ho roll istor YouTube, evel-se e c'hall erbedadennoù YouTube deskiñ diouto. Netra ne vez ouzhpennet keit ha ma vez ehanet ar roll istor war YouTube."
   General Settings:
     Built-in Streams: |
       Emgefreek a lenn al lodenn vrasañ eus ar videoioù dre arval visionOS YouTube, a grog buanoc'h hag a skor ar perzhded emgefreek. Ar froudoù war-eeun hag ar videoioù n'hall ket lenn a implij SABR.
@@ -2724,3 +2758,22 @@ Platforms:
   Playlist Not Found: N'eus ket bet kavet ar roll lenn-mañ.
   Load Error: N'eus ket bet gallet kargañ ar bajenn-mañ diwar {platform}.
   Empty Tab: N'eus netra amañ c'hoazh.
+YouTube Account:
+  Like: "Plijout a ra din"
+  Dislike: "Ne blij ket din"
+  Rating Failed: "N'eus ket bet gallet notenniñ war YouTube: {error}"
+  Subscribe Failed: "N'eus ket bet gallet koumanantiñ war YouTube: {error}"
+  Unsubscribe Failed: "N'eus ket bet gallet digoumanantiñ war YouTube: {error}"
+  Add a comment: "Ouzhpennañ un evezhiadenn"
+  Add a reply: "Ouzhpennañ ur respont"
+  Comment: "Embann"
+  Reply: "Respont"
+  Comment Posted: "Embannet eo an evezhiadenn"
+  Reply Posted: "Embannet eo ar respont"
+  Comment Failed: "N'eus ket bet gallet embann an evezhiadenn: {error}"
+  Delete Comment: "Dilemel an evezhiadenn"
+  Delete Comment Confirmation: "Dilemel hoc'h evezhiadenn eus YouTube?"
+  Comment Deleted: "Dilamet eo an evezhiadenn"
+  Delete Comment Failed: "N'eus ket bet gallet dilemel an evezhiadenn: {error}"
+  Recommendations: "Erbedadennoù YouTube"
+  Recommendations Failed: "N'eus ket bet gallet kargañ hoc'h erbedadennoù YouTube."

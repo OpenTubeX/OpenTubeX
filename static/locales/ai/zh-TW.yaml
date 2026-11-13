@@ -330,6 +330,37 @@ History:
   History Older Than Days Removed: 已移除超過 {days} 天的觀看記錄
 Settings:
   Experimental Badge: 實驗性
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube 帳戶"
+    Unofficial App Warning: "OpenTubeX 不是 YouTube 官方應用程式。登入後，您在這裡的操作會與您的 Google 帳戶連結，Google 可能會限制或停用使用非官方應用程式的帳戶。請只使用您能承受失去的帳戶登入。"
+    Sign In Explanation: "OpenTubeX 會像電視應用程式一樣登入：您在 Google 網站上核准登入，OpenTubeX 永遠不會看到您的密碼。登入資訊只會保留在這部裝置上，不會同步或備份。"
+    Sign In: "登入"
+    Sign In Anyway: "仍要登入"
+    Sign Out: "登出"
+    Getting Sign-In Code: "正在取得登入代碼"
+    Sign In Instructions: "開啟登入頁面並選擇您的 Google 帳戶。代碼會自動填入。"
+    Other Device Instructions: "在另一部裝置上前往此網址並輸入代碼："
+    YouTube Channel: "YouTube 頻道"
+    Using Channel: "現在以 {name} 的身分使用 YouTube"
+    Switch Channel Failed: "無法切換 YouTube 頻道：{error}"
+    Open Sign-In Page: "開啟登入頁面"
+    Copy Code: "複製代碼"
+    Code Copied: "已複製代碼"
+    Waiting for Approval: "正在等待您核准登入"
+    Sign-In Denied: "登入要求遭到拒絕。"
+    Sign-In Code Expired: "代碼已過期。請再試一次以取得新代碼。"
+    Sign-In Failed: "無法登入：{error}"
+    Signed In As: "已用 {name} 的身分登入 YouTube"
+    Signed Out: "已登出 YouTube"
+    Sign Out Failed: "無法登出：{error}"
+    Revoke Failed: "已登出 YouTube，但 Google 未確認登入已結束。您可以在 Google 帳戶的第三方連結中將其移除。"
+    Signed out by YouTube: "YouTube 已結束登入。請在設定中重新登入，以繼續使用您的帳戶。"
+    Subscribe on YouTube: "同時在 YouTube 上訂閱"
+    Add to YouTube Watch History: "將看過的影片加入 YouTube 觀看紀錄"
+    Import Subscriptions: "從 YouTube 匯入訂閱內容"
+    Imported Subscriptions: "已匯入 {count} 個頻道"
+    No Subscriptions to Import: "這個 YouTube 帳戶沒有任何訂閱內容"
+    Import Subscriptions Failed: "無法匯入訂閱內容：{error}"
   Diagnostics:
     Diagnostics: 診斷
     Description: 啟用診斷記錄後，OpenTubeX 會在記憶體中保留最近的記錄訊息，方便你將其附加到錯誤回報中。它絕不會自行儲存或傳送這些訊息，關閉記錄會將其刪除。報告不包含 Cookie、權杖、IP 位址和 URL 參數，但可能包含你播放過的影片 ID，因此分享前請檢查報告。
@@ -2202,6 +2233,9 @@ Description:
   Games: 遊戲
   Music: 音樂
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "在 OpenTubeX 中訂閱或取消訂閱頻道時，您的 YouTube 帳戶也會執行相同操作。"
+    Add to YouTube Watch History: "您播放的影片會加入您的 YouTube 觀看紀錄，讓 YouTube 的推薦內容從中學習。在 YouTube 上暫停觀看紀錄時，不會加入任何內容。"
   General Settings:
     Built-in Streams: |
       自動模式透過 YouTube 的 visionOS 用戶端播放大多數影片，啟動更快並支援自動畫質。直播和它無法播放的影片會使用 SABR。
@@ -2722,3 +2756,22 @@ Platforms:
   Playlist Not Found: 找不到這個播放清單。
   Load Error: 無法從 {platform} 載入這個頁面。
   Empty Tab: 這裡還沒有任何內容。
+YouTube Account:
+  Like: "喜歡"
+  Dislike: "不喜歡"
+  Rating Failed: "無法在 YouTube 上評分：{error}"
+  Subscribe Failed: "無法在 YouTube 上訂閱：{error}"
+  Unsubscribe Failed: "無法在 YouTube 上取消訂閱：{error}"
+  Add a comment: "新增留言"
+  Add a reply: "新增回覆"
+  Comment: "留言"
+  Reply: "回覆"
+  Comment Posted: "已發布留言"
+  Reply Posted: "已發布回覆"
+  Comment Failed: "無法發布留言：{error}"
+  Delete Comment: "刪除留言"
+  Delete Comment Confirmation: "要從 YouTube 刪除您的留言嗎？"
+  Comment Deleted: "已刪除留言"
+  Delete Comment Failed: "無法刪除留言：{error}"
+  Recommendations: "YouTube 推薦內容"
+  Recommendations Failed: "無法載入您的 YouTube 推薦內容。"

@@ -331,6 +331,37 @@ History:
   History Older Than Days Removed: Riwayat tontonan yang lebih lama dari {days} hari telah dihapus
 Settings:
   Experimental Badge: Eksperimental
+  YouTube Account Settings:
+    YouTube Account Settings: "Akun YouTube"
+    Unofficial App Warning: "OpenTubeX bukan aplikasi resmi YouTube. Saat masuk, aktivitas Anda di sini terhubung ke akun Google Anda, dan Google dapat membatasi atau memblokir akun yang menggunakan aplikasi tidak resmi. Masuklah hanya dengan akun yang tidak masalah jika hilang."
+    Sign In Explanation: "OpenTubeX masuk seperti aplikasi TV: Anda menyetujuinya di situs web Google, dan OpenTubeX tidak pernah melihat kata sandi Anda. Sesi masuk tetap berada di perangkat ini dan tidak disinkronkan atau dicadangkan."
+    Sign In: "Masuk"
+    Sign In Anyway: "Tetap masuk"
+    Sign Out: "Keluar"
+    Getting Sign-In Code: "Mendapatkan kode masuk"
+    Sign In Instructions: "Buka halaman masuk dan pilih akun Google Anda. Kode akan diisi secara otomatis."
+    Other Device Instructions: "Di perangkat lain, buka alamat ini lalu masukkan kodenya:"
+    YouTube Channel: "Kanal YouTube"
+    Using Channel: "Sekarang menggunakan YouTube sebagai {name}"
+    Switch Channel Failed: "Tidak dapat mengganti kanal YouTube: {error}"
+    Open Sign-In Page: "Buka halaman masuk"
+    Copy Code: "Salin kode"
+    Code Copied: "Kode disalin"
+    Waiting for Approval: "Menunggu Anda menyetujui proses masuk"
+    Sign-In Denied: "Proses masuk ditolak."
+    Sign-In Code Expired: "Kode telah kedaluwarsa. Coba lagi untuk mendapatkan kode baru."
+    Sign-In Failed: "Tidak dapat masuk: {error}"
+    Signed In As: "Masuk ke YouTube sebagai {name}"
+    Signed Out: "Keluar dari YouTube"
+    Sign Out Failed: "Tidak dapat keluar: {error}"
+    Revoke Failed: "Anda telah keluar dari YouTube, tetapi Google tidak mengonfirmasi bahwa sesi masuk telah berakhir. Anda dapat menghapusnya di koneksi pihak ketiga pada Akun Google Anda."
+    Signed out by YouTube: "YouTube mengakhiri sesi masuk. Masuk lagi di Pengaturan untuk terus menggunakan akun Anda."
+    Subscribe on YouTube: "Juga berlangganan di YouTube"
+    Add to YouTube Watch History: "Tambahkan video yang ditonton ke riwayat YouTube"
+    Import Subscriptions: "Impor langganan dari YouTube"
+    Imported Subscriptions: "{count} kanal diimpor"
+    No Subscriptions to Import: "Akun YouTube ini tidak memiliki langganan"
+    Import Subscriptions Failed: "Tidak dapat mengimpor langganan: {error}"
   Diagnostics:
     Diagnostics: Diagnostik
     Description: Selama log diagnostik aktif, OpenTubeX menyimpan pesan log terbaru di memori agar Anda dapat melampirkannya ke laporan bug. Aplikasi ini tidak pernah menyimpan atau mengirimnya sendiri, dan menonaktifkan log akan menghapusnya. Laporan tidak menyertakan cookie, token, alamat IP, dan parameter URL, tetapi dapat berisi ID video yang Anda putar, jadi periksa laporan sebelum membagikannya.
@@ -2220,6 +2251,9 @@ Description:
   Games: Gim
   Music: Musik
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Berlangganan atau berhenti berlangganan kanal di OpenTubeX juga melakukan hal yang sama di akun YouTube Anda."
+    Add to YouTube Watch History: "Video yang Anda putar ditambahkan ke riwayat tontonan YouTube Anda, sehingga rekomendasi YouTube belajar darinya. Tidak ada yang ditambahkan selama riwayat dijeda di YouTube."
   General Settings:
     Built-in Streams: |
       Otomatis memutar sebagian besar video melalui klien visionOS YouTube, yang dimulai lebih cepat dan mendukung kualitas otomatis. Siaran langsung dan video yang tidak dapat diputarnya menggunakan SABR.
@@ -2740,3 +2774,22 @@ Platforms:
   Playlist Not Found: Daftar putar ini tidak dapat ditemukan.
   Load Error: Halaman ini tidak dapat dimuat dari {platform}.
   Empty Tab: Belum ada apa pun di sini.
+YouTube Account:
+  Like: "Suka"
+  Dislike: "Tidak suka"
+  Rating Failed: "Tidak dapat memberi penilaian di YouTube: {error}"
+  Subscribe Failed: "Tidak dapat berlangganan di YouTube: {error}"
+  Unsubscribe Failed: "Tidak dapat berhenti berlangganan di YouTube: {error}"
+  Add a comment: "Tambahkan komentar"
+  Add a reply: "Tambahkan balasan"
+  Comment: "Kirim komentar"
+  Reply: "Balas"
+  Comment Posted: "Komentar diposting"
+  Reply Posted: "Balasan diposting"
+  Comment Failed: "Tidak dapat memposting komentar: {error}"
+  Delete Comment: "Hapus komentar"
+  Delete Comment Confirmation: "Hapus komentar Anda dari YouTube?"
+  Comment Deleted: "Komentar dihapus"
+  Delete Comment Failed: "Tidak dapat menghapus komentar: {error}"
+  Recommendations: "Rekomendasi YouTube"
+  Recommendations Failed: "Tidak dapat memuat rekomendasi YouTube Anda."

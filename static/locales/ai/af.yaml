@@ -492,6 +492,37 @@ History:
   History Older Than Days Removed: Kykgeskiedenis ouer as 1 dag is verwyder | Kykgeskiedenis ouer as {days} dae is verwyder
 Settings:
   Experimental Badge: Eksperimenteel
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube-rekening"
+    Unofficial App Warning: "OpenTubeX is nie ’n amptelike YouTube-toep nie. Wanneer u aanmeld, word wat u hier doen aan u Google-rekening gekoppel, en Google kan rekeninge wat nie-amptelike toeps gebruik, beperk of verban. Meld slegs aan met ’n rekening wat u kan bekostig om te verloor."
+    Sign In Explanation: "OpenTubeX meld aan soos ’n TV-toepassing: u keur dit op Google se webwerf goed, en OpenTubeX sien nooit u wagwoord nie. Die aanmelding bly op hierdie toestel en word nie gesinkroniseer of gerugsteun nie."
+    Sign In: "Meld aan"
+    Sign In Anyway: "Meld tog aan"
+    Sign Out: "Meld af"
+    Getting Sign-In Code: "Kry tans ’n aanmeldkode"
+    Sign In Instructions: "Maak die aanmeldbladsy oop en kies u Google-rekening. Die kode word outomaties ingevul."
+    Other Device Instructions: "Gaan op ’n ander toestel na hierdie adres en voer die kode in:"
+    YouTube Channel: "YouTube-kanaal"
+    Using Channel: "YouTube word nou as {name} gebruik"
+    Switch Channel Failed: "Kon nie die YouTube-kanaal wissel nie: {error}"
+    Open Sign-In Page: "Maak aanmeldbladsy oop"
+    Copy Code: "Kopieer kode"
+    Code Copied: "Kode gekopieer"
+    Waiting for Approval: "Wag dat u die aanmelding goedkeur"
+    Sign-In Denied: "Die aanmelding is geweier."
+    Sign-In Code Expired: "Die kode het verval. Probeer weer om ’n nuwe een te kry."
+    Sign-In Failed: "Kon nie aanmeld nie: {error}"
+    Signed In As: "By YouTube aangemeld as {name}"
+    Signed Out: "Van YouTube afgemeld"
+    Sign Out Failed: "Kon nie afmeld nie: {error}"
+    Revoke Failed: "Van YouTube afgemeld, maar Google het nie bevestig dat die aanmelding beëindig is nie. U kan dit onder derdeparty-verbindings in u Google-rekening verwyder."
+    Signed out by YouTube: "YouTube het die aanmelding beëindig. Meld weer in Instellings aan om u rekening verder te gebruik."
+    Subscribe on YouTube: "Teken ook op YouTube in"
+    Add to YouTube Watch History: "Voeg gekykte video’s by YouTube-geskiedenis"
+    Import Subscriptions: "Voer intekeninge van YouTube in"
+    Imported Subscriptions: "{count} kanaal ingevoer | {count} kanale ingevoer"
+    No Subscriptions to Import: "Hierdie YouTube-rekening het geen intekeninge nie"
+    Import Subscriptions Failed: "Kon nie intekeninge invoer nie: {error}"
   Tab Unloading:
     Automatically unload tabs: Ontlaai oortjies outomaties
     Memory threshold: Geheuedrempel
@@ -2451,6 +2482,9 @@ Description:
   Games: Speletjies
   Music: Musiek
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "As u in OpenTubeX op ’n kanaal inteken of uitteken, gebeur dieselfde op u YouTube-rekening."
+    Add to YouTube Watch History: "Video’s wat u speel, word by u YouTube-kykgeskiedenis gevoeg, sodat YouTube se aanbevelings daaruit leer. Niks word bygevoeg terwyl die geskiedenis op YouTube onderbreek is nie."
   General Settings:
     Built-in Streams: |
       Outomaties speel die meeste video's deur YouTube se visionOS-kliënt, wat vinniger begin en outomatiese kwaliteit ondersteun. Regstreekse strome en video's wat dit nie kan speel nie, gebruik SABR.
@@ -2927,3 +2961,22 @@ Platforms:
   Playlist Not Found: Hierdie speellys kon nie gevind word nie.
   Load Error: Hierdie bladsy kon nie van {platform} gelaai word nie.
   Empty Tab: Hier is nog niks nie.
+YouTube Account:
+  Like: "Hou van"
+  Dislike: "Hou nie van nie"
+  Rating Failed: "Kon nie op YouTube gradeer nie: {error}"
+  Subscribe Failed: "Kon nie op YouTube inteken nie: {error}"
+  Unsubscribe Failed: "Kon nie op YouTube uitteken nie: {error}"
+  Add a comment: "Voeg ’n kommentaar by"
+  Add a reply: "Voeg ’n antwoord by"
+  Comment: "Lewer kommentaar"
+  Reply: "Antwoord"
+  Comment Posted: "Kommentaar geplaas"
+  Reply Posted: "Antwoord geplaas"
+  Comment Failed: "Kon nie die kommentaar plaas nie: {error}"
+  Delete Comment: "Verwyder kommentaar"
+  Delete Comment Confirmation: "Verwyder u kommentaar van YouTube?"
+  Comment Deleted: "Kommentaar verwyder"
+  Delete Comment Failed: "Kon nie die kommentaar verwyder nie: {error}"
+  Recommendations: "YouTube-aanbevelings"
+  Recommendations Failed: "Kon nie u YouTube-aanbevelings laai nie."

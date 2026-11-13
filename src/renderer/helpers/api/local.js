@@ -146,6 +146,16 @@ async function createInnertube({ withPlayer = false, location = undefined, safet
 }
 
 /**
+ * The signature timestamp of YouTube's current player script, which the
+ * signed-in TV player needs to answer.
+ * @returns {Promise<number | undefined>}
+ */
+export async function getLocalSignatureTimestamp() {
+  const innertube = await createInnertube({ withPlayer: true })
+  return innertube.session.player?.signature_timestamp
+}
+
+/**
  * @param {string} query
  * @param {AbortSignal} [signal]
  */

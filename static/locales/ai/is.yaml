@@ -330,6 +330,37 @@ History:
   History Older Than Days Removed: Áhorfsferli eldri en {days} dags hefur verið eytt | Áhorfsferli eldri en {days} daga hefur verið eytt
 Settings:
   Experimental Badge: Tilraun
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube-reikningur"
+    Unofficial App Warning: "OpenTubeX er ekki opinbert YouTube-forrit. Þegar þú skráir þig inn tengist það sem þú gerir hér Google-reikningnum þínum og Google getur takmarkað eða bannað reikninga sem nota óopinber forrit. Skráðu þig aðeins inn með reikningi sem þú mátt við að missa."
+    Sign In Explanation: "OpenTubeX skráir sig inn eins og sjónvarpsforrit: þú samþykkir innskráninguna á vefsvæði Google og OpenTubeX sér aldrei lykilorðið þitt. Innskráningin helst á þessu tæki og er hvorki samstillt né afrituð."
+    Sign In: "Skrá inn"
+    Sign In Anyway: "Skrá inn samt"
+    Sign Out: "Skrá út"
+    Getting Sign-In Code: "Sæki innskráningarkóða"
+    Sign In Instructions: "Opnaðu innskráningarsíðuna og veldu Google-reikninginn þinn. Kóðinn er fylltur út sjálfkrafa."
+    Other Device Instructions: "Farðu á þetta vistfang í öðru tæki og sláðu inn kóðann:"
+    YouTube Channel: "YouTube-rás"
+    Using Channel: "Þú notar nú YouTube sem {name}"
+    Switch Channel Failed: "Ekki tókst að skipta um YouTube-rás: {error}"
+    Open Sign-In Page: "Opna innskráningarsíðu"
+    Copy Code: "Afrita kóða"
+    Code Copied: "Kóði afritaður"
+    Waiting for Approval: "Bíð eftir að þú samþykkir innskráninguna"
+    Sign-In Denied: "Innskráningunni var hafnað."
+    Sign-In Code Expired: "Kóðinn rann út. Reyndu aftur til að fá nýjan."
+    Sign-In Failed: "Ekki tókst að skrá inn: {error}"
+    Signed In As: "Innskráning á YouTube sem {name}"
+    Signed Out: "Skráð út af YouTube"
+    Sign Out Failed: "Ekki tókst að skrá út: {error}"
+    Revoke Failed: "Útskráning af YouTube tókst, en Google staðfesti ekki að innskráningunni væri lokið. Þú getur fjarlægt hana undir tengingum þriðju aðila á Google-reikningnum þínum."
+    Signed out by YouTube: "YouTube batt enda á innskráninguna. Skráðu þig aftur inn í stillingum til að halda áfram að nota reikninginn þinn."
+    Subscribe on YouTube: "Gerast líka áskrifandi á YouTube"
+    Add to YouTube Watch History: "Bæta áhorfðum myndskeiðum við YouTube-feril"
+    Import Subscriptions: "Flytja inn áskriftir frá YouTube"
+    Imported Subscriptions: "{count} rás flutt inn | {count} rásir fluttar inn"
+    No Subscriptions to Import: "Þessi YouTube-reikningur er ekki með neinar áskriftir"
+    Import Subscriptions Failed: "Ekki tókst að flytja inn áskriftir: {error}"
   Diagnostics:
     Diagnostics: Greining
     Description: Á meðan greiningarannáll er virkur geymir OpenTubeX nýleg annálaskilaboð í minni svo þú getir hengt þau við villutilkynningar. Það vistar þau aldrei né sendir að eigin frumkvæði og ef slökkt er á annálnum er þeim eytt. Skýrslur sleppa vafrakökum, tókum, IP-tölum og URL-færibreytum, en þær geta innihaldið auðkenni myndskeiða sem þú spilaðir, svo farðu yfir skýrslu áður en þú deilir henni.
@@ -2216,6 +2247,9 @@ Description:
   Games: Leikir
   Music: Tónlist
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Ef þú gerist áskrifandi að rás eða segir upp áskrift í OpenTubeX gerist það sama á YouTube-reikningnum þínum."
+    Add to YouTube Watch History: "Myndskeið sem þú spilar bætast við áhorfsferilinn þinn á YouTube, svo meðmæli YouTube læri af þeim. Engu er bætt við á meðan ferillinn er í bið á YouTube."
   General Settings:
     Built-in Streams: |
       Sjálfvirkt spilar flest myndskeið í gegnum visionOS-biðlara YouTube, sem byrjar hraðar og styður sjálfvirk gæði. Beinar útsendingar og myndskeið sem hann getur ekki spilað nota SABR.
@@ -2738,3 +2772,22 @@ Platforms:
   Playlist Not Found: Þessi spilunarlisti fannst ekki.
   Load Error: Ekki tókst að hlaða þessari síðu frá {platform}.
   Empty Tab: Hér er ekkert ennþá.
+YouTube Account:
+  Like: "Líkar við"
+  Dislike: "Líkar ekki við"
+  Rating Failed: "Ekki tókst að gefa einkunn á YouTube: {error}"
+  Subscribe Failed: "Ekki tókst að gerast áskrifandi á YouTube: {error}"
+  Unsubscribe Failed: "Ekki tókst að segja upp áskrift á YouTube: {error}"
+  Add a comment: "Bæta við athugasemd"
+  Add a reply: "Bæta við svari"
+  Comment: "Skrifa athugasemd"
+  Reply: "Svara"
+  Comment Posted: "Athugasemd birt"
+  Reply Posted: "Svar birt"
+  Comment Failed: "Ekki tókst að birta athugasemdina: {error}"
+  Delete Comment: "Eyða athugasemd"
+  Delete Comment Confirmation: "Eyða athugasemdinni þinni af YouTube?"
+  Comment Deleted: "Athugasemd eytt"
+  Delete Comment Failed: "Ekki tókst að eyða athugasemdinni: {error}"
+  Recommendations: "Meðmæli frá YouTube"
+  Recommendations Failed: "Ekki tókst að hlaða YouTube-meðmælunum þínum."

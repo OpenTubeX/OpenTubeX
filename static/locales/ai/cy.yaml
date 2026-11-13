@@ -331,6 +331,37 @@ History:
   History Older Than Days Removed: Mae hanes gwylio sy'n hŷn na {days} o ddiwrnodau wedi'i ddileu | Mae hanes gwylio sy'n hŷn nag 1 diwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} ddiwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} diwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} diwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} o ddiwrnodau wedi'i ddileu
 Settings:
   Experimental Badge: Arbrofol
+  YouTube Account Settings:
+    YouTube Account Settings: "Cyfrif YouTube"
+    Unofficial App Warning: "Nid yw OpenTubeX yn ap YouTube swyddogol. Mae mewngofnodi yn cysylltu'r hyn rydych yn ei wneud yma â'ch cyfrif Google, a gall Google gyfyngu ar gyfrifon sy'n defnyddio apiau answyddogol neu eu gwahardd. Dim ond mewngofnodi gyda chyfrif y gallwch fforddio ei golli."
+    Sign In Explanation: "Mae OpenTubeX yn mewngofnodi fel ap teledu: rydych chi'n ei gymeradwyo ar wefan Google, a dydy OpenTubeX byth yn gweld eich cyfrinair. Mae'r mewngofnodi'n aros ar y ddyfais hon ac nid yw'n cael ei gysoni na'i gadw wrth gefn."
+    Sign In: "Mewngofnodi"
+    Sign In Anyway: "Mewngofnodi beth bynnag"
+    Sign Out: "Allgofnodi"
+    Getting Sign-In Code: "Yn cael cod mewngofnodi"
+    Sign In Instructions: "Agorwch y dudalen mewngofnodi a dewiswch eich cyfrif Google. Bydd y cod yn cael ei lenwi'n awtomatig."
+    Other Device Instructions: "Ar ddyfais arall, ewch i'r cyfeiriad hwn a rhowch y cod:"
+    YouTube Channel: "Sianel YouTube"
+    Using Channel: "Nawr yn defnyddio YouTube fel {name}"
+    Switch Channel Failed: "Methu newid y sianel YouTube: {error}"
+    Open Sign-In Page: "Agor y dudalen mewngofnodi"
+    Copy Code: "Copïo'r cod"
+    Code Copied: "Wedi copïo'r cod"
+    Waiting for Approval: "Yn aros i chi gymeradwyo'r mewngofnodi"
+    Sign-In Denied: "Cafodd y mewngofnodi ei wrthod."
+    Sign-In Code Expired: "Mae'r cod wedi dod i ben. Rhowch gynnig arall arni i gael un newydd."
+    Sign-In Failed: "Methu mewngofnodi: {error}"
+    Signed In As: "Wedi mewngofnodi i YouTube fel {name}"
+    Signed Out: "Wedi allgofnodi o YouTube"
+    Sign Out Failed: "Methu allgofnodi: {error}"
+    Revoke Failed: "Wedi allgofnodi o YouTube, ond ni chadarnhaodd Google fod y mewngofnodi wedi dod i ben. Gallwch ei dynnu o'r cysylltiadau trydydd parti yn eich cyfrif Google."
+    Signed out by YouTube: "Daeth YouTube â'r mewngofnodi i ben. Mewngofnodwch eto yn y Gosodiadau i barhau i ddefnyddio'ch cyfrif."
+    Subscribe on YouTube: "Tanysgrifio ar YouTube hefyd"
+    Add to YouTube Watch History: "Ychwanegu fideos a wyliwyd at hanes YouTube"
+    Import Subscriptions: "Mewnforio tanysgrifiadau o YouTube"
+    Imported Subscriptions: "Mewnforiwyd {count} o sianeli | Mewnforiwyd {count} sianel | Mewnforiwyd {count} sianel | Mewnforiwyd {count} sianel | Mewnforiwyd {count} sianel | Mewnforiwyd {count} o sianeli"
+    No Subscriptions to Import: "Does gan y cyfrif YouTube hwn ddim tanysgrifiadau"
+    Import Subscriptions Failed: "Methu mewnforio tanysgrifiadau: {error}"
   Diagnostics:
     Diagnostics: Diagnosteg
     Description: Tra bo'r log diagnostig ymlaen, mae OpenTubeX yn cadw negeseuon log diweddar yn y cof fel y gallwch eu hatodi i adroddiadau bygiau. Nid yw byth yn eu cadw na'u hanfon ar ei ben ei hun, ac mae diffodd y log yn eu dileu. Mae adroddiadau'n hepgor cwcis, tocynnau, cyfeiriadau IP a pharamedrau URL, ond gallant gynnwys IDs fideos rydych wedi'u chwarae, felly gwiriwch adroddiad cyn ei rannu.
@@ -2231,6 +2262,9 @@ Description:
   Games: Gemau
   Music: Cerddoriaeth
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Mae tanysgrifio i sianel neu ddad-danysgrifio ohoni yn OpenTubeX yn gwneud yr un peth ar eich cyfrif YouTube."
+    Add to YouTube Watch History: "Mae fideos rydych chi'n eu chwarae yn cael eu hychwanegu at eich hanes gwylio YouTube, fel bod argymhellion YouTube yn dysgu ohonyn nhw. Does dim yn cael ei ychwanegu tra bo'r hanes wedi'i oedi ar YouTube."
   General Settings:
     Built-in Streams: |
       Mae Awtomatig yn chwarae'r rhan fwyaf o fideos drwy gleient visionOS YouTube, sy'n cychwyn yn gynt ac yn cefnogi ansawdd awtomatig. Mae ffrydiau byw a fideos na all eu chwarae yn defnyddio SABR.
@@ -2752,3 +2786,22 @@ Platforms:
   Playlist Not Found: Doedd dim modd dod o hyd i'r rhestr chwarae hon.
   Load Error: Doedd dim modd llwytho'r dudalen hon o {platform}.
   Empty Tab: Does dim byd yma eto.
+YouTube Account:
+  Like: "Hoffi"
+  Dislike: "Ddim yn hoffi"
+  Rating Failed: "Methu rhoi sgôr ar YouTube: {error}"
+  Subscribe Failed: "Methu tanysgrifio ar YouTube: {error}"
+  Unsubscribe Failed: "Methu dad-danysgrifio ar YouTube: {error}"
+  Add a comment: "Ychwanegu sylw"
+  Add a reply: "Ychwanegu ymateb"
+  Comment: "Rhoi sylw"
+  Reply: "Ymateb"
+  Comment Posted: "Sylw wedi'i bostio"
+  Reply Posted: "Ymateb wedi'i bostio"
+  Comment Failed: "Methu postio'r sylw: {error}"
+  Delete Comment: "Dileu sylw"
+  Delete Comment Confirmation: "Dileu eich sylw o YouTube?"
+  Comment Deleted: "Sylw wedi'i ddileu"
+  Delete Comment Failed: "Methu dileu'r sylw: {error}"
+  Recommendations: "Argymhellion YouTube"
+  Recommendations Failed: "Methu llwytho eich argymhellion YouTube."

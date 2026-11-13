@@ -330,6 +330,37 @@ History:
   History Older Than Days Removed: Seerlogg eldre enn 1 dag er fjernet | Seerlogg eldre enn {days} dager er fjernet
 Settings:
   Experimental Badge: Eksperimentell
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube-konto"
+    Unofficial App Warning: "OpenTubeX er ikke en offisiell YouTube-app. Når du logger inn, knyttes det du gjør her, til Google-kontoen din, og Google kan begrense eller utestenge kontoer som bruker uoffisielle apper. Logg bare inn med en konto du har råd til å miste."
+    Sign In Explanation: "OpenTubeX logger inn som en TV-app: du godkjenner innloggingen på Googles nettsted, og OpenTubeX ser aldri passordet ditt. Innloggingen blir værende på denne enheten og blir verken synkronisert eller sikkerhetskopiert."
+    Sign In: "Logg inn"
+    Sign In Anyway: "Logg inn likevel"
+    Sign Out: "Logg ut"
+    Getting Sign-In Code: "Henter innloggingskode"
+    Sign In Instructions: "Åpne innloggingssiden og velg Google-kontoen din. Koden fylles ut automatisk."
+    Other Device Instructions: "Gå til denne adressen på en annen enhet og skriv inn koden:"
+    YouTube Channel: "YouTube-kanal"
+    Using Channel: "Bruker nå YouTube som {name}"
+    Switch Channel Failed: "Kunne ikke bytte YouTube-kanal: {error}"
+    Open Sign-In Page: "Åpne innloggingssiden"
+    Copy Code: "Kopier koden"
+    Code Copied: "Koden er kopiert"
+    Waiting for Approval: "Venter på at du godkjenner innloggingen"
+    Sign-In Denied: "Innloggingen ble avvist."
+    Sign-In Code Expired: "Koden er utløpt. Prøv på nytt for å få en ny."
+    Sign-In Failed: "Kunne ikke logge inn: {error}"
+    Signed In As: "Logget inn på YouTube som {name}"
+    Signed Out: "Logget ut av YouTube"
+    Sign Out Failed: "Kunne ikke logge ut: {error}"
+    Revoke Failed: "Logget ut av YouTube, men Google bekreftet ikke at innloggingen ble avsluttet. Du kan fjerne den under tredjepartstilkoblinger i Google-kontoen din."
+    Signed out by YouTube: "YouTube avsluttet innloggingen. Logg inn igjen i innstillingene for å fortsette å bruke kontoen din."
+    Subscribe on YouTube: "Abonner også på YouTube"
+    Add to YouTube Watch History: "Legg til sette videoer i YouTube-historikken"
+    Import Subscriptions: "Importer abonnementer fra YouTube"
+    Imported Subscriptions: "Importerte {count} kanal | Importerte {count} kanaler"
+    No Subscriptions to Import: "Denne YouTube-kontoen har ingen abonnementer"
+    Import Subscriptions Failed: "Kunne ikke importere abonnementer: {error}"
   Diagnostics:
     Diagnostics: Diagnostikk
     Description: Mens diagnoseloggen er på, holder OpenTubeX nylige loggmeldinger i minnet slik at du kan legge dem ved feilrapporter. Det lagrer eller sender dem aldri av seg selv, og når du slår av loggen, slettes de. Rapporter utelater informasjonskapsler, tokener, IP-adresser og URL-parametere, men de kan inneholde ID-er for videoer du har spilt av, så sjekk en rapport før du deler den.
@@ -2200,6 +2231,9 @@ Description:
   Games: Spill
   Music: Musikk
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Når du abonnerer på eller avslutter abonnementet på en kanal i OpenTubeX, skjer det samme på YouTube-kontoen din."
+    Add to YouTube Watch History: "Videoer du spiller av, legges til i visningshistorikken din på YouTube, slik at YouTubes anbefalinger lærer av dem. Ingenting legges til mens historikken er satt på pause på YouTube."
   General Settings:
     Built-in Streams: |
       Automatisk spiller de fleste videoer via YouTubes visionOS-klient, som starter raskere og støtter automatisk kvalitet. Direktesendinger og videoer den ikke kan spille av, bruker SABR.
@@ -2719,3 +2753,22 @@ Platforms:
   Playlist Not Found: Fant ikke denne spillelisten.
   Load Error: Kunne ikke laste inn denne siden fra {platform}.
   Empty Tab: Det er ingenting her ennå.
+YouTube Account:
+  Like: "Lik"
+  Dislike: "Mislik"
+  Rating Failed: "Kunne ikke vurdere på YouTube: {error}"
+  Subscribe Failed: "Kunne ikke abonnere på YouTube: {error}"
+  Unsubscribe Failed: "Kunne ikke avslutte abonnementet på YouTube: {error}"
+  Add a comment: "Legg til en kommentar"
+  Add a reply: "Legg til et svar"
+  Comment: "Kommenter"
+  Reply: "Svar"
+  Comment Posted: "Kommentaren er publisert"
+  Reply Posted: "Svaret er publisert"
+  Comment Failed: "Kunne ikke publisere kommentaren: {error}"
+  Delete Comment: "Slett kommentar"
+  Delete Comment Confirmation: "Vil du slette kommentaren din fra YouTube?"
+  Comment Deleted: "Kommentaren er slettet"
+  Delete Comment Failed: "Kunne ikke slette kommentaren: {error}"
+  Recommendations: "YouTube-anbefalinger"
+  Recommendations Failed: "Kunne ikke laste inn YouTube-anbefalingene dine."

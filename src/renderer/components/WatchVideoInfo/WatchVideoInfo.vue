@@ -104,6 +104,7 @@
       <WatchVideoLikes
         :like-count="likeCount"
         :dislike-count="useReturnYoutubeDislikes ? dislikeCount : null"
+        :video-id="offline ? '' : id"
       />
     </div>
     <div class="videoButtons">

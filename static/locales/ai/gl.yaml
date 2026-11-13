@@ -335,6 +335,37 @@ History:
   History Older Than Days Removed: Eliminouse o historial de visualización de máis de 1 día | Eliminouse o historial de visualización de máis de {days} días
 Settings:
   Experimental Badge: Experimental
+  YouTube Account Settings:
+    YouTube Account Settings: "Conta de YouTube"
+    Unofficial App Warning: "OpenTubeX non é unha aplicación oficial de YouTube. Ao iniciar sesión, o que fas aquí queda vinculado á túa conta de Google, e Google pode restrinxir ou bloquear as contas que usan aplicacións non oficiais. Inicia sesión só cunha conta que non che importe perder."
+    Sign In Explanation: "OpenTubeX inicia sesión como unha aplicación de TV: aprobas o inicio de sesión no sitio web de Google, e OpenTubeX nunca ve o teu contrasinal. A sesión queda neste dispositivo e non se sincroniza nin se inclúe nas copias de seguranza."
+    Sign In: "Iniciar sesión"
+    Sign In Anyway: "Iniciar sesión igualmente"
+    Sign Out: "Pechar sesión"
+    Getting Sign-In Code: "Obtendo un código de inicio de sesión"
+    Sign In Instructions: "Abre a páxina de inicio de sesión e escolle a túa conta de Google. O código complétase automaticamente."
+    Other Device Instructions: "Noutro dispositivo, vai a este enderezo e introduce o código:"
+    YouTube Channel: "Canle de YouTube"
+    Using Channel: "Agora usas YouTube como {name}"
+    Switch Channel Failed: "Non se puido cambiar a canle de YouTube: {error}"
+    Open Sign-In Page: "Abrir a páxina de inicio de sesión"
+    Copy Code: "Copiar o código"
+    Code Copied: "Copiouse o código"
+    Waiting for Approval: "Agardando a que aprobes o inicio de sesión"
+    Sign-In Denied: "Denegouse o inicio de sesión."
+    Sign-In Code Expired: "O código caducou. Téntao de novo para obter outro."
+    Sign-In Failed: "Non se puido iniciar sesión: {error}"
+    Signed In As: "Sesión iniciada en YouTube como {name}"
+    Signed Out: "Pechouse a sesión de YouTube"
+    Sign Out Failed: "Non se puido pechar a sesión: {error}"
+    Revoke Failed: "Pechaches a sesión de YouTube, pero Google non confirmou que o inicio de sesión rematase. Podes quitalo nas conexións con terceiros da túa conta de Google."
+    Signed out by YouTube: "YouTube pechou a sesión. Volve iniciar sesión en Axustes para seguir usando a túa conta."
+    Subscribe on YouTube: "Subscribirse tamén en YouTube"
+    Add to YouTube Watch History: "Engadir os vídeos vistos ao historial de YouTube"
+    Import Subscriptions: "Importar subscricións de YouTube"
+    Imported Subscriptions: "Importouse {count} canle | Importáronse {count} canles"
+    No Subscriptions to Import: "Esta conta de YouTube non ten subscricións"
+    Import Subscriptions Failed: "Non se puideron importar as subscricións: {error}"
   Diagnostics:
     Diagnostics: Diagnóstico
     Description: Mentres o rexistro de diagnóstico está activado, OpenTubeX garda as mensaxes de rexistro recentes na memoria para que poidas achegalas aos informes de erros. Nunca as garda nin as envía pola súa conta, e desactivar o rexistro elimínaas. Os informes omiten cookies, tokens, enderezos IP e parámetros de URL, pero poden incluír os ID dos vídeos que reproduciches, así que revisa o informe antes de compartilo.
@@ -2255,6 +2286,9 @@ Description:
   Games: Xogos
   Music: Música
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Ao subscribirte ou cancelar a subscrición a unha canle en OpenTubeX, faise o mesmo na túa conta de YouTube."
+    Add to YouTube Watch History: "Os vídeos que reproduces engádense ao teu historial de reprodución de YouTube, para que as recomendacións de YouTube aprendan deles. Non se engade nada mentres o historial estea en pausa en YouTube."
   General Settings:
     Built-in Streams: |
       Automático reproduce a maioría dos vídeos co cliente visionOS de YouTube, que comeza máis rápido e admite a calidade automática. As emisións en directo e os vídeos que non pode reproducir usan SABR.
@@ -2778,3 +2812,22 @@ Platforms:
   Playlist Not Found: Non se puido atopar esta listaxe de reprodución.
   Load Error: Non se puido cargar esta páxina desde {platform}.
   Empty Tab: Aínda non hai nada aquí.
+YouTube Account:
+  Like: "Gústame"
+  Dislike: "Non me gusta"
+  Rating Failed: "Non se puido valorar en YouTube: {error}"
+  Subscribe Failed: "Non se puido facer a subscrición en YouTube: {error}"
+  Unsubscribe Failed: "Non se puido cancelar a subscrición en YouTube: {error}"
+  Add a comment: "Engadir un comentario"
+  Add a reply: "Engadir unha resposta"
+  Comment: "Comentar"
+  Reply: "Responder"
+  Comment Posted: "Publicouse o comentario"
+  Reply Posted: "Publicouse a resposta"
+  Comment Failed: "Non se puido publicar o comentario: {error}"
+  Delete Comment: "Eliminar o comentario"
+  Delete Comment Confirmation: "Queres eliminar o teu comentario de YouTube?"
+  Comment Deleted: "Eliminouse o comentario"
+  Delete Comment Failed: "Non se puido eliminar o comentario: {error}"
+  Recommendations: "Recomendacións de YouTube"
+  Recommendations Failed: "Non se puideron cargar as túas recomendacións de YouTube."

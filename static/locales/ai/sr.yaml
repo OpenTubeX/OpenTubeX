@@ -340,6 +340,37 @@ History:
   History Older Than Days Removed: Историја гледања старија од {days} дана је обрисана | Историја гледања старија од {days} дана је обрисана | Историја гледања старија од {days} дана је обрисана
 Settings:
   Experimental Badge: Експериментално
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube налог"
+    Unofficial App Warning: "OpenTubeX није званична YouTube апликација. Пријављивањем се оно што овде радите повезује са вашим Google налогом, а Google може да ограничи или забрани налоге који користе незваничне апликације. Пријављујте се само налогом чији губитак можете да поднесете."
+    Sign In Explanation: "OpenTubeX се пријављује као ТВ апликација: пријаву одобравате на Google веб-сајту, а OpenTubeX никада не види вашу лозинку. Пријава остаје на овом уређају и не синхронизује се нити се за њу прави резервна копија."
+    Sign In: "Пријави се"
+    Sign In Anyway: "Ипак се пријави"
+    Sign Out: "Одјави се"
+    Getting Sign-In Code: "Преузимање кода за пријаву"
+    Sign In Instructions: "Отворите страницу за пријаву и изаберите свој Google налог. Код се попуњава аутоматски."
+    Other Device Instructions: "На другом уређају идите на ову адресу и унесите код:"
+    YouTube Channel: "YouTube канал"
+    Using Channel: "Сада користите YouTube као {name}"
+    Switch Channel Failed: "Промена YouTube канала није успела: {error}"
+    Open Sign-In Page: "Отвори страницу за пријаву"
+    Copy Code: "Копирај код"
+    Code Copied: "Код је копиран"
+    Waiting for Approval: "Чека се да одобрите пријаву"
+    Sign-In Denied: "Пријава је одбијена."
+    Sign-In Code Expired: "Код је истекао. Покушајте поново да бисте добили нови."
+    Sign-In Failed: "Пријава није успела: {error}"
+    Signed In As: "Пријављени сте на YouTube као {name}"
+    Signed Out: "Одјављени сте са YouTube-а"
+    Sign Out Failed: "Одјава није успела: {error}"
+    Revoke Failed: "Одјављени сте са YouTube-а, али Google није потврдио да је пријава прекинута. Можете је уклонити у везама са трећим странама на свом Google налогу."
+    Signed out by YouTube: "YouTube је прекинуо пријаву. Пријавите се поново у Подешавањима да бисте наставили да користите налог."
+    Subscribe on YouTube: "Запрати и на YouTube-у"
+    Add to YouTube Watch History: "Додај одгледане видео снимке у YouTube историју"
+    Import Subscriptions: "Увези праћења са YouTube-а"
+    Imported Subscriptions: "Увезен је {count} канал | Увезена су {count} канала | Увезено је {count} канала"
+    No Subscriptions to Import: "Овај YouTube налог нема праћења"
+    Import Subscriptions Failed: "Увоз праћења није успео: {error}"
   Diagnostics:
     Diagnostics: Дијагностика
     Description: Док је дијагностички дневник укључен, OpenTubeX чува недавне поруке дневника у меморији како бисте могли да их приложите извештајима о грешкама. Никада их не чува нити шаље сам, а искључивање дневника их брише. Извештаји изостављају колачиће, токене, IP адресе и URL параметре, али могу да садрже ID-ове видео снимака које сте пустили, па проверите извештај пре дељења.
@@ -2277,6 +2308,9 @@ Description:
   Games: Игре
   Music: Музика
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Праћење канала или прекид праћења у OpenTubeX исто то ради и на вашем YouTube налогу."
+    Add to YouTube Watch History: "Видео снимци које пуштате додају се у вашу YouTube историју гледања, па YouTube препоруке уче на основу њих. Ништа се не додаје док је историја паузирана на YouTube-у."
   General Settings:
     Built-in Streams: |
       Аутоматски режим пушта већину видео снимака преко YouTube visionOS клијента, који се покреће брже и подржава аутоматски квалитет. Преноси уживо и видео снимци које не може да пусти користе SABR.
@@ -2802,3 +2836,22 @@ Platforms:
   Playlist Not Found: Ова плејлиста није пронађена.
   Load Error: Ова страница није могла да се учита са платформе {platform}.
   Empty Tab: Овде још нема ничега.
+YouTube Account:
+  Like: "Свиђа ми се"
+  Dislike: "Не свиђа ми се"
+  Rating Failed: "Оцењивање на YouTube-у није успело: {error}"
+  Subscribe Failed: "Праћење на YouTube-у није успело: {error}"
+  Unsubscribe Failed: "Прекид праћења на YouTube-у није успео: {error}"
+  Add a comment: "Додајте коментар"
+  Add a reply: "Додајте одговор"
+  Comment: "Коментариши"
+  Reply: "Одговори"
+  Comment Posted: "Коментар је објављен"
+  Reply Posted: "Одговор је објављен"
+  Comment Failed: "Објављивање коментара није успело: {error}"
+  Delete Comment: "Избриши коментар"
+  Delete Comment Confirmation: "Избрисати ваш коментар са YouTube-а?"
+  Comment Deleted: "Коментар је избрисан"
+  Delete Comment Failed: "Брисање коментара није успело: {error}"
+  Recommendations: "YouTube препоруке"
+  Recommendations Failed: "Учитавање ваших YouTube препорука није успело."

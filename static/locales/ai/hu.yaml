@@ -330,6 +330,37 @@ History:
   History Older Than Days Removed: Az 1 napnál régebbi megtekintési előzmények eltávolítva | A(z) {days} napnál régebbi megtekintési előzmények eltávolítva
 Settings:
   Experimental Badge: Kísérleti
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube-fiók"
+    Unofficial App Warning: "Az OpenTubeX nem hivatalos YouTube-alkalmazás. Bejelentkezéskor az itt végzett tevékenysége a Google-fiókjához kapcsolódik, és a Google korlátozhatja vagy letilthatja a nem hivatalos alkalmazásokat használó fiókokat. Csak olyan fiókkal jelentkezzen be, amelynek elvesztését megengedheti magának."
+    Sign In Explanation: "Az OpenTubeX úgy jelentkezik be, mint egy tévéalkalmazás: a bejelentkezést a Google webhelyén hagyja jóvá, és az OpenTubeX soha nem látja a jelszavát. A bejelentkezés ezen az eszközön marad, és nem kerül szinkronizálásra vagy biztonsági mentésre."
+    Sign In: "Bejelentkezés"
+    Sign In Anyway: "Bejelentkezés ennek ellenére"
+    Sign Out: "Kijelentkezés"
+    Getting Sign-In Code: "Bejelentkezési kód lekérése"
+    Sign In Instructions: "Nyissa meg a bejelentkezési oldalt, és válassza ki Google-fiókját. A kód automatikusan kitöltődik."
+    Other Device Instructions: "Egy másik eszközön nyissa meg ezt a címet, és írja be a kódot:"
+    YouTube Channel: "YouTube-csatorna"
+    Using Channel: "Most {name} néven használja a YouTube-ot"
+    Switch Channel Failed: "Nem sikerült YouTube-csatornát váltani: {error}"
+    Open Sign-In Page: "Bejelentkezési oldal megnyitása"
+    Copy Code: "Kód másolása"
+    Code Copied: "Kód másolva"
+    Waiting for Approval: "Várakozás a bejelentkezés jóváhagyására"
+    Sign-In Denied: "A bejelentkezést elutasították."
+    Sign-In Code Expired: "A kód lejárt. Próbálja újra, hogy újat kapjon."
+    Sign-In Failed: "Nem sikerült bejelentkezni: {error}"
+    Signed In As: "Bejelentkezve a YouTube-ra {name} néven"
+    Signed Out: "Kijelentkezve a YouTube-ról"
+    Sign Out Failed: "Nem sikerült kijelentkezni: {error}"
+    Revoke Failed: "Kijelentkezett a YouTube-ról, de a Google nem erősítette meg, hogy a bejelentkezés megszűnt. Eltávolíthatja a Google-fiókja harmadik féltől származó kapcsolatai között."
+    Signed out by YouTube: "A YouTube megszüntette a bejelentkezést. Jelentkezzen be újra a Beállításokban, hogy továbbra is használhassa fiókját."
+    Subscribe on YouTube: "Feliratkozás a YouTube-on is"
+    Add to YouTube Watch History: "Megtekintett videók hozzáadása a YouTube-előzményekhez"
+    Import Subscriptions: "Feliratkozások importálása a YouTube-ról"
+    Imported Subscriptions: "{count} csatorna importálva | {count} csatorna importálva"
+    No Subscriptions to Import: "Ennek a YouTube-fióknak nincsenek feliratkozásai"
+    Import Subscriptions Failed: "Nem sikerült importálni a feliratkozásokat: {error}"
   Diagnostics:
     Diagnostics: Diagnosztika
     Description: Amíg a diagnosztikai naplózás be van kapcsolva, az OpenTubeX a legutóbbi naplóüzeneteket a memóriában tartja, hogy hibajelentésekhez csatolhasd őket. Soha nem menti és nem küldi el őket magától, a naplózás kikapcsolása pedig törli őket. A jelentések nem tartalmaznak sütiket, tokeneket, IP-címeket és URL-paramétereket, de tartalmazhatják a lejátszott videók azonosítóit, ezért megosztás előtt ellenőrizd a jelentést.
@@ -2196,6 +2227,9 @@ Description:
   Games: Játékok
   Music: Zene
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Ha az OpenTubeX-ben feliratkozik egy csatornára vagy leiratkozik róla, ugyanez történik a YouTube-fiókjában is."
+    Add to YouTube Watch History: "A lejátszott videók bekerülnek a YouTube megtekintési előzményeibe, így a YouTube ajánlásai tanulhatnak belőlük. Amíg az előzmények szüneteltetve vannak a YouTube-on, semmi sem kerül be."
   General Settings:
     Built-in Streams: |
       Az automatikus mód a legtöbb videót a YouTube visionOS-kliensével játssza le, amely gyorsabban indul és támogatja az automatikus minőséget. Az élő közvetítések és az általa nem lejátszható videók SABR-t használnak.
@@ -2716,3 +2750,22 @@ Platforms:
   Playlist Not Found: Ez a lejátszási lista nem található.
   Load Error: 'Ezt az oldalt nem sikerült betölteni innen: {platform}.'
   Empty Tab: Itt még nincs semmi.
+YouTube Account:
+  Like: "Tetszik"
+  Dislike: "Nem tetszik"
+  Rating Failed: "Nem sikerült értékelni a YouTube-on: {error}"
+  Subscribe Failed: "Nem sikerült feliratkozni a YouTube-on: {error}"
+  Unsubscribe Failed: "Nem sikerült leiratkozni a YouTube-on: {error}"
+  Add a comment: "Hozzászólás írása"
+  Add a reply: "Válasz írása"
+  Comment: "Hozzászólás"
+  Reply: "Válasz"
+  Comment Posted: "Hozzászólás közzétéve"
+  Reply Posted: "Válasz közzétéve"
+  Comment Failed: "Nem sikerült közzétenni a hozzászólást: {error}"
+  Delete Comment: "Hozzászólás törlése"
+  Delete Comment Confirmation: "Törli a hozzászólását a YouTube-ról?"
+  Comment Deleted: "Hozzászólás törölve"
+  Delete Comment Failed: "Nem sikerült törölni a hozzászólást: {error}"
+  Recommendations: "YouTube-ajánlások"
+  Recommendations Failed: "Nem sikerült betölteni a YouTube-ajánlásait."

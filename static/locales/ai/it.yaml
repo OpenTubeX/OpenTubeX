@@ -330,6 +330,37 @@ History:
   History Older Than Days Removed: La cronologia di visione più vecchia di 1 giorno è stata rimossa | La cronologia di visione più vecchia di {days} giorni è stata rimossa | La cronologia di visione più vecchia di {days} giorni è stata rimossa
 Settings:
   Experimental Badge: Sperimentale
+  YouTube Account Settings:
+    YouTube Account Settings: "Account YouTube"
+    Unofficial App Warning: "OpenTubeX non è un'app ufficiale di YouTube. Accedendo, ciò che fai qui viene collegato al tuo account Google e Google può limitare o bloccare gli account che usano app non ufficiali. Accedi solo con un account che puoi permetterti di perdere."
+    Sign In Explanation: "OpenTubeX accede come un'app per TV: approvi l'accesso sul sito di Google e OpenTubeX non vede mai la tua password. L'accesso resta su questo dispositivo e non viene sincronizzato né incluso nei backup."
+    Sign In: "Accedi"
+    Sign In Anyway: "Accedi comunque"
+    Sign Out: "Esci"
+    Getting Sign-In Code: "Recupero del codice di accesso"
+    Sign In Instructions: "Apri la pagina di accesso e scegli il tuo account Google. Il codice viene inserito automaticamente."
+    Other Device Instructions: "Su un altro dispositivo, vai a questo indirizzo e inserisci il codice:"
+    YouTube Channel: "Canale YouTube"
+    Using Channel: "Ora stai usando YouTube come {name}"
+    Switch Channel Failed: "Impossibile cambiare canale YouTube: {error}"
+    Open Sign-In Page: "Apri la pagina di accesso"
+    Copy Code: "Copia codice"
+    Code Copied: "Codice copiato"
+    Waiting for Approval: "In attesa che tu approvi l'accesso"
+    Sign-In Denied: "L'accesso è stato negato."
+    Sign-In Code Expired: "Il codice è scaduto. Riprova per ottenerne uno nuovo."
+    Sign-In Failed: "Impossibile accedere: {error}"
+    Signed In As: "Accesso a YouTube effettuato come {name}"
+    Signed Out: "Disconnessione da YouTube effettuata"
+    Sign Out Failed: "Impossibile uscire: {error}"
+    Revoke Failed: "Uscita da YouTube completata, ma Google non ha confermato la fine dell'accesso. Puoi rimuoverlo nelle connessioni di terze parti del tuo account Google."
+    Signed out by YouTube: "YouTube ha chiuso la sessione. Accedi di nuovo nelle Impostazioni per continuare a usare il tuo account."
+    Subscribe on YouTube: "Iscriviti anche su YouTube"
+    Add to YouTube Watch History: "Aggiungi i video guardati alla cronologia di YouTube"
+    Import Subscriptions: "Importa le iscrizioni da YouTube"
+    Imported Subscriptions: "{count} canale importato | {count} canali importati | {count} canali importati"
+    No Subscriptions to Import: "Questo account YouTube non ha iscrizioni"
+    Import Subscriptions Failed: "Impossibile importare le iscrizioni: {error}"
   Diagnostics:
     Diagnostics: Diagnostica
     Description: Finché il log diagnostico è attivo, OpenTubeX conserva in memoria i messaggi di log recenti per consentirti di allegarli alle segnalazioni di bug. Non li salva né li invia mai di sua iniziativa, e disattivare il log li elimina. I rapporti escludono cookie, token, indirizzi IP e parametri URL, ma possono contenere gli ID dei video che hai riprodotto, quindi controlla un rapporto prima di condividerlo.
@@ -2195,6 +2226,9 @@ Description:
   Games: Giochi
   Music: Musica
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Iscriversi a un canale o annullare l'iscrizione in OpenTubeX fa lo stesso sul tuo account YouTube."
+    Add to YouTube Watch History: "I video che riproduci vengono aggiunti alla tua cronologia delle visualizzazioni di YouTube, così i consigli di YouTube imparano da essi. Non viene aggiunto nulla mentre la cronologia è in pausa su YouTube."
   General Settings:
     Built-in Streams: |
       Automatico riproduce la maggior parte dei video tramite il client visionOS di YouTube, che si avvia più rapidamente e supporta la qualità automatica. Le dirette e i video che non può riprodurre usano SABR.
@@ -2715,3 +2749,22 @@ Platforms:
   Playlist Not Found: Impossibile trovare questa playlist.
   Load Error: Impossibile caricare questa pagina da {platform}.
   Empty Tab: Non c’è ancora niente qui.
+YouTube Account:
+  Like: "Mi piace"
+  Dislike: "Non mi piace"
+  Rating Failed: "Impossibile valutare su YouTube: {error}"
+  Subscribe Failed: "Impossibile iscriversi su YouTube: {error}"
+  Unsubscribe Failed: "Impossibile annullare l'iscrizione su YouTube: {error}"
+  Add a comment: "Aggiungi un commento"
+  Add a reply: "Aggiungi una risposta"
+  Comment: "Commenta"
+  Reply: "Rispondi"
+  Comment Posted: "Commento pubblicato"
+  Reply Posted: "Risposta pubblicata"
+  Comment Failed: "Impossibile pubblicare il commento: {error}"
+  Delete Comment: "Elimina commento"
+  Delete Comment Confirmation: "Eliminare il tuo commento da YouTube?"
+  Comment Deleted: "Commento eliminato"
+  Delete Comment Failed: "Impossibile eliminare il commento: {error}"
+  Recommendations: "Consigli di YouTube"
+  Recommendations Failed: "Impossibile caricare i tuoi consigli di YouTube."

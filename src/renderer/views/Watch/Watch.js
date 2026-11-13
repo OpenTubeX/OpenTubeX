@@ -58,6 +58,8 @@ import { clampOverlayScrollTop, isOverlayScrollTopOutOfBounds, restoreOverlayScr
 import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
 import { liveReminder, supportsLiveReminders } from '../../helpers/liveReminders'
 import { withThumbnail } from '../../helpers/notificationHistory'
+import { getYouTubeChannelKey, isSignedInToYouTube } from '../../helpers/youtube-account-state'
+import { addToYouTubeWatchHistory } from '../../helpers/api/youtube-account'
 import { DOWNLOADED_MEDIA_MIME_TYPES } from '../../../constants'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { downloadWatchRoute, isPlayableDownloadFile, navigationDownloadId } from '../../helpers/downloadPlayback'
@@ -626,6 +628,8 @@ export default defineComponent({
       sabrErrorRecoveryLastSeconds: null,
       sabrErrorRecoveryPlayedSeconds: 0,
       recommendationPlaybackSample: null,
+      // The video and channel last added to the YouTube account's watch history.
+      youTubeHistoryKey: null,
       recommendationWatchSession: null,
       recommendationLoadRetryAt: 0,
       historyLastTouchedAt: 0,
@@ -5227,6 +5231,21 @@ export default defineComponent({
         throw error
       }
     },
+    // Like YouTube's apps, once playback starts, not when a video only loads.
+    addToYouTubeWatchHistory() {
+      // Each channel and sign-in has its own history.
+      const key = `${this.videoId}\n${getYouTubeChannelKey(this.$store.getters.getYouTubeAccount)}`
+      if (this.youTubeHistoryKey === key || this.localFilePlayback || this.isOffline ||
+        !isSignedInToYouTube(this.$store.getters) || !this.$store.getters.getYouTubeAccountWatchHistory) {
+        return
+      }
+      this.youTubeHistoryKey = key
+      addToYouTubeWatchHistory(this.videoId).catch(error => {
+        console.error('Could not add the video to the YouTube watch history', error)
+        // Playing again retries.
+        if (this.youTubeHistoryKey === key) this.youTubeHistoryKey = null
+      })
+    },
     handleVideoPlay() {
       if (this.chromecastActive) {
         this.$refs.player?.pause()
@@ -5239,6 +5258,7 @@ export default defineComponent({
         return
       }
       this.$store.commit('markWellbeingPlay', Date.now())
+      this.addToYouTubeWatchHistory()
       this.waitingForPlaylistContinuation = false
       this.$refs.watchVideoPlaylist?.resetUnavailableSkipChain()
       // Resuming consumes the recovery pause, so later format switches or

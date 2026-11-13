@@ -335,6 +335,37 @@ History:
   History Older Than Days Removed: Kijkgeschiedenis ouder dan 1 dag is verwijderd | Kijkgeschiedenis ouder dan {days} dagen is verwijderd
 Settings:
   Experimental Badge: Experimenteel
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube-account"
+    Unofficial App Warning: "OpenTubeX is geen officiële YouTube-app. Als u inlogt, wordt wat u hier doet aan uw Google-account gekoppeld, en Google kan accounts die onofficiële apps gebruiken beperken of blokkeren. Log alleen in met een account dat u zich kunt veroorloven te verliezen."
+    Sign In Explanation: "OpenTubeX logt in zoals een tv-app: u keurt het inloggen goed op de website van Google en OpenTubeX ziet uw wachtwoord nooit. De aanmelding blijft op dit apparaat en wordt niet gesynchroniseerd of in back-ups opgenomen."
+    Sign In: "Inloggen"
+    Sign In Anyway: "Toch inloggen"
+    Sign Out: "Uitloggen"
+    Getting Sign-In Code: "Inlogcode ophalen"
+    Sign In Instructions: "Open de inlogpagina en kies uw Google-account. De code wordt automatisch ingevuld."
+    Other Device Instructions: "Ga op een ander apparaat naar dit adres en voer de code in:"
+    YouTube Channel: "YouTube-kanaal"
+    Using Channel: "U gebruikt YouTube nu als {name}"
+    Switch Channel Failed: "Kan niet van YouTube-kanaal wisselen: {error}"
+    Open Sign-In Page: "Inlogpagina openen"
+    Copy Code: "Code kopiëren"
+    Code Copied: "Code gekopieerd"
+    Waiting for Approval: "Wachten tot u het inloggen goedkeurt"
+    Sign-In Denied: "Het inloggen is geweigerd."
+    Sign-In Code Expired: "De code is verlopen. Probeer het opnieuw om een nieuwe te krijgen."
+    Sign-In Failed: "Kan niet inloggen: {error}"
+    Signed In As: "Ingelogd bij YouTube als {name}"
+    Signed Out: "Uitgelogd bij YouTube"
+    Sign Out Failed: "Kan niet afmelden: {error}"
+    Revoke Failed: "Afgemeld bij YouTube, maar Google heeft niet bevestigd dat de aanmelding is beëindigd. U kunt deze verwijderen bij de verbindingen met derden in uw Google-account."
+    Signed out by YouTube: "YouTube heeft de aanmelding beëindigd. Log opnieuw in via Instellingen om uw account te blijven gebruiken."
+    Subscribe on YouTube: "Ook op YouTube abonneren"
+    Add to YouTube Watch History: "Bekeken video's toevoegen aan de YouTube-geschiedenis"
+    Import Subscriptions: "Abonnementen importeren uit YouTube"
+    Imported Subscriptions: "{count} kanaal geïmporteerd | {count} kanalen geïmporteerd"
+    No Subscriptions to Import: "Dit YouTube-account heeft geen abonnementen"
+    Import Subscriptions Failed: "Kan abonnementen niet importeren: {error}"
   Diagnostics:
     Diagnostics: Diagnostiek
     Description: Zolang het diagnoselogboek is ingeschakeld, bewaart OpenTubeX recente logberichten in het geheugen zodat je ze aan bugrapporten kunt toevoegen. Het slaat ze nooit uit zichzelf op en verstuurt ze nooit, en als je het logboek uitschakelt, worden ze verwijderd. Rapporten laten cookies, tokens, IP-adressen en URL-parameters weg, maar kunnen ID's bevatten van video's die je hebt afgespeeld, dus controleer een rapport voordat je het deelt.
@@ -2261,6 +2292,9 @@ Description:
   Games: Games
   Music: Muziek
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Als u zich in OpenTubeX op een kanaal abonneert of deabonneert, gebeurt dat ook in uw YouTube-account."
+    Add to YouTube Watch History: "Video's die u afspeelt, worden toegevoegd aan uw YouTube-kijkgeschiedenis, zodat de aanbevelingen van YouTube ervan leren. Er wordt niets toegevoegd zolang de geschiedenis op YouTube is onderbroken."
   General Settings:
     Built-in Streams: |
       Automatisch speelt de meeste video's af via de visionOS-client van YouTube, die sneller start en automatische kwaliteit ondersteunt. Livestreams en video's die hij niet kan afspelen, gebruiken SABR.
@@ -2786,3 +2820,22 @@ Platforms:
   Playlist Not Found: Deze afspeellijst kon niet worden gevonden.
   Load Error: Deze pagina kon niet worden geladen van {platform}.
   Empty Tab: Er is hier nog niets.
+YouTube Account:
+  Like: "Vind ik leuk"
+  Dislike: "Vind ik niet leuk"
+  Rating Failed: "Kan niet beoordelen op YouTube: {error}"
+  Subscribe Failed: "Kan niet abonneren op YouTube: {error}"
+  Unsubscribe Failed: "Kan niet deabonneren op YouTube: {error}"
+  Add a comment: "Opmerking toevoegen"
+  Add a reply: "Antwoord toevoegen"
+  Comment: "Opmerking plaatsen"
+  Reply: "Antwoorden"
+  Comment Posted: "Opmerking geplaatst"
+  Reply Posted: "Antwoord geplaatst"
+  Comment Failed: "Kan de opmerking niet plaatsen: {error}"
+  Delete Comment: "Opmerking verwijderen"
+  Delete Comment Confirmation: "Uw opmerking van YouTube verwijderen?"
+  Comment Deleted: "Opmerking verwijderd"
+  Delete Comment Failed: "Kan de opmerking niet verwijderen: {error}"
+  Recommendations: "YouTube-aanbevelingen"
+  Recommendations Failed: "Kan uw YouTube-aanbevelingen niet laden."

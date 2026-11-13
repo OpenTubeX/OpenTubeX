@@ -330,6 +330,37 @@ History:
   History Older Than Days Removed: '{days}日より古い視聴履歴を削除しました'
 Settings:
   Experimental Badge: 試験的
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube アカウント"
+    Unofficial App Warning: "OpenTubeX は YouTube の公式アプリではありません。ログインすると、ここでの操作が Google アカウントに関連付けられます。Google は非公式アプリを使用するアカウントを制限または停止する場合があります。失っても構わないアカウントでのみログインしてください。"
+    Sign In Explanation: "OpenTubeX はテレビアプリと同じ方法でログインします。Google のウェブサイトで承認するため、OpenTubeX がパスワードを見ることはありません。ログイン情報はこのデバイスにのみ保存され、同期やバックアップの対象にはなりません。"
+    Sign In: "ログイン"
+    Sign In Anyway: "それでもログイン"
+    Sign Out: "ログアウト"
+    Getting Sign-In Code: "ログインコードを取得しています"
+    Sign In Instructions: "ログインページを開いて Google アカウントを選択してください。コードは自動で入力されます。"
+    Other Device Instructions: "別のデバイスで次のアドレスにアクセスし、コードを入力してください:"
+    YouTube Channel: "YouTube チャンネル"
+    Using Channel: "{name} として YouTube を使用しています"
+    Switch Channel Failed: "YouTube チャンネルを切り替えられませんでした: {error}"
+    Open Sign-In Page: "ログインページを開く"
+    Copy Code: "コードをコピー"
+    Code Copied: "コードをコピーしました"
+    Waiting for Approval: "ログインの承認を待っています"
+    Sign-In Denied: "ログインが拒否されました。"
+    Sign-In Code Expired: "コードの有効期限が切れました。再試行して新しいコードを取得してください。"
+    Sign-In Failed: "ログインできませんでした: {error}"
+    Signed In As: "{name} として YouTube にログインしました"
+    Signed Out: "YouTube からログアウトしました"
+    Sign Out Failed: "ログアウトできませんでした: {error}"
+    Revoke Failed: "YouTube からログアウトしましたが、Google はログインの終了を確認しませんでした。Google アカウントのサードパーティとの接続から削除できます。"
+    Signed out by YouTube: "YouTube によってログインが終了されました。アカウントを引き続き使用するには、設定から再度ログインしてください。"
+    Subscribe on YouTube: "YouTube でもチャンネル登録する"
+    Add to YouTube Watch History: "視聴した動画を YouTube の履歴に追加する"
+    Import Subscriptions: "YouTube から登録チャンネルをインポート"
+    Imported Subscriptions: "{count} チャンネルをインポートしました"
+    No Subscriptions to Import: "この YouTube アカウントには登録チャンネルがありません"
+    Import Subscriptions Failed: "登録チャンネルをインポートできませんでした: {error}"
   Diagnostics:
     Diagnostics: 診断
     Description: 診断ログが有効な間、OpenTubeX は最近のログメッセージをメモリに保持し、バグ報告に添付できるようにします。自動で保存や送信をすることはなく、ログを無効にすると削除されます。レポートには Cookie、トークン、IP アドレス、URL パラメーターは含まれませんが、再生した動画の ID が含まれる場合があるため、共有する前にレポートを確認してください。
@@ -2195,6 +2226,9 @@ Description:
   Games: ゲーム
   Music: 音楽
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "OpenTubeX でチャンネル登録または登録解除すると、YouTube アカウントでも同じ操作が行われます。"
+    Add to YouTube Watch History: "再生した動画は YouTube の視聴履歴に追加され、YouTube のおすすめに反映されます。YouTube で履歴が一時停止されている間は何も追加されません。"
   General Settings:
     Built-in Streams: |
       自動では、ほとんどの動画を YouTube の visionOS クライアントで再生します。起動が速く、自動画質に対応しています。ライブ配信や再生できない動画には SABR を使用します。
@@ -2715,3 +2749,22 @@ Platforms:
   Playlist Not Found: この再生リストは見つかりませんでした。
   Load Error: '{platform} からこのページを読み込めませんでした。'
   Empty Tab: まだ何もありません。
+YouTube Account:
+  Like: "高く評価"
+  Dislike: "低く評価"
+  Rating Failed: "YouTube で評価できませんでした: {error}"
+  Subscribe Failed: "YouTube でチャンネル登録できませんでした: {error}"
+  Unsubscribe Failed: "YouTube で登録解除できませんでした: {error}"
+  Add a comment: "コメントを追加"
+  Add a reply: "返信を追加"
+  Comment: "コメント"
+  Reply: "返信"
+  Comment Posted: "コメントを投稿しました"
+  Reply Posted: "返信を投稿しました"
+  Comment Failed: "コメントを投稿できませんでした: {error}"
+  Delete Comment: "コメントを削除"
+  Delete Comment Confirmation: "YouTube からコメントを削除しますか？"
+  Comment Deleted: "コメントを削除しました"
+  Delete Comment Failed: "コメントを削除できませんでした: {error}"
+  Recommendations: "YouTube のおすすめ"
+  Recommendations Failed: "YouTube のおすすめを読み込めませんでした。"

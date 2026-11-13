@@ -7,6 +7,7 @@ import {
   SETTINGS_SEARCH_SOURCES,
 } from './settings-search-config.js'
 import { isLiteBuild } from './ytDlpCapabilities.js'
+import { isSignedInToYouTube } from './youtube-account-state.js'
 
 export const settingsSearchNavigationKey = Symbol('settingsSearchNavigation')
 
@@ -102,6 +103,11 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     (sectionType === 'general' && ['Stream Extraction Method', 'Swipe to refresh', 'Ignore System Haptics Setting'].includes(group)) ||
     (sectionType === 'player' && group === 'Voice-over Translation')
   )) return false
+
+  // The account settings only show once signed in, and Sign in only before.
+  if (sectionType === 'youtube-account' && group !== 'YouTube Account Settings') {
+    return (group === 'Sign In') !== isSignedInToYouTube(store.getters)
+  }
 
   // These need the desktop main process or the Android background worker.
   if (sectionType === 'subscription' && [

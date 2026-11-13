@@ -330,6 +330,37 @@ History:
   History Older Than Days Removed: Historie sledování starší než 1 den byla odstraněna | Historie sledování starší než {days} dny byla odstraněna | Historie sledování starší než {days} dní byla odstraněna
 Settings:
   Experimental Badge: Experimentální
+  YouTube Account Settings:
+    YouTube Account Settings: "Účet YouTube"
+    Unofficial App Warning: "OpenTubeX není oficiální aplikace YouTube. Přihlášením se to, co tu děláte, propojí s vaším účtem Google a Google může účty, které používají neoficiální aplikace, omezit nebo zablokovat. Přihlašujte se jen účtem, o který si můžete dovolit přijít."
+    Sign In Explanation: "OpenTubeX se přihlašuje jako aplikace pro televizi: přihlášení schválíte na webu společnosti Google a OpenTubeX nikdy neuvidí vaše heslo. Přihlášení zůstává v tomto zařízení a nesynchronizuje se ani nezálohuje."
+    Sign In: "Přihlásit se"
+    Sign In Anyway: "Přesto se přihlásit"
+    Sign Out: "Odhlásit se"
+    Getting Sign-In Code: "Získávání přihlašovacího kódu"
+    Sign In Instructions: "Otevřete přihlašovací stránku a vyberte svůj účet Google. Kód se vyplní automaticky."
+    Other Device Instructions: "Na jiném zařízení přejděte na tuto adresu a zadejte kód:"
+    YouTube Channel: "Kanál YouTube"
+    Using Channel: "Nyní používáte YouTube jako {name}"
+    Switch Channel Failed: "Kanál YouTube se nepodařilo přepnout: {error}"
+    Open Sign-In Page: "Otevřít přihlašovací stránku"
+    Copy Code: "Kopírovat kód"
+    Code Copied: "Kód zkopírován"
+    Waiting for Approval: "Čeká se, až přihlášení schválíte"
+    Sign-In Denied: "Přihlášení bylo zamítnuto."
+    Sign-In Code Expired: "Platnost kódu vypršela. Zkuste to znovu a získejte nový."
+    Sign-In Failed: "Nepodařilo se přihlásit: {error}"
+    Signed In As: "Přihlášeno do YouTube jako {name}"
+    Signed Out: "Odhlášeno z YouTube"
+    Sign Out Failed: "Odhlášení se nezdařilo: {error}"
+    Revoke Failed: "Odhlášení z YouTube proběhlo, ale Google nepotvrdil ukončení přihlášení. Můžete ho odebrat v propojeních s aplikacemi třetích stran ve svém účtu Google."
+    Signed out by YouTube: "YouTube ukončil přihlášení. Chcete-li účet dál používat, přihlaste se znovu v Nastavení."
+    Subscribe on YouTube: "Odebírat také na YouTube"
+    Add to YouTube Watch History: "Přidávat zhlédnutá videa do historie YouTube"
+    Import Subscriptions: "Importovat odběry z YouTube"
+    Imported Subscriptions: "Importován {count} kanál | Importovány {count} kanály | Importováno {count} kanálů"
+    No Subscriptions to Import: "Tento účet YouTube nemá žádné odběry"
+    Import Subscriptions Failed: "Odběry se nepodařilo importovat: {error}"
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Když je diagnostický protokol zapnutý, OpenTubeX uchovává nedávné zprávy protokolu v paměti, abyste je mohli přiložit k hlášení chyb. Nikdy je sám neukládá ani neodesílá a vypnutím protokolu se smažou. Hlášení neobsahují soubory cookie, tokeny, IP adresy ani parametry URL, mohou však obsahovat ID přehraných videí, proto hlášení před sdílením zkontrolujte.
@@ -2195,6 +2226,9 @@ Description:
   Games: Hry
   Music: Hudba
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Přihlášení k odběru kanálu nebo jeho zrušení v OpenTubeX provede totéž ve vašem účtu YouTube."
+    Add to YouTube Watch History: "Videa, která přehrajete, se přidají do vaší historie sledování na YouTube, takže se z nich učí doporučení YouTube. Když je historie na YouTube pozastavená, nic se nepřidá."
   General Settings:
     Built-in Streams: |
       Automatický režim přehrává většinu videí přes klienta visionOS od YouTube, který začíná rychleji a podporuje automatickou kvalitu. Živé přenosy a videa, která nedokáže přehrát, používají SABR.
@@ -2715,3 +2749,22 @@ Platforms:
   Playlist Not Found: Tento playlist nebyl nalezen.
   Load Error: Tuto stránku se nepodařilo načíst z platformy {platform}.
   Empty Tab: Zatím tu nic není.
+YouTube Account:
+  Like: "Líbí se mi"
+  Dislike: "Nelíbí se mi"
+  Rating Failed: "Nepodařilo se ohodnotit na YouTube: {error}"
+  Subscribe Failed: "Nepodařilo se přihlásit k odběru na YouTube: {error}"
+  Unsubscribe Failed: "Nepodařilo se zrušit odběr na YouTube: {error}"
+  Add a comment: "Přidat komentář"
+  Add a reply: "Přidat odpověď"
+  Comment: "Komentovat"
+  Reply: "Odpovědět"
+  Comment Posted: "Komentář zveřejněn"
+  Reply Posted: "Odpověď zveřejněna"
+  Comment Failed: "Komentář se nepodařilo zveřejnit: {error}"
+  Delete Comment: "Smazat komentář"
+  Delete Comment Confirmation: "Smazat váš komentář z YouTube?"
+  Comment Deleted: "Komentář smazán"
+  Delete Comment Failed: "Komentář se nepodařilo smazat: {error}"
+  Recommendations: "Doporučení YouTube"
+  Recommendations Failed: "Vaše doporučení YouTube se nepodařilo načíst."
