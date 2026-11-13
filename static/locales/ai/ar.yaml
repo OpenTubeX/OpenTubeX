@@ -1717,6 +1717,7 @@ Channel:
     Shows: العروض
     This channel does not currently have any shows: هذه القناة لا تحتوي حاليًا على أي عروض
 Video:
+  Play in Background: "تشغيل في الخلفية"
   Info panel source: 'المصدر: {source}'
   External DRM Protected: "لا يمكن تشغيل مقاطع الفيديو المحمية بنظام إدارة الحقوق الرقمية في OpenTubeX، لأنها تتطلب مكونات خاصة ومغلقة المصدر."
   Invalid Media URL: "رابط الوسائط غير صالح"

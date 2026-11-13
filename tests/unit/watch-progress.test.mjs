@@ -160,6 +160,7 @@ function fixture(existing = true) {
   const view = {
     canSaveWatchProgress: true,
     isCurrentlyPresented: () => true,
+    isPlaybackPresented() { return this.isCurrentlyPresented() || player.presentedOutsideTab === true },
     hasBeenPresented: true,
     $refs: { player },
     isLoading: false,
@@ -208,6 +209,16 @@ for (const reason of ['teardown', 'background', 'never presented', 'not ready'])
     assert.equal(f.history.watchProgress, 11 * 3600)
   })
 }
+test('saves progress while a hidden Watch page plays in the mini player', () => {
+  const f = fixture()
+  f.element.currentTime = 4 * 3600
+  f.element.dispatchEvent(new Event('seeking'))
+  f.view.isCurrentlyPresented = () => false
+  f.player.presentedOutsideTab = true
+  f.save()
+  assert.equal(f.history.watchProgress, 4 * 3600)
+})
+
 test('a seek before the first load creates a complete new history entry', () => {
   const f = fixture(false)
   f.element.currentTime = 14400

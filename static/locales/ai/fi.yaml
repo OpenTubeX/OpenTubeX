@@ -1682,6 +1682,7 @@ Channel:
     Shows: Ohjelmat
     This channel does not currently have any shows: Tällä kanavalla ei ole tällä hetkellä ohjelmia
 Video:
+  Play in Background: "Toista taustalla"
   Info panel source: 'Lähde: {source}'
   External DRM Protected: "DRM-suojattuja videoita ei voida katsoa OpenTubeXissä, koska ne vaativat ei-vapaita, suljetun koodin osia."
   Invalid Media URL: "Virheellinen median URL-osoite"

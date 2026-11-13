@@ -383,6 +383,12 @@ test.describe('mobile downloaded audio mini player', { tag: '@scale' }, () => {
     await expect(page).toHaveURL(/#\/subscriptions$/)
     await expect(player).toHaveClass(/mobileMiniBar/)
     await expect.poll(() => page.evaluate(() => window.$store.getters.getWatchQueueLength)).toBe(0)
+    // The mini player shows the next video, so pausing it saves its progress.
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(1)
+    const progress = await video.evaluate(element => { element.pause(); return element.currentTime })
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getHistoryCacheById.offline0002?.watchProgress))
+      .toBeCloseTo(progress, 1)
+    await video.evaluate(element => element.play())
     // Back returns to the video the mini player plays now.
     await page.locator('.navBackButton button').evaluate(element => element.click())
     await expect(page).toHaveURL(/#\/watch\/offline0002\?downloadId=2/)

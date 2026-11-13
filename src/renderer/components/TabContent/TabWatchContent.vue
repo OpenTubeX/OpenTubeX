@@ -76,6 +76,11 @@ let disposed = false
 let watchTitle = ''
 // The history entry of the Watch page while it plays on behind browsing pages.
 let retainedHistoryIndex = -1
+// The route that Play in Background starts, until its Watch page loads it.
+let backgroundStartPath = null
+// Play in Background keeps playing audio only, including the videos that
+// follow, until the user opens the Watch page or closes the player.
+const audioOnlySession = ref(false)
 let watchTitleOptions
 let disposalPromise = null
 
@@ -380,10 +385,62 @@ function clearMinimizePreview() {
   }
 }
 
+/**
+ * Plays a video in this tab's mini player while the browsing page stays.
+ * A player that already plays there switches to the video in place.
+ *
+ * @param {import('vue-router').RouteLocationRaw} location
+ */
+async function playInBackground(location) {
+  // A dismissal can start while this waits for an earlier one.
+  let disposal
+  while (disposal !== disposalPromise) {
+    disposal = disposalPromise
+    await disposal
+  }
+  if (isWatchRoute.value) return
+  const route = navigation.resolve(location)
+  // Other media play in a different page, which cannot load this video.
+  if (detached.value && !disposed && resolveRouteComponent(route) !== component.value) await dismiss()
+  if (disposed) {
+    // Unmount the disposed Watch page first, even where dismiss() already
+    // cleared its route. Kept for a route to the same video, it would not
+    // reload its stopped player.
+    watchRoute.value = null
+    await nextTick()
+    if (isWatchRoute.value) return
+  }
+  if (detached.value && !disposed) {
+    // Another route to the same video, such as one without its timestamp,
+    // would not reload it.
+    if (route.params.id === watchRoute.value.params.id) {
+      audioOnlySession.value = true
+      watchView.value?.resumeInBackground()
+      return
+    }
+    navigation.updateRetainedWatchEntry(props.tabId, retainedHistoryIndex, watchRoute.value.fullPath, { route })
+  } else {
+    disposed = false
+    retained.value = true
+    // Docks like a minimized Watch page, even where navigation playback is
+    // off. Its route has no history entry until the user opens the video.
+    minimized.value = true
+    retainedHistoryIndex = -1
+    watchTitleOptions = undefined
+  }
+  backgroundStartPath = route.fullPath
+  audioOnlySession.value = true
+  watchTitle = ''
+  setWatchRoute(route)
+}
+
+defineExpose({ playInBackground })
+
 async function dismiss() {
   if (!detached.value) return
   await dispose()
-  if (!isWatchRoute.value) {
+  // Play in Background may have started another video meanwhile.
+  if (!isWatchRoute.value && disposed) {
     retained.value = false
     minimized.value = false
     watchRoute.value = null
@@ -406,7 +463,14 @@ provide(watchNavigationKey, {
     watchTitleOptions = options
     if (options?.resolveHistoryEntry !== false) navigation.updateRetainedWatchEntry(props.tabId, retainedHistoryIndex, watchRoute.value.fullPath, { title })
   },
-  returnToVideo: () => navigation.push(props.tabId, watchRoute.value.fullPath)
+  audioOnlySession,
+  returnToVideo: () => navigation.push(props.tabId, watchRoute.value.fullPath),
+  /** Whether Play in Background started this route, once per start. */
+  takeBackgroundStart: fullPath => {
+    const started = backgroundStartPath === fullPath
+    backgroundStartPath = null
+    return started
+  }
 })
 
 function setWatchRoute(route) {
@@ -426,6 +490,10 @@ watch(() => props.route, route => {
     watchRoute.value = null
   }
 }, { immediate: true })
+
+watch([isWatchRoute, watchRoute], ([watchPage, route]) => {
+  if (watchPage || !route) audioOnlySession.value = false
+})
 
 watch(enabled, value => {
   if (!value && detached.value) {

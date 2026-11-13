@@ -1685,6 +1685,7 @@ Channel:
     Shows: Chương trình
     This channel does not currently have any shows: Kênh này hiện không có chương trình nào
 Video:
+  Play in Background: "Phát trong nền"
   Info panel source: 'Nguồn: {source}'
   External DRM Protected: "Không thể phát video được bảo vệ DRM trong OpenTubeX vì chúng yêu cầu các thành phần nguồn đóng độc quyền."
   Invalid Media URL: "URL phương tiện không hợp lệ"

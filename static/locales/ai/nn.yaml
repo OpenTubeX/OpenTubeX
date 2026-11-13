@@ -1905,6 +1905,7 @@ Channel:
     Shows: Seriar
     This channel does not currently have any shows: Denne kanalen har ingen seriar enno
 Video:
+  Play in Background: "Spel av i bakgrunnen"
   Info panel source: 'Kjelde: {source}'
   External DRM Protected: "DRM-verna videoar kan ikkje spelast av i OpenTubeX fordi dei krev proprietære komponentar med lukka kjeldekode."
   Invalid Media URL: "Ugyldig medie-URL"

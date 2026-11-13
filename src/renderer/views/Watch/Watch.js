@@ -15,7 +15,7 @@ import { probeHlsManifest } from '../../helpers/player/hlsManifest'
 import { getAudioFormatLoudness } from '../../helpers/player/loudnessNormalization'
 import { releaseAndroidRotationFullscreenHandoff } from '../../helpers/player/androidFullscreen'
 import { sampleRecommendationPlayback } from '../../../recommendation-learning'
-import { defineComponent, markRaw, shallowRef } from 'vue'
+import { defineComponent, inject, markRaw, shallowRef } from 'vue'
 import { Capacitor } from '@capacitor/core'
 import { useRoute, useRouter } from 'vue-router'
 import { mapActions } from 'vuex'
@@ -151,7 +151,8 @@ import { isAttestedPoToken } from '../../../main/attestedPoToken'
 import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
 import { limitQualityOnMeteredNetwork } from '../../helpers/player/meteredNetworkQuality'
 import { useI18n } from 'vue-i18n'
-import { useTabAvatar, useTabContext, useTabTitle } from '../../tabs/TabContext'
+import { useTabAvatar, useTabContext, useTabTitle, watchNavigationKey } from '../../tabs/TabContext'
+import { SCROLL_MINI_MIN_INLINE_LAYOUT_HEIGHT } from '../../helpers/scrollMiniPlayer'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 import { keepTabLoaded } from '../../tabs/TabResidency'
 import { useTabToast } from '../../composables/useTabToast'
@@ -266,6 +267,7 @@ export default defineComponent({
     const tabRoute = useRoute()
     const tabRouter = useRouter()
     const { tabId, isTabPresented, lifecycle: tabLifecycle } = useTabContext()
+    const watchNavigation = inject(watchNavigationKey, null)
     const setTabTitle = useTabTitle()
     const setTabAvatar = useTabAvatar()
     const showTabToast = useTabToast()
@@ -283,6 +285,7 @@ export default defineComponent({
       tabId,
       isTabPresented,
       tabLifecycle,
+      watchNavigation,
       tabRoute,
       tabRouter,
       setTabTitle,
@@ -1654,7 +1657,11 @@ export default defineComponent({
     this.isShort = this.tabRoute.query.short === 'true'
     this.useCustomShortsPlayerForCurrentVideo = this.$store.getters.getUseCustomShortsPlayer
     this.videoAspectRatio = this.isShort ? 9 / 16 : null
-    this.activeFormat = this.defaultVideoFormat
+    if (this.applyBackgroundStart()) {
+      // Its Watch page has never been shown, so it cannot measure the inline
+      // player. The smallest dockable height lets returning to it measure one.
+      this.miniPlayerStartHeight = SCROLL_MINI_MIN_INLINE_LAYOUT_HEIGHT
+    }
     // So that the value for this session remains unchanged even if setting changed
     this.autoplayNextRecommendedVideo = this.autoplayNextRecommendedVideoByDefault
     this.autoplayNextPlaylistVideo = this.autoplayNextPlaylistVideoByDefault
@@ -2435,6 +2442,33 @@ export default defineComponent({
       }
     },
 
+    /**
+     * Sets the format for a new video. Play in Background starts it, and the
+     * videos that follow it, with audio only, and plays it even where videos
+     * do not autoplay.
+     *
+     * @returns {boolean} whether Play in Background started this video
+     */
+    applyBackgroundStart() {
+      const backgroundStart = this.watchNavigation?.takeBackgroundStart?.(this.tabRoute.fullPath) === true
+      this.activeFormat = backgroundStart || this.watchNavigation?.audioOnlySession?.value === true
+        ? 'audio'
+        : this.defaultVideoFormat
+      if (backgroundStart) {
+        this.queuedPlaybackVideoId = this.tabRoute.params.id
+        // The user chose to play it in the mini player, unlike a background tab.
+        this.hasBeenPresented = true
+      }
+      return backgroundStart
+    },
+
+    /** Plays the current video with audio only, as Play in Background does. */
+    resumeInBackground() {
+      // Play first: a format switch restores the paused state it started from.
+      this.$refs.player?.play()?.catch(() => {})
+      if (this.audioFormatAvailable) this.activeFormat = 'audio'
+    },
+
     activateWatchRuntime() {
       if (this.isTabPresented === false) {
         return
@@ -2568,9 +2602,10 @@ export default defineComponent({
       this.videoMetadataIncomplete = false
       // Re-evaluate per video: this instance is reused across same-tab
       // navigation, so a tab that was presented for the previous video must not
-      // keep that state while it loads the next one in the background.
-      this.hasBeenPresented = this.isCurrentlyPresented()
-      this.activeFormat = this.defaultVideoFormat
+      // keep that state while it loads the next one in the background. A mini
+      // player that moves on to the next video keeps showing it, though.
+      this.hasBeenPresented = this.isCurrentlyPresented() || this.miniPlayerStartHeight > 0
+      this.applyBackgroundStart()
 
       this.checkIfTimestamp()
       this.checkIfPlaylist()
@@ -5355,7 +5390,7 @@ export default defineComponent({
       // A background tab force-pauses its brief autoplay attempt, which would
       // otherwise save a spurious ~1 second resume point. Only persist progress
       // for tabs the user has actually presented.
-      if (!this.isCurrentlyPresented() || !this.hasBeenPresented) { return }
+      if (!this.isPlaybackPresented() || !this.hasBeenPresented) { return }
       if (this.playerTeardownInProgress) { return }
       const player = this.$refs.player
       // A seek establishes a position before its media segment finishes loading.

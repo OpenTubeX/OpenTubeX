@@ -1684,6 +1684,7 @@ Channel:
     Shows: Relácie
     This channel does not currently have any shows: Tento kanál momentálne nemá žiadne relácie
 Video:
+  Play in Background: "Prehrať na pozadí"
   Info panel source: 'Zdroj: {source}'
   External DRM Protected: "Videá chránené DRM nemôžu byť prehrávané v OpenTubeX, pretože vyžadujú proprietárne, uzavreté zdrojové komponenty."
   Invalid Media URL: "Neplatná adresa URL média"

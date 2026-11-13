@@ -1717,6 +1717,7 @@ Channel:
     Shows: Шоу
     This channel does not currently have any shows: На цьому каналі наразі немає шоу
 Video:
+  Play in Background: "Відтворити у фоні"
   Info panel source: 'Джерело: {source}'
   External DRM Protected: "Відео, захищені DRM, неможливо відтворити в OpenTubeX, оскільки для цього потрібні пропрієтарні компоненти з закритим вихідним кодом."
   Invalid Media URL: "Недійсна URL-адреса медіа"

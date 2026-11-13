@@ -1753,6 +1753,7 @@ Channel:
     Shows: Шоу
     This channel does not currently have any shows: Зараз на гэтым канале няма шоу
 Video:
+  Play in Background: "Прайграваць у фоне"
   Info panel source: 'Крыніца: {source}'
   External DRM Protected: "Відэа, абароненыя DRM, нельга прайграваць у OpenTubeX, бо для іх патрэбны прапрыетарныя кампаненты з закрытым зыходным кодам."
   Invalid Media URL: "Няправільны URL медыя"
