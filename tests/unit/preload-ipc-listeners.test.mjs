@@ -25,7 +25,7 @@ async function loadPreloadInterface() {
     document: { body: { dataset: {} } },
     globalThis: null,
     IpcChannels,
-    DBActions: { GENERAL: { UPSERT: 2 } },
+    DBActions: { GENERAL: { FIND: 1, UPSERT: 2 } },
     ipcRenderer,
     navigator: { userActivation },
     process: {
@@ -125,6 +125,32 @@ test('Cast start checks activation before asynchronous payload preparation and i
   assert.equal(ipcRenderer.listenerCount(IpcChannels.CAST_PROGRESS), 1)
   ipcRenderer.emit(IpcChannels.CAST_PROGRESS, {}, { preparationId: 'grant', stage: 'loading' })
   assert.deepEqual(stages, ['connecting'], 'Settled preparation must no longer receive progress')
+})
+
+test('each startup read answers only the first full read of an unchanged datastore', async () => {
+  const { api, ipcRenderer, IpcChannels } = await loadPreloadInterface()
+  let requests = 0
+  ipcRenderer.invoke = (channel, request) => {
+    const reply = { channel, request, id: ++requests }
+    const savesSettings = channel === IpcChannels.DB_SETTINGS || channel === IpcChannels.DB_HISTORY
+    return Promise.resolve(savesSettings ? { result: reply, savedSetting: null } : reply)
+  }
+  api.startStartupReads()
+  // A repeated call must not replace reads that were not taken yet.
+  api.startStartupReads()
+  assert.equal(requests, 6)
+
+  assert.deepEqual(structuredClone(await api.dbProfiles(1)), { channel: IpcChannels.DB_PROFILES, request: { action: 1 }, id: 3 })
+  assert.equal((await api.dbProfiles(1)).id, 7)
+  assert.equal((await api.dbSettings(1)).id, 2)
+  assert.deepEqual(structuredClone(await api.tabs.getState()), { channel: IpcChannels.TABS_GET_STATE, request: undefined, id: 1 })
+  assert.equal((await api.tabs.getState()).id, 8)
+
+  // A write from this window or a change in another one outdates the read.
+  assert.equal((await api.dbHistory(2, { _id: 'a' })).id, 9)
+  assert.equal((await api.dbHistory(1)).id, 10)
+  ipcRenderer.emit(IpcChannels.SYNC_PLAYLISTS, {}, { event: 0, data: {} })
+  assert.equal((await api.dbPlaylists(1)).id, 11)
 })
 
 test('unauthorized, cancelled and failed Cast preparation never sends a start request', async () => {

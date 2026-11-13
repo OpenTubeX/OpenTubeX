@@ -32,10 +32,12 @@ function number(value) {
 }
 function id(value) { return typeof value === 'string' && value !== 'N/A' ? value.trim() : '' }
 function valid(video) { return video && typeof video === 'object' && id(video.videoId) && (video.type === undefined || video.type === 'video') }
-const segmenter = new Intl.Segmenter(undefined, { granularity: 'word' })
+// Created on first use: loading its segmentation data takes several milliseconds
+let segmenter
 
 export function recommendationTokens(text) {
   if (typeof text !== 'string') return []
+  segmenter ??= new Intl.Segmenter(undefined, { granularity: 'word' })
   return [...segmenter.segment(text.slice(0, 2000).normalize('NFKC').toLowerCase())]
     .filter(part => part.isWordLike)
     .map(part => part.segment)

@@ -1366,8 +1366,8 @@ let removeAndroidYtDlpSettingsListener = null
 let removeOpenTabOrganizerListener = null
 let removeGamepadNavigation = () => {}
 /** @type {number|null} */
-let utilityRoutePreloadId = null
-let utilityRoutePreloadUsesIdleCallback = false
+let idleStartupWorkId = null
+let idleStartupWorkUsesIdleCallback = false
 
 function isSyncSettingsVisible() {
   const section = document.querySelector(
@@ -1385,36 +1385,44 @@ watch([dataReady, () => store.getters.getSyncServerError], ([ready, error]) => {
   })
 }, { flush: 'post' })
 
-function scheduleUtilityRoutePreload() {
-  if (utilityRoutePreloadId !== null) {
+/** Runs what the first screen does not need once the app is idle. */
+function scheduleIdleStartupWork() {
+  if (idleStartupWorkId !== null) {
     return
   }
 
-  const preload = () => {
-    utilityRoutePreloadId = null
+  const run = () => {
+    idleStartupWorkId = null
     preloadUtilityRoutes()
+    // Chromium starts polling gamepads as soon as a page listens for them,
+    // which blocks this thread until the main process has set that up.
+    removeGamepadNavigation = initializeGamepadNavigation({
+      onBack: handleGamepadBack,
+      onNavigate: () => store.dispatch('showOutlines'),
+      onPlayPause: handleGamepadPlayPause,
+    })
   }
 
   if (typeof window.requestIdleCallback === 'function') {
-    utilityRoutePreloadUsesIdleCallback = true
-    utilityRoutePreloadId = window.requestIdleCallback(preload, { timeout: 2000 })
+    idleStartupWorkUsesIdleCallback = true
+    idleStartupWorkId = window.requestIdleCallback(run, { timeout: 2000 })
   } else {
-    utilityRoutePreloadUsesIdleCallback = false
-    utilityRoutePreloadId = window.setTimeout(preload, 1000)
+    idleStartupWorkUsesIdleCallback = false
+    idleStartupWorkId = window.setTimeout(run, 1000)
   }
 }
 
-function cancelUtilityRoutePreload() {
-  if (utilityRoutePreloadId === null) {
+function cancelIdleStartupWork() {
+  if (idleStartupWorkId === null) {
     return
   }
 
-  if (utilityRoutePreloadUsesIdleCallback) {
-    window.cancelIdleCallback(utilityRoutePreloadId)
+  if (idleStartupWorkUsesIdleCallback) {
+    window.cancelIdleCallback(idleStartupWorkId)
   } else {
-    clearTimeout(utilityRoutePreloadId)
+    clearTimeout(idleStartupWorkId)
   }
-  utilityRoutePreloadId = null
+  idleStartupWorkId = null
 }
 let tabSwitcherPreviewRequestId = 0
 let tabSwitcherOpenTimer = null
@@ -1761,11 +1769,6 @@ let removeShimmerVisibility = null
 
 onMounted(async () => {
   removeShimmerVisibility = initializeShimmerVisibility()
-  removeGamepadNavigation = initializeGamepadNavigation({
-    onBack: handleGamepadBack,
-    onNavigate: () => store.dispatch('showOutlines'),
-    onPlayPause: handleGamepadPlayPause,
-  })
   let tabsReady = Promise.resolve()
   if (supportsYtDlp) {
     removeYtDlpBinaryUpdatedListener = ytDlp.addYtDlpBinaryUpdatedListener(invalidateAllYtDlpPlaybackSources)
@@ -1982,7 +1985,7 @@ onMounted(async () => {
         })
       })
     }
-    scheduleUtilityRoutePreload()
+    scheduleIdleStartupWork()
     if (isCapacitor) {
       initializeHapticFeedback(store)
       capacitorPullToRefreshSetup = initializeCapacitorPullToRefresh()
@@ -2056,7 +2059,7 @@ onBeforeUnmount(() => {
   delete document.documentElement.dataset.modalBackdrop
   removeGamepadNavigation()
   removeCustomThemeListener()
-  cancelUtilityRoutePreload()
+  cancelIdleStartupWork()
   cancelTabSwitcher()
   systemColorScheme.removeEventListener('change', handleSystemColorSchemeChange)
   if (isElectron) {

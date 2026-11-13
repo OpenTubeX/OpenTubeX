@@ -723,7 +723,8 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
     try {
       switch (action) {
         case DBActions.GENERAL.FIND:
-          return await baseHandlers.subscriptionCache.find()
+          // Strings cross IPC and the context bridge far faster than records.
+          return await baseHandlers.subscriptionCache._findSerialized()
 
         case DBActions.SUBSCRIPTION_CACHE.UPDATE_VIDEOS_BY_CHANNEL:
           if (!await baseHandlers.subscriptionCache.updateVideosByChannelId(data.channelId, data.entries, data.timestamp)) return false

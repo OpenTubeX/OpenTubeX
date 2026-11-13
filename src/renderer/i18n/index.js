@@ -148,6 +148,42 @@ export async function setAITranslationCompletionsEnabled(enabled) {
   await Promise.all([...requestedLocales].map(recomposeLocale))
 }
 
+const STARTUP_LOCALE_KEY = 'opentubex-startup-locale'
+
+/**
+ * Starts loading the English fallback and the locale of the last launch, so
+ * they arrive while the settings that name the locale are still being read.
+ */
+export function preloadStartupLocales() {
+  let locale = null
+  try {
+    locale = localStorage.getItem(STARTUP_LOCALE_KEY)
+  } catch {
+    // Storage can be unavailable; the locale then loads once the settings did.
+  }
+
+  const locales = new Set(['en-US'])
+  if (activeLocales.includes(locale)) {
+    locales.add(locale)
+    const baseLocale = getBaseLocale(locale)
+    if (baseLocale) locales.add(baseLocale)
+  }
+
+  for (const locale of locales) {
+    // `loadLocale` reports a failed request when it waits for the same one.
+    loadHumanMessages(locale).catch(() => {})
+  }
+}
+
+/** @param {string} locale */
+export function rememberStartupLocale(locale) {
+  try {
+    localStorage.setItem(STARTUP_LOCALE_KEY, locale)
+  } catch {
+    // Startup still works when storage is unavailable.
+  }
+}
+
 export async function loadLocale(locale) {
   if (!activeLocales.includes(locale)) {
     console.error(`Unable to load unknown locale: "${locale}"`)
