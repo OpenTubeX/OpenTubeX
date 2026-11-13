@@ -342,7 +342,7 @@ test('list edits keep the entries other windows saved meanwhile', async () => {
     settingWrites,
     defaultMutationId: id => `set${id}`,
     saveSettingEdit: (commit, id, save) => save(),
-    runLocked: (name, run) => (lock = lock.then(run)),
+    runLocked: (name, run) => (lock = lock.catch(() => {}).then(run)),
     DEFAULT_SETTINGS: { followedRssFeeds: [] },
     DBSettingHandlers: {
       findValue: async id => saved.get(id),
@@ -372,6 +372,31 @@ test('list edits keep the entries other windows saved meanwhile', async () => {
   assert.deepEqual(await Promise.all([first, second, third]), [true, true, true])
   assert.deepEqual(saved.get('followedRssFeeds'), ['first', 'other', 'local'])
   assert.deepEqual(settings.followedRssFeeds, ['first', 'other', 'local'])
+})
+
+test('a failed list edit shows the saved list without dropping the edits after it', async () => {
+  const edit = createSavedSettingEditor()
+  let lock = Promise.resolve()
+  let saved = ['first']
+  let value = saved
+  const options = {
+    read: () => value,
+    commit: next => { value = next },
+    readSaved: async () => saved,
+    write: async next => {
+      if (next.includes('failed')) throw new Error('Disk write failed')
+      saved = next
+    },
+    lock: run => (lock = lock.catch(() => {}).then(run)),
+  }
+  const failed = assert.rejects(edit('items', ids => [...ids, 'failed'], options), /Disk write failed/)
+  const next = edit('items', ids => [...ids, 'next'], options)
+  assert.deepEqual(value, ['first', 'failed', 'next'])
+  await Promise.all([failed, next])
+  assert.deepEqual(value, ['first', 'next'])
+
+  await assert.rejects(edit('items', ids => [...ids, 'failed'], options), /Disk write failed/)
+  assert.deepEqual(value, ['first', 'next'])
 })
 
 test('edit times stay with their values when windows edit settings at once or a save fails', async () => {
