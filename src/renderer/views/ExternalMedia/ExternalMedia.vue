@@ -1036,7 +1036,9 @@ function addToHistoryOnce() {
     // Only both tracks' lengths tell how long the media is.
     (source.value.separateAudioUrl && !hasCompanionMetadata())) return
   historyAdded = true
-  addToHistory(startTimestamp ?? historyEntry.value?.watchProgress ?? 0)
+  // With progress saving off, a timestamp link only sets where playback starts.
+  const timestamp = store.getters.getWatchedProgressSavingMode === 'never' ? null : startTimestamp
+  addToHistory(timestamp ?? historyEntry.value?.watchProgress ?? 0)
 }
 
 /**

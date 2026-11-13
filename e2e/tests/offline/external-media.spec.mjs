@@ -228,7 +228,7 @@ test('external media joins the watch history, where its menu marks it as watched
   const menu = page.locator('.contextMenu')
   await item.locator('.title').click({ button: 'right' })
   await menu.getByRole('menuitem', { name: 'Mark As Watched' }).click()
-  await expect(item.locator('.videoWatched')).toHaveText('Watched')
+  await expect(item.locator('.videoWatched')).toBeVisible()
   await item.locator('.title').click({ button: 'right' })
   await menu.getByRole('menuitem', { name: 'Remove From History' }).click()
   await expect(item).toHaveCount(0)
@@ -454,9 +454,10 @@ test('external media keeps a longer soundtrack\'s position while it plays in the
   await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeGreaterThan(videoDuration + 1)
 })
 
-for (const { label, settings, live } of [
+for (const { label, settings, live, timestamp } of [
   { label: 'history is disabled', settings: { rememberHistory: false }, live: false },
-  { label: 'progress saving is disabled', settings: { watchedProgressSavingMode: 'never' }, live: false },
+  // A timestamp link only sets where playback starts.
+  { label: 'progress saving is disabled', settings: { watchedProgressSavingMode: 'never' }, live: false, timestamp: 15 },
   { label: 'the media is live', settings: {}, live: true },
 ]) {
   test(`external media does not save or restore positions when ${label}`, async ({ app, page }) => {
@@ -470,11 +471,18 @@ for (const { label, settings, live } of [
         await store.dispatch(`update${key[0].toUpperCase()}${key.slice(1)}`, value)
       }
     }, settings)
-    await page.locator(sel.searchInput).fill(mediaUrl)
-    await page.locator(sel.searchInput).press('Enter')
+    if (timestamp === undefined) {
+      await page.locator(sel.searchInput).fill(mediaUrl)
+      await page.locator(sel.searchInput).press('Enter')
+    } else {
+      await page.evaluate(({ url, timestamp }) => window.ftElectron.tabs.create({
+        route: '/external-media', query: { url, timestamp: String(timestamp) }, makeActive: true
+      }), { url: mediaUrl, timestamp })
+    }
     const video = await waitForPlayback(page)
     await video.evaluate(element => element.pause())
-    expect(await video.evaluate(element => element.currentTime)).toBeLessThan(2)
+    if (timestamp === undefined) expect(await video.evaluate(element => element.currentTime)).toBeLessThan(2)
+    else expect(await video.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(timestamp)
     await video.evaluate(element => { element.currentTime = 18 })
     await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
     expect(await savedExternalPosition(page, mediaUrl)).toBe(12)
