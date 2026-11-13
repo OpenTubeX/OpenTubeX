@@ -19,9 +19,54 @@ if (process.platform === 'win32' || process.platform === 'darwin') {
 }
 
 /**
+ * The datastores whose changes other windows send, with the channel they use.
+ */
+const datastoreSyncChannels = new Map([
+  [IpcChannels.DB_SETTINGS, IpcChannels.SYNC_SETTINGS],
+  [IpcChannels.DB_PROFILES, IpcChannels.SYNC_PROFILES],
+  [IpcChannels.DB_HISTORY, IpcChannels.SYNC_HISTORY],
+  [IpcChannels.DB_PLAYLISTS, IpcChannels.SYNC_PLAYLISTS],
+  [IpcChannels.DB_SEARCH_HISTORY, IpcChannels.SYNC_SEARCH_HISTORY],
+  [IpcChannels.DB_SUBSCRIPTION_CACHE, IpcChannels.SYNC_SUBSCRIPTION_CACHE],
+])
+
+/**
+ * Until the app listens for a datastore's changes, they wait here, so none is
+ * lost while the window starts. The app then gets only the ones its last full
+ * read before that does not contain, including ones that arrive after the
+ * read's reply.
+ * @typedef {{ handler: ((message: any) => void) | null, waiting: any[], readRevision: number }} SyncListener
+ * @type {Map<string, SyncListener>}
+ */
+const syncListeners = new Map()
+for (const syncChannel of datastoreSyncChannels.values()) {
+  /** @type {SyncListener} */
+  const listener = { handler: null, waiting: [], readRevision: 0 }
+  syncListeners.set(syncChannel, listener)
+  ipcRenderer.on(syncChannel, (_, message) => {
+    if (!listener.handler) listener.waiting.push(message)
+    else if (message.revision > listener.readRevision) listener.handler(message)
+  })
+}
+
+/**
+ * @param {string} syncChannel
+ * @param {(message: any) => void} handler
+ */
+function listenForSync(syncChannel, handler) {
+  const listener = /** @type {SyncListener} */ (syncListeners.get(syncChannel))
+  const { waiting } = listener
+  listener.handler = handler
+  listener.waiting = []
+  for (const message of waiting) {
+    if (message.revision > listener.readRevision) handler(message)
+  }
+}
+
+/**
  * The tabs, the settings and the library are read while the renderer bundle
  * is evaluated and the app mounts. The app's first full read of each takes
- * that result instead of asking again, unless the datastore changed since.
+ * that result instead of asking again.
  * @type {Map<string, Promise<any>>}
  */
 const startupReads = new Map()
@@ -32,16 +77,14 @@ function startStartupReads() {
   startupReadsStarted = true
 
   startupReads.set(IpcChannels.TABS_GET_STATE, ipcRenderer.invoke(IpcChannels.TABS_GET_STATE))
-  for (const [channel, syncChannel] of [
-    [IpcChannels.DB_SETTINGS, IpcChannels.SYNC_SETTINGS],
-    [IpcChannels.DB_PROFILES, IpcChannels.SYNC_PROFILES],
-    [IpcChannels.DB_HISTORY, IpcChannels.SYNC_HISTORY],
-    [IpcChannels.DB_PLAYLISTS, IpcChannels.SYNC_PLAYLISTS],
-    [IpcChannels.DB_SUBSCRIPTION_CACHE, IpcChannels.SYNC_SUBSCRIPTION_CACHE],
+  for (const channel of [
+    IpcChannels.DB_SETTINGS,
+    IpcChannels.DB_PROFILES,
+    IpcChannels.DB_HISTORY,
+    IpcChannels.DB_PLAYLISTS,
+    IpcChannels.DB_SUBSCRIPTION_CACHE,
   ]) {
     startupReads.set(channel, invokeDatastore(channel, { action: DBActions.GENERAL.FIND }))
-    // Another window changed the datastore before the app listens for that.
-    ipcRenderer.once(syncChannel, () => startupReads.delete(channel))
   }
   // A read that nothing takes must not report an unhandled rejection.
   for (const read of startupReads.values()) read.catch(() => {})
@@ -96,24 +139,18 @@ function recordSettingRevision(id, revision) {
 }
 
 /**
- * Invokes a datastore request that can save a setting, see `handleRequestsSavingSettings` in the main process.
+ * Invokes a request of a datastore that other windows change, see
+ * `handleSyncedDatastoreRequests` in the main process.
  * @param {string} channel
  * @param {{ action: number, data?: any }} request
  */
-async function invokeSavingSettings(channel, request) {
-  const { result, savedSetting } = await ipcRenderer.invoke(channel, request)
+async function invokeDatastore(channel, request) {
+  const { result, revision, savedSetting } = await ipcRenderer.invoke(channel, request)
   if (savedSetting) recordSettingRevision(savedSetting._id, savedSetting.revision)
+  const listener = /** @type {SyncListener} */ (syncListeners.get(/** @type {string} */ (datastoreSyncChannels.get(channel))))
+  // Reads once the app listens, such as exports, need not replace what it shows.
+  if (revision !== undefined && !listener.handler) listener.readRevision = revision
   return result
-}
-
-/**
- * @param {string} channel
- * @param {{ action: number, data?: any }} request
- */
-function invokeDatastore(channel, request) {
-  return channel === IpcChannels.DB_SETTINGS || channel === IpcChannels.DB_HISTORY
-    ? invokeSavingSettings(channel, request)
-    : ipcRenderer.invoke(channel, request)
 }
 
 ipcRenderer.on(IpcChannels.CAST_PROGRESS, (_, progress) => {
@@ -350,14 +387,6 @@ export default {
    */
   clearDiagnosticLog: () => {
     return ipcRenderer.invoke(IpcChannels.DIAGNOSTIC_LOG_CLEAR)
-  },
-
-  /**
-   * @param {string} title
-   * @param {string} tabId
-   */
-  setWindowTitle: (title, tabId) => {
-    ipcRenderer.send(IpcChannels.SET_WINDOW_TITLE, { title, tabId })
   },
 
   /**
@@ -1019,7 +1048,7 @@ export default {
    * @param {any} [data]
    */
   dbSearchHistory: (action, data) => {
-    return ipcRenderer.invoke(IpcChannels.DB_SEARCH_HISTORY, data ? { action, data } : { action })
+    return requestDatastore(IpcChannels.DB_SEARCH_HISTORY, action, data)
   },
 
   /**
@@ -1387,7 +1416,7 @@ export default {
    * @param {(event: number, data: any) => void} handler
    */
   handleSyncSettings: (handler) => {
-    ipcRenderer.on(IpcChannels.SYNC_SETTINGS, (_, { event, data, revision }) => {
+    listenForSync(IpcChannels.SYNC_SETTINGS, ({ event, data, revision }) => {
       if (recordSettingRevision(data._id, revision)) handler(event, data)
     })
   },
@@ -1396,9 +1425,7 @@ export default {
    * @param {(event: number, data: any) => void} handler
    */
   handleSyncHistory: (handler) => {
-    ipcRenderer.on(IpcChannels.SYNC_HISTORY, (_, { event, data }) => {
-      handler(event, data)
-    })
+    listenForSync(IpcChannels.SYNC_HISTORY, ({ event, data }) => handler(event, data))
   },
 
   /**
@@ -1414,36 +1441,28 @@ export default {
    * @param {(event: number, data: any) => void} handler
    */
   handleSyncSearchHistory: (handler) => {
-    ipcRenderer.on(IpcChannels.SYNC_SEARCH_HISTORY, (_, { event, data }) => {
-      handler(event, data)
-    })
+    listenForSync(IpcChannels.SYNC_SEARCH_HISTORY, ({ event, data }) => handler(event, data))
   },
 
   /**
    * @param {(event: number, data: any) => void} handler
    */
   handleSyncProfiles: (handler) => {
-    ipcRenderer.on(IpcChannels.SYNC_PROFILES, (_, { event, data }) => {
-      handler(event, data)
-    })
+    listenForSync(IpcChannels.SYNC_PROFILES, ({ event, data }) => handler(event, data))
   },
 
   /**
    * @param {(event: number, data: any) => void} handler
    */
   handleSyncPlaylists: (handler) => {
-    ipcRenderer.on(IpcChannels.SYNC_PLAYLISTS, (_, { event, data }) => {
-      handler(event, data)
-    })
+    listenForSync(IpcChannels.SYNC_PLAYLISTS, ({ event, data }) => handler(event, data))
   },
 
   /**
    * @param {(event: number, data: any) => void} handler
    */
   handleSyncSubscriptionCache: (handler) => {
-    ipcRenderer.on(IpcChannels.SYNC_SUBSCRIPTION_CACHE, (_, { event, data }) => {
-      handler(event, data)
-    })
+    listenForSync(IpcChannels.SYNC_SUBSCRIPTION_CACHE, ({ event, data }) => handler(event, data))
   },
 
   // Tab management API

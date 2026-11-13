@@ -46,7 +46,7 @@
       class="tabTooltipGridTitleIcon"
       aria-hidden="true"
     />
-    <span class="tabTooltipGridTitleText">{{ formatTabTitle(tab.title) }}</span>
+    <span class="tabTooltipGridTitleText">{{ tab.title }}</span>
   </div>
 </template>
 
@@ -55,7 +55,6 @@ import FtRetryImage from '../FtRetryImage.vue'
 import { FtIcon } from '@opentubex/icons'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { getTabAvatarUrl, getTabPageIcon, getTabPreviewFallbackUrl } from '../../tabs/tabPreview'
-import { formatTabTitle } from '../../tabs/tabTitle'
 
 const props = defineProps({
   tab: { type: Object, required: true },

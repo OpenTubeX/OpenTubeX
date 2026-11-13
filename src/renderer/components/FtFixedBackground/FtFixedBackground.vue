@@ -12,7 +12,9 @@
    it to --fixed-background-host-clip so it does not paint it itself. The
    layer sits below the parent's content without making the parent a stacking
    context, which would trap the parent's dropdowns, so the parent only needs
-   to be positioned. */
+   to be positioned. A transformed ancestor, such as a watch layout area
+   during the theater mode animation, contains the fixed layer instead of the
+   viewport; it sets --fixed-background-inset to cover the viewport again. */
 .fixedBackgroundLayer {
   display: var(--fixed-background-display, none);
   position: absolute;
@@ -29,7 +31,7 @@
 .fixedBackgroundLayer::before {
   content: '';
   position: fixed;
-  inset: 0;
+  inset: var(--fixed-background-inset, 0);
   background-color: inherit;
   background-image: inherit;
 }

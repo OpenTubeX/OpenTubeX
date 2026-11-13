@@ -35,7 +35,7 @@ jobs:
     name: Instrumentation tests (API 35, shard ${{ matrix.shard }})
     if: github.repository == 'OpenTubeX/OpenTubeX' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 80
 
     # Software rendering makes long emulator sessions crash, so each shard
     # runs part of the suite on its own emulator.
@@ -106,9 +106,12 @@ jobs:
         sudo udevadm trigger --name-match=kvm
 
     - name: Run instrumentation tests
-      # A shard takes 20 to 40 minutes. Stop a stalled one early enough for the
-      # next step to read the still running emulator.
-      timeout-minutes: 50
+      # A shard takes 20 to 40 minutes, plus a few for retrying failed tests.
+      # Stop a stalled one early enough for the next step to read the still
+      # running emulator.
+      timeout-minutes: 60
+      env:
+        ANDROID_FLAKY_REPORT: ${{ runner.temp }}/android-flaky.json
       uses: ReactiveCircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
       with:
         api-level: 35
@@ -127,10 +130,8 @@ jobs:
         # Several tests check WebView and system animations.
         disable-animations: false
         emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu swangle -skin 720x1600
-        # A hung test fails after ten minutes instead of using up the shard.
-        # Gradle can report success after the emulator has crashed and skipped
-        # the remaining tests, or after test discovery crashed before any test
-        # ran, so require the emulator to still run and the shard to report tests.
+        # The last line runs the shard and reruns failed tests once; see the
+        # script for the checks it makes.
         # On a slow emulator, the launcher's "isn't responding" dialog takes focus
         # from the app, and notification banners cover it. Android reads the
         # dialog setting on configuration changes only, so the font scale is
@@ -161,9 +162,7 @@ jobs:
           adb shell wm density
           adb shell settings put system font_scale 1.01 && timeout 60 sh -c "until adb shell dumpsys activity activities | grep -q '{1.01 '; do sleep 1; done"
           timeout 60 sh -c "until adb shell settings put system font_scale 1.0 && adb shell dumpsys activity activities | grep -q '{1.0 '; do sleep 1; done"
-          ./android/gradlew --project-dir android :app:connectedDebugAndroidTest -PtestAbi=x86_64 -Pandroid.testInstrumentationRunnerArguments.numShards=3 -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }} -Pandroid.testInstrumentationRunnerArguments.timeout_msec=600000 -Pandroid.testInstrumentationRunnerArguments.listener=org.opentubex.app.FailureDiagnostics
-          adb get-state
-          grep -q '<testcase' android/app/build/outputs/androidTest-results/connected/debug/TEST-*.xml
+          node _scripts/androidInstrumentationTests.mjs ${{ matrix.shard }} 3
 
     - name: Show why the emulator stopped
       if: failure()
@@ -191,3 +190,13 @@ jobs:
           android/app/build/reports/androidTests/connected
           android/app/build/outputs/androidTest-results/connected
         if-no-files-found: ignore
+
+    # Read by the Flaky Tests workflow.
+    - name: Upload flaky tests
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: android-flaky-${{ github.run_attempt }}-${{ matrix.shard }}
+        path: ${{ runner.temp }}/android-flaky.json
+        if-no-files-found: ignore
+        retention-days: 7

@@ -161,90 +161,90 @@
         </div>
         <div class="infoArea">
           <FtCard class="watchVideo externalMediaDetails">
-            <div class="externalMediaHeading">
-              <h1
-                class="videoTitle"
-                dir="auto"
-              >
-                {{ info.title || mediaUrl }}
-              </h1>
-            </div>
-            <div
-              v-if="statusBadges.length"
-              class="externalMediaBadges"
-            >
-              <span
-                v-for="badge in statusBadges"
-                :key="badge"
-                class="externalMediaBadge"
-              >{{ badge }}</span>
-            </div>
-            <div class="externalMediaMetricsRow">
-              <FtInlineMetadata
-                class="externalMediaMetrics"
-                icon-labels
-              >
-                <time
-                  v-if="publishedDate"
-                  class="publishedDate"
-                  :datetime="publishedDate"
-                  :title="`${publishedDateLabel} ${formattedPublishedDate}`"
-                ><FtIcon
-                  :icon="['fas', 'calendar-days']"
-                  class="statIcon"
-                  role="img"
-                  :aria-label="publishedDateLabel"
-                />{{ formattedPublishedDate }}</time>
-                <span
-                  v-if="publishedTimeAgo"
-                  class="publishedTimeAgo"
-                ><FtIcon
-                  :icon="['fas', 'clock']"
-                  class="statIcon"
-                  aria-hidden="true"
-                />{{ publishedTimeAgo }}</span>
-                <span
-                  v-if="formattedViewCount"
-                  class="videoViews"
-                ><FtIcon
-                  :icon="['fas', 'eye']"
-                  class="statIcon"
-                  aria-hidden="true"
-                />{{ formattedViewCount }}</span>
-                <span v-if="metadata.concurrentViewCount !== null"><FtIcon
-                  :icon="['fas', 'users']"
-                  class="statIcon"
-                  aria-hidden="true"
-                />{{ t('Global.Counts.Watching Count', { count: formattedConcurrentViewCount }, metadata.concurrentViewCount) }}</span>
-                <bdi
-                  v-if="metadata.categories.length"
-                  :title="`${t('Description.Video Category')} ${metadata.categories.join(', ')}`"
-                ><FtIcon
-                  :icon="['fas', 'icons']"
-                  class="statIcon"
-                  role="img"
-                  :aria-label="t('Description.Video Category')"
-                />{{ metadata.categories.join(', ') }}</bdi>
-              </FtInlineMetadata>
+            <div class="externalMediaHeader">
+              <div class="externalMediaHeaderText">
+                <h1
+                  class="videoTitle"
+                  dir="auto"
+                >
+                  {{ info.title || mediaUrl }}
+                </h1>
+                <div
+                  v-if="statusBadges.length"
+                  class="externalMediaBadges"
+                >
+                  <span
+                    v-for="badge in statusBadges"
+                    :key="badge"
+                    class="externalMediaBadge"
+                  >{{ badge }}</span>
+                </div>
+                <FtInlineMetadata
+                  class="externalMediaMetrics externalMediaMainMetrics"
+                  icon-labels
+                >
+                  <time
+                    v-if="publishedDate"
+                    class="publishedDate"
+                    :datetime="publishedDate"
+                    :title="`${publishedDateLabel} ${formattedPublishedDate}`"
+                  ><FtIcon
+                    :icon="['fas', 'calendar-days']"
+                    class="statIcon"
+                    role="img"
+                    :aria-label="publishedDateLabel"
+                  />{{ formattedPublishedDate }}</time>
+                  <span
+                    v-if="publishedTimeAgo"
+                    class="publishedTimeAgo"
+                  ><FtIcon
+                    :icon="['fas', 'clock']"
+                    class="statIcon"
+                    aria-hidden="true"
+                  />{{ publishedTimeAgo }}</span>
+                  <span
+                    v-if="formattedViewCount"
+                    class="videoViews"
+                  ><FtIcon
+                    :icon="['fas', 'eye']"
+                    class="statIcon"
+                    aria-hidden="true"
+                  />{{ formattedViewCount }}</span>
+                  <span v-if="metadata.concurrentViewCount !== null"><FtIcon
+                    :icon="['fas', 'users']"
+                    class="statIcon"
+                    aria-hidden="true"
+                  />{{ t('Global.Counts.Watching Count', { count: formattedConcurrentViewCount }, metadata.concurrentViewCount) }}</span>
+                  <bdi
+                    v-if="metadata.categories.length"
+                    :title="`${t('Description.Video Category')} ${metadata.categories.join(', ')}`"
+                  ><FtIcon
+                    :icon="['fas', 'icons']"
+                    class="statIcon"
+                    role="img"
+                    :aria-label="t('Description.Video Category')"
+                  />{{ metadata.categories.join(', ') }}</bdi>
+                </FtInlineMetadata>
+                <FtInlineMetadata
+                  v-if="engagement.length"
+                  class="externalMediaMetrics"
+                  icon-labels
+                >
+                  <span
+                    v-for="item in engagement"
+                    :key="item.label"
+                  ><FtIcon
+                    :icon="item.icon"
+                    class="statIcon"
+                    aria-hidden="true"
+                  />{{ item.text }}</span>
+                </FtInlineMetadata>
+              </div>
               <WatchVideoLikes
                 :like-count="metadata.likeCount"
                 :dislike-count="metadata.dislikeCount"
               />
             </div>
-            <FtInlineMetadata
-              v-if="engagement.length"
-              class="externalMediaMetrics"
-              icon-labels
-            >
-              <span
-                v-for="item in engagement"
-                :key="item.label"
-              ><FtIcon
-                :icon="item.icon"
-                class="statIcon"
-                aria-hidden="true"
-              />{{ item.text }}</span>
-            </FtInlineMetadata>
             <div class="externalMediaCreator">
               <!-- Channels of supported platforms open in the app -->
               <component
@@ -972,7 +972,7 @@ function consumeTimestamp() {
     path: route.path,
     query,
     hash: route.hash,
-    state: { skipTabRouteLoading: true, preserveScroll: true, tabTitle: info.value?.title || hostname.value }
+    state: { preserveScroll: true }
   })
 }
 

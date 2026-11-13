@@ -5,7 +5,6 @@ import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 for (const [uiScale, currentLocale] of [[95, 'en-US'], [100, 'ar']]) {
   test.describe(`Shorts volume at ${uiScale}% UI scale in ${currentLocale}`, () => {
     test.use({
-      launchArgs: ['--disable-gpu'],
       seed: {
         settings: {
           currentLocale,

@@ -34,7 +34,7 @@ import { normalizeQuickSettings } from '../../helpers/quickSettings.js'
 import { normalizeFullscreenActions } from '../../helpers/fullscreenActions.js'
 import { normalizeControlBarButtons } from '../../helpers/controlBarButtons.js'
 import { normalizeHiddenPlayerMenuControls, normalizePlayerMenuControls, withoutControlBarButtons } from '../../helpers/playerMenuControls.js'
-import { createOptimisticSettingUpdater, createSettingUpdateQueue, createSettingWriteTracker } from '../../helpers/settingUpdateQueue.js'
+import { createOptimisticSettingUpdater, createSavedSettingEditor, createSettingUpdateQueue, createSettingWriteTracker } from '../../helpers/settingUpdateQueue.js'
 import { mergeSubscriptionSeenVideos } from '../../../subscriptionSeenVideos.js'
 import { mergeSubscriptionSeenPosts } from '../../../subscriptionSeenPosts.js'
 import { mergeRssFeedSeenItems } from '../../helpers/rssFeedSeenItems.js'
@@ -742,6 +742,33 @@ function updateOrderedSetting(commit, settings, settingId, value) {
   })
 }
 
+const editSavedSetting = createSavedSettingEditor()
+
+/**
+ * Applies `update` to a setting that other windows can change at the same
+ * time. A function derives the new value from the current one, so the edit
+ * keeps what other windows saved meanwhile. A value (imports, resets) replaces it.
+ * @template T
+ * @param {Function} commit
+ * @param {Record<string, any>} settings
+ * @param {string} settingId
+ * @param {T | ((value: T) => T)} update
+ * @returns {Promise<boolean>} whether the edit was saved
+ */
+function updateSharedSetting(commit, settings, settingId, update) {
+  const edit = typeof update === 'function' ? update : () => update
+  return settingWrites.track(settingId, () => editSavedSetting(settingId, edit, {
+    read: () => settings[settingId],
+    commit: value => commit(defaultMutationId(settingId), value),
+    readSaved: async () => (await DBSettingHandlers.findValue(settingId)) ?? structuredClone(DEFAULT_SETTINGS[settingId]),
+    write: value => saveSettingEdit(commit, settingId, () => DBSettingHandlers.upsert(settingId, value)),
+    lock: run => runLocked(`opentubex-setting-${settingId}`, run),
+  })).then(() => true, error => {
+    console.error(error)
+    return false
+  })
+}
+
 let androidProxyUpdate = Promise.resolve()
 
 const customActions = {
@@ -868,9 +895,8 @@ const customActions = {
     normalizeNavigationItems(value)
   ),
 
-  // Pin toggles build on the previous edit, so commit them before the save finishes.
-  updatePinnedPlaylistIds: ({ commit, state }, value) => updateOrderedSetting(commit, state, 'pinnedPlaylistIds', value),
-  updateUserPlaylistsPinnedIds: ({ commit, state }, value) => updateOrderedSetting(commit, state, 'userPlaylistsPinnedIds', value),
+  updatePinnedPlaylistIds: ({ commit, state }, update) => updateSharedSetting(commit, state, 'pinnedPlaylistIds', update),
+  updateUserPlaylistsPinnedIds: ({ commit, state }, update) => updateSharedSetting(commit, state, 'userPlaylistsPinnedIds', update),
   // Takes the new groups (sync, imports) or a function that derives them from
   // the saved ones. Edits read the saved groups inside a lock all windows
   // share, so an edit in one window cannot undo another's.
@@ -884,28 +910,29 @@ const customActions = {
   updateSubscribedChannelsCustomOrder: ({ commit, state }, value) => updateOrderedSetting(
     commit, state, 'subscribedChannelsCustomOrder', value
   ),
-  // Quick removals build on the previous one, so commit them before the save finishes.
-  updateFollowedRssFeeds: ({ commit, state }, value) => updateOrderedSetting(commit, state, 'followedRssFeeds', value),
-  updateFollowedChannels: ({ commit, state }, value) => updateOrderedSetting(commit, state, 'followedChannels', value),
-  updatePinnedChannels: async ({ commit, state }, value) => {
-    if (!await updateOrderedSetting(commit, state, 'pinnedChannels', value)) return false
+  updateFollowedRssFeeds: ({ commit, state }, update) => updateSharedSetting(commit, state, 'followedRssFeeds', update),
+  updateFollowedChannels: ({ commit, state }, update) => updateSharedSetting(commit, state, 'followedChannels', update),
+  updatePinnedChannels: async ({ commit, state }, update) => {
+    const previousIds = state.pinnedChannels.map(channel => channel.id)
+    if (!await updateSharedSetting(commit, state, 'pinnedChannels', update)) return false
+    // Only drop unpinned channels, as other windows may have pinned channels this one doesn't show yet.
     const pinnedIds = new Set(state.pinnedChannels.map(channel => channel.id))
-    const entries = Object.entries(state.pinnedChannelMetadata)
-    const retained = entries.filter(([id]) => pinnedIds.has(id))
-    if (retained.length === entries.length) return true
-    return updateOrderedSetting(commit, state, 'pinnedChannelMetadata', Object.fromEntries(retained))
+    const unpinnedIds = previousIds.filter(id => !pinnedIds.has(id) && state.pinnedChannelMetadata[id])
+    if (unpinnedIds.length === 0) return true
+    return updateSharedSetting(commit, state, 'pinnedChannelMetadata', saved => Object.fromEntries(
+      Object.entries(saved).filter(([id]) => !unpinnedIds.includes(id))
+    ))
   },
   refreshPinnedChannelMetadata: ({ commit, state }, { id, name, thumbnail }) => {
     const pin = state.pinnedChannels.find(channel => channel.id === id)
     if (!pin) return
     const previous = state.pinnedChannelMetadata[id] ?? pin
-    const details = { name: name || previous.name, thumbnail: thumbnail || previous.thumbnail }
-    if (details.name === previous.name && details.thumbnail === previous.thumbnail) return
-    const metadata = Object.fromEntries(state.pinnedChannels
-      .filter(channel => state.pinnedChannelMetadata[channel.id])
-      .map(channel => [channel.id, state.pinnedChannelMetadata[channel.id]]))
-    metadata[id] = details
-    return updateOrderedSetting(commit, state, 'pinnedChannelMetadata', metadata)
+    if ((name || previous.name) === previous.name && (thumbnail || previous.thumbnail) === previous.thumbnail) return
+    // Missing details fall back to the saved ones, which another window may have refreshed.
+    return updateSharedSetting(commit, state, 'pinnedChannelMetadata', saved => {
+      const current = saved[id] ?? pin
+      return { ...saved, [id]: { name: name || current.name, thumbnail: thumbnail || current.thumbnail } }
+    })
   },
 
   // Home customization edits build on the previous edit, so commit them before the save finishes.
@@ -952,7 +979,7 @@ const customActions = {
     if (!removed) return false
     // Saving the playlist again should not bring back an old pin.
     if (state.userPlaylistsPinnedIds.includes(playlistId)) {
-      await updateOrderedSetting(commit, state, 'userPlaylistsPinnedIds', state.userPlaylistsPinnedIds.filter(id => id !== playlistId))
+      await updateSharedSetting(commit, state, 'userPlaylistsPinnedIds', ids => ids.filter(id => id !== playlistId))
     }
     return true
   },
@@ -1365,6 +1392,51 @@ const customActions = {
     await Promise.all(homeTabs.map(tab => navigation.replace(tab.id, landingRoute)))
   },
 
+  // Separate, so the subscription cache sees subscriptions made in other
+  // windows while the window starts before it drops unsubscribed channels.
+  setupProfileListenerToSyncWindows: ({ commit }) => {
+    if (process.env.IS_ELECTRON) {
+      window.ftElectron.handleSyncProfiles((event, data) => {
+        switch (event) {
+          case SyncEvents.GENERAL.CREATE:
+            commit('addProfileToList', data)
+            break
+
+          case SyncEvents.GENERAL.UPSERT:
+            commit('upsertProfileToList', data)
+            break
+
+          case SyncEvents.PROFILES.ADD_CHANNEL:
+            commit('addChannelToProfiles', data)
+            break
+
+          case SyncEvents.PROFILES.REMOVE_CHANNEL:
+            commit('removeChannelFromProfiles', data)
+            break
+
+          case SyncEvents.PROFILES.UPDATE_CHANNEL_SETTINGS:
+            commit('updateChannelSettings', data)
+            break
+
+          case SyncEvents.PROFILES.UPDATE_SUBSCRIPTION_DETAILS:
+            commit('updateSubscriptionDetails', data)
+            break
+
+          case SyncEvents.PROFILES.UPDATE_DETAILS:
+            commit('updateProfileDetails', data)
+            break
+
+          case SyncEvents.GENERAL.DELETE:
+            commit('removeProfileFromList', data)
+            break
+
+          default:
+            console.error('profiles: invalid sync event received')
+        }
+      })
+    }
+  },
+
   // Should be a root action, but we'll tolerate
   setupListenersToSyncWindows: ({ commit, dispatch }) => {
     if (process.env.IS_ELECTRON) {
@@ -1515,45 +1587,6 @@ const customActions = {
 
           default:
             console.error('search history: invalid sync event received')
-        }
-      })
-
-      window.ftElectron.handleSyncProfiles((event, data) => {
-        switch (event) {
-          case SyncEvents.GENERAL.CREATE:
-            commit('addProfileToList', data)
-            break
-
-          case SyncEvents.GENERAL.UPSERT:
-            commit('upsertProfileToList', data)
-            break
-
-          case SyncEvents.PROFILES.ADD_CHANNEL:
-            commit('addChannelToProfiles', data)
-            break
-
-          case SyncEvents.PROFILES.REMOVE_CHANNEL:
-            commit('removeChannelFromProfiles', data)
-            break
-
-          case SyncEvents.PROFILES.UPDATE_CHANNEL_SETTINGS:
-            commit('updateChannelSettings', data)
-            break
-
-          case SyncEvents.PROFILES.UPDATE_SUBSCRIPTION_DETAILS:
-            commit('updateSubscriptionDetails', data)
-            break
-
-          case SyncEvents.PROFILES.UPDATE_DETAILS:
-            commit('updateProfileDetails', data)
-            break
-
-          case SyncEvents.GENERAL.DELETE:
-            commit('removeProfileFromList', data)
-            break
-
-          default:
-            console.error('profiles: invalid sync event received')
         }
       })
 

@@ -29,7 +29,6 @@ async function showResolutionTiles(menu, options) {
 
 test.describe('resolution badges', { tag: '@scale' }, () => {
   test.use({
-    launchArgs: ['--disable-gpu'],
     seed: {
       settings: {
         currentLocale: 'en-US',

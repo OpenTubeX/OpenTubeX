@@ -2768,10 +2768,7 @@ async function saveStateInRouter(query) {
   let location
 
   if (query === '') {
-    location = {
-      path: `/channel/${id.value}`,
-      state: { skipTabRouteLoading: true }
-    }
+    location = { path: `/channel/${id.value}` }
   } else {
     location = {
       path: `/channel/${id.value}`,
@@ -2781,7 +2778,6 @@ async function saveStateInRouter(query) {
       query: {
         searchQueryText: query,
       },
-      state: { skipTabRouteLoading: true }
     }
   }
 
@@ -2995,10 +2991,7 @@ async function replaceTabRoute(tab) {
 
       // We already have the data and only need to switch the visible tab.
       try {
-        await replaceOwnRoute({
-          path: `/channel/${id.value}/${nextTab}`,
-          state: { skipTabRouteLoading: true }
-        })
+        await replaceOwnRoute({ path: `/channel/${id.value}/${nextTab}` })
       } catch (failure) {
         if (!isNavigationFailure(failure, NavigationFailureType.duplicated)) {
           throw failure

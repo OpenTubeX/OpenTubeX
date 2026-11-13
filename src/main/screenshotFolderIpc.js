@@ -6,7 +6,7 @@ import path from 'node:path'
 import { IpcChannels } from '../constants'
 import * as baseHandlers from '../datastores/handlers/base'
 import { handleTrusted, onTrusted, sendToAppWindows } from './ipc'
-import { settingSyncMessage } from './settingRevisions'
+import { settingSyncMessage, writeSynced } from './datastoreSync'
 
 /**
  * @param {import('electron').WebContents} webContents
@@ -37,9 +37,10 @@ async function chooseScreenshotFolder(webContents, currentPath) {
 
   const settingId = 'screenshotFolderPath'
 
-  await baseHandlers.settings.upsert(settingId, result.filePaths[0])
-
-  sendToAppWindows(IpcChannels.SYNC_SETTINGS, settingSyncMessage(settingId, result.filePaths[0]))
+  await writeSynced([IpcChannels.SYNC_SETTINGS], async () => {
+    await baseHandlers.settings.upsert(settingId, result.filePaths[0])
+    sendToAppWindows(IpcChannels.SYNC_SETTINGS, settingSyncMessage(settingId, result.filePaths[0]))
+  })
 
   return result.filePaths[0]
 }

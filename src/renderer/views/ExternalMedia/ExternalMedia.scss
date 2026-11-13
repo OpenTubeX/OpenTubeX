@@ -142,7 +142,7 @@
 .externalMediaDetails {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 16px;
   margin-block-start: 0;
   padding: 16px;
 }
@@ -156,11 +156,26 @@
   overflow-wrap: anywhere;
 }
 
-.externalMediaHeading {
-  align-items: flex-start;
+/* Matches the watch page's header (WatchVideoInfo): likes beside the title and metadata. */
+.externalMediaHeader {
+  align-items: center;
   display: flex;
-  gap: 12px;
-  justify-content: space-between;
+  gap: 16px;
+}
+
+.externalMediaHeaderText {
+  display: flex;
+  flex: auto;
+  flex-direction: column;
+  gap: 6px;
+  min-inline-size: 0;
+}
+
+@media screen and (width <= 680px) {
+  .externalMediaHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
 }
 
 .externalMediaBadges {
@@ -183,27 +198,13 @@
   font-size: 14px;
 }
 
-.externalMediaMetricsRow {
-  align-items: center;
-  color: var(--tertiary-text-color);
-  display: flex;
-  flex-wrap: wrap;
-  font-size: 14px;
-  gap: 10px;
-  justify-content: space-between;
-}
-
-.externalMediaMetricsRow .externalMediaMetrics {
-  flex: 1 1 240px;
-}
-
-.externalMediaMetricsRow .publishedTimeAgo,
-.externalMediaMetricsRow .videoViews {
+.externalMediaHeader .publishedTimeAgo,
+.externalMediaHeader .videoViews {
   white-space: nowrap;
 }
 
 @media screen and (width <= 460px) {
-  .externalMediaMetricsRow .externalMediaMetrics {
+  .externalMediaMainMetrics {
     align-items: flex-start;
     flex-direction: column;
   }

@@ -59,8 +59,7 @@ async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtC
         faAliasToCanon: {},
         getTabAvatarUrl: tab => tab.avatarUrl,
         getTabPreviewFallbackUrl: () => null,
-        getTabPageIcon: () => null,
-        formatTabTitle: title => title
+        getTabPageIcon: () => null
       })
   const renderer = Vue.createRenderer({
     createElement: tag => ({

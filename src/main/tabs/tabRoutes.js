@@ -167,18 +167,14 @@ export function getVideoThumbnailUrl(url) {
 
 /**
  * @param {string} title
- * @returns {boolean}
+ * @returns {string}
  */
-function isGenericTitle(title) {
-  if (typeof title !== 'string') {
-    return true
-  }
-
-  const trimmed = title.trim()
-  return trimmed.length === 0 || trimmed === app.getName()
+export function formatWindowTitle(title) {
+  return title.length > 0 ? `${title} - ${app.getName()}` : app.getName()
 }
 
 /**
+ * A page without a title yet keeps the one the tab already has.
  * @param {string | undefined} currentTitle
  * @param {string} newTitle
  * @returns {string}
@@ -188,15 +184,9 @@ export function resolveTabTitle(currentTitle, newTitle) {
     return currentTitle ?? ''
   }
 
-  if (
-    isGenericTitle(newTitle) &&
-    currentTitle &&
-    !isGenericTitle(currentTitle)
-  ) {
-    return currentTitle
-  }
-
-  return newTitle
+  return newTitle.trim().length === 0 && currentTitle?.trim()
+    ? currentTitle
+    : newTitle
 }
 /**
  * @param {string} route

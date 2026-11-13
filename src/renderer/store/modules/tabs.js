@@ -1,9 +1,7 @@
-import packageDetails from '../../../../package.json'
 import { getTabPageIcon } from '../../tabs/tabPageIcon'
 import { DEFAULT_VIDEO_ZOOM } from '../../helpers/player/videoZoom'
 import { DEFAULT_VOLUME_BOOST } from '../../helpers/player/volumeBoost'
 import { reconcilePendingTabOrder } from '../../tabs/pendingTabOrder'
-import { formatTabTitle } from '../../tabs/tabTitle'
 import { getCapacitorTabService } from '../../tabs/CapacitorTabService'
 
 const MAX_LOGICAL_HISTORY_ENTRIES = 100
@@ -524,7 +522,7 @@ function reconcileTab(previous, incoming) {
     incoming.syncedNavigationRevision !== previous.syncedNavigationRevision
   ) {
     const incomingRoute = normalizeRoute(incoming.route ?? routeFromUrl(incoming.url))
-    const title = stripDocumentTitle(incoming.title || incomingRoute.fullPath)
+    const title = incoming.title || incomingRoute.fullPath
     const restored = restoredHistoryState(incoming, incomingRoute, title)
     history = restored.history
     historyIndex = restored.historyIndex
@@ -554,7 +552,7 @@ function reconcileTab(previous, incoming) {
 }
 
 function createRuntimeTab(incoming, route) {
-  const title = stripDocumentTitle(incoming.title || route.fullPath)
+  const title = incoming.title || route.fullPath
   return {
     ...incoming,
     route,
@@ -667,13 +665,6 @@ function buildFullPath(path, query, hash) {
   }
   const queryString = search.toString()
   return `${path.startsWith('/') ? path : `/${path}`}${queryString ? `?${queryString}` : ''}${hash}`
-}
-
-function stripDocumentTitle(title) {
-  if (title === packageDetails.productName) {
-    return ''
-  }
-  return formatTabTitle(title)
 }
 
 function searchParamsToQuery(searchParams) {

@@ -39,10 +39,10 @@ export function getChannelLinkMenuItems({ id, name, thumbnail }, t) {
     icon: ['fas', pinned ? 'thumbtack-slash' : 'thumbtack'],
     enabled: true,
     run: async () => {
-      const channels = store.getters.getPinnedChannels
-      const saved = await store.dispatch('updatePinnedChannels', pinned
-        ? channels.filter(channel => channel.id !== id)
-        : [...channels.filter(channel => channel.id !== id), { id, name, thumbnail }])
+      const saved = await store.dispatch('updatePinnedChannels', channels => [
+        ...channels.filter(channel => channel.id !== id),
+        ...pinned ? [] : [{ id, name, thumbnail }],
+      ])
       if (!saved) {
         showToast({
           message: t('Channel.Failed to save subscription settings'),

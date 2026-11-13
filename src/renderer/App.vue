@@ -553,7 +553,7 @@
             <FtRetryImage
               v-if="getUsableTabSwitcherPreviewUrl(tab)"
               :src="tabSwitcherPreviewUrls[tab.id]"
-              :alt="`${formatTabTitle(tab.title)} preview`"
+              :alt="`${tab.title} preview`"
               loading="lazy"
               decoding="async"
               draggable="false"
@@ -563,7 +563,7 @@
               v-else-if="!tabSwitcherPreviewPending[tab.id] && getUsableTabSwitcherAvatarUrl(tab)"
               :fallback-icon="getTabPageIcon(tab) || ['fas', 'display']"
               :src="getUsableTabSwitcherAvatarUrl(tab)"
-              :alt="`${formatTabTitle(tab.title)} preview`"
+              :alt="`${tab.title} preview`"
               class="tabSwitcherPreviewAvatar"
               loading="lazy"
               decoding="async"
@@ -600,7 +600,7 @@
               aria-hidden="true"
             />
             <span class="tabSwitcherTitleText">
-              {{ formatTabTitle(tab.title) }}
+              {{ tab.title }}
             </span>
           </span>
         </button>
@@ -729,7 +729,6 @@ import { useRssFeedAutoRefresh } from './composables/useRssFeedAutoRefresh'
 import { usePlatformFeedAutoRefresh } from './composables/usePlatformFeedAutoRefresh'
 import { startTwitchLiveNotifications } from './helpers/platformFeed'
 import { translateWindowTitle } from './helpers/strings'
-import { formatTabTitle } from './tabs/tabTitle'
 import { normalizeScrollbarThumbWidth } from './constants/scrollbar'
 import { getAppFontFamily } from './helpers/appFont'
 import { canMarkHistoryEntryAsWatched } from './helpers/history'
@@ -1827,7 +1826,10 @@ onMounted(async () => {
   // (subscriptions). Load it during the remaining startup work instead of after.
   const libraryReady = Promise.all([
     settingsReady.then(() => Promise.all([store.dispatch('grabHistory'), store.dispatch('grabAllPlaylists')])),
-    profilesReady.then(() => store.dispatch('grabAllSubscriptions')),
+    profilesReady.then(() => {
+      if (process.env.IS_ELECTRON) store.dispatch('setupProfileListenerToSyncWindows')
+      return store.dispatch('grabAllSubscriptions')
+    }),
   ])
   tabsReady.then(() => {
     const initialRoute = usesLogicalTabs ? store.getters.getActiveTab?.route : route
@@ -1906,7 +1908,7 @@ onMounted(async () => {
       await setLastUsedVersion(packageDetails.version)
     }
 
-    store.dispatch('grabSearchHistoryEntries')
+    const searchHistoryReady = store.dispatch('grabSearchHistoryEntries')
 
     // YouTube links have to be caught in both builds, otherwise the browser
     // navigates away from the app instead of opening the linked video,
@@ -1918,7 +1920,6 @@ onMounted(async () => {
     })
 
     if (process.env.IS_ELECTRON) {
-      store.dispatch('setupListenersToSyncWindows')
       removeOpenUrlListener = enableOpenUrl()
       store.dispatch('getExternalPlayerCmdArgumentsData')
       removeReloadRequestListener = window.ftElectron.tabs.onRequestReload(prepareAndReloadTab)
@@ -1929,6 +1930,12 @@ onMounted(async () => {
     }
 
     await libraryReady
+    if (process.env.IS_ELECTRON) {
+      // The preload holds back other windows' changes until the app listens,
+      // then passes on those that the reads above do not contain.
+      await searchHistoryReady
+      store.dispatch('setupListenersToSyncWindows')
+    }
     store.dispatch('initializeSyncServer').catch(error => {
       console.error('Initial sync server sync failed', error)
     })
@@ -4646,20 +4653,10 @@ async function enableCapacitorIntegrations() {
   }
 }
 
-const windowTitle = computed(() => {
-  const routePath = route.path
-  if (
-    !routePath.startsWith('/channel/') &&
-    !routePath.startsWith('/watch/') &&
-    !routePath.startsWith('/hashtag/') &&
-    !routePath.startsWith('/playlist/') &&
-    !routePath.startsWith('/search/')
-  ) {
-    return translateWindowTitle(route.meta.title)
-  } else {
-    return null
-  }
-})
+// Pages without a static title publish their own
+const windowTitle = computed(() => typeof route.meta.title === 'string'
+  ? translateWindowTitle(route.meta.title)
+  : null)
 
 /** @type {import('vue').ComputedRef<string>} */
 const appTitle = computed(() => {
@@ -4671,15 +4668,7 @@ const appTitle = computed(() => {
 })
 
 function publishAppTitle(value) {
-  if (value.length > 0) {
-    document.title = `${value} - ${packageDetails.productName}`
-  } else {
-    document.title = packageDetails.productName
-  }
-
-  if (isElectron && presentedTabId.value) {
-    window.ftElectron.setWindowTitle(document.title, presentedTabId.value)
-  }
+  document.title = value.length > 0 ? `${value} - ${packageDetails.productName}` : packageDetails.productName
 }
 
 watch(appTitle, publishAppTitle)

@@ -381,7 +381,7 @@
                     <FtCheckboxList
                       class="tabSelection"
                       :model-value="selectedTabIds.has(tab.id) ? [tab.id] : []"
-                      :labels="[t('Tab Organizer.Select Tab', { title: formatTabTitle(tab.title) })]"
+                      :labels="[t('Tab Organizer.Select Tab', { title: tab.title })]"
                       :values="[tab.id]"
                       @click.capture="handleTabSelectionClick($event, tab.id)"
                       @update:model-value="toggleTabSelection(tab.id, $event.includes(tab.id))"
@@ -406,7 +406,7 @@
                       class="tabIdentity"
                       @click="activateTab(tab.id)"
                     >
-                      <span>{{ formatTabTitle(tab.title) }}</span>
+                      <span>{{ tab.title }}</span>
                       <small>{{ tab.route.fullPath || tab.url }}</small>
                     </button>
                     <div class="tabIndicators">
@@ -421,7 +421,7 @@
                     <button
                       type="button"
                       class="iconButton"
-                      :aria-label="t('Tab Organizer.Close Tab', { title: formatTabTitle(tab.title) })"
+                      :aria-label="t('Tab Organizer.Close Tab', { title: tab.title })"
                       :title="t('Close')"
                       @click="runAction('close', [tab.id])"
                     >
@@ -547,7 +547,7 @@
                           />
                         </span>
                         <span class="syncedTabIdentity">
-                          <span dir="auto">{{ formatTabTitle(tab.title || getSyncTabRoute(tab.url)) }}</span>
+                          <span dir="auto">{{ tab.title || getSyncTabRoute(tab.url) }}</span>
                           <small>{{ getSyncTabRoute(tab.url) }}</small>
                         </span>
                         <FtIcon
@@ -597,7 +597,7 @@
                       />
                     </span>
                     <div class="tabIdentity">
-                      <span>{{ formatTabTitle(tab.title) }}</span>
+                      <span>{{ tab.title }}</span>
                       <small>{{ tab.route.fullPath || tab.url }}</small>
                     </div>
                     <button
@@ -703,7 +703,6 @@ import { getTabGroupIconLabels } from '../../helpers/tabGroupIconLabels'
 import { showToast } from '../../helpers/utils'
 import store from '../../store/index'
 import { getSyncedTabPreview as syncedTabPreview, getTabAvatarUrl, getTabPageIcon } from '../../tabs/tabPreview'
-import { formatTabTitle } from '../../tabs/tabTitle'
 import FtButton from '../FtButton/FtButton.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'

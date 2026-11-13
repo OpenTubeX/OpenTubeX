@@ -184,11 +184,12 @@
   gap: 0.75em;
 }
 
+/* The auto margin pushes the action buttons to the end without stretching the link past the avatar and name */
 .channelLink {
   display: flex;
   align-items: center;
-  flex: 1;
   min-inline-size: 0;
+  margin-inline-end: auto;
   gap: 0.75em;
   color: inherit;
   text-decoration: none;
@@ -215,7 +216,6 @@
 }
 
 .channelName {
-  flex: 1;
   min-inline-size: 0;
   margin: 0;
   font-weight: 500;
