@@ -192,25 +192,54 @@
   padding: 0;
 }
 
+/* One column of rows in a segmented group, like the other reorder lists.
+   A dragged row lifts out of the group with fully rounded corners. */
 .customizerList {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px 16px;
+  gap: 2px;
+  max-inline-size: 720px;
 }
 
 .customizerItem {
-  display: flex;
+  --reorder-row-color: var(--secondary-card-bg-color);
+
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  min-block-size: 48px;
-  padding-inline: 12px;
-  border-radius: var(--shape-corner-medium);
-  background-color: var(--secondary-card-bg-color);
+  min-block-size: 56px;
+  padding-inline-end: 8px;
+  border-radius: var(--shape-corner-extra-small);
+  background-color: var(--reorder-row-color);
+  transition: border-radius var(--motion-fast-spatial);
+  user-select: none;
 }
 
-.customizerItem :deep(.switch-ctn) {
-  flex: 1;
+.customizerItem:first-child {
+  border-start-start-radius: var(--shape-corner-large-increased);
+  border-start-end-radius: var(--shape-corner-large-increased);
+}
+
+.customizerItem:last-child {
+  border-end-start-radius: var(--shape-corner-large-increased);
+  border-end-end-radius: var(--shape-corner-large-increased);
+}
+
+.customizerItem.dragging {
+  border-radius: var(--shape-corner-large-increased);
+}
+
+.dragHandle {
+  display: flex;
+  align-self: stretch;
+  align-items: center;
+  justify-content: center;
+  color: var(--secondary-text-color);
+  cursor: grab;
+  touch-action: none;
+}
+
+.dragHandle:active {
+  cursor: grabbing;
 }
 
 .reorderButtons {
@@ -481,12 +510,6 @@
 
 .reminderLink:is(:hover, :focus-visible) strong {
   text-decoration: underline;
-}
-
-@media only screen and (width <= 800px) {
-  .customizerList {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media only screen and (width <= 520px) {

@@ -34,7 +34,22 @@
             v-for="(section, index) in configurableSections"
             :key="section.id"
             class="customizerItem"
+            :data-home-section-id="section.id"
+            :class="{ dragging: draggedSectionId === section.id }"
+            :style="sectionRowStyle(section.id)"
           >
+            <span
+              class="dragHandle"
+              aria-hidden="true"
+              @dragstart.prevent
+              @pointerdown="startSectionDrag($event, section.id)"
+              @pointermove="moveSectionDrag"
+              @pointerup="endSectionDrag"
+              @pointercancel="cancelSectionDrag"
+              @lostpointercapture="cancelSectionDrag"
+            >
+              <FtIcon :icon="['fas', 'grip']" />
+            </span>
             <FtToggleSwitch
               :label="sectionLabel(section.id)"
               :default-value="section.visible"
@@ -593,6 +608,8 @@ import { showToast } from '../../helpers/utils'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 import { formatDateTime } from '../../helpers/dateFormat'
 import { useHomeRecommendations } from '../../composables/useHomeRecommendations'
+import { useOrderedItemReorder } from '../../composables/useOrderedItemReorder'
+import { moveItemByVisibleOffset } from '../../../orderedItems'
 
 const { locale, t } = useI18n()
 const IS_ELECTRON = process.env.IS_ELECTRON
@@ -612,6 +629,7 @@ let removeReminderListener = null
 let reminderLoadGeneration = 0
 
 const sectionLayout = computed(() => normalizeHomeSectionLayout(store.getters.getHomeSectionLayout))
+const sectionLayoutIds = computed(() => sectionLayout.value.map(section => section.id))
 const supportedSectionIds = computed(() => new Set(sectionLayout.value
   .map(section => section.id)
   .filter(id => supportsYtDlp || id !== 'recentDownloads')
@@ -907,25 +925,42 @@ function setSectionVisibility(sectionId, visible) {
   store.dispatch('updateHomeSectionLayout', updated)
 }
 
-function moveSection(sectionId, offset) {
-  const supported = configurableSections.value
-  const index = supported.findIndex(section => section.id === sectionId)
-  const target = supported[index + offset]
-  if (index === -1 || target == null) { return }
+function updateSectionOrder(ids) {
+  const sectionsById = new Map(sectionLayout.value.map(section => [section.id, section]))
+  return store.dispatch('updateHomeSectionLayout', ids.map(id => sectionsById.get(id)))
+}
 
-  const updated = sectionLayout.value.slice()
-  const sourceIndex = updated.findIndex(section => section.id === sectionId)
-  const targetIndex = updated.findIndex(section => section.id === target.id)
-  const source = updated[sourceIndex]
-  updated[sourceIndex] = updated[targetIndex]
-  updated[targetIndex] = source
-  store.dispatch('updateHomeSectionLayout', updated)
+function announceSectionMoved(sectionId, position) {
   reorderStatus.value = t('Home Page.Section moved', {
     section: sectionLabel(sectionId),
-    position: index + offset + 1,
-    total: supported.length,
+    position: position + 1,
+    total: configurableSections.value.length,
   })
 }
+
+function moveSection(sectionId, offset) {
+  const visibleIds = configurableSections.value.map(section => section.id)
+  const reordered = moveItemByVisibleOffset(sectionLayoutIds.value, visibleIds, sectionId, offset)
+  if (reordered === sectionLayoutIds.value) return
+
+  updateSectionOrder(reordered)
+  announceSectionMoved(sectionId, visibleIds.indexOf(sectionId) + offset)
+}
+
+const {
+  draggedItemId: draggedSectionId,
+  rowStyle: sectionRowStyle,
+  startPointerDrag: startSectionDrag,
+  movePointerDrag: moveSectionDrag,
+  endPointerDrag: endSectionDrag,
+  cancelPointerDrag: cancelSectionDrag,
+} = useOrderedItemReorder({
+  items: sectionLayoutIds,
+  rowSelector: '.customizerItem',
+  itemIdAttribute: 'data-home-section-id',
+  updateItems: updateSectionOrder,
+  announceMoved: announceSectionMoved,
+})
 
 function toDateKey(date) {
   return [
