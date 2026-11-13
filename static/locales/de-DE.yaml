@@ -2601,6 +2601,7 @@ Video:
       Volume Boost: Lautstärkeverstärkung
       'Off': Aus
     Resize dock: Leiste in der Größe ändern
+    Resize dock width: Leistenbreite ändern
     Google Cast:
       Invalid Authentication: "Der Empfänger hat eine ungültige Authentifizierungsantwort gesendet."
       Authentication Declined: "Der Empfänger hat die Authentifizierung abgelehnt."

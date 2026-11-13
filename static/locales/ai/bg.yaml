@@ -1862,6 +1862,7 @@ Video:
     Auto-generated Caption Template: '{language} (автоматично генерирани)'
     Up next in {seconds}: Следва след {seconds}
     Resize dock: Преоразмеряване на панела
+    Resize dock width: Промяна на ширината на панела
     Play now: Възпроизвеждане сега
     MusicPlaybackRateOverride: Открит е музикален видеоклип, възпроизвежда се със скорост 1x
     Normal: Нормално

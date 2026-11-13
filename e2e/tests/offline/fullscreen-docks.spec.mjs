@@ -1,6 +1,8 @@
 import { writeFile } from 'node:fs/promises'
 
-import { test, expect, expectScrollAtRenderedEnd, setPlayerFullscreen, setWindowSize } from '../../helpers/app.mjs'
+import {
+  test, expect, expectScrollAtRenderedEnd, latestSettings, readDatastore, setPlayerFullscreen, setWindowSize
+} from '../../helpers/app.mjs'
 import { findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
 import { measureFullscreenDockToggle } from '../../helpers/fullscreen-docks.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
@@ -189,6 +191,34 @@ test('full-window docks preserve zoom, stacked panel controls and rapid toggles'
     await expectValidScrollbar()
     await handle.dblclick()
     await expect.poll(() => metadata.evaluate(element => element.clientHeight)).toBe(height)
+
+    // The column edge trades video width for dock width and remembers it.
+    const widthOf = locator => locator.evaluate(element => element.getBoundingClientRect().width)
+    const dockWidth = await widthOf(metadata)
+    // The zoom transform scales the video's bounding box, so compare layout widths.
+    const videoWidth = await video.evaluate(element => element.clientWidth)
+    const widthHandle = player.locator('.fullscreenDockWidthHandle')
+    const handleBox = await widthHandle.boundingBox()
+    await scrollToBottom()
+    await page.mouse.move(handleBox.x + 3, handleBox.y + handleBox.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(handleBox.x - 97, handleBox.y + handleBox.height / 2, { steps: 4 })
+    await page.mouse.up()
+    expect(Math.abs(await widthOf(metadata) - dockWidth - 100)).toBeLessThan(1)
+    expect(Math.abs(await widthOf(chapters) - dockWidth - 100)).toBeLessThan(1)
+    expect(Math.abs(videoWidth - await video.evaluate(element => element.clientWidth) - 100)).toBeLessThanOrEqual(1)
+    await expectValidScrollbar()
+    const savedWidth = await page.evaluate(() => window.$store.getters.getFullscreenDockWidth)
+    // The saved width spans from the column edge to the player's end.
+    const columnStart = (await widthHandle.boundingBox()).x
+    const playerEnd = await player.evaluate(element => element.getBoundingClientRect().right)
+    expect(Math.abs(savedWidth - (playerEnd - columnStart))).toBeLessThanOrEqual(1)
+    await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).fullscreenDockWidth).toBe(savedWidth)
+    await widthHandle.press('ArrowRight')
+    await expect.poll(() => widthOf(metadata)).toBeLessThan(dockWidth + 99)
+    await widthHandle.dblclick()
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getFullscreenDockWidth)).toBe(0)
+    await expect.poll(() => widthOf(metadata)).toBeCloseTo(dockWidth, 1)
     await scrollToBottom()
     await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
     await watch.evaluate(component => component.proxy.$refs.player.closeChaptersOverlay())

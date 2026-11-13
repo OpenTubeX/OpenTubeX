@@ -1,4 +1,5 @@
-import { nextTick, onBeforeUnmount, onUnmounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onUnmounted, reactive, ref, watch } from 'vue'
+import store from '../../../store/index'
 import { applyAnimationSpeed } from '../../../helpers/animationSpeed'
 import {
   FULLSCREEN_DOCK_GAP,
@@ -9,6 +10,10 @@ import { isReducedMotionEnabled } from '../../../helpers/reducedMotion'
 
 const FULLSCREEN_DOCK_PREFERRED_MIN_HEIGHT = 360
 const FULLSCREEN_DOCK_COMPACT_MIN_HEIGHT = 96
+// Matches the automatic width's minimum in ft-shaka-video-player.css.
+const FULLSCREEN_DOCK_MIN_WIDTH = 260
+// Share of the player the dock column may take, so the video stays watchable.
+const FULLSCREEN_DOCK_MAX_WIDTH_SHARE = 0.7
 export const FULLSCREEN_DOCK_HEADER_SELECTOR = [
   '.chapterOverlayHeader',
   '.fullscreenMetadataHeader',
@@ -23,8 +28,8 @@ export const FULLSCREEN_DOCK_HEADER_SELECTOR = [
 
 /**
  * Lays out the information docks stacked beside the video in fullscreen and full window:
- * their order and heights, which the viewer can resize, reorder and collapse, and the
- * transitions of the video and the floating action dock when the docks open or close.
+ * their order and heights, which the viewer can resize, reorder and collapse, the width of
+ * the column, which the viewer can resize, and the transitions of the video and the floating action dock when the docks open or close.
  * @param {{
  *   container: import('vue').Ref<HTMLElement | null>,
  *   video: import('vue').Ref<HTMLVideoElement | null>,
@@ -160,6 +165,13 @@ export function useFullscreenDocks({
   let resizingFullscreenDockWeightBefore = 0
   let resizingFullscreenDockTotalWeight = 0
   let resizingFullscreenDockBounds = null
+  // Each drag follows the pointer that started it, so a second touch cannot move or end it.
+  let fullscreenDockGesturePointerId = null
+
+  /** @param {PointerEvent} [event] */
+  function isOtherFullscreenDockPointer(event) {
+    return event != null && event.pointerId !== fullscreenDockGesturePointerId
+  }
 
   function getFullscreenOpenDocks(includeDock) {
     const openDocks = fullscreenDockOrder.filter(isFullscreenDockOpen)
@@ -277,9 +289,11 @@ export function useFullscreenDocks({
   }
 
   function handleFullscreenDockResizePointerDown(event, dock) {
-    if (event.button !== 0 || !fullscreenDockCanResize(dock)) {
+    if (event.button !== 0 || fullscreenDockGesturePointerId !== null || !fullscreenDockCanResize(dock)) {
       return
     }
+
+    fullscreenDockGesturePointerId = event.pointerId
 
     const openDocks = getFullscreenOpenDocks()
     const index = openDocks.indexOf(dock)
@@ -298,12 +312,15 @@ export function useFullscreenDocks({
   }
 
   function handleFullscreenDockResizePointerMove(event) {
+    if (isOtherFullscreenDockPointer(event)) return
     const pointerWeight = (event.clientY - resizingFullscreenDockBounds.top) /
       resizingFullscreenDockBounds.height * resizingFullscreenDockTotalWeight
     setFullscreenDockBoundary(resizingFullscreenDock, pointerWeight - resizingFullscreenDockWeightBefore)
   }
 
-  function stopFullscreenDockResize() {
+  function stopFullscreenDockResize(event) {
+    if (isOtherFullscreenDockPointer(event)) return
+    fullscreenDockGesturePointerId = null
     fullscreenDockResizing.value = false
     resizingFullscreenDock = null
     resizingFullscreenDockBounds = null
@@ -313,6 +330,100 @@ export function useFullscreenDocks({
   }
 
   onUnmounted(stopFullscreenDockResize)
+
+  const fullscreenDockWidthResizing = ref(false)
+  let resizingFullscreenDockWidthOffset = 0
+
+  // CSS clamps the saved width again, so shrinking the window keeps the limits.
+  const fullscreenDockWidthStyle = computed(() => {
+    const width = store.getters.getFullscreenDockWidth
+    if (!(width > 0) || isPortraitLayout()) return null
+    return {
+      '--side-panel-width': `min(clamp(${FULLSCREEN_DOCK_MIN_WIDTH}px, ${width}px, ${FULLSCREEN_DOCK_MAX_WIDTH_SHARE * 100}%), 100%)`,
+    }
+  })
+
+  /**
+   * The dock column's width if its edge was at `clientX`, measured from the
+   * player's inline end.
+   * @param {number} clientX
+   */
+  function getFullscreenDockWidthAt(clientX) {
+    const bounds = container.value.getBoundingClientRect()
+    return getComputedStyle(container.value).direction === 'rtl'
+      ? clientX - bounds.left
+      : bounds.right - clientX
+  }
+
+  /** @param {number} width */
+  function setFullscreenDockWidth(width) {
+    const maximumWidth = container.value.getBoundingClientRect().width * FULLSCREEN_DOCK_MAX_WIDTH_SHARE
+    const clampedWidth = Math.round(Math.max(FULLSCREEN_DOCK_MIN_WIDTH, Math.min(maximumWidth, width)))
+    // Apply live via the mutation; the end of the gesture persists the result.
+    store.commit('setFullscreenDockWidth', clampedWidth)
+  }
+
+  /**
+   * The rendered width, which differs from the saved one when it is automatic
+   * or clamped to the current player size.
+   * @param {HTMLElement} handle
+   */
+  function getRenderedFullscreenDockWidth(handle) {
+    const bounds = handle.getBoundingClientRect()
+    const rtl = getComputedStyle(container.value).direction === 'rtl'
+    return getFullscreenDockWidthAt(rtl ? bounds.right : bounds.left)
+  }
+
+  function handleFullscreenDockWidthPointerDown(event) {
+    if (event.button !== 0 || fullscreenDockGesturePointerId !== null || isPortraitLayout()) {
+      return
+    }
+
+    fullscreenDockGesturePointerId = event.pointerId
+
+    // Keep the grabbed point under the pointer instead of snapping the edge to it.
+    resizingFullscreenDockWidthOffset = getRenderedFullscreenDockWidth(event.currentTarget) -
+      getFullscreenDockWidthAt(event.clientX)
+    fullscreenDockWidthResizing.value = true
+    window.addEventListener('pointermove', handleFullscreenDockWidthPointerMove)
+    window.addEventListener('pointerup', stopFullscreenDockWidthResize)
+    window.addEventListener('pointercancel', stopFullscreenDockWidthResize)
+    event.preventDefault()
+  }
+
+  function handleFullscreenDockWidthPointerMove(event) {
+    if (isOtherFullscreenDockPointer(event)) return
+    setFullscreenDockWidth(getFullscreenDockWidthAt(event.clientX) + resizingFullscreenDockWidthOffset)
+  }
+
+  function stopFullscreenDockWidthResize(event) {
+    if (!fullscreenDockWidthResizing.value || isOtherFullscreenDockPointer(event)) return
+    fullscreenDockGesturePointerId = null
+    fullscreenDockWidthResizing.value = false
+    window.removeEventListener('pointermove', handleFullscreenDockWidthPointerMove)
+    window.removeEventListener('pointerup', stopFullscreenDockWidthResize)
+    window.removeEventListener('pointercancel', stopFullscreenDockWidthResize)
+    store.dispatch('updateFullscreenDockWidth', store.getters.getFullscreenDockWidth)
+  }
+
+  onUnmounted(stopFullscreenDockWidthResize)
+
+  function handleFullscreenDockWidthKeydown(event) {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') {
+      return
+    }
+
+    // The dock sits at the inline end, so moving its edge towards the start widens it.
+    const towardsStart = (event.key === 'ArrowLeft') ===
+      (getComputedStyle(container.value).direction !== 'rtl')
+    setFullscreenDockWidth(getRenderedFullscreenDockWidth(event.currentTarget) + (towardsStart ? 20 : -20))
+    store.dispatch('updateFullscreenDockWidth', store.getters.getFullscreenDockWidth)
+    event.preventDefault()
+  }
+
+  function resetFullscreenDockWidth() {
+    store.dispatch('updateFullscreenDockWidth', 0)
+  }
 
   function handleFullscreenDockResizeKeydown(event, dock) {
     if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') {
@@ -334,11 +445,13 @@ export function useFullscreenDocks({
     const header = target?.closest(FULLSCREEN_DOCK_HEADER_SELECTOR)
     const interactiveTarget = target?.closest('button, a, input, select, textarea, [role="button"]')
     if (
-      event.button !== 0 || !fullscreenDockCanReorder(dock) || !header ||
-      interactiveTarget || !event.currentTarget.contains(header)
+      event.button !== 0 || fullscreenDockGesturePointerId !== null || !fullscreenDockCanReorder(dock) ||
+      !header || interactiveTarget || !event.currentTarget.contains(header)
     ) {
       return
     }
+
+    fullscreenDockGesturePointerId = event.pointerId
 
     fullscreenDockReordering.value = true
     reorderingFullscreenDock = dock
@@ -350,6 +463,7 @@ export function useFullscreenDocks({
   }
 
   function handleFullscreenDockReorderPointerMove(event) {
+    if (isOtherFullscreenDockPointer(event)) return
     const openDocks = getFullscreenOpenDocks()
     const currentIndex = openDocks.indexOf(reorderingFullscreenDock)
     const otherDocks = openDocks.filter(dock => dock !== reorderingFullscreenDock)
@@ -388,7 +502,9 @@ export function useFullscreenDocks({
     }
   }
 
-  function stopFullscreenDockReorder() {
+  function stopFullscreenDockReorder(event) {
+    if (isOtherFullscreenDockPointer(event)) return
+    fullscreenDockGesturePointerId = null
     fullscreenDockReordering.value = false
     reorderingFullscreenDock = null
     reorderingFullscreenDockBounds = null
@@ -432,10 +548,15 @@ export function useFullscreenDocks({
     fullscreenDockReordering,
     fullscreenDockResizing,
     fullscreenDockStyle,
+    fullscreenDockWidthResizing,
+    fullscreenDockWidthStyle,
     handleFullscreenDockHeaderDoubleClick,
     handleFullscreenDockReorderPointerDown,
     handleFullscreenDockResizeKeydown,
     handleFullscreenDockResizePointerDown,
+    handleFullscreenDockWidthKeydown,
+    handleFullscreenDockWidthPointerDown,
     resetFullscreenDockHeights,
+    resetFullscreenDockWidth,
   }
 }

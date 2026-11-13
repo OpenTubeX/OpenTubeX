@@ -1836,6 +1836,7 @@ Video:
     Auto-generated Caption Template: '{language} (automatikusan létrehozott)'
     Up next in {seconds}: Következik {seconds} múlva
     Resize dock: Dokkolt panel átméretezése
+    Resize dock width: Dokkolt panel szélességének módosítása
     Play now: Lejátszás most
     MusicPlaybackRateOverride: Zenei videó észlelve, lejátszás 1×-es sebességgel
     Normal: Normál

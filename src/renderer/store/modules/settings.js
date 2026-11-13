@@ -437,6 +437,7 @@ export const NON_SYNCABLE_SETTINGS = new Set([
   'uiScale',
   'fontSize',
   'verticalTabBarWidth',
+  'fullscreenDockWidth',
 ])
 
 export function isSettingSyncable(settingKey) {

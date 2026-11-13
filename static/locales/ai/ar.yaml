@@ -1880,7 +1880,8 @@ Video:
       'Off': "إيقاف"
     Auto-generated Caption Template: '{language} (تم إنشاؤه تلقائيًا)'
     Up next in {seconds}: التالي في {seconds}
-    Resize dock: تغيير حجم قفص الاتهام
+    Resize dock: تغيير حجم اللوحة
+    Resize dock width: تغيير عرض اللوحة
     Play now: العب الآن
     MusicPlaybackRateOverride: تم اكتشاف فيديو موسيقي، يتم تشغيله بمعدل 1x
     Normal: طبيعي

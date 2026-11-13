@@ -1836,6 +1836,7 @@ Video:
     Auto-generated Caption Template: '{language} (otomatik oluşturuldu)'
     Up next in {seconds}: '{seconds} saniye sonra sıradaki'
     Resize dock: Paneli yeniden boyutlandır
+    Resize dock width: Panel genişliğini değiştir
     Play now: Şimdi oynat
     MusicPlaybackRateOverride: Müzik videosu algılandı, 1x hızında oynatılıyor
     Normal: Normal

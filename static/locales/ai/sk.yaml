@@ -1842,6 +1842,7 @@ Video:
     Auto-generated Caption Template: '{language} (automaticky vytvorené)'
     Up next in {seconds}: Ďalšie video o {seconds}
     Resize dock: Zmeniť veľkosť panela
+    Resize dock width: Zmeniť šírku panela
     Play now: Prehrať teraz
     MusicPlaybackRateOverride: Zistilo sa hudobné video, prehráva sa rýchlosťou 1×
     Normal: Normálne

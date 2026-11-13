@@ -2195,6 +2195,7 @@ Video:
     Autoplay is on: La reproducción automática está activada
     Up next in {seconds}: A continuación en {seconds}
     Resize dock: Cambiar tamaño del panel
+    Resize dock width: Cambiar ancho del panel
     Play now: Reproducir ahora
     MusicPlaybackRateOverride: Se ha detectado un video musical; se reproducirá a 1x
     Normal: Normal

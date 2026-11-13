@@ -1836,6 +1836,7 @@ Video:
     Auto-generated Caption Template: '{language}（自動生成）'
     Up next in {seconds}: '{seconds}秒後に次の動画'
     Resize dock: ドックのサイズを変更
+    Resize dock width: ドックの幅を変更
     Play now: 今すぐ再生
     MusicPlaybackRateOverride: ミュージックビデオを検出したため、1倍速で再生します
     Normal: 標準

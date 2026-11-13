@@ -2168,6 +2168,7 @@ Video:
     Autoplay is on: 자동 재생 켜짐
     Up next in {seconds}: '{seconds} 후 다음 동영상'
     Resize dock: 독 크기 조절
+    Resize dock width: 독 너비 조절
     Play now: 지금 재생
     MusicPlaybackRateOverride: 뮤직비디오가 감지되어 1배속으로 재생합니다
     Normal: 보통

@@ -1810,6 +1810,7 @@ Video:
     Auto-generated Caption Template: '{language} (generados automáticamente)'
     Up next in {seconds}: A continuación en {seconds}
     Resize dock: Cambiar tamaño del panel
+    Resize dock width: Cambiar ancho del panel
     Play now: Reproducir ahora
     MusicPlaybackRateOverride: Se ha detectado un vídeo musical; se reproducirá a 1x
     Normal: Normal
