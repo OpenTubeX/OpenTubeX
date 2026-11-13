@@ -510,6 +510,7 @@ Settings:
     Sync Subscriptions: "Sinhroniziraj naročnine s storitvijo YouTube"
     Sync Playlists: "Sinhroniziraj sezname predvajanja s storitvijo YouTube"
     Add to YouTube Watch History: "Dodaj ogledane videoposnetke v zgodovino storitve YouTube"
+    Rate Videos: "Všečkanje in nevšečkanje videoposnetkov"
     Sync Now: "Sinhroniziraj zdaj"
     Synced: "Sinhronizirano s storitvijo YouTube"
     Sync Failed: "Sinhronizacija s storitvijo YouTube ni uspela: {error}"
@@ -2753,6 +2754,7 @@ Tooltips:
     Sync Subscriptions: "Kanali, na katere se naročite v storitvi YouTube, se dodajo v profil Vsi kanali, kanali, katerih naročnino tam prekličete, pa se odstranijo iz vseh profilov. Naročanje ali preklic naročnine tukaj v profilu Vsi kanali naredi enako v storitvi YouTube."
     Sync Playlists: "Vaši seznami predvajanja iz storitve YouTube, Za poznejši ogled in Všečkani videoposnetki so prikazani v razdelku Vaši seznami predvajanja, spremembe, ki jih tukaj naredite v njih, pa se izvedejo tudi v storitvi YouTube. Ne sinhronizirajo se z vašimi drugimi napravami in niso vključeni, ko izvozite vse sezname predvajanja ali naredite varnostno kopijo podatkov. Če to možnost izklopite, se odstranijo iz te naprave, ne pa iz storitve YouTube."
     Add to YouTube Watch History: "Videoposnetki, ki jih predvajate, se dodajo v vašo zgodovino predvajanj v storitvi YouTube, zato se priporočila YouTube učijo iz njih. Ko je zgodovina v storitvi YouTube začasno zaustavljena, se ne doda nič."
+    Rate Videos: "Prikaže gumba Všeč mi je in Ni mi všeč na videoposnetkih. Za prikaz vaše ocene se vsak odprt videoposnetek z vašim računom poišče v YouTubu, zato YouTube izve, katere videoposnetke odpirate, tudi ko niso dodani v zgodovino ogledov."
   General Settings:
     Built-in Streams: |
       Samodejni način predvaja večino videoposnetkov prek YouTubovega odjemalca visionOS, ki se zažene hitreje in podpira samodejno kakovost. Prenosi v živo in videoposnetki, ki jih ne more predvajati, uporabljajo SABR.

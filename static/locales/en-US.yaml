@@ -671,6 +671,7 @@ Settings:
     Sync Subscriptions: "Sync subscriptions with YouTube"
     Sync Playlists: "Sync playlists with YouTube"
     Add to YouTube Watch History: "Add watched videos to YouTube history"
+    Rate Videos: "Like and dislike videos"
     Sync Now: "Sync now"
     Synced: "Synced with YouTube"
     Sync Failed: "Could not sync with YouTube: {error}"
@@ -3327,6 +3328,7 @@ Tooltips:
     Sync Subscriptions: "Channels you subscribe to on YouTube are added to All Channels, and channels you unsubscribe from there are removed from every profile. Subscribing or unsubscribing in All Channels here does the same on YouTube."
     Sync Playlists: "Your YouTube playlists, Watch later, and Liked videos appear in Your Playlists, and changes you make to them here are made on YouTube too. They are not synced to your other devices or included when you export all playlists or back up your data. Turning this off removes them from this device but not from YouTube."
     Add to YouTube Watch History: "Videos you play are added to your YouTube watch history, so YouTube's recommendations learn from them. Nothing is added while the history is paused on YouTube."
+    Rate Videos: "Shows like and dislike buttons on videos. To show your rating, each video you open is looked up on YouTube with your account, so YouTube learns which videos you open, even when they are not added to your watch history."
   General Settings:
     Preferred Video Codec: |
       Auto prefers codecs that your device can decode in hardware.

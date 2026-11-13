@@ -205,6 +205,7 @@ Settings:
     Sync Subscriptions: "Synchronizuj subskrypcje z YouTube"
     Sync Playlists: "Synchronizuj playlisty z YouTube"
     Add to YouTube Watch History: "Dodawaj obejrzane filmy do historii YouTube"
+    Rate Videos: "Oceniaj filmy łapką w górę i w dół"
     Sync Now: "Zsynchronizuj teraz"
     Synced: "Zsynchronizowano z YouTube"
     Sync Failed: "Nie udało się zsynchronizować z YouTube: {error}"
@@ -1501,6 +1502,7 @@ Tooltips:
     Sync Subscriptions: "Kanały, które subskrybujesz na YouTube, są dodawane do profilu „Wszystkie kanały”, a kanały, których subskrypcję tam anulujesz, są usuwane ze wszystkich profili. Zasubskrybowanie kanału lub anulowanie jego subskrypcji tutaj w profilu „Wszystkie kanały” robi to samo na YouTube."
     Sync Playlists: "Twoje playlisty z YouTube oraz „Do obejrzenia” i „Filmy, które mi się podobają” pojawiają się w sekcji „Twoje playlisty”, a zmiany, które w nich tutaj wprowadzasz, są wprowadzane także na YouTube. Nie są synchronizowane z innymi twoimi urządzeniami ani uwzględniane, gdy eksportujesz wszystkie playlisty lub tworzysz kopię zapasową danych. Wyłączenie tej opcji usuwa je z tego urządzenia, ale nie z YouTube."
     Add to YouTube Watch History: "Odtwarzane filmy są dodawane do twojej historii oglądania na YouTube, więc rekomendacje YouTube uczą się na ich podstawie. Gdy historia jest wstrzymana na YouTube, nic nie jest dodawane."
+    Rate Videos: "Pokazuje przy filmach przyciski Podoba mi się i Nie podoba mi się. Aby pokazać Twoją ocenę, każdy otwarty film jest sprawdzany w YouTube przy użyciu Twojego konta, więc YouTube wie, które filmy otwierasz, nawet jeśli nie są dodawane do historii oglądania."
   General Settings:
     Built-in Streams: |
       Tryb automatyczny odtwarza większość filmów przez klienta visionOS YouTube, który uruchamia się szybciej i obsługuje automatyczną jakość. Transmisje na żywo i filmy, których nie może odtworzyć, używają SABR.

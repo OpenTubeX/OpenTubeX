@@ -380,6 +380,7 @@ Settings:
     Revoke Failed: "Kijelentkezett a YouTube-ról, de a Google nem erősítette meg, hogy a bejelentkezés megszűnt. Eltávolíthatja a Google-fiókja harmadik féltől származó kapcsolatai között."
     Signed out by YouTube: "A YouTube megszüntette a bejelentkezést. Jelentkezzen be újra a Beállításokban, hogy továbbra is használhassa fiókját."
     Add to YouTube Watch History: "Megtekintett videók hozzáadása a YouTube-előzményekhez"
+    Rate Videos: "Videók kedvelése és nem kedvelése"
     Sync Subscriptions: "Feliratkozások szinkronizálása a YouTube-bal"
     Sync Playlists: "Lejátszási listák szinkronizálása a YouTube-bal"
     Sync Now: "Szinkronizálás most"
@@ -2251,6 +2252,7 @@ Description:
 Tooltips:
   YouTube Account Settings:
     Add to YouTube Watch History: "A lejátszott videók bekerülnek a YouTube megtekintési előzményeibe, így a YouTube ajánlásai tanulhatnak belőlük. Amíg az előzmények szüneteltetve vannak a YouTube-on, semmi sem kerül be."
+    Rate Videos: "Megjeleníti a videóknál a Tetszik és Nem tetszik gombokat. Az értékelésed megjelenítéséhez minden megnyitott videót lekérdez a YouTube-on a fiókoddal, így a YouTube megtudja, mely videókat nyitod meg, akkor is, ha nem kerülnek be a megtekintési előzményeidbe."
     Sync Subscriptions: "Azok a csatornák, amelyekre a YouTube-on feliratkozik, bekerülnek az „Összes csatorna” profilba, azok pedig, amelyekről ott leiratkozik, minden profilból törlődnek. Ha itt az „Összes csatorna” profilban feliratkozik vagy leiratkozik, az a YouTube-on is megtörténik."
     Sync Playlists: "A YouTube-lejátszási listái, a „Megnézendő” és a „Kedvelt videók” megjelennek a „Saját lejátszási listák” között, és az itt rajtuk végzett módosítások a YouTube-on is megtörténnek. Nem szinkronizálódnak a többi eszközére, és nem kerülnek bele, amikor az összes lejátszási listát exportálja, vagy biztonsági mentést készít az adatairól. Ha ezt kikapcsolja, eltűnnek erről az eszközről, de a YouTube-ról nem."
   General Settings:

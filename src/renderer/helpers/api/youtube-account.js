@@ -432,11 +432,13 @@ export async function completeYouTubeSignIn(code, signal) {
       const { profiles, selectedPageId } = await fetchProfiles(credentials)
       const profile = profiles.find(entry => entry.pageId === selectedPageId) ?? profiles[0]
       const channelId = await resolveChannelId(credentials, profile)
-      // Each sign-in asks again before changing the account's subscriptions, playlists, or history.
+      // Each sign-in asks again before changing the account's subscriptions,
+      // playlists, or history, or loading its video ratings.
       saved = !signal.aborted &&
         await store.dispatch('updateYouTubeAccountSyncSubscriptions', false) &&
         await store.dispatch('updateYouTubeAccountSyncPlaylists', false) &&
         await store.dispatch('updateYouTubeAccountWatchHistory', false) &&
+        await store.dispatch('updateYouTubeAccountVideoRatings', false) &&
         !signal.aborted &&
         await store.dispatch('updateYouTubeAccount', {
           credentials,

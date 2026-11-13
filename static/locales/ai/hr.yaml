@@ -383,6 +383,7 @@ Settings:
     Revoke Failed: "Odjava s YouTubea je uspjela, ali Google nije potvrdio da je prijava prekinuta. Možeš je ukloniti u vezama s trećim stranama na svom Google računu."
     Signed out by YouTube: "YouTube je prekinuo prijavu. Ponovno se prijavi u postavkama za daljnje korištenje računa."
     Add to YouTube Watch History: "Dodaj gledane videozapise u YouTube povijest"
+    Rate Videos: "Označavanje videozapisa sa sviđa mi se i ne sviđa mi se"
     Sync Subscriptions: "Sinkroniziraj pretplate s YouTubeom"
     Sync Playlists: "Sinkroniziraj zbirke s YouTubeom"
     Sync Now: "Sinkroniziraj sada"
@@ -2286,6 +2287,7 @@ Description:
 Tooltips:
   YouTube Account Settings:
     Add to YouTube Watch History: "Videozapisi koje pokrećeš dodaju se u tvoju povijest gledanja na YouTubeu, tako da YouTubeove preporuke uče iz njih. Ništa se ne dodaje dok je povijest pauzirana na YouTubeu."
+    Rate Videos: "Prikazuje gumbe Sviđa mi se i Ne sviđa mi se na videozapisima. Kako bi se prikazala tvoja ocjena, svaki videozapis koji otvoriš provjerava se na YouTubeu s tvojim računom, pa YouTube saznaje koje videozapise otvaraš, čak i kad se ne dodaju u povijest gledanja."
     Sync Subscriptions: "Kanali na koje se pretplatiš na YouTubeu dodaju se u „Svi kanali”, a kanali s kojih tamo otkažeš pretplatu uklanjaju se iz svih profila. Pretplata ili otkazivanje pretplate ovdje u „Svi kanali” čini isto na YouTubeu."
     Sync Playlists: "Tvoje YouTube zbirke, „Pogledaj kasnije” i „Videozapisi koji mi se sviđaju” prikazuju se u „Tvoje zbirke”, a promjene koje u njima ovdje napraviš primjenjuju se i na YouTubeu. Ne sinkroniziraju se s tvojim drugim uređajima i nisu uključene kada izvoziš sve zbirke ili izrađuješ sigurnosnu kopiju svojih podataka. Isključivanjem ovoga uklanjaju se s ovog uređaja, ali ne i s YouTubea."
   General Settings:

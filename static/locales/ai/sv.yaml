@@ -382,6 +382,7 @@ Settings:
     Sync Subscriptions: "Synkronisera prenumerationer med YouTube"
     Sync Playlists: "Synkronisera spellistor med YouTube"
     Add to YouTube Watch History: "Lägg till sedda videor i YouTube-historiken"
+    Rate Videos: "Gilla och ogilla videor"
     Sync Now: "Synkronisera nu"
     Synced: "Synkroniserat med YouTube"
     Sync Failed: "Det gick inte att synkronisera med YouTube: {error}"
@@ -2253,6 +2254,7 @@ Tooltips:
     Sync Subscriptions: "Kanaler som du prenumererar på via YouTube läggs till i Alla kanaler, och kanaler som du slutar prenumerera på där tas bort från alla profiler. Att prenumerera eller avsluta en prenumeration i Alla kanaler här gör samma sak på YouTube."
     Sync Playlists: "Dina YouTube-spellistor, Titta senare och Gillade videor visas i Dina spellistor, och ändringar som du gör i dem här görs även på YouTube. De synkroniseras inte till dina andra enheter och tas inte med när du exporterar alla spellistor eller säkerhetskopierar dina data. Om du stänger av detta tas de bort från den här enheten men inte från YouTube."
     Add to YouTube Watch History: "Videor du spelar upp läggs till i din visningshistorik på YouTube, så att rekommendationerna på YouTube lär sig av dem. Inget läggs till medan historiken är pausad på YouTube."
+    Rate Videos: "Visar knappar för att gilla och ogilla videor. För att visa ditt betyg slås varje video du öppnar upp på YouTube med ditt konto, så YouTube får veta vilka videor du öppnar, även när de inte läggs till i din visningshistorik."
   General Settings:
     Built-in Streams: |
       Automatiskt spelar de flesta videor via YouTubes visionOS-klient, som startar snabbare och stöder automatisk kvalitet. Direktsändningar och videor som den inte kan spela upp använder SABR.
