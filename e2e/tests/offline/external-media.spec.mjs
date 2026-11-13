@@ -1284,6 +1284,34 @@ test('external media starts at the default playback speed', async ({ app, page }
   await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.5)
 })
 
+test('external media applies and saves the playback settings of its platform channel', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false, '', [], 30, {
+    channel: 'Test Channel',
+    channel_url: 'https://www.twitch.tv/testchannel'
+  })
+  await page.evaluate(async () => {
+    const store = window.$store
+    await store.dispatch('updateAutoUpdateChannelPlaybackSpeeds', false)
+    await store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify({ 'twitch:testchannel': 1.75, other: 1.25 }))
+    await store.dispatch('updateChannelVolumes', JSON.stringify({ 'twitch:testchannel': 0.4 }))
+  })
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+
+  const video = page.locator(`${activeTab} .videoPlayer video`)
+  await waitForPlayback(page)
+  await expect.poll(() => video.evaluate(element => ({ speed: element.playbackRate, volume: element.volume })))
+    .toEqual({ speed: 1.75, volume: 0.4 })
+
+  await video.evaluate(element => { element.playbackRate = 1.5 })
+  await page.locator(`${activeTab} .externalMediaDetails`).getByRole('button', { name: 'Save channel setting…', exact: true }).click()
+  await page.locator('.channelSettingRow').filter({ hasText: 'Playback Speed' }).locator('.channelSettingSave').click()
+  await expect.poll(() => page.evaluate(() => JSON.parse(window.$store.getters.getChannelPlaybackSpeeds)))
+    .toEqual({ 'twitch:testchannel': 1.5, other: 1.25 })
+})
+
 test('Twitch replay retries a failed page and refreshes once after seeking settles', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   const mediaUrl = 'https://www.twitch.tv/videos/123456789'

@@ -121,6 +121,37 @@ test.describe('quality labels in the grid menu', () => {
   })
 })
 
+test.describe('channel quality from the resolution menu', () => {
+  test.use({
+    seed: {
+      settings: {
+        videoPlaybackEngine: 'yt-dlp',
+        ytDlpPlaybackEngineDefaultMigration: true,
+        defaultVideoFormat: 'dash',
+        defaultQuality: 'auto',
+        autoUpdateChannelVideoQualities: true,
+        useSponsorBlock: false,
+        playNextVideo: false,
+        fetchSubscriptionsAutomatically: false,
+      }
+    }
+  })
+
+  test('saves explicit and automatic quality choices for the channel', async ({ app, page }) => {
+    await openAdaptiveVideo(app, page, ['avc1.42c00d', ['avc1.42c00d', '640x360']])
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    const savedQualities = () => page.evaluate(() => Object.values(JSON.parse(window.$store.getters.getChannelVideoQualities)))
+    await player.hover()
+    await openPlayerOptions(player)
+    await player.locator('.shaka-resolution-button').click()
+    await player.locator('.shaka-resolutions .explicit-resolution').first().click()
+    await expect.poll(savedQualities).toEqual(['360'])
+    await player.locator('.shaka-resolution-button').click()
+    await player.locator('.shaka-resolutions .shaka-enable-abr-button').click()
+    await expect.poll(savedQualities).toEqual(['auto'])
+  })
+})
+
 test.describe('quality in the grid menu', { tag: '@scale' }, () => {
   test.use({
     seed: {

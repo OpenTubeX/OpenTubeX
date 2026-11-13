@@ -96,7 +96,11 @@ async function importFile(values, { failingSettings = [] } = {}) {
     parseImportedJson: content => JSON.parse(content),
     parseSpeedByChannelValues,
     resolveSpeedByChannelValues,
-    parseChannelPreferences: value => JSON.parse(value),
+    updateChannelPreferences: async (store, type, change) => {
+      const values = JSON.parse(store.getters.getChannelPlaybackSpeeds)
+      change(values)
+      return store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify(values))
+    },
     resolveChannelId: async () => null,
     runWithDataImportProgress: callback => callback({ update() {} }),
     primaryProfile: { value: { subscriptions: [] } },
@@ -105,10 +109,12 @@ async function importFile(values, { failingSettings = [] } = {}) {
         get getChannelPlaybackSpeeds() { return settings.channelPlaybackSpeeds },
         getBackendPreference: 'local',
       },
-      // Like the settings store, a failed update is only logged
+      // Like the settings store, resolves whether the update was saved
       dispatch: async (action, value) => {
         const setting = action[6].toLowerCase() + action.slice(7)
-        if (!failingSettings.includes(setting)) settings[setting] = value
+        if (failingSettings.includes(setting)) return false
+        settings[setting] = value
+        return true
       },
     },
     showToast: toast => toasts.push(toast.message),

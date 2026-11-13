@@ -79,7 +79,7 @@
               }"
               @click="handleDropdownClick(option, $event)"
               @keydown.enter="handleDropdownClick(option)"
-              @keydown.space="handleDropdownClick(option)"
+              @keydown.space.prevent="handleDropdownClick(option)"
             >
               <template v-if="option.type !== 'divider'">
                 <div
@@ -116,6 +116,7 @@
             :role="fullscreenDropdownTarget ? 'dialog' : null"
             :aria-label="fullscreenDropdownTarget ? title : null"
             @keydown.esc.stop="handleDropdownEscape"
+            @keydown.space.stop
             @pointerdown.self.prevent
             @pointerdown.stop
             @touchstart.stop
@@ -182,7 +183,7 @@
                     }"
                     @click="handleDropdownClick(option)"
                     @keydown.enter="handleDropdownClick(option)"
-                    @keydown.space="handleDropdownClick(option)"
+                    @keydown.space.prevent="handleDropdownClick(option)"
                   >
                     <div
                       v-if="option.icon || option.active"

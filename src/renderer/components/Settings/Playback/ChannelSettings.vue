@@ -107,13 +107,12 @@
             >
               <div class="channelHeader">
                 <component
-                  :is="disableChannelLinks ? 'span' : 'router-link'"
+                  :is="channel.route ? 'router-link' : 'span'"
                   class="channelLink"
-                  :tabindex="disableChannelLinks ? -1 : null"
-                  :role="disableChannelLinks ? 'group' : null"
+                  :tabindex="channel.route ? null : -1"
+                  :role="channel.route ? null : 'group'"
                   :aria-label="channel.name"
-                  :to="disableChannelLinks ? undefined : `/channel/${channel.id}`"
-                  @click="handleChannelLinkClick"
+                  :to="channel.route ?? undefined"
                 >
                   <FtRetryImage
                     v-if="channel.thumbnail"
@@ -138,6 +137,14 @@
                       class="channelHandle"
                       dir="auto"
                     >{{ channel.handle }}</span>
+                    <span
+                      v-if="channel.platform"
+                      class="channelHandle"
+                    ><FtIcon
+                      class="channelPlatformIcon"
+                      :icon="channel.platform.icon"
+                      aria-hidden="true"
+                    />{{ channel.platform.name }}</span>
                   </p>
                 </component>
                 <FtIconButton
@@ -181,8 +188,8 @@
                     v-else-if="preference.type === 'videoQuality'"
                     :placeholder="t('Settings.Channel Settings.Video Quality')"
                     :value="preference.value"
-                    :select-names="qualityNames"
-                    :select-values="qualityValues"
+                    :select-names="channel.autoQuality ? qualityNamesWithAuto : qualityNames"
+                    :select-values="channel.autoQuality ? QUALITY_VALUES_WITH_AUTO : RESOLUTION_VALUES"
                     :icon="preference.icon"
                     :show-icon="false"
                     @change="value => setPreference(channel.id, preference.type, value)"
@@ -305,6 +312,14 @@
                     class="channelHandle"
                     dir="auto"
                   >{{ channel.handle }}</span>
+                  <span
+                    v-if="channel.platform"
+                    class="channelHandle"
+                  ><FtIcon
+                    class="channelPlatformIcon"
+                    :icon="channel.platform.icon"
+                    aria-hidden="true"
+                  />{{ channel.platform.name }}</span>
                 </span>
                 <FtIcon
                   class="addSubscribedChannelIcon"
@@ -369,8 +384,14 @@ import {
   CHANNEL_PREFERENCE_TYPES,
   fetchChannelInfo,
   getCachedChannelInfo,
-  parseChannelPreferences
+  getPlatformChannelPreferenceKey,
+  parseChannelPreferences,
+  parsePlatformChannelPreferenceKey,
+  removeChannelPreference,
+  saveChannelPreference
 } from '../../../helpers/channel-preferences'
+import { findFollowedChannel, getFollowedChannels, supportsPlatformFollows } from '../../../helpers/platformFeed'
+import { getPlatform, getPlatformChannelRoute, PLATFORM_ICONS } from '../../../../platforms/index'
 import { showToast } from '../../../helpers/utils'
 import { matchesChannelQuery } from '../../../helpers/subscription-channels'
 import { clampOverlayScrollTop } from '../../../helpers/overlayScrollbars'
@@ -389,19 +410,18 @@ const disableChannelLinks = computed(() => store.getters.getDisableChannelLinks)
 const SEARCH_THRESHOLD = 5
 
 const RESOLUTION_VALUES = ['2160', '1440', '1080', '720', '480', '360', '240', '144']
+const QUALITY_VALUES_WITH_AUTO = [...RESOLUTION_VALUES, 'auto']
 
 /**
- * Auto quality is broken with SABR, so it is only offered unless every
- * video's streams use it.
- * @type {import('vue').ComputedRef<boolean>}
+ * Auto quality is broken with SABR, so YouTube channels only offer it unless
+ * every video's streams use it. Other platforms play through yt-dlp, without SABR.
+ * @param {string} channelId
+ * @returns {boolean}
  */
-const autoQualityAvailable = computed(() => {
-  return playbackEngineSupportsAutoQuality(store.getters.getVideoPlaybackEngine, store.getters.getBuiltInStreams)
-})
-
-const qualityValues = computed(() => {
-  return autoQualityAvailable.value ? [...RESOLUTION_VALUES, 'auto'] : RESOLUTION_VALUES
-})
+function isAutoQualityAvailable(channelId) {
+  return parsePlatformChannelPreferenceKey(channelId) !== null ||
+    playbackEngineSupportsAutoQuality(store.getters.getVideoPlaybackEngine, store.getters.getBuiltInStreams)
+}
 
 const qualityNames = computed(() => [
   t('Settings.Player Settings.Default Quality.4k'),
@@ -411,10 +431,10 @@ const qualityNames = computed(() => [
   t('Settings.Player Settings.Default Quality.480p'),
   t('Settings.Player Settings.Default Quality.360p'),
   t('Settings.Player Settings.Default Quality.240p'),
-  t('Settings.Player Settings.Default Quality.144p'),
-
-  ...(autoQualityAvailable.value ? [t('Settings.Player Settings.Default Quality.Auto')] : [])
+  t('Settings.Player Settings.Default Quality.144p')
 ])
+
+const qualityNamesWithAuto = computed(() => [...qualityNames.value, t('Settings.Player Settings.Default Quality.Auto')])
 
 const autoUpdateLabels = computed(() => ({
   playbackSpeed: t('Settings.Channel Settings.Auto Save Playback Speed'),
@@ -446,12 +466,15 @@ const savedChannelSyncDisableLabel = computed(() => (
   t('Settings.Channel Settings.Disable Saved Channel Settings Sync')
 ))
 
-/** @type {import('vue').ComputedRef<string>} */
-const defaultQuality = computed(() => {
+/**
+ * @param {string} channelId
+ * @returns {string}
+ */
+function getDefaultQuality(channelId) {
   const value = store.getters.getDefaultQuality
 
-  return value === 'auto' && !autoQualityAvailable.value ? AUTO_QUALITY_FALLBACK : value
-})
+  return value === 'auto' && !isAutoQualityAvailable(channelId) ? AUTO_QUALITY_FALLBACK : value
+}
 
 /** @type {import('vue').ComputedRef<number>} */
 const videoPlaybackRateInterval = computed(() => store.getters.getVideoPlaybackRateInterval)
@@ -491,11 +514,37 @@ watch(showAddChannelPrompt, async (open) => {
   addChannelSearch.value?.focus()
 })
 
-/** @param {MouseEvent} event */
-function handleChannelLinkClick(event) {
-  if (disableChannelLinks.value) {
-    event.preventDefault()
-  }
+/**
+ * Saved settings of channels on other platforms are keyed by `platform:id`.
+ * Builds without yt-dlp can't open those channels.
+ * @param {string} channelId
+ * @param {{ platform: string, id: string } | null} platformChannel
+ */
+function getChannelRoute(channelId, platformChannel) {
+  if (disableChannelLinks.value) return null
+  if (!platformChannel) return `/channel/${channelId}`
+  return supportsPlatformFollows ? getPlatformChannelRoute(platformChannel.platform, platformChannel.id) : null
+}
+
+/**
+ * @param {{ platform: string } | null} platformChannel
+ * @returns {{ name: string, icon: string[] } | null}
+ */
+function getPlatformLabel(platformChannel) {
+  if (!platformChannel) return null
+  const { platform } = platformChannel
+  return { name: getPlatform(platform)?.name ?? platform, icon: PLATFORM_ICONS[platform] ?? ['fas', 'globe'] }
+}
+
+/**
+ * The name and avatar of a channel without a network request, if possible.
+ * @param {string} channelId
+ */
+function getKnownChannelInfo(channelId) {
+  const platformChannel = parsePlatformChannelPreferenceKey(channelId)
+  const followed = platformChannel && findFollowedChannel(platformChannel.platform, platformChannel.id)
+  if (followed) return { name: followed.name, thumbnail: followed.avatar ?? '' }
+  return getCachedChannelInfo(channelId, subscriptionsById.value)
 }
 const searchQuery = ref('')
 const channelsPerPage = 24
@@ -535,20 +584,10 @@ const fetchedChannels = ref(new Map())
 
 /**
  * @param {string} settingKey
- * @param {boolean | number | string} value
- * @returns {Promise<boolean>}
+ * @param {boolean} value
  */
-async function updateSetting(settingKey, value) {
-  await store.dispatch(`update${settingKey[0].toUpperCase()}${settingKey.slice(1)}`, value)
-  return settings.value[settingKey] === value
-}
-
-/**
- * @param {'playbackSpeed' | 'videoQuality' | 'subtitlesState' | 'volume'} type
- */
-function preferenceValuesFor(type) {
-  const { valuesKey } = PREFERENCES.find(preference => preference.type === type)
-  return { valuesKey, values: parseChannelPreferences(settings.value[valuesKey], valuesKey) }
+function updateSetting(settingKey, value) {
+  store.dispatch(`update${settingKey[0].toUpperCase()}${settingKey.slice(1)}`, value)
 }
 
 const collator = computed(() => new Intl.Collator([locale.value, 'en'], { sensitivity: 'base' }))
@@ -561,6 +600,9 @@ const collator = computed(() => new Intl.Collator([locale.value, 'en'], { sensit
  *   name: string,
  *   thumbnail: string,
  *   handle: string | null,
+ *   platform: { name: string, icon: string[] } | null,
+ *   route: string | import('vue-router').RouteLocationRaw | null,
+ *   autoQuality: boolean,
  *   preferences: {
  *     type: string,
  *     value: number | string | boolean,
@@ -584,7 +626,7 @@ const channelEntries = computed(() => {
         type,
         // Fall back for entries that still hold auto while it is unavailable,
         // to the same quality that playback uses for them
-        type === 'videoQuality' && String(value) === 'auto' && !autoQualityAvailable.value
+        type === 'videoQuality' && String(value) === 'auto' && !isAutoQualityAvailable(channelId)
           ? AUTO_QUALITY_FALLBACK
           : value
       )
@@ -594,7 +636,8 @@ const channelEntries = computed(() => {
   const entries = Array.from(valuesByChannel, ([channelId, values]) => {
     // Read unconditionally, so this recomputes once a fetch fills the channel in
     const fetched = fetchedChannels.value.get(channelId)
-    const channel = getCachedChannelInfo(channelId, subscriptionsById.value) ?? fetched
+    const channel = getKnownChannelInfo(channelId) ?? fetched
+    const platformChannel = parsePlatformChannelPreferenceKey(channelId)
 
     const preferences = PREFERENCES
       .filter(({ type }) => values.has(type))
@@ -615,9 +658,12 @@ const channelEntries = computed(() => {
 
     return {
       id: channelId,
-      name: channel?.name || channelId,
+      name: channel?.name || platformChannel?.id || channelId,
       thumbnail: channel?.thumbnail ?? '',
       handle: subscriptionsById.value.get(channelId)?.handle ?? null,
+      platform: getPlatformLabel(platformChannel),
+      route: getChannelRoute(channelId, platformChannel),
+      autoQuality: isAutoQualityAvailable(channelId),
       preferences,
       addableOptions
     }
@@ -628,16 +674,26 @@ const channelEntries = computed(() => {
 
 const showChannelSearch = computed(() => channelEntries.value.length > SEARCH_THRESHOLD || searchQuery.value !== '')
 
-/** Subscriptions that do not have any saved channel preference yet. */
+/** Subscriptions and followed channels that do not have any saved channel preference yet. */
 const availableSubscriptions = computed(() => {
   const savedChannelIds = new Set(channelEntries.value.map(({ id }) => id))
 
-  return Array.from(subscriptionsById.value, ([id, channel]) => ({
-    id,
-    name: channel.name || id,
-    thumbnail: channel.thumbnail ?? '',
-    handle: channel.handle ?? null
-  }))
+  return [
+    ...Array.from(subscriptionsById.value, ([id, channel]) => ({
+      id,
+      name: channel.name || id,
+      thumbnail: channel.thumbnail ?? '',
+      handle: channel.handle ?? null,
+      platform: null
+    })),
+    ...getFollowedChannels().map(channel => ({
+      id: getPlatformChannelPreferenceKey(channel),
+      name: channel.name,
+      thumbnail: channel.avatar ?? '',
+      handle: null,
+      platform: getPlatformLabel(channel)
+    }))
+  ]
     .filter(({ id }) => !savedChannelIds.has(id))
     .sort((a, b) => collator.value.compare(a.name, b.name))
 })
@@ -700,7 +756,7 @@ const manageButtonLabel = computed(() => {
 async function fetchMissingChannels() {
   const missingIds = channelEntries.value
     .map(({ id }) => id)
-    .filter(id => getCachedChannelInfo(id, subscriptionsById.value) === null)
+    .filter(id => getKnownChannelInfo(id) === null)
 
   for (const channelId of missingIds) {
     const channel = await fetchChannelInfo(channelId, backendOptions.value)
@@ -732,9 +788,7 @@ function setPreference(channelId, type, value, initializationToken) {
     pendingPreferenceInitializations.set(key, initializationToken)
   }
 
-  const { valuesKey, values } = preferenceValuesFor(type)
-  values[channelId] = value
-  return updateSetting(valuesKey, JSON.stringify(values))
+  return saveChannelPreference(store, channelId, type, value)
 }
 
 /**
@@ -744,18 +798,19 @@ function setPreference(channelId, type, value, initializationToken) {
  * @param {'playbackSpeed' | 'videoQuality' | 'subtitlesState' | 'volume'} type
  */
 function addPreference(channelId, type) {
-  return setPreference(channelId, type, defaultPreferenceValue(type))
+  return setPreference(channelId, type, defaultPreferenceValue(channelId, type))
 }
 
 /**
+ * @param {string} channelId
  * @param {'playbackSpeed' | 'videoQuality' | 'subtitlesState' | 'volume'} type
  */
-function defaultPreferenceValue(type) {
+function defaultPreferenceValue(channelId, type) {
   switch (type) {
     case 'playbackSpeed':
       return store.getters.getDefaultPlayback
     case 'videoQuality':
-      return defaultQuality.value
+      return getDefaultQuality(channelId)
     case 'subtitlesState':
       return store.getters.getEnableSubtitlesByDefault
     case 'volume':
@@ -775,7 +830,7 @@ async function addSubscribedChannel(channelId) {
 
   const preferencesToAdd = PREFERENCES.map(({ type }) => ({
     type,
-    initialValue: defaultPreferenceValue(type)
+    initialValue: defaultPreferenceValue(channelId, type)
   }))
   addingSubscribedChannel.value = true
   const initializationToken = Symbol(channelId)
@@ -788,7 +843,8 @@ async function addSubscribedChannel(channelId) {
     )))
 
     if (saved.some(value => !value)) {
-      const rolledBack = await Promise.all(preferencesToAdd.map(({ type, initialValue }) => (
+      // Failed writes saved nothing, so only the saved values need removing
+      const rolledBack = await Promise.all(preferencesToAdd.filter((_, index) => saved[index]).map(({ type, initialValue }) => (
         rollbackPreference(channelId, type, initialValue, initializationToken)
           .catch(error => {
             console.error(error)
@@ -835,18 +891,12 @@ function closeAddChannelPrompt() {
  */
 function rollbackPreference(channelId, type, initialValue, initializationToken) {
   const key = `${channelId}:${type}`
-  const { valuesKey, values } = preferenceValuesFor(type)
-  if (
-    pendingPreferenceInitializations.get(key) !== initializationToken ||
-    !Object.hasOwn(values, channelId) ||
-    values[channelId] !== initialValue
-  ) {
+  if (pendingPreferenceInitializations.get(key) !== initializationToken) {
     return Promise.resolve(true)
   }
 
   pendingPreferenceInitializations.delete(key)
-  delete values[channelId]
-  return updateSetting(valuesKey, JSON.stringify(values))
+  return removeChannelPreference(store, channelId, type, value => value === initialValue)
 }
 
 /**
@@ -854,22 +904,15 @@ function rollbackPreference(channelId, type, initialValue, initializationToken) 
  * @param {'playbackSpeed' | 'videoQuality' | 'subtitlesState' | 'volume'} type
  */
 function deletePreference(channelId, type) {
-  const { valuesKey, values } = preferenceValuesFor(type)
-  delete values[channelId]
-  return updateSetting(valuesKey, JSON.stringify(values))
+  return removeChannelPreference(store, channelId, type)
 }
 
 /**
  * @param {string} channelId
  */
 function forgetChannel(channelId) {
-  for (const { valuesKey } of PREFERENCES) {
-    const values = parseChannelPreferences(settings.value[valuesKey], valuesKey)
-
-    if (Object.hasOwn(values, channelId)) {
-      delete values[channelId]
-      updateSetting(valuesKey, JSON.stringify(values))
-    }
+  for (const { type } of PREFERENCES) {
+    removeChannelPreference(store, channelId, type)
   }
 }
 </script>

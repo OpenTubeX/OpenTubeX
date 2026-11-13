@@ -6,7 +6,7 @@ import vm from 'node:vm'
 const preferences = readFileSync(new URL('../../src/renderer/helpers/channel-preferences.js', import.meta.url), 'utf8')
 const preferenceApi = vm.runInNewContext(
   preferences.slice(preferences.indexOf('export const CHANNEL_PREFERENCE_TYPES'), preferences.indexOf('/**\n * @typedef {{ name:'))
-    .replaceAll('export ', '') + '\n({ removeChannelPreference, CHANNEL_PREFERENCE_TYPES })'
+    .replaceAll('export ', '') + '\n({ removeChannelPreference, saveChannelPreference, CHANNEL_PREFERENCE_TYPES })'
 )
 
 test('removes each channel override, including false and zero, while preserving other channels', async () => {
@@ -16,7 +16,8 @@ test('removes each channel override, including false and zero, while preserving 
     const calls = []
     const store = {
       getters: { [`get${suffix}`]: saved },
-      dispatch: async (...args) => calls.push(args)
+      // The store applies edits to the saved value
+      dispatch: async (action, edit) => calls.push([action, edit(saved)])
     }
     await preferenceApi.removeChannelPreference(store, 'current', type)
     assert.deepEqual(calls, [[`update${suffix}`, '{"other":1}']])
@@ -71,29 +72,25 @@ test('quick speed action switches between saving and removal as current and save
   assert.equal(bar.saveButton_.dataset.remove, 'false')
 })
 
-test('removal does not overwrite malformed collections or collections without the channel', async () => {
+test('removal leaves malformed collections and collections without the channel as saved', async () => {
   for (const saved of ['{invalid', 'null', '[]', '{}', '{"other":1.5}']) {
-    const calls = []
-    const store = {
-      getters: { getChannelPlaybackSpeeds: saved },
-      dispatch: (...args) => calls.push(args)
-    }
-    await preferenceApi.removeChannelPreference(store, 'current', 'playbackSpeed')
-    assert.deepEqual(calls, [], saved)
+    const store = { dispatch: async (action, edit) => edit(saved) === saved }
+    assert.equal(await preferenceApi.removeChannelPreference(store, 'current', 'playbackSpeed'), true, saved)
   }
 })
 
-test('overlapping removals read the collection after the previous write completes', async () => {
+test('edits apply to the saved collection, including entries this window does not show yet', async () => {
+  let saved = '{"first":1,"second":1.5,"elsewhere":2,"unseen":3}'
   const store = {
-    getters: { getChannelPlaybackSpeeds: '{"first":1,"second":1.5,"other":2}' },
-    async dispatch(action, value) {
-      await new Promise(resolve => setTimeout(resolve, 1))
-      this.getters.getChannelPlaybackSpeeds = value
+    getters: { getChannelPlaybackSpeeds: '{"first":1,"second":1.5}' },
+    async dispatch(action, edit) {
+      saved = edit(saved)
+      return true
     }
   }
-  await Promise.all([
-    preferenceApi.removeChannelPreference(store, 'first', 'playbackSpeed'),
-    preferenceApi.removeChannelPreference(store, 'second', 'playbackSpeed')
-  ])
-  assert.deepEqual(JSON.parse(store.getters.getChannelPlaybackSpeeds), { other: 2 })
+  assert.equal(await preferenceApi.removeChannelPreference(store, 'first', 'playbackSpeed'), true)
+  assert.equal(await preferenceApi.saveChannelPreference(store, 'third', 'playbackSpeed', 1.25), true)
+  assert.equal(await preferenceApi.removeChannelPreference(store, 'second', 'playbackSpeed', speed => speed === 2), true)
+  assert.equal(await preferenceApi.removeChannelPreference(store, 'unseen', 'playbackSpeed'), true)
+  assert.deepEqual(JSON.parse(saved), { second: 1.5, elsewhere: 2, third: 1.25 })
 })
