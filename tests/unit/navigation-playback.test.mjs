@@ -325,6 +325,20 @@ test('opening other media disposes the detached player it replaces', async t => 
   assert.equal(mounted.provides.get('route').fullPath, '/external-media')
 })
 
+test('play in background disposes detached other media and plays the video instead', async t => {
+  const mounted = mountWatch(t, { path: '/external-media' })
+  const navigation = mounted.provides.get('navigation')
+  await mounted.navigate('/subscriptions')
+  assert.equal(navigation.detached.value, true)
+  await mounted.exposed().playInBackground('/watch/other')
+  assert.equal(mounted.disposals(), 1)
+  assert.equal(mounted.resumes(), 0)
+  assert.equal(mounted.props.route.path, '/subscriptions')
+  assert.equal(mounted.provides.get('route').fullPath, '/watch/other')
+  assert.equal(navigation.detached.value, true)
+  assert.equal(navigation.takeBackgroundStart('/watch/other'), true)
+})
+
 for (const options of [{ hasLoaded: false, paused: true }]) {
   test(`navigation retains the mounted player ${JSON.stringify(options)}`, async t => {
     const mounted = mountWatch(t, options)

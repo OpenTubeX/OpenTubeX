@@ -400,6 +400,8 @@ async function playInBackground(location) {
   }
   if (isWatchRoute.value) return
   const route = navigation.resolve(location)
+  // Other media play in a different page, which cannot load this video.
+  if (detached.value && !disposed && resolveRouteComponent(route) !== component.value) await dismiss()
   if (disposed) {
     // Unmount the disposed Watch page first, even where dismiss() already
     // cleared its route. Kept for a route to the same video, it would not
