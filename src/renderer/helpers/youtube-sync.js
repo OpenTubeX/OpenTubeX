@@ -13,7 +13,8 @@ import {
   mergeYouTubePlaylistDescription,
   mergeYouTubePlaylistVideos,
   planYouTubePlaylistMoves,
-  resolveYouTubeSetVideoIds
+  resolveYouTubeSetVideoIds,
+  restoreAfterRefusedEdit
 } from './youtube-sync-merge'
 import {
   createYouTubePlaylist,
@@ -68,6 +69,8 @@ const EDIT_BATCH_SIZE = 50
  * @property {string} title the name on YouTube at the last sync
  * @property {string} [description] the description on YouTube at the last sync
  * @property {string | null} signature from the playlist list at the last sync
+ *
+ * @typedef {{ name: boolean, description: boolean }} PlaylistRestore
  */
 
 class AccountChangedError extends Error {
@@ -263,9 +266,9 @@ async function pushSubscriptions(channelIds, subscribed, account) {
  * @param {YouTubeAccount} account
  * @param {YouTubePlaylistSummary} summary
  * @param {boolean} force reads the playlist even when its count and first video are unchanged
- * @param {boolean} [restoreDetails] takes YouTube's name and description, after YouTube refused an edit
+ * @param {PlaylistRestore} [restore] what to take from YouTube, after YouTube refused an edit of it
  */
-async function pullPlaylist(account, summary, force, restoreDetails = false) {
+async function pullPlaylist(account, summary, force, restore = { name: false, description: false }) {
   const key = getYouTubeSyncKey(account)
   const saved = getLinkedPlaylists(key).find(playlist => playlist.youTube.playlistId === summary.playlistId)
   const renamed = saved !== undefined && saved.youTube.title !== summary.title
@@ -317,8 +320,8 @@ async function pullPlaylist(account, summary, force, restoreDetails = false) {
   await store.dispatch('updatePlaylistFromSync', {
     playlist: {
       ...previous,
-      playlistName: renamed || restoreDetails ? name : previous.playlistName,
-      description: mergeYouTubePlaylistDescription(previous.description, previous.youTube.description, remoteDescription, restoreDetails),
+      playlistName: renamed || restore.name ? name : previous.playlistName,
+      description: mergeYouTubePlaylistDescription(previous.description, previous.youTube.description, remoteDescription, restore.description),
       videos: merged,
       youTube
     },
@@ -441,25 +444,26 @@ export function syncYouTubeSubscriptionsBeforeRefresh(automatic) {
 
 /**
  * Playlists waiting to be read again, so opening one twice reads it once.
- * @type {Map<string, { restoreDetails: boolean }>}
+ * @type {Map<string, PlaylistRestore>}
  */
 const pendingPlaylistRefreshes = new Map()
 
 /**
  * Reads an opened synced playlist again, which also finds videos moved on YouTube.
  * @param {string} localId
- * @param {boolean} [restoreDetails] takes YouTube's name and description, after YouTube refused an edit
+ * @param {PlaylistRestore} [restore] what to take from YouTube, after YouTube refused an edit of it
  */
-export function refreshYouTubePlaylist(localId, restoreDetails = false) {
+export function refreshYouTubePlaylist(localId, restore = { name: false, description: false }) {
   const playlist = store.getters.getPlaylist(localId)
   const playlistId = playlist?.youTube?.playlistId
   if (!playlistId || !store.getters.getYouTubeAccountSyncPlaylists) return
   const pending = pendingPlaylistRefreshes.get(localId)
   if (pending) {
-    pending.restoreDetails ||= restoreDetails
+    pending.name ||= restore.name
+    pending.description ||= restore.description
     return
   }
-  const refresh = { restoreDetails }
+  const refresh = { ...restore }
   pendingPlaylistRefreshes.set(localId, refresh)
 
   withSyncLock(async () => {
@@ -468,7 +472,7 @@ export function refreshYouTubePlaylist(localId, restoreDetails = false) {
     const summary = (await getSyncedPlaylistSummaries(account)).find(entry => entry.playlistId === playlistId)
     throwIfAccountChanged(account)
     // Deleted on YouTube, which the next sync handles.
-    if (summary) await pullPlaylist(account, summary, true, refresh.restoreDetails)
+    if (summary) await pullPlaylist(account, summary, true, refresh)
   }).catch(error => {
     if (!(error instanceof AccountChangedError)) console.error(error)
   }).finally(() => pendingPlaylistRefreshes.delete(localId))
@@ -615,7 +619,7 @@ function handlePlaylistChange(change) {
     if (change.type === 'delete') {
       syncWithYouTube({ subscriptions: false })
     } else {
-      refreshYouTubePlaylist(localId, change.type === 'details')
+      refreshYouTubePlaylist(localId, restoreAfterRefusedEdit(change))
     }
   })
 }
