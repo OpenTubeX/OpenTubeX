@@ -1260,7 +1260,6 @@ Settings:
     Paused Interface Hide Delay: Retraso para ocultar la interfaz al pausar
     Hide Channel Shows: Ocultar la pestaña "Programas" del canal
     Blur Blocked Items: Desenfocar los elementos bloqueados en lugar de ocultarlos
-    More Items Count: "+{count} más…"
   Data Settings:
     Settings could not be imported: "No se ha podido importar la configuración"
     Some settings could not be imported: "No se ha podido importar toda la configuración (han fallado {failed} de {total})"

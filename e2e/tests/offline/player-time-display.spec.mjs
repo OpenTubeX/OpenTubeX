@@ -1,6 +1,13 @@
+import { readFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
+
 import { test, expect } from '../../helpers/app.mjs'
 import { findWatchComponent, openMockedVideo, openCaptionLanguages, openPlayerOptions } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
+
+// The path Shaka draws for its replay icon
+const SHAKA_REPLAY_ICON = readFileSync(createRequire(import.meta.url).resolve('shaka-player/ui/enums.js'), 'utf8')
+  .match(/'REPLAY': '([^']+)'/)[1]
 
 test.use({
   seed: {
@@ -179,7 +186,7 @@ for (const shorterSeekRange of [false, true]) {
     await mockPlayableWatchPage(app, page)
     const video = await openMockedVideo(page)
     const watch = await page.evaluateHandle(findWatchComponent)
-    const replayPath = await watch.evaluate(component => component.refs.player.$.setupState.replayIcon)
+    const replayPath = SHAKA_REPLAY_ICON
     const playButton = page.locator('.ftVideoPlayer .shaka-controls-button-panel > .shaka-play-button')
     const replayIcon = playButton.locator(':scope > .shaka-ui-icon:not(.ft-play-pause-morph-icon)')
     const morphIcon = playButton.locator('.ft-play-pause-morph-icon')

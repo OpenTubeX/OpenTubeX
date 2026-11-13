@@ -1295,7 +1295,6 @@ Settings:
     Remove: Remove
     Hide Channel Shows: Hide Channel "Shows" Tab
     Blur Blocked Items: Blur blocked items instead of hiding them
-    More Items Count: "+{count} more…"
   Data Settings:
     Settings could not be imported: "Settings could not be imported"
     Some settings could not be imported: "{failed} of {total} settings could not be imported"

@@ -1321,7 +1321,6 @@ Settings:
     Remove: Ukloni
     Hide Channel Shows: Sakrij karticu "Emisije" kanala
     Blur Blocked Items: Zamuti blokirane stavke umjesto skrivanja
-    More Items Count: "+{count} više…"
   Data Settings:
     Settings could not be imported: "Postavke nije bilo moguće uvesti"
     Some settings could not be imported: "Nije bilo moguće uvesti sve postavke (neuspjelo: {failed} od {total})"

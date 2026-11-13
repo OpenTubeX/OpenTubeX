@@ -1317,7 +1317,6 @@ Settings:
     Paused Interface Hide Delay: Oedi cyn cuddio'r rhyngwyneb wrth oedi
     Hide Channel Shows: Cuddio Tab "Sioeau" Sianel
     Blur Blocked Items: Niwlio eitemau wedi'u blocio yn lle eu cuddio
-    More Items Count: "+{count} arall…"
   Data Settings:
     Settings could not be imported: "Methu mewnforio'r gosodiadau"
     Some settings could not be imported: "Methu mewnforio pob gosodiad ({failed} o {total} wedi methu)"

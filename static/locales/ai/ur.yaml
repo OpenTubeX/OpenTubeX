@@ -1376,7 +1376,6 @@ Settings:
     Remove: ہٹائیں
     Hide Channel Shows: چینل کا ”شوز“ ٹیب چھپائیں
     Blur Blocked Items: بلاک شدہ آئٹمز کو چھپانے کے بجائے دھندلا کریں
-    More Items Count: "+{count} مزید…"
   Data Settings:
     Settings could not be imported: "ترتیبات درآمد نہیں کی جا سکیں"
     Some settings could not be imported: "تمام ترتیبات درآمد نہیں کی جا سکیں ({total} میں سے {failed} ناکام)"

@@ -1327,7 +1327,6 @@ Settings:
     Remove: Remover
     Hide Channel Shows: Ocultar o separador “Programas” do canal
     Blur Blocked Items: Desfocar itens bloqueados em vez de os ocultar
-    More Items Count: "+{count} mais…"
   Data Settings:
     Settings could not be imported: "Não foi possível importar as definições"
     Some settings could not be imported: "Não foi possível importar todas as definições (falharam {failed} de {total})"

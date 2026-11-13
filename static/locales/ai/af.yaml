@@ -1502,7 +1502,6 @@ Settings:
     Add: Voeg by
     Remove: Verwyder
     Blur Blocked Items: Vervaag geblokkeerde items in plaas daarvan om hulle te versteek
-    More Items Count: "+{count} meer…"
   Data Settings:
     Settings could not be imported: "Instellings kon nie ingevoer word nie"
     Some settings could not be imported: "Nie alle instellings kon ingevoer word nie ({failed} van {total} het misluk)"

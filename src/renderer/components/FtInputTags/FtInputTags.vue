@@ -45,7 +45,7 @@
     >
       <ul>
         <li
-          v-for="tag in displayedTagList"
+          v-for="tag in tagList"
           :key="areChannelTags ? tag.name : tag"
         >
           <template v-if="areChannelTags">
@@ -88,15 +88,6 @@
             />
           </button>
         </li>
-        <li
-          v-if="hiddenTagCount > 0"
-        >
-          <span class="name">
-            {{ t('Settings.Distraction Free Settings.More Items Count', {
-              count: hiddenTagCount
-            }) }}
-          </span>
-        </li>
       </ul>
     </div>
   </div>
@@ -106,7 +97,7 @@
 import FtCheckboxList from '../FtCheckboxList/FtCheckboxList.vue'
 import FtRetryImage from '../FtRetryImage.vue'
 import { FtIcon } from '@opentubex/icons'
-import { useId, useTemplateRef, ref, computed } from 'vue'
+import { useId, useTemplateRef, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtInput from '../FtInput/FtInput.vue'
@@ -173,15 +164,6 @@ const emit = defineEmits(['already-exists', 'change', 'error-find-tag-info', 'in
 const { t } = useI18n()
 
 const id = useId()
-
-const DISPLAY_LIMIT = 150
-
-const displayedTagList = computed(() => {
-  const list = props.tagList
-  return list.length > DISPLAY_LIMIT ? list.slice(0, DISPLAY_LIMIT) : list
-})
-
-const hiddenTagCount = computed(() => props.tagList.length - displayedTagList.value.length)
 
 const tagNameInput = useTemplateRef('tagNameInput')
 

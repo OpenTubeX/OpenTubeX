@@ -1337,7 +1337,6 @@ Settings:
     Remove: அகற்று
     Hide Channel Shows: சேனல் "நிகழ்ச்சிகள்" தாவலை மறைக்கவும்
     Blur Blocked Items: தடுக்கப்பட்ட உருப்படிகளை மறைப்பதற்குப் பதிலாக மங்கலாக்கு
-    More Items Count: "+{count} மேலும்…"
   Data Settings:
     Settings could not be imported: "அமைப்புகளை இறக்குமதி செய்ய முடியவில்லை"
     Some settings could not be imported: "அனைத்து அமைப்புகளையும் இறக்குமதி செய்ய முடியவில்லை ({total} இல் {failed} தோல்வியடைந்தன)"

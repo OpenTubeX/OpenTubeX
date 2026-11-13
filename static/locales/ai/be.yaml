@@ -1351,7 +1351,6 @@ Settings:
     Remove: Выдаліць
     Hide Channel Shows: Схаваць укладку «Шоу» канала
     Blur Blocked Items: Размываць заблакіраваныя элементы замест таго, каб хаваць іх
-    More Items Count: "+{count} яшчэ…"
   Data Settings:
     Settings could not be imported: "Не ўдалося імпартаваць налады"
     Some settings could not be imported: "Не ўсе налады ўдалося імпартаваць (не ўдалося: {failed} з {total})"

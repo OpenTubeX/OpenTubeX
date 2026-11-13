@@ -1913,7 +1913,6 @@ Settings:
     Paused Interface Hide Delay: Paused Interface Hide Delay
     Add: Add
     Remove: Remove
-    More Items Count: '+{count} more…'
   Data Settings:
     Scheduled backups: "Scheduled backups"
     Scheduled backup description: "Save complete ZIP backups while OpenTubeX is open. Missed backups run on startup. The limit applies only to scheduled backups in this folder."

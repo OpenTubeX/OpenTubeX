@@ -1472,7 +1472,6 @@ Settings:
     Add: Agregar
     Remove: Eliminar
     Blur Blocked Items: Desenfocar los elementos bloqueados en lugar de ocultarlos
-    More Items Count: "+{count} más…"
   Data Settings:
     Settings could not be imported: "No se pudo importar la configuración"
     Some settings could not be imported: "No se pudo importar toda la configuración (fallaron {failed} de {total})"

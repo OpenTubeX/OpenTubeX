@@ -1547,17 +1547,16 @@ test.describe('scroll mini player', () => {
         const video = await openDemoVideo({ app, page })
         if (uiScale === 100) await video.evaluate(element => element.pause())
         const player = page.locator('.ftVideoPlayer')
-        const watchComponent = await page.evaluateHandle(findWatchComponent)
-        await watchComponent.evaluate(component => {
-          window.miniTransitionState = component.refs.player.$.setupState
-        })
-        await watchComponent.dispose()
 
         await player.evaluate(element => {
           document.documentElement.dataset.reducedMotion = 'no-preference'
           window.miniTransitionWork = { readbacks: 0, rebuilds: 0, ambientFrames: 0 }
           window.miniSettledReadbacks = 0
-          const state = window.miniTransitionState
+          const playerClasses = element.classList
+          const state = {
+            get scrollMiniPlayerAnimating () { return playerClasses.contains('scrollMiniPlayerAnimating') },
+            get scrollMiniPlayerActive () { return playerClasses.contains('scrollMiniPlayer') },
+          }
           const nativeReadback = CanvasRenderingContext2D.prototype.getImageData
           CanvasRenderingContext2D.prototype.getImageData = function (...args) {
             if (state.scrollMiniPlayerAnimating) {

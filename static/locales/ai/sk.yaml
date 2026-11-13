@@ -1314,7 +1314,6 @@ Settings:
     Paused Interface Hide Delay: Oneskorenie skrytia rozhrania pri pozastavení
     Hide Channel Shows: Skryť kartu kanálov "Relácie"
     Blur Blocked Items: Rozmazať blokované položky namiesto ich skrytia
-    More Items Count: "+{count} ďalších…"
   Data Settings:
     Settings could not be imported: "Nastavenia sa nepodarilo importovať"
     Some settings could not be imported: "Niektoré nastavenia sa nepodarilo importovať (zlyhalo {failed} z {total})"

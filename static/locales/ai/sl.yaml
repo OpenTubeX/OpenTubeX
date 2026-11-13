@@ -1578,7 +1578,6 @@ Settings:
     Add: Dodaj
     Remove: Odstrani
     Blur Blocked Items: Zamegli blokirane elemente, namesto da bi jih skril
-    More Items Count: "+{count} več…"
   Data Settings:
     Settings could not be imported: "Nastavitev ni bilo mogoče uvoziti"
     Some settings could not be imported: "Vseh nastavitev ni bilo mogoče uvoziti (neuspešno: {failed} od {total})"

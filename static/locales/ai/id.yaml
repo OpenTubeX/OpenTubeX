@@ -1317,7 +1317,6 @@ Settings:
     Paused Interface Hide Delay: Jeda Sebelum Menyembunyikan Antarmuka yang Dijeda
     Hide Channel Shows: Sembunyikan Tab "Acara" Saluran
     Blur Blocked Items: Buramkan item yang diblokir alih-alih menyembunyikannya
-    More Items Count: "+{count} lainnya…"
   Data Settings:
     Settings could not be imported: "Pengaturan tidak dapat diimpor"
     Some settings could not be imported: "Tidak semua pengaturan dapat diimpor ({failed} dari {total} gagal)"

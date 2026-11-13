@@ -1552,7 +1552,6 @@ Settings:
     Add: Pridėti
     Remove: Pašalinti
     Blur Blocked Items: Sulieti užblokuotus elementus, užuot juos slėpus
-    More Items Count: "+{count} daugiau…"
   Data Settings:
     Settings could not be imported: "Nepavyko importuoti nustatymų"
     Some settings could not be imported: "Nepavyko importuoti visų nustatymų (nepavyko: {failed} iš {total})"

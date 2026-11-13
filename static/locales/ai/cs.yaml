@@ -1313,7 +1313,6 @@ Settings:
     Show Bottom Right Actions Dock: Zobrazovat panel akcí vpravo dole
     Paused Interface Hide Delay: Prodleva skrytí rozhraní při pozastavení
     Blur Blocked Items: Rozmazat blokované položky místo jejich skrytí
-    More Items Count: "+{count} dalších…"
   Data Settings:
     Settings could not be imported: "Nastavení se nepodařilo importovat"
     Some settings could not be imported: "Některá nastavení se nepodařilo importovat (selhalo {failed} z {total})"

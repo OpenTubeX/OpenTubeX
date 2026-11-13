@@ -1314,7 +1314,6 @@ Settings:
     Paused Interface Hide Delay: Độ trễ ẩn giao diện khi tạm dừng
     Hide Channel Shows: Ẩn Tab "Chương trình" của Kênh
     Blur Blocked Items: Làm mờ các mục bị chặn thay vì ẩn chúng
-    More Items Count: "+{count} mục khác…"
   Data Settings:
     Settings could not be imported: "Không thể nhập cài đặt"
     Some settings could not be imported: "Không thể nhập tất cả cài đặt ({failed}/{total} không thành công)"

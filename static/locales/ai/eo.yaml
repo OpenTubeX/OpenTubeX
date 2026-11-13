@@ -1349,7 +1349,6 @@ Settings:
     Show Bottom Right Actions Dock: Montri agobreton malsupre dekstre
     Paused Interface Hide Delay: Prokrasto de kaŝo de la interfaco dum paŭzo
     Blur Blocked Items: Nebuligi blokitajn erojn anstataŭ kaŝi ilin
-    More Items Count: "+{count} pliaj…"
   Data Settings:
     Settings could not be imported: "Ne eblis importi la agordojn"
     Some settings could not be imported: "Ne eblis importi ĉiujn agordojn ({failed} el {total} malsukcesis)"

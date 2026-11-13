@@ -1353,7 +1353,6 @@ Settings:
     Remove: حذف
     Hide Channel Shows: پنهان کردن زبانه "برنامه‌ها" کانال
     Blur Blocked Items: تار کردن موارد مسدودشده به‌جای پنهان کردن آن‌ها
-    More Items Count: "+{count} مورد دیگر…"
   Data Settings:
     Settings could not be imported: "وارد کردن تنظیمات ممکن نشد"
     Some settings could not be imported: "وارد کردن همه تنظیمات ممکن نشد ({failed} از {total} ناموفق بود)"

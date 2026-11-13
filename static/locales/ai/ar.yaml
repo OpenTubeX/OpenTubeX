@@ -1327,7 +1327,6 @@ Settings:
     Remove: إزالة
     Hide Channel Shows: إخفاء علامة التبويب "العروض" في القناة
     Blur Blocked Items: تمويه العناصر المحظورة بدلًا من إخفائها
-    More Items Count: "+{count} أخرى…"
   Data Settings:
     Settings could not be imported: "تعذّر استيراد الإعدادات"
     Some settings could not be imported: "تعذّر استيراد بعض الإعدادات (فشل {failed} من {total})"

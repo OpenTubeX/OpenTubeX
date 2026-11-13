@@ -1315,7 +1315,6 @@ Settings:
     Show Bottom Right Actions Dock: Sýna aðgerðastiku neðst til hægri
     Paused Interface Hide Delay: Töf áður en viðmót er falið í hléi
     Blur Blocked Items: Þoka útilokuð atriði í stað þess að fela þau
-    More Items Count: "+{count} í viðbót…"
   Data Settings:
     Settings could not be imported: "Ekki tókst að flytja inn stillingarnar"
     Some settings could not be imported: "Ekki tókst að flytja inn allar stillingar ({failed} af {total} mistókust)"

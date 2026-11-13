@@ -1318,7 +1318,6 @@ Settings:
     Remove: Elimină
     Hide Channel Shows: Ascunde fila „Emisiuni” a canalului
     Blur Blocked Items: Estompează elementele blocate în loc să le ascunzi
-    More Items Count: "+{count} în plus…"
   Data Settings:
     Settings could not be imported: "Setările nu au putut fi importate"
     Some settings could not be imported: "Nu toate setările au putut fi importate (eșuate: {failed} din {total})"

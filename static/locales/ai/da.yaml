@@ -1342,7 +1342,6 @@ Settings:
     Remove: Fjern
     Hide Channel Shows: Skjul "Serier"-fanen på kanaler
     Blur Blocked Items: Slør blokerede elementer i stedet for at skjule dem
-    More Items Count: "+{count} mere…"
   Data Settings:
     Settings could not be imported: "Indstillingerne kunne ikke importeres"
     Some settings could not be imported: "Ikke alle indstillinger kunne importeres ({failed} af {total} mislykkedes)"

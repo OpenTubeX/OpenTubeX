@@ -1458,7 +1458,6 @@ Settings:
     Add: Legg til
     Remove: Fjern
     Blur Blocked Items: Gjer blokkerte element uskarpe i staden for å gøyma dei
-    More Items Count: "+{count} fleire…"
   Data Settings:
     Settings could not be imported: "Innstillingane kunne ikkje importerast"
     Some settings could not be imported: "Ikkje alle innstillingane kunne importerast ({failed} av {total} mislukkast)"

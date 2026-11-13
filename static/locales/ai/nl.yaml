@@ -1331,7 +1331,6 @@ Settings:
     Remove: Verwijderen
     Hide Channel Shows: Kanaal­tabblad ‘Programma's’ verbergen
     Blur Blocked Items: Geblokkeerde items vervagen in plaats van verbergen
-    More Items Count: "+{count} meer…"
   Data Settings:
     Settings could not be imported: "De instellingen konden niet worden geïmporteerd"
     Some settings could not be imported: "Niet alle instellingen konden worden geïmporteerd ({failed} van {total} mislukt)"

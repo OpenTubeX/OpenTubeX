@@ -223,10 +223,10 @@ for (const audioOnly of [false, true]) {
   }, { fromChannel: true }))
 }
 
-test('fullscreen comment avatar navigation opens the channel and docks the same playing video', { skip }, () => withMobileVideo(async ({ page, player, watch, tap }) => {
+test('fullscreen comment avatar navigation opens the channel and docks the same playing video', { skip }, () => withMobileVideo(async ({ page, player, tap }) => {
   const original = await player.locator('video').elementHandle()
   await player.evaluate(element => element.requestFullscreen())
-  await watch.evaluate(component => component.proxy.$refs.player.$.setupState.setFullscreenComments(true))
+  await player.locator('.fullscreenCommentsToggle').evaluate(button => button.click())
   const link = player.locator('.fullscreenCommentCard a[tabindex="-1"]').first()
   const avatar = link.locator('.commentThumbnail, .commentThumbnailHidden').first()
   await expect(avatar).toBeVisible()

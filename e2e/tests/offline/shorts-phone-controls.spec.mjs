@@ -27,8 +27,9 @@ async function openShort({ app, page }) {
   // The Shorts player reloads the video, which can replace pauses and seeks
   // made before it finishes.
   await expect.poll(() => watch.evaluate(component => {
-    const player = component.proxy.$refs.player.$.setupState
-    return player.hasLoaded && player.videoLayoutReady
+    const player = component.proxy.$refs.player
+    // The player's layout is ready once the video can play
+    return player.hasLoaded && player.$el.querySelector('video').readyState >= HTMLMediaElement.HAVE_FUTURE_DATA
   })).toBe(true)
   await watch.dispose()
 }

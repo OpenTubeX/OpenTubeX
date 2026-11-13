@@ -1273,7 +1273,6 @@ Settings:
     Paused Interface Hide Delay: Задержка скрытия интерфейса во время паузы
     Hide Channel Shows: Скрыть вкладку «Шоу» канала
     Blur Blocked Items: Размывать заблокированные элементы вместо скрытия
-    More Items Count: "+{count} ещё…"
   Data Settings:
     Settings could not be imported: "Не удалось импортировать настройки"
     Some settings could not be imported: "Не все настройки удалось импортировать (не удалось: {failed} из {total})"

@@ -156,8 +156,8 @@ for (const { uiScale, colorScheme } of [{ uiScale: 200, colorScheme: 'dark' }]) 
             title: `Chapter ${index}`, startSeconds: index, endSeconds: index + 1, timestamp: `0:${index}`,
           }))
           await component.proxy.$nextTick()
-          component.proxy.$refs.player.$.setupState.showChaptersOverlay = true
         })
+        await player.locator('.ft-chapters-button').first().evaluate(button => button.click())
         const chapters = player.locator('.chapterOverlay')
         await expect(chapters).toBeVisible()
         const lastChapter = chapters.locator('.chapterSeek').last()

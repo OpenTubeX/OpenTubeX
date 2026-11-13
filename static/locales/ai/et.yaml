@@ -1313,7 +1313,6 @@ Settings:
     Show Bottom Right Actions Dock: Kuva all paremal toiminguriba
     Paused Interface Hide Delay: Liidese peitmise viivitus pausi ajal
     Blur Blocked Items: Hägusta blokeeritud üksused nende peitmise asemel
-    More Items Count: "+{count} veel…"
   Data Settings:
     Settings could not be imported: "Seadeid ei õnnestunud importida"
     Some settings could not be imported: "Kõiki seadeid ei õnnestunud importida ({total}-st nurjus {failed})"

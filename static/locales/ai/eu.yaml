@@ -1313,7 +1313,6 @@ Settings:
     Show Bottom Right Actions Dock: Erakutsi ekintzen panela behean eskuinean
     Paused Interface Hide Delay: Pausatutako interfazea ezkutatzeko atzerapena
     Blur Blocked Items: Lausotu blokeatutako elementuak ezkutatu beharrean
-    More Items Count: "+{count} gehiago…"
   Data Settings:
     Settings could not be imported: "Ezin izan dira ezarpenak inportatu"
     Some settings could not be imported: "Ezin izan dira ezarpen guztiak inportatu ({total}etik {failed} huts egin dute)"

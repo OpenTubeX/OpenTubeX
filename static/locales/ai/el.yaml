@@ -1314,7 +1314,6 @@ Settings:
     Paused Interface Hide Delay: Καθυστέρηση απόκρυψης περιβάλλοντος κατά την παύση
     Hide Channel Shows: Απόκρυψη της καρτέλας «Εκπομπές» του καναλιού
     Blur Blocked Items: Θόλωση αποκλεισμένων στοιχείων αντί για απόκρυψή τους
-    More Items Count: "+{count} ακόμα…"
   Data Settings:
     Settings could not be imported: "Δεν ήταν δυνατή η εισαγωγή των ρυθμίσεων"
     Some settings could not be imported: "Δεν ήταν δυνατή η εισαγωγή όλων των ρυθμίσεων (απέτυχαν {failed} από {total})"

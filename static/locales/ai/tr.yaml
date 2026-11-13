@@ -1313,7 +1313,6 @@ Settings:
     Show Bottom Right Actions Dock: Sağ Alt İşlem Panelini Göster
     Paused Interface Hide Delay: Duraklatılmış Arayüzü Gizleme Gecikmesi
     Blur Blocked Items: Engellenen öğeleri gizlemek yerine bulanıklaştır
-    More Items Count: "+{count} daha…"
   Data Settings:
     Settings could not be imported: "Ayarlar içe aktarılamadı"
     Some settings could not be imported: "Ayarların tümü içe aktarılamadı ({total} ayardan {failed} tanesi başarısız oldu)"
