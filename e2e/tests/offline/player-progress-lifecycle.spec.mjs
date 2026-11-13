@@ -16,7 +16,7 @@ test('late timeupdates do not access the released Shaka cast proxy', async ({ ap
   const video = await openMockedVideo(page)
   const component = await page.evaluateHandle(findWatchComponent)
   const disposal = await component.evaluateHandle(component => {
-    const video = component.refs.player.$.setupState.video
+    const video = component.refs.player.$el.querySelector('video')
     const controls = video.ui.getControls()
     const player = controls.getLocalPlayer()
     const proxy = controls.getPlayer()
@@ -74,7 +74,7 @@ for (const timing of ['while', 'after']) {
     // and input or the end of fullscreen can arrive during or after that teardown.
     const component = await page.evaluateHandle(findWatchComponent)
     const teardown = await component.evaluateHandle(component => {
-      const player = component.refs.player.$.setupState.video.ui.getControls().getLocalPlayer()
+      const player = component.refs.player.$el.querySelector('video').ui.getControls().getLocalPlayer()
       const originalDestroy = player.destroy.bind(player)
       const state = { started: false }
       const gate = new Promise(resolve => { state.release = resolve })

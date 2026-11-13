@@ -3,10 +3,10 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 import { nextTick, reactive, ref } from 'vue'
-import { normalizePlaybackRate, usePlaybackRate } from '../../src/renderer/components/ft-shaka-video-player/opentubex/usePlaybackRate.js'
+import { normalizePlaybackRate, usePlaybackRate } from '../../src/renderer/components/FtShakaVideoPlayer/opentubex/usePlaybackRate.js'
 
-const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
-const barSource = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/player-components/QuickPlaybackRateBar.js', import.meta.url), 'utf8')
+const source = readFileSync(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
+const barSource = readFileSync(new URL('../../src/renderer/components/FtShakaVideoPlayer/player-components/QuickPlaybackRateBar.js', import.meta.url), 'utf8')
 
 /**
  * @param {boolean} music whether the video is detected as music
@@ -75,7 +75,7 @@ function fixture(music, controllerReady = false, { musicMode = false, sabrReload
   // These player functions route control events to the playback rate controller.
   const names = ['handleControlsContainerClick', 'registerQuickPlaybackRateBar']
   const functions = names.map(name => {
-    const match = source.match(new RegExp(`    function ${name}\\([^]*?\\n    }`))
+    const match = source.match(new RegExp(`^function ${name}\\([^]*?\\n}`, 'm'))
     assert.ok(match, `missing ${name}`)
     return match[0]
   }).join('\n')

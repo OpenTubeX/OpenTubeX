@@ -1376,6 +1376,7 @@ Settings:
     Invalid channel playback speeds file: "Ni chafwyd hyd i gyflymderau chwarae sianeli yn y ffeil hon"
     Channel playback speeds imported: "Wedi mewnforio cyflymderau chwarae {count} o sianeli | Wedi mewnforio cyflymder chwarae {count} sianel | Wedi mewnforio cyflymderau chwarae {count} sianel | Wedi mewnforio cyflymderau chwarae {count} sianel | Wedi mewnforio cyflymderau chwarae {count} sianel | Wedi mewnforio cyflymderau chwarae {count} o sianeli"
     Channels not found: "Methwyd dod o hyd i {count} o sianeli | Methwyd dod o hyd i {count} sianel | Methwyd dod o hyd i {count} sianel | Methwyd dod o hyd i {count} sianel | Methwyd dod o hyd i {count} sianel | Methwyd dod o hyd i {count} o sianeli"
+    Playlists have been successfully imported: "Mewnforiwyd {count}/{total} rhestr chwarae yn llwyddiannus | Mewnforiwyd 1/{total} rhestr chwarae yn llwyddiannus | Mewnforiwyd {count}/{total} rhestr chwarae yn llwyddiannus | Mewnforiwyd {count}/{total} rhestr chwarae yn llwyddiannus | Mewnforiwyd {count}/{total} rhestr chwarae yn llwyddiannus | Mewnforiwyd {count}/{total} rhestr chwarae yn llwyddiannus"
   Sync Settings:
     Signed Out After Restore: 'Cafodd cysoni ei allgofnodi oherwydd i ddata''r ap hwn gael ei adfer o gopi wrth gefn neu o ddyfais arall. Mewngofnodwch eto i gysoni''r ddyfais hon.'
     Revoke Session Tabs Warning: "Bydd setiau tabiau wedi’u cysoni’r ddyfais hon hefyd yn cael eu dileu."

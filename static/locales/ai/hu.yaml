@@ -1372,6 +1372,7 @@ Settings:
     Invalid channel playback speeds file: "Ebben a fájlban nem találhatók csatornákhoz tartozó lejátszási sebességek"
     Channel playback speeds imported: "{count} csatorna lejátszási sebessége importálva | {count} csatorna lejátszási sebessége importálva"
     Channels not found: "{count} csatorna nem található | {count} csatorna nem található"
+    Playlists have been successfully imported: "1/{total} lejátszási lista sikeresen importálva | {count}/{total} lejátszási lista sikeresen importálva"
   Sync Settings:
     Signed Out After Restore: 'A szinkronizálás kijelentkezett, mert ezeket az alkalmazásadatokat biztonsági mentésből vagy másik eszközről állították vissza. Jelentkezz be újra az eszköz szinkronizálásához.'
     Revoke Session Tabs Warning: "Az eszköz szinkronizált lapkészletei is törlődnek."
@@ -1568,7 +1569,6 @@ Settings:
     Incorrect Password: Hibás jelszó
     Unlock: Feloldás
     Unlocking: Feloldás…
-  Search Settings: Keresési beállítások
   No Settings Found: Nem találhatók beállítások
   Interface Customizer:
     Customize Interface: "Felület testreszabása"

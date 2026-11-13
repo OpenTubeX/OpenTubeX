@@ -118,7 +118,7 @@ function createSearch (backend, { searchResults = [], missingPublicationDates = 
   const select = (query, spellCorrection) => checkSearchCache({ query, searchSettings, options: {}, spellCorrection })
   const result = id => backend === 'local'
     ? { results: [{ id }], continuationData: `${id} continuation` }
-    : [{ id }]
+    : { results: [{ id }], validResultsCount: 1, rawResultsCount: 1 }
   return { state, history, previous, current, requests, errors, notices, updatedChannels, localSearches, select, nextPage, result }
 }
 

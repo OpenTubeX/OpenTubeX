@@ -205,7 +205,7 @@ test.describe('playlist import with duplicate names', () => {
 
     await dataSection.getByRole('button', { name: 'Import playlists', exact: true }).click()
 
-    await expect(page.locator('.toast', { hasText: 'All playlists has been successfully imported' })).toBeVisible()
+    await expect(page.locator('.toast', { hasText: '1/1 playlist has been successfully imported' })).toBeVisible()
     await expect.poll(() => page.evaluate(() => window.$store.getters.getAllPlaylists
       .filter(({ _id }) => _id.startsWith('music-'))
       .map(({ _id, description, videos }) => ({ _id, description, videoIds: videos.map(({ videoId }) => videoId) }))
@@ -243,7 +243,7 @@ test.describe('playlist import into a renamed playlist', () => {
 
     await dataSection.getByRole('button', { name: 'Import playlists', exact: true }).click()
 
-    await expect(page.locator('.toast', { hasText: 'All playlists has been successfully imported' })).toBeVisible()
+    await expect(page.locator('.toast', { hasText: '2/2 playlists have been successfully imported' })).toBeVisible()
     await expect.poll(() => page.evaluate(() => window.$store.getters.getAllPlaylists
       .filter(({ _id }) => _id === 'rock' || _id === 'jazz')
       .map(({ _id, videos }) => ({ _id, videoIds: videos.map(({ videoId }) => videoId) }))

@@ -6,11 +6,11 @@ import vm from 'node:vm'
 import { getDefaultPlayerMenuControls } from '../../src/renderer/helpers/playerMenuControls.js'
 import { DEFAULT_CONTROL_BAR_BUTTONS, getControlBarButtonDefinitions, getRemovedControlBarButtons } from '../../src/renderer/helpers/controlBarButtons.js'
 
-const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
+const source = readFileSync(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
 function computedSource(name) {
-  const start = source.indexOf(`    const ${name} = computed(() => {`)
+  const start = source.indexOf(`const ${name} = computed(() => {`)
   assert.notEqual(start, -1)
-  return source.slice(start, source.indexOf('\n    })', start) + '\n    })'.length)
+  return source.slice(start, source.indexOf('\n})', start) + '\n})'.length)
 }
 
 function controls(props, overflow = false, quickBar = true, playerIsLive = props.isLive) {

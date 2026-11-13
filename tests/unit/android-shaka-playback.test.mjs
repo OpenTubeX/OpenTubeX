@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
 import { androidRotationFullscreenHandoffs, releaseAndroidRotationFullscreenHandoff } from '../../src/renderer/helpers/player/androidFullscreen.js'
 
-const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
+const source = readFileSync(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
 
 function createPopoverHost() {
   return {
@@ -28,8 +28,8 @@ function createRotationObserver() {
 }
 
 function androidRotationHarness(overrides = {}) {
-  const start = source.indexOf('    let androidRotationFullscreen = false')
-  const end = source.indexOf('\n    let stopAndroidRotation', start)
+  const start = source.indexOf('let androidRotationFullscreen = false')
+  const end = source.indexOf('\nlet stopAndroidRotation', start)
   assert.ok(start !== -1 && end !== -1, 'Android must handle display rotation without requiring a fullscreen user gesture')
 
   const calls = []
@@ -235,8 +235,8 @@ for (const [state, overrides] of [
 }
 
 test('Android selects physical sensing only for the opt-in and releases subscriptions on preference or tab changes', () => {
-  const start = source.indexOf('    let stopAndroidRotation')
-  const end = source.indexOf('\n    onBeforeUnmount(', start)
+  const start = source.indexOf('let stopAndroidRotation')
+  const end = source.indexOf('\nonBeforeUnmount(', start)
   assert.ok(start !== -1 && end !== -1)
   let change
   const calls = []
@@ -263,8 +263,8 @@ test('Android selects physical sensing only for the opt-in and releases subscrip
 })
 
 test('Android retains the exit surface only for a requested rotation', async () => {
-  const start = source.indexOf('    let androidFullscreenRotationRequested = false')
-  const end = source.indexOf('    function fullscreenChangeHandler()', start)
+  const start = source.indexOf('let androidFullscreenRotationRequested = false')
+  const end = source.indexOf('function fullscreenChangeHandler()', start)
   const listeners = new Map()
   const timers = new Map()
   const frames = new Map()
@@ -357,8 +357,8 @@ test('Android retains the exit surface only for a requested rotation', async () 
 })
 
 test('Android tracks landscape requests including metadata changes during fullscreen', () => {
-  const start = source.indexOf('    let androidFullscreenRotationRequested = false')
-  const end = source.indexOf('    function retainAndroidFullscreenDuringRotation', start)
+  const start = source.indexOf('let androidFullscreenRotationRequested = false')
+  const end = source.indexOf('function retainAndroidFullscreenDuringRotation', start)
   const orientationSource = readFileSync(new URL('../../src/renderer/helpers/capacitorUi.js', import.meta.url), 'utf8')
   const predicate = orientationSource.slice(orientationSource.indexOf('export function shouldRotateFullscreenToLandscape'), orientationSource.indexOf('export function setLandscapeOrientation')).replace('export ', '')
   let activeChanged
@@ -387,8 +387,8 @@ test('Android tracks landscape requests including metadata changes during fullsc
 })
 
 test('Android rechecks fullscreen orientation when metadata aspect ratio arrives', async () => {
-  const start = source.indexOf('    watch([rotateFullscreenToLandscape, fullscreenAspectRatio],')
-  const end = source.indexOf('\n    /** @type', start)
+  const start = source.indexOf('watch([rotateFullscreenToLandscape, fullscreenAspectRatio],')
+  const end = source.indexOf('\n/** @type', start)
   assert.ok(start !== -1 && end !== -1)
   const calls = []
   let onChange
@@ -405,8 +405,8 @@ test('Android rechecks fullscreen orientation when metadata aspect ratio arrives
 })
 
 test('fullscreen gesture completion restarts controls while the real post-hold touch is suppressed', () => {
-  const start = source.indexOf('    function handlePlayerTouchEnd(event) {')
-  const end = source.indexOf('\n    /**', start)
+  const start = source.indexOf('function handlePlayerTouchEnd(event) {')
+  const end = source.indexOf('\n/**', start)
   const calls = []
   const handler = vm.runInNewContext(`${source.slice(start, end)}\nhandlePlayerTouchEnd`, {
     suppressTemporaryPlaybackRateClick: true,

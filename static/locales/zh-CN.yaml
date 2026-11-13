@@ -490,7 +490,6 @@ Settings:
     Import Playlists: 导入播放列表
     Export Playlists: 导出播放列表
     Playlist insufficient data: '"{playlist}" 播放列表数据不足，正在跳过'
-    All playlists has been successfully imported: 已成功导入所有播放列表
     All playlists has been successfully exported: 所有播放列表已成功导出
     Playlist File: 播放列表文件
     Subscription File: 订阅文件
@@ -513,6 +512,7 @@ Settings:
     Setting object has insufficient data, skipping item: 设置对象数据不足，跳过项目
     Unknown setting key: 未知的设置键：{key}
     Non-transferable setting key: 不可传输的设置键：{key}
+    Playlists have been successfully imported: 已成功导入 1/{total} 个播放列表 | 已成功导入{count}/{total} 个播放列表
   Distraction Free Settings:
     Hide Popular Videos: 隐藏流行视频
     Hide Trending Videos: 隐藏热门视频
@@ -564,6 +564,7 @@ Settings:
     Add: 添加
     Remove: 删除
     Hide Channel Shows: 隐藏频道 "Shows" 选项卡
+    More Items Count: + 另外 {count} 个 …
   The app needs to restart for changes to take effect. Restart and apply change?: 应用需要重启让修改生效。重启以应用修改？
   Proxy Settings:
     Proxy Protocol: 代理协议
@@ -635,6 +636,9 @@ Settings:
   SABR:
     Label: 启用 SABR 为 DASH 后端
     Tooltip: SABR 在未来版本中将成为唯一后端，无法禁用。提供此开关是以防提早实实施有不可恢复的问题。
+  Search Settings: 搜索设置
+  Settings found: 找到了 1 个设置 | 找到了 {count} 个设置
+  No Matching Settings: 没有设置匹配你的搜索。
 About:
   #On About page
   About: '关于'

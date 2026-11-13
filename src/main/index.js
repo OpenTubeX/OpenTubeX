@@ -25,6 +25,7 @@ import {
   LIGHT_BASE_THEMES,
   DARK_BASE_THEMES,
   DEFAULT_SYSTEM_THEMES,
+  UI_SCALE,
 } from '../constants'
 import { isCustomThemeValue } from '../customTheme'
 import { MATERIAL_SYSTEM_SEED, MATERIAL_THEME_VALUES, materialColorScheme, materialSeedPalette, materialThemeMode } from '../materialTheme.js'
@@ -3124,6 +3125,46 @@ function runApp() {
     updateDockMenu()
   }
 
+  // Zoom steps build on each other, so presses in quick succession all count.
+  let zoomUpdate = Promise.resolve()
+
+  /**
+   * Zooms through the UI Scale setting, so the settings show the zoom and it
+   * applies to every window.
+   * @param {BrowserWindow | undefined} browserWindow
+   * @param {'in' | 'out' | 'reset'} action
+   */
+  function handleZoom(browserWindow, action) {
+    if (
+      browserWindow == null ||
+      appShortcutBlockedWindows.has(browserWindow) ||
+      !isOpenTubeXUrl(browserWindow.webContents.getURL())
+    ) {
+      return
+    }
+
+    zoomUpdate = zoomUpdate.then(async () => {
+      const saved = (await baseHandlers.settings._findOne('uiScale'))?.value
+      const currentPercent = typeof saved === 'number' ? saved : 100
+
+      let percent
+      switch (action) {
+        case 'in':
+          percent = Math.min(UI_SCALE.MAX, currentPercent + UI_SCALE.STEP)
+          break
+        case 'out':
+          percent = Math.max(UI_SCALE.MIN, currentPercent - UI_SCALE.STEP)
+          break
+        default:
+          percent = 100
+      }
+
+      await updateSettingFromMain('uiScale', percent)
+    }).catch((error) => {
+      console.error('Failed to update the UI scale', error)
+    })
+  }
+
   async function setMenu() {
     const t = await getMainTranslator()
     // The app has no other menu to fall back on, so a failed read uses the default shortcuts.
@@ -3266,28 +3307,17 @@ function runApp() {
           {
             label: t('Actual size'),
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.RESET_ZOOM),
-            click: (_menuItem, browserWindow) => {
-              if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
-              browserWindow?.webContents.setZoomLevel(0)
-            }
+            click: (_menuItem, browserWindow) => handleZoom(browserWindow, 'reset')
           },
           {
             label: t('Zoom in'),
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.ZOOM_IN),
-            click: (_menuItem, browserWindow) => {
-              if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {
-                browserWindow.webContents.setZoomLevel(browserWindow.webContents.getZoomLevel() + 0.5)
-              }
-            }
+            click: (_menuItem, browserWindow) => handleZoom(browserWindow, 'in')
           },
           {
             label: t('Zoom out'),
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.ZOOM_OUT),
-            click: (_menuItem, browserWindow) => {
-              if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {
-                browserWindow.webContents.setZoomLevel(browserWindow.webContents.getZoomLevel() - 0.5)
-              }
-            }
+            click: (_menuItem, browserWindow) => handleZoom(browserWindow, 'out')
           },
           { type: 'separator' },
           {

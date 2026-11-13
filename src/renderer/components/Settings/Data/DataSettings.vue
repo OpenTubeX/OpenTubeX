@@ -626,7 +626,7 @@ async function importSelectedTakeoutData() {
   if (takeoutBusy.value || !takeoutFile.value || !takeoutPreviewReady.value) return
   takeoutBusy.value = true
   const selected = new Set(selectedTakeoutTypes.value)
-  let importedPlaylists = false
+  let importedPlaylistCount = 0
   let failedPlaylists = false
   try {
     await forEachTakeoutImportEntry(takeoutFile.value, selected, takeoutEntries.value, async entry => {
@@ -638,15 +638,15 @@ async function importSelectedTakeoutData() {
         await importYouTubeSearchHistory(JSON.parse(entry.content))
       } else if (entry.type === 'playlists') {
         await importTakeoutPlaylist(entry.playlist)
-        importedPlaylists = true
+        importedPlaylistCount++
       }
     }, (error, type, path) => {
       if (type === 'playlists') failedPlaylists = true
       console.error('Unable to import Takeout entry', path, error)
       showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${path ?? error}`, icon: ['fas', 'circle-exclamation'] })
     })
-    if (importedPlaylists && !failedPlaylists) {
-      showToast({ message: t('Settings.Data Settings.All playlists has been successfully imported'), icon: ['far', 'bookmark'] })
+    if (importedPlaylistCount > 0 && !failedPlaylists) {
+      showPlaylistsImportedToast(importedPlaylistCount, importedPlaylistCount)
     }
     closeTakeoutImport()
   } catch (error) {
@@ -1738,7 +1738,7 @@ async function importPlaylists() {
 }
 
 async function importTakeoutPlaylistFiles(files) {
-  let imported = false
+  let importedCount = 0
   let failed = false
   const reportError = (error, filename) => {
     failed = true
@@ -1748,14 +1748,25 @@ async function importTakeoutPlaylistFiles(files) {
   try {
     await forEachTakeoutPlaylistFile(files, async playlist => {
       await importTakeoutPlaylist(playlist)
-      imported = true
+      importedCount++
     }, reportError)
   } catch (error) {
     reportError(error, files.map(file => file.name).join(', '))
   }
-  if (imported && !failed) {
-    showToast({ message: t('Settings.Data Settings.All playlists has been successfully imported'), icon: ['far', 'bookmark'] })
+  if (importedCount > 0 && !failed) {
+    showPlaylistsImportedToast(importedCount, importedCount)
   }
+}
+
+/**
+ * @param {number} count
+ * @param {number} total
+ */
+function showPlaylistsImportedToast(count, total) {
+  showToast({
+    message: t('Settings.Data Settings.Playlists have been successfully imported', { count, total }, count),
+    icon: ['far', 'bookmark'],
+  })
 }
 
 async function importPlaylistDatabase(data) {
@@ -1892,7 +1903,8 @@ async function importPlaylistDatabase(data) {
       }
     })
 
-    if (countRequiredKeysPresent !== requiredKeys.length) {
+    const allVideosSkipped = playlistData.videos.length > 0 && playlistObject.videos.length === 0
+    if (countRequiredKeysPresent !== requiredKeys.length || allVideosSkipped) {
       const message = t('Settings.Data Settings.Playlist insufficient data', { playlist: playlistData.playlistName })
       showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
       return
@@ -1999,10 +2011,7 @@ async function importPlaylistDatabase(data) {
     return
   }
 
-  showToast({
-    message: t('Settings.Data Settings.All playlists has been successfully imported'),
-    icon: ['far', 'bookmark'],
-  })
+  showPlaylistsImportedToast(importedCount, playlists.length)
 }
 
 async function exportPlaylists() {

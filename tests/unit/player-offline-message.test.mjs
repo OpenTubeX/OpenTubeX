@@ -4,10 +4,10 @@ import vm from 'node:vm'
 import test from 'node:test'
 import { computed, reactive, ref } from 'vue'
 
-const source = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
-const sponsorBlockSource = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/opentubex/useSponsorBlockPlayback.js', import.meta.url), 'utf8')
-const start = source.indexOf('    const showOfflineMessage = computed(')
-const expression = source.slice(start, source.indexOf('\n    // #endregion offline message', start))
+const source = await readFile(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
+const sponsorBlockSource = await readFile(new URL('../../src/renderer/components/FtShakaVideoPlayer/opentubex/useSponsorBlockPlayback.js', import.meta.url), 'utf8')
+const start = source.indexOf('\nconst showOfflineMessage = computed(') + 1
+const expression = source.slice(start, source.indexOf('\n// #endregion offline message', start))
 
 test('SponsorBlock refresh waits for connectivity and pending votes', async () => {
   const start = sponsorBlockSource.indexOf('  async function refreshSponsorBlockInfo() {')
@@ -54,8 +54,8 @@ test('offline warning stays hidden while seeking downloaded audio media', () => 
 
 for (const [loaded, loading] of [[false, false], [true, false], [false, true]]) {
   test(`reconnecting SponsorBlock ${loaded ? 'reuses loaded segments and decisions' : loading ? 'keeps the pending request' : 'initializes missing segments'}`, () => {
-    const start = source.indexOf('    watch(useSponsorBlock, enabled => {')
-    const end = source.indexOf('\n    })', start) + '\n    })'.length
+    const start = source.indexOf('\nwatch(useSponsorBlock, enabled => {') + 1
+    const end = source.indexOf('\n})', start) + '\n})'.length
     let change
     let setups = 0
     let schedules = 0
@@ -89,8 +89,8 @@ for (const [loaded, loading] of [[false, false], [true, false], [false, true]]) 
 }
 
 test('a stale SponsorBlock response cannot finish the current request for first', async () => {
-  const start = source.indexOf('    async function setupSponsorBlock() {')
-  const end = source.indexOf('    function skipSponsorBlockSegments(', start)
+  const start = source.indexOf('\nasync function setupSponsorBlock() {') + 1
+  const end = source.indexOf('\nfunction skipSponsorBlockSegments(', start)
   const requests = []
   const props = { videoId: 'first' }
   const loading = ref(false)

@@ -192,7 +192,7 @@ test('line-delimited playlists keep valid rows around a malformed row', async ({
 
   await expectRowError(page)
   await expect(page.locator('.toast', {
-    hasText: 'All playlists has been successfully imported'
+    hasText: '3/4 playlists have been successfully imported'
   })).toBeVisible()
   await expect.poll(() => page.evaluate(() => {
     const store = window.$store
@@ -257,7 +257,7 @@ test('invalid-only line-delimited imports do not report success', async ({ page 
     {
       filename: 'issue-866-playlists.db',
       button: 'Import playlists',
-      success: 'All playlists has been successfully imported'
+      success: /playlists? ha(?:s|ve) been successfully imported/
     },
     {
       filename: 'issue-866-search-history.db',

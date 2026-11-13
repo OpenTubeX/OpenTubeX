@@ -1372,6 +1372,7 @@ Settings:
     Invalid channel playback speeds file: "N'eus bet kavet tizh lenn chadenn ebet er restr-mañ"
     Channel playback speeds imported: "Enporzhiet eo bet tizh lenn {count} chadenn | Enporzhiet eo bet tizhoù lenn {count} chadenn | Enporzhiet eo bet tizhoù lenn {count} chadenn | Enporzhiet eo bet tizhoù lenn {count} chadenn | Enporzhiet eo bet tizhoù lenn {count} chadenn"
     Channels not found: "N'eus ket bet gallet kavout {count} chadenn | N'eus ket bet gallet kavout {count} chadenn | N'eus ket bet gallet kavout {count} chadenn | N'eus ket bet gallet kavout {count} chadenn | N'eus ket bet gallet kavout {count} chadenn"
+    Playlists have been successfully imported: "{count}/{total} roll-lenn enporzhiet gant berzh | {count}/{total} roll-lenn enporzhiet gant berzh | {count}/{total} roll-lenn enporzhiet gant berzh | {count}/{total} roll-lenn enporzhiet gant berzh | {count}/{total} roll-lenn enporzhiet gant berzh"
   Sync Settings:
     Signed Out After Restore: 'Digennasket eo bet ar goubredañ peogwir eo bet assavet roadennoù an arload-mañ eus un enrolladenn gwarez pe eus ur benveg all. Kevreit en-dro evit goubredañ ar benveg-mañ.'
     Revoke Session Tabs Warning: "Holladoù ivinelloù sinkronizet an trevnad-mañ a vo diverket ivez."

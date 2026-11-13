@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { createSpring, createVelocityTracker, EXPAND_SPRING } from '../../src/renderer/components/ft-shaka-video-player/opentubex/spring.js'
+import { createSpring, createVelocityTracker, EXPAND_SPRING } from '../../src/renderer/components/FtShakaVideoPlayer/opentubex/spring.js'
 
 const frames = spring => Array.from({ length: 60 }, (_, index) => spring.at(index * 16))
 const restTime = spring => {

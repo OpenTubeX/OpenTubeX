@@ -243,7 +243,7 @@ export function useHomeRecommendations(visible) {
       ))?.videos ?? [],
       search: (query, signal) => withFallback(
         async () => (await getLocalSearchResults(query, searchSettings, familyFriendly, signal)).results,
-        () => getInvidiousSearchResults(query, 1, searchSettings, signal), signal
+        async () => (await getInvidiousSearchResults(query, 1, searchSettings, signal)).results, signal
       ),
       isCancelled: () => generation !== requestGeneration,
       signal,

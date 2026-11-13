@@ -4,11 +4,11 @@ import test from 'node:test'
 import { compileFunction } from 'node:vm'
 import { nextTick, reactive, ref, watch } from 'vue'
 
-const source = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
-const watcherStart = source.indexOf('    watch(() => props.chapters,')
-const watcherEnd = source.indexOf('\n    watch(sponsorBlockSubmissionVisibleButtons,', watcherStart)
-const loaderStart = source.indexOf('    watch(chapterThumbnails,')
-const loaderEnd = source.indexOf('\n    /**', loaderStart)
+const source = await readFile(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
+const watcherStart = source.indexOf('\nwatch(() => props.chapters,') + 1
+const watcherEnd = source.indexOf('\nwatch(sponsorBlockSubmissionVisibleButtons,', watcherStart)
+const loaderStart = source.indexOf('\nwatch(chapterThumbnails,') + 1
+const loaderEnd = source.indexOf('\n/**', loaderStart)
 
 function deferred() {
   let resolve

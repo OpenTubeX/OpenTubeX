@@ -3,12 +3,13 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 
-const source = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
-const loadSource = source.slice(source.indexOf('    async function performFirstLoad('), source.indexOf('    /**', source.indexOf('    async function performFirstLoad(')))
-const playbackLoadSource = source.match(/ {4}async function loadPlaybackSource\([^]*?\n {4}}/)[0]
+const source = await readFile(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
+const loadStart = source.indexOf('\nasync function performFirstLoad(') + 1
+const loadSource = source.slice(loadStart, source.indexOf('\n/**', loadStart))
+const playbackLoadSource = source.match(/^async function loadPlaybackSource\([^]*?\n}/m)[0]
 function extract(name) {
-  const start = source.indexOf(`    function ${name}(`)
-  return source.slice(start, source.indexOf('\n    function ', start + 1))
+  const start = source.indexOf(`\nfunction ${name}(`) + 1
+  return source.slice(start, source.indexOf('\nfunction ', start))
 }
 function fixture() {
   const intervals = new Set()
@@ -297,8 +298,8 @@ test('late SABR callbacks cannot start a countdown after playback ends', () => {
 })
 
 test('destroying the player aborts SABR backoff before waiting for Shaka', async () => {
-  const start = source.indexOf('    let playerDestruction = null')
-  const destroySource = source.slice(start, source.indexOf('\n    expose({', start))
+  const start = source.indexOf('\nlet playerDestruction = null') + 1
+  const destroySource = source.slice(start, source.indexOf('\ndefineExpose({', start))
   const calls = []
   const noop = () => {}
   const context = {

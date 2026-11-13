@@ -11,7 +11,7 @@ import {
   resolveAndroidAutoPictureInPictureUpdate,
   resolveAutoPictureInPictureAction,
   shouldAutoPictureInPicture
-} from '../../src/renderer/components/ft-shaka-video-player/opentubex/autoPictureInPictureState.js'
+} from '../../src/renderer/components/FtShakaVideoPlayer/opentubex/autoPictureInPictureState.js'
 
 test('Android auto PiP is enabled only while a video is actively playing', () => {
   assert.equal(canEnableAndroidAutoPictureInPicture(true, 'video', null), false)

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { SeekFilmstrip } from '../../src/renderer/components/ft-shaka-video-player/player-components/SeekFilmstrip.js'
+import { SeekFilmstrip } from '../../src/renderer/components/FtShakaVideoPlayer/player-components/SeekFilmstrip.js'
 
 class FakeElement {
   constructor() {

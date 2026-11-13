@@ -640,12 +640,13 @@ async function performSearchInvidious(payload, options = { resetSearchPage: fals
   }
 
   try {
-    const results = await getInvidiousSearchResults(payload.query, searchPage.value, payload.searchSettings)
+    const { results, rawResultsCount } = await getInvidiousSearchResults(payload.query, searchPage.value, payload.searchSettings)
     if (requestId !== searchRequestId) return
     // An empty response is a failure; returning would leave the search loading.
     if (!results) throw new Error('Invidious returned no search results')
 
-    hasMoreResults.value = results.length > 0
+    // A page can contain only result types the app doesn't show, with more pages after it.
+    hasMoreResults.value = rawResultsCount > 0
 
     apiUsed.value = 'invidious'
     // A local correction notice doesn't apply to Invidious results, e.g. after a failed local continuation.

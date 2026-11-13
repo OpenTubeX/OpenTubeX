@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 
-const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/opentubex/useSponsorBlockPlayback.js', import.meta.url), 'utf8')
+const source = readFileSync(new URL('../../src/renderer/components/FtShakaVideoPlayer/opentubex/useSponsorBlockPlayback.js', import.meta.url), 'utf8')
 
 function slice(startMarker, endMarker) {
   const start = source.indexOf(startMarker)

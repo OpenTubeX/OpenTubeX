@@ -491,7 +491,6 @@ Settings:
     Import Subscriptions: Importer abonnementer
     Select Export Type: Velg eksporttype
     Data Settings: Data
-    All playlists has been successfully imported: Alle spillelister har blitt importert
     Subscription File: Abonnementsfil
     History File: Historikkfil
     Playlist File: Spillelistefil
@@ -585,6 +584,7 @@ Settings:
     Add: Legg til
     Remove: Fjern
     Hide Channel Shows: Skjul «Serier»-fanen i kanaler
+    More Items Count: +{count} flere…
   The app needs to restart for changes to take effect. Restart and apply change?: Start programmet på nytt for å ta i bruk endringene?
   SponsorBlock Settings:
     Notify when sponsor segment is skipped: Vis varsel etter at et segment har blitt hoppet over
@@ -637,6 +637,9 @@ Settings:
     Password: Passord
   Return to Settings Menu: Gå tilbake til menyen med innstillinger
   Sort Settings Sections (A-Z): Sorter innstillingsseksjonene (A-Å)
+  Search Settings: Søkeinnstillinger
+  Settings found: 1 innstilling funnet | {count} innstillinger funnet
+  No Matching Settings: Ingen innstillinger samsvarer med søket ditt.
 About:
   #On About page
   About: 'Om'

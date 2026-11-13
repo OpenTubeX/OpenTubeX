@@ -1325,6 +1325,7 @@ Settings:
     Invalid channel playback speeds file: "Nenhuma velocidade de reprodução de canal foi encontrada neste arquivo"
     Channel playback speeds imported: "Importada a velocidade de reprodução de {count} canal | Importadas as velocidades de reprodução de {count} de canais | Importadas as velocidades de reprodução de {count} canais"
     Channels not found: "{count} canal não foi encontrado | {count} de canais não foram encontrados | {count} canais não foram encontrados"
+    Playlists have been successfully imported: "1/{total} playlist importada com sucesso | {count}/{total} playlists importadas com sucesso | {count}/{total} playlists importadas com sucesso"
   Sync Settings:
     Signed Out After Restore: 'A sincronização foi desconectada porque estes dados do app foram restaurados de um backup ou de outro dispositivo. Entre novamente para sincronizar este dispositivo.'
     Revoke Session Tabs Warning: "Os conjuntos de abas sincronizados deste dispositivo também serão excluídos."
@@ -1521,7 +1522,6 @@ Settings:
     Incorrect Password: Palavra-passe incorreta
     Unlock: Desbloquear
     Unlocking: A desbloquear…
-  Search Settings: Procurar nas configurações
   No Settings Found: Nenhuma configuração encontrada
   Interface Customizer:
     Customize Interface: "Personalizar interface"

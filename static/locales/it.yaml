@@ -493,7 +493,6 @@ Settings:
     Import Playlists: Importa playlist
     Export Playlists: Esporta playlist
     Playlist insufficient data: Dati insufficienti per la playlist "{playlist}", elemento saltato
-    All playlists has been successfully imported: Tutte le playlist sono state importate correttamente
     All playlists has been successfully exported: Tutte le playlist sono state esportate correttamente
     History File: File della Cronologia
     Subscription File: File delle iscrizioni
@@ -567,6 +566,7 @@ Settings:
     Add: Aggiungi
     Remove: Rimuovi
     Hide Channel Shows: Nascondi la scheda "Serie" del canale
+    More Items Count: +{count} altri
   The app needs to restart for changes to take effect. Restart and apply change?: L'app deve essere riavviata affinché le modifiche abbiano effetto. Riavviare e applicare la modifica?
   Proxy Settings:
     Proxy Protocol: Protocollo Proxy
@@ -636,6 +636,9 @@ Settings:
     Remove Password: Rimuovi password
   Sort Settings Sections (A-Z): Ordina le sezioni delle Impostazioni (A-Z)
   Return to Settings Menu: Torna al menu Impostazioni
+  Search Settings: Impostazioni di ricerca
+  Settings found: 1 impostazione trovata | {count} impostazioni trovate
+  No Matching Settings: Nessuna impostazione corrisponde alla tua ricerca.
 About:
   #On About page
   About: 'Informazioni'

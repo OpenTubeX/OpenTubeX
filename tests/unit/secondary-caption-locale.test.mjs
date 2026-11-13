@@ -4,7 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 import { findCaptionByLocale } from '../../src/captionLanguages.js'
 
-const source = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/opentubex/useSecondaryCaptions.js', import.meta.url), 'utf8')
+const source = await readFile(new URL('../../src/renderer/components/FtShakaVideoPlayer/opentubex/useSecondaryCaptions.js', import.meta.url), 'utf8')
 const start = source.indexOf('  async function selectSecondaryCaption(')
 const end = source.indexOf('  function isShownAsMainCaption(')
 assert.ok(start > 0 && end > start)

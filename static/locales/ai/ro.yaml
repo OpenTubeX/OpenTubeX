@@ -271,7 +271,6 @@ User Playlists:
   Saved Playlists Refresh Failed: 'Unele liste de redare salvate nu au putut fi reîmprospătate.'
   Save: "Salvează"
   Edit: "Editează"
-  This playlist is private or does not exist.: "Această listă de redare este privată sau nu există."
   Pin to Navigation: "Fixează în navigare"
   Unpin from Navigation: "Anulează fixarea din navigare"
   Pin to Top: "Fixează sus"
@@ -835,8 +834,6 @@ Settings:
     Mono Audio: 'Audio mono'
     Normalize Loudness: 'Normalizează volumul'
     Show Mono Audio Toggle: 'Afișează comutatorul audio mono'
-    Default Media Format:
-      Default Media Format: 'Format media implicit'
     Pause on Stream Recovery: "Pauză la recuperarea fluxului"
     Buffering:
       Buffering: Memorie tampon
@@ -1387,6 +1384,7 @@ Settings:
     Invalid channel playback speeds file: "Nu s-au găsit viteze de redare ale canalelor în acest fișier"
     Channel playback speeds imported: "A fost importată viteza de redare pentru {count} canal | Au fost importate vitezele de redare pentru {count} canale | Au fost importate vitezele de redare pentru {count} de canale"
     Channels not found: "{count} canal nu a putut fi găsit | {count} canale nu au putut fi găsite | {count} de canale nu au putut fi găsite"
+    Playlists have been successfully imported: "1/{total} playlist importat cu succes | {count}/{total} playlisturi importate cu succes | {count}/{total} de playlisturi importate cu succes"
   Sync Settings:
     Signed Out After Restore: 'Sincronizarea a fost deconectată deoarece aceste date ale aplicației au fost restaurate dintr-o copie de rezervă sau de pe alt dispozitiv. Conectează-te din nou pentru a sincroniza acest dispozitiv.'
     Revoke Session Tabs Warning: "Seturile de file sincronizate ale acestui dispozitiv vor fi și ele șterse."

@@ -1372,6 +1372,7 @@ Settings:
     Invalid channel playback speeds file: "Bu dosyada kanal oynatma hızı bulunamadı"
     Channel playback speeds imported: "{count} kanalın oynatma hızı içe aktarıldı | {count} kanalın oynatma hızları içe aktarıldı"
     Channels not found: "{count} kanal bulunamadı | {count} kanal bulunamadı"
+    Playlists have been successfully imported: "1/{total} oynatma listesi başarıyla içe aktarıldı | {count}/{total} oynatma listesi başarıyla içe aktarıldı"
   Sync Settings:
     Signed Out After Restore: 'Bu uygulama verileri bir yedekten veya başka bir cihazdan geri yüklendiği için eşitleme oturumu kapatıldı. Bu cihazı eşitlemek için yeniden oturum açın.'
     Revoke Session Tabs Warning: "Bu cihazın eşitlenmiş sekme kümeleri de silinecek."
@@ -1568,7 +1569,6 @@ Settings:
     Incorrect Password: Parola yanlış
     Unlock: Kilidi aç
     Unlocking: Kilit açılıyor…
-  Search Settings: Arama ayarları
   No Settings Found: Ayar bulunamadı
   Interface Customizer:
     Customize Interface: "Arayüzü özelleştir"

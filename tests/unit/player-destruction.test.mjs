@@ -4,9 +4,9 @@ import test from 'node:test'
 import vm from 'node:vm'
 import { nextTick, ref } from 'vue'
 
-const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
-const start = source.indexOf('    let playerDestruction = null')
-const destruction = source.slice(start, source.indexOf('\n    expose({', start))
+const source = readFileSync(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
+const start = source.indexOf('let playerDestruction = null')
+const destruction = source.slice(start, source.indexOf('\ndefineExpose({', start))
 const castSource = readFileSync(new URL('../../node_modules/shaka-player/lib/cast/cast_proxy.js', import.meta.url), 'utf8')
 const shaka = { cast: {}, util: { FakeEventTarget: class { release() {} } }, ads: { AbstractAd: class {} } }
 vm.runInNewContext(castSource, { shaka, goog: { provide() {}, require() {} } })

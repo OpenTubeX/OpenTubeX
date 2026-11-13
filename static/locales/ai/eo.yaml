@@ -1408,6 +1408,7 @@ Settings:
     Invalid channel playback speeds file: Neniuj kanalaj ludrapidoj troviĝis en ĉi tiu dosiero
     Channel playback speeds imported: Enportis la ludrapidon de {count} kanalo | Enportis la ludrapidojn de {count} kanaloj
     Channels not found: '{count} kanalo ne troviĝis | {count} kanaloj ne troviĝis'
+    Playlists have been successfully imported: "1/{total} ludlisto sukcese importita | {count}/{total} ludlistoj sukcese importitaj"
   Sync Settings:
     Signed Out After Restore: 'Sinkronigo estis elsalutita ĉar ĉi tiuj aplikaĵaj datumoj estis restaŭritaj el sekurkopio aŭ el alia aparato. Ensalutu denove por sinkronigi ĉi tiun aparaton.'
     Revoke Session Tabs Warning: La sinkronigitaj langetaroj de ĉi tiu aparato ankaŭ estos forigitaj.

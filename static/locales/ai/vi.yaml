@@ -1376,6 +1376,7 @@ Settings:
     Invalid channel playback speeds file: "Không tìm thấy tốc độ phát của kênh nào trong tệp này"
     Channel playback speeds imported: "Đã nhập tốc độ phát của {count} kênh"
     Channels not found: "Không tìm thấy {count} kênh"
+    Playlists have been successfully imported: "Đã nhập thành công {count}/{total} danh sách phát"
   Sync Settings:
     Signed Out After Restore: 'Đồng bộ đã bị đăng xuất vì dữ liệu ứng dụng này được khôi phục từ bản sao lưu hoặc từ thiết bị khác. Hãy đăng nhập lại để đồng bộ thiết bị này.'
     Revoke Session Tabs Warning: "Các bộ thẻ đã đồng bộ của thiết bị này cũng sẽ bị xóa."

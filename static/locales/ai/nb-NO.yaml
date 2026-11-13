@@ -1372,6 +1372,7 @@ Settings:
     Invalid channel playback speeds file: "Fant ingen avspillingshastigheter for kanaler i denne filen"
     Channel playback speeds imported: "Importerte avspillingshastigheten for {count} kanal | Importerte avspillingshastighetene for {count} kanaler"
     Channels not found: "{count} kanal ble ikke funnet | {count} kanaler ble ikke funnet"
+    Playlists have been successfully imported: "1/{total} spilleliste ble importert | {count}/{total} spillelister ble importert"
   Sync Settings:
     Signed Out After Restore: 'Synkroniseringen ble logget ut fordi disse appdataene ble gjenopprettet fra en sikkerhetskopi eller en annen enhet. Logg på igjen for å synkronisere denne enheten.'
     Revoke Session Tabs Warning: "Denne enhetens synkroniserte fanesett vil også bli slettet."
@@ -1568,7 +1569,6 @@ Settings:
     Incorrect Password: Feil passord
     Unlock: Lås opp
     Unlocking: Låser opp…
-  Search Settings: Søkeinnstillinger
   No Settings Found: Fant ingen innstillinger
   Interface Customizer:
     Customize Interface: "Tilpass grensesnitt"

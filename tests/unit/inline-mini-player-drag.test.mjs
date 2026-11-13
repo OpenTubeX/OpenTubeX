@@ -3,10 +3,10 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 import { getScrollMiniInlineLayoutHeight } from '../../src/renderer/helpers/scrollMiniPlayer.js'
-import { COLLAPSE_SPRING, createSpring, createVelocityTracker, EXPAND_SPRING } from '../../src/renderer/components/ft-shaka-video-player/opentubex/spring.js'
+import { COLLAPSE_SPRING, createSpring, createVelocityTracker, EXPAND_SPRING } from '../../src/renderer/components/FtShakaVideoPlayer/opentubex/spring.js'
 
-const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/opentubex/useScrollMiniPlayer.js', import.meta.url), 'utf8')
-const morphSource = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/opentubex/scrollMiniPlayerMorph.js', import.meta.url), 'utf8')
+const source = readFileSync(new URL('../../src/renderer/components/FtShakaVideoPlayer/opentubex/useScrollMiniPlayer.js', import.meta.url), 'utf8')
+const morphSource = readFileSync(new URL('../../src/renderer/components/FtShakaVideoPlayer/opentubex/scrollMiniPlayerMorph.js', import.meta.url), 'utf8')
   .replace(/^export /gm, '')
 const dragSource = source.slice(source.indexOf('  let inlineDrag ='), source.indexOf('  function updateScrollMiniVideoAspectRatio'))
 

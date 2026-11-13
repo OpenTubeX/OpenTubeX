@@ -43,7 +43,7 @@ For Android, run `pnpm run capacitor:sync:android`, then `./gradlew assembleDebu
   * Nested scrollable elements use `v-overlay-scrollbars`, not native scrollbars.
   * Layouts must work at UI Scale settings other than 100%.
   * Labeled action buttons such as Refresh or Reset get an icon next to the label.
-* **Player controls.** Read [the player README](src/renderer/components/ft-shaka-video-player/README.md) before adding or changing them.
+* **Player controls.** Read [the player README](src/renderer/components/FtShakaVideoPlayer/README.md) before adding or changing them.
 
 ## Testing
 

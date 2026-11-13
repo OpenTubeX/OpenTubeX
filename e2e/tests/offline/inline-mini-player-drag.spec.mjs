@@ -83,7 +83,7 @@ for (const mode of ['fullscreen', 'fullwindow']) {
         })
         observer.observe(element, { attributeFilter: ['class'] })
       })
-      await watch.evaluate(component => component.proxy.$refs.player.$.setupState.setFullscreenComments(true))
+      await player.locator('.fullscreenCommentsToggle').evaluate(button => button.click())
       const avatarLink = player.locator('.fullscreenCommentCard a[tabindex="-1"]').first()
       const avatar = avatarLink.locator('.commentThumbnail, .commentThumbnailHidden').first()
       await expect(avatar).toBeVisible()

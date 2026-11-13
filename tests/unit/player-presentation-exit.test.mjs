@@ -3,9 +3,9 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 
-const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
-const start = source.indexOf('    async function exitPresentationModes() {')
-const exitSource = source.slice(start, source.indexOf('\n    /**', start))
+const source = readFileSync(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
+const start = source.indexOf('async function exitPresentationModes() {')
+const exitSource = source.slice(start, source.indexOf('\n/**', start))
 
 function createExit({ native = true, active = true, eventBeforePromise = false } = {}) {
   const document = Object.assign(new EventTarget(), { fullscreenElement: native && active ? {} : null })

@@ -1372,6 +1372,7 @@ Settings:
     Invalid channel playback speeds file: "Ez da kanalen erreprodukzio-abiadurarik aurkitu fitxategi honetan"
     Channel playback speeds imported: "{count} kanalaren erreprodukzio-abiadura inportatu da | {count} kanalen erreprodukzio-abiadurak inportatu dira"
     Channels not found: "Ezin izan da {count} kanal aurkitu | Ezin izan dira {count} kanal aurkitu"
+    Playlists have been successfully imported: "1/{total} erreprodukzio-zerrenda behar bezala inportatu da | {count}/{total} erreprodukzio-zerrenda behar bezala inportatu dira"
   Sync Settings:
     Signed Out After Restore: 'Sinkronizazioaren saioa itxi da, aplikazioaren datu hauek babeskopia batetik edo beste gailu batetik leheneratu direlako. Hasi saioa berriro gailu hau sinkronizatzeko.'
     Revoke Session Tabs Warning: "Gailu honen sinkronizatutako fitxa multzoak ere ezabatuko dira."
@@ -1568,7 +1569,6 @@ Settings:
     Incorrect Password: Pasahitza ez da zuzena
     Unlock: Desblokeatu
     Unlocking: Desblokeatzen…
-  Search Settings: Bilaketa-ezarpenak
   No Settings Found: Ez da ezarpenik aurkitu
   Interface Customizer:
     Customize Interface: "Pertsonalizatu interfazea"

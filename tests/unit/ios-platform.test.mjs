@@ -60,8 +60,8 @@ test('unsupported iOS proxy configuration rejects instead of pretending it appli
 })
 
 test('iOS pauses on app hiding when background playback is disabled', async () => {
-  const source = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
-  const handler = source.match(/function handleMobileAdjustmentsVisibility\(\) \{[\s\S]*?\n {4}\}/)?.[0]
+  const source = await readFile(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
+  const handler = source.match(/function handleMobileAdjustmentsVisibility\(\) \{[\s\S]*?\n\}/)?.[0]
   assert.ok(handler)
   for (const [ios, hidden, continuePlaying, expectedPauses] of [
     [true, true, false, 1], [true, true, true, 0],
@@ -82,7 +82,7 @@ test('iOS pauses on app hiding when background playback is disabled', async () =
 })
 
 test('iOS ignores imported silence skipping preferences while other platforms retain them', async () => {
-  const source = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
+  const source = await readFile(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
   const settings = await readFile(new URL('../../src/renderer/components/Settings/Playback/PlayerSettings.vue', import.meta.url), 'utf8')
   for (const ios of [true, false]) {
     for (const enabled of [true, false]) {
@@ -93,7 +93,7 @@ test('iOS ignores imported silence skipping preferences while other platforms re
         store: { getters: { getTabSkipSilence: () => enabled, getShowSkipSilenceButton: enabled } },
       })
       for (const name of ['skipSilence', 'showSkipSilenceButton']) {
-        const declaration = source.match(new RegExp(`const ${name} = computed\\(\\(\\) => \\{[\\s\\S]*?\\n    \\}\\)`))?.[0]
+        const declaration = source.match(new RegExp(`const ${name} = computed\\(\\(\\) => \\{[\\s\\S]*?\\n\\}\\)`))?.[0]
         assert.ok(declaration)
         assert.equal(vm.runInContext(`${declaration}; ${name}.value`, context), !ios && enabled)
       }
@@ -107,10 +107,10 @@ test('iOS ignores imported silence skipping preferences while other platforms re
 })
 
 test('iOS rotation fullscreen stays off during PiP and background transitions', async () => {
-  const source = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
-  const declaration = source.match(/const fullscreenOnRotationEnabled = computed\(\(\) => \{[\s\S]*?\n {4}\}\)/)?.[0] ?? ''
-  const rotationWatch = source.match(/watch\((?:enterFullscreenOnDisplayRotate|fullscreenOnRotationEnabled), \(newValue\) => \{[\s\S]*?\n {4}\}(?:, \{ flush: 'sync' \})?\)/)?.[0]
-  const initialConfig = source.match(/enableFullscreenOnRotation: ([^\n]+),\n {10}fullScreenElement/)?.[1]
+  const source = await readFile(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
+  const declaration = source.match(/const fullscreenOnRotationEnabled = computed\(\(\) => \{[\s\S]*?\n\}\)/)?.[0] ?? ''
+  const rotationWatch = source.match(/watch\((?:enterFullscreenOnDisplayRotate|fullscreenOnRotationEnabled), \(newValue\) => \{[\s\S]*?\n\}(?:, \{ flush: 'sync' \})?\)/)?.[0]
+  const initialConfig = source.match(/enableFullscreenOnRotation: ([^\n]+),\n {6}fullScreenElement/)?.[1]
   assert.ok(rotationWatch)
   assert.ok(initialConfig)
   for (const platform of ['ios', 'android', 'desktop']) {

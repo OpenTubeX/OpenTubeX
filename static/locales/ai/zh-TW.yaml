@@ -1315,7 +1315,6 @@ Settings:
     Show Video Title: 顯示影片標題
     Show Bottom Right Actions Dock: 顯示右下角操作列
     Paused Interface Hide Delay: 暫停介面的隱藏延遲
-    Hide Channel Shows: 隱藏頻道“節目”標籤
     Blur Blocked Items: 模糊顯示已封鎖的項目，而非隱藏
   Data Settings:
     Settings could not be imported: "無法匯入設定"
@@ -1373,6 +1372,7 @@ Settings:
     Invalid channel playback speeds file: "此檔案中找不到頻道播放速度"
     Channel playback speeds imported: "已匯入 {count} 個頻道的播放速度"
     Channels not found: "找不到 {count} 個頻道"
+    Playlists have been successfully imported: "已成功匯入 {count}/{total} 個播放清單"
   Sync Settings:
     Signed Out After Restore: '由於此應用程式資料是從備份或其他裝置還原的，同步已登出。請重新登入以同步此裝置。'
     Revoke Session Tabs Warning: "此裝置已同步的分頁集合也將被刪除。"
@@ -1569,7 +1569,6 @@ Settings:
     Incorrect Password: 密碼不正確
     Unlock: 解鎖
     Unlocking: 正在解鎖…
-  Search Settings: 搜尋設定
   No Settings Found: 找不到設定
   Interface Customizer:
     Customize Interface: "自訂介面"
@@ -1685,9 +1684,6 @@ Channel:
     Original post unavailable: "原始貼文無法使用"
     Members-only video hidden by OpenTubeX: "OpenTubeX 已隱藏會員專屬影片"
     Video hidden by OpenTubeX because of its title: "OpenTubeX 已隱藏此影片，因為其標題包含隱藏文字"
-  Shows:
-    Shows: 節目
-    This channel does not currently have any shows: 該頻道目前還沒有任何節目
 Video:
   Play in Background: "背景播放"
   Info panel source: '來源：{source}'

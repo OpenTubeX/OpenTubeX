@@ -1395,6 +1395,7 @@ Settings:
     Invalid channel playback speeds file: "Não foram encontradas velocidades de reprodução de canais neste ficheiro"
     Channel playback speeds imported: "Importada a velocidade de reprodução de {count} canal | Importadas as velocidades de reprodução de {count} de canais | Importadas as velocidades de reprodução de {count} canais"
     Channels not found: "{count} canal não foi encontrado | {count} de canais não foram encontrados | {count} canais não foram encontrados"
+    Playlists have been successfully imported: "1/{total} lista de reprodução importada com sucesso | {count}/{total} listas de reprodução importadas com sucesso | {count}/{total} listas de reprodução importadas com sucesso"
   Sync Settings:
     Signed Out After Restore: 'A sincronização terminou a sessão porque estes dados da aplicação foram restaurados de uma cópia de segurança ou de outro dispositivo. Inicie sessão novamente para sincronizar este dispositivo.'
     Revoke Session Tabs Warning: "Os conjuntos de separadores sincronizados deste dispositivo também serão eliminados."

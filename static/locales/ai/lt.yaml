@@ -1626,6 +1626,7 @@ Settings:
     Invalid channel playback speeds file: "Šiame faile nerasta kanalų atkūrimo greičių"
     Channel playback speeds imported: "Importuotas {count} kanalo atkūrimo greitis | Importuoti {count} kanalų atkūrimo greičiai | Importuoti {count} kanalų atkūrimo greičiai"
     Channels not found: "{count} kanalas nerastas | {count} kanalai nerasti | {count} kanalų nerasta"
+    Playlists have been successfully imported: "Sėkmingai importuotas {count}/{total} grojaraštis | Sėkmingai importuoti {count}/{total} grojaraščiai | Sėkmingai importuota {count}/{total} grojaraščių"
   Sync Settings:
     Signed Out After Restore: 'Sinchronizavimas atjungtas, nes šios programėlės duomenys buvo atkurti iš atsarginės kopijos arba kito įrenginio. Prisijunkite iš naujo, kad sinchronizuotumėte šį įrenginį.'
     Revoke Session Tabs Warning: "Taip pat bus ištrinti šio įrenginio sinchronizuoti skirtukų rinkiniai."

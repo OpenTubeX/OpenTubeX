@@ -1373,6 +1373,7 @@ Settings:
     Invalid channel playback speeds file: "V tomto súbore sa nenašli žiadne rýchlosti prehrávania kanálov"
     Channel playback speeds imported: "Importovala sa rýchlosť prehrávania {count} kanála | Importovali sa rýchlosti prehrávania {count} kanálov | Importovali sa rýchlosti prehrávania {count} kanálov"
     Channels not found: "{count} kanál sa nepodarilo nájsť | {count} kanály sa nepodarilo nájsť | {count} kanálov sa nepodarilo nájsť"
+    Playlists have been successfully imported: "Úspešne importovaný 1/{total} playlist | Úspešne importované {count}/{total} playlisty | Úspešne importovaných {count}/{total} playlistov"
   Sync Settings:
     Signed Out After Restore: 'Synchronizácia bola odhlásená, pretože tieto údaje aplikácie boli obnovené zo zálohy alebo z iného zariadenia. Prihláste sa znova, aby ste toto zariadenie synchronizovali.'
     Revoke Session Tabs Warning: "Synchronizované sady kariet tohto zariadenia budú tiež odstránené."

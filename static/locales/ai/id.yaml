@@ -1376,6 +1376,7 @@ Settings:
     Invalid channel playback speeds file: "Tidak ada kecepatan pemutaran kanal yang ditemukan dalam berkas ini"
     Channel playback speeds imported: "Kecepatan pemutaran {count} kanal telah diimpor"
     Channels not found: "{count} kanal tidak dapat ditemukan"
+    Playlists have been successfully imported: "{count}/{total} daftar putar berhasil diimpor"
   Sync Settings:
     Signed Out After Restore: 'Sinkronisasi dikeluarkan karena data aplikasi ini dipulihkan dari cadangan atau perangkat lain. Masuk lagi untuk menyinkronkan perangkat ini.'
     Revoke Session Tabs Warning: "Kumpulan tab tersinkronisasi perangkat ini juga akan dihapus."

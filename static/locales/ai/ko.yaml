@@ -1613,6 +1613,7 @@ Settings:
     Invalid channel playback speeds file: "이 파일에서 채널별 재생 속도를 찾을 수 없습니다"
     Channel playback speeds imported: "채널 {count}개의 재생 속도를 가져왔습니다"
     Channels not found: "채널 {count}개를 찾을 수 없습니다"
+    Playlists have been successfully imported: "재생 목록 {count}/{total}개를 가져왔습니다"
   Sync Settings:
     Signed Out After Restore: '이 앱 데이터가 백업이나 다른 기기에서 복원되어 동기화에서 로그아웃되었습니다. 이 기기를 동기화하려면 다시 로그인하세요.'
     Revoke Session Tabs Warning: "이 기기의 동기화된 탭 모음도 삭제됩니다."

@@ -490,7 +490,6 @@ Settings:
     Import Playlists: Importer des playlists
     Export Playlists: Exporter des playlists
     Playlist insufficient data: Données insuffisantes pour la playlist « {playlist} », saut de l'élément
-    All playlists has been successfully imported: Toutes les playlists ont été importées avec succès
     All playlists has been successfully exported: Toutes les playlists ont été exportées avec succès
     History File: Fichier de l'historique
     Subscription File: Fichier des abonnements
@@ -564,6 +563,7 @@ Settings:
     Add: Ajouter
     Remove: Supprimer
     Hide Channel Shows: Masquer l'onglet « Émissions » de la chaîne
+    More Items Count: +{nombre} de plus …
   The app needs to restart for changes to take effect. Restart and apply change?: L'application doit être redémarrée pour que les changements prennent effet. Redémarrer et appliquer les changements ?
   Proxy Settings:
     Error getting network information. Is your proxy configured properly?: Erreur lors de l'obtention des informations sur le réseau. Votre proxy est-il correctement configuré ?
@@ -636,6 +636,9 @@ Settings:
   SABR:
     Label: Activer SABR comme backend DASH
     Tooltip: SABR deviendra le seul moteur DASH dans les prochaines versions et ne pourra pas être désactivé. Cette option est disponible au cas où une implémentation préliminaire présenterait des problèmes irrémédiables.
+  Search Settings: Paramètres de recherche
+  Settings found: 1 paramètre trouvé | {count} paramètres trouvés
+  No Matching Settings: Aucun paramètre ne correspond à votre recherche.
 About:
   #On About page
   About: 'À propos'
@@ -677,7 +680,7 @@ Channel:
       Oldest: 'Plus anciennes'
       Most Popular: 'Les plus populaires'
     This channel does not currently have any videos: 'Cette chaîne n''a pas de vidéos actuellement'
-    This channel has videos but none could be displayed, try fetching more: Cette chaîne a des vidéos mais aucune n'a pu être affichée, tenter d'en récupérer davantage
+    This channel has videos but none could be displayed, try fetching more: Cette chaîne contient des vidéos mais aucune n'a pu être affichée, tenter d'en récupérer davantage
   Playlists:
     Playlists: 'Playlists'
     This channel does not currently have any playlists: 'Cette chaîne n’a pas encore de playlist'
@@ -821,7 +824,7 @@ Video:
     Hide Stats: Masquer les stats
     Stats:
       Stats: Stats
-      Video ID: 'Identifiant de la vidéo : {videoId}'
+      Video ID: 'Identifiant de la vidéo : {videoId}'
       Media Formats: 'Formats du média : {formats}'
       Resolution: 'Résolution : {width}×{height}{''@''}{frameRate}'
       Player Dimensions: 'Dimensions du lecteur : {width}×{height}'

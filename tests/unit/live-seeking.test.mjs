@@ -3,9 +3,9 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 
-const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
-const start = source.indexOf('    const seekingIsPossible = computed(() => {')
-const end = source.indexOf('\n    })', start) + '\n    })'.length
+const source = readFileSync(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
+const start = source.indexOf('\nconst seekingIsPossible = computed(() => {') + 1
+const end = source.indexOf('\n})', start) + '\n})'.length
 
 function canSeekLive(props) {
   return vm.runInNewContext(`${source.slice(start, end)}\nseekingIsPossible.value`, {
@@ -90,7 +90,7 @@ function absoluteSeekFixture(props) {
     },
   }
   const functions = ['pause', 'setCurrentTime', 'rememberSeekPosition', 'registerMediaSessionHandlers', 'handleSeekBarInput', 'handleSeekBarMouseChange', 'restoreSeekAutoplay', 'handleCanPlay'].map(name => {
-    const match = source.match(new RegExp(`    function ${name}\\([^]*?\\n    }`))
+    const match = source.match(new RegExp(`^function ${name}\\([^]*?\\n}`, 'm'))
     assert.ok(match, `missing ${name}`)
     return match[0]
   }).join('\n')
@@ -197,8 +197,8 @@ for (const manifestType of [null, 'DASH']) {
     setCurrentTime(5)
     assert.equal(state.pendingMetadataSeek, 5)
     state.video.value.currentTime = 6
-    const loadedStart = source.indexOf('    async function handleLoaded() {')
-    const loadedEnd = source.indexOf('      // Background tabs', loadedStart)
+    const loadedStart = source.indexOf('\nasync function handleLoaded() {') + 1
+    const loadedEnd = source.indexOf('  // Background tabs', loadedStart)
     let manifestReads = 0
     Object.assign(state, {
       togglePlaybackRate: null,
@@ -211,7 +211,7 @@ for (const manifestType of [null, 'DASH']) {
         getManifest: () => { manifestReads++; return manifestType === null ? null : {} }
       }
     })
-    vm.runInNewContext(`${source.slice(loadedStart, loadedEnd)}\n    }\nhandleLoaded()`, state)
+    vm.runInNewContext(`${source.slice(loadedStart, loadedEnd)}\n}\nhandleLoaded()`, state)
     assert.equal(manifestReads, 0, 'playback detection must not use the deprecated manifest getter')
     assert.equal(state.pendingMetadataSeek, manifestType === null ? null : 5)
     if (manifestType !== null) return
@@ -357,7 +357,7 @@ for (const manifestType of [null, 'DASH']) {
         player.dispatchEvent(new Event('canupdatestarttime'))
         mediaElement.dispatchEvent(new Event('loadedmetadata'))
       }
-      const match = source.match(/ {4}async function loadPlaybackSource\([^]*?\n {4}}/)
+      const match = source.match(/^async function loadPlaybackSource\([^]*?\n}/m)
       assert.ok(match)
       const loadPlaybackSource = vm.runInNewContext(`${match[0]}\nloadPlaybackSource`, {
         player,

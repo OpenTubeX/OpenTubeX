@@ -1380,6 +1380,7 @@ Settings:
     Invalid channel playback speeds file: "U ovoj datoteci nisu pronađene brzine reprodukcije kanala"
     Channel playback speeds imported: "Uvezena je brzina reprodukcije za {count} kanal | Uvezene su brzine reprodukcije za {count} kanala | Uvezene su brzine reprodukcije za {count} kanala"
     Channels not found: "{count} kanal nije pronađen | {count} kanala nisu pronađena | {count} kanala nije pronađeno"
+    Playlists have been successfully imported: "Uspješno uvezena {count}/{total} zbirka | Uspješno uvezene {count}/{total} zbirke | Uspješno uvezeno {count}/{total} zbirki"
   Sync Settings:
     Signed Out After Restore: 'Sinkronizacija je odjavljena jer su ovi podaci aplikacije vraćeni iz sigurnosne kopije ili s drugog uređaja. Ponovno se prijavite kako biste sinkronizirali ovaj uređaj.'
     Revoke Session Tabs Warning: "Sinkronizirani skupovi kartica ovog uređaja također će biti izbrisani."

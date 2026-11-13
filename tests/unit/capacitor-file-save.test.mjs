@@ -91,7 +91,7 @@ for (const [name, mimeType, content] of [
   })
 }
 
-const playerSource = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
+const playerSource = await readFile(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
 const screenshotSource = playerSource.split('// #region screenshots')[1].split('// #endregion screenshots')[0]
 
 function loadScreenshot({ directory = 'content://documents/tree/screenshots', chosenDirectory, mode = 'default_folder', image = new Blob(['frame'], { type: 'image/png' }) } = {}) {

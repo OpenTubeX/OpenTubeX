@@ -6,7 +6,7 @@ import {
   createRequestPresentationTracker,
   releaseAnalysisSegmentsBefore,
   useSilenceSkipping
-} from '../../src/renderer/components/ft-shaka-video-player/opentubex/useSilenceSkipping.js'
+} from '../../src/renderer/components/FtShakaVideoPlayer/opentubex/useSilenceSkipping.js'
 
 test('rejects late responses from an earlier presentation', () => {
   const tracker = createRequestPresentationTracker()

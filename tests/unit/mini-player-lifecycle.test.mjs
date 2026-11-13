@@ -10,7 +10,7 @@ import { scrollMiniPlayerRectToStyle } from '../../src/renderer/helpers/scrollMi
 // dependencies, while retaining Vue watchers, pointer events, and the real volume
 // timeout behavior.
 const source = ['scrollMiniPlayerMorph.js', 'useScrollMiniPlayerControls.js', 'useScrollMiniPlayer.js']
-  .map(file => readFileSync(new URL(`../../src/renderer/components/ft-shaka-video-player/opentubex/${file}`, import.meta.url), 'utf8')
+  .map(file => readFileSync(new URL(`../../src/renderer/components/FtShakaVideoPlayer/opentubex/${file}`, import.meta.url), 'utf8')
     .replace(/^import\s[\s\S]*?from\s+['"][^'"]+['"];?\s*$/gm, '')
     .replace(/^export /gm, ''))
   .join('\n')
@@ -139,8 +139,8 @@ test('the ended event keeps an eligible detached mini player and reveals replay'
   video.value.ended = true
   video.value.paused = true
   player.scrollMiniPlayPauseVisible.value = false
-  const playerSource = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
-  const handler = playerSource.slice(playerSource.indexOf('    function handleEnded() {'), playerSource.indexOf('    function handleSeeking() {'))
+  const playerSource = readFileSync(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
+  const handler = playerSource.slice(playerSource.indexOf('function handleEnded() {'), playerSource.indexOf('function handleSeeking() {'))
   const noop = () => {}
   vm.runInNewContext(`${handler}; handleEnded()`, {
     ...player,

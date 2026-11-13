@@ -1576,6 +1576,7 @@ Settings:
     Invalid channel playback speeds file: Geen afspeelspoed per kanaal is in hierdie lêer gevind nie
     Channel playback speeds imported: Die afspeelspoed van {count} kanaal is ingevoer | Die afspeelspoed van {count} kanale is ingevoer
     Channels not found: '{count} kanaal kon nie gevind word nie | {count} kanale kon nie gevind word nie'
+    Playlists have been successfully imported: "1/{total} snitlys is suksesvol ingevoer | {count}/{total} snitlyste is suksesvol ingevoer"
   Sync Settings:
     Signed Out After Restore: 'Sinkronisering is afgemeld omdat hierdie toepassingsdata vanaf ''n rugsteun of ''n ander toestel herstel is. Meld weer aan om hierdie toestel te sinkroniseer.'
     Revoke Session Tabs Warning: Hierdie toestel se gesinkroniseerde oortjiestelle sal ook geskrap word.

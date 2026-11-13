@@ -4,15 +4,15 @@ import test from 'node:test'
 import vm from 'node:vm'
 import { nextTick, ref } from 'vue'
 
-const playerSource = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
+const playerSource = readFileSync(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
 const handleLoadedSource = playerSource.slice(
-  playerSource.indexOf('    async function handleLoaded() {'),
-  playerSource.indexOf('    async function unloadForFormatSwitch() {')
+  playerSource.indexOf('async function handleLoaded() {'),
+  playerSource.indexOf('async function unloadForFormatSwitch() {')
 )
 
 const wrapSelectionSource = playerSource.slice(
-  playerSource.indexOf('    function wrapTextTrackSelection() {'),
-  playerSource.indexOf('    const playerWidth = computed(')
+  playerSource.indexOf('function wrapTextTrackSelection() {'),
+  playerSource.indexOf('const playerWidth = computed(')
 )
 
 function createLoad () {

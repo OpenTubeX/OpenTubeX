@@ -318,14 +318,14 @@ test('Shorts navigation resumes a previous position and saves the current one', 
   assert.equal(destination.query.oneTimeTimestamp, '4.25')
 })
 
-const playerSource = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
+const playerSource = await readFile(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
 
 for (const wasPlaying of [false, true]) {
   test(`an inactive Short defers SABR reload and preserves ${wasPlaying ? 'playing' : 'paused'} intent`, () => {
-    const sabrStart = playerSource.indexOf('    function ensureSabrStream() {')
-    const sabrSource = playerSource.slice(sabrStart, playerSource.indexOf('    // #endregion SABR', sabrStart))
-    const lifecycleStart = playerSource.indexOf('    let resumeShortsAfterActivation = false')
-    const lifecycle = playerSource.slice(lifecycleStart, playerSource.indexOf('    function isPaused()', lifecycleStart))
+    const sabrStart = playerSource.indexOf('function ensureSabrStream() {')
+    const sabrSource = playerSource.slice(sabrStart, playerSource.indexOf('// #endregion SABR', sabrStart))
+    const lifecycleStart = playerSource.indexOf('let resumeShortsAfterActivation = false')
+    const lifecycle = playerSource.slice(lifecycleStart, playerSource.indexOf('function isPaused()', lifecycleStart))
     let requestReload
     let activate
     let aborted = false
@@ -378,8 +378,8 @@ for (const wasPlaying of [false, true]) {
 }
 
 test('an inactive Short ignores fullscreen events and synchronizes when activated', () => {
-  const start = playerSource.indexOf('    function fullscreenChangeHandler() {')
-  const source = playerSource.slice(start, playerSource.indexOf('    async function exitPresentationModes()', start))
+  const start = playerSource.indexOf('function fullscreenChangeHandler() {')
+  const source = playerSource.slice(start, playerSource.indexOf('async function exitPresentationModes()', start))
   const closed = []
   let fullscreen = true
   let activate
@@ -426,8 +426,8 @@ test('an inactive Short ignores fullscreen events and synchronizes when activate
   handler()
   assert.deepEqual(closed, [], 'a retained Short must not close the current fullwindow player panels')
   context.isActiveTab.value = true
-  const lifecycleStart = playerSource.indexOf('    let resumeShortsAfterActivation = false')
-  const lifecycle = playerSource.slice(lifecycleStart, playerSource.indexOf('    function isPaused()', lifecycleStart))
+  const lifecycleStart = playerSource.indexOf('let resumeShortsAfterActivation = false')
+  const lifecycle = playerSource.slice(lifecycleStart, playerSource.indexOf('function isPaused()', lifecycleStart))
   vm.runInNewContext(lifecycle, { ...context, fullscreenChangeHandler: handler })
   activate()
   assert.equal(context.isFullscreen.value, false)
@@ -435,8 +435,8 @@ test('an inactive Short ignores fullscreen events and synchronizes when activate
 })
 
 test('a Short left during a connection wait replays its error when presented again', () => {
-  const start = playerSource.indexOf('    function handleError(')
-  const source = playerSource.slice(start, playerSource.indexOf('    // #region seek bar markers', start))
+  const start = playerSource.indexOf('function handleError(')
+  const source = playerSource.slice(start, playerSource.indexOf('// #region seek bar markers', start))
   const emitted = []
   let activate
   const context = vm.createContext({
@@ -472,8 +472,8 @@ test('a Short left during a connection wait replays its error when presented aga
   })
   context.props.shortsPlayer = true
   vm.runInContext(source, context)
-  const lifecycleStart = playerSource.indexOf('    let resumeShortsAfterActivation = false')
-  vm.runInContext(playerSource.slice(lifecycleStart, playerSource.indexOf('    function isPaused()', lifecycleStart)), context)
+  const lifecycleStart = playerSource.indexOf('let resumeShortsAfterActivation = false')
+  vm.runInContext(playerSource.slice(lifecycleStart, playerSource.indexOf('function isPaused()', lifecycleStart)), context)
   const error = { code: 1002, severity: 2, category: 1, data: ['sabr://video', new TypeError('network error'), 1] }
   context.handleError(error, 'shaka error handler')
   assert.equal(emitted.length, 1)
@@ -489,8 +489,8 @@ test('a Short left during a connection wait replays its error when presented aga
 })
 
 test('an inactive Short defers player errors without changing current playback', () => {
-  const start = playerSource.indexOf('    function handleError(')
-  const source = playerSource.slice(start, playerSource.indexOf('    // #region seek bar markers', start))
+  const start = playerSource.indexOf('function handleError(')
+  const source = playerSource.slice(start, playerSource.indexOf('// #region seek bar markers', start))
   const emitted = []
   const playbackStates = []
   const context = {
@@ -518,8 +518,8 @@ test('an inactive Short defers player errors without changing current playback',
   assert.equal(context.suspendedShortsError.error, error)
 
   let activate
-  const lifecycleStart = playerSource.indexOf('    let resumeShortsAfterActivation = false')
-  const lifecycle = playerSource.slice(lifecycleStart, playerSource.indexOf('    function isPaused()', lifecycleStart))
+  const lifecycleStart = playerSource.indexOf('let resumeShortsAfterActivation = false')
+  const lifecycle = playerSource.slice(lifecycleStart, playerSource.indexOf('function isPaused()', lifecycleStart))
   vm.runInNewContext(lifecycle, {
     ...context,
     musicMode: ref(false),
@@ -541,8 +541,8 @@ test('an inactive Short defers player errors without changing current playback',
 })
 
 test('evicting an inactive Short does not close the current player panels', () => {
-  const start = playerSource.indexOf('    onBeforeUnmount(() => {', playerSource.indexOf('    // #region tear down'))
-  const source = playerSource.slice(start, playerSource.indexOf("      document.removeEventListener('keydown'", start))
+  const start = playerSource.indexOf('onBeforeUnmount(() => {', playerSource.indexOf('// #region tear down'))
+  const source = playerSource.slice(start, playerSource.indexOf("  document.removeEventListener('keydown'", start))
   const closed = []
   const context = {
     onBeforeUnmount: callback => callback(),
@@ -570,13 +570,13 @@ test('evicting an inactive Short does not close the current player panels', () =
   for (const panel of ['Metadata', 'Transcript', 'SponsorBlock', 'LiveChat', 'Comments', 'Playlist']) {
     context[`closeFullscreen${panel}`] = () => closed.push(panel)
   }
-  vm.runInNewContext(`${source}    })`, context)
+  vm.runInNewContext(`${source}})`, context)
   assert.deepEqual(closed, [])
 })
 
 const handleLoadedSource = playerSource.slice(
-  playerSource.indexOf('    async function handleLoaded() {'),
-  playerSource.indexOf('    async function unloadForFormatSwitch() {')
+  playerSource.indexOf('async function handleLoaded() {'),
+  playerSource.indexOf('async function unloadForFormatSwitch() {')
 )
 for (const paused of [true]) {
   test(`Shorts controls reflect media paused=${paused} after loading without a playback event`, async () => {

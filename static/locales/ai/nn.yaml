@@ -1532,6 +1532,7 @@ Settings:
     Invalid channel playback speeds file: "Fann ingen avspelingsfart for kanalar i denne fila"
     Channel playback speeds imported: "Importerte avspelingsfarten til {count} kanal | Importerte avspelingsfarten til {count} kanalar"
     Channels not found: "{count} kanal vart ikkje funnen | {count} kanalar vart ikkje funne"
+    Playlists have been successfully imported: "1/{total} speleliste vart importert | {count}/{total} spelelister vart importerte"
   Sync Settings:
     Signed Out After Restore: 'Synkroniseringa vart logga ut fordi desse appdataa vart gjenoppretta frå ein tryggleikskopi eller ei anna eining. Logg på igjen for å synkronisere denne eininga.'
     Revoke Session Tabs Warning: "Dei synkroniserte fanesetta til denne eininga vert òg sletta."

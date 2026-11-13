@@ -88,7 +88,7 @@ Do not add tests that assert exact cosmetic styling (colors, spacing, alignment,
 
 - After any visual change or implementation, show the user a screenshot (static appearance) or short recording (interaction, animation, transitions) of the finished result in the final response. Link a copy outside `e2e/results`, which the next test run clears.
 - UI Scale changes Electron's zoom factor, so fractional CSS-pixel geometry is legitimate. Changes involving scrolling, measurements, positioning, reflow, or animation boundaries must work at non-100% scales; do not treat subpixel differences from integer layout properties as stale or invalid state.
-- Before adding or changing Shaka player controls, read `src/renderer/components/ft-shaka-video-player/README.md`.
+- Before adding or changing Shaka player controls, read `src/renderer/components/FtShakaVideoPlayer/README.md`.
 - Labeled action buttons, such as Enable, Load more, Refresh, and Reset, need a relevant icon from the registry beside their visible label; hide decorative icons from assistive technology.
 
 ### Icons
@@ -108,7 +108,7 @@ Do not add tests that assert exact cosmetic styling (colors, spacing, alignment,
 
 - The npm `allow` list in `.github/dependabot.yml` must contain exactly the direct dependencies in `package.json` that are absent from the latest `upstream/development:package.json`; upstream manages shared ones. Fetch `upstream/development` and resync the list whenever dependencies or the Dependabot configuration change.
 - Do not add migrations, compatibility aliases, or legacy handling for behavior or data formats introduced only by unshipped changes in the current PR. Change them directly; if that breaks local development data, tell the user instead of shipping a migration path.
-- When `shaka-player` changes version, including through an upstream merge, follow the upgrade checklist in `src/renderer/components/ft-shaka-video-player/README.md`.
+- When `shaka-player` changes version, including through an upstream merge, follow the upgrade checklist in `src/renderer/components/FtShakaVideoPlayer/README.md`.
 
 ## Translations
 

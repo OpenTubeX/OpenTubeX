@@ -8,7 +8,7 @@ import { getGoogleVideoProbeUrl } from '../../src/renderer/helpers/player/google
 const watchSource = readFileSync(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
 const start = watchSource.indexOf('    handlePlayerError: async function (error) {')
 const end = watchSource.indexOf('\n    /**', start)
-const playerSource = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
+const playerSource = readFileSync(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
 
 test('offline HTTP failure preserves the stream for Failed to fetch', async () => {
   const handle = vm.runInNewContext(`({${watchSource.slice(start, end)}}).handlePlayerError`, {
@@ -192,8 +192,8 @@ test('playback errors that need fresh streaming data do not wait for the network
 })
 
 test('offline errors do not suppress later failures from the retained player', () => {
-  const start = playerSource.indexOf('    function handleError(error, context, details) {')
-  const source = playerSource.slice(start, playerSource.indexOf('    // #region seek bar markers', start))
+  const start = playerSource.indexOf('function handleError(error, context, details) {')
+  const source = playerSource.slice(start, playerSource.indexOf('// #region seek bar markers', start))
   const Code = { HTTP_ERROR: 1002, BAD_HTTP_STATUS: 1001 }
   const Category = { NETWORK: 1, TEXT: 2 }
   const emitted = []

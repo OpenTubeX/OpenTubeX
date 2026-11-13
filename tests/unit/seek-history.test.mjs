@@ -74,7 +74,7 @@ test('shares a video\'s history between the players showing it', () => {
   assert.equal(second.value, EMPTY_SEEK_HISTORY)
 })
 
-const playerSource = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
+const playerSource = readFileSync(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
 
 function recorder() {
   const state = {
@@ -94,7 +94,7 @@ function recorder() {
     setSeekHistory(_key, history) { state.seekHistory.value = history },
   }
   const functions = ['updateSeekHistory', 'noteSeekHistoryJump'].map(name => {
-    const match = playerSource.match(new RegExp(`    function ${name}\\([^]*?\\n    }`))
+    const match = playerSource.match(new RegExp(`^function ${name}\\([^]*?\\n}`, 'm'))
     assert.ok(match, `missing ${name}`)
     return match[0]
   }).join('\n')
@@ -144,7 +144,7 @@ test('holding the mobile mini bar still continues the same jump', () => {
 })
 
 test('SponsorBlock draft jumps are the viewer\'s own seeks', async () => {
-  const submissionSource = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/opentubex/useSponsorBlockSubmission.js', import.meta.url), 'utf8')
+  const submissionSource = readFileSync(new URL('../../src/renderer/components/FtShakaVideoPlayer/opentubex/useSponsorBlockSubmission.js', import.meta.url), 'utf8')
   const match = submissionSource.match(/ {2}async function previewSponsorBlockDraft\([^]*?\n {2}}/)
   assert.ok(match, 'missing previewSponsorBlockDraft')
 

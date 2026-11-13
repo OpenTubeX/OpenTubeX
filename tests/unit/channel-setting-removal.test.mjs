@@ -28,7 +28,7 @@ test('removes each channel override, including false and zero, while preserving 
   }
 })
 
-const barSource = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/player-components/QuickPlaybackRateBar.js', import.meta.url), 'utf8')
+const barSource = readFileSync(new URL('../../src/renderer/components/FtShakaVideoPlayer/player-components/QuickPlaybackRateBar.js', import.meta.url), 'utf8')
 const { QuickPlaybackRateBar, setQuickPlaybackRateBarContext } = vm.runInNewContext(
   barSource.slice(barSource.indexOf('const quickPlaybackRateBarContexts')).replaceAll('export ', '') +
     '\n({ QuickPlaybackRateBar, setQuickPlaybackRateBarContext })',

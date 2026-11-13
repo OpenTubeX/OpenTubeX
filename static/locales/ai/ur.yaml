@@ -1444,6 +1444,7 @@ Settings:
     Invalid channel playback speeds file: اس فائل میں کوئی چینل پلے بیک اسپیڈ نہیں ملی
     Channel playback speeds imported: '{count} چینل کی پلے بیک اسپیڈ امپورٹ کی گئی | {count} چینلز کی پلے بیک اسپیڈز امپورٹ کی گئیں'
     Channels not found: '{count} چینل نہیں مل سکا | {count} چینلز نہیں مل سکے'
+    Playlists have been successfully imported: "1/{total} پلے لسٹ کامیابی سے درآمد ہو گئی | {count}/{total} پلے لسٹس کامیابی سے درآمد ہو گئیں"
   Sync Settings:
     Signed Out After Restore: 'مطابقت سے سائن آؤٹ کر دیا گیا کیونکہ اس ایپ کا ڈیٹا بیک اپ یا کسی دوسرے آلے سے بحال کیا گیا تھا۔ اس آلے کو مطابقت پذیر کرنے کے لیے دوبارہ سائن ان کریں۔'
     Revoke Session Tabs Warning: اس ڈیوائس کے سنک شدہ ٹیب سیٹس بھی حذف ہو جائیں گے۔

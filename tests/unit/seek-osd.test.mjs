@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 
-const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
+const source = readFileSync(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
 
 function fixture(t, { time = 50, live = false } = {}) {
   t.mock.timers.enable({ apis: ['setTimeout'] })
@@ -30,7 +30,7 @@ function fixture(t, { time = 50, live = false } = {}) {
   }
   const names = ['seekBySeconds', 'rememberSeekPosition', 'showValueChange']
   const functions = names.map(name => {
-    const match = source.match(new RegExp(`    function ${name}\\([^]*?\\n    }`))
+    const match = source.match(new RegExp(`^function ${name}\\([^]*?\\n}`, 'm'))
     assert.ok(match, `missing ${name}`)
     return match[0]
   }).join('\n')

@@ -1000,7 +1000,6 @@ test('keeps Android player notices and end cards clear of visible controls', asy
   await player.locator('video').evaluate(element => element.pause())
   await watchComponent.evaluate(async (component) => {
     await component.proxy.$store.dispatch('updateShowPlayerControlsWhenPaused', false)
-    component.proxy.$refs.player.$.setupState.pausedInterfaceRevealed = false
     await component.proxy.$nextTick()
   })
   await expect(player).toHaveClass(/playerPaused/)
@@ -1042,19 +1041,13 @@ test('keeps Android player notices and end cards clear of visible controls', asy
   await expect(actionDock).toHaveCSS('opacity', '0')
   await expect.poll(noticeBottom).toBeLessThan(raisedNoticeBottom - 40)
 
-  await watchComponent.evaluate(async (component) => {
-    component.proxy.$refs.player.$.setupState.fullWindowEnabled = false
-    await component.proxy.$nextTick()
-  })
+  await player.locator('.full-window-button').first().evaluate(button => button.click())
   await expect(player).not.toHaveClass(/fullWindow/)
   await expect(notice).toHaveCSS('bottom', /.+/)
   await expect.poll(noticeBottom).toBeLessThan(raisedNoticeBottom - 40)
 
   await page.locator('.app').evaluate(element => element.classList.remove('capacitorTabs'))
-  await watchComponent.evaluate(async (component) => {
-    component.proxy.$refs.player.$.setupState.fullWindowEnabled = true
-    await component.proxy.$nextTick()
-  })
+  await player.locator('.full-window-button').first().evaluate(button => button.click())
   await expect(player).toHaveClass(/fullWindow/)
   await controls.evaluate(element => element.setAttribute('shown', 'true'))
   await expect(controls).toHaveCSS('z-index', '1')
@@ -1137,7 +1130,7 @@ test('isolates the owning video surface while Android Picture-in-Picture is acti
 test('a save channel setting dropdown clears the fullscreen dock content', async ({ page }) => {
   await goTo(page, 'history')
   const playerStyles = await readScopedStyles(
-    path.join(repoRoot, 'src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.vue')
+    path.join(repoRoot, 'src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue')
   )
   // The dropdown's own placement lives in FtIconButton's stylesheet, and it is
   // what puts the fly-out over the dock edge in the first place.

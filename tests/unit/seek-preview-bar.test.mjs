@@ -4,7 +4,7 @@ import { test } from 'node:test'
 import vm from 'node:vm'
 import { updateSponsorBlockSeekBarState } from '../../src/renderer/helpers/player/sponsorBlockSeekBar.js'
 
-const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/player-components/SeekPreviewBar.js', import.meta.url), 'utf8')
+const source = readFileSync(new URL('../../src/renderer/components/FtShakaVideoPlayer/player-components/SeekPreviewBar.js', import.meta.url), 'utf8')
 
 function fixture() {
   let factory

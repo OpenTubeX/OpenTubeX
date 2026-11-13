@@ -1317,7 +1317,6 @@ Settings:
     Show Video Title: Sýna heiti myndbands
     Show Bottom Right Actions Dock: Sýna aðgerðastiku neðst til hægri
     Paused Interface Hide Delay: Töf áður en viðmót er falið í hléi
-    Hide Channel Shows: Fela flipann með rásinni "Þættir"
     Blur Blocked Items: Þoka útilokuð atriði í stað þess að fela þau
   Data Settings:
     Settings could not be imported: "Ekki tókst að flytja inn stillingarnar"
@@ -1376,6 +1375,7 @@ Settings:
     Invalid channel playback speeds file: "Enginn spilunarhraði rása fannst í þessari skrá"
     Channel playback speeds imported: "Flutti inn spilunarhraða {count} rásar | Flutti inn spilunarhraða {count} rása"
     Channels not found: "{count} rás fannst ekki | {count} rásir fundust ekki"
+    Playlists have been successfully imported: "{count}/{total} spilunarlisti fluttur inn | {count}/{total} spilunarlistar fluttir inn"
   Sync Settings:
     Signed Out After Restore: 'Samstillingu var skráð út vegna þess að þessi forritsgögn voru endurheimt úr öryggisafriti eða af öðru tæki. Skráðu þig inn aftur til að samstilla þetta tæki.'
     Revoke Session Tabs Warning: "Samstilltum flipasöfnum þessa tækis verður einnig eytt."
@@ -1574,7 +1574,6 @@ Settings:
     Incorrect Password: Rangt aðgangsorð
     Unlock: Aflæsa
     Unlocking: Aflæsi…
-  Search Settings: Leitarstillingar
   No Settings Found: Engar stillingar fundust
   Interface Customizer:
     Customize Interface: "Sérsníða viðmót"
@@ -1670,8 +1669,6 @@ Channel:
   More videos per day: "Fleiri myndskeið á dag"
   Verified: Staðfest
   Official Artist Channel: Opinber flytjendarás
-  About:
-    Links: Tenglar
   Subscription settings: Áskriftarstillingar
   Failed to save subscription settings: Ekki tókst að vista rásarstillingar
   Videos per day: Myndskeið á dag
@@ -1692,9 +1689,6 @@ Channel:
     Original post unavailable: "Upprunalega færslan er ekki tiltæk"
     Members-only video hidden by OpenTubeX: "OpenTubeX faldi myndskeið eingöngu fyrir meðlimi"
     Video hidden by OpenTubeX because of its title: "OpenTubeX faldi myndskeiðið því titill þess inniheldur falinn texta"
-  Shows:
-    Shows: Þættir
-    This channel does not currently have any shows: Þessi rás er ekki með neina þætti
 Video:
   Play in Background: "Spila í bakgrunni"
   Info panel source: 'Heimild: {source}'
@@ -2403,8 +2397,6 @@ Tooltips:
     Use Grid Player Menu: Raðar stillingavalmynd myndbandsspilarans í reitanet í stað raðalista.
     Modal Backdrop: "Ákvarðar hvernig forritið lítur út á bak við glugga og valmyndir. Móðun getur verið hæg á aflminni tækjum."
     Click Scrollbar Track to Scroll: "Smellur á skrunstiku utan við sleða hennar flettir um það bil einni síðu í átt að smellinum. Meðan þetta er virkt grípur sýnileg skrunstika smelli sem ætlaðir eru atriðum undir henni. Skrunstika flipastikunnar virkar alltaf svona."
-  Experimental Settings:
-    Disable Hardware Acceleration: Slekkur á vélbúnaðarhröðun skjákorts. Getur lagað myndrænar villur, en mun líklega draga úr afköstum.
   SponsorBlock Settings:
     Always Show DeArrow Badge: Halda DeArrow-hnappnum sýnilegum á myndskeiðum þar sem DeArrow hefur skipt út titli eða smámynd, í stað þess að sýna hann aðeins þegar bendill er yfir.
 The playlist is at the beginning. Enable loop to continue playing: Þú ert við upphaf spilunarlistans. Kveiktu á endurtekningu til að halda spilun áfram

@@ -21,7 +21,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { mapActions } from 'vuex'
 import shaka from 'shaka-player'
 import { Utils, YTNodes } from 'youtubei.js'
-import FtShakaVideoPlayer from '../../components/ft-shaka-video-player/ft-shaka-video-player.vue'
+import FtShakaVideoPlayer from '../../components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue'
 import WatchCast from '../../components/WatchCast/WatchCast.vue'
 import { selectCastSource } from '../../helpers/player/castSource'
 import WatchVideoDownloadPrompt from '../../components/WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
@@ -303,7 +303,7 @@ export default defineComponent({
       startNextVideoInPip: false,
       miniPlayerStartHeight: 0,
       nextVideoAutoPictureInPictureState: null,
-      /** @type {import('../../components/ft-shaka-video-player/opentubex/dockedPanels').DockedPanel[]} */
+      /** @type {import('../../components/FtShakaVideoPlayer/opentubex/dockedPanels').DockedPanel[]} */
       startNextVideoWithDockedPanels: [],
       isLoading: true,
       waitingForBackgroundPlaybackTurn: false,
@@ -2062,7 +2062,7 @@ export default defineComponent({
       // A shorter error can leave the offset past the end of its content.
       clampOverlayScrollTop(container, content)
     },
-    /** @param {{ panel: import('../../components/ft-shaka-video-player/opentubex/dockedPanels').DockedPanel, open: boolean, target: HTMLElement | null, presentationActive?: boolean }} change */
+    /** @param {{ panel: import('../../components/FtShakaVideoPlayer/opentubex/dockedPanels').DockedPanel, open: boolean, target: HTMLElement | null, presentationActive?: boolean }} change */
     handleDockPanelChange({ panel, ...change }) {
       const handlers = {
         metadata: this.handleFullscreenMetadataChange,

@@ -46,7 +46,7 @@
       <ul>
         <li
           v-for="tag in tagList"
-          :key="tag.id"
+          :key="areChannelTags ? tag.name : tag"
         >
           <template v-if="areChannelTags">
             <RouterLink

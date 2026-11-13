@@ -130,8 +130,8 @@ test('timestamp actions use the active receiver position and return to local pla
   assert.equal(view.getTimestamp(), 0)
 })
 
-const playerSource = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
-const seekingHandler = playerSource.slice(playerSource.indexOf('    function isEndSeekPosition()'), playerSource.indexOf('    function handleSeeked()'))
+const playerSource = await readFile(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
+const seekingHandler = playerSource.slice(playerSource.indexOf('function isEndSeekPosition()'), playerSource.indexOf('function handleSeeked()'))
 
 function fixture(existing = true) {
   const element = Object.assign(new EventTarget(), {

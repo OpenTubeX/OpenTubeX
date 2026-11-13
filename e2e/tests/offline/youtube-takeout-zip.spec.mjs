@@ -254,7 +254,7 @@ for (const [name, metadata] of [
     })
     await expect(page.locator('.takeoutSelectionCentered')).toBeHidden()
     await expect(page.locator('.toast', { hasText: 'Unable to read file' })).toBeVisible()
-    await expect(page.locator('.toast', { hasText: 'All playlists has been successfully imported' })).toHaveCount(0)
+    await expect(page.locator('.toast', { hasText: /playlists? ha(?:s|ve) been successfully imported/ })).toHaveCount(0)
   })
 }
 
@@ -287,6 +287,6 @@ for (const [kind, action, failedName] of [
     await expect.poll(() => page.evaluate(() => window.$store.getters.getAllPlaylists.some(playlist => playlist.playlistName === 'Another empty list'))).toBe(true)
     await expect(page.locator('.takeoutSelectionCentered')).toBeHidden()
     await expect(page.locator('.toast', { hasText: `Unable to read file: Takeout/YouTube/playlists/${failedName}-videos.csv` })).toBeVisible()
-    await expect(page.locator('.toast', { hasText: 'All playlists has been successfully imported' })).toHaveCount(0)
+    await expect(page.locator('.toast', { hasText: /playlists? ha(?:s|ve) been successfully imported/ })).toHaveCount(0)
   })
 }

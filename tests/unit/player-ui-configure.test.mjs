@@ -7,7 +7,7 @@ import { computed, nextTick, reactive, ref, watch } from 'vue'
 import { getDefaultPlayerMenuControls } from '../../src/renderer/helpers/playerMenuControls.js'
 import { DEFAULT_CONTROL_BAR_BUTTONS, getControlBarButtonDefinitions, getRemovedControlBarButtons } from '../../src/renderer/helpers/controlBarButtons.js'
 
-const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
+const source = readFileSync(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
 
 function slice(startMarker, endMarker) {
   const start = source.indexOf(startMarker)
@@ -19,12 +19,12 @@ function slice(startMarker, endMarker) {
 function sliceWatcher(startMarker) {
   const start = source.indexOf(startMarker)
   assert.ok(start !== -1, `missing ${startMarker}`)
-  return source.slice(start, source.indexOf('\n    })\n', start) + '\n    })'.length)
+  return source.slice(start, source.indexOf('\n})\n', start) + '\n})'.length)
 }
 
-const configureSource = slice('    function getBigButtons(', '    function closeChaptersOverlay() {')
-const uiConfigWatcherSource = sliceWatcher('    watch(uiConfig, ')
-const loadedWatcherSource = sliceWatcher('    watch(hasLoaded, (loaded) => {')
+const configureSource = slice('function getBigButtons(', 'function closeChaptersOverlay() {')
+const uiConfigWatcherSource = sliceWatcher('watch(uiConfig, ')
+const loadedWatcherSource = sliceWatcher('watch(hasLoaded, (loaded) => {')
 
 function setupPlayer({ theatrePossible = true, useSponsorBlock = true } = {}) {
   const configureCalls = []

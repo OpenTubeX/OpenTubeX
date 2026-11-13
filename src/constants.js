@@ -912,6 +912,12 @@ const DARK_BASE_THEMES = BUILTIN_BASE_THEMES.filter(({ classification }) => clas
 // The themes the System Default mode uses until the user picks others.
 const DEFAULT_SYSTEM_THEMES = Object.freeze({ light: 'openTubeXLight', dark: 'openTubeXDark' })
 
+const UI_SCALE = {
+  MIN: 50,
+  MAX: 300,
+  STEP: 5,
+}
+
 export {
   IpcChannels,
   DBActions,
@@ -955,4 +961,5 @@ export {
   DARK_BASE_THEMES,
   DEFAULT_SYSTEM_THEMES,
   DOWNLOADED_MEDIA_MIME_TYPES,
+  UI_SCALE,
 }

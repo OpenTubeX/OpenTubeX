@@ -1416,6 +1416,7 @@ Settings:
     Invalid channel playback speeds file: "Der blev ikke fundet nogen afspilningshastigheder for kanaler i denne fil"
     Channel playback speeds imported: "Importerede afspilningshastigheden for {count} kanal | Importerede afspilningshastighederne for {count} kanaler"
     Channels not found: "{count} kanal kunne ikke findes | {count} kanaler kunne ikke findes"
+    Playlists have been successfully imported: "1/{total} playliste blev importeret | {count}/{total} playlister blev importeret"
   Sync Settings:
     Signed Out After Restore: 'Synkroniseringen blev logget ud, fordi disse appdata blev gendannet fra en sikkerhedskopi eller en anden enhed. Log ind igen for at synkronisere denne enhed.'
     Revoke Session Tabs Warning: "Denne enheds synkroniserede fanesæt vil også blive slettet."

@@ -206,8 +206,6 @@ Subscriptions:
   Show Combined View: Show combined view
   Newest First: Newest first
   Oldest First: Oldest first
-  Posts:
-    RSS Message: YouTube does not provide RSS feeds for posts. Disable the "{rssSetting}" setting to view posts or enable the "{hideSetting}" setting to hide this tab.
   RSS Feeds:
     Refreshing: Refreshing RSS feeds
     Tab: RSS
@@ -272,7 +270,6 @@ User Playlists:
   Saved Playlists Refresh Failed: 'Some saved playlists could not be refreshed.'
   Save: "Save"
   Edit: "Edit"
-  This playlist is private or does not exist.: "This playlist is private or does not exist."
   Pin to Navigation: "Pin to Navigation"
   Unpin from Navigation: "Unpin from Navigation"
   Pin to Top: "Pin to Top"
@@ -1356,6 +1353,7 @@ Settings:
     Invalid channel playback speeds file: "No channel playback speeds were found in this file"
     Channel playback speeds imported: "Imported the playback speed of {count} channel | Imported the playback speeds of {count} channels"
     Channels not found: "{count} channel could not be found | {count} channels could not be found"
+    Playlists have been successfully imported: "1/{total} playlist has been successfully imported | {count}/{total} playlists have been successfully imported"
   Sync Settings:
     Signed Out After Restore: 'Sync was signed out because this app data was restored from a backup or another device. Sign in again to sync this device.'
     Revoke Session Tabs Warning: "This device's synced tab sets will also be deleted."
@@ -1554,7 +1552,6 @@ Settings:
     Incorrect Password: Incorrect password
     Unlock: Unlock
     Unlocking: Unlocking…
-  Search Settings: Search settings
   No Settings Found: No settings found
   Experimental Settings:
     Disable Hardware Acceleration: Disable Hardware Acceleration
@@ -2578,8 +2575,6 @@ Downloads:
   Remove File Failed: Could not remove the downloaded file.
 Search Bar:
   Use Suggestion: Use suggestion
-  Open Search Container: Open Search Container
-  Search: Search
 Theme Discovery:
   Discover Themes: "Discover themes"
   Refresh: "Refresh"

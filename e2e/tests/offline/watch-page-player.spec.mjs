@@ -957,7 +957,7 @@ test('repeats an A-B range when point B is at the end of the video', async ({ ap
   const watchComponent = await page.evaluateHandle(findWatchComponent)
   await watchComponent.evaluate((component) => {
     const findPlayer = (vnode) => {
-      if (vnode?.component?.type?.name === 'FtShakaVideoPlayer') return vnode.component
+      if (vnode?.component?.type?.__name === 'FtShakaVideoPlayer') return vnode.component
       if (vnode?.component?.subTree) {
         const match = findPlayer(vnode.component.subTree)
         if (match) return match

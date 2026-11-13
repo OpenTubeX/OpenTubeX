@@ -238,9 +238,9 @@ Settings:
       Blur: Elhomályosítás
     Region for Trending: 'Felkapottak régiója'
         #! List countries
-    View all Invidious instance information: Invidious-példányok listájának megtekintése
+    View all Invidious instance information: Invidious példányok listájának megtekintése
     System Default: Rendszer alapértelmezett
-    Current Invidious Instance: Jelenlegi Invidious-példány
+    Current Invidious Instance: Jelenlegi Invidious példány
     Clear Default Instance: Alapértelmezett példány eltávolítása
     Set Current Instance as Default: Jelenlegi példány beállítása alapértelmezettként
     Current instance will be randomized on startup: Véletlenszerű jelenlegi példány használata indításkor
@@ -499,7 +499,6 @@ Settings:
     Export Playlists: Lejátszási listák exportálása
     Import Playlists: Lejátszási listák importálása
     All playlists has been successfully exported: Az összes lejátszási lista exportálása sikeresen megtörtént
-    All playlists has been successfully imported: Az összes lejátszási lista importálása sikeresen megtörtént
     Subscription File: Feliratkozás-fájl
     History File: Előzményfájl
     Playlist File: Lejátszási lista fájl
@@ -573,6 +572,7 @@ Settings:
     Add: Hozzáadás
     Remove: Eltávolítás
     Hide Channel Shows: A „Műsorok” lap elrejtése a csatornán
+    More Items Count: +{count} további…
   The app needs to restart for changes to take effect. Restart and apply change?: Az alkalmazásnak újra kell indulnia, hogy a változtatások életbe lépjenek. Induljon újra és alkalmazza a módosítást?
   Proxy Settings:
     City: Helység
@@ -645,6 +645,9 @@ Settings:
   SABR:
     Label: SABR engedélyezése mint DASH-háttérprogram
     Tooltip: A SABR lesz az egyetlen DASH-háttérprogram a jövőbeli kiadásokban, és nem lehet majd letiltani. Ez a kapcsoló arra az esetre szolgál, ha a korai megvalósítása helyrehozhatatlan problémákat okozna.
+  Search Settings: Keresési beállítások
+  Settings found: 1 beállítás található | {count} beállítás található
+  No Matching Settings: Nem található a keresésnek megfelelő beállítás.
 About:
   #On About page
   About: 'Névjegy'
@@ -1011,7 +1014,7 @@ Tooltips:
   General Settings:
     Preferred API Backend: Válassza ki a háttéralkalmazást, amelyet a OpenTubeX használ az adatok megszerzéséhez. A helyi API egy beépített kinyerő. Az Invidious API használatához Invidious-kiszolgáló szükséges.
     Region for Trending: A felkapottak régiója lehetővé teszi a választást, hogy melyik ország felkapott videóit szeretné megtekinteni.
-    Invidious Instance: Invidious példány, amelyhez a OpenTubeX csatlakozni fog az API-hívásokhoz.
+    Invidious Instance: Az Invidious példány, amelyhez a OpenTubeX API-hívások céljából kapcsolódik. A beállítás módosításai csak a jelenlegi ablakra vonatkoznak, kivéve, ha ezt a példányt alapértelmezettként állítja be.
     Thumbnail Preference: A OpenTubeX-ban minden videó bélyegképe az alapértelmezett miniatűr helyett a videóból kiválasztott képkockára lesz cserélve, amely elmosódott vagy rejtett is lehet.
     Fallback to Non-Preferred Backend on Failure: Ha a választott API-val probléma adódik, a OpenTubeX automatikusan megpróbálja a nem előnyben részesített API-t használni tartalék módszerként, ha ez a funkció engedélyezve van.
     External Link Handling: "Válassza ki az alapértelmezett viselkedést, amikor egy olyan hivatkozásra kattint, amelyet OpenTubeX nem tud megnyitni.\nA OpenTubeX alapértelmezés szerint megnyitja a kattintott hivatkozást az alapértelmezett böngészőben.\n"
@@ -1046,8 +1049,8 @@ Playing Next Video Interval: A következő videó lejátszása folyamatban van. 
 More: Több
 Unknown YouTube url type, cannot be opened in app: Ismeretlen YouTube-webcím, nem nyitható meg az alkalmazásban
 Open New Window: Új ablak megnyitása
-Default Invidious instance has been cleared: Alapértelmezett Invidious-példány eltávolítva
-Default Invidious instance has been set to {instance}: 'Alapértelmezett Invidious-példány {instance} beállítva'
+Default Invidious instance has been cleared: Alapértelmezett Invidious példány eltávolítva
+Default Invidious instance has been set to {instance}: 'Alapértelmezett Invidious példány {instance} beállítva'
 Search Bar:
   Clear Input: Bemenet törlése
   Remove: Eltávolítás

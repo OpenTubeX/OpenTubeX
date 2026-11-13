@@ -56,7 +56,7 @@ test('getLastCharacter keeps the last grapheme whole and reuses one Intl.Segment
 })
 
 test('the audio track menu constructs Intl.DisplayNames once per rebuild', () => {
-  const code = source('components/ft-shaka-video-player/player-components/AudioTrackSelection.js')
+  const code = source('components/FtShakaVideoPlayer/player-components/AudioTrackSelection.js')
   const start = code.indexOf('  updateAudioTracks_() {')
   const body = code.slice(start + '  updateAudioTracks_() {'.length, code.indexOf('\n  }\n', start))
   const counting = countingIntl('DisplayNames')

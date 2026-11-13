@@ -14,9 +14,9 @@ import watchQueue, {
   persistWatchQueue,
 } from '../../src/renderer/store/modules/watch-queue.js'
 
-const playerSource = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
-const autoplayStart = playerSource.indexOf('    const autoplayVideos = computed(')
-const autoplayEnd = playerSource.indexOf('\n    })', autoplayStart) + '\n    })'.length
+const playerSource = await readFile(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
+const autoplayStart = playerSource.indexOf('const autoplayVideos = computed(')
+const autoplayEnd = playerSource.indexOf('\n})', autoplayStart) + '\n})'.length
 const autoplaySource = playerSource.slice(autoplayStart, autoplayEnd)
 
 function video (videoId) {
@@ -316,7 +316,7 @@ for (const timestamp of ['', '&timestamp=0.25']) {
 }
 
 test('queued autoplay ends after playback starts so later source loads obey the preference', async () => {
-  const playing = playerSource.slice(playerSource.indexOf('    function handlePlaying() {'), playerSource.indexOf('    function handleWaiting() {'))
+  const playing = playerSource.slice(playerSource.indexOf('function handlePlaying() {'), playerSource.indexOf('function handleWaiting() {'))
   const autoplayRequested = ref(true)
   const autoplay = runInNewContext(`${autoplaySource}\n${playing}\nautoplayVideos.value; handlePlaying(); autoplayVideos.value`, {
     autoplayRequested,
@@ -369,9 +369,9 @@ for (const format of ['dash', 'legacy']) {
     for (const [loadCase, [switchArgs, restartsSource]] of Object.entries(initialLoadCases)) {
       const restart = queued && restartsSource
       test(`${queued ? 'queued' : 'manual'} ${format} ${loadCase} ${restart ? 'start at zero' : 'preserve the requested start'}`, async () => {
-        const firstLoad = playerSource.slice(playerSource.indexOf('    async function performFirstLoad('), playerSource.indexOf('\n    /**', playerSource.indexOf('    async function performFirstLoad(')))
-        const switchStart = playerSource.indexOf('      async ([newFormat, newSourceKey], [oldFormat, oldSourceKey]) => {')
-        const initialSwitch = playerSource.slice(switchStart, playerSource.indexOf('        const video_ = video.value', switchStart)) + '\n}'
+        const firstLoad = playerSource.slice(playerSource.indexOf('async function performFirstLoad('), playerSource.indexOf('\n/**', playerSource.indexOf('async function performFirstLoad(')))
+        const switchStart = playerSource.indexOf('  async ([newFormat, newSourceKey], [oldFormat, oldSourceKey]) => {')
+        const initialSwitch = playerSource.slice(switchStart, playerSource.indexOf('    const video_ = video.value', switchStart)) + '\n}'
         const starts = []
         const context = {
           props: { format, startTime: 2, autoplayRequested: queued, localFilePlayback: true, manifestSrc: 'queued-file', manifestMimeType: 'audio/mpeg' },

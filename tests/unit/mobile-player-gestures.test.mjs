@@ -3,9 +3,9 @@ import { test } from 'node:test'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
 import { createRenderer, nextTick } from 'vue'
-import { useMobileFullscreenGestures } from '../../src/renderer/components/ft-shaka-video-player/opentubex/useMobileFullscreenGestures.js'
+import { useMobileFullscreenGestures } from '../../src/renderer/components/FtShakaVideoPlayer/opentubex/useMobileFullscreenGestures.js'
 
-const playerSource = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
+const playerSource = readFileSync(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
 
 class ElementStub {
   constructor(selector = '') { this.selector = selector }
@@ -46,7 +46,7 @@ function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = t
         isPlaybackEnded: () => false,
         isPlaybackPaused: () => true,
         isPlayerSurfaceTarget: nativeReplay
-          ? vm.runInNewContext(`(${playerSource.match(/function isPlayerSurfaceTarget\(target\) \{[\s\S]*?\n {4}\}/)[0]})`, {
+          ? vm.runInNewContext(`(${playerSource.match(/function isPlayerSurfaceTarget\(target\) \{[\s\S]*?\n\}/)[0]})`, {
               Element: ElementStub, video: { value: {} }, container: { value: { hasAttribute: () => true } }
             })
           : target => target === surface,
@@ -161,7 +161,7 @@ test('a swipe exits rotation fullscreen without entering native fullscreen', asy
     ui: { getControls: () => ({ toggleFullScreen: () => { nativeToggles++ } }) },
   })
   const fullscreen = vm.runInContext(`(${optionsSource.match(/isFullscreenActive: ([^\n]+),/)[1]})`, context)
-  const toggleFullscreen = vm.runInContext(`(${optionsSource.match(/togglePlayerFullScreen: ([\s\S]*?\n {6}\}),/)[1]})`, context)
+  const toggleFullscreen = vm.runInContext(`(${optionsSource.match(/togglePlayerFullScreen: ([\s\S]*?\n {2}\}),/)[1]})`, context)
   const { gestures: g, event, paint } = fixture(t, { fullscreen, toggleFullscreen })
   t.mock.timers.enable({ apis: ['setTimeout'] })
   assert.equal(fullscreen(), true, 'Rotation fullscreen must be recognized by gestures')
@@ -355,8 +355,8 @@ for (const distance of [24, 120]) {
 }
 
 test('revealing Watch preserves a drag and completed dismissal survives visibility changes, but changing video cancels', () => {
-  const start = playerSource.indexOf('    watch([isActiveTab, scrollMiniPlayerActive, mobileAdjustmentsVisible, () => props.videoId]')
-  const end = playerSource.indexOf('\n    watch(', start + 10)
+  const start = playerSource.indexOf('watch([isActiveTab, scrollMiniPlayerActive, mobileAdjustmentsVisible, () => props.videoId]')
+  const end = playerSource.indexOf('\nwatch(', start + 10)
   let changed
   const resets = []
   const dragging = { value: {} }
@@ -657,8 +657,8 @@ for (const [name, dynamic, time, duration, end, expected] of [
 ]) {
   test(`fullscreen swipe commit respects the ${name}`, () => {
     const video = { value: { currentTime: 15, duration, paused: true } }
-    const seekToTimeSource = playerSource.match(/ {6}seekToTime: (time => \{[^]*?\n {6}\}),/)[1]
-    const seekBySecondsSource = playerSource.match(/ {4}function seekBySeconds\([^]*?\n {4}}/)[0]
+    const seekToTimeSource = playerSource.match(/ {2}seekToTime: (time => \{[^]*?\n {2}\}),/)[1]
+    const seekBySecondsSource = playerSource.match(/\nfunction seekBySeconds\([^]*?\n}/)[0]
     const remembered = []
     const seekToTime = vm.runInNewContext(`${seekBySecondsSource}\n(${seekToTimeSource})`, {
       video,

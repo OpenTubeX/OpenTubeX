@@ -1640,7 +1640,6 @@ Settings:
     Settings Tooltip: Nastavitev, vezanih na operacijski sistem ali uporabnika, in poskusnih nastavitev ni mogoče izvoziti ali uvoziti (npr. posredniški strežnik, zunanji predvajalnik, mapa posnetkov zaslona …)
     Invalid JSON row, skipping item: Neveljaven JSON v vrstici {row}, element bo preskočen
     Playlist insufficient data: Ni dovolj podatkov za seznam predvajanja »{playlist}«, element bo preskočen
-    All playlists has been successfully imported: Vsi seznami predvajanja so bili uspešno uvoženi
     All playlists has been successfully exported: Vsi seznami predvajanja so bili uspešno izvoženi
     All search history has been successfully imported: Celotna zgodovina iskanja je bila uspešno uvožena
     All search history has been successfully exported: Celotna zgodovina iskanja je bila uspešno izvožena
@@ -1660,6 +1659,7 @@ Settings:
     Invalid channel playback speeds file: "V tej datoteki ni bilo najdenih hitrosti predvajanja kanalov"
     Channel playback speeds imported: "Uvožena je hitrost predvajanja za {count} kanal | Uvoženi sta hitrosti predvajanja za {count} kanala | Uvožene so hitrosti predvajanja za {count} kanale | Uvožene so hitrosti predvajanja za {count} kanalov"
     Channels not found: "{count} kanal ni bil najden | {count} kanala nista bila najdena | {count} kanali niso bili najdeni | {count} kanalov ni bilo najdenih"
+    Playlists have been successfully imported: "Uspešno uvožen {count}/{total} seznam predvajanja | Uspešno uvožena {count}/{total} seznama predvajanja | Uspešno uvoženi {count}/{total} seznami predvajanja | Uspešno uvoženih {count}/{total} seznamov predvajanja"
   Sync Settings:
     Signed Out After Restore: 'Sinhronizacija je bila odjavljena, ker so bili ti podatki aplikacije obnovljeni iz varnostne kopije ali z druge naprave. Znova se prijavite, da sinhronizirate to napravo.'
     Revoke Session Tabs Warning: "Izbrisani bodo tudi sinhronizirani nabori zavihkov te naprave."

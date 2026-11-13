@@ -19,7 +19,7 @@ before(async () => {
     : await browser.newPage()
   const sources = {
     'App.css': await readFile(new URL('../../src/renderer/App.css', import.meta.url), 'utf8'),
-    'ft-shaka-video-player.css': await readScopedStyles(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.vue', import.meta.url)),
+    'FtShakaVideoPlayer.css': await readScopedStyles(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url)),
   }
   styles = Object.entries(sources)
     .map(([filename, source]) => compileStyle({ source, filename, id: 'data-v-pip-test', scoped: true }).code)

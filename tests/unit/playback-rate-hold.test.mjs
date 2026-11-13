@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { reactive, ref } from 'vue'
-import { usePlaybackRate } from '../../src/renderer/components/ft-shaka-video-player/opentubex/usePlaybackRate.js'
+import { usePlaybackRate } from '../../src/renderer/components/FtShakaVideoPlayer/opentubex/usePlaybackRate.js'
 
 function fixture({ paused = false, multiplier = 2 } = {}) {
   const video = {

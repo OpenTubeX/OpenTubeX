@@ -1373,6 +1373,7 @@ Settings:
     Invalid channel playback speeds file: "Tiedostosta ei löytynyt kanavien toistonopeuksia"
     Channel playback speeds imported: "Tuotiin {count} kanavan toistonopeus | Tuotiin {count} kanavan toistonopeudet"
     Channels not found: "{count} kanavaa ei löytynyt | {count} kanavaa ei löytynyt"
+    Playlists have been successfully imported: "1/{total} soittolista tuotiin onnistuneesti | {count}/{total} soittolistaa tuotiin onnistuneesti"
   Sync Settings:
     Signed Out After Restore: 'Synkronoinnista kirjauduttiin ulos, koska nämä sovelluksen tiedot palautettiin varmuuskopiosta tai toisesta laitteesta. Kirjaudu uudelleen sisään synkronoidaksesi tämän laitteen.'
     Revoke Session Tabs Warning: "Myös tämän laitteen synkronoidut välilehtijoukot poistetaan."

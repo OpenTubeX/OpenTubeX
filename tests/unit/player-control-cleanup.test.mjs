@@ -3,12 +3,12 @@ import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
 import test from 'node:test'
 
-const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
-const start = source.indexOf('    function cleanUpCustomPlayerControls() {')
+const source = readFileSync(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
+const start = source.indexOf('\nfunction cleanUpCustomPlayerControls() {')
 assert.notEqual(start, -1, 'Update the cleanup harness after renaming cleanUpCustomPlayerControls')
-const end = source.indexOf('\n    }', start)
+const end = source.indexOf('\n}', start)
 assert.notEqual(end, -1, 'Update the cleanup harness after changing the function boundary')
-const cleanup = source.slice(start, end + 6)
+const cleanup = source.slice(start + 1, end + 2)
 
 for (const players of [1, 2]) {
   test(`control factory cleanup with ${players} mounted player(s)`, () => {

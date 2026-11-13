@@ -1399,6 +1399,7 @@ Settings:
     Invalid channel playback speeds file: "Er zijn geen afspeelsnelheden per kanaal gevonden in dit bestand"
     Channel playback speeds imported: "Afspeelsnelheid van {count} kanaal geïmporteerd | Afspeelsnelheden van {count} kanalen geïmporteerd"
     Channels not found: "{count} kanaal kon niet worden gevonden | {count} kanalen konden niet worden gevonden"
+    Playlists have been successfully imported: "1/{total} afspeellijst is geïmporteerd | {count}/{total} afspeellijsten zijn geïmporteerd"
   Sync Settings:
     Signed Out After Restore: 'Synchronisatie is afgemeld omdat deze app-gegevens zijn hersteld vanuit een back-up of vanaf een ander apparaat. Meld je opnieuw aan om dit apparaat te synchroniseren.'
     Revoke Session Tabs Warning: "De gesynchroniseerde tabbladsets van dit apparaat worden ook verwijderd."

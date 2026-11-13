@@ -3,9 +3,9 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 
-const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
-const resizedSource = source.slice(source.indexOf('    function resized(entries) {'), source.indexOf('    // Remeasure the control bar'))
-const layoutSource = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/opentubex/useAdaptiveControlPanelLayout.js', import.meta.url), 'utf8')
+const source = readFileSync(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
+const resizedSource = source.slice(source.indexOf('function resized(entries) {'), source.indexOf('// Remeasure the control bar'))
+const layoutSource = readFileSync(new URL('../../src/renderer/components/FtShakaVideoPlayer/opentubex/useAdaptiveControlPanelLayout.js', import.meta.url), 'utf8')
 
 for (const [active, animating] of [[true, false], [false, true]]) {
   test(`mini-player resize preserves the inline controls with active=${active}, animating=${animating}`, () => {

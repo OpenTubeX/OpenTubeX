@@ -3,8 +3,8 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 
-const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
-const handler = source.match(/ {4}function updateSeekBarTooltip\(seekBarContainer, hoverTime, secondsPerPixel\) \{[\s\S]*?\n {4}\}/)[0]
+const source = readFileSync(new URL('../../src/renderer/components/FtShakaVideoPlayer/FtShakaVideoPlayer.vue', import.meta.url), 'utf8')
+const handler = source.match(/^function updateSeekBarTooltip\(seekBarContainer, hoverTime, secondsPerPixel\) \{[\s\S]*?\n\}/m)[0]
 
 function createTooltip() {
   const thumbnailTime = { textContent: '0:22 · Chapter' }

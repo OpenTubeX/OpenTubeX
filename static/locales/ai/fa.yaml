@@ -1427,6 +1427,7 @@ Settings:
     Invalid channel playback speeds file: "هیچ سرعت پخش کانالی در این فایل پیدا نشد"
     Channel playback speeds imported: "سرعت پخش {count} کانال وارد شد | سرعت پخش {count} کانال وارد شد"
     Channels not found: "{count} کانال پیدا نشد | {count} کانال پیدا نشد"
+    Playlists have been successfully imported: "1/{total} فهرست پخش با موفقیت وارد شد | {count}/{total} فهرست پخش با موفقیت وارد شد"
   Sync Settings:
     Signed Out After Restore: 'همگام‌سازی از حساب خارج شد، چون این داده‌های برنامه از یک نسخهٔ پشتیبان یا دستگاهی دیگر بازیابی شده‌اند. برای همگام‌سازی این دستگاه دوباره وارد شوید.'
     Revoke Session Tabs Warning: "مجموعه‌های برگهٔ همگام‌شدهٔ این دستگاه نیز حذف خواهند شد."

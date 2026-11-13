@@ -889,6 +889,7 @@ Settings:
     Profile Directory: Katalog profilu
     Open Profile Directory: Otwórz katalog profilu
     Invalid JSON row, skipping item: Nieprawidłowy JSON w wierszu {row}. Element zostanie pominięty
+    Playlists have been successfully imported: "Pomyślnie zaimportowano 1/{total} playlistę | Pomyślnie zaimportowano {count}/{total} playlisty | Pomyślnie zaimportowano {count}/{total} playlist"
   Sync Settings:
     Signed Out After Restore: 'Synchronizacja została wylogowana, ponieważ te dane aplikacji przywrócono z kopii zapasowej lub z innego urządzenia. Zaloguj się ponownie, aby synchronizować to urządzenie.'
     Revoke Session Tabs Warning: "Zsynchronizowane zestawy kart tego urządzenia również zostaną usunięte."

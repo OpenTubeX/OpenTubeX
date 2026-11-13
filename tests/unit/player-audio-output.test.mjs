@@ -3,7 +3,7 @@ import test from 'node:test'
 import { createRenderer, shallowRef } from 'vue'
 import { FormatUtils, Misc } from 'youtubei.js'
 
-import { usePlayerAudioOutput } from '../../src/renderer/components/ft-shaka-video-player/opentubex/usePlayerAudioOutput.js'
+import { usePlayerAudioOutput } from '../../src/renderer/components/FtShakaVideoPlayer/opentubex/usePlayerAudioOutput.js'
 import { getActiveAudioLoudnessDb, getAudioFormatLoudness, getLoudnessNormalizationGain } from '../../src/renderer/helpers/player/loudnessNormalization.js'
 import { getSabrFormatId } from '../../src/renderer/helpers/player/formatIds.js'
 

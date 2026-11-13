@@ -46,6 +46,8 @@ async function withMobileVideo(run, { fromChannel = false } = {}) {
         BackendFallback: false,
         RotateFullscreenToLandscape: false,
         EnterFullscreenOnDisplayRotate: false,
+        // The fullscreen comment test opens comments from this action
+        FullscreenActions: ['comments'],
       }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
@@ -223,10 +225,10 @@ for (const audioOnly of [false, true]) {
   }, { fromChannel: true }))
 }
 
-test('fullscreen comment avatar navigation opens the channel and docks the same playing video', { skip }, () => withMobileVideo(async ({ page, player, watch, tap }) => {
+test('fullscreen comment avatar navigation opens the channel and docks the same playing video', { skip }, () => withMobileVideo(async ({ page, player, tap }) => {
   const original = await player.locator('video').elementHandle()
   await player.evaluate(element => element.requestFullscreen())
-  await watch.evaluate(component => component.proxy.$refs.player.$.setupState.setFullscreenComments(true))
+  await player.locator('.fullscreenCommentsToggle').evaluate(button => button.click())
   const link = player.locator('.fullscreenCommentCard a[tabindex="-1"]').first()
   const avatar = link.locator('.commentThumbnail, .commentThumbnailHidden').first()
   await expect(avatar).toBeVisible()

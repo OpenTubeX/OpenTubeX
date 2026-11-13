@@ -10,7 +10,7 @@ import { isReducedMotionEnabled } from '../../../helpers/reducedMotion'
 
 const FULLSCREEN_DOCK_PREFERRED_MIN_HEIGHT = 360
 const FULLSCREEN_DOCK_COMPACT_MIN_HEIGHT = 96
-// Matches the automatic width's minimum in ft-shaka-video-player.css.
+// Matches the automatic width's minimum in FtShakaVideoPlayer.css.
 const FULLSCREEN_DOCK_MIN_WIDTH = 260
 // Share of the player the dock column may take, so the video stays watchable.
 const FULLSCREEN_DOCK_MAX_WIDTH_SHARE = 0.7

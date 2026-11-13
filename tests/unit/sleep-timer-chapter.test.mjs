@@ -4,7 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 import { effectScope, nextTick, ref, watch } from 'vue'
 
-const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/opentubex/useSleepTimer.js', import.meta.url), 'utf8')
+const source = readFileSync(new URL('../../src/renderer/components/FtShakaVideoPlayer/opentubex/useSleepTimer.js', import.meta.url), 'utf8')
   .replace(/^import .*$/gm, '')
   .replace(/^export /gm, '')
 

@@ -1399,6 +1399,7 @@ Settings:
     Invalid channel playback speeds file: "לא נמצאו מהירויות הפעלה של ערוצים בקובץ זה"
     Channel playback speeds imported: "יובאה מהירות ההפעלה של {count} ערוץ | יובאו מהירויות ההפעלה של {count} ערוצים | יובאו מהירויות ההפעלה של {count} ערוצים"
     Channels not found: "{count} ערוץ לא נמצא | {count} ערוצים לא נמצאו | {count} ערוצים לא נמצאו"
+    Playlists have been successfully imported: "יובאה בהצלחה 1/{total} רשימת נגינה | יובאו בהצלחה {count}/{total} רשימות נגינה | יובאו בהצלחה {count}/{total} רשימות נגינה"
   Sync Settings:
     Signed Out After Restore: 'הסנכרון נותק כי נתוני האפליקציה האלה שוחזרו מגיבוי או ממכשיר אחר. יש להתחבר שוב כדי לסנכרן את המכשיר הזה.'
     Revoke Session Tabs Warning: "גם קבוצות הכרטיסיות המסונכרנות של המכשיר הזה יימחקו."
