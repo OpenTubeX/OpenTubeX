@@ -296,7 +296,8 @@ async function addFeed(text) {
     const feed = { url, title: result.title }
     // Cached before saving, so that the RSS tab doesn't reload every feed for the new one
     addLoadedRssFeed(feed, result)
-    if (await store.dispatch('updateFollowedRssFeeds', [...feeds.value, feed]) === false) {
+    const added = followed => followed.some(({ url }) => url === feed.url) ? followed : [...followed, feed]
+    if (await store.dispatch('updateFollowedRssFeeds', added) === false) {
       throw new Error('The feed could not be saved')
     }
     updateMissingRssFeedAvatars([[feed, result]])
@@ -340,7 +341,7 @@ async function retryFeed(feed) {
  * @param {import('../../../helpers/rssFeeds').RssFeed} feed
  */
 function removeFeed(feed) {
-  store.dispatch('updateFollowedRssFeeds', feeds.value.filter(({ url }) => url !== feed.url))
+  store.dispatch('updateFollowedRssFeeds', followed => followed.filter(({ url }) => url !== feed.url))
 }
 </script>
 

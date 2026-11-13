@@ -183,10 +183,8 @@ const canPinPlaylistsToTop = inject('canPinPlaylistsToTop', false)
 const isPinnedToTop = computed(() => canPinPlaylistsToTop && store.getters.getUserPlaylistsPinnedIds.includes(playlistMetadata.value.playlistId))
 function togglePinnedToTop() {
   const id = playlistMetadata.value.playlistId
-  const pinnedIds = store.getters.getUserPlaylistsPinnedIds
-  store.dispatch('updateUserPlaylistsPinnedIds', isPinnedToTop.value
-    ? pinnedIds.filter(pinnedId => pinnedId !== id)
-    : [...pinnedIds, id])
+  const pin = !isPinnedToTop.value
+  store.dispatch('updateUserPlaylistsPinnedIds', pinnedIds => [...pinnedIds.filter(pinnedId => pinnedId !== id), ...pin ? [id] : []])
 }
 const playlistMenuItems = computed(() => {
   const items = store.getters.getTabsEnabled

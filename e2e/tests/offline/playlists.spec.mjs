@@ -1196,7 +1196,7 @@ test.describe('custom playlists overview order', () => {
     // Quick successive pins build on each other before the first save finishes.
     expect(await page.evaluate(async () => {
       const store = window.$store
-      const pin = id => store.dispatch('updatePinnedPlaylistIds', [...store.getters.getPinnedPlaylistIds, id])
+      const pin = id => store.dispatch('updatePinnedPlaylistIds', ids => [...ids, id])
       await Promise.all([pin('custom-overview-c'), pin('custom-overview-a')])
       return store.getters.getPinnedPlaylistIds
     })).toEqual(['custom-overview-b', 'custom-overview-c', 'custom-overview-a'])

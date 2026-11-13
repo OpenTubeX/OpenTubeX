@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 
-import { createOptimisticSettingUpdater, createSettingUpdateQueue, createSettingWriteTracker } from '../../src/renderer/helpers/settingUpdateQueue.js'
+import { createOptimisticSettingUpdater, createSavedSettingEditor, createSettingUpdateQueue, createSettingWriteTracker } from '../../src/renderer/helpers/settingUpdateQueue.js'
 import { areSyncSettingValuesEqual, mergeSettingEntry, mergeSettingItemsEntry, migrateLegacySyncedSettings, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
 
 const settingsSource = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
@@ -298,11 +298,11 @@ test('the last locale change wins when an earlier locale finishes loading later'
 })
 
 test('an ordered setting saved by another window before this window\'s write shows this window\'s value', async () => {
-  const saved = new Map([['pinnedPlaylistIds', ['first']]])
+  const saved = new Map([['navigationItems', ['first']]])
   const settingWrites = createSettingWriteTracker(async id => saved.get(id))
   const started = deferred()
   const release = deferred()
-  const updateOrderedSetting = vm.runInNewContext(`${settingsSection('const updateOptimisticSetting', 'let androidProxyUpdate')}\nupdateOrderedSetting`, {
+  const updateOrderedSetting = vm.runInNewContext(`${settingsSection('const updateOptimisticSetting', 'const editSavedSetting')}\nupdateOrderedSetting`, {
     createOptimisticSettingUpdater,
     settingWrites,
     defaultMutationId: id => `set${id}`,
@@ -316,19 +316,95 @@ test('an ordered setting saved by another window before this window\'s write sho
     },
     console,
   })
-  const settings = { pinnedPlaylistIds: ['first'] }
+  const settings = { navigationItems: ['first'] }
   const commit = (mutation, value) => { settings[mutation.slice(3)] = value }
-  const update = updateOrderedSetting(commit, settings, 'pinnedPlaylistIds', ['first', 'local'])
+  const update = updateOrderedSetting(commit, settings, 'navigationItems', ['first', 'local'])
   await started.promise
 
   // Another window saved its edit first, but its broadcast arrives after this window showed its own.
-  saved.set('pinnedPlaylistIds', ['first', 'other'])
-  settingWrites.savedElsewhere('pinnedPlaylistIds', value => { settings.pinnedPlaylistIds = value })
-  settings.pinnedPlaylistIds = ['first', 'other']
+  saved.set('navigationItems', ['first', 'other'])
+  settingWrites.savedElsewhere('navigationItems', value => { settings.navigationItems = value })
+  settings.navigationItems = ['first', 'other']
   release.resolve()
 
   assert.equal(await update, true)
-  assert.deepEqual(settings.pinnedPlaylistIds, ['first', 'local'])
+  assert.deepEqual(settings.navigationItems, ['first', 'local'])
+})
+
+test('list edits keep the entries other windows saved meanwhile', async () => {
+  const saved = new Map([['followedRssFeeds', ['first', 'other']]])
+  const settingWrites = createSettingWriteTracker(async id => saved.get(id))
+  let lock = Promise.resolve()
+  const started = deferred()
+  const release = deferred()
+  const updateSharedSetting = vm.runInNewContext(`${settingsSection('const editSavedSetting', 'let androidProxyUpdate')}\nupdateSharedSetting`, {
+    createSavedSettingEditor,
+    settingWrites,
+    defaultMutationId: id => `set${id}`,
+    saveSettingEdit: (commit, id, save) => save(),
+    runLocked: (name, run) => (lock = lock.catch(() => {}).then(run)),
+    DEFAULT_SETTINGS: { followedRssFeeds: [] },
+    DBSettingHandlers: {
+      findValue: async id => saved.get(id),
+      upsert: async (id, value) => {
+        if (value.includes('removed')) {
+          started.resolve()
+          await release.promise
+        }
+        saved.set(id, value)
+      },
+    },
+    structuredClone,
+    console,
+  })
+  // This window hasn't received the other window's save yet.
+  const settings = { followedRssFeeds: ['first'] }
+  const commit = (mutation, value) => { settings[mutation.slice(3)] = value }
+  const add = id => updateSharedSetting(commit, settings, 'followedRssFeeds', ids => [...ids, id])
+  const first = add('removed')
+  await started.promise
+  // A quick removal builds on the edit before it, which is still saving.
+  const second = updateSharedSetting(commit, settings, 'followedRssFeeds', ids => ids.filter(id => id !== 'removed'))
+  const third = add('local')
+  assert.deepEqual(settings.followedRssFeeds, ['first', 'local'])
+  release.resolve()
+
+  assert.deepEqual(await Promise.all([first, second, third]), [true, true, true])
+  assert.deepEqual(saved.get('followedRssFeeds'), ['first', 'other', 'local'])
+  assert.deepEqual(settings.followedRssFeeds, ['first', 'other', 'local'])
+})
+
+test('a failed list edit shows the saved list without dropping the edits after it', async () => {
+  const edit = createSavedSettingEditor()
+  let lock = Promise.resolve()
+  let saved = ['first']
+  let value = saved
+  let unavailable = false
+  const options = {
+    read: () => value,
+    commit: next => { value = next },
+    readSaved: async () => {
+      if (unavailable) throw new Error('Disk read failed')
+      return saved
+    },
+    write: async next => {
+      if (next.includes('failed')) throw new Error('Disk write failed')
+      saved = next
+    },
+    lock: run => (lock = lock.catch(() => {}).then(run)),
+  }
+  const failed = assert.rejects(edit('items', ids => [...ids, 'failed'], options), /Disk write failed/)
+  const next = edit('items', ids => [...ids, 'next'], options)
+  assert.deepEqual(value, ['first', 'failed', 'next'])
+  await Promise.all([failed, next])
+  assert.deepEqual(value, ['first', 'next'])
+
+  await assert.rejects(edit('items', ids => [...ids, 'failed'], options), /Disk write failed/)
+  assert.deepEqual(value, ['first', 'next'])
+
+  unavailable = true
+  await assert.rejects(edit('items', ids => [...ids, 'unread'], options), /Disk read failed/)
+  assert.deepEqual(value, ['first', 'next'])
 })
 
 test('edit times stay with their values when windows edit settings at once or a save fails', async () => {

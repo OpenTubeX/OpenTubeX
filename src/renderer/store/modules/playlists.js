@@ -544,13 +544,12 @@ const actions = {
     // Protected playlists survive deletion requests, so only unpin removed ones.
     const remainingIds = new Set(getters.getAllPlaylists.map(playlist => playlist._id))
     const removedIds = new Set(playlistIds.filter(id => !remainingIds.has(id)))
-    const pinnedIds = rootGetters.getPinnedPlaylistIds
-    if (pinnedIds.some(id => removedIds.has(id))) {
-      await dispatch('updatePinnedPlaylistIds', pinnedIds.filter(id => !removedIds.has(id)))
+    const unpin = ids => ids.filter(id => !removedIds.has(id))
+    if (rootGetters.getPinnedPlaylistIds.some(id => removedIds.has(id))) {
+      await dispatch('updatePinnedPlaylistIds', unpin)
     }
-    const topPinnedIds = rootGetters.getUserPlaylistsPinnedIds
-    if (topPinnedIds.some(id => removedIds.has(id))) {
-      await dispatch('updateUserPlaylistsPinnedIds', topPinnedIds.filter(id => !removedIds.has(id)))
+    if (rootGetters.getUserPlaylistsPinnedIds.some(id => removedIds.has(id))) {
+      await dispatch('updateUserPlaylistsPinnedIds', unpin)
     }
   },
 
