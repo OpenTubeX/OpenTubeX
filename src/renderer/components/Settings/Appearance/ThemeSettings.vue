@@ -29,6 +29,9 @@
           system: t('Settings.Theme Settings.Font.System Fonts')
         }"
         :icon="['fas', 'font']"
+        searchable
+        lazy-options
+        :loading="loadingSystemFonts"
         @change="updateAppFont"
         @open="loadSystemFonts"
       >
@@ -79,6 +82,7 @@ const iconPackNames = computed(() => [
 ])
 
 const systemFonts = ref([])
+const loadingSystemFonts = ref(false)
 let systemFontsPromise = null
 
 const appFont = computed(() => normalizeAppFont(store.getters.getAppFont))
@@ -120,6 +124,7 @@ async function loadSystemFonts() {
       ? window.queryLocalFonts().then(fonts => fonts.map(({ family }) => family))
       : Promise.resolve([])
 
+  loadingSystemFonts.value = true
   systemFontsPromise = fontRequest
     .then(fonts => {
       const families = fonts
@@ -130,6 +135,9 @@ async function loadSystemFonts() {
     .catch(error => {
       console.error('Failed to load system fonts', error)
       showToast({ message: t('Settings.Theme Settings.Font.Unable to Load'), icon: ['fas', 'circle-exclamation'] })
+    })
+    .finally(() => {
+      loadingSystemFonts.value = false
     })
 
   await systemFontsPromise
