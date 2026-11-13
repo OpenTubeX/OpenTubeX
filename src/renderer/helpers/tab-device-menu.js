@@ -1,6 +1,5 @@
 import store from '../store/index'
 import { getSyncServerDeviceIcon } from './sync-server-sessions'
-import { formatTabTitle } from '../tabs/tabTitle'
 import { showToast } from './utils'
 
 export function getTabDeviceMenuItem(tabs, t) {
@@ -8,7 +7,7 @@ export function getTabDeviceMenuItem(tabs, t) {
   const videos = tabs.map(tab => ({
     tabId: tab.id,
     videoId: tab.route?.fullPath?.match(/^\/watch\/([A-Za-z0-9_-]{11})(?:[?#]|$)/)?.[1],
-    title: formatTabTitle(tab.contentTitle || tab.title || tab.route?.fullPath || ''),
+    title: tab.contentTitle || tab.title || tab.route?.fullPath || '',
   }))
   if (videos.some(video => !video.videoId)) return null
 

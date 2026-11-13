@@ -24,7 +24,6 @@ const IpcChannels = {
   SYSTEM_ACCENT_COLOR_UPDATED: 'system-accent-color-updated',
   APP_READY: 'app-ready',
   RELAUNCH_REQUEST: 'relaunch-request',
-  SET_WINDOW_TITLE: 'set-window-title',
   SET_TITLE_BAR_OVERLAY: 'set-title-bar-overlay',
   TITLE_BAR_MIDDLE_CLICK: 'title-bar-middle-click',
   WINDOW_CONTROLS_GET: 'window-controls-get',

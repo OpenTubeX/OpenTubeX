@@ -94,7 +94,7 @@
             class="autoUnloadIcon"
             aria-hidden="true"
           />
-          <span class="tabTitleText">{{ displayTitle }}</span>
+          <span class="tabTitleText">{{ tab.title }}</span>
         </span>
         <FtEmbeddedProgress
           v-if="showLoadingIndicator && !showLoadingDot"
@@ -130,7 +130,6 @@ import { useI18n } from 'vue-i18n'
 import store from '../../store/index'
 import { getTabAccentColor } from '../../constants/tabColors'
 import { getTabAvatarUrl, getTabPageIcon, getTabPreviewFallbackUrl } from '../../tabs/tabPreview'
-import { formatTabTitle } from '../../tabs/tabTitle'
 import TabTooltip from './TabTooltip.vue'
 
 const props = defineProps({
@@ -238,9 +237,8 @@ const tabStyle = computed(() => {
 
 const { t } = useI18n()
 const accessibleTitle = computed(() => props.tab.automaticallyUnloaded
-  ? `${displayTitle.value} — ${t('Automatically unloaded to free memory')}`
-  : displayTitle.value)
-const displayTitle = computed(() => formatTabTitle(props.tab.title))
+  ? `${props.tab.title} — ${t('Automatically unloaded to free memory')}`
+  : props.tab.title)
 
 // When a tab points at a channel page and no screenshot has been captured yet,
 // fall back to the channel's profile picture (cached by the Channel view).

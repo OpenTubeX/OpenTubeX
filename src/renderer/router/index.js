@@ -179,7 +179,6 @@ export const routes = [
   {
     path: '/search/:query',
     meta: {
-      title: 'Search Results',
       hasResizableThumbnails: true
     },
     component: SearchPage
@@ -187,8 +186,6 @@ export const routes = [
   {
     path: '/playlist/:id',
     meta: {
-      title: 'Playlist',
-      hasDynamicTitle: true,
       hasResizableThumbnails: true
     },
     component: Playlist
@@ -196,41 +193,28 @@ export const routes = [
   {
     path: '/channel/:id/:currentTab?',
     meta: {
-      title: 'Channel',
       hasResizableThumbnails: true
     },
     component: Channel
   },
   {
     path: '/watch/:id',
-    meta: {
-      title: 'Watch',
-      hasDynamicTitle: true
-    },
     component: Watch
   },
   ...(supportsYtDlp
     ? [{
         path: '/external-media',
-        meta: {
-          title: 'Watch',
-          hasDynamicTitle: true
-        },
         component: ExternalMedia
       }, {
         // Channels and playlists of other platforms, whose items play through yt-dlp
         path: '/external-channel',
         meta: {
-          title: 'Channel',
-          hasDynamicTitle: true,
           hasResizableThumbnails: true
         },
         component: ExternalChannel
       }, {
         path: '/external-playlist',
         meta: {
-          title: 'Playlist',
-          hasDynamicTitle: true,
           hasResizableThumbnails: true
         },
         component: ExternalPlaylist
@@ -243,16 +227,12 @@ export const routes = [
   {
     path: '/hashtag/:hashtag',
     meta: {
-      title: 'Hashtag',
       hasResizableThumbnails: true
     },
     component: Hashtag
   },
   {
     path: '/post/:id',
-    meta: {
-      title: 'Post',
-    },
     component: Post
   }
 ]

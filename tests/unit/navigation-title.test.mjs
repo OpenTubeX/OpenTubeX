@@ -5,7 +5,6 @@ import vm from 'node:vm'
 import { computed, effectScope, nextTick, reactive, watch } from 'vue'
 import { createMemoryHistory, createRouter, START_LOCATION } from 'vue-router'
 import { createStore } from 'vuex'
-import { getFixedInternalRouteTitle } from '../../src/internalRoutes.js'
 import { reconcilePendingTabOrder } from '../../src/renderer/tabs/pendingTabOrder.js'
 import { tabLifecycleService } from '../../src/renderer/tabs/TabLifecycleService.js'
 
@@ -42,13 +41,10 @@ function mountBrowsingTitle(t, store, navigation, fullPath = '/channel/UC-test')
 }
 
 function setup() {
-  const packageDetails = { productName: 'OpenTubeX' }
   const { module, cloneRoute, normalizeRoute } = vm.runInNewContext(`${storeSource}; ({ module, cloneRoute, normalizeRoute })`, {
     URL,
     URLSearchParams,
-    packageDetails,
     DEFAULT_VIDEO_ZOOM: 1,
-    formatTabTitle: title => title,
     reconcilePendingTabOrder,
   })
   const store = createStore(module)
@@ -57,18 +53,16 @@ function setup() {
     routes: [
       { path: '/channel/:id', name: 'channel', component: {} },
       { path: '/watch/:id', name: 'watch', component: {} },
-      { path: '/external-media', component: {}, meta: { title: 'Watch', hasDynamicTitle: true } },
+      { path: '/external-media', component: {} },
       { path: '/subscriptions', name: 'subscriptions', component: {}, meta: { title: 'Subscriptions' } },
     ],
   })
   const Service = vm.runInNewContext(`${navigationSource}; TabNavigationService`, {
     cloneRoute,
     normalizeRoute,
-    packageDetails,
     tabLifecycleService,
     nextTick,
     START_LOCATION,
-    getFixedInternalRouteTitle,
     translateWindowTitle: title => title,
     runPendingViewTransition: run => run(),
     window: { setTimeout: () => 0, clearTimeout() {} },
@@ -96,6 +90,16 @@ test('minimizing Watch restores the loaded channel name without requiring its vi
   assert.equal(tab().contentTitle, 'Test video')
   await navigation.back('tab')
   assert.equal(tab().contentTitle, 'Test channel')
+})
+
+test('a page replacing its own route keeps its title', async () => {
+  const { navigation, tab } = setup()
+  await navigation.replace('tab', { path: '/channel/UC-test', query: { tab: 'clips' } })
+  assert.equal(tab().contentTitle, 'Test channel')
+  assert.equal(tab().history[tab().historyIndex].title, 'Test channel')
+
+  await navigation.replace('tab', '/watch/video')
+  assert.equal(tab().contentTitle, '/watch/video', 'another page waits for its own title')
 })
 
 test('history restores an unresolved Watch title without marking its metadata resolved', async () => {
