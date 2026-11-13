@@ -115,7 +115,8 @@ function mountWatch(t, { tab = null, paused = false, hasLoaded = true, mounted =
     inject: key => key.description === 'watch-navigation' ? provides.get('navigation') : null,
     onBeforeUnmount: callback => unmount.push(callback)
   })
-  provides.get('lifecycle').register('tab', { beforeDispose: () => { disposals++ } })
+  let heldDisposal = null
+  provides.get('lifecycle').register('tab', { beforeDispose: () => { disposals++; return heldDisposal } })
   // The routes the template renders, so a test can tell whether Watch remounted.
   const renderedRoutes = []
   scope.run(() => watch(watchRoute, route => renderedRoutes.push(route?.fullPath ?? null)))
@@ -144,6 +145,12 @@ function mountWatch(t, { tab = null, paused = false, hasLoaded = true, mounted =
     titles,
     updateTitle,
     disposals: () => disposals,
+    /** Keeps the next disposals pending until the returned function runs. */
+    holdDisposal: () => {
+      let release
+      heldDisposal = new Promise(resolve => { release = resolve })
+      return () => { heldDisposal = null; release() }
+    },
     exposed: () => exposed,
     resumes: () => resumes,
     savedBrowsingScroll: () => savedBrowsingScroll,
@@ -461,7 +468,13 @@ test('play in background docks a new player and switches it in place without lea
   for (const [index, dismissFirst] of [false, true].entries()) {
     mounted.renderedRoutes.length = 0
     const start = () => mounted.exposed().playInBackground('/watch/third')
-    await Promise.all(dismissFirst ? [navigation.dismiss(), start()] : [start(), navigation.dismiss()])
+    const release = mounted.holdDisposal()
+    const requests = dismissFirst ? [navigation.dismiss(), start()] : [start(), navigation.dismiss()]
+    await nextTick()
+    await nextTick()
+    assert.deepEqual(mounted.renderedRoutes, [], 'waits for the disposal')
+    release()
+    await Promise.all(requests)
     assert.deepEqual(mounted.renderedRoutes, [null, '/watch/third'], `remounts when ${dismissFirst ? 'dismissing' : 'starting'} first`)
     assert.equal(mounted.resumes(), 2)
     assert.equal(mounted.disposals(), 2 + index)

@@ -382,7 +382,12 @@ function clearMinimizePreview() {
  * @param {import('vue-router').RouteLocationRaw} location
  */
 async function playInBackground(location) {
-  await disposalPromise
+  // A dismissal can start while this waits for an earlier one.
+  let disposal
+  while (disposal !== disposalPromise) {
+    disposal = disposalPromise
+    await disposal
+  }
   if (isWatchRoute.value) return
   if (disposed) {
     // Unmount the disposed Watch page first, even where dismiss() already
