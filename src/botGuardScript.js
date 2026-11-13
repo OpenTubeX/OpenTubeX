@@ -2,7 +2,7 @@ import { BotGuardClient } from 'bgutils-js/botguard'
 import { buildURL, GOOG_API_KEY } from 'bgutils-js/utils'
 import { WebPoMinter } from 'bgutils-js/webpo'
 
-// This script has it's own webpack config, as it gets passed as a string to Electron's evaluateJavaScript function
+// This script has it's own Rspack config, as it gets passed as a string to Electron's evaluateJavaScript function
 // in src/main/poTokenGenerator.js
 
 /**

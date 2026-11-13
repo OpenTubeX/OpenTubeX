@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict'
-import { readFile } from 'node:fs/promises'
+import { mkdtemp, readFile, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import test from 'node:test'
 import vm from 'node:vm'
+import { rspack } from '@rspack/core'
+import botGuardConfig from '../../_scripts/rspack.botGuardScript.config.js'
 import { isAttestedPoToken, mintAttestedPoToken } from '../../src/main/attestedPoToken.js'
 import { withTimeout } from '../../src/main/promiseTimeout.js'
 
@@ -251,4 +255,22 @@ test('disabling the proxy restores the default route for the next attestation', 
   await generate(undefined)
   assert.equal(views.length, 2, 'a proxy change replaces the attestation')
   assert.deepEqual(JSON.parse(JSON.stringify(proxies)), [{ proxyRules: 'socks5://127.0.0.1:9050' }, { mode: 'system' }])
+})
+
+test('the bundled BotGuard script calls its default export with the parameters', async t => {
+  const directory = await mkdtemp(join(tmpdir(), 'opentubex-botguard-'))
+  t.after(() => rm(directory, { recursive: true, force: true }))
+  const compiler = rspack({ ...botGuardConfig, output: { ...botGuardConfig.output, path: directory } })
+  const stats = await new Promise((resolve, reject) => {
+    compiler.run((error, result) => compiler.close(() => (error ? reject(error) : resolve(result))))
+  })
+  assert.ok(!stats.hasErrors(), stats.toString('errors-only'))
+
+  const toBotGuardCall = vm.runInNewContext(`${source}\ntoBotGuardCall`)
+  const script = toBotGuardCall(await readFile(join(directory, 'botGuardScript.js'), 'utf8'))
+  assert.match(script, /\(FT_PARAMS\)$/)
+  // Without the parameters, the script evaluates to the function it would call
+  const generate = vm.runInNewContext(script.replace(/\(FT_PARAMS\)$/, ''))
+  assert.equal(typeof generate, 'function')
+  assert.equal(generate.length, 4, 'videoId, context, initialAttestationData and ytConfig')
 })

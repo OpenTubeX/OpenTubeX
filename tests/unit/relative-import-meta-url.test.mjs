@@ -6,14 +6,14 @@ import { join } from 'node:path'
 import test from 'node:test'
 
 const require = createRequire(import.meta.url)
-const webpack = require('webpack')
+const { rspack } = require('@rspack/core')
 const RelativeImportMetaUrlPlugin = require('../../_scripts/RelativeImportMetaUrlPlugin.js')
 
 test('bundles import.meta.url without the checkout path', async (t) => {
   const directory = await mkdtemp(join(tmpdir(), 'import-meta-url-'))
   t.after(() => rm(directory, { recursive: true, force: true }))
   await writeFile(join(directory, 'entry.mjs'), 'const scriptName = import.meta.url\nexport const base = new URL(".", scriptName).href\n')
-  const compiler = webpack({
+  const compiler = rspack({
     mode: 'production',
     context: directory,
     entry: './entry.mjs',

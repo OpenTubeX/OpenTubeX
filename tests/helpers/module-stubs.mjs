@@ -4,7 +4,7 @@ let nextStubSet = 0
 
 /**
  * Imports modules through their real interfaces while replacing some of their
- * dependencies, such as the store or Electron, with stand-ins. Like webpack,
+ * dependencies, such as the store or Electron, with stand-ins. Like Rspack,
  * it resolves extensionless relative imports.
  *
  * Modules are cached, so each test file should import them once and change

@@ -559,7 +559,7 @@ export async function pickFilesWithPicker(
   // Only supported in Electron and desktop Chromium browsers
   // https://developer.mozilla.org/en-US/docs/Web/API/Window/showOpenFilePicker#browser_compatibility
   // As we know it is supported in Electron, adding the build flag means we can skip the runtime check in Electron
-  // and allow terser to remove the unused else block
+  // and allow the minifier to remove the unused else block
   if (process.env.IS_ELECTRON || 'showOpenFilePicker' in window) {
     try {
       /** @type {FileSystemFileHandle[]} */
@@ -675,7 +675,7 @@ export async function writeFileWithPicker(
   // Only supported in Electron and desktop Chromium browsers
   // https://developer.mozilla.org/en-US/docs/Web/API/Window/showOpenFilePicker#browser_compatibility
   // As we know it is supported in Electron, adding the build flag means we can skip the runtime check in Electron
-  // and allow terser to remove the unused else block
+  // and allow the minifier to remove the unused else block
   if (process.env.IS_ELECTRON || 'showSaveFilePicker' in window) {
     let writableFileStream
 

@@ -9,7 +9,7 @@ import { SyncServerDataLossError } from '../../src/renderer/helpers/sync-server-
 import * as profileSync from '../../src/renderer/helpers/profile-sync.js'
 import * as profileSnapshots from '../../src/renderer/helpers/profileSyncSnapshot.js'
 
-// Run the real sync code, replacing webpack imports with its profile dependencies.
+// Run the real sync code, replacing bundler imports with its profile dependencies.
 const source = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
 const context = vm.createContext({ DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeSyncIds, syncVideoToRemote, MAIN_PROFILE_ID, SyncServerDataLossError, deepCopy: structuredClone, ...profileSync })
 vm.runInContext(source

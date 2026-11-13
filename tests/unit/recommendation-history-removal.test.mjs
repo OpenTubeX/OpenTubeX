@@ -23,7 +23,7 @@ const sources = await Promise.all([
   'src/renderer/store/index.js',
 ].map(path => readFile(new URL(`../../${path}`, import.meta.url), 'utf8')))
 
-// Resolve webpack imports locally, keeping the real datastore handlers, Vuex
+// Resolve bundler imports locally, keeping the real datastore handlers, Vuex
 // actions, mutations and plugin registration. No Electron or network is needed.
 function evaluate (source, dependencies, exports = '') {
   const body = source.replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')

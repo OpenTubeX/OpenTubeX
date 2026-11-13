@@ -156,11 +156,20 @@ async function sharedInit() {
     ? join(__dirname, '../../dist/botGuardScript.js')
     : join(__dirname, 'botGuardScript.js')
 
-  const scriptContent = await readFile(pathToScript, 'utf-8')
+  cachedScript = toBotGuardCall(await readFile(pathToScript, 'utf-8'))
+}
 
-  const scriptExportMatch = scriptContent.match(/export{(\w+) as default};/)
+/**
+ * Turns the bundled BotGuard module into a script that calls its default export with `FT_PARAMS`.
+ * Rspack emits the export inline or as `export{name as default};`.
+ * @param {string} scriptContent
+ */
+function toBotGuardCall(scriptContent) {
+  const exportMatch = scriptContent.match(/export{(\w+) as default};/)
 
-  cachedScript = scriptContent.replace(scriptExportMatch[0], `;${scriptExportMatch[1]}(FT_PARAMS)`)
+  return exportMatch
+    ? scriptContent.replace(exportMatch[0], `;${exportMatch[1]}(FT_PARAMS)`)
+    : `${scriptContent.replace('export default ', 'const ftBotGuardScript=')};ftBotGuardScript(FT_PARAMS)`
 }
 
 // bgutils-js 4 can leave its callback-backed snapshot pending forever.

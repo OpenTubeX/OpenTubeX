@@ -3,7 +3,7 @@ const ProcessBoundaryPlugin = require('./ProcessBoundaryPlugin')
 
 const isDevMode = process.env.NODE_ENV === 'development'
 
-/** @type {import('webpack').Configuration} */
+/** @type {import('@rspack/core').Configuration} */
 const config = {
   name: 'preload',
   mode: process.env.NODE_ENV,

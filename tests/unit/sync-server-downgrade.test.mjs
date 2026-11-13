@@ -33,7 +33,7 @@ import { mergeSubscriptionSeenVideos } from '../../src/subscriptionSeenVideos.js
 import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from '../../src/renderer/helpers/subscription-seen-videos.js'
 import { mergeRssFeedSeenItems, syncRssFeedSeenItems } from '../../src/renderer/helpers/rssFeedSeenItems.js'
 
-// These modules use webpack imports. Keep their actual request, merge, and store
+// These modules use bundler imports. Keep their actual request, merge, and store
 // code while replacing platform dependencies and the network with local fixtures.
 function withoutImports (source) {
   return source.replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')

@@ -6,15 +6,15 @@ import { createRequire } from 'node:module'
 import { once } from 'node:events'
 import net from 'node:net'
 import test from 'node:test'
-import webpack from 'webpack'
-import config from '../../_scripts/webpack.main.config.js'
+import { rspack } from '@rspack/core'
+import config from '../../_scripts/rspack.main.config.js'
 
 const require = createRequire(import.meta.url)
 
 test('main bundling includes font-list dependencies and preserves the runtime native addon loaders', async t => {
   const directory = await mkdtemp(path.join(tmpdir(), 'opentubex-main-bundle-'))
   t.after(() => rm(directory, { recursive: true, force: true }))
-  const compiler = webpack({
+  const compiler = rspack({
     ...config,
     mode: 'production',
     devtool: false,
@@ -45,7 +45,7 @@ test('main bundling includes font-list dependencies and preserves the runtime na
 test('main D-Bus bundling excludes Bun loaders and preserves Node socket connections', async t => {
   const directory = await mkdtemp(path.join(tmpdir(), 'dbus-'))
   t.after(() => rm(directory, { recursive: true, force: true }))
-  const compiler = webpack({
+  const compiler = rspack({
     ...config,
     mode: 'production',
     devtool: false,
