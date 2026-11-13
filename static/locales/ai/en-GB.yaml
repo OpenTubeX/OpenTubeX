@@ -2235,7 +2235,7 @@ Description:
 Tooltips:
   YouTube Account Settings:
     Sync Subscriptions: "Channels you subscribe to on YouTube are added to All Channels, and channels you unsubscribe from there are removed from every profile. Subscribing or unsubscribing in All Channels here does the same on YouTube."
-    Sync Playlists: "Your YouTube playlists, Watch later and Liked videos appear in Your playlists, and changes you make to them here are made on YouTube too. They are not synced to your other devices, exported or backed up. Turning this off removes them from this device but not from YouTube."
+    Sync Playlists: "Your YouTube playlists, Watch later and Liked videos appear in Your playlists, and changes you make to them here are made on YouTube too. They are not synced to your other devices or included when you export all playlists or back up your data. Turning this off removes them from this device but not from YouTube."
     Add to YouTube Watch History: "Videos you play are added to your YouTube watch history, so YouTube's recommendations learn from them. Nothing is added while the history is paused on YouTube."
   General Settings:
     Built-in Streams: |

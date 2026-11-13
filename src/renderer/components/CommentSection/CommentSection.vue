@@ -859,7 +859,6 @@ const youTubeComments = {
     const thread = commentData.value.find(entry => entry.id === rootId)
     const parent = thread && rootId !== commentId ? findCommentParent(thread, commentId) : null
     const comment = rootId === commentId ? thread : parent?.replies.find(reply => reply.id === commentId)
-    // Shown replies keep the object they were created with, so it changes in place.
     if (comment) Object.assign(comment, getEditedCommentFields(comment, text))
     // A new list, so the reply tree, which nests replies by their mentions, is rebuilt.
     if (parent) parent.replies = [...parent.replies]
@@ -1634,8 +1633,12 @@ async function toggleCommentTranslation(comment) {
 
   loadingTranslationIds.value = new Set(loadingTranslationIds.value).add(comment.id)
 
+  const source = comment.translationText
   try {
-    comment.translatedText = await translateCommentText(comment.translationText, targetLanguage)
+    const translatedText = await translateCommentText(source, targetLanguage)
+    // An edit saved meanwhile replaced the text this translates.
+    if (comment.translationText !== source) return
+    comment.translatedText = translatedText
     comment.translatedLanguage = targetLanguage
     comment.showTranslated = true
   } catch (error) {

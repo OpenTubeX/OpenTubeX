@@ -10,7 +10,8 @@
 /**
  * Changes on YouTube since the last sync. Channels subscribed to or
  * unsubscribed from only in OpenTubeX stay as they are; the first sync only
- * adds.
+ * adds. An empty list is more likely a page that was misread than an
+ * unsubscribe from every channel, so it removes nothing either.
  * @template {{ id: string }} T
  * @param {string[] | null} previousIds the channels YouTube had at the last sync, null before the first
  * @param {T[]} remoteChannels the channels YouTube has now
@@ -22,7 +23,7 @@ export function diffYouTubeSubscriptions(previousIds, remoteChannels, localIds) 
   const remoteIds = new Set(remoteChannels.map(channel => channel.id))
   return {
     added: remoteChannels.filter(channel => !localIds.has(channel.id) && !previous?.has(channel.id)),
-    removedIds: previous === null ? [] : [...previous].filter(id => !remoteIds.has(id) && localIds.has(id))
+    removedIds: previous === null || remoteChannels.length === 0 ? [] : [...previous].filter(id => !remoteIds.has(id) && localIds.has(id))
   }
 }
 

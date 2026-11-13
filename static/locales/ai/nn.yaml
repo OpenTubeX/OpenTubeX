@@ -2548,7 +2548,7 @@ Tooltips:
   YouTube Account Settings:
     Add to YouTube Watch History: "Videoar du spelar av, blir lagde til i visingshistorikken din på YouTube, slik at tilrådingane til YouTube lærer av dei. Ingenting blir lagt til medan historikken er sett på pause på YouTube."
     Sync Subscriptions: "Når du abonnerer på ein kanal på YouTube, blir han lagd til i «Alle kanalar», og når du avsluttar abonnementet der, blir han fjerna frå alle profilar. Å abonnere eller avslutte abonnementet her i «Alle kanalar» gjer det same på YouTube."
-    Sync Playlists: "YouTube-spelelistene dine, «Sjå seinare» og «Lika videoar» blir viste i «Dine spelelistar», og endringar du gjer i dei her, blir òg gjorde på YouTube. Dei blir ikkje synkroniserte til dei andre einingane dine, eksporterte eller sikkerheitskopierte. Om du slår av dette, blir dei fjerna frå denne eininga, men ikkje frå YouTube."
+    Sync Playlists: "YouTube-spelelistene dine, «Sjå seinare» og «Lika videoar» blir viste i «Dine spelelistar», og endringar du gjer i dei her, blir òg gjorde på YouTube. Dei blir ikkje synkroniserte til dei andre einingane dine og blir ikkje tekne med når du eksporterer alle spelelistene eller tek sikkerheitskopi av dataa dine. Om du slår av dette, blir dei fjerna frå denne eininga, men ikkje frå YouTube."
   General Settings:
     Built-in Streams: |
       Automatisk spelar dei fleste videoane via visionOS-klienten til YouTube, som startar raskare og støttar automatisk kvalitet. Direktesendingar og videoar han ikkje kan spela av, brukar SABR.

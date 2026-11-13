@@ -2293,7 +2293,7 @@ Description:
 Tooltips:
   YouTube Account Settings:
     Sync Subscriptions: "Canalele la care vă abonați pe YouTube sunt adăugate în „Toate canalele”, iar canalele de la care vă dezabonați acolo sunt eliminate din toate profilurile. Abonarea sau dezabonarea în „Toate canalele” de aici face același lucru pe YouTube."
-    Sync Playlists: "Listele dvs. de redare de pe YouTube, „Vizionează mai târziu” și „Videoclipuri apreciate” apar în „Listele tale de redare”, iar modificările pe care le faceți aici în ele se fac și pe YouTube. Acestea nu sunt sincronizate cu celelalte dispozitive ale dvs., nu sunt exportate și nu sunt incluse în copiile de rezervă. Dezactivarea acestei opțiuni le elimină de pe acest dispozitiv, dar nu și de pe YouTube."
+    Sync Playlists: "Listele dvs. de redare de pe YouTube, „Vizionează mai târziu” și „Videoclipuri apreciate” apar în „Listele tale de redare”, iar modificările pe care le faceți aici în ele se fac și pe YouTube. Acestea nu sunt sincronizate cu celelalte dispozitive ale dvs. și nu sunt incluse când exportați toate listele de redare sau faceți o copie de rezervă a datelor. Dezactivarea acestei opțiuni le elimină de pe acest dispozitiv, dar nu și de pe YouTube."
     Add to YouTube Watch History: "Videoclipurile pe care le redați sunt adăugate în istoricul vizionărilor YouTube, astfel încât recomandările YouTube să învețe din ele. Nu se adaugă nimic cât timp istoricul este întrerupt pe YouTube."
   General Settings:
     Built-in Streams: |

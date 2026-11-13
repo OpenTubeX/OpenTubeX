@@ -2624,7 +2624,7 @@ Tooltips:
   YouTube Account Settings:
     Add to YouTube Watch History: "재생한 동영상이 YouTube 시청 기록에 추가되어 YouTube 추천에 반영됩니다. YouTube에서 기록이 일시중지된 동안에는 아무것도 추가되지 않습니다."
     Sync Subscriptions: "YouTube에서 구독한 채널은 “모든 채널”에 추가되고, YouTube에서 구독 취소한 채널은 모든 프로필에서 삭제됩니다. 여기서 “모든 채널”의 채널을 구독하거나 구독 취소하면 YouTube에서도 똑같이 적용됩니다."
-    Sync Playlists: "YouTube 재생 목록, “나중에 볼 동영상”, “좋아요 표시한 동영상”이 “나의 재생 목록”에 표시되며, 여기서 변경한 내용은 YouTube에도 반영됩니다. 다른 기기와 동기화되지 않으며 내보내거나 백업되지도 않습니다. 이 옵션을 끄면 이 기기에서는 삭제되지만 YouTube에서는 삭제되지 않습니다."
+    Sync Playlists: "YouTube 재생 목록, “나중에 볼 동영상”, “좋아요 표시한 동영상”이 “나의 재생 목록”에 표시되며, 여기서 변경한 내용은 YouTube에도 반영됩니다. 다른 기기와 동기화되지 않으며 모든 재생 목록을 내보내거나 데이터를 백업할 때도 포함되지 않습니다. 이 옵션을 끄면 이 기기에서는 삭제되지만 YouTube에서는 삭제되지 않습니다."
   General Settings:
     Built-in Streams: |
       자동은 대부분의 동영상을 YouTube의 visionOS 클라이언트로 재생하며, 더 빨리 시작되고 자동 화질을 지원합니다. 실시간 스트림과 재생할 수 없는 동영상은 SABR을 사용합니다.

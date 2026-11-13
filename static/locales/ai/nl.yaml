@@ -2304,7 +2304,7 @@ Tooltips:
   YouTube Account Settings:
     Add to YouTube Watch History: "Video's die u afspeelt, worden toegevoegd aan uw YouTube-kijkgeschiedenis, zodat de aanbevelingen van YouTube ervan leren. Er wordt niets toegevoegd zolang de geschiedenis op YouTube is onderbroken."
     Sync Subscriptions: "Kanalen waarop u zich op YouTube abonneert, worden toegevoegd aan ‘Alle kanalen’, en kanalen waarvan u daar het abonnement opzegt, worden uit elk profiel verwijderd. Abonneren of deabonneren hier in ‘Alle kanalen’ doet hetzelfde op YouTube."
-    Sync Playlists: "Uw YouTube-afspeellijsten, ‘Later bekijken’ en ‘Video's die ik leuk vind’ verschijnen in ‘Jouw afspeellijsten’, en wijzigingen die u er hier in aanbrengt, worden ook op YouTube doorgevoerd. Ze worden niet gesynchroniseerd met uw andere apparaten, niet geëxporteerd en niet in back-ups opgenomen. Als u dit uitschakelt, worden ze van dit apparaat verwijderd, maar niet van YouTube."
+    Sync Playlists: "Uw YouTube-afspeellijsten, ‘Later bekijken’ en ‘Video's die ik leuk vind’ verschijnen in ‘Jouw afspeellijsten’, en wijzigingen die u er hier in aanbrengt, worden ook op YouTube doorgevoerd. Ze worden niet gesynchroniseerd met uw andere apparaten en niet meegenomen wanneer u alle afspeellijsten exporteert of een back-up van uw gegevens maakt. Als u dit uitschakelt, worden ze van dit apparaat verwijderd, maar niet van YouTube."
   General Settings:
     Built-in Streams: |
       Automatisch speelt de meeste video's af via de visionOS-client van YouTube, die sneller start en automatische kwaliteit ondersteunt. Livestreams en video's die hij niet kan afspelen, gebruiken SABR.

@@ -2992,7 +2992,7 @@ Dismiss: Ausblenden
 Tooltips:
   YouTube Account Settings:
     Sync Subscriptions: "Kanäle, die du auf YouTube abonnierst, kommen zu „Alle Kanäle“ hinzu, und Kanäle, deren Abo du dort beendest, werden aus jedem Profil entfernt. Wenn du hier in „Alle Kanäle“ abonnierst oder ein Abo beendest, passiert das auch auf YouTube."
-    Sync Playlists: "Deine YouTube-Playlists, „Später ansehen“ und „Videos mit ‚Mag ich‘-Bewertung“ erscheinen unter „Deine Playlists“, und deine Änderungen daran werden auch auf YouTube übernommen. Sie werden nicht mit deinen anderen Geräten synchronisiert, exportiert oder gesichert. Wenn du das ausschaltest, werden sie von diesem Gerät entfernt, aber nicht von YouTube."
+    Sync Playlists: "Deine YouTube-Playlists, „Später ansehen“ und „Videos mit ‚Mag ich‘-Bewertung“ erscheinen unter „Deine Playlists“, und deine Änderungen daran werden auch auf YouTube übernommen. Sie werden nicht mit deinen anderen Geräten synchronisiert und nicht einbezogen, wenn du alle Playlists exportierst oder deine Daten sicherst. Wenn du das ausschaltest, werden sie von diesem Gerät entfernt, aber nicht von YouTube."
     Add to YouTube Watch History: "Videos, die du abspielst, werden zu deinem YouTube-Verlauf hinzugefügt, damit die Empfehlungen von YouTube daraus lernen. Solange der Verlauf auf YouTube pausiert ist, wird nichts hinzugefügt."
   General Settings:
     Preferred Video Codec: |

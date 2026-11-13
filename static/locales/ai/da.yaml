@@ -2325,7 +2325,7 @@ Description:
 Tooltips:
   YouTube Account Settings:
     Sync Subscriptions: "Når du abonnerer på en kanal på YouTube, føjes den til “Alle kanaler”, og når du afmelder abonnementet på en kanal der, fjernes den fra alle profiler. Når du abonnerer eller afmelder abonnementer i “Alle kanaler” her, sker det samme på YouTube."
-    Sync Playlists: "Dine YouTube-playlister, “Se senere” og “Videoer, jeg synes godt om” vises i “Dine playlister”, og ændringer, du foretager i dem her, foretages også på YouTube. De synkroniseres ikke til dine andre enheder, eksporteres ikke og sikkerhedskopieres ikke. Hvis du slår dette fra, fjernes de fra denne enhed, men ikke fra YouTube."
+    Sync Playlists: "Dine YouTube-playlister, “Se senere” og “Videoer, jeg synes godt om” vises i “Dine playlister”, og ændringer, du foretager i dem her, foretages også på YouTube. De synkroniseres ikke til dine andre enheder og medtages ikke, når du eksporterer alle playlister eller sikkerhedskopierer dine data. Hvis du slår dette fra, fjernes de fra denne enhed, men ikke fra YouTube."
     Add to YouTube Watch History: "Videoer, du afspiller, føjes til din YouTube-visningshistorik, så YouTubes anbefalinger lærer af dem. Der føjes intet til, mens historikken er sat på pause på YouTube."
   General Settings:
     Built-in Streams: |

@@ -2252,7 +2252,7 @@ Description:
 Tooltips:
   YouTube Account Settings:
     Sync Subscriptions: "Các kênh bạn đăng ký trên YouTube sẽ được thêm vào Tất cả kênh, còn các kênh bạn hủy đăng ký ở đó sẽ bị xóa khỏi mọi hồ sơ. Đăng ký hoặc hủy đăng ký trong Tất cả kênh tại đây cũng sẽ thực hiện tương tự trên YouTube."
-    Sync Playlists: "Danh sách phát YouTube, Xem sau và Video đã thích của bạn sẽ xuất hiện trong Danh sách phát của bạn, và những thay đổi bạn thực hiện với chúng tại đây cũng được áp dụng trên YouTube. Chúng không được đồng bộ sang các thiết bị khác của bạn, không được xuất và không được sao lưu. Tắt tùy chọn này sẽ xóa chúng khỏi thiết bị này nhưng không xóa khỏi YouTube."
+    Sync Playlists: "Danh sách phát YouTube, Xem sau và Video đã thích của bạn sẽ xuất hiện trong Danh sách phát của bạn, và những thay đổi bạn thực hiện với chúng tại đây cũng được áp dụng trên YouTube. Chúng không được đồng bộ sang các thiết bị khác của bạn và không được bao gồm khi bạn xuất tất cả danh sách phát hoặc sao lưu dữ liệu. Tắt tùy chọn này sẽ xóa chúng khỏi thiết bị này nhưng không xóa khỏi YouTube."
     Add to YouTube Watch History: "Video bạn phát sẽ được thêm vào lịch sử xem YouTube của bạn để đề xuất của YouTube học hỏi từ đó. Không có gì được thêm khi lịch sử đang bị tạm dừng trên YouTube."
   General Settings:
     Built-in Streams: |

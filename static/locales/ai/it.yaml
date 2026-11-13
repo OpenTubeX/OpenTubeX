@@ -2238,7 +2238,7 @@ Tooltips:
   YouTube Account Settings:
     Add to YouTube Watch History: "I video che riproduci vengono aggiunti alla tua cronologia delle visualizzazioni di YouTube, così i consigli di YouTube imparano da essi. Non viene aggiunto nulla mentre la cronologia è in pausa su YouTube."
     Sync Subscriptions: "I canali a cui ti iscrivi su YouTube vengono aggiunti a «Tutti i canali», e quelli da cui annulli l'iscrizione lì vengono rimossi da tutti i profili. Iscriversi o annullare l'iscrizione qui in «Tutti i canali» fa lo stesso su YouTube."
-    Sync Playlists: "Le tue playlist di YouTube, «Guarda più tardi» e «Video piaciuti» compaiono in «Le tue playlist», e le modifiche che vi apporti qui vengono applicate anche su YouTube. Non vengono sincronizzate con gli altri tuoi dispositivi, esportate o incluse nei backup. Disattivando questa opzione vengono rimosse da questo dispositivo, ma non da YouTube."
+    Sync Playlists: "Le tue playlist di YouTube, «Guarda più tardi» e «Video piaciuti» compaiono in «Le tue playlist», e le modifiche che vi apporti qui vengono applicate anche su YouTube. Non vengono sincronizzate con gli altri tuoi dispositivi né incluse quando esporti tutte le playlist o esegui il backup dei tuoi dati. Disattivando questa opzione vengono rimosse da questo dispositivo, ma non da YouTube."
   General Settings:
     Built-in Streams: |
       Automatico riproduce la maggior parte dei video tramite il client visionOS di YouTube, che si avvia più rapidamente e supporta la qualità automatica. Le dirette e i video che non può riprodurre usano SABR.

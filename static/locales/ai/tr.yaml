@@ -2238,7 +2238,7 @@ Description:
 Tooltips:
   YouTube Account Settings:
     Sync Subscriptions: "YouTube'da abone olduğunuz kanallar Tüm Kanallar'a eklenir, orada abonelikten çıktığınız kanallar ise tüm profillerden kaldırılır. Burada Tüm Kanallar'da abone olmak veya abonelikten çıkmak YouTube'da da aynısını yapar."
-    Sync Playlists: "YouTube oynatma listeleriniz, Daha sonra izle ve Beğenilen videolar, Oynatma Listelerin bölümünde görünür ve burada bunlarda yaptığınız değişiklikler YouTube'da da yapılır. Diğer cihazlarınızla eşitlenmez, dışa aktarılmaz ve yedeklenmez. Bunu kapatmak onları bu cihazdan kaldırır ancak YouTube'dan kaldırmaz."
+    Sync Playlists: "YouTube oynatma listeleriniz, Daha sonra izle ve Beğenilen videolar, Oynatma Listelerin bölümünde görünür ve burada bunlarda yaptığınız değişiklikler YouTube'da da yapılır. Diğer cihazlarınızla eşitlenmez ve tüm oynatma listelerini dışa aktardığınızda veya verilerinizi yedeklediğinizde dahil edilmez. Bunu kapatmak onları bu cihazdan kaldırır ancak YouTube'dan kaldırmaz."
     Add to YouTube Watch History: "Oynattığınız videolar YouTube izleme geçmişinize eklenir, böylece YouTube önerileri bunlardan öğrenir. Geçmiş YouTube'da duraklatılmışken hiçbir şey eklenmez."
   General Settings:
     Built-in Streams: |

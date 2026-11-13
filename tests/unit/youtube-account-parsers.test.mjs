@@ -135,6 +135,23 @@ test('lists each subscribed channel once from the TV Subscriptions tabs', () => 
   ])
   // Sync would unsubscribe from everything if an unreadable page counted as empty.
   assert.throws(() => parseSubscribedChannels({ contents: {} }))
+  // Or from the channels on later pages if it read only the first.
+  assert.throws(() => parseSubscribedChannels({
+    contents: {
+      tvBrowseRenderer: {
+        content: {
+          tvSecondaryNavRenderer: {
+            sections: [{
+              tvSecondaryNavSectionRenderer: {
+                tabs: [channelTab('First Channel', 'UCaaaaaaaaaaaaaaaaaa-_aa')],
+                continuations: [{ nextContinuationData: { continuation: 'next' } }]
+              }
+            }]
+          }
+        }
+      }
+    }
+  }))
 })
 
 const playlistTile = (playlistId, title, count, thumbnail) => ({

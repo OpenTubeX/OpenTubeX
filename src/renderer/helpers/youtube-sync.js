@@ -252,7 +252,7 @@ async function pushSubscriptions(channelIds, subscribed, account) {
  * sync. A playlist changed here meanwhile is left for the next sync.
  * @param {YouTubeAccount} account
  * @param {YouTubePlaylistSummary} summary
- * @param {boolean} force reads the whole playlist, which also finds moved videos
+ * @param {boolean} force reads the playlist even when its count and first video are unchanged
  * @param {boolean} [restoreName] takes YouTube's name, after YouTube refused a rename
  */
 async function pullPlaylist(account, summary, force, restoreName = false) {
@@ -263,8 +263,9 @@ async function pullPlaylist(account, summary, force, restoreName = false) {
 
   const previous = saved ? deepCopy(toRaw(saved)) : null
   const savedVideos = previous?.videos ?? []
-  // Liked videos cannot be reordered, so its start shows every change.
-  const readAll = force && summary.playlistId !== LIKED_VIDEOS
+  // Liked videos only gains videos at its start, so the start and the count
+  // show every change. Other playlists can change anywhere.
+  const readAll = summary.playlistId !== LIKED_VIDEOS
   const { title, videos } = await getYouTubePlaylistVideos(summary.playlistId, account,
     readAll ? undefined : read => completeYouTubePlaylistVideos(read, savedVideos, summary.videoCount))
   throwIfAccountChanged(account)

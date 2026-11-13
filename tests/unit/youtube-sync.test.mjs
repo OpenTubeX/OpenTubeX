@@ -43,6 +43,9 @@ test('subscription sync applies only the changes made on YouTube since the last 
     diffYouTubeSubscriptions(['A', 'B', 'C'], [channel('A'), channel('C'), channel('D')], new Set(['A', 'B', 'local'])),
     { added: [channel('D')], removedIds: ['B'] }
   )
+
+  // An empty list removes nothing, as a misread page would otherwise empty every profile.
+  assert.deepEqual(diffYouTubeSubscriptions(['A', 'B'], [], new Set(['A', 'B'])), { added: [], removedIds: [] })
 })
 
 test('playlist sync keeps saved entries and confirms the ones added here', () => {

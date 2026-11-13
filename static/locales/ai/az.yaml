@@ -2250,7 +2250,7 @@ Description:
 Tooltips:
   YouTube Account Settings:
     Sync Subscriptions: "YouTube-da abunə olduğunuz kanallar “Bütün Kanallar” bölməsinə əlavə olunur, orada abunəlikdən çıxdığınız kanallar isə bütün profillərdən silinir. Burada “Bütün Kanallar” bölməsində abunə olmaq və ya abunəlikdən çıxmaq YouTube-da da eyni şeyi edir."
-    Sync Playlists: "YouTube pleylistləriniz, “Sonra baxın” və “Bəyənilən videolar” “Pleylistləriniz” bölməsində görünür və burada onlara etdiyiniz dəyişikliklər YouTube-da da edilir. Onlar digər cihazlarınızla sinxronlaşdırılmır, ixrac edilmir və ehtiyat nüsxəyə daxil edilmir. Bunu söndürmək onları bu cihazdan silir, lakin YouTube-dan silmir."
+    Sync Playlists: "YouTube pleylistləriniz, “Sonra baxın” və “Bəyənilən videolar” “Pleylistləriniz” bölməsində görünür və burada onlara etdiyiniz dəyişikliklər YouTube-da da edilir. Onlar digər cihazlarınızla sinxronlaşdırılmır və bütün pleylistləri ixrac etdikdə və ya məlumatlarınızın ehtiyat nüsxəsini çıxardıqda daxil edilmir. Bunu söndürmək onları bu cihazdan silir, lakin YouTube-dan silmir."
     Add to YouTube Watch History: "Oxutduğunuz videolar YouTube baxış tarixçənizə əlavə olunur, beləliklə YouTube tövsiyələri onlardan öyrənir. YouTube-da tarixçə dayandırılıbsa, heç nə əlavə olunmur."
   General Settings:
     Built-in Streams: |

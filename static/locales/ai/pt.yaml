@@ -2238,7 +2238,7 @@ Description:
 Tooltips:
   YouTube Account Settings:
     Sync Subscriptions: "Os canais que subscreve no YouTube são adicionados a Todos os canais, e os canais cuja subscrição cancela lá são removidos de todos os perfis. Subscrever ou cancelar a subscrição em Todos os canais aqui faz o mesmo no YouTube."
-    Sync Playlists: "As suas playlists do YouTube, Ver mais tarde e Vídeos de que gostei aparecem em Suas playlists, e as alterações que lhes fizer aqui também são feitas no YouTube. Não são sincronizadas com os seus outros dispositivos, exportadas nem incluídas em cópias de segurança. Desativar esta opção remove-as deste dispositivo, mas não do YouTube."
+    Sync Playlists: "As suas playlists do YouTube, Ver mais tarde e Vídeos de que gostei aparecem em Suas playlists, e as alterações que lhes fizer aqui também são feitas no YouTube. Não são sincronizadas com os seus outros dispositivos nem incluídas quando exporta todas as playlists ou faz uma cópia de segurança dos seus dados. Desativar esta opção remove-as deste dispositivo, mas não do YouTube."
     Add to YouTube Watch History: "Os vídeos que reproduz são adicionados ao seu histórico de visualizações do YouTube, para que as recomendações do YouTube aprendam com eles. Nada é adicionado enquanto o histórico estiver em pausa no YouTube."
   General Settings:
     Built-in Streams: |

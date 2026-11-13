@@ -2298,7 +2298,7 @@ Tooltips:
   YouTube Account Settings:
     Add to YouTube Watch History: "Os vídeos que reproduces engádense ao teu historial de reprodución de YouTube, para que as recomendacións de YouTube aprendan deles. Non se engade nada mentres o historial estea en pausa en YouTube."
     Sync Subscriptions: "As canles ás que te subscribes en YouTube engádense a «Tódalas canles», e as canles das que cancelas a subscrición alí elimínanse de todos os perfís. Subscribirse ou cancelar a subscrición aquí en «Tódalas canles» fai o mesmo en YouTube."
-    Sync Playlists: "As túas listas de reprodución de YouTube, «Ver máis tarde» e «Vídeos que me gustan» aparecen en «As túas listaxes de reprodución», e os cambios que fagas nelas aquí tamén se fan en YouTube. Non se sincronizan cos teus outros dispositivos nin se exportan nin se inclúen nas copias de seguranza. Ao desactivar isto elimínanse deste dispositivo, pero non de YouTube."
+    Sync Playlists: "As túas listas de reprodución de YouTube, «Ver máis tarde» e «Vídeos que me gustan» aparecen en «As túas listaxes de reprodución», e os cambios que fagas nelas aquí tamén se fan en YouTube. Non se sincronizan cos teus outros dispositivos nin se inclúen cando exportas todas as listas de reprodución ou fas unha copia de seguranza dos teus datos. Ao desactivar isto elimínanse deste dispositivo, pero non de YouTube."
   General Settings:
     Built-in Streams: |
       Automático reproduce a maioría dos vídeos co cliente visionOS de YouTube, que comeza máis rápido e admite a calidade automática. As emisións en directo e os vídeos que non pode reproducir usan SABR.

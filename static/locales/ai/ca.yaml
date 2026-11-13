@@ -2775,7 +2775,7 @@ Description:
 Tooltips:
   YouTube Account Settings:
     Sync Subscriptions: "Els canals als quals et subscrius a YouTube s'afegeixen a «Tots els canals», i els canals dels quals et dones de baixa allà se suprimeixen de tots els perfils. Subscriure't o donar-te de baixa a «Tots els canals» aquí fa el mateix a YouTube."
-    Sync Playlists: "Les teves llistes de reproducció de YouTube, «Mira més tard» i «Vídeos que m'agraden» apareixen a «Les teves llistes de reproducció», i els canvis que hi facis aquí també es fan a YouTube. No se sincronitzen amb els teus altres dispositius, no s'exporten ni s'inclouen a les còpies de seguretat. Si desactives aquesta opció, se suprimeixen d'aquest dispositiu, però no de YouTube."
+    Sync Playlists: "Les teves llistes de reproducció de YouTube, «Mira més tard» i «Vídeos que m'agraden» apareixen a «Les teves llistes de reproducció», i els canvis que hi facis aquí també es fan a YouTube. No se sincronitzen amb els teus altres dispositius ni s'inclouen quan exportes totes les llistes de reproducció o fas una còpia de seguretat de les teves dades. Si desactives aquesta opció, se suprimeixen d'aquest dispositiu, però no de YouTube."
     Add to YouTube Watch History: "Els vídeos que reprodueixes s'afegeixen al teu historial de visualitzacions de YouTube, perquè les recomanacions de YouTube n'aprenguin. No s'hi afegeix res mentre l'historial està en pausa a YouTube."
   General Settings:
     Built-in Streams: |

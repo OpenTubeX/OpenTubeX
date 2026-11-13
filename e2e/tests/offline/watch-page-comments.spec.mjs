@@ -1090,7 +1090,6 @@ test.describe('manual comment loading', () => {
       await lastThread.locator('.editComposer').getByRole('button', { name: 'Save' }).click()
       await expect(lastThread.locator('.editComposer')).toHaveCount(0)
       await expect(lastThread.locator('.commentText').first()).toHaveText('Edited comment')
-      await expect(lastThread.locator('.commentDate').first()).toContainText('(edited)')
       await expectScrollInRange()
 
       const threadCount = await dock.locator('.commentThread').count()

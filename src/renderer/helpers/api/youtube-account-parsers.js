@@ -171,7 +171,13 @@ export function parseAccountProfiles(data) {
 export function parseSubscribedChannels(data) {
   // Sync removes the channels missing here, so a page it cannot read must not count as empty.
   if (!data?.contents?.tvBrowseRenderer) throw new Error('YouTube returned no subscriptions page')
-  const sections = data.contents.tvBrowseRenderer.content?.tvSecondaryNavRenderer?.sections ?? []
+  const nav = data.contents.tvBrowseRenderer.content?.tvSecondaryNavRenderer
+  const sections = nav?.sections ?? []
+  // The channels on a later page would count as unsubscribed.
+  if (nav?.continuations || sections.some(section => section?.tvSecondaryNavSectionRenderer?.continuations ||
+    section?.tvSecondaryNavSectionRenderer?.tabs?.some(entry => entry?.continuationItemRenderer))) {
+    throw new Error('YouTube listed only some of the subscriptions')
+  }
   const channels = new Map()
 
   for (const section of sections) {

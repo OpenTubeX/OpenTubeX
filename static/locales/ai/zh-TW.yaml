@@ -2244,7 +2244,7 @@ Description:
 Tooltips:
   YouTube Account Settings:
     Sync Subscriptions: "您在 YouTube 上訂閱的頻道會加入「所有頻道」，在 YouTube 上取消訂閱的頻道則會從所有設定檔中移除。在這裡的「所有頻道」中訂閱或取消訂閱，也會在 YouTube 上進行相同操作。"
-    Sync Playlists: "您的 YouTube 播放清單、「稍後觀看」和「喜歡的影片」會顯示在「您的播放清單」中，您在這裡對它們所做的變更也會套用到 YouTube。它們不會同步到您的其他裝置，也不會匯出或備份。關閉此選項會將它們從這部裝置中移除，但不會從 YouTube 移除。"
+    Sync Playlists: "您的 YouTube 播放清單、「稍後觀看」和「喜歡的影片」會顯示在「您的播放清單」中，您在這裡對它們所做的變更也會套用到 YouTube。它們不會同步到您的其他裝置，在您匯出所有播放清單或備份資料時也不會包含在內。關閉此選項會將它們從這部裝置中移除，但不會從 YouTube 移除。"
     Add to YouTube Watch History: "您播放的影片會加入您的 YouTube 觀看紀錄，讓 YouTube 的推薦內容從中學習。在 YouTube 上暫停觀看紀錄時，不會加入任何內容。"
   General Settings:
     Built-in Streams: |

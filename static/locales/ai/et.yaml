@@ -2240,7 +2240,7 @@ Description:
 Tooltips:
   YouTube Account Settings:
     Sync Subscriptions: "Kanalid, mille YouTube'is tellid, lisatakse jaotisesse „Kõik kanalid“ ja kanalid, mille tellimuse seal tühistad, eemaldatakse kõigist profiilidest. Kui tellid siin jaotises „Kõik kanalid“ kanali või tühistad tellimuse, juhtub sama ka YouTube'is."
-    Sync Playlists: "Sinu YouTube'i esitusloendid, „Vaata hiljem“ ja „Meeldivad videod“ kuvatakse jaotises „Sinu esitusloendid“ ning neis siin tehtud muudatused tehakse ka YouTube'is. Neid ei sünkroonita sinu teistesse seadmetesse, ei ekspordita ega varundata. Selle väljalülitamine eemaldab need sellest seadmest, kuid mitte YouTube'ist."
+    Sync Playlists: "Sinu YouTube'i esitusloendid, „Vaata hiljem“ ja „Meeldivad videod“ kuvatakse jaotises „Sinu esitusloendid“ ning neis siin tehtud muudatused tehakse ka YouTube'is. Neid ei sünkroonita sinu teistesse seadmetesse ega kaasata, kui ekspordid kõik esitusloendid või varundad oma andmed. Selle väljalülitamine eemaldab need sellest seadmest, kuid mitte YouTube'ist."
     Add to YouTube Watch History: "Sinu esitatud videod lisatakse sinu YouTube'i vaatamiste ajalukku, nii et YouTube'i soovitused õpivad neist. Kui ajalugu on YouTube'is peatatud, ei lisata midagi."
   General Settings:
     Built-in Streams: |

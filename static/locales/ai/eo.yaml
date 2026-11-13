@@ -2284,7 +2284,7 @@ Description:
 Tooltips:
   YouTube Account Settings:
     Sync Subscriptions: "Kanaloj, kiujn vi abonas ĉe YouTube, aldoniĝas al “Ĉiuj kanaloj”, kaj kanaloj, kies abonon vi tie nuligas, foriĝas el ĉiuj profiloj. Aboni aŭ malaboni en “Ĉiuj kanaloj” ĉi tie faras la samon ĉe YouTube."
-    Sync Playlists: "Viaj YouTube-ludlistoj, “Spekti poste” kaj “Ŝatitaj videaĵoj” aperas en “Viaj ludlistoj”, kaj ŝanĝoj, kiujn vi faras al ili ĉi tie, fariĝas ankaŭ ĉe YouTube. Ili ne estas sinkronigataj al viaj aliaj aparatoj, eksportataj aŭ savkopiataj. Malŝalto de ĉi tio forigas ilin el ĉi tiu aparato, sed ne el YouTube."
+    Sync Playlists: "Viaj YouTube-ludlistoj, “Spekti poste” kaj “Ŝatitaj videaĵoj” aperas en “Viaj ludlistoj”, kaj ŝanĝoj, kiujn vi faras al ili ĉi tie, fariĝas ankaŭ ĉe YouTube. Ili ne estas sinkronigataj al viaj aliaj aparatoj nek inkluzivataj, kiam vi eksportas ĉiujn ludlistojn aŭ savkopias viajn datumojn. Malŝalto de ĉi tio forigas ilin el ĉi tiu aparato, sed ne el YouTube."
     Add to YouTube Watch History: "Videaĵoj, kiujn vi ludas, aldoniĝas al via YouTube-spekthistorio, do la rekomendoj de YouTube lernas el ili. Nenio aldoniĝas dum la historio estas paŭzigita ĉe YouTube."
   General Settings:
     Built-in Streams: |

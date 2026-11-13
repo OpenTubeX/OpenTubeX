@@ -1500,7 +1500,7 @@ Description:
 Tooltips:
   YouTube Account Settings:
     Sync Subscriptions: "Kanały, które subskrybujesz na YouTube, są dodawane do profilu „Wszystkie kanały”, a kanały, których subskrypcję tam anulujesz, są usuwane ze wszystkich profili. Zasubskrybowanie kanału lub anulowanie jego subskrypcji tutaj w profilu „Wszystkie kanały” robi to samo na YouTube."
-    Sync Playlists: "Twoje playlisty z YouTube oraz „Do obejrzenia” i „Filmy, które mi się podobają” pojawiają się w sekcji „Twoje playlisty”, a zmiany, które w nich tutaj wprowadzasz, są wprowadzane także na YouTube. Nie są synchronizowane z innymi twoimi urządzeniami, eksportowane ani uwzględniane w kopiach zapasowych. Wyłączenie tej opcji usuwa je z tego urządzenia, ale nie z YouTube."
+    Sync Playlists: "Twoje playlisty z YouTube oraz „Do obejrzenia” i „Filmy, które mi się podobają” pojawiają się w sekcji „Twoje playlisty”, a zmiany, które w nich tutaj wprowadzasz, są wprowadzane także na YouTube. Nie są synchronizowane z innymi twoimi urządzeniami ani uwzględniane, gdy eksportujesz wszystkie playlisty lub tworzysz kopię zapasową danych. Wyłączenie tej opcji usuwa je z tego urządzenia, ale nie z YouTube."
     Add to YouTube Watch History: "Odtwarzane filmy są dodawane do twojej historii oglądania na YouTube, więc rekomendacje YouTube uczą się na ich podstawie. Gdy historia jest wstrzymana na YouTube, nic nie jest dodawane."
   General Settings:
     Built-in Streams: |
