@@ -328,15 +328,6 @@ const shakaControlKeysToShortcuts = {
 /** @type {Map<string, string>} */
 const LOCALE_MAPPINGS = new Map(process.env.SHAKA_LOCALE_MAPPINGS)
 
-/**
- * The watch layout caps the player's width for a 16:9 video,
- * so any taller video has to be pillarboxed into that box to fit its height.
- * @param {{ width: number, height: number }} dimensions
- */
-function isTallerThanSixteenByNine({ width, height }) {
-  return width / height < 16 / 9
-}
-
 export default defineComponent({
   name: 'FtShakaVideoPlayer',
   components: {
@@ -1294,7 +1285,6 @@ export default defineComponent({
     }
 
     const onlyUseOverFlowMenu = ref(false)
-    const forceAspectRatio = ref(false)
 
     const activeLegacyFormat = shallowRef(null)
 
@@ -5633,7 +5623,7 @@ export default defineComponent({
       container,
       mobileMiniBarOverlay,
       fullWindowEnabled,
-      inlineSixteenByNine: computed(() => audioPlayerMode.value || forceAspectRatio.value || (!props.shortsPlayer && !videoLayoutReady.value)),
+      inlineSixteenByNine: computed(() => audioPlayerMode.value || (!props.shortsPlayer && !videoLayoutReady.value)),
       getUi: () => ui,
       getSeekRange: () => hasLoaded.value ? player?.seekRange() : null,
       isActiveTab,
@@ -10158,21 +10148,6 @@ export default defineComponent({
         }
       })
 
-      if (props.format !== 'legacy') {
-        player.addEventListener('streaming', () => {
-          if (props.format === 'dash') {
-            const firstVariant = player.getVariantTracks()[0]
-
-            // force the player aspect ratio to 16:9 to avoid overflowing the layout
-            forceAspectRatio.value = firstVariant != null && !props.shortsPlayer &&
-              isTallerThanSixteenByNine(firstVariant)
-          }
-        })
-      } else if (props.legacyFormats.length > 0) {
-        // force the player aspect ratio to 16:9 to avoid overflowing the layout, when the video is too tall
-        forceAspectRatio.value = !props.shortsPlayer && isTallerThanSixteenByNine(props.legacyFormats[0])
-      }
-
       if (useSponsorBlock.value) {
         setupSponsorBlock()
         if (sponsorBlockInfoOpen.value) {
@@ -11566,7 +11541,6 @@ export default defineComponent({
 
       fullWindowEnabled,
       fullWindowPlaceholderHeight,
-      forceAspectRatio,
 
       showStats,
       stats,

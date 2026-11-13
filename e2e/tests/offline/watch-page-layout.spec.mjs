@@ -430,7 +430,7 @@ test.describe('theatre mode', () => {
   test.use({ seed: { settings: { ...WATCH_PAGE_SEED, defaultViewingMode: 'theatre' } } })
 
   // The default 1600x900 window is wide enough for the player to reach its width cap.
-  test('fits a video slightly taller than 16:9 into the window', async ({ app, page }) => {
+  test('fits a video taller than 16:9 into the window without shrinking it in tall windows', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await routeDemoMedia(page, await readFile(path.join(path.dirname(DEMO_MEDIA_PATH), 'three-by-two-demo.webm')))
     await page.route(/\/youtubei\/v1\/player/, (route, request) => {
@@ -442,9 +442,16 @@ test.describe('theatre mode', () => {
     const video = await openMockedVideo(page)
     await expect(page.locator(`${activeTab} .videoLayout`)).toHaveClass(/useTheatreMode/)
     await expect.poll(() => video.evaluate(element => element.videoHeight)).toBe(240)
-    await expect.poll(() => page.locator(`${activeTab} .ftVideoPlayer`).evaluate(element => (
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    await expect.poll(() => player.evaluate(element => (
       element.getBoundingClientRect().bottom <= innerHeight
     ))).toBe(true)
+
+    await setWindowSize(app, page, { width: 900, height: 1400 })
+    await expect.poll(() => player.evaluate((element) => {
+      const { width, height } = element.getBoundingClientRect()
+      return Math.abs(width / height - 1.5) < 0.01
+    })).toBe(true)
   })
 })
 
