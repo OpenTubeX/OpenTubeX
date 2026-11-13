@@ -568,6 +568,22 @@ public class PredictiveBackTest {
     }
 
     @Test
+    public void backToAKeptSearchPageRestoresItsFilters() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            WebView view = ready(scenario);
+            String type = STORE + ".getters.getSearchSettings(" + STORE + ".getters.getPresentedTabId).type";
+            evaluate(view, "window.__backRouter.push('/search/piano?type=video')");
+            await(view, type + " === 'video'");
+            evaluate(view, "window.__backRouter.push('/search/piano?type=channel')");
+            await(view, type + " === 'channel' && !!document.querySelector('.tabContent:not([inert]) > .retainedPage')");
+            onMain(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
+            await(view, "location.hash.includes('type=video')");
+            // Filters closing the panel would apply must match the kept search Back shows.
+            await(view, type + " === 'video'");
+        }
+    }
+
+    @Test
     public void systemEdgeSwipeDrivesTheDrawerAndRootReleasesBackToAndroid() throws Exception {
         assumeTrue(Build.VERSION.SDK_INT >= 34);
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {

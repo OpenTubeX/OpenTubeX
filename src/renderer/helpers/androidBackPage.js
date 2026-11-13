@@ -160,13 +160,17 @@ export function createAndroidBackPagePreview({ getTarget, setReveal, back, isAva
       // The page behind has arrived. Drop its preview frames before Back makes
       // it the current page, so nothing moves when it does.
       current.layers.slice(1).forEach(layer => layer.animation.cancel())
+      let wentBack = false
       try {
-        if (isAvailable()) await back()
+        if (isAvailable()) {
+          await back()
+          wentBack = true
+        }
       } finally {
         if (state === current) {
           cancel()
           // A newly loaded page arrives from where a kept page would have been.
-          if (!current.revealed && current.element.isConnected) {
+          if (wentBack && !current.revealed && current.element.isConnected) {
             applyAnimationSpeed(current.element.animate([
               { ...current.slide.previous(0), opacity: 0 },
               { ...current.slide.previous(1), opacity: 1 }
