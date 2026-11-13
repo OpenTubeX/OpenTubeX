@@ -8,6 +8,7 @@ import {
 import { createSettingsSearchIndex } from './settingsSearch'
 import { isMostPopularAvailable, isTrendingAvailable } from '../../navigationAvailability'
 import { getTabAvatarUrl, getTabPageIcon } from '../tabs/tabPreview'
+import { isPlayerRoutePath } from '../tabs/playerDockDestination'
 import { switchActiveProfile, translateProfileName } from './profileSwitching'
 import { getFirstCharacter } from './strings'
 import { shouldShowKeyboardShortcutCommand } from './commandPalette'
@@ -42,6 +43,8 @@ const PLAYBACK_COMMANDS = [
   ['playback.quick-bookmark', 'GENERAL', 'TOGGLE_QUICK_BOOKMARK', 'KeyboardShortcutPrompt.Toggle Quick Bookmark', ['far', 'bookmark'], ['bookmarked', 'favorite']],
   ['playback.add-to-playlist', 'GENERAL', 'OPEN_ADD_TO_PLAYLIST', 'User Playlists.Add to Playlist', ['fac', 'playlist-add'], ['save']],
 ]
+// Media of other sites has no next video, playlists or bookmarks.
+const YOUTUBE_PLAYBACK_COMMANDS = new Set(['SKIP_TO_PREV', 'SKIP_TO_NEXT', 'TOGGLE_QUICK_BOOKMARK', 'OPEN_ADD_TO_PLAYLIST'])
 
 /**
  * Creates the live registry for the current tab. Actions remain small wrappers
@@ -461,10 +464,12 @@ function addDownloadCommands(commands, { t, groups, downloads, isElectron }) {
 
 function addPlaybackCommands(commands, context) {
   const { t, groups, routePath, videoShortcuts, runShortcut, isCapacitor, quickBookmarkAvailable } = context
-  const onVideo = routePath.startsWith('/watch/')
+  const onVideo = isPlayerRoutePath(routePath)
+  const onExternalMedia = routePath === '/external-media'
 
   for (const [id, section, code, labelKey, icon, aliases] of PLAYBACK_COMMANDS) {
     if (isCapacitor && code === 'FULLWINDOW') continue
+    if (onExternalMedia && YOUTUBE_PLAYBACK_COMMANDS.has(code)) continue
     if (!quickBookmarkAvailable && code === 'TOGGLE_QUICK_BOOKMARK') continue
     const configuredShortcut = videoShortcuts[section][code]
     const executionShortcut = configuredShortcut || DefaultKeyboardShortcuts.VIDEO_PLAYER[section][code]
