@@ -857,8 +857,12 @@ const youTubeComments = {
   updateComment(commentId, text) {
     const rootId = getRootCommentId(commentId)
     const thread = commentData.value.find(entry => entry.id === rootId)
-    const comment = rootId === commentId ? thread : thread && findCommentParent(thread, commentId)?.replies.find(reply => reply.id === commentId)
+    const parent = thread && rootId !== commentId ? findCommentParent(thread, commentId) : null
+    const comment = rootId === commentId ? thread : parent?.replies.find(reply => reply.id === commentId)
+    // Shown replies keep the object they were created with, so it changes in place.
     if (comment) Object.assign(comment, getEditedCommentFields(comment, text))
+    // A new list, so the reply tree, which nests replies by their mentions, is rebuilt.
+    if (parent) parent.replies = [...parent.replies]
 
     /** @param {Comment} entry */
     const edit = entry => entry.id === commentId

@@ -346,10 +346,12 @@ export function parsePlaylistLibrary(data) {
  */
 export function parseOwnedPlaylistIds(data) {
   const renderer = (data?.contents ?? []).map(content => content?.addToPlaylistRenderer).find(Boolean)
-  if (!renderer) throw new Error('YouTube returned no playlists to add to')
-  return new Set((renderer.playlists ?? [])
+  const ids = new Set((renderer?.playlists ?? [])
     .map(entry => entry?.playlistAddToOptionRenderer?.playlistId)
     .filter(id => typeof id === 'string'))
+  // Watch later is always there. Without it, sync would remove every playlist.
+  if (ids.size === 0) throw new Error('YouTube returned no playlists to add to')
+  return ids
 }
 
 /**

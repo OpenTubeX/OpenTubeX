@@ -194,6 +194,8 @@ test('only playlists in the TV add to playlist dialog belong to the account', ()
   const option = playlistId => ({ playlistAddToOptionRenderer: { playlistId } })
   assert.deepEqual(parseOwnedPlaylistIds({ contents: [{ addToPlaylistRenderer: { playlists: [option('WL'), option('PLown')] } }] }), new Set(['WL', 'PLown']))
   assert.throws(() => parseOwnedPlaylistIds({ contents: [] }))
+  // Watch later is always there, so an empty dialog is a page sync cannot read.
+  assert.throws(() => parseOwnedPlaylistIds({ contents: [{ addToPlaylistRenderer: { playlists: [] } }] }))
 })
 
 test('reads playlist entries with the IDs that edits need from TV playlist pages', () => {

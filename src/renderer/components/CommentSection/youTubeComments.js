@@ -52,6 +52,8 @@ export function getEditedCommentFields(comment, text) {
     text: Autolinker.link(escapeHTML(text)),
     // A translation of the old text no longer applies.
     translationText: typeof comment.translationText === 'string' ? text : null,
+    translatedText: null,
+    translatedLanguage: null,
     showTranslated: false,
     isEdited: true
   }

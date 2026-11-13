@@ -360,13 +360,17 @@ function setSubscriptionRefreshProgress(percentage) {
  * @template T
  * @param {{ channelIds?: string[] | null, automatic?: boolean }} options
  * @param {(activeProfile: any) => Promise<T>} refresh
- * @returns {Promise<T>}
+ * @returns {Promise<T | null>}
  */
 function withYouTubeSubscriptionChanges(options, refresh) {
   const activeProfile = store.getters.getActiveProfile
   const sync = options.channelIds == null ? syncYouTubeSubscriptionsBeforeRefresh(options.automatic === true) : null
   if (!sync) return refresh(activeProfile)
-  return sync.then(() => refresh(store.getters.profileById(activeProfile._id) ?? activeProfile))
+  // A refresh cancelled while the sync ran does not start.
+  const cancelCountAtSync = cancelCount
+  return sync.catch(error => console.error(error)).then(() => cancelCount !== cancelCountAtSync
+    ? null
+    : refresh(store.getters.profileById(activeProfile._id) ?? activeProfile))
 }
 
 /**

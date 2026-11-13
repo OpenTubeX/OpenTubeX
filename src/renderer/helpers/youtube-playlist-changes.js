@@ -4,7 +4,7 @@
 
 /**
  * @typedef {{ _id: string, playlistName: string, description?: string, youTube?: { playlistId: string, accountKey: string }, videos: { videoId: string, playlistItemId: string, youTubeSetVideoId?: string | null }[] }} SyncedPlaylist
- * @typedef {{ type: 'add', playlistId: string, videoIds: string[] }
+ * @typedef {{ type: 'add', localId: string, videoIds: string[] }
  *   | { type: 'remove', playlist: SyncedPlaylist, videos: SyncedPlaylist['videos'] }
  *   | { type: 'reorder', playlist: SyncedPlaylist, previous: SyncedPlaylist['videos'] }
  *   | { type: 'details', playlist: SyncedPlaylist, playlistName: string | null, description: string | null }

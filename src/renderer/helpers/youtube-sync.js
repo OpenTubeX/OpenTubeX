@@ -67,6 +67,9 @@ class AccountChangedError extends Error {
   }
 }
 
+/** Without Web Locks, sync work queues here, which covers one window. */
+let localSyncWork = Promise.resolve()
+
 /**
  * Runs sync work one at a time, also across windows, so a sync never reads
  * YouTube while an edit from here is on its way.
@@ -76,7 +79,10 @@ class AccountChangedError extends Error {
  * @returns {Promise<T | null>}
  */
 function withSyncLock(callback, ifAvailable = false) {
-  return navigator.locks.request(LOCK_NAME, { ifAvailable }, lock => lock ? callback() : null)
+  if (navigator.locks) return navigator.locks.request(LOCK_NAME, { ifAvailable }, lock => lock ? callback() : null)
+  const result = localSyncWork.then(callback)
+  localSyncWork = result.catch(() => {})
+  return result
 }
 
 /** @returns {YouTubeAccount | null} */
@@ -156,10 +162,13 @@ async function syncSubscriptions(account) {
   }
   if (removedIds.length > 0) {
     const removed = new Set(removedIds)
-    await store.dispatch('removeChannelFromProfiles', {
+    // A removal that did not save must come again with the next sync.
+    if (!await store.dispatch('removeChannelFromProfiles', {
       channelIds: removedIds,
       profileIds: profiles.filter(profile => profile.subscriptions.some(channel => removed.has(channel.id))).map(profile => profile._id)
-    })
+    })) {
+      throw new Error('Could not remove the channels unsubscribed from on YouTube')
+    }
   }
   await updateSyncState(key, { subscriptions: remote.map(channel => channel.id), subscriptionsSyncedAt: Date.now() })
 
@@ -351,8 +360,8 @@ export async function syncWithYouTube({
     try {
       await part(account)
     } catch (error) {
-      if (error instanceof AccountChangedError) return
       succeeded = false
+      if (error instanceof AccountChangedError) return
       console.error(error)
       if (manual) {
         showToast({
@@ -366,7 +375,10 @@ export async function syncWithYouTube({
   await withSyncLock(async () => {
     const account = getSyncAccount()
     await run(removeUnsyncedPlaylists, account)
-    if (!account) return
+    if (!account) {
+      succeeded = false
+      return
+    }
     const key = getYouTubeSyncKey(account)
     // Turning a sync on again starts over: subscriptions without the changes
     // from meanwhile, and both right away.
@@ -550,7 +562,7 @@ async function pushPlaylistChange(change, playlistId, localId, account) {
 /** @param {YouTubePlaylistChange} change */
 function handlePlaylistChange(change) {
   // Taken now, as the playlist can change before the edit goes out.
-  const playlist = 'playlist' in change ? change.playlist : store.getters.getPlaylist(change.playlistId)
+  const playlist = 'playlist' in change ? change.playlist : store.getters.getPlaylist(change.localId)
   const account = getSyncAccount()
   if (!playlist?.youTube || !account || !store.getters.getYouTubeAccountSyncPlaylists ||
     playlist.youTube.accountKey !== getYouTubeSyncKey(account)) return
@@ -587,13 +599,20 @@ export async function createYouTubePlaylistWithVideos(playlist) {
   if (!account) throw new Error('Not signed in to a YouTube account')
   const result = await withSyncLock(async () => {
     const playlistId = await createYouTubePlaylist(playlist.playlistName, playlist.videos.map(video => video.videoId), account)
-    if (playlist.description) {
-      await editYouTubePlaylist(playlistId, [{ action: 'ACTION_SET_PLAYLIST_DESCRIPTION', playlistDescription: playlist.description }], account)
+    try {
+      if (playlist.description) {
+        await editYouTubePlaylist(playlistId, [{ action: 'ACTION_SET_PLAYLIST_DESCRIPTION', playlistDescription: playlist.description }], account)
+      }
+      throwIfAccountChanged(account)
+      /** @type {YouTubePlaylistLink} */
+      const youTube = { playlistId, accountKey: getYouTubeSyncKey(account), title: playlist.playlistName, signature: null }
+      if (!await store.dispatch('addPlaylist', { ...playlist, youTube })) throw new Error('Could not save the playlist')
+      return true
+    } catch (error) {
+      // Without a copy here, trying again would create a second one.
+      await deleteYouTubePlaylist(playlistId, account).catch(cleanupError => console.error(cleanupError))
+      throw error
     }
-    throwIfAccountChanged(account)
-    /** @type {YouTubePlaylistLink} */
-    const youTube = { playlistId, accountKey: getYouTubeSyncKey(account), title: playlist.playlistName, signature: null }
-    return await store.dispatch('addPlaylist', { ...playlist, youTube })
   })
   return result === true
 }
@@ -603,7 +622,6 @@ export async function createYouTubePlaylistWithVideos(playlist) {
  * whenever the sync settings, the sign-in, or the channel change.
  */
 export function startYouTubeSync() {
-  if (!navigator.locks) return
   setYouTubePlaylistChangeListener(handlePlaylistChange)
   store.watch(
     () => [

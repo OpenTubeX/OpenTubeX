@@ -376,7 +376,7 @@ const actions = {
           payload.lastUpdatedAt = result.lastUpdatedAt
           payload.addVideosToTop = result.addVideosToTop
           commit('addVideo', payload)
-          reportYouTubePlaylistChange({ type: 'add', playlistId: _id, videoIds: [videoData.videoId] })
+          reportYouTubePlaylistChange({ type: 'add', localId: _id, videoIds: [videoData.videoId] })
         }
 
         // ALREADY_PRESENT means another window got there first, so the video is
@@ -427,7 +427,7 @@ const actions = {
       const result = await DBPlaylistHandlers.upsertVideosByPlaylistId(_id, lastUpdatedAt, newVideoObjects, deduplicate)
       if (result.status === PlaylistVideoAddResult.ADDED) {
         commit('addVideos', { _id, lastUpdatedAt: result.lastUpdatedAt, addVideosToTop: result.addVideosToTop, videos: result.videos })
-        reportYouTubePlaylistChange({ type: 'add', playlistId: _id, videoIds: result.videos.map(video => video.videoId) })
+        reportYouTubePlaylistChange({ type: 'add', localId: _id, videoIds: result.videos.map(video => video.videoId) })
       }
       return result.status !== PlaylistVideoAddResult.PLAYLIST_MISSING
     } catch (errMessage) {

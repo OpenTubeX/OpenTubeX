@@ -602,6 +602,9 @@ export async function getYouTubeAccountPlaylists(account) {
       page = parsePlaylistLibrary((await innertube.actions.execute('/browse', { continuation: page.continuation })).data)
     }
 
+    // Watch later and Liked videos are always there. Without them, sync would remove every playlist.
+    if (playlists.size === 0) throw new Error('YouTube returned no playlists')
+
     const dialog = await innertube.actions.execute('/playlist/get_add_to_playlist', { videoIds: [ADD_TO_PLAYLIST_VIDEO_ID] })
     return { playlists: [...playlists.values()], ownedIds: parseOwnedPlaylistIds(dialog.data) }
   }, { account })
