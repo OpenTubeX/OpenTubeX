@@ -782,7 +782,7 @@ test.describe('with followed feeds', () => {
       await session.send('Emulation.setTouchEmulationEnabled', { enabled: false })
     } finally { await session.detach() }
     await expect(newest).toHaveClass(/watched/)
-    expect(await position(newestUrl)).toEqual({ seconds: 0, watched: true, updatedAt: expect.any(Number) })
+    expect(await position(newestUrl)).toEqual({ watchProgress: 0, lengthSeconds: 0, isWatched: true })
     await expect(page).toHaveURL(/#\/subscriptions/)
 
     // The options button opens the same menu
