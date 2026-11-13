@@ -518,12 +518,16 @@ export async function refreshPlatformFeed() {
     if (controller.signal.aborted) return
 
     refreshedHere = true
-    const loadedKeys = followed.map(getPlatformChannelKey).filter(key => !failed.has(key))
-    const { live, videos } = splitLoadedItems(items, loadedKeys)
+    // Channels unfollowed during the refresh stay removed, with their items and history
+    const stillFollowed = new Set(getFollowedChannels().map(getPlatformChannelKey))
+    const loadedKeys = followed.map(getPlatformChannelKey).filter(key => !failed.has(key) && stillFollowed.has(key))
+    const loaded = new Set(loadedKeys)
+    const ofLoadedChannels = (/** @type {PlatformItem[]} */ list) => list.filter(item => loaded.has(itemChannelKey(item)))
+    const { live, videos } = splitLoadedItems(ofLoadedChannels(items), loadedKeys)
     // Uploads can be marked on another device before they load here
     unwatchItemsMarkedUnseen(videos, parseRssFeedSeenItems(store.getters.getRssFeedSeenItems))
-    replaceChannelItems(new Set(loadedKeys), { live, videos, clips })
-    platformFeedFailedChannels.value = [...failed]
+    replaceChannelItems(loaded, { live, videos, clips: ofLoadedChannels(clips) })
+    platformFeedFailedChannels.value = [...failed].filter(key => stillFollowed.has(key))
     platformFeedLastRefresh.value = Date.now()
     localStorage.setItem(LAST_REFRESH_STORAGE_KEY, String(platformFeedLastRefresh.value))
     const interval = getPlatformFeedAutoRefreshInterval()
