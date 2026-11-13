@@ -16,6 +16,22 @@ New Tab: زبانه جدید
 Maximize: بیشینه کردن
 Restore: بازگردانی
 Close Tab: بستن زبانه
+App Menu:
+  About App: درباره {appName}
+  Services: خدمات
+  Hide App: پنهان کردن {appName}
+  Hide Others: پنهان کردن بقیه
+  Show All: نمایش همه
+  Quit App: خروج از {appName}
+  Reopen Closed Window: بازکردن دوباره پنجره بسته‌شده
+  Paste and Match Style: چسباندن و تطبیق سبک
+  View: نما
+  Enter Inspect Element Mode: ورود به حالت بازرسی عنصر
+  GPU Internals: اطلاعات داخلی GPU (chrome://gpu)
+  Navigate: پیمایش
+  Next Tab: زبانه بعدی
+  Previous Tab: زبانه قبلی
+  Help: راهنما
 Close Confirmation:
   Background Sync Warning: با خروج، به‌روزرسانی اشتراک‌ها در پس‌زمینه متوقف می‌شود.
   Hide Window: پنهان کردن پنجره

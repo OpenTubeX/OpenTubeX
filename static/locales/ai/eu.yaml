@@ -16,6 +16,22 @@ New Tab: Fitxa berria
 Maximize: Maximizatu
 Restore: Leheneratu
 Close Tab: Itxi fitxa
+App Menu:
+  About App: '{appName}-(r)i buruz'
+  Services: Zerbitzuak
+  Hide App: Ezkutatu {appName}
+  Hide Others: Ezkutatu besteak
+  Show All: Erakutsi denak
+  Quit App: Irten {appName}-(e)tik
+  Reopen Closed Window: Ireki berriro itxitako leihoa
+  Paste and Match Style: Itsatsi eta egokitu estiloa
+  View: Ikusi
+  Enter Inspect Element Mode: Sartu elementuak ikuskatzeko moduan
+  GPU Internals: GPUaren barne-informazioa (chrome://gpu)
+  Navigate: Nabigatu
+  Next Tab: Hurrengo fitxa
+  Previous Tab: Aurreko fitxa
+  Help: Laguntza
 Close Confirmation:
   Background Sync Warning: Irtetez gero, harpidetzen atzeko planoko eguneratzea geldituko da.
   Hide Window: Ezkutatu leihoa

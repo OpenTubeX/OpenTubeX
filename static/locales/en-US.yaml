@@ -30,16 +30,32 @@ Paste: Paste
 Delete: Delete
 Select all: Select all
 Toggle Developer Tools: Toggle Developer Tools
-Actual size: Actual size
-Zoom in: Zoom in
-Zoom out: Zoom out
-Toggle fullscreen: Toggle fullscreen
+Actual size: Actual Size
+Zoom in: Zoom In
+Zoom out: Zoom Out
+Toggle fullscreen: Toggle Full Screen
 Window: Window
 Minimize: Minimize
 Close: Close
 Maximize: Maximize
 Restore: Restore
 Close Tab: Close Tab
+App Menu:
+  About App: About {appName}
+  Services: Services
+  Hide App: Hide {appName}
+  Hide Others: Hide Others
+  Show All: Show All
+  Quit App: Quit {appName}
+  Reopen Closed Window: Reopen Closed Window
+  Paste and Match Style: Paste and Match Style
+  View: View
+  Enter Inspect Element Mode: Enter Inspect Element Mode
+  GPU Internals: GPU Internals (chrome://gpu)
+  Navigate: Navigate
+  Next Tab: Next Tab
+  Previous Tab: Previous Tab
+  Help: Help
 Close Confirmation:
   Title: Quit OpenTubeX?
   Message: Are you sure you want to quit OpenTubeX?

@@ -2731,3 +2731,19 @@ YouTube Account:
   Delete Comment Failed: "No se ha podido eliminar el comentario: {error}"
   Recommendations: "Recomendaciones de YouTube"
   Recommendations Failed: "No se han podido cargar tus recomendaciones de YouTube."
+App Menu:
+  About App: Acerca de {appName}
+  Services: Servicios
+  Hide App: Ocultar {appName}
+  Hide Others: Ocultar otros
+  Show All: Mostrar todo
+  Quit App: Salir de {appName}
+  Reopen Closed Window: Volver a abrir la ventana cerrada
+  Paste and Match Style: Pegar y adaptar estilo
+  View: Ver
+  Enter Inspect Element Mode: Entrar en el modo de inspección de elementos
+  GPU Internals: Información interna de la GPU (chrome://gpu)
+  Navigate: Navegar
+  Next Tab: Pestaña siguiente
+  Previous Tab: Pestaña anterior
+  Help: Ayuda

@@ -16,6 +16,22 @@ New Tab: Nova lapela
 Maximize: Maximizar
 Restore: Restaurar
 Close Tab: Pechar a lapela
+App Menu:
+  About App: Acerca de {appName}
+  Services: Servizos
+  Hide App: Agochar {appName}
+  Hide Others: Agochar os demais
+  Show All: Amosar todo
+  Quit App: Saír de {appName}
+  Reopen Closed Window: Volver abrir a xanela pechada
+  Paste and Match Style: Pegar e adaptar o estilo
+  View: Ver
+  Enter Inspect Element Mode: Entrar no modo de inspección de elementos
+  GPU Internals: Información interna da GPU (chrome://gpu)
+  Navigate: Navegar
+  Next Tab: Seguinte lapela
+  Previous Tab: Lapela anterior
+  Help: Axuda
 Close Confirmation:
   Background Sync Warning: Ao saír deterase a actualización das subscricións en segundo plano.
   Hide Window: Agochar a xanela

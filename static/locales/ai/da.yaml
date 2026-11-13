@@ -16,6 +16,22 @@ New Tab: Ny fane
 Maximize: Maksimér
 Restore: Gendan
 Close Tab: Luk fane
+App Menu:
+  About App: Om {appName}
+  Services: Tjenester
+  Hide App: Skjul {appName}
+  Hide Others: Skjul andre
+  Show All: Vis alle
+  Quit App: Afslut {appName}
+  Reopen Closed Window: Genåbn lukket vindue
+  Paste and Match Style: Indsæt og tilpas stil
+  View: Vis
+  Enter Inspect Element Mode: Start elementinspektion
+  GPU Internals: GPU-interne oplysninger (chrome://gpu)
+  Navigate: Naviger
+  Next Tab: Næste fane
+  Previous Tab: Forrige fane
+  Help: Hjælp
 Close Confirmation:
   Background Sync Warning: Hvis du afslutter, stopper opdatering af abonnementer i baggrunden.
   Hide Window: Skjul vindue

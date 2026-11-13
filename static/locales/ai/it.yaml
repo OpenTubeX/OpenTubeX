@@ -16,6 +16,22 @@ New Tab: Nuova scheda
 Maximize: Massimizza
 Restore: Ripristina
 Close Tab: Chiudi scheda
+App Menu:
+  About App: Informazioni su {appName}
+  Services: Servizi
+  Hide App: Nascondi {appName}
+  Hide Others: Nascondi altre
+  Show All: Mostra tutte
+  Quit App: Esci da {appName}
+  Reopen Closed Window: Riapri la finestra chiusa
+  Paste and Match Style: Incolla e adatta stile
+  View: Vista
+  Enter Inspect Element Mode: Attiva la modalità di ispezione elementi
+  GPU Internals: Informazioni interne GPU (chrome://gpu)
+  Navigate: Naviga
+  Next Tab: Scheda successiva
+  Previous Tab: Scheda precedente
+  Help: Aiuto
 Close Confirmation:
   Background Sync Warning: Uscendo, l'aggiornamento in background delle iscrizioni verrà interrotto.
   Hide Window: Nascondi finestra

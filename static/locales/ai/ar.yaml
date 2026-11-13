@@ -16,6 +16,22 @@ New Tab: علامة تبويب جديدة
 Maximize: 'تكبير'
 Restore: 'استعادة'
 Close Tab: إغلاق علامة التبويب
+App Menu:
+  About App: حول {appName}
+  Services: الخدمات
+  Hide App: إخفاء {appName}
+  Hide Others: إخفاء الآخرين
+  Show All: إظهار الكل
+  Quit App: إنهاء {appName}
+  Reopen Closed Window: إعادة فتح النافذة المغلقة
+  Paste and Match Style: لصق ومطابقة النمط
+  View: عرض
+  Enter Inspect Element Mode: الدخول إلى وضع فحص العناصر
+  GPU Internals: معلومات GPU الداخلية (chrome://gpu)
+  Navigate: التنقل
+  Next Tab: علامة التبويب التالية
+  Previous Tab: علامة التبويب السابقة
+  Help: مساعدة
 Close Confirmation:
   Background Sync Warning: سيؤدي إنهاء التطبيق إلى إيقاف تحديث الاشتراكات في الخلفية.
   Hide Window: إخفاء النافذة

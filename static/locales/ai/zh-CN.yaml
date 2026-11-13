@@ -16,6 +16,22 @@ New Tab: 新建标签页
 Maximize: 最大化
 Restore: 还原
 Close Tab: 关闭标签页
+App Menu:
+  About App: 关于 {appName}
+  Services: 服务
+  Hide App: 隐藏 {appName}
+  Hide Others: 隐藏其他
+  Show All: 全部显示
+  Quit App: 退出 {appName}
+  Reopen Closed Window: 重新打开已关闭的窗口
+  Paste and Match Style: 粘贴并匹配样式
+  View: 视图
+  Enter Inspect Element Mode: 进入元素检查模式
+  GPU Internals: GPU 内部信息 (chrome://gpu)
+  Navigate: 导航
+  Next Tab: 下一个标签页
+  Previous Tab: 上一个标签页
+  Help: 帮助
 Close Confirmation:
   Background Sync Warning: 退出将停止后台订阅刷新。
   Hide Window: 隐藏窗口

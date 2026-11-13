@@ -16,6 +16,22 @@ New Tab: 新分頁
 Maximize: 最大化
 Restore: 還原
 Close Tab: 關閉分頁
+App Menu:
+  About App: 關於 {appName}
+  Services: 服務
+  Hide App: 隱藏 {appName}
+  Hide Others: 隱藏其他
+  Show All: 全部顯示
+  Quit App: 結束 {appName}
+  Reopen Closed Window: 重新開啟已關閉的視窗
+  Paste and Match Style: 貼上並符合樣式
+  View: 顯示方式
+  Enter Inspect Element Mode: 進入元素檢查模式
+  GPU Internals: GPU 內部資訊 (chrome://gpu)
+  Navigate: 瀏覽
+  Next Tab: 下一個分頁
+  Previous Tab: 上一個分頁
+  Help: 說明
 Close Confirmation:
   Background Sync Warning: 結束程式將停止背景訂閱重新整理。
   Hide Window: 隱藏視窗

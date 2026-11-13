@@ -16,6 +16,22 @@ New Tab: Tab newydd
 Maximize: Ehangu
 Restore: Adfer
 Close Tab: Cau'r tab
+App Menu:
+  About App: Ynghylch {appName}
+  Services: Gwasanaethau
+  Hide App: Cuddio {appName}
+  Hide Others: Cuddio Eraill
+  Show All: Dangos y Cyfan
+  Quit App: Gadael {appName}
+  Reopen Closed Window: Ailagor Ffenestr a Gaewyd
+  Paste and Match Style: Gludo a Chyfateb Arddull
+  View: Gweld
+  Enter Inspect Element Mode: Mynd i’r Modd Archwilio Elfen
+  GPU Internals: Manylion Mewnol y GPU (chrome://gpu)
+  Navigate: Llywio
+  Next Tab: Tab Nesaf
+  Previous Tab: Tab Blaenorol
+  Help: Cymorth
 Close Confirmation:
   Background Sync Warning: Bydd gadael yn atal diweddariadau tanysgrifiadau yn y cefndir.
   Hide Window: Cuddio'r ffenestr

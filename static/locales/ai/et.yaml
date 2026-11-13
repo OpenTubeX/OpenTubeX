@@ -16,6 +16,22 @@ New Tab: Uus vahekaart
 Maximize: Maksimeeri
 Restore: Taasta
 Close Tab: Sulge vahekaart
+App Menu:
+  About App: '{appName} teave'
+  Services: Teenused
+  Hide App: Peida {appName}
+  Hide Others: Peida teised
+  Show All: Näita kõiki
+  Quit App: Sulge {appName}
+  Reopen Closed Window: Ava suletud aken uuesti
+  Paste and Match Style: Kleebi ja sobita stiil
+  View: Vaade
+  Enter Inspect Element Mode: Elemendi uurimise režiim
+  GPU Internals: GPU siseteave (chrome://gpu)
+  Navigate: Navigeeri
+  Next Tab: Järgmine kaart
+  Previous Tab: Eelmine kaart
+  Help: Abi
 Close Confirmation:
   Background Sync Warning: Väljumisel peatub tellimuste taustal värskendamine.
   Hide Window: Peida aken

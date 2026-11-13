@@ -16,6 +16,22 @@ New Tab: نیا ٹیب
 Maximize: بڑا کریں
 Restore: بحال کریں
 Close Tab: ٹیب بند کریں
+App Menu:
+  About App: '{appName} کے بارے میں'
+  Services: خدمات
+  Hide App: '{appName} چھپائیں'
+  Hide Others: دیگر چھپائیں
+  Show All: سب دکھائیں
+  Quit App: '{appName} سے باہر نکلیں'
+  Reopen Closed Window: بند ونڈو دوبارہ کھولیں
+  Paste and Match Style: چسپاں کریں اور انداز ملائیں
+  View: منظر
+  Enter Inspect Element Mode: عنصر معائنہ موڈ میں جائیں
+  GPU Internals: GPU کی اندرونی معلومات (chrome://gpu)
+  Navigate: نیویگیٹ کریں
+  Next Tab: اگلا ٹیب
+  Previous Tab: پچھلا ٹیب
+  Help: مدد
 Close Confirmation:
   Title: OpenTubeX سے باہر نکلیں؟
   Message: کیا آپ واقعی OpenTubeX سے باہر نکلنا چاہتے ہیں؟

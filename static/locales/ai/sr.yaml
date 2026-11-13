@@ -16,6 +16,22 @@ New Tab: Нова картица
 Maximize: Увећај
 Restore: Врати
 Close Tab: Затвори картицу
+App Menu:
+  About App: О апликацији {appName}
+  Services: Услуге
+  Hide App: Сакриј {appName}
+  Hide Others: Сакриј остале
+  Show All: Прикажи све
+  Quit App: Затвори {appName}
+  Reopen Closed Window: Поново отвори затворени прозор
+  Paste and Match Style: Налепи и усклади стил
+  View: Приказ
+  Enter Inspect Element Mode: Режим прегледа елемената
+  GPU Internals: Интерни подаци о GPU-у (chrome://gpu)
+  Navigate: Навигација
+  Next Tab: Следећа картица
+  Previous Tab: Претходна картица
+  Help: Помоћ
 Close Confirmation:
   Background Sync Warning: Излазак ће зауставити освежавање претплата у позадини.
   Hide Window: Сакриј прозор

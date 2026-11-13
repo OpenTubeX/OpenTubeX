@@ -16,6 +16,22 @@ New Tab: Nieuw tabblad
 Maximize: Maximaliseren
 Restore: Herstellen
 Close Tab: Tabblad sluiten
+App Menu:
+  About App: Over {appName}
+  Services: Diensten
+  Hide App: Verberg {appName}
+  Hide Others: Verberg andere
+  Show All: Toon alles
+  Quit App: Stop {appName}
+  Reopen Closed Window: Gesloten venster heropenen
+  Paste and Match Style: Plak en pas stijl aan
+  View: Weergave
+  Enter Inspect Element Mode: Elementinspectiemodus openen
+  GPU Internals: Interne GPU-gegevens (chrome://gpu)
+  Navigate: Navigeren
+  Next Tab: Volgend tabblad
+  Previous Tab: Vorig tabblad
+  Help: Help
 Close Confirmation:
   Background Sync Warning: Als je afsluit, stopt het vernieuwen van abonnementen op de achtergrond.
   Hide Window: Venster verbergen

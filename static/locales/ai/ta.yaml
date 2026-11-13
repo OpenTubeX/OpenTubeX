@@ -16,6 +16,22 @@ New Tab: புதிய தாவல்
 Maximize: பெரிதாக்கு
 Restore: மீட்டெடு
 Close Tab: தாவலை மூடு
+App Menu:
+  About App: '{appName} பற்றி'
+  Services: சேவைகள்
+  Hide App: '{appName} ஐ மறை'
+  Hide Others: மற்றவற்றை மறை
+  Show All: அனைத்தையும் காட்டு
+  Quit App: '{appName} இலிருந்து வெளியேறு'
+  Reopen Closed Window: மூடிய சாளரத்தை மீண்டும் திற
+  Paste and Match Style: ஒட்டி பாணியைப் பொருத்து
+  View: காட்சி
+  Enter Inspect Element Mode: உறுப்பு ஆய்வு பயன்முறைக்குச் செல்
+  GPU Internals: GPU உள் விவரங்கள் (chrome://gpu)
+  Navigate: வழிசெலுத்து
+  Next Tab: அடுத்த தாவல்
+  Previous Tab: முந்தைய தாவல்
+  Help: உதவி
 Close Confirmation:
   Background Sync Warning: வெளியேறினால் பின்னணிச் சந்தா புதுப்பிப்புகள் நிறுத்தப்படும்.
   Hide Window: சாளரத்தை மறை

@@ -16,6 +16,22 @@ New Tab: Új lap
 Maximize: Teljes méret
 Restore: Visszaállítás
 Close Tab: Lap bezárása
+App Menu:
+  About App: A(z) {appName} névjegye
+  Services: Szolgáltatások
+  Hide App: '{appName} elrejtése'
+  Hide Others: Többi elrejtése
+  Show All: Az összes megjelenítése
+  Quit App: 'Kilépés: {appName}'
+  Reopen Closed Window: Bezárt ablak újranyitása
+  Paste and Match Style: Beillesztés stílusillesztéssel
+  View: Nézet
+  Enter Inspect Element Mode: Elemvizsgáló mód
+  GPU Internals: GPU belső adatai (chrome://gpu)
+  Navigate: Navigáció
+  Next Tab: Következő lap
+  Previous Tab: Előző lap
+  Help: Súgó
 Close Confirmation:
   Background Sync Warning: A kilépés leállítja a feliratkozások háttérben történő frissítését.
   Hide Window: Ablak elrejtése

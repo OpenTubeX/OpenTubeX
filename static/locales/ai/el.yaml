@@ -16,6 +16,22 @@ New Tab: Νέα καρτέλα
 Maximize: Μεγιστοποίηση
 Restore: Επαναφορά
 Close Tab: Κλείσιμο καρτέλας
+App Menu:
+  About App: Σχετικά με το {appName}
+  Services: Υπηρεσίες
+  Hide App: Απόκρυψη του {appName}
+  Hide Others: Απόκρυψη των άλλων
+  Show All: Εμφάνιση όλων
+  Quit App: Τερματισμός του {appName}
+  Reopen Closed Window: Επαναφορά κλειστού παραθύρου
+  Paste and Match Style: Επικόλληση με προσαρμογή στυλ
+  View: Προβολή
+  Enter Inspect Element Mode: Λειτουργία επιθεώρησης στοιχείων
+  GPU Internals: Εσωτερικά στοιχεία GPU (chrome://gpu)
+  Navigate: Πλοήγηση
+  Next Tab: Επόμενη καρτέλα
+  Previous Tab: Προηγούμενη καρτέλα
+  Help: Βοήθεια
 Close Confirmation:
   Background Sync Warning: Η έξοδος θα διακόψει την ανανέωση συνδρομών στο παρασκήνιο.
   Hide Window: Απόκρυψη παραθύρου

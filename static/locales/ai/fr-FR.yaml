@@ -16,6 +16,22 @@ New Tab: Nouvel onglet
 Maximize: Agrandir
 Restore: Restaurer
 Close Tab: Fermer l’onglet
+App Menu:
+  About App: À propos de {appName}
+  Services: Services
+  Hide App: Masquer {appName}
+  Hide Others: Masquer les autres
+  Show All: Tout afficher
+  Quit App: Quitter {appName}
+  Reopen Closed Window: Rouvrir la fenêtre fermée
+  Paste and Match Style: Coller et adapter le style
+  View: Affichage
+  Enter Inspect Element Mode: Activer le mode d’inspection des éléments
+  GPU Internals: Informations internes du GPU (chrome://gpu)
+  Navigate: Navigation
+  Next Tab: Onglet suivant
+  Previous Tab: Onglet précédent
+  Help: Aide
 Close Confirmation:
   Background Sync Warning: Quitter arrêtera l'actualisation des abonnements en arrière-plan.
   Hide Window: Masquer la fenêtre

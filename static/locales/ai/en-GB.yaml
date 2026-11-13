@@ -15,6 +15,22 @@ New Tab: New Tab
 Maximize: Maximise
 Restore: Restore
 Close Tab: Close Tab
+App Menu:
+  About App: About {appName}
+  Services: Services
+  Hide App: Hide {appName}
+  Hide Others: Hide Others
+  Show All: Show All
+  Quit App: Quit {appName}
+  Reopen Closed Window: Reopen Closed Window
+  Paste and Match Style: Paste and Match Style
+  View: View
+  Enter Inspect Element Mode: Enter Inspect Element Mode
+  GPU Internals: GPU Internals (chrome://gpu)
+  Navigate: Navigate
+  Next Tab: Next Tab
+  Previous Tab: Previous Tab
+  Help: Help
 Close Confirmation:
   Background Sync Warning: Quitting will stop background subscription refreshes.
   Hide Window: Hide Window

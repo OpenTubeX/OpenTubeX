@@ -16,6 +16,22 @@ New Tab: Ny flik
 Maximize: Maximera
 Restore: Återställ
 Close Tab: Stäng flik
+App Menu:
+  About App: Om {appName}
+  Services: Tjänster
+  Hide App: Göm {appName}
+  Hide Others: Göm övriga
+  Show All: Visa alla
+  Quit App: Avsluta {appName}
+  Reopen Closed Window: Öppna stängt fönster igen
+  Paste and Match Style: Klistra in och matcha stil
+  View: Visa
+  Enter Inspect Element Mode: Starta elementinspektion
+  GPU Internals: Intern GPU-information (chrome://gpu)
+  Navigate: Navigera
+  Next Tab: Nästa flik
+  Previous Tab: Föregående flik
+  Help: Hjälp
 Close Confirmation:
   Background Sync Warning: Om du avslutar stoppas uppdateringen av prenumerationer i bakgrunden.
   Hide Window: Dölj fönster

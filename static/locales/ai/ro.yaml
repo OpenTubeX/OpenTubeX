@@ -16,6 +16,22 @@ New Tab: Filă nouă
 Maximize: Maximizează
 Restore: Restaurează
 Close Tab: Închide fila
+App Menu:
+  About App: Despre {appName}
+  Services: Servicii
+  Hide App: Ascunde {appName}
+  Hide Others: Ascunde celelalte
+  Show All: Afișează tot
+  Quit App: Închide {appName}
+  Reopen Closed Window: Redeschide fereastra închisă
+  Paste and Match Style: Lipește și potrivește stilul
+  View: Vizualizare
+  Enter Inspect Element Mode: Modul de inspectare a elementelor
+  GPU Internals: Informații interne GPU (chrome://gpu)
+  Navigate: Navigare
+  Next Tab: Fila următoare
+  Previous Tab: Fila anterioară
+  Help: Ajutor
 Close Confirmation:
   Background Sync Warning: Ieșirea va opri actualizarea abonamentelor în fundal.
   Hide Window: Ascunde fereastra

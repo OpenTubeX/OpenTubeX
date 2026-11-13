@@ -16,6 +16,22 @@ New Tab: 새 탭
 Maximize: 최대화
 Restore: 복원
 Close Tab: 탭 닫기
+App Menu:
+  About App: '{appName} 정보'
+  Services: 서비스
+  Hide App: '{appName} 가리기'
+  Hide Others: 기타 가리기
+  Show All: 모두 보기
+  Quit App: '{appName} 종료'
+  Reopen Closed Window: 닫은 창 다시 열기
+  Paste and Match Style: 붙여넣기 및 스타일 일치
+  View: 보기
+  Enter Inspect Element Mode: 요소 검사 모드 시작
+  GPU Internals: GPU 내부 정보 (chrome://gpu)
+  Navigate: 이동
+  Next Tab: 다음 탭
+  Previous Tab: 이전 탭
+  Help: 도움말
 Close Confirmation:
   Background Sync Warning: 종료하면 백그라운드 구독 새로고침이 중지됩니다.
   Hide Window: 창 숨기기

@@ -16,6 +16,22 @@ New Tab: Nýr flipi
 Maximize: Hámarka
 Restore: Endurheimta
 Close Tab: Loka flipa
+App Menu:
+  About App: Um {appName}
+  Services: Þjónustur
+  Hide App: Fela {appName}
+  Hide Others: Fela aðra
+  Show All: Sýna allt
+  Quit App: Hætta í {appName}
+  Reopen Closed Window: Opna lokaðan glugga aftur
+  Paste and Match Style: Líma og samræma stíl
+  View: Skoða
+  Enter Inspect Element Mode: Fara í ham til að skoða einingar
+  GPU Internals: Innri upplýsingar GPU (chrome://gpu)
+  Navigate: Fletta
+  Next Tab: Næsti flipi
+  Previous Tab: Fyrri flipi
+  Help: Hjálp
 Close Confirmation:
   Background Sync Warning: Ef þú hættir stöðvast uppfærsla áskrifta í bakgrunni.
   Hide Window: Fela glugga

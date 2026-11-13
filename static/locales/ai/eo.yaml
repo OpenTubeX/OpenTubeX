@@ -16,6 +16,22 @@ New Tab: Nova langeto
 Maximize: Maksimumigi
 Restore: Restarigi
 Close Tab: Fermi langeton
+App Menu:
+  About App: Pri {appName}
+  Services: Servoj
+  Hide App: Kaŝi {appName}
+  Hide Others: Kaŝi aliajn
+  Show All: Montri ĉiujn
+  Quit App: Ĉesigi {appName}
+  Reopen Closed Window: Remalfermi fermitan fenestron
+  Paste and Match Style: Alglui kaj adapti stilon
+  View: Vido
+  Enter Inspect Element Mode: Eniri elementan inspektan reĝimon
+  GPU Internals: Internaj informoj de GPU (chrome://gpu)
+  Navigate: Navigi
+  Next Tab: Sekva langeto
+  Previous Tab: Antaŭa langeto
+  Help: Helpo
 Close Confirmation:
   Title: Ĉu eliri el OpenTubeX?
   Message: Ĉu vi certas, ke vi volas eliri el OpenTubeX?

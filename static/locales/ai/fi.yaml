@@ -16,6 +16,22 @@ New Tab: Uusi välilehti
 Maximize: Suurenna
 Restore: Palauta
 Close Tab: Sulje välilehti
+App Menu:
+  About App: 'Tietoja: {appName}'
+  Services: Palvelut
+  Hide App: Kätke {appName}
+  Hide Others: Kätke muut
+  Show All: Näytä kaikki
+  Quit App: Lopeta {appName}
+  Reopen Closed Window: Avaa suljettu ikkuna uudelleen
+  Paste and Match Style: Liitä ja sovita tyyli
+  View: Näytä
+  Enter Inspect Element Mode: Elementin tarkastelutila
+  GPU Internals: GPU:n sisäiset tiedot (chrome://gpu)
+  Navigate: Siirry
+  Next Tab: Seuraava välilehti
+  Previous Tab: Edellinen välilehti
+  Help: Ohje
 Close Confirmation:
   Background Sync Warning: Lopettaminen pysäyttää tilausten päivittämisen taustalla.
   Hide Window: Piilota ikkuna

@@ -15,6 +15,22 @@ Color Picker:
 Maximize: Razpni
 Restore: Obnovi
 Close Tab: Zapri zavihek
+App Menu:
+  About App: O programu {appName}
+  Services: Storitve
+  Hide App: Skrij {appName}
+  Hide Others: Skrij druge
+  Show All: Pokaži vse
+  Quit App: Zapri {appName}
+  Reopen Closed Window: Znova odpri zaprto okno
+  Paste and Match Style: Prilepi in prilagodi slog
+  View: Pogled
+  Enter Inspect Element Mode: Način pregledovanja elementov
+  GPU Internals: Notranji podatki GPU (chrome://gpu)
+  Navigate: Krmarjenje
+  Next Tab: Naslednji zavihek
+  Previous Tab: Prejšnji zavihek
+  Help: Pomoč
 Close Confirmation:
   Background Sync Warning: Izhod bo ustavil osveževanje naročnin v ozadju.
   Hide Window: Skrij okno

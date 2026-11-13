@@ -16,6 +16,22 @@ New Tab: Pestanya nova
 Maximize: Maximitza
 Restore: Restaura
 Close Tab: Tanca la pestanya
+App Menu:
+  About App: Quant a {appName}
+  Services: Serveis
+  Hide App: Amaga {appName}
+  Hide Others: Amaga els altres
+  Show All: Mostra-ho tot
+  Quit App: Surt de {appName}
+  Reopen Closed Window: Torna a obrir la finestra tancada
+  Paste and Match Style: Enganxa i adapta l’estil
+  View: Visualització
+  Enter Inspect Element Mode: Entra al mode d’inspecció d’elements
+  GPU Internals: Informació interna de la GPU (chrome://gpu)
+  Navigate: Navega
+  Next Tab: Pestanya següent
+  Previous Tab: Pestanya anterior
+  Help: Ajuda
 Close Confirmation:
   Background Sync Warning: En sortir, s'aturarà l'actualització de subscripcions en segon pla.
   Hide Window: Amaga la finestra

@@ -16,6 +16,22 @@ New Tab: Yeni vərəq
 Maximize: Böyüt
 Restore: Bərpa et
 Close Tab: Vərəqi bağla
+App Menu:
+  About App: '{appName} haqqında'
+  Services: Xidmətlər
+  Hide App: '{appName} gizlət'
+  Hide Others: Digərlərini gizlət
+  Show All: Hamısını göstər
+  Quit App: '{appName} tətbiqindən çıx'
+  Reopen Closed Window: Bağlanmış pəncərəni yenidən aç
+  Paste and Match Style: Yapışdır və üslubu uyğunlaşdır
+  View: Görünüş
+  Enter Inspect Element Mode: Elementi yoxlama rejiminə keç
+  GPU Internals: GPU daxili məlumatları (chrome://gpu)
+  Navigate: Naviqasiya
+  Next Tab: Növbəti tab
+  Previous Tab: Əvvəlki tab
+  Help: Kömək
 Close Confirmation:
   Background Sync Warning: Tətbiqdən çıxmaq abunəliklərin fonda yenilənməsini dayandıracaq.
   Hide Window: Pəncərəni gizlət

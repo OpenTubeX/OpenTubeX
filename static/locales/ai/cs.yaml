@@ -16,6 +16,22 @@ New Tab: Nová karta
 Maximize: Maximalizovat
 Restore: Obnovit
 Close Tab: Zavřít kartu
+App Menu:
+  About App: O aplikaci {appName}
+  Services: Služby
+  Hide App: Skrýt {appName}
+  Hide Others: Skrýt ostatní
+  Show All: Zobrazit vše
+  Quit App: Ukončit {appName}
+  Reopen Closed Window: Znovu otevřít zavřené okno
+  Paste and Match Style: Vložit a přizpůsobit styl
+  View: Zobrazení
+  Enter Inspect Element Mode: Režim prozkoumání prvku
+  GPU Internals: Interní informace GPU (chrome://gpu)
+  Navigate: Navigace
+  Next Tab: Další karta
+  Previous Tab: Předchozí karta
+  Help: Nápověda
 Close Confirmation:
   Background Sync Warning: Ukončením aplikace se zastaví aktualizace odběrů na pozadí.
   Hide Window: Skrýt okno

@@ -16,6 +16,22 @@ New Tab: 新しいタブ
 Maximize: 最大化
 Restore: 元に戻す
 Close Tab: タブを閉じる
+App Menu:
+  About App: '{appName} について'
+  Services: サービス
+  Hide App: '{appName} を隠す'
+  Hide Others: ほかを隠す
+  Show All: すべてを表示
+  Quit App: '{appName} を終了'
+  Reopen Closed Window: 閉じたウィンドウを再度開く
+  Paste and Match Style: ペーストしてスタイルを合わせる
+  View: 表示
+  Enter Inspect Element Mode: 要素の検証モードに入る
+  GPU Internals: GPU 内部情報 (chrome://gpu)
+  Navigate: 移動
+  Next Tab: 次のタブ
+  Previous Tab: 前のタブ
+  Help: ヘルプ
 Close Confirmation:
   Background Sync Warning: 終了すると、バックグラウンドでの登録チャンネルの更新が停止します。
   Hide Window: ウィンドウを非表示

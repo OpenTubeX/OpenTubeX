@@ -16,6 +16,22 @@ New Tab: Новая ўкладка
 Maximize: Разгарнуць
 Restore: Аднавіць
 Close Tab: Закрыць укладку
+App Menu:
+  About App: Пра {appName}
+  Services: Сэрвісы
+  Hide App: Схаваць {appName}
+  Hide Others: Схаваць іншыя
+  Show All: Паказаць усе
+  Quit App: Выйсці з {appName}
+  Reopen Closed Window: Зноў адкрыць закрытае акно
+  Paste and Match Style: Уставіць з захаваннем стылю
+  View: Выгляд
+  Enter Inspect Element Mode: Рэжым агляду элементаў
+  GPU Internals: Унутраныя звесткі GPU (chrome://gpu)
+  Navigate: Навігацыя
+  Next Tab: Наступная картка
+  Previous Tab: Папярэдняя картка
+  Help: Даведка
 Close Confirmation:
   Background Sync Warning: Выхад з праграмы спыніць фонавае абнаўленне падпісак.
   Hide Window: Схаваць акно

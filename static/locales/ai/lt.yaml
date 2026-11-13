@@ -16,6 +16,22 @@ New Tab: Nauja kortelė
 Maximize: Išdidinti
 Restore: Atkurti
 Close Tab: Užverti kortelę
+App Menu:
+  About App: Apie {appName}
+  Services: Paslaugos
+  Hide App: Slėpti {appName}
+  Hide Others: Slėpti kitas
+  Show All: Rodyti visas
+  Quit App: Išeiti iš {appName}
+  Reopen Closed Window: Iš naujo atverti uždarytą langą
+  Paste and Match Style: Įklijuoti pritaikant stilių
+  View: Rodymas
+  Enter Inspect Element Mode: Elementų tikrinimo režimas
+  GPU Internals: GPU vidinė informacija (chrome://gpu)
+  Navigate: Naršyti
+  Next Tab: Kita kortelė
+  Previous Tab: Ankstesnė kortelė
+  Help: Žinynas
 Close Confirmation:
   Background Sync Warning: Išėjus bus sustabdytas prenumeratų atnaujinimas fone.
   Hide Window: Slėpti langą

@@ -601,6 +601,8 @@ function runApp() {
   let trayOnClose = false
   let trayOnMinimize = false
   let trayTranslate = key => key
+  /** @type {Promise<Awaited<ReturnType<typeof createMainTranslator>>> | null} */
+  let mainTranslatorPromise = null
   let trayMenuIconPack = 'material'
   const trayClosingWindowIds = new Set()
   let trayWindows = []
@@ -1105,19 +1107,7 @@ function runApp() {
     restoreYtDlpDownloadQueue().catch(error => {
       console.warn('Could not restore the download queue', error)
     })
-    createMainTranslator().then(t => {
-      trayTranslate = t
-      dockMediaLabels = {
-        previous: t('Video.Previous'),
-        play: t('Video.Player.Scroll Mini Player.Play'),
-        pause: t('Video.Player.Scroll Mini Player.Pause'),
-        next: t('Video.Next'),
-        newWindow: t('New Window')
-      }
-      updateDockMenu()
-    }).catch(error => {
-      console.warn('Could not load the tray translations', error)
-    })
+    translateTrayAndDock()
 
     if (process.env.NODE_ENV === 'production') {
       protocol.handle('app', async (request) => {
@@ -2730,6 +2720,11 @@ function runApp() {
       case 'keyboardShortcuts':
         await setMenu()
         break
+      case 'currentLocale':
+      case 'useAITranslationCompletions':
+        mainTranslatorPromise = null
+        await Promise.all([setMenu(), translateTrayAndDock()])
+        break
       case 'tabCloseFocus':
         TabManager.setTabCloseFocus(data.value)
         break
@@ -3092,7 +3087,37 @@ function runApp() {
     }
   }
 
+  /**
+   * The translator for the app's current language. A language change while it
+   * loads replaces it, so callers wait for the newest one.
+   */
+  async function getMainTranslator() {
+    while (true) {
+      mainTranslatorPromise ??= createMainTranslator().catch(error => {
+        console.warn('Could not load the translations for the native menus', error)
+        return key => key
+      })
+      const promise = mainTranslatorPromise
+      const t = await promise
+      if (promise === mainTranslatorPromise) return t
+    }
+  }
+
+  async function translateTrayAndDock() {
+    const t = await getMainTranslator()
+    trayTranslate = t
+    dockMediaLabels = {
+      previous: t('Video.Previous'),
+      play: t('Video.Player.Scroll Mini Player.Play'),
+      pause: t('Video.Player.Scroll Mini Player.Pause'),
+      next: t('Video.Next'),
+      newWindow: t('New Window')
+    }
+    updateDockMenu()
+  }
+
   async function setMenu() {
+    const t = await getMainTranslator()
     // The app has no other menu to fall back on, so a failed read uses the default shortcuts.
     const keyboardShortcutsSetting = await baseHandlers.settings._findOne('keyboardShortcuts').catch((error) => {
       console.error('Could not read the keyboard shortcuts for the menu', error)
@@ -3119,24 +3144,24 @@ function runApp() {
             {
               label: app.getName(),
               submenu: [
-                { role: 'about' },
+                { role: 'about', label: t('App Menu.About App', { appName: app.getName() }) },
                 { type: 'separator' },
-                { role: 'services' },
+                { role: 'services', label: t('App Menu.Services') },
                 { type: 'separator' },
-                { role: 'hide' },
-                { role: 'hideothers' },
-                { role: 'unhide' },
+                { role: 'hide', label: t('App Menu.Hide App', { appName: app.getName() }) },
+                { role: 'hideothers', label: t('App Menu.Hide Others') },
+                { role: 'unhide', label: t('App Menu.Show All') },
                 { type: 'separator' },
-                { role: 'quit' }
+                { role: 'quit', label: t('App Menu.Quit App', { appName: app.getName() }) }
               ]
             }
           ]
         : [],
       {
-        label: 'File',
+        label: t('File'),
         submenu: [
           {
-            label: 'New Window',
+            label: t('New Window'),
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NEW_WINDOW),
             click: (_menuItem, browserWindow, _event) => {
               if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
@@ -3148,7 +3173,7 @@ function runApp() {
             type: 'normal'
           },
           {
-            label: 'Reopen Closed Window',
+            label: t('App Menu.Reopen Closed Window'),
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.RESTORE_CLOSED_WINDOW),
             click: (_menuItem, browserWindow) => {
               if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) return
@@ -3157,7 +3182,7 @@ function runApp() {
           },
           { type: 'separator' },
           {
-            label: 'Preferences',
+            label: t('Preferences'),
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NAVIGATE_TO_SETTINGS),
             click: (_menuItem, browserWindow, _event) => {
               if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
@@ -3166,33 +3191,35 @@ function runApp() {
             type: 'normal'
           },
           { type: 'separator' },
-          { role: 'quit' }
+          { role: 'quit', label: t('Quit') }
         ]
       },
       {
-        label: 'Edit',
+        label: t('Edit'),
         submenu: [
-          { role: 'cut' },
+          { role: 'cut', label: t('Cut') },
           {
             role: 'copy',
+            label: t('Copy'),
             accelerator: 'CmdOrCtrl+C',
             selector: 'copy:'
           },
           {
             role: 'paste',
+            label: t('Paste'),
             accelerator: 'CmdOrCtrl+V',
             selector: 'paste:'
           },
-          { role: 'pasteandmatchstyle' },
-          { role: 'delete' },
-          { role: 'selectall' }
+          { role: 'pasteandmatchstyle', label: t('App Menu.Paste and Match Style') },
+          { role: 'delete', label: t('Delete') },
+          { role: 'selectall', label: t('Select all') }
         ]
       },
       {
-        label: 'View',
+        label: t('App Menu.View'),
         submenu: [
           {
-            label: 'Toggle Developer Tools',
+            label: t('Toggle Developer Tools'),
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.TOGGLE_DEVTOOLS),
             click: (_menuItem, browserWindow) => {
               if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
@@ -3200,7 +3227,7 @@ function runApp() {
             }
           },
           {
-            label: 'Enter Inspect Element Mode',
+            label: t('App Menu.Enter Inspect Element Mode'),
             accelerator: 'CmdOrCtrl+Shift+Alt+C',
             click: (_, window) => {
               if (appShortcutBlockedWindows.has(window)) { return }
@@ -3215,7 +3242,7 @@ function runApp() {
             }
           },
           {
-            label: 'GPU Internals (chrome://gpu)',
+            label: t('App Menu.GPU Internals'),
             click() {
               const gpuWindow = new BrowserWindow({
                 show: true,
@@ -3229,7 +3256,7 @@ function runApp() {
           },
           { type: 'separator' },
           {
-            label: 'Actual Size',
+            label: t('Actual size'),
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.RESET_ZOOM),
             click: (_menuItem, browserWindow) => {
               if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
@@ -3237,7 +3264,7 @@ function runApp() {
             }
           },
           {
-            label: 'Zoom In',
+            label: t('Zoom in'),
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.ZOOM_IN),
             click: (_menuItem, browserWindow) => {
               if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {
@@ -3246,7 +3273,7 @@ function runApp() {
             }
           },
           {
-            label: 'Zoom Out',
+            label: t('Zoom out'),
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.ZOOM_OUT),
             click: (_menuItem, browserWindow) => {
               if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {
@@ -3256,7 +3283,7 @@ function runApp() {
           },
           { type: 'separator' },
           {
-            label: 'Toggle Full Screen',
+            label: t('Toggle fullscreen'),
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.FULLSCREEN),
             click: (_menuItem, browserWindow) => {
               if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
@@ -3265,7 +3292,7 @@ function runApp() {
           },
           { type: 'separator' },
           {
-            label: 'Back',
+            label: t('Back'),
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.HISTORY_BACKWARD),
             click: (_menuItem, browserWindow, _event) => {
               if (browserWindow == null || appShortcutBlockedWindows.has(browserWindow)) { return }
@@ -3277,7 +3304,7 @@ function runApp() {
           ...(process.platform === 'darwin'
             ? [
                 {
-                  label: 'Back',
+                  label: t('Back'),
                   accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.HISTORY_BACKWARD_ALT_MAC),
                   click: (_menuItem, browserWindow, _event) => {
                     if (browserWindow == null || appShortcutBlockedWindows.has(browserWindow)) { return }
@@ -3289,7 +3316,7 @@ function runApp() {
               ]
             : []),
           {
-            label: 'Forward',
+            label: t('Forward'),
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.HISTORY_FORWARD),
             click: (_menuItem, browserWindow, _event) => {
               if (browserWindow == null || appShortcutBlockedWindows.has(browserWindow)) { return }
@@ -3301,7 +3328,7 @@ function runApp() {
           ...(process.platform === 'darwin'
             ? [
                 {
-                  label: 'Forward',
+                  label: t('Forward'),
                   accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.HISTORY_FORWARD_ALT_MAC),
                   click: (_menuItem, browserWindow, _event) => {
                     if (browserWindow == null || appShortcutBlockedWindows.has(browserWindow)) { return }
@@ -3315,52 +3342,52 @@ function runApp() {
         ]
       },
       {
-        label: 'Navigate',
+        label: t('App Menu.Navigate'),
         submenu: [
           {
-            label: 'Home',
+            label: t('Home Page.Home'),
             click: (_menuItem, browserWindow, _event) => {
               navigateTo('/home', browserWindow)
             },
             type: 'normal'
           },
           {
-            label: 'Subscriptions',
+            label: t('Subscriptions.Subscriptions'),
             click: (_menuItem, browserWindow, _event) => {
               navigateTo('/subscriptions', browserWindow)
             },
             type: 'normal'
           },
           {
-            label: 'Channels',
+            label: t('Channels.Channels'),
             click: (_menuItem, browserWindow, _event) => {
               navigateTo('/subscribedchannels', browserWindow)
             },
             type: 'normal'
           },
           (backendFallback || backendPreference === 'local') && {
-            label: 'Trending',
+            label: t('Trending.Trending'),
             click: (_menuItem, browserWindow, _event) => {
               navigateTo('/trending', browserWindow)
             },
             type: 'normal'
           },
           (backendFallback || usesInvidiousApi(backendPreference)) && {
-            label: 'Most Popular',
+            label: t('Most Popular'),
             click: (_menuItem, browserWindow, _event) => {
               navigateTo('/popular', browserWindow)
             },
             type: 'normal'
           },
           {
-            label: 'Playlists',
+            label: t('Playlists'),
             click: (_menuItem, browserWindow, _event) => {
               navigateTo('/userplaylists', browserWindow)
             },
             type: 'normal'
           },
           {
-            label: 'Downloads',
+            label: t('Settings.Download Settings.Download Settings'),
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NAVIGATE_TO_DOWNLOADS),
             click: (_menuItem, browserWindow, _event) => {
               if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
@@ -3369,7 +3396,7 @@ function runApp() {
             type: 'normal'
           },
           {
-            label: 'History',
+            label: t('History.History'),
             accelerator: getElectronAccelerator(process.platform === 'darwin'
               ? keyboardShortcuts.APP.GENERAL.NAVIGATE_TO_HISTORY_MAC
               : keyboardShortcuts.APP.GENERAL.NAVIGATE_TO_HISTORY),
@@ -3380,7 +3407,7 @@ function runApp() {
             type: 'normal'
           },
           {
-            label: 'Profile Manager',
+            label: t('Profile.Profile Manager'),
             click: (_menuItem, browserWindow, _event) => {
               showSettingsWindow(browserWindow, 'profile')
             },
@@ -3389,10 +3416,10 @@ function runApp() {
         ].filter((v) => v !== false),
       },
       {
-        label: 'Tabs',
+        label: t('Settings.Theme Settings.Sections.Tabs'),
         submenu: [
           {
-            label: 'New Tab',
+            label: t('New Tab'),
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NEW_TAB),
             click: (_menuItem, browserWindow) => {
               if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {
@@ -3406,7 +3433,7 @@ function runApp() {
             }
           },
           {
-            label: 'Close Tab',
+            label: t('Close Tab'),
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.CLOSE_TAB),
             click: async (_menuItem, browserWindow) => {
               if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {
@@ -3431,18 +3458,18 @@ function runApp() {
             }
           },
           {
-            label: 'Reload Tab',
+            label: t('Context Menu.Reload Tab'),
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.RELOAD_TAB),
             click: reloadTabs,
           },
           {
-            label: 'Reload Tab',
+            label: t('Context Menu.Reload Tab'),
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.RELOAD_TAB_ALT),
             click: reloadTabs,
             visible: false,
           },
           {
-            label: 'Reopen Closed Tab',
+            label: t('Context Menu.Reopen Closed Tab'),
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.RESTORE_CLOSED_TAB),
             click: (_menuItem, browserWindow) => {
               if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {
@@ -3455,7 +3482,7 @@ function runApp() {
           },
           { type: 'separator' },
           {
-            label: 'Next Tab',
+            label: t('App Menu.Next Tab'),
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NEXT_TAB),
             click: (_menuItem, browserWindow) => {
               if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {
@@ -3470,7 +3497,7 @@ function runApp() {
             }
           },
           {
-            label: 'Previous Tab',
+            label: t('App Menu.Previous Tab'),
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.PREV_TAB),
             click: (_menuItem, browserWindow) => {
               if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {
@@ -3488,9 +3515,10 @@ function runApp() {
       },
       {
         role: 'window',
+        label: t('Window'),
         submenu: [
           {
-            label: 'Minimize',
+            label: t('Minimize'),
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.MINIMIZE_WINDOW),
             click: (_menuItem, browserWindow) => {
               if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
@@ -3498,7 +3526,7 @@ function runApp() {
             }
           },
           {
-            label: 'Close Window',
+            label: t('Close Window Confirmation.Close Window'),
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.CLOSE_WINDOW),
             click: (_menuItem, browserWindow) => browserWindow?.close()
           }
@@ -3506,9 +3534,9 @@ function runApp() {
       },
       ...process.platform === 'darwin'
         ? [
-            { role: 'window' },
-            { role: 'help' },
-            { role: 'services' }
+            { role: 'window', label: t('Window') },
+            { role: 'help', label: t('App Menu.Help') },
+            { role: 'services', label: t('App Menu.Services') }
           ]
         : []
     ]

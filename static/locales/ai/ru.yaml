@@ -2746,3 +2746,19 @@ YouTube Account:
   Delete Comment Failed: "Не удалось удалить комментарий: {error}"
   Recommendations: "Рекомендации YouTube"
   Recommendations Failed: "Не удалось загрузить ваши рекомендации YouTube."
+App Menu:
+  About App: О программе {appName}
+  Services: Службы
+  Hide App: Скрыть {appName}
+  Hide Others: Скрыть остальные
+  Show All: Показать все
+  Quit App: Завершить {appName}
+  Reopen Closed Window: Снова открыть закрытое окно
+  Paste and Match Style: Вставить с сохранением стиля
+  View: Вид
+  Enter Inspect Element Mode: Режим проверки элементов
+  GPU Internals: Внутренние сведения GPU (chrome://gpu)
+  Navigate: Навигация
+  Next Tab: Следующая вкладка
+  Previous Tab: Предыдущая вкладка
+  Help: Справка

@@ -2019,3 +2019,19 @@ YouTube Account:
   Delete Comment Failed: "Nie udało się usunąć komentarza: {error}"
   Recommendations: "Rekomendacje YouTube"
   Recommendations Failed: "Nie udało się wczytać twoich rekomendacji YouTube."
+App Menu:
+  About App: O programie {appName}
+  Services: Usługi
+  Hide App: Ukryj {appName}
+  Hide Others: Ukryj pozostałe
+  Show All: Pokaż wszystkie
+  Quit App: Zakończ {appName}
+  Reopen Closed Window: Otwórz ponownie zamknięte okno
+  Paste and Match Style: Wklej i dopasuj styl
+  View: Widok
+  Enter Inspect Element Mode: Tryb sprawdzania elementów
+  GPU Internals: Informacje wewnętrzne GPU (chrome://gpu)
+  Navigate: Nawigacja
+  Next Tab: Następna karta
+  Previous Tab: Poprzednia karta
+  Help: Pomoc

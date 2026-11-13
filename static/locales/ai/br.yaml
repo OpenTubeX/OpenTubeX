@@ -16,6 +16,22 @@ New Tab: "Ivinell nevez"
 Maximize: "Brasaat"
 Restore: "Assav"
 Close Tab: "Serriñ an ivinell"
+App Menu:
+  About App: Diwar-benn {appName}
+  Services: Servijoù
+  Hide App: Kuzhat {appName}
+  Hide Others: Kuzhat ar re all
+  Show All: Diskouez pep tra
+  Quit App: Kuitaat {appName}
+  Reopen Closed Window: Digeriñ en-dro ar prenestr serret
+  Paste and Match Style: Pegañ hag azasaat ar stil
+  View: Gwel
+  Enter Inspect Element Mode: Mod ensellout an elfennoù
+  GPU Internals: Titouroù diabarzh ar GPU (chrome://gpu)
+  Navigate: Merdeiñ
+  Next Tab: Ivinell da-heul
+  Previous Tab: Ivinell kent
+  Help: Skoazell
 Close Confirmation:
   Background Sync Warning: Kuitaat a vo paouez gant hizivaat an enskrivadurioù en drekleur.
   Hide Window: Kuzhat ar prenestr

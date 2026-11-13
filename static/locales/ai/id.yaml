@@ -16,6 +16,22 @@ New Tab: Tab Baru
 Maximize: Maksimalkan
 Restore: Pulihkan
 Close Tab: Tutup Tab
+App Menu:
+  About App: Tentang {appName}
+  Services: Layanan
+  Hide App: Sembunyikan {appName}
+  Hide Others: Sembunyikan Lainnya
+  Show All: Tampilkan Semua
+  Quit App: Keluar dari {appName}
+  Reopen Closed Window: Buka Kembali Jendela yang Ditutup
+  Paste and Match Style: Tempel dan Sesuaikan Gaya
+  View: Tampilan
+  Enter Inspect Element Mode: Masuk ke Mode Periksa Elemen
+  GPU Internals: Info Internal GPU (chrome://gpu)
+  Navigate: Navigasi
+  Next Tab: Tab Berikutnya
+  Previous Tab: Tab Sebelumnya
+  Help: Bantuan
 Close Confirmation:
   Background Sync Warning: Keluar akan menghentikan penyegaran langganan di latar belakang.
   Hide Window: Sembunyikan Jendela

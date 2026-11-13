@@ -16,6 +16,22 @@ New Tab: Ny fane
 Maximize: Maksimer
 Restore: Gjenopprett
 Close Tab: Lukk fana
+App Menu:
+  About App: Om {appName}
+  Services: Tenester
+  Hide App: Gøym {appName}
+  Hide Others: Gøym andre
+  Show All: Vis alle
+  Quit App: Avslutt {appName}
+  Reopen Closed Window: Opna lukka vindauge på nytt
+  Paste and Match Style: Lim inn og tilpass stil
+  View: Vis
+  Enter Inspect Element Mode: Gå til elementinspeksjon
+  GPU Internals: Intern GPU-informasjon (chrome://gpu)
+  Navigate: Naviger
+  Next Tab: Neste fane
+  Previous Tab: Førre fane
+  Help: Hjelp
 Close Confirmation:
   Background Sync Warning: Viss du avsluttar, stoppar oppdatering av abonnement i bakgrunnen.
   Hide Window: Gøym vindauge

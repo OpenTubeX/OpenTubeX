@@ -16,6 +16,22 @@ New Tab: Yeni Sekme
 Maximize: Büyüt
 Restore: Geri Yükle
 Close Tab: Sekmeyi Kapat
+App Menu:
+  About App: '{appName} Hakkında'
+  Services: Hizmetler
+  Hide App: '{appName} Uygulamasını Gizle'
+  Hide Others: Diğerlerini Gizle
+  Show All: Tümünü Göster
+  Quit App: '{appName} Uygulamasından Çık'
+  Reopen Closed Window: Kapatılan Pencereyi Yeniden Aç
+  Paste and Match Style: Yapıştır ve Stili Eşleştir
+  View: Görünüm
+  Enter Inspect Element Mode: Öğe İnceleme Moduna Geç
+  GPU Internals: GPU İç Bilgileri (chrome://gpu)
+  Navigate: Gezin
+  Next Tab: Sonraki Sekme
+  Previous Tab: Önceki Sekme
+  Help: Yardım
 Close Confirmation:
   Background Sync Warning: Çıkmak, arka plandaki abonelik yenilemelerini durdurur.
   Hide Window: Pencereyi Gizle

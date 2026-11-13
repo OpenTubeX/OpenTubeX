@@ -16,6 +16,22 @@ New Tab: Нов раздел
 Maximize: Максимизиране
 Restore: Възстановяване
 Close Tab: Затваряне на раздела
+App Menu:
+  About App: Относно {appName}
+  Services: Услуги
+  Hide App: Скриване на {appName}
+  Hide Others: Скриване на останалите
+  Show All: Показване на всички
+  Quit App: Изход от {appName}
+  Reopen Closed Window: Повторно отваряне на затворен прозорец
+  Paste and Match Style: Поставяне със съвпадащ стил
+  View: Изглед
+  Enter Inspect Element Mode: Режим за инспектиране на елементи
+  GPU Internals: Вътрешна информация за GPU (chrome://gpu)
+  Navigate: Навигация
+  Next Tab: Следващ раздел
+  Previous Tab: Предишен раздел
+  Help: Помощ
 Close Confirmation:
   Background Sync Warning: Излизането ще спре фоновото обновяване на абонаментите.
   Hide Window: Скриване на прозореца

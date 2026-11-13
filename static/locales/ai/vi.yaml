@@ -16,6 +16,22 @@ New Tab: Thẻ mới
 Maximize: Phóng to
 Restore: Khôi phục
 Close Tab: Đóng thẻ
+App Menu:
+  About App: Giới thiệu về {appName}
+  Services: Dịch vụ
+  Hide App: Ẩn {appName}
+  Hide Others: Ẩn các ứng dụng khác
+  Show All: Hiện tất cả
+  Quit App: Thoát {appName}
+  Reopen Closed Window: Mở lại cửa sổ đã đóng
+  Paste and Match Style: Dán và khớp kiểu
+  View: Xem
+  Enter Inspect Element Mode: Vào chế độ kiểm tra phần tử
+  GPU Internals: Thông tin nội bộ GPU (chrome://gpu)
+  Navigate: Điều hướng
+  Next Tab: Thẻ tiếp theo
+  Previous Tab: Thẻ trước
+  Help: Trợ giúp
 Close Confirmation:
   Background Sync Warning: Thoát sẽ dừng làm mới gói đăng ký trong nền.
   Hide Window: Ẩn cửa sổ

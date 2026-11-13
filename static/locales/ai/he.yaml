@@ -16,6 +16,22 @@ New Tab: כרטיסייה חדשה
 Maximize: הגדלה
 Restore: שחזור
 Close Tab: סגירת הכרטיסייה
+App Menu:
+  About App: אודות {appName}
+  Services: שירותים
+  Hide App: הסתרת {appName}
+  Hide Others: הסתרת האחרים
+  Show All: הצגת הכול
+  Quit App: יציאה מ־{appName}
+  Reopen Closed Window: פתיחה מחדש של חלון שנסגר
+  Paste and Match Style: הדבקה והתאמת סגנון
+  View: תצוגה
+  Enter Inspect Element Mode: מעבר למצב בדיקת רכיבים
+  GPU Internals: מידע פנימי על GPU (chrome://gpu)
+  Navigate: ניווט
+  Next Tab: הכרטיסייה הבאה
+  Previous Tab: הכרטיסייה הקודמת
+  Help: עזרה
 Close Confirmation:
   Background Sync Warning: יציאה תפסיק את רענון המינויים ברקע.
   Hide Window: הסתרת החלון

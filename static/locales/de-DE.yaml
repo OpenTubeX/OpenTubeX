@@ -19,6 +19,22 @@ Window: Fenster
 Minimize: Minimieren
 Close: Schließen
 Close Tab: Tab schließen
+App Menu:
+  About App: Über {appName}
+  Services: Dienste
+  Hide App: '{appName} ausblenden'
+  Hide Others: Andere ausblenden
+  Show All: Alle einblenden
+  Quit App: '{appName} beenden'
+  Reopen Closed Window: Geschlossenes Fenster wieder öffnen
+  Paste and Match Style: Einfügen und Stil anpassen
+  View: Ansicht
+  Enter Inspect Element Mode: Element-Untersuchungsmodus starten
+  GPU Internals: GPU-Interna (chrome://gpu)
+  Navigate: Navigieren
+  Next Tab: Nächster Tab
+  Previous Tab: Vorheriger Tab
+  Help: Hilfe
 Back: Zurück
 Forward: Vorwärts
 Resize Tab Bar: Größe der Tableiste ändern

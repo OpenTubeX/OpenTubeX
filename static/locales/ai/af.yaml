@@ -16,6 +16,22 @@ New Tab: Nuwe oortjie
 Maximize: Maksimeer
 Restore: Herstel
 Close Tab: Sluit oortjie
+App Menu:
+  About App: Oor {appName}
+  Services: Dienste
+  Hide App: Versteek {appName}
+  Hide Others: Versteek ander
+  Show All: Wys alles
+  Quit App: Verlaat {appName}
+  Reopen Closed Window: Heropen geslote venster
+  Paste and Match Style: Plak en pas styl aan
+  View: Aansig
+  Enter Inspect Element Mode: Betree element-inspeksiemodus
+  GPU Internals: GPU-interne inligting (chrome://gpu)
+  Navigate: Navigeer
+  Next Tab: Volgende oortjie
+  Previous Tab: Vorige oortjie
+  Help: Hulp
 Close Confirmation:
   Title: Verlaat OpenTubeX?
   Message: Is u seker u wil OpenTubeX verlaat?
