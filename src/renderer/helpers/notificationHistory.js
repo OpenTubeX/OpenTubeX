@@ -19,6 +19,7 @@ export const NOTIFICATION_KIND_ICONS = {
   video: ['fas', 'video'],
   short: ['fas', 'film'],
   post: ['fas', 'message'],
+  'comment-reply': ['fas', 'reply'],
   'download-started': ['fas', 'download'],
   'download-completed': ['fas', 'download'],
   'download-failed': ['fas', 'circle-exclamation']

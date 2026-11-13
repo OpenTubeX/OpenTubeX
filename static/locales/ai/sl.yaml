@@ -515,6 +515,7 @@ Settings:
     Sync Now: "Sinhroniziraj zdaj"
     Synced: "Sinhronizirano s storitvijo YouTube"
     Sync Failed: "Sinhronizacija s storitvijo YouTube ni uspela: {error}"
+    Reply Notifications: "Obvesti me o odgovorih na moje komentarje"
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Dokler je diagnostični dnevnik vklopljen, OpenTubeX hrani nedavna sporočila dnevnika v pomnilniku, da jih lahko priložite poročilom o napakah. Nikoli jih ne shrani ali pošlje sam, izklop dnevnika pa jih izbriše. Poročila izpustijo piškotke, žetone, naslove IP in parametre URL, vendar lahko vsebujejo ID-je predvajanih videoposnetkov, zato poročilo pred deljenjem preglejte.
@@ -2756,6 +2757,7 @@ Tooltips:
     Sync Playlists: "Vaši seznami predvajanja iz storitve YouTube, Za poznejši ogled in Všečkani videoposnetki so prikazani v razdelku Vaši seznami predvajanja, spremembe, ki jih tukaj naredite v njih, pa se izvedejo tudi v storitvi YouTube. Ne sinhronizirajo se z vašimi drugimi napravami in niso vključeni, ko izvozite vse sezname predvajanja ali naredite varnostno kopijo podatkov. Če to možnost izklopite, se odstranijo iz te naprave, ne pa iz storitve YouTube."
     Add to YouTube Watch History: "Videoposnetki, ki jih predvajate, se dodajo v vašo zgodovino predvajanj v storitvi YouTube, zato se priporočila YouTube učijo iz njih. Ko je zgodovina v storitvi YouTube začasno zaustavljena, se ne doda nič."
     Rate Videos: "Prikaže gumba Všeč mi je in Ni mi všeč na videoposnetkih. Za prikaz vaše ocene se vsak odprt videoposnetek z vašim računom poišče v YouTubu, zato YouTube izve, katere videoposnetke odpirate, tudi ko niso dodani v zgodovino ogledov."
+    Reply Notifications: "Medtem ko se OpenTubeX izvaja, preverja, ali so na komentarje, ki ste jih tukaj objavili v zadnjih 30 dneh, prispeli novi odgovori. Komentarji, objavljeni drugje, na primer na spletnem mestu YouTube, niso vključeni."
   General Settings:
     Built-in Streams: |
       Samodejni način predvaja večino videoposnetkov prek YouTubovega odjemalca visionOS, ki se zažene hitreje in podpira samodejno kakovost. Prenosi v živo in videoposnetki, ki jih ne more predvajati, uporabljajo SABR.
@@ -3395,3 +3397,4 @@ YouTube Account:
   Edit Comment Failed: "Komentarja ni bilo mogoče urediti: {error}"
   Recommendations: "Priporočila YouTube"
   Recommendations Failed: "Vaših priporočil YouTube ni bilo mogoče naložiti."
+  "{author} replied to your comment": "{author} je odgovoril(-a) na vaš komentar"

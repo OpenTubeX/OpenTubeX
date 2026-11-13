@@ -387,6 +387,7 @@ Settings:
     Sync Now: "今すぐ同期"
     Synced: "YouTube と同期しました"
     Sync Failed: "YouTube と同期できませんでした: {error}"
+    Reply Notifications: "自分のコメントへの返信を通知する"
   Diagnostics:
     Diagnostics: 診断
     Description: 診断ログが有効な間、OpenTubeX は最近のログメッセージをメモリに保持し、バグ報告に添付できるようにします。自動で保存や送信をすることはなく、ログを無効にすると削除されます。レポートには Cookie、トークン、IP アドレス、URL パラメーターは含まれませんが、再生した動画の ID が含まれる場合があるため、共有する前にレポートを確認してください。
@@ -2254,6 +2255,7 @@ Tooltips:
     Rate Videos: "動画に高評価と低評価のボタンを表示します。評価を表示するため、開いた動画はすべてアカウントを使って YouTube で照会されます。そのため、再生履歴に追加されない場合でも、どの動画を開いたかが YouTube に伝わります。"
     Sync Subscriptions: "YouTube で登録したチャンネルは「すべてのチャンネル」に追加され、YouTube で登録解除したチャンネルはすべてのプロファイルから削除されます。ここで「すべてのチャンネル」でチャンネル登録または登録解除すると、YouTube でも同じ操作が行われます。"
     Sync Playlists: "YouTube の再生リスト、「後で見る」、「高く評価した動画」が「あなたの再生リスト」に表示され、ここで加えた変更は YouTube にも反映されます。これらは他のデバイスに同期されず、すべての再生リストのエクスポートやデータのバックアップにも含まれません。この設定をオフにすると、このデバイスからは削除されますが、YouTube からは削除されません。"
+    Reply Notifications: "OpenTubeX の実行中、過去 30 日間にここで投稿したコメントへの新しい返信を確認します。YouTube のウェブサイトなど、ほかの場所で投稿したコメントは含まれません。"
   General Settings:
     Built-in Streams: |
       自動では、ほとんどの動画を YouTube の visionOS クライアントで再生します。起動が速く、自動画質に対応しています。ライブ配信や再生できない動画には SABR を使用します。
@@ -2797,3 +2799,4 @@ YouTube Account:
   Recommendations Failed: "YouTube のおすすめを読み込めませんでした。"
   Subscriptions Synced: "YouTube から登録チャンネルを同期しました: {added} 件追加、{removed} 件削除"
   Playlist Update Failed: "YouTube で {playlistName} を更新できませんでした: {error}"
+  "{author} replied to your comment": "{author} さんがあなたのコメントに返信しました"

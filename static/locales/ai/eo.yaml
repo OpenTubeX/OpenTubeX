@@ -424,6 +424,7 @@ Settings:
     Sync Now: "Sinkronigi nun"
     Synced: "Sinkronigita kun YouTube"
     Sync Failed: "Ne eblis sinkronigi kun YouTube: {error}"
+    Reply Notifications: "Sciigi min pri respondoj al miaj komentoj"
   Tab Unloading:
     Automatically unload tabs: Aŭtomate malŝargi langetojn
     Memory threshold: Memorsojlo
@@ -2303,6 +2304,7 @@ Tooltips:
     Sync Playlists: "Viaj YouTube-ludlistoj, “Spekti poste” kaj “Ŝatitaj videaĵoj” aperas en “Viaj ludlistoj”, kaj ŝanĝoj, kiujn vi faras al ili ĉi tie, fariĝas ankaŭ ĉe YouTube. Ili ne estas sinkronigataj al viaj aliaj aparatoj nek inkluzivataj, kiam vi eksportas ĉiujn ludlistojn aŭ savkopias viajn datumojn. Malŝalto de ĉi tio forigas ilin el ĉi tiu aparato, sed ne el YouTube."
     Add to YouTube Watch History: "Videaĵoj, kiujn vi ludas, aldoniĝas al via YouTube-spekthistorio, do la rekomendoj de YouTube lernas el ili. Nenio aldoniĝas dum la historio estas paŭzigita ĉe YouTube."
     Rate Videos: "Montras butonojn por ŝati kaj malŝati videojn. Por montri vian takson, ĉiu video, kiun vi malfermas, estas serĉata ĉe YouTube per via konto, do YouTube ekscias, kiujn videojn vi malfermas, eĉ se ili ne estas aldonitaj al via spekta historio."
+    Reply Notifications: "Dum OpenTubeX funkcias, ĝi kontrolas la komentojn, kiujn vi afiŝis ĉi tie dum la lastaj 30 tagoj, por novaj respondoj. Komentoj, kiujn vi afiŝis aliloke, ekzemple en la retejo de YouTube, ne estas inkluzivitaj."
   General Settings:
     Built-in Streams: |
       Aŭtomata ludas la plimulton de videoj per la visionOS-kliento de YouTube, kiu komenciĝas pli rapide kaj subtenas aŭtomatan kvaliton. Rektaj elsendoj kaj videoj, kiujn ĝi ne povas ludi, uzas SABR.
@@ -2798,3 +2800,4 @@ YouTube Account:
   Edit Comment Failed: "Ne eblis redakti la komenton: {error}"
   Recommendations: "YouTube-rekomendoj"
   Recommendations Failed: "Ne eblis ŝargi viajn YouTube-rekomendojn."
+  "{author} replied to your comment": "{author} respondis al via komento"

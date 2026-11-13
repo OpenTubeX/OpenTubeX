@@ -387,6 +387,7 @@ Settings:
     Sync Now: "Synkronoi nyt"
     Synced: "Synkronoitu YouTuben kanssa"
     Sync Failed: "Synkronointi YouTuben kanssa epäonnistui: {error}"
+    Reply Notifications: "Ilmoita minulle vastauksista kommentteihini"
   Diagnostics:
     Diagnostics: Vianmääritys
     Description: Kun vianmääritysloki on käytössä, OpenTubeX säilyttää viimeisimmät lokiviestit muistissa, jotta voit liittää ne virheraportteihin. Se ei koskaan tallenna tai lähetä niitä itsestään, ja lokin poistaminen käytöstä poistaa ne. Raportit jättävät pois evästeet, tunnukset, IP-osoitteet ja URL-parametrit, mutta ne voivat sisältää toistamiesi videoiden tunnuksia, joten tarkista raportti ennen kuin jaat sen.
@@ -2263,6 +2264,7 @@ Tooltips:
     Rate Videos: "Näyttää videoissa tykkää- ja en tykkää -painikkeet. Arviosi näyttämiseksi jokainen avaamasi video haetaan YouTubesta tililläsi, joten YouTube saa tietää, mitä videoita avaat, vaikka niitä ei lisättäisi katseluhistoriaasi."
     Sync Subscriptions: "YouTubessa tilaamasi kanavat lisätään profiiliin ”Kaikki kanavat”, ja kanavat, joiden tilauksen perut siellä, poistetaan kaikista profiileista. Kun tilaat kanavan tai perut tilauksen täällä profiilissa ”Kaikki kanavat”, sama tehdään myös YouTubessa."
     Sync Playlists: "YouTube-soittolistasi, ”Katso myöhemmin” ja ”Tykätyt videot” näkyvät kohdassa ”Omat soittolistat”, ja niihin täällä tekemäsi muutokset tehdään myös YouTubessa. Niitä ei synkronoida muille laitteillesi, eikä niitä sisällytetä, kun viet kaikki soittolistat tai varmuuskopioit tietosi. Tämän poistaminen käytöstä poistaa ne tältä laitteelta mutta ei YouTubesta."
+    Reply Notifications: "Kun OpenTubeX on käynnissä, se tarkistaa, onko täällä viimeisten 30 päivän aikana lähettämiisi kommentteihin tullut uusia vastauksia. Muualla, kuten YouTuben verkkosivustolla, lähettämiäsi kommentteja ei huomioida."
   General Settings:
     Built-in Streams: |
       Automaattinen toistaa useimmat videot YouTuben visionOS-asiakasohjelman kautta, joka käynnistyy nopeammin ja tukee automaattista laatua. Suorat lähetykset ja videot, joita se ei voi toistaa, käyttävät SABRia.
@@ -2806,3 +2808,4 @@ YouTube Account:
   Recommendations Failed: "YouTube-suosituksiasi ei voitu ladata."
   Subscriptions Synced: "Tilaukset synkronoitu YouTubesta: {added} lisätty, {removed} poistettu"
   Playlist Update Failed: "Soittolistan {playlistName} päivittäminen YouTubessa epäonnistui: {error}"
+  "{author} replied to your comment": "{author} vastasi kommenttiisi"

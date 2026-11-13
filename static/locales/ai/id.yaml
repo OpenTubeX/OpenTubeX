@@ -388,6 +388,7 @@ Settings:
     Sync Now: "Selaraskan sekarang"
     Synced: "Diselaraskan dengan YouTube"
     Sync Failed: "Tidak dapat menyelaraskan dengan YouTube: {error}"
+    Reply Notifications: "Beri tahu saya tentang balasan untuk komentar saya"
   Diagnostics:
     Diagnostics: Diagnostik
     Description: Selama log diagnostik aktif, OpenTubeX menyimpan pesan log terbaru di memori agar Anda dapat melampirkannya ke laporan bug. Aplikasi ini tidak pernah menyimpan atau mengirimnya sendiri, dan menonaktifkan log akan menghapusnya. Laporan tidak menyertakan cookie, token, alamat IP, dan parameter URL, tetapi dapat berisi ID video yang Anda putar, jadi periksa laporan sebelum membagikannya.
@@ -2281,6 +2282,7 @@ Tooltips:
     Rate Videos: "Menampilkan tombol suka dan tidak suka pada video. Untuk menampilkan rating Anda, setiap video yang Anda buka dicari di YouTube dengan akun Anda, sehingga YouTube mengetahui video mana yang Anda buka, meskipun video tersebut tidak ditambahkan ke histori tontonan Anda."
     Sync Subscriptions: "Kanal yang Anda langgani di YouTube ditambahkan ke “Semua Kanal”, dan kanal yang langganannya Anda hentikan di sana dihapus dari setiap profil. Berlangganan atau berhenti berlangganan di “Semua Kanal” di sini juga melakukan hal yang sama di YouTube."
     Sync Playlists: "Daftar putar YouTube Anda, “Tonton Nanti”, dan “Video yang disukai” muncul di “Daftar Putar Anda”, dan perubahan yang Anda buat padanya di sini juga diterapkan di YouTube. Semuanya tidak diselaraskan ke perangkat Anda yang lain dan tidak disertakan saat Anda mengekspor semua daftar putar atau mencadangkan data Anda. Menonaktifkan ini akan menghapusnya dari perangkat ini, tetapi tidak dari YouTube."
+    Reply Notifications: "Selama OpenTubeX berjalan, aplikasi ini memeriksa balasan baru untuk komentar yang Anda posting di sini dalam 30 hari terakhir. Komentar yang Anda posting di tempat lain, seperti di situs web YouTube, tidak termasuk."
   General Settings:
     Built-in Streams: |
       Otomatis memutar sebagian besar video melalui klien visionOS YouTube, yang dimulai lebih cepat dan mendukung kualitas otomatis. Siaran langsung dan video yang tidak dapat diputarnya menggunakan SABR.
@@ -2824,3 +2826,4 @@ YouTube Account:
   Recommendations Failed: "Tidak dapat memuat rekomendasi YouTube Anda."
   Subscriptions Synced: "Langganan diselaraskan dari YouTube: {added} ditambahkan, {removed} dihapus"
   Playlist Update Failed: "Tidak dapat memperbarui {playlistName} di YouTube: {error}"
+  "{author} replied to your comment": "{author} membalas komentar Anda"

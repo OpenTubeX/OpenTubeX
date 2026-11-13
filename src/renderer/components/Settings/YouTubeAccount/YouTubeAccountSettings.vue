@@ -88,6 +88,15 @@
           compact
           @change="store.dispatch('updateYouTubeAccountVideoRatings', $event)"
         />
+        <FtToggleSwitch
+          v-if="supportsNotificationHistory"
+          :label="t('Settings.YouTube Account Settings.Reply Notifications')"
+          :default-value="replyNotifications"
+          setting-key="youTubeAccountReplyNotifications"
+          :tooltip="t('Tooltips.YouTube Account Settings.Reply Notifications')"
+          compact
+          @change="updateReplyNotifications"
+        />
       </FtFlexBox>
       <FtFlexBox>
         <FtButton
@@ -132,6 +141,8 @@ import YouTubeSignInPrompt from './YouTubeSignInPrompt.vue'
 import store from '../../../store/index'
 import { ERROR_TOAST_ICON, showToast } from '../../../helpers/utils'
 import { getSelectedYouTubeProfile } from '../../../helpers/youtube-account-state'
+import { supportsNotificationHistory } from '../../../helpers/notificationHistory'
+import { requestCapacitorNotificationPermission } from '../../../helpers/platformFeed'
 import { syncWithYouTube } from '../../../helpers/youtube-sync'
 import {
   refreshYouTubeProfiles,
@@ -147,6 +158,7 @@ const syncSubscriptions = computed(() => store.getters.getYouTubeAccountSyncSubs
 const syncPlaylists = computed(() => store.getters.getYouTubeAccountSyncPlaylists)
 const watchHistory = computed(() => store.getters.getYouTubeAccountWatchHistory)
 const videoRatings = computed(() => store.getters.getYouTubeAccountVideoRatings)
+const replyNotifications = computed(() => store.getters.getYouTubeAccountReplyNotifications)
 
 const signInOpen = ref(false)
 const syncing = ref(false)
@@ -166,6 +178,12 @@ function selectProfile(profile) {
 onMounted(() => {
   if (account.value) refreshYouTubeProfiles().catch(error => console.warn('Could not refresh the YouTube channels', error))
 })
+
+/** @param {boolean} value */
+function updateReplyNotifications(value) {
+  store.dispatch('updateYouTubeAccountReplyNotifications', value)
+  if (process.env.IS_CAPACITOR && value) requestCapacitorNotificationPermission()
+}
 
 async function signOut() {
   try {

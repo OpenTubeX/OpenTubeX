@@ -10,6 +10,7 @@ export const NOTIFICATION_HISTORY_KINDS = /** @type {const} */ ([
   'video',
   'short',
   'post',
+  'comment-reply',
   'download-started',
   'download-completed',
   'download-failed'

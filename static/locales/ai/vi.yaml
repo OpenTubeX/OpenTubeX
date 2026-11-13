@@ -387,6 +387,7 @@ Settings:
     Sync Now: "Đồng bộ ngay"
     Synced: "Đã đồng bộ với YouTube"
     Sync Failed: "Không thể đồng bộ với YouTube: {error}"
+    Reply Notifications: "Thông báo cho tôi về phản hồi cho bình luận của tôi"
   Diagnostics:
     Diagnostics: Chẩn đoán
     Description: Khi nhật ký chẩn đoán đang bật, OpenTubeX giữ các thông báo nhật ký gần đây trong bộ nhớ để bạn có thể đính kèm chúng vào báo cáo lỗi. Ứng dụng không bao giờ tự lưu hay gửi chúng, và tắt nhật ký sẽ xóa chúng. Báo cáo bỏ qua cookie, token, địa chỉ IP và tham số URL, nhưng có thể chứa ID của các video bạn đã phát, vì vậy hãy kiểm tra báo cáo trước khi chia sẻ.
@@ -2271,6 +2272,7 @@ Tooltips:
     Sync Playlists: "Danh sách phát YouTube, Xem sau và Video đã thích của bạn sẽ xuất hiện trong Danh sách phát của bạn, và những thay đổi bạn thực hiện với chúng tại đây cũng được áp dụng trên YouTube. Chúng không được đồng bộ sang các thiết bị khác của bạn và không được bao gồm khi bạn xuất tất cả danh sách phát hoặc sao lưu dữ liệu. Tắt tùy chọn này sẽ xóa chúng khỏi thiết bị này nhưng không xóa khỏi YouTube."
     Add to YouTube Watch History: "Video bạn phát sẽ được thêm vào lịch sử xem YouTube của bạn để đề xuất của YouTube học hỏi từ đó. Không có gì được thêm khi lịch sử đang bị tạm dừng trên YouTube."
     Rate Videos: "Hiển thị nút thích và không thích trên video. Để hiển thị đánh giá của bạn, mỗi video bạn mở sẽ được tra cứu trên YouTube bằng tài khoản của bạn, vì vậy YouTube biết bạn mở những video nào, kể cả khi chúng không được thêm vào nhật ký xem."
+    Reply Notifications: "Khi OpenTubeX đang chạy, ứng dụng sẽ kiểm tra phản hồi mới cho những bình luận bạn đã đăng tại đây trong 30 ngày qua. Các bình luận bạn đăng ở nơi khác, chẳng hạn như trên trang web YouTube, không được tính."
   General Settings:
     Built-in Streams: |
       Tự động phát hầu hết video qua ứng dụng khách visionOS của YouTube, khởi động nhanh hơn và hỗ trợ chất lượng tự động. Các buổi phát trực tiếp và video mà nó không phát được sẽ dùng SABR.
@@ -2815,3 +2817,4 @@ YouTube Account:
   Edit Comment Failed: "Không thể chỉnh sửa bình luận: {error}"
   Recommendations: "Đề xuất từ YouTube"
   Recommendations Failed: "Không thể tải đề xuất YouTube của bạn."
+  "{author} replied to your comment": "{author} đã trả lời bình luận của bạn"

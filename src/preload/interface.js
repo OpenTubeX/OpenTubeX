@@ -1180,6 +1180,12 @@ export default {
     mergeDismissals: (dismissals) => ipcRenderer.invoke(IpcChannels.NOTIFICATION_DISMISSALS_MERGE, dismissals),
 
     /**
+     * Announces a reply to a comment the YouTube account posted.
+     * @param {{ videoId: string, replyId: string, title: string, body: string, thumbnail?: string }} reply
+     */
+    notifyCommentReply: (reply) => ipcRenderer.invoke(IpcChannels.NOTIFICATION_COMMENT_REPLY, reply),
+
+    /**
      * Notifications read or removed on this device, for other devices.
      * @param {() => void} handler
      * @returns {() => void}

@@ -387,6 +387,7 @@ Settings:
     Sync Now: "Sünkrooni kohe"
     Synced: "YouTube'iga sünkroonitud"
     Sync Failed: "YouTube'iga sünkroonimine nurjus: {error}"
+    Reply Notifications: "Teavita mind vastustest minu kommentaaridele"
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Kui diagnostikalogi on sisse lülitatud, hoiab OpenTubeX viimaseid logisõnumeid mälus, et saaksid need veateadetele lisada. See ei salvesta ega saada neid kunagi ise ning logi väljalülitamine kustutab need. Aruanded jätavad välja küpsised, märgid, IP-aadressid ja URL-i parameetrid, kuid võivad sisaldada esitatud videote ID-sid, seega kontrolli aruannet enne jagamist.
@@ -2257,6 +2258,7 @@ Tooltips:
     Sync Playlists: "Sinu YouTube'i esitusloendid, „Vaata hiljem“ ja „Meeldivad videod“ kuvatakse jaotises „Sinu esitusloendid“ ning neis siin tehtud muudatused tehakse ka YouTube'is. Neid ei sünkroonita sinu teistesse seadmetesse ega kaasata, kui ekspordid kõik esitusloendid või varundad oma andmed. Selle väljalülitamine eemaldab need sellest seadmest, kuid mitte YouTube'ist."
     Add to YouTube Watch History: "Sinu esitatud videod lisatakse sinu YouTube'i vaatamiste ajalukku, nii et YouTube'i soovitused õpivad neist. Kui ajalugu on YouTube'is peatatud, ei lisata midagi."
     Rate Videos: "Näitab videotel meeldimise ja mittemeeldimise nuppe. Sinu hinnangu näitamiseks otsitakse iga avatud video sinu kontoga YouTube'ist üles, nii et YouTube saab teada, milliseid videoid sa avad, isegi kui neid sinu vaatamisajalukku ei lisata."
+    Reply Notifications: "Kui OpenTubeX töötab, kontrollib see uusi vastuseid kommentaaridele, mille oled siin viimase 30 päeva jooksul postitanud. Mujal, näiteks YouTube'i veebisaidil postitatud kommentaare ei arvestata."
   General Settings:
     Built-in Streams: |
       Automaatne esitab enamikku videoid YouTube'i visionOS-i kliendi kaudu, mis käivitub kiiremini ja toetab automaatset kvaliteeti. Otseülekanded ja videod, mida see esitada ei saa, kasutavad SABR-i.
@@ -2800,3 +2802,4 @@ YouTube Account:
   Edit Comment Failed: "Kommentaari muutmine nurjus: {error}"
   Recommendations: "YouTube'i soovitused"
   Recommendations Failed: "Sinu YouTube'i soovituste laadimine nurjus."
+  "{author} replied to your comment": "{author} vastas sinu kommentaarile"

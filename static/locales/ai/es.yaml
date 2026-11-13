@@ -331,6 +331,7 @@ Settings:
     Sync Now: "Sincronizar ahora"
     Synced: "Sincronizado con YouTube"
     Sync Failed: "No se ha podido sincronizar con YouTube: {error}"
+    Reply Notifications: "Avisarme de las respuestas a mis comentarios"
   Diagnostics:
     Diagnostics: Diagnóstico
     Description: Mientras el registro de diagnóstico está activado, OpenTubeX guarda los mensajes de registro recientes en la memoria para que puedas adjuntarlos a informes de errores. Nunca los guarda ni los envía por su cuenta, y desactivar el registro los elimina. Los informes omiten cookies, tokens, direcciones IP y parámetros de URL, pero pueden incluir los ID de los vídeos que has reproducido, así que revisa el informe antes de compartirlo.
@@ -2215,6 +2216,7 @@ Tooltips:
     Sync Playlists: "Tus listas de reproducción de YouTube, «Ver más tarde» y «Vídeos que me gustan» aparecen en «Sus listas de reproducción», y los cambios que hagas en ellas aquí también se hacen en YouTube. No se sincronizan con tus otros dispositivos ni se incluyen cuando exportas todas las listas de reproducción o haces una copia de seguridad de tus datos. Si desactivas esta opción, se quitan de este dispositivo, pero no de YouTube."
     Add to YouTube Watch History: "Los vídeos que reproduces se añaden a tu historial de reproducciones de YouTube, para que las recomendaciones de YouTube aprendan de ellos. No se añade nada mientras el historial esté en pausa en YouTube."
     Rate Videos: "Muestra los botones de me gusta y no me gusta en los vídeos. Para mostrar tu valoración, cada vídeo que abres se consulta en YouTube con tu cuenta, así que YouTube sabe qué vídeos abres, aunque no se añadan a tu historial de reproducciones."
+    Reply Notifications: "Mientras OpenTubeX está en ejecución, comprueba si hay respuestas nuevas a los comentarios que publicaste aquí en los últimos 30 días. No se incluyen los comentarios que publicaste en otros sitios, como en la web de YouTube."
   General Settings:
     Built-in Streams: |
       Automático reproduce la mayoría de los vídeos con el cliente visionOS de YouTube, que empieza más rápido y admite la calidad automática. Las emisiones en directo y los vídeos que no puede reproducir usan SABR.
@@ -2750,6 +2752,7 @@ YouTube Account:
   Edit Comment Failed: "No se ha podido editar el comentario: {error}"
   Recommendations: "Recomendaciones de YouTube"
   Recommendations Failed: "No se han podido cargar tus recomendaciones de YouTube."
+  "{author} replied to your comment": "{author} respondió a tu comentario"
 App Menu:
   About App: Acerca de {appName}
   Services: Servicios

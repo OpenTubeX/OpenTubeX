@@ -56,6 +56,7 @@ const IpcChannels = {
   NOTIFICATION_DISMISSALS_MERGE: 'notification-dismissals-merge',
   NOTIFICATION_DISMISSALS_UPDATED: 'notification-dismissals-updated',
   NOTIFICATION_SHOW_IN_APP: 'notification-show-in-app',
+  NOTIFICATION_COMMENT_REPLY: 'notification-comment-reply',
   VIDEO_METADATA_CACHE_UPDATE: 'video-metadata-cache-update',
   VIDEO_METADATA_CACHE_GET_SIZE: 'video-metadata-cache-get-size',
   VIDEO_METADATA_CACHE_CLEAR: 'video-metadata-cache-clear',

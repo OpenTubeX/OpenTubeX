@@ -547,6 +547,7 @@ Settings:
     Sync Now: "Sinkroniseer nou"
     Synced: "Met YouTube gesinkroniseer"
     Sync Failed: "Kon nie met YouTube sinkroniseer nie: {error}"
+    Reply Notifications: "Stel my in kennis van antwoorde op my kommentaar"
   Tab Unloading:
     Automatically unload tabs: Ontlaai oortjies outomaties
     Memory threshold: Geheuedrempel
@@ -2510,6 +2511,7 @@ Tooltips:
     Sync Playlists: "U YouTube-afspeellyste, “Kyk later” en “Video’s waarvan gehou is” verskyn in “U afspeellyste”, en veranderinge wat u hier daaraan aanbring, word ook op YouTube aangebring. Hulle word nie na u ander toestelle gesinkroniseer of ingesluit wanneer u alle afspeellyste uitvoer of u data rugsteun nie. As u dit afskakel, word hulle van hierdie toestel verwyder, maar nie van YouTube nie."
     Add to YouTube Watch History: "Video’s wat u speel, word by u YouTube-kykgeskiedenis gevoeg, sodat YouTube se aanbevelings daaruit leer. Niks word bygevoeg terwyl die geskiedenis op YouTube onderbreek is nie."
     Rate Videos: "Wys knoppies om van video's te hou of nie te hou nie. Om jou gradering te wys, word elke video wat jy oopmaak met jou rekening op YouTube opgesoek, sodat YouTube leer watter video's jy oopmaak, selfs wanneer hulle nie by jou kykgeskiedenis gevoeg word nie."
+    Reply Notifications: "Terwyl OpenTubeX loop, kyk dit of die kommentaar wat jy die afgelope 30 dae hier geplaas het nuwe antwoorde het. Kommentaar wat jy elders geplaas het, soos op die YouTube-webwerf, word nie ingesluit nie."
   General Settings:
     Built-in Streams: |
       Outomaties speel die meeste video's deur YouTube se visionOS-kliënt, wat vinniger begin en outomatiese kwaliteit ondersteun. Regstreekse strome en video's wat dit nie kan speel nie, gebruik SABR.
@@ -3009,3 +3011,4 @@ YouTube Account:
   Edit Comment Failed: "Kon nie die kommentaar wysig nie: {error}"
   Recommendations: "YouTube-aanbevelings"
   Recommendations Failed: "Kon nie u YouTube-aanbevelings laai nie."
+  "{author} replied to your comment": "{author} het op jou kommentaar geantwoord"

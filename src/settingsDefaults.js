@@ -159,6 +159,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     youTubeAccountWatchHistory: false,
     // Loading a video's rating tells YouTube which videos are opened.
     youTubeAccountVideoRatings: false,
+    youTubeAccountReplyNotifications: false,
     ytDlpPlaybackAuthMode: 'none',
     ytDlpPlaybackCookiesPath: '',
     ytDlpPlaybackCookiesBrowser: '',

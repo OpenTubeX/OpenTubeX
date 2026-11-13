@@ -388,6 +388,7 @@ Settings:
     Sync Now: "Cysoni nawr"
     Synced: "Wedi cysoni â YouTube"
     Sync Failed: "Methu cysoni â YouTube: {error}"
+    Reply Notifications: "Rhoi gwybod i mi am atebion i'm sylwadau"
   Diagnostics:
     Diagnostics: Diagnosteg
     Description: Tra bo'r log diagnostig ymlaen, mae OpenTubeX yn cadw negeseuon log diweddar yn y cof fel y gallwch eu hatodi i adroddiadau bygiau. Nid yw byth yn eu cadw na'u hanfon ar ei ben ei hun, ac mae diffodd y log yn eu dileu. Mae adroddiadau'n hepgor cwcis, tocynnau, cyfeiriadau IP a pharamedrau URL, ond gallant gynnwys IDs fideos rydych wedi'u chwarae, felly gwiriwch adroddiad cyn ei rannu.
@@ -2292,6 +2293,7 @@ Tooltips:
     Sync Playlists: "Mae eich rhestrau chwarae YouTube, “Gwylio Nes Ymlaen” a “Fideos a hoffwyd” yn ymddangos yn “Eich Rhestrau Chwarae”, ac mae newidiadau rydych chi'n eu gwneud iddyn nhw yma yn cael eu gwneud ar YouTube hefyd. Dydyn nhw ddim yn cael eu cysoni â'ch dyfeisiau eraill na'u cynnwys pan fyddwch chi'n allforio pob rhestr chwarae neu'n gwneud copi wrth gefn o'ch data. Mae diffodd hyn yn eu tynnu o'r ddyfais hon ond nid o YouTube."
     Add to YouTube Watch History: "Mae fideos rydych chi'n eu chwarae yn cael eu hychwanegu at eich hanes gwylio YouTube, fel bod argymhellion YouTube yn dysgu ohonyn nhw. Does dim yn cael ei ychwanegu tra bo'r hanes wedi'i oedi ar YouTube."
     Rate Videos: "Yn dangos botymau hoffi a pheidio â hoffi ar fideos. I ddangos eich sgôr, mae pob fideo rydych chi'n ei agor yn cael ei chwilio ar YouTube gyda'ch cyfrif, felly mae YouTube yn dysgu pa fideos rydych chi'n eu hagor, hyd yn oed pan nad ydyn nhw'n cael eu hychwanegu at eich hanes gwylio."
+    Reply Notifications: "Tra bo OpenTubeX yn rhedeg, mae'n gwirio'r sylwadau a bostiwyd gennych yma yn ystod y 30 diwrnod diwethaf am atebion newydd. Nid yw sylwadau a bostiwyd gennych yn rhywle arall, fel ar wefan YouTube, wedi'u cynnwys."
   General Settings:
     Built-in Streams: |
       Mae Awtomatig yn chwarae'r rhan fwyaf o fideos drwy gleient visionOS YouTube, sy'n cychwyn yn gynt ac yn cefnogi ansawdd awtomatig. Mae ffrydiau byw a fideos na all eu chwarae yn defnyddio SABR.
@@ -2836,3 +2838,4 @@ YouTube Account:
   Edit Comment Failed: "Methu golygu'r sylw: {error}"
   Recommendations: "Argymhellion YouTube"
   Recommendations Failed: "Methu llwytho eich argymhellion YouTube."
+  "{author} replied to your comment": "Atebodd {author} eich sylw"

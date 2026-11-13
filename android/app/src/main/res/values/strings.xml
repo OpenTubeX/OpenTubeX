@@ -21,4 +21,6 @@
     <string name="notification_channel_downloads_description">Progress for video and audio downloads</string>
     <string name="notification_channel_new_uploads_name">New uploads</string>
     <string name="notification_channel_new_uploads_description">Alerts when subscribed channels publish new content</string>
+    <string name="notification_channel_comment_replies_name">Comment replies</string>
+    <string name="notification_channel_comment_replies_description">Alerts when someone replies to your YouTube comments</string>
 </resources>

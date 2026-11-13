@@ -392,6 +392,7 @@ Settings:
     Sync Now: "Sincronizar agora"
     Synced: "Sincronizado con YouTube"
     Sync Failed: "Non se puido sincronizar con YouTube: {error}"
+    Reply Notifications: "Avisarme das respostas aos meus comentarios"
   Diagnostics:
     Diagnostics: Diagnóstico
     Description: Mentres o rexistro de diagnóstico está activado, OpenTubeX garda as mensaxes de rexistro recentes na memoria para que poidas achegalas aos informes de erros. Nunca as garda nin as envía pola súa conta, e desactivar o rexistro elimínaas. Os informes omiten cookies, tokens, enderezos IP e parámetros de URL, pero poden incluír os ID dos vídeos que reproduciches, así que revisa o informe antes de compartilo.
@@ -2316,6 +2317,7 @@ Tooltips:
     Rate Videos: "Mostra os botóns de gústame e non me gusta nos vídeos. Para mostrar a túa valoración, cada vídeo que abres consúltase en YouTube coa túa conta, así que YouTube sabe que vídeos abres, aínda que non se engadan ao teu historial de reprodución."
     Sync Subscriptions: "As canles ás que te subscribes en YouTube engádense a «Tódalas canles», e as canles das que cancelas a subscrición alí elimínanse de todos os perfís. Subscribirse ou cancelar a subscrición aquí en «Tódalas canles» fai o mesmo en YouTube."
     Sync Playlists: "As túas listas de reprodución de YouTube, «Ver máis tarde» e «Vídeos que me gustan» aparecen en «As túas listaxes de reprodución», e os cambios que fagas nelas aquí tamén se fan en YouTube. Non se sincronizan cos teus outros dispositivos nin se inclúen cando exportas todas as listas de reprodución ou fas unha copia de seguranza dos teus datos. Ao desactivar isto elimínanse deste dispositivo, pero non de YouTube."
+    Reply Notifications: "Mentres OpenTubeX está en execución, comproba se hai respostas novas aos comentarios que publicaches aquí nos últimos 30 días. Non se inclúen os comentarios que publicaches noutros sitios, como no sitio web de YouTube."
   General Settings:
     Built-in Streams: |
       Automático reproduce a maioría dos vídeos co cliente visionOS de YouTube, que comeza máis rápido e admite a calidade automática. As emisións en directo e os vídeos que non pode reproducir usan SABR.
@@ -2862,3 +2864,4 @@ YouTube Account:
   Recommendations Failed: "Non se puideron cargar as túas recomendacións de YouTube."
   Subscriptions Synced: "Subscricións sincronizadas desde YouTube: {added} engadidas, {removed} eliminadas"
   Playlist Update Failed: "Non se puido actualizar {playlistName} en YouTube: {error}"
+  "{author} replied to your comment": "{author} respondeu ao teu comentario"
