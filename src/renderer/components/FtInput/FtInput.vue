@@ -16,8 +16,8 @@
     <span class="inputWrapper">
       <component
         :is="multiline ? 'textarea' : 'input'"
-        :id="id"
         v-bind="inputAttributes"
+        :id="id"
         ref="inputRef"
         :value="inputDataDisplayed"
         class="ft-input"
