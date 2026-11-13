@@ -142,7 +142,7 @@
           <!-- After a failed page, the button tries again -->
           <FtAutoLoadNextPageWrapper
             v-if="page.continuation !== null"
-            :key="currentTab"
+            :key="`${currentTab}:${autoLoadRevision}`"
             :loading="page.loading"
             :paused="page.error"
             @load-next-page="loadMore"
@@ -182,6 +182,7 @@ import PlatformResultList from '../../components/PlatformResultList/PlatformResu
 
 import store from '../../store/index'
 import { getPlatformFetch } from '../../helpers/platformFetch'
+import { useAutoLoadRevision } from '../../composables/useAutoLoadRevision'
 import { formatSubscriberCount, openExternalLink } from '../../helpers/utils'
 import { useTabAvatar, useTabTitle } from '../../tabs/TabContext'
 import { getPlatform, PLATFORM_ICONS } from '../../../platforms/index'
@@ -286,6 +287,8 @@ async function loadPage(tab, more = false) {
     if (generation === loadGeneration) current.loading = false
   }
 }
+
+const autoLoadRevision = useAutoLoadRevision(() => page.value.continuation)
 
 function loadMore() {
   loadPage(currentTab.value, true)

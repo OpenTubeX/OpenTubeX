@@ -468,6 +468,47 @@ test.describe('Channels on other platforms', () => {
     await expect(result.locator('.h3Title')).toHaveText('Other')
   })
 
+  test.describe('with a followed PeerTube channel', () => {
+    test.use({ seed: { settings: { ...SETTINGS, followedChannels: [{ platform: 'peertube', id: 'makers@peertube.example.test', name: 'Makers', url: 'https://peertube.example.test/video-channels/makers' }] } } })
+
+    test('keeps loading channel pages while the end of the list stays in view', async ({ page }) => {
+      await page.route('https://peertube.example.test/**', (route) => {
+        const url = new URL(route.request().url())
+        if (url.pathname.startsWith('/lazy-static/')) return route.fulfill({ path: THUMBNAIL_PATH })
+        if (url.pathname === '/api/v1/video-channels/makers') {
+          return route.fulfill({ json: { name: 'makers', host: 'peertube.example.test', displayName: 'Makers', url: 'https://peertube.example.test/video-channels/makers' } })
+        }
+        if (url.pathname === '/api/v1/video-channels/makers/videos') {
+          // Three pages of one video each, too short to move the end of the list out of view
+          const count = Number(url.searchParams.get('count'))
+          const index = Number(url.searchParams.get('start')) / count
+          const uuid = `00000000-0000-4000-8000-00000000000${index}`
+          return route.fulfill({
+            json: {
+              total: 3 * count,
+              data: [{
+                uuid,
+                name: `Makers video ${index + 1}`,
+                url: `https://peertube.example.test/w/${uuid}`,
+                publishedAt: new Date(now - (index + 1) * 3600000).toISOString(),
+                duration: 125,
+                thumbnailPath: '/lazy-static/thumbnails/video.jpg',
+                channel: { name: 'makers', host: 'peertube.example.test', displayName: 'Makers' }
+              }]
+            }
+          })
+        }
+        return route.fulfill({ status: 404, json: {} })
+      })
+      await goTo(page, 'subscriptions')
+      await page.locator('[data-platforms-tab]').click()
+      await page.locator('#subscriptionsPanel .channelName').first().click()
+      await expect(page.locator('.channelHeader .channelName')).toHaveText('Makers')
+      await expect(page.locator('.ft-list-item .h3Title')).toHaveText(['Makers video 1', 'Makers video 2', 'Makers video 3'])
+      await expect(page.locator('.ft-auto-load-next-page-wrapper')).toHaveCount(0)
+    })
+  })
+
   test.describe('with a followed Twitch channel and a PeerTube instance', () => {
     test.use({ seed: { settings: { ...SETTINGS, followedChannels: [followed(CHANNEL)] } } })
 

@@ -77,6 +77,7 @@
       <!-- After a failed page, the button tries again -->
       <FtAutoLoadNextPageWrapper
         v-if="continuation !== null"
+        :key="autoLoadRevision"
         :loading="loadingMore"
         :paused="pageError"
         @load-next-page="loadMore"
@@ -110,6 +111,7 @@ import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import PlatformResultList from '../../components/PlatformResultList/PlatformResultList.vue'
 
 import { getPlatformFetch } from '../../helpers/platformFetch'
+import { useAutoLoadRevision } from '../../composables/useAutoLoadRevision'
 import { openExternalLink } from '../../helpers/utils'
 import { useTabTitle } from '../../tabs/TabContext'
 import { getPlatform, getPlatformChannelRoute, PLATFORM_ICONS } from '../../../platforms/index'
@@ -167,6 +169,8 @@ async function loadPlaylist() {
     if (generation === loadGeneration) isLoading.value = false
   }
 }
+
+const autoLoadRevision = useAutoLoadRevision(() => continuation.value)
 
 async function loadMore() {
   if (loadingMore.value || continuation.value === null) return

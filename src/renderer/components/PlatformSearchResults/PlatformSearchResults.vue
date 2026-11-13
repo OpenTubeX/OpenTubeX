@@ -21,7 +21,7 @@
       <!-- After a failed page, the button tries again -->
       <FtAutoLoadNextPageWrapper
         v-if="continuation !== null"
-        :key="`${platform.id}:${type}:${query}`"
+        :key="`${platform.id}:${type}:${query}:${autoLoadRevision}`"
         :loading="loading"
         :paused="error"
         @load-next-page="loadMore"
@@ -59,6 +59,7 @@ import FtLoader from '../FtLoader/FtLoader.vue'
 import PlatformResultList from '../PlatformResultList/PlatformResultList.vue'
 
 import { getPlatformFetch } from '../../helpers/platformFetch'
+import { useAutoLoadRevision } from '../../composables/useAutoLoadRevision'
 
 const props = defineProps({
   /** @type {import('vue').PropType<import('../../../platforms/types').Platform>} */
@@ -110,6 +111,8 @@ async function search(more) {
     if (current === generation) loading.value = false
   }
 }
+
+const autoLoadRevision = useAutoLoadRevision(() => continuation.value)
 
 function loadMore() {
   if (!loading.value && continuation.value !== null) search(true)
