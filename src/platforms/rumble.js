@@ -379,8 +379,9 @@ function parseChannelVideos(html, channel) {
       if (item && !items.has(item.id)) items.set(item.id, item)
     }
   }
-  // Empty channels have their listing without a grid
-  const isEmptyChannel = grids.length === 0 && /<section\b[^>]*\bclass="[^"]*\bchannel-listing__container\b/i.test(html)
+  // Empty channels have only a notice in their listing, in the page's language
+  const listing = html.match(/<section\b[^>]*\bclass="[^"]*\bchannel-listing__container\b[^"]*"[^>]*>([\s\S]*?)<\/section\s*>/i)?.[1]
+  const isEmptyChannel = grids.length === 0 && listing !== undefined && listing.trim() !== '' && !listing.includes('<')
   if (readGrids === 0 && !isEmptyChannel) throw new Error('The Rumble channel page has no videos it can read')
   return [...items.values()]
 }

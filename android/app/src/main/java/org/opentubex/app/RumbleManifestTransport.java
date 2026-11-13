@@ -60,7 +60,9 @@ final class RumbleManifestTransport implements Interceptor {
             });
             new Thread(output, "rumble-http").start();
             try (var input = process.getOutputStream()) { input.write(payload.toString().getBytes(StandardCharsets.UTF_8)); }
-            if (!process.waitFor(35, TimeUnit.SECONDS) || process.exitValue() != 0) throw new IOException("Rumble request failed");
+            // The helper's own time limit, and a little more for it to start and answer
+            long waitMs = payload.optLong("timeout", 30000) + 5000;
+            if (!process.waitFor(waitMs, TimeUnit.MILLISECONDS) || process.exitValue() != 0) throw new IOException("Rumble request failed");
             return new JSONObject(new String(output.get(1, TimeUnit.SECONDS), StandardCharsets.UTF_8));
         } finally { if (process != null) process.destroy(); }
     }

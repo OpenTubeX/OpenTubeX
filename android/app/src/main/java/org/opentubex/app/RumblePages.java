@@ -43,13 +43,18 @@ final class RumblePages {
             (host.equals("rumble.com") || host.endsWith(".rumble.com"));
     }
 
-    static JSONObject fetch(String url, Transport transport) throws Exception {
-        return fetch(url, transport, COOKIES);
+    /** @param requestedAt from {@link System#nanoTime()}, so the time a request waits to start counts too */
+    static JSONObject fetch(String url, Transport transport, long requestedAt) throws Exception {
+        return fetch(url, transport, COOKIES, requestedAt);
     }
 
     static JSONObject fetch(String url, Transport transport, Map<String, String> cookies) throws Exception {
+        return fetch(url, transport, cookies, System.nanoTime());
+    }
+
+    private static JSONObject fetch(String url, Transport transport, Map<String, String> cookies, long requestedAt) throws Exception {
         URI uri = url == null ? null : URI.create(url);
-        long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(TIMEOUT_MS);
+        long deadline = requestedAt + TimeUnit.MILLISECONDS.toNanos(TIMEOUT_MS);
         for (int redirect = 0; ; redirect++) {
             if (uri == null || !isRumblePage(uri)) throw new IllegalArgumentException("Not a Rumble page");
             long remaining = TimeUnit.NANOSECONDS.toMillis(deadline - System.nanoTime());

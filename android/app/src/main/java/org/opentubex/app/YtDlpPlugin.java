@@ -250,7 +250,8 @@ public final class YtDlpPlugin extends Plugin {
     }
     @PluginMethod public void info(PluginCall call) { run(call, this::infoResult); }
     @PluginMethod public void fetchRumblePage(PluginCall call) {
-        run(rumbleExecutor, call, () -> RumblePages.fetch(call.getString("url"), payload -> RumbleManifestTransport.send(getContext(), payload)));
+        long requestedAt = System.nanoTime();
+        run(rumbleExecutor, call, () -> RumblePages.fetch(call.getString("url"), payload -> RumbleManifestTransport.send(getContext(), payload), requestedAt));
     }
 
     private static String repository(String channel) {
