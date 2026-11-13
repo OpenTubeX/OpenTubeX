@@ -507,6 +507,67 @@ public class PredictiveBackTest {
     }
 
     @Test
+    public void pageBackRevealsTheKeptPageAndReturnsToItWithoutReloading() throws Exception {
+        assumeTrue(Build.VERSION.SDK_INT >= 34);
+        String tab = ".tabContent[data-tab-id=\"' + " + STORE + ".getters.getPresentedTabId + '\"]";
+        String kept = "document.querySelector('" + tab + " > .retainedPage')";
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            WebView view = ready(scenario);
+            evaluate(view, "window.__pageBackMotion = " + STORE + ".getters.getReducedMotion;" +
+                STORE + ".dispatch('updateReducedMotion', 'off')");
+            try {
+                // Leave the page scrolled, so Back has to show and restore its own offset.
+                // The page may still replace the landing page and restores its own
+                // offset once it loads, so lengthen and scroll it until that stays.
+                await(view, "document.querySelector('" + tab + " > .routerView').style.minHeight = '5000px'," +
+                    "scrollTo(0, 800), Math.round(scrollY) === 800");
+                evaluate(view, "scrollTo(0, 800); window.__backRouter.push('/history')");
+                await(view, STORE + ".getters.getActiveTab.route.path === '/history' && !!" + kept);
+                evaluate(view, "window.__keptPage = " + kept);
+                Thread.sleep(200);
+
+                slide(view, 0f, BackEventCompat.EDGE_RIGHT);
+                slide(view, 0.5f, BackEventCompat.EDGE_RIGHT);
+                await(view, "getComputedStyle(window.__keptPage).contentVisibility === 'visible' && " +
+                    "document.querySelector('" + tab + " > .routerView:not(.retainedPage)').getAnimations().some(a => a.playState === 'paused' && a.currentTime > 0)");
+                onMain(activity -> activity.getOnBackPressedDispatcher().dispatchOnBackCancelled());
+                await(view, "getComputedStyle(window.__keptPage).contentVisibility === 'hidden' && " +
+                    "document.querySelector('" + tab + " > .routerView:not(.retainedPage)').getAnimations().length === 0");
+                assertEquals("Cancel stays on the page", "\"/history\"", evaluate(view, STORE + ".getters.getActiveTab.route.path"));
+
+                slide(view, 0f, BackEventCompat.EDGE_LEFT);
+                slide(view, 0.6f, BackEventCompat.EDGE_LEFT);
+                await(view, "getComputedStyle(window.__keptPage).contentVisibility === 'visible'");
+                evaluate(view, """
+                    (() => {
+                        // Back must leave the revealed page where the gesture showed it.
+                        // Sample after each frame's callbacks, where navigation restores scroll before painting.
+                        const tops = window.__keptPageTops = [window.__keptPage.getBoundingClientRect().top];
+                        const sample = () => setTimeout(() => {
+                            if (!window.__keptPage.isConnected) return;
+                            tops.push(window.__keptPage.getBoundingClientRect().top);
+                            if (tops.length < 60) requestAnimationFrame(sample);
+                        });
+                        requestAnimationFrame(sample);
+                    })()
+                    """);
+                onMain(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
+                await(view, STORE + ".getters.getActiveTab.route.path === '/subscriptions' && !window.__keptPage.classList.contains('retainedPage')");
+                assertEquals("Back shows the kept page instead of mounting a new one", "true", evaluate(view,
+                    "window.__keptPage.isConnected && document.querySelectorAll('" + tab + " > .routerView').length === 1"));
+                // Back restores the kept page's own scroll position.
+                await(view, "Math.round(scrollY) === 800");
+                Thread.sleep(500);
+                assertEquals("The kept page must not move when Back commits: " + evaluate(view, "JSON.stringify(window.__keptPageTops)"),
+                    "true", evaluate(view, "Math.max(...window.__keptPageTops) - Math.min(...window.__keptPageTops) < 1"));
+            } finally {
+                evaluate(view, STORE + ".dispatch('updateReducedMotion', window.__pageBackMotion);" +
+                    "window.__keptPage?.style.removeProperty('min-height'); delete window.__keptPage");
+            }
+        }
+    }
+
+    @Test
     public void systemEdgeSwipeDrivesTheDrawerAndRootReleasesBackToAndroid() throws Exception {
         assumeTrue(Build.VERSION.SDK_INT >= 34);
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
@@ -629,6 +690,17 @@ public class PredictiveBackTest {
         await(view, STORE + ".getters.getActiveTab.route.path === '/subscriptions'");
         scenario.onActivity(activity -> activity.setRequestedOrientation(drawerOriginalOrientation));
         Thread.sleep(200);
+    }
+
+    /** Starts a gesture at 0, then moves the finger across that share of the page. */
+    private static void slide(WebView view, float fraction, int edge) {
+        float width = view.getWidth();
+        float x = edge == BackEventCompat.EDGE_LEFT ? fraction * width : width * (1 - fraction);
+        if (fraction == 0f) {
+            onMain(activity -> activity.getOnBackPressedDispatcher().dispatchOnBackStarted(new BackEventCompat(x, 400, 0, edge)));
+        } else {
+            onMain(activity -> activity.getOnBackPressedDispatcher().dispatchOnBackProgressed(new BackEventCompat(x, 400, fraction, edge)));
+        }
     }
 
     private static void start(int edge) {

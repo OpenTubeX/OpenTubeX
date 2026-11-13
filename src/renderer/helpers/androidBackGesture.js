@@ -1,10 +1,15 @@
 /**
- * @typedef {{ begin: () => boolean, update: (progress: number) => void,
+ * @typedef {'left' | 'right' | 'none'} AndroidBackEdge
+ * @typedef {{ begin: (event?: { edge?: AndroidBackEdge }) => boolean,
+ *   update: (progress: number, drag: number) => void,
  *   finish: (commit: boolean) => Promise<void>, cancel: () => void }} AndroidBackPreview
+ * @typedef {(options: { back: () => Promise<void>, isAvailable: () => boolean }) => AndroidBackPreview} AndroidBackPageFactory
  */
 
 /** @type {Map<string, AndroidBackPreview>} */
 const players = new Map()
+/** @type {Map<string, AndroidBackPageFactory>} */
+const pages = new Map()
 /** @type {WeakMap<HTMLElement, AndroidBackPreview>} */
 const sheets = new WeakMap()
 
@@ -52,6 +57,22 @@ export function getAndroidBackPlayer(tabId) {
 }
 
 /**
+ * @param {string} tabId
+ * @param {AndroidBackPageFactory} createPreview
+ */
+export function registerAndroidBackPage(tabId, createPreview) {
+  pages.set(tabId, createPreview)
+  return () => {
+    if (pages.get(tabId) === createPreview) pages.delete(tabId)
+  }
+}
+
+/** @param {string} tabId */
+export function getAndroidBackPage(tabId) {
+  return pages.get(tabId) ?? null
+}
+
+/**
  * Keep the selected action for the whole gesture. Cancel never invokes Back;
  * button navigation (a commit without a start) uses the normal handler.
  * @param {{ getPreview: () => AndroidBackPreview | null, back: () => Promise<void> }} options
@@ -62,7 +83,7 @@ export function createAndroidBackGestureHandler({ getPreview, back }) {
   let disposed = false
   let pendingCommits = 0
   return {
-    async handle({ phase, progress = 0 }) {
+    async handle({ phase, progress = 0, edge = 'none', drag = progress }) {
       if (disposed) return
       if (finishing) {
         // A later press must act on the layer/history after the current action.
@@ -72,9 +93,10 @@ export function createAndroidBackGestureHandler({ getPreview, back }) {
       if (phase === 'start') {
         preview?.cancel()
         const candidate = getPreview()
-        preview = candidate?.begin() ? candidate : null
+        preview = candidate?.begin({ edge }) ? candidate : null
       } else if (phase === 'progress') {
-        preview?.update(Math.max(0, Math.min(1, progress)))
+        // Progress eases out. Drag is how far the finger moved across the page.
+        preview?.update(Math.max(0, Math.min(1, progress)), Math.max(0, Math.min(1, drag)))
       } else if (phase === 'commit' || phase === 'cancel') {
         finishing = true
         const current = preview
