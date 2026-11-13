@@ -260,10 +260,11 @@
                 v-if="creatorName || creatorChannel"
                 class="externalMediaCreatorIdentity"
               >
-                <!-- Channels of supported platforms open in the app. The name is the link's tab stop. -->
+                <!-- Channels of supported platforms open in the app. The name is the link's tab stop,
+                     so the avatar only shows beside it. -->
                 <component
                   :is="creatorLinkTag"
-                  v-if="creatorAvatarUrl"
+                  v-if="creatorAvatarUrl && creatorName"
                   class="externalMediaCreatorAvatarLink"
                   tabindex="-1"
                   aria-hidden="true"
