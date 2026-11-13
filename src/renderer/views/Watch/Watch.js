@@ -65,7 +65,7 @@ import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { downloadWatchRoute, isPlayableDownloadFile, navigationDownloadId } from '../../helpers/downloadPlayback'
 import { parseLocalVideoGames } from '../../helpers/video-games'
 import { parseLocalVideoMusicTracks, parseVideoMusicTracks } from '../../helpers/video-music'
-import { parseChannelPreferences, showChannelPreferenceSavedToast } from '../../helpers/channel-preferences'
+import { saveChannelPreference, saveChannelPreferenceWithToast } from '../../helpers/channel-preferences'
 import {
   showInvidiousFallbackToast,
   buildChaptersVttFile,
@@ -5128,42 +5128,23 @@ export default defineComponent({
       this._saveWatchProgress()
       showToast({ message: this.t('Video.Watched Progress Saved'), icon: ['fas', 'save'] })
     },
+    // Called by manual actions, which check the settings in the UI
     handleChannelPlaybackSpeedManualSave() {
-      // Should be called by manual action, settings should be checked in UI
-      if (!this.channelId) {
-        return
-      }
-
-      this.saveChannelPlaybackSpeed(this.currentPlaybackRate)
-      showChannelPreferenceSavedToast('playbackSpeed', this.currentPlaybackRate, this.t)
+      saveChannelPreferenceWithToast(this.$store, this.channelId, 'playbackSpeed', this.currentPlaybackRate, this.t)
     },
     handleChannelVideoQualityManualSave() {
-      // Should be called by manual action, settings should be checked in UI
-      if (!this.channelId) {
+      const quality = this.normalizeVideoQuality(this.currentVideoQuality)
+      if (quality.length === 0) {
         return
       }
 
-      if (this.saveChannelVideoQuality(this.currentVideoQuality)) {
-        showChannelPreferenceSavedToast('videoQuality', this.normalizeVideoQuality(this.currentVideoQuality), this.t)
-      }
+      saveChannelPreferenceWithToast(this.$store, this.channelId, 'videoQuality', quality, this.t)
     },
     handleChannelSubtitlesStateManualSave() {
-      // Should be called by manual action, settings should be checked in UI
-      if (!this.channelId || this.currentSubtitlesState === null) {
-        return
-      }
-
-      this.saveChannelSubtitlesState(this.currentSubtitlesState)
-      showChannelPreferenceSavedToast('subtitlesState', this.currentSubtitlesState, this.t)
+      saveChannelPreferenceWithToast(this.$store, this.channelId, 'subtitlesState', this.currentSubtitlesState, this.t)
     },
     handleChannelVolumeManualSave() {
-      // Should be called by manual action, settings should be checked in UI
-      if (!this.channelId || this.currentVolume === null) {
-        return
-      }
-
-      this.saveChannelVolume(this.currentVolume)
-      showChannelPreferenceSavedToast('volume', this.currentVolume, this.t)
+      saveChannelPreferenceWithToast(this.$store, this.channelId, 'volume', this.currentVolume, this.t)
     },
     handleWatchProgressAutoSave() {
       if (!this.rememberHistory || !this.autosaveWatchedProgress) { return }
@@ -7450,18 +7431,14 @@ export default defineComponent({
      * @param {boolean} enabled
      */
     saveChannelSubtitlesState(enabled) {
-      const states = parseChannelPreferences(this.$store.getters.getChannelSubtitlesStates, 'channelSubtitlesStates')
-      states[this.channelId] = enabled
-      this.$store.dispatch('updateChannelSubtitlesStates', JSON.stringify(states))
+      saveChannelPreference(this.$store, this.channelId, 'subtitlesState', enabled)
     },
 
     /**
      * @param {number} volume
      */
     saveChannelVolume(volume) {
-      const volumes = parseChannelPreferences(this.$store.getters.getChannelVolumes, 'channelVolumes')
-      volumes[this.channelId] = volume
-      this.$store.dispatch('updateChannelVolumes', JSON.stringify(volumes))
+      saveChannelPreference(this.$store, this.channelId, 'volume', volume)
     },
 
     /**
@@ -7486,41 +7463,16 @@ export default defineComponent({
     },
 
     saveChannelPlaybackSpeed(rate) {
-      if (!this.channelId) {
-        return
-      }
-
-      try {
-        const channelSpeeds = JSON.parse(this.$store.getters.getChannelPlaybackSpeeds || '{}')
-        channelSpeeds[this.channelId] = rate
-        this.$store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify(channelSpeeds))
-      } catch (e) {
-        console.error('Failed to save channel playback speed:', e)
-      }
+      saveChannelPreference(this.$store, this.channelId, 'playbackSpeed', rate)
     },
 
     /**
      * @param {string | number | null | undefined} quality
-     * @returns {boolean} whether a channel-specific quality was stored
      */
     saveChannelVideoQuality(quality) {
-      if (!this.channelId) {
-        return false
-      }
-
-      try {
-        const channelQualities = JSON.parse(this.$store.getters.getChannelVideoQualities || '{}')
-        const normalizedQuality = this.normalizeVideoQuality(quality)
-        if (normalizedQuality.length === 0) {
-          return false
-        }
-
-        channelQualities[this.channelId] = normalizedQuality
-        this.$store.dispatch('updateChannelVideoQualities', JSON.stringify(channelQualities))
-        return true
-      } catch (e) {
-        console.error('Failed to save channel video quality:', e)
-        return false
+      const normalizedQuality = this.normalizeVideoQuality(quality)
+      if (normalizedQuality.length > 0) {
+        saveChannelPreference(this.$store, this.channelId, 'videoQuality', normalizedQuality)
       }
     },
 

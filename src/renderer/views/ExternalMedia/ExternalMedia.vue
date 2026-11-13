@@ -507,7 +507,7 @@ import {
   getPlatformChannelPreferenceKey,
   parseChannelPreferences,
   saveChannelPreference,
-  showChannelPreferenceSavedToast
+  saveChannelPreferenceWithToast
 } from '../../helpers/channel-preferences'
 import { limitQualityOnMeteredNetwork } from '../../helpers/player/meteredNetworkQuality'
 import { formatDate } from '../../helpers/dateFormat'
@@ -1162,9 +1162,7 @@ function saveChannelPreferenceManually(type) {
     subtitlesState: currentSubtitlesState.value,
     volume: currentVolume.value
   }[type]
-  if (!channelPreferenceKey.value || value === null) return
-  saveChannelPreference(store, channelPreferenceKey.value, type, value)
-  showChannelPreferenceSavedToast(type, value, t)
+  saveChannelPreferenceWithToast(store, channelPreferenceKey.value, type, value, t)
 }
 function updatePlaybackRate(rate) {
   // Retrying remounts the player, which must keep the chosen speed.

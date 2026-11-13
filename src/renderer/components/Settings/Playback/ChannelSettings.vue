@@ -386,7 +386,9 @@ import {
   getCachedChannelInfo,
   getPlatformChannelPreferenceKey,
   parseChannelPreferences,
-  parsePlatformChannelPreferenceKey
+  parsePlatformChannelPreferenceKey,
+  removeChannelPreference,
+  saveChannelPreference
 } from '../../../helpers/channel-preferences'
 import { findFollowedChannel, getFollowedChannels, supportsPlatformFollows } from '../../../helpers/platformFeed'
 import { getPlatform, getPlatformChannelRoute, PLATFORM_ICONS } from '../../../../platforms/index'
@@ -582,20 +584,10 @@ const fetchedChannels = ref(new Map())
 
 /**
  * @param {string} settingKey
- * @param {boolean | number | string} value
- * @returns {Promise<boolean>}
+ * @param {boolean} value
  */
-async function updateSetting(settingKey, value) {
-  await store.dispatch(`update${settingKey[0].toUpperCase()}${settingKey.slice(1)}`, value)
-  return settings.value[settingKey] === value
-}
-
-/**
- * @param {'playbackSpeed' | 'videoQuality' | 'subtitlesState' | 'volume'} type
- */
-function preferenceValuesFor(type) {
-  const { valuesKey } = PREFERENCES.find(preference => preference.type === type)
-  return { valuesKey, values: parseChannelPreferences(settings.value[valuesKey], valuesKey) }
+function updateSetting(settingKey, value) {
+  store.dispatch(`update${settingKey[0].toUpperCase()}${settingKey.slice(1)}`, value)
 }
 
 const collator = computed(() => new Intl.Collator([locale.value, 'en'], { sensitivity: 'base' }))
@@ -796,9 +788,7 @@ function setPreference(channelId, type, value, initializationToken) {
     pendingPreferenceInitializations.set(key, initializationToken)
   }
 
-  const { valuesKey, values } = preferenceValuesFor(type)
-  values[channelId] = value
-  return updateSetting(valuesKey, JSON.stringify(values))
+  return saveChannelPreference(store, channelId, type, value)
 }
 
 /**
@@ -900,18 +890,12 @@ function closeAddChannelPrompt() {
  */
 function rollbackPreference(channelId, type, initialValue, initializationToken) {
   const key = `${channelId}:${type}`
-  const { valuesKey, values } = preferenceValuesFor(type)
-  if (
-    pendingPreferenceInitializations.get(key) !== initializationToken ||
-    !Object.hasOwn(values, channelId) ||
-    values[channelId] !== initialValue
-  ) {
+  if (pendingPreferenceInitializations.get(key) !== initializationToken) {
     return Promise.resolve(true)
   }
 
   pendingPreferenceInitializations.delete(key)
-  delete values[channelId]
-  return updateSetting(valuesKey, JSON.stringify(values))
+  return removeChannelPreference(store, channelId, type, value => value === initialValue)
 }
 
 /**
@@ -919,22 +903,15 @@ function rollbackPreference(channelId, type, initialValue, initializationToken) 
  * @param {'playbackSpeed' | 'videoQuality' | 'subtitlesState' | 'volume'} type
  */
 function deletePreference(channelId, type) {
-  const { valuesKey, values } = preferenceValuesFor(type)
-  delete values[channelId]
-  return updateSetting(valuesKey, JSON.stringify(values))
+  return removeChannelPreference(store, channelId, type)
 }
 
 /**
  * @param {string} channelId
  */
 function forgetChannel(channelId) {
-  for (const { valuesKey } of PREFERENCES) {
-    const values = parseChannelPreferences(settings.value[valuesKey], valuesKey)
-
-    if (Object.hasOwn(values, channelId)) {
-      delete values[channelId]
-      updateSetting(valuesKey, JSON.stringify(values))
-    }
+  for (const { type } of PREFERENCES) {
+    removeChannelPreference(store, channelId, type)
   }
 }
 </script>

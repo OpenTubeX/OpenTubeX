@@ -891,6 +891,11 @@ const customActions = {
   ),
   updateFollowedRssFeeds: ({ commit, state }, update) => updateSharedSetting(commit, state, 'followedRssFeeds', update),
   updateFollowedChannels: ({ commit, state }, update) => updateSharedSetting(commit, state, 'followedChannels', update),
+  // The settings saved per channel, as JSON strings
+  updateChannelPlaybackSpeeds: ({ commit, state }, update) => updateSharedSetting(commit, state, 'channelPlaybackSpeeds', update),
+  updateChannelVideoQualities: ({ commit, state }, update) => updateSharedSetting(commit, state, 'channelVideoQualities', update),
+  updateChannelSubtitlesStates: ({ commit, state }, update) => updateSharedSetting(commit, state, 'channelSubtitlesStates', update),
+  updateChannelVolumes: ({ commit, state }, update) => updateSharedSetting(commit, state, 'channelVolumes', update),
   updatePinnedChannels: async ({ commit, state }, update) => {
     const previousIds = state.pinnedChannels.map(channel => channel.id)
     if (!await updateSharedSetting(commit, state, 'pinnedChannels', update)) return false

@@ -107,46 +107,45 @@ const SAVED_TOASTS = Object.freeze({
 })
 
 /**
- * Confirms a setting that the user saved for a channel by hand.
+ * Saves a setting that the user chose to remember for a channel, and confirms it.
+ * @param {import('vuex').Store} store
+ * @param {string} channelId
  * @param {'playbackSpeed' | 'videoQuality' | 'subtitlesState' | 'volume'} type
  * @param {unknown} value
  * @param {(key: string) => string} t
  */
-export function showChannelPreferenceSavedToast(type, value, t) {
-  const { message, icon } = SAVED_TOASTS[type]
-  showToast({ message: `${message(t)}: ${formatChannelPreferenceValue(type, value, t)}`, icon })
+export async function saveChannelPreferenceWithToast(store, channelId, type, value, t) {
+  if (!channelId || value === null) return
+
+  if (await saveChannelPreference(store, channelId, type, value)) {
+    const { message, icon } = SAVED_TOASTS[type]
+    showToast({ message: `${message(t)}: ${formatChannelPreferenceValue(type, value, t)}`, icon })
+  } else {
+    showToast({ message: t('Channel.Failed to save subscription settings'), icon: ['fas', 'circle-exclamation'] })
+  }
 }
 
-// Tabs share a store. Read each collection only after earlier writes finish.
-const pendingChannelPreferenceWrites = new WeakMap()
-
 /**
+ * Edits the saved values of one setting for any number of channels. The store
+ * applies the edit again to the saved values, so it keeps the changes that
+ * other tabs and windows save meanwhile. `change` can therefore run more than once.
  * @param {import('vuex').Store} store
  * @param {string} type
  * @param {(values: Record<string, unknown>) => boolean} change edits the values, returns whether they changed
- * @returns {Promise<unknown>}
+ * @returns {Promise<boolean>} whether the values were saved, `true` when nothing changed
  */
-async function writeChannelPreferences(store, type, change) {
+export async function updateChannelPreferences(store, type, change) {
   const preference = CHANNEL_PREFERENCE_TYPES.find(preference => preference.type === type)
-  if (!preference) return
+  if (!preference) return false
 
-  const previous = pendingChannelPreferenceWrites.get(store) ?? Promise.resolve()
-  const write = previous.catch(() => {}).then(() => {
-    const { valuesKey } = preference
-    const suffix = valuesKey[0].toUpperCase() + valuesKey.slice(1)
-    const values = parseChannelPreferences(store.getters[`get${suffix}`], valuesKey)
-    if (!change(values)) return
+  const { valuesKey } = preference
+  const suffix = valuesKey[0].toUpperCase() + valuesKey.slice(1)
+  if (!change(parseChannelPreferences(store.getters[`get${suffix}`], valuesKey))) return true
 
-    return store.dispatch(`update${suffix}`, JSON.stringify(values))
+  return store.dispatch(`update${suffix}`, (saved) => {
+    const values = parseChannelPreferences(saved, valuesKey)
+    return change(values) ? JSON.stringify(values) : saved
   })
-  pendingChannelPreferenceWrites.set(store, write)
-  try {
-    return await write
-  } finally {
-    if (pendingChannelPreferenceWrites.get(store) === write) {
-      pendingChannelPreferenceWrites.delete(store)
-    }
-  }
 }
 
 /**
@@ -154,11 +153,11 @@ async function writeChannelPreferences(store, type, change) {
  * @param {string} channelId
  * @param {string} type
  * @param {unknown} value
- * @returns {Promise<unknown>}
+ * @returns {Promise<boolean>} whether the value was saved
  */
 export function saveChannelPreference(store, channelId, type, value) {
-  if (!channelId) return Promise.resolve()
-  return writeChannelPreferences(store, type, values => {
+  if (!channelId) return Promise.resolve(false)
+  return updateChannelPreferences(store, type, values => {
     values[channelId] = value
     return true
   })
@@ -169,12 +168,13 @@ export function saveChannelPreference(store, channelId, type, value) {
  * @param {import('vuex').Store} store
  * @param {string} channelId
  * @param {string} type
- * @returns {Promise<unknown>}
+ * @param {(value: unknown) => boolean} [shouldRemove] checked against the latest saved value
+ * @returns {Promise<boolean>} whether the removal was saved, `true` when nothing was removed
  */
-export function removeChannelPreference(store, channelId, type) {
-  if (!channelId) return Promise.resolve()
-  return writeChannelPreferences(store, type, values => {
-    if (!Object.hasOwn(values, channelId)) return false
+export function removeChannelPreference(store, channelId, type, shouldRemove = () => true) {
+  if (!channelId) return Promise.resolve(true)
+  return updateChannelPreferences(store, type, values => {
+    if (!Object.hasOwn(values, channelId) || !shouldRemove(values[channelId])) return false
     delete values[channelId]
     return true
   })

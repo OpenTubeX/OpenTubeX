@@ -197,10 +197,10 @@ test.describe('channel settings', () => {
     await page.evaluate(channelId => {
       const store = window.$store
       const updatePlaybackSpeeds = store._actions.updateChannelPlaybackSpeeds[0]
-      store._actions.updateChannelPlaybackSpeeds = [value => {
-        const playbackSpeeds = JSON.parse(value)
-        return Object.hasOwn(playbackSpeeds, channelId)
-          ? updatePlaybackSpeeds(value)
+      store._actions.updateChannelPlaybackSpeeds = [update => {
+        const value = typeof update === 'function' ? update(store.state.settings.channelPlaybackSpeeds) : update
+        return Object.hasOwn(JSON.parse(value), channelId)
+          ? updatePlaybackSpeeds(update)
           : Promise.resolve(false)
       }]
       store._actions.updateChannelVolumes = [() => Promise.reject(new Error('write failed'))]
