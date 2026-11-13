@@ -382,6 +382,7 @@ Settings:
     Sync Subscriptions: "Synchronizovať odbery s YouTube"
     Sync Playlists: "Synchronizovať playlisty s YouTube"
     Add to YouTube Watch History: "Pridávať pozreté videá do histórie YouTube"
+    Rate Videos: "Označovať videá ako páči a nepáči"
     Sync Now: "Synchronizovať teraz"
     Synced: "Synchronizované s YouTube"
     Sync Failed: "Synchronizácia s YouTube zlyhala: {error}"
@@ -452,6 +453,8 @@ Settings:
     Privacy Description: História, návrhy vyhľadávania, odkazy a heslo aplikácie
     Data And Storage Description: Zálohy, import a export, využitie disku a čistenie
     Sync Description: Účet synchronizačného servera, párovanie zariadení a synchronizované údaje
+    Accounts and Sync: "Účty a synchronizácia"
+    Accounts and Sync Description: "Účet YouTube, účet synchronizačného servera a párovanie zariadení"
     Advanced: Rozšírené
     Advanced Description: Backendy, vyrovnávacia pamäť, externé nástroje, proxy a diagnostika
     Alternative providers: Poskytovatelia videí a metaúdajov
@@ -2257,6 +2260,7 @@ Tooltips:
     Sync Subscriptions: "Kanály, ktoré začnete odoberať na YouTube, sa pridajú do profilu Všetky kanály a kanály, ktorých odber tam zrušíte, sa odstránia zo všetkých profilov. Začatie alebo zrušenie odberu tu v profile Všetky kanály urobí to isté na YouTube."
     Sync Playlists: "Vaše playlisty z YouTube, Pozrieť neskôr a Videá, ktoré sa mi páčia, sa zobrazia v sekcii Vaše playlisty a zmeny, ktoré v nich tu urobíte, sa urobia aj na YouTube. Nesynchronizujú sa s vašimi ďalšími zariadeniami a nie sú zahrnuté, keď exportujete všetky playlisty alebo zálohujete svoje údaje. Vypnutím tejto možnosti sa odstránia z tohto zariadenia, ale nie z YouTube."
     Add to YouTube Watch History: "Prehrávané videá sa pridávajú do vašej histórie pozerania na YouTube, aby sa z nich učili odporúčania YouTube. Keď je história na YouTube pozastavená, nič sa nepridáva."
+    Rate Videos: "Zobrazuje pri videách tlačidlá Páči sa mi a Nepáči sa mi. Aby sa zobrazilo vaše hodnotenie, každé otvorené video sa vyhľadá na YouTube s vaším účtom, takže YouTube zistí, ktoré videá otvárate, aj keď sa nepridajú do histórie pozerania."
   General Settings:
     Built-in Streams: |
       Automatický režim prehráva väčšinu videí cez klienta visionOS od YouTube, ktorý sa spúšťa rýchlejšie a podporuje automatickú kvalitu. Živé prenosy a videá, ktoré nedokáže prehrať, používajú SABR.

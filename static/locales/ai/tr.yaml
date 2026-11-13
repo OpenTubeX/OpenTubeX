@@ -382,6 +382,7 @@ Settings:
     Sync Subscriptions: "Abonelikleri YouTube ile eşitle"
     Sync Playlists: "Oynatma listelerini YouTube ile eşitle"
     Add to YouTube Watch History: "İzlenen videoları YouTube geçmişine ekle"
+    Rate Videos: "Videoları beğen ve beğenme"
     Sync Now: "Şimdi eşitle"
     Synced: "YouTube ile eşitlendi"
     Sync Failed: "YouTube ile eşitlenemedi: {error}"
@@ -452,6 +453,8 @@ Settings:
     Privacy Description: Geçmiş, arama önerileri, bağlantılar ve uygulama parolası
     Data And Storage Description: Yedekler, içe ve dışa aktarma, disk kullanımı ve temizlik
     Sync Description: Eşitleme sunucusu hesabı, cihaz eşleştirme ve eşitlenen veriler
+    Accounts and Sync: "Hesaplar ve Eşitleme"
+    Accounts and Sync Description: "YouTube hesabı, eşitleme sunucusu hesabı ve cihaz eşleştirme"
     Advanced: Gelişmiş
     Advanced Description: Arka uçlar, arabelleğe alma, harici araçlar, vekil sunucu ve tanılama
     Alternative providers: Video ve meta veri sağlayıcıları
@@ -2251,6 +2254,7 @@ Tooltips:
     Sync Subscriptions: "YouTube'da abone olduğunuz kanallar Tüm Kanallar'a eklenir, orada abonelikten çıktığınız kanallar ise tüm profillerden kaldırılır. Burada Tüm Kanallar'da abone olmak veya abonelikten çıkmak YouTube'da da aynısını yapar."
     Sync Playlists: "YouTube oynatma listeleriniz, Daha sonra izle ve Beğenilen videolar, Oynatma Listelerin bölümünde görünür ve burada bunlarda yaptığınız değişiklikler YouTube'da da yapılır. Diğer cihazlarınızla eşitlenmez ve tüm oynatma listelerini dışa aktardığınızda veya verilerinizi yedeklediğinizde dahil edilmez. Bunu kapatmak onları bu cihazdan kaldırır ancak YouTube'dan kaldırmaz."
     Add to YouTube Watch History: "Oynattığınız videolar YouTube izleme geçmişinize eklenir, böylece YouTube önerileri bunlardan öğrenir. Geçmiş YouTube'da duraklatılmışken hiçbir şey eklenmez."
+    Rate Videos: "Videolarda beğen ve beğenme düğmelerini gösterir. Puanınızı göstermek için açtığınız her video hesabınızla YouTube'da sorgulanır; bu nedenle YouTube, izleme geçmişinize eklenmeseler bile hangi videoları açtığınızı öğrenir."
   General Settings:
     Built-in Streams: |
       Otomatik, çoğu videoyu YouTube'un visionOS istemcisiyle oynatır; bu istemci daha hızlı başlar ve otomatik kaliteyi destekler. Canlı yayınlar ve oynatamadığı videolar SABR kullanır.

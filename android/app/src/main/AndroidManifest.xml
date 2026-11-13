@@ -149,6 +149,19 @@
                 <data android:scheme="https" android:host="www.youtube.com" />
                 <data android:scheme="https" android:host="m.youtube.com" />
                 <data android:scheme="https" android:host="youtu.be" />
+                <!-- Keep the YouTube sign-in pages in the browser, which the
+                     account sign-in opens. Android 14 and older ignore these
+                     groups. A URI must match a group, so the last one allows
+                     everything else. -->
+                <uri-relative-filter-group android:allow="false">
+                    <data android:path="/activate" />
+                </uri-relative-filter-group>
+                <uri-relative-filter-group android:allow="false">
+                    <data android:path="/tv/activate" />
+                </uri-relative-filter-group>
+                <uri-relative-filter-group>
+                    <data android:pathPattern=".*" />
+                </uri-relative-filter-group>
             </intent-filter>
 
             <!-- Sync servers return here after an OIDC sign-in or account deletion. -->

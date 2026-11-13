@@ -1,5 +1,8 @@
 <template>
-  <FtSettingsSection :title="t('Settings.Sync Settings.Sync Settings')">
+  <FtSettingsSection
+    class="syncSettings"
+    :title="t('Settings.Sync Settings.Sync Settings')"
+  >
     <p class="description">
       {{ t('Settings.Sync Settings.Description') }}
     </p>

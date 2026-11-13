@@ -45,6 +45,7 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'youTubeAccountSyncPlaylists',
   'youTubeAccountSyncState',
   'youTubeAccountWatchHistory',
+  'youTubeAccountVideoRatings',
   'ytDlpPlaybackAuthMode',
   'ytDlpPlaybackCookiesPath',
   'ytDlpPlaybackCookiesBrowser',

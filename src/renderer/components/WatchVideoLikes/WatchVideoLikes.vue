@@ -76,7 +76,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, onScopeDispose, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
 import { ERROR_TOAST_ICON, formatNumber, showToast } from '../../helpers/utils'
@@ -95,7 +95,9 @@ const hideVideoLikesAndDislikes = computed(() => store.getters.getHideVideoLikes
 const parsedLikeCount = computed(() => props.likeCount === null ? null : formatNumber(props.likeCount))
 const parsedDislikeCount = computed(() => props.dislikeCount === null ? null : formatNumber(props.dislikeCount))
 
-const canRate = computed(() => props.videoId !== '' && isSignedInToYouTube(store.getters))
+// Opt-in, because loading the rating tells YouTube which videos are opened.
+const canRate = computed(() => props.videoId !== '' && isSignedInToYouTube(store.getters) &&
+  store.getters.getYouTubeAccountVideoRatings)
 /** @type {import('vue').Ref<import('../../helpers/api/youtube-account-parsers').YouTubeRating | null>} */
 const rating = ref(null)
 // The public counts include the rating the account had when they loaded.
@@ -124,6 +126,8 @@ function adjustCount(count, type) {
 }
 
 let ratingLoad = 0
+// Unmounting stops the watcher without starting a new load, so end the waiting one.
+onScopeDispose(() => ratingLoad++)
 // The rating YouTube has, which a failed rating returns to.
 let confirmedRating = 'INDIFFERENT'
 // Ratings go out one at a time, in the order they were clicked.
@@ -143,6 +147,8 @@ watch([() => props.videoId, canRate, () => getYouTubeChannelKey(store.getters.ge
     // A rating still going out, for example from before switching channels
     // and back, would make the loaded one outdated.
     await pendingRating
+    // Opting out or opening another video meanwhile must not send the lookup.
+    if (load !== ratingLoad) return
     current = await getYouTubeVideoRating(videoId)
   } catch (error) {
     console.error(error)

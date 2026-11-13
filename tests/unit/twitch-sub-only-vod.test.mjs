@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { fetchTwitchSubOnlyVod, getTwitchVodId } from '../../src/twitchSubOnlyVod.js'
+import { fetchTwitchLiveVod, fetchTwitchSubOnlyVod, getTwitchVodId } from '../../src/twitchSubOnlyVod.js'
 
 test('only accepts Twitch VOD URLs for the fallback', () => {
   assert.equal(getTwitchVodId('https://www.twitch.tv/videos/12345?t=1h'), '12345')
@@ -288,4 +288,39 @@ test('reads an MP4 highlight codec from its playlist init segment', async () => 
   assert.match(result.playlist, /CODECS="hev1\.2\.2\.L120\.B0,mp4a\.40\.2"/)
   assert.match(result.playlist, /\/360p30\/highlight-12345\.m3u8/)
   assert.ok(requested.includes('https://example.cloudfront.net/archive-key/360p30/init-0.mp4'))
+})
+
+test('finds the recording of an ongoing broadcast, which keeps every segment since its start', async () => {
+  let archiveVideo = null
+  const fetcher = async (url, options) => {
+    if (url === 'https://gql.twitch.tv/gql') {
+      assert.match(JSON.parse(options.body).query, /user\(login: "example"\)/)
+      return Response.json({ data: { user: { stream: { createdAt: '2026-01-01T00:00:00Z', archiveVideo } } } })
+    }
+    if (url.endsWith('/chunked/index-dvr.m3u8')) {
+      return new Response('#EXTM3U\n#EXT-X-PLAYLIST-TYPE:EVENT\n#EXT-X-MAP:URI="init-0.mp4"\n#EXTINF:10,\n0.mp4\n')
+    }
+    if (url.endsWith('/chunked/init-0.mp4')) {
+      const avcC = Buffer.from([0, 0, 0, 12, ...Buffer.from('avcC'), 1, 0x64, 0, 0x28])
+      const sample = Buffer.concat([Buffer.from([0, 0, 0, 98, ...Buffer.from('avc1')]), Buffer.alloc(78), avcC])
+      return new Response(Buffer.concat([Buffer.from([0, 0, 0, 114, ...Buffer.from('stsd'), 0, 0, 0, 0, 0, 0, 0, 1]), sample]))
+    }
+    return new Response('', { status: 404 })
+  }
+
+  assert.equal(await fetchTwitchLiveVod('example', fetcher), null)
+
+  archiveVideo = {
+    id: '12345',
+    status: 'RECORDED',
+    broadcastType: 'ARCHIVE',
+    seekPreviewsURL: 'https://example.cloudfront.net/archive-key/storyboards/12345-info.json'
+  }
+  assert.equal(await fetchTwitchLiveVod('example', fetcher), null)
+
+  archiveVideo.status = 'RECORDING'
+  assert.deepEqual(await fetchTwitchLiveVod('example', fetcher), {
+    playlist: '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=8534000,CODECS="avc1.640028,mp4a.40.2",FRAME-RATE=60\nhttps://example.cloudfront.net/archive-key/chunked/index-dvr.m3u8\n',
+    startedAt: Date.parse('2026-01-01T00:00:00Z')
+  })
 })

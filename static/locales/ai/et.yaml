@@ -382,6 +382,7 @@ Settings:
     Sync Subscriptions: "Sünkrooni tellimused YouTube'iga"
     Sync Playlists: "Sünkrooni esitusloendid YouTube'iga"
     Add to YouTube Watch History: "Lisa vaadatud videod YouTube'i ajalukku"
+    Rate Videos: "Videote meeldimine ja mittemeeldimine"
     Sync Now: "Sünkrooni kohe"
     Synced: "YouTube'iga sünkroonitud"
     Sync Failed: "YouTube'iga sünkroonimine nurjus: {error}"
@@ -452,6 +453,8 @@ Settings:
     Privacy Description: Ajalugu, otsingusoovitused, lingid ja rakenduse parool
     Data And Storage Description: Varukoopiad, import ja eksport, kettakasutus ja puhastamine
     Sync Description: Sünkroonimisserveri konto, seadmete sidumine ja sünkroonitud andmed
+    Accounts and Sync: "Kontod ja sünkroonimine"
+    Accounts and Sync Description: "YouTube'i konto, sünkroonimisserveri konto ja seadmete sidumine"
     Advanced: Täpsemad seaded
     Advanced Description: Taustateenused, puhverdamine, välised tööriistad, puhverserver ja diagnostika
     Alternative providers: Video- ja metaandmete pakkujad
@@ -1369,7 +1372,6 @@ Settings:
     Invalid channel playback speeds file: "Sellest failist ei leitud ühegi kanali esituskiirust"
     Channel playback speeds imported: "Imporditi {count} kanali esituskiirus | Imporditi {count} kanali esituskiirused"
     Channels not found: "{count} kanalit ei leitud | {count} kanalit ei leitud"
-    Playlists have been successfully imported: "1/{total} esitusloend imporditi edukalt | {count}/{total} esitusloendit imporditi edukalt"
   Sync Settings:
     Signed Out After Restore: 'Sünkroonimisest logiti välja, sest need rakenduse andmed taastati varukoopiast või teisest seadmest. Selle seadme sünkroonimiseks logi uuesti sisse.'
     Revoke Session Tabs Warning: "Samuti kustutatakse selle seadme sünkroonitud vahelehtede komplektid."
@@ -2253,6 +2255,7 @@ Tooltips:
     Sync Subscriptions: "Kanalid, mille YouTube'is tellid, lisatakse jaotisesse „Kõik kanalid“ ja kanalid, mille tellimuse seal tühistad, eemaldatakse kõigist profiilidest. Kui tellid siin jaotises „Kõik kanalid“ kanali või tühistad tellimuse, juhtub sama ka YouTube'is."
     Sync Playlists: "Sinu YouTube'i esitusloendid, „Vaata hiljem“ ja „Meeldivad videod“ kuvatakse jaotises „Sinu esitusloendid“ ning neis siin tehtud muudatused tehakse ka YouTube'is. Neid ei sünkroonita sinu teistesse seadmetesse ega kaasata, kui ekspordid kõik esitusloendid või varundad oma andmed. Selle väljalülitamine eemaldab need sellest seadmest, kuid mitte YouTube'ist."
     Add to YouTube Watch History: "Sinu esitatud videod lisatakse sinu YouTube'i vaatamiste ajalukku, nii et YouTube'i soovitused õpivad neist. Kui ajalugu on YouTube'is peatatud, ei lisata midagi."
+    Rate Videos: "Näitab videotel meeldimise ja mittemeeldimise nuppe. Sinu hinnangu näitamiseks otsitakse iga avatud video sinu kontoga YouTube'ist üles, nii et YouTube saab teada, milliseid videoid sa avad, isegi kui neid sinu vaatamisajalukku ei lisata."
   General Settings:
     Built-in Streams: |
       Automaatne esitab enamikku videoid YouTube'i visionOS-i kliendi kaudu, mis käivitub kiiremini ja toetab automaatset kvaliteeti. Otseülekanded ja videod, mida see esitada ei saa, kasutavad SABR-i.

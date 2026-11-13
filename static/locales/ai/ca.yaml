@@ -518,6 +518,7 @@ Settings:
     Sync Subscriptions: "Sincronitza les subscripcions amb YouTube"
     Sync Playlists: "Sincronitza les llistes de reproducció amb YouTube"
     Add to YouTube Watch History: "Afegeix els vídeos vistos a l'historial de YouTube"
+    Rate Videos: "Indicar que t'agraden o no els vídeos"
     Sync Now: "Sincronitza ara"
     Synced: "S'ha sincronitzat amb YouTube"
     Sync Failed: "No s'ha pogut sincronitzar amb YouTube: {error}"
@@ -584,6 +585,8 @@ Settings:
     Privacy Description: Historial, suggeriments de cerca, enllaços i contrasenya de l'aplicació
     Data And Storage Description: Còpies de seguretat, importació i exportació, ús del disc i neteja
     Sync Description: Compte del servidor de sincronització, vinculació de dispositius i dades sincronitzades
+    Accounts and Sync: "Comptes i sincronització"
+    Accounts and Sync Description: "Compte de YouTube, compte del servidor de sincronització i vinculació de dispositius"
     Advanced: Avançat
     Advanced Description: Backends, memòria intermèdia, eines externes, servidor intermediari i diagnòstic
     Alternative providers: Proveïdors de vídeo i metadades
@@ -2789,6 +2792,7 @@ Tooltips:
     Sync Subscriptions: "Els canals als quals et subscrius a YouTube s'afegeixen a «Tots els canals», i els canals dels quals et dones de baixa allà se suprimeixen de tots els perfils. Subscriure't o donar-te de baixa a «Tots els canals» aquí fa el mateix a YouTube."
     Sync Playlists: "Les teves llistes de reproducció de YouTube, «Mira més tard» i «Vídeos que m'agraden» apareixen a «Les teves llistes de reproducció», i els canvis que hi facis aquí també es fan a YouTube. No se sincronitzen amb els teus altres dispositius ni s'inclouen quan exportes totes les llistes de reproducció o fas una còpia de seguretat de les teves dades. Si desactives aquesta opció, se suprimeixen d'aquest dispositiu, però no de YouTube."
     Add to YouTube Watch History: "Els vídeos que reprodueixes s'afegeixen al teu historial de visualitzacions de YouTube, perquè les recomanacions de YouTube n'aprenguin. No s'hi afegeix res mentre l'historial està en pausa a YouTube."
+    Rate Videos: "Mostra els botons de m'agrada i no m'agrada als vídeos. Per mostrar la teva valoració, cada vídeo que obres es consulta a YouTube amb el teu compte, de manera que YouTube sap quins vídeos obres, encara que no s'afegeixin a l'historial de visualitzacions."
   General Settings:
     Built-in Streams: |
       Automàtic reprodueix la majoria de vídeos amb el client visionOS de YouTube, que comença més ràpid i admet la qualitat automàtica. Les emissions en directe i els vídeos que no pot reproduir fan servir SABR.

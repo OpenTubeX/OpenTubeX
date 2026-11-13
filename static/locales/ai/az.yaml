@@ -384,6 +384,7 @@ Settings:
     Sync Subscriptions: "Abunəlikləri YouTube ilə sinxronlaşdır"
     Sync Playlists: "Pleylistləri YouTube ilə sinxronlaşdır"
     Add to YouTube Watch History: "Baxılan videoları YouTube tarixçəsinə əlavə et"
+    Rate Videos: "Videoları bəyənmək və bəyənməmək"
     Sync Now: "İndi sinxronlaşdır"
     Synced: "YouTube ilə sinxronlaşdırıldı"
     Sync Failed: "YouTube ilə sinxronlaşdırmaq mümkün olmadı: {error}"
@@ -454,6 +455,8 @@ Settings:
     Privacy Description: Tarixçə, axtarış təklifləri, keçidlər və tətbiq parolu
     Data And Storage Description: Ehtiyat nüsxələr, idxal və ixrac, disk istifadəsi və təmizləmə
     Sync Description: Sinxronizasiya serveri hesabı, cihazların qoşulması və sinxronlaşdırılan məlumatlar
+    Accounts and Sync: "Hesablar və sinxronizasiya"
+    Accounts and Sync Description: "YouTube hesabı, sinxronizasiya serveri hesabı və cihaz cütləşdirməsi"
     Advanced: Qabaqcıl
     Advanced Description: Backend-lər, buferləmə, xarici alətlər, proksi və diaqnostika
     Alternative providers: Video və metaməlumat təminatçıları
@@ -2262,6 +2265,7 @@ Tooltips:
     Sync Subscriptions: "YouTube-da abunə olduğunuz kanallar “Bütün Kanallar” bölməsinə əlavə olunur, orada abunəlikdən çıxdığınız kanallar isə bütün profillərdən silinir. Burada “Bütün Kanallar” bölməsində abunə olmaq və ya abunəlikdən çıxmaq YouTube-da da eyni şeyi edir."
     Sync Playlists: "YouTube pleylistləriniz, “Sonra baxın” və “Bəyənilən videolar” “Pleylistləriniz” bölməsində görünür və burada onlara etdiyiniz dəyişikliklər YouTube-da da edilir. Onlar digər cihazlarınızla sinxronlaşdırılmır və bütün pleylistləri ixrac etdikdə və ya məlumatlarınızın ehtiyat nüsxəsini çıxardıqda daxil edilmir. Bunu söndürmək onları bu cihazdan silir, lakin YouTube-dan silmir."
     Add to YouTube Watch History: "Oxutduğunuz videolar YouTube baxış tarixçənizə əlavə olunur, beləliklə YouTube tövsiyələri onlardan öyrənir. YouTube-da tarixçə dayandırılıbsa, heç nə əlavə olunmur."
+    Rate Videos: "Videolarda bəyən və bəyənmə düymələrini göstərir. Qiymətləndirmənizi göstərmək üçün açdığınız hər video hesabınızla YouTube-da yoxlanılır, buna görə YouTube hansı videoları açdığınızı öyrənir, hətta onlar baxış tarixçənizə əlavə edilməsə belə."
   General Settings:
     Built-in Streams: |
       Avtomatik rejim əksər videoları YouTube-un visionOS müştərisi ilə oynadır; o, daha tez başlayır və avtomatik keyfiyyəti dəstəkləyir. Canlı yayımlar və onun oynada bilmədiyi videolar SABR istifadə edir.

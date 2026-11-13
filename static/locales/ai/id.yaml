@@ -381,6 +381,7 @@ Settings:
     Revoke Failed: "Anda telah keluar dari YouTube, tetapi Google tidak mengonfirmasi bahwa sesi masuk telah berakhir. Anda dapat menghapusnya di koneksi pihak ketiga pada Akun Google Anda."
     Signed out by YouTube: "YouTube mengakhiri sesi masuk. Masuk lagi di Pengaturan untuk terus menggunakan akun Anda."
     Add to YouTube Watch History: "Tambahkan video yang ditonton ke riwayat YouTube"
+    Rate Videos: "Menyukai dan tidak menyukai video"
     Sync Subscriptions: "Selaraskan langganan dengan YouTube"
     Sync Playlists: "Selaraskan daftar putar dengan YouTube"
     Sync Now: "Selaraskan sekarang"
@@ -453,6 +454,8 @@ Settings:
     Privacy Description: Riwayat, saran pencarian, tautan, dan kata sandi aplikasi
     Data And Storage Description: Cadangan, impor dan ekspor, penggunaan disk, dan pembersihan
     Sync Description: Akun server sinkronisasi, pemasangan perangkat, dan data yang disinkronkan
+    Accounts and Sync: "Akun & Sinkronisasi"
+    Accounts and Sync Description: "Akun YouTube, akun server sinkronisasi, dan penyandingan perangkat"
     Advanced: Lanjutan
     Advanced Description: Backend, buffering, alat eksternal, proksi, dan diagnostik
     Alternative providers: Penyedia video dan metadata
@@ -2274,6 +2277,7 @@ Description:
 Tooltips:
   YouTube Account Settings:
     Add to YouTube Watch History: "Video yang Anda putar ditambahkan ke riwayat tontonan YouTube Anda, sehingga rekomendasi YouTube belajar darinya. Tidak ada yang ditambahkan selama riwayat dijeda di YouTube."
+    Rate Videos: "Menampilkan tombol suka dan tidak suka pada video. Untuk menampilkan rating Anda, setiap video yang Anda buka dicari di YouTube dengan akun Anda, sehingga YouTube mengetahui video mana yang Anda buka, meskipun video tersebut tidak ditambahkan ke histori tontonan Anda."
     Sync Subscriptions: "Kanal yang Anda langgani di YouTube ditambahkan ke “Semua Kanal”, dan kanal yang langganannya Anda hentikan di sana dihapus dari setiap profil. Berlangganan atau berhenti berlangganan di “Semua Kanal” di sini juga melakukan hal yang sama di YouTube."
     Sync Playlists: "Daftar putar YouTube Anda, “Tonton Nanti”, dan “Video yang disukai” muncul di “Daftar Putar Anda”, dan perubahan yang Anda buat padanya di sini juga diterapkan di YouTube. Semuanya tidak diselaraskan ke perangkat Anda yang lain dan tidak disertakan saat Anda mengekspor semua daftar putar atau mencadangkan data Anda. Menonaktifkan ini akan menghapusnya dari perangkat ini, tetapi tidak dari YouTube."
   General Settings:

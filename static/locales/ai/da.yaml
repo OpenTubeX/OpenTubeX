@@ -393,6 +393,7 @@ Settings:
     Sync Subscriptions: "Synkroniser abonnementer med YouTube"
     Sync Playlists: "Synkroniser playlister med YouTube"
     Add to YouTube Watch History: "Føj sete videoer til YouTube-historikken"
+    Rate Videos: "Synes godt om og synes ikke om videoer"
     Sync Now: "Synkroniser nu"
     Synced: "Synkroniseret med YouTube"
     Sync Failed: "Kunne ikke synkronisere med YouTube: {error}"
@@ -463,6 +464,8 @@ Settings:
     Privacy Description: Historik, søgeforslag, links og appadgangskode
     Data And Storage Description: Sikkerhedskopier, import og eksport, diskforbrug og oprydning
     Sync Description: Synkroniseringsserverkonto, parring af enheder og synkroniserede data
+    Accounts and Sync: "Konti og synkronisering"
+    Accounts and Sync Description: "YouTube-konto, synkroniseringsserverkonto og parring af enheder"
     Advanced: Avanceret
     Advanced Description: Backends, buffering, eksterne værktøjer, proxy og diagnosticering
     Alternative providers: Udbydere af video og metadata
@@ -2339,6 +2342,7 @@ Tooltips:
     Sync Subscriptions: "Når du abonnerer på en kanal på YouTube, føjes den til “Alle kanaler”, og når du afmelder abonnementet på en kanal der, fjernes den fra alle profiler. Når du abonnerer eller afmelder abonnementer i “Alle kanaler” her, sker det samme på YouTube."
     Sync Playlists: "Dine YouTube-playlister, “Se senere” og “Videoer, jeg synes godt om” vises i “Dine playlister”, og ændringer, du foretager i dem her, foretages også på YouTube. De synkroniseres ikke til dine andre enheder og medtages ikke, når du eksporterer alle playlister eller sikkerhedskopierer dine data. Hvis du slår dette fra, fjernes de fra denne enhed, men ikke fra YouTube."
     Add to YouTube Watch History: "Videoer, du afspiller, føjes til din YouTube-visningshistorik, så YouTubes anbefalinger lærer af dem. Der føjes intet til, mens historikken er sat på pause på YouTube."
+    Rate Videos: "Viser knapperne Synes godt om og Synes ikke om på videoer. For at vise din bedømmelse slås hver video, du åbner, op på YouTube med din konto, så YouTube får at vide, hvilke videoer du åbner, også når de ikke føjes til din visningshistorik."
   General Settings:
     Built-in Streams: |
       Automatisk afspiller de fleste videoer via YouTubes visionOS-klient, som starter hurtigere og understøtter automatisk kvalitet. Livestreams og videoer, den ikke kan afspille, bruger SABR.

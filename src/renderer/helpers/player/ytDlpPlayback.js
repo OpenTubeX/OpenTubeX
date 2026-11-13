@@ -10,7 +10,8 @@ import { generateAudioTrackField } from '../api/local'
 import { waitForYtDlpFormatAvailability } from './ytDlpFormatAvailability'
 import { getEarliestYtDlpFormatExpiry, YtDlpPlaybackSourceCache } from './ytDlpPlaybackCache'
 import { capacitorHttpFetch } from '../api/capacitor-http'
-import { fetchTwitchSubOnlyVod, getTwitchVodId } from '../../../twitchSubOnlyVod'
+import { fetchTwitchLiveVod, fetchTwitchSubOnlyVod, getTwitchVodId } from '../../../twitchSubOnlyVod'
+import { parseTwitchChannelLogin } from '../../../twitchFollows'
 import { mapExternalPlaybackMetadata } from '../../../ytDlpMetadata'
 import { probeHlsManifest as probeYtDlpHlsManifest } from './hlsManifest'
 
@@ -29,6 +30,8 @@ import { probeHlsManifest as probeYtDlpHlsManifest } from './hlsManifest'
  * @property {'EQUIRECTANGULAR' | null} [vrProjection]
  * @property {boolean} [audioOnly] whether an external manifest has no video formats
  * @property {boolean} [twitchSubOnlyVod]
+ * @property {{ manifestSrc: string, startedAt: number } | null} [twitchLiveRecording] the recording of an ongoing
+ *   Twitch broadcast, which the player switches to when seeking behind the live playlist
  * @property {string | null} [twitchVodRegistrationId]
  * @property {string | null} [separateAudioUrl] audio supplied separately from an external video file
  * @property {number | null} duration
@@ -307,9 +310,60 @@ async function getExternalYtDlpPlaybackSourceFromYtDlp(url, useAuthentication) {
     : info.noFormatsReason ?? 'yt-dlp did not return any playable formats')
 }
 
-export async function getExternalYtDlpPlaybackSource(url, useAuthentication = false) {
+/**
+ * @param {string} playlist
+ * @returns {Promise<string | null>}
+ */
+async function registerTwitchVod(playlist) {
+  if (!process.env.IS_CAPACITOR || process.env.IS_IOS) return null
+  const registration = await ytDlp.ytDlpRegisterTwitchVod(playlist.split('\n').filter(line => line.startsWith('https://')))
+  return registration.id
+}
+
+/**
+ * @param {string} login
+ * @returns {Promise<{ playlist: string, startedAt: number } | null>}
+ */
+async function getTwitchLiveVod(login) {
   try {
-    return await getExternalYtDlpPlaybackSourceFromYtDlp(url, useAuthentication)
+    return process.env.IS_CAPACITOR
+      ? await fetchTwitchLiveVod(login, capacitorHttpFetch)
+      : await window.ftElectron.twitchLiveVod(login)
+  } catch (error) {
+    console.warn('Could not load the Twitch broadcast recording, seeking stays unavailable', error)
+    return null
+  }
+}
+
+export async function getExternalYtDlpPlaybackSource(url, useAuthentication = false) {
+  const twitchLogin = parseTwitchChannelLogin(url)
+  // Requested alongside yt-dlp, whose live playlist only covers the last few seconds
+  const liveVodRequest = twitchLogin === null ? null : getTwitchLiveVod(twitchLogin)
+  try {
+    const result = await getExternalYtDlpPlaybackSourceFromYtDlp(url, useAuthentication)
+    const liveVod = result.source?.isLive && result.source.manifestMimeType === MANIFEST_TYPE_HLS
+      ? await liveVodRequest
+      : null
+    if (!liveVod) return result
+
+    let twitchVodRegistrationId
+    try {
+      twitchVodRegistrationId = await registerTwitchVod(liveVod.playlist)
+    } catch (error) {
+      console.warn('Could not register the Twitch broadcast recording, seeking stays unavailable', error)
+      return result
+    }
+    return {
+      info: result.info,
+      source: {
+        ...result.source,
+        twitchLiveRecording: {
+          manifestSrc: `data:${MANIFEST_TYPE_HLS};charset=UTF-8,${encodeURIComponent(liveVod.playlist)}`,
+          startedAt: liveVod.startedAt
+        },
+        twitchVodRegistrationId
+      }
+    }
   } catch (error) {
     const videoId = getTwitchVodId(url)
     if (videoId === null) throw error
@@ -321,11 +375,7 @@ export async function getExternalYtDlpPlaybackSource(url, useAuthentication = fa
       if (!result) throw error
 
       const { playlist, video, storyboardVtt } = result
-      let twitchVodRegistrationId = null
-      if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
-        const registration = await ytDlp.ytDlpRegisterTwitchVod(playlist.split('\n').filter(line => line.startsWith('https://')))
-        twitchVodRegistrationId = registration.id
-      }
+      const twitchVodRegistrationId = await registerTwitchVod(playlist)
       const owner = video.owner
       return {
         info: {

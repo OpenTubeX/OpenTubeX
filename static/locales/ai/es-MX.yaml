@@ -417,6 +417,7 @@ Settings:
     Sync Subscriptions: "Sincronizar suscripciones con YouTube"
     Sync Playlists: "Sincronizar listas de reproducción con YouTube"
     Add to YouTube Watch History: "Agregar videos vistos al historial de YouTube"
+    Rate Videos: "Indicar si te gustan o no los videos"
     Sync Now: "Sincronizar ahora"
     Synced: "Sincronizado con YouTube"
     Sync Failed: "No se pudo sincronizar con YouTube: {error}"
@@ -483,6 +484,8 @@ Settings:
     Privacy Description: Historial, sugerencias de búsqueda, enlaces y contraseña de la aplicación
     Data And Storage Description: Copias de seguridad, importación y exportación, uso del disco y limpieza
     Sync Description: Cuenta del servidor de sincronización, vinculación de dispositivos y datos sincronizados
+    Accounts and Sync: "Cuentas y sincronización"
+    Accounts and Sync Description: "Cuenta de YouTube, cuenta del servidor de sincronización y vinculación de dispositivos"
     Advanced: Avanzado
     Advanced Description: Backends, búfer, herramientas externas, proxy y diagnóstico
     Alternative providers: Proveedores de videos y metadatos
@@ -2609,6 +2612,7 @@ Tooltips:
     Sync Subscriptions: "Los canales a los que te suscribes en YouTube se agregan a “Todos Los Canales”, y los canales cuya suscripción cancelas allí se quitan de todos los perfiles. Suscribirte o cancelar la suscripción en “Todos Los Canales” aquí hace lo mismo en YouTube."
     Sync Playlists: "Tus listas de reproducción de YouTube, “Ver más tarde” y “Videos que me gustan” aparecen en “Tus Listas de Reproducción”, y los cambios que les hagas aquí también se hacen en YouTube. No se sincronizan con tus otros dispositivos ni se incluyen cuando exportas todas las listas de reproducción o haces una copia de seguridad de tus datos. Si desactivas esta opción, se quitan de este dispositivo, pero no de YouTube."
     Add to YouTube Watch History: "Los videos que reproduces se agregan a tu historial de reproducciones de YouTube, para que las recomendaciones de YouTube aprendan de ellos. No se agrega nada mientras el historial esté en pausa en YouTube."
+    Rate Videos: "Muestra los botones de me gusta y no me gusta en los videos. Para mostrar tu calificación, cada video que abres se consulta en YouTube con tu cuenta, así que YouTube sabe qué videos abres, aunque no se agreguen a tu historial de reproducciones."
   General Settings:
     Built-in Streams: |
       Automático reproduce la mayoría de los videos con el cliente visionOS de YouTube, que inicia más rápido y admite la calidad automática. Las transmisiones en vivo y los videos que no puede reproducir usan SABR.

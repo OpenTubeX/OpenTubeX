@@ -2199,6 +2199,7 @@ import {
 import { useMusicVisualizer } from './opentubex/useMusicVisualizer'
 import { useScrollMiniPlayer } from './opentubex/useScrollMiniPlayer'
 import { useSecondaryCaptions } from './opentubex/useSecondaryCaptions'
+import { useTwitchLiveRewind } from './opentubex/useTwitchLiveRewind'
 import { useSilenceSkipping } from './opentubex/useSilenceSkipping'
 import { useSleepTimer } from './opentubex/useSleepTimer'
 import {
@@ -2238,6 +2239,14 @@ const props = defineProps({
   twitchSubOnlyVod: {
     type: Boolean,
     default: false
+  },
+  /**
+   * The recording of an ongoing Twitch broadcast, which seeking behind the live playlist switches to
+   * @type {import('vue').PropType<{ manifestSrc: string, startedAt: number } | null>}
+   */
+  twitchLiveRecording: {
+    type: Object,
+    default: null
   },
   /**
    * Which engine provided the streams, as yt-dlp's manifests need a few
@@ -3520,6 +3529,13 @@ const secondaryCaptionPosition = computed(() => getSecondaryCaptionPosition(capt
 // Timing belongs to the current video, rather than the saved appearance settings.
 let captionTimingOffset = props.sabrReloadState?.captionTimingOffset ?? 0
 
+const twitchLiveRewind = useTwitchLiveRewind({
+  getControls: () => ui?.getControls() ?? null,
+  getPlayer: () => player,
+  props,
+  video,
+})
+
 const {
   getSecondaryCaption,
   isShownAsMainCaption,
@@ -4299,6 +4315,10 @@ function skipSponsorBlockSegments(currentTime) {
 const seekingIsPossible = computed(() => {
   if (props.isLive && props.isLiveDvrEnabled === false) {
     return false
+  }
+
+  if (props.isLive && props.twitchLiveRecording) {
+    return true
   }
 
   // Only SABR delivers the rewind window of the built-in engine's live streams
@@ -11625,11 +11645,16 @@ onMounted(async () => {
 
   await initializeActiveTab()
 
-  if (props.twitchSubOnlyVod) {
-    disableTwitchTsVideoGap = enableTwitchTsVideoGap(props.manifestSrc)
+  if (props.twitchSubOnlyVod || props.twitchLiveRecording) {
+    disableTwitchTsVideoGap = enableTwitchTsVideoGap(props.twitchLiveRecording?.manifestSrc ?? props.manifestSrc)
   }
 
   const localPlayer = new shaka.Player()
+  if (props.twitchLiveRecording) {
+    twitchLiveRewind.attach(localPlayer, videoElement)
+    videoElement.addEventListener('timeupdate', twitchLiveRewind.handleTimeUpdate)
+    localPlayer.addEventListener('loaded', twitchLiveRewind.handleLoaded)
+  }
 
   ui = new shaka.ui.Overlay(
     localPlayer,
@@ -11730,7 +11755,7 @@ onMounted(async () => {
       }
     })
   }
-  if (props.twitchSubOnlyVod) {
+  if (props.twitchSubOnlyVod || props.twitchLiveRecording) {
     player.getNetworkingEngine().registerResponseFilter(twitchSubOnlyVodResponseFilter)
   }
   if (process.env.IS_ELECTRON) {
@@ -12039,7 +12064,7 @@ async function performFirstLoad(isCurrentLoad = () => true, startTime = props.st
 
   if (props.format === 'dash' || props.format === 'audio') {
     try {
-      await loadPlaybackSource(props.manifestSrc, startTime, props.manifestMimeType)
+      await loadPlaybackSource(twitchLiveRewind.manifestSrc.value, startTime, props.manifestMimeType)
       if (!ui || !player || !isCurrentInitialLoad()) return
 
       if (props.format === 'dash') {
@@ -12116,7 +12141,8 @@ async function handleLoaded() {
   const reloadedLocalCaptions = localCaptions.value
   hasLoaded.value = true
   // Ideally we would set this in the `streaming` event handler, but for HLS this is only set to true after the loaded event fires.
-  isLive.value = player.isLive()
+  // The recording of an ongoing Twitch broadcast is an EVENT playlist, with a finite but growing duration
+  isLive.value = player.isLive() || (props.isLive && player.isDynamic())
   restorePendingPlaybackRate()
   const mediaElement = video.value
   // Native HLS can emit canplay before Shaka finishes loading its tracks.
@@ -12318,7 +12344,7 @@ let formatSwitchGeneration = 0
  * @type {{
  *   oldFormat: 'dash'|'audio'|'legacy',
  *   wasPaused: boolean,
- *   playbackPosition: number,
+ *   playbackPosition: number | null,
  *   useAutoQuality: boolean,
  *   audioBandwidth: number|undefined,
  *   label: string|undefined,
@@ -12331,7 +12357,7 @@ let pendingFormatSwitchState = null
 let restartedSourceKey = null
 
 watch(
-  () => [props.format, props.playbackSourceKey],
+  () => [props.format, props.playbackSourceKey, twitchLiveRewind.mode.value],
   /**
    * Handles changing between formats. It tries its best to backup and restore the settings:
    * - playback position
@@ -12380,6 +12406,12 @@ watch(
     }
 
     const video_ = video.value
+    const switchStartTime = twitchLiveRewind.takeSwitchStartTime()
+    if (switchStartTime !== undefined) {
+      // Seeks queued before the switch use the previous source's timeline
+      pendingMetadataSeek = null
+      if (pendingFormatSwitchState !== null) pendingFormatSwitchState.playbackPosition = switchStartTime
+    }
     if (pendingFormatSwitchState === null) {
       const activeVariant = oldFormat === 'legacy'
         ? undefined
@@ -12395,7 +12427,8 @@ watch(
       pendingFormatSwitchState = {
         oldFormat,
         wasPaused: video_.paused,
-        playbackPosition: video_.currentTime,
+        // Twitch's live playlist and the broadcast's recording have different timelines
+        playbackPosition: switchStartTime === undefined ? video_.currentTime : switchStartTime,
         // The legacy formats don't have an ABR configuration to carry over,
         // so fall back to the user's preference when switching away from them.
         useAutoQuality: oldFormat === 'legacy'
@@ -12489,7 +12522,7 @@ watch(
       player.configure(getPlayerConfig(newFormat, useAutoQuality))
 
       try {
-        await loadPlaybackSource(props.manifestSrc, playbackPosition, props.manifestMimeType)
+        await loadPlaybackSource(twitchLiveRewind.manifestSrc.value, playbackPosition, props.manifestMimeType)
         if (!isCurrentFormatSwitch()) return
 
         if (useAutoQuality) {

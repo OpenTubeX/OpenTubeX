@@ -392,6 +392,7 @@ Settings:
     Revoke Failed: "Logga ut av YouTube, men Google stadfesta ikkje at innlogginga vart avslutta. Du kan fjerne ho under tredjepartstilkoplingar i Google-kontoen din."
     Signed out by YouTube: "YouTube avslutta innlogginga. Logg inn att i innstillingane for å halde fram med å bruke kontoen din."
     Add to YouTube Watch History: "Legg sette videoar til i YouTube-historikken"
+    Rate Videos: "Lik og mislik videoar"
     Sync Subscriptions: "Synkroniser abonnement med YouTube"
     Sync Playlists: "Synkroniser spelelister med YouTube"
     Sync Now: "Synkroniser no"
@@ -464,6 +465,8 @@ Settings:
     Privacy Description: Historikk, søkjeforslag, lenkjer og app-passord
     Data And Storage Description: Tryggingskopiar, import og eksport, diskbruk og opprydding
     Sync Description: Synkroniseringstenarkonto, samankopling av einingar og synkroniserte data
+    Accounts and Sync: "Kontoar og synkronisering"
+    Accounts and Sync Description: "YouTube-konto, synkroniseringstenarkonto og samankopling av einingar"
     Advanced: Avansert
     Advanced Description: Bakgrunnstenester, bufring, eksterne verktøy, mellomtenar og diagnostikk
     Alternative providers: Tilbydarar av video og metadata
@@ -2559,6 +2562,7 @@ Description:
 Tooltips:
   YouTube Account Settings:
     Add to YouTube Watch History: "Videoar du spelar av, blir lagde til i visingshistorikken din på YouTube, slik at tilrådingane til YouTube lærer av dei. Ingenting blir lagt til medan historikken er sett på pause på YouTube."
+    Rate Videos: "Viser knappar for å like og mislike videoar. For å vise vurderinga di blir kvar video du opnar, slått opp på YouTube med kontoen din, så YouTube får vite kva videoar du opnar, også når dei ikkje blir lagde til i sjåarloggen din."
     Sync Subscriptions: "Når du abonnerer på ein kanal på YouTube, blir han lagd til i «Alle kanalar», og når du avsluttar abonnementet der, blir han fjerna frå alle profilar. Å abonnere eller avslutte abonnementet her i «Alle kanalar» gjer det same på YouTube."
     Sync Playlists: "YouTube-spelelistene dine, «Sjå seinare» og «Lika videoar» blir viste i «Dine spelelistar», og endringar du gjer i dei her, blir òg gjorde på YouTube. Dei blir ikkje synkroniserte til dei andre einingane dine og blir ikkje tekne med når du eksporterer alle spelelistene eller tek sikkerheitskopi av dataa dine. Om du slår av dette, blir dei fjerna frå denne eininga, men ikkje frå YouTube."
   General Settings:

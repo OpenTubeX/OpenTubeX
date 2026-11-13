@@ -380,6 +380,7 @@ Settings:
     Revoke Failed: "Déconnexion de YouTube effectuée, mais Google n'a pas confirmé la fin de la connexion. Vous pouvez la supprimer dans les connexions tierces de votre compte Google."
     Signed out by YouTube: "YouTube a mis fin à la connexion. Reconnectez-vous dans les paramètres pour continuer à utiliser votre compte."
     Add to YouTube Watch History: "Ajouter les vidéos regardées à l’historique YouTube"
+    Rate Videos: "Aimer et ne pas aimer les vidéos"
     Sync Subscriptions: "Synchroniser les abonnements avec YouTube"
     Sync Playlists: "Synchroniser les playlists avec YouTube"
     Sync Now: "Synchroniser maintenant"
@@ -452,6 +453,8 @@ Settings:
     Privacy Description: Historique, suggestions de recherche, liens et mot de passe de l’application
     Data And Storage Description: Sauvegardes, importation et exportation, utilisation du disque et nettoyage
     Sync Description: Compte du serveur de synchronisation, association d’appareils et données synchronisées
+    Accounts and Sync: "Comptes et synchronisation"
+    Accounts and Sync Description: "Compte YouTube, compte du serveur de synchronisation et association d’appareils"
     Advanced: Avancé
     Advanced Description: Back-ends, mise en mémoire tampon, outils externes, proxy et diagnostics
     Alternative providers: Fournisseurs de vidéos et de métadonnées
@@ -2247,6 +2250,7 @@ Description:
 Tooltips:
   YouTube Account Settings:
     Add to YouTube Watch History: "Les vidéos que vous lisez sont ajoutées à votre historique de visionnage YouTube, afin que les recommandations de YouTube en tiennent compte. Rien n’est ajouté tant que l’historique est suspendu sur YouTube."
+    Rate Videos: "Affiche les boutons J’aime et Je n’aime pas sur les vidéos. Pour afficher votre note, chaque vidéo que vous ouvrez est consultée sur YouTube avec votre compte : YouTube sait donc quelles vidéos vous ouvrez, même lorsqu’elles ne sont pas ajoutées à votre historique de visionnage."
     Sync Subscriptions: "Les chaînes auxquelles vous vous abonnez sur YouTube sont ajoutées à « Toutes les chaînes », et celles dont vous vous désabonnez là-bas sont retirées de tous les profils. S’abonner ou se désabonner ici dans « Toutes les chaînes » fait de même sur YouTube."
     Sync Playlists: "Vos playlists YouTube, « À regarder plus tard » et « Vidéos J’aime » apparaissent dans « Vos playlists », et les modifications que vous y apportez ici sont aussi effectuées sur YouTube. Elles ne sont pas synchronisées avec vos autres appareils, ni incluses lorsque vous exportez toutes les playlists ou sauvegardez vos données. Désactiver cette option les retire de cet appareil, mais pas de YouTube."
   General Settings:

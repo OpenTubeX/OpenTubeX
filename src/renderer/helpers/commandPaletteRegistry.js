@@ -1,5 +1,6 @@
 import { ytDlp } from './ytDlp'
 import { isLiteBuild } from './ytDlpCapabilities'
+import { supportsYouTubeAccount } from './youtube-account-state'
 import {
   DefaultKeyboardShortcuts,
   getConfiguredKeyboardShortcuts,
@@ -23,7 +24,9 @@ const SETTINGS_SECTIONS = [
   ['focus', 'Settings.Categories.Focus', 'Settings.Categories.Focus Description', ['distraction free', 'hide', 'wellbeing', 'parental control']],
   ['privacy', 'Settings.Privacy Settings.Privacy Settings', 'Settings.Categories.Privacy Description', ['history', 'security']],
   ['data', 'Settings.Data Settings.Data And Storage', 'Settings.Categories.Data And Storage Description', ['import', 'export', 'backup']],
-  ['sync', 'Settings.Sync Settings.Sync Settings', 'Settings.Categories.Sync Description', ['account', 'server']],
+  supportsYouTubeAccount
+    ? ['sync', 'Settings.Categories.Accounts and Sync', 'Settings.Categories.Accounts and Sync Description', ['account', 'server', 'youtube']]
+    : ['sync', 'Settings.Sync Settings.Sync Settings', 'Settings.Categories.Sync Description', ['account', 'server']],
   ['advanced', 'Settings.Categories.Advanced', 'Settings.Categories.Advanced Description', ['proxy', 'experimental', 'external player']],
 ]
 

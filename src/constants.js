@@ -228,6 +228,7 @@ const IpcChannels = {
   YT_DLP_GET_PLAYBACK_INFO: 'yt-dlp-get-playback-info',
   TWITCH_CHAT_REPLAY_PAGE: 'twitch-chat-replay-page',
   TWITCH_SUB_ONLY_VOD: 'twitch-sub-only-vod',
+  TWITCH_LIVE_VOD: 'twitch-live-vod',
   TWITCH_LIVE_CONFIGURE: 'twitch-live-configure',
   TWITCH_LIVE_UPDATED: 'twitch-live-updated',
   RUMBLE_FETCH: 'rumble-fetch',

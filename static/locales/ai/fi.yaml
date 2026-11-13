@@ -380,6 +380,7 @@ Settings:
     Revoke Failed: "Kirjauduit ulos YouTubesta, mutta Google ei vahvistanut kirjautumisen päättymistä. Voit poistaa sen Google-tilisi kolmannen osapuolen yhteyksistä."
     Signed out by YouTube: "YouTube päätti kirjautumisen. Kirjaudu uudelleen asetuksissa, jotta voit jatkaa tilisi käyttöä."
     Add to YouTube Watch History: "Lisää katsotut videot YouTube-historiaan"
+    Rate Videos: "Tykkää ja en tykkää -arviot videoille"
     Sync Subscriptions: "Synkronoi tilaukset YouTuben kanssa"
     Sync Playlists: "Synkronoi soittolistat YouTuben kanssa"
     Sync Now: "Synkronoi nyt"
@@ -452,6 +453,8 @@ Settings:
     Privacy Description: Historia, hakuehdotukset, linkit ja sovelluksen salasana
     Data And Storage Description: Varmuuskopiot, tuonti ja vienti, levyn käyttö ja siivous
     Sync Description: Synkronointipalvelimen tili, laitteiden yhdistäminen ja synkronoidut tiedot
+    Accounts and Sync: "Tilit ja synkronointi"
+    Accounts and Sync Description: "YouTube-tili, synkronointipalvelimen tili ja laitteiden yhdistäminen"
     Advanced: Lisäasetukset
     Advanced Description: Taustapalvelut, puskurointi, ulkoiset työkalut, välityspalvelin ja vianmääritys
     Alternative providers: Video- ja metatietojen palveluntarjoajat
@@ -2256,6 +2259,7 @@ Description:
 Tooltips:
   YouTube Account Settings:
     Add to YouTube Watch History: "Toistamasi videot lisätään YouTube-katseluhistoriaasi, jotta YouTuben suositukset oppivat niistä. Mitään ei lisätä, kun historia on keskeytetty YouTubessa."
+    Rate Videos: "Näyttää videoissa tykkää- ja en tykkää -painikkeet. Arviosi näyttämiseksi jokainen avaamasi video haetaan YouTubesta tililläsi, joten YouTube saa tietää, mitä videoita avaat, vaikka niitä ei lisättäisi katseluhistoriaasi."
     Sync Subscriptions: "YouTubessa tilaamasi kanavat lisätään profiiliin ”Kaikki kanavat”, ja kanavat, joiden tilauksen perut siellä, poistetaan kaikista profiileista. Kun tilaat kanavan tai perut tilauksen täällä profiilissa ”Kaikki kanavat”, sama tehdään myös YouTubessa."
     Sync Playlists: "YouTube-soittolistasi, ”Katso myöhemmin” ja ”Tykätyt videot” näkyvät kohdassa ”Omat soittolistat”, ja niihin täällä tekemäsi muutokset tehdään myös YouTubessa. Niitä ei synkronoida muille laitteillesi, eikä niitä sisällytetä, kun viet kaikki soittolistat tai varmuuskopioit tietosi. Tämän poistaminen käytöstä poistaa ne tältä laitteelta mutta ei YouTubesta."
   General Settings:

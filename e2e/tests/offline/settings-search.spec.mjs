@@ -208,6 +208,13 @@ test.describe('settings', () => {
     await expect(providerSection.locator('.switch-ctn.settingsSearchTarget'))
       .toContainText('Proxy Videos Through Invidious')
 
+    // Tabbed categories hide their headings, so a tab's label highlights its panel.
+    await search.fill('YouTube Account')
+    await page.getByRole('button', { name: 'YouTube Account', exact: true }).click()
+    await expect(page.locator('.settingsWindow [data-settings-tab="youtube-account"]'))
+      .toHaveAttribute('aria-selected', 'true')
+    await expect(page.locator('.section.settingsSearchTarget[data-section="sync"]')).toBeVisible()
+
     await search.fill('test')
     await expect(page.getByRole('button', { name: 'Test Proxy', exact: true })).toHaveCount(0)
     await expect(page.locator('.settingsSearchResultMatch')).toHaveCount(0)

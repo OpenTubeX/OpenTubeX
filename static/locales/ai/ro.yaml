@@ -382,6 +382,7 @@ Settings:
     Sync Subscriptions: "Sincronizați abonamentele cu YouTube"
     Sync Playlists: "Sincronizați listele de redare cu YouTube"
     Add to YouTube Watch History: "Adăugați videoclipurile vizionate în istoricul YouTube"
+    Rate Videos: "Apreciază și nu aprecia videoclipuri"
     Sync Now: "Sincronizați acum"
     Synced: "Sincronizat cu YouTube"
     Sync Failed: "Sincronizarea cu YouTube nu a reușit: {error}"
@@ -452,6 +453,8 @@ Settings:
     Privacy Description: Istoric, sugestii de căutare, linkuri și parola aplicației
     Data And Storage Description: Copii de rezervă, import și export, utilizarea discului și curățare
     Sync Description: Cont pe serverul de sincronizare, asocierea dispozitivelor și date sincronizate
+    Accounts and Sync: "Conturi și sincronizare"
+    Accounts and Sync Description: "Cont YouTube, cont pe serverul de sincronizare și asocierea dispozitivelor"
     Advanced: Avansat
     Advanced Description: Backenduri, memorie tampon, instrumente externe, proxy și diagnosticare
     Alternative providers: Furnizori de videoclipuri și metadate
@@ -2304,6 +2307,7 @@ Tooltips:
     Sync Subscriptions: "Canalele la care vă abonați pe YouTube sunt adăugate în „Toate canalele”, iar canalele de la care vă dezabonați acolo sunt eliminate din toate profilurile. Abonarea sau dezabonarea în „Toate canalele” de aici face același lucru pe YouTube."
     Sync Playlists: "Listele dvs. de redare de pe YouTube, „Vizionează mai târziu” și „Videoclipuri apreciate” apar în „Listele tale de redare”, iar modificările pe care le faceți aici în ele se fac și pe YouTube. Acestea nu sunt sincronizate cu celelalte dispozitive ale dvs. și nu sunt incluse când exportați toate listele de redare sau faceți o copie de rezervă a datelor. Dezactivarea acestei opțiuni le elimină de pe acest dispozitiv, dar nu și de pe YouTube."
     Add to YouTube Watch History: "Videoclipurile pe care le redați sunt adăugate în istoricul vizionărilor YouTube, astfel încât recomandările YouTube să învețe din ele. Nu se adaugă nimic cât timp istoricul este întrerupt pe YouTube."
+    Rate Videos: "Afișează butoanele de apreciere și neapreciere pe videoclipuri. Pentru a-ți afișa evaluarea, fiecare videoclip pe care îl deschizi este căutat pe YouTube cu contul tău, așa că YouTube află ce videoclipuri deschizi, chiar și atunci când nu sunt adăugate în istoricul de vizionare."
   General Settings:
     Built-in Streams: |
       Modul automat redă majoritatea videoclipurilor prin clientul visionOS al YouTube, care pornește mai repede și acceptă calitatea automată. Transmisiunile live și videoclipurile pe care nu le poate reda folosesc SABR.

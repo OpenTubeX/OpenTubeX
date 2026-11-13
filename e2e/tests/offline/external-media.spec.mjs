@@ -48,6 +48,15 @@ async function prepareTwitchYtDlp(app, page, mediaUrl, live, description = '', c
     const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
   })
+  if (live) await mockTwitchLiveVod(app, null)
+}
+
+/** Twitch's recording of the ongoing broadcast, null for channels that keep no VODs */
+async function mockTwitchLiveVod(app, recording) {
+  await app.electronApp.evaluate(({ ipcMain }, recording) => {
+    ipcMain.removeHandler('twitch-live-vod')
+    ipcMain.handle('twitch-live-vod', () => recording)
+  }, recording)
 }
 
 test('unloaded Twitch tabs resolve their title when selected, reloaded, and reopened', async ({ app, page }, testInfo) => {
@@ -1378,6 +1387,112 @@ test('Twitch livestream omits playback speed from player options', async ({ app,
   expect(await player.locator('video').evaluate(video => video.ui.getConfiguration().controlPanelElements)).not.toContain('ft_quick_playback_rate_bar')
   // Shaka temporarily sets the effective rate to zero while buffering.
   await expect.poll(() => player.locator('video').evaluate(video => video.playbackRate)).toBe(1)
+})
+
+test('Twitch livestream seeks back through the recording of its broadcast and returns to live', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const fixture = await readFile(path.join(repoRoot, 'e2e/fixtures/media/hls-1080.mp4'))
+  const fragmentStart = fixture.indexOf(Buffer.from('moof')) - 4
+  expect(fragmentStart).toBeGreaterThan(0)
+  const masterUrl = 'https://live.example.test/master.m3u8'
+  const liveUrl = 'https://live.example.test/1080.m3u8'
+  const executable = path.join(app.userDataDir, 'twitch-live-rewind-yt-dlp.sh')
+  const response = JSON.stringify({
+    title: 'A Twitch livestream',
+    webpage_url: 'https://www.twitch.tv/testchannel',
+    live_status: 'is_live',
+    manifest_url: masterUrl,
+    formats: [{ format_id: '1080p', url: liveUrl, manifest_url: masterUrl, protocol: 'm3u8_native', ext: 'mp4', vcodec: 'avc1.64001f', acodec: 'none', width: 1920, height: 1080 }]
+  })
+  await writeFile(executable, [
+    '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+    `printf '%s\\n' '${response}'`
+  ].join('\n'))
+  await chmod(executable, 0o755)
+  await choosePickerPaths(app, page, { ytDlpPath: executable })
+  await page.evaluate(() => window.$store.dispatch('updateYtDlpSource', 'system'))
+
+  // The live playlist only lists the last few segments, the recording every
+  // segment since the broadcast started a minute before
+  const liveStart = Date.now() - 20_000
+  const startedAt = liveStart - 60_000
+  const recordingUrl = 'https://vod.example.test/chunked/index-dvr.m3u8'
+  await mockTwitchLiveVod(app, {
+    playlist: `#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=8534000,CODECS="avc1.64001f",RESOLUTION=1920x1080\n${recordingUrl}\n`,
+    startedAt
+  })
+  const playlist = (body) => route => route.fulfill({
+    contentType: 'application/vnd.apple.mpegurl',
+    headers: { 'Access-Control-Allow-Origin': '*' },
+    body: typeof body === 'function' ? body() : body
+  })
+  await page.route(masterUrl, playlist(`#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=6000000,CODECS="avc1.64001f",RESOLUTION=1920x1080\n${liveUrl}\n`))
+  await page.route(liveUrl, playlist(() => {
+    const last = Math.floor((Date.now() - liveStart) / 2000) - 1
+    const sequence = Array.from({ length: 4 }, (_, index) => last - 3 + index)
+    return `#EXTM3U
+#EXT-X-VERSION:6
+#EXT-X-TARGETDURATION:2
+#EXT-X-MEDIA-SEQUENCE:${sequence[0]}
+#EXT-X-MAP:URI="https://live.example.test/init.mp4"
+${sequence.map(index => `#EXT-X-PROGRAM-DATE-TIME:${new Date(liveStart + index * 2000).toISOString()}\n#EXTINF:2.000,\nhttps://live.example.test/${index}.mp4`).join('\n')}
+`
+  }))
+  await page.route(recordingUrl, playlist(`#EXTM3U
+#EXT-X-VERSION:6
+#EXT-X-TARGETDURATION:2
+#EXT-X-PLAYLIST-TYPE:EVENT
+#EXT-X-MEDIA-SEQUENCE:0
+#EXT-X-MAP:URI="init-0.mp4"
+${Array.from({ length: 35 }, (_, index) => `#EXTINF:2.000,\n${index}.mp4`).join('\n')}
+`))
+  let recordingRequested = false
+  await page.route(/^https:\/\/(?:live|vod)\.example\.test\/(?:chunked\/)?(?:init|init-0|\d+)\.mp4$/, route => {
+    const isInit = /\/init(?:-0)?\.mp4$/.test(route.request().url())
+    if (route.request().url().startsWith('https://vod.')) recordingRequested = true
+    return route.fulfill({
+      contentType: 'video/mp4',
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: isInit ? fixture.subarray(0, fragmentStart) : fixture.subarray(fragmentStart)
+    })
+  })
+
+  await page.locator(sel.searchInput).fill('https://www.twitch.tv/testchannel')
+  await page.locator(sel.searchInput).press('Enter')
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  const video = player.locator('video')
+  const isLive = () => player.evaluate(element => element.ui?.getControls().getPlayer().isLive() ?? false)
+  await expect.poll(isLive).toBe(true)
+  // The seek bar covers the whole broadcast, although the live playlist only covers the last seconds
+  await expect.poll(() => player.evaluate(element => {
+    const { start, end } = element.ui.getControls().getPlayer().seekRange()
+    return end - start
+  })).toBeGreaterThan(70)
+  expect(recordingRequested).toBe(false)
+
+  const seekBar = player.locator('.shaka-seek-bar-container')
+  await player.hover()
+  const box = await seekBar.boundingBox()
+  await seekBar.click({ position: { x: box.width * 0.2, y: box.height / 2 } })
+  await expect.poll(() => recordingRequested).toBe(true)
+  await expect.poll(isLive).toBe(false)
+  // A fifth of the broadcast, which started a minute before the live playlist
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(10)
+  expect(await video.evaluate(element => element.currentTime)).toBeLessThan(25)
+  await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
+
+  const liveTime = player.locator('.shaka-current-time:not(.ft-playback-adjusted-time)')
+  // Shaka only enables the time once playback is behind live, and only updates it while the controls are shown
+  let hoverX = 10
+  await expect.poll(async () => {
+    hoverX = 30 - hoverX
+    await player.hover({ position: { x: hoverX, y: 10 } })
+    return await liveTime.isEnabled()
+  }).toBe(true)
+  await liveTime.click()
+  // The recording is an EVENT playlist, which Shaka does not consider live
+  await expect.poll(isLive).toBe(true)
 })
 
 test('external media starts at the default playback speed', async ({ app, page }) => {

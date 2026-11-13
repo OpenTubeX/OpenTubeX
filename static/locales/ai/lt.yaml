@@ -498,6 +498,7 @@ Settings:
     Revoke Failed: "Atsijungta nuo YouTube, bet Google nepatvirtino, kad prisijungimas baigtas. Jį galite pašalinti savo Google paskyros trečiųjų šalių ryšiuose."
     Signed out by YouTube: "YouTube nutraukė prisijungimą. Prisijunkite iš naujo nustatymuose, kad galėtumėte toliau naudoti savo paskyrą."
     Add to YouTube Watch History: "Įtraukti žiūrėtus vaizdo įrašus į YouTube istoriją"
+    Rate Videos: "Pažymėti vaizdo įrašus kaip patinkančius ir nepatinkančius"
     Sync Subscriptions: "Sinchronizuoti prenumeratas su YouTube"
     Sync Playlists: "Sinchronizuoti grojaraščius su YouTube"
     Sync Now: "Sinchronizuoti dabar"
@@ -566,6 +567,8 @@ Settings:
     Privacy Description: Istorija, paieškos pasiūlymai, nuorodos ir programos slaptažodis
     Data And Storage Description: Atsarginės kopijos, importavimas ir eksportavimas, disko naudojimas ir valymas
     Sync Description: Sinchronizavimo serverio paskyra, įrenginių susiejimas ir sinchronizuoti duomenys
+    Accounts and Sync: "Paskyros ir sinchronizavimas"
+    Accounts and Sync Description: "YouTube paskyra, sinchronizavimo serverio paskyra ir įrenginių susiejimas"
     Advanced: Išplėstiniai
     Advanced Description: Vidinės sistemos, buferizavimas, išoriniai įrankiai, tarpinis serveris ir diagnostika
     Alternative providers: Vaizdo įrašų ir metaduomenų teikėjai
@@ -2671,6 +2674,7 @@ Description:
 Tooltips:
   YouTube Account Settings:
     Add to YouTube Watch History: "Jūsų paleisti vaizdo įrašai įtraukiami į jūsų YouTube žiūrėjimo istoriją, kad YouTube rekomendacijos iš jų mokytųsi. Kol istorija YouTube pristabdyta, niekas neįtraukiama."
+    Rate Videos: "Rodo vaizdo įrašuose mygtukus „Patinka“ ir „Nepatinka“. Kad būtų parodytas jūsų įvertinimas, kiekvienas atidarytas vaizdo įrašas patikrinamas „YouTube“ naudojant jūsų paskyrą, todėl „YouTube“ sužino, kokius vaizdo įrašus atidarote, net jei jie nepridedami prie žiūrėjimo istorijos."
     Sync Subscriptions: "Kanalai, kuriuos užsiprenumeruojate YouTube, įtraukiami į „Visi kanalai“, o kanalai, kurių prenumeratą ten atšaukiate, pašalinami iš visų profilių. Užsiprenumeravus ar atšaukus prenumeratą čia, „Visi kanalai“, tas pats atliekama ir YouTube."
     Sync Playlists: "Jūsų YouTube grojaraščiai, „Žiūrėti vėliau“ ir „Patikę vaizdo įrašai“ rodomi skiltyje „Tavo grojaraščiai“, o čia juose atlikti pakeitimai atliekami ir YouTube. Jie nesinchronizuojami su kitais jūsų įrenginiais ir neįtraukiami, kai eksportuojate visus grojaraščius ar kuriate atsarginę duomenų kopiją. Tai išjungus, jie pašalinami iš šio įrenginio, bet ne iš YouTube."
   General Settings:

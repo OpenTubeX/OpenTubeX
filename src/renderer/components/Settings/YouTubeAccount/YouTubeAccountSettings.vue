@@ -3,7 +3,12 @@
     :title="t('Settings.YouTube Account Settings.YouTube Account Settings')"
   >
     <p class="accountWarning">
-      <strong>{{ t('Settings.YouTube Account Settings.Unofficial App Warning') }}</strong>
+      <FtIcon
+        :icon="['fas', 'triangle-exclamation']"
+        class="accountWarningIcon"
+        aria-hidden="true"
+      />
+      <span>{{ t('Settings.YouTube Account Settings.Unofficial App Warning') }}</span>
     </p>
     <template v-if="account">
       <p
@@ -75,6 +80,14 @@
           compact
           @change="store.dispatch('updateYouTubeAccountWatchHistory', $event)"
         />
+        <FtToggleSwitch
+          :label="t('Settings.YouTube Account Settings.Rate Videos')"
+          :default-value="videoRatings"
+          setting-key="youTubeAccountVideoRatings"
+          :tooltip="t('Tooltips.YouTube Account Settings.Rate Videos')"
+          compact
+          @change="store.dispatch('updateYouTubeAccountVideoRatings', $event)"
+        />
       </FtFlexBox>
       <FtFlexBox>
         <FtButton
@@ -133,6 +146,7 @@ const account = computed(() => store.getters.getYouTubeAccount)
 const syncSubscriptions = computed(() => store.getters.getYouTubeAccountSyncSubscriptions)
 const syncPlaylists = computed(() => store.getters.getYouTubeAccountSyncPlaylists)
 const watchHistory = computed(() => store.getters.getYouTubeAccountWatchHistory)
+const videoRatings = computed(() => store.getters.getYouTubeAccountVideoRatings)
 
 const signInOpen = ref(false)
 const syncing = ref(false)
@@ -182,13 +196,31 @@ async function syncNow() {
 </script>
 
 <style scoped>
-/* Like the yt-dlp cookie hint in the same category. */
 .accountWarning {
-  margin-block: 0 8px;
+  --warning-color: oklch(0.78 0.16 75);
+
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  box-sizing: border-box;
+  margin-block: 0 1rem;
   margin-inline: auto;
   max-inline-size: 680px;
+  padding-block: 12px;
   padding-inline: 14px;
-  text-align: center;
+  border: 1px solid color-mix(in srgb, var(--warning-color) 45%, transparent);
+  border-radius: var(--shape-corner-medium);
+  background-color: color-mix(in srgb, var(--warning-color) 12%, var(--card-bg-color));
+  color: var(--primary-text-color);
+  line-height: 1.4;
+}
+
+.accountWarningIcon {
+  flex: none;
+  margin-block-start: 0.15em;
+
+  /* Follows the text's lightness, so the icon stays readable on light and dark cards. */
+  color: oklch(from var(--primary-text-color) clamp(0.5, l, 0.82) 0.15 75);
 }
 
 /* Lines up with the section's controls, which are padded divs. */

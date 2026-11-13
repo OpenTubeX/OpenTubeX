@@ -380,6 +380,7 @@ Settings:
     Revoke Failed: "YouTube-ko saioa amaitu da, baina Google-k ez du berretsi saioa amaitu denik. Zure Google kontuko hirugarrenen konexioetan ken dezakezu."
     Signed out by YouTube: "YouTube-k saioa amaitu du. Hasi saioa berriro Ezarpenetan zure kontua erabiltzen jarraitzeko."
     Add to YouTube Watch History: "Gehitu ikusitako bideoak YouTube-ko historikora"
+    Rate Videos: "Bideoak gustuko edo ez gustuko markatu"
     Sync Subscriptions: "Sinkronizatu harpidetzak YouTube-rekin"
     Sync Playlists: "Sinkronizatu erreprodukzio-zerrendak YouTube-rekin"
     Sync Now: "Sinkronizatu orain"
@@ -452,6 +453,8 @@ Settings:
     Privacy Description: Historia, bilaketa-iradokizunak, estekak eta aplikazioaren pasahitza
     Data And Storage Description: Babeskopiak, inportazioa eta esportazioa, diskoaren erabilera eta garbiketa
     Sync Description: Sinkronizazio-zerbitzariko kontua, gailuen parekatzea eta sinkronizatutako datuak
+    Accounts and Sync: "Kontuak eta sinkronizazioa"
+    Accounts and Sync Description: "YouTube kontua, sinkronizazio-zerbitzariaren kontua eta gailuen parekatzea"
     Advanced: Aurreratua
     Advanced Description: Backendak, bufferra, kanpoko tresnak, proxya eta diagnostikoa
     Alternative providers: Bideoen eta metadatuen hornitzaileak
@@ -2258,6 +2261,7 @@ Description:
 Tooltips:
   YouTube Account Settings:
     Add to YouTube Watch History: "Erreproduzitzen dituzun bideoak zure YouTube-ko ikustaldi-historikora gehitzen dira, YouTube-ren gomendioek haietatik ikas dezaten. Historikoa YouTube-n pausatuta dagoen bitartean, ez da ezer gehitzen."
+    Rate Videos: "Bideoetan gustuko dut eta ez dut gustuko botoiak erakusten ditu. Zure balorazioa erakusteko, irekitzen duzun bideo bakoitza zure kontuarekin bilatzen da YouTuben, beraz YouTubek badaki zein bideo irekitzen dituzun, ikusitakoen historian gehitzen ez badira ere."
     Sync Subscriptions: "YouTube-n harpidetzen zaren kanalak «Kanal guztiak» profilera gehitzen dira, eta han harpidetza kentzen diezun kanalak profil guztietatik kentzen dira. Hemen «Kanal guztiak» profilean harpidetzeak edo harpidetza kentzeak gauza bera egiten du YouTube-n."
     Sync Playlists: "Zure YouTube-ko erreprodukzio-zerrendak, «Ikusi geroago» eta «Gustuko bideoak» «Zure erreprodukzio-zerrendak» atalean agertzen dira, eta hemen haietan egiten dituzun aldaketak YouTube-n ere egiten dira. Ez dira zure beste gailuekin sinkronizatzen, eta ez dira sartzen erreprodukzio-zerrenda guztiak esportatzen dituzunean edo zure datuen babeskopia egiten duzunean. Hau desaktibatzean gailu honetatik kentzen dira, baina ez YouTube-tik."
   General Settings:
