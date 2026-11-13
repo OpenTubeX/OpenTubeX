@@ -1,3 +1,4 @@
+import { normalizeLegacyTabTitle } from '../../legacyTabTitle.js'
 import { areJsonValuesEqual } from './jsonValues.js'
 
 export const SYNC_SESSIONS_VERSION = 1
@@ -109,11 +110,14 @@ export function getOtherDeviceSessions(value, deviceId, legacyDeviceIds = []) {
   const currentDeviceIds = new Set([deviceId, ...legacyDeviceIds])
   return Object.entries(document.devices)
     .filter(([id]) => !currentDeviceIds.has(id))
-    .flatMap(([id, device]) => device.sessions.map(session => ({
-      ...clone(session),
-      syncDeviceId: id,
-      syncPlatform: device.platform,
-    })))
+    .flatMap(([id, device]) => device.sessions.map(session => {
+      const copy = clone(session)
+      // Other devices may still run a version that synced window titles
+      for (const tab of Array.isArray(copy?.tabs) ? copy.tabs : []) {
+        if (typeof tab?.title === 'string') tab.title = normalizeLegacyTabTitle(tab.title)
+      }
+      return { ...copy, syncDeviceId: id, syncPlatform: device.platform }
+    }))
 }
 
 export function getRevokedSyncSessionLogins(value, deviceId) {

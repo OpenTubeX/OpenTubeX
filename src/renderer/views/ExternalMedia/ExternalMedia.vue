@@ -951,7 +951,7 @@ function consumeTimestamp() {
     path: route.path,
     query,
     hash: route.hash,
-    state: { skipTabRouteLoading: true, preserveScroll: true, tabTitle: info.value?.title || hostname.value }
+    state: { preserveScroll: true }
   })
 }
 

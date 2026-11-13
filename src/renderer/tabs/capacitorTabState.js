@@ -1,10 +1,10 @@
+import { normalizeLegacyTabTitle } from '../../legacyTabTitle.js'
+
 const MAX_CLOSED_CAPACITOR_TABS = 10
 
 export function createCapacitorTab(route, title = '', id = window.crypto.randomUUID()) {
   const normalizedRoute = normalizeRoute(route)
-  const resolvedTitle = typeof title === 'string' && title.length > 0
-    ? title
-    : normalizedRoute.fullPath
+  const resolvedTitle = normalizeLegacyTabTitle(title) || normalizedRoute.fullPath
 
   return {
     id,
@@ -292,9 +292,7 @@ function isValidPersistedTab(tab) {
 
 function normalizePersistedTab(tab, rememberHistory = true) {
   const route = normalizeRoute(tab.route)
-  const title = typeof tab.title === 'string' && tab.title.length > 0
-    ? tab.title
-    : route.fullPath
+  const title = normalizeLegacyTabTitle(tab.title) || route.fullPath
   const history = rememberHistory && Array.isArray(tab.history) && tab.history.length > 0
     ? tab.history.map(entry => ({
         route: cloneRoute(entry?.route),

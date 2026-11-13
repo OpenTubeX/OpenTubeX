@@ -21,7 +21,7 @@
       class="pageSwipePlaceholder"
     >
       <CapacitorTabPreview :tab="tab" />
-      <span dir="auto">{{ formatTabTitle(tab.contentTitle || tab.title || tab.route.fullPath) }}</span>
+      <span dir="auto">{{ tab.contentTitle || tab.title || tab.route.fullPath }}</span>
     </div>
     <component
       :is="resolvedComponent"
@@ -68,7 +68,6 @@ import { getCapacitorTabService } from '../../tabs/CapacitorTabService'
 import { tabLifecycleService } from '../../tabs/TabLifecycleService'
 import { tabRuntimeRegistry } from '../../tabs/TabRuntimeRegistry'
 import { tabIdKey, tabLifecycleKey, tabPresentedKey } from '../../tabs/TabContext'
-import { formatTabTitle } from '../../tabs/tabTitle'
 import { getPreviousBrowsingRoute } from '../../tabs/playerDockDestination'
 
 const TAB_LOADER_SELECTOR = '[data-tab-loading-indicator]'

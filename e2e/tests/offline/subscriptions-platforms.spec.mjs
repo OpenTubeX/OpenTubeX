@@ -141,6 +141,7 @@ test.describe('Channels on other platforms', () => {
     const requestCount = requests.length
     await page.locator('[data-channel-tab="clips"]').click()
     await expect(page.locator('.ft-list-item .h3Title')).toHaveText(['Streamer clip'])
+    await expect(page.locator(`${sel.activeTab} .tabTitleText`)).toHaveText('Streamer')
     // Switching tabs loads only the new tab, not the channel again, and keeps the loaded one
     await page.locator('[data-channel-tab="videos"]').click()
     await expect(page.locator('.ft-list-item .h3Title')).toHaveText(['Live right now', 'Streamer newest VOD', 'Streamer older VOD'])

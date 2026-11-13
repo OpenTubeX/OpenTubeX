@@ -353,14 +353,6 @@ export default {
   },
 
   /**
-   * @param {string} title
-   * @param {string} tabId
-   */
-  setWindowTitle: (title, tabId) => {
-    ipcRenderer.send(IpcChannels.SET_WINDOW_TITLE, { title, tabId })
-  },
-
-  /**
    * @returns {Promise<string>}
    */
   getSystemLocale: () => {

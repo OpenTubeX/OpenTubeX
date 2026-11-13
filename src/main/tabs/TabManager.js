@@ -40,6 +40,7 @@ import {
 import {
   cloneRoute,
   formatDefaultTabTitle,
+  formatWindowTitle,
   getRouteFromUrl,
   getVideoIdFromUrl,
   normalizeRoute,
@@ -48,6 +49,7 @@ import {
   sanitizeNavigationHistory,
   stripOneTimeTimestampFromUrl
 } from './tabRoutes.js'
+import { normalizeLegacyTabTitle } from '../../legacyTabTitle.js'
 import { isExternalBrowserUrl, isOpenTubeXUrl } from '../utils.js'
 import { releaseForegroundLock } from '../backgroundExternalLink.js'
 
@@ -337,7 +339,8 @@ export class TabManager {
    */
   constructor(browserWindow, rootAppUrl, _preloadPath, sessionId, setWindowTitle) {
     this.browserWindow = browserWindow
-    this._setWindowTitle = setWindowTitle ?? (title => browserWindow.setTitle(title))
+    const setTitle = setWindowTitle ?? (title => browserWindow.setTitle(title))
+    this._setWindowTitle = title => setTitle(formatWindowTitle(title))
     this.rootAppUrl = rootAppUrl
     this.sessionId = sessionId || randomUUID()
     /** @type {Map<string, TabInfo>} */
@@ -642,7 +645,7 @@ export class TabManager {
       id,
       url: location.url,
       route: location.route,
-      title: title || formatDefaultTabTitle(location.url),
+      title: normalizeLegacyTabTitle(title) || formatDefaultTabTitle(location.url),
       avatarDataUrl: isTabPreviewDataUrl(avatarDataUrl) ? avatarDataUrl : null,
       avatarFileName: restoredAvatarFileName,
       lastActiveAt: Date.now(),
@@ -2549,8 +2552,9 @@ export class TabManager {
               console.error('Failed to delete stale synced tab avatar:', error)
             })
           }
-          if (typeof tabData.title === 'string' && tabData.title.trim().length > 0) {
-            tab.title = tabData.title
+          const syncedTitle = normalizeLegacyTabTitle(tabData.title)
+          if (syncedTitle.trim().length > 0) {
+            tab.title = syncedTitle
           }
           tab.isPinned = tabData.isPinned === true
           tab.color = TabManager.normalizeTabColor(tabData.color)
@@ -2558,7 +2562,7 @@ export class TabManager {
             ? tabData.groupId
             : null
         } else {
-          const hasSavedTitle = typeof tabData.title === 'string' && tabData.title.trim().length > 0
+          const hasSavedTitle = normalizeLegacyTabTitle(tabData.title).trim().length > 0
           // createTab inserts into previousTabs through this.tabs. The synced
           // map and restored placement openers below replace that temporary order.
           tab = this.createTab({
@@ -2714,7 +2718,7 @@ export class TabManager {
       await this.runBatched(() => {
         for (const tabData of sessionData.tabs) {
           const makeActive = tabData === activeTabData
-          const hasSavedTitle = typeof tabData.title === 'string' && tabData.title.trim().length > 0
+          const hasSavedTitle = normalizeLegacyTabTitle(tabData.title).trim().length > 0
           const previewFileName = normalizeTabPreviewFileName(tabData.previewFileName)
           const avatarFileName = normalizeTabPreviewFileName(tabData.avatarFileName)
           const avatarDataUrl = avatars.get(avatarFileName) ?? null

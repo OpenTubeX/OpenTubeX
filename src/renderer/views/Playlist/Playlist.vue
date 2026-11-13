@@ -1622,8 +1622,6 @@ async function saveStateInRouter(query) {
       query: routeQuery,
       state: { preserveScroll: true },
     })
-    // The tab title belongs to the replaced route
-    if (!isLoading.value) updatePageTitle()
   } catch (failure) {
     if (isNavigationFailure(failure, NavigationFailureType.duplicated)) {
       return

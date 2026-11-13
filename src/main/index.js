@@ -2448,17 +2448,6 @@ function runApp() {
 
   setupSubscriptionAutoRefreshIpc({ backgroundSubscriptions, updateBackgroundSubscriptionVisibility })
 
-  onTrusted(IpcChannels.SET_WINDOW_TITLE, (event, payload) => {
-    const title = payload?.title
-    const tabId = payload?.tabId
-    const manager = TabManager.getFromWebContents(event.sender)
-    const tab = typeof tabId === 'string' ? manager?.tabs.get(tabId) : null
-
-    if (manager && tab && typeof title === 'string') {
-      manager.applyTabTitle(tab, title)
-    }
-  })
-
   let isRelaunching = false
 
   function relaunch() {

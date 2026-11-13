@@ -17,7 +17,6 @@ function setup({ enabled = true, live = true, devices = [{ id: 'laptop', name: '
         if (error && (!errorVideoId || request.videoId === errorVideoId)) throw new Error(error)
       },
     },
-    formatTabTitle: title => title,
     getSyncServerDeviceIcon: platform => ['fas', platform === 'android' ? 'smartphone' : 'display'],
     showToast: toast => toasts.push(toast),
   })
