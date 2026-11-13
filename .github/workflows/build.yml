@@ -34,7 +34,7 @@ on:
       - '.github/workflows/compress-images.yml'
       - '.github/workflows/conflicts.yml'
       - '.github/workflows/e2e.yml'
-      - '.github/workflows/e2e-flaky.yml'
+      - '.github/workflows/flaky-tests.yml'
       - '.github/workflows/label-issue.yml'
       - '.github/workflows/label-pr.yml'
       - '.github/workflows/linter.yml'
