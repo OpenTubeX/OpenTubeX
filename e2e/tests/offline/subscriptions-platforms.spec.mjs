@@ -159,11 +159,12 @@ test.describe('Channels on other platforms', () => {
     // The archive of the running stream is left out
     const videos = panel.locator('[data-platform-section="videos"]')
     await expect(videos.locator('.h3Title')).toHaveText(['Streamer newest VOD', 'Streamer older VOD'])
-    await expect(videos.locator('.videoDuration').first()).toHaveText('1:02:05')
+    const newestVideo = videos.locator('.ft-list-item', { hasText: 'Streamer newest VOD' })
+    await expect(newestVideo.locator('.videoDuration')).toHaveText('1:02:05')
     await expect(panel.locator('[data-platform-section="clips"] .h3Title')).toHaveText('Streamer clip')
 
     // Videos can come back to the New feed, but clips aren't new content
-    await videos.locator('.ft-list-item', { hasText: 'Streamer newest VOD' }).click({ button: 'right' })
+    await newestVideo.click({ button: 'right' })
     const menu = page.getByRole('menu')
     await expect(menu.getByRole('menuitem', { name: 'Mark As Watched' })).toBeVisible()
     await expect(menu.getByRole('menuitem', { name: 'Mark As Unseen' })).toBeVisible()
@@ -175,13 +176,13 @@ test.describe('Channels on other platforms', () => {
     await page.keyboard.press('Escape')
 
     // The channel of an item opens its page
-    await videos.locator('.channelName').first().click()
+    await newestVideo.locator('.channelName').click()
     await expect.poll(() => page.evaluate(() => window.$router.currentRoute.value.fullPath))
       .toBe('/external-channel?platform=twitch&id=1001')
     await expect(page.locator('.channelHeader .channelName')).toHaveText('Streamer')
     await page.locator(sel.backButton).click()
 
-    await panel.locator('[data-platform-section="videos"] .h3Title').first().click()
+    await newestVideo.locator('.h3Title').click()
     await expect.poll(() => page.evaluate(() => {
       const { path, query } = window.$router.currentRoute.value
       return { path, query }
@@ -257,7 +258,7 @@ test.describe('Channels on other platforms', () => {
       users[OTHER_CHANNEL.id] = { ...twitchUser(OTHER_CHANNEL), login: 'renamed', displayName: 'Renamed' }
       const requestCount = requests.length
       await page.getByRole('button', { name: /Refresh Platforms/ }).click()
-      await expect(page.locator('#subscriptionsPanel .channelNameText').first()).toHaveText('Renamed')
+      await expect(page.locator('#subscriptionsPanel .ft-list-item', { hasText: 'Other newest VOD' }).locator('.channelNameText')).toHaveText('Renamed')
       expect(requests.slice(requestCount)).toEqual([{ ids: [OTHER_CHANNEL.id] }])
       await expect.poll(() => page.evaluate(() => window.$store.getters.getFollowedChannels))
         .toEqual([followed({ ...OTHER_CHANNEL, login: 'renamed', name: 'Renamed' })])
@@ -566,7 +567,7 @@ test.describe('Channels on other platforms', () => {
       })
       await goTo(page, 'subscriptions')
       await page.locator('[data-platforms-tab]').click()
-      await page.locator('#subscriptionsPanel .channelName').first().click()
+      await page.locator('#subscriptionsPanel .ft-list-item', { hasText: 'Makers video 1' }).locator('.channelName').click()
       await expect(page.locator('.channelHeader .channelName')).toHaveText('Makers')
       await expect(page.locator('.ft-list-item .h3Title')).toHaveText(['Makers video 1', 'Makers video 2', 'Makers video 3'])
       await expect(page.locator('.ft-auto-load-next-page-wrapper')).toHaveCount(0)
@@ -634,7 +635,7 @@ test.describe('Channels on other platforms', () => {
 
       // The channel's first page fails once, and loads when tried again
       failingVideoRequests = 1
-      await page.locator('#subscriptionsPanel .channelName').first().click()
+      await page.locator('#subscriptionsPanel .ft-list-item', { hasText: 'Makers newest video' }).locator('.channelName').click()
       await expect.poll(() => page.evaluate(() => {
         const { path, query } = window.$router.currentRoute.value
         return { path, query }
