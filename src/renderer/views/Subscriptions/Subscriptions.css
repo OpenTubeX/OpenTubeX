@@ -1,6 +1,6 @@
 .card {
   --subscriptions-header-padding-block-end: 12px;
-  --subscriptions-top-bar-block-size: 60px;
+  --subscriptions-top-bar-block-size: var(--top-nav-sticky-offset);
 
   box-sizing: border-box;
   inline-size: 100%;
@@ -10,16 +10,15 @@
   overflow: visible;
 }
 
-.subscriptionsPage.hasTabBar .card {
-  --subscriptions-top-bar-block-size: 92px;
-}
-
 .subscriptionsHeader {
   --new-feed-groups-gap: 16px;
 
   position: sticky;
   inset-block-start: var(--subscriptions-top-bar-block-size);
   z-index: 3;
+
+  /* Room for the focus ring of the first row, which the header would cover. */
+  margin-block-end: 6px;
   margin-inline: -16px;
   padding-block: var(--page-title-offset) var(--subscriptions-header-padding-block-end);
   padding-inline: 16px;
@@ -62,37 +61,11 @@
   border-block-end: 1px solid var(--primary-shadow-color);
 }
 
-.markAllSeenButton {
-  align-items: center;
-  background: transparent;
-  border: 0;
-
-  /* Half the height rather than full, so the press morph is smooth. */
-  border-radius: calc(13px * var(--ui-roundness));
-  color: var(--primary-color);
-  cursor: pointer;
-  display: inline-flex;
-  font: inherit;
-  font-size: 0.85em;
-  gap: 6px;
-  padding-block: 5px;
-  padding-inline: 7px;
-  white-space: nowrap;
-  transition: background-color var(--motion-fast-effects), border-radius var(--motion-fast-spatial);
-}
-
-.markAllSeenButton:hover,
-.markAllSeenButton:focus-visible {
-  background-color: var(--side-nav-hover-color);
-}
-
-.markAllSeenButton:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.markAllSeenButton:not(:disabled):active {
-  border-radius: var(--shape-corner-small);
+/* Doubled to outrank FtButton's own margin and minimum width. */
+.markAllSeenButton.markAllSeenButton {
+  flex-shrink: 0;
+  margin: 0;
+  min-inline-size: 0;
 }
 
 .headerActions {
@@ -102,6 +75,12 @@
 
   /* Size to its content so the header row keeps the whole widget together. */
   max-inline-size: 100%;
+}
+
+/* The view toggle, manage buttons and selects, which are items of the actions
+   row like the others, apart from on phones */
+.headerControls {
+  display: contents;
 }
 
 .headerViewToggle {
@@ -386,8 +365,6 @@
 
 @media only screen and (width <= 680px), only screen and (orientation: landscape) and (height <= 600px) {
   .subscriptionsHeader {
-    --subscriptions-top-bar-block-size: var(--top-nav-sticky-offset);
-
     transition: var(--mobile-nav-reveal-transition);
   }
 
@@ -447,6 +424,13 @@
     font-size: 0.9em;
   }
 
+  /* Sized by their labels, which only shorten once all of them have to, down
+     to the minimum target size */
+  .tab {
+    flex-basis: auto;
+    min-inline-size: 24px;
+  }
+
   .tabLabel {
     grid-template-columns: minmax(0, 1fr);
     min-inline-size: 0;
@@ -476,7 +460,7 @@
   }
 
   /* The RSS feed manager button shares the refresh status row */
-  .headerActions:has(> .headerManageFeeds) .headerRefreshWidget {
+  .headerActions:has(.headerManageFeeds) .headerRefreshWidget {
     flex: 1 1 0;
     min-inline-size: 0;
   }
@@ -497,6 +481,20 @@
     flex-basis: 0;
   }
 
+  /* Below the refresh status, the controls share a row of their own rather
+     than taking a column of its grid each */
+  .headerActions.hasAutoRefreshStatus:has(> .markAllSeenButton) .headerControls {
+    display: flex;
+    grid-column: 1 / -1;
+    align-items: center;
+    gap: 6px;
+    min-inline-size: 0;
+  }
+
+  .headerActions.hasAutoRefreshStatus:has(> .markAllSeenButton) .headerSortSelect {
+    flex: 1 1 0;
+  }
+
   .headerSortSelect :deep(.select-text) {
     padding-inline-start: 36px;
   }
@@ -510,9 +508,12 @@
     display: none;
   }
 
-  .markAllSeenButton {
+  /* Matches the view toggle and sort select, instead of FtButton's 48px phone
+     height. Outranks FtButton's phone rules. */
+  .headerActions > .markAllSeenButton.markAllSeenButton {
+    --button-height: 36px;
+
     min-block-size: 36px;
-    border-radius: calc(18px * var(--ui-roundness));
     order: 2;
   }
 
@@ -532,6 +533,47 @@
   }
 }
 
+/* Too narrow for the New feed's controls on one row, so Mark all as seen moves
+   to its own row and the sort control keeps room to show its value. The width
+   leaves room for longer translations. */
+@media only screen and (width <= 600px) {
+  .newFeedActions:has(> .markAllSeenButton) {
+    display: grid;
+    grid-template-areas:
+      '. sort refresh'
+      'mark mark mark';
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    row-gap: 12px;
+
+    /* Keyboard focus follows the rows, reaching Mark all as seen last. */
+    reading-flow: source-order;
+  }
+
+  /* The sort select and manage button sit in the group of header controls */
+  .newFeedActions:has(> .markAllSeenButton):has(.headerManageFeeds) {
+    grid-template-areas:
+      '. . sort refresh'
+      'mark mark mark mark';
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+  }
+
+  .newFeedActions:has(> .markAllSeenButton) .headerSortSelect {
+    grid-area: sort;
+    inline-size: auto;
+  }
+
+  .newFeedActions > .markAllSeenButton {
+    grid-area: mark;
+    justify-self: start;
+    reading-order: 1;
+  }
+
+  .newFeedActions:has(> .markAllSeenButton) :deep(.refreshActions) {
+    grid-area: refresh;
+  }
+}
+
 @media only screen and (width <= 480px) {
   .tabs .subscriptionIcon,
   .newFeedTabs .subscriptionIcon,
@@ -545,4 +587,66 @@
     inset-block-start: 2px;
     inset-inline-end: 2px;
   }
+}
+
+/* Tabs that don't fit onto one line at their full size take the compact layout
+   of phones, rather than wrapping onto a second line */
+.subscriptionsHeader.compactTabs:not(.singleRow) .tabs {
+  --material-tab-min-height: 48px;
+  --material-tab-font-size: 0.9em;
+  --material-tab-padding-inline: 4px;
+
+  flex: 1 1 auto;
+  inline-size: 100%;
+  flex-wrap: nowrap;
+  gap: 0;
+}
+
+.subscriptionsHeader.compactTabs:not(.singleRow) .tab {
+  /* Sized by their labels, which only shorten once all of them have to, down
+     to the minimum target size */
+  flex: 1 1 auto;
+  min-inline-size: 24px;
+  min-block-size: 44px;
+  padding-block: 4px;
+  padding-inline: 4px;
+  font-size: 0.9em;
+}
+
+.subscriptionsHeader.compactTabs:not(.singleRow) .tabs .tabLabel {
+  grid-template-columns: minmax(0, 1fr);
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* stylelint-disable-next-line selector-max-compound-selectors */
+.subscriptionsHeader.compactTabs:not(.singleRow) .tabs .tabLabel > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The platform names and icons explain the filter, so its label is only for
+   screen readers, and the select fits its longest name */
+.headerActions .headerFilterSelect {
+  flex: 0 1 auto;
+  inline-size: 190px;
+}
+
+.headerActions .headerFilterSelect :deep(.select-label) {
+  block-size: 1px;
+  inline-size: 1px;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.headerActions .headerFilterSelect :deep(.select-text) {
+  padding-inline-start: 12px;
+}
+
+.headerActions .headerFilterSelect :deep(.optionIcon) {
+  flex-basis: 14px;
+  inline-size: 14px;
+  font-size: 14px;
 }

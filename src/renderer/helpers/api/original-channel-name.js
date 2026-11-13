@@ -1,3 +1,4 @@
+import { YTNodes } from 'youtubei.js'
 import { parseSubscriptionRss } from './feed-rss.js'
 
 const CACHE_LIMIT = 500
@@ -39,5 +40,19 @@ export function createOriginalChannelNameResolver(fetchFeed) {
       if (name === null && requests.get(channelId) === request) requests.delete(channelId)
     })
     return request
+  }
+}
+
+/**
+ * Translated channel pages keep the original name and description in their profile microformat.
+ * @param {import('youtubei.js').YTNode | undefined} microformat
+ * @returns {{ name?: string, description?: string }}
+ */
+export function getOriginalChannelProfile(microformat) {
+  if (!microformat?.is(YTNodes.MicroformatData)) return {}
+
+  return {
+    name: microformat.profile_name?.trim() || undefined,
+    description: microformat.profile_description?.trim() || undefined
   }
 }

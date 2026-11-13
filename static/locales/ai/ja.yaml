@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: すべてのセクションが非表示です
   All sections hidden description: ホームをカスタマイズして、セクションを再表示してください。
 Subscriptions:
+  Channel Errors:
+    Summary: "{count} 件のチャンネルを更新できませんでした。"
+    Toast: "一部の登録チャンネルを更新できませんでした。クリックして表示します。"
+    Retry Channel: "{channel} を再試行"
+    Show All: "すべて表示"
+    Show Fewer: "表示を減らす"
   Cache Load Error: 保存済みの登録チャンネルのフィードを読み込めませんでした。
   New video from {channel}: "{channel}の新しい動画"
   New short from {channel}: "{channel}の新しいショート動画"
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: "{channel}の新しい投稿"
   Mark As Unseen: 未視聴にする
   Copy Error Details: "技術的な詳細をコピー"
-  Refresh Errors: "更新できなかったチャンネル: {channels}。クリックして詳細を表示します。"
-  Refresh Error Channels More: "{channels} ほか{count}件"
   Never show {type} from this channel in feeds again: このチャンネルの「{type}」をフィードに今後表示しない
   Refreshing Subscription Videos: 登録チャンネルの動画を更新中
   Refreshing Subscription Shorts: 登録チャンネルのショート動画を更新中
@@ -177,7 +181,7 @@ Subscriptions:
   Refreshing Subscription Posts: 登録チャンネルの投稿を更新中
   New Content: 新着コンテンツ
   New Feed Refresh Warning Title: 登録チャンネルのすべてのフィードを更新しますか？
-  New Feed Refresh Warning: RSSを使用せずに{count}件の登録チャンネルですべてのコンテンツを更新すると、時間がかかる場合があります。続行しますか？
+  New Feed Refresh Warning: '{count}件の登録チャンネルですべてのコンテンツを更新すると、時間がかかる場合があります。続行しますか？'
   New Since Last Refresh: 前回の更新以降の新着
   Mark As Seen: 確認済みにする
   Mark All as Seen: すべて確認済みにする
@@ -216,11 +220,33 @@ Subscriptions:
       Optional Parameter: '{parameter}（任意）'
       Not Set: 未設定
     Retry Feed: '{feed} を再試行'
+    Reloading Feed: '{feed} を再読み込み中'
+  Platforms:
+    Tab: プラットフォーム
+    Platform: プラットフォーム
+    All Platforms: すべてのプラットフォーム
+    Followed Channels: 他のプラットフォームでフォロー中のチャンネル
+    Description: Twitch、SoundCloud、PeerTube、Rumble、Odysee のチャンネルをフォローすると、その投稿が登録チャンネルの「プラットフォーム」タブに表示されます。チャンネルは検索で見つけるか、ページのアドレスで追加できます。メディアは yt-dlp で再生されます。
+    Add Channel: チャンネルを追加
+    Channel URL: チャンネルのアドレス
+    Invalid Channel: Twitch、SoundCloud、PeerTube、Rumble、Odysee のチャンネルページのアドレスを入力してください。
+    Channel Not Found: このアドレスにチャンネルはありません。
+    Channel Already Followed: このチャンネルは既にフォローしています。
+    Channel Could Not Be Loaded: チャンネルを読み込めませんでした。
+    No Channels: まだ他のプラットフォームのチャンネルをフォローしていません。
+    Unfollow Channel: '{channel} のフォローを解除'
+    Go To Channel: '{channel} に移動'
+    Follow: フォロー
+    Following: フォロー中
+    Clips: クリップ
+    Refresh Errors: '{count} 件のチャンネルを更新できませんでした。'
+    Content Tabs: プラットフォームのコンテンツのタブ
 Trending:
   Music: 音楽
   Load Error: トレンドを読み込めませんでした。
   Unsupported Backend: トレンドにはLocal APIが必要です。Local APIを選択するか、バックエンドのフォールバックを有効にしてください。
 Most Popular Feed Empty: このInvidiousインスタンスの「人気」フィードは空です。
+Most Popular Load Error: "「人気」フィードを読み込めませんでした。"
 Feed:
   Cancel Refresh: 更新をキャンセル
   Next Auto Refresh: '次回の自動更新: {date}'
@@ -307,8 +333,38 @@ History:
   Custom: カスタム
   History Older Than Days Removed: '{days}日より古い視聴履歴を削除しました'
 Settings:
-  Experimental Settings:
-    Faster Subscription Refresh: "登録チャンネルの高速更新"
+  Experimental Badge: 試験的
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube アカウント"
+    Unofficial App Warning: "OpenTubeX は YouTube の公式アプリではありません。ログインすると、ここでの操作が Google アカウントに関連付けられます。Google は非公式アプリを使用するアカウントを制限または停止する場合があります。失っても構わないアカウントでのみログインしてください。"
+    Sign In Explanation: "OpenTubeX はテレビアプリと同じ方法でログインします。Google のウェブサイトで承認するため、OpenTubeX がパスワードを見ることはありません。ログイン情報はこのデバイスにのみ保存され、同期やバックアップの対象にはなりません。"
+    Sign In: "ログイン"
+    Sign In Anyway: "それでもログイン"
+    Sign Out: "ログアウト"
+    Getting Sign-In Code: "ログインコードを取得しています"
+    Sign In Instructions: "ログインページを開いて Google アカウントを選択してください。コードは自動で入力されます。"
+    Other Device Instructions: "別のデバイスで次のアドレスにアクセスし、コードを入力してください:"
+    YouTube Channel: "YouTube チャンネル"
+    Using Channel: "{name} として YouTube を使用しています"
+    Switch Channel Failed: "YouTube チャンネルを切り替えられませんでした: {error}"
+    Open Sign-In Page: "ログインページを開く"
+    Copy Code: "コードをコピー"
+    Code Copied: "コードをコピーしました"
+    Waiting for Approval: "ログインの承認を待っています"
+    Sign-In Denied: "ログインが拒否されました。"
+    Sign-In Code Expired: "コードの有効期限が切れました。再試行して新しいコードを取得してください。"
+    Sign-In Failed: "ログインできませんでした: {error}"
+    Signed In As: "{name} として YouTube にログインしました"
+    Signed Out: "YouTube からログアウトしました"
+    Sign Out Failed: "ログアウトできませんでした: {error}"
+    Revoke Failed: "YouTube からログアウトしましたが、Google はログインの終了を確認しませんでした。Google アカウントのサードパーティとの接続から削除できます。"
+    Signed out by YouTube: "YouTube によってログインが終了されました。アカウントを引き続き使用するには、設定から再度ログインしてください。"
+    Subscribe on YouTube: "YouTube でもチャンネル登録する"
+    Add to YouTube Watch History: "視聴した動画を YouTube の履歴に追加する"
+    Import Subscriptions: "YouTube から登録チャンネルをインポート"
+    Imported Subscriptions: "{count} チャンネルをインポートしました"
+    No Subscriptions to Import: "この YouTube アカウントには登録チャンネルがありません"
+    Import Subscriptions Failed: "登録チャンネルをインポートできませんでした: {error}"
   Diagnostics:
     Diagnostics: 診断
     Description: 診断ログが有効な間、OpenTubeX は最近のログメッセージをメモリに保持し、バグ報告に添付できるようにします。自動で保存や送信をすることはなく、ログを無効にすると削除されます。レポートには Cookie、トークン、IP アドレス、URL パラメーターは含まれませんが、再生した動画の ID が含まれる場合があるため、共有する前にレポートを確認してください。
@@ -443,6 +499,7 @@ Settings:
       Closing Tabs: 複数のタブを閉じるとき
       Loading Tabs: 複数のタブを読み込むとき
       Unloading Tabs: 複数のタブを解放するとき
+      Refreshing All Feeds: 多数の登録チャンネルを更新するとき
     Remember Tab Navigation History: タブの移動履歴を記憶
     New Tab Position:
       New Tab Position: 新しいタブの位置
@@ -1174,6 +1231,12 @@ Settings:
     Refresh Subscriptions While App Is Closed: "アプリを閉じている間も登録チャンネルを更新"
     Notify About New Uploads: 新着アップロードを通知
     RSS Feeds Auto Refresh Interval: RSS フィードの自動更新間隔
+    Faster Subscription Refresh: "登録チャンネルの高速更新"
+    Platforms:
+      Other Platforms: 他のプラットフォーム
+      Manage Channels: フォロー中のチャンネルを管理
+      Notify When Live: フォロー中の Twitch チャンネルが配信を開始したら通知
+      Auto Refresh Interval: 他のプラットフォームの自動更新間隔
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "視聴時間のカウント対象"
@@ -1778,6 +1841,7 @@ Video:
     Auto-generated Caption Template: '{language}（自動生成）'
     Up next in {seconds}: '{seconds}秒後に次の動画'
     Resize dock: ドックのサイズを変更
+    Resize dock width: ドックの幅を変更
     Play now: 今すぐ再生
     MusicPlaybackRateOverride: ミュージックビデオを検出したため、1倍速で再生します
     Normal: 標準
@@ -2015,6 +2079,7 @@ Context Menu:
   Reload Posts: 投稿を再読み込み
   Reload All Feeds: すべてのフィードを再読み込み
   Reload RSS Feeds: RSS フィードを再読み込み
+  Reload Platforms: プラットフォームを再読み込み
   Close Multiple Tabs: '{count}個のタブを閉じる'
   Duplicate Tab: タブを複製
   Duplicate Multiple Tabs: '{count}個のタブを複製'
@@ -2167,8 +2232,9 @@ Description:
   Games: ゲーム
   Music: 音楽
 Tooltips:
-  Experimental Settings:
-    Faster Subscription Refresh: "最初に各チャンネルの RSS フィードを確認し、新しいアップロードがあるチャンネルの動画、ショート、ライブ配信だけを読み込みます。自動更新では、過去 10 分以内に読み込んだチャンネルもスキップします。新しいアップロードがないチャンネルでは、再生回数、削除された動画、変更されたタイトルが数時間ごとにしか更新されず、RSS フィードが遅れている場合は新しいアップロードの表示が遅れることがあります。Invidious API では利用できません。"
+  YouTube Account Settings:
+    Subscribe on YouTube: "OpenTubeX でチャンネル登録または登録解除すると、YouTube アカウントでも同じ操作が行われます。"
+    Add to YouTube Watch History: "再生した動画は YouTube の視聴履歴に追加され、YouTube のおすすめに反映されます。YouTube で履歴が一時停止されている間は何も追加されません。"
   General Settings:
     Built-in Streams: |
       自動では、ほとんどの動画を YouTube の visionOS クライアントで再生します。起動が速く、自動画質に対応しています。ライブ配信や再生できない動画には SABR を使用します。
@@ -2192,6 +2258,7 @@ Tooltips:
       yt-dlpを使用すると、動画の再生開始に時間がかかる場合があります。
     Avoid translation: |
       YouTubeによる動画のタイトル、説明、チャプターの自動翻訳を無効にします。
+      「アプリ全体」では、チャンネル名とチャンネルの説明も元の言語で表示します。
       一覧にある動画のタイトルをまとめて取得するなど、要求が多すぎると、
       アプリが一時的に不安定になる場合があります。
     Show Thumbnail Previews: 動画のサムネイルにポインターを合わせたときにアニメーションプレビューを表示します。
@@ -2279,8 +2346,11 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "選択した設定でフィードを更新します。デスクトップでは、終了するまでOpenTubeXがシステムトレイに常駐します。Androidでは、バックグラウンド更新の実行時刻をシステムが制御します。"
     Notify About New Uploads: 登録設定で通知をオンにしたチャンネルについて、このデバイスにシステム通知を表示します。OpenTubeXは登録チャンネルの更新時に新着コンテンツを確認するため、自動更新の間隔を選択してください。アプリを閉じている間も通知を受け取るには、アプリを閉じている間の更新も有効にしてください。
     RSS Feeds Auto Refresh Interval: アプリを開いている間に OpenTubeX が RSS フィードを自動更新する間隔です。
+    Faster Subscription Refresh: "最初に各チャンネルの RSS フィードを確認し、新しいアップロードがあるチャンネルの動画、ショート、ライブ配信だけを読み込みます。自動更新では、過去 10 分以内に読み込んだチャンネルもスキップします。新しいアップロードがないチャンネルでは、再生回数、削除された動画、変更されたタイトルが数時間ごとにしか更新されず、RSS フィードが遅れている場合は新しいアップロードの表示が遅れることがあります。Invidious API では利用できません。"
+    Platforms Auto Refresh Interval: アプリを開いている間に OpenTubeX が他のプラットフォームでフォロー中のチャンネルを自動更新する間隔です。
+    Twitch Notify When Live: フォロー中の Twitch チャンネルが配信を開始すると通知します。OpenTubeX は開いている間は数分ごとに確認し、閉じている間も登録チャンネルを更新する設定であれば確認します。
   Theme Settings:
-    Only Show Important Notifications: 操作の確認や状態を伝えるだけのアプリ内通知を非表示にします。エラー、警告、設定したリマインダー、および「元に戻す」などの操作を含む通知は引き続き表示されます。登録チャンネルの更新などのバックグラウンド処理の進捗は、通知ではなく全体の進捗バーに表示されます。システム通知には影響しません。
+    Only Show Important Notifications: 操作の確認や状態を伝えるだけのアプリ内通知を非表示にします（「元に戻す」が表示されるものも含みます）。エラー、警告、設定したリマインダー、およびアップデートの確認など判断を求める通知は引き続き表示されます。登録チャンネルの更新などのバックグラウンド処理の進捗は、通知ではなく全体の進捗バーに表示されます。システム通知には影響しません。
     Visible Search Suggestions: "検索バーがスクロールなしで表示する検索履歴と候補の数を設定します。リストがウィンドウの下端を超えることはありません。"
     Thumbnail Size: "グリッドとリストの動画サムネイルの大きさを変更します。列数を固定したグリッドや「全幅」表示では各行を埋めるため、そこではリストのサムネイルとショートだけが変わります。スマートフォンサイズのウィンドウでは、グリッドのサムネイルは 100% までに制限されます。"
     Playlist Thumbnail Size: "再生リストのページの動画サムネイルの大きさを変更します。列数を固定したグリッドや「全幅」表示では各行を埋めるため、そこではリストのサムネイルとショートだけが変わります。スマートフォンサイズのウィンドウでは、グリッドのサムネイルは 100% までに制限されます。"
@@ -2676,3 +2746,31 @@ Notification Center:
   Clear: "消去"
   Empty: "まだ通知はありません"
   Empty Hint: "ライブ配信のリマインダーと、通知をオンにしたチャンネルの新しいアップロードがここに表示されます。"
+Platforms:
+  Tracks: トラック
+  Playlists: 再生リスト
+  Follower Count: フォロワー {count} 人
+  Open Website: '{platform} で開く'
+  Channel Not Found: このチャンネルは見つかりませんでした。
+  Playlist Not Found: この再生リストは見つかりませんでした。
+  Load Error: '{platform} からこのページを読み込めませんでした。'
+  Empty Tab: まだ何もありません。
+YouTube Account:
+  Like: "高く評価"
+  Dislike: "低く評価"
+  Rating Failed: "YouTube で評価できませんでした: {error}"
+  Subscribe Failed: "YouTube でチャンネル登録できませんでした: {error}"
+  Unsubscribe Failed: "YouTube で登録解除できませんでした: {error}"
+  Add a comment: "コメントを追加"
+  Add a reply: "返信を追加"
+  Comment: "コメント"
+  Reply: "返信"
+  Comment Posted: "コメントを投稿しました"
+  Reply Posted: "返信を投稿しました"
+  Comment Failed: "コメントを投稿できませんでした: {error}"
+  Delete Comment: "コメントを削除"
+  Delete Comment Confirmation: "YouTube からコメントを削除しますか？"
+  Comment Deleted: "コメントを削除しました"
+  Delete Comment Failed: "コメントを削除できませんでした: {error}"
+  Recommendations: "YouTube のおすすめ"
+  Recommendations Failed: "YouTube のおすすめを読み込めませんでした。"

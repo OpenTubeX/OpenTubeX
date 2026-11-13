@@ -1,3 +1,4 @@
+import { DBActions } from '../../../src/constants.js'
 import { openNewWindowFromTabBar, test, expect, waitForAppReady, readDatastore } from '../../helpers/app.mjs'
 
 test('new windows move from the app header to the tab bar context menu', async ({ app, page }) => {
@@ -48,6 +49,46 @@ async function openSecondWindowWithTwoTabs(app, page) {
 
   return { newWindow, windowId, primaryWindowId: existingWindowIds[0] }
 }
+
+test('a starting window keeps history that another window saves after its read', async ({ app, page }) => {
+  // Hold the reply to the next full history read, the new window's.
+  await app.electronApp.evaluate(({ ipcMain }, find) => {
+    const original = ipcMain._invokeHandlers.get('db-history')
+    ipcMain.removeHandler('db-history')
+    ipcMain.handle('db-history', async (event, request) => {
+      const reply = await original(event, request)
+      if (request.action === find && request.data === undefined && !globalThis.releaseHistoryRead) {
+        await new Promise(resolve => { globalThis.releaseHistoryRead = resolve })
+      }
+      return reply
+    })
+  }, DBActions.GENERAL.FIND)
+  const other = await openNewWindowFromTabBar(app, page)
+  await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.releaseHistoryRead)).toBe('function')
+  // History is requested once the settings are loaded, before the profiles.
+  await expect.poll(() => other.evaluate(() => (
+    document.querySelector('#app')?.__vue_app__?.config.globalProperties.$store.getters.getProfileList.length ?? 0
+  ))).toBeGreaterThan(0)
+
+  const videoId = 'aaaaaaaaaaa'
+  await page.evaluate(videoId => window.$store.dispatch('updateHistory', {
+    videoId,
+    title: 'Placeholder video',
+    author: 'Placeholder channel',
+    authorId: 'UCaaaaaaaaaaaaaaaaaaaaaa',
+    lengthSeconds: 60,
+    isLive: false,
+    watchProgress: 0,
+    timeWatched: Date.now(),
+    published: 0,
+    type: 'video'
+  }), videoId)
+  await app.electronApp.evaluate(() => globalThis.releaseHistoryRead())
+
+  await waitForAppReady(other)
+  await expect.poll(() => other.evaluate(videoId => window.$store.getters.getHistoryCacheById[videoId]?.title, videoId))
+    .toBe('Placeholder video')
+})
 
 test.describe('multi-tab window close confirmation', () => {
   test.use({ seed: { settings: { confirmCloseWindowWithMultipleTabs: true } } })

@@ -123,6 +123,7 @@ async function importChannelResult(t, result) {
 
 test('background playlist imports restore missing authors and keep explicit bylines', async t => {
   const published = []
+  const clearedErrors = []
   const cache = { UCchannel: { videos: [{ videoId: 'missing', thumbnailUrl: 'https://images.example/portrait.jpg' }] } }
   let saved
   hooks.store = createStore({
@@ -132,11 +133,13 @@ test('background playlist imports restore missing authors and keep explicit byli
   })
   hooks.store.onDispatch = (_action, value) => { saved = value.videos; cache.UCchannel = value; return true }
   hooks.notifySubscriptionChannelRefreshed = tab => published.push(tab)
+  hooks.clearSubscriptionChannelErrors = (...args) => clearedErrors.push(args)
   hooks.enrichSubscriptionShortDates = async entries => entries.map(entry => ({ ...entry, published: 123456 }))
+  const fetchedAt = Date.now()
   await importChannelResult(t, {
     channelId: 'UCchannel',
     feedType: 'shorts',
-    timestamp: Date.now(),
+    timestamp: fetchedAt,
     payload: {
       backgroundFormat: 'entries',
       entries: [
@@ -156,6 +159,36 @@ test('background playlist imports restore missing authors and keep explicit byli
   assert.ok(saved.every(video => video.isShort))
   assert.ok(saved.every(video => video.published === 123456))
   assert.deepEqual(published, ['shorts'], 'publish imported videos while the native refresh is still active')
+  assert.deepEqual(clearedErrors, [['UCchannel', ['shorts'], fetchedAt]], 'a successful import clears the feed error shown above the feeds')
+})
+
+test('channels that failed in a background refresh are listed above the feed', async t => {
+  const errors = []
+  const notifications = []
+  hooks.store = createStore({
+    getSubscribedChannelsById: new Map(['UCgone', 'UCrefreshed', 'UCoffline'].map(id => [id, { id, name: 'Subscribed creator' }])),
+    getVideoCache: { UCrefreshed: { timestamp: new Date(2000) } },
+  })
+  hooks.setSubscriptionChannelError = (...args) => { errors.push(args); return true }
+  hooks.notifyNewSubscriptionChannelErrors = newErrors => notifications.push(newErrors)
+  const diagnostic = { category: 'subscription videos', backend: 'Subscription backend', lifecycle: 'background', failure: 'http', message: 'HTTP 404' }
+  const failure = channelId => ({ id: channelId, kind: 'channelFailure', profileId: 'all', feedType: 'videos', channelId, timestamp: 1000, diagnostic })
+  const results = [
+    { ...failure('UCgone'), unavailable: true },
+    // A foreground refresh succeeded after the background one failed
+    failure('UCrefreshed'),
+    { ...failure('UCoffline'), diagnostic: { ...diagnostic, failure: 'network' } },
+  ]
+  hooks.getNextResult = async () => results.shift() ?? null
+  start(t, android, { env: { IS_CAPACITOR: 'true' } })
+  showApp()
+  await settle()
+  assert.deepEqual(errors, [['UCgone', 'videos', {
+    reasons: ['HTTP 404'],
+    trace: 'Subscribed creator (UCgone): request=subscription videos; backend=Subscription backend; lifecycle=background; failure=http; message=HTTP 404',
+    unavailable: true
+  }, 1000]])
+  assert.deepEqual(notifications, [[{ feed: 'videos', channelId: 'UCgone' }]])
 })
 
 test('background Yattee Shorts are dated through the server instead of YouTube', async t => {

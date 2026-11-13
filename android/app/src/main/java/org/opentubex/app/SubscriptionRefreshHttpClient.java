@@ -4,9 +4,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
@@ -16,6 +19,13 @@ final class SubscriptionRefreshHttpClient {
 
     private SubscriptionRefreshHttpClient() {}
 
+    /** YouTube explained with an error alert why the channel is gone. */
+    static final class ChannelUnavailableException extends IOException {
+        ChannelUnavailableException() {
+            super("Channel unavailable");
+        }
+    }
+
     @FunctionalInterface
     interface RequestFetcher {
         String fetch(JSONObject request, String type, String channelId) throws IOException, JSONException;
@@ -23,7 +33,39 @@ final class SubscriptionRefreshHttpClient {
 
     static JSONObject fetch(SubscriptionRefreshConfiguration.Feed feed, String channelId)
         throws IOException, JSONException {
-        return fetch(feed, channelId, SubscriptionRefreshHttpClient::fetchRequest);
+        return fetch(feed, channelId, resendingBrokenConnections(SubscriptionRefreshHttpClient::fetchRequest));
+    }
+
+    /**
+     * Background refresh requests only read, so one that lost its connection is
+     * sent again. HttpURLConnection reuses kept-alive connections that the server
+     * or the proxy relay already closed, and fails instead of retrying; each such
+     * connection fails at once, so a second resend covers another one from the
+     * pool. A timeout gets one resend, since each attempt waits a whole timeout.
+     */
+    static RequestFetcher resendingBrokenConnections(RequestFetcher fetcher) {
+        return (request, type, channelId) -> {
+            boolean timedOut = false;
+            for (int attempt = 0; ; attempt++) {
+                try {
+                    return fetcher.fetch(request, type, channelId);
+                } catch (IOException error) {
+                    checkInterrupted();
+                    timedOut |= error instanceof SocketTimeoutException;
+                    if (attempt >= (timedOut ? 1 : 2) || !isBrokenConnection(error)) throw error;
+                }
+            }
+        };
+    }
+
+    static boolean isBrokenConnection(IOException error) {
+        // Includes a reset, an aborted or closed socket, a broken pipe, and a timeout.
+        if (error instanceof SocketException || error instanceof SocketTimeoutException ||
+            error instanceof EOFException || error.getCause() instanceof EOFException) return true;
+        // TLS sockets report a reset or broken pipe as an SSLException.
+        String message = error.getMessage();
+        return message != null && message.toLowerCase(java.util.Locale.ROOT)
+            .matches(".*(unexpected end of stream|connection reset|broken pipe).*");
     }
 
     static JSONObject fetch(SubscriptionRefreshConfiguration.Feed feed, String channelId, RequestFetcher fetcher)
@@ -56,9 +98,10 @@ final class SubscriptionRefreshHttpClient {
                 }
                 if (format.equals("local") || format.equals("localPlaylist")) {
                     if (format.equals("local") && channelHasNoFeed(response, feed.type, channelId)) return emptyFeed(feed.type);
+                    if (format.equals("local") && hasErrorAlert(response)) throw new ChannelUnavailableException();
                     if (format.equals("localPlaylist") && topicChannelWithoutVideosTab &&
                         response.optString("alerts").contains("The playlist does not exist.")) return emptyFeed(feed.type);
-                    if (!hasSelectedContentTab(response.optJSONObject("contents"), format.equals("local") ? optionalTabPath(feed.type) : null) || response.optString("alerts").contains("\"type\":\"ERROR\"")) {
+                    if (!hasSelectedContentTab(response.optJSONObject("contents"), format.equals("local") ? optionalTabPath(feed.type) : null) || hasErrorAlert(response)) {
                         throw new IOException("Channel unavailable");
                     }
                     JSONObject metadata = response.optJSONObject("metadata");
@@ -95,6 +138,8 @@ final class SubscriptionRefreshHttpClient {
                 return response;
             } catch (IOException | JSONException error) {
                 checkInterrupted();
+                // Like foreground refreshes, other sources can't load a channel that YouTube reports as gone
+                if (error instanceof ChannelUnavailableException) throw error;
                 lastError = error;
                 if (request.optString("format").equals("local") && optionalTabPath(feed.type) != null && "HTTP 404".equals(error.getMessage())) {
                     try {
@@ -106,6 +151,9 @@ final class SubscriptionRefreshHttpClient {
                         JSONObject page = new JSONObject(fetcher.fetch(channelRequest, feed.type, channelId));
                         checkInterrupted();
                         if (channelHasNoFeed(page, feed.type, channelId)) return emptyFeed(feed.type);
+                        if (hasErrorAlert(page)) throw new ChannelUnavailableException();
+                    } catch (ChannelUnavailableException gone) {
+                        throw gone;
                     } catch (IOException | JSONException ignored) {
                         checkInterrupted();
                         // An unverified channel is still a failure; try the next configured source.
@@ -114,6 +162,11 @@ final class SubscriptionRefreshHttpClient {
             }
         }
         throw new IOException("Background subscription requests failed", lastError);
+    }
+
+    /** YouTube explains with an error alert why a channel is gone. */
+    private static boolean hasErrorAlert(JSONObject response) {
+        return response.optString("alerts").contains("\"type\":\"ERROR\"");
     }
 
     private static void checkInterrupted() throws IOException {
@@ -137,7 +190,7 @@ final class SubscriptionRefreshHttpClient {
         String path = optionalTabPath(type);
         JSONObject metadata = response.optJSONObject("metadata");
         JSONObject channel = metadata == null ? null : metadata.optJSONObject("channelMetadataRenderer");
-        if (path == null || response.has("error") || response.optString("alerts").contains("\"type\":\"ERROR\"") ||
+        if (path == null || response.has("error") || hasErrorAlert(response) ||
             channel == null || !channel.optString("externalId").equals(channelId)) return false;
         JSONObject contents = response.optJSONObject("contents");
         if (contents == null) return false;

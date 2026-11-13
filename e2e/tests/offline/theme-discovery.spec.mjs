@@ -199,8 +199,7 @@ test('discovers, installs, persists and updates themes without overwriting local
     const store = window.$store
     const theme = (await window.ftElectron.loadCustomTheme()).find(theme => theme.id === 'discussion-1197')
     theme.colors.background = '#abcdef'
-    const themes = await window.ftElectron.saveCustomTheme(theme)
-    await store.dispatch('updateCustomThemes', themes)
+    await store.dispatch('updateCustomThemes', () => window.ftElectron.saveCustomTheme(theme))
   })
   await gallery.getByRole('button', { name: 'Refresh', exact: true }).click()
   await expect(first.getByRole('button', { name: 'Apply theme', exact: true })).toBeVisible()
@@ -237,8 +236,7 @@ test('preserves local edits to older community themes and detects customized ove
   theme.colors.primaryText = '#aabbcc'
   await page.evaluate(async theme => {
     const store = window.$store
-    const themes = await window.ftElectron.saveCustomTheme(theme)
-    await store.dispatch('updateCustomThemes', themes)
+    await store.dispatch('updateCustomThemes', () => window.ftElectron.saveCustomTheme(theme))
   }, theme)
   await mockScreenshots(page)
   const options = { legacy: true }

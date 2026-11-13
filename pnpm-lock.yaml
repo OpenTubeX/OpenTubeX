@@ -180,8 +180,8 @@ patchedDependencies:
   '@sqlite.org/sqlite-wasm@3.53.4-build2': 579d3e536bc0f7ef69623a576db802fe6dc8d02cfb6d6f085f190534a88941a7
   '@vue/runtime-dom@3.5.44': c83073332910a00ffdd4471e0a1d9e44607292ac7992016492fbd5a237ba37fd
   shaka-player@5.3.3: 0459a582ca054acd87dbf4fd3251f0b5d3e74d472c5f4fb8d81afd196a3ab2c3
-  vue-sonner@2.0.9: 34b2065fecd4314653c24cdfc38ff5f2910def4942ed265ec374d66c0e5c0940
-  youtubei.js@18.3.0: 0003a0f2832c7de4790869f6008eb27a3d3fd9c6a8746042692b677c3f291a1e
+  vue-sonner@2.0.9: e778efa69ee00b0c8683a067150b163d9f7b135c2c8d68f9124c6d0fe033a14d
+  youtubei.js@18.3.0: a2127ec938b83177d2da9dea4b45e0d369499114e4b6e9c2cd57787953989b81
 
 importers:
 
@@ -351,13 +351,13 @@ importers:
         version: 5.4.0(@vue/compiler-sfc@3.5.43)(vue@3.5.44)(webpack@5.112.2)
       vue-sonner:
         specifier: ^2.0.9
-        version: 2.0.9(patch_hash=34b2065fecd4314653c24cdfc38ff5f2910def4942ed265ec374d66c0e5c0940)
+        version: 2.0.9(patch_hash=e778efa69ee00b0c8683a067150b163d9f7b135c2c8d68f9124c6d0fe033a14d)
       vuex:
         specifier: ^4.1.0
         version: 4.1.0(vue@3.5.44)
       youtubei.js:
         specifier: ^18.3.0
-        version: 18.3.0(patch_hash=0003a0f2832c7de4790869f6008eb27a3d3fd9c6a8746042692b677c3f291a1e)
+        version: 18.3.0(patch_hash=a2127ec938b83177d2da9dea4b45e0d369499114e4b6e9c2cd57787953989b81)
     devDependencies:
       '@capacitor/cli':
         specifier: ^8.6.0
@@ -369,8 +369,8 @@ importers:
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.14.0)
       '@iconify-json/material-symbols':
-        specifier: ^1.2.97
-        version: 1.2.97
+        specifier: ^1.2.98
+        version: 1.2.98
       '@iconify-json/ri':
         specifier: ^1.2.10
         version: 1.2.10
@@ -958,8 +958,8 @@ packages:
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
 
-  '@iconify-json/material-symbols@1.2.97':
-    resolution: {integrity: sha512-MbE4QHrH4Z4eoerBFrzFSPqHw2NwVGwwOwGZdJym5l5N5loqEUThimlQpK9VJA6mvgWvj5jl43b8bZnqzOxNRQ==}
+  '@iconify-json/material-symbols@1.2.98':
+    resolution: {integrity: sha512-ycgn080/EGstyYcJFu+HN0TYI+ts/KFPb+An0dzpwZit4M/BoFO9U54BwBmrS2Qo/3g9NYV4Y/g1BT425tNgEw==}
 
   '@iconify-json/ri@1.2.10':
     resolution: {integrity: sha512-WWMhoncVVM+Xmu9T5fgu2lhYRrKTEWhKk3Com0KiM111EeEsRLiASjpsFKnC/SrB6covhUp95r2mH8tGxhgd5Q==}
@@ -5992,7 +5992,7 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
-  '@iconify-json/material-symbols@1.2.97':
+  '@iconify-json/material-symbols@1.2.98':
     dependencies:
       '@iconify/types': 2.0.0
 
@@ -10757,7 +10757,7 @@ snapshots:
       - unloader
       - webpack
 
-  vue-sonner@2.0.9(patch_hash=34b2065fecd4314653c24cdfc38ff5f2910def4942ed265ec374d66c0e5c0940): {}
+  vue-sonner@2.0.9(patch_hash=e778efa69ee00b0c8683a067150b163d9f7b135c2c8d68f9124c6d0fe033a14d): {}
 
   vue@3.5.44(typescript@7.0.2):
     dependencies:
@@ -11033,7 +11033,7 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  youtubei.js@18.3.0(patch_hash=0003a0f2832c7de4790869f6008eb27a3d3fd9c6a8746042692b677c3f291a1e):
+  youtubei.js@18.3.0(patch_hash=a2127ec938b83177d2da9dea4b45e0d369499114e4b6e9c2cd57787953989b81):
     dependencies:
       '@bufbuild/protobuf': 2.14.1
       fflate: 0.8.3

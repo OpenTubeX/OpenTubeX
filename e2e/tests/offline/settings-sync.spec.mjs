@@ -573,18 +573,26 @@ test.describe('sync settings', () => {
     await expect(username).toHaveValue('paired-user')
   })
 
-  test('records concurrent setting edits without losing a sync timestamp', async ({ page }) => {
-    const updatedAt = await page.evaluate(async () => {
-      const store = window.$store
-      await Promise.all([
-        store.dispatch('recordSyncSettingEdit', 'baseTheme'),
-        store.dispatch('recordSyncSettingEdit', 'mainColor'),
-      ])
-      return store.state.settings.syncServerSettingUpdatedAt
-    })
+  test('records concurrent setting edits in two windows without losing a sync timestamp', async ({ app, page }) => {
+    const otherWindow = await openNewWindowFromTabBar(app, page)
+    await waitForAppReady(otherWindow)
+    const recordEdits = (target, settingIds) => target.evaluate(ids => (
+      Promise.all(ids.map(settingId => window.$store.dispatch('saveSyncSettingEdit', { settingId, save: async () => {} })))
+    ), settingIds)
 
-    expect(updatedAt.baseTheme).toEqual(expect.any(Number))
-    expect(updatedAt.mainColor).toEqual(expect.any(Number))
+    await Promise.all([
+      recordEdits(page, ['baseTheme', 'mainColor']),
+      recordEdits(otherWindow, ['secColor', 'listType']),
+    ])
+
+    for (const target of [page, otherWindow]) {
+      await expect.poll(() => target.evaluate(() => window.$store.state.settings.syncServerSettingUpdatedAt)).toMatchObject({
+        baseTheme: expect.any(Number),
+        mainColor: expect.any(Number),
+        secColor: expect.any(Number),
+        listType: expect.any(Number),
+      })
+    }
   })
 
   test('does not follow sync-server redirects with credentials', async ({ page }) => {

@@ -100,8 +100,15 @@
               class="feedRow"
               :class="{ hasError: errorFeedUrls.has(feed.url) }"
             >
+              <FtLoader
+                v-if="retryingFeedUrls.has(feed.url)"
+                class="feedIcon"
+                inline
+                :label="t('Subscriptions.RSS Feeds.Reloading Feed', { feed: feed.title || feed.url })"
+                :tab-loading-indicator="false"
+              />
               <FtIcon
-                v-if="errorFeedUrls.has(feed.url)"
+                v-else-if="errorFeedUrls.has(feed.url)"
                 class="feedIcon"
                 :icon="['fas', 'circle-exclamation']"
                 aria-hidden="true"
@@ -163,6 +170,7 @@ import FtButton from '../../FtButton/FtButton.vue'
 import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 import FtIconButton from '../../FtIconButton/FtIconButton.vue'
 import FtInput from '../../FtInput/FtInput.vue'
+import FtLoader from '../../FtLoader/FtLoader.vue'
 import FtRetryImage from '../../FtRetryImage.vue'
 import FtSelect from '../../FtSelect/FtSelect.vue'
 import FtSettingsSection from '../../FtSettingsSection/FtSettingsSection.vue'
@@ -171,6 +179,7 @@ import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 import RssHubFeedPrompt from './RssHubFeedPrompt.vue'
 
 import store from '../../../store/index'
+import { AUTO_REFRESH_INTERVAL_VALUES, getAutoRefreshIntervalNames } from '../../../helpers/autoRefreshIntervals'
 import { clampOverlayScrollTop } from '../../../helpers/overlayScrollbars'
 import {
   addLoadedRssFeed,
@@ -182,6 +191,7 @@ import {
   updateMissingRssFeedAvatars
 } from '../../../helpers/rssFeeds'
 import { showToast } from '../../../helpers/utils'
+import { holdAndroidBackgroundWork } from '../../../helpers/androidBackgroundSync.js'
 
 const RSSHUB_NAME = 'RSSHub'
 const RSSHUB_URL = 'https://github.com/DIYgod/RSSHub'
@@ -190,16 +200,7 @@ const { t } = useI18n()
 
 const enableRssFeeds = computed(() => store.getters.getEnableRssFeeds)
 
-const AUTO_REFRESH_INTERVAL_VALUES = ['0', '1800000', '3600000', '7200000', '14400000', '21600000', '28800000']
-const autoRefreshIntervalNames = computed(() => [
-  t('Settings.General Settings.Avoid translation.Disabled'),
-  '30 min',
-  '1 h',
-  '2 h',
-  '4 h',
-  '6 h',
-  '8 h'
-])
+const autoRefreshIntervalNames = computed(() => getAutoRefreshIntervalNames(t))
 const autoRefreshInterval = computed(() => store.getters.getRssFeedsAutoRefreshInterval)
 /** @type {import('vue').ComputedRef<import('../../../helpers/rssFeeds').RssFeed[]>} */
 const feeds = computed(() => store.getters.getFollowedRssFeeds)
@@ -287,13 +288,16 @@ async function addFeed(text) {
   }
 
   isAdding.value = true
+  // Lets the feed load and save in a hidden Android app
+  const releaseBackgroundHold = holdAndroidBackgroundWork()
   try {
     // Loading the feed first rejects addresses that aren't feeds and finds its title
     const result = await fetchRssFeed(url)
     const feed = { url, title: result.title }
     // Cached before saving, so that the RSS tab doesn't reload every feed for the new one
     addLoadedRssFeed(feed, result)
-    if (await store.dispatch('updateFollowedRssFeeds', [...feeds.value, feed]) === false) {
+    const added = followed => followed.some(({ url }) => url === feed.url) ? followed : [...followed, feed]
+    if (await store.dispatch('updateFollowedRssFeeds', added) === false) {
       throw new Error('The feed could not be saved')
     }
     updateMissingRssFeedAvatars([[feed, result]])
@@ -302,6 +306,7 @@ async function addFeed(text) {
     showFeedError(error)
     return false
   } finally {
+    releaseBackgroundHold()
     isAdding.value = false
   }
 }
@@ -336,7 +341,7 @@ async function retryFeed(feed) {
  * @param {import('../../../helpers/rssFeeds').RssFeed} feed
  */
 function removeFeed(feed) {
-  store.dispatch('updateFollowedRssFeeds', feeds.value.filter(({ url }) => url !== feed.url))
+  store.dispatch('updateFollowedRssFeeds', followed => followed.filter(({ url }) => url !== feed.url))
 }
 </script>
 

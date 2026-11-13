@@ -190,6 +190,12 @@ Home Page:
   All sections hidden: تمام سیکشن پوشیدہ ہیں
   All sections hidden description: کسی سیکشن کو دوبارہ دکھانے کے لیے ہوم کو حسب ضرورت بنائیں۔
 Subscriptions:
+  Channel Errors:
+    Summary: "1 چینل ریفریش نہیں ہو سکا۔ | {count} چینلز ریفریش نہیں ہو سکے۔"
+    Toast: "کچھ سبسکرائب شدہ چینلز ریفریش نہیں ہو سکے۔ انہیں دیکھنے کے لیے کلک کریں۔"
+    Retry Channel: "{channel} دوبارہ آزمائیں"
+    Show All: "سب دکھائیں"
+    Show Fewer: "کم دکھائیں"
   Cache Load Error: آپ کی محفوظ کردہ سبسکرپشن فیڈز لوڈ نہیں ہو سکیں۔
   New video from {channel}: '{channel} کی نئی ویڈیو'
   New short from {channel}: '{channel} کا نیا شارٹ'
@@ -197,8 +203,6 @@ Subscriptions:
   New post from {channel}: '{channel} کی نئی پوسٹ'
   Mark As Unseen: نہ دیکھا گیا نشان زد کریں
   Copy Error Details: تکنیکی تفصیلات کاپی کریں
-  Refresh Errors: 'وہ چینلز جو ریفریش نہیں ہو سکے: {channels}۔ تفصیلات دیکھنے کے لیے کلک کریں۔'
-  Refresh Error Channels More: '{channels} اور {count} مزید | {channels} اور {count} مزید'
   Never show {type} from this channel in feeds again: اس چینل کی {type} فیڈز میں دوبارہ کبھی نہ دکھائیں
   Refreshing Subscription Videos: سبسکرپشن ویڈیوز ریفریش ہو رہی ہیں
   Refreshing Subscription Shorts: سبسکرپشن شارٹس ریفریش ہو رہے ہیں
@@ -206,7 +210,7 @@ Subscriptions:
   Refreshing Subscription Posts: سبسکرپشن پوسٹس ریفریش ہو رہی ہیں
   New Content: نیا مواد
   New Feed Refresh Warning Title: سبسکرپشن کی تمام فیڈز ریفریش کریں؟
-  New Feed Refresh Warning: 1 سبسکرپشن کے لیے RSS کے بغیر تمام اقسام کا مواد ریفریش کرنے میں کافی وقت لگ سکتا ہے۔ کیا آپ جاری رکھنا چاہتے ہیں؟ | {count} سبسکرپشنز کے لیے RSS کے بغیر تمام اقسام کا مواد ریفریش کرنے میں کافی وقت لگ سکتا ہے۔ کیا آپ جاری رکھنا چاہتے ہیں؟
+  New Feed Refresh Warning: 1 سبسکرپشن کے لیے تمام اقسام کا مواد ریفریش کرنے میں کافی وقت لگ سکتا ہے۔ کیا آپ جاری رکھنا چاہتے ہیں؟ | {count} سبسکرپشنز کے لیے تمام اقسام کا مواد ریفریش کرنے میں کافی وقت لگ سکتا ہے۔ کیا آپ جاری رکھنا چاہتے ہیں؟
   New Since Last Refresh: پچھلی ریفریش کے بعد سے نیا
   Mark As Seen: دیکھا گیا نشان زد کریں
   Mark All as Seen: سب کو دیکھا گیا نشان زد کریں
@@ -247,6 +251,27 @@ Subscriptions:
       Optional Parameter: '{parameter} (اختیاری)'
       Not Set: سیٹ نہیں
     Retry Feed: '{feed} دوبارہ آزمائیں'
+    Reloading Feed: '{feed} دوبارہ لوڈ ہو رہا ہے'
+  Platforms:
+    Tab: پلیٹ فارمز
+    Platform: پلیٹ فارم
+    All Platforms: تمام پلیٹ فارمز
+    Followed Channels: دیگر پلیٹ فارمز پر فالو کیے گئے چینلز
+    Description: Twitch، SoundCloud، PeerTube، Rumble اور Odysee پر چینلز کو فالو کریں تاکہ ان کے اپ لوڈز اپنی سبسکرپشنز کے پلیٹ فارمز ٹیب میں دیکھ سکیں۔ تلاش کے ذریعے چینلز ڈھونڈیں، یا ان کے صفحے کے پتے سے انہیں شامل کریں۔ ان کا میڈیا yt-dlp کے ساتھ چلتا ہے۔
+    Add Channel: چینل شامل کریں
+    Channel URL: چینل کا پتا
+    Invalid Channel: Twitch، SoundCloud، PeerTube، Rumble یا Odysee پر کسی چینل صفحے کا پتا درج کریں۔
+    Channel Not Found: اس پتے پر کوئی چینل نہیں ہے۔
+    Channel Already Followed: آپ پہلے ہی اس چینل کو فالو کر رہے ہیں۔
+    Channel Could Not Be Loaded: چینل لوڈ نہیں ہو سکا۔
+    No Channels: آپ ابھی تک دیگر پلیٹ فارمز پر کسی چینل کو فالو نہیں کرتے۔
+    Unfollow Channel: '{channel} کو ان فالو کریں'
+    Go To Channel: '{channel} پر جائیں'
+    Follow: فالو کریں
+    Following: فالو کر رہے ہیں
+    Clips: کلپس
+    Refresh Errors: 1 چینل ریفریش نہیں ہو سکا۔ | {count} چینلز ریفریش نہیں ہو سکے۔
+    Content Tabs: پلیٹ فارم کے مواد کے ٹیبز
 Channels:
   Load More Channels: مزید چینلز لوڈ کریں
 Subscription Groups:
@@ -269,6 +294,7 @@ Trending:
   Load Error: ٹرینڈنگ لوڈ نہیں ہو سکی۔
   Unsupported Backend: ٹرینڈنگ کے لیے لوکل API درکار ہے۔ لوکل API منتخب کریں یا بیک اینڈ فال بیک فعال کریں۔
 Most Popular Feed Empty: اس Invidious انسٹنس کی مقبول ترین فیڈ خالی ہے۔
+Most Popular Load Error: "مقبول ترین فیڈ لوڈ نہیں ہو سکی۔"
 Feed:
   Cancel Refresh: ریفریش منسوخ کریں
   Next Auto Refresh: 'اگلی خودکار ریفریش: {date}'
@@ -358,6 +384,38 @@ History:
   Custom: حسب ضرورت
   History Older Than Days Removed: 1 دن سے پرانی دیکھنے کی ہسٹری ہٹا دی گئی ہے | {days} دن سے پرانی دیکھنے کی ہسٹری ہٹا دی گئی ہے
 Settings:
+  Experimental Badge: تجرباتی
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube اکاؤنٹ"
+    Unofficial App Warning: "OpenTubeX، YouTube کی آفیشل ایپ نہیں ہے۔ سائن ان کرنے سے یہاں آپ جو کچھ کرتے ہیں وہ آپ کے Google اکاؤنٹ سے منسلک ہو جاتا ہے، اور Google غیر آفیشل ایپس استعمال کرنے والے اکاؤنٹس کو محدود یا بین کر سکتا ہے۔ صرف ایسے اکاؤنٹ سے سائن ان کریں جسے کھونا آپ برداشت کر سکیں۔"
+    Sign In Explanation: "OpenTubeX ایک ٹی وی ایپ کی طرح سائن ان کرتا ہے: آپ Google کی ویب سائٹ پر اسے منظور کرتے ہیں، اور OpenTubeX کبھی آپ کا پاس ورڈ نہیں دیکھتا۔ سائن ان اسی آلے پر رہتا ہے اور نہ مطابقت پذیر ہوتا ہے نہ اس کا بیک اپ بنتا ہے۔"
+    Sign In: "سائن ان کریں"
+    Sign In Anyway: "پھر بھی سائن ان کریں"
+    Sign Out: "سائن آؤٹ کریں"
+    Getting Sign-In Code: "سائن ان کوڈ حاصل کیا جا رہا ہے"
+    Sign In Instructions: "سائن ان صفحہ کھولیں اور اپنا Google اکاؤنٹ منتخب کریں۔ کوڈ خود بخود بھر دیا جائے گا۔"
+    Other Device Instructions: "کسی دوسرے آلے پر اس پتے پر جائیں اور کوڈ درج کریں:"
+    YouTube Channel: "YouTube چینل"
+    Using Channel: "آپ اب YouTube کو {name} کے طور پر استعمال کر رہے ہیں"
+    Switch Channel Failed: "YouTube چینل تبدیل نہیں ہو سکا: {error}"
+    Open Sign-In Page: "سائن ان صفحہ کھولیں"
+    Copy Code: "کوڈ کاپی کریں"
+    Code Copied: "کوڈ کاپی ہو گیا"
+    Waiting for Approval: "آپ کی جانب سے سائن ان کی منظوری کا انتظار ہے"
+    Sign-In Denied: "سائن ان مسترد کر دیا گیا۔"
+    Sign-In Code Expired: "کوڈ کی میعاد ختم ہو گئی۔ نیا کوڈ حاصل کرنے کے لیے دوبارہ کوشش کریں۔"
+    Sign-In Failed: "سائن ان نہیں ہو سکا: {error}"
+    Signed In As: "YouTube میں {name} کے طور پر سائن ان ہو گیا"
+    Signed Out: "YouTube سے سائن آؤٹ ہو گیا"
+    Sign Out Failed: "سائن آؤٹ نہیں ہو سکا: {error}"
+    Revoke Failed: "YouTube سے سائن آؤٹ ہو گیا، لیکن Google نے سائن ان ختم ہونے کی تصدیق نہیں کی۔ آپ اسے اپنے Google اکاؤنٹ میں تھرڈ پارٹی کنکشنز سے ہٹا سکتے ہیں۔"
+    Signed out by YouTube: "YouTube نے سائن ان ختم کر دیا۔ اپنا اکاؤنٹ استعمال جاری رکھنے کے لیے سیٹنگز میں دوبارہ سائن ان کریں۔"
+    Subscribe on YouTube: "YouTube پر بھی سبسکرائب کریں"
+    Add to YouTube Watch History: "دیکھی گئی ویڈیوز کو YouTube ہسٹری میں شامل کریں"
+    Import Subscriptions: "YouTube سے سبسکرپشنز امپورٹ کریں"
+    Imported Subscriptions: "{count} چینل امپورٹ ہو گیا | {count} چینلز امپورٹ ہو گئے"
+    No Subscriptions to Import: "اس YouTube اکاؤنٹ میں کوئی سبسکرپشن نہیں ہے"
+    Import Subscriptions Failed: "سبسکرپشنز امپورٹ نہیں ہو سکیں: {error}"
   Tab Unloading:
     Automatically unload tabs: ٹیبز خود بخود ان لوڈ کریں
     Memory threshold: میموری کی حد
@@ -491,6 +549,7 @@ Settings:
       Closing Tabs: متعدد ٹیبز بند کرنا
       Loading Tabs: متعدد ٹیبز لوڈ کرنا
       Unloading Tabs: متعدد ٹیبز ان لوڈ کرنا
+      Refreshing All Feeds: بہت سی سبسکرپشنز ریفریش کرنا
     Always Use Backup Media Server: ہمیشہ بیک اپ میڈیا سرور استعمال کریں
     Close Window With Last Tab: آخری ٹیب بند کرنے پر ونڈو بند کریں
     Remember Tab Navigation History: ٹیب کی نیویگیشن ہسٹری یاد رکھیں
@@ -1232,6 +1291,12 @@ Settings:
     Refresh Subscriptions While App Is Closed: ایپ بند ہونے پر بھی سبسکرپشنز ریفریش کریں
     Notify About New Uploads: نئی اپ لوڈز کی اطلاع دیں
     RSS Feeds Auto Refresh Interval: RSS فیڈز کی خودکار ریفریش کا وقفہ
+    Faster Subscription Refresh: "سبسکرپشنز کی تیز تر تازہ کاری"
+    Platforms:
+      Other Platforms: دیگر پلیٹ فارمز
+      Manage Channels: فالو کیے گئے چینلز کا نظم کریں
+      Notify When Live: فالو کیے گئے Twitch چینلز کے لائیو ہونے پر مطلع کریں
+      Auto Refresh Interval: دیگر پلیٹ فارمز کی خودکار ریفریش کا وقفہ
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: دیکھنے کا وقت شمار کریں از
@@ -1564,7 +1629,6 @@ Settings:
   Parental Control Settings:
     Disable Channel Links: چینل لنکس غیر فعال کریں
   Experimental Settings:
-    Faster Subscription Refresh: "سبسکرپشنز کی تیز تر تازہ کاری"
     Disable Hardware Acceleration: ہارڈ ویئر ایکسلریشن غیر فعال کریں
   Diagnostics:
     Diagnostics: تشخیص
@@ -1916,6 +1980,7 @@ Video:
     Auto-generated Caption Template: '{language} (خودکار طور پر تیار کردہ)'
     Up next in {seconds}: اگلی ویڈیو {seconds} میں
     Resize dock: ڈاک کا سائز بدلیں
+    Resize dock width: ڈاک کی چوڑائی بدلیں
     Play now: ابھی چلائیں
     MusicPlaybackRateOverride: میوزک ویڈیو کا پتہ چلا، 1x پر چل رہی ہے
     Normal: عام
@@ -2126,6 +2191,7 @@ Context Menu:
   Reload Posts: پوسٹس دوبارہ لوڈ کریں
   Reload All Feeds: تمام فیڈز دوبارہ لوڈ کریں
   Reload RSS Feeds: RSS فیڈز دوبارہ لوڈ کریں
+  Reload Platforms: پلیٹ فارمز دوبارہ لوڈ کریں
   Close Multiple Tabs: '{count} ٹیبز بند کریں'
   Duplicate Tab: ٹیب کی نقل بنائیں
   Duplicate Multiple Tabs: '{count} ٹیبز کی نقل بنائیں'
@@ -2279,6 +2345,9 @@ Description:
   Games: گیمز
   Music: موسیقی
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "OpenTubeX میں کسی چینل کو سبسکرائب یا ان سبسکرائب کرنے سے آپ کے YouTube اکاؤنٹ پر بھی یہی ہوتا ہے۔"
+    Add to YouTube Watch History: "آپ جو ویڈیوز چلاتے ہیں وہ آپ کی YouTube واچ ہسٹری میں شامل ہو جاتی ہیں، تاکہ YouTube کی تجاویز ان سے سیکھیں۔ جب YouTube پر ہسٹری موقوف ہو تو کچھ بھی شامل نہیں کیا جاتا۔"
   General Settings:
     Built-in Streams: |
       خودکار زیادہ تر ویڈیوز کو YouTube کے visionOS کلائنٹ سے چلاتا ہے، جو تیزی سے شروع ہوتا ہے اور خودکار معیار کو سپورٹ کرتا ہے۔ لائیو اسٹریمز اور وہ ویڈیوز جو یہ نہیں چلا سکتا، SABR استعمال کرتی ہیں۔
@@ -2302,6 +2371,7 @@ Tooltips:
       yt-dlp استعمال کرنے پر ویڈیوز کو شروع ہونے میں زیادہ وقت لگ سکتا ہے۔
     Avoid translation: |
       ویڈیو کے عنوان، تفصیل اور چیپٹرز کا YouTube کا خودکار ترجمہ غیر فعال کریں۔
+      "پوری ایپ" چینلز کے نام اور تفصیلات بھی ان کی اصل زبان میں دکھاتی ہے۔
       بہت زیادہ درخواستیں، جیسے فہرستوں میں ویڈیو عنوانات حاصل کرنا، عارضی طور پر
       ایپ کی قابل اعتمادی کو متاثر کر سکتی ہیں۔
     Always Use Backup Media Server: تفویض کردہ سرور کے بجائے YouTube کے بتائے گئے بیک اپ سرور سے ویڈیوز اسٹریم کرتا ہے، مثلاً جب آپ کے انٹرنیٹ فراہم کنندہ کا کیش اکثر سست ہو۔ ورنہ OpenTubeX صرف تب سرور تبدیل کرتا ہے جب تفویض کردہ سرور جواب نہ دے۔
@@ -2389,8 +2459,11 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: آپ کی منتخب کردہ سیٹنگز کے ساتھ فیڈز ریفریش کرتا ہے۔ ڈیسک ٹاپ پر OpenTubeX باہر نکلنے تک سسٹم ٹرے میں رہتا ہے۔ Android کنٹرول کرتا ہے کہ پس منظر کی ریفریش کب چلے۔
     Notify About New Uploads: ان چینلز کے لیے اس ڈیوائس پر سسٹم نوٹیفکیشنز دکھاتا ہے جن کی اطلاعات آپ نے ان کی سبسکرپشن سیٹنگز میں آن کی ہیں۔ OpenTubeX سبسکرپشنز ریفریش ہونے پر نیا مواد چیک کرتا ہے، اس لیے خودکار ریفریش کا وقفہ منتخب کریں۔ ایپ بند ہونے پر اطلاع پانے کے لیے ایپ بند ہونے پر ریفریش کرنا بھی فعال کریں۔
     RSS Feeds Auto Refresh Interval: ایپ کھلی ہونے کے دوران OpenTubeX آپ کی RSS فیڈز کو کتنی بار خودکار طور پر ریفریش کرتا ہے۔
+    Faster Subscription Refresh: "پہلے ہر چینل کی RSS فیڈ چیک کرتا ہے اور صرف نئے اپ لوڈز والے چینلز کی ویڈیوز، Shorts اور لائیو اسٹریمز لوڈ کرتا ہے۔ خودکار تازہ کاریاں پچھلے 10 منٹ میں لوڈ کیے گئے چینلز کو بھی چھوڑ دیتی ہیں۔ نئے اپ لوڈز کے بغیر چینلز کے لیے، ویوز کی تعداد، ہٹائی گئی ویڈیوز اور تبدیل شدہ عنوانات صرف ہر چند گھنٹوں بعد اپ ڈیٹ ہوتے ہیں، اور RSS فیڈ پیچھے رہنے پر نئے اپ لوڈز بعد میں ظاہر ہو سکتے ہیں۔ Invidious API کے ساتھ دستیاب نہیں۔"
+    Platforms Auto Refresh Interval: ایپ کھلی ہونے کے دوران OpenTubeX دیگر پلیٹ فارمز پر آپ کے فالو کیے گئے چینلز کو کتنی بار خودکار طور پر ریفریش کرتا ہے۔
+    Twitch Notify When Live: جب آپ کے فالو کیے گئے Twitch چینلز میں سے کوئی اسٹریمنگ شروع کرے تو آپ کو مطلع کرتا ہے۔ OpenTubeX کھلا ہونے کے دوران ہر چند منٹ بعد چیک کرتا ہے، اور بند ہونے کے دوران بھی اگر اس وقت سبسکرپشنز ریفریش کرتا ہو۔
   Theme Settings:
-    Only Show Important Notifications: ایپ کے اندر وہ اطلاعات چھپاتا ہے جو صرف کسی کارروائی کی تصدیق کرتی ہیں یا کسی حالت کی اطلاع دیتی ہیں۔ غلطیاں، انتباہات، آپ کی ترتیب دی ہوئی یاد دہانیاں، اور ایسی اطلاعات جو کوئی کارروائی پیش کرتی ہیں، جیسے پہلے جیسا کریں، بدستور ظاہر ہوتی ہیں۔ پس منظر کے کاموں کی پیش رفت، جیسے سبسکرپشنز کو تازہ کرنا، اطلاع کے بجائے عمومی پیش رفت بار میں دکھائی جاتی ہے۔ سسٹم کی اطلاعات متاثر نہیں ہوتیں۔
+    Only Show Important Notifications: ایپ کے اندر وہ اطلاعات چھپاتا ہے جو صرف کسی کارروائی کی تصدیق کرتی ہیں یا کسی حالت کی اطلاع دیتی ہیں، بشمول وہ جو پہلے جیسا کریں پیش کرتی ہیں۔ غلطیاں، انتباہات، آپ کی ترتیب دی ہوئی یاد دہانیاں، اور ایسی اطلاعات جو آپ سے فیصلہ مانگتی ہیں، جیسے اپ ڈیٹ کی درخواستیں، بدستور ظاہر ہوتی ہیں۔ پس منظر کے کاموں کی پیش رفت، جیسے سبسکرپشنز کو تازہ کرنا، اطلاع کے بجائے عمومی پیش رفت بار میں دکھائی جاتی ہے۔ سسٹم کی اطلاعات متاثر نہیں ہوتیں۔
     Thumbnail Size: گرڈز اور فہرستوں میں ویڈیو تھمب نیلز کا سائز بدلتا ہے۔ مقررہ کالمز والے گرڈز یا پوری چوڑائی والا منظر ہر قطار کو بھر دیتے ہیں، اس لیے وہاں یہ صرف فہرست کے تھمب نیلز اور شارٹس کو تبدیل کرتا ہے۔ فون کے سائز کی ونڈوز گرڈ تھمب نیلز کو 100% تک محدود کرتی ہیں۔
     Playlist Thumbnail Size: پلے لسٹ صفحات پر ویڈیو تھمب نیلز کا سائز بدلتا ہے۔ مقررہ کالمز والے گرڈز یا پوری چوڑائی والا منظر ہر قطار کو بھر دیتے ہیں، اس لیے وہاں یہ صرف فہرست کے تھمب نیلز اور شارٹس کو تبدیل کرتا ہے۔ فون کے سائز کی ونڈوز گرڈ تھمب نیلز کو 100% تک محدود کرتی ہیں۔
     Show Progress as Notification: عمومی پروگریس بار استعمال کرنے کے بجائے پس منظر کی کارروائیوں، جیسے سبسکرپشن ریفریش اور منظم ٹولز کے ڈاؤن لوڈز، کی براہ راست پیش رفت کے ساتھ مستقل نوٹیفکیشن دکھاتا ہے۔
@@ -2404,7 +2477,6 @@ Tooltips:
     Modal Backdrop: "طے کرتا ہے کہ ڈائیلاگز اور مینیوز کے پیچھے ایپ کیسی دکھائی دے۔ دھندلا کرنا کم طاقتور آلات پر سست ہو سکتا ہے۔"
     Click Scrollbar Track to Scroll: "اسکرول بار پر اس کے ہینڈل کے باہر کلک کرنے سے کلک کی سمت میں تقریباً ایک صفحہ اسکرول ہوتا ہے۔ جب تک یہ آن ہے، نظر آنے والی اسکرول بار اپنے نیچے موجود آئٹمز کے لیے کیے گئے کلکس لے لیتی ہے۔ ٹیب بار کی اسکرول بار ہمیشہ اسی طرح کام کرتی ہے۔"
   Experimental Settings:
-    Faster Subscription Refresh: "پہلے ہر چینل کی RSS فیڈ چیک کرتا ہے اور صرف نئے اپ لوڈز والے چینلز کی ویڈیوز، Shorts اور لائیو اسٹریمز لوڈ کرتا ہے۔ خودکار تازہ کاریاں پچھلے 10 منٹ میں لوڈ کیے گئے چینلز کو بھی چھوڑ دیتی ہیں۔ نئے اپ لوڈز کے بغیر چینلز کے لیے، ویوز کی تعداد، ہٹائی گئی ویڈیوز اور تبدیل شدہ عنوانات صرف ہر چند گھنٹوں بعد اپ ڈیٹ ہوتے ہیں، اور RSS فیڈ پیچھے رہنے پر نئے اپ لوڈز بعد میں ظاہر ہو سکتے ہیں۔ Invidious API کے ساتھ دستیاب نہیں۔"
     Disable Hardware Acceleration: GPU ہارڈ ویئر ایکسلریشن غیر فعال کرتا ہے۔ گرافیکل مسائل حل ہو سکتے ہیں، لیکن کارکردگی غالباً کم ہو جائے گی۔
   SponsorBlock Settings:
     Always Show DeArrow Badge: ان ویڈیوز پر جن کا عنوان یا تھمب نیل DeArrow نے تبدیل کیا ہے، DeArrow بٹن کو صرف ماؤس لے جانے پر نہیں بلکہ ہمیشہ نظر آنے دیں۔
@@ -2743,3 +2815,31 @@ Notification Center:
   Clear: "صاف کریں"
   Empty: "ابھی تک کوئی اطلاع نہیں"
   Empty Hint: "لائیو اسٹریم کی یاد دہانیاں اور اطلاعات آن والے چینلز کے نئے اپ لوڈز یہاں نظر آئیں گے۔"
+Platforms:
+  Tracks: ٹریکس
+  Playlists: پلے لسٹس
+  Follower Count: 1 فالوور | {count} فالوورز
+  Open Website: '{platform} پر کھولیں'
+  Channel Not Found: یہ چینل نہیں مل سکا۔
+  Playlist Not Found: یہ پلے لسٹ نہیں مل سکی۔
+  Load Error: یہ صفحہ {platform} سے لوڈ نہیں ہو سکا۔
+  Empty Tab: یہاں ابھی کچھ نہیں ہے۔
+YouTube Account:
+  Like: "پسند کریں"
+  Dislike: "ناپسند کریں"
+  Rating Failed: "YouTube پر ریٹنگ نہیں ہو سکی: {error}"
+  Subscribe Failed: "YouTube پر سبسکرائب نہیں ہو سکا: {error}"
+  Unsubscribe Failed: "YouTube پر ان سبسکرائب نہیں ہو سکا: {error}"
+  Add a comment: "کمنٹ شامل کریں"
+  Add a reply: "جواب شامل کریں"
+  Comment: "کمنٹ کریں"
+  Reply: "جواب دیں"
+  Comment Posted: "کمنٹ پوسٹ ہو گیا"
+  Reply Posted: "جواب پوسٹ ہو گیا"
+  Comment Failed: "کمنٹ پوسٹ نہیں ہو سکا: {error}"
+  Delete Comment: "کمنٹ حذف کریں"
+  Delete Comment Confirmation: "اپنا کمنٹ YouTube سے حذف کریں؟"
+  Comment Deleted: "کمنٹ حذف ہو گیا"
+  Delete Comment Failed: "کمنٹ حذف نہیں ہو سکا: {error}"
+  Recommendations: "YouTube کی تجاویز"
+  Recommendations Failed: "آپ کی YouTube تجاویز لوڈ نہیں ہو سکیں۔"

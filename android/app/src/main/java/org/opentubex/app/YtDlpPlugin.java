@@ -26,6 +26,9 @@ import java.util.function.Consumer;
 @CapacitorPlugin(name = "YtDlp")
 public final class YtDlpPlugin extends Plugin {
     private final ExecutorService executor = Executors.newFixedThreadPool(3);
+    // Rumble pages load for feeds and channel pages, each through a helper
+    // process, so they don't hold up the playback calls.
+    private final ExecutorService rumbleExecutor = Executors.newFixedThreadPool(2);
     private final Consumer<JSONObject> listener = record -> {
         try { notifyListeners("downloadStatus", JSObject.fromJSONObject(record)); }
         catch (Exception error) { android.util.Log.w("OpenTubeXYtDlp", "Unable to deliver download status", error); }
@@ -50,12 +53,14 @@ public final class YtDlpPlugin extends Plugin {
     @Override protected void handleOnDestroy() {
         downloads.unobserve(listener);
         executor.shutdownNow();
+        rumbleExecutor.shutdownNow();
     }
 
     private interface Operation { JSONObject run() throws Exception; }
-    private void run(PluginCall call, Operation operation) {
+    private void run(PluginCall call, Operation operation) { run(executor, call, operation); }
+    private void run(ExecutorService pool, PluginCall call, Operation operation) {
         try {
-            executor.submit(() -> {
+            pool.submit(() -> {
                 try { call.resolve(JSObject.fromJSONObject(operation.run())); }
                 catch (Exception error) {
                     Throwable cause = error.getCause() == null ? error : error.getCause();
@@ -244,6 +249,10 @@ public final class YtDlpPlugin extends Plugin {
             .put("ffprobe", new JSONObject(binary.toString()).put("version", ffprobeVersion));
     }
     @PluginMethod public void info(PluginCall call) { run(call, this::infoResult); }
+    @PluginMethod public void fetchRumblePage(PluginCall call) {
+        long requestedAt = System.nanoTime();
+        run(rumbleExecutor, call, () -> RumblePages.fetch(call.getString("url"), payload -> RumbleManifestTransport.send(getContext(), payload), requestedAt));
+    }
 
     private static String repository(String channel) {
         return "nightly".equals(channel) ? "yt-dlp/yt-dlp-nightly-builds" : "master".equals(channel) ? "yt-dlp/yt-dlp-master-builds" : "yt-dlp/yt-dlp";

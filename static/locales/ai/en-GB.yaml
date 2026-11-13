@@ -160,6 +160,12 @@ Home Page:
   All sections hidden: All sections are hidden
   All sections hidden description: Customise Home to show a section again.
 Subscriptions:
+  Channel Errors:
+    Summary: "1 channel could not be refreshed. | {count} channels could not be refreshed."
+    Toast: "Some subscribed channels could not be refreshed. Click to view them."
+    Retry Channel: "Retry {channel}"
+    Show All: "Show all"
+    Show Fewer: "Show fewer"
   Cache Load Error: Your saved subscription feeds could not be loaded.
   New video from {channel}: New video from {channel}
   New short from {channel}: New short from {channel}
@@ -167,8 +173,6 @@ Subscriptions:
   New post from {channel}: New post from {channel}
   Mark As Unseen: Mark As Unseen
   Copy Error Details: "Copy technical details"
-  Refresh Errors: "Channels that could not be refreshed: {channels}. Click to view details."
-  Refresh Error Channels More: "{channels} and {count} more | {channels} and {count} more"
   Never show {type} from this channel in feeds again: Never show {type} from this channel in feeds again
   Refreshing Subscription Videos: Refreshing subscription videos
   Refreshing Subscription Shorts: Refreshing subscription shorts
@@ -176,7 +180,7 @@ Subscriptions:
   Refreshing Subscription Posts: Refreshing subscription posts
   New Content: New content
   New Feed Refresh Warning Title: Refresh all subscription feeds?
-  New Feed Refresh Warning: Refreshing all content types without RSS for 1 subscription can take a long time. Do you want to continue? | Refreshing all content types without RSS for {count} subscriptions can take a long time. Do you want to continue?
+  New Feed Refresh Warning: Refreshing all content types for 1 subscription can take a long time. Do you want to continue? | Refreshing all content types for {count} subscriptions can take a long time. Do you want to continue?
   New Since Last Refresh: New since last refresh
   Mark As Seen: Mark As Seen
   Mark All as Seen: Mark all as seen
@@ -217,11 +221,33 @@ Subscriptions:
       Optional Parameter: '{parameter} (optional)'
       Not Set: Not set
     Retry Feed: Retry {feed}
+    Reloading Feed: Reloading {feed}
+  Platforms:
+    Tab: Platforms
+    Platform: Platform
+    All Platforms: All platforms
+    Followed Channels: Followed channels on other platforms
+    Description: Follow channels on Twitch, SoundCloud, PeerTube, Rumble and Odysee to see their uploads in the Platforms tab of your subscriptions. Find channels with the search, or add them by the address of their page. Their media plays with yt-dlp.
+    Add Channel: Add channel
+    Channel URL: Channel address
+    Invalid Channel: Enter the address of a channel page on Twitch, SoundCloud, PeerTube, Rumble or Odysee.
+    Channel Not Found: There is no channel at this address.
+    Channel Already Followed: You already follow this channel.
+    Channel Could Not Be Loaded: The channel could not be loaded.
+    No Channels: You don't follow any channels on other platforms yet.
+    Unfollow Channel: Unfollow {channel}
+    Go To Channel: Go to {channel}
+    Follow: Follow
+    Following: Following
+    Clips: Clips
+    Refresh Errors: 1 channel could not be refreshed. | {count} channels could not be refreshed.
+    Content Tabs: Platform content tabs
 Trending:
   Music: Music
   Load Error: Trending could not be loaded.
   Unsupported Backend: Trending requires the Local API. Select the Local API or enable backend fallback.
 Most Popular Feed Empty: This Invidious instance's Most Popular feed is empty.
+Most Popular Load Error: "The Most Popular feed could not be loaded."
 Feed:
   Cancel Refresh: Cancel refresh
   Next Auto Refresh: 'Next auto refresh: {date}'
@@ -309,6 +335,38 @@ History:
   Custom: Custom
   History Older Than Days Removed: Watch history older than 1 day has been removed | Watch history older than {days} days has been removed
 Settings:
+  Experimental Badge: Experimental
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube Account"
+    Unofficial App Warning: "OpenTubeX is not an official YouTube app. Signing in links what you do here to your Google account, and Google can restrict or ban accounts that use unofficial apps. Only sign in with an account you can afford to lose."
+    Sign In Explanation: "OpenTubeX signs in like a TV app: you approve it on Google's website, and OpenTubeX never sees your password. The sign-in stays on this device and is not synced or backed up."
+    Sign In: "Sign in"
+    Sign In Anyway: "Sign in anyway"
+    Sign Out: "Sign out"
+    Getting Sign-In Code: "Getting a sign-in code"
+    Sign In Instructions: "Open the sign-in page and choose your Google account. The code is filled in for you."
+    Other Device Instructions: "On another device, go to this address and enter the code:"
+    YouTube Channel: "YouTube channel"
+    Using Channel: "Now using YouTube as {name}"
+    Switch Channel Failed: "Could not switch the YouTube channel: {error}"
+    Open Sign-In Page: "Open sign-in page"
+    Copy Code: "Copy code"
+    Code Copied: "Code copied"
+    Waiting for Approval: "Waiting for you to approve the sign-in"
+    Sign-In Denied: "The sign-in was denied."
+    Sign-In Code Expired: "The code expired. Try again to get a new one."
+    Sign-In Failed: "Could not sign in: {error}"
+    Signed In As: "Signed in to YouTube as {name}"
+    Signed Out: "Signed out of YouTube"
+    Sign Out Failed: "Could not sign out: {error}"
+    Revoke Failed: "Signed out of YouTube, but Google did not confirm that the sign-in ended. You can remove it under third-party connections in your Google account."
+    Signed out by YouTube: "YouTube ended the sign-in. Sign in again in Settings to keep using your account."
+    Subscribe on YouTube: "Subscribe on YouTube too"
+    Add to YouTube Watch History: "Add watched videos to YouTube history"
+    Import Subscriptions: "Import subscriptions from YouTube"
+    Imported Subscriptions: "Imported {count} channel | Imported {count} channels"
+    No Subscriptions to Import: "This YouTube account has no subscriptions"
+    Import Subscriptions Failed: "Could not import subscriptions: {error}"
   Diagnostics:
     Diagnostics: Diagnostics
     Description: While diagnostic logging is on, OpenTubeX keeps recent log messages in memory so you can attach them to bug reports. It never saves or sends them on its own, and turning logging off deletes them. Reports leave out cookies, tokens, IP addresses and URL parameters, but they can include IDs of videos you played, so check a report before you share it.
@@ -442,6 +500,7 @@ Settings:
       Closing Tabs: Closing multiple tabs
       Loading Tabs: Loading multiple tabs
       Unloading Tabs: Unloading multiple tabs
+      Refreshing All Feeds: Refreshing many subscriptions
     Remember Tab Navigation History: Remember Tab Navigation History
     New Tab Position:
       New Tab Position: New Tab Position
@@ -1159,6 +1218,12 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Refresh Subscriptions While App Is Closed"
     Notify About New Uploads: Notify About New Uploads
     RSS Feeds Auto Refresh Interval: RSS Feeds Auto Refresh Interval
+    Faster Subscription Refresh: "Faster Subscription Refresh"
+    Platforms:
+      Other Platforms: Other platforms
+      Manage Channels: Manage followed channels
+      Notify When Live: Notify when followed Twitch channels go live
+      Auto Refresh Interval: Other platforms auto refresh interval
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Count Watch Time From"
@@ -1472,7 +1537,6 @@ Settings:
   Search Settings: Search settings
   No Settings Found: No settings found
   Experimental Settings:
-    Faster Subscription Refresh: "Faster Subscription Refresh"
     Disable Hardware Acceleration: Disable Hardware Acceleration
   Interface Customizer:
     Customize Interface: "Customise interface"
@@ -1769,6 +1833,7 @@ Video:
     Auto-generated Caption Template: "{language} (auto-generated)"
     Up next in {seconds}: Up next in {seconds}
     Resize dock: Resize dock
+    Resize dock width: Resize dock width
     Play now: Play now
     MusicPlaybackRateOverride: Detected music video, playing back at 1x
     Normal: Normal
@@ -2011,6 +2076,7 @@ Context Menu:
   Reload Posts: Reload Posts
   Reload All Feeds: Reload All Feeds
   Reload RSS Feeds: Reload RSS Feeds
+  Reload Platforms: Reload Platforms
   Close Multiple Tabs: Close {count} Tabs
   Duplicate Tab: Duplicate Tab
   Duplicate Multiple Tabs: Duplicate {count} Tabs
@@ -2164,6 +2230,9 @@ Description:
   Games: Games
   Music: Music
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Subscribing to or unsubscribing from a channel in OpenTubeX does the same on your YouTube account."
+    Add to YouTube Watch History: "Videos you play are added to your YouTube watch history, so YouTube's recommendations learn from them. Nothing is added while the history is paused on YouTube."
   General Settings:
     Built-in Streams: |
       Automatic plays most videos through YouTube's visionOS client, which starts faster and supports automatic quality. Live streams and videos it can't play use SABR.
@@ -2186,7 +2255,8 @@ Tooltips:
       Choose how OpenTubeX obtains video streams. yt-dlp must be available when selected.
       Videos may take longer to start when using yt-dlp.
     Avoid translation: |
-      Disable YouTube's autotranslation of title, description and chapters of a video.
+      Disable YouTube's autotranslation of video titles, descriptions and chapters.
+      Entire App also shows channel names and descriptions in their original language.
       Too many requests, such as fetching video titles across lists, may temporarily
       impact app reliability.
     Show Thumbnail Previews: Show animated previews when hovering over video thumbnails.
@@ -2273,8 +2343,11 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Refreshes feeds using your selected settings. On desktop, OpenTubeX stays in the system tray until you quit. Android controls when background refreshes run."
     Notify About New Uploads: Shows system notifications on this device for channels whose notifications you turned on in their subscription settings. OpenTubeX checks for new content when subscriptions refresh, so choose an auto refresh interval. To be notified while the app is closed, also enable refreshing while the app is closed.
     RSS Feeds Auto Refresh Interval: How often OpenTubeX automatically refreshes your RSS feeds while the app is open.
+    Faster Subscription Refresh: "Checks each channel's RSS feed first and only loads the videos, Shorts and live streams of channels with new uploads. Automatic refreshes also skip channels loaded in the last 10 minutes. For channels without new uploads, view counts, removed videos and changed titles only update every few hours, and new uploads may appear later when the RSS feed lags behind. Not available with the Invidious API."
+    Platforms Auto Refresh Interval: How often OpenTubeX automatically refreshes the channels you follow on other platforms while the app is open.
+    Twitch Notify When Live: Notifies you when one of your followed Twitch channels starts streaming. OpenTubeX checks every few minutes while it is open, and also while it is closed if it refreshes subscriptions then.
   Theme Settings:
-    Only Show Important Notifications: Hides in-app notifications that only confirm an action or report a status. Errors, warnings, reminders you set up, and notifications that offer an action, such as Undo, still appear. Background progress, such as subscription refreshes, shows in the global progress bar instead of a notification. System notifications are not affected.
+    Only Show Important Notifications: Hides in-app notifications that only confirm an action or report a status, including ones that offer Undo. Errors, warnings, reminders you set up, and notifications that ask for a decision, such as update prompts, still appear. Background progress, such as subscription refreshes, shows in the global progress bar instead of a notification. System notifications are not affected.
     Visible Search Suggestions: "Sets how many search history entries and suggestions the search bar shows before its list scrolls. The list never extends past the bottom of the window."
     Thumbnail Size: "Scales video thumbnails in grids and lists. Grids with a fixed column count or the Full Width view type fill each row instead, so there it only changes list thumbnails and Shorts. Phone-sized windows limit grid thumbnails to 100%."
     Playlist Thumbnail Size: "Scales video thumbnails on playlist pages. Grids with a fixed column count or the Full Width view type fill each row instead, so there it only changes list thumbnails and Shorts. Phone-sized windows limit grid thumbnails to 100%."
@@ -2288,7 +2361,6 @@ Tooltips:
     Modal Backdrop: "Sets how the app looks behind dialogues and menus. Blurring it can be slow on less powerful devices."
     Click Scrollbar Track to Scroll: "Clicking a scrollbar outside its handle scrolls about one page towards the click. While this is on, a visible scrollbar catches clicks meant for items under it. The tab bar's scrollbar always works this way."
   Experimental Settings:
-    Faster Subscription Refresh: "Checks each channel's RSS feed first and only loads the videos, Shorts and live streams of channels with new uploads. Automatic refreshes also skip channels loaded in the last 10 minutes. For channels without new uploads, view counts, removed videos and changed titles only update every few hours, and new uploads may appear later when the RSS feed lags behind. Not available with the Invidious API."
     Disable Hardware Acceleration: Disables GPU hardware acceleration. May fix graphical issues, but will probably perform worse.
   SponsorBlock Settings:
     Always Show DeArrow Badge: Keep the DeArrow button visible on videos whose title or thumbnail DeArrow replaced, instead of only on hover.
@@ -2672,3 +2744,31 @@ Notification Center:
   Clear: "Clear"
   Empty: "No notifications yet"
   Empty Hint: "Live stream reminders and new uploads from channels with notifications turned on will show up here."
+Platforms:
+  Tracks: Tracks
+  Playlists: Playlists
+  Follower Count: 1 follower | {count} followers
+  Open Website: Open on {platform}
+  Channel Not Found: This channel could not be found.
+  Playlist Not Found: This playlist could not be found.
+  Load Error: This page could not be loaded from {platform}.
+  Empty Tab: There is nothing here yet.
+YouTube Account:
+  Like: "Like"
+  Dislike: "Dislike"
+  Rating Failed: "Could not rate on YouTube: {error}"
+  Subscribe Failed: "Could not subscribe on YouTube: {error}"
+  Unsubscribe Failed: "Could not unsubscribe on YouTube: {error}"
+  Add a comment: "Add a comment"
+  Add a reply: "Add a reply"
+  Comment: "Comment"
+  Reply: "Reply"
+  Comment Posted: "Comment posted"
+  Reply Posted: "Reply posted"
+  Comment Failed: "Could not post the comment: {error}"
+  Delete Comment: "Delete comment"
+  Delete Comment Confirmation: "Delete your comment from YouTube?"
+  Comment Deleted: "Comment deleted"
+  Delete Comment Failed: "Could not delete the comment: {error}"
+  Recommendations: "YouTube recommendations"
+  Recommendations Failed: "Could not load your YouTube recommendations."

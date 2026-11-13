@@ -4,7 +4,6 @@
     :is-loading="isLoading"
     :video-list="videoList"
     :data-overrides="shortsDataOverrides"
-    :error-channels="errorChannels"
     :attempted-fetch="attemptedFetch"
     :youtube-style-shorts="useCustomShortsPlayer"
     refresh-tab="shorts"
@@ -38,7 +37,6 @@ useKeepAliveEffectScope()
 const isLoading = ref(true)
 const videoList = shallowRef([])
 const shortsDataOverrides = { isShort: true }
-const errorChannels = ref([])
 const attemptedFetch = ref(false)
 const useCustomShortsPlayer = computed(() => store.getters.getUseCustomShortsPlayer)
 /** @type {import('vue').Ref<number | null>} */
@@ -263,7 +261,6 @@ async function loadVideosForSubscriptionsFromRemote(automatic = false) {
   remoteRefreshRunning = true
   isLoading.value = true
   attemptedFetch.value = true
-  errorChannels.value = []
 
   // Whatever is cached is shown right away, the refresh then replaces it
   // channel by channel
@@ -275,8 +272,7 @@ async function loadVideosForSubscriptionsFromRemote(automatic = false) {
   try {
     refreshedVideos = await refreshSubscriptionShortsFromRemote({
       t,
-      automatic,
-      errorChannels: errorChannels.value
+      automatic
     })
     if (refreshedVideos !== null) {
       loadVideosFromCacheForAllActiveProfileChannels()

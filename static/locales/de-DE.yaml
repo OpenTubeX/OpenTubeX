@@ -154,15 +154,18 @@ Subscriptions:
   New post from {channel}: Neuer Beitrag von {channel}
   Mark As Unseen: Als ungesehen markieren
   Copy Error Details: "Technische Details kopieren"
-  Refresh Errors: "Nicht aktualisierte Kanäle: {channels}. Klicken, um Details anzuzeigen."
-  Refresh Error Channels More: "{channels} und {count} weiterer | {channels} und {count} weitere"
+  Channel Errors:
+    Summary: 1 Kanal konnte nicht aktualisiert werden. | {count} Kanäle konnten nicht aktualisiert werden.
+    Toast: Einige abonnierte Kanäle konnten nicht aktualisiert werden. Klicken, um sie anzuzeigen.
+    Retry Channel: '{channel} erneut versuchen'
+    Show All: Alle anzeigen
+    Show Fewer: Weniger anzeigen
   Never show {type} from this channel in feeds again: Nie wieder {type} von diesem Kanal in Feeds anzeigen
     # On Subscriptions Page
   Subscriptions: Abos
   'Your Subscription list is currently empty. Start adding subscriptions to see them here.': Deine Aboliste ist derzeit leer. Wenn du deine Abos importieren möchtest, wähle in den Einstellungen unter dem Bereich „Daten“ „Abos importieren“. Alternativ kannst du nach einem Kanal suchen und diesen abonnieren.
   This profile has a large number of subscriptions. Forcing RSS to avoid rate limiting: Dieses Profil hat eine große Anzahl von Abos.  RSS zur Vermeidung von Geschwindigkeitsbeschränkungen erzwingen
   Load More Videos: Weitere Videos laden
-  Error Channels: Kanäle mit Fehlern
   Disabled Automatic Fetching: Du hast den automatischen Abruf von Abos deaktiviert. Aktualisiere die Abos, um sie hier zu sehen.
   Empty Channels: Deine abonnierten Kanäle haben derzeit keine Videos.
   Subscriptions Tabs: Registerkarten für Abos
@@ -176,7 +179,7 @@ Subscriptions:
   Refreshing Subscription Posts: Abo-Beiträge werden aktualisiert
   New Content: Neue Inhalte
   New Feed Refresh Warning Title: Alle Abo-Feeds aktualisieren?
-  New Feed Refresh Warning: Das Aktualisieren aller Inhaltstypen ohne RSS für {count} Abos kann lange dauern. Möchtest du fortfahren?
+  New Feed Refresh Warning: Das Aktualisieren aller Inhaltstypen für {count} Abos kann lange dauern. Möchtest du fortfahren?
   New Since Last Refresh: Neu seit der letzten Aktualisierung
   Mark All as Seen: Alle als gesehen markieren
   No New Content: Es gibt keine neuen Inhalte.
@@ -217,6 +220,27 @@ Subscriptions:
       Optional Parameter: '{parameter} (optional)'
       Not Set: Nicht festgelegt
     Retry Feed: '{feed} erneut laden'
+    Reloading Feed: '{feed} wird neu geladen'
+  Platforms:
+    Tab: Plattformen
+    Platform: Plattform
+    All Platforms: Alle Plattformen
+    Followed Channels: Gefolgte Kanäle auf anderen Plattformen
+    Description: Folge Kanälen auf Twitch, SoundCloud, PeerTube, Rumble und Odysee, um ihre Uploads im Plattformen-Tab deiner Abos zu sehen. Finde Kanäle über die Suche oder füge sie über die Adresse ihrer Seite hinzu. Ihre Medien werden mit yt-dlp abgespielt.
+    Add Channel: Kanal hinzufügen
+    Channel URL: Kanaladresse
+    Invalid Channel: Gib die Adresse einer Kanalseite auf Twitch, SoundCloud, PeerTube, Rumble oder Odysee ein.
+    Channel Not Found: Unter dieser Adresse gibt es keinen Kanal.
+    Channel Already Followed: Du folgst diesem Kanal bereits.
+    Channel Could Not Be Loaded: Der Kanal konnte nicht geladen werden.
+    No Channels: Du folgst noch keinen Kanälen auf anderen Plattformen.
+    Unfollow Channel: '{channel} entfolgen'
+    Go To Channel: '{channel} öffnen'
+    Follow: Folgen
+    Following: Gefolgt
+    Clips: Clips
+    Refresh Errors: 1 Kanal konnte nicht aktualisiert werden. | {count} Kanäle konnten nicht aktualisiert werden.
+    Content Tabs: Registerkarten für Plattforminhalte
 Trending:
   Trending: Trends
   Trending Tabs: Trends-Tabs
@@ -402,7 +426,39 @@ History:
   Custom: Benutzerdefiniert
   History Older Than Days Removed: Der Wiedergabeverlauf, der älter als {days} Tage ist, wurde gelöscht
 Most Popular Feed Empty: Der Feed „Am beliebtesten“ dieser Invidious-Instanz ist leer.
+Most Popular Load Error: Der Feed „Am beliebtesten“ konnte nicht geladen werden.
 Settings:
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube-Konto"
+    Unofficial App Warning: "OpenTubeX ist keine offizielle YouTube-App. Wenn du dich anmeldest, wird dein Handeln hier mit deinem Google-Konto verknüpft, und Google kann Konten, die inoffizielle Apps nutzen, einschränken oder sperren. Melde dich nur mit einem Konto an, auf das du verzichten kannst."
+    Sign In Explanation: "OpenTubeX meldet sich wie eine TV-App an: Du bestätigst die Anmeldung auf der Website von Google, und OpenTubeX sieht dein Passwort nie. Die Anmeldung bleibt auf diesem Gerät und wird weder synchronisiert noch gesichert."
+    Sign In: "Anmelden"
+    Sign In Anyway: "Trotzdem anmelden"
+    Sign Out: "Abmelden"
+    Getting Sign-In Code: "Anmeldecode wird abgerufen"
+    Sign In Instructions: "Öffne die Anmeldeseite und wähle dein Google-Konto aus. Der Code ist bereits eingetragen."
+    Other Device Instructions: "Auf einem anderen Gerät rufst du diese Adresse auf und gibst den Code ein:"
+    YouTube Channel: "YouTube-Kanal"
+    Using Channel: "YouTube wird jetzt als {name} genutzt"
+    Switch Channel Failed: "YouTube-Kanal konnte nicht gewechselt werden: {error}"
+    Open Sign-In Page: "Anmeldeseite öffnen"
+    Copy Code: "Code kopieren"
+    Code Copied: "Code kopiert"
+    Waiting for Approval: "Warte darauf, dass du die Anmeldung bestätigst"
+    Sign-In Denied: "Die Anmeldung wurde abgelehnt."
+    Sign-In Code Expired: "Der Code ist abgelaufen. Versuche es erneut, um einen neuen zu erhalten."
+    Sign-In Failed: "Anmeldung fehlgeschlagen: {error}"
+    Signed In As: "Bei YouTube angemeldet als {name}"
+    Signed Out: "Von YouTube abgemeldet"
+    Sign Out Failed: "Abmeldung fehlgeschlagen: {error}"
+    Revoke Failed: "Von YouTube abgemeldet, aber Google hat nicht bestätigt, dass die Anmeldung beendet wurde. Du kannst sie in deinem Google-Konto unter den Verbindungen zu Drittanbieter-Apps entfernen."
+    Signed out by YouTube: "YouTube hat die Anmeldung beendet. Melde dich in den Einstellungen erneut an, um dein Konto weiter zu nutzen."
+    Subscribe on YouTube: "Auch auf YouTube abonnieren"
+    Add to YouTube Watch History: "Angesehene Videos zum YouTube-Verlauf hinzufügen"
+    Import Subscriptions: "Abos von YouTube importieren"
+    Imported Subscriptions: "{count} Kanal importiert | {count} Kanäle importiert"
+    No Subscriptions to Import: "Dieses YouTube-Konto hat keine Abos"
+    Import Subscriptions Failed: "Abos konnten nicht importiert werden: {error}"
   Tab Unloading:
     Automatically unload tabs: "Tabs automatisch entladen"
     Memory threshold: "Speicherschwelle"
@@ -635,6 +691,7 @@ Settings:
       Closing Tabs: Schließen mehrerer Tabs
       Loading Tabs: Laden mehrerer Tabs
       Unloading Tabs: Entladen mehrerer Tabs
+      Refreshing All Feeds: Aktualisieren vieler Abos
     Tab Close Focus:
       Last active tab: "Zuletzt aktiver Tab"
       Next tab in tab order: "Nächster Tab in der Tab-Reihenfolge"
@@ -1223,6 +1280,11 @@ Settings:
     RSS Feeds: RSS-Feeds
     Enable RSS Feeds: RSS-Feeds für andere Plattformen aktivieren
     Manage RSS Feeds: RSS-Feeds verwalten
+    Platforms:
+      Other Platforms: Andere Plattformen
+      Manage Channels: Gefolgte Kanäle verwalten
+      Notify When Live: Benachrichtigen, wenn gefolgte Twitch-Kanäle live gehen
+      Auto Refresh Interval: Automatisches Aktualisierungsintervall für andere Plattformen
     Show New Content Indicators: Markierungen für neue Inhalte anzeigen
     Show Scheduled Live Streams / Premieres First: Geplante Livestreams / Premieren zuerst anzeigen
     Confirm Before Unsubscribing: Unbeabsichtigtes Deabonnieren verhindern
@@ -1237,6 +1299,7 @@ Settings:
     RSS Feeds Auto Refresh Interval: Automatisches Aktualisierungsintervall für RSS-Feeds
     Refresh Subscriptions While App Is Closed: Abos bei geschlossener App aktualisieren
     Notify About New Uploads: Über neue Uploads benachrichtigen
+    Faster Subscription Refresh: Schnellere Abo-Aktualisierung
   Privacy Settings:
     Internet Connectivity Checks: "Internetverbindung prüfen"
     Internet Connectivity Checks Tooltip: "Prüft den Internetzugang mit kleinen Anfragen an einen von GrapheneOS gehosteten Server."
@@ -1781,7 +1844,6 @@ Settings:
     Warning: Diese Einstellungen sind experimentell und können zu Abstürzen führen, wenn sie aktiviert sind. Es wird dringend empfohlen, Backups zu erstellen. Verwendung auf eigene Gefahr!
     Replace HTTP Cache: HTTP-Cache ersetzen
     Disable Hardware Acceleration: Hardwarebeschleunigung deaktivieren
-    Faster Subscription Refresh: Schnellere Abo-Aktualisierung
   Diagnostics:
     Diagnostics: Diagnose
     Description: Solange die Diagnoseprotokollierung aktiv ist, behält OpenTubeX aktuelle Protokollmeldungen im Arbeitsspeicher, damit du sie an Fehlerberichte anhängen kannst. Es speichert oder sendet sie nie von selbst, und beim Deaktivieren werden sie gelöscht. Berichte lassen Cookies, Tokens, IP-Adressen und URL-Parameter weg, können aber IDs abgespielter Videos enthalten. Prüfe einen Bericht deshalb, bevor du ihn teilst.
@@ -1834,6 +1896,7 @@ Settings:
     Profile Selector Touch Hint: Du kannst auch lange auf das Profilsymbol tippen, um das Profil zu wechseln
   Highlight Changed Settings: Von den Standardwerten abweichende Einstellungen hervorheben
   Reset Setting to Default: Diese Einstellung auf den Standardwert zurücksetzen
+  Experimental Badge: Experimentell
   Performance Impact:
     Show Performance Impact: Hinweise zu Leistungsauswirkungen anzeigen
     Moderate: Mittlere Auswirkung
@@ -2541,6 +2604,7 @@ Video:
       Volume Boost: Lautstärkeverstärkung
       'Off': Aus
     Resize dock: Leiste in der Größe ändern
+    Resize dock width: Leistenbreite ändern
     Google Cast:
       Invalid Authentication: "Der Empfänger hat eine ungültige Authentifizierungsantwort gesendet."
       Authentication Declined: "Der Empfänger hat die Authentifizierung abgelehnt."
@@ -2924,6 +2988,9 @@ Version {versionNumber} is now available.: Version {versionNumber} ist jetzt ver
 See changes and update: Änderungen ansehen und aktualisieren
 Dismiss: Ausblenden
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Wenn du in OpenTubeX einen Kanal abonnierst oder ein Abo beendest, passiert das auch in deinem YouTube-Konto."
+    Add to YouTube Watch History: "Videos, die du abspielst, werden zu deinem YouTube-Verlauf hinzugefügt, damit die Empfehlungen von YouTube daraus lernen. Solange der Verlauf auf YouTube pausiert ist, wird nichts hinzugefügt."
   General Settings:
     Preferred Video Codec: |
       Auto bevorzugt Codecs, die dein Gerät per Hardware decodieren kann.
@@ -2956,7 +3023,8 @@ Tooltips:
     Close Window With Last Tab: Wenn deaktiviert, öffnet das Schließen des letzten Tabs stattdessen einen neuen Tab, sodass das Fenster geöffnet bleibt, bis du es schließt.
     Remember Tab Navigation History: Der Vor- und Zurück-Navigationsverlauf jedes Tabs wird gespeichert und beim Neustart von OpenTubeX wiederhergestellt.
     Avoid translation: |
-      YouTubes automatische Übersetzung für Titel, Beschreibung und Kapitel eines Videos deaktivieren.
+      YouTubes automatische Übersetzung von Videotiteln, -beschreibungen und -kapiteln deaktivieren.
+      „Komplette Anwendung“ zeigt auch Kanalnamen und -beschreibungen in ihrer Originalsprache.
       Zu viele Anfragen, wie Videotitel in Listen abfragen kann die Zuverlässigkeit der
       Anwendung temporär beeinträchtigen.
     Update Relative Timestamps: >-
@@ -2981,8 +3049,11 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: Zeigt bevorstehende Livestreams und Premieren oben im Abo-Feed an. Wenn deaktiviert, bleiben sie bis zum Start an der Position ihrer Ankündigung. Aktualisiere den Abo-Feed nach dem Deaktivieren einmal, um die Ankündigungszeitpunkte bestehender geplanter Einträge abzurufen.
     Auto Refresh Interval: "Wie oft OpenTubeX automatisch deine Abos aktualisiert während die Anwendung geöffnet ist. Unter Android wird der Feed bei einem Intervall ungleich null auch aktualisiert, während die App geschlossen ist."
     RSS Feeds Auto Refresh Interval: Wie oft OpenTubeX deine RSS-Feeds automatisch aktualisiert, während die App geöffnet ist.
+    Platforms Auto Refresh Interval: Wie oft OpenTubeX die Kanäle, denen du auf anderen Plattformen folgst, automatisch aktualisiert, während die App geöffnet ist.
+    Twitch Notify When Live: Benachrichtigt dich, wenn einer deiner gefolgten Twitch-Kanäle einen Stream startet. OpenTubeX prüft alle paar Minuten, während es geöffnet ist, und auch, während es geschlossen ist, sofern es dann Abos aktualisiert.
     Refresh Subscriptions While App Is Closed: "Aktualisiert Feeds mit deinen gewählten Einstellungen. Auf dem Desktop bleibt OpenTubeX bis zum Beenden im Infobereich aktiv. Android bestimmt, wann Aktualisierungen im Hintergrund ausgeführt werden."
     Notify About New Uploads: "Zeigt auf diesem Gerät Systembenachrichtigungen für Kanäle, deren Benachrichtigungen du in ihren Abo-Einstellungen aktiviert hast. OpenTubeX sucht beim Aktualisieren der Abos nach neuen Inhalten, wähle daher ein automatisches Aktualisierungsintervall. Um auch bei geschlossener App benachrichtigt zu werden, aktiviere zusätzlich die Aktualisierung bei geschlossener App."
+    Faster Subscription Refresh: Prüft zuerst den RSS-Feed jedes Kanals und lädt Videos, Shorts und Livestreams nur von Kanälen mit neuen Uploads. Automatische Aktualisierungen überspringen außerdem Kanäle, die in den letzten 10 Minuten geladen wurden. Bei Kanälen ohne neue Uploads werden Aufrufzahlen, entfernte Videos und geänderte Titel nur alle paar Stunden aktualisiert, und neue Uploads können später erscheinen, wenn der RSS-Feed hinterherhinkt. Mit der Invidious-API nicht verfügbar.
   Player Settings:
     Enable Caption Translations: Wenn aktiviert, bevorzugen die Untertitel-Schaltfläche und das Tastenkürzel C eine automatisch übersetzte Spur in der bevorzugten Untertitelsprache, wenn das Video keine passende Originalspur bereitstellt.
     Default Media Format: Lege die Formate fest, die bei der Wiedergabe eines Videos verwendet werden. DASH-Formate können höhere Auflösungen wiedergeben. Altformate sind auf maximal 360p beschränkt, verbrauchen aber weniger Bandbreite. Audioformate sind reine Audiostreams.
@@ -3064,7 +3135,6 @@ Tooltips:
   Experimental Settings:
     Replace HTTP Cache: Deaktiviert den festplattenbasierten HTTP-Cache von Electron und aktiviert einen benutzerdefinierten In-Memory-Image-Cache. Dies führt zu einer erhöhten RAM-Auslastung.
     Disable Hardware Acceleration: Deaktiviert die GPU-Hardwarebeschleunigung. Dies kann Grafikprobleme beheben, führt jedoch wahrscheinlich zu einer geringeren Leistung.
-    Faster Subscription Refresh: Prüft zuerst den RSS-Feed jedes Kanals und lädt Videos, Shorts und Livestreams nur von Kanälen mit neuen Uploads. Automatische Aktualisierungen überspringen außerdem Kanäle, die in den letzten 10 Minuten geladen wurden. Bei Kanälen ohne neue Uploads werden Aufrufzahlen, entfernte Videos und geänderte Titel nur alle paar Stunden aktualisiert, und neue Uploads können später erscheinen, wenn der RSS-Feed hinterherhinkt. Mit der Invidious-API nicht verfügbar.
   Distraction Free Settings:
     Count Watch Time From: "„Alle Geräte“ zählt jedes Gerät, das Wiedergabestatistiken synchronisiert. „Dieses Gerät“ zählt nur, was du hier ansiehst."
     When a Limit Is Reached: "„Wiedergabe pausieren“ bietet 15 Minuten mehr oder das Ignorieren des Limits für heute an. Mit einem Einstellungspasswort lässt sich ein Limit nur in den Einstellungen erhöhen."
@@ -3093,9 +3163,9 @@ Tooltips:
       Zeigt bei Hintergrundvorgängen wie dem Aktualisieren von Abos und Downloads verwalteter Werkzeuge eine dauerhafte
       Benachrichtigung mit dem aktuellen Fortschritt anstelle des globalen Fortschrittsbalkens an.
     Only Show Important Notifications: >-
-      Blendet In-App-Benachrichtigungen aus, die nur eine Aktion bestätigen oder einen Status melden. Fehler,
-      Warnungen, eingerichtete Erinnerungen und Benachrichtigungen mit einer Aktion wie „Rückgängig“ werden weiterhin
-      angezeigt. Der Fortschritt von Hintergrundvorgängen wie dem Aktualisieren von Abos erscheint im globalen
+      Blendet In-App-Benachrichtigungen aus, die nur eine Aktion bestätigen oder einen Status melden, auch wenn sie
+      „Rückgängig“ anbieten. Fehler, Warnungen, eingerichtete Erinnerungen und Benachrichtigungen, die eine
+      Entscheidung erfordern, etwa Update-Hinweise, werden weiterhin angezeigt. Der Fortschritt von Hintergrundvorgängen wie dem Aktualisieren von Abos erscheint im globalen
       Fortschrittsbalken statt als Benachrichtigung. Systembenachrichtigungen sind nicht betroffen.
     Always Show Scrollbars: >-
       Hält die Scrollbars immer sichtbar. Wenn deaktiviert, werden sie kurz nach dem Ende der Mausbewegung
@@ -3370,6 +3440,7 @@ Context Menu:
   Reload Posts: Beiträge neu laden
   Reload All Feeds: Alle Feeds neu laden
   Reload RSS Feeds: RSS-Feeds neu laden
+  Reload Platforms: Plattformen neu laden
   Close Multiple Tabs: '{count} Tabs schließen'
   Duplicate Tab: Tab duplizieren
   Duplicate Multiple Tabs: '{count} Tabs duplizieren'
@@ -3878,3 +3949,31 @@ Digital Wellbeing:
   Time for bed: "Zeit fürs Bett"
   Bedtime started at: "Deine Schlafenszeit hat um {time} begonnen."
   Remind Me in 10 Minutes: "In 10 Minuten erinnern"
+Platforms:
+  Tracks: Tracks
+  Playlists: Playlists
+  Follower Count: 1 Follower | {count} Follower
+  Open Website: Auf {platform} öffnen
+  Channel Not Found: Dieser Kanal wurde nicht gefunden.
+  Playlist Not Found: Diese Playlist wurde nicht gefunden.
+  Load Error: Diese Seite konnte nicht von {platform} geladen werden.
+  Empty Tab: Hier gibt es noch nichts.
+YouTube Account:
+  Like: "Mag ich"
+  Dislike: "Mag ich nicht"
+  Rating Failed: "Bewertung auf YouTube fehlgeschlagen: {error}"
+  Subscribe Failed: "Abonnieren auf YouTube fehlgeschlagen: {error}"
+  Unsubscribe Failed: "Abo auf YouTube konnte nicht beendet werden: {error}"
+  Add a comment: "Kommentar hinzufügen"
+  Add a reply: "Antwort hinzufügen"
+  Comment: "Kommentieren"
+  Reply: "Antworten"
+  Comment Posted: "Kommentar veröffentlicht"
+  Reply Posted: "Antwort veröffentlicht"
+  Comment Failed: "Kommentar konnte nicht veröffentlicht werden: {error}"
+  Delete Comment: "Kommentar löschen"
+  Delete Comment Confirmation: "Deinen Kommentar auf YouTube löschen?"
+  Comment Deleted: "Kommentar gelöscht"
+  Delete Comment Failed: "Kommentar konnte nicht gelöscht werden: {error}"
+  Recommendations: "YouTube-Empfehlungen"
+  Recommendations Failed: "Deine YouTube-Empfehlungen konnten nicht geladen werden."

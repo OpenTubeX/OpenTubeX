@@ -239,9 +239,13 @@ export async function expectPageScrollWithinRenderedRange(page) {
     const contentBox = content.getBoundingClientRect()
     // Negative margins do not shorten the element's scrollable overflow box.
     const contentMarginBottom = Math.max(0, Number.parseFloat(getComputedStyle(content).marginBottom) || 0)
+    // At fractional zoom, innerHeight and scrollHeight each round to whole CSS
+    // pixels. Measure the rendered end against the fractional viewport, so the
+    // comparison below carries only the document's rounding.
+    const viewportHeight = window.visualViewport?.height ?? window.innerHeight
     const renderedMaximumScrollY = Math.max(
       0,
-      contentBox.bottom + window.scrollY + contentMarginBottom - window.innerHeight
+      contentBox.bottom + window.scrollY + contentMarginBottom - viewportHeight
     )
     const documentMaximumScrollY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
     const scrollbar = document.querySelector('body > .os-scrollbar-vertical')
@@ -397,7 +401,11 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
       path.join(appRoot, 'dist-e2e', 'main.js'),
       ...extraArgs,
       '--ozone-platform=x11',
-      '--mute-audio'
+      '--mute-audio',
+      // Xvfb has no hardware GL, so the app renders in software either way.
+      // Trying hardware GL first can hang the GPU process on CI, and then the
+      // window never paints. This also keeps geometry independent of the host GPU.
+      '--disable-gpu'
     ],
     cwd: appRoot,
     env

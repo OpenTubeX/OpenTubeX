@@ -64,6 +64,10 @@ export function createInternetConnectivity({ eventTarget, isOnline, probe, enabl
     pending = Promise.resolve().then(() => probe(current.signal)).catch(() => false).then(reachable => {
       // Ignore results from a previous network or a disposed app.
       if (controller !== current || current.signal.aborted) return online
+      // Android blocks the network of a hidden app, so a failure then says
+      // nothing about the connection the user returns to. Becoming visible
+      // checks again.
+      if (!reachable && !isVisible()) return false
       if (!reachable && confirmations !== seenConfirmations) {
         trusted = false
         publish(isOnline())

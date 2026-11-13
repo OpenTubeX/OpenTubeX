@@ -544,13 +544,12 @@ const actions = {
     // Protected playlists survive deletion requests, so only unpin removed ones.
     const remainingIds = new Set(getters.getAllPlaylists.map(playlist => playlist._id))
     const removedIds = new Set(playlistIds.filter(id => !remainingIds.has(id)))
-    const pinnedIds = rootGetters.getPinnedPlaylistIds
-    if (pinnedIds.some(id => removedIds.has(id))) {
-      await dispatch('updatePinnedPlaylistIds', pinnedIds.filter(id => !removedIds.has(id)))
+    const unpin = ids => ids.filter(id => !removedIds.has(id))
+    if (rootGetters.getPinnedPlaylistIds.some(id => removedIds.has(id))) {
+      await dispatch('updatePinnedPlaylistIds', unpin)
     }
-    const topPinnedIds = rootGetters.getUserPlaylistsPinnedIds
-    if (topPinnedIds.some(id => removedIds.has(id))) {
-      await dispatch('updateUserPlaylistsPinnedIds', topPinnedIds.filter(id => !removedIds.has(id)))
+    if (rootGetters.getUserPlaylistsPinnedIds.some(id => removedIds.has(id))) {
+      await dispatch('updateUserPlaylistsPinnedIds', unpin)
     }
   },
 
@@ -686,12 +685,12 @@ const mutations = {
   addVideo(state, payload) {
     const playlist = state.playlists.find(playlist => playlist._id === payload._id)
     if (playlist) {
-      if (payload.addVideosToTop === true) {
-        // Unshifting through the proxy would trigger every index it shifts.
-        playlist.videos = [payload.videoData, ...toRaw(playlist.videos)]
-      } else {
-        playlist.videos.push(payload.videoData)
-      }
+      // Video lists are always replaced, never changed in place, so readers
+      // can iterate the raw arrays of large playlists and still update.
+      const videos = toRaw(playlist.videos)
+      playlist.videos = payload.addVideosToTop === true
+        ? [payload.videoData, ...videos]
+        : [...videos, payload.videoData]
       playlist.lastUpdatedAt = payload.lastUpdatedAt
       incrementPlaylistVideoCounts(state.playlistVideoCounts, [payload.videoData])
     }

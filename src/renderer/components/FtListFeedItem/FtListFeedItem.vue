@@ -31,7 +31,7 @@
           class="thumbnailImage thumbnailPlaceholder"
         >
           <FtIcon
-            :icon="['fas', 'rss']"
+            :icon="placeholderIcon ?? platformIcon ?? ['fas', 'rss']"
             aria-hidden="true"
           />
         </span>
@@ -45,6 +45,13 @@
           :start-arc-fraction="0.5"
         />
       </RouterLink>
+      <div
+        v-if="data.isLive || durationText"
+        class="videoDuration"
+        :class="{ live: data.isLive }"
+      >
+        {{ data.isLive ? t('Video.Live') : durationText }}
+      </div>
       <div
         v-if="watchProgress?.watched"
         class="videoWatched"
@@ -68,19 +75,41 @@
         </h3>
       </RouterLink>
       <div class="infoLine">
-        <bdi class="channelName">
+        <component
+          :is="channelRoute ? 'router-link' : 'bdi'"
+          class="channelName"
+          dir="auto"
+          :to="channelRoute ?? undefined"
+        >
           <FtChannelAvatar
             v-if="avatar && !hideChannelAvatars"
             :thumbnail="avatar"
           />
           <span class="channelNameText">{{ data.author }}</span>
-        </bdi>
+          <FtIcon
+            v-if="platform"
+            class="platformIcon"
+            :icon="platformIcon"
+            :title="platform.name"
+          />
+        </component>
         <FtInlineMetadata
-          v-if="publishedText"
+          v-if="publishedText || viewCountText"
           class="videoInfo"
           icon-labels
         >
-          <span class="uploadedTime"><FtIcon
+          <span
+            v-if="viewCountText"
+            class="viewCount"
+          ><FtIcon
+            :icon="['fas', data.isLive ? 'users' : 'eye']"
+            class="statIcon"
+            aria-hidden="true"
+          />{{ viewCountText }}</span>
+          <span
+            v-if="publishedText"
+            class="uploadedTime"
+          ><FtIcon
             :icon="['fas', 'clock']"
             class="statIcon"
             aria-hidden="true"
@@ -134,12 +163,17 @@ import {
 } from '../../helpers/externalMediaPosition'
 import { lightHaptic } from '../../helpers/mobileHaptics'
 import { markRssFeedItemsAsSeen, markRssFeedItemsAsUnseen } from '../../helpers/rssFeeds'
-import { copyToClipboard, getRelativeTimeFromDate, openInternalPath, showToast } from '../../helpers/utils'
+import { copyToClipboard, formatDurationAsTimestamp, formatViewCount, getRelativeTimeFromDate, openInternalPath, showToast } from '../../helpers/utils'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { isTileMarkShortcut, tileKeyboardShortcutsKey } from '../../helpers/tileNavigation'
+import { getPlatform, getPlatformChannelRoute, PLATFORM_ICONS } from '../../../platforms/index'
 
 const props = defineProps({
-  /** @type {import('vue').PropType<import('../../helpers/rssFeeds').RssFeedItem>} */
+  /**
+   * Items from other platforms can also say how long they are, how often they
+   * were viewed, and whether they are live.
+   * @type {import('vue').PropType<import('../../helpers/rssFeeds').RssFeedItem & { duration?: number, viewCount?: number, isLive?: boolean }>}
+   */
   data: {
     type: Object,
     required: true
@@ -157,6 +191,24 @@ const props = defineProps({
   inNewFeed: {
     type: Boolean,
     default: false
+  },
+  /** Whether the item can be marked as seen, like the items of RSS feeds */
+  seenActions: {
+    type: Boolean,
+    default: true
+  },
+  /**
+   * Saves the seen marks of items from other sources than RSS feeds
+   * @type {import('vue').PropType<{ markSeen: (items: object[]) => void, markUnseen: (items: object[]) => void } | null>}
+   */
+  seenMarks: {
+    type: Object,
+    default: null
+  },
+  /** Shown instead of a missing thumbnail, by default the icon of the item's platform */
+  placeholderIcon: {
+    type: Array,
+    default: null
   }
 })
 
@@ -166,29 +218,50 @@ const now = useRelativeTimeClock()
 const blurThumbnails = computed(() => store.getters.getBlurThumbnails)
 const hideChannelAvatars = computed(() => store.getters.getHideChannelAvatars)
 const thumbnailProgressRadius = computed(() => 8 * store.getters.getUiRoundness / 100)
-// The external media page saves the position of everything it plays
-const position = computed(() => getExternalMediaProgress(props.data.url))
+// The external media page saves the position of everything it plays. Live
+// streams play from the channel's address, which every broadcast shares.
+const position = computed(() => props.data.isLive ? null : getExternalMediaProgress(props.data.url))
 const watchProgress = computed(() => position.value?.progress > 0 ? position.value : null)
 const to = computed(() => ({ path: '/external-media', query: { url: props.data.url } }))
-const publishedText = computed(() => props.data.published === null
+// Items from other platforms link to the page of their channel
+const platform = computed(() => getPlatform(props.data.platform))
+const platformIcon = computed(() => platform.value ? PLATFORM_ICONS[platform.value.id] : null)
+const channelRoute = computed(() => platform.value && props.data.channelId
+  ? getPlatformChannelRoute(platform.value.id, props.data.channelId)
+  : null)
+// Live streams show their viewers instead of their start
+const publishedText = computed(() => props.data.published === null || props.data.isLive
   ? ''
   : getRelativeTimeFromDate(props.data.published, false, true, now.value))
+const durationText = computed(() => props.data.duration > 0 ? formatDurationAsTimestamp(props.data.duration) : '')
+const viewCountText = computed(() => {
+  const count = props.data.viewCount
+  if (!Number.isFinite(count) || store.getters.getHideVideoViews) return ''
+  const formatted = formatViewCount(count, store.getters.getShortenViewCounts)
+  return props.data.isLive
+    ? t('Global.Counts.Watching Count', { count: formatted }, count)
+    : t('Global.Counts.View Count', { count: formatted }, count)
+})
 
 const showNewIndicator = computed(() => store.getters.getShowNewSubscriptionFeedIndicators &&
   props.data.isNew === true && !props.inNewFeed && !position.value?.watched)
-const showMarkAsSeen = computed(() => props.data.isNew === true && (props.inNewFeed || showNewIndicator.value))
+const showMarkAsSeen = computed(() => props.seenActions && props.data.isNew === true && (props.inNewFeed || showNewIndicator.value))
 // Like subscription videos, items that aren't new can come back to the New feed,
 // and so can new items that it leaves out because they were watched
-const showMarkAsUnseen = computed(() => !props.inNewFeed && (props.data.isNew !== true || position.value?.watched === true))
+const showMarkAsUnseen = computed(() => props.seenActions && !props.inNewFeed &&
+  (props.data.isNew !== true || position.value?.watched === true))
 
 function markAsSeen() {
-  if (props.data.isNew === true) markRssFeedItemsAsSeen([props.data])
+  if (props.data.isNew !== true) return
+  const markSeen = props.seenMarks?.markSeen ?? markRssFeedItemsAsSeen
+  markSeen([props.data])
 }
 
 function markAsUnseen() {
   // The New feed leaves out watched items
   if (position.value?.watched) unmarkExternalMediaWatched(props.data.url)
-  markRssFeedItemsAsUnseen([props.data])
+  const markUnseen = props.seenMarks?.markUnseen ?? markRssFeedItemsAsUnseen
+  markUnseen([props.data])
 }
 
 const showDownloadPrompt = ref(false)
@@ -239,11 +312,13 @@ const menuItems = computed(() => {
     })
   }
   if (items.length > 0) items.push({ type: 'separator' })
-  items.push({
-    label: watched ? t('Video.Unmark As Watched') : t('Video.Mark As Watched'),
-    icon: ['fas', watched ? 'eye-slash' : 'eye'],
-    run: () => setWatched(!watched)
-  })
+  if (!props.data.isLive) {
+    items.push({
+      label: watched ? t('Video.Unmark As Watched') : t('Video.Mark As Watched'),
+      icon: ['fas', watched ? 'eye-slash' : 'eye'],
+      run: () => setWatched(!watched)
+    })
+  }
   // Without a saved position, marking it as watched already starts it over next time
   if (position.value?.seconds > 0) {
     items.push({
@@ -323,7 +398,7 @@ function handleTileKeydown(event) {
     event.preventDefault()
     if (showMarkAsSeen.value) {
       markAsSeen()
-    } else {
+    } else if (!props.data.isLive) {
       setWatched(position.value?.watched !== true)
     }
   }

@@ -3,8 +3,10 @@
   display: flex;
   flex-direction: column;
   margin-inline-start: auto;
-  margin-block-start: 4px;
   max-inline-size: 210px;
+
+  /* Large counts widen the section (and the bar) instead of overflowing it. */
+  min-inline-size: min-content;
   text-align: end;
 }
 
@@ -50,5 +52,43 @@
   .likeSection {
     margin-inline-start: 0;
     text-align: start;
+  }
+
+  .likeCounts {
+    justify-content: flex-start;
+  }
+}
+
+.rateButton {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  min-block-size: 32px;
+}
+
+.rateButton:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.rateButton:focus-visible {
+  background-color: var(--side-nav-hover-color);
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) {
+  .rateButton:hover:not(:disabled) {
+    background-color: var(--side-nav-hover-color);
+  }
+}
+
+.rateButton[aria-pressed='true'] {
+  color: var(--primary-color);
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .rateButton {
+    min-block-size: var(--phone-touch-target, 48px);
   }
 }

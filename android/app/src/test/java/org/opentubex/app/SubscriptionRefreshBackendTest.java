@@ -33,6 +33,40 @@ public class SubscriptionRefreshBackendTest {
     }
 
     @Test
+    public void resendsRequestsThatLostTheirConnectionOnly() throws Exception {
+        int[] calls = new int[1];
+        SubscriptionRefreshHttpClient.RequestFetcher closedOnce = SubscriptionRefreshHttpClient.resendingBrokenConnections((request, type, id) -> {
+            if (calls[0]++ == 0) throw new java.net.SocketException("Socket closed");
+            return "{}";
+        });
+        assertEquals("{}", closedOnce.fetch(new JSONObject(), "videos", "UCtest"));
+        assertEquals(2, calls[0]);
+
+        for (IOException error : new IOException[] {
+            new IOException("unexpected end of stream on com.android.okhttp.Address@1"),
+            new java.net.SocketTimeoutException("Read timed out"),
+            new javax.net.ssl.SSLException("Read error: ssl=0x1: I/O error during system call, Connection reset by peer"),
+            new IOException("HTTP 404"),
+        }) {
+            calls[0] = 0;
+            IOException thrown = assertThrows(IOException.class, () -> SubscriptionRefreshHttpClient.resendingBrokenConnections((request, type, id) -> {
+                calls[0]++;
+                throw error;
+            }).fetch(new JSONObject(), "videos", "UCtest"));
+            assertSame(error, thrown);
+            assertEquals(error.getMessage(), error instanceof java.net.SocketTimeoutException ? 2 : error.getMessage().startsWith("HTTP") ? 1 : 3, calls[0]);
+        }
+
+        // An attempt that already waited out a timeout gets no third try.
+        calls[0] = 0;
+        assertThrows(IOException.class, () -> SubscriptionRefreshHttpClient.resendingBrokenConnections((request, type, id) -> {
+            if (calls[0]++ == 0) throw new java.net.SocketTimeoutException("Read timed out");
+            throw new java.net.SocketException("Socket closed");
+        }).fetch(new JSONObject(), "videos", "UCtest"));
+        assertEquals(2, calls[0]);
+    }
+
+    @Test
     public void cancelledFetchesStopReadingTheirResponse() throws Exception {
         Thread.currentThread().interrupt();
         try {
@@ -175,6 +209,29 @@ public class SubscriptionRefreshBackendTest {
                     feed(type, new JSONArray().put(new JSONObject().put("format", "local"))), "UCtest",
                     (request, feedType, id) -> page.toString()));
             }
+        }
+    }
+
+    @Test
+    public void aChannelThatYouTubeReportsAsGoneFailsWithoutAskingOtherSources() throws Exception {
+        JSONArray requests = new JSONArray()
+            .put(new JSONObject().put("format", "local").put("body", new JSONObject().put("params", "tab").toString()))
+            .put(new JSONObject().put("format", "rss"));
+        JSONObject gone = new JSONObject().put("alerts", new JSONArray().put(new JSONObject()
+            .put("alertRenderer", new JSONObject().put("type", "ERROR"))));
+        // A failed Live tab request is checked with the channel's page, which tells why
+        for (String type : List.of("videos", "live")) {
+            List<String> formats = new ArrayList<>();
+            assertThrows(
+                SubscriptionRefreshHttpClient.ChannelUnavailableException.class,
+                () -> SubscriptionRefreshHttpClient.fetch(feed(type, requests), "UCtest", (request, feedType, id) -> {
+                    formats.add(request.getString("format"));
+                    if (!request.getString("format").equals("local")) throw new IOException("HTTP 404");
+                    if (type.equals("live") && new JSONObject(request.getString("body")).has("params")) throw new IOException("HTTP 404");
+                    return gone.toString();
+                })
+            );
+            assertEquals(type.equals("live") ? List.of("local", "local") : List.of("local"), formats);
         }
     }
 

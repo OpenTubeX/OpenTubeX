@@ -456,7 +456,7 @@ function stopProgressToastPointerTracking() {
 }
 
 /**
- * @param {CustomEvent<{ message: string | (({elapsedMs: number, remainingMs: number}) => string), time: number | null, action: Function | null, abortSignal: AbortSignal | null, image: string | null, icon: [string, string] | null, buttons: { label: string, action?: Function, primary?: boolean, icon?: [string, string] }[], buttonAction: 'open-sync-settings' | null, verticalButtons: boolean, dismissible: boolean, dismissOnAction?: boolean, important?: boolean, control: import('../../helpers/utils').ToastControl | null }>} event
+ * @param {CustomEvent<{ message: string | (({elapsedMs: number, remainingMs: number}) => string), time: number | null, action: Function | null, abortSignal: AbortSignal | null, image: string | null, icon: [string, string] | null, buttons: { label: string, action?: Function, primary?: boolean, icon?: [string, string] }[], buttonAction: 'open-sync-settings' | null, verticalButtons: boolean, dismissible: boolean, dismissOnAction?: boolean, important?: boolean }>} event
  */
 function open(event) {
   if (store.getters.getOnlyShowImportantToasts && !isImportantToast(event.detail)) {
@@ -510,24 +510,6 @@ function open(event) {
     onAutoClose: forgetToast
   })
   toastId = id
-  event.detail.control = {
-    startTimeout(nextTime) {
-      if (!Number.isFinite(nextTime) || !liveToasts.includes(id)) return
-
-      indefiniteToastIds.delete(id)
-      time = nextTime
-      state.duration = nextTime
-      sonner.custom(toastItem, {
-        id,
-        duration: nextTime,
-        dismissible: state.dismissible,
-        position: SONNER_POSITION,
-        componentProps: { toast: state },
-        onDismiss: forgetToast,
-        onAutoClose: forgetToast
-      })
-    }
-  }
 
   if (typeof message === 'function') {
     let elapsed = 0

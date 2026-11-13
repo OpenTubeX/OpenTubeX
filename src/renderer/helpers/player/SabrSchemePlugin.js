@@ -48,6 +48,7 @@ const ShakaError = shaka.util.Error
  * @property {boolean} isInit
  * @property {boolean} isLiveHead - only asks for the live head, without media
  * @property {number} sequenceNumber
+ * @property {number | undefined} targetDurationMs - only live segments have one
  * @property {string} streamKind
  */
 /**
@@ -75,6 +76,7 @@ const ShakaError = shaka.util.Error
  * @property {number} startedAtMs
  * @property {(() => number) | undefined} getBufferedAheadSeconds
  * @property {string} scheme
+ * @property {{ afterMs: number, beforeMs: number }} liveTimeBounds - the requested live segment lies between these times
  */
 /**
  * @typedef SabrStreamState
@@ -89,7 +91,8 @@ const ShakaError = shaka.util.Error
  * @property {Set<string>} deliveredMediaFor
  * @property {boolean} attestationPending
  * @property {boolean} mediaWithheld
- * @property {Map<string, import('./sabrProtocol').SabrCuepoint>} cuepoints ongoing ad breaks
+ * @property {Map<string, import('./sabrProtocol').SabrCuepoint>} cuepoints recent ad breaks, oldest first
+ * @property {Map<number, number>} deliveredLiveStartsMs reported start of recently delivered live segments, by sequence number
  */
 /**
  * @typedef TimeoutController
@@ -116,6 +119,14 @@ const BACKOFF_ROUNDS_WITHOUT_MEDIA = 6
 /** Leaves time for a reload before playback runs out of withheld media. */
 const WITHHELD_MEDIA_RELOAD_BUFFER_SECONDS = 10
 const WITHHELD_MEDIA_POLL_MS = 1000
+/**
+ * Ad breaks are minutes apart, so this keeps the ones around the playhead.
+ * SABR sends an evicted break's cue point again when playback returns to it.
+ */
+const MAX_REPORTED_CUEPOINTS = 8
+/** More than a live buffer holds, even with one-second segments */
+const MAX_DELIVERED_LIVE_SEGMENTS = 512
+const LIVE_START_TOLERANCE_SECONDS = 0.1
 
 /**
  * @param {shaka.media.SegmentReference} reference
@@ -126,11 +137,28 @@ function getSequenceNumber(reference) {
 
 /**
  * Live media starts near, not exactly at, its estimated segment times, so a
- * segment counts as buffered when its middle is.
+ * segment counts as buffered when its middle is. A segment shorter than the
+ * target duration shifts the media after it by up to a segment from the
+ * estimates, so delivered segments count by the start SABR reported instead.
  * @param {shaka.extern.BufferedRange} buffered
  * @param {shaka.media.SegmentIndex} segmentIndex
+ * @param {Map<number, number>} deliveredStartsMs
  */
-function getBufferedLiveSegments(buffered, segmentIndex) {
+function getBufferedLiveSegments(buffered, segmentIndex, deliveredStartsMs) {
+  if (deliveredStartsMs.size > 0) {
+    let startSegmentIndex = Infinity
+    let endSegmentIndex = -Infinity
+    for (const [sequenceNumber, startMs] of deliveredStartsMs) {
+      // Buffered media starts within milliseconds of the reported start
+      const start = startMs / 1000 + LIVE_START_TOLERANCE_SECONDS
+      if (start >= buffered.start && start < buffered.end) {
+        startSegmentIndex = Math.min(startSegmentIndex, sequenceNumber)
+        endSegmentIndex = Math.max(endSegmentIndex, sequenceNumber)
+      }
+    }
+    return { startSegmentIndex, endSegmentIndex }
+  }
+
   const middle = reference => (reference.startTime + reference.endTime) / 2
 
   const firstPosition = segmentIndex.find(buffered.start) ?? segmentIndex.getNumEvicted()
@@ -152,15 +180,16 @@ function getBufferedLiveSegments(buffered, segmentIndex) {
  * @param {shaka.extern.BufferedRange} buffered
  * @param {shaka.media.SegmentIndex} segmentIndex
  * @param {boolean} isLive
+ * @param {Map<number, number>} deliveredLiveStartsMs
  * @returns {import('googlevideo/protos').BufferedRange | null}
  */
-function createBufferedRange(formatId, buffered, segmentIndex, isLive) {
+function createBufferedRange(formatId, buffered, segmentIndex, isLive, deliveredLiveStartsMs) {
   let startSegmentIndex
   let endSegmentIndex
 
   if (isLive) {
     // Live sequence numbers are not positions in the moving window
-    ({ startSegmentIndex, endSegmentIndex } = getBufferedLiveSegments(buffered, segmentIndex))
+    ({ startSegmentIndex, endSegmentIndex } = getBufferedLiveSegments(buffered, segmentIndex, deliveredLiveStartsMs))
     // Less than half a segment is buffered
     if (startSegmentIndex > endSegmentIndex) return null
   } else {
@@ -210,8 +239,9 @@ function createFullBufferRange(formatId) {
  * @param {boolean} streamIsAudio - Fake video bufferRange can be used
  * @param {import('googlevideo/protos').BufferedRange[]} bufferedRanges
  * @param {shaka.extern.Track} activeVariant
+ * @param {Map<number, number>} deliveredLiveStartsMs
  */
-function fillBufferedRanges(player, manifest, audioFormatsActive, streamIsVideo, streamIsAudio, bufferedRanges, activeVariant) {
+function fillBufferedRanges(player, manifest, audioFormatsActive, streamIsVideo, streamIsAudio, bufferedRanges, activeVariant, deliveredLiveStartsMs) {
   const bufferedInfo = player.getBufferedInfo()
   const isLive = manifest.presentationTimeline.isLive()
 
@@ -235,7 +265,7 @@ function fillBufferedRanges(player, manifest, audioFormatsActive, streamIsVideo,
       bufferedRanges.push(createFullBufferRange(audioFormatId))
     } else {
       for (const buffered of bufferedInfo.audio) {
-        const range = createBufferedRange(audioFormatId, buffered, audioSegmentIndex, isLive)
+        const range = createBufferedRange(audioFormatId, buffered, audioSegmentIndex, isLive, deliveredLiveStartsMs)
         if (range) bufferedRanges.push(range)
       }
     }
@@ -257,7 +287,7 @@ function fillBufferedRanges(player, manifest, audioFormatsActive, streamIsVideo,
           videoSegmentIndex = activeManifestVariant.video.segmentIndex
         }
 
-        const range = createBufferedRange(videoFormatId, buffered, videoSegmentIndex, isLive)
+        const range = createBufferedRange(videoFormatId, buffered, videoSegmentIndex, isLive, deliveredLiveStartsMs)
         if (range) bufferedRanges.push(range)
       }
     }
@@ -325,6 +355,34 @@ function warnSabrRequestFailure(operationInputs, currentState, reason, details =
   }
   facts.push(`after ${Date.now() - currentState.startedAtMs} ms`)
   console.warn(`SABR request ${operationInputs.uri} failed: ${reason} (${facts.join(', ')})`)
+}
+
+/**
+ * Live segment times are estimates, which a segment shorter than the target
+ * duration shifts by up to a segment. SABR answers a time with the segment that
+ * contains it, so ask for the requested segment at a time derived from the
+ * neighbor SABR sent instead, between the neighbors seen so far.
+ * @param {OperationInputs} operationInputs
+ * @param {CurrentState} currentState
+ * @param {{ sequenceNumber: number, startMs: number }} neighbor
+ */
+function retargetLiveRequest({ sequenceNumber, targetDurationMs }, currentState, neighbor) {
+  const clientAbrState = currentState.abrRequest.clientAbrState
+  const bounds = currentState.liveTimeBounds
+  if (neighbor.sequenceNumber < sequenceNumber) {
+    bounds.afterMs = Math.max(bounds.afterMs, Number(clientAbrState.playerTimeMs))
+  } else {
+    bounds.beforeMs = Math.min(bounds.beforeMs, neighbor.startMs)
+  }
+
+  let timeMs = neighbor.startMs + (sequenceNumber - neighbor.sequenceNumber + 0.5) * targetDurationMs
+  if (timeMs <= bounds.afterMs || timeMs >= bounds.beforeMs) {
+    // Segments around it differ from the target duration
+    const afterMs = Number.isFinite(bounds.afterMs) ? bounds.afterMs : bounds.beforeMs - targetDurationMs
+    const beforeMs = Number.isFinite(bounds.beforeMs) ? bounds.beforeMs : bounds.afterMs + targetDurationMs
+    timeMs = (afterMs + beforeMs) / 2
+  }
+  clientAbrState.playerTimeMs = String(Math.round(timeMs))
 }
 
 /**
@@ -448,6 +506,12 @@ async function doRequest(
   let nextRequestPlaybackCookieBytes
   /** @type {import('./sabrProtocol').SabrLiveHead | undefined} */
   let liveHead
+  /**
+   * Another live segment of the requested format, sent for the requested time
+   * @type {{ sequenceNumber: number, startMs: number } | undefined}
+   */
+  let neighborSegment
+  let mediaStartMs
 
   let invalidPoToken = false
   let error
@@ -617,12 +681,15 @@ async function doRequest(
                   (!operationInputs.isInit && !mediaHeader.isInitSeg && mediaHeader.sequenceNumber === operationInputs.sequenceNumber)
                 ) {
                   mediaHeaderId = mediaHeader.headerId
+                  mediaStartMs = Number(mediaHeader.startMs)
                   const rawHeader = part.data.chunks.length === 1
                     ? part.data.chunks[0]
                     : concatenateChunks(part.data.chunks)
                   if (extractRawProtobufField(rawHeader, MEDIA_CONTENT_LENGTH_FIELD_NUMBER, 0) !== undefined) {
                     expectedMediaLength = Number(mediaHeader.contentLength)
                   }
+                } else if (operationInputs.targetDurationMs && !mediaHeader.isInitSeg) {
+                  neighborSegment ??= { sequenceNumber: mediaHeader.sequenceNumber, startMs: Number(mediaHeader.startMs) }
                 }
               }
             }
@@ -677,12 +744,14 @@ async function doRequest(
             break
           }
           case CUEPOINT_LIST_PART_ID: {
+            // Keep reporting a break after its STOP event: SABR withholds the
+            // segment that ends the break until the request reports it
+            const { cuepoints } = currentState.sabrStreamState
             for (const cuepoint of decodePart(part, { decode: parseSabrCuepoints }) ?? []) {
-              if (cuepoint.stopped) {
-                currentState.sabrStreamState.cuepoints.delete(cuepoint.identifier)
-              } else if (!currentState.sabrStreamState.cuepoints.has(cuepoint.identifier)) {
-                currentState.sabrStreamState.cuepoints.set(cuepoint.identifier, cuepoint)
-              }
+              if (cuepoints.has(cuepoint.identifier)) continue
+
+              cuepoints.set(cuepoint.identifier, cuepoint)
+              if (cuepoints.size > MAX_REPORTED_CUEPOINTS) cuepoints.delete(cuepoints.keys().next().value)
             }
             break
           }
@@ -829,6 +898,15 @@ async function doRequest(
     if (!operationInputs.isInit) {
       currentState.sabrStreamState.deliveredMediaFor.add(operationInputs.streamKind)
     }
+    if (operationInputs.targetDurationMs) {
+      const { deliveredLiveStartsMs } = currentState.sabrStreamState
+      // Refresh the order, which decides what to forget first
+      deliveredLiveStartsMs.delete(operationInputs.sequenceNumber)
+      deliveredLiveStartsMs.set(operationInputs.sequenceNumber, mediaStartMs)
+      if (deliveredLiveStartsMs.size > MAX_DELIVERED_LIVE_SEGMENTS) {
+        deliveredLiveStartsMs.delete(deliveredLiveStartsMs.keys().next().value)
+      }
+    }
     if (shouldRetryDueToNextRequestPolicy && nextRequestPlaybackCookieBytes !== undefined) {
       // Policies received before MEDIA_END can establish the session cookie
       // even when this request succeeds. Subsequent audio/video requests must
@@ -877,10 +955,13 @@ async function doRequest(
       new Error('Incomplete segment, missing MEDIA_END part'),
       operationInputs.requestType,
     )
-  } else if (shouldRetry || contextUpdateNeedsRetry) {
+  } else if (shouldRetry || contextUpdateNeedsRetry || neighborSegment) {
     // Context-only handshakes must echo the supplied context, with the same
     // retry limit as policy responses so neither can loop indefinitely.
     currentState.cumulativeRetries++
+    if (neighborSegment) {
+      retargetLiveRequest(operationInputs, currentState, neighborSegment)
+    }
     if (shouldRetryDueToNextRequestPolicy) {
       currentState.sabrStreamState.backoffUntilMs = nextRequestBackoffUntilMs
       if (nextRequestPlaybackCookieBytes !== undefined) {
@@ -1025,7 +1106,7 @@ export function setupSabrScheme(sabrData, getPlayer, getManifest, playerWidth, p
     const bufferedRanges = []
 
     if (!isInit && activeVariant) {
-      /** @__NOINLINE__ */ fillBufferedRanges(player, getManifest(), isAudioOnly, streamIsVideo, streamIsAudio, bufferedRanges, activeVariant)
+      /** @__NOINLINE__ */ fillBufferedRanges(player, getManifest(), isAudioOnly, streamIsVideo, streamIsAudio, bufferedRanges, activeVariant, transport.deliveredLiveStartsMs)
     }
 
     const drcEnabled = url.searchParams.has('drc') || !!(activeVariant && activeVariant.audioRoles.includes('drc'))
@@ -1088,6 +1169,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
     attestationPending: false,
     mediaWithheld: false,
     cuepoints: new Map(),
+    deliveredLiveStartsMs: new Map(),
   }
 
   const requestSegment = (uri, request, requestType, _progressUpdated, headersReceived = () => {}) => {
@@ -1152,6 +1234,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
     }
 
     const sequenceNumber = parseInt(url.searchParams.get('sq'))
+    const targetDurationMs = Number(url.searchParams.get('targetDurationMs')) || undefined
 
     /**
      * Stores whatever state that should be updated across the whole "session"
@@ -1167,6 +1250,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
       isInit,
       isLiveHead,
       sequenceNumber,
+      targetDurationMs,
       streamKind: url.pathname,
     }
 
@@ -1223,6 +1307,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
       startedAtMs: Date.now(),
       getBufferedAheadSeconds: context.getBufferedAheadSeconds,
       scheme: sabrData.scheme,
+      liveTimeBounds: { afterMs: -Infinity, beforeMs: Infinity },
     }
 
     const pendingRequest = doRequest(opInputs, currentState)
@@ -1260,6 +1345,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
       eventEmitter.once('reload', callback)
     },
     getUrl: () => sabrStreamState.sabrUrl,
+    deliveredLiveStartsMs: sabrStreamState.deliveredLiveStartsMs,
     cleanup,
   }
 }

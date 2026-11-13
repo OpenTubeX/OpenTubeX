@@ -1,27 +1,5 @@
 import { test, expect, goTo, goToSettingsSection, latestSettings, readDatastore } from '../../helpers/app.mjs'
 
-test.describe('fresh AI video summary default', () => {
-  test.use({ seed: { freshProfile: true }, showTutorial: true })
-
-  test('defaults AI video summaries to collapsed and preserves that on restart', async ({ app, page }, testInfo) => {
-    await page.locator('.tutorialCard').getByRole('button', { name: 'Skip', exact: true }).click()
-    await expect(page.locator('.tutorialOverlay')).toBeHidden()
-    const focus = await goToSettingsSection(page, 'focus')
-    const summaryMode = focus.getByRole('combobox', { name: 'AI video summaries' })
-    await expect(summaryMode).toHaveText('Collapsed')
-    await summaryMode.scrollIntoViewIfNeeded()
-    await page.screenshot({ path: testInfo.outputPath('summary-default-collapsed.png') })
-    await page.evaluate(async () => {
-      const store = window.$store
-      await store.dispatch('updateConfirmCloseApp', false)
-    })
-
-    const { page: relaunchedPage } = await app.relaunch()
-    const relaunchedFocus = await goToSettingsSection(relaunchedPage, 'focus')
-    await expect(relaunchedFocus.getByRole('combobox', { name: 'AI video summaries' })).toHaveText('Collapsed')
-  })
-})
-
 test('DLNA, Google Cast and FCast casting are opt in from Player Settings', async ({ page }) => {
   const playback = await goToSettingsSection(page, 'playback')
   for (const label of ['Enable DLNA casting', 'Enable Google Cast', 'Enable FCast']) {

@@ -143,8 +143,8 @@ test.describe('New feed refresh while saving seen marks', () => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await page.getByRole('button', { name: /Refresh New content/ }).click()
-    const errorHeading = page.getByRole('heading', { name: 'Channels with errors', exact: true })
-    await expect(errorHeading).toBeVisible()
+    const errorBox = page.locator('.channelErrors.hasErrors')
+    await expect(errorBox).toBeVisible()
     await expect(page.getByRole('button', { name: 'Mark all as seen' })).toBeEnabled()
 
     await holdSeenMarks(page)
@@ -152,7 +152,7 @@ test.describe('New feed refresh while saving seen marks', () => {
       await page.getByRole('button', { name: 'Mark all as seen' }).click()
       await expect.poll(() => page.evaluate(() => !!window.__finishSavingSeenMarks)).toBe(true)
       await expect(page.getByText('There is no new content.', { exact: true })).toBeVisible()
-      await expect.soft(errorHeading).toBeVisible({ timeout: 1000 })
+      await expect.soft(errorBox).toBeVisible({ timeout: 1000 })
       await expect.soft(page.locator('.newFeed').getByRole('link', { name: 'Channel A', exact: true })).toBeVisible({ timeout: 1000 })
       await page.locator('.card').filter({ has: page.locator('.newFeed') }).screenshot({
         path: testInfo.outputPath('failed-channels-during-save.png')
@@ -941,6 +941,22 @@ test.describe('tile keyboard navigation in a long feed', () => {
       await page.keyboard.press('ArrowDown')
       await expect(titleLink(index)).toBeFocused()
     }
+
+    for (let index = 19; index >= 0; index--) {
+      await page.keyboard.press('ArrowUp')
+      await expect(titleLink(index)).toBeFocused()
+    }
+    // The first row cannot scroll further down, so its focus ring needs room
+    // below the sticky header.
+    const { ringTop, headerBottom } = await titleLink(0).evaluate(title => {
+      const tile = title.closest('.ft-list-item')
+      const style = getComputedStyle(tile)
+      return {
+        ringTop: tile.getBoundingClientRect().top - parseFloat(style.outlineWidth) - parseFloat(style.outlineOffset),
+        headerBottom: document.querySelector('.subscriptionsHeader').getBoundingClientRect().bottom
+      }
+    })
+    expect(ringTop).toBeGreaterThanOrEqual(headerBottom)
   })
 })
 
@@ -1419,7 +1435,7 @@ test.describe('large new feed refresh', () => {
     }
   })
 
-  test('warns before refreshing all non-RSS feeds', async ({ page }) => {
+  test('warns before refreshing all feeds', async ({ page }) => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await expect(page.getByText('There is no new content.')).toBeVisible()
@@ -1436,6 +1452,61 @@ test.describe('large new feed refresh', () => {
     await page.getByRole('button', { name: 'No', exact: true }).click()
     await expect(page.getByRole('heading', { name: 'Refresh all subscription feeds?' })).toHaveCount(0)
     await expect(page.getByText('There is no new content.')).toBeVisible()
+
+    // "Never ask again" refreshes and turns the confirmation off
+    await page.route(/^https?:\/\//, route => route.fulfill({ status: 404, body: '' }))
+    await page.evaluate(() => {
+      window.__refreshStarts = 0
+      window.$store.watch(state => state.subscriptionCache.subscriptionFeedRefreshInProgress, refreshing => {
+        if (refreshing) window.__refreshStarts++
+      })
+    })
+    await refreshNewContent.click()
+    await page.getByRole('button', { name: 'Never ask again' }).click()
+    await expect(page.getByRole('heading', { name: 'Refresh all subscription feeds?' })).toHaveCount(0)
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getConfirmRefreshAllFeeds)).toBe(false)
+    // Refreshing all feeds refreshes each feed type in turn, and each one
+    // toggles the flag, so a single refresh can count more than one start.
+    await expect.poll(() => page.evaluate(() => window.__refreshStarts)).toBeGreaterThan(0)
+
+    await page.locator('.subscriptionsHeader').getByRole('button', { name: 'Cancel Refresh' }).click()
+    await expect(refreshNewContent).toHaveAttribute('aria-disabled', 'false')
+    await page.evaluate(() => { window.__refreshStarts = 0 })
+    await refreshNewContent.click()
+    await expect.poll(() => page.evaluate(() => window.__refreshStarts)).toBeGreaterThan(0)
+    await expect(page.getByRole('heading', { name: 'Refresh all subscription feeds?' })).toHaveCount(0)
+  })
+
+  test.describe('with RSS feeds', () => {
+    test.use({
+      seed: {
+        settings: {
+          ...commonSettings,
+          newSubscriptionFeedView: 'tabbed',
+          enableRssFeeds: true,
+          followedRssFeeds: [{ url: 'https://rss.example.test/feed.xml', title: 'Example feed' }]
+        },
+        profiles: [profile(subscriptions)]
+      }
+    })
+
+    test('reloading all feeds from the RSS tab asks too and can be cancelled there', async ({ page }) => {
+      await page.route(/^https?:\/\//, route => route.fulfill({ status: 404, body: '' }))
+      await goTo(page, 'subscriptions')
+      const newTab = page.locator('[data-subscription-feed-tab="all"]')
+      await newTab.click()
+      await page.locator('[data-new-feed-rss-tab]').click()
+      await newTab.click({ button: 'right' })
+      await page.getByRole('menu', { name: 'Context menu' }).getByRole('menuitem', { name: 'Reload All Feeds' }).click()
+      await expect(page.getByRole('heading', { name: 'Refresh all subscription feeds?' })).toBeVisible()
+      await page.getByRole('button', { name: 'Yes', exact: true }).click()
+      await expect(page.getByRole('heading', { name: 'Refresh all subscription feeds?' })).toHaveCount(0)
+
+      // The RSS tab shows and cancels the subscription refresh it started
+      await expect.poll(() => page.evaluate(() => window.$store.getters.getSubscriptionFeedRefreshInProgress)).toBe(true)
+      await page.locator('.subscriptionsHeader').getByRole('button', { name: 'Cancel Refresh' }).click()
+      await expect.poll(() => page.evaluate(() => window.$store.getters.getSubscriptionFeedRefreshInProgress)).toBe(false)
+    })
   })
 
   for (const view of ['combined', 'tabbed']) {

@@ -127,7 +127,6 @@
       v-if="tabOrganizerOpen"
       @close="closeTabOrganizer"
     />
-    <SubscriptionRefreshErrors />
     <DigitalWellbeing />
     <FtPrompt
       v-if="showReleaseNotes"
@@ -554,7 +553,7 @@
             <FtRetryImage
               v-if="getUsableTabSwitcherPreviewUrl(tab)"
               :src="tabSwitcherPreviewUrls[tab.id]"
-              :alt="`${formatTabTitle(tab.title)} preview`"
+              :alt="`${tab.title} preview`"
               loading="lazy"
               decoding="async"
               draggable="false"
@@ -564,7 +563,7 @@
               v-else-if="!tabSwitcherPreviewPending[tab.id] && getUsableTabSwitcherAvatarUrl(tab)"
               :fallback-icon="getTabPageIcon(tab) || ['fas', 'display']"
               :src="getUsableTabSwitcherAvatarUrl(tab)"
-              :alt="`${formatTabTitle(tab.title)} preview`"
+              :alt="`${tab.title} preview`"
               class="tabSwitcherPreviewAvatar"
               loading="lazy"
               decoding="async"
@@ -601,7 +600,7 @@
               aria-hidden="true"
             />
             <span class="tabSwitcherTitleText">
-              {{ formatTabTitle(tab.title) }}
+              {{ tab.title }}
             </span>
           </span>
         </button>
@@ -660,7 +659,6 @@ import { initializeAndroidIncomingShare } from './helpers/androidIncomingShare'
 import { handleRestoredAndroidAppData } from './helpers/androidStorage'
 import { extractSharedMediaLink, extractSharedYoutubeLink } from './helpers/sharedYoutubeLink'
 import { shouldOpenExternalMediaUrl } from './helpers/externalMediaUrl'
-import SubscriptionRefreshErrors from './components/SubscriptionRefreshErrors.vue'
 import DigitalWellbeing from './components/DigitalWellbeing/DigitalWellbeing.vue'
 import FtButton from './components/FtButton/FtButton.vue'
 import FtToast from './components/FtToast/FtToast.vue'
@@ -728,8 +726,9 @@ import {
 import { classifyRequestFailure } from './helpers/api/requestDiagnostics'
 import { useSubscriptionAutoRefresh } from './composables/useSubscriptionAutoRefresh'
 import { useRssFeedAutoRefresh } from './composables/useRssFeedAutoRefresh'
+import { usePlatformFeedAutoRefresh } from './composables/usePlatformFeedAutoRefresh'
+import { startTwitchLiveNotifications } from './helpers/platformFeed'
 import { translateWindowTitle } from './helpers/strings'
-import { formatTabTitle } from './tabs/tabTitle'
 import { normalizeScrollbarThumbWidth } from './constants/scrollbar'
 import { getAppFontFamily } from './helpers/appFont'
 import { canMarkHistoryEntryAsWatched } from './helpers/history'
@@ -1366,8 +1365,8 @@ let removeAndroidYtDlpSettingsListener = null
 let removeOpenTabOrganizerListener = null
 let removeGamepadNavigation = () => {}
 /** @type {number|null} */
-let utilityRoutePreloadId = null
-let utilityRoutePreloadUsesIdleCallback = false
+let idleStartupWorkId = null
+let idleStartupWorkUsesIdleCallback = false
 
 function isSyncSettingsVisible() {
   const section = document.querySelector(
@@ -1385,36 +1384,44 @@ watch([dataReady, () => store.getters.getSyncServerError], ([ready, error]) => {
   })
 }, { flush: 'post' })
 
-function scheduleUtilityRoutePreload() {
-  if (utilityRoutePreloadId !== null) {
+/** Runs what the first screen does not need once the app is idle. */
+function scheduleIdleStartupWork() {
+  if (idleStartupWorkId !== null) {
     return
   }
 
-  const preload = () => {
-    utilityRoutePreloadId = null
+  const run = () => {
+    idleStartupWorkId = null
     preloadUtilityRoutes()
+    // Chromium starts polling gamepads as soon as a page listens for them,
+    // which blocks this thread until the main process has set that up.
+    removeGamepadNavigation = initializeGamepadNavigation({
+      onBack: handleGamepadBack,
+      onNavigate: () => store.dispatch('showOutlines'),
+      onPlayPause: handleGamepadPlayPause,
+    })
   }
 
   if (typeof window.requestIdleCallback === 'function') {
-    utilityRoutePreloadUsesIdleCallback = true
-    utilityRoutePreloadId = window.requestIdleCallback(preload, { timeout: 2000 })
+    idleStartupWorkUsesIdleCallback = true
+    idleStartupWorkId = window.requestIdleCallback(run, { timeout: 2000 })
   } else {
-    utilityRoutePreloadUsesIdleCallback = false
-    utilityRoutePreloadId = window.setTimeout(preload, 1000)
+    idleStartupWorkUsesIdleCallback = false
+    idleStartupWorkId = window.setTimeout(run, 1000)
   }
 }
 
-function cancelUtilityRoutePreload() {
-  if (utilityRoutePreloadId === null) {
+function cancelIdleStartupWork() {
+  if (idleStartupWorkId === null) {
     return
   }
 
-  if (utilityRoutePreloadUsesIdleCallback) {
-    window.cancelIdleCallback(utilityRoutePreloadId)
+  if (idleStartupWorkUsesIdleCallback) {
+    window.cancelIdleCallback(idleStartupWorkId)
   } else {
-    clearTimeout(utilityRoutePreloadId)
+    clearTimeout(idleStartupWorkId)
   }
-  utilityRoutePreloadId = null
+  idleStartupWorkId = null
 }
 let tabSwitcherPreviewRequestId = 0
 let tabSwitcherOpenTimer = null
@@ -1761,11 +1768,6 @@ let removeShimmerVisibility = null
 
 onMounted(async () => {
   removeShimmerVisibility = initializeShimmerVisibility()
-  removeGamepadNavigation = initializeGamepadNavigation({
-    onBack: handleGamepadBack,
-    onNavigate: () => store.dispatch('showOutlines'),
-    onPlayPause: handleGamepadPlayPause,
-  })
   let tabsReady = Promise.resolve()
   if (supportsYtDlp) {
     removeYtDlpBinaryUpdatedListener = ytDlp.addYtDlpBinaryUpdatedListener(invalidateAllYtDlpPlaybackSources)
@@ -1823,7 +1825,10 @@ onMounted(async () => {
   // (subscriptions). Load it during the remaining startup work instead of after.
   const libraryReady = Promise.all([
     settingsReady.then(() => Promise.all([store.dispatch('grabHistory'), store.dispatch('grabAllPlaylists')])),
-    profilesReady.then(() => store.dispatch('grabAllSubscriptions')),
+    profilesReady.then(() => {
+      if (process.env.IS_ELECTRON) store.dispatch('setupProfileListenerToSyncWindows')
+      return store.dispatch('grabAllSubscriptions')
+    }),
   ])
   tabsReady.then(() => {
     const initialRoute = usesLogicalTabs ? store.getters.getActiveTab?.route : route
@@ -1902,7 +1907,7 @@ onMounted(async () => {
       await setLastUsedVersion(packageDetails.version)
     }
 
-    store.dispatch('grabSearchHistoryEntries')
+    const searchHistoryReady = store.dispatch('grabSearchHistoryEntries')
 
     // YouTube links have to be caught in both builds, otherwise the browser
     // navigates away from the app instead of opening the linked video,
@@ -1914,7 +1919,6 @@ onMounted(async () => {
     })
 
     if (process.env.IS_ELECTRON) {
-      store.dispatch('setupListenersToSyncWindows')
       removeOpenUrlListener = enableOpenUrl()
       store.dispatch('getExternalPlayerCmdArgumentsData')
       removeReloadRequestListener = window.ftElectron.tabs.onRequestReload(prepareAndReloadTab)
@@ -1925,6 +1929,12 @@ onMounted(async () => {
     }
 
     await libraryReady
+    if (process.env.IS_ELECTRON) {
+      // The preload holds back other windows' changes until the app listens,
+      // then passes on those that the reads above do not contain.
+      await searchHistoryReady
+      store.dispatch('setupListenersToSyncWindows')
+    }
     store.dispatch('initializeSyncServer').catch(error => {
       console.error('Initial sync server sync failed', error)
     })
@@ -1982,7 +1992,7 @@ onMounted(async () => {
         })
       })
     }
-    scheduleUtilityRoutePreload()
+    scheduleIdleStartupWork()
     if (isCapacitor) {
       initializeHapticFeedback(store)
       capacitorPullToRefreshSetup = initializeCapacitorPullToRefresh()
@@ -2035,6 +2045,7 @@ onMounted(async () => {
   }
   subscriptionAutoRefresh.start()
   rssFeedAutoRefresh.start()
+  platformFeedAutoRefresh.start()
 })
 
 onBeforeUnmount(() => {
@@ -2056,7 +2067,7 @@ onBeforeUnmount(() => {
   delete document.documentElement.dataset.modalBackdrop
   removeGamepadNavigation()
   removeCustomThemeListener()
-  cancelUtilityRoutePreload()
+  cancelIdleStartupWork()
   cancelTabSwitcher()
   systemColorScheme.removeEventListener('change', handleSystemColorSchemeChange)
   if (isElectron) {
@@ -2066,6 +2077,8 @@ onBeforeUnmount(() => {
   cancelWatchSideNavTransitionReset()
   subscriptionAutoRefresh.stop()
   rssFeedAutoRefresh.stop()
+  platformFeedAutoRefresh.stop()
+  stopTwitchLiveNotifications?.()
   clearInterval(historyCleanupTimer)
   clearInterval(searchHistoryCleanupTimer)
   stopUpdateChecks?.()
@@ -2203,6 +2216,12 @@ function scheduleRetentionCleanup(action, days) {
 
 const subscriptionAutoRefresh = useSubscriptionAutoRefresh({ dataReady, t })
 const rssFeedAutoRefresh = useRssFeedAutoRefresh(dataReady)
+const platformFeedAutoRefresh = usePlatformFeedAutoRefresh(dataReady)
+// Starts once the followed channels and the notification settings have loaded
+let stopTwitchLiveNotifications = null
+watch(dataReady, (ready) => {
+  if (ready && stopTwitchLiveNotifications === null) stopTwitchLiveNotifications = startTwitchLiveNotifications()
+}, { immediate: true })
 
 /** @type {import('vue').ComputedRef<string>} */
 const baseTheme = computed(() => store.getters.getBaseTheme)
@@ -4633,20 +4652,10 @@ async function enableCapacitorIntegrations() {
   }
 }
 
-const windowTitle = computed(() => {
-  const routePath = route.path
-  if (
-    !routePath.startsWith('/channel/') &&
-    !routePath.startsWith('/watch/') &&
-    !routePath.startsWith('/hashtag/') &&
-    !routePath.startsWith('/playlist/') &&
-    !routePath.startsWith('/search/')
-  ) {
-    return translateWindowTitle(route.meta.title)
-  } else {
-    return null
-  }
-})
+// Pages without a static title publish their own
+const windowTitle = computed(() => typeof route.meta.title === 'string'
+  ? translateWindowTitle(route.meta.title)
+  : null)
 
 /** @type {import('vue').ComputedRef<string>} */
 const appTitle = computed(() => {
@@ -4658,15 +4667,7 @@ const appTitle = computed(() => {
 })
 
 function publishAppTitle(value) {
-  if (value.length > 0) {
-    document.title = `${value} - ${packageDetails.productName}`
-  } else {
-    document.title = packageDetails.productName
-  }
-
-  if (isElectron && presentedTabId.value) {
-    window.ftElectron.setWindowTitle(document.title, presentedTabId.value)
-  }
+  document.title = value.length > 0 ? `${value} - ${packageDetails.productName}` : packageDetails.productName
 }
 
 watch(appTitle, publishAppTitle)

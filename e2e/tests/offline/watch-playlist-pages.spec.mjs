@@ -136,6 +136,10 @@ test('the progress bar of a reversed playlist shows the video it selects while p
   releasePage()
   await expect(panel.locator('.playlistItem')).toHaveCount(VIDEO_COUNT)
   await waitForPlaylistPagesIdle(watch)
+  // Whether the list is inside the window depends on how Playwright aligned the
+  // buttons it clicked, which at 125% can leave it below. Scrolling the page
+  // keeps the list's own scroll position.
+  await panel.locator('.playlistItemsWrapper').scrollIntoViewIfNeeded()
   await expect(panel.locator(`.playlistItem[data-video-id="${pagedPlaylistVideoId(VIDEO_COUNT - 15, 0)}"]`)).toBeInViewport()
 })
 

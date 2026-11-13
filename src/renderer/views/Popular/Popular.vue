@@ -1,7 +1,6 @@
 <template>
   <div
     class="popularPage"
-    :class="{ hasTabBar: hasHorizontalTabBar }"
   >
     <ft-card
       class="card"
@@ -40,6 +39,13 @@
       >
         {{ $t("Most Popular Feed Empty") }}
       </p>
+      <p
+        v-else-if="loadFailed"
+        class="emptyMessage"
+        role="status"
+      >
+        {{ $t("Most Popular Load Error") }}
+      </p>
     </ft-card>
   </div>
 </template>
@@ -60,11 +66,6 @@ import { getInvidiousApiErrorMessage, getRelativeTimeFromDate, showApiErrorToast
 import { useFeedRefreshShortcut } from '../../composables/useFeedRefreshShortcut'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 
-const isElectron = process.env.IS_ELECTRON
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const hasHorizontalTabBar = computed(() => isElectron && store.getters.getTabBarPosition === 'top')
-
 const isLoading = ref(false)
 const relativeTimeNow = useRelativeTimeClock()
 
@@ -79,6 +80,7 @@ const popularCache = computed(() => {
 
 const shownResults = shallowRef(popularCache.value || [])
 const hasLoaded = ref(popularCache.value !== null)
+const loadFailed = ref(false)
 
 onMounted(() => {
   if (shownResults.value.length === 0) {
@@ -89,6 +91,7 @@ onMounted(() => {
 async function fetchPopularInfo() {
   isLoading.value = true
   hasLoaded.value = false
+  loadFailed.value = false
 
   try {
     const items = await getInvidiousPopularFeed()
@@ -100,6 +103,7 @@ async function fetchPopularInfo() {
     store.commit('setPopularCache', items)
   } catch (err) {
     isLoading.value = false
+    loadFailed.value = true
     const errorMessage = getInvidiousApiErrorMessage(store.getters.getBackendPreference)
     showApiErrorToast(errorMessage, err)
   }

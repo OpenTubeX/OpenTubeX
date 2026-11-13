@@ -232,12 +232,7 @@ export const ERROR_TOAST_ICON = ['fas', 'circle-exclamation']
  * @property {[string, string]} [icon] optional semantic icon (e.g. `['fas', 'trash']`) shown
  *   alongside the message, ignored when an image is given
  * @property {boolean} [important] keeps the toast when only important notifications are allowed,
- *   for reminders the user set up. Errors, warnings, and toasts with actions are kept regardless
- */
-
-/**
- * @typedef {object} ToastControl
- * @property {(time: number) => void} startTimeout starts a finite timeout for an indefinite toast
+ *   for reminders the user set up. Errors, warnings, and toasts with buttons other than Undo are kept regardless
  */
 
 /**
@@ -246,7 +241,6 @@ export const ERROR_TOAST_ICON = ['fas', 'circle-exclamation']
  * @param {number} time
  * @param {Function} action
  * @param {AbortSignal} abortSignal
- * @returns {ToastControl | null | undefined}
  */
 export function showToast(message, time = null, action = null, abortSignal = null) {
   let image = null
@@ -283,11 +277,8 @@ export function showToast(message, time = null, action = null, abortSignal = nul
     dismissible,
     dismissOnAction,
     important,
-    /** @type {ToastControl | null} */
-    control: null,
   }
   ToastEventBus.dispatchEvent(new CustomEvent('toast-open', { detail }))
-  return detail.control
 }
 
 /**

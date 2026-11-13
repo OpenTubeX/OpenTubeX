@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import { compileFunction, createContext, runInContext } from 'node:vm'
+import { createStore } from 'vuex'
 import { Parser, YTNodes } from 'youtubei.js'
 
 import {
@@ -200,4 +201,44 @@ test('keeps the channel handle on parsed search result videos', () => {
 
   assert.equal(parsed.authorId, CHANNEL_ID)
   assert.equal(parsed.authorHandle, '@SlopChannel')
+})
+
+test('coming back online during a failing download retries once it settles', async () => {
+  const listeners = {}
+  const eventTarget = { addEventListener: (type, listener) => { listeners[type] = listener } }
+  let failFirstDownload
+  const firstDownload = new Promise((resolve, reject) => { failFirstDownload = reject })
+  firstDownload.catch(() => {})
+  let fetches = 0
+  const storeSource = (await readFile(new URL('../../src/renderer/store/modules/ai-slop-list.js', import.meta.url), 'utf8'))
+    .replace(/^import[\s\S]*?from '[^']+'\n/gm, '')
+    .replace('export default', 'globalThis.aiSlopListModule =')
+  const context = createContext({
+    markRaw: value => value,
+    AI_SLOP_LIST_MAX_AGE_MS: 86_400_000,
+    AI_SLOP_LIST_URLS: { blocked: 'blocked.txt', warned: 'warned.txt' },
+    loadCachedAiSlopList: () => null,
+    parseAiSlopList,
+    removeCachedAiSlopList() {},
+    saveCachedAiSlopList() {},
+    fetchWithTimeout: () => ++fetches <= 2 ? firstDownload : Promise.resolve({ ok: true, text: async () => CHANNEL_ID }),
+    window: eventTarget,
+    document: { ...eventTarget, visibilityState: 'visible' },
+    console: { error() {} },
+  })
+  runInContext(storeSource, context)
+  const module = context.aiSlopListModule
+  module.getters.getUseAiSlopList = () => true
+  const store = createStore(module)
+
+  const download = store.dispatch('loadAiSlopList')
+  listeners.online()
+  failFirstDownload(new Error('offline'))
+  await download
+  assert.equal(fetches, 4)
+  // The retry is the pending download now
+  await store.dispatch('loadAiSlopList')
+
+  assert.equal(store.getters.getAiSlopListLoadFailed, false)
+  assert.equal(store.state.aiSlopBlockedChannels.has(CHANNEL_ID), true)
 })

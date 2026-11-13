@@ -20,7 +20,7 @@ const SENSITIVE_KEY = /^(?:authorization|cookies?|set-cookie|password|passphrase
 const SENSITIVE_ASSIGNMENT = /(\\{0,3}["']?)(?<![\w-])(authorization|cookies?|set-cookie|password|passphrase|secret|signature|sig|sapisid|visitor[_-]?(?:data|id)|[\w-]*(?:token|secret|password|api[_-]?key))\1(\s*[:=]\s*)(?:\\{1,3}"[^"]*"|"[^"]*"|'[^']*'|[^\s,;&}\]]+)/gi
 // Brackets are valid URL characters (IPv6 hosts, `filters[]=` queries), so a
 // match only ends at whitespace or quotes and loses unbalanced closers later
-const URL_PATTERN = /\b(?:https?|wss?|file):\/\/[^\s"'<>]+/gi
+const URL_PATTERN = /\b(?:https?|wss?|file|app|capacitor):\/\/[^\s"'<>]+/gi
 const CLOSING_BRACKETS = { ')': '(', ']': '[', '}': '{' }
 const IPV4_PATTERN = /(?<![\d.])(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)(?![\d.])/g
 const IPV6_PATTERN = /(?<![\w:])(?:(?:[\da-f]{1,4}:){3,7}[\da-f]{1,4}|(?:[\da-f]{1,4}:){1,6}:(?:[\da-f]{1,4}(?::[\da-f]{1,4})*)?|::[\da-f]{1,4}(?::[\da-f]{1,4}){0,6})(?![\w:])/gi
@@ -31,6 +31,36 @@ const HOME_DIRECTORY_PATTERN = /(\/home\/|\/Users\/|[A-Z]:\\{1,2}Users\\{1,2})(?
 const GOOGLEVIDEO_NODE_PATTERN = /\brr\d+---sn-[\da-z-]+\.googlevideo\.com\b/gi
 // Long opaque path segments are usually tokens, signatures or session IDs
 const OPAQUE_PATH_SEGMENT = /^[\w%=.~-]{40,}$/
+// Video, channel and playlist IDs and channel handles show what the user
+// watched. Words, even long ones like `performance`, have no digits or capitals.
+const MEDIA_ID_PATH_SEGMENT = /^(?:(?=[\w-]*[\dA-Z])[\w-]{11,}|@.+)$/
+// Segments followed by an ID or name, which can be all lowercase, like
+// `/vi/<video ID>/` or `/api/v1/channels/<channel ID>`
+const MEDIA_ID_PARENT_SEGMENTS = new Set(['vi', 'vi_webp', 'shorts', 'embed', 'live', 'v', 'channel', 'c', 'user', 'videos', 'channels', 'playlists', 'comments', 'captions', 'storyboards', 'post'])
+// The app's routes live in the hash, like `#/watch/<id>`. Only their name is
+// kept, since the rest can be a search, a handle or an ID.
+const APP_PROTOCOLS = ['app:', 'capacitor:']
+
+/**
+ * @param {string} path
+ * @returns {string}
+ */
+function redactPath(path) {
+  const segments = path.split('/')
+  return segments
+    .map((segment, index) => {
+      // Handles can be percent-encoded, like `%40name`
+      let decoded = segment
+      try {
+        decoded = decodeURIComponent(segment)
+      } catch {}
+      return OPAQUE_PATH_SEGMENT.test(segment) || MEDIA_ID_PATH_SEGMENT.test(decoded) ||
+        (segment !== '' && MEDIA_ID_PARENT_SEGMENTS.has(segments[index - 1]?.toLowerCase()))
+        ? REDACTED
+        : segment
+    })
+    .join('/')
+}
 
 function redactUrl(match) {
   // Keep sentence punctuation and closing brackets that surround the URL
@@ -58,12 +88,13 @@ function redactUrl(match) {
   } catch {
     return `<url>${trailing}`
   }
-  const path = url.pathname
-    .split('/')
-    .map(segment => OPAQUE_PATH_SEGMENT.test(segment) ? REDACTED : segment)
-    .join('/')
+  const path = redactPath(url.pathname)
   const query = url.search ? `?${REDACTED}` : ''
-  const hash = url.hash ? `#${REDACTED}` : ''
+  let hash = url.hash ? `#${REDACTED}` : ''
+  if (APP_PROTOCOLS.includes(url.protocol) && url.hash.startsWith('#/')) {
+    const [, name, rest] = url.hash.match(/^#\/([^/?]*)(.*)$/)
+    hash = `#/${name}${rest ? `/${REDACTED}` : ''}`
+  }
   const origin = url.protocol === 'file:' ? 'file://' : `${url.protocol}//${url.host}`
   return `${origin}${path}${query}${hash}${trailing}`
 }

@@ -3,6 +3,7 @@ import { BrowserWindow, ipcMain } from 'electron'
 import { IpcChannels } from '../constants'
 import { getIpBlockRecoveryScriptRun } from './ipBlockRecovery'
 import { TabManager } from './tabs/TabManager'
+import { createSerialQueue } from './serialQueue'
 import { isOpenTubeXUrl } from './utils'
 
 /** @type {{ webContents: import('electron').WebContents, tabId: string } | null} */
@@ -84,13 +85,12 @@ export function setupSubscriptionAutoRefreshIpc({ backgroundSubscriptions, updat
 
   // A failed acquisition restores the background work, so a concurrent one
   // must not leave the background before that
-  let acquisition = Promise.resolve(false)
+  const enqueueAcquisition = createSerialQueue()
   ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_ACQUIRE, (event, tabId, feedTab) => {
     // The renderer that asked can reload or crash while this waits
     trackRendererLifecycle(event.sender)
     const generation = rendererGenerations.get(event.sender)
-    acquisition = acquisition.catch(() => {}).then(() => acquire(event, generation, tabId, feedTab))
-    return acquisition
+    return enqueueAcquisition(() => acquire(event, generation, tabId, feedTab))
   })
 
   /**
@@ -107,7 +107,7 @@ export function setupSubscriptionAutoRefreshIpc({ backgroundSubscriptions, updat
         typeof tabId === 'string' &&
         manager.activeTabId === tabId &&
         !event.sender.isDestroyed() &&
-        isOpenTubeXUrl(event.senderFrame.url)
+        isOpenTubeXUrl(event.senderFrame?.url)
     }
 
     if (!canAcquire()) {
@@ -148,7 +148,7 @@ export function setupSubscriptionAutoRefreshIpc({ backgroundSubscriptions, updat
   }
 
   ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_GET_STATE, (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
+    if (!isOpenTubeXUrl(event.senderFrame?.url)) {
       return { inProgress: false, percentage: 0, tab: null }
     }
 
@@ -173,7 +173,7 @@ export function setupSubscriptionAutoRefreshIpc({ backgroundSubscriptions, updat
   })
 
   ipcMain.on(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_CANCEL, (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
+    if (!isOpenTubeXUrl(event.senderFrame?.url)) {
       return
     }
 

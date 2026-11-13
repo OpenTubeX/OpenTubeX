@@ -4,7 +4,7 @@ import store from '../store/index'
 
 import { youtubeImageUrlToInvidious } from '../helpers/api/invidious'
 import { getLocalVideoChannels } from '../helpers/api/local'
-import { fetchChannelInfo, getCachedChannelInfo } from '../helpers/channel-preferences'
+import { fetchChannelInfo, getCachedChannelInfo, runChannelRequest } from '../helpers/channel-preferences'
 import { getResultAuthorThumbnailUrl } from '../helpers/result-channel-avatar'
 import { isCollaborativeVideoAuthor } from '../helpers/video-collaborators'
 
@@ -56,11 +56,12 @@ export function useResultChannelAvatar(result, channelId, enabled) {
       (resolvingChannelId == null && result.value.videoId &&
         (cachedThumbnail === null || isCollaborativeVideoAuthor(result.value.author)))) {
       try {
+        const videoId = result.value.videoId
         // The lookup contacts YouTube directly, so other backends go without it
         const collaborators = result.value.collaborators?.length > 0
           ? result.value.collaborators
-          : result.value.videoId && store.getters.getBackendPreference === 'local'
-            ? await getLocalVideoChannels(result.value.videoId)
+          : videoId && store.getters.getBackendPreference === 'local'
+            ? await runChannelRequest(() => getLocalVideoChannels(videoId), () => generation === loadGeneration) ?? []
             : []
         if (generation !== loadGeneration) return
         if (collaborators.length > 0) {

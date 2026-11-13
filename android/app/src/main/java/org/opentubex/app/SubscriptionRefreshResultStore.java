@@ -119,6 +119,27 @@ final class SubscriptionRefreshResultStore {
         write(context, result, profileId + "\n" + feedType + "\nfailure");
     }
 
+    /** Kept apart from the channel's feed, which the app may not have imported yet. */
+    static synchronized void writeChannelFailure(
+        Context context,
+        String profileId,
+        String feedType,
+        String channelId,
+        SubscriptionRefreshRequestDiagnostic diagnostic,
+        boolean unavailable,
+        long timestamp
+    ) throws IOException, JSONException {
+        String slot = profileId + "\n" + feedType + "\n" + channelId;
+        // The app lists the channel until its next import, so that one must be written even if the feed is unchanged
+        File fingerprint = new File(directory(context), slotName(slot) + ".fingerprint");
+        if (!fingerprint.delete() && fingerprint.exists()) throw new IOException("Unable to forget the channel's fingerprint");
+        JSONObject result = baseResult("channelFailure", profileId, feedType, timestamp)
+            .put("channelId", channelId)
+            .put("diagnostic", diagnostic.toJson())
+            .put("unavailable", unavailable);
+        write(context, result, slot + "\nfailure");
+    }
+
     // The app's cache no longer holds what these fingerprints describe, so the
     // next refresh has to queue those feeds again. Null forgets every channel.
     // Returns false when a matching fingerprint could not be deleted.

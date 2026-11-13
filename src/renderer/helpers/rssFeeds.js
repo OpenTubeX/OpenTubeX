@@ -10,6 +10,7 @@ import { supportsYtDlp } from './ytDlpCapabilities'
 import { isRssFeedItemSeen, onRssFeedSeenItemsSynced, parseRssFeedSeenItems, toRssFeedSeenMarks } from './rssFeedSeenItems'
 import { unmarkExternalMediaWatchedBefore } from './externalMediaPosition'
 import { resolveYtDlpCreatorAvatarUrl } from '../../main/ytDlpCreatorAvatar'
+import { holdAndroidBackgroundWork } from './androidBackgroundSync.js'
 
 const FETCH_TIMEOUT_MS = 15_000
 const MAX_ITEMS_PER_FEED = 50
@@ -638,7 +639,7 @@ export async function updateMissingRssFeedAvatars(results) {
   if (avatars.size === 0) return
 
   // Feeds can change while the lookups run
-  await store.dispatch('updateFollowedRssFeeds', store.getters.getFollowedRssFeeds.map(feed => (
+  await store.dispatch('updateFollowedRssFeeds', feeds => feeds.map(feed => (
     avatars.has(feed.url) && !feed.avatar ? { ...feed, avatar: avatars.get(feed.url) } : feed
   )))
 }
@@ -677,9 +678,14 @@ function setRssFeedErrors(urls) {
  * @param {RssFeed} feed
  */
 export async function retryRssFeed(feed) {
-  const result = await fetchRssFeed(feed.url)
-  addLoadedRssFeed(feed, result)
-  updateMissingRssFeedAvatars([[feed, result]])
+  const releaseBackgroundHold = holdAndroidBackgroundWork()
+  try {
+    const result = await fetchRssFeed(feed.url)
+    addLoadedRssFeed(feed, result)
+    updateMissingRssFeedAvatars([[feed, result]])
+  } finally {
+    releaseBackgroundHold()
+  }
 }
 
 const AUTO_REFRESH_TOAST_DURATION = 5000
@@ -714,6 +720,9 @@ export async function refreshRssFeeds(feeds, { automatic = false, cachedUrls = n
     showToastOnAllTabs(message, AUTO_REFRESH_TOAST_DURATION, ['fas', 'rss'])
   }
 
+  // Keep a hidden Android app running until the refresh ends. Subscription
+  // refresh batches must not wait for RSS feeds, so this holds on its own.
+  const releaseBackgroundHold = holdAndroidBackgroundWork()
   try {
     const cachedFeedUrls = new Set(feeds.filter(feed => cachedUrls.has(feed.url)).map(feed => feed.url))
     const fetchedFeeds = feeds.filter(feed => !cachedFeedUrls.has(feed.url))
@@ -762,6 +771,7 @@ export async function refreshRssFeeds(feeds, { automatic = false, cachedUrls = n
       return result.status === 'fulfilled' ? [[feed, result.value]] : []
     }))
   } finally {
+    releaseBackgroundHold()
     finish()
     progress.finish()
     if (activeRefresh === controller) {

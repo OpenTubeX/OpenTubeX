@@ -85,7 +85,7 @@ test('concurrent post marks persist together and delayed window replies retain n
   assert.deepEqual(JSON.parse(latest).map(entry => entry.postId), ['first', 'second'])
   const source = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
   const context = vm.createContext({ ...seenVideos, ANDROID_PROXY_SETTING_KEYS: [] })
-  vm.runInContext(source.slice(source.indexOf('const customActions ='), source.indexOf('  recordSyncSettingEdit:')) +
+  vm.runInContext(source.slice(source.indexOf('const customActions ='), source.indexOf('  saveSyncSettingEdit:')) +
     '\n}\nglobalThis.actions = customActions', context)
   const state = { subscriptionSeenPosts: latest }
   context.actions.applySubscriptionSeenPosts({ state, commit(type, value) { state.subscriptionSeenPosts = value } }, older)
@@ -330,7 +330,7 @@ test('two windows persist both marks and delayed replies cannot overwrite newer 
     })
     vm.runInContext(settingsSource.slice(
       settingsSource.indexOf('const customActions ='),
-      settingsSource.indexOf('  recordSyncSettingEdit:'),
+      settingsSource.indexOf('  saveSyncSettingEdit:'),
     ) + '\n}\nglobalThis.actions = customActions', context)
     const state = { subscriptionSeenVideos: '[]' }
     const actionContext = {

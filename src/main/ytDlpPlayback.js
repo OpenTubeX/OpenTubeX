@@ -144,7 +144,7 @@ const subtitleRequests = new Map()
  * @returns {Promise<string | { error: string } | null>}
  */
 export async function handleYtDlpGetSubtitle(event, url) {
-  if (!isOpenTubeXUrl(event.senderFrame.url) || !isYouTubeSubtitleUrl(url)) return null
+  if (!isOpenTubeXUrl(event.senderFrame?.url) || !isYouTubeSubtitleUrl(url)) return null
 
   const alwaysUseCookies = (await settings._findOne('ytDlpPlaybackAlwaysUseCookies'))?.value === true
   const subtitleUseCookies = (await settings._findOne('ytDlpSubtitleUseCookies'))?.value === true
@@ -195,7 +195,7 @@ export async function handleYtDlpGetPlaybackInfo(
   includeSubtitles = true,
   liveFromStart = false
 ) {
-  if (!isOpenTubeXUrl(event.senderFrame.url)) {
+  if (!isOpenTubeXUrl(event.senderFrame?.url)) {
     return null
   }
 
@@ -384,12 +384,12 @@ export async function handleYtDlpGetPlaybackInfo(
 const historyMetadataRequests = new Map()
 
 export function handleYtDlpCancelHistoryRepair(event) {
-  if (!isOpenTubeXUrl(event.senderFrame.url)) return
+  if (!isOpenTubeXUrl(event.senderFrame?.url)) return
   for (const controller of historyMetadataRequests.get(event.sender.id) ?? []) controller.abort()
 }
 
 export async function handleYtDlpGetHistoryMetadata(event, videoId) {
-  if (!isOpenTubeXUrl(event.senderFrame.url) || typeof videoId !== 'string' || !ID_REGEX.test(videoId)) return null
+  if (!isOpenTubeXUrl(event.senderFrame?.url) || typeof videoId !== 'string' || !ID_REGEX.test(videoId)) return null
   const senderId = event.sender.id
   const controller = new AbortController()
   const requests = historyMetadataRequests.get(senderId) ?? new Set()
@@ -423,7 +423,7 @@ export async function handleYtDlpGetHistoryMetadata(event, videoId) {
 }
 
 export async function handleYtDlpSearch(event, query, params, page) {
-  if (!isOpenTubeXUrl(event.senderFrame.url)) return null
+  if (!isOpenTubeXUrl(event.senderFrame?.url)) return null
   try {
     const args = buildYtDlpSearchArguments(query, params, page)
     const target = args.splice(-2)
@@ -472,7 +472,7 @@ export async function handleYtDlpSearch(event, query, params, page) {
  * @returns {Promise<YtDlpRecommendation[] | { error: string } | null>}
  */
 export async function handleYtDlpGetRecommendations(event, currentVideoId) {
-  if (!isOpenTubeXUrl(event.senderFrame.url)) {
+  if (!isOpenTubeXUrl(event.senderFrame?.url)) {
     return null
   }
 

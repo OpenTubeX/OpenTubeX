@@ -55,13 +55,17 @@ export function contextMenuLabel(key, parameters = {}, fallback = key) {
 const SELECTION_LABEL_MAX_LENGTH = 30
 
 // Counting grapheme clusters rather than UTF-16 code units, so that the cut
-// never lands inside an emoji or a combining character sequence
-const selectionLabelSegmenter = new Intl.Segmenter()
+// never lands inside an emoji or a combining character sequence. Created on
+// first use: loading its segmentation data takes several milliseconds, which
+// would otherwise be spent before the app is ready.
+/** @type {Intl.Segmenter | undefined} */
+let selectionLabelSegmenter
 
 /**
  * @param {string} text
  */
 export function truncateSelectionForLabel(text) {
+  selectionLabelSegmenter ??= new Intl.Segmenter()
   const graphemes = []
   for (const { segment } of selectionLabelSegmenter.segment(text)) {
     if (graphemes.length === SELECTION_LABEL_MAX_LENGTH) {
@@ -300,6 +304,7 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
       live: 'Reload Live',
       posts: 'Reload Posts',
       feeds: 'Reload RSS Feeds',
+      platforms: 'Reload Platforms',
       all: 'Reload All Feeds'
     }
     const contextMenuTabYouTubeUrls = contextMenuTabs.map(tab => {
@@ -397,14 +402,16 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
     return [
       {
         // While a subscription refresh runs, the same entry cancels it. RSS
-        // feeds refresh separately, without cancellation.
+        // feeds and other platforms refresh separately, without cancellation.
         label: contextMenuLabel(subscriptionFeedLabelKeys[subscriptionFeedTab] ?? 'Reload Videos'),
-        refreshingLabel: subscriptionFeedTab === 'feeds' ? undefined : contextMenuLabel('Cancel Refresh'),
+        refreshingLabel: subscriptionFeedTab === 'feeds' || subscriptionFeedTab === 'platforms'
+          ? undefined
+          : contextMenuLabel('Cancel Refresh'),
         visible: subscriptionFeedTab != null,
         click: () => {
           if (!manager || !subscriptionFeedTab) return
 
-          if (subscriptionFeedTab !== 'feeds' && isSubscriptionAutoRefreshInProgress()) {
+          if (subscriptionFeedTab !== 'feeds' && subscriptionFeedTab !== 'platforms' && isSubscriptionAutoRefreshInProgress()) {
             requestSubscriptionAutoRefreshCancellation()
             return
           }
@@ -419,7 +426,7 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
       },
       {
         label: contextMenuLabel('Mark All as Seen'),
-        visible: (isSubscriptionNewFeedTab || subscriptionFeedTab === 'feeds') &&
+        visible: (isSubscriptionNewFeedTab || subscriptionFeedTab === 'feeds' || subscriptionFeedTab === 'platforms') &&
           manager?.contextMenuSubscriptionFeedHasNewContent === true,
         click: () => {
           if (!manager?.presentedTabId || !subscriptionFeedTab || subscriptionFeedTab === 'all') {
@@ -880,7 +887,7 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
   })
 
   ipcMain.handle(IpcChannels.RESOLVE_FAVICON, async (event, url) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || typeof url !== 'string') return ''
+    if (!isOpenTubeXUrl(event.senderFrame?.url) || typeof url !== 'string') return ''
 
     if (!(await getConfiguredSearchEngines()).some(engine => engine.enabled && engine.url === url)) {
       return ''

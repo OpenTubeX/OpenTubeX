@@ -49,7 +49,12 @@ public class PullToRefreshLayoutTest {
                 await(web, "!!document.querySelector('.tabContent[aria-hidden=\"false\"] .subscriptionsHeaderRefreshWidget')");
                 evaluate(web, "document.querySelector('#app').__vue_app__.config.globalProperties.$router.push('/watch/jNQXAC9IVRw')");
                 await(web, "!!document.querySelector('.tabContent[aria-hidden=\"false\"] .browsingBehindWatch .subscriptionsHeaderRefreshWidget')");
-                await(web, "!!window.__opentubexPullToRefresh(0.2, 0.2)");
+                // The player loads over the placeholder at the top of the page and owns
+                // its gestures, so pull from the loaded page's title below it.
+                await(web, "!!document.querySelector('.tabContent[aria-hidden=\"false\"] .videoLayout:not(.isLoading) .videoTitle')");
+                float pullY = Float.parseFloat(evaluate(web, "(() => { const title = document.querySelector('.tabContent[aria-hidden=\"false\"] .videoTitle')" +
+                    ".getBoundingClientRect(); return (title.top + title.height / 2) / innerHeight })()"));
+                await(web, "!!window.__opentubexPullToRefresh(0.2, " + pullY + ")");
                 evaluate(web, """
                     (() => {
                         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
@@ -63,7 +68,7 @@ public class PullToRefreshLayoutTest {
                     """);
                 AtomicReference<View> layout = new AtomicReference<>();
                 scenario.onActivity(activity -> layout.set((View) web.getParent()));
-                swipe(layout.get(), web, false, false, false);
+                swipe(layout.get(), web, pullY, false, false, false);
                 await(web, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPresentedTab.refreshKey === window.__pullRevision + 1");
                 assertEquals("Watch route remains current", "true", evaluate(web,
                     "document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPresentedTab.route.fullPath === window.__pullRoute"));
@@ -174,9 +179,13 @@ public class PullToRefreshLayoutTest {
     }
 
     private static void swipe(View layout, WebView web, boolean horizontal, boolean cancel, boolean multi) throws Exception {
+        swipe(layout, web, 0.2f, horizontal, cancel, multi);
+    }
+
+    private static void swipe(View layout, WebView web, float startY, boolean horizontal, boolean cancel, boolean multi) throws Exception {
         long down = SystemClock.uptimeMillis();
         float x = layout.getWidth() * 0.2f;
-        float y = layout.getHeight() * 0.2f;
+        float y = layout.getHeight() * startY;
         touch(layout, down, MotionEvent.ACTION_DOWN, x, y);
         // The WebView hit test must return before interception can start. WebView
         // answers evaluations in order, so this one returns after the hit test.

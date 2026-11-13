@@ -12,6 +12,9 @@ import {
 } from '../helpers/subscriptions'
 import { withAndroidSubscriptionRefreshBatch } from '../helpers/androidSubscriptionRefresh'
 import { getEnabledSubscriptionFeedSources } from '../helpers/newSubscriptionFeed'
+import { refreshRssFeeds, rssFeedsRefreshing } from '../helpers/rssFeeds'
+import { getFollowedChannels, platformFeedRefreshing, refreshPlatformFeed } from '../helpers/platformFeed'
+import { supportsYtDlp } from '../helpers/ytDlpCapabilities'
 
 const LARGE_SUBSCRIPTION_COUNT = 125
 
@@ -19,7 +22,6 @@ export function useRefreshAllSubscriptionFeeds() {
   const { t } = useI18n()
   const isRefreshing = ref(false)
   const attemptedFetch = ref(false)
-  const errorChannels = ref([])
   const showRefreshWarning = ref(false)
 
   const activeSubscriptionIds = computed(() => {
@@ -40,12 +42,22 @@ export function useRefreshAllSubscriptionFeeds() {
     }))
   })
 
+  const rssFeeds = computed(() => {
+    return supportsYtDlp && store.getters.getEnableRssFeeds ? store.getters.getFollowedRssFeeds : []
+  })
+
   function refresh() {
     if (isRefreshing.value || store.getters.getSubscriptionFeedRefreshInProgress) {
       return
     }
 
-    if (!store.getters.getUseRssFeeds && activeSubscriptionIds.value.size > LARGE_SUBSCRIPTION_COUNT) {
+    // The confirmation is about the subscription feeds, not the RSS feeds or other platforms
+    if (
+      enabledFeeds.value.length > 0 &&
+      store.getters.getConfirmRefreshAllFeeds &&
+      !store.getters.getUseRssFeeds &&
+      activeSubscriptionIds.value.size > LARGE_SUBSCRIPTION_COUNT
+    ) {
       showRefreshWarning.value = true
       return
     }
@@ -53,15 +65,24 @@ export function useRefreshAllSubscriptionFeeds() {
     refreshAllFeeds()
   }
 
+  // Also refreshes the RSS feeds and the channels followed on other platforms,
+  // which run alongside the subscription feeds
   async function refreshAllFeeds() {
+    // Starting another refresh would abort the running one
+    if (rssFeeds.value.length > 0 && !rssFeedsRefreshing.value) {
+      refreshRssFeeds(rssFeeds.value)
+    }
+    if (getFollowedChannels().length > 0 && !platformFeedRefreshing.value) {
+      refreshPlatformFeed()
+    }
+    if (enabledFeeds.value.length === 0 || activeSubscriptionIds.value.size === 0) return
+
     isRefreshing.value = true
     attemptedFetch.value = true
-    errorChannels.value = []
 
     const cancelCountAtStart = getSubscriptionRefreshCancelCount()
 
     try {
-      if (enabledFeeds.value.length === 0) return
       await withAndroidSubscriptionRefreshBatch(() => withSharedChannelUploads(async () => {
         for (const feed of enabledFeeds.value) {
           // Also covers a cancellation between two feeds, when no feed refresh
@@ -70,7 +91,7 @@ export function useRefreshAllSubscriptionFeeds() {
             break
           }
 
-          await feed.refresh({ t, errorChannels: errorChannels.value })
+          await feed.refresh({ t })
         }
       }), { title: t('Subscriptions.Subscriptions'), cancelLabel: t('Feed.Cancel Refresh') })
     } finally {
@@ -78,10 +99,16 @@ export function useRefreshAllSubscriptionFeeds() {
     }
   }
 
+  /**
+   * @param {'refresh' | 'cancel' | 'neverAskAgain' | null} action
+   */
   function handleRefreshWarning(action) {
     showRefreshWarning.value = false
 
-    if (action === 'refresh') {
+    if (action === 'neverAskAgain') {
+      store.dispatch('updateConfirmRefreshAllFeeds', false)
+    }
+    if (action === 'refresh' || action === 'neverAskAgain') {
       refreshAllFeeds()
     }
   }
@@ -90,7 +117,6 @@ export function useRefreshAllSubscriptionFeeds() {
     activeSubscriptionIds,
     attemptedFetch,
     enabledFeeds,
-    errorChannels,
     handleRefreshWarning,
     isRefreshing,
     refresh,

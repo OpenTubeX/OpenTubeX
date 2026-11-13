@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: Kõik jaotised on peidetud
   All sections hidden description: Kohanda avalehte, et mõni jaotis uuesti kuvada.
 Subscriptions:
+  Channel Errors:
+    Summary: "1 kanalit ei õnnestunud värskendada. | {count} kanalit ei õnnestunud värskendada."
+    Toast: "Mõnda tellitud kanalit ei õnnestunud värskendada. Klõpsa nende vaatamiseks."
+    Retry Channel: "Proovi uuesti: {channel}"
+    Show All: "Näita kõiki"
+    Show Fewer: "Näita vähem"
   Cache Load Error: Salvestatud tellimuste vooge ei õnnestunud laadida.
   New video from {channel}: Uus video kanalilt {channel}
   New short from {channel}: Uus lühivideo kanalilt {channel}
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: Uus postitus kanalilt {channel}
   Mark As Unseen: Märgi mittenähtuks
   Copy Error Details: "Kopeeri tehnilised üksikasjad"
-  Refresh Errors: "Kanalid, mida ei saanud värskendada: {channels}. Klõpsa üksikasjade vaatamiseks."
-  Refresh Error Channels More: "{channels} ja veel {count} | {channels} ja veel {count}"
   Never show {type} from this channel in feeds again: Ära enam näita selle kanali sisu tüübiga {type} voogudes
   Refreshing Subscription Videos: Tellimuste videote värskendamine
   Refreshing Subscription Shorts: Tellimuste Shorts-videote värskendamine
@@ -177,7 +181,7 @@ Subscriptions:
   Refreshing Subscription Posts: Tellimuste postituste värskendamine
   New Content: Uus sisu
   New Feed Refresh Warning Title: Kas värskendada kõiki tellimuste vooge?
-  New Feed Refresh Warning: Ühe tellimuse kõigi sisutüüpide värskendamine ilma RSS-ita võib võtta kaua aega. Kas soovite jätkata? | {count} tellimuse kõigi sisutüüpide värskendamine ilma RSS-ita võib võtta kaua aega. Kas soovite jätkata?
+  New Feed Refresh Warning: Ühe tellimuse kõigi sisutüüpide värskendamine võib võtta kaua aega. Kas soovite jätkata? | {count} tellimuse kõigi sisutüüpide värskendamine võib võtta kaua aega. Kas soovite jätkata?
   New Since Last Refresh: Uus pärast viimast värskendamist
   Mark As Seen: Märgi nähtuks
   Mark All as Seen: Märgi kõik nähtuks
@@ -216,11 +220,33 @@ Subscriptions:
       Optional Parameter: '{parameter} (valikuline)'
       Not Set: Määramata
     Retry Feed: Proovi {feed} uuesti
+    Reloading Feed: Laadin {feed} uuesti
+  Platforms:
+    Tab: Platvormid
+    Platform: Platvorm
+    All Platforms: Kõik platvormid
+    Followed Channels: Jälgitavad kanalid teistel platvormidel
+    Description: Jälgi kanaleid platvormidel Twitch, SoundCloud, PeerTube, Rumble ja Odysee, et näha nende üleslaadimisi oma tellimuste vahekaardil Platvormid. Leia kanaleid otsingu abil või lisa need nende lehe aadressi järgi. Nende meediat esitatakse yt-dlp abil.
+    Add Channel: Lisa kanal
+    Channel URL: Kanali aadress
+    Invalid Channel: Sisesta kanalilehe aadress platvormil Twitch, SoundCloud, PeerTube, Rumble või Odysee.
+    Channel Not Found: Sellel aadressil pole kanalit.
+    Channel Already Followed: Sa juba jälgid seda kanalit.
+    Channel Could Not Be Loaded: Kanalit ei õnnestunud laadida.
+    No Channels: Sa ei jälgi veel ühtegi kanalit teistel platvormidel.
+    Unfollow Channel: Lõpeta kanali {channel} jälgimine
+    Go To Channel: Ava kanal {channel}
+    Follow: Jälgi
+    Following: Jälgid
+    Clips: Klipid
+    Refresh Errors: 1 kanalit ei õnnestunud värskendada. | {count} kanalit ei õnnestunud värskendada.
+    Content Tabs: Platvormide sisu vahekaardid
 Trending:
   Music: Muusika
   Load Error: Trende ei saanud laadida.
   Unsupported Backend: Trendide jaoks on vaja Local API-t. Valige Local API või lubage taustaprogrammi varuvariant.
 Most Popular Feed Empty: Selle Invidiousi eksemplari Most Populari voog on tühi.
+Most Popular Load Error: "Most Populari voogu ei õnnestunud laadida."
 Feed:
   Cancel Refresh: Tühista värskendamine
   Next Auto Refresh: 'Järgmine automaatne värskendamine: {date}'
@@ -307,8 +333,38 @@ History:
   Custom: Kohandatud
   History Older Than Days Removed: Ühest päevast vanem vaatamisajalugu on eemaldatud | {days} päevast vanem vaatamisajalugu on eemaldatud
 Settings:
-  Experimental Settings:
-    Faster Subscription Refresh: "Kiirem tellimuste värskendamine"
+  Experimental Badge: Eksperimentaalne
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube'i konto"
+    Unofficial App Warning: "OpenTubeX ei ole YouTube'i ametlik rakendus. Sisselogimisel seotakse see, mida siin teed, sinu Google'i kontoga, ja Google võib mitteametlikke rakendusi kasutavaid kontosid piirata või blokeerida. Logi sisse ainult kontoga, mille kaotamist saad endale lubada."
+    Sign In Explanation: "OpenTubeX logib sisse nagu teleri rakendus: kinnitad selle Google'i veebisaidil ja OpenTubeX ei näe kunagi sinu parooli. Sisselogimine jääb sellesse seadmesse ning seda ei sünkroonita ega varundata."
+    Sign In: "Logi sisse"
+    Sign In Anyway: "Logi ikkagi sisse"
+    Sign Out: "Logi välja"
+    Getting Sign-In Code: "Sisselogimiskoodi hankimine"
+    Sign In Instructions: "Ava sisselogimisleht ja vali oma Google'i konto. Kood täidetakse automaatselt."
+    Other Device Instructions: "Mine teises seadmes sellele aadressile ja sisesta kood:"
+    YouTube Channel: "YouTube'i kanal"
+    Using Channel: "Kasutad nüüd YouTube'i kasutajana {name}"
+    Switch Channel Failed: "YouTube'i kanali vahetamine nurjus: {error}"
+    Open Sign-In Page: "Ava sisselogimisleht"
+    Copy Code: "Kopeeri kood"
+    Code Copied: "Kood kopeeriti"
+    Waiting for Approval: "Ootan, kuni kinnitad sisselogimise"
+    Sign-In Denied: "Sisselogimine keelati."
+    Sign-In Code Expired: "Kood aegus. Uue saamiseks proovi uuesti."
+    Sign-In Failed: "Sisselogimine nurjus: {error}"
+    Signed In As: "Logitud YouTube'i sisse kasutajana {name}"
+    Signed Out: "YouTube'ist välja logitud"
+    Sign Out Failed: "Väljalogimine ebaõnnestus: {error}"
+    Revoke Failed: "Logisid YouTube'ist välja, kuid Google ei kinnitanud, et sisselogimine lõppes. Saad selle eemaldada oma Google'i konto kolmandate osapoolte ühenduste alt."
+    Signed out by YouTube: "YouTube lõpetas sisselogimise. Konto kasutamise jätkamiseks logi seadistustes uuesti sisse."
+    Subscribe on YouTube: "Telli ka YouTube'is"
+    Add to YouTube Watch History: "Lisa vaadatud videod YouTube'i ajalukku"
+    Import Subscriptions: "Impordi tellimused YouTube'ist"
+    Imported Subscriptions: "Imporditi {count} kanal | Imporditi {count} kanalit"
+    No Subscriptions to Import: "Sellel YouTube'i kontol pole tellimusi"
+    Import Subscriptions Failed: "Tellimuste importimine nurjus: {error}"
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Kui diagnostikalogi on sisse lülitatud, hoiab OpenTubeX viimaseid logisõnumeid mälus, et saaksid need veateadetele lisada. See ei salvesta ega saada neid kunagi ise ning logi väljalülitamine kustutab need. Aruanded jätavad välja küpsised, märgid, IP-aadressid ja URL-i parameetrid, kuid võivad sisaldada esitatud videote ID-sid, seega kontrolli aruannet enne jagamist.
@@ -443,6 +499,7 @@ Settings:
       Closing Tabs: Mitme vahekaardi sulgemist
       Loading Tabs: Mitme vahekaardi laadimist
       Unloading Tabs: Mitme vahekaardi mälust eemaldamist
+      Refreshing All Feeds: Paljude tellimuste värskendamist
     Remember Tab Navigation History: Jäta vahekaartidel liikumise ajalugu meelde
     New Tab Position:
       New Tab Position: Uue vahekaardi asukoht
@@ -1174,6 +1231,12 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Värskenda tellimusi, kui rakendus on suletud"
     Notify About New Uploads: Teavita uutest üleslaadimistest
     RSS Feeds Auto Refresh Interval: RSS-voogude automaatse värskendamise intervall
+    Faster Subscription Refresh: "Kiirem tellimuste värskendamine"
+    Platforms:
+      Other Platforms: Teised platvormid
+      Manage Channels: Halda jälgitavaid kanaleid
+      Notify When Live: Teavita, kui jälgitavad Twitchi kanalid alustavad otseülekannet
+      Auto Refresh Interval: Teiste platvormide automaatse värskendamise intervall
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Vaatamisaja arvestamise allikas"
@@ -1780,6 +1843,7 @@ Video:
     Auto-generated Caption Template: '{language} (automaatselt loodud)'
     Up next in {seconds}: Järgmine algab {seconds} pärast
     Resize dock: Muuda doki suurust
+    Resize dock width: Muuda doki laiust
     Play now: Esita kohe
     MusicPlaybackRateOverride: Tuvastati muusikavideo, esituskiirus on 1×
     Normal: Tavaline
@@ -2017,6 +2081,7 @@ Context Menu:
   Reload Posts: Laadi postitused uuesti
   Reload All Feeds: Laadi kõik vood uuesti
   Reload RSS Feeds: Laadi RSS-vood uuesti
+  Reload Platforms: Laadi platvormid uuesti
   Close Multiple Tabs: Sulge {count} vahekaarti
   Duplicate Tab: Klooni vahekaart
   Duplicate Multiple Tabs: Klooni {count} vahekaarti
@@ -2170,8 +2235,9 @@ Description:
   Games: Mängud
   Music: Muusika
 Tooltips:
-  Experimental Settings:
-    Faster Subscription Refresh: "Kontrollib esmalt iga kanali RSS-voogu ja laadib videod, Shorts'id ja otseülekanded ainult uute üleslaadimistega kanalitest. Automaatsed värskendused jätavad vahele ka kanalid, mis laaditi viimase 10 minuti jooksul. Uute üleslaadimisteta kanalite puhul uuenevad vaatamiste arvud, eemaldatud videod ja muudetud pealkirjad vaid iga mõne tunni tagant ning uued üleslaadimised võivad ilmuda hiljem, kui RSS-voog jääb maha. Invidiouse API-ga pole saadaval."
+  YouTube Account Settings:
+    Subscribe on YouTube: "Kui tellid OpenTubeXis kanali või lõpetad selle tellimuse, tehakse sama ka sinu YouTube'i kontol."
+    Add to YouTube Watch History: "Sinu esitatud videod lisatakse sinu YouTube'i vaatamiste ajalukku, nii et YouTube'i soovitused õpivad neist. Kui ajalugu on YouTube'is peatatud, ei lisata midagi."
   General Settings:
     Built-in Streams: |
       Automaatne esitab enamikku videoid YouTube'i visionOS-i kliendi kaudu, mis käivitub kiiremini ja toetab automaatset kvaliteeti. Otseülekanded ja videod, mida see esitada ei saa, kasutavad SABR-i.
@@ -2195,6 +2261,7 @@ Tooltips:
       yt-dlp kasutamisel võib videote käivitumine kauem aega võtta.
     Avoid translation: |
       Keela YouTube'i video pealkirja, kirjelduse ja peatükkide automaattõlge.
+      Valik „Kogu rakenduses“ näitab ka kanalite nimesid ja kirjeldusi nende algkeeles.
       Liiga palju päringuid, näiteks loendites olevate videote pealkirjade hankimine, võib ajutiselt
       vähendada rakenduse töökindlust.
     Show Thumbnail Previews: Kuva videote pisipiltidele kursori viimisel animeeritud eelvaated.
@@ -2282,8 +2349,11 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Värskendab vooge valitud seadistustega. Arvutis jääb OpenTubeX süsteemisalve kuni väljumiseni. Android määrab taustavärskenduste aja."
     Notify About New Uploads: Kuvab selles seadmes süsteemiteavitusi kanalite kohta, mille teavitused oled nende tellimuse seadetes sisse lülitanud. OpenTubeX kontrollib uut sisu tellimuste värskendamisel, seega vali automaatse värskendamise intervall. Et saada teavitusi ka siis, kui rakendus on suletud, luba ka värskendamine suletud rakenduse korral.
     RSS Feeds Auto Refresh Interval: Kui sageli OpenTubeX sinu RSS-voogusid automaatselt värskendab, kui rakendus on avatud.
+    Faster Subscription Refresh: "Kontrollib esmalt iga kanali RSS-voogu ja laadib videod, Shorts'id ja otseülekanded ainult uute üleslaadimistega kanalitest. Automaatsed värskendused jätavad vahele ka kanalid, mis laaditi viimase 10 minuti jooksul. Uute üleslaadimisteta kanalite puhul uuenevad vaatamiste arvud, eemaldatud videod ja muudetud pealkirjad vaid iga mõne tunni tagant ning uued üleslaadimised võivad ilmuda hiljem, kui RSS-voog jääb maha. Invidiouse API-ga pole saadaval."
+    Platforms Auto Refresh Interval: Kui sageli OpenTubeX kanaleid, mida sa teistel platvormidel jälgid, automaatselt värskendab, kui rakendus on avatud.
+    Twitch Notify When Live: Teavitab sind, kui mõni sinu jälgitavatest Twitchi kanalitest alustab ülekannet. OpenTubeX kontrollib iga paari minuti järel, kui see on avatud, ja ka siis, kui see on suletud, kui see siis tellimusi värskendab.
   Theme Settings:
-    Only Show Important Notifications: Peidab rakendusesisesed teavitused, mis ainult kinnitavad toimingut või teatavad olekust. Vead, hoiatused, teie seadistatud meeldetuletused ja toimingut pakkuvad teavitused, nagu Võta tagasi, kuvatakse endiselt. Taustatoimingute edenemine, näiteks tellimuste värskendamine, kuvatakse teavituse asemel üldisel edenemisribal. Süsteemiteavitusi see ei mõjuta.
+    Only Show Important Notifications: Peidab rakendusesisesed teavitused, mis ainult kinnitavad toimingut või teatavad olekust, sealhulgas need, mis pakuvad valikut Võta tagasi. Vead, hoiatused, teie seadistatud meeldetuletused ja otsust nõudvad teavitused, nagu värskendusviibad, kuvatakse endiselt. Taustatoimingute edenemine, näiteks tellimuste värskendamine, kuvatakse teavituse asemel üldisel edenemisribal. Süsteemiteavitusi see ei mõjuta.
     Visible Search Suggestions: "Määrab, mitu otsinguajaloo kirjet ja soovitust otsinguriba näitab, enne kui selle loendit tuleb kerida. Loend ei ulatu kunagi akna alumisest servast kaugemale."
     Thumbnail Size: "Muudab videote pisipiltide suurust ruudustikes ja loendites. Fikseeritud veergude arvuga või täislaiuse vaatega ruudustikud täidavad selle asemel iga rea, seega muudab see seal ainult loendite pisipilte ja Shortse. Telefonisuurustes akendes on ruudustiku pisipildid piiratud 100%-ga."
     Playlist Thumbnail Size: "Muudab videote pisipiltide suurust esitusloendite lehtedel. Fikseeritud veergude arvuga või täislaiuse vaatega ruudustikud täidavad selle asemel iga rea, seega muudab see seal ainult loendite pisipilte ja Shortse. Telefonisuurustes akendes on ruudustiku pisipildid piiratud 100%-ga."
@@ -2679,3 +2749,31 @@ Notification Center:
   Clear: "Tühjenda"
   Empty: "Teavitusi veel pole"
   Empty Hint: "Siia ilmuvad otseülekannete meeldetuletused ja uued üleslaadimised kanalitelt, mille teavitused on sisse lülitatud."
+Platforms:
+  Tracks: Lood
+  Playlists: Esitusloendid
+  Follower Count: 1 jälgija | {count} jälgijat
+  Open Website: Ava platvormil {platform}
+  Channel Not Found: Seda kanalit ei leitud.
+  Playlist Not Found: Seda esitusloendit ei leitud.
+  Load Error: Seda lehte ei õnnestunud platvormilt {platform} laadida.
+  Empty Tab: Siin pole veel midagi.
+YouTube Account:
+  Like: "Meeldib"
+  Dislike: "Ei meeldi"
+  Rating Failed: "YouTube'is hindamine nurjus: {error}"
+  Subscribe Failed: "YouTube'is tellimine nurjus: {error}"
+  Unsubscribe Failed: "YouTube'is tellimuse lõpetamine nurjus: {error}"
+  Add a comment: "Lisa kommentaar"
+  Add a reply: "Lisa vastus"
+  Comment: "Kommenteeri"
+  Reply: "Vasta"
+  Comment Posted: "Kommentaar avaldati"
+  Reply Posted: "Vastus avaldati"
+  Comment Failed: "Kommentaari avaldamine nurjus: {error}"
+  Delete Comment: "Kustuta kommentaar"
+  Delete Comment Confirmation: "Kas kustutada sinu kommentaar YouTube'ist?"
+  Comment Deleted: "Kommentaar kustutati"
+  Delete Comment Failed: "Kommentaari kustutamine nurjus: {error}"
+  Recommendations: "YouTube'i soovitused"
+  Recommendations Failed: "Sinu YouTube'i soovituste laadimine nurjus."

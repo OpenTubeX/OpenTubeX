@@ -2,7 +2,33 @@
   display: flex;
   flex-direction: column;
   padding: 16px;
-  gap: 8px;
+  gap: 16px;
+}
+
+/*
+  The title (with its badges) and the metadata read as one block, with the
+  likes centered beside them. Narrow layouts stack the likes below, spaced like
+  the card's other rows.
+*/
+.videoHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.videoHeaderText {
+  display: flex;
+  flex: auto;
+  flex-direction: column;
+  gap: 6px;
+  min-inline-size: 0;
+}
+
+@media screen and (width <= 680px) {
+  .videoHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
 .videoTitle {
@@ -16,16 +42,12 @@
   overflow-wrap: break-word;
 }
 
-.videoMetrics,
 .videoButtons {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-}
-
-.videoButtons {
-  flex-wrap: wrap;
 }
 
 .videoBadges {
@@ -134,17 +156,9 @@
   inset-block-start: 0;
 }
 
-.videoMetrics {
+.datePublishedAndViewCount {
   font-size: 14px;
   color: var(--tertiary-text-color);
-  flex-wrap: wrap;
-}
-
-.datePublishedAndViewCount {
-  display: flex;
-  flex: 1 1 240px;
-  flex-wrap: wrap;
-  min-inline-size: 0;
 }
 
 .videoCategory {

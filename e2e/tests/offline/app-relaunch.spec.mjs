@@ -14,7 +14,7 @@ for (const { format, portableExecutable = null, failures = 0, rejectWithFalse = 
       executablePath: process.execPath,
       startupArgs: process.argv.slice(1)
     }))
-    await app.electronApp.evaluate(({ app, ipcMain }, { portableExecutable, failures, rejectWithFalse, restartRequested }) => {
+    await app.electronApp.evaluate(({ app, BrowserWindow, ipcMain }, { portableExecutable, failures, rejectWithFalse, restartRequested }) => {
       if (portableExecutable) process.env.PORTABLE_EXECUTABLE_FILE = portableExecutable
       else delete process.env.PORTABLE_EXECUTABLE_FILE
       // Keep the real shutdown sequence alive after its windows close.
@@ -38,7 +38,8 @@ for (const { format, portableExecutable = null, failures = 0, rejectWithFalse = 
         globalThis.relaunchRequests.push(options)
         return true
       }
-      if (restartRequested) ipcMain.emit('relaunch-request')
+      // Only OpenTubeX pages may request a restart
+      if (restartRequested) ipcMain.emit('relaunch-request', { senderFrame: BrowserWindow.getAllWindows()[0].webContents.mainFrame })
       else app.quit()
     }, { portableExecutable, failures, rejectWithFalse, restartRequested })
 

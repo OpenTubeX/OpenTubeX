@@ -34,6 +34,19 @@ public class SubscriptionRefreshRequestDiagnosticTest {
                 .failure
         );
         assertEquals(
+            "network",
+            SubscriptionRefreshRequestDiagnostic.create("videos", new java.io.IOException(
+                "unexpected end of stream on com.android.okhttp.Address@1",
+                new java.io.EOFException("\\n not found: size=0 content=")))
+                .failure
+        );
+        assertEquals(
+            "network",
+            SubscriptionRefreshRequestDiagnostic.create("videos", new javax.net.ssl.SSLException(
+                "Read error: ssl=0x1: I/O error during system call, Connection reset by peer"))
+                .failure
+        );
+        assertEquals(
             "parsing",
             SubscriptionRefreshRequestDiagnostic.create("posts", new JSONException("bad json"))
                 .failure

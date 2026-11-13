@@ -95,8 +95,8 @@ export async function removeChannelPreference(store, channelId, type) {
 const resolvedChannels = new Map()
 /** @type {Map<string, { request: Promise<ChannelInfo | null>, wanted: (() => boolean)[] }>} */
 const pendingChannels = new Map()
-// Result lists ask for every unknown author they show. Keep those requests from
-// competing with the page's own requests. Other callers ask for one channel and
+// Result lists ask for every unknown author and collaborator list they show.
+// Keep those requests from competing with the page's own requests. Other callers ask for one channel and
 // skip the queue, so slow result lookups cannot hold them up.
 const MAX_CONCURRENT_CHANNEL_REQUESTS = 4
 let activeChannelRequests = 0
@@ -156,12 +156,13 @@ export async function fetchChannelInfo(channelId, backendOptions, { throttle = f
 }
 
 /**
+ * Runs a result list lookup in the shared queue of channel requests.
  * @template T
  * @param {() => Promise<T>} task
  * @param {() => boolean} isWanted checked before a queued task starts
- * @returns {Promise<T | null>}
+ * @returns {Promise<T | null>} `null` when the task was dropped
  */
-async function runChannelRequest(task, isWanted) {
+export async function runChannelRequest(task, isWanted) {
   if (activeChannelRequests < MAX_CONCURRENT_CHANNEL_REQUESTS) {
     activeChannelRequests++
   } else if (!await new Promise(resolve => queuedChannelRequests.push({ start: resolve, isWanted }))) {

@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: כל המקטעים מוסתרים
   All sections hidden description: התאימו אישית את דף הבית כדי להציג שוב מקטע.
 Subscriptions:
+  Channel Errors:
+    Summary: "לא ניתן היה לרענן ערוץ אחד. | לא ניתן היה לרענן {count} ערוצים. | לא ניתן היה לרענן {count} ערוצים."
+    Toast: "לא ניתן היה לרענן חלק מהערוצים שנרשמת אליהם. יש ללחוץ כדי להציג אותם."
+    Retry Channel: "לנסות שוב את {channel}"
+    Show All: "להציג הכול"
+    Show Fewer: "להציג פחות"
   Cache Load Error: לא ניתן היה לטעון את פידי המינויים השמורים שלך.
   New video from {channel}: סרטון חדש מ־{channel}
   New short from {channel}: Short חדש מ־{channel}
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: פוסט חדש מ־{channel}
   Mark As Unseen: סימון כלא נצפה
   Copy Error Details: "העתקת פרטים טכניים"
-  Refresh Errors: "ערוצים שלא ניתן היה לרענן: {channels}. יש ללחוץ להצגת הפרטים."
-  Refresh Error Channels More: "{channels} ועוד {count} | {channels} ועוד {count} | {channels} ועוד {count}"
   Never show {type} from this channel in feeds again: לא להציג שוב תוכן מסוג {type} מהערוץ הזה בפידים
   Refreshing Subscription Videos: סרטוני המינויים מתרעננים
   Refreshing Subscription Shorts: הסרטונים הקצרים מהמינויים מתרעננים
@@ -177,7 +181,7 @@ Subscriptions:
   Refreshing Subscription Posts: הפוסטים מהמינויים מתרעננים
   New Content: תוכן חדש
   New Feed Refresh Warning Title: לרענן את כל עדכוני המינויים?
-  New Feed Refresh Warning: רענון כל סוגי התוכן ללא RSS ל־1 מינוי עלול להימשך זמן רב. להמשיך? | רענון כל סוגי התוכן ללא RSS ל־{count} מינויים עלול להימשך זמן רב. להמשיך? | רענון כל סוגי התוכן ללא RSS ל־{count} מינויים עלול להימשך זמן רב. להמשיך?
+  New Feed Refresh Warning: רענון כל סוגי התוכן ל־1 מינוי עלול להימשך זמן רב. להמשיך? | רענון כל סוגי התוכן ל־{count} מינויים עלול להימשך זמן רב. להמשיך? | רענון כל סוגי התוכן ל־{count} מינויים עלול להימשך זמן רב. להמשיך?
   New Since Last Refresh: חדש מאז הרענון האחרון
   Mark As Seen: סימון כנצפה
   Mark All as Seen: סימון הכול כנצפה
@@ -218,11 +222,33 @@ Subscriptions:
       Optional Parameter: '{parameter} (רשות)'
       Not Set: לא מוגדר
     Retry Feed: ניסיון חוזר עבור {feed}
+    Reloading Feed: טוען מחדש את {feed}
+  Platforms:
+    Tab: פלטפורמות
+    Platform: פלטפורמה
+    All Platforms: כל הפלטפורמות
+    Followed Channels: ערוצים במעקב בפלטפורמות אחרות
+    Description: אפשר לעקוב אחר ערוצים ב־Twitch, ב־SoundCloud, ב־PeerTube, ב־Rumble וב־Odysee כדי לראות את ההעלאות שלהם בלשונית פלטפורמות שבמינויים. אפשר למצוא ערוצים בחיפוש, או להוסיף אותם לפי כתובת הדף שלהם. המדיה שלהם מתנגנת באמצעות yt-dlp.
+    Add Channel: הוספת ערוץ
+    Channel URL: כתובת הערוץ
+    Invalid Channel: יש להזין כתובת של דף ערוץ ב־Twitch, ב־SoundCloud, ב־PeerTube, ב־Rumble או ב־Odysee.
+    Channel Not Found: אין ערוץ בכתובת הזאת.
+    Channel Already Followed: כבר עוקבים אחר הערוץ הזה.
+    Channel Could Not Be Loaded: לא ניתן היה לטעון את הערוץ.
+    No Channels: עדיין לא עוקבים אחר אף ערוץ בפלטפורמות אחרות.
+    Unfollow Channel: הפסקת המעקב אחר {channel}
+    Go To Channel: מעבר אל {channel}
+    Follow: מעקב
+    Following: במעקב
+    Clips: קליפים
+    Refresh Errors: לא ניתן היה לרענן ערוץ אחד. | לא ניתן היה לרענן {count} ערוצים. | לא ניתן היה לרענן {count} ערוצים.
+    Content Tabs: כרטיסיות תוכן פלטפורמות
 Trending:
   Music: מוזיקה
   Load Error: לא ניתן לטעון את התוכן החם.
   Unsupported Backend: לתוכן החם דרוש Local API. יש לבחור ב־Local API או להפעיל מעבר לספק חלופי.
 Most Popular Feed Empty: עדכון התוכן הפופולרי ביותר של מופע Invidious זה ריק.
+Most Popular Load Error: "לא ניתן היה לטעון את עדכון התוכן הפופולרי ביותר."
 Feed:
   Cancel Refresh: ביטול הרענון
   Next Auto Refresh: 'הרענון האוטומטי הבא: {date}'
@@ -312,6 +338,38 @@ History:
   Custom: בהתאמה אישית
   History Older Than Days Removed: היסטוריית צפייה מלפני יותר מ־1 יום נמחקה | היסטוריית צפייה מלפני יותר מ־{days} ימים נמחקה | היסטוריית צפייה מלפני יותר מ־{days} ימים נמחקה
 Settings:
+  Experimental Badge: ניסיוני
+  YouTube Account Settings:
+    YouTube Account Settings: "חשבון YouTube"
+    Unofficial App Warning: "OpenTubeX אינה אפליקציה רשמית של YouTube. הכניסה לחשבון מקשרת את מה שנעשה כאן לחשבון Google, ו־Google עלולה להגביל או לחסום חשבונות שמשתמשים באפליקציות לא רשמיות. יש להיכנס רק עם חשבון שאין בעיה לאבד."
+    Sign In Explanation: "OpenTubeX נכנס לחשבון כמו אפליקציית טלוויזיה: האישור מתבצע באתר של Google, ו־OpenTubeX אף פעם לא רואה את הסיסמה שלך. הכניסה נשמרת במכשיר הזה בלבד ואינה מסונכרנת או מגובה."
+    Sign In: "כניסה"
+    Sign In Anyway: "כניסה בכל זאת"
+    Sign Out: "יציאה"
+    Getting Sign-In Code: "מתקבל קוד כניסה"
+    Sign In Instructions: "יש לפתוח את דף הכניסה ולבחור את חשבון Google. הקוד ימולא באופן אוטומטי."
+    Other Device Instructions: "במכשיר אחר, יש לעבור לכתובת הזו ולהזין את הקוד:"
+    YouTube Channel: "ערוץ YouTube"
+    Using Channel: "השימוש ב־YouTube מתבצע כעת בתור {name}"
+    Switch Channel Failed: "לא ניתן להחליף ערוץ YouTube: {error}"
+    Open Sign-In Page: "פתיחת דף הכניסה"
+    Copy Code: "העתקת הקוד"
+    Code Copied: "הקוד הועתק"
+    Waiting for Approval: "בהמתנה לאישור הכניסה שלך"
+    Sign-In Denied: "הכניסה נדחתה."
+    Sign-In Code Expired: "תוקף הקוד פג. יש לנסות שוב כדי לקבל קוד חדש."
+    Sign-In Failed: "לא ניתן להיכנס: {error}"
+    Signed In As: "הכניסה ל־YouTube בוצעה בתור {name}"
+    Signed Out: "היציאה מ־YouTube בוצעה"
+    Sign Out Failed: "היציאה נכשלה: {error}"
+    Revoke Failed: "היציאה מ-YouTube בוצעה, אך Google לא אישרה שהכניסה הסתיימה. אפשר להסיר אותה בחיבורים לצד שלישי בחשבון Google."
+    Signed out by YouTube: "YouTube סיים את הכניסה לחשבון. יש להיכנס שוב בהגדרות כדי להמשיך להשתמש בחשבון."
+    Subscribe on YouTube: "הרשמה למינוי גם ב־YouTube"
+    Add to YouTube Watch History: "הוספת סרטונים שנצפו להיסטוריה ב־YouTube"
+    Import Subscriptions: "ייבוא מינויים מ־YouTube"
+    Imported Subscriptions: "יובא {count} ערוץ | יובאו {count} ערוצים | יובאו {count} ערוצים"
+    No Subscriptions to Import: "אין מינויים בחשבון YouTube הזה"
+    Import Subscriptions Failed: "לא ניתן לייבא מינויים: {error}"
   Diagnostics:
     Diagnostics: אבחון
     Description: כל עוד יומן האבחון פועל, OpenTubeX שומר הודעות יומן אחרונות בזיכרון כדי שתוכלו לצרף אותן לדיווחי באגים. הוא אף פעם לא שומר או שולח אותן מעצמו, וכיבוי היומן מוחק אותן. הדוחות אינם כוללים קובצי Cookie, אסימונים, כתובות IP ופרמטרים של כתובות URL, אך הם עשויים לכלול מזהים של סרטונים שניגנתם, לכן בדקו דוח לפני שתשתפו אותו.
@@ -446,6 +504,7 @@ Settings:
       Closing Tabs: סגירת כמה כרטיסיות
       Loading Tabs: טעינת כמה כרטיסיות
       Unloading Tabs: פריקת כמה כרטיסיות
+      Refreshing All Feeds: רענון מינויים רבים
     Remember Tab Navigation History: שמירת היסטוריית הניווט בכרטיסיות
     New Tab Position:
       New Tab Position: מיקום כרטיסייה חדשה
@@ -1187,6 +1246,12 @@ Settings:
     Refresh Subscriptions While App Is Closed: "ריענון מינויים כשהיישום סגור"
     Notify About New Uploads: התראה על העלאות חדשות
     RSS Feeds Auto Refresh Interval: מרווח ריענון אוטומטי של פידי RSS
+    Faster Subscription Refresh: "רענון מהיר יותר של מינויים"
+    Platforms:
+      Other Platforms: פלטפורמות אחרות
+      Manage Channels: ניהול ערוצים במעקב
+      Notify When Live: להודיע כשערוצי Twitch במעקב מתחילים שידור חי
+      Auto Refresh Interval: מרווח ריענון אוטומטי של פלטפורמות אחרות
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "מקור ספירת זמן הצפייה"
@@ -1518,7 +1583,6 @@ Settings:
   Search Settings: חיפוש בהגדרות
   No Settings Found: לא נמצאו הגדרות
   Experimental Settings:
-    Faster Subscription Refresh: "רענון מהיר יותר של מינויים"
     Disable Hardware Acceleration: השבתת האצת חומרה
   Interface Customizer:
     Customize Interface: "התאמת הממשק"
@@ -1828,6 +1892,7 @@ Video:
     Auto-generated Caption Template: '{language} (נוצרו אוטומטית)'
     Up next in {seconds}: הסרטון הבא בעוד {seconds}
     Resize dock: שינוי גודל הלוח
+    Resize dock width: שינוי רוחב הלוח
     Play now: הפעלה עכשיו
     MusicPlaybackRateOverride: זוהה סרטון מוזיקה, מופעל במהירות 1x
     Normal: רגיל
@@ -2070,6 +2135,7 @@ Context Menu:
   Reload Posts: טעינה מחדש של הפוסטים
   Reload All Feeds: טעינה מחדש של כל הפידים
   Reload RSS Feeds: טעינה מחדש של הזנות RSS
+  Reload Platforms: טעינה מחדש של הפלטפורמות
   Close Multiple Tabs: סגירת {count} כרטיסייה | סגירת {count} כרטיסיות
   Duplicate Tab: שכפול הכרטיסייה
   Duplicate Multiple Tabs: שכפול {count} כרטיסייה | שכפול {count} כרטיסיות
@@ -2223,6 +2289,9 @@ Description:
   Games: משחקים
   Music: מוזיקה
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "הרשמה למינוי על ערוץ או ביטול המינוי ב־OpenTubeX מתבצעים גם בחשבון YouTube שלך."
+    Add to YouTube Watch History: "סרטונים שמופעלים נוספים להיסטוריית הצפייה שלך ב־YouTube, כך שההמלצות של YouTube לומדות מהם. כשההיסטוריה מושהית ב־YouTube, שום דבר לא נוסף."
   General Settings:
     Built-in Streams: |
       מצב אוטומטי מנגן את רוב הסרטונים דרך לקוח visionOS של YouTube, שמתחיל מהר יותר ותומך באיכות אוטומטית. שידורים חיים וסרטונים שהוא לא יכול לנגן משתמשים ב־SABR.
@@ -2246,6 +2315,7 @@ Tooltips:
       השימוש ב-yt-dlp עשוי לעכב את תחילת הסרטונים.
     Avoid translation: |
       השבתת התרגום האוטומטי של YouTube לכותרת, לתיאור ולפרקי הסרטון.
+      האפשרות „בכל היישום” מציגה גם את שמות הערוצים ואת תיאוריהם בשפת המקור.
       ריבוי בקשות, למשל לאחזור כותרות של סרטונים ברשימות, עלול לפגוע באופן זמני
       באמינות היישום.
     Show Thumbnail Previews: הצגת תצוגה מקדימה מונפשת בעת ריחוף מעל תמונות ממוזערות של סרטונים.
@@ -2333,8 +2403,11 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "מרענן את העדכונים בהתאם להגדרות שבחרת. במחשב, OpenTubeX נשאר במגש המערכת עד ליציאה. Android קובע מתי יבוצעו רענונים ברקע."
     Notify About New Uploads: מציג התראות מערכת במכשיר זה עבור ערוצים שהפעלת את ההתראות שלהם בהגדרות המינוי שלהם. OpenTubeX בודק אם יש תוכן חדש בעת רענון המינויים, לכן יש לבחור מרווח ריענון אוטומטי. כדי לקבל התראות כשהיישום סגור, יש להפעיל גם ריענון כשהיישום סגור.
     RSS Feeds Auto Refresh Interval: באיזו תדירות OpenTubeX מרענן אוטומטית את פידי ה-RSS שלך כשהיישום פתוח.
+    Faster Subscription Refresh: "בודק תחילה את הזנת ה־RSS של כל ערוץ וטוען סרטונים, Shorts ושידורים חיים רק מערוצים עם העלאות חדשות. רענונים אוטומטיים גם מדלגים על ערוצים שנטענו ב־10 הדקות האחרונות. בערוצים ללא העלאות חדשות, מספר הצפיות, סרטונים שהוסרו וכותרות ששונו מתעדכנים רק כל כמה שעות, והעלאות חדשות עשויות להופיע מאוחר יותר כשהזנת ה־RSS מפגרת. לא זמין עם ה־API של Invidious."
+    Platforms Auto Refresh Interval: באיזו תדירות OpenTubeX מרענן אוטומטית את הערוצים שבמעקב בפלטפורמות אחרות כשהיישום פתוח.
+    Twitch Notify When Live: מודיע כשאחד מערוצי ה־Twitch שבמעקב מתחיל לשדר. OpenTubeX בודק כל כמה דקות כל עוד הוא פתוח, וגם כשהוא סגור אם הוא מרענן אז את המינויים.
   Theme Settings:
-    Only Show Important Notifications: מסתיר התראות בתוך היישום שרק מאשרות פעולה או מדווחות על מצב. שגיאות, אזהרות, תזכורות שהגדרת והתראות שמציעות פעולה, כמו הסגה, ממשיכות להופיע. התקדמות פעולות ברקע, כמו רענון המינויים, מוצגת בסרגל ההתקדמות הכללי במקום כהתראה. התראות המערכת אינן מושפעות.
+    Only Show Important Notifications: מסתיר התראות בתוך היישום שרק מאשרות פעולה או מדווחות על מצב, כולל כאלה שמציעות הסגה. שגיאות, אזהרות, תזכורות שהגדרת והתראות שמבקשות ממך להחליט, כמו הצעות לעדכון, ממשיכות להופיע. התקדמות פעולות ברקע, כמו רענון המינויים, מוצגת בסרגל ההתקדמות הכללי במקום כהתראה. התראות המערכת אינן מושפעות.
     Visible Search Suggestions: "קובע כמה רשומות מהיסטוריית החיפוש והצעות סרגל החיפוש מציג לפני שיש לגלול את הרשימה שלו. הרשימה לעולם אינה חורגת מתחתית החלון."
     Thumbnail Size: "משנה את גודל התמונות הממוזערות של סרטונים ברשתות וברשימות. רשתות עם מספר עמודות קבוע או סוג התצוגה „רוחב מלא” ממלאות במקום זאת כל שורה, ולכן שם הוא משנה רק תמונות ממוזערות ברשימות ו־Shorts. בחלונות בגודל טלפון התמונות הממוזערות ברשת מוגבלות ל־100%."
     Playlist Thumbnail Size: "משנה את גודל התמונות הממוזערות של סרטונים בדפי רשימות השמעה. רשתות עם מספר עמודות קבוע או סוג התצוגה „רוחב מלא” ממלאות במקום זאת כל שורה, ולכן שם הוא משנה רק תמונות ממוזערות ברשימות ו־Shorts. בחלונות בגודל טלפון התמונות הממוזערות ברשת מוגבלות ל־100%."
@@ -2348,7 +2421,6 @@ Tooltips:
     Modal Backdrop: "קובע איך היישום נראה מאחורי חלונות דו־שיח ותפריטים. טשטוש עלול להיות איטי במכשירים חלשים יותר."
     Click Scrollbar Track to Scroll: "לחיצה על פס גלילה מחוץ לידית שלו גוללת בערך עמוד אחד לכיוון הלחיצה. כל עוד האפשרות פעילה, פס גלילה גלוי תופס לחיצות המיועדות לפריטים שמתחתיו. פס הגלילה של סרגל הלשוניות תמיד פועל כך."
   Experimental Settings:
-    Faster Subscription Refresh: "בודק תחילה את הזנת ה־RSS של כל ערוץ וטוען סרטונים, Shorts ושידורים חיים רק מערוצים עם העלאות חדשות. רענונים אוטומטיים גם מדלגים על ערוצים שנטענו ב־10 הדקות האחרונות. בערוצים ללא העלאות חדשות, מספר הצפיות, סרטונים שהוסרו וכותרות ששונו מתעדכנים רק כל כמה שעות, והעלאות חדשות עשויות להופיע מאוחר יותר כשהזנת ה־RSS מפגרת. לא זמין עם ה־API של Invidious."
     Disable Hardware Acceleration: משבית את האצת החומרה של המעבד הגרפי. עשוי לפתור בעיות גרפיות, אך כנראה יפגע בביצועים.
   SponsorBlock Settings:
     Always Show DeArrow Badge: משאיר את לחצן DeArrow גלוי בסרטונים שהכותרת או התמונה הממוזערת שלהם הוחלפו על ידי DeArrow, במקום רק במעבר עכבר מעליהם.
@@ -2736,3 +2808,31 @@ Notification Center:
   Clear: "ניקוי"
   Empty: "אין עדיין התראות"
   Empty Hint: "תזכורות לשידורים חיים והעלאות חדשות מערוצים שההתראות שלהם מופעלות יופיעו כאן."
+Platforms:
+  Tracks: רצועות
+  Playlists: רשימות נגינה
+  Follower Count: עוקב אחד | {count} עוקבים | {count} עוקבים
+  Open Website: פתיחה ב־{platform}
+  Channel Not Found: הערוץ הזה לא נמצא.
+  Playlist Not Found: רשימת הנגינה הזאת לא נמצאה.
+  Load Error: לא ניתן היה לטעון את הדף הזה מ־{platform}.
+  Empty Tab: אין כאן עדיין כלום.
+YouTube Account:
+  Like: "לייק"
+  Dislike: "דיסלייק"
+  Rating Failed: "לא ניתן לדרג ב־YouTube: {error}"
+  Subscribe Failed: "לא ניתן להירשם למינוי ב־YouTube: {error}"
+  Unsubscribe Failed: "לא ניתן לבטל את המינוי ב־YouTube: {error}"
+  Add a comment: "הוספת תגובה"
+  Add a reply: "הוספת תשובה"
+  Comment: "תגובה"
+  Reply: "תשובה"
+  Comment Posted: "התגובה פורסמה"
+  Reply Posted: "התשובה פורסמה"
+  Comment Failed: "לא ניתן לפרסם את התגובה: {error}"
+  Delete Comment: "מחיקת התגובה"
+  Delete Comment Confirmation: "למחוק את התגובה שלך מ־YouTube?"
+  Comment Deleted: "התגובה נמחקה"
+  Delete Comment Failed: "לא ניתן למחוק את התגובה: {error}"
+  Recommendations: "המלצות YouTube"
+  Recommendations Failed: "לא ניתן לטעון את ההמלצות שלך מ־YouTube."

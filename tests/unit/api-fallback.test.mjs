@@ -37,8 +37,8 @@ const [{ requestWithFallback }, { getPlaylistSnapshot }, { findChannelTagInfo }]
     invidiousGetPlaylistInfo: async () => respond('invidious', { title: 'Invidious', videos: [], videoCount: 0 }),
   },
 }, {
-  [sourceUrl('src/renderer/helpers/api/local.js')]: ['getLocalChannelId'],
-  [sourceUrl('src/renderer/helpers/api/invidious.js')]: ['invidiousGetChannelId'],
+  [sourceUrl('src/renderer/helpers/api/local.js')]: ['getLocalChannelId', 'parseLocalSubscriberCount'],
+  [sourceUrl('src/renderer/helpers/api/invidious.js')]: ['invidiousGetChannelId', 'youtubeImageUrlToInvidious'],
 })
 
 const requests = { local: async () => respond('local'), invidious: async () => respond('invidious') }

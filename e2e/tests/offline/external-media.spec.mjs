@@ -1758,7 +1758,7 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await expect(page.locator(`${activeTab} .externalMediaDescription`)).toContainText('Creative Commons')
   await expect(page.locator(`${activeTab} .externalMediaDescription`)).toContainText('example')
   await expect(page.locator(`${activeTab} .externalMediaDescription`)).toBeVisible()
-  const metadata = page.locator(`${activeTab} .externalMediaMetricsRow .externalMediaMetrics`)
+  const metadata = page.locator(`${activeTab} .externalMediaMainMetrics`)
   await expect(metadata.locator(':scope > *')).toHaveText([
     'Jul 16, 2019',
     '7 years ago',
@@ -1784,7 +1784,7 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await expect(page.locator(`${activeTab} .externalMediaDetails .likeCount`)).toHaveText('15')
   await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('42 watching')
   await expect(page.locator(`${activeTab} .externalMediaDetails .dislikeCount`)).toHaveText('2')
-  const ratings = page.locator(`${activeTab} .externalMediaMetricsRow .likeBarContainer`)
+  const ratings = page.locator(`${activeTab} .externalMediaHeader .likeBarContainer`)
   await expect(ratings.locator('[data-icon="thumbs-up"] svg')).toBeVisible()
   await expect(ratings.locator('[data-icon="thumbs-down"] svg')).toBeVisible()
   await expect(ratings.locator('.likeBar')).toHaveAttribute('style', /88%/)

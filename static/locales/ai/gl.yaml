@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: Todas as seccións están ocultas
   All sections hidden description: Personaliza o inicio para volver amosar unha sección.
 Subscriptions:
+  Channel Errors:
+    Summary: "Non se puido actualizar 1 canle. | Non se puideron actualizar {count} canles."
+    Toast: "Non se puideron actualizar algunhas canles subscritas. Fai clic para velas."
+    Retry Channel: "Tentar de novo {channel}"
+    Show All: "Amosar todas"
+    Show Fewer: "Amosar menos"
   Cache Load Error: Non se puideron cargar as túas fontes de subscricións gardadas.
   New video from {channel}: Novo vídeo de {channel}
   New short from {channel}: Novo corto de {channel}
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: Nova publicación de {channel}
   Mark As Unseen: Marcar como non visto
   Copy Error Details: "Copiar detalles técnicos"
-  Refresh Errors: "Canles que non se puideron actualizar: {channels}. Preme para ver os detalles."
-  Refresh Error Channels More: "{channels} e {count} máis | {channels} e {count} máis"
   Never show {type} from this channel in feeds again: Non volver mostrar {type} desta canle nos fluxos
   Refreshing Subscription Videos: Actualizando os vídeos das subscricións
   Refreshing Subscription Shorts: Actualizando os vídeos curtos das subscricións
@@ -177,7 +181,7 @@ Subscriptions:
   Refreshing Subscription Posts: Actualizando as publicacións das subscricións
   New Content: Contido novo
   New Feed Refresh Warning Title: Queres actualizar todas as fontes das subscricións?
-  New Feed Refresh Warning: Actualizar todos os tipos de contido sen RSS para 1 subscrición pode levar moito tempo. Queres continuar? | Actualizar todos os tipos de contido sen RSS para {count} subscricións pode levar moito tempo. Queres continuar?
+  New Feed Refresh Warning: Actualizar todos os tipos de contido para 1 subscrición pode levar moito tempo. Queres continuar? | Actualizar todos os tipos de contido para {count} subscricións pode levar moito tempo. Queres continuar?
   New Since Last Refresh: Novo desde a última actualización
   Mark As Seen: Marcar como visto
   Mark All as Seen: Marcar todo como visto
@@ -218,11 +222,33 @@ Subscriptions:
       Optional Parameter: '{parameter} (opcional)'
       Not Set: Sen definir
     Retry Feed: Tentar de novo {feed}
+    Reloading Feed: Recargando {feed}
+  Platforms:
+    Tab: Plataformas
+    Platform: Plataforma
+    All Platforms: Todas as plataformas
+    Followed Channels: Canles seguidas noutras plataformas
+    Description: Segue canles de Twitch, SoundCloud, PeerTube, Rumble e Odysee para ver as súas publicacións na lapela Plataformas das túas subscricións. Atopa canles coa busca ou engádeas co enderezo da súa páxina. O seu contido reprodúcese con yt-dlp.
+    Add Channel: Engadir canle
+    Channel URL: Enderezo da canle
+    Invalid Channel: Introduce o enderezo da páxina dunha canle de Twitch, SoundCloud, PeerTube, Rumble ou Odysee.
+    Channel Not Found: Non hai ningunha canle neste enderezo.
+    Channel Already Followed: Xa segues esta canle.
+    Channel Could Not Be Loaded: Non se puido cargar a canle.
+    No Channels: Aínda non segues ningunha canle doutras plataformas.
+    Unfollow Channel: Deixar de seguir {channel}
+    Go To Channel: Ir a {channel}
+    Follow: Seguir
+    Following: Seguindo
+    Clips: Clips
+    Refresh Errors: Non se puido actualizar 1 canle. | Non se puideron actualizar {count} canles.
+    Content Tabs: Lapelas de contido das plataformas
 Trending:
   Music: Música
   Load Error: Non se puideron cargar as tendencias.
   Unsupported Backend: As tendencias requiren a API local. Selecciona a API local ou activa o servizo alternativo.
 Most Popular Feed Empty: A fonte «Máis populares» desta instancia de Invidious está baleira.
+Most Popular Load Error: "Non se puido cargar a fonte «Máis populares»."
 Feed:
   Cancel Refresh: Cancelar a actualización
   Next Auto Refresh: 'Seguinte actualización automática: {date}'
@@ -312,6 +338,38 @@ History:
   Custom: Personalizado
   History Older Than Days Removed: Eliminouse o historial de visualización de máis de 1 día | Eliminouse o historial de visualización de máis de {days} días
 Settings:
+  Experimental Badge: Experimental
+  YouTube Account Settings:
+    YouTube Account Settings: "Conta de YouTube"
+    Unofficial App Warning: "OpenTubeX non é unha aplicación oficial de YouTube. Ao iniciar sesión, o que fas aquí queda vinculado á túa conta de Google, e Google pode restrinxir ou bloquear as contas que usan aplicacións non oficiais. Inicia sesión só cunha conta que non che importe perder."
+    Sign In Explanation: "OpenTubeX inicia sesión como unha aplicación de TV: aprobas o inicio de sesión no sitio web de Google, e OpenTubeX nunca ve o teu contrasinal. A sesión queda neste dispositivo e non se sincroniza nin se inclúe nas copias de seguranza."
+    Sign In: "Iniciar sesión"
+    Sign In Anyway: "Iniciar sesión igualmente"
+    Sign Out: "Pechar sesión"
+    Getting Sign-In Code: "Obtendo un código de inicio de sesión"
+    Sign In Instructions: "Abre a páxina de inicio de sesión e escolle a túa conta de Google. O código complétase automaticamente."
+    Other Device Instructions: "Noutro dispositivo, vai a este enderezo e introduce o código:"
+    YouTube Channel: "Canle de YouTube"
+    Using Channel: "Agora usas YouTube como {name}"
+    Switch Channel Failed: "Non se puido cambiar a canle de YouTube: {error}"
+    Open Sign-In Page: "Abrir a páxina de inicio de sesión"
+    Copy Code: "Copiar o código"
+    Code Copied: "Copiouse o código"
+    Waiting for Approval: "Agardando a que aprobes o inicio de sesión"
+    Sign-In Denied: "Denegouse o inicio de sesión."
+    Sign-In Code Expired: "O código caducou. Téntao de novo para obter outro."
+    Sign-In Failed: "Non se puido iniciar sesión: {error}"
+    Signed In As: "Sesión iniciada en YouTube como {name}"
+    Signed Out: "Pechouse a sesión de YouTube"
+    Sign Out Failed: "Non se puido pechar a sesión: {error}"
+    Revoke Failed: "Pechaches a sesión de YouTube, pero Google non confirmou que o inicio de sesión rematase. Podes quitalo nas conexións con terceiros da túa conta de Google."
+    Signed out by YouTube: "YouTube pechou a sesión. Volve iniciar sesión en Axustes para seguir usando a túa conta."
+    Subscribe on YouTube: "Subscribirse tamén en YouTube"
+    Add to YouTube Watch History: "Engadir os vídeos vistos ao historial de YouTube"
+    Import Subscriptions: "Importar subscricións de YouTube"
+    Imported Subscriptions: "Importouse {count} canle | Importáronse {count} canles"
+    No Subscriptions to Import: "Esta conta de YouTube non ten subscricións"
+    Import Subscriptions Failed: "Non se puideron importar as subscricións: {error}"
   Diagnostics:
     Diagnostics: Diagnóstico
     Description: Mentres o rexistro de diagnóstico está activado, OpenTubeX garda as mensaxes de rexistro recentes na memoria para que poidas achegalas aos informes de erros. Nunca as garda nin as envía pola súa conta, e desactivar o rexistro elimínaas. Os informes omiten cookies, tokens, enderezos IP e parámetros de URL, pero poden incluír os ID dos vídeos que reproduciches, así que revisa o informe antes de compartilo.
@@ -446,6 +504,7 @@ Settings:
       Closing Tabs: Pechar varias lapelas
       Loading Tabs: Cargar varias lapelas
       Unloading Tabs: Descargar varias lapelas
+      Refreshing All Feeds: Actualizar moitas subscricións
     Remember Tab Navigation History: Lembrar o historial de navegación das lapelas
     New Tab Position:
       New Tab Position: Posición das lapelas novas
@@ -1183,6 +1242,12 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Actualizar as subscricións coa aplicación pechada"
     Notify About New Uploads: Notificar novas subidas
     RSS Feeds Auto Refresh Interval: Intervalo de actualización automática das fontes RSS
+    Faster Subscription Refresh: "Actualización máis rápida das subscricións"
+    Platforms:
+      Other Platforms: Outras plataformas
+      Manage Channels: Xestionar canles seguidas
+      Notify When Live: Notificar cando as canles de Twitch seguidas comecen un directo
+      Auto Refresh Interval: Intervalo de actualización automática doutras plataformas
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Contar o tempo de visualización de"
@@ -1514,7 +1579,6 @@ Settings:
   Search Settings: Buscar na configuración
   No Settings Found: Non se atopou ningún axuste
   Experimental Settings:
-    Faster Subscription Refresh: "Actualización máis rápida das subscricións"
     Disable Hardware Acceleration: Desactivar a aceleración por hardware
   Interface Customizer:
     Customize Interface: "Personalizar a interface"
@@ -1831,6 +1895,7 @@ Video:
     Auto-generated Caption Template: '{language} (xerados automaticamente)'
     Up next in {seconds}: A continuación en {seconds}
     Resize dock: Redimensionar o panel
+    Resize dock width: Cambiar o ancho do panel
     Play now: Reproducir agora
     MusicPlaybackRateOverride: Detectouse un vídeo musical; reprodúcese a 1x
     Normal: Normal
@@ -2073,6 +2138,7 @@ Context Menu:
   Reload Posts: Recargar as publicacións
   Reload All Feeds: Recargar todas as fontes
   Reload RSS Feeds: Recargar as fontes RSS
+  Reload Platforms: Recargar as plataformas
   Close Multiple Tabs: Pechar {count} lapelas
   Duplicate Tab: Duplicar a lapela
   Duplicate Multiple Tabs: Duplicar {count} lapelas
@@ -2226,6 +2292,9 @@ Description:
   Games: Xogos
   Music: Música
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Ao subscribirte ou cancelar a subscrición a unha canle en OpenTubeX, faise o mesmo na túa conta de YouTube."
+    Add to YouTube Watch History: "Os vídeos que reproduces engádense ao teu historial de reprodución de YouTube, para que as recomendacións de YouTube aprendan deles. Non se engade nada mentres o historial estea en pausa en YouTube."
   General Settings:
     Built-in Streams: |
       Automático reproduce a maioría dos vídeos co cliente visionOS de YouTube, que comeza máis rápido e admite a calidade automática. As emisións en directo e os vídeos que non pode reproducir usan SABR.
@@ -2249,6 +2318,7 @@ Tooltips:
       Con yt-dlp, os vídeos poden tardar máis en comezar.
     Avoid translation: |
       Desactiva a tradución automática de YouTube do título, a descrición e os capítulos dun vídeo.
+      «Toda a aplicación» tamén mostra os nomes e as descricións das canles no seu idioma orixinal.
       Demasiadas solicitudes, como obter os títulos dos vídeos das listas, poden afectar temporalmente
       á fiabilidade da aplicación.
     Show Thumbnail Previews: Amosa previsualizacións animadas ao pasar por riba das miniaturas dos vídeos.
@@ -2336,8 +2406,11 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Actualiza as fontes coa configuración seleccionada. No escritorio, OpenTubeX permanece na bandexa do sistema ata saír. Android controla cando se executan as actualizacións en segundo plano."
     Notify About New Uploads: Amosa notificacións do sistema neste dispositivo para as canles cuxas notificacións activaches na súa configuración de subscrición. OpenTubeX busca contido novo ao actualizar as subscricións, así que escolle un intervalo de actualización automática. Para recibir notificacións coa aplicación pechada, activa tamén a actualización coa aplicación pechada.
     RSS Feeds Auto Refresh Interval: Con que frecuencia OpenTubeX actualiza automaticamente as túas fontes RSS mentres a aplicación está aberta.
+    Faster Subscription Refresh: "Primeiro comproba a fonte RSS de cada canle e só carga os vídeos, Shorts e emisións en directo das canles con novas subidas. As actualizacións automáticas tamén omiten as canles cargadas nos últimos 10 minutos. Nas canles sen novas subidas, as visualizacións, os vídeos eliminados e os títulos cambiados só se actualizan cada poucas horas, e as novas subidas poden aparecer máis tarde cando a fonte RSS vai atrasada. Non dispoñible coa API de Invidious."
+    Platforms Auto Refresh Interval: Con que frecuencia OpenTubeX actualiza automaticamente as canles que segues noutras plataformas mentres a aplicación está aberta.
+    Twitch Notify When Live: Avísate cando unha das canles de Twitch que segues comeza a emitir. OpenTubeX compróbao cada poucos minutos mentres está aberto, e tamén mentres está pechado se entón actualiza as subscricións.
   Theme Settings:
-    Only Show Important Notifications: Oculta as notificacións da aplicación que só confirman unha acción ou informan dun estado. Os erros, os avisos, os recordatorios que configuraches e as notificacións que ofrecen unha acción, como Desfacer, seguen aparecendo. O progreso das operacións en segundo plano, como a actualización das subscricións, móstrase na barra de progreso global en lugar dunha notificación. As notificacións do sistema non se ven afectadas.
+    Only Show Important Notifications: Oculta as notificacións da aplicación que só confirman unha acción ou informan dun estado, incluídas as que ofrecen Desfacer. Os erros, os avisos, os recordatorios que configuraches e as notificacións que piden unha decisión, como as solicitudes de actualización, seguen aparecendo. O progreso das operacións en segundo plano, como a actualización das subscricións, móstrase na barra de progreso global en lugar dunha notificación. As notificacións do sistema non se ven afectadas.
     Visible Search Suggestions: "Define cantas entradas do historial de busca e suxestións mostra a barra de busca antes de que a súa lista se desprace. A lista nunca se estende máis alá da parte inferior da xanela."
     Thumbnail Size: "Escala as miniaturas dos vídeos en grellas e listas. As grellas cun número fixo de columnas ou o tipo de vista Ancho completo enchen cada fila, así que alí só cambia as miniaturas das listas e os Shorts. Nas xanelas do tamaño dun teléfono, as miniaturas da grella limítanse ao 100 %."
     Playlist Thumbnail Size: "Escala as miniaturas dos vídeos nas páxinas de listas de reprodución. As grellas cun número fixo de columnas ou o tipo de vista Ancho completo enchen cada fila, así que alí só cambia as miniaturas das listas e os Shorts. Nas xanelas do tamaño dun teléfono, as miniaturas da grella limítanse ao 100 %."
@@ -2351,7 +2424,6 @@ Tooltips:
     Modal Backdrop: "Define como se ve a aplicación detrás dos diálogos e menús. O desenfoque pode ser lento en dispositivos menos potentes."
     Click Scrollbar Track to Scroll: "Ao facer clic nunha barra de desprazamento fóra do seu control, desprázase aproximadamente unha páxina cara ao clic. Mentres estea activado, unha barra de desprazamento visible captura os clics dirixidos aos elementos que ten debaixo. A barra de desprazamento da barra de lapelas sempre funciona así."
   Experimental Settings:
-    Faster Subscription Refresh: "Primeiro comproba a fonte RSS de cada canle e só carga os vídeos, Shorts e emisións en directo das canles con novas subidas. As actualizacións automáticas tamén omiten as canles cargadas nos últimos 10 minutos. Nas canles sen novas subidas, as visualizacións, os vídeos eliminados e os títulos cambiados só se actualizan cada poucas horas, e as novas subidas poden aparecer máis tarde cando a fonte RSS vai atrasada. Non dispoñible coa API de Invidious."
     Disable Hardware Acceleration: Desactiva a aceleración por hardware da GPU. Pode resolver problemas gráficos, pero probablemente reducirá o rendemento.
   SponsorBlock Settings:
     Always Show DeArrow Badge: Mantén visible o botón de DeArrow nos vídeos cuxo título ou miniatura substituíu DeArrow, en lugar de só ao pasar o cursor por riba.
@@ -2737,3 +2809,31 @@ Notification Center:
   Clear: "Borrar"
   Empty: "Aínda non hai notificacións"
   Empty Hint: "Aquí aparecerán os recordatorios de directos e os vídeos novos das canles coas notificacións activadas."
+Platforms:
+  Tracks: Pistas
+  Playlists: Listaxes de reprodución
+  Follower Count: 1 seguidor | {count} seguidores
+  Open Website: Abrir en {platform}
+  Channel Not Found: Non se puido atopar esta canle.
+  Playlist Not Found: Non se puido atopar esta listaxe de reprodución.
+  Load Error: Non se puido cargar esta páxina desde {platform}.
+  Empty Tab: Aínda non hai nada aquí.
+YouTube Account:
+  Like: "Gústame"
+  Dislike: "Non me gusta"
+  Rating Failed: "Non se puido valorar en YouTube: {error}"
+  Subscribe Failed: "Non se puido facer a subscrición en YouTube: {error}"
+  Unsubscribe Failed: "Non se puido cancelar a subscrición en YouTube: {error}"
+  Add a comment: "Engadir un comentario"
+  Add a reply: "Engadir unha resposta"
+  Comment: "Comentar"
+  Reply: "Responder"
+  Comment Posted: "Publicouse o comentario"
+  Reply Posted: "Publicouse a resposta"
+  Comment Failed: "Non se puido publicar o comentario: {error}"
+  Delete Comment: "Eliminar o comentario"
+  Delete Comment Confirmation: "Queres eliminar o teu comentario de YouTube?"
+  Comment Deleted: "Eliminouse o comentario"
+  Delete Comment Failed: "Non se puido eliminar o comentario: {error}"
+  Recommendations: "Recomendacións de YouTube"
+  Recommendations Failed: "Non se puideron cargar as túas recomendacións de YouTube."

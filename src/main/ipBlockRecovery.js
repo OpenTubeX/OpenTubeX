@@ -152,7 +152,7 @@ function startIpBlockRecoveryScript(scriptPath) {
  * @returns {scriptPath is string}
  */
 function isValidIpBlockRecoveryRequest(event, scriptPath) {
-  return isOpenTubeXUrl(event.senderFrame.url) &&
+  return isOpenTubeXUrl(event.senderFrame?.url) &&
     typeof scriptPath === 'string' &&
     scriptPath.trim().length > 0
 }
@@ -173,7 +173,7 @@ export function getIpBlockRecoveryScriptRun() {
  */
 export function setupIpBlockRecoveryIpc({ updateSettingFromMain }) {
   ipcMain.handle(IpcChannels.CHOOSE_IP_BLOCK_RECOVERY_SCRIPT, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
+    if (!isOpenTubeXUrl(event.senderFrame?.url)) {
       return
     }
 
@@ -223,7 +223,7 @@ export function setupIpBlockRecoveryIpc({ updateSettingFromMain }) {
   })
 
   ipcMain.handle(IpcChannels.WAIT_FOR_IP_BLOCK_RECOVERY_SCRIPT, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
+    if (!isOpenTubeXUrl(event.senderFrame?.url)) {
       return
     }
 

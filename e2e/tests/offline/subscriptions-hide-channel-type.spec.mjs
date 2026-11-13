@@ -1,4 +1,4 @@
-import { test, expect, goTo, goToSettingsSection } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
 
 const CHANNEL_A = 'UCaaaaaaaaaaaaaaaaaaaaaa'
 const CHANNEL_B = 'UCbbbbbbbbbbbbbbbbbbbbbb'
@@ -79,7 +79,11 @@ function card(page, category, channelId = CHANNEL_A, index = 0) {
 }
 
 for (const category of types) {
-  test(`hides a channel's ${category} immediately and persists the setting`, { tag: '@scale' }, async ({ app, page }) => {
+  test(`hides a channel's ${category} immediately and persists the setting`, { tag: '@scale' }, async ({ app, page, uiScale }) => {
+    // Keep the default CSS-pixel window at every scale. Hiding moves focus to
+    // the remaining card, which scrolls the page up unless the card already
+    // shows below the sticky header at the end of the page.
+    if (uiScale !== 100) await setWindowSize(app, page, { width: Math.round(1600 * uiScale / 100), height: Math.round(900 * uiScale / 100) })
     await goTo(page, 'subscriptions')
     await page.locator(`[data-subscription-feed-tab="${category}"]`).click()
     const lastCard = card(page, category, CHANNEL_A, 17)

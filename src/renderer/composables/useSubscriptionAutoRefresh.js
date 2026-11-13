@@ -35,10 +35,12 @@ import { formatRequestDiagnostic } from '../helpers/api/requestDiagnostics'
 import { reconcileFetchedSubscriptionEntries } from '../helpers/subscription-entries'
 import { parseSubscriptionRss } from '../helpers/api/feed-rss'
 import { cancelRssFeedsRefresh } from '../helpers/rssFeeds'
+import { clearSubscriptionChannelErrors, setSubscriptionChannelError } from '../helpers/subscriptionRefreshErrors'
 import {
   enrichSubscriptionRssEntries,
   enrichSubscriptionShortDates,
   cancelSubscriptionRefresh,
+  notifyNewSubscriptionChannelErrors,
   notifySubscriptionChannelRefreshed,
   refreshSubscriptionLiveFromRemote,
   refreshSubscriptionPostsFromRemote,
@@ -938,6 +940,7 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
   }
 
   async function importAndroidSubscriptionRefreshResults() {
+    const newErrors = []
     try {
       while (true) {
         const result = await getNextAndroidSubscriptionRefreshResult()
@@ -959,6 +962,10 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
             acknowledgeAndroidSubscriptionRefreshResult
           )
           continue
+        } else if (result.kind === 'channelFailure') {
+          if (importSubscriptionChannelFailure(result)) {
+            newErrors.push({ feed: result.feedType, channelId: result.channelId })
+          }
         } else if (result.kind === 'completion' && store.getters.profileById(result.profileId)) {
           handleSubscriptionRefreshCompleted({
             detail: {
@@ -974,14 +981,41 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
         ) {
           const diagnostic = formatRequestDiagnostic(result.diagnostic)
           console.error(`Closed-app subscription refresh request failed: ${diagnostic}`)
-          showApiErrorToast(store.getters.getBackendPreference === 'local' ? t('Local API Error (Click to copy)') : getInvidiousApiErrorMessage(store.getters.getBackendPreference), diagnostic)
+          // Like the foreground refresh, network failures stay quiet. The
+          // profile's refresh is not marked complete, so it is retried later.
+          if (result.diagnostic.failure !== 'network') showApiErrorToast(store.getters.getBackendPreference === 'local' ? t('Local API Error (Click to copy)') : getInvidiousApiErrorMessage(store.getters.getBackendPreference), diagnostic)
         }
 
         await acknowledgeAndroidSubscriptionRefreshResult(result.id)
       }
     } catch (error) {
       console.error('Failed to reconcile closed-app subscription refresh data', error)
+    } finally {
+      notifyNewSubscriptionChannelErrors(newErrors, t)
     }
+  }
+
+  /**
+   * Lists a channel that failed in a background refresh above its feed, like
+   * a foreground refresh does.
+   * @returns {boolean} whether the channel had no errors before
+   */
+  function importSubscriptionChannelFailure(result) {
+    const channel = store.getters.getSubscribedChannelsById.get(result.channelId)
+    // Like the foreground refresh, network failures stay quiet
+    if (channel === undefined || typeof result.diagnostic?.message !== 'string' || result.diagnostic.failure === 'network') {
+      return false
+    }
+    // A later refresh of the channel succeeded
+    const cache = getAndroidSubscriptionCacheConfig(result.feedType).getCache()[result.channelId]
+    if (cache?.timestamp >= new Date(Number(result.timestamp))) return false
+
+    const channelLabel = channel.name ? `${channel.name} (${channel.id})` : channel.id
+    return setSubscriptionChannelError(channel.id, result.feedType, {
+      reasons: [result.diagnostic.message],
+      trace: `${channelLabel}: ${formatRequestDiagnostic(result.diagnostic)}`,
+      unavailable: result.unavailable === true
+    }, Number(result.timestamp))
   }
 
   async function reconcileAndroidSubscriptionRefreshChannelResult(result) {
@@ -1057,6 +1091,7 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
     if (!(committedTimestamp instanceof Date) || committedTimestamp.getTime() < timestamp.getTime()) {
       throw new Error(`The ${feedType} cache write did not complete`)
     }
+    clearSubscriptionChannelErrors(result.channelId, [feedType], timestamp.getTime())
     notifySubscriptionChannelRefreshed(feedType)
   }
 
@@ -1281,8 +1316,8 @@ export function useSubscriptionAutoRefresh({ dataReady, t }) {
     removeAndroidSubscriptionRefreshCancelledListener =
       await addAndroidSubscriptionRefreshCancelledListener(() => {
         cancelSubscriptionRefresh()
-        // Only YouTube refreshes show the notification, but the combined New
-        // feed refreshes RSS feeds alongside them.
+        // Only YouTube refreshes show the notification, but refreshing all
+        // feeds refreshes the RSS feeds alongside them.
         cancelRssFeedsRefresh()
       })
   }

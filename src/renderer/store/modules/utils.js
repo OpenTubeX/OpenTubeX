@@ -4,6 +4,8 @@ import i18n from '../../i18n/index'
 
 import { checkYoutubeChannelId } from '../../helpers/channels'
 import { commitCustomThemesEdit } from '../../helpers/customThemeSync.js'
+import { CUSTOM_THEMES_SYNC_KEY } from '../../../customTheme.js'
+import { trackSettingWrite } from './settings'
 import {
   CHANNEL_HANDLE_REGEX,
   createWebURL,
@@ -97,6 +99,7 @@ function getOrCreateSearchSettings(state, tabId) {
 // Each search keeps every loaded page of results, so a session only keeps the
 // most recently loaded ones to return to.
 const MAX_SESSION_SEARCHES = 30
+const EMPTY_TRENDING_CACHE = Object.freeze({ gaming: null, music: null, sports: null, podcasts: null })
 
 const state = {
   isSideNavOpen: false,
@@ -109,6 +112,7 @@ const state = {
     sports: null,
     podcasts: null
   },
+  trendingCacheRegion: null,
   cachedPlaylists: {},
   deArrowCache: {},
   // Seed the in-memory fallback once so upgraded sessions can migrate unloaded
@@ -193,8 +197,8 @@ const getters = {
     return state.popularCache
   },
 
-  getTrendingCache(state) {
-    return state.trendingCache
+  getTrendingCacheForRegion: (state) => (region) => {
+    return state.trendingCacheRegion === region ? state.trendingCache : EMPTY_TRENDING_CACHE
   },
 
   getCachedPlaylist: (state) => (tabId = 'web') => {
@@ -348,7 +352,8 @@ const getters = {
 }
 
 const actions = {
-  updateCustomThemes: commitCustomThemesEdit,
+  // Takes a function that saves the themes and resolves to the saved list.
+  updateCustomThemes: (context, save) => trackSettingWrite(CUSTOM_THEMES_SYNC_KEY, () => commitCustomThemesEdit(context, save)),
 
   showOutlines({ commit }) {
     commit('setOutlinesHidden', false)
@@ -701,6 +706,8 @@ const actions = {
         for (const [param, value] of url.searchParams) {
           query[param] = value
         }
+        // They search YouTube, whichever platform the search page last searched
+        query.platform = 'youtube'
 
         return {
           urlType: 'search',
@@ -1074,7 +1081,11 @@ const mutations = {
     state.popularCache = value
   },
 
-  setTrendingCache (state, { value, page }) {
+  setTrendingCache (state, { value, page, region }) {
+    if (state.trendingCacheRegion !== region) {
+      state.trendingCache = { ...EMPTY_TRENDING_CACHE }
+      state.trendingCacheRegion = region
+    }
     state.trendingCache[page] = value
   },
 

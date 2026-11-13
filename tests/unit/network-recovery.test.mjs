@@ -100,7 +100,7 @@ test('non-idempotent operations wait offline but are never automatically replaye
 async function loadAppNetwork(t, fetch, nativeRequest, options = {}, localNetworkAccess) {
   const { readFile } = await import('node:fs/promises')
   const { default: vm } = await import('node:vm')
-  const { classifyRequestFailure } = await import('../../src/renderer/helpers/api/requestDiagnostics.js')
+  const { BROKEN_CONNECTION_ERROR, classifyRequestFailure } = await import('../../src/renderer/helpers/api/requestDiagnostics.js')
   const { createAbortError } = await import('../../src/renderer/helpers/api/requestErrors.js')
   const { waitForRequest } = await import('../../src/renderer/helpers/api/requestWait.js')
   const window = new EventTarget()
@@ -109,12 +109,14 @@ async function loadAppNetwork(t, fetch, nativeRequest, options = {}, localNetwor
     createInternetConnectivity,
     createInternetProbe,
     INTERNET_CHECK_URL,
+    isAppHidden: () => false,
     options,
     window,
     navigator: { onLine: true },
     location: { href: 'https://localhost/', origin: 'https://localhost' },
     process: { env: { IS_IOS: false, IS_CAPACITOR: !!localNetworkAccess } },
     ensureAndroidLocalNetworkAccess: localNetworkAccess,
+    BROKEN_CONNECTION_ERROR,
     classifyRequestFailure,
     createAbortError,
     waitForRequest,
@@ -735,6 +737,13 @@ test('a local, plain HTTP, or possibly cached response does not clear an interne
   // A read the caller allows from the HTTP cache can succeed without the network
   await app.withoutNetworkRecovery(() => app.window.fetch('https://i.ytimg.com/vi/a/default.jpg', { cache: 'force-cache' }))
   assert.equal(app.recovery.state, 'offline')
+  // The app's own files may come from the web build's offline cache
+  await app.window.fetch('https://localhost/static/locales/en-US.json')
+  assert.equal(cacheModes.at(-1), undefined)
+  assert.equal(app.recovery.state, 'offline')
+  // A self-hosted server's Invidious API on the app's origin still revalidates
+  await app.window.fetch('https://localhost/api/v1/trending')
+  assert.equal(cacheModes.at(-1), 'no-cache')
   // A default read must reach the server during the outage, so it proves reachability
   await app.window.fetch('https://api.github.com/repos/OpenTubeX/OpenTubeX/releases')
   assert.equal(cacheModes.at(-1), 'no-cache')

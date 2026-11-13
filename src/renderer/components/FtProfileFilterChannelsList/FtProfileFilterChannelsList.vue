@@ -20,18 +20,44 @@
       >
         {{ selectedText }}
       </p>
-      <FtFlexBox>
-        <FtChannelBubble
-          v-for="channel in channels"
-          :key="channel.id"
-          :channel-id="channel.id"
-          :channel-name="channel.name"
-          :channel-thumbnail="channel.thumbnail"
-          :selectable="showUnsubscribeButton"
-          :selected="selected.has(channel.id)"
-          @change="handleChannelToggle(channel.id)"
-        />
-      </FtFlexBox>
+      <p
+        v-if="visibleChannels.length === 0 && channels.length > 0"
+        class="noResults"
+      >
+        {{ $t('Settings.Channel Settings.No Matching Channels') }}
+      </p>
+      <div
+        ref="channelScroller"
+        v-overlay-scrollbars
+        class="channelScroller"
+      >
+        <FtFlexBox ref="channelGrid">
+          <FtChannelBubble
+            v-for="channel in displayedChannels"
+            :key="channel.id"
+            :channel-id="channel.id"
+            :channel-name="channel.name"
+            :channel-thumbnail="channel.thumbnail"
+            :selectable="showUnsubscribeButton"
+            :selected="selected.has(channel.id)"
+            @change="handleChannelToggle(channel.id)"
+          />
+        </FtFlexBox>
+        <!-- Mounting every subscription at once takes seconds on slower devices -->
+        <FtAutoLoadNextPageWrapper
+          v-if="hasMoreChannels"
+          :key="channelPage"
+          @load-next-page="channelPage++"
+        >
+          <FtFlexBox>
+            <FtButton
+              :label="$t('Channels.Load More Channels')"
+              :icon="['fas', 'arrow-down']"
+              @click="loadMoreChannels"
+            />
+          </FtFlexBox>
+        </FtAutoLoadNextPageWrapper>
+      </div>
       <FtFlexBox
         v-if="showUnsubscribeButton"
       >
@@ -58,7 +84,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, shallowRef, watch } from 'vue'
+import { computed, reactive, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtCard from '../ft-card/ft-card.vue'
@@ -66,10 +92,13 @@ import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtChannelBubble from '../FtChannelBubble/FtChannelBubble.vue'
 import FtButton from '../FtButton/FtButton.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
+import FtAutoLoadNextPageWrapper from '../FtAutoLoadNextPageWrapper.vue'
 
 import store from '../../store/index'
 
+import { useListPagination } from '../../composables/useListPagination'
 import { deepCopy, showToast } from '../../helpers/utils'
+import { matchesChannelQuery } from '../../helpers/subscription-channels'
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { MAIN_PROFILE_ID } from '../../../constants'
 
@@ -91,6 +120,10 @@ const props = defineProps({
   profile: {
     type: Object,
     required: true
+  },
+  query: {
+    type: String,
+    default: ''
   }
 })
 
@@ -133,12 +166,10 @@ function loadChannels() {
   const profileId = profileIdList.value[filteredProfileIndex.value]
   const profile = profileList.value.find((profile) => profile._id === profileId)
 
-  /** @type {Profile['subscriptions']} */
-  let channels_ = deepCopy(profile.subscriptions)
+  const subscribedIds = new Set(props.profile.subscriptions.map(channel => channel.id))
 
-  channels_ = channels_.filter((channel) => {
-    return !props.profile.subscriptions.some((sub) => sub.id === channel.id)
-  })
+  /** @type {Profile['subscriptions']} */
+  const channels_ = deepCopy(profile.subscriptions.filter(channel => !subscribedIds.has(channel.id)))
 
   const collator = intlCollator.value
 
@@ -172,9 +203,24 @@ watch(() => props.profile, (profile, oldProfile) => {
   selected.forEach(channelId => {
     if (!channelIds.has(channelId)) selected.delete(channelId)
   })
-}, { deep: true })
+}, { deep: 2 })
 
 watch(filteredProfileIndex, loadChannels)
+
+const visibleChannels = computed(() => {
+  const query = props.query.trim().toLowerCase()
+  if (query === '') return channels.value
+  return channels.value.filter(channel => matchesChannelQuery(channel, query))
+})
+
+const channelGrid = useTemplateRef('channelGrid')
+const { page: channelPage, displayedItems: displayedChannels, hasMore: hasMoreChannels, loadMore: loadMoreChannels } = useListPagination(visibleChannels, {
+  pageSize: 100,
+  append: true,
+  resetOn: [filteredProfileIndex, () => props.query],
+  scrollTarget: useTemplateRef('channelScroller'),
+  focusItem: index => channelGrid.value?.$el.querySelectorAll('.bubblePadding')[index]?.focus()
+})
 
 /** @type {import('vue').Reactive<Set<string>>} */
 const selected = reactive(new Set())
@@ -183,8 +229,9 @@ const selectedText = computed(() => {
   return t('Profile.{number} selected', { number: selected.size })
 })
 
+// Selections outside the search results stay, so channels can be gathered across searches
 function selectAll() {
-  channels.value.forEach(channel => {
+  visibleChannels.value.forEach(channel => {
     return selected.add(channel.id)
   })
 }
@@ -204,8 +251,8 @@ function handleChannelToggle(channelId) {
   }
 }
 
-watch(profileList, fillProfileList, { deep: true })
-watch(() => props.profile, fillProfileList, { deep: true })
+watch(profileList, fillProfileList, { deep: 2 })
+watch(() => props.profile, fillProfileList)
 
 function fillProfileList() {
   const profiles = profileList.value.filter((profile) => profile._id !== props.profile._id)

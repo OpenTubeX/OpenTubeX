@@ -399,6 +399,7 @@ import {
   getLocalChannelSearchResultType,
 } from './channel-search'
 import { getChannelAboutLinks } from './channel-about-links'
+import { getOriginalChannelProfile } from '../../helpers/api/original-channel-name'
 
 const { locale, t } = useI18n()
 const route = useRoute()
@@ -500,6 +501,22 @@ watch(thumbnailUrl, (thumbnail) => {
   if (id.value && thumbnail) {
     store.commit('setChannelThumbnail', { channelId: id.value, thumbnail })
     setTabAvatar(thumbnail)
+  }
+})
+
+// Settings open over the channel page. Reload so the name, its saved copy and loaded items all follow the preference.
+let preferenceReloads = 0
+watch(() => store.getters.getAvoidTranslation === 'entire_app', async () => {
+  if (apiUsed !== 'local') return
+
+  // The route keeps the query only while the search is shown, and reloading leaves the route alone
+  const query = route.query.searchQueryText ?? ''
+  const channelId = id.value
+  const reload = ++preferenceReloads
+  await loadChannelRoute()
+  // Not the load generation: a fallback to Invidious starts a new one
+  if (query && reload === preferenceReloads && channelId === id.value && route.query.searchQueryText === query) {
+    newSearch(query)
   }
 })
 
@@ -711,6 +728,10 @@ watch(route, () => {
     return
   }
   ownRouteFullPaths.length = 0
+  loadChannelRoute()
+}, { deep: true })
+
+function loadChannelRoute() {
   channelRouteGeneration += 1
   hasLoadedDetails.value = false
   isLoading.value = true
@@ -773,15 +794,15 @@ watch(route, () => {
 
   // Re-enable auto refresh on sort value change AFTER update done
   if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendPreference.value)) {
-    getChannelInfoInvidious().finally(() => {
+    return getChannelInfoInvidious().finally(() => {
       autoRefreshOnSortByChangeEnabled = true
     })
   } else {
-    getChannelLocal().finally(() => {
+    return getChannelLocal().finally(() => {
       autoRefreshOnSortByChangeEnabled = true
     })
   }
-}, { deep: true })
+}
 
 onMounted(async () => {
   document.addEventListener('keydown', handlePanelTabNavigation)
@@ -937,7 +958,7 @@ async function getChannelLocal() {
       /** @type {import('youtubei.js').YTNodes.ChannelAgeGate} */
       const ageGate = channelInstance.memo.get('ChannelAgeGate')[0]
 
-      channelName_ = ageGate.channel_title
+      channelName_ = getOriginalChannelText().name ?? ageGate.channel_title
       channelThumbnailUrl = ageGate.avatar[0].url
 
       channelName.value = channelName_
@@ -958,7 +979,8 @@ async function getChannelLocal() {
     let tags_ = parsedHeader.tags
 
     channelThumbnailUrl = parsedHeader.thumbnailUrl ?? subscriptionInfo.value?.thumbnail
-    channelName_ = parsedHeader.name ?? subscriptionInfo.value?.name
+    const pageName = parsedHeader.name ?? subscriptionInfo.value?.name
+    channelName_ = getOriginalChannelText().name ?? pageName
 
     if (channelThumbnailUrl?.startsWith('//')) {
       channelThumbnailUrl = `https:${channelThumbnailUrl}`
@@ -971,7 +993,8 @@ async function getChannelLocal() {
     channelHandle.value = parsedHeader.handle ?? savedHandle.value
     bannerUrl.value = parsedHeader.bannerUrl ?? null
     isFamilyFriendly.value = !!channelInstance.metadata.is_family_safe
-    isArtistTopicChannel.value = channelName_.endsWith('- Topic') && !!channelInstance.metadata.music_artist_name
+    // The original profile name may not have the suffix
+    isArtistTopicChannel.value = pageName.endsWith('- Topic') && !!channelInstance.metadata.music_artist_name
 
     mayContainContentFromOtherChannels = isArtistTopicChannel.value ||
       !!channelInstance.header?.is(YTNodes.CarouselHeader, YTNodes.InteractiveTabbedHeader) ||
@@ -1082,11 +1105,17 @@ async function getChannelLocal() {
     showApiErrorToast(errorMessage, err)
     if (backendPreference.value === 'local' && backendFallback.value) {
       showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
-      getChannelInfoInvidious()
+      // Callers that restore a search wait for the channel that replaces this one
+      return getChannelInfoInvidious()
     } else {
       isLoading.value = false
     }
   }
+}
+
+function getOriginalChannelText() {
+  if (store.getters.getAvoidTranslation !== 'entire_app') return {}
+  return getOriginalChannelProfile(channelInstance.page.microformat)
 }
 
 async function getChannelAboutLocal() {
@@ -1105,8 +1134,9 @@ async function getChannelAboutLocal() {
     setElementListLoading('about', false)
     links.value = getChannelAboutLinks(about)
 
+    let aboutDescription
     if (about.is(YTNodes.ChannelAboutFullMetadata)) {
-      description.value = about.description.isEmpty() ? '' : autolinker.link(about.description.text)
+      aboutDescription = about.description.isEmpty() ? '' : about.description.text
 
       const viewCount_ = extractNumberFromString(about.view_count.text)
       viewCount.value = isNaN(viewCount_) ? null : viewCount_
@@ -1117,7 +1147,7 @@ async function getChannelAboutLocal() {
 
       location.value = about.country.isEmpty() ? null : about.country.text
     } else {
-      description.value = about.metadata.description ? autolinker.link(about.metadata.description) : ''
+      aboutDescription = about.metadata.description
 
       const viewCount_ = extractNumberFromString(about.metadata.view_count)
       viewCount.value = isNaN(viewCount_) ? null : viewCount_
@@ -1129,6 +1159,9 @@ async function getChannelAboutLocal() {
 
       location.value = about.metadata.country ?? null
     }
+
+    aboutDescription = getOriginalChannelText().description || aboutDescription
+    description.value = aboutDescription ? autolinker.link(aboutDescription) : ''
   } catch (err) {
     if (!isCurrentRoute()) return
 
@@ -2735,10 +2768,7 @@ async function saveStateInRouter(query) {
   let location
 
   if (query === '') {
-    location = {
-      path: `/channel/${id.value}`,
-      state: { skipTabRouteLoading: true }
-    }
+    location = { path: `/channel/${id.value}` }
   } else {
     location = {
       path: `/channel/${id.value}`,
@@ -2748,7 +2778,6 @@ async function saveStateInRouter(query) {
       query: {
         searchQueryText: query,
       },
-      state: { skipTabRouteLoading: true }
     }
   }
 
@@ -2962,10 +2991,7 @@ async function replaceTabRoute(tab) {
 
       // We already have the data and only need to switch the visible tab.
       try {
-        await replaceOwnRoute({
-          path: `/channel/${id.value}/${nextTab}`,
-          state: { skipTabRouteLoading: true }
-        })
+        await replaceOwnRoute({ path: `/channel/${id.value}/${nextTab}` })
       } catch (failure) {
         if (!isNavigationFailure(failure, NavigationFailureType.duplicated)) {
           throw failure

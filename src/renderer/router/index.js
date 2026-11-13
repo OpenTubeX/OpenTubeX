@@ -55,6 +55,8 @@ const Playlist = createAsyncRoute(() => import('../views/Playlist/Playlist.vue')
 const Channel = createAsyncRoute(() => import('../views/Channel/Channel.vue'))
 const Watch = createAsyncRoute(() => import('../views/Watch/Watch.vue'))
 const ExternalMedia = createAsyncRoute(() => import('../views/ExternalMedia/ExternalMedia.vue'))
+const ExternalChannel = createAsyncRoute(() => import('../views/ExternalChannel/ExternalChannel.vue'))
+const ExternalPlaylist = createAsyncRoute(() => import('../views/ExternalPlaylist/ExternalPlaylist.vue'))
 const Hashtag = createAsyncRoute(() => import('../views/Hashtag/Hashtag.vue'))
 const Post = createAsyncRoute(() => import('../views/Post.vue'))
 
@@ -177,7 +179,6 @@ export const routes = [
   {
     path: '/search/:query',
     meta: {
-      title: 'Search Results',
       hasResizableThumbnails: true
     },
     component: SearchPage
@@ -185,8 +186,6 @@ export const routes = [
   {
     path: '/playlist/:id',
     meta: {
-      title: 'Playlist',
-      hasDynamicTitle: true,
       hasResizableThumbnails: true
     },
     component: Playlist
@@ -194,42 +193,46 @@ export const routes = [
   {
     path: '/channel/:id/:currentTab?',
     meta: {
-      title: 'Channel',
       hasResizableThumbnails: true
     },
     component: Channel
   },
   {
     path: '/watch/:id',
-    meta: {
-      title: 'Watch',
-      hasDynamicTitle: true
-    },
     component: Watch
   },
   ...(supportsYtDlp
     ? [{
         path: '/external-media',
-        meta: {
-          title: 'Watch',
-          hasDynamicTitle: true
-        },
         component: ExternalMedia
+      }, {
+        // Channels and playlists of other platforms, whose items play through yt-dlp
+        path: '/external-channel',
+        meta: {
+          hasResizableThumbnails: true
+        },
+        component: ExternalChannel
+      }, {
+        path: '/external-playlist',
+        meta: {
+          hasResizableThumbnails: true
+        },
+        component: ExternalPlaylist
       }]
-    : [{ path: '/external-media', redirect: '/' }]),
+    : [
+        { path: '/external-media', redirect: '/' },
+        { path: '/external-channel', redirect: '/' },
+        { path: '/external-playlist', redirect: '/' }
+      ]),
   {
     path: '/hashtag/:hashtag',
     meta: {
-      title: 'Hashtag',
       hasResizableThumbnails: true
     },
     component: Hashtag
   },
   {
     path: '/post/:id',
-    meta: {
-      title: 'Post',
-    },
     component: Post
   }
 ]

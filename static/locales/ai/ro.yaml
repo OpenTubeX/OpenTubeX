@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: Toate secțiunile sunt ascunse
   All sections hidden description: Personalizează pagina principală pentru a afișa din nou o secțiune.
 Subscriptions:
+  Channel Errors:
+    Summary: "1 canal nu a putut fi reîmprospătat. | {count} canale nu au putut fi reîmprospătate. | {count} de canale nu au putut fi reîmprospătate."
+    Toast: "Unele canale la care v-ați abonat nu au putut fi reîmprospătate. Faceți clic pentru a le vedea."
+    Retry Channel: "Reîncearcă {channel}"
+    Show All: "Afișează tot"
+    Show Fewer: "Afișează mai puțin"
   Cache Load Error: Fluxurile de abonamente salvate nu au putut fi încărcate.
   New video from {channel}: Videoclip nou de la {channel}
   New short from {channel}: Short nou de la {channel}
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: Postare nouă de la {channel}
   Mark As Unseen: Marchează ca nevăzut
   Copy Error Details: "Copiază detaliile tehnice"
-  Refresh Errors: "Canale care nu au putut fi actualizate: {channels}. Faceți clic pentru a vedea detaliile."
-  Refresh Error Channels More: "{channels} și încă {count} | {channels} și încă {count} | {channels} și încă {count}"
   Never show {type} from this channel in feeds again: Nu mai afișa niciodată conținut de tip {type} de pe acest canal în fluxuri
   Refreshing Subscription Videos: Se reîmprospătează videoclipurile din abonamente
   Refreshing Subscription Shorts: Se reîmprospătează videoclipurile Shorts din abonamente
@@ -177,7 +181,7 @@ Subscriptions:
   Refreshing Subscription Posts: Se reîmprospătează postările din abonamente
   New Content: Conținut nou
   New Feed Refresh Warning Title: Reîmprospătați toate fluxurile de abonamente?
-  New Feed Refresh Warning: Reîmprospătarea fără RSS a tuturor tipurilor de conținut pentru 1 abonament poate dura mult. Doriți să continuați? | Reîmprospătarea fără RSS a tuturor tipurilor de conținut pentru {count} abonamente poate dura mult. Doriți să continuați? | Reîmprospătarea fără RSS a tuturor tipurilor de conținut pentru {count} de abonamente poate dura mult. Doriți să continuați?
+  New Feed Refresh Warning: Reîmprospătarea a tuturor tipurilor de conținut pentru 1 abonament poate dura mult. Doriți să continuați? | Reîmprospătarea a tuturor tipurilor de conținut pentru {count} abonamente poate dura mult. Doriți să continuați? | Reîmprospătarea a tuturor tipurilor de conținut pentru {count} de abonamente poate dura mult. Doriți să continuați?
   New Since Last Refresh: Nou de la ultima reîmprospătare
   Mark As Seen: Marchează ca văzut
   Mark All as Seen: Marchează totul ca văzut
@@ -216,11 +220,33 @@ Subscriptions:
       Optional Parameter: '{parameter} (opțional)'
       Not Set: Nesetat
     Retry Feed: Reîncearcă {feed}
+    Reloading Feed: Se reîncarcă {feed}
+  Platforms:
+    Tab: Platforme
+    Platform: Platformă
+    All Platforms: Toate platformele
+    Followed Channels: Canale urmărite pe alte platforme
+    Description: Urmărește canale de pe Twitch, SoundCloud, PeerTube, Rumble și Odysee pentru a vedea ce încarcă în fila Platforme a abonamentelor tale. Găsește canale prin căutare sau adaugă-le după adresa paginii lor. Conținutul lor este redat cu yt-dlp.
+    Add Channel: Adaugă canal
+    Channel URL: Adresa canalului
+    Invalid Channel: Introdu adresa paginii unui canal de pe Twitch, SoundCloud, PeerTube, Rumble sau Odysee.
+    Channel Not Found: Nu există niciun canal la această adresă.
+    Channel Already Followed: Urmărești deja acest canal.
+    Channel Could Not Be Loaded: Canalul nu a putut fi încărcat.
+    No Channels: Încă nu urmărești niciun canal de pe alte platforme.
+    Unfollow Channel: Nu mai urmări {channel}
+    Go To Channel: Mergi la {channel}
+    Follow: Urmărește
+    Following: Urmărit
+    Clips: Clipuri
+    Refresh Errors: 1 canal nu a putut fi reîmprospătat. | {count} canale nu au putut fi reîmprospătate. | {count} de canale nu au putut fi reîmprospătate.
+    Content Tabs: File pentru conținutul platformelor
 Trending:
   Music: Muzică
   Load Error: Tendințele nu au putut fi încărcate.
   Unsupported Backend: Tendințele necesită API-ul local. Selectați API-ul local sau activați furnizorul de rezervă.
 Most Popular Feed Empty: Fluxul „Cele mai populare” al acestei instanțe Invidious este gol.
+Most Popular Load Error: "Fluxul „Cele mai populare” nu a putut fi încărcat."
 Feed:
   Cancel Refresh: Anulează reîmprospătarea
   Next Auto Refresh: 'Următoarea reîmprospătare automată: {date}'
@@ -308,6 +334,38 @@ History:
   Custom: Personalizat
   History Older Than Days Removed: Istoricul vizionărilor mai vechi de 1 zi a fost șters | Istoricul vizionărilor mai vechi de {days} zile a fost șters | Istoricul vizionărilor mai vechi de {days} de zile a fost șters
 Settings:
+  Experimental Badge: Experimental
+  YouTube Account Settings:
+    YouTube Account Settings: "Cont YouTube"
+    Unofficial App Warning: "OpenTubeX nu este o aplicație oficială YouTube. La conectare, ceea ce faceți aici este asociat contului dvs. Google, iar Google poate restricționa sau bloca conturile care folosesc aplicații neoficiale. Conectați-vă doar cu un cont pe care vă permiteți să îl pierdeți."
+    Sign In Explanation: "OpenTubeX se conectează ca o aplicație TV: aprobați conectarea pe site-ul Google, iar OpenTubeX nu vă vede niciodată parola. Conectarea rămâne pe acest dispozitiv și nu este sincronizată sau inclusă în copiile de rezervă."
+    Sign In: "Conectați-vă"
+    Sign In Anyway: "Conectați-vă oricum"
+    Sign Out: "Deconectați-vă"
+    Getting Sign-In Code: "Se obține un cod de conectare"
+    Sign In Instructions: "Deschideți pagina de conectare și alegeți contul Google. Codul este completat automat."
+    Other Device Instructions: "Pe alt dispozitiv, accesați această adresă și introduceți codul:"
+    YouTube Channel: "Canal YouTube"
+    Using Channel: "Acum folosiți YouTube ca {name}"
+    Switch Channel Failed: "Canalul YouTube nu a putut fi schimbat: {error}"
+    Open Sign-In Page: "Deschideți pagina de conectare"
+    Copy Code: "Copiați codul"
+    Code Copied: "Cod copiat"
+    Waiting for Approval: "Se așteaptă să aprobați conectarea"
+    Sign-In Denied: "Conectarea a fost refuzată."
+    Sign-In Code Expired: "Codul a expirat. Încercați din nou pentru a obține unul nou."
+    Sign-In Failed: "Conectarea nu a reușit: {error}"
+    Signed In As: "V-ați conectat la YouTube ca {name}"
+    Signed Out: "V-ați deconectat de la YouTube"
+    Sign Out Failed: "Deconectarea nu a reușit: {error}"
+    Revoke Failed: "V-ați deconectat de la YouTube, dar Google nu a confirmat încheierea conectării. O puteți elimina din conexiunile terță parte ale contului Google."
+    Signed out by YouTube: "YouTube a încheiat conectarea. Conectați-vă din nou din Setări pentru a continua să folosiți contul."
+    Subscribe on YouTube: "Abonați-vă și pe YouTube"
+    Add to YouTube Watch History: "Adăugați videoclipurile vizionate în istoricul YouTube"
+    Import Subscriptions: "Importați abonamentele de pe YouTube"
+    Imported Subscriptions: "{count} canal importat | {count} canale importate | {count} de canale importate"
+    No Subscriptions to Import: "Acest cont YouTube nu are abonamente"
+    Import Subscriptions Failed: "Abonamentele nu au putut fi importate: {error}"
   Diagnostics:
     Diagnostics: Diagnosticare
     Description: Cât timp jurnalul de diagnosticare este activ, OpenTubeX păstrează în memorie mesajele recente din jurnal, ca să le poți atașa la rapoartele de erori. Nu le salvează și nu le trimite niciodată de la sine, iar dezactivarea jurnalului le șterge. Rapoartele omit cookie-urile, tokenurile, adresele IP și parametrii URL, dar pot include ID-urile videoclipurilor redate, așa că verifică un raport înainte de a-l distribui.
@@ -442,6 +500,7 @@ Settings:
       Closing Tabs: Închiderea mai multor file
       Loading Tabs: Încărcarea mai multor file
       Unloading Tabs: Descărcarea din memorie a mai multor file
+      Refreshing All Feeds: Reîmprospătarea multor abonamente
     Remember Tab Navigation History: Reține istoricul de navigare al filelor
     New Tab Position:
       New Tab Position: Poziția filei noi
@@ -1177,6 +1236,12 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Reîmprospătează abonamentele când aplicația este închisă"
     Notify About New Uploads: Notifică despre încărcări noi
     RSS Feeds Auto Refresh Interval: Interval de reîmprospătare automată a fluxurilor RSS
+    Faster Subscription Refresh: "Reîmprospătare mai rapidă a abonamentelor"
+    Platforms:
+      Other Platforms: Alte platforme
+      Manage Channels: Gestionează canalele urmărite
+      Notify When Live: Notifică atunci când canalele Twitch urmărite intră live
+      Auto Refresh Interval: Interval de reîmprospătare automată a altor platforme
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Numără timpul de vizionare de pe"
@@ -1508,7 +1573,6 @@ Settings:
   Search Settings: Caută în setări
   No Settings Found: Nu s-au găsit setări
   Experimental Settings:
-    Faster Subscription Refresh: "Reîmprospătare mai rapidă a abonamentelor"
     Disable Hardware Acceleration: Dezactivează accelerarea hardware
   Interface Customizer:
     Customize Interface: "Personalizează interfața"
@@ -1820,6 +1884,7 @@ Video:
     Auto-generated Caption Template: '{language} (generate automat)'
     Up next in {seconds}: Urmează în {seconds}
     Resize dock: Redimensionează panoul
+    Resize dock width: Modifică lățimea panoului
     Play now: Redă acum
     MusicPlaybackRateOverride: S-a detectat un videoclip muzical, se redă la viteza 1x
     Normal: Normal
@@ -2066,6 +2131,7 @@ Context Menu:
   Reload Posts: Reîncarcă postările
   Reload All Feeds: Reîncarcă toate fluxurile
   Reload RSS Feeds: Reîncarcă fluxurile RSS
+  Reload Platforms: Reîncarcă platformele
   Close Multiple Tabs: Închide {count} filă | Închide {count} file
   Duplicate Tab: Duplică fila
   Duplicate Multiple Tabs: Duplică {count} filă | Duplică {count} file
@@ -2222,6 +2288,9 @@ Description:
   Games: Jocuri
   Music: Muzică
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Abonarea la un canal sau dezabonarea de la acesta în OpenTubeX face același lucru în contul dvs. YouTube."
+    Add to YouTube Watch History: "Videoclipurile pe care le redați sunt adăugate în istoricul vizionărilor YouTube, astfel încât recomandările YouTube să învețe din ele. Nu se adaugă nimic cât timp istoricul este întrerupt pe YouTube."
   General Settings:
     Built-in Streams: |
       Modul automat redă majoritatea videoclipurilor prin clientul visionOS al YouTube, care pornește mai repede și acceptă calitatea automată. Transmisiunile live și videoclipurile pe care nu le poate reda folosesc SABR.
@@ -2245,6 +2314,7 @@ Tooltips:
       Este posibil ca videoclipurile să pornească mai greu când folosiți yt-dlp.
     Avoid translation: |
       Dezactivează traducerea automată YouTube a titlului, descrierii și capitolelor unui videoclip.
+      „Întreaga aplicație” afișează și numele și descrierile canalelor în limba originală.
       Prea multe solicitări, cum ar fi preluarea titlurilor videoclipurilor din liste, pot afecta
       temporar fiabilitatea aplicației.
     Show Thumbnail Previews: Afișează previzualizări animate la trecerea cursorului peste miniaturile videoclipurilor.
@@ -2332,8 +2402,11 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Actualizează fluxurile cu setările alese. Pe desktop, OpenTubeX rămâne în zona de notificare până la ieșire. Android stabilește când rulează actualizările în fundal."
     Notify About New Uploads: Afișează notificări de sistem pe acest dispozitiv pentru canalele ale căror notificări le-ați activat în setările lor de abonament. OpenTubeX caută conținut nou când abonamentele se reîmprospătează, așa că alegeți un interval de reîmprospătare automată. Pentru a primi notificări când aplicația este închisă, activați și reîmprospătarea când aplicația este închisă.
     RSS Feeds Auto Refresh Interval: Cât de des reîmprospătează OpenTubeX automat fluxurile RSS cât timp aplicația este deschisă.
+    Faster Subscription Refresh: "Verifică mai întâi fluxul RSS al fiecărui canal și încarcă videoclipurile, Shorts și transmisiunile live doar de la canalele cu încărcări noi. Reîmprospătările automate omit și canalele încărcate în ultimele 10 minute. Pentru canalele fără încărcări noi, numărul de vizionări, videoclipurile eliminate și titlurile modificate se actualizează doar la câteva ore, iar încărcările noi pot apărea mai târziu când fluxul RSS rămâne în urmă. Indisponibil cu API-ul Invidious."
+    Platforms Auto Refresh Interval: Cât de des reîmprospătează OpenTubeX automat canalele pe care le urmărești pe alte platforme cât timp aplicația este deschisă.
+    Twitch Notify When Live: Te anunță când unul dintre canalele Twitch pe care le urmărești începe o transmisiune. OpenTubeX verifică la fiecare câteva minute cât timp este deschis, și de asemenea cât timp este închis, dacă atunci actualizează abonamentele.
   Theme Settings:
-    Only Show Important Notifications: Ascunde notificările din aplicație care doar confirmă o acțiune sau raportează o stare. Erorile, avertismentele, mementourile pe care le-ați configurat și notificările care oferă o acțiune, precum Anulare, apar în continuare. Progresul operațiunilor din fundal, precum reîmprospătarea abonamentelor, este afișat în bara de progres globală în loc de o notificare. Notificările sistemului nu sunt afectate.
+    Only Show Important Notifications: Ascunde notificările din aplicație care doar confirmă o acțiune sau raportează o stare, inclusiv cele care oferă Anulare. Erorile, avertismentele, mementourile pe care le-ați configurat și notificările care cer o decizie, precum solicitările de actualizare, apar în continuare. Progresul operațiunilor din fundal, precum reîmprospătarea abonamentelor, este afișat în bara de progres globală în loc de o notificare. Notificările sistemului nu sunt afectate.
     Visible Search Suggestions: "Stabilește câte intrări din istoricul căutărilor și sugestii afișează bara de căutare înainte ca lista ei să fie derulată. Lista nu depășește niciodată marginea de jos a ferestrei."
     Thumbnail Size: "Scalează miniaturile videoclipurilor în grile și liste. Grilele cu un număr fix de coloane sau tipul de vizualizare Lățime completă umplu în schimb fiecare rând, așa că acolo modifică doar miniaturile din liste și Shorts. În ferestrele de mărimea unui telefon, miniaturile din grilă sunt limitate la 100%."
     Playlist Thumbnail Size: "Scalează miniaturile videoclipurilor pe paginile playlisturilor. Grilele cu un număr fix de coloane sau tipul de vizualizare Lățime completă umplu în schimb fiecare rând, așa că acolo modifică doar miniaturile din liste și Shorts. În ferestrele de mărimea unui telefon, miniaturile din grilă sunt limitate la 100%."
@@ -2347,7 +2420,6 @@ Tooltips:
     Modal Backdrop: "Stabilește cum arată aplicația în spatele dialogurilor și meniurilor. Estomparea poate fi lentă pe dispozitivele mai puțin performante."
     Click Scrollbar Track to Scroll: "Un clic pe o bară de derulare în afara cursorului ei derulează aproximativ o pagină în direcția clicului. Cât timp opțiunea este activată, o bară de derulare vizibilă preia clicurile destinate elementelor de sub ea. Bara de derulare a barei de file funcționează întotdeauna așa."
   Experimental Settings:
-    Faster Subscription Refresh: "Verifică mai întâi fluxul RSS al fiecărui canal și încarcă videoclipurile, Shorts și transmisiunile live doar de la canalele cu încărcări noi. Reîmprospătările automate omit și canalele încărcate în ultimele 10 minute. Pentru canalele fără încărcări noi, numărul de vizionări, videoclipurile eliminate și titlurile modificate se actualizează doar la câteva ore, iar încărcările noi pot apărea mai târziu când fluxul RSS rămâne în urmă. Indisponibil cu API-ul Invidious."
     Disable Hardware Acceleration: Dezactivează accelerarea hardware a GPU-ului. Poate rezolva problemele grafice, dar probabil va reduce performanța.
   SponsorBlock Settings:
     Always Show DeArrow Badge: Păstrează butonul DeArrow vizibil pe videoclipurile al căror titlu sau miniatură a fost înlocuit de DeArrow, în loc să apară doar la trecerea cursorului.
@@ -2733,3 +2805,31 @@ Notification Center:
   Clear: "Șterge"
   Empty: "Încă nu există notificări"
   Empty Hint: "Aici vor apărea mementourile pentru transmisiunile live și încărcările noi de pe canalele cu notificări activate."
+Platforms:
+  Tracks: Piese
+  Playlists: Liste de redare
+  Follower Count: 1 urmăritor | {count} urmăritori | {count} de urmăritori
+  Open Website: Deschide pe {platform}
+  Channel Not Found: Acest canal nu a putut fi găsit.
+  Playlist Not Found: Această listă de redare nu a putut fi găsită.
+  Load Error: Această pagină nu a putut fi încărcată de pe {platform}.
+  Empty Tab: Încă nu există nimic aici.
+YouTube Account:
+  Like: "Îmi place"
+  Dislike: "Nu îmi place"
+  Rating Failed: "Evaluarea pe YouTube nu a reușit: {error}"
+  Subscribe Failed: "Abonarea pe YouTube nu a reușit: {error}"
+  Unsubscribe Failed: "Dezabonarea pe YouTube nu a reușit: {error}"
+  Add a comment: "Adăugați un comentariu"
+  Add a reply: "Adăugați un răspuns"
+  Comment: "Comentați"
+  Reply: "Răspundeți"
+  Comment Posted: "Comentariu publicat"
+  Reply Posted: "Răspuns publicat"
+  Comment Failed: "Comentariul nu a putut fi publicat: {error}"
+  Delete Comment: "Ștergeți comentariul"
+  Delete Comment Confirmation: "Ștergeți comentariul dvs. de pe YouTube?"
+  Comment Deleted: "Comentariu șters"
+  Delete Comment Failed: "Comentariul nu a putut fi șters: {error}"
+  Recommendations: "Recomandări YouTube"
+  Recommendations Failed: "Recomandările dvs. YouTube nu au putut fi încărcate."

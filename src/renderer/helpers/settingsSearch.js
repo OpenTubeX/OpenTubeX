@@ -7,6 +7,7 @@ import {
   SETTINGS_SEARCH_SOURCES,
 } from './settings-search-config.js'
 import { isLiteBuild } from './ytDlpCapabilities.js'
+import { isSignedInToYouTube } from './youtube-account-state.js'
 
 export const settingsSearchNavigationKey = Symbol('settingsSearchNavigation')
 
@@ -103,6 +104,11 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     (sectionType === 'player' && group === 'Voice-over Translation')
   )) return false
 
+  // The account settings only show once signed in, and Sign in only before.
+  if (sectionType === 'youtube-account' && group !== 'YouTube Account Settings') {
+    return (group === 'Sign In') !== isSignedInToYouTube(store.getters)
+  }
+
   // These need the desktop main process or the Android background worker.
   if (sectionType === 'subscription' && [
     'Refresh Subscriptions While App Is Closed',
@@ -111,9 +117,14 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     return usingElectron || (isCapacitor && !isIos)
   }
 
-  // These switch Electron command line flags
-  if (sectionType === 'experimental' && ['Replace HTTP Cache', 'Disable Hardware Acceleration'].includes(group)) {
-    return usingElectron
+  // Uses the local API's channel feeds
+  if (sectionType === 'subscription' && group === 'Faster Subscription Refresh') {
+    return supportsLocalApi
+  }
+
+  // Items from other platforms open through yt-dlp
+  if (sectionType === 'subscription' && group === 'Platforms') {
+    return (usingElectron || isCapacitor) && !isLiteBuild
   }
 
   // RSS feed items open through yt-dlp, and the manager needs the feature enabled
@@ -165,11 +176,15 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     if (['New Tab Position', 'Tab Close Focus', 'Startup Behavior', 'Remember Tab Navigation History'].includes(group)) {
       return usingElectron || isCapacitor
     }
+    // Matches the options that the Confirm before list shows
+    if (group === 'Confirmation Options') {
+      if (item === 'Refreshing All Feeds') return true
+      if (item === 'Closing App') return usingElectron || isCapacitor
+      return usingElectron
+    }
     if ([
       'Open Deep Links In New Window',
       'Close Window With Last Tab',
-      'Confirm Before',
-      'Confirmation Options',
       'Stream Extraction Method'
     ].includes(group)) {
       return usingElectron

@@ -158,98 +158,97 @@
         </div>
         <div class="infoArea">
           <FtCard class="watchVideo externalMediaDetails">
-            <div class="externalMediaHeading">
-              <h1
-                class="videoTitle"
-                dir="auto"
-              >
-                {{ info.title || mediaUrl }}
-              </h1>
-            </div>
-            <div
-              v-if="statusBadges.length"
-              class="externalMediaBadges"
-            >
-              <span
-                v-for="badge in statusBadges"
-                :key="badge"
-                class="externalMediaBadge"
-              >{{ badge }}</span>
-            </div>
-            <div class="externalMediaMetricsRow">
-              <FtInlineMetadata
-                class="externalMediaMetrics"
-                icon-labels
-              >
-                <time
-                  v-if="publishedDate"
-                  class="publishedDate"
-                  :datetime="publishedDate"
-                  :title="`${publishedDateLabel} ${formattedPublishedDate}`"
-                ><FtIcon
-                  :icon="['fas', 'calendar-days']"
-                  class="statIcon"
-                  role="img"
-                  :aria-label="publishedDateLabel"
-                />{{ formattedPublishedDate }}</time>
-                <span
-                  v-if="publishedTimeAgo"
-                  class="publishedTimeAgo"
-                ><FtIcon
-                  :icon="['fas', 'clock']"
-                  class="statIcon"
-                  aria-hidden="true"
-                />{{ publishedTimeAgo }}</span>
-                <span
-                  v-if="formattedViewCount"
-                  class="videoViews"
-                ><FtIcon
-                  :icon="['fas', 'eye']"
-                  class="statIcon"
-                  aria-hidden="true"
-                />{{ formattedViewCount }}</span>
-                <span v-if="metadata.concurrentViewCount !== null"><FtIcon
-                  :icon="['fas', 'users']"
-                  class="statIcon"
-                  aria-hidden="true"
-                />{{ t('Global.Counts.Watching Count', { count: formattedConcurrentViewCount }, metadata.concurrentViewCount) }}</span>
-                <bdi
-                  v-if="metadata.categories.length"
-                  :title="`${t('Description.Video Category')} ${metadata.categories.join(', ')}`"
-                ><FtIcon
-                  :icon="['fas', 'icons']"
-                  class="statIcon"
-                  role="img"
-                  :aria-label="t('Description.Video Category')"
-                />{{ metadata.categories.join(', ') }}</bdi>
-              </FtInlineMetadata>
+            <div class="externalMediaHeader">
+              <div class="externalMediaHeaderText">
+                <h1
+                  class="videoTitle"
+                  dir="auto"
+                >
+                  {{ info.title || mediaUrl }}
+                </h1>
+                <div
+                  v-if="statusBadges.length"
+                  class="externalMediaBadges"
+                >
+                  <span
+                    v-for="badge in statusBadges"
+                    :key="badge"
+                    class="externalMediaBadge"
+                  >{{ badge }}</span>
+                </div>
+                <FtInlineMetadata
+                  class="externalMediaMetrics externalMediaMainMetrics"
+                  icon-labels
+                >
+                  <time
+                    v-if="publishedDate"
+                    class="publishedDate"
+                    :datetime="publishedDate"
+                    :title="`${publishedDateLabel} ${formattedPublishedDate}`"
+                  ><FtIcon
+                    :icon="['fas', 'calendar-days']"
+                    class="statIcon"
+                    role="img"
+                    :aria-label="publishedDateLabel"
+                  />{{ formattedPublishedDate }}</time>
+                  <span
+                    v-if="publishedTimeAgo"
+                    class="publishedTimeAgo"
+                  ><FtIcon
+                    :icon="['fas', 'clock']"
+                    class="statIcon"
+                    aria-hidden="true"
+                  />{{ publishedTimeAgo }}</span>
+                  <span
+                    v-if="formattedViewCount"
+                    class="videoViews"
+                  ><FtIcon
+                    :icon="['fas', 'eye']"
+                    class="statIcon"
+                    aria-hidden="true"
+                  />{{ formattedViewCount }}</span>
+                  <span v-if="metadata.concurrentViewCount !== null"><FtIcon
+                    :icon="['fas', 'users']"
+                    class="statIcon"
+                    aria-hidden="true"
+                  />{{ t('Global.Counts.Watching Count', { count: formattedConcurrentViewCount }, metadata.concurrentViewCount) }}</span>
+                  <bdi
+                    v-if="metadata.categories.length"
+                    :title="`${t('Description.Video Category')} ${metadata.categories.join(', ')}`"
+                  ><FtIcon
+                    :icon="['fas', 'icons']"
+                    class="statIcon"
+                    role="img"
+                    :aria-label="t('Description.Video Category')"
+                  />{{ metadata.categories.join(', ') }}</bdi>
+                </FtInlineMetadata>
+                <FtInlineMetadata
+                  v-if="engagement.length"
+                  class="externalMediaMetrics"
+                  icon-labels
+                >
+                  <span
+                    v-for="item in engagement"
+                    :key="item.label"
+                  ><FtIcon
+                    :icon="item.icon"
+                    class="statIcon"
+                    aria-hidden="true"
+                  />{{ item.text }}</span>
+                </FtInlineMetadata>
+              </div>
               <WatchVideoLikes
                 :like-count="metadata.likeCount"
                 :dislike-count="metadata.dislikeCount"
               />
             </div>
-            <FtInlineMetadata
-              v-if="engagement.length"
-              class="externalMediaMetrics"
-              icon-labels
-            >
-              <span
-                v-for="item in engagement"
-                :key="item.label"
-              ><FtIcon
-                :icon="item.icon"
-                class="statIcon"
-                aria-hidden="true"
-              />{{ item.text }}</span>
-            </FtInlineMetadata>
             <div class="externalMediaCreator">
+              <!-- Channels of supported platforms open in the app -->
               <component
-                :is="creatorUrl ? 'a' : 'span'"
+                :is="creatorChannel ? 'router-link' : creatorUrl ? 'a' : 'span'"
                 v-if="creatorName"
                 class="externalMediaCreatorProfile"
-                :href="creatorUrl || undefined"
-                :target="creatorUrl ? '_blank' : undefined"
-                :rel="creatorUrl ? 'noopener noreferrer' : undefined"
+                v-bind="creatorLinkAttributes"
               >
                 <FtRetryImage
                   v-if="creatorAvatarUrl"
@@ -260,6 +259,11 @@
                 />
                 <span dir="auto">{{ creatorName }}</span>
               </component>
+              <PlatformFollowButton
+                v-if="creatorChannel"
+                :platform="creatorChannel.platform"
+                :channel-id="creatorChannel.id"
+              />
               <a
                 class="externalMediaSiteLink"
                 :href="mediaUrl"
@@ -466,6 +470,7 @@ import WatchVideoToolbar from '../../components/WatchVideoToolbar/WatchVideoTool
 import WatchVideoInfoSkeleton from '../../components/WatchVideoInfoSkeleton/WatchVideoInfoSkeleton.vue'
 import FtPhonePanel from '../../components/FtPhonePanel/FtPhonePanel.vue'
 import TwitchChat from './TwitchChat.vue'
+import PlatformFollowButton from '../../components/PlatformFollowButton/PlatformFollowButton.vue'
 import { getTwitchChatTarget } from './twitchChat'
 import { getExternalYtDlpPlaybackSource, releaseTwitchVodRegistration } from '../../helpers/player/ytDlpPlayback'
 import { createTheatreModeAnimator, isTheatreLayoutAvailable } from '../../helpers/watchLayout'
@@ -479,6 +484,7 @@ import { useMediaSessionMetadata } from '../../composables/useMediaSessionMetada
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { isExternalMediaUrl } from '../../helpers/externalMediaUrl'
 import { getExternalMediaPosition, saveExternalMediaPosition } from '../../helpers/externalMediaPosition'
+import { findPlatformChannel, getPlatformChannelRoute } from '../../../platforms/index'
 import { createWatchTimeTracker } from '../../helpers/watchTimeTracker'
 import { useTabAvatar, useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
 import store from '../../store/index'
@@ -763,6 +769,13 @@ useMediaSessionMetadata(() => source.value && !errorMessage.value
   : null)
 const creatorUrl = computed(() => safeWebUrl(info.value?.channel ? info.value.channelUrl : info.value?.uploaderUrl))
 const creatorAvatarUrl = computed(() => safeWebUrl(info.value?.channel ? info.value.channelThumbnail : info.value?.uploaderThumbnail))
+// Only the creator's profile names the channel; the media URL can be a clip or VOD
+const creatorChannel = computed(() => findPlatformChannel(creatorUrl.value))
+// A fallthrough href, even an undefined one, would replace the router link's own
+const creatorLinkAttributes = computed(() => {
+  if (creatorChannel.value) return { to: getPlatformChannelRoute(creatorChannel.value.platform, creatorChannel.value.id) }
+  return creatorUrl.value ? { href: creatorUrl.value, target: '_blank', rel: 'noopener noreferrer' } : {}
+})
 const hideSharingActions = computed(() => store.getters.getHideSharingActions)
 const formattedViewCount = computed(() => {
   const count = info.value?.viewCount
@@ -938,7 +951,7 @@ function consumeTimestamp() {
     path: route.path,
     query,
     hash: route.hash,
-    state: { skipTabRouteLoading: true, preserveScroll: true, tabTitle: info.value?.title || hostname.value }
+    state: { preserveScroll: true }
   })
 }
 

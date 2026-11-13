@@ -294,7 +294,9 @@ test.describe('Shorts transcript navigation', () => {
       }
     })).toEqual({ atScrollEnd: true, renderedEndVisible: true })
 
-    await setWindowSize(app, page, { width: 1326, height: 1012 })
+    // Tall enough for the next Short's information to fit without scrolling,
+    // so navigating to it must clamp the position to the top.
+    await setWindowSize(app, page, { width: 1326, height: 1040 })
     await expect.poll(() => scroller.evaluate(element => {
       const contentEnd = element.querySelector('.shortsAuxPanelContentEnd')
       const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')

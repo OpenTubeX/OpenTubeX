@@ -15,6 +15,7 @@ import {
 import { resolveSystemTheme, resolveSystemThemeSettings } from '../appearanceSettings'
 import * as baseHandlers from '../datastores/handlers/base'
 import { isOpenTubeXUrl } from './utils'
+import { writeFileAtomic } from './writeFileAtomic'
 
 /**
  * Stores each custom theme as its own JSON file in the profile and registers
@@ -33,9 +34,7 @@ export function setupCustomThemes({ updateSettingFromMain, updateThemeSource }) 
 
   async function writeCustomThemeFile(theme) {
     const themePath = getCustomThemePath(theme.id)
-    const temporaryPath = `${themePath}.${randomUUID()}.tmp`
-    await asyncFs.writeFile(temporaryPath, `${JSON.stringify(theme, null, 2)}\n`, 'utf8')
-    await asyncFs.rename(temporaryPath, themePath)
+    await writeFileAtomic(themePath, `${JSON.stringify(theme, null, 2)}\n`, { temporaryFile: `${themePath}.${randomUUID()}.tmp` })
   }
 
   async function loadCustomThemes() {
@@ -128,12 +127,12 @@ export function setupCustomThemes({ updateSettingFromMain, updateThemeSource }) 
   }
 
   ipcMain.handle(IpcChannels.CUSTOM_THEME_LOAD, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) return
+    if (!isOpenTubeXUrl(event.senderFrame?.url)) return
     return await loadCustomThemes()
   })
 
   ipcMain.handle(IpcChannels.CUSTOM_THEME_SAVE, async (event, theme) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) return
+    if (!isOpenTubeXUrl(event.senderFrame?.url)) return
 
     const themes = await saveCustomTheme(theme)
     await repairSystemThemeSettingsFromMain(themes)
@@ -142,7 +141,7 @@ export function setupCustomThemes({ updateSettingFromMain, updateThemeSource }) 
   })
 
   ipcMain.handle(IpcChannels.CUSTOM_THEME_REPLACE, async (event, themes) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) return
+    if (!isOpenTubeXUrl(event.senderFrame?.url)) return
 
     const normalizedThemes = await replaceCustomThemes(themes)
     await repairSystemThemeSettingsFromMain(normalizedThemes)
@@ -151,7 +150,7 @@ export function setupCustomThemes({ updateSettingFromMain, updateThemeSource }) 
   })
 
   ipcMain.handle(IpcChannels.CUSTOM_THEME_DELETE, async (event, themeId) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) return
+    if (!isOpenTubeXUrl(event.senderFrame?.url)) return
 
     const deletedTheme = (await loadCustomThemes()).find(({ id }) => id === themeId)
     const themes = await deleteCustomTheme(themeId)

@@ -49,6 +49,7 @@ function createSearch (backend, { searchResults = [], missingPublicationDates = 
     query: { value: '' },
     isLoading: { value: false },
     isLoadingMore: { value: false },
+    nextPageFailed: { value: false },
     hasMoreResults: { value: true },
     apiUsed: { value: backend },
     localSearchCompleted: { value: false },
@@ -76,6 +77,7 @@ function createSearch (backend, { searchResults = [], missingPublicationDates = 
     ...state,
     processedQuery: { get value () { return state.query.value.trim() } },
     sessionSearchHistory: { value: history },
+    searchPlatform: { value: 'youtube' },
     backendPreference: { value: backend },
     backendFallback: { value: true },
     rememberSearchHistory: { value: false },
@@ -120,23 +122,26 @@ function createSearch (backend, { searchResults = [], missingPublicationDates = 
   return { state, history, previous, current, requests, errors, notices, updatedChannels, localSearches, select, nextPage, result }
 }
 
-test('restores the completed empty Local search after an Invidious pagination fallback', async () => {
-  const search = createSearch('invidious')
-  search.select('previous search')
-  const page = search.nextPage()
-  search.previous.reject(new Error('Invidious pagination failed'))
-  await page
-  assert.equal(search.state.apiUsed.value, 'local')
-  assert.equal(search.state.localSearchCompleted.value, true)
-  assert.equal(search.state.shownResults.value.length, 0)
+for (const backend of ['local', 'invidious']) {
+  test(`${backend} keeps the loaded results when a continuation fails`, async () => {
+    const search = createSearch(backend)
+    search.select('previous search')
+    const failedPage = search.nextPage()
+    search.previous.reject(new Error('Pagination failed'))
+    await failedPage
 
-  search.select('cached replacement')
-  search.select('previous search')
-  assert.equal(search.state.apiUsed.value, 'local')
-  assert.equal(search.state.localSearchCompleted.value, true)
-  assert.equal(search.state.shownResults.value.length, 0)
-  assert.equal(search.state.searchParams.value, 'encoded filters')
-})
+    assert.equal(search.state.shownResults.value.map(result => result.id).join(','), 'previous search')
+    assert.equal(search.state.apiUsed.value, backend)
+    assert.equal(search.state.nextPageFailed.value, true, 'automatic loading waits for a retry')
+    assert.equal(search.localSearches.length, 0, 'no fallback search replaces the results')
+
+    const retry = search.nextPage()
+    assert.equal(search.state.nextPageFailed.value, false)
+    search.current.resolve(search.result('next result'))
+    await retry
+    assert.equal(search.state.shownResults.value.map(result => result.id).join(','), 'previous search,next result')
+  })
+}
 
 for (const backend of ['local', 'invidious']) {
   for (const outcome of ['success', 'failure']) {

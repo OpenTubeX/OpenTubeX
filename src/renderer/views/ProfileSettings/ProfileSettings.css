@@ -89,9 +89,36 @@ h2 {
   padding-block: 16px;
 }
 
+/* The channel lists share the window's height and scroll on their own. The
+   window only scrolls once they would drop below their minimum height. */
+.profileSettingsContent.subscriptionsOpen {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 100%;
+}
+
+.subscriptionsOpen > .profilePanels,
+.subscriptionsPanel,
+.channelList {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+}
+
+.subscriptionSearch {
+  --input-bottom-spacing: 0;
+
+  inline-size: 85%;
+
+  /* The outlined label sits above the field. */
+  margin-block: 7px 15px;
+  margin-inline: auto;
+}
+
 @media only screen and (width <= 680px) {
   .card,
-  .profileTabs {
+  .profileTabs,
+  .subscriptionSearch {
     inline-size: 90%;
   }
 }

@@ -4,7 +4,6 @@ import { useI18n } from 'vue-i18n'
 import { isShareableOpenTubeXRoute, transformOpenTubeXRouteUrl } from '../../helpers/share'
 import { copyToClipboard, showToast } from '../../helpers/utils'
 import { getCapacitorTabService } from '../../tabs/CapacitorTabService'
-import { formatTabTitle } from '../../tabs/tabTitle'
 
 const noop = () => {}
 
@@ -62,7 +61,7 @@ export function useCapacitorTabActions({
   })
 
   function tabTitle(tab) {
-    return formatTabTitle(tab.contentTitle || tab.title || tab.route.fullPath)
+    return tab.contentTitle || tab.title || tab.route.fullPath
   }
 
   function tabAriaLabel(tab) {

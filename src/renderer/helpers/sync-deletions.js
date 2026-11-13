@@ -1,5 +1,7 @@
 // @ts-check
 
+import { toRaw } from 'vue'
+
 /**
  * @typedef {object} SyncDeletionDecision
  * @property {string[]} [confirmed] Deletions to apply without asking
@@ -121,6 +123,8 @@ export const SYNC_DELETION_ACTIONS = new Map([
  * @returns {Map<string, Set<string>>} IDs by {@link syncDeletionKey}
  */
 export function syncedIdLists(state, family, mainProfileId) {
+  // Scanning through reactive proxies costs several times more on large libraries.
+  state = toRaw(state)
   /** @type {Map<string, Set<string>>} */
   const lists = new Map()
   switch (family) {

@@ -21,7 +21,7 @@
       class="pageSwipePlaceholder"
     >
       <CapacitorTabPreview :tab="tab" />
-      <span dir="auto">{{ formatTabTitle(tab.contentTitle || tab.title || tab.route.fullPath) }}</span>
+      <span dir="auto">{{ tab.contentTitle || tab.title || tab.route.fullPath }}</span>
     </div>
     <component
       :is="resolvedComponent"
@@ -69,7 +69,6 @@ import { getCapacitorTabService } from '../../tabs/CapacitorTabService'
 import { tabLifecycleService } from '../../tabs/TabLifecycleService'
 import { tabRuntimeRegistry } from '../../tabs/TabRuntimeRegistry'
 import { playInBackgroundKey, tabIdKey, tabLifecycleKey, tabPresentedKey } from '../../tabs/TabContext'
-import { formatTabTitle } from '../../tabs/tabTitle'
 import { getPreviousBrowsingRoute } from '../../tabs/playerDockDestination'
 
 const TAB_LOADER_SELECTOR = '[data-tab-loading-indicator]'
@@ -271,7 +270,9 @@ onMounted(() => {
   }
 
   if (typeof MutationObserver === 'function' && tabContentRef.value) {
-    loaderObserver = new MutationObserver(scheduleLoaderUpdate)
+    loaderObserver = new MutationObserver((records) => {
+      if (records.some(recordAffectsLoader)) scheduleLoaderUpdate()
+    })
     loaderObserver.observe(tabContentRef.value, {
       attributes: true,
       attributeFilter: ['data-tab-loading-indicator'],
@@ -324,6 +325,23 @@ function scheduleLoaderUpdate() {
     loaderAnimationFrameId = null
     updateLoaderState()
   })
+}
+
+/**
+ * Pages such as live chat and comments add nodes continuously. Only changes
+ * that add, remove or toggle a loading indicator can change the tab's state.
+ * @param {MutationRecord} record
+ */
+function recordAffectsLoader(record) {
+  if (record.type === 'attributes') return true
+  for (const nodes of [record.addedNodes, record.removedNodes]) {
+    for (const node of nodes) {
+      if (node instanceof Element && (node.matches(TAB_LOADER_SELECTOR) || node.querySelector(TAB_LOADER_SELECTOR) != null)) {
+        return true
+      }
+    }
+  }
+  return false
 }
 
 function hasCurrentPageLoader() {

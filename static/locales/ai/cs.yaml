@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: Všechny sekce jsou skryté
   All sections hidden description: Přizpůsobte domovskou stránku a některou sekci znovu zobrazte.
 Subscriptions:
+  Channel Errors:
+    Summary: "1 kanál se nepodařilo obnovit. | {count} kanály se nepodařilo obnovit. | {count} kanálů se nepodařilo obnovit."
+    Toast: "Některé odebírané kanály se nepodařilo obnovit. Kliknutím je zobrazíte."
+    Retry Channel: "Zkusit znovu {channel}"
+    Show All: "Zobrazit vše"
+    Show Fewer: "Zobrazit méně"
   Cache Load Error: Uložené kanály odběrů se nepodařilo načíst.
   New video from {channel}: Nové video od {channel}
   New short from {channel}: Nový Short od {channel}
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: Nový příspěvek od {channel}
   Mark As Unseen: Označit jako neviděné
   Copy Error Details: "Kopírovat technické podrobnosti"
-  Refresh Errors: "Kanály, které se nepodařilo obnovit: {channels}. Kliknutím zobrazíte podrobnosti."
-  Refresh Error Channels More: "{channels} a {count} další | {channels} a {count} další | {channels} a {count} další"
   Never show {type} from this channel in feeds again: Už nikdy nezobrazovat {type} z tohoto kanálu ve feedech
   Refreshing Subscription Videos: Obnovování videí z odběrů
   Refreshing Subscription Shorts: Obnovování krátkých videí z odběrů
@@ -177,7 +181,7 @@ Subscriptions:
   Refreshing Subscription Posts: Obnovování příspěvků z odběrů
   New Content: Nový obsah
   New Feed Refresh Warning Title: Obnovit všechny kanály odběrů?
-  New Feed Refresh Warning: Obnovení všech typů obsahu bez RSS pro 1 odběr může trvat dlouho. Chcete pokračovat? | Obnovení všech typů obsahu bez RSS pro {count} odběry může trvat dlouho. Chcete pokračovat? | Obnovení všech typů obsahu bez RSS pro {count} odběrů může trvat dlouho. Chcete pokračovat?
+  New Feed Refresh Warning: Obnovení všech typů obsahu pro 1 odběr může trvat dlouho. Chcete pokračovat? | Obnovení všech typů obsahu pro {count} odběry může trvat dlouho. Chcete pokračovat? | Obnovení všech typů obsahu pro {count} odběrů může trvat dlouho. Chcete pokračovat?
   New Since Last Refresh: Nové od posledního obnovení
   Mark As Seen: Označit jako zobrazené
   Mark All as Seen: Označit vše jako zobrazené
@@ -216,11 +220,33 @@ Subscriptions:
       Optional Parameter: '{parameter} (volitelné)'
       Not Set: Nenastaveno
     Retry Feed: Zkusit znovu načíst {feed}
+    Reloading Feed: Znovu se načítá {feed}
+  Platforms:
+    Tab: Platformy
+    Platform: Platforma
+    All Platforms: Všechny platformy
+    Followed Channels: Sledované kanály na jiných platformách
+    Description: Sledujte kanály na platformách Twitch, SoundCloud, PeerTube, Rumble a Odysee a jejich nově nahraný obsah uvidíte na kartě Platformy ve svých odběrech. Kanály najdete pomocí vyhledávání, nebo je přidejte podle adresy jejich stránky. Jejich média se přehrávají pomocí yt-dlp.
+    Add Channel: Přidat kanál
+    Channel URL: Adresa kanálu
+    Invalid Channel: Zadejte adresu stránky kanálu na platformě Twitch, SoundCloud, PeerTube, Rumble nebo Odysee.
+    Channel Not Found: Na této adrese není žádný kanál.
+    Channel Already Followed: Tento kanál již sledujete.
+    Channel Could Not Be Loaded: Kanál se nepodařilo načíst.
+    No Channels: Zatím nesledujete žádné kanály na jiných platformách.
+    Unfollow Channel: Přestat sledovat {channel}
+    Go To Channel: Přejít na kanál {channel}
+    Follow: Sledovat
+    Following: Sledováno
+    Clips: Klipy
+    Refresh Errors: 1 kanál se nepodařilo obnovit. | {count} kanály se nepodařilo obnovit. | {count} kanálů se nepodařilo obnovit.
+    Content Tabs: Karty s obsahem platforem
 Trending:
   Music: Hudba
   Load Error: Trendy se nepodařilo načíst.
   Unsupported Backend: Trendy vyžadují místní API. Vyberte místní API nebo povolte záložního poskytovatele.
 Most Popular Feed Empty: Kanál Nejoblíbenější je na této instanci Invidious prázdný.
+Most Popular Load Error: "Kanál Nejoblíbenější se nepodařilo načíst."
 Feed:
   Cancel Refresh: Zrušit obnovení
   Next Auto Refresh: 'Další automatické obnovení: {date}'
@@ -307,8 +333,38 @@ History:
   Custom: Vlastní
   History Older Than Days Removed: Historie sledování starší než 1 den byla odstraněna | Historie sledování starší než {days} dny byla odstraněna | Historie sledování starší než {days} dní byla odstraněna
 Settings:
-  Experimental Settings:
-    Faster Subscription Refresh: "Rychlejší obnovení odběrů"
+  Experimental Badge: Experimentální
+  YouTube Account Settings:
+    YouTube Account Settings: "Účet YouTube"
+    Unofficial App Warning: "OpenTubeX není oficiální aplikace YouTube. Přihlášením se to, co tu děláte, propojí s vaším účtem Google a Google může účty, které používají neoficiální aplikace, omezit nebo zablokovat. Přihlašujte se jen účtem, o který si můžete dovolit přijít."
+    Sign In Explanation: "OpenTubeX se přihlašuje jako aplikace pro televizi: přihlášení schválíte na webu společnosti Google a OpenTubeX nikdy neuvidí vaše heslo. Přihlášení zůstává v tomto zařízení a nesynchronizuje se ani nezálohuje."
+    Sign In: "Přihlásit se"
+    Sign In Anyway: "Přesto se přihlásit"
+    Sign Out: "Odhlásit se"
+    Getting Sign-In Code: "Získávání přihlašovacího kódu"
+    Sign In Instructions: "Otevřete přihlašovací stránku a vyberte svůj účet Google. Kód se vyplní automaticky."
+    Other Device Instructions: "Na jiném zařízení přejděte na tuto adresu a zadejte kód:"
+    YouTube Channel: "Kanál YouTube"
+    Using Channel: "Nyní používáte YouTube jako {name}"
+    Switch Channel Failed: "Kanál YouTube se nepodařilo přepnout: {error}"
+    Open Sign-In Page: "Otevřít přihlašovací stránku"
+    Copy Code: "Kopírovat kód"
+    Code Copied: "Kód zkopírován"
+    Waiting for Approval: "Čeká se, až přihlášení schválíte"
+    Sign-In Denied: "Přihlášení bylo zamítnuto."
+    Sign-In Code Expired: "Platnost kódu vypršela. Zkuste to znovu a získejte nový."
+    Sign-In Failed: "Nepodařilo se přihlásit: {error}"
+    Signed In As: "Přihlášeno do YouTube jako {name}"
+    Signed Out: "Odhlášeno z YouTube"
+    Sign Out Failed: "Odhlášení se nezdařilo: {error}"
+    Revoke Failed: "Odhlášení z YouTube proběhlo, ale Google nepotvrdil ukončení přihlášení. Můžete ho odebrat v propojeních s aplikacemi třetích stran ve svém účtu Google."
+    Signed out by YouTube: "YouTube ukončil přihlášení. Chcete-li účet dál používat, přihlaste se znovu v Nastavení."
+    Subscribe on YouTube: "Odebírat také na YouTube"
+    Add to YouTube Watch History: "Přidávat zhlédnutá videa do historie YouTube"
+    Import Subscriptions: "Importovat odběry z YouTube"
+    Imported Subscriptions: "Importován {count} kanál | Importovány {count} kanály | Importováno {count} kanálů"
+    No Subscriptions to Import: "Tento účet YouTube nemá žádné odběry"
+    Import Subscriptions Failed: "Odběry se nepodařilo importovat: {error}"
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Když je diagnostický protokol zapnutý, OpenTubeX uchovává nedávné zprávy protokolu v paměti, abyste je mohli přiložit k hlášení chyb. Nikdy je sám neukládá ani neodesílá a vypnutím protokolu se smažou. Hlášení neobsahují soubory cookie, tokeny, IP adresy ani parametry URL, mohou však obsahovat ID přehraných videí, proto hlášení před sdílením zkontrolujte.
@@ -443,6 +499,7 @@ Settings:
       Closing Tabs: Zavřením více karet
       Loading Tabs: Načtením více karet
       Unloading Tabs: Uvolněním více karet
+      Refreshing All Feeds: Obnovením mnoha odběrů
     Remember Tab Navigation History: Pamatovat si historii procházení karet
     New Tab Position:
       New Tab Position: Umístění nové karty
@@ -1174,6 +1231,12 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Obnovovat odběry, když je aplikace zavřená"
     Notify About New Uploads: Oznamovat nový obsah
     RSS Feeds Auto Refresh Interval: Interval automatického obnovení RSS kanálů
+    Faster Subscription Refresh: "Rychlejší obnovení odběrů"
+    Platforms:
+      Other Platforms: Jiné platformy
+      Manage Channels: Spravovat sledované kanály
+      Notify When Live: Upozornit, když sledované kanály na Twitchi začnou vysílat
+      Auto Refresh Interval: Interval automatického obnovení jiných platforem
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Počítat dobu sledování z"
@@ -1778,6 +1841,7 @@ Video:
     Auto-generated Caption Template: '{language} (automaticky vytvořené)'
     Up next in {seconds}: Další video za {seconds}
     Resize dock: Změnit velikost panelu
+    Resize dock width: Změnit šířku panelu
     Play now: Přehrát nyní
     MusicPlaybackRateOverride: Bylo rozpoznáno hudební video, přehrávání rychlostí 1×
     Normal: Normální
@@ -2015,6 +2079,7 @@ Context Menu:
   Reload Posts: Znovu načíst příspěvky
   Reload All Feeds: Znovu načíst všechny kanály
   Reload RSS Feeds: Znovu načíst kanály RSS
+  Reload Platforms: Znovu načíst platformy
   Close Multiple Tabs: Zavřít {count} kartu | Zavřít {count} karty | Zavřít {count} karet
   Duplicate Tab: Duplikovat kartu
   Duplicate Multiple Tabs: Duplikovat {count} kartu | Duplikovat {count} karty | Duplikovat {count} karet
@@ -2167,8 +2232,9 @@ Description:
   Games: Hry
   Music: Hudba
 Tooltips:
-  Experimental Settings:
-    Faster Subscription Refresh: "Nejprve zkontroluje RSS kanál každého kanálu a videa, Shorts a živé přenosy načte jen z kanálů s novými nahranými videi. Automatická obnovení navíc přeskočí kanály načtené v posledních 10 minutách. U kanálů bez nových videí se počty zhlédnutí, odstraněná videa a změněné názvy aktualizují jen jednou za několik hodin a nová videa se mohou objevit později, když RSS kanál zaostává. Není k dispozici s Invidious API."
+  YouTube Account Settings:
+    Subscribe on YouTube: "Přihlášení k odběru kanálu nebo jeho zrušení v OpenTubeX provede totéž ve vašem účtu YouTube."
+    Add to YouTube Watch History: "Videa, která přehrajete, se přidají do vaší historie sledování na YouTube, takže se z nich učí doporučení YouTube. Když je historie na YouTube pozastavená, nic se nepřidá."
   General Settings:
     Built-in Streams: |
       Automatický režim přehrává většinu videí přes klienta visionOS od YouTube, který začíná rychleji a podporuje automatickou kvalitu. Živé přenosy a videa, která nedokáže přehrát, používají SABR.
@@ -2192,6 +2258,7 @@ Tooltips:
       Při použití yt-dlp může spuštění videa trvat déle.
     Avoid translation: |
       Vypne automatický překlad názvu, popisu a kapitol videa na YouTube.
+      Možnost „Celá aplikace“ zobrazuje i názvy a popisy kanálů v jejich původním jazyce.
       Příliš mnoho požadavků, například načítání názvů videí v seznamech, může dočasně
       snížit spolehlivost aplikace.
     Show Thumbnail Previews: Při najetí ukazatelem na miniaturu videa zobrazí animovaný náhled.
@@ -2279,8 +2346,11 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Aktualizuje kanály podle zvoleného nastavení. Na počítači zůstává OpenTubeX v oznamovací oblasti až do ukončení. Android určuje čas aktualizací na pozadí."
     Notify About New Uploads: Zobrazuje na tomto zařízení systémová oznámení pro kanály, u kterých jste v nastavení odběru zapnuli oznámení. OpenTubeX kontroluje nový obsah při obnovení odběrů, proto zvolte interval automatického obnovení. Chcete-li dostávat oznámení i při zavřené aplikaci, zapněte také obnovování při zavřené aplikaci.
     RSS Feeds Auto Refresh Interval: Jak často OpenTubeX automaticky obnovuje vaše RSS kanály, když je aplikace otevřená.
+    Faster Subscription Refresh: "Nejprve zkontroluje RSS kanál každého kanálu a videa, Shorts a živé přenosy načte jen z kanálů s novými nahranými videi. Automatická obnovení navíc přeskočí kanály načtené v posledních 10 minutách. U kanálů bez nových videí se počty zhlédnutí, odstraněná videa a změněné názvy aktualizují jen jednou za několik hodin a nová videa se mohou objevit později, když RSS kanál zaostává. Není k dispozici s Invidious API."
+    Platforms Auto Refresh Interval: Jak často OpenTubeX automaticky obnovuje kanály, které sledujete na jiných platformách, když je aplikace otevřená.
+    Twitch Notify When Live: Upozorní vás, když některý z vašich sledovaných kanálů na Twitchi začne vysílat. OpenTubeX kontroluje každých několik minut, když je otevřený, a také když je zavřený, pokud v tu dobu aktualizuje odběry.
   Theme Settings:
-    Only Show Important Notifications: Skryje oznámení v aplikaci, která pouze potvrzují akci nebo hlásí stav. Chyby, varování, nastavená připomenutí a oznámení s akcí, například Zpět, se zobrazují i nadále. Průběh operací na pozadí, například obnovování odběrů, se místo oznámení zobrazuje v globálním ukazateli průběhu. Systémová oznámení nejsou ovlivněna.
+    Only Show Important Notifications: Skryje oznámení v aplikaci, která pouze potvrzují akci nebo hlásí stav, včetně těch s možností Zpět. Chyby, varování, nastavená připomenutí a oznámení vyžadující rozhodnutí, například výzvy k aktualizaci, se zobrazují i nadále. Průběh operací na pozadí, například obnovování odběrů, se místo oznámení zobrazuje v globálním ukazateli průběhu. Systémová oznámení nejsou ovlivněna.
     Visible Search Suggestions: "Určuje, kolik položek historie vyhledávání a návrhů zobrazí vyhledávací pole, než se jeho seznam začne posouvat. Seznam nikdy nepřesáhne spodní okraj okna."
     Thumbnail Size: "Mění velikost miniatur videí v mřížkách a seznamech. Mřížky s pevným počtem sloupců nebo zobrazení Plná šířka místo toho vyplní každý řádek, takže tam mění jen miniatury v seznamech a Shorts. V oknech velikosti telefonu jsou miniatury v mřížce omezeny na 100 %."
     Playlist Thumbnail Size: "Mění velikost miniatur videí na stránkách playlistů. Mřížky s pevným počtem sloupců nebo zobrazení Plná šířka místo toho vyplní každý řádek, takže tam mění jen miniatury v seznamech a Shorts. V oknech velikosti telefonu jsou miniatury v mřížce omezeny na 100 %."
@@ -2676,3 +2746,31 @@ Notification Center:
   Clear: "Vymazat"
   Empty: "Zatím žádná oznámení"
   Empty Hint: "Zde se zobrazí připomínky živých přenosů a nová videa z kanálů se zapnutými oznámeními."
+Platforms:
+  Tracks: Skladby
+  Playlists: Playlisty
+  Follower Count: 1 sledující | {count} sledující | {count} sledujících
+  Open Website: Otevřít na webu {platform}
+  Channel Not Found: Tento kanál nebyl nalezen.
+  Playlist Not Found: Tento playlist nebyl nalezen.
+  Load Error: Tuto stránku se nepodařilo načíst z platformy {platform}.
+  Empty Tab: Zatím tu nic není.
+YouTube Account:
+  Like: "Líbí se mi"
+  Dislike: "Nelíbí se mi"
+  Rating Failed: "Nepodařilo se ohodnotit na YouTube: {error}"
+  Subscribe Failed: "Nepodařilo se přihlásit k odběru na YouTube: {error}"
+  Unsubscribe Failed: "Nepodařilo se zrušit odběr na YouTube: {error}"
+  Add a comment: "Přidat komentář"
+  Add a reply: "Přidat odpověď"
+  Comment: "Komentovat"
+  Reply: "Odpovědět"
+  Comment Posted: "Komentář zveřejněn"
+  Reply Posted: "Odpověď zveřejněna"
+  Comment Failed: "Komentář se nepodařilo zveřejnit: {error}"
+  Delete Comment: "Smazat komentář"
+  Delete Comment Confirmation: "Smazat váš komentář z YouTube?"
+  Comment Deleted: "Komentář smazán"
+  Delete Comment Failed: "Komentář se nepodařilo smazat: {error}"
+  Recommendations: "Doporučení YouTube"
+  Recommendations Failed: "Vaše doporučení YouTube se nepodařilo načíst."

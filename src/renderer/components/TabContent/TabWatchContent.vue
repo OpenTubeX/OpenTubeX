@@ -160,8 +160,9 @@ for (const method of ['push', 'replace']) {
       if (!route.path.startsWith('/watch/')) return router[method](location)
       // A detached player moves on to the next video in place, so the tab
       // stays on the page the user browses to.
-      navigation.updateRetainedWatchEntry(props.tabId, retainedHistoryIndex, watchRoute.value.fullPath, { route })
-      if (route.fullPath !== watchRoute.value.fullPath) watchTitle = ''
+      const updatesPage = method === 'replace' && route.path === watchRoute.value.path
+      navigation.updateRetainedWatchEntry(props.tabId, retainedHistoryIndex, watchRoute.value.fullPath, { route, updatesPage })
+      if (!updatesPage && route.fullPath !== watchRoute.value.fullPath) watchTitle = ''
       setWatchRoute(route)
       return Promise.resolve()
     }

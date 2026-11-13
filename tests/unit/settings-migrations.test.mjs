@@ -193,9 +193,6 @@ for (const failure of [null, 'hash', 'write']) {
   })
 }
 
-const tutorialSource = await readFile(new URL('../../src/renderer/helpers/tutorialState.js', import.meta.url), 'utf8')
-const LAST_USED_VERSION_SETTING_ID = tutorialSource.match(/LAST_USED_VERSION_SETTING_ID = '([^']+)'/)[1]
-const TUTORIAL_AUDIENCE_SETTING_ID = tutorialSource.match(/TUTORIAL_AUDIENCE_SETTING_ID = '([^']+)'/)[1]
 const { createDefaultSettings } = await import('../../src/settingsDefaults.js')
 const summaryDefault = createDefaultSettings({ supportsLocalApi: true, isElectron: true }).aiVideoSummaryMode
 const summaryEntriesStart = settingsSource.indexOf('      const legacyHideAiVideoSummariesEntry')
@@ -203,16 +200,12 @@ const summaryEntriesEnd = settingsSource.indexOf('      const legacyPlaybackSpee
 const summaryStartupStart = settingsSource.indexOf('      if (legacyHideAiVideoSummariesEntry)')
 const summaryStartupEnd = settingsSource.indexOf('      // Migrate the legacy auto Picture-in-Picture', summaryStartupStart)
 
-for (const [name, initialSettings, profiles, expectedMode] of [
-  ['fresh installations', {}, [], 'collapsed'],
-  ['tutorial-only settings', { [LAST_USED_VERSION_SETTING_ID]: '0.36.0', [TUTORIAL_AUDIENCE_SETTING_ID]: 'new' }, [], 'collapsed'],
-  ['tutorial-only settings with an existing profile', { [TUTORIAL_AUDIENCE_SETTING_ID]: 'new' }, [{ _id: 'main' }], 'hide'],
-  ['existing users without a saved summary preference', { theme: 'dark' }, [], 'hide'],
-  ['existing profiles without saved settings', {}, [{ _id: 'main' }], 'hide'],
-  ['legacy hidden summaries', { hideAiVideoSummaries: true }, [], 'hide'],
-  ['legacy visible summaries', { hideAiVideoSummaries: false }, [], 'collapsed'],
+for (const [name, initialSettings, expectedMode] of [
+  ['installations without a saved summary preference', {}, 'hide'],
+  ['legacy hidden summaries', { hideAiVideoSummaries: true }, 'hide'],
+  ['legacy visible summaries', { hideAiVideoSummaries: false }, 'collapsed'],
   ...['hide', 'collapsed', 'expanded'].map(mode => [
-    `explicit ${mode} summaries`, { aiVideoSummaryMode: mode }, [], mode,
+    `explicit ${mode} summaries`, { aiVideoSummaryMode: mode }, mode,
   ]),
 ]) {
   test(`startup preserves AI summary mode for ${name} across restarts`, async () => {
@@ -224,9 +217,7 @@ for (const [name, initialSettings, profiles, expectedMode] of [
         ${settingsSource.slice(summaryStartupStart, summaryStartupEnd)}
       })()`, {
         state,
-        TUTORIAL_STATE_SETTING_IDS: new Set([LAST_USED_VERSION_SETTING_ID, TUTORIAL_AUDIENCE_SETTING_ID]),
         userSettings: Object.entries(stored).map(([_id, value]) => ({ _id, value })),
-        DBProfileHandlers: { find: async () => profiles },
         DBSettingHandlers: {
           upsert: async (key, value) => { stored[key] = value },
           delete: async key => { delete stored[key] },
@@ -235,17 +226,12 @@ for (const [name, initialSettings, profiles, expectedMode] of [
           assert.equal(key, 'setAiVideoSummaryMode')
           state.aiVideoSummaryMode = value
         },
-        dispatch: async (key, value) => {
-          assert.equal(key, 'updateAiVideoSummaryMode')
-          stored.aiVideoSummaryMode = value
-          state.aiVideoSummaryMode = value
-        },
-        recordSettingSyncTimestamp: async () => {},
+        saveSettingEdit: (commit, id, save) => save(),
         migrateStoredAiVideoSummarySetting,
         console,
       })
       assert.equal(state.aiVideoSummaryMode, expectedMode)
-      assert.equal(stored.aiVideoSummaryMode, expectedMode)
+      assert.equal(stored.aiVideoSummaryMode ?? summaryDefault, expectedMode)
       assert.equal(Object.hasOwn(stored, 'hideAiVideoSummaries'), false)
     }
   })
@@ -619,27 +605,31 @@ test('a failed control bar migration retries on the next launch', async () => {
 const autoLoadCommentsMigrationStart = settingsSource.indexOf('      // Auto Load Next Page used to control comments too')
 const autoLoadCommentsMigrationEnd = settingsSource.indexOf('      if (legacyHideAiVideoSummariesEntry)', autoLoadCommentsMigrationStart)
 
-const syncTimestampWriterStart = settingsSource.indexOf('let settingSyncTimestampWrite')
-const syncTimestampWriterEnd = settingsSource.indexOf('const customState', syncTimestampWriterStart)
+const syncTimestampWriterStart = settingsSource.indexOf('function updateSettingSyncTimestamp(')
+const syncTimestampWriterEnd = settingsSource.indexOf('const settingWrites =', syncTimestampWriterStart)
+const lockedSettingUpdateStart = settingsSource.indexOf('/** @type {Map<string, Promise<unknown>>} */')
+const lockedSettingUpdateEnd = settingsSource.indexOf('/**\n * Applies `update` to the saved bookmarks', lockedSettingUpdateStart)
 
 /**
  * @param {Record<string, unknown>} stored
  * @param {Record<string, number>} [startupEditTimes] edit times saved earlier in startup
  */
 async function migrateAutoLoadComments(stored, startupEditTimes) {
-  const state = { syncServerSettingUpdatedAt: startupEditTimes ?? stored.syncServerSettingUpdatedAt ?? {} }
+  const userSettings = Object.entries(stored).map(([_id, value]) => ({ _id, value }))
+  // Earlier startup steps save edit times after reading the settings.
+  if (startupEditTimes) stored.syncServerSettingUpdatedAt = startupEditTimes
   const commits = {}
   await vm.runInNewContext(`(async () => {
     ${settingsSource.slice(syncTimestampWriterStart, syncTimestampWriterEnd)}
+    ${settingsSource.slice(lockedSettingUpdateStart, lockedSettingUpdateEnd)}
     ${settingsSource.slice(autoLoadCommentsMigrationStart, autoLoadCommentsMigrationEnd)}
   })()`, {
-    userSettings: Object.entries(stored).map(([_id, value]) => ({ _id, value })),
-    state,
-    commit: (mutation, value) => {
-      commits[mutation] = value
-      if (mutation === 'setSyncServerSettingUpdatedAt') state.syncServerSettingUpdatedAt = value
+    userSettings,
+    commit: (mutation, value) => { commits[mutation] = value },
+    DBSettingHandlers: {
+      findValue: async key => stored[key],
+      upsert: async (key, value) => { stored[key] = value },
     },
-    DBSettingHandlers: { upsert: async (key, value) => { stored[key] = value } },
     isSettingSyncable: () => true,
     CUSTOM_THEMES_SYNC_KEY: 'customThemes',
     console,

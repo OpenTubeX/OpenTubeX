@@ -51,9 +51,14 @@ export async function syncLiveReminders(client, previousRecords = [], reminderSe
   const merged = mergeLiveReminders(local, remote, previousRecords, now)
   const localById = byVideoId(local, now)
   const mergedIds = new Set(merged.map(record => record.videoId))
+  // The user may change a reminder while earlier ones are applied. Their change
+  // wins and schedules another sync, which merges it against this result.
+  const unchangedLocally = async id => JSON.stringify(byVideoId(await reminderService.list(), now).get(id)) ===
+    JSON.stringify(localById.get(id))
 
   for (const reminder of merged) {
     if (JSON.stringify(localById.get(reminder.videoId)) !== JSON.stringify(reminder) &&
+        await unchangedLocally(reminder.videoId) &&
         !await reminderService.schedule(reminder)) {
       // Notifications may be unavailable or permission may be denied. Keep
       // this collection pending without preventing other data from syncing.
@@ -61,7 +66,7 @@ export async function syncLiveReminders(client, previousRecords = [], reminderSe
     }
   }
   for (const id of localById.keys()) {
-    if (!mergedIds.has(id)) await reminderService.cancel(id)
+    if (!mergedIds.has(id) && await unchangedLocally(id)) await reminderService.cancel(id)
   }
   const normalizedRemote = [...byVideoId(remote, now).values()]
     .sort((a, b) => a.videoId.localeCompare(b.videoId))

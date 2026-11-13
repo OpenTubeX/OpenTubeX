@@ -125,6 +125,8 @@ test.describe('overlay scrollbars', () => {
       try {
         for (let index = 0; index < 40; index++) {
           element.style.opacity = index % 2 ? '0.5' : '1'
+          // Like the player's time display, which replaces its text node.
+          element.textContent = String(index)
           await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
         }
         return reads
@@ -200,6 +202,26 @@ test.describe('overlay scrollbars', () => {
     })
     await expect.poll(() => pageOverflows(page)).toBe(true)
     await expect.poll(() => pageScrollbarRangeError(page)).toBeLessThanOrEqual(2)
+  })
+
+  test('remeasures the page when content overflowing a box of its own is added or removed', async ({ page }) => {
+    await expect(page.locator('.tutorialOverlay')).toHaveCount(0)
+    // The box keeps its height, so the body does not resize with the overflow.
+    const content = await page.evaluateHandle(() => {
+      const box = document.createElement('div')
+      box.dataset.scrollbarTestContent = ''
+      box.style.height = '0'
+      const content = document.createElement('div')
+      content.style.height = '3000px'
+      box.append(content)
+      document.body.append(box)
+      return content
+    })
+    await expect.poll(() => pageOverflows(page)).toBe(true)
+    await expect.poll(() => pageScrollbarRangeError(page)).toBeLessThanOrEqual(2)
+    await content.evaluate(element => element.remove())
+    await expect.poll(() => pageOverflows(page)).toBe(false)
+    await expect(page.locator(PAGE_SCROLLBAR)).toHaveClass(/os-scrollbar-unusable/)
   })
 
   test('preserves native keyboard scrolling and clamps a fractional viewport after content shrinks', async ({ page }) => {

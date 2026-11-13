@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: Tất cả các mục đều bị ẩn
   All sections hidden description: Tùy chỉnh Trang chủ để hiển thị lại một mục.
 Subscriptions:
+  Channel Errors:
+    Summary: "Không thể làm mới {count} kênh."
+    Toast: "Không thể làm mới một số kênh đã đăng ký. Nhấp để xem."
+    Retry Channel: "Thử lại {channel}"
+    Show All: "Hiển thị tất cả"
+    Show Fewer: "Hiển thị ít hơn"
   Cache Load Error: Không thể tải các nguồn cấp dữ liệu kênh đăng ký đã lưu của bạn.
   New video from {channel}: Video mới từ {channel}
   New short from {channel}: Shorts mới từ {channel}
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: Bài đăng mới từ {channel}
   Mark As Unseen: Đánh dấu là chưa xem
   Copy Error Details: "Sao chép chi tiết kỹ thuật"
-  Refresh Errors: "Các kênh không thể làm mới: {channels}. Nhấp để xem chi tiết."
-  Refresh Error Channels More: "{channels} và {count} kênh khác"
   Never show {type} from this channel in feeds again: Không bao giờ hiển thị {type} từ kênh này trong bảng tin nữa
   Refreshing Subscription Videos: Đang làm mới video từ kênh đăng ký
   Refreshing Subscription Shorts: Đang làm mới video ngắn từ kênh đăng ký
@@ -177,7 +181,7 @@ Subscriptions:
   Refreshing Subscription Posts: Đang làm mới bài đăng từ kênh đăng ký
   New Content: Nội dung mới
   New Feed Refresh Warning Title: Làm mới tất cả bảng tin đăng ký?
-  New Feed Refresh Warning: Việc làm mới mọi loại nội dung không qua RSS cho {count} kênh đăng ký có thể mất nhiều thời gian. Bạn có muốn tiếp tục không?
+  New Feed Refresh Warning: Việc làm mới mọi loại nội dung cho {count} kênh đăng ký có thể mất nhiều thời gian. Bạn có muốn tiếp tục không?
   New Since Last Refresh: Mới kể từ lần làm mới trước
   Mark As Seen: Đánh dấu đã xem
   Mark All as Seen: Đánh dấu tất cả là đã xem
@@ -216,11 +220,33 @@ Subscriptions:
       Optional Parameter: '{parameter} (không bắt buộc)'
       Not Set: Chưa đặt
     Retry Feed: Thử lại {feed}
+    Reloading Feed: Đang tải lại {feed}
+  Platforms:
+    Tab: Nền tảng
+    Platform: Nền tảng
+    All Platforms: Tất cả nền tảng
+    Followed Channels: Kênh đang theo dõi trên các nền tảng khác
+    Description: Theo dõi các kênh trên Twitch, SoundCloud, PeerTube, Rumble và Odysee để xem nội dung họ tải lên trong thẻ Nền tảng của mục đăng ký. Tìm kênh bằng tính năng tìm kiếm hoặc thêm kênh bằng địa chỉ trang của kênh. Nội dung của các kênh được phát bằng yt-dlp.
+    Add Channel: Thêm kênh
+    Channel URL: Địa chỉ kênh
+    Invalid Channel: Nhập địa chỉ trang của một kênh trên Twitch, SoundCloud, PeerTube, Rumble hoặc Odysee.
+    Channel Not Found: Không có kênh nào ở địa chỉ này.
+    Channel Already Followed: Bạn đã theo dõi kênh này rồi.
+    Channel Could Not Be Loaded: Không thể tải kênh.
+    No Channels: Bạn chưa theo dõi kênh nào trên các nền tảng khác.
+    Unfollow Channel: Bỏ theo dõi {channel}
+    Go To Channel: Đi đến {channel}
+    Follow: Theo dõi
+    Following: Đang theo dõi
+    Clips: Clip
+    Refresh Errors: Không thể làm mới {count} kênh.
+    Content Tabs: Thẻ nội dung nền tảng
 Trending:
   Music: Âm nhạc
   Load Error: Không thể tải nội dung thịnh hành.
   Unsupported Backend: Nội dung thịnh hành cần Local API. Hãy chọn Local API hoặc bật phương án dự phòng cho dịch vụ nền.
 Most Popular Feed Empty: Bảng tin Phổ biến nhất của máy chủ Invidious này đang trống.
+Most Popular Load Error: "Không thể tải bảng tin Phổ biến nhất."
 Feed:
   Cancel Refresh: Hủy làm mới
   Next Auto Refresh: 'Lần tự động làm mới tiếp theo: {date}'
@@ -307,8 +333,38 @@ History:
   Custom: Tùy chỉnh
   History Older Than Days Removed: Đã xóa lịch sử xem cũ hơn {days} ngày
 Settings:
-  Experimental Settings:
-    Faster Subscription Refresh: "Làm mới kênh đăng ký nhanh hơn"
+  Experimental Badge: Thử nghiệm
+  YouTube Account Settings:
+    YouTube Account Settings: "Tài khoản YouTube"
+    Unofficial App Warning: "OpenTubeX không phải là ứng dụng YouTube chính thức. Khi đăng nhập, những gì bạn làm ở đây sẽ được liên kết với tài khoản Google của bạn, và Google có thể hạn chế hoặc cấm các tài khoản dùng ứng dụng không chính thức. Chỉ đăng nhập bằng tài khoản mà bạn chấp nhận bị mất."
+    Sign In Explanation: "OpenTubeX đăng nhập giống như một ứng dụng TV: bạn phê duyệt trên trang web của Google và OpenTubeX không bao giờ thấy mật khẩu của bạn. Thông tin đăng nhập chỉ lưu trên thiết bị này và không được đồng bộ hay sao lưu."
+    Sign In: "Đăng nhập"
+    Sign In Anyway: "Vẫn đăng nhập"
+    Sign Out: "Đăng xuất"
+    Getting Sign-In Code: "Đang lấy mã đăng nhập"
+    Sign In Instructions: "Mở trang đăng nhập và chọn tài khoản Google của bạn. Mã sẽ được điền tự động."
+    Other Device Instructions: "Trên thiết bị khác, truy cập địa chỉ này và nhập mã:"
+    YouTube Channel: "Kênh YouTube"
+    Using Channel: "Đang dùng YouTube với tên {name}"
+    Switch Channel Failed: "Không thể chuyển kênh YouTube: {error}"
+    Open Sign-In Page: "Mở trang đăng nhập"
+    Copy Code: "Sao chép mã"
+    Code Copied: "Đã sao chép mã"
+    Waiting for Approval: "Đang chờ bạn phê duyệt đăng nhập"
+    Sign-In Denied: "Yêu cầu đăng nhập đã bị từ chối."
+    Sign-In Code Expired: "Mã đã hết hạn. Hãy thử lại để nhận mã mới."
+    Sign-In Failed: "Không thể đăng nhập: {error}"
+    Signed In As: "Đã đăng nhập YouTube với tên {name}"
+    Signed Out: "Đã đăng xuất khỏi YouTube"
+    Sign Out Failed: "Không thể đăng xuất: {error}"
+    Revoke Failed: "Đã đăng xuất khỏi YouTube, nhưng Google chưa xác nhận rằng phiên đăng nhập đã kết thúc. Bạn có thể xóa phiên này trong mục kết nối với bên thứ ba của Tài khoản Google."
+    Signed out by YouTube: "YouTube đã kết thúc phiên đăng nhập. Hãy đăng nhập lại trong Cài đặt để tiếp tục dùng tài khoản của bạn."
+    Subscribe on YouTube: "Đăng ký cả trên YouTube"
+    Add to YouTube Watch History: "Thêm video đã xem vào lịch sử YouTube"
+    Import Subscriptions: "Nhập đăng ký từ YouTube"
+    Imported Subscriptions: "Đã nhập {count} kênh"
+    No Subscriptions to Import: "Tài khoản YouTube này không có kênh đăng ký nào"
+    Import Subscriptions Failed: "Không thể nhập đăng ký: {error}"
   Diagnostics:
     Diagnostics: Chẩn đoán
     Description: Khi nhật ký chẩn đoán đang bật, OpenTubeX giữ các thông báo nhật ký gần đây trong bộ nhớ để bạn có thể đính kèm chúng vào báo cáo lỗi. Ứng dụng không bao giờ tự lưu hay gửi chúng, và tắt nhật ký sẽ xóa chúng. Báo cáo bỏ qua cookie, token, địa chỉ IP và tham số URL, nhưng có thể chứa ID của các video bạn đã phát, vì vậy hãy kiểm tra báo cáo trước khi chia sẻ.
@@ -443,6 +499,7 @@ Settings:
       Closing Tabs: Đóng nhiều thẻ
       Loading Tabs: Tải nhiều thẻ
       Unloading Tabs: Dỡ nhiều thẻ
+      Refreshing All Feeds: Làm mới nhiều kênh đăng ký
     Remember Tab Navigation History: Ghi nhớ lịch sử điều hướng của thẻ
     New Tab Position:
       New Tab Position: Vị trí thẻ mới
@@ -1174,6 +1231,12 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Làm mới đăng ký khi ứng dụng đã đóng"
     Notify About New Uploads: Thông báo nội dung mới tải lên
     RSS Feeds Auto Refresh Interval: Khoảng tự động làm mới nguồn cấp RSS
+    Faster Subscription Refresh: "Làm mới kênh đăng ký nhanh hơn"
+    Platforms:
+      Other Platforms: Nền tảng khác
+      Manage Channels: Quản lý kênh đang theo dõi
+      Notify When Live: Thông báo khi các kênh Twitch đang theo dõi bắt đầu phát trực tiếp
+      Auto Refresh Interval: Khoảng tự động làm mới nền tảng khác
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Tính thời gian xem từ"
@@ -1788,6 +1851,7 @@ Video:
     Auto-generated Caption Template: '{language} (tự động tạo)'
     Up next in {seconds}: Tiếp theo sau {seconds}
     Resize dock: Đổi kích thước thanh bên
+    Resize dock width: Đổi chiều rộng thanh bên
     Play now: Phát ngay
     MusicPlaybackRateOverride: Đã phát hiện video nhạc, phát ở tốc độ 1x
     Normal: Bình thường
@@ -2029,6 +2093,7 @@ Context Menu:
   Reload Posts: Tải lại bài đăng
   Reload All Feeds: Tải lại tất cả bảng tin
   Reload RSS Feeds: Tải lại nguồn cấp RSS
+  Reload Platforms: Tải lại các nền tảng
   Close Multiple Tabs: Đóng {count} thẻ
   Duplicate Tab: Nhân đôi thẻ
   Duplicate Multiple Tabs: Nhân đôi {count} thẻ
@@ -2182,6 +2247,9 @@ Description:
   Games: Trò chơi
   Music: Âm nhạc
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Đăng ký hoặc hủy đăng ký một kênh trong OpenTubeX cũng sẽ thực hiện tương tự trên tài khoản YouTube của bạn."
+    Add to YouTube Watch History: "Video bạn phát sẽ được thêm vào lịch sử xem YouTube của bạn để đề xuất của YouTube học hỏi từ đó. Không có gì được thêm khi lịch sử đang bị tạm dừng trên YouTube."
   General Settings:
     Built-in Streams: |
       Tự động phát hầu hết video qua ứng dụng khách visionOS của YouTube, khởi động nhanh hơn và hỗ trợ chất lượng tự động. Các buổi phát trực tiếp và video mà nó không phát được sẽ dùng SABR.
@@ -2205,6 +2273,7 @@ Tooltips:
       Video có thể mất nhiều thời gian hơn để bắt đầu khi dùng yt-dlp.
     Avoid translation: |
       Tắt tính năng tự động dịch tiêu đề, mô tả và chương video của YouTube.
+      "Toàn bộ ứng dụng" cũng hiển thị tên và mô tả kênh bằng ngôn ngữ gốc.
       Quá nhiều yêu cầu, chẳng hạn lấy tiêu đề video trong nhiều danh sách, có thể tạm thời
       làm giảm độ ổn định của ứng dụng.
     Show Thumbnail Previews: Hiện bản xem trước động khi di chuột lên hình thu nhỏ của video.
@@ -2292,8 +2361,11 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Làm mới nguồn cấp theo cài đặt đã chọn. Trên máy tính, OpenTubeX ở trong khay hệ thống cho đến khi bạn thoát. Android quyết định thời điểm làm mới trong nền."
     Notify About New Uploads: Hiện thông báo hệ thống trên thiết bị này cho các kênh mà bạn đã bật thông báo trong cài đặt đăng ký của kênh. OpenTubeX kiểm tra nội dung mới khi làm mới đăng ký, vì vậy hãy chọn khoảng thời gian tự động làm mới. Để nhận thông báo khi ứng dụng đã đóng, hãy bật thêm tùy chọn làm mới khi ứng dụng đã đóng.
     RSS Feeds Auto Refresh Interval: Tần suất OpenTubeX tự động làm mới các nguồn cấp RSS của bạn khi ứng dụng đang mở.
+    Faster Subscription Refresh: "Trước tiên kiểm tra nguồn cấp RSS của từng kênh và chỉ tải video, Shorts và sự kiện trực tiếp từ các kênh có nội dung tải lên mới. Làm mới tự động cũng bỏ qua các kênh đã tải trong 10 phút qua. Với các kênh không có nội dung mới, lượt xem, video đã xóa và tiêu đề đã thay đổi chỉ được cập nhật vài giờ một lần, và nội dung mới có thể xuất hiện muộn hơn khi nguồn cấp RSS bị chậm. Không khả dụng với API Invidious."
+    Platforms Auto Refresh Interval: Tần suất OpenTubeX tự động làm mới các kênh bạn theo dõi trên các nền tảng khác khi ứng dụng đang mở.
+    Twitch Notify When Live: Thông báo cho bạn khi một trong các kênh Twitch bạn theo dõi bắt đầu phát. OpenTubeX kiểm tra vài phút một lần khi đang mở, và cả khi đã đóng nếu lúc đó ứng dụng làm mới mục đăng ký.
   Theme Settings:
-    Only Show Important Notifications: Ẩn các thông báo trong ứng dụng chỉ xác nhận một thao tác hoặc báo cáo trạng thái. Lỗi, cảnh báo, lời nhắc bạn đã thiết lập và các thông báo có thao tác, chẳng hạn như Hoàn tác, vẫn hiển thị. Tiến trình của các thao tác chạy nền, chẳng hạn như làm mới kênh đăng ký, được hiển thị trên thanh tiến trình chung thay vì trong thông báo. Thông báo hệ thống không bị ảnh hưởng.
+    Only Show Important Notifications: Ẩn các thông báo trong ứng dụng chỉ xác nhận một thao tác hoặc báo cáo trạng thái, kể cả những thông báo có Hoàn tác. Lỗi, cảnh báo, lời nhắc bạn đã thiết lập và các thông báo yêu cầu bạn đưa ra quyết định, chẳng hạn như đề nghị cập nhật, vẫn hiển thị. Tiến trình của các thao tác chạy nền, chẳng hạn như làm mới kênh đăng ký, được hiển thị trên thanh tiến trình chung thay vì trong thông báo. Thông báo hệ thống không bị ảnh hưởng.
     Visible Search Suggestions: "Đặt số mục lịch sử tìm kiếm và gợi ý mà thanh tìm kiếm hiển thị trước khi danh sách của nó phải cuộn. Danh sách không bao giờ vượt quá cạnh dưới của cửa sổ."
     Thumbnail Size: "Thay đổi kích thước hình thu nhỏ video trong lưới và danh sách. Lưới có số cột cố định hoặc kiểu xem Toàn chiều rộng sẽ lấp đầy từng hàng, nên ở đó thanh trượt chỉ thay đổi hình thu nhỏ trong danh sách và Shorts. Trong cửa sổ cỡ điện thoại, hình thu nhỏ dạng lưới bị giới hạn ở 100%."
     Playlist Thumbnail Size: "Thay đổi kích thước hình thu nhỏ video trên trang danh sách phát. Lưới có số cột cố định hoặc kiểu xem Toàn chiều rộng sẽ lấp đầy từng hàng, nên ở đó thanh trượt chỉ thay đổi hình thu nhỏ trong danh sách và Shorts. Trong cửa sổ cỡ điện thoại, hình thu nhỏ dạng lưới bị giới hạn ở 100%."
@@ -2307,7 +2379,6 @@ Tooltips:
     Modal Backdrop: "Đặt giao diện của ứng dụng phía sau hộp thoại và menu. Hiệu ứng làm mờ có thể chậm trên thiết bị yếu hơn."
     Click Scrollbar Track to Scroll: "Nhấp vào thanh cuộn bên ngoài tay cầm sẽ cuộn khoảng một trang về phía vị trí nhấp. Khi tùy chọn này bật, thanh cuộn đang hiển thị sẽ nhận các lần nhấp dành cho các mục bên dưới nó. Thanh cuộn của thanh thẻ luôn hoạt động theo cách này."
   Experimental Settings:
-    Faster Subscription Refresh: "Trước tiên kiểm tra nguồn cấp RSS của từng kênh và chỉ tải video, Shorts và sự kiện trực tiếp từ các kênh có nội dung tải lên mới. Làm mới tự động cũng bỏ qua các kênh đã tải trong 10 phút qua. Với các kênh không có nội dung mới, lượt xem, video đã xóa và tiêu đề đã thay đổi chỉ được cập nhật vài giờ một lần, và nội dung mới có thể xuất hiện muộn hơn khi nguồn cấp RSS bị chậm. Không khả dụng với API Invidious."
     Disable Hardware Acceleration: Tắt tăng tốc phần cứng GPU. Có thể khắc phục sự cố đồ họa, nhưng có thể làm giảm hiệu suất.
   SponsorBlock Settings:
     Always Show DeArrow Badge: Giữ nút DeArrow luôn hiển thị trên video có tiêu đề hoặc ảnh thu nhỏ đã được DeArrow thay thế, thay vì chỉ khi di chuột qua.
@@ -2691,3 +2762,31 @@ Notification Center:
   Clear: "Xóa"
   Empty: "Chưa có thông báo nào"
   Empty Hint: "Lời nhắc phát trực tiếp và video mới từ các kênh đã bật thông báo sẽ xuất hiện ở đây."
+Platforms:
+  Tracks: Bản nhạc
+  Playlists: Danh sách phát
+  Follower Count: '{count} người theo dõi'
+  Open Website: Mở trên {platform}
+  Channel Not Found: Không tìm thấy kênh này.
+  Playlist Not Found: Không tìm thấy danh sách phát này.
+  Load Error: Không thể tải trang này từ {platform}.
+  Empty Tab: Chưa có gì ở đây.
+YouTube Account:
+  Like: "Thích"
+  Dislike: "Không thích"
+  Rating Failed: "Không thể đánh giá trên YouTube: {error}"
+  Subscribe Failed: "Không thể đăng ký trên YouTube: {error}"
+  Unsubscribe Failed: "Không thể hủy đăng ký trên YouTube: {error}"
+  Add a comment: "Viết bình luận"
+  Add a reply: "Viết phản hồi"
+  Comment: "Bình luận"
+  Reply: "Phản hồi"
+  Comment Posted: "Đã đăng bình luận"
+  Reply Posted: "Đã đăng phản hồi"
+  Comment Failed: "Không thể đăng bình luận: {error}"
+  Delete Comment: "Xóa bình luận"
+  Delete Comment Confirmation: "Xóa bình luận của bạn khỏi YouTube?"
+  Comment Deleted: "Đã xóa bình luận"
+  Delete Comment Failed: "Không thể xóa bình luận: {error}"
+  Recommendations: "Đề xuất từ YouTube"
+  Recommendations Failed: "Không thể tải đề xuất YouTube của bạn."

@@ -163,6 +163,10 @@ test('touch scrolling chains from sidebar chapters to the page (30 chapters)', {
     element.scrollIntoView({ block: 'center' })
     element.scrollTop = element.scrollHeight
   })
+  // At fractional UI scales, the end a script scrolls to can lie a subpixel
+  // past the end touch scrolling stops at. A swipe there only settles the list,
+  // so reach the end with one first, as a user would.
+  await swipeVertically(session, chapters, -150)
   await expect.poll(() => chapters.evaluate(element =>
     Math.abs(element.scrollHeight - element.clientHeight - element.scrollTop)
   )).toBeLessThanOrEqual(1)

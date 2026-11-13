@@ -158,6 +158,22 @@ for (const [feed, path] of Object.entries({ shorts: 'shorts', live: 'streams', p
   })
 }
 
+test('a channel that YouTube reports as gone fails as unavailable without asking other sources', async () => {
+  const requests = createBackgroundSubscriptionRequests({ useRss: false, fallback: true, instanceUrl: 'https://invidious.example' })
+  const gone = { alerts: [{ alertRenderer: { type: 'ERROR' } }] }
+  // A failed Live tab request is checked with the channel's page, which tells why
+  for (const [feed, tabFails] of [['videos', false], ['live', true]]) {
+    const formats = []
+    await assert.rejects(fetchBackgroundSubscriptionChannel({ requests }, feed, 'UCtest', new AbortController().signal, async request => {
+      formats.push(request.format)
+      if (request.format !== 'local') throw new TypeError('Failed to fetch')
+      if (tabFails && JSON.parse(request.body).params) throw new Error('HTTP 404')
+      return JSON.stringify(gone)
+    }), { message: 'Channel unavailable', channelUnavailable: true })
+    assert.deepEqual(formats, tabFails ? ['local', 'local'] : ['local'])
+  }
+})
+
 function configuration(interval = 100) {
   return {
     intervals: { videos: interval },
@@ -188,6 +204,55 @@ test('background scheduling respects deadlines, deduplicates channels, and exclu
   now = 200
   await scheduler.tick()
   assert.equal(fetched.length, 3)
+})
+
+test('a failed channel is saved for each profile, so the app lists it above the feed', async () => {
+  let now = 0
+  const saved = []
+  const scheduler = createSubscriptionBackgroundScheduler({
+    now: () => now,
+    fetchChannel: async (_, feed, id) => {
+      if (id === 'UC1') throw Object.assign(new Error('HTTP 404'), { channelUnavailable: true })
+      return { videos: [] }
+    },
+    saveResult: async result => saved.push(result)
+  })
+  scheduler.configure(configuration())
+  await scheduler.setBackground(true)
+  now = 100
+  await scheduler.tick()
+  const failures = saved.filter(result => result.kind === 'channelFailure')
+  assert.deepEqual(failures.map(result => result.profileId).sort(), ['all', 'custom'])
+  assert.deepEqual(failures[0], {
+    kind: 'channelFailure',
+    profileId: failures[0].profileId,
+    feedType: 'videos',
+    channelId: 'UC1',
+    timestamp: 100,
+    diagnostic: { category: 'subscription videos', backend: 'Subscription backend', lifecycle: 'background', failure: 'http', message: 'HTTP 404' },
+    unavailable: true
+  })
+})
+
+test('a loaded channel whose result could not be saved is not listed as failed', async () => {
+  let now = 0
+  const saved = []
+  const scheduler = createSubscriptionBackgroundScheduler({
+    now: () => now,
+    fetchChannel: async () => ({ videos: [] }),
+    saveResult: async result => {
+      if (result.kind === 'channel' && result.profileId === 'all' && result.channelId === 'UC1') throw new Error('ENOSPC')
+      saved.push(result)
+    }
+  })
+  scheduler.configure(configuration())
+  await scheduler.setBackground(true)
+  now = 100
+  await scheduler.tick()
+  assert.equal(saved.some(result => result.kind === 'channelFailure'), false)
+  assert.ok(saved.some(result => result.kind === 'channel' && result.profileId === 'custom' && result.channelId === 'UC1'))
+  // Only the profile whose result is missing is retried sooner
+  assert.deepEqual(saved.filter(result => result.kind === 'completion').map(result => result.profileId), ['custom'])
 })
 
 test('profiles sharing a channel get one fetch time, so the app imports it once', async () => {
@@ -255,6 +320,13 @@ test('saved results survive restart and stale acknowledgements cannot remove a n
     assert.equal(next.payload.entries[0].videoId, 'new')
     await reopened.acknowledge(next.id)
     assert.equal(await reopened.next(), null)
+
+    // A failure does not replace a fetched feed the app has not imported yet
+    await reopened.save({ ...first, timestamp: 300 })
+    await reopened.save({ kind: 'channelFailure', profileId: 'all', feedType: 'videos', channelId: 'UC1', timestamp: 400, diagnostic: {} })
+    await reopened.retain(configuration())
+    assert.equal((await readdir(directory)).length, 2)
+    assert.equal((await reopened.next()).kind, 'channel')
   } finally { await rm(directory, { recursive: true, force: true }) }
 })
 

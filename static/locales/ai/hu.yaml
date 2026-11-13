@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: Minden szakasz el van rejtve
   All sections hidden description: Szabja testre a kezdőlapot egy szakasz újbóli megjelenítéséhez.
 Subscriptions:
+  Channel Errors:
+    Summary: "1 csatornát nem sikerült frissíteni. | {count} csatornát nem sikerült frissíteni."
+    Toast: "Néhány feliratkozott csatornát nem sikerült frissíteni. Kattintson a megtekintésükhöz."
+    Retry Channel: "{channel} újrapróbálása"
+    Show All: "Összes megjelenítése"
+    Show Fewer: "Kevesebb megjelenítése"
   Cache Load Error: A mentett feliratkozási hírfolyamokat nem sikerült betölteni.
   New video from {channel}: "Új videó: {channel}"
   New short from {channel}: "Új rövid videó: {channel}"
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: "Új bejegyzés: {channel}"
   Mark As Unseen: Megjelölés nem látottként
   Copy Error Details: "Technikai részletek másolása"
-  Refresh Errors: "Nem frissíthető csatornák: {channels}. Kattintson a részletek megtekintéséhez."
-  Refresh Error Channels More: "{channels} és további {count} | {channels} és további {count}"
   Never show {type} from this channel in feeds again: Soha többé ne jelenjen meg {type} típusú tartalom ettől a csatornától a hírcsatornákban
   Refreshing Subscription Videos: Feliratkozások videóinak frissítése
   Refreshing Subscription Shorts: Feliratkozások rövid videóinak frissítése
@@ -177,7 +181,7 @@ Subscriptions:
   Refreshing Subscription Posts: Feliratkozások bejegyzéseinek frissítése
   New Content: Új tartalom
   New Feed Refresh Warning Title: Frissíti az összes feliratkozási hírfolyamot?
-  New Feed Refresh Warning: Az összes tartalomtípus RSS nélküli frissítése 1 feliratkozásnál sokáig tarthat. Folytatja? | Az összes tartalomtípus RSS nélküli frissítése {count} feliratkozásnál sokáig tarthat. Folytatja?
+  New Feed Refresh Warning: Az összes tartalomtípus frissítése 1 feliratkozásnál sokáig tarthat. Folytatja? | Az összes tartalomtípus frissítése {count} feliratkozásnál sokáig tarthat. Folytatja?
   New Since Last Refresh: Új az utolsó frissítés óta
   Mark As Seen: Megjelölés látottként
   Mark All as Seen: Összes megjelölése látottként
@@ -216,11 +220,33 @@ Subscriptions:
       Optional Parameter: '{parameter} (nem kötelező)'
       Not Set: Nincs beállítva
     Retry Feed: '{feed} újrapróbálása'
+    Reloading Feed: '{feed} újratöltése'
+  Platforms:
+    Tab: Platformok
+    Platform: Platform
+    All Platforms: Összes platform
+    Followed Channels: Követett csatornák más platformokon
+    Description: Kövessen csatornákat a Twitch, SoundCloud, PeerTube, Rumble és Odysee platformon, hogy feltöltéseiket a feliratkozásai Platformok lapján lássa. Keressen csatornákat a keresővel, vagy adja hozzá őket az oldaluk címével. Médiatartalmaik a yt-dlp segítségével játszhatók le.
+    Add Channel: Csatorna hozzáadása
+    Channel URL: Csatorna címe
+    Invalid Channel: Adja meg egy Twitch-, SoundCloud-, PeerTube-, Rumble- vagy Odysee-csatornaoldal címét.
+    Channel Not Found: Ezen a címen nincs csatorna.
+    Channel Already Followed: Már követi ezt a csatornát.
+    Channel Could Not Be Loaded: A csatornát nem sikerült betölteni.
+    No Channels: Még nem követ egyetlen csatornát sem más platformokon.
+    Unfollow Channel: '{channel} követésének megszüntetése'
+    Go To Channel: Ugrás a(z) {channel} csatornára
+    Follow: Követés
+    Following: Követve
+    Clips: Klipek
+    Refresh Errors: 1 csatornát nem sikerült frissíteni. | {count} csatornát nem sikerült frissíteni.
+    Content Tabs: Platformtartalmak lapjai
 Trending:
   Music: Zene
   Load Error: A felkapott tartalmak nem tölthetők be.
   Unsupported Backend: A felkapott tartalmakhoz a Local API szükséges. Válassza a Local API-t, vagy engedélyezze a tartalék háttérszolgáltatást.
 Most Popular Feed Empty: Ennek az Invidious-példánynak üres a Legnépszerűbb hírfolyama.
+Most Popular Load Error: "Nem sikerült betölteni a Legnépszerűbb hírfolyamot."
 Feed:
   Cancel Refresh: Frissítés megszakítása
   Next Auto Refresh: 'Következő automatikus frissítés: {date}'
@@ -307,8 +333,38 @@ History:
   Custom: Egyéni
   History Older Than Days Removed: Az 1 napnál régebbi megtekintési előzmények eltávolítva | A(z) {days} napnál régebbi megtekintési előzmények eltávolítva
 Settings:
-  Experimental Settings:
-    Faster Subscription Refresh: "Gyorsabb feliratkozásfrissítés"
+  Experimental Badge: Kísérleti
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube-fiók"
+    Unofficial App Warning: "Az OpenTubeX nem hivatalos YouTube-alkalmazás. Bejelentkezéskor az itt végzett tevékenysége a Google-fiókjához kapcsolódik, és a Google korlátozhatja vagy letilthatja a nem hivatalos alkalmazásokat használó fiókokat. Csak olyan fiókkal jelentkezzen be, amelynek elvesztését megengedheti magának."
+    Sign In Explanation: "Az OpenTubeX úgy jelentkezik be, mint egy tévéalkalmazás: a bejelentkezést a Google webhelyén hagyja jóvá, és az OpenTubeX soha nem látja a jelszavát. A bejelentkezés ezen az eszközön marad, és nem kerül szinkronizálásra vagy biztonsági mentésre."
+    Sign In: "Bejelentkezés"
+    Sign In Anyway: "Bejelentkezés ennek ellenére"
+    Sign Out: "Kijelentkezés"
+    Getting Sign-In Code: "Bejelentkezési kód lekérése"
+    Sign In Instructions: "Nyissa meg a bejelentkezési oldalt, és válassza ki Google-fiókját. A kód automatikusan kitöltődik."
+    Other Device Instructions: "Egy másik eszközön nyissa meg ezt a címet, és írja be a kódot:"
+    YouTube Channel: "YouTube-csatorna"
+    Using Channel: "Most {name} néven használja a YouTube-ot"
+    Switch Channel Failed: "Nem sikerült YouTube-csatornát váltani: {error}"
+    Open Sign-In Page: "Bejelentkezési oldal megnyitása"
+    Copy Code: "Kód másolása"
+    Code Copied: "Kód másolva"
+    Waiting for Approval: "Várakozás a bejelentkezés jóváhagyására"
+    Sign-In Denied: "A bejelentkezést elutasították."
+    Sign-In Code Expired: "A kód lejárt. Próbálja újra, hogy újat kapjon."
+    Sign-In Failed: "Nem sikerült bejelentkezni: {error}"
+    Signed In As: "Bejelentkezve a YouTube-ra {name} néven"
+    Signed Out: "Kijelentkezve a YouTube-ról"
+    Sign Out Failed: "Nem sikerült kijelentkezni: {error}"
+    Revoke Failed: "Kijelentkezett a YouTube-ról, de a Google nem erősítette meg, hogy a bejelentkezés megszűnt. Eltávolíthatja a Google-fiókja harmadik féltől származó kapcsolatai között."
+    Signed out by YouTube: "A YouTube megszüntette a bejelentkezést. Jelentkezzen be újra a Beállításokban, hogy továbbra is használhassa fiókját."
+    Subscribe on YouTube: "Feliratkozás a YouTube-on is"
+    Add to YouTube Watch History: "Megtekintett videók hozzáadása a YouTube-előzményekhez"
+    Import Subscriptions: "Feliratkozások importálása a YouTube-ról"
+    Imported Subscriptions: "{count} csatorna importálva | {count} csatorna importálva"
+    No Subscriptions to Import: "Ennek a YouTube-fióknak nincsenek feliratkozásai"
+    Import Subscriptions Failed: "Nem sikerült importálni a feliratkozásokat: {error}"
   Diagnostics:
     Diagnostics: Diagnosztika
     Description: Amíg a diagnosztikai naplózás be van kapcsolva, az OpenTubeX a legutóbbi naplóüzeneteket a memóriában tartja, hogy hibajelentésekhez csatolhasd őket. Soha nem menti és nem küldi el őket magától, a naplózás kikapcsolása pedig törli őket. A jelentések nem tartalmaznak sütiket, tokeneket, IP-címeket és URL-paramétereket, de tartalmazhatják a lejátszott videók azonosítóit, ezért megosztás előtt ellenőrizd a jelentést.
@@ -443,6 +499,7 @@ Settings:
       Closing Tabs: Több lap bezárása
       Loading Tabs: Több lap betöltése
       Unloading Tabs: Több lap kiürítése
+      Refreshing All Feeds: Sok feliratkozás frissítése
     Remember Tab Navigation History: Lapnavigációs előzmények megjegyzése
     New Tab Position:
       New Tab Position: Új lap helye
@@ -1174,6 +1231,12 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Feliratkozások frissítése bezárt alkalmazásnál"
     Notify About New Uploads: Értesítés új feltöltésekről
     RSS Feeds Auto Refresh Interval: RSS-hírcsatornák automatikus frissítésének időköze
+    Faster Subscription Refresh: "Gyorsabb feliratkozásfrissítés"
+    Platforms:
+      Other Platforms: Más platformok
+      Manage Channels: Követett csatornák kezelése
+      Notify When Live: Értesítés, amikor a követett Twitch-csatornák élő adást indítanak
+      Auto Refresh Interval: Más platformok automatikus frissítésének időköze
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Nézési idő számításának forrása"
@@ -1778,6 +1841,7 @@ Video:
     Auto-generated Caption Template: '{language} (automatikusan létrehozott)'
     Up next in {seconds}: Következik {seconds} múlva
     Resize dock: Dokkolt panel átméretezése
+    Resize dock width: Dokkolt panel szélességének módosítása
     Play now: Lejátszás most
     MusicPlaybackRateOverride: Zenei videó észlelve, lejátszás 1×-es sebességgel
     Normal: Normál
@@ -2015,6 +2079,7 @@ Context Menu:
   Reload Posts: Bejegyzések újratöltése
   Reload All Feeds: Összes hírfolyam újratöltése
   Reload RSS Feeds: RSS-hírcsatornák újratöltése
+  Reload Platforms: Platformok újratöltése
   Close Multiple Tabs: Lapok bezárása ({count})
   Duplicate Tab: Lap megkettőzése
   Duplicate Multiple Tabs: Lapok megkettőzése ({count})
@@ -2168,8 +2233,9 @@ Description:
   Games: Játékok
   Music: Zene
 Tooltips:
-  Experimental Settings:
-    Faster Subscription Refresh: "Először minden csatorna RSS-hírcsatornáját ellenőrzi, és csak az új feltöltéssel rendelkező csatornák videóit, Shorts-videóit és élő közvetítéseit tölti be. Az automatikus frissítések az elmúlt 10 percben betöltött csatornákat is kihagyják. Az új feltöltés nélküli csatornáknál a megtekintések száma, az eltávolított videók és a módosított címek csak néhány óránként frissülnek, és az új feltöltések később jelenhetnek meg, ha az RSS-hírcsatorna lemarad. Az Invidious API-val nem érhető el."
+  YouTube Account Settings:
+    Subscribe on YouTube: "Ha az OpenTubeX-ben feliratkozik egy csatornára vagy leiratkozik róla, ugyanez történik a YouTube-fiókjában is."
+    Add to YouTube Watch History: "A lejátszott videók bekerülnek a YouTube megtekintési előzményeibe, így a YouTube ajánlásai tanulhatnak belőlük. Amíg az előzmények szüneteltetve vannak a YouTube-on, semmi sem kerül be."
   General Settings:
     Built-in Streams: |
       Az automatikus mód a legtöbb videót a YouTube visionOS-kliensével játssza le, amely gyorsabban indul és támogatja az automatikus minőséget. Az élő közvetítések és az általa nem lejátszható videók SABR-t használnak.
@@ -2193,6 +2259,7 @@ Tooltips:
       A videók indítása tovább tarthat a yt-dlp használatakor.
     Avoid translation: |
       A videócímek, -leírások és -fejezetek YouTube általi automatikus fordításának kikapcsolása.
+      A „Teljes alkalmazás” beállítás a csatornák nevét és leírását is az eredeti nyelven jeleníti meg.
       A túl sok kérés, például a videócímek lekérése több listán keresztül, átmenetileg
       ronthatja az alkalmazás megbízhatóságát.
     Show Thumbnail Previews: Animált előnézet megjelenítése, amikor az egér a videó bélyegképe fölött van.
@@ -2280,8 +2347,11 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "A kiválasztott beállításokkal frissíti a hírcsatornákat. Számítógépen az OpenTubeX kilépésig a rendszertálcán marad. Androidon a rendszer határozza meg a háttérfrissítések idejét."
     Notify About New Uploads: Rendszerértesítéseket jelenít meg ezen az eszközön azokról a csatornákról, amelyeknek a feliratkozási beállításaiban bekapcsolta az értesítéseket. Az OpenTubeX a feliratkozások frissítésekor keres új tartalmat, ezért válasszon automatikus frissítési időközt. Ha bezárt alkalmazásnál is értesítést szeretne kapni, kapcsolja be a bezárt alkalmazásnál történő frissítést is.
     RSS Feeds Auto Refresh Interval: Milyen gyakran frissíti automatikusan az OpenTubeX az RSS-hírcsatornáidat, amíg az alkalmazás nyitva van.
+    Faster Subscription Refresh: "Először minden csatorna RSS-hírcsatornáját ellenőrzi, és csak az új feltöltéssel rendelkező csatornák videóit, Shorts-videóit és élő közvetítéseit tölti be. Az automatikus frissítések az elmúlt 10 percben betöltött csatornákat is kihagyják. Az új feltöltés nélküli csatornáknál a megtekintések száma, az eltávolított videók és a módosított címek csak néhány óránként frissülnek, és az új feltöltések később jelenhetnek meg, ha az RSS-hírcsatorna lemarad. Az Invidious API-val nem érhető el."
+    Platforms Auto Refresh Interval: Milyen gyakran frissíti automatikusan az OpenTubeX a más platformokon követett csatornáidat, amíg az alkalmazás nyitva van.
+    Twitch Notify When Live: Értesít, amikor valamelyik követett Twitch-csatornád adást indít. Az OpenTubeX néhány percenként ellenőriz, amíg nyitva van, és akkor is, amikor be van zárva, ha ilyenkor frissíti a feliratkozásokat.
   Theme Settings:
-    Only Show Important Notifications: Elrejti azokat az alkalmazáson belüli értesítéseket, amelyek csak egy műveletet erősítenek meg vagy állapotot jeleznek. A hibák, figyelmeztetések, az Ön által beállított emlékeztetők és a műveletet kínáló értesítések, például a Visszavonás, továbbra is megjelennek. A háttérfolyamatok, például a feliratkozások frissítésének állapota értesítés helyett a globális folyamatjelző sávon jelenik meg. A rendszerértesítéseket nem érinti.
+    Only Show Important Notifications: Elrejti azokat az alkalmazáson belüli értesítéseket, amelyek csak egy műveletet erősítenek meg vagy állapotot jeleznek, beleértve a Visszavonás lehetőséget kínálókat is. A hibák, figyelmeztetések, az Ön által beállított emlékeztetők és a döntést kérő értesítések, például a frissítési felkérések, továbbra is megjelennek. A háttérfolyamatok, például a feliratkozások frissítésének állapota értesítés helyett a globális folyamatjelző sávon jelenik meg. A rendszerértesítéseket nem érinti.
     Visible Search Suggestions: "Megadja, hány keresési előzményt és javaslatot jelenít meg a keresősáv, mielőtt a listáját görgetni kellene. A lista soha nem nyúlik túl az ablak alsó szélén."
     Thumbnail Size: "Átméretezi a videók bélyegképeit a rácsokban és listákban. A rögzített oszlopszámú vagy Teljes szélesség nézetű rácsok ehelyett kitöltik az összes sort, így ott csak a listák bélyegképeit és a Shorts videókat módosítja. Telefonméretű ablakokban a rács bélyegképei legfeljebb 100%-osak lehetnek."
     Playlist Thumbnail Size: "Átméretezi a videók bélyegképeit a lejátszási listák oldalain. A rögzített oszlopszámú vagy Teljes szélesség nézetű rácsok ehelyett kitöltik az összes sort, így ott csak a listák bélyegképeit és a Shorts videókat módosítja. Telefonméretű ablakokban a rács bélyegképei legfeljebb 100%-osak lehetnek."
@@ -2677,3 +2747,31 @@ Notification Center:
   Clear: "Törlés"
   Empty: "Még nincsenek értesítések"
   Empty Hint: "Itt jelennek meg az élő közvetítések emlékeztetői és a bekapcsolt értesítésű csatornák új feltöltései."
+Platforms:
+  Tracks: Számok
+  Playlists: Lejátszási listák
+  Follower Count: 1 követő | {count} követő
+  Open Website: 'Megnyitás itt: {platform}'
+  Channel Not Found: Ez a csatorna nem található.
+  Playlist Not Found: Ez a lejátszási lista nem található.
+  Load Error: 'Ezt az oldalt nem sikerült betölteni innen: {platform}.'
+  Empty Tab: Itt még nincs semmi.
+YouTube Account:
+  Like: "Tetszik"
+  Dislike: "Nem tetszik"
+  Rating Failed: "Nem sikerült értékelni a YouTube-on: {error}"
+  Subscribe Failed: "Nem sikerült feliratkozni a YouTube-on: {error}"
+  Unsubscribe Failed: "Nem sikerült leiratkozni a YouTube-on: {error}"
+  Add a comment: "Hozzászólás írása"
+  Add a reply: "Válasz írása"
+  Comment: "Hozzászólás"
+  Reply: "Válasz"
+  Comment Posted: "Hozzászólás közzétéve"
+  Reply Posted: "Válasz közzétéve"
+  Comment Failed: "Nem sikerült közzétenni a hozzászólást: {error}"
+  Delete Comment: "Hozzászólás törlése"
+  Delete Comment Confirmation: "Törli a hozzászólását a YouTube-ról?"
+  Comment Deleted: "Hozzászólás törölve"
+  Delete Comment Failed: "Nem sikerült törölni a hozzászólást: {error}"
+  Recommendations: "YouTube-ajánlások"
+  Recommendations Failed: "Nem sikerült betölteni a YouTube-ajánlásait."

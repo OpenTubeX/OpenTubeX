@@ -338,6 +338,14 @@
   border-radius: var(--shape-corner-small);
 }
 
+// Centered in the space of a video thumbnail, which is 96px wide and 54px high.
+.linkPreviewAvatar {
+  inline-size: 54px;
+  margin-inline: 21px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+
 .linkPreviewText {
   display: flex;
   flex-direction: column;

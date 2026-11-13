@@ -316,6 +316,12 @@ export const SETTINGS_SEARCH_SOURCES = {
     exclude: new Set(['Managed Tool Errors']),
     electronOnly: true
   }, {
+    type: 'youtube-account',
+    key: 'Settings.YouTube Account Settings',
+    include: new Set(['YouTube Account Settings', 'Sign In', 'Sign Out', 'Subscribe on YouTube', 'Add to YouTube Watch History', 'Import Subscriptions']),
+    electronOnly: true,
+    capacitorSupported: true
+  }, {
     type: 'yt-dlp-streaming',
     key: 'Settings.Player Settings',
     include: YT_DLP_STREAMING_KEYS,
@@ -328,7 +334,6 @@ export const SETTINGS_SEARCH_SOURCES = {
   }, {
     type: 'experimental',
     key: 'Settings.Experimental Settings',
-    capacitorSupported: true,
     electronOnly: true
   }, {
     type: 'diagnostics',

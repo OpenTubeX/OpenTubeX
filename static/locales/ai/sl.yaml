@@ -64,13 +64,13 @@ Global:
   Posts: Objave
   New: Novo
   Counts:
-    Video Count: 1 videoposnetek | {count} videoposnetka | {count} videoposnetki | {count} videoposnetkov
-    Channel Count: 1 kanal | {count} kanala | {count} kanali | {count} kanalov
-    Subscriber Count: 1 naročnik | {count} naročnika | {count} naročniki | {count} naročnikov
-    View Count: 1 ogled | {count} ogleda | {count} ogledi | {count} ogledov
-    Like Count: 1 všeček | {count} všečka | {count} všečki | {count} všečkov
-    Comment Count: 1 komentar | {count} komentarja | {count} komentarji | {count} komentarjev
-    Watching Count: 1 gledalec | {count} gledalca | {count} gledalci | {count} gledalcev
+    Video Count: '{count} videoposnetek | {count} videoposnetka | {count} videoposnetki | {count} videoposnetkov'
+    Channel Count: '{count} kanal | {count} kanala | {count} kanali | {count} kanalov'
+    Subscriber Count: '{count} naročnik | {count} naročnika | {count} naročniki | {count} naročnikov'
+    View Count: '{count} ogled | {count} ogleda | {count} ogledi | {count} ogledov'
+    Like Count: '{count} všeček | {count} všečka | {count} všečki | {count} všečkov'
+    Comment Count: '{count} komentar | {count} komentarja | {count} komentarji | {count} komentarjev'
+    Watching Count: '{count} gledalec | {count} gledalca | {count} gledalci | {count} gledalcev'
   Show Blocked Item: Prikaži blokiran element
 Search Bar:
   Use Suggestion: Uporabi predlog
@@ -198,6 +198,12 @@ Home Page:
   All sections hidden: Vsi razdelki so skriti
   All sections hidden description: Prilagodite domačo stran, da znova prikažete razdelek.
 Subscriptions:
+  Channel Errors:
+    Summary: "{count} kanala ni bilo mogoče osvežiti. | {count} kanalov ni bilo mogoče osvežiti. | {count} kanalov ni bilo mogoče osvežiti. | {count} kanalov ni bilo mogoče osvežiti."
+    Toast: "Nekaterih naročenih kanalov ni bilo mogoče osvežiti. Kliknite za ogled."
+    Retry Channel: "Poskusi znova: {channel}"
+    Show All: "Pokaži vse"
+    Show Fewer: "Pokaži manj"
   Cache Load Error: Shranjenih virov naročnin ni bilo mogoče naložiti.
   New video from {channel}: Nov videoposnetek kanala {channel}
   New short from {channel}: Nov posnetek Shorts kanala {channel}
@@ -205,8 +211,6 @@ Subscriptions:
   New post from {channel}: Nova objava kanala {channel}
   Mark As Unseen: Označi kot nevideno
   Copy Error Details: "Kopiraj tehnične podrobnosti"
-  Refresh Errors: "Kanali, ki jih ni bilo mogoče osvežiti: {channels}. Kliknite za ogled podrobnosti."
-  Refresh Error Channels More: "{channels} in še {count} | {channels} in še {count} | {channels} in še {count} | {channels} in še {count}"
   Never show {type} from this channel in feeds again: Nikoli več ne prikazuj vsebine vrste {type} s tega kanala v virih
   Empty Posts: Kanali, na katere ste naročeni, trenutno nimajo objav.
   Load More Posts: Naloži več objav
@@ -218,7 +222,7 @@ Subscriptions:
   Refreshing Subscription Posts: Osveževanje objav iz naročnin
   New Content: Nova vsebina
   New Feed Refresh Warning Title: Želite osvežiti vse vire naročnin?
-  New Feed Refresh Warning: Osveževanje vseh vrst vsebine brez RSS za 1 naročnino lahko traja dolgo. Ali želite nadaljevati? | Osveževanje vseh vrst vsebine brez RSS za {count} naročnini lahko traja dolgo. Ali želite nadaljevati? | Osveževanje vseh vrst vsebine brez RSS za {count} naročnine lahko traja dolgo. Ali želite nadaljevati? | Osveževanje vseh vrst vsebine brez RSS za {count} naročnin lahko traja dolgo. Ali želite nadaljevati?
+  New Feed Refresh Warning: Osveževanje vseh vrst vsebine za {count} naročnino lahko traja dolgo. Ali želite nadaljevati? | Osveževanje vseh vrst vsebine za {count} naročnini lahko traja dolgo. Ali želite nadaljevati? | Osveževanje vseh vrst vsebine za {count} naročnine lahko traja dolgo. Ali želite nadaljevati? | Osveževanje vseh vrst vsebine za {count} naročnin lahko traja dolgo. Ali želite nadaljevati?
   New Since Last Refresh: Novo od zadnje osvežitve
   Mark As Seen: Označi kot videno
   Mark All as Seen: Označi vse kot videno
@@ -241,7 +245,7 @@ Subscriptions:
     Feed Already Followed: Ta vir že spremljate.
     Feed Could Not Be Loaded: Vira ni bilo mogoče naložiti. Preverite, ali naslov kaže na vir RSS ali Atom.
     Feed Requires Browser Check: To spletno mesto zahteva preverjanje brskalnika, ki ga OpenTubeX ne more opraviti. Za ta vir poskusite drug naslov ali drug primerek RSSHub.
-    Refresh Errors: 1 vira ni bilo mogoče osvežiti. | {count} virov ni bilo mogoče osvežiti. | {count} virov ni bilo mogoče osvežiti. | {count} virov ni bilo mogoče osvežiti.
+    Refresh Errors: '{count} vira ni bilo mogoče osvežiti. | {count} virov ni bilo mogoče osvežiti. | {count} virov ni bilo mogoče osvežiti. | {count} virov ni bilo mogoče osvežiti.'
     Description: Dodajte vir RSS ali Atom, če želite spremljati ustvarjalce z drugih platform. Primerki {rssHub} ponujajo vire za številna spletna mesta, na primer Twitch.
     Empty Items: Vaši viri trenutno nimajo nobenih elementov.
     No Feeds: Ne spremljate še nobenega vira RSS.
@@ -259,12 +263,34 @@ Subscriptions:
       Optional Parameter: '{parameter} (izbirno)'
       Not Set: Ni nastavljeno
     Retry Feed: Poskusi znova naložiti {feed}
+    Reloading Feed: Ponovno nalaganje {feed}
+  Platforms:
+    Tab: Platforme
+    Platform: Platforma
+    All Platforms: Vse platforme
+    Followed Channels: Spremljani kanali na drugih platformah
+    Description: Spremljajte kanale na platformah Twitch, SoundCloud, PeerTube, Rumble in Odysee, da boste njihove objave videli na zavihku Platforme med svojimi naročninami. Kanale poiščite z iskanjem ali jih dodajte z naslovom njihove strani. Njihove vsebine se predvajajo z yt-dlp.
+    Add Channel: Dodaj kanal
+    Channel URL: Naslov kanala
+    Invalid Channel: Vnesite naslov strani kanala na platformi Twitch, SoundCloud, PeerTube, Rumble ali Odysee.
+    Channel Not Found: Na tem naslovu ni kanala.
+    Channel Already Followed: Ta kanal že spremljate.
+    Channel Could Not Be Loaded: Kanala ni bilo mogoče naložiti.
+    No Channels: Ne spremljate še nobenega kanala na drugih platformah.
+    Unfollow Channel: Prenehaj spremljati {channel}
+    Go To Channel: Pojdi na kanal {channel}
+    Follow: Spremljaj
+    Following: Spremljate
+    Clips: Izrezki
+    Refresh Errors: '{count} kanala ni bilo mogoče osvežiti. | {count} kanalov ni bilo mogoče osvežiti. | {count} kanalov ni bilo mogoče osvežiti. | {count} kanalov ni bilo mogoče osvežiti.'
+    Content Tabs: Zavihki vsebine platform
 Trending:
   Music: Glasba
   Trending Tabs: Zavihki priljubljene vsebine
   Load Error: Priljubljene vsebine ni bilo mogoče naložiti.
   Unsupported Backend: Priljubljena vsebina zahteva Local API. Izberite Local API ali omogočite nadomestno zaledje.
 Most Popular Feed Empty: Vir »Najbolj priljubljeno« tega primerka Invidious je prazen.
+Most Popular Load Error: "Vira »Najbolj priljubljeno« ni bilo mogoče naložiti."
 Feed:
   Cancel Refresh: Prekliči osveževanje
   Feed Last Updated: 'Vir {feedName} je bil nazadnje posodobljen: {date}'
@@ -325,8 +351,8 @@ User Playlists:
   Export Playlist: Izvozi ta seznam predvajanja
   Export list of URLs: Izvozi seznam URL-jev
   The playlist has been successfully exported: Seznam predvajanja je uspešno izvožen
-  Are you sure you want to remove {playlistItemCount} duplicate videos from this playlist? This cannot be undone: Ali res želite s tega seznama predvajanja odstraniti 1 podvojen videoposnetek? Tega ni mogoče razveljaviti. | Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} podvojena videoposnetka? Tega ni mogoče razveljaviti. | Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} podvojene videoposnetke? Tega ni mogoče razveljaviti. | Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} podvojenih videoposnetkov? Tega ni mogoče razveljaviti.
-  Are you sure you want to remove {playlistItemCount} watched videos from this playlist? This cannot be undone: Ali res želite s tega seznama predvajanja odstraniti 1 ogledan videoposnetek? Tega ni mogoče razveljaviti. | Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} ogledana videoposnetka? Tega ni mogoče razveljaviti. | Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} ogledane videoposnetke? Tega ni mogoče razveljaviti. | Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} ogledanih videoposnetkov? Tega ni mogoče razveljaviti.
+  Are you sure you want to remove {playlistItemCount} duplicate videos from this playlist? This cannot be undone: Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} podvojen videoposnetek? Tega ni mogoče razveljaviti. | Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} podvojena videoposnetka? Tega ni mogoče razveljaviti. | Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} podvojene videoposnetke? Tega ni mogoče razveljaviti. | Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} podvojenih videoposnetkov? Tega ni mogoče razveljaviti.
+  Are you sure you want to remove {playlistItemCount} watched videos from this playlist? This cannot be undone: Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} ogledan videoposnetek? Tega ni mogoče razveljaviti. | Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} ogledana videoposnetka? Tega ni mogoče razveljaviti. | Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} ogledane videoposnetke? Tega ni mogoče razveljaviti. | Ali res želite s tega seznama predvajanja odstraniti {playlistItemCount} ogledanih videoposnetkov? Tega ni mogoče razveljaviti.
   Delete Playlist: Izbriši seznam predvajanja
   Cannot delete the quick bookmark target playlist.: Ciljnega seznama predvajanja za hitri zaznamek ni mogoče izbrisati.
   Are you sure you want to delete this playlist? This cannot be undone: Ali res želite izbrisati ta seznam predvajanja? Tega ni mogoče razveljaviti.
@@ -359,24 +385,24 @@ User Playlists:
       Playlist name cannot be empty. Please input a name.: Ime seznama predvajanja ne sme biti prazno. Vnesite ime.
       Playlist has been updated.: Seznam predvajanja je posodobljen.
       There was an issue with updating this playlist.: Pri posodabljanju seznama predvajanja je prišlo do težave.
-      '{videoCount} video(s) have been removed': Odstranjen je bil 1 videoposnetek | Odstranjena sta bila {videoCount} videoposnetka | Odstranjeni so bili {videoCount} videoposnetki | Odstranjenih je bilo {videoCount} videoposnetkov
+      '{videoCount} video(s) have been removed': Odstranjen je bil {videoCount} videoposnetek | Odstranjena sta bila {videoCount} videoposnetka | Odstranjeni so bili {videoCount} videoposnetki | Odstranjenih je bilo {videoCount} videoposnetkov
       There were no videos to remove.: Ni bilo videoposnetkov za odstranitev.
       This playlist is protected and cannot be removed.: Ta seznam predvajanja je zaščiten in ga ni mogoče odstraniti.
       Playlist {playlistName} has been deleted.: Seznam predvajanja {playlistName} je izbrisan.
       This playlist does not exist: Ta seznam predvajanja ne obstaja
       This playlist has a video with a duration error: Ta seznam predvajanja vsebuje vsaj en videoposnetek brez podatka o trajanju. Pri razvrščanju bo njegovo trajanje obravnavano kot nič.
   AddVideoPrompt:
-    Select a playlist to add your N videos to: Izberite seznam predvajanja, na katerega želite dodati videoposnetek | Izberite seznam predvajanja, na katerega želite dodati {videoCount} videoposnetka | Izberite seznam predvajanja, na katerega želite dodati {videoCount} videoposnetke | Izberite seznam predvajanja, na katerega želite dodati {videoCount} videoposnetkov
+    Select a playlist to add your N videos to: Izberite seznam predvajanja, na katerega želite dodati {videoCount} videoposnetek | Izberite seznam predvajanja, na katerega želite dodati {videoCount} videoposnetka | Izberite seznam predvajanja, na katerega želite dodati {videoCount} videoposnetke | Izberite seznam predvajanja, na katerega želite dodati {videoCount} videoposnetkov
     N playlists selected: 'Izbranih seznamov: {playlistCount}'
     Search in Playlists: Išči po seznamih predvajanja
     Allow Adding Duplicate Video(s): Dovoli dodajanje podvojenih videoposnetkov
     Save: Shrani
-    Added {count} Times: Dodano enkrat | Dodano {count}-krat | Dodano {count}-krat | Dodano {count}-krat
+    Added {count} Times: Dodano {count}-krat | Dodano {count}-krat | Dodano {count}-krat | Dodano {count}-krat
     '{videoCount}/{totalVideoCount} Videos Will Be Added': 'Dodanih bo {videoCount}/{totalVideoCount} videoposnetkov'
     '{videoCount}/{totalVideoCount} Videos Already Added': 'Že dodanih: {videoCount}/{totalVideoCount} videoposnetkov'
     Toast:
       You haven't selected any playlist yet.: Izbrali niste še nobenega seznama predvajanja.
-      Video(s) added to {playlistCount} playlists: Videoposnetki so dodani na 1 seznam predvajanja | Videoposnetki so dodani na {playlistCount} seznama predvajanja | Videoposnetki so dodani na {playlistCount} sezname predvajanja | Videoposnetki so dodani na {playlistCount} seznamov predvajanja
+      Video(s) added to {playlistCount} playlists: Videoposnetki so dodani na {playlistCount} seznam predvajanja | Videoposnetki so dodani na {playlistCount} seznama predvajanja | Videoposnetki so dodani na {playlistCount} sezname predvajanja | Videoposnetki so dodani na {playlistCount} seznamov predvajanja
     And N more videos: 'in še {count} videoposnetek | in še {count} videoposnetka | in še {count} videoposnetki | in še {count} videoposnetkov'
   CreatePlaylistPrompt:
     New Playlist Name: Ime novega seznama predvajanja
@@ -434,8 +460,40 @@ History:
   1 Year: 1 leto
   All Time: Ves čas
   Custom: Po meri
-  History Older Than Days Removed: Zgodovina ogledov, starejša od 1 dneva, je odstranjena | Zgodovina ogledov, starejša od {days} dni, je odstranjena | Zgodovina ogledov, starejša od {days} dni, je odstranjena | Zgodovina ogledov, starejša od {days} dni, je odstranjena
+  History Older Than Days Removed: Zgodovina ogledov, starejša od {days} dneva, je odstranjena | Zgodovina ogledov, starejša od {days} dni, je odstranjena | Zgodovina ogledov, starejša od {days} dni, je odstranjena | Zgodovina ogledov, starejša od {days} dni, je odstranjena
 Settings:
+  Experimental Badge: Eksperimentalno
+  YouTube Account Settings:
+    YouTube Account Settings: "Račun YouTube"
+    Unofficial App Warning: "OpenTubeX ni uradna aplikacija storitve YouTube. Ob prijavi se to, kar počnete tukaj, poveže z vašim Google računom, Google pa lahko omeji ali prepove račune, ki uporabljajo neuradne aplikacije. Prijavite se samo z računom, ki si ga lahko privoščite izgubiti."
+    Sign In Explanation: "OpenTubeX se prijavi kot aplikacija za televizor: prijavo odobrite na spletnem mestu Google, OpenTubeX pa nikoli ne vidi vašega gesla. Prijava ostane v tej napravi in se ne sinhronizira ali varnostno kopira."
+    Sign In: "Prijava"
+    Sign In Anyway: "Vseeno se prijavi"
+    Sign Out: "Odjava"
+    Getting Sign-In Code: "Pridobivanje kode za prijavo"
+    Sign In Instructions: "Odprite stran za prijavo in izberite svoj račun Google. Koda se izpolni samodejno."
+    Other Device Instructions: "V drugi napravi pojdite na ta naslov in vnesite kodo:"
+    YouTube Channel: "Kanal YouTube"
+    Using Channel: "YouTube zdaj uporabljate kot {name}"
+    Switch Channel Failed: "Kanala YouTube ni bilo mogoče zamenjati: {error}"
+    Open Sign-In Page: "Odpri stran za prijavo"
+    Copy Code: "Kopiraj kodo"
+    Code Copied: "Koda je kopirana"
+    Waiting for Approval: "Čakanje, da odobrite prijavo"
+    Sign-In Denied: "Prijava je bila zavrnjena."
+    Sign-In Code Expired: "Koda je potekla. Poskusite znova, da dobite novo."
+    Sign-In Failed: "Prijava ni uspela: {error}"
+    Signed In As: "V storitev YouTube ste prijavljeni kot {name}"
+    Signed Out: "Odjavljeni ste iz storitve YouTube"
+    Sign Out Failed: "Odjava ni uspela: {error}"
+    Revoke Failed: "Odjava iz YouTuba je uspela, vendar Google ni potrdil, da je prijava končana. Odstranite jo lahko med povezavami z drugimi ponudniki v svojem Google Računu."
+    Signed out by YouTube: "YouTube je končal prijavo. Za nadaljnjo uporabo računa se znova prijavite v nastavitvah."
+    Subscribe on YouTube: "Naroči se tudi v storitvi YouTube"
+    Add to YouTube Watch History: "Dodaj ogledane videoposnetke v zgodovino storitve YouTube"
+    Import Subscriptions: "Uvozi naročnine iz storitve YouTube"
+    Imported Subscriptions: "Uvožen {count} kanal | Uvožena {count} kanala | Uvoženi {count} kanali | Uvoženih {count} kanalov"
+    No Subscriptions to Import: "Ta račun YouTube nima naročnin"
+    Import Subscriptions Failed: "Naročnin ni bilo mogoče uvoziti: {error}"
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Dokler je diagnostični dnevnik vklopljen, OpenTubeX hrani nedavna sporočila dnevnika v pomnilniku, da jih lahko priložite poročilom o napakah. Nikoli jih ne shrani ali pošlje sam, izklop dnevnika pa jih izbriše. Poročila izpustijo piškotke, žetone, naslove IP in parametre URL, vendar lahko vsebujejo ID-je predvajanih videoposnetkov, zato poročilo pred deljenjem preglejte.
@@ -567,6 +625,7 @@ Settings:
       Closing Tabs: zapiranjem več zavihkov
       Loading Tabs: nalaganjem več zavihkov
       Unloading Tabs: sproščanjem več zavihkov
+      Refreshing All Feeds: osveževanjem številnih naročnin
     Open Deep Links In New Window: Odpri URL-je, posredovane aplikaciji OpenTubeX, v novem oknu
     Minimize to system tray: Pomanjšaj v sistemsko vrstico
     Remember Tab Navigation History: Zapomni si zgodovino krmarjenja po zavihkih
@@ -1408,6 +1467,12 @@ Settings:
     To: Na
     Confirm Before Unsubscribing: Zahtevaj potrditev pred odjavo
     RSS Feeds Auto Refresh Interval: Interval samodejnega osveževanja virov RSS
+    Faster Subscription Refresh: "Hitrejša osvežitev naročnin"
+    Platforms:
+      Other Platforms: Druge platforme
+      Manage Channels: Upravljaj spremljane kanale
+      Notify When Live: Obvesti, ko spremljani kanali Twitch začnejo prenos v živo
+      Auto Refresh Interval: Interval samodejnega osveževanja drugih platform
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Štej čas gledanja"
@@ -1796,7 +1861,6 @@ Settings:
     Hide Search Bar: Skrij iskalno vrstico
     Disable Channel Links: Onemogoči povezave do kanalov
   Experimental Settings:
-    Faster Subscription Refresh: "Hitrejša osvežitev naročnin"
     Experimental Settings: Poskusno
     Warning: Te nastavitve so poskusne in lahko povzročijo sesutje aplikacije. Močno priporočamo izdelavo varnostnih kopij. Uporabljate jih na lastno odgovornost!
     Replace HTTP Cache: Zamenjaj predpomnilnik HTTP
@@ -1971,7 +2035,7 @@ Channel:
     Location: Lokacija
   Posts:
     This channel currently does not have any posts: Ta kanal trenutno nima objav
-    votes: 1 glas | {votes} glasova | {votes} glasovi | {votes} glasov
+    votes: '{votes} glas | {votes} glasova | {votes} glasovi | {votes} glasov'
     View Full Post: Prikaži celotno objavo
     Reveal Answers: Prikaži odgovore
     Hide Answers: Skrij odgovore
@@ -2225,6 +2289,7 @@ Video:
     Autoplay is on: Samodejno predvajanje je vklopljeno
     Up next in {seconds}: Naslednji videoposnetek čez {seconds}
     Resize dock: Spremeni velikost plošče
+    Resize dock width: Spremeni širino plošče
     Play now: Predvajaj zdaj
     MusicPlaybackRateOverride: Zaznan je glasbeni videoposnetek, zato je hitrost predvajanja 1x
     Normal: Običajno
@@ -2394,7 +2459,7 @@ Video:
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Preostali čas zakasnitve SABR: {remindingTimeSeconds}s'
   Station: Postaja
   Playlist:
-    Unavailable videos are hidden: 1 nedostopen videoposnetek je skrit | {count} nedostopna videoposnetka sta skrita | {count} nedostopni videoposnetki so skriti | {count} nedostopnih videoposnetkov je skritih
+    Unavailable videos are hidden: '{count} nedostopen videoposnetek je skrit | {count} nedostopna videoposnetka sta skrita | {count} nedostopni videoposnetki so skriti | {count} nedostopnih videoposnetkov je skritih'
   External Media:
     Dislikes: "Negativna ocena | Negativni oceni | Negativne ocene | Negativnih ocen"
     Reposts: "Ponovna objava | Ponovni objavi | Ponovne objave | Ponovnih objav"
@@ -2504,6 +2569,7 @@ Context Menu:
   Reload Posts: Znova naloži objave
   Reload All Feeds: Znova naloži vse vire
   Reload RSS Feeds: Znova naloži vire RSS
+  Reload Platforms: Znova naloži platforme
   Close Multiple Tabs: Zapri {count} zavihek | Zapri {count} zavihka | Zapri {count} zavihke | Zapri {count} zavihkov
   Duplicate Tab: Podvoji zavihek
   Duplicate Multiple Tabs: Podvoji {count} zavihek | Podvoji {count} zavihka | Podvoji {count} zavihke | Podvoji {count} zavihkov
@@ -2623,13 +2689,13 @@ Chapters:
   Sync to Video Time: 'Sinhroniziraj s časom videoposnetka'
 Comments:
   Image unavailable: "Slika ni na voljo"
-  Comment Count: 1 komentar | {count} komentarja | {count} komentarji | {count} komentarjev
+  Comment Count: '{count} komentar | {count} komentarja | {count} komentarji | {count} komentarjev'
   Show Comments: Prikaži komentarje
   Getting comment replies, please wait: Pridobivanje odgovorov na komentar. Počakajte …
   Reload Comments: Znova naloži komentarje
-  Reply Count: 1 odgovor | {replyCount} odgovora | {replyCount} odgovori | {replyCount} odgovorov
-  View {replyCount} replies: Prikaži 1 odgovor | Prikaži {replyCount} odgovora | Prikaži {replyCount} odgovore | Prikaži {replyCount} odgovorov
-  Hide {replyCount} replies: Skrij 1 odgovor | Skrij {replyCount} odgovora | Skrij {replyCount} odgovore | Skrij {replyCount} odgovorov
+  Reply Count: '{replyCount} odgovor | {replyCount} odgovora | {replyCount} odgovori | {replyCount} odgovorov'
+  View {replyCount} replies: Prikaži {replyCount} odgovor | Prikaži {replyCount} odgovora | Prikaži {replyCount} odgovore | Prikaži {replyCount} odgovorov
+  Hide {replyCount} replies: Skrij {replyCount} odgovor | Skrij {replyCount} odgovora | Skrij {replyCount} odgovore | Skrij {replyCount} odgovorov
   View 1 reply from {channelName}: Prikaži 1 odgovor kanala {channelName}
   View {replyCount} replies from {channelName} and others: Prikaži {replyCount} odgovorov kanala {channelName} in drugih
   There are no comments available for this post: Za to objavo ni komentarjev
@@ -2650,7 +2716,7 @@ Comments:
   Highlighted comment: Poudarjen komentar
   Highlighted reply: Poudarjen odgovor
   Search loaded comments: Išči po naloženih komentarjih
-  Loaded comment search result count: 1 od {total} naloženih komentarjev | {count} od {total} naloženih komentarjev | {count} od {total} naloženih komentarjev | {count} od {total} naloženih komentarjev
+  Loaded comment search result count: '{count} od {total} naloženih komentarjev | {count} od {total} naloženih komentarjev | {count} od {total} naloženih komentarjev | {count} od {total} naloženih komentarjev'
   No loaded comments match your filters: Noben naložen komentar ne ustreza vašim filtrom
   YouTube comment link copied to clipboard: Povezava do komentarja v YouTubu je kopirana v odložišče
   Translate to {language}: Prevedi v jezik {language}
@@ -2668,6 +2734,9 @@ Description:
   Games: Igre
   Music: Glasba
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Naročanje na kanal ali preklic naročnine v OpenTubeX enako stori tudi v vašem računu YouTube."
+    Add to YouTube Watch History: "Videoposnetki, ki jih predvajate, se dodajo v vašo zgodovino predvajanj v storitvi YouTube, zato se priporočila YouTube učijo iz njih. Ko je zgodovina v storitvi YouTube začasno zaustavljena, se ne doda nič."
   General Settings:
     Built-in Streams: |
       Samodejni način predvaja večino videoposnetkov prek YouTubovega odjemalca visionOS, ki se zažene hitreje in podpira samodejno kakovost. Prenosi v živo in videoposnetki, ki jih ne more predvajati, uporabljajo SABR.
@@ -2691,6 +2760,7 @@ Tooltips:
       Pri uporabi yt-dlp lahko traja dlje, da se videoposnetki začnejo predvajati.
     Avoid translation: |
       Onemogoči YouTubov samodejni prevod naslova, opisa in poglavij videoposnetka.
+      Možnost »Celotna aplikacija« prikaže tudi imena in opise kanalov v izvirnem jeziku.
       Preveč zahtev, na primer pridobivanje naslovov videoposnetkov na seznamih, lahko začasno
       vpliva na zanesljivost aplikacije.
     Fallback to Non-Preferred Backend on Failure: Če ima prednostni API težavo, bo OpenTubeX ob vklopljeni možnosti samodejno poskusil uporabiti neprednostni API kot nadomestni način.
@@ -2800,8 +2870,11 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Osvežuje vire z izbranimi nastavitvami. Na računalniku OpenTubeX ostane v sistemski vrstici do izhoda. Android določa čas osveževanja v ozadju."
     Notify About New Uploads: Prikazuje sistemska obvestila v tej napravi za kanale, ki ste jim obvestila vklopili v njihovih nastavitvah naročnine. OpenTubeX preveri novo vsebino ob osvežitvi naročnin, zato izberite interval samodejnega osveževanja. Če želite prejemati obvestila tudi, ko je aplikacija zaprta, vklopite še osveževanje, ko je aplikacija zaprta.
     RSS Feeds Auto Refresh Interval: Kako pogosto OpenTubeX samodejno osveži vaše vire RSS, ko je aplikacija odprta.
+    Faster Subscription Refresh: "Najprej preveri vir RSS vsakega kanala in naloži videoposnetke, Shorts in prenose v živo samo s kanalov z novimi naloženimi vsebinami. Samodejne osvežitve preskočijo tudi kanale, naložene v zadnjih 10 minutah. Pri kanalih brez novih vsebin se število ogledov, odstranjeni videoposnetki in spremenjeni naslovi posodobijo le vsakih nekaj ur, nove vsebine pa se lahko prikažejo pozneje, ko vir RSS zaostaja. Ni na voljo z API-jem Invidious."
+    Platforms Auto Refresh Interval: Kako pogosto OpenTubeX samodejno osveži kanale, ki jih spremljate na drugih platformah, ko je aplikacija odprta.
+    Twitch Notify When Live: Obvesti vas, ko eden od kanalov Twitch, ki jih spremljate, začne oddajati. OpenTubeX preverja vsakih nekaj minut, ko je odprt, in tudi ko je zaprt, če takrat osvežuje naročnine.
   Theme Settings:
-    Only Show Important Notifications: Skrije obvestila v aplikaciji, ki le potrdijo dejanje ali sporočijo stanje. Napake, opozorila, opomniki, ki ste jih nastavili, in obvestila, ki ponujajo dejanje, na primer Razveljavi, se še vedno prikažejo. Napredek opravil v ozadju, na primer osveževanja naročnin, je namesto v obvestilu prikazan v splošni vrstici napredka. Sistemska obvestila niso prizadeta.
+    Only Show Important Notifications: Skrije obvestila v aplikaciji, ki le potrdijo dejanje ali sporočijo stanje, vključno s tistimi, ki ponujajo Razveljavi. Napake, opozorila, opomniki, ki ste jih nastavili, in obvestila, ki zahtevajo odločitev, na primer pozivi k posodobitvi, se še vedno prikažejo. Napredek opravil v ozadju, na primer osveževanja naročnin, je namesto v obvestilu prikazan v splošni vrstici napredka. Sistemska obvestila niso prizadeta.
     Visible Search Suggestions: "Določa, koliko vnosov zgodovine iskanja in predlogov prikaže iskalna vrstica, preden se njen seznam začne pomikati. Seznam nikoli ne sega čez spodnji rob okna."
     Thumbnail Size: "Spremeni velikost sličic videoposnetkov v mrežah in seznamih. Mreže s fiksnim številom stolpcev ali pogled Polna širina namesto tega zapolnijo vsako vrstico, zato tam spremeni le sličice seznamov in Shorts. V oknih velikosti telefona so sličice mreže omejene na 100 %."
     Playlist Thumbnail Size: "Spremeni velikost sličic videoposnetkov na straneh seznamov predvajanja. Mreže s fiksnim številom stolpcev ali pogled Polna širina namesto tega zapolnijo vsako vrstico, zato tam spremeni le sličice seznamov in Shorts. V oknih velikosti telefona so sličice mreže omejene na 100 %."
@@ -2815,7 +2888,6 @@ Tooltips:
     Modal Backdrop: "Določa, kako je videti aplikacija za pogovornimi okni in meniji. Zabrisanje je lahko na manj zmogljivih napravah počasno."
     Click Scrollbar Track to Scroll: "Klik na drsnik zunaj njegove ročice pomakne vsebino za približno eno stran v smeri klika. Dokler je to vklopljeno, viden drsnik prestreže klike, namenjene elementom pod njim. Drsnik vrstice z zavihki vedno deluje tako."
   Experimental Settings:
-    Faster Subscription Refresh: "Najprej preveri vir RSS vsakega kanala in naloži videoposnetke, Shorts in prenose v živo samo s kanalov z novimi naloženimi vsebinami. Samodejne osvežitve preskočijo tudi kanale, naložene v zadnjih 10 minutah. Pri kanalih brez novih vsebin se število ogledov, odstranjeni videoposnetki in spremenjeni naslovi posodobijo le vsakih nekaj ur, nove vsebine pa se lahko prikažejo pozneje, ko vir RSS zaostaja. Ni na voljo z API-jem Invidious."
     Replace HTTP Cache: Onemogoči Electronov predpomnilnik HTTP na disku in omogoči prilagojen predpomnilnik slik v pomnilniku. Poraba pomnilnika RAM bo večja.
     Disable Hardware Acceleration: Onemogoči strojno pospeševanje GPU. Lahko odpravi grafične težave, vendar bo verjetno zmanjšalo zmogljivost.
   SponsorBlock Settings:
@@ -2837,7 +2909,7 @@ Screenshot Error: Zajem zaslona ni uspel. {error}
 Screenshot Clipboard Error: Kopiranje posnetka zaslona v odložišče ni uspelo
 Channel Hidden: '{channel} je dodan v filter kanalov'
 Channel Unhidden: '{channel} je odstranjen iz filtra kanalov'
-Trimmed input must be at least N characters long: Vnos brez okoliških presledkov mora biti dolg najmanj 1 znak | Vnos brez okoliških presledkov mora biti dolg najmanj {length} znaka | Vnos brez okoliških presledkov mora biti dolg najmanj {length} znake | Vnos brez okoliških presledkov mora biti dolg najmanj {length} znakov
+Trimmed input must be at least N characters long: Vnos brez okoliških presledkov mora biti dolg najmanj {length} znak | Vnos brez okoliških presledkov mora biti dolg najmanj {length} znaka | Vnos brez okoliških presledkov mora biti dolg najmanj {length} znake | Vnos brez okoliških presledkov mora biti dolg najmanj {length} znakov
 Tag already exists: Oznaka »{tagName}« že obstaja
 Hashtag:
   Hashtag: Ključnik
@@ -3024,7 +3096,7 @@ Downloads:
   Download Missing: Prenos ni na voljo
   Files Missing: Prenesena datoteka ni več na voljo v datotečnem sistemu. | Preneseni datoteki nista več na voljo v datotečnem sistemu. | Prenesene datoteke niso več na voljo v datotečnem sistemu. | Prenesene datoteke niso več na voljo v datotečnem sistemu.
   Files Available: 'Na voljo je {available} od {total} prenesenih datotek.'
-  More Files: Še 1 datoteka | Še {count} datoteki | Še {count} datoteke | Še {count} datotek
+  More Files: Še {count} datoteka | Še {count} datoteki | Še {count} datoteke | Še {count} datotek
   Template Used: 'Predloga: {name}'
   Download Type: Vrsta prenosa
   Template: Predloga
@@ -3272,3 +3344,31 @@ Notification Center:
   Clear: "Počisti"
   Empty: "Še ni obvestil"
   Empty Hint: "Tukaj bodo prikazani opomniki za prenose v živo in novi posnetki kanalov z vklopljenimi obvestili."
+Platforms:
+  Tracks: Skladbe
+  Playlists: Seznami predvajanja
+  Follower Count: '{count} sledilec | {count} sledilca | {count} sledilci | {count} sledilcev'
+  Open Website: Odpri v {platform}
+  Channel Not Found: Tega kanala ni bilo mogoče najti.
+  Playlist Not Found: Tega seznama predvajanja ni bilo mogoče najti.
+  Load Error: Te strani ni bilo mogoče naložiti s platforme {platform}.
+  Empty Tab: Tukaj še ni ničesar.
+YouTube Account:
+  Like: "Všeč mi je"
+  Dislike: "Ni mi všeč"
+  Rating Failed: "Ocenjevanje v storitvi YouTube ni uspelo: {error}"
+  Subscribe Failed: "Naročanje v storitvi YouTube ni uspelo: {error}"
+  Unsubscribe Failed: "Preklic naročnine v storitvi YouTube ni uspel: {error}"
+  Add a comment: "Dodajte komentar"
+  Add a reply: "Dodajte odgovor"
+  Comment: "Komentiraj"
+  Reply: "Odgovori"
+  Comment Posted: "Komentar je objavljen"
+  Reply Posted: "Odgovor je objavljen"
+  Comment Failed: "Komentarja ni bilo mogoče objaviti: {error}"
+  Delete Comment: "Izbriši komentar"
+  Delete Comment Confirmation: "Želite izbrisati svoj komentar iz storitve YouTube?"
+  Comment Deleted: "Komentar je izbrisan"
+  Delete Comment Failed: "Komentarja ni bilo mogoče izbrisati: {error}"
+  Recommendations: "Priporočila YouTube"
+  Recommendations Failed: "Vaših priporočil YouTube ni bilo mogoče naložiti."

@@ -123,6 +123,11 @@ export async function openPagedPlaylist({ app, page }, { videoCount, playableInd
 
   const panel = page.locator('.watchVideoPlaylist')
   await expect(panel.locator('.playlistItem').first()).toBeAttached()
+  // Narrower windows, such as at larger UI scales, put the panel below the
+  // player. Show all of it, so the rows the list scrolls to are in the window.
+  // Its loading skeleton fades out first, which can move it.
+  await expect(panel).toHaveCount(1)
+  await panel.evaluate(element => element.scrollIntoView({ block: 'nearest' }))
   return { watch, panel, requestedPages }
 }
 

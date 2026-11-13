@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: 所有區塊均已隱藏
   All sections hidden description: 自訂首頁以重新顯示區塊。
 Subscriptions:
+  Channel Errors:
+    Summary: "{count} 個頻道無法重新整理。"
+    Toast: "部分已訂閱頻道無法重新整理。點擊以檢視。"
+    Retry Channel: "重試 {channel}"
+    Show All: "顯示全部"
+    Show Fewer: "顯示較少"
   Cache Load Error: 無法載入已儲存的訂閱內容動態。
   New video from {channel}: "{channel} 發布了新影片"
   New short from {channel}: "{channel} 發布了新短片"
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: "{channel} 發布了新貼文"
   Mark As Unseen: 標記為未看過
   Copy Error Details: "複製技術詳細資訊"
-  Refresh Errors: "無法重新整理的頻道：{channels}。點擊查看詳細資訊。"
-  Refresh Error Channels More: "{channels} 以及其他 {count} 個頻道"
   Never show {type} from this channel in feeds again: 不再於動態中顯示此頻道的{type}
   Refreshing Subscription Videos: 正在重新整理訂閱影片
   Refreshing Subscription Shorts: 正在重新整理訂閱的 Shorts 短片
@@ -177,7 +181,7 @@ Subscriptions:
   Refreshing Subscription Posts: 正在重新整理訂閱貼文
   New Content: 新內容
   New Feed Refresh Warning Title: 要重新整理所有訂閱動態消息嗎？
-  New Feed Refresh Warning: 為 {count} 個訂閱重新整理所有未使用 RSS 的內容類型可能需要很長時間。要繼續嗎？
+  New Feed Refresh Warning: 為 {count} 個訂閱重新整理所有內容類型可能需要很長時間。要繼續嗎？
   New Since Last Refresh: 上次重新整理後的新內容
   Mark As Seen: 標示為已看過
   Mark All as Seen: 全部標示為已看過
@@ -216,11 +220,33 @@ Subscriptions:
       Optional Parameter: '{parameter}（選用）'
       Not Set: 未設定
     Retry Feed: 重試 {feed}
+    Reloading Feed: 正在重新載入 {feed}
+  Platforms:
+    Tab: 平台
+    Platform: 平台
+    All Platforms: 所有平台
+    Followed Channels: 在其他平台上追隨的頻道
+    Description: 追隨 Twitch、SoundCloud、PeerTube、Rumble 和 Odysee 上的頻道，即可在訂閱內容的「平台」分頁中查看其上傳內容。您可以透過搜尋尋找頻道，或以頻道頁面的網址新增。其媒體會使用 yt-dlp 播放。
+    Add Channel: 新增頻道
+    Channel URL: 頻道網址
+    Invalid Channel: 請輸入 Twitch、SoundCloud、PeerTube、Rumble 或 Odysee 上頻道頁面的網址。
+    Channel Not Found: 這個網址沒有頻道。
+    Channel Already Followed: 您已追隨這個頻道。
+    Channel Could Not Be Loaded: 無法載入頻道。
+    No Channels: 您尚未追隨其他平台上的任何頻道。
+    Unfollow Channel: 取消追隨 {channel}
+    Go To Channel: 前往 {channel}
+    Follow: 追隨
+    Following: 追隨中
+    Clips: 剪輯
+    Refresh Errors: '{count} 個頻道無法重新整理。'
+    Content Tabs: 平台內容分頁
 Trending:
   Music: 音樂
   Load Error: 無法載入熱門趨勢。
   Unsupported Backend: 熱門趨勢需要 Local API。請選擇 Local API 或啟用後端備援。
 Most Popular Feed Empty: 此 Invidious 伺服器的「最熱門」動態消息沒有內容。
+Most Popular Load Error: "無法載入「最熱門」動態消息。"
 Feed:
   Cancel Refresh: 取消重新整理
   Next Auto Refresh: '下次自動重新整理：{date}'
@@ -307,8 +333,38 @@ History:
   Custom: 自訂
   History Older Than Days Removed: 已移除超過 {days} 天的觀看記錄
 Settings:
-  Experimental Settings:
-    Faster Subscription Refresh: "更快的訂閱重新整理"
+  Experimental Badge: 實驗性
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube 帳戶"
+    Unofficial App Warning: "OpenTubeX 不是 YouTube 官方應用程式。登入後，您在這裡的操作會與您的 Google 帳戶連結，Google 可能會限制或停用使用非官方應用程式的帳戶。請只使用您能承受失去的帳戶登入。"
+    Sign In Explanation: "OpenTubeX 會像電視應用程式一樣登入：您在 Google 網站上核准登入，OpenTubeX 永遠不會看到您的密碼。登入資訊只會保留在這部裝置上，不會同步或備份。"
+    Sign In: "登入"
+    Sign In Anyway: "仍要登入"
+    Sign Out: "登出"
+    Getting Sign-In Code: "正在取得登入代碼"
+    Sign In Instructions: "開啟登入頁面並選擇您的 Google 帳戶。代碼會自動填入。"
+    Other Device Instructions: "在另一部裝置上前往此網址並輸入代碼："
+    YouTube Channel: "YouTube 頻道"
+    Using Channel: "現在以 {name} 的身分使用 YouTube"
+    Switch Channel Failed: "無法切換 YouTube 頻道：{error}"
+    Open Sign-In Page: "開啟登入頁面"
+    Copy Code: "複製代碼"
+    Code Copied: "已複製代碼"
+    Waiting for Approval: "正在等待您核准登入"
+    Sign-In Denied: "登入要求遭到拒絕。"
+    Sign-In Code Expired: "代碼已過期。請再試一次以取得新代碼。"
+    Sign-In Failed: "無法登入：{error}"
+    Signed In As: "已用 {name} 的身分登入 YouTube"
+    Signed Out: "已登出 YouTube"
+    Sign Out Failed: "無法登出：{error}"
+    Revoke Failed: "已登出 YouTube，但 Google 未確認登入已結束。您可以在 Google 帳戶的第三方連結中將其移除。"
+    Signed out by YouTube: "YouTube 已結束登入。請在設定中重新登入，以繼續使用您的帳戶。"
+    Subscribe on YouTube: "同時在 YouTube 上訂閱"
+    Add to YouTube Watch History: "將看過的影片加入 YouTube 觀看紀錄"
+    Import Subscriptions: "從 YouTube 匯入訂閱內容"
+    Imported Subscriptions: "已匯入 {count} 個頻道"
+    No Subscriptions to Import: "這個 YouTube 帳戶沒有任何訂閱內容"
+    Import Subscriptions Failed: "無法匯入訂閱內容：{error}"
   Diagnostics:
     Diagnostics: 診斷
     Description: 啟用診斷記錄後，OpenTubeX 會在記憶體中保留最近的記錄訊息，方便你將其附加到錯誤回報中。它絕不會自行儲存或傳送這些訊息，關閉記錄會將其刪除。報告不包含 Cookie、權杖、IP 位址和 URL 參數，但可能包含你播放過的影片 ID，因此分享前請檢查報告。
@@ -443,6 +499,7 @@ Settings:
       Closing Tabs: 關閉多個分頁
       Loading Tabs: 載入多個分頁
       Unloading Tabs: 卸載多個分頁
+      Refreshing All Feeds: 重新整理大量訂閱
     Remember Tab Navigation History: 記住分頁瀏覽記錄
     New Tab Position:
       New Tab Position: 新分頁位置
@@ -1174,6 +1231,12 @@ Settings:
     Refresh Subscriptions While App Is Closed: "應用程式關閉時重新整理訂閱"
     Notify About New Uploads: 新上傳通知
     RSS Feeds Auto Refresh Interval: RSS 摘要自動重新整理間隔
+    Faster Subscription Refresh: "更快的訂閱重新整理"
+    Platforms:
+      Other Platforms: 其他平台
+      Manage Channels: 管理追隨的頻道
+      Notify When Live: 追隨的 Twitch 頻道開始直播時通知
+      Auto Refresh Interval: 其他平台自動重新整理間隔
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "觀看時間統計範圍"
@@ -1785,6 +1848,7 @@ Video:
     Auto-generated Caption Template: '{language}（自動產生）'
     Up next in {seconds}: 將於 {seconds} 秒後接著播放
     Resize dock: 調整停駐區大小
+    Resize dock width: 調整停駐區寬度
     Play now: 立即播放
     MusicPlaybackRateOverride: 偵測到音樂影片，正以 1 倍速播放
     Normal: 一般
@@ -2022,6 +2086,7 @@ Context Menu:
   Reload Posts: 重新載入貼文
   Reload All Feeds: 重新載入所有動態消息
   Reload RSS Feeds: 重新載入 RSS 訂閱源
+  Reload Platforms: 重新載入平台
   Close Multiple Tabs: 關閉 {count} 個分頁
   Duplicate Tab: 複製分頁
   Duplicate Multiple Tabs: 複製 {count} 個分頁
@@ -2174,8 +2239,9 @@ Description:
   Games: 遊戲
   Music: 音樂
 Tooltips:
-  Experimental Settings:
-    Faster Subscription Refresh: "先檢查每個頻道的 RSS 資訊提供，只載入有新上傳內容的頻道的影片、Shorts 和直播。自動重新整理也會略過過去 10 分鐘內載入過的頻道。對於沒有新上傳內容的頻道，觀看次數、已移除的影片和變更的標題每隔幾小時才會更新一次，而且當 RSS 資訊提供延遲時，新上傳的內容可能會較晚出現。使用 Invidious API 時無法使用。"
+  YouTube Account Settings:
+    Subscribe on YouTube: "在 OpenTubeX 中訂閱或取消訂閱頻道時，您的 YouTube 帳戶也會執行相同操作。"
+    Add to YouTube Watch History: "您播放的影片會加入您的 YouTube 觀看紀錄，讓 YouTube 的推薦內容從中學習。在 YouTube 上暫停觀看紀錄時，不會加入任何內容。"
   General Settings:
     Built-in Streams: |
       自動模式透過 YouTube 的 visionOS 用戶端播放大多數影片，啟動更快並支援自動畫質。直播和它無法播放的影片會使用 SABR。
@@ -2199,6 +2265,7 @@ Tooltips:
       使用 yt-dlp 時，影片可能需要更久才會開始播放。
     Avoid translation: |
       停用 YouTube 自動翻譯影片標題、說明與章節的功能。
+      選擇「整個應用程式」時，頻道名稱與說明也會以原始語言顯示。
       提出過多請求（例如擷取多份清單中的影片標題）可能會暫時
       影響應用程式的穩定性。
     Show Thumbnail Previews: 將滑鼠游標停在影片縮圖上時顯示動畫預覽。
@@ -2286,8 +2353,11 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "使用所選設定重新整理訂閱。在桌面版，OpenTubeX 會留在系統匣中，直到您結束程式。Android 系統決定背景重新整理的執行時間。"
     Notify About New Uploads: 在此裝置上為你在訂閱設定中開啟了通知的頻道顯示系統通知。OpenTubeX 會在重新整理訂閱時檢查新內容，因此請選擇自動重新整理間隔。若要在應用程式關閉時也收到通知，請同時啟用應用程式關閉時重新整理訂閱。
     RSS Feeds Auto Refresh Interval: 應用程式開啟時 OpenTubeX 自動重新整理 RSS 摘要的頻率。
+    Faster Subscription Refresh: "先檢查每個頻道的 RSS 資訊提供，只載入有新上傳內容的頻道的影片、Shorts 和直播。自動重新整理也會略過過去 10 分鐘內載入過的頻道。對於沒有新上傳內容的頻道，觀看次數、已移除的影片和變更的標題每隔幾小時才會更新一次，而且當 RSS 資訊提供延遲時，新上傳的內容可能會較晚出現。使用 Invidious API 時無法使用。"
+    Platforms Auto Refresh Interval: 應用程式開啟時 OpenTubeX 自動重新整理您在其他平台上追隨的頻道的頻率。
+    Twitch Notify When Live: 你追隨的某個 Twitch 頻道開始直播時通知你。OpenTubeX 開啟時每隔幾分鐘檢查一次；關閉時若仍會重新整理訂閱內容，也會檢查。
   Theme Settings:
-    Only Show Important Notifications: 隱藏僅用於確認操作或回報狀態的應用程式內通知。錯誤、警告、你設定的提醒，以及提供操作（例如復原）的通知仍會顯示。背景作業（例如重新整理訂閱）的進度會顯示在全域進度列中，而不是通知中。系統通知不受影響。
+    Only Show Important Notifications: 隱藏僅用於確認操作或回報狀態的應用程式內通知，包括提供復原的通知。錯誤、警告、你設定的提醒，以及需要你做出決定的通知（例如更新提示）仍會顯示。背景作業（例如重新整理訂閱）的進度會顯示在全域進度列中，而不是通知中。系統通知不受影響。
     Visible Search Suggestions: "設定搜尋列在清單需要捲動之前顯示的搜尋紀錄和建議數量。清單絕不會超出視窗底部。"
     Thumbnail Size: "縮放網格和清單中的影片縮圖。欄數固定的網格或「全寬」檢視會改為填滿每一列，因此在這些情況下只會改變清單縮圖和 Shorts。在手機大小的視窗中，網格縮圖最大為 100%。"
     Playlist Thumbnail Size: "縮放播放清單頁面中的影片縮圖。欄數固定的網格或「全寬」檢視會改為填滿每一列，因此在這些情況下只會改變清單縮圖和 Shorts。在手機大小的視窗中，網格縮圖最大為 100%。"
@@ -2683,3 +2753,31 @@ Notification Center:
   Clear: "清除"
   Empty: "尚無通知"
   Empty Hint: "直播提醒以及已開啟通知的頻道的新上傳內容會顯示在這裡。"
+Platforms:
+  Tracks: 曲目
+  Playlists: 播放清單
+  Follower Count: '{count} 位追隨者'
+  Open Website: 在 {platform} 上開啟
+  Channel Not Found: 找不到這個頻道。
+  Playlist Not Found: 找不到這個播放清單。
+  Load Error: 無法從 {platform} 載入這個頁面。
+  Empty Tab: 這裡還沒有任何內容。
+YouTube Account:
+  Like: "喜歡"
+  Dislike: "不喜歡"
+  Rating Failed: "無法在 YouTube 上評分：{error}"
+  Subscribe Failed: "無法在 YouTube 上訂閱：{error}"
+  Unsubscribe Failed: "無法在 YouTube 上取消訂閱：{error}"
+  Add a comment: "新增留言"
+  Add a reply: "新增回覆"
+  Comment: "留言"
+  Reply: "回覆"
+  Comment Posted: "已發布留言"
+  Reply Posted: "已發布回覆"
+  Comment Failed: "無法發布留言：{error}"
+  Delete Comment: "刪除留言"
+  Delete Comment Confirmation: "要從 YouTube 刪除您的留言嗎？"
+  Comment Deleted: "已刪除留言"
+  Delete Comment Failed: "無法刪除留言：{error}"
+  Recommendations: "YouTube 推薦內容"
+  Recommendations Failed: "無法載入您的 YouTube 推薦內容。"

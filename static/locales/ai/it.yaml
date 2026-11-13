@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: Tutte le sezioni sono nascoste
   All sections hidden description: Personalizza Home per mostrare di nuovo una sezione.
 Subscriptions:
+  Channel Errors:
+    Summary: "Impossibile aggiornare 1 canale. | Impossibile aggiornare {count} canali. | Impossibile aggiornare {count} canali."
+    Toast: "Impossibile aggiornare alcuni canali a cui sei iscritto. Fai clic per visualizzarli."
+    Retry Channel: "Riprova {channel}"
+    Show All: "Mostra tutti"
+    Show Fewer: "Mostra meno"
   Cache Load Error: Impossibile caricare i feed delle iscrizioni salvati.
   New video from {channel}: Nuovo video da {channel}
   New short from {channel}: Nuovo video breve da {channel}
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: Nuovo post da {channel}
   Mark As Unseen: Segna come non visto
   Copy Error Details: "Copia dettagli tecnici"
-  Refresh Errors: "Canali che non è stato possibile aggiornare: {channels}. Fai clic per vedere i dettagli."
-  Refresh Error Channels More: "{channels} e {count} altro | {channels} e altri {count} | {channels} e altri {count}"
   Never show {type} from this channel in feeds again: Non mostrare più contenuti di tipo {type} di questo canale nei feed
   Refreshing Subscription Videos: Aggiornamento dei video delle iscrizioni
   Refreshing Subscription Shorts: Aggiornamento degli Shorts delle iscrizioni
@@ -177,7 +181,7 @@ Subscriptions:
   Refreshing Subscription Posts: Aggiornamento dei post delle iscrizioni
   New Content: Nuovi contenuti
   New Feed Refresh Warning Title: Aggiornare tutti i feed delle iscrizioni?
-  New Feed Refresh Warning: Aggiornare tutti i tipi di contenuto senza RSS per 1 iscrizione può richiedere molto tempo. Vuoi continuare? | Aggiornare tutti i tipi di contenuto senza RSS per {count} iscrizioni può richiedere molto tempo. Vuoi continuare? | Aggiornare tutti i tipi di contenuto senza RSS per {count} iscrizioni può richiedere molto tempo. Vuoi continuare?
+  New Feed Refresh Warning: Aggiornare tutti i tipi di contenuto per 1 iscrizione può richiedere molto tempo. Vuoi continuare? | Aggiornare tutti i tipi di contenuto per {count} iscrizioni può richiedere molto tempo. Vuoi continuare? | Aggiornare tutti i tipi di contenuto per {count} iscrizioni può richiedere molto tempo. Vuoi continuare?
   New Since Last Refresh: Novità dall'ultimo aggiornamento
   Mark As Seen: Segna come visto
   Mark All as Seen: Segna tutto come visto
@@ -216,11 +220,33 @@ Subscriptions:
       Optional Parameter: '{parameter} (facoltativo)'
       Not Set: Non impostato
     Retry Feed: Riprova {feed}
+    Reloading Feed: Ricaricamento di {feed}
+  Platforms:
+    Tab: Piattaforme
+    Platform: Piattaforma
+    All Platforms: Tutte le piattaforme
+    Followed Channels: Canali seguiti su altre piattaforme
+    Description: Segui canali su Twitch, SoundCloud, PeerTube, Rumble e Odysee per vedere i loro caricamenti nella scheda Piattaforme delle tue iscrizioni. Trova i canali con la ricerca o aggiungili tramite l’indirizzo della loro pagina. I loro contenuti vengono riprodotti con yt-dlp.
+    Add Channel: Aggiungi canale
+    Channel URL: Indirizzo del canale
+    Invalid Channel: Inserisci l’indirizzo della pagina di un canale su Twitch, SoundCloud, PeerTube, Rumble o Odysee.
+    Channel Not Found: Non esiste alcun canale a questo indirizzo.
+    Channel Already Followed: Segui già questo canale.
+    Channel Could Not Be Loaded: Impossibile caricare il canale.
+    No Channels: Non segui ancora nessun canale su altre piattaforme.
+    Unfollow Channel: Smetti di seguire {channel}
+    Go To Channel: Vai a {channel}
+    Follow: Segui
+    Following: Seguito
+    Clips: Clip
+    Refresh Errors: Impossibile aggiornare 1 canale. | Impossibile aggiornare {count} canali. | Impossibile aggiornare {count} canali.
+    Content Tabs: Schede dei contenuti delle piattaforme
 Trending:
   Music: Musica
   Load Error: Impossibile caricare le tendenze.
   Unsupported Backend: Le tendenze richiedono l'API locale. Seleziona l'API locale oppure abilita il backend di riserva.
 Most Popular Feed Empty: Il feed Più popolari di questa istanza Invidious è vuoto.
+Most Popular Load Error: "Impossibile caricare il feed Più popolari."
 Feed:
   Cancel Refresh: Annulla aggiornamento
   Next Auto Refresh: 'Prossimo aggiornamento automatico: {date}'
@@ -307,8 +333,38 @@ History:
   Custom: Personalizzato
   History Older Than Days Removed: La cronologia di visione più vecchia di 1 giorno è stata rimossa | La cronologia di visione più vecchia di {days} giorni è stata rimossa | La cronologia di visione più vecchia di {days} giorni è stata rimossa
 Settings:
-  Experimental Settings:
-    Faster Subscription Refresh: "Aggiornamento più rapido delle iscrizioni"
+  Experimental Badge: Sperimentale
+  YouTube Account Settings:
+    YouTube Account Settings: "Account YouTube"
+    Unofficial App Warning: "OpenTubeX non è un'app ufficiale di YouTube. Accedendo, ciò che fai qui viene collegato al tuo account Google e Google può limitare o bloccare gli account che usano app non ufficiali. Accedi solo con un account che puoi permetterti di perdere."
+    Sign In Explanation: "OpenTubeX accede come un'app per TV: approvi l'accesso sul sito di Google e OpenTubeX non vede mai la tua password. L'accesso resta su questo dispositivo e non viene sincronizzato né incluso nei backup."
+    Sign In: "Accedi"
+    Sign In Anyway: "Accedi comunque"
+    Sign Out: "Esci"
+    Getting Sign-In Code: "Recupero del codice di accesso"
+    Sign In Instructions: "Apri la pagina di accesso e scegli il tuo account Google. Il codice viene inserito automaticamente."
+    Other Device Instructions: "Su un altro dispositivo, vai a questo indirizzo e inserisci il codice:"
+    YouTube Channel: "Canale YouTube"
+    Using Channel: "Ora stai usando YouTube come {name}"
+    Switch Channel Failed: "Impossibile cambiare canale YouTube: {error}"
+    Open Sign-In Page: "Apri la pagina di accesso"
+    Copy Code: "Copia codice"
+    Code Copied: "Codice copiato"
+    Waiting for Approval: "In attesa che tu approvi l'accesso"
+    Sign-In Denied: "L'accesso è stato negato."
+    Sign-In Code Expired: "Il codice è scaduto. Riprova per ottenerne uno nuovo."
+    Sign-In Failed: "Impossibile accedere: {error}"
+    Signed In As: "Accesso a YouTube effettuato come {name}"
+    Signed Out: "Disconnessione da YouTube effettuata"
+    Sign Out Failed: "Impossibile uscire: {error}"
+    Revoke Failed: "Uscita da YouTube completata, ma Google non ha confermato la fine dell'accesso. Puoi rimuoverlo nelle connessioni di terze parti del tuo account Google."
+    Signed out by YouTube: "YouTube ha chiuso la sessione. Accedi di nuovo nelle Impostazioni per continuare a usare il tuo account."
+    Subscribe on YouTube: "Iscriviti anche su YouTube"
+    Add to YouTube Watch History: "Aggiungi i video guardati alla cronologia di YouTube"
+    Import Subscriptions: "Importa le iscrizioni da YouTube"
+    Imported Subscriptions: "{count} canale importato | {count} canali importati | {count} canali importati"
+    No Subscriptions to Import: "Questo account YouTube non ha iscrizioni"
+    Import Subscriptions Failed: "Impossibile importare le iscrizioni: {error}"
   Diagnostics:
     Diagnostics: Diagnostica
     Description: Finché il log diagnostico è attivo, OpenTubeX conserva in memoria i messaggi di log recenti per consentirti di allegarli alle segnalazioni di bug. Non li salva né li invia mai di sua iniziativa, e disattivare il log li elimina. I rapporti escludono cookie, token, indirizzi IP e parametri URL, ma possono contenere gli ID dei video che hai riprodotto, quindi controlla un rapporto prima di condividerlo.
@@ -443,6 +499,7 @@ Settings:
       Closing Tabs: Chiudere più schede
       Loading Tabs: Caricare più schede
       Unloading Tabs: Scaricare più schede dalla memoria
+      Refreshing All Feeds: Aggiornare molte iscrizioni
     Remember Tab Navigation History: Ricorda la cronologia di navigazione delle schede
     New Tab Position:
       New Tab Position: Posizione delle nuove schede
@@ -1174,6 +1231,12 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Aggiorna le iscrizioni quando l'app è chiusa"
     Notify About New Uploads: Notifica nuovi caricamenti
     RSS Feeds Auto Refresh Interval: Intervallo di aggiornamento automatico dei feed RSS
+    Faster Subscription Refresh: "Aggiornamento più rapido delle iscrizioni"
+    Platforms:
+      Other Platforms: Altre piattaforme
+      Manage Channels: Gestisci i canali seguiti
+      Notify When Live: Avvisa quando i canali Twitch seguiti vanno in diretta
+      Auto Refresh Interval: Intervallo di aggiornamento automatico delle altre piattaforme
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Conta il tempo di visione da"
@@ -1778,6 +1841,7 @@ Video:
     Auto-generated Caption Template: '{language} (generati automaticamente)'
     Up next in {seconds}: Prossimo video tra {seconds}
     Resize dock: Ridimensiona pannello
+    Resize dock width: Modifica larghezza pannello
     Play now: Riproduci ora
     MusicPlaybackRateOverride: Video musicale rilevato, riproduzione a 1x
     Normal: Normale
@@ -2015,6 +2079,7 @@ Context Menu:
   Reload Posts: Ricarica post
   Reload All Feeds: Ricarica tutti i feed
   Reload RSS Feeds: Ricarica i feed RSS
+  Reload Platforms: Ricarica piattaforme
   Close Multiple Tabs: Chiudi {count} scheda | Chiudi {count} schede
   Duplicate Tab: Duplica scheda
   Duplicate Multiple Tabs: Duplica {count} scheda | Duplica {count} schede
@@ -2167,8 +2232,9 @@ Description:
   Games: Giochi
   Music: Musica
 Tooltips:
-  Experimental Settings:
-    Faster Subscription Refresh: "Controlla prima il feed RSS di ogni canale e carica video, Shorts e dirette solo dai canali con nuovi caricamenti. Gli aggiornamenti automatici saltano anche i canali caricati negli ultimi 10 minuti. Per i canali senza nuovi caricamenti, visualizzazioni, video rimossi e titoli modificati si aggiornano solo ogni poche ore, e i nuovi caricamenti potrebbero comparire più tardi quando il feed RSS è in ritardo. Non disponibile con l'API di Invidious."
+  YouTube Account Settings:
+    Subscribe on YouTube: "Iscriversi a un canale o annullare l'iscrizione in OpenTubeX fa lo stesso sul tuo account YouTube."
+    Add to YouTube Watch History: "I video che riproduci vengono aggiunti alla tua cronologia delle visualizzazioni di YouTube, così i consigli di YouTube imparano da essi. Non viene aggiunto nulla mentre la cronologia è in pausa su YouTube."
   General Settings:
     Built-in Streams: |
       Automatico riproduce la maggior parte dei video tramite il client visionOS di YouTube, che si avvia più rapidamente e supporta la qualità automatica. Le dirette e i video che non può riprodurre usano SABR.
@@ -2192,6 +2258,7 @@ Tooltips:
       Con yt-dlp l'avvio dei video potrebbe richiedere più tempo.
     Avoid translation: |
       Disabilita la traduzione automatica di YouTube per titolo, descrizione e capitoli di un video.
+      "Tutta l'app" mostra anche i nomi e le descrizioni dei canali nella lingua originale.
       Troppe richieste, ad esempio per recuperare i titoli dei video negli elenchi, possono ridurre
       temporaneamente l'affidabilità dell'app.
     Show Thumbnail Previews: Mostra anteprime animate al passaggio del puntatore sulle miniature dei video.
@@ -2279,8 +2346,11 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Aggiorna i feed con le impostazioni scelte. Sul desktop, OpenTubeX rimane nell’area di notifica fino all’uscita. Android decide quando eseguire gli aggiornamenti in background."
     Notify About New Uploads: Mostra notifiche di sistema su questo dispositivo per i canali di cui hai attivato le notifiche nelle relative impostazioni di iscrizione. OpenTubeX cerca nuovi contenuti quando aggiorna le iscrizioni, quindi scegli un intervallo di aggiornamento automatico. Per ricevere notifiche anche quando l'app è chiusa, attiva anche l'aggiornamento quando l'app è chiusa.
     RSS Feeds Auto Refresh Interval: Ogni quanto OpenTubeX aggiorna automaticamente i tuoi feed RSS mentre l'app è aperta.
+    Faster Subscription Refresh: "Controlla prima il feed RSS di ogni canale e carica video, Shorts e dirette solo dai canali con nuovi caricamenti. Gli aggiornamenti automatici saltano anche i canali caricati negli ultimi 10 minuti. Per i canali senza nuovi caricamenti, visualizzazioni, video rimossi e titoli modificati si aggiornano solo ogni poche ore, e i nuovi caricamenti potrebbero comparire più tardi quando il feed RSS è in ritardo. Non disponibile con l'API di Invidious."
+    Platforms Auto Refresh Interval: Ogni quanto OpenTubeX aggiorna automaticamente i canali che segui su altre piattaforme mentre l'app è aperta.
+    Twitch Notify When Live: Ti avvisa quando uno dei canali Twitch che segui inizia a trasmettere. OpenTubeX controlla ogni pochi minuti mentre è aperto, e anche mentre è chiuso se in quel momento aggiorna le iscrizioni.
   Theme Settings:
-    Only Show Important Notifications: Nasconde le notifiche nell'app che si limitano a confermare un'azione o a segnalare uno stato. Errori, avvisi, promemoria che hai impostato e notifiche che offrono un'azione, come Rifai, continuano a essere mostrati. L'avanzamento delle operazioni in background, come l'aggiornamento delle iscrizioni, viene mostrato nella barra di avanzamento globale anziché in una notifica. Le notifiche di sistema non sono interessate.
+    Only Show Important Notifications: Nasconde le notifiche nell'app che si limitano a confermare un'azione o a segnalare uno stato, comprese quelle che offrono Annulla. Errori, avvisi, promemoria che hai impostato e notifiche che richiedono una decisione, come le richieste di aggiornamento, continuano a essere mostrati. L'avanzamento delle operazioni in background, come l'aggiornamento delle iscrizioni, viene mostrato nella barra di avanzamento globale anziché in una notifica. Le notifiche di sistema non sono interessate.
     Visible Search Suggestions: "Imposta quante voci della cronologia di ricerca e quanti suggerimenti mostra la barra di ricerca prima che il suo elenco scorra. L’elenco non si estende mai oltre il bordo inferiore della finestra."
     Thumbnail Size: "Ridimensiona le miniature dei video in griglie ed elenchi. Le griglie con un numero fisso di colonne o il tipo di vista Larghezza piena riempiono invece ogni riga, quindi lì cambia solo le miniature degli elenchi e gli Shorts. Nelle finestre delle dimensioni di un telefono, le miniature della griglia sono limitate al 100%."
     Playlist Thumbnail Size: "Ridimensiona le miniature dei video nelle pagine delle playlist. Le griglie con un numero fisso di colonne o il tipo di vista Larghezza piena riempiono invece ogni riga, quindi lì cambia solo le miniature degli elenchi e gli Shorts. Nelle finestre delle dimensioni di un telefono, le miniature della griglia sono limitate al 100%."
@@ -2676,3 +2746,31 @@ Notification Center:
   Clear: "Cancella"
   Empty: "Ancora nessuna notifica"
   Empty Hint: "Qui compariranno i promemoria delle dirette e i nuovi caricamenti dei canali con le notifiche attive."
+Platforms:
+  Tracks: Brani
+  Playlists: Playlist
+  Follower Count: 1 follower | {count} di follower | {count} follower
+  Open Website: Apri su {platform}
+  Channel Not Found: Impossibile trovare questo canale.
+  Playlist Not Found: Impossibile trovare questa playlist.
+  Load Error: Impossibile caricare questa pagina da {platform}.
+  Empty Tab: Non c’è ancora niente qui.
+YouTube Account:
+  Like: "Mi piace"
+  Dislike: "Non mi piace"
+  Rating Failed: "Impossibile valutare su YouTube: {error}"
+  Subscribe Failed: "Impossibile iscriversi su YouTube: {error}"
+  Unsubscribe Failed: "Impossibile annullare l'iscrizione su YouTube: {error}"
+  Add a comment: "Aggiungi un commento"
+  Add a reply: "Aggiungi una risposta"
+  Comment: "Commenta"
+  Reply: "Rispondi"
+  Comment Posted: "Commento pubblicato"
+  Reply Posted: "Risposta pubblicata"
+  Comment Failed: "Impossibile pubblicare il commento: {error}"
+  Delete Comment: "Elimina commento"
+  Delete Comment Confirmation: "Eliminare il tuo commento da YouTube?"
+  Comment Deleted: "Commento eliminato"
+  Delete Comment Failed: "Impossibile eliminare il commento: {error}"
+  Recommendations: "Consigli di YouTube"
+  Recommendations Failed: "Impossibile caricare i tuoi consigli di YouTube."

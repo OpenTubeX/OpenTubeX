@@ -25,7 +25,7 @@ async function loadPreloadInterface() {
     document: { body: { dataset: {} } },
     globalThis: null,
     IpcChannels,
-    DBActions: { GENERAL: { UPSERT: 2 } },
+    DBActions: { GENERAL: { FIND: 1, UPSERT: 2 } },
     ipcRenderer,
     navigator: { userActivation },
     process: {
@@ -45,7 +45,7 @@ test('queued automatic rule writes require activation and authorize only one fix
   const writes = []
   ipcRenderer.invoke = (...args) => {
     writes.push(JSON.parse(JSON.stringify(args)))
-    return Promise.resolve(null)
+    return Promise.resolve({ result: null, savedSetting: null })
   }
   assert.equal(api.prepareAutomaticDownloadRulesWrite(), null)
   assert.equal(await api.dbSettings(2, { _id: 'ytDlpAutomaticDownloadRules', value: '{}' }), null)
@@ -73,6 +73,23 @@ test('queued automatic rule writers reject invalid values without invoking IPC',
   await assert.rejects(persist({ _id: 'other-setting', value: '{}' }), /must be a string/)
   await assert.rejects(persist('{}'), /already used/)
   assert.equal(writes, 0)
+})
+
+test('settings broadcasts older than a save this window already has are dropped', async () => {
+  const { api, ipcRenderer, IpcChannels } = await loadPreloadInterface()
+  const applied = []
+  api.handleSyncSettings((_event, data) => applied.push(data.value))
+  const broadcast = (value, revision) => ipcRenderer.emit(IpcChannels.SYNC_SETTINGS, {}, {
+    event: 2, data: { _id: 'toastPosition', value }, revision
+  })
+  ipcRenderer.invoke = () => Promise.resolve({ result: null, savedSetting: { _id: 'toastPosition', revision: 2 } })
+
+  // Another window's save 1 arrives after the reply to this window's save 2.
+  await api.dbSettings(2, { _id: 'toastPosition', value: 'mine' })
+  broadcast('older', 1)
+  broadcast('newer', 3)
+  broadcast('newer again', 3)
+  assert.deepEqual(applied, ['newer'])
 })
 
 test('Cast start checks activation before asynchronous payload preparation and invokes IPC once', async () => {
@@ -108,6 +125,53 @@ test('Cast start checks activation before asynchronous payload preparation and i
   assert.equal(ipcRenderer.listenerCount(IpcChannels.CAST_PROGRESS), 1)
   ipcRenderer.emit(IpcChannels.CAST_PROGRESS, {}, { preparationId: 'grant', stage: 'loading' })
   assert.deepEqual(stages, ['connecting'], 'Settled preparation must no longer receive progress')
+})
+
+test('each startup read answers only the first full read of a datastore', async () => {
+  const { api, ipcRenderer, IpcChannels } = await loadPreloadInterface()
+  let requests = 0
+  ipcRenderer.invoke = (channel, request) => {
+    const reply = { channel, request, id: ++requests }
+    return Promise.resolve(channel === IpcChannels.TABS_GET_STATE ? reply : { result: reply, revision: 0 })
+  }
+  api.startStartupReads()
+  // A repeated call must not replace reads that were not taken yet.
+  api.startStartupReads()
+  assert.equal(requests, 6)
+
+  assert.deepEqual(structuredClone(await api.dbProfiles(1)), { channel: IpcChannels.DB_PROFILES, request: { action: 1 }, id: 3 })
+  assert.equal((await api.dbProfiles(1)).id, 7)
+  assert.equal((await api.dbSettings(1)).id, 2)
+  assert.deepEqual(structuredClone(await api.tabs.getState()), { channel: IpcChannels.TABS_GET_STATE, request: undefined, id: 1 })
+  assert.equal((await api.tabs.getState()).id, 8)
+
+  // A write from this window outdates the read.
+  assert.equal((await api.dbHistory(2, { _id: 'a' })).id, 9)
+  assert.equal((await api.dbHistory(1)).id, 10)
+})
+
+test('changes from other windows wait until the app listens and skip those its read contains', async () => {
+  const { api, ipcRenderer, IpcChannels } = await loadPreloadInterface()
+  const change = revision => ipcRenderer.emit(IpcChannels.SYNC_PROFILES, {}, { event: 1, data: revision, revision })
+  let replyToRead
+  ipcRenderer.invoke = () => new Promise(resolve => { replyToRead = resolve })
+
+  change(1)
+  const read = api.dbProfiles(1)
+  // Sent while the read runs: the main process tells which ones it contains.
+  change(2)
+  change(3)
+  replyToRead({ result: [], revision: 2 })
+  await read
+  change(4)
+
+  const applied = []
+  api.handleSyncProfiles((_event, data) => applied.push(data))
+  assert.deepEqual(applied, [3, 4])
+  // Broadcasts can arrive after the reply to a read that contains them.
+  change(2)
+  change(5)
+  assert.deepEqual(applied, [3, 4, 5])
 })
 
 test('unauthorized, cancelled and failed Cast preparation never sends a start request', async () => {

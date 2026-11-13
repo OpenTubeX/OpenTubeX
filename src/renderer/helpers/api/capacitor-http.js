@@ -1,7 +1,8 @@
 import { CapacitorHttp, registerPlugin } from '@capacitor/core'
 
-import { withNetworkRecovery } from '../networkRecovery.js'
+import { isReadOnlyRequest, withNetworkRecovery } from '../networkRecovery.js'
 import { createAbortError } from './requestErrors.js'
+import { BROKEN_CONNECTION_ERROR } from './requestDiagnostics.js'
 import { waitForRequest } from './requestWait.js'
 import { ensureAndroidLocalNetworkAccess } from '../androidLocalNetwork.js'
 
@@ -47,8 +48,10 @@ function waitForRetry(delay, signal) {
   })
 }
 
-async function requestWithDnsRetry(options, signal) {
-  for (let attempt = 0; ; attempt++) {
+async function requestWithRetry(options, signal, readOnly) {
+  let dnsRetries = 0
+  let brokenConnectionRetried = false
+  for (;;) {
     try {
       if (signal?.aborted) throw createAbortError()
       if (AbortableHttp) {
@@ -58,10 +61,17 @@ async function requestWithDnsRetry(options, signal) {
       }
       return await waitForRequest(CapacitorHttp.request(options), signal)
     } catch (error) {
-      if (error?.code !== 'UnknownHostException' || attempt >= DNS_RETRY_DELAYS_MS.length) {
+      if (signal?.aborted) throw error
+      // Android's HttpURLConnection does not retry a request whose kept-alive
+      // connection was already closed. Open a new one at once, like browsers.
+      if (readOnly && !brokenConnectionRetried && BROKEN_CONNECTION_ERROR.test(error?.message)) {
+        brokenConnectionRetried = true
+        continue
+      }
+      if (error?.code !== 'UnknownHostException' || dnsRetries >= DNS_RETRY_DELAYS_MS.length) {
         throw error
       }
-      await waitForRetry(DNS_RETRY_DELAYS_MS[attempt], signal)
+      await waitForRetry(DNS_RETRY_DELAYS_MS[dnsRetries++], signal)
     }
   }
 }
@@ -126,7 +136,8 @@ async function nativeHttpFetch(input, init) {
     headers: Object.fromEntries(headers),
     data: await getRequestBody(input, init),
     responseType: init?.responseType ?? 'text',
-    disableRedirects: isAndroid || redirect !== 'follow',
+    // Native automatic redirects would skip the checks below on later hops
+    disableRedirects: true,
     connectTimeout: init?.nativeTimeoutMs ?? DEFAULT_NATIVE_TIMEOUT_MS,
     readTimeout: init?.nativeTimeoutMs ?? DEFAULT_NATIVE_TIMEOUT_MS,
   }
@@ -134,14 +145,14 @@ async function nativeHttpFetch(input, init) {
   let redirects = 0
   for (;;) {
     if (isAndroid) {
-      // Native automatic redirects would bypass permission checks on later hops.
       await waitForRequest(ensureAndroidLocalNetworkAccess({ url: url.toString() }), signal)
       if (signal?.aborted) throw createAbortError()
     }
-    nativeResponse = await requestWithDnsRetry({ ...options, url: url.toString(), headers: Object.fromEntries(headers) }, signal)
+    nativeResponse = await requestWithRetry({ ...options, url: url.toString(), headers: Object.fromEntries(headers) }, signal,
+      isReadOnlyRequest(url, options.method))
     if (!REDIRECT_STATUSES.has(nativeResponse.status)) break
     if (redirect === 'error') throw new TypeError('Redirects are not allowed for this request')
-    if (!isAndroid || redirect !== 'follow') break
+    if (redirect !== 'follow') break
     const location = new Headers(nativeResponse.headers).get('location')
     if (location === null) break
     if (redirects++ >= 20) throw new TypeError('Too many redirects')
@@ -177,7 +188,7 @@ async function nativeHttpFetch(input, init) {
   })
 
   Object.defineProperty(response, 'url', { value: nativeResponse.url })
-  if (isAndroid) Object.defineProperty(response, 'redirected', { value: redirects > 0 })
+  Object.defineProperty(response, 'redirected', { value: redirects > 0 })
   return response
 }
 

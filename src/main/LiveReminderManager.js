@@ -1,4 +1,6 @@
 // @ts-check
+import { createSerialQueue } from './serialQueue.js'
+
 const MAX_TIMER_DELAY = 2_147_483_647
 // A stream that started while the app was closed is likely still live.
 const MISSED_REMINDER_GRACE_MS = 60 * 60 * 1000
@@ -20,7 +22,7 @@ export class LiveReminderManager {
     this.clearTimerCallback = clearTimer
     this.reminders = new Map()
     this.timers = new Map()
-    this.pendingOperation = Promise.resolve()
+    this.enqueue = createSerialQueue()
   }
 
   initialize() {
@@ -44,14 +46,12 @@ export class LiveReminderManager {
   }
 
   /** @param {string} videoId */
-  async get(videoId) {
-    await this.pendingOperation
-    return this.reminders.get(videoId) ?? null
+  get(videoId) {
+    return this.enqueue(() => this.reminders.get(videoId) ?? null)
   }
 
-  async list() {
-    await this.pendingOperation
-    return [...this.reminders.values()].sort((a, b) => a.startTimestamp - b.startTimestamp)
+  list() {
+    return this.enqueue(() => [...this.reminders.values()].sort((a, b) => a.startTimestamp - b.startTimestamp))
   }
 
   /** @param {import('./liveReminderIpc').LiveReminderRequest} reminder */
@@ -85,12 +85,6 @@ export class LiveReminderManager {
       }
       return removed
     })
-  }
-
-  enqueue(operation) {
-    const result = this.pendingOperation.then(operation)
-    this.pendingOperation = result.catch(() => {})
-    return result
   }
 
   armTimer(reminder) {

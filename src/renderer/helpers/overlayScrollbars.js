@@ -461,11 +461,14 @@ function create(element) {
   const mutationObserver = new MutationObserver(records => {
     let contentChanged = false
     for (const record of records) {
-      if (record.target === element) {
+      // The page observes the html and body elements instead of its children.
+      if (record.target === element && !isPage) {
         observeChildren(record.addedNodes, true)
         observeChildren(record.removedNodes, false)
       }
-      contentChanged ||= !(record.target instanceof Element && record.target.closest('.os-scrollbar'))
+      if (record.target instanceof Element && record.target.closest('.os-scrollbar')) continue
+      // Setting textContent replaces text nodes, which the page leaves out.
+      contentChanged ||= !isPage || [...record.addedNodes, ...record.removedNodes].some(node => node instanceof Element)
     }
     // Code that replaces a container's children takes the bars with them.
     for (const { scrollbar } of scrollbars) {
@@ -504,6 +507,9 @@ function create(element) {
     for (const observed of [document.documentElement, document.body]) {
       pageStyleObserver.observe(observed, { attributes: true, attributeFilter: ['class', 'style'] })
     }
+    // Content overflowing a box that keeps its size changes the range without
+    // resizing the body. Text changes are left out, as the page has many.
+    mutationObserver.observe(element, { childList: true, subtree: true })
   } else {
     element.setAttribute(VIEWPORT_ATTRIBUTE, '')
     element.addEventListener('scroll', onScroll, { passive: true })

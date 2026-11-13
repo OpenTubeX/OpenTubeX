@@ -1,4 +1,7 @@
+import { buildRequestDiagnostic } from '../renderer/helpers/api/requestDiagnostics.js'
+
 const FEED_TYPES = ['videos', 'shorts', 'live', 'posts']
+const CATEGORIES = { videos: 'subscription videos', shorts: 'subscription Shorts', live: 'subscription live streams', posts: 'subscription posts' }
 
 /** Native/background scheduling is independent of renderer timers and visibility. */
 export function createSubscriptionBackgroundScheduler({ fetchChannel, saveResult, now = Date.now }) {
@@ -63,18 +66,44 @@ export function createSubscriptionBackgroundScheduler({ fetchChannel, saveResult
           for (let index = 0; index < channelIds.length && !controller.signal.aborted; index += 4) {
             await Promise.all(channelIds.slice(index, index + 4).map(async channelId => {
               const targets = due.filter(feed => feed.channelIds.includes(channelId))
+              let payload
               try {
-                const payload = await fetchChannel(snapshot, feedType, channelId, controller.signal)
-                if (controller.signal.aborted) return
-                // One timestamp lets the app import the shared response once.
-                const timestamp = now()
-                for (const feed of targets) {
-                  if (controller.signal.aborted) return
-                  await saveResult({ kind: 'channel', profileId: feed.profileId, feedType, channelId, timestamp, payload })
-                }
+                payload = await fetchChannel(snapshot, feedType, channelId, controller.signal)
               } catch (error) {
                 for (const feed of targets) failed.add(feed.key)
-                if (!controller.signal.aborted) console.error('Background subscription refresh failed', error)
+                if (controller.signal.aborted) return
+                console.error('Background subscription refresh failed', error)
+                // The app lists the channel above its feeds, like after a foreground refresh
+                const failure = {
+                  kind: 'channelFailure',
+                  feedType,
+                  channelId,
+                  timestamp: now(),
+                  diagnostic: buildRequestDiagnostic(error, { category: CATEGORIES[feedType], backend: 'Subscription backend', lifecycle: 'background' }),
+                  unavailable: error.channelUnavailable === true
+                }
+                for (const feed of targets) {
+                  if (controller.signal.aborted) return
+                  try {
+                    await saveResult({ ...failure, profileId: feed.profileId })
+                  } catch (saveError) {
+                    console.error('Background subscription failure could not be saved', saveError)
+                  }
+                }
+                return
+              }
+              if (controller.signal.aborted) return
+              // One timestamp lets the app import the shared response once.
+              const timestamp = now()
+              for (const feed of targets) {
+                if (controller.signal.aborted) return
+                try {
+                  await saveResult({ kind: 'channel', profileId: feed.profileId, feedType, channelId, timestamp, payload })
+                } catch (error) {
+                  // The channel loaded, so only this profile's feed is retried sooner
+                  failed.add(feed.key)
+                  if (!controller.signal.aborted) console.error('Background subscription result could not be saved', error)
+                }
               }
             }))
           }

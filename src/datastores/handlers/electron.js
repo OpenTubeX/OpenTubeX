@@ -286,8 +286,9 @@ class Playlists {
     return dbPlaylists(DBActions.GENERAL.CREATE, playlists)
   }
 
-  static find() {
-    return dbPlaylists(DBActions.GENERAL.FIND)
+  static async find() {
+    // The main process sends each playlist as JSON text, see History.find.
+    return (await dbPlaylists(DBActions.GENERAL.FIND)).map(playlist => JSON.parse(playlist))
   }
 
   static sent() {
@@ -432,6 +433,17 @@ function subscriptionCacheRequest(action, data) {
   return enqueueSubscriptionCacheRequest(() => dbSubscriptionCache(action, data))
 }
 
+/**
+ * Parses a document's stored JSON text. Documents saved with dates keep them
+ * in NeDB's `{ "$$date": … }` form, which its reviver turns back into dates.
+ * @param {string} text
+ */
+function parseStoredDocument(text) {
+  return text.includes('"$$date"')
+    ? JSON.parse(text, (key, value) => key === '$$date' ? new Date(value) : (value?.$$date ?? value))
+    : JSON.parse(text)
+}
+
 class SubscriptionCache {
   static markEntriesAsSeen(channelId, tab, entries) {
     return subscriptionCacheRequest(DBActions.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN, { channelId, tab, entries })
@@ -441,8 +453,9 @@ class SubscriptionCache {
     return subscriptionCacheRequest(DBActions.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN_MANY, marks)
   }
 
-  static find() {
-    return subscriptionCacheRequest(DBActions.GENERAL.FIND)
+  static async find() {
+    // The main process sends each channel's stored JSON text, see History.find.
+    return (await subscriptionCacheRequest(DBActions.GENERAL.FIND)).map(parseStoredDocument)
   }
 
   static updateVideosByChannelId(channelId, entries, timestamp) {

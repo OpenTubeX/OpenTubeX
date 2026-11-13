@@ -1218,7 +1218,7 @@ function createNewTab() {
 
 // ===== Context menu =====
 /**
- * @param {{ tabId: string | null, selectedTabIds?: string[], groupId?: string, surface: 'tab' | 'tabBar' | 'tabGroup' | 'content' | 'subscriptionFeedTab', feedTab?: 'videos' | 'shorts' | 'live' | 'posts' | 'all' | 'feeds' | null, isNewFeedTab?: boolean, hasNewContent?: boolean }} payload
+ * @param {{ tabId: string | null, selectedTabIds?: string[], groupId?: string, surface: 'tab' | 'tabBar' | 'tabGroup' | 'content' | 'subscriptionFeedTab', feedTab?: 'videos' | 'shorts' | 'live' | 'posts' | 'all' | 'feeds' | 'platforms' | null, isNewFeedTab?: boolean, hasNewContent?: boolean }} payload
  */
 function updateContextMenuTab(payload) {
   window.ftElectron.tabs.setContextMenuTab({ ...payload, verticalLayout: vertical.value })
@@ -1230,10 +1230,11 @@ function updateContextMenuTab(payload) {
 function updateContextMenuTarget(target) {
   const tabId = target.closest('.tab[data-tab-id]')?.dataset.tabId ?? null
   const contextMenuSelectedTabIds = getContextMenuSelectedTabIds(tabId)
-  const newFeedTab = target.closest('[data-new-feed-tab], [data-new-feed-rss-tab]')
+  const newFeedTab = target.closest('[data-new-feed-tab], [data-new-feed-rss-tab], [data-new-feed-platforms-tab]')
   const rssFeedsTab = target.closest('[data-rss-feeds-tab], [data-new-feed-rss-tab]')
+  const platformsTab = target.closest('[data-platforms-tab], [data-new-feed-platforms-tab]')
   const feedTab = target.closest('[data-subscription-feed-tab]')?.dataset.subscriptionFeedTab ??
-    newFeedTab?.dataset.newFeedTab ?? (rssFeedsTab ? 'feeds' : null)
+    newFeedTab?.dataset.newFeedTab ?? (rssFeedsTab ? 'feeds' : platformsTab ? 'platforms' : null)
   const isTabBar = target.closest('.tabBar') != null
   const groupId = target.closest('.collapsedTabGroup[data-group-id]')?.dataset.groupId
   updateContextMenuTab({
@@ -1243,7 +1244,7 @@ function updateContextMenuTarget(target) {
     surface: tabId ? 'tab' : groupId ? 'tabGroup' : isTabBar ? 'tabBar' : feedTab ? 'subscriptionFeedTab' : 'content',
     feedTab,
     isNewFeedTab: newFeedTab != null,
-    hasNewContent: (newFeedTab ?? rssFeedsTab)?.dataset.hasNewContent === 'true'
+    hasNewContent: (newFeedTab ?? rssFeedsTab ?? platformsTab)?.dataset.hasNewContent === 'true'
   })
 }
 

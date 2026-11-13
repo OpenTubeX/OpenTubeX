@@ -1,11 +1,13 @@
 import assert from 'node:assert/strict'
 import { Buffer } from 'node:buffer'
 import { createHash } from 'node:crypto'
-import { mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
 import { compileFunction } from 'node:vm'
+import { createSerialQueue } from '../../src/main/serialQueue.js'
+import { writeFileAtomic } from '../../src/main/writeFileAtomic.js'
 
 import {
   getEarliestYtDlpFormatExpiry,
@@ -199,10 +201,10 @@ async function loadPersistentCache (directory, stringified) {
     app: { getPath: () => directory },
     Buffer,
     createHash,
+    createSerialQueue,
     readFile,
-    rename,
     rm,
-    writeFile,
+    writeFileAtomic,
     join,
     settings: { _findOne: async () => ({ value: DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB }) },
     DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB,

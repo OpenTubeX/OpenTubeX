@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: 所有版块均已隐藏
   All sections hidden description: 自定义首页以重新显示版块。
 Subscriptions:
+  Channel Errors:
+    Summary: "{count} 个频道无法刷新。"
+    Toast: "部分已订阅频道无法刷新。点击查看。"
+    Retry Channel: "重试 {channel}"
+    Show All: "显示全部"
+    Show Fewer: "收起"
   Cache Load Error: 无法加载已保存的订阅源。
   New video from {channel}: "{channel} 发布了新视频"
   New short from {channel}: "{channel} 发布了新短视频"
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: "{channel} 发布了新帖子"
   Mark As Unseen: 标记为未看过
   Copy Error Details: "复制技术详情"
-  Refresh Errors: "无法刷新的频道：{channels}。点击查看详情。"
-  Refresh Error Channels More: "{channels} 以及其他 {count} 个频道"
   Never show {type} from this channel in feeds again: 不再在动态中显示此频道的{type}
   Refreshing Subscription Videos: 正在刷新订阅视频
   Refreshing Subscription Shorts: 正在刷新订阅短视频
@@ -177,7 +181,7 @@ Subscriptions:
   Refreshing Subscription Posts: 正在刷新订阅帖子
   New Content: 新内容
   New Feed Refresh Warning Title: 要刷新所有订阅源吗？
-  New Feed Refresh Warning: 为 {count} 个订阅刷新所有未使用 RSS 的内容类型可能需要很长时间。要继续吗？
+  New Feed Refresh Warning: 为 {count} 个订阅刷新所有内容类型可能需要很长时间。要继续吗？
   New Since Last Refresh: 上次刷新后的新内容
   Mark As Seen: 标记为已看
   Mark All as Seen: 全部标记为已看
@@ -216,11 +220,33 @@ Subscriptions:
       Optional Parameter: '{parameter}（可选）'
       Not Set: 未设置
     Retry Feed: 重试 {feed}
+    Reloading Feed: 正在重新加载 {feed}
+  Platforms:
+    Tab: 平台
+    Platform: 平台
+    All Platforms: 所有平台
+    Followed Channels: 在其他平台上关注的频道
+    Description: 关注 Twitch、SoundCloud、PeerTube、Rumble 和 Odysee 上的频道，即可在订阅的“平台”标签页中查看其上传内容。可通过搜索查找频道，也可通过频道页面的地址添加。其媒体使用 yt-dlp 播放。
+    Add Channel: 添加频道
+    Channel URL: 频道地址
+    Invalid Channel: 请输入 Twitch、SoundCloud、PeerTube、Rumble 或 Odysee 上频道页面的地址。
+    Channel Not Found: 此地址没有频道。
+    Channel Already Followed: 你已关注此频道。
+    Channel Could Not Be Loaded: 无法加载该频道。
+    No Channels: 你还没有关注其他平台上的任何频道。
+    Unfollow Channel: 取消关注 {channel}
+    Go To Channel: 前往 {channel}
+    Follow: 关注
+    Following: 已关注
+    Clips: 剪辑
+    Refresh Errors: '{count} 个频道无法刷新。'
+    Content Tabs: 平台内容标签页
 Trending:
   Music: 音乐
   Load Error: 无法加载热门内容。
   Unsupported Backend: 热门内容需要使用 Local API。请选择 Local API 或启用后端回退。
 Most Popular Feed Empty: 此 Invidious 实例的“最受欢迎”订阅源为空。
+Most Popular Load Error: "无法加载“最受欢迎”订阅源。"
 Feed:
   Cancel Refresh: 取消刷新
   Next Auto Refresh: '下次自动刷新：{date}'
@@ -307,8 +333,38 @@ History:
   Custom: 自定义
   History Older Than Days Removed: 已删除 {days} 天前的观看历史记录
 Settings:
-  Experimental Settings:
-    Faster Subscription Refresh: "更快的订阅刷新"
+  Experimental Badge: 实验性
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube 账号"
+    Unofficial App Warning: "OpenTubeX 不是 YouTube 官方应用。登录后，你在这里的操作会与你的 Google 账号关联，Google 可能会限制或封禁使用非官方应用的账号。请只使用你能承受丢失的账号登录。"
+    Sign In Explanation: "OpenTubeX 像电视应用一样登录：你在 Google 网站上批准登录，OpenTubeX 永远不会看到你的密码。登录信息仅保存在此设备上，不会同步或备份。"
+    Sign In: "登录"
+    Sign In Anyway: "仍然登录"
+    Sign Out: "退出登录"
+    Getting Sign-In Code: "正在获取登录代码"
+    Sign In Instructions: "打开登录页面并选择你的 Google 账号。代码会自动填写。"
+    Other Device Instructions: "在另一台设备上访问此地址并输入代码："
+    YouTube Channel: "YouTube 频道"
+    Using Channel: "现在以 {name} 的身份使用 YouTube"
+    Switch Channel Failed: "无法切换 YouTube 频道：{error}"
+    Open Sign-In Page: "打开登录页面"
+    Copy Code: "复制代码"
+    Code Copied: "代码已复制"
+    Waiting for Approval: "正在等待你批准登录"
+    Sign-In Denied: "登录请求已被拒绝。"
+    Sign-In Code Expired: "代码已过期。请重试以获取新代码。"
+    Sign-In Failed: "无法登录：{error}"
+    Signed In As: "已以 {name} 的身份登录 YouTube"
+    Signed Out: "已退出 YouTube 账号"
+    Sign Out Failed: "无法退出登录：{error}"
+    Revoke Failed: "已退出 YouTube，但 Google 未确认登录已结束。你可以在 Google 账号的第三方关联中将其移除。"
+    Signed out by YouTube: "YouTube 已终止登录。请在设置中重新登录以继续使用你的账号。"
+    Subscribe on YouTube: "同时在 YouTube 上订阅"
+    Add to YouTube Watch History: "将观看过的视频添加到 YouTube 历史记录"
+    Import Subscriptions: "从 YouTube 导入订阅"
+    Imported Subscriptions: "已导入 {count} 个频道"
+    No Subscriptions to Import: "此 YouTube 账号没有任何订阅"
+    Import Subscriptions Failed: "无法导入订阅：{error}"
   Diagnostics:
     Diagnostics: 诊断
     Description: 启用诊断日志后，OpenTubeX 会在内存中保留最近的日志消息，方便你将其附加到错误报告中。它绝不会自行保存或发送这些消息，关闭日志会将其删除。报告不包含 Cookie、令牌、IP 地址和 URL 参数，但可能包含你播放过的视频 ID，因此分享前请检查报告。
@@ -443,6 +499,7 @@ Settings:
       Closing Tabs: 关闭多个标签页
       Loading Tabs: 加载多个标签页
       Unloading Tabs: 卸载多个标签页
+      Refreshing All Feeds: 刷新大量订阅
     Remember Tab Navigation History: 记住标签页导航历史记录
     New Tab Position:
       New Tab Position: 新标签页位置
@@ -1174,6 +1231,12 @@ Settings:
     Refresh Subscriptions While App Is Closed: "应用关闭时刷新订阅"
     Notify About New Uploads: 新上传通知
     RSS Feeds Auto Refresh Interval: RSS 订阅源自动刷新间隔
+    Faster Subscription Refresh: "更快的订阅刷新"
+    Platforms:
+      Other Platforms: 其他平台
+      Manage Channels: 管理已关注的频道
+      Notify When Live: 关注的 Twitch 频道开播时通知
+      Auto Refresh Interval: 其他平台自动刷新间隔
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "观看时长统计范围"
@@ -1778,6 +1841,7 @@ Video:
     Auto-generated Caption Template: '{language}（自动生成）'
     Up next in {seconds}: '{seconds} 秒后播放下一个'
     Resize dock: 调整停靠栏大小
+    Resize dock width: 调整停靠栏宽度
     Play now: 立即播放
     MusicPlaybackRateOverride: 检测到音乐视频，将以 1 倍速播放
     Normal: 正常
@@ -2015,6 +2079,7 @@ Context Menu:
   Reload Posts: 重新加载帖子
   Reload All Feeds: 重新加载所有订阅源
   Reload RSS Feeds: 重新加载 RSS 订阅源
+  Reload Platforms: 重新加载平台
   Close Multiple Tabs: 关闭 {count} 个标签页
   Duplicate Tab: 复制标签页
   Duplicate Multiple Tabs: 复制 {count} 个标签页
@@ -2167,8 +2232,9 @@ Description:
   Games: 游戏
   Music: 音乐
 Tooltips:
-  Experimental Settings:
-    Faster Subscription Refresh: "先检查每个频道的 RSS 订阅源，只加载有新上传内容的频道的视频、Shorts 和直播。自动刷新还会跳过过去 10 分钟内加载过的频道。对于没有新上传内容的频道，观看次数、已移除的视频和更改的标题每隔几小时才会更新一次，而且当 RSS 订阅源滞后时，新上传的内容可能会稍后才出现。使用 Invidious API 时不可用。"
+  YouTube Account Settings:
+    Subscribe on YouTube: "在 OpenTubeX 中订阅或取消订阅频道时，你的 YouTube 账号也会执行相同操作。"
+    Add to YouTube Watch History: "你播放的视频会添加到你的 YouTube 观看历史记录中，让 YouTube 的推荐据此学习。在 YouTube 上暂停历史记录时，不会添加任何内容。"
   General Settings:
     Built-in Streams: |
       自动模式通过 YouTube 的 visionOS 客户端播放大多数视频，启动更快并支持自动画质。直播和它无法播放的视频使用 SABR。
@@ -2192,6 +2258,7 @@ Tooltips:
       使用 yt-dlp 时，视频可能需要更长时间才能开始播放。
     Avoid translation: |
       禁用 YouTube 对视频标题、简介和章节的自动翻译。
+      选择“整个应用”时，频道名称和简介也会以原始语言显示。
       请求过多（例如获取多个列表中的视频标题）可能会暂时
       影响应用可靠性。
     Show Thumbnail Previews: 将鼠标悬停在视频缩略图上时显示动画预览。
@@ -2279,8 +2346,11 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "使用所选设置刷新订阅。在桌面端，OpenTubeX 会留在系统托盘中，直到您退出。Android 系统决定后台刷新的运行时间。"
     Notify About New Uploads: 在此设备上为你在订阅设置中开启了通知的频道显示系统通知。OpenTubeX 会在刷新订阅时检查新内容，因此请选择自动刷新间隔。若要在应用关闭时也收到通知，请同时启用应用关闭时刷新订阅。
     RSS Feeds Auto Refresh Interval: 应用打开时 OpenTubeX 自动刷新 RSS 订阅源的频率。
+    Faster Subscription Refresh: "先检查每个频道的 RSS 订阅源，只加载有新上传内容的频道的视频、Shorts 和直播。自动刷新还会跳过过去 10 分钟内加载过的频道。对于没有新上传内容的频道，观看次数、已移除的视频和更改的标题每隔几小时才会更新一次，而且当 RSS 订阅源滞后时，新上传的内容可能会稍后才出现。使用 Invidious API 时不可用。"
+    Platforms Auto Refresh Interval: 应用打开时 OpenTubeX 自动刷新你在其他平台上关注的频道的频率。
+    Twitch Notify When Live: 你关注的某个 Twitch 频道开播时通知你。OpenTubeX 打开时每隔几分钟检查一次；关闭时如果仍会刷新订阅，也会检查。
   Theme Settings:
-    Only Show Important Notifications: 隐藏仅用于确认操作或报告状态的应用内通知。错误、警告、你设置的提醒以及提供操作（如撤销）的通知仍会显示。后台操作（如刷新订阅）的进度会显示在全局进度条中，而不是通知中。系统通知不受影响。
+    Only Show Important Notifications: 隐藏仅用于确认操作或报告状态的应用内通知，包括提供撤销的通知。错误、警告、你设置的提醒以及需要你做出决定的通知（如更新提示）仍会显示。后台操作（如刷新订阅）的进度会显示在全局进度条中，而不是通知中。系统通知不受影响。
     Visible Search Suggestions: "设置搜索栏在列表需要滚动之前显示的搜索历史记录和建议数量。列表绝不会超出窗口底部。"
     Thumbnail Size: "缩放网格和列表中的视频缩略图。列数固定的网格或“全宽”视图会改为填满每一行，因此在这些情况下只会改变列表缩略图和 Shorts。在手机大小的窗口中，网格缩略图最大为 100%。"
     Playlist Thumbnail Size: "缩放播放列表页面中的视频缩略图。列数固定的网格或“全宽”视图会改为填满每一行，因此在这些情况下只会改变列表缩略图和 Shorts。在手机大小的窗口中，网格缩略图最大为 100%。"
@@ -2676,3 +2746,31 @@ Notification Center:
   Clear: "清除"
   Empty: "暂无通知"
   Empty Hint: "直播提醒以及已开启通知的频道的新上传内容会显示在这里。"
+Platforms:
+  Tracks: 曲目
+  Playlists: 播放列表
+  Follower Count: '{count} 位关注者'
+  Open Website: 在 {platform} 上打开
+  Channel Not Found: 找不到此频道。
+  Playlist Not Found: 找不到此播放列表。
+  Load Error: 无法从 {platform} 加载此页面。
+  Empty Tab: 这里还没有任何内容。
+YouTube Account:
+  Like: "喜欢"
+  Dislike: "不喜欢"
+  Rating Failed: "无法在 YouTube 上评分：{error}"
+  Subscribe Failed: "无法在 YouTube 上订阅：{error}"
+  Unsubscribe Failed: "无法在 YouTube 上取消订阅：{error}"
+  Add a comment: "添加评论"
+  Add a reply: "添加回复"
+  Comment: "评论"
+  Reply: "回复"
+  Comment Posted: "评论已发布"
+  Reply Posted: "回复已发布"
+  Comment Failed: "无法发布评论：{error}"
+  Delete Comment: "删除评论"
+  Delete Comment Confirmation: "要从 YouTube 删除你的评论吗？"
+  Comment Deleted: "评论已删除"
+  Delete Comment Failed: "无法删除评论：{error}"
+  Recommendations: "YouTube 推荐"
+  Recommendations Failed: "无法加载你的 YouTube 推荐。"

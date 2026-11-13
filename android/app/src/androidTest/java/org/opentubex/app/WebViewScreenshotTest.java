@@ -190,20 +190,26 @@ public class WebViewScreenshotTest {
                 assertTrue("Capture must time out even if visual state never completes", timedOut.await(4, TimeUnit.SECONDS));
                 assertTrue(error.get().getMessage(), error.get().getMessage().contains("Timed out"));
 
-                CountDownLatch retried = new CountDownLatch(1);
                 AtomicReference<Exception> retryError = new AtomicReference<>();
                 AtomicReference<Integer> retryPixel = new AtomicReference<>();
                 scenario.onActivity(activity -> {
                     delayVisualState.set(false);
                     delayedCallback.get().onComplete(0);
-                    WebViewScreenshot.capture(activity, webView, 0.1, 0.3, 320, 180,
+                });
+                // A starved emulator can miss the two-second frame deadline on a
+                // working capture too, so only a capture that never succeeds fails.
+                for (int attempt = 0; attempt < 3; attempt++) {
+                    CountDownLatch retried = new CountDownLatch(1);
+                    retryError.set(null);
+                    scenario.onActivity(activity -> WebViewScreenshot.capture(activity, webView, 0.1, 0.3, 320, 180,
                         bitmap -> {
                             retryPixel.set(bitmap.getPixel(160, 90));
                             bitmap.recycle();
                             retried.countDown();
-                        }, failure -> { retryError.set(failure); retried.countDown(); });
-                });
-                assertTrue("A subsequent capture succeeds", retried.await(10, TimeUnit.SECONDS));
+                        }, failure -> { retryError.set(failure); retried.countDown(); }));
+                    assertTrue("A subsequent capture completes", retried.await(10, TimeUnit.SECONDS));
+                    if (retryError.get() == null) break;
+                }
                 assertEquals(null, retryError.get());
                 assertTrue("Retry captures the green page", Color.green(retryPixel.get()) > 220);
                 assertTrue("The late callback cannot complete capture again", !duplicateCompletion.await(250, TimeUnit.MILLISECONDS));

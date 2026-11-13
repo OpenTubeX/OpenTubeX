@@ -213,7 +213,7 @@ responses as `youtube-responses.json.gz`, since the trace doesn't keep their bod
 The performance project disables tracing to avoid distorting measurements.
 On CI, Playwright retries each failed test once. A test that passes only on
 retry does not fail the run: it gets a warning annotation and an entry in the
-open "Flaky E2E tests" issue, which the Flaky E2E Tests workflow maintains.
+open "Flaky E2E tests" issue, which the Flaky Tests workflow maintains.
 The paired comparison does not retry.
 
 ## Performance comparison

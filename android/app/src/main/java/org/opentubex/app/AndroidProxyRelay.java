@@ -1,5 +1,7 @@
 package org.opentubex.app;
 
+import android.os.SystemClock;
+
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
@@ -21,12 +23,16 @@ import java.util.Base64;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BooleanSupplier;
+import java.util.function.LongSupplier;
 
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocket;
@@ -52,6 +58,10 @@ final class AndroidProxyRelay implements AutoCloseable {
     });
     private final Semaphore capacity = new Semaphore(64);
     private final Set<Socket> sockets = new HashSet<>();
+    /** Includes deep sleep, so a tunnel left alone while the phone slept counts as idle. Tests use System.nanoTime. */
+    static LongSupplier clock = SystemClock::elapsedRealtimeNanos;
+    /** When each connected client's tunnel last carried data, from {@link #clock}. */
+    private final Map<Socket, AtomicLong> tunnels = new ConcurrentHashMap<>();
     interface AddressResolver { InetAddress[] resolve(String host) throws IOException; }
     private final AddressResolver resolver;
     private final ProxySelector systemSelector;
@@ -110,6 +120,18 @@ final class AndroidProxyRelay implements AutoCloseable {
         sockets.clear();
     }
 
+    /**
+     * Closes tunnels that carried no data since {@code nanoTime}. While Android
+     * freezes or firewalls a hidden app, an upstream can close or vanish unseen,
+     * and a client that reuses such a kept-alive tunnel waits for a reply that
+     * never comes. Closing the client socket also ends both pumps.
+     */
+    void closeTunnelsIdleSince(long nanoTime) {
+        for (Map.Entry<Socket, AtomicLong> tunnel : tunnels.entrySet()) {
+            if (tunnel.getValue().get() - nanoTime < 0) closeSocket(tunnel.getKey());
+        }
+    }
+
     private void accept() {
         while (!server.isClosed()) {
             try {
@@ -159,6 +181,8 @@ final class AndroidProxyRelay implements AutoCloseable {
             upstream = transport;
             upstream = connect(upstream, route, host, port, forwardHttp);
             final Socket remote = upstream;
+            AtomicLong traffic = new AtomicLong(clock.getAsLong());
+            tunnels.put(client, traffic);
             synchronized (this) {
                 if (version != generation || client.isClosed()) throw new IOException("Proxy changed");
             }
@@ -190,16 +214,17 @@ final class AndroidProxyRelay implements AutoCloseable {
             // Half-close preserves responses after a client finishes sending its body.
             AtomicBoolean requestEnded = new AtomicBoolean();
             threads.execute(() -> {
-                copyRequest(client, remote);
+                copyRequest(client, remote, traffic);
                 requestEnded.set(true);
             });
-            copyResponse(remote, client, requestEnded::get);
+            copyResponse(remote, client, requestEnded::get, traffic);
         } catch (Exception error) {
             if (!connected) {
                 try { client.getOutputStream().write("HTTP/1.1 502 Bad Gateway\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".getBytes(StandardCharsets.US_ASCII)); }
                 catch (IOException ignored) { /* Client has already disconnected. */ }
             }
         } finally {
+            tunnels.remove(client);
             closeSocket(upstream);
             synchronized (this) { sockets.remove(transport); }
         }
@@ -260,9 +285,9 @@ final class AndroidProxyRelay implements AutoCloseable {
         catch (IOException error) { return false; }
     }
 
-    static void copyRequest(Socket client, Socket remote) {
+    static void copyRequest(Socket client, Socket remote, AtomicLong traffic) {
         try {
-            copy(client.getInputStream(), remote.getOutputStream());
+            copy(client.getInputStream(), remote.getOutputStream(), traffic);
             try { remote.shutdownOutput(); }
             catch (UnsupportedOperationException ignored) {
                 // Older Android TLS sockets cannot half-close. HTTP bodies and
@@ -276,7 +301,7 @@ final class AndroidProxyRelay implements AutoCloseable {
      * after the client finished, for example when the path to them died, so once
      * the request has ended an upstream silent for a whole read timeout is given up.
      * Otherwise each such tunnel keeps its thread and one of the relay's slots. */
-    static void copyResponse(Socket remote, Socket client, BooleanSupplier requestEnded) throws IOException {
+    static void copyResponse(Socket remote, Socket client, BooleanSupplier requestEnded, AtomicLong traffic) throws IOException {
         InputStream input = remote.getInputStream();
         OutputStream output = client.getOutputStream();
         byte[] buffer = new byte[32768];
@@ -291,6 +316,7 @@ final class AndroidProxyRelay implements AutoCloseable {
                 continue;
             }
             if (count == -1) return;
+            traffic.set(clock.getAsLong());
             output.write(buffer, 0, count);
         }
     }
@@ -454,10 +480,13 @@ final class AndroidProxyRelay implements AutoCloseable {
             (policy.username + ":" + policy.password).getBytes(StandardCharsets.UTF_8)) + "\r\n";
     }
 
-    private static void copy(InputStream input, OutputStream output) throws IOException {
+    private static void copy(InputStream input, OutputStream output, AtomicLong traffic) throws IOException {
         byte[] buffer = new byte[32768];
         int count;
-        while ((count = input.read(buffer)) != -1) output.write(buffer, 0, count);
+        while ((count = input.read(buffer)) != -1) {
+            traffic.set(clock.getAsLong());
+            output.write(buffer, 0, count);
+        }
     }
 
     private static void closeSocket(Socket socket) {

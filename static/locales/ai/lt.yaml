@@ -190,6 +190,12 @@ Home Page:
   All sections hidden: Visi skyriai paslėpti
   All sections hidden description: Tinkinkite pradžios puslapį, kad vėl būtų rodomas skyrius.
 Subscriptions:
+  Channel Errors:
+    Summary: "Nepavyko atnaujinti {count} kanalo. | Nepavyko atnaujinti {count} kanalų. | Nepavyko atnaujinti {count} kanalų."
+    Toast: "Nepavyko atnaujinti kai kurių prenumeruojamų kanalų. Spustelėkite, kad juos peržiūrėtumėte."
+    Retry Channel: "Bandyti dar kartą: {channel}"
+    Show All: "Rodyti visus"
+    Show Fewer: "Rodyti mažiau"
   Cache Load Error: Nepavyko įkelti išsaugotų prenumeratų sklaidos kanalų.
   New video from {channel}: Naujas vaizdo įrašas iš {channel}
   New short from {channel}: Naujas šortas iš {channel}
@@ -197,8 +203,6 @@ Subscriptions:
   New post from {channel}: Naujas įrašas iš {channel}
   Mark As Unseen: Pažymėti kaip nematytą
   Copy Error Details: "Kopijuoti techninę informaciją"
-  Refresh Errors: "Kanalai, kurių nepavyko atnaujinti: {channels}. Spustelėkite, kad peržiūrėtumėte išsamią informaciją."
-  Refresh Error Channels More: "{channels} ir dar {count} | {channels} ir dar {count} | {channels} ir dar {count}"
   Never show {type} from this channel in feeds again: Daugiau niekada nerodyti šio kanalo {type} turinio srautuose
   Load More Posts: Įkelti daugiau įrašų
   Subscriptions Tabs: Prenumeratų kortelės
@@ -209,7 +213,7 @@ Subscriptions:
   Refreshing Subscription Posts: Atnaujinami prenumeratų įrašai
   New Content: Naujas turinys
   New Feed Refresh Warning Title: Atnaujinti visus prenumeratų kanalus?
-  New Feed Refresh Warning: Visų vienos prenumeratos turinio tipų atnaujinimas be RSS gali užtrukti. Ar norite tęsti? | Visų {count} prenumeratų turinio tipų atnaujinimas be RSS gali užtrukti. Ar norite tęsti? | Visų {count} prenumeratų turinio tipų atnaujinimas be RSS gali užtrukti. Ar norite tęsti?
+  New Feed Refresh Warning: Visų {count} prenumeratos turinio tipų atnaujinimas gali užtrukti. Ar norite tęsti? | Visų {count} prenumeratų turinio tipų atnaujinimas gali užtrukti. Ar norite tęsti? | Visų {count} prenumeratų turinio tipų atnaujinimas gali užtrukti. Ar norite tęsti?
   New Since Last Refresh: Nauja nuo paskutinio atnaujinimo
   Mark As Seen: Pažymėti kaip peržiūrėtą
   Mark All as Seen: Pažymėti viską kaip peržiūrėta
@@ -232,7 +236,7 @@ Subscriptions:
     Feed Already Followed: Jūs jau stebite šį sklaidos kanalą.
     Feed Could Not Be Loaded: Nepavyko įkelti sklaidos kanalo. Patikrinkite, ar adresas nurodo į RSS arba Atom sklaidos kanalą.
     Feed Requires Browser Check: Ši svetainė reikalauja naršyklės patikros, kurios OpenTubeX negali atlikti. Šiam srautui išbandykite kitą adresą arba kitą RSSHub serverį.
-    Refresh Errors: Nepavyko atnaujinti 1 sklaidos kanalo. | Nepavyko atnaujinti {count} sklaidos kanalų. | Nepavyko atnaujinti {count} sklaidos kanalų.
+    Refresh Errors: Nepavyko atnaujinti {count} sklaidos kanalo. | Nepavyko atnaujinti {count} sklaidos kanalų. | Nepavyko atnaujinti {count} sklaidos kanalų.
     Description: Pridėkite RSS arba Atom sklaidos kanalą, kad galėtumėte stebėti kūrėjus kitose platformose. {rssHub} serveriai teikia sklaidos kanalus daugeliui svetainių, pavyzdžiui, Twitch.
     Empty Items: Jūsų sklaidos kanaluose šiuo metu nėra jokių elementų.
     No Feeds: Dar nestebite jokių RSS sklaidos kanalų.
@@ -250,11 +254,33 @@ Subscriptions:
       Optional Parameter: '{parameter} (neprivaloma)'
       Not Set: Nenustatyta
     Retry Feed: Bandyti dar kartą įkelti {feed}
+    Reloading Feed: Iš naujo įkeliamas {feed}
+  Platforms:
+    Tab: Platformos
+    Platform: Platforma
+    All Platforms: Visos platformos
+    Followed Channels: Sekami kanalai kitose platformose
+    Description: Sekite kanalus Twitch, SoundCloud, PeerTube, Rumble ir Odysee platformose, kad jų įkeltą turinį matytumėte savo prenumeratų skirtuke „Platformos“. Raskite kanalus paieška arba pridėkite juos pagal jų puslapio adresą. Jų medija atkuriama naudojant yt-dlp.
+    Add Channel: Pridėti kanalą
+    Channel URL: Kanalo adresas
+    Invalid Channel: Įveskite kanalo puslapio adresą Twitch, SoundCloud, PeerTube, Rumble arba Odysee platformoje.
+    Channel Not Found: Šiuo adresu kanalo nėra.
+    Channel Already Followed: Jūs jau sekate šį kanalą.
+    Channel Could Not Be Loaded: Nepavyko įkelti kanalo.
+    No Channels: Dar nesekate jokių kanalų kitose platformose.
+    Unfollow Channel: Nebesekti {channel}
+    Go To Channel: Eiti į kanalą {channel}
+    Follow: Sekti
+    Following: Sekama
+    Clips: Klipai
+    Refresh Errors: Nepavyko atnaujinti {count} kanalo. | Nepavyko atnaujinti {count} kanalų. | Nepavyko atnaujinti {count} kanalų.
+    Content Tabs: Platformų turinio kortelės
 Trending:
   Music: Muzika
   Load Error: Nepavyko įkelti tendencijų.
   Unsupported Backend: Tendencijoms reikia Local API. Pasirinkite Local API arba įjunkite atsarginę serverio sąsają.
 Most Popular Feed Empty: Šio Invidious serverio „Populiariausių“ kanalas tuščias.
+Most Popular Load Error: "Nepavyko įkelti „Populiariausių“ kanalo."
 Feed:
   Cancel Refresh: Atšaukti atnaujinimą
   Feed Last Updated: 'Kanalas „{feedName}“ paskutinį kartą atnaujintas: {date}'
@@ -315,8 +341,8 @@ User Playlists:
   Export Playlist: Eksportuoti šį grojaraštį
   Export list of URLs: Eksportuoti URL sąrašą
   The playlist has been successfully exported: Grojaraštis sėkmingai eksportuotas
-  Are you sure you want to remove {playlistItemCount} duplicate videos from this playlist? This cannot be undone: Ar tikrai norite iš šio grojaraščio pašalinti 1 pasikartojantį vaizdo įrašą? Šio veiksmo anuliuoti negalima. | Ar tikrai norite iš šio grojaraščio pašalinti {playlistItemCount} pasikartojančius vaizdo įrašus? Šio veiksmo anuliuoti negalima. | Ar tikrai norite iš šio grojaraščio pašalinti {playlistItemCount} pasikartojančių vaizdo įrašų? Šio veiksmo anuliuoti negalima.
-  Are you sure you want to remove {playlistItemCount} watched videos from this playlist? This cannot be undone: Ar tikrai norite iš šio grojaraščio pašalinti 1 peržiūrėtą vaizdo įrašą? Šio veiksmo anuliuoti negalima. | Ar tikrai norite iš šio grojaraščio pašalinti {playlistItemCount} peržiūrėtus vaizdo įrašus? Šio veiksmo anuliuoti negalima. | Ar tikrai norite iš šio grojaraščio pašalinti {playlistItemCount} peržiūrėtų vaizdo įrašų? Šio veiksmo anuliuoti negalima.
+  Are you sure you want to remove {playlistItemCount} duplicate videos from this playlist? This cannot be undone: Ar tikrai norite iš šio grojaraščio pašalinti {playlistItemCount} pasikartojantį vaizdo įrašą? Šio veiksmo anuliuoti negalima. | Ar tikrai norite iš šio grojaraščio pašalinti {playlistItemCount} pasikartojančius vaizdo įrašus? Šio veiksmo anuliuoti negalima. | Ar tikrai norite iš šio grojaraščio pašalinti {playlistItemCount} pasikartojančių vaizdo įrašų? Šio veiksmo anuliuoti negalima.
+  Are you sure you want to remove {playlistItemCount} watched videos from this playlist? This cannot be undone: Ar tikrai norite iš šio grojaraščio pašalinti {playlistItemCount} peržiūrėtą vaizdo įrašą? Šio veiksmo anuliuoti negalima. | Ar tikrai norite iš šio grojaraščio pašalinti {playlistItemCount} peržiūrėtus vaizdo įrašus? Šio veiksmo anuliuoti negalima. | Ar tikrai norite iš šio grojaraščio pašalinti {playlistItemCount} peržiūrėtų vaizdo įrašų? Šio veiksmo anuliuoti negalima.
   Delete Playlist: Ištrinti grojaraštį
   Cannot delete the quick bookmark target playlist.: Negalima ištrinti sparčiosioms žymėms naudojamo grojaraščio.
   Are you sure you want to delete this playlist? This cannot be undone: Ar tikrai norite ištrinti šį grojaraštį? Šio veiksmo anuliuoti negalima.
@@ -349,24 +375,24 @@ User Playlists:
       Playlist name cannot be empty. Please input a name.: Grojaraščio pavadinimas negali būti tuščias. Įveskite pavadinimą.
       Playlist has been updated.: Grojaraštis atnaujintas.
       There was an issue with updating this playlist.: Atnaujinant šį grojaraštį kilo klaida.
-      '{videoCount} video(s) have been removed': Pašalintas 1 vaizdo įrašas | Pašalinti {videoCount} vaizdo įrašai | Pašalinta {videoCount} vaizdo įrašų
+      '{videoCount} video(s) have been removed': Pašalintas {videoCount} vaizdo įrašas | Pašalinti {videoCount} vaizdo įrašai | Pašalinta {videoCount} vaizdo įrašų
       There were no videos to remove.: Nėra šalintinų vaizdo įrašų.
       This playlist is protected and cannot be removed.: Šis grojaraštis apsaugotas, todėl jo pašalinti negalima.
       Playlist {playlistName} has been deleted.: Grojaraštis {playlistName} ištrintas.
       This playlist does not exist: Šio grojaraščio nėra
       This playlist has a video with a duration error: Šiame grojaraštyje yra bent vienas vaizdo įrašas, kurio trukmė nenurodyta. Rikiuojant bus laikoma, kad jo trukmė lygi nuliui.
   AddVideoPrompt:
-    Select a playlist to add your N videos to: Pasirinkite grojaraštį, prie kurio norite pridėti vaizdo įrašą | Pasirinkite grojaraštį, prie kurio norite pridėti {videoCount} vaizdo įrašus | Pasirinkite grojaraštį, prie kurio norite pridėti {videoCount} vaizdo įrašų
+    Select a playlist to add your N videos to: Pasirinkite grojaraštį, prie kurio norite pridėti {videoCount} vaizdo įrašą | Pasirinkite grojaraštį, prie kurio norite pridėti {videoCount} vaizdo įrašus | Pasirinkite grojaraštį, prie kurio norite pridėti {videoCount} vaizdo įrašų
     N playlists selected: 'Pasirinkta: {playlistCount}'
     Search in Playlists: Ieškoti grojaraščiuose
     Allow Adding Duplicate Video(s): Leisti pridėti pasikartojančius vaizdo įrašus
     Save: Išsaugoti
-    Added {count} Times: Jau pridėta | Pridėta {count} kartus | Pridėta {count} kartų
+    Added {count} Times: Pridėta {count} kartą | Pridėta {count} kartus | Pridėta {count} kartų
     '{videoCount}/{totalVideoCount} Videos Will Be Added': 'Bus pridėta vaizdo įrašų: {videoCount}/{totalVideoCount}'
     '{videoCount}/{totalVideoCount} Videos Already Added': 'Jau pridėta vaizdo įrašų: {videoCount}/{totalVideoCount}'
     Toast:
       You haven't selected any playlist yet.: Dar nepasirinkote grojaraščio.
-      Video(s) added to {playlistCount} playlists: Pridėta prie 1 grojaraščio | Pridėta prie {playlistCount} grojaraščių | Pridėta prie {playlistCount} grojaraščių
+      Video(s) added to {playlistCount} playlists: Pridėta prie {playlistCount} grojaraščio | Pridėta prie {playlistCount} grojaraščių | Pridėta prie {playlistCount} grojaraščių
     And N more videos: 'ir dar {count} vaizdo įrašas | ir dar {count} vaizdo įrašai | ir dar {count} vaizdo įrašų'
   CreatePlaylistPrompt:
     New Playlist Name: Naujo grojaraščio pavadinimas
@@ -424,8 +450,40 @@ History:
   1 Year: 1 metai
   All Time: Visas laikas
   Custom: Pasirinktinai
-  History Older Than Days Removed: Pašalinti senesni nei 1 dienos žiūrėjimo istorijos įrašai | Pašalinti senesni nei {days} dienų žiūrėjimo istorijos įrašai | Pašalinti senesni nei {days} dienų žiūrėjimo istorijos įrašai
+  History Older Than Days Removed: Pašalinti senesni nei {days} dienos žiūrėjimo istorijos įrašai | Pašalinti senesni nei {days} dienų žiūrėjimo istorijos įrašai | Pašalinti senesni nei {days} dienų žiūrėjimo istorijos įrašai
 Settings:
+  Experimental Badge: Eksperimentinis
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube paskyra"
+    Unofficial App Warning: "OpenTubeX nėra oficiali YouTube programa. Prisijungus tai, ką čia darote, susiejama su jūsų Google paskyra, o Google gali apriboti arba užblokuoti paskyras, kurios naudoja neoficialias programas. Prisijunkite tik su paskyra, kurios netekti jums nebūtų gaila."
+    Sign In Explanation: "OpenTubeX prisijungia kaip TV programėlė: prisijungimą patvirtinate Google svetainėje, o OpenTubeX niekada nemato jūsų slaptažodžio. Prisijungimas lieka šiame įrenginyje ir nėra sinchronizuojamas ar įtraukiamas į atsargines kopijas."
+    Sign In: "Prisijungti"
+    Sign In Anyway: "Vis tiek prisijungti"
+    Sign Out: "Atsijungti"
+    Getting Sign-In Code: "Gaunamas prisijungimo kodas"
+    Sign In Instructions: "Atidarykite prisijungimo puslapį ir pasirinkite savo Google paskyrą. Kodas įvedamas automatiškai."
+    Other Device Instructions: "Kitame įrenginyje eikite šiuo adresu ir įveskite kodą:"
+    YouTube Channel: "YouTube kanalas"
+    Using Channel: "Dabar naudojate YouTube kaip {name}"
+    Switch Channel Failed: "Nepavyko perjungti YouTube kanalo: {error}"
+    Open Sign-In Page: "Atidaryti prisijungimo puslapį"
+    Copy Code: "Kopijuoti kodą"
+    Code Copied: "Kodas nukopijuotas"
+    Waiting for Approval: "Laukiama, kol patvirtinsite prisijungimą"
+    Sign-In Denied: "Prisijungimas atmestas."
+    Sign-In Code Expired: "Kodo galiojimas baigėsi. Bandykite dar kartą, kad gautumėte naują."
+    Sign-In Failed: "Nepavyko prisijungti: {error}"
+    Signed In As: "Prisijungta prie YouTube kaip {name}"
+    Signed Out: "Atsijungta nuo YouTube"
+    Sign Out Failed: "Nepavyko atsijungti: {error}"
+    Revoke Failed: "Atsijungta nuo YouTube, bet Google nepatvirtino, kad prisijungimas baigtas. Jį galite pašalinti savo Google paskyros trečiųjų šalių ryšiuose."
+    Signed out by YouTube: "YouTube nutraukė prisijungimą. Prisijunkite iš naujo nustatymuose, kad galėtumėte toliau naudoti savo paskyrą."
+    Subscribe on YouTube: "Prenumeruoti ir YouTube"
+    Add to YouTube Watch History: "Įtraukti žiūrėtus vaizdo įrašus į YouTube istoriją"
+    Import Subscriptions: "Importuoti prenumeratas iš YouTube"
+    Imported Subscriptions: "Importuotas {count} kanalas | Importuoti {count} kanalai | Importuota {count} kanalų"
+    No Subscriptions to Import: "Ši YouTube paskyra neturi prenumeratų"
+    Import Subscriptions Failed: "Nepavyko importuoti prenumeratų: {error}"
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Kol diagnostikos žurnalas įjungtas, OpenTubeX laiko naujausius žurnalo pranešimus atmintyje, kad galėtumėte juos pridėti prie pranešimų apie klaidas. Jis niekada jų neišsaugo ir nesiunčia pats, o išjungus žurnalą jie ištrinami. Ataskaitose nėra slapukų, prieigos raktų, IP adresų ir URL parametrų, tačiau jose gali būti jūsų paleistų vaizdo įrašų ID, todėl prieš dalindamiesi ataskaita ją peržiūrėkite.
@@ -557,6 +615,7 @@ Settings:
       Closing Tabs: Užveriant kelis skirtukus
       Loading Tabs: Įkeliant kelis skirtukus
       Unloading Tabs: Iškeliant kelis skirtukus
+      Refreshing All Feeds: Atnaujinant daug prenumeratų
     Open Deep Links In New Window: „OpenTubeX“ perduotus URL atverti naujame lange
     Minimize to system tray: Sumažinti į sistemos dėklą
     Remember Tab Navigation History: Įsiminti naršymo skirtukuose istoriją
@@ -1391,6 +1450,12 @@ Settings:
     To: Iki
     Confirm Before Unsubscribing: Klausti prieš atsisakant prenumeratos
     RSS Feeds Auto Refresh Interval: RSS sklaidos kanalų automatinio atnaujinimo intervalas
+    Faster Subscription Refresh: "Greitesnis prenumeratų atnaujinimas"
+    Platforms:
+      Other Platforms: Kitos platformos
+      Manage Channels: Tvarkyti sekamus kanalus
+      Notify When Live: Pranešti, kai sekami Twitch kanalai pradeda tiesioginę transliaciją
+      Auto Refresh Interval: Kitų platformų automatinio atnaujinimo intervalas
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Skaičiuoti žiūrėjimo laiką"
@@ -1761,7 +1826,6 @@ Settings:
     Set Password: Nustatyti slaptažodį
     Remove Password: Pašalinti slaptažodį
   Experimental Settings:
-    Faster Subscription Refresh: "Greitesnis prenumeratų atnaujinimas"
     Disable Hardware Acceleration: Išjungti aparatinį spartinimą
   Interface Customizer:
     Customize Interface: "Tinkinti sąsają"
@@ -1918,7 +1982,7 @@ Channel:
     Location: Vieta
   Posts:
     This channel currently does not have any posts: Šiame kanale šiuo metu nėra įrašų
-    votes: 1 balsas | {votes} balsai | {votes} balsų
+    votes: '{votes} balsas | {votes} balsai | {votes} balsų'
     View Full Post: Rodyti visą įrašą
     Reveal Answers: Rodyti atsakymus
     Hide Answers: Slėpti atsakymus
@@ -2143,6 +2207,7 @@ Video:
     Autoplay is on: Automatinis atkūrimas įjungtas
     Up next in {seconds}: Kitas įrašas po {seconds} sek.
     Resize dock: Keisti skydelio dydį
+    Resize dock width: Keisti skydelio plotį
     Play now: Leisti dabar
     MusicPlaybackRateOverride: Aptiktas muzikinis vaizdo įrašas, todėl atkuriama 1× greičiu
     Normal: Įprastas
@@ -2312,7 +2377,7 @@ Video:
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Likęs SABR delsos laikas: {remindingTimeSeconds} s'
   Station: Stotis
   Playlist:
-    Unavailable videos are hidden: 1 nepasiekiamas vaizdo įrašas paslėptas | {count} nepasiekiami vaizdo įrašai paslėpti | {count} nepasiekiamų vaizdo įrašų paslėpta
+    Unavailable videos are hidden: '{count} nepasiekiamas vaizdo įrašas paslėptas | {count} nepasiekiami vaizdo įrašai paslėpti | {count} nepasiekiamų vaizdo įrašų paslėpta'
   External Media:
     Dislikes: "Nepatinka | Nepatinka | Nepatinka"
     Reposts: "Pakartotinis įrašas | Pakartotiniai įrašai | Pakartotinių įrašų"
@@ -2426,6 +2491,7 @@ Context Menu:
   Reload Posts: Įkelti įrašus iš naujo
   Reload All Feeds: Iš naujo įkelti visus kanalus
   Reload RSS Feeds: Iš naujo įkelti RSS sklaidos kanalus
+  Reload Platforms: Iš naujo įkelti platformas
   Close Multiple Tabs: Uždaryti {count} kortelę | Uždaryti {count} korteles | Uždaryti {count} kortelių
   Duplicate Tab: Dubliuoti kortelę
   Duplicate Multiple Tabs: Dubliuoti {count} kortelę | Dubliuoti {count} korteles | Dubliuoti {count} kortelių
@@ -2545,13 +2611,13 @@ Chapters:
   Sync to Video Time: 'Sinchronizuoti su vaizdo įrašo laiku'
 Comments:
   Image unavailable: "Vaizdas nepasiekiamas"
-  Comment Count: 1 komentaras | {count} komentarai | {count} komentarų
+  Comment Count: '{count} komentaras | {count} komentarai | {count} komentarų'
   Show Comments: Rodyti komentarus
   Getting comment replies, please wait: Gaunami atsakymai į komentarą, palaukite
   Reload Comments: Iš naujo įkelti komentarus
-  Reply Count: 1 atsakymas | {replyCount} atsakymai | {replyCount} atsakymų
-  View {replyCount} replies: Rodyti 1 atsakymą | Rodyti {replyCount} atsakymus | Rodyti {replyCount} atsakymų
-  Hide {replyCount} replies: Slėpti 1 atsakymą | Slėpti {replyCount} atsakymus | Slėpti {replyCount} atsakymų
+  Reply Count: '{replyCount} atsakymas | {replyCount} atsakymai | {replyCount} atsakymų'
+  View {replyCount} replies: Rodyti {replyCount} atsakymą | Rodyti {replyCount} atsakymus | Rodyti {replyCount} atsakymų
+  Hide {replyCount} replies: Slėpti {replyCount} atsakymą | Slėpti {replyCount} atsakymus | Slėpti {replyCount} atsakymų
   View 1 reply from {channelName}: Rodyti 1 kanalo {channelName} atsakymą
   View {replyCount} replies from {channelName} and others: Rodyti {replyCount} kanalo {channelName} ir kitų atsakymus
   There are no comments available for this post: Šiam įrašui komentarų nėra
@@ -2571,7 +2637,7 @@ Comments:
   Highlighted comment: Paryškintas komentaras
   Highlighted reply: Paryškintas atsakymas
   Search loaded comments: Ieškoti įkeltuose komentaruose
-  Loaded comment search result count: 1 iš {total} įkeltų komentarų | {count} iš {total} įkeltų komentarų | {count} iš {total} įkeltų komentarų
+  Loaded comment search result count: '{count} iš {total} įkeltų komentarų | {count} iš {total} įkeltų komentarų | {count} iš {total} įkeltų komentarų'
   No loaded comments match your filters: Nė vienas įkeltas komentaras neatitinka filtrų
   YouTube comment link copied to clipboard: YouTube komentaro nuoroda nukopijuota į iškarpinę
   Translate to {language}: Versti į {language}
@@ -2589,6 +2655,9 @@ Description:
   Games: Žaidimai
   Music: Muzika
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Užsiprenumeravus kanalą arba atšaukus jo prenumeratą programoje OpenTubeX, tas pats atliekama ir jūsų YouTube paskyroje."
+    Add to YouTube Watch History: "Jūsų paleisti vaizdo įrašai įtraukiami į jūsų YouTube žiūrėjimo istoriją, kad YouTube rekomendacijos iš jų mokytųsi. Kol istorija YouTube pristabdyta, niekas neįtraukiama."
   General Settings:
     Built-in Streams: |
       Automatinis režimas daugumą vaizdo įrašų leidžia per YouTube visionOS klientą, kuris paleidžia greičiau ir palaiko automatinę kokybę. Tiesioginės transliacijos ir vaizdo įrašai, kurių jis negali paleisti, naudoja SABR.
@@ -2612,6 +2681,7 @@ Tooltips:
       Naudojant yt-dlp vaizdo įrašai gali būti pradedami atkurti lėčiau.
     Avoid translation: |
       Išjungti YouTube automatinį vaizdo įrašo pavadinimo, aprašo ir skyrių vertimą.
+      Parinktis „Visoje programoje“ taip pat rodo kanalų pavadinimus ir aprašus originalo kalba.
       Per daug užklausų, pavyzdžiui, gaunant vaizdo įrašų pavadinimus iš sąrašų, gali laikinai
       sutrikdyti programos veikimą.
     Show Thumbnail Previews: Užvedus pelės žymeklį ant vaizdo įrašų miniatiūrų rodyti animuotas peržiūras.
@@ -2707,8 +2777,11 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Atnaujina srautus pagal pasirinktus nustatymus. Kompiuteryje OpenTubeX lieka sistemos dėkle, kol išeinate. Android nustato foninių atnaujinimų laiką."
     Notify About New Uploads: Šiame įrenginyje rodo sistemos pranešimus apie kanalus, kurių pranešimus įjungėte jų prenumeratos nustatymuose. OpenTubeX naujo turinio ieško atnaujindama prenumeratas, todėl pasirinkite automatinio atnaujinimo intervalą. Kad gautumėte pranešimus, kai programa uždaryta, taip pat įjunkite atnaujinimą, kai programa uždaryta.
     RSS Feeds Auto Refresh Interval: Kaip dažnai OpenTubeX automatiškai atnaujina jūsų RSS sklaidos kanalus, kol programa atidaryta.
+    Faster Subscription Refresh: "Pirmiausia patikrina kiekvieno kanalo RSS sklaidos kanalą ir įkelia vaizdo įrašus, Shorts ir tiesiogines transliacijas tik iš kanalų su naujais įkėlimais. Automatiniai atnaujinimai taip pat praleidžia kanalus, įkeltus per pastarąsias 10 minučių. Kanaluose be naujų įkėlimų peržiūrų skaičiai, pašalinti vaizdo įrašai ir pakeisti pavadinimai atnaujinami tik kas kelias valandas, o nauji įkėlimai gali pasirodyti vėliau, kai RSS sklaidos kanalas vėluoja. Nepasiekiama naudojant Invidious API."
+    Platforms Auto Refresh Interval: Kaip dažnai OpenTubeX automatiškai atnaujina kanalus, kuriuos sekate kitose platformose, kol programa atidaryta.
+    Twitch Notify When Live: Praneša, kai vienas iš jūsų sekamų Twitch kanalų pradeda transliaciją. OpenTubeX tikrina kas kelias minutes, kol yra atidaryta, ir taip pat, kai yra uždaryta, jei tuo metu atnaujina prenumeratas.
   Theme Settings:
-    Only Show Important Notifications: Paslepia programos pranešimus, kurie tik patvirtina veiksmą arba praneša būseną. Klaidos, įspėjimai, jūsų nustatyti priminimai ir pranešimai, siūlantys veiksmą, pavyzdžiui, Anuliuoti, vis tiek rodomi. Foninių operacijų, pavyzdžiui, prenumeratų atnaujinimo, eiga rodoma bendrojoje eigos juostoje, o ne pranešime. Sistemos pranešimams tai neturi įtakos.
+    Only Show Important Notifications: Paslepia programos pranešimus, kurie tik patvirtina veiksmą arba praneša būseną, įskaitant tuos, kuriuose siūloma Anuliuoti. Klaidos, įspėjimai, jūsų nustatyti priminimai ir pranešimai, prašantys priimti sprendimą, pavyzdžiui, raginimai atnaujinti, vis tiek rodomi. Foninių operacijų, pavyzdžiui, prenumeratų atnaujinimo, eiga rodoma bendrojoje eigos juostoje, o ne pranešime. Sistemos pranešimams tai neturi įtakos.
     Visible Search Suggestions: "Nustato, kiek paieškos istorijos įrašų ir pasiūlymų paieškos juosta rodo, kol jos sąrašą reikia slinkti. Sąrašas niekada nesiekia toliau už lango apačią."
     Thumbnail Size: "Keičia vaizdo įrašų miniatiūrų dydį tinkleliuose ir sąrašuose. Tinkleliai su fiksuotu stulpelių skaičiumi arba Viso pločio rodiniu vietoj to užpildo kiekvieną eilutę, todėl ten keičiamos tik sąrašų miniatiūros ir Shorts. Telefono dydžio languose tinklelio miniatiūros ribojamos iki 100 %."
     Playlist Thumbnail Size: "Keičia vaizdo įrašų miniatiūrų dydį grojaraščių puslapiuose. Tinkleliai su fiksuotu stulpelių skaičiumi arba Viso pločio rodiniu vietoj to užpildo kiekvieną eilutę, todėl ten keičiamos tik sąrašų miniatiūros ir Shorts. Telefono dydžio languose tinklelio miniatiūros ribojamos iki 100 %."
@@ -2726,7 +2799,6 @@ Tooltips:
     UseDeArrowThumbnails: Vaizdo įrašų miniatiūras pakeisti DeArrow miniatiūromis.
     Always Show DeArrow Badge: Palikti DeArrow mygtuką matomą prie vaizdo įrašų, kurių pavadinimą ar miniatiūrą pakeitė DeArrow, užuot rodžius tik užvedus žymiklį.
   Experimental Settings:
-    Faster Subscription Refresh: "Pirmiausia patikrina kiekvieno kanalo RSS sklaidos kanalą ir įkelia vaizdo įrašus, Shorts ir tiesiogines transliacijas tik iš kanalų su naujais įkėlimais. Automatiniai atnaujinimai taip pat praleidžia kanalus, įkeltus per pastarąsias 10 minučių. Kanaluose be naujų įkėlimų peržiūrų skaičiai, pašalinti vaizdo įrašai ir pakeisti pavadinimai atnaujinami tik kas kelias valandas, o nauji įkėlimai gali pasirodyti vėliau, kai RSS sklaidos kanalas vėluoja. Nepasiekiama naudojant Invidious API."
     Disable Hardware Acceleration: Išjungia GPU aparatinį spartinimą. Gali išspręsti grafikos problemas, bet tikriausiai sumažins našumą.
 Autoplay Interruption Timer: Automatinis atkūrimas atšauktas dėl {autoplayInterruptionIntervalHours} val. neveiklumo
 The playlist is at the beginning. Enable loop to continue playing: Pasiekta grojaraščio pradžia. Įjunkite kartojimą, kad atkūrimas būtų tęsiamas
@@ -2738,7 +2810,7 @@ Screenshot Clipboard Success: Ekrano kopija išsaugota iškarpinėje
 Screenshot Clipboard Error: Nepavyko nukopijuoti ekrano kopijos į iškarpinę
 Channel Hidden: '{channel} pridėtas prie kanalų filtro'
 Channel Unhidden: '{channel} pašalintas iš kanalų filtro'
-Trimmed input must be at least N characters long: Įvestį be tarpų pradžioje ir pabaigoje turi sudaryti bent 1 simbolis | Įvestį be tarpų pradžioje ir pabaigoje turi sudaryti bent {length} simboliai | Įvestį be tarpų pradžioje ir pabaigoje turi sudaryti bent {length} simbolių
+Trimmed input must be at least N characters long: Įvestį be tarpų pradžioje ir pabaigoje turi sudaryti bent {length} simbolis | Įvestį be tarpų pradžioje ir pabaigoje turi sudaryti bent {length} simboliai | Įvestį be tarpų pradžioje ir pabaigoje turi sudaryti bent {length} simbolių
 Tag already exists: 'Žyma „{tagName}“ jau yra'
 Hashtag:
   Hashtag: Saitažodis
@@ -2925,7 +2997,7 @@ Downloads:
   Download Missing: Atsisiuntimas nepasiekiamas
   Files Missing: Failų sistemoje atsisiųsto failo nebėra. | Failų sistemoje atsisiųstų failų nebėra. | Failų sistemoje atsisiųstų failų nebėra.
   Files Available: 'Pasiekiama {available} iš {total} atsisiųstų failų.'
-  More Files: Dar 1 failas | Dar {count} failai | Dar {count} failų
+  More Files: Dar {count} failas | Dar {count} failai | Dar {count} failų
   Template Used: 'Šablonas: {name}'
   Download Type: Atsisiuntimo tipas
   Template: Šablonas
@@ -3177,3 +3249,31 @@ Notification Center:
   Clear: "Išvalyti"
   Empty: "Pranešimų dar nėra"
   Empty Hint: "Čia bus rodomi tiesioginių transliacijų priminimai ir nauji įkėlimai iš kanalų su įjungtais pranešimais."
+Platforms:
+  Tracks: Takeliai
+  Playlists: Grojaraščiai
+  Follower Count: '{count} sekėjas | {count} sekėjai | {count} sekėjų'
+  Open Website: Atidaryti platformoje {platform}
+  Channel Not Found: Šio kanalo rasti nepavyko.
+  Playlist Not Found: Šio grojaraščio rasti nepavyko.
+  Load Error: Nepavyko įkelti šio puslapio iš {platform}.
+  Empty Tab: Čia dar nieko nėra.
+YouTube Account:
+  Like: "Patinka"
+  Dislike: "Nepatinka"
+  Rating Failed: "Nepavyko įvertinti YouTube: {error}"
+  Subscribe Failed: "Nepavyko užsiprenumeruoti YouTube: {error}"
+  Unsubscribe Failed: "Nepavyko atšaukti prenumeratos YouTube: {error}"
+  Add a comment: "Pridėti komentarą"
+  Add a reply: "Pridėti atsakymą"
+  Comment: "Komentuoti"
+  Reply: "Atsakyti"
+  Comment Posted: "Komentaras paskelbtas"
+  Reply Posted: "Atsakymas paskelbtas"
+  Comment Failed: "Nepavyko paskelbti komentaro: {error}"
+  Delete Comment: "Ištrinti komentarą"
+  Delete Comment Confirmation: "Ištrinti jūsų komentarą iš YouTube?"
+  Comment Deleted: "Komentaras ištrintas"
+  Delete Comment Failed: "Nepavyko ištrinti komentaro: {error}"
+  Recommendations: "YouTube rekomendacijos"
+  Recommendations Failed: "Nepavyko įkelti jūsų YouTube rekomendacijų."

@@ -28,7 +28,6 @@ final class RumbleManifestTransport implements Interceptor {
         String host = request.url().host();
         if (!(host.equals("rumble.com") || host.endsWith(".rumble.com")) ||
             !request.url().encodedPath().endsWith(".m3u8")) return chain.proceed(request);
-        Process process = null;
         try {
             var headers = new HashMap<String, String>();
             for (String name : request.headers().names()) {
@@ -37,22 +36,34 @@ final class RumbleManifestTransport implements Interceptor {
             }
             JSONObject payload = new JSONObject().put("url", request.url().toString())
                 .put("method", request.method()).put("headers", new JSONObject(headers)).put("timeout", 30000);
+            return responseFromPayload(request, send(context, payload));
+        } catch (InterruptedException error) {
+            Thread.currentThread().interrupt();
+            throw new IOException("Rumble manifest request interrupted", error);
+        } catch (Exception error) {
+            throw new IOException("Rumble manifest request failed", error);
+        }
+    }
+
+    /**
+     * Sends a request with the helper. It takes the payload of
+     * opentubex_rumble_http.py and returns the status, headers and Base64 body.
+     */
+    static JSONObject send(Context context, JSONObject payload) throws Exception {
+        Process process = null;
+        try {
             process = YtDlpRuntime.rumbleHttpCommand(context)
                 .redirectError(ProcessBuilder.Redirect.to(new File("/dev/null"))).start();
             Process running = process;
             FutureTask<byte[]> output = new FutureTask<>(() -> {
                 try (var input = running.getInputStream()) { return YtDlpFiles.read(input, 24 * 1024 * 1024); }
             });
-            new Thread(output, "rumble-manifest").start();
+            new Thread(output, "rumble-http").start();
             try (var input = process.getOutputStream()) { input.write(payload.toString().getBytes(StandardCharsets.UTF_8)); }
-            if (!process.waitFor(35, TimeUnit.SECONDS) || process.exitValue() != 0) throw new IOException("Rumble manifest request failed");
-            JSONObject result = new JSONObject(new String(output.get(1, TimeUnit.SECONDS), StandardCharsets.UTF_8));
-            return responseFromPayload(request, result);
-        } catch (InterruptedException error) {
-            Thread.currentThread().interrupt();
-            throw new IOException("Rumble manifest request interrupted", error);
-        } catch (Exception error) {
-            throw new IOException("Rumble manifest request failed", error);
+            // The helper's own time limit, and a little more for it to start and answer
+            long waitMs = payload.optLong("timeout", 30000) + 5000;
+            if (!process.waitFor(waitMs, TimeUnit.MILLISECONDS) || process.exitValue() != 0) throw new IOException("Rumble request failed");
+            return new JSONObject(new String(output.get(1, TimeUnit.SECONDS), StandardCharsets.UTF_8));
         } finally { if (process != null) process.destroy(); }
     }
 

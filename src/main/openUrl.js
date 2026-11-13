@@ -342,7 +342,7 @@ export function createUrlOpener({ rootAppUrl, createWindow }) {
    * @param {import('electron').IpcMainEvent} event
    */
   function openPendingUrlForReadyWebContents(event) {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
+    if (!isOpenTubeXUrl(event.senderFrame?.url)) {
       return
     }
 

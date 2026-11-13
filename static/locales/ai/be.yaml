@@ -174,6 +174,12 @@ Home Page:
   All sections hidden: Усе раздзелы схаваны
   All sections hidden description: Наладзьце галоўную, каб зноў паказаць раздзел.
 Subscriptions:
+  Channel Errors:
+    Summary: "Не ўдалося абнавіць {count} канал. | Не ўдалося абнавіць {count} каналы. | Не ўдалося абнавіць {count} каналаў."
+    Toast: "Не ўдалося абнавіць некаторыя каналы з падпісак. Націсніце, каб іх паглядзець."
+    Retry Channel: "Паўтарыць для {channel}"
+    Show All: "Паказаць усе"
+    Show Fewer: "Паказаць менш"
   Cache Load Error: Не ўдалося загрузіць захаваныя стужкі падпісак.
   New video from {channel}: Новае відэа ад {channel}
   New short from {channel}: Новае кароткае відэа ад {channel}
@@ -181,8 +187,6 @@ Subscriptions:
   New post from {channel}: Новая публікацыя ад {channel}
   Mark As Unseen: Пазначыць як непрагледжанае
   Copy Error Details: "Скапіяваць тэхнічныя падрабязнасці"
-  Refresh Errors: "Каналы, якія не ўдалося абнавіць: {channels}. Націсніце, каб праглядзець падрабязнасці."
-  Refresh Error Channels More: "{channels} і яшчэ {count} | {channels} і яшчэ {count} | {channels} і яшчэ {count}"
   Never show {type} from this channel in feeds again: Больш не паказваць {type} з гэтага канала ў стужках
   Refreshing Subscription Videos: Абнаўляюцца відэа з падпісак
   Refreshing Subscription Shorts: Абнаўляюцца кароткія відэа з падпісак
@@ -190,7 +194,7 @@ Subscriptions:
   Refreshing Subscription Posts: Абнаўляюцца допісы з падпісак
   New Content: Новае змесціва
   New Feed Refresh Warning Title: Абнавіць усе стужкі падпісак?
-  New Feed Refresh Warning: Абнаўленне ўсіх тыпаў змесціва без RSS для 1 падпіскі можа заняць шмат часу. Працягнуць? | Абнаўленне ўсіх тыпаў змесціва без RSS для {count} падпісак можа заняць шмат часу. Працягнуць? | Абнаўленне ўсіх тыпаў змесціва без RSS для {count} падпісак можа заняць шмат часу. Працягнуць?
+  New Feed Refresh Warning: Абнаўленне ўсіх тыпаў змесціва для {count} падпіскі можа заняць шмат часу. Працягнуць? | Абнаўленне ўсіх тыпаў змесціва для {count} падпісак можа заняць шмат часу. Працягнуць? | Абнаўленне ўсіх тыпаў змесціва для {count} падпісак можа заняць шмат часу. Працягнуць?
   New Since Last Refresh: Новае з часу апошняга абнаўлення
   Mark As Seen: Пазначыць прагледжаным
   Mark All as Seen: Пазначыць усё прагледжаным
@@ -213,7 +217,7 @@ Subscriptions:
     Feed Already Followed: Вы ўжо падпісаныя на гэту стужку.
     Feed Could Not Be Loaded: Не ўдалося загрузіць стужку. Праверце, ці вядзе адрас на RSS- або Atom-стужку.
     Feed Requires Browser Check: Гэты сайт патрабуе праверкі браўзера, якую OpenTubeX не можа прайсці. Паспрабуйце іншы адрас або іншы асобнік RSSHub для гэтай стужкі.
-    Refresh Errors: Не ўдалося абнавіць 1 стужку. | Не ўдалося абнавіць {count} стужкі. | Не ўдалося абнавіць {count} стужак.
+    Refresh Errors: Не ўдалося абнавіць {count} стужку. | Не ўдалося абнавіць {count} стужкі. | Не ўдалося абнавіць {count} стужак.
     Description: Дадайце RSS- або Atom-стужку, каб сачыць за аўтарамі на іншых платформах. Асобнікі {rssHub} даюць стужкі для многіх сайтаў, напрыклад Twitch.
     Empty Items: У вашых стужках пакуль няма элементаў.
     No Feeds: Вы пакуль не падпісаны ні на адну RSS-стужку.
@@ -231,11 +235,33 @@ Subscriptions:
       Optional Parameter: '{parameter} (неабавязкова)'
       Not Set: Не зададзена
     Retry Feed: Паўтарыць спробу для {feed}
+    Reloading Feed: Перазагрузка {feed}
+  Platforms:
+    Tab: Платформы
+    Platform: Платформа
+    All Platforms: Усе платформы
+    Followed Channels: Адсочваныя каналы на іншых платформах
+    Description: Адсочвайце каналы на Twitch, SoundCloud, PeerTube, Rumble і Odysee, каб бачыць іх новыя публікацыі на ўкладцы «Платформы» ў вашых падпісках. Знаходзьце каналы праз пошук або дадавайце іх па адрасе іх старонкі. Іх медыя прайграюцца праз yt-dlp.
+    Add Channel: Дадаць канал
+    Channel URL: Адрас канала
+    Invalid Channel: Увядзіце адрас старонкі канала на Twitch, SoundCloud, PeerTube, Rumble або Odysee.
+    Channel Not Found: Па гэтым адрасе няма канала.
+    Channel Already Followed: Вы ўжо адсочваеце гэты канал.
+    Channel Could Not Be Loaded: Не ўдалося загрузіць канал.
+    No Channels: Вы пакуль не адсочваеце ніводнага канала на іншых платформах.
+    Unfollow Channel: Перастаць адсочваць {channel}
+    Go To Channel: Перайсці да канала {channel}
+    Follow: Адсочваць
+    Following: Адсочваецца
+    Clips: Кліпы
+    Refresh Errors: Не ўдалося абнавіць {count} канал. | Не ўдалося абнавіць {count} каналы. | Не ўдалося абнавіць {count} каналаў.
+    Content Tabs: Укладкі змесціва платформ
 Trending:
   Music: Музыка
   Load Error: Не ўдалося загрузіць папулярнае.
   Unsupported Backend: Для папулярнага патрэбны Local API. Выберыце Local API або ўключыце рэзервовы серверны механізм.
 Most Popular Feed Empty: Стужка «Самае папулярнае» гэтага асобніка Invidious пустая.
+Most Popular Load Error: "Не ўдалося загрузіць стужку «Самае папулярнае»."
 Feed:
   Cancel Refresh: Скасаваць абнаўленне
   Next Auto Refresh: 'Наступнае аўтаабнаўленне: {date}'
@@ -278,7 +304,7 @@ User Playlists:
     More videos could not be loaded.: Не ўдалося загрузіць іншыя відэа.
   AddVideoPrompt:
     Toast:
-      Video(s) added to {playlistCount} playlists: Відэа дададзена ў 1 спіс прайгравання | Відэа дададзена ў {playlistCount} спісы прайгравання | Відэа дададзена ў {playlistCount} спісаў прайгравання
+      Video(s) added to {playlistCount} playlists: Відэа дададзена ў {playlistCount} спіс прайгравання | Відэа дададзена ў {playlistCount} спісы прайгравання | Відэа дададзена ў {playlistCount} спісаў прайгравання
     And N more videos: 'і яшчэ {count} відэа | і яшчэ {count} відэа | і яшчэ {count} відэа'
   Playlist Thumbnail: "Мініяцюра плэйліста"
   Restore Default Thumbnail: "Аднавіць стандартную мініяцюру"
@@ -328,8 +354,40 @@ History:
   1 Year: 1 год
   All Time: За ўвесь час
   Custom: Уласны перыяд
-  History Older Than Days Removed: Гісторыя прагляду, старэйшая за 1 дзень, выдаленая | Гісторыя прагляду, старэйшая за {days} дні, выдаленая | Гісторыя прагляду, старэйшая за {days} дзён, выдаленая
+  History Older Than Days Removed: Гісторыя прагляду, старэйшая за {days} дзень, выдаленая | Гісторыя прагляду, старэйшая за {days} дні, выдаленая | Гісторыя прагляду, старэйшая за {days} дзён, выдаленая
 Settings:
+  Experimental Badge: Эксперыментальная
+  YouTube Account Settings:
+    YouTube Account Settings: "Уліковы запіс YouTube"
+    Unofficial App Warning: "OpenTubeX не з'яўляецца афіцыйнай праграмай YouTube. Пры ўваходзе вашы дзеянні тут звязваюцца з вашым уліковым запісам Google, а Google можа абмежаваць або заблакіраваць уліковыя запісы, якія карыстаюцца неафіцыйнымі праграмамі. Уваходзьце толькі з уліковым запісам, які вы гатовыя страціць."
+    Sign In Explanation: "OpenTubeX уваходзіць як праграма для тэлевізара: вы пацвярджаеце ўваход на сайце Google, і OpenTubeX ніколі не бачыць ваш пароль. Уваход захоўваецца толькі на гэтай прыладзе, не сінхранізуецца і не трапляе ў рэзервовыя копіі."
+    Sign In: "Увайсці"
+    Sign In Anyway: "Усё роўна ўвайсці"
+    Sign Out: "Выйсці"
+    Getting Sign-In Code: "Атрыманне кода для ўваходу"
+    Sign In Instructions: "Адкрыйце старонку ўваходу і выберыце ўліковы запіс Google. Код будзе ўведзены аўтаматычна."
+    Other Device Instructions: "На іншай прыладзе перайдзіце па гэтым адрасе і ўвядзіце код:"
+    YouTube Channel: "Канал YouTube"
+    Using Channel: "Цяпер вы карыстаецеся YouTube як {name}"
+    Switch Channel Failed: "Не ўдалося змяніць канал YouTube: {error}"
+    Open Sign-In Page: "Адкрыць старонку ўваходу"
+    Copy Code: "Скапіяваць код"
+    Code Copied: "Код скапіяваны"
+    Waiting for Approval: "Чакаем, пакуль вы пацвердзіце ўваход"
+    Sign-In Denied: "Уваход адхілены."
+    Sign-In Code Expired: "Тэрмін дзеяння кода скончыўся. Паспрабуйце зноў, каб атрымаць новы."
+    Sign-In Failed: "Не ўдалося ўвайсці: {error}"
+    Signed In As: "Вы ўвайшлі ў YouTube як {name}"
+    Signed Out: "Вы выйшлі з YouTube"
+    Sign Out Failed: "Не ўдалося выйсці: {error}"
+    Revoke Failed: "Вы выйшлі з YouTube, але Google не пацвердзіў, што сеанс завершаны. Яго можна выдаліць у раздзеле падключэнняў старонніх праграм ва ўліковым запісе Google."
+    Signed out by YouTube: "YouTube завяршыў сеанс. Увайдзіце зноў у Наладах, каб і далей карыстацца ўліковым запісам."
+    Subscribe on YouTube: "Падпісвацца таксама на YouTube"
+    Add to YouTube Watch History: "Дадаваць прагледжаныя відэа ў гісторыю YouTube"
+    Import Subscriptions: "Імпартаваць падпіскі з YouTube"
+    Imported Subscriptions: "Імпартаваны {count} канал | Імпартаваны {count} каналы | Імпартавана {count} каналаў"
+    No Subscriptions to Import: "У гэтым уліковым запісе YouTube няма падпісак"
+    Import Subscriptions Failed: "Не ўдалося імпартаваць падпіскі: {error}"
   Diagnostics:
     Diagnostics: Дыягностыка
     Description: Пакуль дыягнастычны журнал уключаны, OpenTubeX захоўвае апошнія паведамленні журнала ў памяці, каб вы маглі далучыць іх да справаздач пра памылкі. Ён ніколі не захоўвае і не адпраўляе іх сам, а выключэнне журнала выдаляе іх. Справаздачы не ўключаюць файлы cookie, токены, IP-адрасы і параметры URL, але могуць змяшчаць ідэнтыфікатары прайграных відэа, таму праверце справаздачу перад тым, як падзяліцца ёю.
@@ -464,6 +522,7 @@ Settings:
       Closing Tabs: Закрыццём некалькіх укладак
       Loading Tabs: Загрузкай некалькіх укладак
       Unloading Tabs: Выгрузкай некалькіх укладак
+      Refreshing All Feeds: Абнаўленнем мноства падпісак
     Minimize to system tray: Згортваць у сістэмны латок
     Remember Tab Navigation History: Захоўваць гісторыю навігацыі па ўкладках
     New Tab Position:
@@ -1207,6 +1266,12 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Абнаўляць падпіскі, калі праграма закрыта"
     Notify About New Uploads: Апавяшчаць пра новыя загрузкі
     RSS Feeds Auto Refresh Interval: Інтэрвал аўтаматычнага абнаўлення RSS-стужак
+    Faster Subscription Refresh: "Хутчэйшае абнаўленне падпісак"
+    Platforms:
+      Other Platforms: Іншыя платформы
+      Manage Channels: Кіраваць адсочванымі каналамі
+      Notify When Live: Апавяшчаць, калі адсочваныя каналы Twitch пачынаюць трансляцыю
+      Auto Refresh Interval: Інтэрвал аўтаматычнага абнаўлення іншых платформ
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Улічваць час прагляду з"
@@ -1547,7 +1612,6 @@ Settings:
   Search Settings: Налады пошуку
   No Settings Found: Налады не знойдзены
   Experimental Settings:
-    Faster Subscription Refresh: "Хутчэйшае абнаўленне падпісак"
     Disable Hardware Acceleration: Адключыць апаратнае паскарэнне
   Interface Customizer:
     Customize Interface: "Наладзіць інтэрфейс"
@@ -1866,6 +1930,7 @@ Video:
     Auto-generated Caption Template: '{language} (створана аўтаматычна)'
     Up next in {seconds}: Наступнае праз {seconds}
     Resize dock: Змяніць памер панэлі
+    Resize dock width: Змяніць шырыню панэлі
     Play now: Прайграць зараз
     MusicPlaybackRateOverride: Выяўлена музычнае відэа, хуткасць прайгравання — 1×
     Normal: Звычайная
@@ -2011,7 +2076,7 @@ Video:
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Да паўторнай спробы SABR: {remindingTimeSeconds} с'
   Station: Станцыя
   Playlist:
-    Unavailable videos are hidden: 1 недаступнае відэа схавана | {count} недаступныя відэа схаваныя | {count} недаступных відэа схавана
+    Unavailable videos are hidden: '{count} недаступнае відэа схавана | {count} недаступныя відэа схаваныя | {count} недаступных відэа схавана'
   External Media:
     Dislikes: "Дызлайк | Дызлайкі | Дызлайкаў"
     Reposts: "Рэпост | Рэпосты | Рэпостаў"
@@ -2112,6 +2177,7 @@ Context Menu:
   Reload Posts: Перазагрузіць допісы
   Reload All Feeds: Перазагрузіць усе стужкі
   Reload RSS Feeds: Перазагрузіць RSS-стужкі
+  Reload Platforms: Перазагрузіць платформы
   Close Multiple Tabs: Закрыць {count} укладку | Закрыць {count} укладкі | Закрыць {count} укладак
   Duplicate Tab: Дубляваць укладку
   Duplicate Multiple Tabs: Дубляваць {count} укладку | Дубляваць {count} укладкі | Дубляваць {count} укладак
@@ -2230,12 +2296,12 @@ Chapters:
   Sync to Video Time: 'Сінхранізаваць з часам відэа'
 Comments:
   Image unavailable: "Відарыс недаступны"
-  Comment Count: 1 каментарый | {count} каментары | {count} каментарыяў
+  Comment Count: '{count} каментарый | {count} каментары | {count} каментарыяў'
   Show Comments: Паказаць каментары
   Getting comment replies, please wait: Атрыманне адказаў на каментарый, пачакайце
   Reload Comments: Перазагрузіць каментары
-  Reply Count: 1 адказ | {replyCount} адказы | {replyCount} адказаў
-  Hide {replyCount} replies: Схаваць 1 адказ | Схаваць {replyCount} адказы | Схаваць {replyCount} адказаў
+  Reply Count: '{replyCount} адказ | {replyCount} адказы | {replyCount} адказаў'
+  Hide {replyCount} replies: Схаваць {replyCount} адказ | Схаваць {replyCount} адказы | Схаваць {replyCount} адказаў
   View 1 reply from {channelName}: Паказаць 1 адказ ад {channelName}
   View {replyCount} replies from {channelName} and others: Паказаць адказы ({replyCount}) ад {channelName} і іншых
   Comments are turned off: Каментары адключаныя
@@ -2252,7 +2318,7 @@ Comments:
   Highlighted comment: Вылучаны каментарый
   Highlighted reply: Вылучаны адказ
   Search loaded comments: Шукаць у загружаных каментарах
-  Loaded comment search result count: 1 з {total} загружаных каментароў | {count} з {total} загружаных каментароў | {count} з {total} загружаных каментароў
+  Loaded comment search result count: '{count} з {total} загружаных каментароў | {count} з {total} загружаных каментароў | {count} з {total} загружаных каментароў'
   No loaded comments match your filters: Ніводзін загружаны каментарый не адпавядае вашым фільтрам
   YouTube comment link copied to clipboard: Спасылка на каментарый YouTube скапіяваная ў буфер абмену
   Translate to {language}: Перакласці на {language}
@@ -2268,6 +2334,9 @@ Description:
   Games: Гульні
   Music: Музыка
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Калі вы падпісваецеся на канал або адпісваецеся ад яго ў OpenTubeX, тое ж самае адбываецца ў вашым уліковым запісе YouTube."
+    Add to YouTube Watch History: "Відэа, якія вы прайграеце, дадаюцца ў вашу гісторыю прагляду YouTube, і рэкамендацыі YouTube улічваюць іх. Пакуль гісторыя прыпынена на YouTube, нічога не дадаецца."
   General Settings:
     Built-in Streams: |
       Аўтаматычны рэжым прайгравае большасць відэа праз кліент visionOS ад YouTube, які запускаецца хутчэй і падтрымлівае аўтаматычную якасць. Прамыя трансляцыі і відэа, якія ён не можа прайграць, выкарыстоўваюць SABR.
@@ -2291,6 +2360,7 @@ Tooltips:
       Пры выкарыстанні yt-dlp відэа можа запускацца даўжэй.
     Avoid translation: |
       Адключае аўтаматычны пераклад назвы, апісання і раздзелаў відэа з боку YouTube.
+      «Уся праграма» таксама паказвае назвы і апісанні каналаў на мове арыгінала.
       Занадта шмат запытаў, напрыклад атрыманне назваў відэа ва ўсіх спісах, можа часова
       пагоршыць надзейнасць праграмы.
     Show Thumbnail Previews: Паказвае анімаваны перадпрагляд пры навядзенні на мініяцюры відэа.
@@ -2379,8 +2449,11 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Абнаўляе стужкі з выбранымі наладамі. На камп’ютары OpenTubeX застаецца ў сістэмным трэі да выхаду. Android вызначае час фонавых абнаўленняў."
     Notify About New Uploads: Паказвае сістэмныя апавяшчэнні на гэтай прыладзе для каналаў, апавяшчэнні якіх вы ўключылі ў іх наладах падпіскі. OpenTubeX правярае новы змест пры абнаўленні падпісак, таму выберыце інтэрвал аўтаматычнага абнаўлення. Каб атрымліваць апавяшчэнні, калі праграма закрыта, таксама ўключыце абнаўленне падпісак, калі праграма закрыта.
     RSS Feeds Auto Refresh Interval: Як часта OpenTubeX аўтаматычна абнаўляе вашы RSS-стужкі, пакуль праграма адкрыта.
+    Faster Subscription Refresh: "Спачатку правярае RSS-стужку кожнага канала і загружае відэа, Shorts і трансляцыі толькі з каналаў з новымі запампоўкамі. Аўтаматычныя абнаўленні таксама прапускаюць каналы, загружаныя за апошнія 10 хвілін. Для каналаў без новых запамповак колькасць праглядаў, выдаленыя відэа і змененыя назвы абнаўляюцца толькі раз у некалькі гадзін, а новыя запампоўкі могуць з'явіцца пазней, калі RSS-стужка адстае. Недаступна з API Invidious."
+    Platforms Auto Refresh Interval: Як часта OpenTubeX аўтаматычна абнаўляе каналы, якія вы адсочваеце на іншых платформах, пакуль праграма адкрыта.
+    Twitch Notify When Live: Апавяшчае вас, калі адзін з адсочваных каналаў Twitch пачынае трансляцыю. OpenTubeX правярае кожныя некалькі хвілін, пакуль адкрыты, а таксама калі закрыты, калі ён тады абнаўляе падпіскі.
   Theme Settings:
-    Only Show Important Notifications: Хавае апавяшчэнні ў праграме, якія толькі пацвярджаюць дзеянне або паведамляюць пра стан. Памылкі, папярэджанні, наладжаныя вамі напаміны і апавяшчэнні з дзеяннем, напрыклад «Адрабіць», па-ранейшаму паказваюцца. Ход фонавых аперацый, такіх як абнаўленне падпісак, адлюстроўваецца ў агульнай паласе прагрэсу замест апавяшчэння. Сістэмныя апавяшчэнні не закранаюцца.
+    Only Show Important Notifications: Хавае апавяшчэнні ў праграме, якія толькі пацвярджаюць дзеянне або паведамляюць пра стан, у тым ліку тыя, што прапануюць «Адрабіць». Памылкі, папярэджанні, наладжаныя вамі напаміны і апавяшчэнні, якія патрабуюць рашэння, напрыклад прапановы абнаўлення, па-ранейшаму паказваюцца. Ход фонавых аперацый, такіх як абнаўленне падпісак, адлюстроўваецца ў агульнай паласе прагрэсу замест апавяшчэння. Сістэмныя апавяшчэнні не закранаюцца.
     Visible Search Suggestions: "Задае, колькі запісаў гісторыі пошуку і прапаноў паказвае радок пошуку, перш чым яго спіс пачне пракручвацца. Спіс ніколі не выходзіць за ніжні край акна."
     Thumbnail Size: "Змяняе памер мініяцюр відэа ў сетках і спісах. Сеткі з фіксаванай колькасцю слупкоў або з выглядам «На ўсю шырыню» замест гэтага запаўняюць кожны радок, таму там ён змяняе толькі мініяцюры спісаў і Shorts. У вокнах памерам з тэлефон мініяцюры сеткі абмежаваныя 100%."
     Playlist Thumbnail Size: "Змяняе памер мініяцюр відэа на старонках плэйлістоў. Сеткі з фіксаванай колькасцю слупкоў або з выглядам «На ўсю шырыню» замест гэтага запаўняюць кожны радок, таму там ён змяняе толькі мініяцюры спісаў і Shorts. У вокнах памерам з тэлефон мініяцюры сеткі абмежаваныя 100%."
@@ -2394,7 +2467,6 @@ Tooltips:
     Modal Backdrop: "Вызначае, як выглядае праграма за дыялогамі і меню. Размыццё можа запавольваць працу на менш магутных прыладах."
     Click Scrollbar Track to Scroll: "Пстрычка па паласе пракруткі па-за паўзунком пракручвае прыкладна адну старонку ў бок пстрычкі. Пакуль гэта ўключана, бачная паласа пракруткі перахоплівае пстрычкі па элементах пад ёй. Паласа пракруткі панэлі ўкладак заўсёды працуе так."
   Experimental Settings:
-    Faster Subscription Refresh: "Спачатку правярае RSS-стужку кожнага канала і загружае відэа, Shorts і трансляцыі толькі з каналаў з новымі запампоўкамі. Аўтаматычныя абнаўленні таксама прапускаюць каналы, загружаныя за апошнія 10 хвілін. Для каналаў без новых запамповак колькасць праглядаў, выдаленыя відэа і змененыя назвы абнаўляюцца толькі раз у некалькі гадзін, а новыя запампоўкі могуць з'явіцца пазней, калі RSS-стужка адстае. Недаступна з API Invidious."
     Disable Hardware Acceleration: Адключае апаратнае паскарэнне GPU. Гэта можа вырашыць графічныя праблемы, але, верагодна, знізіць прадукцыйнасць.
   SponsorBlock Settings:
     Always Show DeArrow Badge: Пакідаць кнопку DeArrow бачнай на відэа, у якіх DeArrow замяніў назву або мініяцюру, а не толькі пры навядзенні курсора.
@@ -2523,7 +2595,7 @@ Downloads:
   Download Missing: Спампоўванне недаступнае
   Files Missing: Спампаваны файл больш не даступны ў файлавай сістэме. | Спампаваныя файлы больш не даступныя ў файлавай сістэме. | Спампаваныя файлы больш не даступныя ў файлавай сістэме.
   Files Available: 'Даступна {available} з {total} спампаваных файлаў.'
-  More Files: Яшчэ 1 файл | Яшчэ {count} файлы | Яшчэ {count} файлаў
+  More Files: Яшчэ {count} файл | Яшчэ {count} файлы | Яшчэ {count} файлаў
   Template Used: 'Шаблон: {name}'
   Download Type: Тып спампоўвання
   Template: Шаблон
@@ -2775,3 +2847,31 @@ Notification Center:
   Clear: "Ачысціць"
   Empty: "Пакуль няма апавяшчэнняў"
   Empty Hint: "Тут з’явяцца напаміны пра трансляцыі і новыя відэа з каналаў з уключанымі апавяшчэннямі."
+Platforms:
+  Tracks: Трэкі
+  Playlists: Плэй-лісты
+  Follower Count: '{count} падпісчык | {count} падпісчыкі | {count} падпісчыкаў'
+  Open Website: Адкрыць у {platform}
+  Channel Not Found: Гэты канал не знойдзены.
+  Playlist Not Found: Гэты плэй-ліст не знойдзены.
+  Load Error: Не ўдалося загрузіць гэтую старонку з {platform}.
+  Empty Tab: Тут пакуль нічога няма.
+YouTube Account:
+  Like: "Падабаецца"
+  Dislike: "Не падабаецца"
+  Rating Failed: "Не ўдалося ацаніць на YouTube: {error}"
+  Subscribe Failed: "Не ўдалося падпісацца на YouTube: {error}"
+  Unsubscribe Failed: "Не ўдалося адпісацца на YouTube: {error}"
+  Add a comment: "Дадаць каментарый"
+  Add a reply: "Дадаць адказ"
+  Comment: "Каментаваць"
+  Reply: "Адказаць"
+  Comment Posted: "Каментарый апублікаваны"
+  Reply Posted: "Адказ апублікаваны"
+  Comment Failed: "Не ўдалося апублікаваць каментарый: {error}"
+  Delete Comment: "Выдаліць каментарый"
+  Delete Comment Confirmation: "Выдаліць ваш каментарый з YouTube?"
+  Comment Deleted: "Каментарый выдалены"
+  Delete Comment Failed: "Не ўдалося выдаліць каментарый: {error}"
+  Recommendations: "Рэкамендацыі YouTube"
+  Recommendations Failed: "Не ўдалося загрузіць вашы рэкамендацыі YouTube."

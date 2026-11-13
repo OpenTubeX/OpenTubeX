@@ -1,9 +1,7 @@
-import packageDetails from '../../../../package.json'
 import { getTabPageIcon } from '../../tabs/tabPageIcon'
 import { DEFAULT_VIDEO_ZOOM } from '../../helpers/player/videoZoom'
 import { DEFAULT_VOLUME_BOOST } from '../../helpers/player/volumeBoost'
 import { reconcilePendingTabOrder } from '../../tabs/pendingTabOrder'
-import { formatTabTitle } from '../../tabs/tabTitle'
 import { getCapacitorTabService } from '../../tabs/CapacitorTabService'
 
 const MAX_LOGICAL_HISTORY_ENTRIES = 100
@@ -123,7 +121,8 @@ const mutations = {
     for (const tab of incomingTabs) {
       state.skipSilenceByTabId[tab.id] = tab.skipSilence === true
     }
-    state.selectedTabIds = state.selectedTabIds.filter(tabId => incomingIds.has(tabId))
+    // Keep the array when nothing was removed, so the tab bar does not re-render.
+    state.selectedTabIds = reuseEqualSnapshot(state.selectedTabIds, state.selectedTabIds.filter(tabId => incomingIds.has(tabId)))
     state.activeTabId = payload.activeTabId ?? null
     state.mainPresentedTabId = payload.presentedTabId ?? null
     state.selectionRevision = Number.isInteger(payload.selectionRevision)
@@ -523,19 +522,16 @@ function reconcileTab(previous, incoming) {
     incoming.syncedNavigationRevision !== previous.syncedNavigationRevision
   ) {
     const incomingRoute = normalizeRoute(incoming.route ?? routeFromUrl(incoming.url))
-    const title = stripDocumentTitle(incoming.title || incomingRoute.fullPath)
+    const title = incoming.title || incomingRoute.fullPath
     const restored = restoredHistoryState(incoming, incomingRoute, title)
     history = restored.history
     historyIndex = restored.historyIndex
     route = incomingRoute
     pendingReloadRoute = null
     contentTitle = title
-  } else if (incoming.loadState === 'unloaded' && previous.loadState !== 'unloaded') {
-    const currentEntry = normalizeHistoryEntry(history[historyIndex] ?? { route })
-    history = [currentEntry]
-    historyIndex = 0
-    route = currentEntry.route
   }
+  // Unloading keeps the history: an unloaded tab still goes back and forward
+  // once it loads again, as it does after restoring a session.
 
   const next = {
     ...previous,
@@ -556,7 +552,7 @@ function reconcileTab(previous, incoming) {
 }
 
 function createRuntimeTab(incoming, route) {
-  const title = stripDocumentTitle(incoming.title || route.fullPath)
+  const title = incoming.title || route.fullPath
   return {
     ...incoming,
     route,
@@ -669,13 +665,6 @@ function buildFullPath(path, query, hash) {
   }
   const queryString = search.toString()
   return `${path.startsWith('/') ? path : `/${path}`}${queryString ? `?${queryString}` : ''}${hash}`
-}
-
-function stripDocumentTitle(title) {
-  if (title === packageDetails.productName) {
-    return ''
-  }
-  return formatTabTitle(title)
 }
 
 function searchParamsToQuery(searchParams) {

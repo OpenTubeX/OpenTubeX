@@ -47,6 +47,16 @@
           :setting-keys="syncSettingKeys"
         />
       </span>
+      <span
+        v-if="experimental"
+        class="experimentalBadge"
+      >
+        <FtIcon
+          :icon="['fas', 'flask']"
+          aria-hidden="true"
+        />
+        {{ t('Settings.Experimental Badge') }}
+      </span>
       <FtPerformanceImpact :setting-key="performanceImpactKey || settingKey" />
     </label>
   </div>
@@ -54,6 +64,7 @@
 
 <script setup>
 import { ref, useId, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
 
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
@@ -101,6 +112,11 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  // Marks a setting that works but hasn't been tested much yet
+  experimental: {
+    type: Boolean,
+    default: false
+  },
   settingKey: {
     type: String,
     default: ''
@@ -118,6 +134,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['change'])
+
+const { t } = useI18n()
 
 const id = useId()
 

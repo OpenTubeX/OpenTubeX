@@ -246,7 +246,9 @@ export function initializeNetworkRecovery({ checkInternet, internetChecksEnabled
       internetChecksEnabled,
       eventTarget: window,
       visibilityTarget: typeof document === 'undefined' ? undefined : document,
-      isVisible: () => !isAppHidden(),
+      // Android reports a hidden activity to the page only after Chromium has
+      // already hidden the document.
+      isVisible: () => !isAppHidden() && !globalThis.document?.hidden,
       isOnline: () => navigator.onLine !== false,
       onChange: state => connectionEvents.dispatchEvent(new CustomEvent('change', { detail: state })),
       onWaitingChange: origins => connectionEvents.dispatchEvent(new CustomEvent('waiting', { detail: origins }))
@@ -265,6 +267,21 @@ function isLocalHostname(hostname) {
 }
 
 /**
+ * Whether a request reads one of the app's own static files, which the web
+ * build's service worker keeps for offline use.
+ * @param {RequestInfo | URL} input
+ * @returns {boolean}
+ */
+function isAppStaticFile(input) {
+  try {
+    const url = new URL(input instanceof Request ? input.url : input.toString(), location.href)
+    return url.origin === location.origin && url.pathname.startsWith(new URL('static/', location.href).pathname)
+  } catch {
+    return false
+  }
+}
+
+/**
  * A captive portal can answer plain HTTP, but not HTTPS with a valid
  * certificate. A response from the HTTP cache proves nothing either, so only
  * requests that bypass it count, unless their transport keeps no cache.
@@ -279,6 +296,19 @@ function confirmsInternetReachability(input, init, uncached) {
   const cache = init?.cache ?? request?.cache ?? 'default'
   return url.protocol === 'https:' && !isLocalHostname(url.hostname) &&
     (uncached || !['GET', 'HEAD'].includes(method) || ['no-store', 'reload', 'no-cache'].includes(cache))
+}
+
+/**
+ * Whether sending the request again cannot change anything on the server.
+ * YouTube's metadata and chat APIs use POST for read-only queries.
+ * @param {URL} url
+ * @param {string | undefined} method
+ */
+export function isReadOnlyRequest(url, method = 'GET') {
+  method = method.toUpperCase()
+  return ['GET', 'HEAD'].includes(method) ||
+    (method === 'POST' && /(^|\.)youtube\.com$/.test(url.hostname) &&
+      /^\/youtubei\/v1\/(browse|search|player|next|guide|get_transcript|navigation\/resolve_url|updated_metadata|live_chat\/get_live_chat(?:_replay)?)$/.test(url.pathname))
 }
 
 /**
@@ -310,11 +340,7 @@ export function withNetworkRecovery(input, init, task, { uncached = false, ...op
     })
   }
   if (!['http:', 'https:'].includes(url.protocol) || url.origin === location.origin) return task(init?.signal ?? request?.signal)
-  const method = (init?.method ?? request?.method ?? 'GET').toUpperCase()
-  // YouTube's metadata and chat APIs use POST for read-only queries.
-  const retry = ['GET', 'HEAD'].includes(method) ||
-    (method === 'POST' && /(^|\.)youtube\.com$/.test(url.hostname) &&
-      /^\/youtubei\/v1\/(browse|search|player|next|guide|get_transcript|navigation\/resolve_url|updated_metadata|live_chat\/get_live_chat(?:_replay)?)$/.test(url.pathname))
+  const retry = isReadOnlyRequest(url, init?.method ?? request?.method)
   return initializeNetworkRecovery().run(url.origin, task, { ...options, signal: init?.signal ?? request?.signal, retry, retryDuringOutage: true })
     .then(confirm)
 }
@@ -384,9 +410,10 @@ export function installNetworkFetch({ corsDisabled = false, getRequestError, che
   const fetch = async (input, init) => {
     // During an outage, the HTTP cache could answer a read without the
     // network. Revalidate it with the server, so its success proves that the
-    // internet is reachable again.
+    // internet is reachable again. The app's own files are left to the web
+    // build's offline cache, so the app can still start.
     if (appRecovery?.state === 'offline' && ['GET', 'HEAD'].includes((init?.method ?? (input instanceof Request ? input.method : 'GET')).toUpperCase()) &&
-      (init?.cache ?? (input instanceof Request ? input.cache : 'default')) === 'default') {
+      (init?.cache ?? (input instanceof Request ? input.cache : 'default')) === 'default' && !isAppStaticFile(input)) {
       init = { ...init, cache: 'no-cache' }
     }
     let response

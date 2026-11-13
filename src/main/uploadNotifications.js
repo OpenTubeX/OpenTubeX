@@ -1,6 +1,8 @@
-import { readFile, rm, writeFile, rename } from 'node:fs/promises'
+import { readFile, rm } from 'node:fs/promises'
 import { getUploadTarget } from '../notificationHistory.js'
 import { getUploadThumbnailUrl, createUploadNotificationState, forgetUnconfiguredFeeds, getUploadUrl, isWithinQuietHours, takeVisibleUploads } from '../newUploadNotifications.js'
+import { createSerialQueue } from './serialQueue.js'
+import { writeFileAtomic } from './writeFileAtomic.js'
 
 const ORIGINAL_TITLE_TIMEOUT_MS = 5000
 
@@ -39,15 +41,9 @@ async function fetchOriginalTitle(fetchUrl, videoId) {
 export function createUploadNotifier({ file, show, fetch: fetchUrl = fetch }) {
   let configuration = null
   let state = null
-  let pending = Promise.resolve()
+  const run = createSerialQueue(error => console.error('Upload notification state failed', error))
   // Alerts for uploads already saved as notified, which shutdown waits for.
   const alerts = new Set()
-
-  function run(operation) {
-    const result = pending.then(operation)
-    pending = result.catch(error => console.error('Upload notification state failed', error))
-    return result
-  }
 
   async function load() {
     if (state) return state
@@ -71,8 +67,7 @@ export function createUploadNotifier({ file, show, fetch: fetchUrl = fetch }) {
 
   async function save() {
     try {
-      await writeFile(file + '.tmp', JSON.stringify(state), { mode: 0o600 })
-      await rename(file + '.tmp', file)
+      await writeFileAtomic(file, JSON.stringify(state), { mode: 0o600 })
     } catch (error) {
       // Reload the last saved state, so a later refresh detects these uploads again.
       state = null

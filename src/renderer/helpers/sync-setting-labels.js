@@ -64,6 +64,7 @@ export const SYNC_SETTING_LABELS = {
   confirmCloseWindowWithMultipleTabs: 'Settings.General Settings.Confirmation Options.Closing Window',
   confirmLargePlaylistPreload: 'Settings.Player Settings.Ask Before Preloading Large Playlists',
   confirmLoadMultipleTabs: 'Settings.General Settings.Confirmation Options.Loading Tabs',
+  confirmRefreshAllFeeds: 'Settings.General Settings.Confirmation Options.Refreshing All Feeds',
   confirmUnloadMultipleTabs: 'Settings.General Settings.Confirmation Options.Unloading Tabs',
   contextMenuSearchEngines: 'Settings.Context Menu Search Settings.Context Menu Search Settings',
   continuePlaybackWhenScreenIsLocked: 'Settings.Player Settings.Continue Playback When Screen Is Locked',
@@ -109,7 +110,7 @@ export const SYNC_SETTING_LABELS = {
   enableVideoZoom: 'Settings.Player Settings.Enable Video Zoom',
   enableWatchStats: 'Settings.Privacy Settings.Enable Watch Statistics',
   enterFullscreenOnDisplayRotate: 'Settings.Player Settings.Enter Fullscreen on Display Rotate',
-  fastSubscriptionRefresh: 'Settings.Experimental Settings.Faster Subscription Refresh',
+  fastSubscriptionRefresh: 'Settings.Subscription Settings.Faster Subscription Refresh',
   fullscreenRotationIgnoresSystemLock: 'Settings.Player Settings.Ignore System Rotation Lock for Fullscreen',
   expandSideBar: 'Settings.Theme Settings.Expand Side Bar by Default',
   externalLinkHandling: 'Settings.General Settings.External Link Handling.External Link Handling',
@@ -120,6 +121,7 @@ export const SYNC_SETTING_LABELS = {
   fixedTabWidth: 'Settings.Theme Settings.Tab Width',
   forbiddenTitles: 'Settings.Distraction Free Settings.Hide Videos, Playlists and Channels Containing Text',
   followedRssFeeds: 'Subscriptions.RSS Feeds.Followed Feeds',
+  followedChannels: 'Subscriptions.Platforms.Followed Channels',
   generalAutoLoadMorePaginatedItemsEnabled: 'Settings.General Settings.Auto Load Next Page.Label',
   gridColumns: 'Settings.General Settings.Grid Columns.Grid Columns',
   hideActiveSubscriptions: 'Settings.Distraction Free Settings.Hide Active Subscriptions',
@@ -230,6 +232,11 @@ export const SYNC_SETTING_LABELS = {
   pinnedPlaylistIds: [
     'Playlists',
     'User Playlists.Pin to Navigation'
+  ],
+  platformFeedAutoRefreshInterval: 'Settings.Subscription Settings.Platforms.Auto Refresh Interval',
+  platformFeedView: [
+    'Subscriptions.Platforms.Tab',
+    'Settings.General Settings.Video View Type.Video View Type'
   ],
   playNextVideo: 'Settings.Player Settings.Play Next Video',
   playingInterfaceHideDelay: 'Settings.Distraction Free Settings.Playing Interface Hide Delay',
@@ -388,6 +395,7 @@ export const SYNC_SETTING_LABELS = {
   timeFormat: 'Settings.General Settings.Time Format',
   titleLineLimit: 'Settings.General Settings.Title Lines.Title Lines',
   toastPosition: 'Settings.Theme Settings.Toast Position.Toast Position',
+  twitchLiveNotifications: 'Settings.Subscription Settings.Platforms.Notify When Live',
   uiRoundness: 'Settings.Theme Settings.UI Roundness',
   unsubscriptionPopupStatus: 'Settings.Subscription Settings.Confirm Before Unsubscribing',
   updateRelativeTimestamps: 'Settings.General Settings.Update Relative Timestamps',
@@ -528,6 +536,7 @@ export const SYNC_SETTING_VALUE_LABELS = {
   newSubscriptionFeedSortBy: { newest: 'Subscriptions.Newest First', oldest: 'Subscriptions.Oldest First' },
   newSubscriptionFeedView: { combined: 'Subscriptions.Show Combined View', tabbed: 'Subscriptions.Show Tabbed View' },
   newTabPosition: { end: `${general}New Tab Position.At the end`, afterCurrent: `${general}New Tab Position.After current tab`, afterCurrentInOrder: `${general}New Tab Position.After current tab in opened order` },
+  platformFeedView: { combined: 'Subscriptions.Show Combined View', tabbed: 'Subscriptions.Show Tabbed View' },
   playlistGridColumns: { 0: `${general}Grid Columns.Auto` },
   playlistViewType: { grid: `${general}Video View Type.Grid`, fullWidth: `${general}Video View Type.Full Width`, list: `${general}Video View Type.List` },
   notificationMode: { both: `${general}Notifications.System and In-App`, system: `${general}Notifications.System Only`, off: `${general}Notifications.Off` },

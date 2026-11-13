@@ -53,7 +53,7 @@ const externalPlayerCmdArgs = new Map()
  * @returns {Promise<ExternalPlayerResult | null>} null when nothing was requested
  */
 export async function handleOpenInExternalPlayer(event, payload) {
-  if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused()) {
+  if (!isOpenTubeXUrl(event.senderFrame?.url) || !event.sender.isFocused()) {
     return null
   }
 

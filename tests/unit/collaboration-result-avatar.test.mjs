@@ -28,6 +28,7 @@ function resolve(data, lookup = async () => [{ thumbnail: '//images.test/creator
     fetchChannelInfo: fetchChannel,
     isCollaborativeVideoAuthor,
     getLocalVideoChannels: async id => { calls.push(id); return lookup(id) },
+    runChannelRequest: task => task(),
     result,
     enabled
   }

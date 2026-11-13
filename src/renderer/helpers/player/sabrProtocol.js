@@ -246,7 +246,6 @@ export function getSabrLiveTargetDuration(formats) {
 
 /** Not in googlevideo 4's `UMPPartId` */
 export const CUEPOINT_LIST_PART_ID = 69
-const CUEPOINT_EVENT_STOP = 3
 // YouTube's player reports this state when it throttles ad requests itself
 const SSAP_STATE_RATECONTROL_CLIENT = 11
 const SSAP_PLAYBACK_INFOS_FIELD = 24
@@ -254,7 +253,6 @@ const SSAP_PLAYBACK_INFOS_FIELD = 24
 /**
  * @typedef SabrCuepoint
  * @property {string} identifier
- * @property {boolean} stopped the ad break is over
  * @property {number} startTimeMs
  * @property {number} durationMs
  */
@@ -278,12 +276,10 @@ export function parseSabrCuepoints(bytes) {
     if (!cuepointBytes || !timeRangeBytes) continue
 
     let identifier = ''
-    let event = 0
     let totalDurationSec = 0
     let playheadTimeSec = 0
     for (const { field, wireType, data } of readProtobufFields(cuepointBytes)) {
-      if (field === 2 && wireType === 0) event = readProtobufVarint(data, 0)[0]
-      else if (field === 3 && wireType === 1) totalDurationSec = readProtobufDouble(data)
+      if (field === 3 && wireType === 1) totalDurationSec = readProtobufDouble(data)
       else if (field === 4 && wireType === 1) playheadTimeSec = readProtobufDouble(data)
       else if (field === 6 && wireType === 2) identifier = new TextDecoder().decode(data)
     }
@@ -297,7 +293,6 @@ export function parseSabrCuepoints(bytes) {
 
     cuepoints.push({
       identifier,
-      stopped: event === CUEPOINT_EVENT_STOP,
       startTimeMs: Math.floor((startTicks / timescale - playheadTimeSec) * 1000),
       durationMs: Math.round(totalDurationSec * 1000),
     })

@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: Mae pob adran wedi'i chuddio
   All sections hidden description: Addaswch yr hafan i ddangos adran eto.
 Subscriptions:
+  Channel Errors:
+    Summary: "Methwyd adnewyddu {count} o sianeli. | Methwyd adnewyddu 1 sianel. | Methwyd adnewyddu {count} sianel. | Methwyd adnewyddu {count} sianel. | Methwyd adnewyddu {count} sianel. | Methwyd adnewyddu {count} o sianeli."
+    Toast: "Methwyd adnewyddu rhai sianeli rydych wedi tanysgrifio iddynt. Cliciwch i'w gweld."
+    Retry Channel: "Ceisio {channel} eto"
+    Show All: "Dangos y cyfan"
+    Show Fewer: "Dangos llai"
   Cache Load Error: 'Nid oedd modd llwytho''ch ffrydiau tanysgrifio a gadwyd.'
   New video from {channel}: Fideo newydd gan {channel}
   New short from {channel}: Byr newydd gan {channel}
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: Postiad newydd gan {channel}
   Mark As Unseen: Marcio fel heb ei weld
   Copy Error Details: "Copïo manylion technegol"
-  Refresh Errors: "Sianeli na ellid eu hadnewyddu: {channels}. Cliciwch i weld y manylion."
-  Refresh Error Channels More: "{channels} a {count} arall | {channels} a {count} arall | {channels} a {count} arall | {channels} a {count} arall | {channels} a {count} arall | {channels} a {count} arall"
   Never show {type} from this channel in feeds again: Peidio byth â dangos {type} o’r sianel hon mewn ffrydiau eto
   Refreshing Subscription Videos: Wrthi'n adnewyddu fideos tanysgrifiadau
   Refreshing Subscription Shorts: Wrthi'n adnewyddu Byrion tanysgrifiadau
@@ -177,7 +181,7 @@ Subscriptions:
   Refreshing Subscription Posts: Wrthi'n adnewyddu postiadau tanysgrifiadau
   New Content: Cynnwys newydd
   New Feed Refresh Warning Title: Adnewyddu pob ffrwd tanysgrifiadau?
-  New Feed Refresh Warning: Gall adnewyddu pob math o gynnwys heb RSS ar gyfer {count} o danysgrifiadau gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys heb RSS ar gyfer 1 tanysgrifiad gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys heb RSS ar gyfer {count} danysgrifiad gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys heb RSS ar gyfer {count} thanysgrifiad gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys heb RSS ar gyfer {count} thanysgrifiad gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys heb RSS ar gyfer {count} o danysgrifiadau gymryd amser hir. Ydych chi am barhau?
+  New Feed Refresh Warning: Gall adnewyddu pob math o gynnwys ar gyfer {count} o danysgrifiadau gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys ar gyfer 1 tanysgrifiad gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys ar gyfer {count} danysgrifiad gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys ar gyfer {count} thanysgrifiad gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys ar gyfer {count} thanysgrifiad gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys ar gyfer {count} o danysgrifiadau gymryd amser hir. Ydych chi am barhau?
   New Since Last Refresh: Newydd ers yr adnewyddiad diwethaf
   Mark As Seen: Marcio fel wedi'i weld
   Mark All as Seen: Marcio'r cyfan fel wedi'u gweld
@@ -216,11 +220,33 @@ Subscriptions:
       Optional Parameter: '{parameter} (dewisol)'
       Not Set: Heb ei osod
     Retry Feed: Rhoi cynnig arall ar {feed}
+    Reloading Feed: Yn ail-lwytho {feed}
+  Platforms:
+    Tab: Llwyfannau
+    Platform: Llwyfan
+    All Platforms: Pob llwyfan
+    Followed Channels: Sianeli rydych chi'n eu dilyn ar lwyfannau eraill
+    Description: Dilynwch sianeli ar Twitch, SoundCloud, PeerTube, Rumble ac Odysee i weld eu huwchlwythiadau yn y tab Llwyfannau yn eich tanysgrifiadau. Dewch o hyd i sianeli gyda'r chwiliad, neu ychwanegwch nhw drwy gyfeiriad eu tudalen. Mae eu cyfryngau'n chwarae gyda yt-dlp.
+    Add Channel: Ychwanegu Sianel
+    Channel URL: Cyfeiriad y sianel
+    Invalid Channel: Rhowch gyfeiriad tudalen sianel ar Twitch, SoundCloud, PeerTube, Rumble neu Odysee.
+    Channel Not Found: Does dim sianel yn y cyfeiriad hwn.
+    Channel Already Followed: Rydych eisoes yn dilyn y sianel hon.
+    Channel Could Not Be Loaded: Doedd dim modd llwytho'r sianel.
+    No Channels: Dydych chi ddim yn dilyn unrhyw sianeli ar lwyfannau eraill eto.
+    Unfollow Channel: Dad-ddilyn {channel}
+    Go To Channel: Mynd i {channel}
+    Follow: Dilyn
+    Following: Yn dilyn
+    Clips: Clipiau
+    Refresh Errors: Methwyd adnewyddu {count} o sianeli. | Methwyd adnewyddu 1 sianel. | Methwyd adnewyddu {count} sianel. | Methwyd adnewyddu {count} sianel. | Methwyd adnewyddu {count} sianel. | Methwyd adnewyddu {count} o sianeli.
+    Content Tabs: Tabiau cynnwys llwyfannau
 Trending:
   Music: Cerddoriaeth
   Load Error: Nid oedd modd llwytho Trendio.
   Unsupported Backend: Mae angen yr API Lleol ar Trendio. Dewiswch yr API Lleol neu alluogi'r darparwr wrth gefn.
 Most Popular Feed Empty: Mae ffrwd Mwyaf Poblogaidd yr enghraifft Invidious hon yn wag.
+Most Popular Load Error: "Nid oedd modd llwytho'r ffrwd Mwyaf Poblogaidd."
 Feed:
   Cancel Refresh: Canslo'r adnewyddiad
   Next Auto Refresh: 'Adnewyddiad awtomatig nesaf: {date}'
@@ -308,6 +334,38 @@ History:
   Custom: Personol
   History Older Than Days Removed: Mae hanes gwylio sy'n hŷn na {days} o ddiwrnodau wedi'i ddileu | Mae hanes gwylio sy'n hŷn nag 1 diwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} ddiwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} diwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} diwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} o ddiwrnodau wedi'i ddileu
 Settings:
+  Experimental Badge: Arbrofol
+  YouTube Account Settings:
+    YouTube Account Settings: "Cyfrif YouTube"
+    Unofficial App Warning: "Nid yw OpenTubeX yn ap YouTube swyddogol. Mae mewngofnodi yn cysylltu'r hyn rydych yn ei wneud yma â'ch cyfrif Google, a gall Google gyfyngu ar gyfrifon sy'n defnyddio apiau answyddogol neu eu gwahardd. Dim ond mewngofnodi gyda chyfrif y gallwch fforddio ei golli."
+    Sign In Explanation: "Mae OpenTubeX yn mewngofnodi fel ap teledu: rydych chi'n ei gymeradwyo ar wefan Google, a dydy OpenTubeX byth yn gweld eich cyfrinair. Mae'r mewngofnodi'n aros ar y ddyfais hon ac nid yw'n cael ei gysoni na'i gadw wrth gefn."
+    Sign In: "Mewngofnodi"
+    Sign In Anyway: "Mewngofnodi beth bynnag"
+    Sign Out: "Allgofnodi"
+    Getting Sign-In Code: "Yn cael cod mewngofnodi"
+    Sign In Instructions: "Agorwch y dudalen mewngofnodi a dewiswch eich cyfrif Google. Bydd y cod yn cael ei lenwi'n awtomatig."
+    Other Device Instructions: "Ar ddyfais arall, ewch i'r cyfeiriad hwn a rhowch y cod:"
+    YouTube Channel: "Sianel YouTube"
+    Using Channel: "Nawr yn defnyddio YouTube fel {name}"
+    Switch Channel Failed: "Methu newid y sianel YouTube: {error}"
+    Open Sign-In Page: "Agor y dudalen mewngofnodi"
+    Copy Code: "Copïo'r cod"
+    Code Copied: "Wedi copïo'r cod"
+    Waiting for Approval: "Yn aros i chi gymeradwyo'r mewngofnodi"
+    Sign-In Denied: "Cafodd y mewngofnodi ei wrthod."
+    Sign-In Code Expired: "Mae'r cod wedi dod i ben. Rhowch gynnig arall arni i gael un newydd."
+    Sign-In Failed: "Methu mewngofnodi: {error}"
+    Signed In As: "Wedi mewngofnodi i YouTube fel {name}"
+    Signed Out: "Wedi allgofnodi o YouTube"
+    Sign Out Failed: "Methu allgofnodi: {error}"
+    Revoke Failed: "Wedi allgofnodi o YouTube, ond ni chadarnhaodd Google fod y mewngofnodi wedi dod i ben. Gallwch ei dynnu o'r cysylltiadau trydydd parti yn eich cyfrif Google."
+    Signed out by YouTube: "Daeth YouTube â'r mewngofnodi i ben. Mewngofnodwch eto yn y Gosodiadau i barhau i ddefnyddio'ch cyfrif."
+    Subscribe on YouTube: "Tanysgrifio ar YouTube hefyd"
+    Add to YouTube Watch History: "Ychwanegu fideos a wyliwyd at hanes YouTube"
+    Import Subscriptions: "Mewnforio tanysgrifiadau o YouTube"
+    Imported Subscriptions: "Mewnforiwyd {count} o sianeli | Mewnforiwyd {count} sianel | Mewnforiwyd {count} sianel | Mewnforiwyd {count} sianel | Mewnforiwyd {count} sianel | Mewnforiwyd {count} o sianeli"
+    No Subscriptions to Import: "Does gan y cyfrif YouTube hwn ddim tanysgrifiadau"
+    Import Subscriptions Failed: "Methu mewnforio tanysgrifiadau: {error}"
   Diagnostics:
     Diagnostics: Diagnosteg
     Description: Tra bo'r log diagnostig ymlaen, mae OpenTubeX yn cadw negeseuon log diweddar yn y cof fel y gallwch eu hatodi i adroddiadau bygiau. Nid yw byth yn eu cadw na'u hanfon ar ei ben ei hun, ac mae diffodd y log yn eu dileu. Mae adroddiadau'n hepgor cwcis, tocynnau, cyfeiriadau IP a pharamedrau URL, ond gallant gynnwys IDs fideos rydych wedi'u chwarae, felly gwiriwch adroddiad cyn ei rannu.
@@ -442,6 +500,7 @@ Settings:
       Closing Tabs: Cau mwy nag un tab
       Loading Tabs: Llwytho mwy nag un tab
       Unloading Tabs: Dadlwytho mwy nag un tab
+      Refreshing All Feeds: Adnewyddu llawer o danysgrifiadau
     Remember Tab Navigation History: Cofio hanes llywio tabiau
     New Tab Position:
       New Tab Position: Safle tab newydd
@@ -1175,6 +1234,12 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Adnewyddu tanysgrifiadau pan fydd yr ap ar gau"
     Notify About New Uploads: Hysbysu am gynnwys newydd
     RSS Feeds Auto Refresh Interval: Cyfwng adnewyddu ffrydiau RSS yn awtomatig
+    Faster Subscription Refresh: "Adnewyddu tanysgrifiadau'n gyflymach"
+    Platforms:
+      Other Platforms: Llwyfannau Eraill
+      Manage Channels: Rheoli Sianeli a Ddilynir
+      Notify When Live: Hysbysu Pan Fydd Sianeli Twitch a Ddilynir yn Mynd yn Fyw
+      Auto Refresh Interval: Cyfwng adnewyddu llwyfannau eraill yn awtomatig
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Cyfrif Amser Gwylio O"
@@ -1492,7 +1557,6 @@ Settings:
   Search Settings: Gosodiadau chwilio
   No Settings Found: Ni chanfuwyd unrhyw osodiadau
   Experimental Settings:
-    Faster Subscription Refresh: "Adnewyddu tanysgrifiadau'n gyflymach"
     Disable Hardware Acceleration: Analluogi cyflymiad caledwedd
   Interface Customizer:
     Customize Interface: "Addasu'r rhyngwyneb"
@@ -1807,6 +1871,7 @@ Video:
     Auto-generated Caption Template: '{language} (wedi''i gynhyrchu''n awtomatig)'
     Up next in {seconds}: Nesaf ymhen {seconds}
     Resize dock: Newid maint y doc
+    Resize dock width: Newid lled y doc
     Play now: Chwarae nawr
     MusicPlaybackRateOverride: Wedi canfod fideo cerddoriaeth; yn chwarae ar 1x
     Normal: Arferol
@@ -2049,6 +2114,7 @@ Context Menu:
   Reload Posts: Ail-lwytho postiadau
   Reload All Feeds: Ail-lwytho pob ffrwd
   Reload RSS Feeds: Ail-lwytho ffrydiau RSS
+  Reload Platforms: Ail-lwytho llwyfannau
   Close Multiple Tabs: Cau {count} o dabiau | Cau {count} tab | Cau {count} dab | Cau {count} thab | Cau {count} thab | Cau {count} tab
   Duplicate Tab: Dyblygu'r tab
   Duplicate Multiple Tabs: Dyblygu {count} o dabiau | Dyblygu {count} tab | Dyblygu {count} dab | Dyblygu {count} thab | Dyblygu {count} thab | Dyblygu {count} tab
@@ -2202,6 +2268,9 @@ Description:
   Games: Gemau
   Music: Cerddoriaeth
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Mae tanysgrifio i sianel neu ddad-danysgrifio ohoni yn OpenTubeX yn gwneud yr un peth ar eich cyfrif YouTube."
+    Add to YouTube Watch History: "Mae fideos rydych chi'n eu chwarae yn cael eu hychwanegu at eich hanes gwylio YouTube, fel bod argymhellion YouTube yn dysgu ohonyn nhw. Does dim yn cael ei ychwanegu tra bo'r hanes wedi'i oedi ar YouTube."
   General Settings:
     Built-in Streams: |
       Mae Awtomatig yn chwarae'r rhan fwyaf o fideos drwy gleient visionOS YouTube, sy'n cychwyn yn gynt ac yn cefnogi ansawdd awtomatig. Mae ffrydiau byw a fideos na all eu chwarae yn defnyddio SABR.
@@ -2225,6 +2294,7 @@ Tooltips:
       Gall fideos gymryd mwy o amser i ddechrau wrth ddefnyddio yt-dlp.
     Avoid translation: |
       Analluogi cyfieithu awtomatig YouTube ar deitl, disgrifiad a phenodau fideo.
+      Mae "Yr ap cyfan" hefyd yn dangos enwau a disgrifiadau sianeli yn eu hiaith wreiddiol.
       Gall gormod o geisiadau, megis cyrchu teitlau fideos ar draws rhestrau, effeithio dros dro
       ar ddibynadwyedd yr ap.
     Show Thumbnail Previews: Dangos rhagolygon wedi'u hanimeiddio wrth hofran dros fân-luniau fideos.
@@ -2312,8 +2382,11 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Yn adnewyddu ffrydiau gan ddefnyddio eich gosodiadau. Ar y bwrdd gwaith, mae OpenTubeX yn aros yn hambwrdd y system nes i chi adael. Android sy’n rheoli pryd mae adnewyddu cefndirol yn digwydd."
     Notify About New Uploads: Yn dangos hysbysiadau system ar y ddyfais hon ar gyfer sianeli rydych wedi troi eu hysbysiadau ymlaen yn eu gosodiadau tanysgrifio. Mae OpenTubeX yn gwirio am gynnwys newydd pan fydd tanysgrifiadau'n cael eu hadnewyddu, felly dewiswch gyfwng adnewyddu awtomatig. I gael hysbysiadau pan fydd yr ap ar gau, galluogwch adnewyddu pan fydd yr ap ar gau hefyd.
     RSS Feeds Auto Refresh Interval: Pa mor aml mae OpenTubeX yn adnewyddu eich ffrydiau RSS yn awtomatig tra bod yr ap ar agor.
+    Faster Subscription Refresh: "Yn gwirio ffrwd RSS pob sianel yn gyntaf a dim ond yn llwytho fideos, Shorts a ffrydiau byw sianeli sydd ag uwchlwythiadau newydd. Mae adnewyddiadau awtomatig hefyd yn hepgor sianeli a lwythwyd yn ystod y 10 munud diwethaf. Ar gyfer sianeli heb uwchlwythiadau newydd, dim ond bob ychydig oriau y caiff nifer y gwyliadau, fideos a dynnwyd a theitlau a newidiwyd eu diweddaru, a gall uwchlwythiadau newydd ymddangos yn hwyrach pan fydd y ffrwd RSS ar ei hôl hi. Ddim ar gael gydag API Invidious."
+    Platforms Auto Refresh Interval: Pa mor aml mae OpenTubeX yn adnewyddu'r sianeli rydych chi'n eu dilyn ar lwyfannau eraill yn awtomatig tra bod yr ap ar agor.
+    Twitch Notify When Live: Yn eich hysbysu pan fydd un o'r sianeli Twitch rydych yn eu dilyn yn dechrau ffrydio. Mae OpenTubeX yn gwirio bob ychydig funudau tra bo ar agor, a hefyd tra bo ar gau os yw'n adnewyddu tanysgrifiadau bryd hynny.
   Theme Settings:
-    Only Show Important Notifications: Yn cuddio hysbysiadau yn yr ap sydd ond yn cadarnhau gweithred neu'n adrodd statws. Mae gwallau, rhybuddion, nodiadau atgoffa rydych wedi'u gosod, a hysbysiadau sy'n cynnig gweithred, fel Dadwneud, yn dal i ymddangos. Mae cynnydd yn y cefndir, fel adnewyddu tanysgrifiadau, yn cael ei ddangos yn y bar cynnydd cyffredinol yn lle hysbysiad. Nid yw hysbysiadau'r system yn cael eu heffeithio.
+    Only Show Important Notifications: Yn cuddio hysbysiadau yn yr ap sydd ond yn cadarnhau gweithred neu'n adrodd statws, gan gynnwys rhai sy'n cynnig Dadwneud. Mae gwallau, rhybuddion, nodiadau atgoffa rydych wedi'u gosod, a hysbysiadau sy'n gofyn am benderfyniad, fel cynigion diweddaru, yn dal i ymddangos. Mae cynnydd yn y cefndir, fel adnewyddu tanysgrifiadau, yn cael ei ddangos yn y bar cynnydd cyffredinol yn lle hysbysiad. Nid yw hysbysiadau'r system yn cael eu heffeithio.
     Visible Search Suggestions: "Yn gosod faint o gofnodion hanes chwilio ac awgrymiadau y mae’r bar chwilio’n eu dangos cyn i’w restr sgrolio. Nid yw’r rhestr byth yn ymestyn heibio gwaelod y ffenestr."
     Thumbnail Size: "Yn newid maint mân-luniau fideos mewn gridiau a rhestrau. Mae gridiau gyda nifer sefydlog o golofnau neu'r math gwedd Lled Llawn yn llenwi pob rhes yn lle hynny, felly yno dim ond mân-luniau rhestrau a Shorts y mae'n eu newid. Mewn ffenestri maint ffôn, mae mân-luniau'r grid wedi'u cyfyngu i 100%."
     Playlist Thumbnail Size: "Yn newid maint mân-luniau fideos ar dudalennau rhestri chwarae. Mae gridiau gyda nifer sefydlog o golofnau neu'r math gwedd Lled Llawn yn llenwi pob rhes yn lle hynny, felly yno dim ond mân-luniau rhestrau a Shorts y mae'n eu newid. Mewn ffenestri maint ffôn, mae mân-luniau'r grid wedi'u cyfyngu i 100%."
@@ -2327,7 +2400,6 @@ Tooltips:
     Modal Backdrop: "Yn gosod sut mae’r ap yn edrych y tu ôl i ddeialogau a dewislenni. Gall niwlio fod yn araf ar ddyfeisiau llai pwerus."
     Click Scrollbar Track to Scroll: "Mae clicio bar sgrolio y tu allan i'w ddolen yn sgrolio tua un dudalen tuag at y clic. Tra bo hyn ymlaen, mae bar sgrolio gweladwy yn dal cliciau sydd i fod ar gyfer eitemau oddi tano. Mae bar sgrolio'r bar tabiau bob amser yn gweithio fel hyn."
   Experimental Settings:
-    Faster Subscription Refresh: "Yn gwirio ffrwd RSS pob sianel yn gyntaf a dim ond yn llwytho fideos, Shorts a ffrydiau byw sianeli sydd ag uwchlwythiadau newydd. Mae adnewyddiadau awtomatig hefyd yn hepgor sianeli a lwythwyd yn ystod y 10 munud diwethaf. Ar gyfer sianeli heb uwchlwythiadau newydd, dim ond bob ychydig oriau y caiff nifer y gwyliadau, fideos a dynnwyd a theitlau a newidiwyd eu diweddaru, a gall uwchlwythiadau newydd ymddangos yn hwyrach pan fydd y ffrwd RSS ar ei hôl hi. Ddim ar gael gydag API Invidious."
     Disable Hardware Acceleration: Yn analluogi cyflymiad caledwedd y GPU. Gall ddatrys problemau graffeg, ond mae'n debygol o leihau perfformiad.
   SponsorBlock Settings:
     Always Show DeArrow Badge: Cadw'r botwm DeArrow yn weladwy ar fideos y mae DeArrow wedi amnewid eu teitl neu eu llun bach, yn lle dim ond wrth hofran.
@@ -2711,3 +2783,31 @@ Notification Center:
   Clear: "Clirio"
   Empty: "Dim hysbysiadau eto"
   Empty Hint: "Bydd nodiadau atgoffa ffrydiau byw a lanlwythiadau newydd gan sianeli gyda hysbysiadau ymlaen yn ymddangos yma."
+Platforms:
+  Tracks: Traciau
+  Playlists: Rhestrau Chwarae
+  Follower Count: '{count} o ddilynwyr | 1 dilynwr | {count} dilynwr | {count} dilynwr | {count} dilynwr | {count} o ddilynwyr'
+  Open Website: Agor ar {platform}
+  Channel Not Found: Doedd dim modd dod o hyd i'r sianel hon.
+  Playlist Not Found: Doedd dim modd dod o hyd i'r rhestr chwarae hon.
+  Load Error: Doedd dim modd llwytho'r dudalen hon o {platform}.
+  Empty Tab: Does dim byd yma eto.
+YouTube Account:
+  Like: "Hoffi"
+  Dislike: "Ddim yn hoffi"
+  Rating Failed: "Methu rhoi sgôr ar YouTube: {error}"
+  Subscribe Failed: "Methu tanysgrifio ar YouTube: {error}"
+  Unsubscribe Failed: "Methu dad-danysgrifio ar YouTube: {error}"
+  Add a comment: "Ychwanegu sylw"
+  Add a reply: "Ychwanegu ymateb"
+  Comment: "Rhoi sylw"
+  Reply: "Ymateb"
+  Comment Posted: "Sylw wedi'i bostio"
+  Reply Posted: "Ymateb wedi'i bostio"
+  Comment Failed: "Methu postio'r sylw: {error}"
+  Delete Comment: "Dileu sylw"
+  Delete Comment Confirmation: "Dileu eich sylw o YouTube?"
+  Comment Deleted: "Sylw wedi'i ddileu"
+  Delete Comment Failed: "Methu dileu'r sylw: {error}"
+  Recommendations: "Argymhellion YouTube"
+  Recommendations Failed: "Methu llwytho eich argymhellion YouTube."

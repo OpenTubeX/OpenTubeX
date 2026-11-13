@@ -8,10 +8,12 @@ const backends = { invidious: null, local: null }
 const [{ findChannelTagInfo: findTagInfo }] = await importWithStubs([sourceUrl('src/renderer/helpers/channels.js')], {
   [sourceUrl('src/renderer/helpers/api/invidious.js')]: {
     invidiousGetChannelId: null,
+    youtubeImageUrlToInvidious: null,
     invidiousGetChannelInfo: () => backends.invidious(),
   },
   [sourceUrl('src/renderer/helpers/api/local.js')]: {
     getLocalChannelId: null,
+    parseLocalSubscriberCount: null,
     getLocalChannel: () => backends.local(),
     parseLocalChannelHeader: channel => ({ name: channel.header.name, thumbnailUrl: channel.header.thumbnail }),
   },

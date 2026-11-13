@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: Toutes les sections sont masquées
   All sections hidden description: Personnalisez l’accueil pour afficher à nouveau une section.
 Subscriptions:
+  Channel Errors:
+    Summary: "1 chaîne n’a pas pu être actualisée. | {count} chaînes n’ont pas pu être actualisées. | {count} chaînes n’ont pas pu être actualisées."
+    Toast: "Certains abonnements n’ont pas pu être actualisés. Cliquez pour les afficher."
+    Retry Channel: "Réessayer {channel}"
+    Show All: "Tout afficher"
+    Show Fewer: "Afficher moins"
   Cache Load Error: 'Impossible de charger vos flux d''abonnements enregistrés.'
   New video from {channel}: Nouvelle vidéo de {channel}
   New short from {channel}: Nouveau Short de {channel}
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: Nouveau post de {channel}
   Mark As Unseen: Marquer comme non vu
   Copy Error Details: "Copier les détails techniques"
-  Refresh Errors: "Chaînes qui n'ont pas pu être actualisées : {channels}. Cliquez pour voir les détails."
-  Refresh Error Channels More: "{channels} et {count} de plus | {channels} et {count} de plus | {channels} et {count} de plus"
   Never show {type} from this channel in feeds again: Ne plus jamais afficher les contenus de type {type} de cette chaîne dans les flux
   Refreshing Subscription Videos: Actualisation des vidéos des abonnements
   Refreshing Subscription Shorts: Actualisation des Shorts des abonnements
@@ -177,7 +181,7 @@ Subscriptions:
   Refreshing Subscription Posts: Actualisation des publications des abonnements
   New Content: Nouveau contenu
   New Feed Refresh Warning Title: Actualiser tous les flux d’abonnements ?
-  New Feed Refresh Warning: L’actualisation de tous les types de contenu sans RSS pour 1 abonnement peut prendre beaucoup de temps. Voulez-vous continuer ? | L’actualisation de tous les types de contenu sans RSS pour {count} abonnements peut prendre beaucoup de temps. Voulez-vous continuer ? | L’actualisation de tous les types de contenu sans RSS pour {count} abonnements peut prendre beaucoup de temps. Voulez-vous continuer ?
+  New Feed Refresh Warning: L’actualisation de tous les types de contenu pour 1 abonnement peut prendre beaucoup de temps. Voulez-vous continuer ? | L’actualisation de tous les types de contenu pour {count} abonnements peut prendre beaucoup de temps. Voulez-vous continuer ? | L’actualisation de tous les types de contenu pour {count} abonnements peut prendre beaucoup de temps. Voulez-vous continuer ?
   New Since Last Refresh: Nouveau depuis la dernière actualisation
   Mark As Seen: Marquer comme vu
   Mark All as Seen: Tout marquer comme vu
@@ -216,11 +220,33 @@ Subscriptions:
       Optional Parameter: '{parameter} (facultatif)'
       Not Set: Non défini
     Retry Feed: Réessayer {feed}
+    Reloading Feed: Rechargement de {feed}
+  Platforms:
+    Tab: Plateformes
+    Platform: Plateforme
+    All Platforms: Toutes les plateformes
+    Followed Channels: Chaînes suivies sur d’autres plateformes
+    Description: Suivez des chaînes sur Twitch, SoundCloud, PeerTube, Rumble et Odysee pour voir leurs mises en ligne dans l’onglet Plateformes de vos abonnements. Trouvez des chaînes avec la recherche ou ajoutez-les par l’adresse de leur page. Leurs médias sont lus avec yt-dlp.
+    Add Channel: Ajouter une chaîne
+    Channel URL: Adresse de la chaîne
+    Invalid Channel: Saisissez l’adresse de la page d’une chaîne sur Twitch, SoundCloud, PeerTube, Rumble ou Odysee.
+    Channel Not Found: Il n’y a aucune chaîne à cette adresse.
+    Channel Already Followed: Vous suivez déjà cette chaîne.
+    Channel Could Not Be Loaded: Impossible de charger la chaîne.
+    No Channels: Vous ne suivez encore aucune chaîne sur d’autres plateformes.
+    Unfollow Channel: Ne plus suivre {channel}
+    Go To Channel: Accéder à {channel}
+    Follow: Suivre
+    Following: Suivi
+    Clips: Clips
+    Refresh Errors: 1 chaîne n’a pas pu être actualisée. | {count} chaînes n’ont pas pu être actualisées. | {count} chaînes n’ont pas pu être actualisées.
+    Content Tabs: Onglets des contenus des plateformes
 Trending:
   Music: Musique
   Load Error: Les tendances n’ont pas pu être chargées.
   Unsupported Backend: Les tendances nécessitent l’API locale. Sélectionnez l’API locale ou activez le recours à une autre source.
 Most Popular Feed Empty: Le flux « Les plus populaires » de cette instance Invidious est vide.
+Most Popular Load Error: "Le flux « Les plus populaires » n’a pas pu être chargé."
 Feed:
   Cancel Refresh: Annuler l’actualisation
   Next Auto Refresh: 'Prochaine actualisation automatique : {date}'
@@ -307,8 +333,38 @@ History:
   Custom: Personnalisé
   History Older Than Days Removed: L’historique de visionnage datant de plus de 1 jour a été supprimé | L’historique de visionnage datant de plus de {days} jours a été supprimé | L’historique de visionnage datant de plus de {days} jours a été supprimé
 Settings:
-  Experimental Settings:
-    Faster Subscription Refresh: "Actualisation plus rapide des abonnements"
+  Experimental Badge: Expérimental
+  YouTube Account Settings:
+    YouTube Account Settings: "Compte YouTube"
+    Unofficial App Warning: "OpenTubeX n’est pas une application officielle de YouTube. En vous connectant, ce que vous faites ici est associé à votre compte Google, et Google peut restreindre ou bannir les comptes qui utilisent des applications non officielles. Ne vous connectez qu’avec un compte que vous pouvez vous permettre de perdre."
+    Sign In Explanation: "OpenTubeX se connecte comme une application TV : vous autorisez la connexion sur le site de Google, et OpenTubeX ne voit jamais votre mot de passe. La connexion reste sur cet appareil et n’est ni synchronisée ni sauvegardée."
+    Sign In: "Se connecter"
+    Sign In Anyway: "Se connecter quand même"
+    Sign Out: "Se déconnecter"
+    Getting Sign-In Code: "Obtention d’un code de connexion"
+    Sign In Instructions: "Ouvrez la page de connexion et choisissez votre compte Google. Le code est saisi automatiquement."
+    Other Device Instructions: "Sur un autre appareil, accédez à cette adresse et saisissez le code :"
+    YouTube Channel: "Chaîne YouTube"
+    Using Channel: "Vous utilisez maintenant YouTube en tant que {name}"
+    Switch Channel Failed: "Impossible de changer de chaîne YouTube : {error}"
+    Open Sign-In Page: "Ouvrir la page de connexion"
+    Copy Code: "Copier le code"
+    Code Copied: "Code copié"
+    Waiting for Approval: "En attente de votre approbation de la connexion"
+    Sign-In Denied: "La connexion a été refusée."
+    Sign-In Code Expired: "Le code a expiré. Réessayez pour en obtenir un nouveau."
+    Sign-In Failed: "Impossible de se connecter : {error}"
+    Signed In As: "Connecté à YouTube en tant que {name}"
+    Signed Out: "Déconnecté de YouTube"
+    Sign Out Failed: "Impossible de se déconnecter : {error}"
+    Revoke Failed: "Déconnexion de YouTube effectuée, mais Google n'a pas confirmé la fin de la connexion. Vous pouvez la supprimer dans les connexions tierces de votre compte Google."
+    Signed out by YouTube: "YouTube a mis fin à la connexion. Reconnectez-vous dans les paramètres pour continuer à utiliser votre compte."
+    Subscribe on YouTube: "S’abonner aussi sur YouTube"
+    Add to YouTube Watch History: "Ajouter les vidéos regardées à l’historique YouTube"
+    Import Subscriptions: "Importer les abonnements depuis YouTube"
+    Imported Subscriptions: "{count} chaîne importée | {count} chaînes importées | {count} chaînes importées"
+    No Subscriptions to Import: "Ce compte YouTube n’a aucun abonnement"
+    Import Subscriptions Failed: "Impossible d’importer les abonnements : {error}"
   Diagnostics:
     Diagnostics: Diagnostic
     Description: Tant que le journal de diagnostic est activé, OpenTubeX conserve les messages de journal récents en mémoire pour que vous puissiez les joindre à vos rapports de bogue. Il ne les enregistre ni ne les envoie jamais de lui-même, et désactiver le journal les supprime. Les rapports excluent les cookies, les jetons, les adresses IP et les paramètres d'URL, mais ils peuvent contenir les identifiants des vidéos que vous avez lues ; vérifiez donc un rapport avant de le partager.
@@ -443,6 +499,7 @@ Settings:
       Closing Tabs: De fermer plusieurs onglets
       Loading Tabs: De charger plusieurs onglets
       Unloading Tabs: De décharger plusieurs onglets
+      Refreshing All Feeds: D’actualiser de nombreux abonnements
     Remember Tab Navigation History: Mémoriser l’historique de navigation des onglets
     New Tab Position:
       New Tab Position: Position des nouveaux onglets
@@ -1174,6 +1231,12 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Actualiser les abonnements quand l'application est fermée"
     Notify About New Uploads: Notifier les nouvelles mises en ligne
     RSS Feeds Auto Refresh Interval: Intervalle d’actualisation automatique des flux RSS
+    Faster Subscription Refresh: "Actualisation plus rapide des abonnements"
+    Platforms:
+      Other Platforms: Autres plateformes
+      Manage Channels: Gérer les chaînes suivies
+      Notify When Live: Notifier quand les chaînes Twitch suivies passent en direct
+      Auto Refresh Interval: Intervalle d’actualisation automatique des autres plateformes
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Compter le temps de visionnage depuis"
@@ -1777,6 +1840,7 @@ Video:
     Auto-generated Caption Template: '{language} (générés automatiquement)'
     Up next in {seconds}: À suivre dans {seconds}
     Resize dock: Redimensionner le panneau
+    Resize dock width: Modifier la largeur du panneau
     Play now: Lire maintenant
     MusicPlaybackRateOverride: Clip musical détecté, lecture à vitesse 1x
     Normal: Normal
@@ -2014,6 +2078,7 @@ Context Menu:
   Reload Posts: Recharger les publications
   Reload All Feeds: Recharger tous les flux
   Reload RSS Feeds: Recharger les flux RSS
+  Reload Platforms: Recharger les plateformes
   Close Multiple Tabs: Fermer {count} onglets | Fermer {count} onglets
   Duplicate Tab: Dupliquer l’onglet
   Duplicate Multiple Tabs: Dupliquer {count} onglets | Dupliquer {count} onglets
@@ -2166,8 +2231,9 @@ Description:
   Games: Jeux
   Music: Musique
 Tooltips:
-  Experimental Settings:
-    Faster Subscription Refresh: "Vérifie d'abord le flux RSS de chaque chaîne et ne charge les vidéos, Shorts et diffusions en direct que des chaînes ayant de nouvelles mises en ligne. Les actualisations automatiques ignorent aussi les chaînes chargées au cours des 10 dernières minutes. Pour les chaînes sans nouvelles mises en ligne, le nombre de vues, les vidéos supprimées et les titres modifiés ne sont mis à jour que toutes les quelques heures, et les nouvelles mises en ligne peuvent apparaître plus tard lorsque le flux RSS est en retard. Non disponible avec l'API Invidious."
+  YouTube Account Settings:
+    Subscribe on YouTube: "S’abonner à une chaîne ou s’en désabonner dans OpenTubeX fait de même sur votre compte YouTube."
+    Add to YouTube Watch History: "Les vidéos que vous lisez sont ajoutées à votre historique de visionnage YouTube, afin que les recommandations de YouTube en tiennent compte. Rien n’est ajouté tant que l’historique est suspendu sur YouTube."
   General Settings:
     Built-in Streams: |
       Automatique lit la plupart des vidéos via le client visionOS de YouTube, qui démarre plus vite et prend en charge la qualité automatique. Les diffusions en direct et les vidéos qu’il ne peut pas lire utilisent SABR.
@@ -2191,6 +2257,7 @@ Tooltips:
       Le démarrage des vidéos peut prendre plus de temps avec yt-dlp.
     Avoid translation: |
       Désactivez la traduction automatique par YouTube du titre, de la description et des chapitres d’une vidéo.
+      « Toute l’application » affiche aussi les noms et les descriptions des chaînes dans leur langue d’origine.
       Un trop grand nombre de requêtes, par exemple lors de la récupération des titres de vidéos dans des listes, peut temporairement
       nuire à la fiabilité de l’application.
     Show Thumbnail Previews: Affiche des aperçus animés au survol des miniatures vidéo.
@@ -2278,8 +2345,11 @@ Tooltips:
     Refresh Subscriptions While App Is Closed: "Actualise les flux avec les paramètres choisis. Sur ordinateur, OpenTubeX reste dans la zone de notification jusqu’à ce que vous le quittiez. Android détermine quand les actualisations en arrière-plan s’exécutent."
     Notify About New Uploads: Affiche des notifications système sur cet appareil pour les chaînes dont vous avez activé les notifications dans leurs paramètres d’abonnement. OpenTubeX recherche du nouveau contenu lors de l’actualisation des abonnements ; choisissez donc un intervalle d’actualisation automatique. Pour être notifié lorsque l’application est fermée, activez aussi l’actualisation quand l’application est fermée.
     RSS Feeds Auto Refresh Interval: Fréquence à laquelle OpenTubeX actualise automatiquement vos flux RSS lorsque l’application est ouverte.
+    Faster Subscription Refresh: "Vérifie d'abord le flux RSS de chaque chaîne et ne charge les vidéos, Shorts et diffusions en direct que des chaînes ayant de nouvelles mises en ligne. Les actualisations automatiques ignorent aussi les chaînes chargées au cours des 10 dernières minutes. Pour les chaînes sans nouvelles mises en ligne, le nombre de vues, les vidéos supprimées et les titres modifiés ne sont mis à jour que toutes les quelques heures, et les nouvelles mises en ligne peuvent apparaître plus tard lorsque le flux RSS est en retard. Non disponible avec l'API Invidious."
+    Platforms Auto Refresh Interval: Fréquence à laquelle OpenTubeX actualise automatiquement les chaînes que vous suivez sur d’autres plateformes lorsque l’application est ouverte.
+    Twitch Notify When Live: Vous avertit lorsqu’une de vos chaînes Twitch suivies commence un stream. OpenTubeX vérifie toutes les quelques minutes tant qu’il est ouvert, et aussi lorsqu’il est fermé s’il actualise alors les abonnements.
   Theme Settings:
-    Only Show Important Notifications: Masque les notifications de l’application qui se contentent de confirmer une action ou de signaler un état. Les erreurs, les avertissements, les rappels que vous avez configurés et les notifications qui proposent une action, comme Annuler, continuent de s’afficher. La progression des opérations en arrière-plan, comme l’actualisation des abonnements, s’affiche dans la barre de progression globale plutôt que dans une notification. Les notifications du système ne sont pas concernées.
+    Only Show Important Notifications: Masque les notifications de l’application qui se contentent de confirmer une action ou de signaler un état, y compris celles qui proposent Annuler. Les erreurs, les avertissements, les rappels que vous avez configurés et les notifications qui demandent une décision, comme les invitations à mettre à jour, continuent de s’afficher. La progression des opérations en arrière-plan, comme l’actualisation des abonnements, s’affiche dans la barre de progression globale plutôt que dans une notification. Les notifications du système ne sont pas concernées.
     Visible Search Suggestions: "Définit le nombre d’entrées de l’historique de recherche et de suggestions affichées par la barre de recherche avant que sa liste ne défile. La liste ne dépasse jamais le bas de la fenêtre."
     Thumbnail Size: "Redimensionne les miniatures des vidéos dans les grilles et les listes. Les grilles avec un nombre de colonnes fixe ou le type d’affichage Pleine largeur remplissent plutôt chaque ligne ; le curseur n’y modifie donc que les miniatures des listes et les Shorts. Dans les fenêtres de la taille d’un téléphone, les miniatures de la grille sont limitées à 100 %."
     Playlist Thumbnail Size: "Redimensionne les miniatures des vidéos sur les pages de playlists. Les grilles avec un nombre de colonnes fixe ou le type d’affichage Pleine largeur remplissent plutôt chaque ligne ; le curseur n’y modifie donc que les miniatures des listes et les Shorts. Dans les fenêtres de la taille d’un téléphone, les miniatures de la grille sont limitées à 100 %."
@@ -2675,3 +2745,31 @@ Notification Center:
   Clear: "Effacer"
   Empty: "Aucune notification pour le moment"
   Empty Hint: "Les rappels de diffusions en direct et les nouvelles mises en ligne des chaînes dont les notifications sont activées apparaîtront ici."
+Platforms:
+  Tracks: Titres
+  Playlists: Playlists
+  Follower Count: 1 abonné | {count} d’abonnés | {count} abonnés
+  Open Website: Ouvrir sur {platform}
+  Channel Not Found: Cette chaîne est introuvable.
+  Playlist Not Found: Cette playlist est introuvable.
+  Load Error: Impossible de charger cette page depuis {platform}.
+  Empty Tab: Il n’y a encore rien ici.
+YouTube Account:
+  Like: "J’aime"
+  Dislike: "Je n’aime pas"
+  Rating Failed: "Impossible de noter sur YouTube : {error}"
+  Subscribe Failed: "Impossible de s’abonner sur YouTube : {error}"
+  Unsubscribe Failed: "Impossible de se désabonner sur YouTube : {error}"
+  Add a comment: "Ajouter un commentaire"
+  Add a reply: "Ajouter une réponse"
+  Comment: "Commenter"
+  Reply: "Répondre"
+  Comment Posted: "Commentaire publié"
+  Reply Posted: "Réponse publiée"
+  Comment Failed: "Impossible de publier le commentaire : {error}"
+  Delete Comment: "Supprimer le commentaire"
+  Delete Comment Confirmation: "Supprimer votre commentaire de YouTube ?"
+  Comment Deleted: "Commentaire supprimé"
+  Delete Comment Failed: "Impossible de supprimer le commentaire : {error}"
+  Recommendations: "Recommandations YouTube"
+  Recommendations Failed: "Impossible de charger vos recommandations YouTube."

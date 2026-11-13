@@ -1,5 +1,5 @@
 .card {
-  --trending-top-bar-block-size: 60px;
+  --trending-top-bar-block-size: var(--top-nav-sticky-offset);
 
   box-sizing: border-box;
   inline-size: 100%;
@@ -9,15 +9,14 @@
   overflow: visible;
 }
 
-.trendingPage.hasTabBar .card {
-  --trending-top-bar-block-size: 92px;
-}
-
 .pageHeader {
   container: trending-header / inline-size;
   position: sticky;
   inset-block-start: var(--trending-top-bar-block-size);
   z-index: 3;
+
+  /* Room for the focus ring of the first row, which the header would cover. */
+  margin-block-end: 6px;
   margin-inline: -16px;
   padding-block: var(--page-title-offset) 12px;
   padding-inline: 16px;

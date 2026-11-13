@@ -168,7 +168,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
       const timeout = (timer ?? setTimeout)(callback, ms)
       return () => clearTimeout(timeout)
     },
-    holdBackgroundSync: () => () => {},
+    holdAndroidBackgroundWork: () => () => {},
     setPeriodicBackgroundSync: () => {},
     onPeriodicBackgroundSync: () => {},
     structuredClone,
@@ -192,6 +192,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     resolveMergedThemeEntry,
     getSyncableSettingKeys: () => syncableSettingKeys,
     isSettingSyncEnabled: (settings, key) => !settings.syncServerSettingsExcluded?.includes(key),
+    settingWritesSettled: () => null,
     fetch: async (url, options) => {
       requests.push({ url, method: options.method ?? 'GET', body: options.body })
       if (respond) {

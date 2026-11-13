@@ -306,10 +306,7 @@
         @change="updateRegion"
       />
     </div>
-    <FtFlexBox
-      v-if="(USING_ELECTRON || IS_CAPACITOR)"
-      class="confirmations"
-    >
+    <FtFlexBox class="confirmations">
       <FtCheckboxList
         v-model="enabledConfirmations"
         :title="t('Settings.General Settings.Confirm Before')"
@@ -408,45 +405,55 @@ function updateCheckForUpdates(value) {
 const CONFIRMATION_OPTIONS = [
   {
     value: 'closeApp',
+    visible: USING_ELECTRON || IS_CAPACITOR,
     label: () => t('Settings.General Settings.Confirmation Options.Closing App'),
     enabled: () => store.getters.getConfirmCloseApp,
     action: 'updateConfirmCloseApp'
   },
   {
     value: 'closeWindow',
+    visible: USING_ELECTRON,
     label: () => t('Settings.General Settings.Confirmation Options.Closing Window'),
     enabled: () => store.getters.getConfirmCloseWindowWithMultipleTabs,
     action: 'updateConfirmCloseWindowWithMultipleTabs'
   },
   {
     value: 'closeTabs',
+    visible: USING_ELECTRON,
     label: () => t('Settings.General Settings.Confirmation Options.Closing Tabs'),
     enabled: () => store.getters.getConfirmCloseMultipleTabs,
     action: 'updateConfirmCloseMultipleTabs'
   },
   {
     value: 'loadTabs',
+    visible: USING_ELECTRON,
     label: () => t('Settings.General Settings.Confirmation Options.Loading Tabs'),
     enabled: () => store.getters.getConfirmLoadMultipleTabs,
     action: 'updateConfirmLoadMultipleTabs'
   },
   {
     value: 'unloadTabs',
+    visible: USING_ELECTRON,
     label: () => t('Settings.General Settings.Confirmation Options.Unloading Tabs'),
     enabled: () => store.getters.getConfirmUnloadMultipleTabs,
     action: 'updateConfirmUnloadMultipleTabs'
+  },
+  {
+    value: 'refreshAllFeeds',
+    visible: true,
+    label: () => t('Settings.General Settings.Confirmation Options.Refreshing All Feeds'),
+    enabled: () => store.getters.getConfirmRefreshAllFeeds,
+    action: 'updateConfirmRefreshAllFeeds'
   }
 ]
-const visibleConfirmationOptions = computed(() => IS_CAPACITOR
-  ? CONFIRMATION_OPTIONS.slice(0, 1)
-  : CONFIRMATION_OPTIONS)
-const confirmationValues = computed(() => visibleConfirmationOptions.value.map(option => option.value))
-const confirmationLabels = computed(() => visibleConfirmationOptions.value.map(option => option.label()))
+const VISIBLE_CONFIRMATION_OPTIONS = CONFIRMATION_OPTIONS.filter(option => option.visible)
+const confirmationValues = VISIBLE_CONFIRMATION_OPTIONS.map(option => option.value)
+const confirmationLabels = computed(() => VISIBLE_CONFIRMATION_OPTIONS.map(option => option.label()))
 const enabledConfirmations = computed({
-  get: () => visibleConfirmationOptions.value.filter(option => option.enabled()).map(option => option.value),
+  get: () => VISIBLE_CONFIRMATION_OPTIONS.filter(option => option.enabled()).map(option => option.value),
   set: values => {
     const enabled = new Set(values)
-    for (const option of visibleConfirmationOptions.value) {
+    for (const option of VISIBLE_CONFIRMATION_OPTIONS) {
       const next = enabled.has(option.value)
       if (option.enabled() !== next) {
         store.dispatch(option.action, next)

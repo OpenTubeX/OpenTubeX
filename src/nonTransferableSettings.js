@@ -39,6 +39,10 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'ytDlpSource',
   'ytDlpChannel',
   'ytDlpPath',
+  // The YouTube account is signed in on this device only.
+  'youTubeAccount',
+  'youTubeAccountMirrorSubscriptions',
+  'youTubeAccountWatchHistory',
   'ytDlpPlaybackAuthMode',
   'ytDlpPlaybackCookiesPath',
   'ytDlpPlaybackCookiesBrowser',
@@ -105,3 +109,18 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'yatteePassword',
   'yatteeProxyVideos',
 ])
+
+/**
+ * The settings that exports and backups include. An Invidious instance URL can
+ * contain the server's username and password, which stay on this device.
+ * Importing the result on this device keeps them, since the values compare equal.
+ * @param {Record<string, unknown>} settings
+ * @returns {Record<string, unknown>}
+ */
+export function getTransferableSettings(settings) {
+  const transferable = Object.fromEntries(Object.entries(settings).filter(([key]) => !NON_TRANSFERABLE_SETTINGS.has(key)))
+  if (typeof transferable.defaultInvidiousInstance === 'string') {
+    transferable.defaultInvidiousInstance = transferable.defaultInvidiousInstance.trim().replace(/^([a-z][\w+.-]*:[/\\]*)[^/\\?#]*@/i, '$1')
+  }
+  return transferable
+}

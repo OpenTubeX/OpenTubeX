@@ -1,8 +1,8 @@
 import { createDefaultSettings, resolveDefaultLandingPage } from '../../../settingsDefaults.js'
-import { NON_TRANSFERABLE_SETTINGS } from '../../../nonTransferableSettings.js'
+import { getTransferableSettings, NON_TRANSFERABLE_SETTINGS } from '../../../nonTransferableSettings.js'
 import { normalizeMaterialSeedColor } from '../../../materialTheme.js'
 import { normalizeSignalAccentColor } from '../../../signalTheme.js'
-import i18n, { loadLocale, setAITranslationCompletionsEnabled } from '../../i18n/index'
+import i18n, { loadLocale, rememberStartupLocale, setAITranslationCompletionsEnabled } from '../../i18n/index'
 import allLocales from '../../../../static/locales/activeLocales.json'
 import { applyKeyboardShortcutOverrides, resolveLandingPage, sanitizeKeyboardShortcutOverrides, SyncEvents } from '../../../constants'
 import { DBProfileHandlers, DBSettingHandlers } from '../../../datastores/handlers/index'
@@ -34,7 +34,7 @@ import { normalizeQuickSettings } from '../../helpers/quickSettings.js'
 import { normalizeFullscreenActions } from '../../helpers/fullscreenActions.js'
 import { normalizeControlBarButtons } from '../../helpers/controlBarButtons.js'
 import { normalizeHiddenPlayerMenuControls, normalizePlayerMenuControls, withoutControlBarButtons } from '../../helpers/playerMenuControls.js'
-import { createOptimisticSettingUpdater, createSettingUpdateQueue } from '../../helpers/settingUpdateQueue.js'
+import { createOptimisticSettingUpdater, createSavedSettingEditor, createSettingUpdateQueue, createSettingWriteTracker } from '../../helpers/settingUpdateQueue.js'
 import { mergeSubscriptionSeenVideos } from '../../../subscriptionSeenVideos.js'
 import { mergeSubscriptionSeenPosts } from '../../../subscriptionSeenPosts.js'
 import { mergeRssFeedSeenItems } from '../../helpers/rssFeedSeenItems.js'
@@ -214,6 +214,8 @@ const state = createDefaultSettings({
 // be compared with and restored to their original values.
 export const DEFAULT_SETTINGS = Object.freeze(structuredClone(state))
 
+const runLocaleChange = createSettingUpdateQueue()
+
 const sideEffectHandlers = {
   diagnosticLogging: (_store, value) => {
     setDiagnosticLogging(value === true)
@@ -277,7 +279,9 @@ const sideEffectHandlers = {
     setAnimationSpeed(value)
   },
 
-  currentLocale: async ({ dispatch }, value) => {
+  // Locale changes run in order, and one replaced while its locale loads is
+  // skipped, so the last change wins.
+  currentLocale: ({ dispatch }, value) => runLocaleChange('currentLocale', async isLatest => {
     const fallbackLocale = 'en-US'
 
     let targetLocale = value
@@ -342,9 +346,11 @@ const sideEffectHandlers = {
 
     await Promise.allSettled(loadPromises)
 
+    if (!isLatest()) return
     i18n.global.locale.value = targetLocale
+    rememberStartupLocale(targetLocale)
     await dispatch('getRegionData', targetLocale)
-  },
+  }),
 
   defaultInvidiousInstance: ({ commit, rootState }, value) => {
     // Servers with their own Invidious server always use it, even with synced settings
@@ -431,6 +437,7 @@ export const NON_SYNCABLE_SETTINGS = new Set([
   'uiScale',
   'fontSize',
   'verticalTabBarWidth',
+  'fullscreenDockWidth',
 ])
 
 export function isSettingSyncable(settingKey) {
@@ -464,28 +471,86 @@ const SUBSCRIPTION_FEED_CACHE_MUTATIONS = {
   communityPosts: 'updatePostsCacheByChannel',
 }
 
-let settingSyncTimestampWrite = Promise.resolve()
-
-function recordSettingSyncTimestamp(commit, settings, settingId, editedAt = Date.now()) {
-  if (!isSettingSyncable(settingId) && settingId !== CUSTOM_THEMES_SYNC_KEY) return
-
-  settingSyncTimestampWrite = settingSyncTimestampWrite.then(async () => {
-    const current = settings.syncServerSettingUpdatedAt !== null &&
-      typeof settings.syncServerSettingUpdatedAt === 'object' &&
-      !Array.isArray(settings.syncServerSettingUpdatedAt)
-      ? settings.syncServerSettingUpdatedAt
-      : {}
-    const updatedAt = {
-      ...current,
-      [settingId]: editedAt,
-    }
+/**
+ * Saves the edit time `update` returns for `settingId`, for sync, or removes it
+ * for `undefined`. Windows can edit different settings at once, so it reads the
+ * saved times inside a lock they share.
+ * @param {Function} commit
+ * @param {string} settingId
+ * @param {(editedAt: number | undefined) => number | undefined} update
+ * @returns {Promise<boolean>} whether the edit time was saved
+ */
+function updateSettingSyncTimestamp(commit, settingId, update) {
+  return runLockedSettingUpdate('syncServerSettingUpdatedAt', async () => {
+    // Read the datastore, as the broadcast of another window's edit may still be on its way.
+    const saved = await DBSettingHandlers.findValue('syncServerSettingUpdatedAt')
+    const updatedAt = { ...(saved !== null && typeof saved === 'object' && !Array.isArray(saved) ? saved : {}) }
+    const editedAt = update(updatedAt[settingId])
+    if (editedAt === updatedAt[settingId]) return
+    if (editedAt === undefined) delete updatedAt[settingId]
+    else updatedAt[settingId] = editedAt
     await DBSettingHandlers.upsert('syncServerSettingUpdatedAt', updatedAt)
     commit('setSyncServerSettingUpdatedAt', updatedAt)
-  }).catch(error => {
-    console.error('Failed to record the setting sync timestamp', error)
   })
+}
 
-  return settingSyncTimestampWrite
+/**
+ * Saves an edit of `settingId` with `save`, and its edit time for sync:
+ * - The edit time is saved first, so no window can pair the new value with the
+ *   previous edit time.
+ * - If either save fails, the edit fails and the previous edit time comes back,
+ *   so sync doesn't count the unchanged value as a newer edit. Edits of a
+ *   setting take turns in all windows, so the previous edit time is always
+ *   that of a saved value.
+ * @template T
+ * @param {Function} commit
+ * @param {string} settingId
+ * @param {() => Promise<T>} save
+ * @param {number} [editedAt]
+ * @returns {Promise<T>}
+ */
+function saveSettingEdit(commit, settingId, save, editedAt = Date.now()) {
+  if (!isSettingSyncable(settingId) && settingId !== CUSTOM_THEMES_SYNC_KEY) return save()
+
+  return runLocked(`opentubex-setting-edit-${settingId}`, async () => {
+    let previous
+    const recorded = await updateSettingSyncTimestamp(commit, settingId, saved => {
+      previous = saved
+      return editedAt
+    })
+    if (!recorded) throw new Error(`Failed to save when ${settingId} was edited`)
+    try {
+      return await save()
+    } catch (error) {
+      // Keep an edit time that something else saved meanwhile.
+      await updateSettingSyncTimestamp(commit, settingId, saved => saved === editedAt ? previous : saved)
+      throw error
+    }
+  })
+}
+
+const settingWrites = createSettingWriteTracker(settingId => DBSettingHandlers.findValue(settingId))
+
+/**
+ * Optimistic edits show their value before their edit time is saved, so sync
+ * waits for this window's setting writes.
+ * @returns {Promise<unknown> | null} settles once the writes in flight finish,
+ * or `null` if there are none
+ */
+export function settingWritesSettled() {
+  return settingWrites.settled()
+}
+
+/**
+ * Runs a write of a synchronized value saved outside this module, such as
+ * custom themes, so sync waits for it too.
+ * @template T
+ * @param {string} settingId
+ * @param {() => Promise<T>} write
+ * @returns {Promise<T>}
+ */
+export function trackSettingWrite(settingId, write) {
+  return settingWrites.track(settingId, write)
 }
 
 const customState = {
@@ -587,13 +652,7 @@ const customGetters = {
   },
 
   getTransferableSettings: (state) => {
-    const transferableSettings = {}
-    for (const [key, value] of Object.entries(state)) {
-      if (!NON_TRANSFERABLE_SETTINGS.has(key)) {
-        transferableSettings[key] = value
-      }
-    }
-    return transferableSettings
+    return getTransferableSettings(state)
   },
 
   getDefaultPlayback(state) {
@@ -610,37 +669,43 @@ const customMutations = {
   }
 }
 
-async function updateValidatedSetting(commit, settings, settingId, value) {
-  try {
-    await DBSettingHandlers.upsert(settingId, value)
-    await recordSettingSyncTimestamp(commit, settings, settingId)
+function updateValidatedSetting(commit, settingId, value) {
+  return settingWrites.track(settingId, async () => {
+    await saveSettingEdit(commit, settingId, () => DBSettingHandlers.upsert(settingId, value))
     commit(defaultMutationId(settingId), value)
-    return true
-  } catch (error) {
+  }).then(() => true, error => {
     console.error(error)
     return false
-  }
+  })
 }
 
 /** @type {Map<string, Promise<unknown>>} */
-const pendingLockedSettingUpdates = new Map()
+const pendingLocks = new Map()
 
 /**
- * Runs `persist` inside a lock all windows share for `settingId`, or a queue
- * where locks are missing, so read-modify-write updates cannot interleave.
+ * Runs `run` inside the lock `name`, which all windows share, or a queue where
+ * locks are missing.
+ * @template T
+ * @param {string} name
+ * @param {() => Promise<T>} run
+ * @returns {Promise<T>}
+ */
+function runLocked(name, run) {
+  if (typeof navigator !== 'undefined' && navigator.locks) return navigator.locks.request(name, run)
+  const result = (pendingLocks.get(name) ?? Promise.resolve()).catch(() => {}).then(run)
+  pendingLocks.set(name, result)
+  return result
+}
+
+/**
+ * Runs `persist` inside a lock all windows share for `settingId`, so
+ * read-modify-write updates cannot interleave.
  * @param {string} settingId
  * @param {() => Promise<void>} persist
  * @returns {Promise<boolean>} whether the update was saved
  */
 function runLockedSettingUpdate(settingId, persist) {
-  let updated
-  if (typeof navigator !== 'undefined' && navigator.locks) {
-    updated = navigator.locks.request(`opentubex-setting-${settingId}`, persist)
-  } else {
-    updated = (pendingLockedSettingUpdates.get(settingId) ?? Promise.resolve()).catch(() => {}).then(persist)
-    pendingLockedSettingUpdates.set(settingId, updated)
-  }
-  return updated.then(() => true, error => {
+  return runLocked(`opentubex-setting-${settingId}`, persist).then(() => true, error => {
     console.error(error)
     return false
   })
@@ -667,14 +732,38 @@ function updateSavedPlaylistBookmarks(commit, update) {
 const updateOptimisticSetting = createOptimisticSettingUpdater()
 
 function updateOrderedSetting(commit, settings, settingId, value) {
-  return updateOptimisticSetting(settingId, value, {
+  return settingWrites.track(settingId, () => updateOptimisticSetting(settingId, value, {
     read: () => settings[settingId],
     commit: nextValue => commit(defaultMutationId(settingId), nextValue),
-    persist: async nextValue => {
-      await DBSettingHandlers.upsert(settingId, nextValue)
-      await recordSettingSyncTimestamp(commit, settings, settingId)
-    },
-  }).then(() => true).catch(error => {
+    persist: nextValue => saveSettingEdit(commit, settingId, () => DBSettingHandlers.upsert(settingId, nextValue)),
+  })).then(() => true).catch(error => {
+    console.error(error)
+    return false
+  })
+}
+
+const editSavedSetting = createSavedSettingEditor()
+
+/**
+ * Applies `update` to a setting that other windows can change at the same
+ * time. A function derives the new value from the current one, so the edit
+ * keeps what other windows saved meanwhile. A value (imports, resets) replaces it.
+ * @template T
+ * @param {Function} commit
+ * @param {Record<string, any>} settings
+ * @param {string} settingId
+ * @param {T | ((value: T) => T)} update
+ * @returns {Promise<boolean>} whether the edit was saved
+ */
+function updateSharedSetting(commit, settings, settingId, update) {
+  const edit = typeof update === 'function' ? update : () => update
+  return settingWrites.track(settingId, () => editSavedSetting(settingId, edit, {
+    read: () => settings[settingId],
+    commit: value => commit(defaultMutationId(settingId), value),
+    readSaved: async () => (await DBSettingHandlers.findValue(settingId)) ?? structuredClone(DEFAULT_SETTINGS[settingId]),
+    write: value => saveSettingEdit(commit, settingId, () => DBSettingHandlers.upsert(settingId, value)),
+    lock: run => runLocked(`opentubex-setting-${settingId}`, run),
+  })).then(() => true, error => {
     console.error(error)
     return false
   })
@@ -758,9 +847,8 @@ const customActions = {
     ))
     if (value !== state.subscriptionSeenVideos) commit('setSubscriptionSeenVideos', value)
   },
-  recordSyncSettingEdit: ({ commit, state }, settingId) => (
-    recordSettingSyncTimestamp(commit, state, settingId)
-  ),
+  // Saves an edit of a synced value that is not a setting, such as the custom themes.
+  saveSyncSettingEdit: ({ commit }, { settingId, save }) => saveSettingEdit(commit, settingId, save),
   updateFullscreenActions: ({ commit, state }, value) => updateOrderedSetting(
     commit,
     state,
@@ -807,44 +895,44 @@ const customActions = {
     normalizeNavigationItems(value)
   ),
 
-  // Pin toggles build on the previous edit, so commit them before the save finishes.
-  updatePinnedPlaylistIds: ({ commit, state }, value) => updateOrderedSetting(commit, state, 'pinnedPlaylistIds', value),
-  updateUserPlaylistsPinnedIds: ({ commit, state }, value) => updateOrderedSetting(commit, state, 'userPlaylistsPinnedIds', value),
+  updatePinnedPlaylistIds: ({ commit, state }, update) => updateSharedSetting(commit, state, 'pinnedPlaylistIds', update),
+  updateUserPlaylistsPinnedIds: ({ commit, state }, update) => updateSharedSetting(commit, state, 'userPlaylistsPinnedIds', update),
   // Takes the new groups (sync, imports) or a function that derives them from
   // the saved ones. Edits read the saved groups inside a lock all windows
   // share, so an edit in one window cannot undo another's.
-  updateSubscriptionGroups: ({ commit, state }, update) => runLockedSettingUpdate('subscriptionGroups', async () => {
+  updateSubscriptionGroups: ({ commit, state }, update) => settingWrites.track('subscriptionGroups', () => runLockedSettingUpdate('subscriptionGroups', async () => {
     // Read the datastore, as the broadcast of another window's edit may still be on its way.
     const saved = await DBSettingHandlers.findValue('subscriptionGroups')
     const groups = typeof update === 'function' ? update(saved === undefined ? state.subscriptionGroups : saved) : update
-    await DBSettingHandlers.upsert('subscriptionGroups', groups)
+    await saveSettingEdit(commit, 'subscriptionGroups', () => DBSettingHandlers.upsert('subscriptionGroups', groups))
     commit('setSubscriptionGroups', groups)
-    await recordSettingSyncTimestamp(commit, state, 'subscriptionGroups')
-  }),
+  })),
   updateSubscribedChannelsCustomOrder: ({ commit, state }, value) => updateOrderedSetting(
     commit, state, 'subscribedChannelsCustomOrder', value
   ),
-  // Quick removals build on the previous one, so commit them before the save finishes.
-  updateFollowedRssFeeds: ({ commit, state }, value) => updateOrderedSetting(commit, state, 'followedRssFeeds', value),
-  updatePinnedChannels: async ({ commit, state }, value) => {
-    if (!await updateOrderedSetting(commit, state, 'pinnedChannels', value)) return false
+  updateFollowedRssFeeds: ({ commit, state }, update) => updateSharedSetting(commit, state, 'followedRssFeeds', update),
+  updateFollowedChannels: ({ commit, state }, update) => updateSharedSetting(commit, state, 'followedChannels', update),
+  updatePinnedChannels: async ({ commit, state }, update) => {
+    const previousIds = state.pinnedChannels.map(channel => channel.id)
+    if (!await updateSharedSetting(commit, state, 'pinnedChannels', update)) return false
+    // Only drop unpinned channels, as other windows may have pinned channels this one doesn't show yet.
     const pinnedIds = new Set(state.pinnedChannels.map(channel => channel.id))
-    const entries = Object.entries(state.pinnedChannelMetadata)
-    const retained = entries.filter(([id]) => pinnedIds.has(id))
-    if (retained.length === entries.length) return true
-    return updateOrderedSetting(commit, state, 'pinnedChannelMetadata', Object.fromEntries(retained))
+    const unpinnedIds = previousIds.filter(id => !pinnedIds.has(id) && state.pinnedChannelMetadata[id])
+    if (unpinnedIds.length === 0) return true
+    return updateSharedSetting(commit, state, 'pinnedChannelMetadata', saved => Object.fromEntries(
+      Object.entries(saved).filter(([id]) => !unpinnedIds.includes(id))
+    ))
   },
   refreshPinnedChannelMetadata: ({ commit, state }, { id, name, thumbnail }) => {
     const pin = state.pinnedChannels.find(channel => channel.id === id)
     if (!pin) return
     const previous = state.pinnedChannelMetadata[id] ?? pin
-    const details = { name: name || previous.name, thumbnail: thumbnail || previous.thumbnail }
-    if (details.name === previous.name && details.thumbnail === previous.thumbnail) return
-    const metadata = Object.fromEntries(state.pinnedChannels
-      .filter(channel => state.pinnedChannelMetadata[channel.id])
-      .map(channel => [channel.id, state.pinnedChannelMetadata[channel.id]]))
-    metadata[id] = details
-    return updateOrderedSetting(commit, state, 'pinnedChannelMetadata', metadata)
+    if ((name || previous.name) === previous.name && (thumbnail || previous.thumbnail) === previous.thumbnail) return
+    // Missing details fall back to the saved ones, which another window may have refreshed.
+    return updateSharedSetting(commit, state, 'pinnedChannelMetadata', saved => {
+      const current = saved[id] ?? pin
+      return { ...saved, [id]: { name: name || current.name, thumbnail: thumbnail || current.thumbnail } }
+    })
   },
 
   // Home customization edits build on the previous edit, so commit them before the save finishes.
@@ -867,16 +955,15 @@ const customActions = {
     pendingAutomaticDownloadRuleUpdate = pendingAutomaticDownloadRuleUpdate.then(async () => {
       if (persist === null) throw new Error('Automatic download rules require a user action')
       const value = typeof update === 'function' ? update(state.ytDlpAutomaticDownloadRules) : update
-      await persist(value)
+      await saveSettingEdit(commit, 'ytDlpAutomaticDownloadRules', () => persist(value))
       // Publish successful writes even if a later edit is queued and could fail.
       commit('setYtDlpAutomaticDownloadRules', value)
-      await recordSettingSyncTimestamp(commit, state, 'ytDlpAutomaticDownloadRules')
       return true
     }).catch(error => {
       console.error(error)
       return false
     })
-    return pendingAutomaticDownloadRuleUpdate
+    return settingWrites.track('ytDlpAutomaticDownloadRules', () => pendingAutomaticDownloadRuleUpdate)
   },
 
   savePlaylistBookmark: ({ commit }, bookmark) => updateSavedPlaylistBookmarks(commit, bookmarks => [
@@ -892,7 +979,7 @@ const customActions = {
     if (!removed) return false
     // Saving the playlist again should not bring back an old pin.
     if (state.userPlaylistsPinnedIds.includes(playlistId)) {
-      await updateOrderedSetting(commit, state, 'userPlaylistsPinnedIds', state.userPlaylistsPinnedIds.filter(id => id !== playlistId))
+      await updateSharedSetting(commit, state, 'userPlaylistsPinnedIds', ids => ids.filter(id => id !== playlistId))
     }
     return true
   },
@@ -903,32 +990,26 @@ const customActions = {
     typeof update === 'function' ? update : () => update
   ),
 
-  updatePreferredCaptionLocale: ({ commit, state }, value) => updateValidatedSetting(
+  updatePreferredCaptionLocale: ({ commit }, value) => updateValidatedSetting(
     commit,
-    state,
     'preferredCaptionLocale',
     normalizeYouTubeCaptionLanguageCode(value)
   ),
 
-  updateAppFont: ({ commit, state }, value) => updateValidatedSetting(
+  updateAppFont: ({ commit }, value) => updateValidatedSetting(
     commit,
-    state,
     'appFont',
     normalizeAppFont(value)
   ),
 
-  updateMoveDownloadsToAppHeader: async ({ commit, state }, value) => {
-    try {
-      await DBSettingHandlers.upsert('moveDownloadsToAppHeader', value)
-      await recordSettingSyncTimestamp(commit, state, 'moveDownloadsToAppHeader')
-      commit('setMoveDownloadsToAppHeader', value)
-      await DBSettingHandlers.delete('moveDownloadsToQuickSettings')
-      return true
-    } catch (error) {
-      console.error(error)
-      return false
-    }
-  },
+  updateMoveDownloadsToAppHeader: ({ commit }, value) => settingWrites.track('moveDownloadsToAppHeader', async () => {
+    await saveSettingEdit(commit, 'moveDownloadsToAppHeader', () => DBSettingHandlers.upsert('moveDownloadsToAppHeader', value))
+    commit('setMoveDownloadsToAppHeader', value)
+    await DBSettingHandlers.delete('moveDownloadsToQuickSettings')
+  }).then(() => true, error => {
+    console.error(error)
+    return false
+  }),
 
   updateMaterialSeedColor: ({ commit, state }, value) => updateOrderedSetting(
     commit, state, 'materialSeedColor', normalizeMaterialSeedColor(value)
@@ -938,57 +1019,50 @@ const customActions = {
     commit, state, 'signalAccentColor', normalizeSignalAccentColor(value)
   ),
 
-  updateBaseTheme: ({ commit, rootGetters, state }, value) => updateValidatedSetting(
+  updateBaseTheme: ({ commit, rootGetters }, value) => updateValidatedSetting(
     commit,
-    state,
     'baseTheme',
     resolveBaseTheme(value, 'system', rootGetters.getCustomThemes)
   ),
 
-  updateSystemLightTheme: ({ commit, rootGetters, state }, value) => updateValidatedSetting(
+  updateSystemLightTheme: ({ commit, rootGetters }, value) => updateValidatedSetting(
     commit,
-    state,
     'systemLightTheme',
     resolveSystemTheme(value, 'light', rootGetters.getCustomThemes)
   ),
 
-  updateSystemDarkTheme: ({ commit, rootGetters, state }, value) => updateValidatedSetting(
+  updateSystemDarkTheme: ({ commit, rootGetters }, value) => updateValidatedSetting(
     commit,
-    state,
     'systemDarkTheme',
     resolveSystemTheme(value, 'dark', rootGetters.getCustomThemes)
   ),
 
-  updateMainColor: ({ commit, state }, value) => updateValidatedSetting(
+  updateMainColor: ({ commit }, value) => updateValidatedSetting(
     commit,
-    state,
     'mainColor',
     resolveColor(value, 'Red')
   ),
 
-  updateSecColor: ({ commit, state }, value) => updateValidatedSetting(
+  updateSecColor: ({ commit }, value) => updateValidatedSetting(
     commit,
-    state,
     'secColor',
     resolveColor(value, 'Blue')
   ),
 
-  updateTabBarPosition: ({ commit, state }, value) => updateValidatedSetting(
+  updateTabBarPosition: ({ commit }, value) => updateValidatedSetting(
     commit,
-    state,
     'tabBarPosition',
     normalizeTabBarPosition(value)
   ),
 
-  updateIconPack: async ({ commit, state }, value) => {
+  updateIconPack: ({ commit }, value) => settingWrites.track('iconPack', async () => {
     const previousIconPack = currentIconPack.value
     if (!isIconPack(value) || !await setIconPack(value)) {
       return false
     }
 
     try {
-      await DBSettingHandlers.upsert('iconPack', value)
-      await recordSettingSyncTimestamp(commit, state, 'iconPack')
+      await saveSettingEdit(commit, 'iconPack', () => DBSettingHandlers.upsert('iconPack', value))
       commit('setIconPack', value)
       return true
     } catch (error) {
@@ -998,7 +1072,7 @@ const customActions = {
       console.error(error)
       return false
     }
-  },
+  }),
 
   resetSettingToDefault: ({ dispatch }, settingKey) => {
     if (!Object.prototype.hasOwnProperty.call(DEFAULT_SETTINGS, settingKey)) {
@@ -1032,6 +1106,20 @@ const customActions = {
       const alreadyTriggeredSideEffects = []
       const sideEffectPromises = []
 
+      // The icons load alongside the other settings' side effects. A pack that
+      // cannot load is replaced by the other one, which is then saved.
+      let iconPackApplied
+      const applyIconPack = (value) => {
+        iconPackApplied = dispatch(defaultSideEffectsTriggerId('iconPack'), value).then(async (resolvedValue) => {
+          if (resolvedValue !== value) {
+            await DBSettingHandlers.upsert('iconPack', resolvedValue)
+            commit('setIconPack', resolvedValue)
+          }
+        })
+        // A failure is handled where the result is awaited below.
+        iconPackApplied.catch(() => {})
+      }
+
       for (const { _id, value } of userSettings) {
         let resolvedValue = value
         if (_id === 'syncServerUrl') {
@@ -1047,10 +1135,7 @@ const customActions = {
         }
         if (settingsWithSideEffects.includes(_id)) {
           if (_id === 'iconPack') {
-            resolvedValue = await dispatch(defaultSideEffectsTriggerId(_id), value)
-            if (resolvedValue !== value) {
-              await DBSettingHandlers.upsert(_id, resolvedValue)
-            }
+            applyIconPack(value)
           } else {
             sideEffectPromises.push(
               dispatch(defaultSideEffectsTriggerId(_id), value)
@@ -1191,7 +1276,7 @@ const customActions = {
         const editedAt = userSettings.find(entry => entry._id === 'syncServerSettingUpdatedAt')
           ?.value?.generalAutoLoadMorePaginatedItemsEnabled
         if (typeof editedAt === 'number') {
-          await recordSettingSyncTimestamp(commit, state, 'autoLoadComments', editedAt)
+          await updateSettingSyncTimestamp(commit, 'autoLoadComments', () => editedAt)
         }
       }
 
@@ -1204,8 +1289,7 @@ const customActions = {
             legacyValue: legacyHideAiVideoSummariesEntry.value,
             hasCurrentSetting: hasAiVideoSummaryModeSetting,
             saveCurrentSetting: async (value) => {
-              await DBSettingHandlers.upsert('aiVideoSummaryMode', value)
-              await recordSettingSyncTimestamp(commit, state, 'aiVideoSummaryMode')
+              await saveSettingEdit(commit, 'aiVideoSummaryMode', () => DBSettingHandlers.upsert('aiVideoSummaryMode', value))
               commit('setAiVideoSummaryMode', value)
             },
             deleteLegacySetting: () => DBSettingHandlers.delete('hideAiVideoSummaries'),
@@ -1213,14 +1297,6 @@ const customActions = {
         } catch (error) {
           console.error('Failed to migrate AI video summary visibility', error)
         }
-      } else if (!hasAiVideoSummaryModeSetting) {
-        // Only fresh installations receive the new default. Persist it so
-        // their next startup does not mistake them for an existing installation.
-        const hasExistingSettings = userSettings.some(({ _id }) => !TUTORIAL_STATE_SETTING_IDS.has(_id))
-        const isFreshInstallation = !hasExistingSettings && (await DBProfileHandlers.find()).length === 0
-        const mode = isFreshInstallation ? 'collapsed' : 'hide'
-        commit('setAiVideoSummaryMode', mode)
-        await dispatch('updateAiVideoSummaryMode', mode)
       }
 
       // Migrate the legacy auto Picture-in-Picture setting to the combinable triggers array.
@@ -1273,12 +1349,7 @@ const customActions = {
       for (const _id of settingsWithSideEffects) {
         if (!alreadyTriggeredSideEffects.includes(_id)) {
           if (_id === 'iconPack') {
-            const value = state[_id]
-            const resolvedValue = await dispatch(defaultSideEffectsTriggerId(_id), value)
-            if (resolvedValue !== value) {
-              await DBSettingHandlers.upsert(_id, resolvedValue)
-              commit(defaultMutationId(_id), resolvedValue)
-            }
+            applyIconPack(state[_id])
           } else {
             sideEffectPromises.push(
               dispatch(defaultSideEffectsTriggerId(_id), state[_id])
@@ -1288,6 +1359,7 @@ const customActions = {
       }
 
       await Promise.allSettled(sideEffectPromises)
+      await iconPackApplied
       return {
         hasExistingSettings: userSettings.some(({ _id }) => !TUTORIAL_STATE_SETTING_IDS.has(_id)),
         landingPageToInitialize,
@@ -1320,34 +1392,88 @@ const customActions = {
     await Promise.all(homeTabs.map(tab => navigation.replace(tab.id, landingRoute)))
   },
 
+  // Separate, so the subscription cache sees subscriptions made in other
+  // windows while the window starts before it drops unsubscribed channels.
+  setupProfileListenerToSyncWindows: ({ commit }) => {
+    if (process.env.IS_ELECTRON) {
+      window.ftElectron.handleSyncProfiles((event, data) => {
+        switch (event) {
+          case SyncEvents.GENERAL.CREATE:
+            commit('addProfileToList', data)
+            break
+
+          case SyncEvents.GENERAL.UPSERT:
+            commit('upsertProfileToList', data)
+            break
+
+          case SyncEvents.PROFILES.ADD_CHANNEL:
+            commit('addChannelToProfiles', data)
+            break
+
+          case SyncEvents.PROFILES.REMOVE_CHANNEL:
+            commit('removeChannelFromProfiles', data)
+            break
+
+          case SyncEvents.PROFILES.UPDATE_CHANNEL_SETTINGS:
+            commit('updateChannelSettings', data)
+            break
+
+          case SyncEvents.PROFILES.UPDATE_SUBSCRIPTION_DETAILS:
+            commit('updateSubscriptionDetails', data)
+            break
+
+          case SyncEvents.PROFILES.UPDATE_DETAILS:
+            commit('updateProfileDetails', data)
+            break
+
+          case SyncEvents.GENERAL.DELETE:
+            commit('removeProfileFromList', data)
+            break
+
+          default:
+            console.error('profiles: invalid sync event received')
+        }
+      })
+    }
+  },
+
   // Should be a root action, but we'll tolerate
   setupListenersToSyncWindows: ({ commit, dispatch }) => {
     if (process.env.IS_ELECTRON) {
+      const applySavedSetting = (settingId, value) => {
+        if (settingsWithSideEffects.includes(settingId)) {
+          dispatch(defaultSideEffectsTriggerId(settingId), value)
+        }
+
+        commit(defaultMutationId(settingId), value)
+        if (
+          settingId === 'navigationItems' &&
+          !normalizeNavigationItems(value).includes('home')
+        ) {
+          dispatch('redirectHomeTabsToLandingPage').catch(error => {
+            console.error('Failed to redirect Home tabs after syncing navigation items', error)
+          })
+        }
+        if (settingId === 'syncServerEnabled') {
+          dispatch('applySyncServerEnabled', value, { root: true })
+        } else if (settingId === 'syncServerAutoSync') {
+          dispatch(value ? 'startSyncServerAutoSync' : 'stopSyncServerAutoSync', null, { root: true })
+        } else if (settingId === 'syncServerToken') {
+          dispatch('applySyncServerToken', null, { root: true }).catch(error => {
+            console.error('Failed to refresh sync after a token change in another window', error)
+          })
+        }
+      }
+
       window.ftElectron.handleSyncSettings((event, data) => {
         switch (event) {
           case SyncEvents.GENERAL.UPSERT:
-            if (settingsWithSideEffects.includes(data._id)) {
-              dispatch(defaultSideEffectsTriggerId(data._id), data.value)
-            }
-
-            commit(defaultMutationId(data._id), data.value)
-            if (
-              data._id === 'navigationItems' &&
-              !normalizeNavigationItems(data.value).includes('home')
-            ) {
-              dispatch('redirectHomeTabsToLandingPage').catch(error => {
-                console.error('Failed to redirect Home tabs after syncing navigation items', error)
-              })
-            }
-            if (data._id === 'syncServerEnabled') {
-              dispatch('applySyncServerEnabled', data.value, { root: true })
-            } else if (data._id === 'syncServerAutoSync') {
-              dispatch(data.value ? 'startSyncServerAutoSync' : 'stopSyncServerAutoSync', null, { root: true })
-            } else if (data._id === 'syncServerToken') {
-              dispatch('applySyncServerToken', null, { root: true }).catch(error => {
-                console.error('Failed to refresh sync after a token change in another window', error)
-              })
-            }
+            // If this window is writing the setting too, either save can end
+            // up last, so this window shows the saved value once its writes finish.
+            settingWrites.savedElsewhere(data._id, saved => {
+              if (saved !== undefined) applySavedSetting(data._id, saved)
+            })
+            applySavedSetting(data._id, data.value)
             break
 
           default:
@@ -1461,45 +1587,6 @@ const customActions = {
 
           default:
             console.error('search history: invalid sync event received')
-        }
-      })
-
-      window.ftElectron.handleSyncProfiles((event, data) => {
-        switch (event) {
-          case SyncEvents.GENERAL.CREATE:
-            commit('addProfileToList', data)
-            break
-
-          case SyncEvents.GENERAL.UPSERT:
-            commit('upsertProfileToList', data)
-            break
-
-          case SyncEvents.PROFILES.ADD_CHANNEL:
-            commit('addChannelToProfiles', data)
-            break
-
-          case SyncEvents.PROFILES.REMOVE_CHANNEL:
-            commit('removeChannelFromProfiles', data)
-            break
-
-          case SyncEvents.PROFILES.UPDATE_CHANNEL_SETTINGS:
-            commit('updateChannelSettings', data)
-            break
-
-          case SyncEvents.PROFILES.UPDATE_SUBSCRIPTION_DETAILS:
-            commit('updateSubscriptionDetails', data)
-            break
-
-          case SyncEvents.PROFILES.UPDATE_DETAILS:
-            commit('updateProfileDetails', data)
-            break
-
-          case SyncEvents.GENERAL.DELETE:
-            commit('removeProfileFromList', data)
-            break
-
-          default:
-            console.error('profiles: invalid sync event received')
         }
       })
 
@@ -1631,29 +1718,25 @@ for (const settingId of Object.keys(state)) {
     // If setting has side effects, generate action to handle them
     actions[triggerId] = sideEffectHandlers[settingId]
 
-    actions[updaterId] = ({ commit, dispatch, state }, value) => (
-      runSettingUpdate(settingId, async isLatest => {
-        await DBSettingHandlers.upsert(settingId, value)
-
-        if (!isLatest()) return
-        await recordSettingSyncTimestamp(commit, state, settingId)
+    actions[updaterId] = ({ commit, dispatch }, value) => (
+      settingWrites.track(settingId, () => runSettingUpdate(settingId, async isLatest => {
+        // Once its edit time is saved, the value must be saved too, even if a newer update replaced it.
+        await saveSettingEdit(commit, settingId, () => DBSettingHandlers.upsert(settingId, value))
 
         if (!isLatest()) return
         dispatch(triggerId, value)
 
         commit(mutationId, value)
-      }).then(() => true, handleUpdateError)
+      })).then(() => true, handleUpdateError)
     )
   } else {
-    actions[updaterId] = ({ commit, state }, value) => (
-      runSettingUpdate(settingId, async isLatest => {
-        await DBSettingHandlers.upsert(settingId, value)
-
-        if (!isLatest()) return
-        await recordSettingSyncTimestamp(commit, state, settingId)
+    actions[updaterId] = ({ commit }, value) => (
+      settingWrites.track(settingId, () => runSettingUpdate(settingId, async isLatest => {
+        // Once its edit time is saved, the value must be saved too, even if a newer update replaced it.
+        await saveSettingEdit(commit, settingId, () => DBSettingHandlers.upsert(settingId, value))
 
         if (isLatest()) commit(mutationId, value)
-      }).then(() => true, handleUpdateError)
+      })).then(() => true, handleUpdateError)
     )
   }
 }

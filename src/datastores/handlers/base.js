@@ -1507,6 +1507,17 @@ class SubscriptionCache {
     return db.subscriptionCache.findAsync({})
   }
 
+  // ******************** //
+  // Unique Electron main process handlers
+  /**
+   * Every channel's document as its stored JSON text, which the renderer
+   * parses, see `History._findSerialized`.
+   */
+  static _findSerialized() {
+    return db.subscriptionCache.findSerializedAsync()
+  }
+  // ******************** //
+
   /**
    * Marks entries of many channel feeds as seen in one SQLite transaction.
    * @param {{ channelId: string, tab: string, entries: object[] }[]} marks
