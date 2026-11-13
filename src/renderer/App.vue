@@ -754,6 +754,7 @@ import {
 import { dismissAutoSyncNotice, shouldShowAutoSyncNotice, showAutoSyncNoticeOnce } from './helpers/sync-auto-sync-notice'
 import { invalidateAllYtDlpPlaybackSources } from './helpers/player/ytDlpPlayback'
 import { getTabNavigationService } from './tabs/TabNavigationService'
+import { isPlayerRoutePath } from './tabs/playerDockDestination'
 import { initializeCapacitorTabPreviews } from './tabs/capacitorTabPreviews'
 import { initializeCapacitorTabAvatars } from './tabs/capacitorTabAvatars'
 import { initializeCapacitorTabService } from './tabs/CapacitorTabService'
@@ -1034,7 +1035,7 @@ function handleTabletTabStripChange(event) {
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const useWatchSideNavOverlay = computed(() => {
-  return store.getters.getHideSideBarOnWatchPages && (route.path.startsWith('/watch/') || route.path === '/external-media')
+  return store.getters.getHideSideBarOnWatchPages && isPlayerRoutePath(route.path)
 })
 
 const sideNavOpenBeforeWatchOverlay = ref(null)
