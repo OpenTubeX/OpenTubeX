@@ -1136,7 +1136,9 @@ export function getRelativeTimeFromDate(date, hideSeconds = false, useThirtyDayM
   let timeDiffFromNow = Math.abs(now - date) / 1000
   let timeUnit = 'second'
 
-  if (timeDiffFromNow < 60 && hideSeconds) {
+  // Callers that hide seconds show past events, which only look upcoming
+  // while their clock lags behind
+  if (hideSeconds && (timeDiffFromNow < 60 || isFuture)) {
     return i18n.global.t('Moments Ago')
   }
 
