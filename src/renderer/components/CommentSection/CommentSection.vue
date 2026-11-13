@@ -225,6 +225,10 @@
         @keydown.space.enter.stop
         @keyup.space.stop
       />
+      <CommentComposer
+        v-if="canUseYouTubeComments && showComments && !isLoading"
+        class="topCommentComposer"
+      />
       <div
         v-if="commentEntries.length > 0 && showComments"
         ref="commentsList"
@@ -400,8 +404,14 @@
             :attachment="comment.imageAttachment"
           />
           <p class="commentLikeCount">
+            <CommentAccountActions
+              v-if="canUseYouTubeComments"
+              :comment="comment"
+              :hide-count="hideCommentLikes"
+              :shorten-view-counts="shortenViewCounts"
+            />
             <template
-              v-if="!hideCommentLikes"
+              v-else-if="!hideCommentLikes"
             >
               <FtIcon
                 :icon="['fas', 'thumbs-up']"
@@ -430,6 +440,12 @@
               />
             </span>
           </p>
+          <CommentComposer
+            v-if="canUseYouTubeComments && youTubeReplyingTo === comment.id"
+            class="replyComposer"
+            :parent-id="comment.id"
+            @done="youTubeComments.closeReply(comment.id)"
+          />
           <div
             v-if="index !== null && shouldShowCommentReplyToggle(comment, replyNodes)"
             class="commentReplyContinuation commentReplyRootToggle"
@@ -646,12 +662,14 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { inject, computed, nextTick, onBeforeUnmount, ref, shallowRef, toRaw, useTemplateRef, watch } from 'vue'
+import { inject, computed, nextTick, onBeforeUnmount, provide, reactive, ref, shallowRef, toRaw, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
 
 import FtButton from '../FtButton/FtButton.vue'
 import FtCard from '../ft-card/ft-card.vue'
+import CommentAccountActions from './CommentAccountActions.vue'
+import CommentComposer from './CommentComposer.vue'
 import CommentFilterMenu from './CommentFilterMenu.vue'
 import CommentReply from './CommentReply.vue'
 import CommentTranslationButton from './CommentTranslationButton.vue'
@@ -666,6 +684,8 @@ import CommentImageAttachment from './CommentImageAttachment.vue'
 
 import store from '../../store/index'
 import { usesInvidiousApi } from '../../../apiBackends'
+import { getYouTubeChannelKey, isSignedInToYouTube } from '../../helpers/youtube-account-state'
+import { createPostedComment, getRootCommentId, youTubeCommentsKey } from './youTubeComments'
 
 import { debounce, getInvidiousApiErrorMessage, showInvidiousFallbackToast, copyToClipboard, formatViewCount, getRelativeTimeFromDate, showApiErrorToast, showToast } from '../../helpers/utils'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
@@ -716,7 +736,8 @@ function formatCommentLikeCount(likeCount) {
 
 function formatCommentTime(comment) {
   return comment.published
-    ? getRelativeTimeFromDate(comment.published, false, true, relativeTimeNow.value)
+    // A comment posted since the clock last ticked would read "in a few seconds".
+    ? getRelativeTimeFromDate(comment.published, false, true, Math.max(relativeTimeNow.value, comment.published))
     : comment.time
 }
 
@@ -779,6 +800,169 @@ const nextPageToken = shallowRef(null)
 // we need to react to new replies and showReplies being toggled
 const commentData = ref([])
 const commentCount = ref(props.initialCommentCount)
+
+// Comments deleted here, for comment lists that were loading meanwhile.
+const deletedCommentIds = new Set()
+
+// The signed-in YouTube account can rate, write and delete video comments.
+const youTubeComments = {
+  enabled: computed(() => !props.isPostComments && !props.offline && !props.commentsDisabled &&
+    !areCommentsDisabled.value && isSignedInToYouTube(store.getters)),
+  videoId: computed(() => props.id),
+  channelId: computed(() => store.getters.getYouTubeAccount?.channelId ?? null),
+  replyingTo: ref(null),
+  ratings: reactive(new Map()),
+  // The channel each comment posted here belongs to, as its author ID can be
+  // missing. Kept in memory only, as the key contains the sign-in token.
+  postedBy: reactive(new Map()),
+  clampScroll: () => clampCommentsScrollAfterRender(),
+  // A reply that finishes posting late must not close another reply box.
+  closeReply(commentId) {
+    if (youTubeComments.replyingTo.value === commentId) youTubeComments.replyingTo.value = null
+  },
+  addComment(posted, text, parentId, account) {
+    const comment = createPostedComment(posted, text, account)
+    youTubeComments.postedBy.set(comment.id, getYouTubeChannelKey(account))
+    if (parentId === null) {
+      // A reload while posting can have loaded it already.
+      if (commentData.value.some(entry => entry.id === comment.id)) return
+      commentData.value.unshift(comment)
+      if (commentCount.value !== null) commentCount.value++
+      return
+    }
+
+    const thread = commentData.value.find(entry => entry.id === parentId)
+    if (!thread) {
+      addReplyToPinnedSnapshot(parentId, comment)
+      return
+    }
+    if (thread.replies.some(reply => reply.id === comment.id)) return
+    // A new list, so the cached reply tree is rebuilt.
+    thread.replies = [...thread.replies, comment]
+    thread.numReplies++
+    thread.showReplies = true
+  },
+  removeComment(commentId) {
+    deletedCommentIds.add(commentId)
+    const rootId = getRootCommentId(commentId)
+    if (rootId === commentId) {
+      commentData.value = commentData.value.filter(comment => comment.id !== commentId)
+      if (commentCount.value !== null) commentCount.value = Math.max(0, commentCount.value - 1)
+    } else {
+      const thread = commentData.value.find(entry => entry.id === rootId)
+      const parent = thread && findCommentParent(thread, commentId)
+      if (parent) {
+        parent.replies = parent.replies.filter(reply => reply.id !== commentId)
+        thread.numReplies = Math.max(0, thread.numReplies - 1)
+      }
+    }
+    forgetDeletedCommentPins(commentId, rootId)
+    // Removing content can shorten the list below the scroll position.
+    clampCommentsScrollAfterRender()
+  }
+}
+provide(youTubeCommentsKey, youTubeComments)
+// Closing a comment box shortens the list too.
+watch(youTubeComments.replyingTo, () => clampCommentsScrollAfterRender())
+const canUseYouTubeComments = youTubeComments.enabled
+const youTubeReplyingTo = youTubeComments.replyingTo
+// Separate sources, so a token refresh that replaces the account keeps drafts.
+watch([() => props.id, () => getYouTubeChannelKey(store.getters.getYouTubeAccount)], () => {
+  youTubeComments.replyingTo.value = null
+  youTubeComments.ratings.clear()
+})
+
+/**
+ * A personally pinned thread can show from its saved snapshot when it is not
+ * on the loaded pages, so a reply to it goes into the snapshot.
+ * @param {string} parentId
+ * @param {Comment} reply
+ */
+function addReplyToPinnedSnapshot(parentId, reply) {
+  const snapshot = personalPinnedCommentSnapshots.value.find(comment => comment.id === parentId)
+  if (!snapshot) return
+
+  const updated = createCommentPinSnapshot({
+    ...snapshot,
+    replies: [...snapshot.replies, reply],
+    numReplies: (snapshot.numReplies ?? 0) + 1,
+    showReplies: true
+  })
+  const commentIds = new Set(personalPinnedCommentIds.value)
+  const commentSnapshots = personalPinnedCommentSnapshots.value.map(comment => comment.id === parentId ? updated : comment)
+  personalPinnedCommentSnapshots.value = commentSnapshots
+  saveCommentPins(commentPinStorageKey.value, { commentIds, commentSnapshots })
+}
+
+/**
+ * Replies posted here before the thread's replies loaded come back from
+ * YouTube, so their loaded versions replace them. Replies deleted while
+ * loading stay removed.
+ * @param {Comment[]} replies
+ * @param {Comment[]} loadedReplies
+ */
+function mergeReplies(replies, loadedReplies) {
+  const loadedIds = new Set(loadedReplies.map(reply => reply.id))
+  return replies.filter(reply => !loadedIds.has(reply.id)).concat(withoutDeletedComments(loadedReplies))
+}
+
+/**
+ * YouTube can still return a comment shortly after it was deleted here.
+ * @param {Comment[]} comments
+ */
+function withoutDeletedComments(comments) {
+  return deletedCommentIds.size === 0 ? comments : comments.filter(comment => !deletedCommentIds.has(comment.id))
+}
+
+/**
+ * A personal pin would bring a deleted comment back from its saved snapshot.
+ * @param {string} commentId
+ * @param {string} rootId
+ */
+function forgetDeletedCommentPins(commentId, rootId) {
+  const snapshot = personalPinnedCommentSnapshots.value.find(comment => comment.id === rootId)
+  const commentIds = new Set(personalPinnedCommentIds.value)
+  commentIds.delete(commentId)
+  if (commentId !== rootId) commentIds.delete(getCommentReplyPinMarker(rootId, commentId))
+  if (!snapshot && commentIds.size === personalPinnedCommentIds.value.size) return
+
+  const commentSnapshots = personalPinnedCommentSnapshots.value.filter(comment => comment.id !== rootId)
+  if (snapshot && commentId !== rootId && (commentIds.has(rootId) || hasPinnedCommentReply(commentIds, rootId))) {
+    const thread = commentData.value.find(entry => entry.id === rootId) ?? withoutReply(snapshot, commentId)
+    commentSnapshots.push(createCommentPinSnapshot(thread))
+  }
+
+  personalPinnedCommentIds.value = commentIds
+  personalPinnedCommentSnapshots.value = commentSnapshots
+  saveCommentPins(commentPinStorageKey.value, { commentIds, commentSnapshots })
+}
+
+/**
+ * @param {Comment} comment
+ * @param {string} replyId
+ * @returns {Comment} the comment without the reply anywhere in its thread
+ */
+function withoutReply(comment, replyId) {
+  return {
+    ...comment,
+    replies: (comment.replies ?? []).filter(reply => reply.id !== replyId).map(reply => withoutReply(reply, replyId))
+  }
+}
+
+/**
+ * @param {Comment} comment
+ * @param {string} commentId
+ * @returns {Comment | null} the comment whose replies contain the comment
+ */
+function findCommentParent(comment, commentId) {
+  if (comment.replies.some(reply => reply.id === commentId)) return comment
+  for (const reply of comment.replies) {
+    const parent = findCommentParent(reply, commentId)
+    if (parent) return parent
+  }
+  return null
+}
+
 const commentsContentWrapper = useTemplateRef('commentsContentWrapper')
 const commentsList = useTemplateRef('commentsList')
 const commentFilterMenu = useTemplateRef('commentFilterMenu')
@@ -2027,9 +2211,9 @@ async function getCommentDataLocal(more = false) {
     )
 
     if (more) {
-      commentData.value = commentData.value.concat(parsedComments)
+      commentData.value = commentData.value.concat(withoutDeletedComments(parsedComments))
     } else {
-      commentData.value = parsedComments
+      commentData.value = withoutDeletedComments(parsedComments)
     }
 
     nextPageToken.value = comments.has_continuation ? comments : null
@@ -2127,7 +2311,7 @@ async function getCommentRepliesLocal(index, commentId = null) {
       return
     }
 
-    comment.replies = comment.replies.concat(parsedReplies)
+    comment.replies = mergeReplies(comment.replies, parsedReplies)
 
     const replyLoadState = getReplyLoadState(
       comment.replies.length,
@@ -2223,7 +2407,7 @@ async function getCommentDataInvidious() {
     })
     comments = prioritizeHighlightedComment(comments)
 
-    commentData.value = commentData.value.concat(comments)
+    commentData.value = commentData.value.concat(withoutDeletedComments(comments))
     nextPageToken.value = response.continuation
     isLoading.value = false
     showComments.value = true
@@ -2302,7 +2486,7 @@ async function getCommentRepliesInvidious(
       return
     }
 
-    comment.replies = comment.replies.concat(commentData)
+    comment.replies = mergeReplies(comment.replies, commentData)
     const replyLoadState = getReplyLoadState(
       comment.replies.length,
       comment.numReplies,
@@ -2356,7 +2540,7 @@ function getPostCommentsInvidious() {
       return comment
     })
 
-    commentData.value = commentData.value.concat(comments)
+    commentData.value = commentData.value.concat(withoutDeletedComments(comments))
     nextPageToken.value = response?.continuation ?? continuation
     isLoading.value = false
     showComments.value = true

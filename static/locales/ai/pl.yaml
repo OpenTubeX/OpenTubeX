@@ -149,6 +149,37 @@ User Playlists:
     Checking {playlistName} for unavailable videos: 'Sprawdzanie niedostępnych filmów w {playlistName} ({checked}/{total})'
 Settings:
   Experimental Badge: Eksperymentalne
+  YouTube Account Settings:
+    YouTube Account Settings: "Konto YouTube"
+    Unofficial App Warning: "OpenTubeX nie jest oficjalną aplikacją YouTube. Po zalogowaniu to, co tu robisz, zostaje powiązane z Twoim kontem Google, a Google może ograniczyć lub zablokować konta korzystające z nieoficjalnych aplikacji. Loguj się tylko na konto, którego utrata nie będzie dla Ciebie problemem."
+    Sign In Explanation: "OpenTubeX loguje się jak aplikacja na telewizor: zatwierdzasz logowanie na stronie Google, a OpenTubeX nigdy nie widzi twojego hasła. Logowanie pozostaje na tym urządzeniu i nie jest synchronizowane ani uwzględniane w kopiach zapasowych."
+    Sign In: "Zaloguj się"
+    Sign In Anyway: "Zaloguj się mimo to"
+    Sign Out: "Wyloguj się"
+    Getting Sign-In Code: "Pobieranie kodu logowania"
+    Sign In Instructions: "Otwórz stronę logowania i wybierz swoje konto Google. Kod zostanie wpisany automatycznie."
+    Other Device Instructions: "Na innym urządzeniu przejdź pod ten adres i wpisz kod:"
+    YouTube Channel: "Kanał YouTube"
+    Using Channel: "Teraz korzystasz z YouTube jako {name}"
+    Switch Channel Failed: "Nie udało się przełączyć kanału YouTube: {error}"
+    Open Sign-In Page: "Otwórz stronę logowania"
+    Copy Code: "Kopiuj kod"
+    Code Copied: "Skopiowano kod"
+    Waiting for Approval: "Oczekiwanie na zatwierdzenie logowania"
+    Sign-In Denied: "Logowanie zostało odrzucone."
+    Sign-In Code Expired: "Kod wygasł. Spróbuj ponownie, aby otrzymać nowy."
+    Sign-In Failed: "Nie udało się zalogować: {error}"
+    Signed In As: "Zalogowano na YouTube jako {name}"
+    Signed Out: "Wylogowano z YouTube"
+    Sign Out Failed: "Nie udało się wylogować: {error}"
+    Revoke Failed: "Wylogowano z YouTube, ale Google nie potwierdził zakończenia logowania. Możesz je usunąć w połączeniach z aplikacjami innych firm na swoim koncie Google."
+    Signed out by YouTube: "YouTube zakończył logowanie. Zaloguj się ponownie w Ustawieniach, aby dalej korzystać ze swojego konta."
+    Subscribe on YouTube: "Subskrybuj także na YouTube"
+    Add to YouTube Watch History: "Dodawaj obejrzane filmy do historii YouTube"
+    Import Subscriptions: "Zaimportuj subskrypcje z YouTube"
+    Imported Subscriptions: "Zaimportowano {count} kanał | Zaimportowano {count} kanały | Zaimportowano {count} kanałów"
+    No Subscriptions to Import: "To konto YouTube nie ma żadnych subskrypcji"
+    Import Subscriptions Failed: "Nie udało się zaimportować subskrypcji: {error}"
   Diagnostics:
     Diagnostics: Diagnostyka
     Description: Gdy dziennik diagnostyczny jest włączony, OpenTubeX przechowuje ostatnie komunikaty dziennika w pamięci, aby można je było dołączyć do zgłoszeń błędów. Nigdy nie zapisuje ani nie wysyła ich samodzielnie, a wyłączenie dziennika je usuwa. Raporty pomijają pliki cookie, tokeny, adresy IP i parametry adresów URL, ale mogą zawierać identyfikatory odtwarzanych filmów, więc sprawdź raport przed udostępnieniem.
@@ -1432,6 +1463,9 @@ Description:
   Games: Gry
   Music: Muzyka
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Zasubskrybowanie kanału lub anulowanie jego subskrypcji w OpenTubeX robi to samo na twoim koncie YouTube."
+    Add to YouTube Watch History: "Odtwarzane filmy są dodawane do twojej historii oglądania na YouTube, więc rekomendacje YouTube uczą się na ich podstawie. Gdy historia jest wstrzymana na YouTube, nic nie jest dodawane."
   General Settings:
     Built-in Streams: |
       Tryb automatyczny odtwarza większość filmów przez klienta visionOS YouTube, który uruchamia się szybciej i obsługuje automatyczną jakość. Transmisje na żywo i filmy, których nie może odtworzyć, używają SABR.
@@ -1929,3 +1963,22 @@ Notification Center:
   Clear: "Wyczyść"
   Empty: "Brak powiadomień"
   Empty Hint: "Tutaj pojawią się przypomnienia o transmisjach na żywo i nowe filmy z kanałów z włączonymi powiadomieniami."
+YouTube Account:
+  Like: "Podoba mi się"
+  Dislike: "Nie podoba mi się"
+  Rating Failed: "Nie udało się ocenić na YouTube: {error}"
+  Subscribe Failed: "Nie udało się zasubskrybować na YouTube: {error}"
+  Unsubscribe Failed: "Nie udało się anulować subskrypcji na YouTube: {error}"
+  Add a comment: "Dodaj komentarz"
+  Add a reply: "Dodaj odpowiedź"
+  Comment: "Skomentuj"
+  Reply: "Odpowiedz"
+  Comment Posted: "Opublikowano komentarz"
+  Reply Posted: "Opublikowano odpowiedź"
+  Comment Failed: "Nie udało się opublikować komentarza: {error}"
+  Delete Comment: "Usuń komentarz"
+  Delete Comment Confirmation: "Usunąć swój komentarz z YouTube?"
+  Comment Deleted: "Usunięto komentarz"
+  Delete Comment Failed: "Nie udało się usunąć komentarza: {error}"
+  Recommendations: "Rekomendacje YouTube"
+  Recommendations Failed: "Nie udało się wczytać twoich rekomendacji YouTube."

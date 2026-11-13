@@ -315,6 +315,37 @@ History:
   History Older Than Days Removed: 'تمت إزالة سجل المشاهدة الأقدم من {days} يوم | تمت إزالة سجل المشاهدة الأقدم من يوم واحد | تمت إزالة سجل المشاهدة الأقدم من يومين ({days}) | تمت إزالة سجل المشاهدة الأقدم من {days} أيام | تمت إزالة سجل المشاهدة الأقدم من {days} يومًا | تمت إزالة سجل المشاهدة الأقدم من {days} يوم'
 Settings:
   Experimental Badge: تجريبي
+  YouTube Account Settings:
+    YouTube Account Settings: "حساب YouTube"
+    Unofficial App Warning: "OpenTubeX ليس تطبيقًا رسميًا من YouTube. يؤدي تسجيل الدخول إلى ربط ما تفعله هنا بحسابك على Google، وقد تقيّد Google الحسابات التي تستخدم تطبيقات غير رسمية أو تحظرها. لا تسجّل الدخول إلا بحساب يمكنك تحمّل خسارته."
+    Sign In Explanation: "يسجّل OpenTubeX الدخول كما يفعل تطبيق التلفاز: توافق على ذلك في موقع Google، ولا يرى OpenTubeX كلمة مرورك أبدًا. يبقى تسجيل الدخول على هذا الجهاز ولا تتم مزامنته أو نسخه احتياطيًا."
+    Sign In: "تسجيل الدخول"
+    Sign In Anyway: "تسجيل الدخول على أي حال"
+    Sign Out: "تسجيل الخروج"
+    Getting Sign-In Code: "جارٍ الحصول على رمز تسجيل الدخول"
+    Sign In Instructions: "افتح صفحة تسجيل الدخول واختر حسابك على Google. سيُملأ الرمز تلقائيًا."
+    Other Device Instructions: "على جهاز آخر، انتقل إلى هذا العنوان وأدخل الرمز:"
+    YouTube Channel: "قناة YouTube"
+    Using Channel: "أنت الآن تستخدم YouTube باسم {name}"
+    Switch Channel Failed: "تعذّر تبديل قناة YouTube: {error}"
+    Open Sign-In Page: "فتح صفحة تسجيل الدخول"
+    Copy Code: "نسخ الرمز"
+    Code Copied: "تم نسخ الرمز"
+    Waiting for Approval: "في انتظار موافقتك على تسجيل الدخول"
+    Sign-In Denied: "تم رفض تسجيل الدخول."
+    Sign-In Code Expired: "انتهت صلاحية الرمز. حاول مرة أخرى للحصول على رمز جديد."
+    Sign-In Failed: "تعذّر تسجيل الدخول: {error}"
+    Signed In As: "تم تسجيل الدخول إلى YouTube باسم {name}"
+    Signed Out: "تم تسجيل الخروج من YouTube"
+    Sign Out Failed: "تعذّر تسجيل الخروج: {error}"
+    Revoke Failed: "تم تسجيل الخروج من YouTube، لكن Google لم تؤكد إنهاء تسجيل الدخول. يمكنك إزالته من اتصالات الجهات الخارجية في حسابك على Google."
+    Signed out by YouTube: "أنهى YouTube تسجيل الدخول. سجّل الدخول مجددًا من الإعدادات لمواصلة استخدام حسابك."
+    Subscribe on YouTube: "الاشتراك على YouTube أيضًا"
+    Add to YouTube Watch History: "إضافة مقاطع الفيديو التي تمت مشاهدتها إلى سجلّ YouTube"
+    Import Subscriptions: "استيراد الاشتراكات من YouTube"
+    Imported Subscriptions: "تم استيراد {count} قناة | تم استيراد {count} قناة | تم استيراد {count} قناة | تم استيراد {count} قنوات | تم استيراد {count} قناة | تم استيراد {count} قناة"
+    No Subscriptions to Import: "لا يحتوي حساب YouTube هذا على أي اشتراكات"
+    Import Subscriptions Failed: "تعذّر استيراد الاشتراكات: {error}"
   Diagnostics:
     Diagnostics: التشخيص
     Description: أثناء تفعيل سجل التشخيص، يحتفظ OpenTubeX برسائل السجل الحديثة في الذاكرة حتى تتمكن من إرفاقها بتقارير الأخطاء. لا يحفظها أو يرسلها من تلقاء نفسه أبدًا، ويؤدي إيقاف السجل إلى حذفها. لا تتضمن التقارير ملفات تعريف الارتباط أو الرموز المميزة أو عناوين IP أو معلمات عناوين URL، لكنها قد تتضمن معرّفات الفيديوهات التي شغّلتها، لذا راجع التقرير قبل مشاركته.
@@ -2220,6 +2251,9 @@ Description:
   Games: ألعاب
   Music: الموسيقى
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "يؤدي الاشتراك في قناة أو إلغاء الاشتراك فيها داخل OpenTubeX إلى تنفيذ الإجراء نفسه في حسابك على YouTube."
+    Add to YouTube Watch History: "تُضاف مقاطع الفيديو التي تشغّلها إلى سجلّ المشاهدات في YouTube، فتتعلّم منها اقتراحات YouTube. لا يُضاف أي شيء ما دام السجلّ متوقفًا مؤقتًا على YouTube."
   General Settings:
     Built-in Streams: |
       يشغّل الوضع التلقائي معظم الفيديوهات عبر عميل visionOS من YouTube، الذي يبدأ أسرع ويدعم الجودة التلقائية. تستخدم البثوث المباشرة والفيديوهات التي لا يستطيع تشغيلها SABR.
@@ -2717,3 +2751,22 @@ Notification Center:
   Clear: "مسح"
   Empty: "لا توجد إشعارات بعد"
   Empty Hint: "ستظهر هنا تذكيرات البث المباشر والفيديوهات الجديدة من القنوات التي فعّلت إشعاراتها."
+YouTube Account:
+  Like: "إعجاب"
+  Dislike: "عدم الإعجاب"
+  Rating Failed: "تعذّر التقييم على YouTube: {error}"
+  Subscribe Failed: "تعذّر الاشتراك على YouTube: {error}"
+  Unsubscribe Failed: "تعذّر إلغاء الاشتراك على YouTube: {error}"
+  Add a comment: "إضافة تعليق"
+  Add a reply: "إضافة رد"
+  Comment: "تعليق"
+  Reply: "رد"
+  Comment Posted: "تم نشر التعليق"
+  Reply Posted: "تم نشر الرد"
+  Comment Failed: "تعذّر نشر التعليق: {error}"
+  Delete Comment: "حذف التعليق"
+  Delete Comment Confirmation: "هل تريد حذف تعليقك من YouTube؟"
+  Comment Deleted: "تم حذف التعليق"
+  Delete Comment Failed: "تعذّر حذف التعليق: {error}"
+  Recommendations: "اقتراحات YouTube"
+  Recommendations Failed: "تعذّر تحميل اقتراحاتك من YouTube."

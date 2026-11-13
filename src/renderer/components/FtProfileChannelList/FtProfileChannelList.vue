@@ -98,6 +98,7 @@ import { useListPagination } from '../../composables/useListPagination'
 import { deepCopy, showToast } from '../../helpers/utils'
 import { matchesChannelQuery } from '../../helpers/subscription-channels'
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
+import { mirrorYouTubeSubscription } from '../../helpers/api/youtube-account'
 
 /**
  * @typedef {object} Profile
@@ -281,6 +282,9 @@ function handleDeletePromptClick(value) {
 
     // Pull only the selected channels, like unsubscribing, so channels added elsewhere stay
     store.dispatch('removeChannelFromProfiles', { channelIds, profileIds })
+    if (props.isMainProfile) {
+      mirrorYouTubeSubscription(channelIds, false)
+    }
 
     showToast({ message: t('Profile.Profile has been updated'), icon: ['fas', 'user-check'] })
     selectNone()

@@ -310,6 +310,37 @@ History:
   History Older Than Days Removed: Visningshistorik äldre än 1 dag har tagits bort | Visningshistorik äldre än {days} dagar har tagits bort
 Settings:
   Experimental Badge: Experimentell
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube-konto"
+    Unofficial App Warning: "OpenTubeX är inte en officiell YouTube-app. När du loggar in kopplas det du gör här till ditt Google-konto, och Google kan begränsa eller stänga av konton som använder inofficiella appar. Logga bara in med ett konto som du har råd att förlora."
+    Sign In Explanation: "OpenTubeX loggar in som en tv-app: du godkänner inloggningen på Googles webbplats och OpenTubeX ser aldrig ditt lösenord. Inloggningen stannar på den här enheten och varken synkroniseras eller säkerhetskopieras."
+    Sign In: "Logga in"
+    Sign In Anyway: "Logga in ändå"
+    Sign Out: "Logga ut"
+    Getting Sign-In Code: "Hämtar en inloggningskod"
+    Sign In Instructions: "Öppna inloggningssidan och välj ditt Google-konto. Koden fylls i automatiskt."
+    Other Device Instructions: "Gå till den här adressen på en annan enhet och ange koden:"
+    YouTube Channel: "YouTube-kanal"
+    Using Channel: "Använder nu YouTube som {name}"
+    Switch Channel Failed: "Det gick inte att byta YouTube-kanal: {error}"
+    Open Sign-In Page: "Öppna inloggningssidan"
+    Copy Code: "Kopiera kod"
+    Code Copied: "Koden har kopierats"
+    Waiting for Approval: "Väntar på att du godkänner inloggningen"
+    Sign-In Denied: "Inloggningen nekades."
+    Sign-In Code Expired: "Koden har gått ut. Försök igen för att få en ny."
+    Sign-In Failed: "Det gick inte att logga in: {error}"
+    Signed In As: "Inloggad på YouTube som {name}"
+    Signed Out: "Utloggad från YouTube"
+    Sign Out Failed: "Det gick inte att logga ut: {error}"
+    Revoke Failed: "Utloggad från YouTube, men Google bekräftade inte att inloggningen avslutades. Du kan ta bort den under tredjepartsanslutningar i ditt Google-konto."
+    Signed out by YouTube: "YouTube avslutade inloggningen. Logga in igen i Inställningar för att fortsätta använda ditt konto."
+    Subscribe on YouTube: "Prenumerera även på YouTube"
+    Add to YouTube Watch History: "Lägg till sedda videor i YouTube-historiken"
+    Import Subscriptions: "Importera prenumerationer från YouTube"
+    Imported Subscriptions: "Importerade {count} kanal | Importerade {count} kanaler"
+    No Subscriptions to Import: "Det här YouTube-kontot har inga prenumerationer"
+    Import Subscriptions Failed: "Det gick inte att importera prenumerationer: {error}"
   Diagnostics:
     Diagnostics: Diagnostik
     Description: Medan diagnostikloggen är på sparar OpenTubeX de senaste loggmeddelandena i minnet så att du kan bifoga dem till felrapporter. Det sparar eller skickar dem aldrig på egen hand, och när du stänger av loggen raderas de. Rapporter utelämnar kakor, token, IP-adresser och URL-parametrar, men de kan innehålla id:n för videor du har spelat upp, så granska en rapport innan du delar den.
@@ -2170,6 +2201,9 @@ Description:
   Games: Spel
   Music: Musik
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "När du prenumererar på eller avslutar prenumerationen på en kanal i OpenTubeX görs samma sak på ditt YouTube-konto."
+    Add to YouTube Watch History: "Videor du spelar upp läggs till i din visningshistorik på YouTube, så att rekommendationerna på YouTube lär sig av dem. Inget läggs till medan historiken är pausad på YouTube."
   General Settings:
     Built-in Streams: |
       Automatiskt spelar de flesta videor via YouTubes visionOS-klient, som startar snabbare och stöder automatisk kvalitet. Direktsändningar och videor som den inte kan spela upp använder SABR.
@@ -2678,3 +2712,22 @@ Notification Center:
   Clear: "Rensa"
   Empty: "Inga aviseringar ännu"
   Empty Hint: "Påminnelser om livesändningar och nya uppladdningar från kanaler med aviseringar påslagna visas här."
+YouTube Account:
+  Like: "Gilla"
+  Dislike: "Ogilla"
+  Rating Failed: "Det gick inte att betygsätta på YouTube: {error}"
+  Subscribe Failed: "Det gick inte att prenumerera på YouTube: {error}"
+  Unsubscribe Failed: "Det gick inte att avsluta prenumerationen på YouTube: {error}"
+  Add a comment: "Lägg till en kommentar"
+  Add a reply: "Lägg till ett svar"
+  Comment: "Kommentera"
+  Reply: "Svara"
+  Comment Posted: "Kommentaren har publicerats"
+  Reply Posted: "Svaret har publicerats"
+  Comment Failed: "Det gick inte att publicera kommentaren: {error}"
+  Delete Comment: "Ta bort kommentar"
+  Delete Comment Confirmation: "Vill du ta bort din kommentar från YouTube?"
+  Comment Deleted: "Kommentaren har tagits bort"
+  Delete Comment Failed: "Det gick inte att ta bort kommentaren: {error}"
+  Recommendations: "YouTube-rekommendationer"
+  Recommendations Failed: "Det gick inte att läsa in dina YouTube-rekommendationer."

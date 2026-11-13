@@ -310,6 +310,37 @@ History:
   History Older Than Days Removed: Foi removido o histórico de reprodução com mais de 1 dia | Foi removido o histórico de reprodução com mais de {days} dias | Foi removido o histórico de reprodução com mais de {days} dias
 Settings:
   Experimental Badge: Experimental
+  YouTube Account Settings:
+    YouTube Account Settings: "Conta do YouTube"
+    Unofficial App Warning: "O OpenTubeX não é uma aplicação oficial do YouTube. Ao iniciar sessão, o que faz aqui fica associado à sua conta Google, e a Google pode restringir ou banir contas que utilizam aplicações não oficiais. Inicie sessão apenas com uma conta que não se importe de perder."
+    Sign In Explanation: "O OpenTubeX inicia sessão como uma aplicação de TV: aprova o acesso no site da Google e o OpenTubeX nunca vê a sua palavra-passe. A sessão fica neste dispositivo e não é sincronizada nem incluída nas cópias de segurança."
+    Sign In: "Iniciar sessão"
+    Sign In Anyway: "Iniciar sessão mesmo assim"
+    Sign Out: "Terminar sessão"
+    Getting Sign-In Code: "A obter um código de início de sessão"
+    Sign In Instructions: "Abra a página de início de sessão e escolha a sua Conta Google. O código é preenchido automaticamente."
+    Other Device Instructions: "Noutro dispositivo, aceda a este endereço e introduza o código:"
+    YouTube Channel: "Canal do YouTube"
+    Using Channel: "Agora está a utilizar o YouTube como {name}"
+    Switch Channel Failed: "Não foi possível mudar o canal do YouTube: {error}"
+    Open Sign-In Page: "Abrir página de início de sessão"
+    Copy Code: "Copiar código"
+    Code Copied: "Código copiado"
+    Waiting for Approval: "A aguardar que aprove o início de sessão"
+    Sign-In Denied: "O início de sessão foi recusado."
+    Sign-In Code Expired: "O código expirou. Tente novamente para obter um novo."
+    Sign-In Failed: "Não foi possível iniciar sessão: {error}"
+    Signed In As: "Sessão iniciada no YouTube como {name}"
+    Signed Out: "Sessão terminada no YouTube"
+    Sign Out Failed: "Não foi possível terminar a sessão: {error}"
+    Revoke Failed: "Terminou a sessão do YouTube, mas a Google não confirmou que o início de sessão terminou. Pode removê-lo nas ligações a terceiros da sua Conta Google."
+    Signed out by YouTube: "O YouTube terminou a sessão. Inicie sessão novamente nas Definições para continuar a utilizar a sua conta."
+    Subscribe on YouTube: "Subscrever também no YouTube"
+    Add to YouTube Watch History: "Adicionar vídeos vistos ao histórico do YouTube"
+    Import Subscriptions: "Importar subscrições do YouTube"
+    Imported Subscriptions: "{count} canal importado | {count} canais importados | {count} canais importados"
+    No Subscriptions to Import: "Esta conta do YouTube não tem subscrições"
+    Import Subscriptions Failed: "Não foi possível importar as subscrições: {error}"
   Diagnostics:
     Diagnostics: Diagnóstico
     Description: Enquanto o registo de diagnóstico estiver ativo, o OpenTubeX mantém as mensagens de registo recentes na memória para que as possa anexar a relatórios de erros. Nunca as guarda nem as envia por iniciativa própria, e desativar o registo elimina-as. Os relatórios omitem cookies, tokens, endereços IP e parâmetros de URL, mas podem incluir os ID dos vídeos que reproduziu, por isso verifique o relatório antes de o partilhar.
@@ -2170,6 +2201,9 @@ Description:
   Games: Jogos
   Music: Música
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Subscrever um canal ou cancelar a subscrição no OpenTubeX faz o mesmo na sua conta do YouTube."
+    Add to YouTube Watch History: "Os vídeos que reproduz são adicionados ao seu histórico de visualizações do YouTube, para que as recomendações do YouTube aprendam com eles. Nada é adicionado enquanto o histórico estiver em pausa no YouTube."
   General Settings:
     Built-in Streams: |
       Automático reproduz a maioria dos vídeos através do cliente visionOS do YouTube, que começa mais depressa e suporta a qualidade automática. As transmissões em direto e os vídeos que não consegue reproduzir usam SABR.
@@ -2678,3 +2712,22 @@ Notification Center:
   Clear: "Limpar"
   Empty: "Ainda não há notificações"
   Empty Hint: "Os lembretes de transmissões em direto e os novos carregamentos dos canais com notificações ativadas vão aparecer aqui."
+YouTube Account:
+  Like: "Gosto"
+  Dislike: "Não gosto"
+  Rating Failed: "Não foi possível avaliar no YouTube: {error}"
+  Subscribe Failed: "Não foi possível subscrever no YouTube: {error}"
+  Unsubscribe Failed: "Não foi possível cancelar a subscrição no YouTube: {error}"
+  Add a comment: "Adicionar um comentário"
+  Add a reply: "Adicionar uma resposta"
+  Comment: "Comentar"
+  Reply: "Responder"
+  Comment Posted: "Comentário publicado"
+  Reply Posted: "Resposta publicada"
+  Comment Failed: "Não foi possível publicar o comentário: {error}"
+  Delete Comment: "Eliminar comentário"
+  Delete Comment Confirmation: "Eliminar o seu comentário do YouTube?"
+  Comment Deleted: "Comentário eliminado"
+  Delete Comment Failed: "Não foi possível eliminar o comentário: {error}"
+  Recommendations: "Recomendações do YouTube"
+  Recommendations Failed: "Não foi possível carregar as suas recomendações do YouTube."

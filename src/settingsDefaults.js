@@ -150,6 +150,11 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     ytDlpSource: 'system',
     ytDlpChannel: 'stable',
     ytDlpPath: '',
+    // Credentials and details of the YouTube account signed in through the TV
+    // device-code flow, or null.
+    youTubeAccount: null,
+    youTubeAccountMirrorSubscriptions: false,
+    youTubeAccountWatchHistory: false,
     ytDlpPlaybackAuthMode: 'none',
     ytDlpPlaybackCookiesPath: '',
     ytDlpPlaybackCookiesBrowser: '',

@@ -310,6 +310,37 @@ History:
   History Older Than Days Removed: Đã xóa lịch sử xem cũ hơn {days} ngày
 Settings:
   Experimental Badge: Thử nghiệm
+  YouTube Account Settings:
+    YouTube Account Settings: "Tài khoản YouTube"
+    Unofficial App Warning: "OpenTubeX không phải là ứng dụng YouTube chính thức. Khi đăng nhập, những gì bạn làm ở đây sẽ được liên kết với tài khoản Google của bạn, và Google có thể hạn chế hoặc cấm các tài khoản dùng ứng dụng không chính thức. Chỉ đăng nhập bằng tài khoản mà bạn chấp nhận bị mất."
+    Sign In Explanation: "OpenTubeX đăng nhập giống như một ứng dụng TV: bạn phê duyệt trên trang web của Google và OpenTubeX không bao giờ thấy mật khẩu của bạn. Thông tin đăng nhập chỉ lưu trên thiết bị này và không được đồng bộ hay sao lưu."
+    Sign In: "Đăng nhập"
+    Sign In Anyway: "Vẫn đăng nhập"
+    Sign Out: "Đăng xuất"
+    Getting Sign-In Code: "Đang lấy mã đăng nhập"
+    Sign In Instructions: "Mở trang đăng nhập và chọn tài khoản Google của bạn. Mã sẽ được điền tự động."
+    Other Device Instructions: "Trên thiết bị khác, truy cập địa chỉ này và nhập mã:"
+    YouTube Channel: "Kênh YouTube"
+    Using Channel: "Đang dùng YouTube với tên {name}"
+    Switch Channel Failed: "Không thể chuyển kênh YouTube: {error}"
+    Open Sign-In Page: "Mở trang đăng nhập"
+    Copy Code: "Sao chép mã"
+    Code Copied: "Đã sao chép mã"
+    Waiting for Approval: "Đang chờ bạn phê duyệt đăng nhập"
+    Sign-In Denied: "Yêu cầu đăng nhập đã bị từ chối."
+    Sign-In Code Expired: "Mã đã hết hạn. Hãy thử lại để nhận mã mới."
+    Sign-In Failed: "Không thể đăng nhập: {error}"
+    Signed In As: "Đã đăng nhập YouTube với tên {name}"
+    Signed Out: "Đã đăng xuất khỏi YouTube"
+    Sign Out Failed: "Không thể đăng xuất: {error}"
+    Revoke Failed: "Đã đăng xuất khỏi YouTube, nhưng Google chưa xác nhận rằng phiên đăng nhập đã kết thúc. Bạn có thể xóa phiên này trong mục kết nối với bên thứ ba của Tài khoản Google."
+    Signed out by YouTube: "YouTube đã kết thúc phiên đăng nhập. Hãy đăng nhập lại trong Cài đặt để tiếp tục dùng tài khoản của bạn."
+    Subscribe on YouTube: "Đăng ký cả trên YouTube"
+    Add to YouTube Watch History: "Thêm video đã xem vào lịch sử YouTube"
+    Import Subscriptions: "Nhập đăng ký từ YouTube"
+    Imported Subscriptions: "Đã nhập {count} kênh"
+    No Subscriptions to Import: "Tài khoản YouTube này không có kênh đăng ký nào"
+    Import Subscriptions Failed: "Không thể nhập đăng ký: {error}"
   Diagnostics:
     Diagnostics: Chẩn đoán
     Description: Khi nhật ký chẩn đoán đang bật, OpenTubeX giữ các thông báo nhật ký gần đây trong bộ nhớ để bạn có thể đính kèm chúng vào báo cáo lỗi. Ứng dụng không bao giờ tự lưu hay gửi chúng, và tắt nhật ký sẽ xóa chúng. Báo cáo bỏ qua cookie, token, địa chỉ IP và tham số URL, nhưng có thể chứa ID của các video bạn đã phát, vì vậy hãy kiểm tra báo cáo trước khi chia sẻ.
@@ -2184,6 +2215,9 @@ Description:
   Games: Trò chơi
   Music: Âm nhạc
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Đăng ký hoặc hủy đăng ký một kênh trong OpenTubeX cũng sẽ thực hiện tương tự trên tài khoản YouTube của bạn."
+    Add to YouTube Watch History: "Video bạn phát sẽ được thêm vào lịch sử xem YouTube của bạn để đề xuất của YouTube học hỏi từ đó. Không có gì được thêm khi lịch sử đang bị tạm dừng trên YouTube."
   General Settings:
     Built-in Streams: |
       Tự động phát hầu hết video qua ứng dụng khách visionOS của YouTube, khởi động nhanh hơn và hỗ trợ chất lượng tự động. Các buổi phát trực tiếp và video mà nó không phát được sẽ dùng SABR.
@@ -2694,3 +2728,22 @@ Notification Center:
   Clear: "Xóa"
   Empty: "Chưa có thông báo nào"
   Empty Hint: "Lời nhắc phát trực tiếp và video mới từ các kênh đã bật thông báo sẽ xuất hiện ở đây."
+YouTube Account:
+  Like: "Thích"
+  Dislike: "Không thích"
+  Rating Failed: "Không thể đánh giá trên YouTube: {error}"
+  Subscribe Failed: "Không thể đăng ký trên YouTube: {error}"
+  Unsubscribe Failed: "Không thể hủy đăng ký trên YouTube: {error}"
+  Add a comment: "Viết bình luận"
+  Add a reply: "Viết phản hồi"
+  Comment: "Bình luận"
+  Reply: "Phản hồi"
+  Comment Posted: "Đã đăng bình luận"
+  Reply Posted: "Đã đăng phản hồi"
+  Comment Failed: "Không thể đăng bình luận: {error}"
+  Delete Comment: "Xóa bình luận"
+  Delete Comment Confirmation: "Xóa bình luận của bạn khỏi YouTube?"
+  Comment Deleted: "Đã xóa bình luận"
+  Delete Comment Failed: "Không thể xóa bình luận: {error}"
+  Recommendations: "Đề xuất từ YouTube"
+  Recommendations Failed: "Không thể tải đề xuất YouTube của bạn."

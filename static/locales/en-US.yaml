@@ -602,6 +602,37 @@ History:
   Custom: Custom
   History Older Than Days Removed: Watch history older than 1 day has been removed | Watch history older than {days} days has been removed
 Settings:
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube Account"
+    Unofficial App Warning: "OpenTubeX is not an official YouTube app. Signing in links what you do here to your Google account, and Google can restrict or ban accounts that use unofficial apps. Only sign in with an account you can afford to lose."
+    Sign In Explanation: "OpenTubeX signs in like a TV app: you approve it on Google's website, and OpenTubeX never sees your password. The sign-in stays on this device and is not synced or backed up."
+    Sign In: "Sign in"
+    Sign In Anyway: "Sign in anyway"
+    Sign Out: "Sign out"
+    Getting Sign-In Code: "Getting a sign-in code"
+    Sign In Instructions: "Open the sign-in page and choose your Google account. The code is filled in for you."
+    Other Device Instructions: "On another device, go to this address and enter the code:"
+    YouTube Channel: "YouTube channel"
+    Using Channel: "Now using YouTube as {name}"
+    Switch Channel Failed: "Could not switch the YouTube channel: {error}"
+    Open Sign-In Page: "Open sign-in page"
+    Copy Code: "Copy code"
+    Code Copied: "Code copied"
+    Waiting for Approval: "Waiting for you to approve the sign-in"
+    Sign-In Denied: "The sign-in was denied."
+    Sign-In Code Expired: "The code expired. Try again to get a new one."
+    Sign-In Failed: "Could not sign in: {error}"
+    Signed In As: "Signed in to YouTube as {name}"
+    Signed Out: "Signed out of YouTube"
+    Sign Out Failed: "Could not sign out: {error}"
+    Revoke Failed: "Signed out of YouTube, but Google did not confirm that the sign-in ended. You can remove it under third-party connections in your Google account."
+    Signed out by YouTube: "YouTube ended the sign-in. Sign in again in Settings to keep using your account."
+    Subscribe on YouTube: "Subscribe on YouTube too"
+    Add to YouTube Watch History: "Add watched videos to YouTube history"
+    Import Subscriptions: "Import subscriptions from YouTube"
+    Imported Subscriptions: "Imported {count} channel | Imported {count} channels"
+    No Subscriptions to Import: "This YouTube account has no subscriptions"
+    Import Subscriptions Failed: "Could not import subscriptions: {error}"
   Tab Unloading:
     Automatically unload tabs: "Automatically unload tabs"
     Memory threshold: "Memory threshold"
@@ -3247,6 +3278,9 @@ Description:
 
 #Tooltips
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Subscribing to or unsubscribing from a channel in OpenTubeX does the same on your YouTube account."
+    Add to YouTube Watch History: "Videos you play are added to your YouTube watch history, so YouTube's recommendations learn from them. Nothing is added while the history is paused on YouTube."
   General Settings:
     Preferred Video Codec: |
       Auto prefers codecs that your device can decode in hardware.
@@ -3896,3 +3930,22 @@ Digital Wellbeing:
   Time for bed: "It's time for bed"
   Bedtime started at: "Your bedtime started at {time}."
   Remind Me in 10 Minutes: "Remind Me in 10 Minutes"
+YouTube Account:
+  Like: "Like"
+  Dislike: "Dislike"
+  Rating Failed: "Could not rate on YouTube: {error}"
+  Subscribe Failed: "Could not subscribe on YouTube: {error}"
+  Unsubscribe Failed: "Could not unsubscribe on YouTube: {error}"
+  Add a comment: "Add a comment"
+  Add a reply: "Add a reply"
+  Comment: "Comment"
+  Reply: "Reply"
+  Comment Posted: "Comment posted"
+  Reply Posted: "Reply posted"
+  Comment Failed: "Could not post the comment: {error}"
+  Delete Comment: "Delete comment"
+  Delete Comment Confirmation: "Delete your comment from YouTube?"
+  Comment Deleted: "Comment deleted"
+  Delete Comment Failed: "Could not delete the comment: {error}"
+  Recommendations: "YouTube recommendations"
+  Recommendations Failed: "Could not load your YouTube recommendations."

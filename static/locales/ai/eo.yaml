@@ -347,6 +347,37 @@ History:
   History Older Than Days Removed: Spekthistorio pli malnova ol 1 tago estis forigita | Spekthistorio pli malnova ol {days} tagoj estis forigita
 Settings:
   Experimental Badge: Eksperimenta
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube-konto"
+    Unofficial App Warning: "OpenTubeX ne estas oficiala aplikaĵo de YouTube. Ensalutante vi ligas tion, kion vi faras ĉi tie, al via Google-konto, kaj Google povas limigi aŭ forbari kontojn, kiuj uzas neoficialajn aplikaĵojn. Ensalutu nur per konto, kies perdon vi povas akcepti."
+    Sign In Explanation: "OpenTubeX ensalutas kiel televida aplikaĵo: vi aprobas ĝin en la retejo de Google, kaj OpenTubeX neniam vidas vian pasvorton. La ensaluto restas en ĉi tiu aparato kaj estas nek sinkronigata nek sekurkopiata."
+    Sign In: "Ensaluti"
+    Sign In Anyway: "Tamen ensaluti"
+    Sign Out: "Elsaluti"
+    Getting Sign-In Code: "Akirante ensalutan kodon"
+    Sign In Instructions: "Malfermu la ensalutan paĝon kaj elektu vian Google-konton. La kodo estas aŭtomate plenigita."
+    Other Device Instructions: "En alia aparato, iru al ĉi tiu adreso kaj enigu la kodon:"
+    YouTube Channel: "YouTube-kanalo"
+    Using Channel: "Vi nun uzas YouTube kiel {name}"
+    Switch Channel Failed: "Ne eblis ŝanĝi la YouTube-kanalon: {error}"
+    Open Sign-In Page: "Malfermi ensalutan paĝon"
+    Copy Code: "Kopii kodon"
+    Code Copied: "Kodo kopiita"
+    Waiting for Approval: "Atendante, ke vi aprobu la ensaluton"
+    Sign-In Denied: "La ensaluto estis rifuzita."
+    Sign-In Code Expired: "La kodo eksvalidiĝis. Provu denove por ricevi novan."
+    Sign-In Failed: "Ne eblis ensaluti: {error}"
+    Signed In As: "Ensalutinta al YouTube kiel {name}"
+    Signed Out: "Elsalutinta el YouTube"
+    Sign Out Failed: "Ne eblis elsaluti: {error}"
+    Revoke Failed: "Vi elsalutis el YouTube, sed Google ne konfirmis, ke la ensaluto finiĝis. Vi povas forigi ĝin inter la konektoj al eksteraj aplikaĵoj en via Google-konto."
+    Signed out by YouTube: "YouTube finis la ensaluton. Ensalutu denove en Agordoj por plu uzi vian konton."
+    Subscribe on YouTube: "Aboni ankaŭ ĉe YouTube"
+    Add to YouTube Watch History: "Aldoni spektitajn videaĵojn al la YouTube-historio"
+    Import Subscriptions: "Enporti abonojn el YouTube"
+    Imported Subscriptions: "Enportis {count} kanalon | Enportis {count} kanalojn"
+    No Subscriptions to Import: "Ĉi tiu YouTube-konto ne havas abonojn"
+    Import Subscriptions Failed: "Ne eblis enporti abonojn: {error}"
   Tab Unloading:
     Automatically unload tabs: Aŭtomate malŝargi langetojn
     Memory threshold: Memorsojlo
@@ -2216,6 +2247,9 @@ Description:
   Games: Ludoj
   Music: Muziko
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Aboni aŭ malaboni kanalon en OpenTubeX faras la samon en via YouTube-konto."
+    Add to YouTube Watch History: "Videaĵoj, kiujn vi ludas, aldoniĝas al via YouTube-spekthistorio, do la rekomendoj de YouTube lernas el ili. Nenio aldoniĝas dum la historio estas paŭzigita ĉe YouTube."
   General Settings:
     Built-in Streams: |
       Aŭtomata ludas la plimulton de videoj per la visionOS-kliento de YouTube, kiu komenciĝas pli rapide kaj subtenas aŭtomatan kvaliton. Rektaj elsendoj kaj videoj, kiujn ĝi ne povas ludi, uzas SABR.
@@ -2677,3 +2711,22 @@ Notification Center:
   Clear: "Forigi"
   Empty: "Ankoraŭ neniuj sciigoj"
   Empty Hint: "Memorigoj pri rektaj elsendoj kaj novaj alŝutoj de kanaloj kun ŝaltitaj sciigoj aperos ĉi tie."
+YouTube Account:
+  Like: "Ŝati"
+  Dislike: "Malŝati"
+  Rating Failed: "Ne eblis taksi ĉe YouTube: {error}"
+  Subscribe Failed: "Ne eblis aboni ĉe YouTube: {error}"
+  Unsubscribe Failed: "Ne eblis malaboni ĉe YouTube: {error}"
+  Add a comment: "Aldoni komenton"
+  Add a reply: "Aldoni respondon"
+  Comment: "Komenti"
+  Reply: "Respondi"
+  Comment Posted: "Komento publikigita"
+  Reply Posted: "Respondo publikigita"
+  Comment Failed: "Ne eblis publikigi la komenton: {error}"
+  Delete Comment: "Forigi komenton"
+  Delete Comment Confirmation: "Ĉu forigi vian komenton el YouTube?"
+  Comment Deleted: "Komento forigita"
+  Delete Comment Failed: "Ne eblis forigi la komenton: {error}"
+  Recommendations: "YouTube-rekomendoj"
+  Recommendations Failed: "Ne eblis ŝargi viajn YouTube-rekomendojn."

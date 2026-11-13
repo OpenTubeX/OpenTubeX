@@ -310,6 +310,37 @@ History:
   History Older Than Days Removed: Αφαιρέθηκε το ιστορικό παρακολούθησης που ήταν παλαιότερο από 1 ημέρα | Αφαιρέθηκε το ιστορικό παρακολούθησης που ήταν παλαιότερο από {days} ημέρες
 Settings:
   Experimental Badge: Πειραματική
+  YouTube Account Settings:
+    YouTube Account Settings: "Λογαριασμός YouTube"
+    Unofficial App Warning: "Το OpenTubeX δεν είναι επίσημη εφαρμογή του YouTube. Με τη σύνδεση, ό,τι κάνετε εδώ συνδέεται με τον λογαριασμό σας Google, και η Google μπορεί να περιορίσει ή να αποκλείσει λογαριασμούς που χρησιμοποιούν ανεπίσημες εφαρμογές. Συνδεθείτε μόνο με λογαριασμό που μπορείτε να αντέξετε να χάσετε."
+    Sign In Explanation: "Το OpenTubeX συνδέεται όπως μια εφαρμογή τηλεόρασης: την εγκρίνετε στον ιστότοπο της Google και το OpenTubeX δεν βλέπει ποτέ τον κωδικό πρόσβασής σας. Η σύνδεση παραμένει σε αυτήν τη συσκευή και δεν συγχρονίζεται ούτε περιλαμβάνεται σε αντίγραφα ασφαλείας."
+    Sign In: "Σύνδεση"
+    Sign In Anyway: "Σύνδεση ούτως ή άλλως"
+    Sign Out: "Αποσύνδεση"
+    Getting Sign-In Code: "Λήψη κωδικού σύνδεσης"
+    Sign In Instructions: "Ανοίξτε τη σελίδα σύνδεσης και επιλέξτε τον λογαριασμό σας Google. Ο κωδικός συμπληρώνεται αυτόματα."
+    Other Device Instructions: "Σε άλλη συσκευή, μεταβείτε σε αυτήν τη διεύθυνση και εισαγάγετε τον κωδικό:"
+    YouTube Channel: "Κανάλι YouTube"
+    Using Channel: "Χρησιμοποιείτε πλέον το YouTube ως {name}"
+    Switch Channel Failed: "Δεν ήταν δυνατή η αλλαγή καναλιού YouTube: {error}"
+    Open Sign-In Page: "Άνοιγμα σελίδας σύνδεσης"
+    Copy Code: "Αντιγραφή κωδικού"
+    Code Copied: "Ο κωδικός αντιγράφηκε"
+    Waiting for Approval: "Αναμονή για την έγκριση της σύνδεσης από εσάς"
+    Sign-In Denied: "Η σύνδεση απορρίφθηκε."
+    Sign-In Code Expired: "Ο κωδικός έληξε. Δοκιμάστε ξανά για να λάβετε νέο."
+    Sign-In Failed: "Δεν ήταν δυνατή η σύνδεση: {error}"
+    Signed In As: "Συνδεθήκατε στο YouTube ως {name}"
+    Signed Out: "Αποσυνδεθήκατε από το YouTube"
+    Sign Out Failed: "Δεν ήταν δυνατή η αποσύνδεση: {error}"
+    Revoke Failed: "Αποσυνδεθήκατε από το YouTube, αλλά η Google δεν επιβεβαίωσε ότι η σύνδεση τερματίστηκε. Μπορείτε να την αφαιρέσετε από τις συνδέσεις τρίτων στον λογαριασμό σας Google."
+    Signed out by YouTube: "Το YouTube τερμάτισε τη σύνδεση. Συνδεθείτε ξανά από τις Ρυθμίσεις για να συνεχίσετε να χρησιμοποιείτε τον λογαριασμό σας."
+    Subscribe on YouTube: "Εγγραφή και στο YouTube"
+    Add to YouTube Watch History: "Προσθήκη των βίντεο που παρακολουθήσατε στο ιστορικό του YouTube"
+    Import Subscriptions: "Εισαγωγή συνδρομών από το YouTube"
+    Imported Subscriptions: "Εισήχθη {count} κανάλι | Εισήχθησαν {count} κανάλια"
+    No Subscriptions to Import: "Αυτός ο λογαριασμός YouTube δεν έχει συνδρομές"
+    Import Subscriptions Failed: "Δεν ήταν δυνατή η εισαγωγή συνδρομών: {error}"
   Diagnostics:
     Diagnostics: Διαγνωστικά
     Description: Όσο η διαγνωστική καταγραφή είναι ενεργή, το OpenTubeX κρατά τα πρόσφατα μηνύματα καταγραφής στη μνήμη ώστε να μπορείτε να τα επισυνάψετε σε αναφορές σφαλμάτων. Δεν τα αποθηκεύει ούτε τα στέλνει ποτέ από μόνο του, και η απενεργοποίηση της καταγραφής τα διαγράφει. Οι αναφορές παραλείπουν cookies, tokens, διευθύνσεις IP και παραμέτρους URL, αλλά μπορεί να περιέχουν αναγνωριστικά βίντεο που αναπαραγάγατε, οπότε ελέγξτε μια αναφορά πριν τη μοιραστείτε.
@@ -2183,6 +2214,9 @@ Description:
   Games: Παιχνίδια
   Music: Μουσική
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Η εγγραφή σε ένα κανάλι ή η απεγγραφή από αυτό στο OpenTubeX γίνεται και στον λογαριασμό σας YouTube."
+    Add to YouTube Watch History: "Τα βίντεο που αναπαράγετε προστίθενται στο ιστορικό παρακολούθησης του YouTube, ώστε οι προτάσεις του YouTube να μαθαίνουν από αυτά. Δεν προστίθεται τίποτα όσο το ιστορικό είναι σε παύση στο YouTube."
   General Settings:
     Built-in Streams: |
       Η αυτόματη λειτουργία αναπαράγει τα περισσότερα βίντεο μέσω του προγράμματος-πελάτη visionOS του YouTube, που ξεκινά γρηγορότερα και υποστηρίζει αυτόματη ποιότητα. Οι ζωντανές μεταδόσεις και τα βίντεο που δεν μπορεί να αναπαράγει χρησιμοποιούν SABR.
@@ -2691,3 +2725,22 @@ Notification Center:
   Clear: "Απαλοιφή"
   Empty: "Δεν υπάρχουν ακόμη ειδοποιήσεις"
   Empty Hint: "Εδώ θα εμφανίζονται υπενθυμίσεις ζωντανών μεταδόσεων και νέα βίντεο από κανάλια με ενεργές ειδοποιήσεις."
+YouTube Account:
+  Like: "Μου αρέσει"
+  Dislike: "Δεν μου αρέσει"
+  Rating Failed: "Δεν ήταν δυνατή η αξιολόγηση στο YouTube: {error}"
+  Subscribe Failed: "Δεν ήταν δυνατή η εγγραφή στο YouTube: {error}"
+  Unsubscribe Failed: "Δεν ήταν δυνατή η απεγγραφή στο YouTube: {error}"
+  Add a comment: "Προσθήκη σχολίου"
+  Add a reply: "Προσθήκη απάντησης"
+  Comment: "Σχολιασμός"
+  Reply: "Απάντηση"
+  Comment Posted: "Το σχόλιο δημοσιεύτηκε"
+  Reply Posted: "Η απάντηση δημοσιεύτηκε"
+  Comment Failed: "Δεν ήταν δυνατή η δημοσίευση του σχολίου: {error}"
+  Delete Comment: "Διαγραφή σχολίου"
+  Delete Comment Confirmation: "Διαγραφή του σχολίου σας από το YouTube;"
+  Comment Deleted: "Το σχόλιο διαγράφηκε"
+  Delete Comment Failed: "Δεν ήταν δυνατή η διαγραφή του σχολίου: {error}"
+  Recommendations: "Προτάσεις YouTube"
+  Recommendations Failed: "Δεν ήταν δυνατή η φόρτωση των προτάσεών σας από το YouTube."
