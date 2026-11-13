@@ -115,4 +115,7 @@ test('icon requests check each redirect target before requesting it', async () =
   requested.length = 0
   await assert.rejects(fetchWithCheckedRedirects(request, 'https://cdn.example.net/icon.png', {}, isAllowed), /local network/)
   assert.deepEqual(requested, ['https://cdn.example.net/icon.png', 'https://cdn.example.net/moved.png'])
+  // The renderer would follow the refused redirect, so it gets the engine's icon instead
+  const fetchIcon = (url, init) => fetchWithCheckedRedirects(request, url, init, isAllowed)
+  assert.equal(await fetchFaviconDataUrl('https://cdn.example.net/icon.png', fetchIcon, 'https://search.example.com/favicon.ico'), 'https://search.example.com/favicon.ico')
 })

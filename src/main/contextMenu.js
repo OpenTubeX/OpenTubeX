@@ -273,7 +273,7 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
               url,
               options,
               target => isAllowedIconUrl(target, origin, resolveAddresses)
-            )))
+            ), icon === fallback ? '' : fallback))
       faviconPromises.set(origin, promise)
     }
 

@@ -128,6 +128,8 @@ export async function isAllowedIconUrl(iconUrl, pageUrl, resolveAddresses) {
 }
 
 const MAX_ICON_REDIRECTS = 5
+// Marks icon requests that redirect to the local network or too often
+const REFUSED_ICON = 'OPENTUBEX_REFUSED_ICON'
 
 /**
  * Requests `url` once without following a redirect.
@@ -176,10 +178,15 @@ export async function fetchWithCheckedRedirects(request, url, init, isAllowed) {
   for (let redirects = 0; redirects <= MAX_ICON_REDIRECTS; redirects++) {
     const result = await requestOnce(request, url, init)
     if ('response' in result) return result.response
-    if (!await isAllowed(result.redirectUrl)) throw new Error('Refused an icon redirect to the local network')
+    if (!await isAllowed(result.redirectUrl)) throw refusedIconError('Refused an icon redirect to the local network')
     url = result.redirectUrl
   }
-  throw new Error('Too many icon redirects')
+  throw refusedIconError('Too many icon redirects')
+}
+
+/** @param {string} message */
+function refusedIconError(message) {
+  return Object.assign(new Error(message), { code: REFUSED_ICON })
 }
 
 /**
@@ -216,9 +223,11 @@ export async function resolveFaviconUrl(searchUrl, fetchPage, resolveAddresses) 
  *
  * @param {string} iconUrl
  * @param {(input: string, init: RequestInit) => Promise<Response>} fetchIcon
+ * @param {string} [refusedUrl] what to show when the icon request is refused,
+ *   as the renderer would follow the refused redirect
  * @returns {Promise<string>}
  */
-export async function fetchFaviconDataUrl(iconUrl, fetchIcon) {
+export async function fetchFaviconDataUrl(iconUrl, fetchIcon, refusedUrl = '') {
   try {
     const response = await fetchIcon(iconUrl, {
       headers: { Accept: 'image/*' },
@@ -231,7 +240,7 @@ export async function fetchFaviconDataUrl(iconUrl, fetchIcon) {
     if (data.length === 0 || !complete) return iconUrl
 
     return `data:${contentType};base64,${data.toString('base64')}`
-  } catch {
-    return iconUrl
+  } catch (error) {
+    return error?.code === REFUSED_ICON ? refusedUrl : iconUrl
   }
 }
