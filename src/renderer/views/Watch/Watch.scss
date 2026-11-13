@@ -345,10 +345,16 @@
     }
 
     // The error message scrolls on its own, which would let the browser claim vertical swipes.
-    // Its scroll timeline is only active while the message overflows.
+    // Its scroll timeline is only active while the message overflows. Longhands only: with the
+    // `animation` shorthand, the CSS minifier folds the timeline into it, which Chromium rejects.
+    // The animation moves nothing, so Reduced Motion's global `animation: none` must not stop it.
     .shortsSwipeViewport > .videoPlayer .errorContainer {
-      animation: shorts-error-overflow linear both;
-      animation-timeline: scroll(self block);
+      /* stylelint-disable declaration-no-important */
+      animation-name: shorts-error-overflow !important;
+      animation-timing-function: linear !important;
+      animation-fill-mode: both !important;
+      animation-timeline: scroll(self block) !important;
+      /* stylelint-enable declaration-no-important */
       touch-action: if(style(--shorts-error-overflow: 1): auto; else: pan-x pinch-zoom);
     }
 
