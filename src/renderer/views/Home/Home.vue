@@ -108,8 +108,8 @@
                 :key="video.videoId"
               >
                 <RouterLink
-                  :to="`/watch/${video.videoId}`"
-                  @click.capture="activateExistingContinueWatchingTab($event, video.videoId)"
+                  :to="continueWatchingRoute(video)"
+                  @click.capture="activateExistingContinueWatchingTab($event, video)"
                 >
                   <span class="mediaThumbnail">
                     <FtRetryImage
@@ -588,6 +588,7 @@ import {
 } from '../../helpers/newSubscriptionFeed'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
+import { getExternalMediaHistoryId, isExternalMediaHistoryId } from '../../helpers/externalMediaHistory'
 import { isSignedInToYouTube } from '../../helpers/youtube-account-state'
 import { showToast } from '../../helpers/utils'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
@@ -808,9 +809,9 @@ function videoThumbnail(video) {
   if (thumbnailPreference.value === 'hidden') { return thumbnailPlaceholder }
 
   const storedVideo = store.getters.getHistoryCacheById[video.videoId]
-  return video.thumbnailUrl ?? video.thumbnail ??
-    storedVideo?.thumbnailUrl ?? storedVideo?.thumbnail ??
-    `${thumbnailOrigin.value}/vi/${video.videoId}/maxresdefault.jpg`
+  return video.thumbnailUrl || video.thumbnail ||
+    storedVideo?.thumbnailUrl || storedVideo?.thumbnail ||
+    (isExternalMediaHistoryId(video.videoId) ? thumbnailPlaceholder : `${thumbnailOrigin.value}/vi/${video.videoId}/maxresdefault.jpg`)
 }
 
 function playlistThumbnail(playlist) {
@@ -879,7 +880,13 @@ function playQueuedVideo(queueItemId, event) {
   store.commit('removeVideoFromWatchQueue', queueItemId)
 }
 
-function activateExistingContinueWatchingTab(event, videoId) {
+function continueWatchingRoute(video) {
+  return isExternalMediaHistoryId(video.videoId)
+    ? { path: '/external-media', query: { url: video.videoId } }
+    : `/watch/${video.videoId}`
+}
+
+function activateExistingContinueWatchingTab(event, video) {
   if (
     !IS_ELECTRON ||
     event.button !== 0 ||
@@ -891,9 +898,10 @@ function activateExistingContinueWatchingTab(event, videoId) {
     return
   }
 
-  const videoTab = store.getters.getTabs.find(tab => (
-    tab.isActivatable && tab.route.path === `/watch/${videoId}`
-  ))
+  const external = isExternalMediaHistoryId(video.videoId)
+  const videoTab = store.getters.getTabs.find(tab => tab.isActivatable && (external
+    ? tab.route.path === '/external-media' && getExternalMediaHistoryId(tab.route.query?.url) === video.videoId
+    : tab.route.path === `/watch/${video.videoId}`))
   if (videoTab == null) { return }
 
   event.preventDefault()

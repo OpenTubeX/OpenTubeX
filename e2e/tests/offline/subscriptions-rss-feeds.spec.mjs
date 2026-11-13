@@ -14,10 +14,19 @@ import {
 } from '../../helpers/app.mjs'
 import { encryptSyncDocument, decryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
 import { SYNC_KEY, SYNC_SALT, mockSyncServer, syncWithSyncServer } from '../../helpers/sync-history.mjs'
+import { externalHistoryEntry, saveExternalHistoryEntry } from '../../helpers/external-media-history.mjs'
 
 const THUMBNAIL_PATH = fileURLToPath(new URL('../../fixtures/images/opentubex-playlist.jpg', import.meta.url))
 
 const now = Date.now()
+
+/** A history entry another device synced after watching the media to its end */
+function watchedRemotely(url, watchedAt) {
+  return {
+    video: { id: url, title: url, upload_date: 0, uploader: { id: 'opentubex:unknown-uploader', name: '', avatar: null, verified: false }, thumbnail_url: '', duration: 0 },
+    metadata: { added_date: watchedAt, watched_state: 'completed', position_millis: 0 },
+  }
+}
 // An RSSHub route for a Twitch channel
 const RSS_URL = 'https://rss.example.test/twitch/video/Streamer'
 const ATOM_URL = 'https://rss.example.test/peertube/channel.atom'
@@ -689,10 +698,7 @@ test.describe('with followed feeds', () => {
 
   test('shows the progress of watched items', async ({ page }) => {
     await mockFeeds(page)
-    await page.evaluate(() => {
-      localStorage.setItem('externalMediaPosition:https://www.twitch.tv/videos/3',
-        JSON.stringify({ seconds: 0, watched: true, updatedAt: Date.now() }))
-    })
+    await saveExternalHistoryEntry(page, 'https://www.twitch.tv/videos/3', { isWatched: true })
     await goTo(page, 'subscriptions')
     await page.locator('[data-rss-feeds-tab]').click()
     const items = page.locator('#subscriptionsPanel .ft-list-item')
@@ -703,12 +709,8 @@ test.describe('with followed feeds', () => {
     await expect(items.nth(1)).not.toHaveClass(/watched/)
     await expect(items.nth(1).locator('.watchedProgressBar')).toHaveCount(0)
 
-    // Another window saves a position
-    await page.evaluate(() => {
-      const key = 'externalMediaPosition:https://www.twitch.tv/videos/1'
-      localStorage.setItem(key, JSON.stringify({ seconds: 30, duration: 120, updatedAt: Date.now() }))
-      window.dispatchEvent(new StorageEvent('storage', { key }))
-    })
+    // Playback saves a position
+    await saveExternalHistoryEntry(page, 'https://www.twitch.tv/videos/1', { watchProgress: 30, lengthSeconds: 120 })
     await expect(items.nth(1).locator('.watchedProgressBar')).toBeVisible()
     await expect(items.nth(1)).not.toHaveClass(/watched/)
   })
@@ -717,16 +719,17 @@ test.describe('with followed feeds', () => {
     const newestUrl = 'https://www.twitch.tv/videos/3'
     const olderUrl = 'https://www.twitch.tv/videos/1'
     await mockFeeds(page)
-    await page.evaluate((url) => {
-      localStorage.setItem(`externalMediaPosition:${url}`, JSON.stringify({ seconds: 30, duration: 120, updatedAt: Date.now() }))
-    }, olderUrl)
+    await saveExternalHistoryEntry(page, olderUrl, { watchProgress: 30, lengthSeconds: 120 })
     await goTo(page, 'subscriptions')
     await page.locator('[data-rss-feeds-tab]').click()
     const items = page.locator('#subscriptionsPanel .ft-list-item')
     const [newest, older] = [items.first(), items.nth(1)]
     await expect(items).toHaveCount(2)
     const menu = page.locator('.contextMenu')
-    const position = url => page.evaluate(url => JSON.parse(localStorage.getItem(`externalMediaPosition:${url}`)), url)
+    const position = async url => {
+      const entry = await externalHistoryEntry(page, url)
+      return entry && { watchProgress: entry.watchProgress, lengthSeconds: entry.lengthSeconds, isWatched: entry.isWatched }
+    }
     const openMenu = item => item.locator('.title').click({ button: 'right' })
 
     // Without a saved position, marking it as watched already starts it over next time
@@ -735,21 +738,21 @@ test.describe('with followed feeds', () => {
     await menu.getByRole('menuitem', { name: 'Mark As Watched' }).click()
     await expect(newest).toHaveClass(/watched/)
     await expect(newest.locator('.videoWatched')).toHaveText('Watched')
-    expect(await position(newestUrl)).toEqual({ seconds: 0, watched: true, updatedAt: expect.any(Number) })
+    expect(await position(newestUrl)).toEqual({ watchProgress: 0, lengthSeconds: 0, isWatched: true })
 
     await openMenu(newest)
     await menu.getByRole('menuitem', { name: 'Unmark As Watched' }).click()
     await expect(newest).not.toHaveClass(/watched/)
-    expect(await position(newestUrl)).toBeNull()
+    expect(await position(newestUrl)).toEqual({ watchProgress: 0, lengthSeconds: 0, isWatched: false })
 
     // Marking it as watched keeps where it resumes, marking it as fully watched starts it over
     await openMenu(older)
     await menu.getByRole('menuitem', { name: 'Mark As Watched' }).click()
     await expect(older).toHaveClass(/watched/)
-    expect(await position(olderUrl)).toEqual({ seconds: 30, duration: 120, watched: true, updatedAt: expect.any(Number) })
+    expect(await position(olderUrl)).toEqual({ watchProgress: 30, lengthSeconds: 120, isWatched: true })
     await openMenu(older)
     await menu.getByRole('menuitem', { name: 'Mark As Fully Watched' }).click()
-    await expect.poll(() => position(olderUrl)).toEqual({ seconds: 0, watched: true, updatedAt: expect.any(Number) })
+    await expect.poll(() => position(olderUrl)).toEqual({ watchProgress: 120, lengthSeconds: 120, isWatched: true })
     await expect(older).toHaveClass(/watched/)
 
     await openMenu(older)
@@ -1160,21 +1163,16 @@ test.describe('with new items', () => {
     await item('Newest VOD').locator('.title').click({ button: 'right' })
     await menu.getByRole('menuitem', { name: 'Mark As Watched' }).click()
     await expect(item('Newest VOD')).toHaveClass(/watched/)
-    const watchedAt = await page.evaluate(() => (
-      JSON.parse(localStorage.getItem('externalMediaPosition:https://www.twitch.tv/videos/3')).updatedAt
-    ))
+    const watchedAt = (await externalHistoryEntry(page, 'https://www.twitch.tv/videos/3')).timeWatched
     // Watched on another device, then marked as unseen here
     await item('Older VOD').locator('.title').click({ button: 'right' })
     await menu.getByRole('menuitem', { name: 'Mark As Unseen' }).click()
 
     const remote = {
-      history: await encryptSyncDocument([], SYNC_KEY, SYNC_SALT),
+      history: await encryptSyncDocument([watchedRemotely('https://www.twitch.tv/videos/1', now - 60000)], SYNC_KEY, SYNC_SALT),
       seenRssItems: await encryptSyncDocument([{ key: `${RSS_URL}\nvod-3`, unseenAt: watchedAt + 1000 }], SYNC_KEY, SYNC_SALT),
-      externalMediaPositions: await encryptSyncDocument([
-        { url: 'https://www.twitch.tv/videos/1', seconds: 0, watched: true, updatedAt: now - 60000 }
-      ], SYNC_KEY, SYNC_SALT)
     }
-    await mockSyncServer(page, remote, { external_media_positions: 1 })
+    await mockSyncServer(page, remote)
     expect(await syncWithSyncServer(page)).toEqual(['success', ''])
 
     // The later unseen marks win over the earlier watches
@@ -1193,13 +1191,10 @@ test.describe('with new items', () => {
     const item = panel.locator('.ft-list-item', { hasText: 'Brand new VOD' })
 
     const remote = {
-      history: await encryptSyncDocument([], SYNC_KEY, SYNC_SALT),
+      history: await encryptSyncDocument([watchedRemotely('https://www.twitch.tv/videos/4', Date.now())], SYNC_KEY, SYNC_SALT),
       seenRssItems: await encryptSyncDocument([], SYNC_KEY, SYNC_SALT),
-      externalMediaPositions: await encryptSyncDocument([
-        { url: 'https://www.twitch.tv/videos/4', seconds: 0, watched: true, updatedAt: Date.now() }
-      ], SYNC_KEY, SYNC_SALT)
     }
-    await mockSyncServer(page, remote, { external_media_positions: 1 })
+    await mockSyncServer(page, remote)
     expect(await syncWithSyncServer(page)).toEqual(['success', ''])
 
     // The New feed leaves it out, so it can't be marked as seen, only brought back
@@ -1259,9 +1254,7 @@ test.describe('with new items', () => {
     await item.locator('.title').click({ button: 'right' })
     await page.locator('.contextMenu').getByRole('menuitem', { name: 'Mark As Watched' }).click()
     await expect(item).toHaveClass(/watched/)
-    const watchedAt = await page.evaluate(() => (
-      JSON.parse(localStorage.getItem('externalMediaPosition:https://www.twitch.tv/videos/1')).updatedAt
-    ))
+    const watchedAt = (await externalHistoryEntry(page, 'https://www.twitch.tv/videos/1')).timeWatched
 
     // The item leaves its feed before a later unseen mark from another device syncs
     const withoutItem = updatedRssFeed.replace(/<item>\s*<title>Older VOD<\/title>[\s\S]*?<\/item>/, '')

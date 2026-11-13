@@ -54,7 +54,6 @@ import {
 import { createSyncScheduler } from '../../helpers/sync-server-scheduler'
 import { isSettingSyncEnabled } from './settings'
 import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from '../../helpers/subscription-seen-videos'
-import { syncExternalMediaPositions } from '../../helpers/externalMediaPosition'
 import { syncRssFeedSeenItems } from '../../helpers/rssFeedSeenItems'
 import { containsWatchStatsDevice, mergeWatchStats, replaceWatchStatsDevice, persistUploadedWatchStatsReset, syncWatchStats, watchStatsDeviceDays } from '../../helpers/sync-watch-stats'
 import { areJsonValuesEqual } from '../../helpers/jsonValues'
@@ -492,7 +491,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
 
   async function runStage(stage, callback) {
     assertSyncStillActive()
-    const progressStage = ['seenVideos', 'seenPosts', 'seenRssItems', 'externalMediaPositions'].includes(stage) ? 'history' : stage
+    const progressStage = ['seenVideos', 'seenPosts', 'seenRssItems'].includes(stage) ? 'history' : stage
     if (progressStarted) {
       commit('setSyncServerProgress', {
         stage: progressStage,
@@ -535,15 +534,6 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       case 'seenRssItems':
         result.seenRssItems = await syncRssFeedSeenItems(targetClient, store)
         break
-      case 'externalMediaPositions': {
-        const { synced, retryBaseline } = await syncExternalMediaPositions(
-          targetClient, baseline(collection), rootGetters.getHistoryRetentionDays
-        )
-        onRetryBaseline(() => retryBaseline)
-        next.externalMediaPositions = synced
-        result.externalMediaPositions = Object.keys(synced).length
-        break
-      }
       case 'subscriptions':
         next.subscriptions = await syncSubscriptions(
           targetClient,
@@ -584,7 +574,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           store,
           baseline(collection),
           // Imported playlist videos can enter history without uploader metadata.
-          { allowDataLoss, deletions, allowMissingUploader: encrypted },
+          { allowDataLoss, deletions, allowMissingUploader: encrypted, allowExternalMedia: encrypted },
           // Restoring entries can involve ones that did not change locally.
           { changedIds: unchangedRemote && !deletions.history ? changedIds : null, onRetryBaseline }
         )
@@ -681,7 +671,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         ...(stages.includes('watchStats') ? ['watch_stats'] : []),
         ...(stages.includes('liveReminders') ? ['live_reminders'] : []),
         ...(stages.includes('notificationDismissals') ? ['notification_dismissals'] : []),
-        ...(encrypted && settings.syncServerSyncHistory ? ['seen_videos', 'seen_posts', 'seen_rss_items', 'external_media_positions'] : []),
+        ...(encrypted && settings.syncServerSyncHistory ? ['seen_videos', 'seen_posts', 'seen_rss_items'] : []),
       ],
     })
     const watchStatsSupported = encrypted && capabilities.watch_stats === 1
@@ -719,9 +709,6 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       }
       if (settings.syncServerSyncHistory && capabilities.seen_rss_items === 1) {
         stages.splice(stages.indexOf('history') + 1, 0, 'seenRssItems')
-      }
-      if (settings.syncServerSyncHistory && capabilities.external_media_positions === 1) {
-        stages.splice(stages.indexOf('history') + 1, 0, 'externalMediaPositions')
       }
       if (!settings.syncServerPrivacyKey) {
         throw new Error('Reconnect and enter your privacy passphrase to enable enhanced privacy')

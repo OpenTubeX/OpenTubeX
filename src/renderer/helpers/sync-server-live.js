@@ -260,7 +260,7 @@ function subscriptionPreferences(value) {
 
 // `playlists` are server playlist headers, whose IDs key the playlist preferences.
 export function createSyncActivity(collection, before, after, deviceId, deviceName, subscriptions = [], playlists = []) {
-  if (['history', 'seenVideos', 'seenPosts', 'seenRssItems', 'externalMediaPositions', 'sessions', 'sessionsV2'].includes(collection)) return null
+  if (['history', 'seenVideos', 'seenPosts', 'seenRssItems', 'sessions', 'sessionsV2'].includes(collection)) return null
   const changes = []
   const channelNames = new Map(subscriptions.map(channel => [channel.id, activityText(channel.name)]))
   if (collection === 'settings') {

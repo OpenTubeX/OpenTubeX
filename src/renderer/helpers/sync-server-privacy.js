@@ -99,7 +99,6 @@ export function createEmptySyncDocument() {
     seenVideos: [],
     seenPosts: [],
     seenRssItems: [],
-    externalMediaPositions: [],
     playbackSpeeds: [],
     subscriptionGroups: [],
     playlistBookmarks: [],
@@ -184,7 +183,6 @@ export class EncryptedSyncAdapter {
     this.document.seenVideos ??= []
     this.document.seenPosts ??= []
     this.document.seenRssItems ??= []
-    this.document.externalMediaPositions ??= []
     this.document.playbackSpeeds ??= []
     this.document.profiles ??= []
     this.document.settings ??= []
@@ -295,10 +293,6 @@ export class EncryptedSyncAdapter {
   async getSeenRssItems() { return structuredClone(this.document.seenRssItems) }
 
   async putSeenRssItems(entries) { this.#set('seenRssItems', structuredClone(entries)) }
-
-  async getExternalMediaPositions() { return structuredClone(this.document.externalMediaPositions) }
-
-  async putExternalMediaPositions(entries) { this.#set('externalMediaPositions', structuredClone(entries)) }
 
   async getSessions() {
     return structuredClone(this.document.sessionsV2 ?? this.document.sessions)

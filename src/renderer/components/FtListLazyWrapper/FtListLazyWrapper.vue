@@ -21,8 +21,17 @@
         :blocked="blocked"
         :reveal-key="blockedRevealKey"
       >
+        <FtListFeedItem
+          v-if="externalMediaItem"
+          :data="externalMediaItem"
+          :layout="layout"
+          :avatar="displayedData.authorThumbnail ?? null"
+          :seen-actions="false"
+          :show-watched-style="showWatchedStyleInHistory"
+          exact-dates
+        />
         <FtListVideo
-          v-if="finalDataType === 'video' || finalDataType === 'shortVideo'"
+          v-else-if="finalDataType === 'video' || finalDataType === 'shortVideo'"
           :appearance="appearance"
           :data="displayedData"
           :playlist-id="playlistId"
@@ -81,6 +90,7 @@ import { usePlaylistDrag } from '../../composables/usePlaylistDrag'
 
 import FtBlockedItem from '../FtBlockedItem/FtBlockedItem.vue'
 import FtListVideo from '../FtListVideo/FtListVideo.vue'
+import FtListFeedItem from '../FtListFeedItem/FtListFeedItem.vue'
 import {
   FtCommunityPost,
   FtListChannel,
@@ -91,6 +101,7 @@ import {
 import store from '../../store/index'
 import { isOnAiSlopList } from '../../helpers/aiSlopList'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
+import { externalMediaHistoryItem, isExternalMediaHistoryId } from '../../helpers/externalMediaHistory'
 
 const props = defineProps({
   dataOverrides: {
@@ -352,6 +363,10 @@ const visible = ref(props.firstScreen)
 const displayedData = computed(() => props.dataOverrides
   ? { ...reactive(props.data), ...props.dataOverrides }
   : props.data)
+// History records of media from other sites play on the external media page.
+const externalMediaItem = computed(() => finalDataType.value === 'video' && isExternalMediaHistoryId(displayedData.value.videoId)
+  ? externalMediaHistoryItem(displayedData.value)
+  : null)
 // Community cards contain expandable text/media whose local state must survive scrolling.
 const windowed = (process.env.IS_CAPACITOR || process.env.IS_ELECTRON) && finalDataType.value !== 'community'
 const deferWindowing = process.env.IS_ELECTRON

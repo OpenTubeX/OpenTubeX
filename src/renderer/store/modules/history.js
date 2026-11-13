@@ -1,7 +1,7 @@
 import { toRaw } from 'vue'
 import { getContinueWatchingCandidates } from '../../helpers/homeSections'
 import { DBHistoryHandlers } from '../../../datastores/handlers/index'
-import { clearExternalMediaPositions, removeExternalMediaPositionsBefore } from '../../helpers/externalMediaPosition'
+import { readLegacyExternalMediaPositions, removeLegacyExternalMediaPositions } from '../../helpers/externalMediaHistory'
 import {
   canMarkHistoryEntryAsWatched,
   compareHistoryRecordsNewestFirst,
@@ -73,7 +73,7 @@ const getters = {
 }
 
 const actions = {
-  async grabHistory({ commit, rootGetters }) {
+  async grabHistory({ commit, dispatch, rootGetters }) {
     try {
       const cutoff = getRetentionCutoff(rootGetters.getHistoryRetentionDays)
       let results = await DBHistoryHandlers.find()
@@ -84,7 +84,6 @@ const actions = {
           // main process keeps expired entries they are playing.
           results = await DBHistoryHandlers.find()
         }
-        removeExternalMediaPositionsBefore(cutoff)
       }
 
       const resultsById = {}
@@ -94,6 +93,12 @@ const actions = {
 
       commit('setHistoryCacheSorted', results)
       commit('setHistoryCacheById', resultsById)
+
+      const legacyPositions = readLegacyExternalMediaPositions(resultsById, cutoff)
+      if (legacyPositions.records.length > 0) {
+        await dispatch('updateSubscriptionHistory', { records: legacyPositions.records })
+      }
+      removeLegacyExternalMediaPositions(legacyPositions.keys)
     } catch (errMessage) {
       console.error(errMessage)
     }
@@ -217,7 +222,6 @@ const actions = {
     }
 
     try {
-      removeExternalMediaPositionsBefore(cutoff)
       // The cache mirrors the datastore, so skip its full scan when nothing expired.
       if (!hasExpiredHistory(toRaw(state.historyCacheSorted), cutoff)) return 0
       const videoIds = await DBHistoryHandlers.deleteOlderThan(cutoff)
@@ -233,7 +237,6 @@ const actions = {
   async removeAllHistory({ commit }) {
     try {
       await DBHistoryHandlers.deleteAll()
-      clearExternalMediaPositions()
       commit('setHistoryCacheSorted', [])
       commit('setHistoryCacheById', {})
       return true

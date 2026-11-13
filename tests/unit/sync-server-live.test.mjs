@@ -40,7 +40,7 @@ test('activity describes only changed settings with stable keys and omits initia
   for (const key of ['channelPlaybackSpeeds', 'channelVolumes', 'channelSubtitlesStates', 'channelVideoQualities', 'playlistReverseStates', 'sponsorBlockDraftSegmentsByVideoId']) {
     assert.equal(createSyncActivity('settings', [{ key, value: '{}' }], [{ key, value: '{"video":2}' }], 'device', 'Laptop'), null)
   }
-  for (const collection of ['history', 'seenVideos', 'seenPosts', 'seenRssItems', 'externalMediaPositions', 'sessions', 'sessionsV2']) {
+  for (const collection of ['history', 'seenVideos', 'seenPosts', 'seenRssItems', 'sessions', 'sessionsV2']) {
     assert.equal(createSyncActivity(collection, [], ['changed'], 'device', 'Laptop'), null)
   }
 })

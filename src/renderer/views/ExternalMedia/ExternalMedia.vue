@@ -120,7 +120,7 @@
                 @playing="playCompanionAudio"
                 @pause="handlePlaybackStopped"
                 @waiting="handleBuffering"
-                @ended="handlePlaybackStopped"
+                @ended="handleMediaEnded"
                 @volume-updated="setCompanionVolume"
                 @playback-rate-updated="updatePlaybackRate"
                 @timeupdate="updateCurrentTime"
@@ -483,7 +483,8 @@ import { formatDate } from '../../helpers/dateFormat'
 import { useMediaSessionMetadata } from '../../composables/useMediaSessionMetadata'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { isExternalMediaUrl } from '../../helpers/externalMediaUrl'
-import { getExternalMediaPosition, saveExternalMediaPosition } from '../../helpers/externalMediaPosition'
+import { getExternalMediaAuthorId, getExternalMediaHistoryId } from '../../helpers/externalMediaHistory'
+import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
 import { findPlatformChannel, getPlatformChannelRoute } from '../../../platforms/index'
 import { createWatchTimeTracker } from '../../helpers/watchTimeTracker'
 import { useTabAvatar, useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
@@ -518,7 +519,16 @@ let startTimestamp = null
 let lastPositionSave = 0
 let lastSavedPosition = 0
 let hasBeenPresented = isTabPresented?.value ?? true
-watch(() => isTabPresented?.value, presented => { if (presented) hasBeenPresented = true })
+watch(() => isTabPresented?.value, presented => {
+  if (!presented) return
+  hasBeenPresented = true
+  addToHistoryOnce()
+})
+// Like on the watch page, media joins the history once it plays.
+let historyAdded = false
+let watchedMarkPending = false
+const historyId = computed(() => getExternalMediaHistoryId(mediaUrl.value))
+const historyEntry = computed(() => historyId.value ? store.getters.getHistoryCacheById[historyId.value] : undefined)
 const showChapters = ref(false)
 const showDownloadPrompt = ref(false)
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
@@ -931,9 +941,11 @@ function restoreCompanionPosition() {
  */
 function getStartPosition(duration) {
   if (startTimestamp !== null && (!Number.isFinite(duration) || startTimestamp < duration)) return startTimestamp
-  return store.getters.getRememberHistory && store.getters.getWatchedProgressSavingMode !== 'never'
-    ? getExternalMediaPosition(mediaUrl.value, duration)
-    : null
+  if (!store.getters.getRememberHistory || store.getters.getWatchedProgressSavingMode === 'never') return null
+  const position = historyEntry.value?.watchProgress
+  // Like on the watch page, media within two seconds of its end restarts.
+  if (!(position > 0) || (Number.isFinite(duration) && position >= duration - 2)) return null
+  return position
 }
 
 /** @returns {number | null} */
@@ -958,7 +970,65 @@ function consumeTimestamp() {
 function handleMediaLoaded() {
   updateCompanionLoop()
   restoreCompanionPosition()
+  addToHistoryOnce()
   applyQueryTimestamp()
+}
+
+function getMediaDuration() {
+  const media = getPositionMedia()
+  return Number.isFinite(media?.duration) ? media.duration : info.value?.duration
+}
+
+/**
+ * @param {number} watchProgress
+ * @param {boolean} [isWatched]
+ */
+function addToHistory(watchProgress, isWatched = isHistoryEntryWatched(historyEntry.value)) {
+  const entry = historyEntry.value
+  const duration = getMediaDuration()
+  const published = publishedDate.value ? new Date(publishedDate.value).getTime() : NaN
+  return store.dispatch('updateHistory', {
+    ...entry,
+    videoId: historyId.value,
+    title: info.value.title || entry?.title || historyId.value,
+    author: creatorName.value,
+    authorId: getExternalMediaAuthorId(creatorChannel.value?.platform, creatorChannel.value?.id),
+    ...(creatorAvatarUrl.value ? { authorThumbnail: creatorAvatarUrl.value } : {}),
+    thumbnail: thumbnail.value,
+    published: Number.isFinite(published) && published > 0 ? published : (entry?.published ?? 0),
+    description: info.value.description ?? '',
+    ...(Number.isFinite(info.value.viewCount) ? { viewCount: info.value.viewCount } : {}),
+    lengthSeconds: Number.isFinite(duration) && duration > 0 ? duration : (entry?.lengthSeconds ?? 0),
+    watchProgress,
+    isWatched,
+    timeWatched: Date.now(),
+    isLive: source.value.isLive === true,
+    isUpcoming: false,
+    type: 'video',
+  })
+}
+
+function addToHistoryOnce() {
+  if (historyAdded || !hasBeenPresented || !store.getters.getRememberHistory || historyId.value === null ||
+    loading.value || !info.value || !source.value || !player.value?.hasLoaded ||
+    // Only both tracks' lengths tell how long the media is.
+    (source.value.separateAudioUrl && !hasCompanionMetadata())) return
+  historyAdded = true
+  addToHistory(startTimestamp ?? historyEntry.value?.watchProgress ?? 0)
+}
+
+/**
+ * @param {number} seconds
+ * @param {boolean} [isFinished]
+ */
+function markAsWatchedIfFinished(seconds, isFinished = false) {
+  if (!hasBeenPresented || !store.getters.getRememberHistory || source.value?.isLive ||
+    isHistoryEntryWatched(historyEntry.value) || watchedMarkPending) return
+  if (!isFinished && player.value?.isPaused()) return
+  if (!isFinished && !hasReachedWatchedThreshold(seconds, getMediaDuration(), store.getters.getWatchedPercentageThreshold)) return
+  const watchProgress = store.getters.getWatchedProgressSavingMode === 'never' ? (historyEntry.value?.watchProgress ?? 0) : seconds
+  watchedMarkPending = true
+  addToHistory(watchProgress, true).finally(() => { watchedMarkPending = false })
 }
 
 function hasCompanionMetadata() {
@@ -1000,6 +1070,8 @@ function setCompanionFormat(format) {
 
 function handleCompanionAudioEnded() {
   if (!companionAudioNeeded.value) return
+  // A longer soundtrack ends the media while the video loops.
+  if (getPositionMedia() === companionAudio.value && !isCoub.value) markAsWatchedIfFinished(companionAudio.value.currentTime, true)
   savePosition()
   if (!isCoub.value) {
     pauseCompanionVideo()
@@ -1057,6 +1129,7 @@ function updateCurrentTime(seconds) {
   currentTime.value = seconds
   syncCompanionAudio(seconds)
   watchTimeTracker.track()
+  markAsWatchedIfFinished(getPositionMedia()?.currentTime ?? seconds)
   if (store.getters.getWatchedProgressSavingMode === 'auto' && Date.now() - lastPositionSave >= 2000) savePosition()
 }
 
@@ -1064,13 +1137,16 @@ function savePosition() {
   if (!store.getters.getRememberHistory || store.getters.getWatchedProgressSavingMode === 'never' ||
     loading.value || !source.value || source.value.isLive || !player.value?.hasPlaybackPosition ||
     !hasBeenPresented || (source.value.separateAudioUrl && startTime.value !== null)) return
-  const media = getPositionMedia()
-  const duration = Number.isFinite(media?.duration) ? media.duration : info.value?.duration
-  const seconds = media?.currentTime ?? player.value.getCurrentTime()
+  const seconds = getPositionMedia()?.currentTime ?? player.value.getCurrentTime()
   // Pausing or disposing an unchanged tab must not overwrite another tab's progress.
   if (seconds === lastSavedPosition) return
-  saveExternalMediaPosition(mediaUrl.value, seconds, duration)
-  store.dispatch('scheduleSyncServer', 'history')
+  const duration = getMediaDuration()
+  // Choosing another format can change which track sets the length.
+  if (historyEntry.value && !(duration > 0 && Math.abs(duration - historyEntry.value.lengthSeconds) > 1)) {
+    store.dispatch('updateWatchProgress', { videoId: historyId.value, watchProgress: seconds })
+  } else {
+    addToHistory(seconds)
+  }
   lastSavedPosition = seconds
   lastPositionSave = Date.now()
 }
@@ -1078,6 +1154,11 @@ function savePosition() {
 function savePositionOnExit() {
   watchTimeTracker.flush()
   if (store.getters.getWatchedProgressSavingMode === 'auto') savePosition()
+}
+
+function handleMediaEnded() {
+  markAsWatchedIfFinished(getPositionMedia()?.currentTime ?? currentTime.value, true)
+  handlePlaybackStopped()
 }
 
 function handlePlaybackStopped() {
@@ -1132,6 +1213,8 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
   lastPositionSave = 0
   lastSavedPosition = 0
   hasBeenPresented = isTabPresented?.value ?? true
+  historyAdded = false
+  watchedMarkPending = false
   showChapters.value = false
   showTranscript.value = false
   mobilePanel.value = null

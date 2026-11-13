@@ -1,7 +1,7 @@
 <template>
   <div
     class="ft-list-video ft-list-item result"
-    :class="{ grid: layout === 'grid', list: layout === 'list', watched: watchProgress?.watched }"
+    :class="{ grid: layout === 'grid', list: layout === 'list', watched: showWatchedStyle && watchProgress?.watched }"
     @contextmenu="openContextMenu"
     @keydown="handleTileKeydown"
     @pointerdown="startMenuHold"
@@ -77,6 +77,7 @@
       <div class="infoLine">
         <component
           :is="channelRoute ? 'router-link' : 'bdi'"
+          v-if="data.author"
           class="channelName"
           dir="auto"
           :to="channelRoute ?? undefined"
@@ -156,13 +157,11 @@ import store from '../../store/index'
 import { useContextMenuHold } from '../../composables/useContextMenuHold'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { openButtonMenu } from '../../helpers/buttonMenu'
-import {
-  getExternalMediaProgress,
-  markExternalMediaWatched,
-  unmarkExternalMediaWatched
-} from '../../helpers/externalMediaPosition'
+import { getExternalMediaAuthorId, getExternalMediaHistoryId } from '../../helpers/externalMediaHistory'
+import { isHistoryEntryWatched } from '../../helpers/history'
 import { lightHaptic } from '../../helpers/mobileHaptics'
 import { markRssFeedItemsAsSeen, markRssFeedItemsAsUnseen } from '../../helpers/rssFeeds'
+import { formatDate } from '../../helpers/dateFormat.js'
 import { copyToClipboard, formatDurationAsTimestamp, formatViewCount, getRelativeTimeFromDate, openInternalPath, showToast } from '../../helpers/utils'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { isTileMarkShortcut, tileKeyboardShortcutsKey } from '../../helpers/tileNavigation'
@@ -209,18 +208,38 @@ const props = defineProps({
   placeholderIcon: {
     type: Array,
     default: null
+  },
+  /** Like YouTube videos in the history, watched items are dimmed */
+  showWatchedStyle: {
+    type: Boolean,
+    default: true
+  },
+  /** Like for YouTube videos, the history shows when items were published instead of how long ago */
+  exactDates: {
+    type: Boolean,
+    default: false
   }
 })
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const now = useRelativeTimeClock()
 const blurThumbnails = computed(() => store.getters.getBlurThumbnails)
 const hideChannelAvatars = computed(() => store.getters.getHideChannelAvatars)
 const thumbnailProgressRadius = computed(() => 8 * store.getters.getUiRoundness / 100)
-// The external media page saves the position of everything it plays. Live
-// streams play from the channel's address, which every broadcast shares.
-const position = computed(() => props.data.isLive ? null : getExternalMediaProgress(props.data.url))
+// The external media page adds everything it plays to the history. Live
+// streams play from the channel's address, which every broadcast shares, so
+// they show no progress.
+const historyId = computed(() => getExternalMediaHistoryId(props.data.url))
+const historyEntry = computed(() => historyId.value ? store.getters.getHistoryCacheById[historyId.value] : undefined)
+const position = computed(() => {
+  const entry = historyEntry.value
+  if (!entry || props.data.isLive) return null
+  const seconds = Number.isFinite(entry.watchProgress) ? entry.watchProgress : 0
+  if (isHistoryEntryWatched(entry)) return { watched: true, progress: 1, seconds }
+  const duration = entry.lengthSeconds > 0 ? entry.lengthSeconds : props.data.duration
+  return { watched: false, progress: duration > 0 ? Math.min(seconds / duration, 1) : 0, seconds }
+})
 const watchProgress = computed(() => position.value?.progress > 0 ? position.value : null)
 const to = computed(() => ({ path: '/external-media', query: { url: props.data.url } }))
 // Items from other platforms link to the page of their channel
@@ -230,9 +249,12 @@ const channelRoute = computed(() => platform.value && props.data.channelId
   ? getPlatformChannelRoute(platform.value.id, props.data.channelId)
   : null)
 // Live streams show their viewers instead of their start
-const publishedText = computed(() => props.data.published === null || props.data.isLive
-  ? ''
-  : getRelativeTimeFromDate(props.data.published, false, true, now.value))
+const publishedText = computed(() => {
+  if (props.data.published === null || props.data.isLive) return ''
+  return props.exactDates
+    ? formatDate(props.data.published, locale.value, store.getters.getDateFormat, { year: 'numeric', month: 'numeric', day: 'numeric' })
+    : getRelativeTimeFromDate(props.data.published, false, true, now.value)
+})
 const durationText = computed(() => props.data.duration > 0 ? formatDurationAsTimestamp(props.data.duration) : '')
 const viewCountText = computed(() => {
   const count = props.data.viewCount
@@ -259,7 +281,7 @@ function markAsSeen() {
 
 function markAsUnseen() {
   // The New feed leaves out watched items
-  if (position.value?.watched) unmarkExternalMediaWatched(props.data.url)
+  if (position.value?.watched) store.dispatch('updateHistory', { ...historyEntry.value, isWatched: false })
   const markUnseen = props.seenMarks?.markUnseen ?? markRssFeedItemsAsUnseen
   markUnseen([props.data])
 }
@@ -271,13 +293,35 @@ watch(canDownload, (enabled) => {
 })
 
 function setWatched(watched, fully = false) {
+  const entry = historyEntry.value
   if (watched) {
-    markExternalMediaWatched(props.data.url, fully)
+    const lengthSeconds = entry?.lengthSeconds > 0 ? entry.lengthSeconds : (props.data.duration ?? 0)
+    // Like YouTube videos, the item keeps its history details and only gains them when it has none.
+    store.dispatch('updateHistory', {
+      videoId: historyId.value,
+      title: props.data.title,
+      author: props.data.author,
+      authorId: getExternalMediaAuthorId(props.data.platform, props.data.channelId),
+      ...(props.avatar ? { authorThumbnail: props.avatar } : {}),
+      thumbnail: props.data.thumbnail,
+      published: props.data.published ?? 0,
+      description: '',
+      ...(Number.isFinite(props.data.viewCount) ? { viewCount: props.data.viewCount } : {}),
+      isLive: false,
+      isUpcoming: false,
+      type: 'video',
+      ...entry,
+      lengthSeconds,
+      watchProgress: fully ? lengthSeconds : (entry?.watchProgress ?? 0),
+      isWatched: true,
+      timeWatched: entry?.timeWatched ?? Date.now(),
+    })
     markAsSeen()
+  } else if (store.getters.getWatchedPercentageThreshold === 0) {
+    store.dispatch('removeFromHistory', historyId.value)
   } else {
-    unmarkExternalMediaWatched(props.data.url)
+    store.dispatch('updateHistory', { ...entry, isWatched: false })
   }
-  store.dispatch('scheduleSyncServer', 'history')
   showToast({
     message: watched ? t('Video.Video has been marked as watched') : t('Video.Video has been unmarked as watched'),
     image: props.data.thumbnail || null,
@@ -288,6 +332,15 @@ function setWatched(watched, fully = false) {
 function openElsewhere(newWindow) {
   openInternalPath({ ...to.value, title: props.data.title, doCreateNewTab: !newWindow, doCreateNewWindow: newWindow })
   markAsSeen()
+}
+
+function removeFromHistory() {
+  store.dispatch('removeFromHistory', historyId.value)
+  showToast({
+    message: t('Video.Video has been removed from your history'),
+    image: props.data.thumbnail || null,
+    icon: ['fas', 'trash']
+  })
 }
 
 const menuItems = computed(() => {
@@ -320,7 +373,7 @@ const menuItems = computed(() => {
     })
   }
   // Without a saved position, marking it as watched already starts it over next time
-  if (position.value?.seconds > 0) {
+  if (position.value?.seconds > 0 && position.value.seconds < (historyEntry.value.lengthSeconds || Infinity) - 2) {
     items.push({
       label: t('Video.Mark As Fully Watched'),
       icon: ['fas', 'flag-checkered'],
@@ -339,6 +392,13 @@ const menuItems = computed(() => {
       label: t('Subscriptions.Mark As Unseen'),
       icon: ['fas', 'eye-slash'],
       run: markAsUnseen
+    })
+  }
+  if (historyEntry.value) {
+    items.push({
+      label: t('Video.Remove From History'),
+      icon: ['fas', 'trash'],
+      run: removeFromHistory
     })
   }
   if (canDownload.value) {

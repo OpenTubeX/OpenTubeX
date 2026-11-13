@@ -31,21 +31,7 @@ import { createSyncServerRequestHeaders } from '../../src/renderer/helpers/sync-
 import { mergeSubscriptionSeenPosts } from '../../src/subscriptionSeenPosts.js'
 import { mergeSubscriptionSeenVideos } from '../../src/subscriptionSeenVideos.js'
 import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from '../../src/renderer/helpers/subscription-seen-videos.js'
-import { syncExternalMediaPositions } from '../../src/renderer/helpers/externalMediaPosition.js'
 import { mergeRssFeedSeenItems, syncRssFeedSeenItems } from '../../src/renderer/helpers/rssFeedSeenItems.js'
-
-// External media positions sync from the renderer's browser storage.
-const browserStorage = new Map()
-Object.defineProperty(globalThis, 'localStorage', {
-  configurable: true,
-  value: {
-    get length() { return browserStorage.size },
-    key: index => [...browserStorage.keys()][index] ?? null,
-    getItem: key => browserStorage.get(key) ?? null,
-    setItem: (key, value) => browserStorage.set(key, value),
-    removeItem: key => browserStorage.delete(key),
-  }
-})
 
 // These modules use webpack imports. Keep their actual request, merge, and store
 // code while replacing platform dependencies and the network with local fixtures.
@@ -134,7 +120,6 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     ...privacy,
     syncSubscriptionSeenVideos,
     syncSubscriptionSeenPosts,
-    syncExternalMediaPositions,
     syncRssFeedSeenItems,
     syncNotificationDismissals,
     notificationHistory: {
@@ -562,7 +547,6 @@ for (const [collection, idKey, setting, capability] of [
               seen_videos: 1,
               seen_posts: 1,
               seen_rss_items: 1,
-              external_media_positions: 1,
               [capability]: supported ? 1 : 0,
             }
           }
@@ -643,73 +627,17 @@ for (const [collection, idKey, setting, capability] of [
   })
 }
 
-for (const historyEnabled of [false, true]) {
-  for (const supported of [false, true]) {
-    test(`external media positions sync requires history enabled=${historyEnabled} and server support=${supported}`, async () => {
-      browserStorage.clear()
-      browserStorage.set('externalMediaPosition:https://videos.example.test/local', JSON.stringify({ seconds: 12, updatedAt: 2000 }))
-      const f = fixture({ syncServerSyncSubscriptions: false, syncServerSyncHistory: historyEnabled }, {
-        encrypted: true,
-        respond: async (url, options) => {
-          if (url.endsWith('/health')) {
-            return { capabilities: { encrypted_sync: 1, live_sync: 1, external_media_positions: supported ? 1 : 0 } }
-          }
-          if (url.endsWith('/encrypted_sync')) return { collections: [{ collection: 'externalMediaPositions', revision: 1 }], legacy_data: false }
-          if (url.endsWith('/encrypted_sync/externalMediaPositions') && !options.method) {
-            return {
-              revision: 1,
-              payload: await privacy.encryptSyncDocument([{ url: 'https://videos.example.test/remote', seconds: 7, updatedAt: 1000 }],
-                f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt),
-            }
-          }
-        },
-      })
-      await f.actions.syncWithSyncServer(f.context)
-      assert.equal(f.context.state.syncServerStatus, 'success')
-      const requests = f.requests.filter(request => request.url.endsWith('/encrypted_sync/externalMediaPositions'))
-      const synced = historyEnabled && supported
-      assert.equal(requests.length, synced ? 2 : 0)
-      assert.equal(browserStorage.has('externalMediaPosition:https://videos.example.test/remote'), synced)
-      assert.deepEqual(JSON.parse(f.settings.syncServerSnapshot).externalMediaPositions,
-        synced ? { 'https://videos.example.test/local': 2000, 'https://videos.example.test/remote': 1000 } : undefined)
-      if (synced) {
-        const upload = requests.find(request => request.method === 'PUT')
-        assert.ok(!upload.body.includes('videos.example.test'))
-        const entries = await privacy.decryptSyncDocument(JSON.parse(upload.body).payload, f.settings.syncServerPrivacyKey)
-        assert.deepEqual(entries.map(entry => entry.url), ['https://videos.example.test/remote', 'https://videos.example.test/local'])
-      }
-    })
-  }
-}
-
-test('an external media position removed during an upload conflict stays removed', async () => {
-  browserStorage.clear()
-  browserStorage.set('externalMediaPosition:https://videos.example.test/local', JSON.stringify({ seconds: 12, updatedAt: 2000 }))
-  let uploads = 0
+test('syncing history leaves the external media positions of older versions on the server', async () => {
   const f = fixture({ syncServerSyncSubscriptions: false, syncServerSyncHistory: true }, {
     encrypted: true,
-    respond: async (url, options) => {
+    respond: url => {
       if (url.endsWith('/health')) return { capabilities: { encrypted_sync: 1, live_sync: 1, external_media_positions: 1 } }
       if (url.endsWith('/encrypted_sync')) return { collections: [{ collection: 'externalMediaPositions', revision: 1 }], legacy_data: false }
-      if (!url.endsWith('/encrypted_sync/externalMediaPositions')) return
-      if (options.method === 'PUT') return ++uploads === 1 ? new Response('{}', { status: 409 }) : { revision: 3 }
-      // Another device removed the downloaded position before this upload.
-      return {
-        revision: uploads === 0 ? 1 : 2,
-        payload: await privacy.encryptSyncDocument(
-          uploads === 0 ? [{ url: 'https://videos.example.test/remote', seconds: 7, updatedAt: 1000 }] : [],
-          f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt),
-      }
     },
   })
   await f.actions.syncWithSyncServer(f.context)
   assert.equal(f.context.state.syncServerStatus, 'success')
-  assert.equal(uploads, 2)
-  const upload = f.requests.filter(request => request.method === 'PUT' && request.url.endsWith('/externalMediaPositions')).at(-1)
-  const entries = await privacy.decryptSyncDocument(JSON.parse(upload.body).payload, f.settings.syncServerPrivacyKey)
-  assert.deepEqual(entries.map(entry => entry.url), ['https://videos.example.test/local'])
-  assert.equal(browserStorage.has('externalMediaPosition:https://videos.example.test/remote'), false)
-  assert.deepEqual(JSON.parse(f.settings.syncServerSnapshot).externalMediaPositions, { 'https://videos.example.test/local': 2000 })
+  assert.deepEqual(f.requests.filter(request => request.url.endsWith('/encrypted_sync/externalMediaPositions')), [])
 })
 
 test('a subscription removed during an upload conflict stays removed, and unsent local ones survive', async () => {

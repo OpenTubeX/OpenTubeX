@@ -114,6 +114,9 @@ test('Electron list cards wait for their first sighting on the shared observer',
     FtListPlaylist: {},
     FtCommunityPost: {},
     FtListHashtag: {},
+    FtListFeedItem: {},
+    isExternalMediaHistoryId: () => false,
+    externalMediaHistoryItem: () => null,
   })
   const app = mountList(Wrapper, index => ({ data: { type: 'video', videoId: `video-${index}` }, appearance: 'result', firstScreen: false }))
 
