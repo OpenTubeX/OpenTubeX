@@ -73,3 +73,15 @@ test('discovers favicons from the start of an oversized homepage', async () => {
   assert.equal(icon, 'https://search.example.com/favicon-32.png')
   assert.ok(state.cancelled, 'the oversized homepage was not cancelled')
 })
+
+test('public engines cannot point the icon request at the local network', async () => {
+  const page = href => async () => new Response(`<link rel="icon" href="${href}">`, { headers: { 'content-type': 'text/html' } })
+  const addresses = { 'search.example.com': ['93.184.216.34'], 'cdn.example.net': ['93.184.216.35'], 'router.lan': ['192.168.1.1'], 'searx.lan': ['192.168.1.20'] }
+  const resolve = async hostname => addresses[hostname] ?? []
+
+  assert.equal(await resolveFaviconUrl('https://search.example.com/?q=%s', page('http://192.168.1.1/icon.png'), resolve), 'https://search.example.com/favicon.ico')
+  assert.equal(await resolveFaviconUrl('https://search.example.com/?q=%s', page('http://router.lan/icon.png'), resolve), 'https://search.example.com/favicon.ico')
+  assert.equal(await resolveFaviconUrl('https://search.example.com/?q=%s', page('https://cdn.example.net/icon.png'), resolve), 'https://cdn.example.net/icon.png')
+  // A self-hosted engine on the local network keeps its icons there
+  assert.equal(await resolveFaviconUrl('http://searx.lan/search?q=%s', page('http://192.168.1.1/icon.png'), resolve), 'http://192.168.1.1/icon.png')
+})

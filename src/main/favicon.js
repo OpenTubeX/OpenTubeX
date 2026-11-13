@@ -1,6 +1,8 @@
+import { isIP } from 'node:net'
 import { decodeHTMLAttribute } from 'entities'
 
 import { getFaviconUrl } from '../searchEngines.js'
+import { isNonPublicNetworkAddress } from './utils.js'
 
 const MAX_ICON_BYTES = 262_144
 // Icons are declared in <head>, so the start of a page is enough to find them.
@@ -95,11 +97,41 @@ async function readAtMost(response, limit) {
 }
 
 /**
+ * @param {string} hostname
+ * @param {(hostname: string) => Promise<string[]>} resolveAddresses
+ * @returns {Promise<boolean>} true for hosts that cannot be resolved too
+ */
+async function isNonPublicHost(hostname, resolveAddresses) {
+  const host = hostname.replaceAll(/^\[|\]$/g, '')
+  try {
+    const addresses = isIP(host) ? [host] : await resolveAddresses(host)
+    return addresses.length === 0 || addresses.some(isNonPublicNetworkAddress)
+  } catch {
+    return true
+  }
+}
+
+/**
+ * A public engine's page must not make the app request addresses on the local
+ * network. Self-hosted engines, such as SearXNG, keep icons on their network.
+ * @param {string} iconUrl
+ * @param {string} pageUrl
+ * @param {(hostname: string) => Promise<string[]>} resolveAddresses
+ */
+async function isAllowedIconUrl(iconUrl, pageUrl, resolveAddresses) {
+  const iconHost = new URL(iconUrl).hostname
+  const pageHost = new URL(pageUrl).hostname
+  if (iconHost === pageHost) return true
+  return !await isNonPublicHost(iconHost, resolveAddresses) || await isNonPublicHost(pageHost, resolveAddresses)
+}
+
+/**
  * @param {string} searchUrl
  * @param {(input: string, init: RequestInit) => Promise<Response>} fetchPage
+ * @param {(hostname: string) => Promise<string[]>} resolveAddresses resolves a host name to its IP addresses
  * @returns {Promise<string>}
  */
-export async function resolveFaviconUrl(searchUrl, fetchPage) {
+export async function resolveFaviconUrl(searchUrl, fetchPage, resolveAddresses) {
   const fallback = getFaviconUrl(searchUrl)
   if (!fallback) return ''
 
@@ -113,7 +145,9 @@ export async function resolveFaviconUrl(searchUrl, fetchPage) {
     if (!contentType.includes('text/html')) return fallback
 
     const { data } = await readAtMost(response, MAX_HTML_BYTES)
-    return extractFaviconUrl(new TextDecoder().decode(data), response.url || homepage) ?? fallback
+    const pageUrl = response.url || homepage
+    const iconUrl = extractFaviconUrl(new TextDecoder().decode(data), pageUrl)
+    return iconUrl && await isAllowedIconUrl(iconUrl, pageUrl, resolveAddresses) ? iconUrl : fallback
   } catch {
     return fallback
   }

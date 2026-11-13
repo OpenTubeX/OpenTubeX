@@ -1,4 +1,4 @@
-import { BrowserWindow, clipboard, ipcMain, net, shell } from 'electron'
+import { BrowserWindow, clipboard, ipcMain, net, session, shell } from 'electron'
 
 import { IpcChannels } from '../constants'
 import * as baseHandlers from '../datastores/handlers/base'
@@ -266,7 +266,11 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
     if (!faviconPromises.has(origin)) {
       const promise = process.env.OPENTUBEX_E2E_USER_DATA_DIR
         ? Promise.resolve(fallback)
-        : resolveFaviconUrl(searchUrl, (url, options) => net.fetch(url, options))
+        : resolveFaviconUrl(
+            searchUrl,
+            (url, options) => net.fetch(url, options),
+            async hostname => (await session.defaultSession.resolveHost(hostname)).endpoints.map(({ address }) => address)
+          )
             .then(icon => fetchFaviconDataUrl(icon, (url, options) => net.fetch(url, options)))
       faviconPromises.set(origin, promise)
     }
