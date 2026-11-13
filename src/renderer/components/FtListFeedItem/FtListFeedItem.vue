@@ -53,7 +53,7 @@
         {{ data.isLive ? t('Video.Live') : durationText }}
       </div>
       <div
-        v-if="watchProgress?.watched"
+        v-if="showWatchedStyle && watchProgress?.watched"
         class="videoWatched"
       >
         {{ t('Video.Watched') }}
@@ -77,7 +77,7 @@
       <div class="infoLine">
         <component
           :is="channelRoute ? 'router-link' : 'bdi'"
-          v-if="data.author"
+          v-if="data.author || platform"
           class="channelName"
           dir="auto"
           :to="channelRoute ?? undefined"

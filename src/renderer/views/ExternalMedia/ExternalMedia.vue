@@ -991,8 +991,11 @@ function addToHistory(watchProgress, isWatched = isHistoryEntryWatched(historyEn
     ...entry,
     videoId: historyId.value,
     title: info.value.title || entry?.title || historyId.value,
-    author: creatorName.value,
-    authorId: getExternalMediaAuthorId(creatorChannel.value?.platform, creatorChannel.value?.id),
+    // A later extraction can lack the creator
+    author: creatorName.value || entry?.author || '',
+    authorId: creatorChannel.value
+      ? getExternalMediaAuthorId(creatorChannel.value.platform, creatorChannel.value.id)
+      : (entry?.authorId ?? ''),
     ...(creatorAvatarUrl.value ? { authorThumbnail: creatorAvatarUrl.value } : {}),
     thumbnail: thumbnail.value,
     published: Number.isFinite(published) && published > 0 ? published : (entry?.published ?? 0),

@@ -227,6 +227,30 @@ test('external media joins the watch history, where its menu marks it as watched
   expect(await savedExternalEntry(page, mediaUrl)).toBeNull()
 })
 
+test('positions saved by earlier versions move into the watch history in watch order', async ({ app, page }) => {
+  const mediaUrl = 'https://videos.example.test/episode'
+  await page.evaluate(url => {
+    localStorage.setItem(`externalMediaPosition:${url}`, JSON.stringify({ seconds: 12, duration: 60, updatedAt: Date.now() - 60000 }))
+    return window.$store.dispatch('updateHistory', {
+      videoId: 'aaaaaaaaaaa',
+      title: 'Newer video',
+      author: 'Channel',
+      authorId: 'UC-channel',
+      lengthSeconds: 60,
+      watchProgress: 0,
+      isWatched: false,
+      timeWatched: Date.now(),
+      isLive: false,
+      type: 'video',
+    })
+  }, mediaUrl)
+  const { page: restartedPage } = await app.relaunch()
+  await expect.poll(() => restartedPage.evaluate(() => window.$store.getters.getHistoryCacheSorted.map(entry => entry.videoId)))
+    .toEqual(['aaaaaaaaaaa', mediaUrl])
+  expect(await savedExternalPosition(restartedPage, mediaUrl)).toBe(12)
+  expect(await restartedPage.evaluate(url => localStorage.getItem(`externalMediaPosition:${url}`), mediaUrl)).toBeNull()
+})
+
 test('external media restarts when its extracted duration is shorter than the saved position', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   const mediaUrl = 'https://www.twitch.tv/videos/123456789'

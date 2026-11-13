@@ -94,11 +94,11 @@ const actions = {
       commit('setHistoryCacheSorted', results)
       commit('setHistoryCacheById', resultsById)
 
+      // Merging sorts the records by watch time and keeps newer saves of the same media.
       const legacyPositions = readLegacyExternalMediaPositions(resultsById, cutoff)
-      if (legacyPositions.records.length > 0) {
-        await dispatch('updateSubscriptionHistory', { records: legacyPositions.records })
+      if (legacyPositions.records.length === 0 || await dispatch('mergeHistoryBackup', legacyPositions.records)) {
+        removeLegacyExternalMediaPositions(legacyPositions.keys)
       }
-      removeLegacyExternalMediaPositions(legacyPositions.keys)
     } catch (errMessage) {
       console.error(errMessage)
     }
