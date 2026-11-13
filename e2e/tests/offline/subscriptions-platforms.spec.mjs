@@ -475,6 +475,35 @@ test.describe('Channels on other platforms', () => {
     await expect(result.locator('.h3Title')).toHaveText('Other')
   })
 
+  test.describe('with a followed channel and every YouTube feed hidden', () => {
+    test.use({
+      seed: {
+        settings: {
+          ...SETTINGS,
+          followedChannels: [followed(CHANNEL)],
+          enableRssFeeds: true,
+          hideSubscriptionsVideos: true,
+          hideSubscriptionsShorts: true,
+          hideSubscriptionsLive: true,
+          hideSubscriptionsCommunity: true
+        }
+      }
+    })
+
+    test('refreshes the followed channels from the combined New feed without followed RSS feeds', async ({ page }) => {
+      const requests = await mockTwitch(page, { [CHANNEL.id]: twitchUser(CHANNEL) })
+      await goTo(page, 'subscriptions')
+      await page.locator('[data-subscription-feed-tab="all"]').click()
+      const header = page.locator('.subscriptionsHeader')
+      // The tab opens on startup, before the Twitch API is mocked, so only later requests count
+      const refresh = header.getByRole('button', { name: /^Refresh / })
+      await expect(refresh).toBeEnabled()
+      const requestCount = requests.length
+      await refresh.click()
+      await expect.poll(() => requests.slice(requestCount)).toEqual([{ ids: [CHANNEL.id] }])
+    })
+  })
+
   test.describe('with a followed PeerTube channel', () => {
     test.use({ seed: { settings: { ...SETTINGS, followedChannels: [{ platform: 'peertube', id: 'makers@peertube.example.test', name: 'Makers', url: 'https://peertube.example.test/video-channels/makers' }] } } })
 

@@ -1166,14 +1166,16 @@ const currentPlatformsView = computed(() => currentTab.value === 'platforms' ||
   (currentTab.value === 'new' && newFeedView.value === 'tabbed' && currentNewFeedTab.value === 'platforms'))
 /**
  * Whether the New feed shows only the items of the RSS feeds: its RSS tab, or
- * the combined feed while every subscription feed is hidden
+ * the combined feed while every subscription feed is hidden and no channels
+ * are followed on other platforms
  */
 const currentNewFeedRssTab = computed(() => {
   if (currentTab.value !== 'new') return false
   // The same check as the New feed, which leaves out posts with YouTube's RSS feeds
   return newFeedView.value === 'tabbed'
     ? currentNewFeedTab.value === 'feeds'
-    : enableRssFeeds.value && getEnabledSubscriptionFeedSources(store.getters).length === 0
+    : enableRssFeeds.value && getEnabledSubscriptionFeedSources(store.getters).length === 0 &&
+      followedChannels.value.length === 0
 })
 /** @type {Map<string, HTMLElement>} */
 const newFeedTabRefs = new Map()
