@@ -1933,6 +1933,9 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await externalMedia.locator('.watchVideoChaptersPanel').getByRole('button', { name: 'Copy link at 0:10' }).click()
   await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toBe(`${mediaUrl}?t=10`)
   await externalMedia.locator('.watchVideoChaptersPanel').getByRole('button', { name: 'Close Chapters' }).click()
+  // The sidebar column collapses once the panel has animated out, which moves
+  // the share button and would move its menu during the click.
+  await expect(externalMedia.locator('.videoLayout')).toHaveClass(/noSidebar/)
   await expect(player.locator('.fullscreenSponsorBlockToggle, .ft-shaka-sponsorblock-button')).toHaveCount(0)
   await expect(player.locator('.playerFullscreenTitleOverlay')).not.toHaveAttribute('role', 'button')
   await expect(player.locator('.theatre-button')).toBeHidden()
