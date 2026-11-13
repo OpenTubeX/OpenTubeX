@@ -1801,6 +1801,7 @@ const sortSheetActions = computed(() => sortValues.map((value, index) => {
   return {
     label: sortNames.value[index],
     icon: selected ? ['fas', 'check'] : undefined,
+    type: 'radio',
     checked: selected,
     run: () => handleSortChange(value)
   }

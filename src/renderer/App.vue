@@ -371,7 +371,7 @@
                   <button
                     v-else
                     type="button"
-                    :role="action.checked === undefined ? 'menuitem' : 'menuitemcheckbox'"
+                    :role="action.checked === undefined ? 'menuitem' : action.type === 'radio' ? 'menuitemradio' : 'menuitemcheckbox'"
                     :aria-checked="action.checked"
                     :aria-label="action.label"
                     :disabled="action.enabled === false"
