@@ -76,7 +76,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, onScopeDispose, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
 import { ERROR_TOAST_ICON, formatNumber, showToast } from '../../helpers/utils'
@@ -126,6 +126,8 @@ function adjustCount(count, type) {
 }
 
 let ratingLoad = 0
+// Unmounting stops the watcher without starting a new load, so end the waiting one.
+onScopeDispose(() => ratingLoad++)
 // The rating YouTube has, which a failed rating returns to.
 let confirmedRating = 'INDIFFERENT'
 // Ratings go out one at a time, in the order they were clicked.
