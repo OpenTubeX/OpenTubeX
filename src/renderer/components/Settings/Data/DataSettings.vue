@@ -459,7 +459,8 @@ async function exportUnifiedBackup() {
         const readers = {
           settings: () => deepCopy(transferableSettings.value),
           profiles: () => DBProfileHandlers.find(),
-          playlists: () => DBPlaylistHandlers.find(),
+          // Playlists synced from YouTube stay on YouTube.
+          playlists: async () => (await DBPlaylistHandlers.find()).filter(playlist => !playlist.youTube),
           history: () => DBHistoryHandlers.find(),
           searchHistory: () => DBSearchHistoryHandlers.find(),
           watchStats: async () => {
@@ -2006,7 +2007,8 @@ async function exportPlaylists() {
   const dateStr = getTodayDateStrLocalTimezone()
   const exportFileName = 'opentubex-playlists-' + dateStr + '.db'
 
-  const playlistsDb = allPlaylists.value.map(playlist => {
+  // Playlists synced from YouTube stay on YouTube.
+  const playlistsDb = allPlaylists.value.filter(playlist => !playlist.youTube).map(playlist => {
     return JSON.stringify(playlist)
   }).join('\n') + '\n'
 

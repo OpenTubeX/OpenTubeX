@@ -581,7 +581,9 @@ const sortOrder = computed(() => {
 const isSortOrderCustom = computed(() => sortOrder.value === SORT_BY_VALUES.Custom)
 
 const canMoveVideos = computed(() => {
-  return isUserPlaylist.value && isSortOrderCustom.value && playlistItems.value.length > 1
+  // YouTube orders Liked videos by when they were liked.
+  return isUserPlaylist.value && isSortOrderCustom.value && playlistItems.value.length > 1 &&
+    selectedUserPlaylist.value?.youTube?.playlistId !== 'LL'
 })
 
 const MAX_ENHANCED_PLAYLIST_ITEMS = 200

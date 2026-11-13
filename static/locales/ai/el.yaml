@@ -310,6 +310,10 @@ User Playlists:
     Loading videos from {playlistName}: 'Φόρτωση βίντεο από {playlistName}'
     Adding missing videos to {playlistName}: 'Προσθήκη βίντεο που λείπουν στο {playlistName}'
     Checking {playlistName} for unavailable videos: 'Έλεγχος του {playlistName} για μη διαθέσιμα βίντεο ({checked}/{total})'
+  Synced with YouTube: "Συγχρονισμένη με το YouTube"
+  Delete YouTube Playlist Confirmation: "Να διαγραφεί αυτή η λίστα αναπαραγωγής εδώ και στο YouTube; Αυτό δεν μπορεί να αναιρεθεί."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Δημιουργία και στο YouTube"
 History:
   From Date: 'Από'
   To Date: 'Έως'
@@ -375,12 +379,12 @@ Settings:
     Sign Out Failed: "Δεν ήταν δυνατή η αποσύνδεση: {error}"
     Revoke Failed: "Αποσυνδεθήκατε από το YouTube, αλλά η Google δεν επιβεβαίωσε ότι η σύνδεση τερματίστηκε. Μπορείτε να την αφαιρέσετε από τις συνδέσεις τρίτων στον λογαριασμό σας Google."
     Signed out by YouTube: "Το YouTube τερμάτισε τη σύνδεση. Συνδεθείτε ξανά από τις Ρυθμίσεις για να συνεχίσετε να χρησιμοποιείτε τον λογαριασμό σας."
-    Subscribe on YouTube: "Εγγραφή και στο YouTube"
+    Sync Subscriptions: "Συγχρονισμός συνδρομών με το YouTube"
+    Sync Playlists: "Συγχρονισμός λιστών αναπαραγωγής με το YouTube"
     Add to YouTube Watch History: "Προσθήκη των βίντεο που παρακολουθήσατε στο ιστορικό του YouTube"
-    Import Subscriptions: "Εισαγωγή συνδρομών από το YouTube"
-    Imported Subscriptions: "Εισήχθη {count} κανάλι | Εισήχθησαν {count} κανάλια"
-    No Subscriptions to Import: "Αυτός ο λογαριασμός YouTube δεν έχει συνδρομές"
-    Import Subscriptions Failed: "Δεν ήταν δυνατή η εισαγωγή συνδρομών: {error}"
+    Sync Now: "Συγχρονισμός τώρα"
+    Synced: "Ο συγχρονισμός με το YouTube ολοκληρώθηκε"
+    Sync Failed: "Δεν ήταν δυνατός ο συγχρονισμός με το YouTube: {error}"
   Diagnostics:
     Diagnostics: Διαγνωστικά
     Description: Όσο η διαγνωστική καταγραφή είναι ενεργή, το OpenTubeX κρατά τα πρόσφατα μηνύματα καταγραφής στη μνήμη ώστε να μπορείτε να τα επισυνάψετε σε αναφορές σφαλμάτων. Δεν τα αποθηκεύει ούτε τα στέλνει ποτέ από μόνο του, και η απενεργοποίηση της καταγραφής τα διαγράφει. Οι αναφορές παραλείπουν cookies, tokens, διευθύνσεις IP και παραμέτρους URL, αλλά μπορεί να περιέχουν αναγνωριστικά βίντεο που αναπαραγάγατε, οπότε ελέγξτε μια αναφορά πριν τη μοιραστείτε.
@@ -2257,7 +2261,8 @@ Description:
   Music: Μουσική
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "Η εγγραφή σε ένα κανάλι ή η απεγγραφή από αυτό στο OpenTubeX γίνεται και στον λογαριασμό σας YouTube."
+    Sync Subscriptions: "Τα κανάλια στα οποία εγγράφεστε στο YouTube προστίθενται στα «Όλα τα κανάλια» και τα κανάλια από τα οποία καταργείτε την εγγραφή σας εκεί αφαιρούνται από κάθε προφίλ. Η εγγραφή ή η κατάργηση εγγραφής στα «Όλα τα κανάλια» εδώ κάνει το ίδιο και στο YouTube."
+    Sync Playlists: "Οι λίστες αναπαραγωγής σας στο YouTube, το «Παρακολούθηση αργότερα» και τα «Βίντεο που μου αρέσουν» εμφανίζονται στις «Προσωπικές Λίστες αναπαραγωγής» και οι αλλαγές που κάνετε σε αυτές εδώ γίνονται και στο YouTube. Δεν συγχρονίζονται με τις άλλες συσκευές σας και δεν περιλαμβάνονται όταν εξάγετε όλες τις λίστες αναπαραγωγής ή δημιουργείτε αντίγραφο ασφαλείας των δεδομένων σας. Αν το απενεργοποιήσετε, αφαιρούνται από αυτήν τη συσκευή αλλά όχι από το YouTube."
     Add to YouTube Watch History: "Τα βίντεο που αναπαράγετε προστίθενται στο ιστορικό παρακολούθησης του YouTube, ώστε οι προτάσεις του YouTube να μαθαίνουν από αυτά. Δεν προστίθεται τίποτα όσο το ιστορικό είναι σε παύση στο YouTube."
   General Settings:
     Built-in Streams: |
@@ -2781,6 +2786,8 @@ YouTube Account:
   Rating Failed: "Δεν ήταν δυνατή η αξιολόγηση στο YouTube: {error}"
   Subscribe Failed: "Δεν ήταν δυνατή η εγγραφή στο YouTube: {error}"
   Unsubscribe Failed: "Δεν ήταν δυνατή η απεγγραφή στο YouTube: {error}"
+  Subscriptions Synced: "Οι συνδρομές συγχρονίστηκαν από το YouTube: {added} προστέθηκαν, {removed} αφαιρέθηκαν"
+  Playlist Update Failed: "Δεν ήταν δυνατή η ενημέρωση της λίστας {playlistName} στο YouTube: {error}"
   Add a comment: "Προσθήκη σχολίου"
   Add a reply: "Προσθήκη απάντησης"
   Comment: "Σχολιασμός"
@@ -2792,5 +2799,9 @@ YouTube Account:
   Delete Comment Confirmation: "Διαγραφή του σχολίου σας από το YouTube;"
   Comment Deleted: "Το σχόλιο διαγράφηκε"
   Delete Comment Failed: "Δεν ήταν δυνατή η διαγραφή του σχολίου: {error}"
+  Edit Comment: "Επεξεργασία σχολίου"
+  Save: "Αποθήκευση"
+  Comment Edited: "Έγινε επεξεργασία του σχολίου"
+  Edit Comment Failed: "Δεν ήταν δυνατή η επεξεργασία του σχολίου: {error}"
   Recommendations: "Προτάσεις YouTube"
   Recommendations Failed: "Δεν ήταν δυνατή η φόρτωση των προτάσεών σας από το YouTube."

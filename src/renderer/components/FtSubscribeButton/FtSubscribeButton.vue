@@ -224,7 +224,7 @@ import { supportsUploadNotifications } from '../../helpers/uploadNotifications'
 
 import { MAIN_PROFILE_ID } from '../../../constants'
 import { showToast } from '../../helpers/utils'
-import { mirrorYouTubeSubscription } from '../../helpers/api/youtube-account'
+import { mirrorYouTubeSubscription } from '../../helpers/youtube-sync'
 import { normalizeChannelHandle } from '../../helpers/feed-metadata'
 import { getFirstCharacter } from '../../helpers/strings'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'

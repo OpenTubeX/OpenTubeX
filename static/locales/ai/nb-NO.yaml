@@ -310,6 +310,10 @@ User Playlists:
     Loading videos from {playlistName}: 'Laster inn videoer fra {playlistName}'
     Adding missing videos to {playlistName}: 'Legger til manglende videoer i {playlistName}'
     Checking {playlistName} for unavailable videos: 'Ser etter utilgjengelige videoer i {playlistName} ({checked}/{total})'
+  Synced with YouTube: "Synkronisert med YouTube"
+  Delete YouTube Playlist Confirmation: "Vil du slette denne spillelisten her og på YouTube? Dette kan ikke angres."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Opprett også på YouTube"
 History:
   From Date: 'Fra'
   To Date: 'Til'
@@ -375,12 +379,12 @@ Settings:
     Sign Out Failed: "Kunne ikke logge ut: {error}"
     Revoke Failed: "Logget ut av YouTube, men Google bekreftet ikke at innloggingen ble avsluttet. Du kan fjerne den under tredjepartstilkoblinger i Google-kontoen din."
     Signed out by YouTube: "YouTube avsluttet innloggingen. Logg inn igjen i innstillingene for å fortsette å bruke kontoen din."
-    Subscribe on YouTube: "Abonner også på YouTube"
     Add to YouTube Watch History: "Legg til sette videoer i YouTube-historikken"
-    Import Subscriptions: "Importer abonnementer fra YouTube"
-    Imported Subscriptions: "Importerte {count} kanal | Importerte {count} kanaler"
-    No Subscriptions to Import: "Denne YouTube-kontoen har ingen abonnementer"
-    Import Subscriptions Failed: "Kunne ikke importere abonnementer: {error}"
+    Sync Subscriptions: "Synkroniser abonnementer med YouTube"
+    Sync Playlists: "Synkroniser spillelister med YouTube"
+    Sync Now: "Synkroniser nå"
+    Synced: "Synkronisert med YouTube"
+    Sync Failed: "Kunne ikke synkronisere med YouTube: {error}"
   Diagnostics:
     Diagnostics: Diagnostikk
     Description: Mens diagnoseloggen er på, holder OpenTubeX nylige loggmeldinger i minnet slik at du kan legge dem ved feilrapporter. Det lagrer eller sender dem aldri av seg selv, og når du slår av loggen, slettes de. Rapporter utelater informasjonskapsler, tokener, IP-adresser og URL-parametere, men de kan inneholde ID-er for videoer du har spilt av, så sjekk en rapport før du deler den.
@@ -2248,8 +2252,9 @@ Description:
   Music: Musikk
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "Når du abonnerer på eller avslutter abonnementet på en kanal i OpenTubeX, skjer det samme på YouTube-kontoen din."
     Add to YouTube Watch History: "Videoer du spiller av, legges til i visningshistorikken din på YouTube, slik at YouTubes anbefalinger lærer av dem. Ingenting legges til mens historikken er satt på pause på YouTube."
+    Sync Subscriptions: "Når du abonnerer på en kanal på YouTube, legges den til i «Alle kanaler», og når du avslutter abonnementet der, fjernes den fra alle profiler. Å abonnere eller avslutte abonnementet her i «Alle kanaler» gjør det samme på YouTube."
+    Sync Playlists: "YouTube-spillelistene dine, «Se senere» og «Likte videoer» vises i «Dine spillelister», og endringer du gjør i dem her, gjøres også på YouTube. De synkroniseres ikke til de andre enhetene dine og tas ikke med når du eksporterer alle spillelister eller sikkerhetskopierer dataene dine. Hvis du slår av dette, fjernes de fra denne enheten, men ikke fra YouTube."
   General Settings:
     Built-in Streams: |
       Automatisk spiller de fleste videoer via YouTubes visionOS-klient, som starter raskere og støtter automatisk kvalitet. Direktesendinger og videoer den ikke kan spille av, bruker SABR.
@@ -2783,5 +2788,11 @@ YouTube Account:
   Delete Comment Confirmation: "Vil du slette kommentaren din fra YouTube?"
   Comment Deleted: "Kommentaren er slettet"
   Delete Comment Failed: "Kunne ikke slette kommentaren: {error}"
+  Edit Comment: "Rediger kommentar"
+  Save: "Lagre"
+  Comment Edited: "Kommentaren er redigert"
+  Edit Comment Failed: "Kunne ikke redigere kommentaren: {error}"
   Recommendations: "YouTube-anbefalinger"
   Recommendations Failed: "Kunne ikke laste inn YouTube-anbefalingene dine."
+  Subscriptions Synced: "Abonnementer synkronisert fra YouTube: {added} lagt til, {removed} fjernet"
+  Playlist Update Failed: "Kunne ikke oppdatere {playlistName} på YouTube: {error}"

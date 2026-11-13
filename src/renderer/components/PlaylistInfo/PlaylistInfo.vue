@@ -302,7 +302,9 @@
       <FtPrompt
         v-if="showDeletePlaylistPrompt"
         autosize
-        :label="$t('User Playlists.Are you sure you want to delete this playlist? This cannot be undone')"
+        :label="selectedUserPlaylist?.youTube
+          ? $t('User Playlists.Delete YouTube Playlist Confirmation')
+          : $t('User Playlists.Are you sure you want to delete this playlist? This cannot be undone')"
         :option-names="deletePlaylistPromptNames"
         :option-values="DELETE_PLAYLIST_PROMPT_VALUES"
         :option-icons="[['fas', 'trash'], ['fas', 'xmark']]"
@@ -820,7 +822,9 @@ const ownMenuItems = computed(() => {
   }
   items.push(SEPARATOR)
 
-  if (isUserPlaylist.value && !selectedUserPlaylist.value.protected) {
+  // YouTube keeps Watch later and Liked videos.
+  const youTubePlaylistId = selectedUserPlaylist.value?.youTube?.playlistId
+  if (isUserPlaylist.value && !selectedUserPlaylist.value.protected && youTubePlaylistId !== 'WL' && youTubePlaylistId !== 'LL') {
     items.push({
       // The quick bookmark target cannot be deleted, so explain why in place of the label.
       label: markedAsQuickBookmarkTarget.value ? t('User Playlists["Cannot delete the quick bookmark target playlist."]') : t('User Playlists.Delete Playlist'),
@@ -1070,7 +1074,11 @@ function getExportFilename(title, extension) {
 async function exportAsFreeTubeDatabase() {
   const exportFileName = getExportFilename(selectedUserPlaylist.value.playlistName, 'db')
 
-  const data = JSON.stringify(selectedUserPlaylist.value) + '\n'
+  const playlist = deepCopy(selectedUserPlaylist.value)
+  // A playlist synced from YouTube is exported as a copy, without its link to YouTube.
+  delete playlist.youTube
+  for (const video of playlist.videos) delete video.youTubeSetVideoId
+  const data = JSON.stringify(playlist) + '\n'
 
   // See DataSettings.vue `promptAndWriteToFile`
 

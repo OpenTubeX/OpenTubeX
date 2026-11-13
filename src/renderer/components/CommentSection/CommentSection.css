@@ -710,7 +710,8 @@
 }
 
 /* Lines up with the comment text. */
-.replyComposer {
+.replyComposer,
+.editComposer {
   margin-inline-start: 60px;
 }
 

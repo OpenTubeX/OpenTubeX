@@ -313,6 +313,10 @@ User Playlists:
     Loading videos from {playlistName}: 'Učitavanje videozapisa iz {playlistName}'
     Adding missing videos to {playlistName}: 'Dodavanje nedostajućih videozapisa u {playlistName}'
     Checking {playlistName} for unavailable videos: 'Provjera nedostupnih videozapisa u {playlistName} ({checked}/{total})'
+  Synced with YouTube: "Sinkronizirano s YouTubeom"
+  Delete YouTube Playlist Confirmation: "Izbrisati ovu zbirku ovdje i na YouTubeu? To se ne može poništiti."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Stvori i na YouTubeu"
 History:
   From Date: 'Od'
   To Date: 'Do'
@@ -378,12 +382,12 @@ Settings:
     Sign Out Failed: "Odjava nije uspjela: {error}"
     Revoke Failed: "Odjava s YouTubea je uspjela, ali Google nije potvrdio da je prijava prekinuta. Možeš je ukloniti u vezama s trećim stranama na svom Google računu."
     Signed out by YouTube: "YouTube je prekinuo prijavu. Ponovno se prijavi u postavkama za daljnje korištenje računa."
-    Subscribe on YouTube: "Pretplati se i na YouTubeu"
     Add to YouTube Watch History: "Dodaj gledane videozapise u YouTube povijest"
-    Import Subscriptions: "Uvezi pretplate s YouTubea"
-    Imported Subscriptions: "Uvezen je {count} kanal | Uvezena su {count} kanala | Uvezeno je {count} kanala"
-    No Subscriptions to Import: "Ovaj YouTube račun nema pretplata"
-    Import Subscriptions Failed: "Uvoz pretplata nije uspio: {error}"
+    Sync Subscriptions: "Sinkroniziraj pretplate s YouTubeom"
+    Sync Playlists: "Sinkroniziraj zbirke s YouTubeom"
+    Sync Now: "Sinkroniziraj sada"
+    Synced: "Sinkronizirano s YouTubeom"
+    Sync Failed: "Sinkronizacija s YouTubeom nije uspjela: {error}"
   Diagnostics:
     Diagnostics: Dijagnostika
     Description: Dok je dijagnostički zapisnik uključen, OpenTubeX čuva nedavne poruke zapisnika u memoriji kako biste ih mogli priložiti izvješćima o greškama. Nikad ih ne sprema niti šalje sam, a isključivanje zapisnika ih briše. Izvješća izostavljaju kolačiće, tokene, IP adrese i URL parametre, ali mogu sadržavati ID-ove videozapisa koje ste reproducirali, stoga provjerite izvješće prije dijeljenja.
@@ -2279,8 +2283,9 @@ Description:
   Music: Glazba
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "Pretplata na kanal ili otkazivanje pretplate u OpenTubeXu primjenjuje se i na tvoj YouTube račun."
     Add to YouTube Watch History: "Videozapisi koje pokrećeš dodaju se u tvoju povijest gledanja na YouTubeu, tako da YouTubeove preporuke uče iz njih. Ništa se ne dodaje dok je povijest pauzirana na YouTubeu."
+    Sync Subscriptions: "Kanali na koje se pretplatiš na YouTubeu dodaju se u „Svi kanali”, a kanali s kojih tamo otkažeš pretplatu uklanjaju se iz svih profila. Pretplata ili otkazivanje pretplate ovdje u „Svi kanali” čini isto na YouTubeu."
+    Sync Playlists: "Tvoje YouTube zbirke, „Pogledaj kasnije” i „Videozapisi koji mi se sviđaju” prikazuju se u „Tvoje zbirke”, a promjene koje u njima ovdje napraviš primjenjuju se i na YouTubeu. Ne sinkroniziraju se s tvojim drugim uređajima i nisu uključene kada izvoziš sve zbirke ili izrađuješ sigurnosnu kopiju svojih podataka. Isključivanjem ovoga uklanjaju se s ovog uređaja, ali ne i s YouTubea."
   General Settings:
     Built-in Streams: |
       Automatski način reproducira većinu videozapisa putem YouTubeova visionOS klijenta, koji se pokreće brže i podržava automatsku kvalitetu. Prijenosi uživo i videozapisi koje ne može reproducirati koriste SABR.
@@ -2818,5 +2823,11 @@ YouTube Account:
   Delete Comment Confirmation: "Izbrisati svoj komentar s YouTubea?"
   Comment Deleted: "Komentar je izbrisan"
   Delete Comment Failed: "Brisanje komentara nije uspjelo: {error}"
+  Edit Comment: "Uredi komentar"
+  Save: "Spremi"
+  Comment Edited: "Komentar je uređen"
+  Edit Comment Failed: "Uređivanje komentara nije uspjelo: {error}"
   Recommendations: "YouTube preporuke"
   Recommendations Failed: "Nije moguće učitati tvoje YouTube preporuke."
+  Subscriptions Synced: "Pretplate sinkronizirane s YouTubea: dodano {added}, uklonjeno {removed}"
+  Playlist Update Failed: "Ažuriranje zbirke {playlistName} na YouTubeu nije uspjelo: {error}"

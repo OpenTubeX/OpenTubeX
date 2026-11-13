@@ -140,7 +140,14 @@
           <FtIcon :icon="['fas', 'link']" />
         </button>
       </p>
+      <CommentComposer
+        v-if="youTubeComments?.enabled.value && youTubeComments.editing.value === reply.id"
+        class="editComposer"
+        :edit-comment="reply"
+        @done="youTubeComments.closeEdit(reply.id)"
+      />
       <FtTimestampCatcher
+        v-else
         class="commentText"
         :input-html="reply.showTranslated && reply.translatedLanguage === translationLanguage
           ? reply.translatedText
@@ -408,18 +415,19 @@ function formatCommentTime(comment) {
     : comment.time
 }
 
-const reply = props.node.reply
+// The reply list keys by ID, so a saved edit can hand this component a new reply object.
+const reply = computed(() => props.node.reply)
 const childrenCollapsed = ref(false)
 const hasReplyChildren = computed(() => {
   return props.node.children.length > 0 ||
     (!props.filtering && (
-      (reply.dataType === 'local' && reply.hasReplyToken) ||
-      props.loadingReplyIds.has(reply.id)
+      (reply.value.dataType === 'local' && reply.value.hasReplyToken) ||
+      props.loadingReplyIds.has(reply.value.id)
     ))
 })
 const showReplyChildren = computed(() => hasReplyChildren.value && (!childrenCollapsed.value || props.filtering))
 const replyToggleLabel = computed(() => {
-  const replyCount = getCommentReplyCount(reply)
+  const replyCount = getCommentReplyCount(reply.value)
   return showReplyChildren.value
     ? t('Comments.Hide {replyCount} replies', { replyCount }, replyCount)
     : t('Comments.Reply Count', { replyCount }, replyCount)
@@ -429,37 +437,37 @@ function toggleReplyChildren() {
   childrenCollapsed.value = !childrenCollapsed.value
   emit('replies-toggled')
 }
-const isPersonallyPinned = computed(() => props.personalPinnedCommentIds.has(reply.id))
+const isPersonallyPinned = computed(() => props.personalPinnedCommentIds.has(reply.value.id))
 const personalPinActionLabel = computed(() => {
   return isPersonallyPinned.value
-    ? t('Comments.Unpin comment by author', { author: reply.author })
-    : t('Comments.Pin comment by author', { author: reply.author })
+    ? t('Comments.Unpin comment by author', { author: reply.value.author })
+    : t('Comments.Pin comment by author', { author: reply.value.author })
 })
 const authorSearchSegments = computed(() => {
   const query = props.highlight
   if (query === '') {
-    return [{ text: reply.author, highlighted: false }]
+    return [{ text: reply.value.author, highlighted: false }]
   }
 
-  const normalizedAuthor = reply.author.toLocaleLowerCase()
+  const normalizedAuthor = reply.value.author.toLocaleLowerCase()
   const segments = []
   let start = 0
   let matchIndex = normalizedAuthor.indexOf(query)
 
   while (matchIndex !== -1) {
     if (matchIndex > start) {
-      segments.push({ text: reply.author.slice(start, matchIndex), highlighted: false })
+      segments.push({ text: reply.value.author.slice(start, matchIndex), highlighted: false })
     }
     segments.push({
-      text: reply.author.slice(matchIndex, matchIndex + query.length),
+      text: reply.value.author.slice(matchIndex, matchIndex + query.length),
       highlighted: true
     })
     start = matchIndex + query.length
     matchIndex = normalizedAuthor.indexOf(query, start)
   }
 
-  if (start < reply.author.length) {
-    segments.push({ text: reply.author.slice(start), highlighted: false })
+  if (start < reply.value.author.length) {
+    segments.push({ text: reply.value.author.slice(start), highlighted: false })
   }
 
   return segments

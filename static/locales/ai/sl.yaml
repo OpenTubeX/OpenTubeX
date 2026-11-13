@@ -323,6 +323,7 @@ User Playlists:
   Pin to Top: "Pripni na vrh"
   Unpin from Top: "Odpni z vrha"
   Pinned to Top: "Pripeto na vrh"
+  Synced with YouTube: "Sinhronizirano s storitvijo YouTube"
   Reorder Hint: Povlecite ali uporabite smerne tipke za spreminjanje vrstnega reda
   Add new videos to the top (custom order): "Dodaj nove videoposnetke na vrh (vrstni red po meri)"
   Shuffle videos by default: "Privzeto predvajaj videoposnetke v naključnem vrstnem redu"
@@ -372,6 +373,7 @@ User Playlists:
   Delete Playlist: Izbriši seznam predvajanja
   Cannot delete the quick bookmark target playlist.: Ciljnega seznama predvajanja za hitri zaznamek ni mogoče izbrisati.
   Are you sure you want to delete this playlist? This cannot be undone: Ali res želite izbrisati ta seznam predvajanja? Tega ni mogoče razveljaviti.
+  Delete YouTube Playlist Confirmation: "Želite izbrisati ta seznam predvajanja tukaj in v storitvi YouTube? Tega ni mogoče razveljaviti."
   TotalTimePlaylist: 'Skupni čas: {duration}'
   Sort By:
     NameAscending: A-Z
@@ -423,6 +425,7 @@ User Playlists:
   CreatePlaylistPrompt:
     New Playlist Name: Ime novega seznama predvajanja
     Create: Ustvari
+    Create on YouTube: "Ustvari tudi v storitvi YouTube"
     Toast:
       There is already a playlist with this name. Please pick a different name.: Seznam predvajanja s tem imenom že obstaja. Izberite drugo ime.
       Playlist {playlistName} has been successfully created.: Seznam predvajanja {playlistName} je uspešno ustvarjen.
@@ -504,12 +507,12 @@ Settings:
     Sign Out Failed: "Odjava ni uspela: {error}"
     Revoke Failed: "Odjava iz YouTuba je uspela, vendar Google ni potrdil, da je prijava končana. Odstranite jo lahko med povezavami z drugimi ponudniki v svojem Google Računu."
     Signed out by YouTube: "YouTube je končal prijavo. Za nadaljnjo uporabo računa se znova prijavite v nastavitvah."
-    Subscribe on YouTube: "Naroči se tudi v storitvi YouTube"
+    Sync Subscriptions: "Sinhroniziraj naročnine s storitvijo YouTube"
+    Sync Playlists: "Sinhroniziraj sezname predvajanja s storitvijo YouTube"
     Add to YouTube Watch History: "Dodaj ogledane videoposnetke v zgodovino storitve YouTube"
-    Import Subscriptions: "Uvozi naročnine iz storitve YouTube"
-    Imported Subscriptions: "Uvožen {count} kanal | Uvožena {count} kanala | Uvoženi {count} kanali | Uvoženih {count} kanalov"
-    No Subscriptions to Import: "Ta račun YouTube nima naročnin"
-    Import Subscriptions Failed: "Naročnin ni bilo mogoče uvoziti: {error}"
+    Sync Now: "Sinhroniziraj zdaj"
+    Synced: "Sinhronizirano s storitvijo YouTube"
+    Sync Failed: "Sinhronizacija s storitvijo YouTube ni uspela: {error}"
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Dokler je diagnostični dnevnik vklopljen, OpenTubeX hrani nedavna sporočila dnevnika v pomnilniku, da jih lahko priložite poročilom o napakah. Nikoli jih ne shrani ali pošlje sam, izklop dnevnika pa jih izbriše. Poročila izpustijo piškotke, žetone, naslove IP in parametre URL, vendar lahko vsebujejo ID-je predvajanih videoposnetkov, zato poročilo pred deljenjem preglejte.
@@ -2745,7 +2748,8 @@ Description:
   Music: Glasba
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "Naročanje na kanal ali preklic naročnine v OpenTubeX enako stori tudi v vašem računu YouTube."
+    Sync Subscriptions: "Kanali, na katere se naročite v storitvi YouTube, se dodajo v profil Vsi kanali, kanali, katerih naročnino tam prekličete, pa se odstranijo iz vseh profilov. Naročanje ali preklic naročnine tukaj v profilu Vsi kanali naredi enako v storitvi YouTube."
+    Sync Playlists: "Vaši seznami predvajanja iz storitve YouTube, Za poznejši ogled in Všečkani videoposnetki so prikazani v razdelku Vaši seznami predvajanja, spremembe, ki jih tukaj naredite v njih, pa se izvedejo tudi v storitvi YouTube. Ne sinhronizirajo se z vašimi drugimi napravami in niso vključeni, ko izvozite vse sezname predvajanja ali naredite varnostno kopijo podatkov. Če to možnost izklopite, se odstranijo iz te naprave, ne pa iz storitve YouTube."
     Add to YouTube Watch History: "Videoposnetki, ki jih predvajate, se dodajo v vašo zgodovino predvajanj v storitvi YouTube, zato se priporočila YouTube učijo iz njih. Ko je zgodovina v storitvi YouTube začasno zaustavljena, se ne doda nič."
   General Settings:
     Built-in Streams: |
@@ -3366,6 +3370,8 @@ YouTube Account:
   Rating Failed: "Ocenjevanje v storitvi YouTube ni uspelo: {error}"
   Subscribe Failed: "Naročanje v storitvi YouTube ni uspelo: {error}"
   Unsubscribe Failed: "Preklic naročnine v storitvi YouTube ni uspel: {error}"
+  Subscriptions Synced: "Naročnine iz storitve YouTube so sinhronizirane (dodano: {added}, odstranjeno: {removed})"
+  Playlist Update Failed: "Seznama predvajanja {playlistName} ni bilo mogoče posodobiti v storitvi YouTube: {error}"
   Add a comment: "Dodajte komentar"
   Add a reply: "Dodajte odgovor"
   Comment: "Komentiraj"
@@ -3377,5 +3383,9 @@ YouTube Account:
   Delete Comment Confirmation: "Želite izbrisati svoj komentar iz storitve YouTube?"
   Comment Deleted: "Komentar je izbrisan"
   Delete Comment Failed: "Komentarja ni bilo mogoče izbrisati: {error}"
+  Edit Comment: "Uredi komentar"
+  Save: "Shrani"
+  Comment Edited: "Komentar je urejen"
+  Edit Comment Failed: "Komentarja ni bilo mogoče urediti: {error}"
   Recommendations: "Priporočila YouTube"
   Recommendations Failed: "Vaših priporočil YouTube ni bilo mogoče naložiti."

@@ -276,6 +276,10 @@ User Playlists:
   Pin to Top: "置顶"
   Unpin from Top: "取消置顶"
   Pinned to Top: "已置顶"
+  Synced with YouTube: "已与 YouTube 同步"
+  Delete YouTube Playlist Confirmation: "要在此处和 YouTube 上删除此播放列表吗？此操作无法撤销。"
+  CreatePlaylistPrompt:
+    Create on YouTube: "同时在 YouTube 上创建"
   Reorder Hint: 拖动或使用方向键重新排序
   Add new videos to the top (custom order): "将新视频添加到顶部（自定义顺序）"
   Shuffle videos by default: "默认随机播放视频"
@@ -375,12 +379,12 @@ Settings:
     Sign Out Failed: "无法退出登录：{error}"
     Revoke Failed: "已退出 YouTube，但 Google 未确认登录已结束。你可以在 Google 账号的第三方关联中将其移除。"
     Signed out by YouTube: "YouTube 已终止登录。请在设置中重新登录以继续使用你的账号。"
-    Subscribe on YouTube: "同时在 YouTube 上订阅"
+    Sync Subscriptions: "与 YouTube 同步订阅"
+    Sync Playlists: "与 YouTube 同步播放列表"
     Add to YouTube Watch History: "将观看过的视频添加到 YouTube 历史记录"
-    Import Subscriptions: "从 YouTube 导入订阅"
-    Imported Subscriptions: "已导入 {count} 个频道"
-    No Subscriptions to Import: "此 YouTube 账号没有任何订阅"
-    Import Subscriptions Failed: "无法导入订阅：{error}"
+    Sync Now: "立即同步"
+    Synced: "已与 YouTube 同步"
+    Sync Failed: "无法与 YouTube 同步：{error}"
   Diagnostics:
     Diagnostics: 诊断
     Description: 启用诊断日志后，OpenTubeX 会在内存中保留最近的日志消息，方便你将其附加到错误报告中。它绝不会自行保存或发送这些消息，关闭日志会将其删除。报告不包含 Cookie、令牌、IP 地址和 URL 参数，但可能包含你播放过的视频 ID，因此分享前请检查报告。
@@ -2243,7 +2247,8 @@ Description:
   Music: 音乐
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "在 OpenTubeX 中订阅或取消订阅频道时，你的 YouTube 账号也会执行相同操作。"
+    Sync Subscriptions: "你在 YouTube 上订阅的频道会添加到“所有频道”，在 YouTube 上取消订阅的频道会从所有配置文件中移除。在此处的“所有频道”中订阅或取消订阅，也会在 YouTube 上执行相同操作。"
+    Sync Playlists: "你的 YouTube 播放列表、“稍后观看”和“赞过的视频”会显示在“您的播放列表”中，你在此处对它们所做的更改也会在 YouTube 上生效。它们不会同步到你的其他设备，在你导出所有播放列表或备份数据时也不会包含在内。关闭此选项会将它们从此设备中移除，但不会从 YouTube 中移除。"
     Add to YouTube Watch History: "你播放的视频会添加到你的 YouTube 观看历史记录中，让 YouTube 的推荐据此学习。在 YouTube 上暂停历史记录时，不会添加任何内容。"
   General Settings:
     Built-in Streams: |
@@ -2768,6 +2773,8 @@ YouTube Account:
   Rating Failed: "无法在 YouTube 上评分：{error}"
   Subscribe Failed: "无法在 YouTube 上订阅：{error}"
   Unsubscribe Failed: "无法在 YouTube 上取消订阅：{error}"
+  Subscriptions Synced: "已从 YouTube 同步订阅：新增 {added} 个，移除 {removed} 个"
+  Playlist Update Failed: "无法在 YouTube 上更新 {playlistName}：{error}"
   Add a comment: "添加评论"
   Add a reply: "添加回复"
   Comment: "评论"
@@ -2779,5 +2786,9 @@ YouTube Account:
   Delete Comment Confirmation: "要从 YouTube 删除你的评论吗？"
   Comment Deleted: "评论已删除"
   Delete Comment Failed: "无法删除评论：{error}"
+  Edit Comment: "编辑评论"
+  Save: "保存"
+  Comment Edited: "评论已编辑"
+  Edit Comment Failed: "无法编辑评论：{error}"
   Recommendations: "YouTube 推荐"
   Recommendations Failed: "无法加载你的 YouTube 推荐。"

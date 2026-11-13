@@ -308,6 +308,7 @@ User Playlists:
     Checking {playlistName} for unavailable videos: '{playlistName} wird auf nicht verfügbare Videos geprüft ({checked}/{total})'
   Delete Playlist: Playlist löschen
   Are you sure you want to delete this playlist? This cannot be undone: Bist du sicher, dass du diese Playlist löschen möchtest? Dies kann nicht rückgängig gemacht werden.
+  Delete YouTube Playlist Confirmation: "Diese Playlist hier und auf YouTube löschen? Dies kann nicht rückgängig gemacht werden."
   Reorder Hint: Ziehen oder mit den Pfeiltasten neu anordnen
   Sort By:
     NameAscending: A–Z
@@ -359,6 +360,7 @@ User Playlists:
   CreatePlaylistPrompt:
     New Playlist Name: Neuer Name der Playlist
     Create: Erstellen
+    Create on YouTube: "Auch auf YouTube erstellen"
     Toast:
       There is already a playlist with this name. Please pick a different name.: Es existiert bereits eine Playlist mit diesem Namen. Bitte wähle einen anderen Namen.
       There was an issue with creating the playlist.: Es gab ein Problem beim Erstellen der Playlist.
@@ -376,6 +378,7 @@ User Playlists:
   Pin to Top: "Oben anheften"
   Unpin from Top: "Oben lösen"
   Pinned to Top: "Oben angeheftet"
+  Synced with YouTube: "Mit YouTube synchronisiert"
   Cannot delete the quick bookmark target playlist.: Die Playlist, die für die Funktion „Schnelle Lesezeichen“ genutzt wird, kann nicht gelöscht werden.
   Remove Duplicate Videos: Doppelte Videos entfernen
   Are you sure you want to remove {playlistItemCount} duplicate videos from this playlist? This cannot be undone: Bist du sicher, dass du ein doppeltes Video aus dieser Playlist entfernen möchtest? Dies kann nicht rückgängig gemacht werden. | Bist du sicher, dass du {playlistItemCount} doppelte Videos aus dieser Playlist entfernen möchtest? Dies kann nicht rückgängig gemacht werden.
@@ -469,12 +472,12 @@ Settings:
     Sign Out Failed: "Abmeldung fehlgeschlagen: {error}"
     Revoke Failed: "Von YouTube abgemeldet, aber Google hat nicht bestätigt, dass die Anmeldung beendet wurde. Du kannst sie in deinem Google-Konto unter den Verbindungen zu Drittanbieter-Apps entfernen."
     Signed out by YouTube: "YouTube hat die Anmeldung beendet. Melde dich in den Einstellungen erneut an, um dein Konto weiter zu nutzen."
-    Subscribe on YouTube: "Auch auf YouTube abonnieren"
+    Sync Subscriptions: "Abos mit YouTube synchronisieren"
+    Sync Playlists: "Playlists mit YouTube synchronisieren"
     Add to YouTube Watch History: "Angesehene Videos zum YouTube-Verlauf hinzufügen"
-    Import Subscriptions: "Abos von YouTube importieren"
-    Imported Subscriptions: "{count} Kanal importiert | {count} Kanäle importiert"
-    No Subscriptions to Import: "Dieses YouTube-Konto hat keine Abos"
-    Import Subscriptions Failed: "Abos konnten nicht importiert werden: {error}"
+    Sync Now: "Jetzt synchronisieren"
+    Synced: "Mit YouTube synchronisiert"
+    Sync Failed: "Synchronisierung mit YouTube fehlgeschlagen: {error}"
   Tab Unloading:
     Automatically unload tabs: "Tabs automatisch entladen"
     Memory threshold: "Speicherschwelle"
@@ -3001,7 +3004,8 @@ See changes and update: Änderungen ansehen und aktualisieren
 Dismiss: Ausblenden
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "Wenn du in OpenTubeX einen Kanal abonnierst oder ein Abo beendest, passiert das auch in deinem YouTube-Konto."
+    Sync Subscriptions: "Kanäle, die du auf YouTube abonnierst, kommen zu „Alle Kanäle“ hinzu, und Kanäle, deren Abo du dort beendest, werden aus jedem Profil entfernt. Wenn du hier in „Alle Kanäle“ abonnierst oder ein Abo beendest, passiert das auch auf YouTube."
+    Sync Playlists: "Deine YouTube-Playlists, „Später ansehen“ und „Videos mit ‚Mag ich‘-Bewertung“ erscheinen unter „Deine Playlists“, und deine Änderungen daran werden auch auf YouTube übernommen. Sie werden nicht mit deinen anderen Geräten synchronisiert und nicht einbezogen, wenn du alle Playlists exportierst oder deine Daten sicherst. Wenn du das ausschaltest, werden sie von diesem Gerät entfernt, aber nicht von YouTube."
     Add to YouTube Watch History: "Videos, die du abspielst, werden zu deinem YouTube-Verlauf hinzugefügt, damit die Empfehlungen von YouTube daraus lernen. Solange der Verlauf auf YouTube pausiert ist, wird nichts hinzugefügt."
   General Settings:
     Preferred Video Codec: |
@@ -3972,6 +3976,8 @@ YouTube Account:
   Rating Failed: "Bewertung auf YouTube fehlgeschlagen: {error}"
   Subscribe Failed: "Abonnieren auf YouTube fehlgeschlagen: {error}"
   Unsubscribe Failed: "Abo auf YouTube konnte nicht beendet werden: {error}"
+  Subscriptions Synced: "Abos von YouTube synchronisiert: {added} hinzugefügt, {removed} entfernt"
+  Playlist Update Failed: "{playlistName} konnte auf YouTube nicht geändert werden: {error}"
   Add a comment: "Kommentar hinzufügen"
   Add a reply: "Antwort hinzufügen"
   Comment: "Kommentieren"
@@ -3983,5 +3989,9 @@ YouTube Account:
   Delete Comment Confirmation: "Deinen Kommentar auf YouTube löschen?"
   Comment Deleted: "Kommentar gelöscht"
   Delete Comment Failed: "Kommentar konnte nicht gelöscht werden: {error}"
+  Edit Comment: "Kommentar bearbeiten"
+  Save: "Speichern"
+  Comment Edited: "Kommentar bearbeitet"
+  Edit Comment Failed: "Kommentar konnte nicht bearbeitet werden: {error}"
   Recommendations: "YouTube-Empfehlungen"
   Recommendations Failed: "Deine YouTube-Empfehlungen konnten nicht geladen werden."

@@ -392,6 +392,7 @@ User Playlists:
       There is already a playlist with this name. Please pick a different name.: 같은 이름의 재생목록이 이미 있습니다. 다른 이름을 선택하세요.
       Playlist {playlistName} has been successfully created.: '{playlistName} 재생목록을 만들었습니다.'
       There was an issue with creating the playlist.: 재생목록을 만드는 중 문제가 발생했습니다.
+    Create on YouTube: "YouTube에도 만들기"
   Playlist Thumbnail: "재생목록 썸네일"
   Restore Default Thumbnail: "기본 썸네일 복원"
   Move Up: 위로
@@ -401,6 +402,8 @@ User Playlists:
     Loading videos from {playlistName}: '{playlistName}에서 동영상을 불러오는 중'
     Adding missing videos to {playlistName}: '{playlistName}에 누락된 동영상을 추가하는 중'
     Checking {playlistName} for unavailable videos: '{playlistName}에서 사용할 수 없는 동영상을 확인하는 중 ({checked}/{total})'
+  Synced with YouTube: "YouTube와 동기화됨"
+  Delete YouTube Playlist Confirmation: "이 재생 목록을 여기와 YouTube에서 모두 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
 History:
   From Date: '시작일'
   To Date: '종료일'
@@ -469,12 +472,12 @@ Settings:
     Sign Out Failed: "로그아웃할 수 없습니다: {error}"
     Revoke Failed: "YouTube에서 로그아웃했지만 Google에서 로그인 종료를 확인하지 않았습니다. Google 계정의 서드 파티 연결에서 삭제할 수 있습니다."
     Signed out by YouTube: "YouTube에서 로그인을 종료했습니다. 계정을 계속 사용하려면 설정에서 다시 로그인하세요."
-    Subscribe on YouTube: "YouTube에서도 구독"
     Add to YouTube Watch History: "시청한 동영상을 YouTube 기록에 추가"
-    Import Subscriptions: "YouTube에서 구독 가져오기"
-    Imported Subscriptions: "채널 {count}개를 가져왔습니다"
-    No Subscriptions to Import: "이 YouTube 계정에는 구독한 채널이 없습니다"
-    Import Subscriptions Failed: "구독을 가져올 수 없습니다: {error}"
+    Sync Subscriptions: "YouTube와 구독 동기화"
+    Sync Playlists: "YouTube와 재생 목록 동기화"
+    Sync Now: "지금 동기화"
+    Synced: "YouTube와 동기화했습니다"
+    Sync Failed: "YouTube와 동기화할 수 없습니다: {error}"
   Diagnostics:
     Diagnostics: 진단
     Description: 진단 로그가 켜져 있는 동안 OpenTubeX는 최근 로그 메시지를 메모리에 보관하여 버그 보고서에 첨부할 수 있게 합니다. 스스로 저장하거나 전송하지 않으며, 로그를 끄면 삭제됩니다. 보고서에는 쿠키, 토큰, IP 주소, URL 매개변수가 포함되지 않지만 재생한 동영상의 ID가 포함될 수 있으므로 공유하기 전에 보고서를 확인하세요.
@@ -2630,8 +2633,9 @@ Description:
   Music: 음악
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "OpenTubeX에서 채널을 구독하거나 구독 취소하면 YouTube 계정에서도 똑같이 적용됩니다."
     Add to YouTube Watch History: "재생한 동영상이 YouTube 시청 기록에 추가되어 YouTube 추천에 반영됩니다. YouTube에서 기록이 일시중지된 동안에는 아무것도 추가되지 않습니다."
+    Sync Subscriptions: "YouTube에서 구독한 채널은 “모든 채널”에 추가되고, YouTube에서 구독 취소한 채널은 모든 프로필에서 삭제됩니다. 여기서 “모든 채널”의 채널을 구독하거나 구독 취소하면 YouTube에서도 똑같이 적용됩니다."
+    Sync Playlists: "YouTube 재생 목록, “나중에 볼 동영상”, “좋아요 표시한 동영상”이 “나의 재생 목록”에 표시되며, 여기서 변경한 내용은 YouTube에도 반영됩니다. 다른 기기와 동기화되지 않으며 모든 재생 목록을 내보내거나 데이터를 백업할 때도 포함되지 않습니다. 이 옵션을 끄면 이 기기에서는 삭제되지만 YouTube에서는 삭제되지 않습니다."
   General Settings:
     Built-in Streams: |
       자동은 대부분의 동영상을 YouTube의 visionOS 클라이언트로 재생하며, 더 빨리 시작되고 자동 화질을 지원합니다. 실시간 스트림과 재생할 수 없는 동영상은 SABR을 사용합니다.
@@ -3236,5 +3240,11 @@ YouTube Account:
   Delete Comment Confirmation: "YouTube에서 댓글을 삭제하시겠습니까?"
   Comment Deleted: "댓글을 삭제했습니다"
   Delete Comment Failed: "댓글을 삭제할 수 없습니다: {error}"
+  Edit Comment: "댓글 수정"
+  Save: "저장"
+  Comment Edited: "댓글을 수정했습니다"
+  Edit Comment Failed: "댓글을 수정할 수 없습니다: {error}"
   Recommendations: "YouTube 추천"
   Recommendations Failed: "YouTube 추천을 불러올 수 없습니다."
+  Subscriptions Synced: "YouTube에서 구독을 동기화했습니다: {added}개 추가, {removed}개 삭제"
+  Playlist Update Failed: "YouTube에서 {playlistName}을(를) 업데이트할 수 없습니다: {error}"

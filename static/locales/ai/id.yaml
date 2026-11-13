@@ -311,6 +311,10 @@ User Playlists:
     Loading videos from {playlistName}: 'Memuat video dari {playlistName}'
     Adding missing videos to {playlistName}: 'Menambahkan video yang hilang ke {playlistName}'
     Checking {playlistName} for unavailable videos: 'Memeriksa video yang tidak tersedia di {playlistName} ({checked}/{total})'
+  Synced with YouTube: "Diselaraskan dengan YouTube"
+  Delete YouTube Playlist Confirmation: "Hapus daftar putar ini di sini dan di YouTube? Tindakan ini tidak dapat dibatalkan."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Buat juga di YouTube"
 History:
   From Date: 'Dari'
   To Date: 'Sampai'
@@ -376,12 +380,12 @@ Settings:
     Sign Out Failed: "Tidak dapat keluar: {error}"
     Revoke Failed: "Anda telah keluar dari YouTube, tetapi Google tidak mengonfirmasi bahwa sesi masuk telah berakhir. Anda dapat menghapusnya di koneksi pihak ketiga pada Akun Google Anda."
     Signed out by YouTube: "YouTube mengakhiri sesi masuk. Masuk lagi di Pengaturan untuk terus menggunakan akun Anda."
-    Subscribe on YouTube: "Juga berlangganan di YouTube"
     Add to YouTube Watch History: "Tambahkan video yang ditonton ke riwayat YouTube"
-    Import Subscriptions: "Impor langganan dari YouTube"
-    Imported Subscriptions: "{count} kanal diimpor"
-    No Subscriptions to Import: "Akun YouTube ini tidak memiliki langganan"
-    Import Subscriptions Failed: "Tidak dapat mengimpor langganan: {error}"
+    Sync Subscriptions: "Selaraskan langganan dengan YouTube"
+    Sync Playlists: "Selaraskan daftar putar dengan YouTube"
+    Sync Now: "Selaraskan sekarang"
+    Synced: "Diselaraskan dengan YouTube"
+    Sync Failed: "Tidak dapat menyelaraskan dengan YouTube: {error}"
   Diagnostics:
     Diagnostics: Diagnostik
     Description: Selama log diagnostik aktif, OpenTubeX menyimpan pesan log terbaru di memori agar Anda dapat melampirkannya ke laporan bug. Aplikasi ini tidak pernah menyimpan atau mengirimnya sendiri, dan menonaktifkan log akan menghapusnya. Laporan tidak menyertakan cookie, token, alamat IP, dan parameter URL, tetapi dapat berisi ID video yang Anda putar, jadi periksa laporan sebelum membagikannya.
@@ -2268,8 +2272,9 @@ Description:
   Music: Musik
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "Berlangganan atau berhenti berlangganan kanal di OpenTubeX juga melakukan hal yang sama di akun YouTube Anda."
     Add to YouTube Watch History: "Video yang Anda putar ditambahkan ke riwayat tontonan YouTube Anda, sehingga rekomendasi YouTube belajar darinya. Tidak ada yang ditambahkan selama riwayat dijeda di YouTube."
+    Sync Subscriptions: "Kanal yang Anda langgani di YouTube ditambahkan ke “Semua Kanal”, dan kanal yang langganannya Anda hentikan di sana dihapus dari setiap profil. Berlangganan atau berhenti berlangganan di “Semua Kanal” di sini juga melakukan hal yang sama di YouTube."
+    Sync Playlists: "Daftar putar YouTube Anda, “Tonton Nanti”, dan “Video yang disukai” muncul di “Daftar Putar Anda”, dan perubahan yang Anda buat padanya di sini juga diterapkan di YouTube. Semuanya tidak diselaraskan ke perangkat Anda yang lain dan tidak disertakan saat Anda mengekspor semua daftar putar atau mencadangkan data Anda. Menonaktifkan ini akan menghapusnya dari perangkat ini, tetapi tidak dari YouTube."
   General Settings:
     Built-in Streams: |
       Otomatis memutar sebagian besar video melalui klien visionOS YouTube, yang dimulai lebih cepat dan mendukung kualitas otomatis. Siaran langsung dan video yang tidak dapat diputarnya menggunakan SABR.
@@ -2804,5 +2809,11 @@ YouTube Account:
   Delete Comment Confirmation: "Hapus komentar Anda dari YouTube?"
   Comment Deleted: "Komentar dihapus"
   Delete Comment Failed: "Tidak dapat menghapus komentar: {error}"
+  Edit Comment: "Edit komentar"
+  Save: "Simpan"
+  Comment Edited: "Komentar diedit"
+  Edit Comment Failed: "Tidak dapat mengedit komentar: {error}"
   Recommendations: "Rekomendasi YouTube"
   Recommendations Failed: "Tidak dapat memuat rekomendasi YouTube Anda."
+  Subscriptions Synced: "Langganan diselaraskan dari YouTube: {added} ditambahkan, {removed} dihapus"
+  Playlist Update Failed: "Tidak dapat memperbarui {playlistName} di YouTube: {error}"

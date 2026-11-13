@@ -310,6 +310,10 @@ User Playlists:
     Loading videos from {playlistName}: 'O kargañ ar videoioù eus {playlistName}'
     Adding missing videos to {playlistName}: 'Oc''h ouzhpennañ ar videoioù a vank da {playlistName}'
     Checking {playlistName} for unavailable videos: 'O wiriañ ar videoioù dihegerz e {playlistName} ({checked}/{total})'
+  Synced with YouTube: "Goubredet gant YouTube"
+  Delete YouTube Playlist Confirmation: "Dilemel ar roll-videoioù-mañ amañ ha war YouTube ? Ne vo ket moaien da nullañ war-lerc'h."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Krouiñ war YouTube ivez"
 History:
   From Date: 'Adalek'
   To Date: 'Betek'
@@ -375,12 +379,12 @@ Settings:
     Sign Out Failed: "N'haller ket digennaskañ: {error}"
     Revoke Failed: "Digennasket eus YouTube, met n'en deus ket kadarnaet Google eo bet echuet ar c'hennaskañ. Gallout a rit e zilemel e-touez ar c'hennaskoù gant an trede strolladoù en ho kont Google."
     Signed out by YouTube: "YouTube en deus echuet ar c'hennaskañ. Kennaskit en-dro en Arventennoù evit kenderc'hel da implijout ho kont."
-    Subscribe on YouTube: "Koumanantiñ war YouTube ivez"
+    Sync Subscriptions: "Goubredañ ar c'houmanantoù gant YouTube"
+    Sync Playlists: "Goubredañ ar rolloù-videoioù gant YouTube"
     Add to YouTube Watch History: "Ouzhpennañ ar videoioù sellet ouzh roll istor YouTube"
-    Import Subscriptions: "Enporzhiañ ar c'houmanantoù eus YouTube"
-    Imported Subscriptions: "{count} chadenn enporzhiet | {count} chadenn enporzhiet | {count} chadenn enporzhiet | {count} a chadennoù enporzhiet | {count} chadenn enporzhiet"
-    No Subscriptions to Import: "N'eus koumanant ebet gant ar gont YouTube-mañ"
-    Import Subscriptions Failed: "N'eus ket bet gallet enporzhiañ ar c'houmanantoù: {error}"
+    Sync Now: "Goubredañ bremañ"
+    Synced: "Goubredet gant YouTube"
+    Sync Failed: "N'haller ket goubredañ gant YouTube: {error}"
   Diagnostics:
     Diagnostics: Diagnoz
     Description: E-pad ma vez gweredekaet an deizlevr diagnoz, OpenTubeX a vir ar c'hemennadennoù deizlevr nevez er memor evit ma c'hallfec'h o stagañ ouzh danevelloù fazioù. Biskoazh ne enrollo na ne gaso anezho e-unan, ha diweredekaat an deizlevr a ziverk anezho. An danevelloù n'int ket enno toupinoù, jedouerioù, chomlec'hioù IP na arventennoù URL, met gallout a reont kaout IDoù ar videoioù ho peus lennet, setu gwiriit an danevell a-raok he rannañ.
@@ -2252,7 +2256,8 @@ Description:
   Music: Sonerezh
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "Koumanantiñ pe digoumanantiñ ouzh ur chadenn en OpenTubeX a ra an hevelep tra war ho kont YouTube."
+    Sync Subscriptions: "Ar chadennoù a goumanantit dezho war YouTube a vez ouzhpennet en « An holl chadennoù », hag ar chadennoù a zigoumanantit diouto eno a vez lamet eus an holl brofiloù. Koumanantiñ pe digoumanantiñ en « An holl chadennoù » amañ a ra kement all war YouTube."
+    Sync Playlists: "Ho rolloù-videoioù YouTube, « Da sellet diwezhatoc'h » ha « Videoioù a blij din » a zeu war wel en « Ho rolloù videoioù », hag ar c'hemmoù a rit dezho amañ a vez graet war YouTube ivez. N'int ket goubredet gant ho penvegoù all, ha n'int ket lakaet e-barzh pa ezporzhiit an holl rolloù-videoioù pe pa warezit ho roadennoù. Diweredekaat an dibarzh-mañ a lam anezho eus ar benveg-mañ, met n'eo ket eus YouTube."
     Add to YouTube Watch History: "Ar videoioù a lennit a vez ouzhpennet ouzh ho roll istor YouTube, evel-se e c'hall erbedadennoù YouTube deskiñ diouto. Netra ne vez ouzhpennet keit ha ma vez ehanet ar roll istor war YouTube."
   General Settings:
     Built-in Streams: |
@@ -2777,6 +2782,8 @@ YouTube Account:
   Rating Failed: "N'eus ket bet gallet notenniñ war YouTube: {error}"
   Subscribe Failed: "N'eus ket bet gallet koumanantiñ war YouTube: {error}"
   Unsubscribe Failed: "N'eus ket bet gallet digoumanantiñ war YouTube: {error}"
+  Subscriptions Synced: "Koumanantoù goubredet eus YouTube: {added} ouzhpennet, {removed} lamet"
+  Playlist Update Failed: "N'haller ket hizivaat {playlistName} war YouTube: {error}"
   Add a comment: "Ouzhpennañ un evezhiadenn"
   Add a reply: "Ouzhpennañ ur respont"
   Comment: "Embann"
@@ -2788,5 +2795,9 @@ YouTube Account:
   Delete Comment Confirmation: "Dilemel hoc'h evezhiadenn eus YouTube?"
   Comment Deleted: "Dilamet eo an evezhiadenn"
   Delete Comment Failed: "N'eus ket bet gallet dilemel an evezhiadenn: {error}"
+  Edit Comment: "Kemmañ an evezhiadenn"
+  Save: "Enrollañ"
+  Comment Edited: "Kemmet eo an evezhiadenn"
+  Edit Comment Failed: "N'eus ket bet gallet kemmañ an evezhiadenn: {error}"
   Recommendations: "Erbedadennoù YouTube"
   Recommendations Failed: "N'eus ket bet gallet kargañ hoc'h erbedadennoù YouTube."

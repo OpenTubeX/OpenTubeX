@@ -71,6 +71,13 @@
             role="img"
             :aria-label="t('User Playlists.Pinned to Top')"
             :title="t('User Playlists.Pinned to Top')"
+          /><FtIcon
+            v-if="data.youTube"
+            class="youTubeIcon"
+            :icon="['fab', 'youtube']"
+            role="img"
+            :aria-label="t('User Playlists.Synced with YouTube')"
+            :title="t('User Playlists.Synced with YouTube')"
           />{{ titleForDisplay }}
         </h3>
       </RouterLink>

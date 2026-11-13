@@ -945,7 +945,8 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
     thumbnails: typeof client.supportsPlaylistThumbnails === 'function' && await client.supportsPlaylistThumbnails(),
     sortOrder: typeof client.supportsPlaylistSortOrder === 'function' && await client.supportsPlaylistSortOrder(),
   }
-  const localPlaylists = deepCopy(store.state.playlists.playlists)
+  // Playlists synced from YouTube come from YouTube on each signed-in device.
+  const localPlaylists = deepCopy(store.state.playlists.playlists.filter(playlist => !playlist.youTube))
   const localById = mapBy(localPlaylists, playlist => playlist._id)
   const remotePlaylistHeaders = await client.getPlaylists()
   const remotePlaylists = await Promise.all(

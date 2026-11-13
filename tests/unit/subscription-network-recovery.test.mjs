@@ -92,6 +92,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
   const fetchInvidious = fallbackWorks && backend === 'local' ? fetchFallback : fetchChannel
   const context = vm.createContext({
     shallowReactive,
+    syncYouTubeSubscriptionsBeforeRefresh: () => null,
     isMissingChannelError: err => err?.message === 'This channel does not exist.',
     openInternalPath: location => navigations.push(location),
     window,

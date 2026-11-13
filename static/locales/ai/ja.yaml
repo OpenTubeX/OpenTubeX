@@ -310,6 +310,10 @@ User Playlists:
     Loading videos from {playlistName}: '{playlistName} の動画を読み込み中'
     Adding missing videos to {playlistName}: '{playlistName} に不足している動画を追加中'
     Checking {playlistName} for unavailable videos: '{playlistName} の利用できない動画を確認中 ({checked}/{total})'
+  Synced with YouTube: "YouTube と同期済み"
+  Delete YouTube Playlist Confirmation: "この再生リストをここと YouTube の両方から削除しますか？この操作は元に戻せません。"
+  CreatePlaylistPrompt:
+    Create on YouTube: "YouTube にも作成する"
 History:
   From Date: '開始日'
   To Date: '終了日'
@@ -375,12 +379,12 @@ Settings:
     Sign Out Failed: "ログアウトできませんでした: {error}"
     Revoke Failed: "YouTube からログアウトしましたが、Google はログインの終了を確認しませんでした。Google アカウントのサードパーティとの接続から削除できます。"
     Signed out by YouTube: "YouTube によってログインが終了されました。アカウントを引き続き使用するには、設定から再度ログインしてください。"
-    Subscribe on YouTube: "YouTube でもチャンネル登録する"
     Add to YouTube Watch History: "視聴した動画を YouTube の履歴に追加する"
-    Import Subscriptions: "YouTube から登録チャンネルをインポート"
-    Imported Subscriptions: "{count} チャンネルをインポートしました"
-    No Subscriptions to Import: "この YouTube アカウントには登録チャンネルがありません"
-    Import Subscriptions Failed: "登録チャンネルをインポートできませんでした: {error}"
+    Sync Subscriptions: "登録チャンネルを YouTube と同期する"
+    Sync Playlists: "再生リストを YouTube と同期する"
+    Sync Now: "今すぐ同期"
+    Synced: "YouTube と同期しました"
+    Sync Failed: "YouTube と同期できませんでした: {error}"
   Diagnostics:
     Diagnostics: 診断
     Description: 診断ログが有効な間、OpenTubeX は最近のログメッセージをメモリに保持し、バグ報告に添付できるようにします。自動で保存や送信をすることはなく、ログを無効にすると削除されます。レポートには Cookie、トークン、IP アドレス、URL パラメーターは含まれませんが、再生した動画の ID が含まれる場合があるため、共有する前にレポートを確認してください。
@@ -2243,8 +2247,9 @@ Description:
   Music: 音楽
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "OpenTubeX でチャンネル登録または登録解除すると、YouTube アカウントでも同じ操作が行われます。"
     Add to YouTube Watch History: "再生した動画は YouTube の視聴履歴に追加され、YouTube のおすすめに反映されます。YouTube で履歴が一時停止されている間は何も追加されません。"
+    Sync Subscriptions: "YouTube で登録したチャンネルは「すべてのチャンネル」に追加され、YouTube で登録解除したチャンネルはすべてのプロファイルから削除されます。ここで「すべてのチャンネル」でチャンネル登録または登録解除すると、YouTube でも同じ操作が行われます。"
+    Sync Playlists: "YouTube の再生リスト、「後で見る」、「高く評価した動画」が「あなたの再生リスト」に表示され、ここで加えた変更は YouTube にも反映されます。これらは他のデバイスに同期されず、すべての再生リストのエクスポートやデータのバックアップにも含まれません。この設定をオフにすると、このデバイスからは削除されますが、YouTube からは削除されません。"
   General Settings:
     Built-in Streams: |
       自動では、ほとんどの動画を YouTube の visionOS クライアントで再生します。起動が速く、自動画質に対応しています。ライブ配信や再生できない動画には SABR を使用します。
@@ -2779,5 +2784,11 @@ YouTube Account:
   Delete Comment Confirmation: "YouTube からコメントを削除しますか？"
   Comment Deleted: "コメントを削除しました"
   Delete Comment Failed: "コメントを削除できませんでした: {error}"
+  Edit Comment: "コメントを編集"
+  Save: "保存"
+  Comment Edited: "コメントを編集しました"
+  Edit Comment Failed: "コメントを編集できませんでした: {error}"
   Recommendations: "YouTube のおすすめ"
   Recommendations Failed: "YouTube のおすすめを読み込めませんでした。"
+  Subscriptions Synced: "YouTube から登録チャンネルを同期しました: {added} 件追加、{removed} 件削除"
+  Playlist Update Failed: "YouTube で {playlistName} を更新できませんでした: {error}"

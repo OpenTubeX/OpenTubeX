@@ -48,7 +48,8 @@ async function prepareArchive() {
       return getTransferableSettings(resolvedSettings)
     },
     profiles: () => open('profiles').findAsync({}),
-    playlists: () => open('playlists', 'videos').findAsync({}),
+    // Playlists synced from YouTube stay on YouTube.
+    playlists: () => open('playlists', 'videos').findAsync({ youTube: { $exists: false } }),
     async history() {
       const records = await open('history').findAsync({}).sort({ timeWatched: -1 })
       // Like the app's history, keep only the newest record of a video that

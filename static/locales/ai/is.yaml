@@ -310,6 +310,10 @@ User Playlists:
     Loading videos from {playlistName}: 'Hleð myndskeiðum úr {playlistName}'
     Adding missing videos to {playlistName}: 'Bæti myndskeiðum sem vantar við {playlistName}'
     Checking {playlistName} for unavailable videos: 'Athuga ótiltæk myndskeið í {playlistName} ({checked}/{total})'
+  Synced with YouTube: "Samstillt við YouTube"
+  Delete YouTube Playlist Confirmation: "Eyða þessum spilunarlista hér og á YouTube? Aðgerðin er ekki afturkallanleg."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Búa einnig til á YouTube"
 History:
   From Date: 'Frá'
   To Date: 'Til'
@@ -375,12 +379,12 @@ Settings:
     Sign Out Failed: "Ekki tókst að skrá út: {error}"
     Revoke Failed: "Útskráning af YouTube tókst, en Google staðfesti ekki að innskráningunni væri lokið. Þú getur fjarlægt hana undir tengingum þriðju aðila á Google-reikningnum þínum."
     Signed out by YouTube: "YouTube batt enda á innskráninguna. Skráðu þig aftur inn í stillingum til að halda áfram að nota reikninginn þinn."
-    Subscribe on YouTube: "Gerast líka áskrifandi á YouTube"
     Add to YouTube Watch History: "Bæta áhorfðum myndskeiðum við YouTube-feril"
-    Import Subscriptions: "Flytja inn áskriftir frá YouTube"
-    Imported Subscriptions: "{count} rás flutt inn | {count} rásir fluttar inn"
-    No Subscriptions to Import: "Þessi YouTube-reikningur er ekki með neinar áskriftir"
-    Import Subscriptions Failed: "Ekki tókst að flytja inn áskriftir: {error}"
+    Sync Subscriptions: "Samstilla áskriftir við YouTube"
+    Sync Playlists: "Samstilla spilunarlista við YouTube"
+    Sync Now: "Samstilla núna"
+    Synced: "Samstillt við YouTube"
+    Sync Failed: "Ekki tókst að samstilla við YouTube: {error}"
   Diagnostics:
     Diagnostics: Greining
     Description: Á meðan greiningarannáll er virkur geymir OpenTubeX nýleg annálaskilaboð í minni svo þú getir hengt þau við villutilkynningar. Það vistar þau aldrei né sendir að eigin frumkvæði og ef slökkt er á annálnum er þeim eytt. Skýrslur sleppa vafrakökum, tókum, IP-tölum og URL-færibreytum, en þær geta innihaldið auðkenni myndskeiða sem þú spilaðir, svo farðu yfir skýrslu áður en þú deilir henni.
@@ -2264,8 +2268,9 @@ Description:
   Music: Tónlist
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "Ef þú gerist áskrifandi að rás eða segir upp áskrift í OpenTubeX gerist það sama á YouTube-reikningnum þínum."
     Add to YouTube Watch History: "Myndskeið sem þú spilar bætast við áhorfsferilinn þinn á YouTube, svo meðmæli YouTube læri af þeim. Engu er bætt við á meðan ferillinn er í bið á YouTube."
+    Sync Subscriptions: "Rásum sem þú gerist áskrifandi að á YouTube er bætt við „Allar rásir“, og rásir sem þú segir upp áskrift að þar eru fjarlægðar úr öllum notkunarsniðum. Að gerast áskrifandi eða segja upp áskrift hér í „Allar rásir“ gerir það sama á YouTube."
+    Sync Playlists: "YouTube-spilunarlistarnir þínir, „Horfa síðar“ og „Myndskeið sem mér líkar“ birtast í „Spilunarlistarnir þínir“, og breytingar sem þú gerir á þeim hér eru einnig gerðar á YouTube. Þeir eru ekki samstilltir við önnur tæki þín og eru ekki teknir með þegar þú flytur út alla spilunarlista eða tekur afrit af gögnunum þínum. Ef slökkt er á þessu eru þeir fjarlægðir úr þessu tæki en ekki af YouTube."
   General Settings:
     Built-in Streams: |
       Sjálfvirkt spilar flest myndskeið í gegnum visionOS-biðlara YouTube, sem byrjar hraðar og styður sjálfvirk gæði. Beinar útsendingar og myndskeið sem hann getur ekki spilað nota SABR.
@@ -2802,5 +2807,11 @@ YouTube Account:
   Delete Comment Confirmation: "Eyða athugasemdinni þinni af YouTube?"
   Comment Deleted: "Athugasemd eytt"
   Delete Comment Failed: "Ekki tókst að eyða athugasemdinni: {error}"
+  Edit Comment: "Breyta athugasemd"
+  Save: "Vista"
+  Comment Edited: "Athugasemd breytt"
+  Edit Comment Failed: "Ekki tókst að breyta athugasemdinni: {error}"
   Recommendations: "Meðmæli frá YouTube"
   Recommendations Failed: "Ekki tókst að hlaða YouTube-meðmælunum þínum."
+  Subscriptions Synced: "Áskriftir samstilltar frá YouTube: {added} bætt við, {removed} fjarlægðar"
+  Playlist Update Failed: "Ekki tókst að uppfæra {playlistName} á YouTube: {error}"

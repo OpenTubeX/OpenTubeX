@@ -323,8 +323,10 @@ const actions = {
           console.error('Failed to remove automatic download settings for the unsubscribed channel', error)
         }
       }
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 

@@ -312,6 +312,10 @@ User Playlists:
     Loading videos from {playlistName}: '{playlistName} siyahısından videolar yüklənir'
     Adding missing videos to {playlistName}: 'Çatışmayan videolar {playlistName} siyahısına əlavə edilir'
     Checking {playlistName} for unavailable videos: '{playlistName} əlçatmaz videolar üçün yoxlanılır ({checked}/{total})'
+  Synced with YouTube: "YouTube ilə sinxronlaşdırılıb"
+  Delete YouTube Playlist Confirmation: "Bu pleylist burada və YouTube-da silinsin? Bu geri alına bilməz."
+  CreatePlaylistPrompt:
+    Create on YouTube: "YouTube-da da yarat"
 History:
   From Date: 'Başlanğıc'
   To Date: 'Son'
@@ -377,12 +381,12 @@ Settings:
     Sign Out Failed: "Çıxış etmək mümkün olmadı: {error}"
     Revoke Failed: "YouTube-dan çıxış edildi, lakin Google girişin sonlandırıldığını təsdiqləmədi. Onu Google hesabınızda üçüncü tərəf bağlantıları bölməsindən silə bilərsiniz."
     Signed out by YouTube: "YouTube girişi sonlandırdı. Hesabınızdan istifadəyə davam etmək üçün Tənzimləmələrdə yenidən daxil olun."
-    Subscribe on YouTube: "YouTube-da da abunə ol"
+    Sync Subscriptions: "Abunəlikləri YouTube ilə sinxronlaşdır"
+    Sync Playlists: "Pleylistləri YouTube ilə sinxronlaşdır"
     Add to YouTube Watch History: "Baxılan videoları YouTube tarixçəsinə əlavə et"
-    Import Subscriptions: "Abunəlikləri YouTube-dan idxal et"
-    Imported Subscriptions: "{count} kanal idxal edildi | {count} kanal idxal edildi"
-    No Subscriptions to Import: "Bu YouTube hesabının abunəliyi yoxdur"
-    Import Subscriptions Failed: "Abunəlikləri idxal etmək mümkün olmadı: {error}"
+    Sync Now: "İndi sinxronlaşdır"
+    Synced: "YouTube ilə sinxronlaşdırıldı"
+    Sync Failed: "YouTube ilə sinxronlaşdırmaq mümkün olmadı: {error}"
   Diagnostics:
     Diagnostics: Diaqnostika
     Description: Diaqnostika jurnalı aktiv olduqda OpenTubeX son jurnal mesajlarını yaddaşda saxlayır ki, onları xəta hesabatlarına əlavə edə biləsiniz. Onları heç vaxt özbaşına saxlamır və ya göndərmir, jurnalı söndürdükdə isə onlar silinir. Hesabatlara kukilər, tokenlər, IP ünvanları və URL parametrləri daxil edilmir, lakin oynatdığınız videoların ID-ləri ola bilər, ona görə də hesabatı paylaşmazdan əvvəl yoxlayın.
@@ -2256,7 +2260,8 @@ Description:
   Music: Musiqi
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "OpenTubeX-də kanala abunə olmaq və ya abunəlikdən çıxmaq YouTube hesabınızda da eyni əməliyyatı edir."
+    Sync Subscriptions: "YouTube-da abunə olduğunuz kanallar “Bütün Kanallar” bölməsinə əlavə olunur, orada abunəlikdən çıxdığınız kanallar isə bütün profillərdən silinir. Burada “Bütün Kanallar” bölməsində abunə olmaq və ya abunəlikdən çıxmaq YouTube-da da eyni şeyi edir."
+    Sync Playlists: "YouTube pleylistləriniz, “Sonra baxın” və “Bəyənilən videolar” “Pleylistləriniz” bölməsində görünür və burada onlara etdiyiniz dəyişikliklər YouTube-da da edilir. Onlar digər cihazlarınızla sinxronlaşdırılmır və bütün pleylistləri ixrac etdikdə və ya məlumatlarınızın ehtiyat nüsxəsini çıxardıqda daxil edilmir. Bunu söndürmək onları bu cihazdan silir, lakin YouTube-dan silmir."
     Add to YouTube Watch History: "Oxutduğunuz videolar YouTube baxış tarixçənizə əlavə olunur, beləliklə YouTube tövsiyələri onlardan öyrənir. YouTube-da tarixçə dayandırılıbsa, heç nə əlavə olunmur."
   General Settings:
     Built-in Streams: |
@@ -2778,6 +2783,8 @@ YouTube Account:
   Rating Failed: "YouTube-da qiymətləndirmək mümkün olmadı: {error}"
   Subscribe Failed: "YouTube-da abunə olmaq mümkün olmadı: {error}"
   Unsubscribe Failed: "YouTube-da abunəlikdən çıxmaq mümkün olmadı: {error}"
+  Subscriptions Synced: "Abunəliklər YouTube-dan sinxronlaşdırıldı: {added} əlavə edildi, {removed} silindi"
+  Playlist Update Failed: "{playlistName} YouTube-da yenilənə bilmədi: {error}"
   Add a comment: "Şərh əlavə edin"
   Add a reply: "Cavab əlavə edin"
   Comment: "Şərh yaz"
@@ -2789,5 +2796,9 @@ YouTube Account:
   Delete Comment Confirmation: "Şərhiniz YouTube-dan silinsin?"
   Comment Deleted: "Şərh silindi"
   Delete Comment Failed: "Şərhi silmək mümkün olmadı: {error}"
+  Edit Comment: "Şərhə düzəliş et"
+  Save: "Saxla"
+  Comment Edited: "Şərhə düzəliş edildi"
+  Edit Comment Failed: "Şərhə düzəliş etmək mümkün olmadı: {error}"
   Recommendations: "YouTube tövsiyələri"
   Recommendations Failed: "YouTube tövsiyələrinizi yükləmək mümkün olmadı."

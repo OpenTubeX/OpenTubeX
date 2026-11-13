@@ -310,6 +310,10 @@ User Playlists:
     Loading videos from {playlistName}: 'Videók betöltése innen: {playlistName}'
     Adding missing videos to {playlistName}: 'Hiányzó videók hozzáadása ehhez: {playlistName}'
     Checking {playlistName} for unavailable videos: 'Nem elérhető videók keresése itt: {playlistName} ({checked}/{total})'
+  Synced with YouTube: "Szinkronizálva a YouTube-bal"
+  Delete YouTube Playlist Confirmation: "Törli ezt a lejátszási listát itt és a YouTube-on is? Ez a művelet nem vonható vissza."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Létrehozás a YouTube-on is"
 History:
   From Date: 'Kezdő dátum'
   To Date: 'Záró dátum'
@@ -375,12 +379,12 @@ Settings:
     Sign Out Failed: "Nem sikerült kijelentkezni: {error}"
     Revoke Failed: "Kijelentkezett a YouTube-ról, de a Google nem erősítette meg, hogy a bejelentkezés megszűnt. Eltávolíthatja a Google-fiókja harmadik féltől származó kapcsolatai között."
     Signed out by YouTube: "A YouTube megszüntette a bejelentkezést. Jelentkezzen be újra a Beállításokban, hogy továbbra is használhassa fiókját."
-    Subscribe on YouTube: "Feliratkozás a YouTube-on is"
     Add to YouTube Watch History: "Megtekintett videók hozzáadása a YouTube-előzményekhez"
-    Import Subscriptions: "Feliratkozások importálása a YouTube-ról"
-    Imported Subscriptions: "{count} csatorna importálva | {count} csatorna importálva"
-    No Subscriptions to Import: "Ennek a YouTube-fióknak nincsenek feliratkozásai"
-    Import Subscriptions Failed: "Nem sikerült importálni a feliratkozásokat: {error}"
+    Sync Subscriptions: "Feliratkozások szinkronizálása a YouTube-bal"
+    Sync Playlists: "Lejátszási listák szinkronizálása a YouTube-bal"
+    Sync Now: "Szinkronizálás most"
+    Synced: "Szinkronizálva a YouTube-bal"
+    Sync Failed: "Nem sikerült szinkronizálni a YouTube-bal: {error}"
   Diagnostics:
     Diagnostics: Diagnosztika
     Description: Amíg a diagnosztikai naplózás be van kapcsolva, az OpenTubeX a legutóbbi naplóüzeneteket a memóriában tartja, hogy hibajelentésekhez csatolhasd őket. Soha nem menti és nem küldi el őket magától, a naplózás kikapcsolása pedig törli őket. A jelentések nem tartalmaznak sütiket, tokeneket, IP-címeket és URL-paramétereket, de tartalmazhatják a lejátszott videók azonosítóit, ezért megosztás előtt ellenőrizd a jelentést.
@@ -2244,8 +2248,9 @@ Description:
   Music: Zene
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "Ha az OpenTubeX-ben feliratkozik egy csatornára vagy leiratkozik róla, ugyanez történik a YouTube-fiókjában is."
     Add to YouTube Watch History: "A lejátszott videók bekerülnek a YouTube megtekintési előzményeibe, így a YouTube ajánlásai tanulhatnak belőlük. Amíg az előzmények szüneteltetve vannak a YouTube-on, semmi sem kerül be."
+    Sync Subscriptions: "Azok a csatornák, amelyekre a YouTube-on feliratkozik, bekerülnek az „Összes csatorna” profilba, azok pedig, amelyekről ott leiratkozik, minden profilból törlődnek. Ha itt az „Összes csatorna” profilban feliratkozik vagy leiratkozik, az a YouTube-on is megtörténik."
+    Sync Playlists: "A YouTube-lejátszási listái, a „Megnézendő” és a „Kedvelt videók” megjelennek a „Saját lejátszási listák” között, és az itt rajtuk végzett módosítások a YouTube-on is megtörténnek. Nem szinkronizálódnak a többi eszközére, és nem kerülnek bele, amikor az összes lejátszási listát exportálja, vagy biztonsági mentést készít az adatairól. Ha ezt kikapcsolja, eltűnnek erről az eszközről, de a YouTube-ról nem."
   General Settings:
     Built-in Streams: |
       Az automatikus mód a legtöbb videót a YouTube visionOS-kliensével játssza le, amely gyorsabban indul és támogatja az automatikus minőséget. Az élő közvetítések és az általa nem lejátszható videók SABR-t használnak.
@@ -2780,5 +2785,11 @@ YouTube Account:
   Delete Comment Confirmation: "Törli a hozzászólását a YouTube-ról?"
   Comment Deleted: "Hozzászólás törölve"
   Delete Comment Failed: "Nem sikerült törölni a hozzászólást: {error}"
+  Edit Comment: "Hozzászólás szerkesztése"
+  Save: "Mentés"
+  Comment Edited: "Hozzászólás szerkesztve"
+  Edit Comment Failed: "Nem sikerült szerkeszteni a hozzászólást: {error}"
   Recommendations: "YouTube-ajánlások"
   Recommendations Failed: "Nem sikerült betölteni a YouTube-ajánlásait."
+  Subscriptions Synced: "Feliratkozások szinkronizálva a YouTube-ról: {added} hozzáadva, {removed} eltávolítva"
+  Playlist Update Failed: "Nem sikerült frissíteni a(z) {playlistName} listát a YouTube-on: {error}"

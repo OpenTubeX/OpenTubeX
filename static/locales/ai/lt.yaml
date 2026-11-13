@@ -417,6 +417,7 @@ User Playlists:
       There is already a playlist with this name. Please pick a different name.: Grojaraštis tokiu pavadinimu jau yra. Pasirinkite kitą pavadinimą.
       Playlist {playlistName} has been successfully created.: Grojaraštis {playlistName} sėkmingai sukurtas.
       There was an issue with creating the playlist.: Kuriant grojaraštį kilo klaida.
+    Create on YouTube: "Sukurti ir YouTube"
   Playlist Thumbnail: "Grojaraščio miniatiūra"
   Restore Default Thumbnail: "Atkurti numatytąją miniatiūrą"
   Move Up: Aukštyn
@@ -426,6 +427,8 @@ User Playlists:
     Loading videos from {playlistName}: 'Įkeliami vaizdo įrašai iš {playlistName}'
     Adding missing videos to {playlistName}: 'Į {playlistName} pridedami trūkstami vaizdo įrašai'
     Checking {playlistName} for unavailable videos: 'Tikrinama, ar {playlistName} yra nepasiekiamų vaizdo įrašų ({checked}/{total})'
+  Synced with YouTube: "Sinchronizuota su YouTube"
+  Delete YouTube Playlist Confirmation: "Ištrinti šį grojaraštį čia ir YouTube? Šio veiksmo anuliuoti negalima."
 History:
   From Date: 'Nuo'
   To Date: 'Iki'
@@ -494,12 +497,12 @@ Settings:
     Sign Out Failed: "Nepavyko atsijungti: {error}"
     Revoke Failed: "Atsijungta nuo YouTube, bet Google nepatvirtino, kad prisijungimas baigtas. Jį galite pašalinti savo Google paskyros trečiųjų šalių ryšiuose."
     Signed out by YouTube: "YouTube nutraukė prisijungimą. Prisijunkite iš naujo nustatymuose, kad galėtumėte toliau naudoti savo paskyrą."
-    Subscribe on YouTube: "Prenumeruoti ir YouTube"
     Add to YouTube Watch History: "Įtraukti žiūrėtus vaizdo įrašus į YouTube istoriją"
-    Import Subscriptions: "Importuoti prenumeratas iš YouTube"
-    Imported Subscriptions: "Importuotas {count} kanalas | Importuoti {count} kanalai | Importuota {count} kanalų"
-    No Subscriptions to Import: "Ši YouTube paskyra neturi prenumeratų"
-    Import Subscriptions Failed: "Nepavyko importuoti prenumeratų: {error}"
+    Sync Subscriptions: "Sinchronizuoti prenumeratas su YouTube"
+    Sync Playlists: "Sinchronizuoti grojaraščius su YouTube"
+    Sync Now: "Sinchronizuoti dabar"
+    Synced: "Sinchronizuota su YouTube"
+    Sync Failed: "Nepavyko sinchronizuoti su YouTube: {error}"
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Kol diagnostikos žurnalas įjungtas, OpenTubeX laiko naujausius žurnalo pranešimus atmintyje, kad galėtumėte juos pridėti prie pranešimų apie klaidas. Jis niekada jų neišsaugo ir nesiunčia pats, o išjungus žurnalą jie ištrinami. Ataskaitose nėra slapukų, prieigos raktų, IP adresų ir URL parametrų, tačiau jose gali būti jūsų paleistų vaizdo įrašų ID, todėl prieš dalindamiesi ataskaita ją peržiūrėkite.
@@ -2666,8 +2669,9 @@ Description:
   Music: Muzika
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "Užsiprenumeravus kanalą arba atšaukus jo prenumeratą programoje OpenTubeX, tas pats atliekama ir jūsų YouTube paskyroje."
     Add to YouTube Watch History: "Jūsų paleisti vaizdo įrašai įtraukiami į jūsų YouTube žiūrėjimo istoriją, kad YouTube rekomendacijos iš jų mokytųsi. Kol istorija YouTube pristabdyta, niekas neįtraukiama."
+    Sync Subscriptions: "Kanalai, kuriuos užsiprenumeruojate YouTube, įtraukiami į „Visi kanalai“, o kanalai, kurių prenumeratą ten atšaukiate, pašalinami iš visų profilių. Užsiprenumeravus ar atšaukus prenumeratą čia, „Visi kanalai“, tas pats atliekama ir YouTube."
+    Sync Playlists: "Jūsų YouTube grojaraščiai, „Žiūrėti vėliau“ ir „Patikę vaizdo įrašai“ rodomi skiltyje „Tavo grojaraščiai“, o čia juose atlikti pakeitimai atliekami ir YouTube. Jie nesinchronizuojami su kitais jūsų įrenginiais ir neįtraukiami, kai eksportuojate visus grojaraščius ar kuriate atsarginę duomenų kopiją. Tai išjungus, jie pašalinami iš šio įrenginio, bet ne iš YouTube."
   General Settings:
     Built-in Streams: |
       Automatinis režimas daugumą vaizdo įrašų leidžia per YouTube visionOS klientą, kuris paleidžia greičiau ir palaiko automatinę kokybę. Tiesioginės transliacijos ir vaizdo įrašai, kurių jis negali paleisti, naudoja SABR.
@@ -3282,5 +3286,11 @@ YouTube Account:
   Delete Comment Confirmation: "Ištrinti jūsų komentarą iš YouTube?"
   Comment Deleted: "Komentaras ištrintas"
   Delete Comment Failed: "Nepavyko ištrinti komentaro: {error}"
+  Edit Comment: "Redaguoti komentarą"
+  Save: "Išsaugoti"
+  Comment Edited: "Komentaras paredaguotas"
+  Edit Comment Failed: "Nepavyko redaguoti komentaro: {error}"
   Recommendations: "YouTube rekomendacijos"
   Recommendations Failed: "Nepavyko įkelti jūsų YouTube rekomendacijų."
+  Subscriptions Synced: "Prenumeratos sinchronizuotos iš YouTube: pridėta {added}, pašalinta {removed}"
+  Playlist Update Failed: "Nepavyko atnaujinti {playlistName} YouTube: {error}"

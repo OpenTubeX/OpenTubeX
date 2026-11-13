@@ -229,6 +229,10 @@ User Playlists:
   Pin to Top: "Fixar no topo"
   Unpin from Top: "Desafixar do topo"
   Pinned to Top: "Fixada no topo"
+  Synced with YouTube: "Sincronizada com o YouTube"
+  Delete YouTube Playlist Confirmation: "Excluir esta playlist aqui e no YouTube? Isto não pode ser desfeito."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Criar também no YouTube"
   Reorder Hint: Arraste ou use as teclas de seta para reordenar
   Add new videos to the top (custom order): "Adicionar novos vídeos no início (ordem personalizada)"
   Shuffle videos by default: "Reproduzir vídeos em ordem aleatória por padrão"
@@ -328,12 +332,12 @@ Settings:
     Sign Out Failed: "Não foi possível sair: {error}"
     Revoke Failed: "Você saiu do YouTube, mas o Google não confirmou que o login foi encerrado. Você pode removê-lo nas conexões de terceiros da sua Conta do Google."
     Signed out by YouTube: "O YouTube encerrou o login. Entre novamente nas Configurações para continuar usando sua conta."
-    Subscribe on YouTube: "Inscrever-se também no YouTube"
+    Sync Subscriptions: "Sincronizar inscrições com o YouTube"
+    Sync Playlists: "Sincronizar playlists com o YouTube"
     Add to YouTube Watch History: "Adicionar vídeos assistidos ao histórico do YouTube"
-    Import Subscriptions: "Importar inscrições do YouTube"
-    Imported Subscriptions: "{count} canal importado | {count} canais importados | {count} canais importados"
-    No Subscriptions to Import: "Esta conta do YouTube não tem inscrições"
-    Import Subscriptions Failed: "Não foi possível importar as inscrições: {error}"
+    Sync Now: "Sincronizar agora"
+    Synced: "Sincronizado com o YouTube"
+    Sync Failed: "Não foi possível sincronizar com o YouTube: {error}"
   Diagnostics:
     Diagnostics: Diagnóstico
     Description: Enquanto o log de diagnóstico estiver ativado, o OpenTubeX mantém as mensagens de log recentes na memória para que você possa anexá-las a relatórios de bugs. Ele nunca as salva nem as envia por conta própria, e desativar o log as apaga. Os relatórios omitem cookies, tokens, endereços IP e parâmetros de URL, mas podem incluir os IDs dos vídeos que você reproduziu, então confira o relatório antes de compartilhá-lo.
@@ -2197,7 +2201,8 @@ Description:
   Music: Música
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "Inscrever-se em um canal ou remover a inscrição no OpenTubeX faz o mesmo na sua conta do YouTube."
+    Sync Subscriptions: "Os canais em que você se inscreve no YouTube são adicionados a Todos os canais, e os canais dos quais você cancela a inscrição lá são removidos de todos os perfis. Inscrever-se ou cancelar a inscrição em Todos os canais aqui faz o mesmo no YouTube."
+    Sync Playlists: "Suas playlists do YouTube, Assistir mais tarde e Vídeos marcados com \"Gostei\" aparecem em Suas playlists, e as alterações que você fizer nelas aqui também são feitas no YouTube. Elas não são sincronizadas com seus outros dispositivos nem incluídas quando você exporta todas as playlists ou faz backup dos seus dados. Desativar esta opção as remove deste dispositivo, mas não do YouTube."
     Add to YouTube Watch History: "Os vídeos que você assiste são adicionados ao seu histórico de reprodução do YouTube, para que as recomendações do YouTube aprendam com eles. Nada é adicionado enquanto o histórico estiver pausado no YouTube."
   General Settings:
     Built-in Streams: |
@@ -2714,6 +2719,8 @@ YouTube Account:
   Rating Failed: "Não foi possível avaliar no YouTube: {error}"
   Subscribe Failed: "Não foi possível se inscrever no YouTube: {error}"
   Unsubscribe Failed: "Não foi possível remover a inscrição no YouTube: {error}"
+  Subscriptions Synced: "Inscrições sincronizadas do YouTube: {added} adicionadas, {removed} removidas"
+  Playlist Update Failed: "Não foi possível atualizar {playlistName} no YouTube: {error}"
   Add a comment: "Adicionar um comentário"
   Add a reply: "Adicionar uma resposta"
   Comment: "Comentar"
@@ -2725,6 +2732,10 @@ YouTube Account:
   Delete Comment Confirmation: "Excluir seu comentário do YouTube?"
   Comment Deleted: "Comentário excluído"
   Delete Comment Failed: "Não foi possível excluir o comentário: {error}"
+  Edit Comment: "Editar comentário"
+  Save: "Salvar"
+  Comment Edited: "Comentário editado"
+  Edit Comment Failed: "Não foi possível editar o comentário: {error}"
   Recommendations: "Recomendações do YouTube"
   Recommendations Failed: "Não foi possível carregar suas recomendações do YouTube."
 App Menu:

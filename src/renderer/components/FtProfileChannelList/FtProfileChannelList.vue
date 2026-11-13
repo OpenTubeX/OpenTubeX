@@ -104,7 +104,7 @@ import { useListPagination } from '../../composables/useListPagination'
 import { deepCopy, showToast } from '../../helpers/utils'
 import { matchesChannelQuery } from '../../helpers/subscription-channels'
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
-import { mirrorYouTubeSubscription } from '../../helpers/api/youtube-account'
+import { mirrorYouTubeSubscription } from '../../helpers/youtube-sync'
 
 /**
  * @typedef {object} Profile

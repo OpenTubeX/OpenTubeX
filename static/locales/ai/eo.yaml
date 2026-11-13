@@ -347,6 +347,10 @@ User Playlists:
     Loading videos from {playlistName}: 'Ŝargante videojn el {playlistName}'
     Adding missing videos to {playlistName}: 'Aldonante mankantajn videojn al {playlistName}'
     Checking {playlistName} for unavailable videos: 'Kontrolante {playlistName} pri nedisponeblaj videoj ({checked}/{total})'
+  Synced with YouTube: "Sinkronigita kun YouTube"
+  Delete YouTube Playlist Confirmation: "Ĉu forigi ĉi tiun ludliston ĉi tie kaj ĉe YouTube? Tio ne malfareblas."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Krei ankaŭ ĉe YouTube"
 History:
   From Date: De
   To Date: Ĝis
@@ -412,12 +416,12 @@ Settings:
     Sign Out Failed: "Ne eblis elsaluti: {error}"
     Revoke Failed: "Vi elsalutis el YouTube, sed Google ne konfirmis, ke la ensaluto finiĝis. Vi povas forigi ĝin inter la konektoj al eksteraj aplikaĵoj en via Google-konto."
     Signed out by YouTube: "YouTube finis la ensaluton. Ensalutu denove en Agordoj por plu uzi vian konton."
-    Subscribe on YouTube: "Aboni ankaŭ ĉe YouTube"
+    Sync Subscriptions: "Sinkronigi abonojn kun YouTube"
+    Sync Playlists: "Sinkronigi ludlistojn kun YouTube"
     Add to YouTube Watch History: "Aldoni spektitajn videaĵojn al la YouTube-historio"
-    Import Subscriptions: "Enporti abonojn el YouTube"
-    Imported Subscriptions: "Enportis {count} kanalon | Enportis {count} kanalojn"
-    No Subscriptions to Import: "Ĉi tiu YouTube-konto ne havas abonojn"
-    Import Subscriptions Failed: "Ne eblis enporti abonojn: {error}"
+    Sync Now: "Sinkronigi nun"
+    Synced: "Sinkronigita kun YouTube"
+    Sync Failed: "Ne eblis sinkronigi kun YouTube: {error}"
   Tab Unloading:
     Automatically unload tabs: Aŭtomate malŝargi langetojn
     Memory threshold: Memorsojlo
@@ -2290,7 +2294,8 @@ Description:
   Music: Muziko
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "Aboni aŭ malaboni kanalon en OpenTubeX faras la samon en via YouTube-konto."
+    Sync Subscriptions: "Kanaloj, kiujn vi abonas ĉe YouTube, aldoniĝas al “Ĉiuj kanaloj”, kaj kanaloj, kies abonon vi tie nuligas, foriĝas el ĉiuj profiloj. Aboni aŭ malaboni en “Ĉiuj kanaloj” ĉi tie faras la samon ĉe YouTube."
+    Sync Playlists: "Viaj YouTube-ludlistoj, “Spekti poste” kaj “Ŝatitaj videaĵoj” aperas en “Viaj ludlistoj”, kaj ŝanĝoj, kiujn vi faras al ili ĉi tie, fariĝas ankaŭ ĉe YouTube. Ili ne estas sinkronigataj al viaj aliaj aparatoj nek inkluzivataj, kiam vi eksportas ĉiujn ludlistojn aŭ savkopias viajn datumojn. Malŝalto de ĉi tio forigas ilin el ĉi tiu aparato, sed ne el YouTube."
     Add to YouTube Watch History: "Videaĵoj, kiujn vi ludas, aldoniĝas al via YouTube-spekthistorio, do la rekomendoj de YouTube lernas el ili. Nenio aldoniĝas dum la historio estas paŭzigita ĉe YouTube."
   General Settings:
     Built-in Streams: |
@@ -2767,6 +2772,8 @@ YouTube Account:
   Rating Failed: "Ne eblis taksi ĉe YouTube: {error}"
   Subscribe Failed: "Ne eblis aboni ĉe YouTube: {error}"
   Unsubscribe Failed: "Ne eblis malaboni ĉe YouTube: {error}"
+  Subscriptions Synced: "Abonoj sinkronigitaj el YouTube: {added} aldonitaj, {removed} forigitaj"
+  Playlist Update Failed: "Ne eblis ĝisdatigi {playlistName} ĉe YouTube: {error}"
   Add a comment: "Aldoni komenton"
   Add a reply: "Aldoni respondon"
   Comment: "Komenti"
@@ -2778,5 +2785,9 @@ YouTube Account:
   Delete Comment Confirmation: "Ĉu forigi vian komenton el YouTube?"
   Comment Deleted: "Komento forigita"
   Delete Comment Failed: "Ne eblis forigi la komenton: {error}"
+  Edit Comment: "Redakti komenton"
+  Save: "Konservi"
+  Comment Edited: "Komento redaktita"
+  Edit Comment Failed: "Ne eblis redakti la komenton: {error}"
   Recommendations: "YouTube-rekomendoj"
   Recommendations Failed: "Ne eblis ŝargi viajn YouTube-rekomendojn."

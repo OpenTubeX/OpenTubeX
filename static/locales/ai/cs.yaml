@@ -310,6 +310,10 @@ User Playlists:
     Loading videos from {playlistName}: 'Načítání videí z {playlistName}'
     Adding missing videos to {playlistName}: 'Přidávání chybějících videí do {playlistName}'
     Checking {playlistName} for unavailable videos: 'Kontrola nedostupných videí v {playlistName} ({checked}/{total})'
+  Synced with YouTube: "Synchronizováno s YouTube"
+  Delete YouTube Playlist Confirmation: "Odstranit tento playlist zde i na YouTube? Tato akce je nevratná."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Vytvořit také na YouTube"
 History:
   From Date: 'Od'
   To Date: 'Do'
@@ -375,12 +379,12 @@ Settings:
     Sign Out Failed: "Odhlášení se nezdařilo: {error}"
     Revoke Failed: "Odhlášení z YouTube proběhlo, ale Google nepotvrdil ukončení přihlášení. Můžete ho odebrat v propojeních s aplikacemi třetích stran ve svém účtu Google."
     Signed out by YouTube: "YouTube ukončil přihlášení. Chcete-li účet dál používat, přihlaste se znovu v Nastavení."
-    Subscribe on YouTube: "Odebírat také na YouTube"
+    Sync Subscriptions: "Synchronizovat odběry s YouTube"
+    Sync Playlists: "Synchronizovat playlisty s YouTube"
     Add to YouTube Watch History: "Přidávat zhlédnutá videa do historie YouTube"
-    Import Subscriptions: "Importovat odběry z YouTube"
-    Imported Subscriptions: "Importován {count} kanál | Importovány {count} kanály | Importováno {count} kanálů"
-    No Subscriptions to Import: "Tento účet YouTube nemá žádné odběry"
-    Import Subscriptions Failed: "Odběry se nepodařilo importovat: {error}"
+    Sync Now: "Synchronizovat nyní"
+    Synced: "Synchronizováno s YouTube"
+    Sync Failed: "Synchronizace s YouTube se nezdařila: {error}"
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Když je diagnostický protokol zapnutý, OpenTubeX uchovává nedávné zprávy protokolu v paměti, abyste je mohli přiložit k hlášení chyb. Nikdy je sám neukládá ani neodesílá a vypnutím protokolu se smažou. Hlášení neobsahují soubory cookie, tokeny, IP adresy ani parametry URL, mohou však obsahovat ID přehraných videí, proto hlášení před sdílením zkontrolujte.
@@ -2243,7 +2247,8 @@ Description:
   Music: Hudba
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "Přihlášení k odběru kanálu nebo jeho zrušení v OpenTubeX provede totéž ve vašem účtu YouTube."
+    Sync Subscriptions: "Kanály, které začnete odebírat na YouTube, se přidají do profilu „Všechny kanály“ a kanály, jejichž odběr tam zrušíte, se odeberou ze všech profilů. Když zde v profilu „Všechny kanály“ odběr přidáte nebo zrušíte, stane se totéž na YouTube."
+    Sync Playlists: "Vaše playlisty z YouTube, „Na později“ a „Video s označením Líbí se mi“ se zobrazí v sekci „Vaše playlisty“ a změny, které v nich zde provedete, se provedou i na YouTube. Nesynchronizují se do vašich dalších zařízení a nejsou zahrnuty, když exportujete všechny playlisty nebo zálohujete svá data. Vypnutím této volby je odeberete z tohoto zařízení, ale ne z YouTube."
     Add to YouTube Watch History: "Videa, která přehrajete, se přidají do vaší historie sledování na YouTube, takže se z nich učí doporučení YouTube. Když je historie na YouTube pozastavená, nic se nepřidá."
   General Settings:
     Built-in Streams: |
@@ -2768,6 +2773,8 @@ YouTube Account:
   Rating Failed: "Nepodařilo se ohodnotit na YouTube: {error}"
   Subscribe Failed: "Nepodařilo se přihlásit k odběru na YouTube: {error}"
   Unsubscribe Failed: "Nepodařilo se zrušit odběr na YouTube: {error}"
+  Subscriptions Synced: "Odběry synchronizovány z YouTube: přidáno {added}, odebráno {removed}"
+  Playlist Update Failed: "Playlist {playlistName} se na YouTube nepodařilo aktualizovat: {error}"
   Add a comment: "Přidat komentář"
   Add a reply: "Přidat odpověď"
   Comment: "Komentovat"
@@ -2779,5 +2786,9 @@ YouTube Account:
   Delete Comment Confirmation: "Smazat váš komentář z YouTube?"
   Comment Deleted: "Komentář smazán"
   Delete Comment Failed: "Komentář se nepodařilo smazat: {error}"
+  Edit Comment: "Upravit komentář"
+  Save: "Uložit"
+  Comment Edited: "Komentář upraven"
+  Edit Comment Failed: "Komentář se nepodařilo upravit: {error}"
   Recommendations: "Doporučení YouTube"
   Recommendations Failed: "Vaše doporučení YouTube se nepodařilo načíst."

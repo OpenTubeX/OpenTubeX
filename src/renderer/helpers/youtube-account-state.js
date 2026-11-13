@@ -29,3 +29,13 @@ export function getYouTubeChannelKey(account) {
   const refreshToken = account?.credentials?.refresh_token
   return typeof refreshToken === 'string' ? `${account.pageId ?? ''}\n${refreshToken}` : null
 }
+
+/**
+ * Identifies the channel in use and the sign-in it belongs to, without the
+ * sign-in token, so data synced from it can keep it.
+ * @param {{ signInId?: string, pageId?: string | null } | null | undefined} account
+ * @returns {string | null}
+ */
+export function getYouTubeSyncKey(account) {
+  return typeof account?.signInId === 'string' ? `${account.signInId}\n${account.pageId ?? ''}` : null
+}

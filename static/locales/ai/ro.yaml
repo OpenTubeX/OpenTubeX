@@ -277,6 +277,10 @@ User Playlists:
   Pin to Top: "Fixează sus"
   Unpin from Top: "Anulează fixarea sus"
   Pinned to Top: "Fixată sus"
+  Synced with YouTube: "Sincronizată cu YouTube"
+  Delete YouTube Playlist Confirmation: "Ștergeți această listă de redare aici și pe YouTube? Acest lucru nu poate fi anulat."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Creați și pe YouTube"
   Reorder Hint: Trageți sau folosiți tastele săgeți pentru a reordona
   Add new videos to the top (custom order): "Adaugă videoclipurile noi la început (ordine personalizată)"
   Shuffle videos by default: "Redă videoclipurile în ordine aleatorie în mod implicit"
@@ -376,12 +380,12 @@ Settings:
     Sign Out Failed: "Deconectarea nu a reușit: {error}"
     Revoke Failed: "V-ați deconectat de la YouTube, dar Google nu a confirmat încheierea conectării. O puteți elimina din conexiunile terță parte ale contului Google."
     Signed out by YouTube: "YouTube a încheiat conectarea. Conectați-vă din nou din Setări pentru a continua să folosiți contul."
-    Subscribe on YouTube: "Abonați-vă și pe YouTube"
+    Sync Subscriptions: "Sincronizați abonamentele cu YouTube"
+    Sync Playlists: "Sincronizați listele de redare cu YouTube"
     Add to YouTube Watch History: "Adăugați videoclipurile vizionate în istoricul YouTube"
-    Import Subscriptions: "Importați abonamentele de pe YouTube"
-    Imported Subscriptions: "{count} canal importat | {count} canale importate | {count} de canale importate"
-    No Subscriptions to Import: "Acest cont YouTube nu are abonamente"
-    Import Subscriptions Failed: "Abonamentele nu au putut fi importate: {error}"
+    Sync Now: "Sincronizați acum"
+    Synced: "Sincronizat cu YouTube"
+    Sync Failed: "Sincronizarea cu YouTube nu a reușit: {error}"
   Diagnostics:
     Diagnostics: Diagnosticare
     Description: Cât timp jurnalul de diagnosticare este activ, OpenTubeX păstrează în memorie mesajele recente din jurnal, ca să le poți atașa la rapoartele de erori. Nu le salvează și nu le trimite niciodată de la sine, iar dezactivarea jurnalului le șterge. Rapoartele omit cookie-urile, tokenurile, adresele IP și parametrii URL, dar pot include ID-urile videoclipurilor redate, așa că verifică un raport înainte de a-l distribui.
@@ -2299,7 +2303,8 @@ Description:
   Music: Muzică
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "Abonarea la un canal sau dezabonarea de la acesta în OpenTubeX face același lucru în contul dvs. YouTube."
+    Sync Subscriptions: "Canalele la care vă abonați pe YouTube sunt adăugate în „Toate canalele”, iar canalele de la care vă dezabonați acolo sunt eliminate din toate profilurile. Abonarea sau dezabonarea în „Toate canalele” de aici face același lucru pe YouTube."
+    Sync Playlists: "Listele dvs. de redare de pe YouTube, „Vizionează mai târziu” și „Videoclipuri apreciate” apar în „Listele tale de redare”, iar modificările pe care le faceți aici în ele se fac și pe YouTube. Acestea nu sunt sincronizate cu celelalte dispozitive ale dvs. și nu sunt incluse când exportați toate listele de redare sau faceți o copie de rezervă a datelor. Dezactivarea acestei opțiuni le elimină de pe acest dispozitiv, dar nu și de pe YouTube."
     Add to YouTube Watch History: "Videoclipurile pe care le redați sunt adăugate în istoricul vizionărilor YouTube, astfel încât recomandările YouTube să învețe din ele. Nu se adaugă nimic cât timp istoricul este întrerupt pe YouTube."
   General Settings:
     Built-in Streams: |
@@ -2827,6 +2832,8 @@ YouTube Account:
   Rating Failed: "Evaluarea pe YouTube nu a reușit: {error}"
   Subscribe Failed: "Abonarea pe YouTube nu a reușit: {error}"
   Unsubscribe Failed: "Dezabonarea pe YouTube nu a reușit: {error}"
+  Subscriptions Synced: "Abonamente sincronizate de pe YouTube: {added} adăugate, {removed} eliminate"
+  Playlist Update Failed: "Actualizarea listei {playlistName} pe YouTube nu a reușit: {error}"
   Add a comment: "Adăugați un comentariu"
   Add a reply: "Adăugați un răspuns"
   Comment: "Comentați"
@@ -2838,5 +2845,9 @@ YouTube Account:
   Delete Comment Confirmation: "Ștergeți comentariul dvs. de pe YouTube?"
   Comment Deleted: "Comentariu șters"
   Delete Comment Failed: "Comentariul nu a putut fi șters: {error}"
+  Edit Comment: "Editați comentariul"
+  Save: "Salvați"
+  Comment Edited: "Comentariu editat"
+  Edit Comment Failed: "Comentariul nu a putut fi editat: {error}"
   Recommendations: "Recomandări YouTube"
   Recommendations Failed: "Recomandările dvs. YouTube nu au putut fi încărcate."

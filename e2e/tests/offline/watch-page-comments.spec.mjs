@@ -1076,6 +1076,22 @@ test.describe('manual comment loading', () => {
       await expect(lastThread.locator('.replyComposer')).toHaveCount(0)
       await expectScrollInRange()
 
+      // And so does saving a long edit of your own comment.
+      await page.route(/\/youtubei\/v1\/comment\/update_comment/, route => route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({ actionResult: { status: 'STATUS_SUCCEEDED' } })
+      }))
+      await lastThread.getByRole('button', { name: 'Edit comment' }).first().click()
+      const editInput = lastThread.locator('.editComposer textarea')
+      await editInput.fill(longReply)
+      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+      await editInput.fill('Edited comment')
+      await lastThread.locator('.editComposer').getByRole('button', { name: 'Save' }).click()
+      await expect(lastThread.locator('.editComposer')).toHaveCount(0)
+      await expect(lastThread.locator('.commentText').first()).toHaveText('Edited comment')
+      await expectScrollInRange()
+
       const threadCount = await dock.locator('.commentThread').count()
       await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
       await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)

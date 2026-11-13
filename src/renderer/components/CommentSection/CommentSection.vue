@@ -381,7 +381,14 @@
               />
             </button>
           </p>
+          <CommentComposer
+            v-if="canUseYouTubeComments && youTubeEditing === comment.id"
+            class="editComposer"
+            :edit-comment="comment"
+            @done="youTubeComments.closeEdit(comment.id)"
+          />
           <FtTimestampCatcher
+            v-else
             class="commentText"
             :input-html="comment.showTranslated && comment.translatedLanguage === translationLanguage
               ? comment.translatedText
@@ -685,7 +692,7 @@ import CommentImageAttachment from './CommentImageAttachment.vue'
 import store from '../../store/index'
 import { usesInvidiousApi } from '../../../apiBackends'
 import { getYouTubeChannelKey, isSignedInToYouTube } from '../../helpers/youtube-account-state'
-import { createPostedComment, getRootCommentId, youTubeCommentsKey } from './youTubeComments'
+import { createPostedComment, getEditedCommentFields, getRootCommentId, youTubeCommentsKey } from './youTubeComments'
 
 import { debounce, getInvidiousApiErrorMessage, showInvidiousFallbackToast, copyToClipboard, formatViewCount, getRelativeTimeFromDate, showApiErrorToast, showToast } from '../../helpers/utils'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
@@ -801,8 +808,10 @@ const nextPageToken = shallowRef(null)
 const commentData = ref([])
 const commentCount = ref(props.initialCommentCount)
 
-// Comments deleted here, for comment lists that were loading meanwhile.
+// Comments deleted or edited here, for comment lists that were loading meanwhile.
 const deletedCommentIds = new Set()
+/** @type {Map<string, string>} */
+const editedCommentTexts = new Map()
 
 // The signed-in YouTube account can rate, write and delete video comments.
 const youTubeComments = {
@@ -811,6 +820,8 @@ const youTubeComments = {
   videoId: computed(() => props.id),
   channelId: computed(() => store.getters.getYouTubeAccount?.channelId ?? null),
   replyingTo: ref(null),
+  // The comment open for editing, one at a time like replies.
+  editing: ref(null),
   ratings: reactive(new Map()),
   // The channel each comment posted here belongs to, as its author ID can be
   // missing. Kept in memory only, as the key contains the sign-in token.
@@ -819,6 +830,9 @@ const youTubeComments = {
   // A reply that finishes posting late must not close another reply box.
   closeReply(commentId) {
     if (youTubeComments.replyingTo.value === commentId) youTubeComments.replyingTo.value = null
+  },
+  closeEdit(commentId) {
+    if (youTubeComments.editing.value === commentId) youTubeComments.editing.value = null
   },
   addComment(posted, text, parentId, account) {
     const comment = createPostedComment(posted, text, account)
@@ -842,6 +856,22 @@ const youTubeComments = {
     thread.numReplies++
     thread.showReplies = true
   },
+  updateComment(commentId, text) {
+    editedCommentTexts.set(commentId, text)
+    const rootId = getRootCommentId(commentId)
+    const thread = commentData.value.find(entry => entry.id === rootId)
+    const parent = thread && rootId !== commentId ? findCommentParent(thread, commentId) : null
+    const comment = rootId === commentId ? thread : parent?.replies.find(reply => reply.id === commentId)
+    if (comment) Object.assign(comment, getEditedCommentFields(comment, text))
+    // A new list, so the reply tree, which nests replies by their mentions, is rebuilt.
+    if (parent) parent.replies = [...parent.replies]
+
+    /** @param {Comment} entry */
+    const edit = entry => entry.id === commentId
+      ? { ...entry, ...getEditedCommentFields(entry, text) }
+      : { ...entry, replies: (entry.replies ?? []).map(edit) }
+    updatePinnedSnapshot(rootId, edit)
+  },
   removeComment(commentId) {
     deletedCommentIds.add(commentId)
     const rootId = getRootCommentId(commentId)
@@ -863,12 +893,14 @@ const youTubeComments = {
 }
 provide(youTubeCommentsKey, youTubeComments)
 // Closing a comment box shortens the list too.
-watch(youTubeComments.replyingTo, () => clampCommentsScrollAfterRender())
+watch([youTubeComments.replyingTo, youTubeComments.editing], () => clampCommentsScrollAfterRender())
 const canUseYouTubeComments = youTubeComments.enabled
 const youTubeReplyingTo = youTubeComments.replyingTo
+const youTubeEditing = youTubeComments.editing
 // Separate sources, so a token refresh that replaces the account keeps drafts.
 watch([() => props.id, () => getYouTubeChannelKey(store.getters.getYouTubeAccount)], () => {
   youTubeComments.replyingTo.value = null
+  youTubeComments.editing.value = null
   youTubeComments.ratings.clear()
 })
 
@@ -879,39 +911,57 @@ watch([() => props.id, () => getYouTubeChannelKey(store.getters.getYouTubeAccoun
  * @param {Comment} reply
  */
 function addReplyToPinnedSnapshot(parentId, reply) {
-  const snapshot = personalPinnedCommentSnapshots.value.find(comment => comment.id === parentId)
-  if (!snapshot) return
-
-  const updated = createCommentPinSnapshot({
+  updatePinnedSnapshot(parentId, snapshot => ({
     ...snapshot,
     replies: [...snapshot.replies, reply],
     numReplies: (snapshot.numReplies ?? 0) + 1,
     showReplies: true
-  })
+  }))
+}
+
+/**
+ * Changes the saved snapshot of a personally pinned thread, if it has one.
+ * @param {string} rootId
+ * @param {(snapshot: Comment) => Comment} update
+ */
+function updatePinnedSnapshot(rootId, update) {
+  const snapshot = personalPinnedCommentSnapshots.value.find(comment => comment.id === rootId)
+  if (!snapshot) return
+
+  const updated = createCommentPinSnapshot(update(snapshot))
   const commentIds = new Set(personalPinnedCommentIds.value)
-  const commentSnapshots = personalPinnedCommentSnapshots.value.map(comment => comment.id === parentId ? updated : comment)
+  const commentSnapshots = personalPinnedCommentSnapshots.value.map(comment => comment.id === rootId ? updated : comment)
   personalPinnedCommentSnapshots.value = commentSnapshots
   saveCommentPins(commentPinStorageKey.value, { commentIds, commentSnapshots })
 }
 
 /**
  * Replies posted here before the thread's replies loaded come back from
- * YouTube, so their loaded versions replace them. Replies deleted while
- * loading stay removed.
+ * YouTube, so their loaded versions replace them. Replies deleted or edited
+ * while loading stay that way.
  * @param {Comment[]} replies
  * @param {Comment[]} loadedReplies
  */
 function mergeReplies(replies, loadedReplies) {
   const loadedIds = new Set(loadedReplies.map(reply => reply.id))
-  return replies.filter(reply => !loadedIds.has(reply.id)).concat(withoutDeletedComments(loadedReplies))
+  return replies.filter(reply => !loadedIds.has(reply.id)).concat(withLocalCommentChanges(loadedReplies))
 }
 
 /**
- * YouTube can still return a comment shortly after it was deleted here.
+ * YouTube can still return a comment as it was before it was deleted or
+ * edited here, for example from a request that started before.
  * @param {Comment[]} comments
  */
-function withoutDeletedComments(comments) {
-  return deletedCommentIds.size === 0 ? comments : comments.filter(comment => !deletedCommentIds.has(comment.id))
+function withLocalCommentChanges(comments) {
+  if (deletedCommentIds.size === 0 && editedCommentTexts.size === 0) return comments
+  return comments
+    .filter(comment => !deletedCommentIds.has(comment.id))
+    .map(comment => {
+      const text = editedCommentTexts.get(comment.id)
+      const changed = text === undefined ? comment : { ...comment, ...getEditedCommentFields(comment, text) }
+      // A thread can come with its replies, as when it is the highlighted one.
+      return comment.replies?.length > 0 ? { ...changed, replies: withLocalCommentChanges(comment.replies) } : changed
+    })
 }
 
 /**
@@ -1595,8 +1645,12 @@ async function toggleCommentTranslation(comment) {
 
   loadingTranslationIds.value = new Set(loadingTranslationIds.value).add(comment.id)
 
+  const source = comment.translationText
   try {
-    comment.translatedText = await translateCommentText(comment.translationText, targetLanguage)
+    const translatedText = await translateCommentText(source, targetLanguage)
+    // An edit saved meanwhile replaced the text this translates.
+    if (comment.translationText !== source) return
+    comment.translatedText = translatedText
     comment.translatedLanguage = targetLanguage
     comment.showTranslated = true
   } catch (error) {
@@ -2211,9 +2265,9 @@ async function getCommentDataLocal(more = false) {
     )
 
     if (more) {
-      commentData.value = commentData.value.concat(withoutDeletedComments(parsedComments))
+      commentData.value = commentData.value.concat(withLocalCommentChanges(parsedComments))
     } else {
-      commentData.value = withoutDeletedComments(parsedComments)
+      commentData.value = withLocalCommentChanges(parsedComments)
     }
 
     nextPageToken.value = comments.has_continuation ? comments : null
@@ -2407,7 +2461,7 @@ async function getCommentDataInvidious() {
     })
     comments = prioritizeHighlightedComment(comments)
 
-    commentData.value = commentData.value.concat(withoutDeletedComments(comments))
+    commentData.value = commentData.value.concat(withLocalCommentChanges(comments))
     nextPageToken.value = response.continuation
     isLoading.value = false
     showComments.value = true
@@ -2540,7 +2594,7 @@ function getPostCommentsInvidious() {
       return comment
     })
 
-    commentData.value = commentData.value.concat(withoutDeletedComments(comments))
+    commentData.value = commentData.value.concat(withLocalCommentChanges(comments))
     nextPageToken.value = response?.continuation ?? continuation
     isLoading.value = false
     showComments.value = true

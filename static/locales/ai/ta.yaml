@@ -289,6 +289,10 @@ User Playlists:
   Pin to Top: "மேலே பொருத்து"
   Unpin from Top: "மேலிருந்து பொருத்தத்தை நீக்கு"
   Pinned to Top: "மேலே பொருத்தப்பட்டது"
+  Synced with YouTube: "YouTube உடன் ஒத்திசைக்கப்பட்டது"
+  Delete YouTube Playlist Confirmation: "இந்தப் பிளேலிஸ்ட்டை இங்கேயும் YouTube இலும் நீக்கவா? இதைச் செயல்தவிர்க்க முடியாது."
+  CreatePlaylistPrompt:
+    Create on YouTube: "YouTube இலும் உருவாக்கு"
   Reorder Hint: மறுவரிசைப்படுத்த இழுக்கவும் அல்லது அம்புக்குறி விசைகளைப் பயன்படுத்தவும்
   Add new videos to the top (custom order): "புதிய காணொளிகளை மேலே சேர் (தனிப்பயன் வரிசை)"
   Shuffle videos by default: "இயல்பாகக் காணொளிகளைக் கலந்து இயக்கு"
@@ -388,12 +392,12 @@ Settings:
     Sign Out Failed: "வெளியேற முடியவில்லை: {error}"
     Revoke Failed: "YouTube இலிருந்து வெளியேறிவிட்டீர்கள், ஆனால் உள்நுழைவு முடிந்ததை Google உறுதிப்படுத்தவில்லை. உங்கள் Google கணக்கின் மூன்றாம் தரப்பு இணைப்புகளில் அதை அகற்றலாம்."
     Signed out by YouTube: "YouTube உள்நுழைவை முடித்துவிட்டது. உங்கள் கணக்கைத் தொடர்ந்து பயன்படுத்த அமைப்புகளில் மீண்டும் உள்நுழையவும்."
-    Subscribe on YouTube: "YouTube இலும் குழுசேர்"
+    Sync Subscriptions: "சந்தாக்களை YouTube உடன் ஒத்திசை"
+    Sync Playlists: "பிளேலிஸ்ட்களை YouTube உடன் ஒத்திசை"
     Add to YouTube Watch History: "பார்த்த வீடியோக்களை YouTube வரலாற்றில் சேர்"
-    Import Subscriptions: "YouTube இலிருந்து சந்தாக்களை இறக்குமதி செய்"
-    Imported Subscriptions: "{count} சேனல் இறக்குமதி செய்யப்பட்டது | {count} சேனல்கள் இறக்குமதி செய்யப்பட்டன"
-    No Subscriptions to Import: "இந்த YouTube கணக்கில் சந்தாக்கள் எதுவும் இல்லை"
-    Import Subscriptions Failed: "சந்தாக்களை இறக்குமதி செய்ய முடியவில்லை: {error}"
+    Sync Now: "இப்போது ஒத்திசை"
+    Synced: "YouTube உடன் ஒத்திசைக்கப்பட்டது"
+    Sync Failed: "YouTube உடன் ஒத்திசைக்க முடியவில்லை: {error}"
   Diagnostics:
     Diagnostics: கண்டறிதல்
     Description: கண்டறிதல் பதிவு இயக்கத்தில் இருக்கும்போது, பிழை அறிக்கைகளுடன் இணைக்க OpenTubeX சமீபத்திய பதிவுச் செய்திகளை நினைவகத்தில் வைத்திருக்கிறது. அவற்றை அது ஒருபோதும் தானாகச் சேமிப்பதோ அனுப்புவதோ இல்லை, பதிவை அணைத்தால் அவை நீக்கப்படும். அறிக்கைகளில் குக்கீகள், டோக்கன்கள், IP முகவரிகள் மற்றும் URL அளவுருக்கள் இருக்காது, ஆனால் நீங்கள் இயக்கிய வீடியோக்களின் ID-கள் இருக்கலாம், எனவே பகிரும் முன் அறிக்கையைச் சரிபார்க்கவும்.
@@ -2310,7 +2314,8 @@ Description:
   Music: இசை
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "OpenTubeX இல் ஒரு சேனலுக்குக் குழுசேர்வது அல்லது குழுவிலகுவது உங்கள் YouTube கணக்கிலும் அதையே செய்யும்."
+    Sync Subscriptions: "YouTube இல் நீங்கள் குழுசேரும் சேனல்கள் \"அனைத்து சேனல்களும்\" என்பதில் சேர்க்கப்படும், அங்கு நீங்கள் குழுவிலகும் சேனல்கள் எல்லா சுயவிவரங்களிலிருந்தும் அகற்றப்படும். இங்கே \"அனைத்து சேனல்களும்\" என்பதில் குழுசேர்வதும் குழுவிலகுவதும் YouTube இலும் அதையே செய்யும்."
+    Sync Playlists: "உங்கள் YouTube பிளேலிஸ்ட்கள், \"பின்னர் பார்க்க\", \"விரும்பிய வீடியோக்கள்\" ஆகியவை \"உங்கள் பிளேலிச்ட்கள்\" பகுதியில் தோன்றும், அவற்றில் இங்கே நீங்கள் செய்யும் மாற்றங்கள் YouTube இலும் செய்யப்படும். அவை உங்கள் பிற சாதனங்களுடன் ஒத்திசைக்கப்படாது, மேலும் எல்லா பிளேலிஸ்ட்களையும் ஏற்றுமதி செய்யும்போதோ உங்கள் தரவைக் காப்புப்பிரதி எடுக்கும்போதோ சேர்க்கப்படாது. இதை முடக்கினால் அவை இந்தச் சாதனத்திலிருந்து அகற்றப்படும், ஆனால் YouTube இலிருந்து அகற்றப்படாது."
     Add to YouTube Watch History: "நீங்கள் இயக்கும் வீடியோக்கள் உங்கள் YouTube பார்வை வரலாற்றில் சேர்க்கப்படும், எனவே YouTube பரிந்துரைகள் அவற்றிலிருந்து கற்றுக்கொள்ளும். YouTube இல் வரலாறு இடைநிறுத்தப்பட்டிருக்கும்போது எதுவும் சேர்க்கப்படாது."
   General Settings:
     Built-in Streams: |
@@ -2831,6 +2836,8 @@ YouTube Account:
   Rating Failed: "YouTube இல் மதிப்பிட முடியவில்லை: {error}"
   Subscribe Failed: "YouTube இல் குழுசேர முடியவில்லை: {error}"
   Unsubscribe Failed: "YouTube இல் குழுவிலக முடியவில்லை: {error}"
+  Subscriptions Synced: "YouTube இலிருந்து சந்தாக்கள் ஒத்திசைக்கப்பட்டன: {added} சேர்க்கப்பட்டன, {removed} அகற்றப்பட்டன"
+  Playlist Update Failed: "YouTube இல் {playlistName} ஐப் புதுப்பிக்க முடியவில்லை: {error}"
   Add a comment: "கருத்தைச் சேர்க்கவும்"
   Add a reply: "பதிலைச் சேர்க்கவும்"
   Comment: "கருத்து தெரிவி"
@@ -2842,5 +2849,9 @@ YouTube Account:
   Delete Comment Confirmation: "உங்கள் கருத்தை YouTube இலிருந்து நீக்கவா?"
   Comment Deleted: "கருத்து நீக்கப்பட்டது"
   Delete Comment Failed: "கருத்தை நீக்க முடியவில்லை: {error}"
+  Edit Comment: "கருத்தைத் திருத்து"
+  Save: "சேமி"
+  Comment Edited: "கருத்து திருத்தப்பட்டது"
+  Edit Comment Failed: "கருத்தைத் திருத்த முடியவில்லை: {error}"
   Recommendations: "YouTube பரிந்துரைகள்"
   Recommendations Failed: "உங்கள் YouTube பரிந்துரைகளை ஏற்ற முடியவில்லை."

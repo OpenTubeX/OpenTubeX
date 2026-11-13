@@ -345,6 +345,10 @@ User Playlists:
   Pin to Top: "اوپر پن کریں"
   Unpin from Top: "اوپر سے پن ہٹائیں"
   Pinned to Top: "اوپر پن شدہ"
+  Synced with YouTube: "YouTube کے ساتھ سنک شدہ"
+  Delete YouTube Playlist Confirmation: "یہ پلے لسٹ یہاں اور YouTube پر حذف کریں؟ یہ عمل واپس نہیں لیا جا سکے گا۔"
+  CreatePlaylistPrompt:
+    Create on YouTube: "YouTube پر بھی بنائیں"
   Reorder Hint: ترتیب بدلنے کے لیے گھسیٹیں یا ایرو کیز استعمال کریں
   SinglePlaylistView:
     Retry: دوبارہ کوشش کریں
@@ -426,12 +430,12 @@ Settings:
     Sign Out Failed: "سائن آؤٹ نہیں ہو سکا: {error}"
     Revoke Failed: "YouTube سے سائن آؤٹ ہو گیا، لیکن Google نے سائن ان ختم ہونے کی تصدیق نہیں کی۔ آپ اسے اپنے Google اکاؤنٹ میں تھرڈ پارٹی کنکشنز سے ہٹا سکتے ہیں۔"
     Signed out by YouTube: "YouTube نے سائن ان ختم کر دیا۔ اپنا اکاؤنٹ استعمال جاری رکھنے کے لیے سیٹنگز میں دوبارہ سائن ان کریں۔"
-    Subscribe on YouTube: "YouTube پر بھی سبسکرائب کریں"
+    Sync Subscriptions: "سبسکرپشنز کو YouTube کے ساتھ سنک کریں"
+    Sync Playlists: "پلے لسٹس کو YouTube کے ساتھ سنک کریں"
     Add to YouTube Watch History: "دیکھی گئی ویڈیوز کو YouTube ہسٹری میں شامل کریں"
-    Import Subscriptions: "YouTube سے سبسکرپشنز امپورٹ کریں"
-    Imported Subscriptions: "{count} چینل امپورٹ ہو گیا | {count} چینلز امپورٹ ہو گئے"
-    No Subscriptions to Import: "اس YouTube اکاؤنٹ میں کوئی سبسکرپشن نہیں ہے"
-    Import Subscriptions Failed: "سبسکرپشنز امپورٹ نہیں ہو سکیں: {error}"
+    Sync Now: "ابھی سنک کریں"
+    Synced: "YouTube کے ساتھ سنک ہو گیا"
+    Sync Failed: "YouTube کے ساتھ سنک نہیں ہو سکا: {error}"
   Tab Unloading:
     Automatically unload tabs: ٹیبز خود بخود ان لوڈ کریں
     Memory threshold: میموری کی حد
@@ -2356,7 +2360,8 @@ Description:
   Music: موسیقی
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "OpenTubeX میں کسی چینل کو سبسکرائب یا ان سبسکرائب کرنے سے آپ کے YouTube اکاؤنٹ پر بھی یہی ہوتا ہے۔"
+    Sync Subscriptions: "جن چینلز کو آپ YouTube پر سبسکرائب کرتے ہیں وہ تمام چینلز میں شامل کر دیے جاتے ہیں، اور جن چینلز کو آپ وہاں ان سبسکرائب کرتے ہیں وہ ہر پروفائل سے ہٹا دیے جاتے ہیں۔ یہاں تمام چینلز میں سبسکرائب یا ان سبسکرائب کرنے سے YouTube پر بھی یہی ہوتا ہے۔"
+    Sync Playlists: "آپ کی YouTube پلے لسٹس، بعد میں دیکھیں، اور پسند کردہ ویڈیوز آپ کی پلے لسٹس میں نظر آتی ہیں، اور یہاں ان میں کی گئی تبدیلیاں YouTube پر بھی ہو جاتی ہیں۔ یہ آپ کی دوسری ڈیوائسز کے ساتھ سنک نہیں ہوتیں، اور تمام پلے لسٹس ایکسپورٹ کرنے یا اپنے ڈیٹا کا بیک اپ لینے پر شامل نہیں ہوتیں۔ اسے بند کرنے سے یہ اس ڈیوائس سے ہٹ جاتی ہیں لیکن YouTube سے نہیں۔"
     Add to YouTube Watch History: "آپ جو ویڈیوز چلاتے ہیں وہ آپ کی YouTube واچ ہسٹری میں شامل ہو جاتی ہیں، تاکہ YouTube کی تجاویز ان سے سیکھیں۔ جب YouTube پر ہسٹری موقوف ہو تو کچھ بھی شامل نہیں کیا جاتا۔"
   General Settings:
     Built-in Streams: |
@@ -2837,6 +2842,8 @@ YouTube Account:
   Rating Failed: "YouTube پر ریٹنگ نہیں ہو سکی: {error}"
   Subscribe Failed: "YouTube پر سبسکرائب نہیں ہو سکا: {error}"
   Unsubscribe Failed: "YouTube پر ان سبسکرائب نہیں ہو سکا: {error}"
+  Subscriptions Synced: "YouTube سے سبسکرپشنز سنک ہو گئیں: {added} شامل کی گئیں، {removed} ہٹائی گئیں"
+  Playlist Update Failed: "YouTube پر {playlistName} کو اپ ڈیٹ نہیں کیا جا سکا: {error}"
   Add a comment: "کمنٹ شامل کریں"
   Add a reply: "جواب شامل کریں"
   Comment: "کمنٹ کریں"
@@ -2848,5 +2855,9 @@ YouTube Account:
   Delete Comment Confirmation: "اپنا کمنٹ YouTube سے حذف کریں؟"
   Comment Deleted: "کمنٹ حذف ہو گیا"
   Delete Comment Failed: "کمنٹ حذف نہیں ہو سکا: {error}"
+  Edit Comment: "کمنٹ میں ترمیم کریں"
+  Save: "محفوظ کریں"
+  Comment Edited: "کمنٹ میں ترمیم ہو گئی"
+  Edit Comment Failed: "کمنٹ میں ترمیم نہیں ہو سکی: {error}"
   Recommendations: "YouTube کی تجاویز"
   Recommendations Failed: "آپ کی YouTube تجاویز لوڈ نہیں ہو سکیں۔"

@@ -513,6 +513,7 @@ User Playlists:
   Pin to Top: "Pin to Top"
   Unpin from Top: "Unpin from Top"
   Pinned to Top: "Pinned to Top"
+  Synced with YouTube: "Synced with YouTube"
   Export Playlist: Export This Playlist
   Export list of URLs: Export list of URLs
   The playlist has been successfully exported: The playlist has been successfully exported
@@ -521,6 +522,7 @@ User Playlists:
   Delete Playlist: Delete Playlist
   Cannot delete the quick bookmark target playlist.: Cannot delete the quick bookmark target playlist.
   Are you sure you want to delete this playlist? This cannot be undone: Are you sure you want to delete this playlist? This cannot be undone.
+  Delete YouTube Playlist Confirmation: "Delete this playlist here and on YouTube? This cannot be undone."
 
   TotalTimePlaylist: "Total time: {duration}"
 
@@ -585,6 +587,7 @@ User Playlists:
   CreatePlaylistPrompt:
     New Playlist Name: New Playlist Name
     Create: Create
+    Create on YouTube: "Also create on YouTube"
 
     Toast:
       There is already a playlist with this name. Please pick a different name.: There is already a playlist with this name. Please pick a different name.
@@ -665,12 +668,12 @@ Settings:
     Sign Out Failed: "Could not sign out: {error}"
     Revoke Failed: "Signed out of YouTube, but Google did not confirm that the sign-in ended. You can remove it under third-party connections in your Google account."
     Signed out by YouTube: "YouTube ended the sign-in. Sign in again in Settings to keep using your account."
-    Subscribe on YouTube: "Subscribe on YouTube too"
+    Sync Subscriptions: "Sync subscriptions with YouTube"
+    Sync Playlists: "Sync playlists with YouTube"
     Add to YouTube Watch History: "Add watched videos to YouTube history"
-    Import Subscriptions: "Import subscriptions from YouTube"
-    Imported Subscriptions: "Imported {count} channel | Imported {count} channels"
-    No Subscriptions to Import: "This YouTube account has no subscriptions"
-    Import Subscriptions Failed: "Could not import subscriptions: {error}"
+    Sync Now: "Sync now"
+    Synced: "Synced with YouTube"
+    Sync Failed: "Could not sync with YouTube: {error}"
   Tab Unloading:
     Automatically unload tabs: "Automatically unload tabs"
     Memory threshold: "Memory threshold"
@@ -3319,7 +3322,8 @@ Description:
 #Tooltips
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "Subscribing to or unsubscribing from a channel in OpenTubeX does the same on your YouTube account."
+    Sync Subscriptions: "Channels you subscribe to on YouTube are added to All Channels, and channels you unsubscribe from there are removed from every profile. Subscribing or unsubscribing in All Channels here does the same on YouTube."
+    Sync Playlists: "Your YouTube playlists, Watch later, and Liked videos appear in Your Playlists, and changes you make to them here are made on YouTube too. They are not synced to your other devices or included when you export all playlists or back up your data. Turning this off removes them from this device but not from YouTube."
     Add to YouTube Watch History: "Videos you play are added to your YouTube watch history, so YouTube's recommendations learn from them. Nothing is added while the history is paused on YouTube."
   General Settings:
     Preferred Video Codec: |
@@ -3984,6 +3988,8 @@ YouTube Account:
   Rating Failed: "Could not rate on YouTube: {error}"
   Subscribe Failed: "Could not subscribe on YouTube: {error}"
   Unsubscribe Failed: "Could not unsubscribe on YouTube: {error}"
+  Subscriptions Synced: "Subscriptions synced from YouTube: {added} added, {removed} removed"
+  Playlist Update Failed: "Could not update {playlistName} on YouTube: {error}"
   Add a comment: "Add a comment"
   Add a reply: "Add a reply"
   Comment: "Comment"
@@ -3995,5 +4001,9 @@ YouTube Account:
   Delete Comment Confirmation: "Delete your comment from YouTube?"
   Comment Deleted: "Comment deleted"
   Delete Comment Failed: "Could not delete the comment: {error}"
+  Edit Comment: "Edit comment"
+  Save: "Save"
+  Comment Edited: "Comment edited"
+  Edit Comment Failed: "Could not edit the comment: {error}"
   Recommendations: "YouTube recommendations"
   Recommendations Failed: "Could not load your YouTube recommendations."

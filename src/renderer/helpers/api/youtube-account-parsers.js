@@ -94,6 +94,16 @@ export function createReplyParams(videoId, parentCommentId) {
   return encodeParams([[2, videoId], [4, parentCommentId], [5, [[1, 0]]], [10, 7]])
 }
 
+/**
+ * Comments and replies take the same parameters, in the layout of YouTube's
+ * website, the only client that offers editing.
+ * @param {string} videoId
+ * @param {string} commentId a reply's ID is `parentId.replyId`
+ */
+export function updateCommentParams(videoId, commentId) {
+  return encodeParams([[1, commentId], [4, videoId], [5, [[1, 0]]], [8, 12], [18, []]])
+}
+
 const COMMENT_ACTION_TYPES = { like: 5, unlike: 5, dislike: 4, undislike: 4, delete: 6 }
 
 /**
@@ -159,7 +169,15 @@ export function parseAccountProfiles(data) {
  * @returns {{ id: string, name: string, thumbnail: string | null }[]}
  */
 export function parseSubscribedChannels(data) {
-  const sections = data?.contents?.tvBrowseRenderer?.content?.tvSecondaryNavRenderer?.sections ?? []
+  // Sync removes the channels missing here, so a page it cannot read must not count as empty.
+  if (!data?.contents?.tvBrowseRenderer) throw new Error('YouTube returned no subscriptions page')
+  const nav = data.contents.tvBrowseRenderer.content?.tvSecondaryNavRenderer
+  const sections = nav?.sections ?? []
+  // The channels on a later page would count as unsubscribed.
+  if (nav?.continuations || sections.some(section => section?.tvSecondaryNavSectionRenderer?.continuations ||
+    section?.tvSecondaryNavSectionRenderer?.tabs?.some(entry => entry?.continuationItemRenderer))) {
+    throw new Error('YouTube listed only some of the subscriptions')
+  }
   const channels = new Map()
 
   for (const section of sections) {
@@ -267,6 +285,139 @@ export function parseHomeFeed(data) {
     .find(token => typeof token === 'string') ?? null
 
   return { videos, continuation }
+}
+
+/**
+ * @typedef {object} YouTubePlaylistSummary
+ * @property {string} playlistId
+ * @property {string} title
+ * @property {number | null} videoCount
+ * @property {string} signature changes with the video count and the first video,
+ *   the only signs of a change the list shows
+ *
+ * @typedef {object} YouTubePlaylistVideo
+ * @property {string} videoId
+ * @property {string | null} setVideoId identifies the entry in the playlist; edits need it
+ * @property {string} title
+ * @property {string} author
+ * @property {string} authorId
+ * @property {number | ''} lengthSeconds
+ * @property {number | null} published
+ * @property {number | null} viewCount
+ */
+
+/**
+ * The account's playlists, including Watch later (`WL`), Liked videos (`LL`),
+ * and playlists saved from other channels.
+ * @param {any} data TV `browse` response for `FEplaylist_aggregation` or one of its continuations
+ * @returns {{ playlists: YouTubePlaylistSummary[], continuation: string | null }}
+ */
+export function parsePlaylistLibrary(data) {
+  const grid = data?.continuationContents?.tvSurfaceContentContinuation?.content?.gridRenderer ??
+    data?.contents?.tvBrowseRenderer?.content?.tvSurfaceContentRenderer?.content?.gridRenderer
+  // Sync removes the playlists missing here, so a page it cannot read must not count as empty.
+  if (!grid) throw new Error('YouTube returned no playlist list')
+
+  const playlists = (grid.items ?? [])
+    .map(item => item?.tileRenderer)
+    .filter(tile => tile?.contentType === 'TILE_CONTENT_TYPE_PLAYLIST' && typeof tile.contentId === 'string')
+    .map(tile => {
+      const header = tile.header?.tileHeaderRenderer
+      const count = (header?.thumbnailOverlays ?? [])
+        .map(overlay => readText(overlay?.thumbnailOverlayTimeStatusRenderer?.text))
+        .find(text => text !== '') ?? ''
+      // The thumbnail URL carries signing parameters that change between requests.
+      const thumbnail = bestThumbnail(header?.thumbnail?.thumbnails)?.split('?')[0] ?? ''
+      // "No videos" has no number.
+      const digits = count.replaceAll(/\D/g, '')
+      return {
+        playlistId: tile.contentId,
+        title: readText(tile.metadata?.tileMetadataRenderer?.title).trim(),
+        videoCount: digits !== '' ? Number(digits) : count !== '' ? 0 : null,
+        signature: `${count}\n${thumbnail}`
+      }
+    })
+  const continuation = grid.continuations
+    ?.map(entry => entry?.nextContinuationData?.continuation)
+    .find(token => typeof token === 'string') ?? null
+
+  return { playlists, continuation }
+}
+
+/**
+ * The playlists the account can add videos to: its own and Watch later. The
+ * playlist list also has playlists saved from other channels, which look the same.
+ * @param {any} data `playlist/get_add_to_playlist` response
+ * @returns {Set<string>}
+ */
+export function parseOwnedPlaylistIds(data) {
+  const renderer = (data?.contents ?? []).map(content => content?.addToPlaylistRenderer).find(Boolean)
+  const ids = new Set((renderer?.playlists ?? [])
+    .map(entry => entry?.playlistAddToOptionRenderer?.playlistId)
+    .filter(id => typeof id === 'string'))
+  // Watch later is always there. Without it, sync would remove every playlist.
+  if (ids.size === 0) throw new Error('YouTube returned no playlists to add to')
+  return ids
+}
+
+/**
+ * @param {any} tile a TV `tileRenderer` of a playlist page
+ * @returns {YouTubePlaylistVideo | null}
+ */
+function parsePlaylistTile(tile) {
+  const video = parseTile(tile)
+  if (!video) return null
+
+  const authorId = (tile.metadata?.tileMetadataRenderer?.lines ?? [])
+    .flatMap(line => line?.lineRenderer?.items ?? [])
+    .flatMap(item => item?.lineItemRenderer?.text?.runs ?? [])
+    .map(run => run?.navigationEndpoint?.browseEndpoint?.browseId)
+    .find(id => typeof id === 'string' && id.startsWith('UC')) ?? ''
+  // Only the menu's remove action names the entry.
+  const setVideoId = (tile.onLongPressCommand?.showMenuCommand?.menu?.menuRenderer?.items ?? [])
+    .flatMap(item => Object.values(item ?? {}))
+    .flatMap(item => item?.serviceEndpoint?.playlistEditEndpoint?.actions ?? [])
+    .find(action => action?.action === 'ACTION_REMOVE_VIDEO' && typeof action.setVideoId === 'string')
+    ?.setVideoId ?? null
+
+  return {
+    videoId: video.videoId,
+    setVideoId,
+    title: video.title,
+    author: video.author,
+    authorId,
+    lengthSeconds: video.lengthSeconds,
+    published: video.published ?? null,
+    viewCount: video.viewCount
+  }
+}
+
+/**
+ * A page of a playlist's videos. The first page also has the title, and an
+ * empty playlist has no video list at all.
+ * @param {any} data TV `browse` response for `VL` and the playlist ID, or one of its continuations
+ * @returns {{ title: string | null, videos: YouTubePlaylistVideo[], continuation: string | null }}
+ */
+export function parsePlaylistPage(data) {
+  const continuationList = data?.continuationContents?.playlistVideoListContinuation
+  const columns = data?.contents?.tvBrowseRenderer?.content?.tvSurfaceContentRenderer?.content?.twoColumnRenderer
+  // Removing what is missing here would empty the playlist.
+  if (!continuationList && !columns) throw new Error('YouTube returned no playlist page')
+
+  const list = continuationList ?? columns.rightColumn?.playlistVideoListRenderer
+  const titleText = columns ? readText(columns.leftColumn?.entityMetadataRenderer?.title).trim() : ''
+  const videos = (list?.contents ?? [])
+    .map(item => parsePlaylistTile(item?.tileRenderer))
+    .filter(Boolean)
+  const continuation = list?.continuations
+    ?.map(entry => entry?.nextContinuationData?.continuation)
+    .find(token => typeof token === 'string') ?? null
+
+  return {
+    title: titleText === '' ? null : titleText,
+    videos,
+    continuation
+  }
 }
 
 /**

@@ -45,6 +45,20 @@
       v-if="isOwnComment"
       type="button"
       class="commentAccountAction"
+      :aria-label="t('YouTube Account.Edit Comment')"
+      :title="t('YouTube Account.Edit Comment')"
+      :aria-expanded="comments.editing.value === comment.id"
+      @click="toggleEdit"
+    >
+      <FtIcon
+        :icon="['fas', 'edit']"
+        aria-hidden="true"
+      />
+    </button>
+    <button
+      v-if="isOwnComment"
+      type="button"
+      class="commentAccountAction"
       :aria-label="t('YouTube Account.Delete Comment')"
       :title="t('YouTube Account.Delete Comment')"
       :disabled="deleting"
@@ -155,6 +169,10 @@ function setRating(commentId, value) {
 
 function toggleReply() {
   comments.replyingTo.value = comments.replyingTo.value === props.comment.id ? null : props.comment.id
+}
+
+function toggleEdit() {
+  comments.editing.value = comments.editing.value === props.comment.id ? null : props.comment.id
 }
 
 /** @param {'delete' | 'cancel' | null} value */

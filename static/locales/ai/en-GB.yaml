@@ -312,6 +312,10 @@ User Playlists:
     Loading videos from {playlistName}: 'Loading videos from {playlistName}'
     Adding missing videos to {playlistName}: 'Adding missing videos to {playlistName}'
     Checking {playlistName} for unavailable videos: 'Checking {playlistName} for unavailable videos ({checked}/{total})'
+  Synced with YouTube: "Synced with YouTube"
+  Delete YouTube Playlist Confirmation: "Delete this playlist here and on YouTube? This cannot be undone."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Also create on YouTube"
 History:
   From Date: 'From'
   To Date: 'To'
@@ -377,12 +381,12 @@ Settings:
     Sign Out Failed: "Could not sign out: {error}"
     Revoke Failed: "Signed out of YouTube, but Google did not confirm that the sign-in ended. You can remove it under third-party connections in your Google account."
     Signed out by YouTube: "YouTube ended the sign-in. Sign in again in Settings to keep using your account."
-    Subscribe on YouTube: "Subscribe on YouTube too"
+    Sync Subscriptions: "Sync subscriptions with YouTube"
+    Sync Playlists: "Sync playlists with YouTube"
     Add to YouTube Watch History: "Add watched videos to YouTube history"
-    Import Subscriptions: "Import subscriptions from YouTube"
-    Imported Subscriptions: "Imported {count} channel | Imported {count} channels"
-    No Subscriptions to Import: "This YouTube account has no subscriptions"
-    Import Subscriptions Failed: "Could not import subscriptions: {error}"
+    Sync Now: "Sync now"
+    Synced: "Synced with YouTube"
+    Sync Failed: "Could not sync with YouTube: {error}"
   Diagnostics:
     Diagnostics: Diagnostics
     Description: While diagnostic logging is on, OpenTubeX keeps recent log messages in memory so you can attach them to bug reports. It never saves or sends them on its own, and turning logging off deletes them. Reports leave out cookies, tokens, IP addresses and URL parameters, but they can include IDs of videos you played, so check a report before you share it.
@@ -2241,7 +2245,8 @@ Description:
   Music: Music
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "Subscribing to or unsubscribing from a channel in OpenTubeX does the same on your YouTube account."
+    Sync Subscriptions: "Channels you subscribe to on YouTube are added to All Channels, and channels you unsubscribe from there are removed from every profile. Subscribing or unsubscribing in All Channels here does the same on YouTube."
+    Sync Playlists: "Your YouTube playlists, Watch later and Liked videos appear in Your playlists, and changes you make to them here are made on YouTube too. They are not synced to your other devices or included when you export all playlists or back up your data. Turning this off removes them from this device but not from YouTube."
     Add to YouTube Watch History: "Videos you play are added to your YouTube watch history, so YouTube's recommendations learn from them. Nothing is added while the history is paused on YouTube."
   General Settings:
     Built-in Streams: |
@@ -2766,6 +2771,8 @@ YouTube Account:
   Rating Failed: "Could not rate on YouTube: {error}"
   Subscribe Failed: "Could not subscribe on YouTube: {error}"
   Unsubscribe Failed: "Could not unsubscribe on YouTube: {error}"
+  Subscriptions Synced: "Subscriptions synced from YouTube: {added} added, {removed} removed"
+  Playlist Update Failed: "Could not update {playlistName} on YouTube: {error}"
   Add a comment: "Add a comment"
   Add a reply: "Add a reply"
   Comment: "Comment"
@@ -2777,5 +2784,9 @@ YouTube Account:
   Delete Comment Confirmation: "Delete your comment from YouTube?"
   Comment Deleted: "Comment deleted"
   Delete Comment Failed: "Could not delete the comment: {error}"
+  Edit Comment: "Edit comment"
+  Save: "Save"
+  Comment Edited: "Comment edited"
+  Edit Comment Failed: "Could not edit the comment: {error}"
   Recommendations: "YouTube recommendations"
   Recommendations Failed: "Could not load your YouTube recommendations."

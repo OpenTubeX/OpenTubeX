@@ -310,6 +310,10 @@ User Playlists:
     Loading videos from {playlistName}: '{playlistName} zerrendako bideoak kargatzen'
     Adding missing videos to {playlistName}: 'Falta diren bideoak {playlistName} zerrendara gehitzen'
     Checking {playlistName} for unavailable videos: '{playlistName} zerrendan erabilgarri ez dauden bideoak bilatzen ({checked}/{total})'
+  Synced with YouTube: "YouTube-rekin sinkronizatuta"
+  Delete YouTube Playlist Confirmation: "Erreprodukzio-zerrenda hau hemen eta YouTube-n ezabatu? Hau ezin da desegin."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Sortu YouTube-n ere"
 History:
   From Date: 'Hasiera'
   To Date: 'Amaiera'
@@ -375,12 +379,12 @@ Settings:
     Sign Out Failed: "Ezin izan da saioa amaitu: {error}"
     Revoke Failed: "YouTube-ko saioa amaitu da, baina Google-k ez du berretsi saioa amaitu denik. Zure Google kontuko hirugarrenen konexioetan ken dezakezu."
     Signed out by YouTube: "YouTube-k saioa amaitu du. Hasi saioa berriro Ezarpenetan zure kontua erabiltzen jarraitzeko."
-    Subscribe on YouTube: "Harpidetu YouTube-n ere"
     Add to YouTube Watch History: "Gehitu ikusitako bideoak YouTube-ko historikora"
-    Import Subscriptions: "Inportatu harpidetzak YouTube-tik"
-    Imported Subscriptions: "{count} kanal inportatu da | {count} kanal inportatu dira"
-    No Subscriptions to Import: "YouTube kontu honek ez du harpidetzarik"
-    Import Subscriptions Failed: "Ezin izan dira harpidetzak inportatu: {error}"
+    Sync Subscriptions: "Sinkronizatu harpidetzak YouTube-rekin"
+    Sync Playlists: "Sinkronizatu erreprodukzio-zerrendak YouTube-rekin"
+    Sync Now: "Sinkronizatu orain"
+    Synced: "YouTube-rekin sinkronizatuta"
+    Sync Failed: "Ezin izan da YouTube-rekin sinkronizatu: {error}"
   Diagnostics:
     Diagnostics: Diagnostikoa
     Description: Diagnostiko-erregistroa aktibatuta dagoen bitartean, OpenTubeX-ek azken erregistro-mezuak memorian gordetzen ditu, akats-txostenei erantsi ahal izateko. Ez ditu inoiz bere kabuz gordetzen edo bidaltzen, eta erregistroa desaktibatzean ezabatu egiten dira. Txostenek ez dituzte cookieak, tokenak, IP helbideak eta URL parametroak barne hartzen, baina erreproduzitu dituzun bideoen IDak izan ditzakete; beraz, berrikusi txostena partekatu aurretik.
@@ -2253,8 +2257,9 @@ Description:
   Music: Musika
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "OpenTubeX-en kanal batera harpidetzean edo harpidetza kentzean, gauza bera egiten da zure YouTube kontuan."
     Add to YouTube Watch History: "Erreproduzitzen dituzun bideoak zure YouTube-ko ikustaldi-historikora gehitzen dira, YouTube-ren gomendioek haietatik ikas dezaten. Historikoa YouTube-n pausatuta dagoen bitartean, ez da ezer gehitzen."
+    Sync Subscriptions: "YouTube-n harpidetzen zaren kanalak «Kanal guztiak» profilera gehitzen dira, eta han harpidetza kentzen diezun kanalak profil guztietatik kentzen dira. Hemen «Kanal guztiak» profilean harpidetzeak edo harpidetza kentzeak gauza bera egiten du YouTube-n."
+    Sync Playlists: "Zure YouTube-ko erreprodukzio-zerrendak, «Ikusi geroago» eta «Gustuko bideoak» «Zure erreprodukzio-zerrendak» atalean agertzen dira, eta hemen haietan egiten dituzun aldaketak YouTube-n ere egiten dira. Ez dira zure beste gailuekin sinkronizatzen, eta ez dira sartzen erreprodukzio-zerrenda guztiak esportatzen dituzunean edo zure datuen babeskopia egiten duzunean. Hau desaktibatzean gailu honetatik kentzen dira, baina ez YouTube-tik."
   General Settings:
     Built-in Streams: |
       Automatikoak bideo gehienak YouTuberen visionOS bezeroaren bidez erreproduzitzen ditu; azkarrago hasten da eta kalitate automatikoa onartzen du. Zuzeneko emanaldiek eta erreproduzitu ezin dituen bideoek SABR erabiltzen dute.
@@ -2789,5 +2794,11 @@ YouTube Account:
   Delete Comment Confirmation: "Zure iruzkina YouTube-tik ezabatu?"
   Comment Deleted: "Iruzkina ezabatu da"
   Delete Comment Failed: "Ezin izan da iruzkina ezabatu: {error}"
+  Edit Comment: "Editatu iruzkina"
+  Save: "Gorde"
+  Comment Edited: "Iruzkina editatu da"
+  Edit Comment Failed: "Ezin izan da iruzkina editatu: {error}"
   Recommendations: "YouTube-ren gomendioak"
   Recommendations Failed: "Ezin izan dira zure YouTube gomendioak kargatu."
+  Subscriptions Synced: "Harpidetzak YouTube-tik sinkronizatuta: {added} gehituta, {removed} kenduta"
+  Playlist Update Failed: "Ezin izan da {playlistName} YouTube-n eguneratu: {error}"
