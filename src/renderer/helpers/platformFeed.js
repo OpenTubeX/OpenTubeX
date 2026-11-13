@@ -764,14 +764,30 @@ export function startTwitchLiveNotifications() {
   let stopped = false
   let timer = null
   let lastCheck = 0
+  let checking = false
+  let checkAgain = false
 
+  // One check at a time. A check requested during another, such as after a
+  // change of the channels, runs once that ends, with the configuration then.
   const check = async () => {
     clearTimeout(timer)
     timer = null
-    const configuration = getLiveConfiguration()
-    if (configuration.enabled && !isAppHidden()) {
-      lastCheck = Date.now()
-      await checkLiveStreams(configuration)
+    if (checking) {
+      checkAgain = true
+      return
+    }
+    checking = true
+    try {
+      do {
+        checkAgain = false
+        const configuration = getLiveConfiguration()
+        if (!stopped && configuration.enabled && !isAppHidden()) {
+          lastCheck = Date.now()
+          await checkLiveStreams(configuration)
+        }
+      } while (checkAgain)
+    } finally {
+      checking = false
     }
     if (!stopped) timer = setTimeout(check, LIVE_CHECK_INTERVAL_MS)
   }
