@@ -163,6 +163,12 @@ Home Page:
   All sections hidden: Сви одељци су сакривени
   All sections hidden description: Прилагодите почетну страницу да бисте поново приказали одељак.
 Subscriptions:
+  Channel Errors:
+    Summary: "{count} канал није могуће освежити. | {count} канала није могуће освежити. | {count} канала није могуће освежити."
+    Toast: "Неке канале на које сте претплаћени није могуће освежити. Кликните да их видите."
+    Retry Channel: "Покушај поново: {channel}"
+    Show All: "Прикажи све"
+    Show Fewer: "Прикажи мање"
   Cache Load Error: Сачувани фидови претплата нису могли да се учитају.
   New video from {channel}: Нови видео снимак са канала {channel}
   New short from {channel}: Нови кратки снимак са канала {channel}
@@ -170,8 +176,6 @@ Subscriptions:
   New post from {channel}: Нови пост са канала {channel}
   Mark As Unseen: Означи као невиђено
   Copy Error Details: "Копирај техничке детаље"
-  Refresh Errors: "Канали које није било могуће освежити: {channels}. Кликните да видите детаље."
-  Refresh Error Channels More: "{channels} и још {count} | {channels} и још {count} | {channels} и још {count}"
   Never show {type} from this channel in feeds again: Никада више не приказуј {type} са овог канала у фидовима
   Refreshing Subscription Videos: Освежавају се видео-снимци из претплата
   Refreshing Subscription Shorts: Освежавају се кратки видео-снимци из претплата

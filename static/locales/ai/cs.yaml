@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: Všechny sekce jsou skryté
   All sections hidden description: Přizpůsobte domovskou stránku a některou sekci znovu zobrazte.
 Subscriptions:
+  Channel Errors:
+    Summary: "1 kanál se nepodařilo obnovit. | {count} kanály se nepodařilo obnovit. | {count} kanálů se nepodařilo obnovit."
+    Toast: "Některé odebírané kanály se nepodařilo obnovit. Kliknutím je zobrazíte."
+    Retry Channel: "Zkusit znovu {channel}"
+    Show All: "Zobrazit vše"
+    Show Fewer: "Zobrazit méně"
   Cache Load Error: Uložené kanály odběrů se nepodařilo načíst.
   New video from {channel}: Nové video od {channel}
   New short from {channel}: Nový Short od {channel}
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: Nový příspěvek od {channel}
   Mark As Unseen: Označit jako neviděné
   Copy Error Details: "Kopírovat technické podrobnosti"
-  Refresh Errors: "Kanály, které se nepodařilo obnovit: {channels}. Kliknutím zobrazíte podrobnosti."
-  Refresh Error Channels More: "{channels} a {count} další | {channels} a {count} další | {channels} a {count} další"
   Never show {type} from this channel in feeds again: Už nikdy nezobrazovat {type} z tohoto kanálu ve feedech
   Refreshing Subscription Videos: Obnovování videí z odběrů
   Refreshing Subscription Shorts: Obnovování krátkých videí z odběrů

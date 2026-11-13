@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: Svi su odjeljci skriveni
   All sections hidden description: Prilagodite početnu stranicu kako biste ponovno prikazali odjeljak.
 Subscriptions:
+  Channel Errors:
+    Summary: "{count} kanal nije moguće osvježiti. | {count} kanala nije moguće osvježiti. | {count} kanala nije moguće osvježiti."
+    Toast: "Neke pretplaćene kanale nije moguće osvježiti. Kliknite za prikaz."
+    Retry Channel: "Pokušaj ponovno: {channel}"
+    Show All: "Prikaži sve"
+    Show Fewer: "Prikaži manje"
   Cache Load Error: Spremljeni feedovi pretplata nisu se mogli učitati.
   New video from {channel}: Novi video s kanala {channel}
   New short from {channel}: Novi kratki video s kanala {channel}
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: Nova objava s kanala {channel}
   Mark As Unseen: Označi kao neviđeno
   Copy Error Details: "Kopiraj tehničke pojedinosti"
-  Refresh Errors: "Kanali koji se nisu mogli osvježiti: {channels}. Kliknite za prikaz pojedinosti."
-  Refresh Error Channels More: "{channels} i još {count} | {channels} i još {count} | {channels} i još {count}"
   Never show {type} from this channel in feeds again: Nikad više ne prikazuj {type} s ovog kanala u sažecima sadržaja
   Refreshing Subscription Videos: Osvježavanje videozapisa iz pretplata
   Refreshing Subscription Shorts: Osvježavanje sadržaja Shorts iz pretplata

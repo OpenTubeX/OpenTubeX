@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: Allir hlutar eru faldir
   All sections hidden description: Sérsníddu heimasíðuna til að sýna hluta aftur.
 Subscriptions:
+  Channel Errors:
+    Summary: "Ekki tókst að endurnýja {count} rás. | Ekki tókst að endurnýja {count} rásir."
+    Toast: "Ekki tókst að endurnýja sumar áskriftarrásir. Smelltu til að skoða þær."
+    Retry Channel: "Reyna aftur: {channel}"
+    Show All: "Sýna allt"
+    Show Fewer: "Sýna færri"
   Cache Load Error: Ekki tókst að hlaða vistuðum áskriftarstraumum þínum.
   New video from {channel}: Nýtt myndskeið frá {channel}
   New short from {channel}: Ný símamynd frá {channel}
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: Ný færsla frá {channel}
   Mark As Unseen: Merkja sem óséð
   Copy Error Details: "Afrita tæknilegar upplýsingar"
-  Refresh Errors: "Rásir sem ekki tókst að uppfæra: {channels}. Smelltu til að sjá upplýsingar."
-  Refresh Error Channels More: "{channels} og {count} til viðbótar | {channels} og {count} til viðbótar"
   Never show {type} from this channel in feeds again: Aldrei sýna aftur efni af gerðinni {type} frá þessari rás í straumum
   Refreshing Subscription Videos: Endurnýja myndbönd úr áskriftum
   Refreshing Subscription Shorts: Endurnýja Shorts-myndbönd úr áskriftum

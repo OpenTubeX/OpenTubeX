@@ -1745,7 +1745,7 @@ async function handleFeedReloadRequest(payload) {
     return
   }
 
-  const options = { t, errorChannels: [] }
+  const options = { t }
   const refreshers = {
     videos: refreshSubscriptionVideosFromRemote,
     shorts: refreshSubscriptionShortsFromRemote,

@@ -181,6 +181,12 @@ Home Page:
   All sections hidden: Ĉiuj sekcioj estas kaŝitaj
   All sections hidden description: Personecigu la hejmon por remontri sekcion.
 Subscriptions:
+  Channel Errors:
+    Summary: "1 kanalo ne povis esti aktualigita. | {count} kanaloj ne povis esti aktualigitaj."
+    Toast: "Kelkaj abonitaj kanaloj ne povis esti aktualigitaj. Alklaku por vidi ilin."
+    Retry Channel: "Reprovi {channel}"
+    Show All: "Montri ĉiujn"
+    Show Fewer: "Montri malpli"
   Cache Load Error: Viaj konservitaj abonaj fluoj ne povis esti ŝargitaj.
   New video from {channel}: Nova videaĵo de {channel}
   New short from {channel}: Nova videaĵeto de {channel}
@@ -188,8 +194,6 @@ Subscriptions:
   New post from {channel}: Nova afiŝo de {channel}
   Mark As Unseen: Marki kiel nevidita
   Copy Error Details: Kopii teknikajn detalojn
-  Refresh Errors: 'Kanaloj, kiuj ne povis esti aktualigitaj: {channels}. Alklaku por vidi detalojn.'
-  Refresh Error Channels More: '{channels} kaj {count} plia | {channels} kaj {count} pliaj'
   Never show {type} from this channel in feeds again: Neniam plu montri {type} de ĉi tiu kanalo en fluoj
   Refreshing Subscription Videos: Aktualigado de abonaj videaĵoj
   Refreshing Subscription Shorts: Aktualigado de abonaj videaĵetoj

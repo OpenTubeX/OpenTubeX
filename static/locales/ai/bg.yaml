@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: Всички раздели са скрити
   All sections hidden description: Персонализирайте началната страница, за да покажете отново раздел.
 Subscriptions:
+  Channel Errors:
+    Summary: "1 канал не можа да бъде обновен. | {count} канала не можаха да бъдат обновени."
+    Toast: "Някои абонирани канали не можаха да бъдат обновени. Щракнете, за да ги видите."
+    Retry Channel: "Повторен опит за {channel}"
+    Show All: "Покажи всички"
+    Show Fewer: "Покажи по-малко"
   Cache Load Error: Запазените емисии на абонаментите ви не можаха да бъдат заредени.
   New video from {channel}: Ново видео от {channel}
   New short from {channel}: Ново кратко видео от {channel}
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: Нова публикация от {channel}
   Mark As Unseen: Отбележи като невидяно
   Copy Error Details: "Копиране на техническите подробности"
-  Refresh Errors: "Канали, които не можаха да се обновят: {channels}. Натиснете, за да видите подробностите."
-  Refresh Error Channels More: "{channels} и още {count} | {channels} и още {count}"
   Never show {type} from this channel in feeds again: Никога повече да не се показват {type} от този канал в емисиите
   Refreshing Subscription Videos: Обновяват се видеоклиповете от абонаментите
   Refreshing Subscription Shorts: Обновяват се кратките видеоклипове от абонаментите

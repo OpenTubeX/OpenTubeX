@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: Semua bagian disembunyikan
   All sections hidden description: Sesuaikan Beranda untuk menampilkan kembali bagian.
 Subscriptions:
+  Channel Errors:
+    Summary: "{count} saluran tidak dapat dimuat ulang."
+    Toast: "Beberapa saluran langganan tidak dapat dimuat ulang. Klik untuk melihatnya."
+    Retry Channel: "Coba lagi {channel}"
+    Show All: "Tampilkan semua"
+    Show Fewer: "Tampilkan lebih sedikit"
   Cache Load Error: Feed langganan tersimpan Anda tidak dapat dimuat.
   New video from {channel}: Video baru dari {channel}
   New short from {channel}: Video singkat baru dari {channel}
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: Postingan baru dari {channel}
   Mark As Unseen: Tandai sebagai belum dilihat
   Copy Error Details: "Salin detail teknis"
-  Refresh Errors: "Channel yang tidak dapat diperbarui: {channels}. Klik untuk melihat detail."
-  Refresh Error Channels More: "{channels} dan {count} lainnya"
   Never show {type} from this channel in feeds again: Jangan pernah tampilkan {type} dari channel ini di feed lagi
   Refreshing Subscription Videos: Memperbarui video langganan
   Refreshing Subscription Shorts: Memperbarui Shorts langganan

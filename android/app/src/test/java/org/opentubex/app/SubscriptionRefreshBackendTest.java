@@ -213,6 +213,29 @@ public class SubscriptionRefreshBackendTest {
     }
 
     @Test
+    public void aChannelThatYouTubeReportsAsGoneFailsWithoutAskingOtherSources() throws Exception {
+        JSONArray requests = new JSONArray()
+            .put(new JSONObject().put("format", "local").put("body", new JSONObject().put("params", "tab").toString()))
+            .put(new JSONObject().put("format", "rss"));
+        JSONObject gone = new JSONObject().put("alerts", new JSONArray().put(new JSONObject()
+            .put("alertRenderer", new JSONObject().put("type", "ERROR"))));
+        // A failed Live tab request is checked with the channel's page, which tells why
+        for (String type : List.of("videos", "live")) {
+            List<String> formats = new ArrayList<>();
+            assertThrows(
+                SubscriptionRefreshHttpClient.ChannelUnavailableException.class,
+                () -> SubscriptionRefreshHttpClient.fetch(feed(type, requests), "UCtest", (request, feedType, id) -> {
+                    formats.add(request.getString("format"));
+                    if (!request.getString("format").equals("local")) throw new IOException("HTTP 404");
+                    if (type.equals("live") && new JSONObject(request.getString("body")).has("params")) throw new IOException("HTTP 404");
+                    return gone.toString();
+                })
+            );
+            assertEquals(type.equals("live") ? List.of("local", "local") : List.of("local"), formats);
+        }
+    }
+
+    @Test
     public void localRefreshDoesNotRequireAnInvidiousInstance() throws Exception {
         JSONArray requests = new JSONArray().put(new JSONObject().put("format", "local").put("url", "https://www.youtube.com/youtubei/v1/browse"));
         SubscriptionRefreshConfiguration.Feed feed = feed(requests);

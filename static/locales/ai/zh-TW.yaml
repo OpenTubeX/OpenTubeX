@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: 所有區塊均已隱藏
   All sections hidden description: 自訂首頁以重新顯示區塊。
 Subscriptions:
+  Channel Errors:
+    Summary: "{count} 個頻道無法重新整理。"
+    Toast: "部分已訂閱頻道無法重新整理。點擊以檢視。"
+    Retry Channel: "重試 {channel}"
+    Show All: "顯示全部"
+    Show Fewer: "顯示較少"
   Cache Load Error: 無法載入已儲存的訂閱內容動態。
   New video from {channel}: "{channel} 發布了新影片"
   New short from {channel}: "{channel} 發布了新短片"
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: "{channel} 發布了新貼文"
   Mark As Unseen: 標記為未看過
   Copy Error Details: "複製技術詳細資訊"
-  Refresh Errors: "無法重新整理的頻道：{channels}。點擊查看詳細資訊。"
-  Refresh Error Channels More: "{channels} 以及其他 {count} 個頻道"
   Never show {type} from this channel in feeds again: 不再於動態中顯示此頻道的{type}
   Refreshing Subscription Videos: 正在重新整理訂閱影片
   Refreshing Subscription Shorts: 正在重新整理訂閱的 Shorts 短片

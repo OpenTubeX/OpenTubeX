@@ -22,7 +22,6 @@ export function useRefreshAllSubscriptionFeeds() {
   const { t } = useI18n()
   const isRefreshing = ref(false)
   const attemptedFetch = ref(false)
-  const errorChannels = ref([])
   const showRefreshWarning = ref(false)
 
   const activeSubscriptionIds = computed(() => {
@@ -80,7 +79,6 @@ export function useRefreshAllSubscriptionFeeds() {
 
     isRefreshing.value = true
     attemptedFetch.value = true
-    errorChannels.value = []
 
     const cancelCountAtStart = getSubscriptionRefreshCancelCount()
 
@@ -93,7 +91,7 @@ export function useRefreshAllSubscriptionFeeds() {
             break
           }
 
-          await feed.refresh({ t, errorChannels: errorChannels.value })
+          await feed.refresh({ t })
         }
       }), { title: t('Subscriptions.Subscriptions'), cancelLabel: t('Feed.Cancel Refresh') })
     } finally {
@@ -119,7 +117,6 @@ export function useRefreshAllSubscriptionFeeds() {
     activeSubscriptionIds,
     attemptedFetch,
     enabledFeeds,
-    errorChannels,
     handleRefreshWarning,
     isRefreshing,
     refresh,

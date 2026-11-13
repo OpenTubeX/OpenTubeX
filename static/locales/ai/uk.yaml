@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: Усі розділи приховано
   All sections hidden description: Налаштуйте головну, щоб знову показати розділ.
 Subscriptions:
+  Channel Errors:
+    Summary: "Не вдалося оновити {count} канал. | Не вдалося оновити {count} канали. | Не вдалося оновити {count} каналів."
+    Toast: "Не вдалося оновити деякі канали з підписок. Натисніть, щоб їх переглянути."
+    Retry Channel: "Повторити для {channel}"
+    Show All: "Показати всі"
+    Show Fewer: "Показати менше"
   Cache Load Error: Не вдалося завантажити збережені стрічки підписок.
   New video from {channel}: Нове відео від {channel}
   New short from {channel}: Нове Shorts-відео від {channel}
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: Новий допис від {channel}
   Mark As Unseen: Позначити як непереглянуте
   Copy Error Details: "Скопіювати технічні подробиці"
-  Refresh Errors: "Канали, які не вдалося оновити: {channels}. Натисніть, щоб переглянути подробиці."
-  Refresh Error Channels More: "{channels} і ще {count} | {channels} і ще {count} | {channels} і ще {count}"
   Never show {type} from this channel in feeds again: Більше ніколи не показувати {type} із цього каналу в стрічках
   Refreshing Subscription Videos: Оновлення відео з підписок
   Refreshing Subscription Shorts: Оновлення коротких відео з підписок

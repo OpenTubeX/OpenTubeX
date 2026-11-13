@@ -127,7 +127,6 @@
       v-if="tabOrganizerOpen"
       @close="closeTabOrganizer"
     />
-    <SubscriptionRefreshErrors />
     <DigitalWellbeing />
     <FtPrompt
       v-if="showReleaseNotes"
@@ -660,7 +659,6 @@ import { initializeAndroidIncomingShare } from './helpers/androidIncomingShare'
 import { handleRestoredAndroidAppData } from './helpers/androidStorage'
 import { extractSharedMediaLink, extractSharedYoutubeLink } from './helpers/sharedYoutubeLink'
 import { shouldOpenExternalMediaUrl } from './helpers/externalMediaUrl'
-import SubscriptionRefreshErrors from './components/SubscriptionRefreshErrors.vue'
 import DigitalWellbeing from './components/DigitalWellbeing/DigitalWellbeing.vue'
 import FtButton from './components/FtButton/FtButton.vue'
 import FtToast from './components/FtToast/FtToast.vue'

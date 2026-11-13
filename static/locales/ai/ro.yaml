@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: Toate secțiunile sunt ascunse
   All sections hidden description: Personalizează pagina principală pentru a afișa din nou o secțiune.
 Subscriptions:
+  Channel Errors:
+    Summary: "1 canal nu a putut fi reîmprospătat. | {count} canale nu au putut fi reîmprospătate. | {count} de canale nu au putut fi reîmprospătate."
+    Toast: "Unele canale la care v-ați abonat nu au putut fi reîmprospătate. Faceți clic pentru a le vedea."
+    Retry Channel: "Reîncearcă {channel}"
+    Show All: "Afișează tot"
+    Show Fewer: "Afișează mai puțin"
   Cache Load Error: Fluxurile de abonamente salvate nu au putut fi încărcate.
   New video from {channel}: Videoclip nou de la {channel}
   New short from {channel}: Short nou de la {channel}
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: Postare nouă de la {channel}
   Mark As Unseen: Marchează ca nevăzut
   Copy Error Details: "Copiază detaliile tehnice"
-  Refresh Errors: "Canale care nu au putut fi actualizate: {channels}. Faceți clic pentru a vedea detaliile."
-  Refresh Error Channels More: "{channels} și încă {count} | {channels} și încă {count} | {channels} și încă {count}"
   Never show {type} from this channel in feeds again: Nu mai afișa niciodată conținut de tip {type} de pe acest canal în fluxuri
   Refreshing Subscription Videos: Se reîmprospătează videoclipurile din abonamente
   Refreshing Subscription Shorts: Se reîmprospătează videoclipurile Shorts din abonamente

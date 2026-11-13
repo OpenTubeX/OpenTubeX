@@ -1,5 +1,9 @@
 <template>
   <div>
+    <SubscriptionChannelErrors
+      v-if="channelErrorFeeds.length > 0"
+      :feeds="channelErrorFeeds"
+    />
     <FtFlexBox
       v-if="subscriptionCacheLoadFailed"
       class="cacheLoadError"
@@ -22,20 +26,6 @@
       v-else-if="showsLoadingPlaceholder && !isCommunity"
       :youtube-style-shorts="youtubeStyleShorts"
     />
-    <div
-      v-if="!displayIsLoading && visibleErrorChannels.length !== 0"
-    >
-      <h3> {{ $t("Subscriptions.Error Channels") }}</h3>
-      <FtFlexBox>
-        <FtChannelBubble
-          v-for="channel in visibleErrorChannels"
-          :key="channel.id"
-          :channel-name="channel.name"
-          :channel-id="channel.id"
-          :channel-thumbnail="channel.thumbnail"
-        />
-      </FtFlexBox>
-    </div>
     <FtFlexBox
       v-if="showsEmptyState"
     >
@@ -108,11 +98,11 @@ import { computed, reactive, ref } from 'vue'
 
 import FtAutoLoadNextPageWrapper from '../FtAutoLoadNextPageWrapper.vue'
 import FtButton from '../FtButton/FtButton.vue'
-import FtChannelBubble from '../FtChannelBubble/FtChannelBubble.vue'
 import FtElementList from '../FtElementList/FtElementList.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
 import FtSkeletonGrid from '../FtSkeletonGrid/FtSkeletonGrid.vue'
+import SubscriptionChannelErrors from '../SubscriptionChannelErrors/SubscriptionChannelErrors.vue'
 
 import store from '../../store/index'
 
@@ -153,9 +143,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  errorChannels: {
+  /** The feeds whose channel errors are listed, by default the one of `refreshTab` */
+  errorFeeds: {
     type: Array,
-    default: () => []
+    default: null
   },
   attemptedFetch: {
     type: Boolean,
@@ -232,12 +223,7 @@ const activeProfileHasSubscriptions = computed(() => {
   return store.getters.getActiveProfile.subscriptions.length > 0
 })
 
-// Refreshes cover the whole profile, so only list the errors of the shown channels
-const visibleErrorChannels = computed(() => {
-  if (store.getters.getActiveSubscriptionGroup === null) return props.errorChannels
-  const channelIds = new Set(store.getters.getActiveGroupSubscriptions.map(channel => channel.id))
-  return props.errorChannels.filter(channel => channelIds.has(channel.id))
-})
+const channelErrorFeeds = computed(() => props.errorFeeds ?? (props.refreshTab === null ? [] : [props.refreshTab]))
 
 const activeGroupIsEmpty = computed(() => {
   return store.getters.getActiveSubscriptionGroup !== null && store.getters.getActiveGroupSubscriptions.length === 0

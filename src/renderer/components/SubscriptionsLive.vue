@@ -3,7 +3,6 @@
     ref="tabUi"
     :is-loading="isLoading"
     :video-list="videoList"
-    :error-channels="errorChannels"
     :attempted-fetch="attemptedFetch"
     refresh-tab="live"
     @refresh="loadVideosForSubscriptionsFromRemote"
@@ -46,7 +45,6 @@ useKeepAliveEffectScope()
 
 const isLoading = ref(true)
 const videoList = shallowRef([])
-const errorChannels = ref([])
 const attemptedFetch = ref(false)
 /** @type {import('vue').Ref<number | null>} */
 const lastRemoteRefreshSuccessTimestamp = ref(null)
@@ -325,7 +323,6 @@ async function loadVideosForSubscriptionsFromRemote(automatic = false) {
   remoteRefreshRunning = true
   isLoading.value = true
   attemptedFetch.value = true
-  errorChannels.value = []
 
   // Whatever is cached is shown right away, the refresh then replaces it
   // channel by channel
@@ -337,8 +334,7 @@ async function loadVideosForSubscriptionsFromRemote(automatic = false) {
   try {
     refreshedVideos = await refreshSubscriptionLiveFromRemote({
       t,
-      automatic,
-      errorChannels: errorChannels.value
+      automatic
     })
     if (refreshedVideos !== null) {
       loadVideosFromCacheForAllActiveProfileChannels()

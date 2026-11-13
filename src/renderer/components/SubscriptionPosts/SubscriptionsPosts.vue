@@ -20,7 +20,6 @@
     ref="tabUi"
     :is-loading="isLoading"
     :video-list="postList"
-    :error-channels="errorChannels"
     :attempted-fetch="attemptedFetch"
     refresh-tab="posts"
     :is-community="true"
@@ -55,7 +54,6 @@ const postList = computed(() => {
   const forbiddenTitles = store.getters.getForbiddenTitlesToRemove
   return allPosts.value.filter(post => !forbiddenTitles.some(text => post.author.toLowerCase().includes(text)))
 })
-const errorChannels = ref([])
 const attemptedFetch = ref(false)
 /** @type {import('vue').Ref<number | null>} */
 const lastRemoteRefreshSuccessTimestamp = ref(null)
@@ -292,7 +290,6 @@ async function loadPostsForSubscriptionsFromRemote(automatic = false) {
   remoteRefreshRunning = true
   isLoading.value = true
   attemptedFetch.value = true
-  errorChannels.value = []
 
   // Whatever is cached is shown right away, the refresh then replaces it
   // channel by channel
@@ -304,8 +301,7 @@ async function loadPostsForSubscriptionsFromRemote(automatic = false) {
   try {
     refreshedPosts = await refreshSubscriptionPostsFromRemote({
       t,
-      automatic,
-      errorChannels: errorChannels.value
+      automatic
     })
     if (refreshedPosts !== null) {
       loadPostsFromCacheForAllActiveProfileChannels()

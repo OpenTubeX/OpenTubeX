@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: すべてのセクションが非表示です
   All sections hidden description: ホームをカスタマイズして、セクションを再表示してください。
 Subscriptions:
+  Channel Errors:
+    Summary: "{count} 件のチャンネルを更新できませんでした。"
+    Toast: "一部の登録チャンネルを更新できませんでした。クリックして表示します。"
+    Retry Channel: "{channel} を再試行"
+    Show All: "すべて表示"
+    Show Fewer: "表示を減らす"
   Cache Load Error: 保存済みの登録チャンネルのフィードを読み込めませんでした。
   New video from {channel}: "{channel}の新しい動画"
   New short from {channel}: "{channel}の新しいショート動画"
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: "{channel}の新しい投稿"
   Mark As Unseen: 未視聴にする
   Copy Error Details: "技術的な詳細をコピー"
-  Refresh Errors: "更新できなかったチャンネル: {channels}。クリックして詳細を表示します。"
-  Refresh Error Channels More: "{channels} ほか{count}件"
   Never show {type} from this channel in feeds again: このチャンネルの「{type}」をフィードに今後表示しない
   Refreshing Subscription Videos: 登録チャンネルの動画を更新中
   Refreshing Subscription Shorts: 登録チャンネルのショート動画を更新中

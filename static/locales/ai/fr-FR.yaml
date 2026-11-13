@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: Toutes les sections sont masquées
   All sections hidden description: Personnalisez l’accueil pour afficher à nouveau une section.
 Subscriptions:
+  Channel Errors:
+    Summary: "1 chaîne n’a pas pu être actualisée. | {count} chaînes n’ont pas pu être actualisées. | {count} chaînes n’ont pas pu être actualisées."
+    Toast: "Certains abonnements n’ont pas pu être actualisés. Cliquez pour les afficher."
+    Retry Channel: "Réessayer {channel}"
+    Show All: "Tout afficher"
+    Show Fewer: "Afficher moins"
   Cache Load Error: 'Impossible de charger vos flux d''abonnements enregistrés.'
   New video from {channel}: Nouvelle vidéo de {channel}
   New short from {channel}: Nouveau Short de {channel}
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: Nouveau post de {channel}
   Mark As Unseen: Marquer comme non vu
   Copy Error Details: "Copier les détails techniques"
-  Refresh Errors: "Chaînes qui n'ont pas pu être actualisées : {channels}. Cliquez pour voir les détails."
-  Refresh Error Channels More: "{channels} et {count} de plus | {channels} et {count} de plus | {channels} et {count} de plus"
   Never show {type} from this channel in feeds again: Ne plus jamais afficher les contenus de type {type} de cette chaîne dans les flux
   Refreshing Subscription Videos: Actualisation des vidéos des abonnements
   Refreshing Subscription Shorts: Actualisation des Shorts des abonnements

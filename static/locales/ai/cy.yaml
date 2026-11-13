@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: Mae pob adran wedi'i chuddio
   All sections hidden description: Addaswch yr hafan i ddangos adran eto.
 Subscriptions:
+  Channel Errors:
+    Summary: "Methwyd adnewyddu {count} o sianeli. | Methwyd adnewyddu 1 sianel. | Methwyd adnewyddu {count} sianel. | Methwyd adnewyddu {count} sianel. | Methwyd adnewyddu {count} sianel. | Methwyd adnewyddu {count} o sianeli."
+    Toast: "Methwyd adnewyddu rhai sianeli rydych wedi tanysgrifio iddynt. Cliciwch i'w gweld."
+    Retry Channel: "Ceisio {channel} eto"
+    Show All: "Dangos y cyfan"
+    Show Fewer: "Dangos llai"
   Cache Load Error: 'Nid oedd modd llwytho''ch ffrydiau tanysgrifio a gadwyd.'
   New video from {channel}: Fideo newydd gan {channel}
   New short from {channel}: Byr newydd gan {channel}
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: Postiad newydd gan {channel}
   Mark As Unseen: Marcio fel heb ei weld
   Copy Error Details: "Copïo manylion technegol"
-  Refresh Errors: "Sianeli na ellid eu hadnewyddu: {channels}. Cliciwch i weld y manylion."
-  Refresh Error Channels More: "{channels} a {count} arall | {channels} a {count} arall | {channels} a {count} arall | {channels} a {count} arall | {channels} a {count} arall | {channels} a {count} arall"
   Never show {type} from this channel in feeds again: Peidio byth â dangos {type} o’r sianel hon mewn ffrydiau eto
   Refreshing Subscription Videos: Wrthi'n adnewyddu fideos tanysgrifiadau
   Refreshing Subscription Shorts: Wrthi'n adnewyddu Byrion tanysgrifiadau

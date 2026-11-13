@@ -130,6 +130,12 @@ Home Page:
   All sections hidden: Todas as seções estão ocultas
   All sections hidden description: Personalize a página inicial para mostrar uma seção novamente.
 Subscriptions:
+  Channel Errors:
+    Summary: "Não foi possível atualizar 1 canal. | Não foi possível atualizar {count} canais. | Não foi possível atualizar {count} canais."
+    Toast: "Não foi possível atualizar alguns canais inscritos. Clique para vê-los."
+    Retry Channel: "Tentar novamente {channel}"
+    Show All: "Mostrar tudo"
+    Show Fewer: "Mostrar menos"
   Cache Load Error: Não foi possível carregar seus feeds de inscrições salvos.
   New video from {channel}: Novo vídeo de {channel}
   New short from {channel}: Novo Short de {channel}
@@ -137,8 +143,6 @@ Subscriptions:
   New post from {channel}: Novo post de {channel}
   Mark As Unseen: Marcar como não visto
   Copy Error Details: "Copiar detalhes técnicos"
-  Refresh Errors: "Canais que não puderam ser atualizados: {channels}. Clique para ver os detalhes."
-  Refresh Error Channels More: "{channels} e mais {count} | {channels} e mais {count} | {channels} e mais {count}"
   Never show {type} from this channel in feeds again: Nunca mais mostrar {type} deste canal nos feeds
   Refreshing Subscription Videos: Atualizando os vídeos das inscrições
   Refreshing Subscription Shorts: Atualizando os Shorts das inscrições

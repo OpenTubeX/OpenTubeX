@@ -192,6 +192,12 @@ Home Page:
   All sections hidden: Alle afdelings is versteek
   All sections hidden description: Pas Tuis aan om ’n afdeling weer te wys.
 Subscriptions:
+  Channel Errors:
+    Summary: "1 kanaal kon nie herlaai word nie. | {count} kanale kon nie herlaai word nie."
+    Toast: "Sommige ingetekende kanale kon nie herlaai word nie. Klik om hulle te sien."
+    Retry Channel: "Probeer {channel} weer"
+    Show All: "Wys alles"
+    Show Fewer: "Wys minder"
   Cache Load Error: Jou gestoorde intekeningvoere kon nie gelaai word nie.
   New video from {channel}: Nuwe video van {channel}
   New short from {channel}: Nuwe kortvideo van {channel}
@@ -199,10 +205,7 @@ Subscriptions:
   New post from {channel}: Nuwe plasing van {channel}
   Mark As Unseen: Merk as ongesien
   Copy Error Details: Kopieer tegniese besonderhede
-  Refresh Errors: 'Kanale wat nie verfris kon word nie: {channels}. Klik om besonderhede te sien.'
-  Refresh Error Channels More: '{channels} en {count} meer | {channels} en {count} meer'
   Never show {type} from this channel in feeds again: Moet nooit weer {type} van hierdie kanaal in voere wys nie
-  Error Channels: Kanale met foute
   This profile has a large number of subscriptions. Forcing RSS to avoid rate limiting: Hierdie profiel het ’n groot aantal intekeninge.  RSS word afgedwing om tempobeperking te vermy
   Your Subscription list is currently empty. Start adding subscriptions to see them here.: U intekeninglys is tans leeg. Om intekeninge in te voer, maak Instellings → Data oop en kies Voer intekenings in. U kan ook na ’n kanaal soek en daarop inteken.
   Disabled Automatic Fetching: U het outomatiese ophaal van intekeninge gedeaktiveer. Verfris intekeninge om hulle hier te sien.

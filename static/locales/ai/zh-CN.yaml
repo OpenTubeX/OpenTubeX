@@ -161,6 +161,12 @@ Home Page:
   All sections hidden: 所有版块均已隐藏
   All sections hidden description: 自定义首页以重新显示版块。
 Subscriptions:
+  Channel Errors:
+    Summary: "{count} 个频道无法刷新。"
+    Toast: "部分已订阅频道无法刷新。点击查看。"
+    Retry Channel: "重试 {channel}"
+    Show All: "显示全部"
+    Show Fewer: "收起"
   Cache Load Error: 无法加载已保存的订阅源。
   New video from {channel}: "{channel} 发布了新视频"
   New short from {channel}: "{channel} 发布了新短视频"
@@ -168,8 +174,6 @@ Subscriptions:
   New post from {channel}: "{channel} 发布了新帖子"
   Mark As Unseen: 标记为未看过
   Copy Error Details: "复制技术详情"
-  Refresh Errors: "无法刷新的频道：{channels}。点击查看详情。"
-  Refresh Error Channels More: "{channels} 以及其他 {count} 个频道"
   Never show {type} from this channel in feeds again: 不再在动态中显示此频道的{type}
   Refreshing Subscription Videos: 正在刷新订阅视频
   Refreshing Subscription Shorts: 正在刷新订阅短视频

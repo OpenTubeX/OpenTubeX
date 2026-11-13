@@ -190,6 +190,12 @@ Home Page:
   All sections hidden: تمام سیکشن پوشیدہ ہیں
   All sections hidden description: کسی سیکشن کو دوبارہ دکھانے کے لیے ہوم کو حسب ضرورت بنائیں۔
 Subscriptions:
+  Channel Errors:
+    Summary: "1 چینل ریفریش نہیں ہو سکا۔ | {count} چینلز ریفریش نہیں ہو سکے۔"
+    Toast: "کچھ سبسکرائب شدہ چینلز ریفریش نہیں ہو سکے۔ انہیں دیکھنے کے لیے کلک کریں۔"
+    Retry Channel: "{channel} دوبارہ آزمائیں"
+    Show All: "سب دکھائیں"
+    Show Fewer: "کم دکھائیں"
   Cache Load Error: آپ کی محفوظ کردہ سبسکرپشن فیڈز لوڈ نہیں ہو سکیں۔
   New video from {channel}: '{channel} کی نئی ویڈیو'
   New short from {channel}: '{channel} کا نیا شارٹ'
@@ -197,8 +203,6 @@ Subscriptions:
   New post from {channel}: '{channel} کی نئی پوسٹ'
   Mark As Unseen: نہ دیکھا گیا نشان زد کریں
   Copy Error Details: تکنیکی تفصیلات کاپی کریں
-  Refresh Errors: 'وہ چینلز جو ریفریش نہیں ہو سکے: {channels}۔ تفصیلات دیکھنے کے لیے کلک کریں۔'
-  Refresh Error Channels More: '{channels} اور {count} مزید | {channels} اور {count} مزید'
   Never show {type} from this channel in feeds again: اس چینل کی {type} فیڈز میں دوبارہ کبھی نہ دکھائیں
   Refreshing Subscription Videos: سبسکرپشن ویڈیوز ریفریش ہو رہی ہیں
   Refreshing Subscription Shorts: سبسکرپشن شارٹس ریفریش ہو رہے ہیں

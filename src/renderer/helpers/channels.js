@@ -3,7 +3,7 @@ import { getLocalChannel, getLocalChannelId, parseLocalChannelHeader, parseLocal
 import { requestWithFallback } from './api/fallback'
 import { usesInvidiousApi } from '../../apiBackends'
 
-const isMissingChannelError = err => err?.message === 'This channel does not exist.'
+export const isMissingChannelError = err => err?.message === 'This channel does not exist.'
 
 /**
  * @param {string} id

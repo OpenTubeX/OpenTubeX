@@ -302,13 +302,15 @@ Subscriptions:
   New post from {channel}: New post from {channel}
   Mark As Unseen: Mark As Unseen
   Copy Error Details: "Copy technical details"
-  Refresh Errors: "Channels that could not be refreshed: {channels}. Click to view details."
-  Refresh Error Channels More: "{channels} and {count} more | {channels} and {count} more"
+  Channel Errors:
+    Summary: 1 channel could not be refreshed. | {count} channels could not be refreshed.
+    Toast: Some subscribed channels could not be refreshed. Click to view them.
+    Retry Channel: Retry {channel}
+    Show All: Show all
+    Show Fewer: Show fewer
   Never show {type} from this channel in feeds again: Never show {type} from this channel in feeds again
     # On Subscriptions Page
   Subscriptions: Subscriptions
-  # channels that were likely deleted
-  Error Channels: Channels with Errors
   'This profile has a large number of subscriptions. Forcing RSS to avoid rate limiting': This profile has a large number of subscriptions.  Forcing RSS to avoid rate limiting
   'Your Subscription list is currently empty. Start adding subscriptions to see them here.': Your Subscription list is currently empty. To import subscriptions, open Settings → Data and select Import Subscriptions. You can also search for a channel and subscribe to it.
   Disabled Automatic Fetching: You have disabled automatic subscription fetching. Refresh subscriptions to see them here.
