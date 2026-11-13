@@ -32,6 +32,7 @@ export function createTheatreModeAnimator() {
   let clippedLayout = null
 
   function cleanUp() {
+    document.removeEventListener('scroll', placeFixedBackgrounds, { capture: true })
     insetElements.forEach(element => element.style.removeProperty('--fixed-background-inset'))
     insetElements.clear()
     clippedLayout?.style.removeProperty('overflow-x')
@@ -46,15 +47,38 @@ export function createTheatreModeAnimator() {
 
   /** @param {Animation} animation */
   function track(animation) {
-    animation.addEventListener('finish', () => {
-      // A cancelled run may still deliver a queued finish event.
+    const end = () => {
+      // A cancelled run may still deliver queued events.
       if (!animations.includes(animation)) { return }
       animations = animations.filter(item => item !== animation)
       if (animations.length === 0) {
         cleanUp()
       }
-    })
+    }
+    animation.addEventListener('finish', end)
+    animation.addEventListener('cancel', end)
     animations.push(animation)
+  }
+
+  /**
+   * Covers the viewport with the fixed layers of each animated area, measured
+   * from the area's box without its animated translation. Scrolling moves
+   * that box, so this runs again on scroll.
+   */
+  function placeFixedBackgrounds() {
+    const { clientWidth: viewportWidth, clientHeight: viewportHeight } = document.documentElement
+    insetElements.forEach(element => {
+      const rect = element.getBoundingClientRect()
+      const { m41: translateX, m42: translateY } = new DOMMatrixReadOnly(getComputedStyle(element).transform)
+      const left = rect.left - translateX + element.clientLeft
+      const top = rect.top - translateY + element.clientTop
+      element.style.setProperty('--fixed-background-inset', [
+        -top,
+        left + element.clientWidth - viewportWidth,
+        top + element.clientHeight - viewportHeight,
+        -left
+      ].map(value => `${value}px`).join(' '))
+    })
   }
 
   /**
@@ -64,25 +88,14 @@ export function createTheatreModeAnimator() {
    * snap it back when the animation ends. Place the layers over the viewport
    * and move them against the area instead.
    * @param {HTMLElement} element
-   * @param {DOMRect} rect
    * @param {number} offsetX
    * @param {number} offsetY
    */
-  function keepFixedBackgroundsInPlace(element, rect, offsetX, offsetY) {
+  function keepFixedBackgroundsInPlace(element, offsetX, offsetY) {
     const layers = element.querySelectorAll('.fixedBackgroundLayer')
     if (layers.length === 0) { return }
 
-    const { clientWidth: viewportWidth, clientHeight: viewportHeight } = document.documentElement
-    const left = rect.left + element.clientLeft
-    const top = rect.top + element.clientTop
     insetElements.add(element)
-    element.style.setProperty('--fixed-background-inset', [
-      -top,
-      left + element.clientWidth - viewportWidth,
-      top + element.clientHeight - viewportHeight,
-      -left
-    ].map(value => `${value}px`).join(' '))
-
     layers.forEach(layer => {
       track(applyAnimationSpeed(layer.animate([
         { transform: `translate(${-offsetX}px, ${-offsetY}px)` },
@@ -135,9 +148,14 @@ export function createTheatreModeAnimator() {
       ], ANIMATION_OPTIONS))
       track(animation)
       if (!isVideoPlayer) {
-        keepFixedBackgroundsInPlace(element, nextRect, offsetX, offsetY)
+        keepFixedBackgroundsInPlace(element, offsetX, offsetY)
       }
     })
+
+    if (insetElements.size > 0) {
+      placeFixedBackgrounds()
+      document.addEventListener('scroll', placeFixedBackgrounds, { capture: true, passive: true })
+    }
   }
 
   return { animate, cancel }
