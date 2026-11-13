@@ -319,6 +319,22 @@ test.describe('Channels on other platforms', () => {
       await newTab.click({ button: 'right' })
       await page.getByRole('menu', { name: 'Context menu' }).getByRole('menuitem', { name: 'Reload All Feeds' }).click()
       await expect.poll(() => requests.length).toBeGreaterThan(requestCount)
+
+      // Also while the New feed shows only other platforms
+      let rssRequests = 0
+      await page.route('https://rss.example.test/feed.xml', (route) => {
+        rssRequests++
+        return route.fulfill({ contentType: 'application/rss+xml', body: '<?xml version="1.0"?><rss version="2.0"><channel><title>Feed</title></channel></rss>' })
+      })
+      await page.evaluate(() => Promise.all([
+        window.$store.dispatch('updateEnableRssFeeds', true),
+        window.$store.dispatch('updateFollowedRssFeeds', [{ url: 'https://rss.example.test/feed.xml', title: 'Feed' }])
+      ]))
+      await page.locator('[data-new-feed-platforms-tab]').click()
+      const rssRequestCount = rssRequests
+      await newTab.click({ button: 'right' })
+      await page.getByRole('menu', { name: 'Context menu' }).getByRole('menuitem', { name: 'Reload All Feeds' }).click()
+      await expect.poll(() => rssRequests).toBeGreaterThan(rssRequestCount)
     })
 
     test('brings back uploads that another device marked as unseen after they were watched here', async ({ page }) => {

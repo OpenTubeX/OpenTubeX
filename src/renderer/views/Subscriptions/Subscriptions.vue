@@ -1737,8 +1737,8 @@ async function handleFeedReloadRequest(payload) {
   const viewTab = payload.feedTab === 'posts'
     ? 'community'
     : payload.feedTab === 'all' ? 'new' : payload.feedTab
-  // The New feed's RSS tab only refreshes the RSS feeds
-  if (viewTab === currentTab.value && !currentNewFeedRssTab.value) {
+  // The New feed's RSS and Platforms tabs only refresh their own feeds
+  if (viewTab === currentTab.value && !currentNewFeedRssTab.value && !currentPlatformsView.value) {
     refreshCurrentTab()
     return
   }
