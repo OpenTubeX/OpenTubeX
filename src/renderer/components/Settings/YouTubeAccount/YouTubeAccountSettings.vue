@@ -209,7 +209,9 @@ async function syncNow() {
 .accountWarningIcon {
   flex: none;
   margin-block-start: 0.15em;
-  color: var(--warning-color);
+
+  /* Follows the text's lightness, so the icon stays readable on light and dark cards. */
+  color: oklch(from var(--primary-text-color) clamp(0.5, l, 0.82) 0.15 75);
 }
 
 /* Lines up with the section's controls, which are padded divs. */
