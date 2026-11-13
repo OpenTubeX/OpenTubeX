@@ -6,14 +6,8 @@
       <ThemeGallery />
     </div>
     <FtFlexBox class="themeSelectRow">
-      <FtSelect
+      <IconPackSelect
         size-to-content
-        :placeholder="$t('Settings.Theme Settings.Icon Pack.Icon Pack')"
-        :value="iconPack"
-        setting-key="iconPack"
-        :select-names="iconPackNames"
-        :select-values="ICON_PACKS"
-        :icon="['fas', 'icons']"
         @change="updateIconPack"
       />
       <FtSelect
@@ -60,11 +54,11 @@ import FtFlexBox from '../../ft-flex-box/ft-flex-box.vue'
 import AppIconSettings from './AppIconSettings.vue'
 import TrayIconSettings from './TrayIconSettings.vue'
 import ThemeGallery from './ThemeGallery.vue'
+import IconPackSelect from './IconPackSelect.vue'
 
 import store from '../../../store/index'
 
 import { showToast } from '../../../helpers/utils'
-import { ICON_PACKS } from '../../../icons/iconPackState'
 import { DEFAULT_APP_FONT, getAppFontFamily, normalizeAppFont, SYSTEM_APP_FONT } from '../../../helpers/appFont'
 
 const { locale, t } = useI18n()
@@ -72,11 +66,6 @@ const IS_IOS = !!process.env.IS_IOS
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 /** @type {boolean} */
 const usingElectron = process.env.IS_ELECTRON
-
-const iconPackNames = computed(() => [
-  t('Settings.Theme Settings.Icon Pack.Material Symbols'),
-  t('Settings.Theme Settings.Icon Pack.Remix Icon')
-])
 
 const systemFonts = ref([])
 let systemFontsPromise = null
@@ -134,8 +123,6 @@ async function loadSystemFonts() {
 
   await systemFontsPromise
 }
-
-const iconPack = computed(() => store.getters.getIconPack)
 
 /**
  * @param {import('../../../icons/iconPackState').IconPackId} value

@@ -358,6 +358,11 @@
                       compact
                       @change="updateSetting('EnableSubtitlesByDefault', $event)"
                     />
+                    <IconPackSelect
+                      v-else-if="setting.id === 'iconPack'"
+                      class="quickSelect"
+                      @change="updateBasicQuickSetting('iconPack', $event)"
+                    />
                     <FtSelect
                       v-else-if="setting.id === 'listType'"
                       class="quickSelect"
@@ -485,6 +490,7 @@ import { useI18n } from 'vue-i18n'
 
 import FtCard from '../ft-card/ft-card.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
+import IconPackSelect from '../Settings/Appearance/IconPackSelect.vue'
 import FtMobileSheet from '../FtMobileSheet/FtMobileSheet.vue'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import FtSlider from '../FtSlider/FtSlider.vue'
