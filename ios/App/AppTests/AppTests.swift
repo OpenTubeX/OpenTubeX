@@ -947,6 +947,52 @@ final class AppTests: XCTestCase {
         XCTAssertFalse(isConnectionFailure(URLError(.serverCertificateUntrusted)))
     }
 
+    func testRumblePagesKeepTheCookieOfTheRedirectToTheSamePage() async throws {
+        let url = "https://rumble.com/search/video?q=news"
+        var cookies: [String?] = []
+        RumbleStubProtocol.respond = { request in
+            let cookie = request.value(forHTTPHeaderField: "Cookie")
+            cookies.append(cookie)
+            // URLSession joins the Set-Cookie headers of a response
+            return cookie == nil
+                ? (307, ["Location": url, "Set-Cookie": [
+                    "RNSC=1;max-age=3600;path=/;domain=rumble.com;secure;HttpOnly;SameSite=lax",
+                    "__cf_bm=token; HttpOnly; SameSite=None; Partitioned; Secure; Path=/; Domain=rumble.com; Expires=Fri, 01 Jan 2100 00:00:00 GMT",
+                    // Expired, so it isn't sent
+                    "old=value; Path=/; Expires=Sat, 01-Jan-2000 00:00:00 GMT",
+                ].joined(separator: ", ")], "")
+                : (200, [:], "<html>results</html>")
+        }
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [RumbleStubProtocol.self]
+        let pages = RumblePages(configuration: configuration)
+
+        let page = try await pages.fetch(url)
+        XCTAssertEqual(page.status, 200)
+        XCTAssertEqual(page.text, "<html>results</html>")
+        guard cookies.count == 2 else { return XCTFail("Requested the page \(cookies.count) times") }
+        XCTAssertNil(cookies[0])
+        XCTAssertEqual(Set(cookies[1]?.components(separatedBy: "; ") ?? []), ["RNSC=1", "__cf_bm=token"])
+    }
+
+    func testRumblePagesLoadOnlyRumblePages() async throws {
+        XCTAssertTrue(RumblePages.isRumblePage(URL(string: "https://rumble.com/c/Example?page=2")))
+        for url in ["http://rumble.com/c/Example", "https://rumble.com.example.test/c/Example", "https://notrumble.com/c/Example",
+                    "https://user@rumble.com/c/Example", "https://rumble.com:8443/c/Example", "file:///etc/hosts"] {
+            XCTAssertFalse(RumblePages.isRumblePage(URL(string: url)), url)
+        }
+        // Nor does it follow redirects elsewhere
+        RumbleStubProtocol.respond = { _ in (302, ["Location": "https://example.test/"], "") }
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [RumbleStubProtocol.self]
+        do {
+            _ = try await RumblePages(configuration: configuration).fetch("https://rumble.com/c/Example")
+            XCTFail("Followed a redirect away from Rumble")
+        } catch {
+            XCTAssertEqual(error.localizedDescription, "Not a Rumble page")
+        }
+    }
+
     func testCommandPalettePlaysNativeDownloadAndRechecksDeletedFile() async throws {
         try await openApplication()
         let fixture = try XCTUnwrap(Bundle(for: Self.self).url(forResource: "fixture", withExtension: "mp4"))
@@ -3394,4 +3440,19 @@ private final class BlockingCopyObserver: NSObject, FileManagerDelegate {
         }
         return true
     }
+}
+
+/// Answers the requests of a test's session, which only reach Rumble hosts.
+private final class RumbleStubProtocol: URLProtocol {
+    static var respond: (URLRequest) -> (Int, [String: String], String) = { _ in (500, [:], "") }
+    override class func canInit(with request: URLRequest) -> Bool { true }
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+    override func startLoading() {
+        let (status, headers, body) = Self.respond(request)
+        let response = HTTPURLResponse(url: request.url!, statusCode: status, httpVersion: "HTTP/1.1", headerFields: headers)!
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: Data(body.utf8))
+        client?.urlProtocolDidFinishLoading(self)
+    }
+    override func stopLoading() {}
 }

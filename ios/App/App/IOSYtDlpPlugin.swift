@@ -232,7 +232,7 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "IOSYtDlpPlugin"
     public let jsName = "YtDlp"
     public let pluginMethods: [CAPPluginMethod] = [
-        "info", "extract", "registerMedia", "download", "list", "configure", "control", "queue", "clear", "remove", "open", "play", "cache", "checkUpdate", "update"
+        "info", "extract", "registerMedia", "download", "list", "configure", "control", "queue", "clear", "remove", "open", "play", "cache", "checkUpdate", "update", "fetchRumblePage"
     ].map { CAPPluginMethod(name: $0, returnType: CAPPluginReturnPromise) }
 
     private let exports = DispatchQueue(label: "org.opentubex.ytdlp.export", qos: .userInitiated)
@@ -771,6 +771,16 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
 
+    @objc func fetchRumblePage(_ call: CAPPluginCall) {
+        Task {
+            do {
+                let page = try await RumblePages.shared.fetch(call.getString("url"))
+                call.resolve(["status": page.status, "text": page.text])
+            } catch {
+                call.reject(error.localizedDescription)
+            }
+        }
+    }
     @objc func checkUpdate(_ call: CAPPluginCall) { call.resolve(["available": false]) }
     @objc func update(_ call: CAPPluginCall) {
         IOSYtDlpRuntime.run(["operation": "version"]) { result in

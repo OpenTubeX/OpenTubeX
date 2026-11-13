@@ -4,12 +4,12 @@ import test from 'node:test'
 
 import { sourceUrl } from '../helpers/module-stubs.mjs'
 
-// The Android bridge loads with a dynamic import, which the hooks have to
+// The mobile bridge loads with a dynamic import, which the hooks have to
 // cover after the module loaded, so they stay registered for this file
 const bridge = { calls: 0, fetch: () => new Promise(() => {}) }
 globalThis.__platformFetchBridge = bridge
 const stubs = {
-  [sourceUrl('src/renderer/helpers/ytDlp.js')]: 'export const fetchAndroidRumblePage = url => { globalThis.__platformFetchBridge.calls++; return globalThis.__platformFetchBridge.fetch(url) }',
+  [sourceUrl('src/renderer/helpers/ytDlp.js')]: 'export const fetchMobileRumblePage = url => { globalThis.__platformFetchBridge.calls++; return globalThis.__platformFetchBridge.fetch(url) }',
   [sourceUrl('src/renderer/helpers/rssHub.js')]: 'export const appFetch = () => { throw new Error("Unexpected request") }'
 }
 registerHooks({
@@ -24,7 +24,7 @@ registerHooks({
 })
 const { getPlatformFetch } = await import(sourceUrl('src/renderer/helpers/platformFetch.js'))
 
-test('stops waiting for an Android Rumble page once its request aborts', async (t) => {
+test('stops waiting for a mobile Rumble page once its request aborts', async (t) => {
   const env = process.env
   process.env = { ...env, IS_CAPACITOR: 'true' }
   t.after(() => { process.env = env })

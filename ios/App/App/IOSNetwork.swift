@@ -296,3 +296,75 @@ func isConnectionFailure(_ error: Error) -> Bool {
     guard let code = (error as? URLError)?.code else { return false }
     return connectionFailures.contains(code)
 }
+
+/// Loads Rumble pages for the renderer. Rumble's Cloudflare front answers
+/// requests without its cookie with a redirect to the same page, so the cookies
+/// stay here, apart from the app's other requests, which keep none.
+final class RumblePages: NSObject, URLSessionTaskDelegate {
+    static let shared = RumblePages()
+    private static let maxRedirects = 10
+    private static let maxPageBytes = 10_000_000
+    // For the page with all its redirects
+    private static let timeout: TimeInterval = 30
+    // The user agent of the app's other requests
+    private static let userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    private var session: URLSession!
+    // Only Rumble's pages use them, so names are enough
+    private var cookies: [String: HTTPCookie] = [:]
+    private let lock = NSLock()
+
+    init(configuration: URLSessionConfiguration = .ephemeral) {
+        super.init()
+        configuration.urlCache = nil
+        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+        // The request timeout only limits the time between bytes
+        configuration.timeoutIntervalForResource = Self.timeout
+        configuration.httpCookieStorage = nil
+        configuration.httpShouldSetCookies = false
+        session = URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
+    }
+
+    static func isRumblePage(_ url: URL?) -> Bool {
+        guard let url, url.scheme == "https", url.user == nil, url.password == nil, url.port == nil,
+              let host = url.host?.lowercased() else { return false }
+        return host == "rumble.com" || host.hasSuffix(".rumble.com")
+    }
+
+    func fetch(_ raw: String?) async throws -> (status: Int, text: String) {
+        var url = raw.flatMap(URL.init(string:))
+        let deadline = Date().addingTimeInterval(Self.timeout)
+        var redirects = 0
+        while true {
+            guard let target = url, Self.isRumblePage(target) else { throw Self.error("Not a Rumble page") }
+            let remaining = deadline.timeIntervalSinceNow
+            if remaining <= 0 { throw Self.error("Timed out loading the Rumble page") }
+            var request = URLRequest(url: target, timeoutInterval: remaining)
+            request.setValue(Self.userAgent, forHTTPHeaderField: "User-Agent")
+            request.setValue("text/html", forHTTPHeaderField: "Accept")
+            let current = lock.withLock { cookies.values.filter { ($0.expiresDate ?? .distantFuture) > Date() } }
+            for (name, value) in HTTPCookie.requestHeaderFields(with: current) { request.setValue(value, forHTTPHeaderField: name) }
+            let (data, response) = try await session.data(for: request)
+            guard let response = response as? HTTPURLResponse else { throw Self.error("Missing HTTP response") }
+            let received = HTTPCookie.cookies(withResponseHeaderFields: response.allHeaderFields as? [String: String] ?? [:], for: target)
+            lock.withLock { for cookie in received { cookies[cookie.name] = cookie } }
+            if (300..<400).contains(response.statusCode), let location = response.value(forHTTPHeaderField: "Location") {
+                if redirects == Self.maxRedirects { throw Self.error("Too many redirects") }
+                redirects += 1
+                url = URL(string: location, relativeTo: target)?.absoluteURL
+                continue
+            }
+            if data.count > Self.maxPageBytes { throw Self.error("Rumble page is too large") }
+            return (response.statusCode, String(decoding: data, as: UTF8.self))
+        }
+    }
+
+    // Redirects return here to be checked and to keep their cookies
+    func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
+                    newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
+        completionHandler(nil)
+    }
+
+    private static func error(_ message: String) -> NSError {
+        NSError(domain: "RumblePages", code: 1, userInfo: [NSLocalizedDescriptionKey: message])
+    }
+}
