@@ -148,7 +148,7 @@ jobs:
         script: |
           timeout 60 sh -c "until adb root; do sleep 2; done" && adb wait-for-device && timeout 30 sh -c "until adb shell id | grep -q uid=0; do sleep 1; done"
           adb shell 'echo 100 > /sys/module/mac80211/parameters/beacon_loss_count'
-          adb unroot && adb wait-for-device && timeout 30 sh -c "until adb shell id | grep -q uid=2000; do sleep 1; done"
+          timeout 60 sh -c "until adb unroot; do sleep 2; done" && adb wait-for-device && timeout 30 sh -c "until adb shell id | grep -q uid=2000; do sleep 1; done"
           adb shell cmd wifi set-wifi-enabled disabled
           timeout 60 sh -c "until adb shell cmd wifi status | grep -q 'Wifi is disabled'; do sleep 1; done"
           adb shell cmd wifi set-wifi-enabled enabled
