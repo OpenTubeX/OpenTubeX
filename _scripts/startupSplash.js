@@ -6,7 +6,7 @@ const { readFileSync } = require('fs')
 // sequential calls, so animating there made it about three times slower. The
 // boot script marks a launch without a cached appearance as the first one, and
 // the whole splash holds still on it.
-const STILL_SPLASH = '\n.startupSplash[data-first-launch] *, .startupSplash[data-first-launch] *::before { animation: none; }\n'
+const STILL_SPLASH = '\n:root[data-first-launch] .startupSplash *, :root[data-first-launch] .startupSplash *::before { animation: none; }\n'
 
 // Reuse the app's 9-sided cookie for the logo's container and, as a mask
 // image, for the hole the reveal grows through the splash.

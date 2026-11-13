@@ -8,11 +8,7 @@ const WINDOW_TITLE_TRANSLATION_KEYS = {
   'Most Popular': 'Most Popular',
   'Your Playlists': 'User Playlists.Your Playlists',
   History: 'History.History',
-  Stats: 'Stats.Stats',
-  Settings: 'Settings.Settings',
-  About: 'About.About',
-  'Profile Manager': 'Profile.Profile Manager',
-  Playlist: 'Playlist.Playlist'
+  Stats: 'Stats.Stats'
 }
 
 /**

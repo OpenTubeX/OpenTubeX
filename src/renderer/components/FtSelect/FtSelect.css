@@ -650,6 +650,13 @@
   background: var(--primary-color);
 }
 
+/* Match the radio's size so icons read clearly in touch-sized rows. */
+.phonePicker .optionIcon {
+  flex-basis: 20px;
+  font-size: 20px;
+  inline-size: 20px;
+}
+
 .phonePicker .optionName {
   flex: 1;
   white-space: normal;

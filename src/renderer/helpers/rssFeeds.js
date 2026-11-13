@@ -639,7 +639,7 @@ export async function updateMissingRssFeedAvatars(results) {
   if (avatars.size === 0) return
 
   // Feeds can change while the lookups run
-  await store.dispatch('updateFollowedRssFeeds', store.getters.getFollowedRssFeeds.map(feed => (
+  await store.dispatch('updateFollowedRssFeeds', feeds => feeds.map(feed => (
     avatars.has(feed.url) && !feed.avatar ? { ...feed, avatar: avatars.get(feed.url) } : feed
   )))
 }

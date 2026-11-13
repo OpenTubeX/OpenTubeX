@@ -108,7 +108,11 @@ test('external media resumes its last playback position after reopening and rest
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   const mediaUrl = 'https://www.twitch.tv/videos/123456789'
   await prepareTwitchYtDlp(app, page, mediaUrl, false)
-  await page.evaluate(() => window.$store.dispatch('updateHideSideBarOnWatchPages', false))
+  // Leaving unloads the media, so reopening it restores the saved position.
+  await page.evaluate(async () => {
+    await window.$store.dispatch('updateHideSideBarOnWatchPages', false)
+    await window.$store.dispatch('updateKeepPlayingOnNavigation', false)
+  })
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
   const video = await waitForPlayback(page)
@@ -168,7 +172,11 @@ test('external media resets completed playback and clears positions with watch h
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   const mediaUrl = 'https://www.twitch.tv/videos/123456789'
   await prepareTwitchYtDlp(app, page, mediaUrl, false)
-  await page.evaluate(() => window.$store.dispatch('updateHideSideBarOnWatchPages', false))
+  // Leaving unloads the media, so reopening it restores the saved position.
+  await page.evaluate(async () => {
+    await window.$store.dispatch('updateHideSideBarOnWatchPages', false)
+    await window.$store.dispatch('updateKeepPlayingOnNavigation', false)
+  })
   const open = async () => {
     await page.locator(sel.searchInput).fill(mediaUrl)
     await page.locator(sel.searchInput).press('Enter')
@@ -255,7 +263,11 @@ test('external media restarts when its extracted duration is shorter than the sa
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   const mediaUrl = 'https://www.twitch.tv/videos/123456789'
   await prepareTwitchYtDlp(app, page, mediaUrl, false)
-  await page.evaluate(() => window.$store.dispatch('updateHideSideBarOnWatchPages', false))
+  // Leaving unloads the media, so reopening it restores the saved position.
+  await page.evaluate(async () => {
+    await window.$store.dispatch('updateHideSideBarOnWatchPages', false)
+    await window.$store.dispatch('updateKeepPlayingOnNavigation', false)
+  })
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
   let video = await waitForPlayback(page)
@@ -270,53 +282,63 @@ test('external media restarts when its extracted duration is shorter than the sa
   expect(await video.evaluate(element => element.currentTime)).toBeLessThan(2)
 })
 
+/**
+ * Serves a looping video whose separate soundtrack is longer than it.
+ * @param {() => Promise<void> | null} waitForAudio delays the soundtrack's media requests
+ */
+async function prepareCompanionAudioYtDlp(app, page, waitForAudio = () => null) {
+  const videoUrl = 'https://clips.example.test/video.mp4'
+  const audioUrl = 'https://clips.example.test/audio.m4a'
+  const executable = path.join(app.userDataDir, 'external-resume-audio.sh')
+  const response = JSON.stringify({
+    title: 'Looping video with a longer soundtrack',
+    formats: [
+      { format_id: 'audio', url: audioUrl, protocol: 'https', ext: 'm4a', vcodec: 'none', acodec: 'mp4a.40.2' },
+      { format_id: 'video', url: videoUrl, protocol: 'https', ext: 'mp4', acodec: 'none' },
+    ]
+  })
+  await writeFile(executable, ['#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+  `printf '%s\\n' '${response}'`,
+  ].join('\n'))
+  await chmod(executable, 0o755)
+  for (const [url, file, contentType] of [
+    [videoUrl, 'post-live-video.mp4.b64', 'video/mp4'],
+    [audioUrl, 'post-live-long-audio.m4a.b64', 'audio/mp4'],
+  ]) {
+    const body = Buffer.from((await readFile(path.join(repoRoot, 'e2e/fixtures/media', file), 'utf8')).replaceAll('\n', ''), 'base64')
+    await page.route(`${url}*`, async route => {
+      if (url === audioUrl && route.request().resourceType() === 'media') await waitForAudio()
+      const range = /bytes=(\d+)-(\d*)/.exec(route.request().headers().range ?? '')
+      const start = range ? Number(range[1]) : 0
+      const end = range?.[2] ? Math.min(Number(range[2]), body.length - 1) : body.length - 1
+      return route.fulfill({
+        status: range ? 206 : 200,
+        contentType,
+        headers: { 'accept-ranges': 'bytes', 'content-length': String(end - start + 1), ...(range ? { 'content-range': `bytes ${start}-${end}/${body.length}` } : {}) },
+        body: body.subarray(start, end + 1)
+      })
+    })
+  }
+  await choosePickerPaths(app, page, { ytDlpPath: executable })
+  await page.evaluate(async () => {
+    const store = window.$store
+    await store.dispatch('updateYtDlpSource', 'system')
+    await store.dispatch('updateHideSideBarOnWatchPages', false)
+  })
+}
+
 for (const seekBeforeMetadata of [false, true]) {
   test(seekBeforeMetadata
     ? 'external media preserves seeks made before companion metadata arrives'
     : 'external media resumes and clears the longer companion-audio timeline', async ({ app, page }) => {
     test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
     const mediaUrl = 'https://clips.example.test/clip'
-    const videoUrl = 'https://clips.example.test/video.mp4'
-    const audioUrl = 'https://clips.example.test/audio.m4a'
-    const executable = path.join(app.userDataDir, 'external-resume-audio.sh')
-    const response = JSON.stringify({
-      title: 'Looping video with a longer soundtrack',
-      formats: [
-        { format_id: 'audio', url: audioUrl, protocol: 'https', ext: 'm4a', vcodec: 'none', acodec: 'mp4a.40.2' },
-        { format_id: 'video', url: videoUrl, protocol: 'https', ext: 'mp4', acodec: 'none' },
-      ]
-    })
-    await writeFile(executable, ['#!/bin/sh',
-      'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
-    `printf '%s\\n' '${response}'`,
-    ].join('\n'))
-    await chmod(executable, 0o755)
     let releaseAudio
     let audioReady = new Promise(resolve => { releaseAudio = resolve })
-    for (const [url, file, contentType] of [
-      [videoUrl, 'post-live-video.mp4.b64', 'video/mp4'],
-      [audioUrl, 'post-live-long-audio.m4a.b64', 'audio/mp4'],
-    ]) {
-      const body = Buffer.from((await readFile(path.join(repoRoot, 'e2e/fixtures/media', file), 'utf8')).replaceAll('\n', ''), 'base64')
-      await page.route(`${url}*`, async route => {
-        if (seekBeforeMetadata && url === audioUrl && route.request().resourceType() === 'media') await audioReady
-        const range = /bytes=(\d+)-(\d*)/.exec(route.request().headers().range ?? '')
-        const start = range ? Number(range[1]) : 0
-        const end = range?.[2] ? Math.min(Number(range[2]), body.length - 1) : body.length - 1
-        return route.fulfill({
-          status: range ? 206 : 200,
-          contentType,
-          headers: { 'accept-ranges': 'bytes', 'content-length': String(end - start + 1), ...(range ? { 'content-range': `bytes ${start}-${end}/${body.length}` } : {}) },
-          body: body.subarray(start, end + 1)
-        })
-      })
-    }
-    await choosePickerPaths(app, page, { ytDlpPath: executable })
-    await page.evaluate(async () => {
-      const store = window.$store
-      await store.dispatch('updateYtDlpSource', 'system')
-      await store.dispatch('updateHideSideBarOnWatchPages', false)
-    })
+    await prepareCompanionAudioYtDlp(app, page, () => seekBeforeMetadata ? audioReady : null)
+    // Leaving unloads the media, so reopening it restores the saved position.
+    await page.evaluate(() => window.$store.dispatch('updateKeepPlayingOnNavigation', false))
     const open = async () => {
       await page.locator(sel.searchInput).fill(mediaUrl)
       await page.locator(sel.searchInput).press('Enter')
@@ -410,6 +432,28 @@ for (const seekBeforeMetadata of [false, true]) {
   })
 }
 
+test('external media keeps a longer soundtrack\'s position while it plays in the mini player', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://clips.example.test/clip'
+  await prepareCompanionAudioYtDlp(app, page)
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  const video = await (await waitForPlayback(page)).elementHandle()
+  const audio = await page.locator(`${activeTab} .externalMediaCompanionAudio`).elementHandle()
+  await expect.poll(() => video.evaluate(element => element.loop)).toBe(true)
+  await video.evaluate(element => element.pause())
+  // The soundtrack continues past the end of the looping video.
+  const videoDuration = await video.evaluate(element => element.duration)
+  await audio.evaluate((element, seconds) => { element.currentTime = seconds }, videoDuration + 0.5)
+  await expect.poll(() => audio.evaluate(element => element.seeking)).toBe(false)
+  await goTo(page, 'history')
+  await expect(page.locator('.ftVideoPlayer')).toHaveClass(/scrollMiniPlayer/)
+  await video.evaluate(element => element.play())
+  await expect.poll(() => audio.evaluate(element => element.currentTime)).toBeGreaterThan(videoDuration + 1)
+  await video.evaluate(element => element.pause())
+  await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeGreaterThan(videoDuration + 1)
+})
+
 for (const { label, settings, live } of [
   { label: 'history is disabled', settings: { rememberHistory: false }, live: false },
   { label: 'progress saving is disabled', settings: { watchedProgressSavingMode: 'never' }, live: false },
@@ -471,6 +515,25 @@ test('external media playback counts towards watch stats only while they are ena
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(resumedAt + 2)
   await video.evaluate(element => element.pause())
   expect(await watchedSeconds()).toBe(recorded)
+})
+
+test('external media keeps playing in the mini player while browsing and returning', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+  await page.evaluate(() => window.$store.dispatch('updateHideSideBarOnWatchPages', false))
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  const video = await (await waitForPlayback(page)).elementHandle()
+  const player = page.locator('.ftVideoPlayer')
+  await goTo(page, 'history')
+  await expect(player).toHaveClass(/scrollMiniPlayer/)
+  const time = await video.evaluate(element => element.currentTime)
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(time)
+  await player.locator('.scrollMiniScrollTop').click()
+  await expect(page).toHaveURL(/#\/external-media\?/)
+  await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+  expect(await page.locator(`${activeTab} video`).evaluate((element, original) => element === original, video)).toBe(true)
 })
 
 test('external media keeps background pause and completion positions after switching tabs', async ({ app, page }) => {
@@ -861,6 +924,19 @@ test('external chapters use a phone sheet and keep valid scrolling after resizin
   await sheet.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
   await expect(sheet).toHaveCount(0)
   await expect(page.locator(`${activeTab} .videoLayout`)).toHaveClass(/noSidebar/)
+
+  // Media that keeps playing in the mini player must not leave the sheet
+  // over the next page.
+  await player.hover()
+  await openPlayerOptions(player)
+  await player.locator('.phonePlayerOptions[open] .ft-chapters-button').click()
+  await expect(sheet).toBeVisible()
+  await app.electronApp.evaluate(({ BrowserWindow }, { channel, route }) => {
+    BrowserWindow.getAllWindows()[0].webContents.send(channel, route)
+  }, { channel: IpcChannels.CHANGE_VIEW, route: '/history' })
+  await expect(page).toHaveURL(/#\/history$/)
+  await expect(page.locator('.ftVideoPlayer')).toHaveCount(1)
+  await expect(sheet).toHaveCount(0)
 })
 
 test('external media can stop at the end of its current chapter', async ({ app, page }) => {
@@ -971,15 +1047,10 @@ for (const thumbnail of ['https://static-cdn.jtvnw.net/cf_vods/thumbnail.svg', n
       artist: 'Example Artist',
       artwork: artwork ? [artwork] : []
     }
-    await expect.poll(mediaSession).toEqual(externalMediaSession)
-
-    // The YouTube video stays in the tab as a mini player. Closing it must not
-    // clear the external media's metadata.
-    await page.getByRole('button', { name: 'Hide mini player' }).click()
+    // The external media replaces the YouTube video, whose teardown must not
+    // clear the new metadata or media actions.
     await expect(page.locator('.watchVideoInfo')).toHaveCount(0)
-    expect(await mediaSession()).toEqual(externalMediaSession)
-
-    // Its media actions must keep controlling the external media too.
+    await expect.poll(mediaSession).toEqual(externalMediaSession)
     const video = page.locator(`${activeTab} .videoPlayer video`)
     await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
     await app.electronApp.evaluate(({ BrowserWindow }, channel) => {
@@ -1030,6 +1101,17 @@ test('external media uses phone sheets for chat and the description', { tag: '@s
   await page.keyboard.press('Escape')
   await expect(chatSheet).toHaveCount(0)
   await expect(externalMedia.getByRole('button', { name: 'Show Live Chat Replay' })).toHaveAttribute('aria-pressed', 'false')
+
+  // Media that keeps playing in the mini player must not leave its sheet
+  // over the next page.
+  await chatToggle.click()
+  await expect(chatSheet).toBeVisible()
+  await app.electronApp.evaluate(({ BrowserWindow }, { channel, route }) => {
+    BrowserWindow.getAllWindows()[0].webContents.send(channel, route)
+  }, { channel: IpcChannels.CHANGE_VIEW, route: '/history' })
+  await expect(page).toHaveURL(/#\/history$/)
+  await expect(page.locator('.ftVideoPlayer')).toHaveCount(1)
+  await expect(chatSheet).toHaveCount(0)
 })
 
 test('Twitch replay uses the watch chat toggle and side panel', async ({ app, page, attachScreenshot }) => {
@@ -1806,7 +1888,7 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await expect(page.locator(`${activeTab} .externalMediaDescription`)).toContainText('Creative Commons')
   await expect(page.locator(`${activeTab} .externalMediaDescription`)).toContainText('example')
   await expect(page.locator(`${activeTab} .externalMediaDescription`)).toBeVisible()
-  const metadata = page.locator(`${activeTab} .externalMediaMetricsRow .externalMediaMetrics`)
+  const metadata = page.locator(`${activeTab} .externalMediaMainMetrics`)
   await expect(metadata.locator(':scope > *')).toHaveText([
     'Jul 16, 2019',
     '7 years ago',
@@ -1832,7 +1914,7 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await expect(page.locator(`${activeTab} .externalMediaDetails .likeCount`)).toHaveText('15')
   await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('42 watching')
   await expect(page.locator(`${activeTab} .externalMediaDetails .dislikeCount`)).toHaveText('2')
-  const ratings = page.locator(`${activeTab} .externalMediaMetricsRow .likeBarContainer`)
+  const ratings = page.locator(`${activeTab} .externalMediaHeader .likeBarContainer`)
   await expect(ratings.locator('[data-icon="thumbs-up"] svg')).toBeVisible()
   await expect(ratings.locator('[data-icon="thumbs-down"] svg')).toBeVisible()
   await expect(ratings.locator('.likeBar')).toHaveAttribute('style', /88%/)
@@ -1899,6 +1981,9 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await externalMedia.locator('.watchVideoChaptersPanel').getByRole('button', { name: 'Copy link at 0:10' }).click()
   await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toBe(`${mediaUrl}?t=10`)
   await externalMedia.locator('.watchVideoChaptersPanel').getByRole('button', { name: 'Close Chapters' }).click()
+  // The sidebar column collapses once the panel has animated out, which moves
+  // the share button and would move its menu during the click.
+  await expect(externalMedia.locator('.videoLayout')).toHaveClass(/noSidebar/)
   await expect(player.locator('.fullscreenSponsorBlockToggle, .ft-shaka-sponsorblock-button')).toHaveCount(0)
   await expect(player.locator('.playerFullscreenTitleOverlay')).not.toHaveAttribute('role', 'button')
   await expect(player.locator('.theatre-button')).toBeHidden()

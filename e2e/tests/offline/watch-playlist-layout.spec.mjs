@@ -258,6 +258,9 @@ test('playlist thumbnails remove videos with one click or tap, and phones from t
   await expect(phoneRow.locator('.videoThumbnail')).toBeVisible()
   await expect(phoneRow.locator('.playlistIcons button').filter({ visible: true })).toHaveCount(0)
   const menu = page.locator('.mobileLinkActions')
+  // The toasts of both removals stack at the bottom of the phone sheet, over
+  // the row, until they time out.
+  await expect(page.getByRole('status').filter({ hasText: 'Video has been removed' })).toHaveCount(0)
   const holdPoint = await touchPoint(phoneRow.locator('.thumbnailLink'))
   await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [holdPoint] })
   await expect(menu).toBeVisible()

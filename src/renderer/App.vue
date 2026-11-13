@@ -553,7 +553,7 @@
             <FtRetryImage
               v-if="getUsableTabSwitcherPreviewUrl(tab)"
               :src="tabSwitcherPreviewUrls[tab.id]"
-              :alt="`${formatTabTitle(tab.title)} preview`"
+              :alt="`${tab.title} preview`"
               loading="lazy"
               decoding="async"
               draggable="false"
@@ -563,7 +563,7 @@
               v-else-if="!tabSwitcherPreviewPending[tab.id] && getUsableTabSwitcherAvatarUrl(tab)"
               :fallback-icon="getTabPageIcon(tab) || ['fas', 'display']"
               :src="getUsableTabSwitcherAvatarUrl(tab)"
-              :alt="`${formatTabTitle(tab.title)} preview`"
+              :alt="`${tab.title} preview`"
               class="tabSwitcherPreviewAvatar"
               loading="lazy"
               decoding="async"
@@ -600,7 +600,7 @@
               aria-hidden="true"
             />
             <span class="tabSwitcherTitleText">
-              {{ formatTabTitle(tab.title) }}
+              {{ tab.title }}
             </span>
           </span>
         </button>
@@ -730,7 +730,6 @@ import { useRssFeedAutoRefresh } from './composables/useRssFeedAutoRefresh'
 import { usePlatformFeedAutoRefresh } from './composables/usePlatformFeedAutoRefresh'
 import { startTwitchLiveNotifications } from './helpers/platformFeed'
 import { translateWindowTitle } from './helpers/strings'
-import { formatTabTitle } from './tabs/tabTitle'
 import { normalizeScrollbarThumbWidth } from './constants/scrollbar'
 import { getAppFontFamily } from './helpers/appFont'
 import { canMarkHistoryEntryAsWatched } from './helpers/history'
@@ -755,6 +754,7 @@ import {
 import { dismissAutoSyncNotice, shouldShowAutoSyncNotice, showAutoSyncNoticeOnce } from './helpers/sync-auto-sync-notice'
 import { invalidateAllYtDlpPlaybackSources } from './helpers/player/ytDlpPlayback'
 import { getTabNavigationService } from './tabs/TabNavigationService'
+import { isPlayerRoutePath } from './tabs/playerDockDestination'
 import { initializeCapacitorTabPreviews } from './tabs/capacitorTabPreviews'
 import { initializeCapacitorTabAvatars } from './tabs/capacitorTabAvatars'
 import { initializeCapacitorTabService } from './tabs/CapacitorTabService'
@@ -1035,7 +1035,7 @@ function handleTabletTabStripChange(event) {
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const useWatchSideNavOverlay = computed(() => {
-  return store.getters.getHideSideBarOnWatchPages && (route.path.startsWith('/watch/') || route.path === '/external-media')
+  return store.getters.getHideSideBarOnWatchPages && isPlayerRoutePath(route.path)
 })
 
 const sideNavOpenBeforeWatchOverlay = ref(null)
@@ -4656,20 +4656,10 @@ async function enableCapacitorIntegrations() {
   }
 }
 
-const windowTitle = computed(() => {
-  const routePath = route.path
-  if (
-    !routePath.startsWith('/channel/') &&
-    !routePath.startsWith('/watch/') &&
-    !routePath.startsWith('/hashtag/') &&
-    !routePath.startsWith('/playlist/') &&
-    !routePath.startsWith('/search/')
-  ) {
-    return translateWindowTitle(route.meta.title)
-  } else {
-    return null
-  }
-})
+// Pages without a static title publish their own
+const windowTitle = computed(() => typeof route.meta.title === 'string'
+  ? translateWindowTitle(route.meta.title)
+  : null)
 
 /** @type {import('vue').ComputedRef<string>} */
 const appTitle = computed(() => {
@@ -4681,15 +4671,7 @@ const appTitle = computed(() => {
 })
 
 function publishAppTitle(value) {
-  if (value.length > 0) {
-    document.title = `${value} - ${packageDetails.productName}`
-  } else {
-    document.title = packageDetails.productName
-  }
-
-  if (isElectron && presentedTabId.value) {
-    window.ftElectron.setWindowTitle(document.title, presentedTabId.value)
-  }
+  document.title = value.length > 0 ? `${value} - ${packageDetails.productName}` : packageDetails.productName
 }
 
 watch(appTitle, publishAppTitle)

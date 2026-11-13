@@ -1,8 +1,6 @@
 import { computed, nextTick } from 'vue'
 import { START_LOCATION } from 'vue-router'
 
-import packageDetails from '../../../package.json'
-import { getFixedInternalRouteTitle } from '../../internalRoutes'
 import { translateWindowTitle } from '../helpers/strings'
 import { isAppHidden } from '../helpers/appVisibility'
 import {
@@ -114,12 +112,13 @@ export class TabNavigationService {
       return false
     }
 
+    // The locale can change while a tab is in the background
     const resolvedTargetRoute = this.resolve(targetTab.route)
-    const translatedTitle = typeof resolvedTargetRoute.meta?.title === 'string'
+    const staticTitle = hasStaticTitle(resolvedTargetRoute)
       ? translateWindowTitle(resolvedTargetRoute.meta.title)
       : null
-    if (translatedTitle !== null && resolvedTargetRoute.meta?.hasDynamicTitle !== true) {
-      this.setTitle(tabId, translatedTitle)
+    if (staticTitle !== null) {
+      this.setTitle(tabId, staticTitle)
     }
 
     if (targetTab.loadState === 'mounting') {
@@ -311,7 +310,11 @@ export class TabNavigationService {
     // differently. Compare resolved routes so reopening the same URL does not
     // clear its title without triggering a new content load.
     const sameRoute = route.fullPath === from.fullPath
-    const preserveContentTitle = location?.state?.skipTabRouteLoading === true
+    const componentChanged = getDeepestRouteComponent(from) !== getDeepestRouteComponent(to)
+    // A page that replaces its own route, for example to switch its tab or
+    // filter, stays open. It keeps its title and shows its own loading state.
+    const updatesPage = mode === 'replace' && !componentChanged
+    const resetsTitle = !sameRoute && !updatesPage
     const preserveScroll = location?.state?.preserveScroll === true
     const titlePending = initialTitle === null && route.path.startsWith('/watch/')
     const discardCurrentEntry = !sameRoute && isUnresolvedWatchEntry(tab, from)
@@ -321,22 +324,21 @@ export class TabNavigationService {
     }
 
     const previousTitle = tab.contentTitle || tab.title || ''
-    if (!sameRoute && !preserveContentTitle) {
+    if (resetsTitle) {
       // Clear the previous page's title as soon as navigation starts. Dynamic
       // pages replace this route placeholder once their content has loaded.
       // historyIndex still points at the outgoing entry here, so don't let the
       // placeholder overwrite that entry's title.
-      this.setTitle(tabId, routePlaceholderTitle(to), { skipHistoryEntry: true })
+      this.setTitle(tabId, routeTitle(to), { skipHistoryEntry: true })
     }
 
     this.saveScroll(tabId)
-    const loadingToken = preserveContentTitle || getFixedInternalRouteTitle(route.path) !== null
+    const loadingToken = updatesPage || hasStaticTitle(to)
       ? null
       : this.startRouteLoading(tabId)
     let navigationCommitted = false
 
     try {
-      const componentChanged = getDeepestRouteComponent(from) !== getDeepestRouteComponent(to)
       if (componentChanged) {
         await tabLifecycleService.run(tabId, 'beforeNavigate', { to, from })
       }
@@ -362,14 +364,13 @@ export class TabNavigationService {
       } else if (mode === 'replace') {
         history = tab.history.map(cloneHistoryEntry)
         historyIndex = tab.historyIndex
+        const current = history[historyIndex]
         history[historyIndex] = {
           route: cloneRoute(route),
-          title: history[historyIndex]?.title || routeTitle(to),
-          titlePending: sameRoute
-            ? history[historyIndex]?.titlePending === true
-            : titlePending,
+          title: (updatesPage && current?.title) || initialTitle || routeTitle(to),
+          titlePending: updatesPage ? current?.titlePending === true : titlePending,
           scroll: sameRoute || preserveScroll
-            ? { ...history[historyIndex]?.scroll }
+            ? { ...current?.scroll }
             : { left: 0, top: 0 }
         }
       } else {
@@ -397,7 +398,7 @@ export class TabNavigationService {
           this.setTitle(tabId, history[historyIndex].title || routeTitle(to), { resolveHistoryEntry: false })
         } else if (initialTitle) {
           this.setTitle(tabId, initialTitle)
-        } else if (typeof to.name === 'string') {
+        } else if (hasStaticTitle(to)) {
           this.setTitle(tabId, routeTitle(to), { resolveHistoryEntry: false })
         }
         this.publishRoute(tabId, route)
@@ -425,7 +426,7 @@ export class TabNavigationService {
 
       await tabLifecycleService.run(tabId, 'afterNavigate', { to, from })
     } finally {
-      if (!navigationCommitted && !sameRoute && !preserveContentTitle) {
+      if (!navigationCommitted && resetsTitle) {
         this.setTitle(tabId, previousTitle, { skipHistoryEntry: true })
       }
       if (loadingToken !== null) {
@@ -575,7 +576,7 @@ export class TabNavigationService {
       skipHistoryEntry,
       resolveHistoryEntry
     })
-    window.ftElectron?.tabs?.updateTitle?.(formatDocumentTitle(title), tabId)
+    window.ftElectron?.tabs?.updateTitle?.(title, tabId)
     if (resolvedPendingEntry) {
       this.publishHistory(tabId)
     }
@@ -592,15 +593,18 @@ export class TabNavigationService {
    * @param {string} tabId
    * @param {number} historyIndex the entry the Watch page was left from
    * @param {string} fullPath the route the retained Watch page plays
-   * @param {{ route?: import('vue-router').RouteLocationNormalized, title?: string }} update
+   * @param {{ route?: import('vue-router').RouteLocationNormalized, title?: string, updatesPage?: boolean }} update
+   * `updatesPage` keeps the title of a video that replaced its own route
    */
-  updateRetainedWatchEntry(tabId, historyIndex, fullPath, { route, title }) {
+  updateRetainedWatchEntry(tabId, historyIndex, fullPath, { route, title, updatesPage = false }) {
     const tab = this.store.getters.getTabById(tabId)
     const entry = tab?.history[historyIndex]
     // Later navigation can drop the entry, for example browsing on after Back.
     if (!entry || historyIndex === tab.historyIndex || this.resolve(entry.route).fullPath !== fullPath) return
     const history = tab.history.map(cloneHistoryEntry)
-    if (route) {
+    if (updatesPage) {
+      history[historyIndex].route = serializeResolvedRoute(route)
+    } else if (route) {
       history[historyIndex] = { route: serializeResolvedRoute(route), title: route.fullPath, titlePending: true, scroll: { left: 0, top: 0 } }
     }
     if (typeof title === 'string' && title.length > 0) {
@@ -774,17 +778,22 @@ function cloneHistoryEntry(entry) {
   }
 }
 
-function routeTitle(route) {
+/**
+ * Pages without a static title publish their own once they have loaded.
+ * @param {import('vue-router').RouteLocationNormalized} route
+ */
+function hasStaticTitle(route) {
   return typeof route.meta?.title === 'string'
-    ? translateWindowTitle(route.meta.title) ?? route.meta.title
-    : route.fullPath
 }
 
-function routePlaceholderTitle(route) {
-  const title = getFixedInternalRouteTitle(route.path)
-  return title === null
-    ? route.fullPath
-    : translateWindowTitle(title) ?? title
+/**
+ * The static title of the page, or its URL until the page publishes a title.
+ * @param {import('vue-router').RouteLocationNormalized} route
+ */
+function routeTitle(route) {
+  return hasStaticTitle(route)
+    ? translateWindowTitle(route.meta.title) ?? route.meta.title
+    : route.fullPath
 }
 
 function isUnresolvedWatchEntry(tab, route) {
@@ -841,10 +850,6 @@ function waitForTabElement(tabId, selector, timeout = 3000) {
       finish()
     }
   })
-}
-
-function formatDocumentTitle(title) {
-  return title.length > 0 ? `${title} - ${packageDetails.productName}` : packageDetails.productName
 }
 
 export default TabNavigationService

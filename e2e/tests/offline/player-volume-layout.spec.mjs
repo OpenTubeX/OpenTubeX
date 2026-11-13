@@ -3,8 +3,6 @@ import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 test.describe('volume icon', { tag: '@scale' }, () => {
   test.use({
-    // Keep Xvfb geometry checks independent of the host GPU.
-    launchArgs: ['--disable-gpu'],
     seed: {
       settings: {
         currentLocale: 'en-US',

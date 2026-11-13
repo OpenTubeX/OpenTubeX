@@ -34,6 +34,11 @@
   }
 }
 
+/* The boot script removes the hidden splash once the page has been parsed. */
+:root[data-hide-startup-splash] .startupSplash {
+  display: none;
+}
+
 /* The logo stays upright on a slowly turning tonal cookie. */
 .startupShape {
   position: absolute;

@@ -1,3 +1,5 @@
+import { normalizeLegacyTabTitle } from '../../legacyTabTitle.js'
+
 const MAX_CLOSED_CAPACITOR_TABS = 10
 
 export function createCapacitorTab(route, title = '', id = window.crypto.randomUUID()) {
@@ -33,7 +35,7 @@ export function restoreCapacitorTabSession(value, currentRoute, createId = () =>
           seenIds.add(tab.id)
           return true
         })
-        .map(tab => normalizeRestoredTab(tab, rememberHistory))
+        .map(tab => normalizeRestoredTab(withoutLegacyTitle(tab), rememberHistory))
     : []
 
   const closedTabIds = new Set()
@@ -45,7 +47,7 @@ export function restoreCapacitorTabSession(value, currentRoute, createId = () =>
           return true
         })
         .slice(-MAX_CLOSED_CAPACITOR_TABS)
-        .map(tab => normalizePersistedTab(tab, rememberHistory))
+        .map(tab => normalizePersistedTab(withoutLegacyTitle(tab), rememberHistory))
     : []
 
   if (tabs.length === 0) {
@@ -417,4 +419,17 @@ function buildFullPath(path, query, hash) {
   }
   const queryString = search.toString()
   return `${path.startsWith('/') ? path : `/${path}`}${queryString ? `?${queryString}` : ''}${hash}`
+}
+
+function withoutLegacyTitle(tab) {
+  return {
+    ...tab,
+    title: normalizeLegacyTabTitle(tab.title),
+    // Tabs opened from a synced desktop tab started their history with its title
+    history: Array.isArray(tab.history)
+      ? tab.history.map(entry => typeof entry?.title === 'string'
+          ? { ...entry, title: normalizeLegacyTabTitle(entry.title) || entry.route?.fullPath }
+          : entry)
+      : tab.history
+  }
 }

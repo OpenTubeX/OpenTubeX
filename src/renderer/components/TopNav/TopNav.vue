@@ -318,6 +318,7 @@ import { getChannelHandleFromUrl } from '../../helpers/feed-metadata'
 import { getLocalSearchSuggestions } from '../../helpers/api/local'
 import { getInvidiousSearchSuggestions, youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
+import { isPlayerRoutePath } from '../../tabs/playerDockDestination'
 import { shouldOpenExternalMediaUrl } from '../../helpers/externalMediaUrl'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
@@ -457,7 +458,7 @@ watch(hideSearchBar, hidden => {
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideHeaderLogo = computed(() => store.getters.getHideHeaderLogo)
 const useWatchSideNavOverlay = computed(() => {
-  return store.getters.getHideSideBarOnWatchPages && route.path.startsWith('/watch/')
+  return store.getters.getHideSideBarOnWatchPages && isPlayerRoutePath(route.path)
 })
 /** @type {import('vue').ComputedRef<boolean>} */
 const enableSearchSuggestions = computed(() => store.getters.getEnableSearchSuggestions)

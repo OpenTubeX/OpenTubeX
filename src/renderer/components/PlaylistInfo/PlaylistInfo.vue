@@ -714,9 +714,9 @@ const pinnedPlaylistIds = computed(() => store.getters.getPinnedPlaylistIds)
 const isPinnedToNavigation = computed(() => pinnedPlaylistIds.value.includes(props.id))
 
 function togglePinnedToNavigation() {
-  store.dispatch('updatePinnedPlaylistIds', isPinnedToNavigation.value
-    ? pinnedPlaylistIds.value.filter(id => id !== props.id)
-    : [...pinnedPlaylistIds.value, props.id])
+  const playlistId = props.id
+  const pin = !isPinnedToNavigation.value
+  store.dispatch('updatePinnedPlaylistIds', ids => [...ids.filter(id => id !== playlistId), ...pin ? [playlistId] : []])
 }
 
 const SEPARATOR = { type: 'separator' }

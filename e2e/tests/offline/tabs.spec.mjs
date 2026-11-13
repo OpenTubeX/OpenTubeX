@@ -3875,7 +3875,7 @@ test.describe('tab organizer', () => {
       await window.ftElectron.setZoomFactor(0.95)
       const tab = await window.ftElectron.tabs.create({
         route: '/history',
-        title: 'History entry - OpenTubeX',
+        title: 'History entry',
         makeActive: false,
         lazyLoad: true
       })
@@ -3898,7 +3898,6 @@ test.describe('tab organizer', () => {
     const group = organizer.locator('.tabGroup').filter({ hasText: 'Unloaded group' })
     const row = group.locator('.tabOrganizerRow')
     await expect(row.locator('.tabIdentity > span')).toHaveText('History entry')
-    await expect(row).not.toContainText(' - OpenTubeX')
     await expect(row.locator('.tabIcon [data-icon="clock-rotate-left"]')).toBeVisible()
     await expect(group.getByRole('button', { name: 'Unload All' })).toBeDisabled()
 

@@ -112,6 +112,9 @@
                 :live-chat-available="chatAvailable"
                 :theatre-possible="theatreTogglePossible"
                 :use-theatre-mode="useTheatreMode"
+                :start-in-fullscreen="defaultViewingMode.startsWith('fullscreen')"
+                :start-in-fullwindow="defaultViewingMode.startsWith('fullwindow')"
+                :start-in-pip="defaultViewingMode === 'pip'"
                 playback-engine="yt-dlp"
                 @error="playerErrorHandler"
                 @loaded="handleMediaLoaded"
@@ -158,90 +161,90 @@
         </div>
         <div class="infoArea">
           <FtCard class="watchVideo externalMediaDetails">
-            <div class="externalMediaHeading">
-              <h1
-                class="videoTitle"
-                dir="auto"
-              >
-                {{ info.title || mediaUrl }}
-              </h1>
-            </div>
-            <div
-              v-if="statusBadges.length"
-              class="externalMediaBadges"
-            >
-              <span
-                v-for="badge in statusBadges"
-                :key="badge"
-                class="externalMediaBadge"
-              >{{ badge }}</span>
-            </div>
-            <div class="externalMediaMetricsRow">
-              <FtInlineMetadata
-                class="externalMediaMetrics"
-                icon-labels
-              >
-                <time
-                  v-if="publishedDate"
-                  class="publishedDate"
-                  :datetime="publishedDate"
-                  :title="`${publishedDateLabel} ${formattedPublishedDate}`"
-                ><FtIcon
-                  :icon="['fas', 'calendar-days']"
-                  class="statIcon"
-                  role="img"
-                  :aria-label="publishedDateLabel"
-                />{{ formattedPublishedDate }}</time>
-                <span
-                  v-if="publishedTimeAgo"
-                  class="publishedTimeAgo"
-                ><FtIcon
-                  :icon="['fas', 'clock']"
-                  class="statIcon"
-                  aria-hidden="true"
-                />{{ publishedTimeAgo }}</span>
-                <span
-                  v-if="formattedViewCount"
-                  class="videoViews"
-                ><FtIcon
-                  :icon="['fas', 'eye']"
-                  class="statIcon"
-                  aria-hidden="true"
-                />{{ formattedViewCount }}</span>
-                <span v-if="metadata.concurrentViewCount !== null"><FtIcon
-                  :icon="['fas', 'users']"
-                  class="statIcon"
-                  aria-hidden="true"
-                />{{ t('Global.Counts.Watching Count', { count: formattedConcurrentViewCount }, metadata.concurrentViewCount) }}</span>
-                <bdi
-                  v-if="metadata.categories.length"
-                  :title="`${t('Description.Video Category')} ${metadata.categories.join(', ')}`"
-                ><FtIcon
-                  :icon="['fas', 'icons']"
-                  class="statIcon"
-                  role="img"
-                  :aria-label="t('Description.Video Category')"
-                />{{ metadata.categories.join(', ') }}</bdi>
-              </FtInlineMetadata>
+            <div class="externalMediaHeader">
+              <div class="externalMediaHeaderText">
+                <h1
+                  class="videoTitle"
+                  dir="auto"
+                >
+                  {{ info.title || mediaUrl }}
+                </h1>
+                <div
+                  v-if="statusBadges.length"
+                  class="externalMediaBadges"
+                >
+                  <span
+                    v-for="badge in statusBadges"
+                    :key="badge"
+                    class="externalMediaBadge"
+                  >{{ badge }}</span>
+                </div>
+                <FtInlineMetadata
+                  class="externalMediaMetrics externalMediaMainMetrics"
+                  icon-labels
+                >
+                  <time
+                    v-if="publishedDate"
+                    class="publishedDate"
+                    :datetime="publishedDate"
+                    :title="`${publishedDateLabel} ${formattedPublishedDate}`"
+                  ><FtIcon
+                    :icon="['fas', 'calendar-days']"
+                    class="statIcon"
+                    role="img"
+                    :aria-label="publishedDateLabel"
+                  />{{ formattedPublishedDate }}</time>
+                  <span
+                    v-if="publishedTimeAgo"
+                    class="publishedTimeAgo"
+                  ><FtIcon
+                    :icon="['fas', 'clock']"
+                    class="statIcon"
+                    aria-hidden="true"
+                  />{{ publishedTimeAgo }}</span>
+                  <span
+                    v-if="formattedViewCount"
+                    class="videoViews"
+                  ><FtIcon
+                    :icon="['fas', 'eye']"
+                    class="statIcon"
+                    aria-hidden="true"
+                  />{{ formattedViewCount }}</span>
+                  <span v-if="metadata.concurrentViewCount !== null"><FtIcon
+                    :icon="['fas', 'users']"
+                    class="statIcon"
+                    aria-hidden="true"
+                  />{{ t('Global.Counts.Watching Count', { count: formattedConcurrentViewCount }, metadata.concurrentViewCount) }}</span>
+                  <bdi
+                    v-if="metadata.categories.length"
+                    :title="`${t('Description.Video Category')} ${metadata.categories.join(', ')}`"
+                  ><FtIcon
+                    :icon="['fas', 'icons']"
+                    class="statIcon"
+                    role="img"
+                    :aria-label="t('Description.Video Category')"
+                  />{{ metadata.categories.join(', ') }}</bdi>
+                </FtInlineMetadata>
+                <FtInlineMetadata
+                  v-if="engagement.length"
+                  class="externalMediaMetrics"
+                  icon-labels
+                >
+                  <span
+                    v-for="item in engagement"
+                    :key="item.label"
+                  ><FtIcon
+                    :icon="item.icon"
+                    class="statIcon"
+                    aria-hidden="true"
+                  />{{ item.text }}</span>
+                </FtInlineMetadata>
+              </div>
               <WatchVideoLikes
                 :like-count="metadata.likeCount"
                 :dislike-count="metadata.dislikeCount"
               />
             </div>
-            <FtInlineMetadata
-              v-if="engagement.length"
-              class="externalMediaMetrics"
-              icon-labels
-            >
-              <span
-                v-for="item in engagement"
-                :key="item.label"
-              ><FtIcon
-                :icon="item.icon"
-                class="statIcon"
-                aria-hidden="true"
-              />{{ item.text }}</span>
-            </FtInlineMetadata>
             <div class="externalMediaCreator">
               <!-- Channels of supported platforms open in the app -->
               <component
@@ -368,7 +371,7 @@
         <aside class="sidebarArea">
           <WatchSidebarPanel
             :phone-enabled="phonePanelsEnabled"
-            :phone-open="chaptersPanelOpen"
+            :phone-open="chaptersSheetOpen"
             :title="t('Chapters.Chapters')"
             transition="chapters-panel"
             @close="showChapters = false"
@@ -520,9 +523,16 @@ let lastPositionSave = 0
 let lastSavedPosition = 0
 let hasBeenPresented = isTabPresented?.value ?? true
 watch(() => isTabPresented?.value, presented => {
-  if (!presented) return
-  hasBeenPresented = true
-  addToHistoryOnce()
+  if (presented) {
+    hasBeenPresented = true
+    addToHistoryOnce()
+  } else {
+    // Phone sheets open outside this page, so like on the watch page, hiding
+    // the page, such as while it plays in the mini player, closes them.
+    mobilePanel.value = null
+    // The chapters sheet follows the chapters panel. Desktop keeps it open.
+    if (phonePanelsEnabled.value) showChapters.value = false
+  }
 })
 // Like on the watch page, media joins the history once it plays.
 let historyAdded = false
@@ -543,6 +553,9 @@ const seekCount = ref(0)
 const seeking = ref(false)
 const chatOpen = ref(true)
 const useTheatreMode = ref(false)
+// Like on the watch page, Android and iOS start players inline. Each media
+// starts in the default viewing mode, as it does not play on into the next.
+const defaultViewingMode = computed(() => process.env.IS_CAPACITOR ? 'default' : store.getters.getDefaultViewingMode)
 let theatreModeToggledManually = false
 const theatreModeAnimator = createTheatreModeAnimator()
 const theatreLayoutAvailable = ref(isTheatreLayoutAvailable())
@@ -587,6 +600,9 @@ const chatAvailable = computed(() => twitchChatTarget.value && !(twitchChatTarge
   ? store.getters.getHideLiveChatReplay
   : store.getters.getHideLiveChat))
 const chaptersPanelOpen = computed(() => Boolean(source.value && chapters.value.length && showChapters.value))
+// A hidden page keeps its sidebar chapters open, so its sheet must not show
+// over the presented page when the window becomes narrow.
+const chaptersSheetOpen = computed(() => chaptersPanelOpen.value && isTabPresented?.value !== false)
 // The transcript reads WebVTT and SRT, while other sites may only offer TTML.
 const transcriptCaptions = computed(() => source.value?.captions.filter(caption => caption.mimeType !== 'application/ttml+xml') ?? [])
 const transcriptAvailable = computed(() => transcriptCaptions.value.length > 0 && !source.value.isLive)
@@ -759,10 +775,12 @@ function safeWebUrl(value) {
 }
 const thumbnail = computed(() => safeWebUrl(info.value?.thumbnail))
 const metadata = computed(() => info.value?.externalMetadata ?? {})
-const chapters = computed(() => (metadata.value.chapters ?? []).map(chapter => ({
-  ...chapter,
-  timestamp: formatDurationAsTimestamp(Math.floor(chapter.startSeconds))
-})))
+const chapters = computed(() => store.getters.getHideChapters
+  ? []
+  : (metadata.value.chapters ?? []).map(chapter => ({
+      ...chapter,
+      timestamp: formatDurationAsTimestamp(Math.floor(chapter.startSeconds))
+    })))
 /** @type {import('vue').Ref<number | null>} */
 const loopedChapterIndex = ref(null)
 const chapterThumbnails = shallowRef([])
@@ -906,7 +924,8 @@ function syncCompanionAudio(time, tolerance = 0.5) {
 }
 
 function getCompanionVideo() {
-  return videoLayout.value?.querySelector('.videoPlayer video')
+  // The mini player can move the player out of this page.
+  return player.value?.$refs.video
 }
 
 function getPositionMedia() {
@@ -963,7 +982,7 @@ function consumeTimestamp() {
     path: route.path,
     query,
     hash: route.hash,
-    state: { skipTabRouteLoading: true, preserveScroll: true, tabTitle: info.value?.title || hostname.value }
+    state: { preserveScroll: true }
   })
 }
 

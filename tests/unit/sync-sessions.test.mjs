@@ -109,9 +109,12 @@ test('treats legacy session arrays as a separate desktop device', () => {
 })
 
 test('keeps mobile and desktop sessions separate by default', () => {
+  // Released desktop versions synced window titles
+  const desktop = session('desktop', 1)
+  desktop.tabs[0].title = 'Test video - OpenTubeX'
   const result = mergeSyncSessions({
     localSessions: [session('mobile', 2)],
-    remoteValue: [session('desktop', 1)],
+    remoteValue: [desktop],
     deviceId: 'phone',
     platform: 'mobile',
     preferredMode: 'separate',
@@ -120,6 +123,8 @@ test('keeps mobile and desktop sessions separate by default', () => {
   assert.deepEqual(result.sessionsToApply, [session('mobile', 2)])
   assert.equal(result.otherDeviceSessions[0].sessionId, 'desktop')
   assert.equal(result.otherDeviceSessions[0].syncPlatform, 'desktop')
+  assert.equal(result.otherDeviceSessions[0].tabs[0].title, 'Test video')
+  assert.deepEqual(result.document.devices['legacy-desktop'].sessions, [desktop], 'the synced document is left as is')
 })
 
 test('removes one synced tab set and drops an empty device', () => {

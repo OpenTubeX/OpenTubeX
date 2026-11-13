@@ -429,7 +429,7 @@ async function updateChannelDetails(channels) {
   const changed = getFollowedChannels().some(channel => JSON.stringify(update(channel)) !== JSON.stringify(channel))
   if (!changed) return
   // The channels may have changed during the refresh
-  await store.dispatch('updateFollowedChannels', getFollowedChannels().map(update))
+  await store.dispatch('updateFollowedChannels', followed => followed.map(update))
 }
 
 /**
@@ -587,7 +587,9 @@ export async function followPlatformChannel(platformId, id) {
     }
     let saved = false
     try {
-      saved = await store.dispatch('updateFollowedChannels', [...getFollowedChannels(), followedChannel]) !== false
+      saved = await store.dispatch('updateFollowedChannels', followed => followed.some(entry => getPlatformChannelKey(entry) === key)
+        ? followed
+        : [...followed, followedChannel]) !== false
     } finally {
       // The channel isn't followed, so it keeps neither the items cached for it nor their history
       if (!saved) forgetChannel(key)
@@ -618,7 +620,7 @@ export function followChannelByUrl(input) {
 export async function unfollowPlatformChannel(channel) {
   const key = getPlatformChannelKey(channel)
   // Forgotten once the setting changes, like channels unfollowed elsewhere
-  await store.dispatch('updateFollowedChannels', getFollowedChannels().filter(followed => getPlatformChannelKey(followed) !== key))
+  await store.dispatch('updateFollowedChannels', followed => followed.filter(entry => getPlatformChannelKey(entry) !== key))
 }
 
 /**

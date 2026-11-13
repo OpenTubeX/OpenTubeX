@@ -14,9 +14,7 @@ function createTabStore() {
   const module = vm.runInNewContext(`${source}; module`, {
     URL,
     URLSearchParams,
-    packageDetails: { productName: 'OpenTubeX' },
     DEFAULT_VIDEO_ZOOM: 1,
-    formatTabTitle: title => title,
     reconcilePendingTabOrder,
   })
   return createStore(module)
