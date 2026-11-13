@@ -261,6 +261,8 @@ const mutations = {
       state.day.ignored[payload.kind] ||= payload.ignore === true
     } else if (type === 'setWellbeingBedtimeDismissed' && !(payload <= state.bedtimeDismissedNight)) {
       mutations.setWellbeingBedtimeDismissed(state, payload)
+      // The reminder was dismissed in another window
+      if (state.prompt === 'bedtime') state.prompt = null
     }
   },
 
