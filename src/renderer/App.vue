@@ -378,8 +378,17 @@
                     :aria-haspopup="action.submenu ? 'menu' : undefined"
                     @click="runMobileContextAction(action)"
                   >
+                    <FtRetryImage
+                      v-if="typeof action.icon === 'string'"
+                      :src="action.icon"
+                      :fallback-icon="action.fallbackIcon ?? ['fas', 'circle']"
+                      class="mobileLinkActionImage"
+                      :class="{ roundImageIcon: action.roundIcon }"
+                      alt=""
+                      referrerpolicy="no-referrer"
+                    />
                     <FtIcon
-                      v-if="action.icon"
+                      v-else-if="action.icon"
                       :icon="action.icon"
                       aria-hidden="true"
                     />
@@ -391,6 +400,13 @@
                     <span
                       v-if="action.submenu"
                       class="mobileLinkSubmenuArrow"
+                      aria-hidden="true"
+                    />
+                    <!-- Image icons cannot turn into the check mark. -->
+                    <FtIcon
+                      v-else-if="action.checked && typeof action.icon === 'string'"
+                      class="mobileLinkActionCheck"
+                      :icon="['fas', 'check']"
                       aria-hidden="true"
                     />
                   </button>

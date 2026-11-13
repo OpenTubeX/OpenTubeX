@@ -8,6 +8,7 @@
       v-if="hasImageIcon"
       :fallback-icon="icon"
       class="itemImageIcon"
+      :class="{ roundImageIcon: item.roundIcon }"
       :src="item.icon"
       alt=""
       referrerpolicy="no-referrer"

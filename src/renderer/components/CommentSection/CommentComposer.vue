@@ -5,14 +5,26 @@
     :class="{ topLevelComposer: isTopLevel }"
     @keydown.stop
   >
-    <!-- Shows which channel the comment will be posted as. -->
-    <FtRetryImage
+    <!-- Shows which channel the comment will be posted as, and switches it
+         when the account has more than one. -->
+    <component
+      :is="canSwitchProfile ? 'button' : 'div'"
       v-if="isTopLevel"
-      :src="profile?.thumbnail ?? ''"
-      :fallback-icon="['fas', 'circle-user']"
+      :type="canSwitchProfile ? 'button' : null"
       class="commentComposerAvatar"
-      alt=""
-    />
+      :title="canSwitchProfile ? t('YouTube Account.Switch Channel') : null"
+      :aria-label="canSwitchProfile ? t('YouTube Account.Switch Channel') : null"
+      :aria-haspopup="canSwitchProfile ? 'menu' : null"
+      :disabled="canSwitchProfile && switching ? true : null"
+      @click="canSwitchProfile && openProfileMenu($event.currentTarget)"
+    >
+      <FtRetryImage
+        :src="profile?.thumbnail ?? ''"
+        :fallback-icon="['fas', 'circle-user']"
+        class="commentComposerAvatarImage"
+        alt=""
+      />
+    </component>
     <button
       v-if="!expanded"
       type="button"
@@ -67,6 +79,8 @@ import FtRetryImage from '../FtRetryImage.vue'
 
 import store from '../../store/index'
 import { getSelectedYouTubeProfile } from '../../helpers/youtube-account-state'
+import { openButtonMenu } from '../../helpers/buttonMenu'
+import { useYouTubeProfileSwitch } from '../../composables/useYouTubeProfileSwitch'
 
 import { ERROR_TOAST_ICON, showToast } from '../../helpers/utils'
 import { editYouTubeComment, postYouTubeComment } from '../../helpers/api/youtube-account'
@@ -90,6 +104,26 @@ const posting = ref(false)
 const input = useTemplateRef('input')
 const profile = computed(() => getSelectedYouTubeProfile(store.getters.getYouTubeAccount))
 const isTopLevel = !props.parentId && !props.editComment
+
+const { switching, switchProfile } = useYouTubeProfileSwitch()
+const profiles = computed(() => store.getters.getYouTubeAccount?.profiles ?? [])
+const canSwitchProfile = computed(() => profiles.value.length > 1)
+const profileMenuItems = computed(() => profiles.value.map(entry => ({
+  label: entry.handle ? `${entry.name} (${entry.handle})` : entry.name,
+  // An image, or the fallback icon without one.
+  icon: entry.thumbnail ?? '',
+  fallbackIcon: ['fas', 'circle-user'],
+  roundIcon: true,
+  type: 'radio',
+  checked: entry === profile.value,
+  enabled: !switching.value,
+  run: () => { if (entry !== profile.value) switchProfile(entry) }
+})))
+
+/** @param {HTMLElement} button */
+function openProfileMenu(button) {
+  openButtonMenu(button, profileMenuItems, t('YouTube Account.Switch Channel'))
+}
 // Like on YouTube, a new comment starts as a single line that opens the
 // editor. Replies and edits open from their buttons, so they start open.
 const expanded = ref(!isTopLevel)
@@ -197,9 +231,32 @@ onBeforeUnmount(() => resizeObserver.disconnect())
 }
 
 .commentComposerAvatar {
+  display: flex;
+  flex: none;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: inherit;
+}
+
+button.commentComposerAvatar {
+  cursor: pointer;
+}
+
+button.commentComposerAvatar:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+button.commentComposerAvatar:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.commentComposerAvatarImage {
   block-size: 40px;
   border-radius: 50%;
-  flex: none;
   font-size: 40px;
   inline-size: 40px;
   object-fit: cover;
