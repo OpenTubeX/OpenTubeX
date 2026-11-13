@@ -328,6 +328,15 @@ const shakaControlKeysToShortcuts = {
 /** @type {Map<string, string>} */
 const LOCALE_MAPPINGS = new Map(process.env.SHAKA_LOCALE_MAPPINGS)
 
+/**
+ * The watch layout caps the player's width for a 16:9 video,
+ * so any taller video has to be pillarboxed into that box to fit its height.
+ * @param {{ width: number, height: number }} dimensions
+ */
+function isTallerThanSixteenByNine({ width, height }) {
+  return width / height < 16 / 9
+}
+
 export default defineComponent({
   name: 'FtShakaVideoPlayer',
   components: {
@@ -10156,15 +10165,12 @@ export default defineComponent({
 
             // force the player aspect ratio to 16:9 to avoid overflowing the layout
             forceAspectRatio.value = firstVariant != null && !props.shortsPlayer &&
-              firstVariant.width / firstVariant.height < 1.5
+              isTallerThanSixteenByNine(firstVariant)
           }
         })
       } else if (props.legacyFormats.length > 0) {
         // force the player aspect ratio to 16:9 to avoid overflowing the layout, when the video is too tall
-
-        const firstFormat = props.legacyFormats[0]
-        forceAspectRatio.value = !props.shortsPlayer &&
-          firstFormat.width / firstFormat.height < 1.5
+        forceAspectRatio.value = !props.shortsPlayer && isTallerThanSixteenByNine(props.legacyFormats[0])
       }
 
       if (useSponsorBlock.value) {

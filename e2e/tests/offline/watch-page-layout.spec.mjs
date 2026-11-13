@@ -1,7 +1,9 @@
+import { readFile } from 'node:fs/promises'
+import path from 'node:path'
 import { sel, setWindowSize, test, expect } from '../../helpers/app.mjs'
 import { activeTab, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
-import { demoPlayerResponse } from '../../helpers/media.mjs'
+import { DEMO_MEDIA_PATH, demoPlayerResponse, routeDemoMedia } from '../../helpers/media.mjs'
 import { WATCH_PAGE_SEED, setWindowWidth } from '../../helpers/watch-page.mjs'
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
@@ -421,6 +423,28 @@ test.describe('watch sidebar panels without recommendations', () => {
     await page.getByRole('button', { name: 'Open Chapters', exact: true }).first().click()
     await expect(layout).not.toHaveClass(/noSidebar/)
     await expect(layout).toHaveClass(/useTheatreMode/)
+  })
+})
+
+test.describe('theatre mode', () => {
+  test.use({ seed: { settings: { ...WATCH_PAGE_SEED, defaultViewingMode: 'theatre' } } })
+
+  // The default 1600x900 window is wide enough for the player to reach its width cap.
+  test('fits a video slightly taller than 16:9 into the window', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await routeDemoMedia(page, await readFile(path.join(path.dirname(DEMO_MEDIA_PATH), 'three-by-two-demo.webm')))
+    await page.route(/\/youtubei\/v1\/player/, (route, request) => {
+      const response = demoPlayerResponse(JSON.parse(request.postData() ?? '{}').videoId ?? 'jNQXAC9IVRw')
+      Object.assign(response.streamingData.formats[0], { width: 360, height: 240, qualityLabel: '240p' })
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(response) })
+    })
+
+    const video = await openMockedVideo(page)
+    await expect(page.locator(`${activeTab} .videoLayout`)).toHaveClass(/useTheatreMode/)
+    await expect.poll(() => video.evaluate(element => element.videoHeight)).toBe(240)
+    await expect.poll(() => page.locator(`${activeTab} .ftVideoPlayer`).evaluate(element => (
+      element.getBoundingClientRect().bottom <= innerHeight
+    ))).toBe(true)
   })
 })
 
