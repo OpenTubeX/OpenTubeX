@@ -48,14 +48,13 @@ test('playback saves leave the history entries revision unchanged', () => {
   const entries = [video('first'), video('second')]
   store.commit('setHistoryCacheSorted', entries)
   store.commit('setHistoryCacheById', Object.fromEntries(entries.map(entry => [entry.videoId, entry])))
-  const revisions = () => [store.state.history.historyRevision, store.state.history.historyEntriesRevision]
-  const [revision, entriesRevision] = revisions()
+  const revision = () => store.state.history.historyEntriesRevision
+  const entriesRevision = revision()
   store.commit('updateRecordWatchProgressInHistoryCache', { videoId: 'first', watchProgress: 50 })
   store.commit('updateRecordLastViewedPlaylistIdInHistoryCache', { videoId: 'first', lastViewedPlaylistId: 'playlist' })
-  // Sync conflict detection still sees every change.
-  assert.deepEqual(revisions(), [revision + 2, entriesRevision])
+  assert.equal(revision(), entriesRevision)
   store.commit('upsertToHistoryCache', { ...entries[1], isWatched: true })
-  assert.deepEqual(revisions(), [revision + 3, entriesRevision + 1])
+  assert.equal(revision(), entriesRevision + 1)
 })
 
 test('a newer watch time for the newest entry updates it in place', () => {
@@ -100,7 +99,7 @@ test('retention cleanup reads the datastore and changes the cache only when entr
   const entries = [{ ...video('recent'), timeWatched: 99 * day }, { videoId: 'progress-only', watchProgress: 5 }]
   store.commit('setHistoryCacheSorted', entries)
   store.commit('setHistoryCacheById', Object.fromEntries(entries.map(entry => [entry.videoId, entry])))
-  const revision = () => store.state.history.historyRevision
+  const revision = () => store.state.history.historyEntriesRevision
   const before = revision()
 
   assert.equal(await store.dispatch('removeHistoryOlderThan', 30), 0)

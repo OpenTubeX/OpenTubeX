@@ -34,7 +34,6 @@ const CONTINUE_WATCHING_MUTATIONS = new Set([
 ])
 
 const state = {
-  historyRevision: 0,
   historyEntriesRevision: 0,
   continueWatchingRevision: 0,
   historyCacheSorted: [],
@@ -426,7 +425,6 @@ export default {
   // edits cannot affect membership or any details displayed by Home.
   mutations: Object.fromEntries(Object.entries(mutations).map(([name, mutation]) => [name, (state, payload) => {
     mutation(state, payload)
-    state.historyRevision++
     if (!PLAYBACK_MUTATIONS.has(name)) state.historyEntriesRevision++
     if (CONTINUE_WATCHING_MUTATIONS.has(name)) state.continueWatchingRevision++
   }]))
