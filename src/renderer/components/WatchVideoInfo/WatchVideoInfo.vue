@@ -233,46 +233,16 @@
             theme="base-no-default"
             @click="saveWatchedProgressManually"
           />
-          <FtIconButton
-            v-if="channelSettingSaveActions.length > 0"
-            ref="channelSettingsButton"
-            :title="t('Video.Save Channel Setting')"
-            :icon="['fas', 'floppy-disk']"
-            :overlay-icon="channelSettingSaveActions.some(action => action.saved) ? ['fas', 'check'] : null"
-            theme="base-no-default"
+          <WatchChannelSettingsButton
+            v-if="!isUpcoming"
+            :channel-id="channelId"
+            :current-playback-rate="currentPlaybackRate"
+            :current-video-quality="currentVideoQuality"
+            :current-subtitles-state="currentSubtitlesState"
+            :current-volume="currentVolume"
             :dropdown-portal="channelSettingDropdownPortal"
-            dropdown-class="channelSettingsDropdown"
-            dropdown-position-x="left"
-            force-dropdown
-            :mobile-actions="channelSettingMobileActions"
-          >
-            <div
-              v-for="action in channelSettingSaveActions"
-              :key="action.value"
-              class="channelSettingRow"
-            >
-              <button
-                type="button"
-                class="channelSettingSave"
-                :disabled="action.disabled"
-                @click="saveChannelSetting(action.value)"
-              >
-                <FtIcon
-                  :icon="action.icon"
-                  aria-hidden="true"
-                />
-                <span>{{ action.label }}</span>
-              </button>
-              <FtIconButton
-                :disabled="!action.saved"
-                :size="14"
-                theme="base-no-default"
-                :title="t('Settings.Channel Settings.Forget Value')"
-                :icon="['fas', 'trash']"
-                @click="removeChannelSetting(action.value)"
-              />
-            </div>
-          </FtIconButton>
+            @save="saveChannelSetting"
+          />
           <FtIconButton
             v-if="inToolbar('sponsorBlock')"
             :title="sponsorBlockInfoTitle"
@@ -380,7 +350,7 @@ import FtRetryImage from '../FtRetryImage.vue'
 import { ytDlp } from '../../helpers/ytDlp'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
-import { computed, ref, useTemplateRef, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtAddToPlaylistDropdown from '../FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
@@ -395,6 +365,7 @@ import FtVerifiedBadge from '../FtVerifiedBadge/FtVerifiedBadge.vue'
 import WatchVideoFormatPrompt from '../WatchVideoFormatPrompt/WatchVideoFormatPrompt.vue'
 import WatchVideoMetadataHistory from '../WatchVideoMetadataHistory/WatchVideoMetadataHistory.vue'
 import WatchVideoToolbar from '../WatchVideoToolbar/WatchVideoToolbar.vue'
+import WatchChannelSettingsButton from '../WatchChannelSettingsButton/WatchChannelSettingsButton.vue'
 import WatchVideoLikes from '../WatchVideoLikes/WatchVideoLikes.vue'
 
 import store from '../../store'
@@ -404,7 +375,6 @@ import { vSaferHtml } from '../../directives/vSaferHtml'
 import { linkifyHashtagsAndHandles } from '../../helpers/descriptionLinks'
 import { escapeHTML, formatViewCount, getRelativeTimeFromDate, getVideoThumbnailUrl, isUnloadedBackgroundTabClick, openInExternalPlayer, openInternalPath, showToast } from '../../helpers/utils'
 import { translateSponsorBlockCategory } from '../../helpers/player/utils'
-import { parseChannelPreferences, removeChannelPreference } from '../../helpers/channel-preferences'
 import { useMediaSessionMetadata } from '../../composables/useMediaSessionMetadata'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { formatDate } from '../../helpers/dateFormat'
@@ -883,133 +853,10 @@ function saveWatchedProgressManually() {
   emit('save-watched-progress')
 }
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const autoUpdateChannelPlaybackSpeeds = computed(() => store.getters.getAutoUpdateChannelPlaybackSpeeds)
-
-const showSaveChannelPlaybackSpeedButton = computed(() => {
-  return !props.isUpcoming && !autoUpdateChannelPlaybackSpeeds.value
-})
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const autoUpdateChannelVideoQualities = computed(() => store.getters.getAutoUpdateChannelVideoQualities)
-
-const showSaveChannelVideoQualityButton = computed(() => {
-  return !props.isUpcoming && !autoUpdateChannelVideoQualities.value
-})
-
-const showSaveChannelSubtitlesStateButton = computed(() => {
-  return !props.isUpcoming && !store.getters.getAutoUpdateChannelSubtitlesStates
-})
-
-const showSaveChannelVolumeButton = computed(() => {
-  return !process.env.IS_CAPACITOR &&
-    !props.isUpcoming &&
-    !store.getters.getAutoUpdateChannelVolumes
-})
-
-const channelSettingsButton = useTemplateRef('channelSettingsButton')
-
-const savedChannelSettings = computed(() => ({
-  playbackSpeed: parseChannelPreferences(
-    store.getters.getChannelPlaybackSpeeds,
-    'channelPlaybackSpeeds'
-  )[props.channelId],
-  videoQuality: parseChannelPreferences(
-    store.getters.getChannelVideoQualities,
-    'channelVideoQualities'
-  )[props.channelId],
-  subtitlesState: parseChannelPreferences(
-    store.getters.getChannelSubtitlesStates,
-    'channelSubtitlesStates'
-  )[props.channelId],
-  volume: parseChannelPreferences(
-    store.getters.getChannelVolumes,
-    'channelVolumes'
-  )[props.channelId]
-}))
-
-const currentChannelSettings = computed(() => ({
-  playbackSpeed: props.currentPlaybackRate,
-  videoQuality: props.currentVideoQuality,
-  subtitlesState: props.currentSubtitlesState,
-  volume: props.currentVolume
-}))
-
-function formatChannelSettingValue(type, value) {
-  if (type === 'playbackSpeed') {
-    return `${value}×`
-  }
-  if (type === 'videoQuality') {
-    return `${value}p`
-  }
-  if (type === 'subtitlesState') {
-    return value ? '✓' : '✕'
-  }
-  return `${Math.round(value * 100)}%`
-}
-
-function createChannelSettingSaveAction(type, visible, label, settingLabel, icon) {
-  const savedValue = savedChannelSettings.value[type]
-  const currentValue = currentChannelSettings.value[type]
-  const hasSavedValue = savedValue !== undefined
-  // Player-driven values (especially volume) stay null until initialization finishes;
-  // keep the action disabled so the parent handler cannot silently no-op.
-  const isUninitialized = currentValue === null
-  const isAlreadyCurrent = !isUninitialized && hasSavedValue && String(savedValue) === String(currentValue)
-  const disabled = isUninitialized || isAlreadyCurrent
-  const formattedValue = hasSavedValue ? formatChannelSettingValue(type, savedValue) : ''
-  let actionLabel = label
-
-  if (isAlreadyCurrent) {
-    actionLabel = t('Video.Channel Setting Already Set', { setting: settingLabel, value: formattedValue })
-  } else if (hasSavedValue) {
-    actionLabel = `${label}: ${formattedValue}`
-  }
-
-  return {
-    visible,
-    label: actionLabel,
-    settingLabel,
-    icon,
-    value: type,
-    saved: hasSavedValue,
-    disabled
-  }
-}
-
-const channelSettingSaveActions = computed(() => [
-  createChannelSettingSaveAction('playbackSpeed', showSaveChannelPlaybackSpeedButton.value,
-    t('Video.Save Channel Playback Speed'), t('Settings.Player Settings.Playback Speed'), ['fas', 'gauge']),
-  createChannelSettingSaveAction('videoQuality', showSaveChannelVideoQualityButton.value,
-    t('Video.Save Channel Video Quality'), t('Settings.Channel Settings.Video Quality'), ['fas', 'photo-film']),
-  createChannelSettingSaveAction('subtitlesState', showSaveChannelSubtitlesStateButton.value,
-    t('Video.Save Channel Subtitles State'), t('Search Listing.Label.Subtitles'),
-    ['fas', 'closed-captioning']),
-  createChannelSettingSaveAction('volume', showSaveChannelVolumeButton.value,
-    t('Video.Save Channel Volume'), t('Settings.Channel Settings.Volume'), ['fas', 'volume-high'])
-].filter(action => action.visible && store.getters.getEnableChannelSettings && props.channelId !== ''))
-
-// The bottom sheet has no room for trailing buttons, so saved values get their own rows.
-const channelSettingMobileActions = computed(() => [
-  ...channelSettingSaveActions.value.map(action => ({
-    label: action.label,
-    icon: action.icon,
-    enabled: !action.disabled,
-    run: () => saveChannelSetting(action.value)
-  })),
-  { type: 'separator' },
-  ...channelSettingSaveActions.value.filter(action => action.saved).map(action => ({
-    label: t('Display Label', { label: t('Settings.Channel Settings.Forget Value'), value: action.settingLabel }),
-    icon: ['fas', 'trash'],
-    run: () => removeChannelSetting(action.value)
-  }))
-])
-
 /**
  * @param {'playbackSpeed'|'videoQuality'|'subtitlesState'|'volume'} setting
  */
 function saveChannelSetting(setting) {
-  channelSettingsButton.value?.hideDropdown()
   switch (setting) {
     case 'playbackSpeed':
       emit('save-channel-playback-speed')
@@ -1024,14 +871,6 @@ function saveChannelSetting(setting) {
       emit('save-channel-volume')
       break
   }
-}
-
-/**
- * @param {'playbackSpeed'|'videoQuality'|'subtitlesState'|'volume'} setting
- */
-async function removeChannelSetting(setting) {
-  await removeChannelPreference(store, props.channelId, setting)
-  channelSettingsButton.value?.hideDropdown()
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

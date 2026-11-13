@@ -65,7 +65,7 @@ import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { downloadWatchRoute, isPlayableDownloadFile, navigationDownloadId } from '../../helpers/downloadPlayback'
 import { parseLocalVideoGames } from '../../helpers/video-games'
 import { parseLocalVideoMusicTracks, parseVideoMusicTracks } from '../../helpers/video-music'
-import { parseChannelPreferences } from '../../helpers/channel-preferences'
+import { parseChannelPreferences, showChannelPreferenceSavedToast } from '../../helpers/channel-preferences'
 import {
   showInvidiousFallbackToast,
   buildChaptersVttFile,
@@ -5135,10 +5135,7 @@ export default defineComponent({
       }
 
       this.saveChannelPlaybackSpeed(this.currentPlaybackRate)
-      showToast({
-        message: `${this.t('Video.Channel Playback Speed Saved')}: ${this.currentPlaybackRate}×`,
-        icon: ['fas', 'gauge']
-      })
+      showChannelPreferenceSavedToast('playbackSpeed', this.currentPlaybackRate, this.t)
     },
     handleChannelVideoQualityManualSave() {
       // Should be called by manual action, settings should be checked in UI
@@ -5147,14 +5144,7 @@ export default defineComponent({
       }
 
       if (this.saveChannelVideoQuality(this.currentVideoQuality)) {
-        const savedQuality = this.normalizeVideoQuality(this.currentVideoQuality)
-        const savedQualityLabel = savedQuality === 'auto'
-          ? this.t('Settings.Player Settings.Default Quality.Auto')
-          : `${savedQuality}p`
-        showToast({
-          message: `${this.t('Video.Channel Video Quality Saved')}: ${savedQualityLabel}`,
-          icon: ['fas', 'film']
-        })
+        showChannelPreferenceSavedToast('videoQuality', this.normalizeVideoQuality(this.currentVideoQuality), this.t)
       }
     },
     handleChannelSubtitlesStateManualSave() {
@@ -5164,10 +5154,7 @@ export default defineComponent({
       }
 
       this.saveChannelSubtitlesState(this.currentSubtitlesState)
-      showToast({
-        message: `${this.t('Video.Channel Subtitles State Saved')}: ${this.currentSubtitlesState ? '✓' : '✕'}`,
-        icon: ['fas', 'closed-captioning']
-      })
+      showChannelPreferenceSavedToast('subtitlesState', this.currentSubtitlesState, this.t)
     },
     handleChannelVolumeManualSave() {
       // Should be called by manual action, settings should be checked in UI
@@ -5176,10 +5163,7 @@ export default defineComponent({
       }
 
       this.saveChannelVolume(this.currentVolume)
-      showToast({
-        message: `${this.t('Video.Channel Volume Saved')}: ${Math.round(this.currentVolume * 100)}%`,
-        icon: ['fas', 'volume-high']
-      })
+      showChannelPreferenceSavedToast('volume', this.currentVolume, this.t)
     },
     handleWatchProgressAutoSave() {
       if (!this.rememberHistory || !this.autosaveWatchedProgress) { return }

@@ -99,6 +99,8 @@
                 :is-live="source.isLive"
                 :start-time="source.separateAudioUrl ? null : startTime"
                 :current-playback-rate="currentPlaybackRate"
+                :current-video-quality="currentVideoQuality"
+                :channel-id="channelPreferenceKey"
                 :storyboard-src="source.storyboardSrc"
                 :chapters="chapters"
                 :current-chapter-index="currentChapterIndex"
@@ -124,8 +126,15 @@
                 @pause="handlePlaybackStopped"
                 @waiting="handleBuffering"
                 @ended="handlePlaybackStopped"
-                @volume-updated="setCompanionVolume"
+                @volume-updated="updateVolume"
+                @volume-user-set="value => handleChannelPreferenceUserSet('volume', value)"
                 @playback-rate-updated="updatePlaybackRate"
+                @playback-rate-user-set="value => handleChannelPreferenceUserSet('playbackSpeed', value)"
+                @save-channel-playback-speed="saveChannelPreferenceManually('playbackSpeed')"
+                @video-quality-updated="value => currentVideoQuality = String(value)"
+                @video-quality-user-set="value => handleChannelPreferenceUserSet('videoQuality', String(value))"
+                @subtitles-state-updated="value => currentSubtitlesState = value"
+                @subtitles-state-user-set="handleSubtitlesStateUserSet"
                 @timeupdate="updateCurrentTime"
                 @seeking="handleSeeking"
                 @seeked="handleSeeked"
@@ -278,6 +287,16 @@
                 :overflow-order="TOOLBAR_OVERFLOW_ORDER"
               >
                 <template #primary="{ inToolbar }">
+                  <WatchChannelSettingsButton
+                    v-if="source"
+                    :channel-id="channelPreferenceKey"
+                    :current-playback-rate="currentPlaybackRate"
+                    :current-video-quality="currentVideoQuality"
+                    :current-subtitles-state="currentSubtitlesState"
+                    :current-volume="currentVolume"
+                    :types="channelPreferenceTypes"
+                    @save="saveChannelPreferenceManually"
+                  />
                   <FtIconButton
                     v-if="inToolbar('liveChat')"
                     :title="toolbarActions.liveChat.label"
@@ -474,6 +493,7 @@ import WatchVideoInfoSkeleton from '../../components/WatchVideoInfoSkeleton/Watc
 import FtPhonePanel from '../../components/FtPhonePanel/FtPhonePanel.vue'
 import TwitchChat from './TwitchChat.vue'
 import PlatformFollowButton from '../../components/PlatformFollowButton/PlatformFollowButton.vue'
+import WatchChannelSettingsButton from '../../components/WatchChannelSettingsButton/WatchChannelSettingsButton.vue'
 import { getTwitchChatTarget } from './twitchChat'
 import { getExternalYtDlpPlaybackSource, releaseTwitchVodRegistration } from '../../helpers/player/ytDlpPlayback'
 import { createTheatreModeAnimator, isTheatreLayoutAvailable } from '../../helpers/watchLayout'
@@ -482,6 +502,14 @@ import { getPreferredCaption } from '../../../captionLanguages'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import { buildChaptersVttFile, formatDurationAsTimestamp, formatViewCount, getRelativeTimeFromDate } from '../../helpers/utils'
+import {
+  CHANNEL_PREFERENCE_TYPES,
+  getPlatformChannelPreferenceKey,
+  parseChannelPreferences,
+  saveChannelPreference,
+  showChannelPreferenceSavedToast
+} from '../../helpers/channel-preferences'
+import { limitQualityOnMeteredNetwork } from '../../helpers/player/meteredNetworkQuality'
 import { formatDate } from '../../helpers/dateFormat'
 import { useMediaSessionMetadata } from '../../composables/useMediaSessionMetadata'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
@@ -536,6 +564,14 @@ const showDownloadPrompt = ref(false)
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
 const defaultPlaybackRate = computed(() => store.getters.getDefaultPlayback)
 const currentPlaybackRate = ref(defaultPlaybackRate.value)
+/** @type {import('vue').Ref<string | null>} */
+const currentVideoQuality = ref(null)
+/** @type {import('vue').Ref<boolean | null>} the player reports these once it has loaded */
+const currentSubtitlesState = ref(null)
+/** @type {import('vue').Ref<number | null>} */
+const currentVolume = ref(null)
+/** Whether the loaded media starts at its channel's speed and quality, which retries keep */
+let channelPreferencesApplied = false
 const ambientModeActive = computed(() => store.getters.getAmbientMode && source.value && !source.value.audioOnly)
 // Ambient light extends past the layout, so the app clips its overflow.
 useRootClass('appAmbientMode', () => Boolean(ambientModeActive.value))
@@ -791,6 +827,15 @@ const creatorUrl = computed(() => safeWebUrl(info.value?.channel ? info.value.ch
 const creatorAvatarUrl = computed(() => safeWebUrl(info.value?.channel ? info.value.channelThumbnail : info.value?.uploaderThumbnail))
 // Only the creator's profile names the channel; the media URL can be a clip or VOD
 const creatorChannel = computed(() => findPlatformChannel(creatorUrl.value))
+// Like YouTube channels, the creator's channel remembers the playback settings picked for its media
+const channelPreferenceKey = computed(() => creatorChannel.value ? getPlatformChannelPreferenceKey(creatorChannel.value) : '')
+/** @type {import('vue').ComputedRef<('playbackSpeed' | 'videoQuality' | 'subtitlesState' | 'volume')[]>} */
+const channelPreferenceTypes = computed(() => CHANNEL_PREFERENCE_TYPES
+  .map(({ type }) => type)
+  // Live streams play at normal speed, and some media has no video or captions
+  .filter(type => !(type === 'playbackSpeed' && source.value?.isLive) &&
+    !(type === 'videoQuality' && source.value?.audioOnly) &&
+    !(type === 'subtitlesState' && !source.value?.captions.length)))
 // A fallthrough href, even an undefined one, would replace the router link's own
 const creatorLinkAttributes = computed(() => {
   if (creatorChannel.value) return { to: getPlatformChannelRoute(creatorChannel.value.platform, creatorChannel.value.id) }
@@ -1066,8 +1111,60 @@ function handleBuffering() {
   watchTimeTracker.flush()
 }
 function pauseCompanionVideo() { getCompanionVideo()?.pause() }
-function setCompanionVolume(volume) {
+function updateVolume(volume) {
+  currentVolume.value = volume
   if (companionAudio.value) companionAudio.value.volume = volume
+}
+
+/**
+ * @param {string} type
+ * @returns {unknown} undefined without a saved value
+ */
+function getSavedChannelPreference(type) {
+  if (!store.getters.getEnableChannelSettings || !channelPreferenceKey.value) return undefined
+  const { valuesKey } = CHANNEL_PREFERENCE_TYPES.find(preference => preference.type === type)
+  return parseChannelPreferences(store.state.settings[valuesKey], valuesKey)[channelPreferenceKey.value]
+}
+
+/** The player applies the channel's subtitles state and volume on its own. */
+function applyChannelPreferences() {
+  if (channelPreferencesApplied) return
+  channelPreferencesApplied = true
+  const speed = Number.parseFloat(String(getSavedChannelPreference('playbackSpeed')))
+  currentPlaybackRate.value = Number.isFinite(speed) && speed > 0 ? speed : defaultPlaybackRate.value
+  const quality = getSavedChannelPreference('videoQuality') ?? store.getters.getDefaultQuality
+  currentVideoQuality.value = limitQualityOnMeteredNetwork(String(quality), store.getters.getMeteredNetworkQualityLimit)
+}
+
+/**
+ * Saves a setting the user changed for the creator's channel, when that setting saves automatically.
+ * @param {string} type
+ * @param {unknown} value
+ */
+function handleChannelPreferenceUserSet(type, value) {
+  const { autoUpdateKey } = CHANNEL_PREFERENCE_TYPES.find(preference => preference.type === type)
+  if (store.getters.getEnableChannelSettings && store.getters[`get${autoUpdateKey[0].toUpperCase()}${autoUpdateKey.slice(1)}`]) {
+    saveChannelPreference(store, channelPreferenceKey.value, type, value)
+  }
+}
+
+/** @param {boolean} enabled */
+function handleSubtitlesStateUserSet(enabled) {
+  currentSubtitlesState.value = enabled
+  handleChannelPreferenceUserSet('subtitlesState', enabled)
+}
+
+/** @param {'playbackSpeed' | 'videoQuality' | 'subtitlesState' | 'volume'} type */
+function saveChannelPreferenceManually(type) {
+  const value = {
+    playbackSpeed: currentPlaybackRate.value,
+    videoQuality: currentVideoQuality.value,
+    subtitlesState: currentSubtitlesState.value,
+    volume: currentVolume.value
+  }[type]
+  if (!channelPreferenceKey.value || value === null) return
+  saveChannelPreference(store, channelPreferenceKey.value, type, value)
+  showChannelPreferenceSavedToast(type, value, t)
 }
 function updatePlaybackRate(rate) {
   // Retrying remounts the player, which must keep the chosen speed.
@@ -1134,7 +1231,13 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
   showDownloadPrompt.value = false
   if (seekTimer !== null) clearTimeout(seekTimer)
   seekTimer = null
-  if (url !== mediaUrl.value) currentPlaybackRate.value = defaultPlaybackRate.value
+  if (url !== mediaUrl.value) {
+    currentPlaybackRate.value = defaultPlaybackRate.value
+    currentVideoQuality.value = null
+    channelPreferencesApplied = false
+  }
+  currentSubtitlesState.value = null
+  currentVolume.value = null
   const generation = ++loadGeneration
   companionAudioNeeded.value = false
   playerErrorHandler.value = error => {
@@ -1183,6 +1286,7 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
       return
     }
     info.value = result.info
+    applyChannelPreferences()
     if (!result.source?.isLive) {
       startTimestamp = getQueryTimestamp()
       // Separate tracks wait for their metadata before choosing the position.

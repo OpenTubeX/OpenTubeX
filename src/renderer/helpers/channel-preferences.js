@@ -1,7 +1,13 @@
 import { checkYoutubeChannelId, findChannelTagInfo } from './channels'
+import { getPlatformFetch } from './platformFetch'
+import { showToast } from './utils'
+import { supportsYtDlp } from './ytDlpCapabilities'
+import { getPlatform, getPlatformChannelKey } from '../../platforms/index'
 
 /**
- * The settings that can be remembered per channel.
+ * The settings that can be remembered per channel. They are keyed by YouTube
+ * channel ID, or for channels of other platforms by `platform:id`, see
+ * `getPlatformChannelPreferenceKey`.
  * The values are the keys of the settings that store them.
  * @type {readonly {
  *   type: 'playbackSpeed' | 'videoQuality' | 'subtitlesState' | 'volume',
@@ -48,8 +54,115 @@ export function parseChannelPreferences(value, settingKey) {
   }
 }
 
-// Tabs share a store. Read each collection only after earlier removals finish.
-const pendingChannelPreferenceRemovals = new WeakMap()
+/**
+ * The key that remembers the settings of a channel on another platform. Its
+ * ID comes from the channel's address, which is all that media pages know
+ * about their creator without another request.
+ * @param {{ platform: string, id: string, url?: string }} channel
+ * @returns {string}
+ */
+export function getPlatformChannelPreferenceKey(channel) {
+  const id = (channel.url && getPlatform(channel.platform)?.parseChannelUrl(channel.url)) || channel.id
+  return getPlatformChannelKey({ platform: channel.platform, id })
+}
+
+/**
+ * YouTube channel IDs never contain a colon, so only platform keys split.
+ * @param {string} key
+ * @returns {{ platform: string, id: string } | null}
+ */
+export function parsePlatformChannelPreferenceKey(key) {
+  const separator = key.indexOf(':')
+  if (separator === -1) return null
+  const platform = key.slice(0, separator)
+  const id = key.slice(separator + 1)
+  return getPlatform(platform) && id ? { platform, id } : null
+}
+
+/**
+ * @param {string} type
+ * @param {unknown} value
+ * @param {(key: string) => string} t
+ * @returns {string}
+ */
+export function formatChannelPreferenceValue(type, value, t) {
+  switch (type) {
+    case 'playbackSpeed':
+      return `${value}×`
+    case 'videoQuality':
+      return String(value) === 'auto' ? t('Settings.Player Settings.Default Quality.Auto') : `${value}p`
+    case 'subtitlesState':
+      return value ? '✓' : '✕'
+    default:
+      return `${Math.round(Number(value) * 100)}%`
+  }
+}
+
+/** @type {Readonly<Record<string, { message: (t: (key: string) => string) => string, icon: string[] }>>} */
+const SAVED_TOASTS = Object.freeze({
+  playbackSpeed: { message: t => t('Video.Channel Playback Speed Saved'), icon: ['fas', 'gauge'] },
+  videoQuality: { message: t => t('Video.Channel Video Quality Saved'), icon: ['fas', 'film'] },
+  subtitlesState: { message: t => t('Video.Channel Subtitles State Saved'), icon: ['fas', 'closed-captioning'] },
+  volume: { message: t => t('Video.Channel Volume Saved'), icon: ['fas', 'volume-high'] }
+})
+
+/**
+ * Confirms a setting that the user saved for a channel by hand.
+ * @param {'playbackSpeed' | 'videoQuality' | 'subtitlesState' | 'volume'} type
+ * @param {unknown} value
+ * @param {(key: string) => string} t
+ */
+export function showChannelPreferenceSavedToast(type, value, t) {
+  const { message, icon } = SAVED_TOASTS[type]
+  showToast({ message: `${message(t)}: ${formatChannelPreferenceValue(type, value, t)}`, icon })
+}
+
+// Tabs share a store. Read each collection only after earlier writes finish.
+const pendingChannelPreferenceWrites = new WeakMap()
+
+/**
+ * @param {import('vuex').Store} store
+ * @param {string} type
+ * @param {(values: Record<string, unknown>) => boolean} change edits the values, returns whether they changed
+ * @returns {Promise<unknown>}
+ */
+async function writeChannelPreferences(store, type, change) {
+  const preference = CHANNEL_PREFERENCE_TYPES.find(preference => preference.type === type)
+  if (!preference) return
+
+  const previous = pendingChannelPreferenceWrites.get(store) ?? Promise.resolve()
+  const write = previous.catch(() => {}).then(() => {
+    const { valuesKey } = preference
+    const suffix = valuesKey[0].toUpperCase() + valuesKey.slice(1)
+    const values = parseChannelPreferences(store.getters[`get${suffix}`], valuesKey)
+    if (!change(values)) return
+
+    return store.dispatch(`update${suffix}`, JSON.stringify(values))
+  })
+  pendingChannelPreferenceWrites.set(store, write)
+  try {
+    return await write
+  } finally {
+    if (pendingChannelPreferenceWrites.get(store) === write) {
+      pendingChannelPreferenceWrites.delete(store)
+    }
+  }
+}
+
+/**
+ * @param {import('vuex').Store} store
+ * @param {string} channelId
+ * @param {string} type
+ * @param {unknown} value
+ * @returns {Promise<unknown>}
+ */
+export function saveChannelPreference(store, channelId, type, value) {
+  if (!channelId) return Promise.resolve()
+  return writeChannelPreferences(store, type, values => {
+    values[channelId] = value
+    return true
+  })
+}
 
 /**
  * Remove one saved override without changing the current player state.
@@ -58,28 +171,13 @@ const pendingChannelPreferenceRemovals = new WeakMap()
  * @param {string} type
  * @returns {Promise<unknown>}
  */
-export async function removeChannelPreference(store, channelId, type) {
-  const preference = CHANNEL_PREFERENCE_TYPES.find(preference => preference.type === type)
-  if (!channelId || !preference) return
-
-  const previous = pendingChannelPreferenceRemovals.get(store) ?? Promise.resolve()
-  const removal = previous.catch(() => {}).then(() => {
-    const { valuesKey } = preference
-    const suffix = valuesKey[0].toUpperCase() + valuesKey.slice(1)
-    const values = parseChannelPreferences(store.getters[`get${suffix}`], valuesKey)
-    if (!Object.hasOwn(values, channelId)) return
-
+export function removeChannelPreference(store, channelId, type) {
+  if (!channelId) return Promise.resolve()
+  return writeChannelPreferences(store, type, values => {
+    if (!Object.hasOwn(values, channelId)) return false
     delete values[channelId]
-    return store.dispatch(`update${suffix}`, JSON.stringify(values))
+    return true
   })
-  pendingChannelPreferenceRemovals.set(store, removal)
-  try {
-    return await removal
-  } finally {
-    if (pendingChannelPreferenceRemovals.get(store) === removal) {
-      pendingChannelPreferenceRemovals.delete(store)
-    }
-  }
 }
 
 /**
@@ -138,14 +236,19 @@ export async function fetchChannelInfo(channelId, backendOptions, { throttle = f
     return await pending.request
   }
 
-  if (!checkYoutubeChannelId(channelId)) {
+  const platformChannel = parsePlatformChannelPreferenceKey(channelId)
+  // Only builds with yt-dlp open the channels of other platforms, and can request them
+  if (platformChannel ? !supportsYtDlp : !checkYoutubeChannelId(channelId)) {
     return null
   }
 
+  const resolve = platformChannel
+    ? () => resolvePlatformChannelInfo(channelId, platformChannel)
+    : () => resolveChannelInfo(channelId, backendOptions)
   const wanted = [isWanted]
   const request = throttle
-    ? runChannelRequest(() => resolveChannelInfo(channelId, backendOptions), () => wanted.some(check => check()))
-    : resolveChannelInfo(channelId, backendOptions)
+    ? runChannelRequest(resolve, () => wanted.some(check => check()))
+    : resolve()
   pendingChannels.set(channelId, { request, wanted })
 
   try {
@@ -205,6 +308,29 @@ async function resolveChannelInfo(channelId, backendOptions) {
     return info
   } catch (error) {
     console.error(`Failed to fetch the channel info for ${channelId}:`, error)
+    return null
+  }
+}
+
+/**
+ * @param {string} key
+ * @param {{ platform: string, id: string }} channel
+ * @returns {Promise<ChannelInfo | null>}
+ */
+async function resolvePlatformChannelInfo(key, { platform, id }) {
+  try {
+    const channel = await getPlatform(platform).getChannel(getPlatformFetch(platform), id)
+
+    if (channel === null) {
+      resolvedChannels.set(key, null)
+      return null
+    }
+
+    const info = { name: channel.name, thumbnail: channel.avatar ?? '' }
+    resolvedChannels.set(key, info)
+    return info
+  } catch (error) {
+    console.error(`Failed to fetch the channel info for ${key}:`, error)
     return null
   }
 }
