@@ -148,7 +148,7 @@ import {
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { getSabrLiveTargetDuration, isSabrLiveBroadcastUrl } from '../../helpers/player/sabrProtocol'
 import { isAttestedPoToken } from '../../../main/attestedPoToken'
-import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
+import { getAutoQualityFallback, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
 import { limitQualityOnMeteredNetwork } from '../../helpers/player/meteredNetworkQuality'
 import { useI18n } from 'vue-i18n'
 import { useTabAvatar, useTabContext, useTabTitle, watchNavigationKey } from '../../tabs/TabContext'
@@ -7484,11 +7484,11 @@ export default defineComponent({
     normalizeVideoQuality(quality) {
       const normalizedQuality = quality == null ? '' : String(quality)
 
-      // Auto is broken with SABR, so fall back to the default quality there.
+      // Auto is broken with SABR, so fall back to a fixed quality there.
       // The player checks the streams it actually received as well, as yt-dlp
       // can fall back to the built-in extraction method.
       if (normalizedQuality === 'auto' && !playbackEngineSupportsAutoQuality(this.videoPlaybackEngine, this.$store.getters.getBuiltInStreams)) {
-        return AUTO_QUALITY_FALLBACK
+        return getAutoQualityFallback()
       }
 
       return normalizedQuality

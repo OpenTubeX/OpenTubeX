@@ -50,10 +50,11 @@ test.describe('auto quality setting', () => {
       }
     })
 
-    test('is hidden and falls back to 720p', async ({ page }) => {
+    test('is hidden and falls back to a fixed quality', async ({ page }) => {
       const defaultQuality = await openDefaultQualitySelect(page)
 
-      await expect(defaultQuality).toHaveValue('720')
+      // Which one depends on the screen size
+      await expect(defaultQuality).toHaveValue(/^\d+$/)
       await expect(defaultQuality.locator('option[value="auto"]')).toHaveCount(0)
     })
   })

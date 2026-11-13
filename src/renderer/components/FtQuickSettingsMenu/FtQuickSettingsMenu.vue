@@ -511,7 +511,7 @@ import {
   MIN_THUMBNAIL_SIZE,
   THUMBNAIL_SIZE_STEP
 } from '../../constants/thumbnailSize'
-import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
+import { getAutoQualityFallback, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
 import { getFirstCharacter } from '../../helpers/strings'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import {
@@ -701,7 +701,7 @@ const qualityNames = computed(() => [
 ])
 const defaultQuality = computed(() => {
   const value = store.getters.getDefaultQuality
-  return value === 'auto' && !autoQualityAvailable.value ? AUTO_QUALITY_FALLBACK : value
+  return value === 'auto' && !autoQualityAvailable.value ? getAutoQualityFallback() : value
 })
 
 function toggleMenu() {

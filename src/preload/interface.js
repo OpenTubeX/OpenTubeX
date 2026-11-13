@@ -963,6 +963,9 @@ export default {
     }
   },
 
+  /** @returns {number} */
+  getZoomFactor: () => webFrame.getZoomFactor(),
+
   /**
    * @returns {Promise<{ label: string, value: number, active: boolean }[]>}
    */

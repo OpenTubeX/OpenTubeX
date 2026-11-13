@@ -395,7 +395,7 @@ import { getPlatform, getPlatformChannelRoute, PLATFORM_ICONS } from '../../../.
 import { showToast } from '../../../helpers/utils'
 import { matchesChannelQuery } from '../../../helpers/subscription-channels'
 import { clampOverlayScrollTop } from '../../../helpers/overlayScrollbars'
-import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../../helpers/player/autoQuality'
+import { getAutoQualityFallback, playbackEngineSupportsAutoQuality } from '../../../helpers/player/autoQuality'
 
 const { locale, t } = useI18n()
 
@@ -473,7 +473,7 @@ const savedChannelSyncDisableLabel = computed(() => (
 function getDefaultQuality(channelId) {
   const value = store.getters.getDefaultQuality
 
-  return value === 'auto' && !isAutoQualityAvailable(channelId) ? AUTO_QUALITY_FALLBACK : value
+  return value === 'auto' && !isAutoQualityAvailable(channelId) ? getAutoQualityFallback() : value
 }
 
 /** @type {import('vue').ComputedRef<number>} */
@@ -627,7 +627,7 @@ const channelEntries = computed(() => {
         // Fall back for entries that still hold auto while it is unavailable,
         // to the same quality that playback uses for them
         type === 'videoQuality' && String(value) === 'auto' && !isAutoQualityAvailable(channelId)
-          ? AUTO_QUALITY_FALLBACK
+          ? getAutoQualityFallback()
           : value
       )
     }
