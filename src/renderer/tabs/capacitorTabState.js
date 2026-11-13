@@ -422,5 +422,14 @@ function buildFullPath(path, query, hash) {
 }
 
 function withoutLegacyTitle(tab) {
-  return { ...tab, title: normalizeLegacyTabTitle(tab.title) }
+  return {
+    ...tab,
+    title: normalizeLegacyTabTitle(tab.title),
+    // Tabs opened from a synced desktop tab started their history with its title
+    history: Array.isArray(tab.history)
+      ? tab.history.map(entry => typeof entry?.title === 'string'
+          ? { ...entry, title: normalizeLegacyTabTitle(entry.title) || entry.route?.fullPath }
+          : entry)
+      : tab.history
+  }
 }
