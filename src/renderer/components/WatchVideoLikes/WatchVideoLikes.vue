@@ -145,6 +145,8 @@ watch([() => props.videoId, canRate, () => getYouTubeChannelKey(store.getters.ge
     // A rating still going out, for example from before switching channels
     // and back, would make the loaded one outdated.
     await pendingRating
+    // Opting out or opening another video meanwhile must not send the lookup.
+    if (load !== ratingLoad) return
     current = await getYouTubeVideoRating(videoId)
   } catch (error) {
     console.error(error)

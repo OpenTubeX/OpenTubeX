@@ -54,4 +54,29 @@ test('loads the video rating with the YouTube account only after opting in', asy
   await expect(likeButton).toHaveAttribute('aria-pressed', 'true')
   // A request sent before opting in would make this 2.
   expect(ratingRequests).toBe(1)
+
+  // A lookup that waited for a rating still going out must not be sent after opting out.
+  let writeStarted
+  const writeStartedPromise = new Promise(resolve => { writeStarted = resolve })
+  let releaseWrite
+  const writeReleased = new Promise(resolve => { releaseWrite = resolve })
+  await page.route(/\/youtubei\/v1\/like\//, async route => {
+    writeStarted()
+    await writeReleased
+    await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' })
+  })
+  const setVideoRatings = enabled => page.evaluate(value => window.$store.dispatch('updateYouTubeAccountVideoRatings', value), enabled)
+
+  await likeButton.click()
+  await writeStartedPromise
+  await setVideoRatings(false)
+  await setVideoRatings(true)
+  await setVideoRatings(false)
+  await expect(likeButton).toHaveCount(0)
+  releaseWrite()
+
+  // The lookup after opting in again waits for the same write, so a stale one would go out first.
+  await setVideoRatings(true)
+  await expect(likeButton).toBeEnabled()
+  expect(ratingRequests).toBe(2)
 })
