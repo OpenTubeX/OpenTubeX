@@ -1,6 +1,6 @@
 // @ts-check
 import { createWatchQueueState, watchQueueMutations, PERSISTED_MUTATIONS } from '../watchQueue.js'
-import { readFile } from 'node:fs/promises'
+import { readFile, rename } from 'node:fs/promises'
 import { createSerialQueue } from './serialQueue.js'
 import { writeFileAtomic } from './writeFileAtomic.js'
 
@@ -56,6 +56,8 @@ export function createFileWatchQueue(filename) {
         // would stay unusable until the file is deleted by hand.
         if (error instanceof SyntaxError) {
           console.error('The saved watch queue is corrupt, starting with an empty queue', error)
+          // Keep it for recovery, as the next change saves over it
+          await rename(filename, `${filename}.corrupt`).catch(renameError => console.error(renameError))
           return []
         }
         throw error
