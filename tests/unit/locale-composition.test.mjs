@@ -9,7 +9,7 @@ import { composeLocaleMessages, resolveMessagesWithFallback } from '../../src/lo
 
 const require = createRequire(import.meta.url)
 const ProcessLocalesPlugin = require('../../_scripts/ProcessLocalesPlugin.js')
-const webpack = require('webpack')
+const { rspack } = require('@rspack/core')
 
 test('human base translations take priority over regional and base AI completions', () => {
   const regionalHuman = {
@@ -91,7 +91,7 @@ test('AI locale processing emits separate assets without changing human percenta
       'es',
       aiPlugin.locales.get('es'),
       [],
-      { watching: false, webpack },
+      { watching: false, rspack },
       { emitAsset: (filename, source) => emittedAssets.set(filename, source.source()) }
     )
 

@@ -4,7 +4,7 @@ import test from 'node:test'
 
 import { importWithStubs, sourceUrl } from '../helpers/module-stubs.mjs'
 
-// The handler reads the bundled player map relative to the webpack output
+// The handler reads the bundled player map relative to the Rspack output
 globalThis.__dirname = fileURLToPath(new URL('../../', import.meta.url))
 
 const settingValues = new Map()

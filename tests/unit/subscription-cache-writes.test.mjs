@@ -12,7 +12,7 @@ import { DBActions } from '../../src/constants.js'
 import { SqliteDatastore } from '../../src/datastores/sqlite.js'
 import { createNodeSqliteDriver } from '../../src/datastores/sqliteNode.js'
 
-// The handlers module imports the platform datastore singleton through webpack.
+// The handlers module imports the platform datastore singleton through a bundler alias.
 // Run the actual cache class with an isolated real NeDB for each interleaving.
 const source = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
 const start = source.indexOf('class SubscriptionCache {')

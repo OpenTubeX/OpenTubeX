@@ -3,7 +3,7 @@
  * Sync server error types and the predicates that classify them.
  *
  * Kept in its own module so the classification logic can be unit tested; the
- * main sync-server helper pulls in webpack-resolved imports that a plain Node
+ * main sync-server helper pulls in bundler-resolved imports that a plain Node
  * test runner cannot load.
  */
 

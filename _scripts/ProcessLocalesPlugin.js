@@ -47,12 +47,15 @@ class ProcessLocalesPlugin {
     /** @type {(update: { source: string, locales: [string, string][], translationPercentages?: number[] }) => void|null} */
     this.notifyLocaleChange = null
 
+    /** @type {Map<string, Promise<{ filename: string, json: string, output: string|Buffer }>>} */
+    this.preparedOutputs = new Map()
+
     this.loadLocales(options.activeLocales)
   }
 
-  /** @param {import('webpack').Compiler} compiler  */
+  /** @param {import('@rspack/core').Compiler} compiler  */
   apply(compiler) {
-    const { Compilation, DefinePlugin } = compiler.webpack
+    const { Compilation, DefinePlugin } = compiler.rspack
 
     new DefinePlugin({
       'process.env.HOT_RELOAD_LOCALES': this.hotReload
@@ -63,9 +66,9 @@ class ProcessLocalesPlugin {
         name: this.pluginName,
         stage: Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL
       }, async (_assets) => {
-        // While running in the webpack dev server, this hook gets called for every incremental build.
+        // While running in the dev server, this hook gets called for every incremental build.
         // For incremental builds we can return the already processed versions, which saves time
-        // and makes webpack treat them as cached
+        // and makes Rspack treat them as cached
 
         /** @type {[string, string][]} */
         const updatedLocales = []
@@ -96,6 +99,13 @@ class ProcessLocalesPlugin {
       })
     })
 
+    compiler.hooks.beforeRun.tap(this.pluginName, () => {
+      // One-off builds: compress while the modules build, which takes seconds
+      for (const [locale, data] of this.locales) {
+        this.preparedOutputs.set(locale, this.prepareOutput(locale, data))
+      }
+    })
+
     compiler.hooks.afterCompile.tap(this.pluginName, (compilation) => {
       if (compiler.watching) {
         // watch locale files for changes
@@ -104,7 +114,7 @@ class ProcessLocalesPlugin {
     })
   }
 
-  /** @param {import('webpack').Compilation} compilation */
+  /** @param {import('@rspack/core').Compilation} compilation */
   registerLocaleDependencies(compilation) {
     for (const filePath of this.filePaths) {
       const dependencies = existsSync(filePath)
@@ -118,8 +128,8 @@ class ProcessLocalesPlugin {
    * @param {string} locale
    * @param {any} data
    * @param {[string, string][]} updatedLocales
-   * @param {import('webpack').Compiler} compiler
-   * @param {import('webpack').Compilation} compilation
+   * @param {import('@rspack/core').Compiler} compiler
+   * @param {import('@rspack/core').Compilation} compilation
    */
   async processLocale(locale, data, updatedLocales, compiler, compilation) {
     if (compiler.watching && compiler.fileTimestamps) {
@@ -139,25 +149,18 @@ class ProcessLocalesPlugin {
       }
     }
 
-    this.removeEmptyValues(data)
-    this.localeTranslationKeys.set(locale, this.getTranslationKeys(data))
-
-    let filename = `${this.outputDir}/${locale}.json`
-    let output = JSON.stringify(data)
+    const prepared = this.preparedOutputs.get(locale)
+    this.preparedOutputs.delete(locale)
+    const { filename, json, output } = await (prepared ?? this.prepareOutput(locale, data))
 
     if (this.hotReload && compiler.fileTimestamps) {
-      updatedLocales.push([locale, output])
+      updatedLocales.push([locale, json])
     }
 
-    if (this.compress) {
-      filename += '.br'
-      output = await this.compressLocale(output)
-    }
-
-    let source = new compiler.webpack.sources.RawSource(output)
+    let source = new compiler.rspack.sources.RawSource(output)
 
     if (compiler.watching) {
-      source = new compiler.webpack.sources.CachedSource(source)
+      source = new compiler.rspack.sources.CachedSource(source)
       this.cache.set(locale, { filename, source })
 
       // we don't need the unmodified sources anymore, as we use the cache `this.cache`
@@ -166,6 +169,21 @@ class ProcessLocalesPlugin {
     }
 
     compilation.emitAsset(filename, source, { minimized: true })
+  }
+
+  /**
+   * @param {string} locale
+   * @param {any} data
+   */
+  async prepareOutput(locale, data) {
+    this.removeEmptyValues(data)
+    this.localeTranslationKeys.set(locale, this.getTranslationKeys(data))
+
+    const json = JSON.stringify(data)
+
+    return this.compress
+      ? { filename: `${this.outputDir}/${locale}.json.br`, json, output: await this.compressLocale(json) }
+      : { filename: `${this.outputDir}/${locale}.json`, json, output: json }
   }
 
   /** @param {string[]|undefined} configuredLocales */

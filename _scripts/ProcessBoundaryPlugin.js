@@ -36,7 +36,7 @@ class ProcessBoundaryPlugin {
           // Report only where the chain first crosses the boundary.
           if (chain.slice(0, -1).some(isRendererOnly)) continue
 
-          compilation.errors.push(new compiler.webpack.WebpackError(
+          compilation.errors.push(new compiler.rspack.WebpackError(
             `${PLUGIN_NAME}: the ${compiler.options.name} bundle must not include renderer-only modules:\n  ${chain.map(current => relative(ROOT, current.resource ?? current.identifier())).join('\n  -> ')}`
           ))
         }

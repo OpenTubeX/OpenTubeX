@@ -1,15 +1,13 @@
 const path = require('path')
 const fs = require('fs')
-const webpack = require('webpack')
+const { rspack } = require('@rspack/core')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const { VueLoaderPlugin } = require('vue-loader')
-const CopyWebpackPlugin = require('copy-webpack-plugin')
+const { VueLoaderPlugin } = require('rspack-vue-loader')
 const getStartupSplash = require('./startupSplash')
 const postcssFontScale = require('./postcssFontScale')
 const getBuildCommit = require('./buildCommit')
 const RelativeImportMetaUrlPlugin = require('./RelativeImportMetaUrlPlugin')
-const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-const MinimizerPlugin = require('minimizer-webpack-plugin')
+const getMinimizers = require('./minimizers')
 const ProcessLocalesPlugin = require('./ProcessLocalesPlugin')
 const {
   SHAKA_LOCALE_MAPPINGS,
@@ -19,6 +17,7 @@ const {
 
 const isDevMode = process.env.NODE_ENV === 'development'
 const isCapacitor = process.env.IS_CAPACITOR === 'true'
+const isIos = isCapacitor && process.env.CAPACITOR_PLATFORM === 'ios'
 const isSelfHosted = !isCapacitor && process.env.OPENTUBEX_SELF_HOSTED === 'true'
 const outputPath = path.join(__dirname, isCapacitor ? '../dist/capacitor' : '../dist/web')
 
@@ -26,21 +25,15 @@ const postcssLoader = {
   loader: 'postcss-loader',
   options: {
     postcssOptions: {
-      plugins: [
-        postcssFontScale,
-        // WebKit needs -webkit-backdrop-filter before Safari 18. Keep the targets in
-        // sync with IPHONEOS_DEPLOYMENT_TARGET in ios/App/App.xcodeproj.
-        ...(process.env.CAPACITOR_PLATFORM === 'ios'
-          ? [['autoprefixer', { overrideBrowserslist: ['ios_saf >= 17.4'], remove: false }]]
-          : [])
-      ]
+      // The CSS minimizer adds the vendor prefixes the targets need
+      plugins: [postcssFontScale]
     }
   }
 }
 
 const { version: swiperVersion } = JSON.parse(fs.readFileSync(path.join(__dirname, '../node_modules/swiper/package.json')))
 
-/** @type {import('webpack').Configuration} */
+/** @type {import('@rspack/core').Configuration} */
 const config = {
   name: 'web',
   mode: process.env.NODE_ENV,
@@ -64,7 +57,7 @@ const config = {
       },
       {
         test: /\.vue$/,
-        loader: 'vue-loader',
+        loader: 'rspack-vue-loader',
         options: {
           compilerOptions: {
             isCustomElement: (tag) => tag === 'swiper-container' || tag === 'swiper-slide',
@@ -75,7 +68,7 @@ const config = {
         test: /\.scss$/,
         use: [
           {
-            loader: MiniCssExtractPlugin.loader,
+            loader: rspack.CssExtractRspackPlugin.loader,
           },
           {
             loader: 'css-loader',
@@ -96,7 +89,7 @@ const config = {
         test: /\.css$/,
         use: [
           {
-            loader: MiniCssExtractPlugin.loader
+            loader: rspack.CssExtractRspackPlugin.loader
           },
           {
             loader: 'css-loader',
@@ -146,30 +139,12 @@ const config = {
       }
     }
   },
-  // webpack defaults to only optimising the production builds, so having this here is fine
+  // Rspack only minimizes production builds, so having this here is fine
   optimization: {
-    minimizer: [
-      new MinimizerPlugin({
-        test: /\.(?:css|js|json)(\?.*)?$/i,
-        minify: [
-          {
-            implementation: MinimizerPlugin.cssnanoMinify
-          },
-          {
-            implementation: MinimizerPlugin.jsonMinify
-          },
-          {
-            implementation: MinimizerPlugin.terserMinify,
-            options: {
-              compress: {
-                // webpack sets passes to 2 in its default minimizer config too
-                passes: 2
-              }
-            }
-          }
-        ]
-      })
-    ]
+    minimizer: getMinimizers({
+      cssTargets: isIos ? getMinimizers.IOS_TARGETS : getMinimizers.WEB_TARGETS,
+      json: true
+    })
   },
   node: {
     __dirname: false,
@@ -177,15 +152,15 @@ const config = {
   },
   plugins: [
     new RelativeImportMetaUrlPlugin(),
-    new webpack.DefinePlugin({
+    new rspack.DefinePlugin({
       'process.platform': 'undefined',
       'process.env.IS_ELECTRON': false,
       'process.env.IS_ELECTRON_MAIN': false,
       'process.env.IS_CAPACITOR': isCapacitor,
-      'process.env.IS_IOS': isCapacitor && process.env.CAPACITOR_PLATFORM === 'ios',
+      'process.env.IS_IOS': isIos,
       // Matches the scheme _scripts/prepareIos.mjs registers.
       'process.env.APP_URL_SCHEME': JSON.stringify(
-        isCapacitor && process.env.CAPACITOR_PLATFORM === 'ios' && /-nightly-\d+$/.test(require('../package.json').version)
+        isIos && /-nightly-\d+$/.test(require('../package.json').version)
           ? 'opentubex-nightly'
           : 'opentubex'
       ),
@@ -206,7 +181,7 @@ const config = {
       __INTLIFY_PROD_DEVTOOLS__: 'false',
       'process.env.SWIPER_VERSION': `'${swiperVersion}'`
     }),
-    new webpack.ProvidePlugin({
+    new rspack.ProvidePlugin({
       process: 'process/browser.js'
     }),
     new HtmlWebpackPlugin({
@@ -218,14 +193,14 @@ const config = {
         : { selfHosted: isSelfHosted }
     }),
     new VueLoaderPlugin(),
-    new MiniCssExtractPlugin({
+    new rspack.CssExtractRspackPlugin({
       filename: isDevMode ? '[name].css' : '[name].[contenthash].css',
       chunkFilename: isDevMode ? '[id].css' : '[id].[contenthash].css',
       // Route-level chunks can discover scoped Vue styles in different orders.
       // Their selectors cannot affect one another, so no global order is needed.
       ignoreOrder: true,
     }),
-    new CopyWebpackPlugin({
+    new rspack.CopyRspackPlugin({
       patterns: [
         {
           from: '*/LICENSE',
@@ -235,10 +210,7 @@ const config = {
         {
           from: path.join(__dirname, '../node_modules/swiper/modules/a11y-element.css').replaceAll('\\', '/'),
           to: `swiper-${swiperVersion}.css`,
-          context: path.join(__dirname, '../node_modules/swiper/modules'),
-          transformAll: (assets) => {
-            return Buffer.concat(assets.map(asset => asset.data))
-          }
+          context: path.join(__dirname, '../node_modules/swiper/modules')
         }
       ]
     })
@@ -286,7 +258,7 @@ const processAILocalesPlugin = new ProcessLocalesPlugin({
 config.plugins.push(
   processLocalesPlugin,
   processAILocalesPlugin,
-  new webpack.DefinePlugin({
+  new rspack.DefinePlugin({
     'process.env.LOCALE_NAMES': JSON.stringify(processLocalesPlugin.localeNames),
     'process.env.LOCALE_TRANSLATION_PERCENTAGES': JSON.stringify(processLocalesPlugin.localeTranslationPercentages),
     'process.env.AI_LOCALES': JSON.stringify([...processAILocalesPlugin.locales.keys()]),
@@ -294,7 +266,7 @@ config.plugins.push(
     'process.env.SHAKA_LOCALE_MAPPINGS': JSON.stringify(SHAKA_LOCALE_MAPPINGS),
     'process.env.SHAKA_LOCALES_PREBUNDLED': JSON.stringify(SHAKA_LOCALES_PREBUNDLED)
   }),
-  new CopyWebpackPlugin({
+  new rspack.CopyRspackPlugin({
     patterns: [
       ...(isCapacitor
         ? []

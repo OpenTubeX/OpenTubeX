@@ -2,7 +2,7 @@
 
 [[IgnoredVulns]]
 id = "GHSA-vfj7-8cjw-p6xm"
-reason = "braces: no fixed release; used by micromatch in stylelint, globby and webpack, which only reaches the app tree as an optional peer of vue-router's build plugin."
+reason = "braces: no fixed release; used by micromatch in stylelint and globby."
 
 [[IgnoredVulns]]
 id = "GHSA-ch52-4w7c-c8xp"

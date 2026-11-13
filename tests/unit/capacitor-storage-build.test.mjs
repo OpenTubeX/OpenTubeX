@@ -11,15 +11,17 @@ for (const separator of ['/', '\\']) {
     const dependencies = {
       path,
       'node:child_process': { execFileSync() {} },
-      'copy-webpack-plugin': class {},
-      webpack: {
-        NormalModuleReplacementPlugin: class { constructor(_pattern, callback) { replace = callback } },
-        IgnorePlugin: class {},
+      '@rspack/core': {
+        rspack: {
+          CopyRspackPlugin: class {},
+          NormalModuleReplacementPlugin: class { constructor(_pattern, callback) { replace = callback } },
+          IgnorePlugin: class {},
+        },
       },
-      './webpack.web.config': config,
-      './webpack.botGuardScript.config': { output: {} },
+      './rspack.web.config': config,
+      './rspack.botGuardScript.config': { output: {} },
     }
-    vm.runInNewContext(readFileSync(new URL('../../_scripts/webpack.capacitor.config.js', import.meta.url), 'utf8'), {
+    vm.runInNewContext(readFileSync(new URL('../../_scripts/rspack.capacitor.config.js', import.meta.url), 'utf8'), {
       require: name => dependencies[name],
       process: { env: {}, execPath: 'node' },
       __dirname: '/project/_scripts',
