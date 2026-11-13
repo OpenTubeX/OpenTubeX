@@ -112,6 +112,9 @@
                 :live-chat-available="chatAvailable"
                 :theatre-possible="theatreTogglePossible"
                 :use-theatre-mode="useTheatreMode"
+                :start-in-fullscreen="defaultViewingMode.startsWith('fullscreen')"
+                :start-in-fullwindow="defaultViewingMode.startsWith('fullwindow')"
+                :start-in-pip="defaultViewingMode === 'pip'"
                 playback-engine="yt-dlp"
                 @error="playerErrorHandler"
                 @loaded="handleMediaLoaded"
@@ -368,7 +371,7 @@
         <aside class="sidebarArea">
           <WatchSidebarPanel
             :phone-enabled="phonePanelsEnabled"
-            :phone-open="chaptersPanelOpen"
+            :phone-open="chaptersSheetOpen"
             :title="t('Chapters.Chapters')"
             transition="chapters-panel"
             @close="showChapters = false"
@@ -518,7 +521,16 @@ let startTimestamp = null
 let lastPositionSave = 0
 let lastSavedPosition = 0
 let hasBeenPresented = isTabPresented?.value ?? true
-watch(() => isTabPresented?.value, presented => { if (presented) hasBeenPresented = true })
+watch(() => isTabPresented?.value, presented => {
+  if (presented) hasBeenPresented = true
+  // Phone sheets open outside this page, so like on the watch page, hiding
+  // the page, such as while it plays in the mini player, closes them.
+  else {
+    mobilePanel.value = null
+    // The chapters sheet follows the chapters panel. Desktop keeps it open.
+    if (phonePanelsEnabled.value) showChapters.value = false
+  }
+})
 const showChapters = ref(false)
 const showDownloadPrompt = ref(false)
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
@@ -533,6 +545,9 @@ const seekCount = ref(0)
 const seeking = ref(false)
 const chatOpen = ref(true)
 const useTheatreMode = ref(false)
+// Like on the watch page, Android and iOS start players inline. Each media
+// starts in the default viewing mode, as it does not play on into the next.
+const defaultViewingMode = computed(() => process.env.IS_CAPACITOR ? 'default' : store.getters.getDefaultViewingMode)
 let theatreModeToggledManually = false
 const theatreModeAnimator = createTheatreModeAnimator()
 const theatreLayoutAvailable = ref(isTheatreLayoutAvailable())
@@ -577,6 +592,9 @@ const chatAvailable = computed(() => twitchChatTarget.value && !(twitchChatTarge
   ? store.getters.getHideLiveChatReplay
   : store.getters.getHideLiveChat))
 const chaptersPanelOpen = computed(() => Boolean(source.value && chapters.value.length && showChapters.value))
+// A hidden page keeps its sidebar chapters open, so its sheet must not show
+// over the presented page when the window becomes narrow.
+const chaptersSheetOpen = computed(() => chaptersPanelOpen.value && isTabPresented?.value !== false)
 // The transcript reads WebVTT and SRT, while other sites may only offer TTML.
 const transcriptCaptions = computed(() => source.value?.captions.filter(caption => caption.mimeType !== 'application/ttml+xml') ?? [])
 const transcriptAvailable = computed(() => transcriptCaptions.value.length > 0 && !source.value.isLive)
@@ -749,10 +767,12 @@ function safeWebUrl(value) {
 }
 const thumbnail = computed(() => safeWebUrl(info.value?.thumbnail))
 const metadata = computed(() => info.value?.externalMetadata ?? {})
-const chapters = computed(() => (metadata.value.chapters ?? []).map(chapter => ({
-  ...chapter,
-  timestamp: formatDurationAsTimestamp(Math.floor(chapter.startSeconds))
-})))
+const chapters = computed(() => store.getters.getHideChapters
+  ? []
+  : (metadata.value.chapters ?? []).map(chapter => ({
+      ...chapter,
+      timestamp: formatDurationAsTimestamp(Math.floor(chapter.startSeconds))
+    })))
 /** @type {import('vue').Ref<number | null>} */
 const loopedChapterIndex = ref(null)
 const chapterThumbnails = shallowRef([])
@@ -896,7 +916,8 @@ function syncCompanionAudio(time, tolerance = 0.5) {
 }
 
 function getCompanionVideo() {
-  return videoLayout.value?.querySelector('.videoPlayer video')
+  // The mini player can move the player out of this page.
+  return player.value?.$refs.video
 }
 
 function getPositionMedia() {

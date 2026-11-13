@@ -31,7 +31,7 @@ import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { tabLifecycleService } from '../../tabs/TabLifecycleService'
 import { tabLifecycleKey, tabPresentedKey, watchNavigationKey } from '../../tabs/TabContext'
 import { mobileNavigationMinimizePreview } from '../../helpers/mobileNavigationScroll'
-import { getPreviousBrowsingRoute } from '../../tabs/playerDockDestination'
+import { getPreviousBrowsingRoute, isPlayerRoutePath } from '../../tabs/playerDockDestination'
 import { useRootClass } from '../../helpers/rootClasses'
 
 const props = defineProps({
@@ -65,7 +65,7 @@ const watchView = useTemplateRef('watchView')
 const watchRoute = shallowRef(null)
 const retained = ref(false)
 const minimized = ref(false)
-const isWatchRoute = computed(() => props.route.path.startsWith('/watch/'))
+const isWatchRoute = computed(() => isPlayerRoutePath(props.route.path))
 const presented = computed(() => props.presented && (isWatchRoute.value || previewActive.value))
 const detached = computed(() => retained.value && !isWatchRoute.value)
 const enabled = computed(() => store.getters.getKeepPlayingOnNavigation)
@@ -100,10 +100,16 @@ const unregister = tabLifecycleService.register(props.tabId, {
   async beforeNavigate(context) {
     interruptMinimizePreview()
     await disposalPromise
+    // A YouTube video and other media play in different pages, so opening
+    // one replaces a detached player of the other.
+    if (detached.value && isPlayerRoutePath(context.to.path) && resolveRouteComponent(context.to) !== component.value) {
+      await dismiss()
+      return
+    }
     if (!isWatchRoute.value) return
     // Android teleports even the scrolling mini player outside this view.
     const player = watchView.value?.$refs.player
-    retained.value = Boolean(player) && !context.to.path.startsWith('/watch/') &&
+    retained.value = Boolean(player) && !isPlayerRoutePath(context.to.path) &&
       (minimized.value || enabled.value)
     if (retained.value) {
       // Finish leaving fullscreen while Watch is still presented, so its
@@ -412,7 +418,7 @@ function setWatchRoute(route) {
 }
 
 watch(() => props.route, route => {
-  if (route.path.startsWith('/watch/')) {
+  if (isPlayerRoutePath(route.path)) {
     if (watchRoute.value?.fullPath !== route.fullPath) watchTitle = ''
     disposed = false
     setWatchRoute(route)

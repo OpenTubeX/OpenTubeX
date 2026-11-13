@@ -68,7 +68,7 @@ import { getCapacitorTabService } from '../../tabs/CapacitorTabService'
 import { tabLifecycleService } from '../../tabs/TabLifecycleService'
 import { tabRuntimeRegistry } from '../../tabs/TabRuntimeRegistry'
 import { tabIdKey, tabLifecycleKey, tabPresentedKey } from '../../tabs/TabContext'
-import { getPreviousBrowsingRoute } from '../../tabs/playerDockDestination'
+import { getPreviousBrowsingRoute, isPlayerRoutePath } from '../../tabs/playerDockDestination'
 
 const TAB_LOADER_SELECTOR = '[data-tab-loading-indicator]'
 const TAB_LOADER_LOADING_SOURCE = 'loader'
@@ -118,7 +118,7 @@ const routerFacade = navigation.createRouterFacade(props.tab.id)
 // every deep route watcher in the mounted page.
 const routeFullPath = computed(() => props.tab.route?.fullPath || '/')
 const resolvedRoute = computed(() => navigation.resolve(routeFullPath.value))
-const isWatchRoute = computed(() => resolvedRoute.value.path.startsWith('/watch/'))
+const isWatchRoute = computed(() => isPlayerRoutePath(resolvedRoute.value.path))
 const isBrowsingPresented = computed(() => isPresented.value && !isWatchRoute.value)
 const browsingInitialized = ref(false)
 const watchPreviewing = ref(false)
@@ -135,7 +135,7 @@ watch([initialized, isPresented, isWatchRoute], ([mounted, presented, watchRoute
 }, { immediate: true })
 
 function getBrowsingRoute(route) {
-  if (!route.path.startsWith('/watch/')) return route
+  if (!isPlayerRoutePath(route.path)) return route
   return navigation.resolve(getPreviousBrowsingRoute(props.tab) || '/subscriptions')
 }
 const browsingRoute = shallowRef(getBrowsingRoute(resolvedRoute.value))
