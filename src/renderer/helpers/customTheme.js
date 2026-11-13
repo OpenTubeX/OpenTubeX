@@ -156,10 +156,17 @@ export async function deleteCustomTheme(id) {
   return themes
 }
 
-export async function replaceCustomThemes(themes) {
+/**
+ * @param {unknown} themes
+ * @param {unknown} expected the themes the caller merged against
+ * @returns {Promise<object[] | null>} the saved themes, or `null` if another
+ *   window changed them since `expected` and nothing was replaced
+ */
+export async function replaceCustomThemes(themes, expected) {
   const normalizedThemes = normalizeCustomThemes(themes)
   if (process.env.IS_ELECTRON) {
-    return normalizeCustomThemes(await window.ftElectron.replaceCustomThemes(normalizedThemes))
+    const saved = await window.ftElectron.replaceCustomThemes(normalizedThemes, normalizeCustomThemes(expected))
+    return saved === null ? null : normalizeCustomThemes(saved)
   }
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizedThemes, null, 2))

@@ -435,8 +435,8 @@ export default {
     return ipcRenderer.invoke(IpcChannels.CUSTOM_THEME_DELETE, themeId)
   },
 
-  replaceCustomThemes: (themes) => {
-    return ipcRenderer.invoke(IpcChannels.CUSTOM_THEME_REPLACE, themes)
+  replaceCustomThemes: (themes, expected) => {
+    return ipcRenderer.invoke(IpcChannels.CUSTOM_THEME_REPLACE, themes, expected)
   },
 
   handleCustomThemeUpdated: (handler) => {

@@ -1708,6 +1708,16 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
     const valuesEqual = key === CUSTOM_THEMES_SYNC_KEY
       ? areSyncSettingValuesEqual(key, currentValue, entry.value)
       : metadataEquals(currentValue, entry.value)
+    // Edited while this sync saved an earlier setting. Applying the merge would
+    // undo the edit, so the server keeps its entry and the next sync merges it.
+    const skip = () => {
+      if (remoteEntry) merged[key] = remoteEntry
+      else delete merged[key]
+    }
+    if (!valuesEqual && !itemKeys.has(key) && key !== CUSTOM_THEMES_SYNC_KEY && !metadataEquals(currentValue, value)) {
+      skip()
+      continue
+    }
     if (!valuesEqual) {
       if (key === SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY) {
         await applySubscriptionSettingsSync(store, entry.value, value)
@@ -1715,7 +1725,11 @@ export async function syncSettings(client, store, previousSnapshot = {}, playlis
         await applyPlaylistPreferencesSync(store, entry.value, playlistSnapshot, value)
       } else if (key === CUSTOM_THEMES_SYNC_KEY) {
         const previousThemes = store.state.utils.customThemes
-        const themes = await replaceCustomThemes(entry.value)
+        const themes = await replaceCustomThemes(entry.value, value)
+        if (themes === null) {
+          skip()
+          continue
+        }
         store.commit('setCustomThemes', themes)
         await repairCustomThemeReferences(store, previousThemes, themes)
       } else {
