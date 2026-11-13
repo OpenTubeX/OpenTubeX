@@ -1079,7 +1079,7 @@ test.describe('manual comment loading', () => {
       await expect(dock.locator('.commentThread')).toHaveCount(threadCount - 1)
       await expectScrollInRange()
       await expect.poll(() => scroller.evaluate(element => {
-        const list = element.querySelector('.commentThread:last-of-type').getBoundingClientRect()
+        const list = [...element.querySelectorAll('.commentThread')].at(-1).getBoundingClientRect()
         return Math.round(element.getBoundingClientRect().bottom - list.bottom)
       })).toBeLessThanOrEqual(200)
     })

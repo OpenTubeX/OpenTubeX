@@ -202,7 +202,12 @@ async function handleDeletePrompt(value) {
   font: inherit;
 }
 
-.commentAccountAction:hover:not(:disabled),
+@media (hover: hover) {
+  .commentAccountAction:hover:not(:disabled) {
+    background-color: var(--side-nav-hover-color);
+  }
+}
+
 .commentAccountAction:focus-visible {
   background-color: var(--side-nav-hover-color);
 }
@@ -219,5 +224,11 @@ async function handleDeletePrompt(value) {
 .commentAccountAction:disabled {
   cursor: default;
   opacity: 0.6;
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .commentAccountAction {
+    min-block-size: var(--phone-touch-target, 48px);
+  }
 }
 </style>

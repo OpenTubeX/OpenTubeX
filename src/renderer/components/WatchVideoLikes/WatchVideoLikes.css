@@ -71,10 +71,18 @@
   outline-offset: 2px;
 }
 
-.rateButton:hover:not(:disabled) {
-  background-color: var(--side-nav-hover-color);
+@media (hover: hover) {
+  .rateButton:hover:not(:disabled) {
+    background-color: var(--side-nav-hover-color);
+  }
 }
 
 .rateButton[aria-pressed='true'] {
   color: var(--primary-color);
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .rateButton {
+    min-block-size: var(--phone-touch-target, 48px);
+  }
 }
