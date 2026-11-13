@@ -198,6 +198,10 @@ async function fetchDeArrowData(videoId) {
     if (response.status === 404) {
       return undefined
     }
+    // Other failures are temporary; callers must not cache them as "no data".
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`)
+    }
 
     const json = await response.json()
     return json[videoId] ?? undefined

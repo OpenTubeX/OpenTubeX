@@ -36,7 +36,7 @@ function loadSponsorBlock({ failures = 0 } = {}) {
     },
     async fetch(url) {
       requests.push(url)
-      if (failures-- > 0) return { status: 500, ok: false, text: async () => 'unavailable' }
+      if (failures-- > 0) return { status: 500, ok: false, text: async () => 'unavailable', json: async () => ({ message: 'unavailable' }) }
       const prefix = url.slice(url.lastIndexOf('/') + 1)
       if (url.includes('/api/videoLabels/')) {
         return LABELS[prefix] ? { status: 200, ok: true, json: async () => LABELS[prefix] } : { status: 404, ok: false }
@@ -75,4 +75,10 @@ test('a failed prefix request is retried by the next lookup', async () => {
   await assert.rejects(sponsorBlock.getSponsorBlockVideoLabel('aa-1'))
   assert.equal((await sponsorBlock.getSponsorBlockVideoLabel('aa-1')).UUID, 'sponsor-1')
   assert.equal(sponsorBlock.requests.length, 2)
+})
+
+test('a failed DeArrow request rejects instead of reporting no branding', async () => {
+  const sponsorBlock = loadSponsorBlock({ failures: 1 })
+  await assert.rejects(sponsorBlock.deArrowData('aa-1'))
+  assert.deepEqual(await sponsorBlock.deArrowData('aa-1'), { titles: [], thumbnails: [] })
 })
