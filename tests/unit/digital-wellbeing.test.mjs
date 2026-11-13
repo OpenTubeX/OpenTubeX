@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { createStore } from 'vuex'
 
 import {
   dailyLimitStatus,
@@ -11,7 +12,7 @@ globalThis.localStorage = {
   getItem: key => storage.get(key) ?? null,
   setItem: (key, value) => storage.set(key, String(value)),
 }
-const { default: wellbeing } = await import('../../src/renderer/store/modules/wellbeing.js')
+const { default: wellbeing, shareWellbeingAcrossWindows } = await import('../../src/renderer/store/modules/wellbeing.js')
 
 test('daily windows can cross midnight and equal times describe none', () => {
   const start = 22 * 60
@@ -108,4 +109,76 @@ test('only the pause action blocks playback, and the Shorts limit only blocks Sh
   assert.equal(block('remind')(true), null)
   state.status.watch = 'reached'
   assert.equal(block('pause')(false), 'watch')
+})
+
+test('windows share the time and choices that limits count, but not the break session', async () => {
+  const channels = [new EventTarget(), new EventTarget()]
+  channels.forEach((channel, index) => {
+    channel.postMessage = data => channels[1 - index].dispatchEvent(new MessageEvent('message', { data: structuredClone(data) }))
+  })
+  const [first, second] = channels.map(channel => {
+    const store = createStore({
+      modules: { wellbeing: { ...wellbeing, state: () => structuredClone(wellbeing.state) } },
+      // Without watch statistics, played time is only counted in memory
+      getters: { getRememberHistory: () => true, getEnableWatchStats: () => false },
+    })
+    shareWellbeingAcrossWindows(store, channel)
+    return store
+  })
+  const date = first.state.wellbeing.day.date
+
+  await first.dispatch('recordPlaybackTime', { date, seconds: 30, isShort: true })
+  await second.dispatch('recordPlaybackTime', { date, seconds: 20, isShort: false })
+  await first.dispatch('extendWellbeingLimit', { kind: 'shorts', ignore: true })
+  await second.dispatch('dismissBedtime', date)
+
+  for (const { state: { wellbeing: state } } of [first, second]) {
+    assert.equal(state.day.unrecordedSeconds, 50)
+    assert.equal(state.day.shortsSeconds, 30)
+    assert.equal(state.day.ignored.shorts, true)
+    assert.equal(state.bedtimeDismissedNight, date)
+  }
+  assert.deepEqual([first.state.wellbeing.sessionSeconds, second.state.wellbeing.sessionSeconds], [30, 20])
+})
+
+test('a window opened later starts from the open windows\' day, and saved Shorts time counts both', async () => {
+  const channels = []
+  let pending = 0
+  // Messages arrive after the sender continues, as across processes
+  const connect = () => {
+    const channel = new EventTarget()
+    channel.postMessage = data => channels.filter(other => other !== channel).forEach(other => {
+      pending++
+      setTimeout(() => {
+        other.dispatchEvent(new MessageEvent('message', { data: structuredClone(data) }))
+        pending--
+      })
+    })
+    channels.push(channel)
+    return channel
+  }
+  const open = () => {
+    const store = createStore({
+      modules: { wellbeing: { ...wellbeing, state: () => structuredClone(wellbeing.state) } },
+      getters: { getRememberHistory: () => true, getEnableWatchStats: () => true },
+      actions: { recordWatchTime() {} },
+    })
+    shareWellbeingAcrossWindows(store, connect())
+    return store
+  }
+  const settle = async () => {
+    while (pending > 0) await new Promise(resolve => setTimeout(resolve))
+  }
+  const [first, second] = [open(), open()]
+  await settle()
+  const date = first.state.wellbeing.day.date
+
+  await first.dispatch('recordPlaybackTime', { date, seconds: 10, isShort: true })
+  await second.dispatch('recordPlaybackTime', { date, seconds: 10, isShort: true })
+  await settle()
+  assert.equal(JSON.parse(localStorage.getItem('OpenTubeX/digitalWellbeing')).shortsSeconds, 20)
+
+  const third = open()
+  await settle()
+  assert.equal(third.state.wellbeing.day.shortsSeconds, 20)
 })

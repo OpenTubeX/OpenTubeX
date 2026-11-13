@@ -82,6 +82,68 @@ function persist(state) {
   }
 }
 
+/**
+ * Counts played time toward the day's limits.
+ * @param {typeof state} state
+ * @param {{ date: string, seconds: number, isShort: boolean, recorded: boolean }} playback
+ */
+function addDayPlayback(state, { date, seconds, isShort, recorded }) {
+  // Time flushed after midnight can still belong to the previous day.
+  if (date > state.day.date) state.day = createDay(date)
+  if (date !== state.day.date) return
+  if (!recorded) state.day.unrecordedSeconds += seconds
+  if (isShort) state.day.shortsSeconds += seconds
+  if (isShort && !recorded) state.day.unrecordedShortsSeconds += seconds
+}
+
+/**
+ * Adopts the day of an open window. Windows only add time, so the larger
+ * counts include everything either window has seen.
+ * @param {typeof state} state
+ * @param {ReturnType<typeof createDay>} day
+ */
+function joinWellbeingDay(state, day) {
+  if (day.date > state.day.date) state.day = createDay(day.date)
+  if (day.date !== state.day.date) return
+  for (const key of ['unrecordedSeconds', 'shortsSeconds', 'unrecordedShortsSeconds']) {
+    state.day[key] = Math.max(state.day[key], day[key])
+  }
+  for (const kind of ['watch', 'shorts']) {
+    state.day.extraSeconds[kind] = Math.max(state.day.extraSeconds[kind], day.extraSeconds[kind])
+    state.day.ignored[kind] ||= day.ignored[kind]
+  }
+}
+
+// The limits count playback in every window, so windows share these changes.
+// The break reminder counts each window's own session.
+const SHARED_MUTATIONS = new Set(['addWellbeingPlayback', 'extendWellbeingLimit', 'setWellbeingBedtimeDismissed'])
+
+/**
+ * Store plugin that shares the limits' day and the bedtime dismissal with the
+ * other windows. Time that watch statistics do not record stays in memory, so
+ * the windows tell each other instead of saving it, and a new window asks the
+ * open ones for their day.
+ * @param {import('vuex').Store<any>} store
+ * @param {BroadcastChannel | null} [channel]
+ */
+export function shareWellbeingAcrossWindows(store, channel = typeof BroadcastChannel === 'undefined' ? null : new BroadcastChannel('opentubex-digital-wellbeing')) {
+  if (!channel) return
+  store.subscribe(({ type, payload }, rootState) => {
+    if (SHARED_MUTATIONS.has(type)) channel.postMessage({ type, payload, date: rootState.wellbeing.day.date })
+  })
+  channel.addEventListener('message', ({ data }) => {
+    if (data?.type === 'requestWellbeingDay') {
+      // The state is reactive, which messages cannot clone
+      channel.postMessage({ type: 'wellbeingDay', payload: JSON.parse(JSON.stringify(store.state.wellbeing.day)) })
+      return
+    }
+    store.commit('applySharedWellbeingChange', data)
+    // Another window may have saved its total before it counted this change
+    persist(store.state.wellbeing)
+  })
+  channel.postMessage({ type: 'requestWellbeingDay' })
+}
+
 function recordsWatchStats(rootGetters) {
   return rootGetters.getRememberHistory && rootGetters.getEnableWatchStats
 }
@@ -166,13 +228,19 @@ const mutations = {
     if (now - state.lastPlaybackAt > BREAK_RESET_GAP_MS) state.sessionSeconds = 0
     state.sessionSeconds += seconds
     state.lastPlaybackAt = now
+    addDayPlayback(state, { date, seconds, isShort, recorded })
+  },
 
-    // Time flushed after midnight can still belong to the previous day.
-    if (date > state.day.date) state.day = createDay(date)
-    if (date !== state.day.date) return
-    if (!recorded) state.day.unrecordedSeconds += seconds
-    if (isShort) state.day.shortsSeconds += seconds
-    if (isShort && !recorded) state.day.unrecordedShortsSeconds += seconds
+  /**
+   * Applies a change another window made. The window that made it saved it.
+   * @param {typeof state} state
+   * @param {{ type: string, payload: any, date: string }} change
+   */
+  applySharedWellbeingChange(state, { type, payload, date }) {
+    if (type === 'wellbeingDay') joinWellbeingDay(state, payload)
+    else if (type === 'addWellbeingPlayback') addDayPlayback(state, payload)
+    else if (type === 'extendWellbeingLimit' && date === state.day.date) mutations.extendWellbeingLimit(state, payload)
+    else if (type === 'setWellbeingBedtimeDismissed') mutations.setWellbeingBedtimeDismissed(state, payload)
   },
 
   replaceWellbeingDay(state, day) {
