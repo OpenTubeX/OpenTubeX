@@ -294,6 +294,10 @@ User Playlists:
     Loading videos from {playlistName}: 'Caricamento dei video da {playlistName}'
     Adding missing videos to {playlistName}: 'Aggiunta dei video mancanti a {playlistName}'
     Checking {playlistName} for unavailable videos: 'Ricerca di video non disponibili in {playlistName} ({checked}/{total})'
+  Synced with YouTube: "Sincronizzata con YouTube"
+  Delete YouTube Playlist Confirmation: "Eliminare questa playlist qui e su YouTube? Questa operazione non può essere annullata."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Crea anche su YouTube"
 History:
   From Date: 'Dal'
   To Date: 'Al'
@@ -359,12 +363,12 @@ Settings:
     Sign Out Failed: "Impossibile uscire: {error}"
     Revoke Failed: "Uscita da YouTube completata, ma Google non ha confermato la fine dell'accesso. Puoi rimuoverlo nelle connessioni di terze parti del tuo account Google."
     Signed out by YouTube: "YouTube ha chiuso la sessione. Accedi di nuovo nelle Impostazioni per continuare a usare il tuo account."
-    Subscribe on YouTube: "Iscriviti anche su YouTube"
     Add to YouTube Watch History: "Aggiungi i video guardati alla cronologia di YouTube"
-    Import Subscriptions: "Importa le iscrizioni da YouTube"
-    Imported Subscriptions: "{count} canale importato | {count} canali importati | {count} canali importati"
-    No Subscriptions to Import: "Questo account YouTube non ha iscrizioni"
-    Import Subscriptions Failed: "Impossibile importare le iscrizioni: {error}"
+    Sync Subscriptions: "Sincronizza le iscrizioni con YouTube"
+    Sync Playlists: "Sincronizza le playlist con YouTube"
+    Sync Now: "Sincronizza ora"
+    Synced: "Sincronizzato con YouTube"
+    Sync Failed: "Impossibile sincronizzare con YouTube: {error}"
   Diagnostics:
     Diagnostics: Diagnostica
     Description: Finché il log diagnostico è attivo, OpenTubeX conserva in memoria i messaggi di log recenti per consentirti di allegarli alle segnalazioni di bug. Non li salva né li invia mai di sua iniziativa, e disattivare il log li elimina. I rapporti escludono cookie, token, indirizzi IP e parametri URL, ma possono contenere gli ID dei video che hai riprodotto, quindi controlla un rapporto prima di condividerlo.
@@ -2232,8 +2236,9 @@ Description:
   Music: Musica
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "Iscriversi a un canale o annullare l'iscrizione in OpenTubeX fa lo stesso sul tuo account YouTube."
     Add to YouTube Watch History: "I video che riproduci vengono aggiunti alla tua cronologia delle visualizzazioni di YouTube, così i consigli di YouTube imparano da essi. Non viene aggiunto nulla mentre la cronologia è in pausa su YouTube."
+    Sync Subscriptions: "I canali a cui ti iscrivi su YouTube vengono aggiunti a «Tutti i canali», e quelli da cui annulli l'iscrizione lì vengono rimossi da tutti i profili. Iscriversi o annullare l'iscrizione qui in «Tutti i canali» fa lo stesso su YouTube."
+    Sync Playlists: "Le tue playlist di YouTube, «Guarda più tardi» e «Video piaciuti» compaiono in «Le tue playlist», e le modifiche che vi apporti qui vengono applicate anche su YouTube. Non vengono sincronizzate con gli altri tuoi dispositivi, esportate o incluse nei backup. Disattivando questa opzione vengono rimosse da questo dispositivo, ma non da YouTube."
   General Settings:
     Built-in Streams: |
       Automatico riproduce la maggior parte dei video tramite il client visionOS di YouTube, che si avvia più rapidamente e supporta la qualità automatica. Le dirette e i video che non può riprodurre usano SABR.
@@ -2771,5 +2776,11 @@ YouTube Account:
   Delete Comment Confirmation: "Eliminare il tuo commento da YouTube?"
   Comment Deleted: "Commento eliminato"
   Delete Comment Failed: "Impossibile eliminare il commento: {error}"
+  Edit Comment: "Modifica commento"
+  Save: "Salva"
+  Comment Edited: "Commento modificato"
+  Edit Comment Failed: "Impossibile modificare il commento: {error}"
   Recommendations: "Consigli di YouTube"
   Recommendations Failed: "Impossibile caricare i tuoi consigli di YouTube."
+  Subscriptions Synced: "Iscrizioni sincronizzate da YouTube: {added} aggiunte, {removed} rimosse"
+  Playlist Update Failed: "Impossibile aggiornare {playlistName} su YouTube: {error}"

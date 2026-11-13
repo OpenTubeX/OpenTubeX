@@ -299,6 +299,10 @@ User Playlists:
     Loading videos from {playlistName}: 'טוען סרטונים מ־{playlistName}'
     Adding missing videos to {playlistName}: 'מוסיף סרטונים חסרים ל־{playlistName}'
     Checking {playlistName} for unavailable videos: 'בודק סרטונים לא זמינים ב־{playlistName} ({checked}/{total})'
+  Synced with YouTube: "מסונכרנת עם YouTube"
+  Delete YouTube Playlist Confirmation: "למחוק את רשימת הנגינה הזו כאן וגם ב־YouTube? זאת פעולה בלתי הפיכה."
+  CreatePlaylistPrompt:
+    Create on YouTube: "ליצור גם ב־YouTube"
 History:
   From Date: 'מתאריך'
   To Date: 'עד תאריך'
@@ -364,12 +368,12 @@ Settings:
     Sign Out Failed: "היציאה נכשלה: {error}"
     Revoke Failed: "היציאה מ-YouTube בוצעה, אך Google לא אישרה שהכניסה הסתיימה. אפשר להסיר אותה בחיבורים לצד שלישי בחשבון Google."
     Signed out by YouTube: "YouTube סיים את הכניסה לחשבון. יש להיכנס שוב בהגדרות כדי להמשיך להשתמש בחשבון."
-    Subscribe on YouTube: "הרשמה למינוי גם ב־YouTube"
     Add to YouTube Watch History: "הוספת סרטונים שנצפו להיסטוריה ב־YouTube"
-    Import Subscriptions: "ייבוא מינויים מ־YouTube"
-    Imported Subscriptions: "יובא {count} ערוץ | יובאו {count} ערוצים | יובאו {count} ערוצים"
-    No Subscriptions to Import: "אין מינויים בחשבון YouTube הזה"
-    Import Subscriptions Failed: "לא ניתן לייבא מינויים: {error}"
+    Sync Subscriptions: "סנכרון מינויים עם YouTube"
+    Sync Playlists: "סנכרון רשימות נגינה עם YouTube"
+    Sync Now: "סנכרון עכשיו"
+    Synced: "הסנכרון עם YouTube הושלם"
+    Sync Failed: "לא ניתן לסנכרן עם YouTube: {error}"
   Diagnostics:
     Diagnostics: אבחון
     Description: כל עוד יומן האבחון פועל, OpenTubeX שומר הודעות יומן אחרונות בזיכרון כדי שתוכלו לצרף אותן לדיווחי באגים. הוא אף פעם לא שומר או שולח אותן מעצמו, וכיבוי היומן מוחק אותן. הדוחות אינם כוללים קובצי Cookie, אסימונים, כתובות IP ופרמטרים של כתובות URL, אך הם עשויים לכלול מזהים של סרטונים שניגנתם, לכן בדקו דוח לפני שתשתפו אותו.
@@ -2289,8 +2293,9 @@ Description:
   Music: מוזיקה
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "הרשמה למינוי על ערוץ או ביטול המינוי ב־OpenTubeX מתבצעים גם בחשבון YouTube שלך."
     Add to YouTube Watch History: "סרטונים שמופעלים נוספים להיסטוריית הצפייה שלך ב־YouTube, כך שההמלצות של YouTube לומדות מהם. כשההיסטוריה מושהית ב־YouTube, שום דבר לא נוסף."
+    Sync Subscriptions: "ערוצים שנרשמת אליהם למינוי ב־YouTube נוספים אל „כל הערוצים”, וערוצים שביטלת את המינוי אליהם שם מוסרים מכל הפרופילים. הרשמה למינוי או ביטול מינוי כאן ב„כל הערוצים” עושים את אותו הדבר ב־YouTube."
+    Sync Playlists: "רשימות הנגינה שלך ב־YouTube, „לצפייה בהמשך” ו„סרטונים שאהבתי” מופיעים ב„רשימות הנגינה שלך”, ושינויים שנעשים בהם כאן מתבצעים גם ב־YouTube. הם לא מסונכרנים למכשירים האחרים שלך, לא מיוצאים ולא מגובים. כיבוי האפשרות מסיר אותם מהמכשיר הזה, אך לא מ־YouTube."
   General Settings:
     Built-in Streams: |
       מצב אוטומטי מנגן את רוב הסרטונים דרך לקוח visionOS של YouTube, שמתחיל מהר יותר ותומך באיכות אוטומטית. שידורים חיים וסרטונים שהוא לא יכול לנגן משתמשים ב־SABR.
@@ -2833,5 +2838,11 @@ YouTube Account:
   Delete Comment Confirmation: "למחוק את התגובה שלך מ־YouTube?"
   Comment Deleted: "התגובה נמחקה"
   Delete Comment Failed: "לא ניתן למחוק את התגובה: {error}"
+  Edit Comment: "עריכת התגובה"
+  Save: "שמירה"
+  Comment Edited: "התגובה נערכה"
+  Edit Comment Failed: "לא ניתן לערוך את התגובה: {error}"
   Recommendations: "המלצות YouTube"
   Recommendations Failed: "לא ניתן לטעון את ההמלצות שלך מ־YouTube."
+  Subscriptions Synced: "המינויים סונכרנו מ־YouTube: {added} נוספו, {removed} הוסרו"
+  Playlist Update Failed: "לא ניתן לעדכן את {playlistName} ב־YouTube: {error}"

@@ -303,6 +303,10 @@ User Playlists:
     Loading videos from {playlistName}: 'Indlæser videoer fra {playlistName}'
     Adding missing videos to {playlistName}: 'Tilføjer manglende videoer til {playlistName}'
     Checking {playlistName} for unavailable videos: 'Tjekker {playlistName} for utilgængelige videoer ({checked}/{total})'
+  Synced with YouTube: "Synkroniseret med YouTube"
+  Delete YouTube Playlist Confirmation: "Vil du slette denne playliste her og på YouTube? Det kan ikke fortrydes."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Opret også på YouTube"
 History:
   From Date: 'Fra'
   To Date: 'Til'
@@ -370,12 +374,12 @@ Settings:
     Sign Out Failed: "Kunne ikke logge ud: {error}"
     Revoke Failed: "Logget ud af YouTube, men Google bekræftede ikke, at login blev afsluttet. Du kan fjerne det under tredjepartsforbindelser på din Google-konto."
     Signed out by YouTube: "YouTube har afsluttet login. Log ind igen i Indstillinger for at fortsætte med at bruge din konto."
-    Subscribe on YouTube: "Abonnér også på YouTube"
+    Sync Subscriptions: "Synkroniser abonnementer med YouTube"
+    Sync Playlists: "Synkroniser playlister med YouTube"
     Add to YouTube Watch History: "Føj sete videoer til YouTube-historikken"
-    Import Subscriptions: "Importér abonnementer fra YouTube"
-    Imported Subscriptions: "{count} kanal importeret | {count} kanaler importeret"
-    No Subscriptions to Import: "Denne YouTube-konto har ingen abonnementer"
-    Import Subscriptions Failed: "Kunne ikke importere abonnementer: {error}"
+    Sync Now: "Synkroniser nu"
+    Synced: "Synkroniseret med YouTube"
+    Sync Failed: "Kunne ikke synkronisere med YouTube: {error}"
   Diagnostics:
     Diagnostics: Diagnostik
     Description: Mens diagnosticeringsloggen er slået til, gemmer OpenTubeX de seneste logbeskeder i hukommelsen, så du kan vedhæfte dem til fejlrapporter. Det gemmer eller sender dem aldrig af sig selv, og når du slår loggen fra, slettes de. Rapporter udelader cookies, tokens, IP-adresser og URL-parametre, men de kan indeholde id'er for videoer, du har afspillet, så tjek en rapport, før du deler den.
@@ -2320,7 +2324,8 @@ Description:
   Music: Musik
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "Når du abonnerer på eller afmelder en kanal i OpenTubeX, sker det samme på din YouTube-konto."
+    Sync Subscriptions: "Når du abonnerer på en kanal på YouTube, føjes den til “Alle kanaler”, og når du afmelder abonnementet på en kanal der, fjernes den fra alle profiler. Når du abonnerer eller afmelder abonnementer i “Alle kanaler” her, sker det samme på YouTube."
+    Sync Playlists: "Dine YouTube-playlister, “Se senere” og “Videoer, jeg synes godt om” vises i “Dine playlister”, og ændringer, du foretager i dem her, foretages også på YouTube. De synkroniseres ikke til dine andre enheder, eksporteres ikke og sikkerhedskopieres ikke. Hvis du slår dette fra, fjernes de fra denne enhed, men ikke fra YouTube."
     Add to YouTube Watch History: "Videoer, du afspiller, føjes til din YouTube-visningshistorik, så YouTubes anbefalinger lærer af dem. Der føjes intet til, mens historikken er sat på pause på YouTube."
   General Settings:
     Built-in Streams: |
@@ -2856,6 +2861,8 @@ YouTube Account:
   Rating Failed: "Kunne ikke bedømme på YouTube: {error}"
   Subscribe Failed: "Kunne ikke abonnere på YouTube: {error}"
   Unsubscribe Failed: "Kunne ikke afmelde abonnementet på YouTube: {error}"
+  Subscriptions Synced: "Abonnementer synkroniseret fra YouTube: {added} tilføjet, {removed} fjernet"
+  Playlist Update Failed: "Kunne ikke opdatere {playlistName} på YouTube: {error}"
   Add a comment: "Tilføj en kommentar"
   Add a reply: "Tilføj et svar"
   Comment: "Kommentér"
@@ -2867,5 +2874,9 @@ YouTube Account:
   Delete Comment Confirmation: "Vil du slette din kommentar fra YouTube?"
   Comment Deleted: "Kommentaren er slettet"
   Delete Comment Failed: "Kunne ikke slette kommentaren: {error}"
+  Edit Comment: "Rediger kommentar"
+  Save: "Gem"
+  Comment Edited: "Kommentaren er redigeret"
+  Edit Comment Failed: "Kunne ikke redigere kommentaren: {error}"
   Recommendations: "YouTube-anbefalinger"
   Recommendations Failed: "Kunne ikke indlæse dine YouTube-anbefalinger."

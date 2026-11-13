@@ -41,7 +41,9 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'ytDlpPath',
   // The YouTube account is signed in on this device only.
   'youTubeAccount',
-  'youTubeAccountMirrorSubscriptions',
+  'youTubeAccountSyncSubscriptions',
+  'youTubeAccountSyncPlaylists',
+  'youTubeAccountSyncState',
   'youTubeAccountWatchHistory',
   'ytDlpPlaybackAuthMode',
   'ytDlpPlaybackCookiesPath',

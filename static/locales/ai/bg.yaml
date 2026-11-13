@@ -297,6 +297,10 @@ User Playlists:
     Loading videos from {playlistName}: 'Зареждане на видеоклипове от {playlistName}'
     Adding missing videos to {playlistName}: 'Добавяне на липсващи видеоклипове към {playlistName}'
     Checking {playlistName} for unavailable videos: 'Проверка на {playlistName} за недостъпни видеоклипове ({checked}/{total})'
+  Synced with YouTube: "Синхронизиран с YouTube"
+  Delete YouTube Playlist Confirmation: "Да се изтрие ли този плейлист тук и в YouTube? Това не може да бъде отменено."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Създаване и в YouTube"
 History:
   From Date: 'От'
   To Date: 'До'
@@ -362,12 +366,12 @@ Settings:
     Sign Out Failed: "Излизането не бе успешно: {error}"
     Revoke Failed: "Излязохте от YouTube, но Google не потвърди, че входът е прекратен. Можете да го премахнете от връзките с трети страни в профила си в Google."
     Signed out by YouTube: "YouTube прекрати входа. Влезте отново от Настройки, за да продължите да използвате профила си."
-    Subscribe on YouTube: "Абониране и в YouTube"
+    Sync Subscriptions: "Синхронизиране на абонаментите с YouTube"
+    Sync Playlists: "Синхронизиране на плейлистите с YouTube"
     Add to YouTube Watch History: "Добавяне на гледаните видеа към историята в YouTube"
-    Import Subscriptions: "Внасяне на абонаменти от YouTube"
-    Imported Subscriptions: "Внесен е {count} канал | Внесени са {count} канала"
-    No Subscriptions to Import: "Този профил в YouTube няма абонаменти"
-    Import Subscriptions Failed: "Абонаментите не можаха да бъдат внесени: {error}"
+    Sync Now: "Синхронизиране сега"
+    Synced: "Синхронизирано с YouTube"
+    Sync Failed: "Синхронизирането с YouTube не бе успешно: {error}"
   Diagnostics:
     Diagnostics: Диагностика
     Description: Докато диагностичният журнал е включен, OpenTubeX пази последните съобщения от журнала в паметта, за да можете да ги прикачите към доклади за грешки. Никога не ги запазва и не ги изпраща сам, а изключването на журнала ги изтрива. Докладите не съдържат бисквитки, токени, IP адреси и параметри на URL адреси, но може да съдържат идентификатори на пуснати от вас видеоклипове, затова прегледайте доклада, преди да го споделите.
@@ -2264,7 +2268,8 @@ Description:
   Music: Музика
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "Абонирането за канал или отписването от него в OpenTubeX прави същото и в профила ви в YouTube."
+    Sync Subscriptions: "Каналите, за които се абонирате в YouTube, се добавят към „Всички канали“, а каналите, от които се отпишете там, се премахват от всички профили. Абонирането или отписването във „Всички канали“ тук прави същото и в YouTube."
+    Sync Playlists: "Вашите плейлисти в YouTube, „Гледане по-късно“ и „Харесани видеоклипове“ се показват във „Вашите плейлисти“, а промените, които правите в тях тук, се правят и в YouTube. Те не се синхронизират с другите ви устройства, не се експортират и не се включват в резервните копия. Изключването на тази опция ги премахва от това устройство, но не и от YouTube."
     Add to YouTube Watch History: "Видеата, които пускате, се добавят към историята на гледанията ви в YouTube, така че препоръките на YouTube се учат от тях. Нищо не се добавя, докато историята е на пауза в YouTube."
   General Settings:
     Built-in Streams: |
@@ -2795,6 +2800,8 @@ YouTube Account:
   Rating Failed: "Оценяването в YouTube не беше успешно: {error}"
   Subscribe Failed: "Абонирането в YouTube не беше успешно: {error}"
   Unsubscribe Failed: "Отписването в YouTube не беше успешно: {error}"
+  Subscriptions Synced: "Абонаментите са синхронизирани от YouTube: добавени {added}, премахнати {removed}"
+  Playlist Update Failed: "{playlistName} не можа да се обнови в YouTube: {error}"
   Add a comment: "Добавете коментар"
   Add a reply: "Добавете отговор"
   Comment: "Коментиране"
@@ -2806,5 +2813,9 @@ YouTube Account:
   Delete Comment Confirmation: "Да се изтрие ли коментарът ви от YouTube?"
   Comment Deleted: "Коментарът е изтрит"
   Delete Comment Failed: "Коментарът не можа да бъде изтрит: {error}"
+  Edit Comment: "Редактиране на коментара"
+  Save: "Запазване"
+  Comment Edited: "Коментарът е редактиран"
+  Edit Comment Failed: "Коментарът не можа да бъде редактиран: {error}"
   Recommendations: "Препоръки от YouTube"
   Recommendations Failed: "Препоръките ви от YouTube не можаха да бъдат заредени."

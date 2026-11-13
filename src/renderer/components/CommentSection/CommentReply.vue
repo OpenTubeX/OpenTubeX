@@ -140,7 +140,14 @@
           <FtIcon :icon="['fas', 'link']" />
         </button>
       </p>
+      <CommentComposer
+        v-if="youTubeComments?.enabled.value && youTubeComments.editing.value === reply.id"
+        class="editComposer"
+        :edit-comment="reply"
+        @done="youTubeComments.closeEdit(reply.id)"
+      />
       <FtTimestampCatcher
+        v-else
         class="commentText"
         :input-html="reply.showTranslated && reply.translatedLanguage === translationLanguage
           ? reply.translatedText

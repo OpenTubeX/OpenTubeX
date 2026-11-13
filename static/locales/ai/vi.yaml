@@ -260,6 +260,10 @@ User Playlists:
   Pin to Top: "Ghim lên đầu"
   Unpin from Top: "Bỏ ghim khỏi đầu"
   Pinned to Top: "Đã ghim lên đầu"
+  Synced with YouTube: "Đã đồng bộ với YouTube"
+  Delete YouTube Playlist Confirmation: "Xóa danh sách phát này ở đây và trên YouTube? Việc này sẽ không thể được hoàn tác."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Tạo cả trên YouTube"
   Reorder Hint: Kéo hoặc dùng phím mũi tên để sắp xếp lại
   Add new videos to the top (custom order): "Thêm video mới lên đầu (thứ tự tùy chỉnh)"
   Shuffle videos by default: "Phát ngẫu nhiên video theo mặc định"
@@ -359,12 +363,12 @@ Settings:
     Sign Out Failed: "Không thể đăng xuất: {error}"
     Revoke Failed: "Đã đăng xuất khỏi YouTube, nhưng Google chưa xác nhận rằng phiên đăng nhập đã kết thúc. Bạn có thể xóa phiên này trong mục kết nối với bên thứ ba của Tài khoản Google."
     Signed out by YouTube: "YouTube đã kết thúc phiên đăng nhập. Hãy đăng nhập lại trong Cài đặt để tiếp tục dùng tài khoản của bạn."
-    Subscribe on YouTube: "Đăng ký cả trên YouTube"
+    Sync Subscriptions: "Đồng bộ kênh đăng ký với YouTube"
+    Sync Playlists: "Đồng bộ danh sách phát với YouTube"
     Add to YouTube Watch History: "Thêm video đã xem vào lịch sử YouTube"
-    Import Subscriptions: "Nhập đăng ký từ YouTube"
-    Imported Subscriptions: "Đã nhập {count} kênh"
-    No Subscriptions to Import: "Tài khoản YouTube này không có kênh đăng ký nào"
-    Import Subscriptions Failed: "Không thể nhập đăng ký: {error}"
+    Sync Now: "Đồng bộ ngay"
+    Synced: "Đã đồng bộ với YouTube"
+    Sync Failed: "Không thể đồng bộ với YouTube: {error}"
   Diagnostics:
     Diagnostics: Chẩn đoán
     Description: Khi nhật ký chẩn đoán đang bật, OpenTubeX giữ các thông báo nhật ký gần đây trong bộ nhớ để bạn có thể đính kèm chúng vào báo cáo lỗi. Ứng dụng không bao giờ tự lưu hay gửi chúng, và tắt nhật ký sẽ xóa chúng. Báo cáo bỏ qua cookie, token, địa chỉ IP và tham số URL, nhưng có thể chứa ID của các video bạn đã phát, vì vậy hãy kiểm tra báo cáo trước khi chia sẻ.
@@ -2247,7 +2251,8 @@ Description:
   Music: Âm nhạc
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "Đăng ký hoặc hủy đăng ký một kênh trong OpenTubeX cũng sẽ thực hiện tương tự trên tài khoản YouTube của bạn."
+    Sync Subscriptions: "Các kênh bạn đăng ký trên YouTube sẽ được thêm vào Tất cả kênh, còn các kênh bạn hủy đăng ký ở đó sẽ bị xóa khỏi mọi hồ sơ. Đăng ký hoặc hủy đăng ký trong Tất cả kênh tại đây cũng sẽ thực hiện tương tự trên YouTube."
+    Sync Playlists: "Danh sách phát YouTube, Xem sau và Video đã thích của bạn sẽ xuất hiện trong Danh sách phát của bạn, và những thay đổi bạn thực hiện với chúng tại đây cũng được áp dụng trên YouTube. Chúng không được đồng bộ sang các thiết bị khác của bạn, không được xuất và không được sao lưu. Tắt tùy chọn này sẽ xóa chúng khỏi thiết bị này nhưng không xóa khỏi YouTube."
     Add to YouTube Watch History: "Video bạn phát sẽ được thêm vào lịch sử xem YouTube của bạn để đề xuất của YouTube học hỏi từ đó. Không có gì được thêm khi lịch sử đang bị tạm dừng trên YouTube."
   General Settings:
     Built-in Streams: |
@@ -2776,6 +2781,8 @@ YouTube Account:
   Rating Failed: "Không thể đánh giá trên YouTube: {error}"
   Subscribe Failed: "Không thể đăng ký trên YouTube: {error}"
   Unsubscribe Failed: "Không thể hủy đăng ký trên YouTube: {error}"
+  Subscriptions Synced: "Đã đồng bộ kênh đăng ký từ YouTube: thêm {added}, xóa {removed}"
+  Playlist Update Failed: "Không thể cập nhật {playlistName} trên YouTube: {error}"
   Add a comment: "Viết bình luận"
   Add a reply: "Viết phản hồi"
   Comment: "Bình luận"
@@ -2787,5 +2794,9 @@ YouTube Account:
   Delete Comment Confirmation: "Xóa bình luận của bạn khỏi YouTube?"
   Comment Deleted: "Đã xóa bình luận"
   Delete Comment Failed: "Không thể xóa bình luận: {error}"
+  Edit Comment: "Chỉnh sửa bình luận"
+  Save: "Lưu"
+  Comment Edited: "Đã chỉnh sửa bình luận"
+  Edit Comment Failed: "Không thể chỉnh sửa bình luận: {error}"
   Recommendations: "Đề xuất từ YouTube"
   Recommendations Failed: "Không thể tải đề xuất YouTube của bạn."

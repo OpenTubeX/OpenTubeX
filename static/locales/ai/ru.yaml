@@ -235,6 +235,10 @@ User Playlists:
   Pin to Top: "Закрепить вверху"
   Unpin from Top: "Открепить сверху"
   Pinned to Top: "Закреплено вверху"
+  Synced with YouTube: "Синхронизирован с YouTube"
+  Delete YouTube Playlist Confirmation: "Удалить этот плейлист здесь и на YouTube? Это действие нельзя отменить."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Также создать на YouTube"
   Reorder Hint: Перетащите или используйте клавиши со стрелками, чтобы изменить порядок
   Add new videos to the top (custom order): "Добавлять новые видео в начало (свой порядок)"
   Shuffle videos by default: "Перемешивать видео по умолчанию"
@@ -334,12 +338,12 @@ Settings:
     Sign Out Failed: "Не удалось выйти: {error}"
     Revoke Failed: "Вы вышли из YouTube, но Google не подтвердил завершение сеанса. Его можно удалить в разделе сторонних подключений в аккаунте Google."
     Signed out by YouTube: "YouTube завершил сеанс. Войдите снова в настройках, чтобы продолжить пользоваться аккаунтом."
-    Subscribe on YouTube: "Также подписываться на YouTube"
+    Sync Subscriptions: "Синхронизировать подписки с YouTube"
+    Sync Playlists: "Синхронизировать плейлисты с YouTube"
     Add to YouTube Watch History: "Добавлять просмотренные видео в историю YouTube"
-    Import Subscriptions: "Импортировать подписки из YouTube"
-    Imported Subscriptions: "Импортирован {count} канал | Импортировано {count} канала | Импортировано {count} каналов"
-    No Subscriptions to Import: "В этом аккаунте YouTube нет подписок"
-    Import Subscriptions Failed: "Не удалось импортировать подписки: {error}"
+    Sync Now: "Синхронизировать сейчас"
+    Synced: "Синхронизировано с YouTube"
+    Sync Failed: "Не удалось синхронизировать с YouTube: {error}"
   Diagnostics:
     Diagnostics: Диагностика
     Description: Пока диагностический журнал включён, OpenTubeX хранит последние сообщения журнала в памяти, чтобы вы могли приложить их к отчётам об ошибках. Он никогда не сохраняет и не отправляет их сам, а при отключении журнала они удаляются. Отчёты не включают файлы cookie, токены, IP-адреса и параметры URL, но могут содержать идентификаторы воспроизведённых видео, поэтому проверьте отчёт перед тем, как им поделиться.
@@ -2214,7 +2218,8 @@ Description:
   Music: Музыка
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "Подписка на канал или отписка от него в OpenTubeX выполняет то же действие в вашем аккаунте YouTube."
+    Sync Subscriptions: "Каналы, на которые вы подписываетесь на YouTube, добавляются в профиль «Все каналы», а каналы, от которых вы там отписываетесь, удаляются из всех профилей. Подписка на канал или отписка от него здесь в профиле «Все каналы» делает то же самое на YouTube."
+    Sync Playlists: "Ваши плейлисты YouTube, «Смотреть позже» и «Понравившиеся» появляются в разделе «Ваши плейлисты», а изменения, которые вы вносите в них здесь, вносятся и на YouTube. Они не синхронизируются с другими вашими устройствами, не экспортируются и не попадают в резервные копии. Если отключить этот параметр, они будут удалены с этого устройства, но не с YouTube."
     Add to YouTube Watch History: "Воспроизводимые видео добавляются в вашу историю просмотра YouTube, чтобы рекомендации YouTube учитывали их. Пока история приостановлена на YouTube, ничего не добавляется."
   General Settings:
     Built-in Streams: |
@@ -2740,6 +2745,8 @@ YouTube Account:
   Rating Failed: "Не удалось поставить оценку на YouTube: {error}"
   Subscribe Failed: "Не удалось подписаться на YouTube: {error}"
   Unsubscribe Failed: "Не удалось отписаться на YouTube: {error}"
+  Subscriptions Synced: "Подписки синхронизированы с YouTube: добавлено {added}, удалено {removed}"
+  Playlist Update Failed: "Не удалось обновить плейлист {playlistName} на YouTube: {error}"
   Add a comment: "Добавить комментарий"
   Add a reply: "Добавить ответ"
   Comment: "Комментировать"
@@ -2751,5 +2758,9 @@ YouTube Account:
   Delete Comment Confirmation: "Удалить ваш комментарий с YouTube?"
   Comment Deleted: "Комментарий удалён"
   Delete Comment Failed: "Не удалось удалить комментарий: {error}"
+  Edit Comment: "Изменить комментарий"
+  Save: "Сохранить"
+  Comment Edited: "Комментарий изменён"
+  Edit Comment Failed: "Не удалось изменить комментарий: {error}"
   Recommendations: "Рекомендации YouTube"
   Recommendations Failed: "Не удалось загрузить ваши рекомендации YouTube."

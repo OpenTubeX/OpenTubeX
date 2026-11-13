@@ -260,6 +260,10 @@ User Playlists:
   Pin to Top: "En üste sabitle"
   Unpin from Top: "En üstten sabitlemeyi kaldır"
   Pinned to Top: "En üste sabitlendi"
+  Synced with YouTube: "YouTube ile eşitlendi"
+  Delete YouTube Playlist Confirmation: "Bu oynatma listesi burada ve YouTube'da silinsin mi? Bu işlem geri alınamaz."
+  CreatePlaylistPrompt:
+    Create on YouTube: "YouTube'da da oluştur"
   Reorder Hint: Yeniden sıralamak için sürükleyin veya ok tuşlarını kullanın
   Add new videos to the top (custom order): "Yeni videoları en üste ekle (özel sıralama)"
   Shuffle videos by default: "Videoları varsayılan olarak karışık oynat"
@@ -359,12 +363,12 @@ Settings:
     Sign Out Failed: "Oturum kapatılamadı: {error}"
     Revoke Failed: "YouTube oturumu kapatıldı, ancak Google oturumun sonlandığını onaylamadı. Bunu Google Hesabınızın üçüncü taraf bağlantılarından kaldırabilirsiniz."
     Signed out by YouTube: "YouTube oturumu sonlandırdı. Hesabınızı kullanmaya devam etmek için Ayarlar'da yeniden oturum açın."
-    Subscribe on YouTube: "YouTube'da da abone ol"
+    Sync Subscriptions: "Abonelikleri YouTube ile eşitle"
+    Sync Playlists: "Oynatma listelerini YouTube ile eşitle"
     Add to YouTube Watch History: "İzlenen videoları YouTube geçmişine ekle"
-    Import Subscriptions: "Abonelikleri YouTube'dan içe aktar"
-    Imported Subscriptions: "{count} kanal içe aktarıldı | {count} kanal içe aktarıldı"
-    No Subscriptions to Import: "Bu YouTube hesabının aboneliği yok"
-    Import Subscriptions Failed: "Abonelikler içe aktarılamadı: {error}"
+    Sync Now: "Şimdi eşitle"
+    Synced: "YouTube ile eşitlendi"
+    Sync Failed: "YouTube ile eşitlenemedi: {error}"
   Diagnostics:
     Diagnostics: Tanılama
     Description: Tanılama günlüğü açıkken OpenTubeX, hata raporlarına ekleyebilmeniz için son günlük iletilerini bellekte tutar. Bunları hiçbir zaman kendiliğinden kaydetmez veya göndermez ve günlüğü kapatmak bunları siler. Raporlar çerezleri, belirteçleri, IP adreslerini ve URL parametrelerini içermez, ancak oynattığınız videoların kimliklerini içerebilir; bu yüzden paylaşmadan önce raporu kontrol edin.
@@ -2233,7 +2237,8 @@ Description:
   Music: Müzik
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "OpenTubeX'te bir kanala abone olmak veya abonelikten çıkmak, YouTube hesabınızda da aynısını yapar."
+    Sync Subscriptions: "YouTube'da abone olduğunuz kanallar Tüm Kanallar'a eklenir, orada abonelikten çıktığınız kanallar ise tüm profillerden kaldırılır. Burada Tüm Kanallar'da abone olmak veya abonelikten çıkmak YouTube'da da aynısını yapar."
+    Sync Playlists: "YouTube oynatma listeleriniz, Daha sonra izle ve Beğenilen videolar, Oynatma Listelerin bölümünde görünür ve burada bunlarda yaptığınız değişiklikler YouTube'da da yapılır. Diğer cihazlarınızla eşitlenmez, dışa aktarılmaz ve yedeklenmez. Bunu kapatmak onları bu cihazdan kaldırır ancak YouTube'dan kaldırmaz."
     Add to YouTube Watch History: "Oynattığınız videolar YouTube izleme geçmişinize eklenir, böylece YouTube önerileri bunlardan öğrenir. Geçmiş YouTube'da duraklatılmışken hiçbir şey eklenmez."
   General Settings:
     Built-in Streams: |
@@ -2761,6 +2766,8 @@ YouTube Account:
   Rating Failed: "YouTube'da oy verilemedi: {error}"
   Subscribe Failed: "YouTube'da abone olunamadı: {error}"
   Unsubscribe Failed: "YouTube'da abonelikten çıkılamadı: {error}"
+  Subscriptions Synced: "Abonelikler YouTube'dan eşitlendi: {added} eklendi, {removed} kaldırıldı"
+  Playlist Update Failed: "{playlistName} YouTube'da güncellenemedi: {error}"
   Add a comment: "Yorum ekleyin"
   Add a reply: "Yanıt ekleyin"
   Comment: "Yorum yap"
@@ -2772,5 +2779,9 @@ YouTube Account:
   Delete Comment Confirmation: "Yorumunuz YouTube'dan silinsin mi?"
   Comment Deleted: "Yorum silindi"
   Delete Comment Failed: "Yorum silinemedi: {error}"
+  Edit Comment: "Yorumu düzenle"
+  Save: "Kaydet"
+  Comment Edited: "Yorum düzenlendi"
+  Edit Comment Failed: "Yorum düzenlenemedi: {error}"
   Recommendations: "YouTube önerileri"
   Recommendations Failed: "YouTube önerileriniz yüklenemedi."

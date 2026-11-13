@@ -2,12 +2,12 @@
   <div
     ref="root"
     class="commentComposer"
-    :class="{ topLevelComposer: !parentId }"
+    :class="{ topLevelComposer: isTopLevel }"
     @keydown.stop
   >
     <!-- Shows which channel the comment will be posted as. -->
     <FtRetryImage
-      v-if="!parentId"
+      v-if="isTopLevel"
       :src="profile?.thumbnail ?? ''"
       :fallback-icon="['fas', 'circle-user']"
       class="commentComposerAvatar"
@@ -28,8 +28,8 @@
     >
       <FtInput
         ref="input"
-        :label="parentId ? t('YouTube Account.Add a reply') : t('YouTube Account.Add a comment')"
-        :icon="['fas', parentId ? 'reply' : 'comment']"
+        :label="editComment ? t('YouTube Account.Edit Comment') : parentId ? t('YouTube Account.Add a reply') : t('YouTube Account.Add a comment')"
+        :icon="['fas', editComment ? 'edit' : parentId ? 'reply' : 'comment']"
         :value="text"
         :maxlength="10000"
         :disabled="posting"
@@ -48,9 +48,9 @@
         />
         <FtButton
           type="submit"
-          :label="parentId ? t('YouTube Account.Reply') : t('YouTube Account.Comment')"
-          :icon="['fas', parentId ? 'reply' : 'comment']"
-          :disabled="posting || text.trim() === ''"
+          :label="editComment ? t('YouTube Account.Save') : parentId ? t('YouTube Account.Reply') : t('YouTube Account.Comment')"
+          :icon="['fas', editComment ? 'check' : parentId ? 'reply' : 'comment']"
+          :disabled="posting || text.trim() === '' || (editComment !== null && text.trim() === originalText.trim())"
         />
       </div>
     </form>
@@ -69,26 +69,30 @@ import store from '../../store/index'
 import { getSelectedYouTubeProfile } from '../../helpers/youtube-account-state'
 
 import { ERROR_TOAST_ICON, showToast } from '../../helpers/utils'
-import { postYouTubeComment } from '../../helpers/api/youtube-account'
-import { youTubeCommentsKey } from './youTubeComments'
+import { editYouTubeComment, postYouTubeComment } from '../../helpers/api/youtube-account'
+import { getCommentEditText, youTubeCommentsKey } from './youTubeComments'
 
 const props = defineProps({
   // Posts a reply to this top-level comment instead of a new comment.
   parentId: { type: String, default: null },
   // Starts a reply to a reply with a mention of its author.
-  initialText: { type: String, default: '' }
+  initialText: { type: String, default: '' },
+  // Edits this comment or reply of the account instead of posting a new one.
+  editComment: { type: Object, default: null }
 })
 const emit = defineEmits(['done'])
 const { t } = useI18n()
 const comments = inject(youTubeCommentsKey)
 
-const text = ref(props.initialText)
+const originalText = props.editComment ? getCommentEditText(props.editComment) : props.initialText
+const text = ref(originalText)
 const posting = ref(false)
 const input = useTemplateRef('input')
 const profile = computed(() => getSelectedYouTubeProfile(store.getters.getYouTubeAccount))
+const isTopLevel = !props.parentId && !props.editComment
 // Like on YouTube, a new comment starts as a single line that opens the
-// editor. Replies open from their Reply button, so they start open.
-const expanded = ref(props.parentId !== null)
+// editor. Replies and edits open from their buttons, so they start open.
+const expanded = ref(!isTopLevel)
 
 async function expand() {
   expanded.value = true
@@ -98,16 +102,20 @@ async function expand() {
 
 function cancel() {
   text.value = ''
-  if (props.parentId) {
-    emit('done')
-  } else {
+  if (isTopLevel) {
     expanded.value = false
+  } else {
+    emit('done')
   }
 }
 
 async function submit() {
   const commentText = text.value.trim()
   if (commentText === '' || posting.value) return
+  if (props.editComment) {
+    await saveEdit(commentText)
+    return
+  }
 
   posting.value = true
   // The comment belongs to the channel in use now, even after a switch while it posts.
@@ -133,6 +141,26 @@ async function submit() {
   }
 }
 
+/** @param {string} commentText */
+async function saveEdit(commentText) {
+  posting.value = true
+  const commentId = props.editComment.id
+  try {
+    await editYouTubeComment(comments.videoId.value, commentId, commentText, store.getters.getYouTubeAccount)
+    comments.updateComment(commentId, commentText)
+    showToast({ message: t('YouTube Account.Comment Edited'), icon: ['fas', 'edit'] })
+    emit('done')
+  } catch (error) {
+    console.error(error)
+    showToast({
+      message: t('YouTube Account.Edit Comment Failed', { error: error?.message ?? String(error) }),
+      icon: ERROR_TOAST_ICON
+    })
+  } finally {
+    posting.value = false
+  }
+}
+
 // A shorter text shrinks the auto-sized box and with it the comment list.
 const root = useTemplateRef('root')
 let lastHeight = 0
@@ -144,7 +172,7 @@ const resizeObserver = new ResizeObserver(([entry]) => {
 
 onMounted(async () => {
   if (root.value) resizeObserver.observe(root.value)
-  if (!props.parentId) return
+  if (isTopLevel) return
   await nextTick()
   input.value?.focus?.()
 })

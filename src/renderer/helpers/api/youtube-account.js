@@ -5,15 +5,19 @@ import i18n from '../../i18n/index'
 import { ERROR_TOAST_ICON, showToast } from '../utils'
 import { getLocalSignatureTimestamp, localApiFetch } from './local'
 import { YOUTUBE_USER_AGENT_HEADER, YOUTUBE_USER_AGENTS } from '../../../youTubeUserAgent.js'
-import { getSelectedYouTubeProfile, getYouTubeChannelKey, isSignedInToYouTube } from '../youtube-account-state.js'
+import { getSelectedYouTubeProfile, isSignedInToYouTube } from '../youtube-account-state.js'
 import {
   commentActionParams,
   createCommentParams,
   createReplyParams,
   isCommentActionSuccessful,
   parseAccountProfiles,
+  updateCommentParams,
   parseCreatedComment,
   parseHomeFeed,
+  parseOwnedPlaylistIds,
+  parsePlaylistLibrary,
+  parsePlaylistPage,
   parseSubscribedChannels,
   parseVideoRating,
   parseWatchHistoryUrl
@@ -43,6 +47,13 @@ const TIZEN_CLIENT = Object.freeze({
   osVersion: '2.4.0'
 })
 
+// The TV client may not create or delete playlists, but the TV's embedded
+// player may, with the same sign-in.
+const PLAYLIST_WRITE_CLIENT = Object.freeze({
+  clientName: 'TVHTML5_SIMPLY_EMBEDDED_PLAYER',
+  clientVersion: '2.0'
+})
+
 /**
  * @typedef {object} YouTubeAccountCredentials
  * @property {string} access_token
@@ -55,6 +66,7 @@ const TIZEN_CLIENT = Object.freeze({
  * @property {import('./youtube-account-parsers.js').YouTubeProfile[]} profiles the channels the account can use
  * @property {string | null} pageId the channel in use; null for the Google account's own
  * @property {string | null} channelId the ID of the channel in use
+ * @property {string} signInId new with each sign-in, so data synced from it can be told apart
  *
  * @typedef {object} YouTubeSignInCode
  * @property {string} userCode
@@ -154,12 +166,17 @@ async function createAccountInnertube(credentials, options = {}) {
 // must not be used or saved again by a refresh that finishes meanwhile.
 const signedOutRefreshTokens = new Set()
 
-/** @returns {YouTubeAccount | null} */
+/**
+ * The account in use, unless it is signing out.
+ * @returns {YouTubeAccount | null}
+ */
 function getAccount() {
   if (!isSignedInToYouTube(store.getters)) return null
   const account = store.getters.getYouTubeAccount
   return signedOutRefreshTokens.has(account.credentials.refresh_token) ? null : account
 }
+
+export { getAccount as getCurrentYouTubeAccount }
 
 /** @param {YouTubeAccountCredentials} credentials */
 async function saveCredentials(credentials) {
@@ -256,7 +273,7 @@ async function getCredentials() {
  * Runs the callback as the channel in use when called.
  * @template T
  * @param {(innertube: Innertube) => Promise<T>} callback
- * @param {{ userAgent?: keyof typeof YOUTUBE_USER_AGENTS, account?: YouTubeAccount | null }} [options]
+ * @param {{ userAgent?: keyof typeof YOUTUBE_USER_AGENTS, account?: YouTubeAccount | null, client?: { clientName: string, clientVersion: string } }} [options]
  *   `account` keeps the sign-in and channel that started a longer operation
  * @returns {Promise<T>}
  */
@@ -266,6 +283,7 @@ async function withAccount(callback, options = {}) {
   if (!account) throw new Error('Not signed in to a YouTube account')
   const credentials = await getCredentials()
   const innertube = await createAccountInnertube(credentials, { userAgent: options.userAgent, pageId: account.pageId ?? null })
+  if (options.client) Object.assign(innertube.session.context.client, options.client)
   // Signed out, or into another account, while waiting. A sign-in's
   // token is never reused, so the credentials belong to it as well.
   throwIfSignedOut(account)
@@ -414,12 +432,19 @@ export async function completeYouTubeSignIn(code, signal) {
       const { profiles, selectedPageId } = await fetchProfiles(credentials)
       const profile = profiles.find(entry => entry.pageId === selectedPageId) ?? profiles[0]
       const channelId = await resolveChannelId(credentials, profile)
-      // Each sign-in asks again before changing the account's subscriptions or history.
+      // Each sign-in asks again before changing the account's subscriptions, playlists, or history.
       saved = !signal.aborted &&
-        await store.dispatch('updateYouTubeAccountMirrorSubscriptions', false) &&
+        await store.dispatch('updateYouTubeAccountSyncSubscriptions', false) &&
+        await store.dispatch('updateYouTubeAccountSyncPlaylists', false) &&
         await store.dispatch('updateYouTubeAccountWatchHistory', false) &&
         !signal.aborted &&
-        await store.dispatch('updateYouTubeAccount', { credentials, profiles, pageId: profile.pageId, channelId })
+        await store.dispatch('updateYouTubeAccount', {
+          credentials,
+          profiles,
+          pageId: profile.pageId,
+          channelId,
+          signInId: crypto.randomUUID()
+        })
     } finally {
       // Cancelled, failed, or not saved, so Google can forget this sign-in too.
       if (!saved) await revokeSignIn(credentials.refresh_token)
@@ -526,11 +551,12 @@ export async function getYouTubeVideoRating(videoId) {
 /**
  * @param {string} videoId
  * @param {import('./youtube-account-parsers.js').YouTubeRating} rating
+ * @param {YouTubeAccount} [account] rates as this sign-in and channel instead of the ones in use
  */
-export async function rateYouTubeVideo(videoId, rating) {
+export async function rateYouTubeVideo(videoId, rating, account) {
   // removelike also removes dislikes. There is no removedislike.
   const endpoint = rating === 'LIKE' ? '/like/like' : rating === 'DISLIKE' ? '/like/dislike' : '/like/removelike'
-  await withAccount(innertube => innertube.actions.execute(endpoint, { target: { videoId } }))
+  await withAccount(innertube => innertube.actions.execute(endpoint, { target: { videoId } }), { account })
 }
 
 /** @param {string} channelId */
@@ -543,65 +569,107 @@ export async function unsubscribeOnYouTube(channelId) {
   await withAccount(innertube => innertube.interact.unsubscribe(channelId))
 }
 
-let mirrorQueue = Promise.resolve()
-
 /**
- * Repeats a subscription change in OpenTubeX on the YouTube account, when
- * the user turned that on.
- * @param {string | string[]} channelIds
- * @param {boolean} subscribed
+ * @param {YouTubeAccount} [account] the sign-in and channel that started a sync
+ * @returns {Promise<{ id: string, name: string, thumbnail: string | null }[]>}
  */
-export function mirrorYouTubeSubscription(channelIds, subscribed) {
-  // Only YouTube channels can be subscribed to on YouTube.
-  const youTubeChannelIds = [channelIds].flat().filter(channelId => /^UC[\w-]{22}$/.test(channelId))
-  if (!getAccount() || !store.getters.getYouTubeAccountMirrorSubscriptions || youTubeChannelIds.length === 0) {
-    return Promise.resolve()
-  }
-
-  // Changes go out in the order they were made, so a quick unsubscribe
-  // cannot finish before the subscribe it undoes.
-  const account = getAccount()
-  mirrorQueue = mirrorQueue.then(() => sendMirroredSubscriptions(youTubeChannelIds, subscribed, account))
-  return mirrorQueue
-}
-
-/**
- * @param {string[]} youTubeChannelIds
- * @param {boolean} subscribed
- * @param {YouTubeAccount} account the sign-in and channel in use when the change was made
- */
-async function sendMirroredSubscriptions(youTubeChannelIds, subscribed, account) {
-  const channelKey = getYouTubeChannelKey(account)
-  try {
-    // One at a time, and stop at the first failure instead of repeating it.
-    for (const channelId of youTubeChannelIds) {
-      // After turning mirroring off, a channel switch, or signing out, the
-      // rest would change subscriptions the user no longer wants changed.
-      if (!store.getters.getYouTubeAccountMirrorSubscriptions || getYouTubeChannelKey(getAccount()) !== channelKey) return
-      if (subscribed) {
-        await subscribeOnYouTube(channelId)
-      } else {
-        await unsubscribeOnYouTube(channelId)
-      }
-    }
-  } catch (error) {
-    console.error(error)
-    const details = { error: error?.message ?? String(error) }
-    showToast({
-      message: subscribed
-        ? i18n.global.t('YouTube Account.Subscribe Failed', details)
-        : i18n.global.t('YouTube Account.Unsubscribe Failed', details),
-      icon: ERROR_TOAST_ICON
-    })
-  }
-}
-
-/** @returns {Promise<{ id: string, name: string, thumbnail: string | null }[]>} */
-export async function getYouTubeAccountSubscriptions() {
+export async function getYouTubeAccountSubscriptions(account) {
   return await withAccount(async innertube => {
     const response = await innertube.actions.execute('/browse', { browseId: 'FEsubscriptions' })
     return parseSubscribedChannels(response.data)
-  })
+  }, { account })
+}
+
+// Any video works; the dialog only marks the playlists that already have it.
+const ADD_TO_PLAYLIST_VIDEO_ID = 'jNQXAC9IVRw'
+
+/**
+ * @param {YouTubeAccount} account the sign-in and channel that started the sync
+ * @returns {Promise<{ playlists: import('./youtube-account-parsers.js').YouTubePlaylistSummary[], ownedIds: Set<string> }>}
+ */
+export async function getYouTubeAccountPlaylists(account) {
+  return await withAccount(async innertube => {
+    /** @type {Map<string, import('./youtube-account-parsers.js').YouTubePlaylistSummary>} */
+    const playlists = new Map()
+    let page = parsePlaylistLibrary((await innertube.actions.execute('/browse', { browseId: 'FEplaylist_aggregation' })).data)
+    // Further pages can repeat the first, so stop at one without new playlists.
+    while (true) {
+      const known = playlists.size
+      for (const playlist of page.playlists) {
+        if (!playlists.has(playlist.playlistId)) playlists.set(playlist.playlistId, playlist)
+      }
+      if (!page.continuation || playlists.size === known) break
+      page = parsePlaylistLibrary((await innertube.actions.execute('/browse', { continuation: page.continuation })).data)
+    }
+
+    const dialog = await innertube.actions.execute('/playlist/get_add_to_playlist', { videoIds: [ADD_TO_PLAYLIST_VIDEO_ID] })
+    return { playlists: [...playlists.values()], ownedIds: parseOwnedPlaylistIds(dialog.data) }
+  }, { account })
+}
+
+/**
+ * Reads a playlist's videos from the start. `isComplete` can end it early
+ * when the rest is already known.
+ * @param {string} playlistId
+ * @param {YouTubeAccount} account the sign-in and channel that started the sync
+ * @param {(videos: import('./youtube-account-parsers.js').YouTubePlaylistVideo[]) => import('./youtube-account-parsers.js').YouTubePlaylistVideo[] | null} [isComplete]
+ *   returns all videos once the ones read so far complete them, otherwise null
+ * @returns {Promise<{ title: string | null, videos: import('./youtube-account-parsers.js').YouTubePlaylistVideo[] }>}
+ */
+export async function getYouTubePlaylistVideos(playlistId, account, isComplete = () => null) {
+  return await withAccount(async innertube => {
+    let page = parsePlaylistPage((await innertube.actions.execute('/browse', { browseId: `VL${playlistId}` })).data)
+    const title = page.title
+    const videos = [...page.videos]
+    while (page.continuation) {
+      const completed = isComplete(videos)
+      if (completed) return { title, videos: completed }
+      page = parsePlaylistPage((await innertube.actions.execute('/browse', { continuation: page.continuation })).data)
+      videos.push(...page.videos)
+    }
+    return { title, videos }
+  }, { account })
+}
+
+/**
+ * Creates a private playlist.
+ * @param {string} title
+ * @param {string[]} videoIds
+ * @param {YouTubeAccount} account
+ * @returns {Promise<string>} the new playlist's ID
+ */
+export async function createYouTubePlaylist(title, videoIds, account) {
+  return await withAccount(async innertube => {
+    const response = await innertube.actions.execute('/playlist/create', { title, privacyStatus: 'PRIVATE', videoIds })
+    const playlistId = response.data?.playlistId
+    if (typeof playlistId !== 'string' || playlistId === '') throw new Error('YouTube did not create the playlist')
+    return playlistId
+  }, { account, client: PLAYLIST_WRITE_CLIENT })
+}
+
+/**
+ * @param {string} playlistId
+ * @param {YouTubeAccount} account
+ */
+export async function deleteYouTubePlaylist(playlistId, account) {
+  await withAccount(innertube => innertube.actions.execute('/playlist/delete', { playlistId }),
+    { account, client: PLAYLIST_WRITE_CLIENT })
+}
+
+/**
+ * Applies `ACTION_*` edits, such as adding, removing, and moving videos, in order.
+ * @param {string} playlistId
+ * @param {object[]} actions
+ * @param {YouTubeAccount} account
+ */
+export async function editYouTubePlaylist(playlistId, actions, account) {
+  // Watch later only removes videos by their IDs with this client.
+  await withAccount(async innertube => {
+    const response = await innertube.actions.execute('/browse/edit_playlist', { playlistId, actions })
+    if (response.data?.status !== 'STATUS_SUCCEEDED') {
+      throw new Error(`YouTube did not change the playlist: ${response.data?.status}`)
+    }
+  }, { account, client: PLAYLIST_WRITE_CLIENT })
 }
 
 /**
@@ -633,6 +701,25 @@ export async function postYouTubeComment(videoId, text, parentCommentId, account
           commentText: text
         })
     return parseCreatedComment(response.data)
+  }, { account })
+}
+
+/**
+ * Replaces the text of a comment or reply the account posted.
+ * @param {string} videoId
+ * @param {string} commentId a reply's ID is `parentId.replyId`
+ * @param {string} text
+ * @param {YouTubeAccount | null} [account] edits as this sign-in and channel instead of the ones in use
+ */
+export async function editYouTubeComment(videoId, commentId, text, account) {
+  await withAccount(async innertube => {
+    const params = updateCommentParams(videoId, commentId)
+    const response = commentId.includes('.')
+      ? await innertube.actions.execute('/comment/update_comment_reply', { updateReplyParams: params, replyText: text })
+      : await innertube.actions.execute('/comment/update_comment', { updateCommentParams: params, commentText: text })
+    if (response.data?.actionResult?.status !== 'STATUS_SUCCEEDED') {
+      throw new Error(`YouTube did not edit the comment: ${response.data?.actionResult?.status}`)
+    }
   }, { account })
 }
 

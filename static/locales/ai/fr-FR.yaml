@@ -294,6 +294,10 @@ User Playlists:
     Loading videos from {playlistName}: 'Chargement des vidéos de {playlistName}'
     Adding missing videos to {playlistName}: 'Ajout des vidéos manquantes à {playlistName}'
     Checking {playlistName} for unavailable videos: 'Recherche de vidéos indisponibles dans {playlistName} ({checked}/{total})'
+  Synced with YouTube: "Synchronisée avec YouTube"
+  Delete YouTube Playlist Confirmation: "Supprimer cette playlist ici et sur YouTube ? Cette opération ne peut pas être annulée."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Créer aussi sur YouTube"
 History:
   From Date: 'Du'
   To Date: 'Au'
@@ -359,12 +363,12 @@ Settings:
     Sign Out Failed: "Impossible de se déconnecter : {error}"
     Revoke Failed: "Déconnexion de YouTube effectuée, mais Google n'a pas confirmé la fin de la connexion. Vous pouvez la supprimer dans les connexions tierces de votre compte Google."
     Signed out by YouTube: "YouTube a mis fin à la connexion. Reconnectez-vous dans les paramètres pour continuer à utiliser votre compte."
-    Subscribe on YouTube: "S’abonner aussi sur YouTube"
     Add to YouTube Watch History: "Ajouter les vidéos regardées à l’historique YouTube"
-    Import Subscriptions: "Importer les abonnements depuis YouTube"
-    Imported Subscriptions: "{count} chaîne importée | {count} chaînes importées | {count} chaînes importées"
-    No Subscriptions to Import: "Ce compte YouTube n’a aucun abonnement"
-    Import Subscriptions Failed: "Impossible d’importer les abonnements : {error}"
+    Sync Subscriptions: "Synchroniser les abonnements avec YouTube"
+    Sync Playlists: "Synchroniser les playlists avec YouTube"
+    Sync Now: "Synchroniser maintenant"
+    Synced: "Synchronisé avec YouTube"
+    Sync Failed: "Impossible de synchroniser avec YouTube : {error}"
   Diagnostics:
     Diagnostics: Diagnostic
     Description: Tant que le journal de diagnostic est activé, OpenTubeX conserve les messages de journal récents en mémoire pour que vous puissiez les joindre à vos rapports de bogue. Il ne les enregistre ni ne les envoie jamais de lui-même, et désactiver le journal les supprime. Les rapports excluent les cookies, les jetons, les adresses IP et les paramètres d'URL, mais ils peuvent contenir les identifiants des vidéos que vous avez lues ; vérifiez donc un rapport avant de le partager.
@@ -2231,8 +2235,9 @@ Description:
   Music: Musique
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "S’abonner à une chaîne ou s’en désabonner dans OpenTubeX fait de même sur votre compte YouTube."
     Add to YouTube Watch History: "Les vidéos que vous lisez sont ajoutées à votre historique de visionnage YouTube, afin que les recommandations de YouTube en tiennent compte. Rien n’est ajouté tant que l’historique est suspendu sur YouTube."
+    Sync Subscriptions: "Les chaînes auxquelles vous vous abonnez sur YouTube sont ajoutées à « Toutes les chaînes », et celles dont vous vous désabonnez là-bas sont retirées de tous les profils. S’abonner ou se désabonner ici dans « Toutes les chaînes » fait de même sur YouTube."
+    Sync Playlists: "Vos playlists YouTube, « À regarder plus tard » et « Vidéos J’aime » apparaissent dans « Vos playlists », et les modifications que vous y apportez ici sont aussi effectuées sur YouTube. Elles ne sont pas synchronisées avec vos autres appareils, ni exportées, ni sauvegardées. Désactiver cette option les retire de cet appareil, mais pas de YouTube."
   General Settings:
     Built-in Streams: |
       Automatique lit la plupart des vidéos via le client visionOS de YouTube, qui démarre plus vite et prend en charge la qualité automatique. Les diffusions en direct et les vidéos qu’il ne peut pas lire utilisent SABR.
@@ -2770,5 +2775,11 @@ YouTube Account:
   Delete Comment Confirmation: "Supprimer votre commentaire de YouTube ?"
   Comment Deleted: "Commentaire supprimé"
   Delete Comment Failed: "Impossible de supprimer le commentaire : {error}"
+  Edit Comment: "Modifier le commentaire"
+  Save: "Enregistrer"
+  Comment Edited: "Commentaire modifié"
+  Edit Comment Failed: "Impossible de modifier le commentaire : {error}"
   Recommendations: "Recommandations YouTube"
   Recommendations Failed: "Impossible de charger vos recommandations YouTube."
+  Subscriptions Synced: "Abonnements synchronisés depuis YouTube : {added} ajoutés, {removed} retirés"
+  Playlist Update Failed: "Impossible de mettre à jour {playlistName} sur YouTube : {error}"

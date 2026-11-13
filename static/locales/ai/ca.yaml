@@ -415,6 +415,7 @@ User Playlists:
   CreatePlaylistPrompt:
     New Playlist Name: Nom de la llista de reproducció nova
     Create: Crea
+    Create on YouTube: "Crea-la també a YouTube"
     Toast:
       There is already a playlist with this name. Please pick a different name.: Ja hi ha una llista de reproducció amb aquest nom. Trieu-ne un altre.
       Playlist {playlistName} has been successfully created.: S'ha creat correctament la llista de reproducció {playlistName}.
@@ -428,6 +429,8 @@ User Playlists:
     Loading videos from {playlistName}: 'S''estan carregant els vídeos de {playlistName}'
     Adding missing videos to {playlistName}: 'S''estan afegint els vídeos que falten a {playlistName}'
     Checking {playlistName} for unavailable videos: 'S''està comprovant si hi ha vídeos no disponibles a {playlistName} ({checked}/{total})'
+  Synced with YouTube: "Sincronitzada amb YouTube"
+  Delete YouTube Playlist Confirmation: "Vols suprimir aquesta llista de reproducció aquí i a YouTube? Aquesta acció no es pot desfer."
 History:
   From Date: 'Des de'
   To Date: 'Fins a'
@@ -496,12 +499,12 @@ Settings:
     Sign Out Failed: "No s'ha pogut tancar la sessió: {error}"
     Revoke Failed: "S'ha tancat la sessió de YouTube, però Google no ha confirmat que l'inici de sessió hagi acabat. Pots eliminar-lo a les connexions amb tercers del teu compte de Google."
     Signed out by YouTube: "YouTube ha tancat la sessió. Torna a iniciar la sessió a la Configuració per continuar utilitzant el teu compte."
-    Subscribe on YouTube: "Subscriu-te també a YouTube"
+    Sync Subscriptions: "Sincronitza les subscripcions amb YouTube"
+    Sync Playlists: "Sincronitza les llistes de reproducció amb YouTube"
     Add to YouTube Watch History: "Afegeix els vídeos vistos a l'historial de YouTube"
-    Import Subscriptions: "Importa les subscripcions de YouTube"
-    Imported Subscriptions: "S'ha importat {count} canal | S'han importat {count} de canals | S'han importat {count} canals"
-    No Subscriptions to Import: "Aquest compte de YouTube no té cap subscripció"
-    Import Subscriptions Failed: "No s'han pogut importar les subscripcions: {error}"
+    Sync Now: "Sincronitza ara"
+    Synced: "S'ha sincronitzat amb YouTube"
+    Sync Failed: "No s'ha pogut sincronitzar amb YouTube: {error}"
   Diagnostics:
     Diagnostics: Diagnòstic
     Description: Mentre el registre de diagnòstic està activat, OpenTubeX conserva els missatges de registre recents a la memòria perquè els pugueu adjuntar als informes d'errors. Mai no els desa ni els envia pel seu compte, i desactivar el registre els elimina. Els informes ometen galetes, testimonis, adreces IP i paràmetres d'URL, però poden incloure identificadors dels vídeos que heu reproduït, així que reviseu l'informe abans de compartir-lo.
@@ -2771,7 +2774,8 @@ Description:
   Music: Música
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "Subscriure't a un canal o cancel·lar-ne la subscripció a OpenTubeX fa el mateix al teu compte de YouTube."
+    Sync Subscriptions: "Els canals als quals et subscrius a YouTube s'afegeixen a «Tots els canals», i els canals dels quals et dones de baixa allà se suprimeixen de tots els perfils. Subscriure't o donar-te de baixa a «Tots els canals» aquí fa el mateix a YouTube."
+    Sync Playlists: "Les teves llistes de reproducció de YouTube, «Mira més tard» i «Vídeos que m'agraden» apareixen a «Les teves llistes de reproducció», i els canvis que hi facis aquí també es fan a YouTube. No se sincronitzen amb els teus altres dispositius, no s'exporten ni s'inclouen a les còpies de seguretat. Si desactives aquesta opció, se suprimeixen d'aquest dispositiu, però no de YouTube."
     Add to YouTube Watch History: "Els vídeos que reprodueixes s'afegeixen al teu historial de visualitzacions de YouTube, perquè les recomanacions de YouTube n'aprenguin. No s'hi afegeix res mentre l'historial està en pausa a YouTube."
   General Settings:
     Built-in Streams: |
@@ -3407,6 +3411,8 @@ YouTube Account:
   Rating Failed: "No s'ha pogut valorar a YouTube: {error}"
   Subscribe Failed: "No s'ha pogut fer la subscripció a YouTube: {error}"
   Unsubscribe Failed: "No s'ha pogut cancel·lar la subscripció a YouTube: {error}"
+  Subscriptions Synced: "Subscripcions sincronitzades des de YouTube: {added} afegides, {removed} suprimides"
+  Playlist Update Failed: "No s'ha pogut actualitzar {playlistName} a YouTube: {error}"
   Add a comment: "Afegeix un comentari"
   Add a reply: "Afegeix una resposta"
   Comment: "Comenta"
@@ -3418,5 +3424,9 @@ YouTube Account:
   Delete Comment Confirmation: "Vols suprimir el teu comentari de YouTube?"
   Comment Deleted: "S'ha suprimit el comentari"
   Delete Comment Failed: "No s'ha pogut suprimir el comentari: {error}"
+  Edit Comment: "Edita el comentari"
+  Save: "Desa"
+  Comment Edited: "S'ha editat el comentari"
+  Edit Comment Failed: "No s'ha pogut editar el comentari: {error}"
   Recommendations: "Recomanacions de YouTube"
   Recommendations Failed: "No s'han pogut carregar les teves recomanacions de YouTube."

@@ -295,6 +295,7 @@ User Playlists:
       There is already a playlist with this name. Please pick a different name.: Det finst allereie ei speleliste med dette namnet. Vel eit anna namn.
       Playlist {playlistName} has been successfully created.: Spelelista {playlistName} er oppretta.
       There was an issue with creating the playlist.: Det oppstod eit problem då spelelista skulle opprettast.
+    Create on YouTube: "Opprett òg på YouTube"
   Playlist Thumbnail: "Miniatyrbilete for spelelista"
   Restore Default Thumbnail: "Gjenopprett standard miniatyrbilete"
   Move Up: Flytt opp
@@ -304,6 +305,8 @@ User Playlists:
     Loading videos from {playlistName}: 'Lastar inn videoar frå {playlistName}'
     Adding missing videos to {playlistName}: 'Legg til manglande videoar i {playlistName}'
     Checking {playlistName} for unavailable videos: 'Ser etter utilgjengelege videoar i {playlistName} ({checked}/{total})'
+  Synced with YouTube: "Synkronisert med YouTube"
+  Delete YouTube Playlist Confirmation: "Vil du slette denne spelelista her og på YouTube? Dette kan ikkje angrast."
 History:
   From Date: 'Frå'
   To Date: 'Til'
@@ -372,12 +375,12 @@ Settings:
     Sign Out Failed: "Kunne ikkje logge ut: {error}"
     Revoke Failed: "Logga ut av YouTube, men Google stadfesta ikkje at innlogginga vart avslutta. Du kan fjerne ho under tredjepartstilkoplingar i Google-kontoen din."
     Signed out by YouTube: "YouTube avslutta innlogginga. Logg inn att i innstillingane for å halde fram med å bruke kontoen din."
-    Subscribe on YouTube: "Abonner òg på YouTube"
     Add to YouTube Watch History: "Legg sette videoar til i YouTube-historikken"
-    Import Subscriptions: "Importer abonnement frå YouTube"
-    Imported Subscriptions: "Importerte {count} kanal | Importerte {count} kanalar"
-    No Subscriptions to Import: "Denne YouTube-kontoen har ingen abonnement"
-    Import Subscriptions Failed: "Klarte ikkje å importere abonnement: {error}"
+    Sync Subscriptions: "Synkroniser abonnement med YouTube"
+    Sync Playlists: "Synkroniser spelelister med YouTube"
+    Sync Now: "Synkroniser no"
+    Synced: "Synkronisert med YouTube"
+    Sync Failed: "Klarte ikkje å synkronisere med YouTube: {error}"
   Diagnostics:
     Diagnostics: Diagnostikk
     Description: Medan diagnoseloggen er på, held OpenTubeX nylege loggmeldingar i minnet slik at du kan leggje dei ved feilrapportar. Det lagrar eller sender dei aldri av seg sjølv, og når du slår av loggen, vert dei sletta. Rapportar utelèt informasjonskapslar, token, IP-adresser og URL-parametrar, men dei kan innehalde ID-ar for videoar du har spelt av, så sjekk ein rapport før du deler han.
@@ -2543,8 +2546,9 @@ Description:
   Music: Musikk
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "Når du abonnerer på eller avsluttar abonnementet på ein kanal i OpenTubeX, skjer det same på YouTube-kontoen din."
     Add to YouTube Watch History: "Videoar du spelar av, blir lagde til i visingshistorikken din på YouTube, slik at tilrådingane til YouTube lærer av dei. Ingenting blir lagt til medan historikken er sett på pause på YouTube."
+    Sync Subscriptions: "Når du abonnerer på ein kanal på YouTube, blir han lagd til i «Alle kanalar», og når du avsluttar abonnementet der, blir han fjerna frå alle profilar. Å abonnere eller avslutte abonnementet her i «Alle kanalar» gjer det same på YouTube."
+    Sync Playlists: "YouTube-spelelistene dine, «Sjå seinare» og «Lika videoar» blir viste i «Dine spelelistar», og endringar du gjer i dei her, blir òg gjorde på YouTube. Dei blir ikkje synkroniserte til dei andre einingane dine, eksporterte eller sikkerheitskopierte. Om du slår av dette, blir dei fjerna frå denne eininga, men ikkje frå YouTube."
   General Settings:
     Built-in Streams: |
       Automatisk spelar dei fleste videoane via visionOS-klienten til YouTube, som startar raskare og støttar automatisk kvalitet. Direktesendingar og videoar han ikkje kan spela av, brukar SABR.
@@ -3167,5 +3171,11 @@ YouTube Account:
   Delete Comment Confirmation: "Vil du slette kommentaren din frå YouTube?"
   Comment Deleted: "Kommentaren er sletta"
   Delete Comment Failed: "Klarte ikkje å slette kommentaren: {error}"
+  Edit Comment: "Rediger kommentaren"
+  Save: "Lagre"
+  Comment Edited: "Kommentaren er redigert"
+  Edit Comment Failed: "Klarte ikkje å redigere kommentaren: {error}"
   Recommendations: "YouTube-tilrådingar"
   Recommendations Failed: "Klarte ikkje å laste inn YouTube-tilrådingane dine."
+  Subscriptions Synced: "Abonnement synkroniserte frå YouTube: {added} lagde til, {removed} fjerna"
+  Playlist Update Failed: "Klarte ikkje å oppdatere {playlistName} på YouTube: {error}"

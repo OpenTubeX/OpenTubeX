@@ -29,13 +29,21 @@
         {{ $t('User Playlists.CreatePlaylistPrompt.Toast["There is already a playlist with this name. Please pick a different name."]') }}
       </p>
     </FtFlexBox>
+    <FtFlexBox v-if="youTubeAvailable">
+      <FtToggleSwitch
+        :label="$t('User Playlists.CreatePlaylistPrompt.Create on YouTube')"
+        :default-value="createOnYouTube"
+        compact
+        @change="createOnYouTube = $event"
+      />
+    </FtFlexBox>
     <template #footer>
       <FtFlexBox>
         <FtButton
           theme="primary"
           :label="$t('User Playlists.CreatePlaylistPrompt.Create')"
           :icon="['fas', 'playlist-add']"
-          :disabled="playlistPersistenceDisabled"
+          :disabled="playlistPersistenceDisabled || creating"
           @click="createNewPlaylist"
         />
         <FtButton
@@ -58,10 +66,12 @@ import FtButton from '../FtButton/FtButton.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
+import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../store/index'
 
 import { showToast } from '../../helpers/utils'
+import { canCreateYouTubePlaylists, createYouTubePlaylistWithVideos } from '../../helpers/youtube-sync'
 
 const { t } = useI18n()
 
@@ -93,6 +103,11 @@ const playlistPersistenceDisabled = computed(() => {
 
 const playlistNameInput = useTemplateRef('playlistNameInput')
 
+// With playlist sync on, new playlists go to YouTube unless turned off here.
+const youTubeAvailable = canCreateYouTubePlaylists()
+const createOnYouTube = ref(youTubeAvailable)
+const creating = ref(false)
+
 onMounted(() => {
   // Faster to input required playlist name
   nextTick(() => playlistNameInput.value?.focus())
@@ -110,7 +125,7 @@ function handlePlaylistNameInput(input) {
 
 async function createNewPlaylist() {
   // It is still possible to attempt to create via pressing enter
-  if (playlistPersistenceDisabled.value) { return }
+  if (playlistPersistenceDisabled.value || creating.value) { return }
 
   // Copy any videos handed over by the opener (e.g. the add to playlist dropdown),
   // as they get processed in place and must not be reactive store state
@@ -127,8 +142,12 @@ async function createNewPlaylist() {
   const sourcePlaylistId = store.getters.getNewPlaylistVideoObject.sourcePlaylistId
   if (sourcePlaylistId) playlistObject.sourcePlaylistId = sourcePlaylistId
 
+  creating.value = true
   try {
-    await store.dispatch('addPlaylist', playlistObject)
+    const saved = youTubeAvailable && createOnYouTube.value
+      ? await createYouTubePlaylistWithVideos(playlistObject)
+      : await store.dispatch('addPlaylist', playlistObject)
+    if (!saved) throw new Error('Could not save the playlist')
     showToast({
       message: t('User Playlists.CreatePlaylistPrompt.Toast["Playlist {playlistName} has been successfully created."]', {
         playlistName: playlistName.value,
@@ -142,6 +161,7 @@ async function createNewPlaylist() {
     })
     console.error(e)
   } finally {
+    creating.value = false
     hideCreatePlaylistPrompt()
   }
 }

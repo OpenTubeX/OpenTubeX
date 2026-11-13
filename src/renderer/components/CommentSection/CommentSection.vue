@@ -381,7 +381,14 @@
               />
             </button>
           </p>
+          <CommentComposer
+            v-if="canUseYouTubeComments && youTubeEditing === comment.id"
+            class="editComposer"
+            :edit-comment="comment"
+            @done="youTubeComments.closeEdit(comment.id)"
+          />
           <FtTimestampCatcher
+            v-else
             class="commentText"
             :input-html="comment.showTranslated && comment.translatedLanguage === translationLanguage
               ? comment.translatedText
@@ -685,7 +692,7 @@ import CommentImageAttachment from './CommentImageAttachment.vue'
 import store from '../../store/index'
 import { usesInvidiousApi } from '../../../apiBackends'
 import { getYouTubeChannelKey, isSignedInToYouTube } from '../../helpers/youtube-account-state'
-import { createPostedComment, getRootCommentId, youTubeCommentsKey } from './youTubeComments'
+import { createPostedComment, getEditedCommentFields, getRootCommentId, youTubeCommentsKey } from './youTubeComments'
 
 import { debounce, getInvidiousApiErrorMessage, showInvidiousFallbackToast, copyToClipboard, formatViewCount, getRelativeTimeFromDate, showApiErrorToast, showToast } from '../../helpers/utils'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
@@ -811,6 +818,8 @@ const youTubeComments = {
   videoId: computed(() => props.id),
   channelId: computed(() => store.getters.getYouTubeAccount?.channelId ?? null),
   replyingTo: ref(null),
+  // The comment open for editing, one at a time like replies.
+  editing: ref(null),
   ratings: reactive(new Map()),
   // The channel each comment posted here belongs to, as its author ID can be
   // missing. Kept in memory only, as the key contains the sign-in token.
@@ -819,6 +828,9 @@ const youTubeComments = {
   // A reply that finishes posting late must not close another reply box.
   closeReply(commentId) {
     if (youTubeComments.replyingTo.value === commentId) youTubeComments.replyingTo.value = null
+  },
+  closeEdit(commentId) {
+    if (youTubeComments.editing.value === commentId) youTubeComments.editing.value = null
   },
   addComment(posted, text, parentId, account) {
     const comment = createPostedComment(posted, text, account)
@@ -842,6 +854,18 @@ const youTubeComments = {
     thread.numReplies++
     thread.showReplies = true
   },
+  updateComment(commentId, text) {
+    const rootId = getRootCommentId(commentId)
+    const thread = commentData.value.find(entry => entry.id === rootId)
+    const comment = rootId === commentId ? thread : thread && findCommentParent(thread, commentId)?.replies.find(reply => reply.id === commentId)
+    if (comment) Object.assign(comment, getEditedCommentFields(comment, text))
+
+    /** @param {Comment} entry */
+    const edit = entry => entry.id === commentId
+      ? { ...entry, ...getEditedCommentFields(entry, text) }
+      : { ...entry, replies: (entry.replies ?? []).map(edit) }
+    updatePinnedSnapshot(rootId, edit)
+  },
   removeComment(commentId) {
     deletedCommentIds.add(commentId)
     const rootId = getRootCommentId(commentId)
@@ -863,12 +887,14 @@ const youTubeComments = {
 }
 provide(youTubeCommentsKey, youTubeComments)
 // Closing a comment box shortens the list too.
-watch(youTubeComments.replyingTo, () => clampCommentsScrollAfterRender())
+watch([youTubeComments.replyingTo, youTubeComments.editing], () => clampCommentsScrollAfterRender())
 const canUseYouTubeComments = youTubeComments.enabled
 const youTubeReplyingTo = youTubeComments.replyingTo
+const youTubeEditing = youTubeComments.editing
 // Separate sources, so a token refresh that replaces the account keeps drafts.
 watch([() => props.id, () => getYouTubeChannelKey(store.getters.getYouTubeAccount)], () => {
   youTubeComments.replyingTo.value = null
+  youTubeComments.editing.value = null
   youTubeComments.ratings.clear()
 })
 
@@ -879,17 +905,26 @@ watch([() => props.id, () => getYouTubeChannelKey(store.getters.getYouTubeAccoun
  * @param {Comment} reply
  */
 function addReplyToPinnedSnapshot(parentId, reply) {
-  const snapshot = personalPinnedCommentSnapshots.value.find(comment => comment.id === parentId)
-  if (!snapshot) return
-
-  const updated = createCommentPinSnapshot({
+  updatePinnedSnapshot(parentId, snapshot => ({
     ...snapshot,
     replies: [...snapshot.replies, reply],
     numReplies: (snapshot.numReplies ?? 0) + 1,
     showReplies: true
-  })
+  }))
+}
+
+/**
+ * Changes the saved snapshot of a personally pinned thread, if it has one.
+ * @param {string} rootId
+ * @param {(snapshot: Comment) => Comment} update
+ */
+function updatePinnedSnapshot(rootId, update) {
+  const snapshot = personalPinnedCommentSnapshots.value.find(comment => comment.id === rootId)
+  if (!snapshot) return
+
+  const updated = createCommentPinSnapshot(update(snapshot))
   const commentIds = new Set(personalPinnedCommentIds.value)
-  const commentSnapshots = personalPinnedCommentSnapshots.value.map(comment => comment.id === parentId ? updated : comment)
+  const commentSnapshots = personalPinnedCommentSnapshots.value.map(comment => comment.id === rootId ? updated : comment)
   personalPinnedCommentSnapshots.value = commentSnapshots
   saveCommentPins(commentPinStorageKey.value, { commentIds, commentSnapshots })
 }

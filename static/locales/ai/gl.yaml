@@ -299,6 +299,10 @@ User Playlists:
     Loading videos from {playlistName}: 'Cargando vídeos de {playlistName}'
     Adding missing videos to {playlistName}: 'Engadindo os vídeos que faltan a {playlistName}'
     Checking {playlistName} for unavailable videos: 'Buscando vídeos non dispoñibles en {playlistName} ({checked}/{total})'
+  Synced with YouTube: "Sincronizada con YouTube"
+  Delete YouTube Playlist Confirmation: "Queres eliminar esta lista de reprodución aquí e en YouTube? Isto non se pode desfacer."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Crear tamén en YouTube"
 History:
   From Date: 'Desde'
   To Date: 'Ata'
@@ -364,12 +368,12 @@ Settings:
     Sign Out Failed: "Non se puido pechar a sesión: {error}"
     Revoke Failed: "Pechaches a sesión de YouTube, pero Google non confirmou que o inicio de sesión rematase. Podes quitalo nas conexións con terceiros da túa conta de Google."
     Signed out by YouTube: "YouTube pechou a sesión. Volve iniciar sesión en Axustes para seguir usando a túa conta."
-    Subscribe on YouTube: "Subscribirse tamén en YouTube"
     Add to YouTube Watch History: "Engadir os vídeos vistos ao historial de YouTube"
-    Import Subscriptions: "Importar subscricións de YouTube"
-    Imported Subscriptions: "Importouse {count} canle | Importáronse {count} canles"
-    No Subscriptions to Import: "Esta conta de YouTube non ten subscricións"
-    Import Subscriptions Failed: "Non se puideron importar as subscricións: {error}"
+    Sync Subscriptions: "Sincronizar as subscricións con YouTube"
+    Sync Playlists: "Sincronizar as listas de reprodución con YouTube"
+    Sync Now: "Sincronizar agora"
+    Synced: "Sincronizado con YouTube"
+    Sync Failed: "Non se puido sincronizar con YouTube: {error}"
   Diagnostics:
     Diagnostics: Diagnóstico
     Description: Mentres o rexistro de diagnóstico está activado, OpenTubeX garda as mensaxes de rexistro recentes na memoria para que poidas achegalas aos informes de erros. Nunca as garda nin as envía pola súa conta, e desactivar o rexistro elimínaas. Os informes omiten cookies, tokens, enderezos IP e parámetros de URL, pero poden incluír os ID dos vídeos que reproduciches, así que revisa o informe antes de compartilo.
@@ -2292,8 +2296,9 @@ Description:
   Music: Música
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "Ao subscribirte ou cancelar a subscrición a unha canle en OpenTubeX, faise o mesmo na túa conta de YouTube."
     Add to YouTube Watch History: "Os vídeos que reproduces engádense ao teu historial de reprodución de YouTube, para que as recomendacións de YouTube aprendan deles. Non se engade nada mentres o historial estea en pausa en YouTube."
+    Sync Subscriptions: "As canles ás que te subscribes en YouTube engádense a «Tódalas canles», e as canles das que cancelas a subscrición alí elimínanse de todos os perfís. Subscribirse ou cancelar a subscrición aquí en «Tódalas canles» fai o mesmo en YouTube."
+    Sync Playlists: "As túas listas de reprodución de YouTube, «Ver máis tarde» e «Vídeos que me gustan» aparecen en «As túas listaxes de reprodución», e os cambios que fagas nelas aquí tamén se fan en YouTube. Non se sincronizan cos teus outros dispositivos nin se exportan nin se inclúen nas copias de seguranza. Ao desactivar isto elimínanse deste dispositivo, pero non de YouTube."
   General Settings:
     Built-in Streams: |
       Automático reproduce a maioría dos vídeos co cliente visionOS de YouTube, que comeza máis rápido e admite a calidade automática. As emisións en directo e os vídeos que non pode reproducir usan SABR.
@@ -2834,5 +2839,11 @@ YouTube Account:
   Delete Comment Confirmation: "Queres eliminar o teu comentario de YouTube?"
   Comment Deleted: "Eliminouse o comentario"
   Delete Comment Failed: "Non se puido eliminar o comentario: {error}"
+  Edit Comment: "Editar o comentario"
+  Save: "Gardar"
+  Comment Edited: "Editouse o comentario"
+  Edit Comment Failed: "Non se puido editar o comentario: {error}"
   Recommendations: "Recomendacións de YouTube"
   Recommendations Failed: "Non se puideron cargar as túas recomendacións de YouTube."
+  Subscriptions Synced: "Subscricións sincronizadas desde YouTube: {added} engadidas, {removed} eliminadas"
+  Playlist Update Failed: "Non se puido actualizar {playlistName} en YouTube: {error}"

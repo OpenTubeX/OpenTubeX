@@ -253,6 +253,7 @@ import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrappe
 
 import store from '../../store/index'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
+import { refreshYouTubePlaylist } from '../../helpers/youtube-sync'
 import { usesInvidiousApi } from '../../../apiBackends'
 import { getThumbnailListStyles } from '../../constants/thumbnailSize'
 import { thumbnailSizeSettingKey } from '../../composables/useThumbnailSizeSlider'
@@ -1098,6 +1099,12 @@ watch(userPlaylistsReady, () => {
   getPlaylistInfoDebounce()
 })
 
+// Opening a synced playlist brings in changes on YouTube, also moved videos,
+// which the sync does not see.
+watch([playlistId, userPlaylistsReady], () => {
+  if (isUserPlaylistRequested.value && selectedUserPlaylist.value?.youTube) refreshYouTubePlaylist(selectedUserPlaylist.value._id)
+}, { immediate: true })
+
 // Fetch from local store when current user playlist changed
 watch(selectedUserPlaylist, () => {
   // A queued move or drag would be undone; the last save reloads the playlist
@@ -1267,13 +1274,16 @@ async function getNextPageInvidious() {
   })
 }
 
+// YouTube orders Liked videos by when they were liked.
+const isYouTubeLikedVideos = computed(() => selectedUserPlaylist.value?.youTube?.playlistId === 'LL')
+
 const canMoveVideos = computed(() => {
-  return isUserPlaylistRequested.value && !playlistInVideoSearchMode.value && isSortOrderCustom.value && !pendingDeletionRemovalInProgress.value
+  return isUserPlaylistRequested.value && !playlistInVideoSearchMode.value && isSortOrderCustom.value &&
+    !pendingDeletionRemovalInProgress.value && !isYouTubeLikedVideos.value
 })
 
 const videoDraggingPossible = computed(() => {
-  return isUserPlaylistRequested.value && !playlistInVideoSearchMode.value && isSortOrderCustom.value &&
-    !pendingDeletionRemovalInProgress.value && shownPlaylistItems.value.length >= 2
+  return canMoveVideos.value && shownPlaylistItems.value.length >= 2
 })
 
 /**

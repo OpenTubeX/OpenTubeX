@@ -11,6 +11,7 @@ import { generateRandomUniqueId, processToBeAddedPlaylistVideo } from '../../hel
 import { getQuickBookmarkIconValue } from '../../helpers/quickBookmarkIcons'
 import { PLAYLIST_PREFERENCE_KEYS, getNextPlaylistPreferencesTimestamp } from '../../helpers/playlist-preferences-sync'
 import { deepCopy } from '../../helpers/utils'
+import { reportYouTubePlaylistChange } from '../../helpers/youtube-playlist-changes'
 
 function generateRandomPlaylistId() {
   return `ft-playlist--${generateRandomUniqueId()}`
@@ -46,7 +47,18 @@ const UNDESIRED_VIDEO_ATTRIBUTES = [
   'index',
   'liveNow',
   'videoThumbnails',
+  // Identifies an entry in the YouTube playlist it was synced from, not in the one it is added to.
+  'youTubeSetVideoId',
 ]
+
+/**
+ * A copy of a playlist synced from YouTube, for reporting an edit after the
+ * state changed again. Other playlists are not reported, so they need none.
+ * @param {any} playlist
+ */
+function youTubeSnapshot(playlist) {
+  return playlist?.youTube ? deepCopy(toRaw(playlist)) : null
+}
 
 /**
  * Mutates the given video, so it must be a copy the caller owns.
@@ -228,6 +240,7 @@ const actions = {
 
   async updatePlaylist({ commit, state }, playlist) {
     const current = state.playlists.find(item => item._id === playlist._id)
+    const previousDetails = current?.youTube ? { playlistName: current.playlistName, description: current.description ?? '' } : null
     // Sync merges these per playlist by their edit time
     if (current && PLAYLIST_PREFERENCE_KEYS.some(key => (
       Object.hasOwn(playlist, key) && (playlist[key] === true) !== (current[key] === true)
@@ -249,6 +262,14 @@ const actions = {
       // Another window may have deleted the playlist, which must stay deleted
       if (!await DBPlaylistHandlers.update(playlist)) return false
       commit('upsertPlaylistToList', playlist)
+      if (previousDetails) {
+        const playlistName = typeof playlist.playlistName === 'string' && playlist.playlistName !== previousDetails.playlistName ? playlist.playlistName : null
+        const description = typeof playlist.description === 'string' && playlist.description !== previousDetails.description ? playlist.description : null
+        if (playlistName !== null || description !== null) {
+          const snapshot = youTubeSnapshot(state.playlists.find(item => item._id === playlist._id))
+          if (snapshot) reportYouTubePlaylistChange({ type: 'details', playlist: snapshot, playlistName, description })
+        }
+      }
       return true
     } catch (errMessage) {
       console.error(errMessage)
@@ -296,11 +317,14 @@ const actions = {
    * another window meanwhile are kept as they are.
    * @returns {Promise<boolean>} whether the playlist still existed
    */
-  async reorderPlaylistVideos({ commit }, { _id, playlistItemIds }) {
+  async reorderPlaylistVideos({ commit, state }, { _id, playlistItemIds }) {
+    const previous = youTubeSnapshot(state.playlists.find(playlist => playlist._id === _id))?.videos
     const lastUpdatedAt = Date.now()
     const videos = await DBPlaylistHandlers.reorderVideos(_id, lastUpdatedAt, playlistItemIds)
     if (videos === null) return false
     commit('upsertPlaylistToList', { _id, lastUpdatedAt, videos })
+    const snapshot = previous && youTubeSnapshot(state.playlists.find(playlist => playlist._id === _id))
+    if (snapshot) reportYouTubePlaylistChange({ type: 'reorder', playlist: snapshot, previous })
     return true
   },
 
@@ -352,6 +376,7 @@ const actions = {
           payload.lastUpdatedAt = result.lastUpdatedAt
           payload.addVideosToTop = result.addVideosToTop
           commit('addVideo', payload)
+          reportYouTubePlaylistChange({ type: 'add', playlistId: _id, videoIds: [videoData.videoId] })
         }
 
         // ALREADY_PRESENT means another window got there first, so the video is
@@ -402,6 +427,7 @@ const actions = {
       const result = await DBPlaylistHandlers.upsertVideosByPlaylistId(_id, lastUpdatedAt, newVideoObjects, deduplicate)
       if (result.status === PlaylistVideoAddResult.ADDED) {
         commit('addVideos', { _id, lastUpdatedAt: result.lastUpdatedAt, addVideosToTop: result.addVideosToTop, videos: result.videos })
+        reportYouTubePlaylistChange({ type: 'add', playlistId: _id, videoIds: result.videos.map(video => video.videoId) })
       }
       return result.status !== PlaylistVideoAddResult.PLAYLIST_MISSING
     } catch (errMessage) {
@@ -565,12 +591,14 @@ const actions = {
     }
   },
 
-  async removePlaylist({ commit, dispatch }, playlistId) {
+  async removePlaylist({ commit, dispatch, state }, playlistId) {
     try {
+      const snapshot = youTubeSnapshot(state.playlists.find(playlist => playlist._id === playlistId))
       await dispatch('unsetLastViewedPlaylists', [playlistId])
 
       await DBPlaylistHandlers.delete(playlistId)
       commit('removePlaylist', playlistId)
+      if (snapshot) reportYouTubePlaylistChange({ type: 'delete', playlist: snapshot })
       await dispatch('unpinPlaylists', [playlistId])
     } catch (errMessage) {
       console.error(errMessage)
@@ -589,9 +617,10 @@ const actions = {
     }
   },
 
-  async removeVideo({ commit, dispatch }, payload) {
+  async removeVideo({ commit, dispatch, state }, payload) {
     try {
       const { _id, videoId, playlistItemId } = payload
+      const snapshot = youTubeSnapshot(state.playlists.find(playlist => playlist._id === _id))
 
       await dispatch('unsetLastViewedPlaylistForVideos', { videoIds: [videoId], lastViewedPlaylistId: _id })
 
@@ -602,6 +631,10 @@ const actions = {
       payload.lastUpdatedAt = lastUpdatedAt
 
       commit('removeVideo', payload)
+      if (snapshot) {
+        const videos = snapshot.videos.filter(video => playlistItemId != null ? video.playlistItemId === playlistItemId : video.videoId === videoId)
+        if (videos.length > 0) reportYouTubePlaylistChange({ type: 'remove', playlist: snapshot, videos })
+      }
 
       return true
     } catch (errMessage) {
@@ -611,8 +644,9 @@ const actions = {
     }
   },
 
-  async removeVideos({ commit, dispatch }, payload) {
+  async removeVideos({ commit, dispatch, state }, payload) {
     const { _id, playlistItemIds, videoIds } = payload
+    const snapshot = youTubeSnapshot(state.playlists.find(playlist => playlist._id === _id))
 
     await dispatch('unsetLastViewedPlaylistForVideos', { videoIds, lastViewedPlaylistId: _id })
 
@@ -623,6 +657,11 @@ const actions = {
     payload.lastUpdatedAt = lastUpdatedAt
 
     commit('removeVideos', payload)
+    if (snapshot) {
+      const removedIds = new Set(playlistItemIds)
+      const videos = snapshot.videos.filter(video => removedIds.has(video.playlistItemId))
+      if (videos.length > 0) reportYouTubePlaylistChange({ type: 'remove', playlist: snapshot, videos })
+    }
   },
 }
 

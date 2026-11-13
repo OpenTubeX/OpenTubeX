@@ -9,6 +9,7 @@ import {
 } from './subscriptionRefreshErrors'
 import { isMissingChannelError } from './channels'
 import store from '../store/index'
+import { syncYouTubeSubscriptionsBeforeRefresh } from './youtube-sync'
 import { usesInvidiousApi } from '../../apiBackends'
 import {
   getInvidiousChannelLive,
@@ -351,6 +352,21 @@ function setSubscriptionRefreshProgress(percentage) {
       refreshId: activeRefresh?.refreshId
     }
   }))
+}
+
+/**
+ * Refreshes the profile active now. With YouTube subscription sync on, the
+ * changes on YouTube come in first, so the refresh includes added channels.
+ * @template T
+ * @param {{ channelIds?: string[] | null, automatic?: boolean }} options
+ * @param {(activeProfile: any) => Promise<T>} refresh
+ * @returns {Promise<T>}
+ */
+function withYouTubeSubscriptionChanges(options, refresh) {
+  const activeProfile = store.getters.getActiveProfile
+  const sync = options.channelIds == null ? syncYouTubeSubscriptionsBeforeRefresh(options.automatic === true) : null
+  if (!sync) return refresh(activeProfile)
+  return sync.then(() => refresh(store.getters.profileById(activeProfile._id) ?? activeProfile))
 }
 
 /**
@@ -1049,13 +1065,12 @@ async function enrichScrapedUpcomingPublicationDates(channelId, videos) {
  * }} options
  */
 export function refreshSubscriptionVideosFromRemote(options) {
-  const activeProfile = store.getters.getActiveProfile
-  return withSubscriptionRefreshLock(
+  return withYouTubeSubscriptionChanges(options, activeProfile => withSubscriptionRefreshLock(
     'videos',
     activeProfile._id,
     () => refreshSubscriptionVideosFromRemoteUnlocked(options, activeProfile),
     options
-  )
+  ))
 }
 
 async function refreshSubscriptionVideosFromRemoteUnlocked({
@@ -1172,13 +1187,12 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
  * }} options
  */
 export function refreshSubscriptionShortsFromRemote(options) {
-  const activeProfile = store.getters.getActiveProfile
-  return withSubscriptionRefreshLock(
+  return withYouTubeSubscriptionChanges(options, activeProfile => withSubscriptionRefreshLock(
     'shorts',
     activeProfile._id,
     () => refreshSubscriptionShortsFromRemoteUnlocked(options, activeProfile),
     options
-  )
+  ))
 }
 
 async function refreshSubscriptionShortsFromRemoteUnlocked({
@@ -1280,13 +1294,12 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
  * }} options
  */
 export function refreshSubscriptionLiveFromRemote(options) {
-  const activeProfile = store.getters.getActiveProfile
-  return withSubscriptionRefreshLock(
+  return withYouTubeSubscriptionChanges(options, activeProfile => withSubscriptionRefreshLock(
     'live',
     activeProfile._id,
     () => refreshSubscriptionLiveFromRemoteUnlocked(options, activeProfile),
     options
-  )
+  ))
 }
 
 async function refreshSubscriptionLiveFromRemoteUnlocked({
@@ -1403,13 +1416,12 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
  * }} options
  */
 export function refreshSubscriptionPostsFromRemote(options) {
-  const activeProfile = store.getters.getActiveProfile
-  return withSubscriptionRefreshLock(
+  return withYouTubeSubscriptionChanges(options, activeProfile => withSubscriptionRefreshLock(
     'posts',
     activeProfile._id,
     () => refreshSubscriptionPostsFromRemoteUnlocked(options, activeProfile),
     options
-  )
+  ))
 }
 
 async function refreshSubscriptionPostsFromRemoteUnlocked({

@@ -9,9 +9,13 @@ import {
   parseAccountProfiles,
   parseCreatedComment,
   parseHomeFeed,
+  parseOwnedPlaylistIds,
+  parsePlaylistLibrary,
+  parsePlaylistPage,
   parseSubscribedChannels,
   parseVideoRating,
-  parseWatchHistoryUrl
+  parseWatchHistoryUrl,
+  updateCommentParams
 } from '../../src/renderer/helpers/api/youtube-account-parsers.js'
 import { applyYouTubeUserAgent, YOUTUBE_USER_AGENTS } from '../../src/youTubeUserAgent.js'
 
@@ -129,6 +133,137 @@ test('lists each subscribed channel once from the TV Subscriptions tabs', () => 
     { id: 'UCbbbbbbbbbbbbbbbbbbbbbb', name: 'Second Channel', thumbnail: 'https://yt3.example.com/UCbbbbbbbbbbbbbbbbbbbbbb=s176' },
     { id: 'UCaaaaaaaaaaaaaaaaaa-_aa', name: 'First Channel', thumbnail: 'https://yt3.example.com/UCaaaaaaaaaaaaaaaaaa-_aa=s176' }
   ])
+  // Sync would unsubscribe from everything if an unreadable page counted as empty.
+  assert.throws(() => parseSubscribedChannels({ contents: {} }))
+})
+
+const playlistTile = (playlistId, title, count, thumbnail) => ({
+  tileRenderer: {
+    contentId: playlistId,
+    contentType: 'TILE_CONTENT_TYPE_PLAYLIST',
+    header: {
+      tileHeaderRenderer: {
+        thumbnail: { thumbnails: [{ url: `${thumbnail}?sqp=signed`, width: 480 }] },
+        thumbnailOverlays: [{ thumbnailOverlayTimeStatusRenderer: { text: { runs: count } } }]
+      }
+    },
+    metadata: { tileMetadataRenderer: { title: { simpleText: title } } }
+  }
+})
+
+test('reads the account playlists and their changes from the TV playlist list', () => {
+  const firstPage = parsePlaylistLibrary({
+    contents: {
+      tvBrowseRenderer: {
+        content: {
+          tvSurfaceContentRenderer: {
+            content: {
+              gridRenderer: {
+                items: [
+                  playlistTile('WL', 'Watch later', [{ text: 'No videos' }], 'https://i.example.com/none.jpg'),
+                  playlistTile('PLexample', 'Example', [{ text: '1,234', bold: true }, { text: ' videos' }], 'https://i.example.com/first.jpg')
+                ],
+                continuations: [{ nextContinuationData: { continuation: 'next' } }]
+              }
+            }
+          }
+        }
+      }
+    }
+  })
+  assert.deepEqual(firstPage, {
+    playlists: [
+      { playlistId: 'WL', title: 'Watch later', videoCount: 0, signature: 'No videos\nhttps://i.example.com/none.jpg' },
+      { playlistId: 'PLexample', title: 'Example', videoCount: 1234, signature: '1,234 videos\nhttps://i.example.com/first.jpg' }
+    ],
+    continuation: 'next'
+  })
+
+  const nextPage = parsePlaylistLibrary({
+    continuationContents: {
+      tvSurfaceContentContinuation: { content: { gridRenderer: { items: [playlistTile('LL', 'Liked videos', [{ text: '3 videos' }], 'https://i.example.com/liked.jpg')] } } }
+    }
+  })
+  assert.deepEqual(nextPage.playlists.map(playlist => playlist.playlistId), ['LL'])
+  assert.equal(nextPage.continuation, null)
+  // Sync would remove every playlist if an unreadable list counted as empty.
+  assert.throws(() => parsePlaylistLibrary({ contents: {} }))
+})
+
+test('only playlists in the TV add to playlist dialog belong to the account', () => {
+  const option = playlistId => ({ playlistAddToOptionRenderer: { playlistId } })
+  assert.deepEqual(parseOwnedPlaylistIds({ contents: [{ addToPlaylistRenderer: { playlists: [option('WL'), option('PLown')] } }] }), new Set(['WL', 'PLown']))
+  assert.throws(() => parseOwnedPlaylistIds({ contents: [] }))
+})
+
+test('reads playlist entries with the IDs that edits need from TV playlist pages', () => {
+  const entry = (videoId, setVideoId) => {
+    const { tileRenderer } = tile({
+      videoId,
+      title: `Video ${videoId}`,
+      lines: [
+        [{ text: { runs: [{ text: 'Example Channel', navigationEndpoint: { browseEndpoint: { browseId: 'UCcccccccccccccccccccccc' } } }] } }],
+        [{ text: { simpleText: '12 views' } }]
+      ],
+      duration: '1:05'
+    })
+    tileRenderer.onLongPressCommand = {
+      showMenuCommand: {
+        menu: {
+          menuRenderer: {
+            items: [
+              { menuServiceItemRenderer: { serviceEndpoint: { playlistEditEndpoint: { actions: [{ action: 'ACTION_ADD_VIDEO', addedVideoId: videoId }] } } } },
+              { menuServiceItemRenderer: { serviceEndpoint: { playlistEditEndpoint: { actions: [{ action: 'ACTION_REMOVE_VIDEO', setVideoId }] } } } }
+            ]
+          }
+        }
+      }
+    }
+    return { tileRenderer }
+  }
+
+  const firstPage = parsePlaylistPage({
+    contents: {
+      tvBrowseRenderer: {
+        content: {
+          tvSurfaceContentRenderer: {
+            content: {
+              twoColumnRenderer: {
+                leftColumn: { entityMetadataRenderer: { title: { simpleText: 'Example ' } } },
+                rightColumn: {
+                  playlistVideoListRenderer: {
+                    contents: [entry('video000001', 'SET1')],
+                    continuations: [{ nextContinuationData: { continuation: 'more' } }]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  })
+  assert.equal(firstPage.title, 'Example')
+  assert.equal(firstPage.continuation, 'more')
+  assert.deepEqual(firstPage.videos, [{
+    videoId: 'video000001',
+    setVideoId: 'SET1',
+    title: 'Video video000001',
+    author: 'Example Channel',
+    authorId: 'UCcccccccccccccccccccccc',
+    lengthSeconds: 65,
+    published: null,
+    viewCount: 12
+  }])
+
+  const nextPage = parsePlaylistPage({ continuationContents: { playlistVideoListContinuation: { contents: [entry('video000002', 'SET2')] } } })
+  assert.deepEqual(nextPage.videos.map(video => video.setVideoId), ['SET2'])
+  assert.equal(nextPage.title, null)
+
+  // An empty playlist has no list at all, which is different from an unreadable page.
+  const empty = parsePlaylistPage({ contents: { tvBrowseRenderer: { content: { tvSurfaceContentRenderer: { content: { twoColumnRenderer: { leftColumn: {} } } } } } } })
+  assert.deepEqual(empty.videos, [])
+  assert.throws(() => parsePlaylistPage({ contents: {} }))
 })
 
 test('reads videos and the next page from TV Home shelves', () => {
@@ -221,6 +356,11 @@ test('encodes comment parameters in the layouts YouTube accepts', () => {
   assert.deepEqual(decodeParams(commentActionParams('dislike', 'Ugparent.Ugreply', videoId)), action(4))
   assert.deepEqual(decodeParams(commentActionParams('undislike', 'Ugparent.Ugreply', videoId)), action(4, [0x38, 0x01]))
   assert.deepEqual(decodeParams(commentActionParams('delete', 'Ugparent.Ugreply', videoId)), action(6))
+
+  // Replies take the same layout with their full ID.
+  assert.deepEqual(decodeParams(updateCommentParams(videoId, 'Ugparent.Ugreply')), [
+    0x0a, 16, ...bytes('Ugparent.Ugreply'), 0x22, 11, ...bytes(videoId), 0x2a, 0x02, 0x08, 0x00, 0x40, 0x0c, 0x92, 0x01, 0x00
+  ])
 })
 
 test('reads posted comments and refusals from comment write responses', () => {

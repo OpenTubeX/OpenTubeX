@@ -295,6 +295,10 @@ User Playlists:
     Loading videos from {playlistName}: 'Yn llwytho fideos o {playlistName}'
     Adding missing videos to {playlistName}: 'Yn ychwanegu fideos coll at {playlistName}'
     Checking {playlistName} for unavailable videos: 'Yn gwirio {playlistName} am fideos nad ydynt ar gael ({checked}/{total})'
+  Synced with YouTube: "Wedi'i chysoni â YouTube"
+  Delete YouTube Playlist Confirmation: "Dileu'r rhestr chwarae hon yma ac ar YouTube? Nid oes modd dadwneud hyn."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Creu ar YouTube hefyd"
 History:
   From Date: 'O'
   To Date: 'Hyd at'
@@ -360,12 +364,12 @@ Settings:
     Sign Out Failed: "Methu allgofnodi: {error}"
     Revoke Failed: "Wedi allgofnodi o YouTube, ond ni chadarnhaodd Google fod y mewngofnodi wedi dod i ben. Gallwch ei dynnu o'r cysylltiadau trydydd parti yn eich cyfrif Google."
     Signed out by YouTube: "Daeth YouTube â'r mewngofnodi i ben. Mewngofnodwch eto yn y Gosodiadau i barhau i ddefnyddio'ch cyfrif."
-    Subscribe on YouTube: "Tanysgrifio ar YouTube hefyd"
+    Sync Subscriptions: "Cysoni tanysgrifiadau â YouTube"
+    Sync Playlists: "Cysoni rhestrau chwarae â YouTube"
     Add to YouTube Watch History: "Ychwanegu fideos a wyliwyd at hanes YouTube"
-    Import Subscriptions: "Mewnforio tanysgrifiadau o YouTube"
-    Imported Subscriptions: "Mewnforiwyd {count} o sianeli | Mewnforiwyd {count} sianel | Mewnforiwyd {count} sianel | Mewnforiwyd {count} sianel | Mewnforiwyd {count} sianel | Mewnforiwyd {count} o sianeli"
-    No Subscriptions to Import: "Does gan y cyfrif YouTube hwn ddim tanysgrifiadau"
-    Import Subscriptions Failed: "Methu mewnforio tanysgrifiadau: {error}"
+    Sync Now: "Cysoni nawr"
+    Synced: "Wedi cysoni â YouTube"
+    Sync Failed: "Methu cysoni â YouTube: {error}"
   Diagnostics:
     Diagnostics: Diagnosteg
     Description: Tra bo'r log diagnostig ymlaen, mae OpenTubeX yn cadw negeseuon log diweddar yn y cof fel y gallwch eu hatodi i adroddiadau bygiau. Nid yw byth yn eu cadw na'u hanfon ar ei ben ei hun, ac mae diffodd y log yn eu dileu. Mae adroddiadau'n hepgor cwcis, tocynnau, cyfeiriadau IP a pharamedrau URL, ond gallant gynnwys IDs fideos rydych wedi'u chwarae, felly gwiriwch adroddiad cyn ei rannu.
@@ -2268,7 +2272,8 @@ Description:
   Music: Cerddoriaeth
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "Mae tanysgrifio i sianel neu ddad-danysgrifio ohoni yn OpenTubeX yn gwneud yr un peth ar eich cyfrif YouTube."
+    Sync Subscriptions: "Mae sianeli rydych chi'n tanysgrifio iddyn nhw ar YouTube yn cael eu hychwanegu at “Pob Sianel”, ac mae sianeli rydych chi'n dad-danysgrifio ohonyn nhw yno yn cael eu tynnu o bob proffil. Mae tanysgrifio neu ddad-danysgrifio yn “Pob Sianel” yma yn gwneud yr un peth ar YouTube."
+    Sync Playlists: "Mae eich rhestrau chwarae YouTube, “Gwylio Nes Ymlaen” a “Fideos a hoffwyd” yn ymddangos yn “Eich Rhestrau Chwarae”, ac mae newidiadau rydych chi'n eu gwneud iddyn nhw yma yn cael eu gwneud ar YouTube hefyd. Dydyn nhw ddim yn cael eu cysoni â'ch dyfeisiau eraill, eu hallforio na'u gwneud wrth gefn. Mae diffodd hyn yn eu tynnu o'r ddyfais hon ond nid o YouTube."
     Add to YouTube Watch History: "Mae fideos rydych chi'n eu chwarae yn cael eu hychwanegu at eich hanes gwylio YouTube, fel bod argymhellion YouTube yn dysgu ohonyn nhw. Does dim yn cael ei ychwanegu tra bo'r hanes wedi'i oedi ar YouTube."
   General Settings:
     Built-in Streams: |
@@ -2797,6 +2802,8 @@ YouTube Account:
   Rating Failed: "Methu rhoi sgôr ar YouTube: {error}"
   Subscribe Failed: "Methu tanysgrifio ar YouTube: {error}"
   Unsubscribe Failed: "Methu dad-danysgrifio ar YouTube: {error}"
+  Subscriptions Synced: "Tanysgrifiadau wedi'u cysoni o YouTube: {added} wedi'u hychwanegu, {removed} wedi'u tynnu"
+  Playlist Update Failed: "Methu diweddaru {playlistName} ar YouTube: {error}"
   Add a comment: "Ychwanegu sylw"
   Add a reply: "Ychwanegu ymateb"
   Comment: "Rhoi sylw"
@@ -2808,5 +2815,9 @@ YouTube Account:
   Delete Comment Confirmation: "Dileu eich sylw o YouTube?"
   Comment Deleted: "Sylw wedi'i ddileu"
   Delete Comment Failed: "Methu dileu'r sylw: {error}"
+  Edit Comment: "Golygu sylw"
+  Save: "Cadw"
+  Comment Edited: "Sylw wedi'i olygu"
+  Edit Comment Failed: "Methu golygu'r sylw: {error}"
   Recommendations: "Argymhellion YouTube"
   Recommendations Failed: "Methu llwytho eich argymhellion YouTube."

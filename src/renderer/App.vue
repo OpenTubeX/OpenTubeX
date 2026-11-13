@@ -767,6 +767,8 @@ import { initializeCapacitorPullToRefresh } from './helpers/capacitorPullToRefre
 import { initializeHapticFeedback } from './helpers/mobileHaptics'
 import { getWebViewHeapStatistics, startMemoryPressureMonitor } from './helpers/memoryPressure'
 import { collapseSeparators } from './helpers/menuSeparators'
+import { supportsYouTubeAccount } from './helpers/youtube-account-state'
+import { startYouTubeSync } from './helpers/youtube-sync'
 
 const SettingsWindow = defineAsyncComponent(() => import('./views/Settings/Settings.vue'))
 const FtPlaylistAddVideoPrompt = defineAsyncComponent(() => import('./components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue'))
@@ -1939,6 +1941,7 @@ onMounted(async () => {
     store.dispatch('initializeSyncServer').catch(error => {
       console.error('Initial sync server sync failed', error)
     })
+    if (supportsYouTubeAccount) startYouTubeSync()
 
     dataReady.value = true
 

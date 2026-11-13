@@ -315,6 +315,10 @@ User Playlists:
     Loading videos from {playlistName}: 'Загрузка відэа з {playlistName}'
     Adding missing videos to {playlistName}: 'Даданне адсутных відэа ў {playlistName}'
     Checking {playlistName} for unavailable videos: 'Праверка {playlistName} на недаступныя відэа ({checked}/{total})'
+  Synced with YouTube: "Сінхранізаваны з YouTube"
+  Delete YouTube Playlist Confirmation: "Выдаліць гэты плэй-ліст тут і на YouTube? Гэта дзеянне нельга адмяніць."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Стварыць таксама на YouTube"
 History:
   From Date: 'Ад'
   To Date: 'Да'
@@ -382,12 +386,12 @@ Settings:
     Sign Out Failed: "Не ўдалося выйсці: {error}"
     Revoke Failed: "Вы выйшлі з YouTube, але Google не пацвердзіў, што сеанс завершаны. Яго можна выдаліць у раздзеле падключэнняў старонніх праграм ва ўліковым запісе Google."
     Signed out by YouTube: "YouTube завяршыў сеанс. Увайдзіце зноў у Наладах, каб і далей карыстацца ўліковым запісам."
-    Subscribe on YouTube: "Падпісвацца таксама на YouTube"
+    Sync Subscriptions: "Сінхранізаваць падпіскі з YouTube"
+    Sync Playlists: "Сінхранізаваць плэй-лісты з YouTube"
     Add to YouTube Watch History: "Дадаваць прагледжаныя відэа ў гісторыю YouTube"
-    Import Subscriptions: "Імпартаваць падпіскі з YouTube"
-    Imported Subscriptions: "Імпартаваны {count} канал | Імпартаваны {count} каналы | Імпартавана {count} каналаў"
-    No Subscriptions to Import: "У гэтым уліковым запісе YouTube няма падпісак"
-    Import Subscriptions Failed: "Не ўдалося імпартаваць падпіскі: {error}"
+    Sync Now: "Сінхранізаваць зараз"
+    Synced: "Сінхранізавана з YouTube"
+    Sync Failed: "Не ўдалося сінхранізаваць з YouTube: {error}"
   Diagnostics:
     Diagnostics: Дыягностыка
     Description: Пакуль дыягнастычны журнал уключаны, OpenTubeX захоўвае апошнія паведамленні журнала ў памяці, каб вы маглі далучыць іх да справаздач пра памылкі. Ён ніколі не захоўвае і не адпраўляе іх сам, а выключэнне журнала выдаляе іх. Справаздачы не ўключаюць файлы cookie, токены, IP-адрасы і параметры URL, але могуць змяшчаць ідэнтыфікатары прайграных відэа, таму праверце справаздачу перад тым, як падзяліцца ёю.
@@ -2334,7 +2338,8 @@ Description:
   Music: Музыка
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "Калі вы падпісваецеся на канал або адпісваецеся ад яго ў OpenTubeX, тое ж самае адбываецца ў вашым уліковым запісе YouTube."
+    Sync Subscriptions: "Каналы, на якія вы падпісваецеся на YouTube, дадаюцца ў «Усе каналы», а каналы, ад якіх вы там адпісваецеся, выдаляюцца з усіх профіляў. Калі вы падпісваецеся або адпісваецеся тут у «Усе каналы», тое самае адбываецца на YouTube."
+    Sync Playlists: "Вашы плэй-лісты YouTube, «Глядзець пазней» і «Відэа, якія спадабаліся» з’яўляюцца ў раздзеле «Вашы плэй-лісты», а змены, якія вы ўносіце ў іх тут, уносяцца і на YouTube. Яны не сінхранізуюцца з іншымі вашымі прыладамі, не экспартуюцца і не трапляюць у рэзервовыя копіі. Калі выключыць гэта, яны будуць выдалены з гэтай прылады, але не з YouTube."
     Add to YouTube Watch History: "Відэа, якія вы прайграеце, дадаюцца ў вашу гісторыю прагляду YouTube, і рэкамендацыі YouTube улічваюць іх. Пакуль гісторыя прыпынена на YouTube, нічога не дадаецца."
   General Settings:
     Built-in Streams: |
@@ -2861,6 +2866,8 @@ YouTube Account:
   Rating Failed: "Не ўдалося ацаніць на YouTube: {error}"
   Subscribe Failed: "Не ўдалося падпісацца на YouTube: {error}"
   Unsubscribe Failed: "Не ўдалося адпісацца на YouTube: {error}"
+  Subscriptions Synced: "Падпіскі сінхранізаваны з YouTube: дададзена {added}, выдалена {removed}"
+  Playlist Update Failed: "Не ўдалося абнавіць {playlistName} на YouTube: {error}"
   Add a comment: "Дадаць каментарый"
   Add a reply: "Дадаць адказ"
   Comment: "Каментаваць"
@@ -2872,5 +2879,9 @@ YouTube Account:
   Delete Comment Confirmation: "Выдаліць ваш каментарый з YouTube?"
   Comment Deleted: "Каментарый выдалены"
   Delete Comment Failed: "Не ўдалося выдаліць каментарый: {error}"
+  Edit Comment: "Рэдагаваць каментарый"
+  Save: "Захаваць"
+  Comment Edited: "Каментарый адрэдагаваны"
+  Edit Comment Failed: "Не ўдалося адрэдагаваць каментарый: {error}"
   Recommendations: "Рэкамендацыі YouTube"
   Recommendations Failed: "Не ўдалося загрузіць вашы рэкамендацыі YouTube."

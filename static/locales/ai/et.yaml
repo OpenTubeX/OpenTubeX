@@ -294,6 +294,10 @@ User Playlists:
     Loading videos from {playlistName}: 'Laadin videoid esitusloendist {playlistName}'
     Adding missing videos to {playlistName}: 'Lisan puuduvaid videoid esitusloendisse {playlistName}'
     Checking {playlistName} for unavailable videos: 'Kontrollin esitusloendit {playlistName} kättesaamatute videote suhtes ({checked}/{total})'
+  Synced with YouTube: "YouTube'iga sünkroonitud"
+  Delete YouTube Playlist Confirmation: "Kas kustutada see esitusloend siin ja YouTube'is? Seda tegevust ei saa tagasi pöörata."
+  CreatePlaylistPrompt:
+    Create on YouTube: "Loo ka YouTube'is"
 History:
   From Date: 'Alates'
   To Date: 'Kuni'
@@ -359,12 +363,12 @@ Settings:
     Sign Out Failed: "Väljalogimine ebaõnnestus: {error}"
     Revoke Failed: "Logisid YouTube'ist välja, kuid Google ei kinnitanud, et sisselogimine lõppes. Saad selle eemaldada oma Google'i konto kolmandate osapoolte ühenduste alt."
     Signed out by YouTube: "YouTube lõpetas sisselogimise. Konto kasutamise jätkamiseks logi seadistustes uuesti sisse."
-    Subscribe on YouTube: "Telli ka YouTube'is"
+    Sync Subscriptions: "Sünkrooni tellimused YouTube'iga"
+    Sync Playlists: "Sünkrooni esitusloendid YouTube'iga"
     Add to YouTube Watch History: "Lisa vaadatud videod YouTube'i ajalukku"
-    Import Subscriptions: "Impordi tellimused YouTube'ist"
-    Imported Subscriptions: "Imporditi {count} kanal | Imporditi {count} kanalit"
-    No Subscriptions to Import: "Sellel YouTube'i kontol pole tellimusi"
-    Import Subscriptions Failed: "Tellimuste importimine nurjus: {error}"
+    Sync Now: "Sünkrooni kohe"
+    Synced: "YouTube'iga sünkroonitud"
+    Sync Failed: "YouTube'iga sünkroonimine nurjus: {error}"
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Kui diagnostikalogi on sisse lülitatud, hoiab OpenTubeX viimaseid logisõnumeid mälus, et saaksid need veateadetele lisada. See ei salvesta ega saada neid kunagi ise ning logi väljalülitamine kustutab need. Aruanded jätavad välja küpsised, märgid, IP-aadressid ja URL-i parameetrid, kuid võivad sisaldada esitatud videote ID-sid, seega kontrolli aruannet enne jagamist.
@@ -2235,7 +2239,8 @@ Description:
   Music: Muusika
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "Kui tellid OpenTubeXis kanali või lõpetad selle tellimuse, tehakse sama ka sinu YouTube'i kontol."
+    Sync Subscriptions: "Kanalid, mille YouTube'is tellid, lisatakse jaotisesse „Kõik kanalid“ ja kanalid, mille tellimuse seal tühistad, eemaldatakse kõigist profiilidest. Kui tellid siin jaotises „Kõik kanalid“ kanali või tühistad tellimuse, juhtub sama ka YouTube'is."
+    Sync Playlists: "Sinu YouTube'i esitusloendid, „Vaata hiljem“ ja „Meeldivad videod“ kuvatakse jaotises „Sinu esitusloendid“ ning neis siin tehtud muudatused tehakse ka YouTube'is. Neid ei sünkroonita sinu teistesse seadmetesse, ei ekspordita ega varundata. Selle väljalülitamine eemaldab need sellest seadmest, kuid mitte YouTube'ist."
     Add to YouTube Watch History: "Sinu esitatud videod lisatakse sinu YouTube'i vaatamiste ajalukku, nii et YouTube'i soovitused õpivad neist. Kui ajalugu on YouTube'is peatatud, ei lisata midagi."
   General Settings:
     Built-in Streams: |
@@ -2763,6 +2768,8 @@ YouTube Account:
   Rating Failed: "YouTube'is hindamine nurjus: {error}"
   Subscribe Failed: "YouTube'is tellimine nurjus: {error}"
   Unsubscribe Failed: "YouTube'is tellimuse lõpetamine nurjus: {error}"
+  Subscriptions Synced: "Tellimused YouTube'ist sünkroonitud: {added} lisatud, {removed} eemaldatud"
+  Playlist Update Failed: "Esitusloendi {playlistName} uuendamine YouTube'is nurjus: {error}"
   Add a comment: "Lisa kommentaar"
   Add a reply: "Lisa vastus"
   Comment: "Kommenteeri"
@@ -2774,5 +2781,9 @@ YouTube Account:
   Delete Comment Confirmation: "Kas kustutada sinu kommentaar YouTube'ist?"
   Comment Deleted: "Kommentaar kustutati"
   Delete Comment Failed: "Kommentaari kustutamine nurjus: {error}"
+  Edit Comment: "Muuda kommentaari"
+  Save: "Salvesta"
+  Comment Edited: "Kommentaar muudeti"
+  Edit Comment Failed: "Kommentaari muutmine nurjus: {error}"
   Recommendations: "YouTube'i soovitused"
   Recommendations Failed: "Sinu YouTube'i soovituste laadimine nurjus."

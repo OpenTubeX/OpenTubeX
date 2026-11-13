@@ -52,12 +52,20 @@
       </div>
       <FtFlexBox>
         <FtToggleSwitch
-          :label="t('Settings.YouTube Account Settings.Subscribe on YouTube')"
-          :default-value="mirrorSubscriptions"
-          setting-key="youTubeAccountMirrorSubscriptions"
-          :tooltip="t('Tooltips.YouTube Account Settings.Subscribe on YouTube')"
+          :label="t('Settings.YouTube Account Settings.Sync Subscriptions')"
+          :default-value="syncSubscriptions"
+          setting-key="youTubeAccountSyncSubscriptions"
+          :tooltip="t('Tooltips.YouTube Account Settings.Sync Subscriptions')"
           compact
-          @change="store.dispatch('updateYouTubeAccountMirrorSubscriptions', $event)"
+          @change="store.dispatch('updateYouTubeAccountSyncSubscriptions', $event)"
+        />
+        <FtToggleSwitch
+          :label="t('Settings.YouTube Account Settings.Sync Playlists')"
+          :default-value="syncPlaylists"
+          setting-key="youTubeAccountSyncPlaylists"
+          :tooltip="t('Tooltips.YouTube Account Settings.Sync Playlists')"
+          compact
+          @change="store.dispatch('updateYouTubeAccountSyncPlaylists', $event)"
         />
         <FtToggleSwitch
           :label="t('Settings.YouTube Account Settings.Add to YouTube Watch History')"
@@ -70,10 +78,10 @@
       </FtFlexBox>
       <FtFlexBox>
         <FtButton
-          :label="t('Settings.YouTube Account Settings.Import Subscriptions')"
-          :icon="['fas', 'download']"
-          :disabled="importing"
-          @click="importSubscriptions"
+          :label="t('Settings.YouTube Account Settings.Sync Now')"
+          :icon="['fas', 'sync']"
+          :disabled="syncing || (!syncSubscriptions && !syncPlaylists)"
+          @click="syncNow"
         />
         <FtButton
           :label="t('Settings.YouTube Account Settings.Sign Out')"
@@ -109,11 +117,10 @@ import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 import YouTubeSignInPrompt from './YouTubeSignInPrompt.vue'
 
 import store from '../../../store/index'
-import { MAIN_PROFILE_ID } from '../../../../constants'
 import { ERROR_TOAST_ICON, showToast } from '../../../helpers/utils'
 import { getSelectedYouTubeProfile } from '../../../helpers/youtube-account-state'
+import { syncWithYouTube } from '../../../helpers/youtube-sync'
 import {
-  getYouTubeAccountSubscriptions,
   refreshYouTubeProfiles,
   selectYouTubeProfile,
   signOutOfYouTubeAccount
@@ -123,11 +130,12 @@ const { t } = useI18n()
 
 /** @type {import('vue').ComputedRef<import('../../../helpers/api/youtube-account').YouTubeAccount | null>} */
 const account = computed(() => store.getters.getYouTubeAccount)
-const mirrorSubscriptions = computed(() => store.getters.getYouTubeAccountMirrorSubscriptions)
+const syncSubscriptions = computed(() => store.getters.getYouTubeAccountSyncSubscriptions)
+const syncPlaylists = computed(() => store.getters.getYouTubeAccountSyncPlaylists)
 const watchHistory = computed(() => store.getters.getYouTubeAccountWatchHistory)
 
 const signInOpen = ref(false)
-const importing = ref(false)
+const syncing = ref(false)
 const switching = ref(false)
 const channelLabelId = useId()
 
@@ -175,39 +183,14 @@ async function signOut() {
   }
 }
 
-async function importSubscriptions() {
-  importing.value = true
-  // The profile active when the import started, even if the user switches meanwhile.
-  const profileIds = new Set([MAIN_PROFILE_ID, store.getters.getActiveProfile._id])
-  // Signing out, or into another account, meanwhile drops the result.
-  const refreshToken = account.value?.credentials.refresh_token
-  const sameSignIn = () => account.value?.credentials.refresh_token === refreshToken
+async function syncNow() {
+  syncing.value = true
   try {
-    const channels = await getYouTubeAccountSubscriptions()
-    if (!sameSignIn()) return
-    if (channels.length === 0) {
-      showToast({ message: t('Settings.YouTube Account Settings.No Subscriptions to Import'), icon: ['fas', 'subscriptions'] })
-      return
+    if (await syncWithYouTube({ manual: true })) {
+      showToast({ message: t('Settings.YouTube Account Settings.Synced'), icon: ['fas', 'sync'] })
     }
-
-    for (const profileId of profileIds) {
-      if (!sameSignIn()) return
-      if (await store.dispatch('mergeImportedProfile', { _id: profileId, subscriptions: channels }) !== true) {
-        throw new Error('Could not save the imported subscriptions')
-      }
-    }
-    showToast({
-      message: t('Settings.YouTube Account Settings.Imported Subscriptions', { count: channels.length }, channels.length),
-      icon: ['fas', 'subscriptions']
-    })
-  } catch (error) {
-    console.error(error)
-    showToast({
-      message: t('Settings.YouTube Account Settings.Import Subscriptions Failed', { error: error?.message ?? String(error) }),
-      icon: ERROR_TOAST_ICON
-    })
   } finally {
-    importing.value = false
+    syncing.value = false
   }
 }
 </script>

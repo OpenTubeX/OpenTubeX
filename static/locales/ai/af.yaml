@@ -434,6 +434,7 @@ User Playlists:
   CreatePlaylistPrompt:
     New Playlist Name: Nuwe afspeellysnaam
     Create: Skep
+    Create on YouTube: "Skep ook op YouTube"
     Toast:
       There is already a playlist with this name. Please pick a different name.: Daar is reeds ’n afspeellys met hierdie naam. Kies asseblief ’n ander naam.
       Playlist {playlistName} has been successfully created.: Afspeellys {playlistName} is suksesvol geskep.
@@ -447,6 +448,8 @@ User Playlists:
     Loading videos from {playlistName}: 'Laai video''s van {playlistName}'
     Adding missing videos to {playlistName}: 'Voeg ontbrekende video''s by {playlistName} by'
     Checking {playlistName} for unavailable videos: 'Kontroleer {playlistName} vir onbeskikbare video''s ({checked}/{total})'
+  Synced with YouTube: "Met YouTube gesinkroniseer"
+  Delete YouTube Playlist Confirmation: "Skrap hierdie afspeellys hier en op YouTube? Dit kan nie ontdoen word nie."
 History:
   From Date: Van
   To Date: Tot
@@ -520,12 +523,12 @@ Settings:
     Sign Out Failed: "Kon nie afmeld nie: {error}"
     Revoke Failed: "Van YouTube afgemeld, maar Google het nie bevestig dat die aanmelding beëindig is nie. U kan dit onder derdeparty-verbindings in u Google-rekening verwyder."
     Signed out by YouTube: "YouTube het die aanmelding beëindig. Meld weer in Instellings aan om u rekening verder te gebruik."
-    Subscribe on YouTube: "Teken ook op YouTube in"
+    Sync Subscriptions: "Sinkroniseer intekeninge met YouTube"
+    Sync Playlists: "Sinkroniseer afspeellyste met YouTube"
     Add to YouTube Watch History: "Voeg gekykte video’s by YouTube-geskiedenis"
-    Import Subscriptions: "Voer intekeninge van YouTube in"
-    Imported Subscriptions: "{count} kanaal ingevoer | {count} kanale ingevoer"
-    No Subscriptions to Import: "Hierdie YouTube-rekening het geen intekeninge nie"
-    Import Subscriptions Failed: "Kon nie intekeninge invoer nie: {error}"
+    Sync Now: "Sinkroniseer nou"
+    Synced: "Met YouTube gesinkroniseer"
+    Sync Failed: "Kon nie met YouTube sinkroniseer nie: {error}"
   Tab Unloading:
     Automatically unload tabs: Ontlaai oortjies outomaties
     Memory threshold: Geheuedrempel
@@ -2487,7 +2490,8 @@ Description:
   Music: Musiek
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "As u in OpenTubeX op ’n kanaal inteken of uitteken, gebeur dieselfde op u YouTube-rekening."
+    Sync Subscriptions: "Kanale waarop u op YouTube inteken, word by “Alle kanale” gevoeg, en kanale waarop u daar uitteken, word uit elke profiel verwyder. As u hier in “Alle kanale” inteken of uitteken, gebeur dieselfde op YouTube."
+    Sync Playlists: "U YouTube-afspeellyste, “Kyk later” en “Video’s waarvan gehou is” verskyn in “U afspeellyste”, en veranderinge wat u hier daaraan aanbring, word ook op YouTube aangebring. Hulle word nie na u ander toestelle gesinkroniseer, uitgevoer of gerugsteun nie. As u dit afskakel, word hulle van hierdie toestel verwyder, maar nie van YouTube nie."
     Add to YouTube Watch History: "Video’s wat u speel, word by u YouTube-kykgeskiedenis gevoeg, sodat YouTube se aanbevelings daaruit leer. Niks word bygevoeg terwyl die geskiedenis op YouTube onderbreek is nie."
   General Settings:
     Built-in Streams: |
@@ -2971,6 +2975,8 @@ YouTube Account:
   Rating Failed: "Kon nie op YouTube gradeer nie: {error}"
   Subscribe Failed: "Kon nie op YouTube inteken nie: {error}"
   Unsubscribe Failed: "Kon nie op YouTube uitteken nie: {error}"
+  Subscriptions Synced: "Intekeninge vanaf YouTube gesinkroniseer: {added} bygevoeg, {removed} verwyder"
+  Playlist Update Failed: "Kon nie {playlistName} op YouTube bywerk nie: {error}"
   Add a comment: "Voeg ’n kommentaar by"
   Add a reply: "Voeg ’n antwoord by"
   Comment: "Lewer kommentaar"
@@ -2982,5 +2988,9 @@ YouTube Account:
   Delete Comment Confirmation: "Verwyder u kommentaar van YouTube?"
   Comment Deleted: "Kommentaar verwyder"
   Delete Comment Failed: "Kon nie die kommentaar verwyder nie: {error}"
+  Edit Comment: "Wysig kommentaar"
+  Save: "Stoor"
+  Comment Edited: "Kommentaar gewysig"
+  Edit Comment Failed: "Kon nie die kommentaar wysig nie: {error}"
   Recommendations: "YouTube-aanbevelings"
   Recommendations Failed: "Kon nie u YouTube-aanbevelings laai nie."

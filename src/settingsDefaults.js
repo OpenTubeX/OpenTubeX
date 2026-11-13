@@ -153,7 +153,9 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     // Credentials and details of the YouTube account signed in through the TV
     // device-code flow, or null.
     youTubeAccount: null,
-    youTubeAccountMirrorSubscriptions: false,
+    youTubeAccountSyncSubscriptions: false,
+    youTubeAccountSyncPlaylists: false,
+    youTubeAccountSyncState: null,
     youTubeAccountWatchHistory: false,
     ytDlpPlaybackAuthMode: 'none',
     ytDlpPlaybackCookiesPath: '',

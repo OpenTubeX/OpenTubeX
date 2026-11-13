@@ -39,6 +39,7 @@ function storeActions(handlers) {
     deepCopy: value => JSON.parse(JSON.stringify(value)),
     processToBeAddedPlaylistVideo: () => {},
     removeUndesiredVideoAttributes: () => {},
+    reportYouTubePlaylistChange: () => {},
     console,
   })
 }

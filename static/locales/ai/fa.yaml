@@ -318,6 +318,10 @@ User Playlists:
     Loading videos from {playlistName}: 'در حال بارگیری ویدیوها از {playlistName}'
     Adding missing videos to {playlistName}: 'در حال افزودن ویدیوهای جاافتاده به {playlistName}'
     Checking {playlistName} for unavailable videos: 'در حال بررسی ویدیوهای ناموجود در {playlistName} ({checked}/{total})'
+  Synced with YouTube: "همگام‌سازی‌شده با YouTube"
+  Delete YouTube Playlist Confirmation: "این لیست پخش هم اینجا و هم در YouTube حذف شود؟ این کار قابل واگرد نیست."
+  CreatePlaylistPrompt:
+    Create on YouTube: "در YouTube هم ایجاد شود"
 History:
   From Date: 'از'
   To Date: 'تا'
@@ -383,12 +387,12 @@ Settings:
     Sign Out Failed: "خروج ممکن نشد: {error}"
     Revoke Failed: "از YouTube خارج شدید، اما Google پایان ورود را تأیید نکرد. می‌توانید آن را از بخش اتصال‌های شخص ثالث در حساب Google خود حذف کنید."
     Signed out by YouTube: "YouTube ورود شما را پایان داد. برای ادامهٔ استفاده از حساب خود، دوباره از تنظیمات وارد شوید."
-    Subscribe on YouTube: "اشتراک همزمان در YouTube"
     Add to YouTube Watch History: "افزودن ویدیوهای تماشاشده به تاریخچهٔ YouTube"
-    Import Subscriptions: "وارد کردن اشتراک‌ها از YouTube"
-    Imported Subscriptions: "{count} کانال وارد شد | {count} کانال وارد شد"
-    No Subscriptions to Import: "این حساب YouTube هیچ اشتراکی ندارد"
-    Import Subscriptions Failed: "وارد کردن اشتراک‌ها ممکن نشد: {error}"
+    Sync Subscriptions: "همگام‌سازی اشتراک‌ها با YouTube"
+    Sync Playlists: "همگام‌سازی لیست‌های پخش با YouTube"
+    Sync Now: "همگام‌سازی اکنون"
+    Synced: "با YouTube همگام‌سازی شد"
+    Sync Failed: "همگام‌سازی با YouTube ممکن نشد: {error}"
   Diagnostics:
     Diagnostics: عیب‌یابی
     Description: تا زمانی که گزارش رویداد عیب‌یابی روشن است، OpenTubeX پیام‌های اخیر گزارش رویداد را در حافظه نگه می‌دارد تا بتوانید آن‌ها را به گزارش‌های اشکال پیوست کنید. هرگز آن‌ها را خودسرانه ذخیره یا ارسال نمی‌کند و خاموش کردن گزارش رویداد آن‌ها را حذف می‌کند. گزارش‌ها کوکی‌ها، توکن‌ها، نشانی‌های IP و پارامترهای URL را شامل نمی‌شوند، اما ممکن است شناسه ویدیوهایی را که پخش کرده‌اید داشته باشند، پس پیش از هم‌رسانی گزارش آن را بررسی کنید.
@@ -2332,8 +2336,9 @@ Description:
   Music: موسیقی
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "اشتراک یا لغو اشتراک یک کانال در OpenTubeX، همین کار را در حساب YouTube شما هم انجام می‌دهد."
     Add to YouTube Watch History: "ویدیوهایی که پخش می‌کنید به تاریخچهٔ تماشای YouTube شما افزوده می‌شوند تا پیشنهادهای YouTube از آن‌ها یاد بگیرند. تا زمانی که تاریخچه در YouTube متوقف باشد، چیزی افزوده نمی‌شود."
+    Sync Subscriptions: "کانال‌هایی که در YouTube مشترکشان می‌شوید به «همه کانال ها» افزوده می‌شوند، و کانال‌هایی که در آنجا اشتراکشان را لغو می‌کنید از همهٔ پروفایل‌ها حذف می‌شوند. اشتراک یا لغو اشتراک در «همه کانال ها» در اینجا، همین کار را در YouTube نیز انجام می‌دهد."
+    Sync Playlists: "لیست‌های پخش YouTube شما، «تماشا در فرصتی دیگر» و «ویدیوهای پسندیده‌شده» در «لیست های پخش شما» نمایش داده می‌شوند، و تغییراتی که اینجا در آن‌ها می‌دهید در YouTube نیز اعمال می‌شود. این موارد با دستگاه‌های دیگر شما همگام‌سازی نمی‌شوند، استخراج نمی‌شوند و از آن‌ها پشتیبان گرفته نمی‌شود. خاموش کردن این گزینه آن‌ها را از این دستگاه حذف می‌کند، اما نه از YouTube."
   General Settings:
     Built-in Streams: |
       حالت خودکار بیشتر ویدیوها را با کلاینت visionOS یوتیوب پخش می‌کند که سریع‌تر شروع می‌شود و از کیفیت خودکار پشتیبانی می‌کند. پخش‌های زنده و ویدیوهایی که نمی‌تواند پخش کند از SABR استفاده می‌کنند.
@@ -2867,5 +2872,11 @@ YouTube Account:
   Delete Comment Confirmation: "نظر شما از YouTube حذف شود؟"
   Comment Deleted: "نظر حذف شد"
   Delete Comment Failed: "حذف نظر ممکن نشد: {error}"
+  Edit Comment: "ویرایش نظر"
+  Save: "ذخیره"
+  Comment Edited: "نظر ویرایش شد"
+  Edit Comment Failed: "ویرایش نظر ممکن نشد: {error}"
   Recommendations: "پیشنهادهای YouTube"
   Recommendations Failed: "بارگیری پیشنهادهای YouTube شما ممکن نشد."
+  Subscriptions Synced: "اشتراک‌ها از YouTube همگام‌سازی شدند: {added} مورد افزوده شد، {removed} مورد حذف شد"
+  Playlist Update Failed: "به‌روزرسانی {playlistName} در YouTube ممکن نشد: {error}"

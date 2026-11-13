@@ -299,6 +299,10 @@ User Playlists:
     Loading videos from {playlistName}: 'جارٍ تحميل الفيديوهات من {playlistName}'
     Adding missing videos to {playlistName}: 'جارٍ إضافة الفيديوهات المفقودة إلى {playlistName}'
     Checking {playlistName} for unavailable videos: 'جارٍ التحقق من الفيديوهات غير المتاحة في {playlistName} ({checked}/{total})'
+  Synced with YouTube: "متزامنة مع YouTube"
+  Delete YouTube Playlist Confirmation: "هل تريد حذف قائمة التشغيل هذه هنا وعلى YouTube؟ لا يمكن التراجع عن هذا الإجراء."
+  CreatePlaylistPrompt:
+    Create on YouTube: "إنشاؤها على YouTube أيضًا"
 History:
   From Date: 'من'
   To Date: 'إلى'
@@ -364,12 +368,12 @@ Settings:
     Sign Out Failed: "تعذّر تسجيل الخروج: {error}"
     Revoke Failed: "تم تسجيل الخروج من YouTube، لكن Google لم تؤكد إنهاء تسجيل الدخول. يمكنك إزالته من اتصالات الجهات الخارجية في حسابك على Google."
     Signed out by YouTube: "أنهى YouTube تسجيل الدخول. سجّل الدخول مجددًا من الإعدادات لمواصلة استخدام حسابك."
-    Subscribe on YouTube: "الاشتراك على YouTube أيضًا"
+    Sync Subscriptions: "مزامنة الاشتراكات مع YouTube"
+    Sync Playlists: "مزامنة قوائم التشغيل مع YouTube"
     Add to YouTube Watch History: "إضافة مقاطع الفيديو التي تمت مشاهدتها إلى سجلّ YouTube"
-    Import Subscriptions: "استيراد الاشتراكات من YouTube"
-    Imported Subscriptions: "تم استيراد {count} قناة | تم استيراد {count} قناة | تم استيراد {count} قناة | تم استيراد {count} قنوات | تم استيراد {count} قناة | تم استيراد {count} قناة"
-    No Subscriptions to Import: "لا يحتوي حساب YouTube هذا على أي اشتراكات"
-    Import Subscriptions Failed: "تعذّر استيراد الاشتراكات: {error}"
+    Sync Now: "المزامنة الآن"
+    Synced: "تمت المزامنة مع YouTube"
+    Sync Failed: "تعذّرت المزامنة مع YouTube: {error}"
   Diagnostics:
     Diagnostics: التشخيص
     Description: أثناء تفعيل سجل التشخيص، يحتفظ OpenTubeX برسائل السجل الحديثة في الذاكرة حتى تتمكن من إرفاقها بتقارير الأخطاء. لا يحفظها أو يرسلها من تلقاء نفسه أبدًا، ويؤدي إيقاف السجل إلى حذفها. لا تتضمن التقارير ملفات تعريف الارتباط أو الرموز المميزة أو عناوين IP أو معلمات عناوين URL، لكنها قد تتضمن معرّفات الفيديوهات التي شغّلتها، لذا راجع التقرير قبل مشاركته.
@@ -2283,7 +2287,8 @@ Description:
   Music: الموسيقى
 Tooltips:
   YouTube Account Settings:
-    Subscribe on YouTube: "يؤدي الاشتراك في قناة أو إلغاء الاشتراك فيها داخل OpenTubeX إلى تنفيذ الإجراء نفسه في حسابك على YouTube."
+    Sync Subscriptions: "تُضاف القنوات التي تشترك فيها على YouTube إلى «جميع القنوات»، وتُزال القنوات التي تلغي اشتراكك فيها هناك من كل الملفات الشخصية. والاشتراك أو إلغاء الاشتراك في «جميع القنوات» هنا يُطبَّق كذلك على YouTube."
+    Sync Playlists: "تظهر قوائم التشغيل الخاصة بك على YouTube و«المشاهدة لاحقًا» و«الفيديوهات التي أعجبتني» في «قوائم التشغيل الخاصة بك»، وتُطبَّق التغييرات التي تجريها عليها هنا على YouTube أيضًا. لا تتم مزامنتها مع أجهزتك الأخرى، ولا تُصدَّر، ولا تُنسخ احتياطيًا. يؤدي إيقاف هذا الخيار إلى إزالتها من هذا الجهاز دون إزالتها من YouTube."
     Add to YouTube Watch History: "تُضاف مقاطع الفيديو التي تشغّلها إلى سجلّ المشاهدات في YouTube، فتتعلّم منها اقتراحات YouTube. لا يُضاف أي شيء ما دام السجلّ متوقفًا مؤقتًا على YouTube."
   General Settings:
     Built-in Streams: |
@@ -2799,6 +2804,8 @@ YouTube Account:
   Rating Failed: "تعذّر التقييم على YouTube: {error}"
   Subscribe Failed: "تعذّر الاشتراك على YouTube: {error}"
   Unsubscribe Failed: "تعذّر إلغاء الاشتراك على YouTube: {error}"
+  Subscriptions Synced: "تمت مزامنة الاشتراكات من YouTube: أُضيف {added} وأُزيل {removed}"
+  Playlist Update Failed: "تعذّر تحديث {playlistName} على YouTube: {error}"
   Add a comment: "إضافة تعليق"
   Add a reply: "إضافة رد"
   Comment: "تعليق"
@@ -2810,5 +2817,9 @@ YouTube Account:
   Delete Comment Confirmation: "هل تريد حذف تعليقك من YouTube؟"
   Comment Deleted: "تم حذف التعليق"
   Delete Comment Failed: "تعذّر حذف التعليق: {error}"
+  Edit Comment: "تعديل التعليق"
+  Save: "حفظ"
+  Comment Edited: "تم تعديل التعليق"
+  Edit Comment Failed: "تعذّر تعديل التعليق: {error}"
   Recommendations: "اقتراحات YouTube"
   Recommendations Failed: "تعذّر تحميل اقتراحاتك من YouTube."
