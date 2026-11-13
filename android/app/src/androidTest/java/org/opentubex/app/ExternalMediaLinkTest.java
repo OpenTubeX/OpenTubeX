@@ -76,6 +76,50 @@ public class ExternalMediaLinkTest {
         "https://example.bandcamp.com/album/",
     };
 
+    private static final String[] YOUTUBE_LINKS = {
+        "https://www.youtube.com/watch?v=aaaaaaaaaaa",
+        "https://m.youtube.com/watch?v=aaaaaaaaaaa&list=PLaaaaaaaaaa",
+        "https://youtube.com/shorts/aaaaaaaaaaa",
+        "https://www.youtube.com/live/aaaaaaaaaaa",
+        "https://www.youtube.com/embed/aaaaaaaaaaa",
+        "https://youtu.be/aaaaaaaaaaa?t=7",
+        "https://www.youtube.com/playlist?list=PLaaaaaaaaaa",
+        "https://www.youtube.com/embed?listType=playlist&list=PLaaaaaaaaaa",
+        "https://www.youtube.com/show/VLPLaaaaaaaaaa",
+        "https://www.youtube.com/@example",
+        "https://www.youtube.com/@example/videos",
+        "https://www.youtube.com/channel/UCaaaaaaaaaaaaaaaaaaaaaa",
+        "https://www.youtube.com/c/example",
+        "https://www.youtube.com/user/example",
+        "https://www.youtube.com/post/Ugkxaaaaaaaaaa",
+        "https://www.youtube.com/hashtag/example",
+        "https://www.youtube.com/results?search_query=example",
+        "https://www.youtube.com/feed/subscriptions",
+    };
+
+    private static final String[] OTHER_YOUTUBE_LINKS = {
+        "https://www.youtube.com/",
+        "https://www.youtube.com/activate",
+        "https://www.youtube.com/tv/activate",
+        "https://www.youtube.com/account",
+        "https://www.youtube.com/premium",
+        "https://www.youtube.com/watchlater",
+        "https://www.youtube.com/shorts/",
+        "https://www.youtube.com/feed/storefront",
+        "https://youtu.be/",
+        "https://music.youtube.com/watch?v=aaaaaaaaaaa",
+    };
+
+    @Test public void youtubeLinksMatchOnlyPagesTheAppOpens() {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        for (String url : YOUTUBE_LINKS) {
+            assertEquals(url, true, matches(context, url, "org.opentubex.app.MainActivity"));
+        }
+        for (String url : OTHER_YOUTUBE_LINKS) {
+            assertEquals(url, false, matches(context, url, "org.opentubex.app.MainActivity"));
+        }
+    }
+
     @Test public void linksMatchMediaButNotListingsOrEmptyPaths() {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         for (String url : MEDIA_LINKS) {
@@ -87,10 +131,14 @@ public class ExternalMediaLinkTest {
     }
 
     private static boolean matchesExternalMediaLink(Context context, String url) {
+        return matches(context, url, "org.opentubex.app.ExternalMediaLinkActivity");
+    }
+
+    private static boolean matches(Context context, String url, String activity) {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url))
             .addCategory(Intent.CATEGORY_BROWSABLE)
             .setPackage(context.getPackageName());
         return context.getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
-            .stream().anyMatch(result -> result.activityInfo.name.equals("org.opentubex.app.ExternalMediaLinkActivity"));
+            .stream().anyMatch(result -> result.activityInfo.name.equals(activity));
     }
 }

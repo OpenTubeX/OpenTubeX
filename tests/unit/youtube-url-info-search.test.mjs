@@ -94,3 +94,14 @@ test('search URLs opened in a specific tab use that tab\'s filters instead of th
     process.env = originalEnv
   }
 })
+
+test('watch URLs without a video ID open their playlist instead of a channel', async () => {
+  const context = createContext({}, 'tab-1')
+
+  assert.deepEqual(structuredClone(await getYoutubeUrlInfo(context, 'https://www.youtube.com/watch?list=PLaaaaaaaaaa')), {
+    urlType: 'playlist',
+    playlistId: 'PLaaaaaaaaaa',
+    query: {},
+  })
+  assert.equal((await getYoutubeUrlInfo(context, 'https://www.youtube.com/watch')).urlType, 'unknown')
+})

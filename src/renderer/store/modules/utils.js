@@ -632,7 +632,8 @@ const actions = {
     const showPattern = /^\/show\/VL(?<playlistId>.+)/
     const feedPattern = /^\/feed\/(?<type>trending|subscriptions|history|playlists|you|library)/
     const typePatterns = new Map([
-      ['playlist', /^(\/playlist\/?|\/embed(\/?videoseries)?)$/],
+      // /watch reaches here only without a video ID
+      ['playlist', /^(\/playlist\/?|\/watch|\/embed(\/?videoseries)?)$/],
       ['show', showPattern],
       ['search', /^\/results|search\/?$/],
       ['hashtag', hashtagPattern],
