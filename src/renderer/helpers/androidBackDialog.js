@@ -34,14 +34,21 @@ function getDialogExitAnimations(element) {
 export function createAndroidBackDialogPreview(element, back, isAvailable, getKeyframes) {
   /** @type {Animation[] | null} */
   let animations = null
+  /** @type {{ target: HTMLElement, name: string, value: string, priority: string }[] | null} */
   let styles = null
+  const saveStyle = (target, name) => ({
+    target,
+    name,
+    value: target.style.getPropertyValue(name),
+    priority: target.style.getPropertyPriority(name)
+  })
   const cancel = () => {
     animations?.forEach(animation => animation.cancel())
     animations = null
     if (styles) {
-      for (const { name, value, priority } of styles) {
-        if (value) element.style.setProperty(name, value, priority)
-        else element.style.removeProperty(name)
+      for (const { target, name, value, priority } of styles) {
+        if (value) target.style.setProperty(name, value, priority)
+        else target.style.removeProperty(name)
       }
       styles = null
     }
@@ -51,13 +58,17 @@ export function createAndroidBackDialogPreview(element, back, isAvailable, getKe
       if (!isAvailable() || isReducedMotionEnabled() || element.inert ||
         element.querySelector('.promptCard[inert]')) return false
       const targets = getKeyframes ? [[element, getKeyframes(element)]] : getDialogExitAnimations(element)
-      styles = ['transition', 'animation'].map(name => ({
-        name,
-        value: element.style.getPropertyValue(name),
-        priority: element.style.getPropertyPriority(name)
-      }))
+      // Progress changes the transform from script. Without this hint,
+      // Chromium rasterizes the content again at every new scale.
+      const transformed = targets.filter(([, keyframes]) => keyframes.some(frame => 'transform' in frame)).map(([target]) => target)
+      styles = [
+        saveStyle(element, 'transition'),
+        saveStyle(element, 'animation'),
+        ...transformed.map(target => saveStyle(target, 'will-change'))
+      ]
       // Progress must follow the gesture without a competing CSS transition.
       element.style.setProperty('transition', 'none', 'important')
+      for (const target of transformed) target.style.setProperty('will-change', 'transform', 'important')
       animations = targets.map(([target, keyframes]) => {
         const animation = applyAnimationSpeed(target.animate(keyframes, { duration: 180, fill: 'both' }))
         animation.pause()

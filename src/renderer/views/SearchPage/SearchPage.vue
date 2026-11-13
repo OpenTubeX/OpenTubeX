@@ -212,7 +212,7 @@ import { applyPublicationDates } from '../../helpers/api/missing-publication'
 import { getInvidiousSearchResults } from '../../helpers/api/invidious'
 import { SEARCH_CHAR_LIMIT } from '../../../constants'
 import { getSearchSettingsFromRouteQuery } from '../../../search-history'
-import { useTabContext, useTabTitle } from '../../tabs/TabContext'
+import { useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
 import { ytDlp } from '../../helpers/ytDlp'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
@@ -364,6 +364,12 @@ watch(route, () => {
   setTabTitle(processedQuery.value)
   checkSearchCache(payload)
 }, { deep: true })
+
+// Android keeps a search page mounted for Back. Showing it again changes no
+// route, so give the tab's shared filters back to the search on screen.
+useTabLifecycle({
+  afterNavigate: () => restoreActiveSearchFilters(getRouteSearchSettings())
+})
 
 watch(showFamilyFriendlyOnly, (enabled) => {
   // Replace unrestricted results and ignore responses still loading for them,
