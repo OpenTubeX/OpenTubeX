@@ -808,8 +808,10 @@ const nextPageToken = shallowRef(null)
 const commentData = ref([])
 const commentCount = ref(props.initialCommentCount)
 
-// Comments deleted here, for comment lists that were loading meanwhile.
+// Comments deleted or edited here, for comment lists that were loading meanwhile.
 const deletedCommentIds = new Set()
+/** @type {Map<string, string>} */
+const editedCommentTexts = new Map()
 
 // The signed-in YouTube account can rate, write and delete video comments.
 const youTubeComments = {
@@ -855,6 +857,7 @@ const youTubeComments = {
     thread.showReplies = true
   },
   updateComment(commentId, text) {
+    editedCommentTexts.set(commentId, text)
     const rootId = getRootCommentId(commentId)
     const thread = commentData.value.find(entry => entry.id === rootId)
     const parent = thread && rootId !== commentId ? findCommentParent(thread, commentId) : null
@@ -934,22 +937,29 @@ function updatePinnedSnapshot(rootId, update) {
 
 /**
  * Replies posted here before the thread's replies loaded come back from
- * YouTube, so their loaded versions replace them. Replies deleted while
- * loading stay removed.
+ * YouTube, so their loaded versions replace them. Replies deleted or edited
+ * while loading stay that way.
  * @param {Comment[]} replies
  * @param {Comment[]} loadedReplies
  */
 function mergeReplies(replies, loadedReplies) {
   const loadedIds = new Set(loadedReplies.map(reply => reply.id))
-  return replies.filter(reply => !loadedIds.has(reply.id)).concat(withoutDeletedComments(loadedReplies))
+  return replies.filter(reply => !loadedIds.has(reply.id)).concat(withLocalCommentChanges(loadedReplies))
 }
 
 /**
- * YouTube can still return a comment shortly after it was deleted here.
+ * YouTube can still return a comment as it was before it was deleted or
+ * edited here, for example from a request that started before.
  * @param {Comment[]} comments
  */
-function withoutDeletedComments(comments) {
-  return deletedCommentIds.size === 0 ? comments : comments.filter(comment => !deletedCommentIds.has(comment.id))
+function withLocalCommentChanges(comments) {
+  if (deletedCommentIds.size === 0 && editedCommentTexts.size === 0) return comments
+  return comments
+    .filter(comment => !deletedCommentIds.has(comment.id))
+    .map(comment => {
+      const text = editedCommentTexts.get(comment.id)
+      return text === undefined ? comment : { ...comment, ...getEditedCommentFields(comment, text) }
+    })
 }
 
 /**
@@ -2253,9 +2263,9 @@ async function getCommentDataLocal(more = false) {
     )
 
     if (more) {
-      commentData.value = commentData.value.concat(withoutDeletedComments(parsedComments))
+      commentData.value = commentData.value.concat(withLocalCommentChanges(parsedComments))
     } else {
-      commentData.value = withoutDeletedComments(parsedComments)
+      commentData.value = withLocalCommentChanges(parsedComments)
     }
 
     nextPageToken.value = comments.has_continuation ? comments : null
@@ -2449,7 +2459,7 @@ async function getCommentDataInvidious() {
     })
     comments = prioritizeHighlightedComment(comments)
 
-    commentData.value = commentData.value.concat(withoutDeletedComments(comments))
+    commentData.value = commentData.value.concat(withLocalCommentChanges(comments))
     nextPageToken.value = response.continuation
     isLoading.value = false
     showComments.value = true
@@ -2582,7 +2592,7 @@ function getPostCommentsInvidious() {
       return comment
     })
 
-    commentData.value = commentData.value.concat(withoutDeletedComments(comments))
+    commentData.value = commentData.value.concat(withLocalCommentChanges(comments))
     nextPageToken.value = response?.continuation ?? continuation
     isLoading.value = false
     showComments.value = true

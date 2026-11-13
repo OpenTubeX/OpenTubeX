@@ -52,7 +52,7 @@ function createComments() {
     resetCommentsScroll: () => {},
     setCommentCount: () => {},
     prioritizeHighlightedComment: comments => comments,
-    withoutDeletedComments: comments => comments,
+    withLocalCommentChanges: comments => comments,
     invidiousGetComments: (options) => {
       const request = deferred()
       requests.push({ options, request })
