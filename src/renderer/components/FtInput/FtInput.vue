@@ -16,6 +16,7 @@
     <span class="inputWrapper">
       <component
         :is="multiline ? 'textarea' : 'input'"
+        v-bind="inputAttributes"
         :id="id"
         ref="inputRef"
         :value="inputDataDisplayed"
@@ -326,6 +327,11 @@ const props = defineProps({
   settingKey: {
     type: String,
     default: ''
+  },
+  /** Extra attributes for the native input, such as combobox ARIA state. */
+  inputAttributes: {
+    type: Object,
+    default: null
   }
 })
 

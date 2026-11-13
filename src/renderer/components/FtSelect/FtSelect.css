@@ -188,12 +188,6 @@
   z-index: 12;
   box-sizing: border-box;
   max-inline-size: calc(100vw - 16px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding-block: 8px;
-  padding-inline: 0;
-  margin: 0;
-  list-style: none;
   font-family: var(--app-font-family);
   font-size: 16px;
   line-height: 24px;
@@ -205,6 +199,33 @@
   border: 0;
   border-radius: var(--shape-corner-large);
   box-shadow: 0 2px 6px 2px rgb(0 0 0 / 15%), 0 1px 2px rgb(0 0 0 / 30%);
+}
+
+.selectOptionList {
+  box-sizing: border-box;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-block: 8px;
+  padding-inline: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.selectDropdownPanel:not(.searchPanel) {
+  display: contents;
+}
+
+/* The search field stays above the scrolling options. */
+.selectDropdown.searchPanel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.searchPanel > .selectOptionList {
+  position: relative;
+  flex: 0 1 auto;
+  min-block-size: 0;
 }
 
 .custom .selectDropdown {
@@ -579,6 +600,23 @@
   margin-inline: 12px;
 }
 
+.searchPanel > .pickerSearchField {
+  margin-block: 8px 0;
+  margin-inline: 8px;
+}
+
+.searchLoading :deep(.ft-input) {
+  padding-inline-end: 40px;
+}
+
+.searchLoadingIndicator {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: 12px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
 .selectDropdown.phonePicker {
   position: relative;
   inset: auto;
@@ -684,7 +722,15 @@
   block-size: 1px;
 }
 
+.selectStatus {
+  display: flex;
+  justify-content: center;
+  padding-block: 12px;
+  padding-inline: 16px;
+  color: var(--secondary-text-color);
+}
+
 /* Lazy lists compensate for rows inserted above the viewport themselves. */
-.selectDropdown.lazyOptions {
+.selectOptionList.lazyOptions {
   overflow-anchor: none;
 }

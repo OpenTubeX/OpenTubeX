@@ -32,6 +32,14 @@ function backgroundRgb(locator) {
   })
 }
 
+// Long font lists render rows a page at a time. Scroll until the last page is in.
+async function scrollToLoadedEnd(list) {
+  await expect.poll(() => list.evaluate(menu => {
+    menu.scrollTop = menu.scrollHeight
+    return Array.from(menu.children).findLast(child => child.tagName === 'LI')?.classList.contains('selectOption')
+  })).toBe(true)
+}
+
 async function readSavedThemes (userDataDir) {
   const themeDirectory = path.join(userDataDir, 'themes')
   const files = (await readdir(themeDirectory)).filter(file => file.endsWith('.json'))
@@ -170,7 +178,7 @@ test.describe('default appearance', () => {
     })).toBe(true)
     await expect.poll(() => fontDropdown.evaluate(menu => menu.scrollHeight - menu.clientHeight)).toBeGreaterThan(0)
     await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
-    await fontDropdown.evaluate(menu => { menu.scrollTop = menu.scrollHeight })
+    await scrollToLoadedEnd(fontDropdown)
     await expect.poll(() => fontDropdown.evaluate(menu => menu.scrollTop)).toBeGreaterThan(0)
     await expect(fontDropdown.getByRole('option').last()).toBeInViewport()
 
@@ -183,7 +191,7 @@ test.describe('default appearance', () => {
     await sheet.getByRole('searchbox', { name: 'Search', exact: true }).fill('')
     await expect.poll(() => fontDropdown.getByRole('option').count()).toBeGreaterThan(1)
     await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
-    await fontDropdown.evaluate(menu => { menu.scrollTop = menu.scrollHeight })
+    await scrollToLoadedEnd(fontDropdown)
 
     await page.setViewportSize({ width: 600, height: 480 })
     await expect.poll(() => fontDropdown.evaluate(menu => {
@@ -210,6 +218,7 @@ test.describe('default appearance', () => {
     await appFont.click()
 
     const fontDropdown = page.locator(`#${await appFont.getAttribute('aria-controls')}`)
+    const fontMenu = page.locator('.selectDropdown').filter({ has: fontDropdown })
     const fontOptions = fontDropdown.getByRole('option')
     await expect.poll(() => fontOptions.count()).toBeGreaterThan(10)
     await expect(fontOptions.getByText('Roboto', { exact: true })).toHaveCount(1)
@@ -221,7 +230,7 @@ test.describe('default appearance', () => {
     await expect(fontOptions.first()).toHaveAccessibleDescription('Bundled fonts')
     await expect(fontOptions.nth(9)).toHaveAccessibleDescription('System fonts')
     await expect(headings.nth(1).locator('xpath=following-sibling::li[1]')).toHaveText('System default')
-    await fontDropdown.screenshot({ path: testInfo.outputPath('font-picker.png') })
+    await fontMenu.screenshot({ path: testInfo.outputPath('font-picker.png') })
     await expect(headings.first()).toHaveCSS('border-top-width', '0px')
     // A heading at the top of the list gets no extra space above it.
     await expect(headings.first()).toHaveCSS('margin-top', '0px')
@@ -233,12 +242,53 @@ test.describe('default appearance', () => {
         return style.paddingBlockStart === style.paddingBlockEnd
       })).toBe(true)
     }
-    await expect(fontDropdown).toHaveClass(/below/)
-    expect(await page.evaluate(([buttonId, dropdownId]) => {
+    // The search field sits above the list, inside the positioned menu.
+    await expect(fontMenu).toHaveClass(/below/)
+    const fontSearch = fontMenu.getByRole('combobox', { name: 'Search' })
+    await expect(fontSearch).toBeFocused()
+    expect(await fontSearch.evaluate((search, list) =>
+      search.getBoundingClientRect().bottom <= list.getBoundingClientRect().top, await fontDropdown.elementHandle())).toBe(true)
+    // The menu opens just below the button without covering it.
+    expect(await page.evaluate(([buttonId, menu]) => {
       const button = document.getElementById(buttonId).getBoundingClientRect()
-      const dropdown = document.getElementById(dropdownId).getBoundingClientRect()
-      return Math.abs(dropdown.top - button.bottom - 4)
-    }, [await appFont.getAttribute('id'), await fontDropdown.getAttribute('id')])).toBeLessThanOrEqual(2)
+      const gap = menu.getBoundingClientRect().top - button.bottom
+      return gap >= 0 && gap < button.height
+    }, [await appFont.getAttribute('id'), await fontMenu.elementHandle()])).toBe(true)
+
+    // Searching shortens the scrolled list without leaving it past its end,
+    // and the keyboard picks among the matches only.
+    await scrollToLoadedEnd(fontDropdown)
+    await fontSearch.fill('geist')
+    await expect(fontOptions).toHaveText(['Geist'])
+    await expect(fontSearch).toHaveAttribute('aria-activedescendant', await fontOptions.first().getAttribute('id'))
+    await expectOverlayScrollRange(fontDropdown)
+    await fontSearch.fill('no font has this name')
+    await expect(fontOptions).toHaveCount(0)
+    await expect(fontDropdown.locator('.selectStatus')).toBeVisible()
+    await expect(fontSearch).not.toHaveAttribute('aria-activedescendant')
+    await fontSearch.fill('Sans')
+    await expect(fontOptions.first()).toHaveText('Source Sans 3')
+    await fontSearch.press('ArrowDown')
+    await expect(fontOptions.nth(1)).toHaveText('IBM Plex Sans')
+    await expect(fontOptions.nth(1)).toHaveClass(/active/)
+    await fontSearch.press('Escape')
+    await expect(fontMenu).toHaveCount(0)
+    await expect(appFont).toBeFocused()
+    await expect(appFont).toHaveText('Geist')
+    await page.keyboard.press('Enter')
+    await expect(fontSearch).toBeFocused()
+    await expect(fontSearch).toHaveValue('')
+    await fontSearch.fill('Sans')
+    await fontSearch.press('ArrowDown')
+    await fontSearch.press('Enter')
+    await expect(fontMenu).toHaveCount(0)
+    await expect(appFont).toBeFocused()
+    await expect(appFont).toHaveText('IBM Plex Sans')
+    await appFont.click()
+    await fontMenu.getByRole('option', { name: 'Geist', exact: true }).click()
+    await expect(appFont).toHaveText('Geist')
+    await appFont.click()
+    await expect(fontMenu).toBeVisible()
 
     // Keep this scroll-clamping check in desktop layout; phone pickers close on exit.
     await page.setViewportSize({ width: 800, height: 650 })
@@ -251,7 +301,7 @@ test.describe('default appearance', () => {
     await expect.poll(() => fontDropdown.evaluate(menu => menu.clientHeight)).toBeLessThan(400)
     await expect.poll(() => fontDropdown.evaluate(menu => menu.scrollHeight - menu.clientHeight))
       .toBeGreaterThan(0)
-    await fontDropdown.evaluate(menu => { menu.scrollTop = menu.scrollHeight })
+    await scrollToLoadedEnd(fontDropdown)
     await expect.poll(() => fontDropdown.evaluate(menu => menu.scrollTop)).toBeGreaterThan(0)
     const previousScrollRange = await fontDropdown.evaluate(menu => menu.scrollHeight - menu.clientHeight)
     await page.setViewportSize({ width: 1200, height: 1000 })
@@ -303,6 +353,51 @@ test.describe('default appearance', () => {
     await expect(relaunchedFontOptions.nth(9)).toHaveText('System default')
     await expect(relaunchedFontOptions.nth(10)).toHaveText(selectedFont)
     await expect(relaunchedFontOptions.nth(10)).toHaveAttribute('aria-selected', 'true')
+  })
+})
+
+test.describe('app font loading', () => {
+  test.use({ seed: { settings: { appFont: 'Zeta Serif' } } })
+
+  test('keeps the highlight on a rendered match when installed fonts arrive', async ({ app, page }) => {
+    // Hold each font request, and list more fonts than one lazy page renders.
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      ipcMain.removeHandler('get-system-fonts')
+      ipcMain.handle('get-system-fonts', () => new Promise(resolve => {
+        const fonts = ['Alpha Sans', ...Array.from({ length: 150 }, (_, index) => `Filler ${String(index).padStart(3, '0')}`), 'Zeta Serif']
+        globalThis.releaseFonts = () => resolve(fonts)
+      }))
+    })
+    const releaseFonts = () => app.electronApp.evaluate(() => globalThis.releaseFonts())
+
+    await goToSettingsSection(page, 'theme')
+    const appFont = page.getByRole('combobox', { name: 'App font' })
+    await appFont.click()
+    const fontDropdown = page.locator(`#${await appFont.getAttribute('aria-controls')}`)
+    const fontMenu = page.locator('.selectDropdown').filter({ has: fontDropdown })
+    const fontSearch = fontMenu.getByRole('combobox', { name: 'Search' })
+    await expect(fontDropdown).toHaveAttribute('aria-busy', 'true')
+    await expect(fontMenu.locator('.searchLoadingIndicator')).toBeVisible()
+    await releaseFonts()
+    await expect(fontDropdown).not.toHaveAttribute('aria-busy')
+    // The saved font moves past the first page and stays highlighted.
+    const savedFont = fontDropdown.getByRole('option', { name: 'Zeta Serif', exact: true })
+    await expect(savedFont).toHaveClass(/active/)
+    await expect(savedFont).toBeInViewport()
+    await expect(fontSearch).toHaveAttribute('aria-activedescendant', await savedFont.getAttribute('id'))
+    await fontSearch.press('Escape')
+
+    // A reloaded window requests the fonts again.
+    await page.reload()
+    await goToSettingsSection(page, 'theme')
+    await appFont.click()
+    await fontSearch.fill('alpha')
+    await expect(fontDropdown.getByRole('option')).toHaveCount(0)
+    await releaseFonts()
+    await expect(fontDropdown.getByRole('option')).toHaveText(['Alpha Sans'])
+    await expect(fontDropdown.getByRole('option')).toHaveClass(/active/)
+    await fontSearch.press('Enter')
+    await expect(appFont).toHaveText('Alpha Sans')
   })
 })
 
