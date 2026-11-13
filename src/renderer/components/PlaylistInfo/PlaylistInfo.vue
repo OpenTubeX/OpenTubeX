@@ -808,8 +808,9 @@ const ownMenuItems = computed(() => {
   }
   items.push(SEPARATOR)
 
-  if (userPlaylistDuplicateItemCount.value > 0) {
-    items.push({ label: t('User Playlists.Remove Duplicate Videos'), icon: ['fas', 'users-slash'], run: () => { showRemoveDuplicateVideosPrompt.value = true } })
+  // Shown even without duplicates, so people find the cleanup before they need it.
+  if (isUserPlaylist.value && hasVideos) {
+    items.push({ label: t('User Playlists.Remove Duplicate Videos'), icon: ['fas', 'users-slash'], run: promptRemoveDuplicateVideos })
   }
   if (userPlaylistAnyVideoWatched.value) {
     items.push({ label: t('User Playlists.Remove Watched Videos'), icon: ['fas', 'eye-slash'], run: () => { showRemoveVideosOnWatchPrompt.value = true } })
@@ -1216,6 +1217,21 @@ const removeDuplicateVideosPromptLabelText = computed(() => {
   )
 })
 
+function showNoVideosToRemoveToast() {
+  showToast({
+    message: t('User Playlists.SinglePlaylistView.Toast["There were no videos to remove."]'),
+    icon: ['fas', 'circle-exclamation'],
+  })
+}
+
+function promptRemoveDuplicateVideos() {
+  if (userPlaylistDuplicateItemCount.value > 0) {
+    showRemoveDuplicateVideosPrompt.value = true
+  } else {
+    showNoVideosToRemoveToast()
+  }
+}
+
 /**
  * @param {'delete' | 'cancel' | null} option
  */
@@ -1235,10 +1251,7 @@ async function handleRemoveDuplicateVideosPromptAnswer(option) {
 
   const removedVideosCount = userPlaylistDuplicateItemCount.value
   if (removedVideosCount === 0) {
-    showToast({
-      message: t('User Playlists.SinglePlaylistView.Toast["There were no videos to remove."]'),
-      icon: ['fas', 'circle-exclamation'],
-    })
+    showNoVideosToRemoveToast()
     return
   }
 
@@ -1282,10 +1295,7 @@ async function handleRemoveVideosOnWatchPromptAnswer(option) {
   const removedVideosCount = selectedUserPlaylist.value.videos.length - videosToWatch.length
 
   if (removedVideosCount === 0) {
-    showToast({
-      message: t('User Playlists.SinglePlaylistView.Toast["There were no videos to remove."]'),
-      icon: ['fas', 'circle-exclamation'],
-    })
+    showNoVideosToRemoveToast()
     return
   }
 
