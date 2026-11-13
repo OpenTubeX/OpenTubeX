@@ -12,6 +12,16 @@
 const AUTO_QUALITY_FALLBACKS = [1080, 720, 480, 360, 240, 144]
 
 /**
+ * Physical pixels per CSS pixel of `window.screen`. Electron's zoom factor,
+ * which UI Scale sets, is part of `devicePixelRatio` but not of the screen size.
+ * @returns {number}
+ */
+function getScreenPixelRatio() {
+  const zoomFactor = process.env.IS_ELECTRON ? window.ftElectron.getZoomFactor() : 1
+  return window.devicePixelRatio / zoomFactor
+}
+
+/**
  * The quality that a stored `auto` falls back to while auto quality is
  * unavailable: the highest one that fits the screen's short side in physical
  * pixels, which a fullscreen landscape video fills. The quality stays fixed for
@@ -22,8 +32,9 @@ const AUTO_QUALITY_FALLBACKS = [1080, 720, 480, 360, 240, 144]
  * @param {number} [pixelRatio]
  * @returns {string}
  */
-export function getAutoQualityFallback(screenSize = window.screen, pixelRatio = window.devicePixelRatio) {
-  const shortSide = Math.min(screenSize.width, screenSize.height) * pixelRatio
+export function getAutoQualityFallback(screenSize = window.screen, pixelRatio = getScreenPixelRatio()) {
+  // Rounded, as the zoom factor and devicePixelRatio differ in float precision
+  const shortSide = Math.round(Math.min(screenSize.width, screenSize.height) * pixelRatio)
   const quality = AUTO_QUALITY_FALLBACKS.find(quality => quality <= shortSide) ?? AUTO_QUALITY_FALLBACKS.at(-1)
 
   return String(quality)
