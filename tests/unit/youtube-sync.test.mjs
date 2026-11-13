@@ -83,8 +83,9 @@ test('playlist sync takes descriptions changed on YouTube and keeps the ones cha
   assert.equal(mergeYouTubePlaylistDescription('Old', 'Old', 'New on YouTube', false), 'New on YouTube')
   // Changed here and not yet on YouTube
   assert.equal(mergeYouTubePlaylistDescription('Edited here', 'Old', 'Old', false), 'Edited here')
-  // A page that does not show the description changes nothing.
-  assert.equal(mergeYouTubePlaylistDescription('Edited here', 'Old', null, true), 'Edited here')
+  // A page that does not show the description changes nothing, except that a refused edit goes back to YouTube's last one.
+  assert.equal(mergeYouTubePlaylistDescription('Edited here', 'Old', null, false), 'Edited here')
+  assert.equal(mergeYouTubePlaylistDescription('Edited here', 'Old', null, true), 'Old')
   // YouTube refused the edit made here.
   assert.equal(mergeYouTubePlaylistDescription('Edited here', 'Old', 'Old', true), 'Old')
 })

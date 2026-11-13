@@ -896,11 +896,14 @@ const inputPlaylistWithNameExists = computed(() => {
     })
 })
 
-// Watch later and Liked videos keep their names and descriptions here.
+// Only changes go to YouTube, and Watch later and Liked videos keep their names and descriptions here.
 const inputRejectedByYouTube = computed(() => {
-  const youTubePlaylistId = selectedUserPlaylist.value?.youTube?.playlistId
-  return youTubePlaylistId != null && youTubePlaylistId !== 'WL' && youTubePlaylistId !== 'LL' &&
-    (isRejectedByYouTube(newTitle.value) || isRejectedByYouTube(newDescription.value ?? ''))
+  const playlist = selectedUserPlaylist.value
+  const youTubePlaylistId = playlist?.youTube?.playlistId
+  if (youTubePlaylistId == null || youTubePlaylistId === 'WL' || youTubePlaylistId === 'LL') return false
+  const description = newDescription.value ?? ''
+  return (newTitle.value !== playlist.playlistName && isRejectedByYouTube(newTitle.value)) ||
+    (description !== (playlist.description ?? '') && isRejectedByYouTube(description))
 })
 
 const playlistPersistenceDisabled = computed(() => {

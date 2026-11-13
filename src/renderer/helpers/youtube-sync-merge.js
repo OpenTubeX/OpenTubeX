@@ -85,7 +85,7 @@ export function mergeYouTubePlaylistVideos(saved, remote, { now, newestFirst, cr
  * @returns {string | undefined}
  */
 export function mergeYouTubePlaylistDescription(saved, lastSynced, remote, restore) {
-  if (remote === null) return saved
+  if (remote === null) return restore && lastSynced !== undefined ? lastSynced : saved
   return restore || remote !== lastSynced ? remote : saved
 }
 
