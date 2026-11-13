@@ -80,10 +80,16 @@ test('treats an empty comments response as no comments', { tag: '@scale' }, asyn
   }))
   const sheet = page.locator('.mobileSheet[open]')
   const scroller = sheet.locator('.commentsContentWrapper')
-  const expectScrollInRange = () => expect.poll(() => scroller.evaluate(element => (
-    element.scrollTop + element.clientHeight <= element.scrollHeight + 1 &&
-    element.scrollTop <= Math.max(0, element.scrollHeight - element.clientHeight) + 1
-  ))).toBe(true)
+  const expectScrollInRange = () => expect.poll(() => scroller.evaluate(element => {
+    // No empty space below the last rendered content, unless it all fits.
+    const contentEnd = Math.max(...[...element.children]
+      .filter(child => !child.classList.contains('os-scrollbar'))
+      .map(child => child.getBoundingClientRect().bottom + (Number.parseFloat(getComputedStyle(child).marginBlockEnd) || 0))) +
+      (Number.parseFloat(getComputedStyle(element).paddingBottom) || 0)
+    return element.scrollTop + element.clientHeight <= element.scrollHeight + 1 &&
+      element.scrollTop <= Math.max(0, element.scrollHeight - element.clientHeight) + 1 &&
+      (element.scrollTop <= 1 || contentEnd >= element.getBoundingClientRect().bottom - 1)
+  })).toBe(true)
   const scrollToBottom = async () => {
     await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
     await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)

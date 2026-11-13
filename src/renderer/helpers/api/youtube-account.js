@@ -692,8 +692,10 @@ export async function addToYouTubeWatchHistory(videoId) {
       url.searchParams.set(key, value)
     }
 
-    // Signing out while the player loaded must not add the video afterwards.
+    // Signing out or turning history off while the player loaded must not
+    // add the video afterwards.
     throwIfSignedOut(account)
+    if (!store.getters.getYouTubeAccountWatchHistory) return
     const ping = await localApiFetch(url, {
       headers: {
         Authorization: `Bearer ${innertube.session.oauth.oauth2_tokens.access_token}`,
