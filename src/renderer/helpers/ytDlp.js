@@ -8,6 +8,8 @@ import { normalizeAutomaticDownloadRule, parseAutomaticDownloadRules } from './a
 import { buildYtDlpDownloadArguments, playbackSubtitleArguments } from '../../ytDlpArguments'
 import { EXTERNAL_PLAYBACK_FORMAT_SELECTOR, PLAYBACK_INFO_OUTPUT_TEMPLATE, EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE, parseYtDlpPlaybackInfo, mapPlaybackFormat, mapPlaybackCaptions, getOriginalAudioLanguage, mapExternalPlaybackMetadata, toFiniteNumber, toNonEmptyString } from '../../ytDlpMetadata'
 import { buildYtDlpStoryboardVtt } from '../../main/ytDlpStoryboard'
+import { getTwitchCreatorUrl, resolveYtDlpCreatorAvatarUrl } from '../../main/ytDlpCreatorAvatar'
+import { appFetch } from './rssHub'
 import { isYouTubeSubtitleUrl } from '../../youtubeSubtitle'
 import { buildYtDlpSearchArguments, normalizeYtDlpSearchResults, completeYtDlpSearchPlaylists } from '../../ytDlpSearch'
 import { chooseAndroidDirectory } from './androidStorage'
@@ -241,8 +243,8 @@ const capacitor = {
           info.storyboard = null
         }
       }
-      const creatorAvatarUrl = [info.channel_thumbnail, info.channel_avatar, info.uploader_thumbnail, info.uploader_avatar]
-        .find(value => { try { return new URL(value).protocol === 'https:' } catch { return false } }) ?? null
+      // Like on desktop, creators of other sites get their profile link and avatar
+      const creatorAvatarUrl = isYouTubeVideo ? null : await resolveYtDlpCreatorAvatarUrl(info, appFetch)
       return {
         version: binaries.ytDlp.version,
         incomplete: info.incomplete === true,
@@ -250,10 +252,10 @@ const capacitor = {
         title: toNonEmptyString(info.title),
         description: toNonEmptyString(info.description),
         uploader: toNonEmptyString(info.uploader),
-        uploaderUrl: toNonEmptyString(info.uploader_url),
+        uploaderUrl: toNonEmptyString(info.uploader_url) ?? getTwitchCreatorUrl(info),
         uploaderThumbnail: info.channel ? null : creatorAvatarUrl,
         channel: toNonEmptyString(info.channel),
-        channelUrl: toNonEmptyString(info.channel_url),
+        channelUrl: toNonEmptyString(info.channel_url) ?? getTwitchCreatorUrl(info),
         channelThumbnail: info.channel ? creatorAvatarUrl : null,
         thumbnail: toNonEmptyString(info.thumbnail),
         webpageUrl: toNonEmptyString(info.webpage_url),
@@ -292,6 +294,16 @@ const capacitor = {
   ytDlpPlaybackCacheSet: (videoId, cacheKey, expiryTime, source) => native.cache({ action: 'set', videoId, cacheKey, expiryTime, source, maxEntryBytes: normalizeYtDlpPlaybackCacheMaxEntrySize(store.getters.getYtDlpPlaybackCacheMaxEntrySize) * 1024 * 1024 }),
   ytDlpPlaybackCacheDelete: videoId => native.cache({ action: 'delete', videoId }),
   ytDlpPlaybackCacheClear: () => native.cache({ action: 'clear' }),
+}
+
+/**
+ * Loads a Rumble page with the Chrome transport of the Android Rumble HTTP
+ * helper, as Rumble rejects the native HTTP client.
+ * @param {string} url
+ * @returns {Promise<{ status: number, text: string }>}
+ */
+export function fetchAndroidRumblePage(url) {
+  return native.fetchRumblePage({ url })
 }
 
 export function initializeCapacitorYtDlp() {

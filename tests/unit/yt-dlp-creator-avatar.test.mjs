@@ -62,6 +62,13 @@ for (const webpageUrl of [
   })
 }
 
+test('links a clip to its broadcaster, not to whoever made the clip', () => {
+  const clip = { webpage_url: 'https://www.twitch.tv/example_streamer/clip/Slug-123', uploader_id: '185493864' }
+  // Localized display names aren't logins
+  assert.equal(getTwitchCreatorUrl({ ...clip, channel: '예시 스트리머' }), 'https://www.twitch.tv/example_streamer')
+  assert.equal(getTwitchCreatorUrl({ ...clip, webpage_url: 'https://clips.twitch.tv/Slug-123', channel: '예시 스트리머' }), null)
+})
+
 test('handles unavailable Twitch metadata and rejects unsafe avatar URLs', async () => {
   const info = { webpage_url: 'https://www.twitch.tv/example_streamer', uploader_id: 'example_streamer' }
   for (const payload of [
@@ -89,6 +96,8 @@ test('does not derive Twitch profiles from unrelated URLs or invalid logins', ()
 test('does not replace an invalid clip broadcaster with its numeric curator ID', async () => {
   const info = { webpage_url: 'https://clips.twitch.tv/SomeClip', channel: 'Creator name', uploader_id: '12345' }
   assert.equal(getTwitchCreatorUrl(info), null)
+  // Nor without a broadcaster, as the uploader made the clip
+  assert.equal(getTwitchCreatorUrl({ webpage_url: info.webpage_url, uploader_id: 'clip_maker' }), null)
   assert.equal(await resolveYtDlpCreatorAvatarUrl(info, () => { throw new Error('unexpected curator lookup') }), null)
 })
 

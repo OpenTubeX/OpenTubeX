@@ -13,6 +13,7 @@ import {
 import { withAndroidSubscriptionRefreshBatch } from '../helpers/androidSubscriptionRefresh'
 import { getEnabledSubscriptionFeedSources } from '../helpers/newSubscriptionFeed'
 import { refreshRssFeeds, rssFeedsRefreshing } from '../helpers/rssFeeds'
+import { getFollowedChannels, platformFeedRefreshing, refreshPlatformFeed } from '../helpers/platformFeed'
 import { supportsYtDlp } from '../helpers/ytDlpCapabilities'
 
 const LARGE_SUBSCRIPTION_COUNT = 125
@@ -51,7 +52,7 @@ export function useRefreshAllSubscriptionFeeds() {
       return
     }
 
-    // The confirmation is about the subscription feeds, not the RSS feeds
+    // The confirmation is about the subscription feeds, not the RSS feeds or other platforms
     if (
       enabledFeeds.value.length > 0 &&
       store.getters.getConfirmRefreshAllFeeds &&
@@ -65,11 +66,15 @@ export function useRefreshAllSubscriptionFeeds() {
     refreshAllFeeds()
   }
 
-  // Also refreshes the RSS feeds, which run alongside the subscription feeds
+  // Also refreshes the RSS feeds and the channels followed on other platforms,
+  // which run alongside the subscription feeds
   async function refreshAllFeeds() {
-    // Starting another RSS refresh would abort the running one
+    // Starting another refresh would abort the running one
     if (rssFeeds.value.length > 0 && !rssFeedsRefreshing.value) {
       refreshRssFeeds(rssFeeds.value)
+    }
+    if (getFollowedChannels().length > 0 && !platformFeedRefreshing.value) {
+      refreshPlatformFeed()
     }
     if (enabledFeeds.value.length === 0 || activeSubscriptionIds.value.size === 0) return
 

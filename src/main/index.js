@@ -2,6 +2,7 @@ import { ClosedWindowHistory } from './tabs/ClosedWindowHistory.js'
 import { createFileWatchQueue } from './watchQueue.js'
 import { createSerialQueue } from './serialQueue.js'
 import { writeFileAtomic } from './writeFileAtomic.js'
+import { fetchRumblePage } from './rumblePages.js'
 import {
   app, BrowserWindow, Menu, ipcMain,
   powerSaveBlocker, screen, session,
@@ -44,6 +45,7 @@ import { ChromecastManager } from './chromecast'
 import { FcastManager } from './fcast'
 import { handleTwitchChatReplayPage, handleTwitchSubOnlyVod } from './twitchChat'
 import { applyTwitchPlaylistOrigin } from '../twitchPlaylistOrigin'
+import { createTwitchLiveNotifier } from './twitchLiveNotifications'
 import { isYtDlpStoryboardUrl, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
 import { applyYtDlpPlaybackCacheSettings } from './ytDlpPlaybackCache'
 import { generatePoToken, mintPoTokenFromAttestation } from './poTokenGenerator'
@@ -696,6 +698,16 @@ function runApp() {
   handleTrusted(IpcChannels.NOTIFICATION_HISTORY_CLEAR, () => notificationHistory.clear())
   handleTrusted(IpcChannels.NOTIFICATION_DISMISSALS_GET, () => notificationHistory.getDismissals())
   handleTrusted(IpcChannels.NOTIFICATION_DISMISSALS_MERGE, (_event, dismissals) => notificationHistory.mergeDismissals(dismissals))
+  // Runs without windows too, for example while the app refreshes subscriptions from the tray.
+  const twitchLiveNotifier = createTwitchLiveNotifier({
+    file: path.join(userDataPath, 'twitch-live-notifications.json'),
+    // Uses the session's proxy settings, like the background refresh requests.
+    fetch: (url, options) => net.fetch(url, options),
+    show: showUrlNotification,
+    onLive: live => sendToAppWindows(IpcChannels.TWITCH_LIVE_UPDATED, live)
+  })
+  handleTrusted(IpcChannels.TWITCH_LIVE_CONFIGURE, (_event, configuration) => twitchLiveNotifier.configure(configuration))
+  handleTrusted(IpcChannels.RUMBLE_FETCH, (_event, url) => fetchRumblePage(net, url))
   const uploadNotifier = createUploadNotifier({
     file: path.join(userDataPath, 'upload-notifications.json'),
     show: showUrlNotification,
@@ -2820,6 +2832,7 @@ function runApp() {
     chromecast.stop().catch(error => console.error('Failed to stop Google Cast', error))
     fcast.stop().catch(error => console.error('Failed to stop FCast', error))
     backgroundSubscriptions.stop()
+    twitchLiveNotifier.stop()
     if (tray) { tray.destroy(); tray = null }
   })
 

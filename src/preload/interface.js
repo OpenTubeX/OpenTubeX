@@ -823,6 +823,26 @@ export default {
 
   twitchChatReplayPage: (videoId, position) => ipcRenderer.invoke(IpcChannels.TWITCH_CHAT_REPLAY_PAGE, videoId, position),
   twitchSubOnlyVod: videoId => ipcRenderer.invoke(IpcChannels.TWITCH_SUB_ONLY_VOD, videoId),
+  /**
+   * Which followed Twitch channels the main process checks for live streams.
+   * @param {{ enabled: boolean, channels: { id: string, login: string, name: string }[], title: string }} configuration
+   */
+  configureTwitchLiveNotifications: configuration => ipcRenderer.invoke(IpcChannels.TWITCH_LIVE_CONFIGURE, configuration),
+  /**
+   * Loads a Rumble page with the cookies of the app's session.
+   * @param {string} url
+   * @returns {Promise<{ status: number, text: string }>}
+   */
+  fetchRumblePage: url => ipcRenderer.invoke(IpcChannels.RUMBLE_FETCH, url),
+  /**
+   * @param {(live: import('../twitchFollows').TwitchFeedItem[]) => void} handler
+   * @returns {() => void} removes the listener
+   */
+  onTwitchLiveUpdated: (handler) => {
+    const listener = (_event, live) => handler(live)
+    ipcRenderer.on(IpcChannels.TWITCH_LIVE_UPDATED, listener)
+    return () => ipcRenderer.removeListener(IpcChannels.TWITCH_LIVE_UPDATED, listener)
+  },
 
   /**
    * @param {string} currentVideoId
@@ -1286,7 +1306,7 @@ export default {
   subscriptionFeeds: {
     /**
      * Listen for a mark-seen request from a tabbed New feed category's context menu.
-     * @param {(payload: {tabId: string, feedTab: 'videos' | 'shorts' | 'live' | 'posts'}) => void} handler
+     * @param {(payload: {tabId: string, feedTab: 'videos' | 'shorts' | 'live' | 'posts' | 'feeds' | 'platforms'}) => void} handler
      * @returns {() => void}
      */
     onRequestMarkSeen: (handler) => {
@@ -1297,7 +1317,7 @@ export default {
 
     /**
      * Listen for a reload requested from a subscription feed tab's context menu.
-     * @param {(payload: {tabId: string, feedTab: 'videos' | 'shorts' | 'live' | 'posts' | 'all'}) => void} handler
+     * @param {(payload: {tabId: string, feedTab: 'videos' | 'shorts' | 'live' | 'posts' | 'all' | 'feeds' | 'platforms'}) => void} handler
      * @returns {() => void}
      */
     onRequestReload: (handler) => {

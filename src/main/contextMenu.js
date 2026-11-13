@@ -304,6 +304,7 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
       live: 'Reload Live',
       posts: 'Reload Posts',
       feeds: 'Reload RSS Feeds',
+      platforms: 'Reload Platforms',
       all: 'Reload All Feeds'
     }
     const contextMenuTabYouTubeUrls = contextMenuTabs.map(tab => {
@@ -401,14 +402,16 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
     return [
       {
         // While a subscription refresh runs, the same entry cancels it. RSS
-        // feeds refresh separately, without cancellation.
+        // feeds and other platforms refresh separately, without cancellation.
         label: contextMenuLabel(subscriptionFeedLabelKeys[subscriptionFeedTab] ?? 'Reload Videos'),
-        refreshingLabel: subscriptionFeedTab === 'feeds' ? undefined : contextMenuLabel('Cancel Refresh'),
+        refreshingLabel: subscriptionFeedTab === 'feeds' || subscriptionFeedTab === 'platforms'
+          ? undefined
+          : contextMenuLabel('Cancel Refresh'),
         visible: subscriptionFeedTab != null,
         click: () => {
           if (!manager || !subscriptionFeedTab) return
 
-          if (subscriptionFeedTab !== 'feeds' && isSubscriptionAutoRefreshInProgress()) {
+          if (subscriptionFeedTab !== 'feeds' && subscriptionFeedTab !== 'platforms' && isSubscriptionAutoRefreshInProgress()) {
             requestSubscriptionAutoRefreshCancellation()
             return
           }
@@ -423,7 +426,7 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
       },
       {
         label: contextMenuLabel('Mark All as Seen'),
-        visible: (isSubscriptionNewFeedTab || subscriptionFeedTab === 'feeds') &&
+        visible: (isSubscriptionNewFeedTab || subscriptionFeedTab === 'feeds' || subscriptionFeedTab === 'platforms') &&
           manager?.contextMenuSubscriptionFeedHasNewContent === true,
         click: () => {
           if (!manager?.presentedTabId || !subscriptionFeedTab || subscriptionFeedTab === 'all') {
