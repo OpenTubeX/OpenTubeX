@@ -21,7 +21,8 @@ export function useCardContextMenu({ items, title, thumbnailActions, beforeOpen 
 
   function openContextMenu(event) {
     beforeOpen?.()
-    if (event.target.closest('[role="dialog"], [role="menu"]')) return
+    // Channel links, dialogs and dropdowns keep their own menus
+    if (event.target.closest('a.channelName, [role="dialog"], [role="menu"], .iconDropdown')) return
     if (event.pointerType !== 'touch' && !process.env.IS_ELECTRON) {
       // Only Electron can merge native image and selection actions into our menu.
       const selection = window.getSelection()
@@ -52,7 +53,7 @@ export function useCardContextMenu({ items, title, thumbnailActions, beforeOpen 
   /**
    * Opens the menu for the menu key and Shift+F10.
    * @param {KeyboardEvent} event
-   * @returns {boolean} whether it did
+   * @returns {boolean} whether the key opens menus, so other shortcuts skip it
    */
   function handleMenuKeydown(event) {
     if (event.key !== 'ContextMenu' && !(event.shiftKey && event.key === 'F10')) return false
