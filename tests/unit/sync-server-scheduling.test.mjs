@@ -219,10 +219,10 @@ test('nested remote dispatches and thrown dispatches restore their origin scope'
   assert.equal(isRemoteSyncDispatch(), false)
 })
 
-const platformHooks = { holdBackgroundSync: () => () => {}, isAppHidden: () => false }
+const platformHooks = { holdAndroidBackgroundWork: () => () => {}, isAppHidden: () => false }
 const [{ createSyncScheduler }] = await importWithStubs([sourceUrl('src/renderer/helpers/sync-server-scheduler.js')], {
   [sourceUrl('src/renderer/helpers/androidBackgroundSync.js')]: {
-    holdBackgroundSync: () => platformHooks.holdBackgroundSync(),
+    holdAndroidBackgroundWork: () => platformHooks.holdAndroidBackgroundWork(),
     setPeriodicBackgroundSync: () => {},
   },
   [sourceUrl('src/renderer/helpers/appVisibility.js')]: { isAppHidden: () => platformHooks.isAppHidden() },
@@ -250,7 +250,7 @@ async function schedulingFixture(t, platform = {}) {
   const holdCounts = []
   let nextHold = 0
   platformHooks.isAppHidden = () => hidden
-  platformHooks.holdBackgroundSync = () => {
+  platformHooks.holdAndroidBackgroundWork = () => {
     const id = ++nextHold
     holds.add(id)
     holdCounts.push(holds.size)
