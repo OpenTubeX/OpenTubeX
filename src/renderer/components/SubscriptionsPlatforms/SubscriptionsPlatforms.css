@@ -18,7 +18,7 @@
   gap: 12px;
 
   /* Matches the padding above the content of the items below */
-  margin-block: 6px 0;
+  margin-block: 6px var(--subscriptions-error-banner-margin-block-end, 0);
   padding-block: 4px;
   padding-inline: 14px 4px;
   border: 1px solid color-mix(in srgb, var(--destructive-color) 35%, transparent);

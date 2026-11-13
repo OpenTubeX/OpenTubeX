@@ -37,6 +37,11 @@
   box-shadow: none;
 }
 
+/* Without the header's border, the space above an error banner starts at the sub-tabs, so it repeats below the banner */
+.subscriptionsHeader.tabbedNewFeed + * {
+  --subscriptions-error-banner-margin-block-end: var(--subscriptions-header-padding-block-end);
+}
+
 .headerRow {
   display: flex;
   align-items: center;
