@@ -1879,9 +1879,13 @@ function updateMarkAllSeenBesideTitle(row) {
 
   const titleContent = document.createRange()
   titleContent.selectNodeContents(title)
+  // A title that wraps on a line of its own measures its widest line, which
+  // would no longer fit once it stops wrapping beside the button
+  const titleBoxes = Array.from(titleContent.getClientRects()).filter(box => box.width > 0 && box.height > 0)
+  const titleWraps = titleBoxes.some(box => titleBoxes.some(other => other.top >= box.bottom))
   const columnGap = Number.parseFloat(getComputedStyle(row).columnGap) || 0
 
-  markAllSeenBesideTitle.value = titleContent.getBoundingClientRect().width + columnGap +
+  markAllSeenBesideTitle.value = !titleWraps && titleContent.getBoundingClientRect().width + columnGap +
     button.getBoundingClientRect().width <= contentBoxWidth(row)
 }
 
