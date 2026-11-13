@@ -602,7 +602,9 @@ test.describe('settings', () => {
     await page.setViewportSize({ width: 1200, height: 800 })
     await goTo(page, 'settings')
     await page.setViewportSize({ width: 340, height: 600 })
-    await expect(page.locator('.settingsWindow')).not.toHaveClass(/settings-window-enter-active/)
+    // Vue's fallback timer can drop the enter class before a late-starting enter
+    // transition ends, and its spring overshoots the window past the edges.
+    await page.locator('.settingsWindow').evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
 
     const bounds = await page.locator('.settingsWindow').boundingBox()
     expect(bounds.x).toBeGreaterThanOrEqual(0)
