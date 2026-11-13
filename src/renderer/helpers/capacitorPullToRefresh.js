@@ -81,7 +81,7 @@ export async function initializeCapacitorPullToRefresh() {
         await new Promise(resolve => setTimeout(resolve, 150))
         if (blocked() || currentTab()?.id !== context.tabId || currentTab()?.route.fullPath !== context.fullPath) break
       } while (Date.now() < deadline && (currentTab()?.isLoading ||
-        tabRuntimeRegistry.getRoot(context.tabId)?.querySelector('[data-tab-loading-indicator]') ||
+        tabRuntimeRegistry.getRoot(context.tabId)?.querySelector('[data-tab-loading-indicator]:not(.retainedPage *)') ||
         subscriptionFeedRefreshing()))
     } catch (error) {
       console.error('Failed to refresh the current page', error)

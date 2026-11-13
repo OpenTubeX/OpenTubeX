@@ -698,7 +698,7 @@ import { calculateColorLuminance, resolveColor } from './helpers/colors'
 import { matchesKeyboardShortcut } from './helpers/keyboardShortcuts'
 import { hasVisibleGamepadLayer, initializeGamepadNavigation } from './helpers/gamepadNavigation'
 import { initializeAndroidBack } from './helpers/androidBack'
-import { getAndroidBackPlayer, getAndroidBackSheet } from './helpers/androidBackGesture'
+import { getAndroidBackPage, getAndroidBackPlayer, getAndroidBackSheet } from './helpers/androidBackGesture'
 import { createAndroidBackDialogPreview } from './helpers/androidBackDialog'
 import { getSettingsWindowIconButton, getUtilityWindowCloseKeyframes, getUtilityWindowMorphHooks } from './helpers/utilityWindowMorph'
 import { keyboardEventInitFromShortcut, OPEN_COMMAND_PALETTE_EVENT } from './helpers/commandPalette'
@@ -2897,34 +2897,15 @@ function getAndroidBackPopup(target) {
   return controlled?.matches('[role="listbox"], [role="menu"], [role="dialog"]') ? controlled : null
 }
 
-/**
- * Shrink the visible part of a page into a card, like Android's in-app Back.
- * Pages have no visible fixed-position children, which a transform would move.
- * @param {HTMLElement} page
- */
-function getAndroidBackPageKeyframes(page) {
-  const bounds = page.getBoundingClientRect()
-  const top = Math.max(0, -bounds.top)
-  const left = Math.max(0, -bounds.left)
-  const bottom = Math.max(0, bounds.bottom - window.innerHeight)
-  const right = Math.max(0, bounds.right - window.innerWidth)
-  const transformOrigin = `${window.innerWidth / 2 - bounds.left}px ${window.innerHeight / 2 - bounds.top}px`
-  const visible = `${top}px ${right}px ${bottom}px ${left}px`
-  return [
-    { transformOrigin, transform: 'scale(1)', clipPath: `inset(${visible} round 0px)` },
-    { transformOrigin, transform: 'scale(0.9)', clipPath: `inset(${visible} round 32px)` }
-  ]
-}
-
 /** Use the first preview that can begin; the rest keep their ordinary Back. */
 function combineAndroidBackPreviews(previews) {
   let active = null
   return {
-    begin() {
-      active = previews.find(preview => preview?.begin()) ?? null
+    begin(event) {
+      active = previews.find(preview => preview?.begin(event)) ?? null
       return active !== null
     },
-    update(progress) { active?.update(progress) },
+    update(progress, drag) { active?.update(progress, drag) },
     finish(commit) { return active?.finish(commit) },
     cancel() { active?.cancel() },
   }
@@ -2993,14 +2974,15 @@ function getAndroidBackPreview() {
     ])
   }
   const tabId = presentedTabId.value
-  if (!tabId || settingsWindowOpen.value || isAnyPromptOpen.value || hasVisibleGamepadLayer() ||
+  // Back closes the findbar before it changes history.
+  if (!tabId || settingsWindowOpen.value || isAnyPromptOpen.value || findbarVisible.value || hasVisibleGamepadLayer() ||
     document.fullscreenElement || document.querySelector('dialog[open], .topNav.phoneSearchOpen')) return null
-  const page = document.querySelector(`.tabContent[data-tab-id="${CSS.escape(tabId)}"]`)
   return combineAndroidBackPreviews([
     getAndroidBackPlayer(tabId),
-    page && createAndroidBackDialogPreview(page, handleAndroidBack, () =>
-      page.isConnected && presentedTabId.value === tabId && store.getters.getTabHistoryState(tabId).canGoBack,
-    getAndroidBackPageKeyframes)
+    getAndroidBackPage(tabId)?.({
+      back: handleAndroidBack,
+      isAvailable: () => presentedTabId.value === tabId && store.getters.getTabHistoryState(tabId).canGoBack
+    })
   ])
 }
 

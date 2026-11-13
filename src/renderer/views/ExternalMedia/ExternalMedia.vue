@@ -255,27 +255,45 @@
               />
             </div>
             <div class="externalMediaCreator">
-              <!-- Channels of supported platforms open in the app -->
-              <component
-                :is="creatorChannel ? 'router-link' : creatorUrl ? 'a' : 'span'"
-                v-if="creatorName"
-                class="externalMediaCreatorProfile"
-                v-bind="creatorLinkAttributes"
+              <!-- Like the watch page: the avatar beside the name and the follow button -->
+              <div
+                v-if="creatorName || creatorChannel"
+                class="externalMediaCreatorIdentity"
               >
-                <FtRetryImage
-                  v-if="creatorAvatarUrl"
-                  :fallback-icon="['fas', 'circle-user']"
-                  :src="creatorAvatarUrl"
-                  class="externalMediaCreatorAvatar"
-                  alt=""
-                />
-                <span dir="auto">{{ creatorName }}</span>
-              </component>
-              <PlatformFollowButton
-                v-if="creatorChannel"
-                :platform="creatorChannel.platform"
-                :channel-id="creatorChannel.id"
-              />
+                <!-- Channels of supported platforms open in the app. The name is the link's tab stop,
+                     so the avatar only shows beside it. -->
+                <component
+                  :is="creatorLinkTag"
+                  v-if="creatorAvatarUrl && creatorName"
+                  class="externalMediaCreatorAvatarLink"
+                  tabindex="-1"
+                  aria-hidden="true"
+                  v-bind="creatorLinkAttributes"
+                >
+                  <FtRetryImage
+                    :fallback-icon="['fas', 'circle-user']"
+                    :src="creatorAvatarUrl"
+                    class="externalMediaCreatorAvatar"
+                    alt=""
+                  />
+                </component>
+                <div>
+                  <component
+                    :is="creatorLinkTag"
+                    v-if="creatorName"
+                    class="externalMediaCreatorProfile"
+                    dir="auto"
+                    v-bind="creatorLinkAttributes"
+                  >
+                    {{ creatorName }}
+                  </component>
+                  <PlatformFollowButton
+                    v-if="creatorChannel"
+                    :platform="creatorChannel.platform"
+                    :channel-id="creatorChannel.id"
+                  />
+                </div>
+              </div>
               <a
                 class="externalMediaSiteLink"
                 :href="mediaUrl"
@@ -845,6 +863,7 @@ const channelPreferenceTypes = computed(() => CHANNEL_PREFERENCE_TYPES
   .filter(type => !(type === 'playbackSpeed' && source.value?.isLive) &&
     !(type === 'videoQuality' && source.value?.audioOnly) &&
     !(type === 'subtitlesState' && !source.value?.captions.length)))
+const creatorLinkTag = computed(() => creatorChannel.value ? 'router-link' : creatorUrl.value ? 'a' : 'span')
 // A fallthrough href, even an undefined one, would replace the router link's own
 const creatorLinkAttributes = computed(() => {
   if (creatorChannel.value) return { to: getPlatformChannelRoute(creatorChannel.value.platform, creatorChannel.value.id) }
