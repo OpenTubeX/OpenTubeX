@@ -61,6 +61,7 @@ for (const [name, url, expectedQuery] of [
         duration: 'short',
         features: ['hd'],
         ...(url.includes('sp=') ? { sp: 'EgIQAQ%3D%3D' } : {}),
+        platform: 'youtube',
       })
     } finally {
       process.env = originalEnv
@@ -72,7 +73,7 @@ test('search URLs fall back to the default filters when the tab has none', async
   const result = await getYoutubeUrlInfo(createContext({}, 'tab-9'), 'https://www.youtube.com/results?search_query=test')
 
   assert.equal(result.urlType, 'search')
-  assert.deepEqual(structuredClone(result.query), { prioritize: 'relevance', time: '', type: 'all', duration: '', features: [] })
+  assert.deepEqual(structuredClone(result.query), { prioritize: 'relevance', time: '', type: 'all', duration: '', features: [], platform: 'youtube' })
 })
 
 test('search URLs opened in a specific tab use that tab\'s filters instead of the presented one', async () => {

@@ -473,6 +473,15 @@ test.describe('Channels on other platforms', () => {
     await expect(page.getByRole('combobox', { name: 'Platform' })).toContainText('Twitch')
     await expect(page.getByRole('combobox', { name: 'Type' })).toContainText('Channels')
     await expect(result.locator('.h3Title')).toHaveText('Other')
+
+    // YouTube's search links search YouTube, and the next search Twitch again
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/results?search_query=example')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(/#\/search\/example/)
+    await expect(page.getByRole('combobox', { name: 'Platform' })).toContainText('YouTube')
+    await page.locator(sel.searchInput).fill('other')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page.getByRole('combobox', { name: 'Platform' })).toContainText('Twitch')
   })
 
   test.describe('with a followed channel and every YouTube feed hidden', () => {

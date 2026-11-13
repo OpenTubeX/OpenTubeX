@@ -706,6 +706,8 @@ const actions = {
         for (const [param, value] of url.searchParams) {
           query[param] = value
         }
+        // They search YouTube, whichever platform the search page last searched
+        query.platform = 'youtube'
 
         return {
           urlType: 'search',
