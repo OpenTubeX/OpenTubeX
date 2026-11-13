@@ -7,17 +7,12 @@ import { activeTab, openMockedVideo, waitForPlayback, openPlayerOptions } from '
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { DEMO_MEDIA_PATH, DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
 import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
-import { IpcChannels } from '../../../src/constants.js'
-
-function savedExternalEntry(page, mediaUrl) {
-  return page.evaluate(url => JSON.parse(localStorage.getItem(`externalMediaPosition:${new URL(url).href}`) ?? 'null'), mediaUrl)
-}
-
-/** The resume position. Finished media is remembered as watched without one. */
-async function savedExternalPosition(page, mediaUrl) {
-  const seconds = (await savedExternalEntry(page, mediaUrl))?.seconds
-  return seconds > 0 ? seconds : null
-}
+import { DBActions, IpcChannels } from '../../../src/constants.js'
+import {
+  externalHistoryEntry as savedExternalEntry,
+  externalResumePosition as savedExternalPosition,
+  saveExternalHistoryEntry,
+} from '../../helpers/external-media-history.mjs'
 
 async function prepareTwitchYtDlp(app, page, mediaUrl, live, description = '', chapters = [], duration = 30, metadata = {}) {
   const executable = path.join(app.userDataDir, `twitch-${live ? 'live' : 'replay'}-yt-dlp.sh`)
@@ -146,7 +141,7 @@ test('external media opens a description timestamp link in a new tab at its time
   const mediaUrl = 'https://www.twitch.tv/videos/123456789'
   await prepareTwitchYtDlp(app, page, mediaUrl, false, 'Highlights at 0:15 and 0:22')
   await page.evaluate(() => window.$store.dispatch('updateHideSideBarOnWatchPages', false))
-  await page.evaluate(url => localStorage.setItem(`externalMediaPosition:${url}`, JSON.stringify({ seconds: 5, updatedAt: Date.now() })), mediaUrl)
+  await saveExternalHistoryEntry(page, mediaUrl, { watchProgress: 5 })
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
   const video = await waitForPlayback(page)
@@ -194,7 +189,7 @@ test('external media resets completed playback and clears positions with watch h
   await expect.poll(() => video.evaluate(element => element.ended)).toBe(true)
   await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeNull()
   // Lists such as the RSS feed tab show finished media as watched
-  expect((await savedExternalEntry(page, mediaUrl))?.watched).toBe(true)
+  expect((await savedExternalEntry(page, mediaUrl))?.isWatched).toBe(true)
   await goTo(page, 'history')
   video = await open()
   await video.evaluate(element => element.pause())
@@ -207,6 +202,72 @@ test('external media resets completed playback and clears positions with watch h
   video = await open()
   await video.evaluate(element => element.pause())
   expect(await video.evaluate(element => element.currentTime)).toBeLessThan(2)
+})
+
+test('external media joins the watch history, where its menu marks it as watched and removes it', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+  await page.evaluate(() => window.$store.dispatch('updateHideSideBarOnWatchPages', false))
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  const video = await waitForPlayback(page)
+  await video.evaluate(element => { element.pause(); element.currentTime = 12 })
+  await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeCloseTo(12, 0)
+
+  await goTo(page, 'history')
+  const item = page.locator(`${activeTab} .ft-list-item`, { hasText: 'A Twitch broadcast' })
+  await expect(item.locator('.watchedProgressBar')).toBeVisible()
+  // The Hidden thumbnail preference shows the placeholder instead of the media's image.
+  await page.evaluate(videoId => {
+    const entry = window.$store.getters.getHistoryCacheById[videoId]
+    return window.$store.dispatch('updateHistory', { ...entry, thumbnail: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' })
+  }, new URL(mediaUrl).href)
+  const thumbnail = item.locator('.thumbnailImage:not(.thumbnailPlaceholder)')
+  await expect(thumbnail).toHaveCount(1)
+  await page.evaluate(() => window.$store.dispatch('updateThumbnailPreference', 'hidden'))
+  await expect(thumbnail).toHaveCount(0)
+  await expect(item.locator('.thumbnailPlaceholder')).toBeVisible()
+  await page.evaluate(() => window.$store.dispatch('updateThumbnailPreference', ''))
+  await item.locator('.title').click()
+  await expect(page).toHaveURL(/#\/external-media\?url=/)
+  await waitForPlayback(page)
+  await video.evaluate(element => element.pause())
+  expect(await video.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(12)
+
+  await goTo(page, 'history')
+  const menu = page.locator('.contextMenu')
+  await item.locator('.title').click({ button: 'right' })
+  await menu.getByRole('menuitem', { name: 'Mark As Watched' }).click()
+  await expect(item.locator('.videoWatched')).toBeVisible()
+  await item.locator('.title').click({ button: 'right' })
+  await menu.getByRole('menuitem', { name: 'Remove From History' }).click()
+  await expect(item).toHaveCount(0)
+  expect(await savedExternalEntry(page, mediaUrl)).toBeNull()
+})
+
+test('positions saved by earlier versions move into the watch history in watch order', async ({ app, page }) => {
+  const mediaUrl = 'https://videos.example.test/episode'
+  await page.evaluate(url => {
+    localStorage.setItem(`externalMediaPosition:${url}`, JSON.stringify({ seconds: 12, duration: 60, updatedAt: Date.now() - 60000 }))
+    return window.$store.dispatch('updateHistory', {
+      videoId: 'aaaaaaaaaaa',
+      title: 'Newer video',
+      author: 'Channel',
+      authorId: 'UC-channel',
+      lengthSeconds: 60,
+      watchProgress: 0,
+      isWatched: false,
+      timeWatched: Date.now(),
+      isLive: false,
+      type: 'video',
+    })
+  }, mediaUrl)
+  const { page: restartedPage } = await app.relaunch()
+  await expect.poll(() => restartedPage.evaluate(() => window.$store.getters.getHistoryCacheSorted.map(entry => entry.videoId)))
+    .toEqual(['aaaaaaaaaaa', mediaUrl])
+  expect(await savedExternalPosition(restartedPage, mediaUrl)).toBe(12)
+  expect(await restartedPage.evaluate(url => localStorage.getItem(`externalMediaPosition:${url}`), mediaUrl)).toBeNull()
 })
 
 test('external media restarts when its extracted duration is shorter than the saved position', async ({ app, page }) => {
@@ -299,7 +360,7 @@ for (const seekBeforeMetadata of [false, true]) {
     const video = page.locator(`${activeTab} .videoPlayer video`)
     const audio = page.locator(`${activeTab} .externalMediaCompanionAudio`)
     if (seekBeforeMetadata) {
-      await page.evaluate(url => localStorage.setItem(`externalMediaPosition:${url}`, JSON.stringify({ seconds: 3, updatedAt: Date.now() })), mediaUrl)
+      await saveExternalHistoryEntry(page, mediaUrl, { watchProgress: 3 })
       await page.locator(sel.searchInput).fill(mediaUrl)
       await page.locator(sel.searchInput).press('Enter')
       await expect.poll(() => video.evaluate(element => element.readyState).catch(() => 0)).toBeGreaterThanOrEqual(2)
@@ -404,32 +465,82 @@ test('external media keeps a longer soundtrack\'s position while it plays in the
   await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeGreaterThan(videoDuration + 1)
 })
 
-for (const { label, settings, live } of [
+for (const { label, settings, live, timestamp } of [
   { label: 'history is disabled', settings: { rememberHistory: false }, live: false },
-  { label: 'progress saving is disabled', settings: { watchedProgressSavingMode: 'never' }, live: false },
+  // A timestamp link only sets where playback starts.
+  { label: 'progress saving is disabled', settings: { watchedProgressSavingMode: 'never' }, live: false, timestamp: 15 },
   { label: 'the media is live', settings: {}, live: true },
 ]) {
   test(`external media does not save or restore positions when ${label}`, async ({ app, page }) => {
     test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
     const mediaUrl = live ? 'https://www.twitch.tv/example' : 'https://www.twitch.tv/videos/123456789'
     await prepareTwitchYtDlp(app, page, mediaUrl, live)
-    await page.evaluate(async ({ settings, mediaUrl }) => {
+    await saveExternalHistoryEntry(page, mediaUrl, { watchProgress: 12 })
+    await page.evaluate(async settings => {
       const store = window.$store
       for (const [key, value] of Object.entries(settings)) {
         await store.dispatch(`update${key[0].toUpperCase()}${key.slice(1)}`, value)
       }
-      localStorage.setItem(`externalMediaPosition:${mediaUrl}`, JSON.stringify({ seconds: 12, updatedAt: Date.now() }))
-    }, { settings, mediaUrl })
-    await page.locator(sel.searchInput).fill(mediaUrl)
-    await page.locator(sel.searchInput).press('Enter')
+    }, settings)
+    if (timestamp === undefined) {
+      await page.locator(sel.searchInput).fill(mediaUrl)
+      await page.locator(sel.searchInput).press('Enter')
+    } else {
+      await page.evaluate(({ url, timestamp }) => window.ftElectron.tabs.create({
+        route: '/external-media', query: { url, timestamp: String(timestamp) }, makeActive: true
+      }), { url: mediaUrl, timestamp })
+    }
     const video = await waitForPlayback(page)
     await video.evaluate(element => element.pause())
-    expect(await video.evaluate(element => element.currentTime)).toBeLessThan(2)
+    if (timestamp === undefined) expect(await video.evaluate(element => element.currentTime)).toBeLessThan(2)
+    else expect(await video.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(timestamp)
     await video.evaluate(element => { element.currentTime = 18 })
     await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
     expect(await savedExternalPosition(page, mediaUrl)).toBe(12)
   })
 }
+
+test('external media keeps a watched mark that is still saving when the length changes', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  const storedEntry = () => page.evaluate(async ({ action, videoId }) => {
+    // The main process sends each stored record as JSON text.
+    const records = (await window.ftElectron.dbHistory(action)).map(record => JSON.parse(record))
+    return records.find(record => record.videoId === videoId) ?? null
+  }, { action: DBActions.GENERAL.FIND, videoId: new URL(mediaUrl).href })
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+  // Hold the reply to the watched write once it is stored, so the page still shows the media as unwatched.
+  await app.electronApp.evaluate(({ ipcMain }, action) => {
+    const original = ipcMain._invokeHandlers.get('db-history')
+    ipcMain.removeHandler('db-history')
+    ipcMain.handle('db-history', async (event, request) => {
+      const reply = await original(event, request)
+      if (request.action === action && request.data?.records?.[0]?.isWatched === true && !globalThis.releaseWatchedMark) {
+        await new Promise(resolve => { globalThis.releaseWatchedMark = resolve })
+      }
+      return reply
+    })
+  }, DBActions.HISTORY.UPDATE_SUBSCRIPTION_STATE)
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  const video = await waitForPlayback(page)
+  await video.evaluate(element => { element.currentTime = element.duration - 0.1; return element.play() })
+  await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.releaseWatchedMark)).toBe('function')
+  expect((await savedExternalEntry(page, mediaUrl))?.isWatched).toBe(false)
+  // Another format changes the length, so the next save writes the whole record.
+  await page.evaluate(videoId => {
+    const entry = window.$store.getters.getHistoryCacheById[videoId]
+    window.$store.commit('upsertToHistoryCache', { ...entry, lengthSeconds: 1 })
+  }, new URL(mediaUrl).href)
+  await video.evaluate(element => { element.currentTime = 5; element.dispatchEvent(new Event('pause')) })
+  await app.electronApp.evaluate(() => globalThis.releaseWatchedMark())
+  await expect.poll(async () => (await savedExternalEntry(page, mediaUrl))?.isWatched).toBe(true)
+  expect((await storedEntry())?.isWatched).toBe(true)
+  // Saves after the mark is stored keep it and save the position.
+  await video.evaluate(element => { element.currentTime = 8; element.dispatchEvent(new Event('pause')) })
+  await expect.poll(async () => (await storedEntry())?.watchProgress).toBeCloseTo(8, 0)
+  expect((await storedEntry())?.isWatched).toBe(true)
+})
 
 test('external media saves on pause in semi-auto mode without periodically saving', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
@@ -511,10 +622,8 @@ test('external media does not overwrite saved positions from a never-presented t
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   const mediaUrl = 'https://www.twitch.tv/videos/123456789'
   await prepareTwitchYtDlp(app, page, mediaUrl, false)
-  await page.evaluate(async url => {
-    localStorage.setItem(`externalMediaPosition:${url}`, JSON.stringify({ seconds: 12, updatedAt: Date.now() }))
-    await window.ftElectron.tabs.create({ route: '/external-media', query: { url }, makeActive: false })
-  }, mediaUrl)
+  await saveExternalHistoryEntry(page, mediaUrl, { watchProgress: 12 })
+  await page.evaluate(url => window.ftElectron.tabs.create({ route: '/external-media', query: { url }, makeActive: false }), mediaUrl)
   const video = page.locator('.videoPlayer video')
   await expect.poll(() => video.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
   await video.evaluate(element => { element.pause(); element.currentTime = 18 })
@@ -2938,6 +3047,7 @@ test('plays both streams when an external clip has separate audio and codec-free
   await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
+    await store.dispatch('updateWatchedPercentageThreshold', 100)
   })
 
   await page.locator(sel.searchInput).fill('https://coub.com/view/example')
@@ -2995,6 +3105,8 @@ test('plays both streams when an external clip has separate audio and codec-free
   await expect(video).toHaveJSProperty('loop', true)
   await expect.poll(() => video.evaluate(element => !element.paused)).toBe(true)
   expect(await playsAudioBetween(1, 3)).toBe(true)
+  // The looping soundtrack never ends, so starting over counts as a full play.
+  await expect.poll(async () => (await savedExternalEntry(page, 'https://coub.com/view/example'))?.isWatched, { timeout: 20000 }).toBe(true)
   const audioBeforeSeek = await video.evaluate((element, companion) => {
     element.currentTime = 0.5
     return companion.currentTime

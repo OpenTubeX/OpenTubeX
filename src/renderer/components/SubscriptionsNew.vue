@@ -196,7 +196,7 @@ import { hasConfiguredRestrictedPlaybackAuthentication } from '../helpers/restri
 import { MAX_INCREMENTAL_SUBSCRIPTION_FEED_ENTRIES } from '../helpers/subscription-channels'
 import { applyAnimationSpeed } from '../helpers/animationSpeed'
 import { isReducedMotionEnabled } from '../helpers/reducedMotion'
-import { getExternalMediaProgress } from '../helpers/externalMediaPosition'
+import { isExternalMediaWatched } from '../helpers/externalMediaHistory'
 import { getRssFeedItemKey, refreshRssFeeds, rssFeedsRefreshing } from '../helpers/rssFeeds'
 import { supportsYtDlp } from '../helpers/ytDlpCapabilities'
 import {
@@ -389,7 +389,7 @@ const displayedEntries = computed(() => {
 const enableRssFeeds = computed(() => supportsYtDlp && store.getters.getEnableRssFeeds)
 const { feeds: rssFeeds, feedAvatars: rssFeedAvatars, items: rssItems } = useFollowedRssFeedItems(() => enableRssFeeds.value)
 const newRssItems = computed(() => {
-  const items = rssItems.value.filter(item => item.isNew === true && !getExternalMediaProgress(item.url)?.watched)
+  const items = rssItems.value.filter(item => item.isNew === true && !isExternalMediaWatched(item.url, store.getters.getHistoryCacheById))
   return sortBy.value === 'oldest' ? items.toReversed() : items
 })
 const newRssItemKeys = computed(() => newRssItems.value.map(getRssFeedItemKey))
@@ -403,7 +403,7 @@ const newPlatformItems = computed(() => {
   const items = sortNewestFirst([...live, ...videos].filter(item => (
     item.isNew === true && keys.has(getPlatformChannelKey({ platform: item.platform, id: item.channelId })) &&
     // Every broadcast of a channel shares its address, so live streams are never watched
-    (item.isLive === true || !getExternalMediaProgress(item.url)?.watched)
+    (item.isLive === true || !isExternalMediaWatched(item.url, store.getters.getHistoryCacheById))
   )))
   return sortBy.value === 'oldest' ? items.toReversed() : items
 })

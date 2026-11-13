@@ -743,9 +743,6 @@ test.describe('OpenTubeX sync server', () => {
       ...(capabilities.seen_rss_items === 1
         ? [{ collection: 'seenRssItems', revision: 1, payload: null }]
         : []),
-      ...(capabilities.external_media_positions === 1
-        ? [{ collection: 'externalMediaPositions', revision: 1, payload: null }]
-        : []),
       ...(capabilities.watch_stats === 1
         ? [{ collection: 'watchStats', revision: 1, payload: null }]
         : []),

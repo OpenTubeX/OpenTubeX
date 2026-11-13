@@ -1,5 +1,6 @@
 import { SyncServerDataLossError } from './sync-server-errors.js'
 import { syncDeletionKey } from './sync-deletions.js'
+import { isExternalMediaHistoryId } from './externalMediaHistory.js'
 
 export const DEFAULT_CHANNEL_AVATAR = 'https://yt3.googleusercontent.com/ytc/default'
 // Released clients require a truthy uploader ID to preserve video membership.
@@ -118,6 +119,8 @@ export function uploaderToLocal(uploader) {
 }
 
 function historyToRemote(record, options) {
+  // Servers without encryption share the history with apps that only know YouTube videos.
+  if (!options.allowExternalMedia && isExternalMediaHistoryId(record.videoId)) return null
   const video = videoToRemote(record, options)
   if (!video) return null
 

@@ -659,6 +659,7 @@ import { initializeAndroidIncomingShare } from './helpers/androidIncomingShare'
 import { handleRestoredAndroidAppData } from './helpers/androidStorage'
 import { extractSharedMediaLink, extractSharedYoutubeLink } from './helpers/sharedYoutubeLink'
 import { shouldOpenExternalMediaUrl } from './helpers/externalMediaUrl'
+import { isExternalMediaHistoryId } from './helpers/externalMediaHistory'
 import DigitalWellbeing from './components/DigitalWellbeing/DigitalWellbeing.vue'
 import FtButton from './components/FtButton/FtButton.vue'
 import FtToast from './components/FtToast/FtToast.vue'
@@ -2717,7 +2718,9 @@ function navigateFromCommandPalette(location) {
 }
 
 async function playLibraryVideoFromCommandPalette(video, location) {
-  if (!isElectron || store.getters.getExternalPlayer === '' || store.getters.getDefaultViewingMode !== 'external_player') {
+  // The external player only takes YouTube videos
+  if (!isElectron || store.getters.getExternalPlayer === '' || store.getters.getDefaultViewingMode !== 'external_player' ||
+    isExternalMediaHistoryId(video.videoId)) {
     return navigateFromCommandPalette(location)
   }
   const history = store.getters.getHistoryCacheById[video.videoId]

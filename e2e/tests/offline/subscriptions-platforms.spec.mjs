@@ -7,6 +7,7 @@ import { waitForPlayback } from '../../helpers/player.mjs'
 import { DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
 import { SYNC_KEY, SYNC_SALT, mockSyncServer, syncWithSyncServer } from '../../helpers/sync-history.mjs'
 import { encryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
+import { externalHistoryEntry } from '../../helpers/external-media-history.mjs'
 
 const THUMBNAIL_PATH = fileURLToPath(new URL('../../fixtures/images/opentubex-playlist.jpg', import.meta.url))
 const AVATAR = 'https://twitch.example.test/avatar.jpg'
@@ -348,9 +349,7 @@ test.describe('Channels on other platforms', () => {
       await item.locator('.title').click({ button: 'right' })
       await page.locator('.contextMenu').getByRole('menuitem', { name: 'Mark As Watched' }).click()
       await expect(item).toHaveClass(/watched/)
-      const watchedAt = await page.evaluate(() => (
-        JSON.parse(localStorage.getItem('externalMediaPosition:https://www.twitch.tv/videos/10012')).updatedAt
-      ))
+      const watchedAt = (await externalHistoryEntry(page, 'https://www.twitch.tv/videos/10012')).timeWatched
 
       await mockSyncServer(page, {
         history: await encryptSyncDocument([], SYNC_KEY, SYNC_SALT),

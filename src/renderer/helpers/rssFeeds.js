@@ -8,7 +8,7 @@ import { showToastOnAllTabs } from './utils'
 import { appFetch } from './rssHub'
 import { supportsYtDlp } from './ytDlpCapabilities'
 import { isRssFeedItemSeen, onRssFeedSeenItemsSynced, parseRssFeedSeenItems, toRssFeedSeenMarks } from './rssFeedSeenItems'
-import { unmarkExternalMediaWatchedBefore } from './externalMediaPosition'
+import { unwatchExternalMediaMarkedUnseen } from './externalMediaHistory'
 import { resolveYtDlpCreatorAvatarUrl } from '../../main/ytDlpCreatorAvatar'
 import { holdAndroidBackgroundWork } from './androidBackgroundSync.js'
 
@@ -587,7 +587,7 @@ function unwatchItemsMarkedUnseen(items, entries) {
   if (unseenAt.size === 0) return
   for (const item of items) {
     const timestamp = unseenAt.get(getRssFeedItemKey(item))
-    if (timestamp !== undefined) unmarkExternalMediaWatchedBefore(item.url, timestamp)
+    if (timestamp !== undefined) unwatchExternalMediaMarkedUnseen(store, item.url, timestamp)
   }
 }
 

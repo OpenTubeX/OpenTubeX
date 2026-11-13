@@ -5479,7 +5479,8 @@ export default defineComponent({
         this.videoPlayerLoaded = true
 
         if (this.rememberHistory) {
-          if (this.timestamp !== null) {
+          // With progress saving off, a timestamp link only sets where playback starts.
+          if (this.timestamp !== null && this.watchedProgressSavingEnabled) {
             this.addToHistory(this.timestamp)
           } else if (this.historyEntryExists) {
             this.addToHistory(this.historyEntry.watchProgress)

@@ -147,7 +147,6 @@ test('sync adapter edits replace shared collections and record what they touched
     putSeenVideos: ['seenVideos', []],
     putSeenPosts: ['seenPosts', []],
     putSeenRssItems: ['seenRssItems', []],
-    putExternalMediaPositions: ['externalMediaPositions', []],
     putSessions: ['sessionsV2', { version: 2 }],
     putWatchHistory: ['history', { ...shared.history[0], metadata: { ...shared.history[0].metadata, added_date: 2 } }],
     putWatchHistoryBulk: ['history', [{ video: { ...video, id: 'other' }, metadata: shared.history[0].metadata }]],

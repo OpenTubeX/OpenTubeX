@@ -1,4 +1,5 @@
 import { runCooperatively, runSynchronously } from './cooperativeTask.js'
+import { isExternalMediaHistoryId } from './externalMediaHistory.js'
 
 const DAY = 24 * 60 * 60 * 1000
 const STOPWORDS = new Set(`
@@ -31,7 +32,11 @@ function number(value) {
     : 0
 }
 function id(value) { return typeof value === 'string' && value !== 'N/A' ? value.trim() : '' }
-function valid(video) { return video && typeof video === 'object' && id(video.videoId) && (video.type === undefined || video.type === 'video') }
+// Recommendations come from YouTube, so media from other sites in the history teaches nothing.
+function valid(video) {
+  return video && typeof video === 'object' && id(video.videoId) && !isExternalMediaHistoryId(video.videoId) &&
+    (video.type === undefined || video.type === 'video')
+}
 // Created on first use: loading its segmentation data takes several milliseconds
 let segmenter
 

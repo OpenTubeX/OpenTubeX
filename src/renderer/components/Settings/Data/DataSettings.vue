@@ -372,6 +372,7 @@ import FtImportPreview from '../../FtImportPreview/FtImportPreview.vue'
 import FtLoader from '../../FtLoader/FtLoader.vue'
 import { BACKUP_SECTIONS } from '../../../helpers/unifiedBackup'
 import { runBackgroundJob } from '../../../helpers/background-jobs'
+import { isExternalMediaHistoryId } from '../../../helpers/externalMediaHistory'
 import { compactAllDatastores, DBHistoryHandlers, DBPlaylistHandlers, DBProfileHandlers, DBSearchHistoryHandlers, DBWatchStatsHandlers } from '../../../../datastores/handlers/index'
 import { forEachTakeoutImportEntry, forEachTakeoutPlaylistFile, listYouTubeTakeoutZipEntries } from '../../../helpers/youtube-takeout-zip'
 import {
@@ -1626,7 +1627,8 @@ async function exportFreeTubeWatchHistory() {
 }
 
 async function exportYouTubeWatchHistory() {
-  const historyData = historyCacheSorted.value.map((entry) => {
+  // Takeout only lists YouTube videos
+  const historyData = historyCacheSorted.value.filter(entry => !isExternalMediaHistoryId(entry.videoId)).map((entry) => {
     return {
       header: 'YouTube',
       title: `Watched ${entry.title}`,

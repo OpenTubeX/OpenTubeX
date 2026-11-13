@@ -1,4 +1,5 @@
 import { downloadFileTitle, isDownloadPlaybackSupported, isPlayableDownloadFile } from './downloadPlayback.js'
+import { isExternalMediaHistoryId } from './externalMediaHistory.js'
 
 /**
  * Builds searchable video actions from metadata already held in the local
@@ -97,6 +98,7 @@ export function hasDownloadSearchChanged(previous, next) {
 }
 
 function videoRoute(video, query = {}) {
+  if (isExternalMediaHistoryId(video.videoId)) return { path: '/external-media', query: { url: video.videoId } }
   return {
     path: `/watch/${encodeURIComponent(video.videoId)}`,
     query: {

@@ -6,6 +6,7 @@ import { isProxy, toRaw } from 'vue'
 import { createStore } from 'vuex'
 import { getContinueWatchingCandidates } from '../../src/renderer/helpers/homeSections.js'
 import { canMarkHistoryEntryAsWatched, compareHistoryRecordsNewestFirst, getRetentionCutoff, migrateLegacyHistoryRecord } from '../../src/history.js'
+import { readLegacyExternalMediaPositions, removeLegacyExternalMediaPositions } from '../../src/renderer/helpers/externalMediaHistory.js'
 
 const source = (await readFile(new URL('../../src/renderer/store/modules/history.js', import.meta.url), 'utf8'))
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
@@ -13,7 +14,7 @@ const source = (await readFile(new URL('../../src/renderer/store/modules/history
 
 function fixture(DBHistoryHandlers = {}, rootGetters = {}) {
   const dependencies = {
-    getContinueWatchingCandidates, canMarkHistoryEntryAsWatched, compareHistoryRecordsNewestFirst, getRetentionCutoff, migrateLegacyHistoryRecord, toRaw, DBHistoryHandlers, removeExternalMediaPositionsBefore: () => {},
+    getContinueWatchingCandidates, canMarkHistoryEntryAsWatched, compareHistoryRecordsNewestFirst, getRetentionCutoff, migrateLegacyHistoryRecord, toRaw, DBHistoryHandlers, readLegacyExternalMediaPositions, removeLegacyExternalMediaPositions,
   }
   const history = compileFunction(source, Object.keys(dependencies))(...Object.values(dependencies))
   return createStore({ modules: { history }, getters: rootGetters })

@@ -11,7 +11,7 @@ import { capacitorNotificationHistory } from './capacitorNotificationHistory'
 import { getTwitchLocalNotificationId } from './capacitorSystemNotifications'
 import { notificationThumbnailsAllowed, openNotificationEntry, showInAppNotification } from './notificationHistory'
 import { isRssFeedItemSeen, onRssFeedSeenItemsSynced, parseRssFeedSeenItems, toRssFeedSeenMarks } from './rssFeedSeenItems'
-import { unmarkExternalMediaWatchedBefore } from './externalMediaPosition'
+import { unwatchExternalMediaMarkedUnseen } from './externalMediaHistory'
 import { supportsYtDlp } from './ytDlpCapabilities'
 import {
   findPlatformChannel,
@@ -328,7 +328,7 @@ function unwatchItemsMarkedUnseen(items, entries) {
   if (unseenAt.size === 0) return
   for (const item of items) {
     const timestamp = item.isLive ? undefined : unseenAt.get(getPlatformItemKey(item))
-    if (timestamp !== undefined) unmarkExternalMediaWatchedBefore(item.url, timestamp)
+    if (timestamp !== undefined) unwatchExternalMediaMarkedUnseen(store, item.url, timestamp)
   }
 }
 
