@@ -2349,7 +2349,7 @@ Tooltips:
     Platforms Auto Refresh Interval: 应用打开时 OpenTubeX 自动刷新你在其他平台上关注的频道的频率。
     Twitch Notify When Live: 你关注的某个 Twitch 频道开播时通知你。OpenTubeX 打开时每隔几分钟检查一次；关闭时如果仍会刷新订阅，也会检查。
   Theme Settings:
-    Only Show Important Notifications: 隐藏仅用于确认操作或报告状态的应用内通知。错误、警告、你设置的提醒以及提供操作（如撤销）的通知仍会显示。后台操作（如刷新订阅）的进度会显示在全局进度条中，而不是通知中。系统通知不受影响。
+    Only Show Important Notifications: 隐藏仅用于确认操作或报告状态的应用内通知，包括提供撤销的通知。错误、警告、你设置的提醒以及需要你做出决定的通知（如更新提示）仍会显示。后台操作（如刷新订阅）的进度会显示在全局进度条中，而不是通知中。系统通知不受影响。
     Visible Search Suggestions: "设置搜索栏在列表需要滚动之前显示的搜索历史记录和建议数量。列表绝不会超出窗口底部。"
     Thumbnail Size: "缩放网格和列表中的视频缩略图。列数固定的网格或“全宽”视图会改为填满每一行，因此在这些情况下只会改变列表缩略图和 Shorts。在手机大小的窗口中，网格缩略图最大为 100%。"
     Playlist Thumbnail Size: "缩放播放列表页面中的视频缩略图。列数固定的网格或“全宽”视图会改为填满每一行，因此在这些情况下只会改变列表缩略图和 Shorts。在手机大小的窗口中，网格缩略图最大为 100%。"

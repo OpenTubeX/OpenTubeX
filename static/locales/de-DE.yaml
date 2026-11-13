@@ -3162,9 +3162,9 @@ Tooltips:
       Zeigt bei Hintergrundvorgängen wie dem Aktualisieren von Abos und Downloads verwalteter Werkzeuge eine dauerhafte
       Benachrichtigung mit dem aktuellen Fortschritt anstelle des globalen Fortschrittsbalkens an.
     Only Show Important Notifications: >-
-      Blendet In-App-Benachrichtigungen aus, die nur eine Aktion bestätigen oder einen Status melden. Fehler,
-      Warnungen, eingerichtete Erinnerungen und Benachrichtigungen mit einer Aktion wie „Rückgängig“ werden weiterhin
-      angezeigt. Der Fortschritt von Hintergrundvorgängen wie dem Aktualisieren von Abos erscheint im globalen
+      Blendet In-App-Benachrichtigungen aus, die nur eine Aktion bestätigen oder einen Status melden, auch wenn sie
+      „Rückgängig“ anbieten. Fehler, Warnungen, eingerichtete Erinnerungen und Benachrichtigungen, die eine
+      Entscheidung erfordern, etwa Update-Hinweise, werden weiterhin angezeigt. Der Fortschritt von Hintergrundvorgängen wie dem Aktualisieren von Abos erscheint im globalen
       Fortschrittsbalken statt als Benachrichtigung. Systembenachrichtigungen sind nicht betroffen.
     Always Show Scrollbars: >-
       Hält die Scrollbars immer sichtbar. Wenn deaktiviert, werden sie kurz nach dem Ende der Mausbewegung
