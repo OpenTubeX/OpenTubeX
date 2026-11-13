@@ -17,6 +17,7 @@ import { tabMediaCoordinator } from './TabMediaCoordinator.js'
 import { isAppHidden } from '../helpers/appVisibility.js'
 import { getWebViewHeapStatistics } from '../helpers/memoryPressure.js'
 import { getSyncTabRoute } from '../helpers/sync-sessions.js'
+import { normalizeLegacyTabTitle } from '../../legacyTabTitle.js'
 
 const STORAGE_KEY = 'opentubex-capacitor-tabs'
 const SESSION_SAVE_DELAY_MS = 250
@@ -236,7 +237,7 @@ export class CapacitorTabService {
     const previous = this.currentSession()
     const tabs = synced.tabs.map(tab => createCapacitorTab(
       this.router.resolve(getSyncTabRoute(tab.url)),
-      tab.title,
+      normalizeLegacyTabTitle(tab.title),
       tab.id
     )).map((tab, index) => ({
       ...tab,

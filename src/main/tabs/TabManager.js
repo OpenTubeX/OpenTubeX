@@ -645,7 +645,7 @@ export class TabManager {
       id,
       url: location.url,
       route: location.route,
-      title: normalizeLegacyTabTitle(title) || formatDefaultTabTitle(location.url),
+      title: title || formatDefaultTabTitle(location.url),
       avatarDataUrl: isTabPreviewDataUrl(avatarDataUrl) ? avatarDataUrl : null,
       avatarFileName: restoredAvatarFileName,
       lastActiveAt: Date.now(),
@@ -2562,13 +2562,14 @@ export class TabManager {
             ? tabData.groupId
             : null
         } else {
-          const hasSavedTitle = normalizeLegacyTabTitle(tabData.title).trim().length > 0
+          const savedTitle = normalizeLegacyTabTitle(tabData.title)
+          const hasSavedTitle = savedTitle.trim().length > 0
           // createTab inserts into previousTabs through this.tabs. The synced
           // map and restored placement openers below replace that temporary order.
           tab = this.createTab({
             id: syncedId,
             url: stripOneTimeTimestampFromUrl(tabData.url),
-            title: hasSavedTitle ? tabData.title : undefined,
+            title: hasSavedTitle ? savedTitle : undefined,
             isPinned: tabData.isPinned === true,
             color: tabData.color,
             groupId: tabData.groupId,
@@ -2718,7 +2719,8 @@ export class TabManager {
       await this.runBatched(() => {
         for (const tabData of sessionData.tabs) {
           const makeActive = tabData === activeTabData
-          const hasSavedTitle = normalizeLegacyTabTitle(tabData.title).trim().length > 0
+          const savedTitle = normalizeLegacyTabTitle(tabData.title)
+          const hasSavedTitle = savedTitle.trim().length > 0
           const previewFileName = normalizeTabPreviewFileName(tabData.previewFileName)
           const avatarFileName = normalizeTabPreviewFileName(tabData.avatarFileName)
           const avatarDataUrl = avatars.get(avatarFileName) ?? null
@@ -2735,7 +2737,7 @@ export class TabManager {
             id: typeof tabData.id === 'string' ? tabData.id : undefined,
             // Strip here as well to heal sessions persisted before the strip on save existed
             url: stripOneTimeTimestampFromUrl(tabData.url),
-            title: hasSavedTitle ? tabData.title : undefined,
+            title: hasSavedTitle ? savedTitle : undefined,
             avatarDataUrl,
             avatarFileName: avatarDataUrl == null ? null : avatarFileName,
             isPinned: tabData.isPinned === true,

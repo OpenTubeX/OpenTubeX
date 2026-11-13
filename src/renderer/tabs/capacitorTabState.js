@@ -4,7 +4,9 @@ const MAX_CLOSED_CAPACITOR_TABS = 10
 
 export function createCapacitorTab(route, title = '', id = window.crypto.randomUUID()) {
   const normalizedRoute = normalizeRoute(route)
-  const resolvedTitle = normalizeLegacyTabTitle(title) || normalizedRoute.fullPath
+  const resolvedTitle = typeof title === 'string' && title.length > 0
+    ? title
+    : normalizedRoute.fullPath
 
   return {
     id,
@@ -33,7 +35,7 @@ export function restoreCapacitorTabSession(value, currentRoute, createId = () =>
           seenIds.add(tab.id)
           return true
         })
-        .map(tab => normalizeRestoredTab(tab, rememberHistory))
+        .map(tab => normalizeRestoredTab(withoutLegacyTitle(tab), rememberHistory))
     : []
 
   const closedTabIds = new Set()
@@ -45,7 +47,7 @@ export function restoreCapacitorTabSession(value, currentRoute, createId = () =>
           return true
         })
         .slice(-MAX_CLOSED_CAPACITOR_TABS)
-        .map(tab => normalizePersistedTab(tab, rememberHistory))
+        .map(tab => normalizePersistedTab(withoutLegacyTitle(tab), rememberHistory))
     : []
 
   if (tabs.length === 0) {
@@ -292,7 +294,9 @@ function isValidPersistedTab(tab) {
 
 function normalizePersistedTab(tab, rememberHistory = true) {
   const route = normalizeRoute(tab.route)
-  const title = normalizeLegacyTabTitle(tab.title) || route.fullPath
+  const title = typeof tab.title === 'string' && tab.title.length > 0
+    ? tab.title
+    : route.fullPath
   const history = rememberHistory && Array.isArray(tab.history) && tab.history.length > 0
     ? tab.history.map(entry => ({
         route: cloneRoute(entry?.route),
@@ -415,4 +419,8 @@ function buildFullPath(path, query, hash) {
   }
   const queryString = search.toString()
   return `${path.startsWith('/') ? path : `/${path}`}${queryString ? `?${queryString}` : ''}${hash}`
+}
+
+function withoutLegacyTitle(tab) {
+  return { ...tab, title: normalizeLegacyTabTitle(tab.title) }
 }
