@@ -611,8 +611,8 @@ export function followChannelByUrl(input) {
  */
 export async function unfollowPlatformChannel(channel) {
   const key = getPlatformChannelKey(channel)
+  // Forgotten once the setting changes, like channels unfollowed elsewhere
   await store.dispatch('updateFollowedChannels', getFollowedChannels().filter(followed => getPlatformChannelKey(followed) !== key))
-  forgetChannel(key)
 }
 
 /**
@@ -626,6 +626,16 @@ function forgetChannel(key) {
   delete history[key]
   saveHistory(history)
 }
+
+// Channels also get unfollowed in other windows and on other devices, whose
+// changes arrive through settings sync
+store.watch((_, getters) => getters.getFollowedChannels, (channels, previous) => {
+  const followed = new Set(channels.map(getPlatformChannelKey))
+  for (const channel of previous ?? []) {
+    const key = getPlatformChannelKey(channel)
+    if (!followed.has(key)) forgetChannel(key)
+  }
+})
 
 export function openPlatformChannelManager() {
   store.commit('setSettingsWindowSection', { section: 'subscriptions', subpage: 'platform-channels' })
