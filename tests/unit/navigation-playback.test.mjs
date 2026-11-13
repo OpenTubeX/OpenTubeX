@@ -482,9 +482,24 @@ test('play in background docks a new player and switches it in place without lea
     assert.equal(navigation.takeBackgroundStart('/watch/third'), true)
   }
 
+  // Autoplay and the queue continue the session with audio only.
+  assert.equal(navigation.audioOnlySession.value, true)
+  await mounted.provides.get('router').push('/watch/fourth')
+  await nextTick()
+  assert.equal(mounted.provides.get('route').fullPath, '/watch/fourth')
+  assert.equal(navigation.takeBackgroundStart('/watch/fourth'), false)
+  assert.equal(navigation.audioOnlySession.value, true)
+  // Closing the player or opening its Watch page ends it.
+  await navigation.dismiss()
+  await nextTick()
+  assert.equal(navigation.audioOnlySession.value, false)
+  await mounted.exposed().playInBackground('/watch/third')
+  assert.equal(navigation.audioOnlySession.value, true)
+
   await navigation.returnToVideo()
   assert.equal(mounted.props.route.path, '/watch/third')
   assert.equal(navigation.detached.value, false)
+  assert.equal(navigation.audioOnlySession.value, false)
 })
 
 test('closing the retained mini player disposes and unmounts Watch', async t => {

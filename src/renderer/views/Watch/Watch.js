@@ -2443,14 +2443,17 @@ export default defineComponent({
     },
 
     /**
-     * Sets the format for a new video. Play in Background starts it with
-     * audio only and plays it even where videos do not autoplay.
+     * Sets the format for a new video. Play in Background starts it, and the
+     * videos that follow it, with audio only, and plays it even where videos
+     * do not autoplay.
      *
      * @returns {boolean} whether Play in Background started this video
      */
     applyBackgroundStart() {
       const backgroundStart = this.watchNavigation?.takeBackgroundStart?.(this.tabRoute.fullPath) === true
-      this.activeFormat = backgroundStart ? 'audio' : this.defaultVideoFormat
+      this.activeFormat = backgroundStart || this.watchNavigation?.audioOnlySession?.value === true
+        ? 'audio'
+        : this.defaultVideoFormat
       if (backgroundStart) {
         this.queuedPlaybackVideoId = this.tabRoute.params.id
         // The user chose to play it in the mini player, unlike a background tab.

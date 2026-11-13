@@ -78,6 +78,9 @@ let watchTitle = ''
 let retainedHistoryIndex = -1
 // The route that Play in Background starts, until its Watch page loads it.
 let backgroundStartPath = null
+// Play in Background keeps playing audio only, including the videos that
+// follow, until the user opens the Watch page or closes the player.
+const audioOnlySession = ref(false)
 let watchTitleOptions
 let disposalPromise = null
 
@@ -403,6 +406,7 @@ async function playInBackground(location) {
     // Another route to the same video, such as one without its timestamp,
     // would not reload it.
     if (route.params.id === watchRoute.value.params.id) {
+      audioOnlySession.value = true
       watchView.value?.resumeInBackground()
       return
     }
@@ -417,6 +421,7 @@ async function playInBackground(location) {
     watchTitleOptions = undefined
   }
   backgroundStartPath = route.fullPath
+  audioOnlySession.value = true
   watchTitle = ''
   setWatchRoute(route)
 }
@@ -450,6 +455,7 @@ provide(watchNavigationKey, {
     watchTitleOptions = options
     if (options?.resolveHistoryEntry !== false) navigation.updateRetainedWatchEntry(props.tabId, retainedHistoryIndex, watchRoute.value.fullPath, { title })
   },
+  audioOnlySession,
   returnToVideo: () => navigation.push(props.tabId, watchRoute.value.fullPath),
   /** Whether Play in Background started this route, once per start. */
   takeBackgroundStart: fullPath => {
@@ -476,6 +482,10 @@ watch(() => props.route, route => {
     watchRoute.value = null
   }
 }, { immediate: true })
+
+watch([isWatchRoute, watchRoute], ([watchPage, route]) => {
+  if (watchPage || !route) audioOnlySession.value = false
+})
 
 watch(enabled, value => {
   if (!value && detached.value) {
