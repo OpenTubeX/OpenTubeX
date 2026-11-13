@@ -52,6 +52,12 @@ export function createFileWatchQueue(filename) {
         return JSON.parse(await readFile(filename, 'utf8'))
       } catch (error) {
         if (error.code === 'ENOENT') return []
+        // Without this, every request would retry the read and the queue
+        // would stay unusable until the file is deleted by hand.
+        if (error instanceof SyntaxError) {
+          console.error('The saved watch queue is corrupt, starting with an empty queue', error)
+          return []
+        }
         throw error
       }
     },
