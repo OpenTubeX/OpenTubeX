@@ -18,6 +18,8 @@ const discoveredDevices = new Map()
 /** @type {{ ownerId: number, castId: string, device: object, server: import('node:http').Server } | null} */
 let activeCast = null
 let startingCast = false
+// A cast started before the old one's Stop arrives would be stopped by it.
+let stoppingCast = false
 
 export async function discoverDlnaDevices() {
   const locations = new Map()
@@ -148,7 +150,7 @@ export async function startDlnaCast(ownerId, payload, getHeaders = () => ({}), m
           typeof muxOptions.ffmpegPath !== 'string') return { error: 'Invalid audio source or FFmpeg is unavailable' }
     } catch { return { error: 'Invalid audio source' } }
   }
-  if (activeCast || startingCast) return { error: 'Another window is already casting' }
+  if (activeCast || startingCast || stoppingCast) return { error: 'Another window is already casting' }
   startingCast = true
 
   const token = randomBytes(24).toString('hex')
@@ -213,11 +215,14 @@ export async function stopDlnaCast(ownerId, castId) {
   ))) return false
   const cast = activeCast
   activeCast = null
+  stoppingCast = true
   cast.server.close()
   cast.server.closeAllConnections()
   try {
     await sendAvTransport(cast.device, 'Stop', { InstanceID: 0 })
-  } catch { /* The renderer may already have disconnected. */ }
+  } catch { /* The renderer may already have disconnected. */ } finally {
+    stoppingCast = false
+  }
   return true
 }
 
