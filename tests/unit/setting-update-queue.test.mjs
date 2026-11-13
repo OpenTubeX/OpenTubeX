@@ -379,10 +379,14 @@ test('a failed list edit shows the saved list without dropping the edits after i
   let lock = Promise.resolve()
   let saved = ['first']
   let value = saved
+  let unavailable = false
   const options = {
     read: () => value,
     commit: next => { value = next },
-    readSaved: async () => saved,
+    readSaved: async () => {
+      if (unavailable) throw new Error('Disk read failed')
+      return saved
+    },
     write: async next => {
       if (next.includes('failed')) throw new Error('Disk write failed')
       saved = next
@@ -396,6 +400,10 @@ test('a failed list edit shows the saved list without dropping the edits after i
   assert.deepEqual(value, ['first', 'next'])
 
   await assert.rejects(edit('items', ids => [...ids, 'failed'], options), /Disk write failed/)
+  assert.deepEqual(value, ['first', 'next'])
+
+  unavailable = true
+  await assert.rejects(edit('items', ids => [...ids, 'unread'], options), /Disk read failed/)
   assert.deepEqual(value, ['first', 'next'])
 })
 

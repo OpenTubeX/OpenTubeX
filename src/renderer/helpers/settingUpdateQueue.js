@@ -69,8 +69,7 @@ export function createOptimisticSettingUpdater() {
  * adding to or removing from a list. Each edit shows right away, so the next
  * one builds on it, and applies again to the saved value inside `lock`, so
  * edits other windows saved meanwhile are kept. Once this window's last edit of
- * the setting finishes, it shows the saved value, or the previous one if the
- * save failed.
+ * the setting finishes, it shows the saved value.
  */
 export function createSavedSettingEditor() {
   const pending = new Map()
@@ -88,7 +87,8 @@ export function createSavedSettingEditor() {
    * }} options
    */
   return (settingId, edit, { read, commit, readSaved, write, lock }) => {
-    commit(edit(read()))
+    const previous = read()
+    commit(edit(previous))
     pending.set(settingId, (pending.get(settingId) ?? 0) + 1)
     // Commits inside the lock, before another window can save a newer value.
     const isLast = () => pending.get(settingId) === 1
@@ -98,7 +98,8 @@ export function createSavedSettingEditor() {
         await write(value)
         if (isLast()) commit(value)
       } catch (error) {
-        const saved = await readSaved()
+        // Without the saved value, show the one before this edit.
+        const saved = await readSaved().catch(() => previous)
         if (isLast()) commit(saved)
         throw error
       }

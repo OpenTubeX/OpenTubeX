@@ -308,9 +308,10 @@ const pinThumbnail = computed(() => props.thumbnailUrl?.replace(/^https?:\/\/[^/
 
 async function togglePinnedToNavigation() {
   if (!isPinnedToNavigation.value && !props.canPin) return
-  const pin = isPinnedToNavigation.value ? null : { id: props.id, name: props.name || props.id, thumbnail: pinThumbnail.value }
+  const id = props.id
+  const pin = isPinnedToNavigation.value ? null : { id, name: props.name || id, thumbnail: pinThumbnail.value }
   const saved = await store.dispatch('updatePinnedChannels', channels => [
-    ...channels.filter(channel => channel.id !== props.id),
+    ...channels.filter(channel => channel.id !== id),
     ...pin ? [pin] : [],
   ])
   if (!saved) return
