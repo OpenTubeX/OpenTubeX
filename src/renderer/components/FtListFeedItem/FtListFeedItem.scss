@@ -1,4 +1,7 @@
+@use '../thumbnailSwipe';
 @use '../../scss-partials/ft-list-item';
+
+@include ft-list-item.video-card;
 
 .thumbnailImage {
   aspect-ratio: 16 / 9;

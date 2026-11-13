@@ -56,6 +56,32 @@ $grid-mode-grab-bar-padding: 1em;
   }
 }
 
+// Video cards from YouTube and other platforms outline their thumbnail on hover
+// and keep the channel on its own line above the views and date.
+@mixin video-card {
+  .thumbnailLink:hover {
+    outline: 3px solid var(--side-nav-hover-color);
+  }
+
+  .ft-list-video .info .infoLine {
+    align-items: flex-start;
+    flex-direction: column;
+    row-gap: 5px;
+
+    .videoInfo {
+      overflow-x: clip;
+    }
+
+    .channelName {
+      font-weight: 500;
+    }
+
+    .channelName + .videoInfo::before {
+      content: none;
+    }
+  }
+}
+
 .channelName {
   align-items: center;
   display: inline-flex;

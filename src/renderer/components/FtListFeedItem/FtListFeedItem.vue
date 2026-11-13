@@ -1,146 +1,177 @@
 <template>
   <div
-    class="ft-list-video ft-list-item result"
-    :class="{ grid: layout === 'grid', list: layout === 'list', watched: watchProgress?.watched }"
-    @contextmenu="openContextMenu"
-    @keydown="handleTileKeydown"
-    @pointerdown="startMenuHold"
-    @pointermove="moveMenuHold"
-    @pointerup="cancelMenuHold"
-    @pointercancel="cancelMenuHold"
-    @dragstart="handleMenuHoldDragStart"
+    class="videoSwipeFrame"
+    :class="{
+      thumbnailSwipeEnabled,
+      videoSwipeActive: thumbnailSwipe,
+      videoSwipeDragging: thumbnailSwipe && !thumbnailSwipe.settling,
+    }"
+    :style="{
+      '--video-swipe-offset': `${thumbnailSwipe?.offset ?? 0}px`,
+      '--video-swipe-progress': thumbnailSwipe?.progress ?? 0,
+    }"
+    @pointerdown="startThumbnailSwipe"
+    @pointermove="moveThumbnailSwipe"
+    @pointerup="finishThumbnailSwipe"
+    @pointercancel="abortThumbnailSwipe"
+    @lostpointercapture.self="abortThumbnailSwipe"
   >
-    <div class="videoThumbnail">
-      <RouterLink
-        class="thumbnailLink"
-        tabindex="-1"
-        :to="to"
-        :aria-label="data.title"
-        @click="markAsSeen"
-        @auxclick.middle="markAsSeen"
-      >
-        <FtRetryImage
-          v-if="data.thumbnail"
-          :src="data.thumbnail"
-          class="thumbnailImage"
-          :class="{ blur: blurThumbnails }"
-          alt=""
-        />
-        <span
-          v-else
-          class="thumbnailImage thumbnailPlaceholder"
-        >
-          <FtIcon
-            :icon="placeholderIcon ?? platformIcon ?? ['fas', 'rss']"
-            aria-hidden="true"
-          />
-        </span>
-        <FtEmbeddedProgress
-          v-if="watchProgress"
-          class="watchedProgressBar"
-          :progress="watchProgress.progress * 100"
-          :corner-radius="thumbnailProgressRadius"
-          :end-arc-fraction="0.5"
-          :line-width="3"
-          :start-arc-fraction="0.5"
-        />
-      </RouterLink>
-      <div
-        v-if="data.isLive || durationText"
-        class="videoDuration"
-        :class="{ live: data.isLive }"
-      >
-        {{ data.isLive ? t('Video.Live') : durationText }}
-      </div>
-      <div
-        v-if="watchProgress?.watched"
-        class="videoWatched"
-      >
-        {{ t('Video.Watched') }}
-      </div>
+    <div
+      v-if="thumbnailSwipe"
+      :key="thumbnailSwipe.direction"
+      class="thumbnailSwipeFeedback"
+      :class="{
+        thumbnailSwipeReady: thumbnailSwipe.progress === 1,
+        thumbnailSwipeLeft: thumbnailSwipe.direction === 'left',
+      }"
+      :title="thumbnailSwipe.action.label"
+      aria-hidden="true"
+    >
+      <FtIcon :icon="thumbnailSwipe.action.icon" />
     </div>
-    <div class="info">
-      <RouterLink
-        class="title"
-        :to="to"
-        :title="store.getters.getTitleLineLimit > 0 ? data.title : null"
-        @click="markAsSeen"
-        @auxclick.middle="markAsSeen"
-      >
-        <h3
-          class="h3Title"
-          dir="auto"
+    <div
+      class="ft-list-video ft-list-item result"
+      :class="{ grid: layout === 'grid', list: layout === 'list', watched: watchProgress?.watched }"
+      @contextmenu="openContextMenu"
+      @keydown="handleTileKeydown"
+      @pointerdown="startMenuHold"
+      @pointermove="moveMenuHold"
+      @pointerup="cancelMenuHold"
+      @pointercancel="cancelMenuHold"
+      @dragstart="handleMenuHoldDragStart"
+    >
+      <div class="videoThumbnail">
+        <RouterLink
+          class="thumbnailLink"
+          tabindex="-1"
+          :to="to"
+          :aria-label="data.title"
+          @click="markAsSeen"
+          @auxclick.middle="markAsSeen"
         >
-          <FtNewContentDot v-if="showNewIndicator" />{{ data.title }}
-        </h3>
-      </RouterLink>
-      <div class="infoLine">
-        <component
-          :is="channelRoute ? 'router-link' : 'bdi'"
-          class="channelName"
-          dir="auto"
-          :to="channelRoute ?? undefined"
-        >
-          <FtChannelAvatar
-            v-if="avatar && !hideChannelAvatars"
-            :thumbnail="avatar"
+          <FtRetryImage
+            v-if="data.thumbnail"
+            :src="data.thumbnail"
+            class="thumbnailImage"
+            :class="{ blur: blurThumbnails }"
+            alt=""
           />
-          <span class="channelNameText">{{ data.author }}</span>
-          <FtIcon
-            v-if="platform"
-            class="platformIcon"
-            :icon="platformIcon"
-            :title="platform.name"
+          <span
+            v-else
+            class="thumbnailImage thumbnailPlaceholder"
+          >
+            <FtIcon
+              :icon="placeholderIcon ?? platformIcon ?? ['fas', 'rss']"
+              aria-hidden="true"
+            />
+          </span>
+          <FtEmbeddedProgress
+            v-if="watchProgress"
+            class="watchedProgressBar"
+            :progress="watchProgress.progress * 100"
+            :corner-radius="thumbnailProgressRadius"
+            :end-arc-fraction="0.5"
+            :line-width="3"
+            :start-arc-fraction="0.5"
           />
-        </component>
-        <FtInlineMetadata
-          v-if="publishedText || viewCountText"
-          class="videoInfo"
-          icon-labels
+        </RouterLink>
+        <div
+          v-if="data.isLive || durationText"
+          class="videoDuration"
+          :class="{ live: data.isLive }"
         >
-          <span
-            v-if="viewCountText"
-            class="viewCount"
-          ><FtIcon
-            :icon="['fas', data.isLive ? 'users' : 'eye']"
-            class="statIcon"
-            aria-hidden="true"
-          />{{ viewCountText }}</span>
-          <span
-            v-if="publishedText"
-            class="uploadedTime"
-          ><FtIcon
-            :icon="['fas', 'clock']"
-            class="statIcon"
-            aria-hidden="true"
-          />{{ publishedText }}</span>
-        </FtInlineMetadata>
+          {{ data.isLive ? t('Video.Live') : durationText }}
+        </div>
+        <div
+          v-if="watchProgress?.watched"
+          class="videoWatched"
+        >
+          {{ t('Video.Watched') }}
+        </div>
       </div>
-      <div class="buttonStack">
-        <FtIconButton
-          v-if="store.getters.getShowVideoMenuButton"
-          ref="menuButton"
-          class="optionsButton"
-          :title="t('Video.More Options')"
-          :icon="['fas', 'ellipsis-v']"
-          theme="base-no-default"
-          :size="16"
-          @click="openOptionsMenu"
-        />
+      <div class="info">
+        <RouterLink
+          class="title"
+          :to="to"
+          :title="store.getters.getTitleLineLimit > 0 ? data.title : null"
+          @click="markAsSeen"
+          @auxclick.middle="markAsSeen"
+        >
+          <h3
+            class="h3Title"
+            dir="auto"
+          >
+            <FtNewContentDot v-if="showNewIndicator" />{{ data.title }}
+          </h3>
+        </RouterLink>
+        <div class="infoLine">
+          <component
+            :is="channelRoute ? 'router-link' : 'bdi'"
+            class="channelName"
+            dir="auto"
+            :to="channelRoute ?? undefined"
+          >
+            <FtChannelAvatar
+              v-if="avatar && !hideChannelAvatars"
+              :thumbnail="avatar"
+            />
+            <span class="channelNameText">{{ data.author }}</span>
+            <FtIcon
+              v-if="platform"
+              class="platformIcon"
+              :icon="platformIcon"
+              :title="platform.name"
+            />
+          </component>
+          <FtInlineMetadata
+            v-if="publishedText || viewCountText"
+            class="videoInfo"
+            icon-labels
+          >
+            <span
+              v-if="viewCountText"
+              class="viewCount"
+            ><FtIcon
+              :icon="['fas', data.isLive ? 'users' : 'eye']"
+              class="statIcon"
+              aria-hidden="true"
+            />{{ viewCountText }}</span>
+            <span
+              v-if="publishedText"
+              class="uploadedTime"
+            ><FtIcon
+              :icon="['fas', 'clock']"
+              class="statIcon"
+              aria-hidden="true"
+            />{{ publishedText }}</span>
+          </FtInlineMetadata>
+        </div>
+        <div class="buttonStack">
+          <FtIconButton
+            v-if="store.getters.getShowVideoMenuButton"
+            ref="menuButton"
+            class="optionsButton"
+            :title="t('Video.More Options')"
+            :icon="['fas', 'ellipsis-v']"
+            theme="base-no-default"
+            :size="16"
+            @click="openOptionsMenu"
+          />
+        </div>
       </div>
+      <WatchVideoDownloadPrompt
+        v-if="canDownload && showDownloadPrompt"
+        :external-url="data.url"
+        :title="data.title"
+        :thumbnail="data.thumbnail"
+        @close="showDownloadPrompt = false"
+      />
     </div>
-    <WatchVideoDownloadPrompt
-      v-if="canDownload && showDownloadPrompt"
-      :external-url="data.url"
-      :title="data.title"
-      :thumbnail="data.thumbnail"
-      @close="showDownloadPrompt = false"
-    />
   </div>
 </template>
 
 <script setup>
-import { computed, inject, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
+import { computed, inject, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
 
@@ -153,17 +184,28 @@ import FtRetryImage from '../FtRetryImage.vue'
 import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 
 import store from '../../store/index'
-import { useContextMenuHold } from '../../composables/useContextMenuHold'
+import { useCardContextMenu } from '../../composables/useCardContextMenu'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
-import { openButtonMenu } from '../../helpers/buttonMenu'
+import { useThumbnailSwipe } from '../../composables/useThumbnailSwipe'
+import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import {
   getExternalMediaProgress,
   markExternalMediaWatched,
   unmarkExternalMediaWatched
 } from '../../helpers/externalMediaPosition'
 import { lightHaptic } from '../../helpers/mobileHaptics'
+import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { markRssFeedItemsAsSeen, markRssFeedItemsAsUnseen } from '../../helpers/rssFeeds'
-import { copyToClipboard, formatDurationAsTimestamp, formatViewCount, getRelativeTimeFromDate, openInternalPath, showToast } from '../../helpers/utils'
+import {
+  copyToClipboard,
+  formatDurationAsTimestamp,
+  formatViewCount,
+  getRelativeTimeFromDate,
+  openExternalLink,
+  openInternalPath,
+  shareLink,
+  showToast
+} from '../../helpers/utils'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { isTileMarkShortcut, tileKeyboardShortcutsKey } from '../../helpers/tileNavigation'
 import { getPlatform, getPlatformChannelRoute, PLATFORM_ICONS } from '../../../platforms/index'
@@ -285,10 +327,22 @@ function setWatched(watched, fully = false) {
   })
 }
 
-function openElsewhere(newWindow) {
-  openInternalPath({ ...to.value, title: props.data.title, doCreateNewTab: !newWindow, doCreateNewWindow: newWindow })
+function openElsewhere({ newWindow = false, background = false } = {}) {
+  openInternalPath({ ...to.value, title: props.data.title, doCreateNewTab: !newWindow, doCreateNewWindow: newWindow, makeActive: !background })
   markAsSeen()
 }
+
+const copyLinkItem = computed(() => ({
+  label: t('Share.Copy Link'),
+  icon: ['fas', 'link'],
+  run: () => copyToClipboard(props.data.url)
+}))
+const shareLinkItem = computed(() => process.env.IS_CAPACITOR
+  ? { label: t('Share.Share Link'), icon: ['fas', 'share-alt'], run: () => shareLink(props.data.url) }
+  : null)
+const downloadItem = computed(() => canDownload.value
+  ? { label: t('Downloads.Download Video'), icon: ['fas', 'download'], run: () => { showDownloadPrompt.value = true } }
+  : null)
 
 const menuItems = computed(() => {
   const watched = position.value?.watched === true
@@ -299,7 +353,7 @@ const menuItems = computed(() => {
       shortLabel: t('New Tab'),
       icon: ['fas', 'arrow-up-right-from-square'],
       quickAction: true,
-      run: () => openElsewhere(false)
+      run: () => openElsewhere()
     })
   }
   if (process.env.IS_ELECTRON) {
@@ -308,7 +362,7 @@ const menuItems = computed(() => {
       shortLabel: t('New Window'),
       icon: ['fas', 'external-link-alt'],
       quickAction: true,
-      run: () => openElsewhere(true)
+      run: () => openElsewhere({ newWindow: true })
     })
   }
   if (items.length > 0) items.push({ type: 'separator' })
@@ -341,59 +395,94 @@ const menuItems = computed(() => {
       run: markAsUnseen
     })
   }
-  if (canDownload.value) {
-    items.push({
-      label: t('Downloads.Download Video'),
-      icon: ['fas', 'download'],
-      run: () => { showDownloadPrompt.value = true }
-    })
-  }
-  items.push({ type: 'separator' }, {
-    label: t('Share.Copy Link'),
-    icon: ['fas', 'link'],
-    run: () => copyToClipboard(props.data.url)
+  if (downloadItem.value) items.push(downloadItem.value)
+  items.push({ type: 'separator' }, copyLinkItem.value, {
+    // Feeds that aren't from a supported platform link to any website
+    label: platform.value ? t('Platforms.Open Website', { platform: platform.value.name }) : t('Share.Open Link'),
+    icon: platformIcon.value ?? ['fas', 'external-link-alt'],
+    run: () => openExternalLink(props.data.url)
   })
+  if (shareLinkItem.value) items.push(shareLinkItem.value)
   return items.map(item => item.type === 'separator' ? item : { enabled: true, ...item })
 })
 
+// Like on YouTube videos, phones can open the item without leaving the page
+const thumbnailActions = computed(() => (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && store.getters.getTabsEnabled
+  ? [{
+      label: t('Context Menu.Open in a Background Tab'),
+      shortLabel: t('Context Menu.Background Tab'),
+      icon: ['fas', 'clone'],
+      enabled: true,
+      run: () => openElsewhere({ background: true })
+    }]
+  : [])
+
 const menuButton = useTemplateRef('menuButton')
-const openMobileContextActions = inject('openMobileContextActions')
-const { startMenuHold, moveMenuHold, cancelMenuHold, handleMenuHoldDragStart, suppressMenuHoldClick } = useContextMenuHold(openContextMenu)
+const {
+  startMenuHold, moveMenuHold, cancelMenuHold, handleMenuHoldDragStart, suppressMenuHoldClick,
+  openContextMenu, openOptionsMenu: openCardOptionsMenu, handleMenuKeydown,
+} = useCardContextMenu({ items: menuItems, title: () => props.data.title, thumbnailActions, beforeOpen: () => cancelThumbnailSwipe() })
 
 function openOptionsMenu() {
-  cancelMenuHold()
-  openButtonMenu(menuButton.value.$el.querySelector('button'), menuItems, props.data.title)
+  openCardOptionsMenu(menuButton.value.$el.querySelector('button'))
 }
 
-function openContextMenu(event) {
-  if (event.target.closest('[role="dialog"], [role="menu"]')) return
-  if (event.pointerType !== 'touch' && !process.env.IS_ELECTRON) {
-    // Only Electron can merge native image and selection actions into our menu.
-    const selection = window.getSelection()
-    if (event.target.closest('img, video') || (selection && !selection.isCollapsed && selection.containsNode(event.target, true))) return
+/**
+ * The swipe actions from the settings that apply to items from other
+ * platforms. Playlists, bookmarks and the queue only take YouTube videos.
+ * @param {'left' | 'right'} direction
+ */
+function getThumbnailSwipeAction(direction) {
+  const actionId = direction === 'left'
+    ? store.getters.getThumbnailLeftSwipeAction
+    : store.getters.getThumbnailRightSwipeAction
+  const watched = position.value?.watched === true
+  switch (actionId) {
+    case 'history':
+    case 'markAsFullySeen':
+      if (props.data.isLive) return null
+      // Like on YouTube videos, a watched item is unmarked instead
+      if (actionId === 'history' || watched) {
+        return {
+          label: watched ? t('Video.Unmark As Watched') : t('Video.Mark As Watched'),
+          icon: ['fas', watched ? 'eye-slash' : 'eye'],
+          run: () => setWatched(!watched)
+        }
+      }
+      return { label: t('Video.Mark As Fully Watched'), icon: ['fas', 'flag-checkered'], run: () => setWatched(true, true) }
+    case 'copyYoutube':
+      return copyLinkItem.value
+    case 'share':
+      return shareLinkItem.value
+    case 'download':
+      return downloadItem.value
+    default:
+      return null
   }
-  event.preventDefault()
-  event.stopPropagation()
-  cancelMenuHold()
-  if (event.pointerType === 'touch') {
-    suppressMenuHoldClick()
-    openMobileContextActions({ title: props.data.title, actions: menuItems })
-    lightHaptic()
-    return
-  }
-  const bounds = event.target.getBoundingClientRect()
-  const keyboard = event.type === 'keydown' || (event.clientX === 0 && event.clientY === 0)
-  window.dispatchEvent(new CustomEvent('opentubex:context-menu', {
-    detail: { x: keyboard ? bounds.left : event.clientX, y: keyboard ? bounds.bottom : event.clientY, items: menuItems, contextEvent: event }
-  }))
 }
+
+const {
+  enabled: thumbnailSwipeEnabled, swipe: thumbnailSwipe,
+  startSwipe: startThumbnailSwipe, moveSwipe: moveThumbnailSwipe,
+  finishSwipe: finishThumbnailSwipe, abortSwipe: abortThumbnailSwipe, cancelSwipe: cancelThumbnailSwipe,
+} = useThumbnailSwipe({
+  getAction: getThumbnailSwipeAction,
+  cancelHold: cancelMenuHold,
+  suppressClick: suppressMenuHoldClick,
+  getSettleDuration: () => isReducedMotionEnabled() ? 0 : 200 / getAnimationSpeedMultiplier(store.getters.getAnimationSpeed),
+  onCommit: action => {
+    lightHaptic()
+    action.run()
+  },
+})
+
+watch([() => props.data.url, () => store.getters.getThumbnailLeftSwipeAction, () => store.getters.getThumbnailRightSwipeAction], cancelThumbnailSwipe)
 
 const tileKeyboardShortcuts = inject(tileKeyboardShortcutsKey, false)
 
 function handleTileKeydown(event) {
-  if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
-    openContextMenu(event)
-  } else if (tileKeyboardShortcuts && isTileMarkShortcut(event)) {
+  if (handleMenuKeydown(event)) return
+  if (tileKeyboardShortcuts && isTileMarkShortcut(event)) {
     // Like the menu, a new item is marked as seen first.
     event.preventDefault()
     if (showMarkAsSeen.value) {
@@ -403,10 +492,6 @@ function handleTileKeydown(event) {
     }
   }
 }
-
-onBeforeUnmount(() => {
-  window.dispatchEvent(new CustomEvent('opentubex:close-context-menu', { detail: menuItems }))
-})
 </script>
 
 <style scoped lang="scss" src="./FtListFeedItem.scss" />

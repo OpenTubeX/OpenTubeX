@@ -203,13 +203,6 @@
   white-space: nowrap;
 }
 
-@media screen and (width <= 460px) {
-  .externalMediaMainMetrics {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-}
-
 .externalMediaCreator {
   align-items: center;
   display: flex;
@@ -227,24 +220,36 @@
   z-index: 1;
 }
 
-.externalMediaCreatorProfile {
+/* Matches the watch page's profile row (WatchVideoInfo). */
+.externalMediaCreatorIdentity {
   align-items: center;
-  color: inherit;
-  display: inline-flex;
-  font-weight: 600;
-  gap: 10px;
-  text-decoration: none;
+  display: flex;
+  min-inline-size: 0;
 }
 
-.externalMediaCreatorProfile[href]:hover {
-  text-decoration: underline;
+.externalMediaCreatorAvatarLink {
+  border-radius: 50%;
+  display: flex;
+  margin-inline-end: 10px;
 }
 
 .externalMediaCreatorAvatar {
-  block-size: 40px;
+  block-size: 56px;
   border-radius: 50%;
-  inline-size: 40px;
+  inline-size: 56px;
   object-fit: cover;
+}
+
+.externalMediaCreatorProfile {
+  color: inherit;
+  display: block;
+  font-weight: 500;
+  inset-block-start: -2px;
+  margin-block-end: 3px;
+  margin-inline-start: 6px;
+  overflow-wrap: anywhere;
+  position: relative;
+  text-decoration: none;
 }
 
 .externalMediaSiteLink {
