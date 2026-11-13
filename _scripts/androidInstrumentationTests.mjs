@@ -49,12 +49,16 @@ function testCases() {
     .filter(name => name.startsWith('TEST-') && name.endsWith('.xml'))
     .flatMap(name => [...readFileSync(join(RESULTS, name), 'utf8')
       .matchAll(/<testcase\b([^>]*?)(?:\/>|>([\s\S]*?)<\/testcase>)/g)]
-      .map(([, attributes, body = '']) => ({
-        className: attribute(attributes, 'classname'),
-        name: attribute(attributes, 'name'),
-        failed: /<(?:failure|error)\b/.test(body),
-        skipped: /<skipped\b/.test(body)
-      })))
+      .map(([, attributes, body = '']) => {
+        // AGP reports a test that skips on an assumption as a failure.
+        const assumption = /<failure\b[^>]*>\s*org\.junit\.(?:internal\.)?AssumptionViolatedException/.test(body)
+        return {
+          className: attribute(attributes, 'classname'),
+          name: attribute(attributes, 'name'),
+          failed: !assumption && /<(?:failure|error)\b/.test(body),
+          skipped: assumption || /<skipped\b/.test(body)
+        }
+      }))
 }
 
 /** Finds the test method's source file and line for the issue and annotations. */
