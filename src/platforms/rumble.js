@@ -350,6 +350,15 @@ function parseListedVideo(video, channel, now) {
   }
 }
 
+/** Rumble's notice for a channel without videos, in each language its pages come in */
+const EMPTY_CHANNEL_NOTICES = new Set([
+  'No videos found',
+  'Keine Videos gefunden',
+  'No se han encontrado vídeos',
+  'Aucune vidéo trouvée',
+  'Nenhum vídeo encontrado'
+])
+
 /**
  * The videos of a channel page. They're in JSON for the page's video grids,
  * which the page renders in the browser.
@@ -379,9 +388,9 @@ function parseChannelVideos(html, channel) {
       if (item && !items.has(item.id)) items.set(item.id, item)
     }
   }
-  // Empty channels have only a notice in their listing, in the page's language
+  // Empty channels have only Rumble's notice in their listing
   const listing = html.match(/<section\b[^>]*\bclass="[^"]*\bchannel-listing__container\b[^"]*"[^>]*>([\s\S]*?)<\/section\s*>/i)?.[1]
-  const isEmptyChannel = grids.length === 0 && listing !== undefined && listing.trim() !== '' && !listing.includes('<')
+  const isEmptyChannel = grids.length === 0 && listing !== undefined && !listing.includes('<') && EMPTY_CHANNEL_NOTICES.has(text(listing))
   if (readGrids === 0 && !isEmptyChannel) throw new Error('The Rumble channel page has no videos it can read')
   return [...items.values()]
 }

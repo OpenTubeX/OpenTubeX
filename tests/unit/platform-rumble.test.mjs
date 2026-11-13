@@ -221,14 +221,18 @@ test('lists the videos of a channel page, with live streams first in the feed', 
   const latest = await rumble.getLatestItems(fetcher, channel)
   assert.deepEqual(latest.map(item => item.id), ['v1live1', 'v1next1', 'v1abc11', 'v1abc33', 'v1past1', 'v1repo1'])
 
-  // A channel without videos has none, but a page without a listing it can
-  // read fails, so the feed keeps the channel's earlier items
+  // A channel without videos has none, in each language Rumble has, but a
+  // page without a listing it can read fails, so the feed keeps the channel's
+  // earlier items
   const other = htmlFetch({
-    'https://rumble.com/c/EmptyChannel': '<main><section class="channel-listing__container border-box">No videos found</section></main>',
+    'https://rumble.com/c/EmptyChannel': '<main><section class="channel-listing__container border-box">\n\t\t\tKeine Videos gefunden\t\t</section></main>',
+    'https://rumble.com/c/LoadingChannel': '<main><section class="channel-listing__container">Loading videos...</section></main>',
     'https://rumble.com/c/ChangedChannel': '<main><section class="channel-listing__container"><div class="videos-grid"><a href="/v1abc11-example.html">Video</a></div></section></main>'
   })
   assert.deepEqual(await rumble.getChannelPage(other.fetcher, { ...channel, id: 'c/EmptyChannel' }, 'videos', null), { results: [], continuation: null })
-  await assert.rejects(rumble.getLatestItems(other.fetcher, { ...channel, id: 'c/ChangedChannel' }), /no videos it can read/)
+  for (const id of ['c/ChangedChannel', 'c/LoadingChannel']) {
+    await assert.rejects(rumble.getLatestItems(other.fetcher, { ...channel, id }), /no videos it can read/)
+  }
 })
 
 test('searches videos', async () => {
