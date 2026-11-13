@@ -78,11 +78,12 @@ function loadPreviews() {
   white-space: nowrap;
 }
 
-/* Keeps its width while a pack loads so the list does not resize. */
+/* Keeps its size while a pack loads so the list does not resize. */
 .iconPackPreview {
   display: inline-flex;
   gap: 2px;
   min-inline-size: calc(5 * 1.25em + 4 * 2px);
+  min-block-size: 1em;
   opacity: 0.8;
 }
 
