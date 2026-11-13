@@ -473,6 +473,7 @@ Settings:
     Revoke Failed: "YouTube에서 로그아웃했지만 Google에서 로그인 종료를 확인하지 않았습니다. Google 계정의 서드 파티 연결에서 삭제할 수 있습니다."
     Signed out by YouTube: "YouTube에서 로그인을 종료했습니다. 계정을 계속 사용하려면 설정에서 다시 로그인하세요."
     Add to YouTube Watch History: "시청한 동영상을 YouTube 기록에 추가"
+    Rate Videos: "동영상 좋아요 및 싫어요"
     Sync Subscriptions: "YouTube와 구독 동기화"
     Sync Playlists: "YouTube와 재생 목록 동기화"
     Sync Now: "지금 동기화"
@@ -2636,6 +2637,7 @@ Description:
 Tooltips:
   YouTube Account Settings:
     Add to YouTube Watch History: "재생한 동영상이 YouTube 시청 기록에 추가되어 YouTube 추천에 반영됩니다. YouTube에서 기록이 일시중지된 동안에는 아무것도 추가되지 않습니다."
+    Rate Videos: "동영상에 좋아요 및 싫어요 버튼을 표시합니다. 평가를 표시하려면 여는 모든 동영상을 계정으로 YouTube에서 조회하므로, 시청 기록에 추가되지 않더라도 YouTube는 어떤 동영상을 열었는지 알게 됩니다."
     Sync Subscriptions: "YouTube에서 구독한 채널은 “모든 채널”에 추가되고, YouTube에서 구독 취소한 채널은 모든 프로필에서 삭제됩니다. 여기서 “모든 채널”의 채널을 구독하거나 구독 취소하면 YouTube에서도 똑같이 적용됩니다."
     Sync Playlists: "YouTube 재생 목록, “나중에 볼 동영상”, “좋아요 표시한 동영상”이 “나의 재생 목록”에 표시되며, 여기서 변경한 내용은 YouTube에도 반영됩니다. 다른 기기와 동기화되지 않으며 모든 재생 목록을 내보내거나 데이터를 백업할 때도 포함되지 않습니다. 이 옵션을 끄면 이 기기에서는 삭제되지만 YouTube에서는 삭제되지 않습니다."
   General Settings:

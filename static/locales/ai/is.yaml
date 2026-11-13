@@ -380,6 +380,7 @@ Settings:
     Revoke Failed: "Útskráning af YouTube tókst, en Google staðfesti ekki að innskráningunni væri lokið. Þú getur fjarlægt hana undir tengingum þriðju aðila á Google-reikningnum þínum."
     Signed out by YouTube: "YouTube batt enda á innskráninguna. Skráðu þig aftur inn í stillingum til að halda áfram að nota reikninginn þinn."
     Add to YouTube Watch History: "Bæta áhorfðum myndskeiðum við YouTube-feril"
+    Rate Videos: "Líka við og líka ekki við myndskeið"
     Sync Subscriptions: "Samstilla áskriftir við YouTube"
     Sync Playlists: "Samstilla spilunarlista við YouTube"
     Sync Now: "Samstilla núna"
@@ -2271,6 +2272,7 @@ Description:
 Tooltips:
   YouTube Account Settings:
     Add to YouTube Watch History: "Myndskeið sem þú spilar bætast við áhorfsferilinn þinn á YouTube, svo meðmæli YouTube læri af þeim. Engu er bætt við á meðan ferillinn er í bið á YouTube."
+    Rate Videos: "Sýnir hnappa til að líka við og líka ekki við myndskeið. Til að sýna einkunnina þína er hvert myndskeið sem þú opnar flett upp á YouTube með reikningnum þínum, svo YouTube veit hvaða myndskeið þú opnar, jafnvel þegar þeim er ekki bætt við áhorfsferilinn þinn."
     Sync Subscriptions: "Rásum sem þú gerist áskrifandi að á YouTube er bætt við „Allar rásir“, og rásir sem þú segir upp áskrift að þar eru fjarlægðar úr öllum notkunarsniðum. Að gerast áskrifandi eða segja upp áskrift hér í „Allar rásir“ gerir það sama á YouTube."
     Sync Playlists: "YouTube-spilunarlistarnir þínir, „Horfa síðar“ og „Myndskeið sem mér líkar“ birtast í „Spilunarlistarnir þínir“, og breytingar sem þú gerir á þeim hér eru einnig gerðar á YouTube. Þeir eru ekki samstilltir við önnur tæki þín og eru ekki teknir með þegar þú flytur út alla spilunarlista eða tekur afrit af gögnunum þínum. Ef slökkt er á þessu eru þeir fjarlægðir úr þessu tæki en ekki af YouTube."
   General Settings:

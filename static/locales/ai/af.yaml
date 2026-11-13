@@ -542,6 +542,7 @@ Settings:
     Sync Subscriptions: "Sinkroniseer intekeninge met YouTube"
     Sync Playlists: "Sinkroniseer afspeellyste met YouTube"
     Add to YouTube Watch History: "Voeg gekykte video’s by YouTube-geskiedenis"
+    Rate Videos: "Hou van en hou nie van video's nie"
     Sync Now: "Sinkroniseer nou"
     Synced: "Met YouTube gesinkroniseer"
     Sync Failed: "Kon nie met YouTube sinkroniseer nie: {error}"
@@ -2506,6 +2507,7 @@ Tooltips:
     Sync Subscriptions: "Kanale waarop u op YouTube inteken, word by “Alle kanale” gevoeg, en kanale waarop u daar uitteken, word uit elke profiel verwyder. As u hier in “Alle kanale” inteken of uitteken, gebeur dieselfde op YouTube."
     Sync Playlists: "U YouTube-afspeellyste, “Kyk later” en “Video’s waarvan gehou is” verskyn in “U afspeellyste”, en veranderinge wat u hier daaraan aanbring, word ook op YouTube aangebring. Hulle word nie na u ander toestelle gesinkroniseer of ingesluit wanneer u alle afspeellyste uitvoer of u data rugsteun nie. As u dit afskakel, word hulle van hierdie toestel verwyder, maar nie van YouTube nie."
     Add to YouTube Watch History: "Video’s wat u speel, word by u YouTube-kykgeskiedenis gevoeg, sodat YouTube se aanbevelings daaruit leer. Niks word bygevoeg terwyl die geskiedenis op YouTube onderbreek is nie."
+    Rate Videos: "Wys knoppies om van video's te hou of nie te hou nie. Om jou gradering te wys, word elke video wat jy oopmaak met jou rekening op YouTube opgesoek, sodat YouTube leer watter video's jy oopmaak, selfs wanneer hulle nie by jou kykgeskiedenis gevoeg word nie."
   General Settings:
     Built-in Streams: |
       Outomaties speel die meeste video's deur YouTube se visionOS-kliënt, wat vinniger begin en outomatiese kwaliteit ondersteun. Regstreekse strome en video's wat dit nie kan speel nie, gebruik SABR.

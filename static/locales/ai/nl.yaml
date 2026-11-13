@@ -385,6 +385,7 @@ Settings:
     Revoke Failed: "Afgemeld bij YouTube, maar Google heeft niet bevestigd dat de aanmelding is beëindigd. U kunt deze verwijderen bij de verbindingen met derden in uw Google-account."
     Signed out by YouTube: "YouTube heeft de aanmelding beëindigd. Log opnieuw in via Instellingen om uw account te blijven gebruiken."
     Add to YouTube Watch History: "Bekeken video's toevoegen aan de YouTube-geschiedenis"
+    Rate Videos: "Video's leuk en niet leuk vinden"
     Sync Subscriptions: "Abonnementen synchroniseren met YouTube"
     Sync Playlists: "Afspeellijsten synchroniseren met YouTube"
     Sync Now: "Nu synchroniseren"
@@ -2316,6 +2317,7 @@ Description:
 Tooltips:
   YouTube Account Settings:
     Add to YouTube Watch History: "Video's die u afspeelt, worden toegevoegd aan uw YouTube-kijkgeschiedenis, zodat de aanbevelingen van YouTube ervan leren. Er wordt niets toegevoegd zolang de geschiedenis op YouTube is onderbroken."
+    Rate Videos: "Toont knoppen om video's leuk of niet leuk te vinden. Om je beoordeling te tonen, wordt elke video die je opent met je account op YouTube opgezocht, zodat YouTube weet welke video's je opent, ook als ze niet aan je kijkgeschiedenis worden toegevoegd."
     Sync Subscriptions: "Kanalen waarop u zich op YouTube abonneert, worden toegevoegd aan ‘Alle kanalen’, en kanalen waarvan u daar het abonnement opzegt, worden uit elk profiel verwijderd. Abonneren of deabonneren hier in ‘Alle kanalen’ doet hetzelfde op YouTube."
     Sync Playlists: "Uw YouTube-afspeellijsten, ‘Later bekijken’ en ‘Video's die ik leuk vind’ verschijnen in ‘Jouw afspeellijsten’, en wijzigingen die u er hier in aanbrengt, worden ook op YouTube doorgevoerd. Ze worden niet gesynchroniseerd met uw andere apparaten en niet meegenomen wanneer u alle afspeellijsten exporteert of een back-up van uw gegevens maakt. Als u dit uitschakelt, worden ze van dit apparaat verwijderd, maar niet van YouTube."
   General Settings:

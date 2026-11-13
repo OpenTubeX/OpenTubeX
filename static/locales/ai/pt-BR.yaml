@@ -335,6 +335,7 @@ Settings:
     Sync Subscriptions: "Sincronizar inscrições com o YouTube"
     Sync Playlists: "Sincronizar playlists com o YouTube"
     Add to YouTube Watch History: "Adicionar vídeos assistidos ao histórico do YouTube"
+    Rate Videos: "Gostar e não gostar de vídeos"
     Sync Now: "Sincronizar agora"
     Synced: "Sincronizado com o YouTube"
     Sync Failed: "Não foi possível sincronizar com o YouTube: {error}"
@@ -2206,6 +2207,7 @@ Tooltips:
     Sync Subscriptions: "Os canais em que você se inscreve no YouTube são adicionados a Todos os canais, e os canais dos quais você cancela a inscrição lá são removidos de todos os perfis. Inscrever-se ou cancelar a inscrição em Todos os canais aqui faz o mesmo no YouTube."
     Sync Playlists: "Suas playlists do YouTube, Assistir mais tarde e Vídeos marcados com \"Gostei\" aparecem em Suas playlists, e as alterações que você fizer nelas aqui também são feitas no YouTube. Elas não são sincronizadas com seus outros dispositivos nem incluídas quando você exporta todas as playlists ou faz backup dos seus dados. Desativar esta opção as remove deste dispositivo, mas não do YouTube."
     Add to YouTube Watch History: "Os vídeos que você assiste são adicionados ao seu histórico de reprodução do YouTube, para que as recomendações do YouTube aprendam com eles. Nada é adicionado enquanto o histórico estiver pausado no YouTube."
+    Rate Videos: "Mostra os botões gostei e não gostei nos vídeos. Para mostrar sua avaliação, cada vídeo que você abre é consultado no YouTube com sua conta, então o YouTube fica sabendo quais vídeos você abre, mesmo quando eles não são adicionados ao seu histórico de exibição."
   General Settings:
     Built-in Streams: |
       Automático reproduz a maioria dos vídeos pelo cliente visionOS do YouTube, que inicia mais rápido e oferece suporte à qualidade automática. Transmissões ao vivo e vídeos que ele não consegue reproduzir usam SABR.

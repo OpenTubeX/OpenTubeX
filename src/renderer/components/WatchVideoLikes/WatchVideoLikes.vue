@@ -95,7 +95,9 @@ const hideVideoLikesAndDislikes = computed(() => store.getters.getHideVideoLikes
 const parsedLikeCount = computed(() => props.likeCount === null ? null : formatNumber(props.likeCount))
 const parsedDislikeCount = computed(() => props.dislikeCount === null ? null : formatNumber(props.dislikeCount))
 
-const canRate = computed(() => props.videoId !== '' && isSignedInToYouTube(store.getters))
+// Opt-in, because loading the rating tells YouTube which videos are opened.
+const canRate = computed(() => props.videoId !== '' && isSignedInToYouTube(store.getters) &&
+  store.getters.getYouTubeAccountVideoRatings)
 /** @type {import('vue').Ref<import('../../helpers/api/youtube-account-parsers').YouTubeRating | null>} */
 const rating = ref(null)
 // The public counts include the rating the account had when they loaded.

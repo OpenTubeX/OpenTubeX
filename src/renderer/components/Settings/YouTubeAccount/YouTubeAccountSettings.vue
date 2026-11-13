@@ -80,6 +80,14 @@
           compact
           @change="store.dispatch('updateYouTubeAccountWatchHistory', $event)"
         />
+        <FtToggleSwitch
+          :label="t('Settings.YouTube Account Settings.Rate Videos')"
+          :default-value="videoRatings"
+          setting-key="youTubeAccountVideoRatings"
+          :tooltip="t('Tooltips.YouTube Account Settings.Rate Videos')"
+          compact
+          @change="store.dispatch('updateYouTubeAccountVideoRatings', $event)"
+        />
       </FtFlexBox>
       <FtFlexBox>
         <FtButton
@@ -138,6 +146,7 @@ const account = computed(() => store.getters.getYouTubeAccount)
 const syncSubscriptions = computed(() => store.getters.getYouTubeAccountSyncSubscriptions)
 const syncPlaylists = computed(() => store.getters.getYouTubeAccountSyncPlaylists)
 const watchHistory = computed(() => store.getters.getYouTubeAccountWatchHistory)
+const videoRatings = computed(() => store.getters.getYouTubeAccountVideoRatings)
 
 const signInOpen = ref(false)
 const syncing = ref(false)

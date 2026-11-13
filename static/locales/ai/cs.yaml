@@ -382,6 +382,7 @@ Settings:
     Sync Subscriptions: "Synchronizovat odběry s YouTube"
     Sync Playlists: "Synchronizovat playlisty s YouTube"
     Add to YouTube Watch History: "Přidávat zhlédnutá videa do historie YouTube"
+    Rate Videos: "Označovat videa jako líbí a nelíbí"
     Sync Now: "Synchronizovat nyní"
     Synced: "Synchronizováno s YouTube"
     Sync Failed: "Synchronizace s YouTube se nezdařila: {error}"
@@ -2252,6 +2253,7 @@ Tooltips:
     Sync Subscriptions: "Kanály, které začnete odebírat na YouTube, se přidají do profilu „Všechny kanály“ a kanály, jejichž odběr tam zrušíte, se odeberou ze všech profilů. Když zde v profilu „Všechny kanály“ odběr přidáte nebo zrušíte, stane se totéž na YouTube."
     Sync Playlists: "Vaše playlisty z YouTube, „Na později“ a „Video s označením Líbí se mi“ se zobrazí v sekci „Vaše playlisty“ a změny, které v nich zde provedete, se provedou i na YouTube. Nesynchronizují se do vašich dalších zařízení a nejsou zahrnuty, když exportujete všechny playlisty nebo zálohujete svá data. Vypnutím této volby je odeberete z tohoto zařízení, ale ne z YouTube."
     Add to YouTube Watch History: "Videa, která přehrajete, se přidají do vaší historie sledování na YouTube, takže se z nich učí doporučení YouTube. Když je historie na YouTube pozastavená, nic se nepřidá."
+    Rate Videos: "Zobrazuje u videí tlačítka Líbí se a Nelíbí se. Aby se zobrazilo vaše hodnocení, každé otevřené video se vyhledá na YouTube s vaším účtem, takže YouTube zjistí, která videa otevíráte, i když se nepřidají do historie sledování."
   General Settings:
     Built-in Streams: |
       Automatický režim přehrává většinu videí přes klienta visionOS od YouTube, který začíná rychleji a podporuje automatickou kvalitu. Živé přenosy a videa, která nedokáže přehrát, používají SABR.
