@@ -220,6 +220,22 @@
   text-align: start;
 }
 
+.mobileLinkActionImage {
+  block-size: 24px;
+  inline-size: 24px;
+  font-size: 24px;
+  object-fit: contain;
+}
+
+.mobileLinkActionImage.roundImageIcon {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.mobileLinkActionCheck {
+  color: var(--primary-color);
+}
+
 .mobileLinkActionsHeader {
   display: flex;
   flex-shrink: 0;

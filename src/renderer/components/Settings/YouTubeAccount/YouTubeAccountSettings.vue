@@ -122,9 +122,9 @@ import { getSelectedYouTubeProfile } from '../../../helpers/youtube-account-stat
 import { syncWithYouTube } from '../../../helpers/youtube-sync'
 import {
   refreshYouTubeProfiles,
-  selectYouTubeProfile,
   signOutOfYouTubeAccount
 } from '../../../helpers/api/youtube-account'
+import { useYouTubeProfileSwitch } from '../../../composables/useYouTubeProfileSwitch'
 
 const { t } = useI18n()
 
@@ -136,7 +136,7 @@ const watchHistory = computed(() => store.getters.getYouTubeAccountWatchHistory)
 
 const signInOpen = ref(false)
 const syncing = ref(false)
-const switching = ref(false)
+const { switching, switchProfile } = useYouTubeProfileSwitch()
 const channelLabelId = useId()
 
 const profiles = computed(() => account.value?.profiles ?? [])
@@ -144,22 +144,8 @@ const selectedProfile = computed(() => getSelectedYouTubeProfile(account.value))
 const canSwitch = computed(() => profiles.value.length > 1)
 
 /** @param {import('../../../helpers/api/youtube-account-parsers').YouTubeProfile} profile */
-async function selectProfile(profile) {
-  if (profile === selectedProfile.value || switching.value) return
-  switching.value = true
-  try {
-    if (await selectYouTubeProfile(profile.pageId)) {
-      showToast({ message: t('Settings.YouTube Account Settings.Using Channel', { name: profile.name }), icon: ['fas', 'circle-user'] })
-    }
-  } catch (error) {
-    console.error(error)
-    showToast({
-      message: t('Settings.YouTube Account Settings.Switch Channel Failed', { error: error?.message ?? String(error) }),
-      icon: ERROR_TOAST_ICON
-    })
-  } finally {
-    switching.value = false
-  }
+function selectProfile(profile) {
+  if (profile !== selectedProfile.value) switchProfile(profile)
 }
 
 // Picks up channels created or removed since signing in.
