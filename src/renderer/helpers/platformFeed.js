@@ -422,7 +422,9 @@ async function updateChannelDetails(channels) {
   const current = new Map(channels.map(channel => [getPlatformChannelKey(channel), channel]))
   const update = (/** @type {FollowedChannel} */ channel) => {
     const next = current.get(getPlatformChannelKey(channel))
-    return next ? toFollowedChannel(next) : channel
+    if (!next) return channel
+    // A response without the avatar keeps the known one
+    return toFollowedChannel({ ...next, avatar: next.avatar || channel.avatar })
   }
   const changed = getFollowedChannels().some(channel => JSON.stringify(update(channel)) !== JSON.stringify(channel))
   if (!changed) return
