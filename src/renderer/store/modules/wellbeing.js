@@ -97,16 +97,17 @@ function addDayPlayback(state, { date, seconds, isShort, recorded }) {
 }
 
 /**
- * Adopts the day of an open window. Windows only add time, so the larger
- * counts include everything either window has seen.
+ * Adopts the day of an open window. Its reply cannot include the time this
+ * window played since asking, as messages from one window arrive in order.
  * @param {typeof state} state
- * @param {ReturnType<typeof createDay>} day
+ * @param {{ day: ReturnType<typeof createDay>, own: ReturnType<typeof createDay> }} days the open
+ *   window's day, and the time this window played since asking
  */
-function joinWellbeingDay(state, day) {
+function joinWellbeingDay(state, { day, own }) {
   if (day.date > state.day.date) state.day = createDay(day.date)
   if (day.date !== state.day.date) return
   for (const key of ['unrecordedSeconds', 'shortsSeconds', 'unrecordedShortsSeconds']) {
-    state.day[key] = Math.max(state.day[key], day[key])
+    state.day[key] = Math.max(state.day[key], day[key] + (own.date === day.date ? own[key] : 0))
   }
   for (const kind of ['watch', 'shorts']) {
     state.day.extraSeconds[kind] = Math.max(state.day.extraSeconds[kind], day.extraSeconds[kind])
@@ -128,20 +129,30 @@ const SHARED_MUTATIONS = new Set(['addWellbeingPlayback', 'extendWellbeingLimit'
  */
 export function shareWellbeingAcrossWindows(store, channel = typeof BroadcastChannel === 'undefined' ? null : new BroadcastChannel('opentubex-digital-wellbeing')) {
   if (!channel) return
+  const id = crypto.randomUUID()
+  // The time this window played since asking for the open windows' day
+  const own = { day: createDay(store.state.wellbeing.day.date) }
   store.subscribe(({ type, payload }, rootState) => {
+    if (type === 'addWellbeingPlayback') addDayPlayback(own, payload)
     if (SHARED_MUTATIONS.has(type)) channel.postMessage({ type, payload, date: rootState.wellbeing.day.date })
   })
   channel.addEventListener('message', ({ data }) => {
     if (data?.type === 'requestWellbeingDay') {
       // The state is reactive, which messages cannot clone
-      channel.postMessage({ type: 'wellbeingDay', payload: JSON.parse(JSON.stringify(store.state.wellbeing.day)) })
+      channel.postMessage({ type: 'wellbeingDay', to: data.id, payload: JSON.parse(JSON.stringify(store.state.wellbeing.day)) })
       return
     }
-    store.commit('applySharedWellbeingChange', data)
+    if (data?.type === 'wellbeingDay') {
+      // Open windows already counted what the reply holds
+      if (data.to !== id) return
+      store.commit('applySharedWellbeingChange', { type: data.type, payload: { day: data.payload, own: own.day } })
+    } else {
+      store.commit('applySharedWellbeingChange', data)
+    }
     // Another window may have saved its total before it counted this change
     persist(store.state.wellbeing)
   })
-  channel.postMessage({ type: 'requestWellbeingDay' })
+  channel.postMessage({ type: 'requestWellbeingDay', id })
 }
 
 function recordsWatchStats(rootGetters) {

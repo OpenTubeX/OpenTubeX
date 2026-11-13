@@ -178,7 +178,9 @@ test('a window opened later starts from the open windows\' day, and saved Shorts
   await settle()
   assert.equal(JSON.parse(localStorage.getItem('OpenTubeX/digitalWellbeing')).shortsSeconds, 20)
 
+  // It plays before the open windows' day arrives
   const third = open()
+  await third.dispatch('recordPlaybackTime', { date, seconds: 5, isShort: true })
   await settle()
-  assert.equal(third.state.wellbeing.day.shortsSeconds, 20)
+  assert.deepEqual([first, second, third].map(store => store.state.wellbeing.day.shortsSeconds), [25, 25, 25])
 })
