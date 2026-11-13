@@ -9,6 +9,8 @@ import {
 
 test.afterEach(() => {
   delete process.env.SUPPORTS_LOCAL_API
+  delete process.env.IS_ELECTRON
+  delete globalThis.window
 })
 
 test('auto quality is unavailable for SABR streams', () => {
@@ -35,8 +37,18 @@ test('the fallback for auto fits the screen in physical pixels, up to 1080p', ()
   assert.equal(getAutoQualityFallback({ width: 412, height: 915 }, 2.625), '1080')
   // A 1366 x 768 laptop
   assert.equal(getAutoQualityFallback({ width: 1366, height: 768 }, 1), '720')
-  // A 1080p display at 95% UI Scale, after dividing out Electron's zoom factor
-  assert.equal(getAutoQualityFallback({ width: 1920, height: 1080 }, 0.949999988079071 / 0.95), '1080')
   // A 4K display, which a fixed quality shouldn't saturate the connection for
   assert.equal(getAutoQualityFallback({ width: 1920, height: 1080 }, 2), '1080')
+})
+
+test('UI Scale does not change the fallback for auto', () => {
+  // Electron's zoom factor is part of devicePixelRatio, but not of the screen size
+  process.env.IS_ELECTRON = true
+  globalThis.window = {
+    screen: { width: 1920, height: 1080 },
+    devicePixelRatio: 0.949999988079071,
+    ftElectron: { getZoomFactor: () => 0.95 }
+  }
+
+  assert.equal(getAutoQualityFallback(), '1080')
 })
