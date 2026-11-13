@@ -907,7 +907,6 @@ Settings:
       Wayland Minimize Unsupported: Waylandはウィンドウの最小化をアプリに通知しないため、この条件は利用できません。最小化も対象になる「ウィンドウがフォーカスを失うか、別のウィンドウに切り替えたとき」を使用してください。
       On Tab Change Mini Player: タブを切り替えると、代わりにミニプレーヤーが表示されます。これを使うには、「動画を離れたとき」を「再生を停止」に設定してください。
     Scroll Mini Player:
-      Scroll Mini Player: スクロール時のミニプレーヤー
       Scroll Player Mode: 下へスクロールしたとき
       Scroll Player Mode Tooltip: プレーヤーはウィンドウの高さの半分以下に収まる場合にのみ固定されます。それ以外の場合（横向きのスマートフォンや幅の広いウィンドウなど）は、代わりにミニプレーヤーが表示されます。
       Scroll Player Modes:
@@ -1508,7 +1507,6 @@ Settings:
     Use Shared Tabs: 'すべてのデバイスで1つのタブセットを共有する'
     Shared Tabs Warning: 'このデバイスで開いているタブが共有タブセットになります。他のデバイスは同期時に開いているタブをこのセットで置き換えます。異なるデバイスのタブは統合されません。'
     Tabs From Other Devices: '他のデバイスのタブ'
-    Device Tab Session: '{platform} · {count} 個のタブ'
     Mobile Device: 'モバイル'
     Desktop Device: 'デスクトップ'
     Open All Tabs: 'すべてのタブを開く'
@@ -1521,7 +1519,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'ブラウザーが開き、ログインプロバイダーで削除を確認できます。'
   Proxy Settings:
     IP Block Recovery Script Path: IPブロック復旧スクリプト
-    Select IP Block Recovery Script File: IPブロック復旧スクリプトを選択
     Running IP block recovery script: IPブロック復旧スクリプトを実行中
     IP block recovery script failed: 'IPブロック復旧スクリプトに失敗しました（終了コード: {exitCode}）'
     IP block recovery script finished: IPブロック復旧スクリプトが完了しました
@@ -1630,7 +1627,6 @@ Profile:
   Profile Icon: プロフィールアイコン
   Choose an Emoji: 絵文字を選択
   Custom Emoji: カスタム絵文字
-  Emoji: 絵文字
   Choose Image: 画像を選択
   Crop Image: 画像を切り抜く
   Zoom: ズーム
@@ -1813,7 +1809,6 @@ Video:
       Timer ended: スリープタイマーが終了しました
     A-B Repeat:
       A-B Repeat: A-Bリピート
-      On: オン
       Off: オフ
       Point A: ポイントA
       Point B: ポイントB
@@ -2165,7 +2160,6 @@ Tab Organizer:
   Close All: すべて閉じる
   Ungroup: グループから外す
   Group Name: グループ名
-  Color: 色
   No Color: 色なし
   Create Group: グループを作成
   Expand Group: グループを展開
@@ -2482,12 +2476,10 @@ Downloads:
   Remove File Confirmation: ダウンロード済みファイルを削除しますか？
   Remove File Warning: 「{title}」をデバイスのごみ箱へ移動します。
   File Not Found: ダウンロード済みファイルが見つかりませんでした。
-  Download Missing: ダウンロードを利用できません
   Files Missing: ダウンロード済みファイルはファイルシステム上にありません。
   Files Available: 'ダウンロード済みファイル{total}件中{available}件を利用できます。'
   More Files: 'ほか{count}件のファイル'
   Template Used: 'テンプレート: {name}'
-  Download Type: ダウンロードの種類
   Template: テンプレート
   Unsaved: 未保存
   Media Type: メディアの種類
@@ -2515,7 +2507,6 @@ Downloads:
   Embed Cover Art: サムネイルをカバーアートとして埋め込む
   Embed Metadata: タイトル、作成者、説明、チャプターを埋め込む
   Additional yt-dlp Arguments: 追加のyt-dlp引数
-  Custom yt-dlp Arguments: カスタムyt-dlp引数
   Template Name: テンプレート名
   Save Template: テンプレートを保存
   Delete Template: テンプレートを削除

@@ -65,7 +65,6 @@
  *   searchTypes: PlatformSearchType[],
  *   liveStreams: boolean,
  *   parseChannelUrl: (url: string) => string | null,
- *   parsePlaylistUrl: (url: string) => string | null,
  *   getChannel: (fetch: PlatformFetch, id: string, signal?: AbortSignal) => Promise<PlatformChannel | null>,
  *   getChannelPage: (fetch: PlatformFetch, channel: PlatformChannel, tab: PlatformChannelTab, continuation: string | null, signal?: AbortSignal) => Promise<PlatformPage>,
  *   getLatestItems: (fetch: PlatformFetch, channel: PlatformChannel, signal?: AbortSignal) => Promise<PlatformItem[]>,

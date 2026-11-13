@@ -907,7 +907,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland, pencerenin küçültüldüğünü uygulamalara bildirmediği için bu tetikleyici kullanılamaz. Bunun yerine küçültmeyi de kapsayan "Pencere odağını kaybettiğinde veya başka pencereye geçildiğinde" seçeneğini kullanın.
       On Tab Change Mini Player: Sekme değiştirmek bunun yerine mini oynatıcıyı gösterir. Bunu kullanmak için "Bir videodan ayrılırken" ayarını "Oynatmayı durdur" olarak belirleyin.
     Scroll Mini Player:
-      Scroll Mini Player: Kaydırma mini oynatıcısı
       Scroll Player Mode: Aşağı kaydırırken
       Scroll Player Mode Tooltip: Oynatıcı yalnızca pencere yüksekliğinin en fazla yarısını kapladığı sürece sabitlenir. Aksi takdirde, örneğin yatay moddaki telefonlarda veya geniş pencerelerde, bunun yerine mini oynatıcı gösterilir.
       Scroll Player Modes:
@@ -1508,7 +1507,6 @@ Settings:
     Use Shared Tabs: 'Cihazlar arasında tek bir ortak sekme grubu kullan'
     Shared Tabs Warning: 'Bu cihazda açık olan sekmeler paylaşılan küme olur. Diğer cihazlar eşitlendiklerinde açık sekmelerini bu kümeyle değiştirir; farklı cihazların sekmeleri birleştirilmez.'
     Tabs From Other Devices: 'Diğer cihazlardaki sekmeler'
-    Device Tab Session: '{platform} · {count} sekme'
     Mobile Device: 'Mobil'
     Desktop Device: 'Masaüstü'
     Open All Tabs: 'Tüm sekmeleri aç'
@@ -1521,7 +1519,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'Silme işlemini giriş sağlayıcınızda onaylayabilmeniz için tarayıcınız açılır.'
   Proxy Settings:
     IP Block Recovery Script Path: IP engeli kurtarma betiği
-    Select IP Block Recovery Script File: IP Engeli Kurtarma Betiği Dosyasını Seç
     Running IP block recovery script: IP engeli kurtarma betiği çalıştırılıyor
     IP block recovery script failed: 'IP engeli kurtarma betiği başarısız oldu (çıkış kodu: {exitCode})'
     IP block recovery script finished: IP engeli kurtarma betiği tamamlandı
@@ -1630,7 +1627,6 @@ Profile:
   Profile Icon: Profil Simgesi
   Choose an Emoji: Bir Emoji Seç
   Custom Emoji: Özel Emoji
-  Emoji: Emoji
   Choose Image: Görsel Seç
   Crop Image: Görseli Kırp
   Zoom: Yakınlaştır
@@ -1813,7 +1809,6 @@ Video:
       Timer ended: Uyku zamanlayıcısı sona erdi
     A-B Repeat:
       A-B Repeat: A-B Tekrarı
-      'On': Açık
       'Off': Kapalı
       Point A: A Noktası
       Point B: B Noktası
@@ -2165,7 +2160,6 @@ Tab Organizer:
   Close All: Tümünü Kapat
   Ungroup: Gruptan Çıkar
   Group Name: Grup adı
-  Color: Renk
   No Color: Renksiz
   Create Group: Grup Oluştur
   Expand Group: Grubu genişlet
@@ -2483,12 +2477,10 @@ Downloads:
   Remove File Confirmation: İndirilen dosya kaldırılsın mı?
   Remove File Warning: Bu işlem "{title}" dosyasını cihazınızın çöp kutusuna taşıyacak.
   File Not Found: İndirilen dosya bulunamadı.
-  Download Missing: İndirme kullanılamıyor
   Files Missing: İndirilen dosya artık dosya sisteminde yok. | İndirilen dosyalar artık dosya sisteminde yok.
   Files Available: 'İndirilen {total} dosyadan {available} tanesi kullanılabilir.'
   More Files: 1 dosya daha | {count} dosya daha
   Template Used: 'Şablon: {name}'
-  Download Type: İndirme Türü
   Template: Şablon
   Unsaved: Kaydedilmemiş
   Media Type: Medya Türü
@@ -2516,7 +2508,6 @@ Downloads:
   Embed Cover Art: Küçük resmi kapak görseli olarak göm
   Embed Metadata: Başlık, yazar, açıklama ve bölümleri göm
   Additional yt-dlp Arguments: Ek yt-dlp Argümanları
-  Custom yt-dlp Arguments: Özel yt-dlp Argümanları
   Template Name: Şablon Adı
   Save Template: Şablonu Kaydet
   Delete Template: Şablonu Sil

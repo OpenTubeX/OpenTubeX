@@ -928,7 +928,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland giver ikke apps besked, når et vindue minimeres, så denne udløser er ikke tilgængelig. Brug i stedet "Når vinduet mister fokus, eller der skiftes væk fra det", som også omfatter minimering.
       On Tab Change Mini Player: Når der skiftes fane, vises miniafspilleren i stedet. Indstil “Når en video forlades” til “Stop afspilning” for at bruge dette.
     Scroll Mini Player:
-      Scroll Mini Player: Miniafspiller ved rulning
       Scroll Player Mode: Ved rulning nedad
       Scroll Player Mode Tooltip: Afspilleren fastgøres kun, så længe den fylder højst halvdelen af vinduets højde. Ellers, f.eks. på telefoner i liggende format eller i brede vinduer, vises miniafspilleren i stedet.
       Scroll Player Modes:
@@ -1552,7 +1551,6 @@ Settings:
     Use Shared Tabs: 'Brug ét fælles sæt faner på tværs af enheder'
     Shared Tabs Warning: 'De åbne faner på denne enhed bliver det delte fanesæt. Andre enheder erstatter deres åbne faner med dette sæt, når de synkroniserer; faner fra forskellige enheder flettes ikke sammen.'
     Tabs From Other Devices: 'Faner fra andre enheder'
-    Device Tab Session: '{platform} · {count} faner'
     Mobile Device: 'Mobil'
     Desktop Device: 'Computer'
     Open All Tabs: 'Åbn alle faner'
@@ -1567,7 +1565,6 @@ Settings:
     Proxy Username: Proxybrugernavn
     Proxy Password: Proxyadgangskode
     IP Block Recovery Script Path: Script til gendannelse efter IP-blokering
-    Select IP Block Recovery Script File: Vælg scriptfil til genoprettelse efter IP-blokering
     Running IP block recovery script: Kører script til genoprettelse efter IP-blokering
     IP block recovery script failed: 'Scriptet til genoprettelse efter IP-blokering mislykkedes (afslutningskode: {exitCode})'
     IP block recovery script finished: Scriptet til genoprettelse efter IP-blokering er færdigt
@@ -1687,7 +1684,6 @@ Profile:
   Profile Icon: Profilikon
   Choose an Emoji: Vælg en emoji
   Custom Emoji: Brugerdefineret emoji
-  Emoji: Emoji
   Choose Image: Vælg billede
   Crop Image: Beskær billede
   Zoom: Zoom
@@ -1888,7 +1884,6 @@ Video:
       Timer ended: Sovetimeren er udløbet
     A-B Repeat:
       A-B Repeat: A-B-gentagelse
-      On: Til
       Off: Fra
       Point A: Punkt A
       Point B: Punkt B
@@ -2249,7 +2244,6 @@ Tab Organizer:
   Close All: Luk alle
   Ungroup: Fjern fra gruppe
   Group Name: Gruppenavn
-  Color: Farve
   No Color: Ingen farve
   Create Group: Opret gruppe
   Expand Group: Fold gruppe ud
@@ -2577,12 +2571,10 @@ Downloads:
   Remove File Confirmation: Fjern den downloadede fil?
   Remove File Warning: Dette flytter "{title}" til enhedens papirkurv.
   File Not Found: Den downloadede fil blev ikke fundet.
-  Download Missing: Downloaden er ikke tilgængelig
   Files Missing: Den downloadede fil er ikke længere tilgængelig i filsystemet. | De downloadede filer er ikke længere tilgængelige i filsystemet.
   Files Available: '{available} af {total} downloadede filer er tilgængelige.'
   More Files: 1 fil mere | {count} filer mere
   Template Used: 'Skabelon: {name}'
-  Download Type: Downloadtype
   Template: Skabelon
   Unsaved: Ikke gemt
   Media Type: Medietype
@@ -2610,7 +2602,6 @@ Downloads:
   Embed Cover Art: Integrer miniaturebillede som omslag
   Embed Metadata: Integrer titel, forfatter, beskrivelse og kapitler
   Additional yt-dlp Arguments: Yderligere argumenter til yt-dlp
-  Custom yt-dlp Arguments: Brugerdefinerede argumenter til yt-dlp
   Template Name: Skabelonnavn
   Save Template: Gem skabelon
   Delete Template: Slet skabelon

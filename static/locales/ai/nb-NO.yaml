@@ -907,7 +907,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland varsler ikke programmer når vinduer minimeres, så denne utløseren er utilgjengelig. Bruk «Når vinduet mister fokus eller du bytter til et annet vindu» i stedet. Dette gjelder også ved minimering.
       On Tab Change Mini Player: Ved bytte av fane vises minispilleren i stedet. For å bruke dette, sett «Når du forlater en video» til «Stopp avspilling».
     Scroll Mini Player:
-      Scroll Mini Player: Minispiller ved rulling
       Scroll Player Mode: Når du ruller ned
       Scroll Player Mode Tooltip: Avspilleren festes bare så lenge den tar opp høyst halvparten av vinduets høyde. Ellers, for eksempel på telefoner i liggende modus eller i brede vinduer, vises miniavspilleren i stedet.
       Scroll Player Modes:
@@ -1508,7 +1507,6 @@ Settings:
     Use Shared Tabs: 'Bruk ett delt fanesett på tvers av enheter'
     Shared Tabs Warning: 'De åpne fanene på denne enheten blir det delte fanesettet. Andre enheter erstatter sine åpne faner med dette settet når de synkroniserer; faner fra ulike enheter slås ikke sammen.'
     Tabs From Other Devices: 'Faner fra andre enheter'
-    Device Tab Session: '{platform} · {count} faner'
     Mobile Device: 'Mobil'
     Desktop Device: 'Datamaskin'
     Open All Tabs: 'Åpne alle faner'
@@ -1521,7 +1519,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'Nettleseren åpnes slik at du kan bekrefte slettingen hos påloggingstjenesten din.'
   Proxy Settings:
     IP Block Recovery Script Path: Skript for gjenoppretting etter IP-blokkering
-    Select IP Block Recovery Script File: Velg skriptfil for gjenoppretting etter IP-blokkering
     Running IP block recovery script: Kjører skriptet for gjenoppretting etter IP-blokkering
     IP block recovery script failed: 'Skriptet for gjenoppretting etter IP-blokkering mislyktes (avslutningskode: {exitCode})'
     IP block recovery script finished: Skriptet for gjenoppretting etter IP-blokkering er ferdig
@@ -1630,7 +1627,6 @@ Profile:
   Profile Icon: Profilikon
   Choose an Emoji: Velg en emoji
   Custom Emoji: Egendefinert emoji
-  Emoji: Emoji
   Choose Image: Velg bilde
   Crop Image: Beskjær bilde
   Zoom: Forstørrelse
@@ -1818,7 +1814,6 @@ Video:
       Timer ended: Innsovningstimeren er utløpt
     A-B Repeat:
       A-B Repeat: A-B-gjentakelse
-      On: På
       Off: Av
       Point A: Punkt A
       Point B: Punkt B
@@ -2170,7 +2165,6 @@ Tab Organizer:
   Close All: Lukk alle
   Ungroup: Fjern fra gruppe
   Group Name: Gruppenavn
-  Color: Farge
   No Color: Ingen farge
   Create Group: Opprett gruppe
   Expand Group: Utvid gruppe
@@ -2487,12 +2481,10 @@ Downloads:
   Remove File Confirmation: Vil du fjerne den nedlastede filen?
   Remove File Warning: Dette flytter "{title}" til enhetens papirkurv.
   File Not Found: Fant ikke den nedlastede filen.
-  Download Missing: Nedlastingen er utilgjengelig
   Files Missing: Den nedlastede filen er ikke lenger tilgjengelig i filsystemet. | De nedlastede filene er ikke lenger tilgjengelige i filsystemet.
   Files Available: '{available} av {total} nedlastede filer er tilgjengelige.'
   More Files: 1 fil til | {count} filer til
   Template Used: 'Mal: {name}'
-  Download Type: Nedlastingstype
   Template: Mal
   Unsaved: Ikke lagret
   Media Type: Medietype
@@ -2520,7 +2512,6 @@ Downloads:
   Embed Cover Art: Bygg inn miniatyrbildet som omslagsbilde
   Embed Metadata: Bygg inn tittel, forfatter, beskrivelse og kapitler
   Additional yt-dlp Arguments: Ekstra yt-dlp-argumenter
-  Custom yt-dlp Arguments: Egendefinerte yt-dlp-argumenter
   Template Name: Malnavn
   Save Template: Lagre mal
   Delete Template: Slett mal

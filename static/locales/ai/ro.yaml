@@ -912,7 +912,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland nu raportează aplicațiilor minimizarea ferestrelor, deci acest declanșator nu este disponibil. Folosiți în schimb „Când fereastra pierde focalizarea sau se trece la alta”, opțiune care acoperă și minimizarea.
       On Tab Change Mini Player: La schimbarea filelor se afișează în schimb miniplayerul. Pentru a folosi această opțiune, setează „La părăsirea unui videoclip” la „Oprește redarea”.
     Scroll Mini Player:
-      Scroll Mini Player: Miniplayer la derulare
       Scroll Player Mode: La derularea în jos
       Scroll Player Mode Tooltip: Playerul este fixat doar cât timp ocupă cel mult jumătate din înălțimea ferestrei. Altfel, de exemplu pe telefoane în modul peisaj sau în ferestre late, se afișează în schimb mini playerul.
       Scroll Player Modes:
@@ -1523,7 +1522,6 @@ Settings:
     Use Shared Tabs: 'Folosește un singur set de file partajat între dispozitive'
     Shared Tabs Warning: 'Filele deschise pe acest dispozitiv devin setul partajat. Celelalte dispozitive își înlocuiesc filele deschise cu acest set când se sincronizează; filele de pe dispozitive diferite nu sunt combinate.'
     Tabs From Other Devices: 'File de pe alte dispozitive'
-    Device Tab Session: '{platform} · {count} file'
     Mobile Device: 'Mobil'
     Desktop Device: 'Desktop'
     Open All Tabs: 'Deschide toate filele'
@@ -1538,7 +1536,6 @@ Settings:
     Proxy Username: Nume de utilizator pentru proxy
     Proxy Password: Parolă pentru proxy
     IP Block Recovery Script Path: Script de recuperare după blocarea IP
-    Select IP Block Recovery Script File: Selectați fișierul scriptului de recuperare după blocarea IP-ului
     Running IP block recovery script: Se rulează scriptul de recuperare după blocarea IP-ului
     IP block recovery script failed: 'Scriptul de recuperare după blocarea IP-ului a eșuat (cod de ieșire: {exitCode})'
     IP block recovery script finished: Scriptul de recuperare după blocarea IP-ului s-a încheiat
@@ -1657,7 +1654,6 @@ Profile:
   Profile Icon: Pictograma profilului
   Choose an Emoji: Alegeți un emoji
   Custom Emoji: Emoji personalizat
-  Emoji: Emoji
   Choose Image: Alegeți imaginea
   Crop Image: Decupați imaginea
   Zoom: Zoom
@@ -1856,7 +1852,6 @@ Video:
       Timer ended: Temporizatorul de oprire s-a încheiat
     A-B Repeat:
       A-B Repeat: Repetare A-B
-      On: Activată
       Off: Dezactivată
       Point A: Punctul A
       Point B: Punctul B
@@ -2217,7 +2212,6 @@ Tab Organizer:
   Close All: Închide tot
   Ungroup: Degrupează
   Group Name: Numele grupului
-  Color: Culoare
   No Color: Fără culoare
   Create Group: Creează grupul
   Expand Group: Extinde grupul
@@ -2542,12 +2536,10 @@ Downloads:
   Remove File Confirmation: Eliminați fișierul descărcat?
   Remove File Warning: Această acțiune va muta „{title}” în coșul de gunoi al dispozitivului.
   File Not Found: Fișierul descărcat nu a putut fi găsit.
-  Download Missing: Descărcare indisponibilă
   Files Missing: Fișierul descărcat nu mai este disponibil în sistemul de fișiere. | Fișierele descărcate nu mai sunt disponibile în sistemul de fișiere. | Fișierele descărcate nu mai sunt disponibile în sistemul de fișiere.
   Files Available: '{available} din {total} fișiere descărcate sunt disponibile.'
   More Files: Încă 1 fișier | Încă {count} fișiere | Încă {count} de fișiere
   Template Used: 'Șablon: {name}'
-  Download Type: Tipul descărcării
   Template: Șablon
   Unsaved: Nesalvat
   Media Type: Tip media
@@ -2575,7 +2567,6 @@ Downloads:
   Embed Cover Art: Încorporează miniatura drept copertă
   Embed Metadata: Încorporează titlul, autorul, descrierea și capitolele
   Additional yt-dlp Arguments: Argumente yt-dlp suplimentare
-  Custom yt-dlp Arguments: Argumente yt-dlp personalizate
   Template Name: Numele șablonului
   Save Template: Salvează șablonul
   Delete Template: Șterge șablonul

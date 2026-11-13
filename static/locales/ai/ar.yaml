@@ -918,7 +918,6 @@ Settings:
       Wayland Minimize Unsupported: لا يُبلغ Wayland عن تصغير النافذة للتطبيقات، لذا فإن هذا المشغل غير متاح. استخدم "عندما تفقد النافذة التركيز أو يتم تبديلها" بدلاً من ذلك، والتي تغطي أيضًا عملية التصغير.
       On Tab Change Mini Player: يؤدي تبديل علامات التبويب إلى إظهار المشغل الصغير بدلاً من ذلك. لاستخدام هذا، اضبط «عند مغادرة فيديو» على «إيقاف التشغيل».
     Scroll Mini Player:
-      Scroll Mini Player: إبقاء المشغل المصغّر عند التمرير
       Scroll Player Mode: عند التمرير لأسفل
       Scroll Player Mode Tooltip: يُثبَّت المشغل فقط ما دام لا يشغل أكثر من نصف ارتفاع النافذة. وإلا، كما في الهواتف بالوضع الأفقي أو في النوافذ العريضة، يظهر المشغل المصغر بدلًا من ذلك.
       Scroll Player Modes:
@@ -1531,7 +1530,6 @@ Settings:
     Use Shared Tabs: 'استخدام مجموعة علامات تبويب مشتركة بين الأجهزة'
     Shared Tabs Warning: 'تصبح علامات التبويب المفتوحة على هذا الجهاز هي المجموعة المشتركة. تستبدل الأجهزة الأخرى علامات التبويب المفتوحة لديها بهذه المجموعة عند المزامنة؛ ولا تُدمج علامات التبويب من الأجهزة المختلفة.'
     Tabs From Other Devices: 'علامات تبويب من أجهزة أخرى'
-    Device Tab Session: '{platform} · {count} علامة تبويب'
     Mobile Device: 'هاتف'
     Desktop Device: 'سطح المكتب'
     Open All Tabs: 'فتح كل علامات التبويب'
@@ -1544,7 +1542,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'سيفتح متصفحك لتتمكن من تأكيد الحذف لدى مزوّد تسجيل الدخول.'
   Proxy Settings:
     IP Block Recovery Script Path: برنامج استعادة حظر عنوان IP
-    Select IP Block Recovery Script File: حدد ملف البرنامج النصي لاسترداد حظر IP
     Running IP block recovery script: تشغيل البرنامج النصي لاسترداد كتلة IP
     IP block recovery script failed: 'فشل البرنامج النصي لاسترداد حظر IP (رمز الخروج: {exitCode})'
     IP block recovery script finished: تم الانتهاء من البرنامج النصي لاستعادة كتلة IP
@@ -1660,7 +1657,6 @@ Profile:
   Profile Icon: أيقونة الملف الشخصي
   Choose an Emoji: اختر رمزًا تعبيريًا
   Custom Emoji: رموز تعبيرية مخصصة
-  Emoji: الرموز التعبيرية
   Choose Image: اختر الصورة
   Crop Image: صورة المحاصيل
   Zoom: تكبير
@@ -1858,7 +1854,6 @@ Video:
       Timer ended: انتهى مؤقت النوم
     A-B Repeat:
       A-B Repeat: تكرار A-B
-      On: تشغيل
       Off: إيقاف
       Point A: النقطة A
       Point B: النقطة B
@@ -2215,7 +2210,6 @@ Tab Organizer:
   Close All: إغلاق الكل
   Ungroup: فك التجميع
   Group Name: اسم المجموعة
-  Color: لون
   No Color: لا لون
   Create Group: إنشاء مجموعة
   Expand Group: قم بتوسيع المجموعة
@@ -2520,12 +2514,10 @@ Downloads:
   Remove File Confirmation: هل تريد إزالة الملف الذي تم تنزيله؟
   Remove File Warning: سيؤدي هذا إلى نقل "{title}" إلى سلة المهملات بجهازك.
   File Not Found: لا يمكن العثور على الملف الذي تم تنزيله.
-  Download Missing: التنزيل غير متاح
   Files Missing: 'لا توجد ملفات منزّلة مفقودة من نظام الملفات. | لم يعد الملف المنزّل متاحًا على نظام الملفات. | لم يعد الملفان المنزّلان متاحين على نظام الملفات. | لم تعد الملفات المنزّلة متاحة على نظام الملفات. | لم تعد الملفات المنزّلة متاحة على نظام الملفات. | لم يعد الملف المنزّل متاحًا على نظام الملفات.'
   Files Available: '{available} من {total} الملفات التي تم تنزيلها متاحة.'
   More Files: 'لا توجد ملفات أخرى ({count}) | ملف آخر واحد | ملفان آخران ({count}) | {count} ملفات أخرى | {count} ملفًا آخر | {count} ملف آخر'
   Template Used: 'القالب: {name}'
-  Download Type: نوع التنزيل
   Template: نموذج
   Unsaved: غير محفوظ
   Media Type: نوع الوسائط
@@ -2553,7 +2545,6 @@ Downloads:
   Embed Cover Art: تضمين الصورة المصغرة كغلاف فني
   Embed Metadata: تضمين العنوان والمؤلف والوصف والفصول
   Additional yt-dlp Arguments: وسيطات yt-dlp الإضافية
-  Custom yt-dlp Arguments: وسيطات yt-dlp المخصصة
   Template Name: اسم القالب
   Save Template: حفظ القالب
   Delete Template: حذف القالب

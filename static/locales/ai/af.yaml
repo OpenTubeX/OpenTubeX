@@ -1061,7 +1061,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland rapporteer nie vensterminimalisering aan toepe nie, dus is hierdie sneller nie beskikbaar nie. Gebruik eerder "Wanneer die venster fokus verloor of weggeskakel word", wat ook minimalisering dek.
       On Tab Change Mini Player: Om oortjies te wissel wys eerder die minispeler. Stel “Wanneer u ’n video verlaat” op “Stop speel” om dit te gebruik.
     Scroll Mini Player:
-      Scroll Mini Player: Rol-minispeler
       Scroll Player Mode: Wanneer u afrol
       Scroll Player Mode Tooltip: Die speler word net vasgespeld solank dit hoogstens die helfte van die venster se hoogte beslaan. Andersins, soos op fone in landskap of in wye vensters, word eerder die minispeler gewys.
       Scroll Player Modes:
@@ -1690,7 +1689,6 @@ Settings:
     Use Shared Tabs: Gebruik een gedeelde oortjiestel oor toestelle heen
     Shared Tabs Warning: Die oop oortjies op hierdie toestel word die gedeelde stel. Ander toestelle vervang hul oop oortjies met hierdie stel wanneer hulle sinkroniseer; oortjies van verskillende toestelle word nie saamgevoeg nie.
     Tabs From Other Devices: Oortjies van ander toestelle
-    Device Tab Session: '{platform} · {count} oortjies'
     Mobile Device: Selfoon
     Desktop Device: Rekenaar
     Open All Tabs: Maak alle oortjies oop
@@ -1728,7 +1726,6 @@ Settings:
     Proxy Username: Gebruikersnaam vir instaanbediener
     Proxy Password: Wagwoord vir instaanbediener
     IP Block Recovery Script Path: Herstelskrip vir IP-blokkering
-    Select IP Block Recovery Script File: Kies herstelskriplêer vir IP-blokkering
     Running IP block recovery script: Voer herstelskrip vir IP-blokkering uit
     IP block recovery script failed: 'Herstelskrip vir IP-blokkering het misluk (uittreekode: {exitCode})'
     IP block recovery script finished: Herstelskrip vir IP-blokkering voltooi
@@ -1849,7 +1846,6 @@ Profile:
   Profile Icon: Profielikoon
   Choose an Emoji: Kies ’n emoji
   Custom Emoji: Pasgemaakte emoji
-  Emoji: Emoji
   Choose Image: Kies prent
   Crop Image: Sny prent by
   Zoom: Zoem
@@ -2092,7 +2088,6 @@ Video:
       Timer ended: Slaaptydteller het geëindig
     A-B Repeat:
       A-B Repeat: A-B-herhaling
-      'On': 'Aan'
       'Off': 'Af'
       Point A: Punt A
       Point B: Punt B
@@ -2420,7 +2415,6 @@ Tab Organizer:
   Close All: Sluit alles
   Ungroup: Ontgroepeer
   Group Name: Groepnaam
-  Color: Kleur
   No Color: Geen kleur
   Create Group: Skep groep
   Expand Group: Vou groep uit
@@ -2752,12 +2746,10 @@ Downloads:
   Remove File Confirmation: Verwyder afgelaaide lêer?
   Remove File Warning: Dit sal "{title}" na u toestel se asblik skuif.
   File Not Found: Die afgelaaide lêer kon nie gevind word nie.
-  Download Missing: Aflaai nie beskikbaar nie
   Files Missing: Die afgelaaide lêer is nie meer op die lêerstelsel beskikbaar nie. | Die afgelaaide lêers is nie meer op die lêerstelsel beskikbaar nie.
   Files Available: '{available} van {total} afgelaaide lêers is beskikbaar.'
   More Files: nog 1 lêer | nog {count} lêers
   Template Used: 'Sjabloon: {name}'
-  Download Type: Aflaaitipe
   Template: Sjabloon
   Unsaved: Ongestoor
   Media Type: Mediatipe
@@ -2785,7 +2777,6 @@ Downloads:
   Embed Cover Art: Bed duimnael as omslagkuns in
   Embed Metadata: Bed titel, outeur, beskrywing en hoofstukke in
   Additional yt-dlp Arguments: Bykomende yt-dlp-argumente
-  Custom yt-dlp Arguments: Pasgemaakte yt-dlp-argumente
   Template Name: Sjabloonnaam
   Save Template: Stoor sjabloon
   Delete Template: Skrap sjabloon

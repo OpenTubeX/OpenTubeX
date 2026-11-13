@@ -908,7 +908,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland pəncərənin kiçildilməsini tətbiqlərə bildirmir, buna görə bu şərt əlçatan deyil. Əvəzində kiçildilməni də əhatə edən “Pəncərə fokusu itirdikdə və ya başqa pəncərəyə keçdikdə” seçimini istifadə edin.
       On Tab Change Mini Player: Vərəqlər dəyişdirilərkən əvəzinə kiçik oynadıcı göstərilir. Bundan istifadə etmək üçün “Videodan çıxarkən” seçimini “Oxutmanı dayandır” olaraq təyin edin.
     Scroll Mini Player:
-      Scroll Mini Player: Sürüşdürərkən kiçik oynadıcı
       Scroll Player Mode: Aşağı sürüşdürərkən
       Scroll Player Mode Tooltip: Pleyer yalnız pəncərə hündürlüyünün ən çox yarısını tutduqda sabitlənir. Əks halda, məsələn, telefonlarda üfüqi rejimdə və ya geniş pəncərələrdə, əvəzinə mini pleyer göstərilir.
       Scroll Player Modes:
@@ -1488,7 +1487,6 @@ Settings:
     Use Shared Tabs: Cihazlar arasında vahid ortaq vərəq dəstindən istifadə et
     Shared Tabs Warning: 'Bu cihazda açıq olan vərəqlər ortaq dəstə çevrilir. Digər cihazlar sinxronizasiya zamanı açıq vərəqlərini bu dəstlə əvəz edir; müxtəlif cihazlardakı vərəqlər birləşdirilmir.'
     Tabs From Other Devices: Digər cihazlardakı vərəqlər
-    Device Tab Session: '{platform} · {count} vərəq'
     Mobile Device: Mobil
     Desktop Device: Masaüstü
     Open All Tabs: Bütün vərəqləri aç
@@ -1524,7 +1522,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'Brauzeriniz açılacaq ki, silinməni giriş provayderinizdə təsdiqləyəsiniz.'
   Proxy Settings:
     IP Block Recovery Script Path: IP blokundan bərpa skripti
-    Select IP Block Recovery Script File: IP blokundan bərpa skripti faylını seç
     Running IP block recovery script: IP blokundan bərpa skripti işə salınır
     IP block recovery script failed: 'IP blokundan bərpa skripti uğursuz oldu (çıxış kodu: {exitCode})'
     IP block recovery script finished: IP blokundan bərpa skripti tamamlandı
@@ -1633,7 +1630,6 @@ Profile:
   Profile Icon: Profil nişanı
   Choose an Emoji: Emoji seç
   Custom Emoji: Fərdi emoji
-  Emoji: Emoji
   Choose Image: Şəkil seç
   Crop Image: Şəkli kəs
   Zoom: Miqyas
@@ -1825,7 +1821,6 @@ Video:
       Time Spent: Sərf olunan vaxt
     A-B Repeat:
       A-B Repeat: A-B təkrarı
-      'On': 'Aktiv'
       'Off': 'Bağlı'
       Point A: A nöqtəsi
       Point B: B nöqtəsi
@@ -2177,7 +2172,6 @@ Tab Organizer:
   Close All: Hamısını bağla
   Ungroup: Qrupdan çıxar
   Group Name: Qrup adı
-  Color: Rəng
   No Color: Rəngsiz
   Create Group: Qrup yarat
   Expand Group: Qrupu genişləndir
@@ -2495,12 +2489,10 @@ Downloads:
   Remove File Confirmation: Endirilmiş fayl silinsin?
   Remove File Warning: Bu, "{title}" faylını cihazınızın zibil qutusuna köçürəcək.
   File Not Found: Endirilmiş fayl tapılmadı.
-  Download Missing: Endirmə əlçatmazdır
   Files Missing: Endirilmiş fayl artıq fayl sistemində mövcud deyil. | Endirilmiş fayllar artıq fayl sistemində mövcud deyil.
   Files Available: '{total} endirilmiş fayldan {available} əlçatandır.'
   More Files: Daha 1 fayl | Daha {count} fayl
   Template Used: 'Şablon: {name}'
-  Download Type: Endirmə növü
   Template: Şablon
   Unsaved: Saxlanılmayıb
   Media Type: Media növü
@@ -2528,7 +2520,6 @@ Downloads:
   Embed Cover Art: Miniatürü üz qabığı kimi yerləşdir
   Embed Metadata: Başlığı, müəllifi, açıqlamanı və bölümləri yerləşdir
   Additional yt-dlp Arguments: Əlavə yt-dlp arqumentləri
-  Custom yt-dlp Arguments: Xüsusi yt-dlp arqumentləri
   Template Name: Şablon adı
   Save Template: Şablonu saxla
   Delete Template: Şablonu sil

@@ -918,7 +918,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland אינו מדווח ליישומים על מזעור חלון, ולכן גורם מפעיל זה אינו זמין. השתמשו במקום זאת באפשרות "כשהחלון מאבד מיקוד או כשעוברים ממנו", שחלה גם על מזעור.
       On Tab Change Mini Player: מעבר בין כרטיסיות מציג במקום זאת את נגן המיני. כדי להשתמש בזה, יש להגדיר את “ביציאה מסרטון” ל“עצירת הניגון”.
     Scroll Mini Player:
-      Scroll Mini Player: נגן מיני בגלילה
       Scroll Player Mode: בגלילה מטה
       Scroll Player Mode Tooltip: הנגן מוצמד רק כל עוד הוא תופס לכל היותר מחצית מגובה החלון. אחרת, למשל בטלפונים לרוחב או בחלונות רחבים, מוצג במקום זאת הנגן המוקטן.
       Scroll Player Modes:
@@ -1535,7 +1534,6 @@ Settings:
     Use Shared Tabs: 'שימוש בקבוצת כרטיסיות משותפת אחת בכל המכשירים'
     Shared Tabs Warning: 'הכרטיסיות הפתוחות במכשיר הזה יהפכו לקבוצה המשותפת. מכשירים אחרים יחליפו את הכרטיסיות הפתוחות שלהם בקבוצה הזו בעת הסנכרון; כרטיסיות ממכשירים שונים לא ימוזגו.'
     Tabs From Other Devices: 'כרטיסיות ממכשירים אחרים'
-    Device Tab Session: '{platform} · {count} כרטיסיות'
     Mobile Device: 'נייד'
     Desktop Device: 'מחשב'
     Open All Tabs: 'פתיחת כל הכרטיסיות'
@@ -1548,7 +1546,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'הדפדפן ייפתח כדי שתוכלו לאשר את המחיקה אצל ספק ההתחברות שלכם.'
   Proxy Settings:
     IP Block Recovery Script Path: סקריפט שחזור מחסימת IP
-    Select IP Block Recovery Script File: בחירת קובץ סקריפט התאוששות מחסימת IP
     Running IP block recovery script: סקריפט ההתאוששות מחסימת IP פועל
     IP block recovery script failed: 'סקריפט ההתאוששות מחסימת IP נכשל (קוד יציאה: {exitCode})'
     IP block recovery script finished: סקריפט ההתאוששות מחסימת IP הסתיים
@@ -1664,7 +1661,6 @@ Profile:
   Profile Icon: סמל הפרופיל
   Choose an Emoji: בחירת אמוג׳י
   Custom Emoji: אמוג׳י מותאם אישית
-  Emoji: אמוג׳י
   Choose Image: בחירת תמונה
   Crop Image: חיתוך התמונה
   Zoom: תקריב
@@ -1864,7 +1860,6 @@ Video:
       Timer ended: טיימר השינה הסתיים
     A-B Repeat:
       A-B Repeat: חזרה A-B
-      'On': מופעלת
       'Off': מושבתת
       Point A: נקודה A
       Point B: נקודה B
@@ -2221,7 +2216,6 @@ Tab Organizer:
   Close All: סגירת הכול
   Ungroup: הוצאה מהקבוצה
   Group Name: שם הקבוצה
-  Color: צבע
   No Color: ללא צבע
   Create Group: יצירת קבוצה
   Expand Group: הרחבת הקבוצה
@@ -2543,12 +2537,10 @@ Downloads:
   Remove File Confirmation: להסיר את הקובץ שהורד?
   Remove File Warning: פעולה זו תעביר את "{title}" לאשפה במכשיר.
   File Not Found: הקובץ שהורד לא נמצא.
-  Download Missing: ההורדה אינה זמינה
   Files Missing: הקובץ שהורד אינו זמין עוד במערכת הקבצים. | הקבצים שהורדו אינם זמינים עוד במערכת הקבצים. | הקבצים שהורדו אינם זמינים עוד במערכת הקבצים.
   Files Available: '{available} מתוך {total} קבצים שהורדו זמינים.'
   More Files: עוד קובץ אחד | עוד {count} קבצים | עוד {count} קבצים
   Template Used: 'תבנית: {name}'
-  Download Type: סוג הורדה
   Template: תבנית
   Unsaved: לא נשמר
   Media Type: סוג מדיה
@@ -2576,7 +2568,6 @@ Downloads:
   Embed Cover Art: הטמעת התמונה הממוזערת כתמונת עטיפה
   Embed Metadata: הטמעת כותרת, מחבר, תיאור ופרקים
   Additional yt-dlp Arguments: ארגומנטים נוספים של yt-dlp
-  Custom yt-dlp Arguments: ארגומנטים מותאמים אישית של yt-dlp
   Template Name: שם התבנית
   Save Template: שמירת התבנית
   Delete Template: מחיקת התבנית

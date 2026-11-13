@@ -910,7 +910,6 @@ Settings:
       Wayland Minimize Unsupported: Nid yw Wayland yn rhoi gwybod i apiau pan gaiff ffenestr ei lleihau, felly nid yw'r sbardun hwn ar gael. Defnyddiwch "Pan fydd y ffenestr yn colli ffocws neu pan newidir i ffwrdd ohoni" yn ei le; mae hynny hefyd yn cynnwys lleihau.
       On Tab Change Mini Player: Mae newid tab yn dangos y chwaraewr bach yn lle hynny. I ddefnyddio hyn, gosodwch “Wrth adael fideo” i “Stopio chwarae”.
     Scroll Mini Player:
-      Scroll Mini Player: Chwaraewr bach wrth sgrolio
       Scroll Player Mode: Wrth sgrolio i lawr
       Scroll Player Mode Tooltip: "Dim ond tra bo'n cymryd hanner uchder y ffenestr ar y mwyaf y caiff y chwaraewr ei binio. Fel arall, fel ar ffonau yn y modd tirlun neu mewn ffenestri llydan, dangosir y chwaraewr bach yn lle hynny."
       Scroll Player Modes:
@@ -1512,7 +1511,6 @@ Settings:
     Use Shared Tabs: 'Defnyddio un set o dabiau a rennir ar draws dyfeisiau'
     Shared Tabs Warning: 'Bydd y tabiau sydd ar agor ar y ddyfais hon yn dod yn set a rennir. Pan fydd dyfeisiau eraill yn cysoni, byddant yn disodli eu tabiau agored â’r set hon; ni chyfunir tabiau o ddyfeisiau gwahanol.'
     Tabs From Other Devices: 'Tabiau o ddyfeisiau eraill'
-    Device Tab Session: '{platform} · {count} tab'
     Mobile Device: 'Symudol'
     Desktop Device: 'Bwrdd gwaith'
     Open All Tabs: 'Agor pob tab'
@@ -1525,7 +1523,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'Bydd eich porwr yn agor er mwyn i chi gadarnhau''r dileu gyda''ch darparwr mewngofnodi.'
   Proxy Settings:
     IP Block Recovery Script Path: Sgript adfer bloc IP
-    Select IP Block Recovery Script File: Dewis ffeil sgript adfer ar ôl rhwystr IP
     Running IP block recovery script: Wrthi'n rhedeg y sgript adfer ar ôl rhwystr IP
     IP block recovery script failed: 'Methodd y sgript adfer ar ôl rhwystr IP (cod gadael: {exitCode})'
     IP block recovery script finished: Mae'r sgript adfer ar ôl rhwystr IP wedi gorffen
@@ -1638,7 +1635,6 @@ Profile:
   Profile Icon: Eicon proffil
   Choose an Emoji: Dewis emoji
   Custom Emoji: Emoji personol
-  Emoji: Emoji
   Choose Image: Dewis delwedd
   Crop Image: Tocio'r ddelwedd
   Zoom: Chwyddo
@@ -1843,7 +1839,6 @@ Video:
       Timer ended: Mae'r amserydd cysgu wedi dod i ben
     A-B Repeat:
       A-B Repeat: Ailadrodd A-B
-      On: Ymlaen
       Off: I ffwrdd
       Point A: Pwynt A
       Point B: Pwynt B
@@ -2200,7 +2195,6 @@ Tab Organizer:
   Close All: Cau'r cyfan
   Ungroup: Tynnu o'r grŵp
   Group Name: Enw'r grŵp
-  Color: Lliw
   No Color: Dim lliw
   Create Group: Creu grŵp
   Expand Group: Ehangu'r grŵp
@@ -2520,12 +2514,10 @@ Downloads:
   Remove File Confirmation: Tynnu'r ffeil a lawrlwythwyd?
   Remove File Warning: Bydd hyn yn symud "{title}" i fin sbwriel eich dyfais.
   File Not Found: Nid oedd modd canfod y ffeil a lawrlwythwyd.
-  Download Missing: Nid yw'r lawrlwythiad ar gael
   Files Missing: Nid yw'r ffeiliau a lawrlwythwyd ar gael ar y system ffeiliau mwyach. | Nid yw'r ffeil a lawrlwythwyd ar gael ar y system ffeiliau mwyach. | Nid yw'r ffeiliau a lawrlwythwyd ar gael ar y system ffeiliau mwyach. | Nid yw'r ffeiliau a lawrlwythwyd ar gael ar y system ffeiliau mwyach. | Nid yw'r ffeiliau a lawrlwythwyd ar gael ar y system ffeiliau mwyach. | Nid yw'r ffeiliau a lawrlwythwyd ar gael ar y system ffeiliau mwyach.
   Files Available: 'Mae {available} o {total} o ffeiliau a lawrlwythwyd ar gael.'
   More Files: '{count} o ffeiliau eraill | 1 ffeil arall | {count} ffeil arall | {count} ffeil arall | {count} ffeil arall | {count} o ffeiliau eraill'
   Template Used: 'Templed: {name}'
-  Download Type: Math o lawrlwythiad
   Template: Templed
   Unsaved: Heb ei gadw
   Media Type: Math o gyfrwng
@@ -2553,7 +2545,6 @@ Downloads:
   Embed Cover Art: Mewnblannu'r mân-lun fel clawr
   Embed Metadata: Mewnblannu'r teitl, yr awdur, y disgrifiad a'r penodau
   Additional yt-dlp Arguments: Ymresymiadau yt-dlp ychwanegol
-  Custom yt-dlp Arguments: Ymresymiadau yt-dlp personol
   Template Name: Enw'r templed
   Save Template: Cadw'r templed
   Delete Template: Dileu'r templed

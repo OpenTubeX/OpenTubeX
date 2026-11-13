@@ -924,7 +924,6 @@ Settings:
       Wayland Minimize Unsupported: சாளரத்தைக் குறுக்கியதை Wayland செயலிகளுக்குத் தெரிவிப்பதில்லை. எனவே இந்தத் தூண்டுதல் கிடைக்காது. குறுக்குவதையும் உள்ளடக்கும் "சாளரம் கவனத்தை இழக்கும்போது அல்லது வேறு சாளரத்திற்கு மாறும்போது" என்பதைப் பயன்படுத்தவும்.
       On Tab Change Mini Player: தாவல்களை மாற்றும்போது அதற்குப் பதிலாக சிறிய இயக்கி காட்டப்படும். இதைப் பயன்படுத்த, "காணொளியை விட்டு வெளியேறும்போது" என்பதை "இயக்குவதை நிறுத்து" என அமைக்கவும்.
     Scroll Mini Player:
-      Scroll Mini Player: உருளும் சிறிய இயக்கி
       Scroll Player Mode: கீழே உருட்டும்போது
       Scroll Player Mode Tooltip: சாளர உயரத்தில் அதிகபட்சம் பாதியை மட்டும் எடுத்துக்கொள்ளும் வரை மட்டுமே இயக்கி பொருத்தப்படும். இல்லையெனில், கிடைமட்ட நிலையிலுள்ள தொலைபேசிகள் அல்லது அகலமான சாளரங்கள் போன்றவற்றில், அதற்குப் பதிலாக சிறு இயக்கி காட்டப்படும்.
       Scroll Player Modes:
@@ -1541,7 +1540,6 @@ Settings:
     Use Shared Tabs: 'சாதனங்கள் முழுவதும் ஒரே பகிரப்பட்ட தாவல் தொகுப்பைப் பயன்படுத்தவும்'
     Shared Tabs Warning: 'இந்தச் சாதனத்தில் திறந்திருக்கும் தாவல்கள் பகிரப்பட்ட தொகுப்பாக மாறும். மற்ற சாதனங்கள் ஒத்திசைக்கும்போது தங்கள் திறந்த தாவல்களை இந்தத் தொகுப்பால் மாற்றும்; வெவ்வேறு சாதனங்களின் தாவல்கள் ஒன்றிணைக்கப்படாது.'
     Tabs From Other Devices: 'பிற சாதனங்களின் தாவல்கள்'
-    Device Tab Session: '{platform} · {count} தாவல்கள்'
     Mobile Device: 'கைப்பேசி'
     Desktop Device: 'கணினி'
     Open All Tabs: 'எல்லா தாவல்களையும் திறக்கவும்'
@@ -1554,7 +1552,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'உங்கள் உள்நுழைவு வழங்குநரிடம் நீக்கத்தை உறுதிப்படுத்த உங்கள் உலாவி திறக்கும்.'
   Proxy Settings:
     IP Block Recovery Script Path: IP தடுப்பு மீட்பு நிரல்
-    Select IP Block Recovery Script File: IP தடுப்பு மீட்பு நிரலாக்கக் கோப்பைத் தேர்ந்தெடு
     Running IP block recovery script: IP தடுப்பு மீட்பு நிரலாக்கம் இயங்குகிறது
     IP block recovery script failed: 'IP தடுப்பு மீட்பு நிரலாக்கம் தோல்வியடைந்தது (வெளியேற்றக் குறியீடு: {exitCode})'
     IP block recovery script finished: IP தடுப்பு மீட்பு நிரலாக்கம் முடிந்தது
@@ -1670,7 +1667,6 @@ Profile:
   Profile Icon: சுயவிவரப் படவுரு
   Choose an Emoji: ஈமோஜியைத் தேர்ந்தெடுக்கவும்
   Custom Emoji: தனிப்பயன் ஈமோஜி
-  Emoji: ஈமோஜி
   Choose Image: படத்தைத் தேர்ந்தெடு
   Crop Image: படத்தை வெட்டு
   Zoom: பெரிதாக்கம்
@@ -1872,7 +1868,6 @@ Video:
       Timer ended: உறக்க நேரக்கருவி முடிந்தது
     A-B Repeat:
       A-B Repeat: A-B மீளியக்கம்
-      'On': இயக்கு
       'Off': முடக்கு
       Point A: A புள்ளி
       Point B: B புள்ளி
@@ -2231,7 +2226,6 @@ Tab Organizer:
   Close All: அனைத்தையும் மூடு
   Ungroup: குழுவிலிருந்து பிரி
   Group Name: குழுப் பெயர்
-  Color: நிறம்
   No Color: நிறமில்லை
   Create Group: குழுவை உருவாக்கு
   Expand Group: குழுவை விரி
@@ -2553,12 +2547,10 @@ Downloads:
   Remove File Confirmation: பதிவிறக்கிய கோப்பை அகற்றவா?
   Remove File Warning: இது "{title}" கோப்பை உங்கள் சாதனத்தின் குப்பைக்கு நகர்த்தும்.
   File Not Found: பதிவிறக்கிய கோப்பைக் கண்டுபிடிக்க முடியவில்லை.
-  Download Missing: பதிவிறக்கம் கிடைக்கவில்லை
   Files Missing: பதிவிறக்கிய கோப்பு இனி கோப்பு முறைமையில் கிடைக்கவில்லை. | பதிவிறக்கிய கோப்புகள் இனி கோப்பு முறைமையில் கிடைக்கவில்லை.
   Files Available: பதிவிறக்கிய {total} கோப்புகளில் {available} கிடைக்கின்றன.
   More Files: மேலும் 1 கோப்பு | மேலும் {count} கோப்புகள்
   Template Used: 'வார்ப்புரு: {name}'
-  Download Type: பதிவிறக்க வகை
   Template: வார்ப்புரு
   Unsaved: சேமிக்கப்படவில்லை
   Media Type: ஊடக வகை
@@ -2586,7 +2578,6 @@ Downloads:
   Embed Cover Art: சிறுபடத்தை அட்டைப் படமாகப் பொதி
   Embed Metadata: தலைப்பு, ஆசிரியர், விளக்கம் மற்றும் அத்தியாயங்களைப் பொதி
   Additional yt-dlp Arguments: கூடுதல் yt-dlp அளவுருக்கள்
-  Custom yt-dlp Arguments: தனிப்பயன் yt-dlp அளவுருக்கள்
   Template Name: வார்ப்புருப் பெயர்
   Save Template: வார்ப்புருவைச் சேமி
   Delete Template: வார்ப்புருவை நீக்கு

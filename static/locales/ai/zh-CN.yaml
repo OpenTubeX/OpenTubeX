@@ -907,7 +907,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland 不会向应用报告窗口最小化事件，因此无法使用此触发条件。请改用“窗口失去焦点或切换到其他窗口时”，该选项也适用于最小化窗口。
       On Tab Change Mini Player: 切换标签页时会改为显示迷你播放器。要使用此选项，请将“离开视频时”设为“停止播放”。
     Scroll Mini Player:
-      Scroll Mini Player: 滚动时使用迷你播放器
       Scroll Player Mode: 向下滚动时
       Scroll Player Mode Tooltip: 仅当播放器高度不超过窗口高度的一半时才会固定。否则（例如横屏手机或宽窗口），将改为显示迷你播放器。
       Scroll Player Modes:
@@ -1508,7 +1507,6 @@ Settings:
     Use Shared Tabs: '在各设备上使用同一组共享标签页'
     Shared Tabs Warning: '此设备上打开的标签页将成为共享标签页组。其他设备同步时会用这组标签页替换其当前打开的标签页；不同设备的标签页不会合并。'
     Tabs From Other Devices: '其他设备的标签页'
-    Device Tab Session: '{platform} · {count} 个标签页'
     Mobile Device: '移动设备'
     Desktop Device: '桌面设备'
     Open All Tabs: '打开所有标签页'
@@ -1521,7 +1519,6 @@ Settings:
     Delete Single Sign-On Account Hint: '浏览器将打开，以便你在登录提供方处确认删除。'
   Proxy Settings:
     IP Block Recovery Script Path: IP 封禁恢复脚本
-    Select IP Block Recovery Script File: 选择 IP 封锁恢复脚本文件
     Running IP block recovery script: 正在运行 IP 封锁恢复脚本
     IP block recovery script failed: 'IP 封锁恢复脚本运行失败（退出代码：{exitCode}）'
     IP block recovery script finished: IP 封锁恢复脚本运行完毕
@@ -1630,7 +1627,6 @@ Profile:
   Profile Icon: 配置文件图标
   Choose an Emoji: 选择表情符号
   Custom Emoji: 自定义表情符号
-  Emoji: 表情符号
   Choose Image: 选择图片
   Crop Image: 裁剪图片
   Zoom: 缩放
@@ -1813,7 +1809,6 @@ Video:
       Timer ended: 睡眠定时器已结束
     A-B Repeat:
       A-B Repeat: A-B 循环
-      On: 开
       Off: 关
       Point A: 点 A
       Point B: 点 B
@@ -2165,7 +2160,6 @@ Tab Organizer:
   Close All: 全部关闭
   Ungroup: 取消分组
   Group Name: 组名称
-  Color: 颜色
   No Color: 无颜色
   Create Group: 创建组
   Expand Group: 展开组
@@ -2482,12 +2476,10 @@ Downloads:
   Remove File Confirmation: 是否删除已下载的文件？
   Remove File Warning: 这会将“{title}”移至设备的回收站。
   File Not Found: 找不到已下载的文件。
-  Download Missing: 下载不可用
   Files Missing: 文件系统中已不存在这些下载文件。
   Files Available: '{available} 个已下载文件可用，共 {total} 个。'
   More Files: '还有 {count} 个文件'
   Template Used: '模板：{name}'
-  Download Type: 下载类型
   Template: 模板
   Unsaved: 未保存
   Media Type: 媒体类型
@@ -2515,7 +2507,6 @@ Downloads:
   Embed Cover Art: 将缩略图嵌入为封面
   Embed Metadata: 嵌入标题、作者、说明和章节
   Additional yt-dlp Arguments: 额外 yt-dlp 参数
-  Custom yt-dlp Arguments: 自定义 yt-dlp 参数
   Template Name: 模板名称
   Save Template: 保存模板
   Delete Template: 删除模板

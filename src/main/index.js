@@ -2616,16 +2616,6 @@ function runApp() {
     })
   })
 
-  // Handler for creating new tab from renderer
-  onTrusted(IpcChannels.CREATE_NEW_TAB, (event, path, query) => {
-    const manager = TabManager.getFromWebContents(event.sender)
-    if (manager) {
-      manager.createTabWithPreference({ route: path, query, makeActive: true }).catch(error => {
-        console.error('Failed to create a new tab from the renderer:', error)
-      })
-    }
-  })
-
   ipcMain.handle(IpcChannels.OPEN_IN_EXTERNAL_PLAYER, async (event, payload) => {
     try {
       return await handleOpenInExternalPlayer(event, payload)

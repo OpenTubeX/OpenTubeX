@@ -103,10 +103,6 @@ const twitch = {
     return login && ID_PATTERN.test(login) ? `@${login}` : login
   },
 
-  parsePlaylistUrl() {
-    return null
-  },
-
   async getChannel(fetch, id, signal) {
     const variable = !id.startsWith('@') && ID_PATTERN.test(id) ? { id } : { login: parseTwitchChannelLogin(id) }
     if (!variable.id && !variable.login) return null

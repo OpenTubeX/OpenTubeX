@@ -907,7 +907,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland ei teata rakendustele akna minimeerimisest, seega pole see käiviti saadaval. Kasuta selle asemel valikut "Kui aken kaotab fookuse või vahetatakse teise akna vastu", mis hõlmab ka minimeerimist.
       On Tab Change Mini Player: Vahekaardi vahetamisel kuvatakse selle asemel minipleier. Selle kasutamiseks määra „Videost lahkumisel“ väärtuseks „Peata esitamine“.
     Scroll Mini Player:
-      Scroll Mini Player: Minipleier kerimisel
       Scroll Player Mode: Allapoole kerimisel
       Scroll Player Mode Tooltip: Mängija kinnitatakse ainult siis, kui see võtab enda alla kõige rohkem poole akna kõrgusest. Muul juhul, näiteks telefonides horisontaalpaigutuses või laiades akendes, kuvatakse selle asemel minimängija.
       Scroll Player Modes:
@@ -1508,7 +1507,6 @@ Settings:
     Use Shared Tabs: 'Kasuta seadmetes üht jagatud vahelehtede komplekti'
     Shared Tabs Warning: 'Selles seadmes avatud vahekaardid saavad ühiseks vahekaartide kogumiks. Teised seadmed asendavad sünkroonimisel oma avatud vahekaardid selle kogumikuga; eri seadmete vahekaarte ei ühendata.'
     Tabs From Other Devices: 'Teiste seadmete vahelehed'
-    Device Tab Session: '{platform} · {count} vahelehte'
     Mobile Device: 'Mobiilseade'
     Desktop Device: 'Arvuti'
     Open All Tabs: 'Ava kõik vahelehed'
@@ -1521,7 +1519,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'Brauser avaneb, et saaksid kustutamise oma sisselogimisteenuse pakkuja juures kinnitada.'
   Proxy Settings:
     IP Block Recovery Script Path: IP-blokeeringust taastamise skript
-    Select IP Block Recovery Script File: Vali IP-blokeeringust taastamise skriptifail
     Running IP block recovery script: IP-blokeeringust taastamise skripti käivitamine
     IP block recovery script failed: 'IP-blokeeringust taastamise skript nurjus (väljumiskood: {exitCode})'
     IP block recovery script finished: IP-blokeeringust taastamise skript lõpetas töö
@@ -1630,7 +1627,6 @@ Profile:
   Profile Icon: Profiiliikoon
   Choose an Emoji: Vali emotikon
   Custom Emoji: Kohandatud emotikon
-  Emoji: Emotikon
   Choose Image: Vali pilt
   Crop Image: Kärbi pilti
   Zoom: Suurendus
@@ -1815,7 +1811,6 @@ Video:
       Timer ended: Unetaimeri aeg sai täis
     A-B Repeat:
       A-B Repeat: A-B-kordus
-      'On': Sees
       'Off': Väljas
       Point A: Punkt A
       Point B: Punkt B
@@ -2167,7 +2162,6 @@ Tab Organizer:
   Close All: Sulge kõik
   Ungroup: Eemalda rühmast
   Group Name: Rühma nimi
-  Color: Värv
   No Color: Värv puudub
   Create Group: Loo rühm
   Expand Group: Laienda rühm
@@ -2485,12 +2479,10 @@ Downloads:
   Remove File Confirmation: Kas eemaldada allalaaditud fail?
   Remove File Warning: See teisaldab faili "{title}" sinu seadme prügikasti.
   File Not Found: Allalaaditud faili ei leitud.
-  Download Missing: Allalaadimine pole saadaval
   Files Missing: Allalaaditud fail pole enam failisüsteemis saadaval. | Allalaaditud failid pole enam failisüsteemis saadaval.
   Files Available: '{total} allalaaditud failist on saadaval {available}.'
   More Files: Veel 1 fail | Veel {count} faili
   Template Used: 'Mall: {name}'
-  Download Type: Allalaadimise tüüp
   Template: Mall
   Unsaved: Salvestamata
   Media Type: Meediumi tüüp
@@ -2518,7 +2510,6 @@ Downloads:
   Embed Cover Art: Manusta pisipilt kaanepildina
   Embed Metadata: Manusta pealkiri, autor, kirjeldus ja peatükid
   Additional yt-dlp Arguments: Täiendavad yt-dlp argumendid
-  Custom yt-dlp Arguments: Kohandatud yt-dlp argumendid
   Template Name: Malli nimi
   Save Template: Salvesta mall
   Delete Template: Kustuta mall

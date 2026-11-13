@@ -1218,7 +1218,6 @@ Settings:
       On Window Hide: Wenn das Fenster den Fokus verliert oder gewechselt wird
       Wayland Minimize Unsupported: Wayland meldet das Minimieren von Fenstern nicht an Anwendungen, daher ist dieser Auslöser nicht verfügbar. Verwende stattdessen „Wenn das Fenster den Fokus verliert oder gewechselt wird“, was das Minimieren ebenfalls abdeckt.
     Scroll Mini Player:
-      Scroll Mini Player: Scroll mini player
       Scroll Player Mode: Beim Herunterscrollen
       Scroll Player Mode Tooltip: Der Player wird nur angeheftet, solange er höchstens die Hälfte der Fensterhöhe einnimmt. Sonst, etwa auf Smartphones im Querformat oder in breiten Fenstern, wird stattdessen der Mini-Player angezeigt.
       Scroll Player Modes:
@@ -1661,7 +1660,6 @@ Settings:
     Proxy Username: Proxy-Anmeldename
     Proxy Password: Proxy-Passwort
     IP Block Recovery Script Path: Skript zur IP-Block-Wiederherstellung
-    Select IP Block Recovery Script File: Skriptdatei für IP-Block-Wiederherstellung auswählen
     Running IP block recovery script: IP-Block-Wiederherstellungsskript wird ausgeführt
     IP block recovery script failed: 'IP-Block-Wiederherstellungsskript fehlgeschlagen (Exit-Code: {exitCode})'
     IP block recovery script finished: IP-Block-Wiederherstellungsskript abgeschlossen
@@ -2094,7 +2092,6 @@ Settings:
     Use Shared Tabs: Einen gemeinsamen Tab-Satz auf allen Geräten verwenden
     Shared Tabs Warning: Die auf diesem Gerät geöffneten Tabs werden zum gemeinsamen Tab-Satz. Andere Geräte ersetzen ihre geöffneten Tabs bei der Synchronisierung durch diesen Satz; die Tab-Sätze verschiedener Geräte werden nicht zusammengeführt.
     Tabs From Other Devices: Tabs von anderen Geräten
-    Device Tab Session: '{platform} · {count} Tabs'
     Mobile Device: Mobilgerät
     Desktop Device: Desktop
     Open All Tabs: Alle Tabs öffnen
@@ -2439,7 +2436,6 @@ Video:
       Timer ended: Einschlaftimer abgelaufen
     A-B Repeat:
       A-B Repeat: A-B-Wiederholung
-      On: An
       Off: Aus
       Point A: Punkt A
       Point B: Punkt B
@@ -3526,7 +3522,6 @@ Tab Organizer:
   Close All: Alle schließen
   Ungroup: Gruppierung aufheben
   Group Name: Gruppenname
-  Color: Farbe
   No Color: Keine Farbe
   Create Group: Gruppe erstellen
   Expand Group: Gruppe ausklappen
@@ -3647,8 +3642,6 @@ Downloads:
   Remove File Permanently Warning: "„{title}“ wird dauerhaft gelöscht."
   Download: Herunterladen
   Download Video: Video herunterladen
-  Download Type: Download-Typ
-  Custom yt-dlp Arguments: Benutzerdefinierte yt-dlp-Argumente
   Template Name: Vorlagenname
   Save Template: Vorlage speichern
   Delete Template: Vorlage löschen
@@ -3711,7 +3704,6 @@ Downloads:
   Remove File Warning: Dadurch wird „{title}“ in den Papierkorb deines Geräts verschoben.
   File Not Found: Die heruntergeladene Datei wurde nicht gefunden.
   Remove File Failed: Die heruntergeladene Datei konnte nicht entfernt werden.
-  Download Missing: Download nicht verfügbar
   Files Missing: >-
     Die heruntergeladene Datei ist im Dateisystem nicht mehr verfügbar. | Die heruntergeladenen Dateien sind im
     Dateisystem nicht mehr verfügbar.

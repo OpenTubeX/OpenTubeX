@@ -1137,7 +1137,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland no informa les aplicacions quan es minimitza una finestra, per tant aquest activador no està disponible. Utilitzeu "Quan la finestra perd el focus o se'n canvia a una altra", que també inclou la minimització.
       On Tab Change Mini Player: En canviar de pestanya es mostra el minireproductor. Per fer-ho servir, establiu «En sortir d'un vídeo» a «Atura la reproducció».
     Scroll Mini Player:
-      Scroll Mini Player: Minireproductor en desplaçar-se
       Scroll Player Mode: En desplaçar-se avall
       Scroll Player Mode Tooltip: "El reproductor només es fixa mentre ocupi com a màxim la meitat de l'alçada de la finestra. Si no, com ara en telèfons en horitzontal o en finestres amples, es mostra el minireproductor."
       Scroll Player Modes:
@@ -1832,7 +1831,6 @@ Settings:
     Use Shared Tabs: 'Utilitza un únic conjunt de pestanyes compartit entre dispositius'
     Shared Tabs Warning: 'Les pestanyes obertes en aquest dispositiu es converteixen en el conjunt compartit. Quan se sincronitzin, els altres dispositius substituiran les seves pestanyes obertes per aquest conjunt; les pestanyes de dispositius diferents no es combinaran.'
     Tabs From Other Devices: 'Pestanyes d’altres dispositius'
-    Device Tab Session: '{platform} · {count} pestanyes'
     Mobile Device: 'Mòbil'
     Desktop Device: 'Ordinador'
     Open All Tabs: 'Obre totes les pestanyes'
@@ -1848,7 +1846,6 @@ Settings:
     Proxy Username: Nom d'usuari del servidor intermediari
     Proxy Password: Contrasenya del servidor intermediari
     IP Block Recovery Script Path: Script de recuperació del bloqueig d'IP
-    Select IP Block Recovery Script File: Seleccioneu el fitxer de l'script de recuperació del bloqueig d'IP
     Running IP block recovery script: S'està executant l'script de recuperació del bloqueig d'IP
     IP block recovery script failed: 'Ha fallat l''script de recuperació del bloqueig d''IP (codi de sortida: {exitCode})'
     IP block recovery script finished: Ha acabat l'script de recuperació del bloqueig d'IP
@@ -2001,7 +1998,6 @@ Profile:
   Profile Icon: Icona del perfil
   Choose an Emoji: Trieu un emoji
   Custom Emoji: Emoji personalitzat
-  Emoji: Emoji
   Choose Image: Tria una imatge
   Crop Image: Retalla la imatge
   Zoom: Zoom
@@ -2278,7 +2274,6 @@ Video:
       Timer ended: Ha acabat el temporitzador de desconnexió
     A-B Repeat:
       A-B Repeat: Repetició A-B
-      On: Activada
       Off: Desactivada
       Point A: Punt A
       Point B: Punt B
@@ -2679,7 +2674,6 @@ Tab Organizer:
   Close All: Tanca-ho tot
   Ungroup: Desagrupa
   Group Name: Nom del grup
-  Color: Color
   No Color: Sense color
   Create Group: Crea un grup
   Expand Group: Amplia el grup
@@ -3143,12 +3137,10 @@ Downloads:
   Remove File Confirmation: Voleu suprimir el fitxer baixat?
   Remove File Warning: Es mourà "{title}" a la paperera del dispositiu.
   File Not Found: No s'ha pogut trobar el fitxer baixat.
-  Download Missing: La baixada no està disponible
   Files Missing: El fitxer baixat ja no està disponible al sistema de fitxers. | Els fitxers baixats ja no estan disponibles al sistema de fitxers. | Els fitxers baixats ja no estan disponibles al sistema de fitxers.
   Files Available: 'Hi ha disponibles {available} de {total} fitxers baixats.'
   More Files: 1 fitxer més | {count} fitxers més | {count} fitxers més
   Template Used: 'Plantilla: {name}'
-  Download Type: Tipus de baixada
   Template: Plantilla
   Unsaved: Sense desar
   Media Type: Tipus de fitxer multimèdia
@@ -3176,7 +3168,6 @@ Downloads:
   Embed Cover Art: Incrusta la miniatura com a portada
   Embed Metadata: Incrusta el títol, l'autor, la descripció i els capítols
   Additional yt-dlp Arguments: Arguments addicionals de yt-dlp
-  Custom yt-dlp Arguments: Arguments personalitzats de yt-dlp
   Template Name: Nom de la plantilla
   Save Template: Desa la plantilla
   Delete Template: Suprimeix la plantilla

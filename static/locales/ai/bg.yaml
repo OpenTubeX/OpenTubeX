@@ -912,7 +912,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland не съобщава на приложенията, когато прозорец бъде минимизиран, затова това условие не е достъпно. Вместо него използвайте „Когато прозорецът загуби фокус или преминете към друг прозорец“, което важи и при минимизиране.
       On Tab Change Mini Player: При превключване между раздели вместо това се показва миниплейърът. За да използвате това, задайте „Спиране на възпроизвеждането“ за „При напускане на видеоклип“.
     Scroll Mini Player:
-      Scroll Mini Player: Миниплейър при превъртане
       Scroll Player Mode: При превъртане надолу
       Scroll Player Mode Tooltip: Плейърът се закача само докато заема най-много половината от височината на прозореца. В противен случай, например на телефони в хоризонтален режим или в широки прозорци, вместо това се показва мини плейърът.
       Scroll Player Modes:
@@ -1516,7 +1515,6 @@ Settings:
     Use Shared Tabs: 'Използване на общ набор от раздели на всички устройства'
     Shared Tabs Warning: 'Отворените раздели на това устройство стават общият набор. При синхронизиране другите устройства заменят отворените си раздели с него; разделите от различните устройства не се обединяват.'
     Tabs From Other Devices: 'Раздели от други устройства'
-    Device Tab Session: '{platform} · {count} раздела'
     Mobile Device: 'Мобилно устройство'
     Desktop Device: 'Настолен компютър'
     Open All Tabs: 'Отваряне на всички раздели'
@@ -1529,7 +1527,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'Браузърът ви ще се отвори, за да потвърдите изтриването при доставчика си за вход.'
   Proxy Settings:
     IP Block Recovery Script Path: Скрипт за възстановяване при блокиран IP
-    Select IP Block Recovery Script File: Избор на файл със скрипт за възстановяване след блокиране на IP адреса
     Running IP block recovery script: Изпълнение на скрипта за възстановяване след блокиране на IP адреса
     IP block recovery script failed: 'Скриптът за възстановяване след блокиране на IP адреса е неуспешен (код за изход: {exitCode})'
     IP block recovery script finished: Скриптът за възстановяване след блокиране на IP адреса завърши
@@ -1643,7 +1640,6 @@ Profile:
   Profile Icon: Икона на профила
   Choose an Emoji: Избор на емоджи
   Custom Emoji: Емоджи по избор
-  Emoji: Емоджи
   Choose Image: Избор на изображение
   Crop Image: Изрязване на изображението
   Zoom: Мащаб
@@ -1839,7 +1835,6 @@ Video:
       Timer ended: Таймерът за заспиване изтече
     A-B Repeat:
       A-B Repeat: Повторение A-B
-      On: Вкл.
       Off: Изкл.
       Point A: Точка A
       Point B: Точка B
@@ -2196,7 +2191,6 @@ Tab Organizer:
   Close All: Затваряне на всички
   Ungroup: Премахване от групата
   Group Name: Име на групата
-  Color: Цвят
   No Color: Без цвят
   Create Group: Създаване на група
   Expand Group: Разгъване на групата
@@ -2516,12 +2510,10 @@ Downloads:
   Remove File Confirmation: Да се премахне ли изтегленият файл?
   Remove File Warning: Това ще премести „{title}“ в кошчето на устройството ви.
   File Not Found: Изтегленият файл не бе намерен.
-  Download Missing: Изтеглянето не е достъпно
   Files Missing: Изтегленият файл вече не е наличен във файловата система. | Изтеглените файлове вече не са налични във файловата система.
   Files Available: 'Налични изтеглени файлове: {available} от общо {total}.'
   More Files: Още 1 файл | Още {count} файла
   Template Used: 'Шаблон: {name}'
-  Download Type: Вид на изтеглянето
   Template: Шаблон
   Unsaved: Незапазено
   Media Type: Вид медия
@@ -2549,7 +2541,6 @@ Downloads:
   Embed Cover Art: Вграждане на миниатюрата като обложка
   Embed Metadata: Вграждане на заглавието, автора, описанието и главите
   Additional yt-dlp Arguments: Допълнителни аргументи за yt-dlp
-  Custom yt-dlp Arguments: Персонализирани аргументи за yt-dlp
   Template Name: Име на шаблона
   Save Template: Запазване на шаблона
   Delete Template: Изтриване на шаблона

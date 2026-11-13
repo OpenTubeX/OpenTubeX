@@ -918,7 +918,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland non informa as aplicacións cando se minimiza unha xanela, polo que este activador non está dispoñible. Usa no seu lugar «Cando a xanela perde o foco ou se cambia a outra», que tamén abrangue a minimización.
       On Tab Change Mini Player: Ao cambiar de lapela amósase o minirreprodutor no seu lugar. Para usar isto, establece «Ao saír dun vídeo» en «Deter a reprodución».
     Scroll Mini Player:
-      Scroll Mini Player: Minirreprodutor ao desprazarse
       Scroll Player Mode: Ao desprazarse cara abaixo
       Scroll Player Mode Tooltip: O reprodutor só se fixa mentres ocupe como máximo a metade da altura da xanela. Se non, como en teléfonos en horizontal ou en xanelas anchas, amósase o minirreprodutor.
       Scroll Player Modes:
@@ -1531,7 +1530,6 @@ Settings:
     Use Shared Tabs: 'Usar un único conxunto de lapelas compartido entre dispositivos'
     Shared Tabs Warning: 'As lapelas abertas neste dispositivo convértense no conxunto compartido. Ao sincronizarse, os demais dispositivos substitúen as súas lapelas abertas por este conxunto; as lapelas de distintos dispositivos non se combinan.'
     Tabs From Other Devices: 'Lapelas doutros dispositivos'
-    Device Tab Session: '{platform} · {count} lapelas'
     Mobile Device: 'Móbil'
     Desktop Device: 'Escritorio'
     Open All Tabs: 'Abrir todas as lapelas'
@@ -1544,7 +1542,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'Abrirase o navegador para que confirmes a eliminación co teu provedor de inicio de sesión.'
   Proxy Settings:
     IP Block Recovery Script Path: Script de recuperación do bloqueo de IP
-    Select IP Block Recovery Script File: Escolle o ficheiro do script de recuperación dun bloqueo de IP
     Running IP block recovery script: Executando o script de recuperación dun bloqueo de IP
     IP block recovery script failed: 'Fallou o script de recuperación dun bloqueo de IP (código de saída: {exitCode})'
     IP block recovery script finished: Rematou o script de recuperación dun bloqueo de IP
@@ -1660,7 +1657,6 @@ Profile:
   Profile Icon: Icona do perfil
   Choose an Emoji: Escolle un emoji
   Custom Emoji: Emoji personalizado
-  Emoji: Emoji
   Choose Image: Escoller unha imaxe
   Crop Image: Recortar a imaxe
   Zoom: Ampliación
@@ -1867,7 +1863,6 @@ Video:
       Timer ended: Rematou o temporizador de suspensión
     A-B Repeat:
       A-B Repeat: Repetición A-B
-      'On': Activada
       'Off': Desactivada
       Point A: Punto A
       Point B: Punto B
@@ -2224,7 +2219,6 @@ Tab Organizer:
   Close All: Pechar todo
   Ungroup: Desagrupar
   Group Name: Nome do grupo
-  Color: Cor
   No Color: Sen cor
   Create Group: Crear un grupo
   Expand Group: Expandir o grupo
@@ -2544,12 +2538,10 @@ Downloads:
   Remove File Confirmation: Queres eliminar o ficheiro descargado?
   Remove File Warning: Isto moverá «{title}» ao lixo do dispositivo.
   File Not Found: Non se atopou o ficheiro descargado.
-  Download Missing: A descarga non está dispoñible
   Files Missing: O ficheiro descargado xa non está dispoñible no sistema de ficheiros. | Os ficheiros descargados xa non están dispoñibles no sistema de ficheiros.
   Files Available: 'Están dispoñibles {available} de {total} ficheiros descargados.'
   More Files: 1 ficheiro máis | {count} ficheiros máis
   Template Used: 'Modelo: {name}'
-  Download Type: Tipo de descarga
   Template: Modelo
   Unsaved: Sen gardar
   Media Type: Tipo de ficheiro multimedia
@@ -2577,7 +2569,6 @@ Downloads:
   Embed Cover Art: Incorporar a miniatura como imaxe de portada
   Embed Metadata: Incorporar o título, o autor, a descrición e os capítulos
   Additional yt-dlp Arguments: Argumentos adicionais de yt-dlp
-  Custom yt-dlp Arguments: Argumentos personalizados de yt-dlp
   Template Name: Nome do modelo
   Save Template: Gardar o modelo
   Delete Template: Eliminar o modelo

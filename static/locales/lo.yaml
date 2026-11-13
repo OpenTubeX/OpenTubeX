@@ -843,7 +843,6 @@ Settings:
       On Window Hide: ເມື່ອໜ້າຕ່າງບໍ່ໄດ້ຖືກໃຊ້ງານ ຫຼື ຖືກສະຫຼັບໄປບ່ອນອື່ນ
       Wayland Minimize Unsupported: Wayland ບໍ່ແຈ້ງການຫຍໍ້ໜ້າຕ່າງໃຫ້ແອັບຮູ້, ດັ່ງນັ້ນຕົວເລືອກນີ້ຈຶ່ງໃຊ້ບໍ່ໄດ້. ກະລຸນາໃຊ້ "ເມື່ອໜ້າຕ່າງບໍ່ໄດ້ຖືກໃຊ້ງານ ຫຼື ຖືກສະຫຼັບໄປບ່ອນອື່ນ" ແທນ ຊຶ່ງລວມເຖິງການຫຍໍ້ໜ້າຕ່າງຄືກັນ.
     Scroll Mini Player:
-      Scroll Mini Player: ເຄື່ອງຫຼິ້ນຂະໜາດນ້ອຍແບບເລື່ອນໄດ້
       When Scrolling Down: ສະແດງເຄື່ອງຫຼິ້ນຂະໜາດນ້ອຍຄ້າງໄວ້ເມື່ອເລື່ອນລົງ
       On All Tabs: ສະແດງເຄື່ອງຫຼິ້ນຂະໜາດນ້ອຍຄ້າງໄວ້ເມື່ອສະຫຼັບແທັບ
     Scroll Volume Over Video Player: ເລື່ອນເພື່ອປັບລະດັບສຽງເທິງເຄື່ອງຫຼິ້ນວິດີໂອ
@@ -1394,7 +1393,6 @@ Settings:
     Proxy Username: ຊື່ຜູ້ໃຊ້ພຣັອກຊີ
     Proxy Password: ລະຫັດຜ່ານພຣັອກຊີ
     IP Block Recovery Script Path: ເສັ້ນທາງສະຄຣິບແກ້ໄຂການຖືກບລັອກ IP
-    Select IP Block Recovery Script File: ເລືອກໄຟລ໌ສະຄຣິບແກ້ໄຂການຖືກບລັອກ IP
     Clicking on Test Proxy will send a request to: ການກົດ 'ທົດສອບພຣັອກຊີ' ຈະສົ່ງຄຳຮ້ອງຂໍໄປທີ່
     Test Proxy: ທົດສອບພຣັອກຊີ
     Your Info: ຂໍ້ມູນຂອງທ່ານ
@@ -1518,7 +1516,6 @@ Profile:
   Profile Icon: ໄອຄອນໂປຣໄຟລ໌
   Choose an Emoji: ເລືອກອີໂມຈິ
   Custom Emoji: ອີໂມຈິທີ່ກຳນົດເອງ
-  Emoji: ອີໂມຈິ
   Choose Image: ເລືອກຮູບພາບ
   Crop Image: ຕັດຮູບພາບ
   Zoom: ຊູມ
@@ -1821,7 +1818,6 @@ Video:
       Timer ended: ໝົດເວລາປິດແລ້ວ
     A-B Repeat:
       A-B Repeat: ຫຼິ້ນຊໍ້າ A-B
-      On: ເປີດ
       Off: ປິດ
       Point A: ຈຸດ A
       Point B: ຈຸດ B
@@ -2102,7 +2098,6 @@ Tab Organizer:
   Close All: ປິດທັງໝົດ
   Ungroup: ຍົກເລີກການຈັດກຸ່ມ
   Group Name: ຊື່ກຸ່ມ
-  Color: ສີ
   No Color: ບໍ່ມີສີ
   Create Group: ສ້າງກຸ່ມ
   Expand Group: ຂະຫຍາຍກຸ່ມ
@@ -2486,12 +2481,10 @@ Downloads:
   Remove File Confirmation: ຕ້ອງການລຶບໄຟລ໌ທີ່ດາວໂຫຼດແລ້ວບໍ່?
   Remove File Warning: ສິ່ງນີ້ຈະຍ້າຍ "{title}" ໄປທີ່ຖັງຂີ້ເຫຍື້ອຂອງເຄື່ອງ.
   File Not Found: ບໍ່ພົບໄຟລ໌ທີ່ດາວໂຫຼດ.
-  Download Missing: ການດາວໂຫຼດບໍ່ພ້ອມໃຊ້ງານ
   Files Missing: ໄຟລ໌ທີ່ດາວໂຫຼດບໍ່ມີຢູ່ໃນລະບົບໄຟລ໌ແລ້ວ.
   Files Available: ມີ {available} ຈາກ {total} ໄຟລ໌ທີ່ດາວໂຫຼດພ້ອມໃຊ້ງານ.
   More Files: ອີກ 1 ໄຟລ໌ | ອີກ {count} ໄຟລ໌
   Template Used: 'ແມ່ແບບ: {name}'
-  Download Type: ປະເພດການດາວໂຫຼດ
   Template: ແມ່ແບບ
   Unsaved: ຍັງບໍ່ໄດ້ບັນທຶກ
   Media Type: ປະເພດສື່
@@ -2519,7 +2512,6 @@ Downloads:
   Embed Cover Art: ຝັງຮູບຕົວຢ່າງເປັນຮູບປົກ
   Embed Metadata: ຝັງຊື່, ຜູ້ສ້າງ, ຄຳອະທິບາຍ ແລະ ບົດ
   Additional yt-dlp Arguments: ອາກິວເມັນ yt-dlp ເພີ່ມເຕີມ
-  Custom yt-dlp Arguments: ອາກິວເມັນ yt-dlp ກຳນົດເອງ
   Template Name: ຊື່ແມ່ແບບ
   Save Template: ບັນທຶກແມ່ແບບ
   Delete Template: ລຶບແມ່ແບບ

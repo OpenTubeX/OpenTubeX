@@ -907,7 +907,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland non segnala alle app quando una finestra viene ridotta a icona, quindi questa condizione non è disponibile. Usa invece "Quando la finestra perde lo stato attivo o si passa a un'altra finestra", che comprende anche la riduzione a icona.
       On Tab Change Mini Player: Cambiando scheda viene invece mostrato il mini lettore. Per usare questa opzione, imposta «Quando esci da un video» su «Interrompi la riproduzione».
     Scroll Mini Player:
-      Scroll Mini Player: Mini lettore durante lo scorrimento
       Scroll Player Mode: Durante lo scorrimento verso il basso
       Scroll Player Mode Tooltip: "Il lettore viene fissato solo finché occupa al massimo metà dell'altezza della finestra. Altrimenti, ad esempio sui telefoni in orizzontale o nelle finestre larghe, viene mostrato il mini lettore."
       Scroll Player Modes:
@@ -1508,7 +1507,6 @@ Settings:
     Use Shared Tabs: 'Usa un unico gruppo di schede condiviso tra i dispositivi'
     Shared Tabs Warning: 'Le schede aperte su questo dispositivo diventano il gruppo condiviso. Quando si sincronizzano, gli altri dispositivi sostituiscono le proprie schede aperte con questo gruppo; le schede di dispositivi diversi non vengono unite.'
     Tabs From Other Devices: 'Schede da altri dispositivi'
-    Device Tab Session: '{platform} · {count} schede'
     Mobile Device: 'Dispositivo mobile'
     Desktop Device: 'Computer'
     Open All Tabs: 'Apri tutte le schede'
@@ -1521,7 +1519,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'Si aprirà il browser per confermare l''eliminazione con il tuo provider di accesso.'
   Proxy Settings:
     IP Block Recovery Script Path: Script di recupero dal blocco IP
-    Select IP Block Recovery Script File: Seleziona file dello script di ripristino dal blocco IP
     Running IP block recovery script: Esecuzione dello script di ripristino dal blocco IP
     IP block recovery script failed: 'Script di ripristino dal blocco IP non riuscito (codice di uscita: {exitCode})'
     IP block recovery script finished: Script di ripristino dal blocco IP completato
@@ -1630,7 +1627,6 @@ Profile:
   Profile Icon: Icona del profilo
   Choose an Emoji: Scegli un'emoji
   Custom Emoji: Emoji personalizzata
-  Emoji: Emoji
   Choose Image: Scegli immagine
   Crop Image: Ritaglia immagine
   Zoom: Zoom
@@ -1813,7 +1809,6 @@ Video:
       Timer ended: Timer di spegnimento terminato
     A-B Repeat:
       A-B Repeat: Ripetizione A-B
-      On: Attiva
       Off: Disattiva
       Point A: Punto A
       Point B: Punto B
@@ -2165,7 +2160,6 @@ Tab Organizer:
   Close All: Chiudi tutto
   Ungroup: Rimuovi dal gruppo
   Group Name: Nome del gruppo
-  Color: Colore
   No Color: Nessun colore
   Create Group: Crea gruppo
   Expand Group: Espandi gruppo
@@ -2482,12 +2476,10 @@ Downloads:
   Remove File Confirmation: Rimuovere il file scaricato?
   Remove File Warning: '"{title}" verrà spostato nel cestino del dispositivo.'
   File Not Found: Impossibile trovare il file scaricato.
-  Download Missing: Download non disponibile
   Files Missing: Il file scaricato non è più disponibile nel file system. | I file scaricati non sono più disponibili nel file system. | I file scaricati non sono più disponibili nel file system.
   Files Available: '{available} di {total} file scaricati sono disponibili.'
   More Files: 1 altro file | Altri {count} file | Altri {count} file
   Template Used: 'Modello: {name}'
-  Download Type: Tipo di download
   Template: Modello
   Unsaved: Non salvato
   Media Type: Tipo di contenuto
@@ -2515,7 +2507,6 @@ Downloads:
   Embed Cover Art: Incorpora miniatura come copertina
   Embed Metadata: Incorpora titolo, autore, descrizione e capitoli
   Additional yt-dlp Arguments: Argomenti aggiuntivi di yt-dlp
-  Custom yt-dlp Arguments: Argomenti personalizzati di yt-dlp
   Template Name: Nome del modello
   Save Template: Salva modello
   Delete Template: Elimina modello
