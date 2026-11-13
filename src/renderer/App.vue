@@ -2971,7 +2971,8 @@ function getAndroidBackPreview() {
     ])
   }
   const tabId = presentedTabId.value
-  if (!tabId || settingsWindowOpen.value || isAnyPromptOpen.value || hasVisibleGamepadLayer() ||
+  // Back closes the findbar before it changes history.
+  if (!tabId || settingsWindowOpen.value || isAnyPromptOpen.value || findbarVisible.value || hasVisibleGamepadLayer() ||
     document.fullscreenElement || document.querySelector('dialog[open], .topNav.phoneSearchOpen')) return null
   return combineAndroidBackPreviews([
     getAndroidBackPlayer(tabId),
