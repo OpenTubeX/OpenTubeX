@@ -85,7 +85,9 @@ public class PlaylistTouchReorderTest {
                         "document.querySelector('" + row + " .h3Title').textContent.trim() === window.touchSecond");
                     await(view, APP + ".$store.getters.getPlaylist('" + ID + "').videos[0].title === window.touchSecond");
                     evaluate(view, APP + ".$router.push('/userplaylists')");
-                    await(view, "!document.querySelector('.playlistItemsCard')");
+                    // Android keeps the page a tab leaves mounted for Back, so wait
+                    // for the playlist to leave the page the tab shows.
+                    await(view, "!document.querySelector('.tabContent:not([inert]) > .routerView:not(.retainedPage) .playlistItemsCard')");
                     evaluate(view, APP + ".$router.push('/playlist/" + ID + "?playlistType=user')");
                     await(view, "document.querySelector('" + row + " .h3Title')?.textContent.trim() === window.touchSecond");
                 }
