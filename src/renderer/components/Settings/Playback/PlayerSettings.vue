@@ -878,7 +878,7 @@ import {
   normalizeHoldPlaybackRateMultiplier,
 } from '../../../helpers/holdPlaybackRate.js'
 import { initializePlatformInfo, supportsAutoPictureInPictureMinimize } from '../../../helpers/platform'
-import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../../helpers/player/autoQuality'
+import { getAutoQualityFallback, playbackEngineSupportsAutoQuality } from '../../../helpers/player/autoQuality'
 
 defineOptions({ inheritAttrs: false })
 
@@ -1343,7 +1343,7 @@ const qualityNames = computed(() => [
 const defaultQuality = computed(() => {
   const value = store.getters.getDefaultQuality
 
-  if (value === 'auto' && !autoQualityAvailable.value) { return AUTO_QUALITY_FALLBACK }
+  if (value === 'auto' && !autoQualityAvailable.value) { return getAutoQualityFallback() }
 
   return value
 })

@@ -136,7 +136,7 @@ import { getDefaultAudioVariants } from '../../helpers/player/defaultAudioTrack'
 import { MUSIC_MEDIA_TYPE } from '../../helpers/player/musicMediaType'
 import { resolveSegmentPrefetchLimit } from '../../helpers/player/segmentPrefetch'
 import { getBufferingConfig } from '../../helpers/player/buffering'
-import { AUTO_QUALITY_FALLBACK, streamsSupportAutoQuality } from '../../helpers/player/autoQuality'
+import { getAutoQualityFallback, streamsSupportAutoQuality } from '../../helpers/player/autoQuality'
 import { getMeteredAutoQualityMaxPixels, limitQualityOnMeteredNetwork } from '../../helpers/player/meteredNetworkQuality'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 import { prepareGoogleVideoRequest } from '../../helpers/player/playbackRequestPolicy'
@@ -1710,13 +1710,18 @@ export default defineComponent({
       const value = store.getters.getDefaultQuality
 
       return parseInt(limitQualityOnMeteredNetwork(
-        value === 'auto' ? AUTO_QUALITY_FALLBACK : value,
+        value === 'auto' ? getAutoQualityFallback() : value,
         store.getters.getMeteredNetworkQualityLimit
       ))
     })
 
     /** @type {import('vue').ComputedRef<number>} */
     const preferredVideoQuality = computed(() => {
+      // A channel specific auto falls back like the default quality does
+      if (props.currentVideoQuality === 'auto') {
+        return parseInt(limitQualityOnMeteredNetwork(getAutoQualityFallback(), store.getters.getMeteredNetworkQualityLimit))
+      }
+
       const value = Number.parseInt(props.currentVideoQuality)
       return Number.isNaN(value) ? defaultQuality.value : value
     })

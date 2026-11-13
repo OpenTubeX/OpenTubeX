@@ -191,7 +191,7 @@ import { useI18n } from 'vue-i18n'
 
 import store from '../../store/index'
 import { normalizeTabBarPosition, TAB_BAR_POSITIONS } from '../../constants/tabBarPosition'
-import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
+import { getAutoQualityFallback, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { useLandingPageOptions } from '../../composables/useLandingPageOptions'
 
@@ -344,7 +344,7 @@ const playbackToggles = computed(() => [
 
 const defaultQuality = computed(() => {
   const value = store.getters.getDefaultQuality
-  return value === 'auto' && !autoQualityAvailable.value ? AUTO_QUALITY_FALLBACK : value
+  return value === 'auto' && !autoQualityAvailable.value ? getAutoQualityFallback() : value
 })
 
 // The tabs step highlights the tab bar, which moves when its layout changes

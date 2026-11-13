@@ -8,13 +8,26 @@
  * Invidious' manifests, are unaffected, so auto quality can be offered for those.
  */
 
+/** The qualities that the fallback for auto picks from, highest first. */
+const AUTO_QUALITY_FALLBACKS = [1080, 720, 480, 360, 240, 144]
+
 /**
  * The quality that a stored `auto` falls back to while auto quality is
- * unavailable. It is the default value of the `defaultQuality` setting, but
- * intentionally not that setting's current value: playback uses this fallback,
- * so anything that displays the fallback has to use it as well to agree.
+ * unavailable: the highest one that fits the screen's short side in physical
+ * pixels, which a fullscreen landscape video fills. The quality stays fixed for
+ * the whole video, so it can't step down on a slow connection, which is why it
+ * stops at 1080p. Anything that displays the fallback has to use this as well,
+ * to agree with playback.
+ * @param {{ width: number, height: number }} [screenSize]
+ * @param {number} [pixelRatio]
+ * @returns {string}
  */
-export const AUTO_QUALITY_FALLBACK = '720'
+export function getAutoQualityFallback(screenSize = window.screen, pixelRatio = window.devicePixelRatio) {
+  const shortSide = Math.min(screenSize.width, screenSize.height) * pixelRatio
+  const quality = AUTO_QUALITY_FALLBACKS.find(quality => quality <= shortSide) ?? AUTO_QUALITY_FALLBACKS.at(-1)
+
+  return String(quality)
+}
 
 /**
  * Whether the currently playing streams support the automatic quality selection.
