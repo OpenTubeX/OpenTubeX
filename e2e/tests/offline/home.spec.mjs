@@ -256,7 +256,10 @@ test('opens the subscriptions New feed from its Home summary', async ({ page }) 
   await expect(page).toHaveURL(/#\/subscriptions\?tab=new$/)
   await expect(page.locator('[data-subscription-feed-tab="all"]')).toHaveAttribute('aria-selected', 'true')
   await expect(page.getByText('New Home video', { exact: true })).toBeVisible()
-  await expect(page.getByText('New Home short', { exact: true })).toBeVisible()
+  // Feed items render once they scroll into view, and the Shorts section follows every video.
+  const shortsSection = page.locator('.mediaSection').filter({ has: page.getByRole('heading', { name: 'Shorts', exact: true }) })
+  await shortsSection.scrollIntoViewIfNeeded()
+  await expect(shortsSection.getByText('New Home short', { exact: true })).toBeVisible()
 
   await page.locator('[data-subscription-feed-tab="videos"]').click()
   await expect(page).toHaveURL(/#\/subscriptions\?tab=videos$/)
