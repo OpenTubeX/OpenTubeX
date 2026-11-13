@@ -194,9 +194,14 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        if (hasFocus && bridge != null) {
+        if (bridge == null) return;
+        if (hasFocus) {
             // System gestures can reveal the bars without changing player controls.
             bridge.triggerWindowJSEvent("opentubex:android-window-focus");
+        } else {
+            // Recents keeps the app resumed, so this is the last event before a
+            // swipe there removes the task and Android ends the process.
+            bridge.triggerWindowJSEvent("opentubex:android-window-blur");
         }
     }
 

@@ -39,3 +39,11 @@ export function onPeriodicBackgroundSync(sync) {
       .finally(() => BackgroundSync.end({ id }).catch(() => {}))
   })
 }
+
+/**
+ * @param {() => void} callback Runs when the app window loses focus, for example
+ * when the user opens recents, where they can swipe the app away.
+ */
+export function onAndroidWindowBlur(callback) {
+  if (BackgroundSync) window.addEventListener('opentubex:android-window-blur', callback)
+}

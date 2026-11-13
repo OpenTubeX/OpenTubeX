@@ -25,7 +25,8 @@ const EVENT_SYNC_DELAYS = {
  * Decides when to sync with the sync server; sync-server-scheduling.js
  * decides which changes need one. Runs one sync at a time, queues a full
  * sync behind a remote-only check, waits for a pause in local edits per
- * collection, checks periodically while automatic sync is on, and replays
+ * collection, checks periodically while automatic sync is on, syncs pending
+ * edits right away when the Android app may be leaving, and replays
  * edits that came due while iOS had the app hidden.
  * @param {object} options
  * @param {() => any} options.getSettings The current settings
@@ -60,7 +61,14 @@ export function createSyncScheduler({
   /** @type {ReturnType<typeof setTimeout> | null} */
   let autoSyncTimer = null
   let autoSyncController = new AbortController()
-  /** @type {Map<string, { firstChangeAt: number, timer: ReturnType<typeof setTimeout> | null, releaseHold: () => void }>} */
+  /**
+   * @typedef {object} PendingEventSync
+   * @property {number} firstChangeAt
+   * @property {ReturnType<typeof setTimeout> | null} timer
+   * @property {() => void} releaseHold
+   * @property {() => Promise<void>} run Syncs the pending edits without waiting for the timer
+   */
+  /** @type {Map<string, PendingEventSync>} */
   const eventSyncTimers = new Map()
   // Event syncs that came due while the iOS app was hidden; replayed on resume.
   /** @type {Set<string>} */
@@ -199,39 +207,56 @@ export function createSyncScheduler({
     const firstChangeAt = previous?.firstChangeAt ?? Date.now()
     const { delay, maxWait } = EVENT_SYNC_DELAYS[reason] ?? { delay: EVENT_SYNC_DEBOUNCE_MS, maxWait: Infinity }
     clearTimeout(previous?.timer ?? undefined)
-    // Keep a hidden Android app running until the pending edits are synced.
-    /** @type {{ firstChangeAt: number, timer: ReturnType<typeof setTimeout> | null, releaseHold: () => void }} */
-    const pending = { firstChangeAt, timer: null, releaseHold: previous?.releaseHold ?? holdAndroidBackgroundWork() }
-    eventSyncTimers.set(reason, pending)
-    pending.timer = setTimeout(async () => {
-      // Edits made during a sync retain their own deadline. Once due, wait for
-      // that sync to finish rather than starting a second debounce period.
-      for (let syncing = activeSyncPromise; syncing; syncing = activeSyncPromise) {
-        await syncing.catch(() => {})
-      }
-      if (eventSyncTimers.get(reason) !== pending) return
-      eventSyncTimers.delete(reason)
-      try {
-        const settings = getSettings()
-        if (isOffline() ||
-            !isAutoSyncEnabled(settings) ||
-            !isSyncReasonEnabled(settings, reason)) return
-        // iOS suspends a hidden app, which would stall the sync until it resumes.
-        if (process.env.IS_IOS && isAppHidden()) {
-          hiddenEventSyncReasons.add(reason)
-          return
+    /** @type {PendingEventSync} */
+    const pending = {
+      firstChangeAt,
+      timer: null,
+      // Keep a hidden Android app running until the pending edits are synced.
+      releaseHold: previous?.releaseHold ?? holdAndroidBackgroundWork(),
+      run: async () => {
+        // Edits made during a sync retain their own deadline. Once due, wait for
+        // that sync to finish rather than starting a second debounce period.
+        for (let syncing = activeSyncPromise; syncing; syncing = activeSyncPromise) {
+          await syncing.catch(() => {})
         }
-        // The sync holds the app running from here on.
-        requestSync({
-          skipIfRecent: reason === 'automatic',
-          automatic: true,
-        }).catch(error => {
-          console.error('Sync server event sync failed', error)
-        })
-      } finally {
-        pending.releaseHold()
-      }
-    }, Math.max(0, Math.min(delay, firstChangeAt + maxWait - Date.now())))
+        if (eventSyncTimers.get(reason) !== pending) return
+        eventSyncTimers.delete(reason)
+        try {
+          const settings = getSettings()
+          if (isOffline() ||
+              !isAutoSyncEnabled(settings) ||
+              !isSyncReasonEnabled(settings, reason)) return
+          // iOS suspends a hidden app, which would stall the sync until it resumes.
+          if (process.env.IS_IOS && isAppHidden()) {
+            hiddenEventSyncReasons.add(reason)
+            return
+          }
+          // The sync holds the app running from here on.
+          requestSync({
+            skipIfRecent: reason === 'automatic',
+            automatic: true,
+          }).catch(error => {
+            console.error('Sync server event sync failed', error)
+          })
+        } finally {
+          pending.releaseHold()
+        }
+      },
+    }
+    eventSyncTimers.set(reason, pending)
+    pending.timer = setTimeout(pending.run, Math.max(0, Math.min(delay, firstChangeAt + maxWait - Date.now())))
+  }
+
+  /**
+   * Syncs pending edits now instead of after their delay. Once the Android app
+   * is swiped away, it cannot sync until it opens again.
+   */
+  function flush() {
+    for (const pending of eventSyncTimers.values()) {
+      clearTimeout(pending.timer ?? undefined)
+      pending.timer = null
+      pending.run()
+    }
   }
 
   function resumeHidden() {
@@ -240,5 +265,5 @@ export function createSyncScheduler({
     for (const reason of reasons) schedule(reason)
   }
 
-  return { sync, waitForActiveSync, start, restart, stop, schedule, resumeHidden }
+  return { sync, waitForActiveSync, start, restart, stop, schedule, flush, resumeHidden }
 }
