@@ -181,18 +181,24 @@ const actions = {
     }
   },
 
-  async applyHistorySyncChanges({ commit }, changes) {
+  async applyHistorySyncChanges({ commit, state }, changes) {
     const migratedChanges = {
       insertions: changes.insertions.map(migrateLegacyHistoryRecord),
       updates: changes.updates.map(migrateLegacyHistoryRecord),
       deletions: changes.deletions,
     }
     const skipped = new Set(await DBHistoryHandlers.applySyncChanges(migratedChanges, changes.assertActive))
-    // An edit committed during the write reached the datastore after it, so
-    // only the cache would keep the stale record. The sync retries instead.
-    changes.assertActive?.()
     if (skipped.size > 0) migratedChanges.insertions = migratedChanges.insertions.filter(record => !skipped.has(record.videoId))
+    if (changes.overwritesEdit?.()) {
+      // An edit committed during the write reached the datastore after it, so
+      // the cache keeps it and the sync merges again. The datastore would skip
+      // the arrivals as already stored, so add them now.
+      const arrivals = migratedChanges.insertions.filter(record => !state.historyCacheById[record.videoId])
+      if (arrivals.length > 0) commit('applyHistorySyncChanges', { insertions: arrivals, updates: [], deletions: [] })
+      return false
+    }
     commit('applyHistorySyncChanges', migratedChanges)
+    return true
   },
 
   async markAllHistoryAsWatched({ dispatch, state }) {

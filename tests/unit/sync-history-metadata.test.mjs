@@ -38,7 +38,7 @@ async function downloadHistory(local = [], entry = remote, uploaded = []) {
     state: { history: { historyCacheSorted: local } },
     dispatch: async (action, payload) => {
       assert.equal(action, 'applyHistorySyncChanges')
-      const { assertActive, ...changed } = payload
+      const { assertActive, overwritesEdit, ...changed } = payload
       changes.push(structuredClone(changed))
     },
   })

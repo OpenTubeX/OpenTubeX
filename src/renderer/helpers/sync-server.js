@@ -1265,12 +1265,14 @@ export async function syncHistory(client, store, previous = {}, options = {}, { 
         if (overwritesEdit()) continue
         if (insertions.length > 0 || updates.length > 0 || deletions.length > 0) {
           try {
-            await store.dispatch('applyHistorySyncChanges', {
+            const applied = await store.dispatch('applyHistorySyncChanges', {
               insertions,
               updates,
               deletions,
               assertActive: assertHistoryCurrent,
+              overwritesEdit,
             })
+            if (applied === false) continue
           } catch (error) {
             if (error !== historyChanged) throw error
             store.assertActive?.()

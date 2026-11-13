@@ -174,27 +174,33 @@ test('history edits during serialization prevent stale writes and retry with fre
   } finally { jobs.dispose() }
 })
 
-test('a playback save while the datastore applies a sync is not overwritten', async () => {
+test('a playback save while the datastore applies a sync is not overwritten and keeps arrivals', async () => {
   const jobs = createJobs()
+  const stored = new Set()
   let edited = false
   const store = historyStore({
     applySyncChanges: async (changes, assertActive) => {
       assertActive?.()
+      // Like the datastore, keep already stored records instead of inserting them again.
+      const skipped = changes.insertions.filter(record => stored.has(record.videoId)).map(record => record.videoId)
+      for (const record of changes.insertions) stored.add(record.videoId)
       if (!edited) {
         edited = true
         // The save commits while the sync's write is still on its way to the datastore.
         store.commit('updateRecordWatchProgressInHistoryCache', { videoId: 'video', watchProgress: 99 })
       }
-      return []
+      return skipped
     },
   })
   store.commit('upsertToHistoryCache', historyRecord('video'))
+  stored.add('video')
   try {
     await syncContext((...args) => jobs.run(...args)).syncHistory({
-      getWatchHistory: async () => [remoteRecord('video', 30)],
+      getWatchHistory: async () => [remoteRecord('video', 30), remoteRecord('incoming')],
       applyWatchHistoryChanges: async () => {},
     }, store)
     assert.equal(store.state.history.historyCacheById.video.watchProgress, 99)
+    assert.ok(store.state.history.historyCacheById.incoming, 'The datastore already holds the arrival')
   } finally { jobs.dispose() }
 })
 
