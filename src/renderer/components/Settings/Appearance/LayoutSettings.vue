@@ -53,9 +53,9 @@
         v-if="usingElectron || IS_CAPACITOR"
         :label="$t('Settings.Theme Settings.UI Scale')"
         :default-value="uiScale"
-        :min-value="IS_CAPACITOR ? CAPACITOR_UI_SCALE_MIN : 50"
-        :max-value="IS_CAPACITOR ? CAPACITOR_UI_SCALE_MAX : 300"
-        :step="5"
+        :min-value="IS_CAPACITOR ? CAPACITOR_UI_SCALE_MIN : UI_SCALE.MIN"
+        :max-value="IS_CAPACITOR ? CAPACITOR_UI_SCALE_MAX : UI_SCALE.MAX"
+        :step="UI_SCALE.STEP"
         value-extension="%"
         @change="updateUiScale"
       />
@@ -448,6 +448,7 @@ import {
 import { getMissingTabAvatarTabs, loadMissingTabAvatars } from '../../../helpers/loadTabAvatars'
 import { showToast } from '../../../helpers/utils'
 import { CAPACITOR_UI_SCALE_MIN, CAPACITOR_UI_SCALE_MAX } from '../../../helpers/capacitorUiScale'
+import { UI_SCALE } from '../../../../constants.js'
 import { MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../../helpers/appFont'
 
 const { t } = useI18n()
