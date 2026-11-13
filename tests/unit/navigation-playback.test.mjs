@@ -67,7 +67,7 @@ function mountWatch(t, { tab = null, paused = false, hasLoaded = true, mounted =
     await nextTick()
     await lifecycle.afterNavigate({ to })
   }
-  const previewStyle = scope.run(() => vm.runInNewContext(`${source}\npreviewStyle`, {
+  const { previewStyle, watchRoute } = scope.run(() => vm.runInNewContext(`${source};\n({ previewStyle, watchRoute })`, {
     computed,
     nextTick,
     reactive,
@@ -116,6 +116,9 @@ function mountWatch(t, { tab = null, paused = false, hasLoaded = true, mounted =
     onBeforeUnmount: callback => unmount.push(callback)
   })
   provides.get('lifecycle').register('tab', { beforeDispose: () => { disposals++ } })
+  // The routes the template renders, so a test can tell whether Watch remounted.
+  const renderedRoutes = []
+  scope.run(() => watch(watchRoute, route => renderedRoutes.push(route?.fullPath ?? null)))
   t.after(async () => {
     unmount.forEach(callback => callback())
     await nextTick()
@@ -131,6 +134,7 @@ function mountWatch(t, { tab = null, paused = false, hasLoaded = true, mounted =
     lifecycle,
     previewRoot,
     previewStyle,
+    renderedRoutes,
     hostBounds,
     tabBounds,
     viewport,
@@ -453,12 +457,17 @@ test('play in background docks a new player and switches it in place without lea
   assert.equal(mounted.provides.get('route').fullPath, '/watch/third')
 
   // Closing the mini player meanwhile disposes the old player, so the video
-  // starts again in a new one instead of being dismissed with it.
-  await Promise.all([mounted.exposed().playInBackground('/watch/third'), navigation.dismiss()])
-  assert.equal(mounted.resumes(), 2)
-  assert.equal(mounted.disposals(), 2)
-  assert.equal(navigation.detached.value, true)
-  assert.equal(navigation.takeBackgroundStart('/watch/third'), true)
+  // starts again in a new Watch page, whichever request finishes first.
+  for (const [index, dismissFirst] of [false, true].entries()) {
+    mounted.renderedRoutes.length = 0
+    const start = () => mounted.exposed().playInBackground('/watch/third')
+    await Promise.all(dismissFirst ? [navigation.dismiss(), start()] : [start(), navigation.dismiss()])
+    assert.deepEqual(mounted.renderedRoutes, [null, '/watch/third'], `remounts when ${dismissFirst ? 'dismissing' : 'starting'} first`)
+    assert.equal(mounted.resumes(), 2)
+    assert.equal(mounted.disposals(), 2 + index)
+    assert.equal(navigation.detached.value, true)
+    assert.equal(navigation.takeBackgroundStart('/watch/third'), true)
+  }
 
   await navigation.returnToVideo()
   assert.equal(mounted.props.route.path, '/watch/third')

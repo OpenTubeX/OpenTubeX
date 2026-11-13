@@ -384,9 +384,10 @@ function clearMinimizePreview() {
 async function playInBackground(location) {
   await disposalPromise
   if (isWatchRoute.value) return
-  if (disposed && watchRoute.value) {
-    // Unmount the disposed Watch page first. Kept for a route to the same
-    // video, it would not reload its stopped player.
+  if (disposed) {
+    // Unmount the disposed Watch page first, even where dismiss() already
+    // cleared its route. Kept for a route to the same video, it would not
+    // reload its stopped player.
     watchRoute.value = null
     await nextTick()
     if (isWatchRoute.value) return
