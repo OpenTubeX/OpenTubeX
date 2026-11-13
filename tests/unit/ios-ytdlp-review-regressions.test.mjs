@@ -118,6 +118,7 @@ test('iOS does not select an HLS manifest rejected by every probe', async () => 
       })
     },
     getTwitchVodId: () => null,
+    parseTwitchChannelLogin: () => null,
     isAudioFormat: () => false,
     isVideoFormat: () => true,
     isExternalProgressiveVideoFormat: () => false,
