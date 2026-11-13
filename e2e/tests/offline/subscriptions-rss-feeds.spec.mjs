@@ -674,6 +674,8 @@ test.describe('with followed feeds', () => {
       await input.fill(ATOM_URL)
       await input.press('Enter')
       await expect(manager.locator('.feedRow')).toHaveCount(3)
+      // The list shows the feed before it is saved, and the input clears once it is
+      await expect(input).toHaveValue('')
 
       await page.route(ATOM_URL, route => route.fulfill({ status: 500, body: 'Server error' }))
       await page.reload()
