@@ -1132,9 +1132,11 @@ const showInvidiousShareOptions = computed(() => usesInvidiousInstance(backendPr
 
 const { hideSubscriptionFeedType, hideSubscriptionFeedTypeOption } = useHideSubscriptionFeedType(() => channelId.value)
 
-// Only the mobile mini bar can dock an audio-only player.
+// Only the mobile mini bar can dock an audio-only player. iOS plays most
+// downloads natively, so their Watch page would stream them instead.
 const canPlayInBackground = computed(() => process.env.IS_CAPACITOR && playInBackground !== null &&
-  !listedOnWatchPage && !upcoming.value && props.data.isShort !== true)
+  !listedOnWatchPage && !upcoming.value && props.data.isShort !== true &&
+  !(process.env.IS_IOS && localDownloadId.value !== undefined && !linkDownloadId.value))
 
 const videoMenuOptions = computed(() => {
   const options = [

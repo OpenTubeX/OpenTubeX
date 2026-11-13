@@ -452,6 +452,14 @@ test('play in background docks a new player and switches it in place without lea
   assert.equal(mounted.resumes(), 2)
   assert.equal(mounted.provides.get('route').fullPath, '/watch/third')
 
+  // Closing the mini player meanwhile disposes the old player, so the video
+  // starts again in a new one instead of being dismissed with it.
+  await Promise.all([mounted.exposed().playInBackground('/watch/third'), navigation.dismiss()])
+  assert.equal(mounted.resumes(), 2)
+  assert.equal(mounted.disposals(), 2)
+  assert.equal(navigation.detached.value, true)
+  assert.equal(navigation.takeBackgroundStart('/watch/third'), true)
+
   await navigation.returnToVideo()
   assert.equal(mounted.props.route.path, '/watch/third')
   assert.equal(navigation.detached.value, false)

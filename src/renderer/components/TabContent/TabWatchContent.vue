@@ -384,6 +384,13 @@ function clearMinimizePreview() {
 async function playInBackground(location) {
   await disposalPromise
   if (isWatchRoute.value) return
+  if (disposed && watchRoute.value) {
+    // Unmount the disposed Watch page first. Kept for a route to the same
+    // video, it would not reload its stopped player.
+    watchRoute.value = null
+    await nextTick()
+    if (isWatchRoute.value) return
+  }
   const route = navigation.resolve(location)
   if (detached.value && !disposed) {
     // Another route to the same video, such as one without its timestamp,
@@ -412,7 +419,8 @@ defineExpose({ playInBackground })
 async function dismiss() {
   if (!detached.value) return
   await dispose()
-  if (!isWatchRoute.value) {
+  // Play in Background may have started another video meanwhile.
+  if (!isWatchRoute.value && disposed) {
     retained.value = false
     minimized.value = false
     watchRoute.value = null
