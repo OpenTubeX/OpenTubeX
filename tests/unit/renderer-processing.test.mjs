@@ -13,10 +13,13 @@ import { executeBackgroundJob } from '../../src/renderer/helpers/background-job-
 import { BackgroundJobClient } from '../../src/renderer/helpers/background-job-client.js'
 import { SyncServerDataLossError, SyncServerCancelledError } from '../../src/renderer/helpers/sync-server-errors.js'
 import { parseSubscriptionRss } from '../../src/renderer/helpers/api/feed-rss.js'
+import { createHistoryChangeTracker } from '../../src/renderer/helpers/sync-history-changes.js'
 
 const source = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
 const subscriptions = await readFile(new URL('../../src/renderer/helpers/subscriptions.js', import.meta.url), 'utf8')
 const historySource = await readFile(new URL('../../src/renderer/store/modules/history.js', import.meta.url), 'utf8')
+
+const historyChanges = createHistoryChangeTracker()
 
 function createJobs(onMessage = () => {}) {
   return new BackgroundJobClient(() => {
@@ -30,7 +33,7 @@ function createJobs(onMessage = () => {}) {
 }
 
 function syncContext(runBackgroundJob) {
-  const context = vm.createContext({ runBackgroundJob, toRaw })
+  const context = vm.createContext({ runBackgroundJob, toRaw, historyChanges })
   vm.runInContext(source
     .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
     .replace(/^export \{[\s\S]*?\}\n/gm, '')
@@ -42,7 +45,9 @@ function historyStore(DBHistoryHandlers) {
   const history = vm.compileFunction(historySource
     .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
     .replace('export default ', 'return '), ['DBHistoryHandlers', 'compareHistoryRecordsNewestFirst', 'migrateLegacyHistoryRecord', 'toRaw'])(DBHistoryHandlers, compareHistoryRecordsNewestFirst, migrateLegacyHistoryRecord, toRaw)
-  return createStore({ modules: { history } })
+  const store = createStore({ modules: { history } })
+  store.subscribe(mutation => historyChanges.record(mutation))
+  return store
 }
 
 const historyRecord = (videoId, watchProgress = 15) => ({ videoId, authorId: 'UCtest', timeWatched: 1, watchProgress, lengthSeconds: 120 })
@@ -86,7 +91,7 @@ test('history edits during transfer cannot become remote deletions or lose new p
     video: { id: record.videoId, uploader: { id: 'UCtest' } },
     metadata: { added_date: record.timeWatched, watched_state: 'watching', position_millis: 15_000 },
   }))
-  const history = { historyCacheSorted: records, historyRevision: 0 }
+  const history = { historyCacheSorted: records }
   let edited = false
   const jobs = createJobs(message => {
     if (edited || message.type !== 'chunk' || message.path[0] !== 'localHistory') return
@@ -96,20 +101,23 @@ test('history edits during transfer cannot become remote deletions or lose new p
     const [watched] = records.splice(599, 1)
     records.unshift({ ...watched, timeWatched: 1000 })
     records[1].watchProgress = 99
-    history.historyRevision++
+    historyChanges.record({ type: 'upsertToHistoryCache', payload: records[0] })
+    historyChanges.record({ type: 'updateRecordWatchProgressInHistoryCache', payload: { videoId: records[1].videoId, watchProgress: 99 } })
   })
   const uploaded = []
   try {
-    const snapshot = await syncContext((...args) => jobs.run(...args)).syncHistory({
+    const sync = previous => syncContext((...args) => jobs.run(...args)).syncHistory({
       getWatchHistory: async () => remote,
       applyWatchHistoryChanges: async (entries, deleted) => {
         assert.deepEqual(deleted, [])
         uploaded.push(...entries)
       },
-    }, { state: { history }, dispatch: () => assert.fail('Newer local history must not be overwritten') }, records.map(record => record.videoId))
+    }, { state: { history }, dispatch: () => assert.fail('Newer local history must not be overwritten') }, previous)
+    // The edits schedule their own sync, which uploads them.
+    const snapshot = await sync(await sync(records.map(record => record.videoId)))
     assert.equal(Object.keys(snapshot).length, 600)
-    assert.equal(uploaded.find(entry => entry.video.id === 'video-0')?.metadata.position_millis, 99_000)
-    assert.equal(uploaded.find(entry => entry.video.id === 'video-599')?.metadata.added_date, 1000)
+    assert.equal(uploaded.findLast(entry => entry.video.id === 'video-0')?.metadata.position_millis, 99_000)
+    assert.equal(uploaded.findLast(entry => entry.video.id === 'video-599')?.metadata.added_date, 1000)
   } finally { jobs.dispose() }
 })
 
@@ -166,9 +174,39 @@ test('history edits during serialization prevent stale writes and retry with fre
   } finally { jobs.dispose() }
 })
 
+test('a playback save while the datastore applies a sync is not overwritten and keeps arrivals', async () => {
+  const jobs = createJobs()
+  const stored = new Set()
+  let edited = false
+  const store = historyStore({
+    applySyncChanges: async (changes, assertActive) => {
+      assertActive?.()
+      // Like the datastore, keep already stored records instead of inserting them again.
+      const skipped = changes.insertions.filter(record => stored.has(record.videoId)).map(record => record.videoId)
+      for (const record of changes.insertions) stored.add(record.videoId)
+      if (!edited) {
+        edited = true
+        // The save commits while the sync's write is still on its way to the datastore.
+        store.commit('updateRecordWatchProgressInHistoryCache', { videoId: 'video', watchProgress: 99 })
+      }
+      return skipped
+    },
+  })
+  store.commit('upsertToHistoryCache', historyRecord('video'))
+  stored.add('video')
+  try {
+    await syncContext((...args) => jobs.run(...args)).syncHistory({
+      getWatchHistory: async () => [remoteRecord('video', 30), remoteRecord('incoming')],
+      applyWatchHistoryChanges: async () => {},
+    }, store)
+    assert.equal(store.state.history.historyCacheById.video.watchProgress, 99)
+    assert.ok(store.state.history.historyCacheById.incoming, 'The datastore already holds the arrival')
+  } finally { jobs.dispose() }
+})
+
 for (const backend of ['encrypted', 'legacy']) {
   for (const baseline of ['states', 'ids']) {
-    test(`history re-added during ${backend} deletion survives retry with a ${baseline} baseline`, async () => {
+    test(`history re-added during ${backend} deletion survives and uploads with the next sync from a ${baseline} baseline`, async () => {
       const jobs = createJobs()
       let remote = ['kept', 're-added', 'incoming'].map(id => remoteRecord(id))
       const previous = baseline === 'ids'
@@ -198,7 +236,11 @@ for (const backend of ['encrypted', 'legacy']) {
             }),
       }
       try {
-        const snapshot = await syncContext((...args) => jobs.run(...args)).syncHistory(client, store, previous)
+        const sync = previous => syncContext((...args) => jobs.run(...args)).syncHistory(client, store, previous)
+        // The edit schedules its own sync. This one must not overwrite or delete it.
+        const first = await sync(previous)
+        assert.equal(store.state.history.historyCacheById['re-added']?.watchProgress, 99)
+        const snapshot = await sync(first)
         assert.equal(store.state.history.historyCacheById['re-added']?.watchProgress, 99)
         assert.equal(remote.find(entry => entry.video.id === 're-added')?.metadata.position_millis, 99_000)
         assert.equal(snapshot['re-added']?.position_millis, 99_000)
@@ -211,7 +253,7 @@ for (const backend of ['encrypted', 'legacy']) {
 
 for (const backend of ['encrypted', 'legacy bulk', 'legacy single']) {
   for (const edit of ['remove', 'rewind']) {
-    test(`${edit} during ${backend} upload survives the next history attempt`, async () => {
+    test(`${edit} during ${backend} upload survives and uploads with the next sync`, async () => {
       const jobs = createJobs()
       const store = historyStore({ applySyncChanges: async (changes, assertActive) => assertActive?.() })
       store.commit('upsertToHistoryCache', historyRecord('kept'))
@@ -239,7 +281,10 @@ for (const backend of ['encrypted', 'legacy bulk', 'legacy single']) {
             }),
       }
       try {
-        const snapshot = await syncContext((...args) => jobs.run(...args)).syncHistory(client, store, previous)
+        const sync = previous => syncContext((...args) => jobs.run(...args)).syncHistory(client, store, previous)
+        const first = await sync(previous)
+        assert.equal(store.state.history.historyCacheById.uploaded?.watchProgress, edit === 'remove' ? undefined : 5)
+        const snapshot = await sync(first)
         if (edit === 'remove') {
           assert.equal(store.state.history.historyCacheById.uploaded, undefined)
           assert.equal(remote.some(entry => entry.video.id === 'uploaded'), false)
@@ -309,12 +354,13 @@ test('a partial legacy write failure preserves the error and re-added local hist
   } finally { jobs.dispose() }
 })
 
-test('a stale data-loss error is retried, while continuous history edits stop after bounded retries', async () => {
-  const history = { historyCacheSorted: [], historyRevision: 0 }
+test('a stale data-loss error is retried, playback saves need no retry, and continuous edits stop after bounded retries', async () => {
+  const history = { historyCacheSorted: [] }
+  const reload = () => historyChanges.record({ type: 'setHistoryCacheSorted', payload: [] })
   let attempts = 0
   const context = syncContext(async (operation, input) => {
     if (++attempts === 1) {
-      history.historyRevision++
+      reload()
       throw new SyncServerDataLossError({ collection: 'history', deleted: 1, previous: 1, items: [] })
     }
     return executeBackgroundJob(operation, input)
@@ -324,22 +370,30 @@ test('a stale data-loss error is retried, while continuous history edits stop af
   assert.deepEqual(structuredClone(await context.syncHistory(client, store)), {})
   assert.equal(attempts, 2)
   attempts = 0
-  const busy = syncContext(async (operation, input) => {
+  // External media saves the playing entry's progress every few seconds.
+  const playing = syncContext(async (operation, input) => {
     attempts++
-    history.historyRevision++
+    historyChanges.record({ type: 'updateRecordWatchProgressInHistoryCache', payload: { videoId: 'playing', watchProgress: attempts } })
     return executeBackgroundJob(operation, input)
   })
-  await assert.rejects(busy.syncHistory(client, store), /Watch history changed during sync/)
+  assert.deepEqual(structuredClone(await playing.syncHistory(client, store)), {})
+  assert.equal(attempts, 1)
+  attempts = 0
+  const busy = syncContext(async (operation, input) => {
+    attempts++
+    reload()
+    return executeBackgroundJob(operation, input)
+  })
+  // Each reload may change the entry the merge would insert locally.
+  await assert.rejects(busy.syncHistory({ ...client, getWatchHistory: async () => [remoteRecord('video')] }, store), /Watch history changed during sync/)
   assert.equal(attempts, 3)
 })
 
-test('playlist metadata changes invalidate sync snapshots without evicting the shelf cache', () => {
+test('playlist metadata changes do not evict the shelf cache', () => {
   const store = historyStore({})
   store.commit('upsertToHistoryCache', { videoId: 'video' })
-  const revision = store.state.history.historyRevision
   const shelfRevision = store.state.history.continueWatchingRevision
   store.commit('updateRecordLastViewedPlaylistIdInHistoryCache', { videoId: 'video', lastViewedPlaylistId: 'playlist' })
-  assert.equal(store.state.history.historyRevision, revision + 1)
   assert.equal(store.state.history.continueWatchingRevision, shelfRevision)
 })
 

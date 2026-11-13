@@ -3,13 +3,15 @@ import { historyRepairPatch, needsHistoryRepair, repairHistory } from '../../src
 import { DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote, selectChangedHistory, mergeChangedHistoryBaseline, mergeHistory } from '../../src/renderer/helpers/sync-history-merge.js'
 import { executeBackgroundJob as runBackgroundJob } from '../../src/renderer/helpers/background-job-operations.js'
 import { EncryptedSyncAdapter } from '../../src/renderer/helpers/sync-server-privacy.js'
+import { createHistoryChangeTracker } from '../../src/renderer/helpers/sync-history-changes.js'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 
+const historyChanges = createHistoryChangeTracker()
 const source = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
-const context = vm.createContext({ DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeSyncIds, syncVideoToRemote, selectChangedHistory, mergeChangedHistoryBaseline, runBackgroundJob, toRaw })
+const context = vm.createContext({ DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeSyncIds, syncVideoToRemote, selectChangedHistory, mergeChangedHistoryBaseline, runBackgroundJob, toRaw, historyChanges })
 vm.runInContext(source
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
   .replace(/^export \{[\s\S]*?\}\n/gm, '')
@@ -36,7 +38,8 @@ async function downloadHistory(local = [], entry = remote, uploaded = []) {
     state: { history: { historyCacheSorted: local } },
     dispatch: async (action, payload) => {
       assert.equal(action, 'applyHistorySyncChanges')
-      changes.push(structuredClone(payload))
+      const { assertActive, overwritesEdit, ...changed } = payload
+      changes.push(structuredClone(changed))
     },
   })
   return changes[0]
@@ -453,7 +456,7 @@ test('consumed repair markers cannot resurrect a superseded duration when a late
 test('a newer repair during an upload survives the stale-history retry', async () => {
   const record = { ...imported, lengthSeconds: 100, isLive: true, published: 0 }
   Object.assign(record, historyRepairPatch(record, { lengthSeconds: 120, isLive: false, isUpcoming: false }))
-  const history = { historyCacheSorted: [record], historyRevision: 0 }
+  const history = { historyCacheSorted: [record] }
   let entry = { ...structuredClone(remote), video: { ...remote.video, duration: 100, upload_date: 0 } }
   let writes = 0
   await context.syncHistory({
@@ -463,7 +466,7 @@ test('a newer repair during an upload survives the stale-history retry', async (
       entry = structuredClone(entries[0])
       if (++writes === 1) {
         Object.assign(record, historyRepairPatch(record, { lengthSeconds: 130, isLive: false, isUpcoming: false }))
-        history.historyRevision++
+        historyChanges.record({ type: 'upsertToHistoryCache', payload: record })
       }
     },
   }, {
@@ -471,7 +474,6 @@ test('a newer repair during an upload survives the stale-history retry', async (
     dispatch: async (action, changes) => {
       assert.equal(action, 'applyHistorySyncChanges')
       history.historyCacheSorted = structuredClone(changes.updates)
-      history.historyRevision++
     },
   }, { [record.videoId]: remote.metadata })
   assert.equal(entry.video.duration, 130)
@@ -555,28 +557,31 @@ test('two devices with equal watch timestamps and conflicting progress converge'
   assert.equal(server.writes, finalWrites)
 })
 
-test('an edit during a merge of changed entries is uploaded by the retry', async () => {
+test('an edit the merge does not overwrite is uploaded by the next sync without a retry', async () => {
   const entry = id => ({ ...imported, _id: id, videoId: id, title: `Video ${id}`, timeWatched: 100, watchProgress: 10 })
   const records = [entry('a'), entry('b')]
   const converged = mergeHistory({ localHistory: records, remoteHistory: [], previous: {} })
   const client = new EncryptedSyncAdapter({ history: converged.historyToUpload })
-  const history = { historyCacheSorted: records.map(record => ({ ...record })), historyRevision: 0 }
+  const history = { historyCacheSorted: records.map(record => ({ ...record })) }
   history.historyCacheSorted[0] = { ...records[0], timeWatched: 200, watchProgress: 20 }
   const apply = client.applyWatchHistoryChanges.bind(client)
   let writes = 0
   client.applyWatchHistoryChanges = async (upserts, deletions) => {
     await apply(upserts, deletions)
     if (++writes === 1) {
-      // Another window watches the other video before this sync applies its result.
+      // Playback saves the other video's progress before this sync applies its result.
       history.historyCacheSorted[1] = { ...records[1], timeWatched: 300, watchProgress: 30 }
-      history.historyRevision++
+      historyChanges.record({ type: 'upsertToHistoryCache', payload: history.historyCacheSorted[1] })
     }
   }
-  const next = await context.syncHistory(client, {
-    state: { history },
-    dispatch: async () => { history.historyRevision++ },
-  }, converged.next, { allowMissingUploader: true }, { changedIds: new Set(['a']) })
-  const uploaded = Object.fromEntries(client.document.history.map(item => [item.video.id, item.metadata.position_millis]))
-  assert.deepEqual(uploaded, { a: 20000, b: 30000 })
-  assert.equal(next.b.added_date, 300)
+  const store = { state: { history }, dispatch: async () => assert.fail('No remote change needs a local write') }
+  const uploaded = () => Object.fromEntries(client.document.history.map(item => [item.video.id, item.metadata.position_millis]))
+  const first = await context.syncHistory(client, store, converged.next, { allowMissingUploader: true }, { changedIds: new Set(['a']) })
+  assert.equal(writes, 1)
+  // The baseline keeps the value this sync saw, so the next sync uploads the edit.
+  assert.deepEqual(uploaded(), { a: 20000, b: 10000 })
+  assert.equal(first.b.added_date, 100)
+  const second = await context.syncHistory(client, store, first, { allowMissingUploader: true }, { changedIds: new Set(['b']) })
+  assert.deepEqual(uploaded(), { a: 20000, b: 30000 })
+  assert.equal(second.b.added_date, 300)
 })

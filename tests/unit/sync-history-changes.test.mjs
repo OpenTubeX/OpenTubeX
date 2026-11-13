@@ -29,6 +29,25 @@ test('history changes are tracked by video ID until a mutation may change any en
   assert.equal(tracker.take(), null)
 })
 
+test('watching history changes includes fields sync does not carry', () => {
+  const tracker = createHistoryChangeTracker()
+  tracker.take()
+  const edits = tracker.watch()
+  tracker.record({ type: 'updateRecordWatchProgressInHistoryCache', payload: { videoId: 'a', watchProgress: 3 } })
+  tracker.record({ type: 'updateRecordLastViewedPlaylistIdInHistoryCache', payload: { videoId: 'b' } })
+  tracker.record({ type: 'unsetRecordsLastViewedPlaylistIdInHistoryCache', payload: { videoIds: ['c'] } })
+  assert.deepEqual([...edits.changed()].sort(), ['a', 'b', 'c'])
+  assert.deepEqual([...tracker.take()], ['a'])
+  tracker.record({ type: 'unsetRecordsLastViewedPlaylistIdsInHistoryCache', payload: ['playlist'] })
+  assert.equal(edits.changed(), null)
+  edits.stop()
+  const later = tracker.watch()
+  tracker.record({ type: 'upsertToHistoryCache', payload: { videoId: 'd' } })
+  assert.equal(edits.changed(), null)
+  assert.deepEqual([...later.changed()], ['d'])
+  later.stop()
+})
+
 const record = (id, timeWatched, extra = {}) => ({
   videoId: id,
   title: `Video ${id}`,

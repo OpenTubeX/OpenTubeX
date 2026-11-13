@@ -368,7 +368,6 @@ for (const transition of ['concurrent snapshot', 'disabled', 'new token', 'new p
           remote = remote.filter(entry => entry.video.id !== id)
           if (id === 'first') {
             f.context.rootState.history.historyCacheSorted.push({ videoId: id, authorId: 'channel', timeWatched: 1, watchProgress: 99, lengthSeconds: 120 })
-            f.context.rootState.history.historyRevision++
           }
           return {}
         }
@@ -376,7 +375,6 @@ for (const transition of ['concurrent snapshot', 'disabled', 'new token', 'new p
     })
     f.context.rootState.history = {
       historyCacheSorted: [{ videoId: 'kept', authorId: 'channel', timeWatched: 1, watchProgress: 15, lengthSeconds: 120 }],
-      historyRevision: 0,
     }
     await assert.rejects(f.actions.syncWithSyncServer(f.context), /Second deletion failed/)
     const snapshot = JSON.parse(f.settings.syncServerSnapshot)
@@ -409,7 +407,7 @@ test('an unchanged history baseline is not saved or broadcast again', async () =
     },
   })
   const record = { videoId: 'kept', title: 'kept', authorId: 'channel', author: 'Channel', timeWatched: 1, watchProgress: 15, lengthSeconds: 120 }
-  f.context.rootState.history = { historyCacheSorted: [record], historyRevision: 0 }
+  f.context.rootState.history = { historyCacheSorted: [record] }
   await f.actions.syncWithSyncServer(f.context)
   const saved = f.settings.syncServerSnapshot
   assert.deepEqual(JSON.parse(saved).history, { kept: metadata })
@@ -422,7 +420,6 @@ test('an unchanged history baseline is not saved or broadcast again', async () =
   assert.ok(f.dispatched.some(([action]) => action === 'updateSyncServerLastSyncAt'))
 
   f.context.rootState.history.historyCacheSorted = [{ ...record, timeWatched: 2, watchProgress: 30 }]
-  f.context.rootState.history.historyRevision++
   f.dispatched.length = 0
   await f.actions.syncWithSyncServer(f.context)
   assert.deepEqual(JSON.parse(f.settings.syncServerSnapshot).history.kept, { added_date: 2, watched_state: 'watching', position_millis: 30_000 })

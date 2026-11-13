@@ -4,6 +4,7 @@ import {
   mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote, selectChangedHistory, mergeChangedHistoryBaseline,
 } from './sync-history-merge.js'
 import { runBackgroundJob } from './background-jobs.js'
+import { historyChanges } from './sync-history-changes.js'
 import { DEFAULT_SYSTEM_THEMES, MAIN_PROFILE_ID } from '../../constants'
 import i18n from '../i18n/index'
 import packageDetails from '../../../package.json'
@@ -1199,86 +1200,102 @@ export async function syncHistory(client, store, previous = {}, options = {}, { 
         ...Object.fromEntries(remoteHistory.map(entry => [entry.video.id, entry.metadata])),
       }))
     }
-    const revision = store.state.history.historyRevision
-    const localHistory = toRaw(store.state.history.historyCacheSorted).slice()
-    const assertHistoryCurrent = () => {
-      store.assertActive?.()
-      if (store.state.history.historyRevision !== revision) throw historyChanged
-    }
-    let merged
+    // Playback saves progress every few seconds. An edit this merge does not
+    // overwrite locally is uploaded by the sync it schedules, as the baseline
+    // still holds the value this sync saw. Only overwriting it needs a retry.
+    const edits = historyChanges.watch()
     try {
-      // Sending tens of thousands of entries to the worker costs more than
-      // the merge. Unchanged entries would merge to their baseline again.
-      // A retry follows an edit made during this sync, which the IDs lack.
-      const changed = changedIds && !legacy && attempt === 0
-        ? selectChangedHistory({ localHistory, remoteHistory, previous, changedIds })
-        : null
-      merged = await runBackgroundJob('mergeHistory', {
-        ...(changed ?? { localHistory, remoteHistory, previous }),
-        // Large deletions take the full merge, which asks to confirm them.
-        options: { ...options, ...(changed ? { allowDataLoss: true } : {}), deferRepairAcknowledgement: !legacy },
-        acknowledged: { upserts: Array.from(acknowledgedUpserts), deletions: Array.from(acknowledgedDeletions) },
-      })
-      if (changed) merged.next = mergeChangedHistoryBaseline(previous, changedIds, merged.next)
-      assertHistoryCurrent()
-    } catch (error) {
-      store.assertActive?.()
-      // Even a failed merge can be based on mixed chunks and report false data
-      // loss. Only retry stale computations; rejected writes have uncertain effects.
-      if (store.state.history.historyRevision !== revision) continue
-      throw error
-    }
-    const { next, baselineChanged, historyToUpload, remoteDeletions, insertions, updates, deletions } = merged
-    let completed = false
-    try {
-      if (!legacy) {
-        if (historyToUpload.length || remoteDeletions.length) {
-          await client.applyWatchHistoryChanges(historyToUpload, remoteDeletions)
-          acknowledge(historyToUpload, remoteDeletions)
-        }
-      } else {
-        for (const id of remoteDeletions) {
-          await client.deleteWatchHistory(id)
-          acknowledge([], [id])
-        }
-        await uploadInChunks(
-          historyToUpload,
-          await client.supportsBulkSync(),
-          async entries => { await client.putWatchHistoryBulk(entries); acknowledge(entries) },
-          async entry => { await client.putWatchHistory(entry); acknowledge([entry]) }
-        )
-      }
-
-      store.assertActive?.()
-      if (store.state.history.historyRevision !== revision) continue
-      if (insertions.length > 0 || updates.length > 0 || deletions.length > 0) {
-        try {
-          await store.dispatch('applyHistorySyncChanges', {
-            insertions,
-            updates,
-            deletions,
-            ...(store.assertActive || revision !== undefined ? { assertActive: assertHistoryCurrent } : {}),
-          })
-        } catch (error) {
-          if (error !== historyChanged) throw error
-          store.assertActive?.()
-          continue
-        }
-      }
-      completed = true
-      return next
-    } finally {
-      // Legacy requests already changed the server even if a later write,
-      // local application, or collection fails. Encrypted adapter writes only
-      // change its in-memory document and must wait for the actual upload.
-      const acknowledged = acknowledgedUpserts.size > 0 || acknowledgedDeletions.size > 0
-      if (legacy && ((completed && baselineChanged) || acknowledged)) {
-        await store.persistHistorySyncBaseline?.({
-          previous,
+      const localHistory = toRaw(store.state.history.historyCacheSorted).slice()
+      const edited = () => edits.changed()?.size !== 0
+      let merged
+      try {
+        // Sending tens of thousands of entries to the worker costs more than
+        // the merge. Unchanged entries would merge to their baseline again.
+        // A retry follows an edit made during this sync, which the IDs lack.
+        const changed = changedIds && !legacy && attempt === 0
+          ? selectChangedHistory({ localHistory, remoteHistory, previous, changedIds })
+          : null
+        merged = await runBackgroundJob('mergeHistory', {
+          ...(changed ?? { localHistory, remoteHistory, previous }),
+          // Large deletions take the full merge, which asks to confirm them.
+          options: { ...options, ...(changed ? { allowDataLoss: true } : {}), deferRepairAcknowledgement: !legacy },
           acknowledged: { upserts: Array.from(acknowledgedUpserts), deletions: Array.from(acknowledgedDeletions) },
-          ...(completed ? { next } : {}),
         })
+        if (changed) merged.next = mergeChangedHistoryBaseline(previous, changedIds, merged.next)
+      } catch (error) {
+        store.assertActive?.()
+        // Even a failed merge can be based on mixed chunks and report false data
+        // loss. Only retry stale computations; rejected writes have uncertain effects.
+        if (edited()) continue
+        throw error
       }
+      const { next, baselineChanged, historyToUpload, remoteDeletions, insertions, updates, deletions } = merged
+      const localWrites = [...insertions, ...updates].map(record => record.videoId).concat(deletions)
+      const overwritesEdit = () => {
+        const changed = edits.changed()
+        return localWrites.some(id => !changed || changed.has(id))
+      }
+      const assertHistoryCurrent = () => {
+        store.assertActive?.()
+        if (overwritesEdit()) throw historyChanged
+      }
+      store.assertActive?.()
+      if (overwritesEdit()) continue
+      let completed = false
+      try {
+        if (!legacy) {
+          if (historyToUpload.length || remoteDeletions.length) {
+            await client.applyWatchHistoryChanges(historyToUpload, remoteDeletions)
+            acknowledge(historyToUpload, remoteDeletions)
+          }
+        } else {
+          for (const id of remoteDeletions) {
+            await client.deleteWatchHistory(id)
+            acknowledge([], [id])
+          }
+          await uploadInChunks(
+            historyToUpload,
+            await client.supportsBulkSync(),
+            async entries => { await client.putWatchHistoryBulk(entries); acknowledge(entries) },
+            async entry => { await client.putWatchHistory(entry); acknowledge([entry]) }
+          )
+        }
+
+        store.assertActive?.()
+        if (overwritesEdit()) continue
+        if (insertions.length > 0 || updates.length > 0 || deletions.length > 0) {
+          try {
+            const applied = await store.dispatch('applyHistorySyncChanges', {
+              insertions,
+              updates,
+              deletions,
+              assertActive: assertHistoryCurrent,
+              overwritesEdit,
+            })
+            if (applied === false) continue
+          } catch (error) {
+            if (error !== historyChanged) throw error
+            store.assertActive?.()
+            continue
+          }
+        }
+        completed = true
+        return next
+      } finally {
+        // Legacy requests already changed the server even if a later write,
+        // local application, or collection fails. Encrypted adapter writes only
+        // change its in-memory document and must wait for the actual upload.
+        const acknowledged = acknowledgedUpserts.size > 0 || acknowledgedDeletions.size > 0
+        if (legacy && ((completed && baselineChanged) || acknowledged)) {
+          await store.persistHistorySyncBaseline?.({
+            previous,
+            acknowledged: { upserts: Array.from(acknowledgedUpserts), deletions: Array.from(acknowledgedDeletions) },
+            ...(completed ? { next } : {}),
+          })
+        }
+      }
+    } finally {
+      edits.stop()
     }
   }
   throw historyChanged
