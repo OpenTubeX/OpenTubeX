@@ -61,27 +61,6 @@ export function getRecentDownloads(downloads) {
 }
 
 /**
- * @param {{ id: string, visible: boolean }[]} layout
- * @param {string} sectionId
- * @param {-1 | 1} offset
- * @returns {{ id: string, visible: boolean }[]}
- */
-export function moveHomeSection(layout, sectionId, offset) {
-  const normalized = normalizeHomeSectionLayout(layout)
-  const index = normalized.findIndex(section => section.id === sectionId)
-  const targetIndex = index + offset
-
-  if (index === -1 || targetIndex < 0 || targetIndex >= normalized.length) {
-    return normalized
-  }
-
-  const reordered = normalized.slice()
-  const [section] = reordered.splice(index, 1)
-  reordered.splice(targetIndex, 0, section)
-  return reordered
-}
-
-/**
  * @param {object[]} history
  * @param {number} [limit]
  * @returns {object[]}

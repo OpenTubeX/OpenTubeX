@@ -4,7 +4,6 @@ import test from 'node:test'
 import {
   DEFAULT_HOME_SECTION_LAYOUT,
   getContinueWatchingEntries,
-  moveHomeSection,
   normalizeHomeSectionLayout,
 } from '../../src/renderer/helpers/homeSections.js'
 import { getHomeShelfLayout } from '../../src/renderer/helpers/homeShelfPagination.js'
@@ -25,16 +24,6 @@ test('adds recommendations without resetting existing Home order or visibility',
     ...previousLayout,
     { id: 'recommendations', visible: true },
   ])
-})
-
-test('moves Home sections without mutating the stored layout', () => {
-  const layout = normalizeHomeSectionLayout(DEFAULT_HOME_SECTION_LAYOUT)
-  const reordered = moveHomeSection(layout, 'watchQueue', -1)
-
-  assert.equal(reordered[0].id, 'continueWatching')
-  assert.equal(reordered[3].id, 'watchQueue')
-  assert.equal(reordered[4].id, 'newSinceLastVisit')
-  assert.equal(layout[0].id, 'continueWatching')
 })
 
 test('continue watching includes only started, unfinished videos', () => {
