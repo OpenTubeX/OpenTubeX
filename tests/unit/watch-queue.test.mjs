@@ -393,6 +393,7 @@ for (const format of ['dash', 'legacy']) {
           getPlayerConfig: () => ({}),
           loadPlaybackSource: async (url, start) => starts.push(start),
           setLegacyQuality: async start => starts.push(start),
+          twitchLiveRewind: { manifestSrc: { value: 'queued-file' } },
           process: { env: {} },
           Date,
         }

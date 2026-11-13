@@ -164,20 +164,7 @@ async function fetchStoryboard(preview, duration, fetcher) {
   }
 }
 
-export async function fetchTwitchSubOnlyVod(videoId, fetcher) {
-  if (!/^\d{1,20}$/.test(videoId)) return null
-  const response = await fetcher('https://gql.twitch.tv/gql', {
-    method: 'POST',
-    headers: { 'Client-ID': TWITCH_CHAT_CLIENT_ID, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query: `query { video(id: "${videoId}") { title description lengthSeconds viewCount createdAt broadcastType seekPreviewsURL previewThumbnailURL(width: 320, height: 180) owner { login displayName profileImageURL(width: 70) } } }` }),
-    signal: AbortSignal.timeout(10_000)
-  })
-  if (!response.ok) throw new Error(`Twitch VOD metadata returned HTTP ${response.status}`)
-  const video = (await response.json())?.data?.video
-  if (!video?.seekPreviewsURL) throw new Error('Twitch VOD preview is unavailable')
-  const preview = new URL(video.seekPreviewsURL)
-  const path = getVodPath(video, videoId)
-  const storyboard = fetchStoryboard(preview, video.lengthSeconds, fetcher)
+async function buildPlaylist(preview, path, fetcher) {
   const variants = await Promise.all(QUALITIES.map(async ([quality, resolution, frameRate]) => {
     const url = new URL(path(quality), preview).href
     const codec = await probeQuality(url, fetcher)
@@ -192,9 +179,48 @@ export async function fetchTwitchSubOnlyVod(videoId, fetcher) {
   }))
   const available = variants.filter(Boolean)
   if (available.length === 0) throw new Error('Twitch VOD has no accessible qualities')
+  return `#EXTM3U\n${available.join('\n')}\n`
+}
+
+async function queryTwitch(query, fetcher) {
+  const response = await fetcher('https://gql.twitch.tv/gql', {
+    method: 'POST',
+    headers: { 'Client-ID': TWITCH_CHAT_CLIENT_ID, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query }),
+    signal: AbortSignal.timeout(10_000)
+  })
+  if (!response.ok) throw new Error(`Twitch VOD metadata returned HTTP ${response.status}`)
+  return (await response.json())?.data
+}
+
+/**
+ * Twitch records an ongoing broadcast into a growing EVENT playlist, unlike the
+ * live playlist, which only holds the last few seconds.
+ * @returns {Promise<{ playlist: string, startedAt: number } | null>} null when the
+ * channel is offline or keeps no VODs. `startedAt` is when the recording begins, in ms since the epoch.
+ */
+export async function fetchTwitchLiveVod(login, fetcher) {
+  if (!/^[a-zA-Z0-9_]{1,25}$/.test(login)) return null
+  const data = await queryTwitch(`query { user(login: "${login}") { stream { createdAt archiveVideo { id status broadcastType seekPreviewsURL } } } }`, fetcher)
+  const stream = data?.user?.stream
+  const video = stream?.archiveVideo
+  const startedAt = Date.parse(stream?.createdAt)
+  if (video?.status !== 'RECORDING' || !video.seekPreviewsURL || !/^\d{1,20}$/.test(video.id) || !Number.isFinite(startedAt)) return null
+  const playlist = await buildPlaylist(new URL(video.seekPreviewsURL), getVodPath(video, video.id), fetcher)
+  return { playlist, startedAt }
+}
+
+export async function fetchTwitchSubOnlyVod(videoId, fetcher) {
+  if (!/^\d{1,20}$/.test(videoId)) return null
+  const video = (await queryTwitch(`query { video(id: "${videoId}") { title description lengthSeconds viewCount createdAt broadcastType seekPreviewsURL previewThumbnailURL(width: 320, height: 180) owner { login displayName profileImageURL(width: 70) } } }`, fetcher))?.video
+  if (!video?.seekPreviewsURL) throw new Error('Twitch VOD preview is unavailable')
+  const preview = new URL(video.seekPreviewsURL)
+  const path = getVodPath(video, videoId)
+  const storyboard = fetchStoryboard(preview, video.lengthSeconds, fetcher)
+  const playlist = await buildPlaylist(preview, path, fetcher)
 
   return {
-    playlist: `#EXTM3U\n${available.join('\n')}\n`,
+    playlist,
     storyboardVtt: await storyboard,
     video: {
       title: video.title ?? null,

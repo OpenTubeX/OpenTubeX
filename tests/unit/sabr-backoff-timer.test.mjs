@@ -357,6 +357,7 @@ for (const [format, localFilePlayback] of [['legacy', false], ['audio', true]]) 
       player: { configure() {}, getVariantTracks: () => [] },
       hasMultipleAudioTracks: { value: false },
       loadPlaybackSource: url => loads.push(url),
+      twitchLiveRewind: { manifestSrc: { value: 'local-file' } },
       setLegacyQuality: () => loads.push('local-file'),
       formatSwitchGeneration: 0,
     })
@@ -396,6 +397,7 @@ function prerollLoadFixture() {
     player: { configure() {}, getVariantTracks: () => [] },
     hasMultipleAudioTracks: { value: false },
     loadPlaybackSource: url => loads.push(url),
+    twitchLiveRewind: { manifestSrc: { value: 'file' } },
   }
   const load = vm.runInNewContext(`${extract('clearPreRollTimer')}\n${extract('startPreRollTimer')}\n${loadSource}\nperformFirstLoad`, context)
   return { context, load, loads, waiters, intervals }
