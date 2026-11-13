@@ -763,7 +763,7 @@ test.describe('with followed feeds', () => {
     const session = await page.context().newCDPSession(page)
     try {
       await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
-      await swipeAction(page, session, newest.locator('.title'), 'Mark As Watched')
+      await swipeAction(page, session, newest.locator('.title'), null)
       await expect(newest).toHaveClass(/watched/)
       // A hold that opened the menu doesn't also swipe
       const rect = await newest.locator('.title').boundingBox()
