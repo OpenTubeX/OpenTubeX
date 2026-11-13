@@ -1542,10 +1542,7 @@ async function importLibreTubeWatchHistory(backupData) {
     historyItems: convertedHistoryItems,
     importedCount,
     skippedCount,
-  } = convertLibreTubeWatchHistoryToOpenTubeX(
-    backupData,
-    []
-  )
+  } = convertLibreTubeWatchHistoryToOpenTubeX(backupData)
 
   if (importedCount === 0) {
     showToast({ message: t('Settings.Data Settings.Invalid history file'), icon: ['fas', 'circle-exclamation'] })
@@ -1559,7 +1556,7 @@ async function importLibreTubeWatchHistory(backupData) {
     })
   }
 
-  if (await store.dispatch('importHistory', { records: [...convertedHistoryItems.values()], rule: 'replace' }) !== true) {
+  if (await store.dispatch('importHistory', { records: [...convertedHistoryItems.values()], rule: 'libretube' }) !== true) {
     throw new Error('Could not import history')
   }
 

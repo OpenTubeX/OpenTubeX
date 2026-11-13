@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
-import { mergeTakeoutHistoryRecord, migrateLegacyHistoryRecord, newestUniqueHistoryRecords } from '../../src/history.js'
+import { mergeLibreTubeHistoryRecord, mergeTakeoutHistoryRecord, migrateLegacyHistoryRecord, newestUniqueHistoryRecords } from '../../src/history.js'
 import * as seenVideos from '../../src/subscriptionSeenVideos.js'
 import { migrateStoredSettings } from '../../src/datastores/settingsMigrations.js'
 import Datastore from '@seald-io/nedb'
@@ -30,6 +30,7 @@ async function fixture(t, createDatastore) {
       db,
       ...seenVideos,
       migrateLegacyHistoryRecord,
+      mergeLibreTubeHistoryRecord,
       mergeTakeoutHistoryRecord,
       newestUniqueHistoryRecords,
       migrateStoredSettings,
@@ -197,6 +198,12 @@ test('history imports merge with the records saved when they are written', async
     ['saved', 'Channel', 600, 321, 30, true]
   )
   assert.equal(byId.new.timeWatched, 20)
+
+  // LibreTube backups have no watch times, so a saved record keeps its own
+  // and counts videos without a position as watched, so it keeps the saved progress
+  await History.importRecords([record('saved', { title: 'LibreTube', watchProgress: 600, isWatched: true, timeWatched: 99 })], 'libretube')
+  const libreTube = (await History.find()).find(saved => saved.videoId === 'saved')
+  assert.deepEqual([libreTube.title, libreTube.watchProgress, libreTube.timeWatched], ['saved', 321, 30])
 
   // Other exports replace the saved record of each imported video
   await History.importRecords([record('saved', { title: 'Imported', timeWatched: 5 })], 'replace')
