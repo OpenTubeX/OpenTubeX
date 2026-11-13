@@ -217,6 +217,26 @@ Subscriptions:
       Not Set: 未设置
     Retry Feed: 重试 {feed}
     Reloading Feed: 正在重新加载 {feed}
+  Platforms:
+    Tab: 平台
+    Platform: 平台
+    All Platforms: 所有平台
+    Followed Channels: 在其他平台上关注的频道
+    Description: 关注 Twitch、SoundCloud、PeerTube、Rumble 和 Odysee 上的频道，即可在订阅的“平台”标签页中查看其上传内容。可通过搜索查找频道，也可通过频道页面的地址添加。其媒体使用 yt-dlp 播放。
+    Add Channel: 添加频道
+    Channel URL: 频道地址
+    Invalid Channel: 请输入 Twitch、SoundCloud、PeerTube、Rumble 或 Odysee 上频道页面的地址。
+    Channel Not Found: 此地址没有频道。
+    Channel Already Followed: 你已关注此频道。
+    Channel Could Not Be Loaded: 无法加载该频道。
+    No Channels: 你还没有关注其他平台上的任何频道。
+    Unfollow Channel: 取消关注 {channel}
+    Go To Channel: 前往 {channel}
+    Follow: 关注
+    Following: 已关注
+    Clips: 剪辑
+    Refresh Errors: '{count} 个频道无法刷新。'
+    Content Tabs: 平台内容标签页
 Trending:
   Music: 音乐
   Load Error: 无法加载热门内容。
@@ -1208,6 +1228,11 @@ Settings:
     Notify About New Uploads: 新上传通知
     RSS Feeds Auto Refresh Interval: RSS 订阅源自动刷新间隔
     Faster Subscription Refresh: "更快的订阅刷新"
+    Platforms:
+      Other Platforms: 其他平台
+      Manage Channels: 管理已关注的频道
+      Notify When Live: 关注的 Twitch 频道开播时通知
+      Auto Refresh Interval: 其他平台自动刷新间隔
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "观看时长统计范围"
@@ -2048,6 +2073,7 @@ Context Menu:
   Reload Posts: 重新加载帖子
   Reload All Feeds: 重新加载所有订阅源
   Reload RSS Feeds: 重新加载 RSS 订阅源
+  Reload Platforms: 重新加载平台
   Close Multiple Tabs: 关闭 {count} 个标签页
   Duplicate Tab: 复制标签页
   Duplicate Multiple Tabs: 复制 {count} 个标签页
@@ -2315,6 +2341,8 @@ Tooltips:
     Notify About New Uploads: 在此设备上为你在订阅设置中开启了通知的频道显示系统通知。OpenTubeX 会在刷新订阅时检查新内容，因此请选择自动刷新间隔。若要在应用关闭时也收到通知，请同时启用应用关闭时刷新订阅。
     RSS Feeds Auto Refresh Interval: 应用打开时 OpenTubeX 自动刷新 RSS 订阅源的频率。
     Faster Subscription Refresh: "先检查每个频道的 RSS 订阅源，只加载有新上传内容的频道的视频、Shorts 和直播。自动刷新还会跳过过去 10 分钟内加载过的频道。对于没有新上传内容的频道，观看次数、已移除的视频和更改的标题每隔几小时才会更新一次，而且当 RSS 订阅源滞后时，新上传的内容可能会稍后才出现。使用 Invidious API 时不可用。"
+    Platforms Auto Refresh Interval: 应用打开时 OpenTubeX 自动刷新你在其他平台上关注的频道的频率。
+    Twitch Notify When Live: 你关注的某个 Twitch 频道开播时通知你。OpenTubeX 打开时每隔几分钟检查一次；关闭时如果仍会刷新订阅，也会检查。
   Theme Settings:
     Only Show Important Notifications: 隐藏仅用于确认操作或报告状态的应用内通知。错误、警告、你设置的提醒以及提供操作（如撤销）的通知仍会显示。后台操作（如刷新订阅）的进度会显示在全局进度条中，而不是通知中。系统通知不受影响。
     Visible Search Suggestions: "设置搜索栏在列表需要滚动之前显示的搜索历史记录和建议数量。列表绝不会超出窗口底部。"
@@ -2712,6 +2740,15 @@ Notification Center:
   Clear: "清除"
   Empty: "暂无通知"
   Empty Hint: "直播提醒以及已开启通知的频道的新上传内容会显示在这里。"
+Platforms:
+  Tracks: 曲目
+  Playlists: 播放列表
+  Follower Count: '{count} 位关注者'
+  Open Website: 在 {platform} 上打开
+  Channel Not Found: 找不到此频道。
+  Playlist Not Found: 找不到此播放列表。
+  Load Error: 无法从 {platform} 加载此页面。
+  Empty Tab: 这里还没有任何内容。
 YouTube Account:
   Like: "喜欢"
   Dislike: "不喜欢"

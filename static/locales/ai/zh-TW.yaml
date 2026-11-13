@@ -217,6 +217,26 @@ Subscriptions:
       Not Set: 未設定
     Retry Feed: 重試 {feed}
     Reloading Feed: 正在重新載入 {feed}
+  Platforms:
+    Tab: 平台
+    Platform: 平台
+    All Platforms: 所有平台
+    Followed Channels: 在其他平台上追隨的頻道
+    Description: 追隨 Twitch、SoundCloud、PeerTube、Rumble 和 Odysee 上的頻道，即可在訂閱內容的「平台」分頁中查看其上傳內容。您可以透過搜尋尋找頻道，或以頻道頁面的網址新增。其媒體會使用 yt-dlp 播放。
+    Add Channel: 新增頻道
+    Channel URL: 頻道網址
+    Invalid Channel: 請輸入 Twitch、SoundCloud、PeerTube、Rumble 或 Odysee 上頻道頁面的網址。
+    Channel Not Found: 這個網址沒有頻道。
+    Channel Already Followed: 您已追隨這個頻道。
+    Channel Could Not Be Loaded: 無法載入頻道。
+    No Channels: 您尚未追隨其他平台上的任何頻道。
+    Unfollow Channel: 取消追隨 {channel}
+    Go To Channel: 前往 {channel}
+    Follow: 追隨
+    Following: 追隨中
+    Clips: 剪輯
+    Refresh Errors: '{count} 個頻道無法重新整理。'
+    Content Tabs: 平台內容分頁
 Trending:
   Music: 音樂
   Load Error: 無法載入熱門趨勢。
@@ -1208,6 +1228,11 @@ Settings:
     Notify About New Uploads: 新上傳通知
     RSS Feeds Auto Refresh Interval: RSS 摘要自動重新整理間隔
     Faster Subscription Refresh: "更快的訂閱重新整理"
+    Platforms:
+      Other Platforms: 其他平台
+      Manage Channels: 管理追隨的頻道
+      Notify When Live: 追隨的 Twitch 頻道開始直播時通知
+      Auto Refresh Interval: 其他平台自動重新整理間隔
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "觀看時間統計範圍"
@@ -2055,6 +2080,7 @@ Context Menu:
   Reload Posts: 重新載入貼文
   Reload All Feeds: 重新載入所有動態消息
   Reload RSS Feeds: 重新載入 RSS 訂閱源
+  Reload Platforms: 重新載入平台
   Close Multiple Tabs: 關閉 {count} 個分頁
   Duplicate Tab: 複製分頁
   Duplicate Multiple Tabs: 複製 {count} 個分頁
@@ -2322,6 +2348,8 @@ Tooltips:
     Notify About New Uploads: 在此裝置上為你在訂閱設定中開啟了通知的頻道顯示系統通知。OpenTubeX 會在重新整理訂閱時檢查新內容，因此請選擇自動重新整理間隔。若要在應用程式關閉時也收到通知，請同時啟用應用程式關閉時重新整理訂閱。
     RSS Feeds Auto Refresh Interval: 應用程式開啟時 OpenTubeX 自動重新整理 RSS 摘要的頻率。
     Faster Subscription Refresh: "先檢查每個頻道的 RSS 資訊提供，只載入有新上傳內容的頻道的影片、Shorts 和直播。自動重新整理也會略過過去 10 分鐘內載入過的頻道。對於沒有新上傳內容的頻道，觀看次數、已移除的影片和變更的標題每隔幾小時才會更新一次，而且當 RSS 資訊提供延遲時，新上傳的內容可能會較晚出現。使用 Invidious API 時無法使用。"
+    Platforms Auto Refresh Interval: 應用程式開啟時 OpenTubeX 自動重新整理您在其他平台上追隨的頻道的頻率。
+    Twitch Notify When Live: 你追隨的某個 Twitch 頻道開始直播時通知你。OpenTubeX 開啟時每隔幾分鐘檢查一次；關閉時若仍會重新整理訂閱內容，也會檢查。
   Theme Settings:
     Only Show Important Notifications: 隱藏僅用於確認操作或回報狀態的應用程式內通知。錯誤、警告、你設定的提醒，以及提供操作（例如復原）的通知仍會顯示。背景作業（例如重新整理訂閱）的進度會顯示在全域進度列中，而不是通知中。系統通知不受影響。
     Visible Search Suggestions: "設定搜尋列在清單需要捲動之前顯示的搜尋紀錄和建議數量。清單絕不會超出視窗底部。"
@@ -2719,6 +2747,15 @@ Notification Center:
   Clear: "清除"
   Empty: "尚無通知"
   Empty Hint: "直播提醒以及已開啟通知的頻道的新上傳內容會顯示在這裡。"
+Platforms:
+  Tracks: 曲目
+  Playlists: 播放清單
+  Follower Count: '{count} 位追隨者'
+  Open Website: 在 {platform} 上開啟
+  Channel Not Found: 找不到這個頻道。
+  Playlist Not Found: 找不到這個播放清單。
+  Load Error: 無法從 {platform} 載入這個頁面。
+  Empty Tab: 這裡還沒有任何內容。
 YouTube Account:
   Like: "喜歡"
   Dislike: "不喜歡"

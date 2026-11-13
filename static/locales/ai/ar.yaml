@@ -219,6 +219,26 @@ Subscriptions:
       Not Set: غير محدد
     Retry Feed: أعد محاولة تحميل {feed}
     Reloading Feed: جارٍ إعادة تحميل {feed}
+  Platforms:
+    Tab: المنصات
+    Platform: المنصة
+    All Platforms: كل المنصات
+    Followed Channels: القنوات المتابَعة على منصات أخرى
+    Description: تابع قنوات على Twitch وSoundCloud وPeerTube وRumble وOdysee لترى ما تنشره في علامة تبويب المنصات ضمن اشتراكاتك. ابحث عن القنوات باستخدام البحث، أو أضفها بعنوان صفحتها. يتم تشغيل وسائطها باستخدام yt-dlp.
+    Add Channel: إضافة قناة
+    Channel URL: عنوان القناة
+    Invalid Channel: أدخل عنوان صفحة قناة على Twitch أو SoundCloud أو PeerTube أو Rumble أو Odysee.
+    Channel Not Found: لا توجد قناة على هذا العنوان.
+    Channel Already Followed: أنت تتابع هذه القناة بالفعل.
+    Channel Could Not Be Loaded: تعذّر تحميل القناة.
+    No Channels: لا تتابع أي قنوات على منصات أخرى بعد.
+    Unfollow Channel: إلغاء متابعة {channel}
+    Go To Channel: الانتقال إلى {channel}
+    Follow: متابعة
+    Following: تتم المتابعة
+    Clips: مقاطع
+    Refresh Errors: تعذّر تحديث {count} قناة. | تعذّر تحديث قناة واحدة. | تعذّر تحديث قناتين ({count}). | تعذّر تحديث {count} قنوات. | تعذّر تحديث {count} قناةً. | تعذّر تحديث {count} قناة.
+    Content Tabs: علامات تبويب محتوى المنصات
 Trending:
   Music: موسيقى
   Load Error: تعذر تحميل العناصر الشائعة.
@@ -1219,6 +1239,11 @@ Settings:
     Notify About New Uploads: الإشعار بالمحتوى الجديد
     RSS Feeds Auto Refresh Interval: الفاصل الزمني للتحديث التلقائي لخلاصات RSS
     Faster Subscription Refresh: "تحديث أسرع للاشتراكات"
+    Platforms:
+      Other Platforms: منصات أخرى
+      Manage Channels: إدارة القنوات المتابَعة
+      Notify When Live: الإشعار عند بدء بث قنوات Twitch المتابَعة
+      Auto Refresh Interval: الفاصل الزمني للتحديث التلقائي للمنصات الأخرى
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "احتساب وقت المشاهدة من"
@@ -2098,6 +2123,7 @@ Context Menu:
   Reload Posts: إعادة تحميل المشاركات
   Reload All Feeds: إعادة تحميل كافة الخلاصات
   Reload RSS Feeds: إعادة تحميل موجزات RSS
+  Reload Platforms: إعادة تحميل المنصات
   Close Multiple Tabs: 'إغلاق علامتي تبويب ({count}) | إغلاق {count} علامات تبويب | إغلاق {count} علامة تبويب | إغلاق {count} علامة تبويب'
   Duplicate Tab: علامة تبويب مكررة
   Duplicate Multiple Tabs: 'تكرار علامتي تبويب ({count}) | تكرار {count} علامات تبويب | تكرار {count} علامة تبويب | تكرار {count} علامة تبويب'
@@ -2351,6 +2377,8 @@ Tooltips:
     Notify About New Uploads: يعرض إشعارات النظام على هذا الجهاز للقنوات التي فعّلت إشعاراتها في إعدادات اشتراكها. يتحقق OpenTubeX من وجود محتوى جديد عند تحديث الاشتراكات، لذا اختر فاصلًا زمنيًا للتحديث التلقائي. لتلقي الإشعارات أثناء إغلاق التطبيق، فعّل أيضًا تحديث الاشتراكات أثناء إغلاق التطبيق.
     RSS Feeds Auto Refresh Interval: عدد مرات تحديث OpenTubeX لخلاصات RSS تلقائيًا أثناء فتح التطبيق.
     Faster Subscription Refresh: "يتحقق أولاً من موجز RSS لكل قناة ولا يحمّل الفيديوهات وShorts والبث المباشر إلا من القنوات التي لديها رفعات جديدة. تتخطى التحديثات التلقائية أيضاً القنوات التي حُمّلت خلال آخر 10 دقائق. بالنسبة للقنوات التي ليس لديها رفعات جديدة، لا يتم تحديث عدد المشاهدات والفيديوهات المحذوفة والعناوين المتغيرة إلا كل بضع ساعات، وقد تظهر الرفعات الجديدة لاحقاً عندما يتأخر موجز RSS. غير متاح مع واجهة Invidious البرمجية."
+    Platforms Auto Refresh Interval: عدد مرات تحديث OpenTubeX للقنوات التي تتابعها على منصات أخرى تلقائيًا أثناء فتح التطبيق.
+    Twitch Notify When Live: يُعلمك عندما تبدأ إحدى قنوات Twitch التي تتابعها البث. يتحقق OpenTubeX كل بضع دقائق أثناء فتحه، وكذلك أثناء إغلاقه إذا كان يحدّث الاشتراكات حينها.
   Theme Settings:
     Only Show Important Notifications: يخفي الإشعارات داخل التطبيق التي تقتصر على تأكيد إجراء أو الإبلاغ عن حالة. تظل الأخطاء والتحذيرات والتذكيرات التي أعددتها والإشعارات التي توفر إجراءً، مثل التراجع، ظاهرة. يظهر تقدم العمليات في الخلفية، مثل تحديث الاشتراكات، في شريط التقدم العام بدلًا من إشعار. لا تتأثر إشعارات النظام.
     Visible Search Suggestions: "يحدد عدد إدخالات سجل البحث والاقتراحات التي يعرضها شريط البحث قبل أن تحتاج قائمته إلى التمرير. لا تمتد القائمة أبدًا إلى ما بعد أسفل النافذة."
@@ -2751,6 +2779,15 @@ Notification Center:
   Clear: "مسح"
   Empty: "لا توجد إشعارات بعد"
   Empty Hint: "ستظهر هنا تذكيرات البث المباشر والفيديوهات الجديدة من القنوات التي فعّلت إشعاراتها."
+Platforms:
+  Tracks: المقاطع الصوتية
+  Playlists: قوائم التشغيل
+  Follower Count: '{count} متابع | متابع واحد | متابعان ({count}) | {count} متابعين | {count} متابعًا | {count} متابع'
+  Open Website: فتح في {platform}
+  Channel Not Found: تعذّر العثور على هذه القناة.
+  Playlist Not Found: تعذّر العثور على قائمة التشغيل هذه.
+  Load Error: تعذّر تحميل هذه الصفحة من {platform}.
+  Empty Tab: لا يوجد شيء هنا بعد.
 YouTube Account:
   Like: "إعجاب"
   Dislike: "عدم الإعجاب"

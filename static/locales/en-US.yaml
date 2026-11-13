@@ -367,6 +367,26 @@ Subscriptions:
       Not Set: Not set
     Retry Feed: Retry {feed}
     Reloading Feed: Reloading {feed}
+  Platforms:
+    Tab: Platforms
+    Platform: Platform
+    All Platforms: All platforms
+    Followed Channels: Followed channels on other platforms
+    Description: Follow channels on Twitch, SoundCloud, PeerTube, Rumble and Odysee to see their uploads in the Platforms tab of your subscriptions. Find channels with the search, or add them by the address of their page. Their media plays with yt-dlp.
+    Add Channel: Add Channel
+    Channel URL: Channel address
+    Invalid Channel: Enter the address of a channel page on Twitch, SoundCloud, PeerTube, Rumble or Odysee.
+    Channel Not Found: There is no channel at this address.
+    Channel Already Followed: You already follow this channel.
+    Channel Could Not Be Loaded: The channel could not be loaded.
+    No Channels: You don't follow any channels on other platforms yet.
+    Unfollow Channel: Unfollow {channel}
+    Go To Channel: Go to {channel}
+    Follow: Follow
+    Following: Following
+    Clips: Clips
+    Refresh Errors: 1 channel could not be refreshed. | {count} channels could not be refreshed.
+    Content Tabs: Platform content tabs
 More: More
 Channels:
   Load More Channels: "Load more channels"
@@ -1749,6 +1769,11 @@ Settings:
     RSS Feeds: RSS Feeds
     Enable RSS Feeds: Enable RSS Feeds for Other Platforms
     Manage RSS Feeds: Manage RSS Feeds
+    Platforms:
+      Other Platforms: Other Platforms
+      Manage Channels: Manage Followed Channels
+      Notify When Live: Notify When Followed Twitch Channels Go Live
+      Auto Refresh Interval: Other Platforms Auto Refresh Interval
     Show New Content Indicators: Show New Content Indicators
     Show Scheduled Live Streams / Premieres First: Show Scheduled Live Streams / Premieres First
     Auto Refresh Interval: Auto Refresh Interval
@@ -3095,6 +3120,7 @@ Context Menu:
   Reload Posts: Reload Posts
   Reload All Feeds: Reload All Feeds
   Reload RSS Feeds: Reload RSS Feeds
+  Reload Platforms: Reload Platforms
   Close Multiple Tabs: Close {count} Tabs
   Duplicate Tab: Duplicate Tab
   Duplicate Multiple Tabs: Duplicate {count} Tabs
@@ -3451,6 +3477,8 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: Keeps upcoming live streams and premieres at the top of the subscription feed. When disabled, they remain at their announcement position until they start. Refresh the subscription feed once after disabling to retrieve announcement dates for existing scheduled entries.
     Auto Refresh Interval: "How often OpenTubeX automatically refreshes your subscription feed while the app is open. On Android, a nonzero interval also refreshes it while the app is closed."
     RSS Feeds Auto Refresh Interval: How often OpenTubeX automatically refreshes your RSS feeds while the app is open.
+    Platforms Auto Refresh Interval: How often OpenTubeX automatically refreshes the channels you follow on other platforms while the app is open.
+    Twitch Notify When Live: Notifies you when one of your followed Twitch channels starts streaming. OpenTubeX checks every few minutes while it is open, and also while it is closed if it refreshes subscriptions then.
     Refresh Subscriptions While App Is Closed: "Refreshes feeds using your selected settings. On desktop, OpenTubeX stays in the system tray until you quit. Android controls when background refreshes run."
     Notify About New Uploads: "Shows system notifications on this device for channels whose notifications you turned on in their subscription settings. OpenTubeX checks for new content when subscriptions refresh, so choose an auto refresh interval. To be notified while the app is closed, also enable refreshing while the app is closed."
     Faster Subscription Refresh: Checks each channel's RSS feed first and only loads the videos, Shorts and live streams of channels with new uploads. Automatic refreshes also skip channels loaded in the last 10 minutes. For channels without new uploads, view counts, removed videos and changed titles only update every few hours, and new uploads may appear later when the RSS feed lags behind. Not available with the Invidious API.
@@ -3930,6 +3958,15 @@ Digital Wellbeing:
   Time for bed: "It's time for bed"
   Bedtime started at: "Your bedtime started at {time}."
   Remind Me in 10 Minutes: "Remind Me in 10 Minutes"
+Platforms:
+  Tracks: Tracks
+  Playlists: Playlists
+  Follower Count: 1 follower | {count} followers
+  Open Website: Open on {platform}
+  Channel Not Found: This channel could not be found.
+  Playlist Not Found: This playlist could not be found.
+  Load Error: This page could not be loaded from {platform}.
+  Empty Tab: There is nothing here yet.
 YouTube Account:
   Like: "Like"
   Dislike: "Dislike"

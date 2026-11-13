@@ -17,3 +17,9 @@
 .blur {
   filter: blur(20px) var(--content-filter,);
 }
+
+.platformIcon {
+  color: var(--tertiary-text-color);
+  flex: none;
+  font-size: 0.85em;
+}

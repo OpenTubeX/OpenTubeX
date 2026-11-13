@@ -728,6 +728,8 @@ import {
 import { classifyRequestFailure } from './helpers/api/requestDiagnostics'
 import { useSubscriptionAutoRefresh } from './composables/useSubscriptionAutoRefresh'
 import { useRssFeedAutoRefresh } from './composables/useRssFeedAutoRefresh'
+import { usePlatformFeedAutoRefresh } from './composables/usePlatformFeedAutoRefresh'
+import { startTwitchLiveNotifications } from './helpers/platformFeed'
 import { translateWindowTitle } from './helpers/strings'
 import { formatTabTitle } from './tabs/tabTitle'
 import { normalizeScrollbarThumbWidth } from './constants/scrollbar'
@@ -2038,6 +2040,7 @@ onMounted(async () => {
   }
   subscriptionAutoRefresh.start()
   rssFeedAutoRefresh.start()
+  platformFeedAutoRefresh.start()
 })
 
 onBeforeUnmount(() => {
@@ -2069,6 +2072,8 @@ onBeforeUnmount(() => {
   cancelWatchSideNavTransitionReset()
   subscriptionAutoRefresh.stop()
   rssFeedAutoRefresh.stop()
+  platformFeedAutoRefresh.stop()
+  stopTwitchLiveNotifications?.()
   clearInterval(historyCleanupTimer)
   clearInterval(searchHistoryCleanupTimer)
   stopUpdateChecks?.()
@@ -2206,6 +2211,12 @@ function scheduleRetentionCleanup(action, days) {
 
 const subscriptionAutoRefresh = useSubscriptionAutoRefresh({ dataReady, t })
 const rssFeedAutoRefresh = useRssFeedAutoRefresh(dataReady)
+const platformFeedAutoRefresh = usePlatformFeedAutoRefresh(dataReady)
+// Starts once the followed channels and the notification settings have loaded
+let stopTwitchLiveNotifications = null
+watch(dataReady, (ready) => {
+  if (ready && stopTwitchLiveNotifications === null) stopTwitchLiveNotifications = startTwitchLiveNotifications()
+}, { immediate: true })
 
 /** @type {import('vue').ComputedRef<string>} */
 const baseTheme = computed(() => store.getters.getBaseTheme)

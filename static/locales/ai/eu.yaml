@@ -217,6 +217,26 @@ Subscriptions:
       Not Set: Ezarri gabe
     Retry Feed: Saiatu berriro {feed} kargatzen
     Reloading Feed: '{feed} berriro kargatzen'
+  Platforms:
+    Tab: Plataformak
+    Platform: Plataforma
+    All Platforms: Plataforma guztiak
+    Followed Channels: Beste plataformetan jarraitutako kanalak
+    Description: Jarraitu Twitch, SoundCloud, PeerTube, Rumble eta Odysee plataformetako kanalei, haien igoerak zure harpidetzetako Plataformak fitxan ikusteko. Bilatu kanalak bilaketarekin, edo gehitu haien orriaren helbidearekin. Haien multimedia yt-dlp bidez erreproduzitzen da.
+    Add Channel: Gehitu kanala
+    Channel URL: Kanalaren helbidea
+    Invalid Channel: Idatzi Twitch, SoundCloud, PeerTube, Rumble edo Odysee plataformako kanal-orri baten helbidea.
+    Channel Not Found: Ez dago kanalik helbide honetan.
+    Channel Already Followed: Dagoeneko jarraitzen diozu kanal honi.
+    Channel Could Not Be Loaded: Ezin izan da kanala kargatu.
+    No Channels: Oraindik ez diozu beste plataformetako kanalik jarraitzen.
+    Unfollow Channel: Utzi {channel} jarraitzeari
+    Go To Channel: Joan {channel} kanalera
+    Follow: Jarraitu
+    Following: Jarraitzen
+    Clips: Klipak
+    Refresh Errors: Ezin izan da kanal 1 freskatu. | Ezin izan dira {count} kanal freskatu.
+    Content Tabs: Plataformetako edukiaren fitxak
 Trending:
   Music: Musika
   Load Error: Ezin izan dira joerak kargatu.
@@ -1208,6 +1228,11 @@ Settings:
     Notify About New Uploads: Jakinarazi igoera berriak
     RSS Feeds Auto Refresh Interval: RSS jarioen freskatze automatikoaren tartea
     Faster Subscription Refresh: "Harpidetzen freskatze azkarragoa"
+    Platforms:
+      Other Platforms: Beste plataformak
+      Manage Channels: Kudeatu jarraitutako kanalak
+      Notify When Live: Jakinarazi jarraitutako Twitch kanalak zuzenean hasten direnean
+      Auto Refresh Interval: Beste plataformen freskatze automatikoaren tartea
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Ikusteko denbora zenbatzeko iturria"
@@ -2058,6 +2083,7 @@ Context Menu:
   Reload Posts: Kargatu berriro argitalpenak
   Reload All Feeds: Kargatu berriro jario guztiak
   Reload RSS Feeds: Birkargatu RSS jarioak
+  Reload Platforms: Kargatu berriro plataformak
   Close Multiple Tabs: Itxi {count} fitxa
   Duplicate Tab: Bikoiztu fitxa
   Duplicate Multiple Tabs: Bikoiztu {count} fitxa
@@ -2325,6 +2351,8 @@ Tooltips:
     Notify About New Uploads: Gailu honetan sistemaren jakinarazpenak erakusten ditu harpidetza-ezarpenetan jakinarazpenak aktibatu dituzun kanaletarako. OpenTubeX-ek eduki berria bilatzen du harpidetzak freskatzean; beraz, aukeratu freskatze automatikoaren tarte bat. Aplikazioa itxita dagoenean jakinarazpenak jasotzeko, gaitu ere freskatzea aplikazioa itxita dagoenean.
     RSS Feeds Auto Refresh Interval: Aplikazioa irekita dagoen bitartean OpenTubeX-ek zure RSS jarioak zenbatero freskatzen dituen automatikoki.
     Faster Subscription Refresh: "Lehenik kanal bakoitzaren RSS jarioa egiaztatzen du, eta igoera berriak dituzten kanalen bideoak, Shorts-ak eta zuzeneko emanaldiak soilik kargatzen ditu. Freskatze automatikoek azken 10 minutuetan kargatutako kanalak ere saltatzen dituzte. Igoera berririk ez duten kanaletan, ikustaldi kopuruak, kendutako bideoak eta aldatutako izenburuak ordu batzuetan behin bakarrik eguneratzen dira, eta igoera berriak beranduago ager daitezke RSS jarioa atzeratuta dagoenean. Ez dago erabilgarri Invidious APIarekin."
+    Platforms Auto Refresh Interval: Aplikazioa irekita dagoen bitartean OpenTubeX-ek beste plataformetan jarraitzen dituzun kanalak zenbatero freskatzen dituen automatikoki.
+    Twitch Notify When Live: Jakinarazi egiten dizu jarraitzen dituzun Twitch kanaletako batek emanaldia hasten duenean. OpenTubeX-ek minutu gutxitik behin egiaztatzen du irekita dagoen bitartean, baita itxita dagoenean ere, orduan harpidetzak freskatzen baditu.
   Theme Settings:
     Only Show Important Notifications: Ekintza bat berretsi edo egoera bat jakinarazi besterik egiten ez duten aplikazioko jakinarazpenak ezkutatzen ditu. Erroreak, abisuak, konfiguratu dituzun gogorarazpenak eta ekintza bat eskaintzen duten jakinarazpenak, Desegin adibidez, agertzen jarraitzen dute. Atzeko planoko eragiketen aurrerapena, harpidetzak freskatzea adibidez, aurrerapen-barra orokorrean erakusten da jakinarazpen baten ordez. Sistemaren jakinarazpenei ez die eragiten.
     Visible Search Suggestions: "Bilaketa-barrak bere zerrenda korritu aurretik zenbat bilaketa-historiako sarrera eta iradokizun erakusten dituen zehazten du. Zerrenda ez da inoiz leihoaren behealdetik haratago hedatzen."
@@ -2722,6 +2750,15 @@ Notification Center:
   Clear: "Garbitu"
   Empty: "Oraindik ez dago jakinarazpenik"
   Empty Hint: "Zuzeneko emanaldien gogorarazpenak eta jakinarazpenak aktibatuta dituzten kanalen igoera berriak hemen agertuko dira."
+Platforms:
+  Tracks: Pistak
+  Playlists: Erreprodukzio-zerrendak
+  Follower Count: Jarraitzaile 1 | {count} jarraitzaile
+  Open Website: Ireki {platform} plataforman
+  Channel Not Found: Ezin izan da kanal hau aurkitu.
+  Playlist Not Found: Ezin izan da erreprodukzio-zerrenda hau aurkitu.
+  Load Error: Ezin izan da orri hau {platform} plataformatik kargatu.
+  Empty Tab: Ez dago ezer hemen oraindik.
 YouTube Account:
   Like: "Atsegin dut"
   Dislike: "Ez dut atsegin"

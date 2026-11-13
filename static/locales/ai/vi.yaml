@@ -217,6 +217,26 @@ Subscriptions:
       Not Set: Chưa đặt
     Retry Feed: Thử lại {feed}
     Reloading Feed: Đang tải lại {feed}
+  Platforms:
+    Tab: Nền tảng
+    Platform: Nền tảng
+    All Platforms: Tất cả nền tảng
+    Followed Channels: Kênh đang theo dõi trên các nền tảng khác
+    Description: Theo dõi các kênh trên Twitch, SoundCloud, PeerTube, Rumble và Odysee để xem nội dung họ tải lên trong thẻ Nền tảng của mục đăng ký. Tìm kênh bằng tính năng tìm kiếm hoặc thêm kênh bằng địa chỉ trang của kênh. Nội dung của các kênh được phát bằng yt-dlp.
+    Add Channel: Thêm kênh
+    Channel URL: Địa chỉ kênh
+    Invalid Channel: Nhập địa chỉ trang của một kênh trên Twitch, SoundCloud, PeerTube, Rumble hoặc Odysee.
+    Channel Not Found: Không có kênh nào ở địa chỉ này.
+    Channel Already Followed: Bạn đã theo dõi kênh này rồi.
+    Channel Could Not Be Loaded: Không thể tải kênh.
+    No Channels: Bạn chưa theo dõi kênh nào trên các nền tảng khác.
+    Unfollow Channel: Bỏ theo dõi {channel}
+    Go To Channel: Đi đến {channel}
+    Follow: Theo dõi
+    Following: Đang theo dõi
+    Clips: Clip
+    Refresh Errors: Không thể làm mới {count} kênh.
+    Content Tabs: Thẻ nội dung nền tảng
 Trending:
   Music: Âm nhạc
   Load Error: Không thể tải nội dung thịnh hành.
@@ -1208,6 +1228,11 @@ Settings:
     Notify About New Uploads: Thông báo nội dung mới tải lên
     RSS Feeds Auto Refresh Interval: Khoảng tự động làm mới nguồn cấp RSS
     Faster Subscription Refresh: "Làm mới kênh đăng ký nhanh hơn"
+    Platforms:
+      Other Platforms: Nền tảng khác
+      Manage Channels: Quản lý kênh đang theo dõi
+      Notify When Live: Thông báo khi các kênh Twitch đang theo dõi bắt đầu phát trực tiếp
+      Auto Refresh Interval: Khoảng tự động làm mới nền tảng khác
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Tính thời gian xem từ"
@@ -2062,6 +2087,7 @@ Context Menu:
   Reload Posts: Tải lại bài đăng
   Reload All Feeds: Tải lại tất cả bảng tin
   Reload RSS Feeds: Tải lại nguồn cấp RSS
+  Reload Platforms: Tải lại các nền tảng
   Close Multiple Tabs: Đóng {count} thẻ
   Duplicate Tab: Nhân đôi thẻ
   Duplicate Multiple Tabs: Nhân đôi {count} thẻ
@@ -2330,6 +2356,8 @@ Tooltips:
     Notify About New Uploads: Hiện thông báo hệ thống trên thiết bị này cho các kênh mà bạn đã bật thông báo trong cài đặt đăng ký của kênh. OpenTubeX kiểm tra nội dung mới khi làm mới đăng ký, vì vậy hãy chọn khoảng thời gian tự động làm mới. Để nhận thông báo khi ứng dụng đã đóng, hãy bật thêm tùy chọn làm mới khi ứng dụng đã đóng.
     RSS Feeds Auto Refresh Interval: Tần suất OpenTubeX tự động làm mới các nguồn cấp RSS của bạn khi ứng dụng đang mở.
     Faster Subscription Refresh: "Trước tiên kiểm tra nguồn cấp RSS của từng kênh và chỉ tải video, Shorts và sự kiện trực tiếp từ các kênh có nội dung tải lên mới. Làm mới tự động cũng bỏ qua các kênh đã tải trong 10 phút qua. Với các kênh không có nội dung mới, lượt xem, video đã xóa và tiêu đề đã thay đổi chỉ được cập nhật vài giờ một lần, và nội dung mới có thể xuất hiện muộn hơn khi nguồn cấp RSS bị chậm. Không khả dụng với API Invidious."
+    Platforms Auto Refresh Interval: Tần suất OpenTubeX tự động làm mới các kênh bạn theo dõi trên các nền tảng khác khi ứng dụng đang mở.
+    Twitch Notify When Live: Thông báo cho bạn khi một trong các kênh Twitch bạn theo dõi bắt đầu phát. OpenTubeX kiểm tra vài phút một lần khi đang mở, và cả khi đã đóng nếu lúc đó ứng dụng làm mới mục đăng ký.
   Theme Settings:
     Only Show Important Notifications: Ẩn các thông báo trong ứng dụng chỉ xác nhận một thao tác hoặc báo cáo trạng thái. Lỗi, cảnh báo, lời nhắc bạn đã thiết lập và các thông báo có thao tác, chẳng hạn như Hoàn tác, vẫn hiển thị. Tiến trình của các thao tác chạy nền, chẳng hạn như làm mới kênh đăng ký, được hiển thị trên thanh tiến trình chung thay vì trong thông báo. Thông báo hệ thống không bị ảnh hưởng.
     Visible Search Suggestions: "Đặt số mục lịch sử tìm kiếm và gợi ý mà thanh tìm kiếm hiển thị trước khi danh sách của nó phải cuộn. Danh sách không bao giờ vượt quá cạnh dưới của cửa sổ."
@@ -2728,6 +2756,15 @@ Notification Center:
   Clear: "Xóa"
   Empty: "Chưa có thông báo nào"
   Empty Hint: "Lời nhắc phát trực tiếp và video mới từ các kênh đã bật thông báo sẽ xuất hiện ở đây."
+Platforms:
+  Tracks: Bản nhạc
+  Playlists: Danh sách phát
+  Follower Count: '{count} người theo dõi'
+  Open Website: Mở trên {platform}
+  Channel Not Found: Không tìm thấy kênh này.
+  Playlist Not Found: Không tìm thấy danh sách phát này.
+  Load Error: Không thể tải trang này từ {platform}.
+  Empty Tab: Chưa có gì ở đây.
 YouTube Account:
   Like: "Thích"
   Dislike: "Không thích"

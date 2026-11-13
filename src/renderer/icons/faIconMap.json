@@ -858,6 +858,7 @@
   "bandcamp": { "ri": "video-line", "material": "movie-outline", "simple": "bandcamp" },
   "bilibili": { "ri": "video-line", "material": "movie-outline", "simple": "bilibili" },
   "odysee": { "ri": "video-line", "material": "movie-outline", "simple": "odysee" },
+  "peertube": { "ri": "video-line", "material": "movie-outline", "simple": "peertube" },
   "rumble": { "ri": "video-line", "material": "movie-outline", "simple": "rumble" },
   "internetarchive": { "ri": "video-line", "material": "movie-outline", "simple": "internetarchive" },
   "mixcloud": { "ri": "video-line", "material": "movie-outline", "simple": "mixcloud" },

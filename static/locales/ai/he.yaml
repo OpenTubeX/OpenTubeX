@@ -219,6 +219,26 @@ Subscriptions:
       Not Set: לא מוגדר
     Retry Feed: ניסיון חוזר עבור {feed}
     Reloading Feed: טוען מחדש את {feed}
+  Platforms:
+    Tab: פלטפורמות
+    Platform: פלטפורמה
+    All Platforms: כל הפלטפורמות
+    Followed Channels: ערוצים במעקב בפלטפורמות אחרות
+    Description: אפשר לעקוב אחר ערוצים ב־Twitch, ב־SoundCloud, ב־PeerTube, ב־Rumble וב־Odysee כדי לראות את ההעלאות שלהם בלשונית פלטפורמות שבמינויים. אפשר למצוא ערוצים בחיפוש, או להוסיף אותם לפי כתובת הדף שלהם. המדיה שלהם מתנגנת באמצעות yt-dlp.
+    Add Channel: הוספת ערוץ
+    Channel URL: כתובת הערוץ
+    Invalid Channel: יש להזין כתובת של דף ערוץ ב־Twitch, ב־SoundCloud, ב־PeerTube, ב־Rumble או ב־Odysee.
+    Channel Not Found: אין ערוץ בכתובת הזאת.
+    Channel Already Followed: כבר עוקבים אחר הערוץ הזה.
+    Channel Could Not Be Loaded: לא ניתן היה לטעון את הערוץ.
+    No Channels: עדיין לא עוקבים אחר אף ערוץ בפלטפורמות אחרות.
+    Unfollow Channel: הפסקת המעקב אחר {channel}
+    Go To Channel: מעבר אל {channel}
+    Follow: מעקב
+    Following: במעקב
+    Clips: קליפים
+    Refresh Errors: לא ניתן היה לרענן ערוץ אחד. | לא ניתן היה לרענן {count} ערוצים. | לא ניתן היה לרענן {count} ערוצים.
+    Content Tabs: כרטיסיות תוכן פלטפורמות
 Trending:
   Music: מוזיקה
   Load Error: לא ניתן לטעון את התוכן החם.
@@ -1223,6 +1243,11 @@ Settings:
     Notify About New Uploads: התראה על העלאות חדשות
     RSS Feeds Auto Refresh Interval: מרווח ריענון אוטומטי של פידי RSS
     Faster Subscription Refresh: "רענון מהיר יותר של מינויים"
+    Platforms:
+      Other Platforms: פלטפורמות אחרות
+      Manage Channels: ניהול ערוצים במעקב
+      Notify When Live: להודיע כשערוצי Twitch במעקב מתחילים שידור חי
+      Auto Refresh Interval: מרווח ריענון אוטומטי של פלטפורמות אחרות
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "מקור ספירת זמן הצפייה"
@@ -2104,6 +2129,7 @@ Context Menu:
   Reload Posts: טעינה מחדש של הפוסטים
   Reload All Feeds: טעינה מחדש של כל הפידים
   Reload RSS Feeds: טעינה מחדש של הזנות RSS
+  Reload Platforms: טעינה מחדש של הפלטפורמות
   Close Multiple Tabs: סגירת {count} כרטיסייה | סגירת {count} כרטיסיות
   Duplicate Tab: שכפול הכרטיסייה
   Duplicate Multiple Tabs: שכפול {count} כרטיסייה | שכפול {count} כרטיסיות
@@ -2372,6 +2398,8 @@ Tooltips:
     Notify About New Uploads: מציג התראות מערכת במכשיר זה עבור ערוצים שהפעלת את ההתראות שלהם בהגדרות המינוי שלהם. OpenTubeX בודק אם יש תוכן חדש בעת רענון המינויים, לכן יש לבחור מרווח ריענון אוטומטי. כדי לקבל התראות כשהיישום סגור, יש להפעיל גם ריענון כשהיישום סגור.
     RSS Feeds Auto Refresh Interval: באיזו תדירות OpenTubeX מרענן אוטומטית את פידי ה-RSS שלך כשהיישום פתוח.
     Faster Subscription Refresh: "בודק תחילה את הזנת ה־RSS של כל ערוץ וטוען סרטונים, Shorts ושידורים חיים רק מערוצים עם העלאות חדשות. רענונים אוטומטיים גם מדלגים על ערוצים שנטענו ב־10 הדקות האחרונות. בערוצים ללא העלאות חדשות, מספר הצפיות, סרטונים שהוסרו וכותרות ששונו מתעדכנים רק כל כמה שעות, והעלאות חדשות עשויות להופיע מאוחר יותר כשהזנת ה־RSS מפגרת. לא זמין עם ה־API של Invidious."
+    Platforms Auto Refresh Interval: באיזו תדירות OpenTubeX מרענן אוטומטית את הערוצים שבמעקב בפלטפורמות אחרות כשהיישום פתוח.
+    Twitch Notify When Live: מודיע כשאחד מערוצי ה־Twitch שבמעקב מתחיל לשדר. OpenTubeX בודק כל כמה דקות כל עוד הוא פתוח, וגם כשהוא סגור אם הוא מרענן אז את המינויים.
   Theme Settings:
     Only Show Important Notifications: מסתיר התראות בתוך היישום שרק מאשרות פעולה או מדווחות על מצב. שגיאות, אזהרות, תזכורות שהגדרת והתראות שמציעות פעולה, כמו הסגה, ממשיכות להופיע. התקדמות פעולות ברקע, כמו רענון המינויים, מוצגת בסרגל ההתקדמות הכללי במקום כהתראה. התראות המערכת אינן מושפעות.
     Visible Search Suggestions: "קובע כמה רשומות מהיסטוריית החיפוש והצעות סרגל החיפוש מציג לפני שיש לגלול את הרשימה שלו. הרשימה לעולם אינה חורגת מתחתית החלון."
@@ -2774,6 +2802,15 @@ Notification Center:
   Clear: "ניקוי"
   Empty: "אין עדיין התראות"
   Empty Hint: "תזכורות לשידורים חיים והעלאות חדשות מערוצים שההתראות שלהם מופעלות יופיעו כאן."
+Platforms:
+  Tracks: רצועות
+  Playlists: רשימות נגינה
+  Follower Count: עוקב אחד | {count} עוקבים | {count} עוקבים
+  Open Website: פתיחה ב־{platform}
+  Channel Not Found: הערוץ הזה לא נמצא.
+  Playlist Not Found: רשימת הנגינה הזאת לא נמצאה.
+  Load Error: לא ניתן היה לטעון את הדף הזה מ־{platform}.
+  Empty Tab: אין כאן עדיין כלום.
 YouTube Account:
   Like: "לייק"
   Dislike: "דיסלייק"

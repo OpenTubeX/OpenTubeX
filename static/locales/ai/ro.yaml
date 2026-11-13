@@ -217,6 +217,26 @@ Subscriptions:
       Not Set: Nesetat
     Retry Feed: Reîncearcă {feed}
     Reloading Feed: Se reîncarcă {feed}
+  Platforms:
+    Tab: Platforme
+    Platform: Platformă
+    All Platforms: Toate platformele
+    Followed Channels: Canale urmărite pe alte platforme
+    Description: Urmărește canale de pe Twitch, SoundCloud, PeerTube, Rumble și Odysee pentru a vedea ce încarcă în fila Platforme a abonamentelor tale. Găsește canale prin căutare sau adaugă-le după adresa paginii lor. Conținutul lor este redat cu yt-dlp.
+    Add Channel: Adaugă canal
+    Channel URL: Adresa canalului
+    Invalid Channel: Introdu adresa paginii unui canal de pe Twitch, SoundCloud, PeerTube, Rumble sau Odysee.
+    Channel Not Found: Nu există niciun canal la această adresă.
+    Channel Already Followed: Urmărești deja acest canal.
+    Channel Could Not Be Loaded: Canalul nu a putut fi încărcat.
+    No Channels: Încă nu urmărești niciun canal de pe alte platforme.
+    Unfollow Channel: Nu mai urmări {channel}
+    Go To Channel: Mergi la {channel}
+    Follow: Urmărește
+    Following: Urmărit
+    Clips: Clipuri
+    Refresh Errors: 1 canal nu a putut fi reîmprospătat. | {count} canale nu au putut fi reîmprospătate. | {count} de canale nu au putut fi reîmprospătate.
+    Content Tabs: File pentru conținutul platformelor
 Trending:
   Music: Muzică
   Load Error: Tendințele nu au putut fi încărcate.
@@ -1213,6 +1233,11 @@ Settings:
     Notify About New Uploads: Notifică despre încărcări noi
     RSS Feeds Auto Refresh Interval: Interval de reîmprospătare automată a fluxurilor RSS
     Faster Subscription Refresh: "Reîmprospătare mai rapidă a abonamentelor"
+    Platforms:
+      Other Platforms: Alte platforme
+      Manage Channels: Gestionează canalele urmărite
+      Notify When Live: Notifică atunci când canalele Twitch urmărite intră live
+      Auto Refresh Interval: Interval de reîmprospătare automată a altor platforme
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Numără timpul de vizionare de pe"
@@ -2100,6 +2125,7 @@ Context Menu:
   Reload Posts: Reîncarcă postările
   Reload All Feeds: Reîncarcă toate fluxurile
   Reload RSS Feeds: Reîncarcă fluxurile RSS
+  Reload Platforms: Reîncarcă platformele
   Close Multiple Tabs: Închide {count} filă | Închide {count} file
   Duplicate Tab: Duplică fila
   Duplicate Multiple Tabs: Duplică {count} filă | Duplică {count} file
@@ -2371,6 +2397,8 @@ Tooltips:
     Notify About New Uploads: Afișează notificări de sistem pe acest dispozitiv pentru canalele ale căror notificări le-ați activat în setările lor de abonament. OpenTubeX caută conținut nou când abonamentele se reîmprospătează, așa că alegeți un interval de reîmprospătare automată. Pentru a primi notificări când aplicația este închisă, activați și reîmprospătarea când aplicația este închisă.
     RSS Feeds Auto Refresh Interval: Cât de des reîmprospătează OpenTubeX automat fluxurile RSS cât timp aplicația este deschisă.
     Faster Subscription Refresh: "Verifică mai întâi fluxul RSS al fiecărui canal și încarcă videoclipurile, Shorts și transmisiunile live doar de la canalele cu încărcări noi. Reîmprospătările automate omit și canalele încărcate în ultimele 10 minute. Pentru canalele fără încărcări noi, numărul de vizionări, videoclipurile eliminate și titlurile modificate se actualizează doar la câteva ore, iar încărcările noi pot apărea mai târziu când fluxul RSS rămâne în urmă. Indisponibil cu API-ul Invidious."
+    Platforms Auto Refresh Interval: Cât de des reîmprospătează OpenTubeX automat canalele pe care le urmărești pe alte platforme cât timp aplicația este deschisă.
+    Twitch Notify When Live: Te anunță când unul dintre canalele Twitch pe care le urmărești începe o transmisiune. OpenTubeX verifică la fiecare câteva minute cât timp este deschis, și de asemenea cât timp este închis, dacă atunci actualizează abonamentele.
   Theme Settings:
     Only Show Important Notifications: Ascunde notificările din aplicație care doar confirmă o acțiune sau raportează o stare. Erorile, avertismentele, mementourile pe care le-ați configurat și notificările care oferă o acțiune, precum Anulare, apar în continuare. Progresul operațiunilor din fundal, precum reîmprospătarea abonamentelor, este afișat în bara de progres globală în loc de o notificare. Notificările sistemului nu sunt afectate.
     Visible Search Suggestions: "Stabilește câte intrări din istoricul căutărilor și sugestii afișează bara de căutare înainte ca lista ei să fie derulată. Lista nu depășește niciodată marginea de jos a ferestrei."
@@ -2771,6 +2799,15 @@ Notification Center:
   Clear: "Șterge"
   Empty: "Încă nu există notificări"
   Empty Hint: "Aici vor apărea mementourile pentru transmisiunile live și încărcările noi de pe canalele cu notificări activate."
+Platforms:
+  Tracks: Piese
+  Playlists: Liste de redare
+  Follower Count: 1 urmăritor | {count} urmăritori | {count} de urmăritori
+  Open Website: Deschide pe {platform}
+  Channel Not Found: Acest canal nu a putut fi găsit.
+  Playlist Not Found: Această listă de redare nu a putut fi găsită.
+  Load Error: Această pagină nu a putut fi încărcată de pe {platform}.
+  Empty Tab: Încă nu există nimic aici.
 YouTube Account:
   Like: "Îmi place"
   Dislike: "Nu îmi place"

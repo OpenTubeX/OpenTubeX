@@ -217,6 +217,26 @@ Subscriptions:
       Not Set: Määramata
     Retry Feed: Proovi {feed} uuesti
     Reloading Feed: Laadin {feed} uuesti
+  Platforms:
+    Tab: Platvormid
+    Platform: Platvorm
+    All Platforms: Kõik platvormid
+    Followed Channels: Jälgitavad kanalid teistel platvormidel
+    Description: Jälgi kanaleid platvormidel Twitch, SoundCloud, PeerTube, Rumble ja Odysee, et näha nende üleslaadimisi oma tellimuste vahekaardil Platvormid. Leia kanaleid otsingu abil või lisa need nende lehe aadressi järgi. Nende meediat esitatakse yt-dlp abil.
+    Add Channel: Lisa kanal
+    Channel URL: Kanali aadress
+    Invalid Channel: Sisesta kanalilehe aadress platvormil Twitch, SoundCloud, PeerTube, Rumble või Odysee.
+    Channel Not Found: Sellel aadressil pole kanalit.
+    Channel Already Followed: Sa juba jälgid seda kanalit.
+    Channel Could Not Be Loaded: Kanalit ei õnnestunud laadida.
+    No Channels: Sa ei jälgi veel ühtegi kanalit teistel platvormidel.
+    Unfollow Channel: Lõpeta kanali {channel} jälgimine
+    Go To Channel: Ava kanal {channel}
+    Follow: Jälgi
+    Following: Jälgid
+    Clips: Klipid
+    Refresh Errors: 1 kanalit ei õnnestunud värskendada. | {count} kanalit ei õnnestunud värskendada.
+    Content Tabs: Platvormide sisu vahekaardid
 Trending:
   Music: Muusika
   Load Error: Trende ei saanud laadida.
@@ -1208,6 +1228,11 @@ Settings:
     Notify About New Uploads: Teavita uutest üleslaadimistest
     RSS Feeds Auto Refresh Interval: RSS-voogude automaatse värskendamise intervall
     Faster Subscription Refresh: "Kiirem tellimuste värskendamine"
+    Platforms:
+      Other Platforms: Teised platvormid
+      Manage Channels: Halda jälgitavaid kanaleid
+      Notify When Live: Teavita, kui jälgitavad Twitchi kanalid alustavad otseülekannet
+      Auto Refresh Interval: Teiste platvormide automaatse värskendamise intervall
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Vaatamisaja arvestamise allikas"
@@ -2050,6 +2075,7 @@ Context Menu:
   Reload Posts: Laadi postitused uuesti
   Reload All Feeds: Laadi kõik vood uuesti
   Reload RSS Feeds: Laadi RSS-vood uuesti
+  Reload Platforms: Laadi platvormid uuesti
   Close Multiple Tabs: Sulge {count} vahekaarti
   Duplicate Tab: Klooni vahekaart
   Duplicate Multiple Tabs: Klooni {count} vahekaarti
@@ -2318,6 +2344,8 @@ Tooltips:
     Notify About New Uploads: Kuvab selles seadmes süsteemiteavitusi kanalite kohta, mille teavitused oled nende tellimuse seadetes sisse lülitanud. OpenTubeX kontrollib uut sisu tellimuste värskendamisel, seega vali automaatse värskendamise intervall. Et saada teavitusi ka siis, kui rakendus on suletud, luba ka värskendamine suletud rakenduse korral.
     RSS Feeds Auto Refresh Interval: Kui sageli OpenTubeX sinu RSS-voogusid automaatselt värskendab, kui rakendus on avatud.
     Faster Subscription Refresh: "Kontrollib esmalt iga kanali RSS-voogu ja laadib videod, Shorts'id ja otseülekanded ainult uute üleslaadimistega kanalitest. Automaatsed värskendused jätavad vahele ka kanalid, mis laaditi viimase 10 minuti jooksul. Uute üleslaadimisteta kanalite puhul uuenevad vaatamiste arvud, eemaldatud videod ja muudetud pealkirjad vaid iga mõne tunni tagant ning uued üleslaadimised võivad ilmuda hiljem, kui RSS-voog jääb maha. Invidiouse API-ga pole saadaval."
+    Platforms Auto Refresh Interval: Kui sageli OpenTubeX kanaleid, mida sa teistel platvormidel jälgid, automaatselt värskendab, kui rakendus on avatud.
+    Twitch Notify When Live: Teavitab sind, kui mõni sinu jälgitavatest Twitchi kanalitest alustab ülekannet. OpenTubeX kontrollib iga paari minuti järel, kui see on avatud, ja ka siis, kui see on suletud, kui see siis tellimusi värskendab.
   Theme Settings:
     Only Show Important Notifications: Peidab rakendusesisesed teavitused, mis ainult kinnitavad toimingut või teatavad olekust. Vead, hoiatused, teie seadistatud meeldetuletused ja toimingut pakkuvad teavitused, nagu Võta tagasi, kuvatakse endiselt. Taustatoimingute edenemine, näiteks tellimuste värskendamine, kuvatakse teavituse asemel üldisel edenemisribal. Süsteemiteavitusi see ei mõjuta.
     Visible Search Suggestions: "Määrab, mitu otsinguajaloo kirjet ja soovitust otsinguriba näitab, enne kui selle loendit tuleb kerida. Loend ei ulatu kunagi akna alumisest servast kaugemale."
@@ -2715,6 +2743,15 @@ Notification Center:
   Clear: "Tühjenda"
   Empty: "Teavitusi veel pole"
   Empty Hint: "Siia ilmuvad otseülekannete meeldetuletused ja uued üleslaadimised kanalitelt, mille teavitused on sisse lülitatud."
+Platforms:
+  Tracks: Lood
+  Playlists: Esitusloendid
+  Follower Count: 1 jälgija | {count} jälgijat
+  Open Website: Ava platvormil {platform}
+  Channel Not Found: Seda kanalit ei leitud.
+  Playlist Not Found: Seda esitusloendit ei leitud.
+  Load Error: Seda lehte ei õnnestunud platvormilt {platform} laadida.
+  Empty Tab: Siin pole veel midagi.
 YouTube Account:
   Like: "Meeldib"
   Dislike: "Ei meeldi"

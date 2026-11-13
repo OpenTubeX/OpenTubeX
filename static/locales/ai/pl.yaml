@@ -102,6 +102,26 @@ Subscriptions:
       Not Set: Nie ustawiono
     Retry Feed: Spróbuj ponownie wczytać {feed}
     Reloading Feed: Ponowne wczytywanie {feed}
+  Platforms:
+    Tab: Platformy
+    Platform: Platforma
+    All Platforms: Wszystkie platformy
+    Followed Channels: Obserwowane kanały na innych platformach
+    Description: Obserwuj kanały na platformach Twitch, SoundCloud, PeerTube, Rumble i Odysee, aby widzieć ich nowe materiały na karcie Platformy w swoich subskrypcjach. Znajduj kanały za pomocą wyszukiwania lub dodawaj je po adresie ich strony. Ich multimedia są odtwarzane za pomocą yt-dlp.
+    Add Channel: Dodaj kanał
+    Channel URL: Adres kanału
+    Invalid Channel: Wpisz adres strony kanału na platformie Twitch, SoundCloud, PeerTube, Rumble lub Odysee.
+    Channel Not Found: Pod tym adresem nie ma kanału.
+    Channel Already Followed: Już obserwujesz ten kanał.
+    Channel Could Not Be Loaded: Nie udało się wczytać kanału.
+    No Channels: Nie obserwujesz jeszcze żadnych kanałów na innych platformach.
+    Unfollow Channel: Przestań obserwować {channel}
+    Go To Channel: Przejdź do kanału {channel}
+    Follow: Obserwuj
+    Following: Obserwujesz
+    Clips: Klipy
+    Refresh Errors: Nie udało się odświeżyć 1 kanału. | Nie udało się odświeżyć {count} kanałów. | Nie udało się odświeżyć {count} kanałów.
+    Content Tabs: Karty treści z platform
 Trending:
   Music: Muzyka
   Load Error: Nie udało się wczytać popularnych treści.
@@ -745,6 +765,11 @@ Settings:
     Manage RSS Feeds: Zarządzaj kanałami RSS
     RSS Feeds Auto Refresh Interval: Interwał odświeżania kanałów RSS
     Faster Subscription Refresh: "Szybsze odświeżanie subskrypcji"
+    Platforms:
+      Other Platforms: Inne platformy
+      Manage Channels: Zarządzaj obserwowanymi kanałami
+      Notify When Live: Powiadamiaj, gdy obserwowane kanały Twitch rozpoczną transmisję
+      Auto Refresh Interval: Interwał odświeżania innych platform
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Licz czas oglądania"
@@ -1355,6 +1380,7 @@ Change Format:
   Built-in Fallback Template: 'Wbudowany mechanizm nie odtworzył strumienia. Zostanie użyty yt-dlp: {error}'
 Context Menu:
   Reload RSS Feeds: Załaduj ponownie kanały RSS
+  Reload Platforms: Załaduj ponownie platformy
   Opened in a Background Tab: "Otwarto w karcie w tle"
   Open in a Background Tab: "Otwórz w karcie w tle"
   Select Tab: Zaznacz kartę
@@ -1547,6 +1573,8 @@ Tooltips:
     Enable RSS Feeds: Pokazuje zakładkę RSS na stronie Subskrypcje z elementami kanałów RSS lub Atom, aby można było obserwować twórców z innych platform. Jej elementy otwierają się za pomocą yt-dlp.
     RSS Feeds Auto Refresh Interval: Jak często OpenTubeX automatycznie odświeża Twoje kanały RSS, gdy aplikacja jest otwarta.
     Faster Subscription Refresh: "Najpierw sprawdza kanał RSS każdego kanału i wczytuje filmy, Shorts i transmisje na żywo tylko z kanałów z nowymi przesłanymi filmami. Automatyczne odświeżanie pomija też kanały wczytane w ciągu ostatnich 10 minut. W kanałach bez nowych filmów liczba wyświetleń, usunięte filmy i zmienione tytuły aktualizują się tylko co kilka godzin, a nowe filmy mogą pojawić się później, gdy kanał RSS jest opóźniony. Niedostępne z API Invidious."
+    Platforms Auto Refresh Interval: Jak często OpenTubeX automatycznie odświeża kanały, które obserwujesz na innych platformach, gdy aplikacja jest otwarta.
+    Twitch Notify When Live: Powiadamia, gdy któryś z obserwowanych kanałów Twitch rozpocznie transmisję. OpenTubeX sprawdza co kilka minut, gdy jest otwarty, a także gdy jest zamknięty, jeśli wtedy odświeża subskrypcje.
   Theme Settings:
     Only Show Important Notifications: Ukrywa powiadomienia w aplikacji, które jedynie potwierdzają działanie lub informują o stanie. Błędy, ostrzeżenia, ustawione przez Ciebie przypomnienia oraz powiadomienia oferujące działanie, takie jak Cofnij, nadal się wyświetlają. Postęp operacji w tle, takich jak odświeżanie subskrypcji, jest pokazywany na globalnym pasku postępu zamiast w powiadomieniu. Nie dotyczy to powiadomień systemowych.
     Visible Search Suggestions: "Określa, ile wpisów historii wyszukiwania i sugestii pokazuje pasek wyszukiwania, zanim jego lista zacznie się przewijać. Lista nigdy nie wychodzi poza dolną krawędź okna."
@@ -1963,6 +1991,15 @@ Notification Center:
   Clear: "Wyczyść"
   Empty: "Brak powiadomień"
   Empty Hint: "Tutaj pojawią się przypomnienia o transmisjach na żywo i nowe filmy z kanałów z włączonymi powiadomieniami."
+Platforms:
+  Tracks: Utwory
+  Playlists: Playlisty
+  Follower Count: 1 obserwujący | {count} obserwujących | {count} obserwujących
+  Open Website: Otwórz na platformie {platform}
+  Channel Not Found: Nie znaleziono tego kanału.
+  Playlist Not Found: Nie znaleziono tej playlisty.
+  Load Error: Nie udało się wczytać tej strony z platformy {platform}.
+  Empty Tab: Nic tu jeszcze nie ma.
 YouTube Account:
   Like: "Podoba mi się"
   Dislike: "Nie podoba mi się"

@@ -179,6 +179,7 @@ import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 import RssHubFeedPrompt from './RssHubFeedPrompt.vue'
 
 import store from '../../../store/index'
+import { AUTO_REFRESH_INTERVAL_VALUES, getAutoRefreshIntervalNames } from '../../../helpers/autoRefreshIntervals'
 import { clampOverlayScrollTop } from '../../../helpers/overlayScrollbars'
 import {
   addLoadedRssFeed,
@@ -199,16 +200,7 @@ const { t } = useI18n()
 
 const enableRssFeeds = computed(() => store.getters.getEnableRssFeeds)
 
-const AUTO_REFRESH_INTERVAL_VALUES = ['0', '1800000', '3600000', '7200000', '14400000', '21600000', '28800000']
-const autoRefreshIntervalNames = computed(() => [
-  t('Settings.General Settings.Avoid translation.Disabled'),
-  '30 min',
-  '1 h',
-  '2 h',
-  '4 h',
-  '6 h',
-  '8 h'
-])
+const autoRefreshIntervalNames = computed(() => getAutoRefreshIntervalNames(t))
 const autoRefreshInterval = computed(() => store.getters.getRssFeedsAutoRefreshInterval)
 /** @type {import('vue').ComputedRef<import('../../../helpers/rssFeeds').RssFeed[]>} */
 const feeds = computed(() => store.getters.getFollowedRssFeeds)

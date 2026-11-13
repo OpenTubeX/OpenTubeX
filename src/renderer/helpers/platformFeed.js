@@ -581,6 +581,10 @@ export async function followPlatformChannel(platformId, id) {
     } catch (error) {
       console.error('Failed to load the items of the followed channel', error)
     }
+    // Another follow of the channel can have finished while its items loaded
+    if (getFollowedChannels().some(followed => getPlatformChannelKey(followed) === key)) {
+      return { channel: followedChannel, followed: false }
+    }
     let saved = false
     try {
       saved = await store.dispatch('updateFollowedChannels', [...getFollowedChannels(), followedChannel]) !== false

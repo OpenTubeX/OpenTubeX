@@ -8,133 +8,172 @@
       v-else
       class="card"
     >
-      <h2>
-        <FtIcon
-          :icon="['fas', 'search']"
-          class="headingIcon"
-        />
-        {{ t("Search Filters.Search Results") }}
-      </h2>
-      <div
-        v-if="searchCorrection"
-        class="searchCorrection"
-        :class="{ centered: shownResults.length === 0 }"
-        role="status"
-      >
-        <I18nT
-          v-if="searchCorrection.type === 'didYouMean'"
-          keypath="Search Filters.Did you mean"
-          tag="p"
-          scope="global"
+      <div class="titleRow">
+        <h2 class="pageTitle">
+          <FtIcon
+            :icon="['fas', 'search']"
+            class="headingIcon"
+          />
+          {{ t("Search Filters.Search Results") }}
+        </h2>
+        <div
+          v-if="supportsYtDlp"
+          class="searchControls"
         >
-          <template #query>
-            <RouterLink :to="getSearchRoute(searchCorrection.correctedQuery, true)">
-              <strong>{{ searchCorrection.correctedQuery }}</strong>
-            </RouterLink>
-          </template>
-        </I18nT>
-        <template v-else>
+          <div class="searchControl">
+            <FtSelect
+              :placeholder="t('Subscriptions.Platforms.Platform')"
+              :value="searchPlatform"
+              :select-names="searchPlatformNames"
+              :select-values="searchPlatformValues"
+              :option-icons="searchPlatformIcons"
+              :icon="['fas', 'globe']"
+              @change="changeSearchPlatform"
+            />
+          </div>
+          <div
+            v-if="platform && platform.searchTypes.length > 1"
+            class="searchControl"
+          >
+            <FtSelect
+              :placeholder="t('Search Filters.Type.Type')"
+              :value="platformSearchType"
+              :select-names="platform.searchTypes.map(value => platformSearchTypeLabels[value])"
+              :select-values="platform.searchTypes"
+              :icon="['fas', 'filter']"
+              @change="value => selectedPlatformSearchType = value"
+            />
+          </div>
+        </div>
+      </div>
+      <PlatformSearchResults
+        v-if="platform"
+        :platform="platform"
+        :query="processedQuery"
+        :type="platformSearchType"
+      />
+      <template v-else>
+        <div
+          v-if="searchCorrection"
+          class="searchCorrection"
+          :class="{ centered: shownResults.length === 0 }"
+          role="status"
+        >
           <I18nT
-            :keypath="searchCorrection.type === 'showingResultsFor' ? 'Search Filters.Showing results for' : 'Search Filters.Including results for'"
+            v-if="searchCorrection.type === 'didYouMean'"
+            keypath="Search Filters.Did you mean"
             tag="p"
             scope="global"
           >
             <template #query>
-              <strong>{{ searchCorrection.correctedQuery }}</strong>
-            </template>
-          </I18nT>
-          <I18nT
-            v-if="searchCorrection.canSearchOriginal"
-            :keypath="searchCorrection.type === 'showingResultsFor' ? 'Search Filters.Search instead for' : 'Search Filters.Search only for'"
-            tag="p"
-            scope="global"
-          >
-            <template #query>
-              <RouterLink :to="getSearchRoute(processedQuery, false)">
-                {{ processedQuery }}
+              <RouterLink :to="getSearchRoute(searchCorrection.correctedQuery, true)">
+                <strong>{{ searchCorrection.correctedQuery }}</strong>
               </RouterLink>
             </template>
           </I18nT>
-        </template>
-      </div>
-      <div
-        v-if="searchNotice"
-        class="searchNotice"
-        role="status"
-      >
-        <h3>{{ searchNotice.title }}</h3>
-        <p>{{ searchNotice.body }}</p>
-        <template v-if="searchNotice.requiresAuthentication && supportsCookieSearch && !showFamilyFriendlyOnly">
-          <p v-if="!cookiesConfigured">
-            {{ t('Video.Configure Restricted Playback Cookies Hint') }}
-          </p>
-          <FtButton
-            v-else
-            class="searchRetryButton"
-            :label="t('Video.Try With Configured Cookies')"
-            :icon="['fas', 'cookie']"
-            :disabled="isRetryingWithCookies"
-            @click="retrySearchWithCookies"
-          />
-          <FtLoader
-            v-if="isRetryingWithCookies"
-            :label="t('Search Filters[&quot;Fetching results. Please wait&quot;]')"
-          />
-        </template>
-      </div>
-      <p
-        v-if="cookieSearchFailed"
-        class="searchStatus"
-        role="alert"
-      >
-        {{ t('Search Filters.Cookie Search Failed') }}
-      </p>
-      <FtElementList
-        :data="shownResults"
-      />
-      <!-- Recheck visibility when results are appended or replaced. -->
-      <FtAutoLoadNextPageWrapper
-        v-if="hasMoreResults"
-        :key="autoLoadMore ? paginationRevision : 0"
-        :loading="isLoadingMore"
-        :paused="nextPageFailed"
-        @load-next-page="nextPage"
-      >
-        <div
-          class="getNextPage"
-          role="button"
-          tabindex="0"
-          @click="nextPage"
-          @keydown.enter.space.prevent="nextPage"
-        >
-          <FtIcon :icon="['fas', 'search']" /> {{ t("Search Filters.Fetch more results") }}
+          <template v-else>
+            <I18nT
+              :keypath="searchCorrection.type === 'showingResultsFor' ? 'Search Filters.Showing results for' : 'Search Filters.Including results for'"
+              tag="p"
+              scope="global"
+            >
+              <template #query>
+                <strong>{{ searchCorrection.correctedQuery }}</strong>
+              </template>
+            </I18nT>
+            <I18nT
+              v-if="searchCorrection.canSearchOriginal"
+              :keypath="searchCorrection.type === 'showingResultsFor' ? 'Search Filters.Search instead for' : 'Search Filters.Search only for'"
+              tag="p"
+              scope="global"
+            >
+              <template #query>
+                <RouterLink :to="getSearchRoute(processedQuery, false)">
+                  {{ processedQuery }}
+                </RouterLink>
+              </template>
+            </I18nT>
+          </template>
         </div>
-      </FtAutoLoadNextPageWrapper>
-      <p
-        v-else-if="!searchNotice && !cookieSearchFailed && !isRetryingWithCookies"
-        class="searchStatus"
-        role="status"
-      >
-        {{ exhaustedSearchMessage }}
-      </p>
-      <p
-        v-if="isEmptyLocalSearch && !searchNotice && !showFamilyFriendlyOnly && !isRetryingWithCookies"
-        class="searchHint"
-      >
-        {{ t('Search Filters.Possible Age Restriction Hint') }}
-      </p>
-      <FtButton
-        v-if="showCookieRetryWithoutNotice"
-        class="searchRetryButton"
-        :label="t('Video.Try With Configured Cookies')"
-        :icon="['fas', 'cookie']"
-        :disabled="isRetryingWithCookies"
-        @click="retrySearchWithCookies"
-      />
-      <FtLoader
-        v-if="isRetryingWithCookies && !searchNotice && !isLoadingMore"
-        :label="t('Search Filters[&quot;Fetching results. Please wait&quot;]')"
-      />
+        <div
+          v-if="searchNotice"
+          class="searchNotice"
+          role="status"
+        >
+          <h3>{{ searchNotice.title }}</h3>
+          <p>{{ searchNotice.body }}</p>
+          <template v-if="searchNotice.requiresAuthentication && supportsCookieSearch && !showFamilyFriendlyOnly">
+            <p v-if="!cookiesConfigured">
+              {{ t('Video.Configure Restricted Playback Cookies Hint') }}
+            </p>
+            <FtButton
+              v-else
+              class="searchRetryButton"
+              :label="t('Video.Try With Configured Cookies')"
+              :icon="['fas', 'cookie']"
+              :disabled="isRetryingWithCookies"
+              @click="retrySearchWithCookies"
+            />
+            <FtLoader
+              v-if="isRetryingWithCookies"
+              :label="t('Search Filters[&quot;Fetching results. Please wait&quot;]')"
+            />
+          </template>
+        </div>
+        <p
+          v-if="cookieSearchFailed"
+          class="searchStatus"
+          role="alert"
+        >
+          {{ t('Search Filters.Cookie Search Failed') }}
+        </p>
+        <FtElementList
+          :data="shownResults"
+        />
+        <!-- Recheck visibility when results are appended or replaced. -->
+        <FtAutoLoadNextPageWrapper
+          v-if="hasMoreResults"
+          :key="autoLoadMore ? paginationRevision : 0"
+          :loading="isLoadingMore"
+          :paused="nextPageFailed"
+          @load-next-page="nextPage"
+        >
+          <div
+            class="getNextPage"
+            role="button"
+            tabindex="0"
+            @click="nextPage"
+            @keydown.enter.space.prevent="nextPage"
+          >
+            <FtIcon :icon="['fas', 'search']" /> {{ t("Search Filters.Fetch more results") }}
+          </div>
+        </FtAutoLoadNextPageWrapper>
+        <p
+          v-else-if="!searchNotice && !cookieSearchFailed && !isRetryingWithCookies"
+          class="searchStatus"
+          role="status"
+        >
+          {{ exhaustedSearchMessage }}
+        </p>
+        <p
+          v-if="isEmptyLocalSearch && !searchNotice && !showFamilyFriendlyOnly && !isRetryingWithCookies"
+          class="searchHint"
+        >
+          {{ t('Search Filters.Possible Age Restriction Hint') }}
+        </p>
+        <FtButton
+          v-if="showCookieRetryWithoutNotice"
+          class="searchRetryButton"
+          :label="t('Video.Try With Configured Cookies')"
+          :icon="['fas', 'cookie']"
+          :disabled="isRetryingWithCookies"
+          @click="retrySearchWithCookies"
+        />
+        <FtLoader
+          v-if="isRetryingWithCookies && !searchNotice && !isLoadingMore"
+          :label="t('Search Filters[&quot;Fetching results. Please wait&quot;]')"
+        />
+      </template>
     </FtCard>
   </div>
 </template>
@@ -143,13 +182,15 @@
 import { FtIcon } from '@opentubex/icons'
 import { computed, onMounted, ref, shallowRef, watch } from 'vue'
 import { Translation as I18nT, useI18n } from 'vue-i18n'
-import { RouterLink, useRoute } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtButton from '../../components/FtButton/FtButton.vue'
 import FtElementList from '../../components/FtElementList/FtElementList.vue'
 import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrapper.vue'
+import FtSelect from '../../components/FtSelect/FtSelect.vue'
+import PlatformSearchResults from '../../components/PlatformSearchResults/PlatformSearchResults.vue'
 
 import store from '../../store'
 import { usesInvidiousApi } from '../../../apiBackends'
@@ -175,9 +216,44 @@ import { useTabContext, useTabTitle } from '../../tabs/TabContext'
 import { ytDlp } from '../../helpers/ytDlp'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
+import { getPlatform, PLATFORM_ICONS, PLATFORMS } from '../../../platforms/index'
 
 const { t } = useI18n()
 const route = useRoute()
+const router = useRouter()
+
+const SEARCH_PLATFORM_STORAGE_KEY = 'searchPlatform'
+// The last platform searched stays selected for later searches
+const searchPlatform = computed(() => {
+  if (!supportsYtDlp) return 'youtube'
+  const requested = route.query.platform ?? localStorage.getItem(SEARCH_PLATFORM_STORAGE_KEY)
+  return getPlatform(requested) ? requested : 'youtube'
+})
+const searchPlatformValues = ['youtube', ...PLATFORMS.map(platform => platform.id)]
+const searchPlatformNames = ['YouTube', ...PLATFORMS.map(platform => platform.name)]
+const searchPlatformIcons = [['fab', 'youtube'], ...PLATFORMS.map(platform => PLATFORM_ICONS[platform.id])]
+// Searches on YouTube have none
+const platform = computed(() => getPlatform(searchPlatform.value))
+
+const platformSearchTypeLabels = computed(() => ({
+  videos: t('Search Filters.Type.Videos'),
+  tracks: t('Platforms.Tracks'),
+  channels: t('Search Filters.Type.Channels'),
+  playlists: t('Platforms.Playlists')
+}))
+// The type stays selected for later searches on platforms that have it
+const selectedPlatformSearchType = ref('')
+const platformSearchType = computed(() => platform.value?.searchTypes.includes(selectedPlatformSearchType.value)
+  ? selectedPlatformSearchType.value
+  : platform.value?.searchTypes[0] ?? '')
+
+/**
+ * @param {string} platform
+ */
+function changeSearchPlatform(platform) {
+  localStorage.setItem(SEARCH_PLATFORM_STORAGE_KEY, platform)
+  router.replace({ query: { ...route.query, platform } })
+}
 const { tabId: injectedTabId } = useTabContext()
 const tabId = injectedTabId ?? 'web'
 const setTabTitle = useTabTitle()
@@ -337,6 +413,11 @@ function updateSearchHistoryEntry(searchSettings) {
 
 function checkSearchCache(payload) {
   searchRequestId++
+  // Other platforms search on their own
+  if (searchPlatform.value !== 'youtube') {
+    isLoading.value = false
+    return
+  }
   localSearchCompleted.value = false
   searchNotice.value = null
   searchCorrection.value = null

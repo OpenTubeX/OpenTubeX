@@ -219,6 +219,26 @@ Subscriptions:
       Not Set: Nije postavljeno
     Retry Feed: Pokušaj ponovno učitati {feed}
     Reloading Feed: Ponovno učitavanje {feed}
+  Platforms:
+    Tab: Platforme
+    Platform: Platforma
+    All Platforms: Sve platforme
+    Followed Channels: Praćeni kanali na drugim platformama
+    Description: Pratite kanale na platformama Twitch, SoundCloud, PeerTube, Rumble i Odysee kako biste vidjeli njihove objave na kartici Platforme u svojim pretplatama. Pronađite kanale pretraživanjem ili ih dodajte prema adresi njihove stranice. Njihovi se mediji reproduciraju pomoću yt-dlp.
+    Add Channel: Dodaj kanal
+    Channel URL: Adresa kanala
+    Invalid Channel: Unesite adresu stranice kanala na platformi Twitch, SoundCloud, PeerTube, Rumble ili Odysee.
+    Channel Not Found: Na ovoj adresi nema kanala.
+    Channel Already Followed: Već pratite ovaj kanal.
+    Channel Could Not Be Loaded: Kanal se nije mogao učitati.
+    No Channels: Još ne pratite nijedan kanal na drugim platformama.
+    Unfollow Channel: Prestani pratiti {channel}
+    Go To Channel: Idi na kanal {channel}
+    Follow: Prati
+    Following: Praćeno
+    Clips: Isječci
+    Refresh Errors: '{count} kanal nije moguće osvježiti. | {count} kanala nije moguće osvježiti. | {count} kanala nije moguće osvježiti.'
+    Content Tabs: Kartice sadržaja platformi
 Trending:
   Music: Glazba
   Load Error: Popularni sadržaj nije moguće učitati.
@@ -1213,6 +1233,11 @@ Settings:
     Notify About New Uploads: Obavijesti o novom sadržaju
     RSS Feeds Auto Refresh Interval: Razmak automatskog osvježavanja RSS izvora
     Faster Subscription Refresh: "Brže osvježavanje pretplata"
+    Platforms:
+      Other Platforms: Druge platforme
+      Manage Channels: Upravljanje praćenim kanalima
+      Notify When Live: Obavijesti kada praćeni Twitch kanali počnu prijenos uživo
+      Auto Refresh Interval: Razmak automatskog osvježavanja drugih platformi
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Brojanje vremena gledanja s"
@@ -2083,6 +2108,7 @@ Context Menu:
   Reload Posts: Ponovno učitaj objave
   Reload All Feeds: Ponovno učitaj sve sažetke
   Reload RSS Feeds: Ponovno učitaj RSS izvore
+  Reload Platforms: Ponovno učitaj platforme
   Close Multiple Tabs: Zatvori {count} karticu | Zatvori {count} kartice | Zatvori {count} kartica
   Duplicate Tab: Dupliciraj karticu
   Duplicate Multiple Tabs: Dupliciraj {count} karticu | Dupliciraj {count} kartice | Dupliciraj {count} kartica
@@ -2351,6 +2377,8 @@ Tooltips:
     Notify About New Uploads: Prikazuje obavijesti sustava na ovom uređaju za kanale kojima ste uključili obavijesti u njihovim postavkama pretplate. OpenTubeX provjerava novi sadržaj pri osvježavanju pretplata, stoga odaberite razmak automatskog osvježavanja. Za obavijesti dok je aplikacija zatvorena uključite i osvježavanje dok je aplikacija zatvorena.
     RSS Feeds Auto Refresh Interval: Koliko često OpenTubeX automatski osvježava vaše RSS izvore dok je aplikacija otvorena.
     Faster Subscription Refresh: "Najprije provjerava RSS feed svakog kanala i učitava videozapise, Shorts i prijenose uživo samo s kanala s novim sadržajem. Automatska osvježavanja također preskaču kanale učitane u posljednjih 10 minuta. Za kanale bez novog sadržaja broj pregleda, uklonjeni videozapisi i promijenjeni naslovi ažuriraju se samo svakih nekoliko sati, a novi sadržaj može se pojaviti kasnije kad RSS feed kasni. Nije dostupno s Invidious API-jem."
+    Platforms Auto Refresh Interval: Koliko često OpenTubeX automatski osvježava kanale koje pratite na drugim platformama dok je aplikacija otvorena.
+    Twitch Notify When Live: Obavještava vas kada neki od Twitch kanala koje pratite počne s prijenosom. OpenTubeX provjerava svakih nekoliko minuta dok je otvoren, a i dok je zatvoren ako tada osvježava pretplate.
   Theme Settings:
     Only Show Important Notifications: Skriva obavijesti u aplikaciji koje samo potvrđuju radnju ili javljaju stanje. Pogreške, upozorenja, podsjetnici koje ste postavili i obavijesti koje nude radnju, poput Poništi, i dalje se prikazuju. Napredak pozadinskih radnji, poput osvježavanja pretplata, prikazuje se na globalnoj traci napretka umjesto u obavijesti. Obavijesti sustava nisu obuhvaćene.
     Visible Search Suggestions: "Određuje koliko unosa povijesti pretraživanja i prijedloga traka za pretraživanje prikazuje prije nego što se njezin popis počne pomicati. Popis se nikada ne proteže ispod donjeg ruba prozora."
@@ -2751,6 +2779,15 @@ Notification Center:
   Clear: "Izbriši"
   Empty: "Još nema obavijesti"
   Empty Hint: "Ovdje će se pojaviti podsjetnici za prijenose uživo i novi prijenosi s kanala s uključenim obavijestima."
+Platforms:
+  Tracks: Pjesme
+  Playlists: Zbirke
+  Follower Count: '{count} pratitelj | {count} pratitelja | {count} pratitelja'
+  Open Website: Otvori na platformi {platform}
+  Channel Not Found: Ovaj kanal nije pronađen.
+  Playlist Not Found: Ova zbirka nije pronađena.
+  Load Error: Ova se stranica nije mogla učitati s platforme {platform}.
+  Empty Tab: Ovdje još nema ničega.
 YouTube Account:
   Like: "Sviđa mi se"
   Dislike: "Ne sviđa mi se"

@@ -248,6 +248,26 @@ Subscriptions:
       Not Set: سیٹ نہیں
     Retry Feed: '{feed} دوبارہ آزمائیں'
     Reloading Feed: '{feed} دوبارہ لوڈ ہو رہا ہے'
+  Platforms:
+    Tab: پلیٹ فارمز
+    Platform: پلیٹ فارم
+    All Platforms: تمام پلیٹ فارمز
+    Followed Channels: دیگر پلیٹ فارمز پر فالو کیے گئے چینلز
+    Description: Twitch، SoundCloud، PeerTube، Rumble اور Odysee پر چینلز کو فالو کریں تاکہ ان کے اپ لوڈز اپنی سبسکرپشنز کے پلیٹ فارمز ٹیب میں دیکھ سکیں۔ تلاش کے ذریعے چینلز ڈھونڈیں، یا ان کے صفحے کے پتے سے انہیں شامل کریں۔ ان کا میڈیا yt-dlp کے ساتھ چلتا ہے۔
+    Add Channel: چینل شامل کریں
+    Channel URL: چینل کا پتا
+    Invalid Channel: Twitch، SoundCloud، PeerTube، Rumble یا Odysee پر کسی چینل صفحے کا پتا درج کریں۔
+    Channel Not Found: اس پتے پر کوئی چینل نہیں ہے۔
+    Channel Already Followed: آپ پہلے ہی اس چینل کو فالو کر رہے ہیں۔
+    Channel Could Not Be Loaded: چینل لوڈ نہیں ہو سکا۔
+    No Channels: آپ ابھی تک دیگر پلیٹ فارمز پر کسی چینل کو فالو نہیں کرتے۔
+    Unfollow Channel: '{channel} کو ان فالو کریں'
+    Go To Channel: '{channel} پر جائیں'
+    Follow: فالو کریں
+    Following: فالو کر رہے ہیں
+    Clips: کلپس
+    Refresh Errors: 1 چینل ریفریش نہیں ہو سکا۔ | {count} چینلز ریفریش نہیں ہو سکے۔
+    Content Tabs: پلیٹ فارم کے مواد کے ٹیبز
 Channels:
   Load More Channels: مزید چینلز لوڈ کریں
 Subscription Groups:
@@ -1268,6 +1288,11 @@ Settings:
     Notify About New Uploads: نئی اپ لوڈز کی اطلاع دیں
     RSS Feeds Auto Refresh Interval: RSS فیڈز کی خودکار ریفریش کا وقفہ
     Faster Subscription Refresh: "سبسکرپشنز کی تیز تر تازہ کاری"
+    Platforms:
+      Other Platforms: دیگر پلیٹ فارمز
+      Manage Channels: فالو کیے گئے چینلز کا نظم کریں
+      Notify When Live: فالو کیے گئے Twitch چینلز کے لائیو ہونے پر مطلع کریں
+      Auto Refresh Interval: دیگر پلیٹ فارمز کی خودکار ریفریش کا وقفہ
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: دیکھنے کا وقت شمار کریں از
@@ -2160,6 +2185,7 @@ Context Menu:
   Reload Posts: پوسٹس دوبارہ لوڈ کریں
   Reload All Feeds: تمام فیڈز دوبارہ لوڈ کریں
   Reload RSS Feeds: RSS فیڈز دوبارہ لوڈ کریں
+  Reload Platforms: پلیٹ فارمز دوبارہ لوڈ کریں
   Close Multiple Tabs: '{count} ٹیبز بند کریں'
   Duplicate Tab: ٹیب کی نقل بنائیں
   Duplicate Multiple Tabs: '{count} ٹیبز کی نقل بنائیں'
@@ -2428,6 +2454,8 @@ Tooltips:
     Notify About New Uploads: ان چینلز کے لیے اس ڈیوائس پر سسٹم نوٹیفکیشنز دکھاتا ہے جن کی اطلاعات آپ نے ان کی سبسکرپشن سیٹنگز میں آن کی ہیں۔ OpenTubeX سبسکرپشنز ریفریش ہونے پر نیا مواد چیک کرتا ہے، اس لیے خودکار ریفریش کا وقفہ منتخب کریں۔ ایپ بند ہونے پر اطلاع پانے کے لیے ایپ بند ہونے پر ریفریش کرنا بھی فعال کریں۔
     RSS Feeds Auto Refresh Interval: ایپ کھلی ہونے کے دوران OpenTubeX آپ کی RSS فیڈز کو کتنی بار خودکار طور پر ریفریش کرتا ہے۔
     Faster Subscription Refresh: "پہلے ہر چینل کی RSS فیڈ چیک کرتا ہے اور صرف نئے اپ لوڈز والے چینلز کی ویڈیوز، Shorts اور لائیو اسٹریمز لوڈ کرتا ہے۔ خودکار تازہ کاریاں پچھلے 10 منٹ میں لوڈ کیے گئے چینلز کو بھی چھوڑ دیتی ہیں۔ نئے اپ لوڈز کے بغیر چینلز کے لیے، ویوز کی تعداد، ہٹائی گئی ویڈیوز اور تبدیل شدہ عنوانات صرف ہر چند گھنٹوں بعد اپ ڈیٹ ہوتے ہیں، اور RSS فیڈ پیچھے رہنے پر نئے اپ لوڈز بعد میں ظاہر ہو سکتے ہیں۔ Invidious API کے ساتھ دستیاب نہیں۔"
+    Platforms Auto Refresh Interval: ایپ کھلی ہونے کے دوران OpenTubeX دیگر پلیٹ فارمز پر آپ کے فالو کیے گئے چینلز کو کتنی بار خودکار طور پر ریفریش کرتا ہے۔
+    Twitch Notify When Live: جب آپ کے فالو کیے گئے Twitch چینلز میں سے کوئی اسٹریمنگ شروع کرے تو آپ کو مطلع کرتا ہے۔ OpenTubeX کھلا ہونے کے دوران ہر چند منٹ بعد چیک کرتا ہے، اور بند ہونے کے دوران بھی اگر اس وقت سبسکرپشنز ریفریش کرتا ہو۔
   Theme Settings:
     Only Show Important Notifications: ایپ کے اندر وہ اطلاعات چھپاتا ہے جو صرف کسی کارروائی کی تصدیق کرتی ہیں یا کسی حالت کی اطلاع دیتی ہیں۔ غلطیاں، انتباہات، آپ کی ترتیب دی ہوئی یاد دہانیاں، اور ایسی اطلاعات جو کوئی کارروائی پیش کرتی ہیں، جیسے پہلے جیسا کریں، بدستور ظاہر ہوتی ہیں۔ پس منظر کے کاموں کی پیش رفت، جیسے سبسکرپشنز کو تازہ کرنا، اطلاع کے بجائے عمومی پیش رفت بار میں دکھائی جاتی ہے۔ سسٹم کی اطلاعات متاثر نہیں ہوتیں۔
     Thumbnail Size: گرڈز اور فہرستوں میں ویڈیو تھمب نیلز کا سائز بدلتا ہے۔ مقررہ کالمز والے گرڈز یا پوری چوڑائی والا منظر ہر قطار کو بھر دیتے ہیں، اس لیے وہاں یہ صرف فہرست کے تھمب نیلز اور شارٹس کو تبدیل کرتا ہے۔ فون کے سائز کی ونڈوز گرڈ تھمب نیلز کو 100% تک محدود کرتی ہیں۔
@@ -2781,6 +2809,15 @@ Notification Center:
   Clear: "صاف کریں"
   Empty: "ابھی تک کوئی اطلاع نہیں"
   Empty Hint: "لائیو اسٹریم کی یاد دہانیاں اور اطلاعات آن والے چینلز کے نئے اپ لوڈز یہاں نظر آئیں گے۔"
+Platforms:
+  Tracks: ٹریکس
+  Playlists: پلے لسٹس
+  Follower Count: 1 فالوور | {count} فالوورز
+  Open Website: '{platform} پر کھولیں'
+  Channel Not Found: یہ چینل نہیں مل سکا۔
+  Playlist Not Found: یہ پلے لسٹ نہیں مل سکی۔
+  Load Error: یہ صفحہ {platform} سے لوڈ نہیں ہو سکا۔
+  Empty Tab: یہاں ابھی کچھ نہیں ہے۔
 YouTube Account:
   Like: "پسند کریں"
   Dislike: "ناپسند کریں"

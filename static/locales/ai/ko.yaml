@@ -233,6 +233,26 @@ Subscriptions:
       Not Set: 설정 안 함
     Retry Feed: '{feed} 다시 시도'
     Reloading Feed: '{feed} 다시 불러오는 중'
+  Platforms:
+    Tab: 플랫폼
+    Platform: 플랫폼
+    All Platforms: 모든 플랫폼
+    Followed Channels: 다른 플랫폼에서 팔로우한 채널
+    Description: Twitch, SoundCloud, PeerTube, Rumble, Odysee의 채널을 팔로우하면 구독의 플랫폼 탭에서 업로드를 볼 수 있습니다. 검색으로 채널을 찾거나 채널 페이지 주소로 추가하세요. 미디어는 yt-dlp로 재생됩니다.
+    Add Channel: 채널 추가
+    Channel URL: 채널 주소
+    Invalid Channel: Twitch, SoundCloud, PeerTube, Rumble 또는 Odysee의 채널 페이지 주소를 입력하세요.
+    Channel Not Found: 이 주소에 채널이 없습니다.
+    Channel Already Followed: 이미 이 채널을 팔로우하고 있습니다.
+    Channel Could Not Be Loaded: 채널을 불러올 수 없습니다.
+    No Channels: 아직 다른 플랫폼에서 팔로우한 채널이 없습니다.
+    Unfollow Channel: '{channel} 팔로우 취소'
+    Go To Channel: '{channel} 채널로 이동'
+    Follow: 팔로우
+    Following: 팔로잉
+    Clips: 클립
+    Refresh Errors: 채널 {count}개를 새로 고치지 못했습니다.
+    Content Tabs: 플랫폼 콘텐츠 탭
 Trending:
   Music: 음악
   Load Error: 인기 급상승 콘텐츠를 불러올 수 없습니다.
@@ -1407,6 +1427,11 @@ Settings:
     Confirm Before Unsubscribing: 구독 취소 전 확인
     RSS Feeds Auto Refresh Interval: RSS 피드 자동 새로 고침 간격
     Faster Subscription Refresh: "더 빠른 구독 새로 고침"
+    Platforms:
+      Other Platforms: 다른 플랫폼
+      Manage Channels: 팔로우한 채널 관리
+      Notify When Live: 팔로우한 Twitch 채널이 방송을 시작하면 알림
+      Auto Refresh Interval: 다른 플랫폼 자동 새로 고침 간격
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "시청 시간 계산 기준"
@@ -2426,6 +2451,7 @@ Context Menu:
   Reload Posts: 게시물 다시 불러오기
   Reload All Feeds: 모든 피드 다시 불러오기
   Reload RSS Feeds: RSS 피드 새로고침
+  Reload Platforms: 플랫폼 다시 불러오기
   Close Multiple Tabs: 탭 {count}개 닫기
   Duplicate Tab: 탭 복제
   Duplicate Multiple Tabs: 탭 {count}개 복제
@@ -2708,6 +2734,8 @@ Tooltips:
     Notify About New Uploads: 구독 설정에서 알림을 켠 채널에 대해 이 기기에 시스템 알림을 표시합니다. OpenTubeX는 구독을 새로 고칠 때 새 콘텐츠를 확인하므로 자동 새로 고침 간격을 선택하세요. 앱이 닫혀 있을 때도 알림을 받으려면 앱이 닫혀 있을 때 새로 고침도 사용하도록 설정하세요.
     RSS Feeds Auto Refresh Interval: 앱이 열려 있는 동안 OpenTubeX가 RSS 피드를 자동으로 새로 고치는 빈도입니다.
     Faster Subscription Refresh: "먼저 각 채널의 RSS 피드를 확인하고 새 업로드가 있는 채널의 동영상, Shorts, 라이브 스트림만 불러옵니다. 자동 새로 고침은 지난 10분 이내에 불러온 채널도 건너뜁니다. 새 업로드가 없는 채널은 조회수, 삭제된 동영상, 변경된 제목이 몇 시간마다만 업데이트되며, RSS 피드가 늦어지면 새 업로드가 늦게 표시될 수 있습니다. Invidious API에서는 사용할 수 없습니다."
+    Platforms Auto Refresh Interval: 앱이 열려 있는 동안 OpenTubeX가 다른 플랫폼에서 팔로우한 채널을 자동으로 새로 고치는 빈도입니다.
+    Twitch Notify When Live: 팔로우한 Twitch 채널 중 하나가 방송을 시작하면 알려 줍니다. OpenTubeX는 열려 있는 동안 몇 분마다 확인하며, 닫혀 있는 동안에도 그때 구독을 새로 고치면 확인합니다.
   Theme Settings:
     Only Show Important Notifications: 작업을 확인하거나 상태만 알려 주는 앱 내 알림을 숨깁니다. 오류, 경고, 직접 설정한 알림, 그리고 실행취소처럼 작업을 제공하는 알림은 계속 표시됩니다. 구독 새로 고침과 같은 백그라운드 작업의 진행 상황은 알림 대신 전역 진행 표시줄에 표시됩니다. 시스템 알림에는 영향을 주지 않습니다.
     Visible Search Suggestions: "검색창 목록이 스크롤되기 전에 표시할 검색 기록 항목과 추천 검색어의 수를 설정합니다. 목록은 창 아래쪽 가장자리를 넘어가지 않습니다."
@@ -3169,6 +3197,15 @@ Notification Center:
   Clear: "지우기"
   Empty: "아직 알림이 없습니다"
   Empty Hint: "실시간 스트리밍 알림과 알림을 켠 채널의 새 업로드가 여기에 표시됩니다."
+Platforms:
+  Tracks: 트랙
+  Playlists: 재생 목록
+  Follower Count: 팔로워 {count}명
+  Open Website: '{platform}에서 열기'
+  Channel Not Found: 이 채널을 찾을 수 없습니다.
+  Playlist Not Found: 이 재생 목록을 찾을 수 없습니다.
+  Load Error: '{platform}에서 이 페이지를 불러올 수 없습니다.'
+  Empty Tab: 아직 아무것도 없습니다.
 YouTube Account:
   Like: "좋아요"
   Dislike: "싫어요"
