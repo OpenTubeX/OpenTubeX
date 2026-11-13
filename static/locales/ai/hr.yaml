@@ -16,6 +16,22 @@ New Tab: Nova kartica
 Maximize: Maksimiziraj
 Restore: Vrati
 Close Tab: Zatvori karticu
+App Menu:
+  About App: O aplikaciji {appName}
+  Services: Usluge
+  Hide App: Sakrij {appName}
+  Hide Others: Sakrij ostale
+  Show All: Prikaži sve
+  Quit App: Zatvori {appName}
+  Reopen Closed Window: Ponovo otvori zatvoreni prozor
+  Paste and Match Style: Zalijepi i prilagodi stil
+  View: Prikaz
+  Enter Inspect Element Mode: Način pregledavanja elemenata
+  GPU Internals: Interni podaci GPU-a (chrome://gpu)
+  Navigate: Navigacija
+  Next Tab: Sljedeća kartica
+  Previous Tab: Prethodna kartica
+  Help: Pomoć
 Close Confirmation:
   Background Sync Warning: Izlaskom će se zaustaviti osvježavanje pretplata u pozadini.
   Hide Window: Sakrij prozor
@@ -912,7 +928,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland aplikacijama ne dojavljuje minimiziranje prozora, pa ovaj okidač nije dostupan. Umjesto toga upotrijebite "Kada prozor izgubi fokus ili se prijeđe na drugi prozor", što obuhvaća i minimiziranje.
       On Tab Change Mini Player: Pri promjeni kartice umjesto toga prikazuje se minireproduktor. Za korištenje ove opcije postavite „Pri napuštanju videozapisa” na „Zaustavi reprodukciju”.
     Scroll Mini Player:
-      Scroll Mini Player: Minireproduktor pri pomicanju
       Scroll Player Mode: Pri pomicanju prema dolje
       Scroll Player Mode Tooltip: Player se prikvači samo dok zauzima najviše polovicu visine prozora. Inače, primjerice na telefonima u vodoravnom položaju ili u širokim prozorima, umjesto toga prikazuje se mini player.
       Scroll Player Modes:
@@ -1516,7 +1531,6 @@ Settings:
     Use Shared Tabs: 'Upotrebljavaj jedan zajednički skup kartica na svim uređajima'
     Shared Tabs Warning: 'Otvorene kartice na ovom uređaju postaju zajednički skup. Drugi uređaji pri sinkronizaciji zamjenjuju svoje otvorene kartice tim skupom; kartice s različitih uređaja ne spajaju se.'
     Tabs From Other Devices: 'Kartice s drugih uređaja'
-    Device Tab Session: '{platform} · {count} kartica'
     Mobile Device: 'Mobilni uređaj'
     Desktop Device: 'Računalo'
     Open All Tabs: 'Otvori sve kartice'
@@ -1529,7 +1543,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'Otvorit će se preglednik kako biste brisanje potvrdili kod svog pružatelja prijave.'
   Proxy Settings:
     IP Block Recovery Script Path: Skripta za oporavak od blokiranja IP-a
-    Select IP Block Recovery Script File: Odaberi datoteku skripte za oporavak nakon blokiranja IP adrese
     Running IP block recovery script: Izvršavanje skripte za oporavak nakon blokiranja IP adrese
     IP block recovery script failed: 'Skripta za oporavak nakon blokiranja IP adrese nije uspjela (izlazni kôd: {exitCode})'
     IP block recovery script finished: Skripta za oporavak nakon blokiranja IP adrese završila je s radom
@@ -1643,7 +1656,6 @@ Profile:
   Profile Icon: Ikona profila
   Choose an Emoji: Odaberi emoji
   Custom Emoji: Prilagođeni emoji
-  Emoji: Emoji
   Choose Image: Odaberi sliku
   Crop Image: Obreži sliku
   Zoom: Zumiranje
@@ -1843,7 +1855,6 @@ Video:
       Timer ended: Mjerač vremena za isključivanje je istekao
     A-B Repeat:
       A-B Repeat: A-B ponavljanje
-      'On': Uključeno
       'Off': Isključeno
       Point A: Točka A
       Point B: Točka B
@@ -2200,7 +2211,6 @@ Tab Organizer:
   Close All: Zatvori sve
   Ungroup: Ukloni iz grupe
   Group Name: Naziv grupe
-  Color: Boja
   No Color: Bez boje
   Create Group: Stvori grupu
   Expand Group: Proširi grupu
@@ -2520,12 +2530,10 @@ Downloads:
   Remove File Confirmation: Ukloniti preuzetu datoteku?
   Remove File Warning: Time ćete premjestiti "{title}" u smeće uređaja.
   File Not Found: Preuzeta datoteka nije pronađena.
-  Download Missing: Preuzimanje nije dostupno
   Files Missing: Preuzeta datoteka više nije dostupna u datotečnom sustavu. | Preuzete datoteke više nisu dostupne u datotečnom sustavu. | Preuzete datoteke više nisu dostupne u datotečnom sustavu.
   Files Available: 'Dostupno je {available} od {total} preuzetih datoteka.'
   More Files: Još {count} datoteka | Još {count} datoteke | Još {count} datoteka
   Template Used: 'Predložak: {name}'
-  Download Type: Vrsta preuzimanja
   Template: Predložak
   Unsaved: Nije spremljeno
   Media Type: Vrsta medija
@@ -2553,7 +2561,6 @@ Downloads:
   Embed Cover Art: Ugradi minijaturu kao omot
   Embed Metadata: Ugradi naslov, autora, opis i poglavlja
   Additional yt-dlp Arguments: Dodatni argumenti za yt-dlp
-  Custom yt-dlp Arguments: Prilagođeni argumenti za yt-dlp
   Template Name: Naziv predloška
   Save Template: Spremi predložak
   Delete Template: Izbriši predložak

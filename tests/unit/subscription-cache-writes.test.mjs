@@ -268,6 +268,7 @@ test('loading persisted video caches supplies feed markers without changing know
   vm.runInContext(moduleSource, context)
   const { actions, mutations, state } = context.cacheModule
   await actions.grabAllSubscriptions({
+    rootState: { profiles: { profilesLoaded: true } },
     rootGetters: { getSubscribedChannelIdSet: new Set(['channel']) },
     commit: (type, payload) => mutations[type](state, payload),
   })
@@ -484,8 +485,13 @@ for (const deletion of ['deleteAll', 'deleteMultipleChannels']) {
   })
 }
 
-for (const profilesLoaded of [false, true]) {
-  test(`loading the cache ${profilesLoaded ? 'removes' : 'keeps'} unsubscribed channels when profiles ${profilesLoaded ? 'loaded' : 'failed to load'}`, async () => {
+for (const [description, profilesLoaded, storedSubscriptions, removed] of [
+  ['removes unsubscribed channels when profiles loaded', true, [], ['channel']],
+  ['keeps unsubscribed channels when profiles failed to load', false, [], []],
+  // Another window subscribed and cached the feed before this window received the profile change.
+  ['keeps channels that another window just subscribed to', true, [{ id: 'channel' }], []],
+]) {
+  test(`loading the cache ${description}`, async () => {
     const entry = { _id: 'channel', videos: [{ videoId: 'video' }], videosTimestamp: new Date(1000) }
     const context = vm.createContext({
       console: { error() {} },
@@ -494,18 +500,25 @@ for (const profilesLoaded of [false, true]) {
       ...feedState,
       applySubscriptionSeenVideosToCache,
       applySubscriptionSeenPostsToCache,
+      MAIN_PROFILE_ID: 'allChannels',
+      DBProfileHandlers: { find: async () => [{ _id: 'allChannels', subscriptions: storedSubscriptions }] },
       DBSubscriptionCacheHandlers: { find: async () => [entry] },
     })
     vm.runInContext(moduleSource, context)
     const dispatched = []
+    const committed = []
     await context.cacheModule.actions.grabAllSubscriptions({
-      commit() {},
+      commit: (type, payload) => committed.push([type, payload]),
       dispatch: (...args) => dispatched.push(args),
       // A failed profile load leaves only the default main profile, without subscriptions.
       rootState: { profiles: { profilesLoaded } },
       rootGetters: { getSubscribedChannelIdSet: new Set() },
     })
-    assert.deepEqual(structuredClone(dispatched), profilesLoaded ? [['clearSubscriptionsCacheForManyChannels', ['channel']]] : [])
+    assert.deepEqual(structuredClone(dispatched), removed.length > 0 ? [['clearSubscriptionsCacheForManyChannels', removed]] : [])
+    if (storedSubscriptions.length > 0) {
+      const caches = committed.find(([type]) => type === 'setCaches')[1]
+      assert.equal(caches.videos.channel.videos[0].videoId, 'video', 'the new subscription feed loads')
+    }
   })
 }
 

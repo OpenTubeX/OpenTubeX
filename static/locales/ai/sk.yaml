@@ -16,6 +16,22 @@ New Tab: Nová karta
 Maximize: Maximalizovať
 Restore: Obnoviť
 Close Tab: Zavrieť kartu
+App Menu:
+  About App: O aplikácii {appName}
+  Services: Služby
+  Hide App: Skryť {appName}
+  Hide Others: Skryť ostatné
+  Show All: Zobraziť všetko
+  Quit App: Ukončiť {appName}
+  Reopen Closed Window: Znova otvoriť zatvorené okno
+  Paste and Match Style: Prilepiť a prispôsobiť štýl
+  View: Zobraziť
+  Enter Inspect Element Mode: Režim kontroly prvkov
+  GPU Internals: Interné informácie GPU (chrome://gpu)
+  Navigate: Navigácia
+  Next Tab: Ďalšia karta
+  Previous Tab: Predchádzajúca karta
+  Help: Pomocník
 Close Confirmation:
   Background Sync Warning: Ukončením aplikácie sa zastaví aktualizácia odberov na pozadí.
   Hide Window: Skryť okno
@@ -907,7 +923,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland neoznamuje aplikáciám minimalizovanie okna, preto táto možnosť nie je dostupná. Použite možnosť „Keď okno stratí zameranie alebo sa prepnete inam“, ktorá zahŕňa aj minimalizovanie.
       On Tab Change Mini Player: Pri prepnutí karty sa namiesto toho zobrazí miniatúrny prehrávač. Ak to chcete použiť, nastavte „Pri opustení videa“ na „Zastaviť prehrávanie“.
     Scroll Mini Player:
-      Scroll Mini Player: Miniatúrny prehrávač pri posúvaní
       Scroll Player Mode: Pri posúvaní nadol
       Scroll Player Mode Tooltip: Prehrávač sa pripne len vtedy, keď zaberá najviac polovicu výšky okna. Inak, napríklad na telefónoch na šírku alebo v širokých oknách, sa namiesto toho zobrazí miniprehrávač.
       Scroll Player Modes:
@@ -1509,7 +1524,6 @@ Settings:
     Use Shared Tabs: 'Používať jednu zdieľanú súpravu kariet vo všetkých zariadeniach'
     Shared Tabs Warning: 'Otvorené karty v tomto zariadení sa stanú spoločnou sadou. Ostatné zariadenia pri synchronizácii nahradia svoje otvorené karty touto sadou; karty z rôznych zariadení sa nezlúčia.'
     Tabs From Other Devices: 'Karty z iných zariadení'
-    Device Tab Session: '{platform} · kariet: {count}'
     Mobile Device: 'Mobil'
     Desktop Device: 'Počítač'
     Open All Tabs: 'Otvoriť všetky karty'
@@ -1522,7 +1536,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'Otvorí sa prehliadač, aby ste mohli odstránenie potvrdiť u svojho poskytovateľa prihlásenia.'
   Proxy Settings:
     IP Block Recovery Script Path: Skript na obnovu po blokovaní IP
-    Select IP Block Recovery Script File: Vybrať súbor skriptu na obnovenie po zablokovaní IP adresy
     Running IP block recovery script: Spúšťa sa skript na obnovenie po zablokovaní IP adresy
     IP block recovery script failed: 'Skript na obnovenie po zablokovaní IP adresy zlyhal (návratový kód: {exitCode})'
     IP block recovery script finished: Skript na obnovenie po zablokovaní IP adresy bol dokončený
@@ -1631,7 +1644,6 @@ Profile:
   Profile Icon: Ikona profilu
   Choose an Emoji: Vyberte emoji
   Custom Emoji: Vlastné emoji
-  Emoji: Emoji
   Choose Image: Vybrať obrázok
   Crop Image: Orezať obrázok
   Zoom: Priblíženie
@@ -1819,7 +1831,6 @@ Video:
       Timer ended: Časovač vypnutia skončil
     A-B Repeat:
       A-B Repeat: Opakovanie A-B
-      On: Zapnuté
       Off: Vypnuté
       Point A: Bod A
       Point B: Bod B
@@ -2171,7 +2182,6 @@ Tab Organizer:
   Close All: Zavrieť všetko
   Ungroup: Zrušiť zoskupenie
   Group Name: Názov skupiny
-  Color: Farba
   No Color: Bez farby
   Create Group: Vytvoriť skupinu
   Expand Group: Rozbaliť skupinu
@@ -2488,12 +2498,10 @@ Downloads:
   Remove File Confirmation: Odstrániť stiahnutý súbor?
   Remove File Warning: Súbor „{title}“ sa presunie do koša zariadenia.
   File Not Found: Stiahnutý súbor sa nepodarilo nájsť.
-  Download Missing: Stiahnutý súbor nie je dostupný
   Files Missing: Stiahnutý súbor už nie je dostupný v súborovom systéme. | Stiahnuté súbory už nie sú dostupné v súborovom systéme. | Stiahnuté súbory už nie sú dostupné v súborovom systéme.
   Files Available: 'Dostupných stiahnutých súborov: {available} z {total}.'
   More Files: 1 ďalší súbor | {count} ďalšie súbory | {count} ďalších súborov
   Template Used: 'Šablóna: {name}'
-  Download Type: Typ sťahovania
   Template: Šablóna
   Unsaved: Neuložené
   Media Type: Typ média
@@ -2521,7 +2529,6 @@ Downloads:
   Embed Cover Art: Vložiť miniatúru ako obal
   Embed Metadata: Vložiť názov, autora, opis a kapitoly
   Additional yt-dlp Arguments: Dodatočné argumenty yt-dlp
-  Custom yt-dlp Arguments: Vlastné argumenty yt-dlp
   Template Name: Názov šablóny
   Save Template: Uložiť šablónu
   Delete Template: Odstrániť šablónu

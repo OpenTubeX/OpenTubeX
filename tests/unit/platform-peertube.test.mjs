@@ -45,7 +45,7 @@ function video(overrides = {}) {
 
 const channel = { platform: 'peertube', id: 'my_channel@video.example.org', name: 'My Channel', url: 'https://video.example.org/c/my_channel' }
 
-test('reads channel and playlist IDs from instance pages only', () => {
+test('reads channel IDs from instance pages only', () => {
   assert.equal(peertube.parseChannelUrl('https://video.example.org/c/my_channel'), 'my_channel@video.example.org')
   assert.equal(peertube.parseChannelUrl('https://Video.Example.org/video-channels/my_channel/videos?sort=-views'), 'my_channel@video.example.org')
   // Instances show remote channels, which live on their own host
@@ -73,13 +73,6 @@ test('reads channel and playlist IDs from instance pages only', () => {
   ]) {
     assert.equal(peertube.parseChannelUrl(url), null, url)
   }
-
-  assert.equal(peertube.parsePlaylistUrl(`https://video.example.org/w/p/${SHORT_UUID}`), `${SHORT_UUID}@video.example.org`)
-  assert.equal(peertube.parsePlaylistUrl(`https://video.example.org/videos/watch/playlist/${UUID}`), `${UUID}@video.example.org`)
-  assert.equal(peertube.parsePlaylistUrl(`https://video.example.org/video-playlists/${UUID}`), `${UUID}@video.example.org`)
-  assert.equal(peertube.parsePlaylistUrl(`https://video.example.org/w/${SHORT_UUID}`), null)
-  assert.equal(peertube.parsePlaylistUrl('https://video.example.org/w/p/not-an-id'), null)
-  assert.equal(peertube.parsePlaylistUrl(`https://youtube.com/w/p/${SHORT_UUID}`), null)
 })
 
 test('loads channels from their own instance, with fitting images', async () => {

@@ -16,6 +16,22 @@ New Tab: نیا ٹیب
 Maximize: بڑا کریں
 Restore: بحال کریں
 Close Tab: ٹیب بند کریں
+App Menu:
+  About App: '{appName} کے بارے میں'
+  Services: خدمات
+  Hide App: '{appName} چھپائیں'
+  Hide Others: دیگر چھپائیں
+  Show All: سب دکھائیں
+  Quit App: '{appName} سے باہر نکلیں'
+  Reopen Closed Window: بند ونڈو دوبارہ کھولیں
+  Paste and Match Style: چسپاں کریں اور انداز ملائیں
+  View: منظر
+  Enter Inspect Element Mode: عنصر معائنہ موڈ میں جائیں
+  GPU Internals: GPU کی اندرونی معلومات (chrome://gpu)
+  Navigate: نیویگیٹ کریں
+  Next Tab: اگلا ٹیب
+  Previous Tab: پچھلا ٹیب
+  Help: مدد
 Close Confirmation:
   Title: OpenTubeX سے باہر نکلیں؟
   Message: کیا آپ واقعی OpenTubeX سے باہر نکلنا چاہتے ہیں؟
@@ -943,7 +959,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland ایپس کو ونڈو چھوٹی ہونے کی اطلاع نہیں دیتا، اس لیے یہ ٹرگر دستیاب نہیں ہے۔ اس کے بجائے "جب ونڈو فوکس کھو دے یا اس سے ہٹ جایا جائے" استعمال کریں، جو چھوٹا کرنے کو بھی شامل کرتا ہے۔
       On Tab Change Mini Player: ٹیبز تبدیل کرنے پر اس کے بجائے منی پلیئر دکھایا جاتا ہے۔ اسے استعمال کرنے کے لیے "ویڈیو چھوڑتے وقت" کو "چلانا بند کریں" پر سیٹ کریں۔
     Scroll Mini Player:
-      Scroll Mini Player: اسکرول منی پلیئر
       Scroll Player Mode: نیچے اسکرول کرتے وقت
       Scroll Player Mode Tooltip: پلیئر صرف اس وقت تک پن رہتا ہے جب تک وہ ونڈو کی اونچائی کا زیادہ سے زیادہ آدھا حصہ لے۔ ورنہ، جیسے لینڈ اسکیپ میں فونز یا چوڑی ونڈوز میں، اس کے بجائے منی پلیئر دکھایا جاتا ہے۔
       Scroll Player Modes:
@@ -1557,7 +1572,6 @@ Settings:
     Use Shared Tabs: تمام ڈیوائسز پر ایک مشترکہ ٹیب سیٹ استعمال کریں
     Shared Tabs Warning: اس ڈیوائس کے کھلے ٹیبز مشترکہ سیٹ بن جاتے ہیں۔ دوسرے ڈیوائسز سنک ہونے پر اپنے کھلے ٹیبز کو اس سیٹ سے بدل دیتے ہیں؛ مختلف ڈیوائسز کے ٹیبز آپس میں نہیں ملائے جاتے۔
     Tabs From Other Devices: دوسرے ڈیوائسز کے ٹیبز
-    Device Tab Session: '{platform} · {count} ٹیبز'
     Mobile Device: موبائل
     Desktop Device: ڈیسک ٹاپ
     Open All Tabs: تمام ٹیبز کھولیں
@@ -1593,7 +1607,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'آپ کا براؤزر کھلے گا تاکہ آپ اپنے سائن ان فراہم کنندہ کے ساتھ حذف کی تصدیق کر سکیں۔'
   Proxy Settings:
     IP Block Recovery Script Path: IP بلاک سے بحالی کا اسکرپٹ
-    Select IP Block Recovery Script File: IP بلاک سے بحالی کی اسکرپٹ فائل منتخب کریں
     Running IP block recovery script: IP بلاک سے بحالی کا اسکرپٹ چل رہا ہے
     IP block recovery script failed: 'IP بلاک سے بحالی کا اسکرپٹ ناکام ہو گیا (ایگزٹ کوڈ: {exitCode})'
     IP block recovery script finished: IP بلاک سے بحالی کا اسکرپٹ مکمل ہو گیا
@@ -1713,7 +1726,6 @@ Profile:
   Profile Icon: پروفائل آئیکن
   Choose an Emoji: ایموجی منتخب کریں
   Custom Emoji: حسب ضرورت ایموجی
-  Emoji: ایموجی
   Choose Image: تصویر منتخب کریں
   Crop Image: تصویر کاٹیں
   Zoom: زوم
@@ -1952,7 +1964,6 @@ Video:
       Timer ended: سلیپ ٹائمر ختم ہو گیا
     A-B Repeat:
       A-B Repeat: A-B ریپیٹ
-      'On': 'آن'
       'Off': 'بند'
       Point A: پوائنٹ A
       Point B: پوائنٹ B
@@ -2277,7 +2288,6 @@ Tab Organizer:
   Close All: سب بند کریں
   Ungroup: گروپ ختم کریں
   Group Name: گروپ کا نام
-  Color: رنگ
   No Color: کوئی رنگ نہیں
   Create Group: گروپ بنائیں
   Expand Group: گروپ پھیلائیں
@@ -2610,12 +2620,10 @@ Downloads:
   Remove File Confirmation: ڈاؤن لوڈ کی گئی فائل ہٹائیں؟
   Remove File Warning: اس سے "{title}" آپ کے ڈیوائس کے ردی دان میں منتقل ہو جائے گی۔
   File Not Found: ڈاؤن لوڈ کی گئی فائل نہیں مل سکی۔
-  Download Missing: ڈاؤن لوڈ دستیاب نہیں
   Files Missing: ڈاؤن لوڈ کی گئی فائل اب فائل سسٹم پر دستیاب نہیں ہے۔ | ڈاؤن لوڈ کی گئی فائلیں اب فائل سسٹم پر دستیاب نہیں ہیں۔
   Files Available: '{total} میں سے {available} ڈاؤن لوڈ شدہ فائلیں دستیاب ہیں۔'
   More Files: 1 مزید فائل | {count} مزید فائلیں
   Template Used: 'ٹیمپلیٹ: {name}'
-  Download Type: ڈاؤن لوڈ کی قسم
   Template: ٹیمپلیٹ
   Unsaved: غیر محفوظ شدہ
   Media Type: میڈیا کی قسم
@@ -2643,7 +2651,6 @@ Downloads:
   Embed Cover Art: تھمب نیل کو کور آرٹ کے طور پر شامل کریں
   Embed Metadata: عنوان، مصنف، تفصیل اور چیپٹرز شامل کریں
   Additional yt-dlp Arguments: اضافی yt-dlp آرگیومینٹس
-  Custom yt-dlp Arguments: حسب ضرورت yt-dlp آرگیومینٹس
   Template Name: ٹیمپلیٹ کا نام
   Save Template: ٹیمپلیٹ محفوظ کریں
   Delete Template: ٹیمپلیٹ حذف کریں

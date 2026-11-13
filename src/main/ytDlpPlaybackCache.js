@@ -236,6 +236,12 @@ export async function handleYtDlpPlaybackCacheSet(event, videoId, cacheKey, expi
   await loadEntries()
   if (!cacheEnabled || !isValidEntry(entry)) return false
   entries.delete(entry.videoId)
+  // Expired entries are otherwise only dropped when read, so they would stay
+  // in memory and on disk until 50 newer entries push them out.
+  const now = Date.now()
+  for (const [videoId, cached] of entries) {
+    if (now >= cached.expiryTime - EXPIRY_MARGIN_MS) entries.delete(videoId)
+  }
   const openVideoIds = TabManager.getOpenVideoIds()
   while (entries.size >= MAX_ENTRIES) {
     const videoId = Array.from(entries.keys()).find(videoId => !openVideoIds.has(videoId)) ?? entries.keys().next().value

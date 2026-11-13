@@ -16,6 +16,22 @@ New Tab: Uusi välilehti
 Maximize: Suurenna
 Restore: Palauta
 Close Tab: Sulje välilehti
+App Menu:
+  About App: 'Tietoja: {appName}'
+  Services: Palvelut
+  Hide App: Kätke {appName}
+  Hide Others: Kätke muut
+  Show All: Näytä kaikki
+  Quit App: Lopeta {appName}
+  Reopen Closed Window: Avaa suljettu ikkuna uudelleen
+  Paste and Match Style: Liitä ja sovita tyyli
+  View: Näytä
+  Enter Inspect Element Mode: Elementin tarkastelutila
+  GPU Internals: GPU:n sisäiset tiedot (chrome://gpu)
+  Navigate: Siirry
+  Next Tab: Seuraava välilehti
+  Previous Tab: Edellinen välilehti
+  Help: Ohje
 Close Confirmation:
   Background Sync Warning: Lopettaminen pysäyttää tilausten päivittämisen taustalla.
   Hide Window: Piilota ikkuna
@@ -907,7 +923,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland ei ilmoita ikkunan pienentämisestä sovelluksille, joten tämä käynnistin ei ole käytettävissä. Käytä sen sijaan asetusta "Kun ikkuna menettää kohdistuksen tai siitä siirrytään pois", joka kattaa myös pienentämisen.
       On Tab Change Mini Player: Välilehteä vaihdettaessa näytetään sen sijaan minisoitin. Käytä tätä asettamalla ”Videosta poistuttaessa” arvoon ”Lopeta toisto”.
     Scroll Mini Player:
-      Scroll Mini Player: Vierityksen minisoitin
       Scroll Player Mode: Alaspäin vieritettäessä
       Scroll Player Mode Tooltip: Soitin kiinnitetään vain, kun se vie enintään puolet ikkunan korkeudesta. Muuten, esimerkiksi puhelimissa vaakasuunnassa tai leveissä ikkunoissa, näytetään sen sijaan minisoitin.
       Scroll Player Modes:
@@ -1509,7 +1524,6 @@ Settings:
     Use Shared Tabs: 'Käytä yhtä jaettua välilehtijoukkoa kaikilla laitteilla'
     Shared Tabs Warning: 'Tällä laitteella avoinna olevista välilehdistä tulee yhteinen välilehtijoukko. Muut laitteet korvaavat avoimet välilehtensä tällä joukolla synkronoidessaan; eri laitteiden välilehtiä ei yhdistetä.'
     Tabs From Other Devices: 'Muiden laitteiden välilehdet'
-    Device Tab Session: '{platform} · {count} välilehteä'
     Mobile Device: 'Mobiililaite'
     Desktop Device: 'Tietokone'
     Open All Tabs: 'Avaa kaikki välilehdet'
@@ -1522,7 +1536,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'Selain avautuu, jotta voit vahvistaa poiston kirjautumispalvelussasi.'
   Proxy Settings:
     IP Block Recovery Script Path: IP-eston palautusskripti
-    Select IP Block Recovery Script File: Valitse IP-eston palautuskomentosarjatiedosto
     Running IP block recovery script: Suoritetaan IP-eston palautuskomentosarjaa
     IP block recovery script failed: 'IP-eston palautuskomentosarja epäonnistui (poistumiskoodi: {exitCode})'
     IP block recovery script finished: IP-eston palautuskomentosarja valmistui
@@ -1631,7 +1644,6 @@ Profile:
   Profile Icon: Profiilikuvake
   Choose an Emoji: Valitse emoji
   Custom Emoji: Mukautettu emoji
-  Emoji: Emoji
   Choose Image: Valitse kuva
   Crop Image: Rajaa kuva
   Zoom: Zoomaus
@@ -1819,7 +1831,6 @@ Video:
       Timer ended: Uniajastin päättyi
     A-B Repeat:
       A-B Repeat: A-B-toisto
-      'On': Käytössä
       'Off': Pois käytöstä
       Point A: Piste A
       Point B: Piste B
@@ -2172,7 +2183,6 @@ Tab Organizer:
   Close All: Sulje kaikki
   Ungroup: Pura ryhmä
   Group Name: Ryhmän nimi
-  Color: Väri
   No Color: Ei väriä
   Create Group: Luo ryhmä
   Expand Group: Laajenna ryhmä
@@ -2489,12 +2499,10 @@ Downloads:
   Remove File Confirmation: Poistetaanko ladattu tiedosto?
   Remove File Warning: Tämä siirtää tiedoston "{title}" laitteen roskakoriin.
   File Not Found: Ladattua tiedostoa ei löytynyt.
-  Download Missing: Lataus ei ole käytettävissä
   Files Missing: Ladattu tiedosto ei ole enää käytettävissä tiedostojärjestelmässä. | Ladatut tiedostot eivät ole enää käytettävissä tiedostojärjestelmässä.
   Files Available: '{available}/{total} ladatusta tiedostosta on käytettävissä.'
   More Files: 1 tiedosto lisää | {count} tiedostoa lisää
   Template Used: 'Mallipohja: {name}'
-  Download Type: Latauksen tyyppi
   Template: Mallipohja
   Unsaved: Tallentamaton
   Media Type: Median tyyppi
@@ -2522,7 +2530,6 @@ Downloads:
   Embed Cover Art: Upota pikkukuva kansikuvaksi
   Embed Metadata: Upota nimi, tekijä, kuvaus ja luvut
   Additional yt-dlp Arguments: yt-dlp:n lisäargumentit
-  Custom yt-dlp Arguments: Mukautetut yt-dlp-argumentit
   Template Name: Mallipohjan nimi
   Save Template: Tallenna mallipohja
   Delete Template: Poista mallipohja

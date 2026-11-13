@@ -16,6 +16,22 @@ New Tab: Ny flik
 Maximize: Maximera
 Restore: Återställ
 Close Tab: Stäng flik
+App Menu:
+  About App: Om {appName}
+  Services: Tjänster
+  Hide App: Göm {appName}
+  Hide Others: Göm övriga
+  Show All: Visa alla
+  Quit App: Avsluta {appName}
+  Reopen Closed Window: Öppna stängt fönster igen
+  Paste and Match Style: Klistra in och matcha stil
+  View: Visa
+  Enter Inspect Element Mode: Starta elementinspektion
+  GPU Internals: Intern GPU-information (chrome://gpu)
+  Navigate: Navigera
+  Next Tab: Nästa flik
+  Previous Tab: Föregående flik
+  Help: Hjälp
 Close Confirmation:
   Background Sync Warning: Om du avslutar stoppas uppdateringen av prenumerationer i bakgrunden.
   Hide Window: Dölj fönster
@@ -907,7 +923,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland rapporterar inte minimerade fönster till appar, så den här utlösaren är inte tillgänglig. Använd i stället "När fönstret förlorar fokus eller du växlar bort från det", vilket även omfattar minimering.
       On Tab Change Mini Player: När du byter flik visas minispelaren i stället. Om du vill använda detta ställer du in ”När du lämnar en video” på ”Sluta spela”.
     Scroll Mini Player:
-      Scroll Mini Player: Minispelare vid rullning
       Scroll Player Mode: När du rullar nedåt
       Scroll Player Mode Tooltip: Spelaren fästs bara så länge den tar upp högst halva fönstrets höjd. Annars, till exempel på telefoner i liggande läge eller i breda fönster, visas minispelaren i stället.
       Scroll Player Modes:
@@ -1508,7 +1523,6 @@ Settings:
     Use Shared Tabs: 'Använd en gemensam uppsättning flikar på alla enheter'
     Shared Tabs Warning: 'De öppna flikarna på den här enheten blir den delade uppsättningen. Andra enheter ersätter sina öppna flikar med den när de synkroniseras; flikar från olika enheter slås inte ihop.'
     Tabs From Other Devices: 'Flikar från andra enheter'
-    Device Tab Session: '{platform} · {count} flikar'
     Mobile Device: 'Mobil'
     Desktop Device: 'Dator'
     Open All Tabs: 'Öppna alla flikar'
@@ -1521,7 +1535,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'Webbläsaren öppnas så att du kan bekräfta borttagningen hos din inloggningsleverantör.'
   Proxy Settings:
     IP Block Recovery Script Path: Skript för återställning efter IP-blockering
-    Select IP Block Recovery Script File: Välj skriptfil för återställning efter IP-blockering
     Running IP block recovery script: Kör skript för återställning efter IP-blockering
     IP block recovery script failed: 'Skriptet för återställning efter IP-blockering misslyckades (slutkod: {exitCode})'
     IP block recovery script finished: Skriptet för återställning efter IP-blockering är klart
@@ -1630,7 +1643,6 @@ Profile:
   Profile Icon: Profilikon
   Choose an Emoji: Välj en emoji
   Custom Emoji: Egen emoji
-  Emoji: Emoji
   Choose Image: Välj bild
   Crop Image: Beskär bild
   Zoom: Zoom
@@ -1814,7 +1826,6 @@ Video:
       Timer ended: Insomningstimern har löpt ut
     A-B Repeat:
       A-B Repeat: A-B-upprepning
-      'On': På
       'Off': Av
       Point A: Punkt A
       Point B: Punkt B
@@ -2166,7 +2177,6 @@ Tab Organizer:
   Close All: Stäng alla
   Ungroup: Ta bort gruppering
   Group Name: Gruppnamn
-  Color: Färg
   No Color: Ingen färg
   Create Group: Skapa grupp
   Expand Group: Fäll ut grupp
@@ -2483,12 +2493,10 @@ Downloads:
   Remove File Confirmation: Ta bort den nedladdade filen?
   Remove File Warning: Detta flyttar "{title}" till enhetens papperskorg.
   File Not Found: Den nedladdade filen kunde inte hittas.
-  Download Missing: Nedladdningen är inte tillgänglig
   Files Missing: Den nedladdade filen finns inte längre i filsystemet. | De nedladdade filerna finns inte längre i filsystemet.
   Files Available: '{available} av {total} nedladdade filer är tillgängliga.'
   More Files: 1 fil till | {count} filer till
   Template Used: 'Mall: {name}'
-  Download Type: Nedladdningstyp
   Template: Mall
   Unsaved: Inte sparad
   Media Type: Medietyp
@@ -2516,7 +2524,6 @@ Downloads:
   Embed Cover Art: Bädda in miniatyrbilden som omslagsbild
   Embed Metadata: Bädda in titel, skapare, beskrivning och kapitel
   Additional yt-dlp Arguments: Extra argument för yt-dlp
-  Custom yt-dlp Arguments: Egna argument för yt-dlp
   Template Name: Mallnamn
   Save Template: Spara mall
   Delete Template: Ta bort mall

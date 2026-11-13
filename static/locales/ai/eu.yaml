@@ -16,6 +16,22 @@ New Tab: Fitxa berria
 Maximize: Maximizatu
 Restore: Leheneratu
 Close Tab: Itxi fitxa
+App Menu:
+  About App: '{appName}-(r)i buruz'
+  Services: Zerbitzuak
+  Hide App: Ezkutatu {appName}
+  Hide Others: Ezkutatu besteak
+  Show All: Erakutsi denak
+  Quit App: Irten {appName}-(e)tik
+  Reopen Closed Window: Ireki berriro itxitako leihoa
+  Paste and Match Style: Itsatsi eta egokitu estiloa
+  View: Ikusi
+  Enter Inspect Element Mode: Sartu elementuak ikuskatzeko moduan
+  GPU Internals: GPUaren barne-informazioa (chrome://gpu)
+  Navigate: Nabigatu
+  Next Tab: Hurrengo fitxa
+  Previous Tab: Aurreko fitxa
+  Help: Laguntza
 Close Confirmation:
   Background Sync Warning: Irtetez gero, harpidetzen atzeko planoko eguneratzea geldituko da.
   Hide Window: Ezkutatu leihoa
@@ -907,7 +923,6 @@ Settings:
       Wayland Minimize Unsupported: Waylandek ez die aplikazioei jakinarazten leihoa minimizatzen denean; beraz, abiarazle hau ez dago erabilgarri. Erabili "Leihoak fokua galtzean edo beste leiho batera aldatzean" aukera, minimizatzea ere barne hartzen baitu.
       On Tab Change Mini Player: Fitxaz aldatzean minierreproduzigailua erakusten da horren ordez. Hau erabiltzeko, ezarri «Bideo batetik irtetean» aukera «Gelditu erreprodukzioa» gisa.
     Scroll Mini Player:
-      Scroll Mini Player: Korritzeko minierreproduzigailua
       Scroll Player Mode: Behera korritzean
       Scroll Player Mode Tooltip: Erreproduzigailua leihoaren altueraren erdia gehienez hartzen duen bitartean bakarrik ainguratzen da. Bestela, adibidez telefonoetan horizontalean edo leiho zabaletan, mini erreproduzigailua erakusten da horren ordez.
       Scroll Player Modes:
@@ -1508,7 +1523,6 @@ Settings:
     Use Shared Tabs: 'Erabili partekatutako fitxa multzo bakarra gailu guztietan'
     Shared Tabs Warning: 'Gailu honetan irekita dauden fitxak multzo partekatua bihurtuko dira. Beste gailuek sinkronizatzean beren fitxa irekiak multzo horrekin ordeztuko dituzte; gailu desberdinetako fitxak ez dira bateratuko.'
     Tabs From Other Devices: 'Beste gailuetako fitxak'
-    Device Tab Session: '{platform} · {count} fitxa'
     Mobile Device: 'Mugikorra'
     Desktop Device: 'Mahaigaina'
     Open All Tabs: 'Ireki fitxa guztiak'
@@ -1521,7 +1535,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'Nabigatzailea irekiko da, ezabatzea zure saio-hornitzailearekin berresteko.'
   Proxy Settings:
     IP Block Recovery Script Path: IP blokeoaren berreskuratze-scripta
-    Select IP Block Recovery Script File: Hautatu IP blokeoa berreskuratzeko script-fitxategia
     Running IP block recovery script: IP blokeoa berreskuratzeko scripta exekutatzen
     IP block recovery script failed: 'IP blokeoa berreskuratzeko scriptak huts egin du (irteera-kodea: {exitCode})'
     IP block recovery script finished: IP blokeoa berreskuratzeko scripta amaitu da
@@ -1630,7 +1643,6 @@ Profile:
   Profile Icon: Profilaren ikonoa
   Choose an Emoji: Aukeratu emojia
   Custom Emoji: Emoji pertsonalizatua
-  Emoji: Emojia
   Choose Image: Aukeratu irudia
   Crop Image: Moztu irudia
   Zoom: Zooma
@@ -1823,7 +1835,6 @@ Video:
       Timer ended: Lo-tenporizadorea amaitu da
     A-B Repeat:
       A-B Repeat: A-B errepikapena
-      'On': Aktibatuta
       'Off': Desaktibatuta
       Point A: A puntua
       Point B: B puntua
@@ -2175,7 +2186,6 @@ Tab Organizer:
   Close All: Itxi denak
   Ungroup: Kendu taldetik
   Group Name: Taldearen izena
-  Color: Kolorea
   No Color: Kolorerik ez
   Create Group: Sortu taldea
   Expand Group: Zabaldu taldea
@@ -2492,12 +2502,10 @@ Downloads:
   Remove File Confirmation: Deskargatutako fitxategia kendu?
   Remove File Warning: Ekintza honek "{title}" gailuko zakarrontzira eramango du.
   File Not Found: Ezin izan da deskargatutako fitxategia aurkitu.
-  Download Missing: Deskarga ez dago erabilgarri
   Files Missing: Deskargatutako fitxategia ez dago fitxategi-sisteman erabilgarri. | Deskargatutako fitxategiak ez daude fitxategi-sisteman erabilgarri.
   Files Available: 'Deskargatutako {total} fitxategietatik {available} daude erabilgarri.'
   More Files: Fitxategi 1 gehiago | {count} fitxategi gehiago
   Template Used: 'Txantiloia: {name}'
-  Download Type: Deskarga mota
   Template: Txantiloia
   Unsaved: Gorde gabe
   Media Type: Multimedia mota
@@ -2525,7 +2533,6 @@ Downloads:
   Embed Cover Art: Txertatu koadro txikia azal gisa
   Embed Metadata: Txertatu izenburua, egilea, deskribapena eta kapituluak
   Additional yt-dlp Arguments: yt-dlp-ren argumentu gehigarriak
-  Custom yt-dlp Arguments: yt-dlp-ren argumentu pertsonalizatuak
   Template Name: Txantiloiaren izena
   Save Template: Gorde txantiloia
   Delete Template: Ezabatu txantiloia

@@ -346,7 +346,10 @@ test('portrait playlist opens below the video and clamps after resize and remova
   )).toBeCloseTo(2, 1)
   expect(await excerpt.evaluate(el => el.scrollHeight > el.clientHeight)).toBe(true)
   await expect(page.locator('.watchVideoPlaylist')).toBeHidden()
-  await page.locator('.phonePlaylistButton').click()
+  // The bottom nav covers the button at the top of the page. A click would
+  // scroll the page to uncover it, by an amount that varies between attempts,
+  // and the sheet docks below wherever the video ends up.
+  await page.locator('.phonePlaylistButton').press('Enter')
   const sheet = page.locator('.dockedSheet[open]')
   await expect(sheet).toBeVisible()
   await sheet.evaluate(el => Promise.all(el.getAnimations().map(animation => animation.finished)))

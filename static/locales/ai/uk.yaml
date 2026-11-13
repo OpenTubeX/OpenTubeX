@@ -16,6 +16,22 @@ New Tab: Нова вкладка
 Maximize: Розгорнути
 Restore: Відновити
 Close Tab: Закрити вкладку
+App Menu:
+  About App: Про {appName}
+  Services: Служби
+  Hide App: Сховати {appName}
+  Hide Others: Сховати інші
+  Show All: Показати всі
+  Quit App: Вийти з {appName}
+  Reopen Closed Window: Знову відкрити закрите вікно
+  Paste and Match Style: Вставити зі збереженням стилю
+  View: Вигляд
+  Enter Inspect Element Mode: Режим перевірки елементів
+  GPU Internals: Внутрішні відомості GPU (chrome://gpu)
+  Navigate: Навігація
+  Next Tab: Наступна вкладка
+  Previous Tab: Попередня вкладка
+  Help: Довідка
 Close Confirmation:
   Background Sync Warning: Вихід із програми зупинить фонове оновлення підписок.
   Hide Window: Сховати вікно
@@ -918,7 +934,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland не повідомляє програмам про згортання вікна, тому цей перемикач недоступний. Натомість виберіть «Коли вікно втрачає фокус або користувач переходить до іншого вікна». Цей варіант також спрацьовує під час згортання.
       On Tab Change Mini Player: Під час перемикання вкладок натомість показується мініпрогравач. Щоб використовувати це, встановіть для «Після виходу з відео» значення «Зупинити відтворення».
     Scroll Mini Player:
-      Scroll Mini Player: Мініпрогравач під час прокручування
       Scroll Player Mode: Під час прокручування вниз
       Scroll Player Mode Tooltip: Плеєр закріплюється, лише поки займає не більше половини висоти вікна. Інакше, наприклад на телефонах в альбомній орієнтації або в широких вікнах, натомість показується мініплеєр.
       Scroll Player Modes:
@@ -1531,7 +1546,6 @@ Settings:
     Use Shared Tabs: 'Використовувати один спільний набір вкладок на всіх пристроях'
     Shared Tabs Warning: 'Відкриті на цьому пристрої вкладки стануть спільним набором. Під час синхронізації інші пристрої замінять свої відкриті вкладки цим набором; вкладки з різних пристроїв не об’єднуються.'
     Tabs From Other Devices: 'Вкладки з інших пристроїв'
-    Device Tab Session: '{platform} · вкладок: {count}'
     Mobile Device: 'Мобільний пристрій'
     Desktop Device: 'Комп’ютер'
     Open All Tabs: 'Відкрити всі вкладки'
@@ -1544,7 +1558,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'Відкриється браузер, щоб ви підтвердили видалення в постачальника входу.'
   Proxy Settings:
     IP Block Recovery Script Path: Скрипт відновлення після блокування IP
-    Select IP Block Recovery Script File: Вибрати файл сценарію відновлення після блокування IP-адреси
     Running IP block recovery script: Виконання сценарію відновлення після блокування IP-адреси
     IP block recovery script failed: 'Не вдалося виконати сценарій відновлення після блокування IP-адреси (код виходу: {exitCode})'
     IP block recovery script finished: Сценарій відновлення після блокування IP-адреси виконано
@@ -1660,7 +1673,6 @@ Profile:
   Profile Icon: Піктограма профілю
   Choose an Emoji: Вибрати емодзі
   Custom Emoji: Власний емодзі
-  Emoji: Емодзі
   Choose Image: Вибрати зображення
   Crop Image: Обрізати зображення
   Zoom: Масштаб
@@ -1858,7 +1870,6 @@ Video:
       Timer ended: Таймер сну завершився
     A-B Repeat:
       A-B Repeat: Повтор A-B
-      'On': Увімкнено
       'Off': Вимкнено
       Point A: Точка A
       Point B: Точка B
@@ -2215,7 +2226,6 @@ Tab Organizer:
   Close All: Закрити все
   Ungroup: Розгрупувати
   Group Name: Назва групи
-  Color: Колір
   No Color: Без кольору
   Create Group: Створити групу
   Expand Group: Розгорнути групу
@@ -2535,12 +2545,10 @@ Downloads:
   Remove File Confirmation: Видалити завантажений файл?
   Remove File Warning: Файл «{title}» буде переміщено до смітника на вашому пристрої.
   File Not Found: Не вдалося знайти завантажений файл.
-  Download Missing: Завантаження недоступне
   Files Missing: Завантажений файл більше не доступний у файловій системі. | Завантажені файли більше не доступні у файловій системі. | Завантажені файли більше не доступні у файловій системі.
   Files Available: 'Доступно завантажених файлів: {available} із {total}.'
   More Files: Ще {count} файл | Ще {count} файли | Ще {count} файлів
   Template Used: 'Шаблон: {name}'
-  Download Type: Тип завантаження
   Template: Шаблон
   Unsaved: Не збережено
   Media Type: Тип медіа
@@ -2568,7 +2576,6 @@ Downloads:
   Embed Cover Art: Вбудувати мініатюру як обкладинку
   Embed Metadata: Вбудувати назву, автора, опис і розділи
   Additional yt-dlp Arguments: Додаткові аргументи yt-dlp
-  Custom yt-dlp Arguments: Власні аргументи yt-dlp
   Template Name: Назва шаблону
   Save Template: Зберегти шаблон
   Delete Template: Видалити шаблон

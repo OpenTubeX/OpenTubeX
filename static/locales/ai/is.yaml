@@ -16,6 +16,22 @@ New Tab: Nýr flipi
 Maximize: Hámarka
 Restore: Endurheimta
 Close Tab: Loka flipa
+App Menu:
+  About App: Um {appName}
+  Services: Þjónustur
+  Hide App: Fela {appName}
+  Hide Others: Fela aðra
+  Show All: Sýna allt
+  Quit App: Hætta í {appName}
+  Reopen Closed Window: Opna lokaðan glugga aftur
+  Paste and Match Style: Líma og samræma stíl
+  View: Skoða
+  Enter Inspect Element Mode: Fara í ham til að skoða einingar
+  GPU Internals: Innri upplýsingar GPU (chrome://gpu)
+  Navigate: Fletta
+  Next Tab: Næsti flipi
+  Previous Tab: Fyrri flipi
+  Help: Hjálp
 Close Confirmation:
   Background Sync Warning: Ef þú hættir stöðvast uppfærsla áskrifta í bakgrunni.
   Hide Window: Fela glugga
@@ -909,7 +925,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland tilkynnir forritum ekki þegar gluggi er lágmarkaður, svo þessi kveikja er ekki tiltæk. Notaðu "Þegar glugginn missir fókus eða skipt er frá honum" í staðinn. Sú stilling nær einnig yfir lágmörkun.
       On Tab Change Mini Player: Þegar skipt er um flipa birtist smáspilarinn í staðinn. Til að nota þetta skaltu stilla „Þegar farið er úr myndskeiði“ á „Stöðva spilun“.
     Scroll Mini Player:
-      Scroll Mini Player: Smáspilari við skrun
       Scroll Player Mode: Þegar skrunað er niður
       Scroll Player Mode Tooltip: Spilarinn er aðeins festur á meðan hann tekur að hámarki helming af hæð gluggans. Annars, t.d. í símum í láréttri stöðu eða í breiðum gluggum, birtist smáspilarinn í staðinn.
       Scroll Player Modes:
@@ -1512,7 +1527,6 @@ Settings:
     Use Shared Tabs: 'Nota eitt sameiginlegt flipasafn í öllum tækjum'
     Shared Tabs Warning: 'Opnir flipar á þessu tæki verða sameiginlega flipasafnið. Önnur tæki skipta út opnum flipum sínum fyrir þetta safn þegar þau samstillast; flipum frá mismunandi tækjum er ekki slegið saman.'
     Tabs From Other Devices: 'Flipar úr öðrum tækjum'
-    Device Tab Session: '{platform} · {count} flipar'
     Mobile Device: 'Fartæki'
     Desktop Device: 'Tölva'
     Open All Tabs: 'Opna alla flipa'
@@ -1525,7 +1539,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'Vafrinn opnast svo þú getir staðfest eyðinguna hjá innskráningarveitunni þinni.'
   Proxy Settings:
     IP Block Recovery Script Path: Skrifta fyrir endurheimt eftir IP-lokun
-    Select IP Block Recovery Script File: Velja skrá með endurheimtarskriftu fyrir IP-lokun
     Running IP block recovery script: Keyri endurheimtarskriftu fyrir IP-lokun
     IP block recovery script failed: 'Endurheimtarskrifta fyrir IP-lokun mistókst (lokakóði: {exitCode})'
     IP block recovery script finished: Keyrslu endurheimtarskriftu fyrir IP-lokun lokið
@@ -1636,7 +1649,6 @@ Profile:
   Profile Icon: Tákn notandasniðs
   Choose an Emoji: Velja tjákn
   Custom Emoji: Sérsniðið tjákn
-  Emoji: Tjákn
   Choose Image: Velja mynd
   Crop Image: Skera mynd
   Zoom: Aðdráttur
@@ -1834,7 +1846,6 @@ Video:
       Timer ended: Svefntímastillingu lokið
     A-B Repeat:
       A-B Repeat: A-B-endurtekning
-      'On': Kveikt
       'Off': Slökkt
       Point A: Punktur A
       Point B: Punktur B
@@ -2186,7 +2197,6 @@ Tab Organizer:
   Close All: Loka öllum
   Ungroup: Taka úr hópi
   Group Name: Heiti hóps
-  Color: Litur
   No Color: Enginn litur
   Create Group: Stofna hóp
   Expand Group: Fletta hópi út
@@ -2505,12 +2515,10 @@ Downloads:
   Remove File Confirmation: Fjarlægja sótta skrá?
   Remove File Warning: Þetta færir "{title}" í ruslakörfu tækisins.
   File Not Found: Sótta skráin fannst ekki.
-  Download Missing: Niðurhal ekki tiltækt
   Files Missing: Sótta skráin er ekki lengur tiltæk í skráakerfinu. | Sóttu skrárnar eru ekki lengur tiltækar í skráakerfinu.
   Files Available: 'Tiltækar skrár: {available} af {total} sóttum skrám.'
   More Files: '{count} skrá í viðbót | {count} skrár í viðbót'
   Template Used: 'Sniðmát: {name}'
-  Download Type: Tegund niðurhals
   Template: Sniðmát
   Unsaved: Óvistað
   Media Type: Tegund miðils
@@ -2538,7 +2546,6 @@ Downloads:
   Embed Cover Art: Fella smámynd inn sem umslagsmynd
   Embed Metadata: Fella inn titil, höfund, lýsingu og kafla
   Additional yt-dlp Arguments: Viðbótarviðföng yt-dlp
-  Custom yt-dlp Arguments: Sérsniðin viðföng yt-dlp
   Template Name: Heiti sniðmáts
   Save Template: Vista sniðmát
   Delete Template: Eyða sniðmáti

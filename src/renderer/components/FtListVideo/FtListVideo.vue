@@ -2270,7 +2270,13 @@ const debounceGetDeArrowThumbnail = debounce(fetchDeArrowThumbnail, 1000)
 async function fetchDeArrowData(videoId) {
   const cacheData = { videoId, title: null, videoDuration: null, thumbnail: null, thumbnailTimestamp: null }
 
-  const data = await deArrowData(videoId)
+  let data
+  try {
+    data = await deArrowData(videoId)
+  } catch {
+    // Already logged. Leave the cache empty so the next card load retries.
+    return
+  }
 
   if (Array.isArray(data?.titles) && data.titles.length > 0 && (data.titles[0].locked || data.titles[0].votes >= 0)) {
     // remove dearrow formatting markers https://github.com/ajayyy/DeArrow/blob/0da266485be902fe54259214c3cd7c942f2357c5/src/titles/titleFormatter.ts#L460

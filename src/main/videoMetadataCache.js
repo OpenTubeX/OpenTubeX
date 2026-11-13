@@ -152,8 +152,9 @@ export function updateVideoMetadataCache(input) {
 
     const feedTitles = await findFeedTitles(input.videoId)
     // Concurrent tabs may finish fetching the thumbnail out of order. Do not
-    // let an older observation replace a newer revision that already won.
-    if (previous?.cachedAt > current.cachedAt) {
+    // let an older observation replace a newer revision that already won, or
+    // a newer observation that confirmed the latest revision unchanged.
+    if (previous && Math.max(previous.cachedAt, previous.lastObservedAt ?? 0) > current.cachedAt) {
       return createMetadataHistory(revisions, feedTitles)
     }
 
@@ -178,6 +179,10 @@ export function updateVideoMetadataCache(input) {
         hasThumbnailChange: changedFields.includes('thumbnail')
       })
       revisions.push(storedRevision)
+    } else {
+      const latest = revisions.at(-1)
+      await videoMetadataCache.updateAsync({ _id: latest._id }, { $set: { lastObservedAt: current.cachedAt } })
+      latest.lastObservedAt = current.cachedAt
     }
 
     return createMetadataHistory(revisions, feedTitles)

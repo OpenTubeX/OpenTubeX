@@ -406,19 +406,6 @@ function parseChannelUrl(input) {
 }
 
 /**
- * The path of a public set, such as `user/sets/name`.
- * @param {string} input
- * @returns {string | null}
- */
-function parsePlaylistUrl(input) {
-  const segments = soundCloudPath(input)
-  // Private sets have a secret token as a fourth segment
-  if (segments?.length !== 3 || segments[1] !== 'sets' || RESERVED_PATHS.has(segments[0])) return null
-  const path = segments.join('/')
-  return PLAYLIST_PATH_PATTERN.test(path) ? path : null
-}
-
-/**
  * The lowercase path segments of a SoundCloud page.
  * @param {unknown} input
  * @returns {string[] | null}
@@ -505,7 +492,7 @@ async function search(fetcher, query, type, continuation, signal) {
  * tracks in full and the others as bare IDs, which are looked up per page.
  * `continuation` is the position of the page.
  * @param {PlatformFetch} fetcher
- * @param {string} id a playlist ID, or a path from `parsePlaylistUrl`
+ * @param {string} id a playlist ID, or a set path such as `user/sets/name`
  * @param {string | null} continuation
  * @param {AbortSignal} [signal]
  * @returns {Promise<{ playlist: PlatformPlaylist | null, page: PlatformPage }>}
@@ -565,7 +552,6 @@ export default {
   searchTypes: ['tracks', 'channels', 'playlists'],
   liveStreams: false,
   parseChannelUrl,
-  parsePlaylistUrl,
   getChannel,
   getChannelPage,
   getLatestItems,

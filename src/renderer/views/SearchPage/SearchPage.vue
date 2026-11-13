@@ -686,7 +686,6 @@ async function performSearchInvidious(payload, options = { resetSearchPage: fals
       await performSearchLocal(payload)
     } else {
       isLoading.value = false
-      // TODO: Show toast with error message
     }
   }
 }

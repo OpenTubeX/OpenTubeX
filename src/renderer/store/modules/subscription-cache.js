@@ -1,6 +1,8 @@
 import {
+  DBProfileHandlers,
   DBSubscriptionCacheHandlers,
 } from '../../../datastores/handlers/index'
+import { MAIN_PROFILE_ID } from '../../../constants'
 import { toRaw } from 'vue'
 import { ensureSubscriptionFeedEntryState, ensureUpcomingSubscriptionFeedPublished, getUpcomingPremiereTimestamp } from '../../helpers/subscription-entries'
 import { applySubscriptionSeenVideosToCache, applySubscriptionSeenPostsToCache } from '../../helpers/subscription-seen-videos'
@@ -93,6 +95,21 @@ const getters = {
   },
 }
 
+/**
+ * The channels of the stored main profile, or `null` if it can't be read.
+ * @returns {Promise<string[] | null>}
+ */
+async function getStoredSubscribedChannelIds() {
+  try {
+    const profiles = await DBProfileHandlers.find()
+    const mainProfile = Array.isArray(profiles) ? profiles.find(profile => profile._id === MAIN_PROFILE_ID) : null
+    return Array.isArray(mainProfile?.subscriptions) ? mainProfile.subscriptions.map(channel => channel.id) : null
+  } catch (error) {
+    console.error(error)
+    return null
+  }
+}
+
 const actions = {
   async grabAllSubscriptions({ commit, dispatch, state, rootState, rootGetters }) {
     try {
@@ -104,7 +121,20 @@ const actions = {
       const communityPosts = {}
 
       const toBeRemovedChannelIds = []
-      const subscribedChannelIdSet = rootGetters.getSubscribedChannelIdSet
+      let subscribedChannelIdSet = rootGetters.getSubscribedChannelIdSet
+      // Without loaded profiles every channel looks unsubscribed, so keep the data.
+      let canRemoveUnsubscribed = rootState.profiles.profilesLoaded
+      if (canRemoveUnsubscribed && payload.some(entry => !subscribedChannelIdSet.has(entry._id))) {
+        // Another window may have changed the subscriptions and cached a feed
+        // before this window received the profile change. The cache read above
+        // came after that change was saved, so the stored profile has it.
+        const storedChannelIds = await getStoredSubscribedChannelIds()
+        if (storedChannelIds === null) {
+          canRemoveUnsubscribed = false
+        } else {
+          subscribedChannelIdSet = new Set(storedChannelIds)
+        }
+      }
       const withFeedState = entries => entries.map(entry => ({
         ...entry,
         isNewInSubscriptionFeed: entry.isNewInSubscriptionFeed === true
@@ -113,9 +143,8 @@ const actions = {
       for (const dataEntry of payload) {
         const channelId = dataEntry._id
         if (!subscribedChannelIdSet.has(channelId)) {
-          // Clean up cache data for unsubscribed channels. Without loaded
-          // profiles every channel looks unsubscribed, so keep the data.
-          if (rootState.profiles.profilesLoaded) toBeRemovedChannelIds.push(channelId)
+          // Clean up cache data for unsubscribed channels
+          if (canRemoveUnsubscribed) toBeRemovedChannelIds.push(channelId)
           // No need to load data for unsubscribed channels
           continue
         }

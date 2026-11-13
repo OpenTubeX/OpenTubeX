@@ -16,6 +16,22 @@ New Tab: Nouvel onglet
 Maximize: Agrandir
 Restore: Restaurer
 Close Tab: Fermer l’onglet
+App Menu:
+  About App: À propos de {appName}
+  Services: Services
+  Hide App: Masquer {appName}
+  Hide Others: Masquer les autres
+  Show All: Tout afficher
+  Quit App: Quitter {appName}
+  Reopen Closed Window: Rouvrir la fenêtre fermée
+  Paste and Match Style: Coller et adapter le style
+  View: Affichage
+  Enter Inspect Element Mode: Activer le mode d’inspection des éléments
+  GPU Internals: Informations internes du GPU (chrome://gpu)
+  Navigate: Navigation
+  Next Tab: Onglet suivant
+  Previous Tab: Onglet précédent
+  Help: Aide
 Close Confirmation:
   Background Sync Warning: Quitter arrêtera l'actualisation des abonnements en arrière-plan.
   Hide Window: Masquer la fenêtre
@@ -907,7 +923,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland ne signale pas aux applications qu’une fenêtre est réduite. Ce déclencheur est donc indisponible. Utilisez plutôt « Lorsque la fenêtre perd le focus ou que vous passez à une autre fenêtre », qui couvre aussi la réduction.
       On Tab Change Mini Player: Le changement d’onglet affiche le mini-lecteur à la place. Pour utiliser cette option, réglez « En quittant une vidéo » sur « Arrêter la lecture ».
     Scroll Mini Player:
-      Scroll Mini Player: Mini-lecteur lors du défilement
       Scroll Player Mode: Lors du défilement vers le bas
       Scroll Player Mode Tooltip: Le lecteur n’est épinglé que s’il occupe au plus la moitié de la hauteur de la fenêtre. Sinon, par exemple sur les téléphones en mode paysage ou dans les fenêtres larges, le mini-lecteur s’affiche à la place.
       Scroll Player Modes:
@@ -1508,7 +1523,6 @@ Settings:
     Use Shared Tabs: 'Utiliser un seul ensemble d’onglets partagé entre les appareils'
     Shared Tabs Warning: 'Les onglets ouverts sur cet appareil deviennent l’ensemble partagé. Lors de la synchronisation, les autres appareils remplacent leurs onglets ouverts par cet ensemble ; les onglets des différents appareils ne sont pas fusionnés.'
     Tabs From Other Devices: 'Onglets d’autres appareils'
-    Device Tab Session: '{platform} · {count} onglets'
     Mobile Device: 'Mobile'
     Desktop Device: 'Ordinateur'
     Open All Tabs: 'Ouvrir tous les onglets'
@@ -1521,7 +1535,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'Votre navigateur s’ouvre pour que vous confirmiez la suppression auprès de votre fournisseur d’identité.'
   Proxy Settings:
     IP Block Recovery Script Path: Script de récupération après blocage IP
-    Select IP Block Recovery Script File: Sélectionner le fichier du script de récupération après blocage d’IP
     Running IP block recovery script: Exécution du script de récupération après blocage d’IP
     IP block recovery script failed: 'Échec du script de récupération après blocage d’IP (code de sortie : {exitCode})'
     IP block recovery script finished: Script de récupération après blocage d’IP terminé
@@ -1629,7 +1642,6 @@ Profile:
   Profile Icon: Icône du profil
   Choose an Emoji: Choisir un emoji
   Custom Emoji: Emoji personnalisé
-  Emoji: Emoji
   Choose Image: Choisir une image
   Crop Image: Recadrer l’image
   Zoom: Zoom
@@ -1812,7 +1824,6 @@ Video:
       Timer ended: Minuteur de mise en veille terminé
     A-B Repeat:
       A-B Repeat: Répétition A-B
-      'On': Activée
       'Off': Désactivée
       Point A: Point A
       Point B: Point B
@@ -2164,7 +2175,6 @@ Tab Organizer:
   Close All: Tout fermer
   Ungroup: Retirer du groupe
   Group Name: Nom du groupe
-  Color: Couleur
   No Color: Aucune couleur
   Create Group: Créer un groupe
   Expand Group: Développer le groupe
@@ -2481,12 +2491,10 @@ Downloads:
   Remove File Confirmation: Supprimer le fichier téléchargé ?
   Remove File Warning: Cette action déplacera « {title} » dans la corbeille de votre appareil.
   File Not Found: Le fichier téléchargé est introuvable.
-  Download Missing: Téléchargement indisponible
   Files Missing: Le fichier téléchargé n’est plus disponible dans le système de fichiers. | Les fichiers téléchargés ne sont plus disponibles dans le système de fichiers. | Les fichiers téléchargés ne sont plus disponibles dans le système de fichiers.
   Files Available: '{available} fichiers téléchargés sur {total} sont disponibles.'
   More Files: 1 fichier supplémentaire | {count} fichiers supplémentaires | {count} fichiers supplémentaires
   Template Used: 'Modèle : {name}'
-  Download Type: Type de téléchargement
   Template: Modèle
   Unsaved: Non enregistré
   Media Type: Type de média
@@ -2514,7 +2522,6 @@ Downloads:
   Embed Cover Art: Intégrer la miniature comme pochette
   Embed Metadata: Intégrer le titre, l’auteur, la description et les chapitres
   Additional yt-dlp Arguments: Arguments yt-dlp supplémentaires
-  Custom yt-dlp Arguments: Arguments yt-dlp personnalisés
   Template Name: Nom du modèle
   Save Template: Enregistrer le modèle
   Delete Template: Supprimer le modèle

@@ -16,6 +16,22 @@ New Tab: زبانه جدید
 Maximize: بیشینه کردن
 Restore: بازگردانی
 Close Tab: بستن زبانه
+App Menu:
+  About App: درباره {appName}
+  Services: خدمات
+  Hide App: پنهان کردن {appName}
+  Hide Others: پنهان کردن بقیه
+  Show All: نمایش همه
+  Quit App: خروج از {appName}
+  Reopen Closed Window: بازکردن دوباره پنجره بسته‌شده
+  Paste and Match Style: چسباندن و تطبیق سبک
+  View: نما
+  Enter Inspect Element Mode: ورود به حالت بازرسی عنصر
+  GPU Internals: اطلاعات داخلی GPU (chrome://gpu)
+  Navigate: پیمایش
+  Next Tab: زبانه بعدی
+  Previous Tab: زبانه قبلی
+  Help: راهنما
 Close Confirmation:
   Background Sync Warning: با خروج، به‌روزرسانی اشتراک‌ها در پس‌زمینه متوقف می‌شود.
   Hide Window: پنهان کردن پنجره
@@ -940,7 +956,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland کمینه‌شدن پنجره را به برنامه‌ها گزارش نمی‌کند، پس این محرک در دسترس نیست. به‌جای آن از "هنگامی که پنجره تمرکز را از دست می‌دهد یا به پنجره‌ای دیگر می‌روید" استفاده کنید که کمینه‌کردن را نیز پوشش می‌دهد.
       On Tab Change Mini Player: جابه‌جایی میان برگه‌ها به‌جای آن پخش‌کنندهٔ کوچک را نشان می‌دهد. برای استفاده از این گزینه، «هنگام خروج از ویدیو» را روی «توقف پخش» تنظیم کنید.
     Scroll Mini Player:
-      Scroll Mini Player: پخش‌کنندهٔ کوچک هنگام پیمایش
       Scroll Player Mode: هنگام پیمایش به پایین
       Scroll Player Mode Tooltip: پخش‌کننده فقط تا زمانی سنجاق می‌شود که حداکثر نیمی از ارتفاع پنجره را بگیرد. در غیر این صورت، مثلاً در تلفن‌ها در حالت افقی یا در پنجره‌های عریض، به‌جای آن پخش‌کنندهٔ کوچک نمایش داده می‌شود.
       Scroll Player Modes:
@@ -1563,7 +1578,6 @@ Settings:
     Use Shared Tabs: 'استفاده از یک مجموعه زبانهٔ مشترک در همهٔ دستگاه‌ها'
     Shared Tabs Warning: 'زبانه‌های باز این دستگاه به مجموعهٔ مشترک تبدیل می‌شوند. دستگاه‌های دیگر هنگام همگام‌سازی زبانه‌های باز خود را با این مجموعه جایگزین می‌کنند؛ زبانه‌های دستگاه‌های مختلف با هم ادغام نمی‌شوند.'
     Tabs From Other Devices: 'زبانه‌های دستگاه‌های دیگر'
-    Device Tab Session: '{platform} · {count} زبانه'
     Mobile Device: 'تلفن همراه'
     Desktop Device: 'رایانه'
     Open All Tabs: 'باز کردن همهٔ زبانه‌ها'
@@ -1576,7 +1590,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'مرورگر شما باز می‌شود تا حذف را نزد ارائه‌دهندهٔ ورود خود تأیید کنید.'
   Proxy Settings:
     IP Block Recovery Script Path: اسکریپت بازیابی مسدودیت IP
-    Select IP Block Recovery Script File: انتخاب فایل اسکریپت بازیابی مسدودشدن IP
     Running IP block recovery script: در حال اجرای اسکریپت بازیابی مسدودشدن IP
     IP block recovery script failed: 'اسکریپت بازیابی مسدودشدن IP ناموفق بود (کد خروج: {exitCode})'
     IP block recovery script finished: اجرای اسکریپت بازیابی مسدودشدن IP پایان یافت
@@ -1695,7 +1708,6 @@ Profile:
   Profile Icon: نماد نمایه
   Choose an Emoji: انتخاب ایموجی
   Custom Emoji: ایموجی سفارشی
-  Emoji: ایموجی
   Choose Image: انتخاب تصویر
   Crop Image: برش تصویر
   Zoom: بزرگ‌نمایی
@@ -1900,7 +1912,6 @@ Video:
       Timer ended: تایمر خواب پایان یافت
     A-B Repeat:
       A-B Repeat: تکرار A-B
-      'On': روشن
       'Off': خاموش
       Point A: نقطهٔ A
       Point B: نقطهٔ B
@@ -2261,7 +2272,6 @@ Tab Organizer:
   Close All: بستن همه
   Ungroup: خارج کردن از گروه
   Group Name: نام گروه
-  Color: رنگ
   No Color: بدون رنگ
   Create Group: ساخت گروه
   Expand Group: باز کردن گروه
@@ -2586,12 +2596,10 @@ Downloads:
   Remove File Confirmation: فایل بارگیری‌شده حذف شود؟
   Remove File Warning: این کار "{title}" را به زباله‌دان دستگاه منتقل می‌کند.
   File Not Found: فایل بارگیری‌شده پیدا نشد.
-  Download Missing: بارگیری در دسترس نیست
   Files Missing: فایل بارگیری‌شده دیگر در فایل‌سیستم موجود نیست. | فایل‌های بارگیری‌شده دیگر در فایل‌سیستم موجود نیستند.
   Files Available: '{available} از {total} فایل بارگیری‌شده در دسترس است.'
   More Files: 1 فایل دیگر | {count} فایل دیگر
   Template Used: 'الگو: {name}'
-  Download Type: نوع بارگیری
   Template: الگو
   Unsaved: ذخیره‌نشده
   Media Type: نوع رسانه
@@ -2619,7 +2627,6 @@ Downloads:
   Embed Cover Art: جاسازی تصویر بندانگشتی به‌عنوان تصویر جلد
   Embed Metadata: جاسازی عنوان، سازنده، توضیحات و فصل‌ها
   Additional yt-dlp Arguments: آرگومان‌های اضافی yt-dlp
-  Custom yt-dlp Arguments: آرگومان‌های سفارشی yt-dlp
   Template Name: نام الگو
   Save Template: ذخیره الگو
   Delete Template: حذف الگو

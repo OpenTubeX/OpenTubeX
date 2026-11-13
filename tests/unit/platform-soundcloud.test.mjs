@@ -70,7 +70,7 @@ function fakeSoundCloud(routes, state = { clientId: CLIENT_A }) {
 
 test.beforeEach(() => resetSoundCloudClientId())
 
-test('reads channels and sets from SoundCloud addresses only', () => {
+test('reads channels from SoundCloud addresses only', () => {
   assert.equal(soundcloud.parseChannelUrl('https://soundcloud.com/Artist'), 'artist')
   assert.equal(soundcloud.parseChannelUrl('https://m.soundcloud.com/artist/popular-tracks'), 'artist')
   assert.equal(soundcloud.parseChannelUrl('soundcloud.com/artist/sets/'), 'artist')
@@ -84,11 +84,6 @@ test('reads channels and sets from SoundCloud addresses only', () => {
   assert.equal(soundcloud.parseChannelUrl('https://soundcloud.com.example.test/artist'), null)
   assert.equal(soundcloud.parseChannelUrl('https://user:pass@soundcloud.com/artist'), null)
   assert.equal(soundcloud.parseChannelUrl('artist'), null)
-
-  assert.equal(soundcloud.parsePlaylistUrl('https://soundcloud.com/Artist/sets/Night-Mix?si=x'), 'artist/sets/night-mix')
-  assert.equal(soundcloud.parsePlaylistUrl('https://soundcloud.com/artist/sets/night-mix/s-SecretToken'), null)
-  assert.equal(soundcloud.parsePlaylistUrl('https://soundcloud.com/discover/sets/charts-top'), null)
-  assert.equal(soundcloud.parsePlaylistUrl('https://soundcloud.com/artist/track-1'), null)
 })
 
 test('finds the client ID in the last app script that has one and looks up channels', async () => {

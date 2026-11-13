@@ -16,6 +16,22 @@ New Tab: Нова картица
 Maximize: Увећај
 Restore: Врати
 Close Tab: Затвори картицу
+App Menu:
+  About App: О апликацији {appName}
+  Services: Услуге
+  Hide App: Сакриј {appName}
+  Hide Others: Сакриј остале
+  Show All: Прикажи све
+  Quit App: Затвори {appName}
+  Reopen Closed Window: Поново отвори затворени прозор
+  Paste and Match Style: Налепи и усклади стил
+  View: Приказ
+  Enter Inspect Element Mode: Режим прегледа елемената
+  GPU Internals: Интерни подаци о GPU-у (chrome://gpu)
+  Navigate: Навигација
+  Next Tab: Следећа картица
+  Previous Tab: Претходна картица
+  Help: Помоћ
 Close Confirmation:
   Background Sync Warning: Излазак ће зауставити освежавање претплата у позадини.
   Hide Window: Сакриј прозор
@@ -926,7 +942,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland не пријављује апликацијама умањивање прозора, па овај окидач није доступан. Уместо њега користи „Када прозор изгуби фокус или се пређе на други прозор“, што обухвата и умањивање.
       On Tab Change Mini Player: При промени картице уместо тога се приказује мини-плејер. Да бисте ово користили, подесите „При напуштању видеа” на „Заустави репродукцију”.
     Scroll Mini Player:
-      Scroll Mini Player: Мини-плејер при померању
       Scroll Player Mode: При померању надоле
       Scroll Player Mode Tooltip: Плејер се закачује само док заузима највише половину висине прозора. У супротном, на пример на телефонима у пејзажном режиму или у широким прозорима, уместо тога се приказује мини плејер.
       Scroll Player Modes:
@@ -1549,7 +1564,6 @@ Settings:
     Use Shared Tabs: 'Користи један дељени скуп картица на свим уређајима'
     Shared Tabs Warning: 'Отворене картице на овом уређају постају заједнички скуп. Други уређаји при синхронизацији замењују своје отворене картице тим скупом; картице са различитих уређаја се не спајају.'
     Tabs From Other Devices: 'Картице са других уређаја'
-    Device Tab Session: '{platform} · {count} картица'
     Mobile Device: 'Мобилни уређај'
     Desktop Device: 'Рачунар'
     Open All Tabs: 'Отвори све картице'
@@ -1564,7 +1578,6 @@ Settings:
     Proxy Username: Корисничко име за прокси
     Proxy Password: Лозинка за прокси
     IP Block Recovery Script Path: Скрипта за опоравак од блокирања IP-а
-    Select IP Block Recovery Script File: Изабери датотеку скрипте за опоравак од IP блокаде
     Running IP block recovery script: Покретање скрипте за опоравак од IP блокаде
     IP block recovery script failed: 'Скрипта за опоравак од IP блокаде није успела (излазни кôд: {exitCode})'
     IP block recovery script finished: Скрипта за опоравак од IP блокаде је завршена
@@ -1683,7 +1696,6 @@ Profile:
   Profile Icon: Икона профила
   Choose an Emoji: Изабери емоџи
   Custom Emoji: Прилагођени емоџи
-  Emoji: Емоџи
   Choose Image: Изабери слику
   Crop Image: Исеци слику
   Zoom: Увећање
@@ -1882,7 +1894,6 @@ Video:
       Timer ended: Тајмер за спавање је истекао
     A-B Repeat:
       A-B Repeat: A-B понављање
-      On: Укључено
       Off: Искључено
       Point A: Тачка A
       Point B: Тачка B
@@ -2243,7 +2254,6 @@ Tab Organizer:
   Close All: Затвори све
   Ungroup: Разгрупиши
   Group Name: Назив групе
-  Color: Боја
   No Color: Без боје
   Create Group: Направи групу
   Expand Group: Прошири групу
@@ -2568,12 +2578,10 @@ Downloads:
   Remove File Confirmation: Уклонити преузету датотеку?
   Remove File Warning: Ово ће преместити „{title}“ у смеће на вашем уређају.
   File Not Found: Преузета датотека није пронађена.
-  Download Missing: Преузимање није доступно
   Files Missing: Преузета датотека више није доступна у систему датотека. | Преузете датотеке више нису доступне у систему датотека. | Преузете датотеке више нису доступне у систему датотека.
   Files Available: 'Доступно је {available} од {total} преузетих датотека.'
   More Files: Још {count} датотека | Још {count} датотеке | Још {count} датотека
   Template Used: 'Шаблон: {name}'
-  Download Type: Врста преузимања
   Template: Шаблон
   Unsaved: Несачувано
   Media Type: Врста медија
@@ -2601,7 +2609,6 @@ Downloads:
   Embed Cover Art: Угради сличицу као омот
   Embed Metadata: Угради наслов, аутора, опис и поглавља
   Additional yt-dlp Arguments: Додатни аргументи за yt-dlp
-  Custom yt-dlp Arguments: Прилагођени аргументи за yt-dlp
   Template Name: Назив шаблона
   Save Template: Сачувај шаблон
   Delete Template: Избриши шаблон

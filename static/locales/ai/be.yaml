@@ -16,6 +16,22 @@ New Tab: Новая ўкладка
 Maximize: Разгарнуць
 Restore: Аднавіць
 Close Tab: Закрыць укладку
+App Menu:
+  About App: Пра {appName}
+  Services: Сэрвісы
+  Hide App: Схаваць {appName}
+  Hide Others: Схаваць іншыя
+  Show All: Паказаць усе
+  Quit App: Выйсці з {appName}
+  Reopen Closed Window: Зноў адкрыць закрытае акно
+  Paste and Match Style: Уставіць з захаваннем стылю
+  View: Выгляд
+  Enter Inspect Element Mode: Рэжым агляду элементаў
+  GPU Internals: Унутраныя звесткі GPU (chrome://gpu)
+  Navigate: Навігацыя
+  Next Tab: Наступная картка
+  Previous Tab: Папярэдняя картка
+  Help: Даведка
 Close Confirmation:
   Background Sync Warning: Выхад з праграмы спыніць фонавае абнаўленне падпісак.
   Hide Window: Схаваць акно
@@ -938,7 +954,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland не паведамляе праграмам пра згортванне акна, таму гэты трыгер недаступны. Замест яго выберыце «Калі акно страчвае фокус або вы пераключаецеся з яго». Гэты варыянт таксама спрацоўвае пры згортванні.
       On Tab Change Mini Player: Пры пераключэнні ўкладак замест гэтага паказваецца міні-прайгравальнік. Каб выкарыстоўваць гэта, выберыце «Спыніць прайграванне» ў «Пры выхадзе з відэа».
     Scroll Mini Player:
-      Scroll Mini Player: Міні-прайгравальнік пры пракрутцы
       Scroll Player Mode: Пры пракрутцы ўніз
       Scroll Player Mode Tooltip: Прайгравальнік замацоўваецца, толькі пакуль займае не больш за палову вышыні акна. Інакш, напрыклад на тэлефонах у альбомнай арыентацыі або ў шырокіх вокнах, замест гэтага паказваецца міні-прайгравальнік.
       Scroll Player Modes:
@@ -1561,7 +1576,6 @@ Settings:
     Use Shared Tabs: 'Выкарыстоўваць агульны набор укладак на ўсіх прыладах'
     Shared Tabs Warning: 'Адкрытыя на гэтай прыладзе ўкладкі стануць агульным наборам. Іншыя прылады пры сінхранізацыі заменяць свае адкрытыя ўкладкі гэтым наборам; укладкі розных прылад не аб’ядноўваюцца.'
     Tabs From Other Devices: 'Укладкі з іншых прылад'
-    Device Tab Session: '{platform} · укладак: {count}'
     Mobile Device: 'Мабільная прылада'
     Desktop Device: 'Камп’ютар'
     Open All Tabs: 'Адкрыць усе ўкладкі'
@@ -1576,7 +1590,6 @@ Settings:
     Proxy Username: Імя карыстальніка проксі
     Proxy Password: Пароль проксі
     IP Block Recovery Script Path: Скрыпт аднаўлення пасля блакіроўкі IP
-    Select IP Block Recovery Script File: Выберыце файл сцэнарыя аднаўлення пасля блакавання IP
     Running IP block recovery script: Выконваецца сцэнарый аднаўлення пасля блакавання IP
     IP block recovery script failed: 'Памылка сцэнарыя аднаўлення пасля блакавання IP (код выхаду: {exitCode})'
     IP block recovery script finished: Сцэнарый аднаўлення пасля блакавання IP завершаны
@@ -1696,7 +1709,6 @@ Profile:
   Profile Icon: Значок профілю
   Choose an Emoji: Выбраць эмодзі
   Custom Emoji: Уласны эмодзі
-  Emoji: Эмодзі
   Choose Image: Выбраць выяву
   Crop Image: Абрэзаць выяву
   Zoom: Маштаб
@@ -1902,7 +1914,6 @@ Video:
       Timer ended: Таймер сну спрацаваў
     A-B Repeat:
       A-B Repeat: Паўтор A-B
-      On: Укл.
       Off: Выкл.
       Point A: Пункт A
       Point B: Пункт B
@@ -2263,7 +2274,6 @@ Tab Organizer:
   Close All: Закрыць усе
   Ungroup: Выдаліць з групы
   Group Name: Назва групы
-  Color: Колер
   No Color: Без колеру
   Create Group: Стварыць групу
   Expand Group: Разгарнуць групу
@@ -2591,12 +2601,10 @@ Downloads:
   Remove File Confirmation: Выдаліць спампаваны файл?
   Remove File Warning: Файл «{title}» будзе перамешчаны ў сметніцу вашай прылады.
   File Not Found: Не ўдалося знайсці спампаваны файл.
-  Download Missing: Спампоўванне недаступнае
   Files Missing: Спампаваны файл больш не даступны ў файлавай сістэме. | Спампаваныя файлы больш не даступныя ў файлавай сістэме. | Спампаваныя файлы больш не даступныя ў файлавай сістэме.
   Files Available: 'Даступна {available} з {total} спампаваных файлаў.'
   More Files: Яшчэ {count} файл | Яшчэ {count} файлы | Яшчэ {count} файлаў
   Template Used: 'Шаблон: {name}'
-  Download Type: Тып спампоўвання
   Template: Шаблон
   Unsaved: Не захавана
   Media Type: Тып медыя
@@ -2624,7 +2632,6 @@ Downloads:
   Embed Cover Art: Убудаваць мініяцюру як вокладку
   Embed Metadata: Убудаваць назву, аўтара, апісанне і раздзелы
   Additional yt-dlp Arguments: Дадатковыя аргументы yt-dlp
-  Custom yt-dlp Arguments: Карыстальніцкія аргументы yt-dlp
   Template Name: Назва шаблону
   Save Template: Захаваць шаблон
   Delete Template: Выдаліць шаблон

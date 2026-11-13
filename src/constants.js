@@ -35,7 +35,6 @@ const IpcChannels = {
   CUSTOM_THEME_REPLACE: 'custom-theme-replace',
   CUSTOM_THEME_UPDATED: 'custom-theme-updated',
 
-  SEARCH_INPUT_HANDLING_READY: 'search-input-handling-ready',
   UPDATE_SEARCH_INPUT_TEXT: 'update-search-input-text',
 
   OPEN_URL: 'open-url',
@@ -143,7 +142,6 @@ const IpcChannels = {
   CONTEXT_MENU_OPEN: 'context-menu-open',
   CONTEXT_MENU_EXECUTE: 'context-menu-execute',
   RESOLVE_FAVICON: 'resolve-favicon',
-  CREATE_NEW_TAB: 'create-new-tab',
 
   DB_SETTINGS: 'db-settings',
   DB_HISTORY: 'db-history',

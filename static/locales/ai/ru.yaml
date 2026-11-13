@@ -882,7 +882,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland не сообщает приложениям о сворачивании окна, поэтому этот триггер недоступен. Используйте вариант «Когда окно теряет фокус или пользователь переключается с него», который также срабатывает при сворачивании.
       On Tab Change Mini Player: При переключении вкладок вместо этого показывается мини-плеер. Чтобы использовать это, выберите «Остановить воспроизведение» для параметра «При уходе с видео».
     Scroll Mini Player:
-      Scroll Mini Player: Мини-плеер при прокрутке
       Scroll Player Mode: При прокрутке вниз
       Scroll Player Mode Tooltip: Плеер закрепляется, только пока занимает не больше половины высоты окна. Иначе, например на телефонах в альбомной ориентации или в широких окнах, вместо этого показывается мини-плеер.
       Scroll Player Modes:
@@ -1484,7 +1483,6 @@ Settings:
     Use Shared Tabs: 'Использовать один общий набор вкладок на всех устройствах'
     Shared Tabs Warning: 'Открытые на этом устройстве вкладки станут общим набором. При синхронизации другие устройства заменят свои открытые вкладки этим набором; вкладки с разных устройств не объединяются.'
     Tabs From Other Devices: 'Вкладки с других устройств'
-    Device Tab Session: '{platform} · вкладок: {count}'
     Mobile Device: 'Мобильное устройство'
     Desktop Device: 'Компьютер'
     Open All Tabs: 'Открыть все вкладки'
@@ -1497,7 +1495,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'Откроется браузер, чтобы вы подтвердили удаление у поставщика входа.'
   Proxy Settings:
     IP Block Recovery Script Path: Скрипт восстановления после блокировки IP
-    Select IP Block Recovery Script File: Выбрать файл скрипта восстановления после блокировки IP
     Running IP block recovery script: Выполняется скрипт восстановления после блокировки IP
     IP block recovery script failed: 'Сбой скрипта восстановления после блокировки IP (код выхода: {exitCode})'
     IP block recovery script finished: Скрипт восстановления после блокировки IP завершён
@@ -1606,7 +1603,6 @@ Profile:
   Profile Icon: Значок профиля
   Choose an Emoji: Выбрать эмодзи
   Custom Emoji: Пользовательский эмодзи
-  Emoji: Эмодзи
   Choose Image: Выбрать изображение
   Crop Image: Обрезать изображение
   Zoom: Масштаб
@@ -1795,7 +1791,6 @@ Video:
       Timer ended: Таймер сна сработал
     A-B Repeat:
       A-B Repeat: Повтор A-B
-      On: Вкл.
       Off: Выкл.
       Point A: Точка A
       Point B: Точка B
@@ -2147,7 +2142,6 @@ Tab Organizer:
   Close All: Закрыть все
   Ungroup: Удалить из группы
   Group Name: Название группы
-  Color: Цвет
   No Color: Без цвета
   Create Group: Создать группу
   Expand Group: Развернуть группу
@@ -2462,7 +2456,6 @@ Downloads:
   Remove File Confirmation: Удалить загруженный файл?
   Remove File Warning: Файл «{title}» будет перемещён в корзину устройства.
   File Not Found: Не удалось найти загруженный файл.
-  Download Missing: Загрузка недоступна
   Files Missing: Загруженный файл больше недоступен в файловой системе. | Загруженные файлы больше недоступны в файловой системе. | Загруженные файлы больше недоступны в файловой системе.
   Files Available: 'Доступно загруженных файлов: {available} из {total}.'
   More Files: Ещё {count} файл | Ещё {count} файла | Ещё {count} файлов
@@ -2753,3 +2746,19 @@ YouTube Account:
   Delete Comment Failed: "Не удалось удалить комментарий: {error}"
   Recommendations: "Рекомендации YouTube"
   Recommendations Failed: "Не удалось загрузить ваши рекомендации YouTube."
+App Menu:
+  About App: О программе {appName}
+  Services: Службы
+  Hide App: Скрыть {appName}
+  Hide Others: Скрыть остальные
+  Show All: Показать все
+  Quit App: Завершить {appName}
+  Reopen Closed Window: Снова открыть закрытое окно
+  Paste and Match Style: Вставить с сохранением стиля
+  View: Вид
+  Enter Inspect Element Mode: Режим проверки элементов
+  GPU Internals: Внутренние сведения GPU (chrome://gpu)
+  Navigate: Навигация
+  Next Tab: Следующая вкладка
+  Previous Tab: Предыдущая вкладка
+  Help: Справка

@@ -16,6 +16,22 @@ New Tab: Tab Baru
 Maximize: Maksimalkan
 Restore: Pulihkan
 Close Tab: Tutup Tab
+App Menu:
+  About App: Tentang {appName}
+  Services: Layanan
+  Hide App: Sembunyikan {appName}
+  Hide Others: Sembunyikan Lainnya
+  Show All: Tampilkan Semua
+  Quit App: Keluar dari {appName}
+  Reopen Closed Window: Buka Kembali Jendela yang Ditutup
+  Paste and Match Style: Tempel dan Sesuaikan Gaya
+  View: Tampilan
+  Enter Inspect Element Mode: Masuk ke Mode Periksa Elemen
+  GPU Internals: Info Internal GPU (chrome://gpu)
+  Navigate: Navigasi
+  Next Tab: Tab Berikutnya
+  Previous Tab: Tab Sebelumnya
+  Help: Bantuan
 Close Confirmation:
   Background Sync Warning: Keluar akan menghentikan penyegaran langganan di latar belakang.
   Hide Window: Sembunyikan Jendela
@@ -910,7 +926,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland tidak melaporkan jendela yang diminimalkan kepada aplikasi, jadi pemicu ini tidak tersedia. Gunakan "Saat jendela kehilangan fokus atau ditinggalkan", yang juga mencakup tindakan meminimalkan.
       On Tab Change Mini Player: Berganti tab akan menampilkan pemutar mini sebagai gantinya. Untuk menggunakan ini, atur “Saat meninggalkan video” ke “Hentikan pemutaran”.
     Scroll Mini Player:
-      Scroll Mini Player: Pemutar mini saat menggulir
       Scroll Player Mode: Saat menggulir ke bawah
       Scroll Player Mode Tooltip: Pemutar hanya disematkan selama tingginya paling banyak setengah tinggi jendela. Jika tidak, misalnya di ponsel dalam mode lanskap atau di jendela lebar, pemutar mini ditampilkan sebagai gantinya.
       Scroll Player Modes:
@@ -1512,7 +1527,6 @@ Settings:
     Use Shared Tabs: 'Gunakan satu kumpulan tab bersama di semua perangkat'
     Shared Tabs Warning: 'Tab yang terbuka di perangkat ini menjadi kumpulan bersama. Saat perangkat lain disinkronkan, tab mereka yang terbuka diganti dengan kumpulan ini; tab dari perangkat berbeda tidak digabungkan.'
     Tabs From Other Devices: 'Tab dari perangkat lain'
-    Device Tab Session: '{platform} · {count} tab'
     Mobile Device: 'Seluler'
     Desktop Device: 'Desktop'
     Open All Tabs: 'Buka semua tab'
@@ -1525,7 +1539,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'Peramban Anda akan terbuka agar Anda dapat mengonfirmasi penghapusan dengan penyedia masuk Anda.'
   Proxy Settings:
     IP Block Recovery Script Path: Skrip pemulihan blokir IP
-    Select IP Block Recovery Script File: Pilih Berkas Skrip Pemulihan Blokir IP
     Running IP block recovery script: Menjalankan skrip pemulihan blokir IP
     IP block recovery script failed: 'Skrip pemulihan blokir IP gagal (kode keluar: {exitCode})'
     IP block recovery script finished: Skrip pemulihan blokir IP selesai
@@ -1637,7 +1650,6 @@ Profile:
   Profile Icon: Ikon Profil
   Choose an Emoji: Pilih Emoji
   Custom Emoji: Emoji Khusus
-  Emoji: Emoji
   Choose Image: Pilih Gambar
   Crop Image: Pangkas Gambar
   Zoom: Zoom
@@ -1834,7 +1846,6 @@ Video:
       Timer ended: Pewaktu tidur berakhir
     A-B Repeat:
       A-B Repeat: Pengulangan A-B
-      'On': Aktif
       'Off': Nonaktif
       Point A: Titik A
       Point B: Titik B
@@ -2190,7 +2201,6 @@ Tab Organizer:
   Close All: Tutup Semua
   Ungroup: Keluarkan dari grup
   Group Name: Nama grup
-  Color: Warna
   No Color: Tanpa warna
   Create Group: Buat Grup
   Expand Group: Bentangkan grup
@@ -2507,12 +2517,10 @@ Downloads:
   Remove File Confirmation: Hapus berkas yang diunduh?
   Remove File Warning: Tindakan ini akan memindahkan "{title}" ke tempat sampah perangkat.
   File Not Found: Berkas yang diunduh tidak dapat ditemukan.
-  Download Missing: Unduhan tidak tersedia
   Files Missing: Berkas yang diunduh tidak lagi tersedia di sistem berkas.
   Files Available: '{available} dari {total} berkas unduhan tersedia.'
   More Files: '{count} berkas lainnya'
   Template Used: 'Templat: {name}'
-  Download Type: Jenis Unduhan
   Template: Templat
   Unsaved: Belum disimpan
   Media Type: Jenis Media
@@ -2540,7 +2548,6 @@ Downloads:
   Embed Cover Art: Sematkan gambar mini sebagai sampul
   Embed Metadata: Sematkan judul, pembuat, deskripsi, dan bab
   Additional yt-dlp Arguments: Argumen Tambahan yt-dlp
-  Custom yt-dlp Arguments: Argumen Khusus yt-dlp
   Template Name: Nama Templat
   Save Template: Simpan Templat
   Delete Template: Hapus Templat

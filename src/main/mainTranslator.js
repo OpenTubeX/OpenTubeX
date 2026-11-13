@@ -7,6 +7,7 @@ import { load as loadYaml } from 'js-yaml'
 
 import * as baseHandlers from '../datastores/handlers/base'
 import { composeLocaleMessages } from '../localeComposition'
+import { resolveSystemLocale } from '../systemLocale'
 import { expandMultipleOnlyPluralMessages, selectPluralForm } from '../renderer/i18n/plurals'
 
 const brotliDecompressAsync = promisify(brotliDecompress)
@@ -57,9 +58,10 @@ export async function createMainTranslator() {
   const useAITranslationCompletions = storedAITranslationPreference == null
     ? true
     : storedAITranslationPreference === true
+  // Match the renderer, which resolves "system" from the same system locale.
   const currentLocale = typeof storedLocale === 'string' && storedLocale !== 'system'
     ? storedLocale
-    : app.getLocale().replace('_', '-')
+    : resolveSystemLocale(app.getSystemLocale()) ?? fallbackLocale
 
   const baseLocale = currentLocale.split('-')[0]
   const candidateLocales = [...new Set([currentLocale, baseLocale, fallbackLocale].filter(Boolean))]
