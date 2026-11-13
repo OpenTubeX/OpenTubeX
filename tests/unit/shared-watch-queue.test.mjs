@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdtemp, rm, readFile } from 'node:fs/promises'
+import { mkdtemp, readdir, rm, readFile, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
@@ -231,6 +231,22 @@ test('the desktop queue persists to disk before replying and restores download r
     assert.deepEqual(restored.items.map(({ queueItemId, ...item }) => item), [video])
     await update({ type: 'clearWatchQueue' })
     assert.deepEqual((await createFileWatchQueue(filename)({})).items, [])
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+test('a corrupt saved queue is kept as a backup and the queue works again', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'opentubex-queue-test-'))
+  try {
+    const filename = join(directory, 'watch-queue.json')
+    await writeFile(filename, '[{"videoId": "truncated"')
+    const update = createFileWatchQueue(filename)
+    await update({ type: 'addVideoToWatchQueue', payload: { video: { videoId: 'next' } } })
+
+    assert.deepEqual(JSON.parse(await readFile(filename, 'utf8')).map(item => item.videoId), ['next'])
+    const [backup] = (await readdir(directory)).filter(name => name.startsWith('watch-queue.json.corrupt-'))
+    assert.equal(await readFile(join(directory, backup), 'utf8'), '[{"videoId": "truncated"')
   } finally {
     await rm(directory, { recursive: true, force: true })
   }
