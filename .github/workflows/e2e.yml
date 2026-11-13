@@ -305,7 +305,7 @@ jobs:
           e2e/results/
         retention-days: 14
 
-    # Read by the Flaky E2E Tests workflow.
+    # Read by the Flaky Tests workflow.
     - name: Upload flaky tests
       if: ${{ !cancelled() }}
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
