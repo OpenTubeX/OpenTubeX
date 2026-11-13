@@ -84,7 +84,7 @@ export function readFlakyTests(directory, kind = 'e2e') {
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const [kind, artifactsDirectory, bodyFile, outputFile] = process.argv.slice(2)
-  if (!(kind in KINDS)) throw new Error(`Unknown kind of tests: ${kind}`)
+  if (!Object.hasOwn(KINDS, kind)) throw new Error(`Unknown kind of tests: ${kind}`)
   const flakyTests = readFlakyTests(artifactsDirectory, kind)
   if (flakyTests.length > 0) {
     const body = existsSync(bodyFile) ? readFileSync(bodyFile, 'utf8') : ''
