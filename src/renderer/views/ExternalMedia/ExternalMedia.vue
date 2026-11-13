@@ -177,7 +177,7 @@
                   >{{ badge }}</span>
                 </div>
                 <FtInlineMetadata
-                  class="externalMediaMetrics"
+                  class="externalMediaMetrics externalMediaMainMetrics"
                   icon-labels
                 >
                   <time

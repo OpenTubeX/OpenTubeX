@@ -1758,7 +1758,7 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await expect(page.locator(`${activeTab} .externalMediaDescription`)).toContainText('Creative Commons')
   await expect(page.locator(`${activeTab} .externalMediaDescription`)).toContainText('example')
   await expect(page.locator(`${activeTab} .externalMediaDescription`)).toBeVisible()
-  const metadata = page.locator(`${activeTab} .externalMediaHeader .externalMediaMetrics`).first()
+  const metadata = page.locator(`${activeTab} .externalMediaMainMetrics`)
   await expect(metadata.locator(':scope > *')).toHaveText([
     'Jul 16, 2019',
     '7 years ago',
