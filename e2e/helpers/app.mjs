@@ -401,7 +401,11 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
       path.join(appRoot, 'dist-e2e', 'main.js'),
       ...extraArgs,
       '--ozone-platform=x11',
-      '--mute-audio'
+      '--mute-audio',
+      // Xvfb has no hardware GL, so the app renders in software either way.
+      // Trying hardware GL first can hang the GPU process on CI, and then the
+      // window never paints. This also keeps geometry independent of the host GPU.
+      '--disable-gpu'
     ],
     cwd: appRoot,
     env
