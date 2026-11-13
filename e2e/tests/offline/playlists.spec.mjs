@@ -815,6 +815,13 @@ test.describe('playlist duplicate cleanup', () => {
     // The removal deletes the entries rather than saving the rest, so only they are gone
     await expect.poll(() => readDatastore(app.userDataDir, 'playlists').trim().split('\n').map(line => JSON.parse(line))
       .find(playlist => playlist._id === 'duplicates').videos.map(video => video.playlistItemId)).toEqual(['copy-1', 'once-1'])
+
+    // The option stays available without duplicates, so it can be found before it is needed.
+    // The store commits the removal after the datastore write, so wait for it too.
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getPlaylist('duplicates').videos.length)).toBe(2)
+    await (await openPlaylistMenuItem(page, 'Remove Duplicate Videos')).click()
+    await expect(page.locator('.toast').filter({ hasText: 'There were no videos to remove.' })).toBeVisible()
+    await expect(dialog).toHaveCount(0)
   })
 })
 
