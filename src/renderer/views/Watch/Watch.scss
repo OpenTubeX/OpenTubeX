@@ -348,8 +348,15 @@
     // Its scroll timeline is only active while the message overflows.
     .shortsSwipeViewport > .videoPlayer .errorContainer {
       animation: shorts-error-overflow linear both;
-      animation-timeline: scroll(self block);
       touch-action: if(style(--shorts-error-overflow: 1): auto; else: pan-x pinch-zoom);
+    }
+
+    // A separate block stops the CSS minifier from folding the timeline into the
+    // `animation` shorthand, which browsers reject because the timeline is reset-only there.
+    @supports (animation-timeline: scroll()) {
+      .shortsSwipeViewport > .videoPlayer .errorContainer {
+        animation-timeline: scroll(self block);
+      }
     }
 
     @keyframes shorts-error-overflow {
