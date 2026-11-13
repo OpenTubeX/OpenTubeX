@@ -140,8 +140,9 @@ async function selectProfile(profile) {
   if (profile === selectedProfile.value || switching.value) return
   switching.value = true
   try {
-    await selectYouTubeProfile(profile.pageId)
-    showToast({ message: t('Settings.YouTube Account Settings.Using Channel', { name: profile.name }), icon: ['fas', 'circle-user'] })
+    if (await selectYouTubeProfile(profile.pageId)) {
+      showToast({ message: t('Settings.YouTube Account Settings.Using Channel', { name: profile.name }), icon: ['fas', 'circle-user'] })
+    }
   } catch (error) {
     console.error(error)
     showToast({

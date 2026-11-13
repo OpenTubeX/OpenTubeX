@@ -1048,10 +1048,16 @@ test.describe('manual comment loading', () => {
         pageId: null,
         channelId
       }), authorId)
-      const expectScrollInRange = () => expect.poll(() => scroller.evaluate(element => (
-        element.scrollTop + element.clientHeight <= element.scrollHeight + 1 &&
-        element.scrollTop <= element.scrollHeight - element.clientHeight + 1
-      ))).toBe(true)
+      const expectScrollInRange = () => expect.poll(() => scroller.evaluate(element => {
+        // No empty space below the last rendered content, unless it all fits.
+        const contentEnd = Math.max(...[...element.children]
+          .filter(child => !child.classList.contains('os-scrollbar'))
+          .map(child => child.getBoundingClientRect().bottom + (Number.parseFloat(getComputedStyle(child).marginBlockEnd) || 0))) +
+          (Number.parseFloat(getComputedStyle(element).paddingBottom) || 0)
+        return element.scrollTop + element.clientHeight <= element.scrollHeight + 1 &&
+          element.scrollTop <= element.scrollHeight - element.clientHeight + 1 &&
+          (element.scrollTop <= 1 || contentEnd >= element.getBoundingClientRect().bottom - 1)
+      })).toBe(true)
 
       // So do shortening and closing a long reply at the bottom.
       const longReply = Array.from({ length: 30 }, (_, line) => `Line ${line + 1}`).join('\n')

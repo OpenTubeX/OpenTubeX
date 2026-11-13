@@ -464,6 +464,8 @@ export async function refreshYouTubeProfiles() {
 /**
  * Uses YouTube as another channel of the signed-in Google account.
  * @param {string | null} pageId
+ * @returns {Promise<boolean>} false when signing out or another channel switch, for example in
+ *   another window, finished first
  */
 export async function selectYouTubeProfile(pageId) {
   const credentials = await getCredentials()
@@ -473,10 +475,11 @@ export async function selectYouTubeProfile(pageId) {
 
   const channelId = await resolveChannelId(credentials, profile)
   const latest = getAccount()
-  if (latest?.credentials.refresh_token !== credentials.refresh_token) return
+  if (latest?.credentials.refresh_token !== credentials.refresh_token || latest.pageId !== account.pageId) return false
   if (!await store.dispatch('updateYouTubeAccount', { ...latest, pageId, channelId })) {
     throw new Error('Could not save the YouTube channel on this device')
   }
+  return true
 }
 
 /**
