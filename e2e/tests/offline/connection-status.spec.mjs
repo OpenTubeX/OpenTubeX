@@ -299,9 +299,12 @@ for (const surface of ['sidebar', 'settings']) {
 }
 
 test('internet probe works with browser web security enabled', async ({ app }) => {
+  // The app probes the default URL on its own. Playwright may not know the new
+  // window's frame yet when its request arrives, so tell them apart by URL.
+  const probeUrl = `${INTERNET_CHECK_URL}?web-security`
   let probeRequests = 0
-  await app.electronApp.context().route(INTERNET_CHECK_URL, route => {
-    if (route.request().frame().url() === 'about:blank') probeRequests++
+  await app.electronApp.context().route(url => url.href === probeUrl, route => {
+    probeRequests++
     return route.fulfill({ status: 204 })
   })
   const reachable = await app.electronApp.evaluate(async ({ BrowserWindow }, { probeSource, url }) => {
@@ -311,13 +314,12 @@ test('internet probe works with browser web security enabled', async ({ app }) =
     try {
       await window.loadURL('about:blank')
       return await window.webContents.executeJavaScript(`
-        const INTERNET_CHECK_URL = ${JSON.stringify(url)};
-        (${probeSource})(fetch)(new AbortController().signal)
+        (${probeSource})(fetch, ${JSON.stringify(url)})(new AbortController().signal)
       `)
     } finally {
       window.destroy()
     }
-  }, { probeSource: createInternetProbe.toString(), url: INTERNET_CHECK_URL })
+  }, { probeSource: createInternetProbe.toString(), url: probeUrl })
   expect(reachable).toBe(true)
   expect(probeRequests).toBe(1)
 })
