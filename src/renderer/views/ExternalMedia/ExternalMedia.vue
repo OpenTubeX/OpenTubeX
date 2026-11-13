@@ -549,6 +549,7 @@ const startTime = ref(null)
 let startTimestamp = null
 let lastPositionSave = 0
 let lastSavedPosition = 0
+let lastPlaybackPosition = 0
 let hasBeenPresented = isTabPresented?.value ?? true
 watch(() => isTabPresented?.value, presented => {
   if (presented) {
@@ -1250,7 +1251,13 @@ function updateCurrentTime(seconds) {
   currentTime.value = seconds
   syncCompanionAudio(seconds)
   watchTimeTracker.track()
-  markAsWatchedIfFinished(getPositionMedia()?.currentTime ?? seconds)
+  const media = getPositionMedia()
+  const position = media?.currentTime ?? seconds
+  // A looping soundtrack, as on Coub, starts over without ending.
+  const duration = getMediaDuration()
+  const looped = media?.loop === true && position < lastPlaybackPosition && lastPlaybackPosition >= duration - 2
+  lastPlaybackPosition = position
+  markAsWatchedIfFinished(looped ? duration : position, looped)
   if (store.getters.getWatchedProgressSavingMode === 'auto' && Date.now() - lastPositionSave >= 2000) savePosition()
 }
 
@@ -1343,6 +1350,7 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
   startTimestamp = null
   lastPositionSave = 0
   lastSavedPosition = 0
+  lastPlaybackPosition = 0
   hasBeenPresented = isTabPresented?.value ?? true
   historyAdded = false
   watchedMarkPending = false

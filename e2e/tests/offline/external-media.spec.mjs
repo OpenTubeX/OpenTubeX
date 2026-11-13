@@ -3047,6 +3047,7 @@ test('plays both streams when an external clip has separate audio and codec-free
   await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
+    await store.dispatch('updateWatchedPercentageThreshold', 100)
   })
 
   await page.locator(sel.searchInput).fill('https://coub.com/view/example')
@@ -3104,6 +3105,8 @@ test('plays both streams when an external clip has separate audio and codec-free
   await expect(video).toHaveJSProperty('loop', true)
   await expect.poll(() => video.evaluate(element => !element.paused)).toBe(true)
   expect(await playsAudioBetween(1, 3)).toBe(true)
+  // The looping soundtrack never ends, so starting over counts as a full play.
+  await expect.poll(async () => (await savedExternalEntry(page, 'https://coub.com/view/example'))?.isWatched, { timeout: 20000 }).toBe(true)
   const audioBeforeSeek = await video.evaluate((element, companion) => {
     element.currentTime = 0.5
     return companion.currentTime
