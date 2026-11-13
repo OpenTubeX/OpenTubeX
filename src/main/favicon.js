@@ -1,4 +1,5 @@
 import { isIP } from 'node:net'
+import { Readable } from 'node:stream'
 import { decodeHTMLAttribute } from 'entities'
 
 import { getFaviconUrl } from '../searchEngines.js'
@@ -99,15 +100,15 @@ async function readAtMost(response, limit) {
 /**
  * @param {string} hostname
  * @param {(hostname: string) => Promise<string[]>} resolveAddresses
- * @returns {Promise<boolean>} true for hosts that cannot be resolved too
+ * @returns {Promise<boolean | null>} null for hosts that cannot be resolved
  */
 async function isNonPublicHost(hostname, resolveAddresses) {
   const host = hostname.replaceAll(/^\[|\]$/g, '')
   try {
     const addresses = isIP(host) ? [host] : await resolveAddresses(host)
-    return addresses.length === 0 || addresses.some(isNonPublicNetworkAddress)
+    return addresses.length === 0 ? null : addresses.some(isNonPublicNetworkAddress)
   } catch {
-    return true
+    return null
   }
 }
 
@@ -118,11 +119,67 @@ async function isNonPublicHost(hostname, resolveAddresses) {
  * @param {string} pageUrl
  * @param {(hostname: string) => Promise<string[]>} resolveAddresses
  */
-async function isAllowedIconUrl(iconUrl, pageUrl, resolveAddresses) {
+export async function isAllowedIconUrl(iconUrl, pageUrl, resolveAddresses) {
   const iconHost = new URL(iconUrl).hostname
   const pageHost = new URL(pageUrl).hostname
   if (iconHost === pageHost) return true
-  return !await isNonPublicHost(iconHost, resolveAddresses) || await isNonPublicHost(pageHost, resolveAddresses)
+  // A failed lookup must not grant the exception
+  return await isNonPublicHost(iconHost, resolveAddresses) === false || await isNonPublicHost(pageHost, resolveAddresses) === true
+}
+
+const MAX_ICON_REDIRECTS = 5
+
+/**
+ * Requests `url` once without following a redirect.
+ * @param {(options: object) => import('electron').ClientRequest} request Electron's `net.request`
+ * @param {string} url
+ * @param {{ headers?: Record<string, string>, signal?: AbortSignal }} init
+ * @returns {Promise<{ response: Response } | { redirectUrl: string }>}
+ */
+function requestOnce(request, url, { headers = {}, signal }) {
+  return new Promise((resolve, reject) => {
+    const clientRequest = request({ url, redirect: 'manual' })
+    for (const [name, value] of Object.entries(headers)) clientRequest.setHeader(name, value)
+    const abort = () => {
+      clientRequest.abort()
+      reject(signal?.reason)
+    }
+    if (signal?.aborted) return abort()
+    signal?.addEventListener('abort', abort, { once: true })
+    clientRequest.on('redirect', (_statusCode, _method, redirectUrl) => {
+      clientRequest.abort()
+      resolve({ redirectUrl })
+    })
+    clientRequest.on('response', message => {
+      const responseHeaders = new Headers()
+      for (const [name, value] of Object.entries(message.headers)) {
+        for (const item of [value].flat()) responseHeaders.append(name, item)
+      }
+      const body = [204, 205, 304].includes(message.statusCode) ? null : Readable.toWeb(message)
+      resolve({ response: new Response(body, { status: message.statusCode, headers: responseHeaders }) })
+    })
+    clientRequest.on('error', reject)
+    clientRequest.end()
+  })
+}
+
+/**
+ * Fetches with Electron's `net.request`, which unlike `net.fetch` reports a
+ * redirect without following it, so each target is checked before it is requested.
+ * @param {(options: object) => import('electron').ClientRequest} request Electron's `net.request`
+ * @param {string} url
+ * @param {{ headers?: Record<string, string>, signal?: AbortSignal }} init
+ * @param {(url: string) => Promise<boolean>} isAllowed
+ * @returns {Promise<Response>}
+ */
+export async function fetchWithCheckedRedirects(request, url, init, isAllowed) {
+  for (let redirects = 0; redirects <= MAX_ICON_REDIRECTS; redirects++) {
+    const result = await requestOnce(request, url, init)
+    if ('response' in result) return result.response
+    if (!await isAllowed(result.redirectUrl)) throw new Error('Refused an icon redirect to the local network')
+    url = result.redirectUrl
+  }
+  throw new Error('Too many icon redirects')
 }
 
 /**

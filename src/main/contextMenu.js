@@ -10,7 +10,7 @@ import {
   parseSearchEngines
 } from '../searchEngines'
 import { releaseForegroundLock } from './backgroundExternalLink'
-import { fetchFaviconDataUrl, resolveFaviconUrl } from './favicon'
+import { fetchFaviconDataUrl, fetchWithCheckedRedirects, isAllowedIconUrl, resolveFaviconUrl } from './favicon'
 import { handleTrusted, isTrustedSender } from './ipc'
 import {
   isSubscriptionAutoRefreshInProgress,
@@ -264,14 +264,16 @@ export function setupContextMenu(contextMenuOptions, { createWindow, confirmClos
 
     const origin = new URL(fallback).origin
     if (!faviconPromises.has(origin)) {
+      const resolveAddresses = async hostname => (await session.defaultSession.resolveHost(hostname)).endpoints.map(({ address }) => address)
       const promise = process.env.OPENTUBEX_E2E_USER_DATA_DIR
         ? Promise.resolve(fallback)
-        : resolveFaviconUrl(
-            searchUrl,
-            (url, options) => net.fetch(url, options),
-            async hostname => (await session.defaultSession.resolveHost(hostname)).endpoints.map(({ address }) => address)
-          )
-            .then(icon => fetchFaviconDataUrl(icon, (url, options) => net.fetch(url, options)))
+        : resolveFaviconUrl(searchUrl, (url, options) => net.fetch(url, options), resolveAddresses)
+            .then(icon => fetchFaviconDataUrl(icon, (url, options) => fetchWithCheckedRedirects(
+              requestOptions => net.request(requestOptions),
+              url,
+              options,
+              target => isAllowedIconUrl(target, origin, resolveAddresses)
+            )))
       faviconPromises.set(origin, promise)
     }
 
