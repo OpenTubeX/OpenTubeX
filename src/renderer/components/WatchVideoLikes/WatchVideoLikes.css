@@ -3,8 +3,10 @@
   display: flex;
   flex-direction: column;
   margin-inline-start: auto;
-  margin-block-start: 4px;
   max-inline-size: 210px;
+
+  /* Large counts widen the section (and the bar) instead of overflowing it. */
+  min-inline-size: min-content;
   text-align: end;
 }
 
@@ -50,6 +52,10 @@
   .likeSection {
     margin-inline-start: 0;
     text-align: start;
+  }
+
+  .likeCounts {
+    justify-content: flex-start;
   }
 }
 

@@ -1,106 +1,108 @@
 <template>
   <FtCard class="watchVideoInfo">
-    <div>
-      <!-- rendered as HTML so that the hashtags and handles in the title are clickable -->
-      <h1
-        v-safer-html="titleHtml"
-        class="videoTitle"
-        dir="auto"
-      />
-      <div
-        v-if="isUnlisted || isAgeRestricted || hasAiGeneratedContent || sponsorBlockFullVideoCategory"
-        class="videoBadges"
-      >
-        <div
-          v-if="isUnlisted"
-          class="videoBadge unlistedBadge"
-        >
-          <FtIcon
-            :icon="['fas', 'eye-slash']"
-            aria-hidden="true"
+    <div class="videoHeader">
+      <div class="videoHeaderText">
+        <div class="videoHeading">
+          <!-- rendered as HTML so that the hashtags and handles in the title are clickable -->
+          <h1
+            v-safer-html="titleHtml"
+            class="videoTitle"
+            dir="auto"
           />
-          {{ t('Video.Unlisted') }}
+          <div
+            v-if="isUnlisted || isAgeRestricted || hasAiGeneratedContent || sponsorBlockFullVideoCategory"
+            class="videoBadges"
+          >
+            <div
+              v-if="isUnlisted"
+              class="videoBadge unlistedBadge"
+            >
+              <FtIcon
+                :icon="['fas', 'eye-slash']"
+                aria-hidden="true"
+              />
+              {{ t('Video.Unlisted') }}
+            </div>
+            <div
+              v-if="isAgeRestricted"
+              class="videoBadge ageRestrictedBadge"
+            >
+              <FtIcon
+                :icon="['fas', 'user-lock']"
+                aria-hidden="true"
+              />
+              {{ t('Video.Age Restricted Badge') }}
+            </div>
+            <div
+              v-if="hasAiGeneratedContent"
+              :aria-label="t('Video.AI-generated content')"
+              :title="t('Video.AI-generated content')"
+              class="videoBadge"
+            >
+              <FtIcon :icon="['fas', 'info-circle']" />
+              {{ t('Video.AI') }}
+            </div>
+            <div
+              v-if="sponsorBlockFullVideoCategory"
+              class="videoBadge"
+            >
+              <FtIcon :icon="['fas', 'shield-halved']" />
+              {{ t('Video.Player.SponsorBlock.FullVideoLabel', {
+                segmentCategory: translateSponsorBlockCategory(sponsorBlockFullVideoCategory)
+              }) }}
+            </div>
+          </div>
         </div>
-        <div
-          v-if="isAgeRestricted"
-          class="videoBadge ageRestrictedBadge"
+        <FtInlineMetadata
+          class="datePublishedAndViewCount"
+          icon-labels
         >
-          <FtIcon
-            :icon="['fas', 'user-lock']"
+          <span
+            v-if="isPremiereInProgress"
+            class="publishedDate"
+          ><FtIcon
+            :icon="['fas', 'tower-broadcast']"
+            class="statIcon"
             aria-hidden="true"
-          />
-          {{ t('Video.Age Restricted Badge') }}
-        </div>
-        <div
-          v-if="hasAiGeneratedContent"
-          :aria-label="t('Video.AI-generated content')"
-          :title="t('Video.AI-generated content')"
-          class="videoBadge"
-        >
-          <FtIcon :icon="['fas', 'info-circle']" />
-          {{ t('Video.AI') }}
-        </div>
-        <div
-          v-if="sponsorBlockFullVideoCategory"
-          class="videoBadge"
-        >
-          <FtIcon :icon="['fas', 'shield-halved']" />
-          {{ t('Video.Player.SponsorBlock.FullVideoLabel', {
-            segmentCategory: translateSponsorBlockCategory(sponsorBlockFullVideoCategory)
-          }) }}
-        </div>
+          />{{ t('Video.Premiere started', { timeAgo: publishedTimeAgo }) }}</span>
+          <span
+            v-else-if="publishedDateText"
+            class="publishedDate"
+            :title="publishedDateText"
+          ><FtIcon
+            :icon="['fas', 'calendar-days']"
+            class="statIcon"
+            role="img"
+            :aria-label="publishedString"
+          />{{ dateString }}</span>
+          <span
+            v-if="publishedTimeAgo && !isPremiereInProgress"
+            class="publishedTimeAgo"
+          ><FtIcon
+            :icon="['fas', 'clock']"
+            class="statIcon"
+            aria-hidden="true"
+          />{{ publishedTimeAgo }}</span>
+          <span
+            v-if="parsedViewCount"
+            class="videoViews"
+          ><FtIcon
+            :icon="['fas', 'eye']"
+            class="statIcon"
+            aria-hidden="true"
+          />{{ parsedViewCount }}</span>
+          <bdi
+            v-if="category"
+            class="videoCategory"
+            :title="`${t('Description.Video Category')} ${category}`"
+          ><FtIcon
+            :icon="['fas', 'icons']"
+            class="statIcon"
+            role="img"
+            :aria-label="t('Description.Video Category')"
+          />{{ category }}</bdi>
+        </FtInlineMetadata>
       </div>
-    </div>
-    <div class="videoMetrics">
-      <FtInlineMetadata
-        class="datePublishedAndViewCount"
-        icon-labels
-      >
-        <span
-          v-if="isPremiereInProgress"
-          class="publishedDate"
-        ><FtIcon
-          :icon="['fas', 'tower-broadcast']"
-          class="statIcon"
-          aria-hidden="true"
-        />{{ t('Video.Premiere started', { timeAgo: publishedTimeAgo }) }}</span>
-        <span
-          v-else-if="publishedDateText"
-          class="publishedDate"
-          :title="publishedDateText"
-        ><FtIcon
-          :icon="['fas', 'calendar-days']"
-          class="statIcon"
-          role="img"
-          :aria-label="publishedString"
-        />{{ dateString }}</span>
-        <span
-          v-if="publishedTimeAgo && !isPremiereInProgress"
-          class="publishedTimeAgo"
-        ><FtIcon
-          :icon="['fas', 'clock']"
-          class="statIcon"
-          aria-hidden="true"
-        />{{ publishedTimeAgo }}</span>
-        <span
-          v-if="parsedViewCount"
-          class="videoViews"
-        ><FtIcon
-          :icon="['fas', 'eye']"
-          class="statIcon"
-          aria-hidden="true"
-        />{{ parsedViewCount }}</span>
-        <bdi
-          v-if="category"
-          class="videoCategory"
-          :title="`${t('Description.Video Category')} ${category}`"
-        ><FtIcon
-          :icon="['fas', 'icons']"
-          class="statIcon"
-          role="img"
-          :aria-label="t('Description.Video Category')"
-        />{{ category }}</bdi>
-      </FtInlineMetadata>
       <WatchVideoLikes
         :like-count="likeCount"
         :dislike-count="useReturnYoutubeDislikes ? dislikeCount : null"
