@@ -40,7 +40,7 @@
             {{ getPlatform(channel.platform)?.name }}
           </span>
           <span
-            v-if="channel.followerCount != null"
+            v-if="channel.followerCount != null && !hideChannelSubscriptions"
             class="subscriberCount hasMetadataSeparator"
           >
             {{ t('Platforms.Follower Count', { count: formatSubscriberCount(channel.followerCount) }, channel.followerCount) }}
@@ -63,6 +63,7 @@ import { FtIcon } from '@opentubex/icons'
 import FtRetryImage from '../FtRetryImage.vue'
 import PlatformFollowButton from '../PlatformFollowButton/PlatformFollowButton.vue'
 
+import store from '../../store/index'
 import { formatSubscriberCount } from '../../helpers/utils'
 import { getPlatform, getPlatformChannelRoute, PLATFORM_ICONS } from '../../../platforms/index'
 
@@ -81,6 +82,7 @@ const props = defineProps({
 const { t } = useI18n()
 
 const route = computed(() => getPlatformChannelRoute(props.channel.platform, props.channel.id))
+const hideChannelSubscriptions = computed(() => store.getters.getHideChannelSubscriptions)
 </script>
 
 <style scoped lang="scss" src="../FtListChannel/FtListChannel.scss" />
