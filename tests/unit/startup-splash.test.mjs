@@ -35,6 +35,8 @@ for (const hideSplash of [true, false]) {
     let removed = false
     let inert = true
     let presented = false
+    const rootAttributes = new Set()
+    let parsed = () => {}
     vm.runInNewContext(script, {
       window: {
         ftElectron: {
@@ -43,13 +45,17 @@ for (const hideSplash of [true, false]) {
         }
       },
       document: {
-        documentElement: {},
+        documentElement: { setAttribute: name => rootAttributes.add(name) },
+        addEventListener: (type, listener) => { if (type === 'readystatechange') parsed = listener },
         getElementById: id => id === 'startup-splash'
           ? { remove: () => { removed = true } }
           : { removeAttribute: name => { if (name === 'inert') inert = false } }
       },
       requestAnimationFrame: callback => callback()
     })
+    // The script runs in <head>, before the splash has been parsed.
+    assert.equal(rootAttributes.has('data-hide-startup-splash'), hideSplash === true)
+    parsed()
     assert.equal(removed, hideSplash === true)
     assert.equal(inert, hideSplash !== true)
     assert.equal(presented, true, 'the native window still becomes visible')
@@ -62,6 +68,7 @@ test('mobile startup uses cached appearance and can hide the splash before loadi
     const properties = new Map()
     let removed = false
     let inert = true
+    let parsed = () => {}
     vm.runInNewContext(script, {
       window: { matchMedia: () => ({ matches: false }) },
       localStorage: {
@@ -75,13 +82,18 @@ test('mobile startup uses cached appearance and can hide the splash before loadi
         }
       },
       document: {
-        documentElement: { style: { setProperty: (name, value) => properties.set(name, value) } },
+        documentElement: {
+          style: { setProperty: (name, value) => properties.set(name, value) },
+          setAttribute: () => {}
+        },
+        addEventListener: (type, listener) => { if (type === 'readystatechange') parsed = listener },
         getElementById: id => id === 'startup-splash'
           ? { remove: () => { removed = true } }
           : { removeAttribute: () => { inert = false } }
       },
       requestAnimationFrame: callback => callback()
     })
+    parsed()
     assert.equal(properties.get('--startup-background'), '#f1f1f1')
     assert.equal(properties.get('--startup-foreground'), '#212121')
     assert.equal(removed, hideSplash)
@@ -96,7 +108,7 @@ test('mobile startup survives unavailable or corrupt appearance storage', async 
     assert.doesNotThrow(() => vm.runInNewContext(script, {
       window: {},
       localStorage: { getItem },
-      document: { documentElement: {}, getElementById: () => ({ setAttribute: () => {} }) },
+      document: { documentElement: { setAttribute: () => {} } },
       requestAnimationFrame: callback => { painted = true; callback() }
     }))
     assert.ok(painted)

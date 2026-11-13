@@ -399,6 +399,20 @@
     inline-size: 100%;
   }
 
+  /* Mark all as seen shares the title's line while both fit onto it */
+  .subscriptionsHeader.markAllSeenBesideTitle .pageTitle {
+    flex: 1 1 0;
+    min-inline-size: 0;
+
+    /* Wrapping would shrink the width measured to decide whether both fit */
+    white-space: nowrap;
+  }
+
+  .titleActions {
+    display: flex;
+    align-self: center;
+  }
+
   .tabsRow {
     margin-block: 0;
   }
@@ -510,7 +524,8 @@
 
   /* Matches the view toggle and sort select, instead of FtButton's 48px phone
      height. Outranks FtButton's phone rules. */
-  .headerActions > .markAllSeenButton.markAllSeenButton {
+  .headerActions > .markAllSeenButton.markAllSeenButton,
+  .titleActions > .markAllSeenButton.markAllSeenButton {
     --button-height: 36px;
 
     min-block-size: 36px;

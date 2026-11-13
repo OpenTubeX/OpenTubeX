@@ -13,7 +13,7 @@
 .likeBar {
   border-radius: var(--shape-corner-extra-small);
   block-size: 8px;
-  margin-block-end: 4px;
+  margin-block-end: 8px;
 }
 
 /* Likes and dislikes read as one connected pair of tonal pills. */

@@ -3,17 +3,19 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import { load } from 'js-yaml'
 import { createSettingsSearchIndex } from '../../src/renderer/helpers/settingsSearch.js'
+import { isPlayerRoutePath } from '../../src/renderer/tabs/playerDockDestination.js'
 
 const messages = load(await readFile(new URL('../../static/locales/en-US.yaml', import.meta.url), 'utf8'))
 const source = (await readFile(new URL('../../src/renderer/helpers/commandPaletteRegistry.js', import.meta.url), 'utf8'))
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
   .replace('export function', 'function')
 const shortcuts = { APP: { GENERAL: {} }, VIDEO_PLAYER: { GENERAL: {}, PLAYBACK: {} } }
-const createRegistry = new Function('createSettingsSearchIndex', 'getConfiguredKeyboardShortcuts',
+const loadRegistry = isLiteBuild => new Function('createSettingsSearchIndex', 'getConfiguredKeyboardShortcuts',
   'DefaultKeyboardShortcuts', 'KeyboardShortcuts', 'shouldShowKeyboardShortcutCommand',
-  'isTrendingAvailable', 'isMostPopularAvailable', 'isLiteBuild', `${source}\nreturn createCommandPaletteRegistry`)(
-  createSettingsSearchIndex, () => shortcuts, shortcuts, shortcuts, () => false, () => false, () => false, false
+  'isTrendingAvailable', 'isMostPopularAvailable', 'isLiteBuild', 'isPlayerRoutePath', `${source}\nreturn createCommandPaletteRegistry`)(
+  createSettingsSearchIndex, () => shortcuts, shortcuts, shortcuts, () => false, () => false, () => false, isLiteBuild, isPlayerRoutePath
 )
+const createRegistry = loadRegistry(false)
 
 test('opening the ordinary command registry does not read the video library', () => {
   const getters = {
@@ -68,11 +70,7 @@ test('download settings commands respect Android availability', () => {
 })
 
 test('lite Android builds omit download commands', () => {
-  const createLiteRegistry = new Function('createSettingsSearchIndex', 'getConfiguredKeyboardShortcuts',
-    'DefaultKeyboardShortcuts', 'KeyboardShortcuts', 'shouldShowKeyboardShortcutCommand',
-    'isTrendingAvailable', 'isMostPopularAvailable', 'isLiteBuild', `${source}\nreturn createCommandPaletteRegistry`)(
-    createSettingsSearchIndex, () => shortcuts, shortcuts, shortcuts, () => false, () => false, () => false, true
-  )
+  const createLiteRegistry = loadRegistry(true)
   const commands = createLiteRegistry({
     isElectron: false,
     downloads: [],

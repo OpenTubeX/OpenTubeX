@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises'
 import vm from 'node:vm'
 import test from 'node:test'
 import { computed, effectScope, nextTick, reactive, ref, shallowRef, watch } from 'vue'
-import { getPreviousBrowsingRoute } from '../../src/renderer/tabs/playerDockDestination.js'
+import { getPreviousBrowsingRoute, isPlayerRoutePath } from '../../src/renderer/tabs/playerDockDestination.js'
 
 const source = (await readFile(new URL('../../src/renderer/components/TabContent/TabWatchContent.vue', import.meta.url), 'utf8'))
   .split('<script setup>')[1].split('</script>')[0].replace(/^import .*$/gm, '')
@@ -11,8 +11,16 @@ const source = (await readFile(new URL('../../src/renderer/components/TabContent
 const titleSource = (await readFile(new URL('../../src/renderer/tabs/TabContext.js', import.meta.url), 'utf8'))
   .replace(/^import .*$/gm, '').replace(/^export /gm, '')
 
-function mountWatch(t, { tab = null, paused = false, hasLoaded = true, mounted = true, enabled = true, previous = '/history', loaded = hasLoaded, mobile = false, exitPresentationModes = () => {} } = {}) {
-  const route = { path: '/watch/video', fullPath: '/watch/video', params: { id: 'video' } }
+const routeComponents = new Map()
+/** Videos, other media and each browsing page render their own component. */
+function resolveRouteComponent(route) {
+  const page = route.path.split('/')[1]
+  if (!routeComponents.has(page)) routeComponents.set(page, {})
+  return routeComponents.get(page)
+}
+
+function mountWatch(t, { tab = null, path = '/watch/video', paused = false, hasLoaded = true, mounted = true, enabled = true, previous = '/history', loaded = hasLoaded, mobile = false, exitPresentationModes = () => {} } = {}) {
+  const route = { path, fullPath: path, params: { id: 'video' } }
   const props = reactive({ tabId: 'tab', route, presented: true })
   const defaultTab = { historyIndex: previous ? 1 : 0, history: previous ? [{ route: { path: previous } }, { route }] : [{ route }] }
   const getters = reactive({ getKeepPlayingOnNavigation: enabled, getTabById: () => tab ?? defaultTab })
@@ -54,7 +62,7 @@ function mountWatch(t, { tab = null, paused = false, hasLoaded = true, mounted =
   async function navigate(path) {
     const to = { path, fullPath: path, params: {} }
     const from = props.route
-    const componentChanged = !from.path.startsWith('/watch/') || !path.startsWith('/watch/')
+    const componentChanged = resolveRouteComponent(from) !== resolveRouteComponent(to)
     if (tab) tab.history[tab.historyIndex].scroll = { left: viewport.scrollX, top: viewport.scrollY }
     if (componentChanged) await lifecycle.beforeNavigate({ to, from })
     for (const guard of navigationGuards) await guard(to, from)
@@ -100,13 +108,14 @@ function mountWatch(t, { tab = null, paused = false, hasLoaded = true, mounted =
         if (tab?.history[payload.historyIndex]) tab.history[payload.historyIndex].scroll = { ...payload.scroll }
       }
     },
-    resolveRouteComponent: () => ({}),
+    resolveRouteComponent,
     getTabNavigationService: () => ({ createRouterFacade: () => ({ beforeEach: guard => { navigationGuards.add(guard); return () => navigationGuards.delete(guard) } }), setTitle: (...args) => titles.push(args), resolve: path => ({ path, fullPath: path, params: { id: path.split(/[/?]/)[2] } }), updateRetainedWatchEntry: () => {}, back: () => navigate(props.route.path === '/subscriptions' ? '/watch/video' : previous), forward: () => navigate('/watch/video'), push: (_id, path) => navigate(path) }),
     tabLifecycleService: { register: (_id, hooks) => { lifecycle = hooks; return () => {} } },
     tabLifecycleKey: 'lifecycle',
     tabPresentedKey: 'presented',
     watchNavigationKey: 'navigation',
     getPreviousBrowsingRoute,
+    isPlayerRoutePath,
     routeLocationKey: 'route',
     routerKey: 'router',
     console
@@ -294,6 +303,26 @@ test('retains a playing native video outside the watch DOM across navigation', a
   assert.equal(mounted.disposals(), 0)
   assert.equal(mounted.provides.get('presented').value, true)
   assert.equal(mounted.provides.get('navigation').detached.value, false)
+})
+
+test('retains external media across navigation', async t => {
+  const mounted = mountWatch(t, { path: '/external-media' })
+  await mounted.navigate('/subscriptions')
+  assert.equal(mounted.disposals(), 0)
+  assert.equal(mounted.provides.get('navigation').detached.value, true)
+  assert.equal(mounted.provides.get('route').fullPath, '/external-media')
+  await mounted.navigate('/external-media')
+  assert.equal(mounted.disposals(), 0)
+  assert.equal(mounted.provides.get('navigation').detached.value, false)
+})
+
+test('opening other media disposes the detached player it replaces', async t => {
+  const mounted = mountWatch(t)
+  await mounted.navigate('/subscriptions')
+  await mounted.navigate('/external-media')
+  assert.equal(mounted.disposals(), 1)
+  assert.equal(mounted.provides.get('navigation').detached.value, false)
+  assert.equal(mounted.provides.get('route').fullPath, '/external-media')
 })
 
 for (const options of [{ hasLoaded: false, paused: true }]) {

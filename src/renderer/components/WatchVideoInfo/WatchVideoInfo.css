@@ -20,7 +20,7 @@
   display: flex;
   flex: auto;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
   min-inline-size: 0;
 }
 
