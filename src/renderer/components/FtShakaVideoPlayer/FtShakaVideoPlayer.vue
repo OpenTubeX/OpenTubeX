@@ -7005,6 +7005,8 @@ let startPositionSeekPending = false
 /** @param {boolean} loaded */
 function handleMediaFrameLoaded(loaded) {
   mediaFrameLoaded = loaded
+  // The new source has its own dimensions, see unloadForFormatSwitch
+  if (loaded) video.value?.style.removeProperty('aspect-ratio')
   // A replaced source never seeks to the old start position.
   if (!loaded) startPositionSeekPending = false
 }
@@ -12329,6 +12331,12 @@ async function unloadForFormatSwitch() {
   // produced a frame of its own.
   showPoster.value = true
   video.value?.removeAttribute('poster')
+  // Unloading clears the video's intrinsic dimensions, which would collapse
+  // the player to the empty video's 150px default height until the new
+  // source reports its own. Keep the ratio until it has loaded a frame.
+  if (video.value?.videoWidth > 0 && video.value.videoHeight > 0) {
+    video.value.style.aspectRatio = `${video.value.videoWidth} / ${video.value.videoHeight}`
+  }
 
   try {
     await player.unload()
