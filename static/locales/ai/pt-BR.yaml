@@ -876,7 +876,6 @@ Settings:
       Wayland Minimize Unsupported: O Wayland não comunica às aplicações quando uma janela é minimizada, pelo que este acionador não está disponível. Use «Quando a janela perde o foco ou se muda para outra janela», que também abrange a minimização.
       On Tab Change Mini Player: Ao mudar de guia, o minileitor é exibido no lugar. Para usar isto, defina “Ao sair de um vídeo” como “Parar a reprodução”.
     Scroll Mini Player:
-      Scroll Mini Player: Minileitor ao deslocar
       Scroll Player Mode: Ao rolar para baixo
       Scroll Player Mode Tooltip: O player só é fixado enquanto ocupa no máximo metade da altura da janela. Caso contrário, como em celulares na horizontal ou em janelas largas, o miniplayer é exibido no lugar.
       Scroll Player Modes:
@@ -1477,7 +1476,6 @@ Settings:
     Use Shared Tabs: 'Usar um único conjunto de abas compartilhado entre dispositivos'
     Shared Tabs Warning: 'As abas abertas neste dispositivo se tornam o conjunto compartilhado. Ao sincronizar, os outros dispositivos substituem suas abas abertas por esse conjunto; as abas de dispositivos diferentes não são combinadas.'
     Tabs From Other Devices: 'Abas de outros dispositivos'
-    Device Tab Session: '{platform} · {count} abas'
     Mobile Device: 'Celular'
     Desktop Device: 'Computador'
     Open All Tabs: 'Abrir todas as abas'
@@ -1490,7 +1488,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'Seu navegador será aberto para você confirmar a exclusão com seu provedor de login.'
   Proxy Settings:
     IP Block Recovery Script Path: Script de recuperação do bloqueio de IP
-    Select IP Block Recovery Script File: Selecionar arquivo do script de recuperação de bloqueio de IP
     Running IP block recovery script: Executando o script de recuperação de bloqueio de IP
     IP block recovery script failed: 'Falha no script de recuperação de bloqueio de IP (código de saída: {exitCode})'
     IP block recovery script finished: Script de recuperação de bloqueio de IP concluído
@@ -1599,7 +1596,6 @@ Profile:
   Profile Icon: Ícone do perfil
   Choose an Emoji: Escolher um emoji
   Custom Emoji: Emoji personalizado
-  Emoji: Emoji
   Choose Image: Escolher imagem
   Crop Image: Recortar imagem
   Zoom: Ampliação
@@ -1783,7 +1779,6 @@ Video:
       Timer ended: O temporizador de suspensão terminou
     A-B Repeat:
       A-B Repeat: Repetição A-B
-      On: Ativada
       Off: Desativada
       Point A: Ponto A
       Point B: Ponto B
@@ -2135,7 +2130,6 @@ Tab Organizer:
   Close All: Fechar todos
   Ungroup: Desagrupar
   Group Name: Nome do grupo
-  Color: Cor
   No Color: Sem cor
   Create Group: Criar grupo
   Expand Group: Expandir grupo
@@ -2452,12 +2446,10 @@ Downloads:
   Remove File Confirmation: Remover o arquivo baixado?
   Remove File Warning: Esta ação move "{title}" para a Lixeira do dispositivo.
   File Not Found: Não foi possível encontrar o arquivo baixado.
-  Download Missing: Download indisponível
   Files Missing: O arquivo baixado já não está disponível no sistema de arquivos. | Os arquivos baixados já não estão disponíveis no sistema de arquivos. | Os arquivos baixados já não estão disponíveis no sistema de arquivos.
   Files Available: Estão disponíveis {available} de {total} arquivos baixados.
   More Files: Mais 1 arquivo | Mais {count} arquivos | Mais {count} arquivos
   Template Used: 'Modelo: {name}'
-  Download Type: Tipo de download
   Template: Modelo
   Unsaved: Não salvo
   Media Type: Tipo de mídia
@@ -2485,7 +2477,6 @@ Downloads:
   Embed Cover Art: Incorporar miniatura como capa
   Embed Metadata: Incorporar título, autor, descrição e capítulos
   Additional yt-dlp Arguments: Argumentos adicionais do yt-dlp
-  Custom yt-dlp Arguments: Argumentos personalizados do yt-dlp
   Template Name: Nome do modelo
   Save Template: Salvar modelo
   Delete Template: Excluir modelo
@@ -2735,3 +2726,19 @@ YouTube Account:
   Delete Comment Failed: "Não foi possível excluir o comentário: {error}"
   Recommendations: "Recomendações do YouTube"
   Recommendations Failed: "Não foi possível carregar suas recomendações do YouTube."
+App Menu:
+  About App: Sobre o {appName}
+  Services: Serviços
+  Hide App: Ocultar {appName}
+  Hide Others: Ocultar outros
+  Show All: Mostrar tudo
+  Quit App: Sair do {appName}
+  Reopen Closed Window: Reabrir janela fechada
+  Paste and Match Style: Colar e corresponder estilo
+  View: Exibir
+  Enter Inspect Element Mode: Entrar no modo de inspeção de elementos
+  GPU Internals: Informações internas da GPU (chrome://gpu)
+  Navigate: Navegar
+  Next Tab: Próxima aba
+  Previous Tab: Aba anterior
+  Help: Ajuda

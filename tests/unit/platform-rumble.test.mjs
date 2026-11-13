@@ -134,7 +134,6 @@ test('reads channel IDs from channel addresses only', () => {
   assert.equal(rumble.parseChannelUrl('https://user:pass@rumble.com/c/ExampleChannel'), null)
   assert.equal(rumble.parseChannelUrl('ftp://rumble.com/c/ExampleChannel'), null)
   assert.equal(rumble.parseChannelUrl('not a channel'), null)
-  assert.equal(rumble.parsePlaylistUrl('https://rumble.com/playlists/abc'), null)
 })
 
 test('reads the channel header, with the canonical case of its ID', async () => {

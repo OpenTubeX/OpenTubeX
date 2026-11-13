@@ -15,6 +15,22 @@ Color Picker:
 Maximize: Razpni
 Restore: Obnovi
 Close Tab: Zapri zavihek
+App Menu:
+  About App: O programu {appName}
+  Services: Storitve
+  Hide App: Skrij {appName}
+  Hide Others: Skrij druge
+  Show All: Pokaži vse
+  Quit App: Zapri {appName}
+  Reopen Closed Window: Znova odpri zaprto okno
+  Paste and Match Style: Prilepi in prilagodi slog
+  View: Pogled
+  Enter Inspect Element Mode: Način pregledovanja elementov
+  GPU Internals: Notranji podatki GPU (chrome://gpu)
+  Navigate: Krmarjenje
+  Next Tab: Naslednji zavihek
+  Previous Tab: Prejšnji zavihek
+  Help: Pomoč
 Close Confirmation:
   Background Sync Warning: Izhod bo ustavil osveževanje naročnin v ozadju.
   Hide Window: Skrij okno
@@ -1113,7 +1129,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland aplikacijam ne sporoča pomanjšanja okna, zato ta sprožilec ni na voljo. Namesto tega uporabite »Ko okno izgubi žarišče ali preklopite drugam«, kar velja tudi za pomanjšanje.
       On Tab Change Mini Player: Ob preklopu med zavihki se namesto tega prikaže mini predvajalnik. Če želite uporabiti to možnost, nastavite »Ob odhodu z videoposnetka« na »Ustavi predvajanje«.
     Scroll Mini Player:
-      Scroll Mini Player: Mini predvajalnik med pomikanjem
       Scroll Player Mode: Med pomikanjem navzdol
       Scroll Player Mode Tooltip: Predvajalnik se pripne le, dokler zavzema največ polovico višine okna. Sicer, na primer na telefonih v ležeči postavitvi ali v širokih oknih, se namesto tega prikaže mini predvajalnik.
       Scroll Player Modes:
@@ -1797,7 +1812,6 @@ Settings:
     Use Shared Tabs: 'Uporabi en skupni nabor zavihkov v vseh napravah'
     Shared Tabs Warning: 'Odprti zavihki v tej napravi postanejo skupni nabor. Druge naprave pri sinhronizaciji z njim zamenjajo svoje odprte zavihke; zavihki iz različnih naprav se ne združijo.'
     Tabs From Other Devices: 'Zavihki iz drugih naprav'
-    Device Tab Session: '{platform} · {count} zavihkov'
     Mobile Device: 'Mobilna naprava'
     Desktop Device: 'Računalnik'
     Open All Tabs: 'Odpri vse zavihke'
@@ -1813,7 +1827,6 @@ Settings:
     Proxy Username: Uporabniško ime posredniškega strežnika
     Proxy Password: Geslo posredniškega strežnika
     IP Block Recovery Script Path: Skript za obnovitev po blokadi IP
-    Select IP Block Recovery Script File: Izberi datoteko skripta za obnovitev po blokadi IP-ja
     Running IP block recovery script: Izvajanje skripta za obnovitev po blokadi IP-ja
     IP block recovery script failed: 'Skript za obnovitev po blokadi IP-ja ni uspel (izhodna koda: {exitCode})'
     IP block recovery script finished: Skript za obnovitev po blokadi IP-ja je končan
@@ -1970,7 +1983,6 @@ Profile:
   Profile Icon: Ikona profila
   Choose an Emoji: Izberi emoji
   Custom Emoji: Emoji po meri
-  Emoji: Emoji
   Choose Image: Izberi sliko
   Crop Image: Obreži sliko
   Zoom: Povečava
@@ -2257,7 +2269,6 @@ Video:
       Timer ended: Časovnik za spanje se je iztekel
     A-B Repeat:
       A-B Repeat: Ponavljanje A-B
-      On: Vklopljeno
       Off: Izklopljeno
       Point A: Točka A
       Point B: Točka B
@@ -2655,7 +2666,6 @@ Tab Organizer:
   Close All: Zapri vse
   Ungroup: Odstrani iz skupine
   Group Name: Ime skupine
-  Color: Barva
   No Color: Brez barve
   Create Group: Ustvari skupino
   Expand Group: Razširi skupino
@@ -3092,12 +3102,10 @@ Downloads:
   Remove File Confirmation: Želite odstraniti preneseno datoteko?
   Remove File Warning: S tem boste datoteko »{title}« premaknili v smeti naprave.
   File Not Found: Prenesene datoteke ni bilo mogoče najti.
-  Download Missing: Prenos ni na voljo
   Files Missing: Prenesena datoteka ni več na voljo v datotečnem sistemu. | Preneseni datoteki nista več na voljo v datotečnem sistemu. | Prenesene datoteke niso več na voljo v datotečnem sistemu. | Prenesene datoteke niso več na voljo v datotečnem sistemu.
   Files Available: 'Na voljo je {available} od {total} prenesenih datotek.'
   More Files: Še {count} datoteka | Še {count} datoteki | Še {count} datoteke | Še {count} datotek
   Template Used: 'Predloga: {name}'
-  Download Type: Vrsta prenosa
   Template: Predloga
   Unsaved: Neshranjeno
   Media Type: Vrsta predstavnosti
@@ -3125,7 +3133,6 @@ Downloads:
   Embed Cover Art: Vdelaj sličico kot naslovno sliko
   Embed Metadata: Vdelaj naslov, avtorja, opis in poglavja
   Additional yt-dlp Arguments: Dodatni argumenti za yt-dlp
-  Custom yt-dlp Arguments: Argumenti po meri za yt-dlp
   Template Name: Ime predloge
   Save Template: Shrani predlogo
   Delete Template: Izbriši predlogo

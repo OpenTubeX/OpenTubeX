@@ -407,21 +407,6 @@ function parseChannelUrl(url) {
 }
 
 /**
- * @param {string} url
- * @returns {string | null}
- */
-function parsePlaylistUrl(url) {
-  const page = parsePage(url)
-  const [first, second, third, fourth] = page?.segments ?? []
-  const id = first === 'w' && second === 'p'
-    ? third
-    : first === 'videos' && second === 'watch' && third === 'playlist'
-      ? fourth
-      : first === 'video-playlists' ? second : undefined
-  return page && isMediaId(id) ? `${id}@${page.host}` : null
-}
-
-/**
  * @param {PlatformFetch} fetch
  * @param {string} id
  * @param {AbortSignal} [signal]
@@ -541,7 +526,6 @@ const peertube = {
   searchTypes: ['videos', 'channels', 'playlists'],
   liveStreams: true,
   parseChannelUrl,
-  parsePlaylistUrl,
   getChannel,
   getChannelPage,
   getLatestItems,

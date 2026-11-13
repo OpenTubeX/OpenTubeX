@@ -49,19 +49,6 @@ export function findPlatformChannel(url) {
 }
 
 /**
- * @param {unknown} url
- * @returns {{ platform: string, id: string } | null}
- */
-export function findPlatformPlaylist(url) {
-  if (typeof url !== 'string') return null
-  for (const platform of PLATFORMS) {
-    const id = platform.parsePlaylistUrl(url)
-    if (id) return { platform: platform.id, id }
-  }
-  return null
-}
-
-/**
  * The in-app page of a channel.
  * @param {string} platform
  * @param {string} id

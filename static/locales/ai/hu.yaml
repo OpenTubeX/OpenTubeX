@@ -16,6 +16,22 @@ New Tab: Új lap
 Maximize: Teljes méret
 Restore: Visszaállítás
 Close Tab: Lap bezárása
+App Menu:
+  About App: A(z) {appName} névjegye
+  Services: Szolgáltatások
+  Hide App: '{appName} elrejtése'
+  Hide Others: Többi elrejtése
+  Show All: Az összes megjelenítése
+  Quit App: 'Kilépés: {appName}'
+  Reopen Closed Window: Bezárt ablak újranyitása
+  Paste and Match Style: Beillesztés stílusillesztéssel
+  View: Nézet
+  Enter Inspect Element Mode: Elemvizsgáló mód
+  GPU Internals: GPU belső adatai (chrome://gpu)
+  Navigate: Navigáció
+  Next Tab: Következő lap
+  Previous Tab: Előző lap
+  Help: Súgó
 Close Confirmation:
   Background Sync Warning: A kilépés leállítja a feliratkozások háttérben történő frissítését.
   Hide Window: Ablak elrejtése
@@ -907,7 +923,6 @@ Settings:
       Wayland Minimize Unsupported: A Wayland nem jelzi az alkalmazásoknak az ablak kis méretűre állítását, ezért ez az eseményindító nem érhető el. Használja helyette az „Amikor az ablak elveszti a fókuszt, vagy másik ablakra vált” lehetőséget, amely a kis méretűre állítást is lefedi.
       On Tab Change Mini Player: Lapváltáskor helyette a minilejátszó jelenik meg. A használatához állítsa a „Videó elhagyásakor” beállítást „Lejátszás leállítása” értékre.
     Scroll Mini Player:
-      Scroll Mini Player: Görgetéskor megjelenő minilejátszó
       Scroll Player Mode: Lefelé görgetéskor
       Scroll Player Mode Tooltip: A lejátszó csak akkor rögzül, ha legfeljebb az ablak magasságának felét foglalja el. Ellenkező esetben, például fekvő tájolású telefonokon vagy széles ablakokban, helyette a minilejátszó jelenik meg.
       Scroll Player Modes:
@@ -1508,7 +1523,6 @@ Settings:
     Use Shared Tabs: 'Egy közös lapkészlet használata minden eszközön'
     Shared Tabs Warning: 'Az ezen az eszközön nyitott lapok alkotják majd a megosztott készletet. A többi eszköz szinkronizáláskor erre a készletre cseréli a nyitott lapjait; a különböző eszközök lapjai nem egyesülnek.'
     Tabs From Other Devices: 'Más eszközök lapjai'
-    Device Tab Session: '{platform} · {count} lap'
     Mobile Device: 'Mobil'
     Desktop Device: 'Asztali gép'
     Open All Tabs: 'Összes lap megnyitása'
@@ -1521,7 +1535,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'Megnyílik a böngésző, hogy a bejelentkezési szolgáltatódnál megerősíthesd a törlést.'
   Proxy Settings:
     IP Block Recovery Script Path: IP-blokkolás helyreállítási szkriptje
-    Select IP Block Recovery Script File: IP-tiltás helyreállító parancsfájljának kiválasztása
     Running IP block recovery script: IP-tiltás helyreállító parancsfájljának futtatása
     IP block recovery script failed: 'Az IP-tiltás helyreállító parancsfájlja hibával leállt (kilépési kód: {exitCode})'
     IP block recovery script finished: Az IP-tiltás helyreállító parancsfájlja befejeződött
@@ -1630,7 +1643,6 @@ Profile:
   Profile Icon: Profilikon
   Choose an Emoji: Emoji kiválasztása
   Custom Emoji: Egyéni emoji
-  Emoji: Emoji
   Choose Image: Kép kiválasztása
   Crop Image: Kép körülvágása
   Zoom: Nagyítás
@@ -1813,7 +1825,6 @@ Video:
       Timer ended: Az elalvásidőzítő lejárt
     A-B Repeat:
       A-B Repeat: A-B ismétlés
-      'On': Be
       'Off': Ki
       Point A: A pont
       Point B: B pont
@@ -2165,7 +2176,6 @@ Tab Organizer:
   Close All: Összes bezárása
   Ungroup: Eltávolítás a csoportból
   Group Name: Csoport neve
-  Color: Szín
   No Color: Szín nélkül
   Create Group: Csoport létrehozása
   Expand Group: Csoport kibontása
@@ -2483,12 +2493,10 @@ Downloads:
   Remove File Confirmation: Eltávolítja a letöltött fájlt?
   Remove File Warning: Ezzel a(z) „{title}” az eszköz kukájába kerül.
   File Not Found: A letöltött fájl nem található.
-  Download Missing: A letöltés nem érhető el
   Files Missing: A letöltött fájl már nem érhető el a fájlrendszeren. | A letöltött fájlok már nem érhetők el a fájlrendszeren.
   Files Available: '{total} letöltött fájlból {available} érhető el.'
   More Files: További 1 fájl | További {count} fájl
   Template Used: 'Sablon: {name}'
-  Download Type: Letöltés típusa
   Template: Sablon
   Unsaved: Nincs mentve
   Media Type: Médiatípus
@@ -2516,7 +2524,6 @@ Downloads:
   Embed Cover Art: Bélyegkép beágyazása borítóképként
   Embed Metadata: Cím, szerző, leírás és fejezetek beágyazása
   Additional yt-dlp Arguments: További yt-dlp-argumentumok
-  Custom yt-dlp Arguments: Egyéni yt-dlp-argumentumok
   Template Name: Sablon neve
   Save Template: Sablon mentése
   Delete Template: Sablon törlése

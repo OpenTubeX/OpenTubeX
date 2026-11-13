@@ -16,6 +16,22 @@ New Tab: Thẻ mới
 Maximize: Phóng to
 Restore: Khôi phục
 Close Tab: Đóng thẻ
+App Menu:
+  About App: Giới thiệu về {appName}
+  Services: Dịch vụ
+  Hide App: Ẩn {appName}
+  Hide Others: Ẩn các ứng dụng khác
+  Show All: Hiện tất cả
+  Quit App: Thoát {appName}
+  Reopen Closed Window: Mở lại cửa sổ đã đóng
+  Paste and Match Style: Dán và khớp kiểu
+  View: Xem
+  Enter Inspect Element Mode: Vào chế độ kiểm tra phần tử
+  GPU Internals: Thông tin nội bộ GPU (chrome://gpu)
+  Navigate: Điều hướng
+  Next Tab: Thẻ tiếp theo
+  Previous Tab: Thẻ trước
+  Help: Trợ giúp
 Close Confirmation:
   Background Sync Warning: Thoát sẽ dừng làm mới gói đăng ký trong nền.
   Hide Window: Ẩn cửa sổ
@@ -907,7 +923,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland không thông báo cho ứng dụng khi cửa sổ được thu nhỏ, nên không dùng được điều kiện này. Hãy dùng "Khi cửa sổ mất lấy nét hoặc bị chuyển ra sau", điều kiện này cũng bao gồm việc thu nhỏ.
       On Tab Change Mini Player: Khi chuyển thẻ, trình phát thu nhỏ sẽ hiện thay thế. Để dùng tùy chọn này, hãy đặt "Khi rời khỏi video" thành "Dừng phát".
     Scroll Mini Player:
-      Scroll Mini Player: Trình phát thu nhỏ khi cuộn
       Scroll Player Mode: Khi cuộn xuống
       Scroll Player Mode Tooltip: Trình phát chỉ được ghim khi chiếm tối đa một nửa chiều cao cửa sổ. Nếu không, chẳng hạn trên điện thoại ở chế độ ngang hoặc trong cửa sổ rộng, trình phát mini sẽ hiển thị thay thế.
       Scroll Player Modes:
@@ -1512,7 +1527,6 @@ Settings:
     Use Shared Tabs: 'Dùng một bộ thẻ chung trên các thiết bị'
     Shared Tabs Warning: 'Các thẻ đang mở trên thiết bị này sẽ trở thành bộ thẻ dùng chung. Khi đồng bộ hóa, các thiết bị khác sẽ thay thế thẻ đang mở bằng bộ thẻ này; thẻ từ các thiết bị khác nhau không được gộp lại.'
     Tabs From Other Devices: 'Thẻ từ thiết bị khác'
-    Device Tab Session: '{platform} · {count} thẻ'
     Mobile Device: 'Di động'
     Desktop Device: 'Máy tính'
     Open All Tabs: 'Mở tất cả thẻ'
@@ -1525,7 +1539,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'Trình duyệt sẽ mở để bạn xác nhận việc xóa với nhà cung cấp đăng nhập.'
   Proxy Settings:
     IP Block Recovery Script Path: Tập lệnh khôi phục chặn IP
-    Select IP Block Recovery Script File: Chọn tệp tập lệnh khôi phục khi bị chặn IP
     Running IP block recovery script: Đang chạy tập lệnh khôi phục khi bị chặn IP
     IP block recovery script failed: 'Tập lệnh khôi phục khi bị chặn IP đã lỗi (mã thoát: {exitCode})'
     IP block recovery script finished: Tập lệnh khôi phục khi bị chặn IP đã chạy xong
@@ -1634,7 +1647,6 @@ Profile:
   Profile Icon: Biểu tượng hồ sơ
   Choose an Emoji: Chọn biểu tượng cảm xúc
   Custom Emoji: Biểu tượng cảm xúc tùy chỉnh
-  Emoji: Biểu tượng cảm xúc
   Choose Image: Chọn ảnh
   Crop Image: Cắt ảnh
   Zoom: Thu phóng
@@ -1823,7 +1835,6 @@ Video:
       Timer ended: Đã hết giờ ngủ
     A-B Repeat:
       A-B Repeat: Lặp A-B
-      On: Bật
       Off: Tắt
       Point A: Điểm A
       Point B: Điểm B
@@ -2179,7 +2190,6 @@ Tab Organizer:
   Close All: Đóng tất cả
   Ungroup: Bỏ nhóm
   Group Name: Tên nhóm
-  Color: Màu
   No Color: Không màu
   Create Group: Tạo nhóm
   Expand Group: Mở rộng nhóm
@@ -2499,12 +2509,10 @@ Downloads:
   Remove File Confirmation: Xóa tệp đã tải?
   Remove File Warning: Thao tác này sẽ chuyển "{title}" vào thùng rác của thiết bị.
   File Not Found: Không tìm thấy tệp đã tải.
-  Download Missing: Không dùng được bản tải xuống
   Files Missing: Các tệp đã tải không còn tồn tại trên hệ thống tệp.
   Files Available: 'Có {available} trong số {total} tệp đã tải.'
   More Files: 'Thêm {count} tệp'
   Template Used: 'Mẫu: {name}'
-  Download Type: Loại tải xuống
   Template: Mẫu
   Unsaved: Chưa lưu
   Media Type: Loại nội dung
@@ -2532,7 +2540,6 @@ Downloads:
   Embed Cover Art: Nhúng hình thu nhỏ làm ảnh bìa
   Embed Metadata: Nhúng tiêu đề, tác giả, mô tả và chương
   Additional yt-dlp Arguments: Đối số yt-dlp bổ sung
-  Custom yt-dlp Arguments: Đối số yt-dlp tùy chỉnh
   Template Name: Tên mẫu
   Save Template: Lưu mẫu
   Delete Template: Xóa mẫu

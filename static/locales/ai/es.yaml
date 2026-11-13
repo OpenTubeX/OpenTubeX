@@ -869,7 +869,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland no informa a las aplicaciones cuando se minimiza una ventana, por lo que este activador no está disponible. Usa «Cuando la ventana pierde el foco o se cambia a otra», que también abarca la minimización.
       On Tab Change Mini Player: Al cambiar de pestaña se muestra el minirreproductor. Para usar esto, cambia «Al salir de un vídeo» a «Detener la reproducción».
     Scroll Mini Player:
-      Scroll Mini Player: Minirreproductor al desplazarse
       Scroll Player Mode: Al desplazarse hacia abajo
       Scroll Player Mode Tooltip: El reproductor solo se fija mientras ocupe como máximo la mitad de la altura de la ventana. De lo contrario, como en teléfonos en horizontal o en ventanas anchas, se muestra el minirreproductor.
       Scroll Player Modes:
@@ -1473,7 +1472,6 @@ Settings:
     Use Shared Tabs: 'Usar un único conjunto de pestañas compartido entre dispositivos'
     Shared Tabs Warning: 'Las pestañas abiertas en este dispositivo se convierten en el conjunto compartido. Al sincronizarse, los demás dispositivos sustituyen sus pestañas abiertas por este conjunto; las pestañas de distintos dispositivos no se combinan.'
     Tabs From Other Devices: 'Pestañas de otros dispositivos'
-    Device Tab Session: '{platform} · {count} pestañas'
     Mobile Device: 'Móvil'
     Desktop Device: 'Ordenador'
     Open All Tabs: 'Abrir todas las pestañas'
@@ -1486,7 +1484,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'Se abrirá tu navegador para que confirmes la eliminación con tu proveedor de inicio de sesión.'
   Proxy Settings:
     IP Block Recovery Script Path: Script de recuperación del bloqueo de IP
-    Select IP Block Recovery Script File: Seleccionar archivo del script de recuperación tras un bloqueo de IP
     Running IP block recovery script: Ejecutando script de recuperación tras un bloqueo de IP
     IP block recovery script failed: 'Falló el script de recuperación tras un bloqueo de IP (código de salida: {exitCode})'
     IP block recovery script finished: Ha terminado el script de recuperación tras un bloqueo de IP
@@ -1595,7 +1592,6 @@ Profile:
   Profile Icon: Icono del perfil
   Choose an Emoji: Elegir un emoji
   Custom Emoji: Emoji personalizado
-  Emoji: Emoji
   Choose Image: Elegir imagen
   Crop Image: Recortar imagen
   Zoom: Zoom
@@ -1787,7 +1783,6 @@ Video:
       Timer ended: El temporizador de suspensión ha terminado
     A-B Repeat:
       A-B Repeat: Repetición A-B
-      On: Activada
       Off: Desactivada
       Point A: Punto A
       Point B: Punto B
@@ -2140,7 +2135,6 @@ Tab Organizer:
   Close All: Cerrar todas
   Ungroup: Desagrupar
   Group Name: Nombre del grupo
-  Color: Color
   No Color: Sin color
   Create Group: Crear grupo
   Expand Group: Expandir grupo
@@ -2457,12 +2451,10 @@ Downloads:
   Remove File Confirmation: ¿Eliminar el archivo descargado?
   Remove File Warning: Esto moverá «{title}» a la papelera del dispositivo.
   File Not Found: No se encontró el archivo descargado.
-  Download Missing: Descarga no disponible
   Files Missing: El archivo descargado ya no está disponible en el sistema de archivos. | Los archivos descargados ya no están disponibles en el sistema de archivos. | Los archivos descargados ya no están disponibles en el sistema de archivos.
   Files Available: '{available} de {total} archivos descargados están disponibles.'
   More Files: 1 archivo más | {count} archivos más | {count} archivos más
   Template Used: 'Plantilla: {name}'
-  Download Type: Tipo de descarga
   Template: Plantilla
   Unsaved: Sin guardar
   Media Type: Tipo de contenido multimedia
@@ -2490,7 +2482,6 @@ Downloads:
   Embed Cover Art: Incrustar la miniatura como carátula
   Embed Metadata: Incrustar título, autor, descripción y capítulos
   Additional yt-dlp Arguments: Argumentos adicionales de yt-dlp
-  Custom yt-dlp Arguments: Argumentos personalizados de yt-dlp
   Template Name: Nombre de la plantilla
   Save Template: Guardar plantilla
   Delete Template: Eliminar plantilla
@@ -2740,3 +2731,19 @@ YouTube Account:
   Delete Comment Failed: "No se ha podido eliminar el comentario: {error}"
   Recommendations: "Recomendaciones de YouTube"
   Recommendations Failed: "No se han podido cargar tus recomendaciones de YouTube."
+App Menu:
+  About App: Acerca de {appName}
+  Services: Servicios
+  Hide App: Ocultar {appName}
+  Hide Others: Ocultar otros
+  Show All: Mostrar todo
+  Quit App: Salir de {appName}
+  Reopen Closed Window: Volver a abrir la ventana cerrada
+  Paste and Match Style: Pegar y adaptar estilo
+  View: Ver
+  Enter Inspect Element Mode: Entrar en el modo de inspección de elementos
+  GPU Internals: Información interna de la GPU (chrome://gpu)
+  Navigate: Navegar
+  Next Tab: Pestaña siguiente
+  Previous Tab: Pestaña anterior
+  Help: Ayuda

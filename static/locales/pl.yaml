@@ -609,7 +609,6 @@ Settings:
     No Saved Video Qualities: Brak zapisanych ustawień rozdzielczości
     Playback Speed: Prędkość odtwarzania
     Scroll Mini Player:
-      Scroll Mini Player: Mini odtwarzacz podczas przewijania
       When Scrolling Down: Utrzymuj mini odtwarzacz na widoku podczas przewijania w dół
     Customize Quick Playback Speed Bar: Dostosuj pasek wyboru prędkości odtwarzania
     Quick Playback Speed Bar Manager: Pasek wyboru prędkości odtwarzania
@@ -846,7 +845,6 @@ Settings:
     Proxy Username: Nazwa użytkownika usługi proxy
     Proxy Password: Hasło do usługi proxy
     IP Block Recovery Script Path: Ścieżka do skryptu omijania blokady IP
-    Select IP Block Recovery Script File: Wybierz plik skryptu omijania blokady IP
     Running IP block recovery script: Uruchom skrypt omijania blokady IP
     IP block recovery script failed: 'Błąd skryptu omijania blokady IP (kod błędu: {exitCode})'
     IP block recovery script finished: Zakończono wykonywanie skryptu omijania blokady IP
@@ -1951,8 +1949,6 @@ Context Menu:
 Downloads:
   Download: Pobierz
   Download Video: Pobierz wideo
-  Download Type: Typ pobierania
-  Custom yt-dlp Arguments: Niestandardowe argumenty dla yt-dlp
   Template Name: Nazwa szablonu
   Save Template: Zapisz szablon
   Delete Template: Usuń szablon

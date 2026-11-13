@@ -996,7 +996,6 @@ Settings:
     Use Shared Tabs: 'Używaj jednego wspólnego zestawu kart na wszystkich urządzeniach'
     Shared Tabs Warning: 'Karty otwarte na tym urządzeniu staną się wspólnym zestawem. Pozostałe urządzenia podczas synchronizacji zastąpią nim swoje otwarte karty; karty z różnych urządzeń nie zostaną połączone.'
     Tabs From Other Devices: 'Karty z innych urządzeń'
-    Device Tab Session: '{platform} · karty: {count}'
     Mobile Device: 'Urządzenie mobilne'
     Desktop Device: 'Komputer'
     Open All Tabs: 'Otwórz wszystkie karty'
@@ -1098,7 +1097,6 @@ Profile:
   Profile Icon: Ikona profilu
   Choose an Emoji: Wybierz emoji
   Custom Emoji: Własne emoji
-  Emoji: Emoji
   Choose Image: Wybierz obraz
   Crop Image: Przytnij obraz
   Zoom: Powiększenie
@@ -1232,7 +1230,6 @@ Video:
       End of current chapter: Koniec bieżącego rozdziału
     A-B Repeat:
       A-B Repeat: Powtarzanie A-B
-      On: Włączone
       Off: Wyłączone
       Point A: Punkt A
       Point B: Punkt B
@@ -1441,7 +1438,6 @@ Tab Organizer:
   Close All: Zamknij wszystkie
   Ungroup: Usuń z grupy
   Group Name: Nazwa grupy
-  Color: Kolor
   No Color: Bez koloru
   Create Group: Utwórz grupę
   Expand Group: Rozwiń grupę
@@ -1682,7 +1678,6 @@ Downloads:
   Remove File Confirmation: Usunąć pobrany plik?
   Remove File Warning: Plik „{title}” zostanie przeniesiony do kosza na tym urządzeniu.
   File Not Found: Nie znaleziono pobranego pliku.
-  Download Missing: Pobrany plik jest niedostępny
   Files Missing: Pobrany plik nie jest już dostępny w systemie plików. | Pobrane pliki nie są już dostępne w systemie plików. | Pobrane pliki nie są już dostępne w systemie plików.
   Files Available: 'Dostępnych pobranych plików: {available} z {total}.'
   More Files: 'Jeszcze 1 plik | Jeszcze {count} pliki | Jeszcze {count} plików'
@@ -2024,3 +2019,19 @@ YouTube Account:
   Delete Comment Failed: "Nie udało się usunąć komentarza: {error}"
   Recommendations: "Rekomendacje YouTube"
   Recommendations Failed: "Nie udało się wczytać twoich rekomendacji YouTube."
+App Menu:
+  About App: O programie {appName}
+  Services: Usługi
+  Hide App: Ukryj {appName}
+  Hide Others: Ukryj pozostałe
+  Show All: Pokaż wszystkie
+  Quit App: Zakończ {appName}
+  Reopen Closed Window: Otwórz ponownie zamknięte okno
+  Paste and Match Style: Wklej i dopasuj styl
+  View: Widok
+  Enter Inspect Element Mode: Tryb sprawdzania elementów
+  GPU Internals: Informacje wewnętrzne GPU (chrome://gpu)
+  Navigate: Nawigacja
+  Next Tab: Następna karta
+  Previous Tab: Poprzednia karta
+  Help: Pomoc

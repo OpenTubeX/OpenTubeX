@@ -59,8 +59,8 @@ function fakeFetch(handler) {
   return { fetch, requests }
 }
 
-test('reads channel references from channel pages and playlist IDs from playlist pages', () => {
-  const { parseChannelUrl, parsePlaylistUrl } = odysee
+test('reads channel references from channel pages', () => {
+  const { parseChannelUrl } = odysee
   assert.equal(parseChannelUrl('https://odysee.com/@Creator:a1?view=content'), '@Creator:a1')
   assert.equal(parseChannelUrl('https://odysee.com/@Creator#A1'), '@Creator:a1')
   assert.equal(parseChannelUrl('https://www.odysee.com/@Creator/'), '@Creator')
@@ -74,11 +74,6 @@ test('reads channel references from channel pages and playlist IDs from playlist
   assert.equal(parseChannelUrl('https://odysee.com/@Bad%22Name'), null)
   assert.equal(parseChannelUrl('https://odysee.com.example.test/@Creator'), null)
   assert.equal(parseChannelUrl('https://user:pass@odysee.com/@Creator'), null)
-
-  assert.equal(parsePlaylistUrl(`https://odysee.com/$/playlist/${PLAYLIST_ID}?index=2`), PLAYLIST_ID)
-  assert.equal(parsePlaylistUrl(`https://odysee.com/$/playlist/${PLAYLIST_ID.slice(1)}`), null)
-  assert.equal(parsePlaylistUrl('https://odysee.com/@Creator:a/list:b'), null)
-  assert.equal(parsePlaylistUrl(`https://odysee.example.test/$/playlist/${PLAYLIST_ID}`), null)
 })
 
 test('looks up channels by claim ID and by name, and finds no unknown channels', async () => {

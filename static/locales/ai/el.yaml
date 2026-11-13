@@ -16,6 +16,22 @@ New Tab: Νέα καρτέλα
 Maximize: Μεγιστοποίηση
 Restore: Επαναφορά
 Close Tab: Κλείσιμο καρτέλας
+App Menu:
+  About App: Σχετικά με το {appName}
+  Services: Υπηρεσίες
+  Hide App: Απόκρυψη του {appName}
+  Hide Others: Απόκρυψη των άλλων
+  Show All: Εμφάνιση όλων
+  Quit App: Τερματισμός του {appName}
+  Reopen Closed Window: Επαναφορά κλειστού παραθύρου
+  Paste and Match Style: Επικόλληση με προσαρμογή στυλ
+  View: Προβολή
+  Enter Inspect Element Mode: Λειτουργία επιθεώρησης στοιχείων
+  GPU Internals: Εσωτερικά στοιχεία GPU (chrome://gpu)
+  Navigate: Πλοήγηση
+  Next Tab: Επόμενη καρτέλα
+  Previous Tab: Προηγούμενη καρτέλα
+  Help: Βοήθεια
 Close Confirmation:
   Background Sync Warning: Η έξοδος θα διακόψει την ανανέωση συνδρομών στο παρασκήνιο.
   Hide Window: Απόκρυψη παραθύρου
@@ -907,7 +923,6 @@ Settings:
       Wayland Minimize Unsupported: Το Wayland δεν αναφέρει στις εφαρμογές την ελαχιστοποίηση παραθύρων, επομένως αυτή η συνθήκη δεν είναι διαθέσιμη. Χρησιμοποιήστε την επιλογή «Όταν το παράθυρο χάνει την εστίαση ή αλλάζετε εφαρμογή», η οποία καλύπτει και την ελαχιστοποίηση.
       On Tab Change Mini Player: Κατά την αλλαγή καρτέλας εμφανίζεται αντί γι' αυτό το μικρό πρόγραμμα αναπαραγωγής. Για να το χρησιμοποιήσετε, ορίστε το «Κατά την έξοδο από ένα βίντεο» σε «Διακοπή αναπαραγωγής».
     Scroll Mini Player:
-      Scroll Mini Player: Μικρό πρόγραμμα αναπαραγωγής κατά την κύλιση
       Scroll Player Mode: Κατά την κύλιση προς τα κάτω
       Scroll Player Mode Tooltip: Η αναπαραγωγή καρφιτσώνεται μόνο όσο καταλαμβάνει το πολύ το μισό ύψος του παραθύρου. Διαφορετικά, όπως σε τηλέφωνα σε οριζόντιο προσανατολισμό ή σε φαρδιά παράθυρα, εμφανίζεται η μίνι αναπαραγωγή.
       Scroll Player Modes:
@@ -1509,7 +1524,6 @@ Settings:
     Use Shared Tabs: 'Χρήση ενός κοινόχρηστου συνόλου καρτελών σε όλες τις συσκευές'
     Shared Tabs Warning: 'Οι ανοιχτές καρτέλες αυτής της συσκευής γίνονται το κοινό σύνολο. Όταν συγχρονιστούν οι άλλες συσκευές, αντικαθιστούν τις ανοιχτές καρτέλες τους με αυτό το σύνολο· οι καρτέλες διαφορετικών συσκευών δεν συγχωνεύονται.'
     Tabs From Other Devices: 'Καρτέλες από άλλες συσκευές'
-    Device Tab Session: '{platform} · {count} καρτέλες'
     Mobile Device: 'Κινητό'
     Desktop Device: 'Υπολογιστής'
     Open All Tabs: 'Άνοιγμα όλων των καρτελών'
@@ -1522,7 +1536,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'Θα ανοίξει το πρόγραμμα περιήγησης για να επιβεβαιώσετε τη διαγραφή στον πάροχο σύνδεσής σας.'
   Proxy Settings:
     IP Block Recovery Script Path: Σενάριο ανάκτησης από αποκλεισμό IP
-    Select IP Block Recovery Script File: Επιλογή αρχείου δέσμης ενεργειών αποκατάστασης αποκλεισμού IP
     Running IP block recovery script: Εκτέλεση δέσμης ενεργειών αποκατάστασης αποκλεισμού IP
     IP block recovery script failed: 'Η δέσμη ενεργειών αποκατάστασης αποκλεισμού IP απέτυχε (κωδικός εξόδου: {exitCode})'
     IP block recovery script finished: Η δέσμη ενεργειών αποκατάστασης αποκλεισμού IP ολοκληρώθηκε
@@ -1638,7 +1651,6 @@ Profile:
   Profile Icon: Εικονίδιο προφίλ
   Choose an Emoji: Επιλογή emoji
   Custom Emoji: Προσαρμοσμένο emoji
-  Emoji: Emoji
   Choose Image: Επιλογή εικόνας
   Crop Image: Περικοπή εικόνας
   Zoom: Μεγέθυνση
@@ -1827,7 +1839,6 @@ Video:
       Timer ended: Ο χρονοδιακόπτης ύπνου έληξε
     A-B Repeat:
       A-B Repeat: Επανάληψη A-B
-      On: Ενεργή
       Off: Ανενεργή
       Point A: Σημείο A
       Point B: Σημείο B
@@ -2179,7 +2190,6 @@ Tab Organizer:
   Close All: Κλείσιμο όλων
   Ungroup: Κατάργηση ομαδοποίησης
   Group Name: Όνομα ομάδας
-  Color: Χρώμα
   No Color: Χωρίς χρώμα
   Create Group: Δημιουργία ομάδας
   Expand Group: Ανάπτυξη ομάδας
@@ -2496,12 +2506,10 @@ Downloads:
   Remove File Confirmation: Αφαίρεση ληφθέντος αρχείου;
   Remove File Warning: Το «{title}» θα μετακινηθεί στον κάδο απορριμμάτων της συσκευής σας.
   File Not Found: Δεν ήταν δυνατή η εύρεση του ληφθέντος αρχείου.
-  Download Missing: Η λήψη δεν είναι διαθέσιμη
   Files Missing: Το ληφθέν αρχείο δεν είναι πλέον διαθέσιμο στο σύστημα αρχείων. | Τα ληφθέντα αρχεία δεν είναι πλέον διαθέσιμα στο σύστημα αρχείων.
   Files Available: 'Είναι διαθέσιμα {available} από {total} ληφθέντα αρχεία.'
   More Files: 1 ακόμη αρχείο | {count} ακόμη αρχεία
   Template Used: 'Πρότυπο: {name}'
-  Download Type: Τύπος λήψης
   Template: Πρότυπο
   Unsaved: Μη αποθηκευμένο
   Media Type: Τύπος πολυμέσων
@@ -2529,7 +2537,6 @@ Downloads:
   Embed Cover Art: Ενσωμάτωση μικρογραφίας ως εξώφυλλο
   Embed Metadata: Ενσωμάτωση τίτλου, δημιουργού, περιγραφής και κεφαλαίων
   Additional yt-dlp Arguments: Πρόσθετα ορίσματα yt-dlp
-  Custom yt-dlp Arguments: Προσαρμοσμένα ορίσματα yt-dlp
   Template Name: Όνομα προτύπου
   Save Template: Αποθήκευση προτύπου
   Delete Template: Διαγραφή προτύπου

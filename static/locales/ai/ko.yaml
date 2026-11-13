@@ -16,6 +16,22 @@ New Tab: 새 탭
 Maximize: 최대화
 Restore: 복원
 Close Tab: 탭 닫기
+App Menu:
+  About App: '{appName} 정보'
+  Services: 서비스
+  Hide App: '{appName} 가리기'
+  Hide Others: 기타 가리기
+  Show All: 모두 보기
+  Quit App: '{appName} 종료'
+  Reopen Closed Window: 닫은 창 다시 열기
+  Paste and Match Style: 붙여넣기 및 스타일 일치
+  View: 보기
+  Enter Inspect Element Mode: 요소 검사 모드 시작
+  GPU Internals: GPU 내부 정보 (chrome://gpu)
+  Navigate: 이동
+  Next Tab: 다음 탭
+  Previous Tab: 이전 탭
+  Help: 도움말
 Close Confirmation:
   Background Sync Warning: 종료하면 백그라운드 구독 새로고침이 중지됩니다.
   Hide Window: 창 숨기기
@@ -1082,7 +1098,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland는 앱에 창 최소화 상태를 알리지 않으므로 이 조건을 사용할 수 없습니다. 최소화도 감지하는 "창이 포커스를 잃거나 다른 창으로 전환할 때"를 대신 사용하세요.
       On Tab Change Mini Player: 탭을 전환하면 대신 미니 플레이어가 표시됩니다. 이 기능을 사용하려면 "동영상을 벗어날 때"를 "재생 중지"로 설정하세요.
     Scroll Mini Player:
-      Scroll Mini Player: 스크롤 미니 플레이어
       Scroll Player Mode: 아래로 스크롤할 때
       Scroll Player Mode Tooltip: 플레이어는 창 높이의 절반 이하를 차지할 때만 고정됩니다. 그렇지 않으면, 예를 들어 가로 모드의 휴대폰이나 넓은 창에서는 대신 미니 플레이어가 표시됩니다.
       Scroll Player Modes:
@@ -1750,7 +1765,6 @@ Settings:
     Use Shared Tabs: '기기 간에 하나의 탭 모음 공유'
     Shared Tabs Warning: '이 기기에 열려 있는 탭이 공유 탭 모음이 됩니다. 다른 기기는 동기화할 때 열려 있는 탭을 이 모음으로 대체하며, 서로 다른 기기의 탭은 합쳐지지 않습니다.'
     Tabs From Other Devices: '다른 기기의 탭'
-    Device Tab Session: '{platform} · 탭 {count}개'
     Mobile Device: '모바일'
     Desktop Device: '데스크톱'
     Open All Tabs: '모든 탭 열기'
@@ -1766,7 +1780,6 @@ Settings:
     Proxy Username: 프록시 사용자 이름
     Proxy Password: 프록시 비밀번호
     IP Block Recovery Script Path: IP 차단 복구 스크립트
-    Select IP Block Recovery Script File: IP 차단 복구 스크립트 파일 선택
     Running IP block recovery script: IP 차단 복구 스크립트 실행 중
     IP block recovery script failed: 'IP 차단 복구 스크립트 실패 (종료 코드: {exitCode})'
     IP block recovery script finished: IP 차단 복구 스크립트 완료
@@ -1895,7 +1908,6 @@ Profile:
   Profile Icon: 프로필 아이콘
   Choose an Emoji: 이모지 선택
   Custom Emoji: 사용자 지정 이모지
-  Emoji: 이모지
   Choose Image: 이미지 선택
   Crop Image: 이미지 자르기
   Zoom: 확대/축소
@@ -2141,7 +2153,6 @@ Video:
       Timer ended: 취침 타이머가 끝났습니다
     A-B Repeat:
       A-B Repeat: A-B 반복
-      On: 켜기
       Off: 끄기
       Point A: 지점 A
       Point B: 지점 B
@@ -2543,7 +2554,6 @@ Tab Organizer:
   Close All: 모두 닫기
   Ungroup: 그룹 해제
   Group Name: 그룹 이름
-  Color: 색상
   No Color: 색상 없음
   Create Group: 그룹 만들기
   Expand Group: 그룹 펼치기
@@ -2947,12 +2957,10 @@ Downloads:
   Remove File Confirmation: 다운로드한 파일을 제거하시겠습니까?
   Remove File Warning: '"{title}"을(를) 기기의 휴지통으로 이동합니다.'
   File Not Found: 다운로드한 파일을 찾을 수 없습니다.
-  Download Missing: 다운로드를 사용할 수 없음
   Files Missing: 다운로드한 파일을 파일 시스템에서 더 이상 사용할 수 없습니다.
   Files Available: '다운로드한 파일 {total}개 중 {available}개를 사용할 수 있습니다.'
   More Files: '파일 {count}개 더 있음'
   Template Used: '템플릿: {name}'
-  Download Type: 다운로드 유형
   Template: 템플릿
   Unsaved: 저장되지 않음
   Media Type: 미디어 유형
@@ -2980,7 +2988,6 @@ Downloads:
   Embed Cover Art: 썸네일을 표지 이미지로 삽입
   Embed Metadata: 제목, 작성자, 설명 및 챕터 삽입
   Additional yt-dlp Arguments: 추가 yt-dlp 인수
-  Custom yt-dlp Arguments: 사용자 지정 yt-dlp 인수
   Template Name: 템플릿 이름
   Save Template: 템플릿 저장
   Delete Template: 템플릿 삭제

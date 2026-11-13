@@ -574,7 +574,6 @@ const rumble = {
   liveStreams: true,
   parseChannelUrl,
   // Rumble's playlists aren't supported
-  parsePlaylistUrl: () => null,
   getChannel,
   getChannelPage,
   getLatestItems,

@@ -3,7 +3,7 @@ import { getTransferableSettings, NON_TRANSFERABLE_SETTINGS } from '../../../non
 import { normalizeMaterialSeedColor } from '../../../materialTheme.js'
 import { normalizeSignalAccentColor } from '../../../signalTheme.js'
 import i18n, { loadLocale, rememberStartupLocale, setAITranslationCompletionsEnabled } from '../../i18n/index'
-import allLocales from '../../../../static/locales/activeLocales.json'
+import { resolveSystemLocale } from '../../../systemLocale.js'
 import { applyKeyboardShortcutOverrides, resolveLandingPage, sanitizeKeyboardShortcutOverrides, SyncEvents } from '../../../constants'
 import { DBProfileHandlers, DBSettingHandlers } from '../../../datastores/handlers/index'
 import { hashPassword } from '../../helpers/passwords'
@@ -286,31 +286,10 @@ const sideEffectHandlers = {
 
     let targetLocale = value
     if (value === 'system') {
-      const systemLocaleName = (await getSystemLocale()).replace('_', '-') // ex: en-US
-      const systemLocaleSplit = systemLocaleName.split('-') // ex: en
-      const targetLocaleOptions = allLocales.filter((locale) => {
-        // filter out other languages
-        const localeLang = locale.split('-')[0]
-        return localeLang.includes(systemLocaleSplit[0])
-      }).sort((aLocaleName, bLocaleName) => {
-        const aLocale = aLocaleName.split('-') // ex: [en, US]
-        const bLocale = bLocaleName.split('-')
+      const systemLocale = resolveSystemLocale(await getSystemLocale())
 
-        if (aLocaleName === systemLocaleName) { // country & language match, prefer a
-          return -1
-        } else if (bLocaleName === systemLocaleName) { // country & language match, prefer b
-          return 1
-        } else if (aLocale.length === 1) { // no country code for a, prefer a
-          return -1
-        } else if (bLocale.length === 1) { // no country code for b, prefer b
-          return 1
-        } else { // a & b have different country code from system, sort alphabetically
-          return aLocaleName.localeCompare(bLocaleName)
-        }
-      })
-
-      if (targetLocaleOptions.length > 0) {
-        targetLocale = targetLocaleOptions[0]
+      if (systemLocale !== null) {
+        targetLocale = systemLocale
       } else {
         // Go back to default value if locale is unavailable
         targetLocale = fallbackLocale

@@ -231,10 +231,6 @@
     "ri": "more-2-line",
     "material": "more-vert"
   },
-  "envelope": {
-    "ri": "mail-line",
-    "material": "mail-outline"
-  },
   "exchange-alt": {
     "ri": "arrow-left-right-line",
     "material": "swap-horiz-rounded"
@@ -456,9 +452,6 @@
     "material": "payments-outline"
   },
   "moon": {
-    "lucide": "moon",
-    "tabler": "moon",
-    "ph": "moon",
     "ri": "moon-line",
     "material": "dark-mode-outline-rounded"
   },
@@ -610,10 +603,6 @@
     "ri": "share-line",
     "material": "share-outline"
   },
-  "shield": {
-    "ri": "shield-line",
-    "material": "shield-outline"
-  },
   "shield-halved": {
     "ri": "shield-half-line",
     "material": "shield-half-outline"
@@ -642,10 +631,6 @@
     "ri": "sort-alphabet-desc",
     "material": "sort-by-alpha-za-rounded"
   },
-  "sort-down": {
-    "ri": "arrow-down-s-line",
-    "material": "keyboard-arrow-down-rounded"
-  },
   "speaker": {
     "ri": "speaker-line",
     "material": "speaker-outline-rounded"
@@ -659,9 +644,6 @@
     "material": "skip-next-rounded"
   },
   "sun": {
-    "lucide": "sun",
-    "tabler": "sun",
-    "ph": "sun",
     "ri": "sun-line",
     "material": "light-mode-outline"
   },
@@ -819,10 +801,6 @@
     "material": "smart-display-outline",
     "simple": "youtube"
   },
-  "dot-circle": {
-    "ri": "checkbox-blank-circle-line",
-    "material": "radio-button-unchecked"
-  },
   "vertical-tabs": {
     "ri": "layout-left-line",
     "material": "vertical-split-outline"
@@ -875,7 +853,6 @@
   "bell-outline": { "ri": "notification-3-line", "material": "notifications-outline-rounded" },
   "bell-plain": { "ri": "notification-3-fill", "material": "notifications-rounded" },
   "bell-slash": { "ri": "notification-off-line", "material": "notifications-off-outline-rounded" },
-  "text-size": { "ri": "font-size", "material": "format-size-rounded" },
   "text-color": { "ri": "font-color", "material": "format-color-text-rounded" },
   "opacity": { "ri": "contrast-drop-2-line", "material": "opacity-rounded" },
   "fill-color": { "ri": "paint-line", "material": "format-color-fill-rounded" }

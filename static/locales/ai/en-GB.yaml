@@ -15,6 +15,22 @@ New Tab: New Tab
 Maximize: Maximise
 Restore: Restore
 Close Tab: Close Tab
+App Menu:
+  About App: About {appName}
+  Services: Services
+  Hide App: Hide {appName}
+  Hide Others: Hide Others
+  Show All: Show All
+  Quit App: Quit {appName}
+  Reopen Closed Window: Reopen Closed Window
+  Paste and Match Style: Paste and Match Style
+  View: View
+  Enter Inspect Element Mode: Enter Inspect Element Mode
+  GPU Internals: GPU Internals (chrome://gpu)
+  Navigate: Navigate
+  Next Tab: Next Tab
+  Previous Tab: Previous Tab
+  Help: Help
 Close Confirmation:
   Background Sync Warning: Quitting will stop background subscription refreshes.
   Hide Window: Hide Window
@@ -895,7 +911,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland does not report window minimise to apps, so this trigger is unavailable. Use "When the window loses focus or is switched away" instead, which also covers minimising.
       On Tab Change Mini Player: Switching tabs shows the mini player instead. To use this, set "When leaving a video" to "Stop playing".
     Scroll Mini Player:
-      Scroll Mini Player: Scroll mini player
       Scroll Player Mode: When scrolling down
       Scroll Player Mode Tooltip: "The player is only pinned while it takes up at most half of the window's height. Otherwise, such as on phones in landscape or in wide windows, the mini player shows instead."
       Scroll Player Modes:
@@ -1492,7 +1507,6 @@ Settings:
     Use Shared Tabs: 'Use one shared tab set across devices'
     Shared Tabs Warning: 'The open tabs on this device become the shared set. Other devices replace their open tabs with this set when they sync; tabs from different devices are not combined.'
     Tabs From Other Devices: 'Tabs from other devices'
-    Device Tab Session: '{platform} · {count} tabs'
     Mobile Device: 'Mobile'
     Desktop Device: 'Desktop'
     Open All Tabs: 'Open all tabs'
@@ -1505,7 +1519,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'Your browser opens so that you can confirm the deletion with your sign-in provider.'
   Proxy Settings:
     IP Block Recovery Script Path: IP block recovery script
-    Select IP Block Recovery Script File: Select IP Block Recovery Script File
     Running IP block recovery script: Running IP block recovery script
     IP block recovery script failed: 'IP block recovery script failed (exit code: {exitCode})'
     IP block recovery script finished: IP block recovery script finished
@@ -1618,7 +1631,6 @@ Profile:
   Profile Icon: Profile Icon
   Choose an Emoji: Choose an Emoji
   Custom Emoji: Custom Emoji
-  Emoji: Emoji
   Choose Image: Choose Image
   Crop Image: Crop Image
   Zoom: Zoom
@@ -1805,7 +1817,6 @@ Video:
       Timer ended: Sleep timer ended
     A-B Repeat:
       A-B Repeat: A-B repeat
-      On: 'On'
       Off: 'Off'
       Point A: Point A
       Point B: Point B
@@ -2162,7 +2173,6 @@ Tab Organizer:
   Close All: Close All
   Ungroup: Ungroup
   Group Name: Group name
-  Color: Colour
   No Color: No colour
   Create Group: Create Group
   Expand Group: Expand group
@@ -2481,12 +2491,10 @@ Downloads:
   Remove File Confirmation: Remove downloaded file?
   Remove File Warning: This will move "{title}" to your device's bin.
   File Not Found: The downloaded file could not be found.
-  Download Missing: Download unavailable
   Files Missing: The downloaded file is no longer available on the filesystem. | The downloaded files are no longer available on the filesystem.
   Files Available: "{available} of {total} downloaded files are available."
   More Files: 1 more file | {count} more files
   Template Used: 'Template: {name}'
-  Download Type: Download Type
   Template: Template
   Unsaved: Unsaved
   Media Type: Media Type
@@ -2514,7 +2522,6 @@ Downloads:
   Embed Cover Art: Embed thumbnail as cover art
   Embed Metadata: Embed title, author, description, and chapters
   Additional yt-dlp Arguments: Additional yt-dlp Arguments
-  Custom yt-dlp Arguments: Custom yt-dlp Arguments
   Template Name: Template Name
   Save Template: Save Template
   Delete Template: Delete Template

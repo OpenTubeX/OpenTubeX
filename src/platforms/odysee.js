@@ -364,20 +364,6 @@ const odysee = {
     }
   },
 
-  parsePlaylistUrl(input) {
-    if (typeof input !== 'string') return null
-    try {
-      const url = new URL(input.trim())
-      if (!['https:', 'http:'].includes(url.protocol) || !WEB_HOSTS.includes(url.hostname.toLowerCase()) ||
-        url.username || url.password) return null
-      // Collection claims have URLs like videos, so only playlist pages are recognized
-      const [, id] = /^\/\$\/(?:playlist|list)\/([0-9a-f]{40})\/?$/.exec(url.pathname) ?? []
-      return id ?? null
-    } catch {
-      return null
-    }
-  },
-
   async getChannel(fetch, id, signal) {
     if (isClaimId(id)) {
       const [claim] = await claimsById(fetch, [id], { claim_type: ['channel'] }, signal)

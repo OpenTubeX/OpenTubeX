@@ -76,11 +76,12 @@ test('blocks app shortcuts during the new-user tutorial and restores them after 
       zoom: browserWindow.webContents.getZoomLevel()
     }
   })
-  await clickAppMenuItem(app, 'File', 'New Window')
+  // The app menu is translated, and tests run in en-GB.
+  await clickAppMenuItem(app, 'File', 'New window')
   await clickAppMenuItem(app, 'View', 'Toggle Developer Tools')
-  await clickAppMenuItem(app, 'View', 'Zoom In')
-  await clickAppMenuItem(app, 'View', 'Toggle Full Screen')
-  await clickAppMenuItem(app, 'Window', 'Minimize')
+  await clickAppMenuItem(app, 'View', 'Zoom in')
+  await clickAppMenuItem(app, 'View', 'Toggle full-screen')
+  await clickAppMenuItem(app, 'Window', 'Minimise')
   await expect.poll(() => app.electronApp.evaluate(({ BrowserWindow }) => {
     const browserWindow = BrowserWindow.getAllWindows()[0]
     return {

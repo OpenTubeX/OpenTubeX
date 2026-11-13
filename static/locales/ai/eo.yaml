@@ -16,6 +16,22 @@ New Tab: Nova langeto
 Maximize: Maksimumigi
 Restore: Restarigi
 Close Tab: Fermi langeton
+App Menu:
+  About App: Pri {appName}
+  Services: Servoj
+  Hide App: Kaŝi {appName}
+  Hide Others: Kaŝi aliajn
+  Show All: Montri ĉiujn
+  Quit App: Ĉesigi {appName}
+  Reopen Closed Window: Remalfermi fermitan fenestron
+  Paste and Match Style: Alglui kaj adapti stilon
+  View: Vido
+  Enter Inspect Element Mode: Eniri elementan inspektan reĝimon
+  GPU Internals: Internaj informoj de GPU (chrome://gpu)
+  Navigate: Navigi
+  Next Tab: Sekva langeto
+  Previous Tab: Antaŭa langeto
+  Help: Helpo
 Close Confirmation:
   Title: Ĉu eliri el OpenTubeX?
   Message: Ĉu vi certas, ke vi volas eliri el OpenTubeX?
@@ -925,7 +941,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland ne raportas minimumigon de fenestroj al aplikaĵoj, do ĉi tiu ekigilo ne disponeblas. Uzu anstataŭe "Kiam la fenestro perdas fokuson aŭ oni ŝanĝas al alia", kiu ankaŭ kovras minimumigon.
       On Tab Change Mini Player: Ŝanĝo de langeto anstataŭe montras la ludileton. Por uzi tion, agordu “Kiam oni forlasas videaĵon” al “Ĉesigi ludadon”.
     Scroll Mini Player:
-      Scroll Mini Player: Rulumada ludileto
       Scroll Player Mode: Dum rulumado malsupren
       Scroll Player Mode Tooltip: La ludilo estas fiksita nur dum ĝi okupas maksimume duonon de la alteco de la fenestro. Alie, ekzemple ĉe telefonoj en horizontala orientiĝo aŭ en larĝaj fenestroj, anstataŭe aperas la miniludilo.
       Scroll Player Modes:
@@ -1521,7 +1536,6 @@ Settings:
     Use Shared Tabs: Uzi unu komunan langetaron inter aparatoj
     Shared Tabs Warning: La malfermitaj langetoj en ĉi tiu aparato fariĝas la komuna aro. Aliaj aparatoj anstataŭigas siajn malfermitajn langetojn per ĉi tiu aro kiam ili sinkroniĝas; langetoj de malsamaj aparatoj ne estas kunigitaj.
     Tabs From Other Devices: Langetoj de aliaj aparatoj
-    Device Tab Session: '{platform} · {count} langetoj'
     Mobile Device: Poŝaparato
     Desktop Device: Labortablo
     Open All Tabs: Malfermi ĉiujn langetojn
@@ -1557,7 +1571,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'Via retumilo malfermiĝos, por ke vi konfirmu la forigon ĉe via ensaluta provizanto.'
   Proxy Settings:
     IP Block Recovery Script Path: Skripto por restariĝo post IP-bloko
-    Select IP Block Recovery Script File: Elekti skriptodosieron por restariĝo post IP-bloko
     Running IP block recovery script: Rulado de skripto por restariĝo post IP-bloko
     IP block recovery script failed: 'Skripto por restariĝo post IP-bloko malsukcesis (elira kodo: {exitCode})'
     IP block recovery script finished: Skripto por restariĝo post IP-bloko finiĝis
@@ -1667,7 +1680,6 @@ Profile:
   Profile Icon: Profila piktogramo
   Choose an Emoji: Elekti emoĝion
   Custom Emoji: Laŭmenda emoĝio
-  Emoji: Emoĝio
   Choose Image: Elekti bildon
   Crop Image: Stuci bildon
   Zoom: Zomo
@@ -1891,7 +1903,6 @@ Video:
       Timer ended: Dorma tempumilo finiĝis
     A-B Repeat:
       A-B Repeat: A-B-ripeto
-      'On': 'Ŝaltita'
       'Off': 'Malŝaltita'
       Point A: Punkto A
       Point B: Punkto B
@@ -2212,7 +2223,6 @@ Tab Organizer:
   Close All: Fermi ĉiujn
   Ungroup: Malgrupigi
   Group Name: Nomo de grupo
-  Color: Koloro
   No Color: Neniu koloro
   Create Group: Krei grupon
   Expand Group: Malfaldi grupon
@@ -2540,12 +2550,10 @@ Downloads:
   Remove File Confirmation: Ĉu forigi la elŝutitan dosieron?
   Remove File Warning: Tio ĉi movos "{title}" al la rubujo de via aparato.
   File Not Found: La elŝutita dosiero ne troviĝis.
-  Download Missing: Elŝuto ne disponeblas
   Files Missing: La elŝutita dosiero ne plu disponeblas en la dosiersistemo. | La elŝutitaj dosieroj ne plu disponeblas en la dosiersistemo.
   Files Available: '{available} el {total} elŝutitaj dosieroj disponeblas.'
   More Files: 1 plia dosiero | {count} pliaj dosieroj
   Template Used: 'Ŝablono: {name}'
-  Download Type: Elŝuta tipo
   Template: Ŝablono
   Unsaved: Nekonservita
   Media Type: Aŭdvidaĵa tipo
@@ -2573,7 +2581,6 @@ Downloads:
   Embed Cover Art: Enkorpigi bildeton kiel kovrilbildon
   Embed Metadata: Enkorpigi titolon, aŭtoron, priskribon kaj ĉapitrojn
   Additional yt-dlp Arguments: Aldonaj argumentoj por yt-dlp
-  Custom yt-dlp Arguments: Laŭmendaj argumentoj por yt-dlp
   Template Name: Nomo de ŝablono
   Save Template: Konservi ŝablonon
   Delete Template: Forigi ŝablonon

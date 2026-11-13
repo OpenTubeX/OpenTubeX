@@ -1408,7 +1408,6 @@ export default {
       }
 
       ipcRenderer.on(IpcChannels.UPDATE_SEARCH_INPUT_TEXT, currentUpdateSearchInputTextListener)
-      ipcRenderer.send(IpcChannels.SEARCH_INPUT_HANDLING_READY)
     }
   },
 

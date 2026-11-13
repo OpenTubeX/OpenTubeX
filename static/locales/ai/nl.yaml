@@ -16,6 +16,22 @@ New Tab: Nieuw tabblad
 Maximize: Maximaliseren
 Restore: Herstellen
 Close Tab: Tabblad sluiten
+App Menu:
+  About App: Over {appName}
+  Services: Diensten
+  Hide App: Verberg {appName}
+  Hide Others: Verberg andere
+  Show All: Toon alles
+  Quit App: Stop {appName}
+  Reopen Closed Window: Gesloten venster heropenen
+  Paste and Match Style: Plak en pas stijl aan
+  View: Weergave
+  Enter Inspect Element Mode: Elementinspectiemodus openen
+  GPU Internals: Interne GPU-gegevens (chrome://gpu)
+  Navigate: Navigeren
+  Next Tab: Volgend tabblad
+  Previous Tab: Vorig tabblad
+  Help: Help
 Close Confirmation:
   Background Sync Warning: Als je afsluit, stopt het vernieuwen van abonnementen op de achtergrond.
   Hide Window: Venster verbergen
@@ -918,7 +934,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland meldt het minimaliseren van vensters niet aan apps, waardoor deze trigger niet beschikbaar is. Gebruik in plaats daarvan "Wanneer het venster de focus verliest of je naar een ander venster gaat". Dit geldt ook voor minimaliseren.
       On Tab Change Mini Player: Bij wisselen van tabblad verschijnt in plaats daarvan de minispeler. Stel ‘Bij het verlaten van een video’ in op ‘Afspelen stoppen’ om dit te gebruiken.
     Scroll Mini Player:
-      Scroll Mini Player: Minispeler tijdens scrollen
       Scroll Player Mode: Bij omlaag scrollen
       Scroll Player Mode Tooltip: De speler wordt alleen vastgezet zolang die hoogstens de helft van de vensterhoogte inneemt. Anders, zoals op telefoons in liggende stand of in brede vensters, wordt in plaats daarvan de minispeler getoond.
       Scroll Player Modes:
@@ -1535,7 +1550,6 @@ Settings:
     Use Shared Tabs: 'Eén gedeelde set tabbladen op alle apparaten gebruiken'
     Shared Tabs Warning: 'De geopende tabbladen op dit apparaat worden de gedeelde set. Andere apparaten vervangen hun geopende tabbladen door deze set wanneer ze synchroniseren; tabbladen van verschillende apparaten worden niet samengevoegd.'
     Tabs From Other Devices: 'Tabbladen van andere apparaten'
-    Device Tab Session: '{platform} · {count} tabbladen'
     Mobile Device: 'Mobiel'
     Desktop Device: 'Desktop'
     Open All Tabs: 'Alle tabbladen openen'
@@ -1548,7 +1562,6 @@ Settings:
     Delete Single Sign-On Account Hint: 'Je browser wordt geopend zodat je het verwijderen kunt bevestigen bij je aanmeldprovider.'
   Proxy Settings:
     IP Block Recovery Script Path: Script voor herstel na IP-blokkering
-    Select IP Block Recovery Script File: Herstelscript voor IP-blokkade selecteren
     Running IP block recovery script: Herstelscript voor IP-blokkade uitvoeren
     IP block recovery script failed: 'Herstelscript voor IP-blokkade mislukt (afsluitcode: {exitCode})'
     IP block recovery script finished: Herstelscript voor IP-blokkade voltooid
@@ -1667,7 +1680,6 @@ Profile:
   Profile Icon: Profielpictogram
   Choose an Emoji: Emoji kiezen
   Custom Emoji: Aangepaste emoji
-  Emoji: Emoji
   Choose Image: Afbeelding kiezen
   Crop Image: Afbeelding bijsnijden
   Zoom: Zoom
@@ -1870,7 +1882,6 @@ Video:
       Timer ended: Slaaptimer afgelopen
     A-B Repeat:
       A-B Repeat: A-B-herhaling
-      On: Aan
       Off: Uit
       Point A: Punt A
       Point B: Punt B
@@ -2230,7 +2241,6 @@ Tab Organizer:
   Close All: Alles sluiten
   Ungroup: Uit groep halen
   Group Name: Groepsnaam
-  Color: Kleur
   No Color: Geen kleur
   Create Group: Groep maken
   Expand Group: Groep uitvouwen
@@ -2552,12 +2562,10 @@ Downloads:
   Remove File Confirmation: Gedownload bestand verwijderen?
   Remove File Warning: Hiermee wordt "{title}" naar de prullenbak van je apparaat verplaatst.
   File Not Found: Het gedownloade bestand is niet gevonden.
-  Download Missing: Download niet beschikbaar
   Files Missing: Het gedownloade bestand is niet meer beschikbaar in het bestandssysteem. | De gedownloade bestanden zijn niet meer beschikbaar in het bestandssysteem.
   Files Available: '{available} van {total} gedownloade bestanden zijn beschikbaar.'
   More Files: Nog 1 bestand | Nog {count} bestanden
   Template Used: 'Sjabloon: {name}'
-  Download Type: Downloadtype
   Template: Sjabloon
   Unsaved: Niet opgeslagen
   Media Type: Mediatype
@@ -2585,7 +2593,6 @@ Downloads:
   Embed Cover Art: Miniatuur als albumhoes insluiten
   Embed Metadata: Titel, maker, beschrijving en hoofdstukken insluiten
   Additional yt-dlp Arguments: Aanvullende yt-dlp-argumenten
-  Custom yt-dlp Arguments: Aangepaste yt-dlp-argumenten
   Template Name: Sjabloonnaam
   Save Template: Sjabloon opslaan
   Delete Template: Sjabloon verwijderen

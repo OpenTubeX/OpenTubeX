@@ -16,6 +16,22 @@ New Tab: Nauja kortelė
 Maximize: Išdidinti
 Restore: Atkurti
 Close Tab: Užverti kortelę
+App Menu:
+  About App: Apie {appName}
+  Services: Paslaugos
+  Hide App: Slėpti {appName}
+  Hide Others: Slėpti kitas
+  Show All: Rodyti visas
+  Quit App: Išeiti iš {appName}
+  Reopen Closed Window: Iš naujo atverti uždarytą langą
+  Paste and Match Style: Įklijuoti pritaikant stilių
+  View: Rodymas
+  Enter Inspect Element Mode: Elementų tikrinimo režimas
+  GPU Internals: GPU vidinė informacija (chrome://gpu)
+  Navigate: Naršyti
+  Next Tab: Kita kortelė
+  Previous Tab: Ankstesnė kortelė
+  Help: Žinynas
 Close Confirmation:
   Background Sync Warning: Išėjus bus sustabdytas prenumeratų atnaujinimas fone.
   Hide Window: Slėpti langą
@@ -1103,7 +1119,6 @@ Settings:
       Wayland Minimize Unsupported: Wayland nepraneša programoms apie lango sumažinimą, todėl šis paleidiklis nepasiekiamas. Vietoj jo naudokite „Langui praradus aktyvumą arba perėjus į kitą langą“, nes tai taip pat apima sumažinimą.
       On Tab Change Mini Player: Perjungiant skirtukus vietoj to rodomas mini leistuvas. Norėdami tai naudoti, nustatykite „Išeinant iš vaizdo įrašo“ į „Sustabdyti atkūrimą“.
     Scroll Mini Player:
-      Scroll Mini Player: Mini leistuvas slenkant
       Scroll Player Mode: Slenkant žemyn
       Scroll Player Mode Tooltip: Grotuvas prisegamas tik tol, kol užima ne daugiau kaip pusę lango aukščio. Kitu atveju, pavyzdžiui, telefonuose gulsčiu režimu arba plačiuose languose, vietoj jo rodomas mini grotuvas.
       Scroll Player Modes:
@@ -1763,7 +1778,6 @@ Settings:
     Use Shared Tabs: 'Naudoti vieną bendrą kortelių rinkinį visuose įrenginiuose'
     Shared Tabs Warning: 'Šiame įrenginyje atvertos kortelės taps bendru rinkiniu. Sinchronizuojant kiti įrenginiai pakeis savo atvertas korteles šiuo rinkiniu; skirtingų įrenginių kortelės nesujungiamos.'
     Tabs From Other Devices: 'Kortelės iš kitų įrenginių'
-    Device Tab Session: '{platform} · {count} kortelės'
     Mobile Device: 'Mobilusis įrenginys'
     Desktop Device: 'Kompiuteris'
     Open All Tabs: 'Atverti visas korteles'
@@ -1779,7 +1793,6 @@ Settings:
     Proxy Username: Įgaliotojo serverio naudotojo vardas
     Proxy Password: Įgaliotojo serverio slaptažodis
     IP Block Recovery Script Path: IP blokavimo atkūrimo scenarijus
-    Select IP Block Recovery Script File: Pasirinkti IP blokavimo atkūrimo scenarijaus failą
     Running IP block recovery script: Vykdomas IP blokavimo atkūrimo scenarijus
     IP block recovery script failed: 'IP blokavimo atkūrimo scenarijaus vykdyti nepavyko (išėjimo kodas: {exitCode})'
     IP block recovery script finished: IP blokavimo atkūrimo scenarijus baigtas
@@ -1916,7 +1929,6 @@ Profile:
   Profile Icon: Profilio piktograma
   Choose an Emoji: Pasirinkti jaustuką
   Custom Emoji: Pasirinktinis jaustukas
-  Emoji: Jaustukas
   Choose Image: Pasirinkti paveikslėlį
   Crop Image: Apkirpti paveikslėlį
   Zoom: Mastelis
@@ -2175,7 +2187,6 @@ Video:
       Timer ended: Miego laikmatis baigėsi
     A-B Repeat:
       A-B Repeat: A–B kartojimas
-      On: Įjungta
       Off: Išjungta
       Point A: Taškas A
       Point B: Taškas B
@@ -2577,7 +2588,6 @@ Tab Organizer:
   Close All: Uždaryti visas
   Ungroup: Išgrupuoti
   Group Name: Grupės pavadinimas
-  Color: Spalva
   No Color: Be spalvos
   Create Group: Sukurti grupę
   Expand Group: Išskleisti grupę
@@ -2993,12 +3003,10 @@ Downloads:
   Remove File Confirmation: Pašalinti atsisiųstą failą?
   Remove File Warning: Šis veiksmas perkels "{title}" į įrenginio šiukšlinę.
   File Not Found: Atsisiųsto failo rasti nepavyko.
-  Download Missing: Atsisiuntimas nepasiekiamas
   Files Missing: Failų sistemoje atsisiųsto failo nebėra. | Failų sistemoje atsisiųstų failų nebėra. | Failų sistemoje atsisiųstų failų nebėra.
   Files Available: 'Pasiekiama {available} iš {total} atsisiųstų failų.'
   More Files: Dar {count} failas | Dar {count} failai | Dar {count} failų
   Template Used: 'Šablonas: {name}'
-  Download Type: Atsisiuntimo tipas
   Template: Šablonas
   Unsaved: Neišsaugotas
   Media Type: Medijos tipas
@@ -3026,7 +3034,6 @@ Downloads:
   Embed Cover Art: Įterpti miniatiūrą kaip viršelį
   Embed Metadata: Įterpti pavadinimą, autorių, aprašą ir skyrius
   Additional yt-dlp Arguments: Papildomi yt-dlp argumentai
-  Custom yt-dlp Arguments: Pasirinktiniai yt-dlp argumentai
   Template Name: Šablono pavadinimas
   Save Template: Išsaugoti šabloną
   Delete Template: Ištrinti šabloną
