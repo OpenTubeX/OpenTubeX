@@ -125,16 +125,28 @@ export function selectPluralForm(locale, message, choice) {
  * @returns {import('vue-i18n').PluralizationRule}
  */
 function createPluralRule(locale) {
-  const pluralRules = new Intl.PluralRules(locale)
-  const categories = getPluralCategories(locale)
+  // Resolved on first use: every locale gets a rule when the app starts, but
+  // only the active locale and its fallbacks are ever asked.
+  /** @type {{ pluralRules: Intl.PluralRules, categories: string[] } | null | undefined} */
+  let resolved
 
   return (choice, choicesLength, defaultRule) => {
+    if (resolved === undefined) {
+      try {
+        resolved = { pluralRules: new Intl.PluralRules(locale), categories: getPluralCategories(locale) }
+      } catch (error) {
+        // Intl doesn't recognise the locale, so vue-i18n's built-in rule is used.
+        console.error(`Unable to create plural rules for locale: "${locale}"`, error)
+        resolved = null
+      }
+    }
+
     // Only translations that cover every category can be mapped reliably.
-    if (choicesLength !== categories.length) {
+    if (resolved === null || choicesLength !== resolved.categories.length) {
       return defaultRule(choice, choicesLength)
     }
 
-    const index = categories.indexOf(pluralRules.select(Math.abs(choice)))
+    const index = resolved.categories.indexOf(resolved.pluralRules.select(Math.abs(choice)))
 
     return index === -1 ? defaultRule(choice, choicesLength) : index
   }
@@ -145,16 +157,5 @@ function createPluralRule(locale) {
  * @returns {Record<string, import('vue-i18n').PluralizationRule>}
  */
 export function createPluralRules(locales) {
-  const rules = {}
-
-  for (const locale of locales) {
-    try {
-      rules[locale] = createPluralRule(locale)
-    } catch (error) {
-      // Intl doesn't recognise the locale, so vue-i18n's built-in rule is used.
-      console.error(`Unable to create plural rules for locale: "${locale}"`, error)
-    }
-  }
-
-  return rules
+  return Object.fromEntries(locales.map(locale => [locale, createPluralRule(locale)]))
 }

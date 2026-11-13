@@ -26,32 +26,38 @@
       >
         {{ $t('Settings.Channel Settings.No Matching Channels') }}
       </p>
-      <FtFlexBox ref="channelGrid">
-        <FtChannelBubble
-          v-for="channel in displayedChannels"
-          :key="channel.id"
-          :channel-id="channel.id"
-          :channel-name="channel.name"
-          :channel-thumbnail="channel.thumbnail"
-          :selectable="showUnsubscribeButton"
-          :selected="selected.has(channel.id)"
-          @change="handleChannelToggle(channel.id)"
-        />
-      </FtFlexBox>
-      <!-- Mounting every subscription at once takes seconds on slower devices -->
-      <FtAutoLoadNextPageWrapper
-        v-if="hasMoreChannels"
-        :key="channelPage"
-        @load-next-page="channelPage++"
+      <div
+        ref="channelScroller"
+        v-overlay-scrollbars
+        class="channelScroller"
       >
-        <FtFlexBox>
-          <FtButton
-            :label="$t('Channels.Load More Channels')"
-            :icon="['fas', 'arrow-down']"
-            @click="loadMoreChannels"
+        <FtFlexBox ref="channelGrid">
+          <FtChannelBubble
+            v-for="channel in displayedChannels"
+            :key="channel.id"
+            :channel-id="channel.id"
+            :channel-name="channel.name"
+            :channel-thumbnail="channel.thumbnail"
+            :selectable="showUnsubscribeButton"
+            :selected="selected.has(channel.id)"
+            @change="handleChannelToggle(channel.id)"
           />
         </FtFlexBox>
-      </FtAutoLoadNextPageWrapper>
+        <!-- Mounting every subscription at once takes seconds on slower devices -->
+        <FtAutoLoadNextPageWrapper
+          v-if="hasMoreChannels"
+          :key="channelPage"
+          @load-next-page="channelPage++"
+        >
+          <FtFlexBox>
+            <FtButton
+              :label="$t('Channels.Load More Channels')"
+              :icon="['fas', 'arrow-down']"
+              @click="loadMoreChannels"
+            />
+          </FtFlexBox>
+        </FtAutoLoadNextPageWrapper>
+      </div>
       <FtFlexBox
         v-if="showUnsubscribeButton"
       >
@@ -212,6 +218,7 @@ const { page: channelPage, displayedItems: displayedChannels, hasMore: hasMoreCh
   pageSize: 100,
   append: true,
   resetOn: [filteredProfileIndex, () => props.query],
+  scrollTarget: useTemplateRef('channelScroller'),
   focusItem: index => channelGrid.value?.$el.querySelectorAll('.bubblePadding')[index]?.focus()
 })
 

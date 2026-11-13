@@ -74,6 +74,12 @@
   max-inline-size: 100%;
 }
 
+/* The view toggle, manage buttons and selects, which are items of the actions
+   row like the others, apart from on phones */
+.headerControls {
+  display: contents;
+}
+
 .headerViewToggle {
   flex-shrink: 0;
 }
@@ -415,6 +421,13 @@
     font-size: 0.9em;
   }
 
+  /* Sized by their labels, which only shorten once all of them have to, down
+     to the minimum target size */
+  .tab {
+    flex-basis: auto;
+    min-inline-size: 24px;
+  }
+
   .tabLabel {
     grid-template-columns: minmax(0, 1fr);
     min-inline-size: 0;
@@ -444,7 +457,7 @@
   }
 
   /* The RSS feed manager button shares the refresh status row */
-  .headerActions:has(> .headerManageFeeds) .headerRefreshWidget {
+  .headerActions:has(.headerManageFeeds) .headerRefreshWidget {
     flex: 1 1 0;
     min-inline-size: 0;
   }
@@ -463,6 +476,20 @@
 
   .headerActions .headerSortSelect {
     flex-basis: 0;
+  }
+
+  /* Below the refresh status, the controls share a row of their own rather
+     than taking a column of its grid each */
+  .headerActions.hasAutoRefreshStatus:has(> .markAllSeenButton) .headerControls {
+    display: flex;
+    grid-column: 1 / -1;
+    align-items: center;
+    gap: 6px;
+    min-inline-size: 0;
+  }
+
+  .headerActions.hasAutoRefreshStatus:has(> .markAllSeenButton) .headerSortSelect {
+    flex: 1 1 0;
   }
 
   .headerSortSelect :deep(.select-text) {
@@ -520,14 +547,15 @@
     reading-flow: source-order;
   }
 
-  .newFeedActions:has(> .markAllSeenButton):has(> .headerManageFeeds) {
+  /* The sort select and manage button sit in the group of header controls */
+  .newFeedActions:has(> .markAllSeenButton):has(.headerManageFeeds) {
     grid-template-areas:
       '. . sort refresh'
       'mark mark mark mark';
     grid-template-columns: auto auto minmax(0, 1fr) auto;
   }
 
-  .newFeedActions:has(> .markAllSeenButton) > .headerSortSelect {
+  .newFeedActions:has(> .markAllSeenButton) .headerSortSelect {
     grid-area: sort;
     inline-size: auto;
   }
@@ -556,4 +584,66 @@
     inset-block-start: 2px;
     inset-inline-end: 2px;
   }
+}
+
+/* Tabs that don't fit onto one line at their full size take the compact layout
+   of phones, rather than wrapping onto a second line */
+.subscriptionsHeader.compactTabs:not(.singleRow) .tabs {
+  --material-tab-min-height: 48px;
+  --material-tab-font-size: 0.9em;
+  --material-tab-padding-inline: 4px;
+
+  flex: 1 1 auto;
+  inline-size: 100%;
+  flex-wrap: nowrap;
+  gap: 0;
+}
+
+.subscriptionsHeader.compactTabs:not(.singleRow) .tab {
+  /* Sized by their labels, which only shorten once all of them have to, down
+     to the minimum target size */
+  flex: 1 1 auto;
+  min-inline-size: 24px;
+  min-block-size: 44px;
+  padding-block: 4px;
+  padding-inline: 4px;
+  font-size: 0.9em;
+}
+
+.subscriptionsHeader.compactTabs:not(.singleRow) .tabs .tabLabel {
+  grid-template-columns: minmax(0, 1fr);
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* stylelint-disable-next-line selector-max-compound-selectors */
+.subscriptionsHeader.compactTabs:not(.singleRow) .tabs .tabLabel > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The platform names and icons explain the filter, so its label is only for
+   screen readers, and the select fits its longest name */
+.headerActions .headerFilterSelect {
+  flex: 0 1 auto;
+  inline-size: 190px;
+}
+
+.headerActions .headerFilterSelect :deep(.select-label) {
+  block-size: 1px;
+  inline-size: 1px;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.headerActions .headerFilterSelect :deep(.select-text) {
+  padding-inline-start: 12px;
+}
+
+.headerActions .headerFilterSelect :deep(.optionIcon) {
+  flex-basis: 14px;
+  inline-size: 14px;
+  font-size: 14px;
 }

@@ -428,6 +428,98 @@ test.describe('local player request concurrency', () => {
     expect(visionOsRequests).toEqual(['jNQXAC9IVRw'])
   })
 
+  /**
+   * Serves the DASH demo files as the streams of visionOS /player responses.
+   * @param {import('@playwright/test').Page} page
+   * @param {(videoId: string, request: number) => { expiresInSeconds?: string, captions?: object }} [response]
+   */
+  async function routePlayableVisionOsStreams(page, response = () => ({})) {
+    const media = {
+      video: readFileSync(path.join(repoRoot, 'e2e', 'fixtures', 'media', 'dash-demo-video.webm')),
+      audio: readFileSync(path.join(repoRoot, 'e2e', 'fixtures', 'media', 'dash-demo-audio.webm')),
+    }
+    // WebM keeps its Cues right before the first Cluster
+    const ranges = body => {
+      const firstCluster = body.indexOf(Buffer.from([0x1F, 0x43, 0xB6, 0x75]))
+      const cues = body.lastIndexOf(Buffer.from([0x1C, 0x53, 0xBB, 0x6B]), firstCluster)
+      return {
+        initRange: { start: '0', end: String(cues - 1) },
+        indexRange: { start: String(cues), end: String(firstCluster - 1) },
+        contentLength: String(body.length),
+      }
+    }
+    const visionOsRequests = await routeVisionOsPlayer(page, (videoId, request) => {
+      const { expiresInSeconds = '21540', ...rest } = response(videoId, request)
+      const url = (itag, kind) => `https://rr1---sn-opentubex-visionos.googlevideo.com/videoplayback?id=${videoId}&itag=${itag}&kind=${kind}&c=VISIONOS&request=${request}`
+      const format = { lastModified: '1700000000000000', approxDurationMs: '6000' }
+      // Both video qualities serve the same file
+      const video = (itag, width, height) => ({
+        ...format,
+        ...ranges(media.video),
+        itag,
+        url: url(itag, 'video'),
+        mimeType: 'video/webm; codecs="vp9"',
+        bitrate: height * 1000,
+        width,
+        height,
+        fps: 30,
+        quality: 'medium',
+        qualityLabel: `${height}p`,
+      })
+      return {
+        streamingData: {
+          expiresInSeconds,
+          adaptiveFormats: [video(247, 1280, 720), video(243, 640, 360), {
+            ...format,
+            ...ranges(media.audio),
+            itag: 251,
+            url: url(251, 'audio'),
+            mimeType: 'audio/webm; codecs="opus"',
+            bitrate: 64_000,
+            audioQuality: 'AUDIO_QUALITY_MEDIUM',
+            audioSampleRate: '48000',
+            audioChannels: 2,
+          }]
+        },
+        ...rest,
+      }
+    })
+    await page.route(/^https:\/\/rr1---sn-opentubex-visionos\.googlevideo\.com\//, route => {
+      const url = new URL(route.request().url())
+      const body = media[url.searchParams.get('kind')]
+      const range = /bytes=(\d+)-(\d*)/.exec(route.request().headers().range ?? '') ??
+        /^(\d+)-(\d*)$/.exec(url.searchParams.get('range') ?? '')
+      const start = range ? Number(range[1]) : 0
+      const end = range?.[2] ? Math.min(Number(range[2]), body.length - 1) : body.length - 1
+      return route.fulfill({
+        status: range ? 206 : 200,
+        contentType: 'video/webm',
+        headers: range ? { 'content-range': `bytes ${start}-${end}/${body.length}` } : {},
+        body: body.subarray(start, end + 1),
+      })
+    })
+    return visionOsRequests
+  }
+
+  test('loads the WEB legacy formats when they are picked while visionOS streams play', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await routePlayableVisionOsStreams(page)
+    const legacyRequests = []
+    page.on('request', request => {
+      if (request.url().startsWith(DEMO_MEDIA_URL)) legacyRequests.push(request.url())
+    })
+
+    const video = await openMockedVideo(page)
+    await page.getByRole('button', { name: 'Change Media Formats' }).click()
+    await page.getByRole('dialog', { name: 'Change Media Formats' })
+      .getByRole('button', { name: /Use Legacy Formats/ }).click()
+
+    await expect.poll(() => legacyRequests.length).toBeGreaterThan(0)
+    // The WEB stream needs the token that the visionOS streams skipped
+    expect(new URL(legacyRequests[0]).searchParams.get('pot')).toBe('test-po-token')
+    await expect.poll(() => video.evaluate(element => !element.paused && element.readyState >= 2)).toBe(true)
+  })
+
   test.describe('with a fixed quality and subtitles', () => {
     test.use({
       seed: {
@@ -443,81 +535,22 @@ test.describe('local player request concurrency', () => {
 
     test('replaces expired visionOS streams without reloading the page', async ({ app, page }) => {
       await mockPlayableWatchPage(app, page, { captionTranslations: true })
-      const media = {
-        video: readFileSync(path.join(repoRoot, 'e2e', 'fixtures', 'media', 'dash-demo-video.webm')),
-        audio: readFileSync(path.join(repoRoot, 'e2e', 'fixtures', 'media', 'dash-demo-audio.webm')),
-      }
-      // WebM keeps its Cues right before the first Cluster
-      const ranges = body => {
-        const firstCluster = body.indexOf(Buffer.from([0x1F, 0x43, 0xB6, 0x75]))
-        const cues = body.lastIndexOf(Buffer.from([0x1C, 0x53, 0xBB, 0x6B]), firstCluster)
-        return {
-          initRange: { start: '0', end: String(cues - 1) },
-          indexRange: { start: String(cues), end: String(firstCluster - 1) },
-          contentLength: String(body.length),
-        }
-      }
-      const visionOsRequests = await routeVisionOsPlayer(page, (videoId, request) => {
-        const url = (itag, kind) => `https://rr1---sn-opentubex-visionos.googlevideo.com/videoplayback?id=${videoId}&itag=${itag}&kind=${kind}&c=VISIONOS&request=${request}`
-        const format = { lastModified: '1700000000000000', approxDurationMs: '6000' }
-        // Both video qualities serve the same file
-        const video = (itag, width, height) => ({
-          ...format,
-          ...ranges(media.video),
-          itag,
-          url: url(itag, 'video'),
-          mimeType: 'video/webm; codecs="vp9"',
-          bitrate: height * 1000,
-          width,
-          height,
-          fps: 30,
-          quality: 'medium',
-          qualityLabel: `${height}p`,
-        })
-        return {
-          streamingData: {
-            // The first streams stand in for a page left open overnight
-            expiresInSeconds: request === 0 ? '0' : '21540',
-            adaptiveFormats: [video(247, 1280, 720), video(243, 640, 360), {
-              ...format,
-              ...ranges(media.audio),
-              itag: 251,
-              url: url(251, 'audio'),
-              mimeType: 'audio/webm; codecs="opus"',
-              bitrate: 64_000,
-              audioQuality: 'AUDIO_QUALITY_MEDIUM',
-              audioSampleRate: '48000',
-              audioChannels: 2,
-            }]
-          },
-          captions: {
-            playerCaptionsTracklistRenderer: {
-              captionTracks: [{
-                baseUrl: `https://www.youtube.com/api/timedtext?v=${videoId}&lang=en&request=${request}`,
-                name: { simpleText: 'English' },
-                vssId: '.en',
-                languageCode: 'en',
-                isTranslatable: true,
-              }],
-              translationLanguages: [{ languageCode: 'de', languageName: { simpleText: 'German' } }],
-            }
-          },
-        }
-      })
-      await page.route(/^https:\/\/rr1---sn-opentubex-visionos\.googlevideo\.com\//, route => {
-        const url = new URL(route.request().url())
-        const body = media[url.searchParams.get('kind')]
-        const range = /bytes=(\d+)-(\d*)/.exec(route.request().headers().range ?? '') ??
-          /^(\d+)-(\d*)$/.exec(url.searchParams.get('range') ?? '')
-        const start = range ? Number(range[1]) : 0
-        const end = range?.[2] ? Math.min(Number(range[2]), body.length - 1) : body.length - 1
-        return route.fulfill({
-          status: range ? 206 : 200,
-          contentType: 'video/webm',
-          headers: range ? { 'content-range': `bytes ${start}-${end}/${body.length}` } : {},
-          body: body.subarray(start, end + 1),
-        })
-      })
+      const visionOsRequests = await routePlayableVisionOsStreams(page, (videoId, request) => ({
+        // The first streams stand in for a page left open overnight
+        expiresInSeconds: request === 0 ? '0' : '21540',
+        captions: {
+          playerCaptionsTracklistRenderer: {
+            captionTracks: [{
+              baseUrl: `https://www.youtube.com/api/timedtext?v=${videoId}&lang=en&request=${request}`,
+              name: { simpleText: 'English' },
+              vssId: '.en',
+              languageCode: 'en',
+              isTranslatable: true,
+            }],
+            translationLanguages: [{ languageCode: 'de', languageName: { simpleText: 'German' } }],
+          }
+        },
+      }))
       const captionRequests = []
       page.on('request', request => {
         const url = new URL(request.url())
@@ -552,6 +585,8 @@ test.describe('local player request concurrency', () => {
       // Once the buffered part has played, the next segment request gets this
       // error. The demo file is buffered whole, so it is reported directly.
       const watch = await watchViewHandle(page)
+      // The WEB legacy formats expire with the first streams
+      expect(await watch.evaluate(view => view.prepareLegacyFormats())).toBe(true)
       await watch.evaluate(view => view.handlePlayerError({
         code: 1001,
         data: [new URL(decodeURIComponent(view.manifestSrc).match(/<BaseURL>([^<]+)</)[1].replaceAll('&amp;', '&')).toString(), 403],
@@ -564,6 +599,7 @@ test.describe('local player request concurrency', () => {
       // The new source loads the captions again, from their fresh URL
       await expect.poll(() => captionRequests.at(-1)).toBe('1 de')
       expect(await watch.evaluate(view => view.streamErrorReloadAttemptedForCurrentVideo)).toBe(false)
+      expect(await watch.evaluate(view => view.legacyFormatAvailable)).toBe(false)
     })
   })
 

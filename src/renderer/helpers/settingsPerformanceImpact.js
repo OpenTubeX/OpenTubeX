@@ -50,6 +50,8 @@ const SETTING_PERFORMANCE_IMPACTS = new Map([
   ['subscriptionLiveAutoRefreshInterval', { level: 'moderate', resources: ['Network'] }],
   ['subscriptionPostsAutoRefreshInterval', { level: 'moderate', resources: ['Network'] }],
   ['rssFeedsAutoRefreshInterval', { level: 'moderate', resources: ['Network'] }],
+  ['platformFeedAutoRefreshInterval', { level: 'moderate', resources: ['Network'] }],
+  ['twitchLiveNotifications', { level: 'moderate', resources: ['Network'] }],
 
   // higher resolutions cost bandwidth and are more work to decode
   ['defaultQuality', { level: 'moderate', resources: ['Network', 'CPU'] }],

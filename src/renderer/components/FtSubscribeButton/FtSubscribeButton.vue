@@ -224,6 +224,7 @@ import { supportsUploadNotifications } from '../../helpers/uploadNotifications'
 
 import { MAIN_PROFILE_ID } from '../../../constants'
 import { showToast } from '../../helpers/utils'
+import { mirrorYouTubeSubscription } from '../../helpers/api/youtube-account'
 import { normalizeChannelHandle } from '../../helpers/feed-metadata'
 import { getFirstCharacter } from '../../helpers/strings'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
@@ -734,6 +735,10 @@ function handleSubscription(profile) {
     }
 
     showToast({ message: t('Channel.Added channel to your subscriptions'), icon: ['fas', 'subscriptions'] })
+    // Only the first profile to subscribe adds the channel to All Channels.
+    if (profileIds.includes(MAIN_PROFILE_ID)) {
+      mirrorYouTubeSubscription(props.channelId, true)
+    }
     emit('subscribed')
   }
 
@@ -934,6 +939,10 @@ function handleUnsubscription(profile) {
   }
 
   store.dispatch('removeChannelFromProfiles', { channelIds: [props.channelId], profileIds })
+  // Removing a channel from All Channels unsubscribes every profile.
+  if (profile._id === MAIN_PROFILE_ID) {
+    mirrorYouTubeSubscription(props.channelId, false)
+  }
 
   showToast({ message: t('Channel.Channel has been removed from your subscriptions'), icon: ['fas', 'trash'] })
 

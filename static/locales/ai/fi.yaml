@@ -221,6 +221,26 @@ Subscriptions:
       Not Set: Ei asetettu
     Retry Feed: Yritä ladata {feed} uudelleen
     Reloading Feed: Ladataan {feed} uudelleen
+  Platforms:
+    Tab: Alustat
+    Platform: Alusta
+    All Platforms: Kaikki alustat
+    Followed Channels: Seuratut kanavat muilla alustoilla
+    Description: Seuraa kanavia palveluissa Twitch, SoundCloud, PeerTube, Rumble ja Odysee, niin näet niiden lataukset tilaustesi Alustat-välilehdellä. Etsi kanavia haulla tai lisää ne niiden sivun osoitteella. Niiden media toistetaan yt-dlp:llä.
+    Add Channel: Lisää kanava
+    Channel URL: Kanavan osoite
+    Invalid Channel: Kirjoita kanavasivun osoite palvelusta Twitch, SoundCloud, PeerTube, Rumble tai Odysee.
+    Channel Not Found: Tässä osoitteessa ei ole kanavaa.
+    Channel Already Followed: Seuraat jo tätä kanavaa.
+    Channel Could Not Be Loaded: Kanavaa ei voitu ladata.
+    No Channels: Et seuraa vielä yhtään kanavaa muilla alustoilla.
+    Unfollow Channel: Lopeta kanavan {channel} seuraaminen
+    Go To Channel: Siirry kanavalle {channel}
+    Follow: Seuraa
+    Following: Seurataan
+    Clips: Klipit
+    Refresh Errors: 1 kanavaa ei voitu päivittää. | {count} kanavaa ei voitu päivittää.
+    Content Tabs: Alustojen sisällön välilehdet
 Trending:
   Music: Musiikki
   Load Error: Nousussa olevia videoita ei voitu ladata.
@@ -314,6 +334,37 @@ History:
   History Older Than Days Removed: Yli päivän vanha katseluhistoria on poistettu | Yli {days} päivää vanha katseluhistoria on poistettu
 Settings:
   Experimental Badge: Kokeellinen
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube-tili"
+    Unofficial App Warning: "OpenTubeX ei ole YouTuben virallinen sovellus. Kun kirjaudut sisään, täällä tekemäsi asiat yhdistetään Google-tiliisi, ja Google voi rajoittaa tai estää tilejä, jotka käyttävät epävirallisia sovelluksia. Kirjaudu sisään vain tilillä, jonka olet valmis menettämään."
+    Sign In Explanation: "OpenTubeX kirjautuu sisään kuten TV-sovellus: hyväksyt kirjautumisen Googlen verkkosivustolla, eikä OpenTubeX koskaan näe salasanaasi. Kirjautuminen säilyy tällä laitteella, eikä sitä synkronoida tai varmuuskopioida."
+    Sign In: "Kirjaudu sisään"
+    Sign In Anyway: "Kirjaudu silti"
+    Sign Out: "Kirjaudu ulos"
+    Getting Sign-In Code: "Haetaan kirjautumiskoodia"
+    Sign In Instructions: "Avaa kirjautumissivu ja valitse Google-tilisi. Koodi täytetään automaattisesti."
+    Other Device Instructions: "Siirry toisella laitteella tähän osoitteeseen ja syötä koodi:"
+    YouTube Channel: "YouTube-kanava"
+    Using Channel: "Käytät nyt YouTubea käyttäjänä {name}"
+    Switch Channel Failed: "YouTube-kanavan vaihtaminen epäonnistui: {error}"
+    Open Sign-In Page: "Avaa kirjautumissivu"
+    Copy Code: "Kopioi koodi"
+    Code Copied: "Koodi kopioitu"
+    Waiting for Approval: "Odotetaan, että hyväksyt kirjautumisen"
+    Sign-In Denied: "Kirjautuminen hylättiin."
+    Sign-In Code Expired: "Koodi vanheni. Yritä uudelleen saadaksesi uuden."
+    Sign-In Failed: "Kirjautuminen epäonnistui: {error}"
+    Signed In As: "Kirjauduttu YouTubeen käyttäjänä {name}"
+    Signed Out: "Kirjauduttu ulos YouTubesta"
+    Sign Out Failed: "Uloskirjautuminen epäonnistui: {error}"
+    Revoke Failed: "Kirjauduit ulos YouTubesta, mutta Google ei vahvistanut kirjautumisen päättymistä. Voit poistaa sen Google-tilisi kolmannen osapuolen yhteyksistä."
+    Signed out by YouTube: "YouTube päätti kirjautumisen. Kirjaudu uudelleen asetuksissa, jotta voit jatkaa tilisi käyttöä."
+    Subscribe on YouTube: "Tilaa myös YouTubessa"
+    Add to YouTube Watch History: "Lisää katsotut videot YouTube-historiaan"
+    Import Subscriptions: "Tuo tilaukset YouTubesta"
+    Imported Subscriptions: "{count} kanava tuotu | {count} kanavaa tuotu"
+    No Subscriptions to Import: "Tällä YouTube-tilillä ei ole tilauksia"
+    Import Subscriptions Failed: "Tilausten tuonti epäonnistui: {error}"
   Diagnostics:
     Diagnostics: Vianmääritys
     Description: Kun vianmääritysloki on käytössä, OpenTubeX säilyttää viimeisimmät lokiviestit muistissa, jotta voit liittää ne virheraportteihin. Se ei koskaan tallenna tai lähetä niitä itsestään, ja lokin poistaminen käytöstä poistaa ne. Raportit jättävät pois evästeet, tunnukset, IP-osoitteet ja URL-parametrit, mutta ne voivat sisältää toistamiesi videoiden tunnuksia, joten tarkista raportti ennen kuin jaat sen.
@@ -1181,6 +1232,11 @@ Settings:
     Notify About New Uploads: Ilmoita uusista latauksista
     RSS Feeds Auto Refresh Interval: RSS-syötteiden automaattisen päivityksen aikaväli
     Faster Subscription Refresh: "Nopeampi tilausten päivitys"
+    Platforms:
+      Other Platforms: Muut alustat
+      Manage Channels: Hallitse seurattuja kanavia
+      Notify When Live: Ilmoita, kun seuratut Twitch-kanavat aloittavat suoratoiston
+      Auto Refresh Interval: Muiden alustojen automaattisen päivityksen aikaväli
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Katseluaika lasketaan"
@@ -2028,6 +2084,7 @@ Context Menu:
   Reload Posts: Lataa julkaisut uudelleen
   Reload All Feeds: Lataa kaikki syötteet uudelleen
   Reload RSS Feeds: Lataa RSS-syötteet uudelleen
+  Reload Platforms: Lataa alustat uudelleen
   Close Multiple Tabs: Sulje {count} välilehteä
   Duplicate Tab: Monista välilehti
   Duplicate Multiple Tabs: Monista {count} välilehteä
@@ -2180,6 +2237,9 @@ Description:
   Games: Pelit
   Music: Musiikki
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Kun tilaat kanavan tai perut sen tilauksen OpenTubeX:ssä, sama tehdään YouTube-tililläsi."
+    Add to YouTube Watch History: "Toistamasi videot lisätään YouTube-katseluhistoriaasi, jotta YouTuben suositukset oppivat niistä. Mitään ei lisätä, kun historia on keskeytetty YouTubessa."
   General Settings:
     Built-in Streams: |
       Automaattinen toistaa useimmat videot YouTuben visionOS-asiakasohjelman kautta, joka käynnistyy nopeammin ja tukee automaattista laatua. Suorat lähetykset ja videot, joita se ei voi toistaa, käyttävät SABRia.
@@ -2292,6 +2352,8 @@ Tooltips:
     Notify About New Uploads: Näyttää tällä laitteella järjestelmäilmoituksia kanavista, joiden ilmoitukset olet ottanut käyttöön niiden tilausasetuksissa. OpenTubeX tarkistaa uuden sisällön tilauksia päivitettäessä, joten valitse automaattisen päivityksen aikaväli. Jos haluat ilmoituksia myös sovelluksen ollessa suljettuna, ota käyttöön myös päivitys sovelluksen ollessa suljettuna.
     RSS Feeds Auto Refresh Interval: Kuinka usein OpenTubeX päivittää RSS-syötteesi automaattisesti, kun sovellus on auki.
     Faster Subscription Refresh: "Tarkistaa ensin jokaisen kanavan RSS-syötteen ja lataa videot, Shorts-videot ja suoratoistot vain kanavilta, joilla on uusia latauksia. Automaattiset päivitykset ohittavat myös kanavat, jotka on ladattu viimeisen 10 minuutin aikana. Kanavilla, joilla ei ole uusia latauksia, katselukerrat, poistetut videot ja muuttuneet otsikot päivittyvät vain muutaman tunnin välein, ja uudet lataukset voivat näkyä myöhemmin, kun RSS-syöte on jäljessä. Ei käytettävissä Invidious-rajapinnan kanssa."
+    Platforms Auto Refresh Interval: Kuinka usein OpenTubeX päivittää muilla alustoilla seuraamasi kanavat automaattisesti, kun sovellus on auki.
+    Twitch Notify When Live: Ilmoittaa, kun jokin seuraamistasi Twitch-kanavista aloittaa lähetyksen. OpenTubeX tarkistaa muutaman minuutin välein ollessaan auki, ja myös ollessaan suljettuna, jos se silloin päivittää tilaukset.
   Theme Settings:
     Only Show Important Notifications: Piilottaa sovelluksen sisäiset ilmoitukset, jotka vain vahvistavat toiminnon tai kertovat tilasta. Virheet, varoitukset, asettamasi muistutukset ja toimintoa tarjoavat ilmoitukset, kuten Kumoa, näytetään edelleen. Taustatoimintojen edistyminen, kuten tilausten päivitys, näytetään ilmoituksen sijaan yleisessä edistymispalkissa. Järjestelmäilmoituksiin tämä ei vaikuta.
     Visible Search Suggestions: "Määrittää, montako hakuhistorian merkintää ja ehdotusta hakupalkki näyttää ennen kuin sen luetteloa täytyy vierittää. Luettelo ei koskaan ulotu ikkunan alareunan yli."
@@ -2689,3 +2751,31 @@ Notification Center:
   Clear: "Tyhjennä"
   Empty: "Ei vielä ilmoituksia"
   Empty Hint: "Suoratoistojen muistutukset ja uudet lataukset kanavilta, joiden ilmoitukset ovat päällä, näkyvät täällä."
+Platforms:
+  Tracks: Kappaleet
+  Playlists: Soittolistat
+  Follower Count: 1 seuraaja | {count} seuraajaa
+  Open Website: Avaa palvelussa {platform}
+  Channel Not Found: Tätä kanavaa ei löytynyt.
+  Playlist Not Found: Tätä soittolistaa ei löytynyt.
+  Load Error: Tätä sivua ei voitu ladata palvelusta {platform}.
+  Empty Tab: Täällä ei ole vielä mitään.
+YouTube Account:
+  Like: "Tykkää"
+  Dislike: "En tykkää"
+  Rating Failed: "Arviointi YouTubessa epäonnistui: {error}"
+  Subscribe Failed: "Tilaaminen YouTubessa epäonnistui: {error}"
+  Unsubscribe Failed: "Tilauksen peruminen YouTubessa epäonnistui: {error}"
+  Add a comment: "Lisää kommentti"
+  Add a reply: "Lisää vastaus"
+  Comment: "Kommentoi"
+  Reply: "Vastaa"
+  Comment Posted: "Kommentti julkaistu"
+  Reply Posted: "Vastaus julkaistu"
+  Comment Failed: "Kommentin julkaiseminen epäonnistui: {error}"
+  Delete Comment: "Poista kommentti"
+  Delete Comment Confirmation: "Poistetaanko kommenttisi YouTubesta?"
+  Comment Deleted: "Kommentti poistettu"
+  Delete Comment Failed: "Kommentin poistaminen epäonnistui: {error}"
+  Recommendations: "YouTube-suositukset"
+  Recommendations Failed: "YouTube-suosituksiasi ei voitu ladata."

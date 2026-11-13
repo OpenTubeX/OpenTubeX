@@ -255,6 +255,26 @@ Subscriptions:
       Not Set: Nenustatyta
     Retry Feed: Bandyti dar kartą įkelti {feed}
     Reloading Feed: Iš naujo įkeliamas {feed}
+  Platforms:
+    Tab: Platformos
+    Platform: Platforma
+    All Platforms: Visos platformos
+    Followed Channels: Sekami kanalai kitose platformose
+    Description: Sekite kanalus Twitch, SoundCloud, PeerTube, Rumble ir Odysee platformose, kad jų įkeltą turinį matytumėte savo prenumeratų skirtuke „Platformos“. Raskite kanalus paieška arba pridėkite juos pagal jų puslapio adresą. Jų medija atkuriama naudojant yt-dlp.
+    Add Channel: Pridėti kanalą
+    Channel URL: Kanalo adresas
+    Invalid Channel: Įveskite kanalo puslapio adresą Twitch, SoundCloud, PeerTube, Rumble arba Odysee platformoje.
+    Channel Not Found: Šiuo adresu kanalo nėra.
+    Channel Already Followed: Jūs jau sekate šį kanalą.
+    Channel Could Not Be Loaded: Nepavyko įkelti kanalo.
+    No Channels: Dar nesekate jokių kanalų kitose platformose.
+    Unfollow Channel: Nebesekti {channel}
+    Go To Channel: Eiti į kanalą {channel}
+    Follow: Sekti
+    Following: Sekama
+    Clips: Klipai
+    Refresh Errors: Nepavyko atnaujinti {count} kanalo. | Nepavyko atnaujinti {count} kanalų. | Nepavyko atnaujinti {count} kanalų.
+    Content Tabs: Platformų turinio kortelės
 Trending:
   Music: Muzika
   Load Error: Nepavyko įkelti tendencijų.
@@ -433,6 +453,37 @@ History:
   History Older Than Days Removed: Pašalinti senesni nei {days} dienos žiūrėjimo istorijos įrašai | Pašalinti senesni nei {days} dienų žiūrėjimo istorijos įrašai | Pašalinti senesni nei {days} dienų žiūrėjimo istorijos įrašai
 Settings:
   Experimental Badge: Eksperimentinis
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube paskyra"
+    Unofficial App Warning: "OpenTubeX nėra oficiali YouTube programa. Prisijungus tai, ką čia darote, susiejama su jūsų Google paskyra, o Google gali apriboti arba užblokuoti paskyras, kurios naudoja neoficialias programas. Prisijunkite tik su paskyra, kurios netekti jums nebūtų gaila."
+    Sign In Explanation: "OpenTubeX prisijungia kaip TV programėlė: prisijungimą patvirtinate Google svetainėje, o OpenTubeX niekada nemato jūsų slaptažodžio. Prisijungimas lieka šiame įrenginyje ir nėra sinchronizuojamas ar įtraukiamas į atsargines kopijas."
+    Sign In: "Prisijungti"
+    Sign In Anyway: "Vis tiek prisijungti"
+    Sign Out: "Atsijungti"
+    Getting Sign-In Code: "Gaunamas prisijungimo kodas"
+    Sign In Instructions: "Atidarykite prisijungimo puslapį ir pasirinkite savo Google paskyrą. Kodas įvedamas automatiškai."
+    Other Device Instructions: "Kitame įrenginyje eikite šiuo adresu ir įveskite kodą:"
+    YouTube Channel: "YouTube kanalas"
+    Using Channel: "Dabar naudojate YouTube kaip {name}"
+    Switch Channel Failed: "Nepavyko perjungti YouTube kanalo: {error}"
+    Open Sign-In Page: "Atidaryti prisijungimo puslapį"
+    Copy Code: "Kopijuoti kodą"
+    Code Copied: "Kodas nukopijuotas"
+    Waiting for Approval: "Laukiama, kol patvirtinsite prisijungimą"
+    Sign-In Denied: "Prisijungimas atmestas."
+    Sign-In Code Expired: "Kodo galiojimas baigėsi. Bandykite dar kartą, kad gautumėte naują."
+    Sign-In Failed: "Nepavyko prisijungti: {error}"
+    Signed In As: "Prisijungta prie YouTube kaip {name}"
+    Signed Out: "Atsijungta nuo YouTube"
+    Sign Out Failed: "Nepavyko atsijungti: {error}"
+    Revoke Failed: "Atsijungta nuo YouTube, bet Google nepatvirtino, kad prisijungimas baigtas. Jį galite pašalinti savo Google paskyros trečiųjų šalių ryšiuose."
+    Signed out by YouTube: "YouTube nutraukė prisijungimą. Prisijunkite iš naujo nustatymuose, kad galėtumėte toliau naudoti savo paskyrą."
+    Subscribe on YouTube: "Prenumeruoti ir YouTube"
+    Add to YouTube Watch History: "Įtraukti žiūrėtus vaizdo įrašus į YouTube istoriją"
+    Import Subscriptions: "Importuoti prenumeratas iš YouTube"
+    Imported Subscriptions: "Importuotas {count} kanalas | Importuoti {count} kanalai | Importuota {count} kanalų"
+    No Subscriptions to Import: "Ši YouTube paskyra neturi prenumeratų"
+    Import Subscriptions Failed: "Nepavyko importuoti prenumeratų: {error}"
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Kol diagnostikos žurnalas įjungtas, OpenTubeX laiko naujausius žurnalo pranešimus atmintyje, kad galėtumėte juos pridėti prie pranešimų apie klaidas. Jis niekada jų neišsaugo ir nesiunčia pats, o išjungus žurnalą jie ištrinami. Ataskaitose nėra slapukų, prieigos raktų, IP adresų ir URL parametrų, tačiau jose gali būti jūsų paleistų vaizdo įrašų ID, todėl prieš dalindamiesi ataskaita ją peržiūrėkite.
@@ -1400,6 +1451,11 @@ Settings:
     Confirm Before Unsubscribing: Klausti prieš atsisakant prenumeratos
     RSS Feeds Auto Refresh Interval: RSS sklaidos kanalų automatinio atnaujinimo intervalas
     Faster Subscription Refresh: "Greitesnis prenumeratų atnaujinimas"
+    Platforms:
+      Other Platforms: Kitos platformos
+      Manage Channels: Tvarkyti sekamus kanalus
+      Notify When Live: Pranešti, kai sekami Twitch kanalai pradeda tiesioginę transliaciją
+      Auto Refresh Interval: Kitų platformų automatinio atnaujinimo intervalas
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Skaičiuoti žiūrėjimo laiką"
@@ -2433,6 +2489,7 @@ Context Menu:
   Reload Posts: Įkelti įrašus iš naujo
   Reload All Feeds: Iš naujo įkelti visus kanalus
   Reload RSS Feeds: Iš naujo įkelti RSS sklaidos kanalus
+  Reload Platforms: Iš naujo įkelti platformas
   Close Multiple Tabs: Uždaryti {count} kortelę | Uždaryti {count} korteles | Uždaryti {count} kortelių
   Duplicate Tab: Dubliuoti kortelę
   Duplicate Multiple Tabs: Dubliuoti {count} kortelę | Dubliuoti {count} korteles | Dubliuoti {count} kortelių
@@ -2596,6 +2653,9 @@ Description:
   Games: Žaidimai
   Music: Muzika
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Užsiprenumeravus kanalą arba atšaukus jo prenumeratą programoje OpenTubeX, tas pats atliekama ir jūsų YouTube paskyroje."
+    Add to YouTube Watch History: "Jūsų paleisti vaizdo įrašai įtraukiami į jūsų YouTube žiūrėjimo istoriją, kad YouTube rekomendacijos iš jų mokytųsi. Kol istorija YouTube pristabdyta, niekas neįtraukiama."
   General Settings:
     Built-in Streams: |
       Automatinis režimas daugumą vaizdo įrašų leidžia per YouTube visionOS klientą, kuris paleidžia greičiau ir palaiko automatinę kokybę. Tiesioginės transliacijos ir vaizdo įrašai, kurių jis negali paleisti, naudoja SABR.
@@ -2716,6 +2776,8 @@ Tooltips:
     Notify About New Uploads: Šiame įrenginyje rodo sistemos pranešimus apie kanalus, kurių pranešimus įjungėte jų prenumeratos nustatymuose. OpenTubeX naujo turinio ieško atnaujindama prenumeratas, todėl pasirinkite automatinio atnaujinimo intervalą. Kad gautumėte pranešimus, kai programa uždaryta, taip pat įjunkite atnaujinimą, kai programa uždaryta.
     RSS Feeds Auto Refresh Interval: Kaip dažnai OpenTubeX automatiškai atnaujina jūsų RSS sklaidos kanalus, kol programa atidaryta.
     Faster Subscription Refresh: "Pirmiausia patikrina kiekvieno kanalo RSS sklaidos kanalą ir įkelia vaizdo įrašus, Shorts ir tiesiogines transliacijas tik iš kanalų su naujais įkėlimais. Automatiniai atnaujinimai taip pat praleidžia kanalus, įkeltus per pastarąsias 10 minučių. Kanaluose be naujų įkėlimų peržiūrų skaičiai, pašalinti vaizdo įrašai ir pakeisti pavadinimai atnaujinami tik kas kelias valandas, o nauji įkėlimai gali pasirodyti vėliau, kai RSS sklaidos kanalas vėluoja. Nepasiekiama naudojant Invidious API."
+    Platforms Auto Refresh Interval: Kaip dažnai OpenTubeX automatiškai atnaujina kanalus, kuriuos sekate kitose platformose, kol programa atidaryta.
+    Twitch Notify When Live: Praneša, kai vienas iš jūsų sekamų Twitch kanalų pradeda transliaciją. OpenTubeX tikrina kas kelias minutes, kol yra atidaryta, ir taip pat, kai yra uždaryta, jei tuo metu atnaujina prenumeratas.
   Theme Settings:
     Only Show Important Notifications: Paslepia programos pranešimus, kurie tik patvirtina veiksmą arba praneša būseną. Klaidos, įspėjimai, jūsų nustatyti priminimai ir pranešimai, siūlantys veiksmą, pavyzdžiui, Anuliuoti, vis tiek rodomi. Foninių operacijų, pavyzdžiui, prenumeratų atnaujinimo, eiga rodoma bendrojoje eigos juostoje, o ne pranešime. Sistemos pranešimams tai neturi įtakos.
     Visible Search Suggestions: "Nustato, kiek paieškos istorijos įrašų ir pasiūlymų paieškos juosta rodo, kol jos sąrašą reikia slinkti. Sąrašas niekada nesiekia toliau už lango apačią."
@@ -3185,3 +3247,31 @@ Notification Center:
   Clear: "Išvalyti"
   Empty: "Pranešimų dar nėra"
   Empty Hint: "Čia bus rodomi tiesioginių transliacijų priminimai ir nauji įkėlimai iš kanalų su įjungtais pranešimais."
+Platforms:
+  Tracks: Takeliai
+  Playlists: Grojaraščiai
+  Follower Count: '{count} sekėjas | {count} sekėjai | {count} sekėjų'
+  Open Website: Atidaryti platformoje {platform}
+  Channel Not Found: Šio kanalo rasti nepavyko.
+  Playlist Not Found: Šio grojaraščio rasti nepavyko.
+  Load Error: Nepavyko įkelti šio puslapio iš {platform}.
+  Empty Tab: Čia dar nieko nėra.
+YouTube Account:
+  Like: "Patinka"
+  Dislike: "Nepatinka"
+  Rating Failed: "Nepavyko įvertinti YouTube: {error}"
+  Subscribe Failed: "Nepavyko užsiprenumeruoti YouTube: {error}"
+  Unsubscribe Failed: "Nepavyko atšaukti prenumeratos YouTube: {error}"
+  Add a comment: "Pridėti komentarą"
+  Add a reply: "Pridėti atsakymą"
+  Comment: "Komentuoti"
+  Reply: "Atsakyti"
+  Comment Posted: "Komentaras paskelbtas"
+  Reply Posted: "Atsakymas paskelbtas"
+  Comment Failed: "Nepavyko paskelbti komentaro: {error}"
+  Delete Comment: "Ištrinti komentarą"
+  Delete Comment Confirmation: "Ištrinti jūsų komentarą iš YouTube?"
+  Comment Deleted: "Komentaras ištrintas"
+  Delete Comment Failed: "Nepavyko ištrinti komentaro: {error}"
+  Recommendations: "YouTube rekomendacijos"
+  Recommendations Failed: "Nepavyko įkelti jūsų YouTube rekomendacijų."

@@ -222,6 +222,26 @@ Subscriptions:
       Not Set: Not set
     Retry Feed: Retry {feed}
     Reloading Feed: Reloading {feed}
+  Platforms:
+    Tab: Platforms
+    Platform: Platform
+    All Platforms: All platforms
+    Followed Channels: Followed channels on other platforms
+    Description: Follow channels on Twitch, SoundCloud, PeerTube, Rumble and Odysee to see their uploads in the Platforms tab of your subscriptions. Find channels with the search, or add them by the address of their page. Their media plays with yt-dlp.
+    Add Channel: Add channel
+    Channel URL: Channel address
+    Invalid Channel: Enter the address of a channel page on Twitch, SoundCloud, PeerTube, Rumble or Odysee.
+    Channel Not Found: There is no channel at this address.
+    Channel Already Followed: You already follow this channel.
+    Channel Could Not Be Loaded: The channel could not be loaded.
+    No Channels: You don't follow any channels on other platforms yet.
+    Unfollow Channel: Unfollow {channel}
+    Go To Channel: Go to {channel}
+    Follow: Follow
+    Following: Following
+    Clips: Clips
+    Refresh Errors: 1 channel could not be refreshed. | {count} channels could not be refreshed.
+    Content Tabs: Platform content tabs
 Trending:
   Music: Music
   Load Error: Trending could not be loaded.
@@ -316,6 +336,37 @@ History:
   History Older Than Days Removed: Watch history older than 1 day has been removed | Watch history older than {days} days has been removed
 Settings:
   Experimental Badge: Experimental
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube Account"
+    Unofficial App Warning: "OpenTubeX is not an official YouTube app. Signing in links what you do here to your Google account, and Google can restrict or ban accounts that use unofficial apps. Only sign in with an account you can afford to lose."
+    Sign In Explanation: "OpenTubeX signs in like a TV app: you approve it on Google's website, and OpenTubeX never sees your password. The sign-in stays on this device and is not synced or backed up."
+    Sign In: "Sign in"
+    Sign In Anyway: "Sign in anyway"
+    Sign Out: "Sign out"
+    Getting Sign-In Code: "Getting a sign-in code"
+    Sign In Instructions: "Open the sign-in page and choose your Google account. The code is filled in for you."
+    Other Device Instructions: "On another device, go to this address and enter the code:"
+    YouTube Channel: "YouTube channel"
+    Using Channel: "Now using YouTube as {name}"
+    Switch Channel Failed: "Could not switch the YouTube channel: {error}"
+    Open Sign-In Page: "Open sign-in page"
+    Copy Code: "Copy code"
+    Code Copied: "Code copied"
+    Waiting for Approval: "Waiting for you to approve the sign-in"
+    Sign-In Denied: "The sign-in was denied."
+    Sign-In Code Expired: "The code expired. Try again to get a new one."
+    Sign-In Failed: "Could not sign in: {error}"
+    Signed In As: "Signed in to YouTube as {name}"
+    Signed Out: "Signed out of YouTube"
+    Sign Out Failed: "Could not sign out: {error}"
+    Revoke Failed: "Signed out of YouTube, but Google did not confirm that the sign-in ended. You can remove it under third-party connections in your Google account."
+    Signed out by YouTube: "YouTube ended the sign-in. Sign in again in Settings to keep using your account."
+    Subscribe on YouTube: "Subscribe on YouTube too"
+    Add to YouTube Watch History: "Add watched videos to YouTube history"
+    Import Subscriptions: "Import subscriptions from YouTube"
+    Imported Subscriptions: "Imported {count} channel | Imported {count} channels"
+    No Subscriptions to Import: "This YouTube account has no subscriptions"
+    Import Subscriptions Failed: "Could not import subscriptions: {error}"
   Diagnostics:
     Diagnostics: Diagnostics
     Description: While diagnostic logging is on, OpenTubeX keeps recent log messages in memory so you can attach them to bug reports. It never saves or sends them on its own, and turning logging off deletes them. Reports leave out cookies, tokens, IP addresses and URL parameters, but they can include IDs of videos you played, so check a report before you share it.
@@ -1168,6 +1219,11 @@ Settings:
     Notify About New Uploads: Notify About New Uploads
     RSS Feeds Auto Refresh Interval: RSS Feeds Auto Refresh Interval
     Faster Subscription Refresh: "Faster Subscription Refresh"
+    Platforms:
+      Other Platforms: Other platforms
+      Manage Channels: Manage followed channels
+      Notify When Live: Notify when followed Twitch channels go live
+      Auto Refresh Interval: Other platforms auto refresh interval
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Count Watch Time From"
@@ -2018,6 +2074,7 @@ Context Menu:
   Reload Posts: Reload Posts
   Reload All Feeds: Reload All Feeds
   Reload RSS Feeds: Reload RSS Feeds
+  Reload Platforms: Reload Platforms
   Close Multiple Tabs: Close {count} Tabs
   Duplicate Tab: Duplicate Tab
   Duplicate Multiple Tabs: Duplicate {count} Tabs
@@ -2171,6 +2228,9 @@ Description:
   Games: Games
   Music: Music
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Subscribing to or unsubscribing from a channel in OpenTubeX does the same on your YouTube account."
+    Add to YouTube Watch History: "Videos you play are added to your YouTube watch history, so YouTube's recommendations learn from them. Nothing is added while the history is paused on YouTube."
   General Settings:
     Built-in Streams: |
       Automatic plays most videos through YouTube's visionOS client, which starts faster and supports automatic quality. Live streams and videos it can't play use SABR.
@@ -2282,6 +2342,8 @@ Tooltips:
     Notify About New Uploads: Shows system notifications on this device for channels whose notifications you turned on in their subscription settings. OpenTubeX checks for new content when subscriptions refresh, so choose an auto refresh interval. To be notified while the app is closed, also enable refreshing while the app is closed.
     RSS Feeds Auto Refresh Interval: How often OpenTubeX automatically refreshes your RSS feeds while the app is open.
     Faster Subscription Refresh: "Checks each channel's RSS feed first and only loads the videos, Shorts and live streams of channels with new uploads. Automatic refreshes also skip channels loaded in the last 10 minutes. For channels without new uploads, view counts, removed videos and changed titles only update every few hours, and new uploads may appear later when the RSS feed lags behind. Not available with the Invidious API."
+    Platforms Auto Refresh Interval: How often OpenTubeX automatically refreshes the channels you follow on other platforms while the app is open.
+    Twitch Notify When Live: Notifies you when one of your followed Twitch channels starts streaming. OpenTubeX checks every few minutes while it is open, and also while it is closed if it refreshes subscriptions then.
   Theme Settings:
     Only Show Important Notifications: Hides in-app notifications that only confirm an action or report a status. Errors, warnings, reminders you set up, and notifications that offer an action, such as Undo, still appear. Background progress, such as subscription refreshes, shows in the global progress bar instead of a notification. System notifications are not affected.
     Visible Search Suggestions: "Sets how many search history entries and suggestions the search bar shows before its list scrolls. The list never extends past the bottom of the window."
@@ -2680,3 +2742,31 @@ Notification Center:
   Clear: "Clear"
   Empty: "No notifications yet"
   Empty Hint: "Live stream reminders and new uploads from channels with notifications turned on will show up here."
+Platforms:
+  Tracks: Tracks
+  Playlists: Playlists
+  Follower Count: 1 follower | {count} followers
+  Open Website: Open on {platform}
+  Channel Not Found: This channel could not be found.
+  Playlist Not Found: This playlist could not be found.
+  Load Error: This page could not be loaded from {platform}.
+  Empty Tab: There is nothing here yet.
+YouTube Account:
+  Like: "Like"
+  Dislike: "Dislike"
+  Rating Failed: "Could not rate on YouTube: {error}"
+  Subscribe Failed: "Could not subscribe on YouTube: {error}"
+  Unsubscribe Failed: "Could not unsubscribe on YouTube: {error}"
+  Add a comment: "Add a comment"
+  Add a reply: "Add a reply"
+  Comment: "Comment"
+  Reply: "Reply"
+  Comment Posted: "Comment posted"
+  Reply Posted: "Reply posted"
+  Comment Failed: "Could not post the comment: {error}"
+  Delete Comment: "Delete comment"
+  Delete Comment Confirmation: "Delete your comment from YouTube?"
+  Comment Deleted: "Comment deleted"
+  Delete Comment Failed: "Could not delete the comment: {error}"
+  Recommendations: "YouTube recommendations"
+  Recommendations Failed: "Could not load your YouTube recommendations."

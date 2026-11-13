@@ -3,6 +3,7 @@ import { BrowserWindow } from 'electron'
 import { DBActions, IpcChannels, PlaylistVideoAddResult, SyncEvents } from '../constants'
 import * as baseHandlers from '../datastores/handlers/base'
 import { handleTrusted, sendToOtherAppWindows } from './ipc'
+import { settingSyncMessage } from './settingRevisions'
 import { canRendererWriteSetting } from './settingWriteGuard'
 import { TabManager } from './tabs/TabManager'
 import { recordSubscriptionFeedTitles } from './videoMetadataCache'
@@ -29,34 +30,50 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
     sendToOtherAppWindows(event.sender, channel, payload)
   }
 
+  /**
+   * Like `handleDatastoreRequests` for requests that can save settings. They
+   * reply with `{ result, savedSetting }`, where `savedSetting` holds the
+   * revision of the setting the request saved, so the window can drop older
+   * broadcasts that arrive after the reply.
+   * @param {string} channel
+   * @param {(
+   *   event: import('electron').IpcMainInvokeEvent,
+   *   request: { action: number, data: any },
+   *   syncSetting: (_id: string, value: unknown) => void
+   * ) => Promise<unknown>} handler
+   */
+  function handleRequestsSavingSettings(channel, handler) {
+    handleDatastoreRequests(channel, async (event, request) => {
+      /** @type {{ _id: string, revision: number } | null} */
+      let savedSetting = null
+      const result = await handler(event, request, (_id, value) => {
+        const message = settingSyncMessage(_id, value)
+        syncOtherWindows(IpcChannels.SYNC_SETTINGS, event, message)
+        savedSetting = { _id, revision: message.revision }
+      })
+      return { result, savedSetting }
+    })
+  }
+
   // Settings
-  handleDatastoreRequests(IpcChannels.DB_SETTINGS, async (event, { action, data }) => {
+  handleRequestsSavingSettings(IpcChannels.DB_SETTINGS, async (event, { action, data }, syncSetting) => {
     try {
       switch (action) {
         case DBActions.SETTINGS.MERGE_SEEN_VIDEOS: {
           const value = await baseHandlers.settings.mergeSeenVideos(data)
-          syncOtherWindows(IpcChannels.SYNC_SETTINGS, event, {
-            event: SyncEvents.GENERAL.UPSERT,
-            data: { _id: 'subscriptionSeenVideos', value }
-          })
+          syncSetting('subscriptionSeenVideos', value)
           return value
         }
 
         case DBActions.SETTINGS.MERGE_SEEN_POSTS: {
           const value = await baseHandlers.settings.mergeSeenPosts(data)
-          syncOtherWindows(IpcChannels.SYNC_SETTINGS, event, {
-            event: SyncEvents.GENERAL.UPSERT,
-            data: { _id: 'subscriptionSeenPosts', value }
-          })
+          syncSetting('subscriptionSeenPosts', value)
           return value
         }
 
         case DBActions.SETTINGS.MERGE_SEEN_RSS_ITEMS: {
           const value = await baseHandlers.settings.mergeSeenRssItems(data)
-          syncOtherWindows(IpcChannels.SYNC_SETTINGS, event, {
-            event: SyncEvents.GENERAL.UPSERT,
-            data: { _id: 'rssFeedSeenItems', value }
-          })
+          syncSetting('rssFeedSeenItems', value)
           return value
         }
 
@@ -74,11 +91,7 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
           }
 
           await baseHandlers.settings.upsert(data._id, data.value)
-          syncOtherWindows(
-            IpcChannels.SYNC_SETTINGS,
-            event,
-            { event: SyncEvents.GENERAL.UPSERT, data }
-          )
+          syncSetting(data._id, data.value)
           await onSettingUpserted(data)
           return null
 
@@ -98,7 +111,7 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
   })
 
   // History
-  handleDatastoreRequests(IpcChannels.DB_HISTORY, async (event, { action, data }) => {
+  handleRequestsSavingSettings(IpcChannels.DB_HISTORY, async (event, { action, data }, syncSetting) => {
     try {
       switch (action) {
         case DBActions.HISTORY.UPDATE_SUBSCRIPTION_STATE: {
@@ -111,12 +124,7 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
                   data: { insertions: [], updates: result.records, deletions: [] }
                 })
           }
-          if (result.seenVideos != null) {
-            syncOtherWindows(IpcChannels.SYNC_SETTINGS, event, {
-              event: SyncEvents.GENERAL.UPSERT,
-              data: { _id: 'subscriptionSeenVideos', value: result.seenVideos }
-            })
-          }
+          if (result.seenVideos != null) syncSetting('subscriptionSeenVideos', result.seenVideos)
           return result
         }
 
@@ -715,7 +723,8 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
     try {
       switch (action) {
         case DBActions.GENERAL.FIND:
-          return await baseHandlers.subscriptionCache.find()
+          // Strings cross IPC and the context bridge far faster than records.
+          return await baseHandlers.subscriptionCache._findSerialized()
 
         case DBActions.SUBSCRIPTION_CACHE.UPDATE_VIDEOS_BY_CHANNEL:
           if (!await baseHandlers.subscriptionCache.updateVideosByChannelId(data.channelId, data.entries, data.timestamp)) return false

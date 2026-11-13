@@ -146,6 +146,16 @@ async function createInnertube({ withPlayer = false, location = undefined, safet
 }
 
 /**
+ * The signature timestamp of YouTube's current player script, which the
+ * signed-in TV player needs to answer.
+ * @returns {Promise<number | undefined>}
+ */
+export async function getLocalSignatureTimestamp() {
+  const innertube = await createInnertube({ withPlayer: true })
+  return innertube.session.player?.signature_timestamp
+}
+
+/**
  * @param {string} query
  * @param {AbortSignal} [signal]
  */
@@ -900,6 +910,7 @@ export function mergeLateWatchNext(info, playerResponse, nextResponse, actions) 
  *   androidLiveDashManifestUrl: string | null,
  *   getVrHlsManifest: () => Promise<string | null>,
  *   refreshVisionOsStreams?: (() => Promise<import('youtubei.js').YT.VideoInfo | null>) | null,
+ *   loadLegacyFormats?: (() => Promise<import('youtubei.js').Misc.Format[]>) | null,
  *   contentDisclosures: { label: string, description: string, attribution: string }[] | null,
  *   infoPanels: LocalInfoPanel[] | null,
  *   musicMediaType: import('../player/musicMediaType').MusicMediaType,
@@ -945,9 +956,10 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
   prewarmPlayerScriptEvaluator()
 
   // Playback loads take their streams from visionOS while the metadata loads,
-  // unless the user chose SABR. SABR reloads stay with the WEB streams that requested them.
+  // unless the user chose SABR or the legacy formats, which visionOS lacks.
+  // SABR reloads stay with the WEB streams that requested them.
   const visionOsStreamsRequest = lateWatchNext && !reloadPlaybackContext && store.getters.getBuiltInStreams !== 'sabr' &&
-    isVisionOsStreamsEnabled() && shouldGeneratePoToken()
+    store.getters.getDefaultVideoFormat !== 'legacy' && isVisionOsStreamsEnabled() && shouldGeneratePoToken()
     ? requestVisionOsStreams(id)
     : Promise.resolve(null)
 
@@ -1034,6 +1046,8 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
     await playerReady
     const visionOsStreams = await visionOsStreamsRequest
     let contentPoToken = direct?.poToken
+    /** @type {(() => Promise<string>) | null} */
+    let requestWebStreamsToken = null
     if (direct) {
       player.po_token = contentPoToken
     } else if ((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) &&
@@ -1048,6 +1062,8 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
       if (visionOsStreams && htmlExtracts.playerResponse) {
         // The watch page's metadata and visionOS's streams need no token. Attest
         // anyway, without waiting, so later videos can skip the watch page.
+        // The WEB legacy formats mint theirs only when they are played.
+        requestWebStreamsToken = requestToken
         backgroundAttestation ??= requestToken()
           .catch(error => console.warn('Local API, background attestation failed', error))
           .finally(() => { backgroundAttestation = null })
@@ -1082,12 +1098,12 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
           }
         })
     const musicMediaType = await resolveMusicMediaType(playerResponse, htmlExtracts.session.actions, id)
-    return { playerResponse, contentPoToken, musicMediaType, visionOsStreams }
+    return { playerResponse, contentPoToken, requestWebStreamsToken, musicMediaType, visionOsStreams }
   }
 
   // /next needs neither the playback token nor the player script.
   // Without the watch page, playback starts before /next arrives.
-  const [{ playerResponse, contentPoToken, musicMediaType, visionOsStreams }, nextResponse] = await Promise.all([
+  const [{ playerResponse, contentPoToken, requestWebStreamsToken, musicMediaType, visionOsStreams }, nextResponse] = await Promise.all([
     loadPlayerResponse(),
     direct
       ? null
@@ -1216,6 +1232,12 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
   }
 
   const usesVisionOsStreams = visionOsStreams !== null && info.playability_status.status === 'OK'
+  // visionOS has no muxed formats, so the legacy formats stay the WEB ones
+  const webLegacyFormats = usesVisionOsStreams ? info.streaming_data?.formats ?? [] : []
+  // They are held back by the WEB streams' preroll
+  const webAdEndTimeUnixMs = adEndTimeUnixMs
+  /** @type {Promise<import('youtubei.js').Misc.Format[]> | null} */
+  let legacyFormatsRequest = null
   if (usesVisionOsStreams) {
     const visionOsInfo = new YT.VideoInfo([{ data: visionOsStreams }], htmlExtracts.session.actions, cpn)
     info.streaming_data = visionOsInfo.streaming_data
@@ -1320,6 +1342,29 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
         prepareCaptionUrls(refreshed.captions, undefined, 'VISIONOS')
         return refreshed
       }
+      : null,
+    // The WEB legacy formats need the token and deciphering that visionOS's streams skip
+    loadLegacyFormats: webLegacyFormats.length > 0
+      ? () => {
+          if (legacyFormatsRequest) return legacyFormatsRequest
+          legacyFormatsRequest = (async () => {
+            const prerollEnd = new Promise(resolve => setTimeout(resolve, webAdEndTimeUnixMs - Date.now()))
+            const poToken = contentPoToken ?? await requestWebStreamsToken?.()
+            await decipherFormats(webLegacyFormats, player)
+            await prerollEnd
+            if (poToken) {
+              for (const format of webLegacyFormats) {
+                const url = new URL(format.freeTubeUrl)
+                url.searchParams.set('pot', poToken)
+                format.freeTubeUrl = url.toString()
+              }
+            }
+            return webLegacyFormats
+          })()
+          // A failed token or decipher can be retried
+          legacyFormatsRequest.catch(() => { legacyFormatsRequest = null })
+          return legacyFormatsRequest
+        }
       : null,
     watchNextPromise: getWatchNextPromise(),
   }

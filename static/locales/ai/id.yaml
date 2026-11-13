@@ -221,6 +221,26 @@ Subscriptions:
       Not Set: Tidak diatur
     Retry Feed: Coba lagi {feed}
     Reloading Feed: Memuat ulang {feed}
+  Platforms:
+    Tab: Platform
+    Platform: Platform
+    All Platforms: Semua platform
+    Followed Channels: Kanal yang diikuti di platform lain
+    Description: Ikuti kanal di Twitch, SoundCloud, PeerTube, Rumble, dan Odysee untuk melihat unggahan mereka di tab Platform pada langganan Anda. Temukan kanal melalui pencarian, atau tambahkan menggunakan alamat halamannya. Media mereka diputar dengan yt-dlp.
+    Add Channel: Tambah Kanal
+    Channel URL: Alamat kanal
+    Invalid Channel: Masukkan alamat halaman kanal di Twitch, SoundCloud, PeerTube, Rumble, atau Odysee.
+    Channel Not Found: Tidak ada kanal di alamat ini.
+    Channel Already Followed: Anda sudah mengikuti kanal ini.
+    Channel Could Not Be Loaded: Kanal tidak dapat dimuat.
+    No Channels: Anda belum mengikuti kanal apa pun di platform lain.
+    Unfollow Channel: Berhenti mengikuti {channel}
+    Go To Channel: Buka {channel}
+    Follow: Ikuti
+    Following: Mengikuti
+    Clips: Klip
+    Refresh Errors: '{count} kanal tidak dapat diperbarui.'
+    Content Tabs: Tab konten platform
 Trending:
   Music: Musik
   Load Error: Trending tidak dapat dimuat.
@@ -315,6 +335,37 @@ History:
   History Older Than Days Removed: Riwayat tontonan yang lebih lama dari {days} hari telah dihapus
 Settings:
   Experimental Badge: Eksperimental
+  YouTube Account Settings:
+    YouTube Account Settings: "Akun YouTube"
+    Unofficial App Warning: "OpenTubeX bukan aplikasi resmi YouTube. Saat masuk, aktivitas Anda di sini terhubung ke akun Google Anda, dan Google dapat membatasi atau memblokir akun yang menggunakan aplikasi tidak resmi. Masuklah hanya dengan akun yang tidak masalah jika hilang."
+    Sign In Explanation: "OpenTubeX masuk seperti aplikasi TV: Anda menyetujuinya di situs web Google, dan OpenTubeX tidak pernah melihat kata sandi Anda. Sesi masuk tetap berada di perangkat ini dan tidak disinkronkan atau dicadangkan."
+    Sign In: "Masuk"
+    Sign In Anyway: "Tetap masuk"
+    Sign Out: "Keluar"
+    Getting Sign-In Code: "Mendapatkan kode masuk"
+    Sign In Instructions: "Buka halaman masuk dan pilih akun Google Anda. Kode akan diisi secara otomatis."
+    Other Device Instructions: "Di perangkat lain, buka alamat ini lalu masukkan kodenya:"
+    YouTube Channel: "Kanal YouTube"
+    Using Channel: "Sekarang menggunakan YouTube sebagai {name}"
+    Switch Channel Failed: "Tidak dapat mengganti kanal YouTube: {error}"
+    Open Sign-In Page: "Buka halaman masuk"
+    Copy Code: "Salin kode"
+    Code Copied: "Kode disalin"
+    Waiting for Approval: "Menunggu Anda menyetujui proses masuk"
+    Sign-In Denied: "Proses masuk ditolak."
+    Sign-In Code Expired: "Kode telah kedaluwarsa. Coba lagi untuk mendapatkan kode baru."
+    Sign-In Failed: "Tidak dapat masuk: {error}"
+    Signed In As: "Masuk ke YouTube sebagai {name}"
+    Signed Out: "Keluar dari YouTube"
+    Sign Out Failed: "Tidak dapat keluar: {error}"
+    Revoke Failed: "Anda telah keluar dari YouTube, tetapi Google tidak mengonfirmasi bahwa sesi masuk telah berakhir. Anda dapat menghapusnya di koneksi pihak ketiga pada Akun Google Anda."
+    Signed out by YouTube: "YouTube mengakhiri sesi masuk. Masuk lagi di Pengaturan untuk terus menggunakan akun Anda."
+    Subscribe on YouTube: "Juga berlangganan di YouTube"
+    Add to YouTube Watch History: "Tambahkan video yang ditonton ke riwayat YouTube"
+    Import Subscriptions: "Impor langganan dari YouTube"
+    Imported Subscriptions: "{count} kanal diimpor"
+    No Subscriptions to Import: "Akun YouTube ini tidak memiliki langganan"
+    Import Subscriptions Failed: "Tidak dapat mengimpor langganan: {error}"
   Diagnostics:
     Diagnostics: Diagnostik
     Description: Selama log diagnostik aktif, OpenTubeX menyimpan pesan log terbaru di memori agar Anda dapat melampirkannya ke laporan bug. Aplikasi ini tidak pernah menyimpan atau mengirimnya sendiri, dan menonaktifkan log akan menghapusnya. Laporan tidak menyertakan cookie, token, alamat IP, dan parameter URL, tetapi dapat berisi ID video yang Anda putar, jadi periksa laporan sebelum membagikannya.
@@ -1184,6 +1235,11 @@ Settings:
     Notify About New Uploads: Beri Notifikasi Unggahan Baru
     RSS Feeds Auto Refresh Interval: Interval Pembaruan Otomatis Umpan RSS
     Faster Subscription Refresh: "Penyegaran langganan lebih cepat"
+    Platforms:
+      Other Platforms: Platform Lain
+      Manage Channels: Kelola Kanal yang Diikuti
+      Notify When Live: Beri Tahu Saat Kanal Twitch yang Diikuti Mulai Siaran Langsung
+      Auto Refresh Interval: Interval Pembaruan Otomatis Platform Lain
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Hitung Waktu Tonton Dari"
@@ -2046,6 +2102,7 @@ Context Menu:
   Reload Posts: Muat Ulang Postingan
   Reload All Feeds: Muat Ulang Semua Umpan
   Reload RSS Feeds: Muat ulang feed RSS
+  Reload Platforms: Muat Ulang Platform
   Close Multiple Tabs: Tutup {count} Tab
   Duplicate Tab: Duplikasikan Tab
   Duplicate Multiple Tabs: Duplikasikan {count} Tab
@@ -2198,6 +2255,9 @@ Description:
   Games: Gim
   Music: Musik
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Berlangganan atau berhenti berlangganan kanal di OpenTubeX juga melakukan hal yang sama di akun YouTube Anda."
+    Add to YouTube Watch History: "Video yang Anda putar ditambahkan ke riwayat tontonan YouTube Anda, sehingga rekomendasi YouTube belajar darinya. Tidak ada yang ditambahkan selama riwayat dijeda di YouTube."
   General Settings:
     Built-in Streams: |
       Otomatis memutar sebagian besar video melalui klien visionOS YouTube, yang dimulai lebih cepat dan mendukung kualitas otomatis. Siaran langsung dan video yang tidak dapat diputarnya menggunakan SABR.
@@ -2310,6 +2370,8 @@ Tooltips:
     Notify About New Uploads: Menampilkan notifikasi sistem di perangkat ini untuk channel yang notifikasinya Anda aktifkan di pengaturan langganannya. OpenTubeX memeriksa konten baru saat langganan diperbarui, jadi pilih interval pembaruan otomatis. Agar tetap mendapat notifikasi saat aplikasi ditutup, aktifkan juga pembaruan saat aplikasi ditutup.
     RSS Feeds Auto Refresh Interval: Seberapa sering OpenTubeX memperbarui umpan RSS Anda secara otomatis saat aplikasi terbuka.
     Faster Subscription Refresh: "Memeriksa umpan RSS setiap saluran terlebih dahulu dan hanya memuat video, Shorts, dan siaran langsung dari saluran yang memiliki unggahan baru. Penyegaran otomatis juga melewati saluran yang dimuat dalam 10 menit terakhir. Untuk saluran tanpa unggahan baru, jumlah penayangan, video yang dihapus, dan judul yang diubah hanya diperbarui setiap beberapa jam, dan unggahan baru mungkin muncul lebih lambat saat umpan RSS tertinggal. Tidak tersedia dengan API Invidious."
+    Platforms Auto Refresh Interval: Seberapa sering OpenTubeX memperbarui kanal yang Anda ikuti di platform lain secara otomatis saat aplikasi terbuka.
+    Twitch Notify When Live: Memberi tahu Anda saat salah satu kanal Twitch yang Anda ikuti mulai bersiaran. OpenTubeX memeriksa setiap beberapa menit saat terbuka, dan juga saat ditutup jika saat itu memperbarui langganan.
   Theme Settings:
     Only Show Important Notifications: Menyembunyikan notifikasi dalam aplikasi yang hanya mengonfirmasi tindakan atau melaporkan status. Kesalahan, peringatan, pengingat yang Anda atur, dan notifikasi yang menawarkan tindakan, seperti Urungkan, tetap muncul. Progres operasi latar belakang, seperti penyegaran langganan, ditampilkan di bilah progres global, bukan sebagai notifikasi. Notifikasi sistem tidak terpengaruh.
     Visible Search Suggestions: "Menentukan berapa banyak entri riwayat pencarian dan saran yang ditampilkan bilah pencarian sebelum daftarnya perlu digulir. Daftar tidak pernah melewati bagian bawah jendela."
@@ -2707,3 +2769,31 @@ Notification Center:
   Clear: "Hapus"
   Empty: "Belum ada notifikasi"
   Empty Hint: "Pengingat siaran langsung dan unggahan baru dari saluran yang notifikasinya aktif akan muncul di sini."
+Platforms:
+  Tracks: Trek
+  Playlists: Daftar Putar
+  Follower Count: '{count} pengikut'
+  Open Website: Buka di {platform}
+  Channel Not Found: Kanal ini tidak dapat ditemukan.
+  Playlist Not Found: Daftar putar ini tidak dapat ditemukan.
+  Load Error: Halaman ini tidak dapat dimuat dari {platform}.
+  Empty Tab: Belum ada apa pun di sini.
+YouTube Account:
+  Like: "Suka"
+  Dislike: "Tidak suka"
+  Rating Failed: "Tidak dapat memberi penilaian di YouTube: {error}"
+  Subscribe Failed: "Tidak dapat berlangganan di YouTube: {error}"
+  Unsubscribe Failed: "Tidak dapat berhenti berlangganan di YouTube: {error}"
+  Add a comment: "Tambahkan komentar"
+  Add a reply: "Tambahkan balasan"
+  Comment: "Kirim komentar"
+  Reply: "Balas"
+  Comment Posted: "Komentar diposting"
+  Reply Posted: "Balasan diposting"
+  Comment Failed: "Tidak dapat memposting komentar: {error}"
+  Delete Comment: "Hapus komentar"
+  Delete Comment Confirmation: "Hapus komentar Anda dari YouTube?"
+  Comment Deleted: "Komentar dihapus"
+  Delete Comment Failed: "Tidak dapat menghapus komentar: {error}"
+  Recommendations: "Rekomendasi YouTube"
+  Recommendations Failed: "Tidak dapat memuat rekomendasi YouTube Anda."

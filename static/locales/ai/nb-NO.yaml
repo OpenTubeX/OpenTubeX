@@ -221,6 +221,26 @@ Subscriptions:
       Not Set: Ikke angitt
     Retry Feed: Prøv {feed} på nytt
     Reloading Feed: Laster inn {feed} på nytt
+  Platforms:
+    Tab: Plattformer
+    Platform: Plattform
+    All Platforms: Alle plattformer
+    Followed Channels: Fulgte kanaler på andre plattformer
+    Description: Følg kanaler på Twitch, SoundCloud, PeerTube, Rumble og Odysee for å se opplastingene deres i Plattformer-fanen i abonnementene dine. Finn kanaler med søket, eller legg dem til med adressen til siden deres. Mediene deres spilles av med yt-dlp.
+    Add Channel: Legg til kanal
+    Channel URL: Kanaladresse
+    Invalid Channel: Skriv inn adressen til en kanalside på Twitch, SoundCloud, PeerTube, Rumble eller Odysee.
+    Channel Not Found: Det finnes ingen kanal på denne adressen.
+    Channel Already Followed: Du følger allerede denne kanalen.
+    Channel Could Not Be Loaded: Kunne ikke laste inn kanalen.
+    No Channels: Du følger ingen kanaler på andre plattformer ennå.
+    Unfollow Channel: Slutt å følge {channel}
+    Go To Channel: Gå til {channel}
+    Follow: Følg
+    Following: Følger
+    Clips: Klipp
+    Refresh Errors: 1 kanal kunne ikke oppdateres. | {count} kanaler kunne ikke oppdateres.
+    Content Tabs: Faner for plattforminnhold
 Trending:
   Music: Musikk
   Load Error: Populært innhold kunne ikke lastes inn.
@@ -314,6 +334,37 @@ History:
   History Older Than Days Removed: Seerlogg eldre enn 1 dag er fjernet | Seerlogg eldre enn {days} dager er fjernet
 Settings:
   Experimental Badge: Eksperimentell
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube-konto"
+    Unofficial App Warning: "OpenTubeX er ikke en offisiell YouTube-app. Når du logger inn, knyttes det du gjør her, til Google-kontoen din, og Google kan begrense eller utestenge kontoer som bruker uoffisielle apper. Logg bare inn med en konto du har råd til å miste."
+    Sign In Explanation: "OpenTubeX logger inn som en TV-app: du godkjenner innloggingen på Googles nettsted, og OpenTubeX ser aldri passordet ditt. Innloggingen blir værende på denne enheten og blir verken synkronisert eller sikkerhetskopiert."
+    Sign In: "Logg inn"
+    Sign In Anyway: "Logg inn likevel"
+    Sign Out: "Logg ut"
+    Getting Sign-In Code: "Henter innloggingskode"
+    Sign In Instructions: "Åpne innloggingssiden og velg Google-kontoen din. Koden fylles ut automatisk."
+    Other Device Instructions: "Gå til denne adressen på en annen enhet og skriv inn koden:"
+    YouTube Channel: "YouTube-kanal"
+    Using Channel: "Bruker nå YouTube som {name}"
+    Switch Channel Failed: "Kunne ikke bytte YouTube-kanal: {error}"
+    Open Sign-In Page: "Åpne innloggingssiden"
+    Copy Code: "Kopier koden"
+    Code Copied: "Koden er kopiert"
+    Waiting for Approval: "Venter på at du godkjenner innloggingen"
+    Sign-In Denied: "Innloggingen ble avvist."
+    Sign-In Code Expired: "Koden er utløpt. Prøv på nytt for å få en ny."
+    Sign-In Failed: "Kunne ikke logge inn: {error}"
+    Signed In As: "Logget inn på YouTube som {name}"
+    Signed Out: "Logget ut av YouTube"
+    Sign Out Failed: "Kunne ikke logge ut: {error}"
+    Revoke Failed: "Logget ut av YouTube, men Google bekreftet ikke at innloggingen ble avsluttet. Du kan fjerne den under tredjepartstilkoblinger i Google-kontoen din."
+    Signed out by YouTube: "YouTube avsluttet innloggingen. Logg inn igjen i innstillingene for å fortsette å bruke kontoen din."
+    Subscribe on YouTube: "Abonner også på YouTube"
+    Add to YouTube Watch History: "Legg til sette videoer i YouTube-historikken"
+    Import Subscriptions: "Importer abonnementer fra YouTube"
+    Imported Subscriptions: "Importerte {count} kanal | Importerte {count} kanaler"
+    No Subscriptions to Import: "Denne YouTube-kontoen har ingen abonnementer"
+    Import Subscriptions Failed: "Kunne ikke importere abonnementer: {error}"
   Diagnostics:
     Diagnostics: Diagnostikk
     Description: Mens diagnoseloggen er på, holder OpenTubeX nylige loggmeldinger i minnet slik at du kan legge dem ved feilrapporter. Det lagrer eller sender dem aldri av seg selv, og når du slår av loggen, slettes de. Rapporter utelater informasjonskapsler, tokener, IP-adresser og URL-parametere, men de kan inneholde ID-er for videoer du har spilt av, så sjekk en rapport før du deler den.
@@ -1181,6 +1232,11 @@ Settings:
     Notify About New Uploads: Varsle om nye opplastinger
     RSS Feeds Auto Refresh Interval: Intervall for automatisk oppdatering av RSS-strømmer
     Faster Subscription Refresh: "Raskere oppdatering av abonnementer"
+    Platforms:
+      Other Platforms: Andre plattformer
+      Manage Channels: Administrer fulgte kanaler
+      Notify When Live: Varsle når fulgte Twitch-kanaler starter direktesending
+      Auto Refresh Interval: Intervall for automatisk oppdatering av andre plattformer
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Tell seertid fra"
@@ -2026,6 +2082,7 @@ Context Menu:
   Reload Posts: Last inn innlegg på nytt
   Reload All Feeds: Last inn alle innholdsstrømmene på nytt
   Reload RSS Feeds: Last inn RSS-strømmer på nytt
+  Reload Platforms: Last inn plattformer på nytt
   Close Multiple Tabs: Lukk {count} faner
   Duplicate Tab: Dupliser fanen
   Duplicate Multiple Tabs: Dupliser {count} faner
@@ -2178,6 +2235,9 @@ Description:
   Games: Spill
   Music: Musikk
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Når du abonnerer på eller avslutter abonnementet på en kanal i OpenTubeX, skjer det samme på YouTube-kontoen din."
+    Add to YouTube Watch History: "Videoer du spiller av, legges til i visningshistorikken din på YouTube, slik at YouTubes anbefalinger lærer av dem. Ingenting legges til mens historikken er satt på pause på YouTube."
   General Settings:
     Built-in Streams: |
       Automatisk spiller de fleste videoer via YouTubes visionOS-klient, som starter raskere og støtter automatisk kvalitet. Direktesendinger og videoer den ikke kan spille av, bruker SABR.
@@ -2290,6 +2350,8 @@ Tooltips:
     Notify About New Uploads: Viser systemvarsler på denne enheten for kanaler du har slått på varsler for i abonnementsinnstillingene deres. OpenTubeX ser etter nytt innhold når abonnementer oppdateres, så velg et intervall for automatisk oppdatering. For å bli varslet mens appen er lukket, må du også slå på oppdatering mens appen er lukket.
     RSS Feeds Auto Refresh Interval: Hvor ofte OpenTubeX automatisk oppdaterer RSS-strømmene dine mens appen er åpen.
     Faster Subscription Refresh: "Sjekker først RSS-strømmen til hver kanal og laster bare inn videoer, Shorts og direktesendinger fra kanaler med nye opplastinger. Automatiske oppdateringer hopper også over kanaler som er lastet inn de siste 10 minuttene. For kanaler uten nye opplastinger oppdateres visningstall, fjernede videoer og endrede titler bare med noen timers mellomrom, og nye opplastinger kan dukke opp senere når RSS-strømmen henger etter. Ikke tilgjengelig med Invidious-API-et."
+    Platforms Auto Refresh Interval: Hvor ofte OpenTubeX automatisk oppdaterer kanalene du følger på andre plattformer mens appen er åpen.
+    Twitch Notify When Live: Varsler deg når en av Twitch-kanalene du følger, begynner å strømme. OpenTubeX sjekker med noen minutters mellomrom mens det er åpent, og også mens det er lukket hvis det da oppdaterer abonnementer.
   Theme Settings:
     Only Show Important Notifications: Skjuler varsler i appen som bare bekrefter en handling eller melder en status. Feil, advarsler, påminnelser du har satt opp, og varsler som tilbyr en handling, som Angre, vises fortsatt. Fremdrift for bakgrunnsoperasjoner, som oppdatering av abonnementer, vises i den globale fremdriftslinjen i stedet for som et varsel. Systemvarsler påvirkes ikke.
     Visible Search Suggestions: "Angir hvor mange oppføringer fra søkeloggen og forslag søkefeltet viser før listen må rulles. Listen går aldri forbi nederkanten av vinduet."
@@ -2686,3 +2748,31 @@ Notification Center:
   Clear: "Fjern"
   Empty: "Ingen varsler ennå"
   Empty Hint: "Påminnelser om direktesendinger og nye opplastinger fra kanaler med varsler slått på vises her."
+Platforms:
+  Tracks: Spor
+  Playlists: Spillelister
+  Follower Count: 1 følger | {count} følgere
+  Open Website: Åpne på {platform}
+  Channel Not Found: Fant ikke denne kanalen.
+  Playlist Not Found: Fant ikke denne spillelisten.
+  Load Error: Kunne ikke laste inn denne siden fra {platform}.
+  Empty Tab: Det er ingenting her ennå.
+YouTube Account:
+  Like: "Lik"
+  Dislike: "Mislik"
+  Rating Failed: "Kunne ikke vurdere på YouTube: {error}"
+  Subscribe Failed: "Kunne ikke abonnere på YouTube: {error}"
+  Unsubscribe Failed: "Kunne ikke avslutte abonnementet på YouTube: {error}"
+  Add a comment: "Legg til en kommentar"
+  Add a reply: "Legg til et svar"
+  Comment: "Kommenter"
+  Reply: "Svar"
+  Comment Posted: "Kommentaren er publisert"
+  Reply Posted: "Svaret er publisert"
+  Comment Failed: "Kunne ikke publisere kommentaren: {error}"
+  Delete Comment: "Slett kommentar"
+  Delete Comment Confirmation: "Vil du slette kommentaren din fra YouTube?"
+  Comment Deleted: "Kommentaren er slettet"
+  Delete Comment Failed: "Kunne ikke slette kommentaren: {error}"
+  Recommendations: "YouTube-anbefalinger"
+  Recommendations Failed: "Kunne ikke laste inn YouTube-anbefalingene dine."

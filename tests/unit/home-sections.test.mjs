@@ -32,8 +32,8 @@ test('moves Home sections without mutating the stored layout', () => {
   const reordered = moveHomeSection(layout, 'watchQueue', -1)
 
   assert.equal(reordered[0].id, 'continueWatching')
-  assert.equal(reordered[2].id, 'watchQueue')
-  assert.equal(reordered[3].id, 'newSinceLastVisit')
+  assert.equal(reordered[3].id, 'watchQueue')
+  assert.equal(reordered[4].id, 'newSinceLastVisit')
   assert.equal(layout[0].id, 'continueWatching')
 })
 

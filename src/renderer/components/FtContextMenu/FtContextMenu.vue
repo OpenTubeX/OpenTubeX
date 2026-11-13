@@ -315,6 +315,7 @@ const itemIcons = {
   'Pin Tabs': ['fas', 'thumbtack'],
   'Reload All Feeds': ['fas', 'sync'],
   'Reload Live': ['fas', 'sync'],
+  'Reload Platforms': ['fas', 'sync'],
   'Reload Posts': ['fas', 'sync'],
   'Reload RSS Feeds': ['fas', 'sync'],
   'Reload Shorts': ['fas', 'sync'],

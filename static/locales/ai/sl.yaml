@@ -264,6 +264,26 @@ Subscriptions:
       Not Set: Ni nastavljeno
     Retry Feed: Poskusi znova naložiti {feed}
     Reloading Feed: Ponovno nalaganje {feed}
+  Platforms:
+    Tab: Platforme
+    Platform: Platforma
+    All Platforms: Vse platforme
+    Followed Channels: Spremljani kanali na drugih platformah
+    Description: Spremljajte kanale na platformah Twitch, SoundCloud, PeerTube, Rumble in Odysee, da boste njihove objave videli na zavihku Platforme med svojimi naročninami. Kanale poiščite z iskanjem ali jih dodajte z naslovom njihove strani. Njihove vsebine se predvajajo z yt-dlp.
+    Add Channel: Dodaj kanal
+    Channel URL: Naslov kanala
+    Invalid Channel: Vnesite naslov strani kanala na platformi Twitch, SoundCloud, PeerTube, Rumble ali Odysee.
+    Channel Not Found: Na tem naslovu ni kanala.
+    Channel Already Followed: Ta kanal že spremljate.
+    Channel Could Not Be Loaded: Kanala ni bilo mogoče naložiti.
+    No Channels: Ne spremljate še nobenega kanala na drugih platformah.
+    Unfollow Channel: Prenehaj spremljati {channel}
+    Go To Channel: Pojdi na kanal {channel}
+    Follow: Spremljaj
+    Following: Spremljate
+    Clips: Izrezki
+    Refresh Errors: '{count} kanala ni bilo mogoče osvežiti. | {count} kanalov ni bilo mogoče osvežiti. | {count} kanalov ni bilo mogoče osvežiti. | {count} kanalov ni bilo mogoče osvežiti.'
+    Content Tabs: Zavihki vsebine platform
 Trending:
   Music: Glasba
   Trending Tabs: Zavihki priljubljene vsebine
@@ -443,6 +463,37 @@ History:
   History Older Than Days Removed: Zgodovina ogledov, starejša od {days} dneva, je odstranjena | Zgodovina ogledov, starejša od {days} dni, je odstranjena | Zgodovina ogledov, starejša od {days} dni, je odstranjena | Zgodovina ogledov, starejša od {days} dni, je odstranjena
 Settings:
   Experimental Badge: Eksperimentalno
+  YouTube Account Settings:
+    YouTube Account Settings: "Račun YouTube"
+    Unofficial App Warning: "OpenTubeX ni uradna aplikacija storitve YouTube. Ob prijavi se to, kar počnete tukaj, poveže z vašim Google računom, Google pa lahko omeji ali prepove račune, ki uporabljajo neuradne aplikacije. Prijavite se samo z računom, ki si ga lahko privoščite izgubiti."
+    Sign In Explanation: "OpenTubeX se prijavi kot aplikacija za televizor: prijavo odobrite na spletnem mestu Google, OpenTubeX pa nikoli ne vidi vašega gesla. Prijava ostane v tej napravi in se ne sinhronizira ali varnostno kopira."
+    Sign In: "Prijava"
+    Sign In Anyway: "Vseeno se prijavi"
+    Sign Out: "Odjava"
+    Getting Sign-In Code: "Pridobivanje kode za prijavo"
+    Sign In Instructions: "Odprite stran za prijavo in izberite svoj račun Google. Koda se izpolni samodejno."
+    Other Device Instructions: "V drugi napravi pojdite na ta naslov in vnesite kodo:"
+    YouTube Channel: "Kanal YouTube"
+    Using Channel: "YouTube zdaj uporabljate kot {name}"
+    Switch Channel Failed: "Kanala YouTube ni bilo mogoče zamenjati: {error}"
+    Open Sign-In Page: "Odpri stran za prijavo"
+    Copy Code: "Kopiraj kodo"
+    Code Copied: "Koda je kopirana"
+    Waiting for Approval: "Čakanje, da odobrite prijavo"
+    Sign-In Denied: "Prijava je bila zavrnjena."
+    Sign-In Code Expired: "Koda je potekla. Poskusite znova, da dobite novo."
+    Sign-In Failed: "Prijava ni uspela: {error}"
+    Signed In As: "V storitev YouTube ste prijavljeni kot {name}"
+    Signed Out: "Odjavljeni ste iz storitve YouTube"
+    Sign Out Failed: "Odjava ni uspela: {error}"
+    Revoke Failed: "Odjava iz YouTuba je uspela, vendar Google ni potrdil, da je prijava končana. Odstranite jo lahko med povezavami z drugimi ponudniki v svojem Google Računu."
+    Signed out by YouTube: "YouTube je končal prijavo. Za nadaljnjo uporabo računa se znova prijavite v nastavitvah."
+    Subscribe on YouTube: "Naroči se tudi v storitvi YouTube"
+    Add to YouTube Watch History: "Dodaj ogledane videoposnetke v zgodovino storitve YouTube"
+    Import Subscriptions: "Uvozi naročnine iz storitve YouTube"
+    Imported Subscriptions: "Uvožen {count} kanal | Uvožena {count} kanala | Uvoženi {count} kanali | Uvoženih {count} kanalov"
+    No Subscriptions to Import: "Ta račun YouTube nima naročnin"
+    Import Subscriptions Failed: "Naročnin ni bilo mogoče uvoziti: {error}"
   Diagnostics:
     Diagnostics: Diagnostika
     Description: Dokler je diagnostični dnevnik vklopljen, OpenTubeX hrani nedavna sporočila dnevnika v pomnilniku, da jih lahko priložite poročilom o napakah. Nikoli jih ne shrani ali pošlje sam, izklop dnevnika pa jih izbriše. Poročila izpustijo piškotke, žetone, naslove IP in parametre URL, vendar lahko vsebujejo ID-je predvajanih videoposnetkov, zato poročilo pred deljenjem preglejte.
@@ -1417,6 +1468,11 @@ Settings:
     Confirm Before Unsubscribing: Zahtevaj potrditev pred odjavo
     RSS Feeds Auto Refresh Interval: Interval samodejnega osveževanja virov RSS
     Faster Subscription Refresh: "Hitrejša osvežitev naročnin"
+    Platforms:
+      Other Platforms: Druge platforme
+      Manage Channels: Upravljaj spremljane kanale
+      Notify When Live: Obvesti, ko spremljani kanali Twitch začnejo prenos v živo
+      Auto Refresh Interval: Interval samodejnega osveževanja drugih platform
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Štej čas gledanja"
@@ -2511,6 +2567,7 @@ Context Menu:
   Reload Posts: Znova naloži objave
   Reload All Feeds: Znova naloži vse vire
   Reload RSS Feeds: Znova naloži vire RSS
+  Reload Platforms: Znova naloži platforme
   Close Multiple Tabs: Zapri {count} zavihek | Zapri {count} zavihka | Zapri {count} zavihke | Zapri {count} zavihkov
   Duplicate Tab: Podvoji zavihek
   Duplicate Multiple Tabs: Podvoji {count} zavihek | Podvoji {count} zavihka | Podvoji {count} zavihke | Podvoji {count} zavihkov
@@ -2675,6 +2732,9 @@ Description:
   Games: Igre
   Music: Glasba
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Naročanje na kanal ali preklic naročnine v OpenTubeX enako stori tudi v vašem računu YouTube."
+    Add to YouTube Watch History: "Videoposnetki, ki jih predvajate, se dodajo v vašo zgodovino predvajanj v storitvi YouTube, zato se priporočila YouTube učijo iz njih. Ko je zgodovina v storitvi YouTube začasno zaustavljena, se ne doda nič."
   General Settings:
     Built-in Streams: |
       Samodejni način predvaja večino videoposnetkov prek YouTubovega odjemalca visionOS, ki se zažene hitreje in podpira samodejno kakovost. Prenosi v živo in videoposnetki, ki jih ne more predvajati, uporabljajo SABR.
@@ -2809,6 +2869,8 @@ Tooltips:
     Notify About New Uploads: Prikazuje sistemska obvestila v tej napravi za kanale, ki ste jim obvestila vklopili v njihovih nastavitvah naročnine. OpenTubeX preveri novo vsebino ob osvežitvi naročnin, zato izberite interval samodejnega osveževanja. Če želite prejemati obvestila tudi, ko je aplikacija zaprta, vklopite še osveževanje, ko je aplikacija zaprta.
     RSS Feeds Auto Refresh Interval: Kako pogosto OpenTubeX samodejno osveži vaše vire RSS, ko je aplikacija odprta.
     Faster Subscription Refresh: "Najprej preveri vir RSS vsakega kanala in naloži videoposnetke, Shorts in prenose v živo samo s kanalov z novimi naloženimi vsebinami. Samodejne osvežitve preskočijo tudi kanale, naložene v zadnjih 10 minutah. Pri kanalih brez novih vsebin se število ogledov, odstranjeni videoposnetki in spremenjeni naslovi posodobijo le vsakih nekaj ur, nove vsebine pa se lahko prikažejo pozneje, ko vir RSS zaostaja. Ni na voljo z API-jem Invidious."
+    Platforms Auto Refresh Interval: Kako pogosto OpenTubeX samodejno osveži kanale, ki jih spremljate na drugih platformah, ko je aplikacija odprta.
+    Twitch Notify When Live: Obvesti vas, ko eden od kanalov Twitch, ki jih spremljate, začne oddajati. OpenTubeX preverja vsakih nekaj minut, ko je odprt, in tudi ko je zaprt, če takrat osvežuje naročnine.
   Theme Settings:
     Only Show Important Notifications: Skrije obvestila v aplikaciji, ki le potrdijo dejanje ali sporočijo stanje. Napake, opozorila, opomniki, ki ste jih nastavili, in obvestila, ki ponujajo dejanje, na primer Razveljavi, se še vedno prikažejo. Napredek opravil v ozadju, na primer osveževanja naročnin, je namesto v obvestilu prikazan v splošni vrstici napredka. Sistemska obvestila niso prizadeta.
     Visible Search Suggestions: "Določa, koliko vnosov zgodovine iskanja in predlogov prikaže iskalna vrstica, preden se njen seznam začne pomikati. Seznam nikoli ne sega čez spodnji rob okna."
@@ -3280,3 +3342,31 @@ Notification Center:
   Clear: "Počisti"
   Empty: "Še ni obvestil"
   Empty Hint: "Tukaj bodo prikazani opomniki za prenose v živo in novi posnetki kanalov z vklopljenimi obvestili."
+Platforms:
+  Tracks: Skladbe
+  Playlists: Seznami predvajanja
+  Follower Count: '{count} sledilec | {count} sledilca | {count} sledilci | {count} sledilcev'
+  Open Website: Odpri v {platform}
+  Channel Not Found: Tega kanala ni bilo mogoče najti.
+  Playlist Not Found: Tega seznama predvajanja ni bilo mogoče najti.
+  Load Error: Te strani ni bilo mogoče naložiti s platforme {platform}.
+  Empty Tab: Tukaj še ni ničesar.
+YouTube Account:
+  Like: "Všeč mi je"
+  Dislike: "Ni mi všeč"
+  Rating Failed: "Ocenjevanje v storitvi YouTube ni uspelo: {error}"
+  Subscribe Failed: "Naročanje v storitvi YouTube ni uspelo: {error}"
+  Unsubscribe Failed: "Preklic naročnine v storitvi YouTube ni uspel: {error}"
+  Add a comment: "Dodajte komentar"
+  Add a reply: "Dodajte odgovor"
+  Comment: "Komentiraj"
+  Reply: "Odgovori"
+  Comment Posted: "Komentar je objavljen"
+  Reply Posted: "Odgovor je objavljen"
+  Comment Failed: "Komentarja ni bilo mogoče objaviti: {error}"
+  Delete Comment: "Izbriši komentar"
+  Delete Comment Confirmation: "Želite izbrisati svoj komentar iz storitve YouTube?"
+  Comment Deleted: "Komentar je izbrisan"
+  Delete Comment Failed: "Komentarja ni bilo mogoče izbrisati: {error}"
+  Recommendations: "Priporočila YouTube"
+  Recommendations Failed: "Vaših priporočil YouTube ni bilo mogoče naložiti."

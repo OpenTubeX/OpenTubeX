@@ -243,13 +243,15 @@
               />{{ item.text }}</span>
             </FtInlineMetadata>
             <div class="externalMediaCreator">
+              <!-- Channels of supported platforms open in the app -->
               <component
-                :is="creatorUrl ? 'a' : 'span'"
+                :is="creatorChannel ? 'router-link' : creatorUrl ? 'a' : 'span'"
                 v-if="creatorName"
                 class="externalMediaCreatorProfile"
-                :href="creatorUrl || undefined"
-                :target="creatorUrl ? '_blank' : undefined"
-                :rel="creatorUrl ? 'noopener noreferrer' : undefined"
+                :to="creatorChannel ? getPlatformChannelRoute(creatorChannel.platform, creatorChannel.id) : undefined"
+                :href="!creatorChannel && creatorUrl ? creatorUrl : undefined"
+                :target="!creatorChannel && creatorUrl ? '_blank' : undefined"
+                :rel="!creatorChannel && creatorUrl ? 'noopener noreferrer' : undefined"
               >
                 <FtRetryImage
                   v-if="creatorAvatarUrl"
@@ -260,6 +262,11 @@
                 />
                 <span dir="auto">{{ creatorName }}</span>
               </component>
+              <PlatformFollowButton
+                v-if="creatorChannel"
+                :platform="creatorChannel.platform"
+                :channel-id="creatorChannel.id"
+              />
               <a
                 class="externalMediaSiteLink"
                 :href="mediaUrl"
@@ -466,6 +473,7 @@ import WatchVideoToolbar from '../../components/WatchVideoToolbar/WatchVideoTool
 import WatchVideoInfoSkeleton from '../../components/WatchVideoInfoSkeleton/WatchVideoInfoSkeleton.vue'
 import FtPhonePanel from '../../components/FtPhonePanel/FtPhonePanel.vue'
 import TwitchChat from './TwitchChat.vue'
+import PlatformFollowButton from '../../components/PlatformFollowButton/PlatformFollowButton.vue'
 import { getTwitchChatTarget } from './twitchChat'
 import { getExternalYtDlpPlaybackSource, releaseTwitchVodRegistration } from '../../helpers/player/ytDlpPlayback'
 import { createTheatreModeAnimator, isTheatreLayoutAvailable } from '../../helpers/watchLayout'
@@ -479,6 +487,7 @@ import { useMediaSessionMetadata } from '../../composables/useMediaSessionMetada
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { isExternalMediaUrl } from '../../helpers/externalMediaUrl'
 import { getExternalMediaPosition, saveExternalMediaPosition } from '../../helpers/externalMediaPosition'
+import { findPlatformChannel, getPlatformChannelRoute } from '../../../platforms/index'
 import { createWatchTimeTracker } from '../../helpers/watchTimeTracker'
 import { useTabAvatar, useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
 import store from '../../store/index'
@@ -763,6 +772,8 @@ useMediaSessionMetadata(() => source.value && !errorMessage.value
   : null)
 const creatorUrl = computed(() => safeWebUrl(info.value?.channel ? info.value.channelUrl : info.value?.uploaderUrl))
 const creatorAvatarUrl = computed(() => safeWebUrl(info.value?.channel ? info.value.channelThumbnail : info.value?.uploaderThumbnail))
+// Only the creator's profile names the channel; the media URL can be a clip or VOD
+const creatorChannel = computed(() => findPlatformChannel(creatorUrl.value))
 const hideSharingActions = computed(() => store.getters.getHideSharingActions)
 const formattedViewCount = computed(() => {
   const count = info.value?.viewCount

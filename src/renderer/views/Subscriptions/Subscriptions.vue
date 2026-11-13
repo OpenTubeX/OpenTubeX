@@ -13,8 +13,9 @@
         class="subscriptionsHeader"
         :class="{
           singleRow: headerFitsOneRow,
+          compactTabs,
           scrollHidden: headerScrollHidden,
-          tabbedNewFeed: currentTab === 'new' && newFeedView === 'tabbed',
+          tabbedNewFeed: (currentTab === 'new' && newFeedView === 'tabbed') || (currentTab === 'platforms' && platformFeedView === 'tabbed'),
           groupsBesideNewFeedTabs
         }"
         @focusin="resetHeaderScrollVisibility"
@@ -210,6 +211,42 @@
                 </div>
                 <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
                 <div
+                  v-if="visibleTabs.includes('platforms')"
+                  ref="platformsTab"
+                  class="tab"
+                  role="tab"
+                  :aria-selected="selectedTab === 'platforms'"
+                  aria-controls="subscriptionsPanel"
+                  data-platforms-tab
+                  :data-has-new-content="platformsHaveNewContent"
+                  :tabindex="currentTab === 'platforms' ? 0 : -1"
+                  :class="{ selectedTab: selectedTab === 'platforms' }"
+                  @click="changeTabFromPointer($event, 'platforms')"
+                  @keydown.space.enter.prevent="changeTab('platforms')"
+                  @keydown.left.right="switchTab($event, 'platforms')"
+                >
+                  <span
+                    class="tabIcon"
+                    :class="{ loading: platformFeedRefreshing }"
+                  >
+                    <FtIcon
+                      :icon="['fas', 'globe']"
+                      class="subscriptionIcon"
+                    />
+                    <FtLoader
+                      v-if="platformFeedRefreshing"
+                      class="tabLoadingIndicator"
+                      inline
+                      size="16px"
+                    />
+                  </span>
+                  <span
+                    class="tabLabel"
+                    :data-label="$t('Subscriptions.Platforms.Tab')"
+                  ><span>{{ $t('Subscriptions.Platforms.Tab') }}</span></span>
+                </div>
+                <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+                <div
                   v-if="visibleTabs.includes('feeds')"
                   ref="feedsTab"
                   class="tab"
@@ -254,39 +291,66 @@
                 hasAutoRefreshStatus: currentTabPanel.lastRefreshTimestamp && currentTabPanel.nextAutoRefreshTimestamp
               }"
             >
-              <FtIconButton
-                v-if="currentTab === 'new'"
-                class="headerViewToggle"
-                :title="newFeedView === 'tabbed'
-                  ? $t('Subscriptions.Show Combined View')
-                  : $t('Subscriptions.Show Tabbed View')"
-                :icon="newFeedView === 'tabbed' ? ['fas', 'layer-group'] : ['fac', 'horizontal-tabs']"
-                :aria-pressed="newFeedView === 'tabbed'"
-                :padding="8"
-                :size="20"
-                theme="base-no-default"
-                @click="toggleNewFeedView"
-              />
-              <FtIconButton
-                v-if="currentTab === 'feeds' || currentNewFeedRssTab"
-                class="headerViewToggle headerManageFeeds"
-                :title="$t('Settings.Subscription Settings.Manage RSS Feeds')"
-                :icon="['fas', 'edit']"
-                :padding="8"
-                :size="20"
-                theme="base-no-default"
-                @click="openRssFeedManager"
-              />
-              <FtSelect
-                v-if="currentTab === 'new'"
-                class="headerSortSelect"
-                :placeholder="$t('Global.Sort By')"
-                :value="newFeedSortBy"
-                :select-names="newFeedSortByNames"
-                :select-values="NEW_FEED_SORT_BY_VALUES"
-                :icon="newFeedSortByIcon"
-                @change="updateNewFeedSortBy"
-              />
+              <!-- One row on phones -->
+              <div
+                v-if="currentTab === 'new' || currentTab === 'feeds' || currentNewFeedRssTab || currentPlatformsView"
+                class="headerControls"
+              >
+                <FtIconButton
+                  v-if="currentTab === 'new' || currentTab === 'platforms'"
+                  class="headerViewToggle"
+                  :title="currentTabView === 'tabbed'
+                    ? $t('Subscriptions.Show Combined View')
+                    : $t('Subscriptions.Show Tabbed View')"
+                  :icon="currentTabView === 'tabbed' ? ['fas', 'layer-group'] : ['fac', 'horizontal-tabs']"
+                  :aria-pressed="currentTabView === 'tabbed'"
+                  :padding="8"
+                  :size="20"
+                  theme="base-no-default"
+                  @click="currentTab === 'new' ? toggleNewFeedView() : togglePlatformFeedView()"
+                />
+                <FtIconButton
+                  v-if="currentTab === 'feeds' || currentNewFeedRssTab"
+                  class="headerViewToggle headerManageFeeds"
+                  :title="$t('Settings.Subscription Settings.Manage RSS Feeds')"
+                  :icon="['fas', 'edit']"
+                  :padding="8"
+                  :size="20"
+                  theme="base-no-default"
+                  @click="openRssFeedManager"
+                />
+                <FtIconButton
+                  v-if="currentPlatformsView"
+                  class="headerViewToggle headerManageFeeds"
+                  :title="$t('Settings.Subscription Settings.Platforms.Manage Channels')"
+                  :icon="['fas', 'edit']"
+                  :padding="8"
+                  :size="20"
+                  theme="base-no-default"
+                  @click="openPlatformChannelManager"
+                />
+                <FtSelect
+                  v-if="currentTab === 'new'"
+                  class="headerSortSelect"
+                  :placeholder="$t('Global.Sort By')"
+                  :value="newFeedSortBy"
+                  :select-names="newFeedSortByNames"
+                  :select-values="NEW_FEED_SORT_BY_VALUES"
+                  :icon="newFeedSortByIcon"
+                  @change="updateNewFeedSortBy"
+                />
+                <FtSelect
+                  v-if="currentTab === 'platforms' && followedPlatforms.length > 1"
+                  class="headerSortSelect headerFilterSelect"
+                  :placeholder="$t('Subscriptions.Platforms.Platform')"
+                  :value="activePlatformFeedFilter"
+                  :select-names="platformFilterOptions.map(option => option.label)"
+                  :select-values="platformFilterOptions.map(option => option.id)"
+                  :option-icons="platformFilterOptions.map(option => option.icon)"
+                  :icon="['fas', 'filter']"
+                  @change="setPlatformFeedFilter"
+                />
+              </div>
               <Teleport
                 v-if="currentTabHasNewContent"
                 :to="tabsRowRef"
@@ -313,10 +377,12 @@
               <FtRefreshWidget
                 embedded
                 class="headerRefreshWidget subscriptionsHeaderRefreshWidget"
-                :disable-refresh="currentTab === 'feeds' || currentNewFeedRssTab
-                  ? currentTabPanel.isLoading || followedRssFeeds.length === 0
-                  : subscriptionFeedRefreshInProgress || currentTabPanel.isLoading ||
-                    (activeSubscriptionList.length === 0 && !newFeedRefreshesRssFeeds)"
+                :disable-refresh="currentPlatformsView
+                  ? currentTabPanel.isLoading || followedChannels.length === 0
+                  : currentTab === 'feeds' || currentNewFeedRssTab
+                    ? currentTabPanel.isLoading || followedRssFeeds.length === 0
+                    : subscriptionFeedRefreshInProgress || currentTabPanel.isLoading ||
+                      (activeSubscriptionList.length === 0 && !newFeedRefreshesRssFeeds && !newFeedRefreshesPlatforms)"
                 :last-refresh-timestamp="currentTabPanel.lastRefreshTimestamp"
                 :next-auto-refresh-timestamp="currentTabPanel.nextAutoRefreshTimestamp"
                 :next-auto-refresh-tooltip="currentTabPanel.nextAutoRefreshTooltip"
@@ -347,8 +413,9 @@
             role="tab"
             :aria-selected="currentNewFeedTab === tab.id"
             aria-controls="subscriptionsPanel"
-            :data-new-feed-tab="tab.id === 'feeds' ? null : tab.id"
+            :data-new-feed-tab="tab.id === 'feeds' || tab.id === 'platforms' ? null : tab.id"
             :data-new-feed-rss-tab="tab.id === 'feeds' ? '' : null"
+            :data-new-feed-platforms-tab="tab.id === 'platforms' ? '' : null"
             :data-has-new-content="newFeedTabHasNewContent(tab.id)"
             :tabindex="currentNewFeedTab === tab.id ? 0 : -1"
             @click="changeNewFeedTab(tab.id)"
@@ -380,8 +447,46 @@
             />
           </button>
         </FtTabs>
+        <FtTabs
+          v-if="currentTab === 'platforms' && platformFeedView === 'tabbed'"
+          class="newFeedTabs"
+          role="tablist"
+          :aria-label="$t('Subscriptions.Platforms.Content Tabs')"
+        >
+          <button
+            v-for="tab in platformFeedTabs"
+            :key="tab.id"
+            :ref="element => setPlatformFeedTabRef(tab.id, element)"
+            class="newFeedTab"
+            :class="{ selectedTab: currentPlatformFeedTab === tab.id }"
+            type="button"
+            role="tab"
+            :aria-selected="currentPlatformFeedTab === tab.id"
+            aria-controls="subscriptionsPanel"
+            :data-platform-feed-tab="tab.id"
+            :tabindex="currentPlatformFeedTab === tab.id ? 0 : -1"
+            @click="changePlatformFeedTab(tab.id)"
+            @keydown.left.right="switchPlatformFeedTab($event, tab.id)"
+            @keydown.home.end.prevent="switchPlatformFeedTab($event, tab.id)"
+          >
+            <span class="tabIcon">
+              <FtIcon
+                :icon="tab.icon"
+                class="subscriptionIcon"
+              />
+            </span>
+            <span
+              class="tabLabel"
+              :data-label="tab.label"
+            ><span>{{ tab.label }}</span></span>
+            <FtNewContentDot
+              v-if="showNewSubscriptionFeedIndicators && platformsPanel?.hasNewContentByCategory?.[tab.id] === true"
+              class="newFeedTabDot"
+            />
+          </button>
+        </FtTabs>
         <FtSubscriptionGroupBar
-          v-if="hasSubscriptionGroups && currentTab !== 'feeds' && !currentNewFeedRssTab"
+          v-if="hasSubscriptionGroups && currentTab !== 'feeds' && !currentPlatformsView && !currentNewFeedRssTab"
           ref="subscriptionGroupsRef"
           class="subscriptionGroups"
           panel-id="subscriptionsPanel"
@@ -432,6 +537,14 @@
           ref="feedsPanel"
           role="tabpanel"
         />
+        <SubscriptionsPlatforms
+          v-else-if="currentTab === 'platforms'"
+          id="subscriptionsPanel"
+          key="subscriptions-platforms"
+          ref="platformsPanel"
+          role="tabpanel"
+          :active-category="platformFeedView === 'tabbed' ? currentPlatformFeedTab : null"
+        />
       </KeepAlive>
       <p v-if="currentTab === null">
         {{ $t("Subscriptions.All Subscription Tabs Hidden", {
@@ -480,6 +593,7 @@ import SubscriptionsLive from '../../components/SubscriptionsLive.vue'
 import SubscriptionsShorts from '../../components/SubscriptionsShorts.vue'
 import SubscriptionsPosts from '../../components/SubscriptionPosts/SubscriptionsPosts.vue'
 import SubscriptionsFeeds from '../../components/SubscriptionsFeeds/SubscriptionsFeeds.vue'
+import SubscriptionsPlatforms from '../../components/SubscriptionsPlatforms/SubscriptionsPlatforms.vue'
 
 import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
@@ -511,11 +625,28 @@ import {
   rssFeedsRefreshing
 } from '../../helpers/rssFeeds'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
+import {
+  activePlatformFeedFilter,
+  cancelPlatformFeedRefresh,
+  followedPlatforms,
+  getFollowedChannels,
+  getPlatformFeedAutoRefreshInterval,
+  markPlatformItemsAsSeen,
+  openPlatformChannelManager,
+  platformFeed,
+  platformFeedCategories,
+  platformFeedNextAutoRefresh,
+  platformFeedRefreshing,
+  refreshPlatformFeed,
+  setPlatformFeedFilter
+} from '../../helpers/platformFeed'
+import { getPlatformChannelKey, PLATFORM_ICONS } from '../../../platforms/index'
 
 const isElectron = process.env.IS_ELECTRON
 const usesLogicalTabs = process.env.IS_ELECTRON || process.env.IS_CAPACITOR
 const openMobileContextActions = inject('openMobileContextActions')
-const FEED_TAB_SELECTOR = '[data-subscription-feed-tab], [data-new-feed-tab], [data-rss-feeds-tab], [data-new-feed-rss-tab]'
+const FEED_TAB_SELECTOR = '[data-subscription-feed-tab], [data-new-feed-tab], [data-rss-feeds-tab], [data-new-feed-rss-tab], ' +
+  '[data-platforms-tab], [data-new-feed-platforms-tab]'
 let feedTabHold = null
 
 function cancelFeedTabHold() {
@@ -578,31 +709,36 @@ function handleFeedContextMenu(event) {
     document.addEventListener('pointerdown', resetFeedTabHold, true)
     document.addEventListener('keydown', resetFeedTabHold, true)
   }
-  const feedTab = tab.dataset.subscriptionFeedTab ?? tab.dataset.newFeedTab ?? 'feeds'
+  const feedTab = tab.dataset.subscriptionFeedTab ?? tab.dataset.newFeedTab ??
+    (tab.matches('[data-platforms-tab], [data-new-feed-platforms-tab]') ? 'platforms' : 'feeds')
   const reloadLabels = {
     videos: t('Context Menu.Reload Videos'),
     shorts: t('Context Menu.Reload Shorts'),
     live: t('Context Menu.Reload Live'),
     posts: t('Context Menu.Reload Posts'),
     all: t('Context Menu.Reload All Feeds'),
-    feeds: t('Context Menu.Reload RSS Feeds')
+    feeds: t('Context Menu.Reload RSS Feeds'),
+    platforms: t('Context Menu.Reload Platforms')
   }
-  // RSS feeds refresh separately, and refreshing all feeds refreshes them too
+  // RSS feeds and other platforms refresh separately, and refreshing all feeds refreshes them too
   const newFeedHasRss = feedTab === 'all' && enableRssFeeds.value && followedRssFeeds.value.length > 0
+  const newFeedHasPlatforms = feedTab === 'all' && followedChannels.value.length > 0
   const cancelsRss = (feedTab === 'feeds' || newFeedHasRss) && rssFeedsRefreshing.value
-  const cancelsSubscriptions = feedTab !== 'feeds' && subscriptionFeedRefreshInProgress.value
-  const cancels = cancelsRss || cancelsSubscriptions
+  const cancelsPlatforms = (feedTab === 'platforms' || newFeedHasPlatforms) && platformFeedRefreshing.value
+  const cancelsSubscriptions = feedTab !== 'feeds' && feedTab !== 'platforms' && subscriptionFeedRefreshInProgress.value
+  const cancels = cancelsRss || cancelsPlatforms || cancelsSubscriptions
   const actions = [{
     label: cancels ? t('Context Menu.Cancel Refresh') : reloadLabels[feedTab],
     icon: cancels ? ['fas', 'xmark'] : ['fas', 'sync'],
     run: cancels
       ? () => {
           if (cancelsRss) cancelRssFeedsRefresh()
+          if (cancelsPlatforms) cancelPlatformFeedRefresh()
           if (cancelsSubscriptions) requestSubscriptionRefreshCancellation()
         }
       : () => handleFeedReloadRequest({ tabId, feedTab })
   }]
-  if (tab.dataset.hasNewContent === 'true' && (tab.dataset.newFeedTab || feedTab === 'feeds')) {
+  if (tab.dataset.hasNewContent === 'true' && (tab.dataset.newFeedTab || feedTab === 'feeds' || feedTab === 'platforms')) {
     actions.push({
       label: t('Subscriptions.Mark All as Seen'),
       icon: ['fas', 'check'],
@@ -685,6 +821,7 @@ const showNewSubscriptionFeed = computed(() => {
 // Items from other platforms open through yt-dlp
 const enableRssFeeds = computed(() => supportsYtDlp && store.getters.getEnableRssFeeds)
 const followedRssFeeds = computed(() => store.getters.getFollowedRssFeeds)
+const followedChannels = computed(() => getFollowedChannels())
 
 const newFeedSortBy = computed(() => {
   const value = store.getters.getNewSubscriptionFeedSortBy
@@ -711,6 +848,75 @@ async function toggleNewFeedView() {
   resetNewFeedScroll()
 }
 
+const platformFeedView = computed(() => store.getters.getPlatformFeedView === 'tabbed' ? 'tabbed' : 'combined')
+
+async function togglePlatformFeedView() {
+  await store.dispatch('updatePlatformFeedView', platformFeedView.value === 'tabbed' ? 'combined' : 'tabbed')
+  resetTabScroll('platforms')
+}
+
+/** The view of the New feed or the Platforms tab, which have a combined and a tabbed one */
+const currentTabView = computed(() => currentTab.value === 'platforms' ? platformFeedView.value : newFeedView.value)
+
+const platformFilterOptions = computed(() => [
+  { id: 'all', label: t('Subscriptions.Platforms.All Platforms'), icon: ['fas', 'globe'] },
+  ...followedPlatforms.value.map(platform => ({ id: platform.id, label: platform.name, icon: PLATFORM_ICONS[platform.id] }))
+])
+
+const PLATFORM_FEED_TAB_STORAGE_KEY = 'subscriptionsPlatformFeedTab'
+const platformFeedTabs = computed(() => platformFeedCategories.value.map(id => ({
+  id,
+  icon: { videos: ['fas', 'video'], live: ['fas', 'tower-broadcast'], clips: ['fas', 'film'] }[id],
+  label: { videos: t('Global.Videos'), live: t('Global.Live'), clips: t('Subscriptions.Platforms.Clips') }[id]
+})))
+/** @type {import('vue').Ref<'videos' | 'live' | 'clips'>} */
+const storedPlatformFeedTab = ref(/** @type {'videos' | 'live' | 'clips'} */ (localStorage.getItem(PLATFORM_FEED_TAB_STORAGE_KEY) ?? 'videos'))
+/** The stored tab, or the first one while the shown platforms have no such items */
+const currentPlatformFeedTab = computed(() => platformFeedCategories.value.includes(storedPlatformFeedTab.value)
+  ? storedPlatformFeedTab.value
+  : platformFeedCategories.value[0])
+/** @type {Map<string, HTMLElement>} */
+const platformFeedTabRefs = new Map()
+
+/**
+ * @param {'videos' | 'live' | 'clips'} tab
+ */
+function changePlatformFeedTab(tab) {
+  if (tab === currentPlatformFeedTab.value) return
+  storedPlatformFeedTab.value = tab
+  localStorage.setItem(PLATFORM_FEED_TAB_STORAGE_KEY, tab)
+  resetTabScroll('platforms')
+}
+
+/**
+ * @param {KeyboardEvent} event
+ * @param {'videos' | 'live' | 'clips'} focusedTab
+ */
+function switchPlatformFeedTab(event, focusedTab) {
+  if (event.altKey) return
+  event.preventDefault()
+  const tabs = platformFeedTabs.value
+  let index = tabs.findIndex(tab => tab.id === focusedTab)
+  if (event.key === 'Home') index = 0
+  else if (event.key === 'End') index = tabs.length - 1
+  else if (event.key === 'ArrowLeft') index = index <= 0 ? tabs.length - 1 : index - 1
+  else index = index >= tabs.length - 1 ? 0 : index + 1
+  const tab = tabs[index]?.id
+  if (tab == null) return
+  changePlatformFeedTab(tab)
+  nextTick(() => platformFeedTabRefs.get(tab)?.focus())
+  store.commit('setOutlinesHidden', false)
+}
+
+/**
+ * @param {string} tab
+ * @param {Element | import('vue').ComponentPublicInstance | null} element
+ */
+function setPlatformFeedTabRef(tab, element) {
+  if (element instanceof HTMLElement) platformFeedTabRefs.set(tab, element)
+  else platformFeedTabRefs.delete(tab)
+}
+
 const activeSubscriptions = computed(() => store.getters.getActiveGroupSubscriptions)
 const hasSubscriptionGroups = computed(() => store.getters.getSubscriptionGroupList.length > 0)
 
@@ -735,6 +941,10 @@ const refreshingFeedTab = computed(() => {
 })
 
 const currentTabRefreshing = computed(() => {
+  if (currentPlatformsView.value) {
+    return platformFeedRefreshing.value
+  }
+
   if (currentTab.value === 'feeds' || currentNewFeedRssTab.value) {
     return rssFeedsRefreshing.value
   }
@@ -751,18 +961,25 @@ const currentTabRefreshing = computed(() => {
 
 // Includes the RSS refresh where the current tab shows its items
 const currentTabRefreshInProgress = computed(() => {
+  if (currentTab.value === 'platforms') {
+    return platformFeedRefreshing.value
+  }
   if (currentTab.value === 'feeds') {
     return rssFeedsRefreshing.value
   }
-  // Reloading all feeds from the New feed's RSS tab refreshes the subscriptions too
+  // Reloading all feeds from the New feed's RSS or Platforms tab refreshes the subscriptions too
   if (currentNewFeedRssTab.value) {
     return rssFeedsRefreshing.value || subscriptionFeedRefreshInProgress.value
   }
+  if (currentPlatformsView.value) {
+    return platformFeedRefreshing.value || subscriptionFeedRefreshInProgress.value
+  }
   return subscriptionFeedRefreshInProgress.value ||
-    (newFeedRefreshesRssFeeds.value && rssFeedsRefreshing.value)
+    (newFeedRefreshesRssFeeds.value && rssFeedsRefreshing.value) ||
+    (newFeedRefreshesPlatforms.value && platformFeedRefreshing.value)
 })
 
-/** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'community' | 'new' | 'feeds' | null>} */
+/** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'community' | 'new' | 'feeds' | 'platforms' | null>} */
 const currentTab = ref('videos')
 const selectedTab = ref('videos')
 let tabChangeSequence = 0
@@ -773,9 +990,10 @@ const tabScrollPositions = {
   live: 0,
   community: 0,
   new: 0,
-  feeds: 0
+  feeds: 0,
+  platforms: 0
 }
-/** @type {'videos' | 'shorts' | 'live' | 'community' | 'new' | 'feeds' | null} */
+/** @type {'videos' | 'shorts' | 'live' | 'community' | 'new' | 'feeds' | 'platforms' | null} */
 let scrollPositionOwnerTab = currentTab.value
 let restoreScrollOnActivate = false
 
@@ -870,7 +1088,7 @@ watch(currentTab, async (value) => {
 })
 
 const visibleTabs = computed(() => {
-  /** @type {('videos' | 'shorts' | 'live' | 'community' | 'new' | 'feeds')[]} */
+  /** @type {('videos' | 'shorts' | 'live' | 'community' | 'new' | 'feeds' | 'platforms')[]} */
   const tabs = []
 
   if (!hideSubscriptionsVideos.value) {
@@ -890,8 +1108,12 @@ const visibleTabs = computed(() => {
   }
 
   // The New feed lists the new RSS items too
-  if (showNewSubscriptionFeed.value && (tabs.length > 0 || enableRssFeeds.value)) {
+  if (showNewSubscriptionFeed.value && (tabs.length > 0 || enableRssFeeds.value || followedChannels.value.length > 0)) {
     tabs.push('new')
+  }
+
+  if (followedChannels.value.length > 0) {
+    tabs.push('platforms')
   }
 
   if (enableRssFeeds.value) {
@@ -906,6 +1128,7 @@ const newFeedTabDefinitions = computed(() => [
   { id: 'shorts', icon: ['fa', 'clapperboard'], label: t('Global.Shorts') },
   { id: 'live', icon: ['fa', 'tower-broadcast'], label: t('Global.Live') },
   { id: 'posts', icon: ['fa', 'message'], label: t('Global.Posts') },
+  { id: 'platforms', icon: ['fas', 'globe'], label: t('Subscriptions.Platforms.Tab') },
   { id: 'feeds', icon: ['fas', 'rss'], label: t('Subscriptions.RSS Feeds.Tab') }
 ])
 
@@ -918,7 +1141,7 @@ const visibleNewFeedTabs = computed(() => {
 })
 
 const storedNewFeedTab = localStorage.getItem(currentNewFeedTabStorageKey)
-/** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'posts' | 'feeds'>} */
+/** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'posts' | 'feeds' | 'platforms'>} */
 const currentNewFeedTab = ref(storedNewFeedTab ?? 'videos')
 const rssFeedsHaveNewContent = computed(() => {
   const urls = new Set(followedRssFeeds.value.map(feed => feed.url))
@@ -928,16 +1151,31 @@ const rssFeedsHaveNewContent = computed(() => {
 const newFeedRefreshesRssFeeds = computed(() => {
   return currentTab.value === 'new' && enableRssFeeds.value && followedRssFeeds.value.length > 0
 })
+/** Whether the followed channels on other platforms have new live streams or uploads */
+const platformsHaveNewContent = computed(() => {
+  const keys = new Set(followedChannels.value.map(getPlatformChannelKey))
+  return [...platformFeed.value.live, ...platformFeed.value.videos]
+    .some(item => item.isNew === true && keys.has(getPlatformChannelKey({ platform: item.platform, id: item.channelId })))
+})
+/** The New feed refreshes all feeds, including those of the channels followed on other platforms */
+const newFeedRefreshesPlatforms = computed(() => {
+  return currentTab.value === 'new' && followedChannels.value.length > 0
+})
+/** Whether the current view shows only items from other platforms: their tab, or that of the New feed */
+const currentPlatformsView = computed(() => currentTab.value === 'platforms' ||
+  (currentTab.value === 'new' && newFeedView.value === 'tabbed' && currentNewFeedTab.value === 'platforms'))
 /**
  * Whether the New feed shows only the items of the RSS feeds: its RSS tab, or
- * the combined feed while every subscription feed is hidden
+ * the combined feed while every subscription feed is hidden and no channels
+ * are followed on other platforms
  */
 const currentNewFeedRssTab = computed(() => {
   if (currentTab.value !== 'new') return false
   // The same check as the New feed, which leaves out posts with YouTube's RSS feeds
   return newFeedView.value === 'tabbed'
     ? currentNewFeedTab.value === 'feeds'
-    : enableRssFeeds.value && getEnabledSubscriptionFeedSources(store.getters).length === 0
+    : enableRssFeeds.value && getEnabledSubscriptionFeedSources(store.getters).length === 0 &&
+      followedChannels.value.length === 0
 })
 /** @type {Map<string, HTMLElement>} */
 const newFeedTabRefs = new Map()
@@ -985,7 +1223,7 @@ watch(() => route.query.tab, value => {
 })
 
 /**
- * @param {'videos' | 'shorts' | 'live' | 'community' | 'new' | 'feeds'} tab
+ * @param {'videos' | 'shorts' | 'live' | 'community' | 'new' | 'feeds' | 'platforms'} tab
  */
 function changeTab(tab) {
   // First visible tab or no tab as fallback
@@ -1034,7 +1272,7 @@ function changeTab(tab) {
 
 /**
  * @param {MouseEvent} event
- * @param {'videos' | 'shorts' | 'live' | 'community' | 'new' | 'feeds'} tab
+ * @param {'videos' | 'shorts' | 'live' | 'community' | 'new' | 'feeds' | 'platforms'} tab
  */
 function changeTabFromPointer(event, tab) {
   changeTab(tab)
@@ -1045,7 +1283,7 @@ function changeTabFromPointer(event, tab) {
 }
 
 /**
- * @param {'videos' | 'shorts' | 'live' | 'posts' | 'feeds'} tab
+ * @param {'videos' | 'shorts' | 'live' | 'posts' | 'feeds' | 'platforms'} tab
  */
 function changeNewFeedTab(tab) {
   if (
@@ -1061,7 +1299,7 @@ function changeNewFeedTab(tab) {
 
 /**
  * @param {KeyboardEvent} event
- * @param {'videos' | 'shorts' | 'live' | 'posts' | 'feeds'} focusedTab
+ * @param {'videos' | 'shorts' | 'live' | 'posts' | 'feeds' | 'platforms'} focusedTab
  */
 function switchNewFeedTab(event, focusedTab) {
   if (event.altKey) {
@@ -1094,7 +1332,7 @@ function switchNewFeedTab(event, focusedTab) {
 }
 
 /**
- * @param {'videos' | 'shorts' | 'live' | 'posts' | 'feeds'} tab
+ * @param {'videos' | 'shorts' | 'live' | 'posts' | 'feeds' | 'platforms'} tab
  * @param {Element | import('vue').ComponentPublicInstance | null} element
  */
 function setNewFeedTabRef(tab, element) {
@@ -1105,11 +1343,19 @@ function setNewFeedTabRef(tab, element) {
   }
 }
 
-async function resetNewFeedScroll() {
-  tabScrollPositions.new = 0
+function resetNewFeedScroll() {
+  return resetTabScroll('new')
+}
+
+/**
+ * Starts the tab over at the top, after its content changed
+ * @param {'new' | 'platforms'} tab
+ */
+async function resetTabScroll(tab) {
+  tabScrollPositions[tab] = 0
 
   if (
-    currentTab.value !== 'new' ||
+    currentTab.value !== tab ||
     (usesLogicalTabs && isTabPresented?.value !== true)
   ) {
     return
@@ -1126,11 +1372,11 @@ async function resetNewFeedScroll() {
 
   if (
     isMounted &&
-    currentTab.value === 'new' &&
+    currentTab.value === tab &&
     (!usesLogicalTabs || isTabPresented?.value === true)
   ) {
     window.scrollTo({ left: 0, top: 0, behavior: 'instant' })
-    scrollPositionOwnerTab = 'new'
+    scrollPositionOwnerTab = tab
   }
 }
 
@@ -1140,18 +1386,18 @@ const shortsTab = useTemplateRef('shortsTab')
 const communityTab = useTemplateRef('communityTab')
 const newTab = useTemplateRef('newTab')
 const feedsTab = useTemplateRef('feedsTab')
+const platformsTab = useTemplateRef('platformsTab')
 const videosPanel = useTemplateRef('videosPanel')
 const livePanel = useTemplateRef('livePanel')
 const shortsPanel = useTemplateRef('shortsPanel')
 const communityPanel = useTemplateRef('communityPanel')
 const newPanel = useTemplateRef('newPanel')
 const feedsPanel = useTemplateRef('feedsPanel')
+const platformsPanel = useTemplateRef('platformsPanel')
 
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts' | 'feeds'} tab
- */
-/** @param {'videos' | 'shorts' | 'live' | 'posts' | 'feeds'} tab */
+/** @param {'videos' | 'shorts' | 'live' | 'posts' | 'feeds' | 'platforms'} tab */
 function newFeedTabRefreshing(tab) {
+  if (tab === 'platforms') return platformFeedRefreshing.value
   return tab === 'feeds' ? rssFeedsRefreshing.value : refreshingFeedTab.value === tab
 }
 
@@ -1173,6 +1419,8 @@ const currentTabPanel = computed(() => {
       return newPanel.value
     case 'feeds':
       return feedsPanel.value
+    case 'platforms':
+      return platformsPanel.value
     default:
       return null
   }
@@ -1186,12 +1434,12 @@ const currentTabHasNewContent = computed(() => {
   return showNewSubscriptionFeedIndicators.value && currentTabPanel.value?.hasNewContent === true
 })
 
-/** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'community' | 'new' | 'feeds' | null>} */
+/** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'community' | 'new' | 'feeds' | 'platforms' | null>} */
 const markingSeenTab = ref(null)
 
 /**
- * @param {'videos' | 'shorts' | 'live' | 'community' | 'new' | 'feeds'} tab
- * @param {'videos' | 'shorts' | 'live' | 'posts' | 'feeds'} [newFeedTab=currentNewFeedTab.value]
+ * @param {'videos' | 'shorts' | 'live' | 'community' | 'new' | 'feeds' | 'platforms'} tab
+ * @param {'videos' | 'shorts' | 'live' | 'posts' | 'feeds' | 'platforms'} [newFeedTab=currentNewFeedTab.value]
  */
 async function markAllAsSeen(tab, newFeedTab = currentNewFeedTab.value) {
   if (markingSeenTab.value !== null) {
@@ -1206,8 +1454,9 @@ async function markAllAsSeen(tab, newFeedTab = currentNewFeedTab.value) {
         : visibleTabs.value.filter(visibleTab => visibleTab !== 'new')
       : [tab]
     const marksRssFeeds = feedTabs.includes('feeds')
+    const marksPlatforms = feedTabs.includes('platforms')
 
-    const cacheFeedTabs = feedTabs.filter(feedTab => feedTab !== 'feeds')
+    const cacheFeedTabs = feedTabs.filter(feedTab => feedTab !== 'feeds' && feedTab !== 'platforms')
       .map(feedTab => feedTab === 'community' ? 'posts' : feedTab)
     const channelIdsByTab = Object.fromEntries(cacheFeedTabs.map(feedTab => [
       feedTab,
@@ -1234,8 +1483,15 @@ async function markAllAsSeen(tab, newFeedTab = currentNewFeedTab.value) {
     ]))
 
     const rssItems = marksRssFeeds ? rssFeedItems.value.filter(item => item.isNew === true) : []
+    // The Platforms tab marks what it shows, with its filter and tab
+    const platformItems = !marksPlatforms
+      ? []
+      : tab === 'platforms' && currentTab.value === 'platforms' && platformsPanel.value
+        ? platformsPanel.value.shownNewItems
+        : [...platformFeed.value.live, ...platformFeed.value.videos].filter(item => item.isNew === true)
     const markSeen = async () => {
       markRssFeedItemsAsSeen(rssItems)
+      markPlatformItemsAsSeen(platformItems)
       if (cacheFeedTabs.length > 0) {
         await store.dispatch('markSubscriptionEntriesAsSeen', {
           tabs: cacheFeedTabs,
@@ -1279,13 +1535,13 @@ async function markAllAsSeen(tab, newFeedTab = currentNewFeedTab.value) {
 }
 
 /**
- * @param {{tabId: string, feedTab: 'videos' | 'shorts' | 'live' | 'posts' | 'feeds'}} payload
+ * @param {{tabId: string, feedTab: 'videos' | 'shorts' | 'live' | 'posts' | 'feeds' | 'platforms'}} payload
  */
 function handleFeedMarkSeenRequest(payload) {
-  if (payload?.tabId === tabId && payload.feedTab === 'feeds') {
-    // Both RSS tabs list the same new items. Mark them through the New feed
-    // while it shows them, so that they leave with its animation.
-    markAllAsSeen(currentTab.value === 'new' && newFeedView.value === 'tabbed' ? 'new' : 'feeds', 'feeds')
+  if (payload?.tabId === tabId && (payload.feedTab === 'feeds' || payload.feedTab === 'platforms')) {
+    // Both RSS tabs, and both Platforms tabs, list the same new items. Mark them
+    // through the New feed while it shows them, so that they leave with its animation.
+    markAllAsSeen(currentTab.value === 'new' && newFeedView.value === 'tabbed' ? 'new' : payload.feedTab, payload.feedTab)
     return
   }
   if (
@@ -1325,6 +1581,10 @@ const currentAutoRefresh = computed(() => {
       timestamp = rssFeedsNextAutoRefresh.value
       interval = getRssFeedsAutoRefreshInterval()
       break
+    case 'platforms':
+      timestamp = platformFeedNextAutoRefresh.value
+      interval = getPlatformFeedAutoRefreshInterval()
+      break
     default:
       return { timestamp: 0, interval: 0 }
   }
@@ -1337,7 +1597,7 @@ const currentAutoRefresh = computed(() => {
 
 /**
  * @param {KeyboardEvent} event
- * @param {'videos' | 'shorts' | 'live' | 'community' | 'new' | 'feeds'} focusedTab
+ * @param {'videos' | 'shorts' | 'live' | 'community' | 'new' | 'feeds' | 'platforms'} focusedTab
  * @param {boolean} moveFocus
  */
 function switchTab(event, focusedTab, moveFocus = true) {
@@ -1394,6 +1654,9 @@ function switchTab(event, focusedTab, moveFocus = true) {
       case 'feeds':
         feedsTab.value?.focus()
         break
+      case 'platforms':
+        platformsTab.value?.focus()
+        break
     }
 
     store.commit('setOutlinesHidden', false)
@@ -1443,7 +1706,10 @@ function cancelRefresh() {
   if (rssTab || newFeedRefreshesRssFeeds.value) {
     cancelRssFeedsRefresh()
   }
-  if (currentTab.value !== 'feeds') {
+  if (currentPlatformsView.value || newFeedRefreshesPlatforms.value) {
+    cancelPlatformFeedRefresh()
+  }
+  if (currentTab.value !== 'feeds' && currentTab.value !== 'platforms') {
     // The refresh may be owned by another window, so it is cancelled everywhere
     requestSubscriptionRefreshCancellation()
   }
@@ -1457,6 +1723,10 @@ async function handleFeedReloadRequest(payload) {
     refreshRssFeeds(followedRssFeeds.value)
     return
   }
+  if (payload?.tabId === tabId && payload.feedTab === 'platforms') {
+    refreshPlatformFeed()
+    return
+  }
   if (payload?.tabId !== tabId || subscriptionFeedRefreshInProgress.value) {
     return
   }
@@ -1464,8 +1734,8 @@ async function handleFeedReloadRequest(payload) {
   const viewTab = payload.feedTab === 'posts'
     ? 'community'
     : payload.feedTab === 'all' ? 'new' : payload.feedTab
-  // The New feed's RSS tab only refreshes the RSS feeds
-  if (viewTab === currentTab.value && !currentNewFeedRssTab.value) {
+  // The New feed's RSS and Platforms tabs only refresh their own feeds
+  if (viewTab === currentTab.value && !currentNewFeedRssTab.value && !currentPlatformsView.value) {
     refreshCurrentTab()
     return
   }
@@ -1492,6 +1762,15 @@ const feedTabsControlsRowRef = useTemplateRef('feedTabsControlsRowRef')
 const tabsRowRef = useTemplateRef('tabsRowRef')
 /** @type {import('vue').Ref<boolean>} */
 const headerFitsOneRow = ref(false)
+/**
+ * Whether the tabs take the compact layout of phones below the title, as they
+ * would wrap onto a second line at their full size.
+ * @type {import('vue').Ref<boolean>}
+ */
+const compactTabs = ref(false)
+// The width of the tabs at their full size, measured while they have it
+let fullTabsWidth = 0
+const WIDE_HEADER_QUERY = '(width > 680px)'
 let headerResizeObserver = null
 
 /**
@@ -1546,8 +1825,9 @@ function updateHeaderFitsOneRow() {
     return
   }
 
+  if (!compactTabs.value) fullTabsWidth = singleLineWidth(tabs)
   const tabsRowWidth = singleLineWidth(tabsRow, child => {
-    return child === tabs ? singleLineWidth(tabs) : child.getBoundingClientRect().width
+    return child === tabs ? fullTabsWidth : child.getBoundingClientRect().width
   })
   const feedTabsControlsRowWidth = singleLineWidth(feedTabsControlsRow, child => {
     return child === tabsRow ? tabsRowWidth : child.getBoundingClientRect().width
@@ -1562,6 +1842,10 @@ function updateHeaderFitsOneRow() {
   // Fractional widths throughout, as rounding the available space up would let
   // the single row layout overflow, which puts the tabs onto a second line again
   headerFitsOneRow.value = requiredWidth <= contentBoxWidth(row)
+  // Below the title, the tabs and their row get a line of their own. The phone
+  // layout's tabs are compact already.
+  compactTabs.value = window.matchMedia(WIDE_HEADER_QUERY).matches && !headerFitsOneRow.value &&
+    tabsRowWidth > contentBoxWidth(feedTabsControlsRow)
 }
 
 const newFeedTabsRef = useTemplateRef('newFeedTabsRef')
@@ -1670,6 +1954,7 @@ watch([
   newFeedView,
   visibleNewFeedTabs,
   currentNewFeedRssTab,
+  currentPlatformsView,
   () => store.getters.getSubscriptionGroupList
 ], () => {
   const restoreFocus = headerRowRef.value?.querySelector('.markAllSeenButton') === document.activeElement
@@ -1684,6 +1969,12 @@ watch([
 })
 
 const tabsContainerRef = useTemplateRef('tabsContainerRef')
+
+// Other tabs need measuring at their full size again
+watch(visibleTabs, () => {
+  compactTabs.value = false
+  nextTick(updateHeaderLayout)
+})
 
 onMounted(() => {
   if (typeof ResizeObserver === 'function') {

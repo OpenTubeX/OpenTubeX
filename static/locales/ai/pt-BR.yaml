@@ -190,6 +190,26 @@ Subscriptions:
       Not Set: Não definido
     Retry Feed: Tentar {feed} novamente
     Reloading Feed: Recarregando {feed}
+  Platforms:
+    Tab: Plataformas
+    Platform: Plataforma
+    All Platforms: Todas as plataformas
+    Followed Channels: Canais seguidos em outras plataformas
+    Description: Siga canais da Twitch, SoundCloud, PeerTube, Rumble e Odysee para ver as publicações deles na aba Plataformas das suas inscrições. Encontre canais pela pesquisa ou adicione-os pelo endereço da página deles. A mídia deles é reproduzida com yt-dlp.
+    Add Channel: Adicionar canal
+    Channel URL: Endereço do canal
+    Invalid Channel: Digite o endereço da página de um canal da Twitch, SoundCloud, PeerTube, Rumble ou Odysee.
+    Channel Not Found: Não há nenhum canal neste endereço.
+    Channel Already Followed: Você já segue este canal.
+    Channel Could Not Be Loaded: Não foi possível carregar o canal.
+    No Channels: Você ainda não segue nenhum canal de outras plataformas.
+    Unfollow Channel: Deixar de seguir {channel}
+    Go To Channel: Ir para {channel}
+    Follow: Seguir
+    Following: Seguindo
+    Clips: Clipes
+    Refresh Errors: Não foi possível atualizar 1 canal. | Não foi possível atualizar {count} canais. | Não foi possível atualizar {count} canais.
+    Content Tabs: Guias de conteúdo das plataformas
 Trending:
   Music: Música
   Load Error: Não foi possível carregar as tendências.
@@ -283,6 +303,37 @@ History:
   History Older Than Days Removed: Foi removido o histórico de reprodução com mais de 1 dia | Foi removido o histórico de reprodução com mais de {days} dias | Foi removido o histórico de reprodução com mais de {days} dias
 Settings:
   Experimental Badge: Experimental
+  YouTube Account Settings:
+    YouTube Account Settings: "Conta do YouTube"
+    Unofficial App Warning: "O OpenTubeX não é um app oficial do YouTube. Ao entrar na conta, o que você faz aqui fica vinculado à sua conta do Google, e o Google pode restringir ou banir contas que usam apps não oficiais. Só entre com uma conta que você não se importe de perder."
+    Sign In Explanation: "O OpenTubeX faz login como um app de TV: você aprova o acesso no site do Google, e o OpenTubeX nunca vê sua senha. O login fica neste dispositivo e não é sincronizado nem incluído em backups."
+    Sign In: "Entrar"
+    Sign In Anyway: "Entrar mesmo assim"
+    Sign Out: "Sair"
+    Getting Sign-In Code: "Obtendo um código de login"
+    Sign In Instructions: "Abra a página de login e escolha sua Conta do Google. O código é preenchido automaticamente."
+    Other Device Instructions: "Em outro dispositivo, acesse este endereço e digite o código:"
+    YouTube Channel: "Canal do YouTube"
+    Using Channel: "Agora você está usando o YouTube como {name}"
+    Switch Channel Failed: "Não foi possível trocar o canal do YouTube: {error}"
+    Open Sign-In Page: "Abrir página de login"
+    Copy Code: "Copiar código"
+    Code Copied: "Código copiado"
+    Waiting for Approval: "Aguardando você aprovar o login"
+    Sign-In Denied: "O login foi negado."
+    Sign-In Code Expired: "O código expirou. Tente novamente para obter um novo."
+    Sign-In Failed: "Não foi possível entrar: {error}"
+    Signed In As: "Conectado ao YouTube como {name}"
+    Signed Out: "Desconectado do YouTube"
+    Sign Out Failed: "Não foi possível sair: {error}"
+    Revoke Failed: "Você saiu do YouTube, mas o Google não confirmou que o login foi encerrado. Você pode removê-lo nas conexões de terceiros da sua Conta do Google."
+    Signed out by YouTube: "O YouTube encerrou o login. Entre novamente nas Configurações para continuar usando sua conta."
+    Subscribe on YouTube: "Inscrever-se também no YouTube"
+    Add to YouTube Watch History: "Adicionar vídeos assistidos ao histórico do YouTube"
+    Import Subscriptions: "Importar inscrições do YouTube"
+    Imported Subscriptions: "{count} canal importado | {count} canais importados | {count} canais importados"
+    No Subscriptions to Import: "Esta conta do YouTube não tem inscrições"
+    Import Subscriptions Failed: "Não foi possível importar as inscrições: {error}"
   Diagnostics:
     Diagnostics: Diagnóstico
     Description: Enquanto o log de diagnóstico estiver ativado, o OpenTubeX mantém as mensagens de log recentes na memória para que você possa anexá-las a relatórios de bugs. Ele nunca as salva nem as envia por conta própria, e desativar o log as apaga. Os relatórios omitem cookies, tokens, endereços IP e parâmetros de URL, mas podem incluir os IDs dos vídeos que você reproduziu, então confira o relatório antes de compartilhá-lo.
@@ -1150,6 +1201,11 @@ Settings:
     Notify About New Uploads: Notificar novos envios
     RSS Feeds Auto Refresh Interval: Intervalo de atualização automática dos feeds RSS
     Faster Subscription Refresh: "Atualização mais rápida das inscrições"
+    Platforms:
+      Other Platforms: Outras plataformas
+      Manage Channels: Gerenciar canais seguidos
+      Notify When Live: Notificar quando canais seguidos da Twitch entrarem ao vivo
+      Auto Refresh Interval: Intervalo de atualização automática de outras plataformas
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Contar tempo de visualização de"
@@ -1991,6 +2047,7 @@ Context Menu:
   Reload Posts: Recarregar publicações
   Reload All Feeds: Recarregar todos os feeds
   Reload RSS Feeds: Recarregar feeds RSS
+  Reload Platforms: Recarregar plataformas
   Close Multiple Tabs: Fechar {count} guia | Fechar {count} guias
   Duplicate Tab: Duplicar guia
   Duplicate Multiple Tabs: Duplicar {count} guia | Duplicar {count} guias
@@ -2143,6 +2200,9 @@ Description:
   Games: Jogos
   Music: Música
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Inscrever-se em um canal ou remover a inscrição no OpenTubeX faz o mesmo na sua conta do YouTube."
+    Add to YouTube Watch History: "Os vídeos que você assiste são adicionados ao seu histórico de reprodução do YouTube, para que as recomendações do YouTube aprendam com eles. Nada é adicionado enquanto o histórico estiver pausado no YouTube."
   General Settings:
     Built-in Streams: |
       Automático reproduz a maioria dos vídeos pelo cliente visionOS do YouTube, que inicia mais rápido e oferece suporte à qualidade automática. Transmissões ao vivo e vídeos que ele não consegue reproduzir usam SABR.
@@ -2255,6 +2315,8 @@ Tooltips:
     Notify About New Uploads: Mostra notificações do sistema neste dispositivo para os canais cujas notificações você ativou nas configurações de inscrição deles. O OpenTubeX verifica se há conteúdo novo quando as inscrições são atualizadas, então escolha um intervalo de atualização automática. Para receber notificações com o aplicativo fechado, ative também a atualização com o aplicativo fechado.
     RSS Feeds Auto Refresh Interval: Com que frequência o OpenTubeX atualiza automaticamente seus feeds RSS enquanto o aplicativo está aberto.
     Faster Subscription Refresh: "Primeiro verifica o feed RSS de cada canal e só carrega os vídeos, Shorts e transmissões ao vivo dos canais com novos envios. As atualizações automáticas também ignoram canais carregados nos últimos 10 minutos. Em canais sem novos envios, visualizações, vídeos removidos e títulos alterados só são atualizados a cada poucas horas, e novos envios podem aparecer mais tarde quando o feed RSS está atrasado. Indisponível com a API do Invidious."
+    Platforms Auto Refresh Interval: Com que frequência o OpenTubeX atualiza automaticamente os canais que você segue em outras plataformas enquanto o aplicativo está aberto.
+    Twitch Notify When Live: Avisa quando um dos canais da Twitch que você segue começa a transmitir. O OpenTubeX verifica a cada poucos minutos enquanto está aberto, e também enquanto está fechado se nesse momento atualizar as inscrições.
   Theme Settings:
     Only Show Important Notifications: Oculta as notificações do app que apenas confirmam uma ação ou informam um status. Erros, avisos, lembretes que você configurou e notificações que oferecem uma ação, como Desfazer, continuam aparecendo. O progresso das operações em segundo plano, como a atualização das inscrições, é mostrado na barra de progresso global em vez de em uma notificação. As notificações do sistema não são afetadas.
     Visible Search Suggestions: "Define quantas entradas do histórico de pesquisa e sugestões a barra de pesquisa mostra antes de sua lista rolar. A lista nunca ultrapassa a parte inferior da janela."
@@ -2644,3 +2706,31 @@ Notification Center:
   Clear: "Limpar"
   Empty: "Nenhuma notificação ainda"
   Empty Hint: "Lembretes de transmissões ao vivo e novos envios de canais com notificações ativadas vão aparecer aqui."
+Platforms:
+  Tracks: Faixas
+  Playlists: Playlists
+  Follower Count: 1 seguidor | {count} de seguidores | {count} seguidores
+  Open Website: Abrir em {platform}
+  Channel Not Found: Não foi possível encontrar este canal.
+  Playlist Not Found: Não foi possível encontrar esta playlist.
+  Load Error: Não foi possível carregar esta página de {platform}.
+  Empty Tab: Ainda não há nada aqui.
+YouTube Account:
+  Like: "Gostei"
+  Dislike: "Não gostei"
+  Rating Failed: "Não foi possível avaliar no YouTube: {error}"
+  Subscribe Failed: "Não foi possível se inscrever no YouTube: {error}"
+  Unsubscribe Failed: "Não foi possível remover a inscrição no YouTube: {error}"
+  Add a comment: "Adicionar um comentário"
+  Add a reply: "Adicionar uma resposta"
+  Comment: "Comentar"
+  Reply: "Responder"
+  Comment Posted: "Comentário publicado"
+  Reply Posted: "Resposta publicada"
+  Comment Failed: "Não foi possível publicar o comentário: {error}"
+  Delete Comment: "Excluir comentário"
+  Delete Comment Confirmation: "Excluir seu comentário do YouTube?"
+  Comment Deleted: "Comentário excluído"
+  Delete Comment Failed: "Não foi possível excluir o comentário: {error}"
+  Recommendations: "Recomendações do YouTube"
+  Recommendations Failed: "Não foi possível carregar suas recomendações do YouTube."

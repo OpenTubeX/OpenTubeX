@@ -3,9 +3,10 @@ import { constants as fsConstants } from 'node:fs'
 import asyncFs from 'node:fs/promises'
 import path from 'node:path'
 
-import { IpcChannels, SyncEvents } from '../constants'
+import { IpcChannels } from '../constants'
 import * as baseHandlers from '../datastores/handlers/base'
 import { handleTrusted, onTrusted, sendToAppWindows } from './ipc'
+import { settingSyncMessage } from './settingRevisions'
 
 /**
  * @param {import('electron').WebContents} webContents
@@ -38,13 +39,7 @@ async function chooseScreenshotFolder(webContents, currentPath) {
 
   await baseHandlers.settings.upsert(settingId, result.filePaths[0])
 
-  sendToAppWindows(IpcChannels.SYNC_SETTINGS, {
-    event: SyncEvents.GENERAL.UPSERT,
-    data: {
-      _id: settingId,
-      value: result.filePaths[0]
-    }
-  })
+  sendToAppWindows(IpcChannels.SYNC_SETTINGS, settingSyncMessage(settingId, result.filePaths[0]))
 
   return result.filePaths[0]
 }

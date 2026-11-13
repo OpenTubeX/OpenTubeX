@@ -1,4 +1,5 @@
 // @ts-check
+import { parseTwitchNotificationId } from './twitchFollows.js'
 
 /** Older entries are dropped once the history holds this many. */
 export const NOTIFICATION_HISTORY_LIMIT = 100
@@ -136,6 +137,8 @@ export function getLiveReminderTarget(videoId) {
  * @returns {NotificationHistoryTarget | null}
  */
 export function getUploadTarget(feedType, id, live = false) {
+  // Android announces Twitch streams like uploads
+  if (feedType === 'twitch') return parseTwitchNotificationId(id)
   if (typeof id !== 'string' || !ID_PATTERN.test(id)) return null
   if (feedType === 'posts') return { kind: 'post', path: `/post/${id}` }
   if (feedType === 'shorts') return { kind: 'short', path: `/watch/${id}`, query: { short: 'true' } }

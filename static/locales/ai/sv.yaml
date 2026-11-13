@@ -221,6 +221,26 @@ Subscriptions:
       Not Set: Inte angivet
     Retry Feed: Försök med {feed} igen
     Reloading Feed: Läser in {feed} igen
+  Platforms:
+    Tab: Plattformar
+    Platform: Plattform
+    All Platforms: Alla plattformar
+    Followed Channels: Följda kanaler på andra plattformar
+    Description: Följ kanaler på Twitch, SoundCloud, PeerTube, Rumble och Odysee för att se deras uppladdningar på fliken Plattformar i dina prenumerationer. Hitta kanaler med sökningen eller lägg till dem med adressen till deras sida. Deras media spelas upp med yt-dlp.
+    Add Channel: Lägg till kanal
+    Channel URL: Kanaladress
+    Invalid Channel: Ange adressen till en kanalsida på Twitch, SoundCloud, PeerTube, Rumble eller Odysee.
+    Channel Not Found: Det finns ingen kanal på den här adressen.
+    Channel Already Followed: Du följer redan den här kanalen.
+    Channel Could Not Be Loaded: Kanalen kunde inte läsas in.
+    No Channels: Du följer inga kanaler på andra plattformar än.
+    Unfollow Channel: Sluta följa {channel}
+    Go To Channel: Gå till {channel}
+    Follow: Följ
+    Following: Följer
+    Clips: Klipp
+    Refresh Errors: 1 kanal kunde inte uppdateras. | {count} kanaler kunde inte uppdateras.
+    Content Tabs: Flikar för plattformsinnehåll
 Trending:
   Music: Musik
   Load Error: Trendande innehåll kunde inte läsas in.
@@ -314,6 +334,37 @@ History:
   History Older Than Days Removed: Visningshistorik äldre än 1 dag har tagits bort | Visningshistorik äldre än {days} dagar har tagits bort
 Settings:
   Experimental Badge: Experimentell
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube-konto"
+    Unofficial App Warning: "OpenTubeX är inte en officiell YouTube-app. När du loggar in kopplas det du gör här till ditt Google-konto, och Google kan begränsa eller stänga av konton som använder inofficiella appar. Logga bara in med ett konto som du har råd att förlora."
+    Sign In Explanation: "OpenTubeX loggar in som en tv-app: du godkänner inloggningen på Googles webbplats och OpenTubeX ser aldrig ditt lösenord. Inloggningen stannar på den här enheten och varken synkroniseras eller säkerhetskopieras."
+    Sign In: "Logga in"
+    Sign In Anyway: "Logga in ändå"
+    Sign Out: "Logga ut"
+    Getting Sign-In Code: "Hämtar en inloggningskod"
+    Sign In Instructions: "Öppna inloggningssidan och välj ditt Google-konto. Koden fylls i automatiskt."
+    Other Device Instructions: "Gå till den här adressen på en annan enhet och ange koden:"
+    YouTube Channel: "YouTube-kanal"
+    Using Channel: "Använder nu YouTube som {name}"
+    Switch Channel Failed: "Det gick inte att byta YouTube-kanal: {error}"
+    Open Sign-In Page: "Öppna inloggningssidan"
+    Copy Code: "Kopiera kod"
+    Code Copied: "Koden har kopierats"
+    Waiting for Approval: "Väntar på att du godkänner inloggningen"
+    Sign-In Denied: "Inloggningen nekades."
+    Sign-In Code Expired: "Koden har gått ut. Försök igen för att få en ny."
+    Sign-In Failed: "Det gick inte att logga in: {error}"
+    Signed In As: "Inloggad på YouTube som {name}"
+    Signed Out: "Utloggad från YouTube"
+    Sign Out Failed: "Det gick inte att logga ut: {error}"
+    Revoke Failed: "Utloggad från YouTube, men Google bekräftade inte att inloggningen avslutades. Du kan ta bort den under tredjepartsanslutningar i ditt Google-konto."
+    Signed out by YouTube: "YouTube avslutade inloggningen. Logga in igen i Inställningar för att fortsätta använda ditt konto."
+    Subscribe on YouTube: "Prenumerera även på YouTube"
+    Add to YouTube Watch History: "Lägg till sedda videor i YouTube-historiken"
+    Import Subscriptions: "Importera prenumerationer från YouTube"
+    Imported Subscriptions: "Importerade {count} kanal | Importerade {count} kanaler"
+    No Subscriptions to Import: "Det här YouTube-kontot har inga prenumerationer"
+    Import Subscriptions Failed: "Det gick inte att importera prenumerationer: {error}"
   Diagnostics:
     Diagnostics: Diagnostik
     Description: Medan diagnostikloggen är på sparar OpenTubeX de senaste loggmeddelandena i minnet så att du kan bifoga dem till felrapporter. Det sparar eller skickar dem aldrig på egen hand, och när du stänger av loggen raderas de. Rapporter utelämnar kakor, token, IP-adresser och URL-parametrar, men de kan innehålla id:n för videor du har spelat upp, så granska en rapport innan du delar den.
@@ -1181,6 +1232,11 @@ Settings:
     Notify About New Uploads: Avisera om nya uppladdningar
     RSS Feeds Auto Refresh Interval: Intervall för automatisk uppdatering av RSS-flöden
     Faster Subscription Refresh: "Snabbare uppdatering av prenumerationer"
+    Platforms:
+      Other Platforms: Andra plattformar
+      Manage Channels: Hantera följda kanaler
+      Notify When Live: Meddela när följda Twitch-kanaler börjar sända live
+      Auto Refresh Interval: Intervall för automatisk uppdatering av andra plattformar
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Räkna visningstid från"
@@ -2022,6 +2078,7 @@ Context Menu:
   Reload Posts: Läs in inlägg igen
   Reload All Feeds: Läs in alla flöden igen
   Reload RSS Feeds: Läs in RSS-flöden igen
+  Reload Platforms: Läs in plattformar igen
   Close Multiple Tabs: Stäng {count} flikar
   Duplicate Tab: Duplicera flik
   Duplicate Multiple Tabs: Duplicera {count} flikar
@@ -2174,6 +2231,9 @@ Description:
   Games: Spel
   Music: Musik
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "När du prenumererar på eller avslutar prenumerationen på en kanal i OpenTubeX görs samma sak på ditt YouTube-konto."
+    Add to YouTube Watch History: "Videor du spelar upp läggs till i din visningshistorik på YouTube, så att rekommendationerna på YouTube lär sig av dem. Inget läggs till medan historiken är pausad på YouTube."
   General Settings:
     Built-in Streams: |
       Automatiskt spelar de flesta videor via YouTubes visionOS-klient, som startar snabbare och stöder automatisk kvalitet. Direktsändningar och videor som den inte kan spela upp använder SABR.
@@ -2286,6 +2346,8 @@ Tooltips:
     Notify About New Uploads: Visar systemaviseringar på den här enheten för kanaler vars aviseringar du har aktiverat i deras prenumerationsinställningar. OpenTubeX söker efter nytt innehåll när prenumerationer uppdateras, så välj ett intervall för automatisk uppdatering. Om du vill få aviseringar medan appen är stängd aktiverar du även uppdatering medan appen är stängd.
     RSS Feeds Auto Refresh Interval: Hur ofta OpenTubeX automatiskt uppdaterar dina RSS-flöden medan appen är öppen.
     Faster Subscription Refresh: "Kontrollerar först varje kanals RSS-flöde och läser bara in videor, Shorts och livesändningar från kanaler med nya uppladdningar. Automatiska uppdateringar hoppar också över kanaler som lästs in de senaste 10 minuterna. För kanaler utan nya uppladdningar uppdateras visningar, borttagna videor och ändrade titlar bara med några timmars mellanrum, och nya uppladdningar kan dyka upp senare när RSS-flödet släpar efter. Inte tillgängligt med Invidious-API:t."
+    Platforms Auto Refresh Interval: Hur ofta OpenTubeX automatiskt uppdaterar kanalerna du följer på andra plattformar medan appen är öppen.
+    Twitch Notify When Live: Meddelar dig när en av dina följda Twitch-kanaler börjar streama. OpenTubeX kontrollerar med några minuters mellanrum medan det är öppet, och även medan det är stängt om det då uppdaterar prenumerationer.
   Theme Settings:
     Only Show Important Notifications: Döljer aviseringar i appen som bara bekräftar en åtgärd eller rapporterar en status. Fel, varningar, påminnelser som du har ställt in och aviseringar som erbjuder en åtgärd, till exempel Ångra, visas fortfarande. Förloppet för bakgrundsåtgärder, till exempel uppdatering av prenumerationer, visas i den globala förloppsindikatorn i stället för som en avisering. Systemaviseringar påverkas inte.
     Visible Search Suggestions: "Anger hur många poster från sökhistoriken och förslag sökfältet visar innan listan behöver rullas. Listan sträcker sig aldrig förbi fönstrets nederkant."
@@ -2682,3 +2744,31 @@ Notification Center:
   Clear: "Rensa"
   Empty: "Inga aviseringar ännu"
   Empty Hint: "Påminnelser om livesändningar och nya uppladdningar från kanaler med aviseringar påslagna visas här."
+Platforms:
+  Tracks: Spår
+  Playlists: Spellistor
+  Follower Count: 1 följare | {count} följare
+  Open Website: Öppna på {platform}
+  Channel Not Found: Den här kanalen kunde inte hittas.
+  Playlist Not Found: Den här spellistan kunde inte hittas.
+  Load Error: Den här sidan kunde inte läsas in från {platform}.
+  Empty Tab: Här finns inget ännu.
+YouTube Account:
+  Like: "Gilla"
+  Dislike: "Ogilla"
+  Rating Failed: "Det gick inte att betygsätta på YouTube: {error}"
+  Subscribe Failed: "Det gick inte att prenumerera på YouTube: {error}"
+  Unsubscribe Failed: "Det gick inte att avsluta prenumerationen på YouTube: {error}"
+  Add a comment: "Lägg till en kommentar"
+  Add a reply: "Lägg till ett svar"
+  Comment: "Kommentera"
+  Reply: "Svara"
+  Comment Posted: "Kommentaren har publicerats"
+  Reply Posted: "Svaret har publicerats"
+  Comment Failed: "Det gick inte att publicera kommentaren: {error}"
+  Delete Comment: "Ta bort kommentar"
+  Delete Comment Confirmation: "Vill du ta bort din kommentar från YouTube?"
+  Comment Deleted: "Kommentaren har tagits bort"
+  Delete Comment Failed: "Det gick inte att ta bort kommentaren: {error}"
+  Recommendations: "YouTube-rekommendationer"
+  Recommendations Failed: "Det gick inte att läsa in dina YouTube-rekommendationer."

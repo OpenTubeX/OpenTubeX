@@ -1,8 +1,8 @@
 # Android signing
 
-Gradle signs debug and nightly APKs with `nightly.keystore`. Its credentials are public by design, so local builds stay installable. These builds use separate application IDs so they cannot update the production `org.opentubex.app` package or access its private data. This key must never sign the production package.
+Local debug and nightly builds are signed with `nightly.keystore`. Its credentials are public by design, so anyone can build an installable APK. These builds use separate application IDs so they cannot update the production `org.opentubex.app` package or access its private data. This key must never sign the production package.
 
-Published nightlies are re-signed with a private nightly key, so nobody else can publish an update for them. See [Nightly signing](#nightly-signing).
+Published nightlies don't keep the public signature. CI re-signs them with a private nightly key, so nobody else can publish an update for them. See [Nightly signing](#nightly-signing). Stable releases are signed with the private release key.
 
 | Build | Command from `android/` | Application ID | Launcher name |
 | --- | --- | --- | --- |

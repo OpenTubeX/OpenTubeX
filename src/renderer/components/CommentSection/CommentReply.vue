@@ -163,7 +163,13 @@
         :attachment="reply.imageAttachment"
       />
       <p class="commentLikeCount">
-        <template v-if="!hideCommentLikes">
+        <CommentAccountActions
+          v-if="youTubeComments?.enabled.value"
+          :comment="reply"
+          :hide-count="hideCommentLikes"
+          :shorten-view-counts="shortenViewCounts"
+        />
+        <template v-else-if="!hideCommentLikes">
           <FtIcon :icon="['fas', 'thumbs-up']" />
           {{ formatViewCount(reply.likes, shortenViewCounts) }}
         </template>
@@ -189,6 +195,14 @@
           />
         </span>
       </p>
+      <!-- Replies to replies go to the thread, mentioning the author, as on YouTube. -->
+      <CommentComposer
+        v-if="youTubeComments?.enabled.value && youTubeComments.replyingTo.value === reply.id"
+        class="replyComposer"
+        :parent-id="getRootCommentId(reply.id)"
+        :initial-text="reply.author.startsWith('@') ? `${reply.author} ` : ''"
+        @done="youTubeComments.closeReply(reply.id)"
+      />
     </div>
     <div
       v-if="hasReplyChildren"
@@ -279,7 +293,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, ref } from 'vue'
+import { computed, inject, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtTimestampCatcher from '../FtTimestampCatcher.vue'
@@ -288,11 +302,15 @@ import CommentImageAttachment from './CommentImageAttachment.vue'
 import FtRetryImage from '../FtRetryImage.vue'
 import FtVerifiedBadge from '../FtVerifiedBadge/FtVerifiedBadge.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
+import CommentAccountActions from './CommentAccountActions.vue'
+import CommentComposer from './CommentComposer.vue'
+import { getRootCommentId, youTubeCommentsKey } from './youTubeComments'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { formatViewCount, getRelativeTimeFromDate } from '../../helpers/utils'
 import { getCommentReplyCount } from '../../helpers/comment-replies'
 
 const { t } = useI18n()
+const youTubeComments = inject(youTubeCommentsKey, null)
 
 const props = defineProps({
   node: {
@@ -385,7 +403,8 @@ const relativeTimeNow = useRelativeTimeClock()
 
 function formatCommentTime(comment) {
   return comment.published
-    ? getRelativeTimeFromDate(comment.published, false, true, relativeTimeNow.value)
+    // A comment posted since the clock last ticked would read "in a few seconds".
+    ? getRelativeTimeFromDate(comment.published, false, true, Math.max(relativeTimeNow.value, comment.published))
     : comment.time
 }
 

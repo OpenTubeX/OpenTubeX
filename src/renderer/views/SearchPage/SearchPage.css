@@ -139,3 +139,42 @@
     box-sizing: border-box;
   }
 }
+
+/* The selects sit beside the title, and below it only when they don't fit */
+.titleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 20px;
+  margin-block-end: 16px;
+  padding-block-start: var(--page-title-offset);
+}
+
+.searchControls {
+  display: flex;
+  flex: 0 1 auto;
+  gap: 16px;
+  min-inline-size: 0;
+
+  /* Room for the select labels, which sit on their top border */
+  padding-block-start: 8px;
+}
+
+/* A definite width, as the row is as wide as its content */
+.searchControl {
+  flex: 0 1 auto;
+  inline-size: 220px;
+  min-inline-size: 0;
+}
+
+.searchControl > :deep(.select) {
+  inline-size: 100%;
+  margin-block-start: 0;
+}
+
+.searchControl :deep(.optionIcon) {
+  flex-basis: 14px;
+  inline-size: 14px;
+  font-size: 14px;
+}

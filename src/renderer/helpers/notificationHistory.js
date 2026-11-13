@@ -28,7 +28,7 @@ export const NOTIFICATION_KIND_ICONS = {
  * Whether notifications may show thumbnails. Toasts and system notifications
  * cannot blur images, so blurred thumbnails leave them out too.
  */
-function notificationThumbnailsAllowed() {
+export function notificationThumbnailsAllowed() {
   return store.getters.getThumbnailPreference !== 'hidden' && !store.getters.getBlurThumbnails
 }
 

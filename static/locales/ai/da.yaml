@@ -225,6 +225,26 @@ Subscriptions:
       Not Set: Ikke angivet
     Retry Feed: Prøv {feed} igen
     Reloading Feed: Genindlæser {feed}
+  Platforms:
+    Tab: Platforme
+    Platform: Platform
+    All Platforms: Alle platforme
+    Followed Channels: Fulgte kanaler på andre platforme
+    Description: Følg kanaler på Twitch, SoundCloud, PeerTube, Rumble og Odysee for at se deres uploads under fanen Platforme i dine abonnementer. Find kanaler med søgningen, eller tilføj dem med adressen på deres side. Deres medier afspilles med yt-dlp.
+    Add Channel: Tilføj kanal
+    Channel URL: Kanaladresse
+    Invalid Channel: Indtast adressen på en kanalside på Twitch, SoundCloud, PeerTube, Rumble eller Odysee.
+    Channel Not Found: Der er ingen kanal på denne adresse.
+    Channel Already Followed: Du følger allerede denne kanal.
+    Channel Could Not Be Loaded: Kanalen kunne ikke indlæses.
+    No Channels: Du følger ikke nogen kanaler på andre platforme endnu.
+    Unfollow Channel: Stop med at følge {channel}
+    Go To Channel: Gå til {channel}
+    Follow: Følg
+    Following: Følger
+    Clips: Klip
+    Refresh Errors: 1 kanal kunne ikke opdateres. | {count} kanaler kunne ikke opdateres.
+    Content Tabs: Faner med platformindhold
 Trending:
   Music: Musik
   Load Error: Populært indhold kunne ikke indlæses.
@@ -325,6 +345,37 @@ History:
   History Older Than Days Removed: Visningshistorik, der er ældre end 1 dag, er blevet slettet | Visningshistorik, der er ældre end {days} dage, er blevet slettet
 Settings:
   Experimental Badge: Eksperimentel
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube-konto"
+    Unofficial App Warning: "OpenTubeX er ikke en officiel YouTube-app. Når du logger ind, knyttes det, du gør her, til din Google-konto, og Google kan begrænse eller udelukke konti, der bruger uofficielle apps. Log kun ind med en konto, du har råd til at miste."
+    Sign In Explanation: "OpenTubeX logger ind som en tv-app: Du godkender det på Googles websted, og OpenTubeX ser aldrig din adgangskode. Login forbliver på denne enhed og bliver ikke synkroniseret eller sikkerhedskopieret."
+    Sign In: "Log ind"
+    Sign In Anyway: "Log ind alligevel"
+    Sign Out: "Log ud"
+    Getting Sign-In Code: "Henter en loginkode"
+    Sign In Instructions: "Åbn loginsiden, og vælg din Google-konto. Koden udfyldes automatisk."
+    Other Device Instructions: "Gå til denne adresse på en anden enhed, og indtast koden:"
+    YouTube Channel: "YouTube-kanal"
+    Using Channel: "Bruger nu YouTube som {name}"
+    Switch Channel Failed: "Kunne ikke skifte YouTube-kanal: {error}"
+    Open Sign-In Page: "Åbn loginside"
+    Copy Code: "Kopiér kode"
+    Code Copied: "Koden er kopieret"
+    Waiting for Approval: "Venter på, at du godkender login"
+    Sign-In Denied: "Login blev afvist."
+    Sign-In Code Expired: "Koden er udløbet. Prøv igen for at få en ny."
+    Sign-In Failed: "Kunne ikke logge ind: {error}"
+    Signed In As: "Logget ind på YouTube som {name}"
+    Signed Out: "Logget ud af YouTube"
+    Sign Out Failed: "Kunne ikke logge ud: {error}"
+    Revoke Failed: "Logget ud af YouTube, men Google bekræftede ikke, at login blev afsluttet. Du kan fjerne det under tredjepartsforbindelser på din Google-konto."
+    Signed out by YouTube: "YouTube har afsluttet login. Log ind igen i Indstillinger for at fortsætte med at bruge din konto."
+    Subscribe on YouTube: "Abonnér også på YouTube"
+    Add to YouTube Watch History: "Føj sete videoer til YouTube-historikken"
+    Import Subscriptions: "Importér abonnementer fra YouTube"
+    Imported Subscriptions: "{count} kanal importeret | {count} kanaler importeret"
+    No Subscriptions to Import: "Denne YouTube-konto har ingen abonnementer"
+    Import Subscriptions Failed: "Kunne ikke importere abonnementer: {error}"
   Diagnostics:
     Diagnostics: Diagnostik
     Description: Mens diagnosticeringsloggen er slået til, gemmer OpenTubeX de seneste logbeskeder i hukommelsen, så du kan vedhæfte dem til fejlrapporter. Det gemmer eller sender dem aldrig af sig selv, og når du slår loggen fra, slettes de. Rapporter udelader cookies, tokens, IP-adresser og URL-parametre, men de kan indeholde id'er for videoer, du har afspillet, så tjek en rapport, før du deler den.
@@ -1207,6 +1258,11 @@ Settings:
     Limit the number of videos displayed for each channel: Begræns antallet af viste videoer for hver kanal
     RSS Feeds Auto Refresh Interval: Interval for automatisk opdatering af RSS-feeds
     Faster Subscription Refresh: "Hurtigere opdatering af abonnementer"
+    Platforms:
+      Other Platforms: Andre platforme
+      Manage Channels: Administrer fulgte kanaler
+      Notify When Live: Giv besked, når fulgte Twitch-kanaler går live
+      Auto Refresh Interval: Interval for automatisk opdatering af andre platforme
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Tæl visningstid fra"
@@ -2105,6 +2161,7 @@ Context Menu:
   Reload Posts: Genindlæs opslag
   Reload All Feeds: Genindlæs alle feeds
   Reload RSS Feeds: Genindlæs RSS-feeds
+  Reload Platforms: Genindlæs platforme
   Close Multiple Tabs: Luk {count} faner
   Duplicate Tab: Dupliker fane
   Duplicate Multiple Tabs: Dupliker {count} faner
@@ -2261,6 +2318,9 @@ Description:
   Games: Spil
   Music: Musik
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Når du abonnerer på eller afmelder en kanal i OpenTubeX, sker det samme på din YouTube-konto."
+    Add to YouTube Watch History: "Videoer, du afspiller, føjes til din YouTube-visningshistorik, så YouTubes anbefalinger lærer af dem. Der føjes intet til, mens historikken er sat på pause på YouTube."
   General Settings:
     Built-in Streams: |
       Automatisk afspiller de fleste videoer via YouTubes visionOS-klient, som starter hurtigere og understøtter automatisk kvalitet. Livestreams og videoer, den ikke kan afspille, bruger SABR.
@@ -2374,6 +2434,8 @@ Tooltips:
     Notify About New Uploads: Viser systemmeddelelser på denne enhed for kanaler, hvor du har slået meddelelser til i deres abonnementsindstillinger. OpenTubeX søger efter nyt indhold, når abonnementer opdateres, så vælg et interval for automatisk opdatering. Hvis du vil have besked, mens appen er lukket, skal du også aktivere opdatering, mens appen er lukket.
     RSS Feeds Auto Refresh Interval: Hvor ofte OpenTubeX automatisk opdaterer dine RSS-feeds, mens appen er åben.
     Faster Subscription Refresh: "Tjekker først hver kanals RSS-feed og indlæser kun videoer, Shorts og livestreams fra kanaler med nye uploads. Automatiske opdateringer springer også kanaler over, der er indlæst inden for de sidste 10 minutter. For kanaler uden nye uploads opdateres visningstal, fjernede videoer og ændrede titler kun med nogle timers mellemrum, og nye uploads kan dukke op senere, når RSS-feedet halter bagefter. Ikke tilgængelig med Invidious API."
+    Platforms Auto Refresh Interval: Hvor ofte OpenTubeX automatisk opdaterer de kanaler, du følger på andre platforme, mens appen er åben.
+    Twitch Notify When Live: Giver dig besked, når en af dine fulgte Twitch-kanaler begynder at streame. OpenTubeX tjekker hvert par minutter, mens den er åben, og også mens den er lukket, hvis den opdaterer abonnementer da.
   Theme Settings:
     Only Show Important Notifications: Skjuler notifikationer i appen, der kun bekræfter en handling eller oplyser en status. Fejl, advarsler, påmindelser, du har oprettet, og notifikationer med en handling, såsom Fortryd, vises stadig. Fremskridt for baggrundshandlinger, såsom opdatering af abonnementer, vises i den globale statuslinje i stedet for som en notifikation. Systemnotifikationer påvirkes ikke.
     Visible Search Suggestions: "Angiver, hvor mange poster fra søgehistorikken og forslag søgefeltet viser, før dets liste skal rulles. Listen går aldrig ud over vinduets nederste kant."
@@ -2778,3 +2840,31 @@ Notification Center:
   Clear: "Ryd"
   Empty: "Ingen notifikationer endnu"
   Empty Hint: "Påmindelser om livestreams og nye uploads fra kanaler med notifikationer slået til vises her."
+Platforms:
+  Tracks: Numre
+  Playlists: Playlister
+  Follower Count: 1 følger | {count} følgere
+  Open Website: Åbn på {platform}
+  Channel Not Found: Denne kanal blev ikke fundet.
+  Playlist Not Found: Denne playliste blev ikke fundet.
+  Load Error: Denne side kunne ikke indlæses fra {platform}.
+  Empty Tab: Der er intet her endnu.
+YouTube Account:
+  Like: "Synes godt om"
+  Dislike: "Synes ikke om"
+  Rating Failed: "Kunne ikke bedømme på YouTube: {error}"
+  Subscribe Failed: "Kunne ikke abonnere på YouTube: {error}"
+  Unsubscribe Failed: "Kunne ikke afmelde abonnementet på YouTube: {error}"
+  Add a comment: "Tilføj en kommentar"
+  Add a reply: "Tilføj et svar"
+  Comment: "Kommentér"
+  Reply: "Svar"
+  Comment Posted: "Kommentaren er slået op"
+  Reply Posted: "Svaret er slået op"
+  Comment Failed: "Kunne ikke slå kommentaren op: {error}"
+  Delete Comment: "Slet kommentar"
+  Delete Comment Confirmation: "Vil du slette din kommentar fra YouTube?"
+  Comment Deleted: "Kommentaren er slettet"
+  Delete Comment Failed: "Kunne ikke slette kommentaren: {error}"
+  Recommendations: "YouTube-anbefalinger"
+  Recommendations Failed: "Kunne ikke indlæse dine YouTube-anbefalinger."

@@ -274,6 +274,18 @@
       </FtCard>
 
       <FtCard
+        v-else-if="section.id === 'youtubeRecommendations'"
+        class="homeSection"
+        data-home-section="youtubeRecommendations"
+      >
+        <HomeSectionHeading
+          :title="sectionLabel(section.id)"
+          :icon="['fab', 'youtube']"
+        />
+        <HomeYouTubeRecommendations />
+      </FtCard>
+
+      <FtCard
         v-else-if="section.id === 'newSinceLastVisit'"
         class="homeSection"
         data-home-section="newSinceLastVisit"
@@ -559,6 +571,7 @@ import FtTooltip from '../../components/FtTooltip/FtTooltip.vue'
 import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
 import HomeShelf from './HomeShelf.vue'
 import HomeSectionHeading from './HomeSectionHeading.vue'
+import HomeYouTubeRecommendations from './HomeYouTubeRecommendations.vue'
 import HomeRecommendationOptions from './HomeRecommendationOptions.vue'
 
 import store from '../../store/index'
@@ -575,6 +588,7 @@ import {
 } from '../../helpers/newSubscriptionFeed'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
+import { isSignedInToYouTube } from '../../helpers/youtube-account-state'
 import { showToast } from '../../helpers/utils'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 import { formatDateTime } from '../../helpers/dateFormat'
@@ -601,7 +615,8 @@ const sectionLayout = computed(() => normalizeHomeSectionLayout(store.getters.ge
 const supportedSectionIds = computed(() => new Set(sectionLayout.value
   .map(section => section.id)
   .filter(id => supportsYtDlp || id !== 'recentDownloads')
-  .filter(id => (supportsLiveReminders && store.getters.getNotificationMode !== 'off') || id !== 'reminders')))
+  .filter(id => (supportsLiveReminders && store.getters.getNotificationMode !== 'off') || id !== 'reminders')
+  .filter(id => id !== 'youtubeRecommendations' || isSignedInToYouTube(store.getters))))
 const configurableSections = computed(() => (
   sectionLayout.value.filter(section => supportedSectionIds.value.has(section.id))
 ))
@@ -742,6 +757,10 @@ const thumbnailOrigin = computed(() => store.getters.getBackendPreference === 'i
 const sectionDefinitions = computed(() => ({
   recommendations: {
     label: t('Home Page.Recommended for you'),
+    hasContent: true,
+  },
+  youtubeRecommendations: {
+    label: t('YouTube Account.Recommendations'),
     hasContent: true,
   },
   continueWatching: {

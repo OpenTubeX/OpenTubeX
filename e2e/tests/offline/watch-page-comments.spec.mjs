@@ -69,6 +69,44 @@ test('treats an empty comments response as no comments', { tag: '@scale' }, asyn
   await expect.poll(() => page.locator('.mobileSheet[open] .noComments').evaluate(element => element.scrollWidth > element.clientWidth + 1)).toBe(false)
   await expect(page.locator('.toast', { hasText: 'Local API Error' })).toHaveCount(0)
   expect(commentRequestCount).toBe(1)
+
+  // Without comments, shortening or closing a long comment draft at the
+  // bottom shortens the panel too.
+  await page.evaluate(() => window.$store.dispatch('updateYouTubeAccount', {
+    credentials: { access_token: 'token', refresh_token: 'token', expiry_date: new Date(Date.now() + 3_600_000).toISOString(), client: { client_id: 'id', client_secret: 'secret' } },
+    profiles: [{ name: 'Commenter', handle: null, thumbnail: null, pageId: null }],
+    pageId: null,
+    channelId: null
+  }))
+  const sheet = page.locator('.mobileSheet[open]')
+  const scroller = sheet.locator('.commentsContentWrapper')
+  const expectScrollInRange = () => expect.poll(() => scroller.evaluate(element => {
+    // No empty space below the last rendered content, unless it all fits.
+    const contentEnd = Math.max(...[...element.children]
+      .filter(child => !child.classList.contains('os-scrollbar'))
+      .map(child => child.getBoundingClientRect().bottom + (Number.parseFloat(getComputedStyle(child).marginBlockEnd) || 0))) +
+      (Number.parseFloat(getComputedStyle(element).paddingBottom) || 0)
+    return element.scrollTop + element.clientHeight <= element.scrollHeight + 1 &&
+      element.scrollTop <= Math.max(0, element.scrollHeight - element.clientHeight) + 1 &&
+      (element.scrollTop <= 1 || contentEnd >= element.getBoundingClientRect().bottom - 1)
+  })).toBe(true)
+  const scrollToBottom = async () => {
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  }
+  const longDraft = Array.from({ length: 30 }, (_, line) => `Line ${line + 1}`).join('\n')
+  await sheet.getByRole('button', { name: 'Add a comment' }).click()
+  const draft = sheet.locator('.topCommentComposer textarea')
+  await draft.fill(longDraft)
+  await scrollToBottom()
+  await draft.fill('Short comment')
+  await expectScrollInRange()
+
+  await draft.fill(longDraft)
+  await scrollToBottom()
+  await sheet.locator('.topCommentComposer').getByRole('button', { name: 'Cancel' }).click()
+  await expect(draft).toHaveCount(0)
+  await expectScrollInRange()
 })
 
 const headerOnlyResponse = JSON.parse(emptyCommentsResponse)
@@ -776,6 +814,53 @@ test.describe('manual comment loading', () => {
     await expect(commentLikes).toHaveText('0')
   })
 
+  test('drops a queued comment rating after signing in to another account', async ({ app, page }) => {
+    const signIn = name => page.evaluate(name => window.$store.dispatch('updateYouTubeAccount', {
+      credentials: { access_token: `${name}-access`, refresh_token: `${name}-refresh`, expiry_date: new Date(Date.now() + 3_600_000).toISOString(), client: { client_id: 'id', client_secret: 'secret' } },
+      profiles: [{ name, handle: null, thumbnail: null, pageId: null }],
+      pageId: null,
+      channelId: null
+    }), name)
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await signIn('first')
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+    const requests = []
+    const { promise: firstRatingHeld, resolve: releaseFirstRating } = Promise.withResolvers()
+    await page.route(/\/youtubei\/v1\/comment\/perform_comment_action/, async (route, request) => {
+      requests.push({ authorization: request.headers().authorization, action: JSON.parse(request.postData()).actions[0] })
+      if (requests.length === 1) await firstRatingHeld
+      // The first account's like goes through and the second account's fails.
+      const status = requests.length === 1 ? 'STATUS_SUCCEEDED' : 'STATUS_FAILED'
+      return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ actionResults: [{ status }] }) })
+    })
+
+    const like = page.locator('.commentAccountAction[aria-pressed]').first()
+    await like.click()
+    await expect.poll(() => requests.length).toBe(1)
+    // The unlike waits behind the first like, and both accounts use the
+    // Google account's own channel.
+    await like.click()
+    await signIn('second')
+    await expect(like).toHaveAttribute('aria-pressed', 'false')
+    // Ratings go out in order, so the unlike would go before this like.
+    await like.click()
+    await expect(like).toHaveAttribute('aria-pressed', 'true')
+    releaseFirstRating()
+
+    await expect.poll(() => requests.length).toBe(2)
+    expect(requests.map(entry => entry.authorization)).toEqual(['Bearer first-access', 'Bearer second-access'])
+    expect(requests[1].action).toBe(requests[0].action)
+    // The failed like shows the second account's own rating, not the first account's like.
+    await expect(like).toHaveAttribute('aria-pressed', 'false')
+    expect(requests).toHaveLength(2)
+  })
+
   test.describe('comment filtering at 125% UI scale', () => {
     test.use({
       seed: {
@@ -936,11 +1021,73 @@ test.describe('manual comment loading', () => {
 
       await dock.getByRole('button', { name: 'Filter loaded comments' }).click()
       await dock.getByRole('checkbox', { name: 'Search loaded comments' }).click()
-      await dock.getByRole('searchbox', { name: 'Search loaded comments' }).fill('honored')
+      const search = dock.getByRole('searchbox', { name: 'Search loaded comments' })
+      await search.fill('honored')
 
       await expect(dock.locator('.commentThread')).toHaveCount(1)
       await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
       await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+
+      // Deleting your own comment from the bottom shortens the list too.
+      await search.fill('')
+      await search.press('Escape')
+      const lastThread = dock.locator('.commentThread').last()
+      const authorId = (await lastThread.locator('a[href*="/channel/"]').first().getAttribute('href')).split('/channel/')[1]
+      await page.route(/\/youtubei\/v1\/comment\/perform_comment_action/, (route, request) => {
+        // The action's third field is the comment ID.
+        const action = [...Buffer.from(decodeURIComponent(JSON.parse(request.postData()).actions[0]), 'base64')]
+        const commentId = Buffer.from(action.slice(6, 6 + action[5])).toString()
+        return route.fulfill({
+          contentType: 'application/json',
+          body: JSON.stringify({ actions: [{ removeCommentAction: { commentId, actionResult: { status: 'STATUS_SUCCEEDED' } } }] })
+        })
+      })
+      await page.evaluate(channelId => window.$store.dispatch('updateYouTubeAccount', {
+        credentials: { access_token: 'token', refresh_token: 'token', expiry_date: new Date(Date.now() + 3_600_000).toISOString(), client: { client_id: 'id', client_secret: 'secret' } },
+        profiles: [{ name: 'Commenter', handle: null, thumbnail: null, pageId: null }],
+        pageId: null,
+        channelId
+      }), authorId)
+      const expectScrollInRange = () => expect.poll(() => scroller.evaluate(element => {
+        // No empty space below the last rendered content, unless it all fits.
+        const contentEnd = Math.max(...[...element.children]
+          .filter(child => !child.classList.contains('os-scrollbar'))
+          .map(child => child.getBoundingClientRect().bottom + (Number.parseFloat(getComputedStyle(child).marginBlockEnd) || 0))) +
+          (Number.parseFloat(getComputedStyle(element).paddingBottom) || 0)
+        return element.scrollTop + element.clientHeight <= element.scrollHeight + 1 &&
+          element.scrollTop <= element.scrollHeight - element.clientHeight + 1 &&
+          (element.scrollTop <= 1 || contentEnd >= element.getBoundingClientRect().bottom - 1)
+      })).toBe(true)
+
+      // So do shortening and closing a long reply at the bottom.
+      const longReply = Array.from({ length: 30 }, (_, line) => `Line ${line + 1}`).join('\n')
+      await lastThread.getByRole('button', { name: 'Reply', exact: true }).click()
+      const replyInput = lastThread.locator('.replyComposer textarea')
+      await replyInput.fill(longReply)
+      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+      await replyInput.fill('Short reply')
+      await expectScrollInRange()
+
+      await replyInput.fill(longReply)
+      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+      await lastThread.locator('.replyComposer').getByRole('button', { name: 'Cancel' }).click()
+      await expect(lastThread.locator('.replyComposer')).toHaveCount(0)
+      await expectScrollInRange()
+
+      const threadCount = await dock.locator('.commentThread').count()
+      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+      await lastThread.getByRole('button', { name: 'Delete comment' }).first().click()
+      await page.locator('.prompt').getByRole('button', { name: 'Delete comment', includeHidden: true }).click({ force: true })
+      await expect(dock.locator('.commentThread')).toHaveCount(threadCount - 1)
+      await expectScrollInRange()
+      await expect.poll(() => scroller.evaluate(element => {
+        const list = [...element.querySelectorAll('.commentThread')].at(-1).getBoundingClientRect()
+        return Math.round(element.getBoundingClientRect().bottom - list.bottom)
+      })).toBeLessThanOrEqual(200)
     })
   })
 

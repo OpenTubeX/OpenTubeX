@@ -27,7 +27,7 @@
             :value="subscriptionFeedAutoRefreshInterval"
             setting-key="subscriptionFeedAutoRefreshInterval"
             :select-names="subscriptionFeedAutoRefreshIntervalNames"
-            :select-values="subscriptionFeedAutoRefreshIntervalValues"
+            :select-values="AUTO_REFRESH_INTERVAL_VALUES"
             :tooltip="$t('Tooltips.Subscription Settings.Auto Refresh Interval')"
             :icon="['fas', 'clock']"
             @change="updateSubscriptionFeedAutoRefreshInterval"
@@ -37,7 +37,7 @@
             :value="subscriptionShortsAutoRefreshInterval"
             setting-key="subscriptionShortsAutoRefreshInterval"
             :select-names="subscriptionFeedAutoRefreshIntervalNames"
-            :select-values="subscriptionFeedAutoRefreshIntervalValues"
+            :select-values="AUTO_REFRESH_INTERVAL_VALUES"
             :tooltip="$t('Tooltips.Subscription Settings.Auto Refresh Interval')"
             :icon="['fas', 'clock']"
             @change="updateSubscriptionShortsAutoRefreshInterval"
@@ -47,7 +47,7 @@
             :value="subscriptionLiveAutoRefreshInterval"
             setting-key="subscriptionLiveAutoRefreshInterval"
             :select-names="subscriptionFeedAutoRefreshIntervalNames"
-            :select-values="subscriptionFeedAutoRefreshIntervalValues"
+            :select-values="AUTO_REFRESH_INTERVAL_VALUES"
             :tooltip="$t('Tooltips.Subscription Settings.Auto Refresh Interval')"
             :icon="['fas', 'clock']"
             @change="updateSubscriptionLiveAutoRefreshInterval"
@@ -57,7 +57,7 @@
             :value="subscriptionPostsAutoRefreshInterval"
             setting-key="subscriptionPostsAutoRefreshInterval"
             :select-names="subscriptionFeedAutoRefreshIntervalNames"
-            :select-values="subscriptionFeedAutoRefreshIntervalValues"
+            :select-values="AUTO_REFRESH_INTERVAL_VALUES"
             :tooltip="$t('Tooltips.Subscription Settings.Auto Refresh Interval')"
             :icon="['fas', 'clock']"
             @change="updateSubscriptionPostsAutoRefreshInterval"
@@ -161,6 +161,7 @@ import FtToggleSwitch from '../../FtToggleSwitch/FtToggleSwitch.vue'
 import SubscriptionChannelSettings from './SubscriptionChannelSettings.vue'
 
 import store from '../../../store/index'
+import { AUTO_REFRESH_INTERVAL_VALUES, getAutoRefreshIntervalNames } from '../../../helpers/autoRefreshIntervals'
 
 const { t } = useI18n()
 const IS_IOS = !!process.env.IS_IOS
@@ -171,25 +172,7 @@ const SUPPORTS_LOCAL_API = !!process.env.SUPPORTS_LOCAL_API
 /** @type {import('vue').ComputedRef<boolean>} */
 const fetchSubscriptionsAutomatically = computed(() => store.getters.getFetchSubscriptionsAutomatically)
 
-const subscriptionFeedAutoRefreshIntervalNames = computed(() => [
-  t('Settings.General Settings.Avoid translation.Disabled'),
-  '30 min',
-  '1 h',
-  '2 h',
-  '4 h',
-  '6 h',
-  '8 h'
-])
-
-const subscriptionFeedAutoRefreshIntervalValues = [
-  '0',
-  '1800000',
-  '3600000',
-  '7200000',
-  '14400000',
-  '21600000',
-  '28800000'
-]
+const subscriptionFeedAutoRefreshIntervalNames = computed(() => getAutoRefreshIntervalNames(t))
 
 /**
  * @param {boolean} value

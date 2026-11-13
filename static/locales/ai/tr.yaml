@@ -221,6 +221,26 @@ Subscriptions:
       Not Set: Ayarlanmadı
     Retry Feed: '{feed} akışını yeniden dene'
     Reloading Feed: '{feed} yeniden yükleniyor'
+  Platforms:
+    Tab: Platformlar
+    Platform: Platform
+    All Platforms: Tüm platformlar
+    Followed Channels: Diğer platformlarda takip edilen kanallar
+    Description: Aboneliklerinizin Platformlar sekmesinde yüklemelerini görmek için Twitch, SoundCloud, PeerTube, Rumble ve Odysee'deki kanalları takip edin. Kanalları aramayla bulun veya sayfalarının adresiyle ekleyin. Medyaları yt-dlp ile oynatılır.
+    Add Channel: Kanal Ekle
+    Channel URL: Kanal adresi
+    Invalid Channel: Twitch, SoundCloud, PeerTube, Rumble veya Odysee'deki bir kanal sayfasının adresini girin.
+    Channel Not Found: Bu adreste kanal yok.
+    Channel Already Followed: Bu kanalı zaten takip ediyorsunuz.
+    Channel Could Not Be Loaded: Kanal yüklenemedi.
+    No Channels: Henüz diğer platformlarda hiçbir kanalı takip etmiyorsunuz.
+    Unfollow Channel: '{channel} takibini bırak'
+    Go To Channel: '{channel} kanalına git'
+    Follow: Takip Et
+    Following: Takip Ediliyor
+    Clips: Klipler
+    Refresh Errors: 1 kanal yenilenemedi. | {count} kanal yenilenemedi.
+    Content Tabs: Platform içeriği sekmeleri
 Trending:
   Music: Müzik
   Load Error: Öne çıkanlar yüklenemedi.
@@ -314,6 +334,37 @@ History:
   History Older Than Days Removed: 1 günden eski izleme geçmişi kaldırıldı | {days} günden eski izleme geçmişi kaldırıldı
 Settings:
   Experimental Badge: Deneysel
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube Hesabı"
+    Unofficial App Warning: "OpenTubeX resmi bir YouTube uygulaması değildir. Oturum açtığınızda burada yaptıklarınız Google hesabınızla ilişkilendirilir ve Google resmi olmayan uygulamalar kullanan hesapları kısıtlayabilir veya yasaklayabilir. Yalnızca kaybetmeyi göze alabileceğiniz bir hesapla oturum açın."
+    Sign In Explanation: "OpenTubeX bir TV uygulaması gibi oturum açar: oturum açmayı Google'ın web sitesinde onaylarsınız ve OpenTubeX şifrenizi hiçbir zaman görmez. Oturum bu cihazda kalır; eşitlenmez ve yedeklenmez."
+    Sign In: "Oturum aç"
+    Sign In Anyway: "Yine de oturum aç"
+    Sign Out: "Oturumu kapat"
+    Getting Sign-In Code: "Oturum açma kodu alınıyor"
+    Sign In Instructions: "Oturum açma sayfasını açın ve Google hesabınızı seçin. Kod otomatik olarak doldurulur."
+    Other Device Instructions: "Başka bir cihazda bu adrese gidin ve kodu girin:"
+    YouTube Channel: "YouTube kanalı"
+    Using Channel: "YouTube artık {name} olarak kullanılıyor"
+    Switch Channel Failed: "YouTube kanalı değiştirilemedi: {error}"
+    Open Sign-In Page: "Oturum açma sayfasını aç"
+    Copy Code: "Kodu kopyala"
+    Code Copied: "Kod kopyalandı"
+    Waiting for Approval: "Oturum açmayı onaylamanız bekleniyor"
+    Sign-In Denied: "Oturum açma reddedildi."
+    Sign-In Code Expired: "Kodun süresi doldu. Yeni bir kod almak için tekrar deneyin."
+    Sign-In Failed: "Oturum açılamadı: {error}"
+    Signed In As: "YouTube'da {name} olarak oturum açıldı"
+    Signed Out: "YouTube oturumu kapatıldı"
+    Sign Out Failed: "Oturum kapatılamadı: {error}"
+    Revoke Failed: "YouTube oturumu kapatıldı, ancak Google oturumun sonlandığını onaylamadı. Bunu Google Hesabınızın üçüncü taraf bağlantılarından kaldırabilirsiniz."
+    Signed out by YouTube: "YouTube oturumu sonlandırdı. Hesabınızı kullanmaya devam etmek için Ayarlar'da yeniden oturum açın."
+    Subscribe on YouTube: "YouTube'da da abone ol"
+    Add to YouTube Watch History: "İzlenen videoları YouTube geçmişine ekle"
+    Import Subscriptions: "Abonelikleri YouTube'dan içe aktar"
+    Imported Subscriptions: "{count} kanal içe aktarıldı | {count} kanal içe aktarıldı"
+    No Subscriptions to Import: "Bu YouTube hesabının aboneliği yok"
+    Import Subscriptions Failed: "Abonelikler içe aktarılamadı: {error}"
   Diagnostics:
     Diagnostics: Tanılama
     Description: Tanılama günlüğü açıkken OpenTubeX, hata raporlarına ekleyebilmeniz için son günlük iletilerini bellekte tutar. Bunları hiçbir zaman kendiliğinden kaydetmez veya göndermez ve günlüğü kapatmak bunları siler. Raporlar çerezleri, belirteçleri, IP adreslerini ve URL parametrelerini içermez, ancak oynattığınız videoların kimliklerini içerebilir; bu yüzden paylaşmadan önce raporu kontrol edin.
@@ -1181,6 +1232,11 @@ Settings:
     Notify About New Uploads: Yeni Yüklemeleri Bildir
     RSS Feeds Auto Refresh Interval: RSS Akışlarının Otomatik Yenileme Aralığı
     Faster Subscription Refresh: "Daha hızlı abonelik yenileme"
+    Platforms:
+      Other Platforms: Diğer Platformlar
+      Manage Channels: Takip Edilen Kanalları Yönet
+      Notify When Live: Takip Edilen Twitch Kanalları Canlı Yayına Başladığında Bildir
+      Auto Refresh Interval: Diğer Platformların Otomatik Yenileme Aralığı
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "İzleme Süresi Kaynağı"
@@ -2021,6 +2077,7 @@ Context Menu:
   Reload Posts: Gönderileri Yeniden Yükle
   Reload All Feeds: Tüm Akışları Yeniden Yükle
   Reload RSS Feeds: RSS beslemelerini yeniden yükle
+  Reload Platforms: Platformları Yeniden Yükle
   Close Multiple Tabs: '{count} Sekmeyi Kapat'
   Duplicate Tab: Sekmeyi Çoğalt
   Duplicate Multiple Tabs: '{count} Sekmeyi Çoğalt'
@@ -2174,6 +2231,9 @@ Description:
   Games: Oyunlar
   Music: Müzik
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "OpenTubeX'te bir kanala abone olmak veya abonelikten çıkmak, YouTube hesabınızda da aynısını yapar."
+    Add to YouTube Watch History: "Oynattığınız videolar YouTube izleme geçmişinize eklenir, böylece YouTube önerileri bunlardan öğrenir. Geçmiş YouTube'da duraklatılmışken hiçbir şey eklenmez."
   General Settings:
     Built-in Streams: |
       Otomatik, çoğu videoyu YouTube'un visionOS istemcisiyle oynatır; bu istemci daha hızlı başlar ve otomatik kaliteyi destekler. Canlı yayınlar ve oynatamadığı videolar SABR kullanır.
@@ -2286,6 +2346,8 @@ Tooltips:
     Notify About New Uploads: Abonelik ayarlarında bildirimlerini açtığınız kanallar için bu cihazda sistem bildirimleri gösterir. OpenTubeX yeni içeriği abonelikler yenilendiğinde denetler, bu nedenle bir otomatik yenileme aralığı seçin. Uygulama kapalıyken de bildirim almak için uygulama kapalıyken yenilemeyi de etkinleştirin.
     RSS Feeds Auto Refresh Interval: Uygulama açıkken OpenTubeX'in RSS akışlarınızı ne sıklıkla otomatik olarak yenilediği.
     Faster Subscription Refresh: "Önce her kanalın RSS akışını denetler ve yalnızca yeni yüklemesi olan kanalların videolarını, Shorts'larını ve canlı yayınlarını yükler. Otomatik yenilemeler son 10 dakikada yüklenen kanalları da atlar. Yeni yüklemesi olmayan kanallarda görüntüleme sayıları, kaldırılan videolar ve değişen başlıklar yalnızca birkaç saatte bir güncellenir ve RSS akışı geride kaldığında yeni yüklemeler daha geç görünebilir. Invidious API ile kullanılamaz."
+    Platforms Auto Refresh Interval: Uygulama açıkken OpenTubeX'in diğer platformlarda takip ettiğiniz kanalları ne sıklıkla otomatik olarak yenilediği.
+    Twitch Notify When Live: Takip ettiğiniz Twitch kanallarından biri yayına başladığında size bildirir. OpenTubeX açıkken birkaç dakikada bir kontrol eder; kapalıyken de o sırada abonelikleri yeniliyorsa kontrol eder.
   Theme Settings:
     Only Show Important Notifications: Yalnızca bir işlemi onaylayan veya bir durumu bildiren uygulama içi bildirimleri gizler. Hatalar, uyarılar, ayarladığınız hatırlatıcılar ve Geri al gibi bir işlem sunan bildirimler görünmeye devam eder. Abonelikleri yenileme gibi arka plan işlemlerinin ilerlemesi bildirim yerine genel ilerleme çubuğunda gösterilir. Sistem bildirimleri etkilenmez.
     Visible Search Suggestions: "Arama çubuğunun listesi kaydırılmadan önce kaç arama geçmişi girdisi ve öneri göstereceğini belirler. Liste hiçbir zaman pencerenin alt kenarını aşmaz."
@@ -2683,3 +2745,31 @@ Notification Center:
   Clear: "Temizle"
   Empty: "Henüz bildirim yok"
   Empty Hint: "Canlı yayın hatırlatıcıları ve bildirimleri açık kanalların yeni yüklemeleri burada görünür."
+Platforms:
+  Tracks: Parçalar
+  Playlists: Oynatma Listeleri
+  Follower Count: 1 takipçi | {count} takipçi
+  Open Website: '{platform} üzerinde aç'
+  Channel Not Found: Bu kanal bulunamadı.
+  Playlist Not Found: Bu oynatma listesi bulunamadı.
+  Load Error: Bu sayfa {platform} üzerinden yüklenemedi.
+  Empty Tab: Burada henüz bir şey yok.
+YouTube Account:
+  Like: "Beğen"
+  Dislike: "Beğenme"
+  Rating Failed: "YouTube'da oy verilemedi: {error}"
+  Subscribe Failed: "YouTube'da abone olunamadı: {error}"
+  Unsubscribe Failed: "YouTube'da abonelikten çıkılamadı: {error}"
+  Add a comment: "Yorum ekleyin"
+  Add a reply: "Yanıt ekleyin"
+  Comment: "Yorum yap"
+  Reply: "Yanıtla"
+  Comment Posted: "Yorum gönderildi"
+  Reply Posted: "Yanıt gönderildi"
+  Comment Failed: "Yorum gönderilemedi: {error}"
+  Delete Comment: "Yorumu sil"
+  Delete Comment Confirmation: "Yorumunuz YouTube'dan silinsin mi?"
+  Comment Deleted: "Yorum silindi"
+  Delete Comment Failed: "Yorum silinemedi: {error}"
+  Recommendations: "YouTube önerileri"
+  Recommendations Failed: "YouTube önerileriniz yüklenemedi."

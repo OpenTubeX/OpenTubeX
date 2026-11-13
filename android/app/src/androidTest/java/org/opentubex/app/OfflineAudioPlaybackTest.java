@@ -173,6 +173,17 @@ public class OfflineAudioPlaybackTest {
                     })()
                     """);
                 await(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getActiveTab?.route.path === '/subscriptions'");
+                // Closing the scenario moves focus away from the app. A WebView frame waits
+                // for a busy renderer, and on a slow emulator tearing down the watch page
+                // can keep it busy long enough for the focus change to time out as an ANR.
+                evaluate(view, """
+                    (() => {
+                        window.__offlineAudioIdle = false;
+                        requestAnimationFrame(() => requestIdleCallback(() => requestAnimationFrame(() =>
+                            requestIdleCallback(() => { window.__offlineAudioIdle = true; }))));
+                    })()
+                    """);
+                await(view, "window.__offlineAudioIdle === true");
             }
         } finally {
             media.delete();

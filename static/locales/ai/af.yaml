@@ -263,6 +263,26 @@ Subscriptions:
       Not Set: Nie gestel nie
     Retry Feed: Probeer {feed} weer
     Reloading Feed: Laai {feed} weer
+  Platforms:
+    Tab: Platforms
+    Platform: Platform
+    All Platforms: Alle platforms
+    Followed Channels: Gevolgde kanale op ander platforms
+    Description: Volg kanale op Twitch, SoundCloud, PeerTube, Rumble en Odysee om hul oplaaie in die Platforms-oortjie van u intekeninge te sien. Vind kanale met die soekfunksie, of voeg hulle by met die adres van hul bladsy. Hul media speel met yt-dlp.
+    Add Channel: Voeg kanaal by
+    Channel URL: Kanaaladres
+    Invalid Channel: Voer die adres van ’n kanaalbladsy op Twitch, SoundCloud, PeerTube, Rumble of Odysee in.
+    Channel Not Found: Daar is geen kanaal by hierdie adres nie.
+    Channel Already Followed: U volg reeds hierdie kanaal.
+    Channel Could Not Be Loaded: Die kanaal kon nie gelaai word nie.
+    No Channels: U volg nog geen kanale op ander platforms nie.
+    Unfollow Channel: Ontvolg {channel}
+    Go To Channel: Gaan na {channel}
+    Follow: Volg
+    Following: Volg tans
+    Clips: Knipsels
+    Refresh Errors: 1 kanaal kon nie verfris word nie. | {count} kanale kon nie verfris word nie.
+    Content Tabs: Oortjies vir platforminhoud
 Channels:
   Load More Channels: Laai meer kanale
   Channels: Kanale
@@ -475,6 +495,37 @@ History:
   History Older Than Days Removed: Kykgeskiedenis ouer as 1 dag is verwyder | Kykgeskiedenis ouer as {days} dae is verwyder
 Settings:
   Experimental Badge: Eksperimenteel
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube-rekening"
+    Unofficial App Warning: "OpenTubeX is nie ’n amptelike YouTube-toep nie. Wanneer u aanmeld, word wat u hier doen aan u Google-rekening gekoppel, en Google kan rekeninge wat nie-amptelike toeps gebruik, beperk of verban. Meld slegs aan met ’n rekening wat u kan bekostig om te verloor."
+    Sign In Explanation: "OpenTubeX meld aan soos ’n TV-toepassing: u keur dit op Google se webwerf goed, en OpenTubeX sien nooit u wagwoord nie. Die aanmelding bly op hierdie toestel en word nie gesinkroniseer of gerugsteun nie."
+    Sign In: "Meld aan"
+    Sign In Anyway: "Meld tog aan"
+    Sign Out: "Meld af"
+    Getting Sign-In Code: "Kry tans ’n aanmeldkode"
+    Sign In Instructions: "Maak die aanmeldbladsy oop en kies u Google-rekening. Die kode word outomaties ingevul."
+    Other Device Instructions: "Gaan op ’n ander toestel na hierdie adres en voer die kode in:"
+    YouTube Channel: "YouTube-kanaal"
+    Using Channel: "YouTube word nou as {name} gebruik"
+    Switch Channel Failed: "Kon nie die YouTube-kanaal wissel nie: {error}"
+    Open Sign-In Page: "Maak aanmeldbladsy oop"
+    Copy Code: "Kopieer kode"
+    Code Copied: "Kode gekopieer"
+    Waiting for Approval: "Wag dat u die aanmelding goedkeur"
+    Sign-In Denied: "Die aanmelding is geweier."
+    Sign-In Code Expired: "Die kode het verval. Probeer weer om ’n nuwe een te kry."
+    Sign-In Failed: "Kon nie aanmeld nie: {error}"
+    Signed In As: "By YouTube aangemeld as {name}"
+    Signed Out: "Van YouTube afgemeld"
+    Sign Out Failed: "Kon nie afmeld nie: {error}"
+    Revoke Failed: "Van YouTube afgemeld, maar Google het nie bevestig dat die aanmelding beëindig is nie. U kan dit onder derdeparty-verbindings in u Google-rekening verwyder."
+    Signed out by YouTube: "YouTube het die aanmelding beëindig. Meld weer in Instellings aan om u rekening verder te gebruik."
+    Subscribe on YouTube: "Teken ook op YouTube in"
+    Add to YouTube Watch History: "Voeg gekykte video’s by YouTube-geskiedenis"
+    Import Subscriptions: "Voer intekeninge van YouTube in"
+    Imported Subscriptions: "{count} kanaal ingevoer | {count} kanale ingevoer"
+    No Subscriptions to Import: "Hierdie YouTube-rekening het geen intekeninge nie"
+    Import Subscriptions Failed: "Kon nie intekeninge invoer nie: {error}"
   Tab Unloading:
     Automatically unload tabs: Ontlaai oortjies outomaties
     Memory threshold: Geheuedrempel
@@ -1365,6 +1416,11 @@ Settings:
     Notify About New Uploads: Stel in kennis oor nuwe oplaaie
     RSS Feeds Auto Refresh Interval: Interval vir outomatiese verfrissing van RSS-voere
     Faster Subscription Refresh: "Vinniger verfrissing van intekeninge"
+    Platforms:
+      Other Platforms: Ander platforms
+      Manage Channels: Bestuur gevolgde kanale
+      Notify When Live: Stel in kennis wanneer gevolgde Twitch-kanale regstreeks gaan
+      Auto Refresh Interval: Interval vir outomatiese verfrissing van ander platforms
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: Tel kyktyd vanaf
@@ -2276,6 +2332,7 @@ Context Menu:
   Reload Posts: Herlaai plasings
   Reload All Feeds: Herlaai alle voere
   Reload RSS Feeds: Laai RSS-feeds weer
+  Reload Platforms: Herlaai platforms
   Close Multiple Tabs: Sluit {count} oortjies
   Duplicate Tab: Dupliseer oortjie
   Duplicate Multiple Tabs: Dupliseer {count} oortjies
@@ -2428,6 +2485,9 @@ Description:
   Games: Speletjies
   Music: Musiek
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "As u in OpenTubeX op ’n kanaal inteken of uitteken, gebeur dieselfde op u YouTube-rekening."
+    Add to YouTube Watch History: "Video’s wat u speel, word by u YouTube-kykgeskiedenis gevoeg, sodat YouTube se aanbevelings daaruit leer. Niks word bygevoeg terwyl die geskiedenis op YouTube onderbreek is nie."
   General Settings:
     Built-in Streams: |
       Outomaties speel die meeste video's deur YouTube se visionOS-kliënt, wat vinniger begin en outomatiese kwaliteit ondersteun. Regstreekse strome en video's wat dit nie kan speel nie, gebruik SABR.
@@ -2540,6 +2600,8 @@ Tooltips:
     Notify About New Uploads: Wys stelselkennisgewings op hierdie toestel vir kanale waarvoor u kennisgewings in hul intekeninginstellings aangeskakel het. OpenTubeX kyk vir nuwe inhoud wanneer intekeninge verfris, dus kies ’n outomatiese verfrissingsinterval. Om in kennis gestel te word terwyl die toep gesluit is, aktiveer ook verfrissing terwyl die toep gesluit is.
     RSS Feeds Auto Refresh Interval: Hoe gereeld OpenTubeX jou RSS-voere outomaties verfris terwyl die toep oop is.
     Faster Subscription Refresh: "Gaan eers elke kanaal se RSS-voer na en laai slegs die video's, Shorts en regstreekse uitsendings van kanale met nuwe oplaaisels. Outomatiese verfrissings slaan ook kanale oor wat in die afgelope 10 minute gelaai is. Vir kanale sonder nuwe oplaaisels word kyktellings, verwyderde video's en veranderde titels slegs elke paar uur bygewerk, en nuwe oplaaisels kan later verskyn wanneer die RSS-voer agterloop. Nie beskikbaar met die Invidious-API nie."
+    Platforms Auto Refresh Interval: Hoe gereeld OpenTubeX die kanale wat u op ander platforms volg, outomaties verfris terwyl die toep oop is.
+    Twitch Notify When Live: Stel jou in kennis wanneer een van jou gevolgde Twitch-kanale begin uitsaai. OpenTubeX kyk elke paar minute terwyl dit oop is, en ook terwyl dit toe is as dit dan intekeninge verfris.
   Theme Settings:
     Only Show Important Notifications: Versteek kennisgewings in die app wat slegs 'n aksie bevestig of 'n status meld. Foute, waarskuwings, herinneringe wat jy opgestel het en kennisgewings met 'n aksie, soos Ontdoen, verskyn steeds. Agtergrondvordering, soos die verfris van intekeninge, word in die globale vorderingsbalk gewys in plaas van as 'n kennisgewing. Stelselkennisgewings word nie geraak nie.
     Thumbnail Size: Skaal videoduimnaels in roosters en lyste. Roosters met ’n vaste aantal kolomme of die aansigtipe Volle breedte vul eerder elke ry, dus verander dit daar slegs lysduimnaels en kortvideo’s. Vensters van foongrootte beperk roosterduimnaels tot 100%.
@@ -2893,3 +2955,31 @@ Notification Center:
   Clear: "Vee uit"
   Empty: "Nog geen kennisgewings nie"
   Empty Hint: "Herinneringe vir regstreekse uitsendings en nuwe oplaaie van kanale met kennisgewings aan sal hier verskyn."
+Platforms:
+  Tracks: Snitte
+  Playlists: Speellyste
+  Follower Count: 1 volgeling | {count} volgelinge
+  Open Website: Maak oop op {platform}
+  Channel Not Found: Hierdie kanaal kon nie gevind word nie.
+  Playlist Not Found: Hierdie speellys kon nie gevind word nie.
+  Load Error: Hierdie bladsy kon nie van {platform} gelaai word nie.
+  Empty Tab: Hier is nog niks nie.
+YouTube Account:
+  Like: "Hou van"
+  Dislike: "Hou nie van nie"
+  Rating Failed: "Kon nie op YouTube gradeer nie: {error}"
+  Subscribe Failed: "Kon nie op YouTube inteken nie: {error}"
+  Unsubscribe Failed: "Kon nie op YouTube uitteken nie: {error}"
+  Add a comment: "Voeg ’n kommentaar by"
+  Add a reply: "Voeg ’n antwoord by"
+  Comment: "Lewer kommentaar"
+  Reply: "Antwoord"
+  Comment Posted: "Kommentaar geplaas"
+  Reply Posted: "Antwoord geplaas"
+  Comment Failed: "Kon nie die kommentaar plaas nie: {error}"
+  Delete Comment: "Verwyder kommentaar"
+  Delete Comment Confirmation: "Verwyder u kommentaar van YouTube?"
+  Comment Deleted: "Kommentaar verwyder"
+  Delete Comment Failed: "Kon nie die kommentaar verwyder nie: {error}"
+  Recommendations: "YouTube-aanbevelings"
+  Recommendations Failed: "Kon nie u YouTube-aanbevelings laai nie."

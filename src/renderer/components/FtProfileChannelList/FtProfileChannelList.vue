@@ -40,33 +40,39 @@
       >
         {{ $t('Settings.Channel Settings.No Matching Channels') }}
       </p>
-      <FtFlexBox ref="channelGrid">
-        <FtChannelBubble
-          v-for="channel in displayedSubscriptions"
-          :key="channel.id"
-          :channel-id="channel.id"
-          :channel-name="channel.name"
-          :channel-thumbnail="channel.thumbnail"
-          :selectable="showUnsubscribeButton"
-          :selected="selected.has(channel.id)"
-          @change="handleChannelToggle(channel.id)"
-        />
-      </FtFlexBox>
-      <!-- Mounting every subscription at once takes seconds on slower devices -->
-      <FtAutoLoadNextPageWrapper
-        v-if="hasMoreSubscriptions"
-        :key="subscriptionPage"
-        class="loadMore"
-        @load-next-page="subscriptionPage++"
+      <div
+        ref="channelScroller"
+        v-overlay-scrollbars
+        class="channelScroller"
       >
-        <FtFlexBox>
-          <FtButton
-            :label="$t('Channels.Load More Channels')"
-            :icon="['fas', 'arrow-down']"
-            @click="loadMoreSubscriptions"
+        <FtFlexBox ref="channelGrid">
+          <FtChannelBubble
+            v-for="channel in displayedSubscriptions"
+            :key="channel.id"
+            :channel-id="channel.id"
+            :channel-name="channel.name"
+            :channel-thumbnail="channel.thumbnail"
+            :selectable="showUnsubscribeButton"
+            :selected="selected.has(channel.id)"
+            @change="handleChannelToggle(channel.id)"
           />
         </FtFlexBox>
-      </FtAutoLoadNextPageWrapper>
+        <!-- Mounting every subscription at once takes seconds on slower devices -->
+        <FtAutoLoadNextPageWrapper
+          v-if="hasMoreSubscriptions"
+          :key="subscriptionPage"
+          class="loadMore"
+          @load-next-page="subscriptionPage++"
+        >
+          <FtFlexBox>
+            <FtButton
+              :label="$t('Channels.Load More Channels')"
+              :icon="['fas', 'arrow-down']"
+              @click="loadMoreSubscriptions"
+            />
+          </FtFlexBox>
+        </FtAutoLoadNextPageWrapper>
+      </div>
     </FtCard>
     <FtPrompt
       v-if="showDeletePrompt"
@@ -98,6 +104,7 @@ import { useListPagination } from '../../composables/useListPagination'
 import { deepCopy, showToast } from '../../helpers/utils'
 import { matchesChannelQuery } from '../../helpers/subscription-channels'
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
+import { mirrorYouTubeSubscription } from '../../helpers/api/youtube-account'
 
 /**
  * @typedef {object} Profile
@@ -188,6 +195,7 @@ const { page: subscriptionPage, displayedItems: displayedSubscriptions, hasMore:
   pageSize: 100,
   append: true,
   resetOn: () => props.query,
+  scrollTarget: useTemplateRef('channelScroller'),
   focusItem: index => channelGrid.value?.$el.querySelectorAll('.bubblePadding')[index]?.focus()
 })
 
@@ -281,6 +289,9 @@ function handleDeletePromptClick(value) {
 
     // Pull only the selected channels, like unsubscribing, so channels added elsewhere stay
     store.dispatch('removeChannelFromProfiles', { channelIds, profileIds })
+    if (props.isMainProfile) {
+      mirrorYouTubeSubscription(channelIds, false)
+    }
 
     showToast({ message: t('Profile.Profile has been updated'), icon: ['fas', 'user-check'] })
     selectNone()

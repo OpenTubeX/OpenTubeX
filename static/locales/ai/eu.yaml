@@ -221,6 +221,26 @@ Subscriptions:
       Not Set: Ezarri gabe
     Retry Feed: Saiatu berriro {feed} kargatzen
     Reloading Feed: '{feed} berriro kargatzen'
+  Platforms:
+    Tab: Plataformak
+    Platform: Plataforma
+    All Platforms: Plataforma guztiak
+    Followed Channels: Beste plataformetan jarraitutako kanalak
+    Description: Jarraitu Twitch, SoundCloud, PeerTube, Rumble eta Odysee plataformetako kanalei, haien igoerak zure harpidetzetako Plataformak fitxan ikusteko. Bilatu kanalak bilaketarekin, edo gehitu haien orriaren helbidearekin. Haien multimedia yt-dlp bidez erreproduzitzen da.
+    Add Channel: Gehitu kanala
+    Channel URL: Kanalaren helbidea
+    Invalid Channel: Idatzi Twitch, SoundCloud, PeerTube, Rumble edo Odysee plataformako kanal-orri baten helbidea.
+    Channel Not Found: Ez dago kanalik helbide honetan.
+    Channel Already Followed: Dagoeneko jarraitzen diozu kanal honi.
+    Channel Could Not Be Loaded: Ezin izan da kanala kargatu.
+    No Channels: Oraindik ez diozu beste plataformetako kanalik jarraitzen.
+    Unfollow Channel: Utzi {channel} jarraitzeari
+    Go To Channel: Joan {channel} kanalera
+    Follow: Jarraitu
+    Following: Jarraitzen
+    Clips: Klipak
+    Refresh Errors: Ezin izan da kanal 1 freskatu. | Ezin izan dira {count} kanal freskatu.
+    Content Tabs: Plataformetako edukiaren fitxak
 Trending:
   Music: Musika
   Load Error: Ezin izan dira joerak kargatu.
@@ -314,6 +334,37 @@ History:
   History Older Than Days Removed: Egun 1 baino zaharragoa den ikustaldi-historia kendu da | {days} egun baino zaharragoa den ikustaldi-historia kendu da
 Settings:
   Experimental Badge: Esperimentala
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube kontua"
+    Unofficial App Warning: "OpenTubeX ez da YouTube-ren aplikazio ofiziala. Saioa hastean, hemen egiten duzuna zure Google kontuarekin lotzen da, eta Google-k aplikazio ez-ofizialak erabiltzen dituzten kontuak mugatu edo blokeatu ditzake. Hasi saioa galtzea axola ez zaizun kontu batekin soilik."
+    Sign In Explanation: "OpenTubeX-ek telebista-aplikazio batek bezala hasten du saioa: Google-ren webgunean onartzen duzu, eta OpenTubeX-ek ez du inoiz zure pasahitza ikusten. Saioa gailu honetan geratzen da, eta ez da sinkronizatzen ez babeskopietan gordetzen."
+    Sign In: "Hasi saioa"
+    Sign In Anyway: "Hasi saioa hala ere"
+    Sign Out: "Amaitu saioa"
+    Getting Sign-In Code: "Saioa hasteko kodea lortzen"
+    Sign In Instructions: "Ireki saioa hasteko orria eta aukeratu zure Google kontua. Kodea automatikoki betetzen da."
+    Other Device Instructions: "Beste gailu batean, joan helbide honetara eta idatzi kodea:"
+    YouTube Channel: "YouTube kanala"
+    Using Channel: "Orain YouTube {name} gisa erabiltzen ari zara"
+    Switch Channel Failed: "Ezin izan da YouTube kanala aldatu: {error}"
+    Open Sign-In Page: "Ireki saioa hasteko orria"
+    Copy Code: "Kopiatu kodea"
+    Code Copied: "Kodea kopiatu da"
+    Waiting for Approval: "Saioa hastea onartu arte zain"
+    Sign-In Denied: "Saioa hastea ukatu da."
+    Sign-In Code Expired: "Kodea iraungi da. Saiatu berriro beste bat lortzeko."
+    Sign-In Failed: "Ezin izan da saioa hasi: {error}"
+    Signed In As: "YouTube-n saioa hasita {name} gisa"
+    Signed Out: "YouTube-ko saioa amaitu da"
+    Sign Out Failed: "Ezin izan da saioa amaitu: {error}"
+    Revoke Failed: "YouTube-ko saioa amaitu da, baina Google-k ez du berretsi saioa amaitu denik. Zure Google kontuko hirugarrenen konexioetan ken dezakezu."
+    Signed out by YouTube: "YouTube-k saioa amaitu du. Hasi saioa berriro Ezarpenetan zure kontua erabiltzen jarraitzeko."
+    Subscribe on YouTube: "Harpidetu YouTube-n ere"
+    Add to YouTube Watch History: "Gehitu ikusitako bideoak YouTube-ko historikora"
+    Import Subscriptions: "Inportatu harpidetzak YouTube-tik"
+    Imported Subscriptions: "{count} kanal inportatu da | {count} kanal inportatu dira"
+    No Subscriptions to Import: "YouTube kontu honek ez du harpidetzarik"
+    Import Subscriptions Failed: "Ezin izan dira harpidetzak inportatu: {error}"
   Diagnostics:
     Diagnostics: Diagnostikoa
     Description: Diagnostiko-erregistroa aktibatuta dagoen bitartean, OpenTubeX-ek azken erregistro-mezuak memorian gordetzen ditu, akats-txostenei erantsi ahal izateko. Ez ditu inoiz bere kabuz gordetzen edo bidaltzen, eta erregistroa desaktibatzean ezabatu egiten dira. Txostenek ez dituzte cookieak, tokenak, IP helbideak eta URL parametroak barne hartzen, baina erreproduzitu dituzun bideoen IDak izan ditzakete; beraz, berrikusi txostena partekatu aurretik.
@@ -1181,6 +1232,11 @@ Settings:
     Notify About New Uploads: Jakinarazi igoera berriak
     RSS Feeds Auto Refresh Interval: RSS jarioen freskatze automatikoaren tartea
     Faster Subscription Refresh: "Harpidetzen freskatze azkarragoa"
+    Platforms:
+      Other Platforms: Beste plataformak
+      Manage Channels: Kudeatu jarraitutako kanalak
+      Notify When Live: Jakinarazi jarraitutako Twitch kanalak zuzenean hasten direnean
+      Auto Refresh Interval: Beste plataformen freskatze automatikoaren tartea
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Ikusteko denbora zenbatzeko iturria"
@@ -2031,6 +2087,7 @@ Context Menu:
   Reload Posts: Kargatu berriro argitalpenak
   Reload All Feeds: Kargatu berriro jario guztiak
   Reload RSS Feeds: Birkargatu RSS jarioak
+  Reload Platforms: Kargatu berriro plataformak
   Close Multiple Tabs: Itxi {count} fitxa
   Duplicate Tab: Bikoiztu fitxa
   Duplicate Multiple Tabs: Bikoiztu {count} fitxa
@@ -2183,6 +2240,9 @@ Description:
   Games: Jokoak
   Music: Musika
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "OpenTubeX-en kanal batera harpidetzean edo harpidetza kentzean, gauza bera egiten da zure YouTube kontuan."
+    Add to YouTube Watch History: "Erreproduzitzen dituzun bideoak zure YouTube-ko ikustaldi-historikora gehitzen dira, YouTube-ren gomendioek haietatik ikas dezaten. Historikoa YouTube-n pausatuta dagoen bitartean, ez da ezer gehitzen."
   General Settings:
     Built-in Streams: |
       Automatikoak bideo gehienak YouTuberen visionOS bezeroaren bidez erreproduzitzen ditu; azkarrago hasten da eta kalitate automatikoa onartzen du. Zuzeneko emanaldiek eta erreproduzitu ezin dituen bideoek SABR erabiltzen dute.
@@ -2295,6 +2355,8 @@ Tooltips:
     Notify About New Uploads: Gailu honetan sistemaren jakinarazpenak erakusten ditu harpidetza-ezarpenetan jakinarazpenak aktibatu dituzun kanaletarako. OpenTubeX-ek eduki berria bilatzen du harpidetzak freskatzean; beraz, aukeratu freskatze automatikoaren tarte bat. Aplikazioa itxita dagoenean jakinarazpenak jasotzeko, gaitu ere freskatzea aplikazioa itxita dagoenean.
     RSS Feeds Auto Refresh Interval: Aplikazioa irekita dagoen bitartean OpenTubeX-ek zure RSS jarioak zenbatero freskatzen dituen automatikoki.
     Faster Subscription Refresh: "Lehenik kanal bakoitzaren RSS jarioa egiaztatzen du, eta igoera berriak dituzten kanalen bideoak, Shorts-ak eta zuzeneko emanaldiak soilik kargatzen ditu. Freskatze automatikoek azken 10 minutuetan kargatutako kanalak ere saltatzen dituzte. Igoera berririk ez duten kanaletan, ikustaldi kopuruak, kendutako bideoak eta aldatutako izenburuak ordu batzuetan behin bakarrik eguneratzen dira, eta igoera berriak beranduago ager daitezke RSS jarioa atzeratuta dagoenean. Ez dago erabilgarri Invidious APIarekin."
+    Platforms Auto Refresh Interval: Aplikazioa irekita dagoen bitartean OpenTubeX-ek beste plataformetan jarraitzen dituzun kanalak zenbatero freskatzen dituen automatikoki.
+    Twitch Notify When Live: Jakinarazi egiten dizu jarraitzen dituzun Twitch kanaletako batek emanaldia hasten duenean. OpenTubeX-ek minutu gutxitik behin egiaztatzen du irekita dagoen bitartean, baita itxita dagoenean ere, orduan harpidetzak freskatzen baditu.
   Theme Settings:
     Only Show Important Notifications: Ekintza bat berretsi edo egoera bat jakinarazi besterik egiten ez duten aplikazioko jakinarazpenak ezkutatzen ditu. Erroreak, abisuak, konfiguratu dituzun gogorarazpenak eta ekintza bat eskaintzen duten jakinarazpenak, Desegin adibidez, agertzen jarraitzen dute. Atzeko planoko eragiketen aurrerapena, harpidetzak freskatzea adibidez, aurrerapen-barra orokorrean erakusten da jakinarazpen baten ordez. Sistemaren jakinarazpenei ez die eragiten.
     Visible Search Suggestions: "Bilaketa-barrak bere zerrenda korritu aurretik zenbat bilaketa-historiako sarrera eta iradokizun erakusten dituen zehazten du. Zerrenda ez da inoiz leihoaren behealdetik haratago hedatzen."
@@ -2692,3 +2754,31 @@ Notification Center:
   Clear: "Garbitu"
   Empty: "Oraindik ez dago jakinarazpenik"
   Empty Hint: "Zuzeneko emanaldien gogorarazpenak eta jakinarazpenak aktibatuta dituzten kanalen igoera berriak hemen agertuko dira."
+Platforms:
+  Tracks: Pistak
+  Playlists: Erreprodukzio-zerrendak
+  Follower Count: Jarraitzaile 1 | {count} jarraitzaile
+  Open Website: Ireki {platform} plataforman
+  Channel Not Found: Ezin izan da kanal hau aurkitu.
+  Playlist Not Found: Ezin izan da erreprodukzio-zerrenda hau aurkitu.
+  Load Error: Ezin izan da orri hau {platform} plataformatik kargatu.
+  Empty Tab: Ez dago ezer hemen oraindik.
+YouTube Account:
+  Like: "Atsegin dut"
+  Dislike: "Ez dut atsegin"
+  Rating Failed: "Ezin izan da YouTube-n balorazioa eman: {error}"
+  Subscribe Failed: "Ezin izan da YouTube-n harpidetu: {error}"
+  Unsubscribe Failed: "Ezin izan da YouTube-ko harpidetza kendu: {error}"
+  Add a comment: "Gehitu iruzkin bat"
+  Add a reply: "Gehitu erantzun bat"
+  Comment: "Iruzkindu"
+  Reply: "Erantzun"
+  Comment Posted: "Iruzkina argitaratu da"
+  Reply Posted: "Erantzuna argitaratu da"
+  Comment Failed: "Ezin izan da iruzkina argitaratu: {error}"
+  Delete Comment: "Ezabatu iruzkina"
+  Delete Comment Confirmation: "Zure iruzkina YouTube-tik ezabatu?"
+  Comment Deleted: "Iruzkina ezabatu da"
+  Delete Comment Failed: "Ezin izan da iruzkina ezabatu: {error}"
+  Recommendations: "YouTube-ren gomendioak"
+  Recommendations Failed: "Ezin izan dira zure YouTube gomendioak kargatu."

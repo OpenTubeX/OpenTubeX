@@ -221,6 +221,26 @@ Subscriptions:
       Not Set: Nann-termenet
     Retry Feed: Klask en-dro {feed}
     Reloading Feed: O adkargañ {feed}
+  Platforms:
+    Tab: Savennoù
+    Platform: Savenn
+    All Platforms: An holl savennoù
+    Followed Channels: Chadennoù heuliet war savennoù all
+    Description: Heuliit chadennoù war Twitch, SoundCloud, PeerTube, Rumble hag Odysee evit gwelet ar pezh a embannont en ivinell Savennoù ho koumanantoù. Kavit chadennoù gant an enklask, pe ouzhpennit anezho gant chomlec'h o fajenn. Lennet e vez o mediaoù gant yt-dlp.
+    Add Channel: Ouzhpennañ ur chadenn
+    Channel URL: Chomlec'h ar chadenn
+    Invalid Channel: Skrivit chomlec'h pajenn ur chadenn war Twitch, SoundCloud, PeerTube, Rumble pe Odysee.
+    Channel Not Found: N'eus chadenn ebet er chomlec'h-mañ.
+    Channel Already Followed: Heuliañ a rit ar chadenn-mañ dija.
+    Channel Could Not Be Loaded: N'eus ket bet gallet kargañ ar chadenn.
+    No Channels: Ne heuliit chadenn ebet war savennoù all c'hoazh.
+    Unfollow Channel: Paouez da heuliañ {channel}
+    Go To Channel: Mont d'ar chadenn {channel}
+    Follow: Heuliañ
+    Following: O heuliañ
+    Clips: Klipoù
+    Refresh Errors: N'eus ket bet gallet adkargañ {count} chadenn. | N'eus ket bet gallet adkargañ {count} chadenn. | N'eus ket bet gallet adkargañ {count} chadenn. | N'eus ket bet gallet adkargañ {count} a chadennoù. | N'eus ket bet gallet adkargañ {count} chadenn.
+    Content Tabs: Ivinelloù endalc'had ar savennoù
 Trending:
   Music: Sonerezh
   Load Error: "N'eus ket bet gallet kargañ ar re diouzh ar c'hiz."
@@ -314,6 +334,37 @@ History:
   History Older Than Days Removed: "Dilamet eo bet an istor sellout koshoc'h eget {days} devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} zevezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh."
 Settings:
   Experimental Badge: Arnodel
+  YouTube Account Settings:
+    YouTube Account Settings: "Kont YouTube"
+    Unofficial App Warning: "OpenTubeX n'eo ket un arload ofisiel YouTube. Pa gennaskit e vez liammet ar pezh a rit amañ ouzh ho kont Google, ha Google a c'hall bevenniñ pe stankañ ar c'hontoù a implij arloadoù n'int ket ofisiel. Na gennaskit nemet gant ur gont a c'hallit koll hep keuz."
+    Sign In Explanation: "OpenTubeX a gennask evel un arload skinwel: aprouiñ a rit anezhañ war lec'hienn Google, ha ne wel morse OpenTubeX ho ker-tremen. Ar c'hennaskañ a chom war an trobarzhell-mañ ha n'eo ket goubredet nag enrollet en un enrolladenn gwarez."
+    Sign In: "Kennaskañ"
+    Sign In Anyway: "Kennaskañ memes tra"
+    Sign Out: "Digennaskañ"
+    Getting Sign-In Code: "O kaout ur c'hod kennaskañ"
+    Sign In Instructions: "Digorit ar bajenn gennaskañ ha dibabit ho kont Google. Leuniet e vo ar c'hod ent emgefreek."
+    Other Device Instructions: "War ur benveg all, it d'ar chomlec'h-mañ ha roit ar c'hod:"
+    YouTube Channel: "Chadenn YouTube"
+    Using Channel: "Implijout a rit YouTube evel {name} bremañ"
+    Switch Channel Failed: "N'eus ket bet gallet cheñch ar chadenn YouTube: {error}"
+    Open Sign-In Page: "Digeriñ ar bajenn gennaskañ"
+    Copy Code: "Eilañ ar c'hod"
+    Code Copied: "Kod eilet"
+    Waiting for Approval: "O c'hortoz ma aprouot ar c'hennaskañ"
+    Sign-In Denied: "Nac'het eo bet ar c'hennaskañ."
+    Sign-In Code Expired: "Aet eo ar c'hod d'e dermen. Klaskit en-dro evit kaout unan nevez."
+    Sign-In Failed: "N'eus ket bet gallet kennaskañ: {error}"
+    Signed In As: "Kennasket ouzh YouTube evel {name}"
+    Signed Out: "Digennasket eus YouTube"
+    Sign Out Failed: "N'haller ket digennaskañ: {error}"
+    Revoke Failed: "Digennasket eus YouTube, met n'en deus ket kadarnaet Google eo bet echuet ar c'hennaskañ. Gallout a rit e zilemel e-touez ar c'hennaskoù gant an trede strolladoù en ho kont Google."
+    Signed out by YouTube: "YouTube en deus echuet ar c'hennaskañ. Kennaskit en-dro en Arventennoù evit kenderc'hel da implijout ho kont."
+    Subscribe on YouTube: "Koumanantiñ war YouTube ivez"
+    Add to YouTube Watch History: "Ouzhpennañ ar videoioù sellet ouzh roll istor YouTube"
+    Import Subscriptions: "Enporzhiañ ar c'houmanantoù eus YouTube"
+    Imported Subscriptions: "{count} chadenn enporzhiet | {count} chadenn enporzhiet | {count} chadenn enporzhiet | {count} a chadennoù enporzhiet | {count} chadenn enporzhiet"
+    No Subscriptions to Import: "N'eus koumanant ebet gant ar gont YouTube-mañ"
+    Import Subscriptions Failed: "N'eus ket bet gallet enporzhiañ ar c'houmanantoù: {error}"
   Diagnostics:
     Diagnostics: Diagnoz
     Description: E-pad ma vez gweredekaet an deizlevr diagnoz, OpenTubeX a vir ar c'hemennadennoù deizlevr nevez er memor evit ma c'hallfec'h o stagañ ouzh danevelloù fazioù. Biskoazh ne enrollo na ne gaso anezho e-unan, ha diweredekaat an deizlevr a ziverk anezho. An danevelloù n'int ket enno toupinoù, jedouerioù, chomlec'hioù IP na arventennoù URL, met gallout a reont kaout IDoù ar videoioù ho peus lennet, setu gwiriit an danevell a-raok he rannañ.
@@ -1181,6 +1232,11 @@ Settings:
     Notify About New Uploads: Rebuadiñ diwar-benn an endalc'had nevez
     RSS Feeds Auto Refresh Interval: Etrevez adkargañ emgefreek ar gwazhioù RSS
     Faster Subscription Refresh: "Freskaat ar c'houmanantoù buanoc'h"
+    Platforms:
+      Other Platforms: Savennoù all
+      Manage Channels: Merañ ar chadennoù heuliet
+      Notify When Live: Kemenn pa grog ar chadennoù Twitch heuliet da skignañ war-eeun
+      Auto Refresh Interval: Etrevez adkargañ emgefreek ar savennoù all
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Kontañ an amzer sellet diwar"
@@ -2030,6 +2086,7 @@ Context Menu:
   Reload Posts: "Adkargañ ar pennadoù"
   Reload All Feeds: "Adkargañ an holl wazhioù"
   Reload RSS Feeds: Adkargañ ar gwazhioù RSS
+  Reload Platforms: Adkargañ ar savennoù
   Close Multiple Tabs: "Serriñ {count} ivinell | Serriñ {count} ivinell | Serriñ {count} ivinell | Serriñ {count} ivinell | Serriñ {count} ivinell"
   Duplicate Tab: "Eilañ an ivinell"
   Duplicate Multiple Tabs: "Eilañ {count} ivinell | Eilañ {count} ivinell | Eilañ {count} ivinell | Eilañ {count} ivinell | Eilañ {count} ivinell"
@@ -2182,6 +2239,9 @@ Description:
   Games: "C'hoarioù"
   Music: Sonerezh
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Koumanantiñ pe digoumanantiñ ouzh ur chadenn en OpenTubeX a ra an hevelep tra war ho kont YouTube."
+    Add to YouTube Watch History: "Ar videoioù a lennit a vez ouzhpennet ouzh ho roll istor YouTube, evel-se e c'hall erbedadennoù YouTube deskiñ diouto. Netra ne vez ouzhpennet keit ha ma vez ehanet ar roll istor war YouTube."
   General Settings:
     Built-in Streams: |
       Emgefreek a lenn al lodenn vrasañ eus ar videoioù dre arval visionOS YouTube, a grog buanoc'h hag a skor ar perzhded emgefreek. Ar froudoù war-eeun hag ar videoioù n'hall ket lenn a implij SABR.
@@ -2294,6 +2354,8 @@ Tooltips:
     Notify About New Uploads: Diskouez a ra rebuadoù reizhiad war an trevnad-mañ evit ar chadennoù ho peus gweredekaet o rebuadoù en o arventennoù koumanant. OpenTubeX a wir ha bez ez eus endalc'had nevez pa vez freskaet ar c'houmanantoù, setu dibabit un etrevez adkargañ emgefreek. Evit bezañ kelaouet pa vez serret an arload, gweredekait ivez ar freskañ pa vez serret an arload.
     RSS Feeds Auto Refresh Interval: Pegen alies e vez adkarget ho kwazhioù RSS ent emgefreek gant OpenTubeX e-pad ma vez digor an arload.
     Faster Subscription Refresh: "Gwiriañ a ra lanv RSS pep chadenn da gentañ ha ne garg nemet videoioù, Shorts ha skignadennoù war-eeun ar chadennoù o deus pellgasadennoù nevez. Ar freskadurioù emgefre a lez a-gostez ivez ar chadennoù karget e-pad an 10 munutenn diwezhañ. Evit ar chadennoù hep pellgasadennoù nevez, ne vez hizivaet an niver a selloù, ar videoioù dilamet hag an titloù kemmet nemet bep un nebeud eurioù, ha gallout a ra ar pellgasadennoù nevez dont war wel diwezhatoc'h pa vez dale gant al lanv RSS. N'eo ket hegerz gant API Invidious."
+    Platforms Auto Refresh Interval: Pegen alies e vez adkarget ar chadennoù a heuliit war savennoù all ent emgefreek gant OpenTubeX e-pad ma vez digor an arload.
+    Twitch Notify When Live: Ho kemenn a ra pa grog unan eus ar chadennoù Twitch a heuliit da skignañ. Gwiriañ a ra OpenTubeX bep un nebeud munutennoù keit ha ma vez digor, hag ivez keit ha ma vez serret ma nevesa ar c'houmanantoù neuze.
   Theme Settings:
     Only Show Important Notifications: Kuzhat a ra ar c'hemennoù en arload na reont nemet kadarnaat un ober pe reiñ ur stad. Diskouezet e vez c'hoazh ar fazioù, ar c'hemennoù-diwall, an degasoù-koun ho peus kefluniet hag ar c'hemennoù a ginnig un ober, evel Dizober. Diskouezet e vez araokadur an oberoù en drekleur, evel freskaat ar c'houmanantoù, er varrenn araokadur hollek e-lec'h en ur c'hemenn. Ar c'hemennoù reizhiad n'int ket tizhet.
     Visible Search Suggestions: "Termeniñ a ra pet enmont eus ar roll-istor klask ha pet kinnig a ziskouez ar varrenn glask a-raok ma ranker dibunañ he roll. Ne ya morse ar roll en tu all da draoñ ar prenestr."
@@ -2691,3 +2753,31 @@ Notification Center:
   Clear: "Skarzhañ"
   Empty: "Kemenn ebet evit c’hoazh"
   Empty Hint: "An dalc’hoù-soñj evit ar c’hwitelladennoù war-eeun hag ar pellgasadennoù nevez eus ar chadennoù gant kemennoù gweredekaet a zeuio war wel amañ."
+Platforms:
+  Tracks: Tonioù
+  Playlists: Rolloù lenn
+  Follower Count: '{count} heulier | {count} heulier | {count} heulier | {count} a heulierien | {count} heulier'
+  Open Website: Digeriñ war {platform}
+  Channel Not Found: N'eus ket bet kavet ar chadenn-mañ.
+  Playlist Not Found: N'eus ket bet kavet ar roll lenn-mañ.
+  Load Error: N'eus ket bet gallet kargañ ar bajenn-mañ diwar {platform}.
+  Empty Tab: N'eus netra amañ c'hoazh.
+YouTube Account:
+  Like: "Plijout a ra din"
+  Dislike: "Ne blij ket din"
+  Rating Failed: "N'eus ket bet gallet notenniñ war YouTube: {error}"
+  Subscribe Failed: "N'eus ket bet gallet koumanantiñ war YouTube: {error}"
+  Unsubscribe Failed: "N'eus ket bet gallet digoumanantiñ war YouTube: {error}"
+  Add a comment: "Ouzhpennañ un evezhiadenn"
+  Add a reply: "Ouzhpennañ ur respont"
+  Comment: "Embann"
+  Reply: "Respont"
+  Comment Posted: "Embannet eo an evezhiadenn"
+  Reply Posted: "Embannet eo ar respont"
+  Comment Failed: "N'eus ket bet gallet embann an evezhiadenn: {error}"
+  Delete Comment: "Dilemel an evezhiadenn"
+  Delete Comment Confirmation: "Dilemel hoc'h evezhiadenn eus YouTube?"
+  Comment Deleted: "Dilamet eo an evezhiadenn"
+  Delete Comment Failed: "N'eus ket bet gallet dilemel an evezhiadenn: {error}"
+  Recommendations: "Erbedadennoù YouTube"
+  Recommendations Failed: "N'eus ket bet gallet kargañ hoc'h erbedadennoù YouTube."

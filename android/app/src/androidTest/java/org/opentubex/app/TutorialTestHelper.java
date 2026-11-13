@@ -24,7 +24,7 @@ final class TutorialTestHelper {
         await(view, "!!document.querySelector('.app')", 60000);
         await(view, "localStorage.getItem('opentubex.tutorial.audience') !== 'new' || " +
             "!!document.querySelector('.tutorialSkip button')", 15000);
-        evaluate(view, "document.querySelector('.tutorialSkip button')?.click()");
+        evaluate(view, "document.querySelector('.tutorialSkip button')?.click()", 15000);
         await(view, "!document.querySelector('.tutorialOverlay')", 15000);
     }
 
@@ -32,22 +32,23 @@ final class TutorialTestHelper {
         long deadline = SystemClock.uptimeMillis() + timeoutMs;
         String value;
         do {
-            value = evaluate(view, condition);
+            // A starved software-GPU emulator can hold the UI thread, which
+            // delivers the reply, for longer than one evaluation's budget.
+            value = evaluate(view, condition, Math.max(15000, deadline - SystemClock.uptimeMillis()));
             if ("true".equals(value)) return;
             Thread.sleep(100);
         } while (SystemClock.uptimeMillis() < deadline);
         assertEquals(condition, "true", value);
     }
 
-    private static String evaluate(WebView view, String script) throws Exception {
+    private static String evaluate(WebView view, String script, long timeoutMs) throws Exception {
         CountDownLatch evaluated = new CountDownLatch(1);
         AtomicReference<String> result = new AtomicReference<>();
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> view.evaluateJavascript(script, value -> {
             result.set(value);
             evaluated.countDown();
         }));
-        // A busy software-GPU emulator can hold the UI thread for several seconds.
-        assertTrue("JavaScript responds", evaluated.await(15, TimeUnit.SECONDS));
+        assertTrue("JavaScript responds", evaluated.await(timeoutMs, TimeUnit.MILLISECONDS));
         return result.get();
     }
 }

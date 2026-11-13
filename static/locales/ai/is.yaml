@@ -221,6 +221,26 @@ Subscriptions:
       Not Set: Ekki stillt
     Retry Feed: Reyna {feed} aftur
     Reloading Feed: Endurhleð {feed}
+  Platforms:
+    Tab: Vettvangar
+    Platform: Vettvangur
+    All Platforms: Allir vettvangar
+    Followed Channels: Rásir sem þú fylgir á öðrum vettvöngum
+    Description: Fylgdu rásum á Twitch, SoundCloud, PeerTube, Rumble og Odysee til að sjá það sem þær hlaða upp í flipanum Vettvangar í áskriftunum þínum. Finndu rásir með leitinni eða bættu þeim við með slóð síðunnar þeirra. Efni þeirra er spilað með yt-dlp.
+    Add Channel: Bæta við rás
+    Channel URL: Slóð rásar
+    Invalid Channel: Sláðu inn slóð á rásarsíðu á Twitch, SoundCloud, PeerTube, Rumble eða Odysee.
+    Channel Not Found: Engin rás er á þessari slóð.
+    Channel Already Followed: Þú fylgir þessari rás nú þegar.
+    Channel Could Not Be Loaded: Ekki tókst að hlaða rásinni.
+    No Channels: Þú fylgir engum rásum á öðrum vettvöngum ennþá.
+    Unfollow Channel: Hætta að fylgja {channel}
+    Go To Channel: Fara á {channel}
+    Follow: Fylgja
+    Following: Fylgir
+    Clips: Klippur
+    Refresh Errors: Ekki tókst að uppfæra {count} rás. | Ekki tókst að uppfæra {count} rásir.
+    Content Tabs: Flipar fyrir efni frá vettvöngum
 Trending:
   Music: Tónlist
   Load Error: Ekki tókst að hlaða vinsælu efni.
@@ -314,6 +334,37 @@ History:
   History Older Than Days Removed: Áhorfsferli eldri en {days} dags hefur verið eytt | Áhorfsferli eldri en {days} daga hefur verið eytt
 Settings:
   Experimental Badge: Tilraun
+  YouTube Account Settings:
+    YouTube Account Settings: "YouTube-reikningur"
+    Unofficial App Warning: "OpenTubeX er ekki opinbert YouTube-forrit. Þegar þú skráir þig inn tengist það sem þú gerir hér Google-reikningnum þínum og Google getur takmarkað eða bannað reikninga sem nota óopinber forrit. Skráðu þig aðeins inn með reikningi sem þú mátt við að missa."
+    Sign In Explanation: "OpenTubeX skráir sig inn eins og sjónvarpsforrit: þú samþykkir innskráninguna á vefsvæði Google og OpenTubeX sér aldrei lykilorðið þitt. Innskráningin helst á þessu tæki og er hvorki samstillt né afrituð."
+    Sign In: "Skrá inn"
+    Sign In Anyway: "Skrá inn samt"
+    Sign Out: "Skrá út"
+    Getting Sign-In Code: "Sæki innskráningarkóða"
+    Sign In Instructions: "Opnaðu innskráningarsíðuna og veldu Google-reikninginn þinn. Kóðinn er fylltur út sjálfkrafa."
+    Other Device Instructions: "Farðu á þetta vistfang í öðru tæki og sláðu inn kóðann:"
+    YouTube Channel: "YouTube-rás"
+    Using Channel: "Þú notar nú YouTube sem {name}"
+    Switch Channel Failed: "Ekki tókst að skipta um YouTube-rás: {error}"
+    Open Sign-In Page: "Opna innskráningarsíðu"
+    Copy Code: "Afrita kóða"
+    Code Copied: "Kóði afritaður"
+    Waiting for Approval: "Bíð eftir að þú samþykkir innskráninguna"
+    Sign-In Denied: "Innskráningunni var hafnað."
+    Sign-In Code Expired: "Kóðinn rann út. Reyndu aftur til að fá nýjan."
+    Sign-In Failed: "Ekki tókst að skrá inn: {error}"
+    Signed In As: "Innskráning á YouTube sem {name}"
+    Signed Out: "Skráð út af YouTube"
+    Sign Out Failed: "Ekki tókst að skrá út: {error}"
+    Revoke Failed: "Útskráning af YouTube tókst, en Google staðfesti ekki að innskráningunni væri lokið. Þú getur fjarlægt hana undir tengingum þriðju aðila á Google-reikningnum þínum."
+    Signed out by YouTube: "YouTube batt enda á innskráninguna. Skráðu þig aftur inn í stillingum til að halda áfram að nota reikninginn þinn."
+    Subscribe on YouTube: "Gerast líka áskrifandi á YouTube"
+    Add to YouTube Watch History: "Bæta áhorfðum myndskeiðum við YouTube-feril"
+    Import Subscriptions: "Flytja inn áskriftir frá YouTube"
+    Imported Subscriptions: "{count} rás flutt inn | {count} rásir fluttar inn"
+    No Subscriptions to Import: "Þessi YouTube-reikningur er ekki með neinar áskriftir"
+    Import Subscriptions Failed: "Ekki tókst að flytja inn áskriftir: {error}"
   Diagnostics:
     Diagnostics: Greining
     Description: Á meðan greiningarannáll er virkur geymir OpenTubeX nýleg annálaskilaboð í minni svo þú getir hengt þau við villutilkynningar. Það vistar þau aldrei né sendir að eigin frumkvæði og ef slökkt er á annálnum er þeim eytt. Skýrslur sleppa vafrakökum, tókum, IP-tölum og URL-færibreytum, en þær geta innihaldið auðkenni myndskeiða sem þú spilaðir, svo farðu yfir skýrslu áður en þú deilir henni.
@@ -1183,6 +1234,11 @@ Settings:
     Notify About New Uploads: Tilkynna um nýtt efni
     RSS Feeds Auto Refresh Interval: Bil milli sjálfvirkra uppfærslna RSS-strauma
     Faster Subscription Refresh: "Hraðari uppfærsla áskrifta"
+    Platforms:
+      Other Platforms: Aðrir vettvangar
+      Manage Channels: Sýsla með rásir sem þú fylgir
+      Notify When Live: Láta vita þegar Twitch-rásir sem þú fylgir fara í beina útsendingu
+      Auto Refresh Interval: Bil milli sjálfvirkra uppfærslna annarra vettvanga
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Telja áhorfstíma"
@@ -2042,6 +2098,7 @@ Context Menu:
   Reload Posts: Endurhlaða færslur
   Reload All Feeds: Endurhlaða allar veitur
   Reload RSS Feeds: Endurhlaða RSS-straumum
+  Reload Platforms: Endurhlaða vettvanga
   Close Multiple Tabs: Loka {count} flipa | Loka {count} flipum
   Duplicate Tab: Tvítaka flipa
   Duplicate Multiple Tabs: Tvítaka {count} flipa | Tvítaka {count} flipa
@@ -2194,6 +2251,9 @@ Description:
   Games: Leikir
   Music: Tónlist
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Ef þú gerist áskrifandi að rás eða segir upp áskrift í OpenTubeX gerist það sama á YouTube-reikningnum þínum."
+    Add to YouTube Watch History: "Myndskeið sem þú spilar bætast við áhorfsferilinn þinn á YouTube, svo meðmæli YouTube læri af þeim. Engu er bætt við á meðan ferillinn er í bið á YouTube."
   General Settings:
     Built-in Streams: |
       Sjálfvirkt spilar flest myndskeið í gegnum visionOS-biðlara YouTube, sem byrjar hraðar og styður sjálfvirk gæði. Beinar útsendingar og myndskeið sem hann getur ekki spilað nota SABR.
@@ -2306,6 +2366,8 @@ Tooltips:
     Notify About New Uploads: Birtir kerfistilkynningar á þessu tæki fyrir rásir sem þú hefur kveikt á tilkynningum fyrir í áskriftarstillingum þeirra. OpenTubeX athugar hvort nýtt efni sé komið þegar áskriftir eru uppfærðar, svo veldu bil milli sjálfvirkra uppfærslna. Til að fá tilkynningar þegar forritið er lokað skaltu einnig virkja uppfærslu þegar forritið er lokað.
     RSS Feeds Auto Refresh Interval: Hversu oft OpenTubeX uppfærir RSS-straumana þína sjálfvirkt á meðan forritið er opið.
     Faster Subscription Refresh: "Athugar fyrst RSS-straum hverrar rásar og hleður aðeins myndskeiðum, Shorts og beinum útsendingum frá rásum með nýjum upphleðslum. Sjálfvirkar uppfærslur sleppa einnig rásum sem hlaðið var á síðustu 10 mínútum. Fyrir rásir án nýrra upphleðslna uppfærast áhorfstölur, fjarlægð myndskeið og breyttir titlar aðeins á nokkurra klukkustunda fresti, og nýjar upphleðslur geta birst síðar þegar RSS-straumurinn er á eftir. Ekki í boði með Invidious API."
+    Platforms Auto Refresh Interval: Hversu oft OpenTubeX uppfærir rásirnar sem þú fylgir á öðrum vettvöngum sjálfvirkt á meðan forritið er opið.
+    Twitch Notify When Live: Lætur þig vita þegar ein af Twitch-rásunum sem þú fylgir hefur útsendingu. OpenTubeX athugar á nokkurra mínútna fresti á meðan það er opið, og líka á meðan það er lokað ef það uppfærir áskriftir þá.
   Theme Settings:
     Only Show Important Notifications: Felur tilkynningar í forritinu sem aðeins staðfesta aðgerð eða greina frá stöðu. Villur, viðvaranir, áminningar sem þú hefur sett upp og tilkynningar sem bjóða upp á aðgerð, eins og Afturkalla, birtast áfram. Framvinda bakgrunnsaðgerða, eins og uppfærsla áskrifta, birtist á almennu framvindustikunni í stað tilkynningar. Kerfistilkynningar verða ekki fyrir áhrifum.
     Visible Search Suggestions: "Stillir hversu margar færslur úr leitarferli og tillögur leitarstikan sýnir áður en fletta þarf listanum. Listinn nær aldrei út fyrir neðri brún gluggans."
@@ -2705,3 +2767,31 @@ Notification Center:
   Clear: "Hreinsa"
   Empty: "Engar tilkynningar enn"
   Empty Hint: "Áminningar um beinar útsendingar og ný myndskeið frá rásum með kveikt á tilkynningum birtast hér."
+Platforms:
+  Tracks: Lög
+  Playlists: Spilunarlistar
+  Follower Count: '{count} fylgjandi | {count} fylgjendur'
+  Open Website: Opna á {platform}
+  Channel Not Found: Þessi rás fannst ekki.
+  Playlist Not Found: Þessi spilunarlisti fannst ekki.
+  Load Error: Ekki tókst að hlaða þessari síðu frá {platform}.
+  Empty Tab: Hér er ekkert ennþá.
+YouTube Account:
+  Like: "Líkar við"
+  Dislike: "Líkar ekki við"
+  Rating Failed: "Ekki tókst að gefa einkunn á YouTube: {error}"
+  Subscribe Failed: "Ekki tókst að gerast áskrifandi á YouTube: {error}"
+  Unsubscribe Failed: "Ekki tókst að segja upp áskrift á YouTube: {error}"
+  Add a comment: "Bæta við athugasemd"
+  Add a reply: "Bæta við svari"
+  Comment: "Skrifa athugasemd"
+  Reply: "Svara"
+  Comment Posted: "Athugasemd birt"
+  Reply Posted: "Svar birt"
+  Comment Failed: "Ekki tókst að birta athugasemdina: {error}"
+  Delete Comment: "Eyða athugasemd"
+  Delete Comment Confirmation: "Eyða athugasemdinni þinni af YouTube?"
+  Comment Deleted: "Athugasemd eytt"
+  Delete Comment Failed: "Ekki tókst að eyða athugasemdinni: {error}"
+  Recommendations: "Meðmæli frá YouTube"
+  Recommendations Failed: "Ekki tókst að hlaða YouTube-meðmælunum þínum."

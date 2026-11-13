@@ -1095,19 +1095,20 @@ function lengthDelimited(field, bytes) {
   return [...varint(field * 8 + 2, bytes.length), ...bytes]
 }
 
-test('requests after an ad break carry its cue point so SABR resumes the stream', async t => {
-  // Captured from a live stream: SABR withholds the segment behind a cue point
-  // and backoffs until the request reports how the client handled the ad break
-  const duration = [...new Uint8Array(new Float64Array([60]).buffer)]
-  const cuepoint = [...varint(2 << 3, 1), (3 << 3) | 1, ...duration,
+test('requests at the end of an ad break carry its cue point so SABR resumes the stream', async t => {
+  // Captured from a live stream: SABR withholds the segment that ends an ad
+  // break, sending its STOP cue point 58s into the 60s break, and backoffs
+  // until the request reports how the client handled the break
+  const double = value => [...new Uint8Array(new Float64Array([value]).buffer)]
+  const cuepoint = [...varint(1 << 3, 1, 2 << 3, 3), (3 << 3) | 1, ...double(60), (4 << 3) | 1, ...double(58),
     ...lengthDelimited(6, [...new TextEncoder().encode('ad-1')])]
-  const timeRange = varint(1 << 3, 7_170_358_133, 3 << 3, 1000)
+  const timeRange = varint(1 << 3, 7_228_000, 3 << 3, 1000)
   const cuepointList = lengthDelimited(1, [...lengthDelimited(1, cuepoint), ...lengthDelimited(4, timeRange)])
 
   const bodies = []
   const { createSabrTransport } = load(async (_uri, options) => {
     bodies.push(options.body)
-    if (bodies.length > 1) return response([1, 2])
+    if (protocol.extractRawProtobufField(options.body, 24)) return response([1, 2])
     const buffer = new CompositeBuffer([])
     const writer = new UmpWriter(buffer)
     writer.write(protocol.CUEPOINT_LIST_PART_ID, Uint8Array.from(cuepointList))
@@ -1120,15 +1121,49 @@ test('requests after an ad break carry its cue point so SABR resumes the stream'
   const segment = await transport.request(uri, request(uri), 1).promise
 
   assert.deepEqual([...segment.data], [1, 2])
+  assert.equal(bodies.length, 2)
   assert.equal(protocol.extractRawProtobufField(bodies[0], 24), undefined)
   const ssapPlaybackInfo = protocol.extractRawProtobufField(bodies[1], 24)
   assert.deepEqual([...ssapPlaybackInfo], [
     ...lengthDelimited(7, [...new TextEncoder().encode('ad-1')]),
-    ...varint(8 << 3, 11, 10 << 3, 7_170_358_133, 11 << 3, 60_000),
+    ...varint(8 << 3, 11, 10 << 3, 7_170_000, 11 << 3, 60_000),
   ])
   // The request stays valid for decoders that do not know the field
   assert.deepEqual(protos.VideoPlaybackAbrRequest.decode(bodies[1]).selectedFormatIds,
     protos.VideoPlaybackAbrRequest.decode(bodies[0]).selectedFormatIds)
+})
+
+test('a live request that SABR answers with a neighboring segment asks again within the requested one', async t => {
+  // As on a live stream after a short segment, the estimated segment times are
+  // off by more than half a segment, so SABR answers the requested time with a
+  // neighbor. Segment 10 lasts only 0.4s.
+  const timeline = [
+    { sequenceNumber: 9, startMs: 16_000 },
+    { sequenceNumber: 10, startMs: 18_000 },
+    { sequenceNumber: 11, startMs: 18_400 },
+  ]
+  const requestedTimes = []
+  const { createSabrTransport } = load(async (_uri, options) => {
+    const playerTimeMs = Number(protos.VideoPlaybackAbrRequest.decode(options.body).clientAbrState.playerTimeMs)
+    requestedTimes.push(playerTimeMs)
+    const { sequenceNumber, startMs } = timeline.findLast(segment => segment.startMs <= playerTimeMs)
+    const buffer = new CompositeBuffer([])
+    const writer = new UmpWriter(buffer)
+    writer.write(protos.UMPPartId.NEXT_REQUEST_POLICY, protos.NextRequestPolicy.encode({ targetAudioReadaheadMs: 15000 }).finish())
+    writer.write(protos.UMPPartId.MEDIA_HEADER, protos.MediaHeader.encode({
+      headerId: 1, formatId: audioFormatId, sequenceNumber, startMs: String(startMs),
+    }).finish())
+    writer.write(protos.UMPPartId.MEDIA, Uint8Array.of(1, sequenceNumber))
+    writer.write(protos.UMPPartId.MEDIA_END, Uint8Array.of(1))
+    return new Response(utils.concatenateChunks(buffer.chunks))
+  })
+  const transport = createSabrTransport(sabrData, () => context)
+  t.after(() => transport.cleanup())
+  const uri = 'sabr1:audio?formatId=140-123-&targetDurationMs=2000&startTimeMs=19000&sq=10'
+  const segment = await transport.request(uri, request(uri), 1).promise
+
+  assert.deepEqual([...segment.data], [10])
+  assert.ok(requestedTimes.length <= 5, `requested ${requestedTimes.join(', ')}`)
 })
 
 test('a live buffered range ends with the last segment whose middle is buffered', () => {
@@ -1141,9 +1176,16 @@ test('a live buffered range ends with the last segment whose middle is buffered'
 
   // Media timestamps differ slightly from the estimated segment times. Claiming
   // segment 102 would make SABR skip it and leave playback without it.
-  const range = createBufferedRange(audioFormatId, { start: -0.3, end: 10.002 }, segmentIndex, true)
+  const range = createBufferedRange(audioFormatId, { start: -0.3, end: 10.002 }, segmentIndex, true, new Map())
   assert.equal(range.startSegmentIndex, 100)
   assert.equal(range.endSegmentIndex, 101)
 
-  assert.equal(createBufferedRange(audioFormatId, { start: 5.1, end: 7 }, segmentIndex, true), null)
+  assert.equal(createBufferedRange(audioFormatId, { start: 5.1, end: 7 }, segmentIndex, true, new Map()), null)
+
+  // A short segment shifted the media 3s from the estimates, so the reported
+  // starts of the delivered segments decide which of them are buffered
+  const delivered = new Map([[101, 2_000], [102, 7_000], [103, 12_000]])
+  const shifted = createBufferedRange(audioFormatId, { start: 2.01, end: 12 }, segmentIndex, true, delivered)
+  assert.equal(shifted.startSegmentIndex, 101)
+  assert.equal(shifted.endSegmentIndex, 102)
 })

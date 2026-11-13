@@ -2,6 +2,7 @@ import { ClosedWindowHistory } from './tabs/ClosedWindowHistory.js'
 import { createFileWatchQueue } from './watchQueue.js'
 import { createSerialQueue } from './serialQueue.js'
 import { writeFileAtomic } from './writeFileAtomic.js'
+import { fetchRumblePage } from './rumblePages.js'
 import {
   app, BrowserWindow, Menu, ipcMain,
   powerSaveBlocker, screen, session,
@@ -17,7 +18,6 @@ import cp from 'child_process'
 
 import {
   IpcChannels,
-  SyncEvents,
   getConfiguredKeyboardShortcuts,
   getElectronAccelerator,
   SEARCH_CHAR_LIMIT,
@@ -30,6 +30,7 @@ import { isCustomThemeValue } from '../customTheme'
 import { MATERIAL_SYSTEM_SEED, MATERIAL_THEME_VALUES, materialColorScheme, materialSeedPalette, materialThemeMode } from '../materialTheme.js'
 import { resolveSystemTheme } from '../appearanceSettings'
 import { applySyncServerUserAgent } from '../syncServerUserAgent'
+import { applyYouTubeUserAgent } from '../youTubeUserAgent'
 import * as baseHandlers from '../datastores/handlers/base'
 import { liveReminders, waitForDatastores } from '../datastores'
 import { createImageCacheHandler, ImageCache } from './ImageCache'
@@ -45,6 +46,7 @@ import { ChromecastManager } from './chromecast'
 import { FcastManager } from './fcast'
 import { handleTwitchChatReplayPage, handleTwitchSubOnlyVod } from './twitchChat'
 import { applyTwitchPlaylistOrigin } from '../twitchPlaylistOrigin'
+import { createTwitchLiveNotifier } from './twitchLiveNotifications'
 import { isYtDlpStoryboardUrl, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
 import { applyYtDlpPlaybackCacheSettings } from './ytDlpPlaybackCache'
 import { generatePoToken, mintPoTokenFromAttestation } from './poTokenGenerator'
@@ -90,6 +92,7 @@ import { createScheduledBackups } from './scheduledBackups'
 import { createBackupArchiveFactory } from './backupArchive'
 import { createDatastoreRequestTracker } from './datastoreRequests'
 import { setupDatastoreIpc } from './datastoreIpc'
+import { settingSyncMessage } from './settingRevisions'
 import { getWindowButtonLayout, onWindowButtonLayoutChanged } from './windowButtonLayout'
 import { watchTrayColorScheme } from './trayColorScheme'
 import { setDiagnosticLogging, setupDiagnosticLogIpc } from './diagnosticLog'
@@ -148,6 +151,10 @@ Options:
 
 function runApp() {
   let deferredDatastoresStarted = false
+
+  // Electron otherwise builds its default menu before the app is ready, only
+  // for the app's own menu to replace it with the first window.
+  Menu.setApplicationMenu(null)
 
   // Registered synchronously, before any datastore loading started above can finish.
   setupLibraryNotices()
@@ -327,10 +334,7 @@ function runApp() {
     } else {
       await baseHandlers.settings.upsert(settingKey, value)
     }
-    const syncPayload = {
-      event: SyncEvents.GENERAL.UPSERT,
-      data: { _id: settingKey, value }
-    }
+    const syncPayload = settingSyncMessage(settingKey, value)
     for (const window of BrowserWindow.getAllWindows()) {
       if (!window.webContents.isDestroyed() && isOpenTubeXUrl(window.webContents.getURL())) {
         window.webContents.send(IpcChannels.SYNC_SETTINGS, syncPayload)
@@ -695,6 +699,16 @@ function runApp() {
   handleTrusted(IpcChannels.NOTIFICATION_HISTORY_CLEAR, () => notificationHistory.clear())
   handleTrusted(IpcChannels.NOTIFICATION_DISMISSALS_GET, () => notificationHistory.getDismissals())
   handleTrusted(IpcChannels.NOTIFICATION_DISMISSALS_MERGE, (_event, dismissals) => notificationHistory.mergeDismissals(dismissals))
+  // Runs without windows too, for example while the app refreshes subscriptions from the tray.
+  const twitchLiveNotifier = createTwitchLiveNotifier({
+    file: path.join(userDataPath, 'twitch-live-notifications.json'),
+    // Uses the session's proxy settings, like the background refresh requests.
+    fetch: (url, options) => net.fetch(url, options),
+    show: showUrlNotification,
+    onLive: live => sendToAppWindows(IpcChannels.TWITCH_LIVE_UPDATED, live)
+  })
+  handleTrusted(IpcChannels.TWITCH_LIVE_CONFIGURE, (_event, configuration) => twitchLiveNotifier.configure(configuration))
+  handleTrusted(IpcChannels.RUMBLE_FETCH, (_event, url) => fetchRumblePage(net, url))
   const uploadNotifier = createUploadNotifier({
     file: path.join(userDataPath, 'upload-notifications.json'),
     show: showUrlNotification,
@@ -986,7 +1000,13 @@ function runApp() {
 
   const PLAYER_CACHE_PATH = `${userDataPath}/player_cache`
 
-  if (!isPortableBuild()) {
+  // Registering asks the desktop and blocks this process until it has answered,
+  // so it waits until the first window has shown its content.
+  let protocolClientRegistered = false
+  function registerProtocolClient() {
+    if (protocolClientRegistered || isPortableBuild()) return
+    protocolClientRegistered = true
+
     // See: https://stackoverflow.com/questions/45570589/electron-protocol-handler-not-working-on-windows
     // remove so we can register each time as we run the app.
     app.removeAsDefaultProtocolClient('opentubex')
@@ -1325,6 +1345,7 @@ function runApp() {
 
       if (webContents && isOpenTubeXUrl(webContents.getURL())) {
         applySyncServerUserAgent(requestHeaders)
+        applyYouTubeUserAgent(url, requestHeaders)
       }
 
       if (url.startsWith('https://www.youtube.com/youtubei/')) {
@@ -1935,6 +1956,9 @@ function runApp() {
             height: 800
           }
     })
+    // Electron loads its fetch implementation when the first request reaches a
+    // protocol handler. Load it while the renderer process starts instead.
+    Reflect.get(globalThis, 'Request')
     newWindow.once('show', () => {
       if (deferredDatastoresStarted) return
       deferredDatastoresStarted = true
@@ -2230,6 +2254,7 @@ function runApp() {
     }
 
     const initialization = initializeTabs()
+    initialization.then(registerProtocolClient, registerProtocolClient)
     if (!waitForInitialization) {
       initialization.catch(error => {
         console.error('Failed to initialize tabs', error)
@@ -2809,6 +2834,7 @@ function runApp() {
     chromecast.stop().catch(error => console.error('Failed to stop Google Cast', error))
     fcast.stop().catch(error => console.error('Failed to stop FCast', error))
     backgroundSubscriptions.stop()
+    twitchLiveNotifier.stop()
     if (tray) { tray.destroy(); tray = null }
   })
 
@@ -3091,7 +3117,11 @@ function runApp() {
   }
 
   async function setMenu() {
-    const keyboardShortcutsSetting = await baseHandlers.settings._findOne('keyboardShortcuts')
+    // The app has no other menu to fall back on, so a failed read uses the default shortcuts.
+    const keyboardShortcutsSetting = await baseHandlers.settings._findOne('keyboardShortcuts').catch((error) => {
+      console.error('Could not read the keyboard shortcuts for the menu', error)
+      return null
+    })
     const keyboardShortcuts = getConfiguredKeyboardShortcuts(keyboardShortcutsSetting?.value)
     const reloadTabs = (_menuItem, browserWindow) => {
       if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {

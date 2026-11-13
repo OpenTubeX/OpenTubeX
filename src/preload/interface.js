@@ -18,11 +18,103 @@ if (process.platform === 'win32' || process.platform === 'darwin') {
   document.addEventListener('leavepictureinpicture', () => ipcRenderer.send(IpcChannels.PICTURE_IN_PICTURE_HIDDEN))
 }
 
+/**
+ * The tabs, the settings and the library are read while the renderer bundle
+ * is evaluated and the app mounts. The app's first full read of each takes
+ * that result instead of asking again, unless the datastore changed since.
+ * @type {Map<string, Promise<any>>}
+ */
+const startupReads = new Map()
+let startupReadsStarted = false
+
+function startStartupReads() {
+  if (startupReadsStarted) return
+  startupReadsStarted = true
+
+  startupReads.set(IpcChannels.TABS_GET_STATE, ipcRenderer.invoke(IpcChannels.TABS_GET_STATE))
+  for (const [channel, syncChannel] of [
+    [IpcChannels.DB_SETTINGS, IpcChannels.SYNC_SETTINGS],
+    [IpcChannels.DB_PROFILES, IpcChannels.SYNC_PROFILES],
+    [IpcChannels.DB_HISTORY, IpcChannels.SYNC_HISTORY],
+    [IpcChannels.DB_PLAYLISTS, IpcChannels.SYNC_PLAYLISTS],
+    [IpcChannels.DB_SUBSCRIPTION_CACHE, IpcChannels.SYNC_SUBSCRIPTION_CACHE],
+  ]) {
+    startupReads.set(channel, invokeDatastore(channel, { action: DBActions.GENERAL.FIND }))
+    // Another window changed the datastore before the app listens for that.
+    ipcRenderer.once(syncChannel, () => startupReads.delete(channel))
+  }
+  // A read that nothing takes must not report an unhandled rejection.
+  for (const read of startupReads.values()) read.catch(() => {})
+}
+
+/**
+ * @param {string} channel
+ * @returns {Promise<any> | undefined} the startup read, the first time it is asked for
+ */
+function takeStartupRead(channel) {
+  const read = startupReads.get(channel)
+  startupReads.delete(channel)
+  return read
+}
+
+/**
+ * @param {string} channel
+ * @param {number} action
+ * @param {any} [data]
+ */
+function requestDatastore(channel, action, data) {
+  const startupRead = takeStartupRead(channel)
+  // Any other request may change what the startup read would have returned.
+  if (startupRead && action === DBActions.GENERAL.FIND && !data) return startupRead
+  return invokeDatastore(channel, data ? { action, data } : { action })
+}
+
 let currentUpdateSearchInputTextListener
 let currentYtDlpBinaryDownloadProgressListener
 const ytDlpBinaryDownloadProgressListeners = new Set()
 const ytDlpBinaryUpdatedListeners = new Set()
 const castProgressListeners = new Map()
+
+/**
+ * The newest revision of each setting this window has. Settings broadcasts and
+ * the replies to this window's saves can arrive out of order, so a broadcast
+ * not newer than a save this window already has is dropped.
+ * @type {Map<string, number>}
+ */
+const settingRevisions = new Map()
+
+/**
+ * Records `revision` of setting `id`.
+ * @param {string} id
+ * @param {number} revision
+ * @returns {boolean} whether it is newer than the one this window has
+ */
+function recordSettingRevision(id, revision) {
+  if (revision <= (settingRevisions.get(id) ?? 0)) return false
+  settingRevisions.set(id, revision)
+  return true
+}
+
+/**
+ * Invokes a datastore request that can save a setting, see `handleRequestsSavingSettings` in the main process.
+ * @param {string} channel
+ * @param {{ action: number, data?: any }} request
+ */
+async function invokeSavingSettings(channel, request) {
+  const { result, savedSetting } = await ipcRenderer.invoke(channel, request)
+  if (savedSetting) recordSettingRevision(savedSetting._id, savedSetting.revision)
+  return result
+}
+
+/**
+ * @param {string} channel
+ * @param {{ action: number, data?: any }} request
+ */
+function invokeDatastore(channel, request) {
+  return channel === IpcChannels.DB_SETTINGS || channel === IpcChannels.DB_HISTORY
+    ? invokeSavingSettings(channel, request)
+    : ipcRenderer.invoke(channel, request)
+}
 
 ipcRenderer.on(IpcChannels.CAST_PROGRESS, (_, progress) => {
   castProgressListeners.get(progress?.preparationId)?.(progress.stage)
@@ -148,6 +240,7 @@ export default {
   /** @param {string} url */
   openExternalLinkInBackground: url => ipcRenderer.invoke(IpcChannels.OPEN_EXTERNAL_LINK_IN_BACKGROUND, url),
   startupSplashReady: () => ipcRenderer.send(IpcChannels.STARTUP_SPLASH_READY),
+  startStartupReads,
   startupAppearance: {
     background: process.argv.find(argument => argument.startsWith('--startup-background='))?.slice('--startup-background='.length),
     dark: process.argv.includes('--startup-dark=true'),
@@ -730,6 +823,26 @@ export default {
 
   twitchChatReplayPage: (videoId, position) => ipcRenderer.invoke(IpcChannels.TWITCH_CHAT_REPLAY_PAGE, videoId, position),
   twitchSubOnlyVod: videoId => ipcRenderer.invoke(IpcChannels.TWITCH_SUB_ONLY_VOD, videoId),
+  /**
+   * Which followed Twitch channels the main process checks for live streams.
+   * @param {{ enabled: boolean, channels: { id: string, login: string, name: string }[], title: string }} configuration
+   */
+  configureTwitchLiveNotifications: configuration => ipcRenderer.invoke(IpcChannels.TWITCH_LIVE_CONFIGURE, configuration),
+  /**
+   * Loads a Rumble page with the cookies of the app's session.
+   * @param {string} url
+   * @returns {Promise<{ status: number, text: string }>}
+   */
+  fetchRumblePage: url => ipcRenderer.invoke(IpcChannels.RUMBLE_FETCH, url),
+  /**
+   * @param {(live: import('../twitchFollows').TwitchFeedItem[]) => void} handler
+   * @returns {() => void} removes the listener
+   */
+  onTwitchLiveUpdated: (handler) => {
+    const listener = (_event, live) => handler(live)
+    ipcRenderer.on(IpcChannels.TWITCH_LIVE_UPDATED, listener)
+    return () => ipcRenderer.removeListener(IpcChannels.TWITCH_LIVE_UPDATED, listener)
+  },
 
   /**
    * @param {string} currentVideoId
@@ -847,10 +960,7 @@ export default {
       if (used) return Promise.reject(new Error('Automatic download rule writer already used'))
       used = true
       if (typeof value !== 'string') return Promise.reject(new Error('Automatic download rules must be a string'))
-      return ipcRenderer.invoke(IpcChannels.DB_SETTINGS, {
-        action: DBActions.GENERAL.UPSERT,
-        data: { _id: 'ytDlpAutomaticDownloadRules', value }
-      })
+      return requestDatastore(IpcChannels.DB_SETTINGS, DBActions.GENERAL.UPSERT, { _id: 'ytDlpAutomaticDownloadRules', value })
     }
   },
 
@@ -863,7 +973,7 @@ export default {
       !navigator.userActivation.isActive) {
       return Promise.resolve(null)
     }
-    return ipcRenderer.invoke(IpcChannels.DB_SETTINGS, data ? { action, data } : { action })
+    return requestDatastore(IpcChannels.DB_SETTINGS, action, data)
   },
 
   /**
@@ -871,7 +981,7 @@ export default {
    * @param {any} [data]
    */
   dbHistory: (action, data) => {
-    return ipcRenderer.invoke(IpcChannels.DB_HISTORY, data ? { action, data } : { action })
+    return requestDatastore(IpcChannels.DB_HISTORY, action, data)
   },
 
   /**
@@ -893,7 +1003,7 @@ export default {
    * @param {any} [data]
    */
   dbProfiles: (action, data) => {
-    return ipcRenderer.invoke(IpcChannels.DB_PROFILES, data ? { action, data } : { action })
+    return requestDatastore(IpcChannels.DB_PROFILES, action, data)
   },
 
   /**
@@ -901,7 +1011,7 @@ export default {
    * @param {any} [data]
    */
   dbPlaylists: (action, data) => {
-    return ipcRenderer.invoke(IpcChannels.DB_PLAYLISTS, data ? { action, data } : { action })
+    return requestDatastore(IpcChannels.DB_PLAYLISTS, action, data)
   },
 
   /**
@@ -917,7 +1027,7 @@ export default {
    * @param {any} [data]
    */
   dbSubscriptionCache: (action, data) => {
-    return ipcRenderer.invoke(IpcChannels.DB_SUBSCRIPTION_CACHE, data ? { action, data } : { action })
+    return requestDatastore(IpcChannels.DB_SUBSCRIPTION_CACHE, action, data)
   },
 
   /**
@@ -1196,7 +1306,7 @@ export default {
   subscriptionFeeds: {
     /**
      * Listen for a mark-seen request from a tabbed New feed category's context menu.
-     * @param {(payload: {tabId: string, feedTab: 'videos' | 'shorts' | 'live' | 'posts'}) => void} handler
+     * @param {(payload: {tabId: string, feedTab: 'videos' | 'shorts' | 'live' | 'posts' | 'feeds' | 'platforms'}) => void} handler
      * @returns {() => void}
      */
     onRequestMarkSeen: (handler) => {
@@ -1207,7 +1317,7 @@ export default {
 
     /**
      * Listen for a reload requested from a subscription feed tab's context menu.
-     * @param {(payload: {tabId: string, feedTab: 'videos' | 'shorts' | 'live' | 'posts' | 'all'}) => void} handler
+     * @param {(payload: {tabId: string, feedTab: 'videos' | 'shorts' | 'live' | 'posts' | 'all' | 'feeds' | 'platforms'}) => void} handler
      * @returns {() => void}
      */
     onRequestReload: (handler) => {
@@ -1277,8 +1387,8 @@ export default {
    * @param {(event: number, data: any) => void} handler
    */
   handleSyncSettings: (handler) => {
-    ipcRenderer.on(IpcChannels.SYNC_SETTINGS, (_, { event, data }) => {
-      handler(event, data)
+    ipcRenderer.on(IpcChannels.SYNC_SETTINGS, (_, { event, data, revision }) => {
+      if (recordSettingRevision(data._id, revision)) handler(event, data)
     })
   },
 
@@ -1337,5 +1447,8 @@ export default {
   },
 
   // Tab management API
-  tabs
+  tabs: {
+    ...tabs,
+    getState: () => takeStartupRead(IpcChannels.TABS_GET_STATE) ?? tabs.getState(),
+  }
 }

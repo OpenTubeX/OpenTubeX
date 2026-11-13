@@ -14,7 +14,9 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -221,6 +223,38 @@ public class SubscriptionRefreshPlugin extends Plugin {
         }
         UploadNotifications.configure(getContext(), configuration);
         call.resolve();
+    }
+
+    @PluginMethod
+    public void configureTwitchLive(PluginCall call) {
+        JSObject configuration = call.getObject("configuration");
+        if (configuration == null) {
+            call.reject("A Twitch configuration is required");
+            return;
+        }
+        TwitchLiveNotifications.configure(getContext(), configuration);
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void observeTwitchLive(PluginCall call) {
+        JSArray streams = call.getArray("streams");
+        JSArray channelIds = call.getArray("channelIds");
+        if (streams == null || channelIds == null) {
+            call.reject("Twitch channels and streams are required");
+            return;
+        }
+        Context context = getContext();
+        UPLOADS.execute(() -> {
+            try {
+                List<String> checked = new ArrayList<>();
+                for (int index = 0; index < channelIds.length(); index++) checked.add(channelIds.optString(index));
+                TwitchLiveNotifications.observe(context, checked, streams);
+                call.resolve();
+            } catch (Exception error) {
+                call.reject("Unable to check for Twitch streams", error);
+            }
+        });
     }
 
     @PluginMethod

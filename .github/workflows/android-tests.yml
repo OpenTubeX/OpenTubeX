@@ -1,9 +1,10 @@
 name: Android Tests
 
 on:
-  # The suite takes about an hour of emulator time, so pull requests run it
-  # only for native changes. The nightly run covers renderer changes.
-  pull_request:
+  # Each run takes three shards of up to an hour, so pull requests don't run
+  # it. Each push to development that changes native code runs it, and the
+  # nightly run covers renderer changes.
+  push:
     branches: [ development ]
     paths:
       - 'android/**'
@@ -23,9 +24,11 @@ on:
 
 permissions: {}
 
+# A running suite finishes, and only the latest waiting run starts next, so one
+# run can cover several merges.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   instrumentation:
@@ -71,6 +74,17 @@ jobs:
       with:
         distribution: temurin
         java-version: 21
+
+    # Maven Central sometimes fails a download, which fails the whole shard, so
+    # reuse the Gradle distribution and dependencies of earlier runs.
+    - name: Cache Gradle dependencies
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        key: ${{ format('gradle-{0}-{1}-{2}', runner.os, runner.arch, hashFiles('android/**/*.gradle', 'android/gradle/wrapper/gradle-wrapper.properties', 'pnpm-lock.yaml')) }}
+        restore-keys: ${{ format('gradle-{0}-{1}-', runner.os, runner.arch) }}
+        path: |
+          ~/.gradle/caches/modules-2
+          ~/.gradle/wrapper
 
     - name: Set up Android SDK
       uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
@@ -121,8 +135,11 @@ jobs:
         # from the app, and notification banners cover it. Android reads the
         # dialog setting on configuration changes only, so the font scale is
         # changed and restored, each time waiting until the configuration shows
-        # it. FailureDiagnostics closes another app's dialog that still appears
-        # and logs whatever window held the screen when a test failed.
+        # it. Android writes each applied font scale back to the setting, and on a
+        # busy device writing back 1.01 can overwrite the restored 1.0, so the
+        # restore is repeated until it shows. FailureDiagnostics closes another
+        # app's dialog that still appears and logs whatever window held the
+        # screen when a test failed.
         # A starved runner delays the virtual access point's beacons, and after a
         # few missed ones the guest drops Wi-Fi. Android then often rejoins
         # without the network's routes, which breaks casting tests for the rest
@@ -131,7 +148,7 @@ jobs:
         script: |
           timeout 60 sh -c "until adb root; do sleep 2; done" && adb wait-for-device && timeout 30 sh -c "until adb shell id | grep -q uid=0; do sleep 1; done"
           adb shell 'echo 100 > /sys/module/mac80211/parameters/beacon_loss_count'
-          adb unroot && adb wait-for-device && timeout 30 sh -c "until adb shell id | grep -q uid=2000; do sleep 1; done"
+          timeout 60 sh -c "until adb unroot; do sleep 2; done" && adb wait-for-device && timeout 30 sh -c "until adb shell id | grep -q uid=2000; do sleep 1; done"
           adb shell cmd wifi set-wifi-enabled disabled
           timeout 60 sh -c "until adb shell cmd wifi status | grep -q 'Wifi is disabled'; do sleep 1; done"
           adb shell cmd wifi set-wifi-enabled enabled
@@ -143,7 +160,7 @@ jobs:
           adb shell wm size
           adb shell wm density
           adb shell settings put system font_scale 1.01 && timeout 60 sh -c "until adb shell dumpsys activity activities | grep -q '{1.01 '; do sleep 1; done"
-          adb shell settings put system font_scale 1.0 && timeout 60 sh -c "until adb shell dumpsys activity activities | grep -q '{1.0 '; do sleep 1; done"
+          timeout 60 sh -c "until adb shell settings put system font_scale 1.0 && adb shell dumpsys activity activities | grep -q '{1.0 '; do sleep 1; done"
           ./android/gradlew --project-dir android :app:connectedDebugAndroidTest -PtestAbi=x86_64 -Pandroid.testInstrumentationRunnerArguments.numShards=3 -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }} -Pandroid.testInstrumentationRunnerArguments.timeout_msec=600000 -Pandroid.testInstrumentationRunnerArguments.listener=org.opentubex.app.FailureDiagnostics
           adb get-state
           grep -q '<testcase' android/app/build/outputs/androidTest-results/connected/debug/TEST-*.xml

@@ -279,10 +279,8 @@ function selectFormat(value) {
     return
   }
 
-  if (value !== props.activeFormat) {
-    emit('change-format', value)
-  }
-
+  // Also for the active format, which supersedes a selection that is still loading
+  emit('change-format', value)
   emit('close')
 }
 

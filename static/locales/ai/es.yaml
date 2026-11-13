@@ -180,6 +180,26 @@ Subscriptions:
       Not Set: Sin definir
     Retry Feed: Reintentar {feed}
     Reloading Feed: Recargando {feed}
+  Platforms:
+    Tab: Plataformas
+    Platform: Plataforma
+    All Platforms: Todas las plataformas
+    Followed Channels: Canales seguidos en otras plataformas
+    Description: Siga canales de Twitch, SoundCloud, PeerTube, Rumble y Odysee para ver sus publicaciones en la pestaña Plataformas de sus suscripciones. Busque canales con el buscador o añádalos con la dirección de su página. Su contenido se reproduce con yt-dlp.
+    Add Channel: Añadir canal
+    Channel URL: Dirección del canal
+    Invalid Channel: Introduzca la dirección de la página de un canal de Twitch, SoundCloud, PeerTube, Rumble u Odysee.
+    Channel Not Found: No hay ningún canal en esta dirección.
+    Channel Already Followed: Ya sigue este canal.
+    Channel Could Not Be Loaded: No se ha podido cargar el canal.
+    No Channels: Todavía no sigue ningún canal de otras plataformas.
+    Unfollow Channel: Dejar de seguir a {channel}
+    Go To Channel: Ir a {channel}
+    Follow: Seguir
+    Following: Siguiendo
+    Clips: Clips
+    Refresh Errors: No se ha podido actualizar 1 canal. | No se han podido actualizar {count} canales. | No se han podido actualizar {count} canales.
+    Content Tabs: Pestañas de contenido de plataformas
 Trending:
   Music: Música
   Load Error: No se pudo cargar Tendencias.
@@ -274,6 +294,37 @@ History:
   History Older Than Days Removed: Se ha eliminado el historial de reproducción de más de 1 día | Se ha eliminado el historial de reproducción de más de {days} días | Se ha eliminado el historial de reproducción de más de {days} días
 Settings:
   Experimental Badge: Experimental
+  YouTube Account Settings:
+    YouTube Account Settings: "Cuenta de YouTube"
+    Unofficial App Warning: "OpenTubeX no es una aplicación oficial de YouTube. Al iniciar sesión, lo que haces aquí queda vinculado a tu cuenta de Google, y Google puede restringir o bloquear las cuentas que usan aplicaciones no oficiales. Inicia sesión solo con una cuenta que puedas permitirte perder."
+    Sign In Explanation: "OpenTubeX inicia sesión como una aplicación de TV: lo apruebas en el sitio web de Google y OpenTubeX nunca ve tu contraseña. La sesión se queda en este dispositivo y no se sincroniza ni se incluye en las copias de seguridad."
+    Sign In: "Iniciar sesión"
+    Sign In Anyway: "Iniciar sesión de todos modos"
+    Sign Out: "Cerrar sesión"
+    Getting Sign-In Code: "Obteniendo un código de inicio de sesión"
+    Sign In Instructions: "Abre la página de inicio de sesión y elige tu cuenta de Google. El código se rellena automáticamente."
+    Other Device Instructions: "En otro dispositivo, ve a esta dirección e introduce el código:"
+    YouTube Channel: "Canal de YouTube"
+    Using Channel: "Ahora usas YouTube como {name}"
+    Switch Channel Failed: "No se ha podido cambiar el canal de YouTube: {error}"
+    Open Sign-In Page: "Abrir página de inicio de sesión"
+    Copy Code: "Copiar código"
+    Code Copied: "Código copiado"
+    Waiting for Approval: "Esperando a que apruebes el inicio de sesión"
+    Sign-In Denied: "Se ha denegado el inicio de sesión."
+    Sign-In Code Expired: "El código ha caducado. Inténtalo de nuevo para obtener uno nuevo."
+    Sign-In Failed: "No se ha podido iniciar sesión: {error}"
+    Signed In As: "Has iniciado sesión en YouTube como {name}"
+    Signed Out: "Has cerrado sesión en YouTube"
+    Sign Out Failed: "No se ha podido cerrar la sesión: {error}"
+    Revoke Failed: "Has cerrado la sesión de YouTube, pero Google no ha confirmado que el inicio de sesión haya terminado. Puedes quitarlo en las conexiones con terceros de tu cuenta de Google."
+    Signed out by YouTube: "YouTube ha cerrado la sesión. Vuelve a iniciar sesión en Configuración para seguir usando tu cuenta."
+    Subscribe on YouTube: "Suscribirse también en YouTube"
+    Add to YouTube Watch History: "Añadir los vídeos vistos al historial de YouTube"
+    Import Subscriptions: "Importar suscripciones de YouTube"
+    Imported Subscriptions: "Se ha importado {count} canal | Se han importado {count} de canales | Se han importado {count} canales"
+    No Subscriptions to Import: "Esta cuenta de YouTube no tiene suscripciones"
+    Import Subscriptions Failed: "No se han podido importar las suscripciones: {error}"
   Diagnostics:
     Diagnostics: Diagnóstico
     Description: Mientras el registro de diagnóstico está activado, OpenTubeX guarda los mensajes de registro recientes en la memoria para que puedas adjuntarlos a informes de errores. Nunca los guarda ni los envía por su cuenta, y desactivar el registro los elimina. Los informes omiten cookies, tokens, direcciones IP y parámetros de URL, pero pueden incluir los ID de los vídeos que has reproducido, así que revisa el informe antes de compartirlo.
@@ -1143,6 +1194,11 @@ Settings:
     Notify About New Uploads: Notificar nuevas subidas
     RSS Feeds Auto Refresh Interval: Intervalo de actualización automática de fuentes RSS
     Faster Subscription Refresh: "Actualización más rápida de suscripciones"
+    Platforms:
+      Other Platforms: Otras plataformas
+      Manage Channels: Gestionar canales seguidos
+      Notify When Live: Notificar cuando los canales de Twitch seguidos empiecen un directo
+      Auto Refresh Interval: Intervalo de actualización automática de otras plataformas
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "Contar el tiempo de visualización de"
@@ -1996,6 +2052,7 @@ Context Menu:
   Reload Posts: Recargar publicaciones
   Reload All Feeds: Recargar todas las fuentes
   Reload RSS Feeds: Volver a cargar los feeds RSS
+  Reload Platforms: Recargar plataformas
   Close Multiple Tabs: Cerrar {count} pestañas | Cerrar {count} pestañas
   Duplicate Tab: Duplicar pestaña
   Duplicate Multiple Tabs: Duplicar {count} pestañas | Duplicar {count} pestañas
@@ -2148,6 +2205,9 @@ Description:
   Games: Juegos
   Music: Música
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "Suscribirte a un canal o desuscribirte de él en OpenTubeX hace lo mismo en tu cuenta de YouTube."
+    Add to YouTube Watch History: "Los vídeos que reproduces se añaden a tu historial de reproducciones de YouTube, para que las recomendaciones de YouTube aprendan de ellos. No se añade nada mientras el historial esté en pausa en YouTube."
   General Settings:
     Built-in Streams: |
       Automático reproduce la mayoría de los vídeos con el cliente visionOS de YouTube, que empieza más rápido y admite la calidad automática. Las emisiones en directo y los vídeos que no puede reproducir usan SABR.
@@ -2260,6 +2320,8 @@ Tooltips:
     Notify About New Uploads: Muestra notificaciones del sistema en este dispositivo para los canales cuyas notificaciones has activado en sus ajustes de suscripción. OpenTubeX busca contenido nuevo al actualizar las suscripciones, así que elige un intervalo de actualización automática. Para recibir notificaciones con la aplicación cerrada, activa también la actualización con la aplicación cerrada.
     RSS Feeds Auto Refresh Interval: Con qué frecuencia OpenTubeX actualiza automáticamente tus fuentes RSS mientras la aplicación está abierta.
     Faster Subscription Refresh: "Primero comprueba el feed RSS de cada canal y solo carga los vídeos, Shorts y emisiones en directo de los canales con subidas nuevas. Las actualizaciones automáticas también omiten los canales cargados en los últimos 10 minutos. En los canales sin subidas nuevas, las visualizaciones, los vídeos eliminados y los títulos cambiados solo se actualizan cada pocas horas, y las subidas nuevas pueden aparecer más tarde cuando el feed RSS se retrasa. No disponible con la API de Invidious."
+    Platforms Auto Refresh Interval: Con qué frecuencia OpenTubeX actualiza automáticamente los canales que sigues en otras plataformas mientras la aplicación está abierta.
+    Twitch Notify When Live: Te avisa cuando uno de los canales de Twitch que sigues empieza a emitir. OpenTubeX lo comprueba cada pocos minutos mientras está abierto, y también mientras está cerrado si entonces actualiza las suscripciones.
   Theme Settings:
     Only Show Important Notifications: Oculta las notificaciones de la aplicación que solo confirman una acción o informan de un estado. Los errores, las advertencias, los recordatorios que hayas configurado y las notificaciones que ofrecen una acción, como Deshacer, se siguen mostrando. El progreso de las operaciones en segundo plano, como la actualización de las suscripciones, se muestra en la barra de progreso global en lugar de en una notificación. Las notificaciones del sistema no se ven afectadas.
     Visible Search Suggestions: "Define cuántas entradas del historial de búsqueda y sugerencias muestra la barra de búsqueda antes de que su lista se desplace. La lista nunca se extiende más allá de la parte inferior de la ventana."
@@ -2649,3 +2711,31 @@ Notification Center:
   Clear: "Borrar"
   Empty: "Aún no hay notificaciones"
   Empty Hint: "Aquí aparecerán los recordatorios de directos y los vídeos nuevos de los canales con notificaciones activadas."
+Platforms:
+  Tracks: Pistas
+  Playlists: Listas de reproducción
+  Follower Count: 1 seguidor | {count} de seguidores | {count} seguidores
+  Open Website: Abrir en {platform}
+  Channel Not Found: No se ha podido encontrar este canal.
+  Playlist Not Found: No se ha podido encontrar esta lista de reproducción.
+  Load Error: No se ha podido cargar esta página desde {platform}.
+  Empty Tab: Todavía no hay nada aquí.
+YouTube Account:
+  Like: "Me gusta"
+  Dislike: "No me gusta"
+  Rating Failed: "No se ha podido valorar en YouTube: {error}"
+  Subscribe Failed: "No se ha podido suscribir en YouTube: {error}"
+  Unsubscribe Failed: "No se ha podido desuscribir en YouTube: {error}"
+  Add a comment: "Añade un comentario"
+  Add a reply: "Añade una respuesta"
+  Comment: "Comentar"
+  Reply: "Responder"
+  Comment Posted: "Comentario publicado"
+  Reply Posted: "Respuesta publicada"
+  Comment Failed: "No se ha podido publicar el comentario: {error}"
+  Delete Comment: "Eliminar comentario"
+  Delete Comment Confirmation: "¿Eliminar tu comentario de YouTube?"
+  Comment Deleted: "Comentario eliminado"
+  Delete Comment Failed: "No se ha podido eliminar el comentario: {error}"
+  Recommendations: "Recomendaciones de YouTube"
+  Recommendations Failed: "No se han podido cargar tus recomendaciones de YouTube."

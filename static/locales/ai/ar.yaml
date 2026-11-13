@@ -223,6 +223,26 @@ Subscriptions:
       Not Set: غير محدد
     Retry Feed: أعد محاولة تحميل {feed}
     Reloading Feed: جارٍ إعادة تحميل {feed}
+  Platforms:
+    Tab: المنصات
+    Platform: المنصة
+    All Platforms: كل المنصات
+    Followed Channels: القنوات المتابَعة على منصات أخرى
+    Description: تابع قنوات على Twitch وSoundCloud وPeerTube وRumble وOdysee لترى ما تنشره في علامة تبويب المنصات ضمن اشتراكاتك. ابحث عن القنوات باستخدام البحث، أو أضفها بعنوان صفحتها. يتم تشغيل وسائطها باستخدام yt-dlp.
+    Add Channel: إضافة قناة
+    Channel URL: عنوان القناة
+    Invalid Channel: أدخل عنوان صفحة قناة على Twitch أو SoundCloud أو PeerTube أو Rumble أو Odysee.
+    Channel Not Found: لا توجد قناة على هذا العنوان.
+    Channel Already Followed: أنت تتابع هذه القناة بالفعل.
+    Channel Could Not Be Loaded: تعذّر تحميل القناة.
+    No Channels: لا تتابع أي قنوات على منصات أخرى بعد.
+    Unfollow Channel: إلغاء متابعة {channel}
+    Go To Channel: الانتقال إلى {channel}
+    Follow: متابعة
+    Following: تتم المتابعة
+    Clips: مقاطع
+    Refresh Errors: تعذّر تحديث {count} قناة. | تعذّر تحديث قناة واحدة. | تعذّر تحديث قناتين ({count}). | تعذّر تحديث {count} قنوات. | تعذّر تحديث {count} قناةً. | تعذّر تحديث {count} قناة.
+    Content Tabs: علامات تبويب محتوى المنصات
 Trending:
   Music: موسيقى
   Load Error: تعذر تحميل العناصر الشائعة.
@@ -319,6 +339,37 @@ History:
   History Older Than Days Removed: 'تمت إزالة سجل المشاهدة الأقدم من {days} يوم | تمت إزالة سجل المشاهدة الأقدم من يوم واحد | تمت إزالة سجل المشاهدة الأقدم من يومين ({days}) | تمت إزالة سجل المشاهدة الأقدم من {days} أيام | تمت إزالة سجل المشاهدة الأقدم من {days} يومًا | تمت إزالة سجل المشاهدة الأقدم من {days} يوم'
 Settings:
   Experimental Badge: تجريبي
+  YouTube Account Settings:
+    YouTube Account Settings: "حساب YouTube"
+    Unofficial App Warning: "OpenTubeX ليس تطبيقًا رسميًا من YouTube. يؤدي تسجيل الدخول إلى ربط ما تفعله هنا بحسابك على Google، وقد تقيّد Google الحسابات التي تستخدم تطبيقات غير رسمية أو تحظرها. لا تسجّل الدخول إلا بحساب يمكنك تحمّل خسارته."
+    Sign In Explanation: "يسجّل OpenTubeX الدخول كما يفعل تطبيق التلفاز: توافق على ذلك في موقع Google، ولا يرى OpenTubeX كلمة مرورك أبدًا. يبقى تسجيل الدخول على هذا الجهاز ولا تتم مزامنته أو نسخه احتياطيًا."
+    Sign In: "تسجيل الدخول"
+    Sign In Anyway: "تسجيل الدخول على أي حال"
+    Sign Out: "تسجيل الخروج"
+    Getting Sign-In Code: "جارٍ الحصول على رمز تسجيل الدخول"
+    Sign In Instructions: "افتح صفحة تسجيل الدخول واختر حسابك على Google. سيُملأ الرمز تلقائيًا."
+    Other Device Instructions: "على جهاز آخر، انتقل إلى هذا العنوان وأدخل الرمز:"
+    YouTube Channel: "قناة YouTube"
+    Using Channel: "أنت الآن تستخدم YouTube باسم {name}"
+    Switch Channel Failed: "تعذّر تبديل قناة YouTube: {error}"
+    Open Sign-In Page: "فتح صفحة تسجيل الدخول"
+    Copy Code: "نسخ الرمز"
+    Code Copied: "تم نسخ الرمز"
+    Waiting for Approval: "في انتظار موافقتك على تسجيل الدخول"
+    Sign-In Denied: "تم رفض تسجيل الدخول."
+    Sign-In Code Expired: "انتهت صلاحية الرمز. حاول مرة أخرى للحصول على رمز جديد."
+    Sign-In Failed: "تعذّر تسجيل الدخول: {error}"
+    Signed In As: "تم تسجيل الدخول إلى YouTube باسم {name}"
+    Signed Out: "تم تسجيل الخروج من YouTube"
+    Sign Out Failed: "تعذّر تسجيل الخروج: {error}"
+    Revoke Failed: "تم تسجيل الخروج من YouTube، لكن Google لم تؤكد إنهاء تسجيل الدخول. يمكنك إزالته من اتصالات الجهات الخارجية في حسابك على Google."
+    Signed out by YouTube: "أنهى YouTube تسجيل الدخول. سجّل الدخول مجددًا من الإعدادات لمواصلة استخدام حسابك."
+    Subscribe on YouTube: "الاشتراك على YouTube أيضًا"
+    Add to YouTube Watch History: "إضافة مقاطع الفيديو التي تمت مشاهدتها إلى سجلّ YouTube"
+    Import Subscriptions: "استيراد الاشتراكات من YouTube"
+    Imported Subscriptions: "تم استيراد {count} قناة | تم استيراد {count} قناة | تم استيراد {count} قناة | تم استيراد {count} قنوات | تم استيراد {count} قناة | تم استيراد {count} قناة"
+    No Subscriptions to Import: "لا يحتوي حساب YouTube هذا على أي اشتراكات"
+    Import Subscriptions Failed: "تعذّر استيراد الاشتراكات: {error}"
   Diagnostics:
     Diagnostics: التشخيص
     Description: أثناء تفعيل سجل التشخيص، يحتفظ OpenTubeX برسائل السجل الحديثة في الذاكرة حتى تتمكن من إرفاقها بتقارير الأخطاء. لا يحفظها أو يرسلها من تلقاء نفسه أبدًا، ويؤدي إيقاف السجل إلى حذفها. لا تتضمن التقارير ملفات تعريف الارتباط أو الرموز المميزة أو عناوين IP أو معلمات عناوين URL، لكنها قد تتضمن معرّفات الفيديوهات التي شغّلتها، لذا راجع التقرير قبل مشاركته.
@@ -1192,6 +1243,11 @@ Settings:
     Notify About New Uploads: الإشعار بالمحتوى الجديد
     RSS Feeds Auto Refresh Interval: الفاصل الزمني للتحديث التلقائي لخلاصات RSS
     Faster Subscription Refresh: "تحديث أسرع للاشتراكات"
+    Platforms:
+      Other Platforms: منصات أخرى
+      Manage Channels: إدارة القنوات المتابَعة
+      Notify When Live: الإشعار عند بدء بث قنوات Twitch المتابَعة
+      Auto Refresh Interval: الفاصل الزمني للتحديث التلقائي للمنصات الأخرى
   Distraction Free Settings:
     Digital Wellbeing:
       Count Watch Time From: "احتساب وقت المشاهدة من"
@@ -2071,6 +2127,7 @@ Context Menu:
   Reload Posts: إعادة تحميل المشاركات
   Reload All Feeds: إعادة تحميل كافة الخلاصات
   Reload RSS Feeds: إعادة تحميل موجزات RSS
+  Reload Platforms: إعادة تحميل المنصات
   Close Multiple Tabs: 'إغلاق علامتي تبويب ({count}) | إغلاق {count} علامات تبويب | إغلاق {count} علامة تبويب | إغلاق {count} علامة تبويب'
   Duplicate Tab: علامة تبويب مكررة
   Duplicate Multiple Tabs: 'تكرار علامتي تبويب ({count}) | تكرار {count} علامات تبويب | تكرار {count} علامة تبويب | تكرار {count} علامة تبويب'
@@ -2224,6 +2281,9 @@ Description:
   Games: ألعاب
   Music: الموسيقى
 Tooltips:
+  YouTube Account Settings:
+    Subscribe on YouTube: "يؤدي الاشتراك في قناة أو إلغاء الاشتراك فيها داخل OpenTubeX إلى تنفيذ الإجراء نفسه في حسابك على YouTube."
+    Add to YouTube Watch History: "تُضاف مقاطع الفيديو التي تشغّلها إلى سجلّ المشاهدات في YouTube، فتتعلّم منها اقتراحات YouTube. لا يُضاف أي شيء ما دام السجلّ متوقفًا مؤقتًا على YouTube."
   General Settings:
     Built-in Streams: |
       يشغّل الوضع التلقائي معظم الفيديوهات عبر عميل visionOS من YouTube، الذي يبدأ أسرع ويدعم الجودة التلقائية. تستخدم البثوث المباشرة والفيديوهات التي لا يستطيع تشغيلها SABR.
@@ -2321,6 +2381,8 @@ Tooltips:
     Notify About New Uploads: يعرض إشعارات النظام على هذا الجهاز للقنوات التي فعّلت إشعاراتها في إعدادات اشتراكها. يتحقق OpenTubeX من وجود محتوى جديد عند تحديث الاشتراكات، لذا اختر فاصلًا زمنيًا للتحديث التلقائي. لتلقي الإشعارات أثناء إغلاق التطبيق، فعّل أيضًا تحديث الاشتراكات أثناء إغلاق التطبيق.
     RSS Feeds Auto Refresh Interval: عدد مرات تحديث OpenTubeX لخلاصات RSS تلقائيًا أثناء فتح التطبيق.
     Faster Subscription Refresh: "يتحقق أولاً من موجز RSS لكل قناة ولا يحمّل الفيديوهات وShorts والبث المباشر إلا من القنوات التي لديها رفعات جديدة. تتخطى التحديثات التلقائية أيضاً القنوات التي حُمّلت خلال آخر 10 دقائق. بالنسبة للقنوات التي ليس لديها رفعات جديدة، لا يتم تحديث عدد المشاهدات والفيديوهات المحذوفة والعناوين المتغيرة إلا كل بضع ساعات، وقد تظهر الرفعات الجديدة لاحقاً عندما يتأخر موجز RSS. غير متاح مع واجهة Invidious البرمجية."
+    Platforms Auto Refresh Interval: عدد مرات تحديث OpenTubeX للقنوات التي تتابعها على منصات أخرى تلقائيًا أثناء فتح التطبيق.
+    Twitch Notify When Live: يُعلمك عندما تبدأ إحدى قنوات Twitch التي تتابعها البث. يتحقق OpenTubeX كل بضع دقائق أثناء فتحه، وكذلك أثناء إغلاقه إذا كان يحدّث الاشتراكات حينها.
   Theme Settings:
     Only Show Important Notifications: يخفي الإشعارات داخل التطبيق التي تقتصر على تأكيد إجراء أو الإبلاغ عن حالة. تظل الأخطاء والتحذيرات والتذكيرات التي أعددتها والإشعارات التي توفر إجراءً، مثل التراجع، ظاهرة. يظهر تقدم العمليات في الخلفية، مثل تحديث الاشتراكات، في شريط التقدم العام بدلًا من إشعار. لا تتأثر إشعارات النظام.
     Visible Search Suggestions: "يحدد عدد إدخالات سجل البحث والاقتراحات التي يعرضها شريط البحث قبل أن تحتاج قائمته إلى التمرير. لا تمتد القائمة أبدًا إلى ما بعد أسفل النافذة."
@@ -2721,3 +2783,31 @@ Notification Center:
   Clear: "مسح"
   Empty: "لا توجد إشعارات بعد"
   Empty Hint: "ستظهر هنا تذكيرات البث المباشر والفيديوهات الجديدة من القنوات التي فعّلت إشعاراتها."
+Platforms:
+  Tracks: المقاطع الصوتية
+  Playlists: قوائم التشغيل
+  Follower Count: '{count} متابع | متابع واحد | متابعان ({count}) | {count} متابعين | {count} متابعًا | {count} متابع'
+  Open Website: فتح في {platform}
+  Channel Not Found: تعذّر العثور على هذه القناة.
+  Playlist Not Found: تعذّر العثور على قائمة التشغيل هذه.
+  Load Error: تعذّر تحميل هذه الصفحة من {platform}.
+  Empty Tab: لا يوجد شيء هنا بعد.
+YouTube Account:
+  Like: "إعجاب"
+  Dislike: "عدم الإعجاب"
+  Rating Failed: "تعذّر التقييم على YouTube: {error}"
+  Subscribe Failed: "تعذّر الاشتراك على YouTube: {error}"
+  Unsubscribe Failed: "تعذّر إلغاء الاشتراك على YouTube: {error}"
+  Add a comment: "إضافة تعليق"
+  Add a reply: "إضافة رد"
+  Comment: "تعليق"
+  Reply: "رد"
+  Comment Posted: "تم نشر التعليق"
+  Reply Posted: "تم نشر الرد"
+  Comment Failed: "تعذّر نشر التعليق: {error}"
+  Delete Comment: "حذف التعليق"
+  Delete Comment Confirmation: "هل تريد حذف تعليقك من YouTube؟"
+  Comment Deleted: "تم حذف التعليق"
+  Delete Comment Failed: "تعذّر حذف التعليق: {error}"
+  Recommendations: "اقتراحات YouTube"
+  Recommendations Failed: "تعذّر تحميل اقتراحاتك من YouTube."
