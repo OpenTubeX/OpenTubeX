@@ -9,6 +9,7 @@ import { desktopDatastorePaths } from '../datastores/sqliteNode'
 import { fetchCastMedia, resolveCastMediaAddresses } from './castMediaServer'
 import { createSerialQueue } from './serialQueue'
 import { isNonPublicNetworkAddress, isOpenTubeXUrl } from './utils'
+import { isTrustedSender } from './ipc'
 const MAX_TITLE_LENGTH = 10_000
 const MAX_DESCRIPTION_LENGTH = 1_000_000
 const MAX_THUMBNAIL_DATA_URL_LENGTH = 8_000_000
@@ -434,7 +435,7 @@ export function setupVideoMetadataCacheIpc({ getConfiguredApiServerUrl }) {
   }
 
   ipcMain.handle(IpcChannels.VIDEO_METADATA_CACHE_UPDATE, async (event, metadata) => {
-    if (!isOpenTubeXUrl(event.senderFrame?.url) || !isValidVideoId(metadata?.videoId)) {
+    if (!isTrustedSender(event) || !isValidVideoId(metadata?.videoId)) {
       return null
     }
 
@@ -446,7 +447,7 @@ export function setupVideoMetadataCacheIpc({ getConfiguredApiServerUrl }) {
   })
 
   ipcMain.handle(IpcChannels.VIDEO_METADATA_CACHE_CLEAR, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame?.url)) return false
+    if (!isTrustedSender(event)) return false
 
     videoMetadataCacheGeneration += 1
     await clearVideoMetadataCache()
@@ -459,7 +460,7 @@ export function setupVideoMetadataCacheIpc({ getConfiguredApiServerUrl }) {
   })
 
   ipcMain.handle(IpcChannels.VIDEO_METADATA_CACHE_GET_SIZE, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame?.url)) return 0
+    if (!isTrustedSender(event)) return 0
     return getVideoMetadataCacheSize()
   })
 }

@@ -28,7 +28,8 @@ const stubs = {
   '../datastores': datastoreModule,
   '../datastores/sqliteNode': 'export const desktopDatastorePaths = {}',
   './castMediaServer': 'export const fetchCastMedia = null, resolveCastMediaAddresses = null',
-  './utils': 'export const isNonPublicNetworkAddress = null, isOpenTubeXUrl = null'
+  './utils': 'export const isNonPublicNetworkAddress = null, isOpenTubeXUrl = null',
+  './ipc': 'export const isTrustedSender = null'
 }
 
 const hooks = registerHooks({

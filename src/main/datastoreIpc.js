@@ -136,6 +136,7 @@ export function setupDatastoreIpc({ datastoreRequests, onSettingUpserted, onSett
           return null
 
         case DBActions.GENERAL.DELETE:
+          if (typeof data !== 'string') return null
           await baseHandlers.settings.delete(data)
           onSettingDeleted(data)
           return null

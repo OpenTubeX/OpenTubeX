@@ -7,7 +7,7 @@ import { IpcChannels } from '../constants'
 import * as baseHandlers from '../datastores/handlers/base'
 import { choosePathSetting } from './pathSettingPicker'
 import { PROCESS_TREE_SPAWN_OPTIONS, stopProcessTree } from './processTree'
-import { isOpenTubeXUrl } from './utils'
+import { isTrustedSender } from './ipc'
 
 /** @type {Promise<{ exitCode: number | null, signal: NodeJS.Signals | null, stdout: string, stderr: string }> | null} */
 let ipBlockRecoveryScriptPromise = null
@@ -152,7 +152,7 @@ function startIpBlockRecoveryScript(scriptPath) {
  * @returns {scriptPath is string}
  */
 function isValidIpBlockRecoveryRequest(event, scriptPath) {
-  return isOpenTubeXUrl(event.senderFrame?.url) &&
+  return isTrustedSender(event) &&
     typeof scriptPath === 'string' &&
     scriptPath.trim().length > 0
 }
@@ -173,7 +173,7 @@ export function getIpBlockRecoveryScriptRun() {
  */
 export function setupIpBlockRecoveryIpc({ updateSettingFromMain }) {
   ipcMain.handle(IpcChannels.CHOOSE_IP_BLOCK_RECOVERY_SCRIPT, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame?.url)) {
+    if (!isTrustedSender(event)) {
       return
     }
 
@@ -223,7 +223,7 @@ export function setupIpBlockRecoveryIpc({ updateSettingFromMain }) {
   })
 
   ipcMain.handle(IpcChannels.WAIT_FOR_IP_BLOCK_RECOVERY_SCRIPT, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame?.url)) {
+    if (!isTrustedSender(event)) {
       return
     }
 

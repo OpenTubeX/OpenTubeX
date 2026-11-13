@@ -5,6 +5,7 @@ import { getIpBlockRecoveryScriptRun } from './ipBlockRecovery'
 import { TabManager } from './tabs/TabManager'
 import { createSerialQueue } from './serialQueue'
 import { isOpenTubeXUrl } from './utils'
+import { isTrustedSender } from './ipc'
 
 /** @type {{ webContents: import('electron').WebContents, tabId: string } | null} */
 let subscriptionAutoRefreshOwner = null
@@ -107,7 +108,7 @@ export function setupSubscriptionAutoRefreshIpc({ backgroundSubscriptions, updat
         typeof tabId === 'string' &&
         manager.activeTabId === tabId &&
         !event.sender.isDestroyed() &&
-        isOpenTubeXUrl(event.senderFrame?.url)
+        isTrustedSender(event)
     }
 
     if (!canAcquire()) {
@@ -148,7 +149,7 @@ export function setupSubscriptionAutoRefreshIpc({ backgroundSubscriptions, updat
   }
 
   ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_GET_STATE, (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame?.url)) {
+    if (!isTrustedSender(event)) {
       return { inProgress: false, percentage: 0, tab: null }
     }
 
@@ -173,7 +174,7 @@ export function setupSubscriptionAutoRefreshIpc({ backgroundSubscriptions, updat
   })
 
   ipcMain.on(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_CANCEL, (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame?.url)) {
+    if (!isTrustedSender(event)) {
       return
     }
 

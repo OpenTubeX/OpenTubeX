@@ -3,6 +3,7 @@ import { BrowserWindow } from 'electron'
 import { IpcChannels } from '../constants'
 import { TabManager } from './tabs/TabManager'
 import { isOpenTubeXUrl } from './utils'
+import { isTrustedSender } from './ipc'
 
 /**
  * Maps an app or YouTube URL to the app URL that opens it directly, or
@@ -342,7 +343,7 @@ export function createUrlOpener({ rootAppUrl, createWindow }) {
    * @param {import('electron').IpcMainEvent} event
    */
   function openPendingUrlForReadyWebContents(event) {
-    if (!isOpenTubeXUrl(event.senderFrame?.url)) {
+    if (!isTrustedSender(event)) {
       return
     }
 

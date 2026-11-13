@@ -18,7 +18,7 @@ async function fixture() {
   const context = vm.createContext({
     IpcChannels: { DLNA_START: 'start' },
     ipcMain: { handle: (channel, handler) => handlers.set(channel, handler) },
-    isOpenTubeXUrl: url => url === event.senderFrame.url,
+    isTrustedSender: sender => sender.senderFrame?.url === event.senderFrame.url,
     invidiousAuthorizations: new Map(),
     getYtDlpExternalStreamHeaders: () => ({}),
     getYtDlpExternalStreamCookieHeader: () => null,
