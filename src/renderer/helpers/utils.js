@@ -1136,7 +1136,7 @@ export function getRelativeTimeFromDate(date, hideSeconds = false, useThirtyDayM
   let timeDiffFromNow = Math.abs(now - date) / 1000
   let timeUnit = 'second'
 
-  if (timeDiffFromNow < 60 && hideSeconds && !isFuture) {
+  if (timeDiffFromNow < 60 && hideSeconds) {
     return i18n.global.t('Moments Ago')
   }
 
@@ -1176,9 +1176,10 @@ export function getRelativeTimeFromDate(date, hideSeconds = false, useThirtyDayM
   }
 
   // Rounding down so that 1.x days ago is displayed as 1 day ago
-  // Notice that past values are turned negative to be displayed as "ago"
+  // Notice that past values are turned negative to be displayed as "ago",
+  // and that future ones are at least 1, so nothing is due "in 0 seconds"
   const value = Math.floor(timeDiffFromNow)
-  return getCachedRelativeTimeFormat(i18n.global.locale.value).format(isFuture ? value : -value, timeUnit)
+  return getCachedRelativeTimeFormat(i18n.global.locale.value).format(isFuture ? Math.max(value, 1) : -value, timeUnit)
 }
 
 /**
