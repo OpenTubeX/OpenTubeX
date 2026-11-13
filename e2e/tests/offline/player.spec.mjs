@@ -1552,25 +1552,28 @@ test.describe('scroll mini player', () => {
           document.documentElement.dataset.reducedMotion = 'no-preference'
           window.miniTransitionWork = { readbacks: 0, rebuilds: 0, ambientFrames: 0 }
           window.miniSettledReadbacks = 0
-          const playerClasses = element.classList
-          const state = {
-            get scrollMiniPlayerAnimating () { return playerClasses.contains('scrollMiniPlayerAnimating') },
-            get scrollMiniPlayerActive () { return playerClasses.contains('scrollMiniPlayer') },
-          }
+          // The player's classes show its transition state once Vue has rendered
+          // the change that caused this canvas work, so check them after it.
+          const afterRender = check => queueMicrotask(check)
+          const animating = () => element.classList.contains('scrollMiniPlayerAnimating')
           const nativeReadback = CanvasRenderingContext2D.prototype.getImageData
           CanvasRenderingContext2D.prototype.getImageData = function (...args) {
-            if (state.scrollMiniPlayerAnimating) {
-              window.miniTransitionWork.readbacks++
-            } else if (state.scrollMiniPlayerActive && this.canvas.width === 9 && this.canvas.height === 3) {
-              window.miniSettledReadbacks++
-            }
+            const settledSize = this.canvas.width === 9 && this.canvas.height === 3
+            afterRender(() => {
+              if (animating()) {
+                window.miniTransitionWork.readbacks++
+              } else if (element.classList.contains('scrollMiniPlayer') && settledSize) {
+                window.miniSettledReadbacks++
+              }
+            })
             return nativeReadback.apply(this, args)
           }
           const nativeDraw = CanvasRenderingContext2D.prototype.drawImage
           CanvasRenderingContext2D.prototype.drawImage = function (...args) {
-            if (state.scrollMiniPlayerAnimating && this.canvas.matches('.ambientCanvas, .ambientLayoutCanvas, .ambientFullscreenCanvas')) {
-              window.miniTransitionWork.ambientFrames++
-            }
+            const ambient = this.canvas.matches('.ambientCanvas, .ambientLayoutCanvas, .ambientFullscreenCanvas')
+            afterRender(() => {
+              if (ambient && animating()) window.miniTransitionWork.ambientFrames++
+            })
             return nativeDraw.apply(this, args)
           }
           const controls = element.querySelector('.shaka-controls-button-panel')
