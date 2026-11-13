@@ -106,8 +106,13 @@ function addDayPlayback(state, { date, seconds, isShort, recorded }) {
 function joinWellbeingDay(state, { day, own }) {
   if (day.date > state.day.date) state.day = createDay(day.date)
   if (day.date !== state.day.date) return
-  for (const key of ['unrecordedSeconds', 'shortsSeconds', 'unrecordedShortsSeconds']) {
-    state.day[key] = Math.max(state.day[key], day[key] + (own.date === day.date ? own[key] : 0))
+  const ownDay = own.date === day.date ? own : createDay(day.date)
+  state.day.unrecordedSeconds = Math.max(state.day.unrecordedSeconds, day.unrecordedSeconds + ownDay.unrecordedSeconds)
+  // Saving subtracts the unrecorded Shorts time, so both counts come from the same window
+  const shortsSeconds = day.shortsSeconds + ownDay.shortsSeconds
+  if (shortsSeconds >= state.day.shortsSeconds) {
+    state.day.shortsSeconds = shortsSeconds
+    state.day.unrecordedShortsSeconds = day.unrecordedShortsSeconds + ownDay.unrecordedShortsSeconds
   }
   for (const kind of ['watch', 'shorts']) {
     state.day.extraSeconds[kind] = Math.max(state.day.extraSeconds[kind], day.extraSeconds[kind])
@@ -250,8 +255,13 @@ const mutations = {
   applySharedWellbeingChange(state, { type, payload, date }) {
     if (type === 'wellbeingDay') joinWellbeingDay(state, payload)
     else if (type === 'addWellbeingPlayback') addDayPlayback(state, payload)
-    else if (type === 'extendWellbeingLimit' && date === state.day.date) mutations.extendWellbeingLimit(state, payload)
-    else if (type === 'setWellbeingBedtimeDismissed') mutations.setWellbeingBedtimeDismissed(state, payload)
+    else if (type === 'extendWellbeingLimit' && date === state.day.date) {
+      // Allowances only grow during a day, so a late message cannot take one back
+      state.day.extraSeconds[payload.kind] = Math.max(state.day.extraSeconds[payload.kind], payload.extraSeconds ?? 0)
+      state.day.ignored[payload.kind] ||= payload.ignore === true
+    } else if (type === 'setWellbeingBedtimeDismissed' && !(payload <= state.bedtimeDismissedNight)) {
+      mutations.setWellbeingBedtimeDismissed(state, payload)
+    }
   },
 
   replaceWellbeingDay(state, day) {
