@@ -10,6 +10,8 @@ export const tabIdKey = Symbol('logical-tab-id')
 export const tabPresentedKey = Symbol('logical-tab-presented')
 export const tabLifecycleKey = Symbol('logical-tab-lifecycle')
 export const watchNavigationKey = Symbol('watch-navigation')
+// Starts a video in the tab's mini player without leaving the browsing page.
+export const playInBackgroundKey = Symbol('play-in-background')
 
 export function useTabContext() {
   return {

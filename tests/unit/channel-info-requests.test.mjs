@@ -11,6 +11,7 @@ function loadChannelInfo(findChannelTagInfo) {
       '\n({ fetchChannelInfo, getCachedChannelInfo })',
     {
       checkYoutubeChannelId: id => id.startsWith('UC'),
+      parsePlatformChannelPreferenceKey: () => null,
       findChannelTagInfo,
       console: { error() {} }
     }

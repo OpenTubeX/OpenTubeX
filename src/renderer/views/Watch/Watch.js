@@ -15,7 +15,7 @@ import { probeHlsManifest } from '../../helpers/player/hlsManifest'
 import { getAudioFormatLoudness } from '../../helpers/player/loudnessNormalization'
 import { releaseAndroidRotationFullscreenHandoff } from '../../helpers/player/androidFullscreen'
 import { sampleRecommendationPlayback } from '../../../recommendation-learning'
-import { defineComponent, markRaw, shallowRef } from 'vue'
+import { defineComponent, inject, markRaw, shallowRef } from 'vue'
 import { Capacitor } from '@capacitor/core'
 import { useRoute, useRouter } from 'vue-router'
 import { mapActions } from 'vuex'
@@ -65,7 +65,7 @@ import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { downloadWatchRoute, isPlayableDownloadFile, navigationDownloadId } from '../../helpers/downloadPlayback'
 import { parseLocalVideoGames } from '../../helpers/video-games'
 import { parseLocalVideoMusicTracks, parseVideoMusicTracks } from '../../helpers/video-music'
-import { parseChannelPreferences } from '../../helpers/channel-preferences'
+import { saveChannelPreference, saveChannelPreferenceWithToast } from '../../helpers/channel-preferences'
 import {
   showInvidiousFallbackToast,
   buildChaptersVttFile,
@@ -151,7 +151,8 @@ import { isAttestedPoToken } from '../../../main/attestedPoToken'
 import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
 import { limitQualityOnMeteredNetwork } from '../../helpers/player/meteredNetworkQuality'
 import { useI18n } from 'vue-i18n'
-import { useTabAvatar, useTabContext, useTabTitle } from '../../tabs/TabContext'
+import { useTabAvatar, useTabContext, useTabTitle, watchNavigationKey } from '../../tabs/TabContext'
+import { SCROLL_MINI_MIN_INLINE_LAYOUT_HEIGHT } from '../../helpers/scrollMiniPlayer'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 import { keepTabLoaded } from '../../tabs/TabResidency'
 import { useTabToast } from '../../composables/useTabToast'
@@ -266,6 +267,7 @@ export default defineComponent({
     const tabRoute = useRoute()
     const tabRouter = useRouter()
     const { tabId, isTabPresented, lifecycle: tabLifecycle } = useTabContext()
+    const watchNavigation = inject(watchNavigationKey, null)
     const setTabTitle = useTabTitle()
     const setTabAvatar = useTabAvatar()
     const showTabToast = useTabToast()
@@ -283,6 +285,7 @@ export default defineComponent({
       tabId,
       isTabPresented,
       tabLifecycle,
+      watchNavigation,
       tabRoute,
       tabRouter,
       setTabTitle,
@@ -1654,7 +1657,11 @@ export default defineComponent({
     this.isShort = this.tabRoute.query.short === 'true'
     this.useCustomShortsPlayerForCurrentVideo = this.$store.getters.getUseCustomShortsPlayer
     this.videoAspectRatio = this.isShort ? 9 / 16 : null
-    this.activeFormat = this.defaultVideoFormat
+    if (this.applyBackgroundStart()) {
+      // Its Watch page has never been shown, so it cannot measure the inline
+      // player. The smallest dockable height lets returning to it measure one.
+      this.miniPlayerStartHeight = SCROLL_MINI_MIN_INLINE_LAYOUT_HEIGHT
+    }
     // So that the value for this session remains unchanged even if setting changed
     this.autoplayNextRecommendedVideo = this.autoplayNextRecommendedVideoByDefault
     this.autoplayNextPlaylistVideo = this.autoplayNextPlaylistVideoByDefault
@@ -2435,6 +2442,33 @@ export default defineComponent({
       }
     },
 
+    /**
+     * Sets the format for a new video. Play in Background starts it, and the
+     * videos that follow it, with audio only, and plays it even where videos
+     * do not autoplay.
+     *
+     * @returns {boolean} whether Play in Background started this video
+     */
+    applyBackgroundStart() {
+      const backgroundStart = this.watchNavigation?.takeBackgroundStart?.(this.tabRoute.fullPath) === true
+      this.activeFormat = backgroundStart || this.watchNavigation?.audioOnlySession?.value === true
+        ? 'audio'
+        : this.defaultVideoFormat
+      if (backgroundStart) {
+        this.queuedPlaybackVideoId = this.tabRoute.params.id
+        // The user chose to play it in the mini player, unlike a background tab.
+        this.hasBeenPresented = true
+      }
+      return backgroundStart
+    },
+
+    /** Plays the current video with audio only, as Play in Background does. */
+    resumeInBackground() {
+      // Play first: a format switch restores the paused state it started from.
+      this.$refs.player?.play()?.catch(() => {})
+      if (this.audioFormatAvailable) this.activeFormat = 'audio'
+    },
+
     activateWatchRuntime() {
       if (this.isTabPresented === false) {
         return
@@ -2568,9 +2602,10 @@ export default defineComponent({
       this.videoMetadataIncomplete = false
       // Re-evaluate per video: this instance is reused across same-tab
       // navigation, so a tab that was presented for the previous video must not
-      // keep that state while it loads the next one in the background.
-      this.hasBeenPresented = this.isCurrentlyPresented()
-      this.activeFormat = this.defaultVideoFormat
+      // keep that state while it loads the next one in the background. A mini
+      // player that moves on to the next video keeps showing it, though.
+      this.hasBeenPresented = this.isCurrentlyPresented() || this.miniPlayerStartHeight > 0
+      this.applyBackgroundStart()
 
       this.checkIfTimestamp()
       this.checkIfPlaylist()
@@ -5128,58 +5163,23 @@ export default defineComponent({
       this._saveWatchProgress()
       showToast({ message: this.t('Video.Watched Progress Saved'), icon: ['fas', 'save'] })
     },
+    // Called by manual actions, which check the settings in the UI
     handleChannelPlaybackSpeedManualSave() {
-      // Should be called by manual action, settings should be checked in UI
-      if (!this.channelId) {
-        return
-      }
-
-      this.saveChannelPlaybackSpeed(this.currentPlaybackRate)
-      showToast({
-        message: `${this.t('Video.Channel Playback Speed Saved')}: ${this.currentPlaybackRate}×`,
-        icon: ['fas', 'gauge']
-      })
+      saveChannelPreferenceWithToast(this.$store, this.channelId, 'playbackSpeed', this.currentPlaybackRate, this.t)
     },
     handleChannelVideoQualityManualSave() {
-      // Should be called by manual action, settings should be checked in UI
-      if (!this.channelId) {
+      const quality = this.normalizeVideoQuality(this.currentVideoQuality)
+      if (quality.length === 0) {
         return
       }
 
-      if (this.saveChannelVideoQuality(this.currentVideoQuality)) {
-        const savedQuality = this.normalizeVideoQuality(this.currentVideoQuality)
-        const savedQualityLabel = savedQuality === 'auto'
-          ? this.t('Settings.Player Settings.Default Quality.Auto')
-          : `${savedQuality}p`
-        showToast({
-          message: `${this.t('Video.Channel Video Quality Saved')}: ${savedQualityLabel}`,
-          icon: ['fas', 'film']
-        })
-      }
+      saveChannelPreferenceWithToast(this.$store, this.channelId, 'videoQuality', quality, this.t)
     },
     handleChannelSubtitlesStateManualSave() {
-      // Should be called by manual action, settings should be checked in UI
-      if (!this.channelId || this.currentSubtitlesState === null) {
-        return
-      }
-
-      this.saveChannelSubtitlesState(this.currentSubtitlesState)
-      showToast({
-        message: `${this.t('Video.Channel Subtitles State Saved')}: ${this.currentSubtitlesState ? '✓' : '✕'}`,
-        icon: ['fas', 'closed-captioning']
-      })
+      saveChannelPreferenceWithToast(this.$store, this.channelId, 'subtitlesState', this.currentSubtitlesState, this.t)
     },
     handleChannelVolumeManualSave() {
-      // Should be called by manual action, settings should be checked in UI
-      if (!this.channelId || this.currentVolume === null) {
-        return
-      }
-
-      this.saveChannelVolume(this.currentVolume)
-      showToast({
-        message: `${this.t('Video.Channel Volume Saved')}: ${Math.round(this.currentVolume * 100)}%`,
-        icon: ['fas', 'volume-high']
-      })
+      saveChannelPreferenceWithToast(this.$store, this.channelId, 'volume', this.currentVolume, this.t)
     },
     handleWatchProgressAutoSave() {
       if (!this.rememberHistory || !this.autosaveWatchedProgress) { return }
@@ -5355,7 +5355,7 @@ export default defineComponent({
       // A background tab force-pauses its brief autoplay attempt, which would
       // otherwise save a spurious ~1 second resume point. Only persist progress
       // for tabs the user has actually presented.
-      if (!this.isCurrentlyPresented() || !this.hasBeenPresented) { return }
+      if (!this.isPlaybackPresented() || !this.hasBeenPresented) { return }
       if (this.playerTeardownInProgress) { return }
       const player = this.$refs.player
       // A seek establishes a position before its media segment finishes loading.
@@ -7467,18 +7467,14 @@ export default defineComponent({
      * @param {boolean} enabled
      */
     saveChannelSubtitlesState(enabled) {
-      const states = parseChannelPreferences(this.$store.getters.getChannelSubtitlesStates, 'channelSubtitlesStates')
-      states[this.channelId] = enabled
-      this.$store.dispatch('updateChannelSubtitlesStates', JSON.stringify(states))
+      saveChannelPreference(this.$store, this.channelId, 'subtitlesState', enabled)
     },
 
     /**
      * @param {number} volume
      */
     saveChannelVolume(volume) {
-      const volumes = parseChannelPreferences(this.$store.getters.getChannelVolumes, 'channelVolumes')
-      volumes[this.channelId] = volume
-      this.$store.dispatch('updateChannelVolumes', JSON.stringify(volumes))
+      saveChannelPreference(this.$store, this.channelId, 'volume', volume)
     },
 
     /**
@@ -7503,41 +7499,16 @@ export default defineComponent({
     },
 
     saveChannelPlaybackSpeed(rate) {
-      if (!this.channelId) {
-        return
-      }
-
-      try {
-        const channelSpeeds = JSON.parse(this.$store.getters.getChannelPlaybackSpeeds || '{}')
-        channelSpeeds[this.channelId] = rate
-        this.$store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify(channelSpeeds))
-      } catch (e) {
-        console.error('Failed to save channel playback speed:', e)
-      }
+      saveChannelPreference(this.$store, this.channelId, 'playbackSpeed', rate)
     },
 
     /**
      * @param {string | number | null | undefined} quality
-     * @returns {boolean} whether a channel-specific quality was stored
      */
     saveChannelVideoQuality(quality) {
-      if (!this.channelId) {
-        return false
-      }
-
-      try {
-        const channelQualities = JSON.parse(this.$store.getters.getChannelVideoQualities || '{}')
-        const normalizedQuality = this.normalizeVideoQuality(quality)
-        if (normalizedQuality.length === 0) {
-          return false
-        }
-
-        channelQualities[this.channelId] = normalizedQuality
-        this.$store.dispatch('updateChannelVideoQualities', JSON.stringify(channelQualities))
-        return true
-      } catch (e) {
-        console.error('Failed to save channel video quality:', e)
-        return false
+      const normalizedQuality = this.normalizeVideoQuality(quality)
+      if (normalizedQuality.length > 0) {
+        saveChannelPreference(this.$store, this.channelId, 'videoQuality', normalizedQuality)
       }
     },
 

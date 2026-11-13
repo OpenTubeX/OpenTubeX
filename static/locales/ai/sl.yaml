@@ -2060,6 +2060,7 @@ Channel:
     Shows: Oddaje
     This channel does not currently have any shows: Ta kanal trenutno nima oddaj
 Video:
+  Play in Background: "Predvajaj v ozadju"
   Info panel source: 'Vir: {source}'
   External DRM Protected: "Videoposnetkov z zaščito DRM ni mogoče predvajati v OpenTubeX, saj zahtevajo lastniške zaprtokodne komponente."
   Invalid Media URL: "Neveljaven URL predstavnosti"

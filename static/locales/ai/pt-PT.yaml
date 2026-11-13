@@ -1714,6 +1714,7 @@ Channel:
     Shows: Programas
     This channel does not currently have any shows: Este canal não tem atualmente nenhum programa
 Video:
+  Play in Background: "Reproduzir em segundo plano"
   Info panel source: 'Fonte: {source}'
   External DRM Protected: "Os vídeos protegidos por DRM não podem ser reproduzidos no OpenTubeX, uma vez que requerem componentes proprietários e de código fechado."
   Invalid Media URL: "URL de conteúdo multimédia inválido"

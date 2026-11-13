@@ -1699,6 +1699,7 @@ Channel:
     Shows: Предавания
     This channel does not currently have any shows: В момента този канал няма никакви предавания
 Video:
+  Play in Background: "Възпроизвеждане във фонов режим"
   Info panel source: 'Източник: {source}'
   External DRM Protected: "Видеата, защитени с DRM, не могат да се възпроизвеждат в OpenTubeX, тъй като изискват собствени компоненти със затворен код."
   Invalid Media URL: "Невалиден URL адрес на медия"

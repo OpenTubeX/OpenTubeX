@@ -1678,6 +1678,7 @@ Channel:
     Members-only video hidden by OpenTubeX: "Video riservato ai membri nascosto da OpenTubeX"
     Video hidden by OpenTubeX because of its title: "Video nascosto da OpenTubeX perché il titolo contiene testo nascosto"
 Video:
+  Play in Background: "Riproduci in background"
   Info panel source: 'Fonte: {source}'
   External DRM Protected: "I video protetti da DRM non possono essere riprodotti in OpenTubeX, poiché richiedono componenti proprietari e closed source."
   Invalid Media URL: "URL multimediale non valido"

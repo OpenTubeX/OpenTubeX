@@ -407,6 +407,22 @@ test('a failed list edit shows the saved list without dropping the edits after i
   assert.deepEqual(value, ['first', 'next'])
 })
 
+test('an edit that leaves the saved value unchanged writes nothing', async () => {
+  const edit = createSavedSettingEditor()
+  const saved = '{"other":1}'
+  let value = saved
+  let writes = 0
+  await edit('values', current => current, {
+    read: () => value,
+    commit: next => { value = next },
+    readSaved: async () => saved,
+    write: async () => { writes++ },
+    lock: run => run(),
+  })
+  assert.equal(writes, 0)
+  assert.equal(value, saved)
+})
+
 test('edit times stay with their values when windows edit settings at once or a save fails', async () => {
   const saved = new Map()
   const locks = new Map()

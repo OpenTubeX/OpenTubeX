@@ -1985,6 +1985,7 @@ Channel:
     Shows: 프로그램
     This channel does not currently have any shows: 이 채널에는 현재 프로그램이 없습니다
 Video:
+  Play in Background: "백그라운드에서 재생"
   Info panel source: '출처: {source}'
   External DRM Protected: "DRM 보호 동영상에는 독점 비공개 소스 구성 요소가 필요하므로 OpenTubeX에서 재생할 수 없습니다."
   Invalid Media URL: "유효하지 않은 미디어 URL"

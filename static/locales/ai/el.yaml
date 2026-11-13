@@ -1689,6 +1689,7 @@ Channel:
     Shows: Εκπομπές
     This channel does not currently have any shows: Αυτό το κανάλι δεν έχει προς το παρόν εκπομπές
 Video:
+  Play in Background: "Αναπαραγωγή στο παρασκήνιο"
   Info panel source: 'Πηγή: {source}'
   External DRM Protected: "Τα βίντεο που προστατεύονται με DRM δεν μπορούν να αναπαραχθούν στο OpenTubeX, καθώς απαιτούν ιδιόκτητα εξαρτήματα κλειστού κώδικα."
   Invalid Media URL: "Μη έγκυρο URL πολυμέσων"

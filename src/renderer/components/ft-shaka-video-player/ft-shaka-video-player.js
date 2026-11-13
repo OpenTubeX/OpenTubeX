@@ -9803,7 +9803,14 @@ export default defineComponent({
       // The codec switcher only changes which resolutions are listed
       if (target.closest('.shaka-resolutions :is(.explicit-resolution, .shaka-enable-abr-button)')) {
         setTimeout(() => {
-          if (!player || player.getConfiguration().abr.enabled) {
+          if (!player) {
+            return
+          }
+
+          // Variant changes don't report auto, so report it here
+          if (player.getConfiguration().abr.enabled) {
+            emit('video-quality-updated', 'auto')
+            emit('video-quality-user-set', 'auto')
             return
           }
 

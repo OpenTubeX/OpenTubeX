@@ -364,7 +364,7 @@ import {
 } from '../../../helpers/libretube'
 import { parseLineDelimitedJson } from '../../../helpers/line-delimited-json'
 import { parseOpmlFeeds } from '../../../helpers/opml'
-import { parseChannelPreferences } from '../../../helpers/channel-preferences'
+import { updateChannelPreferences } from '../../../helpers/channel-preferences'
 import { resolveChannelId } from '../../../helpers/channels'
 import { parseSpeedByChannelValues, resolveSpeedByChannelValues } from '../../../helpers/speed-by-channel-import'
 import { previewBackupImport, previewTakeoutImport, parseTakeoutSubscriptions, parseTakeoutWatchHistory, parseTakeoutSearchHistory } from '../../../helpers/import-preview'
@@ -2240,11 +2240,11 @@ async function importChannelPlaybackSpeeds() {
 
       const count = Object.keys(speeds).length
       if (count > 0) {
-        const currentSpeeds = parseChannelPreferences(store.getters.getChannelPlaybackSpeeds, 'channelPlaybackSpeeds')
-        const value = JSON.stringify({ ...currentSpeeds, ...speeds })
-        await store.dispatch('updateChannelPlaybackSpeeds', value)
-        // The store only logs failed updates
-        if (store.getters.getChannelPlaybackSpeeds === value) {
+        const saved = await updateChannelPreferences(store, 'playbackSpeed', (values) => {
+          Object.assign(values, speeds)
+          return true
+        })
+        if (saved) {
           showToast({
             message: t('Settings.Data Settings.Channel playback speeds imported', { count }, count),
             icon: ['fas', 'gauge'],

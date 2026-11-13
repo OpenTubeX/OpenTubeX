@@ -1678,6 +1678,7 @@ Channel:
     Members-only video hidden by OpenTubeX: "OpenTubeX がメンバー限定動画を非表示にしました"
     Video hidden by OpenTubeX because of its title: "タイトルに非表示のテキストが含まれているため、OpenTubeX が動画を非表示にしました"
 Video:
+  Play in Background: "バックグラウンドで再生"
   Info panel source: '出典: {source}'
   External DRM Protected: "DRMで保護された動画は、独自のクローズドソースコンポーネントが必要なため、OpenTubeXでは再生できません。"
   Invalid Media URL: "無効なメディアURL"

@@ -2540,6 +2540,7 @@ Video:
   Queue: Queue
   Play Next: Play Next
   Add to Queue: Add to Queue
+  Play in Background: Play in Background
   Added to Play Next: Video will play next
   Added to Queue: Video added to queue
   Clear Queue: Clear Queue

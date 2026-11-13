@@ -1643,6 +1643,7 @@ Channel:
     Shows: Шоу
     This channel does not currently have any shows: На этом канале в настоящее время нет шоу
 Video:
+  Play in Background: "Воспроизвести в фоне"
   Info panel source: 'Источник: {source}'
   External DRM Protected: "Видео, защищенное DRM, не может быть воспроизведено в OpenTubeX, так как оно требует использования проприетарных компонентов с закрытым исходным кодом."
   Invalid Media URL: "Недопустимый URL медиа"

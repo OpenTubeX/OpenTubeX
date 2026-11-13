@@ -94,8 +94,10 @@ export function createSavedSettingEditor() {
     const isLast = () => pending.get(settingId) === 1
     return lock(async () => {
       try {
-        const value = edit(await readSaved())
-        await write(value)
+        const saved = await readSaved()
+        const value = edit(saved)
+        // An edit that returns the saved value has nothing to save
+        if (value !== saved) await write(value)
         if (isLast()) commit(value)
       } catch (error) {
         // Without the saved value, show the one before this edit.

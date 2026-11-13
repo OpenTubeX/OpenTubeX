@@ -629,6 +629,7 @@ import { useResultChannelAvatar } from '../../composables/useResultChannelAvatar
 import { formatDate, formatDateTime } from '../../helpers/dateFormat.js'
 import { getYoutubeVideoShareUrl } from '../../helpers/share'
 import { isTileMarkShortcut, tileKeyboardShortcutsKey } from '../../helpers/tileNavigation'
+import { playInBackgroundKey, watchNavigationKey } from '../../tabs/TabContext'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
 const props = defineProps({
@@ -842,19 +843,13 @@ const canToggleLiveReminder = computed(() => (
   premiereTimestamp.value > premiereNow.value
 ))
 
-const canMarkAsWatched = computed(() => {
-  if (isLive.value) {
-    return false
-  }
+// A scheduled premiere can only be watched once its start time has passed,
+// even if a cached entry still carries a stale upcoming flag.
+const upcoming = computed(() => premiereTimestamp.value != null
+  ? premiereTimestamp.value > premiereNow.value
+  : isUpcoming.value)
 
-  // A scheduled premiere can only be watched once its start time has passed,
-  // even if a cached entry still carries a stale upcoming flag.
-  if (premiereTimestamp.value != null) {
-    return premiereTimestamp.value <= premiereNow.value
-  }
-
-  return !isUpcoming.value
-})
+const canMarkAsWatched = computed(() => !isLive.value && !upcoming.value)
 
 function clearPremiereStartTimer() {
   if (premiereStartTimer != null) {
@@ -900,6 +895,9 @@ const effectiveListTypeIsList = computed(() => {
 
 const thumbnailSizeSetting = inject(thumbnailSizeSettingKey, 'thumbnailSize')
 const tileKeyboardShortcuts = inject(tileKeyboardShortcutsKey, false)
+const playInBackground = inject(playInBackgroundKey, null)
+// Videos listed on a Watch page would replace the video that the page plays.
+const listedOnWatchPage = inject(watchNavigationKey, null) !== null
 // Full width grid cards form a single column, so moving them goes up and down.
 const verticalMoveControls = computed(() => {
   return effectiveListTypeIsList.value ||
@@ -1134,6 +1132,12 @@ const showInvidiousShareOptions = computed(() => usesInvidiousInstance(backendPr
 
 const { hideSubscriptionFeedType, hideSubscriptionFeedTypeOption } = useHideSubscriptionFeedType(() => channelId.value)
 
+// Only the mobile mini bar can dock an audio-only player. iOS plays most
+// downloads natively, so their Watch page would stream them instead.
+const canPlayInBackground = computed(() => process.env.IS_CAPACITOR && playInBackground !== null &&
+  !listedOnWatchPage && !upcoming.value && props.data.isShort !== true &&
+  !(process.env.IS_IOS && localDownloadId.value !== undefined && !linkDownloadId.value))
+
 const videoMenuOptions = computed(() => {
   const options = [
     ...(store.getters.getTabsEnabled
@@ -1151,6 +1155,13 @@ const videoMenuOptions = computed(() => {
         }]
       : []),
     { type: 'divider' },
+    ...(canPlayInBackground.value
+      ? [{
+          label: t('Video.Play in Background'),
+          value: 'playInBackground',
+          icon: ['fas', 'headphones']
+        }]
+      : []),
     {
       label: t('Video.Play Next'),
       value: 'playNext',
@@ -1793,6 +1804,10 @@ function handleOptionsClick(option) {
       break
     case 'hideSubscriptionFeedType':
       hideSubscriptionFeedType()
+      break
+    case 'playInBackground':
+      markSubscriptionVideoAsSeen()
+      playInBackground({ path: `/watch/${id.value}`, query: watchPageLinkQuery.value })
       break
     case 'playNext':
       addToWatchQueue(true)
