@@ -155,7 +155,7 @@ async function syncSubscriptions(account) {
 
   const profiles = store.getters.getProfileList
   const mainIds = new Set(profiles.find(profile => profile._id === MAIN_PROFILE_ID)?.subscriptions.map(channel => channel.id))
-  const { added, removedIds } = diffYouTubeSubscriptions(getSyncState(key).subscriptions, remote, mainIds)
+  const { added, removedIds, nextIds } = diffYouTubeSubscriptions(getSyncState(key).subscriptions, remote, mainIds)
 
   if (added.length > 0 && await store.dispatch('mergeImportedProfile', { _id: MAIN_PROFILE_ID, subscriptions: added }) !== true) {
     throw new Error('Could not save the subscriptions from YouTube')
@@ -170,7 +170,7 @@ async function syncSubscriptions(account) {
       throw new Error('Could not remove the channels unsubscribed from on YouTube')
     }
   }
-  await updateSyncState(key, { subscriptions: remote.map(channel => channel.id), subscriptionsSyncedAt: Date.now() })
+  await updateSyncState(key, { subscriptions: nextIds, subscriptionsSyncedAt: Date.now() })
 
   if (added.length > 0 || removedIds.length > 0) {
     showToast({

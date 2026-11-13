@@ -33,7 +33,7 @@ test('subscription sync applies only the changes made on YouTube since the last 
   // The first sync adds what is missing and removes nothing.
   assert.deepEqual(
     diffYouTubeSubscriptions(null, [channel('A'), channel('B')], new Set(['B', 'local'])),
-    { added: [channel('A')], removedIds: [] }
+    { added: [channel('A')], removedIds: [], nextIds: ['A', 'B'] }
   )
 
   // Later, channels new on YouTube are added, and channels gone from YouTube
@@ -41,11 +41,18 @@ test('subscription sync applies only the changes made on YouTube since the last 
   // one subscribed to only here (local) stays.
   assert.deepEqual(
     diffYouTubeSubscriptions(['A', 'B', 'C'], [channel('A'), channel('C'), channel('D')], new Set(['A', 'B', 'local'])),
-    { added: [channel('D')], removedIds: ['B'] }
+    { added: [channel('D')], removedIds: ['B'], nextIds: ['A', 'C', 'D'] }
   )
 
-  // An empty list removes nothing, as a misread page would otherwise empty every profile.
-  assert.deepEqual(diffYouTubeSubscriptions(['A', 'B'], [], new Set(['A', 'B'])), { added: [], removedIds: [] })
+  // An empty list removes nothing, as a misread page would otherwise empty
+  // every profile, and the next sync still finds what changed since the last
+  // list it could read.
+  const misread = diffYouTubeSubscriptions(['A', 'B'], [], new Set(['A', 'B']))
+  assert.deepEqual(misread, { added: [], removedIds: [], nextIds: ['A', 'B'] })
+  assert.deepEqual(
+    diffYouTubeSubscriptions(misread.nextIds, [channel('A')], new Set(['A', 'B'])),
+    { added: [], removedIds: ['B'], nextIds: ['A'] }
+  )
 })
 
 test('playlist sync keeps saved entries and confirms the ones added here', () => {
