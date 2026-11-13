@@ -583,7 +583,8 @@ watch(() => isTabPresented?.value, presented => {
 })
 // Like on the watch page, media joins the history once it plays.
 let historyAdded = false
-let watchedMarkPending = false
+/** @type {Promise<unknown> | null} the watched write of the loaded media */
+let watchedMarkPending = null
 const historyId = computed(() => getExternalMediaHistoryId(mediaUrl.value))
 const historyEntry = computed(() => historyId.value ? store.getters.getHistoryCacheById[historyId.value] : undefined)
 const showChapters = ref(false)
@@ -1012,6 +1013,7 @@ function restoreCompanionPosition() {
   if (position === null) return
   if (media === audio) {
     audio.currentTime = position
+    lastPlaybackPosition = position
     player.value.setCurrentTime(position % video.duration)
   } else {
     player.value.setCurrentTime(position)
@@ -1118,8 +1120,10 @@ function markAsWatchedIfFinished(seconds, isFinished = false) {
   if (!isFinished && source.value?.separateAudioUrl && !hasCompanionMetadata()) return
   if (!isFinished && !hasReachedWatchedThreshold(seconds, getMediaDuration(), store.getters.getWatchedPercentageThreshold)) return
   const watchProgress = store.getters.getWatchedProgressSavingMode === 'never' ? (historyEntry.value?.watchProgress ?? 0) : seconds
-  watchedMarkPending = true
-  addToHistory(watchProgress, true).finally(() => { watchedMarkPending = false })
+  const mark = addToHistory(watchProgress, true)
+  watchedMarkPending = mark
+  // Media loaded since then has its own watched write.
+  mark.finally(() => { if (watchedMarkPending === mark) watchedMarkPending = null })
 }
 
 function hasCompanionMetadata() {
@@ -1274,7 +1278,7 @@ function updateCurrentTime(seconds) {
   const position = media?.currentTime ?? seconds
   // A looping soundtrack, as on Coub, starts over without ending.
   const duration = getMediaDuration()
-  const looped = media?.loop === true && position < lastPlaybackPosition && lastPlaybackPosition >= duration - 2
+  const looped = media?.loop === true && !media.paused && position < lastPlaybackPosition && lastPlaybackPosition >= duration - 2
   lastPlaybackPosition = position
   markAsWatchedIfFinished(looped ? duration : position, looped)
   if (store.getters.getWatchedProgressSavingMode === 'auto' && Date.now() - lastPositionSave >= 2000) savePosition()
@@ -1323,6 +1327,8 @@ function seekTo(seconds) {
   const video = getCompanionVideo()
   if (audio && getPositionMedia() === audio && Number.isFinite(video?.duration)) {
     audio.currentTime = seconds
+    // Moving back from the end is not the soundtrack starting over.
+    lastPlaybackPosition = seconds
     player.value?.setCurrentTime(seconds % video.duration, true)
   } else {
     player.value?.setCurrentTime(seconds, true)
@@ -1372,7 +1378,7 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
   lastPlaybackPosition = 0
   hasBeenPresented = isTabPresented?.value ?? true
   historyAdded = false
-  watchedMarkPending = false
+  watchedMarkPending = null
   showChapters.value = false
   showTranscript.value = false
   mobilePanel.value = null
