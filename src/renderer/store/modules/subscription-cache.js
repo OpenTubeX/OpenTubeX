@@ -125,14 +125,14 @@ const actions = {
       // Without loaded profiles every channel looks unsubscribed, so keep the data.
       let canRemoveUnsubscribed = rootState.profiles.profilesLoaded
       if (canRemoveUnsubscribed && payload.some(entry => !subscribedChannelIdSet.has(entry._id))) {
-        // Another window may have subscribed to a channel and cached its feed
+        // Another window may have changed the subscriptions and cached a feed
         // before this window received the profile change. The cache read above
-        // came after that subscription was saved, so the stored profile has it.
+        // came after that change was saved, so the stored profile has it.
         const storedChannelIds = await getStoredSubscribedChannelIds()
         if (storedChannelIds === null) {
           canRemoveUnsubscribed = false
         } else {
-          subscribedChannelIdSet = new Set([...subscribedChannelIdSet, ...storedChannelIds])
+          subscribedChannelIdSet = new Set(storedChannelIds)
         }
       }
       const withFeedState = entries => entries.map(entry => ({

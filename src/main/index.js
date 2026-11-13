@@ -603,6 +603,8 @@ function runApp() {
   let trayTranslate = key => key
   /** @type {Promise<Awaited<ReturnType<typeof createMainTranslator>>> | null} */
   let mainTranslatorPromise = null
+  /** @param {string} key */
+  const untranslated = key => key
   let trayMenuIconPack = 'material'
   const trayClosingWindowIds = new Set()
   let trayWindows = []
@@ -1107,7 +1109,9 @@ function runApp() {
     restoreYtDlpDownloadQueue().catch(error => {
       console.warn('Could not restore the download queue', error)
     })
-    translateTrayAndDock()
+    translateTrayAndDock().catch(error => {
+      console.warn('Could not translate the tray and dock menus', error)
+    })
 
     if (process.env.NODE_ENV === 'production') {
       protocol.handle('app', async (request) => {
@@ -3095,11 +3099,14 @@ function runApp() {
     while (true) {
       mainTranslatorPromise ??= createMainTranslator().catch(error => {
         console.warn('Could not load the translations for the native menus', error)
-        return key => key
+        return untranslated
       })
       const promise = mainTranslatorPromise
       const t = await promise
-      if (promise === mainTranslatorPromise) return t
+      if (promise !== mainTranslatorPromise) continue
+      // Try loading the translations again the next time a menu is built.
+      if (t === untranslated) mainTranslatorPromise = null
+      return t
     }
   }
 

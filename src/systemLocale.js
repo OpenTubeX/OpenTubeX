@@ -11,7 +11,7 @@ export function resolveSystemLocale(systemLocale) {
   const systemLanguage = systemLocaleName.split('-')[0] // ex: en
   const options = activeLocales.filter((locale) => {
     // filter out other languages
-    return locale.split('-')[0].includes(systemLanguage)
+    return locale.split('-')[0] === systemLanguage
   }).sort((aLocaleName, bLocaleName) => {
     const aLocale = aLocaleName.split('-') // ex: [en, US]
     const bLocale = bLocaleName.split('-')
