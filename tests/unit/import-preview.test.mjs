@@ -3,7 +3,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 import { readFile } from 'node:fs/promises'
 import { strToU8, zipSync } from 'fflate'
-import { previewBackupImport, previewTakeoutImport, parseTakeoutWatchHistory } from '../../src/renderer/helpers/import-preview.js'
+import { previewBackupImport, previewTakeoutImport, parseTakeoutSubscriptions, parseTakeoutWatchHistory } from '../../src/renderer/helpers/import-preview.js'
 import { mergeTakeoutHistoryRecord } from '../../src/history.js'
 import { mergeBackupProfile, mergeBackupPlaylist } from '../../src/renderer/helpers/unifiedBackup.js'
 import { processToBeAddedPlaylistVideo } from '../../src/renderer/helpers/playlists.js'
@@ -245,6 +245,12 @@ test('re-importing older watch history keeps the saved duration, resume position
   assert.deepEqual([otherChannel.author, otherChannel.authorId], ['', 'UCsaved'])
   const unnamedChannel = mergeTakeoutHistoryRecord({ ...saved, author: 'Other', authorId: '' }, parseTakeoutWatchHistory([takeout('abcdefghijk', '2025-01-01T00:00:00Z')]).entries[0])
   assert.deepEqual([unnamedChannel.author, unnamedChannel.authorId], ['Other', ''])
+})
+
+test('subscription CSVs with Windows line endings import only the listed channels', () => {
+  const id = 'UC' + 'a'.repeat(22)
+  const content = `Channel Id,Channel Url,Channel Title\r\n${id},https://www.youtube.com/channel/${id},Plain\r\n\r\n`
+  assert.deepEqual(parseTakeoutSubscriptions({ path: 'subscriptions.csv', content }), [{ id, name: 'Plain', thumbnail: null }])
 })
 
 test('watch history parsing excludes malformed records from preview counts and preserves usable entries', () => {
