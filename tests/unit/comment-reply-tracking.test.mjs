@@ -36,6 +36,8 @@ test('in another thread, announces only later replies that mention the whole han
     reply('mention', 'UCother', 'Thanks @Me.')
   ])
   assert.deepEqual(added.map(item => item.id), ['thread1.mention'])
+  // Without the account's reply, earlier mentions do not count as answers.
+  assert.deepEqual(findNewReplies(thread, [reply('mention', 'UCother', '@me hi')]).added, [])
 })
 
 test('posting in a watched thread again keeps its state and extends watching', () => {

@@ -92,9 +92,11 @@ export function trackPostedComment(threads, { videoId, threadId, commentId, chan
 export function findNewReplies(thread, replies) {
   const ownThread = thread.commentId === thread.threadId
   // Loaded replies are `threadId.replyId`, which a posted reply may lack.
+  // Without the account's reply, as when it was deleted or not loaded, no
+  // reply is known to follow it.
   const start = ownThread
     ? 0
-    : replies.findIndex(reply => reply.id === thread.commentId || reply.id === `${thread.threadId}.${thread.commentId}`) + 1
+    : replies.findIndex(reply => reply.id === thread.commentId || reply.id === `${thread.threadId}.${thread.commentId}`) + 1 || replies.length
   // The whole handle, which may end a sentence with a period. Handles can
   // contain letters of any script, digits, and `_-.·`.
   const mention = thread.handle
