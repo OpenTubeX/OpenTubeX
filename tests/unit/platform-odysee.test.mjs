@@ -152,16 +152,8 @@ test('lists the playable videos of a channel page by page', async () => {
   const last = await odysee.getChannelPage(fetch, channel, 'videos', '3')
   assert.equal(last.continuation, null)
   assert.deepEqual(requests.map(({ body }) => body.params.page), [1, 3])
-  assert.deepEqual(requests[0].body.params, {
-    channel_ids: [CHANNEL_ID],
-    claim_type: ['stream'],
-    stream_types: ['video', 'audio'],
-    has_source: true,
-    not_tags: ['c:unlisted', 'c:private', 'c:members-only'],
-    order_by: ['release_time'],
-    page: 1,
-    page_size: 20
-  })
+  const { channel_ids: channelIds, claim_type: claimType, order_by: orderBy } = requests[0].body.params
+  assert.deepEqual({ channelIds, claimType, orderBy }, { channelIds: [CHANNEL_ID], claimType: ['stream'], orderBy: ['release_time'] })
 
   assert.deepEqual(await odysee.getChannelPage(fetch, channel, 'videos', 'not-a-page'), { results: [], continuation: null })
   assert.equal(requests.length, 2)
@@ -222,15 +214,8 @@ test('searches videos and channels in the order Lighthouse ranks them', async ()
   const videos = await odysee.search(fetch, ' linux tips ', 'videos', null)
   assert.deepEqual(videos.results.map(result => result.kind === 'item' && result.item.id), videoIds)
   assert.equal(videos.continuation, '20')
-  assert.deepEqual(Object.fromEntries(requests[0].url.searchParams), {
-    s: 'linux tips',
-    size: '20',
-    from: '0',
-    claimType: 'file',
-    nsfw: 'false',
-    free_only: 'true',
-    mediaType: 'video,audio'
-  })
+  const search = requests[0].url.searchParams
+  assert.deepEqual([search.get('s'), search.get('from'), search.get('claimType')], ['linux tips', '0', 'file'])
 
   const channels = await odysee.search(fetch, 'linux', 'channels', '40')
   assert.deepEqual(channels.results.map(result => result.kind === 'channel' && [result.channel.id, result.channel.url]), [

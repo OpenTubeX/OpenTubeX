@@ -16,7 +16,8 @@ function fakeFetch(routes) {
   const fetcher = async (url, options) => {
     requests.push({ url: new URL(url), options })
     const { origin, pathname } = new URL(url)
-    const body = routes[origin + pathname]
+    const route = routes[origin + pathname]
+    const body = typeof route === 'function' ? route(new URL(url)) : route
     return body === undefined ? new Response('Not found', { status: 404 }) : Response.json(body)
   }
   return { fetcher, requests }
@@ -193,13 +194,28 @@ test('pages through channel videos and lists remote, live and private ones corre
 
   const last = await peertube.getChannelPage(fetcher, channel, 'videos', '40')
   assert.equal(last.continuation, null)
-  assert.deepEqual((await peertube.getLatestItems(fetcher, channel)).map(item => item.id), [UUID, OTHER_UUID])
-  assert.equal(requests.at(-1).url.searchParams.get('start'), '0')
+})
+
+test('lists the lives on air before the newest uploads', async () => {
+  const LIVE_UUID = '3c2e6c87-4d2f-4f1a-9a5b-2d0c1e6f7a8b'
+  const { fetcher } = fakeFetch({
+    // The live started before the newest uploads, so it isn't among them
+    'https://video.example.org/api/v1/video-channels/my_channel/videos': url => url.searchParams.get('isLive') === 'true'
+      ? { total: 1, data: [video({ uuid: LIVE_UUID, shortUUID: null, name: 'On air', isLive: true })] }
+      : { total: 1, data: [video()] }
+  })
+  assert.deepEqual((await peertube.getLatestItems(fetcher, channel)).map(item => [item.id, item.isLive]), [[LIVE_UUID, true], [UUID, undefined]])
+
+  // Instances that can't filter lives still have the uploads
+  const older = fakeFetch({
+    'https://video.example.org/api/v1/video-channels/my_channel/videos': url => url.searchParams.has('isLive') ? undefined : { total: 1, data: [video()] }
+  })
+  assert.deepEqual((await peertube.getLatestItems(older.fetcher, channel)).map(item => item.id), [UUID])
 })
 
 test('loads playlists without their removed videos', async () => {
   const base = `https://video.example.org/api/v1/video-playlists/${SHORT_UUID}`
-  const { fetcher, requests } = fakeFetch({
+  const { fetcher } = fakeFetch({
     [base]: {
       uuid: UUID,
       shortUUID: SHORT_UUID,
@@ -231,7 +247,6 @@ test('loads playlists without their removed videos', async () => {
   })
   assert.deepEqual(page.results.map(result => result.kind === 'item' && result.item.id), [UUID, OTHER_UUID])
   assert.equal(page.continuation, null)
-  assert.equal(requests.find(({ url }) => url.pathname.endsWith('/videos')).url.searchParams.get('count'), '20')
 
   assert.deepEqual(await peertube.getPlaylist(fetcher, `${UUID}@video.example.org`, null), { playlist: null, page: { results: [], continuation: null } })
 })

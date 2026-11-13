@@ -24,6 +24,9 @@ const MAX_TIMER_DELAY_MS = 2 ** 31 - 1
  */
 export function useFeedAutoRefresh(dataReady, feed) {
   let timer = null
+  let active = false
+  // Changes with each start and stop, so work from before a stop is dropped
+  let run = 0
   const interval = computed(() => feed.getInterval())
 
   // A changed interval starts over, a deadline from before a restart stays
@@ -35,7 +38,7 @@ export function useFeedAutoRefresh(dataReady, feed) {
   function schedule() {
     clearTimeout(timer)
     timer = null
-    if (!dataReady.value || interval.value <= 0) return
+    if (!active || !dataReady.value || interval.value <= 0) return
 
     const deadline = feed.nextAutoRefresh.value
     if (deadline === null) {
@@ -49,10 +52,14 @@ export function useFeedAutoRefresh(dataReady, feed) {
 
   async function refreshIfDue() {
     timer = null
+    const current = run
     // Continues once the app is visible and online again
-    if (isAppHidden() || navigator.onLine === false) return
+    const canRefresh = () => current === run && dataReady.value && !isAppHidden() && navigator.onLine !== false
+    if (!canRefresh()) return
 
     await navigator.locks.request(feed.lockName, async () => {
+      // Waiting for the lock takes a while when another window holds it
+      if (!canRefresh()) return
       // Another window may have refreshed it before its storage event arrived
       const deadline = feed.loadNextAutoRefresh()
       if (deadline !== null && deadline > Date.now()) {
@@ -83,12 +90,16 @@ export function useFeedAutoRefresh(dataReady, feed) {
   }
 
   function start() {
+    active = true
+    run++
     document.addEventListener('visibilitychange', refreshIfOverdue)
     window.addEventListener('online', refreshIfOverdue)
     schedule()
   }
 
   function stop() {
+    active = false
+    run++
     clearTimeout(timer)
     timer = null
     document.removeEventListener('visibilitychange', refreshIfOverdue)

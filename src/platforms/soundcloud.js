@@ -375,20 +375,18 @@ async function listPage(fetcher, pathname, params, continuation, signal) {
   let url = continuation === null ? apiUrl(pathname, params) : nextPageUrl(continuation, pathname)
   if (!url) throw new Error('Invalid SoundCloud continuation')
   // SoundCloud picks a page before it leaves out what it doesn't show, such as
-  // private sets, so pages can be empty in the middle of a list. Those are
-  // skipped, within limits, since an empty page with a continuation would stall
-  // the list.
-  for (let request = 0; request < MAX_REQUESTS_PER_PAGE; request++) {
+  // private sets, so pages can be empty in the middle of a list. A few of them
+  // are skipped in one go, and after that the next page is still offered.
+  for (let request = 1; ; request++) {
     url.searchParams.set('limit', String(PAGE_SIZE))
     url.searchParams.set('linked_partitioning', '1')
     const data = object(await api(fetcher, url, signal))
     const collection = Array.isArray(data.collection) ? data.collection : []
     const results = collection.map(parseResult).filter(result => result !== null)
     const next = nextPageUrl(data.next_href, pathname)
-    if (results.length > 0 || !next) return { results, continuation: next ? next.href : null }
+    if (results.length > 0 || !next || request === MAX_REQUESTS_PER_PAGE) return { results, continuation: next ? next.href : null }
     url = next
   }
-  return { results: [], continuation: null }
 }
 
 /**
@@ -531,27 +529,30 @@ async function getPlaylist(fetcher, id, continuation, signal) {
   const trackList = object(data).tracks
   /** @type {unknown[]} */
   const tracks = Array.isArray(trackList) ? trackList : []
-  const offset = continuation === null ? 0 : Number(continuation)
-  const slice = tracks.slice(offset, offset + PLAYLIST_PAGE_SIZE)
   /** @param {unknown} track */
   const isStub = track => typeof object(track).permalink_url !== 'string'
-  const missing = [...new Set(slice.filter(isStub).map(track => idString(object(track).id)).filter(Boolean))]
+  // Like empty pages of lists, a few slices whose tracks are all gone are skipped
+  let offset = continuation === null ? 0 : Number(continuation)
+  for (let requests = 0; ;) {
+    const slice = tracks.slice(offset, offset + PLAYLIST_PAGE_SIZE)
+    const missing = [...new Set(slice.filter(isStub).map(track => idString(object(track).id)).filter(Boolean))]
 
-  /** @type {Map<string, unknown>} */
-  const filled = new Map()
-  if (missing.length > 0) {
-    // Tracks that were deleted or made private are left out of the answer
-    const found = await api(fetcher, apiUrl('/tracks', { ids: missing.join(',') }), signal)
-    for (const track of Array.isArray(found) ? found : []) filled.set(idString(object(track).id), track)
-  }
+    /** @type {Map<string, unknown>} */
+    const filled = new Map()
+    if (missing.length > 0) {
+      requests++
+      // Tracks that were deleted or made private are left out of the answer
+      const found = await api(fetcher, apiUrl('/tracks', { ids: missing.join(',') }), signal)
+      for (const track of Array.isArray(found) ? found : []) filled.set(idString(object(track).id), track)
+    }
 
-  return {
-    playlist,
-    page: {
-      results: slice
-        .map(track => parseTrack(isStub(track) ? filled.get(idString(object(track).id)) : track))
-        .flatMap(item => item ? [{ kind: /** @type {const} */ ('item'), item }] : []),
-      continuation: offset + PLAYLIST_PAGE_SIZE < tracks.length ? String(offset + PLAYLIST_PAGE_SIZE) : null
+    const results = slice
+      .map(track => parseTrack(isStub(track) ? filled.get(idString(object(track).id)) : track))
+      .flatMap(item => item ? [{ kind: /** @type {const} */ ('item'), item }] : [])
+    offset += PLAYLIST_PAGE_SIZE
+    const next = offset < tracks.length ? String(offset) : null
+    if (results.length > 0 || next === null || requests >= MAX_REQUESTS_PER_PAGE) {
+      return { playlist, page: { results, continuation: next } }
     }
   }
 }

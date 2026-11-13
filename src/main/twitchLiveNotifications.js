@@ -42,10 +42,14 @@ export function normalizeTwitchLiveConfiguration(value) {
  *   show: (notification: { title: string, body: string, url: string, thumbnail?: string, target: import('../notificationHistory.js').NotificationHistoryTarget }) => Promise<unknown> | unknown,
  *   onLive?: (live: TwitchFeedItem[]) => void,
  *   intervalMs?: number,
- *   configureDelayMs?: number
+ *   configureDelayMs?: number,
+ *   timers?: { setTimeout: typeof setTimeout, clearTimeout: typeof clearTimeout }
  * }} options
  */
-export function createTwitchLiveNotifier({ file, fetch, show, onLive, intervalMs = CHECK_INTERVAL_MS, configureDelayMs = CONFIGURE_DELAY_MS }) {
+export function createTwitchLiveNotifier({
+  file, fetch, show, onLive, intervalMs = CHECK_INTERVAL_MS, configureDelayMs = CONFIGURE_DELAY_MS,
+  timers = { setTimeout, clearTimeout }
+}) {
   /** @type {TwitchLiveConfiguration} */
   let configuration = normalizeTwitchLiveConfiguration(null)
   let configurationKey = ''
@@ -82,10 +86,10 @@ export function createTwitchLiveNotifier({ file, fetch, show, onLive, intervalMs
    * @param {number} delay
    */
   function schedule(delay) {
-    if (timer) clearTimeout(timer)
+    if (timer) timers.clearTimeout(timer)
     timer = null
     if (stopped || !configuration.enabled) return
-    timer = setTimeout(() => {
+    timer = timers.setTimeout(() => {
       timer = null
       // A check that runs schedules the next one when it ends
       if (!checking) checking = check().finally(() => { checking = null })
@@ -97,10 +101,10 @@ export function createTwitchLiveNotifier({ file, fetch, show, onLive, intervalMs
     try {
       const channelIds = checked.channels.map(channel => channel.id)
       const { feed } = await fetchTwitchChannels(fetch, channelIds, { liveOnly: true })
-      if (stopped) return
+      // Channels or notifications may have changed meanwhile, and the next
+      // check, which comes soon, covers the new channels
+      if (stopped || checked !== configuration) return
       onLive?.(feed.live)
-      // Channels or notifications may have changed meanwhile
-      if (checked !== configuration) return
       const state = await loadKnown()
       // Notifications turned off meanwhile stay off, without recreating the state
       if (!configuration.enabled) return
@@ -152,7 +156,7 @@ export function createTwitchLiveNotifier({ file, fetch, show, onLive, intervalMs
     },
     stop() {
       stopped = true
-      if (timer) clearTimeout(timer)
+      if (timer) timers.clearTimeout(timer)
       timer = null
     }
   }

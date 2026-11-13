@@ -194,13 +194,14 @@ test('pages through the tracks of a channel, newest first for the feed', async (
   assert.deepEqual(last.results.map(result => result.item.id), ['0'])
   assert.equal(last.continuation, null)
 
-  // Lists that keep coming back empty end
+  // A list that keeps coming back empty stops after a few pages, and offers the next one
   let emptyPages = 0
   const endless = fakeSoundCloud({
     '/users/183/tracks': () => ({ collection: [], next_href: `${API}/users/183/tracks?offset=${++emptyPages}` })
   })
-  assert.deepEqual(await soundcloud.getChannelPage(endless.fetcher, channel, 'tracks', null), { results: [], continuation: null })
-  assert.equal(emptyPages, 4)
+  const empty = await soundcloud.getChannelPage(endless.fetcher, channel, 'tracks', null)
+  assert.deepEqual(empty.results, [])
+  assert.equal(new URL(empty.continuation).searchParams.get('offset'), String(emptyPages))
 
   await assert.rejects(soundcloud.getChannelPage(fetcher, channel, 'tracks', 'https://example.test/users/183/tracks'), /continuation/)
   await assert.rejects(soundcloud.getChannelPage(fetcher, channel, 'tracks', `${API}/users/184/tracks`), /continuation/)
@@ -258,6 +259,15 @@ test('fills the bare tracks of a set a page at a time', async () => {
   await assert.rejects(soundcloud.getPlaylist(fetcher, '777', 'https://example.test/'), /continuation/)
   assert.deepEqual(await soundcloud.getPlaylist(fetcher, 'artist/sets/unknown', null),
     { playlist: null, page: { results: [], continuation: null } })
+
+  // A page whose tracks are all gone is skipped
+  const gone = fakeSoundCloud({
+    '/playlists/778': () => ({ ...playlist, id: 778, tracks: Array.from({ length: 60 }, (_, index) => ({ kind: 'track', id: index + 1 })) }),
+    '/tracks': url => url.searchParams.get('ids').split(',').map(Number).filter(id => id > 50).map(id => track(id))
+  })
+  const rest = await soundcloud.getPlaylist(gone.fetcher, '778', null)
+  assert.deepEqual(rest.page.results.map(result => result.item.id), Array.from({ length: 10 }, (_, index) => String(index + 51)))
+  assert.equal(rest.page.continuation, null)
 })
 
 test('searches tracks, channels and sets', async () => {

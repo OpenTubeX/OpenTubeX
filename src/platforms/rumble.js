@@ -356,13 +356,16 @@ function parseListedVideo(video, channel, now) {
  * @param {string} html
  * @param {PlatformChannel} channel
  * @returns {PlatformItem[]}
+ * @throws for pages without a grid that it can read, unless they show an
+ * empty channel, so a changed page doesn't count as a channel without videos
  */
 function parseChannelVideos(html, channel) {
   const now = Date.now()
   /** @type {Map<string, PlatformItem>} */
   const items = new Map()
-  const grids = /<rum-videos-grid\b[^>]*>\s*<script\b[^>]*>([\s\S]*?)<\/script\s*>/gi
-  for (const [, json] of html.matchAll(grids)) {
+  const grids = [...html.matchAll(/<rum-videos-grid\b[^>]*>\s*<script\b[^>]*>([\s\S]*?)<\/script\s*>/gi)]
+  let readGrids = 0
+  for (const [, json] of grids) {
     let videos
     try {
       videos = JSON.parse(json)?.items
@@ -370,11 +373,15 @@ function parseChannelVideos(html, channel) {
       continue
     }
     if (!Array.isArray(videos)) continue
+    readGrids++
     for (const video of videos) {
       const item = parseListedVideo(video, channel, now)
       if (item && !items.has(item.id)) items.set(item.id, item)
     }
   }
+  // Empty channels have their listing without a grid
+  const isEmptyChannel = grids.length === 0 && /<section\b[^>]*\bclass="[^"]*\bchannel-listing__container\b/i.test(html)
+  if (readGrids === 0 && !isEmptyChannel) throw new Error('The Rumble channel page has no videos it can read')
   return [...items.values()]
 }
 

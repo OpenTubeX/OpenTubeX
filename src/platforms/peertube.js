@@ -457,16 +457,33 @@ async function getChannelPage(fetch, channel, tab, continuation, signal) {
 }
 
 /**
- * Lives come in upload order: lists mark which videos are lives, but not
- * whether they are on air.
+ * The newest uploads, after the lives on air. Public lists have only published
+ * videos, and lives are published while they are on air.
  * @param {PlatformFetch} fetch
  * @param {PlatformChannel} channel
  * @param {AbortSignal} [signal]
  * @returns {Promise<PlatformItem[]>}
  */
 async function getLatestItems(fetch, channel, signal) {
-  const { results } = await getChannelPage(fetch, channel, 'videos', null, signal)
-  return results.flatMap(result => result.kind === 'item' ? [result.item] : [])
+  const parsed = splitId(channel.id, isName)
+  if (!parsed) return []
+  const base = `https://${parsed.host}/api/v1/video-channels/${encodeURIComponent(parsed.name)}/videos`
+  const [uploads, lives] = await Promise.all([
+    getChannelPage(fetch, channel, 'videos', null, signal),
+    // A live that started before the newest uploads isn't on their first page.
+    // Instances without the filter still have the uploads.
+    request(fetch, withParams(base, { start: 0, count: PAGE_SIZE, sort: '-publishedAt', isLive: 'true' }), signal)
+      .catch((error) => {
+        if (signal?.aborted) throw error
+        return null
+      })
+  ])
+  /** @type {Map<string, PlatformItem>} */
+  const items = new Map()
+  for (const result of [...listPage(lives, 0, video => videoResult(video, parsed.host)).results, ...uploads.results]) {
+    if (result.kind === 'item' && !items.has(result.item.id)) items.set(result.item.id, result.item)
+  }
+  return [...items.values()]
 }
 
 /**

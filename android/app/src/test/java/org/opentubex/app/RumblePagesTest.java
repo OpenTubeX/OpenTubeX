@@ -34,7 +34,9 @@ public class RumblePagesTest {
                     .put("Location", new JSONArray().put(url))
                     .put("set-cookie", new JSONArray()
                         .put("RNSC=1;max-age=3600;path=/;domain=rumble.com;secure;HttpOnly;SameSite=lax")
-                        .put("__cf_bm=token; HttpOnly; SameSite=None; Partitioned; Secure; Path=/; Domain=rumble.com; Expires=Thu, 12 Nov 2026 13:27:28 GMT")), "");
+                        .put("__cf_bm=token; HttpOnly; SameSite=None; Partitioned; Secure; Path=/; Domain=rumble.com; Expires=Fri, 01 Jan 2100 00:00:00 GMT")
+                        // Expired, so it isn't sent
+                        .put("old=value; Path=/; Expires=Sat, 01-Jan-2000 00:00:00 GMT")), "");
         }, new LinkedHashMap<>());
 
         assertEquals(200, page.getInt("status"));

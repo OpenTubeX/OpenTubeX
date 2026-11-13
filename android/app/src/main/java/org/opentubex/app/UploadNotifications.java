@@ -235,7 +235,7 @@ final class UploadNotifications {
 
     /** Removes the notifications of uploads the user read or removed in the app. */
     static void cancel(Context context, String feedType, String id) {
-        context.getSystemService(NotificationManager.class).cancel(TAG, url(feedType, id).hashCode());
+        context.getSystemService(NotificationManager.class).cancel(TAG, notificationId(feedType, id));
     }
 
     static JSONArray takeShown(File file) throws Exception {
@@ -518,6 +518,14 @@ final class UploadNotifications {
         return start < end ? minute >= start && minute < end : minute >= start || minute < end;
     }
 
+    /**
+     * Each upload and each Twitch broadcast has its own notification, although
+     * the broadcasts of a channel share its address.
+     */
+    private static int notificationId(String feedType, String id) {
+        return (feedType.equals("twitch") ? "twitch:" + id : url(feedType, id)).hashCode();
+    }
+
     static String url(String feedType, String id) {
         // Twitch notifications lead to the live stream of the channel
         if (feedType.equals("twitch")) return "https://www.twitch.tv/" + Uri.encode(id.substring(0, Math.max(0, id.indexOf('/'))));
@@ -531,6 +539,7 @@ final class UploadNotifications {
     private static void show(Context context, String title, String body, String feedType, String id, boolean live,
         boolean history, boolean silent, String thumbnail) {
         String url = url(feedType, id);
+        int notificationId = notificationId(feedType, id);
         OpenTubeXNotificationChannels.createAll(context);
         Notification.Builder builder = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
             ? new Notification.Builder(context, OpenTubeXNotificationChannels.NEW_UPLOADS_ID)
@@ -540,7 +549,7 @@ final class UploadNotifications {
         if (history) putUpload(open, feedType, id, live);
         PendingIntent contentIntent = PendingIntent.getActivity(
             context,
-            url.hashCode(),
+            notificationId,
             open,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
@@ -555,14 +564,14 @@ final class UploadNotifications {
             Intent dismiss = putUpload(new Intent(context, UploadNotificationDismissReceiver.class), feedType, id, live);
             builder.setDeleteIntent(PendingIntent.getBroadcast(
                 context,
-                url.hashCode(),
+                notificationId,
                 dismiss,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
             ));
         }
         if (silent) builder.setGroup(QUIET_GROUP).setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY);
         NotificationManager manager = context.getSystemService(NotificationManager.class);
-        manager.notify(TAG, url.hashCode(), builder.build());
+        manager.notify(TAG, notificationId, builder.build());
         if (thumbnail == null) return;
         // Show the notification right away and add the thumbnail once it loads.
         THUMBNAILS.execute(() -> {
@@ -577,12 +586,12 @@ final class UploadNotifications {
                 }
                 image = AndroidMediaArtwork.loadBlocking(thumbnail);
             }
-            if (image == null || !isActive(manager, url.hashCode())) return;
+            if (image == null || !isActive(manager, notificationId)) return;
             builder.setLargeIcon(image)
                 .setStyle(new Notification.BigPictureStyle().bigPicture(image).bigLargeIcon((Icon) null).setSummaryText(body))
                 .setOnlyAlertOnce(true);
             try {
-                manager.notify(TAG, url.hashCode(), builder.build());
+                manager.notify(TAG, notificationId, builder.build());
             } catch (RuntimeException error) {
                 android.util.Log.w("OpenTubeXUploads", "Unable to add a thumbnail to an upload notification", error);
             }

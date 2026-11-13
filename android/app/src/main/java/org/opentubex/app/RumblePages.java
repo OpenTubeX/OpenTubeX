@@ -3,10 +3,17 @@ package org.opentubex.app;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -21,6 +28,10 @@ final class RumblePages {
 
     private static final int MAX_REDIRECTS = 10;
     private static final int MAX_PAGE_BYTES = 10_000_000;
+    // For the page with all its redirects
+    private static final long TIMEOUT_MS = 30_000;
+    private static final Pattern MAX_AGE = Pattern.compile(";\\s*max-age\\s*=\\s*(-?\\d+)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern EXPIRES = Pattern.compile(";\\s*expires\\s*=\\s*([^;]+)", Pattern.CASE_INSENSITIVE);
     // Only Rumble's pages use them, so names and values are enough
     private static final Map<String, String> COOKIES = new LinkedHashMap<>();
 
@@ -38,13 +49,16 @@ final class RumblePages {
 
     static JSONObject fetch(String url, Transport transport, Map<String, String> cookies) throws Exception {
         URI uri = url == null ? null : URI.create(url);
+        long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(TIMEOUT_MS);
         for (int redirect = 0; ; redirect++) {
             if (uri == null || !isRumblePage(uri)) throw new IllegalArgumentException("Not a Rumble page");
+            long remaining = TimeUnit.NANOSECONDS.toMillis(deadline - System.nanoTime());
+            if (remaining <= 0) throw new IOException("Timed out loading the Rumble page");
             JSONObject headers = new JSONObject().put("Accept", "text/html");
             String cookie = cookieHeader(cookies);
             if (!cookie.isEmpty()) headers.put("Cookie", cookie);
             JSONObject result = transport.send(new JSONObject().put("url", uri.toString()).put("method", "GET")
-                .put("headers", headers).put("timeout", 30000));
+                .put("headers", headers).put("timeout", remaining));
 
             String location = null;
             JSONObject rawHeaders = result.getJSONObject("headers");
@@ -87,10 +101,25 @@ final class RumblePages {
         if (equals <= 0) return;
         String name = pair.substring(0, equals).trim();
         String value = pair.substring(equals + 1).trim();
-        boolean expired = value.isEmpty() || header.toLowerCase(Locale.ROOT).matches("(?s).*;\\s*max-age\\s*=\\s*(0|-\\d+)\\s*(;.*)?");
+        boolean expired = value.isEmpty() || hasExpired(header);
         synchronized (cookies) {
             if (expired) cookies.remove(name);
             else cookies.put(name, value);
+        }
+    }
+
+    /** Max-Age takes precedence over Expires, whose unreadable dates count as not expired. */
+    private static boolean hasExpired(String header) {
+        Matcher maxAge = MAX_AGE.matcher(header);
+        if (maxAge.find()) return maxAge.group(1).startsWith("-") || maxAge.group(1).matches("0+");
+        Matcher expires = EXPIRES.matcher(header);
+        if (!expires.find()) return false;
+        try {
+            // Also with the dashes of the older cookie date format
+            String date = expires.group(1).trim().replace('-', ' ');
+            return !ZonedDateTime.parse(date, DateTimeFormatter.RFC_1123_DATE_TIME).toInstant().isAfter(Instant.now());
+        } catch (DateTimeParseException error) {
+            return false;
         }
     }
 }

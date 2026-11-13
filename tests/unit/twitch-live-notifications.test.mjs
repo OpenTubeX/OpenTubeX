@@ -16,12 +16,27 @@ function user({ id, login, name }, stream) {
 async function setup(t) {
   const directory = await mkdtemp(path.join(tmpdir(), 'twitch-live-'))
   t.after(() => rm(directory, { recursive: true, force: true }))
-  const state = { streams: {}, shown: [], live: [], checks: 0, waiters: [] }
+  const state = { streams: {}, shown: [], live: [], checks: 0, waiters: [], timers: new Set() }
   const file = path.join(directory, 'twitch-live-notifications.json')
   const create = () => createTwitchLiveNotifier({
     file,
     intervalMs: 60_000,
     configureDelayMs: 0,
+    // Real timers, whose pending ones the tests can see
+    timers: {
+      setTimeout: (callback, delay) => {
+        const timer = setTimeout(() => {
+          state.timers.delete(timer)
+          callback()
+        }, delay)
+        state.timers.add(timer)
+        return timer
+      },
+      clearTimeout: (timer) => {
+        state.timers.delete(timer)
+        clearTimeout(timer)
+      }
+    },
     fetch: async (_url, options) => {
       const { variables } = JSON.parse(options.body)
       return Response.json({ data: { users: variables.ids.map(id => user(id === CHANNEL.id ? CHANNEL : OTHER, state.streams[id])) } })
@@ -98,11 +113,10 @@ test('announces each broadcast once, starting from the streams live at the first
   assert.deepEqual(await readKnown(), { [CHANNEL.id]: ['s2', 's1'], [OTHER.id]: ['o1'] })
 
   // Turning notifications off forgets the streams, and stops the checks
-  const checks = state.checks
+  await until(() => state.timers.size > 0)
   await notifier.configure({ ...configuration, enabled: false })
   await assert.rejects(readFile(file, 'utf8'), { code: 'ENOENT' })
-  await new Promise(resolve => setTimeout(resolve, 50))
-  assert.equal(state.checks, checks)
+  assert.equal(state.timers.size, 0)
 })
 
 test('accepts only valid channels and a title for the channel name', async t => {

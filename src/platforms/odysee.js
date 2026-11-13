@@ -16,6 +16,8 @@ const WEB_URL = 'https://odysee.com'
 const WEB_HOSTS = ['odysee.com', 'www.odysee.com']
 const REQUEST_TIMEOUT_MS = 15_000
 const PAGE_SIZE = 20
+/** Pages of a channel the feed looks through for uploads it can play */
+const MAX_LATEST_PAGES = 3
 
 const CLAIM_ID_PATTERN = /^[0-9a-f]{40}$/
 /**
@@ -397,8 +399,14 @@ const odysee = {
 
   async getLatestItems(fetch, channel, signal) {
     if (!isClaimId(channel.id)) return []
-    const { results } = await getChannelClaims(fetch, channel.id, 'stream', 1, signal)
-    return results.flatMap(result => result.kind === 'item' ? [result.item] : [])
+    // A page can hold only uploads the app can't play, such as paid ones
+    let page = 1
+    for (let request = 1; ; request++) {
+      const { results, continuation } = await getChannelClaims(fetch, channel.id, 'stream', page, signal)
+      const items = results.flatMap(result => result.kind === 'item' ? [result.item] : [])
+      if (items.length > 0 || continuation === null || request === MAX_LATEST_PAGES) return items
+      page = Number(continuation)
+    }
   },
 
   async search(fetch, query, type, continuation, signal) {

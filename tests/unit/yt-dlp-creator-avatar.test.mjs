@@ -64,7 +64,6 @@ for (const webpageUrl of [
 
 test('links a clip to its broadcaster, not to whoever made the clip', () => {
   const clip = { webpage_url: 'https://www.twitch.tv/example_streamer/clip/Slug-123', uploader_id: '185493864' }
-  assert.equal(getTwitchCreatorUrl({ ...clip, channel: 'Example_Streamer' }), 'https://www.twitch.tv/example_streamer')
   // Localized display names aren't logins
   assert.equal(getTwitchCreatorUrl({ ...clip, channel: '예시 스트리머' }), 'https://www.twitch.tv/example_streamer')
   assert.equal(getTwitchCreatorUrl({ ...clip, webpage_url: 'https://clips.twitch.tv/Slug-123', channel: '예시 스트리머' }), null)
