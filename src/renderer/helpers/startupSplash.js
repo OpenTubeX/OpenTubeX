@@ -50,7 +50,9 @@ export function revealStartupSplash() {
     const bounds = splash.getBoundingClientRect()
     // The app's spring, as a duration followed by a linear() easing.
     const motion = getComputedStyle(document.body).getPropertyValue('--motion-fast-spatial').trim()
-    const duration = Number.parseFloat(motion) || STARTUP_REVEAL_DURATION_MS
+    // The production CSS minifier writes 350ms as .35s.
+    const time = motion.split(' ', 1)[0]
+    const duration = Number.parseFloat(time) * (time.endsWith('ms') ? 1 : 1000) || STARTUP_REVEAL_DURATION_MS
     const easing = motion.slice(motion.indexOf(' ') + 1) || 'ease-out'
     const progress = splash.querySelector('.startupProgress')
     progress.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, fill: 'forwards' })

@@ -70,7 +70,7 @@ for (const [theme, background, zoom] of [
               window.__startupReveal = {
                 presented: !!document.querySelector('.tabContent[aria-hidden="false"] > .routerView'),
                 // The splash opens a hole for the app instead of fading.
-                opening: splash.getAnimations().some(animation => animation.effect.getKeyframes().some(keyframe => keyframe.maskSize)),
+                opening: splash.getAnimations().find(animation => animation.effect.getKeyframes().some(keyframe => keyframe.maskSize))?.effect.getTiming().duration,
                 started: performance.now()
               }
             }
@@ -87,7 +87,8 @@ for (const [theme, background, zoom] of [
         expect(await page.evaluate(() => [...new Set(window.__startupColors)])).toEqual([background])
         expect(await page.evaluate(() => new Set(window.__startupPalettes).size)).toBe(1)
         expect(reveal.presented).toBe(true)
-        expect(reveal.opening).toBe(true)
+        // Minified CSS writes the spring's duration in seconds, not milliseconds.
+        expect(reveal.opening).toBeGreaterThanOrEqual(100)
         expect(reveal.duration).toBeLessThan(850)
         expect(await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].isVisible())).toBe(true)
       } finally {
